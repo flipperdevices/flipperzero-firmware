@@ -146,6 +146,12 @@ bool mrtd_bac_encrypt(const uint8_t* data, size_t data_length, uint8_t* key, uin
 bool mrtd_bac_decrypt(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t* output) {
     uint8_t IV[8] = "\x00\x00\x00\x00\x00\x00\x00\x00";
 
+    printf("Decrypt: ");
+    for(uint8_t i=0; i<data_length; ++i) {
+        printf("%02X ", data[i]);
+    }
+    printf("\n");
+
     mbedtls_des3_context ctx;
     mbedtls_des3_init(&ctx);
     mbedtls_des3_set2key_dec(&ctx, key);
@@ -164,7 +170,42 @@ bool mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8_t* k
     mrtd_bac_padded_mac(data, data_length - 8, key_mac, mac_calc);
 
     if(memcmp(mac_calc, data + data_length - 8, 8)) {
-        printf( "MAC failed\n");
+        printf( "MAC failed\r\n");
+        for(uint8_t i=0; i<8; ++i) {
+            printf("%02X <=> %02X\r\n", mac_calc[i], data[data_length - 8 + i]);
+        }
+        return false;
+    }
+    return true;
+}
+
+bool mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* output, uint16_t* ret_code) {
+    // Message: [DO'85 or DO'87] || [DO'99] || DO'8E
+    // Lengths:      Var            1+1+2=4    1+1+8=10
+
+    printf("ret_code: %02X %02X\n", data[data_length - 10 - 2], data[data_length - 10 - 2 + 1]);
+    *ret_code = data[data_length - 10 - 2] <<8 | data[data_length - 10 - 1];
+    //ntohs(data + data_length - 10 - 2);
+    printf("set to: %04X\n", *ret_code);
+
+    if(data[0] == 0x87) {
+        uint8_t do87_length = data[1] - 1;
+        mrtd_bac_decrypt(data + 3, do87_length, key_enc, output);
+    }
+
+    mrtd_bac_mac_ctx ctx;
+    mrtd_bac_mac_init(&ctx, key_mac);
+    uint64_t ssc_n = htonll(ssc);
+    mrtd_bac_mac_update(&ctx, (uint8_t*)&ssc_n, 8);
+    mrtd_bac_mac_update(&ctx, data, data_length - 10); // 10 = len(DO'8E) = len(header + length + MAC) = 1 + 1 + 8
+    uint8_t mac_calc[8];
+    mrtd_bac_mac_finalize(&ctx, mac_calc);
+
+    if(memcmp(mac_calc, data + data_length - 8, 8)) {
+        printf( "SM MAC failed\r\n");
+        for(uint8_t i=0; i<8; ++i) {
+            printf("%02X <=> %02X\r\n", mac_calc[i], data[data_length - 8 + i]);
+        }
         return false;
     }
     return true;
@@ -180,6 +221,7 @@ bool mrtd_bac_mac_init(mrtd_bac_mac_ctx* ctx, uint8_t key[16]) {
 }
 
 bool mrtd_bac_mac_update(mrtd_bac_mac_ctx* ctx, const uint8_t* data, size_t data_length) {
+    //printf("MAC add %d: ", data_length); print_hex(data, data_length); printf("\n");
     size_t data_idx = 0;
     //uint8_t* xormac = ctx->xormac;
 
@@ -198,7 +240,7 @@ bool mrtd_bac_mac_update(mrtd_bac_mac_ctx* ctx, const uint8_t* data, size_t data
             }
             mbedtls_des_crypt_ecb(&ctx->des, ctx->xormac, ctx->mac);
 
-            printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+            printf("DES buf: %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
                 ctx->buffer_in[0], ctx->buffer_in[1], ctx->buffer_in[2], ctx->buffer_in[3],
                 ctx->buffer_in[4], ctx->buffer_in[5], ctx->buffer_in[6], ctx->buffer_in[7]);
 
@@ -218,7 +260,7 @@ bool mrtd_bac_mac_update(mrtd_bac_mac_ctx* ctx, const uint8_t* data, size_t data
         }
 
         mbedtls_des_crypt_ecb(&ctx->des, ctx->xormac, ctx->mac);
-        printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+        printf("DES add: %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
             data[data_idx - 8 + 0], data[data_idx - 8 + 1], data[data_idx - 8 + 2], data[data_idx - 8 + 3],
             data[data_idx - 8 + 4], data[data_idx - 8 + 5], data[data_idx - 8 + 6], data[data_idx - 8 + 7]);
 
@@ -277,7 +319,7 @@ bool mrtd_bac_mac(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t
         }
 
         mbedtls_des_crypt_ecb(&ctx, xormac, mac);
-        printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\n",
+        printf("DES1: %02X %02X %02X %02X %02X %02X %02X %02X\r\n",
             xormac[0], xormac[1], xormac[2], xormac[3],
             xormac[4], xormac[5], xormac[6], xormac[7]);
     }
@@ -318,6 +360,8 @@ size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8
     mrtd_bac_mac_ctx mac_ctx;
     mrtd_bac_mac_init(&mac_ctx, key_mac);
     uint64_t ssc_n = htonll(ssc);
+    printf("ssc: %016llx\r\n", ssc);
+    //printf("ssc_n: "); print_hex(ssc_n, 8); printf("\n");
     mrtd_bac_mac_update(&mac_ctx, (uint8_t*)&ssc_n, 8);
 
     // Mask cla
@@ -335,10 +379,10 @@ size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8
 
     // Build DO'87
     // TODO: condition on data presence
-    {
+    // TODO: if ins is odd, use 0x85
+    if(lc > 0) {
         size_t newlength = ((lc+8)/8)*8;
         uint8_t padded[newlength];
-        size_t idx_do87 = idx;
 
         output[idx++] = 0x87; // Header
         output[idx++] = newlength + 1;  // Length
@@ -350,9 +394,16 @@ size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8
 
         mrtd_bac_encrypt(padded, newlength, key_enc, output + idx);
         idx += newlength;
-     
-        mrtd_bac_mac_update(&mac_ctx, output + idx_do87, idx - idx_do87);
     }
+
+    // Build DO'97
+    if(le >= 0) {
+        output[idx++] = 0x97; // Header
+        output[idx++] = 0x01; // Length
+        output[idx++] = le;
+    }
+
+    mrtd_bac_mac_update(&mac_ctx, output + idx_lc + 1, idx - idx_lc - 1);
 
     // Build DO'8E
     // TODO: conditions?
@@ -360,16 +411,14 @@ size_t mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8
         output[idx++] = 0x8E; // Header
         output[idx++] = 0x08; // Length
 
-        printf("idx: %d\n", idx);
-
-        uint8_t mac[8];
         mrtd_bac_mac_finalize(&mac_ctx, output + idx);
         idx += 8;
+
         printf("MAC: ");
         for(uint8_t i=0; i<8; ++i) {
-            printf("%02X ", mac[i]);
+            printf("%02X ", output[idx - 8 + i]);
         }
-        printf("\n");
+        printf("\r\n");
     }
 
     output[idx_lc] = idx - idx_lc - 1; // Set Lc

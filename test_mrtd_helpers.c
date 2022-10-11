@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <mbedtls/sha1.h>
 #include <mbedtls/des.h>
+
+#include "applications/main/nfc/test_bac_creds.h" //TODO: remove
 
 #include "lib/nfc/protocols/mrtd_helpers.h"
 
@@ -209,12 +212,58 @@ void test_mrtd_bac_mac_calls(uint8_t* data, size_t data_length, uint8_t* key, ui
     }
 }
 
+void test_mrtd_bac_mac_steps(uint8_t* data, size_t data_length, uint8_t* key, uint8_t* exp_output, size_t exp_output_length) {
+    mrtd_bac_mac_ctx ctx;
+
+    printf("A\n");
+
+    if(!mrtd_bac_mac_init(&ctx, key)) {
+        printf("ERROR mrtd_bac_mac_init (steps)\n");
+        return;
+    }
+
+    if(!mrtd_bac_mac_update(&ctx, data, 8)) {
+        printf("ERROR mrtd_bac_mac_update 1 (steps)\n");
+    }
+
+    if(!mrtd_bac_mac_update(&ctx, data + 8, 4)) {
+        printf("ERROR mrtd_bac_mac_update 2 (steps)\n");
+    }
+
+    if(!mrtd_bac_mac_pad(&ctx)) {
+        printf("ERROR mrtd_bac_mac_pad (steps)\n");
+    }
+
+    if(!mrtd_bac_mac_update(&ctx, data + 16, 11)) {
+        printf("ERROR mrtd_bac_mac_update 3 (steps)\n");
+    }
+
+    uint8_t mac[8];
+    if(!mrtd_bac_mac_finalize(&ctx, mac)) {
+        printf("ERROR mrtd_bac_mac_finalize (steps)\n");
+        return;
+    }
+
+    if(memcmp(exp_output, mac, exp_output_length)) {
+        printf(COLOR_RED "FAILED  - mrtd_bac_mac (steps), expected output:\n");
+        print_hex(exp_output, exp_output_length);
+        printf(" is:\n");
+        print_hex(mac, 8);
+        printf(COLOR_RESET "\n");
+        return;
+    } else {
+        printf(COLOR_GREEN "SUCCESS - mrtd_bac_mac (steps) output: ");
+        print_hex(mac, 8);
+        printf(COLOR_RESET "\n");
+    }
+}
+
 void test_mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint8_t* exp_output, size_t exp_output_length, bool should_verify) {
     uint8_t buffer[256];
 
     bool result = mrtd_bac_decrypt_verify(data, data_length, key_enc, key_mac, buffer);
     if(result != should_verify) {
-        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify, expected verify: %d, but is: %d\n", should_verify, result);
+        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify, expected verify: %d, but is: %d\n" COLOR_RESET, should_verify, result);
         return;
     }
 
@@ -223,10 +272,40 @@ void test_mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8
         print_hex(exp_output, exp_output_length);
         printf(" is:\n");
         print_hex(buffer, 32);
+        printf(COLOR_RESET "\n");
         return;
     }
 
     printf(COLOR_GREEN "SUCCESS - mrtd_bac_decrypt_verify output: ");
+    print_hex(buffer, exp_output_length);
+    printf(COLOR_RESET "\n");
+}
+
+void test_mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* exp_output, size_t exp_output_length, bool should_verify) {
+    uint8_t buffer[256];
+    uint16_t ret_code;
+
+    bool result = mrtd_bac_decrypt_verify_sm(data, data_length, key_enc, key_mac, ssc, buffer, &ret_code);
+    if(result != should_verify) {
+        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify_sm, expected verify: %d, but is: %d\n" COLOR_RESET, should_verify, result);
+        return;
+    }
+
+    if(ret_code != 0x9000) {
+        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify_sm, expected ret_code: %04X, but is: %04X\n" COLOR_RESET, 0x9000, ret_code);
+        return;
+    }
+
+    if(memcmp(exp_output, buffer, exp_output_length)) {
+        printf(COLOR_RED "FAILED  - mrtd_bac_decrypt_verify_sm, expected output:\n");
+        print_hex(exp_output, exp_output_length);
+        printf(" is:\n");
+        print_hex(buffer, 32);
+        printf(COLOR_RESET "\n");
+        return;
+    }
+
+    printf(COLOR_GREEN "SUCCESS - mrtd_bac_decrypt_verify_sm output: ");
     print_hex(buffer, exp_output_length);
     printf(COLOR_RESET "\n");
 }
@@ -253,10 +332,11 @@ void test_mrtd_protect_apdu(uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, ui
     }
 
     if(memcmp(buffer, exp_output, ret)) {
-        printf(COLOR_RED "FAILED - mrtd_protect_apdu, expected output:\n" COLOR_RESET);
+        printf(COLOR_RED "FAILED - mrtd_protect_apdu, expected output:\n");
         print_hex(exp_output, exp_output_length);
         printf(" is:\n");
         print_hex(buffer, ret);
+        printf("\n" COLOR_RESET);
         return;
     }
 
@@ -349,9 +429,84 @@ int main(int argc, char** argv) {
     uint8_t* rnd_ic = (uint8_t*)"\x46\x08\xF9\x19\x88\x70\x22\x12";
     uint8_t* rnd_ifd = (uint8_t*)"\x78\x17\x23\x86\x0C\x06\xC2\x26";
 
-    test_mrtd_ssc_from_data(rnd_ic, rnd_ifd, 0x887022120C06C226);
+    uint64_t ssc = 0x887022120C06C226;
+    test_mrtd_ssc_from_data(rnd_ic, rnd_ifd, ssc);
 
-    test_mrtd_protect_apdu(0x00, 0xA4, 0x02, 0x0C, 0x02, "\x01\x1e", -1, ks_enc, ks_mac, 0x887022120C06C227, (uint8_t*)"\x0C\xA4\x02\x0C\x15\x87\x09\x01\x63\x75\x43\x29\x08\xC0\x44\xF6\x8E\x08\xBF\x8B\x92\xD6\x35\xFF\x24\xF8\x00", 27);
+    ssc++;
+
+    test_mrtd_protect_apdu(0x00, 0xA4, 0x02, 0x0C, 0x02, "\x01\x1e", -1, ks_enc, ks_mac, ssc, (uint8_t*)"\x0C\xA4\x02\x0C\x15\x87\x09\x01\x63\x75\x43\x29\x08\xC0\x44\xF6\x8E\x08\xBF\x8B\x92\xD6\x35\xFF\x24\xF8\x00", 27);
+
+    ssc++; // Increment for decrypt, verify
+
+    test_mrtd_bac_decrypt_verify_sm((uint8_t*)"\x99\x02\x90\x00\x8E\x08\xFA\x85\x5A\x5D\x4C\x50\xA8\xED", 14, ks_enc, ks_mac, ssc, NULL, 0, 1);
+
+    ssc++; // Increment for encrypt, sign
+
+    test_mrtd_protect_apdu(0x00, 0xB0, 0x00, 0x00, 0x00, NULL, 0x04, ks_enc, ks_mac, ssc, (uint8_t*)"\x0C\xB0\x00\x00\x0D\x97\x01\x04\x8E\x08\xED\x67\x05\x41\x7E\x96\xBA\x55\x00", 19);
+
+    ssc++; // Increment for decrypt, verify
+
+    test_mrtd_bac_decrypt_verify_sm((uint8_t*)"\x87\x09\x01\x9F\xF0\xEC\x34\xF9\x92\x26\x51\x99\x02\x90\x00\x8E\x08\xAD\x55\xCC\x17\x14\x0B\x2D\xED", 25, ks_enc, ks_mac, ssc, (uint8_t*)"\x60\x14\x5F\x01", 4, 1);
+
+    ssc++; // Increment for encrypt, sign
+
+    test_mrtd_protect_apdu(0x00, 0xB0, 0x00, 0x04, 0x00, NULL, 0x12, ks_enc, ks_mac, ssc, (uint8_t*)"\x0C\xB0\x00\x04\x0D\x97\x01\x12\x8E\x08\x2E\xA2\x8A\x70\xF3\xC7\xB5\x35\x00", 19);
+
+    // Verify working against mrtdreader
+
+    /*
+    printf("=====================================\n\n");
+
+    //TODO: set auth data
+    MrtdAuthData auth;
+    auth.birth_date = TODO_REMOVE_ID_DOB;
+    auth.expiry_date = TODO_REMOVE_ID_DOE;
+    memcpy(auth.doc_number, TODO_REMOVE_ID_DOC, 9);
+    uint8_t kenc[16];
+    uint8_t kmac[16];
+    mrtd_bac_keys(&auth, kenc, kmac);
+
+    printf("kenc: "); print_hex(kenc, 16); printf("\n");
+    printf("kmac: "); print_hex(kmac, 16); printf("\n");
+
+    uint8_t buffer[32]; // RND.IC || RND.IFD || KIC
+
+    //TODO: set challenge rx
+    mrtd_bac_decrypt_verify((uint8_t*)"\x3F\xD4\x6B\xA9\xFF\x29\x4B\xF6\x77\x4E\x8F\x1E\xEC\xAE\x2E\x67\xDB\xE7\x70\x53\xB3\xAD\x9C\xDC\xED\x6E\xED\xD6\x04\x2E\xB7\x6B\x74\xDE\x2A\xFB\x4B\xC0\xF7\x24", 40, kenc, kmac, buffer);
+    //TODO: set kifd
+    uint8_t *kifd = "\x9F\x10\x40\xEA\x7F\xAE\xF8\xC3\x09\x6E\xAE\x07\x66\x95\x3F\xDC";
+
+    printf("buffer: "); print_hex(buffer, 32); printf("\n");
+    // 8F763C0B1CDF9F9D|0983F7C136155248|7A705FD193C6A6328C42264A3804002C
+    rnd_ic = buffer;
+    rnd_ifd = buffer+8;
+    uint8_t *kic = buffer+16;
+    printf("kifd: "); print_hex(kifd, 16); printf("\n");
+    printf("kicc: "); print_hex(kic, 16); printf("\n");
+    uint8_t kseed[16];
+    for(uint8_t i=0; i<16; ++i) {
+        kseed[i] = kifd[i] ^ kic[i];
+        printf("seed %2d = %02X ^ %02X = %02X\r\n", i, kifd[i], kic[i], kseed[i]);
+    }
+    printf("kseed: "); print_hex(kseed, 16); printf("\n");
+
+    ks_enc = malloc(16);
+    ks_mac = malloc(16);
+    mrtd_bac_keys_from_seed(kseed, ks_enc, ks_mac);
+    printf("ks_enc: "); print_hex(ks_enc, 16); printf("\n");
+    printf("ks_mac: "); print_hex(ks_mac, 16); printf("\n");
+
+    printf("rnd_ic: "); print_hex(rnd_ic, 16); printf("\n");
+    printf("rnd_ifd: "); print_hex(rnd_ifd, 16); printf("\n");
+    uint64_t ssc = mrtd_ssc_from_data(rnd_ic, rnd_ifd);
+    printf("ssc: %016lx", ssc);
+
+    ssc++;
+
+    //TODO: set challenge TX for verification
+    test_mrtd_protect_apdu(0x00, 0xA4, 0x02, 0x0C, 0x02, "\x01\x1e", -1, ks_enc, ks_mac, ssc,
+            (uint8_t*)"\x0C\xA4\x02\x0C\x15\x87\x09\x01\xC5\x4E\x76\x3A\xD1\x89\xF0\xFA\x8E\x08\x1F\x03\xC2\xB6\xCE\x8A\xE1\x53\x00", 27);
+    */
 
     return 0;
 }

@@ -132,11 +132,32 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
     if(furi_hal_nfc_tx_rx(tx_rx, 300)) {
         mrtd_trace(app);
         uint16_t ret_code = mrtd_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8);
+
         //TODO: handle other return codes?
         if(ret_code == 0x9000) {
+
+            if(app->secure_messaging) {
+                //TODO: decrypt and verify
+                app->ssc_long++;
+
+                mrtd_bac_decrypt_verify
+            }
+
             return true;
         } else {
             FURI_LOG_I(TAG, "APDU answer is not 0x9000, but 0x%04X", ret_code);
+
+            switch(ret_code) {
+                case 0x6987:
+                    FURI_LOG_I(TAG, "'expected secure messaging data objects are missing'");
+                    app->secure_messaging = false;
+                    break;
+                case 0x6988:
+                    FURI_LOG_I(TAG, "'secure messaging data objects are incorrect'");
+                    app->secure_messaging = false;
+                    break;
+            }
+
             return false;
         }
     }
@@ -358,6 +379,9 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
     //memcpy(rnd_ifd, "\x78\x17\x23\x86\x0C\x06\xC2\x26", 8);
     //memcpy(k_ifd, "\x0B\x79\x52\x40\xCB\x70\x49\xB0\x1C\x19\xB3\x3E\x32\x80\x4F\x0B", 16);
 
+    hexdump(FuriLogLevelDebug, "rnd_ifd:", rnd_ifd, 8);
+    hexdump(FuriLogLevelDebug, "k_ifd:", k_ifd, 16);
+
     uint8_t kenc[16];
     uint8_t kmac[16];
 
@@ -375,9 +399,9 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
 
     uint8_t cmd_data[40];
     uint8_t *eifd = cmd_data;
-    uint8_t *kifd = cmd_data+32;
+    uint8_t *mifd = cmd_data+32;
     mrtd_bac_encrypt(S, 32, kenc, eifd);
-    mrtd_bac_padded_mac(eifd, 32, kmac, kifd);
+    mrtd_bac_padded_mac(eifd, 32, kmac, mifd);
 
     uint8_t response[40];
     if(!mrtd_external_authenticate(app, cmd_data, 40, response, 40)) {
@@ -393,19 +417,26 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
     uint8_t *rnd_ifd_recv = buffer + 8;
     uint8_t *kic = buffer + 16;
 
+    hexdump(FuriLogLevelDebug, "kic:", kic, 16);
+
     if(memcmp(rnd_ifd, rnd_ifd_recv, 8)) {
         FURI_LOG_W(TAG, "BAC RND.IFD sent and received mismatch.");
     }
 
     uint8_t kseed[16];
     for(uint8_t i=0; i<16; ++i) {
-        kseed[i] = kifd[i] ^ kic[i];
+        kseed[i] = k_ifd[i] ^ kic[i];
+        printf("seed %2d = %02X ^ %02X = %02X\r\n", i, k_ifd[i], kic[i], kseed[i]);
     }
+
+    hexdump(FuriLogLevelDebug, "kseed:", kseed, 16);
 
     if(!mrtd_bac_keys_from_seed(kseed, app->ksenc, app->ksmac)) {
         FURI_LOG_E(TAG, "BAC error, could not derive KSenc and KSmac");
         return false;
     }
+    hexdump(FuriLogLevelDebug, "ksenc:", app->ksenc, 16);
+    hexdump(FuriLogLevelDebug, "ksmac:", app->ksmac, 16);
 
     hexdump(FuriLogLevelTrace, "RND.IC:", rnd_ic, 8);
     hexdump(FuriLogLevelTrace, "RND.IFS:", rnd_ifd, 8);
