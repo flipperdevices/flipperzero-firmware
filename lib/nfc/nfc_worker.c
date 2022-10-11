@@ -268,7 +268,8 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
 
 static bool nfc_worker_read_id_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
-    IdApplication id_app = {.aid = {0x07, 0xA0, 0x00, 0x00, 0x02, 0x47, 0x10, 0x01}, .aid_len = 8};
+    EmrtdApplication id_app = {
+        .aid = {0x07, 0xA0, 0x00, 0x00, 0x02, 0x47, 0x10, 0x01}, .aid_len = 8};
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);

@@ -61,7 +61,6 @@ typedef struct {
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
         MifareDesfireData mf_df_data;
-        IdData id_data;
     };
     FuriString* parsed_data;
 } NfcDeviceData;

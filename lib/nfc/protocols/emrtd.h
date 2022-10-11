@@ -15,4 +15,4 @@ typedef struct {
  * 
  * @return true on success
  */
-bool read_id_card(FuriHalNfcTxRxContext* tx_rx, EmrtdApplication* id_app);
+bool read_id_card(FuriHalNfcTxRxContext* tx_rx, EmrtdApplication* emrtd_app);
