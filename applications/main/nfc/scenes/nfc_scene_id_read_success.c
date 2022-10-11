@@ -10,6 +10,7 @@ void nfc_scene_id_read_success_widget_callback(GuiButtonType result, InputType t
 
 void nfc_scene_id_read_success_on_enter(void* context) {
     Nfc* nfc = context;
+    FuriHalNfcDevData data = nfc->dev->dev_data.nfc_data;
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
     // Setup Custom Widget view
@@ -23,8 +24,11 @@ void nfc_scene_id_read_success_on_enter(void* context) {
 
     string_t temp_str;
     string_init(temp_str);
-    string_set_str(temp_str, "UID:");
-    FuriHalNfcDevData data = nfc->dev->dev_data.nfc_data;
+    if(data.type == FuriHalNfcTypeA) {
+        string_set_str(temp_str, "NFC-A UID:");
+    } else if(data.type == FuriHalNfcTypeB) {
+        string_set_str(temp_str, "NFC-B UID:");
+    }
     for(uint8_t i = 0; i < data.uid_len; i++) {
         string_cat_printf(temp_str, " %02X", data.uid[i]);
     }
