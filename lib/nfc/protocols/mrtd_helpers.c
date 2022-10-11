@@ -146,12 +146,6 @@ bool mrtd_bac_encrypt(const uint8_t* data, size_t data_length, uint8_t* key, uin
 bool mrtd_bac_decrypt(const uint8_t* data, size_t data_length, uint8_t* key, uint8_t* output) {
     uint8_t IV[8] = "\x00\x00\x00\x00\x00\x00\x00\x00";
 
-    printf("Decrypt: ");
-    for(uint8_t i=0; i<data_length; ++i) {
-        printf("%02X ", data[i]);
-    }
-    printf("\n");
-
     mbedtls_des3_context ctx;
     mbedtls_des3_init(&ctx);
     mbedtls_des3_set2key_dec(&ctx, key);

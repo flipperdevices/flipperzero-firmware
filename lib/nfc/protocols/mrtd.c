@@ -77,28 +77,9 @@ struct AIDSet AID = {
     .AdditionalBiometrics = {0xA0, 0x00, 0x00, 0x02, 0x47, 0x20, 0x03},
 };
 
-/*bool mrtd_send_apdu(MrtdApplication* app, uint8_t* buffer, size_t length) {
-    FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
 
-    memcpy(tx_rx->tx_data, buffer, length);
-    tx_rx->tx_bits = length * 8;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-
-    //TODO: timeout as param?
-    if(furi_hal_nfc_tx_rx(tx_rx, 300)) {
-        mrtd_trace(app);
-        uint16_t ret_code = mrtd_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8);
-        if(ret_code == 0x9000) {
-            return true;
-        } else {
-            FURI_LOG_E(TAG, "APDU answer is not 0x9000, but 0x%04X", ret_code);
-            return false;
-        }
-    }
-    return false;
-}*/
-
-bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le) {
+//TODO: rename to transceive?
+bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* output) {
     FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
     size_t idx = 0;
 
@@ -133,16 +114,18 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
         mrtd_trace(app);
         uint16_t ret_code = mrtd_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8);
 
+        if(app->secure_messaging && ret_code == 0x9000) {
+            app->ssc_long++;
+            mrtd_bac_decrypt_verify_sm(tx_rx->rx_data, tx_rx->rx_bits / 8 - 2,
+                app->ksenc, app->ksmac, app->ssc_long, output, &ret_code);
+        }
+
         //TODO: handle other return codes?
         if(ret_code == 0x9000) {
-
-            if(app->secure_messaging) {
-                //TODO: decrypt and verify
-                app->ssc_long++;
-
-                mrtd_bac_decrypt_verify
+            if(!app->secure_messaging && le > 0) {
+                // Secure Messaging sets output while decrypting
+                memcpy(output, tx_rx->rx_data, le);
             }
-
             return true;
         } else {
             FURI_LOG_I(TAG, "APDU answer is not 0x9000, but 0x%04X", ret_code);
@@ -168,7 +151,7 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 bool mrtd_select_app(MrtdApplication* app, AIDValue aid) {
     FURI_LOG_D(TAG, "Send select App: %02X %02X %02X %02X %02X %02X %02X",
         aid[0], aid[1], aid[2], aid[3], aid[4], aid[5], aid[6]);
-    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x04, 0x0C, 0x07, aid, -1)) {
+    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x04, 0x0C, 0x07, aid, -1, NULL)) {
         FURI_LOG_W(TAG, "Failed select App");
         return false;
     }
@@ -177,13 +160,10 @@ bool mrtd_select_app(MrtdApplication* app, AIDValue aid) {
 
 bool mrtd_get_challenge(MrtdApplication* app, uint8_t challenge[8]) {
     FURI_LOG_D(TAG, "Send Get Challenge");
-    if(!mrtd_send_apdu(app, 0x00, 0x84, 0x00, 0x00, 0x00, NULL, 0x08)) {
+    if(!mrtd_send_apdu(app, 0x00, 0x84, 0x00, 0x00, 0x00, NULL, 0x08, challenge)) {
         FURI_LOG_W(TAG, "Failed get challenge");
         return false;
     }
-
-    FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
-    memcpy(challenge, tx_rx->rx_data, 8);
 
     return true;
 }
@@ -193,13 +173,10 @@ bool mrtd_external_authenticate(MrtdApplication* app, uint8_t* cmd_data, size_t 
     furi_assert(out_size >= 0x28);
 
     FURI_LOG_D(TAG, "Send External Authenticate");
-    if(!mrtd_send_apdu(app, 0x00, 0x82, 0x00, 0x00, cmd_size, cmd_data, 0x28)) {
+    if(!mrtd_send_apdu(app, 0x00, 0x82, 0x00, 0x00, cmd_size, cmd_data, 0x28, out_data)) {
         FURI_LOG_W(TAG, "Failed External Authenticate");
         return false;
     }
-
-    FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
-    memcpy(out_data, tx_rx->rx_data, 0x28);
 
     return true;
 }
@@ -207,7 +184,7 @@ bool mrtd_external_authenticate(MrtdApplication* app, uint8_t* cmd_data, size_t 
 bool mrtd_select_file(MrtdApplication* app, EFFile file) {
     uint8_t data[] = {file.file_id >> 8, file.file_id & 0xff};
     FURI_LOG_D(TAG, "Send select EF: 0x%04X", file.file_id);
-    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x02, 0x0C, 0x02, data, -1)) {
+    if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x02, 0x0C, 0x02, data, -1, NULL)) {
         FURI_LOG_E(TAG, "Failed select EF 0x%04X", file.file_id);
         return false;
     }
@@ -221,12 +198,12 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
     UNUSED(bufsize);
     // 00 B0 offst -
     FURI_LOG_D(TAG, "Read binary, offset: %d", offset);
-    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, 0)) {
+    //TODO: limit reading/buffer fill to max bufsize
+    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, 0, buffer)) {
         FURI_LOG_E(TAG, "Failed to read");
         return 0;
     }
 
-    //TODO: copy data to buffer
     //TODO: return read amount
 
     return 0;

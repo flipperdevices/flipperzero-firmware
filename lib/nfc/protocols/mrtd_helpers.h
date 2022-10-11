@@ -71,6 +71,8 @@ bool mrtd_bac_decrypt(const uint8_t* data, size_t data_length, uint8_t* key, uin
 
 bool mrtd_bac_decrypt_verify(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint8_t* output);
 
+bool mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uint8_t* key_enc, uint8_t* key_mac, uint64_t ssc, uint8_t* output, uint16_t* ret_code);
+
 #include <machine/_endian.h>
 #define htonll(x) ((((uint64_t)__htonl(x)) << 32) + __htonl((x) >> 32))
 
