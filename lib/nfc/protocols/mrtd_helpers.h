@@ -15,6 +15,8 @@ typedef struct {
 #define MRTD_DOCNR_MAX_LENGTH 21
 
 typedef enum {
+    MrtdAuthMethodNone,
+    MrtdAuthMethodAny,
     MrtdAuthMethodBac,
     MrtdAuthMethodPace,
 } MrtdAuthMethod;

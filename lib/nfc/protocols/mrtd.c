@@ -277,7 +277,22 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     mrtd_data->auth.expiry_date = (MrtdDate){.year=94, .month=6, .day=23};
     memcpy(mrtd_data->auth.doc_number, "L898902C<", 9);
     */
-    mrtd_bac(app, &mrtd_data->auth);
+
+    MrtdAuthMethod method = mrtd_data->auth.method;
+    FURI_LOG_D(TAG, "Auth method: %d", method);
+    switch(method) {
+        case MrtdAuthMethodAny:
+            //TODO: try PACE, then BAC
+        case MrtdAuthMethodBac:
+            mrtd_bac(app, &mrtd_data->auth);
+            break;
+        case MrtdAuthMethodPace:
+            FURI_LOG_E(TAG, "Auth method PACE not implemented");
+            break;
+        case MrtdAuthMethodNone:
+        default:
+            break;
+    }
 }
 
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {

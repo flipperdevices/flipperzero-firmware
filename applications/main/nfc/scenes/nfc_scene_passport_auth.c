@@ -2,9 +2,11 @@
 
 #define TAG "PassportAuth"
 
-#define MRTD_AUTH_METHOD_COUNT 2
-// Indexes must match MrtdAuthMethod (lib/nfc/protocols/mrtd.h)
+#define MRTD_AUTH_METHOD_COUNT 4
+// Indexes must match MrtdAuthMethod (lib/nfc/protocols/mrtd_helpers.h)
 const char* const mrtd_auth_method_text[MRTD_AUTH_METHOD_COUNT] = {
+    "None",
+    "Any",
     "BAC",
     "PACE",
 };
@@ -77,6 +79,9 @@ void nfc_scene_passport_auth_on_enter(void* context) {
         nfc);
 
     value_index = nfc->dev->dev_data.mrtd_data.auth.method;
+    if(value_index == MrtdAuthMethodNone) {
+        value_index = MrtdAuthMethodAny;
+    }
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, mrtd_auth_method_text[value_index]);
 
@@ -114,6 +119,9 @@ bool nfc_scene_passport_auth_on_event(void* context, SceneManagerEvent event) {
         case NfcScenePassportAuthSelectAuth:
             if(nfc->dev->dev_data.mrtd_data.auth.method == MrtdAuthMethodPace) {
                 scene_manager_next_scene(nfc->scene_manager, NfcScenePassportPaceTodo);
+            } else {
+                nfc_device_clear(nfc->dev);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             }
             consumed = true;
             break;
