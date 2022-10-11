@@ -337,6 +337,29 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     return card_read;
 }
 
+static bool nfc_worker_read_nfcb(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+
+    bool card_read = false;
+    bool found_protocol = false;
+    furi_hal_nfc_sleep();
+    if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
+        FURI_LOG_I(TAG, "ISO14443-4 card detected");
+        if(nfc_worker_read_id_card(nfc_worker, tx_rx)) {
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolID;
+            found_protocol = true;
+        }
+        furi_hal_nfc_sleep();
+        if(!found_protocol) {
+            FURI_LOG_I(TAG, "Unknown card. Save UID");
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
+        }
+    }
+    card_read = true;
+
+    return card_read;
+}
+
 void nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
@@ -381,8 +404,15 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                     }
                 }
             } else if(nfc_data->type == FuriHalNfcTypeB) {
-                event = NfcWorkerEventReadUidNfcB;
-                break;
+                if(nfc_worker_read_nfcb(nfc_worker, &tx_rx)) {
+                    if(dev_data->protocol == NfcDeviceProtocolID) {
+                        event = NfcWorkerEventReadIDcard;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
+                        event = NfcWorkerEventReadUidNfcB;
+                        break;
+                    }
+                }
             } else if(nfc_data->type == FuriHalNfcTypeF) {
                 event = NfcWorkerEventReadUidNfcF;
                 break;
