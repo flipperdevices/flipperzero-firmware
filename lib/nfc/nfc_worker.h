@@ -38,6 +38,7 @@ typedef enum {
     NfcWorkerEventReadMfClassicLoadKeyCache,
     NfcWorkerEventReadMfClassicDictAttackRequired,
     NfcWorkerEventReadBankCard,
+    NfcWorkerEventReadPassport,
 
     // Nfc worker common events
     NfcWorkerEventSuccess,

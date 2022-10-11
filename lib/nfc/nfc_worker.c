@@ -179,7 +179,9 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     return read_success;
 }
 
-static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+//TODO: remove unused attribute
+static bool __attribute__((unused))
+nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     EmvApplication emv_app = {};
     EmvData* result = &nfc_worker->dev_data->emv_data;
@@ -214,6 +216,44 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
     return read_success;
 }
 
+static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    bool read_success = false;
+    MrtdApplication mrtd_app = {};
+    //EmvData* result = &nfc_worker->dev_data->emv_data;
+
+    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    do {
+        // Read passport
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        if(!mrtd_select_lds1(tx_rx, &mrtd_app)) break;
+
+        /*
+        // Copy data
+        // TODO Set EmvData to reader or like in mifare ultralight!
+        result->number_len = emv_app.card_number_len;
+        memcpy(result->number, emv_app.card_number, result->number_len);
+        result->aid_len = emv_app.aid_len;
+        memcpy(result->aid, emv_app.aid, result->aid_len);
+        if(emv_app.name_found) {
+            memcpy(result->name, emv_app.name, sizeof(emv_app.name));
+        }
+        if(emv_app.exp_month) {
+            result->exp_mon = emv_app.exp_month;
+            result->exp_year = emv_app.exp_year;
+        }
+        if(emv_app.country_code) {
+            result->country_code = emv_app.country_code;
+        }
+        if(emv_app.currency_code) {
+            result->currency_code = emv_app.currency_code;
+        }
+		*/
+        read_success = true;
+    } while(false);
+
+    return read_success;
+}
+
 static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
@@ -239,8 +279,14 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         card_read = true;
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         FURI_LOG_I(TAG, "ISO14443-4 card detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
-        if(!nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+        //TODO: EMV read on MRTD results in states: 0, 10, 11, 13, 30, 33?
+        /*if(nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+			nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
+        } else*/
+        if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
+            FURI_LOG_I(TAG, "MRTD reading");
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
+        } else {
             FURI_LOG_I(TAG, "Unknown card. Save UID");
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
         }
@@ -282,6 +328,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
                         event = NfcWorkerEventReadBankCard;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolMRTD) {
+                        event = NfcWorkerEventReadPassport;
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
                         event = NfcWorkerEventReadUidNfcA;
