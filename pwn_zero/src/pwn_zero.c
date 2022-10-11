@@ -47,7 +47,7 @@ void pwn_zero_screen_flush(Canvas* canvas, void* context) {
     for (size_t ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
         for (size_t jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
             if (pwn->pwnagotchi->screen[ii][jj]) {
-                canvas_draw_dot(canvas, ii, jj);
+                canvas_draw_dot(canvas, jj, ii);
             }
         }
     }
@@ -84,9 +84,21 @@ int32_t pwn_zero_app(void* p) {
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-
     /// Body will go here
+    InputEvent event;
+    for (int ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
+        furi_message_queue_get(eventQueue, &event, FuriWaitForever);
 
+        for (int jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
+            PwnZero* pwnZero = (PwnZero*) acquire_mutex_block(&pwnMutex);
+
+            pwn_zero_screen_set(pwnZero, ii, jj, true);
+
+            view_port_update(view_port);
+
+            release_mutex(&pwnMutex, pwnZero);
+        }
+    }
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
