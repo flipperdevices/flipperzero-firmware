@@ -271,7 +271,11 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, MrtdData* mrtd_data, Fur
     MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx);
     //EmvData* result = &nfc_worker->dev_data->emv_data;
 
-    nfc_debug_pcap_prepare_tx_rx(nfc_worker->debug_pcap_worker, tx_rx, false);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
     do {
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
