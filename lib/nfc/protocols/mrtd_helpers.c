@@ -1,4 +1,5 @@
 #include "mrtd_helpers.h"
+#include "../helpers/iso7816.h"
 
 #include <stdio.h> //TODO: remove
 #include <stdlib.h>
@@ -185,15 +186,25 @@ uint16_t mrtd_bac_decrypt_verify_sm(const uint8_t* data, size_t data_length, uin
     uint16_t ret_code = data[data_length - 10 - 2] <<8 | data[data_length - 10 - 1];
     //ntohs(data + data_length - 10 - 2);
 
-    if(data[0] == 0x87) {
+    TlvInfo do87 = iso7816_tlv_select(data, data_length, (uint16_t[]){0x87}, 1);
+    //printf("DO87.Tag: %X\n", do87.tag);
+    //printf("DO87.Length: %ld\n", do87.length);
+    //printf("DO87.Value: ");
+    //for(uint8_t i=1; i<do87.length; ++i) { printf("%02X ", do87.value[i]); }
+    //printf("\r\n");
+
+    if(do87.tag) {
         if(output_written != NULL && output != NULL) {
-            uint8_t do87_length = data[1] - 1;
-            mrtd_bac_decrypt(data + 3, do87_length, key_enc, output);
-            printf("Decrypted: "); for(uint8_t i=0; i<do87_length; ++i) printf("%02X ", output[i]); printf("\r\n");
+            // Skip the first byte '01'
+            const uint8_t* encdata = do87.value + 1;
+            size_t enclength = do87.length - 1;
+
+            mrtd_bac_decrypt(encdata, enclength, key_enc, output);
+            printf("Decrypted: "); for(uint8_t i=0; i<enclength; ++i) printf("%02X ", output[i]); printf("\r\n");
 
             //TODO: function mrtd_bac_unpad?
             int padidx;
-            for(padidx=do87_length-1; padidx>=0; --padidx) {
+            for(padidx=enclength-1; padidx>=0; --padidx) {
                 if(output[padidx] == 0x00) {
                     continue;
                 } else if(output[padidx] == 0x80) {
