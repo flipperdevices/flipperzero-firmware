@@ -97,7 +97,7 @@ BtHid* bt_hid_app_alloc() {
         app->submenu, "Keyboard", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
     submenu_add_item(app->submenu, "Media", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "TikTok controller", BtHidSubmenuIndexTikTok, bt_hid_submenu_callback, app);
+        app->submenu, "TikTok Controller", BtHidSubmenuIndexTikTok, bt_hid_submenu_callback, app);
     submenu_add_item(app->submenu, "Mouse", BtHidSubmenuIndexMouse, bt_hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
     view_dispatcher_add_view(
