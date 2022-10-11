@@ -1,6 +1,5 @@
 #include "weather_station_history.h"
 #include <lib/subghz/receiver.h>
-#include <lib/subghz/protocols/came.h>
 
 #include <furi.h>
 #include <m-string.h>
@@ -180,21 +179,7 @@ bool ws_history_add_to_history(
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
         }
-        if(!strcmp(string_get_cstr(instance->tmp_string), "KeeLoq")) {
-            string_set_str(instance->tmp_string, "KL ");
-            if(!flipper_format_read_string(item->flipper_string, "Manufacture", text)) {
-                FURI_LOG_E(TAG, "Missing Protocol");
-                break;
-            }
-            string_cat(instance->tmp_string, text);
-        } else if(!strcmp(string_get_cstr(instance->tmp_string), "Star Line")) {
-            string_set_str(instance->tmp_string, "SL ");
-            if(!flipper_format_read_string(item->flipper_string, "Manufacture", text)) {
-                FURI_LOG_E(TAG, "Missing Protocol");
-                break;
-            }
-            string_cat(instance->tmp_string, text);
-        }
+
         if(!flipper_format_rewind(item->flipper_string)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
