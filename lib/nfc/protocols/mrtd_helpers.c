@@ -47,8 +47,14 @@ bool mrtd_bac_get_kmrz(MrtdAuthData* auth, char* output, uint8_t output_size) {
     }
 
     cd_idx = idx;
-    memcpy(output+idx, auth->doc_number, docnr_length);
-    idx += docnr_length;
+    for(uint8_t i=0; i<docnr_length; ++i) {
+        char c = auth->doc_number[i];
+        if(c >= 'a' && c <= 'z') {
+            c = c - 'a' + 'A';
+        }
+        output[idx++] = c;
+    }
+
     if(docnr_length < 9) {
         memset(output+idx, '<', 9-docnr_length);
         idx += 9-docnr_length;
