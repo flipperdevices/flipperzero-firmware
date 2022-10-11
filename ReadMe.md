@@ -5,17 +5,17 @@ The main goal is to make any features possible in this device without any limita
 
 # What's changed
 
-* Grabbed ibutton, lfrfid, nfc intercom-keys [(by wetox-team)](https://github.com/wetox-team/flipperzero-goodies) with grabbed by Jerky in `grb` folders
+* Grabbed ibutton, lfrfid, nfc intercom-keys (grabbed by Jerky, wetox-team)
 * BadUSB scripts (Android PIN bruteforce, Kiosk evation bruteforce, Windows wifi/web passwords information)
 * SubGhz gates bruteforce (Came, Lift Master, Handicap)
 * SubGhz jammers (can be illegal in your country, for educational purposes only!)
 * SubGhz just for fun (sex-toys manipulation, Tesla charge opener, etc.)
 * Some IR TV remotes (Samsung, Sharp, don't forget about Universal Remote)
-* Cleaned some animations - only 2 per level (tech. based)
+* Cleaned some standard animations, added new
 
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/pieceofsys/flipperzero-firmware/dev?logo=github)](https://github.com/pieceofsys/flipperzero-firmware/commits/dev)
 
-# What's changed by Unleashed team
+# What's changed by DarkFlippers
 * SubGHz regional TX restrictions removed
 * SubGHz frequecy range can be extended in settings file (Warning: It can damage flipper's hardware)
 * Many rolling code protocols now have the ability to save & send captured signals
