@@ -38,6 +38,10 @@ typedef struct {
     MrtdAuthData auth;
 } MrtdData;
 
+//TODO: description
+bool mrtd_select_efcardaccess(FuriHalNfcTxRxContext* tx_rx, MrtdApplication* mrtd_app);
+bool mrtd_select_efdir(FuriHalNfcTxRxContext* tx_rx, MrtdApplication* mrtd_app);
+
 /** Select the LDS1 eMRTD application
  * @note Can be used to detect presence of Passport/ID-card
  *

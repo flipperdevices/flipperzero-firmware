@@ -223,6 +223,8 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     do {
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        mrtd_select_efcardaccess(tx_rx, &mrtd_app);
+        mrtd_select_efdir(tx_rx, &mrtd_app);
         if(!mrtd_select_lds1(tx_rx, &mrtd_app)) break;
 
         /*
