@@ -298,10 +298,8 @@ static bool nfc_worker_read_id_card(NfcWorker* nfc_worker, FuriHalNfcTxRxContext
 
     do {
         // Read card
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 1000)) break;
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
         if(!read_id_card(tx_rx, &id_app)) break;
-        // Copy data
-        // TODO Set EmvData to reader or like in mifare ultralight!
         read_success = true;
     } while(false);
 
@@ -433,6 +431,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                 if(nfc_worker_read_nfcb(nfc_worker, &tx_rx)) {
                     if(dev_data->protocol == NfcDeviceProtocolID) {
                         event = NfcWorkerEventReadIDcard;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
+                        event = NfcWorkerEventReadBankCard;
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
                         event = NfcWorkerEventReadUidNfcB;
