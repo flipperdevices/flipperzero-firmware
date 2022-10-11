@@ -182,19 +182,6 @@ static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app
     return success;
 }
 
-static bool id_decode_response(uint8_t* buff, uint16_t len) {
-    if(len < 2) {
-        return false;
-    }
-    bool success = false;
-    if(buff[0] == 0x69 && buff[1] == 0x82) {
-        success = true;
-    }
-    if(buff[0] == 0x90 && buff[1] == 0x00) {
-        success = true;
-    }
-    return success;
-}
 bool emv_select_ppse(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
     bool app_aid_found = false;
     const uint8_t emv_select_ppse_cmd[] = {
@@ -252,40 +239,6 @@ bool emv_select_app(FuriHalNfcTxRxContext* tx_rx, EmvApplication* app) {
             select_app_success = true;
         } else {
             FURI_LOG_E(TAG, "Failed to read PAN or PDOL");
-        }
-    } else {
-        FURI_LOG_E(TAG, "Failed to start application");
-    }
-
-    return select_app_success;
-}
-
-bool id_select_app(FuriHalNfcTxRxContext* tx_rx, IdApplication* app) {
-    bool select_app_success = false;
-    const uint8_t id_select_header[] = {
-        0x00,
-        0xA4, // SELECT application
-        0x04,
-        0x0C // P1:By name, P2:First or only occurence
-    };
-    uint16_t size = sizeof(id_select_header);
-
-    // Copy header
-    memcpy(tx_rx->tx_data, id_select_header, size);
-    // Copy AID
-    // tx_rx->tx_data[size++] = app->aid_len;
-    memcpy(&tx_rx->tx_data[size], app->aid, app->aid_len);
-    size += app->aid_len;
-    tx_rx->tx_data[size++] = 0x00;
-    tx_rx->tx_bits = size * 8;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-
-    FURI_LOG_D(TAG, "Start application");
-    if(furi_hal_nfc_tx_rx(tx_rx, 800)) {
-        if(id_decode_response(tx_rx->rx_data, tx_rx->rx_bits / 8)) {
-            select_app_success = true;
-        } else {
-            FURI_LOG_E(TAG, "Failed to find id app");
         }
     } else {
         FURI_LOG_E(TAG, "Failed to start application");
@@ -436,19 +389,6 @@ bool emv_read_bank_card(FuriHalNfcTxRxContext* tx_rx, EmvApplication* emv_app) {
         } else {
             card_num_read = emv_read_files(tx_rx, emv_app);
         }
-    } while(false);
-
-    return card_num_read;
-}
-
-bool read_id_card(FuriHalNfcTxRxContext* tx_rx, IdApplication* id_app) {
-    furi_assert(tx_rx);
-    furi_assert(id_app);
-    bool card_num_read = false;
-
-    do {
-        if(!id_select_app(tx_rx, id_app)) break;
-        card_num_read = true;
     } while(false);
 
     return card_num_read;

@@ -8,6 +8,7 @@
 #include <furi_hal_nfc.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/protocols/emv.h>
+#include <lib/nfc/protocols/emrtd.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>

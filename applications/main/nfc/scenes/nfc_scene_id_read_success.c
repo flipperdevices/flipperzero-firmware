@@ -22,18 +22,24 @@ void nfc_scene_id_read_success_on_enter(void* context) {
     widget_add_string_element(
         nfc->widget, 64, 12, AlignCenter, AlignBottom, FontPrimary, "Passport or ID card");
 
-    string_t temp_str;
-    string_init(temp_str);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
     if(data.type == FuriHalNfcTypeA) {
-        string_set_str(temp_str, "NFC-A UID:");
+        furi_string_set_str(temp_str, "NFC-A UID:");
     } else if(data.type == FuriHalNfcTypeB) {
-        string_set_str(temp_str, "NFC-B UID:");
+        furi_string_set_str(temp_str, "NFC-B UID:");
     }
     for(uint8_t i = 0; i < data.uid_len; i++) {
-        string_cat_printf(temp_str, " %02X", data.uid[i]);
+        furi_string_cat_printf(temp_str, " %02X", data.uid[i]);
     }
     widget_add_string_element(
-        nfc->widget, 64, 28, AlignCenter, AlignCenter, FontSecondary, string_get_cstr(temp_str));
+        nfc->widget,
+        64,
+        28,
+        AlignCenter,
+        AlignCenter,
+        FontSecondary,
+        furi_string_get_cstr(temp_str));
     widget_add_string_element(
         nfc->widget, 64, 40, AlignCenter, AlignCenter, FontSecondary, "(Probably random)");
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
