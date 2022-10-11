@@ -40,17 +40,17 @@ void nfc_scene_passport_bac_on_enter(void* context) {
     const size_t temp_str_size = 10;
     char temp_str[temp_str_size];
     snprintf(temp_str, temp_str_size, "%02u%02u%02u",
-        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date.year,
-        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date.month,
-        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date.day);
+        nfc->dev->dev_data.mrtd_data.auth.birth_date.year,
+        nfc->dev->dev_data.mrtd_data.auth.birth_date.month,
+        nfc->dev->dev_data.mrtd_data.auth.birth_date.day);
 
     item = variable_item_list_add(variable_item_list, "Birth Date", 1, NULL, NULL);
     variable_item_set_current_value_text(item, temp_str);
 
     snprintf(temp_str, temp_str_size, "%02u%02u%02u",
-        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date.year,
-        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date.month,
-        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date.day);
+        nfc->dev->dev_data.mrtd_data.auth.expiry_date.year,
+        nfc->dev->dev_data.mrtd_data.auth.expiry_date.month,
+        nfc->dev->dev_data.mrtd_data.auth.expiry_date.day);
 
     item = variable_item_list_add(variable_item_list, "Expiry Date", 1, NULL, NULL);
     variable_item_set_current_value_text(item, temp_str);

@@ -18,13 +18,6 @@ typedef struct {
 // NULL terminated document ID
 #define MRTD_DOCNR_MAX_LENGTH 21
 
-typedef struct {
-    // BAC input fields
-    MrtdDate birth_date;
-    MrtdDate expiry_date;
-    char doc_number[MRTD_DOCNR_MAX_LENGTH];
-} MrtdBacData;
-
 typedef enum {
     MrtdAuthMethodBac,
     MrtdAuthMethodPace,
@@ -32,9 +25,13 @@ typedef enum {
 
 typedef struct {
     MrtdAuthMethod method;
-    union {
-        MrtdBacData bac;
-    };
+
+    // BAC input fields
+    MrtdDate birth_date;
+    MrtdDate expiry_date;
+    char doc_number[MRTD_DOCNR_MAX_LENGTH];
+
+    //TODO: PACE
 } MrtdAuthData;
 
 typedef struct {

@@ -29,11 +29,11 @@ void nfc_scene_passport_date_on_enter(void* context) {
     switch(date_type) {
     case NFC_PASSPORT_DATE_BIRTH:
         text_input_set_header_text(text_input, "Birth Date");
-        date_value = nfc->dev->dev_data.mrtd_data.auth.bac.birth_date;
+        date_value = nfc->dev->dev_data.mrtd_data.auth.birth_date;
         break;
     case NFC_PASSPORT_DATE_EXPIRY:
         text_input_set_header_text(text_input, "Expiry Date");
-        date_value = nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date;
+        date_value = nfc->dev->dev_data.mrtd_data.auth.expiry_date;
         break;
     }
 
@@ -90,10 +90,10 @@ bool nfc_scene_passport_date_save(Nfc* nfc) {
     //TODO: use types in .h file? also in nfc_scene_passport_bac.c
     switch(date_type) {
     case NFC_PASSPORT_DATE_BIRTH:
-        nfc->dev->dev_data.mrtd_data.auth.bac.birth_date = date_value;
+        nfc->dev->dev_data.mrtd_data.auth.birth_date = date_value;
         break;
     case NFC_PASSPORT_DATE_EXPIRY:
-        nfc->dev->dev_data.mrtd_data.auth.bac.expiry_date = date_value;
+        nfc->dev->dev_data.mrtd_data.auth.expiry_date = date_value;
         break;
     }
 
