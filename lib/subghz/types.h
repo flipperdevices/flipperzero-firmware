@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+//#include "m-string.h"
 
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/toolbox/level_duration.h>
@@ -26,7 +27,7 @@
 //
 
 struct SubGhzPresetDefinition {
-    string_t name;
+    FuriString* name;
     uint32_t frequency;
     uint8_t* data;
     size_t data_size;

@@ -188,7 +188,7 @@ void weather_station_scene_receiver_config_on_enter(void* context) {
         weather_station_scene_receiver_config_set_preset,
         app);
     value_index = weather_station_scene_receiver_config_next_preset(
-        string_get_cstr(app->txrx->preset->name), app);
+        furi_string_get_cstr(app->txrx->preset->name), app);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(
         item, subghz_setting_get_preset_name(app->setting, value_index));

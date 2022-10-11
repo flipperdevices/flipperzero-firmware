@@ -74,7 +74,7 @@ WeatherStationApp* weather_station_app_alloc() {
     app->lock = WSLockOff;
     app->txrx = malloc(sizeof(WeatherStationTxRx));
     app->txrx->preset = malloc(sizeof(SubGhzPresetDefinition));
-    string_init(app->txrx->preset->name);
+    app->txrx->preset->name = furi_string_alloc();
     ws_preset_init(app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
 
     app->txrx->hopper_state = WSHopperStateOFF;
@@ -129,7 +129,7 @@ void weather_station_app_free(WeatherStationApp* app) {
     ws_history_free(app->txrx->history);
     subghz_worker_free(app->txrx->worker);
 
-    string_clear(app->txrx->preset->name);
+    furi_string_free(app->txrx->preset->name);
     free(app->txrx->preset);
     free(app->txrx);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers/subghz_types.h"
+#include <lib/subghz/types.h>
 #include "subghz.h"
 #include "views/receiver.h"
 #include "views/transmitter.h"
@@ -11,8 +12,6 @@
 #include "views/subghz_test_carrier.h"
 #include "views/subghz_test_packet.h"
 
-// #include <furi.h>
-// #include <furi_hal.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>

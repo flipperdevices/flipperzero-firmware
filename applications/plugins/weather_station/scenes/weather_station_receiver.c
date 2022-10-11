@@ -3,30 +3,30 @@
 
 static void weather_station_scene_receiver_update_statusbar(void* context) {
     WeatherStationApp* app = context;
-    string_t history_stat_str;
-    string_init(history_stat_str);
+    FuriString* history_stat_str;
+    history_stat_str = furi_string_alloc();
     if(!ws_history_get_text_space_left(app->txrx->history, history_stat_str)) {
-        string_t frequency_str;
-        string_t modulation_str;
+        FuriString* frequency_str;
+        FuriString* modulation_str;
 
-        string_init(frequency_str);
-        string_init(modulation_str);
+        frequency_str = furi_string_alloc();
+        modulation_str= furi_string_alloc();
 
         ws_get_frequency_modulation(app, frequency_str, modulation_str);
 
         ws_view_receiver_add_data_statusbar(
             app->ws_receiver,
-            string_get_cstr(frequency_str),
-            string_get_cstr(modulation_str),
-            string_get_cstr(history_stat_str));
+            furi_string_get_cstr(frequency_str),
+            furi_string_get_cstr(modulation_str),
+            furi_string_get_cstr(history_stat_str));
 
-        string_clear(frequency_str);
-        string_clear(modulation_str);
+        furi_string_free(frequency_str);
+        furi_string_free(modulation_str);
     } else {
         ws_view_receiver_add_data_statusbar(
-            app->ws_receiver, string_get_cstr(history_stat_str), "", "");
+            app->ws_receiver, furi_string_get_cstr(history_stat_str), "", "");
     }
-    string_clear(history_stat_str);
+    furi_string_free(history_stat_str);
 }
 
 void weather_station_scene_receiver_callback(WSCustomEvent event, void* context) {
@@ -41,32 +41,32 @@ static void weather_station_scene_add_to_history_callback(
     void* context) {
     furi_assert(context);
     WeatherStationApp* app = context;
-    string_t str_buff;
-    string_init(str_buff);
+    FuriString* str_buff;
+    str_buff = furi_string_alloc();
 
     if(ws_history_add_to_history(app->txrx->history, decoder_base, app->txrx->preset)) {
-        string_reset(str_buff);
+        furi_string_reset(str_buff);
 
         ws_history_get_text_item_menu(
             app->txrx->history, str_buff, ws_history_get_item(app->txrx->history) - 1);
         ws_view_receiver_add_item_to_menu(
             app->ws_receiver,
-            string_get_cstr(str_buff),
+            furi_string_get_cstr(str_buff),
             ws_history_get_type_protocol(
                 app->txrx->history, ws_history_get_item(app->txrx->history) - 1));
 
         weather_station_scene_receiver_update_statusbar(app);
     }
     subghz_receiver_reset(receiver);
-    string_clear(str_buff);
+    furi_string_free(str_buff);
     app->txrx->rx_key_state = WSRxKeyStateAddKey;
 }
 
 void weather_station_scene_receiver_on_enter(void* context) {
     WeatherStationApp* app = context;
 
-    string_t str_buff;
-    string_init(str_buff);
+    FuriString* str_buff;
+    str_buff = furi_string_alloc();
 
     if(app->txrx->rx_key_state == WSRxKeyStateIDLE) {
         ws_preset_init(app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
@@ -79,15 +79,15 @@ void weather_station_scene_receiver_on_enter(void* context) {
     //Load history to receiver
     ws_view_receiver_exit(app->ws_receiver);
     for(uint8_t i = 0; i < ws_history_get_item(app->txrx->history); i++) {
-        string_reset(str_buff);
+        furi_string_reset(str_buff);
         ws_history_get_text_item_menu(app->txrx->history, str_buff, i);
         ws_view_receiver_add_item_to_menu(
             app->ws_receiver,
-            string_get_cstr(str_buff),
+            furi_string_get_cstr(str_buff),
             ws_history_get_type_protocol(app->txrx->history, i));
         app->txrx->rx_key_state = WSRxKeyStateAddKey;
     }
-    string_clear(str_buff);
+    furi_string_free(str_buff);
     weather_station_scene_receiver_update_statusbar(app);
 
     ws_view_receiver_set_callback(app->ws_receiver, weather_station_scene_receiver_callback, app);
@@ -102,7 +102,7 @@ void weather_station_scene_receiver_on_enter(void* context) {
         ws_begin(
             app,
             subghz_setting_get_preset_data_by_name(
-                app->setting, string_get_cstr(app->txrx->preset->name)));
+                app->setting, furi_string_get_cstr(app->txrx->preset->name)));
 
         ws_rx(app, app->txrx->preset->frequency);
     }

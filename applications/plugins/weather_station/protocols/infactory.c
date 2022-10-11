@@ -283,13 +283,13 @@ bool ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* fli
     return ret;
 }
 
-void ws_protocol_decoder_infactory_get_string(void* context, string_t output) {
+void ws_protocol_decoder_infactory_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;
 
     ws_protocol_infactory_remote_controller(instance);
 
-    string_cat_printf(
+    furi_string_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"

@@ -74,7 +74,7 @@ void ws_preset_init(
     uint8_t* preset_data,
     size_t preset_data_size);
 bool ws_set_preset(WeatherStationApp* app, const char* preset);
-void ws_get_frequency_modulation(WeatherStationApp* app, string_t frequency, string_t modulation);
+void ws_get_frequency_modulation(WeatherStationApp* app, FuriString* frequency, FuriString* modulation);
 void ws_begin(WeatherStationApp* app, uint8_t* preset_data);
 uint32_t ws_rx(WeatherStationApp* app, uint32_t frequency);
 void ws_idle(WeatherStationApp* app);

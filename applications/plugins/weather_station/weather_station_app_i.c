@@ -11,7 +11,7 @@ void ws_preset_init(
     size_t preset_data_size) {
     furi_assert(context);
     WeatherStationApp* app = context;
-    string_set(app ->txrx->preset->name, preset_name);
+    furi_string_set(app ->txrx->preset->name, preset_name);
     app ->txrx->preset->frequency = frequency;
     app ->txrx->preset->data = preset_data;
     app ->txrx->preset->data_size = preset_data_size;
@@ -19,15 +19,15 @@ void ws_preset_init(
 
 bool ws_set_preset(WeatherStationApp* app, const char* preset) {
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
-        string_set(app ->txrx->preset->name, "AM270");
+        furi_string_set(app ->txrx->preset->name, "AM270");
     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
-        string_set(app ->txrx->preset->name, "AM650");
+        furi_string_set(app ->txrx->preset->name, "AM650");
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev238Async")) {
-        string_set(app ->txrx->preset->name, "FM238");
+        furi_string_set(app ->txrx->preset->name, "FM238");
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev476Async")) {
-        string_set(app ->txrx->preset->name, "FM476");
+        furi_string_set(app ->txrx->preset->name, "FM476");
     } else if(!strcmp(preset, "FuriHalSubGhzPresetCustom")) {
-        string_set(app ->txrx->preset->name, "CUSTOM");
+        furi_string_set(app ->txrx->preset->name, "CUSTOM");
     } else {
         FURI_LOG_E(TAG, "Unknown preset");
         return false;
@@ -35,17 +35,17 @@ bool ws_set_preset(WeatherStationApp* app, const char* preset) {
     return true;
 }
 
-void ws_get_frequency_modulation(WeatherStationApp* app, string_t frequency, string_t modulation) {
+void ws_get_frequency_modulation(WeatherStationApp* app, FuriString* frequency, FuriString* modulation) {
     furi_assert(app);
     if(frequency != NULL) {
-        string_printf(
+        furi_string_printf(
             frequency,
             "%03ld.%02ld",
             app ->txrx->preset->frequency / 1000000 % 1000,
             app ->txrx->preset->frequency / 10000 % 100);
     }
     if(modulation != NULL) {
-        string_printf(modulation, "%0.2s", string_get_cstr(app ->txrx->preset->name));
+        furi_string_printf(modulation, "%.2s", furi_string_get_cstr(app ->txrx->preset->name));
     }
 }
 
@@ -172,7 +172,7 @@ void ws_hopper_update(WeatherStationApp* app) {
 }
 
 // void tx(WeatherStationApp* app) {
-//     string_t flipper_format_string;
+//     FuriString* flipper_format_string;
 //     string_init_printf(
 //         flipper_format_string,
 //         "Protocol: Princeton\n"
@@ -183,7 +183,7 @@ void ws_hopper_update(WeatherStationApp* app) {
 //     FlipperFormat* flipper_format = flipper_format_string_alloc();
 //     Stream* stream = flipper_format_get_raw_stream(flipper_format);
 //     stream_clean(stream);
-//     stream_write_cstring(stream, string_get_cstr(flipper_format_string));
+//     stream_write_cstring(stream, furi_string_get_cstr(flipper_format_string));
 
 //     SubGhzTransmitter* transmitter =
 //         subghz_transmitter_alloc_init(app->txrx->environment, "Princeton");

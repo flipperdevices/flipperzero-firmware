@@ -8,7 +8,7 @@
 #define TAG "WSHistory"
 
 typedef struct {
-    string_t item_str;
+    FuriString* item_str;
     FlipperFormat* flipper_string;
     uint8_t type;
     SubGhzPresetDefinition* preset;
@@ -26,13 +26,13 @@ struct WSHistory {
     uint32_t last_update_timestamp;
     uint16_t last_index_write;
     uint8_t code_last_hash_data;
-    string_t tmp_string;
+    FuriString* tmp_string;
     WSHistoryStruct* history;
 };
 
 WSHistory* ws_history_alloc(void) {
     WSHistory* instance = malloc(sizeof(WSHistory));
-    string_init(instance->tmp_string);
+    instance->tmp_string = furi_string_alloc();
     instance->history = malloc(sizeof(WSHistoryStruct));
     WSHistoryItemArray_init(instance->history->data);
     return instance;
@@ -40,11 +40,11 @@ WSHistory* ws_history_alloc(void) {
 
 void ws_history_free(WSHistory* instance) {
     furi_assert(instance);
-    string_clear(instance->tmp_string);
+    furi_string_free(instance->tmp_string);
     for
         M_EACH(item, instance->history->data, WSHistoryItemArray_t) {
-            string_clear(item->item_str);
-            string_clear(item->preset->name);
+            furi_string_free(item->item_str);
+            furi_string_free(item->preset->name);
             free(item->preset);
             flipper_format_free(item->flipper_string);
             item->type = 0;
@@ -69,16 +69,16 @@ SubGhzPresetDefinition* ws_history_get_preset_def(WSHistory* instance, uint16_t 
 const char* ws_history_get_preset(WSHistory* instance, uint16_t idx) {
     furi_assert(instance);
     WSHistoryItem* item = WSHistoryItemArray_get(instance->history->data, idx);
-    return string_get_cstr(item->preset->name);
+    return furi_string_get_cstr(item->preset->name);
 }
 
 void ws_history_reset(WSHistory* instance) {
     furi_assert(instance);
-    string_reset(instance->tmp_string);
+    furi_string_reset(instance->tmp_string);
     for
         M_EACH(item, instance->history->data, WSHistoryItemArray_t) {
-            string_clear(item->item_str);
-            string_clear(item->preset->name);
+            furi_string_free(item->item_str);
+            furi_string_free(item->preset->name);
             free(item->preset);
             flipper_format_free(item->flipper_string);
             item->type = 0;
@@ -105,9 +105,9 @@ const char* ws_history_get_protocol_name(WSHistory* instance, uint16_t idx) {
     flipper_format_rewind(item->flipper_string);
     if(!flipper_format_read_string(item->flipper_string, "Protocol", instance->tmp_string)) {
         FURI_LOG_E(TAG, "Missing Protocol");
-        string_reset(instance->tmp_string);
+        furi_string_reset(instance->tmp_string);
     }
-    return string_get_cstr(instance->tmp_string);
+    return furi_string_get_cstr(instance->tmp_string);
 }
 
 FlipperFormat* ws_history_get_raw_data(WSHistory* instance, uint16_t idx) {
@@ -119,26 +119,23 @@ FlipperFormat* ws_history_get_raw_data(WSHistory* instance, uint16_t idx) {
         return NULL;
     }
 }
-bool ws_history_get_text_space_left(WSHistory* instance, string_t output) {
+bool ws_history_get_text_space_left(WSHistory* instance, FuriString* output) {
     furi_assert(instance);
     if(instance->last_index_write == WS_HISTORY_MAX) {
-        if(output != NULL) string_printf(output, "Memory is FULL");
+        if(output != NULL) furi_string_printf(output, "Memory is FULL");
         return true;
     }
     if(output != NULL)
-        string_printf(output, "%02u/%02u", instance->last_index_write, WS_HISTORY_MAX);
+        furi_string_printf(output, "%02u/%02u", instance->last_index_write, WS_HISTORY_MAX);
     return false;
 }
 
-void ws_history_get_text_item_menu(WSHistory* instance, string_t output, uint16_t idx) {
+void ws_history_get_text_item_menu(WSHistory* instance, FuriString* output, uint16_t idx) {
     WSHistoryItem* item = WSHistoryItemArray_get(instance->history->data, idx);
-    string_set(output, item->item_str);
+    furi_string_set(output, item->item_str);
 }
 
-bool ws_history_add_to_history(
-    WSHistory* instance,
-    void* context,
-    SubGhzPresetDefinition* preset) {
+bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetDefinition* preset) {
     furi_assert(instance);
     furi_assert(context);
 
@@ -155,18 +152,18 @@ bool ws_history_add_to_history(
     instance->code_last_hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
     instance->last_update_timestamp = furi_get_tick();
 
-    string_t text;
-    string_init(text);
+    FuriString* text;
+    text = furi_string_alloc();
     WSHistoryItem* item = WSHistoryItemArray_push_raw(instance->history->data);
     item->preset = malloc(sizeof(SubGhzPresetDefinition));
     item->type = decoder_base->protocol->type;
     item->preset->frequency = preset->frequency;
-    string_init(item->preset->name);
-    string_set(item->preset->name, preset->name);
+    item->preset->name = furi_string_alloc();
+    furi_string_set(item->preset->name, preset->name);
     item->preset->data = preset->data;
     item->preset->data_size = preset->data_size;
 
-    string_init(item->item_str);
+    item->item_str = furi_string_alloc();
     item->flipper_string = flipper_format_string_alloc();
     subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
 
@@ -194,22 +191,22 @@ bool ws_history_add_to_history(
             data = (data << 8) | key_data[i];
         }
         if(!(uint32_t)(data >> 32)) {
-            string_printf(
+            furi_string_printf(
                 item->item_str,
                 "%s %lX",
-                string_get_cstr(instance->tmp_string),
+                furi_string_get_cstr(instance->tmp_string),
                 (uint32_t)(data & 0xFFFFFFFF));
         } else {
-            string_printf(
+            furi_string_printf(
                 item->item_str,
                 "%s %lX%08lX",
-                string_get_cstr(instance->tmp_string),
+                furi_string_get_cstr(instance->tmp_string),
                 (uint32_t)(data >> 32),
                 (uint32_t)(data & 0xFFFFFFFF));
         }
     } while(false);
 
-    string_clear(text);
+    furi_string_free(text);
     instance->last_index_write++;
     return true;
 }

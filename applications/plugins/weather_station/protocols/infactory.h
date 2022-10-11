@@ -76,4 +76,4 @@ bool ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* fli
  * @param context Pointer to a WSProtocolDecoderInfactory instance
  * @param output Resulting text
  */
-void ws_protocol_decoder_infactory_get_string(void* context, string_t output);
+void ws_protocol_decoder_infactory_get_string(void* context, FuriString* output);

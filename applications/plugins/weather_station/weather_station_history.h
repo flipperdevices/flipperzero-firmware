@@ -71,18 +71,18 @@ const char* ws_history_get_protocol_name(WSHistory* instance, uint16_t idx);
 /** Get string item menu to history[idx]
  * 
  * @param instance  - WSHistory instance
- * @param output    - string_t output
+ * @param output    - FuriString* output
  * @param idx       - record index
  */
-void ws_history_get_text_item_menu(WSHistory* instance, string_t output, uint16_t idx);
+void ws_history_get_text_item_menu(WSHistory* instance, FuriString* output, uint16_t idx);
 
 /** Get string the remaining number of records to history
  * 
  * @param instance  - WSHistory instance
- * @param output    - string_t output
+ * @param output    - FuriString* output
  * @return bool - is FUUL
  */
-bool ws_history_get_text_space_left(WSHistory* instance, string_t output);
+bool ws_history_get_text_space_left(WSHistory* instance, FuriString* output);
 
 /** Add protocol to history
  * 
