@@ -16,6 +16,7 @@ env.Append(
         File("#/lib/subghz/blocks/encoder.h"),
         File("#/lib/subghz/blocks/generic.h"),
         File("#/lib/subghz/blocks/math.h"),
+        File("#/lib/subghz/subghz_setting.h"),
     ],
 )
 

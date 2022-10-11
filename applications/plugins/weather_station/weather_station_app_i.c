@@ -54,9 +54,7 @@ void ws_begin(WeatherStationApp* app, uint8_t* preset_data) {
     UNUSED (preset_data);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    //furi_hal_subghz_load_custom_preset(preset_data);
-    //ToDo load preset
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    furi_hal_subghz_load_custom_preset(preset_data);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     app ->txrx->txrx_state = WSTxRxStateIDLE;
 }

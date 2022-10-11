@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,1.20,,
+Version,+,1.22,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -132,6 +132,7 @@ Header,+,lib/subghz/blocks/math.h,,
 Header,+,lib/subghz/environment.h,,
 Header,+,lib/subghz/protocols/raw.h,,
 Header,+,lib/subghz/receiver.h,,
+Header,+,lib/subghz/subghz_setting.h,,
 Header,+,lib/subghz/subghz_tx_rx_worker.h,,
 Header,+,lib/subghz/subghz_worker.h,,
 Header,+,lib/subghz/transmitter.h,,
@@ -2237,6 +2238,23 @@ Function,+,subghz_receiver_reset,void,SubGhzReceiver*
 Function,+,subghz_receiver_search_decoder_base_by_name,SubGhzProtocolDecoderBase*,"SubGhzReceiver*, const char*"
 Function,+,subghz_receiver_set_filter,void,"SubGhzReceiver*, SubGhzProtocolFlag"
 Function,+,subghz_receiver_set_rx_callback,void,"SubGhzReceiver*, SubGhzReceiverCallback, void*"
+Function,+,subghz_setting_alloc,SubGhzSetting*,
+Function,+,subghz_setting_delete_custom_preset,_Bool,"SubGhzSetting*, const char*"
+Function,+,subghz_setting_free,void,SubGhzSetting*
+Function,+,subghz_setting_get_default_frequency,uint32_t,SubGhzSetting*
+Function,+,subghz_setting_get_frequency,uint32_t,"SubGhzSetting*, size_t"
+Function,+,subghz_setting_get_frequency_count,size_t,SubGhzSetting*
+Function,+,subghz_setting_get_frequency_default_index,uint32_t,SubGhzSetting*
+Function,+,subghz_setting_get_hopper_frequency,uint32_t,"SubGhzSetting*, size_t"
+Function,+,subghz_setting_get_hopper_frequency_count,size_t,SubGhzSetting*
+Function,+,subghz_setting_get_inx_preset_by_name,int,"SubGhzSetting*, const char*"
+Function,+,subghz_setting_get_preset_count,size_t,SubGhzSetting*
+Function,+,subghz_setting_get_preset_data,uint8_t*,"SubGhzSetting*, size_t"
+Function,+,subghz_setting_get_preset_data_by_name,uint8_t*,"SubGhzSetting*, const char*"
+Function,+,subghz_setting_get_preset_data_size,size_t,"SubGhzSetting*, size_t"
+Function,+,subghz_setting_get_preset_name,const char*,"SubGhzSetting*, size_t"
+Function,+,subghz_setting_load,void,"SubGhzSetting*, const char*"
+Function,+,subghz_setting_load_custom_preset,_Bool,"SubGhzSetting*, const char*, FlipperFormat*"
 Function,+,subghz_transmitter_alloc_init,SubGhzTransmitter*,"SubGhzEnvironment*, const char*"
 Function,+,subghz_transmitter_deserialize,_Bool,"SubGhzTransmitter*, FlipperFormat*"
 Function,+,subghz_transmitter_free,void,SubGhzTransmitter*

@@ -12,6 +12,7 @@
 #include "views/weather_station_show.h"
 #include "views/weather_station_receiver.h"
 
+#include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
@@ -20,18 +21,6 @@
 #include "weather_station_history.h"
 
 typedef struct WeatherStationApp WeatherStationApp;
-
-// struct WeatherStationPresetDefinition {
-//     string_t name;
-//     uint32_t frequency;
-//     FuriHalSubGhzPreset preset;
-//     //uint8_t* data;
-//     //size_t data_size;
-// };
-
-// typedef struct WeatherStationPresetDefinition WeatherStationPresetDefinition;
-// //TODO  SubGhzPresetDefinition
-
 
 struct WeatherStationTxRx {
     SubGhzWorker* worker;
@@ -47,10 +36,10 @@ struct WeatherStationTxRx {
     WSHistory* history;
     uint16_t idx_menu_chosen;
     WSTxRxState txrx_state;
-    //SubGhzHopperState hopper_state;
+    WSHopperState hopper_state;
     //uint8_t hopper_timeout;
     //uint8_t hopper_idx_frequency;
-    //SubGhzRxKeyState rx_key_state;
+    WSRxKeyState rx_key_state;
 };
 
 typedef struct WeatherStationTxRx WeatherStationTxRx;
@@ -61,11 +50,13 @@ struct WeatherStationApp {
     WeatherStationTxRx* txrx;
     SceneManager* scene_manager;
 
-    // VariableItemList* var_item_list;
+    VariableItemList* variable_item_list;
     Submenu* submenu;
+    //todo detete weather_station_show
     WeatherStationShow* weather_station_show;
     WSReceiver* ws_receiver;
     WSLock lock;
+    SubGhzSetting* setting;
 
     // FuriHalClockMcoSourceId mco_src;
     // FuriHalClockMcoDivisorId mco_div;

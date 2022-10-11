@@ -21,26 +21,9 @@
 //     SubGhzTxRxStateSleep,
 // } SubGhzTxRxState;
 
-// /** SubGhzHopperState state */
-// typedef enum {
-//     SubGhzHopperStateOFF,
-//     SubGhzHopperStateRunnig,
-//     SubGhzHopperStatePause,
-//     SubGhzHopperStateRSSITimeOut,
-// } SubGhzHopperState;
 
-// /** SubGhzRxKeyState state */
-// typedef enum {
-//     SubGhzRxKeyStateIDLE,
-//     SubGhzRxKeyStateNoSave,
-//     SubGhzRxKeyStateNeedSave,
-//     SubGhzRxKeyStateBack,
-//     SubGhzRxKeyStateStart,
-//     SubGhzRxKeyStateAddKey,
-//     SubGhzRxKeyStateExit,
-//     SubGhzRxKeyStateRAWLoad,
-//     SubGhzRxKeyStateRAWSave,
-// } SubGhzRxKeyState;
+
+
 
 // /** SubGhzLoadKeyState state */
 // typedef enum {
@@ -49,27 +32,26 @@
 //     SubGhzLoadKeyStateParseErr,
 // } SubGhzLoadKeyState;
 
-// /** SubGhzLock */
-// typedef enum {
-//     SubGhzLockOff,
-//     SubGhzLockOn,
-// } SubGhzLock;
+/** WSRxKeyState state */
+typedef enum {
+    WSRxKeyStateIDLE,
+    //WSRxKeyStateNoSave,
+    //WSRxKeyStateNeedSave,
+    WSRxKeyStateBack,
+    WSRxKeyStateStart,
+    WSRxKeyStateAddKey,
+    //WSRxKeyStateExit,
+    //WSRxKeyStateRAWLoad,
+    //WSRxKeyStateRAWSave,
+} WSRxKeyState;
 
-// typedef enum {
-//     SubGhzViewIdMenu,
-//     SubGhzViewIdReceiver,
-//     SubGhzViewIdPopup,
-//     SubGhzViewIdTextInput,
-//     SubGhzViewIdWidget,
-//     SubGhzViewIdTransmitter,
-//     SubGhzViewIdVariableItemList,
-//     SubGhzViewIdFrequencyAnalyzer,
-//     SubGhzViewIdReadRAW,
-
-//     SubGhzViewIdStatic,
-//     SubGhzViewIdTestCarrier,
-//     SubGhzViewIdTestPacket,
-// } SubGhzViewId;
+/** WSHopperState state */
+typedef enum {
+    WSHopperStateOFF,
+    WSHopperStateRunnig,
+    WSHopperStatePause,
+    WSHopperStateRSSITimeOut,
+} WSHopperState;
 
 /** WSLock */
 typedef enum {
@@ -78,7 +60,7 @@ typedef enum {
 } WSLock;
 
 typedef enum {
-    //WeatherStationViewVarItemList,
+    WeatherStationViewVariableItemList,
     WeatherStationViewSubmenu,
     WeatherStationViewShow,
     WeatherStationViewReceiver,

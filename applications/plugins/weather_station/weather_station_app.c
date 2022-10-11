@@ -41,11 +41,12 @@ WeatherStationApp* weather_station_app_alloc() {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    // app->var_item_list = variable_item_list_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher,
-    //     TemperatureViewVarItemList,
-    //     variable_item_list_get_view(app->var_item_list));
+    // Variable Item List
+    app->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        WeatherStationViewVariableItemList,
+        variable_item_list_get_view(app->variable_item_list));
 
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(
@@ -64,13 +65,19 @@ WeatherStationApp* weather_station_app_alloc() {
         WeatherStationViewReceiver,
         ws_view_receiver_get_view(app->ws_receiver));
 
+    //init setting
+    app->setting = subghz_setting_alloc();
+    //ToDo FIX  file name setting
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user"));
+
     //init Worker & Protocol & History
     app->lock = WSLockOff;
     app->txrx = malloc(sizeof(WeatherStationTxRx));
     app->txrx->preset = malloc(sizeof(SubGhzPresetDefinition));
     string_init(app->txrx->preset->name);
-    ws_preset_init(app, "AM650", 433920000, NULL, 0);
+    ws_preset_init(app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
 
+    app->txrx->hopper_state = WSHopperStateOFF;
     app->txrx->history = ws_history_alloc();
     app->txrx->worker = subghz_worker_alloc();
     app->txrx->environment = subghz_environment_alloc();
@@ -98,11 +105,12 @@ void weather_station_app_free(WeatherStationApp* app) {
     //CC1101 off
     ws_sleep(app);
 
-    // Views
-    // view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewVarItemList);
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewSubmenu);
-
     submenu_free(app->submenu);
+
+    // Variable Item List
+    view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewVariableItemList);
+    variable_item_list_free(app->variable_item_list);
 
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewShow);
     weather_station_show_free(app->weather_station_show);
@@ -110,9 +118,11 @@ void weather_station_app_free(WeatherStationApp* app) {
     // Receiver
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewReceiver);
     ws_view_receiver_free(app->ws_receiver);
-    // variable_item_list_free(app->var_item_list);
+    //variable_item_list_free(app->var_item_list);
     //weather_station_pwm_free(app->pwm_view);
 
+    //setting
+    subghz_setting_free(app->setting);
     //Worker & Protocol & History
     subghz_receiver_free(app->txrx->receiver);
     subghz_environment_free(app->txrx->environment);

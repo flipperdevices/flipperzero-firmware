@@ -1,5 +1,6 @@
 #include "subghz_setting.h"
-#include "subghz_i.h"
+#include "types.h"
+//#include "subghz_i.h"
 
 #include <furi.h>
 #include <m-list.h>

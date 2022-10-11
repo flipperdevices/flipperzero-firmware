@@ -24,14 +24,13 @@
 #include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
-
 #include <lib/subghz/subghz_worker.h>
-
+#include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 
 #include "subghz_history.h"
-#include "subghz_setting.h"
+
 
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
