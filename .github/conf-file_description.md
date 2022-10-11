@@ -47,7 +47,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 **Default value:** 0.000000
 
 **Description:** Timezone offset **in hours**. Need to be modified manually. Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google.
-**Important note: if you timezone offset is negative, use negative sign, like this `-2.0`, however if you timezone offset is positive DO NOT use explicit positive sign, just put offset without any sign like this `2.0`**
+**Important note: if your timezone offset is negative, use negative sign, like this `-2.0`, however if your timezone offset is positive DO NOT use explicit positive sign, just put offset without any sign like this `2.0`**
 
 ### TokenName
 
@@ -80,7 +80,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 **Default value:** `6`
 
-**Description:** Defines TOTP code length. If you don;t know which to use - use `6` as majority of websites requires 6-digits code.
+**Description:** Defines TOTP code length. If you don't know which to use - use `6` as majority of websites requires 6-digits code.
 
 ## Example config file
 
