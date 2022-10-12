@@ -63,7 +63,7 @@ jobs:
           set -e
           for TARGET in ${TARGETS}; do
             FBT_TOOLCHAIN_PATH=/opt ./fbt TARGET_HW="$(echo "${TARGET}" | sed 's/f//')" \
-                updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+                copro_dist updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
           done
 
       - name: 'Move upload files'
@@ -86,8 +86,7 @@ jobs:
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          FBT_TOOLCHAIN_PATH=/opt ./fbt copro_dist
-          tar czpf "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz" -C assets core2_firmware
+          cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
       - name: 'Copy .map file'
         run: |

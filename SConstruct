@@ -165,9 +165,10 @@ distenv.Depends(firmware_env["FW_RESOURCES"], plugin_resources_dist)
 
 # Target for bundling core2 package for qFlipper
 copro_dist = distenv.CoproBuilder(
-    distenv.Dir("assets/core2_firmware"),
+    "#/build/core2_firmware.tgz",
     [],
 )
+distenv.AlwaysBuild(copro_dist)
 distenv.Alias("copro_dist", copro_dist)
 
 firmware_flash = distenv.AddOpenOCDFlashTarget(firmware_env)
