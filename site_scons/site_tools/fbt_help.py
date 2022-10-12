@@ -21,6 +21,8 @@ Flashing & debugging:
         Start GDB
 
 Other:
+    cli:
+        Open a Flipper CLI session over USB
     firmware_cdb, updater_cdb:
         Generate сompilation_database.json
     lint, lint_py:
