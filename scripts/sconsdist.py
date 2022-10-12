@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 
 from flipper.app import App
-<<<<<<< HEAD
 from os.path import join, exists, relpath
-from os import makedirs, walk
-=======
-from os.path import join, exists
-from os import makedirs, environ
->>>>>>> dev
+from os import makedirs, walk, environ
 from update import Main as UpdateMain
 import shutil
 import zipfile
@@ -161,7 +156,14 @@ class Main(App):
                     )
                 )
             bundle_args.extend(self.other_args)
-<<<<<<< HEAD
+            log_custom_fz_name = (
+                environ.get("CUSTOM_FLIPPER_NAME", None)
+                or ""
+            )
+            if (log_custom_fz_name != "") and (len(log_custom_fz_name) <= 8) and (log_custom_fz_name.isalnum()) and (log_custom_fz_name.isascii()):
+                self.logger.info(
+                    f"Flipper Custom Name is set:\n\tName: {log_custom_fz_name} : length - {len(log_custom_fz_name)} chars"
+                )
 
             if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
                 self.logger.info(
@@ -180,21 +182,6 @@ class Main(App):
                     tar.add(bundle_dir, arcname=bundle_dir_name)
 
             return bundle_result
-=======
-            self.logger.info(
-                f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
-            )
-            log_custom_fz_name = (
-                environ.get("CUSTOM_FLIPPER_NAME", None)
-                or ""
-            )
-            if (log_custom_fz_name != "") and (len(log_custom_fz_name) <= 8) and (log_custom_fz_name.isalnum()) and (log_custom_fz_name.isascii()):
-                self.logger.info(
-                    f"Flipper Custom Name is set:\n\tName: {log_custom_fz_name} : length - {len(log_custom_fz_name)} chars"
-                )
-
-            return UpdateMain(no_exit=True)(bundle_args)
->>>>>>> dev
 
         return 0
 

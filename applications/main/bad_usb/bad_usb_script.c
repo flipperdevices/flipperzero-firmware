@@ -288,14 +288,10 @@ static int32_t
     } else if(strncmp(line_tmp, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
-<<<<<<< HEAD
-        state = ducky_string(line_tmp);
+        state = ducky_string(bad_usb, line_tmp);
         if(!state && error != NULL) {
             snprintf(error, error_len, "Invalid string %s", line_tmp);
         }
-=======
-        state = ducky_string(bad_usb, line_tmp);
->>>>>>> dev
         return (state) ? (0) : SCRIPT_STATE_ERROR;
     } else if(strncmp(line_tmp, ducky_cmd_altchar, strlen(ducky_cmd_altchar)) == 0) {
         // ALTCHAR
@@ -335,18 +331,13 @@ static int32_t
         return (0);
     } else {
         // Special keys + modifiers
-<<<<<<< HEAD
-        uint16_t key = ducky_get_keycode(line_tmp, false);
+        uint16_t key = ducky_get_keycode(bad_usb, line_tmp, false);
         if(key == HID_KEYBOARD_NONE) {
             if(error != NULL) {
                 snprintf(error, error_len, "No keycode defined for %s", line_tmp);
             }
             return SCRIPT_STATE_ERROR;
         }
-=======
-        uint16_t key = ducky_get_keycode(bad_usb, line_tmp, false);
-        if(key == HID_KEYBOARD_NONE) return SCRIPT_STATE_ERROR;
->>>>>>> dev
         if((key & 0xFF00) != 0) {
             // It's a modifier key
             line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
