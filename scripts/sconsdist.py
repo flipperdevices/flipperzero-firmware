@@ -6,6 +6,7 @@ from os import makedirs, walk
 from update import Main as UpdateMain
 import shutil
 import zipfile
+import tarfile
 
 
 class ProjectDir:
@@ -126,9 +127,8 @@ class Main(App):
         )
 
         if self.args.version:
-            bundle_dir = join(
-                self.output_dir_path, f"{self.target}-update-{self.args.suffix}"
-            )
+            bundle_dir_name = f"{self.target}-update-{self.args.suffix}"
+            bundle_dir = join(self.output_dir_path, bundle_dir_name)
             bundle_args = [
                 "generate",
                 "-d",
@@ -154,10 +154,17 @@ class Main(App):
                     )
                 )
             bundle_args.extend(self.other_args)
-            self.logger.info(
-                f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
-            )
-            return UpdateMain(no_exit=True)(bundle_args)
+
+            if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
+                self.logger.info(
+                    f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
+                )
+
+                # Create tgz archive
+                with tarfile.open(f"{bundle_dir}.tgz", "w:gz", compresslevel=9) as tar:
+                    tar.add(bundle_dir, arcname=bundle_dir_name)
+
+            return bundle_result
 
         return 0
 
