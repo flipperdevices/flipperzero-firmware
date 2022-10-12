@@ -173,7 +173,7 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
     }
 
     if (file_version < CONFIG_FILE_ACTUAL_VERSION) {
-        FURI_LOG_I(LOGGING_TAG, "Obsolete config file version detected. Current version: %d; Actual version: %d", file_version, CONFIG_FILE_ACTUAL_VERSION);
+        FURI_LOG_I(LOGGING_TAG, "Obsolete config file version detected. Current version: %" PRIu32 "; Actual version: %" PRId16, file_version, CONFIG_FILE_ACTUAL_VERSION);
         totp_close_config_file(fff_data_file);
 
         if (storage_common_stat(storage, CONFIG_FILE_BACKUP_PATH, NULL) == FSE_OK) {
@@ -311,7 +311,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
     plugin_state->tokens_count = index;
     plugin_state->token_list_loaded = true;
 
-    FURI_LOG_D(LOGGING_TAG, "Found %d tokens", index);
+    FURI_LOG_D(LOGGING_TAG, "Found %" PRIu8 " tokens", index);
 
     furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);
