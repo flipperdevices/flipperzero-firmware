@@ -4,6 +4,8 @@
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 
+#include "Bluetooth_Remote_icons.h"
+
 struct BtHidMouse {
     View* view;
 };
