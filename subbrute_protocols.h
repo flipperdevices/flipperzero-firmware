@@ -34,6 +34,7 @@ typedef enum {
     SubBruteAttackChamberlain9bit300,
     SubBruteAttackChamberlain9bit315,
     SubBruteAttackChamberlain9bit390,
+    SubBruteAttackChamberlain9bit433,
     SubBruteAttackLinear10bit300,
     SubBruteAttackLinear10bit310,
     SubBruteAttackLoadFile,
