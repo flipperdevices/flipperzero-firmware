@@ -19,22 +19,7 @@ typedef struct bucket_info {
     uint32_t numbuckets;
 } bucket_info_t;
 
-void bucket_sort_intersect(uint32_t *const estart, uint32_t *const estop,
-                           uint32_t *const ostart, uint32_t *const ostop,
-                           bucket_info_t *bucket_info, bucket_array_t bucket);
-
 struct Crypto1State {uint32_t odd, even;};
-void crypto1_get_lfsr(struct Crypto1State *, uint64_t *);
-uint8_t crypto1_bit(struct Crypto1State *, uint8_t, int);
-uint32_t crypto1_word(struct Crypto1State *, uint32_t, int);
-uint32_t prng_successor(uint32_t x, uint32_t n);
-
-#if !defined(__arm__) || defined(__linux__) || defined(_WIN32) || defined(__APPLE__) // bare metal ARM Proxmark lacks malloc()/free()
-struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in);
-#endif
-
-uint8_t lfsr_rollback_bit(struct Crypto1State *s, uint32_t in, int fb);
-uint32_t lfsr_rollback_word(struct Crypto1State *s, uint32_t in, int fb);
 
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
