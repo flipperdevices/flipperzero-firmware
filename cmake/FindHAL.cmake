@@ -54,6 +54,9 @@ endif()
 foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
     string(TOUPPER ${family_comp} family_comp)
     string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" family_comp ${family_comp})
+    if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
+        set(FAMILY ${CMAKE_MATCH_1})
+    endif()
     find_path(HAL_${FAMILY}_PATH
         NAMES Inc/stm32${FAMILY_L}xx_hal.h
         PATHS "${STM32_HAL_${FAMILY}_PATH}" "${STM32_CUBE_${FAMILY}_PATH}/Drivers/STM32${FAMILY}xx_HAL_Driver"
@@ -62,7 +65,7 @@ foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
     if(NOT HAL_${FAMILY}_PATH)
         message(FATAL_ERROR "could not find HAL for family ${FAMILY}")
     else()
-        set(HAL_${COMP}_FOUND TRUE)
+        set(HAL_${family_comp}_FOUND TRUE)
     endif()
     if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
         get_list_hal_drivers(HAL_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH} "hal")
