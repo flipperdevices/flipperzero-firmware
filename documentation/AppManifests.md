@@ -30,7 +30,7 @@ Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optio
 | METAPACKAGE  | Does not define any code to be run, used for declaring dependencies and application bundles |
 
 * **name**: Name that is displayed in menus.
-* **entry_point**: C function to be used as application's entry point.
+* **entry_point**: C function to be used as application's entry point. Note that C++ function names are mangled, so you need to wrap them in `extern "C"` in order to use them as entry points.
 * **flags**: Internal flags for system apps. Do not use.
 * **cdefines**: C preprocessor definitions to declare globally for other apps when current application is included in active build configuration.
 * **requires**: List of application IDs to also include in build configuration, when current application is referenced in list of applications to build.

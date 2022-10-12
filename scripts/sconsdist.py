@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 from flipper.app import App
-from os.path import join, exists
-from os import makedirs
+from os.path import join, exists, relpath
+from os import makedirs, walk
 from update import Main as UpdateMain
 import shutil
+import zipfile
 
 
 class ProjectDir:
@@ -59,7 +60,7 @@ class Main(App):
     def copy_single_project(self, project):
         obj_directory = join("build", project.dir)
 
-        for filetype in ("elf", "bin", "dfu", "json", "zip"):
+        for filetype in ("elf", "bin", "dfu", "json"):
             if exists(src_file := join(obj_directory, f"{project.project}.{filetype}")):
                 shutil.copyfile(
                     src_file,
@@ -67,6 +68,21 @@ class Main(App):
                         self.get_project_filename(project, filetype)
                     ),
                 )
+            if exists(sdk_folder := join(obj_directory, "sdk")):
+                with zipfile.ZipFile(
+                    self.get_dist_filepath(self.get_project_filename(project, "zip")),
+                    "w",
+                    zipfile.ZIP_DEFLATED,
+                ) as zf:
+                    for root, dirs, files in walk(sdk_folder):
+                        for file in files:
+                            zf.write(
+                                join(root, file),
+                                relpath(
+                                    join(root, file),
+                                    sdk_folder,
+                                ),
+                            )
 
     def copy(self):
         self.projects = dict(
