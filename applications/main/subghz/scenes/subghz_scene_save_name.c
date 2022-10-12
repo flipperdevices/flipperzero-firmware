@@ -5,7 +5,7 @@
 #include <lib/subghz/protocols/raw.h>
 #include <gui/modules/validators.h>
 
-#define MAX_TEXT_INPUT_LEN 22
+#define MAX_TEXT_INPUT_LEN 23
 
 void subghz_scene_save_name_text_input_callback(void* context) {
     furi_assert(context);
@@ -18,7 +18,7 @@ void subghz_scene_save_name_get_timefilename(FuriString* name) {
     furi_hal_rtc_get_datetime(&datetime);
     furi_string_printf(
         name,
-        "RAW-%.4d%.2d%.2d-%.2d%.2d%.2d",
+        "RAW_%.4d.%.2d.%.2d-%.2d.%.2d.%.2d",
         datetime.year,
         datetime.month,
         datetime.day,
@@ -47,6 +47,7 @@ void subghz_scene_save_name_on_enter(void* context) {
         //highlighting the entire filename by default
         dev_name_empty = true;
     } else {
+        furi_string_reset(subghz->file_path_tmp);
         furi_string_set(subghz->file_path_tmp, subghz->file_path);
         path_extract_dirname(furi_string_get_cstr(subghz->file_path), dir_name);
         path_extract_filename(subghz->file_path, file_name, true);
@@ -84,7 +85,7 @@ void subghz_scene_save_name_on_enter(void* context) {
 bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeBack) {
-        if(!strcmp(subghz->file_name_tmp, "") ||
+        if(!(strcmp(subghz->file_name_tmp, "") == 0) ||
            scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
                SubGhzCustomEventManagerNoSet) {
             furi_string_set(subghz->file_path, subghz->file_path_tmp);

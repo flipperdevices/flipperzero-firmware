@@ -220,11 +220,7 @@ void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogMessage* message = dialog_message_alloc();
 
     const char* header_text = "Transmission is blocked";
-    const char* message_text = "Transmission on\nthis frequency is\nrestricted in\nyour region";
-    if(!furi_hal_region_is_provisioned()) {
-        header_text = "Firmware update needed";
-        message_text = "Please update\nfirmware before\nusing this feature\nflipp.dev/upd";
-    }
+    const char* message_text = "Frequency\nis outside of\ndefault range.\nCheck docs.";
 
     dialog_message_set_header(message, header_text, 63, 3, AlignCenter, AlignTop);
     dialog_message_set_text(message, message_text, 0, 17, AlignLeft, AlignTop);
@@ -278,6 +274,11 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
             break;
         }
 
+        if(!furi_hal_subghz_is_tx_allowed(temp_data32)) {
+            FURI_LOG_E(TAG, "This frequency can only be used for RX");
+            load_key_state = SubGhzLoadKeyStateOnlyRx;
+            break;
+        }
         subghz->txrx->preset->frequency = temp_data32;
 
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
@@ -348,6 +349,12 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
     case SubGhzLoadKeyStateParseErr:
         if(show_dialog) {
             dialog_message_show_storage_error(subghz->dialogs, "Cannot parse\nfile");
+        }
+        return false;
+
+    case SubGhzLoadKeyStateOnlyRx:
+        if(show_dialog) {
+            subghz_dialog_message_show_only_rx(subghz);
         }
         return false;
 
@@ -424,7 +431,7 @@ bool subghz_save_protocol_to_file(
     do {
         //removing additional fields
         flipper_format_delete_key(flipper_format, "Repeat");
-        flipper_format_delete_key(flipper_format, "Manufacture");
+        //flipper_format_delete_key(flipper_format, "Manufacture");
 
         // Create subghz folder directory if necessary
         if(!storage_simply_mkdir(storage, furi_string_get_cstr(file_dir))) {

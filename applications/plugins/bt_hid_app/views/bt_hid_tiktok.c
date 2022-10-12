@@ -4,7 +4,11 @@
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 
+<<<<<<< HEAD
 #include "bt_hid_icons.h"
+=======
+#include "Bluetooth_Remote_icons.h"
+>>>>>>> dev
 
 struct BtHidTikTok {
     View* view;

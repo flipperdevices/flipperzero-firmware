@@ -207,7 +207,11 @@ bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
 
     // Fix incorrect length byte
     if(protocol->data[0] != 26 && protocol->data[0] != 50 && protocol->data[0] != 37 &&
+<<<<<<< HEAD
        protocol->data[0] != 34 && protocol->data[0] != 36 ) {
+=======
+       protocol->data[0] != 34 && protocol->data[0] != 36) {
+>>>>>>> dev
         protocol->data[0] = 26;
     }
 

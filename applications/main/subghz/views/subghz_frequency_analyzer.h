@@ -17,3 +17,10 @@ SubGhzFrequencyAnalyzer* subghz_frequency_analyzer_alloc();
 void subghz_frequency_analyzer_free(SubGhzFrequencyAnalyzer* subghz_static);
 
 View* subghz_frequency_analyzer_get_view(SubGhzFrequencyAnalyzer* subghz_static);
+
+uint32_t subghz_frequency_analyzer_get_frequency_to_save(SubGhzFrequencyAnalyzer* instance);
+
+uint8_t subghz_frequency_analyzer_feedback_level(
+    SubGhzFrequencyAnalyzer* instance,
+    uint8_t level,
+    bool update);

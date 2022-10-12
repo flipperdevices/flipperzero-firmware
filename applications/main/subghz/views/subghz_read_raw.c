@@ -27,6 +27,7 @@ typedef struct {
     uint8_t ind_write;
     uint8_t ind_sin;
     SubGhzReadRAWStatus status;
+    bool raw_send_only;
 } SubGhzReadRAWModel;
 
 void subghz_read_raw_set_callback(
@@ -240,9 +241,11 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
         elements_button_right(canvas, "Save");
         break;
     case SubGhzReadRAWStatusLoadKeyIDLE:
-        elements_button_left(canvas, "New");
+        if(!model->raw_send_only) {
+            elements_button_left(canvas, "New");
+            elements_button_right(canvas, "More");
+        }
         elements_button_center(canvas, "Send");
-        elements_button_right(canvas, "More");
         elements_text_box(
             canvas,
             4,
@@ -378,19 +381,21 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             instance->view,
             SubGhzReadRAWModel * model,
             {
-                if(model->status == SubGhzReadRAWStatusStart) {
-                    //Config
-                    instance->callback(SubGhzCustomEventViewReadRAWConfig, instance->context);
-                } else if(
-                    (model->status == SubGhzReadRAWStatusIDLE) ||
-                    (model->status == SubGhzReadRAWStatusLoadKeyIDLE)) {
-                    //Erase
-                    model->status = SubGhzReadRAWStatusStart;
-                    model->rssi_history_end = false;
-                    model->ind_write = 0;
-                    furi_string_set(model->sample_write, "0 spl.");
-                    furi_string_reset(model->file_name);
-                    instance->callback(SubGhzCustomEventViewReadRAWErase, instance->context);
+                if(!model->raw_send_only) {
+                    if(model->status == SubGhzReadRAWStatusStart) {
+                        //Config
+                        instance->callback(SubGhzCustomEventViewReadRAWConfig, instance->context);
+                    } else if(
+                        (model->status == SubGhzReadRAWStatusIDLE) ||
+                        (model->status == SubGhzReadRAWStatusLoadKeyIDLE)) {
+                        //Erase
+                        model->status = SubGhzReadRAWStatusStart;
+                        model->rssi_history_end = false;
+                        model->ind_write = 0;
+                        furi_string_set(model->sample_write, "0 spl.");
+                        furi_string_reset(model->file_name);
+                        instance->callback(SubGhzCustomEventViewReadRAWErase, instance->context);
+                    }
                 }
             },
             true);
@@ -399,12 +404,14 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
             instance->view,
             SubGhzReadRAWModel * model,
             {
-                if(model->status == SubGhzReadRAWStatusIDLE) {
-                    //Save
-                    instance->callback(SubGhzCustomEventViewReadRAWSave, instance->context);
-                } else if(model->status == SubGhzReadRAWStatusLoadKeyIDLE) {
-                    //More
-                    instance->callback(SubGhzCustomEventViewReadRAWMore, instance->context);
+                if(!model->raw_send_only) {
+                    if(model->status == SubGhzReadRAWStatusIDLE) {
+                        //Save
+                        instance->callback(SubGhzCustomEventViewReadRAWSave, instance->context);
+                    } else if(model->status == SubGhzReadRAWStatusLoadKeyIDLE) {
+                        //More
+                        instance->callback(SubGhzCustomEventViewReadRAWMore, instance->context);
+                    }
                 }
             },
             true);
@@ -515,7 +522,7 @@ void subghz_read_raw_exit(void* context) {
         true);
 }
 
-SubGhzReadRAW* subghz_read_raw_alloc() {
+SubGhzReadRAW* subghz_read_raw_alloc(bool raw_send_only) {
     SubGhzReadRAW* instance = malloc(sizeof(SubGhzReadRAW));
 
     // View allocation and configuration
@@ -535,6 +542,7 @@ SubGhzReadRAW* subghz_read_raw_alloc() {
             model->preset_str = furi_string_alloc();
             model->sample_write = furi_string_alloc();
             model->file_name = furi_string_alloc();
+            model->raw_send_only = raw_send_only;
             model->rssi_history = malloc(SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE * sizeof(uint8_t));
         },
         true);

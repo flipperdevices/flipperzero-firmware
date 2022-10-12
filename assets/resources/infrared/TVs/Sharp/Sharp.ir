@@ -1,0 +1,44 @@
+Filetype: IR signals file
+Version: 1
+# 
+name: POWER
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 4A 00 00 00
+# 
+name: MUTE
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 6A 00 00 00
+# 
+name: VOL+
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 6F 00 00 00
+# 
+name: VOL-
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 70 00 00 00
+# 
+name: CH+
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 6D 00 00 00
+# 
+name: CH-
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 6E 00 00 00
+# 
+name: SOURCE
+type: parsed
+protocol: NEC
+address: 71 00 00 00
+command: 73 00 00 00

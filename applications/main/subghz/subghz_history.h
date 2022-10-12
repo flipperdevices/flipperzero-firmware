@@ -84,6 +84,13 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, FuriString* outp
  */
 bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* output);
 
+/** Return last index
+ *
+ * @param instance - SubGhzHistory instance
+ * @return
+ */
+uint16_t subghz_history_get_last_index(SubGhzHistory* instance);
+
 /** Add protocol to history
  * 
  * @param instance  - SubGhzHistory instance
@@ -103,3 +110,10 @@ bool subghz_history_add_to_history(
  * @return SubGhzProtocolCommonLoad*
  */
 FlipperFormat* subghz_history_get_raw_data(SubGhzHistory* instance, uint16_t idx);
+
+/** Set hopper state for internal usage in history
+ * 
+ * @param instance  - SubGhzHistory instance
+ * @param hopper_state - bool is hopper running?
+ */
+void subghz_history_set_hopper_state(SubGhzHistory* instance, bool hopper_state);

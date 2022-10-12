@@ -1,8 +1,12 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
 
-static const NotificationSequence subghs_sequence_rx = {
+#define TAG "SubGhzSceneReceiver"
+
+const NotificationSequence subghz_sequence_rx = {
     &message_green_255,
+
+    &message_display_backlight_on,
 
     &message_vibro_on,
     &message_note_c6,
@@ -14,7 +18,7 @@ static const NotificationSequence subghs_sequence_rx = {
     NULL,
 };
 
-static const NotificationSequence subghs_sequence_rx_locked = {
+const NotificationSequence subghz_sequence_rx_locked = {
     &message_green_255,
 
     &message_display_backlight_on,
@@ -42,7 +46,17 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
         frequency_str = furi_string_alloc();
         modulation_str = furi_string_alloc();
 
+#ifdef SUBGHZ_EXT_PRESET_NAME
+        if(subghz_history_get_last_index(subghz->txrx->history) > 0) {
+            subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+        } else {
+            subghz_get_frequency_modulation(subghz, frequency_str, NULL);
+            furi_string_printf(
+                modulation_str, "Mod: %s", furi_string_get_cstr(subghz->txrx->preset->name));
+        }
+#else
         subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+#endif
 
         subghz_view_receiver_add_data_statusbar(
             subghz->subghz_receiver,
@@ -103,12 +117,17 @@ void subghz_scene_receiver_on_enter(void* context) {
 
     if(subghz->txrx->rx_key_state == SubGhzRxKeyStateIDLE) {
         subghz_preset_init(
-            subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
+            subghz,
+            subghz_setting_get_preset_name(subghz->setting, subghz->last_settings->preset),
+            subghz->last_settings->frequency,
+            NULL,
+            0);
         subghz_history_reset(subghz->txrx->history);
         subghz->txrx->rx_key_state = SubGhzRxKeyStateStart;
     }
 
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz->lock);
+    subghz_view_receiver_set_mode(subghz->subghz_receiver, SubGhzViewReceiverModeLive);
 
     //Load history to receiver
     subghz_view_receiver_exit(subghz->subghz_receiver);
@@ -131,7 +150,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     subghz->state_notifications = SubGhzNotificationStateRx;
     if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
         subghz_rx_end(subghz);
-    };
+    }
     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
         subghz_begin(
@@ -156,8 +175,9 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);
-            };
+            }
             subghz->txrx->hopper_state = SubGhzHopperStateOFF;
+            subghz_history_set_hopper_state(subghz->txrx->history, false);
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
 
@@ -168,8 +188,8 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
                 subghz_preset_init(
                     subghz,
-                    "AM650",
-                    subghz_setting_get_default_frequency(subghz->setting),
+                    subghz_setting_get_preset_name(subghz->setting, subghz->last_settings->preset),
+                    subghz->last_settings->frequency,
                     NULL,
                     0);
                 scene_manager_search_and_switch_to_previous_scene(
@@ -178,6 +198,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOK:
+            // Show file info, scene: receiver_info
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
@@ -187,6 +208,8 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzViewIdReceiver, SubGhzCustomEventManagerSet);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             consumed = true;
             break;
@@ -212,9 +235,9 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         case SubGhzNotificationStateRxDone:
             if(subghz->lock != SubGhzLockOn) {
-                notification_message(subghz->notifications, &subghs_sequence_rx);
+                notification_message(subghz->notifications, &subghz_sequence_rx);
             } else {
-                notification_message(subghz->notifications, &subghs_sequence_rx_locked);
+                notification_message(subghz->notifications, &subghz_sequence_rx_locked);
             }
             subghz->state_notifications = SubGhzNotificationStateRx;
             break;
