@@ -1,10 +1,20 @@
 ### New changes [DarkFlippers]
-* Plugins: RFID Fuzzer - fixed crash in load uids from file
-* Fixed .fap's debug (unable to set breakpoint)
-* PR: Turkish language support badusb layout (by @hardcod3dd | PR #95)
-* New icon for UART Echo (by @Svaarich)
+* SubGHz: Fix Nice Smilo, MHouse encoder
+* SubGHz: Add support for JCM (keeloq)
+* SubGHz: Fix random changes of manufacturer (now manufacturer is saved into file, also you can change it if wrong one is set)
+* PR: SubGHz improvements (Show full information about preset in Read/ReadRAW screens, Frequency analyzer sound setting saving) (by @derskythe | PR #103)
+* PR: SubGHz: Detect RAW fixes (Fix for running Plan B, if Plain A failed) (by @derskythe | PR #102)
+* Infrared: Update universal remote assets (by @Amec0e)
+* Plugins: Added TOTP (Authenticator) [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+* Plugins: Added Metronome [(by panki27)](https://github.com/panki27/Metronome)
+* Plugins: Added Minesweeper [(by panki27)](https://github.com/panki27/minesweeper)
+* OFW PR: allow 36-bit AWID (L11601 Lenel) (OFW PR 1838 by ae5au)
+* OFW PR: BLE tiktok controller... (OFW PR 1859 by gornekich)
+* OFW PR: MFC Improvements Part 2/2 (OFW PR 1868 by Astrrra)
+* OFW: NFC: bank card rework reading
+* OFW: Dolphin score points update
 
-#### [🎲 Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
+####  [🎲 Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
 
 [-> How to install firmware](https://github.com/pieceofsys/flipperzero-firmware/blob/dev/documentation/HowToInstall.md)
 
