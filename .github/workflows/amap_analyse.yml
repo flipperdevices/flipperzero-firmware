@@ -99,4 +99,3 @@ jobs:
             ${{ secrets.AMAP_MARIADB_PORT }} \
             ${{ secrets.AMAP_MARIADB_DATABASE }} \
             artifacts/flipper-z-f7-firmware-$SUFFIX.elf.map.all
-
