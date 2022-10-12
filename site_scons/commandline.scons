@@ -98,7 +98,7 @@ vars.AddVariables(
     ),
     (
 		"CUSTOM_FLIPPER_NAME",
-		help="Replaces OTP flipper name with custom string of 8 chars",
+		"Replaces OTP flipper name with custom string of 8 chars",
 		"",
     ),
     (
