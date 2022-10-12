@@ -81,7 +81,7 @@ extern void bucket_sort_intersect(uint32_t *const estart, uint32_t *const estop,
     }
 }
 
-#if !defined LOWMEM && defined __GNUC__
+// The following 7 lines use more memory and less time
 static uint8_t filterlut[1 << 20];
 static void __attribute__((constructor)) fill_lut(void) {
     uint32_t i;
@@ -89,7 +89,6 @@ static void __attribute__((constructor)) fill_lut(void) {
         filterlut[i] = filter(i);
 }
 #define filter(x) (filterlut[(x) & 0xfffff])
-#endif
 
 static inline void update_contribution(uint32_t *item, const uint32_t mask1, const uint32_t mask2) {
     uint32_t p = *item >> 25;
@@ -173,7 +172,6 @@ recover(uint32_t *o_head, uint32_t *o_tail, uint32_t oks,
 }
 
 
-#if !defined(__arm__) || defined(__linux__) || defined(_WIN32) || defined(__APPLE__) // bare metal ARM Proxmark lacks malloc()/free()
 struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in) {
     struct Crypto1State *statelist;
     uint32_t *odd_head = 0, *odd_tail = 0, oks = 0;
@@ -185,8 +183,8 @@ struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in) {
     for (i = 30; i >= 0; i -= 2)
         eks = eks << 1 | BEBIT(ks2, i);
 
-    odd_head = odd_tail = calloc(1, sizeof(uint32_t) << 21);
-    even_head = even_tail = calloc(1, sizeof(uint32_t) << 21);
+    odd_head = odd_tail = calloc(1, sizeof(uint32_t) << 20);
+    even_head = even_tail = calloc(1, sizeof(uint32_t) << 20);
     statelist =  calloc(1, sizeof(struct Crypto1State) << 18);
     if (!odd_tail-- || !even_tail-- || !statelist) {
         free(statelist);
@@ -200,7 +198,7 @@ struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in) {
 
     for (i = 0; i < 2; i++) {
         for (uint32_t j = 0; j <= 0xff; j++) {
-            bucket[i][j].head = calloc(1, sizeof(uint32_t) << 14);
+            bucket[i][j].head = calloc(1, sizeof(uint32_t) << 12);
             if (!bucket[i][j].head) {
                 goto out;
             }
@@ -230,7 +228,6 @@ out:
     free(even_head);
     return statelist;
 }
-#endif
 
 uint8_t lfsr_rollback_bit(struct Crypto1State *s, uint32_t in, int fb) {
     int out;
