@@ -5,7 +5,11 @@
 #include <gui/elements.h>
 #include <gui/icon_i.h>
 
+<<<<<<< HEAD
+#include "bt_hid_icons.h"
+=======
 #include "Bluetooth_Remote_icons.h"
+>>>>>>> dev
 
 struct BtHidKeyboard {
     View* view;
