@@ -207,7 +207,7 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
     if(file_version < CONFIG_FILE_ACTUAL_VERSION) {
         FURI_LOG_I(
             LOGGING_TAG,
-            "Obsolete config file version detected. Current version: %d; Actual version: %d",
+            "Obsolete config file version detected. Current version: %ld; Actual version: %d",
             file_version,
             CONFIG_FILE_ACTUAL_VERSION);
         totp_close_config_file(fff_data_file);
