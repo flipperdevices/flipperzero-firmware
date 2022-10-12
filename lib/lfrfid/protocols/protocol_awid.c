@@ -232,7 +232,7 @@ bool protocol_awid_write_data(ProtocolAwid* protocol, void* data) {
 
 const ProtocolBase protocol_awid = {
     .name = "AWID",
-    .manufacturer = "AWIG",
+    .manufacturer = "AWID",
     .data_size = AWID_DECODED_DATA_SIZE,
     .features = LFRFIDFeatureASK,
     .validate_count = 3,
