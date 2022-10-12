@@ -11,14 +11,14 @@
 #include <gui/modules/submenu.h>
 #include "views/weather_station_show.h"
 #include "views/weather_station_receiver.h"
+#include "views/weather_station_receiver_info.h"
+#include "weather_station_history.h"
 
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/registry.h>
-
-#include "weather_station_history.h"
 
 typedef struct WeatherStationApp WeatherStationApp;
 
@@ -27,12 +27,7 @@ struct WeatherStationTxRx {
 
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
-    //SubGhzTransmitter* transmitter;
-    //SubGhzProtocolDecoderBase* decoder_result;
-    //FlipperFormat* fff_data;
-
     SubGhzPresetDefinition* preset;
-
     WSHistory* history;
     uint16_t idx_menu_chosen;
     WSTxRxState txrx_state;
@@ -55,16 +50,9 @@ struct WeatherStationApp {
     //todo detete weather_station_show
     WeatherStationShow* weather_station_show;
     WSReceiver* ws_receiver;
+    WSReceiverInfo* ws_receiver_info;
     WSLock lock;
     SubGhzSetting* setting;
-
-    // FuriHalClockMcoSourceId mco_src;
-    // FuriHalClockMcoDivisorId mco_div;
-
-    // FuriHalPwmOutputId pwm_ch_prev;
-    // FuriHalPwmOutputId pwm_ch;
-    // uint32_t pwm_freq;
-    // uint8_t pwm_duty;
 };
 
 void ws_preset_init(
@@ -84,5 +72,3 @@ void ws_idle(WeatherStationApp* app);
 void ws_rx_end(WeatherStationApp* app);
 void ws_sleep(WeatherStationApp* app);
 void ws_hopper_update(WeatherStationApp* app);
-
-//void tx(WeatherStationApp* app);

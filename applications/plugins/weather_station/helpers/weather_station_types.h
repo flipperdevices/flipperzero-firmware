@@ -1,35 +1,19 @@
 #pragma once
 
-//#include "m-string.h"
 #include <furi.h>
 #include <furi_hal.h>
 
 #define WS_KEY_FILE_VERSION 1
 #define WS_KEY_FILE_TYPE "Flipper Weather Station Key File"
 
-// /** SubGhzNotification state */
+// /** WSNotification state */
 // typedef enum {
-//     SubGhzNotificationStateStarting,
-//     SubGhzNotificationStateIDLE,
-//     SubGhzNotificationStateTx,
-//     SubGhzNotificationStateRx,
-//     SubGhzNotificationStateRxDone,
-// } SubGhzNotificationState;
-
-// /** SubGhzTxRx state */
-// typedef enum {
-//     SubGhzTxRxStateIDLE,
-//     SubGhzTxRxStateRx,
-//     SubGhzTxRxStateTx,
-//     SubGhzTxRxStateSleep,
-// } SubGhzTxRxState;
-
-// /** SubGhzLoadKeyState state */
-// typedef enum {
-//     SubGhzLoadKeyStateUnknown,
-//     SubGhzLoadKeyStateOK,
-//     SubGhzLoadKeyStateParseErr,
-// } SubGhzLoadKeyState;
+//     WSNotificationStateStarting,
+//     WSNotificationStateIDLE,
+//     WSNotificationStateTx,
+//     WSNotificationStateRx,
+//     WSNotificationStateRxDone,
+// } WSNotificationState;
 
 /** WSRxKeyState state */
 typedef enum {
@@ -40,8 +24,6 @@ typedef enum {
     WSRxKeyStateStart,
     WSRxKeyStateAddKey,
     //WSRxKeyStateExit,
-    //WSRxKeyStateRAWLoad,
-    //WSRxKeyStateRAWSave,
 } WSRxKeyState;
 
 /** WSHopperState state */
@@ -63,6 +45,7 @@ typedef enum {
     WeatherStationViewSubmenu,
     WeatherStationViewShow,
     WeatherStationViewReceiver,
+    WeatherStationViewReceiverInfo,
 } WeatherStationView;
 
 /** WeatherStationTxRx state */

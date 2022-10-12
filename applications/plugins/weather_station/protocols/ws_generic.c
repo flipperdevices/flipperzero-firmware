@@ -65,14 +65,14 @@ bool ws_block_generic_serialize(
             break;
         }
 
-        uint32_t temp = instance->id;
-        if(!flipper_format_write_uint32(flipper_format, "Id", &temp, 1)) {
+        uint32_t temp_data = instance->id;
+        if(!flipper_format_write_uint32(flipper_format, "Id", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Unable to add Id");
             break;
         }
 
-        temp = instance->data_count_bit;
-        if(!flipper_format_write_uint32(flipper_format, "Bit", &temp, 1)) {
+        temp_data = instance->data_count_bit;
+        if(!flipper_format_write_uint32(flipper_format, "Bit", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Unable to add Bit");
             break;
         }
@@ -82,10 +82,41 @@ bool ws_block_generic_serialize(
             key_data[sizeof(uint64_t) - i - 1] = (instance->data >> i * 8) & 0xFF;
         }
 
-        if(!flipper_format_write_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Unable to add Key");
+        if(!flipper_format_write_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(TAG, "Unable to add Data");
             break;
         }
+
+        temp_data = instance->battery_low;
+        if(!flipper_format_write_uint32(flipper_format, "Batt", &temp_data, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Battery_low");
+            break;
+        }
+
+        temp_data = instance->humidity;
+        if(!flipper_format_write_uint32(flipper_format, "Hum", &temp_data, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Humidity");
+            break;
+        }
+
+        temp_data = instance->channel;
+        if(!flipper_format_write_uint32(flipper_format, "Ch", &temp_data, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Channel");
+            break;
+        }
+
+        // temp_data = instance->btn;
+        // if(!flipper_format_write_uint32(flipper_format, "Btn", &temp_data, 1)) {
+        //     FURI_LOG_E(TAG, "Unable to add Btn");
+        //     break;
+        // }
+
+        float temp = instance->temp;
+        if(!flipper_format_write_float(flipper_format, "Temp", &temp, 1)) {
+            FURI_LOG_E(TAG, "Unable to add Temperature");
+            break;
+        }
+
         res = true;
     } while(false);
     furi_string_free(temp_str);
@@ -95,8 +126,6 @@ bool ws_block_generic_serialize(
 bool ws_block_generic_deserialize(WSBlockGeneric* instance, FlipperFormat* flipper_format) {
     furi_assert(instance);
     bool res = false;
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
     uint32_t temp_data = 0;
 
     do {
@@ -118,18 +147,48 @@ bool ws_block_generic_deserialize(WSBlockGeneric* instance, FlipperFormat* flipp
         instance->data_count_bit = (uint8_t)temp_data;
 
         uint8_t key_data[sizeof(uint64_t)] = {0};
-        if(!flipper_format_read_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Missing Key");
+        if(!flipper_format_read_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(TAG, "Missing Data");
             break;
         }
+
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
             instance->data = instance->data << 8 | key_data[i];
         }
 
+        if(!flipper_format_read_uint32(flipper_format, "Batt", (uint32_t*)&temp_data, 1)) {
+            FURI_LOG_E(TAG, "Missing Battery_low");
+            break;
+        }
+        instance->battery_low = (uint8_t)temp_data;
+
+        if(!flipper_format_read_uint32(flipper_format, "Hum", (uint32_t*)&temp_data, 1)) {
+            FURI_LOG_E(TAG, "Missing Humidity");
+            break;
+        }
+        instance->humidity = (uint8_t)temp_data;
+
+        if(!flipper_format_read_uint32(flipper_format, "Ch", (uint32_t*)&temp_data, 1)) {
+            FURI_LOG_E(TAG, "Missing Channel");
+            break;
+        }
+        instance->channel = (uint8_t)temp_data;
+
+        // if(!flipper_format_read_uint32(flipper_format, "Btn", (uint32_t*)&temp_data, 1)) {
+        //     FURI_LOG_E(TAG, "Missing Btn");
+        //     break;
+        // }
+        // instance->btn = (uint8_t)temp_data;
+
+        float temp;
+        if(!flipper_format_read_float(flipper_format, "Temp", (float*)&temp, 1)) {
+            FURI_LOG_E(TAG, "Missing Temperature");
+            break;
+        }
+        instance->temp = temp;
+
         res = true;
     } while(0);
-
-    furi_string_free(temp_str);
 
     return res;
 }

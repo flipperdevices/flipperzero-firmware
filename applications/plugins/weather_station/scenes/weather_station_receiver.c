@@ -35,7 +35,7 @@ void weather_station_scene_receiver_callback(WSCustomEvent event, void* context)
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
-static void weather_station_scene_add_to_history_callback(
+static void weather_station_scene_receiver_add_to_history_callback(
     SubGhzReceiver* receiver,
     SubGhzProtocolDecoderBase* decoder_base,
     void* context) {
@@ -92,7 +92,7 @@ void weather_station_scene_receiver_on_enter(void* context) {
 
     ws_view_receiver_set_callback(app->ws_receiver, weather_station_scene_receiver_callback, app);
     subghz_receiver_set_rx_callback(
-        app->txrx->receiver, weather_station_scene_add_to_history_callback, app);
+        app->txrx->receiver, weather_station_scene_receiver_add_to_history_callback, app);
 
     //app->state_notifications = SubGhzNotificationStateRx;
     if(app->txrx->txrx_state == WSTxRxStateRx) {
@@ -139,12 +139,12 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             //}
             consumed = true;
             break;
-        // case WSCustomEventViewReceiverOK:
-        //     subghz->txrx->idx_menu_chosen =
-        //         ws_view_receiver_get_idx_menu(subghz->ws_receiver);
-        //     scene_manager_next_scene(subghz->scene_manager, WeatherStationSceneReceiverInfo);
-        //     consumed = true;
-        //     break;
+        case WSCustomEventViewReceiverOK:
+            app->txrx->idx_menu_chosen =
+                ws_view_receiver_get_idx_menu(app->ws_receiver);
+            scene_manager_next_scene(app->scene_manager, WeatherStationSceneReceiverInfo);
+            consumed = true;
+            break;
         case WSCustomEventViewReceiverConfig:
             //subghz->state_notifications = SubGhzNotificationStateIDLE;
             app->txrx->idx_menu_chosen = ws_view_receiver_get_idx_menu(app->ws_receiver);

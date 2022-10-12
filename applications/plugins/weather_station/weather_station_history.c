@@ -158,8 +158,6 @@ bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetD
     FlipperFormat* fff = flipper_format_string_alloc();
     uint32_t id = 0;
     subghz_protocol_decoder_base_serialize(decoder_base, fff, preset);
-    //Stream* fff_stream = flipper_format_get_raw_stream(fff);
-    //stream_dump_data(fff_stream);
 
     do {
         if(!flipper_format_rewind(fff)) {
@@ -173,21 +171,15 @@ bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetD
     } while(false);
     flipper_format_free(fff);
 
-    //FURI_LOG_E(TAG, "ID 0x%lx", id);
-
     //Update record if found
     bool sensor_found = false;
     for(size_t i = 0; i < WSHistoryItemArray_size(instance->history->data); i++) {
         WSHistoryItem* item = WSHistoryItemArray_get(instance->history->data, i);
-        //FURI_LOG_E(TAG, "---ID 0x%lx", item->id);
         if(item->id == id) {
-            //FURI_LOG_E(TAG, "---ID 0x%lx OK", item->id);
             sensor_found = true;
             Stream* flipper_string_stream = flipper_format_get_raw_stream(item->flipper_string);
-            //stream_dump_data(flipper_string_stream);
             stream_clean(flipper_string_stream);
             subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
-            //stream_dump_data(flipper_string_stream);
             return false;
         }
     }
@@ -224,8 +216,8 @@ bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetD
                 break;
             }
             uint8_t key_data[sizeof(uint64_t)] = {0};
-            if(!flipper_format_read_hex(item->flipper_string, "Key", key_data, sizeof(uint64_t))) {
-                FURI_LOG_E(TAG, "Missing Key");
+            if(!flipper_format_read_hex(item->flipper_string, "Data", key_data, sizeof(uint64_t))) {
+                FURI_LOG_E(TAG, "Missing Data");
                 break;
             }
             uint64_t data = 0;

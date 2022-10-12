@@ -6,7 +6,6 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
-#include <m-string.h>
 #include <m-array.h>
 
 #define FRAME_HEIGHT 12
@@ -30,9 +29,10 @@ struct WSReceiverHistory {
 typedef struct WSReceiverHistory WSReceiverHistory;
 
 static const Icon* ReceiverItemIcons[] = {
-    [SubGhzProtocolTypeUnknown] = &I_station_icon, //&I_Quest_7x8,
+    [SubGhzProtocolTypeUnknown] = &I_Quest_7x8,
     [SubGhzProtocolTypeStatic] = &I_Unlock_7x8,
     [SubGhzProtocolTypeDynamic] = &I_Lock_7x8,
+    [SubGhzProtocolWeatherStation] = &I_station_icon,
 };
 
 typedef enum {

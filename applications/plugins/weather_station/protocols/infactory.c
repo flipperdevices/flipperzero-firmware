@@ -52,12 +52,6 @@ struct WSProtocolDecoderInfactory {
     WSBlockGeneric generic;
 
     uint16_t header_count;
-
-    // uint8_t id;
-    // uint8_t battery_low;
-    // uint8_t humidity;
-    // uint8_t channel;
-    // float temp;
 };
 
 struct WSProtocolEncoderInfactory {
@@ -98,7 +92,7 @@ const SubGhzProtocolEncoder ws_protocol_infactory_encoder = {
 
 const SubGhzProtocol ws_protocol_infactory = {
     .name = WS_PROTOCOL_INFACTORY_NAME,
-    .type = SubGhzProtocolTypeUnknown,
+    .type = SubGhzProtocolWeatherStation,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
@@ -283,7 +277,6 @@ bool ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* fli
 void ws_protocol_decoder_infactory_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;
-    //ws_protocol_infactory_remote_controller(&instance->generic);
     furi_string_printf(
         output,
         "%s %dbit\r\n"

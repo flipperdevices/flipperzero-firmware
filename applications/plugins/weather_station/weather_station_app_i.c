@@ -82,21 +82,6 @@ uint32_t ws_rx(WeatherStationApp* app, uint32_t frequency) {
     return value;
 }
 
-// static bool ws_tx(WeatherStationApp* app, uint32_t frequency) {
-//     furi_assert(app);
-//     if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-//         furi_crash("WeatherStation: Incorrect TX frequency.");
-//     }
-//     furi_assert(app->txrx->txrx_state != WSTxRxStateSleep);
-//     furi_hal_subghz_idle();
-//     furi_hal_subghz_set_frequency_and_path(frequency);
-//     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-//     furi_hal_gpio_write(&gpio_cc1101_g0, true);
-//     bool ret = furi_hal_subghz_tx();
-//     app->txrx->txrx_state = WSTxRxStateTx;
-//     return ret;
-// }
-
 void ws_idle(WeatherStationApp* app) {
     furi_assert(app);
     furi_assert(app->txrx->txrx_state != WSTxRxStateSleep);
@@ -172,40 +157,3 @@ void ws_hopper_update(WeatherStationApp* app) {
         ws_rx(app, app->txrx->preset->frequency);
     }
 }
-
-// void tx(WeatherStationApp* app) {
-//     FuriString* flipper_format_string;
-//     string_init_printf(
-//         flipper_format_string,
-//         "Protocol: Princeton\n"
-//         "Bit: 24\n"
-//         "Key: 00 00 00 00 00 15 15 AA\n"
-//         "TE: 400\n"
-//         "Repeat: 20\n");
-//     FlipperFormat* flipper_format = flipper_format_string_alloc();
-//     Stream* stream = flipper_format_get_raw_stream(flipper_format);
-//     stream_clean(stream);
-//     stream_write_cstring(stream, furi_string_get_cstr(flipper_format_string));
-
-//     SubGhzTransmitter* transmitter =
-//         subghz_transmitter_alloc_init(app->txrx->environment, "Princeton");
-//     subghz_transmitter_deserialize(transmitter, flipper_format);
-//     weather_station_begin(app, FuriHalSubGhzPresetOok650Async);
-
-//     furi_hal_subghz_set_frequency_and_path(433920000);
-//     furi_hal_power_suppress_charge_enter();
-//     furi_hal_subghz_start_async_tx(subghz_transmitter_yield, transmitter);
-
-//     while(!(furi_hal_subghz_is_async_tx_complete())) {
-//         printf(".");
-//         fflush(stdout);
-//         furi_delay_ms(333);
-//     }
-//     furi_hal_subghz_stop_async_tx();
-//     furi_hal_subghz_sleep();
-
-//     furi_hal_power_suppress_charge_exit();
-
-//     flipper_format_free(flipper_format);
-//     subghz_transmitter_free(transmitter);
-// }
