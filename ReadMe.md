@@ -18,6 +18,7 @@
 - Assets: Includes New Dolphin Animations: [Flipper City (By Svaarich)]
 - Updated Random Deed Function To Include New Options from OFW
 - Updated Assets: Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)] & [Narut0 (By Sasquach)]
+- OFW: Dolphin score points update **(WARNING!!! Dolphin Level will be reset after installing of this release!!!!)**
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
