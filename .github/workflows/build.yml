@@ -144,7 +144,7 @@ jobs:
 
   compact:
     if: ${{ !startsWith(github.ref, 'refs/tags') }}
-    runs-on: [self-hosted,FlipperZeroK8s]
+    runs-on: [self-hosted,FlipperZeroShell]
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
