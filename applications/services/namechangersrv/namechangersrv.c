@@ -8,13 +8,13 @@ void namechanger_on_system_start() {
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
     FuriString* NAMEHEADER;
-    NAMEHEADER = furi_string_alloc_set( "Flipper Name File");
+    NAMEHEADER = furi_string_alloc_set("Flipper Name File");
 
     FuriString* folderpath;
-    folderpath = furi_string_alloc_set( "/ext/dolphin");
+    folderpath = furi_string_alloc_set("/ext/dolphin");
 
     FuriString* filepath;
-    filepath = furi_string_alloc_set( "/ext/dolphin/name.txt");
+    filepath = furi_string_alloc_set("/ext/dolphin/name.txt");
 
     //Make dir if doesn't exist
     if(storage_simply_mkdir(storage, furi_string_get_cstr(folderpath))) {
@@ -60,7 +60,7 @@ void namechanger_on_system_start() {
             bool res = false;
 
             FuriString* name;
-            name = furi_string_alloc_set( furi_hal_version_get_name_ptr());
+            name = furi_string_alloc_set(furi_hal_version_get_name_ptr());
 
             do {
                 // Open file for write
@@ -117,7 +117,7 @@ void namechanger_on_system_start() {
                 bool res = false;
 
                 FuriString* name;
-                name = furi_string_alloc_set( furi_hal_version_get_name_ptr());
+                name = furi_string_alloc_set(furi_hal_version_get_name_ptr());
 
                 do {
                     // Open file for write
@@ -126,7 +126,8 @@ void namechanger_on_system_start() {
                     }
 
                     // Write header
-                    if(!flipper_format_write_header_cstr(file, furi_string_get_cstr(NAMEHEADER), 1)) {
+                    if(!flipper_format_write_header_cstr(
+                           file, furi_string_get_cstr(NAMEHEADER), 1)) {
                         break;
                     }
 
@@ -149,7 +150,8 @@ void namechanger_on_system_start() {
                     }
 
                     //Write name
-                    if(!flipper_format_write_string_cstr(file, "Name", furi_string_get_cstr(name))) {
+                    if(!flipper_format_write_string_cstr(
+                           file, "Name", furi_string_get_cstr(name))) {
                         break;
                     }
 

@@ -292,7 +292,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
 
             furi_string_printf(
                 temp_str, "%s/%s%s", SUBGHZ_RAW_FOLDER, strings[0], SUBGHZ_APP_EXTENSION);
-            subghz_protocol_raw_gen_fff_data(subghz->txrx->fff_data, furi_string_get_cstr(temp_str));
+            subghz_protocol_raw_gen_fff_data(
+                subghz->txrx->fff_data, furi_string_get_cstr(temp_str));
             furi_string_free(temp_str);
 
             if(spl_count > 0) {

@@ -184,7 +184,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Snake.fap"));
             consumed = true;
             break;
-		}
+        }
         case DesktopMainEventOpen2048: {
             LoaderStatus status =
                 loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/2048.fap"));
@@ -219,7 +219,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             loader_start(desktop->loader, FLIPPER_APPS[1].name, NULL);
             consumed = true;
             break;
-		}
+        }
         case DesktopLockedEventUpdate:
             desktop_view_locked_update(desktop->locked_view);
             consumed = true;
