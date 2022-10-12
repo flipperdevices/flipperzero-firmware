@@ -109,7 +109,7 @@ bool nfc_scene_passport_auth_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        FURI_LOG_D(TAG, "event.event: %d", event.event);
+        FURI_LOG_D(TAG, "event.event: %ld", event.event);
         switch(event.event) {
         case NfcScenePassportAuthSelectDob:
             scene_manager_set_scene_state(nfc->scene_manager, NfcScenePassportDate, 0);

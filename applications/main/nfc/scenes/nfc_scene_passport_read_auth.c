@@ -41,7 +41,7 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     furi_string_cat_printf(temp_str, "LDS version: %d.%d\n", lds_version/100, lds_version%100);
 
     uint32_t unicode_version = mrtd_data->files.EF_COM.unicode_version;
-    furi_string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", unicode_version/10000, unicode_version/100%100, unicode_version%100);
+    furi_string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", (uint8_t)(unicode_version/10000), (uint8_t)(unicode_version/100%100), (uint8_t)(unicode_version%100));
 
     furi_string_cat_printf(temp_str, "Avail.files: ");
     for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
