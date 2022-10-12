@@ -70,6 +70,28 @@ const SubBruteProtocol subbrute_protocol_nice_12bit_868 = {
     .file = NICEFileProtocol};
 
 /**
+ * Chamberlain 7bit 390MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_7bit_390 = {
+    .frequency = 390000000,
+    .bits = 7,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok270Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 8bit 390MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_8bit_390 = {
+    .frequency = 390000000,
+    .bits = 8,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
  * Chamberlain 9bit 300MHz
  */
 const SubBruteProtocol subbrute_protocol_chamberlain_9bit_300 = {
@@ -148,6 +170,8 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit868] = "CAME 12bit 868MHz",
     [SubBruteAttackNICE12bit433] = "NICE 12bit 433MHz",
     [SubBruteAttackNICE12bit868] = "NICE 12bit 868MHz",
+    [SubBruteAttackChamberlain7bit390] = "Chamberlain 7bit 390MHz",
+    [SubBruteAttackChamberlain8bit390] = "Chamberlain 8bit 390MHz",
     [SubBruteAttackChamberlain9bit300] = "Chamberlain 9bit 300MHz",
     [SubBruteAttackChamberlain9bit315] = "Chamberlain 9bit 315MHz",
     [SubBruteAttackChamberlain9bit390] = "Chamberlain 9bit 390MHz",
@@ -175,6 +199,8 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackCAME12bit868] = &subbrute_protocol_came_12bit_868,
     [SubBruteAttackNICE12bit433] = &subbrute_protocol_nice_12bit_433,
     [SubBruteAttackNICE12bit868] = &subbrute_protocol_nice_12bit_868,
+    [SubBruteAttackChamberlain7bit390] = &subbrute_protocol_chamberlain_7bit_390,
+    [SubBruteAttackChamberlain8bit390] = &subbrute_protocol_chamberlain_8bit_390,
     [SubBruteAttackChamberlain9bit300] = &subbrute_protocol_chamberlain_9bit_300,
     [SubBruteAttackChamberlain9bit315] = &subbrute_protocol_chamberlain_9bit_315,
     [SubBruteAttackChamberlain9bit390] = &subbrute_protocol_chamberlain_9bit_390,

@@ -31,6 +31,8 @@ typedef enum {
     SubBruteAttackCAME12bit868,
     SubBruteAttackNICE12bit433,
     SubBruteAttackNICE12bit868,
+    SubBruteAttackChamberlain7bit390,
+    SubBruteAttackChamberlain8bit390,
     SubBruteAttackChamberlain9bit300,
     SubBruteAttackChamberlain9bit315,
     SubBruteAttackChamberlain9bit390,
