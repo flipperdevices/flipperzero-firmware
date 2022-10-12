@@ -16,6 +16,7 @@
 - Updated [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 - Assets: Includes New Dolphin Animations: [Blaster (By Sasquach)]
 - Assets: Includes New Dolphin Animations: [Flipper City (By Svaarich)]
+- Updated Random Deed Function To Include New Options from OFW
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
