@@ -19,6 +19,8 @@ class ProjectDir:
 
 
 class Main(App):
+    DIST_FILE_PREFIX = "flipper-z-"
+
     def init(self):
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
 
@@ -53,7 +55,7 @@ class Main(App):
             elif filetype != "elf":
                 project_name = "full"
 
-        return f"flipper-z-{self.target}-{project_name}-{self.args.suffix}.{filetype}"
+        return f"{self.DIST_FILE_PREFIX}{self.target}-{project_name}-{self.args.suffix}.{filetype}"
 
     def get_dist_filepath(self, filename):
         return join(self.output_dir_path, filename)
@@ -161,7 +163,14 @@ class Main(App):
                 )
 
                 # Create tgz archive
-                with tarfile.open(f"{bundle_dir}.tgz", "w:gz", compresslevel=9) as tar:
+                with tarfile.open(
+                    join(
+                        self.output_dir_path,
+                        f"{self.DIST_FILE_PREFIX}{bundle_dir_name}.tgz",
+                    ),
+                    "w:gz",
+                    compresslevel=9,
+                ) as tar:
                     tar.add(bundle_dir, arcname=bundle_dir_name)
 
             return bundle_result
