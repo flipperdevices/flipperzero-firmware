@@ -229,13 +229,6 @@ set(HAL_LL_DRIVERS_WL
     rng rtc spi tim usart utils
 )
 
-foreach(FAMILY_SUFFIX ${STM32_SUPPORTED_FAMILIES_SHORT_NAME})
-    list(APPEND HAL_DRIVERS ${HAL_DRIVERS_${FAMILY_SUFFIX}})
-    list(APPEND HAL_LL_DRIVERS ${HAL_LL_DRIVERS_${FAMILY_SUFFIX}})
-endforeach()
-list(REMOVE_DUPLICATES HAL_DRIVERS)
-list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
-
 # This function gets a list of hal_driver using a given prefix and suffix
 #
 # out_list_hal_drivers   list of hal_drivers foud
@@ -281,9 +274,37 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     endif()
 endforeach()
 
+# If no family requested look for all families
 if(NOT HAL_FIND_COMPONENTS_FAMILIES)
     set(HAL_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
 endif()
+
+# Look for available drivers for all requested families
+foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
+    string(TOUPPER ${family_comp} family_comp)
+    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" family_comp ${family_comp})
+    find_path(HAL_${FAMILY}_PATH
+        NAMES Inc/stm32${FAMILY_L}xx_hal.h
+        PATHS "${STM32_HAL_${FAMILY}_PATH}" "${STM32_CUBE_${FAMILY}_PATH}/Drivers/STM32${FAMILY}xx_HAL_Driver"
+        NO_DEFAULT_PATH
+        )
+    if(NOT HAL_${FAMILY}_PATH)
+        message(FATAL_ERROR "could not find HAL for family ${FAMILY}")
+    else()
+        set(HAL_${COMP}_FOUND TRUE)
+    endif()
+    if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
+        get_list_hal_drivers(HAL_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH} "hal")
+        get_list_hal_drivers(HAL_EX_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH}  "ex")
+        get_list_hal_drivers(HAL_LL_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH} "ll")
+        list(APPEND HAL_DRIVERS ${HAL_DRIVERS_${FAMILY}})
+        list(APPEND HAL_LL_DRIVERS ${HAL_LL_DRIVERS_${FAMILY}})
+    else()
+    endif()
+endforeach()
+message("P2H HAL drivers are ${HAL_DRIVERS}")
+list(REMOVE_DUPLICATES HAL_DRIVERS)
+list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
 
 #Checkinf all the requested drivers
 foreach(COMP ${HAL_FIND_COMPONENTS_UNHANDLED})
