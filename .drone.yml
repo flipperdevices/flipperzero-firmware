@@ -23,7 +23,7 @@ steps:
       - ls -laS artifacts-default
       - ls -laS artifacts-default/f7-update-${DRONE_TAG}
       - sed -i 's/(version)/'${DRONE_TAG}'/g' CHANGELOG.md
-      - echo '# [Install via Web Updater](https://my.flipp.dev/?url=https://b12abf54-1d92-4e84-bd69-b99d1c280f71.selcdn.net/flipper/flipper-z-f7-update-'${DRONE_TAG}'.tgz&channel=dev-cfw&version='${DRONE_TAG}')' >> CHANGELOG.md
+      - echo '# 🌎 [Install via Web Updater](https://my.flipp.dev/?url=https://b12abf54-1d92-4e84-bd69-b99d1c280f71.selcdn.net/flipper/flipper-z-f7-update-'${DRONE_TAG}'.tgz&channel=dev-cfw&version='${DRONE_TAG}')' >> CHANGELOG.md
 
   - name: "Bundle self-update packages"
     image: kramos/alpine-zip
