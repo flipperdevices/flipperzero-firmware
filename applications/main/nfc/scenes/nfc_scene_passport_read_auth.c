@@ -31,64 +31,53 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     Widget* widget = nfc->widget;
 
     // Setup Custom Widget view
-    string_t temp_str;
-    string_init_printf(temp_str, "\e#Passport\n");
-    string_cat_printf(temp_str, "Authenticated: %d\n", mrtd_data->auth_success);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+    furi_string_set(temp_str, "\e#Passport\n");
+    furi_string_cat_printf(temp_str, "Authenticated: %d\n", mrtd_data->auth_success);
     // TODO: indicate BAC / PACE used
 
     uint16_t lds_version = mrtd_data->files.EF_COM.lds_version;
-    string_cat_printf(temp_str, "LDS version: %d.%d\n", lds_version/100, lds_version%100);
+    furi_string_cat_printf(temp_str, "LDS version: %d.%d\n", lds_version/100, lds_version%100);
 
     uint32_t unicode_version = mrtd_data->files.EF_COM.unicode_version;
-    string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", unicode_version/10000, unicode_version/100%100, unicode_version%100);
+    furi_string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", unicode_version/10000, unicode_version/100%100, unicode_version%100);
 
-    string_cat_printf(temp_str, "Avail.files: ");
+    furi_string_cat_printf(temp_str, "Avail.files: ");
     for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
         uint8_t tag = mrtd_data->files.EF_COM.tag_list[i];
         const EFFile* file = mrtd_tag_to_file(tag);
         if(file->tag) {
-            if(i > 0) string_cat_printf(temp_str, ", ");
-            string_cat_printf(temp_str, "%s", file->name);
+            if(i > 0) furi_string_cat_printf(temp_str, ", ");
+            furi_string_cat_printf(temp_str, "%s", file->name);
         }
     }
-    string_cat_printf(temp_str, "\n");
+    furi_string_cat_printf(temp_str, "\n");
 
     EF_DIR_contents* EF_DIR = &mrtd_data->files.EF_DIR;
     if(EF_DIR->applications_count > 0) {
-        string_cat_printf(temp_str, "Apps:\n");
+        furi_string_cat_printf(temp_str, "Apps:\n");
         for(uint8_t i=0; i<EF_DIR->applications_count; ++i) {
             for(uint8_t n=0; n<sizeof(AIDValue); ++n) {
-                string_cat_printf(temp_str, "%02X ", EF_DIR->applications[i][n]);
+                furi_string_cat_printf(temp_str, "%02X ", EF_DIR->applications[i][n]);
             }
-            string_cat_printf(temp_str, "\n");
+            furi_string_cat_printf(temp_str, "\n");
         }
     }
 
     EF_DG1_contents* DG1 = &mrtd_data->files.DG1;
-    string_cat_printf(temp_str, "\e#DG1\n");
-    string_cat_printf(temp_str, "Doc Type: %s\n", DG1->doctype);
-    string_cat_printf(temp_str, "Issuing State: %s\n", DG1->issuing_state);
-    string_cat_printf(temp_str, "Name: %s\n", DG1->name);
-    string_cat_printf(temp_str, "DocNr: %s\n", DG1->docnr);
-    string_cat_printf(temp_str, "Nationality: %s\n", DG1->nationality);
-    string_cat_printf(temp_str, "Birth Date: %02d %s %02d\n", DG1->birth_date.day, months[DG1->birth_date.month], DG1->birth_date.year);
-    string_cat_printf(temp_str, "Sex: %s\n", DG1->sex);
-    string_cat_printf(temp_str, "Expiry Date: %02d %s %02d\n", DG1->expiry_date.day, months[DG1->expiry_date.month], DG1->expiry_date.year);
+    furi_string_cat_printf(temp_str, "\e#DG1\n");
+    furi_string_cat_printf(temp_str, "Doc Type: %s\n", DG1->doctype);
+    furi_string_cat_printf(temp_str, "Issuing State: %s\n", DG1->issuing_state);
+    furi_string_cat_printf(temp_str, "Name: %s\n", DG1->name);
+    furi_string_cat_printf(temp_str, "DocNr: %s\n", DG1->docnr);
+    furi_string_cat_printf(temp_str, "Nationality: %s\n", DG1->nationality);
+    furi_string_cat_printf(temp_str, "Birth Date: %02d %s %02d\n", DG1->birth_date.day, months[DG1->birth_date.month], DG1->birth_date.year);
+    furi_string_cat_printf(temp_str, "Sex: %s\n", DG1->sex);
+    furi_string_cat_printf(temp_str, "Expiry Date: %02d %s %02d\n", DG1->expiry_date.day, months[DG1->expiry_date.month], DG1->expiry_date.year);
 
-    /*
-    char iso_type = FURI_BIT(data->sak, 5) ? '4' : '3';
-    //TODO: NFC-B?
-    string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
-    string_cat_printf(temp_str, "UID:");
-    for(size_t i = 0; i < data->uid_len; i++) {
-        string_cat_printf(temp_str, " %02X", data->uid[i]);
-    }
-    string_cat_printf(temp_str, "\nATQA: %02X %02X ", data->atqa[1], data->atqa[0]);
-    string_cat_printf(temp_str, " SAK: %02X", data->sak);
-    */
-
-    widget_add_text_scroll_element(widget, 0, 0, 128, 52, string_get_cstr(temp_str));
-    string_clear(temp_str);
+    widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+    furi_string_free(temp_str);
 
     widget_add_button_element(
         nfc->widget, GuiButtonTypeLeft, "Retry", nfc_scene_passport_read_auth_widget_callback, nfc);
