@@ -11,7 +11,7 @@ on:
 
 jobs:
   lint_python:
-    runs-on: [self-hosted,FlipperZeroK8s]
+    runs-on: [self-hosted,FlipperZeroShell]
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
