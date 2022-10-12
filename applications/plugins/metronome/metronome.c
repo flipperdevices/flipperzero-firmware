@@ -65,14 +65,17 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
 
     // draw bars/beat
-    furi_string_printf(tempStr, "%d/%d", metronome_state->beats_per_bar, metronome_state->note_length);
-    canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_printf(
+        tempStr, "%d/%d", metronome_state->beats_per_bar, metronome_state->note_length);
+    canvas_draw_str_aligned(
+        canvas, 64, 8, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
     furi_string_reset(tempStr);
 
     // draw BPM value
     furi_string_printf(tempStr, "%.2f", metronome_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 24, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    canvas_draw_str_aligned(
+        canvas, 64, 24, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
     furi_string_reset(tempStr);
 
     // draw volume indicator

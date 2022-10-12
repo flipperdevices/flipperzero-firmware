@@ -241,7 +241,6 @@ static uint8_t usb_hid_keyboard_get_selected_key(UsbHidKeyboardModel* model) {
         return key.value;
 }
 
-
 static void
     usb_hid_keyboard_get_select_key(UsbHidKeyboardModel* model, UsbHidKeyboardPoint delta) {
     // Keep going until a valid spot is found, this allows for nulls and zero width keys in the map

@@ -150,12 +150,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_string_reset(tempStr);
 
     furi_string_printf(tempStr, "x2 %.2f /2 %.2f", bpm_state->bpm * 2, bpm_state->bpm / 2);
-    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    canvas_draw_str_aligned(
+        canvas, 64, 60, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
     furi_string_reset(tempStr);
 
     furi_string_printf(tempStr, "%.2f", bpm_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    canvas_draw_str_aligned(
+        canvas, 64, 40, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
     furi_string_reset(tempStr);
 
     furi_string_free(tempStr);

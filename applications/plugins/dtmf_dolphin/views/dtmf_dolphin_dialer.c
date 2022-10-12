@@ -191,7 +191,7 @@ static bool dtmf_dolphin_dialer_process_up(DTMFDolphinDialer* dtmf_dolphin_diale
             if(span != 0) {
                 model->row = cursor;
             }
-        }, 
+        },
         true);
     return true;
 }
@@ -268,8 +268,8 @@ static bool
     bool consumed = false;
 
     with_view_model(
-        dtmf_dolphin_dialer->view, 
-        DTMFDolphinDialerModel * model, 
+        dtmf_dolphin_dialer->view,
+        DTMFDolphinDialerModel * model,
         {
             if(event->type == InputTypePress) {
                 model->playing = dtmf_dolphin_audio_play_tones(model->freq1, model->freq2);
@@ -287,7 +287,7 @@ static void dtmf_dolphin_dialer_enter_callback(void* context) {
     DTMFDolphinDialer* dtmf_dolphin_dialer = context;
 
     with_view_model(
-        dtmf_dolphin_dialer->view, 
+        dtmf_dolphin_dialer->view,
         DTMFDolphinDialerModel * model,
         {
             model->col = 0;
@@ -309,8 +309,8 @@ DTMFDolphinDialer* dtmf_dolphin_dialer_alloc() {
 
     with_view_model(
         dtmf_dolphin_dialer->view,
-        DTMFDolphinDialerModel * model
-        ,{
+        DTMFDolphinDialerModel * model,
+        {
             model->col = 0;
             model->row = 0;
             model->section = 0;
