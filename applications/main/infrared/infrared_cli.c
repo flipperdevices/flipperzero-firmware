@@ -1,4 +1,5 @@
 #include <cli/cli.h>
+#include <cli/cli_i.h>
 #include <infrared.h>
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
@@ -10,10 +11,15 @@
 
 #define INFRARED_CLI_BUF_SIZE 10
 
+enum RemoteTypes { TV = 0, AC = 1 };
+
 static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args);
 static void infrared_cli_start_ir_tx(Cli* cli, FuriString* args);
 static void infrared_cli_process_decode(Cli* cli, FuriString* args);
 static void infrared_cli_process_remote(Cli* cli, FuriString* args);
+static void infrared_cli_list_remote_signals(enum RemoteTypes remote_type);
+static void
+    infrared_cli_brute_force_signals(Cli* cli, enum RemoteTypes remote_type, FuriString* signal);
 
 static const struct {
     const char* cmd;
@@ -22,7 +28,7 @@ static const struct {
     {.cmd = "rx", .process_function = infrared_cli_start_ir_rx},
     {.cmd = "tx", .process_function = infrared_cli_start_ir_tx},
     {.cmd = "decode", .process_function = infrared_cli_process_decode},
-    {.cmd = "remote", .process_function = infrared_cli_process_remote},
+    {.cmd = "universal", .process_function = infrared_cli_process_remote},
 };
 
 static void signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -93,7 +99,8 @@ static void infrared_cli_print_usage(void) {
         INFRARED_MIN_FREQUENCY,
         INFRARED_MAX_FREQUENCY);
     printf("\tir decode <input_file> [<output_file>]\r\n");
-    printf("\tir remote <power/mute/cup/cdown/vup/vdown\r\n");
+    printf("\tir universal <tv, ac> <signal name>\r\n");
+    printf("\tir universal list <tv, ac>\r\n");
 }
 
 static bool infrared_cli_parse_message(const char* str, InfraredSignal* signal) {
@@ -333,57 +340,140 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
 }
 
 static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-
-    InfraredBruteForce* brute_force = infrared_brute_force_alloc();
+    enum RemoteTypes Remote;
 
     FuriString* command;
+    FuriString* remote;
+    FuriString* signal;
     command = furi_string_alloc();
-    args_read_string_and_trim(args, command);
+    remote = furi_string_alloc();
+    signal = furi_string_alloc();
 
-    if(furi_string_empty(command)) {
-        infrared_cli_print_usage();
-    } else {
-        printf("Bruteforcing: %s\r\n", furi_string_get_cstr(command));
-        infrared_brute_force_set_db_filename(brute_force, EXT_PATH("infrared/assets/tv.ir"));
-
-        uint32_t i = 0;
-
-        if(strncmp(furi_string_get_cstr(command), "power", 5) == 0) {
-            infrared_brute_force_add_record(brute_force, i++, "POWER");
-        } else if(strncmp(furi_string_get_cstr(command), "mute", 4) == 0) {
-            infrared_brute_force_add_record(brute_force, i++, "MUTE");
-        } else if(strncmp(furi_string_get_cstr(command), "vup", 3) == 0) {
-            infrared_brute_force_add_record(brute_force, i++, "VOL+");
-        } else if(strncmp(furi_string_get_cstr(command), "vdown", 3) == 0) {
-            infrared_brute_force_add_record(brute_force, i++, "VOL-");
-        } else if(strncmp(furi_string_get_cstr(command), "cup", 3) == 0) {
-            infrared_brute_force_add_record(brute_force, i++, "CH+");
-        } else if(strncmp(furi_string_get_cstr(command), "cdown", 3) == 0) {
-            infrared_brute_force_add_record(brute_force, i++, "CH-");
-        } else {
+    do {
+        if(!args_read_string_and_trim(args, command)) {
+            printf("Invalid command please see help.\r\n");
             infrared_cli_print_usage();
+            break;
         }
 
-        bool success = infrared_brute_force_calculate_messages(brute_force);
-        if(success) {
-            printf("Sending codes to tv...\r\n");
-
-            uint32_t record_count;
-            uint32_t index = 0;
-
-            bool running = infrared_brute_force_start(brute_force, index, &record_count);
-
-            while(running) {
-                running = infrared_brute_force_send_next(brute_force);
+        if(strncmp(furi_string_get_cstr(command), "list", 4) == 0) {
+            args_read_string_and_trim(args, remote);
+            if(strncmp(furi_string_get_cstr(remote), "tv", 2) == 0) {
+                Remote = TV;
+            } else if(strncmp(furi_string_get_cstr(remote), "ac", 2) == 0) {
+                Remote = AC;
+            } else {
+                printf("Invalid remote type.\r\n");
+                break;
             }
-
-            infrared_brute_force_stop(brute_force);
+            infrared_cli_list_remote_signals(Remote);
+            break;
         }
+
+        if(strncmp(furi_string_get_cstr(command), "tv", 2) == 0) {
+            Remote = TV;
+        } else if(strncmp(furi_string_get_cstr(command), "ac", 2) == 0) {
+            Remote = AC;
+        } else {
+            printf("Invalid remote type.\r\n");
+            break;
+        }
+
+        args_read_string_and_trim(args, signal);
+        if(furi_string_empty(signal)) {
+            printf("Must supply a valid signal for type of remote selected.\r\n");
+            break;
+        }
+
+        infrared_cli_brute_force_signals(cli, Remote, signal);
+        break;
+
+    } while(false);
+
+    furi_string_free(command);
+    furi_string_free(remote);
+    furi_string_free(signal);
+}
+
+static void infrared_cli_list_remote_signals(enum RemoteTypes remote_type) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    const char* remote_file = NULL;
+    bool success = false;
+
+    switch(remote_type) {
+    case TV:
+        remote_file = EXT_PATH("infrared/assets/tv.ir");
+        break;
+    case AC:
+        remote_file = EXT_PATH("infrared/assets/ac.ir");
+        break;
+    default:
+        break;
+    }
+
+    success = flipper_format_buffered_file_open_existing(ff, remote_file);
+    if(success) {
+        FuriString* signal_name;
+        signal_name = furi_string_alloc();
+        printf("Valid signals:\r\n");
+        while(flipper_format_read_string(ff, "name", signal_name)) {
+            printf("\t%s\r\n", furi_string_get_cstr(signal_name));
+        }
+        furi_string_free(signal_name);
+    }
+
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+}
+
+static void
+    infrared_cli_brute_force_signals(Cli* cli, enum RemoteTypes remote_type, FuriString* signal) {
+    InfraredBruteForce* brute_force = infrared_brute_force_alloc();
+    const char* remote_file = NULL;
+    uint32_t i = 0;
+
+    switch(remote_type) {
+    case TV:
+        remote_file = EXT_PATH("infrared/assets/tv.ir");
+        break;
+    case AC:
+        remote_file = EXT_PATH("infrared/assets/ac.ir");
+        break;
+    default:
+        break;
+    }
+
+    infrared_brute_force_set_db_filename(brute_force, remote_file);
+    infrared_brute_force_add_record(brute_force, i++, furi_string_get_cstr(signal));
+
+    bool success = infrared_brute_force_calculate_messages(brute_force);
+    if(success) {
+        uint32_t record_count;
+        uint32_t index = 0;
+        int records_sent = 0;
+
+        bool running = infrared_brute_force_start(brute_force, index, &record_count);
+
+        printf("Sending %ld codes to the tv.\r\n", record_count);
+        printf("Press Ctrl-C to stop.\r\n");
+        while(running) {
+            running = infrared_brute_force_send_next(brute_force);
+            records_sent++;
+
+            if(cli_cmd_interrupt_received(cli)) break;
+
+            int pc = (float)records_sent / (float)record_count * 100;
+            printf("\r%d%% complete.", pc);
+            fflush(stdout);
+        }
+
+        infrared_brute_force_stop(brute_force);
+    } else {
+        printf("Invalid signal.\r\n");
     }
 
     infrared_brute_force_free(brute_force);
-    furi_string_free(command);
 }
 
 static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
