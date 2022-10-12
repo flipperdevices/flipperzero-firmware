@@ -1,6 +1,5 @@
-import SCons
 from SCons.Platform import TempFileMunge
-from fbt import util
+from fbt.util import tempfile_arg_esc_func, single_quote, wrap_tempfile
 
 import os
 import multiprocessing
@@ -91,10 +90,10 @@ SetOption("max_drift", 1)
 
 
 # Setting up temp file parameters - to overcome command line length limits
-coreenv["TEMPFILEARGESCFUNC"] = util.tempfile_arg_esc_func
-util.wrap_tempfile(coreenv, "LINKCOM")
-util.wrap_tempfile(coreenv, "ARCOM")
+coreenv["TEMPFILEARGESCFUNC"] = tempfile_arg_esc_func
+wrap_tempfile(coreenv, "LINKCOM")
+wrap_tempfile(coreenv, "ARCOM")
 
-coreenv["SINGLEQUOTEFUNC"] = util.single_quote
+coreenv["SINGLEQUOTEFUNC"] = single_quote
 
 Return("coreenv")

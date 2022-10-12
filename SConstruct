@@ -17,6 +17,7 @@ EnsurePythonVersion(3, 8)
 # This environment is created only for loading options & validating file/dir existence
 fbt_variables = SConscript("site_scons/commandline.scons")
 cmd_environment = Environment(
+    toolpath=["#/scripts/fbt_tools"],
     tools=[
         ("fbt_help", {"vars": fbt_variables}),
     ],
@@ -28,6 +29,7 @@ cmd_environment = Environment(
 coreenv = SConscript(
     "site_scons/environ.scons",
     exports={"VAR_ENV": cmd_environment},
+    toolpath=["#/scripts/fbt_tools"],
 )
 SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 

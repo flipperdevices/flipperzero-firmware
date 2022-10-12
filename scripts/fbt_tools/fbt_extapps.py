@@ -6,11 +6,9 @@ import SCons.Warnings
 import os
 import pathlib
 from fbt.elfmanifest import assemble_manifest_data
-from fbt.appmanifest import FlipperManifestException
+from fbt.appmanifest import FlipperApplication, FlipperManifestException
 from fbt.sdk import SdkCache
 import itertools
-
-from site_scons.fbt.appmanifest import FlipperApplication
 
 
 def BuildAppElf(env, app):
