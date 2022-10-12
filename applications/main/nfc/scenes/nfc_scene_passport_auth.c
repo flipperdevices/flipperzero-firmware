@@ -1,7 +1,5 @@
 #include "../nfc_i.h"
 
-#include "../test_bac_creds.h" //TODO: remove
-
 #define TAG "PassportAuth"
 
 #define MRTD_AUTH_METHOD_COUNT 4
@@ -41,12 +39,6 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     MrtdAuthMethod* auth_method = &mrtd_data->auth.method;
     if(*auth_method == MrtdAuthMethodNone) {
         *auth_method = MrtdAuthMethodAny;
-
-        //TODO: remove testing credentials:
-        mrtd_data->auth.birth_date = TODO_REMOVE_ID_DOB;
-        mrtd_data->auth.expiry_date = TODO_REMOVE_ID_DOE;
-        memcpy(mrtd_data->auth.doc_number, TODO_REMOVE_ID_DOC, 9);
-        //TODO: remove testing credentials ^^
     }
 
     VariableItemList* variable_item_list = nfc->variable_item_list;
