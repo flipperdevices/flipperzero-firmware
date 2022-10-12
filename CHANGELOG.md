@@ -14,7 +14,7 @@
 * OFW: NFC: bank card rework reading
 * OFW: Dolphin score points update
 
-####  [🎲 Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
+#### 🎲 [Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
 
 [-> How to install firmware](https://github.com/pieceofsys/flipperzero-firmware/blob/dev/documentation/HowToInstall.md)
 
@@ -22,6 +22,6 @@
 
 **Note: To avoid issues with .dfu, prefer installing using .tgz with qFlipper, web updater or by self update package, all needed assets will be installed**
 
-Self-update package (update from microSD) - `flipper-z-f7-update-(version).zip` or download `.tgz` for iOS mobile app / qFlipper
+📦 Self-update package (update from microSD) - `flipper-z-f7-update-(version).zip` or download `.tgz` for iOS mobile app / qFlipper
 
-Update using qFlipper (1.2.0) is now possible with `.tgz` update package! Also you can use Web Updater or self-update package.
+📥 Update using qFlipper (1.2.0) is now possible with `.tgz` update package! Also you can use Web Updater or self-update package.
