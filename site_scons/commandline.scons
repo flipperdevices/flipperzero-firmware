@@ -97,9 +97,9 @@ vars.AddVariables(
         "${DIST_SUFFIX}",
     ),
     (
-		"CUSTOM_FLIPPER_NAME",
-		"Replaces OTP flipper name with custom string of 8 chars",
-		"",
+        "CUSTOM_FLIPPER_NAME",
+        "Replaces OTP flipper name with custom string of 8 chars",
+        "",
     ),
     (
         "COPRO_CUBE_VERSION",

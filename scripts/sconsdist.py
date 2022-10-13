@@ -2,7 +2,7 @@
 
 from flipper.app import App
 from os.path import join, exists, relpath
-from os import makedirs, walk
+from os import makedirs, walk, environ
 from update import Main as UpdateMain
 import shutil
 import zipfile
@@ -156,9 +156,6 @@ class Main(App):
                     )
                 )
             bundle_args.extend(self.other_args)
-            self.logger.info(
-                f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
-            )
             log_custom_fz_name = (
                 environ.get("CUSTOM_FLIPPER_NAME", None)
                 or ""
@@ -168,7 +165,24 @@ class Main(App):
                     f"Flipper Custom Name is set:\n\tName: {log_custom_fz_name} : length - {len(log_custom_fz_name)} chars"
                 )
 
-            return UpdateMain(no_exit=True)(bundle_args)
+            if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
+                self.logger.info(
+                    f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
+                )
+
+                # Create tgz archive
+                with tarfile.open(
+                    join(
+                        self.output_dir_path,
+                        f"{self.DIST_FILE_PREFIX}{bundle_dir_name}.tgz",
+                    ),
+                    "w:gz",
+                    compresslevel=9,
+                    format=tarfile.GNU_FORMAT,
+                ) as tar:
+                    tar.add(bundle_dir, arcname=bundle_dir_name)
+
+            return bundle_result
 
         return 0
 
