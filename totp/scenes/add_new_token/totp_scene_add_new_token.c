@@ -100,8 +100,8 @@ void totp_scene_add_new_token_render(Canvas* const canvas, PluginState* plugin_s
 
     ui_control_text_box_render(canvas, 10 - scene_state->screen_y_offset, scene_state->token_name, scene_state->selected_control == TokenNameTextBox);
     ui_control_text_box_render(canvas, 27 - scene_state->screen_y_offset, scene_state->token_secret, scene_state->selected_control == TokenSecretTextBox);
-    ui_control_select_render(canvas, 44 - scene_state->screen_y_offset, TOKEN_ALGO_LIST[scene_state->algo], scene_state->selected_control == TokenAlgoSelect);
-    ui_control_select_render(canvas, 63 - scene_state->screen_y_offset, TOKEN_DIGITS_LIST[scene_state->digits_count], scene_state->selected_control == TokenLengthSelect);
+    ui_control_select_render(canvas, 0, 44 - scene_state->screen_y_offset, SCREEN_WIDTH, TOKEN_ALGO_LIST[scene_state->algo], scene_state->selected_control == TokenAlgoSelect);
+    ui_control_select_render(canvas, 0, 63 - scene_state->screen_y_offset, SCREEN_WIDTH, TOKEN_DIGITS_LIST[scene_state->digits_count], scene_state->selected_control == TokenLengthSelect);
     ui_control_button_render(canvas, SCREEN_WIDTH_CENTER - 24, 85 - scene_state->screen_y_offset, 48, 13, "Confirm", scene_state->selected_control == ConfirmButton);
 
     canvas_set_color(canvas, ColorWhite);
@@ -212,14 +212,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                             }
                             plugin_state->tokens_count++;
 
-                            Storage* cfg_storage = totp_open_storage();
-                            FlipperFormat* cfg_file = totp_open_config_file(cfg_storage);
-
-                            flipper_format_seek_to_end(cfg_file);
-                            totp_config_file_save_new_token(cfg_file, tokenInfo);
-
-                            totp_close_config_file(cfg_file);
-                            totp_close_storage();
+                            totp_config_file_save_new_token(tokenInfo);
 
                             GenerateTokenSceneContext generate_scene_context = { .current_token_index = plugin_state->tokens_count - 1 };
                             totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, &generate_scene_context);
