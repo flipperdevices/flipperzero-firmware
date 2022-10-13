@@ -381,6 +381,7 @@
   #endif
 
   #ifndef HAS_SCREEN
+    #define TFT_WHITE 0
     #define TFT_CYAN 0
     #define TFT_BLUE 0
     #define TFT_RED 0
