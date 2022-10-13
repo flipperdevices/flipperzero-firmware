@@ -5,13 +5,13 @@
   #define POLISH_POTATO
   
   //#define MARAUDER_MINI
-  //#define MARAUDER_V4
+  #define MARAUDER_V4
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
-  #define MARAUDER_FLIPPER
+  //#define MARAUDER_FLIPPER
 
-  #define MARAUDER_VERSION "v0.9.15"
+  #define MARAUDER_VERSION "v0.9.16"
 
   //// BUTTON DEFINITIONS
   #ifdef MARAUDER_MINI
@@ -55,7 +55,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH 16
     #define LVGL_TICK_PERIOD 6
     
@@ -109,7 +109,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH 16
     #define LVGL_TICK_PERIOD 6
     
@@ -164,7 +164,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH 16
     #define LVGL_TICK_PERIOD 6
     
@@ -231,7 +231,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH (TFT_HEIGHT/16)
     #define LVGL_TICK_PERIOD 6
     

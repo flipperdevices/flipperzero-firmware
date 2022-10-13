@@ -62,6 +62,8 @@
 #define WIFI_ATTACK_AP_SPAM 21
 #define WIFI_SCAN_TARGET_AP_FULL 22
 #define WIFI_SCAN_ACTIVE_EAPOL 23
+#define WIFI_ATTACK_DEAUTH_MANUAL 24
+#define WIFI_SCAN_RAW_CAPTURE 25
 
 #define GRAPH_REFRESH 100
 
@@ -249,6 +251,7 @@ class WiFiScan
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
+    void RunRawScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
     void RunEapolScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
@@ -279,6 +282,9 @@ class WiFiScan
     String free_ram = "";
     String old_free_ram = "";
     String connected_network = "";
+
+    byte dst_mac[6] = {};
+    byte src_mac[6] = {};
 
     //lv_obj_t * scr = lv_cont_create(NULL, NULL);
 
@@ -315,6 +321,7 @@ class WiFiScan
     static void espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
