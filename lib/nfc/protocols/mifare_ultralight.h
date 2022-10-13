@@ -28,6 +28,8 @@
 
 #define MF_UL_NTAG203_COUNTER_PAGE (41)
 
+#define MF_UL_DEFAULT_PWD (0xFFFFFFFF)
+
 typedef enum {
     MfUltralightAuthMethodManual,
     MfUltralightAuthMethodAmeebo,

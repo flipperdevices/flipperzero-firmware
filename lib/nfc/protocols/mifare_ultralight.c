@@ -756,6 +756,23 @@ bool mf_ul_read_card(
             mf_ultralight_read_tearing_flags(tx_rx, data);
         }
         data->curr_authlim = 0;
+
+        if(reader->pages_read == reader->pages_to_read &&
+           reader->supported_features & MfUltralightSupportAuth) {
+            MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+            if(config->access.authlim == 0) {
+                // Attempt to auth with default PWD
+                uint16_t pack;
+                data->auth_success = mf_ultralight_authenticate(tx_rx, MF_UL_DEFAULT_PWD, &pack);
+                if(data->auth_success) {
+                    config->auth_data.pwd.value = MF_UL_DEFAULT_PWD;
+                    config->auth_data.pack.value = pack;
+                } else {
+                    furi_hal_nfc_sleep();
+                    furi_hal_nfc_activate_nfca(300, NULL);
+                }
+            }
+        }
     }
 
     if(reader->pages_read != reader->pages_to_read) {
