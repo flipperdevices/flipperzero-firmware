@@ -256,7 +256,7 @@ void CommandLine::runCommand(String input) {
         display_obj.clearScreen();
         menu_function_obj.drawStatusBar();
       #endif
-      wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
+      wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_RED);
     }
     // Beacon sniff
     else if (cmd_args.get(0) == SNIFF_BEACON_CMD) {
