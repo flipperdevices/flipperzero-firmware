@@ -1569,10 +1569,10 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP, TFT_MAGENTA);
   });
-  addNodes(&wifiSnifferMenu, text_table1[58], TFT_WHITE, NULL, PACKET_MONITOR, [this]() {
+  addNodes(&wifiSnifferMenu, text_table1[58], TFT_RED, NULL, PACKET_MONITOR, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
-    wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
+    wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_RED);
   });
 
   // Build WiFi attack menu
