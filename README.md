@@ -1,3 +1,8 @@
+[![Badge Issues]][Issues]
+[![Badge License]][License]
+
+***
+
 # Flipper Authenticator
 
 ![Screenshot](.github/assets/screenshot_1.png)
