@@ -269,7 +269,7 @@ bool totp_scene_generate_token_handle_event(PluginEvent* const event, PluginStat
                 break;
             case InputKeyOk:
                 if(plugin_state->tokens_count == 0) {
-                    totp_scene_director_activate_scene(plugin_state, TotpSceneAddNewToken, NULL);
+                    totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, NULL);
                 } else {
                     TokenMenuSceneContext ctx = {
                         .current_token_index = scene_state->current_token_index};

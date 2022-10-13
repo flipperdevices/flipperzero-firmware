@@ -112,12 +112,16 @@ void totp_scene_add_new_token_render(Canvas* const canvas, PluginState* plugin_s
         scene_state->selected_control == TokenSecretTextBox);
     ui_control_select_render(
         canvas,
+        0,
         44 - scene_state->screen_y_offset,
+        SCREEN_WIDTH,
         TOKEN_ALGO_LIST[scene_state->algo],
         scene_state->selected_control == TokenAlgoSelect);
     ui_control_select_render(
         canvas,
+        0,
         63 - scene_state->screen_y_offset,
+        SCREEN_WIDTH,
         TOKEN_DIGITS_LIST[scene_state->digits_count],
         scene_state->selected_control == TokenLengthSelect);
     ui_control_button_render(
@@ -242,14 +246,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                     }
                     plugin_state->tokens_count++;
 
-                    Storage* cfg_storage = totp_open_storage();
-                    FlipperFormat* cfg_file = totp_open_config_file(cfg_storage);
-
-                    flipper_format_seek_to_end(cfg_file);
-                    totp_config_file_save_new_token(cfg_file, tokenInfo);
-
-                    totp_close_config_file(cfg_file);
-                    totp_close_storage();
+                    totp_config_file_save_new_token(tokenInfo);
 
                     GenerateTokenSceneContext generate_scene_context = {
                         .current_token_index = plugin_state->tokens_count - 1};

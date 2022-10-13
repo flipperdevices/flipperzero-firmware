@@ -4,6 +4,7 @@
 #include "generate_token/totp_scene_generate_token.h"
 #include "add_new_token/totp_scene_add_new_token.h"
 #include "token_menu/totp_scene_token_menu.h"
+#include "app_settings/totp_app_settings.h"
 
 void totp_scene_director_activate_scene(
     PluginState* const plugin_state,
@@ -23,6 +24,9 @@ void totp_scene_director_activate_scene(
         break;
     case TotpSceneTokenMenu:
         totp_scene_token_menu_activate(plugin_state, context);
+        break;
+    case TotpSceneAppSettings:
+        totp_scene_app_settings_activate(plugin_state, context);
         break;
     }
 
@@ -44,6 +48,9 @@ void totp_scene_director_deactivate_active_scene(PluginState* const plugin_state
     case TotpSceneTokenMenu:
         totp_scene_token_menu_deactivate(plugin_state);
         break;
+    case TotpSceneAppSettings:
+        totp_scene_app_settings_deactivate(plugin_state);
+        break;
     }
 }
 
@@ -52,6 +59,7 @@ void totp_scene_director_init_scenes(PluginState* const plugin_state) {
     totp_scene_generate_token_init(plugin_state);
     totp_scene_add_new_token_init(plugin_state);
     totp_scene_token_menu_init(plugin_state);
+    totp_scene_app_settings_init(plugin_state);
 }
 
 void totp_scene_director_render(Canvas* const canvas, PluginState* const plugin_state) {
@@ -68,6 +76,9 @@ void totp_scene_director_render(Canvas* const canvas, PluginState* const plugin_
     case TotpSceneTokenMenu:
         totp_scene_token_menu_render(canvas, plugin_state);
         break;
+    case TotpSceneAppSettings:
+        totp_scene_app_settings_render(canvas, plugin_state);
+        break;
     }
 }
 
@@ -76,6 +87,7 @@ void totp_scene_director_dispose(PluginState* const plugin_state) {
     totp_scene_authenticate_free(plugin_state);
     totp_scene_add_new_token_free(plugin_state);
     totp_scene_token_menu_free(plugin_state);
+    totp_scene_app_settings_free(plugin_state);
 }
 
 bool totp_scene_director_handle_event(PluginEvent* const event, PluginState* const plugin_state) {
@@ -92,6 +104,9 @@ bool totp_scene_director_handle_event(PluginEvent* const event, PluginState* con
         break;
     case TotpSceneTokenMenu:
         processing = totp_scene_token_menu_handle_event(event, plugin_state);
+        break;
+    case TotpSceneAppSettings:
+        processing = totp_scene_app_settings_handle_event(event, plugin_state);
         break;
     }
 
