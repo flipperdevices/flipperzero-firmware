@@ -9,6 +9,15 @@
 
 typedef struct WSHistory WSHistory;
 
+/** History state add key */
+typedef enum {
+    WSHistoryStateAddKeyUnknown,
+    WSHistoryStateAddKeyTimeOut,
+    WSHistoryStateAddKeyNewDada,
+    WSHistoryStateAddKeyUpdateData,
+    WSHistoryStateAddKeyOverflow,
+} WSHistoryStateAddKey;
+
 /** Allocate WSHistory
  * 
  * @return WSHistory* 
@@ -89,9 +98,10 @@ bool ws_history_get_text_space_left(WSHistory* instance, FuriString* output);
  * @param instance  - WSHistory instance
  * @param context    - SubGhzProtocolCommon context
  * @param preset    - SubGhzPresetDefinition preset
- * @return bool;
+ * @return WSHistoryStateAddKey;
  */
-bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetDefinition* preset);
+WSHistoryStateAddKey
+    ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetDefinition* preset);
 
 /** Get SubGhzProtocolCommonLoad to load into the protocol decoder bin data
  * 

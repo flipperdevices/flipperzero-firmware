@@ -6,24 +6,12 @@
 #define WS_KEY_FILE_VERSION 1
 #define WS_KEY_FILE_TYPE "Flipper Weather Station Key File"
 
-// /** WSNotification state */
-// typedef enum {
-//     WSNotificationStateStarting,
-//     WSNotificationStateIDLE,
-//     WSNotificationStateTx,
-//     WSNotificationStateRx,
-//     WSNotificationStateRxDone,
-// } WSNotificationState;
-
 /** WSRxKeyState state */
 typedef enum {
     WSRxKeyStateIDLE,
-    //WSRxKeyStateNoSave,
-    //WSRxKeyStateNeedSave,
     WSRxKeyStateBack,
     WSRxKeyStateStart,
     WSRxKeyStateAddKey,
-    //WSRxKeyStateExit,
 } WSRxKeyState;
 
 /** WSHopperState state */

@@ -9,6 +9,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/submenu.h>
+#include <notification/notification_messages.h>
 #include "views/weather_station_show.h"
 #include "views/weather_station_receiver.h"
 #include "views/weather_station_receiver_info.h"
@@ -44,7 +45,7 @@ struct WeatherStationApp {
     ViewDispatcher* view_dispatcher;
     WeatherStationTxRx* txrx;
     SceneManager* scene_manager;
-
+    NotificationApp* notifications;
     VariableItemList* variable_item_list;
     Submenu* submenu;
     //todo detete weather_station_show

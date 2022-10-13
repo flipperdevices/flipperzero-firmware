@@ -6,7 +6,7 @@
 #include <gui/elements.h>
 #include "math.h"
 
-#define abs(x) ((x)>0?(x):-(x))
+#define abs(x) ((x) > 0 ? (x) : -(x))
 
 struct WSReceiverInfo {
     View* view;
@@ -60,9 +60,9 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
     canvas_draw_str(canvas, 5, 32, buffer);
 
     elements_bold_rounded_frame(canvas, 2, 37, 123, 25);
-
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_icon(canvas, 13, 42, &I_Therm_7x16);
+
+    canvas_draw_icon(canvas, 13 + 5, 42, &I_Therm_7x16);
     snprintf(
         buffer,
         sizeof(buffer),
@@ -70,13 +70,12 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
         (int16_t)model->generic->temp,
         abs(((int16_t)(model->generic->temp * 10) - (((int16_t)model->generic->temp) * 10))));
     //canvas_draw_str(canvas, 24, 54, buffer);
-    canvas_draw_str_aligned(
-        canvas, 58, 46, AlignRight, AlignTop, buffer);
-    canvas_draw_circle(canvas, 50, 45, 1);
+    canvas_draw_str_aligned(canvas, 58 + 5, 46, AlignRight, AlignTop, buffer);
+    canvas_draw_circle(canvas, 50 + 5, 45, 1);
 
-    canvas_draw_icon(canvas, 70, 42, &I_Humid_10x15);
+    canvas_draw_icon(canvas, 70 + 5, 42, &I_Humid_10x15);
     snprintf(buffer, sizeof(buffer), "%d%%", model->generic->humidity);
-    canvas_draw_str(canvas, 86, 54, buffer);
+    canvas_draw_str(canvas, 86 + 5, 54, buffer);
 }
 
 bool ws_view_receiver_info_input(InputEvent* event, void* context) {

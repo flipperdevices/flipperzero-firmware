@@ -32,7 +32,7 @@ WeatherStationApp* weather_station_app_alloc() {
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&weather_station_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);
-    
+
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, weather_station_app_custom_event_callback);
@@ -42,6 +42,9 @@ WeatherStationApp* weather_station_app_alloc() {
         app->view_dispatcher, weather_station_app_tick_event_callback, 100);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+
+    // Open Notification record
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Variable Item List
     app->variable_item_list = variable_item_list_alloc();
@@ -68,7 +71,7 @@ WeatherStationApp* weather_station_app_alloc() {
         app->view_dispatcher,
         WeatherStationViewReceiver,
         ws_view_receiver_get_view(app->ws_receiver));
-    
+
     // Receiver Info
     app->ws_receiver_info = ws_view_receiver_info_alloc();
     view_dispatcher_add_view(
@@ -138,7 +141,7 @@ void weather_station_app_free(WeatherStationApp* app) {
 
     //setting
     subghz_setting_free(app->setting);
-    
+
     //Worker & Protocol & History
     subghz_receiver_free(app->txrx->receiver);
     subghz_environment_free(app->txrx->environment);
@@ -151,6 +154,10 @@ void weather_station_app_free(WeatherStationApp* app) {
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
+
+    // Notifications
+    furi_record_close(RECORD_NOTIFICATION);
+    app->notifications = NULL;
 
     // Close records
     furi_record_close(RECORD_GUI);

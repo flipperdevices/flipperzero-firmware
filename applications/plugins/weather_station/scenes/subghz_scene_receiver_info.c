@@ -13,16 +13,17 @@ static void weather_station_scene_receiver_info_add_to_history_callback(
     void* context) {
     furi_assert(context);
     WeatherStationApp* app = context;
-    FuriString* str_buff;
-    str_buff = furi_string_alloc();
 
-    ws_history_add_to_history(app->txrx->history, decoder_base, app->txrx->preset);
-    ws_view_receiver_info_update(
-        app->ws_receiver_info,
-        ws_history_get_raw_data(app->txrx->history, app->txrx->idx_menu_chosen));
-    subghz_receiver_reset(receiver);
-    furi_string_free(str_buff);
-    app->txrx->rx_key_state = WSRxKeyStateAddKey;
+    if(ws_history_add_to_history(app->txrx->history, decoder_base, app->txrx->preset) ==
+       WSHistoryStateAddKeyUpdateData) {
+        ws_view_receiver_info_update(
+            app->ws_receiver_info,
+            ws_history_get_raw_data(app->txrx->history, app->txrx->idx_menu_chosen));
+        subghz_receiver_reset(receiver);
+
+        notification_message(app->notifications, &sequence_blink_green_10);
+        app->txrx->rx_key_state = WSRxKeyStateAddKey;
+    }
 }
 
 void weather_station_scene_receiver_info_on_enter(void* context) {

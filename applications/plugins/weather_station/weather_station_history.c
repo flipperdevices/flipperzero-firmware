@@ -138,18 +138,19 @@ void ws_history_get_text_item_menu(WSHistory* instance, FuriString* output, uint
     furi_string_set(output, item->item_str);
 }
 
-bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetDefinition* preset) {
+WSHistoryStateAddKey
+    ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetDefinition* preset) {
     furi_assert(instance);
     furi_assert(context);
 
-    if(instance->last_index_write >= WS_HISTORY_MAX) return false;
+    if(instance->last_index_write >= WS_HISTORY_MAX) return WSHistoryStateAddKeyOverflow;
 
     SubGhzProtocolDecoderBase* decoder_base = context;
     if((instance->code_last_hash_data ==
         subghz_protocol_decoder_base_get_hash_data(decoder_base)) &&
        ((furi_get_tick() - instance->last_update_timestamp) < 500)) {
         instance->last_update_timestamp = furi_get_tick();
-        return false;
+        return WSHistoryStateAddKeyTimeOut;
     }
 
     instance->code_last_hash_data = subghz_protocol_decoder_base_get_hash_data(decoder_base);
@@ -180,7 +181,7 @@ bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetD
             Stream* flipper_string_stream = flipper_format_get_raw_stream(item->flipper_string);
             stream_clean(flipper_string_stream);
             subghz_protocol_decoder_base_serialize(decoder_base, item->flipper_string, preset);
-            return false;
+            return WSHistoryStateAddKeyUpdateData;
         }
     }
 
@@ -240,6 +241,7 @@ bool ws_history_add_to_history(WSHistory* instance, void* context, SubGhzPresetD
             }
         } while(false);
         instance->last_index_write++;
+        return WSHistoryStateAddKeyNewDada;
     }
-    return true;
+    return WSHistoryStateAddKeyUnknown;
 }

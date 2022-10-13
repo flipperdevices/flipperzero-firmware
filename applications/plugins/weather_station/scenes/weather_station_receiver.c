@@ -1,6 +1,36 @@
 #include "../weather_station_app_i.h"
 #include "../views/weather_station_receiver.h"
 
+static const NotificationSequence subghs_sequence_rx = {
+    &message_green_255,
+
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+
+    &message_delay_50,
+    NULL,
+};
+
+static const NotificationSequence subghs_sequence_rx_locked = {
+    &message_green_255,
+
+    &message_display_backlight_on,
+
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_50,
+    &message_sound_off,
+    &message_vibro_off,
+
+    &message_delay_500,
+
+    &message_display_backlight_off,
+    NULL,
+};
+
 static void weather_station_scene_receiver_update_statusbar(void* context) {
     WeatherStationApp* app = context;
     FuriString* history_stat_str;
@@ -44,7 +74,8 @@ static void weather_station_scene_receiver_add_to_history_callback(
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    if(ws_history_add_to_history(app->txrx->history, decoder_base, app->txrx->preset)) {
+    if(ws_history_add_to_history(app->txrx->history, decoder_base, app->txrx->preset) ==
+       WSHistoryStateAddKeyNewDada) {
         furi_string_reset(str_buff);
 
         ws_history_get_text_item_menu(
@@ -56,6 +87,12 @@ static void weather_station_scene_receiver_add_to_history_callback(
                 app->txrx->history, ws_history_get_item(app->txrx->history) - 1));
 
         weather_station_scene_receiver_update_statusbar(app);
+        notification_message(app->notifications, &sequence_blink_green_10);
+        if(app->lock != WSLockOn) {
+            notification_message(app->notifications, &subghs_sequence_rx);
+        } else {
+            notification_message(app->notifications, &subghs_sequence_rx_locked);
+        }
     }
     subghz_receiver_reset(receiver);
     furi_string_free(str_buff);
@@ -94,7 +131,6 @@ void weather_station_scene_receiver_on_enter(void* context) {
     subghz_receiver_set_rx_callback(
         app->txrx->receiver, weather_station_scene_receiver_add_to_history_callback, app);
 
-    //app->state_notifications = SubGhzNotificationStateRx;
     if(app->txrx->txrx_state == WSTxRxStateRx) {
         ws_rx_end(app);
     };
@@ -118,7 +154,6 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
         switch(event.event) {
         case WSCustomEventViewReceiverBack:
             // Stop CC1101 Rx
-            //app->state_notifications = SubGhzNotificationStateIDLE;
             if(app->txrx->txrx_state == WSTxRxStateRx) {
                 ws_rx_end(app);
                 ws_sleep(app);
@@ -127,34 +162,27 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             app->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(app->txrx->receiver, NULL, app);
 
-            // if(subghz->txrx->rx_key_state == WSRxKeyStateAddKey) {
-            //     subghz->txrx->rx_key_state = WSRxKeyStateExit;
-            //     scene_manager_next_scene(subghz->scene_manager, WeatherStationSceneNeedSaving);
-            // } else {
             app->txrx->rx_key_state = WSRxKeyStateIDLE;
             ws_preset_init(
                 app, "AM650", subghz_setting_get_default_frequency(app->setting), NULL, 0);
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, WeatherStationSceneStart);
-            //}
             consumed = true;
             break;
         case WSCustomEventViewReceiverOK:
-            app->txrx->idx_menu_chosen =
-                ws_view_receiver_get_idx_menu(app->ws_receiver);
+            app->txrx->idx_menu_chosen = ws_view_receiver_get_idx_menu(app->ws_receiver);
             scene_manager_next_scene(app->scene_manager, WeatherStationSceneReceiverInfo);
             consumed = true;
             break;
         case WSCustomEventViewReceiverConfig:
-            //subghz->state_notifications = SubGhzNotificationStateIDLE;
             app->txrx->idx_menu_chosen = ws_view_receiver_get_idx_menu(app->ws_receiver);
             scene_manager_next_scene(app->scene_manager, WeatherStationSceneReceiverConfig);
             consumed = true;
             break;
-        // case WSCustomEventViewReceiverOffDisplay:
-        //     notification_message(app->notifications, &sequence_display_backlight_off);
-        //     consumed = true;
-        //     break;
+        case WSCustomEventViewReceiverOffDisplay:
+            notification_message(app->notifications, &sequence_display_backlight_off);
+            consumed = true;
+            break;
         case WSCustomEventViewReceiverUnlock:
             app->lock = WSLockOff;
             consumed = true;
@@ -167,21 +195,6 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             ws_hopper_update(app);
             weather_station_scene_receiver_update_statusbar(app);
         }
-        // switch(subghz->state_notifications) {
-        // case SubGhzNotificationStateRx:
-        //     notification_message(subghz->notifications, &sequence_blink_cyan_10);
-        //     break;
-        // case SubGhzNotificationStateRxDone:
-        //     if(subghz->lock != WSLockOn) {
-        //         notification_message(subghz->notifications, &subghs_sequence_rx);
-        //     } else {
-        //         notification_message(subghz->notifications, &subghs_sequence_rx_locked);
-        //     }
-        //     subghz->state_notifications = SubGhzNotificationStateRx;
-        //     break;
-        // default:
-        //     break;
-        // }
     }
     return consumed;
 }
