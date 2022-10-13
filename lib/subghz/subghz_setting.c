@@ -325,7 +325,7 @@ void subghz_setting_load(SubGhzSetting* instance, const char* file_path) {
     if(file_path) {
         do {
             if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
-                FURI_LOG_E(TAG, "Error open file %s", file_path);
+                FURI_LOG_I(TAG, "File is not used %s", file_path);
                 break;
             }
 
