@@ -20,6 +20,8 @@
 - Updated Assets: Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)] & [Narut0 (By Sasquach)]
 - OFW: Dolphin score points update **(WARNING!!! Dolphin Level will be reset after installing of this release!!!!)**
 - Updated view for desktop to exclude icons on the left and show minimal battery [By Talking-Sasquach](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Battery%20Only%20Top%20Status%20Bar)
+- Added: [Black Jack (By teeebor)](https://github.com/teeebor/flipper_games) (Thank you Haseo for PR)
+- Added: [Music Beeper (By OFW)](With Changes By qqMajiKpp/Haseo)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -181,6 +183,7 @@ $ ./fbt plugin_dist
   
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
+- [Black Jack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW  `Broken?`
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) (Needs Controls Programmed) `HIDDEN because its broken`
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
@@ -215,6 +218,7 @@ $ ./fbt plugin_dist
 - [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
 - [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
+- Music Beeper [OFW] (With Changes By qqMajiKpp/Haseo)
 - Music Player [OFW]
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
