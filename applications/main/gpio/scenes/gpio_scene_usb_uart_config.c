@@ -116,7 +116,12 @@ void gpio_scene_usb_uart_cfg_on_enter(void* context) {
     variable_item_set_current_value_index(item, cfg_set->uart_ch);
     variable_item_set_current_value_text(item, uart_ch[cfg_set->uart_ch]);
 
-    item = variable_item_list_add(var_item_list, "RTS/DTR Pins", COUNT_OF(flow_pins), line_flow_cb, app);
+    // GPIO pins PC0, PC1 (16,15) are unavailable for RTS/DTR when LPUART is
+    // selected.
+    int available_flow_pins = cfg_set->uart_ch == FuriHalUartIdLPUART1 ? 3 : 4;
+    if(cfg_set->flow_pins >= available_flow_pins) cfg_set->flow_pins = 0;
+    item = variable_item_list_add(
+        var_item_list, "RTS/DTR Pins", available_flow_pins, line_flow_cb, app);
     variable_item_set_current_value_index(item, cfg_set->flow_pins);
     variable_item_set_current_value_text(item, flow_pins[cfg_set->flow_pins]);
 

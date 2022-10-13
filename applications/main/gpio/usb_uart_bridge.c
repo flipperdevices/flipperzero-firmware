@@ -14,7 +14,7 @@
 static const GpioPin* flow_pins[][2] = {
     {&gpio_ext_pa7, &gpio_ext_pa6}, // 2, 3
     {&gpio_ext_pb2, &gpio_ext_pc3}, // 6, 7
-    {&gpio_ext_pc0, &gpio_ext_pc1}, // 0, 1
+    {&gpio_ext_pc0, &gpio_ext_pc1}, // 16, 15
 };
 
 typedef enum {
