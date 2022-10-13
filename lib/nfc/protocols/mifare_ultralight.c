@@ -758,7 +758,7 @@ bool mf_ul_read_card(
         data->curr_authlim = 0;
 
         if(reader->pages_read == reader->pages_to_read &&
-           reader->supported_features & MfUltralightSupportAuth) {
+           reader->supported_features & MfUltralightSupportAuth && !data->auth_success) {
             MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
             if(config->access.authlim == 0) {
                 // Attempt to auth with default PWD
