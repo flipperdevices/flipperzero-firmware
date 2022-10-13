@@ -1,7 +1,7 @@
 all:
 	gcc mfkeymin.c -o mfkey
 test:
-	echo "Expected result: 824b8305a6df"
-	/usr/bin/time -v ./mfkey dee5251d f96eef89 3f7743ef e48f8835 4c50d4c6 a096efa5 7542b17c
+        @/usr/bin/echo -e "Expected result:\na0a1a2a3a4a5\n65e26477b84b\n2a2c13cc242a"
+        /usr/bin/time -v ./mfkey
 clean:
-	rm mfkey
+        rm mfkey
