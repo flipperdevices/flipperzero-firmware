@@ -3,6 +3,8 @@ A simple plugin for the FlipperZero written as a tutorial example [ie. excessive
 
 If you wish to review this repository at the last point before the FAP update, use [this link](https://github.com/csBlueChip/FlipperZero_plugin_howto/tree/21f2620035728cd04e1951c3f6a30de1cfe8a280)
 
+If you wish to review the (trivial) change[s] required to convert from the old "plugin" system to the new "FAP"/"Application" system, see [this link](https://github.com/csBlueChip/FlipperZero_plugin_howto/commit/91e06b53d5b9499edd7247b9b87b73e867f1a841#diff-277dc3e809211402bcdb4976c80cd9f172ede7d3c4f8b95137c00b51c236d71d) ...the addition of an icon and a sub-folder are optional.
+
 # FAP Support Has Arrived! :)
 Since the move to FAP, your "plugins" are now known as "applications"
 * "Plugins" are 
