@@ -13,7 +13,7 @@ static UsbUartConfig* cfg_set;
 
 static const char* vcp_ch[] = {"0 (CLI)", "1"};
 static const char* uart_ch[] = {"13,14", "15,16"};
-static const char* flow_pins[] = {"None", "2,3", "6,7", "0,1"};
+static const char* flow_pins[] = {"None", "2,3", "6,7", "16,15"};
 static const char* baudrate_mode[] = {"Host"};
 static const uint32_t baudrate_list[] = {
     2400,
