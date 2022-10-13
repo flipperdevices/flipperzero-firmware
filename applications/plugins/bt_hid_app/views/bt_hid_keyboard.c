@@ -5,6 +5,8 @@
 #include <gui/elements.h>
 #include <gui/icon_i.h>
 
+#include "bt_hid_icons.h"
+
 struct BtHidKeyboard {
     View* view;
 };
@@ -277,7 +279,9 @@ static void bt_hid_keyboard_get_select_key(BtHidKeyboardModel* model, BtHidKeybo
 
 static void bt_hid_keyboard_process(BtHidKeyboard* bt_hid_keyboard, InputEvent* event) {
     with_view_model(
-        bt_hid_keyboard->view, (BtHidKeyboardModel * model) {
+        bt_hid_keyboard->view,
+        BtHidKeyboardModel * model,
+        {
             if(event->key == InputKeyOk) {
                 if(event->type == InputTypePress) {
                     model->ok_pressed = true;
@@ -338,8 +342,8 @@ static void bt_hid_keyboard_process(BtHidKeyboard* bt_hid_keyboard, InputEvent* 
                     bt_hid_keyboard_get_select_key(model, (BtHidKeyboardPoint){.x = 1, .y = 0});
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool bt_hid_keyboard_input_callback(InputEvent* event, void* context) {
@@ -382,8 +386,5 @@ View* bt_hid_keyboard_get_view(BtHidKeyboard* bt_hid_keyboard) {
 void bt_hid_keyboard_set_connected_status(BtHidKeyboard* bt_hid_keyboard, bool connected) {
     furi_assert(bt_hid_keyboard);
     with_view_model(
-        bt_hid_keyboard->view, (BtHidKeyboardModel * model) {
-            model->connected = connected;
-            return true;
-        });
+        bt_hid_keyboard->view, BtHidKeyboardModel * model, { model->connected = connected; }, true);
 }

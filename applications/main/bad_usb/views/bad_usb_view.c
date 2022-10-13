@@ -53,6 +53,7 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 46, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
+        canvas_draw_str_aligned(canvas, 127, 56, AlignRight, AlignBottom, model->state.error);
     } else if(model->state.state == BadUsbStateIdle) {
         canvas_draw_icon(canvas, 4, 22, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
@@ -145,29 +146,33 @@ void bad_usb_set_ok_callback(BadUsb* bad_usb, BadUsbOkCallback callback, void* c
     furi_assert(bad_usb);
     furi_assert(callback);
     with_view_model(
-        bad_usb->view, (BadUsbModel * model) {
+        bad_usb->view,
+        BadUsbModel * model,
+        {
             UNUSED(model);
             bad_usb->callback = callback;
             bad_usb->context = context;
-            return true;
-        });
+        },
+        true);
 }
 
 void bad_usb_set_file_name(BadUsb* bad_usb, const char* name) {
     furi_assert(name);
     with_view_model(
-        bad_usb->view, (BadUsbModel * model) {
-            strlcpy(model->file_name, name, MAX_NAME_LEN);
-            return true;
-        });
+        bad_usb->view,
+        BadUsbModel * model,
+        { strlcpy(model->file_name, name, MAX_NAME_LEN); },
+        true);
 }
 
 void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
     furi_assert(st);
     with_view_model(
-        bad_usb->view, (BadUsbModel * model) {
+        bad_usb->view,
+        BadUsbModel * model,
+        {
             memcpy(&(model->state), st, sizeof(BadUsbState));
             model->anim_frame ^= 1;
-            return true;
-        });
+        },
+        true);
 }
