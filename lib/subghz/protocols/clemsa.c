@@ -173,7 +173,7 @@ bool subghz_protocol_encoder_clemsa_deserialize(void* context, FlipperFormat* fl
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_clemsa_get_upload(instance);
+        if(!subghz_protocol_encoder_clemsa_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
@@ -343,12 +343,12 @@ bool subghz_protocol_decoder_clemsa_deserialize(void* context, FlipperFormat* fl
     return ret;
 }
 
-void subghz_protocol_decoder_clemsa_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_clemsa_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderClemsa* instance = context;
     subghz_protocol_clemsa_check_remote_controller(&instance->generic);
     //uint32_t data = (uint32_t)(instance->generic.data & 0xFFFFFF);
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:%05lX   Btn %X\r\n"

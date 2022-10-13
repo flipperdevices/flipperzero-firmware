@@ -150,7 +150,7 @@ bool subghz_protocol_encoder_phoenix_v2_deserialize(void* context, FlipperFormat
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_phoenix_v2_get_upload(instance);
+        if(!subghz_protocol_encoder_phoenix_v2_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
@@ -320,16 +320,16 @@ bool subghz_protocol_decoder_phoenix_v2_deserialize(void* context, FlipperFormat
     return ret;
 }
 
-void subghz_protocol_decoder_phoenix_v2_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_phoenix_v2_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderPhoenix_V2* instance = context;
     subghz_protocol_phoenix_v2_check_remote_controller(&instance->generic);
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:%02lX%08lX\r\n"
         "Sn:0x%07lX \r\n"
-        "Btn:%lX\r\n",
+        "Btn:%X\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data >> 32) & 0xFFFFFFFF,

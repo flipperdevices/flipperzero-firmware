@@ -173,7 +173,7 @@ bool subghz_protocol_encoder_bett_deserialize(void* context, FlipperFormat* flip
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_bett_get_upload(instance);
+        if(!subghz_protocol_encoder_bett_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
@@ -323,11 +323,11 @@ bool subghz_protocol_decoder_bett_deserialize(void* context, FlipperFormat* flip
     return ret;
 }
 
-void subghz_protocol_decoder_bett_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_bett_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderBETT* instance = context;
     uint32_t data = (uint32_t)(instance->generic.data & 0x3FFFF);
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:%05lX\r\n"

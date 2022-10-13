@@ -163,7 +163,7 @@ bool subghz_protocol_encoder_hormann_deserialize(void* context, FlipperFormat* f
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_hormann_get_upload(instance);
+        if(!subghz_protocol_encoder_hormann_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
@@ -338,12 +338,12 @@ bool subghz_protocol_decoder_hormann_deserialize(void* context, FlipperFormat* f
     return ret;
 }
 
-void subghz_protocol_decoder_hormann_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_hormann_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderHormann* instance = context;
     subghz_protocol_hormann_check_remote_controller(&instance->generic);
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s\r\n"
         "%dbit\r\n"

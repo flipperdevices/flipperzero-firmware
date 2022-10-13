@@ -207,7 +207,7 @@ bool subghz_protocol_decoder_faac_slh_deserialize(void* context, FlipperFormat* 
     return ret;
 }
 
-void subghz_protocol_decoder_faac_slh_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_faac_slh_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderFaacSLH* instance = context;
     subghz_protocol_faac_slh_check_remote_controller(&instance->generic);
@@ -216,13 +216,13 @@ void subghz_protocol_decoder_faac_slh_get_string(void* context, string_t output)
     uint32_t code_fix = code_found_reverse & 0xFFFFFFFF;
     uint32_t code_hop = (code_found_reverse >> 32) & 0xFFFFFFFF;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:%lX%08lX\r\n"
         "Fix:%08lX \r\n"
         "Hop:%08lX \r\n"
-        "Sn:%07lX Btn:%lX\r\n",
+        "Sn:%07lX Btn:%X\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data >> 32),

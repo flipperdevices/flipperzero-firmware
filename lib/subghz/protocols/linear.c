@@ -165,7 +165,7 @@ bool subghz_protocol_encoder_linear_deserialize(void* context, FlipperFormat* fl
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_linear_get_upload(instance);
+        if(!subghz_protocol_encoder_linear_get_upload(instance)) break;
         instance->encoder.is_running = true;
 
         res = true;
@@ -327,7 +327,7 @@ bool subghz_protocol_decoder_linear_deserialize(void* context, FlipperFormat* fl
     return ret;
 }
 
-void subghz_protocol_decoder_linear_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_linear_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderLinear* instance = context;
 
@@ -338,7 +338,7 @@ void subghz_protocol_decoder_linear_get_string(void* context, string_t output) {
 
     uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"

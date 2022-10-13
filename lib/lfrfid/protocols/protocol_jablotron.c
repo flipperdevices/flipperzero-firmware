@@ -160,14 +160,18 @@ LevelDuration protocol_jablotron_encoder_yield(ProtocolJablotron* protocol) {
     return level_duration_make(protocol->last_level, duration);
 };
 
-void protocol_jablotron_render_data(ProtocolJablotron* protocol, string_t result) {
+void protocol_jablotron_render_data(ProtocolJablotron* protocol, FuriString* result) {
     uint64_t id = protocol_jablotron_card_id(protocol->data);
-    string_printf(result, "ID: %llX\r\n", id);
+    furi_string_printf(result, "ID: %llX\r\n", id);
 };
 
 bool protocol_jablotron_write_data(ProtocolJablotron* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
+
+    // Correct protocol data by redecoding
+    protocol_jablotron_encoder_start(protocol);
+    protocol_jablotron_decode(protocol);
 
     protocol_jablotron_encoder_start(protocol);
 
