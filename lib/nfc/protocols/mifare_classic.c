@@ -213,6 +213,23 @@ void mf_classic_get_read_sectors_and_keys(
     }
 }
 
+bool mf_classic_is_card_read(MfClassicData* data) {
+    furi_assert(data);
+
+    bool card_read = false;
+    do {
+        uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+        uint8_t sectors_read = 0;
+        uint8_t keys_found = 0;
+        mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
+        if(sectors_read != sectors_total) break;
+        if(keys_found != sectors_total * 2) break;
+        card_read = true;
+    } while(false);
+
+    return card_read;
+}
+
 static bool mf_classic_is_allowed_access_sector_trailer(
     MfClassicEmulator* emulator,
     uint8_t block_num,
