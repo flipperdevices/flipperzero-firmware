@@ -4,7 +4,9 @@
 #include "../protocols/ws_generic.h"
 #include <input/input.h>
 #include <gui/elements.h>
+#include "math.h"
 
+#define abs(x) ((x)>0?(x):-(x))
 
 struct WSReceiverInfo {
     View* view;
@@ -40,7 +42,7 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
     snprintf(
         buffer,
         sizeof(buffer),
-        "%s %d bit",
+        "%s %db",
         furi_string_get_cstr(model->protocol_name),
         model->generic->data_count_bit);
     canvas_draw_str(canvas, 5, 8, buffer);
@@ -65,14 +67,16 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
         buffer,
         sizeof(buffer),
         "%3.2d.%d C",
-        (uint16_t)model->generic->temp,
-        ((uint16_t)(model->generic->temp * 10) - (((uint16_t)model->generic->temp) * 10)));
-    canvas_draw_str(canvas, 24, 54, buffer);
+        (int16_t)model->generic->temp,
+        abs(((int16_t)(model->generic->temp * 10) - (((int16_t)model->generic->temp) * 10))));
+    //canvas_draw_str(canvas, 24, 54, buffer);
+    canvas_draw_str_aligned(
+        canvas, 58, 46, AlignRight, AlignTop, buffer);
     canvas_draw_circle(canvas, 50, 45, 1);
 
     canvas_draw_icon(canvas, 70, 42, &I_Humid_10x15);
     snprintf(buffer, sizeof(buffer), "%d%%", model->generic->humidity);
-    canvas_draw_str(canvas, 85, 54, buffer);
+    canvas_draw_str(canvas, 86, 54, buffer);
 }
 
 bool ws_view_receiver_info_input(InputEvent* event, void* context) {
@@ -97,9 +101,7 @@ void ws_view_receiver_info_exit(void* context) {
     with_view_model(
         ws_receiver_info->view,
         WSReceiverInfoModel * model,
-        {
-            furi_string_reset(model->protocol_name);
-        },
+        { furi_string_reset(model->protocol_name); },
         false);
 }
 

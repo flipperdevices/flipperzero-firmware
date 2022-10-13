@@ -143,7 +143,7 @@ static void ws_protocol_infactory_remote_controller(WSBlockGeneric* instance) {
     instance->id = instance->data >> 32;
     instance->battery_low = (instance->data >> 26) & 1;
     instance->temp = ws_block_generic_fahrenheit_to_celsius(
-        (float)(((instance->data >> 12) & 0x0FFF) - 900) / 10.0f);
+        ((float)((instance->data >> 12) & 0x0FFF) - 900.0f) / 10.0f);
     instance->humidity =
         (((instance->data >> 8) & 0x0F) * 10) + ((instance->data >> 4) & 0x0F); // BCD, 'A0'=100%rH
     instance->channel = instance->data & 0x03;
