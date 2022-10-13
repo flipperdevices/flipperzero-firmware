@@ -21,7 +21,7 @@ uint32_t prng_successor(uint32_t x, uint32_t n) {
 
     return SWAPENDIAN(x);
 }
-static inline int filter_pop(uint32_t const x) {
+static inline int filter(uint32_t const x) {
     uint32_t f;
     f  = 0xf22c0 >> (x       & 0xf) & 16;
     f |= 0x6c9c0 >> (x >>  4 & 0xf) &  8;
@@ -30,14 +30,6 @@ static inline int filter_pop(uint32_t const x) {
     f |= 0x0d938 >> (x >> 16 & 0xf) &  1;
     return BIT(0xEC57E80A, f);
 }
-// The following 7 lines use more memory and less time
-static uint8_t filterlut[1 << 20];
-static void __attribute__((constructor)) fill_lut(void) {
-    uint32_t i;
-    for (i = 0; i < 1 << 20; ++i)
-        filterlut[i] = filter_pop(i);
-}
-#define filter(x) (filterlut[(x) & 0xfffff])
 static inline uint8_t evenparity32(uint32_t x) {
     return (__builtin_parity(x) & 0xFF);
 }
@@ -76,7 +68,6 @@ void bucket_sort_intersect(uint32_t *const estart, uint32_t *const estop, uint32
 }
 static inline void update_contribution(uint32_t *item, const uint32_t mask1, const uint32_t mask2) {
     uint32_t p = *item >> 25;
-
     p = p << 1 | (evenparity32(*item & mask1));
     p = p << 1 | (evenparity32(*item & mask2));
     *item = p << 24 | (*item & 0xffffff);
@@ -187,31 +178,29 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
         *lfsr = *lfsr << 1 | BIT(state->even, i ^ 3);
     }
 }
-uint8_t lfsr_rollback_bit(struct Crypto1State *s, uint32_t in, int fb) {
-    int out;
+uint8_t crypt_or_rollback_bit(struct Crypto1State *s, uint32_t in, int x, int is_crypt) {
     uint8_t ret;
-    uint32_t t;
-    s->odd &= 0xffffff;
-    t = s->odd, s->odd = s->even, s->even = t;
-    out = s->even & 1;
-    out ^= LF_POLY_EVEN & (s->even >>= 1);
-    out ^= LF_POLY_ODD & s->odd;
-    out ^= !!in;
-    out ^= (ret = filter(s->odd)) & (!!fb);
-    s->even |= (evenparity32(out)) << 23;
-    return ret;
-}
-uint8_t crypto1_bit(struct Crypto1State *s, uint8_t in, int is_encrypted) {
     uint32_t feedin, t;
-    uint8_t ret = filter(s->odd);
-    feedin  = ret & (!!is_encrypted);
-    feedin ^= !!in;
+    if (is_crypt == 0) {
+        s->odd &= 0xffffff;
+        t = s->odd, s->odd = s->even, s->even = t;
+    }
+    ret = filter(s->odd);
+    feedin = ret & (!!x);
+    if (is_crypt == 0) {
+        feedin ^= s->even & 1;
+        feedin ^= LF_POLY_EVEN & (s->even >>= 1);
+    } else {
+        feedin ^= LF_POLY_EVEN & s->even;
+    }
     feedin ^= LF_POLY_ODD & s->odd;
-    feedin ^= LF_POLY_EVEN & s->even;
-    s->even = s->even << 1 | (evenparity32(feedin));
-    t = s->odd;
-    s->odd = s->even;
-    s->even = t;
+    feedin ^= !!in;
+    if (is_crypt == 0) {
+        s->even |= (evenparity32(feedin)) << 23;
+    } else {
+        s->even = s->even << 1 | (evenparity32(feedin));
+        t = s->odd, s->odd = s->even, s->even = t;
+    }
     return ret;
 }
 uint32_t crypt_or_rollback_word(struct Crypto1State *s, uint32_t in, int x, int is_crypt) {
@@ -219,11 +208,11 @@ uint32_t crypt_or_rollback_word(struct Crypto1State *s, uint32_t in, int x, int 
     int i;
     if (is_crypt == 0) {
         for (i = 31; i >= 0; i--) {
-            ret |= lfsr_rollback_bit(s, BEBIT(in, i), x) << (24 ^ i);
+            ret |= crypt_or_rollback_bit(s, BEBIT(in, i), x, 0) << (24 ^ i);
         }
     } else {
         for (i = 0; i <= 31; i++) {
-            ret |= crypto1_bit(s, BEBIT(in, i), x) << (24 ^ i);
+            ret |= crypt_or_rollback_bit(s, BEBIT(in, i), x, 1) << (24 ^ i);
         }
     }
     return ret;
