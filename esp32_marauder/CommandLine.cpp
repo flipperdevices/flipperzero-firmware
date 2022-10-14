@@ -345,6 +345,14 @@ void CommandLine::runCommand(String input) {
         // Branch on attack type
         // Deauth
         if (attack_type == ATTACK_TYPE_DEAUTH) {
+          if (dst_addr_sw == -1) {
+            Serial.println("Sending to broadcast...");
+            wifi_scan_obj.dst_mac = "ff:ff:ff:ff:ff:ff";
+          }
+          else {
+            wifi_scan_obj.dst_mac = cmd_args.get(dst_addr_sw + 1);
+            Serial.println("Sending to " + wifi_scan_obj.dst_mac + "...");
+          }
           if (src_addr_sw == -1) {
             if (!this->apSelected()) {
               Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
