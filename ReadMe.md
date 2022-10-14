@@ -22,6 +22,7 @@
 - Updated view for desktop to exclude icons on the left and show minimal battery [By Talking-Sasquach](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Battery%20Only%20Top%20Status%20Bar)
 - Added: [Black Jack (By teeebor)](https://github.com/teeebor/flipper_games) (Thank you Haseo for PR)
 - Added: [Music Beeper (By OFW)](With Changes By qqMajiKpp/Haseo)
+- Chip 8 Removed, Tama Fix and Tanks Fixed [By Haseo](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/362)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
