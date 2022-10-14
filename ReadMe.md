@@ -19,11 +19,11 @@
 - Updated Random Deed Function To Include New Options from OFW
 - Updated Assets: Dolphin Animations: [Rogue Master Custom Firmware (By Sasquach)] & [Narut0 (By Sasquach)]
 - OFW: Dolphin score points update **(WARNING!!! Dolphin Level will be reset after installing of this release!!!!)**
-- Updated view for desktop to exclude icons on the left and show minimal battery [By Talking-Sasquach](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Battery%20Only%20Top%20Status%20Bar)
+- Updated view for desktop to exclude icons on the left and show minimal battery [By skizzophrenic/Talking-Sasquach](https://github.com/skizzophrenic/Talking-Sasquach/tree/main/Battery%20Only%20Top%20Status%20Bar)
 - Added: [Black Jack (By teeebor)](https://github.com/teeebor/flipper_games) (Thank you Haseo for PR)
 - Added: [Music Beeper (By OFW)](With Changes By qqMajiKpp/Haseo)
 - Chip 8 Removed, Tama Fix and Tanks Fixed [By Haseo](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/362)
-- Fixed Sub Remote Shortcut
+- Fixed Sub Remote Desktop Shortcut
 - Added: [Tuning Fork (By Unknown)][PR by skizzophrenic](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
 
 <details>
@@ -31,13 +31,13 @@
 
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
+- [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
 - Lost To Faps: Settings: Hold Down for Games Menu [(Thanks to ESurge)](https://github.com/ESurge/flipperzero-firmware-wPlugins)
 - Moved SubGHz Remote to FAP App (Not Working, So Reverted To Internal)
 - Moved GPIO to FAP App (Not Working, So Reverted To Internal)
 - Moved Infrared to FAP App (Not Working, So Reverted To Internal)
-- [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 
 </details>
 
@@ -117,6 +117,7 @@ $ ./fbt plugin_dist
 - BadUSB: sk-SK maping keybord for BadUsb [(By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1619)
 - Clock.fap, iButton.fap and U2F.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
 - Desktop: Hidden top bar [Thanks to ESurge](https://github.com/ESurge/)
+- Desktop: Exclude icons on the left and show minimal battery [Thanks to skizzophrenic/Talking-Sasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10 (Happy Lvl 1 Dolphin), 11-15 (Happy Lvl 2 Dolphin), 16-18 (Happy Lvl 3 Dolphin), 19-21 (Kid G0ku), 22-24 (Adult G0ku), 25-27 (SSJ G0ku) and 28-30 (SSJ3 G0ku)
 - Dolphin: Expanded max level from 3 to 30 using [Roll20](https://roll20.net/compendium/dnd5e/Monsters#h-Experience%20Points), Increased max deed XP per action type from 15 to 45 exp daily & updated animation manifest for max level 30 for all animations (By RogueMaster)
