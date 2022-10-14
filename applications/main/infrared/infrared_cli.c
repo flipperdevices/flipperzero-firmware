@@ -484,12 +484,10 @@ static void
         printf("Press Ctrl-C to stop.\r\n");
         while(running) {
             running = infrared_brute_force_send_next(brute_force);
-            records_sent++;
 
             if(cli_cmd_interrupt_received(cli)) break;
 
-            int pc = (float)records_sent / (float)record_count * 100;
-            printf("\r%d%% complete.", pc);
+            printf("\r%d%% complete.", (int)((float)records_sent++ / (float)record_count * 100));
             fflush(stdout);
         }
 
