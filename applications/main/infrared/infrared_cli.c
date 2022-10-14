@@ -9,7 +9,12 @@
 #include "infrared_signal.h"
 #include "infrared_brute_force.h"
 
+#include "m-dict.h"
+#include "m-string.h"
+
 #define INFRARED_CLI_BUF_SIZE 10
+
+DICT_DEF2(dict_signals, string_t, STRING_OPLIST, int, M_DEFAULT_OPLIST)
 
 enum RemoteTypes { TV = 0, AC = 1 };
 
@@ -398,8 +403,11 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
 static void infrared_cli_list_remote_signals(enum RemoteTypes remote_type) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    dict_signals_t signals_dict;
+    string_t key;
     const char* remote_file = NULL;
     bool success = false;
+    int max = 1;
 
     switch(remote_type) {
     case TV:
@@ -412,17 +420,34 @@ static void infrared_cli_list_remote_signals(enum RemoteTypes remote_type) {
         break;
     }
 
+    dict_signals_init(signals_dict);
+    string_init(key);
+
     success = flipper_format_buffered_file_open_existing(ff, remote_file);
     if(success) {
         FuriString* signal_name;
         signal_name = furi_string_alloc();
         printf("Valid signals:\r\n");
         while(flipper_format_read_string(ff, "name", signal_name)) {
-            printf("\t%s\r\n", furi_string_get_cstr(signal_name));
+            string_set_str(key, furi_string_get_cstr(signal_name));
+            int* v = dict_signals_get(signals_dict, key);
+            if(v != NULL) {
+                (*v)++;
+                max = M_MAX(*v, max);
+            } else {
+                dict_signals_set_at(signals_dict, key, 1);
+            }
+        }
+        dict_signals_it_t it;
+        for(dict_signals_it(it, signals_dict); !dict_signals_end_p(it); dict_signals_next(it)) {
+            const struct dict_signals_pair_s* pair = dict_signals_cref(it);
+            printf("\t%s\r\n", string_get_cstr(pair->key));
         }
         furi_string_free(signal_name);
     }
 
+    string_clear(key);
+    dict_signals_clear(signals_dict);
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 }
