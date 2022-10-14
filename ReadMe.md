@@ -25,6 +25,7 @@
 - Chip 8 Removed, Tama Fix and Tanks Fixed [By Haseo](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/362)
 - Fixed Sub Remote Desktop Shortcut
 - Added: [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)[PR by skizzophrenic](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
+- Fixed Desktop issue [By skizzophrenic/Talking-Sasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/363)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
