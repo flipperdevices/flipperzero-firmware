@@ -407,25 +407,25 @@ int32_t minesweeper_app(void* p) {
             case InputKeyUp:
               minesweeper_state->cursor_y--;
               if(minesweeper_state->cursor_y < 0) {
-                 minesweeper_state->cursor_y = 0;
+                 minesweeper_state->cursor_y = PLAYFIELD_HEIGHT - 1;
               }
               break;
             case InputKeyDown:
               minesweeper_state->cursor_y++;
               if(minesweeper_state->cursor_y >= PLAYFIELD_HEIGHT) {
-                 minesweeper_state->cursor_y = PLAYFIELD_HEIGHT-1;
+                 minesweeper_state->cursor_y = 0;
               }
               break;
             case InputKeyRight:
               minesweeper_state->cursor_x++;
               if(minesweeper_state->cursor_x >= PLAYFIELD_WIDTH) {
-                 minesweeper_state->cursor_x = PLAYFIELD_WIDTH-1;
+                 minesweeper_state->cursor_x = 0;
               }
               break;
             case InputKeyLeft:
               minesweeper_state->cursor_x--;
               if(minesweeper_state->cursor_x < 0) {
-                 minesweeper_state->cursor_x = 0;
+                 minesweeper_state->cursor_x = PLAYFIELD_WIDTH-1;
               }
               break;
             case InputKeyOk:
