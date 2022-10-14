@@ -152,7 +152,8 @@ FlipperFormat* totp_open_config_file(Storage* storage) {
     return fff_data_file;
 }
 
-void totp_config_file_save_new_token(FlipperFormat* file, TokenInfo* token_info) {
+void totp_config_file_save_new_token_i(FlipperFormat* file, TokenInfo* token_info) {
+    flipper_format_seek_to_end(file);
     flipper_format_write_string_cstr(file, TOTP_CONFIG_KEY_TOKEN_NAME, token_info->name);
     flipper_format_write_hex(
         file, TOTP_CONFIG_KEY_TOKEN_SECRET, token_info->token, token_info->token_length);
@@ -160,6 +161,26 @@ void totp_config_file_save_new_token(FlipperFormat* file, TokenInfo* token_info)
         file, TOTP_CONFIG_KEY_TOKEN_ALGO, token_info_get_algo_as_cstr(token_info));
     uint32_t digits_count_as_uint32 = token_info_get_digits_as_int(token_info);
     flipper_format_write_uint32(file, TOTP_CONFIG_KEY_TOKEN_DIGITS, &digits_count_as_uint32, 1);
+}
+
+void totp_config_file_save_new_token(TokenInfo* token_info) {
+    Storage* cfg_storage = totp_open_storage();
+    FlipperFormat* file = totp_open_config_file(cfg_storage);
+
+    totp_config_file_save_new_token_i(file, token_info);
+
+    totp_close_config_file(file);
+    totp_close_storage();
+}
+
+void totp_config_file_update_timezone_offset(float new_timezone_offset) {
+    Storage* cfg_storage = totp_open_storage();
+    FlipperFormat* file = totp_open_config_file(cfg_storage);
+
+    flipper_format_insert_or_update_float(file, TOTP_CONFIG_KEY_TIMEZONE, &new_timezone_offset, 1);
+
+    totp_close_config_file(file);
+    totp_close_storage();
 }
 
 void totp_full_save_config_file(PluginState* const plugin_state) {
@@ -181,7 +202,7 @@ void totp_full_save_config_file(PluginState* const plugin_state) {
     ListNode* node = plugin_state->tokens_list;
     while(node != NULL) {
         TokenInfo* token_info = node->data;
-        totp_config_file_save_new_token(fff_data_file, token_info);
+        totp_config_file_save_new_token_i(fff_data_file, token_info);
         node = node->next;
     }
 
@@ -207,7 +228,8 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
     if(file_version < CONFIG_FILE_ACTUAL_VERSION) {
         FURI_LOG_I(
             LOGGING_TAG,
-            "Obsolete config file version detected. Current version: %ld; Actual version: %d",
+            "Obsolete config file version detected. Current version: %" PRIu32
+            "; Actual version: %" PRId16,
             file_version,
             CONFIG_FILE_ACTUAL_VERSION);
         totp_close_config_file(fff_data_file);
@@ -363,7 +385,7 @@ void totp_config_file_load_tokens(PluginState* const plugin_state) {
     plugin_state->tokens_count = index;
     plugin_state->token_list_loaded = true;
 
-    FURI_LOG_D(LOGGING_TAG, "Found %d tokens", index);
+    FURI_LOG_D(LOGGING_TAG, "Found %" PRIu8 " tokens", index);
 
     furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);

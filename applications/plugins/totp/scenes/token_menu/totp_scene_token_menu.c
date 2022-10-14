@@ -9,12 +9,16 @@
 #include "../../types/token_info.h"
 #include "../generate_token/totp_scene_generate_token.h"
 #include "../add_new_token/totp_scene_add_new_token.h"
+#include "../app_settings/totp_app_settings.h"
 
-typedef enum { AddNewToken, DeleteToken } Control;
+#define SCREEN_HEIGHT_THIRD (SCREEN_HEIGHT / 3)
+#define SCREEN_HEIGHT_THIRD_CENTER (SCREEN_HEIGHT_THIRD >> 1)
+
+typedef enum { AddNewToken, DeleteToken, AppSettings } Control;
 
 typedef struct {
     Control selected_control;
-    uint8_t current_token_index;
+    int16_t current_token_index;
 } SceneState;
 
 void totp_scene_token_menu_init(PluginState* plugin_state) {
@@ -26,27 +30,58 @@ void totp_scene_token_menu_activate(
     const TokenMenuSceneContext* context) {
     SceneState* scene_state = malloc(sizeof(SceneState));
     plugin_state->current_scene_state = scene_state;
-    scene_state->current_token_index = context->current_token_index;
+    if(context != NULL) {
+        scene_state->current_token_index = context->current_token_index;
+    } else {
+        scene_state->current_token_index = -1;
+    }
 }
 
 void totp_scene_token_menu_render(Canvas* const canvas, PluginState* plugin_state) {
     SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
-    ui_control_button_render(
-        canvas,
-        SCREEN_WIDTH_CENTER - 36,
-        5,
-        72,
-        21,
-        "Add new token",
-        scene_state->selected_control == AddNewToken);
-    ui_control_button_render(
-        canvas,
-        SCREEN_WIDTH_CENTER - 36,
-        39,
-        72,
-        21,
-        "Delete token",
-        scene_state->selected_control == DeleteToken);
+    if(scene_state->current_token_index < 0) {
+        ui_control_button_render(
+            canvas,
+            SCREEN_WIDTH_CENTER - 36,
+            5,
+            72,
+            21,
+            "Add new token",
+            scene_state->selected_control == AddNewToken);
+        ui_control_button_render(
+            canvas,
+            SCREEN_WIDTH_CENTER - 36,
+            39,
+            72,
+            21,
+            "Settings",
+            scene_state->selected_control == AppSettings);
+    } else {
+        ui_control_button_render(
+            canvas,
+            SCREEN_WIDTH_CENTER - 36,
+            SCREEN_HEIGHT_THIRD_CENTER - 8,
+            72,
+            16,
+            "Add new token",
+            scene_state->selected_control == AddNewToken);
+        ui_control_button_render(
+            canvas,
+            SCREEN_WIDTH_CENTER - 36,
+            SCREEN_HEIGHT_THIRD + SCREEN_HEIGHT_THIRD_CENTER - 8,
+            72,
+            16,
+            "Delete token",
+            scene_state->selected_control == DeleteToken);
+        ui_control_button_render(
+            canvas,
+            SCREEN_WIDTH_CENTER - 36,
+            SCREEN_HEIGHT_THIRD + SCREEN_HEIGHT_THIRD + SCREEN_HEIGHT_THIRD_CENTER - 8,
+            72,
+            16,
+            "Settings",
+            scene_state->selected_control == AppSettings);
+    }
 }
 
 bool totp_scene_token_menu_handle_event(PluginEvent* const event, PluginState* plugin_state) {
@@ -57,11 +92,23 @@ bool totp_scene_token_menu_handle_event(PluginEvent* const event, PluginState* p
             case InputKeyUp:
                 if(scene_state->selected_control > AddNewToken) {
                     scene_state->selected_control--;
+                    if(scene_state->selected_control == DeleteToken &&
+                       scene_state->current_token_index < 0) {
+                        scene_state->selected_control--;
+                    }
+                } else {
+                    scene_state->selected_control = AppSettings;
                 }
                 break;
             case InputKeyDown:
-                if(scene_state->selected_control < DeleteToken) {
+                if(scene_state->selected_control < AppSettings) {
                     scene_state->selected_control++;
+                    if(scene_state->selected_control == DeleteToken &&
+                       scene_state->current_token_index < 0) {
+                        scene_state->selected_control++;
+                    }
+                } else {
+                    scene_state->selected_control = AddNewToken;
                 }
                 break;
             case InputKeyRight:
@@ -112,13 +159,29 @@ bool totp_scene_token_menu_handle_event(PluginEvent* const event, PluginState* p
                     }
                     break;
                 }
+                case AppSettings: {
+                    if(scene_state->current_token_index >= 0) {
+                        AppSettingsSceneContext app_settings_context = {
+                            .current_token_index = scene_state->current_token_index};
+                        totp_scene_director_activate_scene(
+                            plugin_state, TotpSceneAppSettings, &app_settings_context);
+                    } else {
+                        totp_scene_director_activate_scene(
+                            plugin_state, TotpSceneAppSettings, NULL);
+                    }
+                    break;
+                }
                 }
                 break;
             case InputKeyBack: {
-                GenerateTokenSceneContext generate_scene_context = {
-                    .current_token_index = scene_state->current_token_index};
-                totp_scene_director_activate_scene(
-                    plugin_state, TotpSceneGenerateToken, &generate_scene_context);
+                if(scene_state->current_token_index >= 0) {
+                    GenerateTokenSceneContext generate_scene_context = {
+                        .current_token_index = scene_state->current_token_index};
+                    totp_scene_director_activate_scene(
+                        plugin_state, TotpSceneGenerateToken, &generate_scene_context);
+                } else {
+                    totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+                }
                 break;
             }
             }

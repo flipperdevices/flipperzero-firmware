@@ -39,7 +39,13 @@ void ui_control_text_box_render(Canvas* const canvas, int8_t y, char* text, bool
         canvas, TEXT_BOX_MARGIN + 2, TEXT_BOX_MARGIN + 3 + y, AlignLeft, AlignTop, text);
 }
 
-void ui_control_select_render(Canvas* const canvas, int8_t y, char* text, bool is_selected) {
+void ui_control_select_render(
+    Canvas* const canvas,
+    int16_t x,
+    int16_t y,
+    uint8_t width,
+    char* text,
+    bool is_selected) {
     if(y < -TEXT_BOX_HEIGHT) {
         return;
     }
@@ -47,40 +53,40 @@ void ui_control_select_render(Canvas* const canvas, int8_t y, char* text, bool i
     if(is_selected) {
         canvas_draw_rframe(
             canvas,
-            TEXT_BOX_MARGIN,
+            x + TEXT_BOX_MARGIN,
             TEXT_BOX_MARGIN + y,
-            SCREEN_WIDTH - TEXT_BOX_MARGIN - TEXT_BOX_MARGIN,
+            width - TEXT_BOX_MARGIN - TEXT_BOX_MARGIN,
             TEXT_BOX_HEIGHT,
             0);
         canvas_draw_rframe(
             canvas,
-            TEXT_BOX_MARGIN - 1,
+            x + TEXT_BOX_MARGIN - 1,
             TEXT_BOX_MARGIN + y - 1,
-            SCREEN_WIDTH - TEXT_BOX_MARGIN - TEXT_BOX_MARGIN + 2,
+            width - TEXT_BOX_MARGIN - TEXT_BOX_MARGIN + 2,
             TEXT_BOX_HEIGHT + 2,
             1);
     } else {
         canvas_draw_rframe(
             canvas,
-            TEXT_BOX_MARGIN,
+            x + TEXT_BOX_MARGIN,
             TEXT_BOX_MARGIN + y,
-            SCREEN_WIDTH - TEXT_BOX_MARGIN - TEXT_BOX_MARGIN,
+            width - TEXT_BOX_MARGIN - TEXT_BOX_MARGIN,
             TEXT_BOX_HEIGHT,
             1);
     }
 
     canvas_draw_str_aligned(
-        canvas, SCREEN_WIDTH_CENTER, TEXT_BOX_MARGIN + 3 + y, AlignCenter, AlignTop, text);
+        canvas, x + (width >> 1), TEXT_BOX_MARGIN + 3 + y, AlignCenter, AlignTop, text);
     canvas_draw_xbm(
         canvas,
-        TEXT_BOX_MARGIN + 2,
+        x + TEXT_BOX_MARGIN + 2,
         TEXT_BOX_MARGIN + 2 + y,
         ICON_ARROW_LEFT_8x9_WIDTH,
         ICON_ARROW_LEFT_8x9_HEIGHT,
         &ICON_ARROW_LEFT_8x9[0]);
     canvas_draw_xbm(
         canvas,
-        SCREEN_WIDTH - TEXT_BOX_MARGIN - 10,
+        x + width - TEXT_BOX_MARGIN - 10,
         TEXT_BOX_MARGIN + 2 + y,
         ICON_ARROW_RIGHT_8x9_WIDTH,
         ICON_ARROW_RIGHT_8x9_HEIGHT,
@@ -89,8 +95,8 @@ void ui_control_select_render(Canvas* const canvas, int8_t y, char* text, bool i
 
 void ui_control_button_render(
     Canvas* const canvas,
-    uint8_t x,
-    int8_t y,
+    int16_t x,
+    int16_t y,
     uint8_t width,
     uint8_t height,
     char* text,
