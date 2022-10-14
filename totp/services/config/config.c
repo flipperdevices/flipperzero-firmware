@@ -167,6 +167,7 @@ void totp_full_save_config_file(PluginState* const plugin_state) {
     flipper_format_write_hex(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, &plugin_state->base_iv[0], TOTP_IV_SIZE);
     flipper_format_write_hex(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERIFY, plugin_state->crypto_verify_data, plugin_state->crypto_verify_data_length);
     flipper_format_write_float(fff_data_file, TOTP_CONFIG_KEY_TIMEZONE, &plugin_state->timezone_offset, 1);
+    flipper_format_write_bool(fff_data_file, TOTP_CONFIG_KEY_PINSET, &plugin_state->pin_set, 1);
     ListNode* node = plugin_state->tokens_list;
     while (node != NULL) {
         TokenInfo* token_info = node->data;
@@ -246,6 +247,12 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
         plugin_state->timezone_offset = 0;
         FURI_LOG_D(LOGGING_TAG, "Missing timezone offset information, defaulting to 0");
     }
+
+    flipper_format_rewind(fff_data_file);
+
+    if (!flipper_format_read_bool(fff_data_file, TOTP_CONFIG_KEY_PINSET, &plugin_state->pin_set, 1)) {
+        plugin_state->pin_set = true;
+    }    
 
     furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);
