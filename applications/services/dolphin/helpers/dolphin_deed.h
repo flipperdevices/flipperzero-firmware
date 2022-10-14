@@ -13,8 +13,6 @@ typedef enum {
     DolphinAppIr,
     DolphinAppIbutton,
     DolphinAppBadusb,
-    DolphinAppU2f,
-    DolphinAppGpio,
     DolphinAppPlugin,
     DolphinAppMAX,
 } DolphinApp;
