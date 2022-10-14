@@ -2,7 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-
+#include <string.h>
 #include <lib/toolbox/args.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/subghz_keystore.h>
@@ -1595,11 +1595,11 @@ int32_t tanks_game_app(void* p) {
                             char arr[2];
                             arr[0] = GoesUp;
                             arr[1] = 0;
-                            string_set(goesUp, (char*)&arr);
+                            furi_string_set(goesUp, (char*)&arr);
 
                             subghz_tx_rx_worker_write(
                                 subghz_txrx,
-                                (uint8_t*)string_get_cstr(goesUp),
+                                (uint8_t*)furi_string_get_cstr(goesUp),
                                 strlen(furi_string_get_cstr(goesUp)));
 
                         } else {
@@ -1619,11 +1619,11 @@ int32_t tanks_game_app(void* p) {
                             char arr[2];
                             arr[0] = GoesDown;
                             arr[1] = 0;
-                            string_set(goesDown, (char*)&arr);
+                            furi_string_set(goesDown, (char*)&arr);
 
                             subghz_tx_rx_worker_write(
                                 subghz_txrx,
-                                (uint8_t*)string_get_cstr(goesDown),
+                                (uint8_t*)furi_string_get_cstr(goesDown),
                                 strlen(furi_string_get_cstr(goesDown)));
                         } else {
                             tanks_state->p1->moving = true;
@@ -1636,11 +1636,11 @@ int32_t tanks_game_app(void* p) {
                             char arr[2];
                             arr[0] = GoesRight;
                             arr[1] = 0;
-                            string_set(goesRight, (char*)&arr);
+                            furi_string_set(goesRight, (char*)&arr);
 
                             subghz_tx_rx_worker_write(
                                 subghz_txrx,
-                                (uint8_t*)string_get_cstr(goesRight),
+                                (uint8_t*)furi_string_get_cstr(goesRight),
                                 strlen(furi_string_get_cstr(goesRight)));
                         } else {
                             tanks_state->p1->moving = true;
@@ -1653,11 +1653,11 @@ int32_t tanks_game_app(void* p) {
                             char arr[2];
                             arr[0] = GoesLeft;
                             arr[1] = 0;
-                            string_set(goesLeft, (char*)&arr);
+                            furi_string_set(goesLeft, (char*)&arr);
 
                             subghz_tx_rx_worker_write(
                                 subghz_txrx,
-                                (uint8_t*)string_get_cstr(goesLeft),
+                                (uint8_t*)furi_string_get_cstr(goesLeft),
                                 strlen(furi_string_get_cstr(goesLeft)));
                         } else {
                             tanks_state->p1->moving = true;
@@ -1686,11 +1686,11 @@ int32_t tanks_game_app(void* p) {
                             char arr[2];
                             arr[0] = Shoots;
                             arr[1] = 0;
-                            string_set(shoots, (char*)&arr);
+                            furi_string_set(shoots, (char*)&arr);
 
                             subghz_tx_rx_worker_write(
                                 subghz_txrx,
-                                (uint8_t*)string_get_cstr(shoots),
+                                (uint8_t*)furi_string_get_cstr(shoots),
                                 strlen(furi_string_get_cstr(shoots)));
                         } else {
                             tanks_state->p1->shooting = true;
@@ -1748,11 +1748,11 @@ int32_t tanks_game_app(void* p) {
 
                     arr[11 * 16] = 0;
 
-                    string_set(serializedData, (char*)&arr);
+                    furi_string_set(serializedData, (char*)&arr);
 
                     subghz_tx_rx_worker_write(
                         subghz_txrx,
-                        (uint8_t*)string_get_cstr(serializedData),
+                        (uint8_t*)furi_string_get_cstr(serializedData),
                         strlen(furi_string_get_cstr(serializedData)));
 
                     tanks_state->sent++;
