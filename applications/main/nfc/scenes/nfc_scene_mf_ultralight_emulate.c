@@ -28,8 +28,8 @@ bool nfc_mf_ultralight_emulate_worker_callback(NfcWorkerEvent event, void* conte
             // Event data is only available for the duration of this callback, so we're updating the
             // text box right here
             MfUltralightAuth* auth = nfc_worker_get_event_data(nfc->worker);
-            if(auth != NULL &&
-               furi_string_size(nfc->text_box_store) < NFC_SCENE_MF_ULTRALIGHT_EMULATE_LOG_SIZE_MAX) {
+            if(auth != NULL && furi_string_size(nfc->text_box_store) <
+                                   NFC_SCENE_MF_ULTRALIGHT_EMULATE_LOG_SIZE_MAX) {
                 furi_string_cat(nfc->text_box_store, "PWD:");
                 for(size_t i = 0; i < sizeof(auth->pwd.raw); ++i) {
                     furi_string_cat_printf(nfc->text_box_store, " %02X", auth->pwd.raw[i]);

@@ -74,24 +74,25 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         ViewPort* view_port = *ViewPortArray_ref(it);
         if(view_port_is_enabled(view_port)) {
             width = view_port_get_width(view_port);
-            if(!width) width = 8;
+            if(!width) width = 1;
             // Recalculate next position
             right_used += (width + 2);
             x -= (width + 2);
-            // Prepare work area background
+            // Prepare work area background (This part prints the background image)
             canvas_frame_set(
                 gui->canvas,
                 x - 1,
-                GUI_STATUS_BAR_Y + 1,
+                GUI_STATUS_BAR_Y + 64,
                 width + 2,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
             canvas_set_color(gui->canvas, ColorWhite);
             canvas_draw_box(
                 gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas));
-            canvas_set_color(gui->canvas, ColorBlack);
+            canvas_set_color(gui->canvas, ColorWhite);
             // ViewPort draw
             canvas_frame_set(
-                gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
+			// SASQUACH SAYS this is wwhere you can move the battery bar, 64 moves it off screen
+                gui->canvas, x + 5, GUI_STATUS_BAR_Y + 0, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
             view_port_draw(view_port, gui->canvas);
         }
         ViewPortArray_next(it);

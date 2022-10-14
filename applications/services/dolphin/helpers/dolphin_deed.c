@@ -18,13 +18,15 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
     {1, DolphinAppNfc}, // DolphinDeedNfcRead
     {3, DolphinAppNfc}, // DolphinDeedNfcReadSuccess
     {3, DolphinAppNfc}, // DolphinDeedNfcSave
+    {1, DolphinAppNfc}, // DolphinDeedNfcDetectReader
     {2, DolphinAppNfc}, // DolphinDeedNfcEmulate
-    {2, DolphinAppNfc}, // DolphinDeedNfcAdd
+    {2, DolphinAppNfc}, // DolphinDeedNfcMfcAdd
+    {1, DolphinAppNfc}, // DolphinDeedNfcMfulError
+    {1, DolphinAppNfc}, // DolphinDeedNfcAddSave
 
     {1, DolphinAppIr}, // DolphinDeedIrSend
     {3, DolphinAppIr}, // DolphinDeedIrLearnSuccess
     {3, DolphinAppIr}, // DolphinDeedIrSave
-    {2, DolphinAppIr}, // DolphinDeedIrBruteForce
 
     {1, DolphinAppIbutton}, // DolphinDeedIbuttonRead
     {3, DolphinAppIbutton}, // DolphinDeedIbuttonReadSuccess
@@ -34,9 +36,11 @@ static const DolphinDeedWeight dolphin_deed_weights[] = {
 
     {3, DolphinAppBadusb}, // DolphinDeedBadUsbPlayScript
     {3, DolphinAppU2f}, // DolphinDeedU2fAuthorized
+    {1, DolphinAppGpio}, // DolphinDeedGpioUartBridge
 
-    // {3, DolphinAppPlugin}, // DolphinDeedPluginAchivement
-    // {1, DolphinAppPlugin}, // DolphinDeedPluginMinorAchivement
+    {1, DolphinAppPlugin}, // DolphinDeedPluginStart
+    {1, DolphinAppPlugin}, // DolphinDeedPluginGameStart
+    {10, DolphinAppPlugin}, // DolphinDeedPluginGameWin
 };
 
 static uint8_t dolphin_deed_limits[] = {
@@ -47,7 +51,8 @@ static uint8_t dolphin_deed_limits[] = {
     100, // DolphinAppIbutton
     100, // DolphinAppBadusb
     100, // DolphinAppU2f
-    // 198, // DolphinAppPlugin
+    100, // DolphinAppGpio
+    100, // DolphinAppPlugin
 };
 
 _Static_assert(COUNT_OF(dolphin_deed_weights) == DolphinDeedMAX, "dolphin_deed_weights size error");

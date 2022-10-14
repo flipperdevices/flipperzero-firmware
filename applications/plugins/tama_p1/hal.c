@@ -39,7 +39,7 @@ static void tama_p1_hal_log(log_level_t level, char* buff, ...) {
     FuriString* string;
     va_list args;
     va_start(args, buff);
-    string_init_vprintf(string, buff, args);
+    furi_string_cat_vprintf(string, buff, args);
     va_end(args);
 
     switch(level) {

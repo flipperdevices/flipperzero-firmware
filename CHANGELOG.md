@@ -1,7 +1,10 @@
 ### New changes
-* PR: SubGHz Bruteforcer v3 (improved speed of all protos (example CAME -> was 17:48, now 5:58), fixed issue with BF existing dump) (by @derskythe | PR #97)
-* PR: SubGHz: Detect RAW fixes (now files are split properly, and random noise added before and after signal to allow decoding) (by @derskythe | PR #98)
-* Plugins: RFID Fuzzer fix
+* Add 433Mhz Security+ 1.0/2.0 in add manually in subghz
+* Update Minesweeper (https://github.com/panki27/minesweeper)
+-----
+* SubGHz: Fix DTM Neo (keeloq) encoder
+* fbt: fix flash usb without resources 
+* OFW: DesktopSettings: reset submenu before running dialog
 
 #### [🎲 Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
 

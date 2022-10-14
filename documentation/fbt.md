@@ -43,6 +43,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 ### High-level (what you most likely need)
  
 - `fw_dist` - build & publish firmware to `dist` folder. This is a default target, when no other are specified
+- `fap_dist` - build external plugins & publish to `dist` folder  
 - `updater_package`, `updater_minpackage` - build self-update package. Minimal version only inclues firmware's DFU file; full version also includes radio stack & resources for SD card
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `flash` - flash attached device with OpenOCD over ST-Link
@@ -55,6 +56,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
 - `get_blackmagic` - output blackmagic address in gdb remote format. Useful for IDE integration
 - `lint`, `format` - run clang-tidy on C source code to check and reformat it according to `.clang-format` specs
 - `lint_py`, `format_py` - run [black](https://black.readthedocs.io/en/stable/index.html) on Python source code, build system files & application manifests 
+- `cli` - start Flipper CLI session over USB
 
 ### Firmware targets
 

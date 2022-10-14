@@ -196,7 +196,7 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
             uint8_t sectors_total =
                 mf_classic_get_total_sectors_num(nfc_worker->dev_data->mf_classic_data.type);
             FURI_LOG_I(TAG, "Read %d sectors out of %d total", sectors_read, sectors_total);
-            read_success = (sectors_read == sectors_total);
+            read_success = mf_classic_is_card_read(&nfc_worker->dev_data->mf_classic_data);
         }
     } while(false);
 
@@ -238,31 +238,51 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
         reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
     }
 
-    do {
-        // Read card
+    // Bank cards require strong field to start application. If we find AID, try at least several
+    // times to start EMV application
+    uint8_t start_application_attempts = 0;
+    while(start_application_attempts < 3) {
+        if(nfc_worker->state != NfcWorkerStateRead) break;
+        start_application_attempts++;
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
-        if(!emv_read_bank_card(tx_rx, &emv_app)) break;
-        // Copy data
-        // TODO Set EmvData to reader or like in mifare ultralight!
-        result->number_len = emv_app.card_number_len;
-        memcpy(result->number, emv_app.card_number, result->number_len);
+        if(emv_read_bank_card(tx_rx, &emv_app)) {
+            FURI_LOG_D(TAG, "Bank card number read from %d attempt", start_application_attempts);
+            break;
+        } else if(emv_app.aid_len && !emv_app.app_started) {
+            FURI_LOG_D(
+                TAG,
+                "AID found but failed to start EMV app from %d attempt",
+                start_application_attempts);
+            furi_hal_nfc_sleep();
+            continue;
+        } else {
+            FURI_LOG_D(TAG, "Failed to find AID");
+            break;
+        }
+    }
+    // Copy data
+    if(emv_app.aid_len) {
         result->aid_len = emv_app.aid_len;
         memcpy(result->aid, emv_app.aid, result->aid_len);
-        if(emv_app.name_found) {
-            memcpy(result->name, emv_app.name, sizeof(emv_app.name));
-        }
-        if(emv_app.exp_month) {
-            result->exp_mon = emv_app.exp_month;
-            result->exp_year = emv_app.exp_year;
-        }
-        if(emv_app.country_code) {
-            result->country_code = emv_app.country_code;
-        }
-        if(emv_app.currency_code) {
-            result->currency_code = emv_app.currency_code;
-        }
         read_success = true;
-    } while(false);
+    }
+    if(emv_app.card_number_len) {
+        result->number_len = emv_app.card_number_len;
+        memcpy(result->number, emv_app.card_number, result->number_len);
+    }
+    if(emv_app.name_found) {
+        memcpy(result->name, emv_app.name, sizeof(emv_app.name));
+    }
+    if(emv_app.exp_month) {
+        result->exp_mon = emv_app.exp_month;
+        result->exp_year = emv_app.exp_year;
+    }
+    if(emv_app.country_code) {
+        result->country_code = emv_app.country_code;
+    }
+    if(emv_app.currency_code) {
+        result->currency_code = emv_app.currency_code;
+    }
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_stop(nfc_worker->reader_analyzer);
@@ -474,6 +494,9 @@ static void nfc_worker_mf_classic_key_attack(
     uint16_t start_sector) {
     furi_assert(nfc_worker);
 
+    bool card_found_notified = true;
+    bool card_removed_notified = false;
+
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
     uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
 
@@ -481,36 +504,52 @@ static void nfc_worker_mf_classic_key_attack(
 
     // Check every sector's A and B keys with the given key
     for(size_t i = start_sector; i < total_sectors; i++) {
-        uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
-        if(mf_classic_is_sector_read(data, i)) continue;
-        if(!mf_classic_is_key_found(data, i, MfClassicKeyA)) {
-            FURI_LOG_D(
-                TAG,
-                "Trying A key for sector %d, key: %04lx%08lx",
-                i,
-                (uint32_t)(key >> 32),
-                (uint32_t)key);
-            if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyA)) {
-                mf_classic_set_key_found(data, i, MfClassicKeyA, key);
-                FURI_LOG_D(TAG, "Key found");
-                nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+        furi_hal_nfc_sleep();
+        if(furi_hal_nfc_activate_nfca(200, NULL)) {
+            furi_hal_nfc_sleep();
+            if(!card_found_notified) {
+                nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+                card_found_notified = true;
+                card_removed_notified = false;
+            }
+            uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
+            if(mf_classic_is_sector_read(data, i)) continue;
+            if(!mf_classic_is_key_found(data, i, MfClassicKeyA)) {
+                FURI_LOG_D(
+                    TAG,
+                    "Trying A key for sector %d, key: %04lx%08lx",
+                    i,
+                    (uint32_t)(key >> 32),
+                    (uint32_t)key);
+                if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyA)) {
+                    mf_classic_set_key_found(data, i, MfClassicKeyA, key);
+                    FURI_LOG_D(TAG, "Key found");
+                    nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
+                }
+            }
+            if(!mf_classic_is_key_found(data, i, MfClassicKeyB)) {
+                FURI_LOG_D(
+                    TAG,
+                    "Trying B key for sector %d, key: %04lx%08lx",
+                    i,
+                    (uint32_t)(key >> 32),
+                    (uint32_t)key);
+                if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyB)) {
+                    mf_classic_set_key_found(data, i, MfClassicKeyB, key);
+                    FURI_LOG_D(TAG, "Key found");
+                    nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
+                }
+            }
+
+            if(mf_classic_is_sector_read(data, i)) continue;
+            mf_classic_read_sector(tx_rx, data, i);
+        } else {
+            if(!card_removed_notified) {
+                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+                card_removed_notified = true;
+                card_found_notified = false;
             }
         }
-        if(!mf_classic_is_key_found(data, i, MfClassicKeyB)) {
-            FURI_LOG_D(
-                TAG,
-                "Trying B key for sector %d, key: %04lx%08lx",
-                i,
-                (uint32_t)(key >> 32),
-                (uint32_t)key);
-            if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyB)) {
-                mf_classic_set_key_found(data, i, MfClassicKeyB, key);
-                FURI_LOG_D(TAG, "Key found");
-                nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
-            }
-        }
-        if(mf_classic_is_sector_read(data, i)) continue;
-        mf_classic_read_sector(tx_rx, data, i);
         if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
     }
 }
@@ -524,6 +563,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         &nfc_worker->dev_data->mf_classic_dict_attack_data;
     uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
     uint64_t key = 0;
+    uint64_t prev_key = 0;
     FuriHalNfcTxRxContext tx_rx = {};
     bool card_found_notified = true;
     bool card_removed_notified = false;
@@ -534,6 +574,18 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
         FURI_LOG_E(TAG, "Dictionary not found");
         nfc_worker->callback(NfcWorkerEventNoDictFound, nfc_worker->context);
         return;
+    }
+
+    // Clear found keys if the key cache is incorrect (key set as found but sector not read)
+    for(uint16_t sector = 0; sector < total_sectors; sector++) {
+        if(mf_classic_is_key_found(data, sector, MfClassicKeyA) &&
+           !mf_classic_is_sector_read(data, sector)) {
+            mf_classic_set_key_not_found(data, sector, MfClassicKeyA);
+        }
+        if(mf_classic_is_key_found(data, sector, MfClassicKeyB) &&
+           !mf_classic_is_sector_read(data, sector)) {
+            mf_classic_set_key_not_found(data, sector, MfClassicKeyB);
+        }
     }
 
     FURI_LOG_D(
@@ -558,6 +610,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
                     card_found_notified = true;
                     card_removed_notified = false;
+                    nfc_worker_mf_classic_key_attack(nfc_worker, prev_key, &tx_rx, i);
                 }
                 FURI_LOG_D(
                     TAG,
@@ -594,6 +647,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                 }
                 if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
             }
+            memcpy(&prev_key, &key, sizeof(key));
         }
         if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
         mf_classic_read_sector(&tx_rx, data, i);

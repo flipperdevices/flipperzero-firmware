@@ -84,8 +84,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             } else if(event->key == InputKeyDown) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenSubRemote, main_view->context); // OPENS SUBGHZ REMOTE
+                main_view->callback(DesktopMainEventOpenSubRemote, main_view->context); // OPENS SUBGHZ REMOTE
             }
         }
     } else if(main_view->is_gamemode == true) {
@@ -106,11 +105,9 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenDOOM, main_view->context); // OPENS DOOM
             } else if(event->key == InputKeyDown) {
-                main_view->callback(
-                    DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
+                main_view->callback(DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
+                main_view->callback(DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
             }
         }
     } else {
@@ -130,11 +127,9 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
             } else if(event->key == InputKeyDown) {
-                main_view->callback(
-                    DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
+                main_view->callback(DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
+                main_view->callback(DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
             }
         }
     }

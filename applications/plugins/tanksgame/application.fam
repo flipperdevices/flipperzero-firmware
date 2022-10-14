@@ -1,5 +1,5 @@
 App(
-    appid="zBroken_Tanks",
+    appid="Tanks",
     name="Tanks",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tanks_game_app",

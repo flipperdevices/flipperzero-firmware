@@ -309,6 +309,10 @@ bool subghz_history_get_text_space_left(SubGhzHistory* instance, FuriString* out
     return false;
 }
 
+uint16_t subghz_history_get_last_index(SubGhzHistory* instance) {
+    return instance->last_index_write;
+}
+
 void subghz_history_get_text_item_menu(SubGhzHistory* instance, FuriString* output, uint16_t idx) {
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     furi_string_set(output, item->item_str);
@@ -444,6 +448,10 @@ bool subghz_history_add_to_history(
         if(!subghz_history_tmp_write_file_split(instance, item, furi_string_get_cstr(dir_path))) {
             // Plan B!
             subghz_history_tmp_write_file_full(instance, item, dir_path);
+        }
+        if(item->is_file) {
+            flipper_format_free(item->flipper_string);
+            item->flipper_string = NULL;
         }
         furi_string_free(filename);
         furi_string_free(dir_path);
@@ -857,9 +865,8 @@ bool subghz_history_tmp_write_file_split(
     flipper_format_file_close(flipper_format_file);
     flipper_format_free(flipper_format_file);
     furi_string_free(temp_str);
-    flipper_format_free(item->flipper_string);
-    item->flipper_string = NULL;
-    item->is_file = true;
+
+    item->is_file = result;
 
     return result;
 }
@@ -876,8 +883,6 @@ void subghz_history_tmp_write_file_full(
     stream_rewind(dst);
     if(stream_save_to_file(
            dst, instance->storage, furi_string_get_cstr(dir_path), FSOM_CREATE_ALWAYS) > 0) {
-        flipper_format_free(item->flipper_string);
-        item->flipper_string = NULL;
 #ifdef FURI_DEBUG
         FURI_LOG_I(TAG, "Save done!");
 #endif

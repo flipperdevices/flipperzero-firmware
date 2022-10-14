@@ -40,13 +40,16 @@ bool storage_DolphinBackup_perform(void) {
     for(uint32_t i = 0; i < COUNT_OF(app_dirsDolphinBackup); i++) {
         if(i > 5) {
             furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
-            furi_string_printf(path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirsDolphinBackup[i]);
+            furi_string_printf(
+                path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirsDolphinBackup[i]);
             storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
-            storage_common_copy(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
+            storage_common_copy(
+                storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
         } else {
             furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
             furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirsDolphinBackup[i]);
-            storage_common_merge(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
+            storage_common_merge(
+                storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
             storage_simply_remove_recursive(storage, furi_string_get_cstr(path_src));
         }
     }

@@ -30,7 +30,8 @@ bool drestorer_perform(void) {
         furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
         furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
         storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
-        storage_common_copy(storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
+        storage_common_copy(
+            storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
     }
 
     furi_string_free(path_src);
