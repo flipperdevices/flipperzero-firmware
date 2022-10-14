@@ -1,5 +1,5 @@
 App(
-    appid="music_player",
+    appid="Music_Player",
     name="Music Player",
     apptype=FlipperAppType.PLUGIN,
     entry_point="music_player_app",
@@ -10,9 +10,9 @@ App(
     ],
     provides=["music_player_start"],
     stack_size=2 * 1024,
-    order=20,
+    order=45,
     fap_icon="../../../assets/icons/Archive/music_10px.png",
-    fap_category="Misc",
+    fap_category="Music",
 )
 
 App(

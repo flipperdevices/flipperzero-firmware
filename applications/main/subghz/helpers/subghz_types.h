@@ -46,6 +46,7 @@ typedef enum {
     SubGhzLoadKeyStateUnknown,
     SubGhzLoadKeyStateOK,
     SubGhzLoadKeyStateParseErr,
+    SubGhzLoadKeyStateOnlyRx,
 } SubGhzLoadKeyState;
 
 /** SubGhzLock */
@@ -59,6 +60,7 @@ typedef enum {
     SubGhzViewIdReceiver,
     SubGhzViewIdPopup,
     SubGhzViewIdTextInput,
+    SubGhzViewIdByteInput,
     SubGhzViewIdWidget,
     SubGhzViewIdTransmitter,
     SubGhzViewIdVariableItemList,
@@ -78,3 +80,10 @@ struct SubGhzPresetDefinition {
 };
 
 typedef struct SubGhzPresetDefinition SubGhzPresetDefinition;
+
+typedef enum {
+    SubGhzViewReceiverModeLive,
+    SubGhzViewReceiverModeFile,
+} SubGhzViewReceiverMode;
+
+#define SUBGHZ_HISTORY_REMOVE_SAVED_ITEMS 1

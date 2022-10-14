@@ -4,7 +4,7 @@
 #include <lib/subghz/protocols/raw.h>
 #include <lib/toolbox/path.h>
 
-#define RAW_FILE_NAME "Raw_signal_"
+#define RAW_FILE_NAME "RAW_"
 #define TAG "SubGhzSceneReadRAW"
 
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
@@ -42,7 +42,12 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     frequency_str = furi_string_alloc();
     modulation_str = furi_string_alloc();
 
+#ifdef SUBGHZ_EXT_PRESET_NAME
+    subghz_get_frequency_modulation(subghz, frequency_str, NULL);
+    furi_string_printf(modulation_str, "%s", furi_string_get_cstr(subghz->txrx->preset->name));
+#else
     subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+#endif
     subghz_read_raw_add_data_statusbar(
         subghz->subghz_read_raw,
         furi_string_get_cstr(frequency_str),
@@ -103,6 +108,9 @@ void subghz_scene_read_raw_on_enter(void* context) {
         subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME);
     furi_assert(subghz->txrx->decoder_result);
 
+    // make sure we're not in auto-detect mode, which is only meant for the Read app
+    subghz_protocol_decoder_raw_set_auto_mode(subghz->txrx->decoder_result, false);
+
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
@@ -135,12 +143,22 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                subghz_preset_init(
-                    subghz,
-                    "AM650",
-                    subghz_setting_get_default_frequency(subghz->setting),
-                    NULL,
-                    0);
+                if(subghz->raw_send_only) {
+                    subghz_preset_init(
+                        subghz,
+                        "AM650",
+                        subghz_setting_get_default_frequency(subghz->setting),
+                        NULL,
+                        0);
+                } else {
+                    subghz_preset_init(
+                        subghz,
+                        subghz_setting_get_preset_name(
+                            subghz->setting, subghz->last_settings->preset),
+                        subghz->last_settings->frequency,
+                        NULL,
+                        0);
+                }
                 if(!scene_manager_search_and_switch_to_previous_scene(
                        subghz->scene_manager, SubGhzSceneSaved)) {
                     if(!scene_manager_search_and_switch_to_previous_scene(
@@ -343,6 +361,10 @@ void subghz_scene_read_raw_on_exit(void* context) {
     subghz->state_notifications = SubGhzNotificationStateIDLE;
     notification_message(subghz->notifications, &sequence_reset_rgb);
 
-    //filter restoration
+//filter restoration
+#ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
+    subghz_last_settings_set_detect_raw_values(subghz);
+#else
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
+#endif
 }

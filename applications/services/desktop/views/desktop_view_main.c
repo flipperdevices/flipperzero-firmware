@@ -17,7 +17,7 @@ struct DesktopMainView {
     bool dummy_mode;
 };
 
-#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 5000
+#define DESKTOP_MAIN_VIEW_POWEROFF_TIMEOUT 2000
 
 static void desktop_main_poweroff_timer_callback(TimerHandle_t timer) {
     DesktopMainView* main_view = pvTimerGetTimerID(timer);
@@ -67,6 +67,8 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(DesktopMainEventOpenDebug, main_view->context);
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenFavoriteSecondary, main_view->context);
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventLock, main_view->context);
             }
         }
     } else {

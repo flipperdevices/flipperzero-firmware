@@ -1,6 +1,8 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
 #include <dolphin/dolphin.h>
+#include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/star_line.h>
 
 void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -24,6 +26,7 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
         subghz->txrx->receiver,
         subghz_history_get_protocol_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
     if(subghz->txrx->decoder_result) {
+        // In this case flipper format was changed to short file content
         subghz_protocol_decoder_base_deserialize(
             subghz->txrx->decoder_result,
             subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
@@ -42,10 +45,7 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     return false;
 }
 
-void subghz_scene_receiver_info_on_enter(void* context) {
-    SubGhz* subghz = context;
-
-    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
+void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
     if(subghz_scene_receiver_info_update_parser(subghz)) {
         FuriString* frequency_str;
         FuriString* modulation_str;
@@ -90,10 +90,12 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz_scene_receiver_info_callback,
                 subghz);
         }
+        // Removed static check
         if(((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
             SubGhzProtocolFlag_Send) &&
-           subghz->txrx->decoder_result->protocol->encoder->deserialize &&
-           subghz->txrx->decoder_result->protocol->type == SubGhzProtocolTypeStatic) {
+           // disable "Send" for auto-captured RAW signals for now. They can still be saved and sent by loading them.
+           subghz->txrx->decoder_result->protocol->type != SubGhzProtocolTypeRAW &&
+           subghz->txrx->decoder_result->protocol->encoder->deserialize) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeCenter,
@@ -108,6 +110,13 @@ void subghz_scene_receiver_info_on_enter(void* context) {
     }
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
+}
+
+void subghz_scene_receiver_info_on_enter(void* context) {
+    SubGhz* subghz = context;
+
+    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
+    subghz_scene_receiver_info_draw_widget(subghz);
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
@@ -139,20 +148,26 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoTxStop) {
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = SubGhzNotificationStateIDLE;
+
+            widget_reset(subghz->widget);
+            subghz_scene_receiver_info_draw_widget(subghz);
+
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
                 subghz_tx_stop(subghz);
             }
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
-                subghz_begin(
-                    subghz,
-                    subghz_setting_get_preset_data_by_name(
-                        subghz->setting, furi_string_get_cstr(subghz->txrx->preset->name)));
-                subghz_rx(subghz, subghz->txrx->preset->frequency);
+            if(!subghz->in_decoder_scene) {
+                if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
+                    subghz_begin(
+                        subghz,
+                        subghz_setting_get_preset_data_by_name(
+                            subghz->setting, furi_string_get_cstr(subghz->txrx->preset->name)));
+                    subghz_rx(subghz, subghz->txrx->preset->frequency);
+                }
+                if(subghz->txrx->hopper_state == SubGhzHopperStatePause) {
+                    subghz->txrx->hopper_state = SubGhzHopperStateRunnig;
+                }
+                subghz->state_notifications = SubGhzNotificationStateRx;
             }
-            if(subghz->txrx->hopper_state == SubGhzHopperStatePause) {
-                subghz->txrx->hopper_state = SubGhzHopperStateRunnig;
-            }
-            subghz->state_notifications = SubGhzNotificationStateRx;
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
             //CC1101 Stop RX -> Save
@@ -171,6 +186,10 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
                SubGhzProtocolFlag_Save) {
                 subghz_file_name_clear(subghz);
+
+                if(subghz->in_decoder_scene) {
+                    subghz->in_decoder_scene_skip = true;
+                }
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
             return true;
@@ -199,5 +218,12 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
 
 void subghz_scene_receiver_info_on_exit(void* context) {
     SubGhz* subghz = context;
+    if(subghz->in_decoder_scene && !subghz->in_decoder_scene_skip) {
+        subghz->in_decoder_scene = false;
+    }
     widget_reset(subghz->widget);
+    keeloq_reset_mfname();
+    keeloq_reset_kl_type();
+    star_line_reset_mfname();
+    star_line_reset_kl_type();
 }

@@ -1,134 +1,65 @@
-# Flipper Zero Firmware
+### Welcome to Flipper Zero Jerky Firmware repo!
+Based on clean [Flipper Devices](https://github.com/flipperdevices/flipperzero-firmware) + [Unleashed Firmware](https://github.com/DarkFlippers/unleashed-firmware)
 
-[![Discord](https://img.shields.io/discord/740930220399525928.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](http://flipperzero.one/discord)
+The main goal is to make any features possible in this device without any limitations!
 
-![Show me the code](https://habrastorage.org/webt/eo/m0/e4/eom0e4btudte7nrhnyic-laiog0.png)
+# What's changed
 
-Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
-Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
+* Grabbed ibutton, lfrfid, nfc intercom-keys (grabbed by Jerky, wetox-team)
+* BadUSB scripts (Android PIN bruteforce, Kiosk evation bruteforce, Windows wifi/web passwords information)
+* SubGhz gates bruteforce (Came, Lift Master, Handicap)
+* SubGhz jammers (can be illegal in your country, for educational purposes only!)
+* SubGhz just for fun (sex-toys manipulation, Tesla charge opener, etc.)
+* Some IR TV remotes (Samsung, Sharp, don't forget about Universal Remote)
+* Cleaned some standard animations, added new
 
-# Clone the Repository
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/pieceofsys/flipperzero-firmware/dev?logo=github)](https://github.com/pieceofsys/flipperzero-firmware/commits/dev)
 
-You should clone with 
-```shell
-$ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
-```
+# What's changed by DarkFlippers
+* SubGHz regional TX restrictions removed
+* SubGHz frequecy range can be extended in settings file (Warning: It can damage flipper's hardware)
+* Many rolling code protocols now have the ability to save & send captured signals
+* FAAC SLH (Spa) & BFT Mitto (secure with seed) manual creation
+* Sub-GHz static code brute-force plugin
+* LFRFID Fuzzer plugin
+* Custom community plugins and games added
+* Extra SubGHz frequencies + extra Mifare Classic keys
+* Picopass/iClass plugin included in releases
+* Recompiled IR TV Universal Remote for ALL buttons
+* Universal remote for Projectors, Fans, A/Cs and Audio(soundbars, etc.)
+* BadUSB keyboard layouts
+* Customizable Flipper name
+* SubGHz -> Press OK in frequency analyzer to use detected frequency in Read modes
+* SubGHz -> Long press OK button in SubGHz Frequency analyzer to switch to Read menu 
+* Other small fixes and changes throughout
+* See other changes in changelog and in readme below
 
-# Read the Docs
+### Current modified and new SubGHz protocols list:
+- HCS101
+- An-Motors
+- CAME Atomo
+- FAAC SLH (Spa) [External seed calculation required]
+- BFT Mitto [External seed calculation required]
+- Keeloq [Not ALL systems supported yet!]
+- Nice Flor S
+- Security+ v1 & v2
+- Star Line (saving only)
 
-Check out details on [how to build firmware](documentation/fbt.md), [write applications](documentation/AppsOnSDCard.md), [un-brick your device](documentation/KeyCombo.md) and more in `documentation` folder. 
-
-# Update firmware
-
-[Get Latest Firmware from Update Server](https://update.flipperzero.one/)
-
-Flipper Zero's firmware consists of two components:
-
-- Core2 firmware set - proprietary components by ST: FUS + radio stack. FUS is flashed at factory, and you should never update it.
-- Core1 Firmware - HAL + OS + Drivers + Applications.
-
-They both must be flashed in the order described.
-
-## With offline update package
-
-With Flipper attached over USB:
-
-`./fbt flash_usb`
-
-Just building the package:
-
-`./fbt updater_package`
-
-To update, copy the resulting directory to Flipper's SD card and navigate to `update.fuf` file in Archive app. 
-
-## With STLink
-
-### Core1 Firmware
-
-Prerequisites:
-
-- Linux / macOS
-- Terminal
-- [arm-gcc-none-eabi](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
-- openocd
-
-One-liner: `./fbt firmware_flash`
-
-## With USB DFU 
-
-1. Download latest [Firmware](https://update.flipperzero.one)
-
-2. Reboot Flipper to Bootloader
- - Press and hold `← Left` + `↩ Back` for reset 
- - Release `↩ Back` and keep holding `← Left` until blue LED lights up
- - Release `← Left`
-
-3. Run `dfu-util -D full.dfu -a 0`
-
-# Build on Linux/macOS
-
-Check out `documentation/fbt.md` for details on building and flashing firmware. 
-
-## macOS Prerequisites
-
-Make sure you have [brew](https://brew.sh) and install all the dependencies:
-```sh
-brew bundle --verbose
-```
-
-## Linux Prerequisites
-
-The FBT tool handles everything, only `git` is required.
-
-### Optional dependencies
-
-- openocd (debugging/flashing over SWD)
-- heatshrink (compiling image assets)
-- clang-format (code formatting)
-- dfu-util (flashing over USB DFU)
-- protobuf (compiling proto sources)
-
-For example, to install them on Debian, use:
-```sh
-apt update
-apt install openocd clang-format-13 dfu-util protobuf-compiler
-```
-
-heatshrink has to be compiled [from sources](https://github.com/atomicobject/heatshrink).
-
-## Compile everything
-
-```sh
-./fbt
-```
-
-Check `dist/` for build outputs.
-
-Use **`flipper-z-{target}-full-{suffix}.dfu`** to flash your device.
-
-## Flash everything
-
-Connect your device via ST-Link and run:
-```sh
-./fbt firmware_flash
-```
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/DarkFlippers/unleashed-firmware/dev?logo=github)](https://github.com/DarkFlippers/unleashed-firmware/commits/dev)
 
 # Links
-
-* Discord: [flipp.dev/discord](https://flipp.dev/discord)
-* Website: [flipperzero.one](https://flipperzero.one)
-* Kickstarter page: [kickstarter.com](https://www.kickstarter.com/projects/flipper-devices/flipper-zero-tamagochi-for-hackers)
-* Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
+* Official Docs: [http://docs.flipperzero.one](http://docs.flipperzero.one)
+* Official Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
 
 # Project structure
-
 - `applications`    - Applications and services used in firmware
 - `assets`          - Assets used by applications and services
 - `furi`            - Furi Core: os level primitives and helpers
 - `debug`           - Debug tool: GDB-plugins, SVD-file and etc
 - `documentation`   - Documentation generation system configs and input files
 - `firmware`        - Firmware source code
-- `lib`             - Our and 3rd party libraries, drivers, etc.
+- `lib`             - Our and 3rd party libraries, drivers and etc...
+- `site_scons`      - Build helpers
 - `scripts`         - Supplementary scripts and python libraries home
 
 Also pay attention to `ReadMe.md` files inside those directories.

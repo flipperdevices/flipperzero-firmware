@@ -1,0 +1,6 @@
+Filetype: Flipper iButton key
+Version: 1
+# Key type can be Cyfral, Dallas or Metakom
+Key type: Dallas
+# Data size for Cyfral is 2, for Metakom is 4, for Dallas is 8
+Data: 01 00 00 00 00 00 00 3D

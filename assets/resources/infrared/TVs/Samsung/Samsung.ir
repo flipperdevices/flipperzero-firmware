@@ -1,0 +1,44 @@
+Filetype: IR signals file
+Version: 1
+#
+name: POWER
+type: parsed
+protocol: Samsung32
+address: 07 00 00 00
+command: 02 00 00 00
+#
+name: MUTE
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 866 126590 891
+#
+name: VOL+
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 973 126624 946
+#
+name: VOL-
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 948 126866 760
+#
+name: CH+
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 973 126736 947
+#
+name: CH-
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 1025 126854 765
+#
+name: SOURCE
+type: raw
+frequency: 38000
+duty_cycle: 0.330000
+data: 972 126734 921

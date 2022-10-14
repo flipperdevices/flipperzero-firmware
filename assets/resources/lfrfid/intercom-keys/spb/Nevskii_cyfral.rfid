@@ -1,0 +1,6 @@
+Filetype: Flipper RFID key
+Version: 1
+# Key type can be EM4100, H10301 or I40134
+Key type: EM4100
+# Data size for EM4100 is 5, for H10301 is 3, for I40134 is 3
+Data: 1B 00 25 5D D2

@@ -32,6 +32,7 @@ static const Icon* ReceiverItemIcons[] = {
     [SubGhzProtocolTypeUnknown] = &I_Quest_7x8,
     [SubGhzProtocolTypeStatic] = &I_Unlock_7x8,
     [SubGhzProtocolTypeDynamic] = &I_Lock_7x8,
+    [SubGhzProtocolTypeRAW] = &I_Unlock_7x8,
 };
 
 typedef enum {
@@ -54,12 +55,21 @@ typedef struct {
     FuriString* frequency_str;
     FuriString* preset_str;
     FuriString* history_stat_str;
+    FuriString* progress_str;
     SubGhzReceiverHistory* history;
     uint16_t idx;
     uint16_t list_offset;
     uint16_t history_item;
     SubGhzViewReceiverBarShow bar_show;
+    SubGhzViewReceiverMode mode;
 } SubGhzViewReceiverModel;
+
+void subghz_view_receiver_set_mode(
+    SubGhzViewReceiver* subghz_receiver,
+    SubGhzViewReceiverMode mode) {
+    with_view_model(
+        subghz_receiver->view, SubGhzViewReceiverModel * model, { model->mode = mode; }, true);
+}
 
 void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, SubGhzLock lock) {
     furi_assert(subghz_receiver);
@@ -154,6 +164,17 @@ void subghz_view_receiver_add_data_statusbar(
         true);
 }
 
+void subghz_view_receiver_add_data_progress(
+    SubGhzViewReceiver* subghz_receiver,
+    const char* progress_str) {
+    furi_assert(subghz_receiver);
+    with_view_model(
+        subghz_receiver->view,
+        SubGhzViewReceiverModel * model,
+        { furi_string_set(model->progress_str, progress_str); },
+        true);
+}
+
 static void subghz_view_receiver_draw_frame(Canvas* canvas, uint16_t idx, bool scrollbar) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_box(canvas, 0, 0 + idx * FRAME_HEIGHT, scrollbar ? 122 : 127, FRAME_HEIGHT);
@@ -173,8 +194,12 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
 
-    elements_button_left(canvas, "Config");
-    canvas_draw_line(canvas, 46, 51, 125, 51);
+    if(model->mode == SubGhzViewReceiverModeLive) {
+        elements_button_left(canvas, "Config");
+        canvas_draw_line(canvas, 46, 51, 125, 51);
+    } else {
+        canvas_draw_str(canvas, 3, 62, furi_string_get_cstr(model->progress_str));
+    }
 
     bool scrollbar = model->history_item > 4;
     FuriString* str_buff;
@@ -204,11 +229,18 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_set_color(canvas, ColorBlack);
 
     if(model->history_item == 0) {
-        canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 63, 46, "Scanning...");
-        canvas_draw_line(canvas, 46, 51, 125, 51);
-        canvas_set_font(canvas, FontSecondary);
+        if(model->mode == SubGhzViewReceiverModeLive) {
+            canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str(canvas, 63, 46, "Scanning...");
+            canvas_draw_line(canvas, 46, 51, 125, 51);
+            canvas_set_font(canvas, FontSecondary);
+        } else {
+            canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str(canvas, 63, 46, "Decoding...");
+            canvas_set_font(canvas, FontSecondary);
+        }
     }
 
     switch(model->bar_show) {
@@ -233,11 +265,30 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         canvas_draw_icon(canvas, 64, 55, &I_Unlock_7x8);
         canvas_draw_str(canvas, 74, 62, "Unlocked");
         break;
-    default:
-        canvas_draw_str(canvas, 44, 62, furi_string_get_cstr(model->frequency_str));
+    default: {
+        const char* frequency_str = furi_string_get_cstr(model->frequency_str);
+        canvas_draw_str(canvas, 44, 62, frequency_str);
+#ifdef SUBGHZ_EXT_PRESET_NAME
+        if(model->history_item == 0 && model->mode == SubGhzViewReceiverModeLive) {
+            canvas_draw_str(
+                canvas, 44 + canvas_string_width(canvas, frequency_str) + 1, 62, "MHz");
+            const char* str = furi_string_get_cstr(model->preset_str);
+            const uint8_t vertical_offset = 7;
+            const uint8_t horizontal_offset = 3;
+            const uint8_t string_width = canvas_string_width(canvas, str);
+            canvas_draw_str(
+                canvas,
+                canvas_width(canvas) - (string_width + horizontal_offset),
+                vertical_offset,
+                str);
+        } else {
+            canvas_draw_str(canvas, 79, 62, furi_string_get_cstr(model->preset_str));
+        }
+#else
         canvas_draw_str(canvas, 79, 62, furi_string_get_cstr(model->preset_str));
+#endif
         canvas_draw_str(canvas, 96, 62, furi_string_get_cstr(model->history_stat_str));
-        break;
+    } break;
     }
 }
 
@@ -346,6 +397,7 @@ void subghz_view_receiver_exit(void* context) {
             furi_string_reset(model->frequency_str);
             furi_string_reset(model->preset_str);
             furi_string_reset(model->history_stat_str);
+
                 for
                     M_EACH(item_menu, model->history->data, SubGhzReceiverMenuItemArray_t) {
                         furi_string_free(item_menu->item_str);
@@ -383,6 +435,7 @@ SubGhzViewReceiver* subghz_view_receiver_alloc() {
             model->frequency_str = furi_string_alloc();
             model->preset_str = furi_string_alloc();
             model->history_stat_str = furi_string_alloc();
+            model->progress_str = furi_string_alloc();
             model->bar_show = SubGhzViewReceiverBarShowDefault;
             model->history = malloc(sizeof(SubGhzReceiverHistory));
             SubGhzReceiverMenuItemArray_init(model->history->data);
@@ -403,6 +456,7 @@ void subghz_view_receiver_free(SubGhzViewReceiver* subghz_receiver) {
             furi_string_free(model->frequency_str);
             furi_string_free(model->preset_str);
             furi_string_free(model->history_stat_str);
+            furi_string_free(model->progress_str);
                 for
                     M_EACH(item_menu, model->history->data, SubGhzReceiverMenuItemArray_t) {
                         furi_string_free(item_menu->item_str);

@@ -3,6 +3,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*MusicPlayerWorkerCallback)(
     uint8_t semitone,
     uint8_t dots,
@@ -36,3 +40,7 @@ void music_player_worker_set_volume(MusicPlayerWorker* instance, float volume);
 void music_player_worker_start(MusicPlayerWorker* instance);
 
 void music_player_worker_stop(MusicPlayerWorker* instance);
+
+#ifdef __cplusplus
+}
+#endif
