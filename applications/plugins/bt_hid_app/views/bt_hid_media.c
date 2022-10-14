@@ -4,6 +4,8 @@
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 
+#include "bt_hid_icons.h"
+
 struct BtHidMedia {
     View* view;
 };
@@ -107,7 +109,9 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
 
 static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* event) {
     with_view_model(
-        bt_hid_media->view, (BtHidMediaModel * model) {
+        bt_hid_media->view,
+        BtHidMediaModel * model,
+        {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
                 furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
@@ -124,13 +128,15 @@ static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* eve
                 model->ok_pressed = true;
                 furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_PLAY_PAUSE);
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static void bt_hid_media_process_release(BtHidMedia* bt_hid_media, InputEvent* event) {
     with_view_model(
-        bt_hid_media->view, (BtHidMediaModel * model) {
+        bt_hid_media->view,
+        BtHidMediaModel * model,
+        {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
                 furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
@@ -147,8 +153,8 @@ static void bt_hid_media_process_release(BtHidMedia* bt_hid_media, InputEvent* e
                 model->ok_pressed = false;
                 furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_PLAY_PAUSE);
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool bt_hid_media_input_callback(InputEvent* event, void* context) {
@@ -196,8 +202,5 @@ View* bt_hid_media_get_view(BtHidMedia* bt_hid_media) {
 void bt_hid_media_set_connected_status(BtHidMedia* bt_hid_media, bool connected) {
     furi_assert(bt_hid_media);
     with_view_model(
-        bt_hid_media->view, (BtHidMediaModel * model) {
-            model->connected = connected;
-            return true;
-        });
+        bt_hid_media->view, BtHidMediaModel * model, { model->connected = connected; }, true);
 }

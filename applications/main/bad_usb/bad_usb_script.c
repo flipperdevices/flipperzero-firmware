@@ -26,16 +26,16 @@ typedef enum {
 struct BadUsbScript {
     FuriHalUsbHidConfig hid_cfg;
     BadUsbState st;
-    string_t file_path;
+    FuriString* file_path;
     uint32_t defdelay;
     FuriThread* thread;
     uint8_t file_buf[FILE_BUFFER_LEN + 1];
     uint8_t buf_start;
     uint8_t buf_len;
     bool file_end;
-    string_t line;
+    FuriString* line;
 
-    string_t line_prev;
+    FuriString* line_prev;
     uint32_t repeat_cnt;
 };
 
@@ -109,6 +109,7 @@ static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
 static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
+static const char ducky_cmd_sysrq[] = {"SYSRQ "};
 
 static const char ducky_cmd_altchar[] = {"ALTCHAR "};
 static const char ducky_cmd_altstr_1[] = {"ALTSTRING "};
@@ -230,9 +231,10 @@ static uint16_t ducky_get_keycode(const char* param, bool accept_chars) {
     return 0;
 }
 
-static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
-    uint32_t line_len = string_size(line);
-    const char* line_tmp = string_get_cstr(line);
+static int32_t
+    ducky_parse_line(BadUsbScript* bad_usb, FuriString* line, char* error, size_t error_len) {
+    uint32_t line_len = furi_string_size(line);
+    const char* line_tmp = furi_string_get_cstr(line);
     bool state = false;
 
     for(uint32_t i = 0; i < line_len; i++) {
@@ -260,6 +262,9 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         if((state) && (delay_val > 0)) {
             return (int32_t)delay_val;
         }
+        if(error != NULL) {
+            snprintf(error, error_len, "Invalid number %s", line_tmp);
+        }
         return SCRIPT_STATE_ERROR;
     } else if(
         (strncmp(line_tmp, ducky_cmd_defdelay_1, strlen(ducky_cmd_defdelay_1)) == 0) ||
@@ -267,17 +272,26 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         // DEFAULT_DELAY
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         state = ducky_get_number(line_tmp, &bad_usb->defdelay);
+        if(!state && error != NULL) {
+            snprintf(error, error_len, "Invalid number %s", line_tmp);
+        }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
     } else if(strncmp(line_tmp, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         state = ducky_string(line_tmp);
+        if(!state && error != NULL) {
+            snprintf(error, error_len, "Invalid string %s", line_tmp);
+        }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
     } else if(strncmp(line_tmp, ducky_cmd_altchar, strlen(ducky_cmd_altchar)) == 0) {
         // ALTCHAR
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         ducky_numlock_on();
         state = ducky_altchar(line_tmp);
+        if(!state && error != NULL) {
+            snprintf(error, error_len, "Invalid altchar %s", line_tmp);
+        }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
     } else if(
         (strncmp(line_tmp, ducky_cmd_altstr_1, strlen(ducky_cmd_altstr_1)) == 0) ||
@@ -286,16 +300,35 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         ducky_numlock_on();
         state = ducky_altstring(line_tmp);
+        if(!state && error != NULL) {
+            snprintf(error, error_len, "Invalid altstring %s", line_tmp);
+        }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
     } else if(strncmp(line_tmp, ducky_cmd_repeat, strlen(ducky_cmd_repeat)) == 0) {
         // REPEAT
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
         state = ducky_get_number(line_tmp, &bad_usb->repeat_cnt);
+        if(!state && error != NULL) {
+            snprintf(error, error_len, "Invalid number %s", line_tmp);
+        }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
+    } else if(strncmp(line_tmp, ducky_cmd_sysrq, strlen(ducky_cmd_sysrq)) == 0) {
+        // SYSRQ
+        line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
+        uint16_t key = ducky_get_keycode(line_tmp, true);
+        furi_hal_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
+        furi_hal_hid_kb_press(key);
+        furi_hal_hid_kb_release_all();
+        return (0);
     } else {
         // Special keys + modifiers
         uint16_t key = ducky_get_keycode(line_tmp, false);
-        if(key == HID_KEYBOARD_NONE) return SCRIPT_STATE_ERROR;
+        if(key == HID_KEYBOARD_NONE) {
+            if(error != NULL) {
+                snprintf(error, error_len, "No keycode defined for %s", line_tmp);
+            }
+            return SCRIPT_STATE_ERROR;
+        }
         if((key & 0xFF00) != 0) {
             // It's a modifier key
             line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
@@ -304,6 +337,9 @@ static int32_t ducky_parse_line(BadUsbScript* bad_usb, string_t line) {
         furi_hal_hid_kb_press(key);
         furi_hal_hid_kb_release(key);
         return (0);
+    }
+    if(error != NULL) {
+        strncpy(error, "Unknown error", error_len);
     }
     return SCRIPT_STATE_ERROR;
 }
@@ -323,7 +359,7 @@ static bool ducky_set_usb_id(BadUsbScript* bad_usb, const char* line) {
         }
         FURI_LOG_D(
             WORKER_TAG,
-            "set id: %04X:%04X mfr:%s product:%s",
+            "set id: %04lX:%04lX mfr:%s product:%s",
             bad_usb->hid_cfg.vid,
             bad_usb->hid_cfg.pid,
             bad_usb->hid_cfg.manuf,
@@ -337,7 +373,7 @@ static bool ducky_script_preload(BadUsbScript* bad_usb, File* script_file) {
     uint8_t ret = 0;
     uint32_t line_len = 0;
 
-    string_reset(bad_usb->line);
+    furi_string_reset(bad_usb->line);
 
     do {
         ret = storage_file_read(script_file, bad_usb->file_buf, FILE_BUFFER_LEN);
@@ -347,7 +383,7 @@ static bool ducky_script_preload(BadUsbScript* bad_usb, File* script_file) {
                 line_len = 0;
             } else {
                 if(bad_usb->st.line_nb == 0) { // Save first line
-                    string_push_back(bad_usb->line, bad_usb->file_buf[i]);
+                    furi_string_push_back(bad_usb->line, bad_usb->file_buf[i]);
                 }
                 line_len++;
             }
@@ -360,7 +396,7 @@ static bool ducky_script_preload(BadUsbScript* bad_usb, File* script_file) {
         }
     } while(ret > 0);
 
-    const char* line_tmp = string_get_cstr(bad_usb->line);
+    const char* line_tmp = furi_string_get_cstr(bad_usb->line);
     bool id_set = false; // Looking for ID command at first line
     if(strncmp(line_tmp, ducky_cmd_id, strlen(ducky_cmd_id)) == 0) {
         id_set = ducky_set_usb_id(bad_usb, &line_tmp[strlen(ducky_cmd_id) + 1]);
@@ -373,7 +409,7 @@ static bool ducky_script_preload(BadUsbScript* bad_usb, File* script_file) {
     }
 
     storage_file_seek(script_file, 0, true);
-    string_reset(bad_usb->line);
+    furi_string_reset(bad_usb->line);
 
     return true;
 }
@@ -383,20 +419,21 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
 
     if(bad_usb->repeat_cnt > 0) {
         bad_usb->repeat_cnt--;
-        delay_val = ducky_parse_line(bad_usb, bad_usb->line_prev);
+        delay_val = ducky_parse_line(
+            bad_usb, bad_usb->line_prev, bad_usb->st.error, sizeof(bad_usb->st.error));
         if(delay_val == SCRIPT_STATE_NEXT_LINE) { // Empty line
             return 0;
         } else if(delay_val < 0) { // Script error
             bad_usb->st.error_line = bad_usb->st.line_cur - 1;
-            FURI_LOG_E(WORKER_TAG, "Unknown command at line %lu", bad_usb->st.line_cur - 1);
+            FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur - 1);
             return SCRIPT_STATE_ERROR;
         } else {
             return (delay_val + bad_usb->defdelay);
         }
     }
 
-    string_set(bad_usb->line_prev, bad_usb->line);
-    string_reset(bad_usb->line);
+    furi_string_set(bad_usb->line_prev, bad_usb->line);
+    furi_string_reset(bad_usb->line);
 
     while(1) {
         if(bad_usb->buf_len == 0) {
@@ -413,20 +450,22 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
             if(bad_usb->buf_len == 0) return SCRIPT_STATE_END;
         }
         for(uint8_t i = bad_usb->buf_start; i < (bad_usb->buf_start + bad_usb->buf_len); i++) {
-            if(bad_usb->file_buf[i] == '\n' && string_size(bad_usb->line) > 0) {
+            if(bad_usb->file_buf[i] == '\n' && furi_string_size(bad_usb->line) > 0) {
                 bad_usb->st.line_cur++;
                 bad_usb->buf_len = bad_usb->buf_len + bad_usb->buf_start - (i + 1);
                 bad_usb->buf_start = i + 1;
-                delay_val = ducky_parse_line(bad_usb, bad_usb->line);
+                delay_val = ducky_parse_line(
+                    bad_usb, bad_usb->line, bad_usb->st.error, sizeof(bad_usb->st.error));
+
                 if(delay_val < 0) {
                     bad_usb->st.error_line = bad_usb->st.line_cur;
-                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %lu", bad_usb->st.line_cur);
+                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
                     return SCRIPT_STATE_ERROR;
                 } else {
                     return (delay_val + bad_usb->defdelay);
                 }
             } else {
-                string_push_back(bad_usb->line, bad_usb->file_buf[i]);
+                furi_string_push_back(bad_usb->line, bad_usb->file_buf[i]);
             }
         }
         bad_usb->buf_len = 0;
@@ -456,8 +495,8 @@ static int32_t bad_usb_worker(void* context) {
 
     FURI_LOG_I(WORKER_TAG, "Init");
     File* script_file = storage_file_alloc(furi_record_open(RECORD_STORAGE));
-    string_init(bad_usb->line);
-    string_init(bad_usb->line_prev);
+    bad_usb->line = furi_string_alloc();
+    bad_usb->line_prev = furi_string_alloc();
 
     furi_hal_hid_set_state_callback(bad_usb_hid_state_callback, bad_usb);
 
@@ -465,7 +504,7 @@ static int32_t bad_usb_worker(void* context) {
         if(worker_state == BadUsbStateInit) { // State: initialization
             if(storage_file_open(
                    script_file,
-                   string_get_cstr(bad_usb->file_path),
+                   furi_string_get_cstr(bad_usb->file_path),
                    FSAM_READ,
                    FSOM_OPEN_EXISTING)) {
                 if((ducky_script_preload(bad_usb, script_file)) && (bad_usb->st.line_nb > 0)) {
@@ -577,22 +616,23 @@ static int32_t bad_usb_worker(void* context) {
 
     storage_file_close(script_file);
     storage_file_free(script_file);
-    string_clear(bad_usb->line);
-    string_clear(bad_usb->line_prev);
+    furi_string_free(bad_usb->line);
+    furi_string_free(bad_usb->line_prev);
 
     FURI_LOG_I(WORKER_TAG, "End");
 
     return 0;
 }
 
-BadUsbScript* bad_usb_script_open(string_t file_path) {
+BadUsbScript* bad_usb_script_open(FuriString* file_path) {
     furi_assert(file_path);
 
     BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript));
-    string_init(bad_usb->file_path);
-    string_set(bad_usb->file_path, file_path);
+    bad_usb->file_path = furi_string_alloc();
+    furi_string_set(bad_usb->file_path, file_path);
 
     bad_usb->st.state = BadUsbStateInit;
+    bad_usb->st.error[0] = '\0';
 
     bad_usb->thread = furi_thread_alloc();
     furi_thread_set_name(bad_usb->thread, "BadUsbWorker");
@@ -609,7 +649,7 @@ void bad_usb_script_close(BadUsbScript* bad_usb) {
     furi_thread_flags_set(furi_thread_get_id(bad_usb->thread), WorkerEvtEnd);
     furi_thread_join(bad_usb->thread);
     furi_thread_free(bad_usb->thread);
-    string_clear(bad_usb->file_path);
+    furi_string_free(bad_usb->file_path);
     free(bad_usb);
 }
 

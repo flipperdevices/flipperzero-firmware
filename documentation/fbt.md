@@ -43,7 +43,7 @@ To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 ### High-level (what you most likely need)
  
 - `fw_dist` - build & publish firmware to `dist` folder. This is a default target, when no other are specified
-- `plugin_dist` - build external plugins & publish to `dist` folder  
+- `fap_dist` - build external plugins & publish to `dist` folder  
 - `updater_package`, `updater_minpackage` - build self-update package. Minimal version only inclues firmware's DFU file; full version also includes radio stack & resources for SD card
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `flash` - flash attached device with OpenOCD over ST-Link
@@ -56,13 +56,15 @@ To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 - `get_blackmagic` - output blackmagic address in gdb remote format. Useful for IDE integration
 - `lint`, `format` - run clang-format on C source code to check and reformat it according to `.clang-format` specs
 - `lint_py`, `format_py` - run [black](https://black.readthedocs.io/en/stable/index.html) on Python source code, build system files & application manifests 
+- `cli` - start Flipper CLI session over USB
 
 ### Firmware targets
 
-- `firmware_extapps` - build all plug-ins as separate .elf files
-    - `firmware_snake_game`, etc - build single plug-in as .elf by its name
-    - Check out `--extra-ext-apps` for force adding extra apps to external build 
-    - `firmware_snake_game_list`, etc - generate source + assembler listing for app's .elf
+- `faps` - build all external & plugin apps as [.faps](./AppsOnSDCard.md#fap-flipper-application-package). 
+- **`fbt`** also defines per-app targets. For example, for an app with `appid=snake_game` target names are:
+    - `fap_snake_game`, etc - build single app as .fap by its application ID.
+    - Check out [`--extra-ext-apps`](#command-line-parameters) for force adding extra apps to external build
+    - `fap_snake_game_list`, etc - generate source + assembler listing for app's .fap
 - `flash`, `firmware_flash` - flash current version to attached device with OpenOCD over ST-Link
 - `jflash` - flash current version to attached device with JFlash using J-Link probe. JFlash executable must be on your $PATH
 - `flash_blackmagic` - flash current version to attached device with Blackmagic probe
@@ -83,9 +85,9 @@ To run cleanup (think of `make clean`) for specified targets, add `-c` option.
 ## Command-line parameters
 
 - `--options optionfile.py` (default value `fbt_options.py`) - load file with multiple configuration values
-- `--with-updater` - enables updater-related targets and dependency tracking. Enabling this option introduces extra startup time costs, so use it when bundling update packages. _Explicily enabling this should no longer be required, **`fbt`** now has specific handling for updater-related targets_
 - `--extra-int-apps=app1,app2,appN` - forces listed apps to be built as internal with `firmware` target
 - `--extra-ext-apps=app1,app2,appN` - forces listed apps to be built as external with `firmware_extapps` target
+- `--proxy-env=VAR1,VAR2` - additional environment variables to expose to subprocesses spawned by `fbt`. By default, `fbt` sanitizes execution environment and doesn't forward all inherited environment variables. You can find list of variables that are always forwarded in `environ.scons` file. 
 
 
 ## Configuration 

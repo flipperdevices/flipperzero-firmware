@@ -23,42 +23,65 @@ void nfc_scene_emv_read_success_on_enter(void* context) {
     widget_add_button_element(
         nfc->widget, GuiButtonTypeRight, "More", nfc_scene_emv_read_success_widget_callback, nfc);
 
-    string_t temp_str;
-    string_init_printf(temp_str, "\e#%s\n", emv_data->name);
-    for(uint8_t i = 0; i < emv_data->number_len; i += 2) {
-        string_cat_printf(temp_str, "%02X%02X ", emv_data->number[i], emv_data->number[i + 1]);
+    FuriString* temp_str;
+    if(emv_data->name[0] != '\0') {
+        temp_str = furi_string_alloc_printf("\e#%s\n", emv_data->name);
+    } else {
+        temp_str = furi_string_alloc_printf("\e#Unknown Bank Card\n");
     }
-    string_strim(temp_str);
+    if(emv_data->number_len) {
+        for(uint8_t i = 0; i < emv_data->number_len; i += 2) {
+            furi_string_cat_printf(
+                temp_str, "%02X%02X ", emv_data->number[i], emv_data->number[i + 1]);
+        }
+        furi_string_trim(temp_str);
+    } else if(emv_data->aid_len) {
+        furi_string_cat_printf(temp_str, "Can't parse data from app\n");
+        // Parse AID name
+        FuriString* aid_name;
+        aid_name = furi_string_alloc();
+        if(nfc_emv_parser_get_aid_name(
+               nfc->dev->storage, emv_data->aid, emv_data->aid_len, aid_name)) {
+            furi_string_cat_printf(temp_str, "AID: %s", furi_string_get_cstr(aid_name));
+        } else {
+            furi_string_cat_printf(temp_str, "AID: ");
+            for(uint8_t i = 0; i < emv_data->aid_len; i++) {
+                furi_string_cat_printf(temp_str, "%02X", emv_data->aid[i]);
+            }
+        }
+        furi_string_free(aid_name);
+    }
 
     // Add expiration date
     if(emv_data->exp_mon) {
-        string_cat_printf(temp_str, "\nExp: %02X/%02X", emv_data->exp_mon, emv_data->exp_year);
+        furi_string_cat_printf(
+            temp_str, "\nExp: %02X/%02X", emv_data->exp_mon, emv_data->exp_year);
     }
     // Parse currency code
     if((emv_data->currency_code)) {
-        string_t currency_name;
-        string_init(currency_name);
+        FuriString* currency_name;
+        currency_name = furi_string_alloc();
         if(nfc_emv_parser_get_currency_name(
                nfc->dev->storage, emv_data->currency_code, currency_name)) {
-            string_cat_printf(temp_str, "\nCur: %s  ", string_get_cstr(currency_name));
+            furi_string_cat_printf(temp_str, "\nCur: %s  ", furi_string_get_cstr(currency_name));
         }
-        string_clear(currency_name);
+        furi_string_free(currency_name);
     }
     // Parse country code
     if((emv_data->country_code)) {
-        string_t country_name;
-        string_init(country_name);
+        FuriString* country_name;
+        country_name = furi_string_alloc();
         if(nfc_emv_parser_get_country_name(
                nfc->dev->storage, emv_data->country_code, country_name)) {
-            string_cat_printf(temp_str, "Reg: %s", string_get_cstr(country_name));
+            furi_string_cat_printf(temp_str, "Reg: %s", furi_string_get_cstr(country_name));
         }
-        string_clear(country_name);
+        furi_string_free(country_name);
     }
 
     notification_message_block(nfc->notifications, &sequence_set_green_255);
 
-    widget_add_text_scroll_element(nfc->widget, 0, 0, 128, 52, string_get_cstr(temp_str));
-    string_clear(temp_str);
+    widget_add_text_scroll_element(nfc->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+    furi_string_free(temp_str);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
