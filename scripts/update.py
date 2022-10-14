@@ -78,8 +78,12 @@ class Main(App):
 
     def generate(self):
         stage_basename = "updater.bin"  # used to be basename(self.args.stage)
-        dfu_basename = "firmware.dfu"  # used to be basename(self.args.dfu)
-        radiobin_basename = "radio.bin"  # used to be basename(self.args.radiobin)
+        dfu_basename = (
+            "firmware.dfu" if self.args.dfu else ""
+        )  # used to be basename(self.args.dfu)
+        radiobin_basename = (
+            "radio.bin" if self.args.radiobin else ""
+        )  # used to be basename(self.args.radiobin)
         resources_basename = ""
 
         radio_version = 0
@@ -115,7 +119,7 @@ class Main(App):
         if self.args.dfu:
             dfu_size = os.stat(self.args.dfu).st_size
             shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
-        if self.args.radiobin:
+        if radiobin_basename:
             shutil.copyfile(
                 self.args.radiobin, join(self.args.directory, radiobin_basename)
             )
@@ -158,7 +162,7 @@ class Main(App):
         file.writeKey("Radio", radiobin_basename or "")
         file.writeKey("Radio address", self.int2ffhex(radio_addr))
         file.writeKey("Radio version", self.int2ffhex(radio_version, 12))
-        if self.args.radiobin:
+        if radiobin_basename:
             file.writeKey("Radio CRC", self.int2ffhex(self.crc(self.args.radiobin)))
         else:
             file.writeKey("Radio CRC", self.int2ffhex(0))
