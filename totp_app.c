@@ -16,6 +16,8 @@
 #include "types/event_type.h"
 #include "types/common.h"
 #include "scenes/scene_director.h"
+#include "services/ui/constants.h"
+#include "services/crypto/crypto.h"
 
 #define IDLE_TIMEOUT 60000
 
@@ -42,7 +44,25 @@ static void totp_state_init(PluginState* const plugin_state) {
     totp_config_file_load_base(plugin_state);
 
     totp_scene_director_init_scenes(plugin_state);
-    totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
+
+    if (plugin_state->crypto_verify_data == NULL) {
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_buttons(message, "No", NULL, "Yes");
+        dialog_message_set_text(message, "Would you like to setup PIN?", SCREEN_WIDTH_CENTER, SCREEN_HEIGHT_CENTER, AlignCenter, AlignCenter);
+        DialogMessageButton dialog_result = dialog_message_show(plugin_state->dialogs, message);
+        dialog_message_free(message);
+        if (dialog_result == DialogMessageButtonRight) {
+            totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
+        } else {
+            totp_crypto_seed_iv(plugin_state, NULL, 0);
+            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+        }
+    } else if (plugin_state->pin_set) {
+        totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
+    } else {
+        totp_crypto_seed_iv(plugin_state, NULL, 0);
+        totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+    }
 }
 
 static void dispose_plugin_state(PluginState* plugin_state) {
