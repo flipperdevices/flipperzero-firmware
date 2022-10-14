@@ -115,7 +115,7 @@ class Main(App):
         if self.args.dfu:
             dfu_size = os.stat(self.args.dfu).st_size
             shutil.copyfile(self.args.dfu, join(self.args.directory, dfu_basename))
-        if radiobin_basename:
+        if self.args.radiobin:
             shutil.copyfile(
                 self.args.radiobin, join(self.args.directory, radiobin_basename)
             )
@@ -158,7 +158,7 @@ class Main(App):
         file.writeKey("Radio", radiobin_basename or "")
         file.writeKey("Radio address", self.int2ffhex(radio_addr))
         file.writeKey("Radio version", self.int2ffhex(radio_version, 12))
-        if radiobin_basename:
+        if self.args.radiobin:
             file.writeKey("Radio CRC", self.int2ffhex(self.crc(self.args.radiobin)))
         else:
             file.writeKey("Radio CRC", self.int2ffhex(0))
