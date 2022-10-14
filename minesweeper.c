@@ -99,7 +99,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_string_printf(timeStr, "%01d:%02d", minutes, seconds);
     canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(timeStr));
 
-    uint8_t tile_to_draw;
+    uint8_t* tile_to_draw;
 
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
@@ -141,6 +141,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             tile_to_draw = tile_uncleared_bits;
             break;
           case TileTypeMine:
+            tile_to_draw = tile_mine_bits;
+            break;
+          default:
+            // this should never happen
             tile_to_draw = tile_mine_bits;
             break;
         }
