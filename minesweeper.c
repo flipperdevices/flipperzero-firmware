@@ -43,7 +43,7 @@ typedef enum {
 } TileType;
 
 typedef enum {
-    FieldEmpty, // <-- same goes for this
+    FieldEmpty,
     FieldMine
 } Field;
 
@@ -99,6 +99,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     furi_string_printf(timeStr, "%01d:%02d", minutes, seconds);
     canvas_draw_str_aligned(canvas, 128, 0, AlignRight, AlignTop, furi_string_get_cstr(timeStr));
 
+    uint8_t tile_to_draw;
+
     for (int y = 0; y < PLAYFIELD_HEIGHT; y++) {
       for (int x = 0; x < PLAYFIELD_WIDTH; x++) {
         if ( x == minesweeper_state->cursor_x && y == minesweeper_state->cursor_y) {
@@ -106,114 +108,49 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
         switch (minesweeper_state->playfield[x][y]) {
           case TileType0:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_0_bits);
+            tile_to_draw = tile_0_bits;
             break;
           case TileType1:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_1_bits);
+            tile_to_draw = tile_1_bits;
             break;
           case TileType2:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_2_bits);
+            tile_to_draw = tile_2_bits;
             break;
           case TileType3:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_3_bits);
+            tile_to_draw = tile_3_bits;
             break;
           case TileType4:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_4_bits);
+            tile_to_draw = tile_4_bits;
             break;
           case TileType5:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_5_bits);
+            tile_to_draw = tile_5_bits;
             break;
           case TileType6:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_6_bits);
+            tile_to_draw = tile_6_bits;
             break;
           case TileType7:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_7_bits);
+            tile_to_draw = tile_7_bits;
             break;
           case TileType8:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_8_bits);
+            tile_to_draw = tile_8_bits;
             break;
           case TileTypeFlag:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_flag_bits);
+            tile_to_draw = tile_flag_bits;
             break;
           case TileTypeUncleared:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_uncleared_bits);
+            tile_to_draw = tile_uncleared_bits;
             break;
           case TileTypeMine:
-            canvas_draw_xbm(
-                canvas,
-                x*TILE_HEIGHT, // x
-                8 + (y * TILE_WIDTH), // y
-                TILE_WIDTH,
-                TILE_HEIGHT,
-                tile_mine_bits);
+            tile_to_draw = tile_mine_bits;
             break;
         }
+        canvas_draw_xbm(
+            canvas,
+            x*TILE_HEIGHT, // x
+            8 + (y * TILE_WIDTH), // y
+            TILE_WIDTH,
+            TILE_HEIGHT,
+            tile_to_draw);
         if ( x == minesweeper_state->cursor_x && y == minesweeper_state->cursor_y) {
           canvas_invert_color(canvas);
         }
