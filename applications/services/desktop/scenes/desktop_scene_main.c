@@ -229,7 +229,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenSubRemote: {
-            loader_start(desktop->loader, FLIPPER_APPS[1].name, NULL);
+            loader_start(desktop->loader, FLIPPER_APPS[2].name, NULL);
             consumed = true;
             break;
         }
