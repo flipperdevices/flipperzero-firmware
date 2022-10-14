@@ -98,7 +98,24 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         ViewPortArray_next(it);
     }
     // Draw frame around icons on the right
+    if(right_used) {
+        canvas_frame_set(
+            gui->canvas,
+            GUI_DISPLAY_WIDTH - 3 - right_used,
+            GUI_STATUS_BAR_Y,
+            right_used + 2,
+            GUI_STATUS_BAR_HEIGHT);
+        canvas_set_color(gui->canvas, ColorBlack);
+        canvas_draw_rframe(
+            gui->canvas, 0, 0, canvas_width(gui->canvas), canvas_height(gui->canvas) - 1, 1);
+        canvas_draw_line(
+            gui->canvas,
+            canvas_width(gui->canvas) - 1,
+            2,
+            canvas_width(gui->canvas) - 1,
+            canvas_height(gui->canvas) - 4);
 
+    }
 
     // Left side
     x = 2;
