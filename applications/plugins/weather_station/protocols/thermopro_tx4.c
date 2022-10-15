@@ -121,15 +121,6 @@ static bool ws_protocol_thermopro_tx4_check(WSProtocolDecoderThermoPRO_TX4* inst
  * @param instance Pointer to a WSBlockGeneric* instance
  */
 static void ws_protocol_thermopro_tx4_remote_controller(WSBlockGeneric* instance) {
-    // *     [type] [id0] [id1] [flags] [temp0] [temp1] [temp2] [humi0] [humi1]
-    //  * - type: 4 bit fixed 1001 (9) or 0110 (5)
-    //  * - id: 8 bit a random id that is generated when the sensor starts, could include battery status
-    //  *   the same batteries often generate the same id
-    //  * - flags(3): is 1 when the battery is low, otherwise 0 (ok)
-    //  * - flags(2): is 1 when the sensor sends a reading when pressing the button on the sensor
-    //  * - flags(1,0): the channel number that can be set by the sensor (1, 2, 3, X)
-    //  * - temp: 12 bit signed scaled by 10
-    //  * - humi: 8 bit always 11001100 (0xCC) if no humidity sensor is available
 
     instance->id = (instance->data >> 25) & 0xFF;
     instance->battery_low = (instance->data >> 24) & 1;
@@ -143,9 +134,6 @@ static void ws_protocol_thermopro_tx4_remote_controller(WSBlockGeneric* instance
         instance->temp = (float)((~(instance->data >> 9) & 0x07FF)+1) / -10.0f;
     }
 
-    //instance->temp = (float)((instance->data >> 9) & 0x0FFF) / 10.0f;
-    // instance->temp = ws_block_generic_fahrenheit_to_celsius(
-    //     (float)(((instance->data >> 9) & 0x0FFF) - 900) / 10.0f);
     instance->humidity = (instance->data >> 1) & 0xFF;
 }
 
