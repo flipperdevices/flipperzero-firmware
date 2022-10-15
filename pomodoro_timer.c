@@ -4,20 +4,59 @@
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
 
-struct PomodoroTimer {
-    View* view;
+const NotificationSequence sequence_finish = {
+    &message_display_backlight_on,
+    &message_green_255,
+    &message_vibro_on,
+    &message_note_c5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_e5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_g5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_b5,
+    &message_delay_250,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_250,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
 };
 
-struct {
-    bool ok_pressed;
-    bool reset_pressed;
-    bool back_pressed;
-    bool connected;
-    bool timer_running;
-    uint32_t timer_start_timestamp;
-    uint32_t timer_stopped_seconds;
-    uint32_t time_passed;
-} PomodoroTimerModel;
+const NotificationSequence sequence_rest = {
+    &message_display_backlight_on,
+    &message_red_255,
+    &message_vibro_on,
+    &message_note_c6,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_b5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_g5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_e5,
+    &message_delay_100,
+    &message_vibro_off,
+    &message_vibro_on,
+    &message_note_c5,
+    &message_delay_250,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
 
 void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event) {
     with_view_model(
@@ -49,6 +88,7 @@ void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event) {
                     } else if(!model->time_passed) {
                         // INITIAL -> STARTED
                         model->timer_start_timestamp = current_timestamp;
+                        model->rest_running = false;
                     } else {
                         // PAUSED -> STARTED
                         model->timer_start_timestamp =
@@ -72,7 +112,7 @@ void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event) {
         true);
 }
 
-void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds) {
+void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds, int max_seconds_rest) {
     furi_assert(context);
     PomodoroTimerModel* model = context;
     FuriHalRtcDateTime curr_dt;
@@ -81,29 +121,29 @@ void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds) {
 
     // Header
     canvas_set_font(canvas, FontPrimary);
-    elements_multiline_text_aligned(canvas, 3, 3, AlignLeft, AlignTop, "Pomodoro");
+    elements_multiline_text_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Pomodoro");
 
-    canvas_draw_icon(canvas, 68, 2, &I_Pin_back_arrow_10x8);
+    canvas_draw_icon(canvas, 68, 0, &I_Pin_back_arrow_10x8);
     canvas_set_font(canvas, FontSecondary);
-    elements_multiline_text_aligned(canvas, 127, 3, AlignRight, AlignTop, "Hold to exit");
+    elements_multiline_text_aligned(canvas, 127, 0, AlignRight, AlignTop, "Hold to exit");
 
     // Ok
-    canvas_draw_icon(canvas, 63, 25, &I_Space_65x18); // button
+    canvas_draw_icon(canvas, 63, 23, &I_Space_65x18); // button
     if(model->ok_pressed) {
-        elements_slightly_rounded_box(canvas, 66, 27, 60, 13);
+        elements_slightly_rounded_box(canvas, 66, 25, 60, 13);
         canvas_set_color(canvas, ColorWhite);
     }
     if(model->timer_running) {
         model->time_passed = current_timestamp - model->timer_start_timestamp;
-        elements_multiline_text_aligned(canvas, 83, 36, AlignLeft, AlignBottom, "Pause");
-        canvas_draw_icon(canvas, 67, 27, &I_Ok_btn_pressed_13x13); // OK icon
+        elements_multiline_text_aligned(canvas, 83, 34, AlignLeft, AlignBottom, "Pause");
+        canvas_draw_icon(canvas, 67, 25, &I_Ok_btn_pressed_13x13); // OK icon
     } else {
         if(model->time_passed) {
-            elements_multiline_text_aligned(canvas, 83, 36, AlignLeft, AlignBottom, "Continue");
+            elements_multiline_text_aligned(canvas, 83, 34, AlignLeft, AlignBottom, "Continue");
         } else {
-            elements_multiline_text_aligned(canvas, 83, 36, AlignLeft, AlignBottom, "Start");
+            elements_multiline_text_aligned(canvas, 83, 34, AlignLeft, AlignBottom, "Start");
         }
-        canvas_draw_icon(canvas, 70, 29, &I_Ok_btn_9x9); // OK icon
+        canvas_draw_icon(canvas, 70, 27, &I_Ok_btn_9x9); // OK icon
     }
     canvas_set_color(canvas, ColorBlack);
 
@@ -121,23 +161,49 @@ void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds) {
 
     char buffer[64];
 
-    // Time passed
+    // Time to work
     int total_time_left = (max_seconds - (uint32_t)model->time_passed);
     int minutes_left = total_time_left / 60;
     int seconds_left = total_time_left % 60;
     canvas_set_font(canvas, FontBigNumbers);
 
-    snprintf(buffer, sizeof(buffer), "%d:%02d", minutes_left, seconds_left);
-    canvas_draw_str(canvas, 0, 40, buffer);
-
-    if(total_time_left < 1) {
-        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_success);
+    if(total_time_left == 1 && !model->sound_playing) {
+        model->sound_playing = true;
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_finish);
     }
     if(total_time_left < 0) {
         model->timer_running = false;
         model->time_passed = 0;
+        model->sound_playing = false;
+
+        model->rest_running = true;
+        model->rest_start_timestamp = current_timestamp;
+        seconds_left = 0;
+    }
+    snprintf(buffer, sizeof(buffer), "%d:%02d", minutes_left, seconds_left);
+    canvas_draw_str(canvas, 0, 40, buffer);
+
+    // Time to rest
+    if(model->rest_running && !model->timer_running) {
+        int rest_passed = current_timestamp - model->rest_start_timestamp;
+        int rest_total_time_left = (max_seconds_rest - rest_passed);
+        int rest_minutes_left = rest_total_time_left / 60;
+        int rest_seconds_left = rest_total_time_left % 60;
+
+        if(rest_total_time_left == 1 && !model->sound_playing) {
+            model->sound_playing = true;
+            notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_rest);
+        }
+        if(rest_total_time_left < 0) {
+            rest_seconds_left = 0;
+            model->rest_running = false;
+            model->sound_playing = false;
+        }
+        snprintf(buffer, sizeof(buffer), "%d:%02d", rest_minutes_left, rest_seconds_left);
+        canvas_draw_str(canvas, 0, 60, buffer);
     }
 
+    // Clocks
     canvas_set_font(canvas, FontSecondary);
     snprintf(
         buffer,
@@ -146,5 +212,5 @@ void pomodoro_draw_callback(Canvas* canvas, void* context, int max_seconds) {
         ((uint32_t)current_timestamp % (60 * 60 * 24)) / (60 * 60),
         ((uint32_t)current_timestamp % (60 * 60)) / 60,
         (uint32_t)current_timestamp % 60);
-    canvas_draw_str(canvas, 0, 60, buffer);
+    canvas_draw_str(canvas, 0, 20, buffer);
 }

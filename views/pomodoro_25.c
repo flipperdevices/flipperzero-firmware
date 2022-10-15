@@ -1,14 +1,14 @@
-#include "pomodoro_25.h"
 #include "../pomodoro_timer.h"
+#include "pomodoro_25.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
 
-int max_seconds_25 = 25 * 60;
-
 static void pomodoro_25_draw_callback(Canvas* canvas, void* context) {
-    pomodoro_draw_callback(canvas, context, max_seconds_25);
+    int max_seconds = 60 * 25;
+    int max_seconds_rest = 60 * 5;
+    pomodoro_draw_callback(canvas, context, max_seconds, max_seconds_rest);
 }
 
 static bool pomodoro_25_input_callback(InputEvent* event, void* context) {

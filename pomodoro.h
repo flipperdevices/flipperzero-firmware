@@ -8,8 +8,10 @@
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
-#include "views/pomodoro_25.h"
 #include "pomodoro_timer.h"
+#include "views/pomodoro_10.h"
+#include "views/pomodoro_25.h"
+#include "views/pomodoro_50.h"
 
 typedef struct {
     Gui* gui;
@@ -17,12 +19,16 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     DialogEx* dialog;
+    PomodoroTimer* pomodoro_10;
     PomodoroTimer* pomodoro_25;
+    PomodoroTimer* pomodoro_50;
     uint32_t view_id;
 } Pomodoro;
 
 typedef enum {
     PomodoroViewSubmenu,
+    PomodoroView10,
     PomodoroView25,
+    PomodoroView50,
     PomodoroViewExitConfirm,
 } PomodoroView;
