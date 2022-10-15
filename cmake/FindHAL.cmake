@@ -2,7 +2,7 @@
 
 # This function gets a list of hal_driver using a given prefix and suffix
 #
-# out_list_hal_drivers   list of hal_drivers foud
+# out_list_hal_drivers   list of hal_drivers found
 # hal_drivers_path       path to the hal's drivers
 # hal_driver_type        hal_driver type to find (hal/ll/ex)
 function(get_list_hal_drivers out_list_hal_drivers hal_drivers_path hal_driver_type)
