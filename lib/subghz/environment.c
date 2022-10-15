@@ -85,3 +85,14 @@ void* subghz_environment_get_protocol_registry(SubGhzEnvironment* instance) {
     furi_assert(instance->protocol_registry);
     return (void*)instance->protocol_registry;
 }
+
+const char*
+    subghz_environment_get_protocol_name_registry(SubGhzEnvironment* instance, size_t idx) {
+    const SubGhzProtocol* protocol =
+        subghz_protocol_registry_get_by_index(instance->protocol_registry, idx);
+    if(protocol != NULL) {
+        return protocol->name;
+    } else {
+        return NULL;
+    }
+}

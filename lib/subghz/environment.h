@@ -85,6 +85,14 @@ void subghz_environment_set_protocol_registry(
  */
 void* subghz_environment_get_protocol_registry(SubGhzEnvironment* instance);
 
+/**
+ * Get list of protocols names.
+ * @param instance Pointer to a SubGhzEnvironment instance
+ * @param idx index protocols
+ * @return Pointer to a SubGhzProtocolRegistry
+ */
+const char* subghz_environment_get_protocol_name_registry(SubGhzEnvironment* instance, size_t idx);
+
 #ifdef __cplusplus
 }
 #endif

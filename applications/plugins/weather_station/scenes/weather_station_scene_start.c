@@ -1,9 +1,8 @@
 #include "../weather_station_app_i.h"
 
 typedef enum {
-    SubmenuIndexWeatherStationShow,
     SubmenuIndexWeatherStationReceiver,
-    //SubmenuIndexNext,
+    SubmenuIndexWeatherStationAbout,
 } SubmenuIndex;
 
 void weather_station_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -16,16 +15,17 @@ void weather_station_scene_start_on_enter(void* context) {
     WeatherStationApp* app = context;
     Submenu* submenu = app->submenu;
 
+    
     submenu_add_item(
         submenu,
         "Weather Station",
-        SubmenuIndexWeatherStationShow,
+        SubmenuIndexWeatherStationReceiver,
         weather_station_scene_start_submenu_callback,
         app);
-    submenu_add_item(
+        submenu_add_item(
         submenu,
-        "rec",
-        SubmenuIndexWeatherStationReceiver,
+        "About",
+        SubmenuIndexWeatherStationAbout,
         weather_station_scene_start_submenu_callback,
         app);
 
@@ -40,8 +40,8 @@ bool weather_station_scene_start_on_event(void* context, SceneManagerEvent event
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexWeatherStationShow) {
-            scene_manager_next_scene(app->scene_manager, WeatherStationSceneShow);
+        if(event.event == SubmenuIndexWeatherStationAbout) {
+            scene_manager_next_scene(app->scene_manager, WeatherStationSceneAbout);
             consumed = true;
         } else if(event.event == SubmenuIndexWeatherStationReceiver) {
             scene_manager_next_scene(app->scene_manager, WeatherStationSceneReceiver);

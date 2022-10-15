@@ -58,12 +58,10 @@ WeatherStationApp* weather_station_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, WeatherStationViewSubmenu, submenu_get_view(app->submenu));
 
-    //todo delete
-    app->weather_station_show = weather_station_show_alloc();
+    // Widget
+    app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        WeatherStationViewShow,
-        weather_station_show_get_view(app->weather_station_show));
+        app->view_dispatcher, WeatherStationViewWidget, widget_get_view(app->widget));
 
     // Receiver
     app->ws_receiver = ws_view_receiver_alloc();
@@ -128,8 +126,9 @@ void weather_station_app_free(WeatherStationApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewVariableItemList);
     variable_item_list_free(app->variable_item_list);
 
-    view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewShow);
-    weather_station_show_free(app->weather_station_show);
+    //  Widget
+    view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewWidget);
+    widget_free(app->widget);
 
     // Receiver
     view_dispatcher_remove_view(app->view_dispatcher, WeatherStationViewReceiver);

@@ -8,9 +8,8 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
-#include <gui/modules/submenu.h>
+#include <gui/modules/widget.h>
 #include <notification/notification_messages.h>
-#include "views/weather_station_show.h"
 #include "views/weather_station_receiver.h"
 #include "views/weather_station_receiver_info.h"
 #include "weather_station_history.h"
@@ -48,8 +47,7 @@ struct WeatherStationApp {
     NotificationApp* notifications;
     VariableItemList* variable_item_list;
     Submenu* submenu;
-    //todo detete weather_station_show
-    WeatherStationShow* weather_station_show;
+    Widget* widget;
     WSReceiver* ws_receiver;
     WSReceiverInfo* ws_receiver_info;
     WSLock lock;

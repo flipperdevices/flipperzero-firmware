@@ -3,6 +3,11 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+
+#define WS_VERSION_APP "0.1"
+#define WS_DEVELOPED "SkorP"
+#define WS_GITHUB "https://github.com/flipperdevices/flipperzero-firmware"
+
 #define WS_KEY_FILE_VERSION 1
 #define WS_KEY_FILE_TYPE "Flipper Weather Station Key File"
 
@@ -31,9 +36,9 @@ typedef enum {
 typedef enum {
     WeatherStationViewVariableItemList,
     WeatherStationViewSubmenu,
-    WeatherStationViewShow,
     WeatherStationViewReceiver,
     WeatherStationViewReceiverInfo,
+    WeatherStationViewWidget,
 } WeatherStationView;
 
 /** WeatherStationTxRx state */
