@@ -9,6 +9,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include "views/pomodoro_25.h"
+#include "pomodoro_timer.h"
 
 typedef struct {
     Gui* gui;
@@ -16,7 +17,7 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     DialogEx* dialog;
-    Pomodoro25* pomodoro_25;
+    PomodoroTimer* pomodoro_25;
     uint32_t view_id;
 } Pomodoro;
 
