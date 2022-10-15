@@ -12,7 +12,11 @@ Three timers available:
 - long 50 min work, 10 min rest
 - sprint 10 min work, 2 min rest
 
-It has sound alerts
+With tomato counter
+
+Plays sound alerts
+
+Has built-in clocks
 
 Screenshots:
 
@@ -23,6 +27,8 @@ Screenshots:
 ![](./misc/3.png)
 
 ![](./misc/4.png)
+
+![](./misc/5.png)
 
 
 Compatible with firmware v. F81999EA from 14 Oct. 2022
