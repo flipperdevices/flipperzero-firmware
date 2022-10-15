@@ -25,6 +25,7 @@ struct PomodoroTimerModel {
     uint32_t timer_stopped_seconds;
     uint32_t time_passed;
     uint32_t rest_start_timestamp;
+    int counter;
 };
 
 void pomodoro_timer_process(PomodoroTimer* pomodoro_timer, InputEvent* event);
