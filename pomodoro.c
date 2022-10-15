@@ -4,15 +4,25 @@
 #define TAG "PomodoroApp"
 
 enum PomodoroDebugSubmenuIndex {
+    PomodoroSubmenuIndex10,
     PomodoroSubmenuIndex25,
+    PomodoroSubmenuIndex50,
 };
 
 void pomodoro_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     Pomodoro* app = context;
+    if(index == PomodoroSubmenuIndex10) {
+        app->view_id = PomodoroView10;
+        view_dispatcher_switch_to_view(app->view_dispatcher, PomodoroView10);
+    }
     if(index == PomodoroSubmenuIndex25) {
         app->view_id = PomodoroView25;
         view_dispatcher_switch_to_view(app->view_dispatcher, PomodoroView25);
+    }
+    if(index == PomodoroSubmenuIndex50) {
+        app->view_id = PomodoroView50;
+        view_dispatcher_switch_to_view(app->view_dispatcher, PomodoroView50);
     }
 }
 
@@ -55,7 +65,23 @@ Pomodoro* pomodoro_app_alloc() {
     // Submenu view
     app->submenu = submenu_alloc();
     submenu_add_item(
-        app->submenu, "25 minutes", PomodoroSubmenuIndex25, pomodoro_submenu_callback, app);
+        app->submenu,
+        "Classic: 25 work 5 rest",
+        PomodoroSubmenuIndex25,
+        pomodoro_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Long: 50 work 10 rest",
+        PomodoroSubmenuIndex50,
+        pomodoro_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Sprint: 10 work 2 rest",
+        PomodoroSubmenuIndex10,
+        pomodoro_submenu_callback,
+        app);
     view_set_previous_callback(submenu_get_view(app->submenu), pomodoro_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, PomodoroViewSubmenu, submenu_get_view(app->submenu));
@@ -77,6 +103,18 @@ Pomodoro* pomodoro_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, PomodoroView25, pomodoro_25_get_view(app->pomodoro_25));
 
+    // 50 minutes view
+    app->pomodoro_50 = pomodoro_50_alloc();
+    view_set_previous_callback(pomodoro_50_get_view(app->pomodoro_50), pomodoro_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, PomodoroView50, pomodoro_50_get_view(app->pomodoro_50));
+
+    // 10 minutes view
+    app->pomodoro_10 = pomodoro_10_alloc();
+    view_set_previous_callback(pomodoro_10_get_view(app->pomodoro_10), pomodoro_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, PomodoroView10, pomodoro_10_get_view(app->pomodoro_10));
+
     // TODO switch to menu after Media is done
     app->view_id = PomodoroViewSubmenu;
     view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
@@ -97,6 +135,10 @@ void pomodoro_app_free(Pomodoro* app) {
     dialog_ex_free(app->dialog);
     view_dispatcher_remove_view(app->view_dispatcher, PomodoroView25);
     pomodoro_25_free(app->pomodoro_25);
+    view_dispatcher_remove_view(app->view_dispatcher, PomodoroView50);
+    pomodoro_50_free(app->pomodoro_50);
+    view_dispatcher_remove_view(app->view_dispatcher, PomodoroView10);
+    pomodoro_10_free(app->pomodoro_10);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
