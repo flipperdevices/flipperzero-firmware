@@ -3,7 +3,6 @@
 typedef enum {
     SPIMemSceneStartSubmenuIndexRead,
     SPIMemSceneStartSubmenuIndexSaved,
-    SPIMemSceneStartSubmenuIndexChipInfo
 } SPIMemSceneStartSubmenuIndex;
 
 static void spi_mem_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -25,12 +24,6 @@ void spi_mem_scene_start_on_enter(void* context) {
         SPIMemSceneStartSubmenuIndexSaved,
         spi_mem_scene_start_submenu_callback,
         app);
-    submenu_add_item(
-        app->submenu,
-        "Chip info",
-        SPIMemSceneStartSubmenuIndexChipInfo,
-        spi_mem_scene_start_submenu_callback,
-        app);
     submenu_set_selected_item(
         app->submenu, scene_manager_get_scene_state(app->scene_manager, SPIMemSceneStart));
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewSubmenu);
@@ -41,12 +34,13 @@ bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(app->scene_manager, SPIMemSceneStart, event.event);
         if(event.event == SPIMemSceneStartSubmenuIndexRead) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
             consumed = true;
         } else if(event.event == SPIMemSceneStartSubmenuIndexSaved) {
-            consumed = true;
-        } else if(event.event == SPIMemSceneStartSubmenuIndexChipInfo) {
+            furi_string_set(app->file_path, SPI_MEM_FILE_FOLDER);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneSelectFile);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, SPIMemSceneStart, event.event);
