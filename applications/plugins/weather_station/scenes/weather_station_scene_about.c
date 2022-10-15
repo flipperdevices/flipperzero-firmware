@@ -26,7 +26,7 @@ void weather_station_scene_about_on_enter(void* context) {
     furi_string_cat_printf(
         temp_str, "Reading messages from\nweather station that work\nwith SubGhz sensors\n\n");
 
-    furi_string_cat_printf(temp_str, "Supported protocols\n");
+    furi_string_cat_printf(temp_str, "Supported protocols:\n");
     size_t i = 0;
     const char* protocol_name =
         subghz_environment_get_protocol_name_registry(app->txrx->environment, i++);

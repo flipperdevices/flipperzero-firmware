@@ -69,7 +69,6 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
         "%3.2d.%d C",
         (int16_t)model->generic->temp,
         abs(((int16_t)(model->generic->temp * 10) - (((int16_t)model->generic->temp) * 10))));
-    //canvas_draw_str(canvas, 24, 54, buffer);
     canvas_draw_str_aligned(canvas, 58 + 5, 46, AlignRight, AlignTop, buffer);
     canvas_draw_circle(canvas, 50 + 5, 45, 1);
 
