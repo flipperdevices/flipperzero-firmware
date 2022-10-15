@@ -70,14 +70,6 @@ static void pomodoro_25_draw_callback(Canvas* canvas, void* context) {
 
     char buffer[64];
 
-    // Timer start time
-    // snprintf(buffer, sizeof(buffer), "%ld", (uint32_t)model->timer_start_timestamp);
-    // elements_multiline_text_aligned(canvas, 3, 20, AlignLeft, AlignBottom, buffer);
-
-    // Timer stopped
-    // snprintf(buffer, sizeof(buffer), "%ld", (uint32_t)model->timer_stopped_seconds);
-    // elements_multiline_text_aligned(canvas, 3, 30, AlignLeft, AlignBottom, buffer);
-
     // Time passed
     int total_time_left = (max_seconds_25 - (uint32_t)model->time_passed);
     int minutes_left = total_time_left / 60;
@@ -143,16 +135,16 @@ static void pomodoro_25_process(Pomodoro25* pomodoro_25, InputEvent* event) {
                     }
                     model->timer_running = !model->timer_running;
                 } else if(event->key == InputKeyLeft) {
-                    furi_record_close(RECORD_NOTIFICATION);
-                    model->timer_stopped_seconds = 0;
-                    model->timer_start_timestamp = 0;
-                    model->time_passed = 0;
+                    if(!model->timer_running) {
+                        furi_record_close(RECORD_NOTIFICATION);
+                        model->timer_stopped_seconds = 0;
+                        model->timer_start_timestamp = 0;
+                        model->time_passed = 0;
+                        model->timer_running = false;
+                    }
                     model->reset_pressed = false;
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = false;
-                }
-            } else if(event->type == InputTypeShort) {
-                if(event->key == InputKeyBack) {
                 }
             }
         },
@@ -162,15 +154,13 @@ static void pomodoro_25_process(Pomodoro25* pomodoro_25, InputEvent* event) {
 static bool pomodoro_25_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     Pomodoro25* pomodoro_25 = context;
-    bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
+        return false;
     } else {
         pomodoro_25_process(pomodoro_25, event);
-        consumed = true;
+        return true;
     }
-
-    return consumed;
 }
 
 Pomodoro25* pomodoro_25_alloc() {
