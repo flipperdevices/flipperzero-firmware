@@ -127,22 +127,6 @@ static void power_auto_shutdown_timer_callback(void* context) {
     power_off(power);
 }
 
-static void auto_shutdown_update(Power* power) {
-    uint32_t old_time = power->shutdown_idle_delay_ms;
-    LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
-    if(power->shutdown_idle_delay_ms) {
-        if(power->shutdown_idle_delay_ms != old_time) {
-            if(old_time) {
-                power_start_auto_shutdown_timer(power);
-            } else {
-                power_auto_shutdown_arm(power);
-            }
-        }
-    } else if(old_time) {
-        power_auto_shutdown_inhibit(power);
-    }
-}
-
 Power* power_alloc() {
     Power* power = malloc(sizeof(Power));
 
@@ -338,9 +322,6 @@ int32_t power_srv(void* p) {
     free(settings);
 
     while(1) {
-        //Check current setting for automatic shutdown
-        auto_shutdown_update(power);
-
         // Update data from gauge and charger
         bool need_refresh = power_update_info(power);
 
