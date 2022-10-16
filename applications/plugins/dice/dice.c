@@ -30,7 +30,7 @@ typedef struct {
     uint8_t playerOneScore;
     uint8_t playerTwoScore;
     char rollTime[1][15];
-    char diceType[1][10];
+    char diceType[1][11];
     char strings[5][45];
     char theScores[1][45];
     bool letsRoll;
