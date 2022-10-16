@@ -127,22 +127,22 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
                 "I'd do it.",
                 "Hell, yeah!",
                 "You bet your life!",
-                "What are you\nwaiting for?",
-                "You could do\nworse things.",
+                "What are you waiting for?",
+                "You could do worse things.",
                 "Sure, I won't tell.",
-                "Yeah, you got this.\nWould I lie to you?",
+                "Yeah, you got this. Would I lie to you?",
                 "Looks like fun to me. ",
                 "Yeah, sure, why not?",
                 "DO IT!!!",
                 "Who's it gonna hurt?",
-                "Can you blame\nsomeone else?",
+                "Can you blame someone else?",
                 "Ask me again later.",
-                "Maybe, maybe not,\nI can't tell right now. ",
-                "Are you the\nbetting type? ",
-                "Don't blame me if\nyou get caught.",
-                "What have you got\nto lose?",
+                "Maybe, maybe not, I can't tell right now. ",
+                "Are you the betting type? ",
+                "Don't blame me if you get caught.",
+                "What have you got to lose?",
                 "I wouldn't if I were you.",
-                "My money's on\nthe snowball.",
+                "My money's on the snowball.",
                 "Oh Hell no!"};
             state->diceRoll =
                 ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
@@ -361,6 +361,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, state->strings[2]);
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->strings[3]);
             canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignCenter, state->strings[4]);
+        } else if(state->diceSelect == 228) {
+            canvas_set_font(canvas, FontBigNumbers);
+            canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, state->strings[0]);
         } else {
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
