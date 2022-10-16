@@ -33,6 +33,7 @@ In this version you have to configure the sketch for ESP8266 manually, compile i
 Edit IFTTMode.cpp file in FlipperZero-IFTTT_WiFi_Module directory and change in this line with your credential.
 
 Change "triggername" and "keyID" with yours that you created before
+
 const char* resource = "https://maker.ifttt.com/trigger/triggername/json/with/key/keyID";
 
 Enter the SSID and password of your WiFi connection
