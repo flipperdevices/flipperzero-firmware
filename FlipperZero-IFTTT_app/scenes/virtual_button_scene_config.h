@@ -1,0 +1,5 @@
+ADD_SCENE(virtual_button, start, Start)
+ADD_SCENE(virtual_button, send_view, SendView)
+ADD_SCENE(virtual_button, module_view, ModuleView)
+ADD_SCENE(virtual_button, reboot_view, RebootView)
+ADD_SCENE(virtual_button, reset_view, ResetView)
