@@ -12,6 +12,7 @@
 - Assets: Includes New Dolphin Animations: [Narut0 (By Sasquach)]
 - Assets: Includes New Dolphin Animations: [Blaster (By Sasquach)]
 - Assets: Includes New Dolphin Animations: [Flipper City (By Svaarich)]
+- Unleashed PR [feature[animation]: purple rain animation #111 (By wotori)](https://github.com/DarkFlippers/unleashed-firmware/pull/111)
 
 
 ## REPOSITORIES FOR OTHER ANIMATION CREATORS:
