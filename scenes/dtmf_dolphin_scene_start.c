@@ -2,22 +2,26 @@
 
 static void dtmf_dolphin_scene_start_main_menu_enter_callback(void* context, uint32_t index) {
     DTMFDolphinApp* app = context;
-    if (index == DTMFDolphinSceneStateDialer) {
-        view_dispatcher_send_custom_event(
-            app->view_dispatcher,
-            DTMFDolphinEventStartDialer
-        );
-    } else if (index == DTMFDolphinSceneStateBluebox) {
-        view_dispatcher_send_custom_event(
-            app->view_dispatcher,
-            DTMFDolphinEventStartBluebox
-        );
-    } else if (index == DTMFDolphinSceneStateMisc) {
-        view_dispatcher_send_custom_event(
-            app->view_dispatcher,
-            DTMFDolphinEventStartMisc
-        );
+    uint8_t cust_event = 255;
+    switch (index)
+    {
+    case 0:
+        cust_event = DTMFDolphinEventStartDialer;
+        break;
+    case 1:
+        cust_event = DTMFDolphinEventStartBluebox;
+        break;
+    case 2:
+        cust_event = DTMFDolphinEventStartMisc;
+        break;
+    default:
+        return;
     }
+    
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher,
+        cust_event
+    );
 }
 
 void dtmf_dolphin_scene_start_on_enter(void* context) {
