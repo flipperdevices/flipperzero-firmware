@@ -259,7 +259,7 @@ int32_t temperature_sensor_app(void* p) {
 				// Blink blue
 				notification_message(notifications, &sequence_blink_blue_100);
 
-				if (celsius != TS_DEFAULT_VALUE && humidity != TS_DEFAULT_VALUE)) {
+				if (celsius != TS_DEFAULT_VALUE && humidity != TS_DEFAULT_VALUE) {
 
 					// Convert celsius to fahrenheit
 					fahrenheit = (celsius * 9 / 5) + 32;
