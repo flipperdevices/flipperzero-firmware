@@ -30,3 +30,10 @@ you will need: 1 ESP8266 (I recommend ESP01 for the size) and 2 buttons.
 
 # Warnings for the first beta version
 In this version you have to configure the sketch for ESP8266 manually, compile it and flash it.
+Edit IFTTMode.cpp file in FlipperZero-IFTTT_WiFi_Module directory and change in this line with your credential.
+
+const char* resource = "https://maker.ifttt.com/trigger/triggername/json/with/key/keyID";
+change "triggername" and "keyID" whit your 
+//insert SSID and Password in field
+const char *ssidIFTTT = "SSID";
+const char *passwordIFTTT = "password";
