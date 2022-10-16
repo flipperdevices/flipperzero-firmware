@@ -52,7 +52,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     }
 
     canvas_set_font(canvas, FontSecondary);
-    if(state->diceSelect < 229) {
+    if(state->diceSelect < 228) {
         if(state->diceQty == 1) {
             elements_button_left(canvas, "x1");
         } else if(state->diceQty == 2) {
