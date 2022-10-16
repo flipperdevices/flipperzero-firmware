@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
+#include <gui/icon_i.h>
 #include <input/input.h>
 #include <stdlib.h>
 
@@ -8,6 +9,10 @@
 
 #define DINO_START_X 0
 #define DINO_START_Y 42
+
+#define FPS 60
+
+#define DINO_RUNNING_TICKS 15
 
 typedef enum {
     EventTypeTick,
@@ -21,7 +26,8 @@ typedef struct {
 
 typedef struct {
   FuriTimer* timer;
-  int dino_run_step;
+  const Icon* dino_icon;
+  int dino_tick;
 } GameState;
 
 static void timer_callback(void* ctx) {
@@ -30,10 +36,16 @@ static void timer_callback(void* ctx) {
     return;
   }
 
-  if (game_state->dino_run_step == 0) {
-    game_state->dino_run_step = 1;
-  } else {
-    game_state->dino_run_step = 0;
+  // game update
+  game_state->dino_tick++;
+  // TODO: switch by dino state
+  if (game_state->dino_tick >= DINO_RUNNING_TICKS) {
+    if (game_state->dino_icon == &I_DinoRun0) {
+      game_state->dino_icon = &I_DinoRun1;
+    } else {
+      game_state->dino_icon = &I_DinoRun0;
+    }
+    game_state->dino_tick = 0;
   }
 
   release_mutex((ValueMutex*)ctx, game_state);
@@ -53,18 +65,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
   }
 
 //  canvas_draw_xbm(canvas, 0, 0, dino_width, dino_height, dino_bits);
-//  canvas_draw_icon(canvas, 0, 0, &I_dino);
-  if (game_state->dino_run_step == 0) {
-    canvas_draw_icon(canvas, DINO_START_X, DINO_START_Y, &I_DinoRun0);
-  } else {
-    canvas_draw_icon(canvas, DINO_START_X, DINO_START_Y, &I_DinoRun1);
-  }
+  canvas_draw_icon(canvas, DINO_START_X, DINO_START_Y, game_state->dino_icon);
 
   release_mutex((ValueMutex*)ctx, game_state);
 }
 
 static void game_state_init(GameState* const game_state) {
-  game_state->dino_run_step = 0;
+  game_state->dino_tick = 0;
+  game_state->dino_icon = &I_Dino;
 }
 
 int32_t trexrunner_app(void* p) {
@@ -89,7 +97,7 @@ int32_t trexrunner_app(void* p) {
   view_port_input_callback_set(view_port, input_callback, event_queue);
   game_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, &state_mutex);
 
-  furi_timer_start(game_state->timer, (uint32_t) furi_kernel_get_tick_frequency() * 0.4);
+  furi_timer_start(game_state->timer, (uint32_t) furi_kernel_get_tick_frequency() / FPS);
 
   // Open GUI and register view_port
   Gui* gui = furi_record_open("gui");
