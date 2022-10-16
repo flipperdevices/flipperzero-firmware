@@ -8,6 +8,11 @@ build: $(FLIPPER_FIRMWARE_PATH)/applications_user/t-rex-runner
 launch: $(FLIPPER_FIRMWARE_PATH)/applications_user/t-rex-runner
 	cd $(FLIPPER_FIRMWARE_PATH) && ./fbt launch_app APPSRC=applications_user/t-rex-runner
 
+.PHONY: assets
+assets:
+	rm assets_icons.*
+	$(MAKE) assets_icons.c
+
 assets_icons.c: $(FLIPPER_FIRMWARE_PATH)/applications_user/t-rex-runner
 	cd $(FLIPPER_FIRMWARE_PATH) && ./scripts/assets.py icons applications_user/t-rex-runner/assets/ applications_user/t-rex-runner/
 

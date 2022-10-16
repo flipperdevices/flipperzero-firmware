@@ -6,6 +6,9 @@
 
 #include "assets_icons.h"
 
+#define DINO_START_X 0
+#define DINO_START_Y 42
+
 typedef enum {
     EventTypeTick,
     EventTypeKey,
@@ -16,6 +19,26 @@ typedef struct {
     InputEvent input;
 } PluginEvent;
 
+typedef struct {
+  FuriTimer* timer;
+  int dino_run_step;
+} GameState;
+
+static void timer_callback(void* ctx) {
+  GameState* game_state = acquire_mutex((ValueMutex*)ctx, 25);
+  if (game_state == NULL) {
+    return;
+  }
+
+  if (game_state->dino_run_step == 0) {
+    game_state->dino_run_step = 1;
+  } else {
+    game_state->dino_run_step = 0;
+  }
+
+  release_mutex((ValueMutex*)ctx, game_state);
+}
+
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
@@ -24,10 +47,24 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-  UNUSED(ctx);
+  const GameState* game_state = acquire_mutex((ValueMutex*)ctx, 25);
+  if (game_state == NULL) {
+    return;
+  }
 
 //  canvas_draw_xbm(canvas, 0, 0, dino_width, dino_height, dino_bits);
-  canvas_draw_icon(canvas, 0, 0, &I_dino);
+//  canvas_draw_icon(canvas, 0, 0, &I_dino);
+  if (game_state->dino_run_step == 0) {
+    canvas_draw_icon(canvas, DINO_START_X, DINO_START_Y, &I_DinoRun0);
+  } else {
+    canvas_draw_icon(canvas, DINO_START_X, DINO_START_Y, &I_DinoRun1);
+  }
+
+  release_mutex((ValueMutex*)ctx, game_state);
+}
+
+static void game_state_init(GameState* const game_state) {
+  game_state->dino_run_step = 0;
 }
 
 int32_t trexrunner_app(void* p) {
@@ -35,18 +72,24 @@ int32_t trexrunner_app(void* p) {
 
   FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-//  ValueMutex state_mutex;
-//  if (!init_mutex(&state_mutex, minesweeper_state, sizeof(minesweeper_state))) {
-//      FURI_LOG_E("t-rex runner", "cannot create mutex\r\n");
-//        free(minesweeper_state);
-//      return 255;
-//  }
+  GameState* game_state = malloc(sizeof(GameState));
+  game_state_init(game_state);
+
+  ValueMutex state_mutex;
+  if (!init_mutex(&state_mutex, game_state, sizeof(game_state))) {
+      FURI_LOG_E("T-rex runner", "cannot create mutex\r\n");
+        free(game_state);
+      return 255;
+  }
   // BEGIN IMPLEMENTATION
 
   // Set system callbacks
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, render_callback, view_port);
+  view_port_draw_callback_set(view_port, render_callback, &state_mutex);
   view_port_input_callback_set(view_port, input_callback, event_queue);
+  game_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, &state_mutex);
+
+  furi_timer_start(game_state->timer, (uint32_t) furi_kernel_get_tick_frequency() * 0.4);
 
   // Open GUI and register view_port
   Gui* gui = furi_record_open("gui");
@@ -78,7 +121,7 @@ int32_t trexrunner_app(void* p) {
       ;
     }
     view_port_update(view_port);
-//    release_mutex(&state_mutex, minesweeper_state);
+    release_mutex(&state_mutex, game_state);
   }
 
   view_port_enabled_set(view_port, false);
@@ -86,9 +129,9 @@ int32_t trexrunner_app(void* p) {
   furi_record_close("gui");
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
-//  delete_mutex(&state_mutex);
-//  furi_timer_free(minesweeper_state->timer);
-//  free(minesweeper_state);
+  delete_mutex(&state_mutex);
+  furi_timer_free(game_state->timer);
+  free(game_state);
 
   return 0;
 }
