@@ -16,6 +16,8 @@
 - Unleashed PR [feature[animation]: purple rain animation #111 (By wotori)](https://github.com/DarkFlippers/unleashed-firmware/pull/111)
 - Unleashed PR [Minesweeper: Set cursor to initial position on death #113 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/113)
 - Unleashed PR [Flappy: Border hitboxes, bigger Pilars #114 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114)
+- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
+- Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -179,7 +181,7 @@ $ ./fbt plugin_dist
   
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
-- [Black Jack (By teeebor)](https://github.com/teeebor/flipper_games)
+- [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW  `Broken?`
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
