@@ -17,12 +17,12 @@ typedef struct {
 typedef struct {
     size_t buffer_length;
     size_t half_buffer_length;
-    uint8_t* buffer_buffer;
-    uint16_t* sample_buffer;
+    uint8_t *buffer_buffer;
+    uint16_t *sample_buffer;
     float volume;
-    FuriMessageQueue* queue;
-    DTMFDolphinOsc* osc1;
-    DTMFDolphinOsc* osc2;
+    FuriMessageQueue *queue;
+    DTMFDolphinOsc *osc1;
+    DTMFDolphinOsc *osc2;
 } DTMFDolphinAudio;
 
 DTMFDolphinOsc* dtmf_dolphin_osc_alloc();

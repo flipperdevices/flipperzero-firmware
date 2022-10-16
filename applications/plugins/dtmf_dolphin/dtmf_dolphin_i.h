@@ -17,6 +17,7 @@
 
 #define TAG "DTMFDolphin"
 
+
 enum DTMFDolphinSceneState {
     DTMFDolphinSceneStateDialer,
     DTMFDolphinSceneStateBluebox,
@@ -38,4 +39,7 @@ typedef struct {
     NotificationApp* notification;
 } DTMFDolphinApp;
 
-typedef enum { DTMFDolphinViewMainMenu, DTMFDolphinViewDialer } DTMFDolphinView;
+typedef enum {
+    DTMFDolphinViewMainMenu,
+    DTMFDolphinViewDialer
+} DTMFDolphinView;

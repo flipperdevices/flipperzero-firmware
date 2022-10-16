@@ -5,11 +5,12 @@ App(
     entry_point="dtmf_dolphin_app",
     cdefines=["DTMF_DOLPHIN"],
     requires=[
+        "storage",
         "gui",
         "dialogs",
     ],
+    fap_icon="phone.png",
     stack_size=8 * 1024,
     order=20,
-    fap_icon="dtmf_10px.png",
-    fap_category="Misc",
+    fap_category="Tools",
 )
