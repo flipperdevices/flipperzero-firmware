@@ -8,7 +8,7 @@
 #include "ws_generic.h"
 #include <lib/subghz/blocks/math.h>
 
-#define WS_PROTOCOL_THERMOPRO_TX4_NAME "ThermoPRO_TX4"
+#define WS_PROTOCOL_THERMOPRO_TX4_NAME "ThermoPRO-TX4"
 
 typedef struct WSProtocolDecoderThermoPRO_TX4 WSProtocolDecoderThermoPRO_TX4;
 typedef struct WSProtocolEncoderThermoPRO_TX4 WSProtocolEncoderThermoPRO_TX4;

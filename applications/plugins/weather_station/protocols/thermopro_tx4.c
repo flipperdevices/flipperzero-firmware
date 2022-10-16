@@ -111,7 +111,6 @@ static bool ws_protocol_thermopro_tx4_check(WSProtocolDecoderThermoPRO_TX4* inst
     if((type == THERMO_PRO_TX4_TYPE_1) || (type == THERMO_PRO_TX4_TYPE_2)) {
         return true;
     } else {
-        FURI_LOG_I (TAG , " ERR 0x%X , ~0x%llX ", type,instance->decoder.decode_data);
         return false;
     }
 }
@@ -130,7 +129,6 @@ static void ws_protocol_thermopro_tx4_remote_controller(WSBlockGeneric* instance
     if(!((instance->data >> 20) & 1)) {
         instance->temp = (float)((instance->data >> 9) & 0x07FF) / 10.0f;
     } else {
-        FURI_LOG_I (TAG , "0x%llX , ~0x%llX ", (instance->data >> 9) & 0x07FF,(~(instance->data >> 9) & 0x07FF));
         instance->temp = (float)((~(instance->data >> 9) & 0x07FF)+1) / -10.0f;
     }
 
