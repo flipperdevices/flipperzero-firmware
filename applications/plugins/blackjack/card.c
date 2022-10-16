@@ -1,5 +1,6 @@
-#include "card.h"
 #include <math.h>
+#include "card.h"
+#include "util.h"
 
 //region CardDesign
 bool pips[4][49] =
@@ -57,7 +58,9 @@ uint8_t characters[13] =
                 2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'
         };
 
-
+uint8_t edge_cards[3] = {
+        0, 8, 15
+};
 //region Player card positions
 uint8_t playerCardPositions[22][4] = {
         //first row
@@ -102,38 +105,52 @@ void drawPlayerDeck(const Card cards[21], uint8_t count, Canvas *const canvas) {
     }
 }
 
-void drawCardAt(uint8_t pos_x, uint8_t pos_y, uint8_t pip, uint8_t character, CardState state, Canvas *const canvas) {
+bool is_at_edge(uint8_t index) {
+    for (uint8_t i = 0; i < 3; i++)
+        if (edge_cards[i] == index) return true;
+
+    return false;
+}
+
+Vector card_pos_at_index(uint8_t index) {
+    return (Vector) {
+            playerCardPositions[index][0],
+            playerCardPositions[index][1]
+    };
+}
+
+void drawCardAt(int8_t pos_x, int8_t pos_y, uint8_t pip, uint8_t character, CardState state, Canvas *const canvas) {
     if (state == Normal) {
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, pos_x, pos_y, CARD_WIDHT, CARD_HEIGHT);
+        canvas_draw_box(canvas, pos_x, pos_y, CARD_WIDTH, CARD_HEIGHT);
 
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, pos_x, pos_y, CARD_WIDHT, CARD_HEIGHT);
+        canvas_draw_frame(canvas, pos_x, pos_y, CARD_WIDTH, CARD_HEIGHT);
     } else {
         if (state == BottomCut || state == BottomAndRightCut)
             canvas_draw_line(canvas, pos_x, pos_y, pos_x, pos_y + CARD_HALF_HEIGHT - 1);   //half height line
 
         if (state == BottomCut) {
-            canvas_draw_line(canvas, pos_x, pos_y, pos_x + CARD_WIDHT - 1, pos_y);  //full width line
-            canvas_draw_line(canvas, pos_x + CARD_WIDHT - 1, pos_y, pos_x + CARD_WIDHT - 1,
+            canvas_draw_line(canvas, pos_x, pos_y, pos_x + CARD_WIDTH - 1, pos_y);  //full width line
+            canvas_draw_line(canvas, pos_x + CARD_WIDTH - 1, pos_y, pos_x + CARD_WIDTH - 1,
                              pos_y + CARD_HALF_HEIGHT - 1); //half height line
         }
 
         if (state == BottomAndRightCut) {
-            canvas_draw_line(canvas, pos_x, pos_y, pos_x + CARD_HALF_WIDHT - 1, pos_y);  //half width
+            canvas_draw_line(canvas, pos_x, pos_y, pos_x + CARD_HALF_WIDTH - 1, pos_y);  //half width
         }
 
         if (state == RightCut) {
-            canvas_draw_line(canvas, pos_x, pos_y, pos_x + CARD_HALF_WIDHT - 1, pos_y);   //half width
+            canvas_draw_line(canvas, pos_x, pos_y, pos_x + CARD_HALF_WIDTH - 1, pos_y);   //half width
             canvas_draw_line(canvas, pos_x, pos_y, pos_x, pos_y + CARD_HEIGHT - 1);    //full height line
-            canvas_draw_line(canvas, pos_x, pos_y + CARD_HEIGHT - 1, pos_x + CARD_HALF_WIDHT - 1,
+            canvas_draw_line(canvas, pos_x, pos_y + CARD_HEIGHT - 1, pos_x + CARD_HALF_WIDTH - 1,
                              pos_y + CARD_HEIGHT - 1);  //full height line
         }
 
     }
 
     uint8_t left = pos_x + CORNER_MARGIN;
-    uint8_t right = (pos_x + CARD_WIDHT - CORNER_MARGIN - 7);
+    uint8_t right = (pos_x + CARD_WIDTH - CORNER_MARGIN - 7);
     uint8_t top = pos_y + CORNER_MARGIN;
     uint8_t bottom = (pos_y + CARD_HEIGHT - CORNER_MARGIN - 7);
 
@@ -171,13 +188,13 @@ void drawCardAt(uint8_t pos_x, uint8_t pos_y, uint8_t pip, uint8_t character, Ca
     //canvas_draw_str(canvas, left, top, drawChar );
 }
 
-void drawCardBackAt(uint8_t pos_x, uint8_t pos_y, Canvas *const canvas) {
+void drawCardBackAt(int8_t pos_x, int8_t pos_y, Canvas *const canvas) {
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, pos_x, pos_y, CARD_WIDHT, CARD_HEIGHT);
+    canvas_draw_box(canvas, pos_x, pos_y, CARD_WIDTH, CARD_HEIGHT);
 
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_frame(canvas, pos_x, pos_y, CARD_WIDHT, CARD_HEIGHT);
-    for (uint8_t x = 0; x < CARD_WIDHT - 2; x++) {
+    canvas_draw_frame(canvas, pos_x, pos_y, CARD_WIDTH, CARD_HEIGHT);
+    for (uint8_t x = 0; x < CARD_WIDTH - 2; x++) {
         for (uint8_t y = 0; y < CARD_HEIGHT - 2; y++) {
             uint8_t _x = x;
             uint8_t _y = y * 2;
@@ -236,4 +253,24 @@ uint8_t handCount(const Card cards[21], uint8_t count) {
     }
 
     return score;
+}
+
+void draw_card_animation(Card animatingCard, Vector from, Vector control, Vector to, float t, bool extra_margin,
+                         Canvas *const canvas) {
+    float time = t;
+    if (extra_margin) {
+        time += 0.2;
+    }
+
+    Vector currentPos = quadratic_2d(from, control, to, time);
+    if (t > 1) {
+        drawCardAt(currentPos.x, currentPos.y, animatingCard.pip,
+                   animatingCard.character, Normal, canvas);
+    } else {
+        if (t < 0.5)
+            drawCardBackAt(currentPos.x, currentPos.y, canvas);
+        else
+            drawCardAt(currentPos.x, currentPos.y, animatingCard.pip,
+                       animatingCard.character, Normal, canvas);
+    }
 }
