@@ -15,6 +15,7 @@
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-16 04:20 GMT`
 - Unleashed PR [feature[animation]: purple rain animation #111 (By wotori)](https://github.com/DarkFlippers/unleashed-firmware/pull/111)
 - Unleashed PR [Minesweeper: Set cursor to initial position on death #113 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/113)
+- Unleashed PR [Flappy: Border hitboxes, bigger Pilars #114 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
