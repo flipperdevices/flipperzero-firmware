@@ -37,6 +37,7 @@ Change "triggername" and "keyID" with yours that you created before
 const char* resource = "https://maker.ifttt.com/trigger/triggername/json/with/key/keyID";
 
 Enter the SSID and password of your WiFi connection
+
 const char *ssidIFTTT = "SSID";
 const char *passwordIFTTT = "password";
 
