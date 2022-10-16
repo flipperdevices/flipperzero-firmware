@@ -361,7 +361,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, state->strings[2]);
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->strings[3]);
             canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignCenter, state->strings[4]);
-        } else if(state->diceSelect == 228) {
+        } else if(state->diceSelect == 228 || state->diceSelect == 229) {
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
             canvas_set_font(canvas, FontSecondary);
