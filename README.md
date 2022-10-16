@@ -2,7 +2,7 @@
 
 ## DTMF Dolphin
 
-DTMF (Dual-Tone Multi-Frequency) dialer, Bluebox, and future Redbox.
+DTMF (Dual-Tone Multi-Frequency) dialer, Bluebox, and Redbox.
 
 Now in a release-ready state for both Dialer, Bluebox, and Redbox (US/UK) functionality!
 
