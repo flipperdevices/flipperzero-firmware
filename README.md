@@ -29,3 +29,4 @@ you will need: 1 ESP8266 (I recommend ESP01 for the size) and 2 buttons.
 - Final URL should appear at the bottom of the web page. We'll need to copy that URL.
 
 # Warnings for the first beta version
+In this version you have to configure the sketch for ESP8266 manually, compile it and flash it.
