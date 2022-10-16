@@ -457,6 +457,7 @@ static void
     InfraredBruteForce* brute_force = infrared_brute_force_alloc();
     const char* remote_file = NULL;
     uint32_t i = 0;
+    bool success = false;
 
     switch(remote_type) {
     case TV:
@@ -472,13 +473,19 @@ static void
     infrared_brute_force_set_db_filename(brute_force, remote_file);
     infrared_brute_force_add_record(brute_force, i++, furi_string_get_cstr(signal));
 
-    bool success = infrared_brute_force_calculate_messages(brute_force);
+    success = infrared_brute_force_calculate_messages(brute_force);
     if(success) {
         uint32_t record_count;
         uint32_t index = 0;
         int records_sent = 0;
+        bool running = false;
 
-        bool running = infrared_brute_force_start(brute_force, index, &record_count);
+        running = infrared_brute_force_start(brute_force, index, &record_count);
+        if(record_count <= 0) {
+            printf("Invalid signal.\n");
+            infrared_brute_force_reset(brute_force);
+            return;
+        }
 
         printf("Sending %ld codes to the tv.\r\n", record_count);
         printf("Press Ctrl-C to stop.\r\n");
@@ -496,7 +503,7 @@ static void
         printf("Invalid signal.\r\n");
     }
 
-    infrared_brute_force_free(brute_force);
+    infrared_brute_force_reset(brute_force);
 }
 
 static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
