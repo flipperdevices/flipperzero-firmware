@@ -1,0 +1,14 @@
+App(
+    appid="SAM",
+    name="SAM",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="sam_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=4 * 1024,
+    order=20,
+    fap_icon="../../assets/icons/Archive/music_10px.png",
+    fap_category="Misc",
+)
