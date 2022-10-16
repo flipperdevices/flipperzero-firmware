@@ -39,6 +39,7 @@ const char* resource = "https://maker.ifttt.com/trigger/triggername/json/with/ke
 Enter the SSID and password of your WiFi connection
 
 const char *ssidIFTTT = "SSID";
+
 const char *passwordIFTTT = "password";
 
 COMPILE AND FLASH YOUR ESP8266!!!
