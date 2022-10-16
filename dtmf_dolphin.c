@@ -67,14 +67,9 @@ static void app_free(DTMFDolphinApp* app) {
     variable_item_list_free(app->main_menu_list);
 
     dtmf_dolphin_dialer_free(app->dtmf_dolphin_dialer);
-    // widget_free(app->dtmf_dolphin_play);
 
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
-
-    // button_panel_free(app->dialer_button_panel);
-    // button_panel_free(app->bluebox_button_panel);
-    // button_panel_free(app->redbox_button_panel);
 
     notification_message(app->notification, &sequence_display_backlight_enforce_auto);
 

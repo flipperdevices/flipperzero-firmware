@@ -12,6 +12,11 @@ static void dtmf_dolphin_scene_start_main_menu_enter_callback(void* context, uin
             app->view_dispatcher,
             DTMFDolphinEventStartBluebox
         );
+    } else if (index == DTMFDolphinSceneStateMisc) {
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher,
+            DTMFDolphinEventStartMisc
+        );
     }
 }
 
