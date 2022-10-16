@@ -63,3 +63,10 @@ Max butthurt: 10
 Min level: 2
 Max level: 30
 Weight: 3
+
+Name: L1_Purple_rain_128x64
+Min butthurt: 0
+Max butthurt: 8
+Min level: 1
+Max level: 3
+Weight: 3
