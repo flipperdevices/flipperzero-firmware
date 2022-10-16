@@ -28,4 +28,4 @@ you will need: 1 ESP8266 (I recommend ESP01 for the size) and 2 buttons.
 - Type the name of the event, "button_pressed".
 - Final URL should appear at the bottom of the web page. We'll need to copy that URL.
 
-# 
+# Warnings for the first beta version
