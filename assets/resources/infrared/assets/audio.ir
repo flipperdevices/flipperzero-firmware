@@ -1,3 +1,201 @@
 Filetype: IR library file
 Version: 1
 #
+# Model: NoName Unknown Audio remote
+name: Play
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 43 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 15 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 07 00 00 00
+#
+name: Next
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 40 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 44 00 00 00
+#
+# Model: Western Digital Unknown
+name: Power
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 12 ED 00 00
+#
+name: Play
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 0A F5 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 05 FA 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 00 FF 00 00
+#
+name: Next
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 01 FE 00 00
+#
+name: Prev
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 02 FD 00 00
+#
+name: Eject
+type: parsed
+protocol: NECext
+address: 84 79 00 00
+command: 10 EF 00 00
+#
+# Model: Yamaha RAV15
+name: Play
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 43 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 15 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 07 00 00 00
+#
+name: Next
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 40 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 44 00 00 00
+#
+# Model: Yamaha RX-V375
+name: Power
+type: parsed
+protocol: NEC
+address: 7E 00 00 00
+command: 2A 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 7A 00 00 00
+command: 1A 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 7A 00 00 00
+command: 1C 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 7A 00 00 00
+command: 1B 00 00 00
+#
+# Model: SVEN HT-415
+name: Power
+type: parsed
+protocol: NEC
+address: 41 00 00 00
+command: 42 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 41 00 00 00
+command: 0B 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 41 00 00 00
+command: 1B 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 41 00 00 00
+command: 56 00 00 00
+#
+# Model: HUAYU AKB74475490
+name: Power
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 08 00 00 00
+#
+name: Play
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: B0 00 00 00
+#
+name: Vol_up
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 02 00 00 00
+#
+name: Vol_dn
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 03 00 00 00
+#
+name: Prev
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 8F 00 00 00
+#
+name: Next
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 8E 00 00 00
+#
+name: Mute
+type: parsed
+protocol: NEC
+address: 04 00 00 00
+command: 09 00 00 00
+#
