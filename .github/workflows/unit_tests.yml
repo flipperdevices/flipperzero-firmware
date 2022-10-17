@@ -19,6 +19,8 @@ jobs:
       - name: 'Compile unit tests firmware'
         continue-on-error: true
         run: |
+          pwd
+          ls -lah
           ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
 
       - name: 'Copy unit tests to flipper'
@@ -29,4 +31,5 @@ jobs:
       - name: 'Run units and validate results'
         continue-on-error: true
         run: |
-          poetry run python3 /home/kvolkov/units/run.py Nyroplos
+          cd /home/kvolkov/QA-flipper-units/
+          poetry run python3 run_units.py Mod2
