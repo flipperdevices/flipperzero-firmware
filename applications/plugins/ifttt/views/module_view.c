@@ -78,7 +78,9 @@ static void module_view_draw_callback(Canvas* canvas, void* context) {
 
 static void module_view_process(ModuleView* module_view, InputEvent* event) {
     with_view_model(
-        module_view->view, (ModuleViewModel * model) {
+        module_view->view,
+        ModuleViewModel * model,
+        {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                 } else if(event->key == InputKeyDown) {
@@ -101,8 +103,8 @@ static void module_view_process(ModuleView* module_view, InputEvent* event) {
                 if(event->key == InputKeyBack) {
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool module_view_input_callback(InputEvent* event, void* context) {
@@ -147,8 +149,10 @@ View* module_view_get_view(ModuleView* module_view) {
 void module_view_set_data(ModuleView* module_view, bool connected) {
     furi_assert(module_view);
     with_view_model(
-        module_view->view, (ModuleViewModel * model) {
+        module_view->view,
+        ModuleViewModel * model,
+        {
             model->connected = connected;
-            return true;
-        });
+        }
+        true);
 }

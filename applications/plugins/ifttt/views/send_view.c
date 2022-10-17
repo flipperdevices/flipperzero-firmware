@@ -62,7 +62,9 @@ static void send_view_draw_callback(Canvas* canvas, void* context) {
 
 static void send_view_process(SendView* send_view, InputEvent* event) {
     with_view_model(
-        send_view->view, (SendViewModel * model) {
+        send_view->view,
+        SendViewModel * model,
+        {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                 } else if(event->key == InputKeyDown) {
@@ -87,8 +89,8 @@ static void send_view_process(SendView* send_view, InputEvent* event) {
                 if(event->key == InputKeyBack) {
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool send_view_input_callback(InputEvent* event, void* context) {
@@ -131,8 +133,10 @@ View* send_view_get_view(SendView* send_view) {
 void send_view_set_data(SendView* send_view, bool connected) {
     furi_assert(send_view);
     with_view_model(
-        send_view->view, (SendViewModel * model) {
+        send_view->view,
+        SendViewModel * model,
+        {
             model->connected = connected;
-            return true;
-        });
+        },
+        true);
 }
