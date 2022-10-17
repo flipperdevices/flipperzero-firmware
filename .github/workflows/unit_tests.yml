@@ -1,0 +1,32 @@
+name: 'unit_tests'
+
+on:
+  push:
+    branches:
+      - doom/2887_actions_units
+    tags:
+      - '*'
+  pull_request:
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+
+jobs:
+  main:
+    runs-on: [self-hosted, FlipperZeroTest]
+    steps:
+      - name: 'Compile unit tests firmware'
+        continue-on-error: true
+        run: |
+          ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
+
+      - name: 'Copy unit tests to flipper'
+        continue-on-error: true
+        run: |
+          ./scripts/storage.py send assets/unit_tests /ext/unit_tests
+
+      - name: 'Run units and validate results'
+        continue-on-error: true
+        run: |
+          poetry run python3 /home/kvolkov/units/run.py Nyroplos
