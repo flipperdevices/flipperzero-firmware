@@ -161,9 +161,8 @@ bool mf_classic_dict_get_next_key_str(MfClassicDict* dict, FuriString* key) {
     furi_string_reset(key);
     while(!key_read) {
         if(!stream_read_line(dict->stream, key)) break;
-        furi_string_trim(key);
         if(furi_string_get_char(key, 0) == '#') continue;
-        if(furi_string_size(key) != NFC_MF_CLASSIC_KEY_LEN - 1) continue;
+        if(furi_string_size(key) != NFC_MF_CLASSIC_KEY_LEN) continue;
         furi_string_left(key, 12);
         key_read = true;
     }
