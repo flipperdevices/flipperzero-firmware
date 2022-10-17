@@ -21,7 +21,7 @@ enum RemoteTypes { TV = 0, AC = 1 };
 static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args);
 static void infrared_cli_start_ir_tx(Cli* cli, FuriString* args);
 static void infrared_cli_process_decode(Cli* cli, FuriString* args);
-static void infrared_cli_process_remote(Cli* cli, FuriString* args);
+static void infrared_cli_process_universal(Cli* cli, FuriString* args);
 static void infrared_cli_list_remote_signals(enum RemoteTypes remote_type);
 static void
     infrared_cli_brute_force_signals(Cli* cli, enum RemoteTypes remote_type, FuriString* signal);
@@ -33,7 +33,7 @@ static const struct {
     {.cmd = "rx", .process_function = infrared_cli_start_ir_rx},
     {.cmd = "tx", .process_function = infrared_cli_start_ir_tx},
     {.cmd = "decode", .process_function = infrared_cli_process_decode},
-    {.cmd = "universal", .process_function = infrared_cli_process_remote},
+    {.cmd = "universal", .process_function = infrared_cli_process_universal},
 };
 
 static void signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -344,7 +344,7 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
     furi_record_close(RECORD_STORAGE);
 }
 
-static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
+static void infrared_cli_process_universal(Cli* cli, FuriString* args) {
     enum RemoteTypes Remote;
 
     FuriString* command;
@@ -355,16 +355,16 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
     signal = furi_string_alloc();
 
     do {
-        if(!args_read_string_and_trim(args, command) || args_length(args) > 5) {
+        if(!args_read_string_and_trim(args, command)) {
             infrared_cli_print_usage();
             break;
         }
 
-        if(strncmp(furi_string_get_cstr(command), "list", 4) == 0) {
+        if(furi_string_cmp_str(command, "list") == 0) {
             args_read_string_and_trim(args, remote);
-            if(strncmp(furi_string_get_cstr(remote), "tv", 2) == 0) {
+            if(furi_string_cmp_str(remote, "tv") == 0) {
                 Remote = TV;
-            } else if(strncmp(furi_string_get_cstr(remote), "ac", 2) == 0) {
+            } else if(furi_string_cmp_str(remote, "ac") == 0) {
                 Remote = AC;
             } else {
                 printf("Invalid remote type.\r\n");
@@ -374,9 +374,9 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
             break;
         }
 
-        if(strncmp(furi_string_get_cstr(command), "tv", 2) == 0) {
+        if(furi_string_cmp_str(command, "tv") == 0) {
             Remote = TV;
-        } else if(strncmp(furi_string_get_cstr(command), "ac", 2) == 0) {
+        } else if(furi_string_cmp_str(command, "ac") == 0) {
             Remote = AC;
         } else {
             printf("Invalid remote type.\r\n");
