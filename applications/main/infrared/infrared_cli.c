@@ -503,6 +503,7 @@ static void
     }
 
     infrared_brute_force_reset(brute_force);
+    infrared_brute_force_free(brute_force);
 }
 
 static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
