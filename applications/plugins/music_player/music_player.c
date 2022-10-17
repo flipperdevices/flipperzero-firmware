@@ -8,8 +8,6 @@
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 
-#include <m-string.h>
-
 #define TAG "MusicPlayer"
 
 #define MUSIC_PLAYER_APP_PATH_FOLDER ANY_PATH("music_player")
@@ -250,12 +248,16 @@ static void music_player_worker_callback(
     view_port_update(music_player->view_port);
 }
 
+void music_player_clear(MusicPlayer* instance) {
+    memset(instance->model->duration_history, 0xff, MUSIC_PLAYER_SEMITONE_HISTORY_SIZE);
+    memset(instance->model->semitone_history, 0xff, MUSIC_PLAYER_SEMITONE_HISTORY_SIZE);
+    music_player_worker_clear(instance->worker);
+}
+
 MusicPlayer* music_player_alloc() {
     MusicPlayer* instance = malloc(sizeof(MusicPlayer));
 
     instance->model = malloc(sizeof(MusicPlayerModel));
-    memset(instance->model->duration_history, 0xff, MUSIC_PLAYER_SEMITONE_HISTORY_SIZE);
-    memset(instance->model->semitone_history, 0xff, MUSIC_PLAYER_SEMITONE_HISTORY_SIZE);
     instance->model->volume = 3;
 
     instance->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -266,6 +268,8 @@ MusicPlayer* music_player_alloc() {
     music_player_worker_set_volume(
         instance->worker, MUSIC_PLAYER_VOLUMES[instance->model->volume]);
     music_player_worker_set_callback(instance->worker, music_player_worker_callback, instance);
+
+    music_player_clear(instance);
 
     instance->view_port = view_port_alloc();
     view_port_draw_callback_set(instance->view_port, render_callback, instance);
@@ -296,14 +300,14 @@ void music_player_free(MusicPlayer* instance) {
 int32_t music_player_app(void* p) {
     MusicPlayer* music_player = music_player_alloc();
 
-    string_t file_path;
-    string_init(file_path);
+    FuriString* file_path;
+    file_path = furi_string_alloc();
 
     do {
         if(p && strlen(p)) {
-            string_cat_str(file_path, p);
+            furi_string_set(file_path, (const char*)p);
         } else {
-            string_set_str(file_path, MUSIC_PLAYER_APP_PATH_FOLDER);
+            furi_string_set(file_path, MUSIC_PLAYER_APP_PATH_FOLDER);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
@@ -320,7 +324,7 @@ int32_t music_player_app(void* p) {
             }
         }
 
-        if(!music_player_worker_load(music_player->worker, string_get_cstr(file_path))) {
+        if(!music_player_worker_load(music_player->worker, furi_string_get_cstr(file_path))) {
             FURI_LOG_E(TAG, "Unable to load file");
             break;
         }
@@ -352,9 +356,11 @@ int32_t music_player_app(void* p) {
         }
 
         music_player_worker_stop(music_player->worker);
-    } while(0);
+        if(p && strlen(p)) break; // Exit instead of going to browser if launched with arg
+        music_player_clear(music_player);
+    } while(1);
 
-    string_clear(file_path);
+    furi_string_free(file_path);
     music_player_free(music_player);
 
     return 0;
