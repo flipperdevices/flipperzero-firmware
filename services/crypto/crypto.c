@@ -56,8 +56,28 @@ void totp_crypto_seed_iv(PluginState* plugin_state, uint8_t* pin, uint8_t pin_le
 
     memcpy(&plugin_state->iv[0], &plugin_state->base_iv[0], TOTP_IV_SIZE);
     if (pin != NULL && pin_length > 0) {
-        for (uint8_t i = 0; i < pin_length; i++) {
+        uint8_t max_i; 
+        if (pin_length > TOTP_IV_SIZE) {
+            max_i = TOTP_IV_SIZE;
+        } else {
+            max_i = pin_length;
+        }
+
+        for (uint8_t i = 0; i < max_i; i++) {
             plugin_state->iv[i] = plugin_state->iv[i] ^ (uint8_t)(pin[i] * (i + 1));
+        }
+    } else {
+        uint8_t max_i;
+        size_t uid_size = furi_hal_version_uid_size();
+        if (uid_size > TOTP_IV_SIZE) {
+            max_i = TOTP_IV_SIZE;
+        } else {
+            max_i = uid_size;
+        }
+
+        const uint8_t* uid = furi_hal_version_uid();
+        for(uint8_t i = 0; i < max_i; i++) {
+            plugin_state->iv[i] = plugin_state->iv[i] ^ uid[i];
         }
     }
 

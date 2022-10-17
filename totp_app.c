@@ -37,7 +37,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void totp_state_init(PluginState* const plugin_state) {
+static bool totp_state_init(PluginState* const plugin_state) {
     plugin_state->gui = furi_record_open(RECORD_GUI);
     plugin_state->notification = furi_record_open(RECORD_NOTIFICATION);
     plugin_state->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -61,8 +61,20 @@ static void totp_state_init(PluginState* const plugin_state) {
         totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
     } else {
         totp_crypto_seed_iv(plugin_state, NULL, 0);
-        totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+        if (totp_crypto_verify_key(plugin_state)) {
+            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+        } else {
+            FURI_LOG_E(LOGGING_TAG, "Digital signature verification failed. Looks like conf file was created on another flipper and can't be used on any other");
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_buttons(message, "Exit", NULL, NULL);
+            dialog_message_set_text(message, "Digital signature verification failed", SCREEN_WIDTH_CENTER, SCREEN_HEIGHT_CENTER, AlignCenter, AlignCenter);
+            dialog_message_show(plugin_state->dialogs, message);
+            dialog_message_free(message);
+            return false;
+        }
     }
+
+    return true;
 }
 
 static void dispose_plugin_state(PluginState* plugin_state) {
@@ -94,7 +106,11 @@ int32_t totp_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     PluginState* plugin_state = malloc(sizeof(PluginState));
 
-    totp_state_init(plugin_state);
+    if (!totp_state_init(plugin_state)) {
+        FURI_LOG_E(LOGGING_TAG, "App state initialization failed\r\n");
+        dispose_plugin_state(plugin_state);
+        return 254;
+    }
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
@@ -126,7 +142,7 @@ int32_t totp_app() {
             }
 
             processing = totp_scene_director_handle_event(&event, plugin_state);
-        } else if (plugin_state->current_scene != TotpSceneAuthentication && furi_get_tick() - last_user_interaction_time > IDLE_TIMEOUT) {
+        } else if (plugin_state->pin_set && plugin_state->current_scene != TotpSceneAuthentication && furi_get_tick() - last_user_interaction_time > IDLE_TIMEOUT) {
             totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
         }
 

@@ -231,14 +231,18 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
     flipper_format_rewind(fff_data_file);
 
     uint32_t crypto_size;
-    if (flipper_format_get_value_count(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERIFY, &crypto_size)) {
+    if (flipper_format_get_value_count(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERIFY, &crypto_size) && crypto_size > 0) {
         plugin_state->crypto_verify_data = malloc(sizeof(uint8_t) * crypto_size);
         plugin_state->crypto_verify_data_length = crypto_size;
         if (!flipper_format_read_hex(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERIFY, plugin_state->crypto_verify_data, crypto_size)) {
             FURI_LOG_D(LOGGING_TAG, "Missing crypto verify token");
             free(plugin_state->crypto_verify_data);
             plugin_state->crypto_verify_data = NULL;
+            plugin_state->crypto_verify_data_length = 0;
         }
+    } else {
+        plugin_state->crypto_verify_data = NULL;
+        plugin_state->crypto_verify_data_length = 0;
     }
 
     flipper_format_rewind(fff_data_file);
