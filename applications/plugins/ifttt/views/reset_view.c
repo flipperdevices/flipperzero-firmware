@@ -8,10 +8,7 @@
 #define MODULE_CONTROL_COMMAND_RESET 'a'
 #define FLIPPERZERO_SERIAL_BAUD 115200
 
-typedef enum ESerialCommand
-{
-    ESerialCommand_Reset
-} ESerialCommand;
+typedef enum ESerialCommand { ESerialCommand_Reset } ESerialCommand;
 
 struct ResetView {
     View* view;
@@ -28,17 +25,15 @@ static void Shake(void) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-void send_serial_command_reset(ESerialCommand command)
-{
-    uint8_t data[1] = { 0 };
+void send_serial_command_reset(ESerialCommand command) {
+    uint8_t data[1] = {0};
 
-    switch(command)
-    {
-        case ESerialCommand_Reset:
-            data[0] = MODULE_CONTROL_COMMAND_RESET;
-            break;
-        default:
-            return;          
+    switch(command) {
+    case ESerialCommand_Reset:
+        data[0] = MODULE_CONTROL_COMMAND_RESET;
+        break;
+    default:
+        return;
     };
 
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
@@ -133,10 +128,5 @@ View* reset_view_get_view(ResetView* reset_view) {
 void reset_view_set_data(ResetView* reset_view, bool connected) {
     furi_assert(reset_view);
     with_view_model(
-        reset_view->view,
-        ResetViewModel * model,
-        {
-            model->connected = connected;
-        },
-        true);
+        reset_view->view, ResetViewModel * model, { model->connected = connected; }, true);
 }

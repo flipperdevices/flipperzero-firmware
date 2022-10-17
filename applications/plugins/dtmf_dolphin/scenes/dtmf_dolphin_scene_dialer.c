@@ -2,17 +2,15 @@
 // #include "../dtmf_dolphin_data.h"
 // #include "../dtmf_dolphin_audio.h"
 
-
-void dtmf_dolphin_scene_dialer_on_enter(void *context) {
+void dtmf_dolphin_scene_dialer_on_enter(void* context) {
     DTMFDolphinApp* app = context;
     DTMFDolphinScene scene_id = DTMFDolphinSceneDialer;
     enum DTMFDolphinSceneState state = scene_manager_get_scene_state(app->scene_manager, scene_id);
 
-    switch (state)
-    {
+    switch(state) {
     case DTMFDolphinSceneStateBluebox:
         dtmf_dolphin_data_set_current_section(DTMF_DOLPHIN_TONE_BLOCK_BLUEBOX);
-        break;    
+        break;
     case DTMFDolphinSceneStateRedboxUS:
         dtmf_dolphin_data_set_current_section(DTMF_DOLPHIN_TONE_BLOCK_REDBOX_US);
         break;

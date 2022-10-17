@@ -11,11 +11,7 @@
 
 bool configState;
 
-typedef enum ESerialCommand
-{
-    ESerialCommand_Config_On,
-    ESerialCommand_Config_Off
-} ESerialCommand;
+typedef enum ESerialCommand { ESerialCommand_Config_On, ESerialCommand_Config_Off } ESerialCommand;
 
 struct ModuleView {
     View* view;
@@ -34,20 +30,18 @@ static void Shake(void) {
 }
 */
 
-void send_serial_command_module(ESerialCommand command)
-{
-    uint8_t data[1] = { 0 };
+void send_serial_command_module(ESerialCommand command) {
+    uint8_t data[1] = {0};
 
-    switch(command)
-    {
-        case ESerialCommand_Config_On:
-            data[0] = MODULE_CONTROL_COMMAND_CONFIG_ON;
-            break;
-        case ESerialCommand_Config_Off:
-            data[0] = MODULE_CONTROL_COMMAND_CONFIG_OFF;
-            break;
-        default:
-            return;          
+    switch(command) {
+    case ESerialCommand_Config_On:
+        data[0] = MODULE_CONTROL_COMMAND_CONFIG_ON;
+        break;
+    case ESerialCommand_Config_Off:
+        data[0] = MODULE_CONTROL_COMMAND_CONFIG_OFF;
+        break;
+    default:
+        return;
     };
 
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
@@ -66,10 +60,10 @@ static void module_view_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str_aligned(canvas, 64, 45, AlignCenter, AlignTop, "and hold back to return");
     canvas_draw_str_aligned(canvas, 64, 55, AlignCenter, AlignTop, "to the menu");
 
-    if(configState == false){
+    if(configState == false) {
         send_serial_command_module(ESerialCommand_Config_On);
         configState = true;
-    }   
+    }
 
     // Right
     if(model->right_pressed) {
@@ -149,10 +143,5 @@ View* module_view_get_view(ModuleView* module_view) {
 void module_view_set_data(ModuleView* module_view, bool connected) {
     furi_assert(module_view);
     with_view_model(
-        module_view->view,
-        ModuleViewModel * model,
-        {
-            model->connected = connected;
-        },
-        true);
+        module_view->view, ModuleViewModel * model, { model->connected = connected; }, true);
 }

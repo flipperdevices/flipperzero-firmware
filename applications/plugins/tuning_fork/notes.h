@@ -1,7 +1,6 @@
 #ifndef NOTES
 #define NOTES
 
-
 #define C0 16.35f
 #define Cs0 17.32f
 #define Db0 17.32f
@@ -157,4 +156,3 @@
 #define B8 7902.13f
 
 #endif //NOTES
-

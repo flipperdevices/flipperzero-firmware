@@ -54,11 +54,11 @@ bool virtual_button_scene_start_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == VirtualButtonSubmenuIndexSendView) {
             scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneSendView);
-        }else if(event.event == VirtualButtonSubmenuIndexModuleView) {
+        } else if(event.event == VirtualButtonSubmenuIndexModuleView) {
             scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneModuleView);
-        }else if(event.event == VirtualButtonSubmenuIndexRebootView) {
+        } else if(event.event == VirtualButtonSubmenuIndexRebootView) {
             scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneRebootView);
-        }else if(event.event == VirtualButtonSubmenuIndexResetView) {
+        } else if(event.event == VirtualButtonSubmenuIndexResetView) {
             scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneResetView);
         }
         scene_manager_set_scene_state(app->scene_manager, VirtualButtonAppSceneStart, event.event);

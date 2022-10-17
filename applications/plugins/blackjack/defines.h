@@ -23,7 +23,7 @@ typedef enum {
     EventTypeKey,
 } EventType;
 
-typedef struct{
+typedef struct {
     uint32_t animation_margin;
     uint32_t animation_duration;
     uint32_t message_duration;
@@ -45,14 +45,7 @@ typedef enum {
     GameStateDealer,
 } PlayState;
 
-typedef enum {
-    DirectionUp,
-    DirectionRight,
-    DirectionDown,
-    DirectionLeft,
-    Select,
-    None
-} Direction;
+typedef enum { DirectionUp, DirectionRight, DirectionDown, DirectionLeft, Select, None } Direction;
 
 typedef struct {
     Card player_cards[21];
@@ -75,4 +68,3 @@ typedef struct {
     unsigned int last_tick;
     unsigned int animationStart;
 } GameState;
-

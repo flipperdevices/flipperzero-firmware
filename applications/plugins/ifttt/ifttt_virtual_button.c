@@ -41,9 +41,7 @@ VirtualButtonApp* ifttt_virtual_button_app_alloc(uint32_t first_scene) {
     // Views
     app->sen_view = send_view_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        VirtualButtonAppViewSendView,
-        send_view_get_view(app->sen_view));
+        app->view_dispatcher, VirtualButtonAppViewSendView, send_view_get_view(app->sen_view));
 
     app->modul_view = module_view_alloc();
     view_dispatcher_add_view(
@@ -59,9 +57,7 @@ VirtualButtonApp* ifttt_virtual_button_app_alloc(uint32_t first_scene) {
 
     app->rese_view = reset_view_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        VirtualButtonAppViewResetView,
-        reset_view_get_view(app->rese_view));
+        app->view_dispatcher, VirtualButtonAppViewResetView, reset_view_get_view(app->rese_view));
 
     app->submenu = submenu_alloc();
     view_dispatcher_add_view(

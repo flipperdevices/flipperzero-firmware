@@ -8,10 +8,7 @@
 #define MODULE_CONTROL_COMMAND_SEND 's'
 #define FLIPPERZERO_SERIAL_BAUD 115200
 
-typedef enum ESerialCommand
-{
-    ESerialCommand_Send
-} ESerialCommand;
+typedef enum ESerialCommand { ESerialCommand_Send } ESerialCommand;
 
 struct SendView {
     View* view;
@@ -28,17 +25,15 @@ static void Shake(void) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-void send_serial_command_send(ESerialCommand command)
-{
-    uint8_t data[1] = { 0 };
+void send_serial_command_send(ESerialCommand command) {
+    uint8_t data[1] = {0};
 
-    switch(command)
-    {
-        case ESerialCommand_Send:
-            data[0] = MODULE_CONTROL_COMMAND_SEND;
-            break;
-        default:
-            return;          
+    switch(command) {
+    case ESerialCommand_Send:
+        data[0] = MODULE_CONTROL_COMMAND_SEND;
+        break;
+    default:
+        return;
     };
 
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
@@ -133,10 +128,5 @@ View* send_view_get_view(SendView* send_view) {
 void send_view_set_data(SendView* send_view, bool connected) {
     furi_assert(send_view);
     with_view_model(
-        send_view->view,
-        SendViewModel * model,
-        {
-            model->connected = connected;
-        },
-        true);
+        send_view->view, SendViewModel * model, { model->connected = connected; }, true);
 }
