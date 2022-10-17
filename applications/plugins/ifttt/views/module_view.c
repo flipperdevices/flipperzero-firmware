@@ -153,6 +153,6 @@ void module_view_set_data(ModuleView* module_view, bool connected) {
         ModuleViewModel * model,
         {
             model->connected = connected;
-        }
+        },
         true);
 }
