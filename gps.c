@@ -29,7 +29,15 @@ static void render_callback(Canvas* const canvas, void* context)
   snprintf(buffer, 64, "LAT: %f", (double)gps_uart->status.latitude);
   canvas_draw_str_aligned(canvas, 10, 10, AlignLeft, AlignBottom, buffer);
   snprintf(buffer, 64, "LON: %f", (double)gps_uart->status.longitude);
+  canvas_draw_str_aligned(canvas, 10, 20, AlignLeft, AlignBottom, buffer);
+  snprintf(buffer, 64, "C/S: %.1f / %.2fkn", (double)gps_uart->status.course, (double)gps_uart->status.speed);
   canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, buffer);
+  snprintf(buffer, 64, "ALT: %.1f %c", (double)gps_uart->status.altitude, gps_uart->status.altitude_units);
+  canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, buffer);
+  snprintf(buffer, 64, "FIX: %d", gps_uart->status.fix_quality);
+  canvas_draw_str_aligned(canvas, 10, 50, AlignLeft, AlignBottom, buffer);
+  snprintf(buffer, 64, "SAT: %d", gps_uart->status.satellites_tracked);
+  canvas_draw_str_aligned(canvas, 10, 60, AlignLeft, AlignBottom, buffer);
 
   release_mutex((ValueMutex*)context, gps_uart);
 }

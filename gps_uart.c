@@ -45,8 +45,25 @@ static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line)
       struct minmea_sentence_rmc frame;
       if (minmea_parse_rmc(&frame, line))
       {
+        gps_uart->status.valid = frame.valid;
         gps_uart->status.latitude = minmea_tocoord(&frame.latitude);
         gps_uart->status.longitude = minmea_tocoord(&frame.longitude);
+        gps_uart->status.speed = minmea_tofloat(&frame.speed);
+        gps_uart->status.course = minmea_tofloat(&frame.course);
+      }
+    } break;
+
+    case MINMEA_SENTENCE_GGA:
+    {
+      struct minmea_sentence_gga frame;
+      if (minmea_parse_gga(&frame, line))
+      {
+        gps_uart->status.latitude = minmea_tocoord(&frame.latitude);
+        gps_uart->status.longitude = minmea_tocoord(&frame.longitude);
+        gps_uart->status.altitude = minmea_tofloat(&frame.altitude);
+        gps_uart->status.altitude_units = frame.altitude_units;
+        gps_uart->status.fix_quality = frame.fix_quality;
+        gps_uart->status.satellites_tracked = frame.satellites_tracked;
       }
     } break;
 
@@ -131,8 +148,15 @@ GpsUart* gps_uart_enable()
 {
   GpsUart* gps_uart = malloc(sizeof(GpsUart));
 
+  gps_uart->status.valid = false;
   gps_uart->status.latitude = 0.0;
   gps_uart->status.longitude = 0.0;
+  gps_uart->status.speed = 0.0;
+  gps_uart->status.course = 0.0;
+  gps_uart->status.altitude = 0.0;
+  gps_uart->status.altitude_units = ' ';
+  gps_uart->status.fix_quality = 0;
+  gps_uart->status.satellites_tracked = 0;
 
   gps_uart->thread = furi_thread_alloc();
   furi_thread_set_name(gps_uart->thread, "GpsUartWorker");
