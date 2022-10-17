@@ -25,6 +25,11 @@ if ((Test-Path -Path "$firmware_path\applications_user\totp") -ne $True) {
     }    
 }
 
+$builtin_totp_path = "$firmware_path\applications\plugins\totp"
+if ((Test-Path -Path $builtin_totp_path) -eq $True) {
+    Remove-Item $builtin_totp_path -Recurse
+}
+
 Push-Location $firmware_path
 
 ./fbt $args[1..($args.Length - 1)]

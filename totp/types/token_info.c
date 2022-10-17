@@ -26,7 +26,7 @@ void token_info_set_secret(TokenInfo* token_info, const char* base32_token_secre
 
     token_info->token = totp_crypto_encrypt(plain_secret, plain_secret_length, iv, &token_info->token_length);
 
-    memset(plain_secret, 0, token_info->token_length);
+    memset(plain_secret, 0, token_secret_length);
     free(plain_secret);
 }
 
