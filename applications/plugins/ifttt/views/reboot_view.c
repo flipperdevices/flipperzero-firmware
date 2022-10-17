@@ -62,7 +62,9 @@ static void reboot_view_draw_callback(Canvas* canvas, void* context) {
 
 static void reboot_view_process(RebootView* reboot_view, InputEvent* event) {
     with_view_model(
-        reboot_view->view, (RebootViewModel * model) {
+        reboot_view->view, 
+		(RebootViewModel * model),
+		{
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                 } else if(event->key == InputKeyDown) {
@@ -87,8 +89,8 @@ static void reboot_view_process(RebootView* reboot_view, InputEvent* event) {
                 if(event->key == InputKeyBack) {
                 }
             }
-            return true;
-        });
+        },
+		true);
 }
 
 static bool reboot_view_input_callback(InputEvent* event, void* context) {
