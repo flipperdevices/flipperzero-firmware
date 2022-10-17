@@ -15,12 +15,9 @@ void picopass_scene_read_card_success_widget_callback(
 
 void picopass_scene_read_card_success_on_enter(void* context) {
     Picopass* picopass = context;
-    FuriString* credential_str;
-    FuriString* wiegand_str;
-    FuriString* sio_str;
-    credential_str = furi_string_alloc();
-    wiegand_str = furi_string_alloc();
-    sio_str = furi_string_alloc();
+    FuriString* credential_str = furi_string_alloc();
+    FuriString* wiegand_str = furi_string_alloc();
+    FuriString* sio_str = furi_string_alloc();
 
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
@@ -31,7 +28,8 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
-    if(pacs->record.bitLength == 0) {
+    // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
+    if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
 
         if(pacs->se_enabled) {
