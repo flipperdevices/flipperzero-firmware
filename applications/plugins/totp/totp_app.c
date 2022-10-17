@@ -16,12 +16,14 @@
 #include "types/event_type.h"
 #include "types/common.h"
 #include "scenes/scene_director.h"
+#include "services/ui/constants.h"
+#include "services/crypto/crypto.h"
 
 #define IDLE_TIMEOUT 60000
 
 static void render_callback(Canvas* const canvas, void* ctx) {
     PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if(plugin_state != NULL && !plugin_state->changing_scene) {
+    if (plugin_state != NULL && !plugin_state->changing_scene) {
         totp_scene_director_render(canvas, plugin_state);
     }
 
@@ -35,14 +37,44 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void totp_state_init(PluginState* const plugin_state) {
+static bool totp_state_init(PluginState* const plugin_state) {
     plugin_state->gui = furi_record_open(RECORD_GUI);
     plugin_state->notification = furi_record_open(RECORD_NOTIFICATION);
     plugin_state->dialogs = furi_record_open(RECORD_DIALOGS);
     totp_config_file_load_base(plugin_state);
 
     totp_scene_director_init_scenes(plugin_state);
-    totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
+
+    if (plugin_state->crypto_verify_data == NULL) {
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_buttons(message, "No", NULL, "Yes");
+        dialog_message_set_text(message, "Would you like to setup PIN?", SCREEN_WIDTH_CENTER, SCREEN_HEIGHT_CENTER, AlignCenter, AlignCenter);
+        DialogMessageButton dialog_result = dialog_message_show(plugin_state->dialogs, message);
+        dialog_message_free(message);
+        if (dialog_result == DialogMessageButtonRight) {
+            totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
+        } else {
+            totp_crypto_seed_iv(plugin_state, NULL, 0);
+            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+        }
+    } else if (plugin_state->pin_set) {
+        totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
+    } else {
+        totp_crypto_seed_iv(plugin_state, NULL, 0);
+        if (totp_crypto_verify_key(plugin_state)) {
+            totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
+        } else {
+            FURI_LOG_E(LOGGING_TAG, "Digital signature verification failed. Looks like conf file was created on another flipper and can't be used on any other");
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_buttons(message, "Exit", NULL, NULL);
+            dialog_message_set_text(message, "Digital signature verification failed", SCREEN_WIDTH_CENTER, SCREEN_HEIGHT_CENTER, AlignCenter, AlignCenter);
+            dialog_message_show(plugin_state->dialogs, message);
+            dialog_message_free(message);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 static void dispose_plugin_state(PluginState* plugin_state) {
@@ -56,7 +88,7 @@ static void dispose_plugin_state(PluginState* plugin_state) {
 
     ListNode* node = plugin_state->tokens_list;
     ListNode* tmp;
-    while(node != NULL) {
+    while (node != NULL) {
         tmp = node->next;
         TokenInfo* tokenInfo = (TokenInfo*)node->data;
         token_info_free(tokenInfo);
@@ -64,7 +96,7 @@ static void dispose_plugin_state(PluginState* plugin_state) {
         node = tmp;
     }
 
-    if(plugin_state->crypto_verify_data != NULL) {
+    if (plugin_state->crypto_verify_data != NULL) {
         free(plugin_state->crypto_verify_data);
     }
     free(plugin_state);
@@ -74,7 +106,11 @@ int32_t totp_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     PluginState* plugin_state = malloc(sizeof(PluginState));
 
-    totp_state_init(plugin_state);
+    if (!totp_state_init(plugin_state)) {
+        FURI_LOG_E(LOGGING_TAG, "App state initialization failed\r\n");
+        dispose_plugin_state(plugin_state);
+        return 254;
+    }
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
@@ -95,20 +131,18 @@ int32_t totp_app() {
     bool processing = true;
     uint32_t last_user_interaction_time = furi_get_tick();
     while(processing) {
-        if(plugin_state->changing_scene) continue;
+        if (plugin_state->changing_scene) continue;
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
 
         if(event_status == FuriStatusOk) {
-            if(event.type == EventTypeKey) {
+            if (event.type == EventTypeKey) {
                 last_user_interaction_time = furi_get_tick();
             }
 
             processing = totp_scene_director_handle_event(&event, plugin_state);
-        } else if(
-            plugin_state->current_scene != TotpSceneAuthentication &&
-            furi_get_tick() - last_user_interaction_time > IDLE_TIMEOUT) {
+        } else if (plugin_state->pin_set && plugin_state->current_scene != TotpSceneAuthentication && furi_get_tick() - last_user_interaction_time > IDLE_TIMEOUT) {
             totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication, NULL);
         }
 

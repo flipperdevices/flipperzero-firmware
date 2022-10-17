@@ -20,6 +20,7 @@
 - Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - Added: [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
 - Added: [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
+- Updated: [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
