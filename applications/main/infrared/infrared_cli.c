@@ -355,7 +355,7 @@ static void infrared_cli_process_remote(Cli* cli, FuriString* args) {
     signal = furi_string_alloc();
 
     do {
-        if(!args_read_string_and_trim(args, command) || args_length(args) > 4) {
+        if(!args_read_string_and_trim(args, command) || args_length(args) > 5) {
             infrared_cli_print_usage();
             break;
         }
