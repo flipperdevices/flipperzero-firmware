@@ -62,21 +62,23 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
                    dict->stream,
                    MF_CLASSIC_DICT_UNIT_TEST_PATH,
                    FSAM_READ_WRITE,
-                   FSOM_CREATE_ALWAYS)) {
+                   FSOM_OPEN_ALWAYS)) {
                 buffered_file_stream_close(dict->stream);
                 break;
             }
         }
 
         // Check for new line ending
-        if(!stream_seek(dict->stream, -1, StreamOffsetFromEnd)) break;
-        uint8_t last_char = 0;
-        if(stream_read(dict->stream, &last_char, 1) != 1) break;
-        if(last_char != '\n') {
-            FURI_LOG_D(TAG, "Adding new line ending");
-            if(stream_write_char(dict->stream, '\n') != 1) break;
+        if(!stream_eof(dict->stream)) {
+            if(!stream_seek(dict->stream, -1, StreamOffsetFromEnd)) break;
+            uint8_t last_char = 0;
+            if(stream_read(dict->stream, &last_char, 1) != 1) break;
+            if(last_char != '\n') {
+                FURI_LOG_D(TAG, "Adding new line ending");
+                if(stream_write_char(dict->stream, '\n') != 1) break;
+            }
+            if(!stream_rewind(dict->stream)) break;
         }
-        if(!stream_rewind(dict->stream)) break;
 
         // Read total amount of keys
         FuriString* next_line;
