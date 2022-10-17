@@ -63,7 +63,7 @@ static void reboot_view_draw_callback(Canvas* canvas, void* context) {
 static void reboot_view_process(RebootView* reboot_view, InputEvent* event) {
     with_view_model(
         reboot_view->view, 
-		(RebootViewModel * model),
+		RebootViewModel * model,
 		{
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
@@ -133,8 +133,10 @@ View* reboot_view_get_view(RebootView* reboot_view) {
 void reboot_view_set_data(RebootView* reboot_view, bool connected) {
     furi_assert(reboot_view);
     with_view_model(
-        reboot_view->view, (RebootViewModel * model) {
+        reboot_view->view, 
+		RebootViewModel * model,
+		{
             model->connected = connected;
-            return true;
-        });
+        },
+		true);
 }
