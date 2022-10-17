@@ -5,17 +5,19 @@
 #define GPS_BAUDRATE 9600
 #define RX_BUF_SIZE 1024
 
-typedef struct {
-    float latitude;
-    float longitude;
+typedef struct
+{
+  float latitude;
+  float longitude;
 } GpsStatus;
 
-typedef struct {
-    FuriThread* thread;
-    FuriStreamBuffer* rx_stream;
-    uint8_t rx_buf[RX_BUF_SIZE];
+typedef struct
+{
+  FuriThread* thread;
+  FuriStreamBuffer* rx_stream;
+  uint8_t rx_buf[RX_BUF_SIZE];
 
-    GpsStatus status;
+  GpsStatus status;
 } GpsUart;
 
 GpsUart* gps_uart_enable();
