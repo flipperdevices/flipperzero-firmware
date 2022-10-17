@@ -13,13 +13,6 @@
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-17 16:23 GMT`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-17 16:23 GMT`
-- Unleashed PR [feature[animation]: purple rain animation #111 (By wotori)](https://github.com/DarkFlippers/unleashed-firmware/pull/111)
-- Unleashed PR [Minesweeper: Set cursor to initial position on death #113 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/113)
-- Unleashed PR [Flappy: Border hitboxes, bigger Pilars #114 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114)
-- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
-- Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
-- Added: [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
-- Added: [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - Updated: [TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
 
 <details>
