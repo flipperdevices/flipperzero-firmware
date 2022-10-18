@@ -51,6 +51,7 @@ double scorched_tanks_tan[91] = {
     -2.246, -2.356, -2.475, -2.605, -2.747, -2.904, -3.078, -3.271, -3.487, -3.732, -4.011,
     -4.331, -4.704, -5.144, -5.671, -6.313, -7.115, -8.144, -9.513, -11.429, -14.298, -19.077,
     -28.627, -57.254, -90747.269};
+unsigned char scorched_tanks_ground_modifiers[SCREEN_WIDTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  };
 
 typedef struct
 {
@@ -134,7 +135,7 @@ void scorched_tanks_generate_ground(Game *game_state)
                 newPoint = newPoint < MIN_GROUND_HEIGHT ? MIN_GROUND_HEIGHT : newPoint;
                 newPoint = newPoint > MAX_GROUND_HEIGHT ? MAX_GROUND_HEIGHT : newPoint;
                 game_state->ground[index].x = index;
-                game_state->ground[index].y = newPoint;
+                game_state->ground[index].y = newPoint - scorched_tanks_ground_modifiers[a];
                 lastHeight = newPoint;
             }
             else
@@ -170,7 +171,7 @@ void scorched_tanks_calculate_trajectory(Game *game_state)
 {
     if (game_state->player.isShooting)
     {
-        game_state->bulletVector.x += ((double)game_state->windSpeed - MAX_WIND / 2) / 50;
+        game_state->bulletVector.x += ((double)game_state->windSpeed - MAX_WIND / 2) / 40;
         game_state->bulletVector.y += GRAVITY_FORCE;
 
         game_state->bulletPosition.x += game_state->bulletVector.x;
