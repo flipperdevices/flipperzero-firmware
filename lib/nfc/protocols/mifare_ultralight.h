@@ -171,7 +171,7 @@ typedef struct {
 } MfUltralightReader;
 
 // TODO rework with reader analyzer
-// typedef void (*MfUltralightAuthReceivedCallback)(MfUltralightAuth auth, void* context);
+typedef void (*MfUltralightAuthReceivedCallback)(MfUltralightAuth auth, void* context);
 
 typedef struct {
     MfUltralightData data;
