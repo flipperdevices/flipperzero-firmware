@@ -51,7 +51,7 @@ double scorched_tanks_tan[91] = {
     -2.246, -2.356, -2.475, -2.605, -2.747, -2.904, -3.078, -3.271, -3.487, -3.732, -4.011,
     -4.331, -4.704, -5.144, -5.671, -6.313, -7.115, -8.144, -9.513, -11.429, -14.298, -19.077,
     -28.627, -57.254, -90747.269};
-unsigned char scorched_tanks_ground_modifiers[SCREEN_WIDTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0  };
+unsigned char scorched_tanks_ground_modifiers[SCREEN_WIDTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 typedef struct
 {
@@ -207,6 +207,34 @@ void scorched_tanks_calculate_trajectory(Game *game_state)
     }
 }
 
+static void scorched_tanks_draw_tank(Canvas *const canvas, unsigned char x, unsigned char y, bool isPlayer)
+{
+    unsigned char lineIndex = 0;
+
+    if (isPlayer)
+    {
+        // Draw tank base
+        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex++);
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+
+        // draw turret
+        canvas_draw_line(canvas, x - 2, y - lineIndex, x + 1, y - lineIndex++);
+        canvas_draw_line(canvas, x - 2, y - lineIndex, x, y - lineIndex++);
+    }
+    else
+    {
+        // Draw tank base
+        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex++);
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+
+        // draw turret
+        canvas_draw_line(canvas, x - 1, y - lineIndex, x + 2, y - lineIndex++);
+        canvas_draw_line(canvas, x, y - lineIndex, x + 2, y - lineIndex++);
+    }
+}
+
 static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 {
     const Game *game_state = acquire_mutex((ValueMutex *)ctx, 25);
@@ -240,17 +268,9 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
         }
     }
 
-    canvas_draw_disc(
-        canvas,
-        game_state->enemy.locationX,
-        game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE,
-        3);
+    scorched_tanks_draw_tank(canvas, game_state->enemy.locationX, game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE, true);
 
-    canvas_draw_circle(
-        canvas,
-        game_state->player.locationX,
-        game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE,
-        3);
+    scorched_tanks_draw_tank(canvas, game_state->player.locationX, game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE, false);
 
     auto aimX1 = game_state->player.locationX;
     auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
@@ -260,7 +280,7 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
     int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
     int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
 
-    canvas_draw_line(canvas, aimX1, aimY1, aimX2, aimY2);
+    canvas_draw_line(canvas, aimX1 + 1, aimY1 - 3, aimX2 + 1, aimY2 - 3);
 
     canvas_set_font(canvas, FontSecondary);
 
@@ -337,8 +357,14 @@ static void scorched_tanks_fire(Game *game_state)
 {
     if (!game_state->player.isShooting)
     {
-        game_state->bulletPosition.x = game_state->player.locationX;
-        game_state->bulletPosition.y = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
+        double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
+        double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
+        auto aimX1 = game_state->player.locationX;
+        auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
+        int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
+        int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
+        game_state->bulletPosition.x = aimX2;
+        game_state->bulletPosition.y = aimY2;
         game_state->bulletVector.x = scorched_tanks_cos[game_state->player.aimAngle] * ((double)game_state->player.firePower / 10);
         game_state->bulletVector.y = scorched_tanks_sin[game_state->player.aimAngle] * ((double)game_state->player.firePower / 10);
         game_state->trajectoryAnimationStep = 0;
