@@ -19,9 +19,7 @@ jobs:
       - name: 'Compile unit tests firmware'
         continue-on-error: true
         run: |
-          pwd
-          ls -lah
-          ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
+          FBT_TOOLCHAIN_PATH=/opt ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
 
       - name: 'Copy unit tests to flipper'
         continue-on-error: true
@@ -32,4 +30,4 @@ jobs:
         continue-on-error: true
         run: |
           cd /home/kvolkov/QA-flipper-units/
-          poetry run python3 run_units.py Mod2
+          /home/vk/.local/bin/poetry run python3 run_units.py Mod2
