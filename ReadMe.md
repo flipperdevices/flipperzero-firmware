@@ -18,6 +18,8 @@
 - Added (In apps2 folder): [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266`
 - - Since source is not available for this app, a FAP must be distributed
 - Added new NFC MF keys [from ankris812](https://github.com/DarkFlippers/unleashed-firmware/commit/aba6607e38126cc8ec98d89024c0aa807c46265b)
+- Added: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
+- Added: [Picopass: Read Elite #1888 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1888)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -171,6 +173,8 @@ $ ./fbt plugin_dist
   
 - [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
+- [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
+- [Picopass: Read Elite #1888 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1888)
 
 </details>
 
