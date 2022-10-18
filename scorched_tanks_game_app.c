@@ -332,7 +332,7 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 
     if (game_state->isPlayerTurn)
     {
-        canvas_draw_str(canvas, 90, 10, "player1");
+        canvas_draw_str(canvas, 93, 10, "player1");
 
         char buffer[12];
         snprintf(buffer, sizeof(buffer), "a: %u", game_state->player.aimAngle);
@@ -343,7 +343,7 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
     }
     else
     {
-        canvas_draw_str(canvas, 90, 10, "player2");
+        canvas_draw_str(canvas, 93, 10, "player2");
 
         char buffer[12];
         snprintf(buffer, sizeof(buffer), "a: %u", game_state->enemy.aimAngle);
