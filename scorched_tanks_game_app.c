@@ -79,7 +79,6 @@ typedef struct
     unsigned char hp;
     int aimAngle;
     unsigned char firePower;
-    bool isShooting;
 } Tank;
 
 typedef struct
@@ -88,6 +87,7 @@ typedef struct
     Tank player;
     Tank enemy;
     bool isPlayerTurn;
+    bool isShooting;
     int windSpeed;
     Point trajectory[SCREEN_WIDTH];
     unsigned char trajectoryAnimationStep;
@@ -154,7 +154,10 @@ void scorched_tanks_init_game(Game *game_state)
     game_state->player.locationX = PLAYER_INIT_LOCATION_X + scorched_tanks_random(0, MAX_PLAYER_DIFF_X) - MAX_PLAYER_DIFF_X / 2;
     game_state->player.aimAngle = PLAYER_INIT_AIM;
     game_state->player.firePower = PLAYER_INIT_POWER;
+    game_state->enemy.aimAngle = PLAYER_INIT_AIM;
+    game_state->enemy.firePower = PLAYER_INIT_POWER;
     game_state->enemy.locationX = ENEMY_INIT_LOCATION_X + scorched_tanks_random(0, MAX_ENEMY_DIFF_X) - MAX_ENEMY_DIFF_X / 2;
+    game_state->isPlayerTurn = true;
 
     game_state->windSpeed = scorched_tanks_random(0, MAX_WIND);
 
@@ -169,7 +172,7 @@ void scorched_tanks_init_game(Game *game_state)
 
 void scorched_tanks_calculate_trajectory(Game *game_state)
 {
-    if (game_state->player.isShooting)
+    if (game_state->isShooting)
     {
         game_state->bulletVector.x += ((double)game_state->windSpeed - MAX_WIND / 2) / 40;
         game_state->bulletVector.y += GRAVITY_FORCE;
@@ -177,24 +180,37 @@ void scorched_tanks_calculate_trajectory(Game *game_state)
         game_state->bulletPosition.x += game_state->bulletVector.x;
         game_state->bulletPosition.y += game_state->bulletVector.y;
 
-        double distanceToEnemyX = game_state->enemy.locationX - game_state->bulletPosition.x;
-        double distanceToEnemyY = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE - game_state->bulletPosition.y;
-        int totalDistanceToEnemy = sqrt(distanceToEnemyX * distanceToEnemyX + distanceToEnemyY * distanceToEnemyY);
+        int totalDistanceToEnemy = 100;
+
+        if (game_state->isPlayerTurn)
+        {
+            double distanceToEnemyX = game_state->enemy.locationX - game_state->bulletPosition.x;
+            double distanceToEnemyY = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE - game_state->bulletPosition.y;
+            totalDistanceToEnemy = sqrt(distanceToEnemyX * distanceToEnemyX + distanceToEnemyY * distanceToEnemyY);
+        }
+        else
+        {
+            double distanceToEnemyX = game_state->player.locationX - game_state->bulletPosition.x;
+            double distanceToEnemyY = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE - game_state->bulletPosition.y;
+            totalDistanceToEnemy = sqrt(distanceToEnemyX * distanceToEnemyX + distanceToEnemyY * distanceToEnemyY);
+        }
 
         if (totalDistanceToEnemy <= TANK_COLLIDER_SIZE)
         {
-            game_state->player.isShooting = false;
+            game_state->isShooting = false;
             scorched_tanks_init_game(game_state);
+            game_state->isPlayerTurn = !game_state->isPlayerTurn;
             return;
         }
 
         if (game_state->bulletPosition.x > SCREEN_WIDTH ||
             game_state->bulletPosition.y > game_state->ground[(int)round(game_state->bulletPosition.x)].y)
         {
-            game_state->player.isShooting = false;
+            game_state->isShooting = false;
             game_state->bulletPosition.x = 0;
             game_state->bulletPosition.y = 0;
             game_state->windSpeed = scorched_tanks_random(0, MAX_WIND);
+            game_state->isPlayerTurn = !game_state->isPlayerTurn;
             return;
         }
 
@@ -248,7 +264,7 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 
     canvas_set_color(canvas, ColorBlack);
 
-    if (game_state->player.isShooting)
+    if (game_state->isShooting)
     {
         canvas_draw_dot(canvas, game_state->bulletPosition.x, game_state->bulletPosition.y);
     }
@@ -272,15 +288,41 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 
     scorched_tanks_draw_tank(canvas, game_state->player.locationX, game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE, false);
 
-    auto aimX1 = game_state->player.locationX;
-    auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
+    int aimX1 = 0;
+    int aimY1 = 0;
+    int aimX2 = 0;
+    int aimY2 = 0;
 
-    double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
-    double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
-    int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
-    int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
+    if (game_state->isPlayerTurn)
+    {
+        aimX1 = game_state->player.locationX;
+        aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
 
-    canvas_draw_line(canvas, aimX1 + 1, aimY1 - 3, aimX2 + 1, aimY2 - 3);
+        double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
+        double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
+        aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
+        aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
+
+        aimX1 += 1;
+        aimX2 += 1;
+    }
+    else
+    {
+        aimX1 = game_state->enemy.locationX;
+        aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
+
+        double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
+        double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
+        aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
+        aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
+
+        aimX2 = aimX1 - (aimX2 - aimX1);
+
+        aimX1 -= 1;
+        aimX2 -= 1;
+    }
+
+    canvas_draw_line(canvas, aimX1, aimY1 - 3, aimX2, aimY2 - 3);
 
     canvas_set_font(canvas, FontSecondary);
 
@@ -288,12 +330,28 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
     snprintf(buffer2, sizeof(buffer2), "wind: %i", game_state->windSpeed - MAX_WIND / 2);
     canvas_draw_str(canvas, 55, 10, buffer2);
 
-    char buffer[12];
-    snprintf(buffer, sizeof(buffer), "a: %u", game_state->player.aimAngle);
-    canvas_draw_str(canvas, 2, 10, buffer);
+    if (game_state->isPlayerTurn)
+    {
+        canvas_draw_str(canvas, 90, 10, "player1");
 
-    snprintf(buffer, sizeof(buffer), "p: %u", game_state->player.firePower);
-    canvas_draw_str(canvas, 27, 10, buffer);
+        char buffer[12];
+        snprintf(buffer, sizeof(buffer), "a: %u", game_state->player.aimAngle);
+        canvas_draw_str(canvas, 2, 10, buffer);
+
+        snprintf(buffer, sizeof(buffer), "p: %u", game_state->player.firePower);
+        canvas_draw_str(canvas, 27, 10, buffer);
+    }
+    else
+    {
+        canvas_draw_str(canvas, 90, 10, "player2");
+
+        char buffer[12];
+        snprintf(buffer, sizeof(buffer), "a: %u", game_state->enemy.aimAngle);
+        canvas_draw_str(canvas, 2, 10, buffer);
+
+        snprintf(buffer, sizeof(buffer), "p: %u", game_state->enemy.firePower);
+        canvas_draw_str(canvas, 27, 10, buffer);
+    }
 
     release_mutex((ValueMutex *)ctx, game_state);
 }
@@ -316,33 +374,64 @@ static void scorched_tanks_update_timer_callback(FuriMessageQueue *event_queue)
 
 static void scorched_tanks_increase_power(Game *game_state)
 {
-    if (game_state->player.firePower < MAX_FIRE_POWER && !game_state->player.isShooting)
+    if (game_state->player.firePower < MAX_FIRE_POWER && !game_state->isShooting)
     {
-        game_state->player.firePower++;
+        if (game_state->isPlayerTurn && game_state->player.firePower < MAX_FIRE_POWER)
+        {
+            game_state->player.firePower++;
+        }
+
+        if (!game_state->isPlayerTurn && game_state->enemy.firePower < MAX_FIRE_POWER)
+        {
+            game_state->enemy.firePower++;
+        }
     }
 }
 
 static void scorched_tanks_decrease_power(Game *game_state)
 {
-    if (game_state->player.firePower > MIN_FIRE_POWER && !game_state->player.isShooting)
+    if (game_state->player.firePower > MIN_FIRE_POWER && !game_state->isShooting)
     {
-        game_state->player.firePower--;
+        if (game_state->isPlayerTurn && game_state->player.firePower > MIN_FIRE_POWER)
+        {
+            game_state->player.firePower--;
+        }
+
+        if (!game_state->isPlayerTurn && game_state->enemy.firePower > MIN_FIRE_POWER)
+        {
+            game_state->enemy.firePower--;
+        }
     }
 }
 
 static void scorched_tanks_aim_up(Game *game_state)
 {
-    if (game_state->player.aimAngle < 90 && !game_state->player.isShooting)
+    if (!game_state->isShooting)
     {
-        game_state->player.aimAngle++;
+        if (game_state->isPlayerTurn && game_state->player.aimAngle < 90)
+        {
+            game_state->player.aimAngle++;
+        }
+
+        if (!game_state->isPlayerTurn && game_state->enemy.aimAngle < 90)
+        {
+            game_state->enemy.aimAngle++;
+        }
     }
 }
 
 static void scorched_tanks_aim_down(Game *game_state)
 {
-    if (game_state->player.aimAngle > 0 && !game_state->player.isShooting)
+    if (game_state->player.aimAngle > 0 && !game_state->isShooting)
     {
-        game_state->player.aimAngle--;
+        if (game_state->isPlayerTurn)
+        {
+            game_state->player.aimAngle--;
+        }
+        else
+        {
+            game_state->enemy.aimAngle--;
+        }
     }
 }
 
@@ -355,18 +444,37 @@ const NotificationSequence sequence_long_vibro = {
 
 static void scorched_tanks_fire(Game *game_state)
 {
-    if (!game_state->player.isShooting)
+    if (!game_state->isShooting)
     {
-        double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
-        double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
-        auto aimX1 = game_state->player.locationX;
-        auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
-        int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
-        int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
-        game_state->bulletPosition.x = aimX2;
-        game_state->bulletPosition.y = aimY2;
-        game_state->bulletVector.x = scorched_tanks_cos[game_state->player.aimAngle] * ((double)game_state->player.firePower / 10);
-        game_state->bulletVector.y = scorched_tanks_sin[game_state->player.aimAngle] * ((double)game_state->player.firePower / 10);
+        if (game_state->isPlayerTurn)
+        {
+            double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
+            double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
+            auto aimX1 = game_state->player.locationX;
+            auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
+            int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
+            int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
+            game_state->bulletPosition.x = aimX2;
+            game_state->bulletPosition.y = aimY2;
+            game_state->bulletVector.x = scorched_tanks_cos[game_state->player.aimAngle] * ((double)game_state->player.firePower / 10);
+            game_state->bulletVector.y = scorched_tanks_sin[game_state->player.aimAngle] * ((double)game_state->player.firePower / 10);
+        }
+        else
+        {
+            double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
+            double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
+            auto aimX1 = game_state->enemy.locationX;
+            auto aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
+            int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
+            int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
+            aimX2 = aimX1 - (aimX2 - aimX1);
+
+            game_state->bulletPosition.x = aimX2;
+            game_state->bulletPosition.y = aimY2;
+            game_state->bulletVector.x = -scorched_tanks_cos[game_state->enemy.aimAngle] * ((double)game_state->enemy.firePower / 10);
+            game_state->bulletVector.y = scorched_tanks_sin[game_state->enemy.aimAngle] * ((double)game_state->enemy.firePower / 10);
+        }
+
         game_state->trajectoryAnimationStep = 0;
 
         for (int x = 0; x < SCREEN_WIDTH; x++)
@@ -375,7 +483,7 @@ static void scorched_tanks_fire(Game *game_state)
             game_state->trajectory[x].y = 0;
         }
 
-        game_state->player.isShooting = true;
+        game_state->isShooting = true;
 
         NotificationApp *notification = furi_record_open("notification");
         notification_message(notification, &sequence_long_vibro);
