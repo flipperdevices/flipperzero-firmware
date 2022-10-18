@@ -33,7 +33,12 @@ typedef struct {
     SPIMemChip* chip_info;
 } SPIMemApp;
 
-typedef enum { SPIMemViewSubmenu, SPIMemViewDialogEx, SPIMemViewPopup, SPIMemViewWidget} SPIMemView;
+typedef enum {
+    SPIMemViewSubmenu,
+    SPIMemViewDialogEx,
+    SPIMemViewPopup,
+    SPIMemViewWidget
+} SPIMemView;
 
 void spi_mem_file_create_folder(SPIMemApp* app);
 bool spi_mem_file_select(SPIMemApp* app);

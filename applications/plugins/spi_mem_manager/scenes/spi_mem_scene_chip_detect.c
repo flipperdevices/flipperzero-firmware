@@ -11,7 +11,8 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
     notification_message(app->notifications, &sequence_blink_start_cyan);
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewPopup);
     spi_mem_worker_start_thread(app->worker);
-    spi_mem_worker_chip_detect_start(app->chip_info, app->worker, spi_mem_chip_detect_callback, app);
+    spi_mem_worker_chip_detect_start(
+        app->chip_info, app->worker, spi_mem_chip_detect_callback, app);
 }
 
 bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {

@@ -16,7 +16,7 @@ static void spi_mem_scene_chip_detected_print_chip_info(Widget* widget, SPIMemCh
     furi_string_printf(tmp_string, "%s %s", chip_info->vendor_name, chip_info->model_name);
     widget_add_string_element(
         widget, 40, 12, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
-    furi_string_printf(tmp_string, "Size: %u KB", chip_info ->size / 1024);
+    furi_string_printf(tmp_string, "Size: %u KB", chip_info->size / 1024);
     widget_add_string_element(
         widget, 40, 20, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
     furi_string_free(tmp_string);
@@ -41,7 +41,7 @@ bool spi_mem_scene_chip_detected_on_event(void* context, SceneManagerEvent event
     if(event.type == SceneManagerEventTypeBack) {
         consumed = true;
         scene_manager_search_and_switch_to_previous_scene(app->scene_manager, SPIMemSceneStart);
-    } else if (event.type == SceneManagerEventTypeCustom) {
+    } else if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(app->scene_manager);
