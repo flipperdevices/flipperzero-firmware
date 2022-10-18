@@ -1,5 +1,5 @@
 App(
-    appid="caesar_cipher",
+    appid="Caesar_Cipher",
     name="Caesar Cipher",
     apptype=FlipperAppType.PLUGIN,
     entry_point="caesar_cipher_app",
