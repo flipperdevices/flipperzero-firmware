@@ -9,7 +9,7 @@
 -Press . center, dump the EEPROM to serial (USB connected, log mode ON)
 -Press <- left, erase the EEPROM
 
-## Flipper Dev Board Schematic
+## Flipper Prototyping Board Schematic
 
 - SDA -> Pin 15
 - SCL -> Pin 16
@@ -20,17 +20,17 @@
 
 The upper 6 pins male header is not required (unless you want to use the PicKit2 either)
 
-![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/schema.jpg)
+![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAPP/raw/master/assets/schema.jpg)
 
 
 ## PicKit2 Schematic
 
-![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/a74c600b-28eb-400c-b6e2-54530d133a6a.jpg)
+![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAPP/raw/master/assets/a74c600b-28eb-400c-b6e2-54530d133a6a.jpg)
 
 
 ## Demo
 
-![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/flipper.jpg)
+![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAPP/raw/master/assets/flipper.jpg)
 
 ## TODO
  - [ ] Write .bin dump loaded from file
