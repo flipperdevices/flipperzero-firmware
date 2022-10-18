@@ -20,7 +20,7 @@
 
 The upper 6 pins male header is not required (unless you want to use the PicKit2 either)
 
-![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/schema.jpg)
+![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/schema.png)
 
 
 ## PicKit2 Schematic
