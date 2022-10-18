@@ -30,6 +30,7 @@
 #include "TemperatureInterface.h"
 #include "settings.h"
 #include "Assets.h"
+#include "flipperLED.h"
 //#include "MenuFunctions.h"
 
 #define bad_list_length 3
@@ -58,6 +59,11 @@
 #define WIFI_ATTACK_AUTH 18
 #define WIFI_ATTACK_MIMIC 19
 #define WIFI_ATTACK_DEAUTH 20
+#define WIFI_ATTACK_AP_SPAM 21
+#define WIFI_SCAN_TARGET_AP_FULL 22
+#define WIFI_SCAN_ACTIVE_EAPOL 23
+#define WIFI_ATTACK_DEAUTH_MANUAL 24
+#define WIFI_SCAN_RAW_CAPTURE 25
 
 #define GRAPH_REFRESH 100
 
@@ -71,6 +77,7 @@ extern Buffer buffer_obj;
 extern BatteryInterface battery_obj;
 extern TemperatureInterface temp_obj;
 extern Settings settings_obj;
+extern flipperLED flipper_led;
 
 esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, bool en_sys_seq);
 //int ieee80211_raw_frame_sanity_check(int32_t arg, int32_t arg2, int32_t arg3);
@@ -78,6 +85,7 @@ esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, b
 struct ssid {
   String essid;
   int bssid[6];
+  bool selected;
 };
 
 struct AccessPoint {
@@ -85,6 +93,8 @@ struct AccessPoint {
   int channel;
   int bssid[6];
   bool selected;
+  LinkedList<char>* beacon;
+  int rssi;
 };
 
 class WiFiScan
@@ -225,9 +235,11 @@ class WiFiScan
     void tftDrawColorKey();
     void tftDrawGraphObjects();
     void sendProbeAttack(uint32_t currentTime);
-    void sendDeauthAttack(uint32_t currentTime);
+    void sendDeauthAttack(uint32_t currentTime, String dst_mac_str = "ff:ff:ff:ff:ff:ff");
+    void sendDeauthFrame(uint8_t bssid[6], int channel, String dst_mac_str = "ff:ff:ff:ff:ff:ff");
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
+    void broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_ssid);
     void broadcastSetSSID(uint32_t current_time, char* ESSID);
     void RunAPScan(uint8_t scan_mode, uint16_t color);
     //void RunRickRoll(uint8_t scan_mode, uint16_t color);
@@ -239,6 +251,7 @@ class WiFiScan
     void RunEspressifScan(uint8_t scan_mode, uint16_t color);
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
+    void RunRawScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
     void RunEapolScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
@@ -270,6 +283,9 @@ class WiFiScan
     String old_free_ram = "";
     String connected_network = "";
 
+    String dst_mac = "ff:ff:ff:ff:ff:ff";
+    byte src_mac[6] = {};
+
     //lv_obj_t * scr = lv_cont_create(NULL, NULL);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT(); 
@@ -279,7 +295,7 @@ class WiFiScan
     int clearSSIDs();
     int clearAPs();
     bool addSSID(String essid);
-    int generateSSIDs();
+    int generateSSIDs(int count = 20);
     bool shutdownWiFi();
     bool shutdownBLE();
     bool scanning();
@@ -288,10 +304,11 @@ class WiFiScan
     String getApMAC();
     String freeRAM();
     void changeChannel();
+    void changeChannel(int chan);
     void RunInfo();
     void RunShutdownWiFi();
     void RunShutdownBLE();
-    void RunGenerateSSIDs();
+    void RunGenerateSSIDs(int count = 20);
     void RunClearSSIDs();
     void RunClearAPs();
     void channelHop();
@@ -304,10 +321,13 @@ class WiFiScan
     static void espressifSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void probeSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void activeEapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void eapolSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void wifiSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
 };

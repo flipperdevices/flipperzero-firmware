@@ -837,8 +837,10 @@ void MenuFunctions::main(uint32_t currentTime)
   // Get the display buffer out of the way
   if ((wifi_scan_obj.currentScanMode != WIFI_SCAN_OFF ) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AP_SPAM) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH_MANUAL) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
     display_obj.displayBuffer();
@@ -864,22 +866,26 @@ void MenuFunctions::main(uint32_t currentTime)
     {
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AP_SPAM) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH_MANUAL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
       {
-        Serial.println("Stopping scan...");
+        //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
         // If we don't do this, the text and button coordinates will be off
@@ -908,22 +914,29 @@ void MenuFunctions::main(uint32_t currentTime)
     {
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_PWN) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ESPRESSIF) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_SPAM) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AP_SPAM) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH_MANUAL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
-          (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
+          (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_EAPOL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_ACTIVE_EAPOL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR))
       {
-        Serial.println("Stopping scan...");
+        //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
         // If we don't do this, the text and button coordinates will be off
@@ -946,8 +959,10 @@ void MenuFunctions::main(uint32_t currentTime)
   // This is for when on a menu
   #ifndef MARAUDER_MINI
     if ((wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_SPAM) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AP_SPAM) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH_MANUAL) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
         //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
@@ -1010,23 +1025,36 @@ void MenuFunctions::main(uint32_t currentTime)
 
   #ifdef MARAUDER_MINI
     if (u_btn.justPressed()){
-      if (current_menu->selected > 0) {
-        current_menu->selected--;
-        this->buttonSelected(current_menu->selected);
-        this->buttonNotSelected(current_menu->selected + 1);
-        Serial.println("Current menu index: " + (String)current_menu->selected);
+      if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
+          (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
+        if (current_menu->selected > 0) {
+          current_menu->selected--;
+          this->buttonSelected(current_menu->selected);
+          this->buttonNotSelected(current_menu->selected + 1);
+        }
+      }
+      else if ((wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR) ||
+               (wifi_scan_obj.currentScanMode == WIFI_SCAN_EAPOL)) {
+        if (wifi_scan_obj.set_channel < 14)
+          wifi_scan_obj.changeChannel(wifi_scan_obj.set_channel + 1);
       }
     }
     if (d_btn.justPressed()){
-      if (current_menu->selected < current_menu->list->size() - 1) {
-        current_menu->selected++;
-        this->buttonSelected(current_menu->selected);
-        this->buttonNotSelected(current_menu->selected - 1);
-        Serial.println("Current menu index: " + (String)current_menu->selected);
+      if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF) ||
+          (wifi_scan_obj.currentScanMode == OTA_UPDATE)) {
+        if (current_menu->selected < current_menu->list->size() - 1) {
+          current_menu->selected++;
+          this->buttonSelected(current_menu->selected);
+          this->buttonNotSelected(current_menu->selected - 1);
+        }
+      }
+      else if ((wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR) ||
+               (wifi_scan_obj.currentScanMode == WIFI_SCAN_EAPOL)) {
+        if (wifi_scan_obj.set_channel > 1)
+          wifi_scan_obj.changeChannel(wifi_scan_obj.set_channel - 1);
       }
     }
     if(c_btn_press){
-      Serial.println("CENTER");
       current_menu->list->get(current_menu->selected).callable();
     }
 
@@ -1309,7 +1337,6 @@ void MenuFunctions::drawStatusBar()
 
 void MenuFunctions::orientDisplay()
 {
-  Serial.println(F("orientDisplay()"));
   display_obj.tft.init();
 
   display_obj.tft.setRotation(0); // Portrait
@@ -1319,10 +1346,10 @@ void MenuFunctions::orientDisplay()
   #ifndef MARAUDER_MINI
     #ifdef TFT_SHIELD
       uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
-      Serial.println("Using TFT Shield");
+      //Serial.println("Using TFT Shield");
     #else if defined(TFT_DIY)
       uint16_t calData[5] = { 339, 3470, 237, 3438, 2 }; // tft.setRotation(0); // Portrait with DIY TFT
-      Serial.println("Using TFT DIY");
+      //Serial.println("Using TFT DIY");
     #endif
 
     display_obj.tft.setTouch(calData);
@@ -1332,7 +1359,7 @@ void MenuFunctions::orientDisplay()
 }
 
 void MenuFunctions::runBoolSetting(String key) {
-  Serial.println("Building bool setting screen...");
+  //Serial.println("Building bool setting screen...");
   display_obj.tftDrawRedOnOffButton();
   //display_obj.tftDrawGreenOnOffButton();
 }
@@ -1508,12 +1535,25 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
   });
-  addNodes(&wifiSnifferMenu, text_table1[45], TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
-    wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
-  });
-  addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
-    wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
-  });
+  #ifndef MARAUDER_MINI
+    addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
+      wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
+    });
+    addNodes(&wifiSnifferMenu, text_table1[45], TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
+      wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
+    });
+  #else
+    addNodes(&wifiSnifferMenu, text_table1[46], TFT_VIOLET, NULL, EAPOL, [this]() {
+      display_obj.clearScreen();
+      this->drawStatusBar();
+      wifi_scan_obj.StartScan(WIFI_SCAN_EAPOL, TFT_VIOLET);
+    });
+    addNodes(&wifiSnifferMenu, text_table1[45], TFT_BLUE, NULL, PACKET_MONITOR, [this]() {
+      display_obj.clearScreen();
+      this->drawStatusBar();
+      wifi_scan_obj.StartScan(WIFI_PACKET_MONITOR, TFT_BLUE);
+    });
+  #endif
   addNodes(&wifiSnifferMenu, text_table1[47], TFT_RED, NULL, PWNAGOTCHI, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
@@ -1528,6 +1568,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_TARGET_AP, TFT_MAGENTA);
+  });
+  addNodes(&wifiSnifferMenu, text_table1[58], TFT_WHITE, NULL, PACKET_MONITOR, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
   });
 
   // Build WiFi attack menu
@@ -1559,6 +1604,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
+  });
+  addNodes(&wifiAttackMenu, text_table1[57], TFT_MAGENTA, NULL, BEACON_LIST, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_ATTACK_AP_SPAM, TFT_MAGENTA);
   });
   //addNodes(&wifiAttackMenu, "AP Mimic Flood", TFT_PURPLE, NULL, DEAUTH_SNIFF, [this]() {
   //  display_obj.clearScreen();
@@ -1773,6 +1823,7 @@ void MenuFunctions::RunSetup()
   // Select update
   whichUpdateMenu.parentMenu = &deviceMenu;
   addNodes(&whichUpdateMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+    wifi_scan_obj.currentScanMode = WIFI_SCAN_OFF;
     changeMenu(whichUpdateMenu.parentMenu);
   });
   addNodes(&whichUpdateMenu, text_table1[39], TFT_GREEN, NULL, WEB_UPDATE, [this]() {
@@ -1884,7 +1935,7 @@ void MenuFunctions::addNodes(Menu * menu, String name, uint16_t color, Menu * ch
 
 void MenuFunctions::buildButtons(Menu * menu)
 {
-  Serial.println("Bulding buttons...");
+  //Serial.println("Bulding buttons...");
   if (menu->list != NULL)
   {
     //for (int i = 0; i < sizeof(key); i++)
@@ -1913,7 +1964,7 @@ void MenuFunctions::buildButtons(Menu * menu)
 
 void MenuFunctions::displayCurrentMenu()
 {
-  Serial.println(F("Displaying current menu..."));
+  //Serial.println(F("Displaying current menu..."));
   display_obj.clearScreen();
   display_obj.tft.setTextColor(TFT_LIGHTGREY, TFT_DARKGREY);
   this->drawStatusBar();

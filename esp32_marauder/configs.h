@@ -4,14 +4,14 @@
 
   #define POLISH_POTATO
   
-  //#define MARAUDER_MINI
-  #define MARAUDER_V4
+  #define MARAUDER_MINI
+  //#define MARAUDER_V4
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
   //#define MARAUDER_FLIPPER
 
-  #define MARAUDER_VERSION "v0.9.6"
+  #define MARAUDER_VERSION "v0.9.17"
 
   //// BUTTON DEFINITIONS
   #ifdef MARAUDER_MINI
@@ -55,7 +55,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH 16
     #define LVGL_TICK_PERIOD 6
     
@@ -109,7 +109,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH 16
     #define LVGL_TICK_PERIOD 6
     
@@ -164,7 +164,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH 16
     #define LVGL_TICK_PERIOD 6
     
@@ -201,6 +201,10 @@
     #define TOUCH_CS 21
     #define SD_CS 4
 
+    #define SCREEN_BUFFER
+
+    #define MAX_SCREEN_BUFFER 9
+
     #define BANNER_TEXT_SIZE 1
 
     #ifndef TFT_WIDTH
@@ -210,7 +214,8 @@
     #ifndef TFT_HEIGHT
       #define TFT_HEIGHT 128
     #endif
-    
+
+    #define CHAR_WIDTH 6
     #define SCREEN_WIDTH TFT_WIDTH // Originally 240
     #define SCREEN_HEIGHT TFT_HEIGHT // Originally 320
     #define HEIGHT_1 TFT_WIDTH
@@ -226,7 +231,7 @@
     //#define MENU_FONT &FreeMonoBold9pt7b
     //#define MENU_FONT &FreeSans9pt7b
     //#define MENU_FONT &FreeSansBold9pt7b
-    #define BUTTON_ARRAY_LEN 9
+    #define BUTTON_ARRAY_LEN 10
     #define STATUS_BAR_WIDTH (TFT_HEIGHT/16)
     #define LVGL_TICK_PERIOD 6
     
@@ -346,7 +351,7 @@
   #endif
 
   #ifdef MARAUDER_FLIPPER
-    #define SD_CS -1
+    #define SD_CS 10
   #endif
   //// END SD DEFINITIONS
 
@@ -376,6 +381,7 @@
   #endif
 
   #ifndef HAS_SCREEN
+    #define TFT_WHITE 0
     #define TFT_CYAN 0
     #define TFT_BLUE 0
     #define TFT_RED 0
@@ -384,6 +390,8 @@
     #define TFT_GRAY 0
     #define TFT_MAGENTA 0
     #define TFT_VIOLET 0
+    #define TFT_ORANGE 0
+    #define TFT_YELLOW 0
     #define STANDARD_FONT_CHAR_LIMIT 40
     #define FLASH_BUTTON -1
 

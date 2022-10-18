@@ -34,6 +34,7 @@ https://www.online-utility.org/image/convert/to/XBM
 #include "settings.h"
 #include "CommandLine.h"
 #include "lang_var.h"
+#include "flipperLED.h"
 
 #ifdef HAS_SCREEN
   #include "Display.h"
@@ -60,6 +61,7 @@ LedInterface led_obj;
 EspInterface esp_obj;
 Settings settings_obj;
 CommandLine cli_obj;
+flipperLED flipper_led;
 
 #ifdef HAS_SCREEN
   Display display_obj;
@@ -117,21 +119,31 @@ void setup()
   #ifdef HAS_SCREEN
     digitalWrite(TFT_CS, HIGH);
   #endif
+
+  pinMode(SD_CS, OUTPUT);
+
+  delay(10);
   
   digitalWrite(SD_CS, HIGH);
+
+  delay(10);
 
   Serial.begin(115200);
   
   //Serial.begin(115200);
 
-  Serial.println("\n\nHello, World!\n");
+  //Serial.println("\n\nHello, World!\n");
 
   Serial.println("ESP-IDF version is: " + String(esp_get_idf_version()));
 
-  #ifdef HAS_SCREEN
-    Serial.println("Has Screen");
-  #else
-    Serial.println("Does not have screen");
+  //#ifdef HAS_SCREEN
+  //  Serial.println("Has Screen");
+  //#else
+  //  Serial.println("Does not have screen");
+  //#endif
+
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.RunSetup();
   #endif
 
   #ifdef HAS_SCREEN
@@ -159,9 +171,9 @@ void setup()
 
   backlightOn(); // Need this
 
-  delay(2000);
-
   #ifdef HAS_SCREEN
+    delay(2000);
+
     display_obj.clearScreen();
   
     display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
@@ -174,26 +186,20 @@ void setup()
   
     display_obj.tft.println(text_table0[1]);
   #endif
-  
-  Serial.println(F("\n\n--------------------------------\n"));
-  Serial.println(F("         ESP32 Marauder      \n"));
-  Serial.println("            " + version_number + "\n");
-  Serial.println(F("       By: justcallmekoko\n"));
-  Serial.println(F("--------------------------------\n\n"));
 
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
 
   settings_obj.begin();
 
-  Serial.println("This is a test Channel: " + (String)settings_obj.loadSetting<uint8_t>("Channel"));
-  if (settings_obj.loadSetting<bool>( "Force PMKID"))
-    Serial.println("This is a test Force PMKID: true");
-  else
-    Serial.println("This is a test Force PMKID: false");
+  //Serial.println("This is a test Channel: " + (String)settings_obj.loadSetting<uint8_t>("Channel"));
+  //if (settings_obj.loadSetting<bool>( "Force PMKID"))
+  //  Serial.println("This is a test Force PMKID: true");
+  //else
+  //  Serial.println("This is a test Force PMKID: false");
 
   wifi_scan_obj.RunSetup();
 
-  Serial.println(wifi_scan_obj.freeRAM());
+  //Serial.println(wifi_scan_obj.freeRAM());
 
   #ifdef HAS_SCREEN
     display_obj.tft.println(F(text_table0[2]));
@@ -201,7 +207,7 @@ void setup()
 
   // Do some SD stuff
   if(sd_obj.initSD()) {
-    Serial.println(F("SD Card supported"));
+    //Serial.println(F("SD Card supported"));
     #ifdef HAS_SCREEN
       display_obj.tft.println(F(text_table0[3]));
     #endif
@@ -215,14 +221,6 @@ void setup()
     #endif
   }
 
-  // Run display setup
-  Serial.println(wifi_scan_obj.freeRAM());
-
-  // Build menus
-  Serial.println(wifi_scan_obj.freeRAM());
-
-  // Battery stuff
-  Serial.println(wifi_scan_obj.freeRAM());
   battery_obj.RunSetup();
 
   #ifdef HAS_SCREEN
@@ -230,7 +228,6 @@ void setup()
   #endif
 
   // Temperature stuff
-  Serial.println(wifi_scan_obj.freeRAM());
   #ifndef MARAUDER_FLIPPER
     temp_obj.RunSetup();
   #endif
@@ -239,31 +236,26 @@ void setup()
     display_obj.tft.println(F(text_table0[6]));
   #endif
 
-  Serial.println("Bat lvl");
-
   #ifndef MARAUDER_FLIPPER
     battery_obj.battery_level = battery_obj.getBatteryLevel();
   
-    if (battery_obj.i2c_supported) {
-      Serial.println(F("IP5306 I2C Supported: true"));
-    }
-    else
-      Serial.println(F("IP5306 I2C Supported: false"));
+//    if (battery_obj.i2c_supported) {
+//      Serial.println(F("IP5306 I2C Supported: true"));
+//    }
+//    else
+//      Serial.println(F("IP5306 I2C Supported: false"));
   #endif
-
-  Serial.println(wifi_scan_obj.freeRAM());
 
   // Do some LED stuff
   #ifndef MARAUDER_FLIPPER
-    Serial.println("LED");
     led_obj.RunSetup();
   #endif
 
   #ifdef HAS_SCREEN
     display_obj.tft.println(F(text_table0[7]));
-  #endif
 
-  delay(500);
+    delay(500);
+  #endif
 
   #ifdef HAS_SCREEN
     display_obj.tft.println(F(text_table0[8]));
@@ -273,18 +265,29 @@ void setup()
     delay(2000);
   #endif
 
-  Serial.println("CLI");
-  cli_obj.RunSetup();
-
   #ifdef HAS_SCREEN
     menu_function_obj.RunSetup();
   #endif
+
+  //Serial.println(F("\n\n--------------------------------\n"));
+  //Serial.println(F("         ESP32 Marauder      \n"));
+  //Serial.println("            " + version_number + "\n");
+  //Serial.println(F("       By: justcallmekoko\n"));
+  //Serial.println(F("--------------------------------\n\n"));
+  
+  Serial.println("CLI Ready");
+  cli_obj.RunSetup();
 }
 
 
 void loop()
 {
   currentTime = millis();
+  bool mini = false;
+
+  #ifdef MARAUDER_MINI
+    mini = true;
+  #endif
 
   // Update all of our objects
   #ifdef HAS_SCREEN
@@ -306,8 +309,8 @@ void loop()
       temp_obj.main(currentTime);
     #endif
     settings_obj.main(currentTime);
-    if ((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) &&
-        (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL)) {
+    if (((wifi_scan_obj.currentScanMode != WIFI_PACKET_MONITOR) && (wifi_scan_obj.currentScanMode != WIFI_SCAN_EAPOL)) ||
+        (mini)) {
       #ifdef HAS_SCREEN
         menu_function_obj.main(currentTime);
       #endif
@@ -315,7 +318,11 @@ void loop()
     }
       if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
         web_obj.main();
-    delay(1);
+    #ifdef HAS_SCREEN
+      delay(1);
+    #else
+      delay(50);
+    #endif
   }
   #ifdef HAS_SCREEN
     else if ((display_obj.draw_tft) &&
