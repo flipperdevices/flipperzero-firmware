@@ -1408,6 +1408,8 @@ void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
 // Function to build the menus
 void MenuFunctions::RunSetup()
 {
+  extern LinkedList<AccessPoint>* access_points;
+  
   #ifndef MARAUDER_MINI
     this->initLVGL();
   #endif
@@ -1437,6 +1439,7 @@ void MenuFunctions::RunSetup()
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
   wifiAttackMenu.list = new LinkedList<MenuNode>();
   wifiGeneralMenu.list = new LinkedList<MenuNode>();
+  wifiAPMenu.list = new LinkedList<MenuNode>();
 
   // Bluetooth menu stuff
   bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
@@ -1474,6 +1477,7 @@ void MenuFunctions::RunSetup()
   generateSSIDsMenu.name = text_table1[27];
   clearSSIDsMenu.name = text_table1[28];
   clearAPsMenu.name = text_table1[29];
+  wifiAPMenu.name = "Access Points";
   
 
   // Build Main Menu
@@ -1654,11 +1658,44 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.RunClearAPs();
   });
   #ifndef MARAUDER_MINI
+    // Select APs on OG
     addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
       display_obj.clearScreen(); 
       wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
       wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
       addAPGFX();
+    });
+  #else
+    // Select APs on Mini
+    addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+      wifiAPMenu.list->clear();
+        addNodes(&wifiAPMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+        changeMenu(wifiAPMenu.parentMenu);
+      });
+      /*addNodes(&wifiAPMenu, "potato", TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+        changeMenu(wifiAPMenu.parentMenu);
+      });*/
+      for (int i = 0; i < access_points->size(); i++) {
+        addNodes(&wifiAPMenu, access_points->get(i).essid, TFT_CYAN, NULL, KEYBOARD_ICO, [this, i](){
+        AccessPoint new_ap = access_points->get(i);
+        new_ap.selected = !access_points->get(i).selected;
+        if (new_ap.selected) {
+          new_ap.essid = ">" + access_points->get(i).essid;
+          changeMenu(current_menu);
+        } else {
+          new_ap.essid = access_points->get(i).essid;
+          changeMenu(current_menu);
+        }
+        access_points->set(i, new_ap);
+        //changeMenu(wifiAPMenu.parentMenu);
+        });
+      }
+      changeMenu(&wifiAPMenu);
+    });
+
+    wifiAPMenu.parentMenu = &wifiGeneralMenu;
+    addNodes(&wifiAPMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+      changeMenu(wifiAPMenu.parentMenu);
     });
   #endif
 
