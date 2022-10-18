@@ -291,6 +291,38 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
     return read_success;
 }
 
+static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    bool read_success = false;
+    MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx);
+    MrtdData* mrtd_data = &nfc_worker->dev_data->mrtd_data;
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
+    do {
+        // Read passport
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+
+        //TODO: if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
+
+        mrtd_test(mrtd_app, mrtd_data); // Some EFs are only available before Select App
+        //TODO: try select eMRTDApp first, but when PACE, read CardAccess first!
+
+        //TODO: read general informatie
+        //TODO: after auth scene, do auth (BAC / PACE)
+
+        read_success = true;
+    } while(false);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
+    return read_success;
+}
+
 static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
@@ -316,11 +348,25 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         card_read = true;
     } else if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         FURI_LOG_I(TAG, "ISO14443-4 card detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
-        if(!nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+        //TODO: thoughts on improving logic/readability here?
+        do {
+            FURI_LOG_D(TAG, "Try reading EMV");
+            if(nfc_worker_read_bank_card(nfc_worker, tx_rx)) {
+                nfc_worker->dev_data->protocol = NfcDeviceProtocolEMV;
+                break;
+            }
+
+            furi_hal_nfc_sleep(); // Needed between checks
+            FURI_LOG_D(TAG, "Try reading MRTD");
+            //TODO: support NFC-B?
+            if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
+                nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
+                break;
+            }
+
             FURI_LOG_I(TAG, "Unknown card. Save UID");
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
-        }
+        } while(false);
         card_read = true;
     } else {
         nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
@@ -359,6 +405,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
                         event = NfcWorkerEventReadBankCard;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolMRTD) {
+                        event = NfcWorkerEventReadPassport;
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
                         event = NfcWorkerEventReadUidNfcA;
