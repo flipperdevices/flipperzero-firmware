@@ -17,7 +17,7 @@
 #define SUBGHZ_DOWNLOAD_MAX_SIZE 512
 #define SUBGHZ_AUTO_DETECT_DOWNLOAD_MAX_SIZE 2048
 #define SUBGHZ_AUTO_DETECT_RAW_THRESHOLD -72.0f
-#define SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES 30
+#define SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES 40
 
 static const SubGhzBlockConst subghz_protocol_raw_const = {
     .te_short = 50,
@@ -214,7 +214,7 @@ void subghz_protocol_decoder_raw_set_rssi_threshold(void* context, int rssi_thre
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
-    FURI_LOG_E(TAG, "RSSI set: (%d)", rssi_threshold);
+    FURI_LOG_D(TAG, "RSSI set: (%d)", rssi_threshold);
 
     instance->rssi_threshold = rssi_threshold;
 
