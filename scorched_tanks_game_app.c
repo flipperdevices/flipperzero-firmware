@@ -13,7 +13,7 @@
 #define PLAYER_INIT_POWER 50
 #define ENEMY_INIT_LOCATION_X 108
 #define TANK_BARREL_LENGTH 8
-#define GRAVITY_FORCE 0.5
+#define GRAVITY_FORCE (double)0.5
 #define MIN_GROUND_HEIGHT 35
 #define MAX_GROUND_HEIGHT 55
 #define MAX_FIRE_POWER 100
@@ -114,12 +114,12 @@ int scorched_tanks_random(int min, int max)
 
 void scorched_tanks_generate_ground(Game *game_state)
 {
-    auto lastHeight = 45;
+    int lastHeight = 45;
 
     for (unsigned char a = 0; a < SCREEN_WIDTH; a++)
     {
-        auto diffHeight = scorched_tanks_random(-2, 3);
-        auto changeLength = scorched_tanks_random(1, 6);
+        int diffHeight = scorched_tanks_random(-2, 3);
+        int changeLength = scorched_tanks_random(1, 6);
 
         if (diffHeight == 0)
         {
@@ -130,8 +130,8 @@ void scorched_tanks_generate_ground(Game *game_state)
         {
             if (a + b < SCREEN_WIDTH)
             {
-                auto index = a + b;
-                auto newPoint = lastHeight + diffHeight;
+                int index = a + b;
+                int newPoint = lastHeight + diffHeight;
                 newPoint = newPoint < MIN_GROUND_HEIGHT ? MIN_GROUND_HEIGHT : newPoint;
                 newPoint = newPoint > MAX_GROUND_HEIGHT ? MAX_GROUND_HEIGHT : newPoint;
                 game_state->ground[index].x = index;
@@ -450,8 +450,8 @@ static void scorched_tanks_fire(Game *game_state)
         {
             double sinFromAngle = scorched_tanks_sin[game_state->player.aimAngle];
             double cosFromAngle = scorched_tanks_cos[game_state->player.aimAngle];
-            auto aimX1 = game_state->player.locationX;
-            auto aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
+            unsigned char aimX1 = game_state->player.locationX;
+            unsigned char aimY1 = game_state->ground[game_state->player.locationX].y - TANK_COLLIDER_SIZE;
             int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
             int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
             game_state->bulletPosition.x = aimX2;
@@ -463,8 +463,8 @@ static void scorched_tanks_fire(Game *game_state)
         {
             double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
             double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
-            auto aimX1 = game_state->enemy.locationX;
-            auto aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
+            unsigned char aimX1 = game_state->enemy.locationX;
+            unsigned char aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
             int aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
             int aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
             aimX2 = aimX1 - (aimX2 - aimX1);
