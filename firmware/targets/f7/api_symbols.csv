@@ -2772,12 +2772,6 @@ Function,+,subghz_protocol_raw_gen_fff_data,void,"FlipperFormat*, const char*"
 Function,+,subghz_protocol_raw_get_sample_write,size_t,SubGhzProtocolDecoderRAW*
 Function,+,subghz_protocol_raw_save_to_file_init,_Bool,"SubGhzProtocolDecoderRAW*, const char*, SubGhzPresetDefinition*"
 Function,+,subghz_protocol_raw_save_to_file_stop,void,SubGhzProtocolDecoderRAW*
-Function,+,subghz_protocol_registry_count,size_t,
-Function,+,subghz_protocol_registry_get_by_index,const SubGhzProtocol*,size_t
-Function,+,subghz_protocol_registry_get_by_name,const SubGhzProtocol*,const char*
-Function,-,subghz_protocol_raw_get_sample_write,size_t,SubGhzProtocolDecoderRAW*
-Function,-,subghz_protocol_raw_save_to_file_init,_Bool,"SubGhzProtocolDecoderRAW*, const char*, SubGhzPresetDefinition*"
-Function,-,subghz_protocol_raw_save_to_file_stop,void,SubGhzProtocolDecoderRAW*
 Function,+,subghz_protocol_registry_count,size_t,const SubGhzProtocolRegistry*
 Function,+,subghz_protocol_registry_get_by_index,const SubGhzProtocol*,"const SubGhzProtocolRegistry*, size_t"
 Function,+,subghz_protocol_registry_get_by_name,const SubGhzProtocol*,"const SubGhzProtocolRegistry*, const char*"
