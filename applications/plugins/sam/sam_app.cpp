@@ -7,7 +7,7 @@ extern "C" int32_t sam_app(void* p) {
     UNUSED(p);
 
     voice.begin();
-    voice.say("Hello world. I am FLIPPER SAM, automated voice! All your base are belong to us. You have no chance to survive make your time. ha ha ha. goodbye. ");
+    voice.say("All your base are belong to us. You have no chance to survive make your time. ha ha ha. goodbye. ");
 
     return 0;
 }
