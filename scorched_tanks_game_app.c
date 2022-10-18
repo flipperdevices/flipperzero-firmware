@@ -225,29 +225,39 @@ void scorched_tanks_calculate_trajectory(Game *game_state)
 
 static void scorched_tanks_draw_tank(Canvas *const canvas, unsigned char x, unsigned char y, bool isPlayer)
 {
-    unsigned char lineIndex = 0;
+    int lineIndex = -2;
 
     if (isPlayer)
     {
         // Draw tank base
-        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
 
         // draw turret
-        canvas_draw_line(canvas, x - 2, y - lineIndex, x + 1, y - lineIndex++);
-        canvas_draw_line(canvas, x - 2, y - lineIndex, x, y - lineIndex++);
+        canvas_draw_line(canvas, x - 2, y - lineIndex, x + 1, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 2, y - lineIndex, x, y - lineIndex);
+        lineIndex++;
     }
     else
     {
         // Draw tank base
-        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
-        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex++);
+        canvas_draw_line(canvas, x - 3, y - lineIndex, x + 3, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x - 4, y - lineIndex, x + 4, y - lineIndex);
+        lineIndex++;
 
         // draw turret
-        canvas_draw_line(canvas, x - 1, y - lineIndex, x + 2, y - lineIndex++);
-        canvas_draw_line(canvas, x, y - lineIndex, x + 2, y - lineIndex++);
+        canvas_draw_line(canvas, x - 1, y - lineIndex, x + 2, y - lineIndex);
+        lineIndex++;
+        canvas_draw_line(canvas, x, y - lineIndex, x + 2, y - lineIndex);
+        lineIndex++;
     }
 }
 
@@ -326,7 +336,7 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 
     canvas_set_font(canvas, FontSecondary);
 
-    char buffer2[12];
+    char buffer2[18];
     snprintf(buffer2, sizeof(buffer2), "wind: %i", game_state->windSpeed - MAX_WIND / 2);
     canvas_draw_str(canvas, 55, 10, buffer2);
 
