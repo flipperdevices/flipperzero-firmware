@@ -8,6 +8,7 @@
 #include <furi_hal_nfc.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/protocols/emv.h>
+#include <lib/nfc/protocols/mrtd.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
@@ -25,6 +26,7 @@ typedef void (*NfcLoadingCallback)(void* context, bool state);
 typedef enum {
     NfcDeviceProtocolUnknown,
     NfcDeviceProtocolEMV,
+    NfcDeviceProtocolMRTD,
     NfcDeviceProtocolMifareUl,
     NfcDeviceProtocolMifareClassic,
     NfcDeviceProtocolMifareDesfire,
@@ -56,6 +58,7 @@ typedef struct {
     };
     union {
         EmvData emv_data;
+        MrtdData mrtd_data;
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
         MifareDesfireData mf_df_data;

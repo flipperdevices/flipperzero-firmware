@@ -32,6 +32,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     // Set tag type
     if(protocol == NfcDeviceProtocolEMV) {
         furi_string_cat_printf(temp_str, "\e#EMV Bank Card\n");
+    } else if(protocol == NfcDeviceProtocolMRTD) {
+        furi_string_cat_printf(temp_str, "\e#Passport/ID\n");
     } else if(protocol == NfcDeviceProtocolMifareUl) {
         furi_string_cat_printf(
             temp_str, "\e#%s\n", nfc_mf_ul_type(dev_data->mf_ul_data.type, true));
