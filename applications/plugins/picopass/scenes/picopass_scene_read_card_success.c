@@ -15,6 +15,7 @@ void picopass_scene_read_card_success_widget_callback(
 
 void picopass_scene_read_card_success_on_enter(void* context) {
     Picopass* picopass = context;
+    FuriString* csn_str = furi_string_alloc_set("CSN:");
     FuriString* credential_str = furi_string_alloc();
     FuriString* wiegand_str = furi_string_alloc();
     FuriString* sio_str = furi_string_alloc();
@@ -25,8 +26,15 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     notification_message(picopass->notifications, &sequence_success);
 
     // Setup view
+    PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
+
+    uint8_t csn[PICOPASS_BLOCK_LEN];
+    memcpy(csn, &AA1->data[PICOPASS_CSN_BLOCK_INDEX], PICOPASS_BLOCK_LEN);
+    for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        furi_string_cat_printf(csn_str, " %02X", csn[i]);
+    }
 
     // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
     if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
@@ -77,18 +85,21 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     }
 
     widget_add_string_element(
-        widget, 64, 12, AlignCenter, AlignCenter, FontPrimary, furi_string_get_cstr(wiegand_str));
+        widget, 64, 5, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(csn_str));
+    widget_add_string_element(
+        widget, 64, 20, AlignCenter, AlignCenter, FontPrimary, furi_string_get_cstr(wiegand_str));
     widget_add_string_element(
         widget,
         64,
-        32,
+        36,
         AlignCenter,
         AlignCenter,
         FontSecondary,
         furi_string_get_cstr(credential_str));
     widget_add_string_element(
-        widget, 64, 42, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(sio_str));
+        widget, 64, 46, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(sio_str));
 
+    furi_string_free(csn_str);
     furi_string_free(credential_str);
     furi_string_free(wiegand_str);
     furi_string_free(sio_str);
