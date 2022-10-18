@@ -27,10 +27,10 @@ jobs:
       - name: 'Copy unit tests to flipper'
         continue-on-error: true
         run: |
-          ./scripts/storage.py send assets/unit_tests /ext/unit_tests
+          ./scripts/storage.py -p /dev/ttyACM0 send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
         continue-on-error: true
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
-          /home/actions-runner/.local/bin/poetry run python3 run_units.py Mod2
+          /home/actions-runner/.local/bin/poetry run python3 run_units.py /dev/ttyACM0
