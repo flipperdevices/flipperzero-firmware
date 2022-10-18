@@ -67,7 +67,7 @@ typedef
 		dir_t        dir;      // animation direction
 
 		// We will need a timer to run the animation
-	    FuriTimer*   timer;    // the timer
+		FuriTimer*   timer;    // the timer
 		uint32_t     timerHz;  // system ticks per second
 		int          fps;      // animation frames-per-second
 
