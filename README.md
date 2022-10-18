@@ -4,10 +4,10 @@
 - [Vendors Still Allow You to Hack Their Vending Machine](https://medium.com/@nic_whr/vendors-still-allow-you-to-hack-the-vending-machine-34ddad81dbad)
 
 ## Features
--Read credit on load
--Press -> right, set credit to 10 EUR
--Press . center, dump the EEPROM to serial (USB connected, log mode ON)
--Press <- left, erase the EEPROM
+- Read credit on load
+- Press -> right, set credit to 10 EUR
+- Press . center, dump the EEPROM to serial (USB connected, log mode ON)
+- Press <- left, erase the EEPROM
 
 ## Flipper Prototyping Board Schematic
 
