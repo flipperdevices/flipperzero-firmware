@@ -3,11 +3,19 @@
 #include <furi.h>
 #include "spi_mem_chip.h"
 
-typedef void (*SPIMemWorkerChipDetectCallback)(void* context);
-
 typedef enum { SPIMemWorkerModeIdle, SPIMemWorkerModeChipDetect } SPIMemWorkerMode;
 
-enum SPIMemCustomEventWorker { SPIMemCustomEventWorkerChipDetect };
+typedef enum {
+    SPIMemCustomEventWorkerChipDetectSuccess,
+    SPIMemCustomEventWorkerChipDetectFail
+} SPIMemCustomEventWorker;
+
+typedef enum {
+    SPIMemWorkerChipDetectResultSuccess,
+    SPIMemWorkerChipDetectResultFail
+} SPIMemWorkerChipDetectResult;
+
+typedef void (*SPIMemWorkerChipDetectCallback)(void* context, SPIMemWorkerChipDetectResult result);
 
 typedef struct {
     SPIMemChip* chip_info;

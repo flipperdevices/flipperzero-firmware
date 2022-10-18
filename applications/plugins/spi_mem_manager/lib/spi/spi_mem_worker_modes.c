@@ -8,8 +8,9 @@ const SPIMemWorkerModeType spi_mem_worker_modes[] = {
 
 // ChipDetect
 static void spi_mem_get_chip_detect_process(SPIMemWorker* worker) {
-    spi_mem_get_chip_info(worker->chip_info);
+    SPIMemWorkerChipDetectResult result = SPIMemWorkerChipDetectResultFail;
+    if(spi_mem_get_chip_info(worker->chip_info)) result = SPIMemWorkerChipDetectResultSuccess;
     if(worker->chip_detect_cb) {
-        worker->chip_detect_cb(worker->cb_ctx);
+        worker->chip_detect_cb(worker->cb_ctx, result);
     }
 }

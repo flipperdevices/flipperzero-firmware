@@ -1,8 +1,16 @@
 #include "../spi_mem_app.h"
 
-static void spi_mem_chip_detect_callback(void* context) {
+static void spi_mem_chip_detect_callback(void* context, SPIMemWorkerChipDetectResult result) {
     SPIMemApp* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, SPIMemCustomEventWorkerChipDetect);
+    SPIMemCustomEventWorker event;
+    if(result == SPIMemWorkerChipDetectResultSuccess) {
+        event = SPIMemCustomEventWorkerChipDetectSuccess;
+    } else if(result == SPIMemWorkerChipDetectResultFail) {
+        event = SPIMemCustomEventWorkerChipDetectFail;
+    } else {
+        return;
+    }
+    view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
 void spi_mem_scene_chip_detect_on_enter(void* context) {
@@ -21,7 +29,7 @@ bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        if(event.event == SPIMemCustomEventWorkerChipDetect) {
+        if(event.event == SPIMemCustomEventWorkerChipDetectSuccess) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetected);
         }
     }
