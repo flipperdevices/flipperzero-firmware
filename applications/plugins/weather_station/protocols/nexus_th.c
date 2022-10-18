@@ -255,7 +255,7 @@ void ws_protocol_decoder_nexus_th_get_string(void* context, FuriString* output) 
         instance->generic.id,
         instance->generic.channel,
         instance->generic.battery_low,
-        (uint16_t)instance->generic.temp,
-        ((uint16_t)(instance->generic.temp * 10) - (((uint16_t)instance->generic.temp) * 10)),
+        (int16_t)instance->generic.temp,
+        abs(((int16_t)(instance->generic.temp * 10) - (((int16_t)instance->generic.temp) * 10))),
         instance->generic.humidity);
 }
