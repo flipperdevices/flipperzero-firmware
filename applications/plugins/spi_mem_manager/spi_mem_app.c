@@ -14,23 +14,6 @@ static bool spi_mem_back_event_callback(void* context) {
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void spi_mem_file_create_folder(SPIMemApp* app) {
-    if(!storage_simply_mkdir(app->storage, SPI_MEM_FILE_FOLDER)) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
-    }
-}
-
-bool spi_mem_file_select(SPIMemApp* app) {
-    DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, SPI_MEM_FILE_EXTENSION, &I_Dip8_10px);
-    bool success =
-        dialog_file_browser_show(app->dialogs, app->file_path, app->file_path, &browser_options);
-    if(success) {
-        // success = ibutton_load_key_data(ibutton, ibutton->file_path, true);
-    }
-    return success;
-}
-
 SPIMemApp* spi_mem_alloc(void) {
     SPIMemApp* instance = malloc(sizeof(SPIMemApp));
 
@@ -45,6 +28,8 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->worker = spi_mem_worker_alloc();
     instance->dialogs = furi_record_open(RECORD_DIALOGS);
     instance->storage = furi_record_open(RECORD_STORAGE);
+    instance->widget = widget_alloc();
+    instance->chip_info = malloc(sizeof(SPIMemChip));
 
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
@@ -60,6 +45,8 @@ SPIMemApp* spi_mem_alloc(void) {
         instance->view_dispatcher, SPIMemViewDialogEx, dialog_ex_get_view(instance->dialog_ex));
     view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemViewPopup, popup_get_view(instance->popup));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, SPIMemViewWidget, widget_get_view(instance->widget));
 
     scene_manager_next_scene(instance->scene_manager, SPIMemSceneStart);
     return instance;
@@ -69,12 +56,15 @@ void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewSubmenu);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewDialogEx);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewPopup);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewWidget);
     submenu_free(instance->submenu);
     dialog_ex_free(instance->dialog_ex);
     popup_free(instance->popup);
+    widget_free(instance->widget);
     view_dispatcher_free(instance->view_dispatcher);
     scene_manager_free(instance->scene_manager);
     spi_mem_worker_free(instance->worker);
+    free(instance->chip_info);
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_NOTIFICATION);

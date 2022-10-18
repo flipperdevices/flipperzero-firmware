@@ -8,6 +8,7 @@
 #include <gui/modules/popup.h>
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
+#include <gui/modules/widget.h>
 #include <storage/storage.h>
 #include "scenes/spi_mem_scene.h"
 #include "lib/spi/spi_mem_worker.h"
@@ -27,9 +28,12 @@ typedef struct {
     FuriString* file_path;
     DialogsApp* dialogs;
     Storage* storage;
+    Widget* widget;
     SPIMemWorker* worker;
+    SPIMemChip* chip_info;
 } SPIMemApp;
 
-typedef enum { SPIMemViewSubmenu, SPIMemViewDialogEx, SPIMemViewPopup } SPIMemView;
+typedef enum { SPIMemViewSubmenu, SPIMemViewDialogEx, SPIMemViewPopup, SPIMemViewWidget} SPIMemView;
 
+void spi_mem_file_create_folder(SPIMemApp* app);
 bool spi_mem_file_select(SPIMemApp* app);
