@@ -1842,6 +1842,7 @@ Function,-,pow10f,float,float
 Function,-,power_enable_low_battery_level_notification,void,"Power*, _Bool"
 Function,+,power_get_info,void,"Power*, PowerInfo*"
 Function,+,power_get_pubsub,FuriPubSub*,Power*
+Function,+,power_get_settings_events_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
 Function,+,power_off,void,Power*
 Function,+,power_reboot,void,PowerBootMode

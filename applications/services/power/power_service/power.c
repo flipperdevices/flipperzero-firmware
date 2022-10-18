@@ -92,6 +92,10 @@ static void power_stop_auto_shutdown_timer(Power* power) {
     furi_timer_stop(power->auto_shutdown_timer);
 }
 
+static uint32_t power_is_running_auto_shutdown_timer(Power* power) {
+    return furi_timer_is_running(power->auto_shutdown_timer);
+}
+
 static void power_input_event_callback(const void* value, void* context) {
     furi_assert(value);
     furi_assert(context);
@@ -104,8 +108,10 @@ static void power_input_event_callback(const void* value, void* context) {
 
 static void power_auto_shutdown_arm(Power* power) {
     if(power->shutdown_idle_delay_ms) {
-        power->input_events_subscription =
-            furi_pubsub_subscribe(power->input_events_pubsub, power_input_event_callback, power);
+        if(power->input_events_subscription == NULL) {
+            power->input_events_subscription = furi_pubsub_subscribe(
+                power->input_events_pubsub, power_input_event_callback, power);
+        }
         power_start_auto_shutdown_timer(power);
     }
 }
@@ -125,6 +131,18 @@ static void power_auto_shutdown_timer_callback(void* context) {
     power_off(power);
 }
 
+static void power_shutdown_time_changed_callback(const void* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+    Power* power = context;
+    power->shutdown_idle_delay_ms = *(uint32_t*)event;
+    if(power->shutdown_idle_delay_ms) {
+        power_auto_shutdown_arm(power);
+    } else if(power_is_running_auto_shutdown_timer(power)) {
+        power_auto_shutdown_inhibit(power);
+    }
+}
+
 Power* power_alloc() {
     Power* power = malloc(sizeof(Power));
 
@@ -133,6 +151,10 @@ Power* power_alloc() {
     power->gui = furi_record_open(RECORD_GUI);
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
+    power->settings_events = furi_pubsub_alloc();
+    furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
+    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
+    power->input_events_subscription = NULL;
 
     power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     power->input_events_subscription = NULL;
@@ -183,12 +205,16 @@ void power_free(Power* power) {
 
     // FuriPubSub
     furi_pubsub_free(power->event_pubsub);
+    furi_pubsub_free(power->settings_events);
     furi_pubsub_free(power->input_events_pubsub);
 
     if(power->input_events_subscription) {
         furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
         power->input_events_subscription = NULL;
     }
+
+    //Auto shutdown timer
+    furi_timer_free(power->auto_shutdown_timer);
 
     // Records
     furi_record_close(RECORD_NOTIFICATION);

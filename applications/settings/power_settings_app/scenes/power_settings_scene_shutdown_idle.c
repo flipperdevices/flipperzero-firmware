@@ -10,8 +10,6 @@ const char* const shutdown_idle_delay_text[SHUTDOWN_IDLE_DELAY_COUNT] =
 const uint32_t shutdown_idle_delay_value[SHUTDOWN_IDLE_DELAY_COUNT] =
     {0, 900000, 1800000, 3600000, 21600000, 43200000, 86400000, 172800000};
 
-uint32_t origShutdownIdleDelay_value = 0;
-
 static void power_settings_scene_shutodwn_idle_callback(void* context, uint32_t index) {
     PowerSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -31,7 +29,6 @@ void power_settings_scene_shutdown_idle_on_enter(void* context) {
     VariableItemList* variable_item_list = app->variable_item_list;
     VariableItem* item;
     uint8_t value_index;
-    origShutdownIdleDelay_value = app->shutdown_idle_delay_ms;
 
     item = variable_item_list_add(
         variable_item_list,
@@ -66,9 +63,6 @@ bool power_settings_scene_shutdown_idle_on_event(void* context, SceneManagerEven
 void power_settings_scene_shutdown_idle_on_exit(void* context) {
     PowerSettingsApp* app = context;
     SAVE_POWER_SETTINGS(&app->shutdown_idle_delay_ms);
+    furi_pubsub_publish(app->settings_events, &app->shutdown_idle_delay_ms);
     variable_item_list_reset(app->variable_item_list);
-
-    if(app->shutdown_idle_delay_ms != origShutdownIdleDelay_value) {
-        furi_hal_power_reset();
-    }
 }
