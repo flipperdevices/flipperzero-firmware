@@ -12,7 +12,7 @@
 #define PLAYER_INIT_AIM 45
 #define PLAYER_INIT_POWER 50
 #define ENEMY_INIT_LOCATION_X 108
-#define TANK_BARREL_LENGTH 8
+#define TANK_BARREL_LENGTH 7
 #define GRAVITY_FORCE (double)0.5
 #define MIN_GROUND_HEIGHT 35
 #define MAX_GROUND_HEIGHT 55
@@ -313,13 +313,13 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
         aimX2 = aimX1 + TANK_BARREL_LENGTH * cosFromAngle;
         aimY2 = aimY1 + TANK_BARREL_LENGTH * sinFromAngle;
 
-        aimX1 += 1;
-        aimX2 += 1;
+        aimX1 += 2;
+        aimX2 += 2;
     }
     else
     {
         aimX1 = game_state->enemy.locationX;
-        aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE;
+        aimY1 = game_state->ground[game_state->enemy.locationX].y - TANK_COLLIDER_SIZE + 2;
 
         double sinFromAngle = scorched_tanks_sin[game_state->enemy.aimAngle];
         double cosFromAngle = scorched_tanks_cos[game_state->enemy.aimAngle];
@@ -328,11 +328,11 @@ static void scorched_tanks_render_callback(Canvas *const canvas, void *ctx)
 
         aimX2 = aimX1 - (aimX2 - aimX1);
 
-        aimX1 -= 1;
-        aimX2 -= 1;
+        aimX1 -= 2;
+        aimX2 -= 2;
     }
 
-    canvas_draw_line(canvas, aimX1, aimY1 - 3, aimX2, aimY2 - 3);
+    canvas_draw_line(canvas, aimX1, aimY1 - 2, aimX2, aimY2 - 2);
 
     canvas_set_font(canvas, FontSecondary);
 
@@ -432,13 +432,14 @@ static void scorched_tanks_aim_up(Game *game_state)
 
 static void scorched_tanks_aim_down(Game *game_state)
 {
-    if (game_state->player.aimAngle > 0 && !game_state->isShooting)
+    if (!game_state->isShooting)
     {
-        if (game_state->isPlayerTurn)
+        if (game_state->isPlayerTurn && game_state->player.aimAngle > 0)
         {
             game_state->player.aimAngle--;
         }
-        else
+
+        if (!game_state->isPlayerTurn && game_state->enemy.aimAngle > 0)
         {
             game_state->enemy.aimAngle--;
         }
