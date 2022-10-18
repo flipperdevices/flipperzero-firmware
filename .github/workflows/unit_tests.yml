@@ -27,6 +27,8 @@ jobs:
       - name: 'Copy unit tests to flipper'
         continue-on-error: true
         run: |
+#         need sleep for flipper to update, will need to check acm devices to see if it is available
+          sleep 30
           ./scripts/storage.py -p /dev/ttyACM0 send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
