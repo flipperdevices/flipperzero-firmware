@@ -26,7 +26,7 @@ uint8_t virgin_buffer[128] = {
 
 void virgin(){     
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 10000)){
+	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
 		bool result = false;
 		for (size_t i = 0; i < sizeof(virgin_buffer); i++)
 		{	
@@ -45,7 +45,7 @@ void virgin(){
 
 void dump(){
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 10000)){
+	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
 		uint8_t temp[1];
 		char str[513];
 		int index = 0;
@@ -64,9 +64,15 @@ void dump(){
 
 void write_10_eur(){
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 10000)){
-		furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, (uint8_t *) address_44_buffer, sizeof(address_44_buffer), (uint32_t) 2000);
-		furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x54, (uint8_t *) address_54_buffer, sizeof(address_54_buffer), (uint32_t) 2000);
+	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
+		bool result = false;
+		while(!result){
+			result = furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, (uint8_t *) address_44_buffer, sizeof(address_44_buffer), (uint32_t) 2000);
+		}
+		result = false;
+		while(!result){
+			result = furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x54, (uint8_t *) address_54_buffer, sizeof(address_54_buffer), (uint32_t) 2000);
+		}
 	}
 	else{
         FURI_LOG_D("COFFEE", "WRITE 10: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
@@ -77,33 +83,37 @@ void write_10_eur(){
 double read_credit(){
     memset(data_buffer, 0, sizeof(data_buffer)); //reset array
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 10000)){
-		furi_hal_i2c_read_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, data_buffer, sizeof(data_buffer), (uint32_t) 1000);
-		int credit = 0;
-		int exponent = 14;
-		int hi, lo = 0;
-		for (size_t i = 0; i < sizeof(data_buffer); i++)
-		{  //iterate 2 bit at times
-			hi = 0;
-			lo = 0;
-			for (int j = 3; j >= 0; j--) {
-				int k = (data_buffer[i] % 16) >> j; // right shift
-				if (k & 1){
-					if(j>=2)
-						hi += pow(2, j-2);
-					else
-						lo += pow(2, j);
+	bool is_ready = false;
+	while(!is_ready){
+		is_ready = furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000);
+		if(is_ready){
+			furi_hal_i2c_read_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, data_buffer, sizeof(data_buffer), (uint32_t) 1000);
+			int credit = 0;
+			int exponent = 14;
+			int hi, lo = 0;
+			for (size_t i = 0; i < sizeof(data_buffer); i++)
+			{  //iterate 2 bit at times
+				hi = 0;
+				lo = 0;
+				for (int j = 3; j >= 0; j--) {
+					int k = (data_buffer[i] % 16) >> j; // right shift
+					if (k & 1){
+						if(j>=2)
+							hi += pow(2, j-2);
+						else
+							lo += pow(2, j);
+					}
 				}
+				credit += hi * pow(2, exponent) + lo * pow(2, exponent-8);
+				exponent -= 2;
 			}
-			credit += hi * pow(2, exponent) + lo * pow(2, exponent-8);
-			exponent -= 2;
+			furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+			return credit / 100.0;
 		}
-		furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-        return credit / 100.0;
+		else{
+			FURI_LOG_D("COFFEE", "READ CREDIT: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
+		}
 	}
-	else{
-        FURI_LOG_D("COFFEE", "READ CREDIT: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
-    }
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 	return 0.0;
 }

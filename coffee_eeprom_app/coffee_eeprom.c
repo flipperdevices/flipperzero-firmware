@@ -83,6 +83,7 @@ int32_t coffee_eeprom_app(void* p) {
                     case InputKeyRight:
                         write_10_eur();
                         plugin_state->credit = read_credit();
+                        snprintf(plugin_state->status, sizeof(plugin_state->status), "Write done!");
                         break;
                     case InputKeyLeft:
                         virgin();
