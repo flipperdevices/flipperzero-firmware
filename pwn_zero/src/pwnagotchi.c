@@ -16,8 +16,12 @@ Pwnagotchi* pwnagotchi_alloc() {
     // Turn off all pixels in screen array
     memset(pwn->screen, 0, sizeof(pwn->screen));
 
-    pwn->queueIdx = 0;
-    pwn->byteIdx = 0;
+    // Allocate message buffer
+    pwn->messageQueue = malloc(sizeof(uint8_t) * PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE);
+    pwn->queueSize = PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE;
+
+    pwn->readIdx = pwn->messageQueue;
+    pwn->writeIdx = pwn->messageQueue;
 
     return pwn;
 }

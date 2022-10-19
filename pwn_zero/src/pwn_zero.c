@@ -64,25 +64,26 @@ void input_callback(InputEvent* inputEvent, FuriMessageQueue* eventQueue) {
 void pwn_uart_rx_cb(UartIrqEvent event, uint8_t data, void* context) {
     furi_assert(context);
 
-    Pwnagotchi* pwn = ((PwnZero*)context)->pwnagotchi;
+    PwnZero* pwnZero = acquire_mutex_block((ValueMutex*) context);
+    Pwnagotchi* pwn = pwnZero->pwnagotchi;
 
     if (event == UartIrqEventRXNE) {
         // Manage the queue
-        if (pwn->byteIdx >= PWNAGOTCHI_PROTOCOL_BYTE_LEN) {
-            pwn->byteIdx = 0;
-            pwn->queueIdx++;
+        if (pwn->writeIdx >= (pwn->messageQueue + pwn->queueSize)) {
+            pwn->writeIdx = pwn->messageQueue;
         }
 
-        // Make sure queueIdx isn't exceeding
-        if (pwn->queueIdx >= PWNAGOTCHI_PROTOCOL_QUEUE_SIZE) {
-            pwn->queueIdx = PWNAGOTCHI_PROTOCOL_QUEUE_SIZE - 1;
-            pwn->byteIdx = 0;
-        }
-
-        // Now add it in
-        pwn->messageQueue[pwn->queueIdx][pwn->byteIdx] = data;
+    //     // Now add it in
+    //     *(pwn->writeIdx) = data;
+    //     pwn->writeIdx += 1;
 
     }
+
+    UNUSED(pwn);
+    UNUSED(event);
+    UNUSED(data);
+
+    release_mutex(context, pwnZero);
 
 }
 
@@ -107,7 +108,7 @@ int32_t pwn_zero_app(void* p) {
     view_port_input_callback_set(view_port, input_callback, eventQueue);  
 
     // Set rx callback
-    furi_hal_uart_set_irq_cb(pwnZero->pwnagotchi->channel, pwn_uart_rx_cb, pwnZero); 
+    furi_hal_uart_set_irq_cb(pwnZero->pwnagotchi->channel, pwn_uart_rx_cb, &pwnMutex); 
 
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
@@ -115,13 +116,15 @@ int32_t pwn_zero_app(void* p) {
     /// Body will go here
     for (int ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
         // Loop until message
-        size_t queueIdx = 0;
+        uint8_t* messageQueue;
+        uint8_t* writeIdx;
         do {
-        PwnZero* tmp = (PwnZero*) acquire_mutex_block(&pwnMutex);
-        queueIdx = tmp->pwnagotchi->queueIdx;
+            PwnZero* tmp = (PwnZero*) acquire_mutex_block(&pwnMutex);
+            messageQueue = tmp->pwnagotchi->messageQueue;
+            writeIdx = tmp->pwnagotchi->writeIdx;
 
-        release_mutex(&pwnMutex, tmp);
-        } while (queueIdx != 0);
+            release_mutex(&pwnMutex, tmp);
+        } while (messageQueue == writeIdx);
 
         PwnZero* pwnZero = (PwnZero*) acquire_mutex_block(&pwnMutex);
         for (int jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {

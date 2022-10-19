@@ -15,11 +15,13 @@ typedef struct {
     bool screen[FLIPPER_SCREEN_HEIGHT][FLIPPER_SCREEN_WIDTH];
 
     /// Message queue
-    uint8_t messageQueue[PWNAGOTCHI_PROTOCOL_QUEUE_SIZE][PWNAGOTCHI_PROTOCOL_BYTE_LEN];
-    /// Index of currently saving queue number
-    size_t queueIdx;
-    /// The current position in the given protocol message
-    size_t byteIdx;
+    uint8_t* messageQueue;
+    /// Size of the message queue in bytes
+    unsigned int queueSize;
+    /// Location of memory index that is currently being read
+    uint8_t* readIdx;
+    /// Location of memory index that should be used for writing
+    uint8_t* writeIdx;
 
 } Pwnagotchi;
 
