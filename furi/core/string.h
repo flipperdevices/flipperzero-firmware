@@ -719,7 +719,7 @@ void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnico
 #define F_STR_INIT_SET(a, b) ((a) = furi_string_alloc_set(b))
 
 /**
- * @brief INIT SET OPLIST for FuriString.
+ * @brief INIT MOVE OPLIST for FuriString.
  */
 #define F_STR_INIT_MOVE(a, b) ((a) = furi_string_alloc_move(b))
 
