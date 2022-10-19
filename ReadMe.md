@@ -21,6 +21,7 @@
 - Added: [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - Updated: [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
 - Updated: [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254) [Refactoring (By GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256) with RAINBOW effect notification upon timer or true Konami code (10 presses)
+- Removed duplicate rfidfuzzer folder from assets root directory (You will have to delete your dupe on your SD card)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
