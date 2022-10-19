@@ -200,6 +200,81 @@ const NotificationSequence clock_alert_startStop = {
     NULL,
 };
 
+const NotificationMessage message_red_127 = {
+    .type = NotificationMessageTypeLedRed,
+    .data.led.value = 0x7F,
+};
+
+const NotificationMessage message_green_127 = {
+    .type = NotificationMessageTypeLedGreen,
+    .data.led.value = 0x7F,
+};
+
+const NotificationMessage message_blue_127 = {
+    .type = NotificationMessageTypeLedBlue,
+    .data.led.value = 0x7F,
+};
+
+const NotificationSequence sequence_rainbow = {
+    &message_red_255,
+    &message_green_0,
+    &message_blue_0,
+    &message_delay_250,
+    &message_red_255,
+    &message_green_127,
+    &message_blue_0,
+    &message_delay_250,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_0,
+    &message_delay_250,
+    &message_red_127,
+    &message_green_255,
+    &message_blue_0,
+    &message_delay_250,
+    &message_red_0,
+    &message_green_255,
+    &message_blue_0,
+    &message_delay_250,
+    &message_red_0,
+    &message_green_255,
+    &message_blue_127,
+    &message_delay_250,
+    &message_red_0,
+    &message_green_255,
+    &message_blue_255,
+    &message_delay_250,
+    &message_red_0,
+    &message_green_127,
+    &message_blue_255,
+    &message_delay_250,
+    &message_red_0,
+    &message_green_0,
+    &message_blue_255,
+    &message_delay_250,
+    &message_red_127,
+    &message_green_0,
+    &message_blue_255,
+    &message_delay_250,
+    &message_red_255,
+    &message_green_0,
+    &message_blue_255,
+    &message_delay_250,
+    &message_red_255,
+    &message_green_0,
+    &message_blue_127,
+    &message_delay_250,
+    &message_red_127,
+    &message_green_127,
+    &message_blue_127,
+    &message_delay_250,
+    &message_red_255,
+    &message_green_255,
+    &message_blue_255,
+    &message_delay_250,
+    NULL,
+};
+
 static void desktop_view_main_dumbmode_changed(DesktopSettings* settings) {
     settings->is_dumbmode = !settings->is_dumbmode;
     DESKTOP_SETTINGS_SAVE(settings);
@@ -294,7 +369,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             elements_button_right(canvas, "S:ByMin");
         }
     }
-    if(state->w_test) canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
+    if(state->w_test && state->desktop_settings->is_dumbmode) canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
 }
 
 static void clock_state_init(ClockState* const state) {
@@ -393,6 +468,7 @@ int32_t clock_app(void* p) {
                             plugin_state->codeSequence++;
                             if(plugin_state->codeSequence == 8) {
                                 desktop_view_main_dumbmode_changed(plugin_state->desktop_settings);
+                                plugin_state->w_test = true; // OH HEY NOW LETS GAIN EXP & MORE FUN
                             }
                         } else {
                             plugin_state->codeSequence = 0;
@@ -481,9 +557,10 @@ int32_t clock_app(void* p) {
                         if(plugin_state->songSelect == 1 || plugin_state->songSelect == 2 ||
                            plugin_state->songSelect == 3) {
                             notification_message(notification, &sequence_success);
+                            notification_message(notification, &sequence_rainbow);
+                            notification_message(notification, &sequence_rainbow);
                         }
                         plugin_state->militaryTime = true; // 24 HR TIME FOR THIS
-                        plugin_state->w_test = true; // OH HEY NOW LETS GAIN EXP & MORE FUN
                         DOLPHIN_DEED(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
@@ -525,6 +602,8 @@ int32_t clock_app(void* p) {
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 2) {
                             notification_message(notification, &clock_alert_pr3);
+                            notification_message(notification, &sequence_rainbow);
+                            notification_message(notification, &sequence_rainbow);
                         }
                     } else if(plugin_state->songSelect == 2) {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
@@ -543,6 +622,8 @@ int32_t clock_app(void* p) {
                         }
                         if(plugin_state->timerSecs == plugin_state->alert_time + 2) {
                             notification_message(notification, &clock_alert_mario3);
+                            notification_message(notification, &sequence_rainbow);
+                            notification_message(notification, &sequence_rainbow);
                         }
                     } else {
                         if(plugin_state->timerSecs == plugin_state->alert_time) {
