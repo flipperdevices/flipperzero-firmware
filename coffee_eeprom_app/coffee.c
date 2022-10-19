@@ -23,24 +23,31 @@ uint8_t virgin_buffer[128] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
-
-void virgin(){     
+bool write_buffer(uint8_t *buffer, size_t buffer_size, uint8_t start_address){
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
+	bool result = false;
 	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
-		bool result = false;
-		for (size_t i = 0; i < sizeof(virgin_buffer); i++)
-		{	
-			while(!result){
-				result = furi_hal_i2c_write_reg_8(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x00 + i, virgin_buffer[i], (uint32_t) 2000);
-            	FURI_LOG_D("COFFEE", "Write %d/%d at address %.2X, result %d", i + 1, sizeof(virgin_buffer), 0x00 + i, result);
-			}
+		for (size_t i = 0; i < buffer_size; i++){	
 			result = false;
+			while(!result){
+				result = furi_hal_i2c_write_reg_8(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, start_address + i, buffer[i], (uint32_t) 2000);
+            	FURI_LOG_D("COFFEE", "Write %.2X, byte %d/%d at address %.2X, result %d", buffer[i], i + 1, buffer_size, start_address + i, result);
+			}
 		}
 	}
 	else{
         FURI_LOG_D("COFFEE", "VIRGIN: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
     }
 	furi_hal_i2c_release(&furi_hal_i2c_handle_external);
+	return result;
+}
+void virgin(){     
+	write_buffer(virgin_buffer, sizeof(virgin_buffer), 0x00);
+}
+
+void write_10_eur(){
+	write_buffer(address_44_buffer, sizeof(address_44_buffer), 0x44);
+	write_buffer(address_54_buffer, sizeof(address_54_buffer), 0x54);
 }
 
 void dump(){
@@ -60,24 +67,6 @@ void dump(){
         FURI_LOG_D("COFFEE", "DUMP: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
     }
 	furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-}
-
-void write_10_eur(){
-	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
-		bool result = false;
-		while(!result){
-			result = furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x44, (uint8_t *) address_44_buffer, sizeof(address_44_buffer), (uint32_t) 2000);
-		}
-		result = false;
-		while(!result){
-			result = furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x54, (uint8_t *) address_54_buffer, sizeof(address_54_buffer), (uint32_t) 2000);
-		}
-	}
-	else{
-        FURI_LOG_D("COFFEE", "WRITE 10: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
-    }
-    furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
 double read_credit(){
