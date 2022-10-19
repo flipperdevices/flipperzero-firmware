@@ -22,7 +22,7 @@
 #define SEND_MENU_Y 34
 
 #define PLAY_MENU_TEXT "Play"
-#define PLAY_MENU_X 70
+#define PLAY_MENU_X 75
 #define PLAY_MENU_Y 48
 
 // Sniffer Pins
@@ -42,16 +42,6 @@ typedef enum {
     /* Know menu Size*/
     MENU_SIZE
 } i2cToolsMainMenu;
-
-/*
-// Menu
-typedef struct {
-    uint8_t idx;
-    char* name;
-    void* cb;
-    Icon* icon;
-} i2cMenu;
-*/
 
 // Bus Sniffer
 typedef enum { I2C_BUS_IDLE, I2C_BUS_STARTED } i2cBusStates;
@@ -79,13 +69,15 @@ typedef struct {
     uint8_t addresses[MAX_I2C_ADDR + 1];
     uint8_t found;
     uint8_t menu_index;
+    bool scanned;
 } _scanner;
 
 // Sender
 typedef struct {
-    uint8_t address;
+    uint8_t address_idx;
     uint8_t value;
-    uint8_t recv[MAX_FRAMES];
+    uint8_t recv[2];
+    bool must_send;
     bool sended;
     bool error;
 } _sender;
@@ -103,9 +95,9 @@ typedef struct {
 
 void scan_i2c_bus(i2cToolsData* data) {
     data->scanner.found = 0;
+    data->scanner.scanned = true;
     furi_hal_i2c_acquire(I2C_BUS);
     // scan
-    printf("scan\r\n");
     for(uint8_t addr = 0x01; addr < MAX_I2C_ADDR; addr++) {
         // Check for peripherals
         if(furi_hal_i2c_is_device_ready(I2C_BUS, addr, 2)) {
@@ -116,8 +108,6 @@ void scan_i2c_bus(i2cToolsData* data) {
             // convert addr to 7-bits
             data->scanner.addresses[data->scanner.found] = addr >> 1;
             data->scanner.found++;
-            printf("%#4x", addr >> 1);
-            printf("\r\n");
         }
     }
     furi_hal_i2c_release(I2C_BUS);
@@ -263,31 +253,21 @@ static void SCLcallback(void* ctx) {
     }
 }
 
+void start_interrupts(i2cToolsData* data) {
+    furi_hal_gpio_init(pinSCL, GpioModeInterruptRise, GpioPullNo, GpioSpeedHigh);
+    furi_hal_gpio_add_int_callback(pinSCL, SCLcallback, data);
+
+    // Add Rise and Fall Interrupt on SDA pin
+    furi_hal_gpio_init(pinSDA, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedHigh);
+    furi_hal_gpio_add_int_callback(pinSDA, SDAcallback, data);
+}
+
+void stop_interrupts() {
+    furi_hal_gpio_remove_int_callback(pinSCL);
+    furi_hal_gpio_remove_int_callback(pinSDA);
+}
+
 void i2ctools_draw_sniff_view(Canvas* canvas, i2cToolsData* data) {
-    if(!data->sniffer.started) {
-        // Add Rise Interrupt on SCL pin
-        furi_hal_gpio_init(pinSCL, GpioModeInterruptRise, GpioPullNo, GpioSpeedHigh);
-        furi_hal_gpio_add_int_callback(pinSCL, SCLcallback, data);
-
-        // Add Rise and Fall Interrupt on SDA pin
-        furi_hal_gpio_init(pinSDA, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedHigh);
-        furi_hal_gpio_add_int_callback(pinSDA, SDAcallback, data);
-
-        data->sniffer.started = true;
-    }
-    if(data->sniffer.frame_index == 0) {
-        data->sniffer.menu_index = 0;
-        /*
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_rframe(canvas, 0, 0, 128, 64, 3);
-        canvas_draw_icon(canvas, 2, 13, &I_passport_happy2_46x49);
-
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SNIFF_MENU_TEXT);
-        */
-        return;
-    }
-
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 3);
@@ -295,8 +275,18 @@ void i2ctools_draw_sniff_view(Canvas* canvas, i2cToolsData* data) {
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SNIFF_MENU_TEXT);
-
     canvas_set_font(canvas, FontSecondary);
+
+    // Button
+    canvas_draw_rbox(canvas, 70, 48, 45, 13, 3);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_icon(canvas, 75, 50, &I_Ok_btn_9x9);
+    if(!data->sniffer.started) {
+        canvas_draw_str_aligned(canvas, 85, 51, AlignLeft, AlignTop, "Start");
+    } else {
+        canvas_draw_str_aligned(canvas, 85, 51, AlignLeft, AlignTop, "Stop");
+    }
+    canvas_set_color(canvas, ColorBlack);
     // Address text
     char addr_text[8];
     snprintf(
@@ -356,15 +346,13 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cToolsData* data) {
     canvas_draw_icon(canvas, 2, 13, &I_passport_happy2_46x49);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SEND_MENU_TEXT);
-    UNUSED(data);
-    /*
-     if(!data->scanned) {
-        get_available_i2c(data);
+
+    if(!data->scanner.scanned) {
+        scan_i2c_bus(data);
     }
 
-    
     canvas_set_font(canvas, FontSecondary);
-    if(data->nb_available <= 0) {
+    if(data->scanner.found <= 0) {
         canvas_draw_str_aligned(canvas, 60, 5, AlignLeft, AlignTop, "No peripherals");
         canvas_draw_str_aligned(canvas, 60, 15, AlignLeft, AlignTop, "Found");
         return;
@@ -381,41 +369,41 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cToolsData* data) {
     snprintf(
         addr_text,
         sizeof(addr_text),
-        "%#04x",
-        (int)data->available_addr[data->send_view_addr_index]);
+        "0x%02x",
+        (int)data->scanner.addresses[data->sender.address_idx]);
     canvas_draw_str_aligned(canvas, 90, 5, AlignLeft, AlignTop, addr_text);
     canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignTop, "Value: ");
 
     canvas_draw_icon(canvas, 80, 17, &I_ButtonUp_7x4);
     canvas_draw_icon(canvas, 115, 17, &I_ButtonDown_7x4);
-    snprintf(addr_text, sizeof(addr_text), "%#04x", (int)data->send_view_to_send);
+    snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)data->sender.value);
     canvas_draw_str_aligned(canvas, 90, 15, AlignLeft, AlignTop, addr_text);
-    if(data->send_view_must_send) {
+    if(data->sender.must_send) {
         furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-        data->send_get_return = furi_hal_i2c_trx(
+        data->sender.error = furi_hal_i2c_trx(
             &furi_hal_i2c_handle_external,
-            data->available_addr[data->send_view_addr_index] << 1,
-            &data->send_view_to_send,
+            data->scanner.addresses[data->sender.address_idx] << 1,
+            &data->sender.value,
             1,
-            data->send_last_recv,
-            sizeof(data->send_last_recv),
+            data->sender.recv,
+            sizeof(data->sender.recv),
             3);
         furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-        data->send_view_must_send = false;
-        data->send_started = true;
+        data->sender.must_send = false;
+        data->sender.sended = true;
     }
     canvas_draw_str_aligned(canvas, 50, 25, AlignLeft, AlignTop, "Result: ");
-    if(data->send_started) {
-        if(data->send_get_return) {
-            for(uint8_t i = 0; i < sizeof(data->send_last_recv); i++) {
-                snprintf(addr_text, sizeof(addr_text), "%#04x", (int)data->send_last_recv[i]);
-                canvas_draw_str_aligned(canvas, 90, 25 + (i * 10), AlignLeft, AlignTop, addr_text);
-            }
+    if(data->sender.sended) {
+        //if(data->sender.error) {
+        for(uint8_t i = 0; i < sizeof(data->sender.recv); i++) {
+            snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)data->sender.recv[i]);
+            canvas_draw_str_aligned(canvas, 90, 25 + (i * 10), AlignLeft, AlignTop, addr_text);
+        }
+        /*
         } else {
             canvas_draw_str_aligned(canvas, 90, 25, AlignLeft, AlignTop, "Error");
-        }
+        }*/
     }
-    */
 }
 
 void i2ctools_draw_scan_view(Canvas* canvas, i2cToolsData* data) {
@@ -440,7 +428,7 @@ void i2ctools_draw_scan_view(Canvas* canvas, i2cToolsData* data) {
             break;
         }
         snprintf(
-            count_text, sizeof(count_text), "%#04x ", (int)data->scanner.addresses[idx_to_print]);
+            count_text, sizeof(count_text), "0x%02x ", (int)data->scanner.addresses[idx_to_print]);
         if(i < 3) {
             x_pos = 50 + (i * 26);
             y_pos = 15;
@@ -464,6 +452,12 @@ void i2ctools_draw_scan_view(Canvas* canvas, i2cToolsData* data) {
     // Right cursor
     y_pos = 14 + data->scanner.menu_index;
     canvas_draw_rbox(canvas, 125, y_pos, 3, 10, 1);
+
+    // Button
+    canvas_draw_rbox(canvas, 70, 48, 45, 13, 3);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_icon(canvas, 75, 50, &I_Ok_btn_9x9);
+    canvas_draw_str_aligned(canvas, 85, 51, AlignLeft, AlignTop, "Scan");
 }
 
 void i2ctools_draw_callback(Canvas* canvas, void* ctx) {
@@ -529,14 +523,17 @@ int32_t i2ctools_app(void* p) {
     i2caddrs->sniffer.menu_index = 0;
 
     i2caddrs->scanner.menu_index = 0;
+    i2caddrs->scanner.scanned = false;
+
+    i2caddrs->sender.must_send = false;
+    i2caddrs->sender.sended = false;
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         if(event.key == InputKeyBack && event.type == InputTypeRelease) {
             if(i2caddrs->current_menu == MAIN_VIEW) {
                 break;
             } else {
                 if(i2caddrs->current_menu == SNIFF_VIEW) {
-                    furi_hal_gpio_remove_int_callback(pinSCL);
-                    furi_hal_gpio_remove_int_callback(pinSDA);
+                    stop_interrupts();
                     i2caddrs->sniffer.started = false;
                     i2caddrs->sniffer.state = I2C_BUS_IDLE;
                 }
@@ -551,28 +548,23 @@ int32_t i2ctools_app(void* p) {
                 if(i2caddrs->scanner.menu_index > 0) {
                     i2caddrs->scanner.menu_index--;
                 }
-            } /* else if(i2caddrs->current_menu == SEND_VIEW) {
-                if(i2caddrs->send_view_to_send < 0xFF) {
-                    i2caddrs->send_view_to_send++;
-                    i2caddrs->send_started = false;
+            } else if(i2caddrs->current_menu == SEND_VIEW) {
+                if(i2caddrs->sender.value < 0xFF) {
+                    i2caddrs->sender.value++;
+                    i2caddrs->sender.sended = false;
                 }
             }
-            */
-
-        }
-        /*
-        else if(
+        } else if(
             event.key == InputKeyUp &&
             (event.type == InputTypeLong || event.type == InputTypeRepeat)) {
             if(i2caddrs->current_menu == SEND_VIEW) {
-                if(i2caddrs->send_view_to_send < 0xF9) {
-                    i2caddrs->send_view_to_send += 5;
-                    i2caddrs->send_started = false;
+                if(i2caddrs->sender.value < 0xF9) {
+                    i2caddrs->sender.value += 5;
+                    i2caddrs->sender.sended = false;
                 }
             }
 
-        } */
-        else if(event.key == InputKeyDown && event.type == InputTypeRelease) {
+        } else if(event.key == InputKeyDown && event.type == InputTypeRelease) {
             if(i2caddrs->current_menu == MAIN_VIEW) {
                 if(i2caddrs->main_menu_index < 3) {
                     i2caddrs->main_menu_index++;
@@ -581,25 +573,21 @@ int32_t i2ctools_app(void* p) {
                 if(i2caddrs->scanner.menu_index < ((int)i2caddrs->scanner.found / 3)) {
                     i2caddrs->scanner.menu_index++;
                 }
-            } /*else if(i2caddrs->current_menu == SEND_VIEW) {
-                if(i2caddrs->send_view_to_send > 0x00) {
-                    i2caddrs->send_view_to_send--;
-                    i2caddrs->send_started = false;
+            } else if(i2caddrs->current_menu == SEND_VIEW) {
+                if(i2caddrs->sender.value > 0x00) {
+                    i2caddrs->sender.value--;
+                    i2caddrs->sender.sended = false;
                 }
-            }*/
-        }
-        /*
-        else if(event.key == InputKeyDown && event.type == InputTypeLong) {
+            }
+        } else if(event.key == InputKeyDown && event.type == InputTypeLong) {
             if(i2caddrs->current_menu == SEND_VIEW) {
-                if(i2caddrs->send_view_to_send > 0x05) {
-                    i2caddrs->send_view_to_send -= 5;
-                    i2caddrs->send_started = false;
+                if(i2caddrs->sender.value > 0x05) {
+                    i2caddrs->sender.value -= 5;
+                    i2caddrs->sender.sended = false;
                 }
             }
 
-        } 
-        */
-        else if(event.key == InputKeyOk && event.type == InputTypeRelease) {
+        } else if(event.key == InputKeyOk && event.type == InputTypeRelease) {
             if(i2caddrs->current_menu == MAIN_VIEW) {
                 if(i2caddrs->main_menu_index == 0) {
                     scan_i2c_bus(i2caddrs);
@@ -614,16 +602,24 @@ int32_t i2ctools_app(void* p) {
             } else if(i2caddrs->current_menu == SCAN_VIEW) {
                 scan_i2c_bus(i2caddrs);
             } else if(i2caddrs->current_menu == SEND_VIEW) {
-                //i2caddrs->send_view_must_send = true;
+                i2caddrs->sender.must_send = true;
+            } else if(i2caddrs->current_menu == SNIFF_VIEW) {
+                if(i2caddrs->sniffer.started) {
+                    stop_interrupts();
+                    i2caddrs->sniffer.started = false;
+                    i2caddrs->sniffer.state = I2C_BUS_IDLE;
+                } else {
+                    start_interrupts(i2caddrs);
+                    i2caddrs->sniffer.started = true;
+                    i2caddrs->sniffer.state = I2C_BUS_IDLE;
+                }
             }
         } else if(event.key == InputKeyRight && event.type == InputTypeRelease) {
             if(i2caddrs->current_menu == SEND_VIEW) {
-                /*
-                if(i2caddrs->send_view_addr_index < (i2caddrs->nb_available - 1)) {
-                    i2caddrs->send_view_addr_index++;
-                    i2caddrs->send_started = false;
+                if(i2caddrs->sender.address_idx < (i2caddrs->scanner.found - 1)) {
+                    i2caddrs->sender.address_idx++;
+                    i2caddrs->sender.sended = false;
                 }
-                */
             } else if(i2caddrs->current_menu == SNIFF_VIEW) {
                 if(i2caddrs->sniffer.menu_index < i2caddrs->sniffer.frame_index) {
                     i2caddrs->sniffer.menu_index++;
@@ -631,12 +627,10 @@ int32_t i2ctools_app(void* p) {
             }
         } else if(event.key == InputKeyLeft && event.type == InputTypeRelease) {
             if(i2caddrs->current_menu == SEND_VIEW) {
-                /*
-                if(i2caddrs->send_view_addr_index > 0) {
-                    i2caddrs->send_view_addr_index--;
-                    i2caddrs->send_started = false;
+                if(i2caddrs->sender.address_idx > 0) {
+                    i2caddrs->sender.address_idx--;
+                    i2caddrs->sender.sended = false;
                 }
-            */
             } else if(i2caddrs->current_menu == SNIFF_VIEW) {
                 if(i2caddrs->sniffer.menu_index > 0) {
                     i2caddrs->sniffer.menu_index--;
