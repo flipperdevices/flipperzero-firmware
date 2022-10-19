@@ -7,7 +7,8 @@ extern "C" int32_t sam_app(void* p) {
     UNUSED(p);
 
     voice.begin();
-    voice.say("All your base are belong to us. You have no chance to survive make your time. ha. ha. ha. GOOD BYE. ");
+    voice.say(
+        "All your base are belong to us. You have no chance to survive make your time. ha. ha. ha. GOOD BYE. ");
 
     return 0;
 }

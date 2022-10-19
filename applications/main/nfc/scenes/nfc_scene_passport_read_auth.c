@@ -17,7 +17,10 @@ const char months[13][4] = {
     "DEC",
 };
 
-void nfc_scene_passport_read_auth_widget_callback(GuiButtonType result, InputType type, void* context) {
+void nfc_scene_passport_read_auth_widget_callback(
+    GuiButtonType result,
+    InputType type,
+    void* context) {
     Nfc* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
@@ -38,13 +41,18 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     // TODO: indicate BAC / PACE used
 
     uint16_t lds_version = mrtd_data->files.EF_COM.lds_version;
-    furi_string_cat_printf(temp_str, "LDS version: %d.%d\n", lds_version/100, lds_version%100);
+    furi_string_cat_printf(temp_str, "LDS version: %d.%d\n", lds_version / 100, lds_version % 100);
 
     uint32_t unicode_version = mrtd_data->files.EF_COM.unicode_version;
-    furi_string_cat_printf(temp_str, "Unicode version: %d.%d.%d\n", (uint8_t)(unicode_version/10000), (uint8_t)(unicode_version/100%100), (uint8_t)(unicode_version%100));
+    furi_string_cat_printf(
+        temp_str,
+        "Unicode version: %d.%d.%d\n",
+        (uint8_t)(unicode_version / 10000),
+        (uint8_t)(unicode_version / 100 % 100),
+        (uint8_t)(unicode_version % 100));
 
     furi_string_cat_printf(temp_str, "Avail.files: ");
-    for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
+    for(size_t i = 0; i < MAX_EFCOM_TAGS; ++i) {
         uint8_t tag = mrtd_data->files.EF_COM.tag_list[i];
         const EFFile* file = mrtd_tag_to_file(tag);
         if(file->tag) {
@@ -57,8 +65,8 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     EF_DIR_contents* EF_DIR = &mrtd_data->files.EF_DIR;
     if(EF_DIR->applications_count > 0) {
         furi_string_cat_printf(temp_str, "Apps:\n");
-        for(uint8_t i=0; i<EF_DIR->applications_count; ++i) {
-            for(uint8_t n=0; n<sizeof(AIDValue); ++n) {
+        for(uint8_t i = 0; i < EF_DIR->applications_count; ++i) {
+            for(uint8_t n = 0; n < sizeof(AIDValue); ++n) {
                 furi_string_cat_printf(temp_str, "%02X ", EF_DIR->applications[i][n]);
             }
             furi_string_cat_printf(temp_str, "\n");
@@ -72,9 +80,19 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     furi_string_cat_printf(temp_str, "Name: %s\n", DG1->name);
     furi_string_cat_printf(temp_str, "DocNr: %s\n", DG1->docnr);
     furi_string_cat_printf(temp_str, "Nationality: %s\n", DG1->nationality);
-    furi_string_cat_printf(temp_str, "Birth Date: %02d %s %02d\n", DG1->birth_date.day, months[DG1->birth_date.month], DG1->birth_date.year);
+    furi_string_cat_printf(
+        temp_str,
+        "Birth Date: %02d %s %02d\n",
+        DG1->birth_date.day,
+        months[DG1->birth_date.month],
+        DG1->birth_date.year);
     furi_string_cat_printf(temp_str, "Sex: %s\n", DG1->sex);
-    furi_string_cat_printf(temp_str, "Expiry Date: %02d %s %02d\n", DG1->expiry_date.day, months[DG1->expiry_date.month], DG1->expiry_date.year);
+    furi_string_cat_printf(
+        temp_str,
+        "Expiry Date: %02d %s %02d\n",
+        DG1->expiry_date.day,
+        months[DG1->expiry_date.month],
+        DG1->expiry_date.year);
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);

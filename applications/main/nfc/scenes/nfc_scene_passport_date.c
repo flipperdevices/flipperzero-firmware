@@ -44,13 +44,7 @@ void nfc_scene_passport_date_on_enter(void* context) {
         date_empty = true;
     } else {
         char temp_str[10];
-        snprintf(
-            temp_str,
-            10,
-            "%02u%02u%02u",
-            date_value.year,
-            date_value.month,
-            date_value.day);
+        snprintf(temp_str, 10, "%02u%02u%02u", date_value.year, date_value.month, date_value.day);
 
         memcpy(nfc->text_store, temp_str, DATE_LENGTH);
         nfc->text_store[DATE_LENGTH] = '\x00';

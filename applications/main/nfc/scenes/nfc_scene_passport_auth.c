@@ -48,7 +48,10 @@ void nfc_scene_passport_auth_on_enter(void* context) {
 
     const size_t temp_str_size = 15;
     char temp_str[temp_str_size];
-    snprintf(temp_str, temp_str_size, "%02u%02u%02u",
+    snprintf(
+        temp_str,
+        temp_str_size,
+        "%02u%02u%02u",
         mrtd_data->auth.birth_date.year,
         mrtd_data->auth.birth_date.month,
         mrtd_data->auth.birth_date.day);
@@ -56,7 +59,10 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     item = variable_item_list_add(variable_item_list, "Birth Date", 1, NULL, NULL);
     variable_item_set_current_value_text(item, temp_str);
 
-    snprintf(temp_str, temp_str_size, "%02u%02u%02u",
+    snprintf(
+        temp_str,
+        temp_str_size,
+        "%02u%02u%02u",
         mrtd_data->auth.expiry_date.year,
         mrtd_data->auth.expiry_date.month,
         mrtd_data->auth.expiry_date.day);
@@ -74,9 +80,7 @@ void nfc_scene_passport_auth_on_enter(void* context) {
         temp_str[10] = '.';
         temp_str[11] = '\x00';
     }
-    variable_item_set_current_value_text(
-        item,
-        temp_str);
+    variable_item_set_current_value_text(item, temp_str);
 
     item = variable_item_list_add(
         variable_item_list,

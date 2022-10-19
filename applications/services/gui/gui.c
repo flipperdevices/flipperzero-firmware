@@ -113,7 +113,6 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             2,
             canvas_width(gui->canvas) - 1,
             canvas_height(gui->canvas) - 4);
-
     }
 
     // Left side
@@ -128,7 +127,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             canvas_frame_set(
                 gui->canvas,
                 x - 1,
-				// SASQUACH SAYS : This is the white box behind the left bar, move it 64 to hide it
+                // SASQUACH SAYS : This is the white box behind the left bar, move it 64 to hide it
                 GUI_STATUS_BAR_Y + 64,
                 width + 2,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
@@ -138,8 +137,12 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             canvas_set_color(gui->canvas, ColorBlack);
             // ViewPort draw
             canvas_frame_set(
-			// SASQUACH SAYS : This is where you move the Icons for the left bar, 64 to hide it
-                gui->canvas, x, GUI_STATUS_BAR_Y + 64, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
+                // SASQUACH SAYS : This is where you move the Icons for the left bar, 64 to hide it
+                gui->canvas,
+                x,
+                GUI_STATUS_BAR_Y + 64,
+                width,
+                GUI_STATUS_BAR_WORKAREA_HEIGHT);
             view_port_draw(view_port, gui->canvas);
             // Recalculate next position
             left_used += (width + 2);
