@@ -170,7 +170,7 @@ SubGhz* subghz_alloc() {
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
-    subghz->txrx->preset = malloc(sizeof(SubGhzPresetDefinition));
+    subghz->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
     subghz->txrx->preset->name = furi_string_alloc();
     subghz_preset_init(
         subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
