@@ -157,6 +157,7 @@ class MenuFunctions
     Menu wifiSnifferMenu;
     Menu wifiAttackMenu;
     Menu wifiGeneralMenu;
+    Menu wifiAPMenu;
 
     // Bluetooth menu stuff
     Menu bluetoothSnifferMenu;
@@ -207,7 +208,7 @@ class MenuFunctions
     void displaySettingsGFX();
     void writeBadUSB();
 
-    void buildButtons(Menu* menu);
+    void buildButtons(Menu* menu, int starting_index = 0);
     void changeMenu(Menu* menu);
     void drawStatusBar();
     void displayCurrentMenu();

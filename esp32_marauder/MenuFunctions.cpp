@@ -1030,7 +1030,8 @@ void MenuFunctions::main(uint32_t currentTime)
         if (current_menu->selected > 0) {
           current_menu->selected--;
           this->buttonSelected(current_menu->selected);
-          this->buttonNotSelected(current_menu->selected + 1);
+          if (!current_menu->list->get(current_menu->selected + 1).selected)
+            this->buttonNotSelected(current_menu->selected + 1);
         }
       }
       else if ((wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR) ||
@@ -1045,7 +1046,8 @@ void MenuFunctions::main(uint32_t currentTime)
         if (current_menu->selected < current_menu->list->size() - 1) {
           current_menu->selected++;
           this->buttonSelected(current_menu->selected);
-          this->buttonNotSelected(current_menu->selected - 1);
+          if (!current_menu->list->get(current_menu->selected - 1).selected)
+            this->buttonNotSelected(current_menu->selected - 1);
         }
       }
       else if ((wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR) ||
@@ -1408,6 +1410,8 @@ void MenuFunctions::displaySetting(String key, Menu* menu, int index) {
 // Function to build the menus
 void MenuFunctions::RunSetup()
 {
+  extern LinkedList<AccessPoint>* access_points;
+  
   #ifndef MARAUDER_MINI
     this->initLVGL();
   #endif
@@ -1437,6 +1441,7 @@ void MenuFunctions::RunSetup()
   wifiSnifferMenu.list = new LinkedList<MenuNode>();
   wifiAttackMenu.list = new LinkedList<MenuNode>();
   wifiGeneralMenu.list = new LinkedList<MenuNode>();
+  wifiAPMenu.list = new LinkedList<MenuNode>();
 
   // Bluetooth menu stuff
   bluetoothSnifferMenu.list = new LinkedList<MenuNode>();
@@ -1474,6 +1479,7 @@ void MenuFunctions::RunSetup()
   generateSSIDsMenu.name = text_table1[27];
   clearSSIDsMenu.name = text_table1[28];
   clearAPsMenu.name = text_table1[29];
+  wifiAPMenu.name = "Access Points";
   
 
   // Build Main Menu
@@ -1654,11 +1660,48 @@ void MenuFunctions::RunSetup()
     wifi_scan_obj.RunClearAPs();
   });
   #ifndef MARAUDER_MINI
+    // Select APs on OG
     addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
       display_obj.clearScreen(); 
       wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
       wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
       addAPGFX();
+    });
+  #else
+    // Select APs on Mini
+    addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){
+      wifiAPMenu.list->clear();
+        addNodes(&wifiAPMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+        changeMenu(wifiAPMenu.parentMenu);
+      });
+      for (int i = 0; i < access_points->size(); i++) {
+        addNodes(&wifiAPMenu, access_points->get(i).essid, TFT_CYAN, NULL, KEYBOARD_ICO, [this, i](){
+        AccessPoint new_ap = access_points->get(i);
+        new_ap.selected = !access_points->get(i).selected;
+
+        // Change selection status of menu node
+        MenuNode new_node = current_menu->list->get(i + 1);
+        new_node.selected = !current_menu->list->get(i + 1).selected;
+        current_menu->list->set(i + 1, new_node);
+
+        // Change selection status of button key
+        if (new_ap.selected) {
+          this->buttonSelected(i + 1);
+          //changeMenu(current_menu);
+        } else {
+          this->buttonNotSelected(i + 1);
+          //changeMenu(current_menu);
+        }
+        access_points->set(i, new_ap);
+        //changeMenu(wifiAPMenu.parentMenu);
+        }, access_points->get(i).selected);
+      }
+      changeMenu(&wifiAPMenu);
+    });
+
+    wifiAPMenu.parentMenu = &wifiGeneralMenu;
+    addNodes(&wifiAPMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
+      changeMenu(wifiAPMenu.parentMenu);
     });
   #endif
 
@@ -1933,7 +1976,7 @@ void MenuFunctions::addNodes(Menu * menu, String name, uint16_t color, Menu * ch
   //menu->list->add(MenuNode{name, color, place, callable});
 }
 
-void MenuFunctions::buildButtons(Menu * menu)
+void MenuFunctions::buildButtons(Menu * menu, int starting_index)
 {
   //Serial.println("Bulding buttons...");
   if (menu->list != NULL)
@@ -1943,8 +1986,8 @@ void MenuFunctions::buildButtons(Menu * menu)
     for (uint8_t i = 0; i < menu->list->size(); i++)
     {
       TFT_eSPI_Button new_button;
-      char buf[menu->list->get(i).name.length() + 1] = {};
-      menu->list->get(i).name.toCharArray(buf, menu->list->get(i).name.length() + 1);
+      char buf[menu->list->get(starting_index + i).name.length() + 1] = {};
+      menu->list->get(starting_index + i).name.toCharArray(buf, menu->list->get(starting_index + i).name.length() + 1);
       display_obj.key[i].initButton(&display_obj.tft,
                                     KEY_X + 0 * (KEY_W + KEY_SPACING_X),
                                     KEY_Y + i * (KEY_H + KEY_SPACING_Y), // x, y, w, h, outline, fill, text
@@ -1952,7 +1995,7 @@ void MenuFunctions::buildButtons(Menu * menu)
                                     KEY_H,
                                     TFT_BLACK, // Outline
                                     TFT_BLACK, // Fill
-                                    menu->list->get(i).color, // Text
+                                    menu->list->get(starting_index + i).color, // Text
                                     buf,
                                     KEY_TEXTSIZE);
 
@@ -1999,10 +2042,10 @@ void MenuFunctions::displayCurrentMenu()
       #endif
 
       #ifdef MARAUDER_MINI
-        if (current_menu->selected != i)
-          display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
-        else
+        if ((current_menu->selected == i) || (current_menu->list->get(i).selected))
           display_obj.key[i].drawButton(true, current_menu->list->get(i).name);
+        else 
+          display_obj.key[i].drawButton(false, current_menu->list->get(i).name);
       #endif
     }
     display_obj.tft.setFreeFont(NULL);
