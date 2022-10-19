@@ -1,6 +1,5 @@
 #include "stdint.h"
 #include "furi_hal_i2c.h"
-#include <furi_hal.h>
 
 void virgin();
 void dump();
