@@ -34,7 +34,7 @@ typedef struct {
     InputTextSceneContext* token_secret_input_context;
     InputTextSceneState* input_state;
     uint32_t input_started_at;
-    int current_token_index;
+    int16_t current_token_index;
     int32_t screen_y_offset;
     TokenHashAlgo algo;
     TokenDigitsCount digits_count;
