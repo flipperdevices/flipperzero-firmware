@@ -8,10 +8,7 @@
 #define MODULE_CONTROL_COMMAND_REBOOT 'r'
 #define FLIPPERZERO_SERIAL_BAUD 115200
 
-typedef enum ESerialCommand
-{
-    ESerialCommand_Reboot
-} ESerialCommand;
+typedef enum ESerialCommand { ESerialCommand_Reboot } ESerialCommand;
 
 struct RebootView {
     View* view;
@@ -28,17 +25,15 @@ static void Shake(void) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-void send_serial_command_reboot(ESerialCommand command)
-{
-    uint8_t data[1] = { 0 };
+void send_serial_command_reboot(ESerialCommand command) {
+    uint8_t data[1] = {0};
 
-    switch(command)
-    {
-        case ESerialCommand_Reboot:
-            data[0] = MODULE_CONTROL_COMMAND_REBOOT;
-            break;
-        default:
-            return;          
+    switch(command) {
+    case ESerialCommand_Reboot:
+        data[0] = MODULE_CONTROL_COMMAND_REBOOT;
+        break;
+    default:
+        return;
     };
 
     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
@@ -62,7 +57,9 @@ static void reboot_view_draw_callback(Canvas* canvas, void* context) {
 
 static void reboot_view_process(RebootView* reboot_view, InputEvent* event) {
     with_view_model(
-        reboot_view->view, (RebootViewModel * model) {
+        reboot_view->view,
+        RebootViewModel * model,
+        {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                 } else if(event->key == InputKeyDown) {
@@ -87,8 +84,8 @@ static void reboot_view_process(RebootView* reboot_view, InputEvent* event) {
                 if(event->key == InputKeyBack) {
                 }
             }
-            return true;
-        });
+        },
+        true);
 }
 
 static bool reboot_view_input_callback(InputEvent* event, void* context) {
@@ -131,8 +128,5 @@ View* reboot_view_get_view(RebootView* reboot_view) {
 void reboot_view_set_data(RebootView* reboot_view, bool connected) {
     furi_assert(reboot_view);
     with_view_model(
-        reboot_view->view, (RebootViewModel * model) {
-            model->connected = connected;
-            return true;
-        });
+        reboot_view->view, RebootViewModel * model, { model->connected = connected; }, true);
 }
