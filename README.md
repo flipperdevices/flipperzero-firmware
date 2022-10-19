@@ -12,7 +12,8 @@ pwnagotchi-flipper
 - TBD is the pwnagotchi-side application
 
 ## Current state
-As of commit ff5b581 (10/10/22) the Pwnagotchi app for the flipper has a test function in the main function. This was used for me to determine if my UART callback was working (which it is not). Currently the interface is incomplete, I will make a note in this section when it is finished.
+FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
+As of commit 9e5f6b7 (10/18/22) on rxBuffer branch the Pwnagotchi app for the flipper has a test function in the main function. This basically updates the screen when it receives a message. At the moment this causes the pwnagotchi to dereference a null pointer when it receives data. At least this means data is being received!
 
 ## Setup
 TODO: Explain setup process
