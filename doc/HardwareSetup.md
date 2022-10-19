@@ -19,7 +19,7 @@
 | GND     | Black   | GND    |
 
 #### Flipper Wiring
-<img src='attachments/flipperGPIO.png' alt='Wires connected to corresponding flipper GPIO ports' height="250" width="400"/>
+<img src='attachments/flipperGPIO.png' alt='Wires connected to corresponding flipper GPIO ports' height="250" width="390"/>
 
 #### RPI Wiring
-<img src='attachments/rpiGPIO.png' alt='Wires connected to corresponding RPI GPIO ports' height="160" width="400"/>
+<img src='attachments/rpiGPIO.png' alt='Wires connected to corresponding RPI GPIO ports' height="160" width="365"/>
