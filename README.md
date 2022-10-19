@@ -11,8 +11,12 @@ pwnagotchi-flipper
 - pwn_zero is the Flipper-side application
 - TBD is the pwnagotchi-side application
 
+## Current state
+As of commit ff5b581 (10/10/22) the Pwnagotchi app for the flipper has a test function in the main function. This was used for me to determine if my UART callback was working (which it is not). Currently the interface is incomplete, I will make a note in this section when it is finished.
+
 ## Setup
 TODO: Explain setup process
+NOTE: Interface is still being developed, when I have a working version I will explain the setup procedure.
 
 ## Development stages
 ### Stage 1: Simple display rendering
