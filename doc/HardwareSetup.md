@@ -1,14 +1,12 @@
-# Hardware Communication
+# Hardware Communication (v1.0.1)
 ## Flipper
 - Through UART
-	- 5v: 5v
 	- Tx: 13
 	- Rx: 14
 	- GND: 18
 
 ## RPI 0 W
 - Through UART (full or mini)
-	- 5v: 5v
 	- Tx: GPIO 14
 	- Rx: GPIO 15
 	- GND: 6
@@ -16,7 +14,6 @@
 ## Interface
 | Flipper | Jumpers | RPI    |
 | ------- | ------- | -------|
-| 5v      | Brown   | 5v     |
 | Tx      | Gray    | Rx     |
 | Rx      | White   | Tx     |
 | GND     | Black   | GND    |
