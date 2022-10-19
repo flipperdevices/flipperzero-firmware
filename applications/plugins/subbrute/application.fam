@@ -4,9 +4,9 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="subbrute_app",
     cdefines=["APP_SUB_BRUTE"],
-    requires=["storage", "gui", "dialogs", "subghz"],
+    requires=["gui","dialogs"],
     stack_size=2 * 1024,
-    order=190,
+    order=11,
     fap_icon="subbrute_10px.png",
     fap_category="Tools",
 )

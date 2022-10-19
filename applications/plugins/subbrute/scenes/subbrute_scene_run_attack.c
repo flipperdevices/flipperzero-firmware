@@ -28,9 +28,8 @@ void subbrute_scene_run_attack_on_exit(void* context) {
     furi_assert(context);
     SubBruteState* instance = (SubBruteState*)context;
 
-    subbrute_worker_stop(instance->worker);
-
     notification_message(instance->notifications, &sequence_blink_stop);
+    subbrute_worker_stop(instance->worker);
 }
 
 void subbrute_scene_run_attack_on_enter(void* context) {

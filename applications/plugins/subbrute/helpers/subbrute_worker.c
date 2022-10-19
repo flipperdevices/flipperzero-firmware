@@ -188,8 +188,11 @@ bool subbrute_worker_start(SubBruteWorker* instance) {
 void subbrute_worker_stop(SubBruteWorker* instance) {
     furi_assert(instance);
 
-    instance->worker_running = false;
+    if (!instance->worker_running) {
+        return;
+    }
 
+    instance->worker_running = false;
     furi_thread_join(instance->thread);
 
     furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
