@@ -10,7 +10,7 @@
  *     iiii iiii | buuu tttt | tttt tttt | cccc cccc
  * - i: identification; changes on battery switch
  * - c: lfsr_digest8;
- * - u: unknown; (sometimes set at power-on, but not always)
+ * - u: unknown;
  * - b: battery low; flag to indicate low battery voltage
  * - t: Temperature; in °C
  * 
