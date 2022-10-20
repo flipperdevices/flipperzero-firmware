@@ -40,7 +40,6 @@ bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) 
 
 void spi_mem_scene_chip_detect_on_exit(void* context) {
     SPIMemApp* app = context;
-    spi_mem_worker_stop(app->worker);
     spi_mem_worker_stop_thread(app->worker);
     notification_message(app->notifications, &sequence_blink_stop);
     popup_reset(app->popup);

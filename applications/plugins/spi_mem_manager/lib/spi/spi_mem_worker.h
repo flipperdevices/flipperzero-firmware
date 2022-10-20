@@ -35,7 +35,6 @@ SPIMemWorker* spi_mem_worker_alloc();
 
 void spi_mem_worker_free(SPIMemWorker* worker);
 void spi_mem_worker_start_thread(SPIMemWorker* worker);
-void spi_mem_worker_stop(SPIMemWorker* worker);
 void spi_mem_worker_stop_thread(SPIMemWorker* worker);
 void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
