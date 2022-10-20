@@ -1,6 +1,6 @@
 App(
-    appid="Si7021_Temperature_Sensor",
-    name="[Si7021] Temperature Sensor",
+    appid="HTU21D_Temperature_Sensor",
+    name="[HTU21D] Temp Sensor",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="temperature_sensor_app",
     cdefines=["APP_TEMPERATURE_SENSOR"],
