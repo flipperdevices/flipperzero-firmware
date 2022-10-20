@@ -5,6 +5,7 @@ const SubGhzProtocol* weather_station_protocol_registry_items[] = {
     &ws_protocol_thermopro_tx4,
     &ws_protocol_nexus_th,
     &ws_protocol_gt_wt_03,
+    &ws_protocol_acurite_606tx,
 };
 
 const SubGhzProtocolRegistry weather_station_protocol_registry = {
