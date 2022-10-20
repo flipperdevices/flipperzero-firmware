@@ -63,7 +63,7 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
 
     if(model->generic->battery_low != WS_NO_BATT) {
         snprintf(
-            buffer, sizeof(buffer), "Batt: %s", (!model->generic->battery_low ? "low" : "low"));
+            buffer, sizeof(buffer), "Batt: %s", (!model->generic->battery_low ? "ok" : "low"));
         canvas_draw_str(canvas, 90, 20, buffer);
     }
 
