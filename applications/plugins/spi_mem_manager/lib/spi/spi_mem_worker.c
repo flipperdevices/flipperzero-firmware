@@ -28,8 +28,7 @@ void spi_mem_worker_free(SPIMemWorker* worker) {
 
 static int32_t spi_mem_worker_thread(void* thread_context) {
     SPIMemWorker* worker = thread_context;
-    bool running = true;
-    while(running) {
+    while(true) {
         uint32_t flags = furi_thread_flags_wait(SPIMemEventAll, FuriFlagWaitAny, FuriWaitForever);
         if(flags != FuriFlagErrorTimeout) {
             if(flags & SPIMemEventStopThread) break;

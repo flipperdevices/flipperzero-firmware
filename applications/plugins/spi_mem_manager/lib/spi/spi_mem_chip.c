@@ -40,32 +40,42 @@ static const SPIMemChip SPIMemChips[] = {
     {SPIMemChipVendorUnknown, NULL, NULL, 0, SPIMemChipWriteModeUnknown, 0, 0, 0, 0}};
 
 static bool spi_mem_read_chip_info(SPIMemChip* chip) {
+    // mock
     furi_delay_ms(1000);
     chip->vendor_id = SPIMemChipVendorWinbond;
     chip->type_id = 0x40;
     chip->capacity_id = 0x16;
     return true;
+    // mock
+}
+
+static void spi_mem_copy_chip_info(SPIMemChip* dest, const SPIMemChip* src) {
+    dest->vendor_id = src->vendor_id;
+    dest->model_name = src->model_name;
+    dest->vendor_name = src->vendor_name;
+    dest->size = src->size;
+    dest->write_mode = src->write_mode;
+    dest->type_id = src->type_id;
+    dest->capacity_id = src->capacity_id;
+    dest->erase_gran = src->erase_gran;
+    dest->erase_gran_cmd = src->erase_gran_cmd;
 }
 
 static bool spi_mem_complete_chip_info(SPIMemChip* chip_info) {
-    for(const SPIMemChip* chip_info_arr = SPIMemChips; chip_info_arr->model_name != NULL;
-        chip_info_arr++) {
+    const SPIMemChip* chip_info_arr;
+    for(chip_info_arr = SPIMemChips; chip_info_arr->model_name != NULL; chip_info_arr++) {
         if(chip_info->vendor_id != chip_info_arr->vendor_id) continue;
         if(chip_info->type_id != chip_info_arr->type_id) continue;
         if(chip_info->capacity_id != chip_info_arr->capacity_id) continue;
+        spi_mem_copy_chip_info(chip_info, chip_info_arr);
         chip_info->vendor_name = spi_mem_get_chip_vendor_name(chip_info->vendor_id);
-        chip_info->model_name = chip_info_arr->model_name;
-        chip_info->size = chip_info_arr->size;
-        chip_info->write_mode = chip_info_arr->write_mode;
-        chip_info->erase_gran = chip_info_arr->erase_gran;
-        chip_info->erase_gran_cmd = chip_info_arr->erase_gran_cmd;
         return true;
     }
     return false;
 }
 
 bool spi_mem_get_chip_info(SPIMemChip* chip) {
-    spi_mem_read_chip_info(chip);
-    spi_mem_complete_chip_info(chip);
+    if(!spi_mem_read_chip_info(chip)) return false;
+    if(!spi_mem_complete_chip_info(chip)) return false;
     return true;
 }

@@ -13,6 +13,7 @@
 #include "scenes/spi_mem_scene.h"
 #include "lib/spi/spi_mem_worker.h"
 #include "spi_mem_manager_icons.h"
+#include "views/spi_mem_view_read.h"
 
 #define SPI_MEM_FILE_EXTENSION ".spimem"
 #define SPI_MEM_FILE_FOLDER ANY_PATH("spimem")
@@ -31,14 +32,18 @@ typedef struct {
     Widget* widget;
     SPIMemWorker* worker;
     SPIMemChip* chip_info;
+    SPIMemReadView* view_read;
 } SPIMemApp;
 
 typedef enum {
     SPIMemViewSubmenu,
     SPIMemViewDialogEx,
     SPIMemViewPopup,
-    SPIMemViewWidget
+    SPIMemViewWidget,
+    SPIMemViewRead
 } SPIMemView;
+
+typedef enum { SPIMemCustomEventViewReadCancel } SPIMemCustomEvent;
 
 void spi_mem_file_create_folder(SPIMemApp* app);
 bool spi_mem_file_select(SPIMemApp* app);

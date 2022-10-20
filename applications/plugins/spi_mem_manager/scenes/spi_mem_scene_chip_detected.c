@@ -11,14 +11,14 @@ static void spi_mem_scene_chip_detected_widget_callback(
 }
 
 static void spi_mem_scene_chip_detected_print_chip_info(Widget* widget, SPIMemChip* chip_info) {
-    FuriString* tmp_string;
-    tmp_string = furi_string_alloc();
-    furi_string_printf(tmp_string, "%s %s", chip_info->vendor_name, chip_info->model_name);
+    FuriString* tmp_string = furi_string_alloc();
     widget_add_string_element(
-        widget, 40, 12, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
+        widget, 40, 12, AlignLeft, AlignTop, FontSecondary, chip_info->vendor_name);
+    widget_add_string_element(
+        widget, 40, 20, AlignLeft, AlignTop, FontSecondary, chip_info->model_name);
     furi_string_printf(tmp_string, "Size: %u KB", chip_info->size / 1024);
     widget_add_string_element(
-        widget, 40, 20, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
+        widget, 40, 28, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
     furi_string_free(tmp_string);
 }
 
@@ -27,7 +27,7 @@ void spi_mem_scene_chip_detected_on_enter(void* context) {
     widget_add_button_element(
         app->widget, GuiButtonTypeLeft, "Retry", spi_mem_scene_chip_detected_widget_callback, app);
     widget_add_button_element(
-        app->widget, GuiButtonTypeRight, "More", spi_mem_scene_chip_detected_widget_callback, app);
+        app->widget, GuiButtonTypeRight, "Read", spi_mem_scene_chip_detected_widget_callback, app);
     widget_add_icon_element(app->widget, 0, 12, &I_Dip8_32x36);
     widget_add_string_element(
         app->widget, 64, 9, AlignCenter, AlignBottom, FontPrimary, "Detected SPI chip");
@@ -46,7 +46,7 @@ bool spi_mem_scene_chip_detected_on_event(void* context, SceneManagerEvent event
         if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == GuiButtonTypeRight) {
-            // scene_manager_next_scene(scene_manager, SPIMemSceneReadMenu);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneRead);
         }
     }
     return consumed;

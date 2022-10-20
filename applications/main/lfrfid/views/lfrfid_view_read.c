@@ -12,7 +12,7 @@ typedef struct {
     LfRfidReadViewMode read_mode;
 } LfRfidReadViewModel;
 
-static void lfrfid_view_read_draw_callback(Canvas* canvas, void* _model) {
+static void lfrfid_view_read_draw_callback(Canvas* canvas, void* context) {
     LfRfidReadViewModel* model = _model;
     canvas_set_color(canvas, ColorBlack);
 
