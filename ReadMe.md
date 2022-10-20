@@ -11,17 +11,11 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-19 22:19 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-19 22:19 GMT`
-- Added new NFC MF keys [from ankris812](https://github.com/DarkFlippers/unleashed-firmware/commit/aba6607e38126cc8ec98d89024c0aa807c46265b)
-- Added: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
-- Added: [Picopass: Read Elite #1888 (By pcunning)](https://github.com/flipperdevices/flipperzero-firmware/pull/1888)
-- Added: [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
-- Updated: [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
-- Added: [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
-- Updated: [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
-- Updated: [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254) [Refactoring (By GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256) with RAINBOW effect notification upon timer or true Konami code (10 presses)
-- Removed duplicate rfidfuzzer folder from assets root directory (You will have to delete your dupe on your SD card)
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-20 06:50 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-20 06:50 GMT`
+- Added: [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
+- Added: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- Added: [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -220,6 +214,8 @@ $ ./fbt plugin_dist
 - [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
+- [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Metronome (By panki27)](https://github.com/panki27/Metronome)
 - [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
@@ -228,6 +224,7 @@ $ ./fbt plugin_dist
 - Music Beeper [OFW] (Music Player With Changes By qqMajiKpp/Haseo)
 - Music Player [OFW]
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
+- [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
