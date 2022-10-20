@@ -188,7 +188,7 @@ bool subbrute_worker_start(SubBruteWorker* instance) {
 void subbrute_worker_stop(SubBruteWorker* instance) {
     furi_assert(instance);
 
-    if (!instance->worker_running) {
+    if(!instance->worker_running) {
         return;
     }
 
