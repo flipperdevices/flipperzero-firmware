@@ -20,5 +20,5 @@ App(
             ],
         ),
     ],
-    fap_icon_assets ="icons",
+    fap_icon_assets="icons",
 )
