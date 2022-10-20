@@ -71,7 +71,6 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubBruteCustomEventTypeTransmitStarted) {
-            subbrute_attack_view_set_worker_type(view, false);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneRunAttack);
         } else if(event.event == SubBruteCustomEventTypeSaveFile) {
             subbrute_attack_view_init_values(
