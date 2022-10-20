@@ -14,10 +14,14 @@ struct SubBruteAttackView {
     View* view;
     SubBruteAttackViewCallback callback;
     void* context;
+    SubBruteAttacks attack_type;
+    uint64_t max_value;
+    uint64_t current_step;
+    bool is_attacking;
 };
 
 typedef struct {
-    SubBruteAttacks index;
+    SubBruteAttacks attack_type;
     uint64_t max_value;
     uint64_t current_step;
     bool is_attacking;
@@ -45,128 +49,79 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
     SubBruteAttackView* instance = context;
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        instance->callback(SubBruteCustomEventTypeBackPressed, instance->context);
+        instance->is_attacking = false;
         with_view_model(
             instance->view,
             SubBruteAttackViewModel * model,
-            {
-                model->is_attacking = false;
-                model->is_continuous_worker = false;
-            },
+            { model->is_attacking = false; },
             true);
+
+        instance->callback(SubBruteCustomEventTypeBackPressed, instance->context);
         return true;
     }
 
-    bool is_attacking = false;
+    bool update = false;
 
-    with_view_model(
-        instance->view,
-        SubBruteAttackViewModel * model,
-        { is_attacking = model->is_attacking; },
-        false);
-
-    //    if(!is_attacking) {
-    //        instance->callback(SubBruteCustomEventTypeTransmitNotStarted, instance->context);
-    //    } else {
-    //        instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);
-    //    }
-
-    if(!is_attacking) {
+    if(!instance->is_attacking) {
         if(event->type == InputTypeShort && event->key == InputKeyOk) {
 #ifdef FURI_DEBUG
             FURI_LOG_D(TAG, "InputKey: %d OK", event->key);
 #endif
-            with_view_model(
-                instance->view,
-                SubBruteAttackViewModel * model,
-                {
-                    model->is_attacking = true;
-                    model->is_continuous_worker = false;
-                    icon_animation_stop(model->icon);
-                    icon_animation_start(model->icon);
-                },
-                true);
+            instance->is_attacking = true;
             instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);
-            /*if(event->type == InputTypeRepeat && event->key == InputKeyOk) {
-#ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "InputKey: %d OK. SubBruteCustomEventTypeTransmitContinuousStarted", event->key);
-#endif
-            with_view_model(
-                instance->view, (SubBruteAttackViewModel * model) {
-                    model->is_attacking = true;
-                    model->is_continuous_worker = true;
-                    icon_animation_stop(model->icon);
-                    icon_animation_start(model->icon);
-                    return true;
-                });
-            instance->callback(SubBruteCustomEventTypeTransmitContinuousStarted, instance->context);
-        } else if(event->type == InputTypeShort && event->key == InputKeyOk) {
-#ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "InputKey: %d OK", event->key);
-#endif
-            with_view_model(
-                instance->view, (SubBruteAttackViewModel * model) {
-                    model->is_attacking = true;
-                    model->is_continuous_worker = false;
-                    icon_animation_stop(model->icon);
-                    icon_animation_start(model->icon);
-                    return true;
-                });
-            instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);*/
+            update = true;
         } else if(event->key == InputKeyUp) {
             instance->callback(SubBruteCustomEventTypeSaveFile, instance->context);
+            update = true;
         } else if(event->key == InputKeyDown) {
             instance->callback(SubBruteCustomEventTypeTransmitCustom, instance->context);
+            update = true;
         } else if(event->type == InputTypeShort) {
             if(event->key == InputKeyLeft) {
                 instance->callback(SubBruteCustomEventTypeChangeStepDown, instance->context);
             } else if(event->key == InputKeyRight) {
                 instance->callback(SubBruteCustomEventTypeChangeStepUp, instance->context);
             }
-            //            with_view_model(
-            //                instance->view, (SubBruteAttackViewModel * model) {
-            //                    if(event->key == InputKeyLeft) {
-            //                        model->current_step =
-            //                            ((model->current_step - 1) + model->max_value) % model->max_value;
-            //                    } else if(event->key == InputKeyRight) {
-            //                        model->current_step = (model->current_step + 1) % model->max_value;
-            //                    }
-            //                    return true;
-            //                });
-            //            instance->callback(SubBruteCustomEventTypeChangeStep, instance->context);
+            update = true;
         } else if(event->type == InputTypeRepeat) {
             if(event->key == InputKeyLeft) {
                 instance->callback(SubBruteCustomEventTypeChangeStepDownMore, instance->context);
             } else if(event->key == InputKeyRight) {
                 instance->callback(SubBruteCustomEventTypeChangeStepUpMore, instance->context);
             }
-            /*with_view_model(
-                instance->view, (SubBruteAttackViewModel * model) {
-                    if(event->key == InputKeyLeft) {
-                        model->current_step =
-                            ((model->current_step - 100) + model->max_value) % model->max_value;
-                    } else if(event->key == InputKeyRight) {
-                        model->current_step = (model->current_step + 100) % model->max_value;
-                    }
-                    return true;
-                });
-            instance->callback(SubBruteCustomEventTypeChangeStep, instance->context);*/
+            update = true;
         }
     } else {
+        // ATTACK Mode!
         if((event->type == InputTypeShort || event->type == InputTypeRepeat) &&
            (event->key == InputKeyOk || event->key == InputKeyBack)) {
-            with_view_model(
-                instance->view,
-                SubBruteAttackViewModel * model,
-                {
-                    model->is_attacking = false;
-                    model->is_continuous_worker = false;
-                    icon_animation_stop(model->icon);
-                    icon_animation_start(model->icon);
-                },
-                true);
+            instance->is_attacking = false;
             instance->callback(SubBruteCustomEventTypeTransmitNotStarted, instance->context);
+
+            update = true;
         }
+    }
+
+    if(update) {
+        with_view_model(
+            instance->view,
+            SubBruteAttackViewModel * model,
+            {
+                if(model->is_attacking != instance->is_attacking) {
+                    if(instance->is_attacking) {
+                        icon_animation_stop(model->icon);
+                        icon_animation_start(model->icon);
+                    } else {
+                        icon_animation_stop(model->icon);
+                    }
+                }
+
+                model->attack_type = instance->attack_type;
+                model->max_value = instance->max_value;
+                model->current_step = instance->current_step;
+                model->is_attacking = instance->is_attacking;
+            },
+            true);
     }
 
     return true;
@@ -186,12 +141,17 @@ SubBruteAttackView* subbrute_attack_view_alloc() {
             model->icon = icon_animation_alloc(&A_Sub1ghz_14);
             view_tie_icon_animation(instance->view, model->icon);
         },
-        false);
+        true);
 
     view_set_draw_callback(instance->view, (ViewDrawCallback)subbrute_attack_view_draw);
     view_set_input_callback(instance->view, subbrute_attack_view_input);
     view_set_enter_callback(instance->view, subbrute_attack_view_enter);
     view_set_exit_callback(instance->view, subbrute_attack_view_exit);
+
+    instance->attack_type = SubBruteAttackTotalCount;
+    instance->max_value = 0x00;
+    instance->current_step = 0;
+    instance->is_attacking = false;
 
     return instance;
 }
@@ -231,19 +191,11 @@ void subbrute_attack_view_set_current_step(SubBruteAttackView* instance, uint64_
 #ifdef FURI_DEBUG
     //FURI_LOG_D(TAG, "Set step: %d", current_step);
 #endif
+    instance->current_step = current_step;
     with_view_model(
         instance->view,
         SubBruteAttackViewModel * model,
         { model->current_step = current_step; },
-        true);
-}
-
-void subbrute_attack_view_set_worker_type(SubBruteAttackView* instance, bool is_continuous_worker) {
-    furi_assert(instance);
-    with_view_model(
-        instance->view,
-        SubBruteAttackViewModel * model,
-        { model->is_continuous_worker = is_continuous_worker; },
         true);
 }
 
@@ -258,17 +210,21 @@ void subbrute_attack_view_init_values(
 #ifdef FURI_DEBUG
     FURI_LOG_D(
         TAG,
-        "init, index: %d, max_value: %lld, current_step: %lld",
+        "init, attack_type: %d, max_value: %lld, current_step: %lld",
         index,
         max_value,
         current_step);
 #endif
+    instance->attack_type = index;
+    instance->max_value = max_value;
+    instance->current_step = current_step;
+    instance->is_attacking = is_attacking;
     with_view_model(
         instance->view,
         SubBruteAttackViewModel * model,
         {
             model->max_value = max_value;
-            model->index = index;
+            model->attack_type = index;
             model->current_step = current_step;
             model->is_attacking = is_attacking;
             if(is_attacking) {
@@ -363,7 +319,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
     char buffer[26];
 
     const char* attack_name = NULL;
-    attack_name = subbrute_protocol_name(model->index);
+    attack_name = subbrute_protocol_name(model->attack_type);
     // Title
     if(model->is_attacking) {
         canvas_set_color(canvas, ColorBlack);
