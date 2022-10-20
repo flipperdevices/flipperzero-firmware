@@ -4,15 +4,6 @@
 #include <furi_hal_subghz.h>
 #include <core/string.h>
 #include <toolbox/stream/stream.h>
-//typedef enum {
-//    FrequencyProtocolField,
-//    BitsProtocolField,
-//    HasTeProtocolField,
-//    RepeatProtocolField,
-//    PresetProtocolField,
-//    FileProtocolField,
-//    TotalProtocolFields
-//} ProtocolFields;
 
 typedef enum {
     CAMEFileProtocol,

@@ -45,7 +45,8 @@ void subbrute_scene_setup_attack_on_enter(void* context) {
         instance->device->attack,
         instance->device->max_value,
         instance->device->key_index,
-        false);
+        false,
+        instance->device->extra_repeats);
 
     instance->current_view = SubBruteViewAttack;
     subbrute_attack_view_set_callback(view, subbrute_scene_setup_attack_callback, instance);
@@ -78,7 +79,8 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 instance->device->attack,
                 instance->device->max_value,
                 instance->device->key_index,
-                false);
+                false,
+                instance->device->extra_repeats);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSaveName);
         } else if(event.event == SubBruteCustomEventTypeBackPressed) {
             subbrute_attack_view_init_values(
@@ -86,7 +88,8 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 instance->device->attack,
                 instance->device->max_value,
                 instance->device->key_index,
-                false);
+                false,
+                instance->device->extra_repeats);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneStart);
         } else if(event.event == SubBruteCustomEventTypeError) {
             notification_message(instance->notifications, &sequence_error);

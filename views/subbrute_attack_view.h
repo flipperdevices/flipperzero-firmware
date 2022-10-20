@@ -22,4 +22,5 @@ void subbrute_attack_view_init_values(
     uint8_t index,
     uint64_t max_value,
     uint64_t current_step,
-    bool is_attacking);
+    bool is_attacking,
+    uint8_t extra_repeats);

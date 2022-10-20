@@ -48,6 +48,7 @@ typedef struct {
     // Attack state
     SubBruteAttacks attack;
     uint64_t max_value;
+    uint8_t extra_repeats;
 
     // Loaded info for attack type
     char current_key[SUBBRUTE_PAYLOAD_SIZE];

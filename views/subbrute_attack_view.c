@@ -20,6 +20,7 @@ typedef struct {
     SubBruteAttacks index;
     uint64_t max_value;
     uint64_t current_step;
+    uint8_t extra_repeats;
     bool is_attacking;
     bool is_continuous_worker;
     IconAnimation* icon;
@@ -65,12 +66,6 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
         { is_attacking = model->is_attacking; },
         false);
 
-    //    if(!is_attacking) {
-    //        instance->callback(SubBruteCustomEventTypeTransmitNotStarted, instance->context);
-    //    } else {
-    //        instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);
-    //    }
-
     if(!is_attacking) {
         if(event->type == InputTypeShort && event->key == InputKeyOk) {
 #ifdef FURI_DEBUG
@@ -87,32 +82,6 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
                 },
                 true);
             instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);
-            /*if(event->type == InputTypeRepeat && event->key == InputKeyOk) {
-#ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "InputKey: %d OK. SubBruteCustomEventTypeTransmitContinuousStarted", event->key);
-#endif
-            with_view_model(
-                instance->view, (SubBruteAttackViewModel * model) {
-                    model->is_attacking = true;
-                    model->is_continuous_worker = true;
-                    icon_animation_stop(model->icon);
-                    icon_animation_start(model->icon);
-                    return true;
-                });
-            instance->callback(SubBruteCustomEventTypeTransmitContinuousStarted, instance->context);
-        } else if(event->type == InputTypeShort && event->key == InputKeyOk) {
-#ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "InputKey: %d OK", event->key);
-#endif
-            with_view_model(
-                instance->view, (SubBruteAttackViewModel * model) {
-                    model->is_attacking = true;
-                    model->is_continuous_worker = false;
-                    icon_animation_stop(model->icon);
-                    icon_animation_start(model->icon);
-                    return true;
-                });
-            instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);*/
         } else if(event->key == InputKeyUp) {
             instance->callback(SubBruteCustomEventTypeSaveFile, instance->context);
         } else if(event->key == InputKeyDown) {
@@ -123,34 +92,12 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
             } else if(event->key == InputKeyRight) {
                 instance->callback(SubBruteCustomEventTypeChangeStepUp, instance->context);
             }
-            //            with_view_model(
-            //                instance->view, (SubBruteAttackViewModel * model) {
-            //                    if(event->key == InputKeyLeft) {
-            //                        model->current_step =
-            //                            ((model->current_step - 1) + model->max_value) % model->max_value;
-            //                    } else if(event->key == InputKeyRight) {
-            //                        model->current_step = (model->current_step + 1) % model->max_value;
-            //                    }
-            //                    return true;
-            //                });
-            //            instance->callback(SubBruteCustomEventTypeChangeStep, instance->context);
         } else if(event->type == InputTypeRepeat) {
             if(event->key == InputKeyLeft) {
                 instance->callback(SubBruteCustomEventTypeChangeStepDownMore, instance->context);
             } else if(event->key == InputKeyRight) {
                 instance->callback(SubBruteCustomEventTypeChangeStepUpMore, instance->context);
             }
-            /*with_view_model(
-                instance->view, (SubBruteAttackViewModel * model) {
-                    if(event->key == InputKeyLeft) {
-                        model->current_step =
-                            ((model->current_step - 100) + model->max_value) % model->max_value;
-                    } else if(event->key == InputKeyRight) {
-                        model->current_step = (model->current_step + 100) % model->max_value;
-                    }
-                    return true;
-                });
-            instance->callback(SubBruteCustomEventTypeChangeStep, instance->context);*/
         }
     } else {
         if((event->type == InputTypeShort || event->type == InputTypeRepeat) &&
@@ -254,7 +201,8 @@ void subbrute_attack_view_init_values(
     uint8_t index,
     uint64_t max_value,
     uint64_t current_step,
-    bool is_attacking) {
+    bool is_attacking,
+    uint8_t extra_repeats) {
 #ifdef FURI_DEBUG
     FURI_LOG_D(
         TAG,
@@ -271,6 +219,7 @@ void subbrute_attack_view_init_values(
             model->index = index;
             model->current_step = current_step;
             model->is_attacking = is_attacking;
+            model->extra_repeats = extra_repeats;
             if(is_attacking) {
                 icon_animation_start(model->icon);
             } else {
@@ -313,10 +262,12 @@ void elements_button_top_left(Canvas* canvas, const char* str) {
     const uint8_t x = 0;
     const uint8_t y = 0 + button_height;
 
-    canvas_draw_box(canvas, x, y - button_height, button_width, button_height);
-    canvas_draw_line(canvas, x + button_width + 0, y - button_height, x + button_width + 0, y - 1);
-    canvas_draw_line(canvas, x + button_width + 1, y - button_height, x + button_width + 1, y - 2);
-    canvas_draw_line(canvas, x + button_width + 2, y - button_height, x + button_width + 2, y - 3);
+    uint8_t line_x = x + button_width;
+    uint8_t line_y = y - button_height;
+    canvas_draw_box(canvas, x, line_y, button_width, button_height);
+    canvas_draw_line(canvas, line_x + 0, line_y, line_x + 0, y - 1);
+    canvas_draw_line(canvas, line_x + 1, line_y, line_x + 1, y - 2);
+    canvas_draw_line(canvas, line_x + 2, line_y, line_x + 2, y - 3);
 
     canvas_invert_color(canvas);
     canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, icon);
@@ -345,10 +296,12 @@ void elements_button_top_right(Canvas* canvas, const char* str) {
     const uint8_t x = canvas_width(canvas);
     const uint8_t y = 0 + button_height;
 
-    canvas_draw_box(canvas, x - button_width, y - button_height, button_width, button_height);
-    canvas_draw_line(canvas, x - button_width - 1, y - button_height, x - button_width - 1, y - 1);
-    canvas_draw_line(canvas, x - button_width - 2, y - button_height, x - button_width - 2, y - 2);
-    canvas_draw_line(canvas, x - button_width - 3, y - button_height, x - button_width - 3, y - 3);
+    uint8_t line_x = x - button_width;
+    uint8_t line_y = y - button_height;
+    canvas_draw_box(canvas, line_x, line_y, button_width, button_height);
+    canvas_draw_line(canvas, line_x - 1, line_y, line_x - 1, y - 1);
+    canvas_draw_line(canvas, line_x - 2, line_y, line_x - 2, y - 2);
+    canvas_draw_line(canvas, line_x - 3, line_y, line_x - 3, y - 3);
 
     canvas_invert_color(canvas);
     canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
