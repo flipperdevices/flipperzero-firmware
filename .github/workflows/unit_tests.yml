@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - doom/2887_actions_units
-    tags:
-      - '*'
   pull_request:
 
 env:
@@ -22,7 +20,7 @@ jobs:
       - name: 'Compile unit tests firmware'
         continue-on-error: true
         run: |
-          ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
+          FBT_TOOLCHAIN_PATH=/runner/_work ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
 
       - name: 'Copy unit tests to flipper'
         continue-on-error: true
