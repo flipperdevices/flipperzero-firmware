@@ -40,8 +40,8 @@ def dolphin_emitter(target, source, env):
         target = [target_base_dir.File("manifest.txt")]
         ## A detailed list of files to be generated
         ## works better if we just leave target the folder
-        # target.extend(
         # target = []
+        # target.extend(
         #     map(
         #         lambda node: target_base_dir.File(
         #             res_root_dir.rel_path(node).replace(".png", ".bm")
