@@ -38,13 +38,13 @@ uint32_t furi_hal_cortex_instructions_per_microsecond();
  *
  * @param[in]  timeout_us  The expire timeout in us
  *
- * @return     instructions per microsecond count
+ * @return     The FuriHalCortexTimer
  */
 FuriHalCortexTimer furi_hal_cortex_timer_get(uint32_t timeout_us);
 
 /** Check if timer expired
  *
- * @param[in]  cortex_timer  The cortex timer
+ * @param[in]  cortex_timer  The FuriHalCortexTimer
  *
  * @return     true if expired
  */
@@ -52,7 +52,7 @@ bool furi_hal_cortex_timer_is_expired(FuriHalCortexTimer cortex_timer);
 
 /** Wait for timer expire
  *
- * @param[in]  cortex_timer  The cortex timer
+ * @param[in]  cortex_timer  The FuriHalCortexTimer
  */
 void furi_hal_cortex_timer_wait(FuriHalCortexTimer cortex_timer);
 
