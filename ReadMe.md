@@ -11,9 +11,10 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-20 20:11 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-20 20:11 GMT`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-20 21:20 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-20 21:20 GMT`
 - Added: [DAP Link (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
+- Many apps renamed, delete /ext/apps before install
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
