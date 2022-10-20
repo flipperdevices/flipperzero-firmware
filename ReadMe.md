@@ -16,6 +16,7 @@
 - Added: [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - Added: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - Added: [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
+- Added: [DAP Link (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -191,7 +192,7 @@ $ ./fbt plugin_dist
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Minesweeper (By panki27)](https://github.com/panki27/minesweeper)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
-- Snake [OFW]
+- [Snake (By OlegSchwann)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/829)(With updates from DrZlo13, xMasterX, QtRoS and RogueMaster)
 - [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
 - [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game)
 - [Tetris (By jeffplang)](https://github.com/jeffplang/flipperzero-firmware/tree/tetris_game/applications/tetris_game)
@@ -209,9 +210,10 @@ $ ./fbt plugin_dist
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Clock/Stopwatch (By CompaqDisc, Stopwatch & Sound Alert By RogueMaster)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254) [Refactoring (By GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256)
+- [DAP Link (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
-- [Dolphin Backup (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
+- [Dolphin Backup (By nminaylov)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
@@ -221,8 +223,8 @@ $ ./fbt plugin_dist
 - [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
 - [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
-- Music Beeper [OFW] (Music Player With Changes By qqMajiKpp/Haseo)
-- Music Player [OFW]
+- [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) (With Changes By qqMajiKpp/Haseo)
+- [Music Player (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -233,16 +235,16 @@ $ ./fbt plugin_dist
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
-- Signal Generator [OFW]
+- [Signal Generator (By nminaylov)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Sub-GHz Bruteforcer (By Ganapati & xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/57)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU21D / SI7021`
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
-- UART Echo [OFW]
+- [UART Echo (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UPC-A Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
-- [WAV Player (By Zlo)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
+- [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266`
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
