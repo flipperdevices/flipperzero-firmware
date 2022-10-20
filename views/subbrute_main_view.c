@@ -92,8 +92,11 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_box(canvas, 0, 0, canvas_width(canvas), STATUS_BAR_Y_SHIFT);
     canvas_invert_color(canvas);
-    canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Sub-GHz BruteForcer 3.1");
+    canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Sub-GHz BruteForcer 3.2");
     canvas_invert_color(canvas);
+
+    uint16_t screen_width = canvas_width(canvas);
+    uint16_t screen_height = canvas_height(canvas);
 
     if(model->is_select_byte) {
 #ifdef FURI_DEBUG
@@ -138,6 +141,24 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
                         AlignCenter,
                         subbrute_protocol_name(position));
 
+                    if(model->extra_repeats > 0) {
+                        canvas_set_font(canvas, FontBatteryPercent);
+                        char buffer[10];
+                        snprintf(
+                            buffer,
+                            sizeof(buffer),
+                            "x%d",
+                            model->extra_repeats + subbrute_protocol_repeats_count(model->index));
+                        canvas_draw_str_aligned(
+                            canvas,
+                            screen_width - 15,
+                            9 + (item_position * item_height) + STATUS_BAR_Y_SHIFT,
+                            AlignLeft,
+                            AlignCenter,
+                            buffer);
+                        canvas_set_font(canvas, FontSecondary);
+                    }
+
                     elements_frame(
                         canvas, 1, 1 + (item_position * item_height) + STATUS_BAR_Y_SHIFT, 124, 15);
                 } else {
@@ -154,9 +175,9 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
 
         elements_scrollbar_pos(
             canvas,
-            canvas_width(canvas),
+            screen_width,
             STATUS_BAR_Y_SHIFT + 2,
-            canvas_height(canvas) - STATUS_BAR_Y_SHIFT,
+            screen_height - STATUS_BAR_Y_SHIFT,
             model->index,
             SubBruteAttackTotalCount);
     }
@@ -176,6 +197,7 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
     SubBruteMainView* instance = context;
     const uint8_t min_value = 0;
     const uint8_t correct_total = SubBruteAttackTotalCount - 1;
+    const uint8_t max_repeats = 9;
     uint8_t index = 0;
 
     bool updated = false;
@@ -189,6 +211,7 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             } else {
                 instance->index = CLAMP(instance->index - 1, correct_total, min_value);
             }
+            instance->extra_repeats = 0;
             updated = true;
             consumed = true;
         } else if(event->key == InputKeyDown && is_short) {
@@ -197,6 +220,15 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             } else {
                 instance->index = CLAMP(instance->index + 1, correct_total, min_value);
             }
+            instance->extra_repeats = 0;
+            updated = true;
+            consumed = true;
+        } else if(event->key == InputKeyLeft && is_short) {
+            instance->extra_repeats = CLAMP(instance->extra_repeats - 1, max_repeats, 0);
+            updated = true;
+            consumed = true;
+        } else if(event->key == InputKeyRight && is_short) {
+            instance->extra_repeats = CLAMP(instance->extra_repeats + 1, max_repeats, 0);
             updated = true;
             consumed = true;
         } else if(event->key == InputKeyOk && is_short) {
@@ -299,7 +331,6 @@ SubBruteMainView* subbrute_main_view_alloc() {
         {
             model->index = 0;
             model->window_position = 0;
-            model->extra_repeats = 0;
             model->key_field = NULL;
             model->is_select_byte = false;
             model->extra_repeats = 0;

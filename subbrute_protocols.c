@@ -287,6 +287,10 @@ const SubBruteProtocol* subbrute_protocol(SubBruteAttacks index) {
     return subbrute_protocol_registry[index];
 }
 
+uint8_t subbrute_protocol_repeats_count(SubBruteAttacks index) {
+    return subbrute_protocol_registry[index]->repeat;
+}
+
 const char* subbrute_protocol_preset(FuriHalSubGhzPreset preset) {
     return subbrute_protocol_presets[preset];
 }
