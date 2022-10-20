@@ -15,6 +15,7 @@
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-20 21:20 GMT`
 - Added: [DAP Link (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - Many apps renamed, delete /ext/apps before install
+- Added apps for SAM YES and SAM NO
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
