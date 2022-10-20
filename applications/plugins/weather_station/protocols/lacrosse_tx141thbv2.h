@@ -69,7 +69,9 @@ bool ws_protocol_decoder_lacrosse_tx141thbv2_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool ws_protocol_decoder_lacrosse_tx141thbv2_deserialize(void* context, FlipperFormat* flipper_format);
+bool ws_protocol_decoder_lacrosse_tx141thbv2_deserialize(
+    void* context,
+    FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
