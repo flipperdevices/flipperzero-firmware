@@ -19,7 +19,7 @@ struct SubBruteMainView {
     uint8_t index;
     bool is_select_byte;
     const char* key_field;
-    uint8_t repeats_count;
+    uint8_t extra_repeats;
     uint8_t window_position;
 };
 
@@ -29,7 +29,6 @@ typedef struct {
     uint8_t window_position;
     bool is_select_byte;
     const char* key_field;
-    uint8_t repeats_count;
 } SubBruteMainViewModel;
 
 void subbrute_main_view_set_callback(
@@ -89,8 +88,6 @@ FuriString* center_displayed_key(const char* key_cstr, uint8_t index) {
 }
 
 void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
-    SubBruteMainViewModel* m = model;
-
     // Title
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_box(canvas, 0, 0, canvas_width(canvas), STATUS_BAR_Y_SHIFT);
@@ -98,17 +95,17 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
     canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Sub-GHz BruteForcer 3.1");
     canvas_invert_color(canvas);
 
-    if(m->is_select_byte) {
+    if(model->is_select_byte) {
 #ifdef FURI_DEBUG
         //FURI_LOG_D(TAG, "key_field: %s", model->key_field);
 #endif
         char msg_index[18];
-        snprintf(msg_index, sizeof(msg_index), "Field index : %d", m->index);
+        snprintf(msg_index, sizeof(msg_index), "Field index : %d", model->index);
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignTop, msg_index);
 
         FuriString* menu_items;
 
-        menu_items = center_displayed_key(m->key_field, m->index);
+        menu_items = center_displayed_key(model->key_field, model->index);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(
             canvas, 64, 40, AlignCenter, AlignTop, furi_string_get_cstr(menu_items));
@@ -131,8 +128,8 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
         for(uint8_t position = 0; position < SubBruteAttackTotalCount; ++position) {
             uint8_t item_position = position - model->window_position;
 
-            if(item_position < items_on_screen) {
-                if(m->index == position) {
+            if(item_position < ITEMS_ON_SCREEN) {
+                if(model->index == position) {
                     canvas_draw_str_aligned(
                         canvas,
                         4,
@@ -160,7 +157,7 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
             canvas_width(canvas),
             STATUS_BAR_Y_SHIFT + 2,
             canvas_height(canvas) - STATUS_BAR_Y_SHIFT,
-            m->index,
+            model->index,
             SubBruteAttackTotalCount);
     }
 }
@@ -252,7 +249,7 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
                 model->window_position = instance->window_position;
                 model->key_field = instance->key_field;
                 model->is_select_byte = instance->is_select_byte;
-                model->repeats_count = instance->repeats_count;
+                model->extra_repeats = instance->extra_repeats;
             },
             true);
     }
@@ -305,7 +302,7 @@ SubBruteMainView* subbrute_main_view_alloc() {
             model->extra_repeats = 0;
             model->key_field = NULL;
             model->is_select_byte = false;
-            model->repeats_count = 0;
+            model->extra_repeats = 0;
         },
         true);
 
@@ -313,7 +310,7 @@ SubBruteMainView* subbrute_main_view_alloc() {
     instance->window_position = 0;
     instance->key_field = NULL;
     instance->is_select_byte = false;
-    instance->repeats_count = 0;
+    instance->extra_repeats = 0;
 
     return instance;
 }
@@ -367,7 +364,7 @@ void subbrute_main_view_set_index(
             model->window_position = instance->window_position;
             model->key_field = instance->key_field;
             model->is_select_byte = instance->is_select_byte;
-            model->repeats_count = instance->repeats_count;
+            model->extra_repeats = instance->extra_repeats;
         },
         true);
 }
@@ -379,13 +376,5 @@ SubBruteAttacks subbrute_main_view_get_index(SubBruteMainView* instance) {
 
 uint8_t subbrute_main_view_get_extra_repeats(SubBruteMainView* instance) {
     furi_assert(instance);
-
-    uint8_t extra_repeats = 0;
-    with_view_model(
-        instance->view,
-        SubBruteMainViewModel * model,
-        { extra_repeats = model->extra_repeats; },
-        false);
-
-    return extra_repeats;
+    return instance->extra_repeats;
 }
