@@ -21,3 +21,18 @@ void furi_hal_cortex_delay_us(uint32_t microseconds) {
 uint32_t furi_hal_cortex_instructions_per_microsecond() {
     return SystemCoreClock / 1000000;
 }
+
+FuriHalCortexTimer furi_hal_cortex_timer_get(uint32_t timeout_us) {
+    FuriHalCortexTimer cortex_timer = {0};
+    cortex_timer.start = DWT->CYCCNT;
+    cortex_timer.value = SystemCoreClock / 1000000 * timeout_us;
+    return cortex_timer;
+}
+
+bool furi_hal_cortex_timer_is_expired(FuriHalCortexTimer cortex_timer) {
+    return !((DWT->CYCCNT - cortex_timer.start) < cortex_timer.value);
+}
+
+void furi_hal_cortex_timer_wait(FuriHalCortexTimer cortex_timer) {
+    while(!furi_hal_cortex_timer_is_expired(cortex_timer));
+}
