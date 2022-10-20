@@ -20,6 +20,7 @@
 ## [Haseo Flipper Animations](https://github.com/Haseosama/FZ_Animations)
 ## [Talking-Sasquach Flipper Animations](https://github.com/skizzophrenic/Talking-Sasquach)
 ## [stopoxy Flipper Animations](https://github.com/stopoxy/FZAnimations)
+## [CharlesTheGreat77 Flipper Animations](https://github.com/CharlesTheGreat77/FlipperZeroAnimation)
 
 
 ## Some Previews Provided By Creators:
