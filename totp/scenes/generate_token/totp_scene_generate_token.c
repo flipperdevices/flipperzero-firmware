@@ -87,10 +87,7 @@ void update_totp_params(PluginState* const plugin_state) {
     SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
 
     if(scene_state->current_token_index < plugin_state->tokens_count) {
-        TokenInfo* tokenInfo =
-            (TokenInfo*)(list_element_at(
-                             plugin_state->tokens_list, scene_state->current_token_index)
-                             ->data);
+        TokenInfo* tokenInfo = list_element_at(plugin_state->tokens_list, scene_state->current_token_index)->data;
 
         scene_state->need_token_update = true;
         scene_state->last_code_name = tokenInfo->name;
