@@ -99,6 +99,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_emulate_mf_ultralight(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicEmulate) {
         nfc_worker_emulate_mf_classic(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateMfClassicWrite) {
+        nfc_worker_write_mf_classic(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMfUltralightReadAuth) {
         nfc_worker_mf_ultralight_read_auth(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
@@ -664,6 +666,15 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     nfca_signal_free(nfca_signal);
 
     rfal_platform_spi_release();
+}
+
+void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
+    // FuriHalNfcTxRxContext tx_rx = {};
+
+    while(nfc_worker->state == NfcWorkerStateMfClassicWrite) {
+        FURI_LOG_I(TAG, "Write");
+        furi_delay_ms(1000);
+    }
 }
 
 void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
