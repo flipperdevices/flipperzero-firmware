@@ -16,6 +16,7 @@
 - Added: [DAP Link (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - Many apps renamed, delete /ext/apps before install
 - Added apps for SAM YES and SAM NO
+- [UniRFRemix - Cleaned up error checking + Bug fix #373 (By Esurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/373)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
