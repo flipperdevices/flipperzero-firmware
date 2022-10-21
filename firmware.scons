@@ -86,21 +86,6 @@ env.AddMethod(ApplyLibFlags)
 
 Export("env")
 
-if not env["VERBOSE"]:
-    env.SetDefault(
-        HEXCOMSTR="\tHEX\t${TARGET}",
-        BINCOMSTR="\tBIN\t${TARGET}",
-        DFUCOMSTR="\tDFU\t${TARGET}",
-        SDK_PREGEN_COMSTR="\tPREGEN\t${TARGET}",
-        SDK_COMSTR="\tSDKSRC\t${TARGET}",
-        SDKSYM_UPDATER_COMSTR="\tSDKCHK\t${TARGET}",
-        SDKSYM_GENERATOR_COMSTR="\tSDKSYM\t${TARGET}",
-        APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
-        APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
-        APPCHECK_COMSTR="\tAPPCHK\t${SOURCE}",
-    )
-
-
 if env["IS_BASE_FIRMWARE"]:
     env.Append(
         FIRMWARE_BUILD_CFG="firmware",

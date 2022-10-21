@@ -213,6 +213,14 @@ def GetExtAppFromPath(env, app_dir):
 
 def generate(env, **kw):
     env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR"))
+
+    if not env["VERBOSE"]:
+        env.SetDefault(
+            APPMETA_COMSTR="\tAPPMETA\t${TARGET}",
+            APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
+            APPCHECK_COMSTR="\tAPPCHK\t${SOURCE}",
+        )
+
     # env.VariantDir(env.subst("$EXT_APPS_WORK_DIR"), env.Dir("#"), duplicate=False)
 
     env.AddMethod(BuildAppElf)

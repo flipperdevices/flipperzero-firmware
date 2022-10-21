@@ -217,6 +217,14 @@ def generate_sdk_symbols(source, target, env):
 
 
 def generate(env, **kw):
+    if not env["VERBOSE"]:
+        env.SetDefault(
+            SDK_PREGEN_COMSTR="\tPREGEN\t${TARGET}",
+            SDK_COMSTR="\tSDKSRC\t${TARGET}",
+            SDKSYM_UPDATER_COMSTR="\tSDKCHK\t${TARGET}",
+            SDKSYM_GENERATOR_COMSTR="\tSDKSYM\t${TARGET}",
+        )
+
     env.AddMethod(ProcessSdkDepends)
     env.Append(
         BUILDERS={
