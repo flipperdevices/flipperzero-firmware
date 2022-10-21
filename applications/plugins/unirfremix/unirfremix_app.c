@@ -25,6 +25,26 @@
 
 #define TAG "UniRF Remix"
 
+static const char* mfname;
+
+static int kl_type;
+
+void keeloq_reset_mfname() {
+    mfname = "";
+}
+
+void keeloq_reset_kl_type() {
+    kl_type = 0;
+}
+
+void star_line_reset_mfname() {
+    mfname = "";
+}
+
+void star_line_reset_kl_type() {
+    kl_type = 0;
+}
+
 typedef struct {
     uint32_t frequency;
     FuriString* name;

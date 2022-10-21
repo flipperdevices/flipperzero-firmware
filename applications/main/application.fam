@@ -17,7 +17,8 @@ App(
         "fap_loader",
         "archive",
         # "Clock",
-        "SubGHz_Remote",
+        #"SubGHz_Remote",
+        "SubGHz_Remote_loader",
         # "Spectrum_Analyzer",
     ],
 )
