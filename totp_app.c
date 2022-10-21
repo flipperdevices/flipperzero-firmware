@@ -77,7 +77,7 @@ static bool totp_state_init(PluginState* const plugin_state) {
     return true;
 }
 
-static void dispose_plugin_state(PluginState* plugin_state) {
+static void plugin_state_free(PluginState* plugin_state) {
     totp_scene_director_deactivate_active_scene(plugin_state);
 
     totp_scene_director_dispose(plugin_state);
@@ -90,7 +90,7 @@ static void dispose_plugin_state(PluginState* plugin_state) {
     ListNode* tmp;
     while (node != NULL) {
         tmp = node->next;
-        TokenInfo* tokenInfo = (TokenInfo*)node->data;
+        TokenInfo* tokenInfo = node->data;
         token_info_free(tokenInfo);
         free(node);
         node = tmp;
@@ -108,14 +108,14 @@ int32_t totp_app() {
 
     if (!totp_state_init(plugin_state)) {
         FURI_LOG_E(LOGGING_TAG, "App state initialization failed\r\n");
-        dispose_plugin_state(plugin_state);
+        plugin_state_free(plugin_state);
         return 254;
     }
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
         FURI_LOG_E(LOGGING_TAG, "Cannot create mutex\r\n");
-        dispose_plugin_state(plugin_state);
+        plugin_state_free(plugin_state);
         return 255;
     }
 
@@ -134,7 +134,7 @@ int32_t totp_app() {
         if (plugin_state->changing_scene) continue;
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        PluginState* plugin_state = acquire_mutex_block(&state_mutex);
 
         if(event_status == FuriStatusOk) {
             if (event.type == EventTypeKey) {
@@ -155,6 +155,6 @@ int32_t totp_app() {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
-    dispose_plugin_state(plugin_state);
+    plugin_state_free(plugin_state);
     return 0;
 }
