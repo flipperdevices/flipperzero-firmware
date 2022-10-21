@@ -35,6 +35,7 @@ for env_value_name in variables_to_forward:
 
 coreenv = VAR_ENV.Clone(
     tools=[
+        "fbt_tweaks",
         (
             "crosscc",
             {
