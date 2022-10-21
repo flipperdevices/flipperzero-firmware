@@ -16,7 +16,6 @@
 // limitations under the License.
 
 #include <string.h>
-#include <stdbool.h>
 
 #include "base32.h"
 
@@ -26,11 +25,9 @@ int base32_decode(const uint8_t* encoded, uint8_t* result, int bufSize) {
     int count = 0;
     for(const uint8_t* ptr = encoded; count < bufSize && *ptr; ++ptr) {
         uint8_t ch = *ptr;
-        bool chIsValid = (ch >= '0' && ch <= '8') || (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z');
-        if(!chIsValid) {
+        if(ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n' || ch == '-') {
             continue;
         }
-
         buffer <<= 5;
 
         // Deal with commonly mistyped characters
