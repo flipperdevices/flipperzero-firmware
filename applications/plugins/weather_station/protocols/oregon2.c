@@ -290,21 +290,6 @@ bool ws_protocol_decoder_oregon2_deserialize(void* context, FlipperFormat* flipp
     return ret;
 }
 
-// append string of the variable data
-static void
-    oregon2_var_data_append_string(uint16_t sensor_id, uint32_t var_data, FuriString* output) {
-    uint32_t val;
-
-    if(sensor_id == 0xEC40) {
-        val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
-        furi_string_cat_printf(
-            output,
-            "Temp: %s%ld.%ld C\r\n",
-            (var_data & 0xF) ? "-" : "+",
-            val,
-            (uint32_t)(var_data >> 12) & 0xF);
-    }
-}
 
 static void oregon2_append_check_sum(uint32_t fix_data, uint32_t var_data, FuriString* output) {
     uint8_t sum = fix_data & 0xF;
@@ -328,20 +313,24 @@ static void oregon2_append_check_sum(uint32_t fix_data, uint32_t var_data, FuriS
 void ws_protocol_decoder_oregon2_get_string(void* context, FuriString* output) {
     furi_assert(context);
     WSProtocolDecoderOregon2* instance = context;
-    uint16_t sensor_id = OREGON2_SENSOR_ID(instance->generic.data);
     furi_string_cat_printf(
         output,
         "%s\r\n"
-        "ID: 0x%04lX, ch: %ld%s, rc: 0x%02lX\r\n",
+        "ID: 0x%04lX, ch: %d, bat: %d, rc: 0x%02lX\r\n",
         instance->generic.protocol_name,
-        (uint32_t)sensor_id,
-        (uint32_t)(instance->generic.data >> 12) & 0xF,
-        ((instance->generic.data & OREGON2_FLAG_BAT_LOW) ? ", low bat" : ""),
+        instance->generic.id,
+        instance->generic.channel,
+        instance->generic.battery_low,
         (uint32_t)(instance->generic.data >> 4) & 0xFF);
 
     if(instance->var_bits > 0) {
-        oregon2_var_data_append_string(
-            sensor_id, instance->var_data >> OREGON2_CHECKSUM_BITS, output);
+        furi_string_cat_printf(
+            output,
+            "Temp:%d.%d C Hum:%d%%",
+            (int16_t)instance->generic.temp,
+            abs(((int16_t)(instance->generic.temp * 10) - (((int16_t)instance->generic.temp) * 10))),
+            instance->generic.humidity
+        );
         oregon2_append_check_sum((uint32_t)instance->generic.data, instance->var_data, output);
     }
 }
