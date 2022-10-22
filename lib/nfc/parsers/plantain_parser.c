@@ -44,15 +44,15 @@ bool plantain_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
 bool plantain_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
-    MfClassicReader reader = {};
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    MfClassicData* mf_classic_data = &nfc_worker->dev_data->mf_classic_data;
     for(size_t i = 0; i < COUNT_OF(plantain_keys); i++) {
-        mf_classic_reader_add_sector(
-            &reader, plantain_keys[i].sector, plantain_keys[i].key_a, plantain_keys[i].key_b);
+        mf_classic_set_key_found(
+            mf_classic_data, plantain_keys[i].sector, MfClassicKeyA, plantain_keys[i].key_a);
+        mf_classic_set_key_found(
+            mf_classic_data, plantain_keys[i].sector, MfClassicKeyB, plantain_keys[i].key_b);
     }
 
-    return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
+    return mf_classic_update_card(tx_rx, mf_classic_data) == 16;
 }
 
 uint8_t plantain_calculate_luhn(uint64_t number) {

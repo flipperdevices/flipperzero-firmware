@@ -42,16 +42,15 @@ bool troika_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
 bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
-    MfClassicReader reader = {};
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
-
+    MfClassicData* mf_classic_data = &nfc_worker->dev_data->mf_classic_data;
     for(size_t i = 0; i < COUNT_OF(troika_keys); i++) {
-        mf_classic_reader_add_sector(
-            &reader, troika_keys[i].sector, troika_keys[i].key_a, troika_keys[i].key_b);
+        mf_classic_set_key_found(
+            mf_classic_data, troika_keys[i].sector, MfClassicKeyA, troika_keys[i].key_a);
+        mf_classic_set_key_found(
+            mf_classic_data, troika_keys[i].sector, MfClassicKeyB, troika_keys[i].key_b);
     }
 
-    return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
+    return mf_classic_update_card(tx_rx, mf_classic_data) == 16;
 }
 
 bool troika_parser_parse(NfcDeviceData* dev_data) {

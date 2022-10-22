@@ -69,23 +69,15 @@ bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_
 bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
-    MfClassicReader reader = {};
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    MfClassicData* mf_classic_data = &nfc_worker->dev_data->mf_classic_data;
     for(size_t i = 0; i < COUNT_OF(plantain_keys_4k); i++) {
-        mf_classic_reader_add_sector(
-            &reader,
-            plantain_keys_4k[i].sector,
-            plantain_keys_4k[i].key_a,
-            plantain_keys_4k[i].key_b);
-        FURI_LOG_T("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
+        mf_classic_set_key_found(
+            mf_classic_data, plantain_keys_4k[i].sector, MfClassicKeyA, plantain_keys_4k[i].key_a);
+        mf_classic_set_key_found(
+            mf_classic_data, plantain_keys_4k[i].sector, MfClassicKeyB, plantain_keys_4k[i].key_b);
     }
-    for(int i = 0; i < 5; i++) {
-        if(mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40) {
-            return true;
-        }
-    }
-    return false;
+
+    return mf_classic_update_card(tx_rx, mf_classic_data) == 40;
 }
 
 bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
