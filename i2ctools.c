@@ -2,8 +2,6 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
 
 #define MAX_I2C_ADDR 0x7F
 
@@ -85,7 +83,6 @@ typedef struct {
 typedef struct {
     ViewPort* view_port;
     i2cToolsMainMenu current_menu;
-    NotificationApp* notifications; // Used to blink LED
     uint8_t main_menu_index;
 
     _scanner scanner;
@@ -395,15 +392,10 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cTools* i2ctools) {
     }
     canvas_draw_str_aligned(canvas, 50, 25, AlignLeft, AlignTop, "Result: ");
     if(i2ctools->sender.sended) {
-        //if(i2ctools->sender.error) {
         for(uint8_t i = 0; i < sizeof(i2ctools->sender.recv); i++) {
             snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)i2ctools->sender.recv[i]);
             canvas_draw_str_aligned(canvas, 90, 25 + (i * 10), AlignLeft, AlignTop, addr_text);
         }
-        /*
-        } else {
-            canvas_draw_str_aligned(canvas, 90, 25, AlignLeft, AlignTop, "Error");
-        }*/
     }
 }
 
@@ -510,7 +502,6 @@ int32_t i2ctools_app(void* p) {
     }
     printf(APP_NAME);
     printf("\r\n");
-    // i2ctools->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     i2ctools->view_port = view_port_alloc();
     view_port_draw_callback_set(i2ctools->view_port, i2ctools_draw_callback, &i2ctools_mutex);
@@ -522,11 +513,8 @@ int32_t i2ctools_app(void* p) {
 
     InputEvent event;
 
-    i2ctools->storage = furi_record_open(RECORD_STORAGE);
-
     clearSnifferBuffers(i2ctools);
     i2ctools->sniffer.started = false;
-    i2ctools->sniffer.must_save = false;
     i2ctools->sniffer.menu_index = 0;
 
     i2ctools->scanner.menu_index = 0;
@@ -649,8 +637,6 @@ int32_t i2ctools_app(void* p) {
     view_port_free(i2ctools->view_port);
     furi_message_queue_free(event_queue);
     free(i2ctools);
-    //furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-
     return 0;
 }
