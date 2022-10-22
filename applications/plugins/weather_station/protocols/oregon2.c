@@ -56,6 +56,12 @@ void* ws_protocol_decoder_oregon2_alloc(SubGhzEnvironment* environment) {
     WSProtocolDecoderOregon2* instance = malloc(sizeof(WSProtocolDecoderOregon2));
     instance->base.protocol = &ws_protocol_oregon2;
     instance->generic.protocol_name = instance->base.protocol->name;
+    instance->generic.humidity = WS_NO_HUMIDITY;
+    instance->generic.temp = WS_NO_TEMPERATURE;
+    instance->generic.btn = WS_NO_BTN;
+    instance->generic.channel = WS_NO_CHANNEL;
+    instance->generic.battery_low = WS_NO_BATT;
+    instance->generic.id = WS_NO_ID;
     return instance;
 }
 
@@ -99,6 +105,36 @@ static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration
 static uint8_t oregon2_sensor_id_var_bits(uint16_t sensor_id) {
     if(sensor_id == 0xEC40) return 16;
     return 0;
+}
+
+static void ws_oregon2_decode_const_data(WSBlockGeneric* ws_block) {
+    ws_block->id = OREGON2_SENSOR_ID(ws_block->data);
+
+    uint8_t ch_bits = (ws_block->data >> 12) & 0xF;
+    ws_block->channel = 1;
+    while (ch_bits > 1) {
+        ws_block->channel++;
+        ch_bits >>= 1;
+    }
+
+    ws_block->battery_low = (ws_block->data & OREGON2_FLAG_BAT_LOW) ? 1 : 0;
+}
+
+
+static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_block,
+                                       uint16_t sensor_id, uint32_t var_data)
+{
+    int16_t temp_val;
+    if (sensor_id == 0xEC40) {
+        temp_val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
+        temp_val *= 10;
+        temp_val += (var_data >> 12) & 0xF;
+        if(var_data & 0xF) temp_val = -temp_val;
+    }
+    else
+        return;
+
+    ws_block->temp = (float)temp_val / 10.0;
 }
 
 void ws_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t duration) {
@@ -155,6 +191,7 @@ void ws_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t durati
             instance->generic.data = (instance->generic.data & 0x33333333) << 2 |
                                      (instance->generic.data & 0xCCCCCCCC) >> 2;
 
+            ws_oregon2_decode_const_data(&instance->generic);
             instance->var_bits =
                 oregon2_sensor_id_var_bits(OREGON2_SENSOR_ID(instance->generic.data));
 
@@ -178,6 +215,11 @@ void ws_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t durati
                                  (instance->var_data & 0xAAAAAAAA) >> 1;
             instance->var_data = (instance->var_data & 0x33333333) << 2 |
                                  (instance->var_data & 0xCCCCCCCC) >> 2;
+
+            ws_oregon2_decode_var_data(
+                &instance->generic,
+                OREGON2_SENSOR_ID(instance->generic.data),
+                instance->var_data >> OREGON2_CHECKSUM_BITS);
 
             instance->decoder.parser_step = Oregon2DecoderStepReset;
             if(instance->base.callback)
