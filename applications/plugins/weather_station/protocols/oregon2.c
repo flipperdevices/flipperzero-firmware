@@ -50,7 +50,6 @@ typedef enum {
     Oregon2DecoderStepVarData,
 } Oregon2DecoderStep;
 
-
 void* ws_protocol_decoder_oregon2_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
     WSProtocolDecoderOregon2* instance = malloc(sizeof(WSProtocolDecoderOregon2));
@@ -112,7 +111,7 @@ static void ws_oregon2_decode_const_data(WSBlockGeneric* ws_block) {
 
     uint8_t ch_bits = (ws_block->data >> 12) & 0xF;
     ws_block->channel = 1;
-    while (ch_bits > 1) {
+    while(ch_bits > 1) {
         ws_block->channel++;
         ch_bits >>= 1;
     }
@@ -120,18 +119,15 @@ static void ws_oregon2_decode_const_data(WSBlockGeneric* ws_block) {
     ws_block->battery_low = (ws_block->data & OREGON2_FLAG_BAT_LOW) ? 1 : 0;
 }
 
-
-static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_block,
-                                       uint16_t sensor_id, uint32_t var_data)
-{
+static void
+    ws_oregon2_decode_var_data(WSBlockGeneric* ws_block, uint16_t sensor_id, uint32_t var_data) {
     int16_t temp_val;
-    if (sensor_id == 0xEC40) {
+    if(sensor_id == 0xEC40) {
         temp_val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
         temp_val *= 10;
         temp_val += (var_data >> 12) & 0xF;
         if(var_data & 0xF) temp_val = -temp_val;
-    }
-    else
+    } else
         return;
 
     ws_block->temp = (float)temp_val / 10.0;
@@ -290,7 +286,6 @@ bool ws_protocol_decoder_oregon2_deserialize(void* context, FlipperFormat* flipp
     return ret;
 }
 
-
 static void oregon2_append_check_sum(uint32_t fix_data, uint32_t var_data, FuriString* output) {
     uint8_t sum = fix_data & 0xF;
     uint8_t ref_sum = var_data & 0xFF;
@@ -328,9 +323,10 @@ void ws_protocol_decoder_oregon2_get_string(void* context, FuriString* output) {
             output,
             "Temp:%d.%d C Hum:%d%%",
             (int16_t)instance->generic.temp,
-            abs(((int16_t)(instance->generic.temp * 10) - (((int16_t)instance->generic.temp) * 10))),
-            instance->generic.humidity
-        );
+            abs(
+                ((int16_t)(instance->generic.temp * 10) -
+                 (((int16_t)instance->generic.temp) * 10))),
+            instance->generic.humidity);
         oregon2_append_check_sum((uint32_t)instance->generic.data, instance->var_data, output);
     }
 }
