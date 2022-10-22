@@ -41,9 +41,9 @@ void bad_usb_scene_work_on_enter(void* context) {
 
     path_extract_filename(app->keyboard_layout, layout_name, true);
     bad_usb_set_layout_name(app->bad_usb_view, furi_string_get_cstr(layout_name));
-    //app->bad_usb_script = bad_usb_script_open(app->file_path);
 
     furi_string_free(file_name);
+    furi_string_free(layout_name);
 
     bad_usb_set_state(app->bad_usb_view, bad_usb_script_get_state(app->bad_usb_script));
 
