@@ -72,12 +72,12 @@ static FURI_NORETURN void __furi_halt_mcu() {
 }
 
 FURI_NORETURN void __furi_crash() {
-    register const void* r12 asm ("r12") = (void*)__furi_check_registers;
     asm volatile(
-        "stm r12, {r0-r11} \n"
-        :
-        : "r" (r12)
-        : "memory");
+        "ldr r11, =__furi_check_message     \n"
+        "str r12, [r11]                     \n"
+        "ldr r12, =__furi_check_registers   \n"
+        "stm r12, {r0-r11}                  \n"
+        : : : "memory");
 
     bool isr = FURI_IS_ISR();
     __disable_irq();
@@ -109,12 +109,12 @@ FURI_NORETURN void __furi_crash() {
 }
 
 FURI_NORETURN void __furi_halt() {
-    register const void* r12 asm ("r12") = (void*)__furi_check_registers;
     asm volatile(
-        "stm r12, {r0-r11} \n"
-        :
-        : "r" (r12)
-        : "memory");
+        "ldr r11, =__furi_check_message     \n"
+        "str r12, [r11]                     \n"
+        "ldr r12, =__furi_check_registers   \n"
+        "stm r12, {r0-r11}                  \n"
+        : : : "memory");
 
     bool isr = FURI_IS_ISR();
     __disable_irq();
