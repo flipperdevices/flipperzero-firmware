@@ -83,7 +83,7 @@ static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
         return -1;
     }
 
-    return string_cmp(a->path, b->path);
+    return furi_string_cmp(a->path, b->path);
 }
 
 #define M_OPL_ArchiveFile_t()                 \

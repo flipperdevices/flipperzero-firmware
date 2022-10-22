@@ -81,7 +81,7 @@ static int BrowserItem_t_cmp(const BrowserItem_t* a, const BrowserItem_t* b) {
         return -1;
     }
 
-    return string_cmp(a->path, b->path);
+    return furi_string_cmp(a->path, b->path);
 }
 
 #define M_OPL_BrowserItem_t()                 \
