@@ -14,6 +14,16 @@
 PLACE_IN_SECTION("MB_MEM2") const char* __furi_check_message = NULL;
 PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[12] = {0};
 
+/** Load r12 value to __furi_check_message and store registers to __furi_check_registers */
+#define GET_MESSAGE_AND_STORE_REGISTERS()                \
+    asm volatile("ldr r11, =__furi_check_message     \n" \
+                 "str r12, [r11]                     \n" \
+                 "ldr r12, =__furi_check_registers   \n" \
+                 "stm r12, {r0-r11}                  \n" \
+                 :                                       \
+                 :                                       \
+                 : "memory");
+
 extern size_t xPortGetTotalHeapSize(void);
 extern size_t xPortGetFreeHeapSize(void);
 extern size_t xPortGetMinimumEverFreeHeapSize(void);
@@ -56,6 +66,7 @@ static void __furi_print_name(bool isr) {
 }
 
 FURI_NORETURN __attribute__((always_inline)) static inline void __furi_halt_mcu() {
+    // Restore registers and halt MCU
     asm volatile("ldr r12, =__furi_check_registers  \n"
                  "ldm r12, {r0-r11}                 \n"
 #ifdef FURI_DEBUG
@@ -71,13 +82,7 @@ FURI_NORETURN __attribute__((always_inline)) static inline void __furi_halt_mcu(
 }
 
 FURI_NORETURN void __furi_crash() {
-    asm volatile("ldr r11, =__furi_check_message     \n"
-                 "str r12, [r11]                     \n"
-                 "ldr r12, =__furi_check_registers   \n"
-                 "stm r12, {r0-r11}                  \n"
-                 :
-                 :
-                 : "memory");
+    GET_MESSAGE_AND_STORE_REGISTERS();
 
     bool isr = FURI_IS_ISR();
     __disable_irq();
@@ -109,13 +114,7 @@ FURI_NORETURN void __furi_crash() {
 }
 
 FURI_NORETURN void __furi_halt() {
-    asm volatile("ldr r11, =__furi_check_message     \n"
-                 "str r12, [r11]                     \n"
-                 "ldr r12, =__furi_check_registers   \n"
-                 "stm r12, {r0-r11}                  \n"
-                 :
-                 :
-                 : "memory");
+    GET_MESSAGE_AND_STORE_REGISTERS();
 
     bool isr = FURI_IS_ISR();
     __disable_irq();
