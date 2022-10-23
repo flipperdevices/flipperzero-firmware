@@ -149,7 +149,7 @@ size_t
     furi_assert(session);
     furi_assert(encoded_bytes);
 
-    if (!size) return 0;
+    if(!size) return 0;
 
     size_t bytes_sent = furi_stream_buffer_send(session->stream, encoded_bytes, size, timeout);
 
