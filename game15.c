@@ -248,10 +248,8 @@ static void game_tick() {
 
 static void draw_cell(Canvas* canvas, uint8_t x, uint8_t y, uint8_t cell_number) {
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_line(canvas, x + 1, y, x + 17, y);
-    canvas_draw_line(canvas, x + 1, y + 13, x + 16, y + 13);
-    canvas_draw_line(canvas, x, y + 1, x, y + 13);
-    canvas_draw_line(canvas, x + 17, y + 1, x + 17, y + 13);
+    canvas_draw_rframe(canvas, x, y, 18, 14, 1);
+    canvas_set_color(canvas, ColorBlack);
     canvas_draw_xbm(canvas, x + 4, y + 3, CELL_WIDTH, CELL_HEIGHT, pic_cells + cell_number * 16);
 }
 
@@ -311,6 +309,11 @@ static void render_callback(Canvas* const canvas) {
         canvas_set_color(canvas, ColorBlack);
         board_draw(canvas);
         info_draw(canvas);
+
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, 0, 0, 128, 64);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_str(canvas, 10, 10, "0123456789");
     }
     if(scene == SceneWin) {
         canvas_set_color(canvas, ColorWhite);
