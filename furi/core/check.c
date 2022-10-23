@@ -81,7 +81,7 @@ FURI_NORETURN void __furi_crash() {
     __disable_irq();
     GET_MESSAGE_AND_STORE_REGISTERS();
 
-    bool isr = FURI_IS_ISR();
+    bool isr = FURI_IS_IRQ_MODE();
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "Fatal Error";
@@ -113,7 +113,7 @@ FURI_NORETURN void __furi_halt() {
     __disable_irq();
     GET_MESSAGE_AND_STORE_REGISTERS();
 
-    bool isr = FURI_IS_ISR();
+    bool isr = FURI_IS_IRQ_MODE();
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "System halt requested.";
