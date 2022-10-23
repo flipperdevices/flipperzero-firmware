@@ -1,9 +1,9 @@
 ### New changes
-* Plugins: Update TOTP [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+* API version changed to 5.1 due to OFW updates, Extra apps pack update is coming, download it from link below tomorrow or get it from our discord
+* OFW: SubGHz: Move Oregon2 protocol to Weather Station plugin
+* OFW: Gui: update statusbar attention icon and better crash handling (breaking change, API version increased because of that)
 
-**Note: Version naming changed to be more clear what version is newer, now we using -> unlshd-123 where 123 is build number**
-
-#### [🎲 Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
+#### [🎲 Download extra apps pack](https://download-directory.github.io/?url=https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed%20(and%20RogueMaster))
 
 [-> How to install firmware](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/HowToInstall.md)
 
