@@ -670,9 +670,44 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
 
 void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
     // FuriHalNfcTxRxContext tx_rx = {};
+    bool card_found_notified = false;
+    FuriHalNfcDevData nfc_data = {};
+    MfClassicData* mf_data = &nfc_worker->dev_data->mf_classic_data;
 
     while(nfc_worker->state == NfcWorkerStateMfClassicWrite) {
-        FURI_LOG_I(TAG, "Write");
+        if(furi_hal_nfc_detect(&nfc_data, 200)) {
+            if(!card_found_notified) {
+                nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+                card_found_notified = true;
+            }
+            furi_hal_nfc_sleep();
+
+            FURI_LOG_I(TAG, "Check low level nfc data");
+            if(memcmp(&nfc_data, &nfc_worker->dev_data->nfc_data, sizeof(FuriHalNfcDevData))) {
+                FURI_LOG_E(TAG, "Wrong card");
+                nfc_worker->callback(NfcWorkerEventWrongCard, nfc_worker->context);
+                break;
+            }
+
+            FURI_LOG_I(TAG, "Check mf classic type");
+            MfClassicType type =
+                mf_classic_get_classic_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak);
+            if(type != nfc_worker->dev_data->mf_classic_data.type) {
+                FURI_LOG_E(TAG, "Wrong mf classic type");
+                nfc_worker->callback(NfcWorkerEventWrongCard, nfc_worker->context);
+                break;
+            }
+
+            FURI_LOG_I(TAG, "Read manufacturer block");
+            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(mf_data, 0);
+            
+
+        } else {
+            if(card_found_notified) {
+                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+                card_found_notified = false;
+            }
+        }
         furi_delay_ms(1000);
     }
 }
