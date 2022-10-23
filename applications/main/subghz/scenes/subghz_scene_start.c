@@ -45,9 +45,9 @@ void subghz_scene_start_on_enter(void* context) {
         submenu_add_item(
             subghz->submenu, "Test", SubmenuIndexTest, subghz_scene_start_submenu_callback, subghz);
     }
-
     submenu_set_selected_item(
         subghz->submenu, scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneStart));
+
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdMenu);
 }
 
