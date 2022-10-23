@@ -3,12 +3,12 @@
  * 
  * Furi crash and assert functions.
  * 
- * The main problem with crashing is that you can't do anything without disturbing registers, 
+ * The main problem with crashing is that you can't do anything without disturbing registers,
  * and if you disturb registers, you won't be able to see the correct register values in the debugger.
  * 
- * So, we use the trick: we keep the crash message in register r12 (scratch register), 
- * and then we call the noreturn crash function, which saves the registers r0-r11 in the memory location, 
- * outputs a crash message, restores the registers and halts the MCU.=
+ * Current solution works around it by passing the message throw r12 and some magic with registers in crash function.
+ * r0-r10 are stored in the ram2 on crash routine start and restored at the end.
+ * The only register that is going to be lost is r11.
  * 
  */
 #pragma once
