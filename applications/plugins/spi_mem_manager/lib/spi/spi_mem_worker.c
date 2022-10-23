@@ -25,6 +25,12 @@ void spi_mem_worker_free(SPIMemWorker* worker) {
     free(worker);
 }
 
+bool spi_mem_worker_check_for_stop(SPIMemWorker* worker) {
+    UNUSED(worker);
+    uint32_t flags = furi_thread_flags_get();
+    return (flags & SPIMemEventStopThread);
+}
+
 static int32_t spi_mem_worker_thread(void* thread_context) {
     SPIMemWorker* worker = thread_context;
     while(true) {
@@ -46,7 +52,6 @@ void spi_mem_worker_start_thread(SPIMemWorker* worker) {
 }
 
 void spi_mem_worker_stop_thread(SPIMemWorker* worker) {
-    furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventStopThread);
     furi_thread_join(worker->thread);
 }

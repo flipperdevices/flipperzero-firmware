@@ -32,6 +32,12 @@ typedef enum {
     SPIMemChipWriteModeDualBuffer = 0x08
 } SPIMemChipWriteMode;
 
+typedef enum {
+    SPIMemChipCMDWriteStatusReg1 = 0x01,
+    SPIMemChipCMDWriteStatusReg2 = 0x31,
+    SPIMemChipCMDReadJEDECChipID = 0x9F
+} SPIMemChipCMD;
+
 typedef struct {
     const char* vendor_name;
     SPIMemChipVendor vendor_id;
@@ -49,4 +55,4 @@ typedef struct {
     uint8_t erase_gran_cmd;
 } SPIMemChip;
 
-bool spi_mem_get_chip_info(SPIMemChip* chip);
+bool spi_mem_chip_complete_info(SPIMemChip* chip_info);

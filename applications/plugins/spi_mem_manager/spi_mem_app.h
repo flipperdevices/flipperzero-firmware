@@ -1,6 +1,8 @@
 #pragma once
 
 #include <furi.h>
+#include <furi_hal_spi.h>
+#include <furi_hal_spi_config.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>

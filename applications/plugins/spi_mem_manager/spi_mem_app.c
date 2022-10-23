@@ -53,6 +53,7 @@ SPIMemApp* spi_mem_alloc(void) {
         SPIMemViewRead,
         spi_mem_view_read_get_view(instance->view_read));
 
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_external);
     scene_manager_next_scene(instance->scene_manager, SPIMemSceneStart);
     return instance;
 }
@@ -77,6 +78,7 @@ void spi_mem_free(SPIMemApp* instance) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     furi_string_free(instance->file_path);
+    furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_external);
     free(instance);
 }
 
