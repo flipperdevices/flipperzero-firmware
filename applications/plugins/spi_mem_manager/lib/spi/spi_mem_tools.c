@@ -12,7 +12,7 @@ static bool spi_mem_tools_trx(
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
     do {
         if(!furi_hal_spi_bus_tx(
-               &furi_hal_spi_bus_handle_external, (uint8_t*)&cmd, 1, SPI_MEM_TOOLS_SPI_TIMEOUT))
+               &furi_hal_spi_bus_handle_external, (uint8_t*)&cmd, 1, SPI_MEM_SPI_TIMEOUT))
             break;
         if(tx_buf) {
             if(!furi_hal_spi_bus_tx(
