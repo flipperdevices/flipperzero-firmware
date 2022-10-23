@@ -55,29 +55,29 @@ static void __furi_print_name(bool isr) {
     }
 }
 
-static FURI_NORETURN void __furi_halt_mcu() {
-    register const void* r12 asm ("r12") = (void*)__furi_check_registers;
-    asm volatile(
-        "ldm r12, {r0-r11} \n"
+FURI_NORETURN __attribute__((always_inline)) static inline void __furi_halt_mcu() {
+    asm volatile("ldr r12, =__furi_check_registers  \n"
+                 "ldm r12, {r0-r11}                 \n"
 #ifdef FURI_DEBUG
-        "bkpt 0x00  \n"
+                 "bkpt 0x00                         \n"
 #endif
-        "loop%=:    \n"
-        "wfi        \n"
-        "b loop%=   \n"
-        :
-        : "r" (r12)
-        : "memory");
+                 "loop%=:                           \n"
+                 "wfi                               \n"
+                 "b loop%=                          \n"
+                 :
+                 :
+                 : "memory");
     __builtin_unreachable();
 }
 
 FURI_NORETURN void __furi_crash() {
-    asm volatile(
-        "ldr r11, =__furi_check_message     \n"
-        "str r12, [r11]                     \n"
-        "ldr r12, =__furi_check_registers   \n"
-        "stm r12, {r0-r11}                  \n"
-        : : : "memory");
+    asm volatile("ldr r11, =__furi_check_message     \n"
+                 "str r12, [r11]                     \n"
+                 "ldr r12, =__furi_check_registers   \n"
+                 "stm r12, {r0-r11}                  \n"
+                 :
+                 :
+                 : "memory");
 
     bool isr = FURI_IS_ISR();
     __disable_irq();
@@ -104,17 +104,18 @@ FURI_NORETURN void __furi_crash() {
     furi_hal_console_puts("\r\nRebooting system.\r\n");
     furi_hal_console_puts("\033[0m\r\n");
     furi_hal_power_reset();
-#endif
     __builtin_unreachable();
+#endif
 }
 
 FURI_NORETURN void __furi_halt() {
-    asm volatile(
-        "ldr r11, =__furi_check_message     \n"
-        "str r12, [r11]                     \n"
-        "ldr r12, =__furi_check_registers   \n"
-        "stm r12, {r0-r11}                  \n"
-        : : : "memory");
+    asm volatile("ldr r11, =__furi_check_message     \n"
+                 "str r12, [r11]                     \n"
+                 "ldr r12, =__furi_check_registers   \n"
+                 "stm r12, {r0-r11}                  \n"
+                 :
+                 :
+                 : "memory");
 
     bool isr = FURI_IS_ISR();
     __disable_irq();
