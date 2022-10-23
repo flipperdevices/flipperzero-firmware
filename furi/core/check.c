@@ -15,17 +15,17 @@ PLACE_IN_SECTION("MB_MEM2") const char* __furi_check_message = NULL;
 PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[12] = {0};
 
 /** Load r12 value to __furi_check_message and store registers to __furi_check_registers */
-#define GET_MESSAGE_AND_STORE_REGISTERS()                \
-    asm volatile("ldr r11, =__furi_check_message     \n" \
-                 "str r12, [r11]                     \n" \
-                 "ldr r12, =__furi_check_registers   \n" \
-                 "stm r12, {r0-r11}                  \n" \
-                 :                                       \
-                 :                                       \
+#define GET_MESSAGE_AND_STORE_REGISTERS()               \
+    asm volatile("ldr r11, =__furi_check_message    \n" \
+                 "str r12, [r11]                    \n" \
+                 "ldr r12, =__furi_check_registers  \n" \
+                 "stm r12, {r0-r11}                 \n" \
+                 :                                      \
+                 :                                      \
                  : "memory");
 
 // Restore registers and halt MCU
-#define HALT_MCU()                                      \
+#define RESTORE_REGISTERS_AND_HALT_MCU()                \
     asm volatile("ldr r12, =__furi_check_registers  \n" \
                  "ldm r12, {r0-r11}                 \n" \
                  "loop%=:                           \n" \
@@ -78,10 +78,10 @@ static void __furi_print_name(bool isr) {
 }
 
 FURI_NORETURN void __furi_crash() {
+    __disable_irq();
     GET_MESSAGE_AND_STORE_REGISTERS();
 
     bool isr = FURI_IS_ISR();
-    __disable_irq();
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "Fatal Error";
@@ -99,7 +99,7 @@ FURI_NORETURN void __furi_crash() {
 #ifdef FURI_DEBUG
     furi_hal_console_puts("\r\nSystem halted. Connect debugger for more info\r\n");
     furi_hal_console_puts("\033[0m\r\n");
-    HALT_MCU();
+    RESTORE_REGISTERS_AND_HALT_MCU();
 #else
     furi_hal_rtc_set_fault_data((uint32_t)__furi_check_message);
     furi_hal_console_puts("\r\nRebooting system.\r\n");
@@ -110,10 +110,10 @@ FURI_NORETURN void __furi_crash() {
 }
 
 FURI_NORETURN void __furi_halt() {
+    __disable_irq();
     GET_MESSAGE_AND_STORE_REGISTERS();
 
     bool isr = FURI_IS_ISR();
-    __disable_irq();
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "System halt requested.";
@@ -124,6 +124,6 @@ FURI_NORETURN void __furi_halt() {
     furi_hal_console_puts(__furi_check_message);
     furi_hal_console_puts("\r\nSystem halted. Bye-bye!\r\n");
     furi_hal_console_puts("\033[0m\r\n");
-    HALT_MCU();
+    RESTORE_REGISTERS_AND_HALT_MCU();
     __builtin_unreachable();
 }
