@@ -207,6 +207,7 @@ void subghz_protocol_raw_save_to_file_pause(SubGhzProtocolDecoderRAW* instance, 
     if(instance->pause != pause) {
         if(!instance->pause) {
             subghz_protocol_raw_save_to_file_write(instance);
+            subghz_protocol_decoder_raw_reset(instance);
         }
         instance->pause = pause;
     }
