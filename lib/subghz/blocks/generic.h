@@ -9,6 +9,10 @@
 #include "furi_hal.h"
 #include "../types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SubGhzBlockGeneric SubGhzBlockGeneric;
 
 struct SubGhzBlockGeneric {
@@ -25,19 +29,19 @@ struct SubGhzBlockGeneric {
  * @param preset_name name preset
  * @param preset_str Output name preset
  */
-void subghz_block_generic_get_preset_name(const char* preset_name, string_t preset_str);
+void subghz_block_generic_get_preset_name(const char* preset_name, FuriString* preset_str);
 
 /**
  * Serialize data SubGhzBlockGeneric.
  * @param instance Pointer to a SubGhzBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return true On success
  */
 bool subghz_block_generic_serialize(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize data SubGhzBlockGeneric.
@@ -46,3 +50,7 @@ bool subghz_block_generic_serialize(
  * @return true On success
  */
 bool subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format);
+
+#ifdef __cplusplus
+}
+#endif

@@ -152,7 +152,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     }
     // Extra notification
     if(need_attention) {
-        width = icon_get_width(&I_Attention_5x8);
+        width = icon_get_width(&I_Hidden_window_9x8);
         // Prepare work area background
         canvas_frame_set(
             gui->canvas,
@@ -166,7 +166,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         // Draw Icon
         canvas_frame_set(
             gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
-        canvas_draw_icon(gui->canvas, 0, 0, &I_Attention_5x8);
+        canvas_draw_icon(gui->canvas, 0, 0, &I_Hidden_window_9x8);
         // Recalculate next position
         left_used += (width + 2);
         x += (width + 2);
@@ -260,7 +260,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
             "non-complementary input, discarding key: %s type: %s, sequence: %p",
             input_get_key_name(input_event->key),
             input_get_type_name(input_event->type),
-            input_event->sequence);
+            (void*)input_event->sequence);
         return;
     }
 
@@ -290,7 +290,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
             view_port,
             input_get_key_name(input_event->key),
             input_get_type_name(input_event->type),
-            input_event->sequence);
+            (void*)input_event->sequence);
         view_port_input(gui->ongoing_input_view_port, input_event);
     } else {
         FURI_LOG_D(
@@ -300,7 +300,7 @@ void gui_input(Gui* gui, InputEvent* input_event) {
             view_port,
             input_get_key_name(input_event->key),
             input_get_type_name(input_event->type),
-            input_event->sequence);
+            (void*)input_event->sequence);
     }
 
     gui_unlock(gui);

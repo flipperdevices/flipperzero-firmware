@@ -11,8 +11,8 @@
 
 #define LFS_BACKUP_DEFAULT_LOCATION EXT_PATH(LFS_BACKUP_DEFAULT_FILENAME)
 
-static void backup_name_converter(string_t filename) {
-    if(string_empty_p(filename) || (string_get_char(filename, 0) == '.')) {
+static void backup_name_converter(FuriString* filename) {
+    if(furi_string_empty(filename) || (furi_string_get_char(filename, 0) == '.')) {
         return;
     }
 
@@ -27,8 +27,8 @@ static void backup_name_converter(string_t filename) {
     };
 
     for(size_t i = 0; i < COUNT_OF(names); i++) {
-        if(string_equal_str_p(filename, &names[i][1])) {
-            string_set_str(filename, names[i]);
+        if(furi_string_equal(filename, &names[i][1])) {
+            furi_string_set(filename, names[i]);
             return;
         }
     }
@@ -42,8 +42,7 @@ bool lfs_backup_create(Storage* storage, const char* destination) {
 
 bool lfs_backup_exists(Storage* storage, const char* source) {
     const char* final_source = source && strlen(source) ? source : LFS_BACKUP_DEFAULT_LOCATION;
-    FileInfo fi;
-    return storage_common_stat(storage, final_source, &fi) == FSE_OK;
+    return storage_common_stat(storage, final_source, NULL) == FSE_OK;
 }
 
 bool lfs_backup_unpack(Storage* storage, const char* source) {

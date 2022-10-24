@@ -83,13 +83,13 @@ uint8_t subghz_protocol_decoder_phoenix_v2_get_hash_data(void* context);
  * Serialize data SubGhzProtocolDecoderPhoenix_V2.
  * @param context Pointer to a SubGhzProtocolDecoderPhoenix_V2 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return true On success
  */
 bool subghz_protocol_decoder_phoenix_v2_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderPhoenix_V2.
@@ -104,4 +104,4 @@ bool subghz_protocol_decoder_phoenix_v2_deserialize(void* context, FlipperFormat
  * @param context Pointer to a SubGhzProtocolDecoderPhoenix_V2 instance
  * @param output Resulting text
  */
-void subghz_protocol_decoder_phoenix_v2_get_string(void* context, string_t output);
+void subghz_protocol_decoder_phoenix_v2_get_string(void* context, FuriString* output);

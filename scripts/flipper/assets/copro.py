@@ -1,10 +1,11 @@
 import logging
-import datetime
-import shutil
 import json
-from os.path import basename
-
+from io import BytesIO
+import tarfile
 import xml.etree.ElementTree as ET
+import posixpath
+import os
+
 from flipper.utils import *
 from flipper.assets.coprobin import CoproBinary, get_stack_type
 
@@ -24,6 +25,8 @@ MANIFEST_TEMPLATE = {
 
 
 class Copro:
+    COPRO_TAR_DIR = "core2_firmware"
+
     def __init__(self, mcu):
         self.mcu = mcu
         self.version = None
@@ -51,20 +54,21 @@ class Copro:
             raise Exception(f"Unsupported cube version")
         self.version = cube_version
 
+    def _getFileName(self, name):
+        return posixpath.join(self.COPRO_TAR_DIR, name)
+
     def addFile(self, array, filename, **kwargs):
         source_file = os.path.join(self.mcu_copro, filename)
-        destination_file = os.path.join(self.output_dir, filename)
-        shutil.copyfile(source_file, destination_file)
-        array.append(
-            {"name": filename, "sha256": file_sha256(destination_file), **kwargs}
-        )
+        self.output_tar.add(source_file, arcname=self._getFileName(filename))
+        array.append({"name": filename, "sha256": file_sha256(source_file), **kwargs})
 
-    def bundle(self, output_dir, stack_file_name, stack_type, stack_addr=None):
-        if not os.path.isdir(output_dir):
-            raise Exception(f'"{output_dir}" doesn\'t exists')
-        self.output_dir = output_dir
+    def bundle(self, output_file, stack_file_name, stack_type, stack_addr=None):
+        self.output_tar = tarfile.open(output_file, "w:gz", format=tarfile.USTAR_FORMAT)
+        fw_directory = tarfile.TarInfo(self.COPRO_TAR_DIR)
+        fw_directory.type = tarfile.DIRTYPE
+        self.output_tar.addfile(fw_directory)
+
         stack_file = os.path.join(self.mcu_copro, stack_file_name)
-        manifest_file = os.path.join(self.output_dir, "Manifest.json")
         # Form Manifest
         manifest = dict(MANIFEST_TEMPLATE)
         manifest["manifest"]["timestamp"] = timestamp()
@@ -105,6 +109,10 @@ class Copro:
             stack_file_name,
             address=f"0x{stack_addr:X}",
         )
-        # Save manifest to
-        with open(manifest_file, "w", newline="\n") as file:
-            json.dump(manifest, file)
+
+        # Save manifest
+        manifest_data = json.dumps(manifest, indent=4).encode("utf-8")
+        info = tarfile.TarInfo(self._getFileName("Manifest.json"))
+        info.size = len(manifest_data)
+        self.output_tar.addfile(info, BytesIO(manifest_data))
+        self.output_tar.close()

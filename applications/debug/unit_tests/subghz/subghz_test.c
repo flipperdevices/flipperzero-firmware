@@ -5,7 +5,7 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/subghz_keystore.h>
 #include <lib/subghz/subghz_file_encoder_worker.h>
-#include <lib/subghz/protocols/registry.h>
+#include <lib/subghz/protocols/protocol_items.h>
 #include <flipper_format/flipper_format_i.h>
 
 #define TAG "SubGhz TEST"
@@ -28,12 +28,12 @@ static void subghz_test_rx_callback(
     void* context) {
     UNUSED(receiver);
     UNUSED(context);
-    string_t text;
-    string_init(text);
+    FuriString* text;
+    text = furi_string_alloc();
     subghz_protocol_decoder_base_get_string(decoder_base, text);
     subghz_receiver_reset(receiver_handler);
-    FURI_LOG_T(TAG, "\r\n%s", string_get_cstr(text));
-    string_clear(text);
+    FURI_LOG_T(TAG, "\r\n%s", furi_string_get_cstr(text));
+    furi_string_free(text);
     subghz_test_decoder_count++;
 }
 
@@ -43,6 +43,8 @@ static void subghz_test_init(void) {
         environment_handler, CAME_ATOMO_DIR_NAME);
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         environment_handler, NICE_FLOR_S_DIR_NAME);
+    subghz_environment_set_protocol_registry(
+        environment_handler, (void*)&subghz_protocol_registry);
 
     receiver_handler = subghz_receiver_alloc_init(environment_handler);
     subghz_receiver_set_filter(receiver_handler, SubGhzProtocolFlag_Decodable);
@@ -141,8 +143,8 @@ static bool subghz_decode_random_test(const char* path) {
 static bool subghz_encoder_test(const char* path) {
     subghz_test_decoder_count = 0;
     uint32_t test_start = furi_get_tick();
-    string_t temp_str;
-    string_init(temp_str);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
     bool file_load = false;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -167,11 +169,11 @@ static bool subghz_encoder_test(const char* path) {
     } while(false);
     if(file_load) {
         SubGhzTransmitter* transmitter =
-            subghz_transmitter_alloc_init(environment_handler, string_get_cstr(temp_str));
+            subghz_transmitter_alloc_init(environment_handler, furi_string_get_cstr(temp_str));
         subghz_transmitter_deserialize(transmitter, fff_data_file);
 
         SubGhzProtocolDecoderBase* decoder = subghz_receiver_search_decoder_base_by_name(
-            receiver_handler, string_get_cstr(temp_str));
+            receiver_handler, furi_string_get_cstr(temp_str));
 
         if(decoder) {
             LevelDuration level_duration;
@@ -192,10 +194,11 @@ static bool subghz_encoder_test(const char* path) {
     flipper_format_free(fff_data_file);
     FURI_LOG_T(TAG, "\r\n Decoder count parse \033[0;33m%d\033[0m ", subghz_test_decoder_count);
     if(furi_get_tick() - test_start > TEST_TIMEOUT) {
-        printf("\033[0;31mTest encoder %s ERROR TimeOut\033[0m\r\n", string_get_cstr(temp_str));
+        printf(
+            "\033[0;31mTest encoder %s ERROR TimeOut\033[0m\r\n", furi_string_get_cstr(temp_str));
         subghz_test_decoder_count = 0;
     }
-    string_clear(temp_str);
+    furi_string_free(temp_str);
 
     return subghz_test_decoder_count ? true : false;
 }
@@ -412,11 +415,11 @@ MU_TEST(subghz_decoder_honeywell_wdb_test) {
         "Test decoder " SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME " error\r\n");
 }
 
-MU_TEST(subghz_decoder_magellen_test) {
+MU_TEST(subghz_decoder_magellan_test) {
     mu_assert(
         subghz_decoder_test(
-            EXT_PATH("unit_tests/subghz/magellen_raw.sub"), SUBGHZ_PROTOCOL_MAGELLEN_NAME),
-        "Test decoder " SUBGHZ_PROTOCOL_MAGELLEN_NAME " error\r\n");
+            EXT_PATH("unit_tests/subghz/magellan_raw.sub"), SUBGHZ_PROTOCOL_MAGELLAN_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_MAGELLAN_NAME " error\r\n");
 }
 
 MU_TEST(subghz_decoder_intertechno_v3_test) {
@@ -537,10 +540,10 @@ MU_TEST(subghz_encoder_honeywell_wdb_test) {
         "Test encoder " SUBGHZ_PROTOCOL_HONEYWELL_WDB_NAME " error\r\n");
 }
 
-MU_TEST(subghz_encoder_magellen_test) {
+MU_TEST(subghz_encoder_magellan_test) {
     mu_assert(
-        subghz_encoder_test(EXT_PATH("unit_tests/subghz/magellen.sub")),
-        "Test encoder " SUBGHZ_PROTOCOL_MAGELLEN_NAME " error\r\n");
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/magellan.sub")),
+        "Test encoder " SUBGHZ_PROTOCOL_MAGELLAN_NAME " error\r\n");
 }
 
 MU_TEST(subghz_encoder_intertechno_v3_test) {
@@ -592,7 +595,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_doitrand_test);
     MU_RUN_TEST(subghz_decoder_phoenix_v2_test);
     MU_RUN_TEST(subghz_decoder_honeywell_wdb_test);
-    MU_RUN_TEST(subghz_decoder_magellen_test);
+    MU_RUN_TEST(subghz_decoder_magellan_test);
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
 
@@ -613,7 +616,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_doitrand_test);
     MU_RUN_TEST(subghz_encoder_phoenix_v2_test);
     MU_RUN_TEST(subghz_encoder_honeywell_wdb_test);
-    MU_RUN_TEST(subghz_encoder_magellen_test);
+    MU_RUN_TEST(subghz_encoder_magellan_test);
     MU_RUN_TEST(subghz_encoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_encoder_clemsa_test);
 

@@ -52,11 +52,19 @@ static bool check_address_boundaries(const size_t address) {
     return ((address >= min_allowed_address) && (address < max_allowed_address));
 }
 
+static bool update_task_flash_program_page(
+    const uint8_t i_page,
+    const uint8_t* update_block,
+    uint16_t update_block_len) {
+    furi_hal_flash_program_page(i_page, update_block, update_block_len);
+    return true;
+}
+
 static bool update_task_write_dfu(UpdateTask* update_task) {
     DfuUpdateTask page_task = {
         .address_cb = &check_address_boundaries,
         .progress_cb = &update_task_file_progress,
-        .task_cb = &furi_hal_flash_program_page,
+        .task_cb = &update_task_flash_program_page,
         .context = update_task,
     };
 
@@ -117,7 +125,7 @@ static bool update_task_write_stack_data(UpdateTask* update_task) {
             furi_hal_flash_get_page_number(update_task->manifest->radio_address + element_offs);
         CHECK_RESULT(i_page >= 0);
 
-        CHECK_RESULT(furi_hal_flash_program_page(i_page, fw_block, bytes_read));
+        furi_hal_flash_program_page(i_page, fw_block, bytes_read);
 
         element_offs += bytes_read;
         update_task_set_progress(
@@ -263,7 +271,7 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
             match = false;
             FURI_LOG_E(
                 TAG,
-                "OB MISMATCH: #%d: real %08X != %08X (exp.), full %08X",
+                "OB MISMATCH: #%d: real %08lX != %08lX (exp.), full %08lX",
                 idx,
                 device_ob_value_masked,
                 ref_value,
@@ -281,7 +289,7 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
                     (manifest->ob_reference.obs[idx].values.base &
                      manifest->ob_write_mask.obs[idx].values.base);
 
-                FURI_LOG_W(TAG, "Fixing up OB byte #%d to %08X", idx, patched_value);
+                FURI_LOG_W(TAG, "Fixing up OB byte #%d to %08lX", idx, patched_value);
                 ob_dirty = true;
 
                 bool is_fixed = furi_hal_flash_ob_set_word(idx, patched_value) &&
@@ -293,16 +301,16 @@ bool update_task_validate_optionbytes(UpdateTask* update_task) {
                      * reference value */
                     FURI_LOG_W(
                         TAG,
-                        "OB #%d is FUBAR (fixed&masked %08X, not %08X)",
+                        "OB #%d is FUBAR (fixed&masked %08lX, not %08lX)",
                         idx,
                         patched_value,
                         ref_value);
                 }
             }
         } else {
-            FURI_LOG_I(
+            FURI_LOG_D(
                 TAG,
-                "OB MATCH: #%d: real %08X == %08X (exp.)",
+                "OB MATCH: #%d: real %08lX == %08lX (exp.)",
                 idx,
                 device_ob_value_masked,
                 ref_value);

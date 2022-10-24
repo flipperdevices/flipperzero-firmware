@@ -1,14 +1,27 @@
+from SCons.Errors import UserError
+
+
 Import("ENV")
 
 
 from fbt.appmanifest import FlipperAppType
 
 appenv = ENV.Clone(
-    tools=[("fbt_extapps", {"EXT_APPS_WORK_DIR": ENV.subst("${BUILD_DIR}/.extapps")})]
+    tools=[
+        (
+            "fbt_extapps",
+            {
+                "EXT_APPS_WORK_DIR": ENV.subst(
+                    "${BUILD_DIR}/.extapps",
+                )
+            },
+        ),
+        "fbt_assets",
+    ]
 )
 
 appenv.Replace(
-    LINKER_SCRIPT="application-ext",
+    LINKER_SCRIPT="application_ext",
 )
 
 appenv.AppendUnique(
@@ -63,7 +76,10 @@ def build_app_as_external(env, appdef):
     extapps["dist"][appdef.appid] = (appdef.fap_category, compact_elf)
 
 
-apps_to_build_as_faps = [FlipperAppType.PLUGIN, FlipperAppType.EXTERNAL]
+apps_to_build_as_faps = [
+    FlipperAppType.PLUGIN,
+    FlipperAppType.EXTERNAL,
+]
 if appenv["DEBUG_TOOLS"]:
     apps_to_build_as_faps.append(FlipperAppType.DEBUG)
 
@@ -80,15 +96,26 @@ if extra_app_list := GetOption("extra_ext_apps"):
 if appenv["FORCE"]:
     appenv.AlwaysBuild(extapps["compact"].values())
 
-Alias(appenv["FIRMWARE_BUILD_CFG"] + "_extapps", extapps["compact"].values())
+
+# Deprecation stub
+def legacy_app_build_stub(**kw):
+    raise UserError(f"Target name 'firmware_extapps' is deprecated, use 'faps' instead")
+
+
+appenv.PhonyTarget("firmware_extapps", appenv.Action(legacy_app_build_stub, None))
+
+
+Alias("faps", extapps["compact"].values())
+Alias("faps", extapps["validators"].values())
 
 if appsrc := appenv.subst("$APPSRC"):
-    app_manifest, fap_file = appenv.GetExtAppFromPath(appsrc)
+    app_manifest, fap_file, app_validator = appenv.GetExtAppFromPath(appsrc)
     appenv.PhonyTarget(
         "launch_app",
         '${PYTHON3} scripts/runfap.py ${SOURCE} --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
         source=fap_file,
         FAP_CATEGORY=app_manifest.fap_category,
     )
+    appenv.Alias("launch_app", app_validator)
 
 Return("extapps")

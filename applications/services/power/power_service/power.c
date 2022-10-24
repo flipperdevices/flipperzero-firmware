@@ -1,10 +1,7 @@
 #include "power_i.h"
-#include "views/power_off.h"
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <gui/view_port.h>
-#include <gui/view.h>
 
 #define POWER_OFF_TIMEOUT 90
 
@@ -99,7 +96,7 @@ void power_free(Power* power) {
 
 static void power_check_charging_state(Power* power) {
     if(furi_hal_power_is_charging()) {
-        if(power->info.charge == 100) {
+        if((power->info.charge == 100) || (furi_hal_power_is_charging_done())) {
             if(power->state != PowerStateCharged) {
                 notification_internal_message(power->notification, &sequence_charged);
                 power->state = PowerStateCharged;
@@ -127,6 +124,7 @@ static void power_check_charging_state(Power* power) {
 static bool power_update_info(Power* power) {
     PowerInfo info;
 
+    info.is_charging = furi_hal_power_is_charging();
     info.gauge_is_ok = furi_hal_power_gauge_is_ok();
     info.charge = furi_hal_power_get_pct();
     info.health = furi_hal_power_get_bat_health_pct();
@@ -142,6 +140,7 @@ static bool power_update_info(Power* power) {
 
     furi_mutex_acquire(power->api_mtx, FuriWaitForever);
     bool need_refresh = power->info.charge != info.charge;
+    need_refresh |= power->info.is_charging != info.is_charging;
     power->info = info;
     furi_mutex_release(power->api_mtx);
 

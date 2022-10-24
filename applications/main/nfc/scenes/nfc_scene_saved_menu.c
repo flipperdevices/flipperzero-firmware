@@ -20,8 +20,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     Submenu* submenu = nfc->submenu;
 
     if(nfc->dev->format == NfcDeviceSaveFormatUid ||
-       nfc->dev->format == NfcDeviceSaveFormatMifareDesfire ||
-       nfc->dev->format == NfcDeviceSaveFormatBankCard) {
+       nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
         submenu_add_item(
             submenu,
             "Emulate UID",
@@ -91,7 +90,9 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             bool application_info_present = false;
             if(dev_data->protocol == NfcDeviceProtocolEMV) {
                 application_info_present = true;
-            } else if(dev_data->protocol == NfcDeviceProtocolMifareClassic) {
+            } else if(
+                dev_data->protocol == NfcDeviceProtocolMifareClassic ||
+                dev_data->protocol == NfcDeviceProtocolMifareUl) {
                 application_info_present = nfc_supported_card_verify_and_parse(dev_data);
             }
 

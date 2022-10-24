@@ -4,7 +4,6 @@
 #include <st25r3916_irq.h>
 #include <rfal_rf.h>
 #include <furi.h>
-#include <m-string.h>
 
 #include <lib/digital_signal/digital_signal.h>
 #include <furi_hal_spi.h>
@@ -37,6 +36,10 @@ void furi_hal_nfc_init() {
 
 bool furi_hal_nfc_is_busy() {
     return rfalNfcGetState() != RFAL_NFC_STATE_IDLE;
+}
+
+bool furi_hal_nfc_is_init() {
+    return rfalNfcGetState() != RFAL_NFC_STATE_NOTINIT;
 }
 
 void furi_hal_nfc_field_on() {
@@ -739,7 +742,8 @@ void furi_hal_nfc_sleep() {
     rfalLowPowerModeStart();
 }
 
-FuriHalNfcReturn furi_hal_nfc_ll_set_mode(FuriHalNfcMode mode, FuriHalNfcBitrate txBR, FuriHalNfcBitrate rxBR) {
+FuriHalNfcReturn
+    furi_hal_nfc_ll_set_mode(FuriHalNfcMode mode, FuriHalNfcBitrate txBR, FuriHalNfcBitrate rxBR) {
     return rfalSetMode((rfalMode)mode, (rfalBitRate)txBR, (rfalBitRate)rxBR);
 }
 

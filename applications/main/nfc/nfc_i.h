@@ -33,7 +33,13 @@
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
 
+#include <dialogs/dialogs.h>
+
 #include "rpc/rpc_app.h"
+
+#include <m-array.h>
+
+ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
 
 #define NFC_TEXT_STORE_SIZE 128
 
@@ -56,8 +62,9 @@ struct Nfc {
     FuriHalNfcDevData dev_edit_data;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
-    string_t text_box_store;
+    FuriString* text_box_store;
     uint8_t byte_input_store[6];
+    MfClassicUserKeys_t mfc_key_strs; // Used in MFC key listing
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
@@ -98,7 +105,11 @@ void nfc_text_store_set(Nfc* nfc, const char* text, ...);
 
 void nfc_text_store_clear(Nfc* nfc);
 
-void nfc_blink_start(Nfc* nfc);
+void nfc_blink_read_start(Nfc* nfc);
+
+void nfc_blink_emulate_start(Nfc* nfc);
+
+void nfc_blink_detect_start(Nfc* nfc);
 
 void nfc_blink_stop(Nfc* nfc);
 

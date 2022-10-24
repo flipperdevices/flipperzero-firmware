@@ -4,6 +4,10 @@
 
 #define SUBGHZ_PROTOCOL_RAW_NAME "RAW"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*SubGhzProtocolEncoderRAWCallbackEnd)(void* context);
 
 typedef struct SubGhzProtocolDecoderRAW SubGhzProtocolDecoderRAW;
@@ -17,13 +21,13 @@ extern const SubGhzProtocol subghz_protocol_raw;
  * Open file for writing
  * @param instance Pointer to a SubGhzProtocolDecoderRAW instance
  * @param dev_name  File name
- * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return true On success
  */
 bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
-    SubGhzPresetDefinition* preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Stop writing file to flash
@@ -78,7 +82,7 @@ bool subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipp
  * @param context Pointer to a SubGhzProtocolDecoderRAW instance
  * @param output Resulting text
  */
-void subghz_protocol_decoder_raw_get_string(void* context, string_t output);
+void subghz_protocol_decoder_raw_get_string(void* context, FuriString* output);
 
 /**
  * Allocate SubGhzProtocolEncoderRAW.
@@ -98,12 +102,6 @@ void subghz_protocol_encoder_raw_free(void* context);
  * @param context Pointer to a SubGhzProtocolEncoderRAW instance
  */
 void subghz_protocol_encoder_raw_stop(void* context);
-
-/**
- * Сallback on completion of file transfer.
- * @param context Pointer to a SubGhzProtocolEncoderRAW instance
- */
-void subghz_protocol_raw_file_encoder_worker_callback_end(void* context);
 
 /**
  * Set callback on completion of file transfer.
@@ -137,3 +135,7 @@ bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipp
  * @return LevelDuration 
  */
 LevelDuration subghz_protocol_encoder_raw_yield(void* context);
+
+#ifdef __cplusplus
+}
+#endif

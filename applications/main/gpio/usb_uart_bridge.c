@@ -1,6 +1,5 @@
 #include "usb_uart_bridge.h"
 #include "furi_hal.h"
-#include <stream_buffer.h>
 #include <furi_hal_usb_cdc.h>
 #include "usb_cdc.h"
 #include "cli/cli_vcp.h"
@@ -15,6 +14,7 @@
 static const GpioPin* flow_pins[][2] = {
     {&gpio_ext_pa7, &gpio_ext_pa6}, // 2, 3
     {&gpio_ext_pb2, &gpio_ext_pc3}, // 6, 7
+    {&gpio_ext_pc0, &gpio_ext_pc1}, // 16, 15
 };
 
 typedef enum {
@@ -43,7 +43,7 @@ struct UsbUartBridge {
     FuriThread* thread;
     FuriThread* tx_thread;
 
-    StreamBufferHandle_t rx_stream;
+    FuriStreamBuffer* rx_stream;
 
     FuriMutex* usb_mutex;
 
@@ -74,12 +74,10 @@ static int32_t usb_uart_tx_thread(void* context);
 
 static void usb_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     UsbUartBridge* usb_uart = (UsbUartBridge*)context;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     if(ev == UartIrqEventRXNE) {
-        xStreamBufferSendFromISR(usb_uart->rx_stream, &data, 1, &xHigherPriorityTaskWoken);
+        furi_stream_buffer_send(usb_uart->rx_stream, &data, 1, 0);
         furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtRxDone);
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 }
 
@@ -156,7 +154,7 @@ static int32_t usb_uart_worker(void* context) {
 
     memcpy(&usb_uart->cfg, &usb_uart->cfg_new, sizeof(UsbUartConfig));
 
-    usb_uart->rx_stream = xStreamBufferCreate(USB_UART_RX_BUF_SIZE, 1);
+    usb_uart->rx_stream = furi_stream_buffer_alloc(USB_UART_RX_BUF_SIZE, 1);
 
     usb_uart->tx_sem = furi_semaphore_alloc(1, 1);
     usb_uart->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -189,8 +187,8 @@ static int32_t usb_uart_worker(void* context) {
         furi_check((events & FuriFlagError) == 0);
         if(events & WorkerEvtStop) break;
         if(events & WorkerEvtRxDone) {
-            size_t len =
-                xStreamBufferReceive(usb_uart->rx_stream, usb_uart->rx_buf, USB_CDC_PKT_LEN, 0);
+            size_t len = furi_stream_buffer_receive(
+                usb_uart->rx_stream, usb_uart->rx_buf, USB_CDC_PKT_LEN, 0);
             if(len > 0) {
                 if(furi_semaphore_acquire(usb_uart->tx_sem, 100) == FuriStatusOk) {
                     usb_uart->st.rx_cnt += len;
@@ -199,7 +197,7 @@ static int32_t usb_uart_worker(void* context) {
                     furi_hal_cdc_send(usb_uart->cfg.vcp_ch, usb_uart->rx_buf, len);
                     furi_check(furi_mutex_release(usb_uart->usb_mutex) == FuriStatusOk);
                 } else {
-                    xStreamBufferReset(usb_uart->rx_stream);
+                    furi_stream_buffer_reset(usb_uart->rx_stream);
                 }
             }
         }
@@ -270,7 +268,7 @@ static int32_t usb_uart_worker(void* context) {
     furi_thread_join(usb_uart->tx_thread);
     furi_thread_free(usb_uart->tx_thread);
 
-    vStreamBufferDelete(usb_uart->rx_stream);
+    furi_stream_buffer_free(usb_uart->rx_stream);
     furi_mutex_free(usb_uart->usb_mutex);
     furi_semaphore_free(usb_uart->tx_sem);
 

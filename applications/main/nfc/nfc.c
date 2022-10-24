@@ -83,7 +83,7 @@ Nfc* nfc_alloc() {
     nfc->text_box = text_box_alloc();
     view_dispatcher_add_view(
         nfc->view_dispatcher, NfcViewTextBox, text_box_get_view(nfc->text_box));
-    string_init(nfc->text_box_store);
+    nfc->text_box_store = furi_string_alloc();
 
     // Custom Widget
     nfc->widget = widget_alloc();
@@ -153,7 +153,7 @@ void nfc_free(Nfc* nfc) {
     // TextBox
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewTextBox);
     text_box_free(nfc->text_box);
-    string_clear(nfc->text_box_store);
+    furi_string_free(nfc->text_box_store);
 
     // Custom Widget
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
@@ -201,8 +201,16 @@ void nfc_text_store_clear(Nfc* nfc) {
     memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }
 
-void nfc_blink_start(Nfc* nfc) {
-    notification_message(nfc->notifications, &sequence_blink_start_blue);
+void nfc_blink_read_start(Nfc* nfc) {
+    notification_message(nfc->notifications, &sequence_blink_start_cyan);
+}
+
+void nfc_blink_emulate_start(Nfc* nfc) {
+    notification_message(nfc->notifications, &sequence_blink_start_magenta);
+}
+
+void nfc_blink_detect_start(Nfc* nfc) {
+    notification_message(nfc->notifications, &sequence_blink_start_yellow);
 }
 
 void nfc_blink_stop(Nfc* nfc) {
@@ -223,7 +231,30 @@ void nfc_show_loading_popup(void* context, bool show) {
     }
 }
 
+static bool nfc_is_hal_ready() {
+    if(!furi_hal_nfc_is_init()) {
+        // No connection to the chip, show an error screen
+        DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_text(
+            message,
+            "Error!\nNFC chip failed to start\n\n\nSend a photo of this to:\nsupport@flipperzero.one",
+            0,
+            0,
+            AlignLeft,
+            AlignTop);
+        dialog_message_show(dialogs, message);
+        dialog_message_free(message);
+        furi_record_close(RECORD_DIALOGS);
+        return false;
+    } else {
+        return true;
+    }
+}
+
 int32_t nfc_app(void* p) {
+    if(!nfc_is_hal_ready()) return 0;
+
     Nfc* nfc = nfc_alloc();
     char* args = p;
 
@@ -246,6 +277,8 @@ int32_t nfc_app(void* p) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
                 } else {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
                 }

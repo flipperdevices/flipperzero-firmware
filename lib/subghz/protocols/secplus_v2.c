@@ -592,7 +592,7 @@ bool subghz_protocol_secplus_v2_create_data(
     uint32_t serial,
     uint8_t btn,
     uint32_t cnt,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolEncoderSecPlus_v2* instance = context;
     instance->generic.serial = serial;
@@ -759,7 +759,7 @@ uint8_t subghz_protocol_decoder_secplus_v2_get_hash_data(void* context) {
 bool subghz_protocol_decoder_secplus_v2_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v2* instance = context;
     bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
@@ -810,18 +810,18 @@ bool subghz_protocol_decoder_secplus_v2_deserialize(void* context, FlipperFormat
     return res;
 }
 
-void subghz_protocol_decoder_secplus_v2_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_secplus_v2_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v2* instance = context;
     subghz_protocol_secplus_v2_remote_controller(&instance->generic, instance->secplus_packet_1);
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "Pk1:0x%lX%08lX\r\n"
         "Pk2:0x%lX%08lX\r\n"
         "Sn:0x%08lX  Btn:0x%01X\r\n"
-        "Cnt:0x%03X\r\n",
+        "Cnt:0x%03lX\r\n",
 
         instance->generic.protocol_name,
         instance->generic.data_count_bit,

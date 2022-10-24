@@ -26,7 +26,7 @@ void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
             popup_reset(nfc->popup);
             popup_set_text(
                 nfc->popup, "Apply card to\nFlipper's back", 97, 24, AlignCenter, AlignTop);
-            popup_set_icon(nfc->popup, 0, 8, &I_NFC_manual);
+            popup_set_icon(nfc->popup, 0, 8, &I_NFC_manual_60x50);
         } else if(state == NfcSceneReadStateReading) {
             popup_reset(nfc->popup);
             popup_set_header(
@@ -49,7 +49,7 @@ void nfc_scene_read_on_enter(void* context) {
     nfc_worker_start(
         nfc->worker, NfcWorkerStateRead, &nfc->dev->dev_data, nfc_scene_read_worker_callback, nfc);
 
-    nfc_blink_start(nfc);
+    nfc_blink_read_start(nfc);
 }
 
 bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
@@ -92,9 +92,11 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == NfcWorkerEventCardDetected) {
             nfc_scene_read_set_state(nfc, NfcSceneReadStateReading);
+            nfc_blink_detect_start(nfc);
             consumed = true;
         } else if(event.event == NfcWorkerEventNoCardDetected) {
             nfc_scene_read_set_state(nfc, NfcSceneReadStateDetecting);
+            nfc_blink_read_start(nfc);
             consumed = true;
         }
     }

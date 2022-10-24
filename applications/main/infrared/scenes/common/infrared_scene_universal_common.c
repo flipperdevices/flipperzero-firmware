@@ -70,7 +70,7 @@ bool infrared_scene_universal_common_on_event(void* context, SceneManagerEvent e
                 uint32_t record_count;
                 if(infrared_brute_force_start(
                        brute_force, infrared_custom_event_get_value(event.event), &record_count)) {
-                    DOLPHIN_DEED(DolphinDeedIrBruteForce);
+                    DOLPHIN_DEED(DolphinDeedIrSend);
                     infrared_scene_universal_common_show_popup(infrared, record_count);
                 } else {
                     scene_manager_next_scene(scene_manager, InfraredSceneErrorDatabases);
@@ -87,5 +87,6 @@ void infrared_scene_universal_common_on_exit(void* context) {
     Infrared* infrared = context;
     ButtonPanel* button_panel = infrared->button_panel;
     view_stack_remove_view(infrared->view_stack, button_panel_get_view(button_panel));
+    infrared_brute_force_reset(infrared->brute_force);
     button_panel_reset(button_panel);
 }

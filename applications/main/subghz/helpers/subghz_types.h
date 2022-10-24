@@ -1,6 +1,5 @@
 #pragma once
 
-#include "m-string.h"
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -47,7 +46,6 @@ typedef enum {
     SubGhzLoadKeyStateUnknown,
     SubGhzLoadKeyStateOK,
     SubGhzLoadKeyStateParseErr,
-    SubGhzLoadKeyStateOnlyRx,
 } SubGhzLoadKeyState;
 
 /** SubGhzLock */
@@ -71,12 +69,3 @@ typedef enum {
     SubGhzViewIdTestCarrier,
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
-
-struct SubGhzPresetDefinition {
-    string_t name;
-    uint32_t frequency;
-    uint8_t* data;
-    size_t data_size;
-};
-
-typedef struct SubGhzPresetDefinition SubGhzPresetDefinition;
