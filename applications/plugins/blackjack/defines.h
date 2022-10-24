@@ -5,14 +5,13 @@
 #include <gui/elements.h>
 #include <flipper_format/flipper_format.h>
 #include <flipper_format/flipper_format_i.h>
-#include "card.h"
+#include "common/card.h"
+#include "common/queue.h"
+#include "common/menu.h"
 
 #define APP_NAME "Blackjack"
-//#define ANIMATION_TIME furi_ms_to_ticks(1500)
-//#define ANIMATION_END_MARGIN furi_ms_to_ticks(200)
 
 #define CONF_ANIMATION_DURATION "AnimationDuration"
-#define CONF_ANIMATION_MARGIN "AnimationMargin"
 #define CONF_MESSAGE_DURATION "MessageDuration"
 #define CONF_STARTING_MONEY "StartingMoney"
 #define CONF_ROUND_PRICE "RoundPrice"
@@ -23,8 +22,7 @@ typedef enum {
     EventTypeKey,
 } EventType;
 
-typedef struct {
-    uint32_t animation_margin;
+typedef struct{
     uint32_t animation_duration;
     uint32_t message_duration;
     uint32_t starting_money;
@@ -45,7 +43,14 @@ typedef enum {
     GameStateDealer,
 } PlayState;
 
-typedef enum { DirectionUp, DirectionRight, DirectionDown, DirectionLeft, Select, None } Direction;
+typedef enum {
+    DirectionUp,
+    DirectionRight,
+    DirectionDown,
+    DirectionLeft,
+    Select,
+    None
+} Direction;
 
 typedef struct {
     Card player_cards[21];
@@ -58,13 +63,14 @@ typedef struct {
 
     uint32_t player_score;
     uint32_t bet;
-    bool doubled;
-    bool animating;
-    bool started;
     uint8_t selectedMenu;
+    bool doubled;
+    bool started;
     bool processing;
     Deck deck;
     PlayState state;
+    QueueState queue_state;
+    Menu *menu;
     unsigned int last_tick;
-    unsigned int animationStart;
 } GameState;
+
