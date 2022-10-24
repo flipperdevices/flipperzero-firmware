@@ -13,7 +13,7 @@ LEAK_THRESHOLD = 3000  # added until units are fixed
 def main():
     flp_serial = flp_serial_by_name(sys.argv[1])
 
-    if flp_serial == '':
+    if flp_serial == "":
         print("Name or serial port is invalid")
         sys.exit(1)
 
@@ -24,9 +24,9 @@ def main():
 
         flipper.timeout = 300
 
-        flipper.read_until(b'>: ').decode("utf-8")
+        flipper.read_until(b">: ").decode("utf-8")
         flipper.write(b"unit_tests\r")
-        data = flipper.read_until(b'>: ').decode("utf-8")
+        data = flipper.read_until(b">: ").decode("utf-8")
 
         lines = data.split("\r\n")
 
@@ -69,9 +69,11 @@ def main():
             print(f"Time elapsed {time/1000} seconds.")
             sys.exit(1)
 
-        print(f"Tests ran successfully! Time elapsed {time/1000} seconds. Passed {tests} tests.")
+        print(
+            f"Tests ran successfully! Time elapsed {time/1000} seconds. Passed {tests} tests."
+        )
         sys.exit(0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
