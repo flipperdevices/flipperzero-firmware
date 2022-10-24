@@ -34,7 +34,7 @@ jobs:
         continue-on-error: true
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
-          /home/actions-runner/.local/bin/poetry run python3 /home/actions-runner/actions-runner/QA-flipper-units/check_flipper_availability.py ${{steps.device.outputs.flipper}}
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
       - name: 'Copy unit tests to flipper'
         id: copy
@@ -48,4 +48,4 @@ jobs:
         continue-on-error: true
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
-          /home/actions-runner/.local/bin/poetry run python3 run_units.py ${{steps.device.outputs.flipper}}
+          python3 scripts/testing/run_units.py ${{steps.device.outputs.flipper}}
