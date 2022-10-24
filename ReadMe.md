@@ -11,14 +11,15 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-20 21:20 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-20 21:20 GMT`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-14-20 20:45 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-24 20:45 GMT`
 - Added: [DAP Link (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
 - Many apps renamed, delete /ext/apps before install
 - Added apps for SAM YES and SAM NO
 - [UniRFRemix - Cleaned up error checking + Bug fix #373 (By Esurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/373)
 - [UniRFRemix into FAP #374 (By Esurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/374)
 - Added: [15 (By x27)](https://github.com/x27/flipperzero-game15)
+- Updates for BlackJack and Temperature Sensor
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
