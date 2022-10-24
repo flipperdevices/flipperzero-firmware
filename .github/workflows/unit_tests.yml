@@ -32,7 +32,6 @@ jobs:
         id: connect
         if: steps.compile.outcome == 'success'
         continue-on-error: true
-        uses: device
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
           /home/actions-runner/.local/bin/poetry run python3 /home/actions-runner/actions-runner/QA-flipper-units/check_flipper_availability.py ${{steps.device.outputs.stdout}}
