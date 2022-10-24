@@ -171,7 +171,7 @@ void ws_protocol_decoder_acurite_592txr_feed(void* context, bool level, uint32_t
                 ws_protocol_acurite_592txr_const.te_delta * 2)) {
                 //Found preambule
                 instance->header_count++;
-            } else if(instance->header_count == 4) {
+            } else if((instance->header_count > 2) && (instance->header_count < 5)) {
                 if((DURATION_DIFF(
                         instance->decoder.te_last, ws_protocol_acurite_592txr_const.te_short) <
                     ws_protocol_acurite_592txr_const.te_delta) &&
