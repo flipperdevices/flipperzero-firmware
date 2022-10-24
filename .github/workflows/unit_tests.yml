@@ -34,7 +34,6 @@ jobs:
         id: copy
         if: steps.connect.outcome == 'success'
         continue-on-error: true
-        depends-on:
         run: |
           ./scripts/storage.py -p /dev/ttyACM0 send assets/unit_tests /ext/unit_tests
 
