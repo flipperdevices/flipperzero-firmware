@@ -16,6 +16,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Compile unit tests firmware'
         id: compile
@@ -28,7 +31,8 @@ jobs:
         if: steps.compile.outcome == 'success'
         continue-on-error: true
         run: |
-          /home/actions-runner/.local/bin/poetry run python3 check_flipper_availibility.py /dev/ttyACM0
+          cd /home/actions-runner/actions-runner/QA-flipper-units
+          /home/actions-runner/.local/bin/poetry run python3 /home/actions-runner/actions-runner/QA-flipper-units/check_flipper_availability.py /dev/ttyACM0
 
       - name: 'Copy unit tests to flipper'
         id: copy
