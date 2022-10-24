@@ -77,18 +77,21 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     if(snake_state->state == GameStateGameOver) {
         // Screen is 128x64 px
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 34, 20, 62, 24);
+        canvas_draw_box(canvas, 32, 20, 64, 34);
 
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 34, 20, 62, 24);
+        canvas_draw_frame(canvas, 32, 20, 64, 34);
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
         canvas_set_font(canvas, FontSecondary);
-        char buffer[12];
+        char buffer[18];
         snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len - 7);
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
+
+        snprintf(buffer, sizeof(buffer), "Highscore: %d", snake_state->highscore);
+        canvas_draw_str_aligned(canvas, 64, 51, AlignCenter, AlignBottom, buffer);
     }
 
     release_mutex((ValueMutex*)ctx, snake_state);
@@ -239,6 +242,7 @@ static void
             return;
         } else if(snake_state->state == GameStateLastChance) {
             snake_state->state = GameStateGameOver;
+            snake_state->highscore = snake_game_save_score_to_file(snake_state->len);
             notification_message_block(notification, &sequence_fail);
             return;
         }
@@ -251,6 +255,7 @@ static void
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
         snake_state->state = GameStateGameOver;
+        snake_state->highscore = snake_game_save_score_to_file(snake_state->len);
         notification_message_block(notification, &sequence_fail);
         return;
     }
@@ -260,6 +265,7 @@ static void
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
             snake_state->state = GameStateGameOver;
+            snake_state->highscore = snake_game_save_score_to_file(snake_state->len);
             notification_message_block(notification, &sequence_fail);
             return;
         }

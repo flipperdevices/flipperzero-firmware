@@ -33,6 +33,32 @@ static FlipperFormat* snake_game_open_file(Storage* storage) {
     return file;
 }
 
+int16_t snake_game_save_score_to_file(int32_t len) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* file = snake_game_open_file(storage);
+
+    len = len - 7;
+    int32_t temp;
+    if(!flipper_format_read_int32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &temp, 1)){
+        if(!flipper_format_insert_or_update_int32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &len, 1)){
+            snake_game_close_file(file);
+            return -1;
+        }
+    }else{
+        if(len > temp){
+            flipper_format_rewind(file);
+            if(!flipper_format_insert_or_update_int32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &len, 1)){
+                snake_game_close_file(file);
+                return -1;
+            }
+        }else{
+            len = temp;
+        }
+    }
+    snake_game_close_file(file);
+    return len;
+}
+
 void snake_game_save_game_to_file(SnakeState* const snake_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = snake_game_open_file(storage);
