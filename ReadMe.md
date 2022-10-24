@@ -17,6 +17,8 @@
 - Many apps renamed, delete /ext/apps before install
 - Added apps for SAM YES and SAM NO
 - [UniRFRemix - Cleaned up error checking + Bug fix #373 (By Esurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/373)
+- [UniRFRemix into FAP #374 (By Esurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/374)
+- Added: [15 (By x27)](https://github.com/x27/flipperzero-game15)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -180,6 +182,7 @@ $ ./fbt plugin_dist
 <details>
   <summary><B>GAMES</b></summary><br/>
   
+- [15 (By x27)](https://github.com/x27/flipperzero-game15)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
