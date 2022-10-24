@@ -18,17 +18,28 @@ jobs:
         uses: actions/checkout@v2
 
       - name: 'Compile unit tests firmware'
+        id: compile
         continue-on-error: true
         run: |
           FBT_TOOLCHAIN_PATH=/opt ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
 
-      - name: 'Copy unit tests to flipper'
+      - name: 'Wait for flipper to finish updating'
+        id: connect
+        if: steps.compile.outcome == 'success'
         continue-on-error: true
         run: |
-          sleep 30
+          /home/actions-runner/.local/bin/poetry run python3 check_flipper_availibility.py /dev/ttyACM0
+
+      - name: 'Copy unit tests to flipper'
+        id: copy
+        if: steps.connect.outcome == 'success'
+        continue-on-error: true
+        depends-on:
+        run: |
           ./scripts/storage.py -p /dev/ttyACM0 send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
+        if: steps.copy.outcome == 'success'
         continue-on-error: true
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
