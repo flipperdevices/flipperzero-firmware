@@ -12,6 +12,7 @@
 ## Description
 
 Flipper Authenticator is a software-based authenticator that implements two-step verification services using the Time-based One-time Password (TOTP; specified in RFC 6238) and HMAC-based One-time Password algorithm.
+
 It is like [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2), but for [Flipper Zero](https://flipperzero.one/) device.
 
 ## Support
