@@ -103,6 +103,7 @@ static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration
 // From sensor id code return amount of bits in variable section
 static uint8_t oregon2_sensor_id_var_bits(uint16_t sensor_id) {
     if(sensor_id == 0xEC40) return 16;
+    if(sensor_id == 0x1D20) return 24;
     return 0;
 }
 
@@ -119,18 +120,26 @@ static void ws_oregon2_decode_const_data(WSBlockGeneric* ws_block) {
     ws_block->battery_low = (ws_block->data & OREGON2_FLAG_BAT_LOW) ? 1 : 0;
 }
 
-static void
-    ws_oregon2_decode_var_data(WSBlockGeneric* ws_block, uint16_t sensor_id, uint32_t var_data) {
+static float ws_oregon2_decode_temp(uint32_t var_data) {
     int16_t temp_val;
-    if(sensor_id == 0xEC40) {
-        temp_val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
-        temp_val *= 10;
-        temp_val += (var_data >> 12) & 0xF;
-        if(var_data & 0xF) temp_val = -temp_val;
-    } else
-        return;
+    temp_val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
+    temp_val *= 10;
+    temp_val += (var_data >> 12) & 0xF;
+    if(var_data & 0xF) temp_val = -temp_val;
+    return (float)temp_val / 10.0;
+}
 
-    ws_block->temp = (float)temp_val / 10.0;
+static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_block, uint16_t sensor_id,
+                                       uint32_t var_data) {
+    switch(sensor_id) {
+    case 0xEC40:
+        ws_block->temp = ws_oregon2_decode_temp(var_data);
+        break;
+    case 0x1D20:
+        ws_block->temp = ws_oregon2_decode_temp(var_data >> 8);
+        ws_block->humidity = ((var_data >> 16) & 0xF) * 10 + ((var_data >> 20) & 0xF);
+        break;
+    }
 }
 
 void ws_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t duration) {
