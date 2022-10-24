@@ -1,3 +1,4 @@
+#include "helpers/snake_file_handler.h"
 #include "helpers/snake_types.h"
 
 #include <furi.h>
@@ -279,7 +280,8 @@ int32_t snake_game_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SnakeEvent));
 
     SnakeState* snake_state = malloc(sizeof(SnakeState));
-    snake_game_init_game(snake_state);
+    if(!snake_game_init_game_from_file(snake_state))
+        snake_game_init_game(snake_state);
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
@@ -334,6 +336,8 @@ int32_t snake_game_app(void* p) {
                         }
                         break;
                     case InputKeyBack:
+                        if(snake_state->state == GameStateLife)
+                            snake_game_save_game_to_file(snake_state);
                         processing = false;
                         break;
                     }
