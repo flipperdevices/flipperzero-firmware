@@ -130,7 +130,7 @@ void totp_scene_generate_token_activate(
         }
     }
     SceneState* scene_state = malloc(sizeof(SceneState));
-    if(context == NULL) {
+    if(context == NULL || context->current_token_index > plugin_state->tokens_count) {
         scene_state->current_token_index = 0;
     } else {
         scene_state->current_token_index = context->current_token_index;
