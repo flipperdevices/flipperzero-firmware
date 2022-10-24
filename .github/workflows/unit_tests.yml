@@ -20,7 +20,7 @@ jobs:
       - name: 'Get flipper from device manager (mock)'
         id: device
         run: |
-          echo /dev/ttyACM0
+          echo "::set-output name=flipper::/dev/ttyACM0"
 
       - name: 'Compile unit tests firmware'
         id: compile
@@ -34,18 +34,18 @@ jobs:
         continue-on-error: true
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
-          /home/actions-runner/.local/bin/poetry run python3 /home/actions-runner/actions-runner/QA-flipper-units/check_flipper_availability.py ${{steps.device.outputs.stdout}}
+          /home/actions-runner/.local/bin/poetry run python3 /home/actions-runner/actions-runner/QA-flipper-units/check_flipper_availability.py ${{steps.device.outputs.flipper}}
 
       - name: 'Copy unit tests to flipper'
         id: copy
         if: steps.connect.outcome == 'success'
         continue-on-error: true
         run: |
-          ./scripts/storage.py -p ${{steps.device.outputs.stdout}} send assets/unit_tests /ext/unit_tests
+          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
         if: steps.copy.outcome == 'success'
         continue-on-error: true
         run: |
           cd /home/actions-runner/actions-runner/QA-flipper-units
-          /home/actions-runner/.local/bin/poetry run python3 run_units.py ${{steps.device.outputs.stdout}}
+          /home/actions-runner/.local/bin/poetry run python3 run_units.py ${{steps.device.outputs.flipper}}
