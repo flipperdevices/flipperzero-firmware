@@ -20,7 +20,7 @@ jobs:
       - name: 'Get flipper from device manager (mock)'
         id: device
         run: |
-          echo "::set-output name=flipper::/dev/ttyACM0"
+          echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
 
       - name: 'Compile unit tests firmware'
         id: compile
