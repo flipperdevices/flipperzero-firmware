@@ -33,7 +33,6 @@ jobs:
         if: steps.compile.outcome == 'success'
         continue-on-error: true
         run: |
-          cd /home/actions-runner/actions-runner/QA-flipper-units
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
       - name: 'Copy unit tests to flipper'
@@ -47,5 +46,4 @@ jobs:
         if: steps.copy.outcome == 'success'
         continue-on-error: true
         run: |
-          cd /home/actions-runner/actions-runner/QA-flipper-units
           python3 scripts/testing/run_units.py ${{steps.device.outputs.flipper}}
