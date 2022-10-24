@@ -1,9 +1,6 @@
 name: 'unit_tests'
 
 on:
-  push:
-    branches:
-      - doom/2887_actions_units
   pull_request:
 
 env:
@@ -16,6 +13,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Get flipper from device manager (mock)'
         id: device
