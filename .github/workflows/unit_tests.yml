@@ -46,4 +46,4 @@ jobs:
         if: steps.copy.outcome == 'success'
         continue-on-error: true
         run: |
-          ./scripts/testing/run_units.py ${{steps.device.outputs.flipper}}
+          ./scripts/testing/units.py ${{steps.device.outputs.flipper}}
