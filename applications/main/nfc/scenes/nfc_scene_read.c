@@ -1,5 +1,4 @@
 #include "../nfc_i.h"
-#include <dolphin/dolphin.h>
 
 typedef enum {
     NfcSceneReadStateIdle,
@@ -39,7 +38,6 @@ void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
 
 void nfc_scene_read_on_enter(void* context) {
     Nfc* nfc = context;
-    DOLPHIN_DEED(DolphinDeedNfcRead);
 
     nfc_device_clear(nfc->dev);
     // Setup view
