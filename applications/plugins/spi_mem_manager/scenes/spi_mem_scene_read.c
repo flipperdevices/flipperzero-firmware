@@ -13,17 +13,17 @@ void spi_mem_scene_read_on_enter(void* context) {
 
 bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
-    bool consumed = false;
+    bool success = false;
     if(event.type == SceneManagerEventTypeBack) {
-        consumed = true;
+        success = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        consumed = true;
+        success = true;
         if(event.event == SPIMemCustomEventViewReadCancel) {
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, SPIMemSceneChipDetected);
         }
     }
-    return consumed;
+    return success;
 }
 void spi_mem_scene_read_on_exit(void* context) {
     UNUSED(context);

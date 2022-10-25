@@ -29,14 +29,14 @@ static void spi_mem_view_read_draw_callback(Canvas* canvas, void* context) {
 
 static bool spi_mem_view_read_input_callback(InputEvent* event, void* context) {
     SPIMemReadView* app = context;
-    bool consumed = false;
+    bool success = false;
     if(event->type == InputTypeShort && event->key == InputKeyLeft) {
         if(app->callback) {
             app->callback(app->cb_ctx);
         }
-        consumed = true;
+        success = true;
     }
-    return consumed;
+    return success;
 }
 
 SPIMemReadView* spi_mem_view_read_alloc() {

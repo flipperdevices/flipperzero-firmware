@@ -27,17 +27,17 @@ void spi_mem_scene_chip_detect_failed_on_enter(void* context) {
 
 bool spi_mem_scene_chip_detect_failed_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
-    bool consumed = false;
+    bool success = false;
     if(event.type == SceneManagerEventTypeBack) {
-        consumed = true;
+        success = true;
         scene_manager_search_and_switch_to_previous_scene(app->scene_manager, SPIMemSceneStart);
     } else if(event.type == SceneManagerEventTypeCustom) {
-        consumed = true;
+        success = true;
         if(event.event == GuiButtonTypeCenter) {
             scene_manager_previous_scene(app->scene_manager);
         }
     }
-    return consumed;
+    return success;
 }
 void spi_mem_scene_chip_detect_failed_on_exit(void* context) {
     SPIMemApp* app = context;

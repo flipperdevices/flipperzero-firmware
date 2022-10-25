@@ -26,16 +26,16 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
 bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
     UNUSED(app);
-    bool consumed = false;
+    bool success = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        consumed = true;
+        success = true;
         if(event.event == SPIMemCustomEventWorkerChipIdentified) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetected);
         } else if(event.event == SPIMemCustomEventWorkerChipUnknown) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetectFailed);
         }
     }
-    return consumed;
+    return success;
 }
 
 void spi_mem_scene_chip_detect_on_exit(void* context) {
