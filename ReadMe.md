@@ -25,6 +25,7 @@
 - Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) if you don't want to do the work but want more animations.
 - Fixed score on Snake
 - Fixed hold left shortcut for SubGHz Remote
+- Added [SubGhz: Add KaKu support (By qistoph)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/379) Not sure if this is ready or WTF is Kaku.
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
