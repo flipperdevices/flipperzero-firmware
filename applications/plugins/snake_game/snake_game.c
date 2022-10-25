@@ -77,6 +77,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     // Show score on the game field
     if(snake_state->state != GameStateGameOver) {
         char buffer2[6];
+        canvas_set_font(canvas, FontBatteryPercent);
         snprintf(buffer2, sizeof(buffer2), "%u", snake_state->len - 7);
         canvas_draw_str_aligned(canvas, 124, 10, AlignRight, AlignBottom, buffer2);
     }
@@ -103,10 +104,6 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
         DOLPHIN_DEED(getRandomDeed());
     }
-
-    canvas_set_font(canvas, FontSecondary);
-    snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len - 7);
-    canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
 
     release_mutex((ValueMutex*)ctx, snake_state);
 }
