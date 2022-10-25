@@ -1,13 +1,6 @@
 Filetype: Flipper Animation Manifest
 Version: 1
 
-Name: RM_G0kuPatPat_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 18
-Max level: 30
-Weight: 0
-
 Name: RM_Sail0rM00n_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -50,13 +43,6 @@ Min level: 18
 Max level: 30
 Weight: 0
 
-Name: RM_Z3lda_R3ady_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 18
-Max level: 30
-Weight: 0
-
 Name: RM_Z3lda_0h_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -72,20 +58,6 @@ Max level: 30
 Weight: 7
 
 Name: Sasquach_Naruto_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: RM_G0kuPew_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: RM_ChiChi_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
@@ -183,13 +155,6 @@ Min level: 1
 Max level: 30
 Weight: 7
 
-Name: Sharingan_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
 Name: Sasquach_G0ku_128x64
 Min butthurt: 0
 Max butthurt: 14
@@ -229,20 +194,6 @@ Name: L2_FlipperCity_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 2
-Max level: 30
-Weight: 7
-
-Name: L1_B0ws3r_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L1_Mario_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
 Max level: 30
 Weight: 7
 
@@ -350,55 +301,6 @@ Max butthurt: 14
 Min level: 1
 Max level: 30
 Weight: 3
-
-Name: MjK_LionsRoar_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: L1_Earth_Arcadia_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: L1_GITS_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: Allen_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: Maha_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: Umbrella_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 3
-
-Name: NeonK_Jiji_Milk
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 2
 
 Name: L1_Rickroll_128x64
 Min butthurt: 0
