@@ -2,7 +2,7 @@
 #include <cli/cli.h>
 
 void totp_cli_print_invalid_arguments() {
-    printf("Invalid command arguments. use \"help\" command to get list of available commands");
+    TOTP_CLI_PRINTF("Invalid command arguments. use \"help\" command to get list of available commands");
 }
 
 bool totp_cli_ensure_authenticated(PluginState* plugin_state, Cli* cli) {

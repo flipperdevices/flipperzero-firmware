@@ -2,6 +2,7 @@
 
 #include "cli.h"
 #include <lib/toolbox/args.h>
+#include "cli_common_helpers.h"
 #include "commands/list/list.h"
 #include "commands/add/add.h"
 #include "commands/delete/delete.h"
@@ -11,14 +12,14 @@
 #define TOTP_CLI_COMMAND_HELP "help"
 
 static void totp_cli_print_unknown_command(FuriString* unknown_command) {
-    printf("Command \"%s\" is unknown. Use \"help\" command to get list of available commands.", furi_string_get_cstr(unknown_command));
+    TOTP_CLI_PRINTF("Command \"%s\" is unknown. Use \"help\" command to get list of available commands.", furi_string_get_cstr(unknown_command));
 }
 
 static void totp_cli_print_help() {
-    printf("Usage:\r\n");
-    printf(TOTP_CLI_COMMAND_NAME " <command> <arguments>\r\n");
-    printf("Command list:\r\n");
-    printf("\t" TOTP_CLI_COMMAND_HELP " - print command usage help\r\n\r\n");
+    TOTP_CLI_PRINTF("Usage:\r\n");
+    TOTP_CLI_PRINTF(TOTP_CLI_COMMAND_NAME " <command> <arguments>\r\n");
+    TOTP_CLI_PRINTF("Command list:\r\n");
+    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_HELP " - print command usage help\r\n\r\n");
     totp_cli_command_list_print_help();
     totp_cli_command_delete_print_help();
     totp_cli_command_add_print_help();
