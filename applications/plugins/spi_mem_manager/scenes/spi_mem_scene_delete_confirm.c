@@ -19,7 +19,11 @@ void spi_mem_scene_delete_confirm_on_enter(void* context) {
     widget_add_text_box_element(
         app->widget, 0, 0, 128, 27, AlignCenter, AlignCenter, furi_string_get_cstr(message), true);
     widget_add_button_element(
-        app->widget, GuiButtonTypeLeft, "Cancel", spi_mem_scene_delete_confirm_widget_callback, app);
+        app->widget,
+        GuiButtonTypeLeft,
+        "Cancel",
+        spi_mem_scene_delete_confirm_widget_callback,
+        app);
     widget_add_button_element(
         app->widget,
         GuiButtonTypeRight,
@@ -41,7 +45,8 @@ bool spi_mem_scene_delete_confirm_on_event(void* context, SceneManagerEvent even
                 scene_manager_next_scene(app->scene_manager, SPIMemSceneDeleteSuccess);
             }
         } else if(event.event == GuiButtonTypeLeft) {
-            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, SPIMemSceneSavedFileMenu);
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, SPIMemSceneSavedFileMenu);
         }
     }
     return success;
