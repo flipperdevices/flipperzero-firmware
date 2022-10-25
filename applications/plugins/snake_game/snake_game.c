@@ -74,6 +74,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_box(canvas, p.x, p.y, 4, 4);
     }
 
+    char buffer[18];
     // Game Over banner
     if(snake_state->state == GameStateGameOver) {
         // Screen is 128x64 px
@@ -86,18 +87,20 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
-        if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
-            DOLPHIN_DEED(getRandomDeed());
-        }
-
         canvas_set_font(canvas, FontSecondary);
-        char buffer[18];
         snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len - 7);
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
 
         snprintf(buffer, sizeof(buffer), "Highscore: %d", snake_state->highscore);
         canvas_draw_str_aligned(canvas, 64, 51, AlignCenter, AlignBottom, buffer);
     }
+    if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
+        DOLPHIN_DEED(getRandomDeed());
+    }
+
+    canvas_set_font(canvas, FontSecondary);
+    snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len - 7);
+    canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
 
     release_mutex((ValueMutex*)ctx, snake_state);
 }
