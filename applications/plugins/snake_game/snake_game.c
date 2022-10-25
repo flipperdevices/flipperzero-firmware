@@ -233,7 +233,6 @@ static void
         return;
     }
 
-    
     snake_state->currentMovement = snake_game_get_turn_snake(snake_state);
 
     Point next_step = snake_game_get_next_step(snake_state);
@@ -289,8 +288,7 @@ int32_t snake_game_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SnakeEvent));
 
     SnakeState* snake_state = malloc(sizeof(SnakeState));
-    if(!snake_game_init_game_from_file(snake_state))
-        snake_game_init_game(snake_state);
+    if(!snake_game_init_game_from_file(snake_state)) snake_game_init_game(snake_state);
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
