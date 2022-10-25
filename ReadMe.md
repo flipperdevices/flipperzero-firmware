@@ -11,11 +11,9 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-25 06:17 GMT`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-25 07:17 GMT`
-- Many apps renamed, delete /ext/apps before install
-- Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) if you don't want to do the work but want more animations.
-- Fixed Game15
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-25 18:19 GMT`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-25 18:19 GMT`
+- Assets: Includes a NFC Level 50 Z3lda Amiibo
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -94,7 +92,7 @@ $ ./fbt plugin_dist
 - Animations: RM FW Update image [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
 - Archive: FAPs are now launchable from Archive [By RogueMaster], thanks xMasterX for the suggestion
-- Assets: Includes a NFC Level 50 Gan0n Amiibo
+- Assets: Includes a NFC Level 50 Z3lda Amiibo
 - Assets: Includes a NFC Rick Roll link
 - Assets: Includes New Dolphin Animations: [Listed Here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/assets/resources/dolphin)
 - Assets: Includes sample Music Player tunes
