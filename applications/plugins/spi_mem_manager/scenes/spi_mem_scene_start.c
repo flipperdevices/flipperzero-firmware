@@ -31,22 +31,19 @@ void spi_mem_scene_start_on_enter(void* context) {
 
 bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
-    bool consumed = false;
-
+    bool success = false;
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(app->scene_manager, SPIMemSceneStart, event.event);
         if(event.event == SPIMemSceneStartSubmenuIndexRead) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
-            consumed = true;
+            success = true;
         } else if(event.event == SPIMemSceneStartSubmenuIndexSaved) {
             furi_string_set(app->file_path, SPI_MEM_FILE_FOLDER);
             scene_manager_next_scene(app->scene_manager, SPIMemSceneSelectFile);
-            consumed = true;
+            success = true;
         }
-        scene_manager_set_scene_state(app->scene_manager, SPIMemSceneStart, event.event);
     }
-
-    return consumed;
+    return success;
 }
 
 void spi_mem_scene_start_on_exit(void* context) {

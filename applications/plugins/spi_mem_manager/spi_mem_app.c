@@ -1,7 +1,5 @@
 #include "spi_mem_app.h"
 
-#define TAG "SPIMem"
-
 static bool spi_mem_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SPIMemApp* app = context;
@@ -31,6 +29,9 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->widget = widget_alloc();
     instance->chip_info = malloc(sizeof(SPIMemChip));
     instance->view_read = spi_mem_view_read_alloc();
+    instance->text_input = text_input_alloc();
+
+    furi_string_set(instance->file_path, SPI_MEM_FILE_FOLDER);
 
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
@@ -52,6 +53,8 @@ SPIMemApp* spi_mem_alloc(void) {
         instance->view_dispatcher,
         SPIMemViewRead,
         spi_mem_view_read_get_view(instance->view_read));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, SPIMemViewTextInput, text_input_get_view(instance->text_input));
 
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_external);
     scene_manager_next_scene(instance->scene_manager, SPIMemSceneStart);
@@ -64,11 +67,13 @@ void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewPopup);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewWidget);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewRead);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewTextInput);
     spi_mem_view_read_free(instance->view_read);
     submenu_free(instance->submenu);
     dialog_ex_free(instance->dialog_ex);
     popup_free(instance->popup);
     widget_free(instance->widget);
+    text_input_free(instance->text_input);
     view_dispatcher_free(instance->view_dispatcher);
     scene_manager_free(instance->scene_manager);
     spi_mem_worker_free(instance->worker);

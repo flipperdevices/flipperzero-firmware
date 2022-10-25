@@ -6,6 +6,42 @@ void spi_mem_file_create_folder(SPIMemApp* app) {
     }
 }
 
+bool spi_mem_file_delete(SPIMemApp* app) {
+    if(!storage_simply_remove(app->storage, furi_string_get_cstr(app->file_path))) {
+        FuriString* file_name = furi_string_alloc();
+        FuriString* message = furi_string_alloc();
+        path_extract_filename(app->file_path, file_name, true);
+        furi_string_printf(message, "Cannot detete\n%s", furi_string_get_cstr(file_name));
+        dialog_message_show_storage_error(app->dialogs, furi_string_get_cstr(message));
+        furi_string_free(file_name);
+        furi_string_free(message);
+        return false;
+    }
+    return true;
+}
+
+bool spi_mem_file_create(SPIMemApp* app, const char* file_name) {
+    bool success = false;
+    FlipperFormat* file = flipper_format_file_alloc(app->storage);
+    do {
+        if(furi_string_end_with(app->file_path, SPI_MEM_FILE_EXTENSION)) {
+            if(!spi_mem_file_delete(app)) break;
+            size_t filename_start = furi_string_search_rchar(app->file_path, '/');
+            furi_string_left(app->file_path, filename_start);
+        }
+        furi_string_cat_printf(app->file_path, "/%s%s", file_name, SPI_MEM_FILE_EXTENSION);
+        FURI_LOG_E(TAG, furi_string_get_cstr(app->file_path));
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(app->file_path))) break;
+        if(!flipper_format_write_header_cstr(file, SPI_MEM_FILE_TYPE, 1)) break;
+        success = true;
+    } while(0);
+    if(!success) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot save\nkey file");
+    }
+    flipper_format_free(file);
+    return success;
+}
+
 bool spi_mem_file_select(SPIMemApp* app) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, SPI_MEM_FILE_EXTENSION, &I_Dip8_10px);
@@ -15,8 +51,4 @@ bool spi_mem_file_select(SPIMemApp* app) {
         // success = ibutton_load_key_data(ibutton, ibutton->file_path, true);
     }
     return success;
-}
-
-bool spi_mem_file_delete(SPIMemApp* app) {
-    return storage_simply_remove(app->storage, furi_string_get_cstr(app->file_path));
 }

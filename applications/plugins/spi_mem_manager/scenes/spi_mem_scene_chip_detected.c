@@ -46,7 +46,7 @@ bool spi_mem_scene_chip_detected_on_event(void* context, SceneManagerEvent event
         if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == GuiButtonTypeRight) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneRead);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneReadFilename);
         }
     }
     return consumed;

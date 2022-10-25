@@ -37,9 +37,16 @@ void spi_mem_scene_saved_file_menu_on_enter(void* context) {
 }
 
 bool spi_mem_scene_saved_file_menu_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-    return false;
+    SPIMemApp* app = context;
+    bool success = false;
+    if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(app->scene_manager, SPIMemSceneSavedFileMenu, event.event);
+        if(event.event == SPIMemSceneSavedFileMenuSubmenuIndexDelete) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneDeleteConfirm);
+            success = true;
+        }
+    }
+    return success;
 }
 
 void spi_mem_scene_saved_file_menu_on_exit(void* context) {

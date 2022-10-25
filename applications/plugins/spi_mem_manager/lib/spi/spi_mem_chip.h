@@ -35,7 +35,8 @@ typedef enum {
 typedef enum {
     SPIMemChipCMDWriteStatusReg1 = 0x01,
     SPIMemChipCMDWriteStatusReg2 = 0x31,
-    SPIMemChipCMDReadJEDECChipID = 0x9F
+    SPIMemChipCMDReadJEDECChipID = 0x9F,
+    SPIMemChipCMDReadData = 0x03
 } SPIMemChipCMD;
 
 typedef struct {

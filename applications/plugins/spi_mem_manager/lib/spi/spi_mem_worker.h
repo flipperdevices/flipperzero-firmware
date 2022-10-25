@@ -1,29 +1,34 @@
 #pragma once
 
 #include <furi.h>
+#include <flipper_format/flipper_format.h>
 #include "spi_mem_chip.h"
 #include "spi_mem_tools.h"
 
-typedef enum { SPIMemWorkerModeIdle, SPIMemWorkerModeChipDetect } SPIMemWorkerMode;
+typedef enum {
+    SPIMemWorkerModeIdle,
+    SPIMemWorkerModeChipDetect,
+    SPIMemWorkerModeRead
+} SPIMemWorkerMode;
 
 typedef enum {
-    SPIMemCustomEventWorkerChipDetectSuccess,
-    SPIMemCustomEventWorkerChipDetectFail
+    SPIMemCustomEventWorkerChipIdentified,
+    SPIMemCustomEventWorkerChipUnknown
 } SPIMemCustomEventWorker;
 
-typedef enum {
-    SPIMemWorkerChipDetectResultSuccess,
-    SPIMemWorkerChipDetectResultFail
-} SPIMemWorkerChipDetectResult;
+typedef enum { SPIMemWorkerChipIdentified, SPIMemWorkerChipUnknown } SPIMemWorkerResult;
 
-typedef void (*SPIMemWorkerChipDetectCallback)(void* context, SPIMemWorkerChipDetectResult result);
+typedef void (*SPIMemWorkerChipDetectCallback)(void* context, SPIMemWorkerResult result);
+typedef void (*SPIMemWorkerReadCallback)(void* context, SPIMemWorkerResult result);
 
 typedef struct {
     SPIMemChip* chip_info;
     SPIMemWorkerMode mode_index;
     SPIMemWorkerChipDetectCallback chip_detect_cb;
+    SPIMemWorkerReadCallback read_cb;
     void* cb_ctx;
     FuriThread* thread;
+    FuriString* file_name;
 } SPIMemWorker;
 
 typedef struct {
@@ -42,4 +47,9 @@ void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerChipDetectCallback callback,
+    void* context);
+void spi_mem_worker_read_start(
+    SPIMemChip* chip_info,
+    SPIMemWorker* worker,
+    SPIMemWorkerReadCallback callback,
     void* context);

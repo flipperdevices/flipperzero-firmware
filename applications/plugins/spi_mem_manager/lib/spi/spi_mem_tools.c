@@ -31,12 +31,32 @@ static bool spi_mem_tools_trx(
 }
 
 bool spi_mem_tools_read_chip_info(SPIMemChip* chip) {
-    uint8_t rx_buf[3];
-    memset(rx_buf, 0, 3);
+    uint8_t rx_buf[3] = {0, 0, 0};
     if(!spi_mem_tools_trx(SPIMemChipCMDReadJEDECChipID, NULL, 0, rx_buf, 3)) return false;
     if(rx_buf[0] == 0) return false;
     chip->vendor_id = (SPIMemChipVendor)rx_buf[0];
     chip->type_id = rx_buf[1];
     chip->capacity_id = rx_buf[2];
+    return true;
+}
+
+static uint8_t spi_mem_tools_addr_to_byte_arr(uint32_t addr, uint8_t* cmd) {
+    uint8_t len = 3;
+    for(uint8_t i = 0; i < len; i++) {
+        cmd[i] = (addr >> ((len - (i + 1)) * 8)) & 0xFF;
+    }
+    return len;
+}
+
+bool spi_mem_tools_read_block_data(SPIMemChip* chip, size_t offset, uint8_t* data) {
+    uint8_t cmd[3];
+    if((offset + SPI_MEM_MAX_BLOCK_SIZE) >= chip->size) return false;
+    if(!spi_mem_tools_trx(
+           SPIMemChipCMDReadData,
+           cmd,
+           spi_mem_tools_addr_to_byte_arr(offset, cmd),
+           data,
+           SPI_MEM_MAX_BLOCK_SIZE))
+        return false;
     return true;
 }

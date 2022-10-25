@@ -3,7 +3,8 @@
 typedef enum {
     SPIMemEventStopThread = (1 << 0),
     SPIMemEventChipDetect = (1 << 1),
-    SPIMemEventAll = (SPIMemEventStopThread | SPIMemEventChipDetect)
+    SPIMemEventRead = (1 << 2),
+    SPIMemEventAll = (SPIMemEventStopThread | SPIMemEventChipDetect | SPIMemEventRead)
 } SPIMemEventEventType;
 
 static int32_t spi_mem_worker_thread(void* thread_context);
@@ -66,4 +67,16 @@ void spi_mem_worker_chip_detect_start(
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventChipDetect);
+}
+
+void spi_mem_worker_read_start(
+    SPIMemChip* chip_info,
+    SPIMemWorker* worker,
+    SPIMemWorkerReadCallback callback,
+    void* context) {
+    furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
+    worker->read_cb = callback;
+    worker->cb_ctx = context;
+    worker->chip_info = chip_info;
+    furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventRead);
 }

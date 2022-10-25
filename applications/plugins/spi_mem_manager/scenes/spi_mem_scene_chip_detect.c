@@ -1,12 +1,12 @@
 #include "../spi_mem_app.h"
 
-static void spi_mem_chip_detect_callback(void* context, SPIMemWorkerChipDetectResult result) {
+static void spi_mem_scene_chip_detect_callback(void* context, SPIMemWorkerResult result) {
     SPIMemApp* app = context;
     SPIMemCustomEventWorker event;
-    if(result == SPIMemWorkerChipDetectResultSuccess) {
-        event = SPIMemCustomEventWorkerChipDetectSuccess;
-    } else if(result == SPIMemWorkerChipDetectResultFail) {
-        event = SPIMemCustomEventWorkerChipDetectFail;
+    if(result == SPIMemWorkerChipIdentified) {
+        event = SPIMemCustomEventWorkerChipIdentified;
+    } else if(result == SPIMemWorkerChipUnknown) {
+        event = SPIMemCustomEventWorkerChipUnknown;
     } else {
         return;
     }
@@ -20,7 +20,7 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewPopup);
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_chip_detect_start(
-        app->chip_info, app->worker, spi_mem_chip_detect_callback, app);
+        app->chip_info, app->worker, spi_mem_scene_chip_detect_callback, app);
 }
 
 bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {
@@ -29,9 +29,9 @@ bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) 
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        if(event.event == SPIMemCustomEventWorkerChipDetectSuccess) {
+        if(event.event == SPIMemCustomEventWorkerChipIdentified) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetected);
-        } else if(event.event == SPIMemCustomEventWorkerChipDetectFail) {
+        } else if(event.event == SPIMemCustomEventWorkerChipUnknown) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetectFailed);
         }
     }

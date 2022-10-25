@@ -9,16 +9,24 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <notification/notification_messages.h>
+#include <flipper_format/flipper_format.h>
 #include <dialogs/dialogs.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/text_input.h>
 #include <storage/storage.h>
+#include <toolbox/path.h>
+#include <toolbox/random_name.h>
 #include "scenes/spi_mem_scene.h"
 #include "lib/spi/spi_mem_worker.h"
 #include "spi_mem_manager_icons.h"
 #include "views/spi_mem_view_read.h"
 
+#define TAG "SPIMem"
+#define SPI_MEM_FILE_TYPE "Flipper SPI memmory dump"
 #define SPI_MEM_FILE_EXTENSION ".spimem"
-#define SPI_MEM_FILE_FOLDER ANY_PATH("spimem")
+#define SPI_MEM_FILE_FOLDER EXT_PATH("spimem")
+#define SPI_MEM_FILE_NAME_SIZE 100
+#define SPI_MEM_TEXT_BUFFER_SIZE 128
 
 typedef struct {
     Gui* gui;
@@ -35,6 +43,8 @@ typedef struct {
     SPIMemWorker* worker;
     SPIMemChip* chip_info;
     SPIMemReadView* view_read;
+    TextInput* text_input;
+    char text_buffer[SPI_MEM_TEXT_BUFFER_SIZE + 1];
 } SPIMemApp;
 
 typedef enum {
@@ -42,10 +52,17 @@ typedef enum {
     SPIMemViewDialogEx,
     SPIMemViewPopup,
     SPIMemViewWidget,
+    SPIMemViewTextInput,
     SPIMemViewRead
 } SPIMemView;
 
-typedef enum { SPIMemCustomEventViewReadCancel } SPIMemCustomEvent;
+typedef enum {
+    SPIMemCustomEventViewReadCancel,
+    SPIMemCustomEventTextEditResult,
+    SPIMemCustomEventPopupBack
+} SPIMemCustomEvent;
 
 void spi_mem_file_create_folder(SPIMemApp* app);
 bool spi_mem_file_select(SPIMemApp* app);
+bool spi_mem_file_create(SPIMemApp* app, const char* file_name);
+bool spi_mem_file_delete(SPIMemApp* app);
