@@ -27,7 +27,7 @@ Detailed description of file format can be found [here](.github/conf-file_descri
 ## Is there a CLI?
 
 **YES!**
-When Flipper Authenticator is running `totp` CLI command will be available for you to list, add or remove tokens.
+When Flipper Authenticator is running `totp` CLI is available for you to list, add or remove tokens. Run `totp help` to get list of available commands and arguments.
 
 ## How to change\recover PIN?
 
