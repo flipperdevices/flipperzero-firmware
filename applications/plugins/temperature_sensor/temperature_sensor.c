@@ -80,8 +80,9 @@ static bool temperature_sensor_cmd(uint8_t cmd, uint8_t* buffer, uint8_t size) {
             ret = furi_hal_i2c_rx(I2C_BUS, HTU21D_ADDRESS, buffer, size, timeout);
             furi_hal_i2c_release(I2C_BUS);
         }
-    } else
+    } else {
         furi_hal_i2c_release(I2C_BUS);
+    }
 
     return ret;
 }
@@ -198,6 +199,7 @@ static void temperature_sensor_timer_callback(FuriMessageQueue* event_queue) {
 int32_t temperature_sensor_app(void* p) {
     UNUSED(p);
 
+    furi_hal_power_suppress_charge_enter();
     // Declare our variables and assign variables a default value
     TSEvent tsEvent;
     bool sensorFound = false;
