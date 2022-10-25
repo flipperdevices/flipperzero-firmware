@@ -306,8 +306,9 @@ if fwenv["IS_BASE_FIRMWARE"]:
             "-D__inline__=inline",
         ],
     )
-    # Depends(sdk_source, (fwenv["SDK_HEADERS"], fwenv["FW_ASSETS_HEADERS"]))
     Depends(sdk_source, fwenv.ProcessSdkDepends("sdk_origin.d"))
+    # Extra deps for root headers and generated files
+    Depends(sdk_source, (fwenv["SDK_HEADERS"], fwenv["FW_ASSETS_HEADERS"]))
 
     fwenv["SDK_DIR"] = fwenv.Dir("sdk")
     sdk_tree = fwenv.SDKTree(fwenv["SDK_DIR"], "sdk_origin")
