@@ -124,25 +124,24 @@ uint16_t bcd_decode_short(uint32_t data) {
     return (data & 0xF) * 10 + ((data >> 4) & 0xF);
 }
 
-static float ws_oregon2_decode_temp(uint32_t var_data) {
+static float ws_oregon2_decode_temp(uint32_t data) {
     int32_t temp_val;
-    temp_val = bcd_decode_short(var_data >> 4);
+    temp_val = bcd_decode_short(data >> 4);
     temp_val *= 10;
-    temp_val += (var_data >> 12) & 0xF;
-    if(var_data & 0xF) temp_val = -temp_val;
+    temp_val += (data >> 12) & 0xF;
+    if(data & 0xF) temp_val = -temp_val;
     return (float)temp_val / 10.0;
 }
 
-static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_block, uint16_t sensor_id,
-                                       uint32_t var_data) {
+static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_b, uint16_t sensor_id, uint32_t data) {
     switch(sensor_id) {
     case 0xEC40:
-        ws_block->temp = ws_oregon2_decode_temp(var_data);
-        ws_block->humidity = WS_NO_HUMIDITY;
+        ws_b->temp = ws_oregon2_decode_temp(data);
+        ws_b->humidity = WS_NO_HUMIDITY;
         break;
     case 0x1D20:
-        ws_block->humidity = bcd_decode_short(var_data);
-        ws_block->temp = ws_oregon2_decode_temp(var_data >> 8);
+        ws_b->humidity = bcd_decode_short(data);
+        ws_b->temp = ws_oregon2_decode_temp(data >> 8);
         break;
     }
 }
