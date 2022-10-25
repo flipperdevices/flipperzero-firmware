@@ -35,6 +35,7 @@
 #include "magellan.h"
 #include "intertechno_v3.h"
 #include "clemsa.h"
+#include "kaku.h"
 
 #ifdef __cplusplus
 extern "C" {
