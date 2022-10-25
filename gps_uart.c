@@ -167,6 +167,9 @@ GpsUart* gps_uart_enable()
   gps_uart->status.altitude_units = ' ';
   gps_uart->status.fix_quality = 0;
   gps_uart->status.satellites_tracked = 0;
+  gps_uart->status.time_hours = 0;
+  gps_uart->status.time_minutes = 0;
+  gps_uart->status.time_seconds = 0;
 
   gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
 
