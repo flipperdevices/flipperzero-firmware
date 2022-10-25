@@ -4,6 +4,7 @@
 #include "../../../list/list.h"
 #include "../../../../types/token_info.h"
 #include "../../../config/constants.h"
+#include "../../cli_common_helpers.h"
 
 static char* get_algo_as_cstr(TokenHashAlgo algo) {
     switch(algo) {
@@ -29,24 +30,28 @@ static uint8_t get_digits_as_int(TokenDigitsCount digits) {
     return 6;
 }
 
-void totp_cli_handle_list_command(PluginState* plugin_state) {
+void totp_cli_command_list_print_help() {
+    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_LIST " - list all tokens\r\n\r\n");
+}
+
+void totp_cli_command_list_handle(PluginState* plugin_state) {
     if (plugin_state->tokens_list == NULL) {
-        printf("There are no tokens");
+        TOTP_CLI_PRINTF("There are no tokens");
         return;
     }
 
     ListNode* node = plugin_state->tokens_list;
 
-    printf("+-----+-----------------------------+--------+--------+\r\n");
-    printf("| %-*s | %-*s | %-*s | %-s |\r\n", 3, "#", 27, "Name", 6, "Algo", "Digits");
-    printf("+-----+-----------------------------+--------+--------+\r\n");
+    TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
+    TOTP_CLI_PRINTF("| %-*s | %-*s | %-*s | %-s |\r\n", 3, "#", 27, "Name", 6, "Algo", "Digits");
+    TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
     uint16_t index = 1;
     while(node != NULL) {
         TokenInfo* token_info = (TokenInfo* )node->data;
         token_info_get_digits_count(token_info);
-        printf("| %-3" PRIu16 " | %-27.27s | %-6s | %-6" PRIu8 " |\r\n", index, token_info->name, get_algo_as_cstr(token_info->algo), get_digits_as_int(token_info->digits));
+        TOTP_CLI_PRINTF("| %-3" PRIu16 " | %-27.27s | %-6s | %-6" PRIu8 " |\r\n", index, token_info->name, get_algo_as_cstr(token_info->algo), get_digits_as_int(token_info->digits));
         node = node->next;
         index++;
     }
-    printf("+-----+-----------------------------+--------+--------+\r\n");
+    TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
 }

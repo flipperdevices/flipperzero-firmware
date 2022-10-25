@@ -7,6 +7,13 @@
 #include "../../cli_common_helpers.h"
 #include "../../../../scenes/scene_director.h"
 
+#define TOTP_CLI_COMMAND_ADD_ARG_NAME "NAME"
+#define TOTP_CLI_COMMAND_ADD_ARG_SECRET "SECRET"
+#define TOTP_CLI_COMMAND_ADD_ARG_ALGO "ALGO"
+#define TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX "-a"
+#define TOTP_CLI_COMMAND_ADD_ARG_DIGITS "DIGITS"
+#define TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX "-d"
+
 static bool token_info_set_digits_from_str(TokenInfo* token_info, FuriString* str) {
     switch(furi_string_get_char(str, 0)) {
     case '6':
@@ -39,7 +46,15 @@ static bool token_info_set_algo_from_str(TokenInfo* token_info, FuriString* str)
     return false;
 }
 
-void totp_cli_handle_add_command(PluginState* plugin_state, FuriString* args) {
+void totp_cli_command_add_print_help() {
+    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_ADD " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_NAME) " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_SECRET) " " TOTP_CLI_OPTIONAL_PARAM(TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_ALGO)) " " TOTP_CLI_OPTIONAL_PARAM(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_DIGITS)) " - add new token\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_NAME) "   - token name\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_SECRET) " - Base32 token secret\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_ALGO) "   - " TOTP_CLI_OPTIONAL_PARAM_MARK " token hashing algorithm, could be one of: sha1, sha256, sha512; default: sha1\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_DIGITS) " - " TOTP_CLI_OPTIONAL_PARAM_MARK " number of digits to generate, one of: 6, 8; default: 6\r\n\r\n");
+}
+
+void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args) {
     FuriString* temp_str = furi_string_alloc();
     const char* temp_cstr;
 
@@ -67,7 +82,7 @@ void totp_cli_handle_add_command(PluginState* plugin_state, FuriString* args) {
 
     temp_cstr = furi_string_get_cstr(temp_str);
     if (!token_info_set_secret(token_info, temp_cstr, strlen(temp_cstr), plugin_state->iv)) {
-        printf("Token secret seems to be invalid and can not be parsed\r\n");
+        TOTP_CLI_PRINTF("Token secret seems to be invalid and can not be parsed\r\n");
         furi_string_free(temp_str);
         token_info_free(token_info);
         return;
@@ -76,19 +91,19 @@ void totp_cli_handle_add_command(PluginState* plugin_state, FuriString* args) {
     // Read optional arguments
     while (args_read_string_and_trim(args, temp_str)) {
         bool parsed = false;
-        if (furi_string_cmpi_str(temp_str, "-a") == 0) {
+        if (furi_string_cmpi_str(temp_str, TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX) == 0) {
             if (!args_read_string_and_trim(args, temp_str)) {
-                printf("Missed value for argument \"-a\"\r\n");
+                TOTP_CLI_PRINTF("Missed value for argument \"" TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX "\"\r\n");
             } else if (!token_info_set_algo_from_str(token_info, temp_str)) {
-                printf("\"%s\" is incorrect value for argument \"-a\"\r\n", furi_string_get_cstr(temp_str));
+                TOTP_CLI_PRINTF("\"%s\" is incorrect value for argument \"" TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX "\"\r\n", furi_string_get_cstr(temp_str));
             } else {
                 parsed = true;
             }
-        } else if (furi_string_cmpi_str(temp_str, "-d") == 0) {
+        } else if (furi_string_cmpi_str(temp_str, TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX) == 0) {
             if (!args_read_string_and_trim(args, temp_str)) {
-                printf("Missed value for argument \"-d\"\r\n");
+                TOTP_CLI_PRINTF("Missed value for argument \"" TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX "\"\r\n");
             } else if (!token_info_set_digits_from_str(token_info, temp_str)) {
-                printf("\"%s\" is incorrect value for argument \"-d\"\r\n", furi_string_get_cstr(temp_str));
+                TOTP_CLI_PRINTF("\"%s\" is incorrect value for argument \"" TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX "\"\r\n", furi_string_get_cstr(temp_str));
             } else {
                 parsed = true;
             }
@@ -121,5 +136,5 @@ void totp_cli_handle_add_command(PluginState* plugin_state, FuriString* args) {
 
     furi_string_free(temp_str);
 
-    printf("Token \"%s\" has been successfully added\r\n", token_info->name);
+    TOTP_CLI_PRINTF("Token \"%s\" has been successfully added\r\n", token_info->name);
 }

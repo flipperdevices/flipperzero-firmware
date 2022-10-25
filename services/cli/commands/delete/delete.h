@@ -3,4 +3,7 @@
 #include <cli/cli.h>
 #include "../../../../types/plugin_state.h"
 
-void totp_cli_handle_delete_command(PluginState* plugin_state, FuriString* args, Cli* cli);
+#define TOTP_CLI_COMMAND_DELETE "delete"
+
+void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args, Cli* cli);
+void totp_cli_command_delete_print_help();

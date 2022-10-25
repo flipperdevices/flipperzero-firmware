@@ -8,7 +8,16 @@
 #include "../../cli_common_helpers.h"
 #include "../../../../scenes/scene_director.h"
 
-void totp_cli_handle_delete_command(PluginState* plugin_state, FuriString* args, Cli* cli) {
+#define TOTP_CLI_COMMAND_DELETE_ARG_INDEX "INDEX"
+#define TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX "-f"
+
+void totp_cli_command_delete_print_help() {
+    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_DELETE " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " " TOTP_CLI_OPTIONAL_PARAM(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) " - delete token\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " - token index in the list\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX " - " TOTP_CLI_OPTIONAL_PARAM_MARK " force command to do not ask user for interactive confirmation\r\n\r\n");
+}
+
+void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
     int token_number;
     if (!args_read_int_and_trim(args, &token_number) || token_number <= 0 || token_number > plugin_state->tokens_count) {
         totp_cli_print_invalid_arguments();
@@ -18,10 +27,10 @@ void totp_cli_handle_delete_command(PluginState* plugin_state, FuriString* args,
     FuriString* temp_str = furi_string_alloc();
     bool confirm_needed = true;
     if (args_read_string_and_trim(args, temp_str)) {
-        if (furi_string_cmpi_str(temp_str, "-f") == 0) {
+        if (furi_string_cmpi_str(temp_str, TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) == 0) {
             confirm_needed = false;
         } else {
-            printf("Unknown argument \"%s\"\r\n", furi_string_get_cstr(temp_str));
+            TOTP_CLI_PRINTF("Unknown argument \"%s\"\r\n", furi_string_get_cstr(temp_str));
             totp_cli_print_invalid_arguments();
             furi_string_free(temp_str);
             return;
@@ -35,21 +44,21 @@ void totp_cli_handle_delete_command(PluginState* plugin_state, FuriString* args,
 
     bool confirmed = !confirm_needed;
     if (confirm_needed) {
-        printf("WARNING!\r\n");
-        printf("Token \"%s\" will be permanently deleted without ability to recover it.\r\n", token_info->name);
-        printf("Confirm? [y/n]\r\n");
+        TOTP_CLI_PRINTF("WARNING!\r\n");
+        TOTP_CLI_PRINTF("TOKEN \"%s\" WILL BE PERMANENTLY DELETED WITHOUT ABILITY TO RECOVER IT.\r\n", token_info->name);
+        TOTP_CLI_PRINTF("Confirm? [y/n]\r\n");
         fflush(stdout);
         char user_pick;
         do {
             user_pick = tolower(cli_getc(cli));
-        } while (user_pick != 'y' && user_pick != 'n' && user_pick != 0x0d);
+        } while (user_pick != 'y' && user_pick != 'n' && user_pick != CliSymbolAsciiCR);
 
-        confirmed = user_pick == 'y' || user_pick == 0x0d;
+        confirmed = user_pick == 'y' || user_pick == CliSymbolAsciiCR;
     }
 
     if (confirmed) {
         bool activate_generate_token_scene = false;
-        if (plugin_state->current_scene == TotpSceneGenerateToken) {
+        if (plugin_state->current_scene != TotpSceneAuthentication) {
             totp_scene_director_activate_scene(plugin_state, TotpSceneNone, NULL);
             activate_generate_token_scene = true;
         }
@@ -63,9 +72,9 @@ void totp_cli_handle_delete_command(PluginState* plugin_state, FuriString* args,
             totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken, NULL);
         }
 
-        printf("Token \"%s\" has been successfully deleted\r\n", token_info->name);
+        TOTP_CLI_PRINTF("Token \"%s\" has been successfully deleted\r\n", token_info->name);
         token_info_free(token_info);
     } else {
-        printf("User not confirmed\r\n");
+        TOTP_CLI_PRINTF("User not confirmed\r\n");
     }
 }
