@@ -7,7 +7,7 @@
 
 #define TAG "MoveToInt"
 
-#define MOVE_SRC "/ext"
+#define MOVE_SRC "/ext/dolphin_restorer"
 #define MOVE_DST "/int"
 
 static const char* app_dirs[] = {
@@ -17,10 +17,6 @@ static const char* app_dirs[] = {
     ".notification.settings",
     ".bt.keys",
     ".power.settings",
-    "dolphin/manifest.txt",
-    "dolphin/name.txt",
-    "subghz/assets/extend_range.txt",
-    "subghz/assets/setting_user.txt",
 };
 
 bool drestorer_perform(void) {
@@ -31,19 +27,11 @@ bool drestorer_perform(void) {
     path_dst = furi_string_alloc();
 
     for(uint32_t i = 0; i < COUNT_OF(app_dirs); i++) {
-        if(i>5) {
-            furi_string_printf(path_src, "%s/dolphin_restorer/%s", MOVE_DST, app_dirs[i]);
-            furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
-            storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
-            storage_common_copy(
-                storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
-        } else {
-            furi_string_printf(path_src, "%s/dolphin_restorer/%s", MOVE_SRC, app_dirs[i]);
-            furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
-            storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
-            storage_common_copy(
-                storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
-        }
+		furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirs[i]);
+		furi_string_printf(path_dst, "%s/%s", MOVE_DST, app_dirs[i]);
+		storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
+		storage_common_copy(
+			storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
     }
 
     furi_string_free(path_src);

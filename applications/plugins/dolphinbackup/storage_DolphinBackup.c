@@ -23,10 +23,6 @@ static const char* app_dirsDolphinBackup[] = {
     ".notification.settings",
     ".bt.keys",
     ".power.settings",
-    "dolphin/manifest.txt",
-    "dolphin/name.txt",
-    "subghz/assets/extend_range.txt",
-    "subghz/assets/setting_user.txt",
 };
 
 bool storage_DolphinBackup_perform(void) {
@@ -42,14 +38,7 @@ bool storage_DolphinBackup_perform(void) {
     storage_common_mkdir(storage, furi_string_get_cstr(new_path));
     furi_string_free(new_path);
     for(uint32_t i = 0; i < COUNT_OF(app_dirsDolphinBackup); i++) {
-        if(i > 11) {
-            furi_string_printf(path_src, "%s/%s", MOVE_DST, app_dirsDolphinBackup[i]);
-            furi_string_printf(
-                path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirsDolphinBackup[i]);
-            storage_simply_remove_recursive(storage, furi_string_get_cstr(path_dst));
-            storage_common_merge(
-                storage, furi_string_get_cstr(path_src), furi_string_get_cstr(path_dst));
-        } else if(i > 5) {
+        if(i > 5) {
             furi_string_printf(path_src, "%s/%s", MOVE_SRC, app_dirsDolphinBackup[i]);
             furi_string_printf(
                 path_dst, "%s/dolphin_restorer/%s", MOVE_DST, app_dirsDolphinBackup[i]);
