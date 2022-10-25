@@ -50,6 +50,9 @@ static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line)
         gps_uart->status.longitude = minmea_tocoord(&frame.longitude);
         gps_uart->status.speed = minmea_tofloat(&frame.speed);
         gps_uart->status.course = minmea_tofloat(&frame.course);
+        gps_uart->status.time_hours = frame.time.hours;
+        gps_uart->status.time_minutes = frame.time.minutes;
+        gps_uart->status.time_seconds = frame.time.seconds;
       }
     } break;
 
@@ -64,6 +67,9 @@ static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line)
         gps_uart->status.altitude_units = frame.altitude_units;
         gps_uart->status.fix_quality = frame.fix_quality;
         gps_uart->status.satellites_tracked = frame.satellites_tracked;
+        gps_uart->status.time_hours = frame.time.hours;
+        gps_uart->status.time_minutes = frame.time.minutes;
+        gps_uart->status.time_seconds = frame.time.seconds;
       }
     } break;
 

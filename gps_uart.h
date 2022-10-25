@@ -16,6 +16,9 @@ typedef struct
   char altitude_units;
   int fix_quality;
   int satellites_tracked;
+  int time_hours;
+  int time_minutes;
+  int time_seconds;
 } GpsStatus;
 
 typedef struct
