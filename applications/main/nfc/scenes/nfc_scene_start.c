@@ -54,6 +54,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             bool sd_exist = storage_sd_status(nfc->dev->storage) == FSE_OK;
             if(sd_exist) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDetectReader);
+                DOLPHIN_DEED(DolphinDeedNfcDetectReader);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
             }
