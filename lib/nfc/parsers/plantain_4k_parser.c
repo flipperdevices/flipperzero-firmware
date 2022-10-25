@@ -48,6 +48,22 @@ static const MfClassicAuthContext plantain_keys_4k[] = {
     {.sector = 39, .key_a = 0x7259fa0197c6, .key_b = 0x5583698df085},
 };
 
+static const MfClassicAuthContext alt_plantain_keys_4k[] = {
+    //not constantly
+    {.sector = 2, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xb0b2b3b4b5b5},
+    {.sector = 3, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xb0b2b3b4b5b5},
+    {.sector = 7, .key_a = 0x2066f4727129, .key_b = 0xf7a65799c6ee},
+    {.sector = 13, .key_a = 0xac70ca327a04, .key_b = 0xf29411c2663c},
+    {.sector = 14, .key_a = 0x51044efb5aab, .key_b = 0xebdc720dd1ce},
+    {.sector = 15, .key_a = 0xa0a1a2a3a4a5, .key_b = 0x103c08acceb2},
+
+    {.sector = 25, .key_a = 0x46d78e850a7e, .key_b = 0xa740f8130991},
+    {.sector = 26, .key_a = 0x42e9b54e51ab, .key_b = 0x0231b86df52e},
+    {.sector = 27, .key_a = 0x0f01ceff2742, .key_b = 0x6fec74559ca7},
+    {.sector = 28, .key_a = 0xb81f2b0c2f66, .key_b = 0xa7e2d95f0003},
+    {.sector = 29, .key_a = 0x9ea3387a63c1, .key_b = 0x437e59f57561},
+};
+
 bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
     UNUSED(nfc_worker);
@@ -68,16 +84,68 @@ bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_
 
 bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
-
+    uint8_t block;
     MfClassicData* mf_classic_data = &nfc_worker->dev_data->mf_classic_data;
+    bool key_a_found;
+    bool key_b_found;
     for(size_t i = 0; i < COUNT_OF(plantain_keys_4k); i++) {
-        mf_classic_set_key_found(
-            mf_classic_data, plantain_keys_4k[i].sector, MfClassicKeyA, plantain_keys_4k[i].key_a);
-        mf_classic_set_key_found(
-            mf_classic_data, plantain_keys_4k[i].sector, MfClassicKeyB, plantain_keys_4k[i].key_b);
-    }
+        key_a_found = false;
+        key_b_found = false;
+        FURI_LOG_D("Plant4K", "Authenticating sector %d", plantain_keys_4k[i].sector);
+        for(size_t j = 0; j < COUNT_OF(alt_plantain_keys_4k); j++) {
+            if(plantain_keys_4k[i].sector != alt_plantain_keys_4k[j].sector) {
+                continue;
+            }
+            block =
+                mf_classic_get_sector_trailer_block_num_by_sector(alt_plantain_keys_4k[j].sector);
 
-    return mf_classic_update_card(tx_rx, mf_classic_data) == 40;
+            if(!key_a_found) {
+                if(mf_classic_authenticate(
+                       tx_rx, block, alt_plantain_keys_4k[j].key_a, MfClassicKeyA)) {
+                    mf_classic_set_key_found(
+                        mf_classic_data,
+                        alt_plantain_keys_4k[j].sector,
+                        MfClassicKeyA,
+                        alt_plantain_keys_4k[j].key_a);
+                    key_a_found = true;
+                    FURI_LOG_D("Plant4K", "Sector %d alt key a found", plantain_keys_4k[i].sector);
+                }
+                furi_hal_nfc_sleep();
+            }
+            if(!key_b_found) {
+                if(mf_classic_authenticate(
+                       tx_rx, block, alt_plantain_keys_4k[j].key_b, MfClassicKeyB)) {
+                    mf_classic_set_key_found(
+                        mf_classic_data,
+                        alt_plantain_keys_4k[j].sector,
+                        MfClassicKeyB,
+                        alt_plantain_keys_4k[j].key_b);
+                    key_b_found = true;
+                    FURI_LOG_D("Plant4K", "Sector %d alt key b found", plantain_keys_4k[i].sector);
+                }
+                furi_hal_nfc_sleep();
+            }
+        }
+        if(!key_a_found) {
+            mf_classic_set_key_found(
+                mf_classic_data,
+                plantain_keys_4k[i].sector,
+                MfClassicKeyA,
+                plantain_keys_4k[i].key_a);
+            FURI_LOG_D("Plant4K", "Sector %d def key a found", plantain_keys_4k[i].sector);
+        }
+        if(!key_b_found) {
+            mf_classic_set_key_found(
+                mf_classic_data,
+                plantain_keys_4k[i].sector,
+                MfClassicKeyB,
+                plantain_keys_4k[i].key_b);
+            FURI_LOG_D("Plant4K", "Sector %d def key b found", plantain_keys_4k[i].sector);
+        }
+    }
+    uint8_t result = mf_classic_update_card(tx_rx, mf_classic_data);
+    FURI_LOG_D("Plant4K", "Update card result %d", result);
+    return result == 40;
 }
 
 bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
