@@ -27,7 +27,7 @@ typedef struct {
 
 //TODO: description
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx);
+void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data); //TODO: remove
 bool mrtd_select_app(MrtdApplication* app, AIDValue aid);
-bool mrtd_select_file(MrtdApplication* app, EFFile file);
-void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data);
-bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth);
+bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data);
+bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file);

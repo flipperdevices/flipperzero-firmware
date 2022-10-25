@@ -280,13 +280,17 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
 
-        //TODO: if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
-
-        mrtd_test(mrtd_app, mrtd_data); // Some EFs are only available before Select App
         //TODO: try select eMRTDApp first, but when PACE, read CardAccess first!
+        if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break; // Passport app not selected
 
-        //TODO: read general informatie
-        //TODO: after auth scene, do auth (BAC / PACE)
+        // At least we're dealing with a passport. So return true.
+        read_success = true;
+
+        if(!mrtd_authenticate(mrtd_app, mrtd_data)) break; // Authentication failed
+        //TODO: show auth failure screen
+
+        mrtd_read_parse_file(mrtd_app, mrtd_data, EF.COM);
+        mrtd_read_parse_file(mrtd_app, mrtd_data, EF.DG1);
 
         read_success = true;
     } while(false);
