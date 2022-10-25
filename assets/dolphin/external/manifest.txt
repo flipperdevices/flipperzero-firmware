@@ -1,13 +1,6 @@
 Filetype: Flipper Animation Manifest
 Version: 1
 
-Name: L1_Halloween_128x64
-Min butthurt: 0
-Max butthurt: 13
-Min level: 1
-Max level: 30
-Weight: 3
-
 Name: L1_Waves_128x50
 Min butthurt: 0
 Max butthurt: 5
@@ -50,30 +43,9 @@ Min level: 3
 Max level: 30
 Weight: 3
 
-Name: L3_Fireplace_128x64
-Min butthurt: 0
-Max butthurt: 13
-Min level: 2
-Max level: 30
-Weight: 3
-
-Name: L2_FlipperCity_128x64
-Min butthurt: 0
-Max butthurt: 13
-Min level: 2
-Max level: 3
-Weight: 3
-
 Name: L2_Soldering_128x64
 Min butthurt: 0
 Max butthurt: 10
 Min level: 2
 Max level: 30
-Weight: 3
-
-Name: L1_Purple_rain_128x64
-Min butthurt: 0
-Max butthurt: 8
-Min level: 1
-Max level: 3
 Weight: 3
