@@ -292,23 +292,10 @@ Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_all", fw_artifacts)
 if fwenv["IS_BASE_FIRMWARE"]:
     sdk_source = fwenv.SDKPrebuilder(
         "sdk_origin",
-        [],
-        # Filtering out things cxxheaderparser cannot handle
-        SDK_PP_FLAGS=[
-            '-D"_Static_assert(x,y)="',
-            '-D"__asm__(x)="',
-            '-D"__attribute__(x)="',
-            "-Drestrict=",
-            "-D_Noreturn=",
-            "-D__restrict=",
-            "-D__extension__=",
-            "-D__inline=inline",
-            "-D__inline__=inline",
-        ],
+        (fwenv["SDK_HEADERS"], fwenv["FW_ASSETS_HEADERS"]),
     )
-    Depends(sdk_source, fwenv.ProcessSdkDepends("sdk_origin.d"))
     # Extra deps for root headers and generated files
-    Depends(sdk_source, (fwenv["SDK_HEADERS"], fwenv["FW_ASSETS_HEADERS"]))
+    Depends(sdk_source, fwenv.ProcessSdkDepends("sdk_origin.d"))
 
     fwenv["SDK_DIR"] = fwenv.Dir("sdk")
     sdk_tree = fwenv.SDKTree(fwenv["SDK_DIR"], "sdk_origin")
