@@ -14,7 +14,7 @@
 void totp_cli_command_delete_print_help() {
     TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_DELETE " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " " TOTP_CLI_OPTIONAL_PARAM(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) " - delete token\r\n");
     TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " - token index in the list\r\n");
-    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX " - " TOTP_CLI_OPTIONAL_PARAM_MARK " force command to do not ask user for interactive confirmation\r\n\r\n");
+    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX "      - " TOTP_CLI_OPTIONAL_PARAM_MARK " force command to do not ask user for interactive confirmation\r\n\r\n");
 }
 
 void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
@@ -38,6 +38,10 @@ void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args,
     }
     furi_string_free(temp_str);
 
+    if (!totp_cli_ensure_authenticated(plugin_state, cli)) {
+        return;
+    }
+
     ListNode* list_node = list_element_at(plugin_state->tokens_list, token_number - 1);
 
     TokenInfo* token_info = list_node->data;
@@ -51,12 +55,20 @@ void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args,
         char user_pick;
         do {
             user_pick = tolower(cli_getc(cli));
-        } while (user_pick != 'y' && user_pick != 'n' && user_pick != CliSymbolAsciiCR);
+        } while (user_pick != 'y' && 
+            user_pick != 'n' && 
+            user_pick != CliSymbolAsciiCR && 
+            user_pick != CliSymbolAsciiETX && 
+            user_pick != CliSymbolAsciiEsc);
 
         confirmed = user_pick == 'y' || user_pick == CliSymbolAsciiCR;
     }
 
     if (confirmed) {
+        if (!totp_cli_ensure_authenticated(plugin_state, cli)) {
+            return;
+        }
+
         bool activate_generate_token_scene = false;
         if (plugin_state->current_scene != TotpSceneAuthentication) {
             totp_scene_director_activate_scene(plugin_state, TotpSceneNone, NULL);

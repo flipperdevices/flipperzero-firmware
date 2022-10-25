@@ -11,7 +11,11 @@ void totp_cli_command_timezone_print_help() {
     TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE) " - " TOTP_CLI_OPTIONAL_PARAM_MARK " timezone offset in hours to be set, if not provided then current timezone offset will be printed\r\n\r\n");
 }
 
-void totp_cli_command_timezone_handle(PluginState* plugin_state, FuriString* args) {
+void totp_cli_command_timezone_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
+    if (!totp_cli_ensure_authenticated(plugin_state, cli)) {
+        return;
+    }
+
     FuriString* temp_str = furi_string_alloc();
     if (args_read_string_and_trim(args, temp_str)) {
         float tz = strtof(furi_string_get_cstr(temp_str), NULL);

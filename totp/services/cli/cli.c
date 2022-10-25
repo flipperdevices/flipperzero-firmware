@@ -25,24 +25,8 @@ static void totp_cli_print_help() {
     totp_cli_command_timezone_print_help();
 }
 
-static void totp_cli_print_unauthenticated() {
-    printf("Pleases enter PIN on your flipper device\r\n");
-}
-
 static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
     PluginState* plugin_state = (PluginState* )context;
-
-    if (plugin_state->current_scene == TotpSceneAuthentication) {
-        totp_cli_print_unauthenticated();
-        
-        while (plugin_state->current_scene == TotpSceneAuthentication && !cli_cmd_interrupt_received(cli)) {
-            furi_delay_tick(0);
-        }
-
-        if (plugin_state->current_scene == TotpSceneAuthentication) {
-            return;
-        }
-    }
 
     FuriString* cmd = furi_string_alloc();
 
@@ -51,13 +35,13 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
     if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP) == 0 || furi_string_empty(cmd)) {
         totp_cli_print_help();
     } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD) == 0) {
-        totp_cli_command_add_handle(plugin_state, args);
+        totp_cli_command_add_handle(plugin_state, args, cli);
     } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0) {
-        totp_cli_command_list_handle(plugin_state);
+        totp_cli_command_list_handle(plugin_state, cli);
     } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0) {
         totp_cli_command_delete_handle(plugin_state, args, cli);
     } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE) == 0) {
-        totp_cli_command_timezone_handle(plugin_state, args);
+        totp_cli_command_timezone_handle(plugin_state, args, cli);
     } else {
         totp_cli_print_unknown_command(cmd);
     }
