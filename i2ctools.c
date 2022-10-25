@@ -1,9 +1,4 @@
-#include <furi.h>
-#include <furi_hal.h>
-#include <gui/gui.h>
-#include <input/input.h>
-
-#define MAX_I2C_ADDR 0x7F
+#include "i2ctools_i.h"
 
 #define APP_NAME "I2C Tools"
 
@@ -23,72 +18,8 @@
 #define PLAY_MENU_X 75
 #define PLAY_MENU_Y 48
 
-// Sniffer Pins
-#define pinSCL &gpio_ext_pc0
-#define pinSDA &gpio_ext_pc1
-
 // I2C BUS
 #define I2C_BUS &furi_hal_i2c_handle_external
-
-typedef enum {
-    MAIN_VIEW,
-    SCAN_VIEW,
-    SNIFF_VIEW,
-    SEND_VIEW,
-    PLAY_VIEW,
-
-    /* Know menu Size*/
-    MENU_SIZE
-} i2cToolsMainMenu;
-
-// Bus Sniffer
-typedef enum { I2C_BUS_IDLE, I2C_BUS_STARTED } i2cBusStates;
-
-#define MAX_FRAMES 32
-
-typedef struct {
-    uint8_t i2ctools[MAX_FRAMES];
-    bool ack[MAX_FRAMES];
-    uint8_t bit_index;
-    uint8_t data_index;
-} i2cFrame;
-
-typedef struct {
-    bool started;
-    bool first;
-    i2cBusStates state;
-    i2cFrame frames[MAX_FRAMES];
-    uint8_t frame_index;
-    uint8_t menu_index;
-} _sniffer;
-
-// Bus scanner
-typedef struct {
-    uint8_t addresses[MAX_I2C_ADDR + 1];
-    uint8_t found;
-    uint8_t menu_index;
-    bool scanned;
-} _scanner;
-
-// Sender
-typedef struct {
-    uint8_t address_idx;
-    uint8_t value;
-    uint8_t recv[2];
-    bool must_send;
-    bool sended;
-    bool error;
-} _sender;
-
-typedef struct {
-    ViewPort* view_port;
-    i2cToolsMainMenu current_menu;
-    uint8_t main_menu_index;
-
-    _scanner scanner;
-    _sniffer sniffer;
-    _sender sender;
-} i2cTools;
 
 void scan_i2c_bus(i2cTools* i2ctools) {
     i2ctools->scanner.found = 0;
@@ -184,86 +115,6 @@ void i2ctools_draw_main_menu(Canvas* canvas, i2cTools* i2ctools) {
     }
 }
 
-void clearSnifferBuffers(void* ctx) {
-    i2cTools* i2ctools = ctx;
-    for(uint8_t i = 0; i < MAX_FRAMES; i++) {
-        for(uint8_t j = 0; j < MAX_FRAMES; j++) {
-            i2ctools->sniffer.frames[i].ack[j] = false;
-            i2ctools->sniffer.frames[i].i2ctools[j] = 0;
-        }
-        i2ctools->sniffer.frames[i].bit_index = 0;
-        i2ctools->sniffer.frames[i].data_index = 0;
-    }
-    i2ctools->sniffer.frame_index = 0;
-    i2ctools->sniffer.state = I2C_BUS_IDLE;
-    i2ctools->sniffer.first = true;
-}
-
-// Called on Fallin/Rising SDA
-// Used to monitor i2c bus state
-static void SDAcallback(void* ctx) {
-    i2cTools* i2ctools = ctx;
-    // SCL is low maybe cclock strecching
-    if(furi_hal_gpio_read(pinSCL) == false) {
-        return;
-    }
-    // Check for stop condition: SDA rising while SCL is High
-    if(i2ctools->sniffer.state == I2C_BUS_STARTED) {
-        if(furi_hal_gpio_read(pinSDA) == true) {
-            i2ctools->sniffer.state = I2C_BUS_IDLE;
-            view_port_update(i2ctools->view_port);
-        }
-    }
-    // Check for start condition: SDA falling while SCL is high
-    else if(furi_hal_gpio_read(pinSDA) == false) {
-        i2ctools->sniffer.state = I2C_BUS_STARTED;
-        if(i2ctools->sniffer.first) {
-            i2ctools->sniffer.first = false;
-            return;
-        }
-        i2ctools->sniffer.frame_index++;
-        if(i2ctools->sniffer.frame_index >= MAX_FRAMES) {
-            clearSnifferBuffers(ctx);
-        }
-    }
-    return;
-}
-
-// Called on Rising SCL
-// Used to read bus datas
-static void SCLcallback(void* ctx) {
-    i2cTools* i2ctools = ctx;
-    if(i2ctools->sniffer.state == I2C_BUS_IDLE) {
-        return;
-    }
-    uint8_t frame = i2ctools->sniffer.frame_index;
-    uint8_t bit = i2ctools->sniffer.frames[frame].bit_index;
-    uint8_t data_idx = i2ctools->sniffer.frames[frame].data_index;
-    if(bit < 8) {
-        i2ctools->sniffer.frames[frame].i2ctools[data_idx] <<= 1;
-        i2ctools->sniffer.frames[frame].i2ctools[data_idx] |= (int)furi_hal_gpio_read(pinSDA);
-        i2ctools->sniffer.frames[frame].bit_index++;
-    } else {
-        i2ctools->sniffer.frames[frame].ack[data_idx] = !furi_hal_gpio_read(pinSDA);
-        i2ctools->sniffer.frames[frame].data_index++;
-        i2ctools->sniffer.frames[frame].bit_index = 0;
-    }
-}
-
-void start_interrupts(i2cTools* i2ctools) {
-    furi_hal_gpio_init(pinSCL, GpioModeInterruptRise, GpioPullNo, GpioSpeedHigh);
-    furi_hal_gpio_add_int_callback(pinSCL, SCLcallback, i2ctools);
-
-    // Add Rise and Fall Interrupt on SDA pin
-    furi_hal_gpio_init(pinSDA, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedHigh);
-    furi_hal_gpio_add_int_callback(pinSDA, SDAcallback, i2ctools);
-}
-
-void stop_interrupts() {
-    furi_hal_gpio_remove_int_callback(pinSCL);
-    furi_hal_gpio_remove_int_callback(pinSDA);
-}
-
 void i2ctools_draw_sniff_view(Canvas* canvas, i2cTools* i2ctools) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -278,7 +129,7 @@ void i2ctools_draw_sniff_view(Canvas* canvas, i2cTools* i2ctools) {
     canvas_draw_rbox(canvas, 70, 48, 45, 13, 3);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_icon(canvas, 75, 50, &I_Ok_btn_9x9);
-    if(!i2ctools->sniffer.started) {
+    if(!i2ctools->sniffer->started) {
         canvas_draw_str_aligned(canvas, 85, 51, AlignLeft, AlignTop, "Start");
     } else {
         canvas_draw_str_aligned(canvas, 85, 51, AlignLeft, AlignTop, "Stop");
@@ -290,35 +141,35 @@ void i2ctools_draw_sniff_view(Canvas* canvas, i2cTools* i2ctools) {
         addr_text,
         sizeof(addr_text),
         "0x%02x",
-        (int)(i2ctools->sniffer.frames[i2ctools->sniffer.menu_index].i2ctools[0] >> 1));
+        (int)(i2ctools->sniffer->frames[i2ctools->sniffer->menu_index].data[0] >> 1));
     canvas_draw_str_aligned(canvas, 50, 3, AlignLeft, AlignTop, "Addr: ");
     canvas_draw_str_aligned(canvas, 75, 3, AlignLeft, AlignTop, addr_text);
     // R/W
-    if((int)(i2ctools->sniffer.frames[i2ctools->sniffer.menu_index].i2ctools[0]) % 2 == 0) {
+    if((int)(i2ctools->sniffer->frames[i2ctools->sniffer->menu_index].data[0]) % 2 == 0) {
         canvas_draw_str_aligned(canvas, 105, 3, AlignLeft, AlignTop, "W");
     } else {
         canvas_draw_str_aligned(canvas, 105, 3, AlignLeft, AlignTop, "R");
     }
     // nbFrame text
     canvas_draw_str_aligned(canvas, 50, 13, AlignLeft, AlignTop, "Frames: ");
-    snprintf(addr_text, sizeof(addr_text), "%d", (int)i2ctools->sniffer.menu_index + 1);
+    snprintf(addr_text, sizeof(addr_text), "%d", (int)i2ctools->sniffer->menu_index + 1);
     canvas_draw_str_aligned(canvas, 90, 13, AlignLeft, AlignTop, addr_text);
     canvas_draw_str_aligned(canvas, 100, 13, AlignLeft, AlignTop, "/");
-    snprintf(addr_text, sizeof(addr_text), "%d", (int)i2ctools->sniffer.frame_index + 1);
+    snprintf(addr_text, sizeof(addr_text), "%d", (int)i2ctools->sniffer->frame_index + 1);
     canvas_draw_str_aligned(canvas, 110, 13, AlignLeft, AlignTop, addr_text);
     // Frames content
     uint8_t x_pos = 0;
     uint8_t y_pos = 23;
-    for(uint8_t i = 1; i < i2ctools->sniffer.frames[i2ctools->sniffer.menu_index].data_index;
+    for(uint8_t i = 1; i < i2ctools->sniffer->frames[i2ctools->sniffer->menu_index].data_index;
         i++) {
         snprintf(
             addr_text,
             sizeof(addr_text),
             "0x%02x",
-            (int)i2ctools->sniffer.frames[i2ctools->sniffer.menu_index].i2ctools[i]);
+            (int)i2ctools->sniffer->frames[i2ctools->sniffer->menu_index].data[i]);
         x_pos = 50 + (i - 1) * 35;
         canvas_draw_str_aligned(canvas, x_pos, y_pos, AlignLeft, AlignTop, addr_text);
-        if(i2ctools->sniffer.frames[i2ctools->sniffer.menu_index].ack[i]) {
+        if(i2ctools->sniffer->frames[i2ctools->sniffer->menu_index].ack[i]) {
             canvas_draw_str_aligned(canvas, x_pos + 24, y_pos, AlignLeft, AlignTop, "A");
         } else {
             canvas_draw_str_aligned(canvas, x_pos + 24, y_pos, AlignLeft, AlignTop, "N");
@@ -494,14 +345,21 @@ int32_t i2ctools_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     i2cTools* i2ctools = malloc(sizeof(i2cTools));
+    i2csniffer* sniffer = malloc(sizeof(i2csniffer));
     ValueMutex i2ctools_mutex;
     if(!init_mutex(&i2ctools_mutex, i2ctools, sizeof(i2cTools))) {
         FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
         free(i2ctools);
         return -1;
     }
-    printf(APP_NAME);
-    printf("\r\n");
+    ValueMutex sniffer_mutex;
+    if(!init_mutex(&sniffer_mutex, sniffer, sizeof(sniffer))) {
+        FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
+        free(sniffer);
+        return -1;
+    }
+
+    i2ctools->sniffer = sniffer;
 
     i2ctools->view_port = view_port_alloc();
     view_port_draw_callback_set(i2ctools->view_port, i2ctools_draw_callback, &i2ctools_mutex);
@@ -513,9 +371,9 @@ int32_t i2ctools_app(void* p) {
 
     InputEvent event;
 
-    clearSnifferBuffers(i2ctools);
-    i2ctools->sniffer.started = false;
-    i2ctools->sniffer.menu_index = 0;
+    clearSnifferBuffers(i2ctools->sniffer);
+    i2ctools->sniffer->started = false;
+    i2ctools->sniffer->menu_index = 0;
 
     i2ctools->scanner.menu_index = 0;
     i2ctools->scanner.scanned = false;
@@ -529,8 +387,8 @@ int32_t i2ctools_app(void* p) {
             } else {
                 if(i2ctools->current_menu == SNIFF_VIEW) {
                     stop_interrupts();
-                    i2ctools->sniffer.started = false;
-                    i2ctools->sniffer.state = I2C_BUS_IDLE;
+                    i2ctools->sniffer->started = false;
+                    i2ctools->sniffer->state = I2C_BUS_FREE;
                 }
                 i2ctools->current_menu = MAIN_VIEW;
             }
@@ -598,14 +456,14 @@ int32_t i2ctools_app(void* p) {
             } else if(i2ctools->current_menu == SEND_VIEW) {
                 i2ctools->sender.must_send = true;
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
-                if(i2ctools->sniffer.started) {
+                if(i2ctools->sniffer->started) {
                     stop_interrupts();
-                    i2ctools->sniffer.started = false;
-                    i2ctools->sniffer.state = I2C_BUS_IDLE;
+                    i2ctools->sniffer->started = false;
+                    i2ctools->sniffer->state = I2C_BUS_FREE;
                 } else {
-                    start_interrupts(i2ctools);
-                    i2ctools->sniffer.started = true;
-                    i2ctools->sniffer.state = I2C_BUS_IDLE;
+                    start_interrupts(i2ctools->sniffer);
+                    i2ctools->sniffer->started = true;
+                    i2ctools->sniffer->state = I2C_BUS_FREE;
                 }
             }
         } else if(event.key == InputKeyRight && event.type == InputTypeRelease) {
@@ -615,8 +473,8 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->sender.sended = false;
                 }
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
-                if(i2ctools->sniffer.menu_index < i2ctools->sniffer.frame_index) {
-                    i2ctools->sniffer.menu_index++;
+                if(i2ctools->sniffer->menu_index < i2ctools->sniffer->frame_index) {
+                    i2ctools->sniffer->menu_index++;
                 }
             }
         } else if(event.key == InputKeyLeft && event.type == InputTypeRelease) {
@@ -626,8 +484,8 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->sender.sended = false;
                 }
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
-                if(i2ctools->sniffer.menu_index > 0) {
-                    i2ctools->sniffer.menu_index--;
+                if(i2ctools->sniffer->menu_index > 0) {
+                    i2ctools->sniffer->menu_index--;
                 }
             }
         }
@@ -637,6 +495,7 @@ int32_t i2ctools_app(void* p) {
     view_port_free(i2ctools->view_port);
     furi_message_queue_free(event_queue);
     free(i2ctools);
+    free(sniffer);
     furi_record_close(RECORD_GUI);
     return 0;
 }
