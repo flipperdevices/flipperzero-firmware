@@ -283,11 +283,18 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         //TODO: try select eMRTDApp first, but when PACE, read CardAccess first!
         if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break; // Passport app not selected
 
-        // At least we're dealing with a passport. So return true.
-        read_success = true;
+        if(mrtd_data->auth.method == MrtdAuthMethodNone) {
+            // Selected the passport app, but auth. not selected
+            // Successfully read what we could
+            read_success = true;
+            break;
+        }
 
-        if(!mrtd_authenticate(mrtd_app, mrtd_data)) break; // Authentication failed
-        //TODO: show auth failure screen
+        if(!mrtd_authenticate(mrtd_app, mrtd_data)) {
+            // At least we're reading an MRTD and should the app switch to the NFC scenes
+            read_success = true;
+            break; // Authentication failed
+        }
 
         mrtd_read_parse_file(mrtd_app, mrtd_data, EF.COM);
         mrtd_read_parse_file(mrtd_app, mrtd_data, EF.DG1);
@@ -337,7 +344,6 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
 
             furi_hal_nfc_sleep(); // Needed between checks
             FURI_LOG_D(TAG, "Try reading MRTD");
-            //TODO: support NFC-B?
             if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
                 nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
                 break;
