@@ -2,6 +2,8 @@
 
 A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the [Adafruit Ultimate GPS Breakout].
 
+![ui](ui.png)
+
 Heavy lifting (NMEA parsing) provided by [minmea], which is included in this repository.
 
 ## Hardware Setup
