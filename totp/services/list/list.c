@@ -44,7 +44,7 @@ ListNode* list_element_at(ListNode* head, uint16_t index) {
 }
 
 ListNode* list_remove(ListNode* head, ListNode* ep) {
-    if (head == NULL) {
+    if(head == NULL) {
         return NULL;
     }
 
