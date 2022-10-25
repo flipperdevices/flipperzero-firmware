@@ -21,6 +21,7 @@
 - Added: [15 (By x27)](https://github.com/x27/flipperzero-game15)
 - Updates for BlackJack and Temperature Sensor
 - Added OFW PR: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
+- Assets: Includes New Dolphin Animations: [D1g1talRa1n (By Sasquach)]
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
