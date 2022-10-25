@@ -24,10 +24,35 @@ At first start app will create new config file (default location is [`/ext/apps/
 
 Detailed description of file format can be found [here](.github/conf-file_description.md)
 
+## Is there a CLI?
+
+**YES!**
+When Flipper Authenticator is running `totp` CLI command will be available for you to list, add or remove tokens.
+
 ## How to change\recover PIN?
 
-There is no way to change or recover PIN once it is set without loosing all the token secrets. If you would like to completely reset app settings including PIN and all the tokens - just delete `/ext/apps/Misc/totp.conf` file. Flipper Authenticator will create new empty file and you will be able to setup everything from scratch.
+For now there is no way to change or recover PIN once it is set without loosing all the token secrets. If you would like to completely reset app settings including PIN and all the tokens - just delete `/ext/apps/Misc/totp.conf` file. Flipper Authenticator will create new empty file and you will be able to setup everything from scratch.
 
 ## How to backup?
 
 All token secrets are stored in encrypted form and are tied to an original Flipper device and PIN. Given that, there is no sense to try to backup `/ext/apps/Misc/totp.conf` file as it will not help you in situation when you loose your Flipper device. Instead use your favorite password manager to store plain token secrets and\or any other information which will help you recover your accounts.
+
+## Flipper Authenticator generates invalid tokens, why so?
+
+There are multiple reasons why Flipper Authenticator generates invalid tokens:
+
+### Clock is not precise
+
+Flipper Zero clock has known clock drift problem. So there is a chance that clock on your flipper device is just not precise and you just need to sync them by using desktop\mobile [qFlipper application](https://flipperzero.one/update).
+
+### Timezone is not correct
+
+Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google. Then set it either in [conf file](.github/conf-file_description.md) or via setting menu of Flipper Authenticator.
+
+### Token secret is not correct
+
+Sometimes it is possible that you just made a mistake while typing or copying token secret. Some providers (ex. Amazon) shows token secrets as a grouped string (ex. `XXXX ZZZZ YYYY NNNN MMMM`), it is fine to use such a string if you are entering token secret manually or using CLI, **however** it is not allowed to use such a string to copy&paste it straight to a config file. In such a scenario you need to drop all the whitespaces from your token secret before putting it into config file.
+
+### Token hashing algorithm is not correct
+
+In majority of situation using default hashing algorithm `SHA1` should work just fine. But for some rare providers it might be necessary to use `SHA256` or `SHA512` as a hashinig alogorithm.

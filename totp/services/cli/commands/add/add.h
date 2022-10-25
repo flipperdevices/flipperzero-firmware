@@ -3,4 +3,7 @@
 #include <cli/cli.h>
 #include "../../../../types/plugin_state.h"
 
-void totp_cli_handle_add_command(PluginState* plugin_state, FuriString* args);
+#define TOTP_CLI_COMMAND_ADD "add"
+
+void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args);
+void totp_cli_command_add_print_help();

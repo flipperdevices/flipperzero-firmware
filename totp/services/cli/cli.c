@@ -5,8 +5,10 @@
 #include "commands/list/list.h"
 #include "commands/add/add.h"
 #include "commands/delete/delete.h"
+#include "commands/timezone/timezone.h"
 
 #define TOTP_CLI_COMMAND_NAME "totp"
+#define TOTP_CLI_COMMAND_HELP "help"
 
 static void totp_cli_print_unknown_command(FuriString* unknown_command) {
     printf("Command \"%s\" is unknown. Use \"help\" command to get list of available commands.", furi_string_get_cstr(unknown_command));
@@ -14,18 +16,13 @@ static void totp_cli_print_unknown_command(FuriString* unknown_command) {
 
 static void totp_cli_print_help() {
     printf("Usage:\r\n");
-    printf("totp <command> <arguments>\r\n");
+    printf(TOTP_CLI_COMMAND_NAME " <command> <arguments>\r\n");
     printf("Command list:\r\n");
-    printf("\thelp - print command usage help\r\n");
-    printf("\tlist - list all tokens\r\n");
-    printf("\tdelete <INDEX> [-f] - delete token\r\n");
-    printf("\t\t<INDEX> - token index in the list\r\n");
-    printf("\t\t-f - [OPTIONAL] force command to do not ask user for interactive confirmation\r\n");
-    printf("\tadd <NAME> <SECRET> [-a <ALGO>] [-d <DIGITS>] - add new token\r\n");
-    printf("\t\t<NAME>   - token name\r\n");
-    printf("\t\t<SECRET> - Base32 token secret\r\n");
-    printf("\t\t<ALGO>   - [OPTIONAL] token hashing algorithm, could be one of: sha1, sha256, sha512; default: sha1\r\n");
-    printf("\t\t<DIGITS> - [OPTIONAL] number of digits to generate, one of: 6, 8; default: 6\r\n\r\n");
+    printf("\t" TOTP_CLI_COMMAND_HELP " - print command usage help\r\n\r\n");
+    totp_cli_command_list_print_help();
+    totp_cli_command_delete_print_help();
+    totp_cli_command_add_print_help();
+    totp_cli_command_timezone_print_help();
 }
 
 static void totp_cli_print_unauthenticated() {
@@ -51,14 +48,16 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
 
     args_read_string_and_trim(args, cmd);
 
-    if(furi_string_cmp_str(cmd, "help") == 0 || furi_string_empty(cmd)) {
+    if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP) == 0 || furi_string_empty(cmd)) {
         totp_cli_print_help();
-    } else if(furi_string_cmp_str(cmd, "add") == 0) {
-        totp_cli_handle_add_command(plugin_state, args);
-    } else if(furi_string_cmp_str(cmd, "list") == 0) {
-        totp_cli_handle_list_command(plugin_state);
-    } else if(furi_string_cmp_str(cmd, "delete") == 0) {
-        totp_cli_handle_delete_command(plugin_state, args, cli);
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD) == 0) {
+        totp_cli_command_add_handle(plugin_state, args);
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0) {
+        totp_cli_command_list_handle(plugin_state);
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0) {
+        totp_cli_command_delete_handle(plugin_state, args, cli);
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE) == 0) {
+        totp_cli_command_timezone_handle(plugin_state, args);
     } else {
         totp_cli_print_unknown_command(cmd);
     }
