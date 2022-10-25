@@ -34,11 +34,11 @@ void totp_cli_command_list_print_help() {
 }
 
 void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
-    if (!totp_cli_ensure_authenticated(plugin_state, cli)) {
+    if(!totp_cli_ensure_authenticated(plugin_state, cli)) {
         return;
     }
 
-    if (plugin_state->tokens_list == NULL) {
+    if(plugin_state->tokens_list == NULL) {
         TOTP_CLI_PRINTF("There are no tokens");
         return;
     }
@@ -50,9 +50,14 @@ void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
     TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
     uint16_t index = 1;
     while(node != NULL) {
-        TokenInfo* token_info = (TokenInfo* )node->data;
+        TokenInfo* token_info = (TokenInfo*)node->data;
         token_info_get_digits_count(token_info);
-        TOTP_CLI_PRINTF("| %-3" PRIu16 " | %-27.27s | %-6s | %-6" PRIu8 " |\r\n", index, token_info->name, get_algo_as_cstr(token_info->algo), get_digits_as_int(token_info->digits));
+        TOTP_CLI_PRINTF(
+            "| %-3" PRIu16 " | %-27.27s | %-6s | %-6" PRIu8 " |\r\n",
+            index,
+            token_info->name,
+            get_algo_as_cstr(token_info->algo),
+            get_digits_as_int(token_info->digits));
         node = node->next;
         index++;
     }
