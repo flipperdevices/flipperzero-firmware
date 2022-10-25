@@ -156,11 +156,9 @@ Depends(fap_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
 Alias("fap_dist", fap_dist)
 # distenv.Default(fap_dist)
 
-plugin_resources_dist = list(
-    distenv.Install(f"#/assets/resources/apps/{dist_entry[0]}", dist_entry[1])
-    for dist_entry in firmware_env["FW_EXTAPPS"]["dist"].values()
+distenv.Depends(
+    firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"]["resources_dist"]
 )
-distenv.Depends(firmware_env["FW_RESOURCES"], plugin_resources_dist)
 
 
 # Target for bundling core2 package for qFlipper

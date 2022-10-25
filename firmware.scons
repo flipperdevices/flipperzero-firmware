@@ -134,9 +134,10 @@ fwenv.LoadApplicationManifests()
 fwenv.PrepareApplicationsBuild()
 
 # Build external apps
-extapps = fwenv["FW_EXTAPPS"] = SConscript(
-    "site_scons/extapps.scons", exports={"ENV": fwenv}
-)
+if env["IS_BASE_FIRMWARE"]:
+    extapps = fwenv["FW_EXTAPPS"] = SConscript(
+        "site_scons/extapps.scons", exports={"ENV": fwenv}
+    )
 
 
 # Add preprocessor definitions for current set of apps
