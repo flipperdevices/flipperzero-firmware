@@ -289,6 +289,16 @@ distenv.PhonyTarget(
     "@echo $( ${BLACKMAGIC_ADDR} $)",
 )
 
+
+# Find STLink probe ids
+distenv.PhonyTarget(
+    "get_stlink",
+    distenv.Action(
+        lambda **kw: distenv.GetDevices(),
+        None,
+    ),
+)
+
 # Prepare vscode environment
 vscode_dist = distenv.Install("#.vscode", distenv.Glob("#.vscode/example/*"))
 distenv.Precious(vscode_dist)
