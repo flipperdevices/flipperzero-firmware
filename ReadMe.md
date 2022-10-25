@@ -23,6 +23,7 @@
 - Added OFW PR: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - Assets: Includes New Dolphin Animations: [D1g1talRa1n (By Sasquach)]
 - Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) if you don't want to do the work.
+- Updates to backup/restore SubGHz settings, extend_range.txt, manifest.txt and name.txt
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
