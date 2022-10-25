@@ -54,6 +54,7 @@ void nfc_scene_mf_ultralight_read_auth_result_on_enter(void* context) {
         widget_add_string_element(
             widget, 0, 39, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
     } else {
+        // TODO: Move to event handler
         DOLPHIN_DEED(DolphinDeedNfcMfulError);
     }
     furi_string_printf(
