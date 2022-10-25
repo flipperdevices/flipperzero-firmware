@@ -1,5 +1,4 @@
 #include "list.h"
-#include <cli/cli.h>
 #include <stdlib.h>
 #include "../../../list/list.h"
 #include "../../../../types/token_info.h"
@@ -34,7 +33,11 @@ void totp_cli_command_list_print_help() {
     TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_LIST " - list all tokens\r\n\r\n");
 }
 
-void totp_cli_command_list_handle(PluginState* plugin_state) {
+void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
+    if (!totp_cli_ensure_authenticated(plugin_state, cli)) {
+        return;
+    }
+
     if (plugin_state->tokens_list == NULL) {
         TOTP_CLI_PRINTF("There are no tokens");
         return;
