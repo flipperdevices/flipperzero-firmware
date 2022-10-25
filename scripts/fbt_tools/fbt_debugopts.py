@@ -1,4 +1,20 @@
+from fbt_options import OPENOCD_OPTS
+
+
 def generate(env, **kw):
+    if (adapter_serial := env.subst("$OPENOCD_ADAPTER_SERIAL")) != "auto":
+        env.Append(
+            OPENOCD_OPTS=[
+                "-c",
+                f"adapter serial {adapter_serial}",
+            ]
+        )
+
+    # Final command is "init", always explicitly added
+    env.Append(
+        OPENOCD_OPTS=["-c", "init"],
+    )
+
     env.SetDefault(
         OPENOCD_GDB_PIPE=[
             "|openocd -c 'gdb_port pipe; log_output debug/openocd.log' ${[SINGLEQUOTEFUNC(OPENOCD_OPTS)]}"
