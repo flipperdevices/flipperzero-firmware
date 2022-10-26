@@ -58,11 +58,13 @@ bool ibutton_scene_save_name_on_event(void* context, SceneManagerEvent event) {
         if(event.event == iButtonCustomEventTextEditResult) {
             if(ibutton_save_key(ibutton, ibutton->text_store)) {
                 scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveSuccess);
-                if(scene_manager_has_previous_scene(ibutton->scene_manager, iButtonSceneSavedKeyMenu)) {
+                if(scene_manager_has_previous_scene(
+                       ibutton->scene_manager, iButtonSceneSavedKeyMenu)) {
                     // Nothing, do not count editing as saving
-                } else if(scene_manager_has_previous_scene(ibutton->scene_manager, iButtonSceneAddType)) {
+                } else if(scene_manager_has_previous_scene(
+                              ibutton->scene_manager, iButtonSceneAddType)) {
                     DOLPHIN_DEED(DolphinDeedIbuttonAdd);
-                } else  {
+                } else {
                     DOLPHIN_DEED(DolphinDeedIbuttonSave);
                 }
             } else {

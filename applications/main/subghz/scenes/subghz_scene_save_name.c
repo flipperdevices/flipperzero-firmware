@@ -132,12 +132,13 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 }
 
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveSuccess);
-                if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSetType)) {
+                if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSavedMenu)) {
+                    // Nothing, do not count editing as saving
+                } else if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneMoreRAW)) {
+                    // Ditto, for RAW signals
+                } else if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSetType)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzAddManually);
-                } else if(
-                    !scene_manager_has_previous_scene(
-                        subghz->scene_manager, SubGhzSceneSavedMenu) &&
-                    !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneMoreRAW)) {
+                } else {
                     DOLPHIN_DEED(DolphinDeedSubGhzSave);
                 }
                 return true;

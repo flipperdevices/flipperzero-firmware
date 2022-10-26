@@ -56,10 +56,11 @@ bool lfrfid_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 
             if(lfrfid_save_key(app)) {
                 scene_manager_next_scene(scene_manager, LfRfidSceneSaveSuccess);
-                if(scene_manager_has_previous_scene(scene_manager, LfRfidSceneSaveType)) {
+                if(scene_manager_has_previous_scene(scene_manager, LfRfidSceneSavedKeyMenu)) {
+                    // Nothing, do not count editing as saving
+                } else if(scene_manager_has_previous_scene(scene_manager, LfRfidSceneSaveType)) {
                     DOLPHIN_DEED(DolphinDeedRfidAdd);
-                } else if(!scene_manager_has_previous_scene(
-                              scene_manager, LfRfidSceneSavedKeyMenu)) {
+                } else {
                     DOLPHIN_DEED(DolphinDeedRfidSave);
                 }
             } else {
