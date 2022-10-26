@@ -43,6 +43,7 @@ struct SubGhzProtocolDecoderRAW {
     bool has_rssi_above_threshold;
     int rssi_threshold;
     uint8_t postroll_frames;
+    bool pause;
 };
 
 struct SubGhzProtocolEncoderRAW {
@@ -169,6 +170,7 @@ bool subghz_protocol_raw_save_to_file_init(
         instance->upload_raw = malloc(SUBGHZ_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
         instance->file_is_open = RAWFileIsOpenWrite;
         instance->sample_write = 0;
+        instance->pause = false;
         init = true;
     } while(0);
 
@@ -240,6 +242,14 @@ void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode) {
     subghz_protocol_decoder_raw_reset(context);
 }
 
+void subghz_protocol_raw_save_to_file_pause(SubGhzProtocolDecoderRAW* instance, bool pause) {
+    furi_assert(instance);
+
+    if(instance->pause != pause) {
+        instance->pause = pause;
+    }
+}
+
 size_t subghz_protocol_raw_get_sample_write(SubGhzProtocolDecoderRAW* instance) {
     return instance->sample_write + instance->ind_write;
 }
@@ -306,24 +316,8 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
-    if(instance->upload_raw != NULL && duration > subghz_protocol_raw_const.te_short) {
-        if(instance->auto_mode) {
-            float rssi = furi_hal_subghz_get_rssi();
-
-            if(rssi >= instance->rssi_threshold) {
-                subghz_protocol_decoder_raw_write_data(context, level, duration);
-                instance->has_rssi_above_threshold = true;
-                instance->postroll_frames = 0;
-            } else if(instance->has_rssi_above_threshold) {
-                subghz_protocol_decoder_raw_write_data(instance, level, duration);
-                instance->postroll_frames++;
-
-                if(instance->postroll_frames >= SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES) {
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
-                }
-            }
-        } else {
+    if(!instance->pause && (instance->upload_raw != NULL)) {
+        if(duration > subghz_protocol_raw_const.te_short) {
             if(instance->last_level != level) {
                 instance->last_level = (level ? true : false);
                 instance->upload_raw[instance->ind_write++] = (level ? duration : -duration);
