@@ -11,6 +11,7 @@
 #include <notification/notification_messages.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
+#include <file_browser_test_icons.h>
 
 typedef struct FileBrowserApp FileBrowserApp;
 
