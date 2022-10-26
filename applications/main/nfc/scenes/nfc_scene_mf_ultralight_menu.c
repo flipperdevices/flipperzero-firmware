@@ -57,7 +57,11 @@ bool nfc_scene_mf_ultralight_menu_on_event(void* context, SceneManagerEvent even
             consumed = true;
         } else if(event.event == SubmenuIndexEmulate) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-            DOLPHIN_DEED(DolphinDeedNfcEmulate);
+            if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
+                DOLPHIN_DEED(DolphinDeedNfcAddEmulate);
+            } else {
+                DOLPHIN_DEED(DolphinDeedNfcEmulate);
+            }
             consumed = true;
         } else if(event.event == SubmenuIndexUnlock) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
