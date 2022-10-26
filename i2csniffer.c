@@ -89,6 +89,8 @@ i2cSniffer* i2c_sniffer_alloc() {
 
 void i2c_sniffer_free(i2cSniffer* i2c_sniffer) {
     furi_assert(i2c_sniffer);
-    furi_check(i2c_sniffer->started == false);
+    if(i2c_sniffer->started) {
+        stop_interrupts();
+    }
     free(i2c_sniffer);
 }

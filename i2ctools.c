@@ -345,21 +345,14 @@ int32_t i2ctools_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     i2cTools* i2ctools = malloc(sizeof(i2cTools));
-    i2cSniffer* sniffer = malloc(sizeof(i2cSniffer));
     ValueMutex i2ctools_mutex;
     if(!init_mutex(&i2ctools_mutex, i2ctools, sizeof(i2cTools))) {
         FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
         free(i2ctools);
         return -1;
     }
-    ValueMutex sniffer_mutex;
-    if(!init_mutex(&sniffer_mutex, sniffer, sizeof(sniffer))) {
-        FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
-        free(sniffer);
-        return -1;
-    }
 
-    i2ctools->sniffer = sniffer;
+    i2ctools->sniffer = i2c_sniffer_alloc();
 
     i2ctools->view_port = view_port_alloc();
     view_port_draw_callback_set(i2ctools->view_port, i2ctools_draw_callback, &i2ctools_mutex);
@@ -371,8 +364,6 @@ int32_t i2ctools_app(void* p) {
 
     InputEvent event;
 
-    clear_sniffer_buffers(i2ctools->sniffer);
-    i2ctools->sniffer->started = false;
     i2ctools->sniffer->menu_index = 0;
 
     i2ctools->scanner.menu_index = 0;
@@ -494,8 +485,8 @@ int32_t i2ctools_app(void* p) {
     gui_remove_view_port(gui, i2ctools->view_port);
     view_port_free(i2ctools->view_port);
     furi_message_queue_free(event_queue);
+    i2c_sniffer_free(i2ctools->sniffer);
     free(i2ctools);
-    free(sniffer);
     furi_record_close(RECORD_GUI);
     return 0;
 }
