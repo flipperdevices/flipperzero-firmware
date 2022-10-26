@@ -134,7 +134,10 @@ bool subghz_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveSuccess);
                 if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSetType)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzAddManually);
-                } else {
+                } else if(
+                    !scene_manager_has_previous_scene(
+                        subghz->scene_manager, SubGhzSceneSavedMenu) &&
+                    !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneMoreRAW)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzSave);
                 }
                 return true;
