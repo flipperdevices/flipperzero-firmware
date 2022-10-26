@@ -2,30 +2,17 @@
 
 #include "cli.h"
 #include <lib/toolbox/args.h>
-#include "cli_common_helpers.h"
+#include "cli_helpers.h"
 #include "commands/list/list.h"
 #include "commands/add/add.h"
 #include "commands/delete/delete.h"
 #include "commands/timezone/timezone.h"
-
-#define TOTP_CLI_COMMAND_NAME "totp"
-#define TOTP_CLI_COMMAND_HELP "help"
+#include "commands/help/help.h"
 
 static void totp_cli_print_unknown_command(FuriString* unknown_command) {
     TOTP_CLI_PRINTF(
-        "Command \"%s\" is unknown. Use \"help\" command to get list of available commands.",
+        "Command \"%s\" is unknown. Use \"" TOTP_CLI_COMMAND_HELP "\" command to get list of available commands.",
         furi_string_get_cstr(unknown_command));
-}
-
-static void totp_cli_print_help() {
-    TOTP_CLI_PRINTF("Usage:\r\n");
-    TOTP_CLI_PRINTF(TOTP_CLI_COMMAND_NAME " <command> <arguments>\r\n");
-    TOTP_CLI_PRINTF("Command list:\r\n");
-    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_HELP " - print command usage help\r\n\r\n");
-    totp_cli_command_list_print_help();
-    totp_cli_command_delete_print_help();
-    totp_cli_command_add_print_help();
-    totp_cli_command_timezone_print_help();
 }
 
 static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
@@ -35,15 +22,23 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
 
     args_read_string_and_trim(args, cmd);
 
-    if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP) == 0 || furi_string_empty(cmd)) {
-        totp_cli_print_help();
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD) == 0) {
+    if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP) == 0 || 
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP_ALT) == 0 || 
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP_ALT2) == 0 || 
+        furi_string_empty(cmd)) {
+        totp_cli_command_help_handle();
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD) == 0 || 
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD_ALT) == 0 ||
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD_ALT2) == 0) {
         totp_cli_command_add_handle(plugin_state, args, cli);
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0) {
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0 ||
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST_ALT) == 0) {
         totp_cli_command_list_handle(plugin_state, cli);
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0) {
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0 ||
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE_ALT) == 0) {
         totp_cli_command_delete_handle(plugin_state, args, cli);
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE) == 0) {
+    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE) == 0 ||
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE_ALT) == 0) {
         totp_cli_command_timezone_handle(plugin_state, args, cli);
     } else {
         totp_cli_print_unknown_command(cmd);

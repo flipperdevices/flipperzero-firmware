@@ -4,13 +4,13 @@
 #include "../../../list/list.h"
 #include "../../../../types/token_info.h"
 #include "../../../config/config.h"
-#include "../../cli_common_helpers.h"
+#include "../../cli_helpers.h"
 #include "../../../../scenes/scene_director.h"
 
-#define TOTP_CLI_COMMAND_ADD_ARG_NAME "NAME"
-#define TOTP_CLI_COMMAND_ADD_ARG_ALGO "ALGO"
+#define TOTP_CLI_COMMAND_ADD_ARG_NAME "name"
+#define TOTP_CLI_COMMAND_ADD_ARG_ALGO "algo"
 #define TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX "-a"
-#define TOTP_CLI_COMMAND_ADD_ARG_DIGITS "DIGITS"
+#define TOTP_CLI_COMMAND_ADD_ARG_DIGITS "digits"
 #define TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX "-d"
 #define TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX "-u"
 
@@ -46,22 +46,26 @@ static bool token_info_set_algo_from_str(TokenInfo* token_info, FuriString* str)
     return false;
 }
 
-void totp_cli_command_add_print_help() {
-    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_ADD " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_NAME) " " TOTP_CLI_OPTIONAL_PARAM(
-        TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX " " TOTP_CLI_ARG(
-            TOTP_CLI_COMMAND_ADD_ARG_ALGO)) " " TOTP_CLI_OPTIONAL_PARAM(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX
-                                                                        " " TOTP_CLI_ARG(
-                                                                            TOTP_CLI_COMMAND_ADD_ARG_DIGITS)) " " TOTP_CLI_OPTIONAL_PARAM(TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX) " - add new token\r\n");
-    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_ADD_ARG_NAME) "   - token name\r\n");
-    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(
-        TOTP_CLI_COMMAND_ADD_ARG_ALGO) "   - " TOTP_CLI_OPTIONAL_PARAM_MARK
-                                       " token hashing algorithm, could be one of: sha1, sha256, sha512; default: sha1\r\n");
-    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_ARG(
-        TOTP_CLI_COMMAND_ADD_ARG_DIGITS) " - " TOTP_CLI_OPTIONAL_PARAM_MARK
-                                         " number of digits to generate, one of: 6, 8; default: 6\r\n");
-    TOTP_CLI_PRINTF(
-        "\t\t" TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX "       - " TOTP_CLI_OPTIONAL_PARAM_MARK
-        " to show console user input as-is without masking; default: show masked\r\n\r\n");
+void totp_cli_command_add_docopt_commands() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_ADD ", " TOTP_CLI_COMMAND_ADD_ALT ", " TOTP_CLI_COMMAND_ADD_ALT2 "     Add new token\r\n");
+}
+
+void totp_cli_command_add_docopt_usage() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_ADD " | " TOTP_CLI_COMMAND_ADD_ALT " | " TOTP_CLI_COMMAND_ADD_ALT2) " " DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_NAME) " " 
+        DOCOPT_OPTIONAL(DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_ALGO))) " " 
+        DOCOPT_OPTIONAL(DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_DIGITS))) " " 
+        DOCOPT_OPTIONAL(DOCOPT_SWITCH(TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX))"\r\n");
+}
+
+void totp_cli_command_add_docopt_arguments() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_ADD_ARG_NAME "        Token name\r\n");
+}
+
+void totp_cli_command_add_docopt_options() {
+    TOTP_CLI_PRINTF("  " DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_ALGO)) "      Token hashing algorithm.\r\n");
+    TOTP_CLI_PRINTF("                 Could be one of: sha1, sha256, sha512 " DOCOPT_DEFAULT("sha1") "\r\n");
+    TOTP_CLI_PRINTF("  " DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_DIGITS))"    Number of digits to generate, one of: 6, 8 " DOCOPT_DEFAULT("6") "\r\n");
+    TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX) "             Show console user input as-is without masking\r\n");
 }
 
 void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
@@ -72,7 +76,7 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
 
     // Reading token name
     if(!args_read_probably_quoted_string_and_trim(args, temp_str)) {
-        totp_cli_print_invalid_arguments();
+        TOTP_CLI_PRINT_INVALID_ARGUMENTS();
         furi_string_free(temp_str);
         token_info_free(token_info);
         return;
@@ -117,7 +121,7 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
         }
 
         if(!parsed) {
-            totp_cli_print_invalid_arguments();
+            TOTP_CLI_PRINT_INVALID_ARGUMENTS();
             furi_string_free(temp_str);
             token_info_free(token_info);
             return;
@@ -126,7 +130,7 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
 
     // Reading token secret
     furi_string_reset(temp_str);
-    TOTP_CLI_PRINTF("Enter token secret and confirm with [ENTER]:\r\n");
+    TOTP_CLI_PRINTF("Enter token secret and confirm with [ENTER]\r\n");
 
     uint8_t c;
     while(cli_read(cli, &c, 1) == 1) {
@@ -135,6 +139,7 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
             cli_read_timeout(cli, &c2, 1, 0);
             cli_read_timeout(cli, &c2, 1, 0);
         } else if(c == CliSymbolAsciiETX) {
+            TOTP_CLI_DELETE_CURRENT_LINE();
             TOTP_CLI_PRINTF("Cancelled by user");
             furi_string_free(temp_str);
             token_info_free(token_info);
@@ -161,6 +166,8 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
     }
 
     temp_cstr = furi_string_get_cstr(temp_str);
+
+    TOTP_CLI_DELETE_LAST_LINE();
 
     if(!totp_cli_ensure_authenticated(plugin_state, cli)) {
         furi_string_free(temp_str);

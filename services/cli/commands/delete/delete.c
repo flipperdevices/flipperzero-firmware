@@ -5,29 +5,34 @@
 #include <lib/toolbox/args.h>
 #include "../../../list/list.h"
 #include "../../../config/config.h"
-#include "../../cli_common_helpers.h"
+#include "../../cli_helpers.h"
 #include "../../../../scenes/scene_director.h"
 
-#define TOTP_CLI_COMMAND_DELETE_ARG_INDEX "INDEX"
+#define TOTP_CLI_COMMAND_DELETE_ARG_INDEX "index"
 #define TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX "-f"
 
-void totp_cli_command_delete_print_help() {
-    TOTP_CLI_PRINTF(
-        "\t" TOTP_CLI_COMMAND_DELETE
-        " " TOTP_CLI_ARG(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " " TOTP_CLI_OPTIONAL_PARAM(
-            TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) " - delete token\r\n");
-    TOTP_CLI_PRINTF(
-        "\t\t" TOTP_CLI_ARG(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " - token index in the list\r\n");
-    TOTP_CLI_PRINTF("\t\t" TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX
-                    "      - " TOTP_CLI_OPTIONAL_PARAM_MARK
-                    " force command to do not ask user for interactive confirmation\r\n\r\n");
+void totp_cli_command_delete_docopt_commands() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_DELETE ", " TOTP_CLI_COMMAND_DELETE_ALT "       Delete existing token\r\n");
+}
+
+void totp_cli_command_delete_docopt_usage() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_DELETE " | " TOTP_CLI_COMMAND_DELETE_ALT) " " DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " "
+        DOCOPT_OPTIONAL(DOCOPT_SWITCH(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX)) "\r\n");
+}
+
+void totp_cli_command_delete_docopt_arguments() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_DELETE_ARG_INDEX "       Token index in the list\r\n");
+}
+
+void totp_cli_command_delete_docopt_options() {
+    TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) "             Force command to do not ask user for interactive confirmation\r\n");
 }
 
 void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
     int token_number;
     if(!args_read_int_and_trim(args, &token_number) || token_number <= 0 ||
        token_number > plugin_state->tokens_count) {
-        totp_cli_print_invalid_arguments();
+        TOTP_CLI_PRINT_INVALID_ARGUMENTS();
         return;
     }
 
@@ -38,7 +43,7 @@ void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args,
             confirm_needed = false;
         } else {
             TOTP_CLI_PRINTF("Unknown argument \"%s\"\r\n", furi_string_get_cstr(temp_str));
-            totp_cli_print_invalid_arguments();
+            TOTP_CLI_PRINT_INVALID_ARGUMENTS();
             furi_string_free(temp_str);
             return;
         }
