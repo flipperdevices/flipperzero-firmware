@@ -345,7 +345,7 @@ int32_t i2ctools_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     i2cTools* i2ctools = malloc(sizeof(i2cTools));
-    i2csniffer* sniffer = malloc(sizeof(i2csniffer));
+    i2cSniffer* sniffer = malloc(sizeof(i2cSniffer));
     ValueMutex i2ctools_mutex;
     if(!init_mutex(&i2ctools_mutex, i2ctools, sizeof(i2cTools))) {
         FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
@@ -371,7 +371,7 @@ int32_t i2ctools_app(void* p) {
 
     InputEvent event;
 
-    clearSnifferBuffers(i2ctools->sniffer);
+    clear_sniffer_buffers(i2ctools->sniffer);
     i2ctools->sniffer->started = false;
     i2ctools->sniffer->menu_index = 0;
 

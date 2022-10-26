@@ -45,6 +45,6 @@ typedef struct {
     uint8_t main_menu_index;
 
     _scanner scanner;
-    i2csniffer* sniffer;
+    i2cSniffer* sniffer;
     _sender sender;
 } i2cTools;

@@ -33,10 +33,13 @@ typedef struct {
     i2cFrame frames[MAX_RECORDS];
     uint8_t frame_index;
     uint8_t menu_index;
-} i2csniffer;
+} i2cSniffer;
 
-void clearSnifferBuffers(i2csniffer* sniffer);
-void start_interrupts(i2csniffer* sniffer);
+void clear_sniffer_buffers(i2cSniffer* i2c_sniffer);
+void start_interrupts(i2cSniffer* i2c_sniffer);
 void stop_interrupts();
-void SDAcallback(void* _sniffer);
-void SCLcallback(void* _sniffer);
+void SDAcallback(void* _i2c_sniffer);
+void SCLcallback(void* _i2c_sniffer);
+
+i2cSniffer* i2c_sniffer_alloc();
+void i2c_sniffer_free(i2cSniffer* i2c_sniffer);
