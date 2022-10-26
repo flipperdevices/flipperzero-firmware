@@ -669,10 +669,11 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
-    // FuriHalNfcTxRxContext tx_rx = {};
+    FuriHalNfcTxRxContext tx_rx = {};
     bool card_found_notified = false;
     FuriHalNfcDevData nfc_data = {};
-    MfClassicData* mf_data = &nfc_worker->dev_data->mf_classic_data;
+    MfClassicData* src_data = &nfc_worker->dev_data->mf_classic_data;
+    MfClassicData dest_data = *src_data;
 
     while(nfc_worker->state == NfcWorkerStateMfClassicWrite) {
         if(furi_hal_nfc_detect(&nfc_data, 200)) {
@@ -698,9 +699,14 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
                 break;
             }
 
-            FURI_LOG_I(TAG, "Read manufacturer block");
-            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(mf_data, 0);
-            
+            FURI_LOG_I(TAG, "Read card sectors");
+            uint8_t sectors = mf_classic_get_total_sectors_num(type);
+            for(uint8_t i = 0; i < sectors; i++) {
+                mf_classic_read_sector(&tx_rx, &dest_data, i);
+            }
+            uint8_t sectors_read = mf_classic_update_card(&tx_rx, &dest_data);
+            FURI_LOG_I(TAG, "Sectors read: %d", sectors_read);
+            if(nfc_worker->state != NfcWorkerStateMfClassicWrite) break;
 
         } else {
             if(card_found_notified) {

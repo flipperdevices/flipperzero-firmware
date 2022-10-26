@@ -27,6 +27,20 @@ typedef enum {
     MfClassicKeyB,
 } MfClassicKey;
 
+typedef enum {
+    MfClassicActionDataRead,
+    MfClassicActionDataWrite,
+    MfClassicActionDataInc,
+    MfClassicActionDataDec,
+
+    MfClassicActionKeyARead,
+    MfClassicActionKeyAWrite,
+    MfClassicActionKeyBRead,
+    MfClassicActionKeyBWrite,
+    MfClassicActionACRead,
+    MfClassicActionACWrite,
+} MfClassicAction;
+
 typedef struct {
     uint8_t value[MF_CLASSIC_BLOCK_SIZE];
 } MfClassicBlock;
@@ -89,6 +103,18 @@ uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector);
 bool mf_classic_is_sector_trailer(uint8_t block);
 
 uint8_t mf_classic_get_sector_by_block(uint8_t block);
+
+bool mf_classic_is_allowed_access_sector_trailer(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKey key,
+    MfClassicAction action);
+
+bool mf_classic_is_allowed_access_data_block(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKey key,
+    MfClassicAction action);
 
 bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type);
 

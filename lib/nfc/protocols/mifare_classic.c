@@ -11,20 +11,6 @@
 #define MF_CLASSIC_AUTH_KEY_B_CMD (0x61U)
 #define MF_CLASSIC_READ_SECT_CMD (0x30)
 
-typedef enum {
-    MfClassicActionDataRead,
-    MfClassicActionDataWrite,
-    MfClassicActionDataInc,
-    MfClassicActionDataDec,
-
-    MfClassicActionKeyARead,
-    MfClassicActionKeyAWrite,
-    MfClassicActionKeyBRead,
-    MfClassicActionKeyBWrite,
-    MfClassicActionACRead,
-    MfClassicActionACWrite,
-} MfClassicAction;
-
 const char* mf_classic_get_type_str(MfClassicType type) {
     if(type == MfClassicType1k) {
         return "MIFARE Classic 1K";
@@ -225,12 +211,12 @@ bool mf_classic_is_card_read(MfClassicData* data) {
     return card_read;
 }
 
-static bool mf_classic_is_allowed_access_sector_trailer(
-    MfClassicEmulator* emulator,
+bool mf_classic_is_allowed_access_sector_trailer(
+    MfClassicData* data,
     uint8_t block_num,
     MfClassicKey key,
     MfClassicAction action) {
-    uint8_t* sector_trailer = emulator->data.block[block_num].value;
+    uint8_t* sector_trailer = data->block[block_num].value;
     uint8_t AC = ((sector_trailer[7] >> 5) & 0x04) | ((sector_trailer[8] >> 2) & 0x02) |
                  ((sector_trailer[8] >> 7) & 0x01);
     switch(action) {
@@ -266,13 +252,13 @@ static bool mf_classic_is_allowed_access_sector_trailer(
     return true;
 }
 
-static bool mf_classic_is_allowed_access_data_block(
-    MfClassicEmulator* emulator,
+bool mf_classic_is_allowed_access_data_block(
+    MfClassicData* data,
     uint8_t block_num,
     MfClassicKey key,
     MfClassicAction action) {
     uint8_t* sector_trailer =
-        emulator->data.block[mf_classic_get_sector_trailer_num_by_block(block_num)].value;
+        data->block[mf_classic_get_sector_trailer_num_by_block(block_num)].value;
 
     uint8_t sector_block;
     if(block_num <= 128) {
@@ -336,9 +322,10 @@ static bool mf_classic_is_allowed_access(
     MfClassicKey key,
     MfClassicAction action) {
     if(mf_classic_is_sector_trailer(block_num)) {
-        return mf_classic_is_allowed_access_sector_trailer(emulator, block_num, key, action);
+        return mf_classic_is_allowed_access_sector_trailer(
+            &emulator->data, block_num, key, action);
     } else {
-        return mf_classic_is_allowed_access_data_block(emulator, block_num, key, action);
+        return mf_classic_is_allowed_access_data_block(&emulator->data, block_num, key, action);
     }
 }
 
