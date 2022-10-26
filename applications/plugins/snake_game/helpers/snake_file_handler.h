@@ -4,7 +4,7 @@
 #include <furi.h>
 #include <flipper_format/flipper_format.h>
 
-#define SNAKE_GAME_FILE_PATH "/ext/apps/games/snake.stat"
+#define SNAKE_GAME_FILE_PATH "/ext/apps/games/.snake"
 
 #define SNAKE_GAME_FILE_HEADER "Flipper Snake plugin run file"
 #define SNAKE_GAME_FILE_ACTUAL_VERSION 1
