@@ -323,7 +323,7 @@ void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
     // Only fullscreen supports Vertical orientation for now
     furi_assert(
         (layer == GuiLayerFullscreen) ||
-        ((view_port->orientation != ViewPortOrientationVertical) ||
+        ((view_port->orientation != ViewPortOrientationVertical) &&
          (view_port->orientation != ViewPortOrientationVerticalFlip)));
 
     gui_lock(gui);
