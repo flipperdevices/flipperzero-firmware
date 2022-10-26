@@ -336,6 +336,8 @@ int32_t i2ctools_app(void* p) {
     i2ctools->scanner = i2c_scanner_alloc();
 
     i2ctools->sender = i2c_sender_alloc();
+    // Share scanner with sender
+    i2ctools->sender->scanner = i2ctools->scanner;
 
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         if(event.key == InputKeyBack && event.type == InputTypeRelease) {

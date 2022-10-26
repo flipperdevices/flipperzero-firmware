@@ -39,7 +39,6 @@ Send command from file
 - [ ] Remove max data size
 - [ ] Remove max frames read size
 - [ ] Test with rate > 100khz
-- [ ] Share scanner obj to sender
 - [ ] Save records
 - [ ] Play from files
 - [ ] Kicad module

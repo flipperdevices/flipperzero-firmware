@@ -18,8 +18,6 @@ void i2c_send(i2cSender* i2c_sender) {
 
 i2cSender* i2c_sender_alloc() {
     i2cSender* i2c_sender = malloc(sizeof(i2cSender));
-    i2c_sender->scanner = i2c_scanner_alloc();
-    scan_i2c_bus(i2c_sender->scanner);
     i2c_sender->must_send = false;
     i2c_sender->sended = false;
     return i2c_sender;
@@ -27,6 +25,5 @@ i2cSender* i2c_sender_alloc() {
 
 void i2c_sender_free(i2cSender* i2c_sender) {
     furi_assert(i2c_sender);
-    i2c_scanner_free(i2c_sender->scanner);
     free(i2c_sender);
 }
