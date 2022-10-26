@@ -34,7 +34,7 @@ void subghz_protocol_blocks_add_to_128_bit(
     SubGhzBlockDecoder* decoder,
     uint8_t bit,
     uint64_t* head_64_bit);
-    
+
 /**
  * Getting the hash sum of the last randomly received parcel.
  * @param decoder Pointer to a SubGhzBlockDecoder instance
