@@ -62,13 +62,11 @@ void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
-    Storage* storage,
     void* context) {
     furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
     worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
-    worker->storage = storage;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventChipDetect);
 }
 
@@ -76,12 +74,12 @@ void spi_mem_worker_read_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
-    Storage* storage,
+    FlipperFormat* flipper_file,
     void* context) {
     furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
     worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
-    worker->storage = storage;
+    worker->flipper_file = flipper_file;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventRead);
 }

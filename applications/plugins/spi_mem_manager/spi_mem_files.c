@@ -20,29 +20,6 @@ bool spi_mem_file_delete(SPIMemApp* app) {
     return true;
 }
 
-bool spi_mem_file_create(SPIMemApp* app, const char* file_name) {
-    bool success = false;
-    FlipperFormat* file = flipper_format_file_alloc(app->storage);
-    do {
-        if(furi_string_end_with(app->file_path, SPI_MEM_FILE_EXTENSION)) {
-            if(!spi_mem_file_delete(app)) break;
-            size_t filename_start = furi_string_search_rchar(app->file_path, '/');
-            furi_string_left(app->file_path, filename_start);
-        }
-        furi_string_cat_printf(app->file_path, "/%s%s", file_name, SPI_MEM_FILE_EXTENSION);
-        FURI_LOG_E(TAG, furi_string_get_cstr(app->file_path));
-        if(!flipper_format_file_open_always(file, furi_string_get_cstr(app->file_path))) break;
-        if(!flipper_format_write_header_cstr(file, SPI_MEM_FILE_TYPE, 1)) break;
-        success = true;
-    } while(0);
-    if(!success) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot save\nkey file");
-    }
-    flipper_format_file_close(file);
-    flipper_format_free(file);
-    return success;
-}
-
 bool spi_mem_file_select(SPIMemApp* app) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, SPI_MEM_FILE_EXTENSION, &I_Dip8_10px);
@@ -54,18 +31,35 @@ bool spi_mem_file_select(SPIMemApp* app) {
     return success;
 }
 
-FlipperFormat* spi_mem_file_open(SPIMemApp* app) {
-    FlipperFormat* file = flipper_format_file_alloc(app->storage);
-    flipper_format_file_open_always(file, furi_string_get_cstr(app->file_path));
-    return file;
+bool spi_mem_file_open(SPIMemApp* app) {
+    bool success = false;
+    app->flipper_file = flipper_format_file_alloc(app->storage);
+    do {
+        if(furi_string_end_with(app->file_path, SPI_MEM_FILE_EXTENSION)) {
+            if(!spi_mem_file_delete(app)) break;
+            size_t filename_start = furi_string_search_rchar(app->file_path, '/');
+            furi_string_left(app->file_path, filename_start);
+        }
+        furi_string_cat_printf(app->file_path, "/%s%s", app->text_buffer, SPI_MEM_FILE_EXTENSION);
+        FURI_LOG_E(TAG, furi_string_get_cstr(app->file_path));
+        if(!flipper_format_file_open_always(
+               app->flipper_file, furi_string_get_cstr(app->file_path)))
+            break;
+        if(!flipper_format_write_header_cstr(app->flipper_file, SPI_MEM_FILE_TYPE, 1)) break;
+        success = true;
+    } while(0);
+    if(!success) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot save\nfile");
+    }
+    return success;
 }
 
-bool spi_mem_file_write_block(FlipperFormat* file, uint8_t* data, size_t size) {
-    if(!flipper_format_write_hex(file, "Data", data, size)) return false;
+bool spi_mem_file_write_block(SPIMemApp* app, uint8_t* data, size_t size) {
+    if(!flipper_format_write_hex(app->flipper_file, "Data", data, size)) return false;
     return true;
 }
 
-void spi_mem_file_close(FlipperFormat* file) {
-    flipper_format_file_close(file);
-    flipper_format_free(file);
+void spi_mem_file_close(SPIMemApp* app) {
+    flipper_format_file_close(app->flipper_file);
+    flipper_format_free(app->flipper_file);
 }

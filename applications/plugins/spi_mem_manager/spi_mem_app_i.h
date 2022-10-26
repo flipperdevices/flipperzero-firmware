@@ -40,6 +40,7 @@ struct SPIMemApp {
     FuriString* file_path;
     DialogsApp* dialogs;
     Storage* storage;
+    FlipperFormat* flipper_file;
     Widget* widget;
     SPIMemWorker* worker;
     SPIMemChip* chip_info;

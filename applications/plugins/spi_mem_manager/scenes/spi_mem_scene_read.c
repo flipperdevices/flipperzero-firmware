@@ -19,7 +19,7 @@ void spi_mem_scene_read_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewRead);
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_read_start(
-        app->chip_info, app->worker, spi_mem_scene_read_callback, app->storage, app);
+        app->chip_info, app->worker, spi_mem_scene_read_callback, app->flipper_file, app);
 }
 
 bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
@@ -36,8 +36,7 @@ bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_read_inc_progress(app->view_read);
         } else if(event.event == SPIMemCustomEventWorkerReadDone) {
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetected);
+            // scene_manager_next_scene(app->scene_manager, SPIMemSceneReadSuccess);
         }
     }
     return success;
@@ -45,6 +44,6 @@ bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
 void spi_mem_scene_read_on_exit(void* context) {
     SPIMemApp* app = context;
     spi_mem_worker_stop_thread(app->worker);
-    // spi_mem_view_read_reset(app->view_read);
+    spi_mem_view_read_reset(app->view_read);
     notification_message(app->notifications, &sequence_blink_stop);
 }

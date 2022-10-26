@@ -27,7 +27,7 @@ typedef struct {
     void* cb_ctx;
     FuriThread* thread;
     FuriString* file_name;
-    Storage* storage;
+    FlipperFormat* flipper_file;
 } SPIMemWorker;
 
 typedef struct {
@@ -46,11 +46,10 @@ void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
-    Storage* storage,
     void* context);
 void spi_mem_worker_read_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
-    Storage* storage,
+    FlipperFormat* flipper_file,
     void* context);
