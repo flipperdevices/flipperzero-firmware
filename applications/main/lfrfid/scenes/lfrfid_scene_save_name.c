@@ -58,7 +58,7 @@ bool lfrfid_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(scene_manager, LfRfidSceneSaveSuccess);
                 if(scene_manager_has_previous_scene(scene_manager, LfRfidSceneSaveType)) {
                     DOLPHIN_DEED(DolphinDeedRfidAdd);
-                } else {
+                } else if(!scene_manager_has_previous_scene(scene_manager, LfRfidSceneSavedKeyMenu)) {
                     DOLPHIN_DEED(DolphinDeedRfidSave);
                 }
             } else {
