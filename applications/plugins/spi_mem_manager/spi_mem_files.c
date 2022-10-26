@@ -20,6 +20,11 @@ bool spi_mem_file_delete(SPIMemApp* app) {
     return true;
 }
 
+bool spi_mem_file_write_block(FlipperFormat* file, size_t size, uint8_t* data) {
+    if(!flipper_format_write_hex(file, "Data", data, size)) return false;
+    return true;
+}
+
 bool spi_mem_file_create(SPIMemApp* app, const char* file_name) {
     bool success = false;
     FlipperFormat* file = flipper_format_file_alloc(app->storage);
@@ -38,6 +43,7 @@ bool spi_mem_file_create(SPIMemApp* app, const char* file_name) {
     if(!success) {
         dialog_message_show_storage_error(app->dialogs, "Cannot save\nkey file");
     }
+    flipper_format_file_close(file);
     flipper_format_free(file);
     return success;
 }

@@ -13,22 +13,21 @@ typedef enum {
 
 typedef enum {
     SPIMemCustomEventWorkerChipIdentified,
-    SPIMemCustomEventWorkerChipUnknown
+    SPIMemCustomEventWorkerChipUnknown,
+    SPIMemCustomEventWorkerBlockReaded,
+    SPIMemCustomEventWorkerReadDone
 } SPIMemCustomEventWorker;
 
-typedef enum { SPIMemWorkerChipIdentified, SPIMemWorkerChipUnknown } SPIMemWorkerResult;
-
-typedef void (*SPIMemWorkerChipDetectCallback)(void* context, SPIMemWorkerResult result);
-typedef void (*SPIMemWorkerReadCallback)(void* context, SPIMemWorkerResult result);
+typedef void (*SPIMemWorkerCallback)(void* context, SPIMemCustomEventWorker event);
 
 typedef struct {
     SPIMemChip* chip_info;
     SPIMemWorkerMode mode_index;
-    SPIMemWorkerChipDetectCallback chip_detect_cb;
-    SPIMemWorkerReadCallback read_cb;
+    SPIMemWorkerCallback callback;
     void* cb_ctx;
     FuriThread* thread;
     FuriString* file_name;
+    Storage* storage;
 } SPIMemWorker;
 
 typedef struct {
@@ -46,10 +45,12 @@ bool spi_mem_worker_check_for_stop(SPIMemWorker* worker);
 void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
-    SPIMemWorkerChipDetectCallback callback,
+    SPIMemWorkerCallback callback,
+    Storage* storage,
     void* context);
 void spi_mem_worker_read_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
-    SPIMemWorkerReadCallback callback,
+    SPIMemWorkerCallback callback,
+    Storage* storage,
     void* context);

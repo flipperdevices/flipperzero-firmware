@@ -9,10 +9,15 @@ void spi_mem_scene_read_on_enter(void* context) {
     SPIMemApp* app = context;
     spi_mem_view_read_set_callback(app->view_read, spi_mem_scene_read_view_result_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewRead);
+    //spi_mem_worker_start_thread(app->worker);
+    //spi_mem_worker_read_start(
+    //    app->chip_info, app->worker, spi_mem_scene_read_callback, app->storage, app);
+    spi_mem_view_read_set_progress(app->view_read, 0.34);
 }
 
 bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
+    UNUSED(app);
     bool success = false;
     if(event.type == SceneManagerEventTypeBack) {
         success = true;

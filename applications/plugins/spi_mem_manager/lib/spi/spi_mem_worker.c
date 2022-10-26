@@ -11,7 +11,7 @@ static int32_t spi_mem_worker_thread(void* thread_context);
 
 SPIMemWorker* spi_mem_worker_alloc() {
     SPIMemWorker* worker = malloc(sizeof(SPIMemWorker));
-    worker->chip_detect_cb = NULL;
+    worker->callback = NULL;
     worker->thread = furi_thread_alloc();
     worker->mode_index = SPIMemWorkerModeIdle;
     furi_thread_set_name(worker->thread, "SPIMemWorker");
@@ -60,23 +60,27 @@ void spi_mem_worker_stop_thread(SPIMemWorker* worker) {
 void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
-    SPIMemWorkerChipDetectCallback callback,
+    SPIMemWorkerCallback callback,
+    Storage* storage,
     void* context) {
     furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
-    worker->chip_detect_cb = callback;
+    worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
+    worker->storage = storage;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventChipDetect);
 }
 
 void spi_mem_worker_read_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
-    SPIMemWorkerReadCallback callback,
+    SPIMemWorkerCallback callback,
+    Storage* storage,
     void* context) {
     furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
-    worker->read_cb = callback;
+    worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
+    worker->storage = storage;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventRead);
 }

@@ -1,15 +1,7 @@
 #include "../spi_mem_app.h"
 
-static void spi_mem_scene_chip_detect_callback(void* context, SPIMemWorkerResult result) {
+static void spi_mem_scene_chip_detect_callback(void* context, SPIMemCustomEventWorker event) {
     SPIMemApp* app = context;
-    SPIMemCustomEventWorker event;
-    if(result == SPIMemWorkerChipIdentified) {
-        event = SPIMemCustomEventWorkerChipIdentified;
-    } else if(result == SPIMemWorkerChipUnknown) {
-        event = SPIMemCustomEventWorkerChipUnknown;
-    } else {
-        return;
-    }
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
@@ -20,7 +12,7 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewPopup);
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_chip_detect_start(
-        app->chip_info, app->worker, spi_mem_scene_chip_detect_callback, app);
+        app->chip_info, app->worker, spi_mem_scene_chip_detect_callback, app->storage, app);
 }
 
 bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {

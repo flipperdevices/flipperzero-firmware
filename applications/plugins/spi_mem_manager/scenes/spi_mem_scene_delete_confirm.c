@@ -1,4 +1,5 @@
 #include "../spi_mem_app.h"
+#include "../spi_mem_files.h"
 
 static void spi_mem_scene_delete_confirm_widget_callback(
     GuiButtonType result,

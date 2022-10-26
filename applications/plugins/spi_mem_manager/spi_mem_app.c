@@ -90,7 +90,7 @@ void spi_mem_free(SPIMemApp* instance) {
 int32_t spi_mem_app(void* p) {
     UNUSED(p);
     SPIMemApp* instance = spi_mem_alloc();
-    spi_mem_file_create_folder(instance);
+    // spi_mem_file_create_folder(instance);
     view_dispatcher_run(instance->view_dispatcher);
     spi_mem_free(instance);
     return 0;

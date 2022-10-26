@@ -48,15 +48,11 @@ static uint8_t spi_mem_tools_addr_to_byte_arr(uint32_t addr, uint8_t* cmd) {
     return len;
 }
 
-bool spi_mem_tools_read_block_data(SPIMemChip* chip, size_t offset, uint8_t* data) {
+bool spi_mem_tools_read_block_data(SPIMemChip* chip, size_t size, size_t offset, uint8_t* data) {
     uint8_t cmd[3];
-    if((offset + SPI_MEM_MAX_BLOCK_SIZE) >= chip->size) return false;
+    if((offset + size) >= chip->size) return false;
     if(!spi_mem_tools_trx(
-           SPIMemChipCMDReadData,
-           cmd,
-           spi_mem_tools_addr_to_byte_arr(offset, cmd),
-           data,
-           SPI_MEM_MAX_BLOCK_SIZE))
+           SPIMemChipCMDReadData, cmd, spi_mem_tools_addr_to_byte_arr(offset, cmd), data, size))
         return false;
     return true;
 }

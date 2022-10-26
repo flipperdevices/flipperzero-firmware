@@ -7,6 +7,10 @@ struct SPIMemReadView {
     void* cb_ctx;
 };
 
+typedef struct {
+    float progress;
+} SPIMemReadViewModel;
+
 View* spi_mem_view_read_get_view(SPIMemReadView* app) {
     return app->view;
 }
@@ -20,11 +24,11 @@ static void spi_mem_view_read_draw_progress(Canvas* canvas, float progress) {
     furi_string_free(progress_str);
 }
 
-static void spi_mem_view_read_draw_callback(Canvas* canvas, void* context) {
+static void spi_mem_view_read_draw_callback(Canvas* canvas, void* model) {
+    SPIMemReadViewModel* app = model;
     canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Reading dump");
-    spi_mem_view_read_draw_progress(canvas, 0.47);
+    spi_mem_view_read_draw_progress(canvas, app->progress);
     elements_button_left(canvas, "Cancel");
-    UNUSED(context);
 }
 
 static bool spi_mem_view_read_input_callback(InputEvent* event, void* context) {
@@ -42,9 +46,12 @@ static bool spi_mem_view_read_input_callback(InputEvent* event, void* context) {
 SPIMemReadView* spi_mem_view_read_alloc() {
     SPIMemReadView* app = malloc(sizeof(SPIMemReadView));
     app->view = view_alloc();
+    view_allocate_model(app->view, ViewModelTypeLocking, sizeof(SPIMemReadViewModel));
     view_set_context(app->view, app);
     view_set_draw_callback(app->view, spi_mem_view_read_draw_callback);
     view_set_input_callback(app->view, spi_mem_view_read_input_callback);
+    with_view_model(
+        app->view, SPIMemReadViewModel * model, { model->progress = 0; }, false);
     return app;
 }
 
@@ -59,4 +66,9 @@ void spi_mem_view_read_set_callback(
     void* cb_ctx) {
     app->callback = callback;
     app->cb_ctx = cb_ctx;
+}
+
+void spi_mem_view_read_set_progress(SPIMemReadView* app, float progress) {
+    with_view_model(
+        app->view, SPIMemReadViewModel * model, { model->progress = progress; }, false);
 }

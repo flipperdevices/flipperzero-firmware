@@ -1,4 +1,5 @@
 #include "../spi_mem_app.h"
+#include "../spi_mem_files.h"
 
 void spi_mem_scene_read_filename_view_result_callback(void* context) {
     SPIMemApp* app = context;
@@ -36,7 +37,6 @@ bool spi_mem_scene_read_filename_on_event(void* context, SceneManagerEvent event
         success = true;
         if(event.event == SPIMemCustomEventTextEditResult) {
             if(spi_mem_file_create(app, app->text_buffer)) {
-                // wtart worker in read mode
                 scene_manager_next_scene(app->scene_manager, SPIMemSceneRead);
             } else {
                 scene_manager_search_and_switch_to_previous_scene(
