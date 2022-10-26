@@ -3,13 +3,7 @@
 #define TAG "PassportAuth"
 
 #define MRTD_AUTH_METHOD_COUNT 4
-// Indexes must match MrtdAuthMethod (lib/nfc/protocols/mrtd_helpers.h)
-const char* const mrtd_auth_method_text[MRTD_AUTH_METHOD_COUNT] = {
-    "None",
-    "Any",
-    "BAC",
-    "PACE",
-};
+// Must match MrtdAuthMethod size (lib/nfc/protocols/mrtd_helpers.h)
 
 typedef enum {
     NfcScenePassportAuthSelectDob,
@@ -28,7 +22,7 @@ void nfc_scene_passport_auth_method_changed(VariableItem* item) {
     Nfc* nfc = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     nfc->dev->dev_data.mrtd_data.auth.method = index;
-    variable_item_set_current_value_text(item, mrtd_auth_method_text[index]);
+    variable_item_set_current_value_text(item, mrtd_auth_method_string(index));
 }
 
 void nfc_scene_passport_auth_on_enter(void* context) {
@@ -87,7 +81,7 @@ void nfc_scene_passport_auth_on_enter(void* context) {
 
     value_index = *auth_method;
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, mrtd_auth_method_text[value_index]);
+    variable_item_set_current_value_text(item, mrtd_auth_method_string(value_index));
 
     variable_item_list_add(variable_item_list, "Authenticate and read", 1, NULL, NULL);
 

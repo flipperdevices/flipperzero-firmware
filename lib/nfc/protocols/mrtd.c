@@ -532,12 +532,14 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
 bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data) {
     MrtdAuthMethod method = mrtd_data->auth.method;
     mrtd_data->auth_success = false;
+    mrtd_data->auth_method_used = MrtdAuthMethodNone;
     FURI_LOG_D(TAG, "Auth method: %d", method);
     switch(method) {
         case MrtdAuthMethodAny:
             //TODO: try PACE, then BAC. For now, fall through to just BAC
         case MrtdAuthMethodBac:
             mrtd_data->auth_success = mrtd_bac(app, &mrtd_data->auth);
+            mrtd_data->auth_method_used = MrtdAuthMethodBac;
             break;
         case MrtdAuthMethodPace:
             FURI_LOG_E(TAG, "Auth method PACE not implemented");
@@ -552,46 +554,4 @@ bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data) {
     }
 
     return true;
-}
-
-//TODO: remove testing function
-void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
-    FURI_LOG_D(TAG, "Mrtd Test");
-    //mrtd_read_dump(app, EF.ATR);
-    //mrtd_read_dump(app, EF.COM);
-    //mrtd_read_dump(app, EF.DIR);
-    //mrtd_read_dump(app, EF.CardAccess);
-    //mrtd_read_dump(app, EF.CardSecurity);
-
-    mrtd_select_app(app, AID.eMRTDApplication);
-
-    MrtdAuthMethod method = mrtd_data->auth.method;
-    mrtd_data->auth_success = false;
-    FURI_LOG_D(TAG, "Auth method: %d", method);
-    switch(method) {
-        case MrtdAuthMethodAny:
-            //TODO: try PACE, then BAC
-        case MrtdAuthMethodBac:
-            mrtd_data->auth_success = mrtd_bac(app, &mrtd_data->auth);
-            break;
-        case MrtdAuthMethodPace:
-            FURI_LOG_E(TAG, "Auth method PACE not implemented");
-            break;
-        case MrtdAuthMethodNone:
-        default:
-            break;
-    }
-
-    if(!mrtd_data->auth_success) {
-        return;
-    }
-
-    mrtd_read_parse_file(app, mrtd_data, EF.COM);
-    //mrtd_read_parse_file(app, mrtd_data, EF.DIR);
-
-    mrtd_read_parse_file(app, mrtd_data, EF.DG1);
-
-    //mrtd_read_dump(app, EF.DG2);
-    //mrtd_read_dump(app, EF.DG14);
-    //mrtd_read_dump(app, EF.DG15);
 }

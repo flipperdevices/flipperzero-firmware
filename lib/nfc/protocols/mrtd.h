@@ -16,7 +16,8 @@ typedef struct {
 
 typedef struct {
     MrtdAuthData auth;
-    bool auth_success; //TODO: register (and display) method used BAC/PACE
+    bool auth_success;
+    MrtdAuthMethod auth_method_used;
 
     struct {
         EF_DIR_contents EF_DIR;

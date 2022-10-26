@@ -25,6 +25,21 @@ typedef enum {
     MrtdAuthMethodPace,
 } MrtdAuthMethod;
 
+inline const char* mrtd_auth_method_string(MrtdAuthMethod method) {
+    switch(method) {
+        case MrtdAuthMethodBac:
+            return "BAC";
+        case MrtdAuthMethodPace:
+            return "PACE";
+        case MrtdAuthMethodNone:
+            return "None";
+        case MrtdAuthMethodAny:
+            return "Any";
+        default:
+            return "Unknown";
+    }
+}
+
 typedef enum {
     MrtdTypeUnknown,
     MrtdTypeTD1,

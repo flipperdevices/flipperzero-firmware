@@ -34,7 +34,7 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     furi_string_set(temp_str, "\e#Passport\n");
-    furi_string_cat_printf(temp_str, "Authenticated: %d\n", mrtd_data->auth_success);
+    furi_string_cat_printf(temp_str, "Auth.method: %s\n", mrtd_auth_method_string(mrtd_data->auth_method_used));
     // TODO: indicate BAC / PACE used
 
     uint16_t lds_version = mrtd_data->files.EF_COM.lds_version;
