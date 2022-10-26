@@ -11,7 +11,8 @@
 
 static void totp_cli_print_unknown_command(FuriString* unknown_command) {
     TOTP_CLI_PRINTF(
-        "Command \"%s\" is unknown. Use \"" TOTP_CLI_COMMAND_HELP "\" command to get list of available commands.",
+        "Command \"%s\" is unknown. Use \"" TOTP_CLI_COMMAND_HELP
+        "\" command to get list of available commands.",
         furi_string_get_cstr(unknown_command));
 }
 
@@ -22,22 +23,25 @@ static void totp_cli_handler(Cli* cli, FuriString* args, void* context) {
 
     args_read_string_and_trim(args, cmd);
 
-    if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP) == 0 || 
-        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP_ALT) == 0 || 
-        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP_ALT2) == 0 || 
-        furi_string_empty(cmd)) {
+    if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP) == 0 ||
+       furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP_ALT) == 0 ||
+       furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_HELP_ALT2) == 0 || furi_string_empty(cmd)) {
         totp_cli_command_help_handle();
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD) == 0 || 
+    } else if(
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD_ALT) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_ADD_ALT2) == 0) {
         totp_cli_command_add_handle(plugin_state, args, cli);
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0 ||
+    } else if(
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_LIST_ALT) == 0) {
         totp_cli_command_list_handle(plugin_state, cli);
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0 ||
+    } else if(
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_DELETE_ALT) == 0) {
         totp_cli_command_delete_handle(plugin_state, args, cli);
-    } else if(furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE) == 0 ||
+    } else if(
+        furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE) == 0 ||
         furi_string_cmp_str(cmd, TOTP_CLI_COMMAND_TIMEZONE_ALT) == 0) {
         totp_cli_command_timezone_handle(plugin_state, args, cli);
     } else {

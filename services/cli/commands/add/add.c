@@ -47,14 +47,18 @@ static bool token_info_set_algo_from_str(TokenInfo* token_info, FuriString* str)
 }
 
 void totp_cli_command_add_docopt_commands() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_ADD ", " TOTP_CLI_COMMAND_ADD_ALT ", " TOTP_CLI_COMMAND_ADD_ALT2 "     Add new token\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_ADD ", " TOTP_CLI_COMMAND_ADD_ALT
+                    ", " TOTP_CLI_COMMAND_ADD_ALT2 "     Add new token\r\n");
 }
 
 void totp_cli_command_add_docopt_usage() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_ADD " | " TOTP_CLI_COMMAND_ADD_ALT " | " TOTP_CLI_COMMAND_ADD_ALT2) " " DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_NAME) " " 
-        DOCOPT_OPTIONAL(DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_ALGO))) " " 
-        DOCOPT_OPTIONAL(DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_DIGITS))) " " 
-        DOCOPT_OPTIONAL(DOCOPT_SWITCH(TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX))"\r\n");
+    TOTP_CLI_PRINTF(
+        "  " TOTP_CLI_COMMAND_NAME
+        " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_ADD " | " TOTP_CLI_COMMAND_ADD_ALT " | " TOTP_CLI_COMMAND_ADD_ALT2) " " DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_NAME) " " DOCOPT_OPTIONAL(
+            DOCOPT_OPTION(
+                TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX,
+                DOCOPT_ARGUMENT(
+                    TOTP_CLI_COMMAND_ADD_ARG_ALGO))) " " DOCOPT_OPTIONAL(DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_DIGITS))) " " DOCOPT_OPTIONAL(DOCOPT_SWITCH(TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX)) "\r\n");
 }
 
 void totp_cli_command_add_docopt_arguments() {
@@ -62,10 +66,17 @@ void totp_cli_command_add_docopt_arguments() {
 }
 
 void totp_cli_command_add_docopt_options() {
-    TOTP_CLI_PRINTF("  " DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_ALGO)) "      Token hashing algorithm.\r\n");
-    TOTP_CLI_PRINTF("                 Could be one of: sha1, sha256, sha512 " DOCOPT_DEFAULT("sha1") "\r\n");
-    TOTP_CLI_PRINTF("  " DOCOPT_OPTION(TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX, DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_DIGITS))"    Number of digits to generate, one of: 6, 8 " DOCOPT_DEFAULT("6") "\r\n");
-    TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX) "             Show console user input as-is without masking\r\n");
+    TOTP_CLI_PRINTF("  " DOCOPT_OPTION(
+        TOTP_CLI_COMMAND_ADD_ARG_ALGO_PREFIX,
+        DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_ADD_ARG_ALGO)) "      Token hashing algorithm.\r\n");
+    TOTP_CLI_PRINTF(
+        "                 Could be one of: sha1, sha256, sha512 " DOCOPT_DEFAULT("sha1") "\r\n");
+    TOTP_CLI_PRINTF("  " DOCOPT_OPTION(
+        TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX,
+        DOCOPT_ARGUMENT(
+            TOTP_CLI_COMMAND_ADD_ARG_DIGITS)) "    Number of digits to generate, one of: 6, 8 " DOCOPT_DEFAULT("6") "\r\n");
+    TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(
+        TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX) "             Show console user input as-is without masking\r\n");
 }
 
 void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {

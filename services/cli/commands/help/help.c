@@ -6,11 +6,14 @@
 #include "../timezone/timezone.h"
 
 void totp_cli_command_help_docopt_commands() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_HELP ", " TOTP_CLI_COMMAND_HELP_ALT ", " TOTP_CLI_COMMAND_HELP_ALT2 "       Show command usage help\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_HELP ", " TOTP_CLI_COMMAND_HELP_ALT
+                    ", " TOTP_CLI_COMMAND_HELP_ALT2 "       Show command usage help\r\n");
 }
 
 void totp_cli_command_help_docopt_usage() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_HELP " | " TOTP_CLI_COMMAND_HELP_ALT " | " TOTP_CLI_COMMAND_HELP_ALT2) "\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(
+        TOTP_CLI_COMMAND_HELP " | " TOTP_CLI_COMMAND_HELP_ALT
+                              " | " TOTP_CLI_COMMAND_HELP_ALT2) "\r\n");
 }
 
 void totp_cli_command_help_handle() {
