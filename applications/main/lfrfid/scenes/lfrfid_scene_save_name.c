@@ -1,5 +1,6 @@
 #include <lib/toolbox/random_name.h>
 #include "../lfrfid_i.h"
+#include <dolphin/dolphin.h>
 
 void lfrfid_scene_save_name_on_enter(void* context) {
     LfRfid* app = context;
@@ -55,6 +56,11 @@ bool lfrfid_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 
             if(lfrfid_save_key(app)) {
                 scene_manager_next_scene(scene_manager, LfRfidSceneSaveSuccess);
+                if(scene_manager_has_previous_scene(scene_manager, LfRfidSceneSaveType)) {
+                    DOLPHIN_DEED(DolphinDeedRfidAdd);
+                } else {
+                    DOLPHIN_DEED(DolphinDeedRfidSave);
+                }
             } else {
                 scene_manager_search_and_switch_to_previous_scene(
                     scene_manager, LfRfidSceneReadKeyMenu);
