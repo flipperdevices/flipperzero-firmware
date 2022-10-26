@@ -78,7 +78,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
     if(snake_state->state != GameStateGameOver) {
         char buffer2[6];
         canvas_set_font(canvas, FontBatteryPercent);
-        snprintf(buffer2, sizeof(buffer2), "%u", snake_state->len - 7);
+        snprintf(buffer2, sizeof(buffer2), "%u", snake_state->len);
         canvas_draw_str_aligned(canvas, 124, 10, AlignRight, AlignBottom, buffer2);
     }
     // Game Over banner
@@ -95,7 +95,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
 
         char buffer[18];
         canvas_set_font(canvas, FontSecondary);
-        snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len - 7);
+        snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len);
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
 
         snprintf(buffer, sizeof(buffer), "Highscore: %d", snake_state->highscore);
@@ -233,6 +233,18 @@ static void snake_game_move_snake(SnakeState* const snake_state, Point const nex
     snake_state->points[0] = next_step;
 }
 
+static void snake_game_game_over(SnakeState* const snake_state, NotificationApp* notification) {
+    snake_state->state = GameStateGameOver;
+    snake_state->len = snake_state->len -7;
+    if(snake_state->len > snake_state->highscore){
+        snake_state->isNewHighscore = true;
+        snake_state->highscore = snake_state->len;
+    }
+
+    notification_message_block(notification, &sequence_fail);
+
+}
+
 static void
     snake_game_process_game_step(SnakeState* const snake_state, NotificationApp* notification) {
     if(snake_state->state == GameStateGameOver) {
@@ -249,9 +261,7 @@ static void
             snake_state->state = GameStateLastChance;
             return;
         } else if(snake_state->state == GameStateLastChance) {
-            snake_state->state = GameStateGameOver;
-            snake_state->highscore = snake_game_save_score_to_file(snake_state->len);
-            notification_message_block(notification, &sequence_fail);
+            snake_game_game_over(snake_state, notification);
             return;
         }
     } else {
@@ -262,9 +272,7 @@ static void
 
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
-        snake_state->state = GameStateGameOver;
-        snake_state->highscore = snake_game_save_score_to_file(snake_state->len);
-        notification_message_block(notification, &sequence_fail);
+        snake_game_game_over(snake_state, notification);
         return;
     }
 
@@ -272,9 +280,7 @@ static void
     if(eatFruit) {
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
-            snake_state->state = GameStateGameOver;
-            snake_state->highscore = snake_game_save_score_to_file(snake_state->len);
-            notification_message_block(notification, &sequence_fail);
+            snake_game_game_over(snake_state, notification);
             return;
         }
     }
@@ -294,7 +300,10 @@ int32_t snake_game_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SnakeEvent));
 
     SnakeState* snake_state = malloc(sizeof(SnakeState));
-    if(!snake_game_init_game_from_file(snake_state)) snake_game_init_game(snake_state);
+    snake_state->isNewHighscore = false;
+    snake_state->highscore = 0;
+    if(!snake_game_init_game_from_file(snake_state))
+        snake_game_init_game(snake_state);
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
@@ -367,6 +376,8 @@ int32_t snake_game_app(void* p) {
         release_mutex(&state_mutex, snake_state);
     }
 
+    if(snake_state->isNewHighscore)
+        snake_game_save_score_to_file(snake_state->highscore);
     // Wait for all notifications to be played and return backlight to normal state
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);
 
