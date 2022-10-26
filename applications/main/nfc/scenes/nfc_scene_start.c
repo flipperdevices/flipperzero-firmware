@@ -51,6 +51,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexDetectReader) {
             bool sd_exist = storage_sd_status(nfc->dev->storage) == FSE_OK;
             if(sd_exist) {
+                nfc_device_data_clear(&nfc->dev->dev_data);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDetectReader);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);

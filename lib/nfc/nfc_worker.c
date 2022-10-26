@@ -881,7 +881,12 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
 
     ReaderAnalyzer* reader_analyzer = nfc_worker->reader_analyzer;
-    FuriHalNfcDevData* nfc_data = reader_analyzer_get_nfc_data(reader_analyzer);
+    FuriHalNfcDevData* nfc_data = NULL;
+    if(nfc_worker->dev_data->protocol == NfcDeviceProtocolMifareClassic) {
+        nfc_data = &nfc_worker->dev_data->nfc_data;
+    } else {
+        nfc_data = reader_analyzer_get_nfc_data(reader_analyzer);
+    }
     MfClassicEmulator emulator = {
         .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
         .data = nfc_worker->dev_data->mf_classic_data,
