@@ -19,6 +19,8 @@ typedef enum {
     DesktopMainEventOpenTetris,
     DesktopMainEventOpenDOOM,
     DesktopMainEventOpenDice,
+    DesktopMainEventOpenArkanoid,
+    DesktopMainEventOpenHeap,
     DesktopMainEventOpenSubRemote,
 
     DesktopLockedEventUnlocked,
