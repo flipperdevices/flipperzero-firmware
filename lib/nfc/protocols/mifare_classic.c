@@ -108,6 +108,24 @@ void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassic
     FURI_BIT_SET(data->block_read_mask[block_num / 32], block_num % 32);
 }
 
+bool mf_classic_is_sector_data_read(MfClassicData* data, uint8_t sector_num) {
+    furi_assert(data);
+
+    uint8_t first_block = mf_classic_get_first_block_num_of_sector(sector_num);
+    uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(sector_num);
+    bool data_read = true;
+    for(size_t i = first_block; i < first_block + total_blocks; i++) {
+        data_read &= mf_classic_is_block_read(data, i);
+    }
+
+    return data_read;
+}
+
+void mf_classic_set_sector_data_not_read(MfClassicData* data) {
+    furi_assert(data);
+    memset(data->block_read_mask, 0, sizeof(data->block_read_mask));
+}
+
 bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type) {
     furi_assert(data);
 
@@ -176,6 +194,9 @@ void mf_classic_get_read_sectors_and_keys(
     uint8_t* sectors_read,
     uint8_t* keys_found) {
     furi_assert(data);
+    furi_assert(sectors_read);
+    furi_assert(keys_found);
+
     *sectors_read = 0;
     *keys_found = 0;
     uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);

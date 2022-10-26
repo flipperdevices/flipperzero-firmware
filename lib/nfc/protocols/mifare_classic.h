@@ -130,6 +130,10 @@ bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
 
+bool mf_classic_is_sector_data_read(MfClassicData* data, uint8_t sector_num);
+
+void mf_classic_set_sector_data_not_read(MfClassicData* data);
+
 bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num);
 
 bool mf_classic_is_card_read(MfClassicData* data);
