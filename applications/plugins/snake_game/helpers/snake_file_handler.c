@@ -34,30 +34,14 @@ static FlipperFormat* snake_game_open_file() {
     return file;
 }
 
-int16_t snake_game_save_score_to_file(int32_t len) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = snake_game_open_file(storage);
-
-    len = len - 7;
-    int32_t temp;
-    if(!flipper_format_read_int32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &temp, 1)){
-        if(!flipper_format_insert_or_update_int32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &len, 1)){
-            snake_game_close_file(file);
-            return -1;
-        }
-    }else{
-        if(len > temp){
-            flipper_format_rewind(file);
-            if(!flipper_format_insert_or_update_int32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &len, 1)){
-                snake_game_close_file(file);
-                return -1;
-            }
-        }else{
-            len = temp;
-        }
+void snake_game_save_score_to_file(int16_t highscore) {
+    FlipperFormat* file = snake_game_open_file();
+    uint32_t temp = highscore;
+    if(!flipper_format_insert_or_update_uint32(file, SNAKE_GAME_CONFIG_HIGHSCORE,&temp, 1)){
+        snake_game_close_file(file);
+        return;
     }
     snake_game_close_file(file);
-    return len;
 }
 
 void snake_game_save_game_to_file(SnakeState* const snake_state) {
@@ -116,7 +100,11 @@ bool snake_game_init_game_from_file(SnakeState* const snake_state) {
     }
     furi_string_free(file_type);
 
+
     uint32_t temp;
+    snake_state->highscore = (flipper_format_read_uint32(file, SNAKE_GAME_CONFIG_HIGHSCORE, &temp, 1)) ? temp : 0;
+    flipper_format_rewind(file);
+
     if(!flipper_format_read_uint32(file, SNAKE_GAME_CONFIG_KEY_LEN, &temp, 1)){
         snake_game_close_file(file);
         return false;

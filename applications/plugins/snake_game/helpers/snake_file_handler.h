@@ -16,7 +16,7 @@
 #define SNAKE_GAME_CONFIG_KEY_FRUIT_POINTS "FruitPoints"
 #define SNAKE_GAME_CONFIG_HIGHSCORE "Highscore"
 
-int16_t snake_game_save_score_to_file(int32_t length);
+void snake_game_save_score_to_file(int16_t highscore);
 
 void snake_game_save_game_to_file(SnakeState* const snake_state);
 

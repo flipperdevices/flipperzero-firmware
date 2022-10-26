@@ -42,6 +42,7 @@ typedef enum {
 typedef struct {
     Point points[MAX_SNAKE_LEN];
     uint16_t len;
+    bool isNewHighscore;
     int16_t highscore;
     Direction currentMovement;
     Direction nextMovement; // if backward of currentMovement, ignore
