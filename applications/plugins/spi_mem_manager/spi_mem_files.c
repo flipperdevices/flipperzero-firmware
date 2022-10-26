@@ -69,4 +69,3 @@ void spi_mem_file_close(FlipperFormat* file) {
     flipper_format_file_close(file);
     flipper_format_free(file);
 }
-

@@ -73,28 +73,36 @@ void spi_mem_view_read_set_callback(
 
 void spi_mem_view_read_set_chip_size(SPIMemReadView* app, size_t chip_size) {
     with_view_model(
-        app->view, SPIMemReadViewModel* model, { model->chip_size = chip_size; }, true);;
+        app->view, SPIMemReadViewModel * model, { model->chip_size = chip_size; }, true);
+    ;
 }
 
 void spi_mem_view_read_set_block_size(SPIMemReadView* app, size_t block_size) {
     with_view_model(
-        app->view, SPIMemReadViewModel* model, { model->block_size = block_size; }, true);
+        app->view, SPIMemReadViewModel * model, { model->block_size = block_size; }, true);
 }
 
 void spi_mem_view_read_inc_progress(SPIMemReadView* app) {
     with_view_model(
-        app->view, SPIMemReadViewModel* model, {
+        app->view,
+        SPIMemReadViewModel * model,
+        {
             model->blocks_written++;
-            model->progress = ((float)model->block_size * (float)model->blocks_written) / ((float)model->chip_size * (float)1000);
-        }, true);
+            model->progress = ((float)model->block_size * (float)model->blocks_written) /
+                              ((float)model->chip_size * (float)1000);
+        },
+        true);
 }
 
 void spi_mem_view_read_reset(SPIMemReadView* app) {
     with_view_model(
-        app->view, SPIMemReadViewModel* model, {
-        model->blocks_written = 0;
-        model->block_size = 0;
-        model->chip_size = 0;
-        model->progress = 0;
-    }, true);
+        app->view,
+        SPIMemReadViewModel * model,
+        {
+            model->blocks_written = 0;
+            model->block_size = 0;
+            model->chip_size = 0;
+            model->progress = 0;
+        },
+        true);
 }

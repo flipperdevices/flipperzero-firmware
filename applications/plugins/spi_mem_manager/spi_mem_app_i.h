@@ -29,7 +29,7 @@
 #define SPI_MEM_FILE_NAME_SIZE 100
 #define SPI_MEM_TEXT_BUFFER_SIZE 128
 
-struct SPIMemApp{
+struct SPIMemApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
