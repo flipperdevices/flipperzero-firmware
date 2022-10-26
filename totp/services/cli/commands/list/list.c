@@ -30,11 +30,13 @@ static uint8_t get_digits_as_int(TokenDigitsCount digits) {
 }
 
 void totp_cli_command_list_docopt_commands() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_LIST ", " TOTP_CLI_COMMAND_LIST_ALT "         List all available tokens\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_LIST ", " TOTP_CLI_COMMAND_LIST_ALT
+                    "         List all available tokens\r\n");
 }
 
 void totp_cli_command_list_docopt_usage() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_LIST " | " TOTP_CLI_COMMAND_LIST_ALT) "\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(
+        TOTP_CLI_COMMAND_LIST " | " TOTP_CLI_COMMAND_LIST_ALT) "\r\n");
 }
 
 void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {

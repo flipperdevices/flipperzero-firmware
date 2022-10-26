@@ -21,6 +21,8 @@
 
 #define TOTP_CLI_DELETE_LAST_LINE() TOTP_CLI_PRINTF("\033[A\33[2K\r")
 #define TOTP_CLI_DELETE_CURRENT_LINE() TOTP_CLI_PRINTF("\33[2K\r")
-#define TOTP_CLI_PRINT_INVALID_ARGUMENTS() TOTP_CLI_PRINTF("Invalid command arguments. use \"help\" command to get list of available commands")
+#define TOTP_CLI_PRINT_INVALID_ARGUMENTS() \
+    TOTP_CLI_PRINTF(                       \
+        "Invalid command arguments. use \"help\" command to get list of available commands")
 
 bool totp_cli_ensure_authenticated(PluginState* plugin_state, Cli* cli);

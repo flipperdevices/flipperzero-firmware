@@ -7,16 +7,22 @@
 #define TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE "timezone"
 
 void totp_cli_command_timezone_docopt_commands() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_TIMEZONE ", " TOTP_CLI_COMMAND_TIMEZONE_ALT "     Get or set current timezone\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_TIMEZONE ", " TOTP_CLI_COMMAND_TIMEZONE_ALT
+                    "     Get or set current timezone\r\n");
 }
 
 void totp_cli_command_timezone_docopt_usage() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_TIMEZONE " | " TOTP_CLI_COMMAND_TIMEZONE_ALT) " " DOCOPT_OPTIONAL(DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE)) "\r\n");
+    TOTP_CLI_PRINTF(
+        "  " TOTP_CLI_COMMAND_NAME
+        " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_TIMEZONE " | " TOTP_CLI_COMMAND_TIMEZONE_ALT) " " DOCOPT_OPTIONAL(
+            DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE)) "\r\n");
 }
 
 void totp_cli_command_timezone_docopt_arguments() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE "    Timezone offset in hours to be set.\r\n");
-    TOTP_CLI_PRINTF("              If not provided then current timezone offset will be printed\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE
+                    "    Timezone offset in hours to be set.\r\n");
+    TOTP_CLI_PRINTF(
+        "              If not provided then current timezone offset will be printed\r\n");
 }
 
 void totp_cli_command_timezone_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {

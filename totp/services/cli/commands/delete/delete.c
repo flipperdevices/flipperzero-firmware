@@ -12,12 +12,15 @@
 #define TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX "-f"
 
 void totp_cli_command_delete_docopt_commands() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_DELETE ", " TOTP_CLI_COMMAND_DELETE_ALT "       Delete existing token\r\n");
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_DELETE ", " TOTP_CLI_COMMAND_DELETE_ALT
+                    "       Delete existing token\r\n");
 }
 
 void totp_cli_command_delete_docopt_usage() {
-    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_DELETE " | " TOTP_CLI_COMMAND_DELETE_ALT) " " DOCOPT_ARGUMENT(TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " "
-        DOCOPT_OPTIONAL(DOCOPT_SWITCH(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX)) "\r\n");
+    TOTP_CLI_PRINTF(
+        "  " TOTP_CLI_COMMAND_NAME
+        " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_DELETE " | " TOTP_CLI_COMMAND_DELETE_ALT) " " DOCOPT_ARGUMENT(
+            TOTP_CLI_COMMAND_DELETE_ARG_INDEX) " " DOCOPT_OPTIONAL(DOCOPT_SWITCH(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX)) "\r\n");
 }
 
 void totp_cli_command_delete_docopt_arguments() {
@@ -25,7 +28,8 @@ void totp_cli_command_delete_docopt_arguments() {
 }
 
 void totp_cli_command_delete_docopt_options() {
-    TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) "             Force command to do not ask user for interactive confirmation\r\n");
+    TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(
+        TOTP_CLI_COMMAND_DELETE_ARG_FORCE_SUFFIX) "             Force command to do not ask user for interactive confirmation\r\n");
 }
 
 void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
