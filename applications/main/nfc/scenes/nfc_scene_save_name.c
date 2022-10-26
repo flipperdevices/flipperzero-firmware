@@ -66,7 +66,8 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
                     DOLPHIN_DEED(DolphinDeedNfcAddSave);
-                } else {
+                } else if(!scene_manager_has_previous_scene(
+                              nfc->scene_manager, NfcSceneSavedMenu)) {
                     DOLPHIN_DEED(DolphinDeedNfcSave);
                 }
                 consumed = true;
