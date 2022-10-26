@@ -59,7 +59,7 @@ bool nfc_scene_mf_classic_write_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventWrongCard) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicWriteFail);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicWrongCard);
             consumed = true;
         } else if(event.event == NfcWorkerEventCardDetected) {
             scene_manager_set_scene_state(

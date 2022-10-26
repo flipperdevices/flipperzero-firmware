@@ -778,9 +778,6 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
                 *old_data = new_data;
                 nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
                 break;
-            } else {
-                nfc_worker->callback(NfcWorkerEventFail, nfc_worker->context);
-                break;
             }
         } else {
             if(card_found_notified) {
