@@ -13,7 +13,8 @@ static void snake_game_close_file(FlipperFormat* file) {
     furi_record_close(RECORD_STORAGE);
 }
 
-static FlipperFormat* snake_game_open_file(Storage* storage) {
+static FlipperFormat* snake_game_open_file() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
     if(storage_common_stat(storage, SNAKE_GAME_FILE_PATH, NULL) == FSE_OK) {
@@ -60,8 +61,7 @@ int16_t snake_game_save_score_to_file(int32_t len) {
 }
 
 void snake_game_save_game_to_file(SnakeState* const snake_state) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = snake_game_open_file(storage);
+    FlipperFormat* file = snake_game_open_file();
 
     uint32_t temp = snake_state->len;
     if(!flipper_format_insert_or_update_uint32(file, SNAKE_GAME_CONFIG_KEY_LEN,&temp, 1)){
@@ -105,8 +105,7 @@ void snake_game_save_game_to_file(SnakeState* const snake_state) {
 }
 
 bool snake_game_init_game_from_file(SnakeState* const snake_state) {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = snake_game_open_file(storage);
+    FlipperFormat* file = snake_game_open_file();
 
     FuriString* file_type = furi_string_alloc();
     uint32_t version = 1;
@@ -151,7 +150,6 @@ bool snake_game_init_game_from_file(SnakeState* const snake_state) {
     }
     snake_state->nextMovement = temp;
     flipper_format_delete_key(file, SNAKE_GAME_CONFIG_KEY_NEXT_MOVEMENT);
-
 
     array_size = 2;
     uint32_t temp_point_array[array_size];
