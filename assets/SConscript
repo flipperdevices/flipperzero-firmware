@@ -68,10 +68,11 @@ if assetsenv["IS_BASE_FIRMWARE"]:
         assetsenv.Dir("#/assets/dolphin"),
         DOLPHIN_RES_TYPE="external",
     )
+    assetsenv.NoClean(dolphin_external)
     if assetsenv["FORCE"]:
         assetsenv.AlwaysBuild(dolphin_external)
     assetsenv.Alias("dolphin_ext", dolphin_external)
-    assetsenv.Clean(dolphin_external, assetsenv.Dir("#/assets/resources/dolphin"))
+    # assetsenv.Clean(dolphin_external, assetsenv.Dir("#/assets/resources/dolphin"))
 
     # Resources manifest
     resources = assetsenv.Command(
