@@ -1,4 +1,4 @@
-#include "../spi_mem_app.h"
+#include "../spi_mem_app_i.h"
 
 typedef enum {
     SPIMemSceneSavedFileMenuSubmenuIndexWrite,

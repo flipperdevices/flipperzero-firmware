@@ -1,4 +1,4 @@
-#include "spi_mem_app.h"
+#include "spi_mem_app_i.h"
 
 static bool spi_mem_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

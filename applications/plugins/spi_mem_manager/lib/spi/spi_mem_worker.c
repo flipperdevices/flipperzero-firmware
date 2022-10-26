@@ -39,6 +39,7 @@ static int32_t spi_mem_worker_thread(void* thread_context) {
         if(flags != FuriFlagErrorTimeout) {
             if(flags & SPIMemEventStopThread) break;
             if(flags & SPIMemEventChipDetect) worker->mode_index = SPIMemWorkerModeChipDetect;
+            if(flags & SPIMemEventRead) worker->mode_index = SPIMemWorkerModeRead;
             if(spi_mem_worker_modes[worker->mode_index].process) {
                 spi_mem_worker_modes[worker->mode_index].process(worker);
             }

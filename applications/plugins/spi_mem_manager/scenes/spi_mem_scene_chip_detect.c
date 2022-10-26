@@ -1,4 +1,4 @@
-#include "../spi_mem_app.h"
+#include "../spi_mem_app_i.h"
 
 static void spi_mem_scene_chip_detect_callback(void* context, SPIMemCustomEventWorker event) {
     SPIMemApp* app = context;
@@ -8,7 +8,7 @@ static void spi_mem_scene_chip_detect_callback(void* context, SPIMemCustomEventW
 void spi_mem_scene_chip_detect_on_enter(void* context) {
     SPIMemApp* app = context;
     popup_set_text(app->popup, "Looking\nfor SPI chip ...", 95, 25, AlignCenter, AlignTop);
-    notification_message(app->notifications, &sequence_blink_start_cyan);
+    notification_message(app->notifications, &sequence_blink_start_yellow);
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewPopup);
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_chip_detect_start(

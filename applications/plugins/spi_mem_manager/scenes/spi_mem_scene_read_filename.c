@@ -1,4 +1,4 @@
-#include "../spi_mem_app.h"
+#include "../spi_mem_app_i.h"
 #include "../spi_mem_files.h"
 
 void spi_mem_scene_read_filename_view_result_callback(void* context) {

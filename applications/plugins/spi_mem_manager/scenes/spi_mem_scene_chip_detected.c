@@ -1,4 +1,4 @@
-#include "../spi_mem_app.h"
+#include "../spi_mem_app_i.h"
 
 static void spi_mem_scene_chip_detected_widget_callback(
     GuiButtonType result,

@@ -1,4 +1,4 @@
-#include "spi_mem_app.h"
+#include "spi_mem_app_i.h"
 
 void spi_mem_file_create_folder(SPIMemApp* app) {
     if(!storage_simply_mkdir(app->storage, SPI_MEM_FILE_FOLDER)) {
@@ -17,11 +17,6 @@ bool spi_mem_file_delete(SPIMemApp* app) {
         furi_string_free(message);
         return false;
     }
-    return true;
-}
-
-bool spi_mem_file_write_block(FlipperFormat* file, size_t size, uint8_t* data) {
-    if(!flipper_format_write_hex(file, "Data", data, size)) return false;
     return true;
 }
 
@@ -58,3 +53,20 @@ bool spi_mem_file_select(SPIMemApp* app) {
     }
     return success;
 }
+
+FlipperFormat* spi_mem_file_open(SPIMemApp* app) {
+    FlipperFormat* file = flipper_format_file_alloc(app->storage);
+    flipper_format_file_open_always(file, furi_string_get_cstr(app->file_path));
+    return file;
+}
+
+bool spi_mem_file_write_block(FlipperFormat* file, uint8_t* data, size_t size) {
+    if(!flipper_format_write_hex(file, "Data", data, size)) return false;
+    return true;
+}
+
+void spi_mem_file_close(FlipperFormat* file) {
+    flipper_format_file_close(file);
+    flipper_format_free(file);
+}
+

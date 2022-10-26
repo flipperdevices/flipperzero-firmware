@@ -1,4 +1,4 @@
-#include "../spi_mem_app.h"
+#include "../spi_mem_app_i.h"
 
 static void spi_mem_scene_delete_success_popup_callback(void* context) {
     SPIMemApp* app = context;
