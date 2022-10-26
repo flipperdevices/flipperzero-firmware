@@ -196,32 +196,21 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cTools* i2ctools) {
         addr_text,
         sizeof(addr_text),
         "0x%02x",
-        (int)i2ctools->scanner->addresses[i2ctools->sender.address_idx]);
+        (int)i2ctools->scanner->addresses[i2ctools->sender->address_idx]);
     canvas_draw_str_aligned(canvas, 90, 5, AlignLeft, AlignTop, addr_text);
     canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignTop, "Value: ");
 
     canvas_draw_icon(canvas, 80, 17, &I_ButtonUp_7x4);
     canvas_draw_icon(canvas, 115, 17, &I_ButtonDown_7x4);
-    snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)i2ctools->sender.value);
+    snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)i2ctools->sender->value);
     canvas_draw_str_aligned(canvas, 90, 15, AlignLeft, AlignTop, addr_text);
-    if(i2ctools->sender.must_send) {
-        furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-        i2ctools->sender.error = furi_hal_i2c_trx(
-            &furi_hal_i2c_handle_external,
-            i2ctools->scanner->addresses[i2ctools->sender.address_idx] << 1,
-            &i2ctools->sender.value,
-            1,
-            i2ctools->sender.recv,
-            sizeof(i2ctools->sender.recv),
-            3);
-        furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-        i2ctools->sender.must_send = false;
-        i2ctools->sender.sended = true;
+    if(i2ctools->sender->must_send) {
+        i2c_send(i2ctools->sender);
     }
     canvas_draw_str_aligned(canvas, 50, 25, AlignLeft, AlignTop, "Result: ");
-    if(i2ctools->sender.sended) {
-        for(uint8_t i = 0; i < sizeof(i2ctools->sender.recv); i++) {
-            snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)i2ctools->sender.recv[i]);
+    if(i2ctools->sender->sended) {
+        for(uint8_t i = 0; i < sizeof(i2ctools->sender->recv); i++) {
+            snprintf(addr_text, sizeof(addr_text), "0x%02x", (int)i2ctools->sender->recv[i]);
             canvas_draw_str_aligned(canvas, 90, 25 + (i * 10), AlignLeft, AlignTop, addr_text);
         }
     }
@@ -346,8 +335,8 @@ int32_t i2ctools_app(void* p) {
 
     i2ctools->scanner = i2c_scanner_alloc();
 
-    i2ctools->sender.must_send = false;
-    i2ctools->sender.sended = false;
+    i2ctools->sender = i2c_sender_alloc();
+
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         if(event.key == InputKeyBack && event.type == InputTypeRelease) {
             if(i2ctools->current_menu == MAIN_VIEW) {
@@ -370,18 +359,18 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->scanner->menu_index--;
                 }
             } else if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.value < 0xFF) {
-                    i2ctools->sender.value++;
-                    i2ctools->sender.sended = false;
+                if(i2ctools->sender->value < 0xFF) {
+                    i2ctools->sender->value++;
+                    i2ctools->sender->sended = false;
                 }
             }
         } else if(
             event.key == InputKeyUp &&
             (event.type == InputTypeLong || event.type == InputTypeRepeat)) {
             if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.value < 0xF9) {
-                    i2ctools->sender.value += 5;
-                    i2ctools->sender.sended = false;
+                if(i2ctools->sender->value < 0xF9) {
+                    i2ctools->sender->value += 5;
+                    i2ctools->sender->sended = false;
                 }
             }
         } else if(event.key == InputKeyDown && event.type == InputTypeRelease) {
@@ -394,16 +383,16 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->scanner->menu_index++;
                 }
             } else if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.value > 0x00) {
-                    i2ctools->sender.value--;
-                    i2ctools->sender.sended = false;
+                if(i2ctools->sender->value > 0x00) {
+                    i2ctools->sender->value--;
+                    i2ctools->sender->sended = false;
                 }
             }
         } else if(event.key == InputKeyDown && event.type == InputTypeLong) {
             if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.value > 0x05) {
-                    i2ctools->sender.value -= 5;
-                    i2ctools->sender.sended = false;
+                if(i2ctools->sender->value > 0x05) {
+                    i2ctools->sender->value -= 5;
+                    i2ctools->sender->sended = false;
                 }
             }
 
@@ -422,7 +411,7 @@ int32_t i2ctools_app(void* p) {
             } else if(i2ctools->current_menu == SCAN_VIEW) {
                 scan_i2c_bus(i2ctools->scanner);
             } else if(i2ctools->current_menu == SEND_VIEW) {
-                i2ctools->sender.must_send = true;
+                i2ctools->sender->must_send = true;
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
                 if(i2ctools->sniffer->started) {
                     stop_interrupts();
@@ -436,9 +425,9 @@ int32_t i2ctools_app(void* p) {
             }
         } else if(event.key == InputKeyRight && event.type == InputTypeRelease) {
             if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.address_idx < (i2ctools->scanner->nb_found - 1)) {
-                    i2ctools->sender.address_idx++;
-                    i2ctools->sender.sended = false;
+                if(i2ctools->sender->address_idx < (i2ctools->scanner->nb_found - 1)) {
+                    i2ctools->sender->address_idx++;
+                    i2ctools->sender->sended = false;
                 }
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
                 if(i2ctools->sniffer->menu_index < i2ctools->sniffer->frame_index) {
@@ -447,9 +436,9 @@ int32_t i2ctools_app(void* p) {
             }
         } else if(event.key == InputKeyLeft && event.type == InputTypeRelease) {
             if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.address_idx > 0) {
-                    i2ctools->sender.address_idx--;
-                    i2ctools->sender.sended = false;
+                if(i2ctools->sender->address_idx > 0) {
+                    i2ctools->sender->address_idx--;
+                    i2ctools->sender->sended = false;
                 }
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
                 if(i2ctools->sniffer->menu_index > 0) {

@@ -5,6 +5,7 @@
 
 #include "i2csniffer.h"
 #include "i2cscanner.h"
+#include "i2csender.h"
 
 // Menu
 typedef enum {
@@ -18,18 +19,6 @@ typedef enum {
     MENU_SIZE
 } i2cToolsMainMenu;
 
-// Bus scanner
-
-// Sender
-typedef struct {
-    uint8_t address_idx;
-    uint8_t value;
-    uint8_t recv[2];
-    bool must_send;
-    bool sended;
-    bool error;
-} _sender;
-
 // App datas
 typedef struct {
     ViewPort* view_port;
@@ -38,5 +27,5 @@ typedef struct {
 
     i2cScanner* scanner;
     i2cSniffer* sniffer;
-    _sender sender;
+    i2cSender* sender;
 } i2cTools;
