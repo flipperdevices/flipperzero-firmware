@@ -3,7 +3,7 @@
 #include "../../../list/list.h"
 #include "../../../../types/token_info.h"
 #include "../../../config/constants.h"
-#include "../../cli_common_helpers.h"
+#include "../../cli_helpers.h"
 
 static char* get_algo_as_cstr(TokenHashAlgo algo) {
     switch(algo) {
@@ -29,8 +29,12 @@ static uint8_t get_digits_as_int(TokenDigitsCount digits) {
     return 6;
 }
 
-void totp_cli_command_list_print_help() {
-    TOTP_CLI_PRINTF("\t" TOTP_CLI_COMMAND_LIST " - list all tokens\r\n\r\n");
+void totp_cli_command_list_docopt_commands() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_LIST ", " TOTP_CLI_COMMAND_LIST_ALT "         List all available tokens\r\n");
+}
+
+void totp_cli_command_list_docopt_usage() {
+    TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_NAME " " DOCOPT_REQUIRED(TOTP_CLI_COMMAND_LIST " | " TOTP_CLI_COMMAND_LIST_ALT) "\r\n");
 }
 
 void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
