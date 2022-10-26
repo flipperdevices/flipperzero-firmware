@@ -139,13 +139,8 @@ bool totp_scene_token_menu_handle_event(PluginEvent* const event, PluginState* p
                         dialog_message_show(plugin_state->dialogs, message);
                     dialog_message_free(message);
                     if(dialog_result == DialogMessageButtonRight) {
-                        uint8_t i = 0;
-
-                        ListNode* list_node = plugin_state->tokens_list;
-                        while(i < scene_state->current_token_index && list_node->next != NULL) {
-                            list_node = list_node->next;
-                            i++;
-                        }
+                        ListNode* list_node = list_element_at(
+                            plugin_state->tokens_list, scene_state->current_token_index);
 
                         TokenInfo* tokenInfo = list_node->data;
                         token_info_free(tokenInfo);

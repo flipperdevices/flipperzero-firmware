@@ -24,6 +24,7 @@ void totp_scene_authenticate_activate(PluginState* plugin_state) {
     scene_state->code_length = 0;
     memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
     plugin_state->current_scene_state = scene_state;
+    memset(&plugin_state->iv[0], 0, TOTP_IV_SIZE);
 }
 
 void totp_scene_authenticate_render(Canvas* const canvas, PluginState* plugin_state) {
