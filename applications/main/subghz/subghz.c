@@ -230,9 +230,11 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+    if(!alloc_for_tx_only) {
+        subghz->txrx->history = subghz_history_alloc();
+    }
 
     subghz->txrx->raw_threshold_rssi = SUBGHZ_RAW_TRESHOLD_MIN;
-    subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
 
     subghz->txrx->fff_data = flipper_format_string_alloc();

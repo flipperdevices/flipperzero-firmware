@@ -316,8 +316,25 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
-    if(!instance->pause && (instance->upload_raw != NULL)) {
-        if(duration > subghz_protocol_raw_const.te_short) {
+    if(instance->upload_raw != NULL && !instance->pause &&
+       duration > subghz_protocol_raw_const.te_short) {
+        if(instance->auto_mode) {
+            float rssi = furi_hal_subghz_get_rssi();
+
+            if(rssi >= instance->rssi_threshold) {
+                subghz_protocol_decoder_raw_write_data(context, level, duration);
+                instance->has_rssi_above_threshold = true;
+                instance->postroll_frames = 0;
+            } else if(instance->has_rssi_above_threshold) {
+                subghz_protocol_decoder_raw_write_data(instance, level, duration);
+                instance->postroll_frames++;
+
+                if(instance->postroll_frames >= SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES) {
+                    if(instance->base.callback)
+                        instance->base.callback(&instance->base, instance->base.context);
+                }
+            }
+        } else {
             if(instance->last_level != level) {
                 instance->last_level = (level ? true : false);
                 instance->upload_raw[instance->ind_write++] = (level ? duration : -duration);
