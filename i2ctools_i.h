@@ -4,6 +4,7 @@
 #include <input/input.h>
 
 #include "i2csniffer.h"
+#include "i2cscanner.h"
 
 // Menu
 typedef enum {
@@ -18,13 +19,6 @@ typedef enum {
 } i2cToolsMainMenu;
 
 // Bus scanner
-#define MAX_I2C_ADDR 0x7F
-typedef struct {
-    uint8_t addresses[MAX_I2C_ADDR + 1];
-    uint8_t found;
-    uint8_t menu_index;
-    bool scanned;
-} _scanner;
 
 // Sender
 typedef struct {
@@ -42,7 +36,7 @@ typedef struct {
     i2cToolsMainMenu current_menu;
     uint8_t main_menu_index;
 
-    _scanner scanner;
+    i2cScanner* scanner;
     i2cSniffer* sniffer;
     _sender sender;
 } i2cTools;

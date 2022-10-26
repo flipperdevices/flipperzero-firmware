@@ -18,29 +18,6 @@
 #define PLAY_MENU_X 75
 #define PLAY_MENU_Y 48
 
-// I2C BUS
-#define I2C_BUS &furi_hal_i2c_handle_external
-
-void scan_i2c_bus(i2cTools* i2ctools) {
-    i2ctools->scanner.found = 0;
-    i2ctools->scanner.scanned = true;
-    furi_hal_i2c_acquire(I2C_BUS);
-    // scan
-    for(uint8_t addr = 0x01; addr < MAX_I2C_ADDR; addr++) {
-        // Check for peripherals
-        if(furi_hal_i2c_is_device_ready(I2C_BUS, addr, 2)) {
-            // skip even 8-bit addr
-            if(addr % 2 != 0) {
-                continue;
-            }
-            // convert addr to 7-bits
-            i2ctools->scanner.addresses[i2ctools->scanner.found] = addr >> 1;
-            i2ctools->scanner.found++;
-        }
-    }
-    furi_hal_i2c_release(I2C_BUS);
-}
-
 void i2ctools_draw_main_menu(Canvas* canvas, i2cTools* i2ctools) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -196,12 +173,12 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cTools* i2ctools) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SEND_MENU_TEXT);
 
-    if(!i2ctools->scanner.scanned) {
-        scan_i2c_bus(i2ctools);
+    if(!i2ctools->scanner->scanned) {
+        scan_i2c_bus(i2ctools->scanner);
     }
 
     canvas_set_font(canvas, FontSecondary);
-    if(i2ctools->scanner.found <= 0) {
+    if(i2ctools->scanner->nb_found <= 0) {
         canvas_draw_str_aligned(canvas, 60, 5, AlignLeft, AlignTop, "No peripherals");
         canvas_draw_str_aligned(canvas, 60, 15, AlignLeft, AlignTop, "Found");
         return;
@@ -219,7 +196,7 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cTools* i2ctools) {
         addr_text,
         sizeof(addr_text),
         "0x%02x",
-        (int)i2ctools->scanner.addresses[i2ctools->sender.address_idx]);
+        (int)i2ctools->scanner->addresses[i2ctools->sender.address_idx]);
     canvas_draw_str_aligned(canvas, 90, 5, AlignLeft, AlignTop, addr_text);
     canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignTop, "Value: ");
 
@@ -231,7 +208,7 @@ void i2ctools_draw_send_view(Canvas* canvas, i2cTools* i2ctools) {
         furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
         i2ctools->sender.error = furi_hal_i2c_trx(
             &furi_hal_i2c_handle_external,
-            i2ctools->scanner.addresses[i2ctools->sender.address_idx] << 1,
+            i2ctools->scanner->addresses[i2ctools->sender.address_idx] << 1,
             &i2ctools->sender.value,
             1,
             i2ctools->sender.recv,
@@ -261,13 +238,13 @@ void i2ctools_draw_scan_view(Canvas* canvas, i2cTools* i2ctools) {
     char count_text[46];
     char count_text_fmt[] = "Found: %d";
     canvas_set_font(canvas, FontSecondary);
-    snprintf(count_text, sizeof(count_text), count_text_fmt, (int)i2ctools->scanner.found);
+    snprintf(count_text, sizeof(count_text), count_text_fmt, (int)i2ctools->scanner->nb_found);
     canvas_draw_str_aligned(canvas, 50, 3, AlignLeft, AlignTop, count_text);
     uint8_t x_pos = 0;
     uint8_t y_pos = 0;
     uint8_t idx_to_print = 0;
-    for(uint8_t i = 0; i < (int)i2ctools->scanner.found; i++) {
-        idx_to_print = i + i2ctools->scanner.menu_index * 3;
+    for(uint8_t i = 0; i < (int)i2ctools->scanner->nb_found; i++) {
+        idx_to_print = i + i2ctools->scanner->menu_index * 3;
         if(idx_to_print >= MAX_I2C_ADDR) {
             break;
         }
@@ -275,7 +252,7 @@ void i2ctools_draw_scan_view(Canvas* canvas, i2cTools* i2ctools) {
             count_text,
             sizeof(count_text),
             "0x%02x ",
-            (int)i2ctools->scanner.addresses[idx_to_print]);
+            (int)i2ctools->scanner->addresses[idx_to_print]);
         if(i < 3) {
             x_pos = 50 + (i * 26);
             y_pos = 15;
@@ -297,7 +274,7 @@ void i2ctools_draw_scan_view(Canvas* canvas, i2cTools* i2ctools) {
         canvas_draw_str_aligned(canvas, x_pos, y_pos, AlignLeft, AlignTop, count_text);
     }
     // Right cursor
-    y_pos = 14 + i2ctools->scanner.menu_index;
+    y_pos = 14 + i2ctools->scanner->menu_index;
     canvas_draw_rbox(canvas, 125, y_pos, 3, 10, 1);
 
     // Button
@@ -344,6 +321,7 @@ int32_t i2ctools_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
+    // Alloc i2ctools
     i2cTools* i2ctools = malloc(sizeof(i2cTools));
     ValueMutex i2ctools_mutex;
     if(!init_mutex(&i2ctools_mutex, i2ctools, sizeof(i2cTools))) {
@@ -352,8 +330,7 @@ int32_t i2ctools_app(void* p) {
         return -1;
     }
 
-    i2ctools->sniffer = i2c_sniffer_alloc();
-
+    // Alloc viewport
     i2ctools->view_port = view_port_alloc();
     view_port_draw_callback_set(i2ctools->view_port, i2ctools_draw_callback, &i2ctools_mutex);
     view_port_input_callback_set(i2ctools->view_port, i2ctools_input_callback, event_queue);
@@ -364,10 +341,10 @@ int32_t i2ctools_app(void* p) {
 
     InputEvent event;
 
+    i2ctools->sniffer = i2c_sniffer_alloc();
     i2ctools->sniffer->menu_index = 0;
 
-    i2ctools->scanner.menu_index = 0;
-    i2ctools->scanner.scanned = false;
+    i2ctools->scanner = i2c_scanner_alloc();
 
     i2ctools->sender.must_send = false;
     i2ctools->sender.sended = false;
@@ -389,8 +366,8 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->main_menu_index--;
                 }
             } else if(i2ctools->current_menu == SCAN_VIEW) {
-                if(i2ctools->scanner.menu_index > 0) {
-                    i2ctools->scanner.menu_index--;
+                if(i2ctools->scanner->menu_index > 0) {
+                    i2ctools->scanner->menu_index--;
                 }
             } else if(i2ctools->current_menu == SEND_VIEW) {
                 if(i2ctools->sender.value < 0xFF) {
@@ -413,8 +390,8 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->main_menu_index++;
                 }
             } else if(i2ctools->current_menu == SCAN_VIEW) {
-                if(i2ctools->scanner.menu_index < ((int)i2ctools->scanner.found / 3)) {
-                    i2ctools->scanner.menu_index++;
+                if(i2ctools->scanner->menu_index < ((int)i2ctools->scanner->nb_found / 3)) {
+                    i2ctools->scanner->menu_index++;
                 }
             } else if(i2ctools->current_menu == SEND_VIEW) {
                 if(i2ctools->sender.value > 0x00) {
@@ -433,7 +410,7 @@ int32_t i2ctools_app(void* p) {
         } else if(event.key == InputKeyOk && event.type == InputTypeRelease) {
             if(i2ctools->current_menu == MAIN_VIEW) {
                 if(i2ctools->main_menu_index == 0) {
-                    scan_i2c_bus(i2ctools);
+                    scan_i2c_bus(i2ctools->scanner);
                     i2ctools->current_menu = SCAN_VIEW;
                 } else if(i2ctools->main_menu_index == 1) {
                     i2ctools->current_menu = SNIFF_VIEW;
@@ -443,7 +420,7 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->current_menu = PLAY_VIEW;
                 }
             } else if(i2ctools->current_menu == SCAN_VIEW) {
-                scan_i2c_bus(i2ctools);
+                scan_i2c_bus(i2ctools->scanner);
             } else if(i2ctools->current_menu == SEND_VIEW) {
                 i2ctools->sender.must_send = true;
             } else if(i2ctools->current_menu == SNIFF_VIEW) {
@@ -459,7 +436,7 @@ int32_t i2ctools_app(void* p) {
             }
         } else if(event.key == InputKeyRight && event.type == InputTypeRelease) {
             if(i2ctools->current_menu == SEND_VIEW) {
-                if(i2ctools->sender.address_idx < (i2ctools->scanner.found - 1)) {
+                if(i2ctools->sender.address_idx < (i2ctools->scanner->nb_found - 1)) {
                     i2ctools->sender.address_idx++;
                     i2ctools->sender.sended = false;
                 }
@@ -486,6 +463,7 @@ int32_t i2ctools_app(void* p) {
     view_port_free(i2ctools->view_port);
     furi_message_queue_free(event_queue);
     i2c_sniffer_free(i2ctools->sniffer);
+    i2c_scanner_free(i2ctools->scanner);
     free(i2ctools);
     furi_record_close(RECORD_GUI);
     return 0;
