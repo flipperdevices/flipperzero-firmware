@@ -453,6 +453,7 @@ int32_t i2ctools_app(void* p) {
     furi_message_queue_free(event_queue);
     i2c_sniffer_free(i2ctools->sniffer);
     i2c_scanner_free(i2ctools->scanner);
+    i2c_sender_free(i2ctools->sender);
     free(i2ctools);
     furi_record_close(RECORD_GUI);
     return 0;
