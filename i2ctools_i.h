@@ -6,24 +6,15 @@
 #include "i2csniffer.h"
 #include "i2cscanner.h"
 #include "i2csender.h"
-
-// Menu
-typedef enum {
-    MAIN_VIEW,
-    SCAN_VIEW,
-    SNIFF_VIEW,
-    SEND_VIEW,
-    PLAY_VIEW,
-
-    /* Know menu Size*/
-    MENU_SIZE
-} i2cToolsMainMenu;
+#include "views/main_view.h"
+#include "views/sniffer_view.h"
+#include "views/scanner_view.h"
+#include "views/sender_view.h"
 
 // App datas
 typedef struct {
     ViewPort* view_port;
-    i2cToolsMainMenu current_menu;
-    uint8_t main_menu_index;
+    i2cMainView* main_view;
 
     i2cScanner* scanner;
     i2cSniffer* sniffer;
