@@ -27,12 +27,6 @@ void nfc_scene_passport_auth_method_changed(VariableItem* item) {
     variable_item_set_current_value_text(item, mrtd_auth_method_string(index));
 }
 
-void nfc_scene_passport_load_select_changed(VariableItem* item) {
-    Nfc* nfc = variable_item_get_context(item);
-    UNUSED(nfc); //TODO: remove either this or previous line
-    //TODO: iterate through params
-}
-
 bool nfc_scene_passport_auth_load(Nfc* nfc) {
     const DialogsFileBrowserOptions browser_options = {
         .extension = MRTD_APP_EXTENSION,
@@ -87,8 +81,6 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     const size_t temp_str_size = 15;
     char temp_str[temp_str_size];
 
-    uint8_t num_params_saved = 0;
-
     snprintf(temp_str, temp_str_size, "%02u%02u%02u",
         mrtd_data->auth.birth_date.year,
         mrtd_data->auth.birth_date.month,
@@ -133,7 +125,7 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     variable_item_list_add(variable_item_list, "Authenticate and read", 1, NULL, NULL);
 
     variable_item_list_add(variable_item_list, "Save parameters", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Load parameters", num_params_saved, nfc_scene_passport_load_select_changed, nfc);
+    variable_item_list_add(variable_item_list, "Load parameters", 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(
         variable_item_list, nfc_scene_passport_auth_var_list_enter_callback, nfc);
