@@ -56,6 +56,7 @@ bool nfc_scene_passport_auth_load(Nfc* nfc) {
                 true);
 
         nfc_scene_passport_auth_on_enter(nfc);
+        variable_item_list_set_selected_item(nfc->variable_item_list, NfcScenePassportAuthSelectAuth);
     }
 
     return res;
