@@ -23,7 +23,6 @@
 #include "views/spi_mem_view_read.h"
 
 #define TAG "SPIMem"
-#define SPI_MEM_FILE_TYPE "Flipper SPI memmory dump"
 #define SPI_MEM_FILE_EXTENSION ".spimem"
 #define SPI_MEM_FILE_FOLDER EXT_PATH("spimem")
 #define SPI_MEM_FILE_NAME_SIZE 100
@@ -40,7 +39,7 @@ struct SPIMemApp {
     FuriString* file_path;
     DialogsApp* dialogs;
     Storage* storage;
-    FlipperFormat* flipper_file;
+    File* file;
     Widget* widget;
     SPIMemWorker* worker;
     SPIMemChip* chip_info;

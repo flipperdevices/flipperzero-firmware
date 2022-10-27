@@ -17,7 +17,7 @@ SPIMemWorker* spi_mem_worker_alloc() {
     furi_thread_set_name(worker->thread, "SPIMemWorker");
     furi_thread_set_callback(worker->thread, spi_mem_worker_thread);
     furi_thread_set_context(worker->thread, worker);
-    furi_thread_set_stack_size(worker->thread, 1024);
+    furi_thread_set_stack_size(worker->thread, 6000);
     return worker;
 }
 
@@ -74,12 +74,10 @@ void spi_mem_worker_read_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
-    FlipperFormat* flipper_file,
     void* context) {
     furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
     worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
-    worker->flipper_file = flipper_file;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventRead);
 }

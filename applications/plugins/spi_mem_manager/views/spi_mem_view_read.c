@@ -89,7 +89,7 @@ void spi_mem_view_read_inc_progress(SPIMemReadView* app) {
         {
             model->blocks_written++;
             model->progress = ((float)model->block_size * (float)model->blocks_written) /
-                              ((float)model->chip_size * (float)1000);
+                              ((float)model->chip_size);
         },
         true);
 }

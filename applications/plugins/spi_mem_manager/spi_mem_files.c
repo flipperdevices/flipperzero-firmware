@@ -33,7 +33,7 @@ bool spi_mem_file_select(SPIMemApp* app) {
 
 bool spi_mem_file_open(SPIMemApp* app) {
     bool success = false;
-    app->flipper_file = flipper_format_file_alloc(app->storage);
+    app->file = storage_file_alloc(app->storage);
     do {
         if(furi_string_end_with(app->file_path, SPI_MEM_FILE_EXTENSION)) {
             if(!spi_mem_file_delete(app)) break;
@@ -41,11 +41,9 @@ bool spi_mem_file_open(SPIMemApp* app) {
             furi_string_left(app->file_path, filename_start);
         }
         furi_string_cat_printf(app->file_path, "/%s%s", app->text_buffer, SPI_MEM_FILE_EXTENSION);
-        FURI_LOG_E(TAG, furi_string_get_cstr(app->file_path));
-        if(!flipper_format_file_open_always(
-               app->flipper_file, furi_string_get_cstr(app->file_path)))
+        if(!storage_file_open(
+               app->file, furi_string_get_cstr(app->file_path), FSAM_READ_WRITE, FSOM_CREATE_NEW))
             break;
-        if(!flipper_format_write_header_cstr(app->flipper_file, SPI_MEM_FILE_TYPE, 1)) break;
         success = true;
     } while(0);
     if(!success) {
@@ -55,11 +53,11 @@ bool spi_mem_file_open(SPIMemApp* app) {
 }
 
 bool spi_mem_file_write_block(SPIMemApp* app, uint8_t* data, size_t size) {
-    if(!flipper_format_write_hex(app->flipper_file, "Data", data, size)) return false;
+    if(storage_file_write(app->file, data, size) != size) return false;
     return true;
 }
 
 void spi_mem_file_close(SPIMemApp* app) {
-    flipper_format_file_close(app->flipper_file);
-    flipper_format_free(app->flipper_file);
+    storage_file_close(app->file);
+    storage_file_free(app->file);
 }

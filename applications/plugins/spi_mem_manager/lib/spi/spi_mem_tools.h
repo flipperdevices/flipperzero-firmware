@@ -4,6 +4,13 @@
 
 #define SPI_MEM_SPI_TIMEOUT 1000
 #define SPI_MEM_MAX_BLOCK_SIZE 256
+#define SPI_MEM_FILE_BUFFER_SIZE 4096
 
 bool spi_mem_tools_read_chip_info(SPIMemChip* chip);
-bool spi_mem_tools_read_block_data(SPIMemChip* chip, size_t size, size_t offset, uint8_t* data);
+bool spi_mem_tools_read_block_data(
+    SPIMemChip* chip,
+    size_t offset,
+    uint8_t* data,
+    size_t block_size);
+size_t spi_mem_tools_get_chip_size(SPIMemChip* chip);
+size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip);

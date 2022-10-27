@@ -48,11 +48,32 @@ static uint8_t spi_mem_tools_addr_to_byte_arr(uint32_t addr, uint8_t* cmd) {
     return len;
 }
 
-bool spi_mem_tools_read_block_data(SPIMemChip* chip, size_t size, size_t offset, uint8_t* data) {
-    uint8_t cmd[3];
-    if((offset + size) >= chip->size) return false;
-    if(!spi_mem_tools_trx(
-           SPIMemChipCMDReadData, cmd, spi_mem_tools_addr_to_byte_arr(offset, cmd), data, size))
-        return false;
+bool spi_mem_tools_read_block_data(
+    SPIMemChip* chip,
+    size_t offset,
+    uint8_t* data,
+    size_t block_size) {
+    for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
+        uint8_t cmd[3];
+        if((offset + SPI_MEM_MAX_BLOCK_SIZE) >= chip->size) return false;
+        if(!spi_mem_tools_trx(
+               SPIMemChipCMDReadData,
+               cmd,
+               spi_mem_tools_addr_to_byte_arr(offset, cmd),
+               data,
+               SPI_MEM_MAX_BLOCK_SIZE))
+            return false;
+        offset += SPI_MEM_MAX_BLOCK_SIZE;
+        data += SPI_MEM_MAX_BLOCK_SIZE;
+    }
     return true;
+}
+
+size_t spi_mem_tools_get_chip_size(SPIMemChip* chip) {
+    return (chip->size);
+}
+
+size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip) {
+    UNUSED(chip);
+    return (SPI_MEM_FILE_BUFFER_SIZE);
 }
