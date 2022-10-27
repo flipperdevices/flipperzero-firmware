@@ -97,6 +97,8 @@ bool nfc_scene_passport_read_auth_on_event(void* context, SceneManagerEvent even
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
+            nfc->dev->dev_data.mrtd_data.auth_success = false;
+            nfc->dev->dev_data.mrtd_data.auth.method = MrtdAuthMethodNone;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(event.event == GuiButtonTypeCenter) {
