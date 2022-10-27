@@ -28,6 +28,9 @@ void start_interrupts(i2cSniffer* i2c_sniffer) {
 void stop_interrupts() {
     furi_hal_gpio_remove_int_callback(pinSCL);
     furi_hal_gpio_remove_int_callback(pinSDA);
+    // Reset GPIO pins to default state
+    furi_hal_gpio_init(pinSCL, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(pinSDA, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
 // Called on Fallin/Rising SDA
