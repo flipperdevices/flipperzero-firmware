@@ -903,6 +903,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
     FuriHalNfcDevData* nfc_data = NULL;
     if(nfc_worker->dev_data->protocol == NfcDeviceProtocolMifareClassic) {
         nfc_data = &nfc_worker->dev_data->nfc_data;
+        reader_analyzer_set_nfc_data(reader_analyzer, nfc_data);
     } else {
         nfc_data = reader_analyzer_get_nfc_data(reader_analyzer);
     }
