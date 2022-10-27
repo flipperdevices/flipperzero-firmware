@@ -12,7 +12,8 @@ import posixpath
 import pathlib
 import json
 
-from fbt.sdk import SdkCollector, SdkCache
+from fbt.sdk.parser import SdkCollector
+from fbt.sdk.cache import SdkCache
 
 
 def ProcessSdkDepends(env, filename):
