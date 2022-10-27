@@ -1157,6 +1157,7 @@ bool mf_classic_write_sector(
                     break;
                 }
             } else {
+                FURI_LOG_E(TAG, "Failed to find key with write access");
                 write_success = false;
                 break;
             }

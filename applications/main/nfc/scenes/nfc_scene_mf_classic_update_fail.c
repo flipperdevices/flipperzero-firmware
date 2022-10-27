@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-void nfc_scene_mf_classic_update_fail_widget_callback(
+void nfc_scene_mf_classic_write_fail_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
@@ -10,20 +10,20 @@ void nfc_scene_mf_classic_update_fail_widget_callback(
     }
 }
 
-void nfc_scene_mf_classic_update_fail_on_enter(void* context) {
+void nfc_scene_mf_classic_write_fail_on_enter(void* context) {
     Nfc* nfc = context;
     Widget* widget = nfc->widget;
 
     widget_add_string_element(
-        widget, 64, 32, AlignCenter, AlignCenter, FontSecondary, "Update failed");
+        widget, 64, 32, AlignCenter, AlignCenter, FontSecondary, "Write failed");
     widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Retry", nfc_scene_mf_classic_update_fail_widget_callback, nfc);
+        widget, GuiButtonTypeLeft, "Retry", nfc_scene_mf_classic_write_fail_widget_callback, nfc);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-bool nfc_scene_mf_classic_update_fail_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_mf_classic_write_fail_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     bool consumed = false;
 
@@ -38,7 +38,7 @@ bool nfc_scene_mf_classic_update_fail_on_event(void* context, SceneManagerEvent 
     return consumed;
 }
 
-void nfc_scene_mf_classic_update_fail_on_exit(void* context) {
+void nfc_scene_mf_classic_write_fail_on_exit(void* context) {
     Nfc* nfc = context;
 
     widget_reset(nfc->widget);
