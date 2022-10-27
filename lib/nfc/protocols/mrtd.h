@@ -4,6 +4,9 @@
 
 #include "mrtd_helpers.h"
 
+#define MRTD_APP_FOLDER NFC_APP_FOLDER "/mrtd"
+#define MRTD_APP_EXTENSION ".mrtd"
+
 typedef struct {
     FuriHalNfcTxRxContext* tx_rx;
     uint16_t file_offset;
@@ -32,3 +35,8 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data); //TODO: remove
 bool mrtd_select_app(MrtdApplication* app, AIDValue aid);
 bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data);
 bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file);
+
+bool mrtd_auth_params_save(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name);
+bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name, const char* folder, const char* extension);
+
+bool mrtd_auth_params_load(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_path, bool show_dialog);

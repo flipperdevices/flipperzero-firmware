@@ -25,21 +25,6 @@ typedef enum {
     MrtdAuthMethodPace,
 } MrtdAuthMethod;
 
-inline const char* mrtd_auth_method_string(MrtdAuthMethod method) {
-    switch(method) {
-        case MrtdAuthMethodBac:
-            return "BAC";
-        case MrtdAuthMethodPace:
-            return "PACE";
-        case MrtdAuthMethodNone:
-            return "None";
-        case MrtdAuthMethodAny:
-            return "Any";
-        default:
-            return "Unknown";
-    }
-}
-
 typedef enum {
     MrtdTypeUnknown,
     MrtdTypeTD1,
@@ -143,6 +128,10 @@ typedef struct {
     uint8_t sex[2];
     MrtdDate expiry_date;
 } EF_DG1_contents;
+
+const char* mrtd_auth_method_string(MrtdAuthMethod method);
+
+bool mrtd_auth_method_parse_string(MrtdAuthMethod* method, const char* str);
 
 uint8_t mrtd_bac_check_digit(const char* input, const uint8_t length);
 

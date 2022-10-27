@@ -1,4 +1,7 @@
 #include <furi_hal_random.h>
+#include <storage/storage.h>
+#include <dialogs/dialogs.h>
+#include <nfc/nfc_device.h>
 
 #include "../helpers/iso7816.h"
 
@@ -18,6 +21,9 @@
 //TODO: idea - generalize ISO7816 reading. List available apps
 
 #define num_elements(A) (sizeof(A)/sizeof(A[0]))
+
+static const char* mrtd_auth_file_header = "Flipper MRTD params";
+static const uint32_t mrtd_auth_file_version = 1;
 
 static void hexdump(FuriLogLevel level, char* prefix, void* data, size_t length) {
     if(furi_log_get_level() >= level) {
@@ -554,4 +560,142 @@ bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data) {
     }
 
     return true;
+}
+
+bool mrtd_auth_params_save(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name) {
+    return mrtd_auth_params_save_file(storage, dialogs, auth_data, file_name, MRTD_APP_FOLDER, MRTD_APP_EXTENSION);
+}
+
+void mrtd_date_prepare_format_string(MrtdDate date, FuriString* format_string) {
+    furi_string_printf(
+        format_string, "%02u%02u%02u",
+        date.year,
+        date.month,
+        date.day);
+}
+
+bool mrtd_date_parse_format_string(MrtdDate* date, FuriString* format_string) {
+    int year;
+    int month;
+    int day;
+
+    int ret = sscanf(furi_string_get_cstr(format_string), "%02d%02d%02d", &year, &month, &day);
+    if(ret != 3) {
+        return false;
+    }
+
+    date->year = year;
+    date->month = month;
+    date->day = day;
+    return true;
+}
+
+bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name, const char* folder, const char* extension) {
+    furi_assert(auth_data);
+
+    bool saved = false;
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+
+    do {
+        // Create mrtd directory if necessary
+        if(!storage_simply_mkdir(storage, MRTD_APP_FOLDER)) break;
+
+        furi_string_printf(temp_str, "%s/%s%s", folder, file_name, extension);
+ 
+        // Open file
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+        // Write header
+        if(!flipper_format_write_header_cstr(file, mrtd_auth_file_header, mrtd_auth_file_version)) break;
+
+        // Write auth method
+        furi_string_set(temp_str, mrtd_auth_method_string(auth_data->method));
+        if(!flipper_format_write_string(file, "Method", temp_str)) break;
+
+        // Write birth date
+        mrtd_date_prepare_format_string(auth_data->birth_date, temp_str);
+        if(!flipper_format_write_string(file, "BirthDate", temp_str)) break;
+
+        // Write expiry date
+        mrtd_date_prepare_format_string(auth_data->expiry_date, temp_str);
+        if(!flipper_format_write_string(file, "ExpiryDate", temp_str)) break;
+
+        // Write docnr
+        furi_string_set(temp_str, auth_data->doc_number);
+        if(!flipper_format_write_string(file, "DocNr", temp_str)) break;
+
+        saved = true;
+    } while(false);
+
+    if(!saved) {
+        dialog_message_show_storage_error(dialogs, "Can not save\nparams file");
+    }
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return saved;
+}
+
+bool mrtd_auth_params_load(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_path, bool show_dialog) {
+    furi_assert(storage);
+    furi_assert(dialogs);
+    furi_assert(auth_data);
+    furi_assert(file_path);
+
+    bool parsed = false;
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+    bool deprecated_version = false;
+
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+
+    MrtdAuthData copy;
+
+    FURI_LOG_D(TAG, "Load auth params");
+
+    do {
+        if(!flipper_format_file_open_existing(file, file_path)) break;
+
+        uint32_t version = 0;
+        if(!flipper_format_read_header(file, temp_str, &version)) break;
+        FURI_LOG_D(TAG, "Version: %s", furi_string_get_cstr(temp_str));
+        if(furi_string_cmp_str(temp_str, mrtd_auth_file_header) || (version != mrtd_auth_file_version)) {
+            deprecated_version = true;
+            break;
+        }
+
+        if(!flipper_format_read_string(file, "Method", temp_str)) break;
+        FURI_LOG_D(TAG, "Method: %s", furi_string_get_cstr(temp_str));
+        if(!mrtd_auth_method_parse_string(&copy.method, furi_string_get_cstr(temp_str))) break;
+
+        if(!flipper_format_read_string(file, "BirthDate", temp_str)) break;
+        FURI_LOG_D(TAG, "BirthDate: %s", furi_string_get_cstr(temp_str));
+        if(!mrtd_date_parse_format_string(&copy.birth_date, temp_str)) break;
+
+        if(!flipper_format_read_string(file, "ExpiryDate", temp_str)) break;
+        FURI_LOG_D(TAG, "ExpiryDate: %s", furi_string_get_cstr(temp_str));
+        if(!mrtd_date_parse_format_string(&copy.expiry_date, temp_str)) break;
+
+        if(!flipper_format_read_string(file, "DocNr", temp_str)) break;
+        FURI_LOG_D(TAG, "DocNr: %s", furi_string_get_cstr(temp_str));
+        strlcpy(copy.doc_number, furi_string_get_cstr(temp_str), MRTD_DOCNR_MAX_LENGTH);
+
+        // Everything went fine. Save copy to pointed auth data
+        *auth_data = copy;
+        parsed = true;
+    } while(false);
+
+    FURI_LOG_D(TAG, "Load done, success: %d", parsed);
+
+    if(!parsed && show_dialog) {
+        if(deprecated_version) {
+            dialog_message_show_storage_error(dialogs, "File format deprecated");
+        } else {
+            dialog_message_show_storage_error(dialogs, "Can not parse\nfile");
+        }
+    }
+    
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return parsed;
 }
