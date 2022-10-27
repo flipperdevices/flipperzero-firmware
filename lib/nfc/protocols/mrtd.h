@@ -8,6 +8,7 @@
 
 typedef struct {
     FuriHalNfcTxRxContext* tx_rx;
+    MrtdData* mrtd_data;
     uint16_t file_offset;
     uint8_t ksenc[16];
     uint8_t ksmac[16];
@@ -17,11 +18,10 @@ typedef struct {
 } MrtdApplication;
 
 //TODO: description
-MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx);
-void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data); //TODO: remove
+MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx, MrtdData* mrtd_data);
 bool mrtd_select_app(MrtdApplication* app, AIDValue aid);
-bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data);
-bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file);
+bool mrtd_authenticate(MrtdApplication* app);
+bool mrtd_read_parse_file(MrtdApplication* app, EFFile file);
 
 bool mrtd_auth_params_save(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name);
 bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name, const char* folder, const char* extension);

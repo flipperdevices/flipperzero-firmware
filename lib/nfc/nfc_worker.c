@@ -288,8 +288,8 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
 
 static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
-    MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx);
     MrtdData* mrtd_data = &nfc_worker->dev_data->mrtd_data;
+    MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx, mrtd_data);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -310,14 +310,14 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             break;
         }
 
-        if(!mrtd_authenticate(mrtd_app, mrtd_data)) {
+        if(!mrtd_authenticate(mrtd_app)) {
             // At least we're reading an MRTD and should the app switch to the NFC scenes
             read_success = true;
             break; // Authentication failed
         }
 
-        mrtd_read_parse_file(mrtd_app, mrtd_data, EF.COM);
-        mrtd_read_parse_file(mrtd_app, mrtd_data, EF.DG1);
+        mrtd_read_parse_file(mrtd_app, EF.COM);
+        mrtd_read_parse_file(mrtd_app, EF.DG1);
 
         read_success = true;
     } while(false);

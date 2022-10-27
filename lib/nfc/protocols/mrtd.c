@@ -389,7 +389,7 @@ bool parse_ef_dg1(EF_DG1_contents* DG1, const uint8_t* data, size_t length) {
     return true;
 }
 
-bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file) {
+bool mrtd_read_parse_file(MrtdApplication* app, EFFile file) {
     uint8_t buffer[100];
     size_t buf_len;
 
@@ -414,13 +414,13 @@ bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file
     bool result = false;
 
     if(file.file_id == EF.COM.file_id) {
-        result = parse_ef_com(&mrtd_data->files.EF_COM, buffer, buf_len);
+        result = parse_ef_com(&app->mrtd_data->files.EF_COM, buffer, buf_len);
         FURI_LOG_D(TAG, "Parsed EF.COM");
     } else if(file.file_id == EF.DIR.file_id) {
-        result = parse_ef_dir(&mrtd_data->files.EF_DIR, buffer, buf_len);
+        result = parse_ef_dir(&app->mrtd_data->files.EF_DIR, buffer, buf_len);
         FURI_LOG_D(TAG, "Parsed EF.DIR");
     } else if(file.file_id == EF.DG1.file_id) {
-        result = parse_ef_dg1(&mrtd_data->files.DG1, buffer, buf_len);
+        result = parse_ef_dg1(&app->mrtd_data->files.DG1, buffer, buf_len);
     } else {
         FURI_LOG_W(TAG, "Don't know how to parse file with id 0x%04X", file.file_id);
     }
@@ -428,10 +428,11 @@ bool mrtd_read_parse_file(MrtdApplication* app, MrtdData* mrtd_data, EFFile file
     return result;
 }
 
-MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx) {
+MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx, MrtdData* mrtd_data) {
     MrtdApplication* app = malloc(sizeof(MrtdApplication));
 
     app->tx_rx = tx_rx;
+    app->mrtd_data = mrtd_data;
 
     return app;
 }
@@ -535,17 +536,17 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
     return true;
 }
 
-bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data) {
-    MrtdAuthMethod method = mrtd_data->auth.method;
-    mrtd_data->auth_success = false;
-    mrtd_data->auth_method_used = MrtdAuthMethodNone;
+bool mrtd_authenticate(MrtdApplication* app) {
+    MrtdAuthMethod method = app->mrtd_data->auth.method;
+    app->mrtd_data->auth_success = false;
+    app->mrtd_data->auth_method_used = MrtdAuthMethodNone;
     FURI_LOG_D(TAG, "Auth method: %d", method);
     switch(method) {
         case MrtdAuthMethodAny:
             //TODO: try PACE, then BAC. For now, fall through to just BAC
         case MrtdAuthMethodBac:
-            mrtd_data->auth_success = mrtd_bac(app, &mrtd_data->auth);
-            mrtd_data->auth_method_used = MrtdAuthMethodBac;
+            app->mrtd_data->auth_success = mrtd_bac(app, &app->mrtd_data->auth);
+            app->mrtd_data->auth_method_used = MrtdAuthMethodBac;
             break;
         case MrtdAuthMethodPace:
             FURI_LOG_E(TAG, "Auth method PACE not implemented");
@@ -555,7 +556,7 @@ bool mrtd_authenticate(MrtdApplication* app, MrtdData* mrtd_data) {
             break;
     }
 
-    if(!mrtd_data->auth_success) {
+    if(!app->mrtd_data->auth_success) {
         return false;
     }
 
