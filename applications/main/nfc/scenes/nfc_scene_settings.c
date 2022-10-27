@@ -9,7 +9,8 @@ static void nfc_scene_settings_set_mfc_logging(VariableItem* item) {
     Nfc* nfc = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, mfc_logging_text[index]);
-    nfc->mfc_nonce_logging = index;
+    nfc->settings.mfc_nonce_logging = index;
+    nfc_settings_save(&nfc->settings);
 }
 
 void nfc_scene_settings_on_enter(void* context) {
@@ -23,7 +24,7 @@ void nfc_scene_settings_on_enter(void* context) {
         COUNT_OF(mfc_logging_text),
         nfc_scene_settings_set_mfc_logging,
         nfc);
-    value_index = nfc->mfc_nonce_logging? 1 : 0;
+    value_index = nfc->settings.mfc_nonce_logging? 1 : 0;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, mfc_logging_text[value_index]);
     

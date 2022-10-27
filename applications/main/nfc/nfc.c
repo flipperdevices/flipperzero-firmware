@@ -1,6 +1,25 @@
 #include "nfc_i.h"
 #include "furi_hal_nfc.h"
 
+#define NFC_SETTINGS_FILE_NAME ".nfc.settings"
+#define NFC_SETTINGS_PATH INT_PATH(NFC_SETTINGS_FILE_NAME)
+#define NFC_SETTINGS_VERSION (0)
+#define NFC_SETTINGS_MAGIC (0x23)
+
+bool nfc_settings_load(NfcSettings* nfc_settings) {
+    furi_assert(nfc_settings);
+
+    return saved_struct_load(
+        NFC_SETTINGS_PATH, nfc_settings, sizeof(NfcSettings), NFC_SETTINGS_MAGIC, NFC_SETTINGS_VERSION);
+}
+
+bool nfc_settings_save(NfcSettings* nfc_settings) {
+    furi_assert(nfc_settings);
+
+    return saved_struct_save(
+        NFC_SETTINGS_PATH, nfc_settings, sizeof(NfcSettings), NFC_SETTINGS_MAGIC, NFC_SETTINGS_VERSION);
+}
+
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Nfc* nfc = context;
@@ -42,6 +61,10 @@ Nfc* nfc_alloc() {
     view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
+
+    if (!nfc_settings_load(&nfc->settings)) {
+        nfc->settings.mfc_nonce_logging = false;
+    }
 
     // Nfc device
     nfc->dev = nfc_device_alloc();

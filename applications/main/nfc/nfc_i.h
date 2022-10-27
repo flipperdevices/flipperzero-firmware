@@ -27,6 +27,7 @@
 #include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/parsers/nfc_supported_card.h>
+#include <lib/toolbox/saved_struct.h>
 
 #include "views/dict_attack.h"
 #include "views/detect_reader.h"
@@ -50,6 +51,10 @@ typedef enum {
     NfcRpcStateEmulated,
 } NfcRpcState;
 
+typedef struct {
+    bool mfc_nonce_logging;
+} NfcSettings;
+
 // Forward declaration due to circular dependency
 typedef struct NfcGenerator NfcGenerator;
 
@@ -63,7 +68,7 @@ struct Nfc {
     FuriHalNfcDevData dev_edit_data;
     VariableItemList* variable_item_list;
 
-    bool mfc_nonce_logging;
+    NfcSettings settings;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
@@ -119,3 +124,7 @@ void nfc_blink_detect_start(Nfc* nfc);
 void nfc_blink_stop(Nfc* nfc);
 
 void nfc_show_loading_popup(void* context, bool show);
+
+bool nfc_settings_load(NfcSettings* nfc_settings);
+
+bool nfc_settings_save(NfcSettings* nfc_settings);
