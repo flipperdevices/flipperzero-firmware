@@ -799,7 +799,10 @@ void mf_crypto1_encrypt(
     }
 }
 
-bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx, bool log_to_file) {
+bool mf_classic_emulator(
+    MfClassicEmulator* emulator,
+    FuriHalNfcTxRxContext* tx_rx,
+    bool log_to_file) {
     furi_assert(emulator);
     furi_assert(tx_rx);
     bool command_processed = false;
@@ -894,11 +897,11 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 nr,
                 ar);
 
-            if (log_to_file) {
+            if(log_to_file) {
                 Storage* storage = furi_record_open(RECORD_STORAGE);
                 Stream* file_stream = buffered_file_stream_alloc(storage);
                 if(buffered_file_stream_open(
-                    file_stream, INT_PATH(".mfkey32_emul.log"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+                       file_stream, INT_PATH(".mfkey32_emul.log"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
                     FuriString* str = furi_string_alloc_printf(
                         "Sec %d key %c cuid %08lx nt %08lx nr %08lx ar %08lx\n",
                         sector_trailer_block,

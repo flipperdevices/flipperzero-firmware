@@ -9,12 +9,20 @@ bool nfc_settings_load(NfcSettings* nfc_settings) {
     furi_assert(nfc_settings);
 
     return saved_struct_load(
-        NFC_SETTINGS_PATH, nfc_settings, sizeof(NfcSettings), NFC_SETTINGS_MAGIC, NFC_SETTINGS_VERSION);
+        NFC_SETTINGS_PATH,
+        nfc_settings,
+        sizeof(NfcSettings),
+        NFC_SETTINGS_MAGIC,
+        NFC_SETTINGS_VERSION);
 }
 
 bool nfc_settings_save(NfcSettings* nfc_settings) {
     furi_assert(nfc_settings);
 
     return saved_struct_save(
-        NFC_SETTINGS_PATH, nfc_settings, sizeof(NfcSettings), NFC_SETTINGS_MAGIC, NFC_SETTINGS_VERSION);
+        NFC_SETTINGS_PATH,
+        nfc_settings,
+        sizeof(NfcSettings),
+        NFC_SETTINGS_MAGIC,
+        NFC_SETTINGS_VERSION);
 }

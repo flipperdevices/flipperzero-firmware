@@ -24,10 +24,10 @@ void nfc_scene_settings_on_enter(void* context) {
         COUNT_OF(mfc_logging_text),
         nfc_scene_settings_set_mfc_logging,
         nfc);
-    value_index = nfc->settings.mfc_nonce_logging? 1 : 0;
+    value_index = nfc->settings.mfc_nonce_logging ? 1 : 0;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, mfc_logging_text[value_index]);
-    
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewSettings);
 }
 

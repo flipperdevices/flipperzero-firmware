@@ -43,7 +43,7 @@ Nfc* nfc_alloc() {
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
 
-    if (!nfc_settings_load(&nfc->settings)) {
+    if(!nfc_settings_load(&nfc->settings)) {
         nfc->settings.mfc_nonce_logging = false;
     }
 
