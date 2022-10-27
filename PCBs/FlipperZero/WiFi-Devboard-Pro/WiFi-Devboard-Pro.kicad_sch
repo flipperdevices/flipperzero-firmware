@@ -59,7 +59,59 @@
       )
       (symbol "+3V3_1_1_1"
         (pin power_in line (at 0 0 90) (length 0) hide
-          (name "+3V3" (effects (font (size 1.27 1.27))))
+          (name "+LDO_3V3" (effects (font (size 1.27 1.27))))
+          (number "1" (effects (font (size 1.27 1.27))))
+        )
+      )
+    )
+    (symbol "+3V3_2" (power) (pin_names (offset 0)) (in_bom yes) (on_board yes)
+      (property "Reference" "#PWR?" (id 0) (at 0 -3.81 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "Value" "+3V3_2" (id 1) (at 0 5.08 0)
+        (effects (font (size 1.27 1.27)))
+      )
+      (property "Footprint" "" (id 2) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "Datasheet" "" (id 3) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_keywords" "power-flag" (id 4) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_description" "Power symbol creates a global label with name \"+3V3\"" (id 5) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (symbol "+3V3_2_0_1"
+        (polyline
+          (pts
+            (xy -0.762 1.27)
+            (xy 0 2.54)
+          )
+          (stroke (width 0) (type default) (color 0 0 0 0))
+          (fill (type none))
+        )
+        (polyline
+          (pts
+            (xy 0 0)
+            (xy 0 2.54)
+          )
+          (stroke (width 0) (type default) (color 0 0 0 0))
+          (fill (type none))
+        )
+        (polyline
+          (pts
+            (xy 0 2.54)
+            (xy 0.762 1.27)
+          )
+          (stroke (width 0) (type default) (color 0 0 0 0))
+          (fill (type none))
+        )
+      )
+      (symbol "+3V3_2_1_1"
+        (pin power_in line (at 0 0 90) (length 0) hide
+          (name "+LDO_3V3" (effects (font (size 1.27 1.27))))
           (number "1" (effects (font (size 1.27 1.27))))
         )
       )
@@ -68,7 +120,7 @@
       (property "Reference" "#PWR?" (id 0) (at 0 -3.81 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-      (property "Value" "+5V_1" (id 1) (at 0 5.08 0)
+      (property "Value" "+ext_5V" (id 1) (at 0 5.08 0)
         (effects (font (size 1.27 1.27)))
       )
       (property "Footprint" "" (id 2) (at 0 0 0)
@@ -111,7 +163,7 @@
       )
       (symbol "+5V_1_1_1"
         (pin power_in line (at 0 0 90) (length 0) hide
-          (name "+5V" (effects (font (size 1.27 1.27))))
+          (name "+ext_5V" (effects (font (size 1.27 1.27))))
           (number "1" (effects (font (size 1.27 1.27))))
         )
       )
@@ -1566,7 +1618,7 @@
       )
       (symbol "+ext_3V3_1_1"
         (pin power_in line (at 0 0 90) (length 0) hide
-          (name "+3V3" (effects (font (size 1.27 1.27))))
+          (name "+ext_3V3" (effects (font (size 1.27 1.27))))
           (number "1" (effects (font (size 1.27 1.27))))
         )
       )
@@ -3043,7 +3095,7 @@
     (property "Reference" "R?" (id 0) (at 411.48 151.1299 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "RC0402FR-07100KL" (id 1) (at 411.48 153.6699 90)
+    (property "Value" "100K" (id 1) (at 411.48 153.6699 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "RESC1005X40N" (id 2) (at 407.67 147.32 0)
@@ -3092,7 +3144,7 @@
     (property "Reference" "R?" (id 0) (at 344.17 151.1299 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "RC0402FR-07100KL" (id 1) (at 344.17 153.6699 90)
+    (property "Value" "100K" (id 1) (at 344.17 153.6699 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "RESC1005X40N" (id 2) (at 340.36 147.32 0)
@@ -3206,7 +3258,7 @@
     (property "Reference" "R?" (id 0) (at 480.06 151.1299 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "RC0402FR-07100KL" (id 1) (at 480.06 153.6699 90)
+    (property "Value" "100K" (id 1) (at 480.06 153.6699 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "RESC1005X40N" (id 2) (at 476.25 147.32 0)
@@ -3384,7 +3436,7 @@
     (property "Reference" "R?" (id 0) (at 306.07 151.1299 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "RC0402FR-07100KL" (id 1) (at 306.07 153.6699 90)
+    (property "Value" "100K" (id 1) (at 306.07 153.6699 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "RESC1005X40N" (id 2) (at 302.26 147.32 0)
@@ -3834,7 +3886,7 @@
     (pin "1" (uuid 6efc9d70-df04-495d-9537-e7b7a286e60a))
   )
 
-  (symbol (lib_name "+3V3_1") (lib_id "power:+3V3") (at 373.38 91.44 0) (unit 1)
+  (symbol (lib_name "+3V3_2") (lib_id "power:+3V3") (at 373.38 91.44 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid b9758d43-4478-4d55-a7c9-ed9a4bf533c0)
     (property "Reference" "#PWR?" (id 0) (at 373.38 95.25 0)
@@ -4079,7 +4131,7 @@
     (property "Reference" "R?" (id 0) (at 373.38 151.1299 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "RC0402FR-07100KL" (id 1) (at 373.38 153.6699 90)
+    (property "Value" "100K" (id 1) (at 373.38 153.6699 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "RESC1005X40N" (id 2) (at 369.57 147.32 0)
@@ -4195,7 +4247,7 @@
     (property "Reference" "R?" (id 0) (at 441.96 151.1299 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "RC0402FR-07100KL" (id 1) (at 441.96 153.6699 90)
+    (property "Value" "100K" (id 1) (at 441.96 153.6699 90)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "RESC1005X40N" (id 2) (at 438.15 147.32 0)
@@ -4433,25 +4485,25 @@
       (reference "R?") (unit 1) (value "10k") (footprint "")
     )
     (path "/3d7cf57e-46ad-45b0-8f37-4bcf93c58b86"
-      (reference "R?") (unit 1) (value "RC0402FR-07100KL") (footprint "RESC1005X40N")
+      (reference "R?") (unit 1) (value "100K") (footprint "RESC1005X40N")
     )
     (path "/434b8a81-ef27-4884-a038-c7022455a731"
-      (reference "R?") (unit 1) (value "RC0402FR-07100KL") (footprint "RESC1005X40N")
+      (reference "R?") (unit 1) (value "100K") (footprint "RESC1005X40N")
     )
     (path "/51956227-9277-4ca3-a264-ee96fef2edbb"
-      (reference "R?") (unit 1) (value "RC0402FR-07100KL") (footprint "RESC1005X40N")
+      (reference "R?") (unit 1) (value "100K") (footprint "RESC1005X40N")
     )
     (path "/7e45edae-6aea-4a3f-b6bd-37e282e1851a"
-      (reference "R?") (unit 1) (value "RC0402FR-07100KL") (footprint "RESC1005X40N")
+      (reference "R?") (unit 1) (value "100K") (footprint "RESC1005X40N")
     )
     (path "/e70859b0-5640-4eb1-b309-a9cceea26974"
-      (reference "R?") (unit 1) (value "RC0402FR-07100KL") (footprint "RESC1005X40N")
+      (reference "R?") (unit 1) (value "100K") (footprint "RESC1005X40N")
     )
     (path "/ed41245f-e4c9-458c-b7a4-4a54f1cc652d"
       (reference "R?") (unit 1) (value "10k") (footprint "")
     )
     (path "/f825078a-0b67-447d-a4bb-7e5f06e86419"
-      (reference "R?") (unit 1) (value "RC0402FR-07100KL") (footprint "RESC1005X40N")
+      (reference "R?") (unit 1) (value "100K") (footprint "RESC1005X40N")
     )
     (path "/032121d6-13fe-407e-b1d5-09ad6e574252"
       (reference "SW?") (unit 1) (value "SW_Push") (footprint "")
