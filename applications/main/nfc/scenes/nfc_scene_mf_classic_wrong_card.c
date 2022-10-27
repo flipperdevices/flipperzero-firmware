@@ -14,6 +14,9 @@ void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
     Nfc* nfc = context;
     Widget* widget = nfc->widget;
 
+    notification_message(nfc->notifications, &sequence_error);
+
+    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(
         widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "This is wrong card");
     widget_add_string_multiline_element(
@@ -24,7 +27,6 @@ void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
         AlignTop,
         FontSecondary,
         "Data management\nis only possible\nwith initial card");
-    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_scene_mf_classic_wrong_card_widget_callback, nfc);
 
