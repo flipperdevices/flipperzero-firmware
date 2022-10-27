@@ -799,7 +799,7 @@ void mf_crypto1_encrypt(
     }
 }
 
-bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
+bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx, bool log_to_file) {
     furi_assert(emulator);
     furi_assert(tx_rx);
     bool command_processed = false;
@@ -894,24 +894,25 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 nr,
                 ar);
 
-            // Log to file
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            Stream* file_stream = buffered_file_stream_alloc(storage);
-            if(buffered_file_stream_open(
-                file_stream, INT_PATH(".mfkey32_emul.log"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
-                FuriString* str = furi_string_alloc_printf(
-                    "Sec %d key %c cuid %08lx nt %08lx nr %08lx ar %08lx\n",
-                    sector_trailer_block,
-                    access_key == MfClassicKeyA ? 'A' : 'B',
-                    emulator->cuid,
-                    nonce,
-                    nr,
-                    ar);
-                stream_write_string(file_stream, str);
-                furi_string_free(str);
+            if (log_to_file) {
+                Storage* storage = furi_record_open(RECORD_STORAGE);
+                Stream* file_stream = buffered_file_stream_alloc(storage);
+                if(buffered_file_stream_open(
+                    file_stream, INT_PATH(".mfkey32_emul.log"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+                    FuriString* str = furi_string_alloc_printf(
+                        "Sec %d key %c cuid %08lx nt %08lx nr %08lx ar %08lx\n",
+                        sector_trailer_block,
+                        access_key == MfClassicKeyA ? 'A' : 'B',
+                        emulator->cuid,
+                        nonce,
+                        nr,
+                        ar);
+                    stream_write_string(file_stream, str);
+                    furi_string_free(str);
+                }
+                buffered_file_stream_close(file_stream);
+                stream_free(file_stream);
             }
-            buffered_file_stream_close(file_stream);
-            stream_free(file_stream);
 
             crypto1_word(&emulator->crypto, nr, 1);
             uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);

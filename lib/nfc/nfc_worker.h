@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nfc_device.h"
+#include "nfc_settings.h"
 
 typedef struct NfcWorker NfcWorker;
 
@@ -67,7 +68,7 @@ typedef enum {
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
 
-NfcWorker* nfc_worker_alloc();
+NfcWorker* nfc_worker_alloc(NfcSettings* settings);
 
 NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker);
 

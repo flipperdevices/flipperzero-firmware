@@ -35,7 +35,7 @@ static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
 Nfc* nfc_alloc() {
     Nfc* nfc = malloc(sizeof(Nfc));
 
-    nfc->worker = nfc_worker_alloc();
+    nfc->worker = nfc_worker_alloc(&nfc->settings);
     nfc->view_dispatcher = view_dispatcher_alloc();
     nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
     view_dispatcher_enable_queue(nfc->view_dispatcher);

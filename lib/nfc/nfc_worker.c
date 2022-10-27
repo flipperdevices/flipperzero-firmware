@@ -8,7 +8,7 @@
 
 /***************************** NFC Worker API *******************************/
 
-NfcWorker* nfc_worker_alloc() {
+NfcWorker* nfc_worker_alloc(NfcSettings* settings) {
     NfcWorker* nfc_worker = malloc(sizeof(NfcWorker));
 
     // Worker thread attributes
@@ -18,6 +18,7 @@ NfcWorker* nfc_worker_alloc() {
     furi_thread_set_callback(nfc_worker->thread, nfc_worker_task);
     furi_thread_set_context(nfc_worker->thread, nfc_worker);
 
+    nfc_worker->settings = settings;
     nfc_worker->callback = NULL;
     nfc_worker->context = NULL;
     nfc_worker->storage = furi_record_open(RECORD_STORAGE);
@@ -650,7 +651,7 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     furi_hal_nfc_listen_start(nfc_data);
     while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) {
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
-            mf_classic_emulator(&emulator, &tx_rx);
+            mf_classic_emulator(&emulator, &tx_rx, nfc_worker->settings->mfc_nonce_logging);
         }
     }
     if(emulator.data_changed) {
@@ -790,7 +791,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
             NfcProtocol protocol =
                 reader_analyzer_guess_protocol(reader_analyzer, tx_rx.rx_data, tx_rx.rx_bits / 8);
             if(protocol == NfcDeviceProtocolMifareClassic) {
-                mf_classic_emulator(&emulator, &tx_rx);
+                mf_classic_emulator(&emulator, &tx_rx, false);
             }
         } else {
             reader_no_data_received_cnt++;
