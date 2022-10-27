@@ -143,8 +143,16 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
             FURI_LOG_D("Plant4K", "Sector %d def key b found", plantain_keys_4k[i].sector);
         }
     }
-    uint8_t result = mf_classic_update_card(tx_rx, mf_classic_data);
-    FURI_LOG_D("Plant4K", "Update card result %d", result);
+    uint8_t result;
+    for(size_t i = 0; i < 4; i++) {
+        result = mf_classic_update_card(tx_rx, mf_classic_data);
+        FURI_LOG_D("Plant4K", "Update card result %d", result);
+        if(result == 40) {
+            return true;
+        }
+    }
+    FURI_LOG_D("Plant4K", "Card not readed, total %d", result);
+
     return result == 40;
 }
 

@@ -721,6 +721,11 @@ uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data
 
     for(size_t i = 0; i < total_sectors; i++) {
         MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+        if(mf_classic_is_sector_read(data, i)) {
+            FURI_LOG_D("NFC", "Sector %d skipped as already readed", i);
+            sectors_read++;
+            continue;
+        }
         // Load key A
         if(mf_classic_is_key_found(data, i, MfClassicKeyA)) {
             sec_reader.key_a = nfc_util_bytes2num(sec_tr->key_a, 6);
@@ -742,6 +747,7 @@ uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data
                 }
                 sectors_read++;
             } else {
+                FURI_LOG_D("NFC", "Sector %d not readed", i);
                 // Invalid key, set it to not found
                 if(key_a != MF_CLASSIC_NO_KEY) {
                     mf_classic_set_key_not_found(data, i, MfClassicKeyA);
