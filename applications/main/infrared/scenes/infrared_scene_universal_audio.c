@@ -44,8 +44,8 @@ void infrared_scene_universal_audio_on_enter(void* context) {
         1,
         3,
         41,
-        &I_PlayPause_25x27,
-        &I_PlayPause_hvr_25x27,
+        &I_Play_25x27,
+        &I_Play_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "Play");
@@ -56,8 +56,8 @@ void infrared_scene_universal_audio_on_enter(void* context) {
         1,
         36,
         41,
-        &I_Eject_25x27,
-        &I_Eject_hvr_25x27,
+        &I_Pause_25x27,
+        &I_Pause_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "Pause");
