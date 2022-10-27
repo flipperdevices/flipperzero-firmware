@@ -1,5 +1,4 @@
 #include "nfc_supported_card.h"
-
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
 
@@ -86,17 +85,6 @@ static const MfClassicAuthContext alt_plantain_keys_4k[] = {
     {.sector = 8, .key_a = 0xa73f5dc1d333, .key_b = 0xd27058c6e2c7}, //B unknown, TODO
 };
 
-// MfClassicAuthContext* getAuthContext_by_sector_num(uint8_t sec_num, uint8_t key_type) {
-//     if (sec_num < 40) {
-//         if (key_type == 0) {
-//             return (MfClassicAuthContext*)&plantain_keys_4k[sec_num];
-//         } else {
-//             return (MfClassicAuthContext*)&alt_plantain_keys_4k[sec_num];
-//         }
-//     }
-//     return NULL;
-// }
-
 bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
     UNUSED(nfc_worker);
@@ -113,6 +101,25 @@ bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_
         return true;
     }
     return false;
+}
+
+uint8_t plantain_calculate_luhn_str(const char* num) {
+    // No.
+    // Yes :)
+
+    uint8_t sum = 0;
+    uint8_t len = strlen(num);
+    for(uint8_t i = 0; i < len; i++) {
+        uint8_t digit = num[i] - '0';
+        if(i % 2 == 0) {
+            digit *= 2;
+            if(digit > 9) {
+                digit -= 9;
+            }
+        }
+        sum += digit;
+    }
+    return (10 - (sum % 10)) % 10;
 }
 
 bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
@@ -199,27 +206,6 @@ bool is_with_key_readed(MfClassicData* mf_classic_data, uint8_t sector, uint64_t
 }
 
 uint8_t get_SPBcard_type(MfClassicData* mf_classic_data) {
-    // static const MfClassicAuthContext SPB_type_1[] = {
-    //     {.sector = 4, .key_a = 0xe56ac127dd45, .key_b = 0x19fc84a3784b},
-    //     {.sector = 5, .key_a = 0x77dabc9825e1, .key_b = 0x9764fec3154a},
-    //     {.sector = 8, .key_a = 0x26973ea74321, .key_b = 0xd27058c6e2c7},
-    //     {.sector = 12, .key_a = 0xacffffffffff, .key_b = 0x71f3a315ad26},
-    // };
-
-    // static const MfClassicAuthContext SPB_type_2[] = {
-    //     {.sector = 4, .key_a = 0xe56ac127dd45, .key_b = 0x19fc84a3784b},
-    //     {.sector = 5, .key_a = 0x77dabc9825e1, .key_b = 0x9764fec3154a},
-    //     {.sector = 8, .key_a = 0xa73f5dc1d333, .key_b = 0xd27058c6e2c7}, //B unknown, TODO
-    // };
-
-    // static const MfClassicAuthContext SPB_type_3[] = {
-    //     {.sector = 8, .key_a = 0x26973ea74321, .key_b = 0xd27058c6e2c7},
-    //     {.sector = 9, .key_a = 0xeb0a8ff88ade, .key_b = 0x578a9ada41e3},
-    //     {.sector = 12, .key_a = 0x000000000000, .key_b = 0x71f3a315ad26},
-    //     {.sector = 13, .key_a = 0xac70ca327a04, .key_b = 0xf29411c2663c},
-    //     {.sector = 14, .key_a = 0x51044efb5aab, .key_b = 0xebdc720dd1ce},
-    // };
-
     if(is_with_key_readed(mf_classic_data, 4, 0xe56ac127dd45) &&
        is_with_key_readed(mf_classic_data, 5, 0x77dabc9825e1) &&
        is_with_key_readed(mf_classic_data, 8, 0x26973ea74321) &&
@@ -290,68 +276,105 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     // Convert card number to string
     FuriString* card_number_str;
     card_number_str = furi_string_alloc();
-    // Should look like "361301047292848684"
+
     furi_string_printf(card_number_str, "%llu", card_number);
-    // Add suffix with luhn checksum (1 digit) to the card number string
-    FuriString* card_number_suffix;
-    card_number_suffix = furi_string_alloc();
 
-    furi_string_cat_printf(card_number_suffix, "-");
-    furi_string_cat_printf(card_number_str, furi_string_get_cstr(card_number_suffix));
-    // Free all not needed strings
-    furi_string_free(card_number_suffix);
+    FuriString* plantain_card_prefix;
+    FuriString* full_number;
+    FuriString* last_day;
+    plantain_card_prefix = furi_string_alloc();
+    full_number = furi_string_alloc();
+    last_day = furi_string_alloc();
+    uint8_t luhn;
 
-    switch(card_type) {
-    case 0:
+    if(card_type == 0) {
         // Unknown card type
         furi_string_printf(
             dev_data->parsed_data,
             "\e#Unknown SPB card\nN:%s\nBalance:%ld\n",
             furi_string_get_cstr(card_number_str),
             balance);
-        break;
-    case 1:
+    } else if(card_type == 1) {
         // Plantain card
+
+        furi_string_printf(plantain_card_prefix, "96433078");
+        furi_string_printf(
+            full_number,
+            "%s%s",
+            furi_string_get_cstr(plantain_card_prefix),
+            furi_string_get_cstr(card_number_str));
+        luhn = plantain_calculate_luhn_str(furi_string_get_cstr(full_number));
+        FURI_LOG_D("Plantain", "Luhn: %d, trans: %s", luhn, furi_string_get_cstr(full_number));
+
         furi_string_printf(
             dev_data->parsed_data,
-            "\e#Plantain card\nN:%s\nBalance:%ld\n",
+            "\e#Plantain card\nNumber:\n%s\n%s%01d\nBalance:%ld\n",
+            furi_string_get_cstr(plantain_card_prefix),
             furi_string_get_cstr(card_number_str),
+            luhn,
             balance);
-        break;
-    case 2:
+        furi_string_free(plantain_card_prefix);
+    } else if(card_type == 2) {
         // Strange card
+        furi_string_printf(plantain_card_prefix, "96433078");
+        furi_string_printf(
+            full_number,
+            "%s%s",
+            furi_string_get_cstr(plantain_card_prefix),
+            furi_string_get_cstr(card_number_str));
+        luhn = plantain_calculate_luhn_str(furi_string_get_cstr(full_number));
+
         furi_string_printf(
             dev_data->parsed_data,
-            "\e#Strange SPB card\nN:%s\nBalance:%ld\n",
+            "\e#Strange SPB card\nNumber:\n%s\n%s%01d\nBalance:%ld\n",
+            furi_string_get_cstr(plantain_card_prefix),
             furi_string_get_cstr(card_number_str),
+            luhn,
             balance);
-        break;
-    case 3:
+    } else if(card_type == 3) {
         // Concession card
+
+        temp_ptr = &data->block[8 * 4].value[10];
+
+        furi_string_printf(
+            last_day, "%02d.%02d.%04d", temp_ptr[2], temp_ptr[1], temp_ptr[0] + 2000);
+
+        furi_string_printf(plantain_card_prefix, "96433078"); // TODO: check real prefix
+        furi_string_printf(
+            full_number,
+            "%s%s",
+            furi_string_get_cstr(plantain_card_prefix),
+            furi_string_get_cstr(card_number_str));
+        luhn = plantain_calculate_luhn_str(furi_string_get_cstr(full_number));
+
         temp_ptr = &data->block[8 * 4 + 1].value[0];
         // Read bytes 3-8 of block 1 of sector 8
         FuriString* passport_series;
         passport_series = furi_string_alloc();
         furi_string_cat_printf(
             passport_series, "%c%c%c%c", temp_ptr[3], temp_ptr[4], temp_ptr[6], temp_ptr[7]);
-        // furi_string_init_printf(
-        //     passport_series, "%c%c%c%c", temp_ptr[3], temp_ptr[4], temp_ptr[6], temp_ptr[7]);
         temp_ptr = &data->block[8 * 4 + 1].value[0];
         // Read bytes 9-11 of block 1 of sector 8
         uint32_t passport_number = (temp_ptr[11] << 16) | (temp_ptr[10] << 8) | temp_ptr[9];
         furi_string_printf(
             dev_data->parsed_data,
-            "\e#Concession SPB card\nN:%s\nPN:%s %ld",
+            "\e#Concession SPB card\nNumber:\n%s\n%s%01d\nLast day: %s\nPassport num: %s %06ld",
+            furi_string_get_cstr(plantain_card_prefix),
             furi_string_get_cstr(card_number_str),
+            luhn,
+            furi_string_get_cstr(last_day),
             furi_string_get_cstr(passport_series),
             passport_number);
         furi_string_free(passport_series);
-
-        break;
-
-    default:
-        break;
+    } else {
+        // Unknown card type
+        furi_string_printf(
+            dev_data->parsed_data,
+            "\e#Unknown SPB card\nN:%s\nBalance:%ld\n",
+            furi_string_get_cstr(card_number_str),
+            balance);
     }
+
     // furi_string_printf(
     //     dev_data->parsed_data,
     //     "\e#Plantain\nN:%s\nBalance:%ld\nType:%d EKP:%d",
@@ -363,5 +386,7 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     //     furi_string_cat_printf(dev_data->parsed_data, "\nEKP:%lld", EKPnum);
     // }
     furi_string_free(card_number_str);
+    furi_string_free(full_number);
+    furi_string_free(last_day);
     return true;
 }

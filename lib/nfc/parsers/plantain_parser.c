@@ -57,8 +57,33 @@ bool plantain_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
 
 uint8_t plantain_calculate_luhn(uint64_t number) {
     // No.
-    UNUSED(number);
-    return 0;
+    // Yes :)
+
+    uint8_t sum = 0;
+    uint8_t digit = 0;
+    uint8_t addend = 0;
+    bool times_two = false;
+
+    while(number > 0) {
+        digit = number % 10;
+        if(times_two) {
+            addend = digit * 2;
+            if(addend > 9) {
+                addend -= 9;
+            }
+        } else {
+            addend = digit;
+        }
+        sum += addend;
+        times_two = !times_two;
+        number /= 10;
+    }
+
+    uint8_t remainder = sum % 10;
+    if(remainder == 0) {
+        return remainder;
+    }
+    return 10 - remainder;
 }
 
 bool plantain_parser_parse(NfcDeviceData* dev_data) {
