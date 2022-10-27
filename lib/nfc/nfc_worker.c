@@ -703,22 +703,22 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
 
             // Set blocks not read
             mf_classic_set_sector_data_not_read(&dest_data);
-            FURI_LOG_D(TAG, "Updating card sectors");
+            FURI_LOG_I(TAG, "Updating card sectors");
             uint8_t total_sectors = mf_classic_get_total_sectors_num(type);
             bool write_success = true;
             for(uint8_t i = 0; i < total_sectors; i++) {
-                FURI_LOG_D(TAG, "Reading sector %d", i);
+                FURI_LOG_I(TAG, "Reading sector %d", i);
                 mf_classic_read_sector(&tx_rx, &dest_data, i);
                 bool old_data_read = mf_classic_is_sector_data_read(src_data, i);
                 bool new_data_read = mf_classic_is_sector_data_read(&dest_data, i);
                 if(old_data_read != new_data_read) {
-                    FURI_LOG_D(TAG, "Failed to update sector %d", i);
+                    FURI_LOG_E(TAG, "Failed to update sector %d", i);
                     write_success = false;
                     break;
                 }
                 if(nfc_worker->state != NfcWorkerStateMfClassicWrite) break;
                 if(!mf_classic_write_sector(&tx_rx, &dest_data, src_data, i)) {
-                    FURI_LOG_D(TAG, "Failed to write %d sector", i);
+                    FURI_LOG_E(TAG, "Failed to write %d sector", i);
                     write_success = false;
                     break;
                 }
@@ -775,16 +775,16 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
 
             // Set blocks not read
             mf_classic_set_sector_data_not_read(&new_data);
-            FURI_LOG_D(TAG, "Updating card sectors");
+            FURI_LOG_I(TAG, "Updating card sectors");
             uint8_t total_sectors = mf_classic_get_total_sectors_num(type);
             bool update_success = true;
             for(uint8_t i = 0; i < total_sectors; i++) {
-                FURI_LOG_D(TAG, "Reading sector %d", i);
+                FURI_LOG_I(TAG, "Reading sector %d", i);
                 mf_classic_read_sector(&tx_rx, &new_data, i);
                 bool old_data_read = mf_classic_is_sector_data_read(old_data, i);
                 bool new_data_read = mf_classic_is_sector_data_read(&new_data, i);
                 if(old_data_read != new_data_read) {
-                    FURI_LOG_D(TAG, "Failed to update sector %d", i);
+                    FURI_LOG_E(TAG, "Failed to update sector %d", i);
                     update_success = false;
                     break;
                 }

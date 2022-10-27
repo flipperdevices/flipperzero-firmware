@@ -10,7 +10,8 @@ void nfc_scene_mf_classic_update_success_on_enter(void* context) {
     Nfc* nfc = context;
     DOLPHIN_DEED(DolphinDeedNfcSave);
 
-    // Setup view
+    notification_message(nfc->notifications, &sequence_success);
+
     Popup* popup = nfc->popup;
     popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
     popup_set_header(popup, "Updated!", 11, 20, AlignLeft, AlignBottom);
@@ -18,6 +19,7 @@ void nfc_scene_mf_classic_update_success_on_enter(void* context) {
     popup_set_context(popup, nfc);
     popup_set_callback(popup, nfc_scene_mf_classic_update_success_popup_callback);
     popup_enable_timeout(popup);
+
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 }
 

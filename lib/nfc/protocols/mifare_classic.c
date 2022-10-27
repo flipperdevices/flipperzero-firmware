@@ -1077,8 +1077,16 @@ bool mf_classic_write_block(
         }
 
         // Send data
-        mf_crypto1_encrypt(&crypto, NULL, plain_data, 18 * 8, tx_rx->tx_data, tx_rx->tx_parity);
-        tx_rx->tx_bits = 18 * 8;
+        memcpy(plain_data, src_block->value, MF_CLASSIC_BLOCK_SIZE);
+        nfca_append_crc16(plain_data, MF_CLASSIC_BLOCK_SIZE);
+        mf_crypto1_encrypt(
+            &crypto,
+            NULL,
+            plain_data,
+            (MF_CLASSIC_BLOCK_SIZE + 2) * 8,
+            tx_rx->tx_data,
+            tx_rx->tx_parity);
+        tx_rx->tx_bits = (MF_CLASSIC_BLOCK_SIZE + 2) * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
@@ -1092,8 +1100,17 @@ bool mf_classic_write_block(
             FURI_LOG_D(TAG, "Failed to send data");
             break;
         }
-
         write_success = true;
+
+        // Send Halt
+        plain_data[0] = 0x50;
+        plain_data[1] = 0x00;
+        nfca_append_crc16(plain_data, 2);
+        mf_crypto1_encrypt(&crypto, NULL, plain_data, 2 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        tx_rx->tx_bits = 2 * 8;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
+        // No response is expected
+        furi_hal_nfc_tx_rx(tx_rx, 50);
     } while(false);
 
     return write_success;
@@ -1124,18 +1141,18 @@ bool mf_classic_write_sector(
                 dest_data, i, MfClassicKeyB, MfClassicActionDataWrite);
 
             if(key_a_found && key_a_write_allowed) {
-                FURI_LOG_D(TAG, "Writing block %d with key A", i);
+                FURI_LOG_I(TAG, "Writing block %d with key A", i);
                 uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
                 if(!mf_classic_write_block(tx_rx, &src_data->block[i], i, MfClassicKeyA, key)) {
-                    FURI_LOG_D(TAG, "Failed to write block %d", i);
+                    FURI_LOG_E(TAG, "Failed to write block %d", i);
                     write_success = false;
                     break;
                 }
             } else if(key_b_found && key_b_write_allowed) {
-                FURI_LOG_D(TAG, "Writing block %d with key A", i);
+                FURI_LOG_I(TAG, "Writing block %d with key A", i);
                 uint64_t key = nfc_util_bytes2num(sec_tr->key_b, 6);
                 if(!mf_classic_write_block(tx_rx, &src_data->block[i], i, MfClassicKeyB, key)) {
-                    FURI_LOG_D(TAG, "Failed to write block %d", i);
+                    FURI_LOG_E(TAG, "Failed to write block %d", i);
                     write_success = false;
                     break;
                 }
