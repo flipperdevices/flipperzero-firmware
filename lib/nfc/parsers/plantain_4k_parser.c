@@ -53,8 +53,6 @@ static const MfClassicAuthContext alt_plantain_keys_4k[] = {
     {.sector = 2, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xb0b2b3b4b5b5},
     {.sector = 3, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xb0b2b3b4b5b5},
     {.sector = 7, .key_a = 0x2066f4727129, .key_b = 0xf7a65799c6ee},
-    {.sector = 13, .key_a = 0xac70ca327a04, .key_b = 0xf29411c2663c},
-    {.sector = 14, .key_a = 0x51044efb5aab, .key_b = 0xebdc720dd1ce},
     {.sector = 15, .key_a = 0xa0a1a2a3a4a5, .key_b = 0x103c08acceb2},
 
     {.sector = 25, .key_a = 0x46d78e850a7e, .key_b = 0xa740f8130991},
@@ -62,7 +60,42 @@ static const MfClassicAuthContext alt_plantain_keys_4k[] = {
     {.sector = 27, .key_a = 0x0f01ceff2742, .key_b = 0x6fec74559ca7},
     {.sector = 28, .key_a = 0xb81f2b0c2f66, .key_b = 0xa7e2d95f0003},
     {.sector = 29, .key_a = 0x9ea3387a63c1, .key_b = 0x437e59f57561},
+
+    //EKP Keys
+    {.sector = 32, .key_a = 0x7A396F0D633D, .key_b = 0xAD2BDC097023},
+    {.sector = 33, .key_a = 0xA3FAA6DAFF67, .key_b = 0x7600E889ADF9},
+    {.sector = 34, .key_a = 0xFD8705E721B0, .key_b = 0x296FC317A513},
+    {.sector = 35, .key_a = 0xC9822A101508, .key_b = 0x88819B6B2632},
+    {.sector = 36, .key_a = 0x424DA92F838A, .key_b = 0xFDDFF8FE692E},
+    {.sector = 37, .key_a = 0x6141FE928401, .key_b = 0xC744FF0BAA94},
+    {.sector = 38, .key_a = 0x1EDF969F11D0, .key_b = 0x34DB430A0498},
+    {.sector = 39, .key_a = 0xE341067BFB71, .key_b = 0x61C928D7231B},
+
+    // Type 3
+    {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xb0b2b3b4b5b5},
+    {.sector = 4, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
+    {.sector = 5, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
+    {.sector = 8, .key_a = 0x26973ea74321, .key_b = 0xd27058c6e2c7},
+    {.sector = 9, .key_a = 0xeb0a8ff88ade, .key_b = 0x578a9ada41e3},
+    {.sector = 12, .key_a = 0x000000000000, .key_b = 0x71f3a315ad26},
+    {.sector = 13, .key_a = 0xac70ca327a04, .key_b = 0xf29411c2663c},
+    {.sector = 14, .key_a = 0x51044efb5aab, .key_b = 0xebdc720dd1ce},
+
+    {.sector = 4, .key_a = 0xe56ac127dd45, .key_b = 0x19fc84a3784b},
+    {.sector = 5, .key_a = 0x77dabc9825e1, .key_b = 0x9764fec3154a},
+    {.sector = 8, .key_a = 0xa73f5dc1d333, .key_b = 0xd27058c6e2c7}, //B unknown, TODO
 };
+
+// MfClassicAuthContext* getAuthContext_by_sector_num(uint8_t sec_num, uint8_t key_type) {
+//     if (sec_num < 40) {
+//         if (key_type == 0) {
+//             return (MfClassicAuthContext*)&plantain_keys_4k[sec_num];
+//         } else {
+//             return (MfClassicAuthContext*)&alt_plantain_keys_4k[sec_num];
+//         }
+//     }
+//     return NULL;
+// }
 
 bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
@@ -156,6 +189,71 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
     return result == 40;
 }
 
+bool is_with_key_readed(MfClassicData* mf_classic_data, uint8_t sector, uint64_t key) {
+    MfClassicSectorTrailer* sec_tr =
+        mf_classic_get_sector_trailer_by_sector(mf_classic_data, sector);
+    if(nfc_util_bytes2num(sec_tr->key_a, 6) == key) {
+        return true;
+    }
+    return false;
+}
+
+uint8_t get_SPBcard_type(MfClassicData* mf_classic_data) {
+    // static const MfClassicAuthContext SPB_type_1[] = {
+    //     {.sector = 4, .key_a = 0xe56ac127dd45, .key_b = 0x19fc84a3784b},
+    //     {.sector = 5, .key_a = 0x77dabc9825e1, .key_b = 0x9764fec3154a},
+    //     {.sector = 8, .key_a = 0x26973ea74321, .key_b = 0xd27058c6e2c7},
+    //     {.sector = 12, .key_a = 0xacffffffffff, .key_b = 0x71f3a315ad26},
+    // };
+
+    // static const MfClassicAuthContext SPB_type_2[] = {
+    //     {.sector = 4, .key_a = 0xe56ac127dd45, .key_b = 0x19fc84a3784b},
+    //     {.sector = 5, .key_a = 0x77dabc9825e1, .key_b = 0x9764fec3154a},
+    //     {.sector = 8, .key_a = 0xa73f5dc1d333, .key_b = 0xd27058c6e2c7}, //B unknown, TODO
+    // };
+
+    // static const MfClassicAuthContext SPB_type_3[] = {
+    //     {.sector = 8, .key_a = 0x26973ea74321, .key_b = 0xd27058c6e2c7},
+    //     {.sector = 9, .key_a = 0xeb0a8ff88ade, .key_b = 0x578a9ada41e3},
+    //     {.sector = 12, .key_a = 0x000000000000, .key_b = 0x71f3a315ad26},
+    //     {.sector = 13, .key_a = 0xac70ca327a04, .key_b = 0xf29411c2663c},
+    //     {.sector = 14, .key_a = 0x51044efb5aab, .key_b = 0xebdc720dd1ce},
+    // };
+
+    if(is_with_key_readed(mf_classic_data, 4, 0xe56ac127dd45) &&
+       is_with_key_readed(mf_classic_data, 5, 0x77dabc9825e1) &&
+       is_with_key_readed(mf_classic_data, 8, 0x26973ea74321) &&
+       is_with_key_readed(mf_classic_data, 12, 0xacffffffffff)) {
+        return 1;
+    }
+    if(is_with_key_readed(mf_classic_data, 4, 0xe56ac127dd45) &&
+       is_with_key_readed(mf_classic_data, 5, 0x77dabc9825e1) &&
+       is_with_key_readed(mf_classic_data, 8, 0xa73f5dc1d333)) {
+        return 2;
+    }
+    if(is_with_key_readed(mf_classic_data, 8, 0x26973ea74321) &&
+       is_with_key_readed(mf_classic_data, 9, 0xeb0a8ff88ade) &&
+       is_with_key_readed(mf_classic_data, 12, 0x000000000000) &&
+       is_with_key_readed(mf_classic_data, 13, 0xac70ca327a04) &&
+       is_with_key_readed(mf_classic_data, 14, 0x51044efb5aab)) {
+        return 3;
+    }
+    return 0;
+}
+
+uint64_t getEKPnum(MfClassicData* mf_classic_data) {
+    if(is_with_key_readed(mf_classic_data, 32, 0x7A396F0D633D)) {
+        // Point to block 0 of sector 32
+        uint8_t* temp_ptr = &mf_classic_data->block[32 * 4].value[0];
+        // Read bytes 1-8 of block 0 of sector 32
+        uint64_t ekp_num = (uint64_t)(*(uint64_t*)&temp_ptr[0]);
+        // Convert to little endian
+        ekp_num = __builtin_bswap64(ekp_num);
+        return ekp_num;
+    }
+    return 0;
+}
+
 bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
@@ -163,6 +261,11 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
     if(key != plantain_keys_4k[8].key_a) return false;
+
+    uint8_t card_type = get_SPBcard_type(data);
+
+    // uint64_t EKPnum = getEKPnum(data);
+    // uint8_t isEKPcard = EKPnum != 0;
 
     // Point to block 0 of sector 4, value 0
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];
@@ -198,12 +301,67 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     // Free all not needed strings
     furi_string_free(card_number_suffix);
 
-    furi_string_printf(
-        dev_data->parsed_data,
-        "\e#Plantain\nN:%s\nBalance:%ld\n",
-        furi_string_get_cstr(card_number_str),
-        balance);
-    furi_string_free(card_number_str);
+    switch(card_type) {
+    case 0:
+        // Unknown card type
+        furi_string_printf(
+            dev_data->parsed_data,
+            "\e#Unknown SPB card\nN:%s\nBalance:%ld\n",
+            furi_string_get_cstr(card_number_str),
+            balance);
+        break;
+    case 1:
+        // Plantain card
+        furi_string_printf(
+            dev_data->parsed_data,
+            "\e#Plantain card\nN:%s\nBalance:%ld\n",
+            furi_string_get_cstr(card_number_str),
+            balance);
+        break;
+    case 2:
+        // Strange card
+        furi_string_printf(
+            dev_data->parsed_data,
+            "\e#Strange SPB card\nN:%s\nBalance:%ld\n",
+            furi_string_get_cstr(card_number_str),
+            balance);
+        break;
+    case 3:
+        // Concession card
+        temp_ptr = &data->block[8 * 4 + 1].value[0];
+        // Read bytes 3-8 of block 1 of sector 8
+        FuriString* passport_series;
+        passport_series = furi_string_alloc();
+        furi_string_cat_printf(
+            passport_series, "%c%c%c%c", temp_ptr[3], temp_ptr[4], temp_ptr[6], temp_ptr[7]);
+        // furi_string_init_printf(
+        //     passport_series, "%c%c%c%c", temp_ptr[3], temp_ptr[4], temp_ptr[6], temp_ptr[7]);
+        temp_ptr = &data->block[8 * 4 + 1].value[0];
+        // Read bytes 9-11 of block 1 of sector 8
+        uint32_t passport_number = (temp_ptr[11] << 16) | (temp_ptr[10] << 8) | temp_ptr[9];
+        furi_string_printf(
+            dev_data->parsed_data,
+            "\e#Concession SPB card\nN:%s\nPN:%s %ld",
+            furi_string_get_cstr(card_number_str),
+            furi_string_get_cstr(passport_series),
+            passport_number);
+        furi_string_free(passport_series);
 
+        break;
+
+    default:
+        break;
+    }
+    // furi_string_printf(
+    //     dev_data->parsed_data,
+    //     "\e#Plantain\nN:%s\nBalance:%ld\nType:%d EKP:%d",
+    //     furi_string_get_cstr(card_number_str),
+    //     balance,
+    //     card_type,
+    //     isEKPcard);
+    // if(isEKPcard) {
+    //     furi_string_cat_printf(dev_data->parsed_data, "\nEKP:%lld", EKPnum);
+    // }
+    furi_string_free(card_number_str);
     return true;
 }
