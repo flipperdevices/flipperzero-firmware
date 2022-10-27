@@ -1,7 +1,7 @@
 from typing import List
 
 from cxxheaderparser.parser import CxxParser
-from scripts.fbt.sdk import (
+from . import (
     ApiEntries,
     ApiEntryFunction,
     ApiEntryVariable,

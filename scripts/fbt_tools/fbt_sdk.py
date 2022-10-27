@@ -12,7 +12,7 @@ import posixpath
 import pathlib
 import json
 
-from fbt.sdk.parser import SdkCollector
+from fbt.sdk.collector import SdkCollector
 from fbt.sdk.cache import SdkCache
 
 

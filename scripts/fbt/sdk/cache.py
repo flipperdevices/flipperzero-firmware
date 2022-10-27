@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 from ansi.color import fg
 
-from scripts.fbt.sdk import (
+from . import (
     ApiEntries,
     ApiEntryFunction,
     ApiEntryVariable,
