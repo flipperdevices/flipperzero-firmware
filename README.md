@@ -13,7 +13,7 @@ pwnagotchi-flipper
 
 ## Current state
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
-As of commit 9e5f6b7 (10/18/22) on rxBuffer branch the Pwnagotchi app for the flipper has a test function in the main function. This basically updates the screen when it receives a message. At the moment this causes the pwnagotchi to dereference a null pointer when it receives data. At least this means data is being received!
+Currently I am working on getting the rxBuffer system to work. Right now that just involves experimenting until I find the best solution. Going forward will be referencing the uart_echo tool included with debug in the firmware. Hopefully will have a buffering version soon and then from there just processing the protocol to draw on the screen.
 
 ## Setup
 TODO: Explain setup process
