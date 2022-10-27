@@ -362,7 +362,8 @@ static void infrared_cli_list_remote_signals(FuriString* remote_name) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
-    FuriString* remote_path = furi_string_alloc_printf("%s/%s.ir", EXT_PATH(INFRARED_ASSETS_FOLDER), furi_string_get_cstr(remote_name));
+    FuriString* remote_path = furi_string_alloc_printf(
+        "%s/%s.ir", EXT_PATH(INFRARED_ASSETS_FOLDER), furi_string_get_cstr(remote_name));
 
     do {
         if(!flipper_format_buffered_file_open_existing(ff, furi_string_get_cstr(remote_path))) {
@@ -409,10 +410,12 @@ static void infrared_cli_list_remote_signals(FuriString* remote_name) {
 static void
     infrared_cli_brute_force_signals(Cli* cli, FuriString* remote_name, FuriString* signal_name) {
     InfraredBruteForce* brute_force = infrared_brute_force_alloc();
-    FuriString* remote_path = furi_string_alloc_printf("%s/%s.ir", EXT_PATH(INFRARED_ASSETS_FOLDER), furi_string_get_cstr(remote_name));
+    FuriString* remote_path = furi_string_alloc_printf(
+        "%s/%s.ir", EXT_PATH(INFRARED_ASSETS_FOLDER), furi_string_get_cstr(remote_name));
 
     infrared_brute_force_set_db_filename(brute_force, furi_string_get_cstr(remote_path));
-    infrared_brute_force_add_record(brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, furi_string_get_cstr(signal_name));
+    infrared_brute_force_add_record(
+        brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, furi_string_get_cstr(signal_name));
 
     do {
         if(furi_string_empty(signal_name)) {
@@ -425,7 +428,8 @@ static void
         }
 
         uint32_t record_count;
-        bool running = infrared_brute_force_start(brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &record_count);
+        bool running = infrared_brute_force_start(
+            brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &record_count);
 
         if(record_count <= 0) {
             printf("Invalid signal name.\r\n");
