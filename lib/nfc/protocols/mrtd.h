@@ -16,18 +16,6 @@ typedef struct {
     bool secure_messaging;
 } MrtdApplication;
 
-typedef struct {
-    MrtdAuthData auth;
-    bool auth_success;
-    MrtdAuthMethod auth_method_used;
-
-    struct {
-        EF_DIR_contents EF_DIR;
-        EF_COM_contents EF_COM;
-        EF_DG1_contents DG1;
-    } files;
-} MrtdData;
-
 //TODO: description
 MrtdApplication* mrtd_alloc_init(FuriHalNfcTxRxContext* tx_rx);
 void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data); //TODO: remove
