@@ -19,7 +19,7 @@ void infrared_scene_universal_audio_on_enter(void* context) {
         0,
         0,
         3,
-        14,
+        11,
         &I_Power_25x27,
         &I_Power_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -31,7 +31,19 @@ void infrared_scene_universal_audio_on_enter(void* context) {
         1,
         0,
         36,
-        14,
+        11,
+        &I_Mute_25x27,
+        &I_Mute_hvr_25x27,
+        infrared_scene_universal_common_item_callback,
+        context);
+    infrared_brute_force_add_record(brute_force, i++, "Mute");
+    button_panel_add_item(
+        button_panel,
+        i,
+        0,
+        1,
+        3,
+        41,
         &I_PlayPause_25x27,
         &I_PlayPause_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -40,22 +52,34 @@ void infrared_scene_universal_audio_on_enter(void* context) {
     button_panel_add_item(
         button_panel,
         i,
-        0,
         1,
-        3,
-        43,
-        &I_Vol_up_25x27,
-        &I_Vol_up_hvr_25x27,
+        1,
+        36,
+        41,
+        &I_Eject_25x27,
+        &I_Eject_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "Vol_up");
+    infrared_brute_force_add_record(brute_force, i++, "Pause");
+    button_panel_add_item(
+        button_panel,
+        i,
+        0,
+        2,
+        3,
+        71,
+        &I_TrackPrev_25x27,
+        &I_TrackPrev_hvr_25x27,
+        infrared_scene_universal_common_item_callback,
+        context);
+    infrared_brute_force_add_record(brute_force, i++, "Prev");
     button_panel_add_item(
         button_panel,
         i,
         1,
-        1,
+        2,
         36,
-        43,
+        71,
         &I_TrackNext_25x27,
         &I_TrackNext_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -65,9 +89,9 @@ void infrared_scene_universal_audio_on_enter(void* context) {
         button_panel,
         i,
         0,
-        2,
         3,
-        72,
+        3,
+        101,
         &I_Vol_down_25x27,
         &I_Vol_down_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -77,40 +101,16 @@ void infrared_scene_universal_audio_on_enter(void* context) {
         button_panel,
         i,
         1,
-        2,
-        36,
-        72,
-        &I_TrackPrev_25x27,
-        &I_TrackPrev_hvr_25x27,
-        infrared_scene_universal_common_item_callback,
-        context);
-    infrared_brute_force_add_record(brute_force, i++, "Prev");
-    button_panel_add_item(
-        button_panel,
-        i,
-        0,
-        3,
-        3,
-        101,
-        &I_Eject_25x27,
-        &I_Eject_hvr_25x27,
-        infrared_scene_universal_common_item_callback,
-        context);
-    infrared_brute_force_add_record(brute_force, i++, "Eject");
-    button_panel_add_item(
-        button_panel,
-        i,
-        1,
         3,
         36,
         101,
-        &I_Mute_25x27,
-        &I_Mute_hvr_25x27,
+        &I_Vol_up_25x27,
+        &I_Vol_up_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
-    infrared_brute_force_add_record(brute_force, i++, "Mute");
+    infrared_brute_force_add_record(brute_force, i++, "Vol_up");
 
-    button_panel_add_label(button_panel, 6, 9, FontPrimary, "MC remote");
+    button_panel_add_label(button_panel, 1, 8, FontPrimary, "Mus. remote");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
