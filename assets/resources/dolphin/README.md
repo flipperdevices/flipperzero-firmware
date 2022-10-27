@@ -1,4 +1,12 @@
 
+- Animations: Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder (RM Select)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) or [this folder (RM minimal)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-minimal) if you don't want to do the work but want more animations.
+- - Rename the [minimal animation file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleMin) to see it, or [RM select](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleRM) if you have copied over [the RM select](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) animations.
+- on OFW the manifest.txt gets generated for the source material available to fbt (PNGs) and the BMs get built at run
+- on RM manifest.txt is not auto-generated, whatever OFW, RM or Unleashed animations installed will remain. New animations added would need to be added based on the animation set being used. Also, new animation development would need to have either a recode made of certain files or use a different FW to generate BMs for install. (Will need to try to fix this I guess, I might be able to)
+- I link to option folders here: https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/ReadMe.md?plain=1#L105 but also explain further here with examples that in the install: https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/ReadMe.md?plain=1#L25 
+(the minimal is in the install)
+
+
 ## Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 
 - Not all of these animations are here, some are [here](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-all)
@@ -23,6 +31,7 @@
 ## [Haseo Flipper Animations](https://github.com/Haseosama/FZ_Animations)
 ## [Talking-Sasquach Flipper Animations](https://github.com/skizzophrenic/Talking-Sasquach)
 ## [stopoxy Flipper Animations](https://github.com/stopoxy/FZAnimations)
+## [HexxedBitHeadz Flipper Animations](https://github.com/HexxedBitHeadz/FlipperZeroWallpaper)
 ## [CharlesTheGreat77 Flipper Animations](https://github.com/CharlesTheGreat77/FlipperZeroAnimation)
 
 
