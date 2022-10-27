@@ -26,7 +26,7 @@ jobs:
         id: compile
         continue-on-error: true
         run: |
-          FBT_TOOLCHAIN_PATH=/opt ./fbt FIRMWARE_APP_SET=unit_tests flash_usb FORCE=1
+          FBT_TOOLCHAIN_PATH=/opt ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
 
       - name: 'Wait for flipper to finish updating'
         id: connect
