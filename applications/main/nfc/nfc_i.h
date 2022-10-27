@@ -20,6 +20,7 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/variable_item_list.h>
 
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_worker.h>
@@ -60,6 +61,9 @@ struct Nfc {
     SceneManager* scene_manager;
     NfcDevice* dev;
     FuriHalNfcDevData dev_edit_data;
+    VariableItemList* variable_item_list;
+
+    bool mfc_nonce_logging;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
@@ -86,6 +90,7 @@ struct Nfc {
 
 typedef enum {
     NfcViewMenu,
+    NfcViewSettings,
     NfcViewDialogEx,
     NfcViewPopup,
     NfcViewLoading,

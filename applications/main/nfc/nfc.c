@@ -56,6 +56,13 @@ Nfc* nfc_alloc() {
     nfc->submenu = submenu_alloc();
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewMenu, submenu_get_view(nfc->submenu));
 
+    // Settings
+    nfc->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        nfc->view_dispatcher,
+        NfcViewSettings,
+        variable_item_list_get_view(nfc->variable_item_list));
+
     // Dialog
     nfc->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
@@ -129,6 +136,10 @@ void nfc_free(Nfc* nfc) {
     // Submenu
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewMenu);
     submenu_free(nfc->submenu);
+
+    // Settings
+    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewSettings);
+    variable_item_list_free(nfc->variable_item_list);
 
     // DialogEx
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDialogEx);
