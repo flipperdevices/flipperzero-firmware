@@ -21,15 +21,12 @@ static void nfc_scene_mf_classic_write_setup_view(Nfc* nfc) {
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicWrite);
 
     if(state == NfcSceneMfClassicWriteStateCardSearch) {
-        popup_set_header(popup, "Place card to write", 64, 32, AlignCenter, AlignCenter);
+        popup_set_text(
+            nfc->popup, "Apply the initial\ncard only", 128, 32, AlignRight, AlignCenter);
+        popup_set_icon(nfc->popup, 0, 8, &I_NFC_manual_60x50);
     } else {
-        if(strcmp(nfc->dev->dev_name, "")) {
-            nfc_text_store_set(nfc, "Writing\n%s", nfc->dev->dev_name);
-        } else {
-            nfc_text_store_set(nfc, "Writing\nMf Classic", nfc->dev->dev_name);
-        }
-        popup_set_icon(popup, 0, 3, &I_RFIDDolphinSend_97x61);
-        popup_set_header(popup, nfc->text_store, 56, 31, AlignLeft, AlignTop);
+        popup_set_header(popup, "Writing\nDon't move...", 52, 32, AlignLeft, AlignCenter);
+        popup_set_icon(popup, 12, 23, &A_Loading_24);
     }
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);

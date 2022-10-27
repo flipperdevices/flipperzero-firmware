@@ -19,7 +19,7 @@ typedef struct {
 
 static void detect_reader_draw_callback(Canvas* canvas, void* model) {
     DetectReaderViewModel* m = model;
-    char text[64] = {};
+    char text[32] = {};
 
     // Draw header and icon
     canvas_draw_icon(canvas, 0, 16, &I_Modern_reader_18x34);
