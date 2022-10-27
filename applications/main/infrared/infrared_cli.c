@@ -83,9 +83,10 @@ static void infrared_cli_print_usage(void) {
         INFRARED_MIN_FREQUENCY,
         INFRARED_MAX_FREQUENCY);
     printf("\tir decode <input_file> [<output_file>]\r\n");
+    printf("\tir universal <remote_name> <signal_name>\r\n");
+    printf("\tir universal list <remote_name>\r\n");
     // TODO: Do not hardcode universal remote names
-    printf("\tir universal <tv, audio, ac> <signal_name>\r\n");
-    printf("\tir universal list <tv, audio, ac>\r\n");
+    printf("\tAvailable universal remotes: tv audio ac\r\n");
 }
 
 static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args) {
