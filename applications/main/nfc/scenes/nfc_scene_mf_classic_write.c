@@ -58,7 +58,10 @@ bool nfc_scene_mf_classic_write_on_event(void* context, SceneManagerEvent event)
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcWorkerEventWrongCard) {
+        if(event.event == NfcWorkerEventSuccess) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicWriteSuccess);
+            consumed = true;
+        } else if(event.event == NfcWorkerEventWrongCard) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicWrongCard);
             consumed = true;
         } else if(event.event == NfcWorkerEventCardDetected) {
@@ -79,6 +82,7 @@ bool nfc_scene_mf_classic_write_on_event(void* context, SceneManagerEvent event)
 void nfc_scene_mf_classic_write_on_exit(void* context) {
     Nfc* nfc = context;
 
+    nfc_worker_stop(nfc->worker);
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneMfClassicWrite, NfcSceneMfClassicWriteStateCardSearch);
     // Clear view

@@ -175,3 +175,16 @@ uint8_t mf_classic_read_card(
 uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data);
 
 bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx);
+
+bool mf_classic_write_block(
+    FuriHalNfcTxRxContext* tx_rx,
+    MfClassicBlock* src_block,
+    uint8_t block_num,
+    MfClassicKey key_type,
+    uint64_t key);
+
+bool mf_classic_write_sector(
+    FuriHalNfcTxRxContext* tx_rx,
+    MfClassicData* dest_data,
+    MfClassicData* src_data,
+    uint8_t sec_num);

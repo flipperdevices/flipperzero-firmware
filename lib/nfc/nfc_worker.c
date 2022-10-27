@@ -701,14 +701,36 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
                 break;
             }
 
-            FURI_LOG_I(TAG, "Read card sectors");
-            uint8_t sectors = mf_classic_get_total_sectors_num(type);
-            for(uint8_t i = 0; i < sectors; i++) {
+            // Set blocks not read
+            mf_classic_set_sector_data_not_read(&dest_data);
+            FURI_LOG_D(TAG, "Updating card sectors");
+            uint8_t total_sectors = mf_classic_get_total_sectors_num(type);
+            bool write_success = true;
+            for(uint8_t i = 0; i < total_sectors; i++) {
+                FURI_LOG_D(TAG, "Reading sector %d", i);
                 mf_classic_read_sector(&tx_rx, &dest_data, i);
+                bool old_data_read = mf_classic_is_sector_data_read(src_data, i);
+                bool new_data_read = mf_classic_is_sector_data_read(&dest_data, i);
+                if(old_data_read != new_data_read) {
+                    FURI_LOG_D(TAG, "Failed to update sector %d", i);
+                    write_success = false;
+                    break;
+                }
+                if(nfc_worker->state != NfcWorkerStateMfClassicWrite) break;
+                if(!mf_classic_write_sector(&tx_rx, &dest_data, src_data, i)) {
+                    FURI_LOG_D(TAG, "Failed to write %d sector", i);
+                    write_success = false;
+                    break;
+                }
             }
-            uint8_t sectors_read = mf_classic_update_card(&tx_rx, &dest_data);
-            FURI_LOG_I(TAG, "Sectors read: %d", sectors_read);
             if(nfc_worker->state != NfcWorkerStateMfClassicWrite) break;
+            if(write_success) {
+                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+                break;
+            } else {
+                nfc_worker->callback(NfcWorkerEventFail, nfc_worker->context);
+                break;
+            }
 
         } else {
             if(card_found_notified) {
@@ -716,7 +738,7 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
                 card_found_notified = false;
             }
         }
-        furi_delay_ms(1000);
+        furi_delay_ms(300);
     }
 }
 
@@ -766,10 +788,7 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
                     update_success = false;
                     break;
                 }
-                if(nfc_worker->state != NfcWorkerStateMfClassicUpdate) {
-                    update_success = false;
-                    break;
-                }
+                if(nfc_worker->state != NfcWorkerStateMfClassicUpdate) break;
             }
             if(nfc_worker->state != NfcWorkerStateMfClassicUpdate) break;
 

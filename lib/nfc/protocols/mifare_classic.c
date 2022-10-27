@@ -9,7 +9,8 @@
 
 #define MF_CLASSIC_AUTH_KEY_A_CMD (0x60U)
 #define MF_CLASSIC_AUTH_KEY_B_CMD (0x61U)
-#define MF_CLASSIC_READ_SECT_CMD (0x30)
+#define MF_CLASSIC_READ_BLOCK_CMD (0x30)
+#define MF_CLASSIC_WRITE_BLOCK_CMD (0xA0)
 
 const char* mf_classic_get_type_str(MfClassicType type) {
     if(type == MfClassicType1k) {
@@ -377,6 +378,49 @@ MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t S
     return MfClassicType1k;
 }
 
+void mf_crypto1_decrypt(
+    Crypto1* crypto,
+    uint8_t* encrypted_data,
+    uint16_t encrypted_data_bits,
+    uint8_t* decrypted_data) {
+    if(encrypted_data_bits < 8) {
+        uint8_t decrypted_byte = 0;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 0)) << 0;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 1)) << 1;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 2)) << 2;
+        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 3)) << 3;
+        decrypted_data[0] = decrypted_byte;
+    } else {
+        for(size_t i = 0; i < encrypted_data_bits / 8; i++) {
+            decrypted_data[i] = crypto1_byte(crypto, 0, 0) ^ encrypted_data[i];
+        }
+    }
+}
+
+void mf_crypto1_encrypt(
+    Crypto1* crypto,
+    uint8_t* keystream,
+    uint8_t* plain_data,
+    uint16_t plain_data_bits,
+    uint8_t* encrypted_data,
+    uint8_t* encrypted_parity) {
+    if(plain_data_bits < 8) {
+        encrypted_data[0] = 0;
+        for(size_t i = 0; i < plain_data_bits; i++) {
+            encrypted_data[0] |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(plain_data[0], i)) << i;
+        }
+    } else {
+        memset(encrypted_parity, 0, plain_data_bits / 8 + 1);
+        for(uint8_t i = 0; i < plain_data_bits / 8; i++) {
+            encrypted_data[i] = crypto1_byte(crypto, keystream ? keystream[i] : 0, 0) ^
+                                plain_data[i];
+            encrypted_parity[i / 8] |=
+                (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_data[i])) & 0x01)
+                 << (7 - (i & 0x0007)));
+        }
+    }
+}
+
 void mf_classic_reader_add_sector(
     MfClassicReader* reader,
     uint8_t sector,
@@ -522,25 +566,17 @@ bool mf_classic_read_block(
     furi_assert(block);
 
     bool read_block_success = false;
-    uint8_t plain_cmd[4] = {MF_CLASSIC_READ_SECT_CMD, block_num, 0x00, 0x00};
+    uint8_t plain_cmd[4] = {MF_CLASSIC_READ_BLOCK_CMD, block_num, 0x00, 0x00};
     nfca_append_crc16(plain_cmd, 2);
-    memset(tx_rx->tx_data, 0, sizeof(tx_rx->tx_data));
-    memset(tx_rx->tx_parity, 0, sizeof(tx_rx->tx_parity));
 
-    for(uint8_t i = 0; i < 4; i++) {
-        tx_rx->tx_data[i] = crypto1_byte(crypto, 0x00, 0) ^ plain_cmd[i];
-        tx_rx->tx_parity[0] |=
-            ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_cmd[i])) & 0x01) << (7 - i);
-    }
+    mf_crypto1_encrypt(crypto, NULL, plain_cmd, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
     tx_rx->tx_bits = 4 * 9;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
     if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
         if(tx_rx->rx_bits == 8 * (MF_CLASSIC_BLOCK_SIZE + 2)) {
             uint8_t block_received[MF_CLASSIC_BLOCK_SIZE + 2];
-            for(uint8_t i = 0; i < MF_CLASSIC_BLOCK_SIZE + 2; i++) {
-                block_received[i] = crypto1_byte(crypto, 0, 0) ^ tx_rx->rx_data[i];
-            }
+            mf_crypto1_decrypt(crypto, tx_rx->rx_data, tx_rx->rx_bits, block_received);
             uint16_t crc_calc = nfca_get_crc16(block_received, MF_CLASSIC_BLOCK_SIZE);
             uint16_t crc_received = (block_received[MF_CLASSIC_BLOCK_SIZE + 1] << 8) |
                                     block_received[MF_CLASSIC_BLOCK_SIZE];
@@ -760,49 +796,6 @@ uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data
         }
     }
     return sectors_read;
-}
-
-void mf_crypto1_decrypt(
-    Crypto1* crypto,
-    uint8_t* encrypted_data,
-    uint16_t encrypted_data_bits,
-    uint8_t* decrypted_data) {
-    if(encrypted_data_bits < 8) {
-        uint8_t decrypted_byte = 0;
-        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 0)) << 0;
-        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 1)) << 1;
-        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 2)) << 2;
-        decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_data[0], 3)) << 3;
-        decrypted_data[0] = decrypted_byte;
-    } else {
-        for(size_t i = 0; i < encrypted_data_bits / 8; i++) {
-            decrypted_data[i] = crypto1_byte(crypto, 0, 0) ^ encrypted_data[i];
-        }
-    }
-}
-
-void mf_crypto1_encrypt(
-    Crypto1* crypto,
-    uint8_t* keystream,
-    uint8_t* plain_data,
-    uint16_t plain_data_bits,
-    uint8_t* encrypted_data,
-    uint8_t* encrypted_parity) {
-    if(plain_data_bits < 8) {
-        encrypted_data[0] = 0;
-        for(size_t i = 0; i < plain_data_bits; i++) {
-            encrypted_data[0] |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(plain_data[0], i)) << i;
-        }
-    } else {
-        memset(encrypted_parity, 0, plain_data_bits / 8 + 1);
-        for(uint8_t i = 0; i < plain_data_bits / 8; i++) {
-            encrypted_data[i] = crypto1_byte(crypto, keystream ? keystream[i] : 0, 0) ^
-                                plain_data[i];
-            encrypted_parity[i / 8] |=
-                (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_data[i])) & 0x01)
-                 << (7 - (i & 0x0007)));
-        }
-    }
 }
 
 bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
@@ -1034,4 +1027,126 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     }
 
     return true;
+}
+
+bool mf_classic_write_block(
+    FuriHalNfcTxRxContext* tx_rx,
+    MfClassicBlock* src_block,
+    uint8_t block_num,
+    MfClassicKey key_type,
+    uint64_t key) {
+    furi_assert(tx_rx);
+    furi_assert(src_block);
+
+    Crypto1 crypto = {};
+    uint8_t plain_data[18] = {};
+    uint8_t resp = 0;
+    bool write_success = false;
+
+    do {
+        furi_hal_nfc_sleep();
+        if(!mf_classic_auth(tx_rx, block_num, key, key_type, &crypto)) {
+            FURI_LOG_D(TAG, "Auth fail");
+            break;
+        }
+        // Send write command
+        plain_data[0] = MF_CLASSIC_WRITE_BLOCK_CMD;
+        plain_data[1] = block_num;
+        nfca_append_crc16(plain_data, 2);
+        mf_crypto1_encrypt(&crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        tx_rx->tx_bits = 4 * 8;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
+
+        if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
+            if(tx_rx->rx_bits == 4) {
+                mf_crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
+                if(resp != 0x0A) {
+                    FURI_LOG_D(TAG, "NACK received on write cmd: %02X", resp);
+                    break;
+                }
+            } else {
+                FURI_LOG_E(TAG, "Received %d bits", tx_rx->rx_bits);
+                for(size_t i = 0; i < tx_rx->rx_bits / 8; i++) {
+                    printf("%02X ", tx_rx->rx_data[i]);
+                }
+                printf("\r\n");
+            }
+        } else {
+            FURI_LOG_D(TAG, "Failed to send write cmd");
+            break;
+        }
+
+        // Send data
+        mf_crypto1_encrypt(&crypto, NULL, plain_data, 18 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        tx_rx->tx_bits = 18 * 8;
+        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
+        if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
+            if(tx_rx->rx_bits == 4) {
+                mf_crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
+                if(resp != 0x0A) {
+                    FURI_LOG_D(TAG, "NACK received on sending data");
+                    break;
+                }
+            }
+        } else {
+            FURI_LOG_D(TAG, "Failed to send data");
+            break;
+        }
+
+        write_success = true;
+    } while(false);
+
+    return write_success;
+}
+
+bool mf_classic_write_sector(
+    FuriHalNfcTxRxContext* tx_rx,
+    MfClassicData* dest_data,
+    MfClassicData* src_data,
+    uint8_t sec_num) {
+    furi_assert(tx_rx);
+    furi_assert(dest_data);
+    furi_assert(src_data);
+
+    uint8_t first_block = mf_classic_get_first_block_num_of_sector(sec_num);
+    uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(sec_num);
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(dest_data, sec_num);
+    bool key_a_found = mf_classic_is_key_found(dest_data, sec_num, MfClassicKeyA);
+    bool key_b_found = mf_classic_is_key_found(dest_data, sec_num, MfClassicKeyB);
+
+    bool write_success = true;
+    for(size_t i = first_block; i < first_block + total_blocks; i++) {
+        // Compare blocks
+        if(memcmp(dest_data->block[i].value, src_data->block[i].value, MF_CLASSIC_BLOCK_SIZE)) {
+            bool key_a_write_allowed = mf_classic_is_allowed_access_data_block(
+                dest_data, i, MfClassicKeyA, MfClassicActionDataWrite);
+            bool key_b_write_allowed = mf_classic_is_allowed_access_data_block(
+                dest_data, i, MfClassicKeyB, MfClassicActionDataWrite);
+
+            if(key_a_found && key_a_write_allowed) {
+                FURI_LOG_D(TAG, "Writing block %d with key A", i);
+                uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
+                if(!mf_classic_write_block(tx_rx, &src_data->block[i], i, MfClassicKeyA, key)) {
+                    FURI_LOG_D(TAG, "Failed to write block %d", i);
+                    write_success = false;
+                    break;
+                }
+            } else if(key_b_found && key_b_write_allowed) {
+                FURI_LOG_D(TAG, "Writing block %d with key A", i);
+                uint64_t key = nfc_util_bytes2num(sec_tr->key_b, 6);
+                if(!mf_classic_write_block(tx_rx, &src_data->block[i], i, MfClassicKeyB, key)) {
+                    FURI_LOG_D(TAG, "Failed to write block %d", i);
+                    write_success = false;
+                    break;
+                }
+            } else {
+                write_success = false;
+                break;
+            }
+        } else {
+            FURI_LOG_D(TAG, "Blocks %d are equal", i);
+        }
+    }
+
+    return write_success;
 }
