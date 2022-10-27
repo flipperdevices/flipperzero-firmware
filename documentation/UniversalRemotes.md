@@ -1,9 +1,10 @@
 # Universal Remotes
 ## Audio Players
 ### Recording signals
-Adding your audio player to the universal remote is quite straightforward. 8 signals can be recorded: `Power`, `Play`, `Vol_up`, `Vol_dn`, `Next`, `Prev`, `Mute`, `Eject`. Any of them can be omitted if it is not supported by the device. 
+Adding your audio player to the universal remote is quite straightforward. 8 signals can be recorded: `Power`, `Play`, `Pause`, `Vol_up`, `Vol_dn`, `Next`, `Prev`, `Mute`. Any of them can be omitted if it is not supported by the device. 
 
-The signal names are self-explanatory. On many remotes, the `Play` button doubles as `Pause` (which is not present in the above list). Record whatever one your remote has. 
+The signal names are self-explanatory. 
+On many remotes, the `Play` button doubles as `Pause`. In this case record it as `Play` omitting the `Pause`.
 Make sure that every signal does what it's supposed to.
 
 If everything checks out, append these signals **to the end** of the [Audio players universal remote file](/assets/resources/infrared/assets/audio.ir).
