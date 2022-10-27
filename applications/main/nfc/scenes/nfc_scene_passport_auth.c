@@ -31,7 +31,7 @@ bool nfc_scene_passport_auth_load(Nfc* nfc) {
     const DialogsFileBrowserOptions browser_options = {
         .extension = MRTD_APP_EXTENSION,
         .skip_assets = true,
-        .icon = &I_Nfc_10px, //TODO: custom icon?
+        .icon = &I_u2f_10px,
         .hide_ext = true,
         .item_loader_callback = NULL,
         .item_loader_context = NULL,
@@ -55,7 +55,6 @@ bool nfc_scene_passport_auth_load(Nfc* nfc) {
                 furi_string_get_cstr(file_path),
                 true);
 
-        //TODO: make sure this call is ok:
         nfc_scene_passport_auth_on_enter(nfc);
     }
 
