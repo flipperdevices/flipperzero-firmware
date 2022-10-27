@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,4.1,,
+Version,+,6.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2271,21 +2271,26 @@ Function,-,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, u
 Function,-,subghz_keystore_raw_get_data,_Bool,"const char*, size_t, uint8_t*, size_t"
 Function,-,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
 Function,+,subghz_protocol_blocks_add_bit,void,"SubGhzBlockDecoder*, uint8_t"
-Function,+,subghz_protocol_blocks_crc16,uint16_t,"const uint8_t[], unsigned, uint16_t, uint16_t"
-Function,+,subghz_protocol_blocks_crc16lsb,uint16_t,"const uint8_t[], unsigned, uint16_t, uint16_t"
-Function,+,subghz_protocol_blocks_crc4,uint8_t,"const uint8_t[], unsigned, uint8_t, uint8_t"
-Function,+,subghz_protocol_blocks_crc7,uint8_t,"const uint8_t[], unsigned, uint8_t, uint8_t"
-Function,+,subghz_protocol_blocks_crc8,uint8_t,"const uint8_t[], unsigned, uint8_t, uint8_t"
-Function,+,subghz_protocol_blocks_crc8le,uint8_t,"const uint8_t[], unsigned, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_add_bytes,uint8_t,"const uint8_t[], size_t"
+Function,+,subghz_protocol_blocks_add_to_128_bit,void,"SubGhzBlockDecoder*, uint8_t, uint64_t*"
+Function,+,subghz_protocol_blocks_crc16,uint16_t,"const uint8_t[], size_t, uint16_t, uint16_t"
+Function,+,subghz_protocol_blocks_crc16lsb,uint16_t,"const uint8_t[], size_t, uint16_t, uint16_t"
+Function,+,subghz_protocol_blocks_crc4,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_crc7,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_crc8,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_crc8le,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
 Function,+,subghz_protocol_blocks_get_bit_array,_Bool,"uint8_t[], size_t"
 Function,+,subghz_protocol_blocks_get_hash_data,uint8_t,"SubGhzBlockDecoder*, size_t"
 Function,+,subghz_protocol_blocks_get_parity,uint8_t,"uint64_t, uint8_t"
 Function,+,subghz_protocol_blocks_get_upload,size_t,"uint8_t[], size_t, LevelDuration*, size_t, uint32_t"
-Function,+,subghz_protocol_blocks_lfsr_digest16,uint16_t,"const uint8_t[], unsigned, uint16_t, uint16_t"
-Function,+,subghz_protocol_blocks_lfsr_digest8,uint8_t,"const uint8_t[], unsigned, uint8_t, uint8_t"
-Function,+,subghz_protocol_blocks_lfsr_digest8_reflect,uint8_t,"const uint8_t[], int, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_lfsr_digest16,uint16_t,"const uint8_t[], size_t, uint16_t, uint16_t"
+Function,+,subghz_protocol_blocks_lfsr_digest8,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_lfsr_digest8_reflect,uint8_t,"const uint8_t[], size_t, uint8_t, uint8_t"
+Function,+,subghz_protocol_blocks_parity8,uint8_t,uint8_t
+Function,+,subghz_protocol_blocks_parity_bytes,uint8_t,"const uint8_t[], size_t"
 Function,+,subghz_protocol_blocks_reverse_key,uint64_t,"uint64_t, uint8_t"
 Function,+,subghz_protocol_blocks_set_bit_array,void,"_Bool, uint8_t[], size_t, size_t"
+Function,+,subghz_protocol_blocks_xor_bytes,uint8_t,"const uint8_t[], size_t"
 Function,-,subghz_protocol_decoder_base_deserialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*"
 Function,+,subghz_protocol_decoder_base_get_hash_data,uint8_t,SubGhzProtocolDecoderBase*
 Function,+,subghz_protocol_decoder_base_get_string,_Bool,"SubGhzProtocolDecoderBase*, FuriString*"
@@ -2306,6 +2311,7 @@ Function,+,subghz_protocol_raw_file_encoder_worker_set_callback_end,void,"SubGhz
 Function,+,subghz_protocol_raw_gen_fff_data,void,"FlipperFormat*, const char*"
 Function,+,subghz_protocol_raw_get_sample_write,size_t,SubGhzProtocolDecoderRAW*
 Function,+,subghz_protocol_raw_save_to_file_init,_Bool,"SubGhzProtocolDecoderRAW*, const char*, SubGhzRadioPreset*"
+Function,+,subghz_protocol_raw_save_to_file_pause,void,"SubGhzProtocolDecoderRAW*, _Bool"
 Function,+,subghz_protocol_raw_save_to_file_stop,void,SubGhzProtocolDecoderRAW*
 Function,+,subghz_receiver_alloc_init,SubGhzReceiver*,SubGhzEnvironment*
 Function,+,subghz_receiver_decode,void,"SubGhzReceiver*, _Bool, uint32_t"
@@ -2851,7 +2857,6 @@ Variable,+,I_update_10px,const Icon,
 Variable,-,MSIRangeTable,const uint32_t[16],
 Variable,-,SmpsPrescalerTable,const uint32_t[4][6],
 Variable,+,SystemCoreClock,uint32_t,
-Variable,+,__furi_check_message,const char*,
 Variable,+,_ctype_,const char[],
 Variable,+,_global_impure_ptr,_reent*,
 Variable,+,_impure_ptr,_reent*,
