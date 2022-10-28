@@ -186,18 +186,21 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
 bool subbrute_main_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "InputKey: %d", event->key);
-#endif
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
+#ifdef FURI_DEBUG
+        FURI_LOG_I(TAG, "InputKey: BACK");
+#endif
         return false;
     }
 
     SubBruteMainView* instance = context;
+#ifdef FURI_DEBUG
+    FURI_LOG_D(TAG, "InputKey: %d, extra_repeats: %d", event->key, instance->extra_repeats);
+#endif
     const uint8_t min_value = 0;
     const uint8_t correct_total = SubBruteAttackTotalCount - 1;
-    const uint8_t max_repeats = 9;
+    uint8_t max_repeats = 9 - subbrute_protocol_repeats_count(instance->index);
     uint8_t index = 0;
 
     bool updated = false;

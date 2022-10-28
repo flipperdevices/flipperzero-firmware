@@ -44,10 +44,10 @@ void subbrute_attack_view_set_callback(
 bool subbrute_attack_view_input(InputEvent* event, void* context) {
     furi_assert(event);
     furi_assert(context);
+    SubBruteAttackView* instance = context;
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "InputKey: %d", event->key);
 #endif
-    SubBruteAttackView* instance = context;
 
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         instance->is_attacking = false;
@@ -210,12 +210,13 @@ void subbrute_attack_view_init_values(
     bool is_attacking,
     uint8_t extra_repeats) {
 #ifdef FURI_DEBUG
-    FURI_LOG_D(
+    FURI_LOG_I(
         TAG,
-        "init, attack_type: %d, max_value: %lld, current_step: %lld",
+        "INIT, attack_type: %d, max_value: %lld, current_step: %lld, extra_repeats: %d",
         index,
         max_value,
-        current_step);
+        current_step,
+        extra_repeats);
 #endif
     instance->attack_type = index;
     instance->max_value = max_value;
