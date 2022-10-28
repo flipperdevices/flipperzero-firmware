@@ -12,7 +12,12 @@ pwnagotchi-flipper
 - TBD is the pwnagotchi-side application
 
 ## Current state
-As of commit ff5b581 (10/10/22) the Pwnagotchi app for the flipper has a test function in the main function. This was used for me to determine if my UART callback was working (which it is not). Currently the interface is incomplete, I will make a note in this section when it is finished.
+FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
+<<<<<<< HEAD
+As of commit 23858cc (10/28/22) on rxBuffer branch the I have begun structuring a message queue which will ultimately leverage built in furi streams to process uart input. After restructuring and getting the receive to work I will merge into main and begin working on getting the screen to color as per the protocol's transmission.
+=======
+Currently I am working on getting the rxBuffer system to work. Right now that just involves experimenting until I find the best solution. Going forward will be referencing the uart_echo tool included with debug in the firmware. Hopefully will have a buffering version soon and then from there just processing the protocol to draw on the screen.
+>>>>>>> 7f88c85c33412c7424c05dfa0eae445f3c5e9acb
 
 ## Setup
 TODO: Explain setup process
