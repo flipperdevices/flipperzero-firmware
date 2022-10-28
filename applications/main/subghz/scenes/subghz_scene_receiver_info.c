@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include <dolphin/dolphin.h>
 
 void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -28,8 +27,8 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
             subghz->txrx->decoder_result,
             subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
 
-        SubGhzPresetDefinition* preset =
-            subghz_history_get_preset_def(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
+        SubGhzRadioPreset* preset =
+            subghz_history_get_radio_preset(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
         subghz_preset_init(
             subghz,
             furi_string_get_cstr(preset->name),
@@ -45,7 +44,6 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
 void subghz_scene_receiver_info_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
     if(subghz_scene_receiver_info_update_parser(subghz)) {
         FuriString* frequency_str;
         FuriString* modulation_str;

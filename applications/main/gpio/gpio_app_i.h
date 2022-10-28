@@ -15,6 +15,7 @@
 #include <gui/modules/widget.h>
 #include "views/gpio_test.h"
 #include "views/gpio_usb_uart.h"
+#include <assets_icons.h>
 
 struct GpioApp {
     Gui* gui;
@@ -24,6 +25,7 @@ struct GpioApp {
     Widget* widget;
 
     VariableItemList* var_item_list;
+    VariableItem* var_item_flow;
     GpioTest* gpio_test;
     GpioUsbUart* gpio_usb_uart;
     UsbUartBridge* usb_uart_bridge;
