@@ -7,6 +7,12 @@
 ![contributions - welcome](https://img.shields.io/badge/contributions-welcome-blue)
 [![Discord server](https://img.shields.io/discord/937479784148115456)](https://discord.com/channels/937479784148115456)
 
+---
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=akopachov_flipper-zero_authenticator)
+
+---
+
 ![Screenshot](docs/assets/screenshot_1.png)
 
 ## Description

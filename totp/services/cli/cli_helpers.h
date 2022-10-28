@@ -37,4 +37,4 @@
     TOTP_CLI_PRINTF(                       \
         "Invalid command arguments. use \"help\" command to get list of available commands")
 
-bool totp_cli_ensure_authenticated(PluginState* plugin_state, Cli* cli);
+bool totp_cli_ensure_authenticated(const PluginState* plugin_state, Cli* cli);
