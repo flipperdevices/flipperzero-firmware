@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
 
@@ -45,7 +44,9 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     return false;
 }
 
-void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
+void subghz_scene_receiver_info_on_enter(void* context) {
+    SubGhz* subghz = context;
+
     if(subghz_scene_receiver_info_update_parser(subghz)) {
         FuriString* frequency_str;
         FuriString* modulation_str;

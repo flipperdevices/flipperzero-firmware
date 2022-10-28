@@ -39,7 +39,6 @@ void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
 
 void nfc_scene_read_on_enter(void* context) {
     Nfc* nfc = context;
-    DOLPHIN_DEED(DolphinDeedNfcRead);
 
     nfc_device_clear(nfc->dev);
     // Setup view
@@ -62,28 +61,34 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
            (event.event == NfcWorkerEventReadUidNfcV)) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadUidNfcA) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfUltralight) {
             notification_message(nfc->notifications, &sequence_success);
             // Set unlock password input to 0xFFFFFFFF only on fresh read
             memset(nfc->byte_input_store, 0xFF, 4);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDone) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfDesfire) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadBankCard) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneEmvReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadPassport) {
             notification_message(nfc->notifications, &sequence_success);
