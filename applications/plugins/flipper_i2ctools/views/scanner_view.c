@@ -1,5 +1,4 @@
 #include "scanner_view.h"
-#include "i2cTools_icons.h"
 
 void draw_scanner_view(Canvas* canvas, i2cScanner* i2c_scanner) {
     canvas_clear(canvas);
