@@ -53,6 +53,15 @@ static uint8_t spi_mem_tools_addr_to_byte_arr(
     return len;
 }
 
+bool spi_mem_tools_check_chip_info(SPIMemChip* chip) {
+    SPIMemChip new_chip_info;
+    spi_mem_tools_read_chip_info(&new_chip_info);
+    if(chip->vendor_id != new_chip_info.vendor_id) return false;
+    if(chip->type_id != new_chip_info.type_id) return false;
+    if(chip->capacity_id != new_chip_info.capacity_id) return false;
+    return true;
+}
+
 bool spi_mem_tools_read_block_data(
     SPIMemChip* chip,
     size_t offset,
@@ -61,6 +70,7 @@ bool spi_mem_tools_read_block_data(
     for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
         uint8_t cmd[3];
         if((offset + SPI_MEM_MAX_BLOCK_SIZE) >= chip->size) return false;
+        if(!spi_mem_tools_check_chip_info(chip)) return false;
         if(!spi_mem_tools_trx(
                SPIMemChipCMDReadData,
                cmd,
