@@ -2,70 +2,23 @@
 
 #include <furi.h>
 #include <gui/gui.h>
-#include <stdlib.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
+#include <gui/elements.h>
+#include <furi_hal_uart.h>
+#include <furi_hal_console.h>
+#include <gui/view_dispatcher.h>
+#include <gui/modules/dialog_ex.h>
 
-#include "pwnagotchi.h"
+#include "message_queue.h"
+#include "constants.h"
 
 typedef struct {
-    Pwnagotchi* pwnagotchi;
+    Gui* gui;
+    NotificationApp* notification;
+    ViewDispatcher* viewDispatcher;
+    View* view;
+    FuriThread* workerThread;
+    FuriStreamBuffer* rxStream;
+} PwnZeroApp;
 
-    // To be expandable in the future for input buffers etc.
-
-} PwnZero;
-
-/**
- * @brief Allocates and constructs the PwnZero structure. Initializes gui
- * 
- * @return PwnZero* Newly constructed object
- */
-PwnZero* pwn_zero_alloc();
-
-/**
- * @brief Deallocates and closes the pwnagotchi connection
- * 
- * @param pwn PwnZero to destroy
- */
-void pwn_zero_free(PwnZero* pwn);
-
-/**
- * @brief Set a given pixel on or off
- * 
- * @param pwn PwnZero object to operate on
- * @param i Column to set
- * @param j Row to set
- * @param status ? on : off
- * @return Whether the operation was successful
- */
-bool pwn_zero_screen_set(PwnZero* pwn, uint8_t i, uint8_t j, bool status);
-
-/**
- * @brief Clears the screen buffer
- * 
- * @param pwn PwnZero to operate on
- */
-void pwn_zero_screen_clear(const PwnZero* pwn);
-
-/**
- * @brief Flushes the screen buffer and writes the pixels to the screen (does not wipe the buffer)
- * 
- * @param canvas Canvas object to draw on
- * @param context PwnZero to operate on
- */
-void pwn_zero_screen_flush(Canvas* canvas, void* context);
-
-/**
- * @brief Callback function to add the inputs to the queue
- * 
- * @param inputEvent Event that needs adding to queue
- * @param eventQueue Queue to add inputEvent
- */
-void input_callback(InputEvent* inputEvent, FuriMessageQueue* eventQueue);
-
-/**
- * @brief Callback to read rx data into queue
- * 
- * @param event Event received
- * @param data Data from rx
- * @param context Pwnagotchi device
- */
-void pwn_uart_rx_cb(UartIrqEvent event, uint8_t data, void* context);
