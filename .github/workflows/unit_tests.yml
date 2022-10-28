@@ -35,9 +35,16 @@ jobs:
         run: |
           python3 ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
+      - name: 'Format flipper SD card'
+        id: format
+        if: steps.connect.outcome == 'success'
+        continue-on-error: true
+        run: |
+          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+
       - name: 'Copy unit tests to flipper'
         id: copy
-        if: steps.connect.outcome == 'success'
+        if: steps.format.outcome == 'success'
         continue-on-error: true
         run: |
           ./scripts/storage.py -p ${{steps.device.outputs.flipper}} send assets/unit_tests /ext/unit_tests
