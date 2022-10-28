@@ -148,11 +148,11 @@ class Main(App):
                 "-t",
                 self.target,
                 "--dfu",
-                self.get_dist_filepath(
+                self.get_dist_file_path(
                     self.get_project_filename(self.projects["firmware"], "dfu")
                 ),
                 "--stage",
-                self.get_dist_filepath(
+                self.get_dist_file_path(
                     self.get_project_filename(self.projects["updater"], "bin")
                 ),
             ]
