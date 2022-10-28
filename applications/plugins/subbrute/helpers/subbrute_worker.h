@@ -22,7 +22,8 @@ bool subbrute_worker_init_default_attack(
     SubBruteWorker* instance,
     SubBruteAttacks attack_type,
     uint64_t step,
-    const SubBruteProtocol* protocol);
+    const SubBruteProtocol* protocol,
+    uint8_t extra_repeats);
 bool subbrute_worker_init_file_attack(
     SubBruteWorker* instance,
     uint64_t step,

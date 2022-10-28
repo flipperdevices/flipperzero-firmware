@@ -4,15 +4,6 @@
 #include <furi_hal_subghz.h>
 #include <core/string.h>
 #include <toolbox/stream/stream.h>
-//typedef enum {
-//    FrequencyProtocolField,
-//    BitsProtocolField,
-//    HasTeProtocolField,
-//    RepeatProtocolField,
-//    PresetProtocolField,
-//    FileProtocolField,
-//    TotalProtocolFields
-//} ProtocolFields;
 
 typedef enum {
     CAMEFileProtocol,
@@ -61,6 +52,7 @@ const char* subbrute_protocol_preset(FuriHalSubGhzPreset preset);
 const char* subbrute_protocol_file(SubBruteFileProtocol protocol);
 FuriHalSubGhzPreset subbrute_protocol_convert_preset(FuriString* preset_name);
 SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name);
+uint8_t subbrute_protocol_repeats_count(SubBruteAttacks index);
 const char* subbrute_protocol_name(SubBruteAttacks index);
 
 void subbrute_protocol_default_payload(

@@ -1,6 +1,5 @@
 #include "../subbrute_i.h"
 #include "subbrute_scene.h"
-#include "SubGHz_Bruteforcer_icons.h"
 
 #define TAG "SubBruteSceneLoadFile"
 
@@ -38,7 +37,7 @@ void subbrute_scene_load_file_on_enter(void* context) {
         load_result =
             subbrute_device_load_from_file(instance->device, furi_string_get_cstr(load_path));
         if(load_result == SubBruteFileResultOk) {
-            load_result = subbrute_device_attack_set(instance->device, SubBruteAttackLoadFile);
+            load_result = subbrute_device_attack_set(instance->device, SubBruteAttackLoadFile, 0);
             if(load_result == SubBruteFileResultOk) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
