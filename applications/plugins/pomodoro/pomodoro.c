@@ -1,5 +1,6 @@
 #include "pomodoro.h"
 #include <notification/notification_messages.h>
+#include <Pomodoro_Timer_icons.h>
 
 #define TAG "PomodoroApp"
 
