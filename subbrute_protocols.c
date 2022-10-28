@@ -342,7 +342,13 @@ void subbrute_protocol_default_payload(
     furi_string_free(buffer);
 
 #ifdef FURI_DEBUG
-    //FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
+    FURI_LOG_D(
+        TAG,
+        "candidate: %s, step: %lld, repeat: %d, te: %s",
+        furi_string_get_cstr(candidate),
+        step,
+        repeat,
+        te ? "true" : "false");
 #endif
     stream_clean(stream);
     if(te) {
@@ -376,7 +382,13 @@ void subbrute_protocol_file_payload(
     furi_string_replace_at(candidate, load_index * 3, 3, subbrute_payload_byte);
 
 #ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
+    FURI_LOG_D(
+        TAG,
+        "candidate: %s, step: %lld, repeat: %d, te: %s",
+        furi_string_get_cstr(candidate),
+        step,
+        repeat,
+        te ? "true" : "false");
 #endif
     stream_clean(stream);
 
