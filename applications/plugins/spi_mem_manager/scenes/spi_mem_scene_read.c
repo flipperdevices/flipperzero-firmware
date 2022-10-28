@@ -31,14 +31,17 @@ bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == SPIMemCustomEventViewReadCancel) {
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetected);
+            scene_manager_search_and_switch_to_another_scene(
+                app->scene_manager, SPIMemSceneChipDetect);
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_read_inc_progress(app->view_read);
         } else if(event.event == SPIMemCustomEventWorkerReadDone) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneReadSuccess);
+        } else if(event.event == SPIMemCustomEventWorkerReadFail) {
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, SPIMemSceneChipDetected);
-            // scene_manager_next_scene(app->scene_manager, SPIMemSceneReadSuccess);
+        } else if(event.event == SPIMemCustomEventWorkerWriteFileFailed) {
+            // storage error
         }
     }
     return success;

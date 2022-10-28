@@ -27,6 +27,8 @@ static const char* spi_mem_chip_get_vendor_name(SPIMemChipVendor vendor_id) {
     return vendor->vendor_name;
 }
 
+// vendor_id, model_name, vendor_name, size, write_mode,
+// type_id, capacity_id, erase_gran, erase_gran_cmd, address_type
 static const SPIMemChip SPIMemChips[] = {
     {SPIMemChipVendorWinbond,
      "W25Q32BV",
@@ -36,8 +38,18 @@ static const SPIMemChip SPIMemChips[] = {
      0x40,
      0x16,
      4096,
-     0x20},
-    {SPIMemChipVendorUnknown, NULL, NULL, 0, SPIMemChipWriteModeUnknown, 0, 0, 0, 0}};
+     0x20,
+     SPIMemChipAddressType3byte},
+    {SPIMemChipVendorUnknown,
+     NULL,
+     NULL,
+     0,
+     SPIMemChipWriteModeUnknown,
+     0,
+     0,
+     0,
+     0,
+     SPIMemChipAddressTypeUnknown}};
 
 static void spi_mem_chip_copy_info(SPIMemChip* dest, const SPIMemChip* src) {
     dest->vendor_id = src->vendor_id;

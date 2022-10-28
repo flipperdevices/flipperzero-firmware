@@ -57,6 +57,11 @@ bool spi_mem_file_write_block(SPIMemApp* app, uint8_t* data, size_t size) {
     return true;
 }
 
+bool spi_mem_file_read_block(SPIMemApp* app, uint8_t* data, size_t size) {
+    if(storage_file_read(app->file, data, size) != size) return false;
+    return true;
+}
+
 void spi_mem_file_close(SPIMemApp* app) {
     storage_file_close(app->file);
     storage_file_free(app->file);

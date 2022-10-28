@@ -7,12 +7,11 @@ void spi_mem_scene_read_filename_view_result_callback(void* context) {
 }
 
 void spi_mem_scene_read_set_random_filename(SPIMemApp* app) {
-    FuriString* file_name = furi_string_alloc();
     if(furi_string_end_with(app->file_path, SPI_MEM_FILE_EXTENSION)) {
-        path_extract_filename(app->file_path, file_name, true);
+        size_t filename_start = furi_string_search_rchar(app->file_path, '/');
+        furi_string_left(app->file_path, filename_start);
     }
     set_random_name(app->text_buffer, SPI_MEM_TEXT_BUFFER_SIZE);
-    furi_string_free(file_name);
 }
 
 void spi_mem_scene_read_filename_on_enter(void* context) {

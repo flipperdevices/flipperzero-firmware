@@ -40,8 +40,13 @@ bool spi_mem_tools_read_chip_info(SPIMemChip* chip) {
     return true;
 }
 
-static uint8_t spi_mem_tools_addr_to_byte_arr(uint32_t addr, uint8_t* cmd) {
-    uint8_t len = 3;
+static uint8_t spi_mem_tools_addr_to_byte_arr(
+    SPIMemChipAddressType address_type,
+    uint32_t addr,
+    uint8_t* cmd) {
+    uint8_t len = 4;
+    if(address_type == SPIMemChipAddressType3byte || address_type == SPIMemChipAddressTypeAll)
+        len = 3;
     for(uint8_t i = 0; i < len; i++) {
         cmd[i] = (addr >> ((len - (i + 1)) * 8)) & 0xFF;
     }
@@ -59,7 +64,7 @@ bool spi_mem_tools_read_block_data(
         if(!spi_mem_tools_trx(
                SPIMemChipCMDReadData,
                cmd,
-               spi_mem_tools_addr_to_byte_arr(offset, cmd),
+               spi_mem_tools_addr_to_byte_arr(chip->address_type, offset, cmd),
                data,
                SPI_MEM_MAX_BLOCK_SIZE))
             return false;

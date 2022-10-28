@@ -9,6 +9,12 @@ const SPIMemWorkerModeType spi_mem_worker_modes[] = {
     [SPIMemWorkerModeChipDetect] = {.process = spi_mem_chip_detect_process},
     [SPIMemWorkerModeRead] = {.process = spi_mem_read_process}};
 
+void spi_mem_run_worker_callback(SPIMemWorker* worker, SPIMemCustomEventWorker event) {
+    if(worker->callback) {
+        worker->callback(worker->cb_ctx, event);
+    }
+}
+
 // ChipDetect
 static void spi_mem_chip_detect_process(SPIMemWorker* worker) {
     SPIMemCustomEventWorker event;
@@ -20,9 +26,7 @@ static void spi_mem_chip_detect_process(SPIMemWorker* worker) {
     } else {
         event = SPIMemCustomEventWorkerChipUnknown;
     }
-    if(worker->callback) {
-        worker->callback(worker->cb_ctx, event);
-    }
+    spi_mem_run_worker_callback(worker, event);
 }
 
 // Read
@@ -30,19 +34,24 @@ static void spi_mem_chip_detect_process(SPIMemWorker* worker) {
 static void spi_mem_read_process(SPIMemWorker* worker) {
     uint8_t data_buffer[SPI_MEM_FILE_BUFFER_SIZE];
     size_t offset = 0;
+    bool success = true;
     while(true) {
         if(spi_mem_worker_check_for_stop(worker)) break;
         if((offset + SPI_MEM_FILE_BUFFER_SIZE) >= worker->chip_info->size) break;
-        spi_mem_tools_read_block_data(
-            worker->chip_info, offset, data_buffer, SPI_MEM_FILE_BUFFER_SIZE);
-        spi_mem_file_write_block(worker->cb_ctx, data_buffer, SPI_MEM_FILE_BUFFER_SIZE);
-        offset += SPI_MEM_FILE_BUFFER_SIZE;
-        if(worker->callback) {
-            worker->callback(worker->cb_ctx, SPIMemCustomEventWorkerBlockReaded);
+        if(!spi_mem_tools_read_block_data(
+               worker->chip_info, offset, data_buffer, SPI_MEM_FILE_BUFFER_SIZE)) {
+            spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerReadFail);
+            success = false;
+            break;
         }
+        if(!spi_mem_file_write_block(worker->cb_ctx, data_buffer, SPI_MEM_FILE_BUFFER_SIZE)) {
+            spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerWriteFileFailed);
+            success = false;
+            break;
+        }
+        offset += SPI_MEM_FILE_BUFFER_SIZE;
+        spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerBlockReaded);
     }
     spi_mem_file_close(worker->cb_ctx);
-    if(worker->callback) {
-        worker->callback(worker->cb_ctx, SPIMemCustomEventWorkerReadDone);
-    }
+    if(success) spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerReadDone);
 }

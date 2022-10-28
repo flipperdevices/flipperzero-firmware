@@ -44,6 +44,13 @@ typedef struct {
     SPIMemChipVendor vendor_id;
 } SPIMemChipVendorName;
 
+typedef enum {
+    SPIMemChipAddressTypeUnknown,
+    SPIMemChipAddressType3byte,
+    SPIMemChipAddressType4byte,
+    SPIMemChipAddressTypeAll
+} SPIMemChipAddressType;
+
 typedef struct {
     SPIMemChipVendor vendor_id;
     const char* model_name;
@@ -54,6 +61,7 @@ typedef struct {
     uint8_t capacity_id;
     size_t erase_gran;
     uint8_t erase_gran_cmd;
+    SPIMemChipAddressType address_type;
 } SPIMemChip;
 
 bool spi_mem_chip_complete_info(SPIMemChip* chip_info);
