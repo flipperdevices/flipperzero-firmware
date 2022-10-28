@@ -35,12 +35,12 @@ typedef struct {
     InputTextSceneState* input_state;
     uint32_t input_started_at;
     int16_t current_token_index;
-    int32_t screen_y_offset;
+    int16_t screen_y_offset;
     TokenHashAlgo algo;
     TokenDigitsCount digits_count;
 } SceneState;
 
-void totp_scene_add_new_token_init(PluginState* plugin_state) {
+void totp_scene_add_new_token_init(const PluginState* plugin_state) {
     UNUSED(plugin_state);
 }
 
@@ -311,6 +311,6 @@ void totp_scene_add_new_token_deactivate(PluginState* plugin_state) {
     plugin_state->current_scene_state = NULL;
 }
 
-void totp_scene_add_new_token_free(PluginState* plugin_state) {
+void totp_scene_add_new_token_free(const PluginState* plugin_state) {
     UNUSED(plugin_state);
 }

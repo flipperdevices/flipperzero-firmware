@@ -14,7 +14,7 @@
 #define TOTP_CLI_COMMAND_ADD_ARG_DIGITS_PREFIX "-d"
 #define TOTP_CLI_COMMAND_ADD_ARG_UNSECURE_PREFIX "-u"
 
-static bool token_info_set_digits_from_str(TokenInfo* token_info, FuriString* str) {
+static bool token_info_set_digits_from_str(TokenInfo* token_info, const FuriString* str) {
     switch(furi_string_get_char(str, 0)) {
     case '6':
         token_info->digits = TOTP_6_DIGITS;
@@ -27,7 +27,7 @@ static bool token_info_set_digits_from_str(TokenInfo* token_info, FuriString* st
     return false;
 }
 
-static bool token_info_set_algo_from_str(TokenInfo* token_info, FuriString* str) {
+static bool token_info_set_algo_from_str(TokenInfo* token_info, const FuriString* str) {
     if(furi_string_cmpi_str(str, TOTP_CONFIG_TOKEN_ALGO_SHA1_NAME) == 0) {
         token_info->algo = SHA1;
         return true;

@@ -57,7 +57,7 @@ uint8_t* totp_crypto_decrypt(
     return decrypted_data;
 }
 
-void totp_crypto_seed_iv(PluginState* plugin_state, uint8_t* pin, uint8_t pin_length) {
+void totp_crypto_seed_iv(PluginState* plugin_state, const uint8_t* pin, uint8_t pin_length) {
     if(plugin_state->crypto_verify_data == NULL) {
         FURI_LOG_D(LOGGING_TAG, "Generating new IV");
         furi_hal_random_fill_buf(&plugin_state->base_iv[0], TOTP_IV_SIZE);
@@ -120,7 +120,7 @@ void totp_crypto_seed_iv(PluginState* plugin_state, uint8_t* pin, uint8_t pin_le
 
 bool totp_crypto_verify_key(const PluginState* plugin_state) {
     size_t decrypted_key_length;
-    uint8_t* decrypted_key = totp_crypto_decrypt(
+    const uint8_t* decrypted_key = totp_crypto_decrypt(
         plugin_state->crypto_verify_data,
         plugin_state->crypto_verify_data_length,
         &plugin_state->iv[0],

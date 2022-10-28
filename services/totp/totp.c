@@ -49,7 +49,7 @@ uint32_t otp_generate(
 
     uint64_t input_swapped = swap_uint64(input);
 
-    int hmac_len = (*(algo))(plain_secret, plain_secret_length, (uint8_t*)&input_swapped, 8, hmac);
+    int hmac_len = (*algo)(plain_secret, plain_secret_length, (uint8_t*)&input_swapped, 8, hmac);
     if(hmac_len == 0) {
         free(hmac);
         return OTP_ERROR;
