@@ -44,9 +44,7 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     return false;
 }
 
-void subghz_scene_receiver_info_on_enter(void* context) {
-    SubGhz* subghz = context;
-
+void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
     if(subghz_scene_receiver_info_update_parser(subghz)) {
         FuriString* frequency_str;
         FuriString* modulation_str;
@@ -116,7 +114,6 @@ void subghz_scene_receiver_info_on_enter(void* context) {
 void subghz_scene_receiver_info_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
     subghz_scene_receiver_info_draw_widget(subghz);
 }
 
