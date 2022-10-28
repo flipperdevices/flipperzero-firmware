@@ -4,7 +4,7 @@ from SCons.Action import Action
 from SCons.Errors import UserError
 
 # from SCons.Scanner import C
-from SCons.Script import Mkdir, Copy, Delete, Entry
+from SCons.Script import Entry
 from SCons.Util import LogicalLines
 
 import os.path
@@ -59,6 +59,7 @@ class SdkMeta:
             "cc_args": self._wrap_scons_vars("$CCFLAGS $_CCCOMCOM"),
             "cpp_args": self._wrap_scons_vars("$CXXFLAGS $CCFLAGS $_CCCOMCOM"),
             "linker_args": self._wrap_scons_vars("$LINKFLAGS"),
+            # "linker_script": os.path.basename(self.env.subst("${LINKER_SCRIPT_PATH}")),
         }
         with open(json_manifest_path, "wt") as f:
             json.dump(meta_contents, f, indent=4)
@@ -69,6 +70,8 @@ class SdkMeta:
 
 
 class SdkTreeBuilder:
+    SDK_DIR_SUBST = "SDK_ROOT_DIR"
+
     def __init__(self, env, target, source) -> None:
         self.env = env
         self.target = target
@@ -89,6 +92,7 @@ class SdkTreeBuilder:
             self.header_depends = list(
                 filter(lambda fname: fname.endswith(".h"), depends.split()),
             )
+            self.header_depends.append(self.env.subst("${LINKER_SCRIPT_PATH}"))
             self.header_dirs = sorted(
                 set(map(os.path.normpath, map(os.path.dirname, self.header_depends)))
             )
@@ -106,11 +110,26 @@ class SdkTreeBuilder:
         for dir in full_fw_paths:
             if dir in sdk_dirs:
                 filtered_paths.append(
-                    posixpath.normpath(posixpath.join(self.target_sdk_dir_name, dir))
+                    posixpath.normpath(
+                        posixpath.join(
+                            self.SDK_DIR_SUBST, self.target_sdk_dir_name, dir
+                        )
+                    )
                 )
 
         sdk_env = self.env.Clone()
-        sdk_env.Replace(CPPPATH=filtered_paths)
+        sdk_env.Replace(
+            CPPPATH=filtered_paths,
+            LINKER_SCRIPT=self.env.subst("${APP_LINKER_SCRIPT}"),
+            ORIG_LINKER_SCRIPT_PATH=self.env["LINKER_SCRIPT_PATH"],
+            LINKER_SCRIPT_PATH=posixpath.normpath(
+                posixpath.join(
+                    self.SDK_DIR_SUBST,
+                    self.target_sdk_dir_name,
+                    "${ORIG_LINKER_SCRIPT_PATH}",
+                )
+            ),
+        )
         meta = SdkMeta(sdk_env)
         meta.save_to(self.target[0].path)
 
