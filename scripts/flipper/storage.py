@@ -342,7 +342,8 @@ class FlipperStorage:
 
     def format_ext(self):
         """Create a directory on Flipper"""
-        self.send_and_wait_eol("storage format /ext\ny")
+        self.send_and_wait_eol("storage format /ext\r")
+        self.send_and_wait_eol("y\r")
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
 
