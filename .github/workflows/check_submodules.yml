@@ -3,11 +3,14 @@ name: 'Check submodules branch'
 on:
   push:
     branches:
-      - dev
-      - "release*"
+      - 'dev'
+      - 'release*'
     tags:
       - '*'
   pull_request:
+    branches-ignore:
+      - 'dev'
+      - 'release*'
 
 jobs:
   check_protobuf:

@@ -1,7 +1,16 @@
 name: 'Unit tests'
 
 on:
+  push:
+    branches:
+      - 'dev'
+      - 'release*'
+    tags:
+      - '*'
   pull_request:
+    branches-ignore:
+      - 'dev'
+      - 'release*'
 
 env:
   TARGETS: f7

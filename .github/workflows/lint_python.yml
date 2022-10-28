@@ -3,11 +3,14 @@ name: 'Python Lint'
 on:
   push:
     branches:
-      - dev
-      - "release*"
+      - 'dev'
+      - 'release*'
     tags:
       - '*'
   pull_request:
+    branches-ignore:
+      - 'dev'
+      - 'release*'
 
 jobs:
   lint_python:

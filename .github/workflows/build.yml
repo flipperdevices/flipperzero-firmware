@@ -3,11 +3,14 @@ name: 'Build'
 on:
   push:
     branches:
-      - dev
-      - "release*"
+      - 'dev'
+      - 'release*'
     tags:
       - '*'
   pull_request:
+    branches-ignore:
+      - 'dev'
+      - 'release*'
 
 env:
   TARGETS: f7

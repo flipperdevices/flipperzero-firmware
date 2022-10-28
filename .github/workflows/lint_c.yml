@@ -3,11 +3,14 @@ name: 'Lint C/C++ with clang-format'
 on:
   push:
     branches:
-      - dev
-      - "release*"
+      - 'dev'
+      - 'release*'
     tags:
       - '*'
   pull_request:
+    branches-ignore:
+      - 'dev'
+      - 'release*'
 
 env:
   TARGETS: f7
