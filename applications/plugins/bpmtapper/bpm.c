@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include "BPM_Tapper_icons.h"
 
 typedef enum {
     EventTypeTick,
