@@ -6,12 +6,7 @@
 ![maintained - yes](https://img.shields.io/badge/maintained-yes-blue)
 ![contributions - welcome](https://img.shields.io/badge/contributions-welcome-blue)
 [![Discord server](https://img.shields.io/discord/937479784148115456)](https://discord.com/channels/937479784148115456)
-
----
-
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=akopachov_flipper-zero_authenticator)
-
----
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=akopachov_flipper-zero_authenticator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=akopachov_flipper-zero_authenticator)
 
 ![Screenshot](docs/assets/screenshot_1.png)
 
