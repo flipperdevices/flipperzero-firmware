@@ -169,7 +169,6 @@ void ws_protocol_decoder_acurite_606tx_feed(void* context, bool level, uint32_t 
                     }
                     instance->decoder.decode_data = 0;
                     instance->decoder.decode_count_bit = 0;
-                    break;
                 } else if(
                     DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_long) <
                     ws_protocol_acurite_606tx_const.te_delta * 2) {
@@ -183,7 +182,6 @@ void ws_protocol_decoder_acurite_606tx_feed(void* context, bool level, uint32_t 
                 } else {
                     instance->decoder.parser_step = Acurite_606TXDecoderStepReset;
                 }
-
             } else {
                 instance->decoder.parser_step = Acurite_606TXDecoderStepReset;
             }
