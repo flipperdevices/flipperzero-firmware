@@ -1,5 +1,6 @@
 #include "../subbrute_i.h"
 #include "subbrute_scene.h"
+#include "SubGHz_Bruteforcer_icons.h"
 
 #define TAG "SubBruteSceneLoadFile"
 
