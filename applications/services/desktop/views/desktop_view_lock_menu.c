@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include <assets_icons.h>
 
 #include "../desktop_i.h"
 #include "desktop_view_lock_menu.h"
