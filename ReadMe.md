@@ -11,9 +11,8 @@
 
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-26 20:52 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-26 20:52 EST`
-- Assets: Includes a NFC Level 50 Z3lda Amiibo
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-28 00:36 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-28 00:36 EST`
 - Animations: Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder (RM Select)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) or [this folder (RM minimal)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-minimal) if you don't want to do the work but want more animations.
 - Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
@@ -23,6 +22,7 @@
 - ReADDED: Assets: Includes New Dolphin Animations: [Sharingan (By Haseo)]
 - - With speed optimizations by RogueMaster. 
 - - Rename the [minimal animation file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleMin) to see it, or [RM select](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleRM) if you have copied over [the RM select](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) animations.
+- Updated: [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>

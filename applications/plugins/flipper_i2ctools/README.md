@@ -1,7 +1,5 @@
 # flipperzero-i2ctools
 
-[Original link](https://github.com/NaejEL/flipperzero-i2ctools)
-
 Set of i2c tools for Flipper Zero
 
 ## Wiring
@@ -36,7 +34,11 @@ Send command from file
 
 ## TODO
 
-- [ ] Read more than 2 bytes in sender mode
+- [ ] Read more than 2 bytes in sender modez
+- [ ] Add 10-bits adresses support
+- [ ] Remove max data size
+- [ ] Remove max frames read size
+- [ ] Test with rate > 100khz
 - [ ] Save records
 - [ ] Play from files
 - [ ] Kicad module
