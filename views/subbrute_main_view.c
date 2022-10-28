@@ -5,7 +5,6 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <gui/icon.h>
-#include <assets_icons.h>
 
 #define STATUS_BAR_Y_SHIFT 14
 #define TAG "SubBruteMainView"
