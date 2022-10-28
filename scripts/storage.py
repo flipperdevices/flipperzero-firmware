@@ -284,7 +284,7 @@ class Main(App):
 
         self.logger.debug("Formatting /ext SD card")
 
-        if not storage.format():
+        if not storage.format_ext():
             self.logger.error(f"Error: {storage.last_error}")
         storage.stop()
         return 0
