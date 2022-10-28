@@ -137,12 +137,9 @@ static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration
 // From sensor id code return amount of bits in variable section
 // https://temofeev.ru/info/articles/o-dekodirovanii-protokola-pogodnykh-datchikov-oregon-scientific
 static uint8_t oregon2_sensor_id_var_bits(uint16_t sensor_id) {
-    if(sensor_id == ID_THR228N || sensor_id == ID_THN802 || (sensor_id & 0xfff) == ID_RTHN129)
-        return 16;
+    if(sensor_id == ID_THR228N) return 16;
 
-    if(sensor_id == ID_THGR122N || sensor_id == ID_THGR968 || sensor_id == ID_THGR810 ||
-       (sensor_id & 0xfff) == ID_RTGN318)
-        return 24;
+    if(sensor_id == ID_THGR122N) return 24;
 
     return 0;
 }
@@ -174,14 +171,13 @@ static float ws_oregon2_decode_temp(uint32_t data) {
 }
 
 static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_b, uint16_t sensor_id, uint32_t data) {
-    if(sensor_id == ID_THR228N || sensor_id == ID_THN802 || (sensor_id & 0xfff) == ID_RTHN129) {
+    if(sensor_id == ID_THR228N) {
         ws_b->temp = ws_oregon2_decode_temp(data);
         ws_b->humidity = WS_NO_HUMIDITY;
         return;
     }
 
-    if(sensor_id == ID_THGR122N || sensor_id == ID_THGR968 || sensor_id == ID_THGR810 ||
-       (sensor_id & 0xfff) == ID_RTGN318) {
+    if(sensor_id == ID_THGR122N) {
         ws_b->humidity = bcd_decode_short(data);
         ws_b->temp = ws_oregon2_decode_temp(data >> 8);
         return;
