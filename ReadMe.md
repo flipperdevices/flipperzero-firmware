@@ -1,4 +1,4 @@
-# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) v8.2
+# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) with API v8.2
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
