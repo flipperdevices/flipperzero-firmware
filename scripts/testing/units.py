@@ -57,7 +57,7 @@ def main():
             print("Failed to get data. Or output is corrupt")
             sys.exit(1)
 
-        leak = int(re.findall(r"\d+", leak.group(0))[0])
+        leak = int(re.findall(r"[- ]\d+", leak.group(0))[0])
         status = re.findall(r"\w+", status.group(0))[1]
         tests = int(re.findall(r"\d+", tests.group(0))[0])
         time = int(re.findall(r"\d+", time.group(0))[0])
