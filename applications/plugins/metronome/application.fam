@@ -10,5 +10,6 @@ App(
     fap_icon="metronome_icon.png",
     fap_category="Music",
     stack_size=2 * 1024,
+    fap_icon_assets="icons",
     order=20,
 )
