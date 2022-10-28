@@ -22,7 +22,7 @@ Pull the repo with recursive submodule initialization and then run `./build.ps1`
 
 At first start app will create new config file (default location is [`/ext/apps/Misc/totp.conf`](https://github.com/akopachov/flipper-zero_authenticator/blob/master/totp/services/config/config.c#:~:text=%23define%20CONFIG_FILE_DIRECTORY_PATH,totp.conf%22)).
 
-Detailed description of file format can be found [here](.github/conf-file_description.md)
+Detailed description of file format can be found [here](docs/conf-file_description.md)
 
 ## Is there a CLI?
 
@@ -47,7 +47,7 @@ Flipper Zero clock has known clock drift problem. So there is a chance that cloc
 
 ### Timezone is not correct
 
-Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google. Then set it either in [conf file](.github/conf-file_description.md) or via setting menu of Flipper Authenticator.
+Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google. Then set it either in [conf file](docs/conf-file_description.md) or via setting menu of Flipper Authenticator.
 
 ### Token secret is not correct
 

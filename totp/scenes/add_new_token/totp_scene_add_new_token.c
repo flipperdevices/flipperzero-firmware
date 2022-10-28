@@ -25,9 +25,9 @@ typedef enum {
 
 typedef struct {
     char* token_name;
-    uint8_t token_name_length;
+    size_t token_name_length;
     char* token_secret;
-    uint8_t token_secret_length;
+    size_t token_secret_length;
     bool saved;
     Control selected_control;
     InputTextSceneContext* token_name_input_context;
@@ -235,7 +235,10 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
 
                     if(token_secret_set) {
                         tokenInfo->name = malloc(scene_state->token_name_length + 1);
-                        strcpy(tokenInfo->name, scene_state->token_name);
+                        strlcpy(
+                            tokenInfo->name,
+                            scene_state->token_name,
+                            scene_state->token_name_length + 1);
                         tokenInfo->algo = scene_state->algo;
                         tokenInfo->digits = scene_state->digits_count;
 

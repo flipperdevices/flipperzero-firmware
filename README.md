@@ -7,7 +7,7 @@
 ![contributions - welcome](https://img.shields.io/badge/contributions-welcome-blue)
 [![Discord server](https://img.shields.io/discord/937479784148115456)](https://discord.com/channels/937479784148115456)
 
-![Screenshot](.github/assets/screenshot_1.png)
+![Screenshot](docs/assets/screenshot_1.png)
 
 ## Description
 
