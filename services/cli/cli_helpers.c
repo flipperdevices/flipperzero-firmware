@@ -11,7 +11,6 @@ bool totp_cli_ensure_authenticated(PluginState* plugin_state, Cli* cli) {
         }
 
         TOTP_CLI_DELETE_LAST_LINE();
-        fflush(stdout);
 
         if(plugin_state->current_scene == TotpSceneAuthentication) {
             return false;
