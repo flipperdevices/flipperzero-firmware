@@ -11,6 +11,5 @@ App(
     fap_category="Music",
     fap_icon_assets="images",
     stack_size=2 * 1024,
-    fap_icon_assets="icons",
     order=20,
 )
