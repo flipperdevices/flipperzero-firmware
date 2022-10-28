@@ -7,6 +7,7 @@
 #include "../scene_director.h"
 #include "../totp_scenes_enum.h"
 #include "../../services/crypto/crypto.h"
+#include <Authenticator_icons.h>
 
 #define MAX_CODE_LENGTH TOTP_IV_SIZE
 

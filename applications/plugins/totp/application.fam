@@ -16,4 +16,5 @@ App(
     order=20,
     fap_category="Misc",
     fap_icon="totp_10px.png"
+    fap_icon_assets="icons",
 )
