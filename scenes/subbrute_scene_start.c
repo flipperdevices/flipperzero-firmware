@@ -50,19 +50,22 @@ bool subbrute_scene_start_on_event(void* context, SceneManagerEvent event) {
 #endif
         if(event.event == SubBruteCustomEventTypeMenuSelected) {
             SubBruteAttacks attack = subbrute_main_view_get_index(instance->view_main);
+            uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
 
-            if(subbrute_device_attack_set(instance->device, attack) != SubBruteFileResultOk ||
+            if(subbrute_device_attack_set(instance->device, attack, extra_repeats) != SubBruteFileResultOk ||
                !subbrute_worker_init_default_attack(
                    instance->worker,
                    attack,
                    instance->device->key_index,
-                   instance->device->protocol_info)) {
+                   instance->device->protocol_info,
+                   instance->device->extra_repeats)) {
                 furi_crash("Invalid attack set!");
             }
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSetupAttack);
 
             consumed = true;
         } else if(event.event == SubBruteCustomEventTypeLoadFile) {
+            instance->device->extra_repeats = 0;
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneLoadFile);
             consumed = true;
         }

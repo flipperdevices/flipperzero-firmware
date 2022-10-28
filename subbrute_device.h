@@ -48,6 +48,7 @@ typedef struct {
     // Attack state
     SubBruteAttacks attack;
     uint64_t max_value;
+    uint8_t extra_repeats;
 
     // Loaded info for attack type
     char current_key[SUBBRUTE_PAYLOAD_SIZE];
@@ -59,7 +60,10 @@ void subbrute_device_free(SubBruteDevice* instance);
 
 bool subbrute_device_save_file(SubBruteDevice* instance, const char* key_name);
 const char* subbrute_device_error_get_desc(SubBruteFileResult error_id);
-SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* context, SubBruteAttacks type);
+SubBruteFileResult subbrute_device_attack_set(
+    SubBruteDevice* context,
+    SubBruteAttacks type,
+    uint8_t extra_repeats);
 uint8_t subbrute_device_load_from_file(SubBruteDevice* context, const char* file_path);
 
 uint64_t subbrute_device_add_step(SubBruteDevice* instance, int8_t step);

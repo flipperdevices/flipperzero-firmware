@@ -133,16 +133,20 @@ bool subbrute_device_save_file(SubBruteDevice* instance, const char* dev_file_na
     return result;
 }
 
-SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBruteAttacks type) {
+SubBruteFileResult subbrute_device_attack_set(
+    SubBruteDevice* instance,
+    SubBruteAttacks type,
+    uint8_t extra_repeats) {
     furi_assert(instance);
 #ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_device_attack_set: %d", type);
+    FURI_LOG_D(TAG, "subbrute_device_attack_set: %d, extra_repeats: %d", type, extra_repeats);
 #endif
     subbrute_device_attack_set_default_values(instance, type);
 
     if(type != SubBruteAttackLoadFile) {
         subbrute_device_free_protocol_info(instance);
         instance->protocol_info = subbrute_protocol(type);
+        instance->extra_repeats = extra_repeats;
     }
 
     // For non-file types we didn't set SubGhzProtocolDecoderBase
@@ -175,7 +179,7 @@ SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBrute
 #ifdef FURI_DEBUG
         bits = instance->protocol_info->bits;
         te = instance->protocol_info->te;
-        repeat = instance->protocol_info->repeat;
+        repeat = instance->protocol_info->repeat + instance->extra_repeats;
         preset = instance->protocol_info->preset;
         file = instance->protocol_info->file;
 #endif
@@ -189,7 +193,7 @@ SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBrute
 #ifdef FURI_DEBUG
         bits = instance->file_protocol_info->bits;
         te = instance->file_protocol_info->te;
-        repeat = instance->file_protocol_info->repeat;
+        repeat = instance->file_protocol_info->repeat + instance->extra_repeats;
         preset = instance->file_protocol_info->preset;
         file = instance->file_protocol_info->file;
 #endif
@@ -390,6 +394,7 @@ void subbrute_device_attack_set_default_values(
     instance->attack = default_attack;
     instance->key_index = 0x00;
     instance->load_index = 0x00;
+    instance->extra_repeats = 0;
     memset(instance->current_key, 0, sizeof(instance->current_key));
 
     if(default_attack != SubBruteAttackLoadFile) {
