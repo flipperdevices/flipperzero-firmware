@@ -52,7 +52,8 @@ bool subbrute_scene_start_on_event(void* context, SceneManagerEvent event) {
             SubBruteAttacks attack = subbrute_main_view_get_index(instance->view_main);
             uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
 
-            if(subbrute_device_attack_set(instance->device, attack, extra_repeats) != SubBruteFileResultOk ||
+            if(subbrute_device_attack_set(instance->device, attack, extra_repeats) !=
+                   SubBruteFileResultOk ||
                !subbrute_worker_init_default_attack(
                    instance->worker,
                    attack,
