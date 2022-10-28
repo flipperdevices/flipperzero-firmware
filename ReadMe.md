@@ -23,6 +23,7 @@
 - - With speed optimizations by RogueMaster. 
 - - Rename the [minimal animation file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleMin) to see it, or [RM select](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleRM) if you have copied over [the RM select](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) animations.
 - Updated: [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
+- Updated: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
