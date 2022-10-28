@@ -2,10 +2,8 @@ name: 'Analyze .map file with Amap'
 
 on:
   workflow_run:
-    workflows: [ 'Build' ]
+    workflows: [ Build ]
     types: [ completed ]
-    branches:
-      - '**'
 
 env:
   TARGETS: f7
