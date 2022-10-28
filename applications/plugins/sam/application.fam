@@ -9,8 +9,9 @@ App(
     ],
     stack_size=4 * 1024,
     order=20,
-    fap_icon="../../../assets/icons/Archive/music_10px.png",
+    fap_icon="icons/music_10px.png",
     fap_category="Music",
+    fap_icon_assets="icons",
 )
 App(
     appid="SAM_YES",
@@ -23,8 +24,9 @@ App(
     ],
     stack_size=4 * 1024,
     order=20,
-    fap_icon="../../../assets/icons/Archive/music_10px.png",
+    fap_icon="icons/music_10px.png",
     fap_category="Music",
+    fap_icon_assets="icons",
 )
 App(
     appid="SAM_NO",
@@ -37,6 +39,7 @@ App(
     ],
     stack_size=4 * 1024,
     order=20,
-    fap_icon="../../../assets/icons/Archive/music_10px.png",
+    fap_icon="icons/music_10px.png",
     fap_category="Music",
+    fap_icon_assets="icons",
 )
