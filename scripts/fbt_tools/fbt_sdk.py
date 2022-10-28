@@ -62,9 +62,7 @@ class SdkMeta:
             "cc_args": self._wrap_scons_vars("$CCFLAGS $_CCCOMCOM"),
             "cpp_args": self._wrap_scons_vars("$CXXFLAGS $CCFLAGS $_CCCOMCOM"),
             "linker_args": self._wrap_scons_vars("$LINKFLAGS"),
-            "linker_script": self.treebuilder.build_sdk_file_path(
-                self.env.subst("${LINKER_SCRIPT_PATH}")
-            ),
+            "linker_script": self.env.subst("${LINKER_SCRIPT_PATH}"),
         }
         with open(json_manifest_path, "wt") as f:
             json.dump(meta_contents, f, indent=4)
@@ -105,12 +103,18 @@ class SdkTreeBuilder:
 
     def _generate_sdk_meta(self):
         filtered_paths = [self.target_sdk_dir_name]
+        full_fw_paths = list(
+            map(
+                os.path.normpath,
+                (self.env.Dir(inc_dir).relpath for inc_dir in self.env["CPPPATH"]),
+            )
+        )
 
         sdk_dirs = ", ".join(f"'{dir}'" for dir in self.header_dirs)
         filtered_paths.extend(
             map(
                 self.build_sdk_file_path,
-                filter(lambda path: path in sdk_dirs, self.header_depends),
+                filter(lambda path: path in sdk_dirs, full_fw_paths),
             )
         )
 
@@ -132,7 +136,7 @@ class SdkTreeBuilder:
                 self.target_sdk_dir_name,
                 orig_path,
             )
-        )
+        ).replace("\\", "/")
 
     def emitter(self, target, source, env):
         target_folder = target[0]

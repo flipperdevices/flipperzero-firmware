@@ -149,11 +149,11 @@ class Main(App):
                 self.target,
                 "--dfu",
                 self.get_dist_file_path(
-                    self.get_project_filename(self.projects["firmware"], "dfu")
+                    self.get_project_file_name(self.projects["firmware"], "dfu")
                 ),
                 "--stage",
                 self.get_dist_file_path(
-                    self.get_project_filename(self.projects["updater"], "bin")
+                    self.get_project_file_name(self.projects["updater"], "bin")
                 ),
             ]
             if self.args.resources:
