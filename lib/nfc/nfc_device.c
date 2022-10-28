@@ -921,7 +921,7 @@ static bool nfc_device_save_mifare_classic_keys(NfcDevice* dev) {
                     file, furi_string_get_cstr(temp_str), sec_tr->key_a, 6);
             }
             if(!key_save_success) break;
-            if(FURI_BIT(data->key_a_mask, i)) {
+            if(FURI_BIT(data->key_b_mask, i)) {
                 furi_string_printf(temp_str, "Key B sector %d", i);
                 key_save_success = flipper_format_write_hex(
                     file, furi_string_get_cstr(temp_str), sec_tr->key_b, 6);
@@ -1122,6 +1122,13 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
         if(!flipper_format_read_hex(file, "UID", data->uid, data->uid_len)) break;
         if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
         if(!flipper_format_read_hex(file, "SAK", &data->sak, 1)) break;
+        // Load CUID
+        uint8_t* cuid_start = data->uid;
+        if(data->uid_len == 7) {
+            cuid_start = &data->uid[3];
+        }
+        data->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
+                     (cuid_start[3]);
         // Parse other data
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_load_mifare_ul_data(file, dev)) break;

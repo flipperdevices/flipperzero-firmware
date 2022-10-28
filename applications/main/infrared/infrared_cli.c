@@ -1,17 +1,25 @@
 #include <cli/cli.h>
+#include <cli/cli_i.h>
 #include <infrared.h>
 #include <infrared_worker.h>
 #include <furi_hal_infrared.h>
 #include <flipper_format.h>
 #include <toolbox/args.h>
+#include <m-dict.h>
 
 #include "infrared_signal.h"
+#include "infrared_brute_force.h"
 
 #define INFRARED_CLI_BUF_SIZE 10
+#define INFRARED_ASSETS_FOLDER "infrared/assets"
+#define INFRARED_BRUTE_FORCE_DUMMY_INDEX 0
+
+DICT_DEF2(dict_signals, FuriString*, FURI_STRING_OPLIST, int, M_DEFAULT_OPLIST)
 
 static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args);
 static void infrared_cli_start_ir_tx(Cli* cli, FuriString* args);
 static void infrared_cli_process_decode(Cli* cli, FuriString* args);
+static void infrared_cli_process_universal(Cli* cli, FuriString* args);
 
 static const struct {
     const char* cmd;
@@ -20,6 +28,7 @@ static const struct {
     {.cmd = "rx", .process_function = infrared_cli_start_ir_rx},
     {.cmd = "tx", .process_function = infrared_cli_start_ir_tx},
     {.cmd = "decode", .process_function = infrared_cli_process_decode},
+    {.cmd = "universal", .process_function = infrared_cli_process_universal},
 };
 
 static void signal_received_callback(void* context, InfraredWorkerSignal* received_signal) {
@@ -57,25 +66,9 @@ static void signal_received_callback(void* context, InfraredWorkerSignal* receiv
     }
 }
 
-static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args) {
-    UNUSED(cli);
-    UNUSED(args);
-    InfraredWorker* worker = infrared_worker_alloc();
-    infrared_worker_rx_start(worker);
-    infrared_worker_rx_set_received_signal_callback(worker, signal_received_callback, cli);
-
-    printf("Receiving INFRARED...\r\nPress Ctrl+C to abort\r\n");
-    while(!cli_cmd_interrupt_received(cli)) {
-        furi_delay_ms(50);
-    }
-
-    infrared_worker_rx_stop(worker);
-    infrared_worker_free(worker);
-}
-
 static void infrared_cli_print_usage(void) {
     printf("Usage:\r\n");
-    printf("\tir rx\r\n");
+    printf("\tir rx [raw]\r\n");
     printf("\tir tx <protocol> <address> <command>\r\n");
     printf("\t<command> and <address> are hex-formatted\r\n");
     printf("\tAvailable protocols:");
@@ -90,6 +83,39 @@ static void infrared_cli_print_usage(void) {
         INFRARED_MIN_FREQUENCY,
         INFRARED_MAX_FREQUENCY);
     printf("\tir decode <input_file> [<output_file>]\r\n");
+    printf("\tir universal <remote_name> <signal_name>\r\n");
+    printf("\tir universal list <remote_name>\r\n");
+    // TODO: Do not hardcode universal remote names
+    printf("\tAvailable universal remotes: tv audio ac\r\n");
+}
+
+static void infrared_cli_start_ir_rx(Cli* cli, FuriString* args) {
+    UNUSED(cli);
+
+    bool enable_decoding = true;
+
+    if(!furi_string_empty(args)) {
+        if(!furi_string_cmp_str(args, "raw")) {
+            enable_decoding = false;
+        } else {
+            printf("Wrong arguments.\r\n");
+            infrared_cli_print_usage();
+            return;
+        }
+    }
+
+    InfraredWorker* worker = infrared_worker_alloc();
+    infrared_worker_rx_enable_signal_decoding(worker, enable_decoding);
+    infrared_worker_rx_start(worker);
+    infrared_worker_rx_set_received_signal_callback(worker, signal_received_callback, cli);
+
+    printf("Receiving %s INFRARED...\r\nPress Ctrl+C to abort\r\n", enable_decoding ? "" : "RAW");
+    while(!cli_cmd_interrupt_received(cli)) {
+        furi_delay_ms(50);
+    }
+
+    infrared_worker_rx_stop(worker);
+    infrared_worker_free(worker);
 }
 
 static bool infrared_cli_parse_message(const char* str, InfraredSignal* signal) {
@@ -326,6 +352,131 @@ static void infrared_cli_process_decode(Cli* cli, FuriString* args) {
     flipper_format_free(input_file);
     if(output_file) flipper_format_free(output_file);
     furi_record_close(RECORD_STORAGE);
+}
+
+static void infrared_cli_list_remote_signals(FuriString* remote_name) {
+    if(furi_string_empty(remote_name)) {
+        printf("Missing remote name.\r\n");
+        return;
+    }
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    FuriString* remote_path = furi_string_alloc_printf(
+        "%s/%s.ir", EXT_PATH(INFRARED_ASSETS_FOLDER), furi_string_get_cstr(remote_name));
+
+    do {
+        if(!flipper_format_buffered_file_open_existing(ff, furi_string_get_cstr(remote_path))) {
+            printf("Invalid remote name.\r\n");
+            break;
+        }
+
+        dict_signals_t signals_dict;
+        dict_signals_init(signals_dict);
+
+        FuriString* key = furi_string_alloc();
+        FuriString* signal_name = furi_string_alloc();
+
+        printf("Valid signals:\r\n");
+        int max = 1;
+        while(flipper_format_read_string(ff, "name", signal_name)) {
+            furi_string_set_str(key, furi_string_get_cstr(signal_name));
+            int* v = dict_signals_get(signals_dict, key);
+            if(v != NULL) {
+                (*v)++;
+                max = M_MAX(*v, max);
+            } else {
+                dict_signals_set_at(signals_dict, key, 1);
+            }
+        }
+
+        dict_signals_it_t it;
+        for(dict_signals_it(it, signals_dict); !dict_signals_end_p(it); dict_signals_next(it)) {
+            const struct dict_signals_pair_s* pair = dict_signals_cref(it);
+            printf("\t%s\r\n", furi_string_get_cstr(pair->key));
+        }
+
+        furi_string_free(key);
+        furi_string_free(signal_name);
+        dict_signals_clear(signals_dict);
+
+    } while(false);
+
+    flipper_format_free(ff);
+    furi_string_free(remote_path);
+    furi_record_close(RECORD_STORAGE);
+}
+
+static void
+    infrared_cli_brute_force_signals(Cli* cli, FuriString* remote_name, FuriString* signal_name) {
+    InfraredBruteForce* brute_force = infrared_brute_force_alloc();
+    FuriString* remote_path = furi_string_alloc_printf(
+        "%s/%s.ir", EXT_PATH(INFRARED_ASSETS_FOLDER), furi_string_get_cstr(remote_name));
+
+    infrared_brute_force_set_db_filename(brute_force, furi_string_get_cstr(remote_path));
+    infrared_brute_force_add_record(
+        brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, furi_string_get_cstr(signal_name));
+
+    do {
+        if(furi_string_empty(signal_name)) {
+            printf("Missing signal name.\r\n");
+            break;
+        }
+        if(!infrared_brute_force_calculate_messages(brute_force)) {
+            printf("Invalid remote name.\r\n");
+            break;
+        }
+
+        uint32_t record_count;
+        bool running = infrared_brute_force_start(
+            brute_force, INFRARED_BRUTE_FORCE_DUMMY_INDEX, &record_count);
+
+        if(record_count <= 0) {
+            printf("Invalid signal name.\r\n");
+            break;
+        }
+
+        printf("Sending %ld signal(s)...\r\n", record_count);
+        printf("Press Ctrl-C to stop.\r\n");
+
+        int records_sent = 0;
+        while(running) {
+            running = infrared_brute_force_send_next(brute_force);
+
+            if(cli_cmd_interrupt_received(cli)) break;
+
+            printf("\r%d%% complete.", (int)((float)records_sent++ / (float)record_count * 100));
+            fflush(stdout);
+        }
+
+        infrared_brute_force_stop(brute_force);
+    } while(false);
+
+    furi_string_free(remote_path);
+    infrared_brute_force_reset(brute_force);
+    infrared_brute_force_free(brute_force);
+}
+
+static void infrared_cli_process_universal(Cli* cli, FuriString* args) {
+    FuriString* arg1 = furi_string_alloc();
+    FuriString* arg2 = furi_string_alloc();
+
+    do {
+        if(!args_read_string_and_trim(args, arg1)) break;
+        if(!args_read_string_and_trim(args, arg2)) break;
+    } while(false);
+
+    if(furi_string_empty(arg1)) {
+        printf("Wrong arguments.\r\n");
+        infrared_cli_print_usage();
+    } else if(furi_string_equal_str(arg1, "list")) {
+        infrared_cli_list_remote_signals(arg2);
+    } else {
+        infrared_cli_brute_force_signals(cli, arg1, arg2);
+    }
+
+    furi_string_free(arg1);
+    furi_string_free(arg2);
 }
 
 static void infrared_cli_start_ir(Cli* cli, FuriString* args, void* context) {
