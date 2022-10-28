@@ -10,4 +10,5 @@ App(
     order=9,
     fap_icon="ClockIcon.png",
     fap_category="Main",
+    fap_icon_assets="icons",
 )

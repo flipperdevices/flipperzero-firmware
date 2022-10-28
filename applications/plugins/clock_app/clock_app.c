@@ -7,6 +7,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
+#include "Clock_icons.h"
 
 #define TAG "Clock"
 
