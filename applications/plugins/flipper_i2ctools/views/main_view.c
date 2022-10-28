@@ -1,4 +1,5 @@
 #include "main_view.h"
+#include "i2cTools_icons.h"
 
 void draw_main_view(Canvas* canvas, i2cMainView* main_view) {
     canvas_clear(canvas);
