@@ -1,0 +1,2 @@
+# flipper-flashlight
+Flashlight plugin
