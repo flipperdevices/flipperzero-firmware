@@ -1,4 +1,5 @@
 #include "sniffer_view.h"
+#include "i2cTools_icons.h"
 
 void draw_sniffer_view(Canvas* canvas, i2cSniffer* i2c_sniffer) {
     canvas_clear(canvas);
