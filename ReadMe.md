@@ -17,7 +17,7 @@
 - Game Mode now requires to HOLD LEFT to enter Clock.
 - Can someone confirm that the new i2ctools replace: [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)?
 - Added Discovered Work [Archive: File Browser Ordering (By Dig03)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/389)
-- Tried Fixed for SubGHz_Remote.fap, failed.
+- Fixed SubGHz_Remote.fap load
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
