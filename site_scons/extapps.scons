@@ -145,7 +145,7 @@ AlwaysBuild(sdk_apicheck)
 Alias("sdk_check", sdk_apicheck)
 
 sdk_apisyms = appenv.SDKSymGenerator(
-    "assets/compiled/symbols.h", appenv["SDK_DEFINITION"]
+    "${BUILD_DIR}/assets/compiled/symbols.h", appenv["SDK_DEFINITION"]
 )
 Alias("api_syms", sdk_apisyms)
 
