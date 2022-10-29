@@ -38,8 +38,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
 
     char str[12];
-    // snprintf(str, sizeof(str), "%#04x %#04x", lightmeter->sender->recv[0], lightmeter->sender->recv[1]);
-    // canvas_draw_str(canvas, 30, 30, str);
 
     if(lightmeter->sender->sended) {
         for(uint8_t i = 0; i < sizeof(lightmeter->sender->recv); i++) {
@@ -101,7 +99,7 @@ int32_t lightmeter_app(void* p) {
     gui_add_view_port(gui, lightmeter->view_port, GuiLayerFullscreen);
 
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, event_queue);
-    // furi_timer_start(timer, 500);
+    furi_timer_start(timer, 500);
 
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
 
@@ -111,14 +109,13 @@ int32_t lightmeter_app(void* p) {
         if(event.type == EventTypeInput) {
             if(event.input.key == InputKeyBack) {
                 break;
-            } else if(event.input.key == InputKeyOk) {
-                lightmeter->sender->value = 0x20;
-                lightmeter->sender->must_send = true;
-                view_port_update(lightmeter->view_port);
             }
 
         } else if(event.type == EventTypeTick) {
             notification_message(notifications, &sequence_blink_blue_100);
+            lightmeter->sender->value = 0x20;
+            lightmeter->sender->must_send = true;
+            view_port_update(lightmeter->view_port);
         }
     }
 
