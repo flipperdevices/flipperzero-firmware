@@ -46,7 +46,9 @@ def prebuild_sdk_emitter(target, source, env):
 def prebuild_sdk_create_origin_file(target, source, env):
     mega_file = env.subst("${TARGET}.c", target=target[0])
     with open(mega_file, "wt") as sdk_c:
-        sdk_c.write("\n".join(f"#include <{h.path}>" for h in env["SDK_HEADERS"]))
+        sdk_c.write(
+            "\n".join(f"#include <{h.srcnode().path}>" for h in env["SDK_HEADERS"])
+        )
 
 
 class SdkMeta:
@@ -65,6 +67,7 @@ class SdkMeta:
             "linker_libs": self.env.subst("${LIBS}"),
             "app_ep_subst": self.env.subst("${APP_ENTRY}"),
             "sdk_path_subst": self.env.subst("${SDK_DIR_SUBST}"),
+            "hardware": self.env.subst("${TARGET_HW}"),
         }
         with open(json_manifest_path, "wt") as f:
             json.dump(meta_contents, f, indent=4)
