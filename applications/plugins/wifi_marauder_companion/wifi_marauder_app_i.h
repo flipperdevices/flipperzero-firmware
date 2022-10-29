@@ -27,7 +27,7 @@ struct WifiMarauderApp {
     size_t text_box_store_strlen;
     TextBox* text_box;
     TextInput* text_input;
-    // Widget* widget;
+    //Widget* widget;
 
     VariableItemList* var_item_list;
 

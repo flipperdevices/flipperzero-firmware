@@ -3,7 +3,6 @@ App(
     name="Basic applications for main menu",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "wifi_marauder",
         "gpio",
         "ibutton",
         "infrared",
