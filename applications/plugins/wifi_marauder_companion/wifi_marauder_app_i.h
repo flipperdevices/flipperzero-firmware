@@ -17,24 +17,25 @@
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
-struct WifiMarauderApp {
-    Gui* gui;
-    ViewDispatcher* view_dispatcher;
-    SceneManager* scene_manager;
+struct WifiMarauderApp
+{
+    Gui *gui;
+    ViewDispatcher *view_dispatcher;
+    SceneManager *scene_manager;
 
     char text_input_store[WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE + 1];
-    string_t text_box_store;
+    FuriString *text_box_store;
     size_t text_box_store_strlen;
-    TextBox* text_box;
-    TextInput* text_input;
-    //Widget* widget;
+    TextBox *text_box;
+    TextInput *text_input;
+    // Widget* widget;
 
-    VariableItemList* var_item_list;
+    VariableItemList *var_item_list;
 
-    WifiMarauderUart* uart;
+    WifiMarauderUart *uart;
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
-    const char* selected_tx_string;
+    const char *selected_tx_string;
     bool is_command;
     bool is_custom_tx_string;
     bool focus_console_start;
@@ -62,7 +63,8 @@ struct WifiMarauderApp {
 //   Update
 //   Reboot
 
-typedef enum {
+typedef enum
+{
     WifiMarauderAppViewVarItemList,
     WifiMarauderAppViewConsoleOutput,
     WifiMarauderAppViewTextInput,

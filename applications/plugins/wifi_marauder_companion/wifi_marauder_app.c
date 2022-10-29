@@ -3,26 +3,30 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-static bool wifi_marauder_app_custom_event_callback(void* context, uint32_t event) {
+static bool wifi_marauder_app_custom_event_callback(void *context, uint32_t event)
+{
     furi_assert(context);
-    WifiMarauderApp* app = context;
+    WifiMarauderApp *app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
-static bool wifi_marauder_app_back_event_callback(void* context) {
+static bool wifi_marauder_app_back_event_callback(void *context)
+{
     furi_assert(context);
-    WifiMarauderApp* app = context;
+    WifiMarauderApp *app = context;
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
-static void wifi_marauder_app_tick_event_callback(void* context) {
+static void wifi_marauder_app_tick_event_callback(void *context)
+{
     furi_assert(context);
-    WifiMarauderApp* app = context;
+    WifiMarauderApp *app = context;
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-WifiMarauderApp* wifi_marauder_app_alloc() {
-    WifiMarauderApp* app = malloc(sizeof(WifiMarauderApp));
+WifiMarauderApp *wifi_marauder_app_alloc()
+{
+    WifiMarauderApp *app = malloc(sizeof(WifiMarauderApp));
 
     app->gui = furi_record_open(RECORD_GUI);
 
@@ -46,15 +50,16 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
         WifiMarauderAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
-    for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
+    for (int i = 0; i < NUM_MENU_ITEMS; ++i)
+    {
         app->selected_option_index[i] = 0;
     }
 
     app->text_box = text_box_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, WifiMarauderAppViewConsoleOutput, text_box_get_view(app->text_box));
-    string_init(app->text_box_store);
-    string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
+    app->text_box_store = furi_string_alloc();
+    furi_string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
 
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
@@ -65,7 +70,8 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     return app;
 }
 
-void wifi_marauder_app_free(WifiMarauderApp* app) {
+void wifi_marauder_app_free(WifiMarauderApp *app)
+{
     furi_assert(app);
 
     // Views
@@ -73,7 +79,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewTextInput);
     text_box_free(app->text_box);
-    string_clear(app->text_box_store);
+    furi_string_free(app->text_box_store);
     text_input_free(app->text_input);
 
     // View dispatcher
@@ -88,9 +94,10 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     free(app);
 }
 
-int32_t wifi_marauder_app(void* p) {
+int32_t wifi_marauder_app(void *p)
+{
     UNUSED(p);
-    WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
+    WifiMarauderApp *wifi_marauder_app = wifi_marauder_app_alloc();
 
     wifi_marauder_app->uart = wifi_marauder_uart_init(wifi_marauder_app);
 
