@@ -13,13 +13,9 @@
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-29 02:37 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-29 02:37 EST`
-- Switched to use manifest.txt again. Now RM default animations are [minimal](), if you want more, check out these [Select Animations](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) for animations that are more tested to be working well, or [this collection](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-all) for a larger animation collection, now organized by creator into folders (Thanks to @ESurge).
 - Game Mode now requires to HOLD LEFT to enter Clock.
 - Can someone confirm that the new i2ctools replace: [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)? Does it also, GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)?
-- Added Discovered Work [Archive: File Browser Ordering (By Dig03)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/389)
-- Fixed SubGHz_Remote.fap load
-- Added: [T-Rex (By gelin)](https://github.com/gelin/t-rex-runner) WIP
-- Added: [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
+- [Music Player Back (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/music-player-back)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
