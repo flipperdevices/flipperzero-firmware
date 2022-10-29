@@ -205,7 +205,7 @@ const SubBruteProtocol subbrute_protocol_linear_10bit_310 = {
  * BF existing dump
  */
 const SubBruteProtocol subbrute_protocol_load_file =
-    {0, 0, 0, 3, FuriHalSubGhzPresetOok650Async, RAWFileProtocol};
+    {0, 0, 0, 3, FuriHalSubGhzPresetOok650Async, UnknownFileProtocol};
 
 static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit303] = "CAME 12bit 303MHz",
@@ -267,7 +267,14 @@ static const char* subbrute_protocol_file_types[] = {
     [ChamberlainFileProtocol] = "Cham_Code",
     [LinearFileProtocol] = "Linear",
     [PrincetonFileProtocol] = "Princeton",
-    [RAWFileProtocol] = "RAW"};
+    [RAWFileProtocol] = "RAW",
+    [BETTFileProtocol] = "BETT",
+    [ClemsaFileProtocol] = "Clemsa",
+    [DoitrandFileProtocol] = "Doitrand",
+    [GateTXFileProtocol] = "GateTX",
+    [MagellanFileProtocol] = "Magellan",
+    [IntertechnoV3FileProtocol] = "Intertechno_V3",
+    [UnknownFileProtocol] = "Unknown"};
 
 /**
  * Values to not use less memory for packet parse operations
@@ -316,7 +323,7 @@ SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name) {
         }
     }
 
-    return RAWFileProtocol;
+    return UnknownFileProtocol;
 }
 
 void subbrute_protocol_default_payload(
