@@ -19,6 +19,7 @@
 - Added Discovered Work [Archive: File Browser Ordering (By Dig03)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/389)
 - Fixed SubGHz_Remote.fap load
 - Added: [T-Rex (By gelin)](https://github.com/gelin/t-rex-runner) WIP
+- Added: [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
@@ -225,6 +226,7 @@ $ ./fbt plugin_dist
 - [Dolphin Backup (By nminaylov)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
 - [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
+- [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
