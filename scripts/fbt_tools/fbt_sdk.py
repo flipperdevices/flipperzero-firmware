@@ -62,18 +62,23 @@ class SdkMeta:
             "cc_args": self._wrap_scons_vars("$CCFLAGS $_CCCOMCOM"),
             "cpp_args": self._wrap_scons_vars("$CXXFLAGS $CCFLAGS $_CCCOMCOM"),
             "linker_args": self._wrap_scons_vars("$LINKFLAGS"),
-            "linker_script": self.env.subst("${LINKER_SCRIPT_PATH}"),
+            "app_ep_subst": self.env.subst("${APP_ENTRY}"),
+            "sdk_path_subst": self.env.subst("${SDK_DIR_SUBST}"),
         }
         with open(json_manifest_path, "wt") as f:
             json.dump(meta_contents, f, indent=4)
 
     def _wrap_scons_vars(self, vars: str):
-        expanded_vars = self.env.subst(vars, target=Entry("dummy"))
+        expanded_vars = self.env.subst(
+            vars,
+            target=Entry("dummy"),
+        )
         return expanded_vars.replace("\\", "/")
 
 
 class SdkTreeBuilder:
     SDK_DIR_SUBST = "SDK_ROOT_DIR"
+    SDK_APP_EP_SUBST = "SDK_APP_EP_SUBST"
 
     def __init__(self, env, target, source) -> None:
         self.env = env
@@ -87,6 +92,11 @@ class SdkTreeBuilder:
         self.sdk_root_dir = target[0].Dir(".")
         self.sdk_deploy_dir = self.sdk_root_dir.Dir(self.target_sdk_dir_name)
 
+        self.sdk_env = self.env.Clone(
+            APP_ENTRY=self.SDK_APP_EP_SUBST,
+            SDK_DIR_SUBST=self.SDK_DIR_SUBST,
+        )
+
     def _parse_sdk_depends(self):
         deps_file = self.source[0]
         with open(deps_file.path, "rt") as deps_f:
@@ -95,38 +105,36 @@ class SdkTreeBuilder:
             self.header_depends = list(
                 filter(lambda fname: fname.endswith(".h"), depends.split()),
             )
-            self.header_depends.append(self.env.subst("${LINKER_SCRIPT_PATH}"))
-            self.header_depends.append(self.env.subst("${SDK_DEFINITION}"))
+            self.header_depends.append(self.sdk_env.subst("${LINKER_SCRIPT_PATH}"))
+            self.header_depends.append(self.sdk_env.subst("${SDK_DEFINITION}"))
             self.header_dirs = sorted(
                 set(map(os.path.normpath, map(os.path.dirname, self.header_depends)))
             )
 
     def _generate_sdk_meta(self):
-        filtered_paths = [self.target_sdk_dir_name]
+        filtered_paths = ["."]
         full_fw_paths = list(
             map(
                 os.path.normpath,
-                (self.env.Dir(inc_dir).relpath for inc_dir in self.env["CPPPATH"]),
+                (
+                    self.sdk_env.Dir(inc_dir).relpath
+                    for inc_dir in self.sdk_env["CPPPATH"]
+                ),
             )
         )
 
         sdk_dirs = ", ".join(f"'{dir}'" for dir in self.header_dirs)
         filtered_paths.extend(
-            map(
-                self.build_sdk_file_path,
-                filter(lambda path: path in sdk_dirs, full_fw_paths),
-            )
+            filter(lambda path: path in sdk_dirs, full_fw_paths),
         )
+        filtered_paths = list(map(self.build_sdk_file_path, filtered_paths))
 
-        sdk_env = self.env.Clone()
-        sdk_env.Replace(
+        self.sdk_env.Replace(
             CPPPATH=filtered_paths,
-            LINKER_SCRIPT=self.env.subst("${APP_LINKER_SCRIPT}"),
             ORIG_LINKER_SCRIPT_PATH=self.env["LINKER_SCRIPT_PATH"],
             LINKER_SCRIPT_PATH=self.build_sdk_file_path("${ORIG_LINKER_SCRIPT_PATH}"),
         )
-
-        meta = SdkMeta(sdk_env, self)
+        meta = SdkMeta(self.sdk_env, self)
         meta.save_to(self.target[0].path)
 
     def build_sdk_file_path(self, orig_path: str) -> str:
