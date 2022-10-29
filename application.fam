@@ -1,0 +1,14 @@
+App(
+    appid="lightmeter",
+    name="Lightmeter",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="lightmeter_app",
+    cdefines=["APP_LIGHTMETER"],
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="lightmeter.png",
+    fap_category="Tools",
+)
