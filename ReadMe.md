@@ -15,7 +15,6 @@
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-29 02:37 EST`
 - Game Mode now requires to HOLD LEFT to enter Clock.
 - Can someone confirm that the new i2ctools replace: [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)? Does it also, GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)?
-- [Music Player Back (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/music-player-back)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
