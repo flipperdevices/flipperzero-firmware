@@ -123,6 +123,7 @@ def generate(env):
         COPRO_MCU_FAMILY="STM32WB5x",
         SELFUPDATE_SCRIPT="${FBT_SCRIPT_DIR}/selfupdate.py",
         DIST_SCRIPT="${FBT_SCRIPT_DIR}/sconsdist.py",
+        COPRO_ASSETS_SCRIPT="${FBT_SCRIPT_DIR}/assets.py",
     )
 
     env.Append(
@@ -138,7 +139,7 @@ def generate(env):
             "CoproBuilder": Builder(
                 action=Action(
                     [
-                        '${PYTHON3} "${ASSETS_COMPILER}" '
+                        '${PYTHON3} "${COPRO_ASSETS_SCRIPT}" '
                         "copro ${COPRO_CUBE_DIR} "
                         "${TARGET} ${COPRO_MCU_FAMILY} "
                         "--cube_ver=${COPRO_CUBE_VERSION} "
