@@ -10,4 +10,5 @@ App(
     order=11,
     fap_icon="unirfIcon.png",
     fap_category="Main",
+    fap_icon_assets="images",
 )

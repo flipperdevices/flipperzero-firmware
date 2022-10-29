@@ -8,7 +8,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include <assets_icons.h>
+#include <SubGHz_Remote_icons.h>
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/path.h>
