@@ -17,7 +17,7 @@
 
 //TODO: idea - generalize ISO7816 reading. List available apps
 
-#define num_elements(A) (sizeof(A)/sizeof(A[0]))
+#define num_elements(A) (sizeof(A) / sizeof(A[0]))
 
 static void hexdump(FuriLogLevel level, char* prefix, void* data, size_t length) {
     if(furi_log_get_level() >= level) {
@@ -46,12 +46,22 @@ static void mrtd_trace(MrtdApplication* app) {
 
 uint16_t mrtd_decode_response(uint8_t* buffer, size_t len) {
     // Last two bytes are return code
-    return (buffer[len-2] << 8) | buffer[len-1];
+    return (buffer[len - 2] << 8) | buffer[len - 1];
 }
 
 //TODO: rename to transceive?
 //TODO: PRIO output and output written writing seems to crash flipper, sometimes
-bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, uint8_t p2, uint8_t lc, const void* data, int16_t le, uint8_t* output, size_t* output_written) {
+bool mrtd_send_apdu(
+    MrtdApplication* app,
+    uint8_t cla,
+    uint8_t ins,
+    uint8_t p1,
+    uint8_t p2,
+    uint8_t lc,
+    const void* data,
+    int16_t le,
+    uint8_t* output,
+    size_t* output_written) {
     FuriHalNfcTxRxContext* tx_rx = app->tx_rx;
     size_t idx = 0;
 
@@ -59,7 +69,8 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 
     if(app->secure_messaging) {
         app->ssc_long++;
-        idx = mrtd_protect_apdu(cla, ins, p1, p2, lc, data, le, app->ksenc, app->ksmac, app->ssc_long, tx_rx->tx_data);
+        idx = mrtd_protect_apdu(
+            cla, ins, p1, p2, lc, data, le, app->ksenc, app->ksmac, app->ssc_long, tx_rx->tx_data);
     } else {
         tx_rx->tx_data[idx++] = cla;
         tx_rx->tx_data[idx++] = ins;
@@ -71,7 +82,7 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
             idx += lc;
         }
         if(le >= 0) {
-            tx_rx->tx_data[idx++] = le&0xff;
+            tx_rx->tx_data[idx++] = le & 0xff;
         }
     }
 
@@ -85,8 +96,14 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 
         if(app->secure_messaging && ret_code == 0x9000) {
             app->ssc_long++;
-            ret_code = mrtd_bac_decrypt_verify_sm(tx_rx->rx_data, tx_rx->rx_bits / 8 - 2,
-                app->ksenc, app->ksmac, app->ssc_long, output, output_written);
+            ret_code = mrtd_bac_decrypt_verify_sm(
+                tx_rx->rx_data,
+                tx_rx->rx_bits / 8 - 2,
+                app->ksenc,
+                app->ksmac,
+                app->ssc_long,
+                output,
+                output_written);
             //ret_code = 0x1337; //TODO: remove PRIO
         }
 
@@ -101,22 +118,22 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
             FURI_LOG_I(TAG, "APDU answer is not 0x9000, but 0x%04X", ret_code);
 
             switch(ret_code) {
-                case 0x6987:
-                    FURI_LOG_I(TAG, "'expected secure messaging data objects are missing'");
-                    app->secure_messaging = false;
-                    break;
-                case 0x6988:
-                    FURI_LOG_I(TAG, "'secure messaging data objects are incorrect'");
-                    app->secure_messaging = false;
-                    break;
-                case 0xff01:
-                    //CUSTOM ERROR CODE from mrtd_helpers.c
-                    FURI_LOG_I(TAG, "'invalid padding'");
-                    break;
-                case 0xff02:
-                    //CUSTOM ERROR CODE from mrtd_helpers.c
-                    FURI_LOG_I(TAG, "'verify failed'");
-                    break;
+            case 0x6987:
+                FURI_LOG_I(TAG, "'expected secure messaging data objects are missing'");
+                app->secure_messaging = false;
+                break;
+            case 0x6988:
+                FURI_LOG_I(TAG, "'secure messaging data objects are incorrect'");
+                app->secure_messaging = false;
+                break;
+            case 0xff01:
+                //CUSTOM ERROR CODE from mrtd_helpers.c
+                FURI_LOG_I(TAG, "'invalid padding'");
+                break;
+            case 0xff02:
+                //CUSTOM ERROR CODE from mrtd_helpers.c
+                FURI_LOG_I(TAG, "'verify failed'");
+                break;
             }
 
             return false;
@@ -129,8 +146,16 @@ bool mrtd_send_apdu(MrtdApplication* app, uint8_t cla, uint8_t ins, uint8_t p1, 
 
 //TODO: rename commands to "mrtd_cmd_..."
 bool mrtd_select_app(MrtdApplication* app, AIDValue aid) {
-    FURI_LOG_D(TAG, "Send select App: %02X %02X %02X %02X %02X %02X %02X",
-        aid[0], aid[1], aid[2], aid[3], aid[4], aid[5], aid[6]);
+    FURI_LOG_D(
+        TAG,
+        "Send select App: %02X %02X %02X %02X %02X %02X %02X",
+        aid[0],
+        aid[1],
+        aid[2],
+        aid[3],
+        aid[4],
+        aid[5],
+        aid[6]);
     if(!mrtd_send_apdu(app, 0x00, 0xA4, 0x04, 0x0C, 0x07, aid, -1, NULL, NULL)) {
         FURI_LOG_W(TAG, "Failed select App");
         return false;
@@ -149,12 +174,18 @@ bool mrtd_get_challenge(MrtdApplication* app, uint8_t challenge[8]) {
     return true;
 }
 
-bool mrtd_external_authenticate(MrtdApplication* app, uint8_t* cmd_data, size_t cmd_size, uint8_t* out_data, size_t out_size) {
+bool mrtd_external_authenticate(
+    MrtdApplication* app,
+    uint8_t* cmd_data,
+    size_t cmd_size,
+    uint8_t* out_data,
+    size_t out_size) {
     furi_assert(cmd_size == 0x28);
     furi_assert(out_size >= 0x28);
 
     FURI_LOG_D(TAG, "Send External Authenticate");
-    if(!mrtd_send_apdu(app, 0x00, 0x82, 0x00, 0x00, cmd_size, cmd_data, 0x28, out_data, &out_size)) {
+    if(!mrtd_send_apdu(
+           app, 0x00, 0x82, 0x00, 0x00, cmd_size, cmd_data, 0x28, out_data, &out_size)) {
         FURI_LOG_W(TAG, "Failed External Authenticate");
         return false;
     }
@@ -184,7 +215,8 @@ size_t mrtd_read_binary(MrtdApplication* app, uint8_t* buffer, size_t bufsize, s
     //TODO: test with max_read = bufsize (value !0, > file size)
     int16_t max_read = 0; // 0 = 'everything', -1 = 'nothing', >0 = amount of bytes
     size_t buf_written = 0;
-    if(!mrtd_send_apdu(app, 0x00, 0xB0, offset>>8, offset&0xff, 0x00, NULL, max_read, buffer, &buf_written)) {
+    if(!mrtd_send_apdu(
+           app, 0x00, 0xB0, offset >> 8, offset & 0xff, 0x00, NULL, max_read, buffer, &buf_written)) {
         FURI_LOG_E(TAG, "Failed to read");
         return 0;
     }
@@ -225,13 +257,19 @@ bool parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
         TlvInfo tlv = iso7816_tlv_parse(data + offset);
 
         if(tlv.tag != 0x61 || tlv.length != 0x09) {
-            FURI_LOG_E(TAG, "Invalid EF.DIR, tag at offset %d must be '61' and length 9. Got '%02X' and %d", offset, tlv.tag, tlv.length);
+            FURI_LOG_E(
+                TAG,
+                "Invalid EF.DIR, tag at offset %d must be '61' and length 9. Got '%02X' and %d",
+                offset,
+                tlv.tag,
+                tlv.length);
             return false;
         }
 
         tlv = iso7816_tlv_parse(tlv.value);
         if(tlv.tag != 0x4F || tlv.length != 0x07) {
-            FURI_LOG_E(TAG, "Invalid EF.DIR, subtag at offset %d must be '4F' and length 7", offset);
+            FURI_LOG_E(
+                TAG, "Invalid EF.DIR, subtag at offset %d must be '4F' and length 7", offset);
             return false;
         }
 
@@ -244,9 +282,9 @@ bool parse_ef_dir(EF_DIR_contents* EF_DIR, const uint8_t* data, size_t length) {
     //TODO: remove testing block:
     FURI_LOG_D(TAG, "EF.DIR applications: %d", EF_DIR->applications_count);
     if(furi_log_get_level() >= FuriLogLevelDebug) {
-        for(uint8_t i=0; i<EF_DIR->applications_count; ++i) {
+        for(uint8_t i = 0; i < EF_DIR->applications_count; ++i) {
             printf("- ");
-            for(uint8_t n=0; n<sizeof(AIDValue); ++n) {
+            for(uint8_t n = 0; n < sizeof(AIDValue); ++n) {
                 printf("%02X ", EF_DIR->applications[i][n]);
             }
             printf("\r\n");
@@ -261,7 +299,8 @@ bool parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
     uint16_t unicode_tag_path[] = {0x60, 0x5f36};
     uint16_t tags_tag_path[] = {0x60, 0x5c};
 
-    TlvInfo tlv_lds_version = iso7816_tlv_select(data, length, lds_tag_path, num_elements(lds_tag_path));
+    TlvInfo tlv_lds_version =
+        iso7816_tlv_select(data, length, lds_tag_path, num_elements(lds_tag_path));
     if(!tlv_lds_version.tag) {
         FURI_LOG_W(TAG, "EF.COM LDS version not found");
         return false;
@@ -269,7 +308,8 @@ bool parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
 
     EF_COM->lds_version = tlv_number(tlv_lds_version);
 
-    TlvInfo tlv_unicode_version = iso7816_tlv_select(data, length, unicode_tag_path, num_elements(unicode_tag_path));
+    TlvInfo tlv_unicode_version =
+        iso7816_tlv_select(data, length, unicode_tag_path, num_elements(unicode_tag_path));
     if(!tlv_unicode_version.tag) {
         FURI_LOG_W(TAG, "EF.COM Unicode info not found!");
         return false;
@@ -277,13 +317,14 @@ bool parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
 
     EF_COM->unicode_version = tlv_number(tlv_unicode_version);
 
-    TlvInfo tlv_tag_list = iso7816_tlv_select(data, length, tags_tag_path, num_elements(tags_tag_path));
+    TlvInfo tlv_tag_list =
+        iso7816_tlv_select(data, length, tags_tag_path, num_elements(tags_tag_path));
     if(!tlv_tag_list.tag) {
         FURI_LOG_W(TAG, "EF.CO Tag List not found!");
         return false;
     }
 
-    for(size_t i=0; i<MAX_EFCOM_TAGS; ++i) {
+    for(size_t i = 0; i < MAX_EFCOM_TAGS; ++i) {
         EF_COM->tag_list[i] = (i < tlv_tag_list.length) ? tlv_tag_list.value[i] : 0x00;
     }
 
@@ -293,7 +334,7 @@ bool parse_ef_com(EF_COM_contents* EF_COM, const uint8_t* data, size_t length) {
 void mrzcpy(uint8_t* dest, const uint8_t* src, size_t* idx, size_t n) {
     //FURI_LOG_D(TAG, "mrzcpy %d: %.*s", n, n, src + *idx);
     //memcpy(dest, src + *idx, n);
-    for(size_t i=0; i<n; ++i) {
+    for(size_t i = 0; i < n; ++i) {
         uint8_t c = src[i + *idx];
         if(c == '<') {
             c = ' ';
@@ -316,68 +357,69 @@ bool parse_ef_dg1(EF_DG1_contents* DG1, const uint8_t* data, size_t length) {
     size_t idx = 0;
 
     switch(tlv_mrz.length) {
-        case 90:
-            DG1->type = MrtdTypeTD1;
-            mrzcpy(DG1->doctype, mrz, &idx, 2);
-            mrzcpy(DG1->issuing_state, mrz, &idx, 3);
-            mrzcpy(DG1->docnr, mrz, &idx, 9);
-            idx += 1; // docnr check digit
-            idx += 15; // optional data
-            mrtd_parse_date(&DG1->birth_date, mrz + idx);
-            idx += 6; // birth_date
-            idx += 1; // birth date check digit
-            mrzcpy(DG1->sex, mrz, &idx, 1);
-            mrtd_parse_date(&DG1->expiry_date, mrz + idx);
-            idx += 6; // expiry_date
-            idx += 1; // expiry date check digit
-            mrzcpy(DG1->nationality, mrz, &idx, 3);
-            idx += 11; // optional data
-            idx += 1; // check digit
-            mrzcpy(DG1->name, mrz, &idx, 30);
-            // 30 + 30 + 30
-            break;
-        case 72:
-            DG1->type = MrtdTypeTD2;
-            mrzcpy(DG1->doctype, mrz, &idx, 2);
-            mrzcpy(DG1->issuing_state, mrz, &idx, 3);
-            mrzcpy(DG1->name, mrz, &idx, 31);
-            mrzcpy(DG1->docnr, mrz, &idx, 9);
-            idx += 1; // docnr check digit
-            mrzcpy(DG1->nationality, mrz, &idx, 3);
-            mrtd_parse_date(&DG1->birth_date, mrz + idx);
-            idx += 6; // birth_date
-            idx += 1; // birth date check digit
-            mrzcpy(DG1->sex, mrz, &idx, 1);
-            mrtd_parse_date(&DG1->expiry_date, mrz + idx);
-            idx += 6; // expiry_date
-            idx += 1; // expiry date check digit
-            idx += 7; // optional data
-            idx += 1; // check digit
-            // 36 + 36
-            break;
-        case 88:
-            DG1->type = MrtdTypeTD3;
-            mrzcpy(DG1->doctype, mrz, &idx, 2);
-            mrzcpy(DG1->issuing_state, mrz, &idx, 3);
-            mrzcpy(DG1->name, mrz, &idx, 39);
-            mrzcpy(DG1->docnr, mrz, &idx, 9);
-            idx += 1; // docnr check digit
-            mrzcpy(DG1->nationality, mrz, &idx, 3);
-            mrtd_parse_date(&DG1->birth_date, mrz + idx);
-            idx += 1; // birth date check digit
-            idx += 6; // birth_date
-            mrzcpy(DG1->sex, mrz, &idx, 1);
-            mrtd_parse_date(&DG1->expiry_date, mrz + idx);
-            idx += 6; // expiry_date
-            idx += 1; // expiry date check digit
-            idx += 14; // optional data
-            idx += 1; //  check digit
-            idx += 1; // check digit
-            // 44 + 44
-            break;
-        default:
-            FURI_LOG_W(TAG, "Unexpected MRZ length in DG1: %d. TD1=90, TD2=72, TD3=88.", tlv_mrz.length);
-            return false;
+    case 90:
+        DG1->type = MrtdTypeTD1;
+        mrzcpy(DG1->doctype, mrz, &idx, 2);
+        mrzcpy(DG1->issuing_state, mrz, &idx, 3);
+        mrzcpy(DG1->docnr, mrz, &idx, 9);
+        idx += 1; // docnr check digit
+        idx += 15; // optional data
+        mrtd_parse_date(&DG1->birth_date, mrz + idx);
+        idx += 6; // birth_date
+        idx += 1; // birth date check digit
+        mrzcpy(DG1->sex, mrz, &idx, 1);
+        mrtd_parse_date(&DG1->expiry_date, mrz + idx);
+        idx += 6; // expiry_date
+        idx += 1; // expiry date check digit
+        mrzcpy(DG1->nationality, mrz, &idx, 3);
+        idx += 11; // optional data
+        idx += 1; // check digit
+        mrzcpy(DG1->name, mrz, &idx, 30);
+        // 30 + 30 + 30
+        break;
+    case 72:
+        DG1->type = MrtdTypeTD2;
+        mrzcpy(DG1->doctype, mrz, &idx, 2);
+        mrzcpy(DG1->issuing_state, mrz, &idx, 3);
+        mrzcpy(DG1->name, mrz, &idx, 31);
+        mrzcpy(DG1->docnr, mrz, &idx, 9);
+        idx += 1; // docnr check digit
+        mrzcpy(DG1->nationality, mrz, &idx, 3);
+        mrtd_parse_date(&DG1->birth_date, mrz + idx);
+        idx += 6; // birth_date
+        idx += 1; // birth date check digit
+        mrzcpy(DG1->sex, mrz, &idx, 1);
+        mrtd_parse_date(&DG1->expiry_date, mrz + idx);
+        idx += 6; // expiry_date
+        idx += 1; // expiry date check digit
+        idx += 7; // optional data
+        idx += 1; // check digit
+        // 36 + 36
+        break;
+    case 88:
+        DG1->type = MrtdTypeTD3;
+        mrzcpy(DG1->doctype, mrz, &idx, 2);
+        mrzcpy(DG1->issuing_state, mrz, &idx, 3);
+        mrzcpy(DG1->name, mrz, &idx, 39);
+        mrzcpy(DG1->docnr, mrz, &idx, 9);
+        idx += 1; // docnr check digit
+        mrzcpy(DG1->nationality, mrz, &idx, 3);
+        mrtd_parse_date(&DG1->birth_date, mrz + idx);
+        idx += 1; // birth date check digit
+        idx += 6; // birth_date
+        mrzcpy(DG1->sex, mrz, &idx, 1);
+        mrtd_parse_date(&DG1->expiry_date, mrz + idx);
+        idx += 6; // expiry_date
+        idx += 1; // expiry date check digit
+        idx += 14; // optional data
+        idx += 1; //  check digit
+        idx += 1; // check digit
+        // 44 + 44
+        break;
+    default:
+        FURI_LOG_W(
+            TAG, "Unexpected MRZ length in DG1: %d. TD1=90, TD2=72, TD3=88.", tlv_mrz.length);
+        return false;
     }
 
     return true;
@@ -437,17 +479,17 @@ void mrtd_test(MrtdApplication* app, MrtdData* mrtd_data) {
     mrtd_data->auth_success = false;
     FURI_LOG_D(TAG, "Auth method: %d", method);
     switch(method) {
-        case MrtdAuthMethodAny:
-            //TODO: try PACE, then BAC
-        case MrtdAuthMethodBac:
-            mrtd_data->auth_success = mrtd_bac(app, &mrtd_data->auth);
-            break;
-        case MrtdAuthMethodPace:
-            FURI_LOG_E(TAG, "Auth method PACE not implemented");
-            break;
-        case MrtdAuthMethodNone:
-        default:
-            break;
+    case MrtdAuthMethodAny:
+        //TODO: try PACE, then BAC
+    case MrtdAuthMethodBac:
+        mrtd_data->auth_success = mrtd_bac(app, &mrtd_data->auth);
+        break;
+    case MrtdAuthMethodPace:
+        FURI_LOG_E(TAG, "Auth method PACE not implemented");
+        break;
+    case MrtdAuthMethodNone:
+    default:
+        break;
     }
 
     if(!mrtd_data->auth_success) {
@@ -514,14 +556,14 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
 
     uint8_t S[32];
     memcpy(S, rnd_ifd, 8);
-    memcpy(S+8, rnd_ic, 8);
-    memcpy(S+16, k_ifd, 16);
+    memcpy(S + 8, rnd_ic, 8);
+    memcpy(S + 16, k_ifd, 16);
 
     hexdump(FuriLogLevelDebug, "S:", S, 32);
 
     uint8_t cmd_data[40];
-    uint8_t *eifd = cmd_data;
-    uint8_t *mifd = cmd_data+32;
+    uint8_t* eifd = cmd_data;
+    uint8_t* mifd = cmd_data + 32;
     mrtd_bac_encrypt(S, 32, kenc, eifd);
     mrtd_bac_padded_mac(eifd, 32, kmac, mifd);
 
@@ -536,8 +578,8 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
         FURI_LOG_W(TAG, "BAC DecryptVerify failed");
     }
 
-    uint8_t *rnd_ifd_recv = buffer + 8;
-    uint8_t *kic = buffer + 16;
+    uint8_t* rnd_ifd_recv = buffer + 8;
+    uint8_t* kic = buffer + 16;
 
     hexdump(FuriLogLevelDebug, "kic:", kic, 16);
 
@@ -546,7 +588,7 @@ bool mrtd_bac(MrtdApplication* app, MrtdAuthData* auth) {
     }
 
     uint8_t kseed[16];
-    for(uint8_t i=0; i<16; ++i) {
+    for(uint8_t i = 0; i < 16; ++i) {
         kseed[i] = k_ifd[i] ^ kic[i];
         //printf("seed %2d = %02X ^ %02X = %02X\r\n", i, k_ifd[i], kic[i], kseed[i]);
     }

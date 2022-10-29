@@ -21,19 +21,19 @@ void nfc_scene_passport_read_on_enter(void* context) {
     temp_str = furi_string_alloc();
     furi_string_set(temp_str, "\e#Passport\n");
     char iso_type = FURI_BIT(data->sak, 5) ? '4' : '3';
-	
-	char nfc_type;
-	switch(data->type) {
-		case FuriHalNfcTypeA:
-			nfc_type = 'A';
-			break;
-		case FuriHalNfcTypeB:
-			nfc_type = 'B';
-			break;
-		default:
-			nfc_type = '?';
-			break;
-	}
+
+    char nfc_type;
+    switch(data->type) {
+    case FuriHalNfcTypeA:
+        nfc_type = 'A';
+        break;
+    case FuriHalNfcTypeB:
+        nfc_type = 'B';
+        break;
+    default:
+        nfc_type = '?';
+        break;
+    }
     furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-%c)\n", iso_type, nfc_type);
     furi_string_cat_printf(temp_str, "UID:");
     for(size_t i = 0; i < data->uid_len; i++) {

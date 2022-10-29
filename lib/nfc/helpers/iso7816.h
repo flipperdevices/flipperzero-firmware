@@ -17,14 +17,15 @@ typedef struct {
         uint8_t constructed : 1;
         uint8_t class : 2;
     } ber;
-	size_t length;
-	const uint8_t* value;
+    size_t length;
+    const uint8_t* value;
 
-	const uint8_t* next;
+    const uint8_t* next;
 } TlvInfo;
 
 // ISO7816-5 §5.2
 // Simple-TLV and BER-TLV parsing
 TlvInfo iso7816_tlv_parse(const uint8_t* data);
 
-TlvInfo iso7816_tlv_select(const uint8_t* data, size_t length, const uint16_t tags[], size_t num_tags);
+TlvInfo
+    iso7816_tlv_select(const uint8_t* data, size_t length, const uint16_t tags[], size_t num_tags);

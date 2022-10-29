@@ -104,31 +104,27 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
 
         FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
         FURI_LOG_I(TAG, "FAP Loader is starting app");
-		
-		if(strcmp(furi_string_get_cstr(loader->fap_args), "false") == 0)
-		{
-			FuriThread* thread =
-				flipper_application_spawn(loader->app, NULL);
-			furi_thread_start(thread);
-			furi_thread_join(thread);
 
-			show_error = false;
-			int ret = furi_thread_get_return_code(thread);
+        if(strcmp(furi_string_get_cstr(loader->fap_args), "false") == 0) {
+            FuriThread* thread = flipper_application_spawn(loader->app, NULL);
+            furi_thread_start(thread);
+            furi_thread_join(thread);
 
-			FURI_LOG_I(TAG, "FAP app returned: %i", ret);
-		}
-		else
-		{
-			FuriThread* thread =
-				flipper_application_spawn(loader->app, (void*)furi_string_get_cstr(loader->fap_args));
-			furi_thread_start(thread);
-			furi_thread_join(thread);
+            show_error = false;
+            int ret = furi_thread_get_return_code(thread);
 
-			show_error = false;
-			int ret = furi_thread_get_return_code(thread);
+            FURI_LOG_I(TAG, "FAP app returned: %i", ret);
+        } else {
+            FuriThread* thread = flipper_application_spawn(
+                loader->app, (void*)furi_string_get_cstr(loader->fap_args));
+            furi_thread_start(thread);
+            furi_thread_join(thread);
 
-			FURI_LOG_I(TAG, "FAP app returned: %i", ret);
-		}
+            show_error = false;
+            int ret = furi_thread_get_return_code(thread);
+
+            FURI_LOG_I(TAG, "FAP app returned: %i", ret);
+        }
     } while(0);
 
     if(show_error) {

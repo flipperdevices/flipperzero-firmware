@@ -385,7 +385,7 @@ static bool nfc_worker_read_nfcb(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
 
     bool card_read = false;
     furi_hal_nfc_sleep();
-	if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
+    if(nfc_data->interface == FuriHalNfcInterfaceIsoDep) {
         FURI_LOG_I(TAG, "ISO14443-4B card detected");
         //TODO: thoughts on improving logic/readability here?
         do {
@@ -451,15 +451,15 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                     }
                 }
             } else if(nfc_data->type == FuriHalNfcTypeB) {
-				if(nfc_worker_read_nfcb(nfc_worker, &tx_rx)) {
-					if(dev_data->protocol == NfcDeviceProtocolMRTD) {
-						event = NfcWorkerEventReadPassport;
-						break;
-					}
-				}
-			
-				event = NfcWorkerEventReadUidNfcB;
-				break;
+                if(nfc_worker_read_nfcb(nfc_worker, &tx_rx)) {
+                    if(dev_data->protocol == NfcDeviceProtocolMRTD) {
+                        event = NfcWorkerEventReadPassport;
+                        break;
+                    }
+                }
+
+                event = NfcWorkerEventReadUidNfcB;
+                break;
             } else if(nfc_data->type == FuriHalNfcTypeF) {
                 event = NfcWorkerEventReadUidNfcF;
                 break;
