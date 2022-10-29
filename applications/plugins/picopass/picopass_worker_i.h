@@ -13,22 +13,21 @@
 
 #include <platform.h>
 
-struct PicopassWorker
-{
-    FuriThread *thread;
-    Storage *storage;
-    Stream *dict_stream;
+struct PicopassWorker {
+    FuriThread* thread;
+    Storage* storage;
+    Stream* dict_stream;
 
-    PicopassDeviceData *dev_data;
+    PicopassDeviceData* dev_data;
     PicopassWorkerCallback callback;
-    void *context;
+    void* context;
 
     PicopassWorkerState state;
 };
 
-void picopass_worker_change_state(PicopassWorker *picopass_worker, PicopassWorkerState state);
+void picopass_worker_change_state(PicopassWorker* picopass_worker, PicopassWorkerState state);
 
-int32_t picopass_worker_task(void *context);
+int32_t picopass_worker_task(void* context);
 
-void picopass_worker_detect(PicopassWorker *picopass_worker);
-void picopass_worker_write(PicopassWorker *picopass_worker);
+void picopass_worker_detect(PicopassWorker* picopass_worker);
+void picopass_worker_write(PicopassWorker* picopass_worker);
