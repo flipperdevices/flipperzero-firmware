@@ -223,7 +223,7 @@ def validate_sdk_cache(source, target, env):
     current_sdk = SdkCollector()
     current_sdk.process_source_file_for_sdk(source[0].path)
     for h in env["SDK_HEADERS"]:
-        current_sdk.add_header_to_sdk(pathlib.Path(h.path).as_posix())
+        current_sdk.add_header_to_sdk(pathlib.Path(h.srcnode().path).as_posix())
 
     sdk_cache = SdkCache(target[0].path)
     sdk_cache.validate_api(current_sdk.get_api())
