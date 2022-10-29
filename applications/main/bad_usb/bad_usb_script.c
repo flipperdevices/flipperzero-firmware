@@ -524,7 +524,9 @@ static int32_t bad_usb_worker(void* context) {
 
         } else if(worker_state == BadUsbStateNotConnected) { // State: USB not connected
             uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle, FuriFlagWaitAny, FuriWaitForever);
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
+                FuriFlagWaitAny,
+                FuriWaitForever);
             furi_check((flags & FuriFlagError) == 0);
             if(flags & WorkerEvtEnd) {
                 break;
@@ -557,10 +559,12 @@ static int32_t bad_usb_worker(void* context) {
                 worker_state = BadUsbStateNotConnected; // USB disconnected
             }
             bad_usb->st.state = worker_state;
-        
+
         } else if(worker_state == BadUsbStateWillRun) { // State: start on connection
             uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle, FuriFlagWaitAny, FuriWaitForever);
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
+                FuriFlagWaitAny,
+                FuriWaitForever);
             furi_check((flags & FuriFlagError) == 0);
             if(flags & WorkerEvtEnd) {
                 break;
