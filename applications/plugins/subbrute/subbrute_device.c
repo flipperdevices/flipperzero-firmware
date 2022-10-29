@@ -146,8 +146,9 @@ SubBruteFileResult subbrute_device_attack_set(
     if(type != SubBruteAttackLoadFile) {
         subbrute_device_free_protocol_info(instance);
         instance->protocol_info = subbrute_protocol(type);
-        instance->extra_repeats = extra_repeats;
     }
+
+    instance->extra_repeats = extra_repeats;
 
     // For non-file types we didn't set SubGhzProtocolDecoderBase
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
@@ -290,11 +291,12 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
 #endif
         }
 
-        instance->decoder_result =
-            subghz_receiver_search_decoder_base_by_name(instance->receiver, protocol_file);
+        instance->decoder_result = subghz_receiver_search_decoder_base_by_name(
+            instance->receiver, furi_string_get_cstr(temp_str));
 
-        if(!instance->decoder_result || strcmp(protocol_file, "RAW") == 0) {
-            FURI_LOG_E(TAG, "RAW unsupported");
+        if((!instance->decoder_result) || (strcmp(protocol_file, "RAW") == 0) ||
+           (strcmp(protocol_file, "Unknown") == 0)) {
+            FURI_LOG_E(TAG, "Protocol unsupported");
             result = SubBruteFileResultProtocolNotSupported;
             break;
         }
@@ -429,7 +431,7 @@ const char* subbrute_device_error_get_desc(SubBruteFileResult error_id) {
         result = "Missing Protocol";
         break;
     case(SubBruteFileResultProtocolNotSupported):
-        result = "RAW unsupported";
+        result = "Protocol unsupported";
         break;
     case(SubBruteFileResultDynamicProtocolNotValid):
         result = "Dynamic protocol unsupported";

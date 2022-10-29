@@ -200,7 +200,6 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
     const uint8_t min_value = 0;
     const uint8_t correct_total = SubBruteAttackTotalCount - 1;
     uint8_t max_repeats = 9 - subbrute_protocol_repeats_count(instance->index);
-    uint8_t index = 0;
 
     bool updated = false;
     bool consumed = false;
@@ -227,14 +226,16 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
             consumed = true;
         } else if(event->key == InputKeyLeft && is_short) {
             instance->extra_repeats = CLAMP(instance->extra_repeats - 1, max_repeats, 0);
+
             updated = true;
             consumed = true;
         } else if(event->key == InputKeyRight && is_short) {
             instance->extra_repeats = CLAMP(instance->extra_repeats + 1, max_repeats, 0);
+
             updated = true;
             consumed = true;
         } else if(event->key == InputKeyOk && is_short) {
-            if(index == SubBruteAttackLoadFile) {
+            if(instance->index == SubBruteAttackLoadFile) {
                 instance->callback(SubBruteCustomEventTypeLoadFile, instance->context);
             } else {
                 instance->callback(SubBruteCustomEventTypeMenuSelected, instance->context);
@@ -293,16 +294,6 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
 
 void subbrute_main_view_enter(void* context) {
     furi_assert(context);
-    SubBruteMainView* instance = context;
-
-    with_view_model(
-        instance->view,
-        SubBruteMainViewModel * model,
-        {
-            model->key_field = NULL;
-            model->is_select_byte = false;
-        },
-        true);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "subbrute_main_view_enter");
@@ -368,7 +359,7 @@ void subbrute_main_view_set_index(
     furi_assert(instance);
     furi_assert(idx < SubBruteAttackTotalCount);
 #ifdef FURI_DEBUG
-    FURI_LOG_I(TAG, "Set index: %d", idx);
+    FURI_LOG_I(TAG, "Set index: %d, IS_SELECT_BYTE: %d", idx, is_select_byte);
 #endif
     instance->is_select_byte = is_select_byte;
     instance->key_field = key_field;
