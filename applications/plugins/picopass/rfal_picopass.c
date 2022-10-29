@@ -1,5 +1,4 @@
 #include "rfal_picopass.h"
-#include "utils.h"
 
 #define RFAL_PICOPASS_TXRX_FLAGS                                                    \
     (FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_TX_MANUAL | FURI_HAL_NFC_LL_TXRX_FLAGS_AGC_ON | \
@@ -7,18 +6,21 @@
 
 #define TAG "RFAL_PICOPASS"
 
-typedef struct {
+typedef struct
+{
     uint8_t CMD;
     uint8_t CSN[RFAL_PICOPASS_UID_LEN];
 } rfalPicoPassSelectReq;
 
-typedef struct {
+typedef struct
+{
     uint8_t CMD;
     uint8_t null[4];
     uint8_t mac[4];
 } rfalPicoPassCheckReq;
 
-static uint16_t rfalPicoPassUpdateCcitt(uint16_t crcSeed, uint8_t dataByte) {
+static uint16_t rfalPicoPassUpdateCcitt(uint16_t crcSeed, uint8_t dataByte)
+{
     uint16_t crc = crcSeed;
     uint8_t dat = dataByte;
 
@@ -31,23 +33,27 @@ static uint16_t rfalPicoPassUpdateCcitt(uint16_t crcSeed, uint8_t dataByte) {
 }
 
 static uint16_t
-    rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
+rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t *buf, uint16_t length)
+{
     uint16_t crc = preloadValue;
     uint16_t index;
 
-    for(index = 0; index < length; index++) {
+    for (index = 0; index < length; index++)
+    {
         crc = rfalPicoPassUpdateCcitt(crc, buf[index]);
     }
 
     return crc;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerInitialize(void) {
+FuriHalNfcReturn rfalPicoPassPollerInitialize(void)
+{
     FuriHalNfcReturn ret;
 
     ret = furi_hal_nfc_ll_set_mode(
         FuriHalNfcModePollPicopass, FuriHalNfcBitrate26p48, FuriHalNfcBitrate26p48);
-    if(ret != FuriHalNfcReturnOk) {
+    if (ret != FuriHalNfcReturnOk)
+    {
         return ret;
     };
 
@@ -59,7 +65,8 @@ FuriHalNfcReturn rfalPicoPassPollerInitialize(void) {
     return FuriHalNfcReturnOk;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerCheckPresence(void) {
+FuriHalNfcReturn rfalPicoPassPollerCheckPresence(void)
+{
     FuriHalNfcReturn ret;
     uint8_t txBuf[1] = {RFAL_PICOPASS_CMD_ACTALL};
     uint8_t rxBuf[32] = {0};
@@ -71,7 +78,8 @@ FuriHalNfcReturn rfalPicoPassPollerCheckPresence(void) {
     return ret;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes) {
+FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes *idRes)
+{
     FuriHalNfcReturn ret;
 
     uint8_t txBuf[1] = {RFAL_PICOPASS_CMD_IDENTIFY};
@@ -82,7 +90,7 @@ FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes) {
     ret = furi_hal_nfc_ll_txrx(
         txBuf,
         sizeof(txBuf),
-        (uint8_t*)idRes,
+        (uint8_t *)idRes,
         sizeof(rfalPicoPassIdentifyRes),
         &recvLen,
         flags,
@@ -92,33 +100,36 @@ FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes) {
     return ret;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerSelect(uint8_t* csn, rfalPicoPassSelectRes* selRes) {
+FuriHalNfcReturn rfalPicoPassPollerSelect(uint8_t *csn, rfalPicoPassSelectRes *selRes)
+{
     FuriHalNfcReturn ret;
 
     rfalPicoPassSelectReq selReq;
     selReq.CMD = RFAL_PICOPASS_CMD_SELECT;
-    ST_MEMCPY(selReq.CSN, csn, RFAL_PICOPASS_UID_LEN);
+    memcpy(selReq.CSN, csn, RFAL_PICOPASS_UID_LEN);
     uint16_t recvLen = 0;
     uint32_t flags = RFAL_PICOPASS_TXRX_FLAGS;
     uint32_t fwt = furi_hal_nfc_ll_ms2fc(20);
 
     ret = furi_hal_nfc_ll_txrx(
-        (uint8_t*)&selReq,
+        (uint8_t *)&selReq,
         sizeof(rfalPicoPassSelectReq),
-        (uint8_t*)selRes,
+        (uint8_t *)selRes,
         sizeof(rfalPicoPassSelectRes),
         &recvLen,
         flags,
         fwt);
     // printf("select rx: %d %s\n", recvLen, hex2Str(selRes->CSN, RFAL_PICOPASS_UID_LEN));
-    if(ret == FuriHalNfcReturnTimeout) {
+    if (ret == FuriHalNfcReturnTimeout)
+    {
         return FuriHalNfcReturnOk;
     }
 
     return ret;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerReadCheck(rfalPicoPassReadCheckRes* rcRes) {
+FuriHalNfcReturn rfalPicoPassPollerReadCheck(rfalPicoPassReadCheckRes *rcRes)
+{
     FuriHalNfcReturn ret;
     uint8_t txBuf[2] = {RFAL_PICOPASS_CMD_READCHECK, 0x02};
     uint16_t recvLen = 0;
@@ -128,48 +139,52 @@ FuriHalNfcReturn rfalPicoPassPollerReadCheck(rfalPicoPassReadCheckRes* rcRes) {
     ret = furi_hal_nfc_ll_txrx(
         txBuf,
         sizeof(txBuf),
-        (uint8_t*)rcRes,
+        (uint8_t *)rcRes,
         sizeof(rfalPicoPassReadCheckRes),
         &recvLen,
         flags,
         fwt);
     // printf("readcheck rx: %d %s\n", recvLen, hex2Str(rcRes->CCNR, 8));
 
-    if(ret == FuriHalNfcReturnCrc) {
+    if (ret == FuriHalNfcReturnCrc)
+    {
         return FuriHalNfcReturnOk;
     }
 
     return ret;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerCheck(uint8_t* mac, rfalPicoPassCheckRes* chkRes) {
+FuriHalNfcReturn rfalPicoPassPollerCheck(uint8_t *mac, rfalPicoPassCheckRes *chkRes)
+{
     FuriHalNfcReturn ret;
     rfalPicoPassCheckReq chkReq;
     chkReq.CMD = RFAL_PICOPASS_CMD_CHECK;
-    ST_MEMCPY(chkReq.mac, mac, 4);
-    ST_MEMSET(chkReq.null, 0, 4);
+    memcpy(chkReq.mac, mac, 4);
+    memset(chkReq.null, 0, 4);
     uint16_t recvLen = 0;
     uint32_t flags = RFAL_PICOPASS_TXRX_FLAGS;
     uint32_t fwt = furi_hal_nfc_ll_ms2fc(20);
 
     // printf("check tx: %s\n", hex2Str((uint8_t *)&chkReq, sizeof(rfalPicoPassCheckReq)));
     ret = furi_hal_nfc_ll_txrx(
-        (uint8_t*)&chkReq,
+        (uint8_t *)&chkReq,
         sizeof(rfalPicoPassCheckReq),
-        (uint8_t*)chkRes,
+        (uint8_t *)chkRes,
         sizeof(rfalPicoPassCheckRes),
         &recvLen,
         flags,
         fwt);
     // printf("check rx: %d %s\n", recvLen, hex2Str(chkRes->mac, 4));
-    if(ret == FuriHalNfcReturnCrc) {
+    if (ret == FuriHalNfcReturnCrc)
+    {
         return FuriHalNfcReturnOk;
     }
 
     return ret;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadBlockRes* readRes) {
+FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadBlockRes *readRes)
+{
     FuriHalNfcReturn ret;
 
     uint8_t txBuf[4] = {RFAL_PICOPASS_CMD_READ, 0, 0, 0};
@@ -184,7 +199,7 @@ FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadB
     ret = furi_hal_nfc_ll_txrx(
         txBuf,
         sizeof(txBuf),
-        (uint8_t*)readRes,
+        (uint8_t *)readRes,
         sizeof(rfalPicoPassReadBlockRes),
         &recvLen,
         flags,
@@ -192,7 +207,8 @@ FuriHalNfcReturn rfalPicoPassPollerReadBlock(uint8_t blockNum, rfalPicoPassReadB
     return ret;
 }
 
-FuriHalNfcReturn rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8], uint8_t mac[4]) {
+FuriHalNfcReturn rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8], uint8_t mac[4])
+{
     FuriHalNfcReturn ret;
 
     uint8_t txBuf[14] = {RFAL_PICOPASS_CMD_WRITE, blockNum, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -205,9 +221,10 @@ FuriHalNfcReturn rfalPicoPassPollerWriteBlock(uint8_t blockNum, uint8_t data[8],
     rfalPicoPassReadBlockRes block;
 
     ret = furi_hal_nfc_ll_txrx(
-        txBuf, sizeof(txBuf), (uint8_t*)&block, sizeof(block), &recvLen, flags, fwt);
+        txBuf, sizeof(txBuf), (uint8_t *)&block, sizeof(block), &recvLen, flags, fwt);
 
-    if(ret == FuriHalNfcReturnOk) {
+    if (ret == FuriHalNfcReturnOk)
+    {
         // TODO: compare response
     }
 
