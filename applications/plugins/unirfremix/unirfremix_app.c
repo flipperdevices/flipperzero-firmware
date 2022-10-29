@@ -8,7 +8,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/path.h>
 #include <applications/main/subghz/subghz_i.h>
