@@ -8,7 +8,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include <SubGHz_Remote_icons.h>
 
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/path.h>
@@ -19,6 +18,8 @@
 #include <lib/subghz/types.h>
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
+
+#include <SubGHz_Remote_icons.h>
 
 #define UNIRFMAP_FOLDER "/ext/subghz/unirf"
 #define UNIRFMAP_EXTENSION ".txt"
