@@ -13,17 +13,10 @@
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-10-28 13:20 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-10-28 13:20 EST`
-- Animations: Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder (RM Select)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) or [this folder (RM minimal)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-minimal) if you don't want to do the work but want more animations.
-- Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipperzero-firmware/tree/totp_plugin)
-- iButton: [Fixed issue when loading iButton keys or U2F token from Archive app #382 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/382)
-- Updated: [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
-- Animations: Painting speech bubbles updated from FalsePhilosopher
-- ReADDED: Assets: Includes New Dolphin Animations: [Sharingan (By Haseo)]
-- - With speed optimizations by RogueMaster. 
-- - Rename the [minimal animation file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleMin) to see it, or [RM select](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleRM) if you have copied over [the RM select](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) animations.
-- Updated: [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
-- Updated: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- Switched to use manifest.txt again. Now RM default animations are [minimal](), if you want more, check out these [Select Animations](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) for animations that are more tested to be working well, or [this collection](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-all) for a larger animation collection, now organized by creator into folders (Thanks to @ESurge).
+- Fixed Unleashed Halloween animation visibility.
+- Updated Dummy Mode to better match the latest Unleashed Dummy Mode upgrade.
+- Game Mode now requires to HOLD LEFT to enter Clock.
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
