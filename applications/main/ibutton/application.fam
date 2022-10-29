@@ -13,4 +13,5 @@ App(
     order=60,
     fap_icon="iBIcon.png",
     fap_category="Main",
+    fap_icon_assets="images",
 )
