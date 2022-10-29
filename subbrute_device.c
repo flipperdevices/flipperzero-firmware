@@ -146,8 +146,9 @@ SubBruteFileResult subbrute_device_attack_set(
     if(type != SubBruteAttackLoadFile) {
         subbrute_device_free_protocol_info(instance);
         instance->protocol_info = subbrute_protocol(type);
-        instance->extra_repeats = extra_repeats;
     }
+
+    instance->extra_repeats = extra_repeats;
 
     // For non-file types we didn't set SubGhzProtocolDecoderBase
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
