@@ -25,6 +25,7 @@ PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[12] = {0};
                  : "memory");
 
 // Restore registers and halt MCU
+#ifdef FURI_DEBUG
 #define RESTORE_REGISTERS_AND_HALT_MCU()                \
     asm volatile("ldr r12, =__furi_check_registers  \n" \
                  "ldm r12, {r0-r11}                 \n" \
@@ -35,6 +36,17 @@ PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[12] = {0};
                  :                                      \
                  :                                      \
                  : "memory");
+#else
+#define RESTORE_REGISTERS_AND_HALT_MCU()                \
+    asm volatile("ldr r12, =__furi_check_registers  \n" \
+                 "ldm r12, {r0-r11}                 \n" \
+                 "loop%=:                           \n" \
+                 "wfi                               \n" \
+                 "b loop%=                          \n" \
+                 :                                      \
+                 :                                      \
+                 : "memory");
+#endif
 
 extern size_t xPortGetTotalHeapSize(void);
 extern size_t xPortGetFreeHeapSize(void);
