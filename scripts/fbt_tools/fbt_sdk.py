@@ -62,6 +62,7 @@ class SdkMeta:
             "cc_args": self._wrap_scons_vars("$CCFLAGS $_CCCOMCOM"),
             "cpp_args": self._wrap_scons_vars("$CXXFLAGS $CCFLAGS $_CCCOMCOM"),
             "linker_args": self._wrap_scons_vars("$LINKFLAGS"),
+            "linker_libs": self.env.subst("${LIBS}"),
             "app_ep_subst": self.env.subst("${APP_ENTRY}"),
             "sdk_path_subst": self.env.subst("${SDK_DIR_SUBST}"),
         }

@@ -55,6 +55,8 @@ coreenv = VAR_ENV.Clone(
     SINGLEQUOTEFUNC=single_quote,
     # Setting up temp file parameters - to overcome command line length limits
     TEMPFILEARGESCFUNC=tempfile_arg_esc_func,
+    FBT_SCRIPT_DIR=Dir("#/scripts"),
+    ROOT_DIR=Dir("#"),
 )
 
 # If DIST_SUFFIX is set in environment, is has precedence (set by CI)

@@ -236,7 +236,10 @@ def fap_dist_action(target, source, env):
 
 
 def generate(env, **kw):
-    env.SetDefault(EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR"))
+    env.SetDefault(
+        EXT_APPS_WORK_DIR=kw.get("EXT_APPS_WORK_DIR"),
+        APP_RUN_SCRIPT="${FBT_SCRIPT_DIR}/runfap.py",
+    )
 
     if not env["VERBOSE"]:
         env.SetDefault(
