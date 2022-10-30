@@ -34,20 +34,9 @@ void spi_mem_scene_about_on_enter(void* context) {
 }
 
 bool spi_mem_scene_about_on_event(void* context, SceneManagerEvent event) {
-    SPIMemApp* app = context;
-    bool success = false;
-    if(event.type == SceneManagerEventTypeBack) {
-        success = true;
-        scene_manager_search_and_switch_to_previous_scene(app->scene_manager, SPIMemSceneStart);
-    } else if(event.type == SceneManagerEventTypeCustom) {
-        success = true;
-        if(event.event == GuiButtonTypeLeft) {
-            scene_manager_previous_scene(app->scene_manager);
-        } else if(event.event == GuiButtonTypeRight) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneReadFilename);
-        }
-    }
-    return success;
+    UNUSED(context);
+    UNUSED(event);
+    return false;
 }
 void spi_mem_scene_about_on_exit(void* context) {
     SPIMemApp* app = context;

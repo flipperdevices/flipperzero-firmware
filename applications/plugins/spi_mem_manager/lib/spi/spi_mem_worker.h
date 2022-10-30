@@ -13,9 +13,12 @@ typedef enum {
     SPIMemCustomEventWorkerChipIdentified,
     SPIMemCustomEventWorkerChipUnknown,
     SPIMemCustomEventWorkerBlockReaded,
-    SPIMemCustomEventWorkerReadFail,
+    SPIMemCustomEventWorkerChipReadFail,
     SPIMemCustomEventWorkerReadDone,
-    SPIMemCustomEventWorkerWriteFileFailed
+    SPIMemCustomEventWorkerWriteFileFail,
+    SPIMemCustomEventWorkerReadFileFail,
+    SPIMemCustomEventWorkerVerifyDone,
+    SPIMemCustomEventWorkerVerifyFail
 } SPIMemCustomEventWorker;
 
 typedef void (*SPIMemWorkerCallback)(void* context, SPIMemCustomEventWorker event);
@@ -31,6 +34,11 @@ void spi_mem_worker_chip_detect_start(
     SPIMemWorkerCallback callback,
     void* context);
 void spi_mem_worker_read_start(
+    SPIMemChip* chip_info,
+    SPIMemWorker* worker,
+    SPIMemWorkerCallback callback,
+    void* context);
+void spi_mem_worker_verify_start(
     SPIMemChip* chip_info,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,

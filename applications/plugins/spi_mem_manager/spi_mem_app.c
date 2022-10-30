@@ -1,6 +1,15 @@
 #include "spi_mem_app_i.h"
 #include "lib/spi/spi_mem_chip_i.h"
 
+void spi_mem_show_chip_error(DialogsApp* context, const char* error_text) {
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_text(message, error_text, 88, 32, AlignCenter, AlignCenter);
+    dialog_message_set_icon(message, &I_Dip8_32x36, 5, 6);
+    dialog_message_set_buttons(message, "Back", NULL, NULL);
+    dialog_message_show(context, message);
+    dialog_message_free(message);
+}
+
 static bool spi_mem_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SPIMemApp* app = context;
@@ -29,7 +38,7 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->widget = widget_alloc();
     instance->chip_info = malloc(sizeof(SPIMemChip));
-    instance->view_read = spi_mem_view_read_alloc();
+    instance->view_read = spi_mem_view_progress_alloc();
     instance->text_input = text_input_alloc();
 
     furi_string_set(instance->file_path, SPI_MEM_FILE_FOLDER);
@@ -52,8 +61,8 @@ SPIMemApp* spi_mem_alloc(void) {
         instance->view_dispatcher, SPIMemViewWidget, widget_get_view(instance->widget));
     view_dispatcher_add_view(
         instance->view_dispatcher,
-        SPIMemViewRead,
-        spi_mem_view_read_get_view(instance->view_read));
+        SPIMemViewProgress,
+        spi_mem_view_progress_get_view(instance->view_read));
     view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemViewTextInput, text_input_get_view(instance->text_input));
 
@@ -67,9 +76,9 @@ void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewDialogEx);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewPopup);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewWidget);
-    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewRead);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewProgress);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewTextInput);
-    spi_mem_view_read_free(instance->view_read);
+    spi_mem_view_progress_free(instance->view_read);
     submenu_free(instance->submenu);
     dialog_ex_free(instance->dialog_ex);
     popup_free(instance->popup);

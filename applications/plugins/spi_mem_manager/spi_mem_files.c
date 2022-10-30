@@ -1,5 +1,15 @@
 #include "spi_mem_app_i.h"
 
+void spi_mem_file_show_storage_error(SPIMemApp* app, const char* error_text) {
+    FuriString* file_name = furi_string_alloc();
+    FuriString* message = furi_string_alloc();
+    path_extract_filename(app->file_path, file_name, true);
+    furi_string_printf(message, "%s\n%s", error_text, furi_string_get_cstr(file_name));
+    dialog_message_show_storage_error(app->dialogs, furi_string_get_cstr(message));
+    furi_string_free(file_name);
+    furi_string_free(message);
+}
+
 void spi_mem_file_create_folder(SPIMemApp* app) {
     if(!storage_simply_mkdir(app->storage, SPI_MEM_FILE_FOLDER)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
@@ -8,13 +18,7 @@ void spi_mem_file_create_folder(SPIMemApp* app) {
 
 bool spi_mem_file_delete(SPIMemApp* app) {
     if(!storage_simply_remove(app->storage, furi_string_get_cstr(app->file_path))) {
-        FuriString* file_name = furi_string_alloc();
-        FuriString* message = furi_string_alloc();
-        path_extract_filename(app->file_path, file_name, true);
-        furi_string_printf(message, "Cannot detete\n%s", furi_string_get_cstr(file_name));
-        dialog_message_show_storage_error(app->dialogs, furi_string_get_cstr(message));
-        furi_string_free(file_name);
-        furi_string_free(message);
+        spi_mem_file_show_storage_error(app, "Cannot detete");
         return false;
     }
     return true;
@@ -36,13 +40,13 @@ bool spi_mem_file_open(SPIMemApp* app) {
     app->file = storage_file_alloc(app->storage);
     do {
         if(furi_string_end_with(app->file_path, SPI_MEM_FILE_EXTENSION)) {
-            if(!spi_mem_file_delete(app)) break;
+            // if(!spi_mem_file_delete(app)) break;
             size_t filename_start = furi_string_search_rchar(app->file_path, '/');
             furi_string_left(app->file_path, filename_start);
         }
         furi_string_cat_printf(app->file_path, "/%s%s", app->text_buffer, SPI_MEM_FILE_EXTENSION);
         if(!storage_file_open(
-               app->file, furi_string_get_cstr(app->file_path), FSAM_READ_WRITE, FSOM_CREATE_NEW))
+               app->file, furi_string_get_cstr(app->file_path), FSAM_READ_WRITE, FSOM_OPEN_ALWAYS))
             break;
         success = true;
     } while(0);

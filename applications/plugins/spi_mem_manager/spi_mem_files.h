@@ -9,3 +9,4 @@ bool spi_mem_file_open(SPIMemApp* app);
 bool spi_mem_file_write_block(SPIMemApp* app, uint8_t* data, size_t size);
 bool spi_mem_file_read_block(SPIMemApp* app, uint8_t* data, size_t size);
 void spi_mem_file_close(SPIMemApp* app);
+void spi_mem_file_show_storage_error(SPIMemApp* app, const char* error_text);

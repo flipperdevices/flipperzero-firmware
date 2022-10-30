@@ -4,7 +4,9 @@ typedef enum {
     SPIMemEventStopThread = (1 << 0),
     SPIMemEventChipDetect = (1 << 1),
     SPIMemEventRead = (1 << 2),
-    SPIMemEventAll = (SPIMemEventStopThread | SPIMemEventChipDetect | SPIMemEventRead)
+    SPIMemEventVerify = (1 << 3),
+    SPIMemEventAll =
+        (SPIMemEventStopThread | SPIMemEventChipDetect | SPIMemEventRead | SPIMemEventVerify)
 } SPIMemEventEventType;
 
 static int32_t spi_mem_worker_thread(void* thread_context);
@@ -17,7 +19,7 @@ SPIMemWorker* spi_mem_worker_alloc() {
     furi_thread_set_name(worker->thread, "SPIMemWorker");
     furi_thread_set_callback(worker->thread, spi_mem_worker_thread);
     furi_thread_set_context(worker->thread, worker);
-    furi_thread_set_stack_size(worker->thread, 6000);
+    furi_thread_set_stack_size(worker->thread, 10240);
     return worker;
 }
 
@@ -40,6 +42,7 @@ static int32_t spi_mem_worker_thread(void* thread_context) {
             if(flags & SPIMemEventStopThread) break;
             if(flags & SPIMemEventChipDetect) worker->mode_index = SPIMemWorkerModeChipDetect;
             if(flags & SPIMemEventRead) worker->mode_index = SPIMemWorkerModeRead;
+            if(flags & SPIMemEventVerify) worker->mode_index = SPIMemWorkerModeVerify;
             if(spi_mem_worker_modes[worker->mode_index].process) {
                 spi_mem_worker_modes[worker->mode_index].process(worker);
             }
@@ -75,9 +78,21 @@ void spi_mem_worker_read_start(
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
     void* context) {
-    furi_assert(worker->mode_index == SPIMemWorkerModeIdle);
+    furi_check(worker->mode_index == SPIMemWorkerModeIdle);
     worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventRead);
+}
+
+void spi_mem_worker_verify_start(
+    SPIMemChip* chip_info,
+    SPIMemWorker* worker,
+    SPIMemWorkerCallback callback,
+    void* context) {
+    furi_check(worker->mode_index == SPIMemWorkerModeIdle);
+    worker->callback = callback;
+    worker->cb_ctx = context;
+    worker->chip_info = chip_info;
+    furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventVerify);
 }
