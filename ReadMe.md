@@ -18,13 +18,13 @@
 - Fixed icons for U2F and iButton.
 - Added source file from third party animations.
 - Restored animation building.
+- Restored: [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
+- Restored: GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
 
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
-- GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
-- [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - [Chip8 Emulator (By mega8bit)](https://github.com/mega8bit/flipperzero-firmware) Updated by ESurge. Add SD folder `chip8`, [Get GAMES HERE](https://johnearnest.github.io/chip8Archive/) (Needs Controls Programmed) `HIDDEN because its broken` [Last Version Before Removal](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/ec49915e1c4e908d9a2b0d4425fd97526755e276/applications/plugins/chip8)
 - Lost To Faps: Settings: Favorite Game by holding UP on Desktop [Thanks to gotnull](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/57)
@@ -137,6 +137,8 @@ $ ./fbt plugin_dist
 - - Tetris, Snake, or Flappy Bird Score For EXP
 - - Zombiez for every 20 Zombie kills
 - Dolphin: SD dolphin manifest updated to weight animations differently
+- GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
+- GPIO: [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
 - iButton: [Fixed issue when loading iButton keys or U2F token from Archive app #382 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/382)
 - Icon Decode/Encode [(Thanks to PixlEmly)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/55/files)
 - IR: Universal AC, Audio, Fans & Projectors from [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware)
