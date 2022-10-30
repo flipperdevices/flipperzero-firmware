@@ -1,12 +1,53 @@
 #include "main_view.h"
+#include <furi.h>
+#include <gui/elements.h>
+// #include <notification/notification.h>
+// #include <notification/notification_messages.h>
+// #include <furi_hal_uart.h>
 
-void draw_main_view(Canvas* canvas, lightmeterMainView* main_view, lightmeterI2CSender* sender) {
-    
+// #define MODULE_CONTROL_COMMAND_SEND 's'
+// #define FLIPPERZERO_SERIAL_BAUD 115200
+
+// typedef enum ESerialCommand { ESerialCommand_Send } ESerialCommand;
+
+struct MainView {
+    View* view;
+};
+
+typedef struct {
+    bool right_pressed;
+    bool connected;
+} MainViewModel;
+
+// static void Shake(void) {
+//     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+//     notification_message(notification, &sequence_single_vibro);
+//     furi_record_close(RECORD_NOTIFICATION);
+// }
+
+// void send_serial_command_send(ESerialCommand command) {
+//     uint8_t data[1] = {0};
+
+//     switch(command) {
+//     case ESerialCommand_Send:
+//         data[0] = MODULE_CONTROL_COMMAND_SEND;
+//         break;
+//     default:
+//         return;
+//     };
+
+//     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+// }
+
+static void main_view_draw_callback(Canvas* canvas, void* context) {
+    furi_assert(context);
+    MainViewModel* model = context;
+
     canvas_clear(canvas);
 
-    if(sender->must_send) {
-        i2c_send(sender);
-    }
+    // if(sender->must_send) {
+    //     i2c_send(sender);
+    // }
 
     // top row
     // draw line
@@ -19,16 +60,17 @@ void draw_main_view(Canvas* canvas, lightmeterMainView* main_view, lightmeterI2C
 
     char str[12];
 
-    if(sender->sended) {
+    // if(sender->sended) {
         // for(uint8_t i = 0; i < sizeof(lightmeter->sender->recv); i++) {
         //     snprintf(str, sizeof(str), "0x%02x", (int)lightmeter->sender->recv[i]);
         //     canvas_draw_str_aligned(canvas, 90, 25 + (i * 10), AlignLeft, AlignTop, str);
         // }
         
-        int lx = ((int)sender->recv[0] << 8) | ((int)sender->recv[1]);
-        snprintf(str, sizeof(str), "lx: %d", lx);
+        // int lx = ((int)sender->recv[0] << 8) | ((int)sender->recv[1]);
+        // snprintf(str, sizeof(str), "lx: %d", lx);
+        snprintf(str, sizeof(str), "lx: 300");
         canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
-    }
+    // }
 
     // add f, T values
     canvas_set_font(canvas, FontBigNumbers);
@@ -48,29 +90,99 @@ void draw_main_view(Canvas* canvas, lightmeterMainView* main_view, lightmeterI2C
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 100, 15, AlignLeft, AlignTop, "EV:\n+7");
 
-    switch(main_view->current_mode) {
-    case FIXED_TIME:
-        canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, 3, 36, AlignLeft, AlignTop, "*");
-        break;
+    // switch(main_view->current_mode) {
+    // case FIXED_TIME:
+    //     canvas_set_font(canvas, FontBigNumbers);
+    //     canvas_draw_str_aligned(canvas, 3, 36, AlignLeft, AlignTop, "*");
+    //     break;
 
-    case FIXED_APERTURE:
-        canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, 3, 17, AlignLeft, AlignTop, "*");
-        break;
+    // case FIXED_APERTURE:
+    //     canvas_set_font(canvas, FontBigNumbers);
+    //     canvas_draw_str_aligned(canvas, 3, 17, AlignLeft, AlignTop, "*");
+    //     break;
 
-    default:
-        break;
+    // default:
+    //     break;
+    // }
+    
+
+    // Right
+    if(model->right_pressed) {
     }
 }
 
-lightmeterMainView* lightmeter_main_view_alloc() {
-    lightmeterMainView* main_view = malloc(sizeof(lightmeterMainView));
-    main_view->current_mode = FIXED_APERTURE;
+static void main_view_process(MainView* main_view, InputEvent* event) {
+    with_view_model(
+        main_view->view,
+        MainViewModel * model,
+        {
+            if(event->type == InputTypePress) {
+                if(event->key == InputKeyUp) {
+                } else if(event->key == InputKeyDown) {
+                } else if(event->key == InputKeyLeft) {
+                } else if(event->key == InputKeyRight) {
+                    model->right_pressed = true;
+                    // Shake();
+                    // send_serial_command_send(ESerialCommand_Send);
+                } else if(event->key == InputKeyOk) {
+                } else if(event->key == InputKeyBack) {
+                }
+            } else if(event->type == InputTypeRelease) {
+                if(event->key == InputKeyUp) {
+                } else if(event->key == InputKeyDown) {
+                } else if(event->key == InputKeyLeft) {
+                } else if(event->key == InputKeyRight) {
+                    model->right_pressed = false;
+                } else if(event->key == InputKeyOk) {
+                } else if(event->key == InputKeyBack) {
+                }
+            } else if(event->type == InputTypeShort) {
+                if(event->key == InputKeyBack) {
+                }
+            }
+        },
+        true);
+}
+
+static bool main_view_input_callback(InputEvent* event, void* context) {
+    furi_assert(context);
+    MainView* main_view = context;
+    bool consumed = false;
+
+    if(event->type == InputTypeShort && event->key == InputKeyBack) {
+    } else {
+        main_view_process(main_view, event);
+        consumed = true;
+    }
+
+    return consumed;
+}
+
+MainView* main_view_alloc() {
+    MainView* main_view = malloc(sizeof(MainView));
+    main_view->view = view_alloc();
+    view_set_context(main_view->view, main_view);
+    view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(MainViewModel));
+    view_set_draw_callback(main_view->view, main_view_draw_callback);
+    view_set_input_callback(main_view->view, main_view_input_callback);
+    // furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
+
     return main_view;
 }
 
-void lightmeter_main_view_free(lightmeterMainView* main_view) {
+void main_view_free(MainView* main_view) {
     furi_assert(main_view);
+    view_free(main_view->view);
     free(main_view);
+}
+
+View* main_view_get_view(MainView* main_view) {
+    furi_assert(main_view);
+    return main_view->view;
+}
+
+void main_view_set_data(MainView* main_view, bool connected) {
+    furi_assert(main_view);
+    with_view_model(
+        main_view->view, MainViewModel * model, { model->connected = connected; }, true);
 }
