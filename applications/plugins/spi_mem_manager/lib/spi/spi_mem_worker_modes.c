@@ -1,4 +1,6 @@
-#include "spi_mem_worker.h"
+#include "spi_mem_worker_i.h"
+#include "spi_mem_chip.h"
+#include "spi_mem_tools.h"
 #include "../../spi_mem_files.h"
 
 static void spi_mem_chip_detect_process(SPIMemWorker* worker);
@@ -33,11 +35,12 @@ static void spi_mem_chip_detect_process(SPIMemWorker* worker) {
 // File already opend by scenes/spi_mem_scene_read_filename.c
 static void spi_mem_read_process(SPIMemWorker* worker) {
     uint8_t data_buffer[SPI_MEM_FILE_BUFFER_SIZE];
+    size_t chip_size = spi_mem_chip_get_size(worker->chip_info);
     size_t offset = 0;
     bool success = true;
     while(true) {
         if(spi_mem_worker_check_for_stop(worker)) break;
-        if((offset + SPI_MEM_FILE_BUFFER_SIZE) >= worker->chip_info->size) break;
+        if((offset + SPI_MEM_FILE_BUFFER_SIZE) >= chip_size) break;
         if(!spi_mem_tools_read_block_data(
                worker->chip_info, offset, data_buffer, SPI_MEM_FILE_BUFFER_SIZE)) {
             spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerReadFail);

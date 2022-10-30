@@ -12,5 +12,4 @@ bool spi_mem_tools_read_block_data(
     size_t offset,
     uint8_t* data,
     size_t block_size);
-size_t spi_mem_tools_get_chip_size(SPIMemChip* chip);
 size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip);

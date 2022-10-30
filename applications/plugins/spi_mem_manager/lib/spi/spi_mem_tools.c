@@ -1,5 +1,6 @@
 #include <furi_hal.h>
 #include <furi_hal_spi_config.h>
+#include "spi_mem_chip_i.h"
 #include "spi_mem_tools.h"
 
 static bool spi_mem_tools_trx(
@@ -67,10 +68,10 @@ bool spi_mem_tools_read_block_data(
     size_t offset,
     uint8_t* data,
     size_t block_size) {
+    if(!spi_mem_tools_check_chip_info(chip)) return false;
     for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
         uint8_t cmd[3];
         if((offset + SPI_MEM_MAX_BLOCK_SIZE) >= chip->size) return false;
-        if(!spi_mem_tools_check_chip_info(chip)) return false;
         if(!spi_mem_tools_trx(
                SPIMemChipCMDReadData,
                cmd,
@@ -82,10 +83,6 @@ bool spi_mem_tools_read_block_data(
         data += SPI_MEM_MAX_BLOCK_SIZE;
     }
     return true;
-}
-
-size_t spi_mem_tools_get_chip_size(SPIMemChip* chip) {
-    return (chip->size);
 }
 
 size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip) {

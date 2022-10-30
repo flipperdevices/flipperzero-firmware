@@ -1,4 +1,6 @@
 #include "../spi_mem_app_i.h"
+#include "../lib/spi/spi_mem_chip.h"
+#include "../lib/spi/spi_mem_tools.h"
 
 void spi_mem_scene_read_view_result_callback(void* context) {
     SPIMemApp* app = context;
@@ -14,7 +16,7 @@ void spi_mem_scene_read_on_enter(void* context) {
     SPIMemApp* app = context;
     spi_mem_view_read_set_callback(app->view_read, spi_mem_scene_read_view_result_callback, app);
     notification_message(app->notifications, &sequence_blink_start_cyan);
-    spi_mem_view_read_set_chip_size(app->view_read, spi_mem_tools_get_chip_size(app->chip_info));
+    spi_mem_view_read_set_chip_size(app->view_read, spi_mem_chip_get_size(app->chip_info));
     spi_mem_view_read_set_block_size(
         app->view_read, spi_mem_tools_get_file_max_block_size(app->chip_info));
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewRead);

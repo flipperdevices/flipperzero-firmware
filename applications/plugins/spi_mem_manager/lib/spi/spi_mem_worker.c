@@ -1,4 +1,4 @@
-#include "spi_mem_worker.h"
+#include "spi_mem_worker_i.h"
 
 typedef enum {
     SPIMemEventStopThread = (1 << 0),

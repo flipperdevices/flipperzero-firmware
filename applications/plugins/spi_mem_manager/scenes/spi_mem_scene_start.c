@@ -3,6 +3,7 @@
 typedef enum {
     SPIMemSceneStartSubmenuIndexRead,
     SPIMemSceneStartSubmenuIndexSaved,
+    SPIMemSceneStartSubmenuIndexAbout
 } SPIMemSceneStartSubmenuIndex;
 
 static void spi_mem_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -24,6 +25,12 @@ void spi_mem_scene_start_on_enter(void* context) {
         SPIMemSceneStartSubmenuIndexSaved,
         spi_mem_scene_start_submenu_callback,
         app);
+    submenu_add_item(
+        app->submenu,
+        "About",
+        SPIMemSceneStartSubmenuIndexAbout,
+        spi_mem_scene_start_submenu_callback,
+        app);
     submenu_set_selected_item(
         app->submenu, scene_manager_get_scene_state(app->scene_manager, SPIMemSceneStart));
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewSubmenu);
@@ -40,6 +47,9 @@ bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemSceneStartSubmenuIndexSaved) {
             furi_string_set(app->file_path, SPI_MEM_FILE_FOLDER);
             scene_manager_next_scene(app->scene_manager, SPIMemSceneSelectFile);
+            success = true;
+        } else if(event.event == SPIMemSceneStartSubmenuIndexAbout) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneAbout);
             success = true;
         }
     }

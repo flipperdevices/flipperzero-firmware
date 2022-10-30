@@ -1,26 +1,26 @@
 #pragma once
 
-#include <furi.h>
-#include "spi_mem_chip.h"
-
-typedef struct SPIMemWorker SPIMemWorker;
-
-typedef struct {
-    void (*const process)(SPIMemWorker* worker);
-} SPIMemWorkerModeType;
+#include "spi_mem_worker.h"
 
 typedef enum {
-    SPIMemCustomEventWorkerChipIdentified,
-    SPIMemCustomEventWorkerChipUnknown,
-    SPIMemCustomEventWorkerBlockReaded,
-    SPIMemCustomEventWorkerReadFail,
-    SPIMemCustomEventWorkerReadDone,
-    SPIMemCustomEventWorkerWriteFileFailed
-} SPIMemCustomEventWorker;
+    SPIMemWorkerModeIdle,
+    SPIMemWorkerModeChipDetect,
+    SPIMemWorkerModeRead
+} SPIMemWorkerMode;
 
-typedef void (*SPIMemWorkerCallback)(void* context, SPIMemCustomEventWorker event);
+struct SPIMemWorker {
+    SPIMemChip* chip_info;
+    SPIMemWorkerMode mode_index;
+    SPIMemWorkerCallback callback;
+    void* cb_ctx;
+    FuriThread* thread;
+    FuriString* file_name;
+};
+
+extern const SPIMemWorkerModeType spi_mem_worker_modes[];
 
 SPIMemWorker* spi_mem_worker_alloc();
+
 void spi_mem_worker_free(SPIMemWorker* worker);
 void spi_mem_worker_start_thread(SPIMemWorker* worker);
 void spi_mem_worker_stop_thread(SPIMemWorker* worker);
