@@ -7,25 +7,37 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 
-#include "views/main_view.h"
-// #include "views/module_view.h"
-// #include "views/reboot_view.h"
-// #include "views/reset_view.h"
-// #include <gui/modules/submenu.h>
+#include "gui/views/main_view.h"
+
+#include <gui/modules/submenu.h>
 // #include <gui/modules/dialog_ex.h>
 
-#include "scenes/lightmeter_scene.h"
+#include "gui/scenes/config/lightmeter_scene.h"
 
 // #include "lightmeterI2C.h"
+
+typedef struct {
+    int iso;
+    int nd;
+} LightMeterAppConfig;
 
 typedef struct {
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     MainView* main_view;
-    // i2cSender* sender;
+    Submenu* submenu;
+    LightMeterAppConfig* config;
 } LightMeterApp;
 
 typedef enum {
-    VirtualButtonAppViewMainView,
+    LightMeterAppViewMainView,
+    LightMeterAppViewConfigView,
+    LightMeterAppViewSubmenu,
 } LightMeterAppView;
+
+typedef enum {
+    LightMeterAppCustomEventConfig,
+    LightMeterAppCustomEventHelp,
+    LightMeterAppCustomEventAbout,
+} LightMeterAppCustomEvent;

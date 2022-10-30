@@ -43,8 +43,12 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     lightmeter->main_view = main_view_alloc();
     view_dispatcher_add_view(
         lightmeter->view_dispatcher, 
-        VirtualButtonAppViewMainView, 
+        LightMeterAppViewMainView, 
         main_view_get_view(lightmeter->main_view));
+    
+    lightmeter->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        lightmeter->view_dispatcher, LightMeterAppViewSubmenu, submenu_get_view(lightmeter->submenu));
 
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
@@ -54,8 +58,10 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
 void lightmeter_app_free(LightMeterApp* lightmeter) {
     furi_assert(lightmeter);
     // Views
-    view_dispatcher_remove_view(lightmeter->view_dispatcher, VirtualButtonAppViewMainView);
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewMainView);
     main_view_free(lightmeter->main_view);
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewSubmenu);
+    submenu_free(lightmeter->submenu);
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);
     scene_manager_free(lightmeter->scene_manager);

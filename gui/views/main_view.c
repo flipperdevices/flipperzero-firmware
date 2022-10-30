@@ -4,15 +4,11 @@
 #include <gui/elements.h>
 // #include <notification/notification.h>
 // #include <notification/notification_messages.h>
-// #include <furi_hal_uart.h>
-
-// #define MODULE_CONTROL_COMMAND_SEND 's'
-// #define FLIPPERZERO_SERIAL_BAUD 115200
-
-// typedef enum ESerialCommand { ESerialCommand_Send } ESerialCommand;
 
 struct MainView {
     View* view;
+    LightMeterMainViewButtonCallback cb_left;
+    void* cb_context;
 };
 
 typedef enum {
@@ -38,6 +34,21 @@ int get_lx() {
     furi_hal_i2c_trx(I2C_BUS, address, &value, sizeof(value), recv, sizeof(recv), I2C_TIMEOUT);
     furi_hal_i2c_release(I2C_BUS);
     return ((int)recv[0] << 8) | ((int)recv[1]);
+}
+
+void lightmeter_main_view_set_left_callback(
+    MainView* lightmeter_main_view,
+    LightMeterMainViewButtonCallback callback,
+    void* context) {
+    with_view_model(
+        lightmeter_main_view->view,
+        MainViewModel * model,
+        {
+            UNUSED(model);
+            lightmeter_main_view->cb_left = callback;
+            lightmeter_main_view->cb_context = context;
+        },
+        true);
 }
 
 static void main_view_draw_callback(Canvas* canvas, void* context) {
@@ -139,7 +150,12 @@ static bool main_view_input_callback(InputEvent* event, void* context) {
     MainView* main_view = context;
     bool consumed = false;
 
-    if(event->type == InputTypeShort && event->key == InputKeyBack) {
+    if(event->type == InputTypeShort && event->key == InputKeyLeft) {
+        if(main_view->cb_left) {
+            main_view->cb_left(main_view->cb_context);
+        }
+        consumed = true;
+    } else if(event->type == InputTypeShort && event->key == InputKeyBack) {
     } else {
         main_view_process(main_view, event);
         consumed = true;

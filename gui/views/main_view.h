@@ -2,7 +2,6 @@
 
 #include <gui/view.h>
 #include "lightmeter_icons.h"
-// #include "../lightmeterI2C.h"
 
 // I2C BUS
 #define I2C_BUS &furi_hal_i2c_handle_external
@@ -10,7 +9,14 @@
 
 typedef struct MainView MainView;
 
+typedef void (*LightMeterMainViewButtonCallback)(void* context);
+
 int get_lx();
+
+void lightmeter_main_view_set_left_callback(
+    MainView* lightmeter_main_view,
+    LightMeterMainViewButtonCallback callback,
+    void* context);
 
 MainView* main_view_alloc();
 
