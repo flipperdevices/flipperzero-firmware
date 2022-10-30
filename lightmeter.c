@@ -21,7 +21,9 @@ static void lightmeter_tick_event_callback(void* context) {
 LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     LightMeterApp* lightmeter = malloc(sizeof(LightMeterApp));
 
-    // lightmeter->sender = lightmeter_sender_alloc();
+    lightmeter->config = malloc(sizeof(LightMeterConfig));
+    lightmeter->config->iso = 0;
+    lightmeter->config->nd = 0;
 
     // Records
     lightmeter->gui = furi_record_open(RECORD_GUI);
@@ -46,9 +48,9 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
         LightMeterAppViewMainView, 
         main_view_get_view(lightmeter->main_view));
     
-    lightmeter->submenu = submenu_alloc();
+    lightmeter->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        lightmeter->view_dispatcher, LightMeterAppViewSubmenu, submenu_get_view(lightmeter->submenu));
+        lightmeter->view_dispatcher, LightMeterAppViewVarItemList, variable_item_list_get_view(lightmeter->var_item_list));
 
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
@@ -60,8 +62,8 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
     // Views
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewMainView);
     main_view_free(lightmeter->main_view);
-    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewSubmenu);
-    submenu_free(lightmeter->submenu);
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewVarItemList);
+    variable_item_list_free(lightmeter->var_item_list);
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);
     scene_manager_free(lightmeter->scene_manager);
@@ -78,4 +80,10 @@ int32_t lightmeter_app(void* p) {
     view_dispatcher_run(lightmeter->view_dispatcher);
     lightmeter_app_free(lightmeter);
     return 0;
+}
+
+void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* config) {
+    lightmeter->config = config;
+    // furi_thread_flags_set(furi_thread_get_id(app->dap_thread), DAPThreadEventApplyConfig);
+    // furi_thread_flags_set(furi_thread_get_id(app->cdc_thread), CDCThreadEventApplyConfig);
 }

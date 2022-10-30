@@ -57,19 +57,19 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_clear(canvas);
 
+    char str[10];
+
     // top row
     // draw line
     canvas_draw_line(canvas, 0, 10, 128, 10);
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "F");
-
+    
+    // snprintf(str, sizeof(str), "ISO: %d", model.);
     canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, "ISO: 400");
 
-    char str[10];
-
     snprintf(str, sizeof(str), "lx: %d", get_lx());
-
     canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
 
     // add f, T values
@@ -171,7 +171,6 @@ MainView* main_view_alloc() {
     view_allocate_model(main_view->view, ViewModelTypeLocking, sizeof(MainViewModel));
     view_set_draw_callback(main_view->view, main_view_draw_callback);
     view_set_input_callback(main_view->view, main_view_input_callback);
-    // furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
 
     return main_view;
 }
