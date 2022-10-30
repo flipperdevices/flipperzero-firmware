@@ -15,10 +15,19 @@ struct MainView {
     View* view;
 };
 
+typedef enum {
+    FIXED_TIME,
+    FIXED_APERTURE,
+
+    /* Know menu Size*/
+    MODES_SIZE
+} MainViewMode;
+
 typedef struct {
     bool right_pressed;
     bool connected;
     uint8_t recv[2];
+    MainViewMode current_mode;
 } MainViewModel;
 
 int get_lx() {
@@ -26,14 +35,7 @@ int get_lx() {
     uint8_t recv[2];
     furi_hal_i2c_acquire(I2C_BUS);
     uint8_t address = 0x23 << 1;
-    furi_hal_i2c_trx(
-        I2C_BUS,
-        address,
-        &value,
-        sizeof(value),
-        recv,
-        sizeof(recv),
-        I2C_TIMEOUT);
+    furi_hal_i2c_trx(I2C_BUS, address, &value, sizeof(value), recv, sizeof(recv), I2C_TIMEOUT);
     furi_hal_i2c_release(I2C_BUS);
     return ((int)recv[0] << 8) | ((int)recv[1]);
 }
@@ -59,14 +61,13 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
 
-
     // add f, T values
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_icon(canvas, 15, 17, &I_f_10x14);
     canvas_draw_str_aligned(canvas, 27, 15, AlignLeft, AlignTop, "/3.2");
     canvas_draw_icon(canvas, 15, 34, &I_T_10x14);
     canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, ":1/50");
-    
+
     // create buttons (for the future)
     canvas_set_font(canvas, FontSecondary);
     elements_button_left(canvas, "Config");
@@ -78,21 +79,20 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontPrimary);
     elements_multiline_text_aligned(canvas, 100, 15, AlignLeft, AlignTop, "EV:\n+7");
 
-    // switch(main_view->current_mode) {
-    // case FIXED_TIME:
-    //     canvas_set_font(canvas, FontBigNumbers);
-    //     canvas_draw_str_aligned(canvas, 3, 36, AlignLeft, AlignTop, "*");
-    //     break;
+    switch(model->current_mode) {
+    case FIXED_TIME:
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str_aligned(canvas, 3, 36, AlignLeft, AlignTop, "*");
+        break;
 
-    // case FIXED_APERTURE:
-    //     canvas_set_font(canvas, FontBigNumbers);
-    //     canvas_draw_str_aligned(canvas, 3, 17, AlignLeft, AlignTop, "*");
-    //     break;
+    case FIXED_APERTURE:
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str_aligned(canvas, 3, 17, AlignLeft, AlignTop, "*");
+        break;
 
-    // default:
-    //     break;
-    // }
-    
+    default:
+        break;
+    }
 
     // Right
     if(model->right_pressed) {
@@ -109,10 +109,12 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                 } else if(event->key == InputKeyDown) {
                 } else if(event->key == InputKeyLeft) {
                 } else if(event->key == InputKeyRight) {
-                    model->right_pressed = true;
-                    // Shake();
-                    // send_serial_command_send(ESerialCommand_Send);
                 } else if(event->key == InputKeyOk) {
+                    if(model->current_mode == FIXED_TIME) {
+                        model->current_mode = FIXED_APERTURE;
+                    } else if(model->current_mode == FIXED_APERTURE) {
+                        model->current_mode = FIXED_TIME;
+                    }
                 } else if(event->key == InputKeyBack) {
                 }
             } else if(event->type == InputTypeRelease) {
