@@ -7,13 +7,16 @@
 #include <notification/notification_messages.h>
 
 #include "lightmeterI2C.h"
+
+#include "views/config_view.h"
 #include "views/main_view.h"
 
 typedef struct {
     ViewPort* view_port;
 
     lightmeterMainView* main_view;
-    // lightmeterConfigView* config_view;
+    lightmeterConfigView* config_view;
 
+    lightmeterConfig* config;
     lightmeterI2CSender* sender;
 } LightMeter;
