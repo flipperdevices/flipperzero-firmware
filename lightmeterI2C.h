@@ -15,9 +15,9 @@ typedef struct {
     bool sended;
     bool error;
 
-} i2cSender;
+} lightmeterI2CSender;
 
 void i2c_send();
 
-i2cSender* i2c_sender_alloc();
-void i2c_sender_free(i2cSender* i2c_sender);
+lightmeterI2CSender* lightmeter_sender_alloc();
+void lightmeter_sender_free(lightmeterI2CSender* i2c_sender);
