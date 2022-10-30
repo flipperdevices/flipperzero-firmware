@@ -4,11 +4,18 @@ Version: 1
 Name: Kuronons_RMCFW_128x64
 Min butthurt: 0
 Max butthurt: 14
-Min level: 1
+Min level: 2
 Max level: 30
 Weight: 7
 
 Name: Sasquach_Blaster_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: Sasquach_CloudG0ku_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 1
