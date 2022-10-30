@@ -11,4 +11,5 @@ App(
     order=90,
 	fap_icon="lightmeter.png",
     fap_category="Tools",
+    fap_icon_assets="icons",
 )
