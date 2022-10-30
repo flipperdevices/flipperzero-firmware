@@ -66,7 +66,7 @@ void draw_main_view(Canvas* canvas, lightmeterMainView* main_view, lightmeterI2C
 
 lightmeterMainView* lightmeter_main_view_alloc() {
     lightmeterMainView* main_view = malloc(sizeof(lightmeterMainView));
-    main_view->current_mode = FIXED_TIME;
+    main_view->current_mode = FIXED_APERTURE;
     return main_view;
 }
 

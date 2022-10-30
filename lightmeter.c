@@ -72,14 +72,14 @@ int32_t lightmeter_app(void* p) {
     gui_add_view_port(gui, lightmeter->view_port, GuiLayerFullscreen);
 
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, event_queue);
-    furi_timer_start(timer, 200);
+    furi_timer_start(timer, 500);
 
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
 
     notification_message(
         notifications, &sequence_display_backlight_enforce_on); // force on backlight
 
-    while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+    while(1) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
         if(event.type == EventTypeInput) {
@@ -94,9 +94,9 @@ int32_t lightmeter_app(void* p) {
                 }
             } else if(
                 (event.input.key == InputKeyUp || event.input.key == InputKeyDown) &&
-                event.input.type == InputTypeRelease) {
+                event.input.type == InputTypePress) {
                 if(lightmeter->main_view->current_view == MAIN_VIEW &&
-                    lightmeter->main_view->current_mode == FIXED_TIME) {
+                   lightmeter->main_view->current_mode == FIXED_TIME) {
                     lightmeter->main_view->current_mode = FIXED_APERTURE;
                 } else if(
                     lightmeter->main_view->current_view == MAIN_VIEW &&
@@ -104,15 +104,15 @@ int32_t lightmeter_app(void* p) {
                     lightmeter->main_view->current_mode = FIXED_TIME;
                 }
             }
+        }
 
-        } 
-        
         if(event.type == EventTypeTick) {
             notification_message(notifications, &sequence_blink_blue_100);
             lightmeter->sender->value = 0x20;
             lightmeter->sender->must_send = true;
-            view_port_update(lightmeter->view_port);
         }
+
+        view_port_update(lightmeter->view_port);
     }
 
     furi_message_queue_free(event_queue);
