@@ -21,6 +21,8 @@ static void lightmeter_tick_event_callback(void* context) {
 LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     LightMeterApp* lightmeter = malloc(sizeof(LightMeterApp));
 
+    // lightmeter->sender = lightmeter_sender_alloc();
+
     // Records
     lightmeter->gui = furi_record_open(RECORD_GUI);
 
@@ -40,30 +42,9 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     // Views
     lightmeter->main_view = main_view_alloc();
     view_dispatcher_add_view(
-        lightmeter->view_dispatcher, VirtualButtonAppViewMainView, main_view_get_view(lightmeter->main_view));
-
-    // app->modul_view = module_view_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher,
-    //     VirtualButtonAppViewModuleView,
-    //     module_view_get_view(app->modul_view));
-
-    // app->reboo_view = reboot_view_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher,
-    //     VirtualButtonAppViewRebootView,
-    //     reboot_view_get_view(app->reboo_view));
-
-    // app->rese_view = reset_view_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher, VirtualButtonAppViewResetView, reset_view_get_view(app->rese_view));
-
-    // app->submenu = submenu_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher, VirtualButtonAppViewSubmenu, submenu_get_view(app->submenu));
-    // app->dialog = dialog_ex_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher, VirtualButtonAppViewDialog, dialog_ex_get_view(app->dialog));
+        lightmeter->view_dispatcher, 
+        VirtualButtonAppViewMainView, 
+        main_view_get_view(lightmeter->main_view));
 
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
@@ -75,19 +56,10 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
     // Views
     view_dispatcher_remove_view(lightmeter->view_dispatcher, VirtualButtonAppViewMainView);
     main_view_free(lightmeter->main_view);
-    // view_dispatcher_remove_view(app->view_dispatcher, VirtualButtonAppViewModuleView);
-    // module_view_free(app->modul_view);
-    // view_dispatcher_remove_view(app->view_dispatcher, VirtualButtonAppViewRebootView);
-    // reboot_view_free(app->reboo_view);
-    // view_dispatcher_remove_view(app->view_dispatcher, VirtualButtonAppViewResetView);
-    // reset_view_free(app->rese_view);
-    // view_dispatcher_remove_view(app->view_dispatcher, VirtualButtonAppViewSubmenu);
-    // submenu_free(app->submenu);
-    // view_dispatcher_remove_view(app->view_dispatcher, VirtualButtonAppViewDialog);
-    // dialog_ex_free(app->dialog);
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);
     scene_manager_free(lightmeter->scene_manager);
+    // lightmeter_sender_free(lightmeter->sender);
     // Records
     furi_record_close(RECORD_GUI);
     free(lightmeter);

@@ -16,11 +16,14 @@
 
 #include "scenes/lightmeter_scene.h"
 
+// #include "lightmeterI2C.h"
+
 typedef struct {
     Gui* gui;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     MainView* main_view;
+    // i2cSender* sender;
 } LightMeterApp;
 
 typedef enum {

@@ -1,5 +1,6 @@
 #include "main_view.h"
 #include <furi.h>
+#include <furi_hal.h>
 #include <gui/elements.h>
 // #include <notification/notification.h>
 // #include <notification/notification_messages.h>
@@ -17,37 +18,31 @@ struct MainView {
 typedef struct {
     bool right_pressed;
     bool connected;
+    uint8_t recv[2];
 } MainViewModel;
 
-// static void Shake(void) {
-//     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-//     notification_message(notification, &sequence_single_vibro);
-//     furi_record_close(RECORD_NOTIFICATION);
-// }
-
-// void send_serial_command_send(ESerialCommand command) {
-//     uint8_t data[1] = {0};
-
-//     switch(command) {
-//     case ESerialCommand_Send:
-//         data[0] = MODULE_CONTROL_COMMAND_SEND;
-//         break;
-//     default:
-//         return;
-//     };
-
-//     furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
-// }
+int get_lx() {
+    uint8_t value = 0x20;
+    uint8_t recv[2];
+    furi_hal_i2c_acquire(I2C_BUS);
+    uint8_t address = 0x23 << 1;
+    furi_hal_i2c_trx(
+        I2C_BUS,
+        address,
+        &value,
+        sizeof(value),
+        recv,
+        sizeof(recv),
+        I2C_TIMEOUT);
+    furi_hal_i2c_release(I2C_BUS);
+    return ((int)recv[0] << 8) | ((int)recv[1]);
+}
 
 static void main_view_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     MainViewModel* model = context;
 
     canvas_clear(canvas);
-
-    // if(sender->must_send) {
-    //     i2c_send(sender);
-    // }
 
     // top row
     // draw line
@@ -58,19 +53,12 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, "ISO: 400");
 
-    char str[12];
+    char str[10];
 
-    // if(sender->sended) {
-        // for(uint8_t i = 0; i < sizeof(lightmeter->sender->recv); i++) {
-        //     snprintf(str, sizeof(str), "0x%02x", (int)lightmeter->sender->recv[i]);
-        //     canvas_draw_str_aligned(canvas, 90, 25 + (i * 10), AlignLeft, AlignTop, str);
-        // }
-        
-        // int lx = ((int)sender->recv[0] << 8) | ((int)sender->recv[1]);
-        // snprintf(str, sizeof(str), "lx: %d", lx);
-        snprintf(str, sizeof(str), "lx: 300");
-        canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
-    // }
+    snprintf(str, sizeof(str), "lx: %d", get_lx());
+
+    canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
+
 
     // add f, T values
     canvas_set_font(canvas, FontBigNumbers);
