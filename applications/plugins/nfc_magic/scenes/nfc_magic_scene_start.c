@@ -1,8 +1,7 @@
 #include "../nfc_magic_i.h"
 enum SubmenuIndex {
     SubmenuIndexRead,
-    SubmenuIndexWipe,
-    SubmenuIndexWrite,
+    SubmenuIndexWriteGen1A,
 };
 
 void nfc_magic_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -15,11 +14,17 @@ void nfc_magic_scene_start_on_enter(void* context) {
 
     Submenu* submenu = nfc_magic->submenu;
     submenu_add_item(
-        submenu, "Read Card", SubmenuIndexRead, nfc_magic_scene_start_submenu_callback, nfc_magic);
+        submenu,
+        "Read Magic Type",
+        SubmenuIndexRead,
+        nfc_magic_scene_start_submenu_callback,
+        nfc_magic);
     submenu_add_item(
-        submenu, "Wipe", SubmenuIndexWipe, nfc_magic_scene_start_submenu_callback, nfc_magic);
-    submenu_add_item(
-        submenu, "Write", SubmenuIndexWrite, nfc_magic_scene_start_submenu_callback, nfc_magic);
+        submenu,
+        "Write Gen1A",
+        SubmenuIndexWriteGen1A,
+        nfc_magic_scene_start_submenu_callback,
+        nfc_magic);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneStart));
@@ -34,11 +39,8 @@ bool nfc_magic_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
             consumed = true;
-        } else if(event.event == SubmenuIndexWipe) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
-            consumed = true;
-        } else if(event.event == SubmenuIndexWrite) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
+        } else if(event.event == SubmenuIndexWriteGen1A) {
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneFileSelect);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc_magic->scene_manager, NfcMagicSceneStart, event.event);
