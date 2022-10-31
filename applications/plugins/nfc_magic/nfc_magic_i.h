@@ -24,6 +24,8 @@
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
+
+#include <lib/nfc/nfc_device.h>
 // #include <nfc_magic_icons.h>
 
 enum NfcMagicCustomEvent {
@@ -36,11 +38,6 @@ enum NfcMagicCustomEvent {
     NfcMagicCustomEventTextInputDone,
 };
 
-typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-} EventType;
-
 struct NfcMagic {
     // NfcMagicWorker* worker;
     ViewDispatcher* view_dispatcher;
@@ -48,6 +45,7 @@ struct NfcMagic {
     NotificationApp* notifications;
     SceneManager* scene_manager;
     // NfcMagicDevice* dev;
+    NfcDevice* nfc_dev;
 
     FuriString* text_box_store;
 

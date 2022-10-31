@@ -1,7 +1,5 @@
 #include "nfc_magic_i.h"
 
-#define TAG "PicoPass"
-
 bool nfc_magic_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     NfcMagic* nfc_magic = context;
@@ -18,6 +16,20 @@ void nfc_magic_tick_event_callback(void* context) {
     furi_assert(context);
     NfcMagic* nfc_magic = context;
     scene_manager_handle_tick_event(nfc_magic->scene_manager);
+}
+
+void nfc_magic_show_loading_popup(void* context, bool show) {
+    NfcMagic* nfc_magic = context;
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewLoading);
+    } else {
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
 }
 
 NfcMagic* nfc_magic_alloc() {
@@ -37,6 +49,9 @@ NfcMagic* nfc_magic_alloc() {
 
     // NfcMagic device
     // nfc_magic->dev = nfc_magic_device_alloc();
+
+    // Nfc device
+    nfc_magic->nfc_dev = nfc_device_alloc();
 
     // Open GUI record
     nfc_magic->gui = furi_record_open(RECORD_GUI);
@@ -83,6 +98,9 @@ void nfc_magic_free(NfcMagic* nfc_magic) {
     // nfc_magic_device_free(nfc_magic->dev);
     // nfc_magic->dev = NULL;
 
+    // Nfc device
+    nfc_device_free(nfc_magic->nfc_dev);
+
     // Submenu
     view_dispatcher_remove_view(nfc_magic->view_dispatcher, NfcMagicViewMenu);
     submenu_free(nfc_magic->submenu);
@@ -124,19 +142,6 @@ void nfc_magic_free(NfcMagic* nfc_magic) {
     free(nfc_magic);
 }
 
-// void nfc_magic_text_store_set(NfcMagic* nfc_magic, const char* text, ...) {
-//     va_list args;
-//     va_start(args, text);
-
-//     vsnprintf(nfc_magic->text_store, sizeof(nfc_magic->text_store), text, args);
-
-//     va_end(args);
-// }
-
-// void nfc_magic_text_store_clear(NfcMagic* nfc_magic) {
-//     memset(nfc_magic->text_store, 0, sizeof(nfc_magic->text_store));
-// }
-
 static const NotificationSequence nfc_magic_sequence_blink_start_blue = {
     &message_blink_start_10,
     &message_blink_set_color_blue,
@@ -155,20 +160,6 @@ void nfc_magic_blink_start(NfcMagic* nfc_magic) {
 
 void nfc_magic_blink_stop(NfcMagic* nfc_magic) {
     notification_message(nfc_magic->notifications, &nfc_magic_sequence_blink_stop);
-}
-
-void nfc_magic_show_loading_popup(void* context, bool show) {
-    NfcMagic* nfc_magic = context;
-    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
-
-    if(show) {
-        // Raise timer priority so that animations can play
-        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
-        view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewLoading);
-    } else {
-        // Restore default timer priority
-        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
-    }
 }
 
 int32_t nfc_magic_app(void* p) {
