@@ -1,131 +1,102 @@
-#include "lightmeter_i.h"
+#include "lightmeter.h"
 
-typedef enum {
-    EventTypeTick,
-    EventTypeInput,
-} EventType;
-
-typedef struct {
-    EventType type;
-    InputEvent input;
-} HelloWorldEvent;
-
-static void draw_callback(Canvas* canvas, void* ctx) {
-    // UNUSED(ctx);
-    LightMeter* lightmeter = acquire_mutex((ValueMutex*)ctx, 25);
-
-    switch(lightmeter->main_view->current_view) {
-    case MAIN_VIEW:
-        draw_main_view(canvas, lightmeter->main_view, lightmeter->sender);
-        break;
-
-    case CONFIG_VIEW:
-        // draw_scanner_view(canvas, i2ctools->scanner);
-        break;
-
-    default:
-        break;
-    }
-
-    release_mutex((ValueMutex*)ctx, lightmeter);
+static bool lightmeter_custom_event_callback(void* context, uint32_t event) {
+    furi_assert(context);
+    LightMeterApp* lightmeter = context;
+    return scene_manager_handle_custom_event(lightmeter->scene_manager, event);
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) {
-    furi_assert(ctx);
-    FuriMessageQueue* event_queue = ctx;
-
-    HelloWorldEvent event = {.type = EventTypeInput, .input = *input_event};
-    furi_message_queue_put(event_queue, &event, FuriWaitForever);
+static bool lightmeter_back_event_callback(void* context) {
+    furi_assert(context);
+    LightMeterApp* lightmeter = context;
+    return scene_manager_handle_back_event(lightmeter->scene_manager);
 }
 
-static void timer_callback(FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
+static void lightmeter_tick_event_callback(void* context) {
+    furi_assert(context);
+    LightMeterApp* lightmeter = context;
+    scene_manager_handle_tick_event(lightmeter->scene_manager);
+}
 
-    HelloWorldEvent event = {.type = EventTypeTick};
-    furi_message_queue_put(event_queue, &event, 0);
+LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
+    LightMeterApp* lightmeter = malloc(sizeof(LightMeterApp));
+
+    lightmeter->config = malloc(sizeof(LightMeterConfig));
+    lightmeter->config->iso = 0;
+    lightmeter->config->nd = 0;
+    lightmeter->config->aperture = 0;
+
+    // Records
+    lightmeter->gui = furi_record_open(RECORD_GUI);
+    lightmeter->notifications = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(
+        lightmeter->notifications, &sequence_display_backlight_enforce_on); // force on backlight
+
+    // View dispatcher
+    lightmeter->view_dispatcher = view_dispatcher_alloc();
+    lightmeter->scene_manager = scene_manager_alloc(&lightmeter_scene_handlers, lightmeter);
+    view_dispatcher_enable_queue(lightmeter->view_dispatcher);
+    view_dispatcher_set_event_callback_context(lightmeter->view_dispatcher, lightmeter);
+    view_dispatcher_set_custom_event_callback(
+        lightmeter->view_dispatcher, lightmeter_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        lightmeter->view_dispatcher, lightmeter_back_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        lightmeter->view_dispatcher, lightmeter_tick_event_callback, 2000);
+    view_dispatcher_attach_to_gui(
+        lightmeter->view_dispatcher, lightmeter->gui, ViewDispatcherTypeFullscreen);
+
+    // Views
+    lightmeter->main_view = main_view_alloc();
+    view_dispatcher_add_view(
+        lightmeter->view_dispatcher,
+        LightMeterAppViewMainView,
+        main_view_get_view(lightmeter->main_view));
+    // set default values
+    main_view_set_iso(lightmeter->main_view, ISO_100);
+    main_view_set_nd(lightmeter->main_view, ND_0);
+    main_view_set_aperture(lightmeter->main_view, AP_2_8);
+    main_view_set_speed(lightmeter->main_view, TIME_125);
+
+    lightmeter->var_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        lightmeter->view_dispatcher,
+        LightMeterAppViewVarItemList,
+        variable_item_list_get_view(lightmeter->var_item_list));
+
+    // Set first scene
+    scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
+    return lightmeter;
+}
+
+void lightmeter_app_free(LightMeterApp* lightmeter) {
+    furi_assert(lightmeter);
+    // Views
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewMainView);
+    main_view_free(lightmeter->main_view);
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewVarItemList);
+    variable_item_list_free(lightmeter->var_item_list);
+    // View dispatcher
+    view_dispatcher_free(lightmeter->view_dispatcher);
+    scene_manager_free(lightmeter->scene_manager);
+    // Records
+    furi_record_close(RECORD_GUI);
+    notification_message(
+        lightmeter->notifications,
+        &sequence_display_backlight_enforce_auto); // set backlight back to auto
+    furi_record_close(RECORD_NOTIFICATION);
+    free(lightmeter);
 }
 
 int32_t lightmeter_app(void* p) {
     UNUSED(p);
-
-    HelloWorldEvent event;
-
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(HelloWorldEvent));
-
-    // Alloc lightmeter
-    LightMeter* lightmeter = malloc(sizeof(LightMeter));
-    ValueMutex lightmeter_mutex;
-    if(!init_mutex(&lightmeter_mutex, lightmeter, sizeof(LightMeter))) {
-        FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
-        free(lightmeter);
-        return -1;
-    }
-
-    lightmeter->view_port = view_port_alloc();
-    lightmeter->sender = lightmeter_sender_alloc();
-    lightmeter->main_view = lightmeter_main_view_alloc();
-
-    view_port_draw_callback_set(lightmeter->view_port, draw_callback, &lightmeter_mutex);
-    view_port_input_callback_set(lightmeter->view_port, input_callback, event_queue);
-
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, lightmeter->view_port, GuiLayerFullscreen);
-
-    FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, event_queue);
-    furi_timer_start(timer, 500);
-
-    NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
-
-    notification_message(
-        notifications, &sequence_display_backlight_enforce_on); // force on backlight
-
-    while(1) {
-        furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
-
-        if(event.type == EventTypeInput) {
-            if(event.input.key == InputKeyBack && event.input.type == InputTypeRelease) {
-                if(lightmeter->main_view->current_view == MAIN_VIEW) {
-                    break;
-                } else {
-                    if(lightmeter->main_view->current_view == CONFIG_VIEW) {
-                        // do something
-                    }
-                    lightmeter->main_view->current_view = MAIN_VIEW;
-                }
-            } else if(
-                (event.input.key == InputKeyUp || event.input.key == InputKeyDown) &&
-                event.input.type == InputTypePress) {
-                if(lightmeter->main_view->current_view == MAIN_VIEW &&
-                   lightmeter->main_view->current_mode == FIXED_TIME) {
-                    lightmeter->main_view->current_mode = FIXED_APERTURE;
-                } else if(
-                    lightmeter->main_view->current_view == MAIN_VIEW &&
-                    lightmeter->main_view->current_mode == FIXED_APERTURE) {
-                    lightmeter->main_view->current_mode = FIXED_TIME;
-                }
-            }
-        }
-
-        if(event.type == EventTypeTick) {
-            notification_message(notifications, &sequence_blink_blue_100);
-            lightmeter->sender->value = 0x20;
-            lightmeter->sender->must_send = true;
-        }
-
-        view_port_update(lightmeter->view_port);
-    }
-
-    furi_message_queue_free(event_queue);
-
-    gui_remove_view_port(gui, lightmeter->view_port);
-    view_port_free(lightmeter->view_port);
-    furi_record_close(RECORD_GUI);
-    furi_timer_free(timer);
-    furi_record_close(RECORD_NOTIFICATION);
-    lightmeter_sender_free(lightmeter->sender);
-    lightmeter_main_view_free(lightmeter->main_view);
-    notification_message(
-        notifications, &sequence_display_backlight_enforce_auto); // set backlight back to auto
-
+    uint32_t first_scene = LightMeterAppSceneMain;
+    LightMeterApp* lightmeter = lightmeter_app_alloc(first_scene);
+    view_dispatcher_run(lightmeter->view_dispatcher);
+    lightmeter_app_free(lightmeter);
     return 0;
+}
+
+void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* config) {
+    lightmeter->config = config;
 }
