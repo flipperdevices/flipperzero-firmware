@@ -51,13 +51,19 @@ public:
 
     // Returns the filtered value. A vector with zeros is returned if no samples
     // have been added.
-    Vector3 GetFilteredData() const { return filtered_data_; }
+    Vector3 GetFilteredData() const {
+        return filtered_data_;
+    }
 
     // Returns the most recent update timestamp in ns.
-    uint64_t GetMostRecentTimestampNs() const { return timestamp_most_recent_update_ns_; }
+    uint64_t GetMostRecentTimestampNs() const {
+        return timestamp_most_recent_update_ns_;
+    }
 
     // Returns true when the filter is initialized.
-    bool IsInitialized() const { return initialized_; }
+    bool IsInitialized() const {
+        return initialized_;
+    }
 
     // Resets filter state.
     void Reset();

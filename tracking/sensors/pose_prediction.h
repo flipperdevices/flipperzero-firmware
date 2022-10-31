@@ -24,30 +24,30 @@
 namespace cardboard {
 namespace pose_prediction {
 
-    // Returns a rotation matrix based on the integration of the gyroscope_value
-    // over the timestep_s in seconds.
-    // TODO(pfg): Document the space better here.
-    //
-    // @param gyroscope_value gyroscope sensor values.
-    // @param timestep_s integration period in seconds.
-    // @return Integration of the gyroscope value the rotation is from Start to
-    //         Sensor Space.
-    Rotation GetRotationFromGyroscope(const Vector3& gyroscope_value, double timestep_s);
+// Returns a rotation matrix based on the integration of the gyroscope_value
+// over the timestep_s in seconds.
+// TODO(pfg): Document the space better here.
+//
+// @param gyroscope_value gyroscope sensor values.
+// @param timestep_s integration period in seconds.
+// @return Integration of the gyroscope value the rotation is from Start to
+//         Sensor Space.
+Rotation GetRotationFromGyroscope(const Vector3& gyroscope_value, double timestep_s);
 
-    // Gets a predicted pose for a given time in the future (e.g. rendering time)
-    // based on a linear prediction model. This uses the system current state
-    // (position, velocity, etc) from the past to extrapolate a position in the
-    // future.
-    //
-    // @param requested_pose_timestamp time at which you want the pose.
-    // @param current_state current state that stores the pose and linear model at a
-    //        given time prior to requested_pose_timestamp_ns.
-    // @return pose from Start to Sensor Space.
-    Rotation PredictPose(int64_t requested_pose_timestamp, const PoseState& current_state);
+// Gets a predicted pose for a given time in the future (e.g. rendering time)
+// based on a linear prediction model. This uses the system current state
+// (position, velocity, etc) from the past to extrapolate a position in the
+// future.
+//
+// @param requested_pose_timestamp time at which you want the pose.
+// @param current_state current state that stores the pose and linear model at a
+//        given time prior to requested_pose_timestamp_ns.
+// @return pose from Start to Sensor Space.
+Rotation PredictPose(int64_t requested_pose_timestamp, const PoseState& current_state);
 
-    // Equivalent to PredictPose, but for use with poses relative to Start Space
-    // rather than sensor space.
-    Rotation PredictPoseInv(int64_t requested_pose_timestamp, const PoseState& current_state);
+// Equivalent to PredictPose, but for use with poses relative to Start Space
+// rather than sensor space.
+Rotation PredictPoseInv(int64_t requested_pose_timestamp, const PoseState& current_state);
 
 } // namespace pose_prediction
 } // namespace cardboard

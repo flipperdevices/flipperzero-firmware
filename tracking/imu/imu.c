@@ -17,7 +17,7 @@ bool imu_begin() {
 
 void imu_end() {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
-    lsm6ds3trc_end(); // 
+    lsm6ds3trc_end(); //
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 

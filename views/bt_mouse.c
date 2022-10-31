@@ -32,25 +32,25 @@ static void bt_mouse_draw_callback(Canvas* canvas, void* context) {
 static void bt_mouse_process(BtMouse* bt_mouse, InputEvent* event) {
     with_view_model(
         bt_mouse->view,
-        void * model,
+        void* model,
         {
             UNUSED(model);
-            if (event->key == InputKeyUp) {
-                if (event->type == InputTypePress) {
+            if(event->key == InputKeyUp) {
+                if(event->type == InputTypePress) {
                     furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
-                } else if (event->type == InputTypeRelease) {
+                } else if(event->type == InputTypeRelease) {
                     furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
                 }
-            } else if (event->key == InputKeyDown) {
-                if (event->type == InputTypePress) {
+            } else if(event->key == InputKeyDown) {
+                if(event->type == InputTypePress) {
                     furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
-                } else if (event->type == InputTypeRelease) {
+                } else if(event->type == InputTypeRelease) {
                     furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
                 }
-            } else if (event->key == InputKeyOk) {
-                if (event->type == InputTypePress) {
+            } else if(event->key == InputKeyOk) {
+                if(event->type == InputTypePress) {
                     furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_WHEEL);
-                } else if (event->type == InputTypeRelease) {
+                } else if(event->type == InputTypeRelease) {
                     furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_WHEEL);
                 }
             }
@@ -63,7 +63,7 @@ static bool bt_mouse_input_callback(InputEvent* event, void* context) {
     BtMouse* bt_mouse = context;
     bool consumed = false;
 
-    if (event->type == InputTypeLong && event->key == InputKeyBack) {
+    if(event->type == InputTypeLong && event->key == InputKeyBack) {
         furi_hal_bt_hid_mouse_release_all();
     } else {
         bt_mouse_process(bt_mouse, event);
@@ -78,7 +78,7 @@ void bt_mouse_connection_status_changed_callback(BtStatus status, void* context)
     BtMouse* bt_mouse = context;
 
     bool connected = (status == BtStatusConnected);
-    if (connected) {
+    if(connected) {
         notification_internal_message(bt_mouse->notifications, &sequence_set_blue_255);
     } else {
         notification_internal_message(bt_mouse->notifications, &sequence_reset_blue);
@@ -88,13 +88,14 @@ void bt_mouse_connection_status_changed_callback(BtStatus status, void* context)
     //    bt_mouse->view, void * model, { model->connected = connected; }, true);
 }
 
-void bt_mouse_enter_callback(void *context) {
+void bt_mouse_enter_callback(void* context) {
     furi_assert(context);
     BtMouse* bt_mouse = context;
 
     bt_mouse->bt = furi_record_open(RECORD_BT);
     bt_mouse->notifications = furi_record_open(RECORD_NOTIFICATION);
-    bt_set_status_changed_callback(bt_mouse->bt, bt_mouse_connection_status_changed_callback, bt_mouse);
+    bt_set_status_changed_callback(
+        bt_mouse->bt, bt_mouse_connection_status_changed_callback, bt_mouse);
     furi_assert(bt_set_profile(bt_mouse->bt, BtProfileHidKeyboard));
     furi_hal_bt_start_advertising();
 
@@ -114,7 +115,7 @@ bool bt_mouse_custom_callback(uint32_t event, void* context) {
     return true;
 }
 
-void bt_mouse_exit_callback(void *context) {
+void bt_mouse_exit_callback(void* context) {
     furi_assert(context);
     BtMouse* bt_mouse = context;
 

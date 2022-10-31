@@ -16,13 +16,13 @@ enum AirMouseSubmenuIndex {
 void air_mouse_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     AirMouse* app = context;
-    if (index == AirMouseSubmenuIndexBtMouse) {
+    if(index == AirMouseSubmenuIndexBtMouse) {
         app->view_id = AirMouseViewBtMouse;
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewBtMouse);
-    } else if (index == AirMouseSubmenuIndexUsbMouse) {
+    } else if(index == AirMouseSubmenuIndexUsbMouse) {
         app->view_id = AirMouseViewUsbMouse;
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewUsbMouse);
-    } else if (index == AirMouseSubmenuIndexCalibration) {
+    } else if(index == AirMouseSubmenuIndexCalibration) {
         app->view_id = AirMouseViewCalibration;
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewCalibration);
     }
@@ -31,11 +31,11 @@ void air_mouse_submenu_callback(void* context, uint32_t index) {
 void air_mouse_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     AirMouse* app = context;
-    if (result == DialogExResultLeft) {
+    if(result == DialogExResultLeft) {
         view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_NONE); // Exit
-    } else if (result == DialogExResultRight) {
+    } else if(result == DialogExResultRight) {
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id); // Show last view
-    } else if (result == DialogExResultCenter) {
+    } else if(result == DialogExResultCenter) {
         view_dispatcher_switch_to_view(app->view_dispatcher, AirMouseViewSubmenu); // Menu
     }
 }
@@ -63,11 +63,19 @@ AirMouse* air_mouse_app_alloc() {
 
     // Submenu view
     app->submenu = submenu_alloc();
-    submenu_add_item(app->submenu, "Bluetooth", AirMouseSubmenuIndexBtMouse, air_mouse_submenu_callback, app);
-    submenu_add_item(app->submenu, "USB", AirMouseSubmenuIndexUsbMouse, air_mouse_submenu_callback, app);
-    submenu_add_item(app->submenu, "Calibration", AirMouseSubmenuIndexCalibration, air_mouse_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "Bluetooth", AirMouseSubmenuIndexBtMouse, air_mouse_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "USB", AirMouseSubmenuIndexUsbMouse, air_mouse_submenu_callback, app);
+    submenu_add_item(
+        app->submenu,
+        "Calibration",
+        AirMouseSubmenuIndexCalibration,
+        air_mouse_submenu_callback,
+        app);
     view_set_previous_callback(submenu_get_view(app->submenu), air_mouse_exit);
-    view_dispatcher_add_view(app->view_dispatcher, AirMouseViewSubmenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, AirMouseViewSubmenu, submenu_get_view(app->submenu));
 
     // Dialog view
     app->dialog = dialog_ex_alloc();
@@ -77,22 +85,27 @@ AirMouse* air_mouse_app_alloc() {
     dialog_ex_set_right_button_text(app->dialog, "Stay");
     dialog_ex_set_center_button_text(app->dialog, "Menu");
     dialog_ex_set_header(app->dialog, "Close Current App?", 16, 12, AlignLeft, AlignTop);
-    view_dispatcher_add_view(app->view_dispatcher, AirMouseViewExitConfirm, dialog_ex_get_view(app->dialog));
+    view_dispatcher_add_view(
+        app->view_dispatcher, AirMouseViewExitConfirm, dialog_ex_get_view(app->dialog));
 
     // Bluetooth view
     app->bt_mouse = bt_mouse_alloc(app->view_dispatcher);
     view_set_previous_callback(bt_mouse_get_view(app->bt_mouse), air_mouse_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, AirMouseViewBtMouse, bt_mouse_get_view(app->bt_mouse));
+    view_dispatcher_add_view(
+        app->view_dispatcher, AirMouseViewBtMouse, bt_mouse_get_view(app->bt_mouse));
 
     // USB view
     app->usb_mouse = usb_mouse_alloc(app->view_dispatcher);
     view_set_previous_callback(usb_mouse_get_view(app->usb_mouse), air_mouse_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, AirMouseViewUsbMouse, usb_mouse_get_view(app->usb_mouse));
+    view_dispatcher_add_view(
+        app->view_dispatcher, AirMouseViewUsbMouse, usb_mouse_get_view(app->usb_mouse));
 
     // Calibration view
     app->calibration = calibration_alloc(app->view_dispatcher);
-    view_set_previous_callback(calibration_get_view(app->calibration), air_mouse_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, AirMouseViewCalibration, calibration_get_view(app->calibration));
+    view_set_previous_callback(
+        calibration_get_view(app->calibration), air_mouse_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, AirMouseViewCalibration, calibration_get_view(app->calibration));
 
     app->view_id = AirMouseViewSubmenu;
     view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
@@ -128,7 +141,7 @@ int32_t air_mouse_app(void* p) {
     UNUSED(p);
 
     AirMouse* app = air_mouse_app_alloc();
-    if (!imu_begin()) {
+    if(!imu_begin()) {
         air_mouse_app_free(app);
         return -1;
     }

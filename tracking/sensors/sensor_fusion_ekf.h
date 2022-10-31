@@ -76,14 +76,15 @@ public:
     bool IsBiasEstimationEnabled() const;
 
     // Returns the current gyroscope bias estimate from GyroscopeBiasEstimator.
-    Vector3 GetGyroscopeBias() const
-    {
-        return { gyroscope_bias_estimate_[0], gyroscope_bias_estimate_[1],
-            gyroscope_bias_estimate_[2] };
+    Vector3 GetGyroscopeBias() const {
+        return {
+            gyroscope_bias_estimate_[0], gyroscope_bias_estimate_[1], gyroscope_bias_estimate_[2]};
     }
 
     // Returns true after receiving the first accelerometer measurement.
-    bool IsFullyInitialized() const { return is_aligned_with_gravity_; }
+    bool IsFullyInitialized() const {
+        return is_aligned_with_gravity_;
+    }
 
 private:
     // Estimates the average timestep between gyroscope event.

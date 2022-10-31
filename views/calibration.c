@@ -31,7 +31,7 @@ bool calibration_custom_callback(uint32_t event, void* context) {
     furi_assert(context);
     Calibration* calibration = context;
 
-    if (calibration_step()) {
+    if(calibration_step()) {
         view_dispatcher_switch_to_view(calibration->view_dispatcher, AirMouseViewSubmenu);
     } else {
         view_dispatcher_send_custom_event(calibration->view_dispatcher, 0);

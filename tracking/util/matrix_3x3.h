@@ -32,8 +32,16 @@ public:
     Matrix3x3();
 
     // Dimension-specific constructors that are passed individual element values.
-    Matrix3x3(double m00, double m01, double m02, double m10, double m11, double m12, double m20,
-        double m21, double m22);
+    Matrix3x3(
+        double m00,
+        double m01,
+        double m02,
+        double m10,
+        double m11,
+        double m12,
+        double m20,
+        double m21,
+        double m22);
 
     // Constructor that reads elements from a linear array of the correct size.
     explicit Matrix3x3(const double array[3 * 3]);
@@ -45,46 +53,72 @@ public:
     static Matrix3x3 Identity();
 
     // Mutable element accessors.
-    double& operator()(int row, int col) { return elem_[row][col]; }
-    std::array<double, 3>& operator[](int row) { return elem_[row]; }
+    double& operator()(int row, int col) {
+        return elem_[row][col];
+    }
+    std::array<double, 3>& operator[](int row) {
+        return elem_[row];
+    }
 
     // Read-only element accessors.
-    const double& operator()(int row, int col) const { return elem_[row][col]; }
-    const std::array<double, 3>& operator[](int row) const { return elem_[row]; }
+    const double& operator()(int row, int col) const {
+        return elem_[row][col];
+    }
+    const std::array<double, 3>& operator[](int row) const {
+        return elem_[row];
+    }
 
     // Return a pointer to the data for interfacing with libraries.
-    double* Data() { return &elem_[0][0]; }
-    const double* Data() const { return &elem_[0][0]; }
+    double* Data() {
+        return &elem_[0][0];
+    }
+    const double* Data() const {
+        return &elem_[0][0];
+    }
 
     // Self-modifying multiplication operators.
-    void operator*=(double s) { MultiplyScalar(s); }
-    void operator*=(const Matrix3x3& m) { *this = Product(*this, m); }
+    void operator*=(double s) {
+        MultiplyScalar(s);
+    }
+    void operator*=(const Matrix3x3& m) {
+        *this = Product(*this, m);
+    }
 
     // Unary operators.
-    Matrix3x3 operator-() const { return Negation(); }
+    Matrix3x3 operator-() const {
+        return Negation();
+    }
 
     // Binary scale operators.
-    friend Matrix3x3 operator*(const Matrix3x3& m, double s) { return Scale(m, s); }
-    friend Matrix3x3 operator*(double s, const Matrix3x3& m) { return Scale(m, s); }
+    friend Matrix3x3 operator*(const Matrix3x3& m, double s) {
+        return Scale(m, s);
+    }
+    friend Matrix3x3 operator*(double s, const Matrix3x3& m) {
+        return Scale(m, s);
+    }
 
     // Binary matrix addition.
-    friend Matrix3x3 operator+(const Matrix3x3& lhs, const Matrix3x3& rhs)
-    {
+    friend Matrix3x3 operator+(const Matrix3x3& lhs, const Matrix3x3& rhs) {
         return Addition(lhs, rhs);
     }
 
     // Binary matrix subtraction.
-    friend Matrix3x3 operator-(const Matrix3x3& lhs, const Matrix3x3& rhs)
-    {
+    friend Matrix3x3 operator-(const Matrix3x3& lhs, const Matrix3x3& rhs) {
         return Subtraction(lhs, rhs);
     }
 
     // Binary multiplication operator.
-    friend Matrix3x3 operator*(const Matrix3x3& m0, const Matrix3x3& m1) { return Product(m0, m1); }
+    friend Matrix3x3 operator*(const Matrix3x3& m0, const Matrix3x3& m1) {
+        return Product(m0, m1);
+    }
 
     // Exact equality and inequality comparisons.
-    friend bool operator==(const Matrix3x3& m0, const Matrix3x3& m1) { return AreEqual(m0, m1); }
-    friend bool operator!=(const Matrix3x3& m0, const Matrix3x3& m1) { return !AreEqual(m0, m1); }
+    friend bool operator==(const Matrix3x3& m0, const Matrix3x3& m1) {
+        return AreEqual(m0, m1);
+    }
+    friend bool operator!=(const Matrix3x3& m0, const Matrix3x3& m1) {
+        return !AreEqual(m0, m1);
+    }
 
 private:
     // These private functions implement most of the operators.

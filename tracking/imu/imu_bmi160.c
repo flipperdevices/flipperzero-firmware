@@ -6,7 +6,7 @@
 
 #define TAG "BMI160"
 
-#define BMI160_DEV_ADDR       (0x69 << 1)
+#define BMI160_DEV_ADDR (0x69 << 1)
 
 static const double DEG_TO_RAD = 0.017453292519943295769236907684886;
 static const double G = 9.81;
@@ -15,14 +15,14 @@ struct bmi160_dev bmi160dev;
 struct bmi160_sensor_data bmi160_accel;
 struct bmi160_sensor_data bmi160_gyro;
 
-int8_t bmi160_write_i2c(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint16_t len) {
-    if (furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, dev_addr, reg_addr, data, len, 50))
+int8_t bmi160_write_i2c(uint8_t dev_addr, uint8_t reg_addr, uint8_t* data, uint16_t len) {
+    if(furi_hal_i2c_write_mem(&furi_hal_i2c_handle_external, dev_addr, reg_addr, data, len, 50))
         return BMI160_OK;
     return BMI160_E_COM_FAIL;
 }
 
-int8_t bmi160_read_i2c(uint8_t dev_addr, uint8_t reg_addr, uint8_t *read_data, uint16_t len) {
-    if (furi_hal_i2c_read_mem(&furi_hal_i2c_handle_external, dev_addr, reg_addr, read_data, len, 50))
+int8_t bmi160_read_i2c(uint8_t dev_addr, uint8_t reg_addr, uint8_t* read_data, uint16_t len) {
+    if(furi_hal_i2c_read_mem(&furi_hal_i2c_handle_external, dev_addr, reg_addr, read_data, len, 50))
         return BMI160_OK;
     return BMI160_E_COM_FAIL;
 }
@@ -30,7 +30,7 @@ int8_t bmi160_read_i2c(uint8_t dev_addr, uint8_t reg_addr, uint8_t *read_data, u
 bool bmi160_begin() {
     FURI_LOG_I(TAG, "Init BMI160");
 
-    if (!furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, BMI160_DEV_ADDR, 50)) {
+    if(!furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, BMI160_DEV_ADDR, 50)) {
         FURI_LOG_E(TAG, "Device not ready!");
         return false;
     }
@@ -43,7 +43,7 @@ bool bmi160_begin() {
     bmi160dev.write = bmi160_write_i2c;
     bmi160dev.delay_ms = furi_delay_ms;
 
-    if (bmi160_init(&bmi160dev) != BMI160_OK) {
+    if(bmi160_init(&bmi160dev) != BMI160_OK) {
         FURI_LOG_E(TAG, "Initialization failure!");
         FURI_LOG_E(TAG, "Chip ID 0x%X", bmi160dev.chip_id);
         return false;
@@ -58,7 +58,7 @@ bool bmi160_begin() {
     bmi160dev.gyro_cfg.bw = BMI160_GYRO_BW_NORMAL_MODE;
     bmi160dev.gyro_cfg.power = BMI160_GYRO_NORMAL_MODE;
 
-    if (bmi160_set_sens_conf(&bmi160dev) != BMI160_OK) {
+    if(bmi160_set_sens_conf(&bmi160dev) != BMI160_OK) {
         FURI_LOG_E(TAG, "Initialization failure!");
         FURI_LOG_E(TAG, "Chip ID 0x%X", bmi160dev.chip_id);
         return false;
@@ -71,7 +71,9 @@ bool bmi160_begin() {
 }
 
 int bmi160_read(float* vec) {
-    if (bmi160_get_sensor_data((BMI160_ACCEL_SEL | BMI160_GYRO_SEL), &bmi160_accel, &bmi160_gyro, &bmi160dev) != BMI160_OK) {
+    if(bmi160_get_sensor_data(
+           (BMI160_ACCEL_SEL | BMI160_GYRO_SEL), &bmi160_accel, &bmi160_gyro, &bmi160dev) !=
+       BMI160_OK) {
         return 0;
     }
 

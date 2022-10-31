@@ -11,20 +11,20 @@
 #define CALIBRATION_DATA_PATH INT_PATH(CALIBRATION_DATA_FILE_NAME)
 #define CALIBRATION_DATA_MAGIC (0x23)
 
-#define CALIBRATION_DATA_SAVE(x) \
-    saved_struct_save(           \
-        CALIBRATION_DATA_PATH,   \
-        (x),                     \
+#define CALIBRATION_DATA_SAVE(x)   \
+    saved_struct_save(             \
+        CALIBRATION_DATA_PATH,     \
+        (x),                       \
         sizeof(CalibrationMedian), \
-        CALIBRATION_DATA_MAGIC,  \
+        CALIBRATION_DATA_MAGIC,    \
         CALIBRATION_DATA_VER)
 
-#define CALIBRATION_DATA_LOAD(x) \
-    saved_struct_load(           \
-        CALIBRATION_DATA_PATH,   \
-        (x),                     \
+#define CALIBRATION_DATA_LOAD(x)   \
+    saved_struct_load(             \
+        CALIBRATION_DATA_PATH,     \
+        (x),                       \
         sizeof(CalibrationMedian), \
-        CALIBRATION_DATA_MAGIC,  \
+        CALIBRATION_DATA_MAGIC,    \
         CALIBRATION_DATA_VER)
 
 typedef struct {
@@ -41,14 +41,15 @@ typedef cardboard::Vector3 Vector;
  * filing bugs), other may be required in the future, e.g. for bias.
  */
 class CalibrationData {
-
 public:
     /**
      * Check if the sensors were calibrated before.
      *
      * @return {@code true} if calibration data is available, or {@code false} otherwise.
      */
-    bool isComplete() { return complete; }
+    bool isComplete() {
+        return complete;
+    }
 
     /** Prepare to collect new calibration data. */
     void reset();
@@ -58,28 +59,36 @@ public:
      *
      * @return Three-axis median vector.
      */
-    Vector getMedian() { return median; }
+    Vector getMedian() {
+        return median;
+    }
 
     /**
      * Retrieve the mean gyroscope readings.
      *
      * @return Three-axis mean vector.
      */
-    Vector getMean() { return mean; }
+    Vector getMean() {
+        return mean;
+    }
 
     /**
      * Retrieve the standard deviation of gyroscope readings.
      *
      * @return Three-axis standard deviation vector.
      */
-    Vector getSigma() { return sigma; }
+    Vector getSigma() {
+        return sigma;
+    }
 
     /**
      * Retrieve the confidence interval size of gyroscope readings.
      *
      * @return Three-axis confidence interval size vector.
      */
-    Vector getDelta() { return delta; }
+    Vector getDelta() {
+        return delta;
+    }
 
     /**
      * Add a new gyroscope reading to the stats.

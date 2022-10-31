@@ -31,16 +31,24 @@ public:
     typedef Vector<4> QuaternionType;
 
     // The default constructor creates an identity Rotation, which has no effect.
-    Rotation() { quat_.Set(0, 0, 0, 1); }
+    Rotation() {
+        quat_.Set(0, 0, 0, 1);
+    }
 
     // Returns an identity Rotation, which has no effect.
-    static Rotation Identity() { return Rotation(); }
+    static Rotation Identity() {
+        return Rotation();
+    }
 
     // Sets the Rotation from a quaternion (4D vector), which is first normalized.
-    void SetQuaternion(const QuaternionType& quaternion) { quat_ = Normalized(quaternion); }
+    void SetQuaternion(const QuaternionType& quaternion) {
+        quat_ = Normalized(quaternion);
+    }
 
     // Returns the Rotation as a normalized quaternion (4D vector).
-    const QuaternionType& GetQuaternion() const { return quat_; }
+    const QuaternionType& GetQuaternion() const {
+        return quat_;
+    }
 
     // Sets the Rotation to rotate by the given angle around the given axis,
     // following the right-hand rule. The axis does not need to be unit
@@ -54,8 +62,7 @@ public:
 
     // Convenience function that constructs and returns a Rotation given an axis
     // and angle.
-    static Rotation FromAxisAndAngle(const VectorType& axis, double angle)
-    {
+    static Rotation FromAxisAndAngle(const VectorType& axis, double angle) {
         Rotation r;
         r.SetAxisAndAngle(axis, angle);
         return r;
@@ -63,8 +70,7 @@ public:
 
     // Convenience function that constructs and returns a Rotation given a
     // quaternion.
-    static Rotation FromQuaternion(const QuaternionType& quat)
-    {
+    static Rotation FromQuaternion(const QuaternionType& quat) {
         Rotation r;
         r.SetQuaternion(quat);
         return r;
@@ -77,8 +83,7 @@ public:
     // Convenience function that constructs and returns a Rotation given Euler
     // angles that are applied in the order of rotate-Z by roll, rotate-X by
     // pitch, rotate-Y by yaw (same as GetRollPitchYaw).
-    static Rotation FromRollPitchYaw(double roll, double pitch, double yaw)
-    {
+    static Rotation FromRollPitchYaw(double roll, double pitch, double yaw) {
         VectorType x(1, 0, 0), y(0, 1, 0), z(0, 0, 1);
         return FromAxisAndAngle(z, roll) * (FromAxisAndAngle(x, pitch) * FromAxisAndAngle(y, yaw));
     }
@@ -86,8 +91,7 @@ public:
     // Convenience function that constructs and returns a Rotation given Euler
     // angles that are applied in the order of rotate-Y by yaw, rotate-X by
     // pitch, rotate-Z by roll (same as GetYawPitchRoll).
-    static Rotation FromYawPitchRoll(double yaw, double pitch, double roll)
-    {
+    static Rotation FromYawPitchRoll(double yaw, double pitch, double roll) {
         VectorType x(1, 0, 0), y(0, 1, 0), z(0, 0, 1);
         return FromAxisAndAngle(y, yaw) * (FromAxisAndAngle(x, pitch) * FromAxisAndAngle(z, roll));
     }
@@ -98,19 +102,18 @@ public:
     static Rotation RotateInto(const VectorType& from, const VectorType& to);
 
     // The negation operator returns the inverse rotation.
-    friend Rotation operator-(const Rotation& r)
-    {
+    friend Rotation operator-(const Rotation& r) {
         // Because we store normalized quaternions, the inverse is found by
         // negating the vector part.
         return Rotation(-r.quat_[0], -r.quat_[1], -r.quat_[2], r.quat_[3]);
     }
 
     // Appends a rotation to this one.
-    Rotation& operator*=(const Rotation& r)
-    {
+    Rotation& operator*=(const Rotation& r) {
         const QuaternionType& qr = r.quat_;
         QuaternionType& qt = quat_;
-        SetQuaternion(QuaternionType(qr[3] * qt[0] + qr[0] * qt[3] + qr[2] * qt[1] - qr[1] * qt[2],
+        SetQuaternion(QuaternionType(
+            qr[3] * qt[0] + qr[0] * qt[3] + qr[2] * qt[1] - qr[1] * qt[2],
             qr[3] * qt[1] + qr[1] * qt[3] + qr[0] * qt[2] - qr[2] * qt[0],
             qr[3] * qt[2] + qr[2] * qt[3] + qr[1] * qt[0] - qr[0] * qt[1],
             qr[3] * qt[3] - qr[0] * qt[0] - qr[1] * qt[1] - qr[2] * qt[2]));
@@ -118,8 +121,7 @@ public:
     }
 
     // Binary multiplication operator - returns a composite Rotation.
-    friend const Rotation operator*(const Rotation& r0, const Rotation& r1)
-    {
+    friend const Rotation operator*(const Rotation& r0, const Rotation& r1) {
         Rotation r = r0;
         r *= r1;
         return r;
@@ -131,14 +133,12 @@ public:
 private:
     // Private constructor that builds a Rotation from quaternion components.
     Rotation(double q0, double q1, double q2, double q3)
-        : quat_(q0, q1, q2, q3)
-    {
+        : quat_(q0, q1, q2, q3) {
     }
 
     // Applies a Rotation to a Vector to rotate the Vector. Method borrowed from:
     // http://blog.molecular-matters.com/2013/05/24/a-faster-quaternion-vector-multiplication/
-    VectorType ApplyToVector(const VectorType& v) const
-    {
+    VectorType ApplyToVector(const VectorType& v) const {
         VectorType im(quat_[0], quat_[1], quat_[2]);
         VectorType temp = 2.0 * Cross(im, v);
         return v + quat_[3] * temp + Cross(im, temp);

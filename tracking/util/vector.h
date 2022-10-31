@@ -21,7 +21,8 @@
 namespace cardboard {
 
 // Geometric N-dimensional Vector class.
-template <int Dimension> class Vector {
+template <int Dimension>
+class Vector {
 public:
     // The default constructor zero-initializes all elements.
     Vector();
@@ -36,33 +37,59 @@ public:
 
     void Set(double e0, double e1, double e2); // Only when Dimension == 3.
     void Set(double e0, double e1, double e2,
-        double e3); // Only when Dimension == 4.
+             double e3); // Only when Dimension == 4.
 
     // Mutable element accessor.
-    double& operator[](int index) { return elem_[index]; }
+    double& operator[](int index) {
+        return elem_[index];
+    }
 
     // Element accessor.
-    double operator[](int index) const { return elem_[index]; }
+    double operator[](int index) const {
+        return elem_[index];
+    }
 
     // Returns a Vector containing all zeroes.
     static Vector Zero();
 
     // Self-modifying operators.
-    void operator+=(const Vector& v) { Add(v); }
-    void operator-=(const Vector& v) { Subtract(v); }
-    void operator*=(double s) { Multiply(s); }
-    void operator/=(double s) { Divide(s); }
+    void operator+=(const Vector& v) {
+        Add(v);
+    }
+    void operator-=(const Vector& v) {
+        Subtract(v);
+    }
+    void operator*=(double s) {
+        Multiply(s);
+    }
+    void operator/=(double s) {
+        Divide(s);
+    }
 
     // Unary negation operator.
-    Vector operator-() const { return Negation(); }
+    Vector operator-() const {
+        return Negation();
+    }
 
     // Binary operators.
-    friend Vector operator+(const Vector& v0, const Vector& v1) { return Sum(v0, v1); }
-    friend Vector operator-(const Vector& v0, const Vector& v1) { return Difference(v0, v1); }
-    friend Vector operator*(const Vector& v, double s) { return Scale(v, s); }
-    friend Vector operator*(double s, const Vector& v) { return Scale(v, s); }
-    friend Vector operator*(const Vector& v, const Vector& s) { return Product(v, s); }
-    friend Vector operator/(const Vector& v, double s) { return Divide(v, s); }
+    friend Vector operator+(const Vector& v0, const Vector& v1) {
+        return Sum(v0, v1);
+    }
+    friend Vector operator-(const Vector& v0, const Vector& v1) {
+        return Difference(v0, v1);
+    }
+    friend Vector operator*(const Vector& v, double s) {
+        return Scale(v, s);
+    }
+    friend Vector operator*(double s, const Vector& v) {
+        return Scale(v, s);
+    }
+    friend Vector operator*(const Vector& v, const Vector& s) {
+        return Product(v, s);
+    }
+    friend Vector operator/(const Vector& v, double s) {
+        return Divide(v, s);
+    }
 
     // Self-modifying addition.
     void Add(const Vector& v);
@@ -92,130 +119,125 @@ private:
 };
 //------------------------------------------------------------------------------
 
-template <int Dimension> Vector<Dimension>::Vector()
-{
-    for (int i = 0; i < Dimension; i++) {
+template <int Dimension>
+Vector<Dimension>::Vector() {
+    for(int i = 0; i < Dimension; i++) {
         elem_[i] = 0;
     }
 }
 
 template <int Dimension>
 constexpr Vector<Dimension>::Vector(double e0, double e1, double e2)
-    : elem_ { e0, e1, e2 }
-{
+    : elem_{e0, e1, e2} {
 }
 
 template <int Dimension>
 constexpr Vector<Dimension>::Vector(double e0, double e1, double e2, double e3)
-    : elem_ { e0, e1, e2, e3 }
-{
+    : elem_{e0, e1, e2, e3} {
 }
 /*
 template <>
 constexpr Vector<4>::Vector(const Vector<3>& v, double s)
     : elem_{v[0], v[1], v[2], s} {}
 */
-template <int Dimension> void Vector<Dimension>::Set(double e0, double e1, double e2)
-{
+template <int Dimension>
+void Vector<Dimension>::Set(double e0, double e1, double e2) {
     elem_[0] = e0;
     elem_[1] = e1;
     elem_[2] = e2;
 }
 
-template <int Dimension> void Vector<Dimension>::Set(double e0, double e1, double e2, double e3)
-{
+template <int Dimension>
+void Vector<Dimension>::Set(double e0, double e1, double e2, double e3) {
     elem_[0] = e0;
     elem_[1] = e1;
     elem_[2] = e2;
     elem_[3] = e3;
 }
 
-template <int Dimension> Vector<Dimension> Vector<Dimension>::Zero()
-{
+template <int Dimension>
+Vector<Dimension> Vector<Dimension>::Zero() {
     Vector<Dimension> v;
     return v;
 }
 
-template <int Dimension> void Vector<Dimension>::Add(const Vector& v)
-{
-    for (int i = 0; i < Dimension; i++) {
+template <int Dimension>
+void Vector<Dimension>::Add(const Vector& v) {
+    for(int i = 0; i < Dimension; i++) {
         elem_[i] += v[i];
     }
 }
 
-template <int Dimension> void Vector<Dimension>::Subtract(const Vector& v)
-{
-    for (int i = 0; i < Dimension; i++) {
+template <int Dimension>
+void Vector<Dimension>::Subtract(const Vector& v) {
+    for(int i = 0; i < Dimension; i++) {
         elem_[i] -= v[i];
     }
 }
 
-template <int Dimension> void Vector<Dimension>::Multiply(double s)
-{
-    for (int i = 0; i < Dimension; i++) {
+template <int Dimension>
+void Vector<Dimension>::Multiply(double s) {
+    for(int i = 0; i < Dimension; i++) {
         elem_[i] *= s;
     }
 }
 
-template <int Dimension> void Vector<Dimension>::Divide(double s)
-{
-    for (int i = 0; i < Dimension; i++) {
+template <int Dimension>
+void Vector<Dimension>::Divide(double s) {
+    for(int i = 0; i < Dimension; i++) {
         elem_[i] /= s;
     }
 }
 
-template <int Dimension> Vector<Dimension> Vector<Dimension>::Negation() const
-{
+template <int Dimension>
+Vector<Dimension> Vector<Dimension>::Negation() const {
     Vector<Dimension> ret;
-    for (int i = 0; i < Dimension; i++) {
+    for(int i = 0; i < Dimension; i++) {
         ret.elem_[i] = -elem_[i];
     }
     return ret;
 }
 
 template <int Dimension>
-Vector<Dimension> Vector<Dimension>::Product(const Vector& v0, const Vector& v1)
-{
+Vector<Dimension> Vector<Dimension>::Product(const Vector& v0, const Vector& v1) {
     Vector<Dimension> ret;
-    for (int i = 0; i < Dimension; i++) {
+    for(int i = 0; i < Dimension; i++) {
         ret.elem_[i] = v0[i] * v1[i];
     }
     return ret;
 }
 
 template <int Dimension>
-Vector<Dimension> Vector<Dimension>::Sum(const Vector& v0, const Vector& v1)
-{
+Vector<Dimension> Vector<Dimension>::Sum(const Vector& v0, const Vector& v1) {
     Vector<Dimension> ret;
-    for (int i = 0; i < Dimension; i++) {
+    for(int i = 0; i < Dimension; i++) {
         ret.elem_[i] = v0[i] + v1[i];
     }
     return ret;
 }
 
 template <int Dimension>
-Vector<Dimension> Vector<Dimension>::Difference(const Vector& v0, const Vector& v1)
-{
+Vector<Dimension> Vector<Dimension>::Difference(const Vector& v0, const Vector& v1) {
     Vector<Dimension> ret;
-    for (int i = 0; i < Dimension; i++) {
+    for(int i = 0; i < Dimension; i++) {
         ret.elem_[i] = v0[i] - v1[i];
     }
     return ret;
 }
 
-template <int Dimension> Vector<Dimension> Vector<Dimension>::Scale(const Vector& v, double s)
-{
+template <int Dimension>
+Vector<Dimension> Vector<Dimension>::Scale(const Vector& v, double s) {
     Vector<Dimension> ret;
-    for (int i = 0; i < Dimension; i++) {
+    for(int i = 0; i < Dimension; i++) {
         ret.elem_[i] = v[i] * s;
     }
     return ret;
 }
 
-template <int Dimension> Vector<Dimension> Vector<Dimension>::Divide(const Vector& v, double s)
-{
+template <int Dimension>
+Vector<Dimension> Vector<Dimension>::Divide(const Vector& v, double s) {
     Vector<Dimension> ret;
-    for (int i = 0; i < Dimension; i++) {
+    for(int i = 0; i < Dimension; i++) {
         ret.elem_[i] = v[i] / s;
     }
     return ret;

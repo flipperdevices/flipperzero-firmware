@@ -24,25 +24,25 @@ static void usb_mouse_draw_callback(Canvas* canvas, void* context) {
 static void usb_mouse_process(UsbMouse* usb_mouse, InputEvent* event) {
     with_view_model(
         usb_mouse->view,
-        void * model,
+        void* model,
         {
             UNUSED(model);
-            if (event->key == InputKeyUp) {
-                if (event->type == InputTypePress) {
+            if(event->key == InputKeyUp) {
+                if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
-                } else if (event->type == InputTypeRelease) {
+                } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
                 }
-            } else if (event->key == InputKeyDown) {
-                if (event->type == InputTypePress) {
+            } else if(event->key == InputKeyDown) {
+                if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
-                } else if (event->type == InputTypeRelease) {
+                } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
                 }
-            } else if (event->key == InputKeyOk) {
-                if (event->type == InputTypePress) {
+            } else if(event->key == InputKeyOk) {
+                if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_WHEEL);
-                } else if (event->type == InputTypeRelease) {
+                } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_WHEEL);
                 }
             }
@@ -55,7 +55,7 @@ static bool usb_mouse_input_callback(InputEvent* event, void* context) {
     UsbMouse* usb_mouse = context;
     bool consumed = false;
 
-    if (event->type == InputTypeLong && event->key == InputKeyBack) {
+    if(event->type == InputTypeLong && event->key == InputKeyBack) {
         // furi_hal_hid_mouse_release_all();
     } else {
         usb_mouse_process(usb_mouse, event);
@@ -65,7 +65,7 @@ static bool usb_mouse_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void usb_mouse_enter_callback(void *context) {
+void usb_mouse_enter_callback(void* context) {
     furi_assert(context);
     UsbMouse* usb_mouse = context;
 
@@ -90,7 +90,7 @@ bool usb_mouse_custom_callback(uint32_t event, void* context) {
     return true;
 }
 
-void usb_mouse_exit_callback(void *context) {
+void usb_mouse_exit_callback(void* context) {
     furi_assert(context);
     UsbMouse* usb_mouse = context;
 
