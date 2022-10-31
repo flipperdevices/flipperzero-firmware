@@ -180,17 +180,23 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         }
         canvas_draw_str_aligned(canvas, 27, 15, AlignLeft, AlignTop, str);
         canvas_draw_icon(canvas, 15, 34, &I_T_10x14);
-        if(T < 1) {
-            snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)normalizeTime(T));
+        if(lux > 0) {
+            if(T < 1) {
+                snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)normalizeTime(T));
+            } else {
+                snprintf(str, sizeof(str), ":%.0f", (double)normalizeTime(T));
+            }
         } else {
-            snprintf(str, sizeof(str), ":%.0f", (double)normalizeTime(T));
+            snprintf(str, sizeof(str), " ---");
         }
         canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
 
     } else if(model->current_mode == FIXED_TIME) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_icon(canvas, 15, 17, &I_f_10x14);
-        if(A < aperture_numbers[AP_8]) {
+        if(A < aperture_numbers[0]) {
+            snprintf(str, sizeof(str), " ---");
+        } else if(A < aperture_numbers[AP_8]) {
             snprintf(str, sizeof(str), "/%.1f", (double)normalizeAperture(A));
         } else {
             snprintf(str, sizeof(str), "/%.0f", (double)normalizeAperture(A));
@@ -211,8 +217,12 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     // draw EV number
     canvas_set_font(canvas, FontSecondary);
-    snprintf(str, sizeof(str), "EV: %1.0f", (double)EV);
-    canvas_draw_str_aligned(canvas, 98, 22, AlignLeft, AlignBottom, str);
+    if(lux > 0) {
+        snprintf(str, sizeof(str), "EV: %1.0f", (double)EV);
+        canvas_draw_str_aligned(canvas, 98, 22, AlignLeft, AlignBottom, str);
+    } else {
+        canvas_draw_str_aligned(canvas, 98, 22, AlignLeft, AlignBottom, "EV: --");
+    }
 
     switch(model->current_mode) {
     case FIXED_TIME:
