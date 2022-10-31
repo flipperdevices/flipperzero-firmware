@@ -24,9 +24,13 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     lightmeter->config = malloc(sizeof(LightMeterConfig));
     lightmeter->config->iso = 0;
     lightmeter->config->nd = 0;
+    lightmeter->config->aperture = 0;
 
     // Records
     lightmeter->gui = furi_record_open(RECORD_GUI);
+    lightmeter->notifications = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(
+        lightmeter->notifications, &sequence_display_backlight_enforce_on); // force on backlight
 
     // View dispatcher
     lightmeter->view_dispatcher = view_dispatcher_alloc();
@@ -70,6 +74,9 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
     // lightmeter_sender_free(lightmeter->sender);
     // Records
     furi_record_close(RECORD_GUI);
+    notification_message(
+        lightmeter->notifications, &sequence_display_backlight_enforce_auto); // set backlight back to auto
+    furi_record_close(RECORD_NOTIFICATION);
     free(lightmeter);
 }
 

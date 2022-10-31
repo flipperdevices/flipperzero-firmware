@@ -13,6 +13,7 @@
 // #include <gui/modules/dialog_ex.h>
 
 #include "gui/scenes/config/lightmeter_scene.h"
+#include <notification/notification_messages.h>
 
 #include "lightmeter_config.h"
 
@@ -21,6 +22,7 @@
 typedef struct {
     int iso;
     int nd;
+    int aperture;
 } LightMeterConfig;
 
 typedef struct {
@@ -30,6 +32,7 @@ typedef struct {
     MainView* main_view;
     VariableItemList* var_item_list;
     LightMeterConfig* config;
+    NotificationApp* notifications;
 } LightMeterApp;
 
 typedef enum {
