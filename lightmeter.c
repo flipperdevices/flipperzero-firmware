@@ -51,6 +51,11 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
         lightmeter->view_dispatcher, 
         LightMeterAppViewMainView, 
         main_view_get_view(lightmeter->main_view));
+    // set default value
+    main_view_set_iso(lightmeter->main_view, ISO_100);
+    main_view_set_nd(lightmeter->main_view, ND_0);
+    main_view_set_aperture(lightmeter->main_view, AP_2_8);
+    main_view_set_time(lightmeter->main_view, TIME_125);
     
     lightmeter->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(

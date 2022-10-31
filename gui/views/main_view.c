@@ -54,16 +54,15 @@ static const float aperture_numbers[] = {
     [AP_128] = 128,
 };
 
-// static const float time_numbers[] =
-//     {
-//         [TIME_30S] = 30.0,        [TIME_15S] = 15.0,        [TIME_8S] = 8.0,
-//         [TIME_4S] = 4.0,          [TIME_2S] = 2.0,          [TIME_1S] = 1.0,
-//         [TIME_2] = 1 / 2,       [TIME_4] = 1 / 4,       [TIME_8] = 1 / 8,
-//         [TIME_15] = 1 / 15,     [TIME_30] = 1 / 30,     [TIME_60] = 1 / 60,
-//         [TIME_125] = 1 / 125,   [TIME_250] = 1 / 250,   [TIME_500] = 1 / 500,
-//         [TIME_1000] = 1 / 1000, [TIME_2000] = 1 / 2000, [TIME_4000] = 1 / 4000,
-//         [TIME_8000] = 1 / 8000,
-// };
+static const float time_numbers[] = {
+    [TIME_8000] = 1.0 / 8000, [TIME_4000] = 1.0 / 4000, [TIME_2000] = 1.0 / 2000,
+    [TIME_1000] = 1.0 / 1000, [TIME_500] = 1.0 / 500,   [TIME_250] = 1.0 / 250,
+    [TIME_125] = 1.0 / 125,   [TIME_60] = 1.0 / 60,     [TIME_30] = 1.0 / 30,
+    [TIME_15] = 1.0 / 15,     [TIME_8] = 1.0 / 8,       [TIME_4] = 1.0 / 4,
+    [TIME_2] = 1.0 / 2,       [TIME_1S] = 1.0,          [TIME_2S] = 2.0,
+    [TIME_4S] = 4.0,          [TIME_8S] = 8.0,          [TIME_15S] = 15.0,
+    [TIME_30S] = 30.0,
+};
 
 struct MainView {
     View* view;
@@ -80,8 +79,6 @@ typedef enum {
 } MainViewMode;
 
 typedef struct {
-    bool right_pressed;
-    bool connected;
     uint8_t recv[2];
     MainViewMode current_mode;
     int iso;
@@ -89,6 +86,8 @@ typedef struct {
     int aperture;
     int time;
 } MainViewModel;
+
+// TODO rename time to speed
 
 int getLux() {
     uint8_t value = 0x20;
@@ -138,7 +137,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     float A_fix = normalizeAperture(3.4);
     FURI_LOG_D(WORKER_TAG, "Fixed Aperture: %.1f", (double)A_fix);
 
-    float T = 0;
+    float T = time_numbers[model->time];
 
     // uint8_t ndStop =
 
@@ -148,26 +147,21 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     if(lux > 0) {
         if(model->current_mode == FIXED_APERTURE) {
             T = 100 * pow(A, 2) / (double)ISO_ND / pow(2, EV);
-            FURI_LOG_D(WORKER_TAG, "Computed Time: 1/%.0f", 1 / (double)T);
-            if(T < 1) {
-                FURI_LOG_D(WORKER_TAG, "Normalized Time: 1/%.0f", 1 / (double)normalizeTime(T));
-            } else {
-                FURI_LOG_D(WORKER_TAG, "Normalized Time: %.0f", (double)normalizeTime(T));
-            }
+        } else if (model->current_mode == FIXED_TIME) {
+            A = sqrt(pow(2, EV) * (double)ISO_ND * (double)T / 100);
         }
     } else {
         T = 0;
         A = 0;
     }
 
-    // compute values here
-
     // top row
     // draw line
     canvas_draw_line(canvas, 0, 10, 128, 10);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "F");
+    // metering mode A – ambient, F – flash
+    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "A"); 
 
     snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
     canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, str);
@@ -196,14 +190,19 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     } else if(model->current_mode == FIXED_TIME) {
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_icon(canvas, 15, 17, &I_f_10x14);
-        if(model->aperture < AP_8) {
-            snprintf(str, sizeof(str), "/%.1f", (double)aperture_numbers[model->aperture]);
+        if(A < aperture_numbers[AP_8]) {
+            snprintf(str, sizeof(str), "/%.1f", (double)normalizeAperture(A));
         } else {
-            snprintf(str, sizeof(str), "/%.0f", (double)aperture_numbers[model->aperture]);
+            snprintf(str, sizeof(str), "/%.0f", (double)normalizeAperture(A));
         }
         canvas_draw_str_aligned(canvas, 27, 15, AlignLeft, AlignTop, str);
         canvas_draw_icon(canvas, 15, 34, &I_T_10x14);
-        canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, ":1/50");
+        if(model->time < TIME_1S) {
+            snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)time_numbers[model->time]);
+        } else {
+            snprintf(str, sizeof(str), ":%.0f", (double)time_numbers[model->time]);
+        }
+        canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
     }
 
     // create buttons (for the future)
@@ -232,10 +231,6 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     default:
         break;
     }
-
-    // Right
-    if(model->right_pressed) {
-    }
 }
 
 static void main_view_process(MainView* main_view, InputEvent* event) {
@@ -248,19 +243,21 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                     if(model->current_mode == FIXED_APERTURE) {
                         if(model->aperture < AP_NUM - 1) {
                             model->aperture++;
-                            FURI_LOG_D(
-                                WORKER_TAG,
-                                "Set aperture: %f",
-                                (double)aperture_numbers[model->aperture]);
+                        }
+                    } else if(model->current_mode == FIXED_TIME) {
+                        if(model->time < TIME_NUM - 1) {
+                            model->time++;
                         }
                     }
                 } else if(event->key == InputKeyDown) {
                     if(model->current_mode == FIXED_APERTURE) {
-                        if(model->aperture > 0) model->aperture--;
-                        FURI_LOG_D(
-                            WORKER_TAG,
-                            "Set aperture: %f",
-                            (double)aperture_numbers[model->aperture]);
+                        if(model->aperture > 0) {
+                            model->aperture--;
+                        }
+                    } else if(model->current_mode == FIXED_TIME) {
+                        if(model->time > 0) {
+                            model->time--;
+                        }
                     }
                 } else if(event->key == InputKeyLeft) {
                 } else if(event->key == InputKeyRight) {
@@ -277,7 +274,6 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                 } else if(event->key == InputKeyDown) {
                 } else if(event->key == InputKeyLeft) {
                 } else if(event->key == InputKeyRight) {
-                    model->right_pressed = false;
                 } else if(event->key == InputKeyOk) {
                 } else if(event->key == InputKeyBack) {
                 }
@@ -330,12 +326,6 @@ View* main_view_get_view(MainView* main_view) {
     return main_view->view;
 }
 
-void main_view_set_data(MainView* main_view, bool connected) {
-    furi_assert(main_view);
-    with_view_model(
-        main_view->view, MainViewModel * model, { model->connected = connected; }, true);
-}
-
 void main_view_set_iso(MainView* main_view, int iso) {
     furi_assert(main_view);
     with_view_model(
@@ -347,3 +337,17 @@ void main_view_set_nd(MainView* main_view, int nd) {
     with_view_model(
         main_view->view, MainViewModel * model, { model->nd = nd; }, true);
 }
+
+void main_view_set_aperture(MainView* main_view, int aperture) {
+    furi_assert(main_view);
+    with_view_model(
+        main_view->view, MainViewModel * model, { model->aperture = aperture; }, true);
+}
+
+void main_view_set_time(MainView* main_view, int time) {
+    furi_assert(main_view);
+    with_view_model(
+        main_view->view, MainViewModel * model, { model->time = time; }, true);
+}
+
+
