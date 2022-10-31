@@ -10,14 +10,11 @@
 #include "gui/views/main_view.h"
 
 #include <gui/modules/variable_item_list.h>
-// #include <gui/modules/dialog_ex.h>
 
 #include "gui/scenes/config/lightmeter_scene.h"
 #include <notification/notification_messages.h>
 
 #include "lightmeter_config.h"
-
-// #include "lightmeterI2C.h"
 
 typedef struct {
     int iso;
@@ -46,6 +43,5 @@ typedef enum {
     LightMeterAppCustomEventHelp,
     LightMeterAppCustomEventAbout,
 } LightMeterAppCustomEvent;
-
 
 void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config);

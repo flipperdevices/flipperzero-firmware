@@ -32,6 +32,3 @@ void main_view_set_nd(MainView* main_view, int nd);
 void main_view_set_aperture(MainView* main_view, int aperture);
 
 void main_view_set_time(MainView* main_view, int time);
-
-
-

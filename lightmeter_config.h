@@ -66,6 +66,6 @@ typedef enum {
     TIME_4S,
     TIME_8S,
     TIME_15S,
-    TIME_30S,   
+    TIME_30S,
     TIME_NUM,
 } LightMeterTimeNumbers;

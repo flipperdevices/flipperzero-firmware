@@ -147,7 +147,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     if(lux > 0) {
         if(model->current_mode == FIXED_APERTURE) {
             T = 100 * pow(A, 2) / (double)ISO_ND / pow(2, EV);
-        } else if (model->current_mode == FIXED_TIME) {
+        } else if(model->current_mode == FIXED_TIME) {
             A = sqrt(pow(2, EV) * (double)ISO_ND * (double)T / 100);
         }
     } else {
@@ -156,18 +156,18 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     }
 
     // top row
-    // draw line
     canvas_draw_line(canvas, 0, 10, 128, 10);
 
     canvas_set_font(canvas, FontPrimary);
     // metering mode A – ambient, F – flash
-    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "A"); 
+    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "A");
 
     snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
     canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, str);
 
+    canvas_set_font(canvas, FontSecondary);
     snprintf(str, sizeof(str), "lx: %d", lux);
-    canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
+    canvas_draw_str_aligned(canvas, 90, 8, AlignLeft, AlignBottom, str);
 
     // add f, T values
     if(model->current_mode == FIXED_APERTURE) {
@@ -205,17 +205,14 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
     }
 
-    // create buttons (for the future)
+    // create buttons
     canvas_set_font(canvas, FontSecondary);
     elements_button_left(canvas, "Config");
-    // elements_button_right(canvas, "Config");
 
     // draw EV number
-    canvas_draw_line(canvas, 95, 15, 95, 33);
-    canvas_draw_line(canvas, 96, 15, 96, 33);
-    canvas_set_font(canvas, FontPrimary);
-    snprintf(str, sizeof(str), "EV:\n%1.0f", (double)EV);
-    elements_multiline_text_aligned(canvas, 100, 15, AlignLeft, AlignTop, str);
+    canvas_set_font(canvas, FontSecondary);
+    snprintf(str, sizeof(str), "EV: %1.0f", (double)EV);
+    canvas_draw_str_aligned(canvas, 98, 22, AlignLeft, AlignBottom, str);
 
     switch(model->current_mode) {
     case FIXED_TIME:
@@ -349,5 +346,3 @@ void main_view_set_time(MainView* main_view, int time) {
     with_view_model(
         main_view->view, MainViewModel * model, { model->time = time; }, true);
 }
-
-

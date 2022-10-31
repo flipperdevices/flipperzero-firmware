@@ -43,23 +43,26 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
         lightmeter->view_dispatcher, lightmeter_back_event_callback);
     view_dispatcher_set_tick_event_callback(
         lightmeter->view_dispatcher, lightmeter_tick_event_callback, 2000);
-    view_dispatcher_attach_to_gui(lightmeter->view_dispatcher, lightmeter->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(
+        lightmeter->view_dispatcher, lightmeter->gui, ViewDispatcherTypeFullscreen);
 
     // Views
     lightmeter->main_view = main_view_alloc();
     view_dispatcher_add_view(
-        lightmeter->view_dispatcher, 
-        LightMeterAppViewMainView, 
+        lightmeter->view_dispatcher,
+        LightMeterAppViewMainView,
         main_view_get_view(lightmeter->main_view));
-    // set default value
+    // set default values
     main_view_set_iso(lightmeter->main_view, ISO_100);
     main_view_set_nd(lightmeter->main_view, ND_0);
     main_view_set_aperture(lightmeter->main_view, AP_2_8);
     main_view_set_time(lightmeter->main_view, TIME_125);
-    
+
     lightmeter->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
-        lightmeter->view_dispatcher, LightMeterAppViewVarItemList, variable_item_list_get_view(lightmeter->var_item_list));
+        lightmeter->view_dispatcher,
+        LightMeterAppViewVarItemList,
+        variable_item_list_get_view(lightmeter->var_item_list));
 
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
@@ -76,11 +79,11 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);
     scene_manager_free(lightmeter->scene_manager);
-    // lightmeter_sender_free(lightmeter->sender);
     // Records
     furi_record_close(RECORD_GUI);
     notification_message(
-        lightmeter->notifications, &sequence_display_backlight_enforce_auto); // set backlight back to auto
+        lightmeter->notifications,
+        &sequence_display_backlight_enforce_auto); // set backlight back to auto
     furi_record_close(RECORD_NOTIFICATION);
     free(lightmeter);
 }
@@ -96,6 +99,4 @@ int32_t lightmeter_app(void* p) {
 
 void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* config) {
     lightmeter->config = config;
-    // furi_thread_flags_set(furi_thread_get_id(app->dap_thread), DAPThreadEventApplyConfig);
-    // furi_thread_flags_set(furi_thread_get_id(app->cdc_thread), CDCThreadEventApplyConfig);
 }

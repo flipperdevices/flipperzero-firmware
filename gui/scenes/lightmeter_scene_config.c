@@ -70,7 +70,6 @@ static void ok_cb(void* context, uint32_t index) {
 }
 
 void lightmeter_scene_config_on_enter(void* context) {
-    
     LightMeterApp* lightmeter = context;
     VariableItemList* var_item_list = lightmeter->var_item_list;
     VariableItem* item;
@@ -81,22 +80,17 @@ void lightmeter_scene_config_on_enter(void* context) {
     variable_item_set_current_value_index(item, config->iso);
     variable_item_set_current_value_text(item, iso_numbers[config->iso]);
 
-    item =
-        variable_item_list_add(
-            var_item_list, "ND", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
+    item = variable_item_list_add(
+        var_item_list, "ND", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
     variable_item_set_current_value_index(item, config->nd);
     variable_item_set_current_value_text(item, nd_numbers[config->nd]);
-
-    // item = variable_item_list_add(
-    //     var_item_list, "Swap TX RX", COUNT_OF(uart_swap), uart_swap_cb, app);
-    // variable_item_set_current_value_index(item, config->uart_swap);
-    // variable_item_set_current_value_text(item, uart_swap[config->uart_swap]);
 
     item = variable_item_list_add(var_item_list, "Help and Pinout", 0, NULL, NULL);
     item = variable_item_list_add(var_item_list, "About", 0, NULL, NULL);
 
     variable_item_list_set_selected_item(
-        var_item_list, scene_manager_get_scene_state(lightmeter->scene_manager, LightMeterAppSceneConfig));
+        var_item_list,
+        scene_manager_get_scene_state(lightmeter->scene_manager, LightMeterAppSceneConfig));
 
     variable_item_list_set_enter_callback(var_item_list, ok_cb, lightmeter);
 
@@ -110,7 +104,6 @@ bool lightmeter_scene_config_on_event(void* context, SceneManagerEvent event) {
     UNUSED(lightmeter);
 
     if(event.type == SceneManagerEventTypeTick) {
-        // lightmeter_scene_send_view_update_model(app);
         consumed = true;
     }
     return consumed;
