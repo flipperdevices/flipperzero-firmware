@@ -115,7 +115,17 @@ void nfc_free(Nfc* nfc) {
         // Stop worker
         nfc_worker_stop(nfc->worker);
         // Save data in shadow file
-        nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
+        // Create path by adding nfc/ to the dev_name or using the load path
+        if(furi_string_end_with(nfc->dev->load_path, NFC_APP_EXTENSION)) {
+            nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
+        } else {
+            char* path = malloc(strlen(nfc->dev->dev_name) + 5);
+            strcpy(path, "nfc/");
+            strcat(path, nfc->text_store);
+            strcat(path, NFC_APP_SHADOW_EXTENSION);
+            nfc_device_save_shadow(nfc->dev, path);
+            free(path);
+        }
     }
     if(nfc->rpc_ctx) {
         rpc_system_app_send_exited(nfc->rpc_ctx);

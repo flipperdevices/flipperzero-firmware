@@ -19,13 +19,13 @@
 #define NFC_TEST_SIGNAL_SHORT_FILE "nfc_nfca_signal_short.nfc"
 #define NFC_TEST_SIGNAL_LONG_FILE "nfc_nfca_signal_long.nfc"
 #define NFC_TEST_DICT_PATH EXT_PATH("unit_tests/mf_classic_dict.nfc")
-#define NFC_TEST_NFCA_PATH EXT_PATH("nfc/nfca.nfc")
-#define NFC_TEST_MFC_1K_4B_PATH EXT_PATH("nfc/mf_classic_1k_4b.nfc")
-#define NFC_TEST_MFC_4K_4B_PATH EXT_PATH("nfc/mf_classic_4k_4b.nfc")
-#define NFC_TEST_MFC_1K_7B_PATH EXT_PATH("nfc/mf_classic_1k_7b.nfc")
-#define NFC_TEST_MFC_4K_7B_PATH EXT_PATH("nfc/mf_classic_4k_7b.nfc")
-#define NFC_TEST_MFU_PATH EXT_PATH("nfc/mf_ultralight.nfc")
-#define NFC_TEST_MFDES_PATH EXT_PATH("nfc/mf_desfire.nfc")
+#define NFC_TEST_NFCA_PATH EXT_PATH("unit_tests/nfc/nfca.nfc")
+#define NFC_TEST_MFC_1K_4B_PATH EXT_PATH("unit_tests/nfc/mf_classic_1k_4b.nfc")
+#define NFC_TEST_MFC_4K_4B_PATH EXT_PATH("unit_tests/nfc/mf_classic_4k_4b.nfc")
+#define NFC_TEST_MFC_1K_7B_PATH EXT_PATH("unit_tests/nfc/mf_classic_1k_7b.nfc")
+#define NFC_TEST_MFC_4K_7B_PATH EXT_PATH("unit_tests/nfc/mf_classic_4k_7b.nfc")
+#define NFC_TEST_MFU_PATH EXT_PATH("unit_tests/nfc/mf_ultralight.nfc")
+#define NFC_TEST_MFDES_PATH EXT_PATH("unit_tests/nfc/mf_desfire.nfc")
 
 static const char* nfc_test_file_type = "Flipper NFC test";
 static const uint32_t nfc_test_file_version = 1;
@@ -312,7 +312,8 @@ MU_TEST(nfca_file_test) {
     nfc->dev_data.nfc_data.type = FuriHalNfcTypeA;
 
     // Save the NFC device data to the file
-    mu_assert(nfc_device_save(nfc, "nfca"), "nfc_device_save == true assert failed\r\n");
+    mu_assert(
+        nfc_device_save(nfc, NFC_TEST_NFCA_PATH), "nfc_device_save == true assert failed\r\n");
     nfc_device_free(nfc);
 
     // Load the NFC device data from the file
@@ -402,7 +403,8 @@ MU_TEST(mf_classic_1k_4b_file_test) {
 
     // Save the NFC device data to the file
     mu_assert(
-        nfc_device_save(nfc, "mf_classic_1k_4b"), "nfc_device_save == true assert failed\r\n");
+        nfc_device_save(nfc, NFC_TEST_MFC_1K_4B_PATH),
+        "nfc_device_save == true assert failed\r\n");
     nfc_device_free(nfc);
 
     // Load the NFC device data from the file
@@ -548,7 +550,8 @@ MU_TEST(mf_classic_4k_4b_file_test) {
     // Save the test file
     // Save the NFC device data to the file
     mu_assert(
-        nfc_device_save(nfc, "mf_classic_4k_4b"), "nfc_device_save == true assert failed\r\n");
+        nfc_device_save(nfc, NFC_TEST_MFC_4K_4B_PATH),
+        "nfc_device_save == true assert failed\r\n");
     nfc_device_free(nfc);
 
     // Load the NFC device data from the file
@@ -691,13 +694,14 @@ MU_TEST(mf_classic_1k_7b_file_test) {
 
     // Save the NFC device data to the file
     mu_assert(
-        nfc_device_save(nfc, "mf_classic_1k_4b"), "nfc_device_save == true assert failed\r\n");
+        nfc_device_save(nfc, NFC_TEST_MFC_1K_7B_PATH),
+        "nfc_device_save == true assert failed\r\n");
     nfc_device_free(nfc);
 
     // Load the NFC device data from the file
     NfcDevice* nfc_validate = nfc_device_alloc();
     mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_MFC_1K_4B_PATH, true),
+        nfc_device_load(nfc_validate, NFC_TEST_MFC_1K_7B_PATH, true),
         "nfc_device_load == true assert failed\r\n");
 
     // Check the UID, sak, ATQA and type
@@ -837,13 +841,14 @@ MU_TEST(mf_classic_4k_7b_file_test) {
     // Save the test file
     // Save the NFC device data to the file
     mu_assert(
-        nfc_device_save(nfc, "mf_classic_4k_4b"), "nfc_device_save == true assert failed\r\n");
+        nfc_device_save(nfc, NFC_TEST_MFC_4K_7B_PATH),
+        "nfc_device_save == true assert failed\r\n");
     nfc_device_free(nfc);
 
     // Load the NFC device data from the file
     NfcDevice* nfc_validate = nfc_device_alloc();
     mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_MFC_4K_4B_PATH, true),
+        nfc_device_load(nfc_validate, NFC_TEST_MFC_4K_7B_PATH, true),
         "nfc_device_load == true assert failed\r\n");
 
     // Check the UID, sak, ATQA and type

@@ -61,13 +61,19 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 nfc->dev->dev_data.nfc_data = nfc->dev_edit_data;
             }
             strlcpy(nfc->dev->dev_name, nfc->text_store, strlen(nfc->text_store) + 1);
-            if(nfc_device_save(nfc->dev, nfc->text_store)) {
+            // Create path by adding nfc/ to the dev_name or using the load path
+            char* path = malloc(strlen(nfc->text_store) + 5);
+            strcpy(path, ANY_PATH("nfc/"));
+            strcat(path, nfc->text_store);
+            strcat(path, NFC_APP_EXTENSION);
+            if(nfc_device_save(nfc->dev, path)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 consumed = true;
             } else {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneStart);
             }
+            free(path);
         }
     }
     return consumed;
