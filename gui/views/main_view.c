@@ -84,7 +84,7 @@ typedef struct {
     int iso;
     int nd;
     int aperture;
-    int time;
+    int speed;
 } MainViewModel;
 
 // TODO rename time to speed
@@ -137,7 +137,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     float A_fix = normalizeAperture(3.4);
     FURI_LOG_D(WORKER_TAG, "Fixed Aperture: %.1f", (double)A_fix);
 
-    float T = time_numbers[model->time];
+    float T = time_numbers[model->speed];
 
     // uint8_t ndStop =
 
@@ -197,10 +197,10 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         }
         canvas_draw_str_aligned(canvas, 27, 15, AlignLeft, AlignTop, str);
         canvas_draw_icon(canvas, 15, 34, &I_T_10x14);
-        if(model->time < TIME_1S) {
-            snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)time_numbers[model->time]);
+        if(model->speed < TIME_1S) {
+            snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)time_numbers[model->speed]);
         } else {
-            snprintf(str, sizeof(str), ":%.0f", (double)time_numbers[model->time]);
+            snprintf(str, sizeof(str), ":%.0f", (double)time_numbers[model->speed]);
         }
         canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
     }
@@ -242,8 +242,8 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                             model->aperture++;
                         }
                     } else if(model->current_mode == FIXED_TIME) {
-                        if(model->time < TIME_NUM - 1) {
-                            model->time++;
+                        if(model->speed < TIME_NUM - 1) {
+                            model->speed++;
                         }
                     }
                 } else if(event->key == InputKeyDown) {
@@ -252,8 +252,8 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                             model->aperture--;
                         }
                     } else if(model->current_mode == FIXED_TIME) {
-                        if(model->time > 0) {
-                            model->time--;
+                        if(model->speed > 0) {
+                            model->speed--;
                         }
                     }
                 } else if(event->key == InputKeyLeft) {
@@ -341,8 +341,8 @@ void main_view_set_aperture(MainView* main_view, int aperture) {
         main_view->view, MainViewModel * model, { model->aperture = aperture; }, true);
 }
 
-void main_view_set_time(MainView* main_view, int time) {
+void main_view_set_speed(MainView* main_view, int speed) {
     furi_assert(main_view);
     with_view_model(
-        main_view->view, MainViewModel * model, { model->time = time; }, true);
+        main_view->view, MainViewModel * model, { model->speed = speed; }, true);
 }
