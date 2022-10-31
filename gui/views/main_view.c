@@ -2,8 +2,16 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/elements.h>
+#include "../../lightmeter.h"
 // #include <notification/notification.h>
 // #include <notification/notification_messages.h>
+
+static const char* iso_numbers[] = {
+    [ISO_100] = "100",
+    [ISO_200] = "200",
+    [ISO_400] = "400",
+    [ISO_800] = "800",
+};
 
 struct MainView {
     View* view;
@@ -24,6 +32,7 @@ typedef struct {
     bool connected;
     uint8_t recv[2];
     MainViewMode current_mode;
+    int iso;
 } MainViewModel;
 
 int get_lx() {
@@ -65,9 +74,9 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "F");
-    
-    // snprintf(str, sizeof(str), "ISO: %d", model.);
-    canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, "ISO: 400");
+
+    snprintf(str, sizeof(str), "ISO: %s", iso_numbers[model->iso]);
+    canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, str);
 
     snprintf(str, sizeof(str), "lx: %d", get_lx());
     canvas_draw_str_aligned(canvas, 80, 0, AlignLeft, AlignTop, str);
@@ -190,4 +199,10 @@ void main_view_set_data(MainView* main_view, bool connected) {
     furi_assert(main_view);
     with_view_model(
         main_view->view, MainViewModel * model, { model->connected = connected; }, true);
+}
+
+void main_view_set_iso(MainView* main_view, int iso) {
+    furi_assert(main_view);
+    with_view_model(
+        main_view->view, MainViewModel * model, { model->iso = iso; }, true);
 }

@@ -119,4 +119,5 @@ bool lightmeter_scene_config_on_event(void* context, SceneManagerEvent event) {
 void lightmeter_scene_config_on_exit(void* context) {
     LightMeterApp* lightmeter = context;
     variable_item_list_reset(lightmeter->var_item_list);
+    main_view_set_iso(lightmeter->main_view, lightmeter->config->iso);
 }
