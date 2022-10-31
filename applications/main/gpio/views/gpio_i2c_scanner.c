@@ -112,13 +112,13 @@ void gpio_i2c_scanner_set_ok_callback(
     furi_assert(callback);
     with_view_model(
         gpio_i2c_scanner->view,
-		GpioI2CScannerModel * model,
-		{
+        GpioI2CScannerModel * model,
+        {
             UNUSED(model);
             gpio_i2c_scanner->callback = callback;
             gpio_i2c_scanner->context = context;
         },
-		false);
+        false);
 }
 
 void gpio_i2c_scanner_update_state(GpioI2CScanner* instance, I2CScannerState* st) {
@@ -127,13 +127,13 @@ void gpio_i2c_scanner_update_state(GpioI2CScanner* instance, I2CScannerState* st
 
     with_view_model(
         instance->view,
-		GpioI2CScannerModel * model,
-		{
+        GpioI2CScannerModel * model,
+        {
             model->items = st->items;
 
             for(int i = 0; i < model->items; i++) {
                 model->responding_address[i] = st->responding_address[i];
             }
         },
-		true);
+        true);
 }
