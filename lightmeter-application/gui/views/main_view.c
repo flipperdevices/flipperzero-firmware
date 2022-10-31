@@ -90,11 +90,12 @@ typedef struct {
 // TODO rename time to speed
 
 int getLux() {
+    uint32_t timeout = furi_ms_to_ticks(100);
     uint8_t value = 0x20;
     uint8_t recv[2];
     furi_hal_i2c_acquire(I2C_BUS);
     uint8_t address = 0x23 << 1;
-    furi_hal_i2c_trx(I2C_BUS, address, &value, sizeof(value), recv, sizeof(recv), I2C_TIMEOUT);
+    furi_hal_i2c_trx(I2C_BUS, address, &value, sizeof(value), recv, sizeof(recv), timeout);
     furi_hal_i2c_release(I2C_BUS);
     return ((int)recv[0] << 8) | ((int)recv[1]);
 }
