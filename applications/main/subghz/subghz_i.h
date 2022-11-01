@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers/subghz_types.h"
+#include <lib/subghz/types.h>
 #include "subghz.h"
 #include "views/receiver.h"
 #include "views/transmitter.h"
@@ -11,9 +12,8 @@
 #include "views/subghz_test_carrier.h"
 #include "views/subghz_test_packet.h"
 
-// #include <furi.h>
-// #include <furi_hal.h>
 #include <gui/gui.h>
+#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
@@ -24,14 +24,12 @@
 #include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
-
 #include <lib/subghz/subghz_worker.h>
-
+#include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 
 #include "subghz_history.h"
-#include "subghz_setting.h"
 
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
@@ -49,7 +47,7 @@ struct SubGhzTxRx {
     SubGhzProtocolDecoderBase* decoder_result;
     FlipperFormat* fff_data;
 
-    SubGhzPresetDefinition* preset;
+    SubGhzRadioPreset* preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
     SubGhzTxRxState txrx_state;
@@ -57,6 +55,9 @@ struct SubGhzTxRx {
     uint8_t hopper_timeout;
     uint8_t hopper_idx_frequency;
     SubGhzRxKeyState rx_key_state;
+
+    float raw_threshold_rssi;
+    uint8_t raw_threshold_rssi_low_count;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
