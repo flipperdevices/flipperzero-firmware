@@ -15,7 +15,7 @@ env:
 jobs:
   mapser_analyse:
     if: ${{ !github.event.pull_request.head.repo.fork }}
-    runs-on: [self-hosted,FlipperZeroMacShell]
+    runs-on: [self-hosted,FlipperZeroShell]
     timeout-minutes: 15
     steps:
       - name: 'Wait Build workflow'

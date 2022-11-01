@@ -78,7 +78,7 @@ jobs:
 
       - name: 'Find Previous Comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -87,7 +87,7 @@ jobs:
 
       - name: 'Create or update comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v2
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
