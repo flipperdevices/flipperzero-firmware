@@ -23,6 +23,7 @@ typedef enum {
     SPIMemChipVendorIssi = 0xD5,
     SPIMemChipVendorWinbond = 0xEF,
     SPIMemChipVendorBoya = 0x68,
+    SPIMemChipVendorAPMemory = 0x0D
 } SPIMemChipVendor;
 
 typedef enum {

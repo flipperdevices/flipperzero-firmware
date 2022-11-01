@@ -70,3 +70,16 @@ void spi_mem_file_close(SPIMemApp* app) {
     storage_file_close(app->file);
     storage_file_free(app->file);
 }
+
+size_t spi_mem_file_get_size(SPIMemApp* app) {
+    size_t size = 0;
+    app->file = storage_file_alloc(app->storage);
+    do {
+        if(!storage_file_open(
+               app->file, furi_string_get_cstr(app->file_path), FSAM_READ, FSOM_OPEN_EXISTING))
+            break;
+        size = storage_file_size(app->file);
+    } while(0);
+    spi_mem_file_close(app);
+    return size;
+}

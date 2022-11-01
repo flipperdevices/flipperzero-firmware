@@ -34,7 +34,11 @@ static bool spi_mem_tools_trx(
 bool spi_mem_tools_read_chip_info(SPIMemChip* chip) {
     uint8_t rx_buf[3] = {0, 0, 0};
     if(!spi_mem_tools_trx(SPIMemChipCMDReadJEDECChipID, NULL, 0, rx_buf, 3)) return false;
-    if(rx_buf[0] == 0) return false;
+    FuriString* str = furi_string_alloc();
+    furi_string_printf(str, "vid:%d, tid:%d, cid:%d", rx_buf[0], rx_buf[1], rx_buf[2]);
+    FURI_LOG_E("SPIMem", furi_string_get_cstr(str));
+    furi_string_free(str);
+    if(rx_buf[0] == 0 || rx_buf[0] == 255) return false;
     chip->vendor_id = (SPIMemChipVendor)rx_buf[0];
     chip->type_id = rx_buf[1];
     chip->capacity_id = rx_buf[2];

@@ -19,6 +19,7 @@ const SPIMemChipVendorName spi_mem_chip_vendor_names[] = {
     {"ISSI", SPIMemChipVendorIssi},
     {"Winbond", SPIMemChipVendorWinbond},
     {"BOYA", SPIMemChipVendorBoya},
+    {"AP Memory", SPIMemChipVendorAPMemory},
     {"Unknown", SPIMemChipVendorUnknown}};
 
 static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_id) {
@@ -28,7 +29,7 @@ static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_id) {
 }
 
 // vendor_id, model_name, vendor_name, size, write_mode,
-// type_id, capacity_id, erase_gran, erase_gran_cmd, address_type
+// type_id, capacity_id, erase_gran, erase_cmd, address_type
 static const SPIMemChip SPIMemChips[] = {
     {SPIMemChipVendorWinbond,
      "W25Q32BV",
@@ -37,6 +38,16 @@ static const SPIMemChip SPIMemChips[] = {
      SPIMemChipWriteModePage256Bytes,
      0x40,
      0x16,
+     4096,
+     0x20,
+     SPIMemChipAddressType3byte},
+    {SPIMemChipVendorWinbond,
+     "W25Q64FV",
+     NULL,
+     8L * 1024L * 1024L,
+     SPIMemChipWriteModePage256Bytes,
+     0x40,
+     0x17,
      4096,
      0x20,
      SPIMemChipAddressType3byte},

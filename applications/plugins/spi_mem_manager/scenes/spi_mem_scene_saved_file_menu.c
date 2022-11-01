@@ -2,8 +2,9 @@
 
 typedef enum {
     SPIMemSceneSavedFileMenuSubmenuIndexWrite,
-    SPIMemSceneSavedFileMenuSubmenuIndexDelete,
+    SPIMemSceneSavedFileMenuSubmenuIndexCompare,
     SPIMemSceneSavedFileMenuSubmenuIndexInfo,
+    SPIMemSceneSavedFileMenuSubmenuIndexDelete,
 } SPIMemSceneSavedFileMenuSubmenuIndex;
 
 static void spi_mem_scene_saved_file_menu_submenu_callback(void* context, uint32_t index) {
@@ -21,14 +22,20 @@ void spi_mem_scene_saved_file_menu_on_enter(void* context) {
         app);
     submenu_add_item(
         app->submenu,
-        "Delete",
-        SPIMemSceneSavedFileMenuSubmenuIndexDelete,
+        "Compare",
+        SPIMemSceneSavedFileMenuSubmenuIndexCompare,
         spi_mem_scene_saved_file_menu_submenu_callback,
         app);
     submenu_add_item(
         app->submenu,
         "Info",
         SPIMemSceneSavedFileMenuSubmenuIndexInfo,
+        spi_mem_scene_saved_file_menu_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Delete",
+        SPIMemSceneSavedFileMenuSubmenuIndexDelete,
         spi_mem_scene_saved_file_menu_submenu_callback,
         app);
     submenu_set_selected_item(
@@ -43,6 +50,10 @@ bool spi_mem_scene_saved_file_menu_on_event(void* context, SceneManagerEvent eve
         scene_manager_set_scene_state(app->scene_manager, SPIMemSceneSavedFileMenu, event.event);
         if(event.event == SPIMemSceneSavedFileMenuSubmenuIndexDelete) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneDeleteConfirm);
+            success = true;
+        }
+        if(event.event == SPIMemSceneSavedFileMenuSubmenuIndexInfo) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneFileInfo);
             success = true;
         }
     }
