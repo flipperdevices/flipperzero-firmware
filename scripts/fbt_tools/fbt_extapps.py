@@ -6,6 +6,7 @@ import SCons.Warnings
 from fbt.elfmanifest import assemble_manifest_data
 from fbt.appmanifest import FlipperApplication, FlipperManifestException
 from fbt.sdk.cache import SdkCache
+from fbt.util import extract_abs_dir_path
 
 import os
 import pathlib
@@ -84,7 +85,12 @@ def BuildAppElf(env, app):
                 *lib_def.cflags,
             ],
             CPPDEFINES=lib_def.cdefines,
-            CPPPATH=list(map(app._appdir.Dir, lib_def.cincludes)),
+            CPPPATH=list(
+                map(
+                    lambda cpath: extract_abs_dir_path(app._appdir.Dir(cpath)),
+                    lib_def.cincludes,
+                )
+            ),
         )
 
         lib = private_lib_env.StaticLibrary(
