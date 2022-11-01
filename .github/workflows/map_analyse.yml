@@ -1,4 +1,4 @@
-name: 'Analyze .map file with Amap'
+name: 'Analyze .map file with mapser'
 
 on:
   push:
@@ -13,17 +13,17 @@ env:
   TARGETS: f7
 
 jobs:
-  amap_analyse:
+  mapser_analyse:
     if: ${{ !github.event.pull_request.head.repo.fork }}
     runs-on: [self-hosted,FlipperZeroMacShell]
     timeout-minutes: 15
     steps:
       - name: 'Wait Build workflow'
-        uses: fountainhead/action-wait-for-check@v1.0.0
+        uses: fountainhead/action-wait-for-check@v1.1.0
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: 'main'
+          checkName: 'build-main'
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           intervalSeconds: 20
 
@@ -71,32 +71,15 @@ jobs:
               ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:"${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${BRANCH_NAME}/" artifacts/;
           rm ./deploy_key;
 
-      - name: 'Make .map file analyze'
-        run: |
-          cd artifacts/
-          /Applications/amap/Contents/MacOS/amap -f "flipper-z-f7-firmware-${SUFFIX}.elf.map"
-
       - name: 'Upload report to DB'
         run: |
           FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
-          get_size()
-          {
-            SECTION="$1";
-            arm-none-eabi-size \
-              -A artifacts/flipper-z-f7-firmware-$SUFFIX.elf \
-              | grep "^$SECTION" | awk '{print $2}'
-          }
-          export BSS_SIZE="$(get_size ".bss")"
-          export TEXT_SIZE="$(get_size ".text")"
-          export RODATA_SIZE="$(get_size ".rodata")"
-          export DATA_SIZE="$(get_size ".data")"
-          export FREE_FLASH_SIZE="$(get_size ".free_flash")"
-          python3 -m pip install mariadb
-          python3 scripts/amap_mariadb_insert.py \
-            ${{ secrets.AMAP_MARIADB_USER }} \
-            ${{ secrets.AMAP_MARIADB_PASSWORD }} \
-            ${{ secrets.AMAP_MARIADB_HOST }} \
-            ${{ secrets.AMAP_MARIADB_PORT }} \
-            ${{ secrets.AMAP_MARIADB_DATABASE }} \
-            artifacts/flipper-z-f7-firmware-$SUFFIX.elf.map.all
+          python3 -m pip install mariadb mapser
+          python3 scripts/analyse_map.py \
+            ${{ secrets.MAP_ANALYSE_MARIADB_USER }} \
+            ${{ secrets.MAP_ANALYSE_MARIADB_PASSWORD }} \
+            ${{ secrets.MAP_ANALYSE_MARIADB_HOST }} \
+            ${{ secrets.MAP_ANALYSE_MARIADB_PORT }} \
+            ${{ secrets.MAP_ANALYSE_MARIADB_DATABASE }} \
+            artifacts/flipper-z-f7-firmware-${SUFFIX}.elf.map
 
