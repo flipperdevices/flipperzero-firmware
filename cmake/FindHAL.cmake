@@ -23,7 +23,7 @@ function(get_list_hal_drivers out_list_hal_drivers hal_drivers_path hal_driver_t
         "${hal_drivers_path}/Src/*.c")
     # For all matched .c files keep only those with a driver name pattern (e.g. stm32xx_hal_rcc.c)
     list(FILTER filtered_files INCLUDE REGEX ${file_pattern})
-    # Retrieve the driver type using the regex's first parenthesis match
+    # From the files names keep only the driver type part using the regex (stm32xx_hal_(rcc).c or stm32xx_ll_(rcc).c => catches rcc)
     list(TRANSFORM filtered_files REPLACE ${file_pattern} "\\1")
     #Making a return by reference by seting the output variable to PARENT_SCOPE
     set(${out_list_hal_drivers} ${filtered_files} PARENT_SCOPE)
