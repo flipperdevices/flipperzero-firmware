@@ -91,6 +91,8 @@ int32_t nfc_worker_task(void* context) {
 
     if(nfc_worker->state == NfcWorkerStateRead) {
         nfc_worker_read(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateReadMfClassic) {
+        nfc_worker_read_mifare_classic(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateUidEmulate) {
         nfc_worker_emulate_uid(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateApdu) {
@@ -378,6 +380,54 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             } else if(nfc_data->type == FuriHalNfcTypeV) {
                 event = NfcWorkerEventReadUidNfcV;
                 break;
+            }
+        } else {
+            if(!card_not_detected_notified) {
+                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
+                card_not_detected_notified = true;
+            }
+        }
+        furi_hal_nfc_sleep();
+        furi_delay_ms(100);
+    }
+    // Notify caller and exit
+    if(event > NfcWorkerEventReserved) {
+        nfc_worker->callback(event, nfc_worker->context);
+    }
+}
+
+void nfc_worker_read_mifare_classic(NfcWorker* nfc_worker) {
+    furi_assert(nfc_worker);
+    furi_assert(nfc_worker->callback);
+
+    nfc_device_data_clear(nfc_worker->dev_data);
+    NfcDeviceData* dev_data = nfc_worker->dev_data;
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    FuriHalNfcTxRxContext tx_rx = {};
+    NfcWorkerEvent event = 0;
+    bool card_not_detected_notified = false;
+
+    while(nfc_worker->state == NfcWorkerStateReadMfClassic) {
+        if(furi_hal_nfc_detect(nfc_data, 300)) {
+            FURI_LOG_D(TAG, "Card detected");
+            // Process first found device
+            nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+            card_not_detected_notified = false;
+            if(nfc_data->type == FuriHalNfcTypeA) {
+                nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
+                nfc_worker->dev_data->mf_classic_data.type = mf_classic_get_classic_type(
+                    nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+                if(nfc_worker_read_mf_classic(nfc_worker, &tx_rx)) {
+                    FURI_LOG_D(TAG, "Card read");
+                    dev_data->protocol = NfcDeviceProtocolMifareClassic;
+                    event = NfcWorkerEventReadMfClassicDone;
+                    break;
+                } else {
+                    FURI_LOG_D(TAG, "Card read failed");
+                    dev_data->protocol = NfcDeviceProtocolMifareClassic;
+                    event = NfcWorkerEventReadMfClassicDictAttackRequired;
+                    break;
+                }
             }
         } else {
             if(!card_not_detected_notified) {
