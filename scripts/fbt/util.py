@@ -1,11 +1,11 @@
 import SCons
 from SCons.Subst import quote_spaces
 from SCons.Errors import StopError
+from SCons.Node.FS import _my_normcase
 
 import re
 import os
-import random
-import string
+
 
 WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
 
@@ -41,3 +41,14 @@ def link_dir(target_path, source_path, is_windows):
 
 def single_quote(arg_list):
     return " ".join(f"'{arg}'" if " " in arg else str(arg) for arg in arg_list)
+
+
+def extract_abs_dir_path(node_proxy):
+    node = node_proxy.get()
+
+    for repo_dir in node.dir.get_all_rdirs():
+        repo_subdir = repo_dir.Dir(node.name, create=False)
+        if repo_subdir is not None and os.path.exists(repo_subdir.abspath):
+            return repo_subdir.abspath
+
+    raise StopError(f"Can't find absolute path for {node.name}")

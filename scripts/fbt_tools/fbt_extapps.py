@@ -1,15 +1,17 @@
-import shutil
 from SCons.Builder import Builder
 from SCons.Action import Action
 from SCons.Errors import UserError
 import SCons.Warnings
 
-import os
-import pathlib
 from fbt.elfmanifest import assemble_manifest_data
 from fbt.appmanifest import FlipperApplication, FlipperManifestException
 from fbt.sdk.cache import SdkCache
+
+import os
+import pathlib
 import itertools
+import shutil
+
 from ansi.color import fg
 
 
@@ -62,7 +64,7 @@ def BuildAppElf(env, app):
         lib_src_root_path = os.path.join(app_work_dir, "lib", lib_def.name)
         app_env.AppendUnique(
             CPPPATH=list(
-                app_env.Dir(lib_src_root_path).Dir(incpath).srcnode()
+                app_env.Dir(lib_src_root_path).Dir(incpath).srcnode().rfile().abspath
                 for incpath in lib_def.fap_include_paths
             ),
         )
@@ -157,7 +159,6 @@ def prepare_app_metadata(target, source, env):
     app = env["APP"]
     meta_file_name = source[0].path + ".meta"
     with open(meta_file_name, "wb") as f:
-        # f.write(f"hello this is {app}")
         f.write(
             assemble_manifest_data(
                 app_manifest=app,

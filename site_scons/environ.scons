@@ -1,5 +1,10 @@
 from SCons.Platform import TempFileMunge
-from fbt.util import tempfile_arg_esc_func, single_quote, wrap_tempfile
+from fbt.util import (
+    tempfile_arg_esc_func,
+    single_quote,
+    wrap_tempfile,
+    extract_abs_dir_path,
+)
 
 import os
 import multiprocessing
@@ -53,6 +58,7 @@ coreenv = VAR_ENV.Clone(
     PROGSUFFIX=".elf",
     ENV=forward_os_env,
     SINGLEQUOTEFUNC=single_quote,
+    ABSPATHGETTERFUNC=extract_abs_dir_path,
     # Setting up temp file parameters - to overcome command line length limits
     TEMPFILEARGESCFUNC=tempfile_arg_esc_func,
     FBT_SCRIPT_DIR=Dir("#/scripts"),

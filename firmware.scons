@@ -1,6 +1,7 @@
 Import("ENV", "fw_build_meta")
 
 from SCons.Errors import UserError
+from SCons.Node import FS
 import itertools
 
 from fbt_extra.util import (
@@ -131,7 +132,14 @@ if extra_int_apps := GetOption("extra_int_apps"):
 if fwenv["FAP_EXAMPLES"]:
     fwenv.Append(APPDIRS=[("applications/examples", False)])
 
-fwenv.LoadApplicationManifests()
+for app_dir, _ in env["APPDIRS"]:
+    app_dir_node = env.Dir("#").Dir(app_dir)
+
+    for entry in app_dir_node.glob("*"):
+        if isinstance(entry, FS.Dir) and not str(entry).startswith("."):
+            fwenv.LoadAppManifest(entry)
+
+
 fwenv.PrepareApplicationsBuild()
 
 # Build external apps
