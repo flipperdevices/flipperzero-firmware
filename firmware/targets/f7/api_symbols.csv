@@ -2662,8 +2662,6 @@ Function,-,ynf,float,"int, float"
 Variable,-,AHBPrescTable,const uint32_t[16],
 Variable,-,APBPrescTable,const uint32_t[8],
 Variable,-,ITM_RxBuffer,volatile int32_t,
-<<<<<<< HEAD
-=======
 Variable,+,I_125_10px,const Icon,
 Variable,+,I_ActiveConnection_50x64,const Icon,
 Variable,+,I_ArrowC_1_36x36,const Icon,
@@ -2831,7 +2829,6 @@ Variable,+,I_sub1_10px,const Icon,
 Variable,+,I_u2f_10px,const Icon,
 Variable,+,I_unknown_10px,const Icon,
 Variable,+,I_update_10px,const Icon,
->>>>>>> 2b21d68e (Add BadUSB Layout)
 Variable,-,MSIRangeTable,const uint32_t[16],
 Variable,-,SmpsPrescalerTable,const uint32_t[4][6],
 Variable,+,SystemCoreClock,uint32_t,
