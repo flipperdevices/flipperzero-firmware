@@ -73,7 +73,7 @@ jobs:
 
       - name: 'Upload report to DB'
         run: |
-          FBT_TOOLCHAIN_PATH=/opt source scripts/toolchain/fbtenv.sh
+          FBT_TOOLCHAIN_PATH=/runner/_work source scripts/toolchain/fbtenv.sh
           python3 -m pip install mariadb mapser
           python3 scripts/analyse_map.py \
             ${{ secrets.MAP_ANALYSE_MARIADB_USER }} \
