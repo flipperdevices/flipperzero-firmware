@@ -51,7 +51,7 @@ bool nfc_magic_scene_write_confirm_on_event(void* context, SceneManagerEvent eve
         if(event.event == GuiButtonTypeLeft) {
             consumed = scene_manager_previous_scene(nfc_magic->scene_manager);
         } else if(event.event == GuiButtonTypeCenter) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWrite);
             consumed = true;
         }
     }

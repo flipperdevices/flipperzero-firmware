@@ -5,6 +5,7 @@
 // #include "nfc_magic_device.h"
 
 // #include "rfal_nfc_magic.h"
+#include "lib/magic/magic.h"
 
 #include <furi.h>
 #include <gui/gui.h>
