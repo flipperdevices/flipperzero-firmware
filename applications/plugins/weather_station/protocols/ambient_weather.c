@@ -5,7 +5,7 @@
 
 /*
  * Help
- * https://github.com/merbanan/rtl_433/blob/5f0ff6db624270a4598958ab9dd79bb385ced3ef/src/devices/gt_wt_03.c
+ * https://github.com/merbanan/rtl_433/blob/master/src/devices/ambient_weather.c
  * 
  * Decode Ambient Weather F007TH, F012TH, TF 30.3208.02, SwitchDoc F016TH.
  * Devices supported:
@@ -33,7 +33,7 @@
 
 #define AMBIENT_WEATHER_PACKET_HEADER_1 0xFFD440000000000 //0xffd45 .. 0xffd46
 #define AMBIENT_WEATHER_PACKET_HEADER_2 0x001440000000000 //0x00145 .. 0x00146
-#define AMBIENT_WEATHER_PACKET_HEADER_MASK 0xFFFFC0000000000 //FC
+#define AMBIENT_WEATHER_PACKET_HEADER_MASK 0xFFFFC0000000000
 
 static const SubGhzBlockConst ws_protocol_ambient_weather_const = {
     .te_short = 500,
