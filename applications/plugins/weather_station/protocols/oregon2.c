@@ -19,7 +19,7 @@ static const SubGhzBlockConst ws_oregon2_const = {
 };
 
 #define OREGON2_PREAMBLE_BITS 19
-#define OREGON2_PREAMBLE_MASK ((1 << (OREGON2_PREAMBLE_BITS + 1)) - 1)
+#define OREGON2_PREAMBLE_MASK 0b1111111111111111111
 #define OREGON2_SENSOR_ID(d) (((d) >> 16) & 0xFFFF)
 #define OREGON2_CHECKSUM_BITS 8
 
@@ -28,6 +28,40 @@ static const SubGhzBlockConst ws_oregon2_const = {
 
 // bit indicating the low battery
 #define OREGON2_FLAG_BAT_LOW 0x4
+
+/// Documentation for Oregon Scientific protocols can be found here:
+/// http://wmrx00.sourceforge.net/Arduino/OregonScientific-RF-Protocols.pdf
+// Sensors ID
+#define ID_THGR122N 0x1d20
+#define ID_THGR968 0x1d30
+#define ID_BTHR918 0x5d50
+#define ID_BHTR968 0x5d60
+#define ID_RGR968 0x2d10
+#define ID_THR228N 0xec40
+#define ID_THN132N 0xec40 // same as THR228N but different packet size
+#define ID_RTGN318 0x0cc3 // warning: id is from 0x0cc3 and 0xfcc3
+#define ID_RTGN129 0x0cc3 // same as RTGN318 but different packet size
+#define ID_THGR810 0xf824 // This might be ID_THGR81, but what's true is lost in (git) history
+#define ID_THGR810a 0xf8b4 // unconfirmed version
+#define ID_THN802 0xc844
+#define ID_PCR800 0x2914
+#define ID_PCR800a 0x2d14 // Different PCR800 ID - AU version I think
+#define ID_WGR800 0x1984
+#define ID_WGR800a 0x1994 // unconfirmed version
+#define ID_WGR968 0x3d00
+#define ID_UV800 0xd874
+#define ID_THN129 0xcc43 // THN129 Temp only
+#define ID_RTHN129 0x0cd3 // RTHN129 Temp, clock sensors
+#define ID_BTHGN129 0x5d53 // Baro, Temp, Hygro sensor
+#define ID_UVR128 0xec70
+#define ID_THGR328N 0xcc23 // Temp & Hygro sensor similar to THR228N with 5 channel instead of 3
+#define ID_RTGR328N_1 0xdcc3 // RTGR328N_[1-5] RFclock(date &time)&Temp&Hygro sensor
+#define ID_RTGR328N_2 0xccc3
+#define ID_RTGR328N_3 0xbcc3
+#define ID_RTGR328N_4 0xacc3
+#define ID_RTGR328N_5 0x9cc3
+#define ID_RTGR328N_6 0x8ce3 // RTGR328N_6&7 RFclock(date &time)&Temp&Hygro sensor like THGR328N
+#define ID_RTGR328N_7 0x8ae3
 
 struct WSProtocolDecoderOregon2 {
     SubGhzProtocolDecoderBase base;
@@ -101,8 +135,12 @@ static ManchesterEvent level_and_duration_to_event(bool level, uint32_t duration
 }
 
 // From sensor id code return amount of bits in variable section
+// https://temofeev.ru/info/articles/o-dekodirovanii-protokola-pogodnykh-datchikov-oregon-scientific
 static uint8_t oregon2_sensor_id_var_bits(uint16_t sensor_id) {
-    if(sensor_id == 0xEC40) return 16;
+    if(sensor_id == ID_THR228N) return 16;
+
+    if(sensor_id == ID_THGR122N) return 24;
+
     return 0;
 }
 
@@ -119,18 +157,31 @@ static void ws_oregon2_decode_const_data(WSBlockGeneric* ws_block) {
     ws_block->battery_low = (ws_block->data & OREGON2_FLAG_BAT_LOW) ? 1 : 0;
 }
 
-static void
-    ws_oregon2_decode_var_data(WSBlockGeneric* ws_block, uint16_t sensor_id, uint32_t var_data) {
-    int16_t temp_val;
-    if(sensor_id == 0xEC40) {
-        temp_val = ((var_data >> 4) & 0xF) * 10 + ((var_data >> 8) & 0xF);
-        temp_val *= 10;
-        temp_val += (var_data >> 12) & 0xF;
-        if(var_data & 0xF) temp_val = -temp_val;
-    } else
-        return;
+uint16_t bcd_decode_short(uint32_t data) {
+    return (data & 0xF) * 10 + ((data >> 4) & 0xF);
+}
 
-    ws_block->temp = (float)temp_val / 10.0;
+static float ws_oregon2_decode_temp(uint32_t data) {
+    int32_t temp_val;
+    temp_val = bcd_decode_short(data >> 4);
+    temp_val *= 10;
+    temp_val += (data >> 12) & 0xF;
+    if(data & 0xF) temp_val = -temp_val;
+    return (float)temp_val / 10.0;
+}
+
+static void ws_oregon2_decode_var_data(WSBlockGeneric* ws_b, uint16_t sensor_id, uint32_t data) {
+    if(sensor_id == ID_THR228N) {
+        ws_b->temp = ws_oregon2_decode_temp(data);
+        ws_b->humidity = WS_NO_HUMIDITY;
+        return;
+    }
+
+    if(sensor_id == ID_THGR122N) {
+        ws_b->humidity = bcd_decode_short(data);
+        ws_b->temp = ws_oregon2_decode_temp(data >> 8);
+        return;
+    }
 }
 
 void ws_protocol_decoder_oregon2_feed(void* context, bool level, uint32_t duration) {
@@ -346,9 +397,8 @@ const SubGhzProtocolDecoder ws_protocol_oregon2_decoder = {
 
 const SubGhzProtocol ws_protocol_oregon2 = {
     .name = WS_PROTOCOL_OREGON2_NAME,
-    .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+    .type = SubGhzProtocolWeatherStation,
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
 
     .decoder = &ws_protocol_oregon2_decoder,
 };
