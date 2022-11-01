@@ -31,9 +31,15 @@ endfunction()
 
 ################################################################################
 # Checking the parameters provided to the find_package(HAL ...) call
-# The expected parameters are families and or drivers
+# The expected parameters are families and or drivers in *any orders*
+# Families are valid if on the list of known families.
+# Drivers are valid if on the list of valid driver of any family. For this
+# reason the requested families must be processed in two steps
+#  - Step 1 : Checking all the requested families
+#  - Step 2 : Generating all the valid drivers from requested families
+#  - Step 3 : Checking the other requested components (Expected to be drivers)
 ################################################################################
-# Checking all the requested families before looking for drivers
+# Step 1 : Checking all the requested families
 foreach(COMP ${HAL_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP_U)
     string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
@@ -50,7 +56,7 @@ if(NOT HAL_FIND_COMPONENTS_FAMILIES)
     set(HAL_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
 endif()
 
-# Look for available drivers for all requested families
+# Step 2 : Generating all the valid drivers from requested families
 foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
     string(TOUPPER ${family_comp} family_comp)
     string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" family_comp ${family_comp})
@@ -76,11 +82,10 @@ foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
     else()
     endif()
 endforeach()
-message("P2H HAL drivers are ${HAL_DRIVERS}")
 list(REMOVE_DUPLICATES HAL_DRIVERS)
 list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
 
-# Checking all the requested drivers
+# Step 3 : Checking the other requested components (Expected to be drivers)
 foreach(COMP ${HAL_FIND_COMPONENTS_UNHANDLED})
     string(TOLOWER ${COMP} COMP_L)
     
