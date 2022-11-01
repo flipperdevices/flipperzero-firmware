@@ -8,7 +8,7 @@
 function(get_list_hal_drivers out_list_hal_drivers hal_drivers_path hal_driver_type)
     #The pattern to retrieve a driver from a file name depends on the hal_driver_type field
     if(${hal_driver_type} STREQUAL "hal" OR ${hal_driver_type} STREQUAL "ll")
-        #This regex match and capture a driver type (stm32xx_hal_(rcc).c => catches rcc) 
+        #This regex match and capture a driver type (stm32xx_hal_(rcc).c or stm32xx_ll_(rcc).c => catches rcc) 
         set(file_pattern ".+_${hal_driver_type}_([a-z0-9]+)\\.c$")
     elseif(${hal_driver_type} STREQUAL "ex")
         #This regex match and capture a driver type (stm32xx_hal_(rcc)_ex.c => catches rcc) 
@@ -33,7 +33,7 @@ endfunction()
 # Checking the parameters provided to the find_package(HAL ...) call
 # The expected parameters are families and or drivers
 ################################################################################
-#Checking all the requested families before looking for drivers
+# Checking all the requested families before looking for drivers
 foreach(COMP ${HAL_FIND_COMPONENTS})
     string(TOUPPER ${COMP} COMP_U)
     string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
@@ -80,7 +80,7 @@ message("P2H HAL drivers are ${HAL_DRIVERS}")
 list(REMOVE_DUPLICATES HAL_DRIVERS)
 list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
 
-#Checkinf all the requested drivers
+# Checking all the requested drivers
 foreach(COMP ${HAL_FIND_COMPONENTS_UNHANDLED})
     string(TOLOWER ${COMP} COMP_L)
     
