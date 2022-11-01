@@ -287,7 +287,7 @@
  */
 #define rfalCreateByteFlagsTxRxContext(ctx, tB, tBL, rB, rBL, rdL, fl, t) \
     (ctx).txBuf = (uint8_t*)(tB);                                         \
-    (ctx).txBufLen = (uint16_t)rfalConvBytesToBits(tBL);                  \
+    (ctx).txBufLen = (uint16_t)(tBL);                                     \
     (ctx).rxBuf = (uint8_t*)(rB);                                         \
     (ctx).rxBufLen = (uint16_t)rfalConvBytesToBits(rBL);                  \
     (ctx).rxRcvdLen = (uint16_t*)(rdL);                                   \
