@@ -81,7 +81,7 @@ def add_set_output_var(name, value, file):
     print("{" + name + "}={" + data["commit_sha"] + "}")
 
 
-def add_envs(data, gh_env_file, args):
+def add_envs(data, gh_env_file, gh_out_file, args):
     add_env("COMMIT_MSG", data["commit_comment"], gh_env_file)
     add_env("COMMIT_HASH", data["commit_hash"], gh_env_file)
     add_env("COMMIT_SHA", data["commit_sha"], gh_env_file)
