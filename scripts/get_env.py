@@ -78,7 +78,7 @@ def add_env(name, value, file):
 
 
 def add_set_output_var(name, value, file):
-    print("{" + name + "}={" + data["commit_sha"] + "}")
+    print("{" + name + "}={" + value + "}", file=file)
 
 
 def add_envs(data, gh_env_file, gh_out_file, args):
