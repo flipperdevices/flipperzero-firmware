@@ -21,12 +21,12 @@ void infrared_encoder_kaseikyo_reset(void* encoder_ptr, const InfraredMessage* m
 
     encoder->data[0] = (uint8_t)(vendor_id & 0xff);
     encoder->data[1] = (uint8_t)(vendor_id >> 8);
-    uint8_t vendor_parity = encoder->data[0]^encoder->data[1];
-    vendor_parity = (vendor_parity&0xf) ^ (vendor_parity>>4);
+    uint8_t vendor_parity = encoder->data[0] ^ encoder->data[1];
+    vendor_parity = (vendor_parity & 0xf) ^ (vendor_parity >> 4);
     encoder->data[2] = (vendor_parity & 0xf) | (genre1 << 4);
     encoder->data[3] = (genre2 & 0xf) | ((uint8_t)(command & 0xf) << 4);
     encoder->data[4] = (id << 6) | (uint8_t)(command >> 4);
-    encoder->data[5] = encoder->data[2]^encoder->data[3]^encoder->data[4];
+    encoder->data[5] = encoder->data[2] ^ encoder->data[3] ^ encoder->data[4];
 
     encoder->bits_to_encode = encoder->protocol->databit_len[0];
 }

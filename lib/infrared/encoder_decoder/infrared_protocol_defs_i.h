@@ -283,10 +283,10 @@ extern const InfraredCommonProtocolSpec protocol_sirc;
 ***************************************************************************************************/
 
 #define INFRARED_KASEIKYO_UNIT 432
-#define INFRARED_KASEIKYO_PREAMBLE_MARK (8*INFRARED_KASEIKYO_UNIT)
-#define INFRARED_KASEIKYO_PREAMBLE_SPACE (4*INFRARED_KASEIKYO_UNIT)
+#define INFRARED_KASEIKYO_PREAMBLE_MARK (8 * INFRARED_KASEIKYO_UNIT)
+#define INFRARED_KASEIKYO_PREAMBLE_SPACE (4 * INFRARED_KASEIKYO_UNIT)
 #define INFRARED_KASEIKYO_BIT1_MARK INFRARED_KASEIKYO_UNIT
-#define INFRARED_KASEIKYO_BIT1_SPACE (3*INFRARED_KASEIKYO_UNIT)
+#define INFRARED_KASEIKYO_BIT1_SPACE (3 * INFRARED_KASEIKYO_UNIT)
 #define INFRARED_KASEIKYO_BIT0_MARK INFRARED_KASEIKYO_UNIT
 #define INFRARED_KASEIKYO_BIT0_SPACE INFRARED_KASEIKYO_UNIT
 #define INFRARED_KASEIKYO_REPEAT_PERIOD 130000
@@ -295,7 +295,7 @@ extern const InfraredCommonProtocolSpec protocol_sirc;
 #define INFRARED_KASEIKYO_REPEAT_PAUSE_MIN 4000
 #define INFRARED_KASEIKYO_REPEAT_PAUSE_MAX 150000
 #define INFRARED_KASEIKYO_REPEAT_MARK INFRARED_KASEIKYO_PREAMBLE_MARK
-#define INFRARED_KASEIKYO_REPEAT_SPACE (INFRARED_KASEIKYO_REPEAT_PERIOD-56000)
+#define INFRARED_KASEIKYO_REPEAT_SPACE (INFRARED_KASEIKYO_REPEAT_PERIOD - 56000)
 #define INFRARED_KASEIKYO_PREAMBLE_TOLERANCE 200 // us
 #define INFRARED_KASEIKYO_BIT_TOLERANCE 120 // us
 
@@ -305,7 +305,8 @@ void infrared_decoder_kaseikyo_free(void* decoder);
 InfraredMessage* infrared_decoder_kaseikyo_check_ready(void* decoder);
 InfraredMessage* infrared_decoder_kaseikyo_decode(void* decoder, bool level, uint32_t duration);
 void* infrared_encoder_kaseikyo_alloc(void);
-InfraredStatus infrared_encoder_kaseikyo_encode(void* encoder_ptr, uint32_t* duration, bool* level);
+InfraredStatus
+    infrared_encoder_kaseikyo_encode(void* encoder_ptr, uint32_t* duration, bool* level);
 void infrared_encoder_kaseikyo_reset(void* encoder_ptr, const InfraredMessage* message);
 void infrared_encoder_kaseikyo_free(void* encoder_ptr);
 bool infrared_decoder_kaseikyo_interpret(InfraredCommonDecoder* decoder);

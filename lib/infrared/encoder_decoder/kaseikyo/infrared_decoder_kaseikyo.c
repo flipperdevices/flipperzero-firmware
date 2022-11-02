@@ -21,13 +21,14 @@ bool infrared_decoder_kaseikyo_interpret(InfraredCommonDecoder* decoder) {
     uint8_t id = decoder->data[4] >> 6;
     uint8_t parity = decoder->data[5];
 
-    uint8_t vendor_parity_check = decoder->data[0]^decoder->data[1];
-    vendor_parity_check = (vendor_parity_check&0xf) ^ (vendor_parity_check>>4);
-    uint8_t parity_check = decoder->data[2]^decoder->data[3]^decoder->data[4];
+    uint8_t vendor_parity_check = decoder->data[0] ^ decoder->data[1];
+    vendor_parity_check = (vendor_parity_check & 0xf) ^ (vendor_parity_check >> 4);
+    uint8_t parity_check = decoder->data[2] ^ decoder->data[3] ^ decoder->data[4];
 
-    if (vendor_parity == vendor_parity_check && parity == parity_check) {
+    if(vendor_parity == vendor_parity_check && parity == parity_check) {
         decoder->message.command = (uint32_t)data;
-        decoder->message.address = ((uint32_t)id << 24) | ((uint32_t)vendor_id << 8) | ((uint32_t)genre1 << 4) | (uint32_t)genre2;
+        decoder->message.address = ((uint32_t)id << 24) | ((uint32_t)vendor_id << 8) |
+                                   ((uint32_t)genre1 << 4) | (uint32_t)genre2;
         decoder->message.protocol = InfraredProtocolKaseikyo;
         decoder->message.repeat = false;
         result = true;
