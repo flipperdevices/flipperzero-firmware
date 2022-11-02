@@ -28,10 +28,10 @@ jobs:
           pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
       - name: Build
         run: |
-          ./pvs-build
+          pvs-studio-analyzer trace -- ./pvs-build
       - name: Analyze
         run: |
-          pvs-studio-analyzer analyze @.pvsoptions -j$(grep -c processor /proc/cpuinfo) -f flipperzero-firmware_unleashed/build/f7-firmware-DC/compile_commands.json 
+          pvs-studio-analyzer analyze @.pvsoptions -j$(grep -c processor /proc/cpuinfo)
       - name: Convert report
         run: |
           plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
