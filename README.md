@@ -28,7 +28,7 @@ you will need: 1 ESP8266 (I recommend ESP01 for the size) and 2 buttons.
 - Type the name of the event, "button_pressed".
 - Final URL should appear at the bottom of the web page. We'll need to copy that URL.
 
-Open the application for the first time, an ifttt folder will be created on the root of the SD with another config folder inside.
-Here you will find the config.settings file, open the file with a text editor and change the values ​​for the wifi connection and the IFTTT account.
+#Open the application for the first time, an ifttt folder will be created on the root of the SD with another config folder inside.
+#Here you will find the config.settings file, open the file with a text editor and change the values ​​for the wifi connection and the IFTTT account.
 
 COMPILE AND FLASH YOUR ESP8266!!!
