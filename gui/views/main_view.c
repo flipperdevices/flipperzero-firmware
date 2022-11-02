@@ -155,7 +155,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontSecondary);
     snprintf(str, sizeof(str), "lx: %d", lux);
-    canvas_draw_str_aligned(canvas, 90, 8, AlignLeft, AlignBottom, str);
+    canvas_draw_str_aligned(canvas, 90, 9, AlignLeft, AlignBottom, str);
 
     // add f, T values
     if(model->current_mode == FIXED_APERTURE) {
