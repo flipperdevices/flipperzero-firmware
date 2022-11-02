@@ -14,6 +14,7 @@
 - [ ] Popup window when no sensor detected
 - [ ] Flash light metering
 - [ ] Cleanup code
+- [ ] Draw suitable icon
 
 ## Wiring
 
