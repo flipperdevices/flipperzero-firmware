@@ -58,13 +58,6 @@ struct WSProtocolEncoderAmbient_Weather {
     WSBlockGeneric generic;
 };
 
-typedef enum {
-    Ambient_WeatherDecoderStepReset = 0,
-    Ambient_WeatherDecoderStepCheckPreambule,
-    Ambient_WeatherDecoderStepSaveDuration,
-    Ambient_WeatherDecoderStepCheckDuration,
-} Ambient_WeatherDecoderStep;
-
 const SubGhzProtocolDecoder ws_protocol_ambient_weather_decoder = {
     .alloc = ws_protocol_decoder_ambient_weather_alloc,
     .free = ws_protocol_decoder_ambient_weather_free,
