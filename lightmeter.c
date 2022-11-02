@@ -21,6 +21,9 @@ static void lightmeter_tick_event_callback(void* context) {
 LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     LightMeterApp* lightmeter = malloc(sizeof(LightMeterApp));
 
+    // send Power on command
+    send_command(0x01);
+
     lightmeter->config = malloc(sizeof(LightMeterConfig));
     lightmeter->config->iso = 0;
     lightmeter->config->nd = 0;
@@ -42,7 +45,7 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     view_dispatcher_set_navigation_event_callback(
         lightmeter->view_dispatcher, lightmeter_back_event_callback);
     view_dispatcher_set_tick_event_callback(
-        lightmeter->view_dispatcher, lightmeter_tick_event_callback, 2000);
+        lightmeter->view_dispatcher, lightmeter_tick_event_callback, furi_ms_to_ticks(200));
     view_dispatcher_attach_to_gui(
         lightmeter->view_dispatcher, lightmeter->gui, ViewDispatcherTypeFullscreen);
 
@@ -85,6 +88,9 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
         lightmeter->notifications,
         &sequence_display_backlight_enforce_auto); // set backlight back to auto
     furi_record_close(RECORD_NOTIFICATION);
+    // send power down command
+    send_command(0x00);
+
     free(lightmeter);
 }
 
@@ -99,4 +105,13 @@ int32_t lightmeter_app(void* p) {
 
 void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* config) {
     lightmeter->config = config;
+}
+
+void send_command(uint8_t command) {
+    uint32_t timeout = furi_ms_to_ticks(100);
+    uint8_t recv[2];
+    furi_hal_i2c_acquire(I2C_BUS);
+    uint8_t address = 0x23 << 1;
+    furi_hal_i2c_trx(I2C_BUS, address, &command, sizeof(command), recv, sizeof(recv), timeout);
+    furi_hal_i2c_release(I2C_BUS);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include <furi_hal.h>
 
 #include <gui/gui.h>
 #include <gui/view.h>
@@ -45,3 +46,5 @@ typedef enum {
 } LightMeterAppCustomEvent;
 
 void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config);
+
+void send_command(uint8_t command);
