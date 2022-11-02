@@ -1,7 +1,6 @@
 from re import search
 
 from SCons.Errors import UserError
-from fbt_options import OPENOCD_OPTS
 
 
 def _get_device_serials(search_str="STLink"):
