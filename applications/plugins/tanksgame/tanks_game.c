@@ -550,8 +550,8 @@ unsigned char* tanks_game_serialize(const TanksState* const tanks_state) {
             case DirectionLeft:
                 cell = CellEnemyLeft;
                 break;
-			default:
-				break;
+            default:
+                break;
             }
 
             tanks_game_write_cell(
@@ -579,8 +579,8 @@ unsigned char* tanks_game_serialize(const TanksState* const tanks_state) {
             case DirectionLeft:
                 cell = CellProjectileLeft;
                 break;
-			default:
-				break;
+            default:
+                break;
             }
 
             tanks_game_write_cell(
@@ -607,8 +607,8 @@ unsigned char* tanks_game_serialize(const TanksState* const tanks_state) {
         case DirectionLeft:
             cell = CellTankLeft;
             break;
-		default:
-			break;
+        default:
+            break;
         }
 
         tanks_game_write_cell(
@@ -631,8 +631,8 @@ unsigned char* tanks_game_serialize(const TanksState* const tanks_state) {
         case DirectionLeft:
             cell = CellTankLeft;
             break;
-		default:
-			break;
+        default:
+            break;
         }
 
         tanks_game_write_cell(
@@ -1251,8 +1251,8 @@ static Point tanks_game_get_next_step(Point coordinates, Direction direction) {
     case DirectionLeft:
         next_step.x--;
         break;
-	default:
-		break;
+    default:
+        break;
     }
     return next_step;
 }
@@ -1709,8 +1709,8 @@ int32_t tanks_game_app(void* p) {
                     case InputKeyBack:
                         processing = false;
                         break;
-					default:
-						break;
+                    default:
+                        break;
                     }
                 }
             } else if(event.type == EventTypeTick) {

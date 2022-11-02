@@ -33,8 +33,8 @@ static void flipfrid_draw_callback(Canvas* const canvas, void* ctx) {
     case SceneLoadCustomUids:
         flipfrid_scene_load_custom_uids_on_draw(canvas, flipfrid_state);
         break;
-	default:
-		break;
+    default:
+        break;
     }
 
     release_mutex((ValueMutex*)ctx, flipfrid_state);
@@ -178,8 +178,8 @@ int32_t flipfrid_start(void* p) {
                 case SceneLoadCustomUids:
                     flipfrid_scene_load_custom_uids_on_event(event, flipfrid_state);
                     break;
-				default:
-					break;
+                default:
+                    break;
                 }
 
             } else if(event.evt_type == EventTypeTick) {
@@ -204,8 +204,8 @@ int32_t flipfrid_start(void* p) {
                         break;
                     case NoneScene:
                         break;
-					default:
-						break;
+                    default:
+                        break;
                     }
 
                     // Trigger Entry Scene
@@ -226,8 +226,8 @@ int32_t flipfrid_start(void* p) {
                     case SceneLoadCustomUids:
                         flipfrid_scene_load_custom_uids_on_enter(flipfrid_state);
                         break;
-					default:
-						break;
+                    default:
+                        break;
                     }
                     flipfrid_state->previous_scene = flipfrid_state->current_scene;
                 }
@@ -250,8 +250,8 @@ int32_t flipfrid_start(void* p) {
                 case SceneLoadCustomUids:
                     flipfrid_scene_load_custom_uids_on_tick(flipfrid_state);
                     break;
-				default:
-					break;
+                default:
+                    break;
                 }
                 view_port_update(view_port);
             }

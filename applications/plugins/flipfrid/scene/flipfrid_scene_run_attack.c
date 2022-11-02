@@ -486,8 +486,8 @@ void flipfrid_scene_run_attack_on_tick(FlipFridState* context) {
                         context->payload[i] = (uint8_t)strtol(temp_str, NULL, 16);
                     }
                     break;
-				default:
-					break;
+                default:
+                    break;
                 }
             }
         }

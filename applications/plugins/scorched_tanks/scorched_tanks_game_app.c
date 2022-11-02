@@ -515,8 +515,8 @@ int32_t scorched_tanks_game_app(void* p) {
                 case InputKeyBack:
                     processing = false;
                     break;
-				default:
-					break;
+                default:
+                    break;
                 }
             }
         } else if(event.type == EventTypeTick) {

@@ -788,8 +788,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
             canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
             canvas_draw_icon(canvas, 116, 18, &I_Pin_star_7x7);
             break;
-		default:
-			break;
+        default:
+            break;
         }
 
         //Repeat indicator
@@ -1096,8 +1096,8 @@ int32_t unirfremix_app(void* p) {
                 case 5:
                     app->send_status_c = 5;
                     break;
-				default:
-					break;
+                default:
+                    break;
                 }
 
                 app->processing = 2;

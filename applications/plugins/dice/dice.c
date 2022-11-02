@@ -556,7 +556,7 @@ int32_t dice_app(void* p) {
                         processing = false;
                         break;
                     default:
-                    	break;
+                        break;
                     }
                 }
             } else if(event.type == EventTypeTick) {
