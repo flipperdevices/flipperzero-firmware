@@ -7,7 +7,7 @@
 #include "../../types/plugin_event.h"
 
 typedef struct {
-    uint8_t current_token_index;
+    uint16_t current_token_index;
 } GenerateTokenSceneContext;
 
 void totp_scene_generate_token_init(const PluginState* plugin_state);

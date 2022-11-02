@@ -333,7 +333,7 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
     }
 
     TokenLoadingResult result = TokenLoadingResultSuccess;
-    uint8_t index = 0;
+    uint16_t index = 0;
     bool has_any_plain_secret = false;
 
     while(true) {
@@ -421,7 +421,7 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
     plugin_state->tokens_count = index;
     plugin_state->token_list_loaded = true;
 
-    FURI_LOG_D(LOGGING_TAG, "Found %" PRIu8 " tokens", index);
+    FURI_LOG_D(LOGGING_TAG, "Found %" PRIu16 " tokens", index);
 
     furi_string_free(temp_str);
     totp_close_config_file(fff_data_file);

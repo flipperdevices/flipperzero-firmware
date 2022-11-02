@@ -1,15 +1,16 @@
 #include <gui/gui.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <totp_icons.h>
 #include "totp_scene_generate_token.h"
 #include "../../types/token_info.h"
 #include "../../types/common.h"
-#include "../../services/ui/icons.h"
 #include "../../services/ui/constants.h"
 #include "../../services/totp/totp.h"
 #include "../../services/config/config.h"
 #include "../../services/crypto/crypto.h"
 #include "../../services/crypto/memset_s.h"
+#include "../../services/roll_value/roll_value.h"
 #include "../scene_director.h"
 #include "../token_menu/totp_scene_token_menu.h"
 
@@ -17,7 +18,7 @@
 #define DIGIT_TO_CHAR(digit) ((digit) + '0')
 
 typedef struct {
-    uint8_t current_token_index;
+    uint16_t current_token_index;
     char last_code[9];
     char* last_code_name;
     bool need_token_update;
@@ -249,65 +250,61 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
     canvas_draw_box(canvas, barX, SCREEN_HEIGHT - BAR_MARGIN - BAR_HEIGHT, barWidth, BAR_HEIGHT);
 
     if(plugin_state->tokens_count > 1) {
-        canvas_draw_xbm(
-            canvas,
-            0,
-            SCREEN_HEIGHT_CENTER - 24,
-            ICON_ARROW_LEFT_8x9_WIDTH,
-            ICON_ARROW_LEFT_8x9_HEIGHT,
-            &ICON_ARROW_LEFT_8x9[0]);
-        canvas_draw_xbm(
-            canvas,
-            SCREEN_WIDTH - 9,
-            SCREEN_HEIGHT_CENTER - 24,
-            ICON_ARROW_RIGHT_8x9_WIDTH,
-            ICON_ARROW_RIGHT_8x9_HEIGHT,
-            &ICON_ARROW_RIGHT_8x9[0]);
+        canvas_draw_icon(canvas, 0, SCREEN_HEIGHT_CENTER - 24, &I_totp_arrow_left_8x9);
+        canvas_draw_icon(
+            canvas, SCREEN_WIDTH - 9, SCREEN_HEIGHT_CENTER - 24, &I_totp_arrow_right_8x9);
     }
 }
 
 bool totp_scene_generate_token_handle_event(
     const PluginEvent* const event,
     PluginState* plugin_state) {
-    if(event->type == EventTypeKey) {
-        if(event->input.type == InputTypeLong && event->input.key == InputKeyBack) {
-            return false;
-        } else if(event->input.type == InputTypePress) {
-            SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
-            switch(event->input.key) {
-            case InputKeyUp:
-                break;
-            case InputKeyDown:
-                break;
-            case InputKeyRight:
-                if(scene_state->current_token_index < plugin_state->tokens_count - 1) {
-                    scene_state->current_token_index++;
-                } else {
-                    scene_state->current_token_index = 0;
-                }
-                update_totp_params(plugin_state);
-                break;
-            case InputKeyLeft:
-                if(scene_state->current_token_index > 0) {
-                    scene_state->current_token_index--;
-                } else {
-                    scene_state->current_token_index = plugin_state->tokens_count - 1;
-                }
-                update_totp_params(plugin_state);
-                break;
-            case InputKeyOk:
-                if(plugin_state->tokens_count == 0) {
-                    totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, NULL);
-                } else {
-                    TokenMenuSceneContext ctx = {
-                        .current_token_index = scene_state->current_token_index};
-                    totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, &ctx);
-                }
-                break;
-            case InputKeyBack:
-                break;
-            }
+    if(event->type != EventTypeKey) {
+        return true;
+    }
+
+    if(event->input.type == InputTypeLong && event->input.key == InputKeyBack) {
+        return false;
+    }
+
+    if(event->input.type != InputTypePress) {
+        return true;
+    }
+
+    SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
+    switch(event->input.key) {
+    case InputKeyUp:
+        break;
+    case InputKeyDown:
+        break;
+    case InputKeyRight:
+        totp_roll_value_uint16_t(
+            &scene_state->current_token_index,
+            1,
+            0,
+            plugin_state->tokens_count - 1,
+            RollOverflowBehaviorRoll);
+        update_totp_params(plugin_state);
+        break;
+    case InputKeyLeft:
+        totp_roll_value_uint16_t(
+            &scene_state->current_token_index,
+            -1,
+            0,
+            plugin_state->tokens_count - 1,
+            RollOverflowBehaviorRoll);
+        update_totp_params(plugin_state);
+        break;
+    case InputKeyOk:
+        if(plugin_state->tokens_count == 0) {
+            totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, NULL);
+        } else {
+            TokenMenuSceneContext ctx = {.current_token_index = scene_state->current_token_index};
+            totp_scene_director_activate_scene(plugin_state, TotpSceneTokenMenu, &ctx);
         }
+        break;
+    case InputKeyBack:
+        break;
     }
 
     return true;
