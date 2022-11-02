@@ -12,8 +12,6 @@ typedef struct MainView MainView;
 
 typedef void (*LightMeterMainViewButtonCallback)(void* context);
 
-int getLux();
-
 void lightmeter_main_view_set_left_callback(
     MainView* lightmeter_main_view,
     LightMeterMainViewButtonCallback callback,

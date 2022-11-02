@@ -47,4 +47,4 @@ typedef enum {
 
 void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config);
 
-void send_command(uint8_t command);
+int send_command(uint8_t command);

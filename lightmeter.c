@@ -107,11 +107,12 @@ void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* conf
     lightmeter->config = config;
 }
 
-void send_command(uint8_t command) {
+int send_command(uint8_t command) {
     uint32_t timeout = furi_ms_to_ticks(100);
     uint8_t recv[2];
     furi_hal_i2c_acquire(I2C_BUS);
     uint8_t address = 0x23 << 1;
     furi_hal_i2c_trx(I2C_BUS, address, &command, sizeof(command), recv, sizeof(recv), timeout);
     furi_hal_i2c_release(I2C_BUS);
+    return ((int)recv[0] << 8) | ((int)recv[1]);
 }
