@@ -148,10 +148,10 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontPrimary);
     // metering mode A – ambient, F – flash
-    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "A");
+    canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, "A");
 
     snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
-    canvas_draw_str_aligned(canvas, 20, 0, AlignLeft, AlignTop, str);
+    canvas_draw_str_aligned(canvas, 20, 1, AlignLeft, AlignTop, str);
 
     canvas_set_font(canvas, FontSecondary);
     snprintf(str, sizeof(str), "lx: %d", lux);
