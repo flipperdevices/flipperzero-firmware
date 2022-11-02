@@ -1,5 +1,7 @@
 # flipperzero-lightmeter
 
+App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project for Arduino by [vpominchuk](https://github.com/vpominchuk).
+
 > **Note**
 > FAP is still in development
 
