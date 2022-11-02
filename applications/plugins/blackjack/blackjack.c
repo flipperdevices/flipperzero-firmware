@@ -599,6 +599,8 @@ int32_t blackjack_app(void* p) {
                     case InputKeyOk:
                         localstate->selectDirection = Select;
                         break;
+					default:
+		                break;
                     }
                 }
             } else if(event.type == EventTypeTick) {

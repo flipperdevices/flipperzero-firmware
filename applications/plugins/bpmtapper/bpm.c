@@ -236,6 +236,8 @@ int32_t bpm_tapper_app(void* p) {
                         // Exit the plugin
                         processing = false;
                         break;
+					default:
+		                break;
                     }
                 }
             }

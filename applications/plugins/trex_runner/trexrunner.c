@@ -126,6 +126,8 @@ int32_t trexrunner_app(void* p) {
                         // Exit the app
                         processing = false;
                         break;
+					default:
+						break;
                     }
                 }
             }

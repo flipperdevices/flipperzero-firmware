@@ -512,6 +512,8 @@ int32_t clock_app(void* p) {
                             if(plugin_state->codeSequence < (uint32_t)-1) processing = false;
                         }
                         break;
+                    default:
+                        break;
                     }
                     if(plugin_state->codeSequence == 10) {
                         plugin_state->codeSequence = 0;

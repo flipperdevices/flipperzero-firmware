@@ -158,6 +158,8 @@ static void timer_callback(void* ctx) {
             break;
         case Silent:
             break;
+		default:
+			break;
         }
     } else {
         // unpronounced beat
@@ -171,6 +173,8 @@ static void timer_callback(void* ctx) {
             break;
         case Silent:
             break;
+		default:
+			break;
         }
     };
 
@@ -192,6 +196,8 @@ static void timer_callback(void* ctx) {
         break;
     case Silent:
         break;
+	default:
+		break;
     }
     notification_message(metronome_state->notifications, &sequence_reset_rgb);
 

@@ -142,6 +142,8 @@ int32_t multi_converter_app(void* p) {
                         case InputKeyDown:
                             multi_converter_mode_select_change_unit(1, multi_converter_state);
                             break;
+						default:
+							break;
                         }
                     }
                 }

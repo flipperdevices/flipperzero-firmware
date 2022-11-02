@@ -288,6 +288,8 @@ int32_t tuning_fork_app() {
                             tuning_fork_state->page = Tunings;
                         }
                         break;
+					default:
+						break;
                     }
                 } else if(event.input.type == InputTypeLong) {
                     // hold events
@@ -330,6 +332,8 @@ int32_t tuning_fork_app() {
                             tuning_fork_state->current_tuning_note_index = 0;
                         }
                         break;
+					default:
+						break;
                     }
                 } else if(event.input.type == InputTypeRepeat) {
                     // repeat events
@@ -372,6 +376,8 @@ int32_t tuning_fork_app() {
                             tuning_fork_state->current_tuning_note_index = 0;
                         }
                         break;
+					default:
+						break;
                     }
                 }
             }

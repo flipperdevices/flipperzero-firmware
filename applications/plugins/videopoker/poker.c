@@ -806,6 +806,8 @@ int32_t video_poker_app(void* p) {
                     /* if game is not over, we should store the game state. */
                     processing = false;
                     break;
+				default:
+					break;
                 }
             }
         }

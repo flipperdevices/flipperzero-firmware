@@ -555,6 +555,8 @@ int32_t dice_app(void* p) {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                    	break;
                     }
                 }
             } else if(event.type == EventTypeTick) {
