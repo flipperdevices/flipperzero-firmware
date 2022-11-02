@@ -2,6 +2,9 @@
 
 > **Note**
 > FAP is still in development
+
+![](images/gui_main.png)
+
 ## TODO:
 - [x] Ambient light metering
 - [x] Make it work with multiple scenes
