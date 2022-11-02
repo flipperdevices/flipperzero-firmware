@@ -19,10 +19,8 @@ typedef enum {
     ViewPortOrientationHorizontalFlip,
     ViewPortOrientationVertical,
     ViewPortOrientationVerticalFlip,
+    ViewPortOrientationMAX, /**< Special value, don't use it */
 } ViewPortOrientation;
-
-#define VIEW_PORT_ORIENTATION_COUNT 4
-#define VIEW_PORT_MAPPED_KEYS_COUNT 4
 
 /** ViewPort Draw callback
  * @warning    called from GUI thread

@@ -7,23 +7,51 @@
 
 // TODO add mutex to view_port ops
 
+_Static_assert(ViewPortOrientationMAX == 4, "Incorrect ViewPortOrientation count");
+_Static_assert(
+    (ViewPortOrientationHorizontal == 0 && ViewPortOrientationHorizontalFlip == 1 &&
+     ViewPortOrientationVertical == 2 && ViewPortOrientationVerticalFlip == 3),
+    "Incorrect ViewPortOrientation order");
+_Static_assert(InputKeyMAX == 6, "Incorrect InputKey count");
+_Static_assert(
+    (InputKeyUp == 0 && InputKeyDown == 1 && InputKeyRight == 2 && InputKeyLeft == 3 &&
+     InputKeyOk == 4 && InputKeyBack == 5),
+    "Incorrect InputKey order");
+
 /** InputKey directional keys mappings for different screen orientations
 * 
-* WANRING: This array depends on the order of elements in `enum InputKey` and `enum ViewPortOrientation`
 */
-static const InputKey
-    view_port_dpad_buttons_mapping[VIEW_PORT_ORIENTATION_COUNT][VIEW_PORT_MAPPED_KEYS_COUNT] = {
-        {InputKeyUp, InputKeyDown, InputKeyRight, InputKeyLeft}, //ViewPortOrientationHorizontal
-        {InputKeyDown, InputKeyUp, InputKeyLeft, InputKeyRight}, //ViewPortOrientationHorizontalFlip
-        {InputKeyRight, InputKeyLeft, InputKeyDown, InputKeyUp}, //ViewPortOrientationVertical
-        {InputKeyLeft, InputKeyRight, InputKeyUp, InputKeyDown}, //ViewPortOrientationVerticalFlip
+static const InputKey view_port_input_mapping[ViewPortOrientationMAX][InputKeyMAX] = {
+    {InputKeyUp,
+     InputKeyDown,
+     InputKeyRight,
+     InputKeyLeft,
+     InputKeyOk,
+     InputKeyBack}, //ViewPortOrientationHorizontal
+    {InputKeyDown,
+     InputKeyUp,
+     InputKeyLeft,
+     InputKeyRight,
+     InputKeyOk,
+     InputKeyBack}, //ViewPortOrientationHorizontalFlip
+    {InputKeyRight,
+     InputKeyLeft,
+     InputKeyDown,
+     InputKeyUp,
+     InputKeyOk,
+     InputKeyBack}, //ViewPortOrientationVertical
+    {InputKeyLeft,
+     InputKeyRight,
+     InputKeyUp,
+     InputKeyDown,
+     InputKeyOk,
+     InputKeyBack}, //ViewPortOrientationVerticalFlip
 };
 
 // Remaps directional pad buttons on Flipper based on ViewPort orientation
-static void view_port_remap_dpad_buttons(InputEvent* event, ViewPortOrientation orientation) {
-    furi_assert(
-        orientation < VIEW_PORT_ORIENTATION_COUNT || event->key < VIEW_PORT_MAPPED_KEYS_COUNT);
-    event->key = view_port_dpad_buttons_mapping[orientation][event->key];
+static void view_port_map_input(InputEvent* event, ViewPortOrientation orientation) {
+    furi_assert(orientation < ViewPortOrientationMAX && event->key < InputKeyMAX);
+    event->key = view_port_input_mapping[orientation][event->key];
 }
 
 static void view_port_setup_canvas_orientation(const ViewPort* view_port, Canvas* canvas) {
@@ -132,9 +160,7 @@ void view_port_input(ViewPort* view_port, InputEvent* event) {
 
     if(view_port->input_callback) {
         ViewPortOrientation orientation = view_port_get_orientation(view_port);
-        if(event->key != InputKeyOk && event->key != InputKeyBack) {
-            view_port_remap_dpad_buttons(event, orientation);
-        }
+        view_port_map_input(event, orientation);
         view_port->input_callback(event, view_port->input_callback_context);
     }
 }
