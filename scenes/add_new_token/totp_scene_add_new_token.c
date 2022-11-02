@@ -251,11 +251,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                 tokenInfo->algo = scene_state->algo;
                 tokenInfo->digits = scene_state->digits_count;
 
-                if(plugin_state->tokens_list == NULL) {
-                    plugin_state->tokens_list = list_init_head(tokenInfo);
-                } else {
-                    list_add(plugin_state->tokens_list, tokenInfo);
-                }
+                TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, tokenInfo);
                 plugin_state->tokens_count++;
 
                 totp_config_file_save_new_token(tokenInfo);
