@@ -103,14 +103,10 @@ int32_t gps_app(void* p)
         {
           switch (event.input.key)
           {
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyRight:
-            case InputKeyLeft:
-            case InputKeyOk:
-              break;
             case InputKeyBack:
               processing = false;
+              break;
+            default:
               break;
           }
         }
