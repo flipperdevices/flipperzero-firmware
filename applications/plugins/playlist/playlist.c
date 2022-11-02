@@ -591,8 +591,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
             }
         }
         break;
-	default:
-		break;
+    default:
+        break;
     }
 
     furi_string_free(temp_str);

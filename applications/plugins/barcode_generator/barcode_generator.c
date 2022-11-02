@@ -346,8 +346,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             case 9:
                 number_9(canvas, isOnRight, editingMarkerPosition[index]);
                 break;
-			default:
-				break;
+            default:
+                break;
             }
         }
 

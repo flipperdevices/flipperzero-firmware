@@ -422,8 +422,8 @@ int32_t montyhall_game_app(void* p) {
                 case InputKeyBack:
                     loop = false;
                     break;
-				default:
-					break;
+                default:
+                    break;
                 }
             }
         } else if(event.type == InputTypeLong) {

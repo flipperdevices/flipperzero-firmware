@@ -109,7 +109,7 @@ int32_t flashlight_app() {
                         processing = false;
                         break;
                     default:
-                    	break;
+                        break;
                     }
                 }
             }
