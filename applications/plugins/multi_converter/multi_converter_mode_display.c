@@ -180,8 +180,6 @@ void multi_converter_mode_display_navigation(
         else if((multi_converter_state->display).key < 0)
             (multi_converter_state->display).key = MULTI_CONVERTER_DISPLAY_KEYS - 1;
         break;
-	default:
-		break;
     }
 
     // if destination key is disabled by max_number_keys, move to the closest one
