@@ -409,11 +409,7 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
 
         FURI_LOG_D(LOGGING_TAG, "Found token \"%s\"", tokenInfo->name);
 
-        if(plugin_state->tokens_list == NULL) {
-            plugin_state->tokens_list = list_init_head(tokenInfo);
-        } else {
-            list_add(plugin_state->tokens_list, tokenInfo);
-        }
+        TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, tokenInfo);
 
         index++;
     }

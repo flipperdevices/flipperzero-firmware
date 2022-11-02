@@ -6,8 +6,8 @@ function Get-LatestDirectory {
     Get-ChildItem -Path $Path | Where-Object {$_.PSIsContainer} | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 }
 
-./fbt u fap_totp
-./fbt o fap_totp
+./fbt u COMPACT=1 DEBUG=0 VERBOSE=0 fap_totp
+./fbt o COMPACT=1 DEBUG=0 VERBOSE=0 fap_totp
 
 Push-Location $PSScriptRoot
 

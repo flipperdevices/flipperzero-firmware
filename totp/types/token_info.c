@@ -25,10 +25,10 @@ bool token_info_set_secret(
     TokenInfo* token_info,
     const char* base32_token_secret,
     size_t token_secret_length,
-    uint8_t* iv) {
+    const uint8_t* iv) {
     uint8_t* plain_secret = malloc(token_secret_length);
     int plain_secret_length =
-        base32_decode((uint8_t*)base32_token_secret, plain_secret, token_secret_length);
+        base32_decode((const uint8_t*)base32_token_secret, plain_secret, token_secret_length);
     bool result;
     if(plain_secret_length >= 0) {
         token_info->token =
@@ -43,7 +43,7 @@ bool token_info_set_secret(
     return result;
 }
 
-uint8_t token_info_get_digits_count(TokenInfo* token_info) {
+uint8_t token_info_get_digits_count(const TokenInfo* token_info) {
     switch(token_info->digits) {
     case TOTP_6_DIGITS:
         return 6;

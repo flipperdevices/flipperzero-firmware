@@ -1,0 +1,42 @@
+name: PVS-Studio build analysis
+on: workflow_dispatch
+jobs:
+  build-analyze:
+    runs-on: ubuntu-latest
+    env:
+      FBT_NO_SYNC: "true"
+      TARGETS: f7
+      DEFAULT_TARGET: f7
+    steps:
+      - name: 'Decontaminate previous build leftovers'
+        run: |
+          if [ -d .git ]; then
+            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          fi
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          submodules: 'recursive'
+      - name: Install tools
+        run: |
+          wget -q -O - https://files.pvs-studio.com/etc/pubkey.txt \
+            | sudo apt-key add -
+          sudo wget -O /etc/apt/sources.list.d/viva64.list \
+            https://files.pvs-studio.com/etc/viva64.list
+          sudo apt update
+          sudo apt install pvs-studio
+          pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
+      - name: Build
+        run: |
+          ./pvs-build
+      - name: Analyze
+        run: |
+          pvs-studio-analyzer analyze @.pvsoptions -j$(grep -c processor /proc/cpuinfo) -f flipperzero-firmware_unleashed/build/f7-firmware-DC/compile_commands.json 
+      - name: Convert report
+        run: |
+          plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
+      - name: Publish report
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: pvs-report.sarif
+          category: PVS-Studio
