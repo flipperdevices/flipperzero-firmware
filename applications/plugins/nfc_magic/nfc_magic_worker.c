@@ -38,6 +38,9 @@ void nfc_magic_worker_free(NfcMagicWorker* nfc_magic_worker) {
 
 void nfc_magic_worker_stop(NfcMagicWorker* nfc_magic_worker) {
     furi_assert(nfc_magic_worker);
+
+    nfc_magic_worker_change_state(nfc_magic_worker, NfcMagicWorkerStateStop);
+    furi_thread_join(nfc_magic_worker->thread);
 }
 
 void nfc_magic_worker_start(

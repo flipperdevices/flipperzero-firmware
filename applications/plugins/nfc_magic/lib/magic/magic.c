@@ -39,7 +39,7 @@ bool magic_wupa() {
 
         // Start communication
         tx_data[0] = MAGIC_CMD_WUPA;
-        ret = furi_hal_nfc_ll_txrx(
+        ret = furi_hal_nfc_ll_txrx_bits(
             tx_data,
             7,
             rx_data,
@@ -49,7 +49,7 @@ bool magic_wupa() {
                 FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_RX_KEEP,
             furi_hal_nfc_ll_ms2fc(20));
         if(ret != FuriHalNfcReturnIncompleteByte) break;
-        if(rx_len != 1) break;
+        if(rx_len != 4) break;
         if(rx_data[0] != MAGIC_ACK) break;
         magic_activated = true;
     } while(false);
@@ -71,7 +71,7 @@ bool magic_data_access_cmd() {
 
     do {
         tx_data[0] = MAGIC_CMD_WRITE;
-        ret = furi_hal_nfc_ll_txrx(
+        ret = furi_hal_nfc_ll_txrx_bits(
             tx_data,
             8,
             rx_data,
@@ -81,7 +81,7 @@ bool magic_data_access_cmd() {
                 FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_RX_KEEP,
             furi_hal_nfc_ll_ms2fc(20));
         if(ret != FuriHalNfcReturnIncompleteByte) break;
-        if(rx_len != 1) break;
+        if(rx_len != 4) break;
         if(rx_data[0] != MAGIC_ACK) break;
 
         write_cmd_success = true;
@@ -108,7 +108,7 @@ bool magic_read_block(uint8_t block_num, MfClassicBlock* data) {
     do {
         tx_data[0] = MAGIC_MIFARE_READ_CMD;
         tx_data[1] = block_num;
-        ret = furi_hal_nfc_ll_txrx(
+        ret = furi_hal_nfc_ll_txrx_bits(
             tx_data,
             2 * 8,
             rx_data,
@@ -118,7 +118,7 @@ bool magic_read_block(uint8_t block_num, MfClassicBlock* data) {
             furi_hal_nfc_ll_ms2fc(20));
 
         if(ret != FuriHalNfcReturnOk) break;
-        if(rx_len != 16) break;
+        if(rx_len != 16 * 8) break;
         memcpy(data->value, rx_data, sizeof(data->value));
         read_success = true;
     } while(false);
@@ -143,7 +143,7 @@ bool magic_write_blk(uint8_t block_num, MfClassicBlock* data) {
     do {
         tx_data[0] = MAGIC_MIFARE_WRITE_CMD;
         tx_data[1] = block_num;
-        ret = furi_hal_nfc_ll_txrx(
+        ret = furi_hal_nfc_ll_txrx_bits(
             tx_data,
             2 * 8,
             rx_data,
@@ -152,11 +152,11 @@ bool magic_write_blk(uint8_t block_num, MfClassicBlock* data) {
             FURI_HAL_NFC_LL_TXRX_FLAGS_AGC_ON | FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_RX_KEEP,
             furi_hal_nfc_ll_ms2fc(20));
         if(ret != FuriHalNfcReturnIncompleteByte) break;
-        if(rx_len != 1) break;
+        if(rx_len != 4) break;
         if(rx_data[0] != MAGIC_ACK) break;
 
         memcpy(tx_data, data->value, sizeof(data->value));
-        ret = furi_hal_nfc_ll_txrx(
+        ret = furi_hal_nfc_ll_txrx_bits(
             tx_data,
             16 * 8,
             rx_data,
@@ -165,7 +165,7 @@ bool magic_write_blk(uint8_t block_num, MfClassicBlock* data) {
             FURI_HAL_NFC_LL_TXRX_FLAGS_AGC_ON | FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_RX_KEEP,
             furi_hal_nfc_ll_ms2fc(20));
         if(ret != FuriHalNfcReturnIncompleteByte) break;
-        if(rx_len != 1) break;
+        if(rx_len != 4) break;
         if(rx_data[0] != MAGIC_ACK) break;
 
         write_success = true;

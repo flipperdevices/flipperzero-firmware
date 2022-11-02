@@ -163,7 +163,7 @@ int32_t nfc_magic_app(void* p) {
     UNUSED(p);
     NfcMagic* nfc_magic = nfc_magic_alloc();
 
-    scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWriteConfirm);
+    scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
 
     view_dispatcher_run(nfc_magic->view_dispatcher);
 
