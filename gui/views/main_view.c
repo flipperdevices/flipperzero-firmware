@@ -87,19 +87,6 @@ typedef struct {
     int speed;
 } MainViewModel;
 
-// TODO rename time to speed
-
-int getLux() {
-    uint32_t timeout = furi_ms_to_ticks(100);
-    uint8_t value = 0x20;
-    uint8_t recv[2];
-    furi_hal_i2c_acquire(I2C_BUS);
-    uint8_t address = 0x23 << 1;
-    furi_hal_i2c_trx(I2C_BUS, address, &value, sizeof(value), recv, sizeof(recv), timeout);
-    furi_hal_i2c_release(I2C_BUS);
-    return ((int)recv[0] << 8) | ((int)recv[1]);
-}
-
 void lightmeter_main_view_set_left_callback(
     MainView* lightmeter_main_view,
     LightMeterMainViewButtonCallback callback,
@@ -123,7 +110,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     char str[10];
 
-    int lux = getLux();
+    int lux = send_command(0x20);
     FURI_LOG_D(WORKER_TAG, "Get Lux: %d", lux);
 
     float EV = lux2ev((float)lux);
