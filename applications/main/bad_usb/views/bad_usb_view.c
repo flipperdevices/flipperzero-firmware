@@ -2,7 +2,7 @@
 #include "../bad_usb_script.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
-#include <assets_icons.h>
+#include <bad_usb_icons.h>
 
 #define MAX_NAME_LEN 64
 
