@@ -108,6 +108,8 @@ int32_t flashlight_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 }
             }
