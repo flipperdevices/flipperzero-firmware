@@ -28,18 +28,4 @@ you will need: 1 ESP8266 (I recommend ESP01 for the size) and 2 buttons.
 - Type the name of the event, "button_pressed".
 - Final URL should appear at the bottom of the web page. We'll need to copy that URL.
 
-# Warnings for the first beta version
-In this version you have to configure the sketch for ESP8266 manually, compile it and flash it.
-Edit IFTTMode.cpp file in FlipperZero-IFTTT_WiFi_Module directory and change in this line with your credential.
-
-Change "triggername" and "keyID" with yours that you created before
-
-const char* resource = "https://maker.ifttt.com/trigger/triggername/json/with/key/keyID";
-
-Enter the SSID and password of your WiFi connection
-
-const char *ssidIFTTT = "SSID";
-
-const char *passwordIFTTT = "password";
-
 COMPILE AND FLASH YOUR ESP8266!!!
