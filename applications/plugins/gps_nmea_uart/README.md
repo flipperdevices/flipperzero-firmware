@@ -1,6 +1,8 @@
 # GPS for Flipper Zero
 
 A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
+
+[Original link](https://github.com/ezod/flipperzero-gps)
 [Adafruit Ultimate GPS Breakout].
 
 [Original link](https://github.com/ezod/flipperzero-gps)

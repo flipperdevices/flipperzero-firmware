@@ -320,6 +320,8 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 } else if(event.input.type == InputTypeLong) {
                     // hold events
@@ -340,6 +342,8 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 } else if(event.input.type == InputTypeRepeat) {
                     // repeat events
@@ -358,6 +362,8 @@ int32_t metronome_app() {
                         break;
                     case InputKeyBack:
                         processing = false;
+                        break;
+                    default:
                         break;
                     }
                 }

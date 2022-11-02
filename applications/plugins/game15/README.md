@@ -1,6 +1,8 @@
 
 # Game "15" for Flipper Zero
 
+[Original link](https://github.com/x27/flipperzero-game15)
+
 Logic game [Wikipedia](https://en.wikipedia.org/wiki/15_puzzle)
 
 ![Game screen](images/Game15.png)
@@ -9,4 +11,3 @@ Logic game [Wikipedia](https://en.wikipedia.org/wiki/15_puzzle)
 
 ![Popoup](images/Game15Popup.png)
 
-FAP file for firmware 0.69.1

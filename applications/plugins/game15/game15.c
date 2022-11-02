@@ -426,6 +426,8 @@ static void game_event_handler(GameEvent const event) {
                     sandbox_loop_exit();
                 }
                 break;
+            default:
+                break;
             }
         }
     } else if(event.type == EventTypeTick) {

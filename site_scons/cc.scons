@@ -33,7 +33,8 @@ ENV.AppendUnique(
         "-ffunction-sections",
         "-fsingle-precision-constant",
         "-fno-math-errno",
-        "-fstack-usage",
+        # Generates .su files with stack usage information
+        # "-fstack-usage",
         "-g",
         "-Wno-unused-parameter",
         "-Wno-type-limits",
