@@ -22,7 +22,6 @@
 
 - [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
 - Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
-- Moved SubGHz Remote to FAP App (Not Working, So Reverted To Internal)
 - Moved GPIO to FAP App (Not Working, So Reverted To Internal)
 - Moved Infrared to FAP App (Not Working, So Reverted To Internal)
 
