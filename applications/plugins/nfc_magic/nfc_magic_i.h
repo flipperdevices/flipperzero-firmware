@@ -1,10 +1,8 @@
 #pragma once
 
 #include "nfc_magic.h"
-// #include "nfc_magic_worker.h"
-// #include "nfc_magic_device.h"
+#include "nfc_magic_worker.h"
 
-// #include "rfal_nfc_magic.h"
 #include "lib/magic/magic.h"
 
 #include <furi.h>
@@ -40,7 +38,7 @@ enum NfcMagicCustomEvent {
 };
 
 struct NfcMagic {
-    // NfcMagicWorker* worker;
+    NfcMagicWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;

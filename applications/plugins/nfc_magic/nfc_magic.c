@@ -35,7 +35,7 @@ void nfc_magic_show_loading_popup(void* context, bool show) {
 NfcMagic* nfc_magic_alloc() {
     NfcMagic* nfc_magic = malloc(sizeof(NfcMagic));
 
-    // nfc_magic->worker = nfc_magic_worker_alloc();
+    nfc_magic->worker = nfc_magic_worker_alloc();
     nfc_magic->view_dispatcher = view_dispatcher_alloc();
     nfc_magic->scene_manager = scene_manager_alloc(&nfc_magic_scene_handlers, nfc_magic);
     view_dispatcher_enable_queue(nfc_magic->view_dispatcher);
@@ -46,9 +46,6 @@ NfcMagic* nfc_magic_alloc() {
         nfc_magic->view_dispatcher, nfc_magic_back_event_callback);
     view_dispatcher_set_tick_event_callback(
         nfc_magic->view_dispatcher, nfc_magic_tick_event_callback, 100);
-
-    // NfcMagic device
-    // nfc_magic->dev = nfc_magic_device_alloc();
 
     // Nfc device
     nfc_magic->nfc_dev = nfc_device_alloc();
@@ -122,8 +119,8 @@ void nfc_magic_free(NfcMagic* nfc_magic) {
     widget_free(nfc_magic->widget);
 
     // Worker
-    // nfc_magic_worker_stop(nfc_magic->worker);
-    // nfc_magic_worker_free(nfc_magic->worker);
+    nfc_magic_worker_stop(nfc_magic->worker);
+    nfc_magic_worker_free(nfc_magic->worker);
 
     // View Dispatcher
     view_dispatcher_free(nfc_magic->view_dispatcher);
