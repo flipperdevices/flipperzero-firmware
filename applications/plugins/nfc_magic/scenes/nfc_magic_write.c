@@ -30,9 +30,16 @@ static void nfc_magic_scene_write_setup_view(NfcMagic* nfc_magic) {
 
     view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewPopup);
 
-    FURI_LOG_I("write", "send wupa");
+    FURI_LOG_I("wupa", "send wupa");
     bool ret = magic_wupa();
     FURI_LOG_W("write", "return %d", ret);
+    ret = magic_data_access_cmd();
+    FURI_LOG_W("write cmd", "return %d", ret);
+    ret = magic_write_blk(1, &nfc_magic->nfc_dev->dev_data.mf_classic_data.block[1]);
+    FURI_LOG_W("write", "return %d", ret);
+    ret = magic_read_block(1, &nfc_magic->nfc_dev->dev_data.mf_classic_data.block[1]);
+    FURI_LOG_W("read", "return %d", ret);
+    magic_deactivate();
 }
 
 void nfc_magic_scene_write_on_enter(void* context) {
