@@ -1,27 +1,14 @@
 #pragma once
 
-#include "constants.h"
-
+#include <gui/gui.h>
 #include <stdbool.h>
 
-#include <furi_hal_uart.h>
+#include "constants.h"
+
 
 typedef struct {
-    /// UART settings
-    FuriHalUartId   channel;
-    uint32_t        baudRate;
-
     /// Screen representation
     bool screen[FLIPPER_SCREEN_HEIGHT][FLIPPER_SCREEN_WIDTH];
-
-    /// Message queue
-    uint8_t* messageQueue;
-    /// Size of the message queue in bytes
-    unsigned int queueSize;
-    /// Location of memory index that is currently being read
-    uint8_t* readIdx;
-    /// Location of memory index that should be used for writing
-    uint8_t* writeIdx;
 
 } Pwnagotchi;
 
@@ -38,3 +25,29 @@ Pwnagotchi* pwnagotchi_alloc();
  * @param pwn Pwnagotchi to destruct
  */
 void pwnagotchi_free(Pwnagotchi* pwn);
+
+/**
+ * Set a pixel in the pwnagotchi screen buffer
+ * 
+ * @param pwn Pwnagotchi structure
+ * @param i Row
+ * @param j Column
+ * @param status ? on : off
+ * @return If set was successful
+ */
+bool pwnagotchi_screen_set(Pwnagotchi* pwn, uint8_t i, uint8_t j, bool status);
+
+/**
+ * Clears the screen buffer of the pwnagotchi
+ * 
+ * @param pwn Pwn to clear
+ */
+void pwnagotchi_screen_clear(Pwnagotchi* pwn);
+
+/**
+ * Flushes the buffer to the screen, used as a callback
+ * 
+ * @param canvas Passed in by OS, allows drawing
+ * @param context Operating context, pwnagotchi itself
+ */
+void pwnagotchi_screen_flush(Canvas* canvas, void* context);
