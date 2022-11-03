@@ -25,11 +25,11 @@
 #define CONFIG_FILE_HEADER "IFTTT Virtual Button Config File"
 #define CONFIG_FILE_VERSION 1
 
-typedef struct{
-    char *save_ssid;
-    char *save_password;
-    char *save_key;
-    char *save_event;
+typedef struct {
+    char* save_ssid;
+    char* save_password;
+    char* save_key;
+    char* save_event;
 } Settings;
 
 typedef struct {
@@ -53,4 +53,4 @@ typedef enum {
 } VirtualButtonAppView;
 
 Settings save_settings(Settings settings);
-Settings *load_settings();
+Settings* load_settings();
