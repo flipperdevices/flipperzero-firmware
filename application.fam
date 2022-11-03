@@ -9,7 +9,7 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
-    fap_version=(0,1),
+    fap_version=(0,2),
 	fap_icon="lightmeter.png",
     fap_category="Tools",
     fap_description="Lightmeter app for photography based on BH1750 sensor",
