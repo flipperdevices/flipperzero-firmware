@@ -12,11 +12,12 @@
 - To avoid Application errors and duplicates, delete /ext/apps before doing the RM firmware update
 - To avoid Animations missing, restore your /ext/dolphin after the RM firmware update
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-02 21:57 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-02 21:57 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-03 01:55 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-03 01:55 EST`
 - Added: [DHT Monitor (By quen0n)](https://github.com/quen0n/FipperZero-DHT-Monitor)
 - Added some stupid breaks for default switch cases.
 - Updated: [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
+- Fixes for slower animations to be MUCH faster
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
