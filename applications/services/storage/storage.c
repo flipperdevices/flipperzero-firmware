@@ -37,8 +37,11 @@ Storage* storage_app_alloc() {
     app->message_queue = furi_message_queue_alloc(8, sizeof(StorageMessage));
     app->pubsub = furi_pubsub_alloc();
 
+    uint32_t timestamp = furi_hal_rtc_get_timestamp();
+
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
         storage_data_init(&app->storage[i]);
+        app->timestamp[i] = timestamp;
     }
 
 #ifndef FURI_RAM_EXEC
