@@ -235,7 +235,7 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
                 }
             },
             true);
-    } else if((event->type == InputTypeLong) && (event->key == InputKeyOk)) {
+    } else if((event->type == InputTypeShort) && (event->key == InputKeyOk)) {
         with_view_model(
             instance->view,
             SubGhzFrequencyAnalyzerModel * model,
@@ -250,7 +250,7 @@ bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
                 }
             },
             true);
-    } else if((event->type == InputTypePress) || (event->type == InputTypeRepeat)) {
+    } else if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
         with_view_model(
             instance->view,
             SubGhzFrequencyAnalyzerModel * model,
