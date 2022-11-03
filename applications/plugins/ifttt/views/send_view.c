@@ -4,8 +4,9 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <furi_hal_uart.h>
+#include <string.h>
+#include <stdio.h>
 
-#define MODULE_CONTROL_COMMAND_SEND 's'
 #define FLIPPERZERO_SERIAL_BAUD 115200
 
 typedef enum ESerialCommand { ESerialCommand_Send } ESerialCommand;
@@ -28,15 +29,19 @@ static void Shake(void) {
 void send_serial_command_send(ESerialCommand command) {
     uint8_t data[1] = {0};
 
-    switch(command) {
-    case ESerialCommand_Send:
-        data[0] = MODULE_CONTROL_COMMAND_SEND;
-        break;
-    default:
-        return;
-    };
+    char name[10] = "send";
+    int length = strlen(name);
+    for(int i = 0; i < length; i++) {
+        switch(command) {
+        case ESerialCommand_Send:
+            data[0] = name[i];
+            break;
+        default:
+            return;
+        };
 
-    furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+        furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
+    }
 }
 
 static void send_view_draw_callback(Canvas* canvas, void* context) {
