@@ -1,11 +1,11 @@
 #include "../nfc_magic_i.h"
 
 enum {
-    NfcMagicSceneWriteStateCardSearch,
-    NfcMagicSceneWriteStateCardFound,
+    NfcMagicSceneWipeStateCardSearch,
+    NfcMagicSceneWipeStateCardFound,
 };
 
-bool nfc_magic_write_worker_callback(NfcMagicWorkerEvent event, void* context) {
+bool nfc_magic_wipe_worker_callback(NfcMagicWorkerEvent event, void* context) {
     furi_assert(context);
 
     NfcMagic* nfc_magic = context;
@@ -14,41 +14,41 @@ bool nfc_magic_write_worker_callback(NfcMagicWorkerEvent event, void* context) {
     return true;
 }
 
-static void nfc_magic_scene_write_setup_view(NfcMagic* nfc_magic) {
+static void nfc_magic_scene_wipe_setup_view(NfcMagic* nfc_magic) {
     Popup* popup = nfc_magic->popup;
     popup_reset(popup);
-    uint32_t state = scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneWrite);
+    uint32_t state = scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneWipe);
 
-    if(state == NfcMagicSceneWriteStateCardSearch) {
+    if(state == NfcMagicSceneWipeStateCardSearch) {
         popup_set_text(
             nfc_magic->popup, "Apply the initial\ncard only", 128, 32, AlignRight, AlignCenter);
         // popup_set_icon(nfc_magic->popup, 0, 8, &I_NFC_manual_60x50);
     } else {
-        popup_set_header(popup, "Writing\nDon't move...", 52, 32, AlignLeft, AlignCenter);
+        popup_set_header(popup, "Wiping\nDon't move...", 52, 32, AlignLeft, AlignCenter);
         // popup_set_icon(popup, 12, 23, &A_Loading_24);
     }
 
     view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewPopup);
 }
 
-void nfc_magic_scene_write_on_enter(void* context) {
+void nfc_magic_scene_wipe_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
 
     scene_manager_set_scene_state(
-        nfc_magic->scene_manager, NfcMagicSceneWrite, NfcMagicSceneWriteStateCardSearch);
-    nfc_magic_scene_write_setup_view(nfc_magic);
+        nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
+    nfc_magic_scene_wipe_setup_view(nfc_magic);
 
     // Setup and start worker
     nfc_magic_worker_start(
         nfc_magic->worker,
-        NfcMagicWorkerStateWrite,
+        NfcMagicWorkerStateWipe,
         &nfc_magic->nfc_dev->dev_data,
-        nfc_magic_write_worker_callback,
+        nfc_magic_wipe_worker_callback,
         nfc_magic);
     nfc_magic_blink_start(nfc_magic);
 }
 
-bool nfc_magic_scene_write_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_wipe_on_event(void* context, SceneManagerEvent event) {
     NfcMagic* nfc_magic = context;
     bool consumed = false;
 
@@ -57,32 +57,32 @@ bool nfc_magic_scene_write_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneSuccess);
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventFail) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWriteFail);
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWipeFail);
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventWrongCard) {
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneNotMagic);
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventCardDetected) {
             scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneWrite, NfcMagicSceneWriteStateCardFound);
-            nfc_magic_scene_write_setup_view(nfc_magic);
+                nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardFound);
+            nfc_magic_scene_wipe_setup_view(nfc_magic);
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventNoCardDetected) {
             scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneWrite, NfcMagicSceneWriteStateCardSearch);
-            nfc_magic_scene_write_setup_view(nfc_magic);
+                nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
+            nfc_magic_scene_wipe_setup_view(nfc_magic);
             consumed = true;
         }
     }
     return consumed;
 }
 
-void nfc_magic_scene_write_on_exit(void* context) {
+void nfc_magic_scene_wipe_on_exit(void* context) {
     NfcMagic* nfc_magic = context;
 
     nfc_magic_worker_stop(nfc_magic->worker);
     scene_manager_set_scene_state(
-        nfc_magic->scene_manager, NfcMagicSceneWrite, NfcMagicSceneWriteStateCardSearch);
+        nfc_magic->scene_manager, NfcMagicSceneWipe, NfcMagicSceneWipeStateCardSearch);
     // Clear view
     popup_reset(nfc_magic->popup);
 

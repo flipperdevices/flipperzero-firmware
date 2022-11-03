@@ -6,7 +6,11 @@ typedef struct NfcMagicWorker NfcMagicWorker;
 
 typedef enum {
     NfcMagicWorkerStateReady,
+
+    NfcMagicWorkerStateCheck,
     NfcMagicWorkerStateWrite,
+    NfcMagicWorkerStateWipe,
+
     NfcMagicWorkerStateStop,
 } NfcMagicWorkerState;
 

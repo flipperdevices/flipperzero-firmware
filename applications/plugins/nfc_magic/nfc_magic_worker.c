@@ -62,8 +62,12 @@ void nfc_magic_worker_start(
 int32_t nfc_magic_worker_task(void* context) {
     NfcMagicWorker* nfc_magic_worker = context;
 
-    if(nfc_magic_worker->state == NfcMagicWorkerStateWrite) {
+    if(nfc_magic_worker->state == NfcMagicWorkerStateCheck) {
+        nfc_magic_worker_check(nfc_magic_worker);
+    } else if(nfc_magic_worker->state == NfcMagicWorkerStateWrite) {
         nfc_magic_worker_write(nfc_magic_worker);
+    } else if(nfc_magic_worker->state == NfcMagicWorkerStateWipe) {
+        nfc_magic_worker_wipe(nfc_magic_worker);
     }
 
     nfc_magic_worker_change_state(nfc_magic_worker, NfcMagicWorkerStateReady);
@@ -106,7 +110,6 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                 }
             }
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
-            magic_deactivate();
             break;
         } else {
             if(card_found_notified) {
@@ -117,4 +120,54 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
         }
         furi_delay_ms(300);
     }
+    magic_deactivate();
+}
+
+void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
+    bool card_found_notified = false;
+
+    while(nfc_magic_worker->state == NfcMagicWorkerStateCheck) {
+        if(magic_wupa()) {
+            if(!card_found_notified) {
+                nfc_magic_worker->callback(
+                    NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
+                card_found_notified = true;
+            }
+
+            nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
+            break;
+        } else {
+            if(card_found_notified) {
+                nfc_magic_worker->callback(
+                    NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
+                card_found_notified = false;
+            }
+        }
+        furi_delay_ms(300);
+    }
+    magic_deactivate();
+}
+
+void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
+    MfClassicBlock block = {};
+    block.value[0] = 0x01;
+    block.value[1] = 0x02;
+    block.value[2] = 0x03;
+    block.value[3] = 0x04;
+    block.value[4] = 0x04;
+    block.value[5] = 0x08;
+    block.value[6] = 0x04;
+
+    while(nfc_magic_worker->state == NfcMagicWorkerStateWipe) {
+        magic_deactivate();
+        furi_delay_ms(300);
+        if(!magic_wupa()) continue;
+        if(!magic_wipe()) continue;
+        if(!magic_data_access_cmd()) continue;
+        if(!magic_write_blk(0, &block)) continue;
+        nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
+        magic_deactivate();
+        break;
+    }
+    magic_deactivate();
 }

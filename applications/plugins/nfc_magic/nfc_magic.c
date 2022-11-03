@@ -91,10 +91,6 @@ NfcMagic* nfc_magic_alloc() {
 void nfc_magic_free(NfcMagic* nfc_magic) {
     furi_assert(nfc_magic);
 
-    // NfcMagic device
-    // nfc_magic_device_free(nfc_magic->dev);
-    // nfc_magic->dev = NULL;
-
     // Nfc device
     nfc_device_free(nfc_magic->nfc_dev);
 

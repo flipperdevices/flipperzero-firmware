@@ -1,27 +1,27 @@
 #include "../nfc_magic_i.h"
 
-void nfc_magic_scene_write_success_popup_callback(void* context) {
+void nfc_magic_scene_success_popup_callback(void* context) {
     NfcMagic* nfc_magic = context;
     view_dispatcher_send_custom_event(nfc_magic->view_dispatcher, NfcMagicCustomEventViewExit);
 }
 
-void nfc_magic_scene_write_success_on_enter(void* context) {
+void nfc_magic_scene_success_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
 
     notification_message(nfc_magic->notifications, &sequence_success);
 
     Popup* popup = nfc_magic->popup;
     // popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_header(popup, "Successfully\nwritten", 13, 22, AlignLeft, AlignBottom);
+    popup_set_header(popup, "Success!", 13, 22, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, nfc_magic);
-    popup_set_callback(popup, nfc_magic_scene_write_success_popup_callback);
+    popup_set_callback(popup, nfc_magic_scene_success_popup_callback);
     popup_enable_timeout(popup);
 
     view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewPopup);
 }
 
-bool nfc_magic_scene_write_success_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_success_on_event(void* context, SceneManagerEvent event) {
     NfcMagic* nfc_magic = context;
     bool consumed = false;
 
@@ -34,7 +34,7 @@ bool nfc_magic_scene_write_success_on_event(void* context, SceneManagerEvent eve
     return consumed;
 }
 
-void nfc_magic_scene_write_success_on_exit(void* context) {
+void nfc_magic_scene_success_on_exit(void* context) {
     NfcMagic* nfc_magic = context;
 
     // Clear view
