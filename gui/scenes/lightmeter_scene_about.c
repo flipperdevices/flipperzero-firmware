@@ -1,9 +1,6 @@
 #include "../../lightmeter.h"
 
-void lightmeter_scene_about_widget_callback(
-    GuiButtonType result,
-    InputType type,
-    void* context) {
+void lightmeter_scene_about_widget_callback(GuiButtonType result, InputType type, void* context) {
     LightMeterApp* lightmeter = context;
     UNUSED(lightmeter);
     UNUSED(result);
@@ -26,7 +23,8 @@ void lightmeter_scene_about_on_enter(void* context) {
 
     furi_string_cat_printf(temp_str, "\e#%s\n", "Description");
     furi_string_cat_printf(
-        temp_str, "Showing suggested camera\nsettings based on ambient\nlight or flash\n\n");
+        temp_str,
+        "Showing suggested camera\nsettings based on ambient\nlight or flash.\n\nInspired by a lightmeter\nproject by vpominchuk\n\n");
 
     widget_add_text_box_element(
         lightmeter->widget,
@@ -48,7 +46,8 @@ void lightmeter_scene_about_on_enter(void* context) {
         AlignBottom,
         "\e#\e!            Lightmeter            \e!\n",
         false);
-    widget_add_text_scroll_element(lightmeter->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
+    widget_add_text_scroll_element(
+        lightmeter->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
 
     view_dispatcher_switch_to_view(lightmeter->view_dispatcher, LightMeterAppViewAbout);
