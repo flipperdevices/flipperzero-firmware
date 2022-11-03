@@ -13,13 +13,17 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] Fixed Aperture mode
 - [x] Fixed Shutter speed mode 
 - [x] ISO correction 
-- [ ] Info screen
-- [ ] Pinout screen
+- [x] Info screen
+- [x] Pinout screen
 - [x] ND correction
 - [ ] Popup window when no sensor detected
 - [ ] Flash light metering
 - [ ] Cleanup code
 - [x] Draw suitable icon
+
+## TODO for later
+- [ ] Save settings to sd card
+- [ ] Backlight auto/on
 
 ## Wiring
 
