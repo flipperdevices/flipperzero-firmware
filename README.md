@@ -15,16 +15,16 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] ISO correction 
 - [ ] Info screen
 - [ ] Pinout screen
-- [ ] ND correction
+- [x] ND correction
 - [ ] Popup window when no sensor detected
 - [ ] Flash light metering
 - [ ] Cleanup code
-- [ ] Draw suitable icon
+- [x] Draw suitable icon
 
 ## Wiring
 
+```
 C0 -> SCL
-
 C1 -> SDA
-
 GND -> GND
+```
