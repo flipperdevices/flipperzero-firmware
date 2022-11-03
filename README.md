@@ -5,7 +5,7 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 > **Note**
 > FAP is still in development
 
-![](images/gui_main.png)
+<img src="images/framed_gui_main.png" width="400px">  
 
 ## TODO:
 - [x] Ambient light metering
@@ -13,18 +13,22 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] Fixed Aperture mode
 - [x] Fixed Shutter speed mode 
 - [x] ISO correction 
-- [ ] Info screen
-- [ ] Pinout screen
-- [ ] ND correction
+- [x] Info screen
+- [x] Pinout screen
+- [x] ND correction
 - [ ] Popup window when no sensor detected
 - [ ] Flash light metering
 - [ ] Cleanup code
-- [ ] Draw suitable icon
+- [x] Draw suitable icon
+
+## TODO for later
+- [ ] Save settings to sd card
+- [ ] Backlight auto/on
 
 ## Wiring
 
+```
 C0 -> SCL
-
 C1 -> SDA
-
 GND -> GND
+```

@@ -55,17 +55,27 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
         lightmeter->view_dispatcher,
         LightMeterAppViewMainView,
         main_view_get_view(lightmeter->main_view));
-    // set default values
+
+    // Set default values
     main_view_set_iso(lightmeter->main_view, ISO_100);
     main_view_set_nd(lightmeter->main_view, ND_0);
     main_view_set_aperture(lightmeter->main_view, AP_2_8);
     main_view_set_speed(lightmeter->main_view, TIME_125);
 
+    // Variable item list
     lightmeter->var_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         lightmeter->view_dispatcher,
         LightMeterAppViewVarItemList,
         variable_item_list_get_view(lightmeter->var_item_list));
+
+    // Widget
+    lightmeter->widget = widget_alloc();
+    view_dispatcher_add_view(
+        lightmeter->view_dispatcher, LightMeterAppViewAbout, widget_get_view(lightmeter->widget));
+    view_dispatcher_add_view(
+        lightmeter->view_dispatcher, LightMeterAppViewHelp, widget_get_view(lightmeter->widget));
+
 
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
@@ -74,21 +84,34 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
 
 void lightmeter_app_free(LightMeterApp* lightmeter) {
     furi_assert(lightmeter);
+    
     // Views
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewMainView);
     main_view_free(lightmeter->main_view);
+    
+    // Variable item list 
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewVarItemList);
     variable_item_list_free(lightmeter->var_item_list);
+    
+    //  Widget
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewAbout);
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewHelp);
+    widget_free(lightmeter->widget);
+
+
+   
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);
     scene_manager_free(lightmeter->scene_manager);
+    
     // Records
     furi_record_close(RECORD_GUI);
     notification_message(
         lightmeter->notifications,
         &sequence_display_backlight_enforce_auto); // set backlight back to auto
     furi_record_close(RECORD_NOTIFICATION);
-    // send power down command
+    
+    // Send power down command
     send_command(0x00);
 
     free(lightmeter);

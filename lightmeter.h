@@ -10,12 +10,17 @@
 
 #include "gui/views/main_view.h"
 
+#include <gui/modules/widget.h>
 #include <gui/modules/variable_item_list.h>
 
 #include "gui/scenes/config/lightmeter_scene.h"
 #include <notification/notification_messages.h>
 
 #include "lightmeter_config.h"
+
+#define LM_VERSION_APP "0.2"
+#define LM_DEVELOPED "Oleksii Kutuzov"
+#define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
 
 typedef struct {
     int iso;
@@ -31,12 +36,15 @@ typedef struct {
     VariableItemList* var_item_list;
     LightMeterConfig* config;
     NotificationApp* notifications;
+    Widget* widget;
 } LightMeterApp;
 
 typedef enum {
     LightMeterAppViewMainView,
     LightMeterAppViewConfigView,
     LightMeterAppViewVarItemList,
+    LightMeterAppViewAbout,
+    LightMeterAppViewHelp,
 } LightMeterAppView;
 
 typedef enum {

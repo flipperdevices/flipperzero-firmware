@@ -1,30 +1,37 @@
 #include "../../lightmeter.h"
 
 static const char* iso_numbers[] = {
+    // [ISO_6] = "6",
+    // [ISO_12] = "12",
+    // [ISO_25] = "25",
+    // [ISO_50] = "50",
     [ISO_100] = "100",
     [ISO_200] = "200",
     [ISO_400] = "400",
     [ISO_800] = "800",
+    [ISO_1600] = "1600",
+    [ISO_3200] = "3200",
+    [ISO_6400] = "6400",
+    [ISO_12800] = "12800",
+    [ISO_25600] = "25600",
+    [ISO_51200] = "51200",
+    [ISO_102400] = "102400",
 };
 
 static const char* nd_numbers[] = {
     [ND_0] = "0",
-    [ND_3] = "3",
-    [ND_6] = "6",
-    [ND_9] = "9",
-    [ND_12] = "12",
-    [ND_15] = "15",
-    [ND_18] = "18",
-    [ND_21] = "21",
-    [ND_24] = "24",
-    [ND_27] = "27",
-    [ND_30] = "30",
-    [ND_33] = "33",
-    [ND_36] = "36",
-    [ND_39] = "39",
-    [ND_42] = "42",
-    [ND_45] = "45",
-    [ND_48] = "48",
+    [ND_2] = "2",
+    [ND_4] = "4",
+    [ND_8] = "8",
+    [ND_16] = "16",
+    [ND_32] = "32",
+    [ND_64] = "64",
+    [ND_128] = "128",
+    [ND_256] = "256",
+    [ND_512] = "512",
+    [ND_1024] = "1024",
+    [ND_2048] = "2048",
+    [ND_4096] = "4096",
 };
 
 enum LightMeterSubmenuIndex {
@@ -58,11 +65,13 @@ static void ok_cb(void* context, uint32_t index) {
     LightMeterApp* lightmeter = context;
     UNUSED(lightmeter);
     switch(index) {
-    case 3:
-        // view_dispatcher_send_custom_event(lightmeter->view_dispatcher, DapAppCustomEventHelp);
+    case 2:
+        view_dispatcher_send_custom_event(
+            lightmeter->view_dispatcher, LightMeterAppCustomEventHelp);
         break;
-    case 4:
-        // view_dispatcher_send_custom_event(lightmeter->view_dispatcher, DapAppCustomEventAbout);
+    case 3:
+        view_dispatcher_send_custom_event(
+            lightmeter->view_dispatcher, LightMeterAppCustomEventAbout);
         break;
     default:
         break;
@@ -81,7 +90,7 @@ void lightmeter_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, iso_numbers[config->iso]);
 
     item = variable_item_list_add(
-        var_item_list, "ND", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
+        var_item_list, "ND factor", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
     variable_item_set_current_value_index(item, config->nd);
     variable_item_set_current_value_text(item, nd_numbers[config->nd]);
 
@@ -105,6 +114,14 @@ bool lightmeter_scene_config_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeTick) {
         consumed = true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == LightMeterAppCustomEventHelp) {
+            scene_manager_next_scene(lightmeter->scene_manager, LightMeterAppSceneHelp);
+            consumed = true;
+        } else if(event.event == LightMeterAppCustomEventAbout) {
+            scene_manager_next_scene(lightmeter->scene_manager, LightMeterAppSceneAbout);
+            consumed = true;
+        }
     }
     return consumed;
 }
@@ -113,4 +130,5 @@ void lightmeter_scene_config_on_exit(void* context) {
     LightMeterApp* lightmeter = context;
     variable_item_list_reset(lightmeter->var_item_list);
     main_view_set_iso(lightmeter->main_view, lightmeter->config->iso);
+    main_view_set_nd(lightmeter->main_view, lightmeter->config->nd);
 }

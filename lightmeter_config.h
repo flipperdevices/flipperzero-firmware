@@ -1,30 +1,40 @@
 #pragma once
 
 typedef enum {
+    // ISO_6,
+    // ISO_12,
+    // ISO_25,
+    // ISO_50,
     ISO_100,
     ISO_200,
     ISO_400,
     ISO_800,
+    ISO_1600,
+    ISO_3200,
+    ISO_6400,
+    ISO_12800,
+    ISO_25600,
+    ISO_51200,
+    ISO_102400,
+
+    ISO_NUM,
 } LightMeterISONumbers;
 
 typedef enum {
     ND_0,
-    ND_3,
-    ND_6,
-    ND_9,
-    ND_12,
-    ND_15,
-    ND_18,
-    ND_21,
-    ND_24,
-    ND_27,
-    ND_30,
-    ND_33,
-    ND_36,
-    ND_39,
-    ND_42,
-    ND_45,
-    ND_48,
+    ND_2,
+    ND_4,
+    ND_8,
+    ND_16,
+    ND_32,
+    ND_64,
+    ND_128,
+    ND_256,
+    ND_512,
+    ND_1024,
+    ND_2048,
+    ND_4096,
+
     ND_NUM,
 } LightMeterNDNumbers;
 
@@ -44,6 +54,7 @@ typedef enum {
     AP_64,
     AP_90,
     AP_128,
+
     AP_NUM,
 } LightMeterApertureNumbers;
 
@@ -67,5 +78,6 @@ typedef enum {
     TIME_8S,
     TIME_15S,
     TIME_30S,
+
     TIME_NUM,
 } LightMeterTimeNumbers;
