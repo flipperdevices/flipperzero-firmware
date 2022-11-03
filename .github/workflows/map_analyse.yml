@@ -23,7 +23,7 @@ jobs:
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: 'build-main'
+          checkName: 'main'
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           intervalSeconds: 20
 
