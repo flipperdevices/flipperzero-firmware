@@ -10,10 +10,21 @@
 #define WORKER_TAG "Main View"
 
 static const int iso_numbers[] = {
+    // [ISO_6] = 6,
+    // [ISO_12] = 12,
+    // [ISO_25] = 25,
+    // [ISO_50] = 50,
     [ISO_100] = 100,
     [ISO_200] = 200,
     [ISO_400] = 400,
     [ISO_800] = 800,
+    [ISO_1600] = 1600,
+    [ISO_3200] = 3200,
+    [ISO_6400] = 6400,
+    [ISO_12800] = 12800,
+    [ISO_25600] = 25600,
+    [ISO_51200] = 51200,
+    [ISO_102400] = 102400,
 };
 
 // static const int nd_numbers[] = {
@@ -71,8 +82,8 @@ struct MainView {
 };
 
 typedef enum {
-    FIXED_TIME,
     FIXED_APERTURE,
+    FIXED_TIME,
 
     /* Know menu Size*/
     MODES_SIZE
@@ -108,7 +119,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     canvas_clear(canvas);
 
-    char str[10];
+    char str[12];
 
     int lux = send_command(0x20);
     FURI_LOG_D(WORKER_TAG, "Get Lux: %d", lux);

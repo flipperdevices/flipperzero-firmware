@@ -1,10 +1,21 @@
 #pragma once
 
 typedef enum {
+    // ISO_6,
+    // ISO_12,
+    // ISO_25,
+    // ISO_50,
     ISO_100,
     ISO_200,
     ISO_400,
     ISO_800,
+    ISO_1600,
+    ISO_3200,
+    ISO_6400,
+    ISO_12800,
+    ISO_25600,
+    ISO_51200,
+    ISO_102400,
 } LightMeterISONumbers;
 
 typedef enum {
