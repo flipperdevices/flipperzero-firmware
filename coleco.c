@@ -1,14 +1,32 @@
 #include <furi.h>
 #include <furi_hal_gpio.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <gui/modules/button_panel.h>
 
-const GpioPin* const pin_up = &gpio_ext_pa4;
-const GpioPin* const pin_down = &gpio_ext_pb2;
-const GpioPin* const pin_right = &gpio_ext_pa7;
-const GpioPin* const pin_left = &gpio_ext_pa6;
-const GpioPin* const pin_fire = &gpio_ext_pc3;
-const GpioPin* const pin_mode = &gpio_ext_pc1;
+#define CODE_0 0x0A
+#define CODE_1 0x0D
+#define CODE_2 0x07
+#define CODE_3 0x0C
+#define CODE_4 0x02
+#define CODE_5 0x03
+#define CODE_6 0x0E
+#define CODE_7 0x05
+#define CODE_8 0x01
+#define CODE_9 0x0B
+#define CODE_H 0x06
+#define CODE_S 0x09
+#define CODE_N 0x0F
+
+const GpioPin* const pin_up = &gpio_ext_pa6;
+const GpioPin* const pin_down = &gpio_ext_pc0;
+const GpioPin* const pin_right = &gpio_ext_pb2;
+const GpioPin* const pin_left = &gpio_ext_pc3;
+const GpioPin* const pin_code0 = &gpio_ext_pa7;
+const GpioPin* const pin_code1 = &gpio_ext_pa4;
+const GpioPin* const pin_code2 = &ibutton_gpio;
+const GpioPin* const pin_code3 = &gpio_ext_pc1;
+const GpioPin* const pin_fire = &gpio_ext_pb3;
 
 typedef enum
 {
@@ -22,120 +40,11 @@ typedef struct
   InputEvent input;
 } PluginEvent;
 
-typedef enum
-{
-  WorkerEvtStop = (1 << 0),
-  WorkerEvtModeChange = (1 << 1),
-  WorkerEvtUpChange = (1 << 2),
-  WorkerEvtDownChange = (1 << 3),
-  WorkerEvtRightChange = (1 << 4),
-  WorkerEvtLeftChange = (1 << 5),
-  WorkerEvtCodeChange = (1 << 6),
-} WorkerEvtFlags;
-
 typedef struct
 {
-  FuriThread* thread;
-  volatile bool mode;
-
-  bool button_up;
-  bool button_down;
-  bool button_right;
-  bool button_left;
-  bool button_fire;
-  unsigned int button_code;
-
   ButtonPanel* button_panel;
   bool dpad;
 } Coleco;
-
-static void mode_isr(void* context)
-{
-  Coleco* coleco = (Coleco*)context;
-  coleco->mode = furi_hal_gpio_read(&gpio_ext_pc1);
-  furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtModeChange);
-}
-
-static int32_t coleco_output_worker(void* context)
-{
-  Coleco* coleco = (Coleco*)context;
-
-  furi_hal_gpio_add_int_callback(pin_mode, mode_isr, coleco);
-
-  while(1)
-  {
-    uint32_t events = furi_thread_flags_wait(0x7F, FuriFlagWaitAny, FuriWaitForever);
-    furi_check((events & FuriFlagError) == 0);
-
-    if (events & WorkerEvtStop)
-    {
-      break;
-    }
-
-    if (events & WorkerEvtModeChange)
-    {
-      if (coleco->mode)
-      {
-        furi_hal_gpio_write(pin_up, !coleco->button_up);
-        furi_hal_gpio_write(pin_down, !coleco->button_down);
-        furi_hal_gpio_write(pin_right, !coleco->button_right);
-        furi_hal_gpio_write(pin_left, !coleco->button_left);
-      }
-      else
-      {
-        furi_hal_gpio_write(pin_left, (coleco->button_code & 1));
-        furi_hal_gpio_write(pin_down, (coleco->button_code & 2));
-        furi_hal_gpio_write(pin_right, (coleco->button_code & 4));
-        furi_hal_gpio_write(pin_up, (coleco->button_code & 8));
-      }
-    }
-
-    if (events & WorkerEvtUpChange)
-    {
-      if (coleco->mode)
-      {
-        furi_hal_gpio_write(pin_up, !coleco->button_up);
-      }
-    }
-
-    if (events & WorkerEvtDownChange)
-    {
-      if (coleco->mode)
-      {
-        furi_hal_gpio_write(pin_down, !coleco->button_down);
-      }
-    }
-
-    if (events & WorkerEvtRightChange)
-    {
-      if (coleco->mode)
-      {
-        furi_hal_gpio_write(pin_right, !coleco->button_right);
-      }
-    }
-
-    if (events & WorkerEvtLeftChange)
-    {
-      if (coleco->mode)
-      {
-        furi_hal_gpio_write(pin_left, !coleco->button_left);
-      }
-    }
-
-    if (events & WorkerEvtCodeChange)
-    {
-      if (!coleco->mode)
-      {
-        furi_hal_gpio_write(pin_left, !(coleco->button_code & 1));
-        furi_hal_gpio_write(pin_down, !(coleco->button_code & 2));
-        furi_hal_gpio_write(pin_right, !(coleco->button_code & 4));
-        furi_hal_gpio_write(pin_up, !(coleco->button_code & 8));
-      }
-    }
-  }
-
-  return 0;
-}
 
 static void render_callback(Canvas* const canvas, void* context)
 {
@@ -170,19 +79,20 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
   furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+static void coleco_write_code(unsigned int code)
+{
+  furi_hal_gpio_write(pin_code0, (code & 1));
+  furi_hal_gpio_write(pin_code1, (code & 2));
+  furi_hal_gpio_write(pin_code2, (code & 4));
+  furi_hal_gpio_write(pin_code3, (code & 8));
+}
+
 static Coleco* coleco_alloc()
 {
   Coleco* coleco = malloc(sizeof(Coleco));
 
   coleco->button_panel = button_panel_alloc();
 
-  coleco->mode = true;
-  coleco->button_up = false;
-  coleco->button_down = false;
-  coleco->button_right = false;
-  coleco->button_left = false;
-  coleco->button_fire = false;
-  coleco->button_code = 0x0F;
   coleco->dpad = false;
 
   // configure output pins
@@ -190,6 +100,10 @@ static Coleco* coleco_alloc()
   furi_hal_gpio_init(pin_down, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_right, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_left, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_code0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_code1, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_code2, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_code3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_fire, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
   furi_hal_gpio_write(pin_up, true);
@@ -198,16 +112,7 @@ static Coleco* coleco_alloc()
   furi_hal_gpio_write(pin_left, true);
   furi_hal_gpio_write(pin_fire, true);
 
-  // configure mode pin
-  furi_hal_gpio_init(pin_mode, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh);
-
-  // set up output worker thread
-  coleco->thread = furi_thread_alloc();
-  furi_thread_set_name(coleco->thread, "ColecoOutputWorker");
-  furi_thread_set_stack_size(coleco->thread, 1024);
-  furi_thread_set_context(coleco->thread, coleco);
-  furi_thread_set_callback(coleco->thread, coleco_output_worker);
-  furi_thread_start(coleco->thread);
+  coleco_write_code(CODE_N);
 
   return coleco;
 }
@@ -215,10 +120,6 @@ static Coleco* coleco_alloc()
 static void coleco_free(Coleco* coleco)
 {
   furi_assert(coleco);
-
-  furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtStop);
-  furi_thread_join(coleco->thread);
-  furi_thread_free(coleco->thread);
 
   button_panel_free(coleco->button_panel);
 
@@ -250,6 +151,8 @@ int32_t coleco_app(void* p)
   Gui* gui = furi_record_open("gui");
   gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+  furi_hal_power_enable_otg();
+
   PluginEvent event;
   for (bool processing = true; processing;)
   {
@@ -269,26 +172,22 @@ int32_t coleco_app(void* p)
             {
               if (event.input.type == InputTypePress)
               {
-                coleco->button_up = true;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtUpChange);
+                furi_hal_gpio_write(pin_up, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                coleco->button_up = false;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtUpChange);
+                furi_hal_gpio_write(pin_up, true);
               }
             }
             else  // FIXME: hack to allow the 1 to be pressed
             {
               if (event.input.type == InputTypePress)
               {
-                coleco->button_code = 0x0D;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtCodeChange);
+                coleco_write_code(CODE_1);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                coleco->button_code = 0x0F;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtCodeChange);
+                coleco_write_code(CODE_N);
               }
             }
             break;
@@ -297,13 +196,22 @@ int32_t coleco_app(void* p)
             {
               if (event.input.type == InputTypePress)
               {
-                coleco->button_down = true;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtDownChange);
+                furi_hal_gpio_write(pin_down, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                coleco->button_down = false;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtDownChange);
+                furi_hal_gpio_write(pin_down, true);
+              }
+            }
+            else  // FIXME: hack to allow the 2 to be pressed
+            {
+              if (event.input.type == InputTypePress)
+              {
+                coleco_write_code(CODE_2);
+              }
+              else if (event.input.type == InputTypeRelease)
+              {
+                coleco_write_code(CODE_N);
               }
             }
             break;
@@ -312,13 +220,22 @@ int32_t coleco_app(void* p)
             {
               if (event.input.type == InputTypePress)
               {
-                coleco->button_right = true;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtRightChange);
+                furi_hal_gpio_write(pin_right, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                coleco->button_right = false;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtRightChange);
+                furi_hal_gpio_write(pin_right, true);
+              }
+            }
+            else  // FIXME: hack to allow the 3 to be pressed
+            {
+              if (event.input.type == InputTypePress)
+              {
+                coleco_write_code(CODE_3);
+              }
+              else if (event.input.type == InputTypeRelease)
+              {
+                coleco_write_code(CODE_N);
               }
             }
             break;
@@ -327,13 +244,22 @@ int32_t coleco_app(void* p)
             {
               if (event.input.type == InputTypePress)
               {
-                coleco->button_left = true;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtLeftChange);
+                furi_hal_gpio_write(pin_left, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                coleco->button_left = false;
-                furi_thread_flags_set(furi_thread_get_id(coleco->thread), WorkerEvtLeftChange);
+                furi_hal_gpio_write(pin_left, true);
+              }
+            }
+            else  // FIXME: hack to allow the 4 to be pressed
+            {
+              if (event.input.type == InputTypePress)
+              {
+                coleco_write_code(CODE_4);
+              }
+              else if (event.input.type == InputTypeRelease)
+              {
+                coleco_write_code(CODE_N);
               }
             }
             break;
@@ -342,13 +268,11 @@ int32_t coleco_app(void* p)
             {
               if (event.input.type == InputTypePress)
               {
-                coleco->button_fire = true;
-                furi_hal_gpio_write(pin_fire, !coleco->button_fire);
+                furi_hal_gpio_write(pin_fire, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                coleco->button_fire = false;
-                furi_hal_gpio_write(pin_fire, !coleco->button_fire);
+                furi_hal_gpio_write(pin_fire, true);
               }
             }
             else
@@ -384,7 +308,8 @@ int32_t coleco_app(void* p)
     release_mutex(&coleco_mutex, coleco);
   }
 
-  furi_hal_gpio_remove_int_callback(pin_mode);
+  furi_hal_power_disable_otg();
+
   view_port_enabled_set(view_port, false);
   gui_remove_view_port(gui, view_port);
   furi_record_close("gui");
