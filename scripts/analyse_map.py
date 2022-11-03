@@ -118,6 +118,16 @@ def insertHeader(header, cur, conn):
     return cur.lastrowid
 
 
+def setAmapStylePath(line, arr):
+    if line["library"].endswith(".a"):
+        arr.append(line["path"] + line["library"]) # lib
+        arr.append(line["object"]) # object
+    else:
+        arr.append("")
+        arr.append(line["path"] + line["object"])
+    return arr
+
+
 def parseMap(mapser, headerID):
     arr = []
     for line in mapser.symbols_information:
@@ -127,8 +137,7 @@ def parseMap(mapser, headerID):
         lineArr.append(line["origin"])  # address hex
         lineArr.append(line["size"])  # size
         lineArr.append(line["symbol"])  # name
-        lineArr.append(line["path"] + line["library"])  # lib
-        lineArr.append(line["object"])  # obj_name
+        lineArr = setAmapStylePath(line, lineArr)
         arr.append(tuple(lineArr))
     return arr
 
