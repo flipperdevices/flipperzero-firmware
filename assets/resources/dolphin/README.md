@@ -1,9 +1,6 @@
 
 - Animations: Trimmed out the Flipper animations. `/ext/dolphin` folder on your Flipper should now be managed by you! [Copy this folder (RM Select)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) or [this folder (RM minimal)](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-minimal) if you don't want to do the work but want more animations.
 - - Rename the [minimal animation file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleMin) to see it, or [RM select](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/dolphin/manifest.txt.exampleRM) if you have copied over [the RM select](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/dolphin-RMselect) animations.
-- I link to option folders here: https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/ReadMe.md?plain=1#L105 but also explain further here with examples that in the install: https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/ReadMe.md?plain=1#L25 
-(the minimal is in the install)
-
 
 ## Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 
