@@ -20,22 +20,18 @@ static const char* iso_numbers[] = {
 
 static const char* nd_numbers[] = {
     [ND_0] = "0",
-    [ND_3] = "3",
-    [ND_6] = "6",
-    [ND_9] = "9",
-    [ND_12] = "12",
-    [ND_15] = "15",
-    [ND_18] = "18",
-    [ND_21] = "21",
-    [ND_24] = "24",
-    [ND_27] = "27",
-    [ND_30] = "30",
-    [ND_33] = "33",
-    [ND_36] = "36",
-    [ND_39] = "39",
-    [ND_42] = "42",
-    [ND_45] = "45",
-    [ND_48] = "48",
+    [ND_2] = "2",
+    [ND_4] = "4",
+    [ND_8] = "8",
+    [ND_16] = "16",
+    [ND_32] = "32",
+    [ND_64] = "64",
+    [ND_128] = "128",
+    [ND_256] = "256",
+    [ND_512] = "512",
+    [ND_1024] = "1024",
+    [ND_2048] = "2048",
+    [ND_4096] = "4096",
 };
 
 enum LightMeterSubmenuIndex {
@@ -124,4 +120,5 @@ void lightmeter_scene_config_on_exit(void* context) {
     LightMeterApp* lightmeter = context;
     variable_item_list_reset(lightmeter->var_item_list);
     main_view_set_iso(lightmeter->main_view, lightmeter->config->iso);
+    main_view_set_nd(lightmeter->main_view, lightmeter->config->nd);
 }

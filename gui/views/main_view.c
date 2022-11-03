@@ -27,25 +27,21 @@ static const int iso_numbers[] = {
     [ISO_102400] = 102400,
 };
 
-// static const int nd_numbers[] = {
-//     [ND_0] = 0,
-//     [ND_3] = 3,
-//     [ND_6] = 6,
-//     [ND_9] = 9,
-//     [ND_12] = 12,
-//     [ND_15] = 15,
-//     [ND_18] = 18,
-//     [ND_21] = 21,
-//     [ND_24] = 24,
-//     [ND_27] = 27,
-//     [ND_30] = 30,
-//     [ND_33] = 33,
-//     [ND_36] = 36,
-//     [ND_39] = 39,
-//     [ND_42] = 42,
-//     [ND_45] = 45,
-//     [ND_48] = 48,
-// };
+static const int nd_numbers[] = {
+    [ND_0] = 0,
+    [ND_2] = 2,
+    [ND_4] = 4,
+    [ND_8] = 8,
+    [ND_16] = 16,
+    [ND_32] = 32,
+    [ND_64] = 64,
+    [ND_128] = 128,
+    [ND_256] = 256,
+    [ND_512] = 512,
+    [ND_1024] = 1024,
+    [ND_2048] = 2048,
+    [ND_4096] = 4096,
+};
 
 static const float aperture_numbers[] = {
     [AP_1] = 1.0,
@@ -138,10 +134,13 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     float T = time_numbers[model->speed];
 
-    // uint8_t ndStop =
+    float ISO_ND = 0;
+    if(model->nd > 0)
+        ISO_ND = iso / nd_numbers[model->nd];
+    else
+        ISO_ND = iso;
 
-    // TODO ND correction
-    float ISO_ND = iso;
+    FURI_LOG_D(WORKER_TAG, "ISO_ND: %f", (double)ISO_ND);
 
     if(lux > 0) {
         if(model->current_mode == FIXED_APERTURE) {
@@ -162,11 +161,11 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, "A");
 
     snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
-    canvas_draw_str_aligned(canvas, 20, 1, AlignLeft, AlignTop, str);
+    canvas_draw_str_aligned(canvas, 19, 1, AlignLeft, AlignTop, str);
 
     canvas_set_font(canvas, FontSecondary);
     snprintf(str, sizeof(str), "lx: %d", lux);
-    canvas_draw_str_aligned(canvas, 90, 9, AlignLeft, AlignBottom, str);
+    canvas_draw_str_aligned(canvas, 87, 2, AlignLeft, AlignTop, str);
 
     // add f, T values
     if(model->current_mode == FIXED_APERTURE) {
@@ -210,17 +209,21 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
     }
 
-    // create buttons
+    // draw buttons
     canvas_set_font(canvas, FontSecondary);
     elements_button_left(canvas, "Config");
+
+    // draw ND number
+    snprintf(str, sizeof(str), "ND: %d", nd_numbers[model->nd]);
+    canvas_draw_str_aligned(canvas, 87, 20, AlignLeft, AlignBottom, str);
 
     // draw EV number
     canvas_set_font(canvas, FontSecondary);
     if(lux > 0) {
         snprintf(str, sizeof(str), "EV: %1.0f", (double)EV);
-        canvas_draw_str_aligned(canvas, 98, 22, AlignLeft, AlignBottom, str);
+        canvas_draw_str_aligned(canvas, 87, 29, AlignLeft, AlignBottom, str);
     } else {
-        canvas_draw_str_aligned(canvas, 98, 22, AlignLeft, AlignBottom, "EV: --");
+        canvas_draw_str_aligned(canvas, 87, 29, AlignLeft, AlignBottom, "EV: --");
     }
 
     switch(model->current_mode) {
