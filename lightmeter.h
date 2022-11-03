@@ -18,10 +18,6 @@
 
 #include "lightmeter_config.h"
 
-#define LM_VERSION_APP "0.2"
-#define LM_DEVELOPED "Oleksii Kutuzov"
-#define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
-
 typedef struct {
     int iso;
     int nd;
@@ -55,4 +51,4 @@ typedef enum {
 
 void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config);
 
-int send_command(uint8_t command);
+bool send_command(uint8_t command, uint8_t* buffer);

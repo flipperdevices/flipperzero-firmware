@@ -16,8 +16,8 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] Info screen
 - [x] Pinout screen
 - [x] ND correction
-- [ ] Popup window when no sensor detected
-- [ ] Flash light metering
+- [x] Popup when no sensor detected
+- [ ] Flash metering
 - [ ] Cleanup code
 - [x] Draw suitable icon
 

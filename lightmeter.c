@@ -1,5 +1,7 @@
 #include "lightmeter.h"
 
+#define WORKER_TAG "Main app"
+
 static bool lightmeter_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     LightMeterApp* lightmeter = context;
@@ -22,7 +24,8 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     LightMeterApp* lightmeter = malloc(sizeof(LightMeterApp));
 
     // send Power on command
-    send_command(0x01);
+    uint8_t buffer[2] = {0x00};
+    send_command(COMMAND_POWER_UP, buffer);
 
     lightmeter->config = malloc(sizeof(LightMeterConfig));
     lightmeter->config->iso = 0;
@@ -76,7 +79,6 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     view_dispatcher_add_view(
         lightmeter->view_dispatcher, LightMeterAppViewHelp, widget_get_view(lightmeter->widget));
 
-
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
     return lightmeter;
@@ -84,35 +86,34 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
 
 void lightmeter_app_free(LightMeterApp* lightmeter) {
     furi_assert(lightmeter);
-    
+
     // Views
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewMainView);
     main_view_free(lightmeter->main_view);
-    
-    // Variable item list 
+
+    // Variable item list
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewVarItemList);
     variable_item_list_free(lightmeter->var_item_list);
-    
+
     //  Widget
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewAbout);
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewHelp);
     widget_free(lightmeter->widget);
 
-
-   
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);
     scene_manager_free(lightmeter->scene_manager);
-    
+
     // Records
     furi_record_close(RECORD_GUI);
     notification_message(
         lightmeter->notifications,
         &sequence_display_backlight_enforce_auto); // set backlight back to auto
     furi_record_close(RECORD_NOTIFICATION);
-    
+
+    uint8_t buffer[2] = {0x00};
     // Send power down command
-    send_command(0x00);
+    send_command(COMMAND_POWER_DOWN, buffer);
 
     free(lightmeter);
 }
@@ -130,12 +131,32 @@ void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* conf
     lightmeter->config = config;
 }
 
-int send_command(uint8_t command) {
+bool send_command(uint8_t command, uint8_t* buffer) {
+
     uint32_t timeout = furi_ms_to_ticks(100);
-    uint8_t recv[2];
+    bool ret = false;
+
+    // Acquire I2C and check if device is ready, then release
     furi_hal_i2c_acquire(I2C_BUS);
-    uint8_t address = 0x23 << 1;
-    furi_hal_i2c_trx(I2C_BUS, address, &command, sizeof(command), recv, sizeof(recv), timeout);
-    furi_hal_i2c_release(I2C_BUS);
-    return ((int)recv[0] << 8) | ((int)recv[1]);
+    if(furi_hal_i2c_is_device_ready(I2C_BUS, SENSOR_ADDRESS, timeout)) {
+        furi_hal_i2c_release(I2C_BUS);
+
+        furi_hal_i2c_acquire(I2C_BUS);
+        // Transmit given command
+        ret = furi_hal_i2c_tx(I2C_BUS, SENSOR_ADDRESS, &command, 1, timeout);
+        furi_hal_i2c_release(I2C_BUS);
+
+        if(ret) {
+            uint32_t wait_ticks = furi_ms_to_ticks(50);
+            furi_delay_tick(wait_ticks);
+
+            furi_hal_i2c_acquire(I2C_BUS);
+            // Receive data
+            ret = furi_hal_i2c_rx(I2C_BUS, SENSOR_ADDRESS, buffer, 2, timeout);
+            furi_hal_i2c_release(I2C_BUS);
+        }
+    } else
+        furi_hal_i2c_release(I2C_BUS);
+
+    return ret;
 }

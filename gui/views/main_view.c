@@ -116,69 +116,86 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     canvas_clear(canvas);
 
     char str[12];
+    int lux = 0;
+    float EV = 0;
+    float A = 0;
+    float T = 0;
+    int iso = 0;
+    uint8_t buffer[2] = {0x00};
 
-    int lux = send_command(0x20);
-    FURI_LOG_D(WORKER_TAG, "Get Lux: %d", lux);
+    bool response = send_command(COMMAND_MEASUREMENT, buffer);
 
-    float EV = lux2ev((float)lux);
-    FURI_LOG_D(WORKER_TAG, "Compute EV: %f", (double)EV);
+    if(response) {
+        lux = ((int)buffer[0] << 8) | ((int)buffer[1]);
+        EV = lux2ev((float)lux);
+        A = aperture_numbers[model->aperture];
+        iso = iso_numbers[model->iso];
+        T = time_numbers[model->speed];
 
-    float A = aperture_numbers[model->aperture];
-    FURI_LOG_D(WORKER_TAG, "Get Aperture: %.1f", (double)A);
+        float ISO_ND = 0;
+        if(model->nd > 0)
+            ISO_ND = iso / nd_numbers[model->nd];
+        else
+            ISO_ND = iso;
 
-    int iso = iso_numbers[model->iso];
-    FURI_LOG_D(WORKER_TAG, "Get ISO: %d", iso);
-
-    float A_fix = normalizeAperture(3.4);
-    FURI_LOG_D(WORKER_TAG, "Fixed Aperture: %.1f", (double)A_fix);
-
-    float T = time_numbers[model->speed];
-
-    float ISO_ND = 0;
-    if(model->nd > 0)
-        ISO_ND = iso / nd_numbers[model->nd];
-    else
-        ISO_ND = iso;
-
-    FURI_LOG_D(WORKER_TAG, "ISO_ND: %f", (double)ISO_ND);
-
-    if(lux > 0) {
-        if(model->current_mode == FIXED_APERTURE) {
-            T = 100 * pow(A, 2) / (double)ISO_ND / pow(2, EV);
-        } else if(model->current_mode == FIXED_TIME) {
-            A = sqrt(pow(2, EV) * (double)ISO_ND * (double)T / 100);
+        if(lux > 0) {
+            if(model->current_mode == FIXED_APERTURE) {
+                T = 100 * pow(A, 2) / (double)ISO_ND / pow(2, EV);
+            } else if(model->current_mode == FIXED_TIME) {
+                A = sqrt(pow(2, EV) * (double)ISO_ND * (double)T / 100);
+            }
+        } else {
+            T = 0;
+            A = 0;
         }
-    } else {
-        T = 0;
-        A = 0;
     }
 
     // top row
-    canvas_draw_line(canvas, 0, 10, 128, 10);
+    if(!response) {
+        canvas_draw_box(canvas, 0, 0, 128, 12);
+        canvas_set_color(canvas, ColorWhite);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 24, 10, "No sensor found");
+        canvas_set_color(canvas, ColorBlack);
+    } else {
+        canvas_draw_line(canvas, 0, 10, 128, 10);
 
-    canvas_set_font(canvas, FontPrimary);
-    // metering mode A – ambient, F – flash
-    canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, "A");
+        canvas_set_font(canvas, FontPrimary);
+        // metering mode A – ambient, F – flash
+        canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, "A");
 
-    snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
-    canvas_draw_str_aligned(canvas, 19, 1, AlignLeft, AlignTop, str);
+        snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
+        canvas_draw_str_aligned(canvas, 19, 1, AlignLeft, AlignTop, str);
 
-    canvas_set_font(canvas, FontSecondary);
-    snprintf(str, sizeof(str), "lx: %d", lux);
-    canvas_draw_str_aligned(canvas, 87, 2, AlignLeft, AlignTop, str);
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(str, sizeof(str), "lx: %d", lux);
+        canvas_draw_str_aligned(canvas, 87, 2, AlignLeft, AlignTop, str);
+    }
 
     // add f, T values
     if(model->current_mode == FIXED_APERTURE) {
         canvas_set_font(canvas, FontBigNumbers);
+
+        // draw f icon
         canvas_draw_icon(canvas, 15, 17, &I_f_10x14);
-        if(model->aperture < AP_8) {
-            snprintf(str, sizeof(str), "/%.1f", (double)aperture_numbers[model->aperture]);
+
+        // draw f number
+        if(response) {
+            if(model->aperture < AP_8) {
+                snprintf(str, sizeof(str), "/%.1f", (double)aperture_numbers[model->aperture]);
+            } else {
+                snprintf(str, sizeof(str), "/%.0f", (double)aperture_numbers[model->aperture]);
+            }
         } else {
-            snprintf(str, sizeof(str), "/%.0f", (double)aperture_numbers[model->aperture]);
+            snprintf(str, sizeof(str), " ---");
         }
         canvas_draw_str_aligned(canvas, 27, 15, AlignLeft, AlignTop, str);
+
+        // draw T icon
         canvas_draw_icon(canvas, 15, 34, &I_T_10x14);
-        if(lux > 0) {
+
+        // draw T number
+        if(lux > 0 && response) {
             if(T < 1) {
                 snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)normalizeTime(T));
             } else {
@@ -191,8 +208,12 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     } else if(model->current_mode == FIXED_TIME) {
         canvas_set_font(canvas, FontBigNumbers);
+
+        // draw f icon
         canvas_draw_icon(canvas, 15, 17, &I_f_10x14);
-        if(A < aperture_numbers[0]) {
+
+        // draw f number
+        if(A < aperture_numbers[0] || !response) {
             snprintf(str, sizeof(str), " ---");
         } else if(A < aperture_numbers[AP_8]) {
             snprintf(str, sizeof(str), "/%.1f", (double)normalizeAperture(A));
@@ -200,32 +221,45 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
             snprintf(str, sizeof(str), "/%.0f", (double)normalizeAperture(A));
         }
         canvas_draw_str_aligned(canvas, 27, 15, AlignLeft, AlignTop, str);
+
+        // draw T icon
         canvas_draw_icon(canvas, 15, 34, &I_T_10x14);
-        if(model->speed < TIME_1S) {
-            snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)time_numbers[model->speed]);
+
+        // draw T number
+        if(response) {
+            if(model->speed < TIME_1S) {
+                snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)time_numbers[model->speed]);
+            } else {
+                snprintf(str, sizeof(str), ":%.0f", (double)time_numbers[model->speed]);
+            }
         } else {
-            snprintf(str, sizeof(str), ":%.0f", (double)time_numbers[model->speed]);
+            snprintf(str, sizeof(str), " ---");
         }
         canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
     }
 
-    // draw buttons
+    // draw button
     canvas_set_font(canvas, FontSecondary);
     elements_button_left(canvas, "Config");
 
     // draw ND number
-    snprintf(str, sizeof(str), "ND: %d", nd_numbers[model->nd]);
+    if(response) {
+        snprintf(str, sizeof(str), "ND: %d", nd_numbers[model->nd]);
+    } else {
+        snprintf(str, sizeof(str), "ND: ---");
+    }
     canvas_draw_str_aligned(canvas, 87, 20, AlignLeft, AlignBottom, str);
 
     // draw EV number
     canvas_set_font(canvas, FontSecondary);
-    if(lux > 0) {
+    if(lux > 0 && response) {
         snprintf(str, sizeof(str), "EV: %1.0f", (double)EV);
         canvas_draw_str_aligned(canvas, 87, 29, AlignLeft, AlignBottom, str);
     } else {
         canvas_draw_str_aligned(canvas, 87, 29, AlignLeft, AlignBottom, "EV: --");
     }
 
+    // draw mode indicator
     switch(model->current_mode) {
     case FIXED_TIME:
         canvas_set_font(canvas, FontBigNumbers);
