@@ -90,7 +90,7 @@ void lightmeter_scene_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, iso_numbers[config->iso]);
 
     item = variable_item_list_add(
-        var_item_list, "ND", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
+        var_item_list, "ND factor", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
     variable_item_set_current_value_index(item, config->nd);
     variable_item_set_current_value_text(item, nd_numbers[config->nd]);
 
