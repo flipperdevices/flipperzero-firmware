@@ -2,9 +2,7 @@
 
 enum VirtualButtonSubmenuIndex {
     VirtualButtonSubmenuIndexSendView,
-    VirtualButtonSubmenuIndexModuleView,
-    VirtualButtonSubmenuIndexRebootView,
-    VirtualButtonSubmenuIndexResetView,
+    VirtualButtonSubmenuIndexAboutView,
 };
 
 static void virtual_button_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -25,20 +23,8 @@ void virtual_button_scene_start_on_enter(void* context) {
         app);
     submenu_add_item(
         submenu,
-        "Configure module",
-        VirtualButtonSubmenuIndexModuleView,
-        virtual_button_scene_start_submenu_callback,
-        app);
-    submenu_add_item(
-        submenu,
-        "Reboot module",
-        VirtualButtonSubmenuIndexRebootView,
-        virtual_button_scene_start_submenu_callback,
-        app);
-    submenu_add_item(
-        submenu,
-        "Reset module",
-        VirtualButtonSubmenuIndexResetView,
+        "About",
+        VirtualButtonSubmenuIndexAboutView,
         virtual_button_scene_start_submenu_callback,
         app);
     submenu_set_selected_item(
@@ -54,12 +40,8 @@ bool virtual_button_scene_start_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == VirtualButtonSubmenuIndexSendView) {
             scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneSendView);
-        } else if(event.event == VirtualButtonSubmenuIndexModuleView) {
-            scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneModuleView);
-        } else if(event.event == VirtualButtonSubmenuIndexRebootView) {
-            scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneRebootView);
-        } else if(event.event == VirtualButtonSubmenuIndexResetView) {
-            scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneResetView);
+        } else if(event.event == VirtualButtonSubmenuIndexAboutView) {
+            scene_manager_next_scene(app->scene_manager, VirtualButtonAppSceneAboutView);
         }
         scene_manager_set_scene_state(app->scene_manager, VirtualButtonAppSceneStart, event.event);
         consumed = true;
