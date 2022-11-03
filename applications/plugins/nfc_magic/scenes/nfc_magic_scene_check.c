@@ -20,12 +20,12 @@ static void nfc_magic_scene_check_setup_view(NfcMagic* nfc_magic) {
     uint32_t state = scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneCheck);
 
     if(state == NfcMagicSceneCheckStateCardSearch) {
+        popup_set_icon(nfc_magic->popup, 0, 8, &I_NFC_manual_60x50);
         popup_set_text(
-            nfc_magic->popup, "Apply the initial\ncard only", 128, 32, AlignRight, AlignCenter);
-        // popup_set_icon(nfc_magic->popup, 0, 8, &I_NFC_manual_60x50);
+            nfc_magic->popup, "Apply card to\nthe back", 128, 32, AlignRight, AlignCenter);
     } else {
-        popup_set_header(popup, "Reading\nDon't move...", 52, 32, AlignLeft, AlignCenter);
-        // popup_set_icon(popup, 12, 23, &A_Loading_24);
+        popup_set_icon(popup, 12, 23, &I_Loading_24);
+        popup_set_header(popup, "Checking\nDon't move...", 52, 32, AlignLeft, AlignCenter);
     }
 
     view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewPopup);

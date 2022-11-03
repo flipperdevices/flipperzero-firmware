@@ -149,7 +149,8 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
 }
 
 void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
-    MfClassicBlock block = {};
+    MfClassicBlock block;
+    memset(&block, 0, sizeof(MfClassicBlock));
     block.value[0] = 0x01;
     block.value[1] = 0x02;
     block.value[2] = 0x03;

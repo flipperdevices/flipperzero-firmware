@@ -16,17 +16,17 @@ void nfc_magic_scene_wrong_card_on_enter(void* context) {
 
     notification_message(nfc_magic->notifications, &sequence_error);
 
-    // widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
+    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(
-        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "This is wrong card");
+        widget, 1, 4, AlignLeft, AlignTop, FontPrimary, "This is wrong card");
     widget_add_string_multiline_element(
         widget,
-        4,
+        1,
         17,
         AlignLeft,
         AlignTop,
         FontSecondary,
-        "Writing is supported\nonly for 4 bytes UID\n Mifare CLassic 1k");
+        "Writing is supported\nonly for 4 bytes UID\nMifare CLassic 1k");
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_wrong_card_widget_callback, nfc_magic);
 

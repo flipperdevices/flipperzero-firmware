@@ -14,7 +14,6 @@ void nfc_magic_scene_write_confirm_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
     Widget* widget = nfc_magic->widget;
 
-    // widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(widget, 3, 0, AlignLeft, AlignTop, FontPrimary, "Risky operation");
     widget_add_text_box_element(
         widget,

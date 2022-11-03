@@ -14,11 +14,11 @@ void nfc_magic_scene_magic_info_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
     Widget* widget = nfc_magic->widget;
 
-    notification_message(nfc_magic->notifications, &sequence_error);
+    notification_message(nfc_magic->notifications, &sequence_success);
 
-    // widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
+    widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(
-        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Mgic card detected");
+        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Magic card detected");
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_magic_info_widget_callback, nfc_magic);
 
