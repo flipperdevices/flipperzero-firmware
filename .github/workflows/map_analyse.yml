@@ -82,4 +82,3 @@ jobs:
             ${{ secrets.MAP_ANALYSE_MARIADB_PORT }} \
             ${{ secrets.MAP_ANALYSE_MARIADB_DATABASE }} \
             artifacts/flipper-z-f7-firmware-${SUFFIX}.elf.map
-
