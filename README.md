@@ -5,7 +5,7 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 > **Note**
 > FAP is still in development
 
-![](images/gui_main.png)
+![](images/framed_gui_main.png)
 
 ## TODO:
 - [x] Ambient light metering
