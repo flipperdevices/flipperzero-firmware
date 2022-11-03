@@ -33,10 +33,6 @@ coreenv = SConscript(
 )
 SConscript("site_scons/cc.scons", exports={"ENV": coreenv})
 
-# Store root dir in environment for certain tools
-coreenv["ROOT_DIR"] = Dir(".")
-
-
 # Create a separate "dist" environment and add construction envs to it
 distenv = coreenv.Clone(
     tools=[
@@ -156,11 +152,9 @@ Depends(fap_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
 Alias("fap_dist", fap_dist)
 # distenv.Default(fap_dist)
 
-plugin_resources_dist = list(
-    distenv.Install(f"#/assets/resources/apps/{dist_entry[0]}", dist_entry[1])
-    for dist_entry in firmware_env["FW_EXTAPPS"]["dist"].values()
+distenv.Depends(
+    firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"]["resources_dist"]
 )
-distenv.Depends(firmware_env["FW_RESOURCES"], plugin_resources_dist)
 
 
 # Target for bundling core2 package for qFlipper
@@ -235,13 +229,13 @@ distenv.PhonyTarget(
 # Linter
 distenv.PhonyTarget(
     "lint",
-    "${PYTHON3} scripts/lint.py check ${LINT_SOURCES}",
+    "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py check ${LINT_SOURCES}",
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
 )
 
 distenv.PhonyTarget(
     "format",
-    "${PYTHON3} scripts/lint.py format ${LINT_SOURCES}",
+    "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py format ${LINT_SOURCES}",
     LINT_SOURCES=firmware_env["LINT_SOURCES"],
 )
 
@@ -282,13 +276,23 @@ distenv.PhonyTarget(
 )
 
 # Start Flipper CLI via PySerial's miniterm
-distenv.PhonyTarget("cli", "${PYTHON3} scripts/serial_cli.py")
+distenv.PhonyTarget("cli", "${PYTHON3} ${FBT_SCRIPT_DIR}/serial_cli.py")
 
 
 # Find blackmagic probe
 distenv.PhonyTarget(
     "get_blackmagic",
     "@echo $( ${BLACKMAGIC_ADDR} $)",
+)
+
+
+# Find STLink probe ids
+distenv.PhonyTarget(
+    "get_stlink",
+    distenv.Action(
+        lambda **kw: distenv.GetDevices(),
+        None,
+    ),
 )
 
 # Prepare vscode environment

@@ -8,10 +8,19 @@ __NM_ARM_BIN = "arm-none-eabi-nm"
 
 def generate(env):
     env.SetDefault(
-        BIN2DFU="${ROOT_DIR.abspath}/scripts/bin2dfu.py",
+        BIN2DFU="${FBT_SCRIPT_DIR}/bin2dfu.py",
+        BIN_SIZE_SCRIPT="${FBT_SCRIPT_DIR}/fwsize.py",
         OBJCOPY=__OBJCOPY_ARM_BIN,  # FIXME
         NM=__NM_ARM_BIN,  # FIXME
     )
+
+    if not env["VERBOSE"]:
+        env.SetDefault(
+            HEXCOMSTR="\tHEX\t${TARGET}",
+            BINCOMSTR="\tBIN\t${TARGET}",
+            DFUCOMSTR="\tDFU\t${TARGET}",
+        )
+
     env.Append(
         BUILDERS={
             "HEXBuilder": Builder(

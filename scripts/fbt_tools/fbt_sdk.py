@@ -1,9 +1,10 @@
+import shutil
 from SCons.Builder import Builder
 from SCons.Action import Action
 from SCons.Errors import UserError
 
 # from SCons.Scanner import C
-from SCons.Script import Mkdir, Copy, Delete, Entry
+from SCons.Script import Entry
 from SCons.Util import LogicalLines
 
 import os.path
@@ -11,7 +12,8 @@ import posixpath
 import pathlib
 import json
 
-from fbt.sdk import SdkCollector, SdkCache
+from fbt.sdk.collector import SdkCollector
+from fbt.sdk.cache import SdkCache
 
 
 def ProcessSdkDepends(env, filename):
@@ -44,29 +46,44 @@ def prebuild_sdk_emitter(target, source, env):
 def prebuild_sdk_create_origin_file(target, source, env):
     mega_file = env.subst("${TARGET}.c", target=target[0])
     with open(mega_file, "wt") as sdk_c:
-        sdk_c.write("\n".join(f"#include <{h.path}>" for h in env["SDK_HEADERS"]))
+        sdk_c.write(
+            "\n".join(f"#include <{h.srcnode().path}>" for h in env["SDK_HEADERS"])
+        )
 
 
 class SdkMeta:
-    def __init__(self, env):
+    def __init__(self, env, tree_builder: "SdkTreeBuilder"):
         self.env = env
+        self.treebuilder = tree_builder
 
     def save_to(self, json_manifest_path: str):
         meta_contents = {
-            "sdk_symbols": self.env["SDK_DEFINITION"].name,
+            "sdk_symbols": self.treebuilder.build_sdk_file_path(
+                self.env["SDK_DEFINITION"].path
+            ),
             "cc_args": self._wrap_scons_vars("$CCFLAGS $_CCCOMCOM"),
             "cpp_args": self._wrap_scons_vars("$CXXFLAGS $CCFLAGS $_CCCOMCOM"),
             "linker_args": self._wrap_scons_vars("$LINKFLAGS"),
+            "linker_libs": self.env.subst("${LIBS}"),
+            "app_ep_subst": self.env.subst("${APP_ENTRY}"),
+            "sdk_path_subst": self.env.subst("${SDK_DIR_SUBST}"),
+            "hardware": self.env.subst("${TARGET_HW}"),
         }
         with open(json_manifest_path, "wt") as f:
             json.dump(meta_contents, f, indent=4)
 
     def _wrap_scons_vars(self, vars: str):
-        expanded_vars = self.env.subst(vars, target=Entry("dummy"))
+        expanded_vars = self.env.subst(
+            vars,
+            target=Entry("dummy"),
+        )
         return expanded_vars.replace("\\", "/")
 
 
 class SdkTreeBuilder:
+    SDK_DIR_SUBST = "SDK_ROOT_DIR"
+    SDK_APP_EP_SUBST = "SDK_APP_EP_SUBST"
+
     def __init__(self, env, target, source) -> None:
         self.env = env
         self.target = target
@@ -79,6 +96,11 @@ class SdkTreeBuilder:
         self.sdk_root_dir = target[0].Dir(".")
         self.sdk_deploy_dir = self.sdk_root_dir.Dir(self.target_sdk_dir_name)
 
+        self.sdk_env = self.env.Clone(
+            APP_ENTRY=self.SDK_APP_EP_SUBST,
+            SDK_DIR_SUBST=self.SDK_DIR_SUBST,
+        )
+
     def _parse_sdk_depends(self):
         deps_file = self.source[0]
         with open(deps_file.path, "rt") as deps_f:
@@ -87,72 +109,74 @@ class SdkTreeBuilder:
             self.header_depends = list(
                 filter(lambda fname: fname.endswith(".h"), depends.split()),
             )
+            self.header_depends.append(self.sdk_env.subst("${LINKER_SCRIPT_PATH}"))
+            self.header_depends.append(self.sdk_env.subst("${SDK_DEFINITION}"))
             self.header_dirs = sorted(
                 set(map(os.path.normpath, map(os.path.dirname, self.header_depends)))
             )
 
     def _generate_sdk_meta(self):
-        filtered_paths = [self.target_sdk_dir_name]
+        filtered_paths = ["."]
         full_fw_paths = list(
             map(
                 os.path.normpath,
-                (self.env.Dir(inc_dir).relpath for inc_dir in self.env["CPPPATH"]),
+                (
+                    self.sdk_env.Dir(inc_dir).relpath
+                    for inc_dir in self.sdk_env["CPPPATH"]
+                ),
             )
         )
 
         sdk_dirs = ", ".join(f"'{dir}'" for dir in self.header_dirs)
-        for dir in full_fw_paths:
-            if dir in sdk_dirs:
-                filtered_paths.append(
-                    posixpath.normpath(posixpath.join(self.target_sdk_dir_name, dir))
-                )
+        filtered_paths.extend(
+            filter(lambda path: path in sdk_dirs, full_fw_paths),
+        )
+        filtered_paths = list(map(self.build_sdk_file_path, filtered_paths))
 
-        sdk_env = self.env.Clone()
-        sdk_env.Replace(CPPPATH=filtered_paths)
-        meta = SdkMeta(sdk_env)
+        self.sdk_env.Replace(
+            CPPPATH=filtered_paths,
+            ORIG_LINKER_SCRIPT_PATH=self.env["LINKER_SCRIPT_PATH"],
+            LINKER_SCRIPT_PATH=self.build_sdk_file_path("${ORIG_LINKER_SCRIPT_PATH}"),
+        )
+        meta = SdkMeta(self.sdk_env, self)
         meta.save_to(self.target[0].path)
+
+    def build_sdk_file_path(self, orig_path: str) -> str:
+        return posixpath.normpath(
+            posixpath.join(
+                self.SDK_DIR_SUBST,
+                self.target_sdk_dir_name,
+                orig_path,
+            )
+        ).replace("\\", "/")
 
     def emitter(self, target, source, env):
         target_folder = target[0]
         target = [target_folder.File("sdk.opts")]
         return target, source
 
-    def _create_deploy_commands(self):
+    def _run_deploy_commands(self):
         dirs_to_create = set(
-            self.sdk_deploy_dir.Dir(dirpath) for dirpath in self.header_dirs
+            self.sdk_deploy_dir.Dir(dirpath).path for dirpath in self.header_dirs
         )
-        actions = [
-            Delete(self.sdk_deploy_dir),
-            Mkdir(self.sdk_deploy_dir),
-            Copy(
-                self.sdk_root_dir,
-                self.env["SDK_DEFINITION"],
-            ),
-        ]
-        actions += [Mkdir(d) for d in dirs_to_create]
 
-        actions += [
-            Action(
-                Copy(self.sdk_deploy_dir.File(h).path, h),
-                # f"Copy {h} to {self.sdk_deploy_dir}",
-            )
-            for h in self.header_depends
-        ]
-        return actions
+        shutil.rmtree(self.sdk_root_dir.path, ignore_errors=False)
 
-    def generate_actions(self):
+        for sdkdir in dirs_to_create:
+            os.makedirs(sdkdir, exist_ok=True)
+
+        for header in self.header_depends:
+            shutil.copy2(header, self.sdk_deploy_dir.File(header).path)
+
+    def deploy_action(self):
         self._parse_sdk_depends()
+        self._run_deploy_commands()
         self._generate_sdk_meta()
 
-        return self._create_deploy_commands()
 
-
-def deploy_sdk_tree(target, source, env, for_signature):
-    if for_signature:
-        return []
-
+def deploy_sdk_tree_action(target, source, env):
     sdk_tree = SdkTreeBuilder(env, target, source)
-    return sdk_tree.generate_actions()
+    return sdk_tree.deploy_action()
 
 
 def deploy_sdk_tree_emitter(target, source, env):
@@ -199,7 +223,7 @@ def validate_sdk_cache(source, target, env):
     current_sdk = SdkCollector()
     current_sdk.process_source_file_for_sdk(source[0].path)
     for h in env["SDK_HEADERS"]:
-        current_sdk.add_header_to_sdk(pathlib.Path(h.path).as_posix())
+        current_sdk.add_header_to_sdk(pathlib.Path(h.srcnode().path).as_posix())
 
     sdk_cache = SdkCache(target[0].path)
     sdk_cache.validate_api(current_sdk.get_api())
@@ -217,6 +241,30 @@ def generate_sdk_symbols(source, target, env):
 
 
 def generate(env, **kw):
+    if not env["VERBOSE"]:
+        env.SetDefault(
+            SDK_PREGEN_COMSTR="\tPREGEN\t${TARGET}",
+            SDK_COMSTR="\tSDKSRC\t${TARGET}",
+            SDKSYM_UPDATER_COMSTR="\tSDKCHK\t${TARGET}",
+            SDKSYM_GENERATOR_COMSTR="\tSDKSYM\t${TARGET}",
+            SDKDEPLOY_COMSTR="\tSDKTREE\t${TARGET}",
+        )
+
+    # Filtering out things cxxheaderparser cannot handle
+    env.SetDefault(
+        SDK_PP_FLAGS=[
+            '-D"_Static_assert(x,y)="',
+            '-D"__asm__(x)="',
+            '-D"__attribute__(x)="',
+            "-Drestrict=",
+            "-D_Noreturn=",
+            "-D__restrict=",
+            "-D__extension__=",
+            "-D__inline=inline",
+            "-D__inline__=inline",
+        ]
+    )
+
     env.AddMethod(ProcessSdkDepends)
     env.Append(
         BUILDERS={
@@ -235,7 +283,10 @@ def generate(env, **kw):
                 suffix=".i",
             ),
             "SDKTree": Builder(
-                generator=deploy_sdk_tree,
+                action=Action(
+                    deploy_sdk_tree_action,
+                    "$SDKDEPLOY_COMSTR",
+                ),
                 emitter=deploy_sdk_tree_emitter,
                 src_suffix=".d",
             ),

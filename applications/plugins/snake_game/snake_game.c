@@ -355,6 +355,8 @@ int32_t snake_game_app(void* p) {
                         }
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 }
             } else if(event.type == EventTypeTick) {
