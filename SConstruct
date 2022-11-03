@@ -43,6 +43,7 @@ distenv = coreenv.Clone(
         "jflash",
     ],
     ENV=os.environ,
+    UPDATE_BUNDLE_DIR="dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}",
 )
 
 firmware_env = distenv.AddFwProject(
