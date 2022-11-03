@@ -28,7 +28,8 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 ## Wiring
 
 ```
-C0 -> SCL
-C1 -> SDA
+VCC -> 3.3V
 GND -> GND
+SCL -> C0
+SDA -> C1
 ```
