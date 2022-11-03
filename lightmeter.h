@@ -44,6 +44,7 @@ typedef enum {
     LightMeterAppViewConfigView,
     LightMeterAppViewVarItemList,
     LightMeterAppViewAbout,
+    LightMeterAppViewHelp,
 } LightMeterAppView;
 
 typedef enum {

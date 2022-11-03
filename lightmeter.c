@@ -73,6 +73,9 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     lightmeter->widget = widget_alloc();
     view_dispatcher_add_view(
         lightmeter->view_dispatcher, LightMeterAppViewAbout, widget_get_view(lightmeter->widget));
+    view_dispatcher_add_view(
+        lightmeter->view_dispatcher, LightMeterAppViewHelp, widget_get_view(lightmeter->widget));
+
 
     // Set first scene
     scene_manager_next_scene(lightmeter->scene_manager, first_scene); //! this to switch
@@ -92,7 +95,10 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
     
     //  Widget
     view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewAbout);
+    view_dispatcher_remove_view(lightmeter->view_dispatcher, LightMeterAppViewHelp);
     widget_free(lightmeter->widget);
+
+
    
     // View dispatcher
     view_dispatcher_free(lightmeter->view_dispatcher);

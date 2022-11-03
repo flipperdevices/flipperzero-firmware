@@ -24,7 +24,7 @@ void lightmeter_scene_about_on_enter(void* context) {
     furi_string_cat_printf(temp_str, "\e#%s\n", "Description");
     furi_string_cat_printf(
         temp_str,
-        "Showing suggested camera\nsettings based on ambient\nlight or flash.\n\nInspired by a lightmeter\nproject by vpominchuk\n\n");
+        "Showing suggested camera\nsettings based on ambient\nlight or flash.\n\nInspired by a lightmeter\nproject by vpominchuk\n");
 
     widget_add_text_box_element(
         lightmeter->widget,

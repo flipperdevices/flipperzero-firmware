@@ -66,7 +66,8 @@ static void ok_cb(void* context, uint32_t index) {
     UNUSED(lightmeter);
     switch(index) {
     case 2:
-        // view_dispatcher_send_custom_event(lightmeter->view_dispatcher, DapAppCustomEventHelp);
+        view_dispatcher_send_custom_event(
+            lightmeter->view_dispatcher, LightMeterAppCustomEventHelp);
         break;
     case 3:
         view_dispatcher_send_custom_event(
@@ -115,11 +116,11 @@ bool lightmeter_scene_config_on_event(void* context, SceneManagerEvent event) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == LightMeterAppCustomEventHelp) {
-            // scene_manager_next_scene(lightmeter->scene_manager, DapSceneHelp);
-            return true;
+            scene_manager_next_scene(lightmeter->scene_manager, LightMeterAppSceneHelp);
+            consumed = true;
         } else if(event.event == LightMeterAppCustomEventAbout) {
             scene_manager_next_scene(lightmeter->scene_manager, LightMeterAppSceneAbout);
-            return true;
+            consumed = true;
         }
     }
     return consumed;
