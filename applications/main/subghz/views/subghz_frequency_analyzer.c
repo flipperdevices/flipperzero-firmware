@@ -76,16 +76,6 @@ void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, uint8_t rssi, uint8_t x
     }
 }
 
-void subghz_frequency_analyzer_draw_rssi_mini(Canvas* canvas, uint8_t rssi, uint8_t x, uint8_t y) {
-    if(rssi) {
-        const uint8_t num_bars = (rssi * 3 / (float)RSSI_MAX);
-        for(uint8_t i = 1; i <= num_bars; i++) {
-            const uint8_t l = i * 2;
-            canvas_draw_box(canvas, x + 2 * i, y - l, 2, l);
-        }
-    }
-}
-
 static void subghz_frequency_analyzer_log_frequency_draw(
     Canvas* canvas,
     SubGhzFrequencyAnalyzerModel* model) {
@@ -127,7 +117,7 @@ static void subghz_frequency_analyzer_log_frequency_draw(
         canvas_draw_str(canvas, offset_x + 48, offset_y + i * 10, buffer);
 
         // Max RSSI
-        subghz_frequency_analyzer_draw_rssi_mini(
+        subghz_frequency_analyzer_draw_rssi(
             canvas, (*log_frequency_item)->rssi_max, offset_x + 69, (offset_y + i * 10));
     }
 
