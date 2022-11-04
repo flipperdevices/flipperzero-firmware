@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,8.41,,
+Version,+,8.42,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1676,6 +1676,8 @@ Function,-,islower,int,int
 Function,-,islower_l,int,"int, locale_t"
 Function,-,isnan,int,double
 Function,-,isnanf,int,float
+Function,-,iso7816_tlv_parse,TlvInfo,const uint8_t*
+Function,-,iso7816_tlv_select,TlvInfo,"const uint8_t*, size_t, const uint16_t[], size_t"
 Function,-,isprint,int,int
 Function,-,isprint_l,int,"int, locale_t"
 Function,-,ispunct,int,int
@@ -1923,6 +1925,7 @@ Function,-,mf_df_prepare_read_records,uint16_t,"uint8_t*, uint8_t, uint32_t, uin
 Function,-,mf_df_prepare_select_application,uint16_t,"uint8_t*, uint8_t[3]"
 Function,-,mf_df_read_card,_Bool,"FuriHalNfcTxRxContext*, MifareDesfireData*"
 Function,-,mf_ul_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
+Function,-,mf_ul_is_full_capture,_Bool,MfUltralightData*
 Function,-,mf_ul_prepare_emulation,void,"MfUltralightEmulator*, MfUltralightData*"
 Function,-,mf_ul_prepare_emulation_response,_Bool,"uint8_t*, uint16_t, uint8_t*, uint16_t*, uint32_t*, void*"
 Function,-,mf_ul_pwdgen_amiibo,uint32_t,FuriHalNfcDevData*
@@ -1950,6 +1953,33 @@ Function,-,modf,double,"double, double*"
 Function,-,modff,float,"float, float*"
 Function,-,modfl,long double,"long double, long double*"
 Function,-,mrand48,long,
+Function,-,mrtd_alloc_init,MrtdApplication*,"FuriHalNfcTxRxContext*, MrtdData*"
+Function,-,mrtd_auth_method_parse_string,_Bool,"MrtdAuthMethod*, const char*"
+Function,-,mrtd_auth_method_string,const char*,MrtdAuthMethod
+Function,-,mrtd_auth_params_load,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, _Bool"
+Function,-,mrtd_auth_params_save,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*"
+Function,-,mrtd_auth_params_save_file,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, const char*, const char*"
+Function,-,mrtd_authenticate,_Bool,MrtdApplication*
+Function,-,mrtd_bac_check_digit,uint8_t,"const char*, const uint8_t"
+Function,-,mrtd_bac_decrypt,_Bool,"const uint8_t*, size_t, uint8_t*, uint8_t*"
+Function,-,mrtd_bac_decrypt_verify,_Bool,"const uint8_t*, size_t, uint8_t*, uint8_t*, uint8_t*"
+Function,-,mrtd_bac_decrypt_verify_sm,uint16_t,"const uint8_t*, size_t, uint8_t*, uint8_t*, uint64_t, uint8_t*, size_t*"
+Function,-,mrtd_bac_encrypt,_Bool,"const uint8_t*, size_t, const uint8_t*, uint8_t*"
+Function,-,mrtd_bac_get_kmrz,_Bool,"MrtdAuthData*, char*, uint8_t"
+Function,-,mrtd_bac_keys,_Bool,"MrtdAuthData*, uint8_t[16], uint8_t[16]"
+Function,-,mrtd_bac_keys_from_seed,_Bool,"const uint8_t*, uint8_t*, uint8_t*"
+Function,-,mrtd_bac_mac,_Bool,"const uint8_t*, size_t, const uint8_t*, uint8_t*"
+Function,-,mrtd_bac_mac_finalize,_Bool,"mrtd_bac_mac_ctx*, uint8_t[8]"
+Function,-,mrtd_bac_mac_init,_Bool,"mrtd_bac_mac_ctx*, const uint8_t[16]"
+Function,-,mrtd_bac_mac_pad,_Bool,mrtd_bac_mac_ctx*
+Function,-,mrtd_bac_mac_update,_Bool,"mrtd_bac_mac_ctx*, const uint8_t*, size_t"
+Function,-,mrtd_bac_padded_mac,_Bool,"const uint8_t*, size_t, uint8_t*, uint8_t*"
+Function,-,mrtd_parse_date,void,"MrtdDate*, const unsigned char*"
+Function,-,mrtd_print_date,void,"char*, MrtdDate*"
+Function,-,mrtd_protect_apdu,size_t,"uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, const void*, int16_t, const uint8_t*, const uint8_t*, uint64_t, uint8_t*"
+Function,-,mrtd_read_parse_file,_Bool,"MrtdApplication*, EFFile"
+Function,-,mrtd_select_app,_Bool,"MrtdApplication*, AIDValue"
+Function,-,mrtd_tag_to_file,const EFFile*,uint8_t
 Function,-,nan,double,const char*
 Function,-,nanf,float,const char*
 Function,-,nanl,long double,const char*
@@ -3139,6 +3169,7 @@ Function,-,timerStopwatchMeasure,uint32_t,
 Function,-,timerStopwatchStart,void,
 Function,-,timingsafe_bcmp,int,"const void*, const void*, size_t"
 Function,-,timingsafe_memcmp,int,"const void*, const void*, size_t"
+Function,-,tlv_number,int,TlvInfo
 Function,-,tmpfile,FILE*,
 Function,-,tmpnam,char*,char*
 Function,-,toascii,int,int
@@ -3150,6 +3181,7 @@ Function,-,toupper_l,int,"int, locale_t"
 Function,-,trunc,double,double
 Function,-,truncf,float,float
 Function,-,truncl,long double,long double
+Function,-,tzset,void,
 Function,-,u8g2_AddPolygonXY,void,"u8g2_t*, int16_t, int16_t"
 Function,-,u8g2_ClearBuffer,void,u8g2_t*
 Function,-,u8g2_ClearDisplay,void,u8g2_t*
@@ -4204,7 +4236,6 @@ Function,-,u8x8_upscale_byte,uint16_t,uint8_t
 Function,-,u8x8_utf8_init,void,u8x8_t*
 Function,-,u8x8_utf8_next,uint16_t,"u8x8_t*, uint8_t"
 Function,-,u8x8_utoa,const char*,uint16_t
-Function,-,tzset,void,
 Function,-,uECC_compress,void,"const uint8_t*, uint8_t*, uECC_Curve"
 Function,+,uECC_compute_public_key,int,"const uint8_t*, uint8_t*, uECC_Curve"
 Function,-,uECC_curve_private_key_size,int,uECC_Curve
@@ -4457,7 +4488,9 @@ Function,-,y1f,float,float
 Function,-,yn,double,"int, double"
 Function,-,ynf,float,"int, float"
 Variable,-,AHBPrescTable,const uint32_t[16],
+Variable,-,AID,AIDSet,
 Variable,-,APBPrescTable,const uint32_t[8],
+Variable,-,EF,const EFFormat,
 Variable,-,ITM_RxBuffer,volatile int32_t,
 Variable,-,MSIRangeTable,const uint32_t[16],
 Variable,-,SmpsPrescalerTable,const uint32_t[4][6],
