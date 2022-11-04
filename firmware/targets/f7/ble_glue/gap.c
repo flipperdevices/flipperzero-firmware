@@ -478,7 +478,6 @@ bool gap_init(GapConfig* config, GapEventCallback on_event_cb, void* context) {
 
     gap = malloc(sizeof(Gap));
     gap->config = config;
-    srand(DWT->CYCCNT);
     // Create advertising timer
     gap->advertise_timer = furi_timer_alloc(gap_advetise_timer_callback, FuriTimerTypeOnce, NULL);
     // Initialization of GATT & GAP layer
