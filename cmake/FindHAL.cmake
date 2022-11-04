@@ -1,251 +1,94 @@
 # For information about why and how of this file: https://cmake.org/cmake/help/latest/command/find_package.html
 
-set(HAL_DRIVERS_F0
-    adc can cec comp cortex crc dac dma exti flash gpio i2c i2s irda iwdg pcd 
-    pwr rcc rtc smartcard smbus spi tim tsc uart usart wwdg
-)
-set(HAL_EX_DRIVERS_F0
-    adc crc dac flash i2c pcd pwr rcc rtc smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_F0
-    adc comp crc crs dac dma exti gpio i2c pwr rcc rtc spi tim usart usb utils
-)
+# This function gets a list of hal_driver using a given prefix and suffix
+#
+# out_list_hal_drivers   list of hal_drivers found
+# hal_drivers_path       path to the hal's drivers
+# hal_driver_type        hal_driver type to find (hal/ll/ex)
+function(get_list_hal_drivers out_list_hal_drivers hal_drivers_path hal_driver_type)
+    #The pattern to retrieve a driver from a file name depends on the hal_driver_type field
+    if(${hal_driver_type} STREQUAL "hal" OR ${hal_driver_type} STREQUAL "ll")
+        #This regex match and capture a driver type (stm32xx_hal_(rcc).c or stm32xx_ll_(rcc).c => catches rcc) 
+        set(file_pattern ".+_${hal_driver_type}_([a-z0-9]+)\\.c$")
+    elseif(${hal_driver_type} STREQUAL "ex")
+        #This regex match and capture a driver type (stm32xx_hal_(rcc)_ex.c => catches rcc) 
+        set(file_pattern ".+_hal_([a-z0-9]+)_ex\\.c$")
+    else()
+        message(FATAL_ERROR "the inputed hal_driver_type(${hal_driver_type}) is not valid.")
+    endif()
 
-set(HAL_DRIVERS_F1
-    adc can cec cortex crc dac dma eth exti flash gpio hcd i2c i2s irda iwdg 
-    mmc nand nor pccard pcd pwr rcc rtc sd smartcard spi sram tim uart usart 
-    wwdg
-)
-set(HAL_EX_DRIVERS_F1
-    adc dac flash gpio pcd rcc rtc tim
-)
-set(HAL_LL_DRIVERS_F1
-    adc crc dac dma exti fsmc gpio i2c pwr rcc rtc sdmmc spi tim usart usb utils
-)
+    #Retrieving all the .c files from hal_drivers_path
+    file(GLOB filtered_files
+        RELATIVE "${hal_drivers_path}/Src"
+        "${hal_drivers_path}/Src/*.c")
+    # For all matched .c files keep only those with a driver name pattern (e.g. stm32xx_hal_rcc.c)
+    list(FILTER filtered_files INCLUDE REGEX ${file_pattern})
+    # From the files names keep only the driver type part using the regex (stm32xx_hal_(rcc).c or stm32xx_ll_(rcc).c => catches rcc)
+    list(TRANSFORM filtered_files REPLACE ${file_pattern} "\\1")
+    #Making a return by reference by seting the output variable to PARENT_SCOPE
+    set(${out_list_hal_drivers} ${filtered_files} PARENT_SCOPE)
+endfunction()
 
-set(HAL_DRIVERS_F2
-    adc can cortex crc cryp dac dcmi dma eth exti flash gpio hash hcd i2c i2s 
-    irda iwdg mmc nand nor pccard pcd pwr rcc rng rtc sd smartcard spi sram tim 
-    uart usart wwdg
-)
-set(HAL_EX_DRIVERS_F2
-    adc dac dcmi dma flash pcd pwr rcc rtc tim
-)
-set(HAL_LL_DRIVERS_F2
-    adc crc dac dma exti fsmc gpio i2c pwr rcc rng rtc sdmmc spi tim usart usb 
-    utils
-)
+################################################################################
+# Checking the parameters provided to the find_package(HAL ...) call
+# The expected parameters are families and or drivers in *any orders*
+# Families are valid if on the list of known families.
+# Drivers are valid if on the list of valid driver of any family. For this
+# reason the requested families must be processed in two steps
+#  - Step 1 : Checking all the requested families
+#  - Step 2 : Generating all the valid drivers from requested families
+#  - Step 3 : Checking the other requested components (Expected to be drivers)
+################################################################################
+# Step 1 : Checking all the requested families
+foreach(COMP ${HAL_FIND_COMPONENTS})
+    string(TOUPPER ${COMP} COMP_U)
+    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
+    if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
+        list(APPEND HAL_FIND_COMPONENTS_FAMILIES ${COMP})
+        message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_FAMILIES")
+    else()
+        list(APPEND HAL_FIND_COMPONENTS_UNHANDLED ${COMP})
+    endif()
+endforeach()
 
-set(HAL_DRIVERS_F3
-    adc can cec comp cortex crc dac dma exti flash gpio hrtim i2c i2s irda iwdg 
-    nand nor opamp pccard pcd pwr rcc rtc sdadc smartcard smbus spi sram tim tsc 
-    uart usart wwdg
-)
-set(HAL_EX_DRIVERS_F3
-    adc crc dac flash i2c i2s opamp pcd pwr rcc rtc smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_F3
-    adc comp crc dac dma exti fmc gpio hrtim i2c opamp pwr rcc rtc spi tim usart 
-    usb utils
-)
+# If no family requested look for all families
+if(NOT HAL_FIND_COMPONENTS_FAMILIES)
+    set(HAL_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
+endif()
 
-set(HAL_DRIVERS_F4
-    adc can cec cortex crc cryp dac dcmi dfsdm dma dma2d dsi eth exti flash
-    flash_ramfunc fmpi2c gpio hash hcd i2c i2s irda iwdg lptim ltdc mmc nand nor 
-    pccard pcd pwr qspi rcc rng rtc sai sd sdram smartcard smbus spdifrx spi 
-    sram tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_F4
-    adc cryp dac dcmi dma flash fmpi2c hash i2c i2s ltdc pcd pwr rcc rtc sai tim 
-)
-set(HAL_LL_DRIVERS_F4
-    adc crc dac dma dma2d exti fmc fsmc gpio i2c lptim pwr rcc rng rtc sdmmc spi 
-    tim usart usb utils 
-)
-
-set(HAL_DRIVERS_F7
-    adc can cec cortex crc cryp dac dcmi dfsdm dma dma2d dsi eth exti flash 
-    gpio hash hcd i2c i2s irda iwdg jpeg lptim ltdc mdios mmc nand nor pcd pwr 
-    qspi rcc rng rtc sai sd sdram smartcard smbus spdifrx spi sram tim uart 
-    usart wwdg
-)
-set(HAL_EX_DRIVERS_F7
-    adc crc cryp dac dcmi dma flash hash i2c ltdc pcd pwr rcc rtc sai smartcard 
-    spi tim uart
-)
-set(HAL_LL_DRIVERS_F7
-    adc crc dac dma dma2d exti fmc gpio i2c lptim pwr rcc rng rtc sdmmc spi tim 
-    usart usb utils
-)
-
-set(HAL_DRIVERS_G0
-    adc cec comp cortex crc cryp dac dma exti flash gpio i2c i2s irda iwdg lptim 
-    pwr rcc rng rtc smartcard smbus spi tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_G0
-    adc crc cryp dac dma flash i2c pwr rcc rtc smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_G0
-    adc comp crc dac dma exti gpio i2c lptim lpuart pwr rcc rng rtc spi tim ucpd 
-    usart utils
-)
-
-set(HAL_DRIVERS_G4
-    adc comp cordic cortex crc cryp dac dma exti fdcan flash flash_ramfunc fmac 
-    gpio hrtim i2c i2s irda iwdg lptim nand nor opamp pcd pwr qspi rcc rng rtc 
-    sai smartcard smbus spi sram tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_G4
-    adc crc cryp dac dma flash i2c opamp pcd pwr rcc rtc sai smartcard spi tim 
-    uart usart
-)
-set(HAL_LL_DRIVERS_G4
-    adc comp cordic crc crs dac dma exti fmac fmc gpio hrtim i2c lptim lpuart 
-    opamp pwr rcc rng rtc spi tim ucpd usart usb utils
-)
-
-set(HAL_DRIVERS_H7
-    adc cec comp cordic cortex crc cryp dac dcmi dfsdm dma dma2d dsi dts eth exti fdcan
-    flash fmac gfxmmu gpio hash hcd hrtim hsem i2c i2s irda iwdg jpeg lptim ltdc mdios
-    mdma mmc nand nor opamp ospi otfdec pcd pssi pwr qspi ramecc rcc rng rtc sai 
-    sd sdram smartcard smbus spdifrx spi sram swpmi tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_H7
-    adc crc cryp dac dfsdm dma eth flash hash i2c i2s ltdc mmc opamp pcd pwr rcc
-    rng rtc sai sd smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_H7
-    adc bdma comp cordic crc crs dac delayblock dma dma2d exti fmac fmc gpio hrtim i2c lptim
-    lpuart mdma opamp pwr rcc rng rtc sdmmc spi swpmi tim usart usb utils
-)
-
-set(HAL_DRIVERS_L0
-    adc comp cortex crc cryp dac dma firewall flash flash_ramfunc gpio i2c i2s 
-    irda iwdg lcd lptim pcd pwr rcc rng rtc smartcard smbus spi tim tsc uart 
-    usart wwdg
-)
-set(HAL_EX_DRIVERS_L0
-    adc comp crc cryp dac flash i2c pcd pwr rcc rtc smartcard tim uart
-)
-set(HAL_LL_DRIVERS_L0
-    adc comp crc crs dac dma exti gpio i2c lptim lpuart pwr rcc rng rtc spi tim 
-    usart usb utils
-)
-
-set(HAL_DRIVERS_L1
-    adc comp cortex crc cryp dac dma flash flash_ramfunc gpio i2c i2s irda iwdg 
-    lcd nor opamp pcd pwr rcc rtc sd smartcard spi sram tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_L1
-    adc cryp dac flash opamp pcd pcd pwr rcc rtc tim
-)
-set(HAL_LL_DRIVERS_L1
-    adc comp crc dac dma exti fsmc gpio i2c opamp pwr rcc rtc sdmmc spi tim 
-    usart usb utils
-)
-
-set(HAL_DRIVERS_L4
-    adc can comp cortex crc cryp dac dcmi dfsdm dma dma2d dsi exti firewall 
-    flash flash_ramfunc gfxmmu gpio hash hcd i2c irda iwdg lcd lptim ltdc mmc 
-    nand nor opamp ospi pcd pka pssi pwr qspi rcc rng rtc sai sd smartcard smbus 
-    spi sram swpmi tim tsc uart usart wwdg
-)
-set(HAL_EX_DRIVERS_L4
-    adc crc cryp dac dfsdm dma flash hash i2c ltdc mmc opamp pcd pwr rcc rng rtc 
-    sai sd smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_L4
-    adc comp crc crs dac dma dma2d exti fmc gpio i2c lptim lpuart opamp pka pwr 
-    rcc rng rtc sdmmc spi swpmi tim usart usb utils
-)
-
-set(HAL_DRIVERS_L5
-    adc comp cortex crc cryp dac dfsdm dma exti fdcan flash flash_ramfunc gpio 
-    gtzc hash i2c icache irda iwdg lptim mmc nand nor opamp ospi pcd pka pwr rcc 
-    rng rtc sai sd smartcard smbus spi sram tim tsc uart usart wwdg
-)
-set(HAL_EX_DRIVERS_L5
-    adc crc cryp dac dfsdm dma flash hash i2c mmc opamp pcd pwr rcc
-    rng rtc sai sd smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_L5
-    adc comp crc crs dac dma exti fmc gpio i2c lptim lpuart opamp pka pwr rcc 
-    rng rtc sdmmc spi tim ucpd usart usb utils
-)
-
-set(HAL_DRIVERS_MP1
-    adc cec cortex crc cryp dac dcmi dfsdm dma exti fdcan gpio hash hsem i2c
-    ipcc lptim mdios mdma pwr qspi rcc rng rtc sai sd smartcard smbus spdifrx
-    spi sram tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_MP1
-    adc crc cryp dac dfsdm dma hash i2c pwr rcc rtc sai sd smartcard spi tim
-    uart usart
-)
-set(HAL_LL_DRIVERS_MP1
-    adc delayblock dma exti fmc gpio i2c lptim pwr rcc rtc sdmmc spi tim usart
-    utils
-)
-
-set(HAL_DRIVERS_U5
-    adc comp cordic cortex crc cryp dac dcache dcmi dma dma2d exti fdcan flash fmac gpio 
-    gtzc hash hcd i2c icache irda iwdg lptim mdf mmc nand nor opamp ospi otfdec pcd pka pssi pwr ramcfg rcc
-    rng rtc sai sd smartcard smbus spi sram tim tsc uart usart wwdg
-)
-set(HAL_EX_DRIVERS_U5
-    adc crc cryp dac dma flash hash i2c mmc opamp pcd pwr rcc
-    rng rtc sai sd smartcard smbus spi tim uart usart
-)
-set(HAL_LL_DRIVERS_U5
-    adc comp cordic crc crs dac dlyb dma dma2d exti fmac fmc gpio i2c icache lpgpio lptim lpuart opamp pka pwr rcc 
-    rng rtc sdmmc spi tim ucpd usart usb utils
-)
-
-set(HAL_DRIVERS_WB
-    adc comp cortex crc cryp dma exti flash gpio hsem 
-    i2c ipcc irda iwdg lcd lptim pcd pka pwr qspi rcc 
-    rng rtc sai smartcard smbus spi tim tsc uart usart wwdg
-)
-set(HAL_EX_DRIVERS_WB
-    adc crc cryp dma flash i2c pcd pwr rcc
-    rtc sai smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_WB
-    adc comp crc crs dma exti gpio i2c lptim lpuart pka pwr rcc 
-    rng rtc spi tim usart usb utils
-)
-
-set(HAL_DRIVERS_WL
-    adc comp cortex crc cryp dac dma exti flash gpio gtzc hsem 
-    i2c i2s ipcc irda iwdg lptim pka pwr rcc 
-    rng rtc smartcard smbus spi subghz tim uart usart wwdg
-)
-set(HAL_EX_DRIVERS_WL
-    adc crc cryp dma flash i2c pwr rcc
-    rng rtc smartcard spi tim uart usart
-)
-set(HAL_LL_DRIVERS_WL
-    adc comp crc dac dma exti gpio i2c lptim lpuart pka pwr rcc 
-    rng rtc spi tim usart utils
-)
-
-foreach(FAMILY_SUFFIX ${STM32_SUPPORTED_FAMILIES_SHORT_NAME})
-    list(APPEND HAL_DRIVERS ${HAL_DRIVERS_${FAMILY_SUFFIX}})
-    list(APPEND HAL_LL_DRIVERS ${HAL_LL_DRIVERS_${FAMILY_SUFFIX}})
+# Step 2 : Generating all the valid drivers from requested families
+foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
+    string(TOUPPER ${family_comp} family_comp)
+    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" family_comp ${family_comp})
+    if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
+        set(FAMILY ${CMAKE_MATCH_1})
+    endif()
+    find_path(HAL_${FAMILY}_PATH
+        NAMES Inc/stm32${FAMILY_L}xx_hal.h
+        PATHS "${STM32_HAL_${FAMILY}_PATH}" "${STM32_CUBE_${FAMILY}_PATH}/Drivers/STM32${FAMILY}xx_HAL_Driver"
+        NO_DEFAULT_PATH
+        )
+    if(NOT HAL_${FAMILY}_PATH)
+        message(FATAL_ERROR "could not find HAL for family ${FAMILY}")
+    else()
+        set(HAL_${family_comp}_FOUND TRUE)
+    endif()
+    if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
+        get_list_hal_drivers(HAL_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH} "hal")
+        get_list_hal_drivers(HAL_EX_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH}  "ex")
+        get_list_hal_drivers(HAL_LL_DRIVERS_${FAMILY} ${HAL_${FAMILY}_PATH} "ll")
+        list(APPEND HAL_DRIVERS ${HAL_DRIVERS_${FAMILY}})
+        list(APPEND HAL_LL_DRIVERS ${HAL_LL_DRIVERS_${FAMILY}})
+    else()
+    endif()
 endforeach()
 list(REMOVE_DUPLICATES HAL_DRIVERS)
 list(REMOVE_DUPLICATES HAL_LL_DRIVERS)
 
-foreach(COMP ${HAL_FIND_COMPONENTS})
+# Step 3 : Checking the other requested components (Expected to be drivers)
+foreach(COMP ${HAL_FIND_COMPONENTS_UNHANDLED})
     string(TOLOWER ${COMP} COMP_L)
-    string(TOUPPER ${COMP} COMP_U)
     
-    string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" COMP_U ${COMP_U})
-    if(CMAKE_MATCH_1)
-        list(APPEND HAL_FIND_COMPONENTS_FAMILIES ${COMP})
-        message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_FAMILIES")
-        continue()
-    endif()
     if(${COMP_L} IN_LIST HAL_DRIVERS)
         list(APPEND HAL_FIND_COMPONENTS_DRIVERS ${COMP})
         message(TRACE "FindHAL: append COMP ${COMP} to HAL_FIND_COMPONENTS_DRIVERS")
@@ -260,9 +103,6 @@ foreach(COMP ${HAL_FIND_COMPONENTS})
     message(FATAL_ERROR "FindHAL: unknown HAL component: ${COMP}")
 endforeach()
 
-if(NOT HAL_FIND_COMPONENTS_FAMILIES)
-    set(HAL_FIND_COMPONENTS_FAMILIES ${STM32_SUPPORTED_FAMILIES_LONG_NAME})
-endif()
 
 if(STM32H7 IN_LIST HAL_FIND_COMPONENTS_FAMILIES)
     list(REMOVE_ITEM HAL_FIND_COMPONENTS_FAMILIES STM32H7)
