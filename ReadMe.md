@@ -22,6 +22,7 @@
 - [RFID: LFRFID AS FAP #397 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/397) (With Thanks to @ESurge)
 - [Infrared: Infrared AS FAP #398 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/398) (With Thanks to @ESurge)
 - [GPIO: GPIO AS FAP #402 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/402) (With Thanks to @ESurge)
+- Fixed image assets for Tanks game so it is not grainy.
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
