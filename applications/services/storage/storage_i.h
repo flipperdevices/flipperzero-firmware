@@ -20,7 +20,6 @@ typedef struct {
 struct Storage {
     FuriMessageQueue* message_queue;
     StorageData storage[STORAGE_COUNT];
-    uint32_t timestamp[STORAGE_COUNT];
     StorageSDGui sd_gui;
     FuriPubSub* pubsub;
 };

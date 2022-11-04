@@ -42,16 +42,6 @@ static const char* remove_vfs(const char* path) {
     return path + MIN(4u, strlen(path));
 }
 
-static StorageType storage_get_type_by_storage(Storage* app, StorageData* storage) {
-    StorageType type = ST_ERROR;
-    for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
-        if(app->storage == storage) {
-            type = i;
-        }
-    }
-    return type;
-}
-
 static StorageType storage_get_type_by_path(Storage* app, const char* path) {
     StorageType type = ST_ERROR;
     if(strlen(path) >= strlen(STORAGE_EXT_PATH_PREFIX) &&
@@ -100,12 +90,6 @@ static void storage_path_change_to_real_storage(FuriString* path, StorageType re
     }
 }
 
-static void storage_timestamp_storage(Storage* app, StorageType type) {
-    if(type < ST_ANY) {
-        app->timestamp[type] = furi_hal_rtc_get_timestamp();
-    }
-}
-
 /******************* File Functions *******************/
 
 bool storage_process_file_open(
@@ -131,7 +115,7 @@ bool storage_process_file_open(
             file->error_id = FSE_ALREADY_OPEN;
         } else {
             if(access_mode & FSAM_WRITE) {
-                storage_timestamp_storage(app, type);
+                storage_data_timestamp(storage);
             }
             storage_push_storage_file(file, real_path, type, storage);
             FS_CALL(storage, file.open(storage, file, remove_vfs(path), access_mode, open_mode));
@@ -181,12 +165,11 @@ static uint16_t storage_process_file_write(
     uint16_t const bytes_to_write) {
     uint16_t ret = 0;
     StorageData* storage = get_storage_by_file(file, app->storage);
-    StorageType type = storage_get_type_by_storage(app, storage);
 
     if(storage == NULL) {
         file->error_id = FSE_INVALID_PARAMETER;
     } else {
-        storage_timestamp_storage(app, type);
+        storage_data_timestamp(storage);
         FS_CALL(storage, file.write(storage, file, buff, bytes_to_write));
     }
 
@@ -226,12 +209,11 @@ static uint64_t storage_process_file_tell(Storage* app, File* file) {
 static bool storage_process_file_truncate(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
-    StorageType type = storage_get_type_by_storage(app, storage);
 
     if(storage == NULL) {
         file->error_id = FSE_INVALID_PARAMETER;
     } else {
-        storage_timestamp_storage(app, type);
+        storage_data_timestamp(storage);
         FS_CALL(storage, file.truncate(storage, file));
     }
 
@@ -241,12 +223,11 @@ static bool storage_process_file_truncate(Storage* app, File* file) {
 static bool storage_process_file_sync(Storage* app, File* file) {
     bool ret = false;
     StorageData* storage = get_storage_by_file(file, app->storage);
-    StorageType type = storage_get_type_by_storage(app, storage);
 
     if(storage == NULL) {
         file->error_id = FSE_INVALID_PARAMETER;
     } else {
-        storage_timestamp_storage(app, type);
+        storage_data_timestamp(storage);
         FS_CALL(storage, file.sync(storage, file));
     }
 
@@ -365,7 +346,8 @@ static FS_Error
     if(storage_type_is_not_valid(type)) {
         ret = FSE_INVALID_NAME;
     } else {
-        *timestamp = app->timestamp[type];
+        StorageData* storage = storage_get_storage_by_type(app, type);
+        *timestamp = storage_data_get_timestamp(storage);
     }
 
     return ret;
@@ -389,8 +371,6 @@ static FS_Error storage_process_common_remove(Storage* app, const char* path) {
     FS_Error ret = FSE_OK;
     StorageType type = storage_get_type_by_path(app, path);
 
-    storage_timestamp_storage(app, type);
-
     FuriString* real_path;
     real_path = furi_string_alloc_set(path);
     storage_path_change_to_real_storage(real_path, type);
@@ -407,6 +387,7 @@ static FS_Error storage_process_common_remove(Storage* app, const char* path) {
             break;
         }
 
+        storage_data_timestamp(storage);
         FS_CALL(storage, common.remove(storage, remove_vfs(path)));
     } while(false);
 
@@ -419,14 +400,11 @@ static FS_Error storage_process_common_mkdir(Storage* app, const char* path) {
     FS_Error ret = FSE_OK;
     StorageType type = storage_get_type_by_path(app, path);
 
-    if(type < ST_ANY) {
-        storage_timestamp_storage(app, type);
-    }
-
     if(storage_type_is_not_valid(type)) {
         ret = FSE_INVALID_NAME;
     } else {
         StorageData* storage = storage_get_storage_by_type(app, type);
+        storage_data_timestamp(storage);
         FS_CALL(storage, common.mkdir(storage, remove_vfs(path)));
     }
 
@@ -462,7 +440,7 @@ static FS_Error storage_process_sd_format(Storage* app) {
         ret = FSE_NOT_READY;
     } else {
         ret = sd_format_card(&app->storage[ST_EXT]);
-        app->timestamp[ST_EXT] = furi_hal_rtc_get_timestamp();
+        storage_data_timestamp(&app->storage[ST_EXT]);
     }
 
     return ret;
@@ -475,7 +453,7 @@ static FS_Error storage_process_sd_unmount(Storage* app) {
         ret = FSE_NOT_READY;
     } else {
         sd_unmount_card(&app->storage[ST_EXT]);
-        app->timestamp[ST_EXT] = furi_hal_rtc_get_timestamp();
+        storage_data_timestamp(&app->storage[ST_EXT]);
     }
 
     return ret;
