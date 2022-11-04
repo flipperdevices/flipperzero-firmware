@@ -50,6 +50,7 @@ static int32_t __furi_thread_stdout_flush(FuriThread* thread);
 __attribute__((__noreturn__)) void furi_thread_catch() {
     asm volatile("nop"); // extra magic
     furi_crash("You are doing it wrong");
+    //-V1082
 }
 
 static void furi_thread_set_state(FuriThread* thread, FuriThreadState state) {

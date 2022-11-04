@@ -179,7 +179,7 @@ SVCCTL_UserEvtFlowStatus_t SVCCTL_App_Notification(void* pckt) {
 
         case EVT_BLUE_GAP_PASS_KEY_REQUEST: {
             // Generate random PIN code
-            uint32_t pin = rand() % 999999;
+            uint32_t pin = rand() % 999999; //-V1064
             aci_gap_pass_key_resp(gap->service.connection_handle, pin);
             if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
                 FURI_LOG_I(TAG, "Pass key request event. Pin: ******");

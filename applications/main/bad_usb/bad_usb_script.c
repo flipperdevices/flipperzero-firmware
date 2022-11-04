@@ -338,10 +338,6 @@ static int32_t
         furi_hal_hid_kb_release(key);
         return (0);
     }
-    if(error != NULL) {
-        strncpy(error, "Unknown error", error_len);
-    }
-    return SCRIPT_STATE_ERROR;
 }
 
 static bool ducky_set_usb_id(BadUsbScript* bad_usb, const char* line) {
