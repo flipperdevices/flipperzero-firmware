@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - vnext
 jobs:
   build:
     name: Build and analyze

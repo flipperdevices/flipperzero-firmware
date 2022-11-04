@@ -31,10 +31,12 @@ jobs:
           pvs-studio-analyzer trace -- ./pvs-build
       - name: Analyze
         run: |
-          pvs-studio-analyzer analyze @.pvsoptions -j$(grep -c processor /proc/cpuinfo)
+          pvs-studio-analyzer analyze @.pvsoptions -j$(grep -c processor /proc/cpuinfo) -o PVS-Studio.log
       - name: Convert report
         run: |
           plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
+          sed -i 's/"results": null/"results": []/g' pvs-report.sarif
+          sed -i 's/"rules": null/"rules": []/g' pvs-report.sarif
       - name: Publish report
         uses: github/codeql-action/upload-sarif@v2
         with:
