@@ -4,7 +4,8 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "clock_loader",
-        "gpio",
+        # "gpio",
+        "gpio_loader",
         # "ibutton",
         "ibutton_loader",
         # "infrared",
