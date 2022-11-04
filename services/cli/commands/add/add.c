@@ -138,6 +138,7 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
 
     size_t temp_cstr_len = furi_string_size(temp_str);
     token_info->name = malloc(temp_cstr_len + 1);
+    furi_check(token_info->name != NULL);
     strlcpy(token_info->name, furi_string_get_cstr(temp_str), temp_cstr_len + 1);
 
     // Read optional arguments
@@ -211,7 +212,7 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
         load_generate_token_scene = true;
     }
 
-    TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, token_info);
+    TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, token_info, furi_check);
     plugin_state->tokens_count++;
     totp_config_file_save_new_token(token_info);
 

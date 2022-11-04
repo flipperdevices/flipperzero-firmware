@@ -37,24 +37,17 @@ static const NotificationSequence sequence_short_vibro_and_sound = {
 };
 
 static void i_token_to_str(uint32_t i_token_code, char* str, TokenDigitsCount len) {
+    uint8_t str_token_length = 0;
     if(len == TOTP_8_DIGITS) {
         str[8] = '\0';
+        str_token_length = 8;
     } else if(len == TOTP_6_DIGITS) {
         str[6] = '\0';
+        str_token_length = 6;
     }
 
-    if(i_token_code == 0) {
-        if(len > TOTP_6_DIGITS) {
-            str[7] = '-';
-            str[6] = '-';
-        }
-
-        str[5] = '-';
-        str[4] = '-';
-        str[3] = '-';
-        str[2] = '-';
-        str[1] = '-';
-        str[0] = '-';
+    if(i_token_code == OTP_ERROR) {
+        memset(&str[0], '-', str_token_length);
     } else {
         if(len == TOTP_8_DIGITS) {
             str[7] = DIGIT_TO_CHAR(i_token_code % 10);
@@ -132,6 +125,7 @@ void totp_scene_generate_token_activate(
         }
     }
     SceneState* scene_state = malloc(sizeof(SceneState));
+    furi_check(scene_state != NULL);
     if(context == NULL || context->current_token_index > plugin_state->tokens_count) {
         scene_state->current_token_index = 0;
     } else {
@@ -197,7 +191,7 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
                     TOKEN_LIFETIME),
                 scene_state->last_code,
                 tokenInfo->digits);
-            memset_s(key, sizeof(key), 0, key_length);
+            memset_s(key, key_length, 0, key_length);
             free(key);
         } else {
             i_token_to_str(0, scene_state->last_code, tokenInfo->digits);

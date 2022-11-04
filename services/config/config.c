@@ -283,6 +283,7 @@ void totp_config_file_load_base(PluginState* const plugin_state) {
     if(flipper_format_get_value_count(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERIFY, &crypto_size) &&
        crypto_size > 0) {
         plugin_state->crypto_verify_data = malloc(sizeof(uint8_t) * crypto_size);
+        furi_check(plugin_state->crypto_verify_data != NULL);
         plugin_state->crypto_verify_data_length = crypto_size;
         if(!flipper_format_read_hex(
                fff_data_file,
@@ -344,7 +345,8 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
         TokenInfo* tokenInfo = token_info_alloc();
 
         size_t temp_cstr_len = furi_string_size(temp_str);
-        tokenInfo->name = (char*)malloc(temp_cstr_len + 1);
+        tokenInfo->name = malloc(temp_cstr_len + 1);
+        furi_check(tokenInfo->name != NULL);
         strlcpy(tokenInfo->name, furi_string_get_cstr(temp_str), temp_cstr_len + 1);
 
         uint32_t secret_bytes_count;
@@ -378,6 +380,7 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
             tokenInfo->token_length = secret_bytes_count;
             if(secret_bytes_count > 0) {
                 tokenInfo->token = malloc(tokenInfo->token_length);
+                furi_check(tokenInfo->token != NULL);
                 if(!flipper_format_read_hex(
                        fff_data_file,
                        TOTP_CONFIG_KEY_TOKEN_SECRET,
@@ -409,7 +412,7 @@ TokenLoadingResult totp_config_file_load_tokens(PluginState* const plugin_state)
 
         FURI_LOG_D(LOGGING_TAG, "Found token \"%s\"", tokenInfo->name);
 
-        TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, tokenInfo);
+        TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, tokenInfo, furi_check);
 
         index++;
     }

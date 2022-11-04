@@ -1,14 +1,16 @@
 #include "list.h"
 
 ListNode* list_init_head(void* data) {
-    ListNode* new = (ListNode*)malloc(sizeof(ListNode));
+    ListNode* new = malloc(sizeof(ListNode));
+    if (new == NULL) return NULL;
     new->data = data;
     new->next = NULL;
     return new;
 }
 
 ListNode* list_add(ListNode* head, void* data) {
-    ListNode* new = (ListNode*)malloc(sizeof(ListNode));
+    ListNode* new = malloc(sizeof(ListNode));
+    if (new == NULL) return NULL;
     new->data = data;
     new->next = NULL;
 

@@ -25,6 +25,7 @@ void totp_scene_authenticate_init(PluginState* plugin_state) {
 
 void totp_scene_authenticate_activate(PluginState* plugin_state) {
     SceneState* scene_state = malloc(sizeof(SceneState));
+    furi_check(scene_state != NULL);
     scene_state->code_length = 0;
     memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
     plugin_state->current_scene_state = scene_state;
