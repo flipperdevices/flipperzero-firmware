@@ -12,8 +12,8 @@ int WorkCount = 0;
 bool InfiniteShot = false;
 
 const NotificationSequence sequence_click = {
-    &message_click,
-    &message_delay_100,
+    &message_note_c7,
+    &message_delay_50,
     &message_sound_off,
     NULL,
 };
