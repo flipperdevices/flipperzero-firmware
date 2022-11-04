@@ -12,7 +12,6 @@ App(
     # icon="A_BadUsb_14",
     order=70,
     fap_category="Main",
-    fap_icon="gpioIcon.png",
+    fap_icon="badusb_10px.png",
     fap_icon_assets="images",
-
 )
