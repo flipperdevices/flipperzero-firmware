@@ -40,16 +40,6 @@ def BuildAppElf(env, app):
 
     app_artifacts = FlipperExternalAppInfo(app)
 
-    # Deprecation stub
-    legacy_app_taget_name = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
-
-    def legacy_app_build_stub(**kw):
-        raise UserError(
-            f"Target name '{legacy_app_taget_name}' is deprecated, use '{app_alias}' instead"
-        )
-
-    app_env.PhonyTarget(legacy_app_taget_name, Action(legacy_app_build_stub, None))
-
     externally_built_files = []
     if app.fap_extbuild:
         for external_file_def in app.fap_extbuild:
