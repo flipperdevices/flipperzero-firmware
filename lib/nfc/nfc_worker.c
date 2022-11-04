@@ -297,8 +297,8 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
 
 static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
-    MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx);
     MrtdData* mrtd_data = &nfc_worker->dev_data->mrtd_data;
+    MrtdApplication* mrtd_app = mrtd_alloc_init(tx_rx, mrtd_data);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -309,13 +309,24 @@ static bool nfc_worker_read_mrtd(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         // Read passport
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
 
-        //TODO: if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break;
-
-        mrtd_test(mrtd_app, mrtd_data); // Some EFs are only available before Select App
         //TODO: try select eMRTDApp first, but when PACE, read CardAccess first!
+        if(!mrtd_select_app(mrtd_app, AID.eMRTDApplication)) break; // Passport app not selected
 
-        //TODO: read general informatie
-        //TODO: after auth scene, do auth (BAC / PACE)
+        if(mrtd_data->auth.method == MrtdAuthMethodNone) {
+            // Selected the passport app, but auth. not selected
+            // Successfully read what we could
+            read_success = true;
+            break;
+        }
+
+        if(!mrtd_authenticate(mrtd_app)) {
+            // At least we're reading an MRTD and should the app switch to the NFC scenes
+            read_success = true;
+            break; // Authentication failed
+        }
+
+        mrtd_read_parse_file(mrtd_app, EF.COM);
+        mrtd_read_parse_file(mrtd_app, EF.DG1);
 
         read_success = true;
     } while(false);
@@ -362,7 +373,6 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
 
             furi_hal_nfc_sleep(); // Needed between checks
             FURI_LOG_D(TAG, "Try reading MRTD");
-            //TODO: support NFC-B?
             if(nfc_worker_read_mrtd(nfc_worker, tx_rx)) {
                 nfc_worker->dev_data->protocol = NfcDeviceProtocolMRTD;
                 break;

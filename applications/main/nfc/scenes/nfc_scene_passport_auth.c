@@ -3,13 +3,7 @@
 #define TAG "PassportAuth"
 
 #define MRTD_AUTH_METHOD_COUNT 4
-// Indexes must match MrtdAuthMethod (lib/nfc/protocols/mrtd_helpers.h)
-const char* const mrtd_auth_method_text[MRTD_AUTH_METHOD_COUNT] = {
-    "None",
-    "Any",
-    "BAC",
-    "PACE",
-};
+// Must match MrtdAuthMethod size (lib/nfc/protocols/mrtd_helpers.h)
 
 typedef enum {
     NfcScenePassportAuthSelectDob,
@@ -17,6 +11,8 @@ typedef enum {
     NfcScenePassportAuthSelectDocNr,
     NfcScenePassportAuthSelectMethod,
     NfcScenePassportAuthSelectAuth,
+    NfcScenePassportAuthSelectSave,
+    NfcScenePassportAuthSelectLoad,
 } NfcScenePassportAuthSelect;
 
 void nfc_scene_passport_auth_var_list_enter_callback(void* context, uint32_t index) {
@@ -28,7 +24,42 @@ void nfc_scene_passport_auth_method_changed(VariableItem* item) {
     Nfc* nfc = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     nfc->dev->dev_data.mrtd_data.auth.method = index;
-    variable_item_set_current_value_text(item, mrtd_auth_method_text[index]);
+    variable_item_set_current_value_text(item, mrtd_auth_method_string(index));
+}
+
+bool nfc_scene_passport_auth_load(Nfc* nfc) {
+    const DialogsFileBrowserOptions browser_options = {
+        .extension = MRTD_APP_EXTENSION,
+        .skip_assets = true,
+        .icon = &I_u2f_10px,
+        .hide_ext = true,
+        .item_loader_callback = NULL,
+        .item_loader_context = NULL,
+    };
+
+    FuriString* mrtd_app_folder;
+    mrtd_app_folder = furi_string_alloc_set(MRTD_APP_FOLDER);
+
+    FuriString* file_path;
+    file_path = furi_string_alloc();
+
+    bool res = dialog_file_browser_show(nfc->dev->dialogs, file_path, mrtd_app_folder, &browser_options);
+
+    furi_string_free(mrtd_app_folder);
+
+    if(res) {
+        mrtd_auth_params_load(
+                nfc->dev->storage,
+                nfc->dev->dialogs,
+                &nfc->dev->dev_data.mrtd_data.auth,
+                furi_string_get_cstr(file_path),
+                true);
+
+        nfc_scene_passport_auth_on_enter(nfc);
+        variable_item_list_set_selected_item(nfc->variable_item_list, NfcScenePassportAuthSelectAuth);
+    }
+
+    return res;
 }
 
 void nfc_scene_passport_auth_on_enter(void* context) {
@@ -42,6 +73,7 @@ void nfc_scene_passport_auth_on_enter(void* context) {
     }
 
     VariableItemList* variable_item_list = nfc->variable_item_list;
+    variable_item_list_reset(variable_item_list);
 
     VariableItem* item;
     uint8_t value_index;
@@ -91,9 +123,12 @@ void nfc_scene_passport_auth_on_enter(void* context) {
 
     value_index = *auth_method;
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, mrtd_auth_method_text[value_index]);
+    variable_item_set_current_value_text(item, mrtd_auth_method_string(value_index));
 
     variable_item_list_add(variable_item_list, "Authenticate and read", 1, NULL, NULL);
+
+    variable_item_list_add(variable_item_list, "Save parameters", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Load parameters", 1, NULL, NULL);
 
     variable_item_list_set_enter_callback(
         variable_item_list, nfc_scene_passport_auth_var_list_enter_callback, nfc);
@@ -107,6 +142,10 @@ bool nfc_scene_passport_auth_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         FURI_LOG_D(TAG, "event.event: %ld", event.event);
         switch(event.event) {
+        case NfcScenePassportAuthSelectLoad:
+            nfc_scene_passport_auth_load(nfc);
+            consumed = true;
+            break;
         case NfcScenePassportAuthSelectDob:
             scene_manager_set_scene_state(nfc->scene_manager, NfcScenePassportDate, 0);
             scene_manager_next_scene(nfc->scene_manager, NfcScenePassportDate);
@@ -131,6 +170,10 @@ bool nfc_scene_passport_auth_on_event(void* context, SceneManagerEvent event) {
                 nfc_device_clear(nfc->dev);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             }
+            consumed = true;
+            break;
+        case NfcScenePassportAuthSelectSave:
+            scene_manager_next_scene(nfc->scene_manager, NfcScenePassportAuthSaveName);
             consumed = true;
             break;
         }

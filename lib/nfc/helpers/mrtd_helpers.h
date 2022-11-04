@@ -129,6 +129,22 @@ typedef struct {
     MrtdDate expiry_date;
 } EF_DG1_contents;
 
+typedef struct {
+    MrtdAuthData auth;
+    bool auth_success;
+    MrtdAuthMethod auth_method_used;
+
+    struct {
+        EF_DIR_contents EF_DIR;
+        EF_COM_contents EF_COM;
+        EF_DG1_contents DG1;
+    } files;
+} MrtdData;
+
+const char* mrtd_auth_method_string(MrtdAuthMethod method);
+
+bool mrtd_auth_method_parse_string(MrtdAuthMethod* method, const char* str);
+
 uint8_t mrtd_bac_check_digit(const char* input, const uint8_t length);
 
 //TODO: swap order, all other functions have output last

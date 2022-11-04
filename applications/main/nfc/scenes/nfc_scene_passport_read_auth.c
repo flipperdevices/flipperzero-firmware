@@ -37,7 +37,7 @@ void nfc_scene_passport_read_auth_on_enter(void* context) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     furi_string_set(temp_str, "\e#Passport\n");
-    furi_string_cat_printf(temp_str, "Authenticated: %d\n", mrtd_data->auth_success);
+    furi_string_cat_printf(temp_str, "Auth.method: %s\n", mrtd_auth_method_string(mrtd_data->auth_method_used));
     // TODO: indicate BAC / PACE used
 
     uint16_t lds_version = mrtd_data->files.EF_COM.lds_version;
@@ -115,6 +115,8 @@ bool nfc_scene_passport_read_auth_on_event(void* context, SceneManagerEvent even
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeLeft) {
+            nfc->dev->dev_data.mrtd_data.auth_success = false;
+            nfc->dev->dev_data.mrtd_data.auth.method = MrtdAuthMethodNone;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(event.event == GuiButtonTypeCenter) {

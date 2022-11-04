@@ -11,6 +11,7 @@ void nfc_scene_passport_read_widget_callback(GuiButtonType result, InputType typ
 void nfc_scene_passport_read_on_enter(void* context) {
     Nfc* nfc = context;
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
+    MrtdData* mrtd_data = &nfc->dev->dev_data.mrtd_data;
 
     DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
@@ -40,7 +41,11 @@ void nfc_scene_passport_read_on_enter(void* context) {
         furi_string_cat_printf(temp_str, " %02X", data->uid[i]);
     }
     furi_string_cat_printf(temp_str, "\nATQA: %02X %02X ", data->atqa[1], data->atqa[0]);
-    furi_string_cat_printf(temp_str, " SAK: %02X", data->sak);
+    furi_string_cat_printf(temp_str, " SAK: %02X\n", data->sak);
+
+    if(mrtd_data->auth.method != MrtdAuthMethodNone && !mrtd_data->auth_success) {
+        furi_string_cat_printf(temp_str, "Auth failed. Wrong params?");
+    }
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);

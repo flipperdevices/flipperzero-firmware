@@ -11,6 +11,42 @@ static inline unsigned char* ucstr(const char* str) {
     return (unsigned char*)str;
 }
 
+const char* mrtd_auth_method_string(MrtdAuthMethod method) {
+    switch(method) {
+        case MrtdAuthMethodBac:
+            return "BAC";
+        case MrtdAuthMethodPace:
+            return "PACE";
+        case MrtdAuthMethodNone:
+            return "None";
+        case MrtdAuthMethodAny:
+            return "Any";
+        default:
+            return "Unknown";
+    }
+}
+
+bool mrtd_auth_method_parse_string(MrtdAuthMethod* method, const char* str) {
+    if(!strcmp(str, "BAC")) {
+        *method = MrtdAuthMethodBac;
+        return true;
+    }
+    if(!strcmp(str, "PACE")) {
+        *method = MrtdAuthMethodPace;
+        return true;
+    }
+    if(!strcmp(str, "None")) {
+        *method = MrtdAuthMethodNone;
+        return true;
+    }
+    if(!strcmp(str, "Any")) {
+        *method = MrtdAuthMethodAny;
+        return true;
+    }
+    return false;
+}
+
+
 uint8_t mrtd_bac_check_digit(const char* input, const uint8_t length) {
     const uint8_t num_weights = 3;
     uint8_t weights[] = {7, 3, 1};
