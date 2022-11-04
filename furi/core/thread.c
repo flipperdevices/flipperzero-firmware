@@ -113,6 +113,12 @@ FuriThread* furi_thread_alloc() {
     FuriThread* thread = malloc(sizeof(FuriThread));
     thread->output.buffer = furi_string_alloc();
     thread->is_service = false;
+
+    if (furi_thread_get_current_id()) {
+        FuriThread* parent = pvTaskGetThreadLocalStoragePointer(NULL, 0);
+        if (parent) thread->heap_trace_enabled = parent->heap_trace_enabled;
+    }
+
     return thread;
 }
 
