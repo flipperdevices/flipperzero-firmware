@@ -68,11 +68,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         }
     }
     if(state->letsRoll) {
-        static bool rand_generator_inited = false;
-        if(!rand_generator_inited) {
-            srand(furi_get_tick());
-            rand_generator_inited = true;
-        }
         furi_hal_rtc_get_datetime(&state->datetime);
         uint8_t hour = state->datetime.hour;
         char strAMPM[3];
