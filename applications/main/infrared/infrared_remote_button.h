@@ -1,6 +1,6 @@
 #pragma once
 
-#include "infrared_signal.h"
+#include "../../services/infraredsrv/infrared_signal.h"
 
 typedef struct InfraredRemoteButton InfraredRemoteButton;
 

@@ -8,7 +8,7 @@ App(
         "gui",
         "dialogs",
     ],
-    provides=["infrared_start"],
+    # provides=["infrared_start"],
     # icon="A_Infrared_14",
     stack_size=3 * 1024,
     order=40,
