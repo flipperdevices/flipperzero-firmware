@@ -108,7 +108,7 @@ void namechanger_on_system_start() {
             furi_string_free(name);
         } else {
             furi_string_trim(data);
-            FURI_LOG_I(TAG, "data: %s", data);
+            FURI_LOG_I(TAG, "data: %s", furi_string_get_cstr(data));
 
             if(!furi_string_size(data)) {
                 //Empty file - get default name and write to file.
