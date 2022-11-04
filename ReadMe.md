@@ -19,7 +19,8 @@
 - Updated: [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - Fixes for slower animations to be MUCH faster
 - [BadUSB: BadUSB as FAP #396 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/396)
-- [RFID: LFRFID AS FAP #397 (By ROgueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/397) (With Thanks to ESurge)
+- [RFID: LFRFID AS FAP #397 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/397) (With Thanks to @ESurge)
+- [Infrared: Infrared AS FAP #398 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/398) (With Thanks to @ESurge)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
