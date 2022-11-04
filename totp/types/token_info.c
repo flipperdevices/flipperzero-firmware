@@ -9,6 +9,7 @@
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
+    furi_check(tokenInfo != NULL);
     tokenInfo->algo = SHA1;
     tokenInfo->digits = TOTP_6_DIGITS;
     return tokenInfo;
@@ -27,6 +28,7 @@ bool token_info_set_secret(
     size_t token_secret_length,
     const uint8_t* iv) {
     uint8_t* plain_secret = malloc(token_secret_length);
+    furi_check(plain_secret != NULL);
     int plain_secret_length =
         base32_decode((const uint8_t*)base32_token_secret, plain_secret, token_secret_length);
     bool result;
@@ -38,7 +40,7 @@ bool token_info_set_secret(
         result = false;
     }
 
-    memset_s(plain_secret, sizeof(plain_secret), 0, token_secret_length);
+    memset_s(plain_secret, token_secret_length, 0, token_secret_length);
     free(plain_secret);
     return result;
 }

@@ -31,6 +31,7 @@ void totp_scene_token_menu_activate(
     PluginState* plugin_state,
     const TokenMenuSceneContext* context) {
     SceneState* scene_state = malloc(sizeof(SceneState));
+    furi_check(scene_state != NULL);
     plugin_state->current_scene_state = scene_state;
     if(context != NULL) {
         TOTP_NULLABLE_VALUE(scene_state->current_token_index, context->current_token_index);

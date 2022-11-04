@@ -194,7 +194,7 @@ void sha256_process_bytes(const void* buffer, size_t len, struct sha256_ctx* ctx
 #define UNALIGNED_P(p) ((uintptr_t)(p) % sizeof(uint32_t) != 0)
         if(UNALIGNED_P(buffer))
             while(len > 64) {
-                sha256_process_block(memcpy(ctx->buffer, buffer, 64), 64, ctx);
+                sha256_process_block(memcpy(ctx->buffer, buffer, 64), 64, ctx); //-V1086
                 buffer = (const char*)buffer + 64;
                 len -= 64;
             }
@@ -299,70 +299,19 @@ void sha256_process_block(const void* buffer, size_t len, struct sha256_ctx* ctx
             words++;
         }
 
-        R(a, b, c, d, e, f, g, h, K(0), x[0]);
-        R(h, a, b, c, d, e, f, g, K(1), x[1]);
-        R(g, h, a, b, c, d, e, f, K(2), x[2]);
-        R(f, g, h, a, b, c, d, e, K(3), x[3]);
-        R(e, f, g, h, a, b, c, d, K(4), x[4]);
-        R(d, e, f, g, h, a, b, c, K(5), x[5]);
-        R(c, d, e, f, g, h, a, b, K(6), x[6]);
-        R(b, c, d, e, f, g, h, a, K(7), x[7]);
-        R(a, b, c, d, e, f, g, h, K(8), x[8]);
-        R(h, a, b, c, d, e, f, g, K(9), x[9]);
-        R(g, h, a, b, c, d, e, f, K(10), x[10]);
-        R(f, g, h, a, b, c, d, e, K(11), x[11]);
-        R(e, f, g, h, a, b, c, d, K(12), x[12]);
-        R(d, e, f, g, h, a, b, c, K(13), x[13]);
-        R(c, d, e, f, g, h, a, b, K(14), x[14]);
-        R(b, c, d, e, f, g, h, a, K(15), x[15]);
-        R(a, b, c, d, e, f, g, h, K(16), M(16));
-        R(h, a, b, c, d, e, f, g, K(17), M(17));
-        R(g, h, a, b, c, d, e, f, K(18), M(18));
-        R(f, g, h, a, b, c, d, e, K(19), M(19));
-        R(e, f, g, h, a, b, c, d, K(20), M(20));
-        R(d, e, f, g, h, a, b, c, K(21), M(21));
-        R(c, d, e, f, g, h, a, b, K(22), M(22));
-        R(b, c, d, e, f, g, h, a, K(23), M(23));
-        R(a, b, c, d, e, f, g, h, K(24), M(24));
-        R(h, a, b, c, d, e, f, g, K(25), M(25));
-        R(g, h, a, b, c, d, e, f, K(26), M(26));
-        R(f, g, h, a, b, c, d, e, K(27), M(27));
-        R(e, f, g, h, a, b, c, d, K(28), M(28));
-        R(d, e, f, g, h, a, b, c, K(29), M(29));
-        R(c, d, e, f, g, h, a, b, K(30), M(30));
-        R(b, c, d, e, f, g, h, a, K(31), M(31));
-        R(a, b, c, d, e, f, g, h, K(32), M(32));
-        R(h, a, b, c, d, e, f, g, K(33), M(33));
-        R(g, h, a, b, c, d, e, f, K(34), M(34));
-        R(f, g, h, a, b, c, d, e, K(35), M(35));
-        R(e, f, g, h, a, b, c, d, K(36), M(36));
-        R(d, e, f, g, h, a, b, c, K(37), M(37));
-        R(c, d, e, f, g, h, a, b, K(38), M(38));
-        R(b, c, d, e, f, g, h, a, K(39), M(39));
-        R(a, b, c, d, e, f, g, h, K(40), M(40));
-        R(h, a, b, c, d, e, f, g, K(41), M(41));
-        R(g, h, a, b, c, d, e, f, K(42), M(42));
-        R(f, g, h, a, b, c, d, e, K(43), M(43));
-        R(e, f, g, h, a, b, c, d, K(44), M(44));
-        R(d, e, f, g, h, a, b, c, K(45), M(45));
-        R(c, d, e, f, g, h, a, b, K(46), M(46));
-        R(b, c, d, e, f, g, h, a, K(47), M(47));
-        R(a, b, c, d, e, f, g, h, K(48), M(48));
-        R(h, a, b, c, d, e, f, g, K(49), M(49));
-        R(g, h, a, b, c, d, e, f, K(50), M(50));
-        R(f, g, h, a, b, c, d, e, K(51), M(51));
-        R(e, f, g, h, a, b, c, d, K(52), M(52));
-        R(d, e, f, g, h, a, b, c, K(53), M(53));
-        R(c, d, e, f, g, h, a, b, K(54), M(54));
-        R(b, c, d, e, f, g, h, a, K(55), M(55));
-        R(a, b, c, d, e, f, g, h, K(56), M(56));
-        R(h, a, b, c, d, e, f, g, K(57), M(57));
-        R(g, h, a, b, c, d, e, f, K(58), M(58));
-        R(f, g, h, a, b, c, d, e, K(59), M(59));
-        R(e, f, g, h, a, b, c, d, K(60), M(60));
-        R(d, e, f, g, h, a, b, c, K(61), M(61));
-        R(c, d, e, f, g, h, a, b, K(62), M(62));
-        R(b, c, d, e, f, g, h, a, K(63), M(63));
+        for (int i = 0; i < 64; i++) {
+            uint32_t xx = i < 16 ? x[i] : M(i);
+            R(a, b, c, d, e, f, g, h, K(i), xx);
+            uint32_t tt = a;
+            a = h;
+            h = g;
+            g = f;
+            f = e;
+            e = d;
+            d = c;
+            c = b;
+            b = tt;
+        }
 
         a = ctx->state[0] += a;
         b = ctx->state[1] += b;

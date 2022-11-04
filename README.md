@@ -16,6 +16,11 @@ Flipper Authenticator is a software-based authenticator that implements two-step
 
 It is like [Google Authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2), but for [Flipper Zero](https://flipperzero.one/) device.
 
+## SAST Tools
+
+[PVS-Studio](https://pvs-studio.com/en/pvs-studio/?utm_source=github&utm_medium=organic&utm_campaign=open_source) - static analyzer for C, C++, C#, and Java code.
+[SonarCloud](https://www.sonarsource.com/products/sonarcloud/) - cloud-based code quality and security service
+
 ## Support
 
 * Buy me a coffee [here](https://ko-fi.com/akopachov) or [here](https://buycoffee.to/akopachov)

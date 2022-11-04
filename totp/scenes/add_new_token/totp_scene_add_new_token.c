@@ -68,6 +68,7 @@ void totp_scene_add_new_token_activate(
     PluginState* plugin_state,
     const TokenAddEditSceneContext* context) {
     SceneState* scene_state = malloc(sizeof(SceneState));
+    furi_check(scene_state != NULL);
     plugin_state->current_scene_state = scene_state;
     scene_state->token_name = "Name";
     scene_state->token_name_length = strlen(scene_state->token_name);
@@ -75,11 +76,13 @@ void totp_scene_add_new_token_activate(
     scene_state->token_secret_length = strlen(scene_state->token_secret);
 
     scene_state->token_name_input_context = malloc(sizeof(InputTextSceneContext));
+    furi_check(scene_state->token_name_input_context != NULL);
     scene_state->token_name_input_context->header_text = "Enter token name";
     scene_state->token_name_input_context->callback_data = scene_state;
     scene_state->token_name_input_context->callback = on_token_name_user_comitted;
 
     scene_state->token_secret_input_context = malloc(sizeof(InputTextSceneContext));
+    furi_check(scene_state->token_secret_input_context != NULL);
     scene_state->token_secret_input_context->header_text = "Enter token secret";
     scene_state->token_secret_input_context->callback_data = scene_state;
     scene_state->token_secret_input_context->callback = on_token_secret_user_comitted;
@@ -246,12 +249,13 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
 
             if(token_secret_set) {
                 tokenInfo->name = malloc(scene_state->token_name_length + 1);
+                furi_check(tokenInfo->name != NULL);
                 strlcpy(
                     tokenInfo->name, scene_state->token_name, scene_state->token_name_length + 1);
                 tokenInfo->algo = scene_state->algo;
                 tokenInfo->digits = scene_state->digits_count;
 
-                TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, tokenInfo);
+                TOTP_LIST_INIT_OR_ADD(plugin_state->tokens_list, tokenInfo, furi_check);
                 plugin_state->tokens_count++;
 
                 totp_config_file_save_new_token(tokenInfo);

@@ -111,6 +111,7 @@ static void totp_plugin_state_free(PluginState* plugin_state) {
 int32_t totp_app() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     PluginState* plugin_state = malloc(sizeof(PluginState));
+    furi_check(plugin_state != NULL);
 
     if (!totp_plugin_state_init(plugin_state)) {
         FURI_LOG_E(LOGGING_TAG, "App state initialization failed\r\n");

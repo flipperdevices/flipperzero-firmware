@@ -23,11 +23,12 @@ ListNode* list_remove(
     ListNode* ep); /* removes element from the list and returns new head node. */
 void list_free(ListNode* head); /* deletes all elements of the list. */
 
-#define TOTP_LIST_INIT_OR_ADD(head, item) \
-    do {                                  \
-        if(head == NULL) {                \
-            head = list_init_head(item);  \
-        } else {                          \
-            list_add(head, item);         \
-        }                                 \
+#define TOTP_LIST_INIT_OR_ADD(head, item, assert) \
+    do {                                          \
+        if(head == NULL) {                        \
+            head = list_init_head(item);          \
+            assert(head != NULL);                 \
+        } else {                                  \
+            assert(list_add(head, item) != NULL); \
+        }                                         \
     } while(false)

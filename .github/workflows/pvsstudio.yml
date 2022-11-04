@@ -36,7 +36,7 @@ jobs:
         run: |
           plog-converter -t sarif -o pvs-report.sarif PVS-Studio.log
       - name: Publish report
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: pvs-report.sarif
           category: PVS-Studio

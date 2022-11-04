@@ -45,6 +45,7 @@ uint32_t otp_generate(
     size_t plain_secret_length,
     uint64_t input) {
     uint8_t* hmac = malloc(64);
+    if (hmac == NULL) return OTP_ERROR;
     memset(hmac, 0, 64);
 
     uint64_t input_swapped = swap_uint64(input);

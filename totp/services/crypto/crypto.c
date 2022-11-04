@@ -20,20 +20,23 @@ uint8_t* totp_crypto_encrypt(
     if(remain) {
         size_t plain_data_aligned_length = plain_data_length - remain + CRYPTO_ALIGNMENT_FACTOR;
         uint8_t* plain_data_aligned = malloc(plain_data_aligned_length);
+        furi_check(plain_data_aligned != NULL);
         memset(plain_data_aligned, 0, plain_data_aligned_length);
         memcpy(plain_data_aligned, plain_data, plain_data_length);
 
         encrypted_data = malloc(plain_data_aligned_length);
+        furi_check(encrypted_data != NULL);
         *encrypted_data_length = plain_data_aligned_length;
 
         furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, iv);
         furi_hal_crypto_encrypt(plain_data_aligned, encrypted_data, plain_data_aligned_length);
         furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
 
-        memset_s(plain_data_aligned, sizeof(plain_data_aligned), 0, plain_data_aligned_length);
+        memset_s(plain_data_aligned, plain_data_aligned_length, 0, plain_data_aligned_length);
         free(plain_data_aligned);
     } else {
         encrypted_data = malloc(plain_data_length);
+        furi_check(encrypted_data != NULL);
         *encrypted_data_length = plain_data_length;
 
         furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, iv);
@@ -51,6 +54,7 @@ uint8_t* totp_crypto_decrypt(
     size_t* decrypted_data_length) {
     *decrypted_data_length = encrypted_data_length;
     uint8_t* decrypted_data = malloc(*decrypted_data_length);
+    furi_check(decrypted_data != NULL);
     furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, iv);
     furi_hal_crypto_decrypt(encrypted_data, decrypted_data, encrypted_data_length);
     furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
@@ -93,6 +97,7 @@ void totp_crypto_seed_iv(PluginState* plugin_state, const uint8_t* pin, uint8_t 
     if(plugin_state->crypto_verify_data == NULL) {
         FURI_LOG_D(LOGGING_TAG, "Generating crypto verify data");
         plugin_state->crypto_verify_data = malloc(CRYPTO_VERIFY_KEY_LENGTH);
+        furi_check(plugin_state->crypto_verify_data != NULL);
         plugin_state->crypto_verify_data_length = CRYPTO_VERIFY_KEY_LENGTH;
         Storage* storage = totp_open_storage();
         FlipperFormat* config_file = totp_open_config_file(storage);
