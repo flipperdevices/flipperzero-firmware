@@ -3,13 +3,20 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <notification/notification_messages_notes.h>
+//#include <notification/notification_messages_notes.h>
 
 int Time = 10;
 int Count = 10;
 int WorkTime = 0;
 int WorkCount = 0;
 bool InfiniteShot = false;
+
+const NotificationSequence sequence_click = {
+    &message_click,
+    &message_delay_100,
+    &message_sound_off,
+    NULL,
+};
 
 typedef enum {
     EventTypeTick,
@@ -173,7 +180,7 @@ int32_t zeitraffer_app(void* p) {
 
 				WorkCount--;
 				if (InfiniteShot) WorkCount++;
-				notification_message(notifications, message_display_backlight_on);
+				notification_message(notifications, &sequence_click);
 				WorkTime = Time;
 				
 			}
