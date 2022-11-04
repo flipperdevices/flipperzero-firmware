@@ -9,6 +9,6 @@ App(
     ],
     stack_size=int(2 * 1024),
     icon="A_BadUsb_14",
-    order=80,
+    order=70,
 	link="/ext/apps/Main/bad_usb.fap",
 )

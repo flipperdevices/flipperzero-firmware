@@ -9,6 +9,6 @@ App(
     ],
     stack_size=int(2 * 1024),
     icon="A_125khz_14",
-    order=80,
+    order=20,
 	link="/ext/apps/Main/lfrfid.fap",
 )
