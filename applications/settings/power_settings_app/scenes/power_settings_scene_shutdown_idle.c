@@ -1,14 +1,14 @@
 #include "../power_settings_app.h"
 #include <lib/toolbox/value_index.h>
 
-#define SHUTDOWN_IDLE_DELAY_COUNT 8
+#define SHUTDOWN_IDLE_DELAY_COUNT 9
 #define SCENE_EVENT_SELECT_SHUTDOWN_IDLE_DELAY 0
 
 const char* const shutdown_idle_delay_text[SHUTDOWN_IDLE_DELAY_COUNT] =
-    {"OFF", "15min", "30min", "1h", "6h", "12h", "24h", "48h"};
+    {"OFF", "15min", "30min", "1h", "2h", "6h", "12h", "24h", "48h"};
 
 const uint32_t shutdown_idle_delay_value[SHUTDOWN_IDLE_DELAY_COUNT] =
-    {0, 900000, 1800000, 3600000, 21600000, 43200000, 86400000, 172800000};
+    {0, 900000, 1800000, 3600000, 7200000, 21600000, 43200000, 86400000, 172800000};
 
 static void power_settings_scene_shutodwn_idle_callback(void* context, uint32_t index) {
     PowerSettingsApp* app = context;
