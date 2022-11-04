@@ -23,7 +23,7 @@
 
 #include "infrared.h"
 #include "infrared_remote.h"
-#include "../../services/infraredsrv/infrared_brute_force.h"
+#include "infrared_brute_force.h"
 #include "infrared_custom_event.h"
 
 #include "scenes/infrared_scene.h"
