@@ -141,21 +141,28 @@ distenv.Default(basic_dist)
 dist_dir = distenv.GetProjetDirName()
 fap_dist = [
     distenv.Install(
-        f"#/dist/{dist_dir}/apps/debug_elf",
-        firmware_env["FW_EXTAPPS"]["debug"].values(),
+        distenv.Dir(f"#/dist/{dist_dir}/apps/debug_elf"),
+        list(
+            app_artifact.debug
+            for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
+        ),
     ),
-    *(
-        distenv.Install(f"#/dist/{dist_dir}/apps/{dist_entry[0]}", dist_entry[1])
-        for dist_entry in firmware_env["FW_EXTAPPS"]["dist"].values()
+    distenv.Install(
+        f"#/dist/{dist_dir}/apps",
+        "#/assets/resources/apps",
     ),
 ]
-Depends(fap_dist, firmware_env["FW_EXTAPPS"]["validators"].values())
+Depends(
+    fap_dist,
+    list(
+        app_artifact.validator
+        for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
+    ),
+)
 Alias("fap_dist", fap_dist)
 # distenv.Default(fap_dist)
 
-distenv.Depends(
-    firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"]["resources_dist"]
-)
+distenv.Depends(firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"].resources_dist)
 
 
 # Target for bundling core2 package for qFlipper

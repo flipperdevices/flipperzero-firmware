@@ -1,6 +1,9 @@
+from dataclasses import dataclass, field
+from typing import Optional
 from SCons.Builder import Builder
 from SCons.Action import Action
 from SCons.Errors import UserError
+from SCons.Node import NodeList
 import SCons.Warnings
 
 from fbt.elfmanifest import assemble_manifest_data
@@ -16,6 +19,15 @@ import shutil
 from ansi.color import fg
 
 
+@dataclass
+class FlipperExternalAppInfo:
+    app: FlipperApplication
+    compact: NodeList = field(default_factory=NodeList)
+    debug: NodeList = field(default_factory=NodeList)
+    validator: NodeList = field(default_factory=NodeList)
+    installer: NodeList = field(default_factory=NodeList)
+
+
 def BuildAppElf(env, app):
     ext_apps_work_dir = env.subst("$EXT_APPS_WORK_DIR")
     app_work_dir = os.path.join(ext_apps_work_dir, app.appid)
@@ -25,6 +37,8 @@ def BuildAppElf(env, app):
     app_env = env.Clone(FAP_SRC_DIR=app._appdir, FAP_WORK_DIR=app_work_dir)
 
     app_alias = f"fap_{app.appid}"
+
+    app_artifacts = FlipperExternalAppInfo(app)
 
     # Deprecation stub
     legacy_app_taget_name = f"{app_env['FIRMWARE_BUILD_CFG']}_{app.appid}"
@@ -115,20 +129,22 @@ def BuildAppElf(env, app):
         CPPPATH=env.Dir(app_work_dir),
     )
 
-    app_elf_raw = app_env.Program(
+    app_artifacts.debug = app_env.Program(
         os.path.join(ext_apps_work_dir, f"{app.appid}_d"),
         app_sources,
         APP_ENTRY=app.entry_point,
     )
 
-    app_env.Clean(app_elf_raw, [*externally_built_files, app_env.Dir(app_work_dir)])
+    app_env.Clean(
+        app_artifacts.debug, [*externally_built_files, app_env.Dir(app_work_dir)]
+    )
 
-    app_elf_dump = app_env.ObjDump(app_elf_raw)
+    app_elf_dump = app_env.ObjDump(app_artifacts.debug)
     app_env.Alias(f"{app_alias}_list", app_elf_dump)
 
-    app_elf_augmented = app_env.EmbedAppMetadata(
+    app_artifacts.compact = app_env.EmbedAppMetadata(
         os.path.join(ext_apps_work_dir, app.appid),
-        app_elf_raw,
+        app_artifacts.debug,
         APP=app,
     )
 
@@ -139,19 +155,21 @@ def BuildAppElf(env, app):
     }
 
     app_env.Depends(
-        app_elf_augmented,
+        app_artifacts.compact,
         [app_env["SDK_DEFINITION"], app_env.Value(manifest_vals)],
     )
     if app.fap_icon:
         app_env.Depends(
-            app_elf_augmented,
+            app_artifacts.compact,
             app_env.File(f"{app._apppath}/{app.fap_icon}"),
         )
 
-    app_elf_import_validator = app_env.ValidateAppImports(app_elf_augmented)
-    app_env.AlwaysBuild(app_elf_import_validator)
-    app_env.Alias(app_alias, app_elf_import_validator)
-    return (app_elf_augmented, app_elf_raw, app_elf_import_validator)
+    app_artifacts.validator = app_env.ValidateAppImports(app_artifacts.compact)
+    app_env.AlwaysBuild(app_artifacts.validator)
+    app_env.Alias(app_alias, app_artifacts.validator)
+
+    env["EXT_APPS"][app.appid] = app_artifacts
+    return app_artifacts
 
 
 def prepare_app_metadata(target, source, env):
@@ -182,11 +200,17 @@ def validate_app_imports(target, source, env):
             app_syms.add(line.split()[0])
     unresolved_syms = app_syms - sdk_cache.get_valid_names()
     if unresolved_syms:
-        SCons.Warnings.warn(
-            SCons.Warnings.LinkWarning,
-            fg.brightyellow(f"{source[0].path}: app won't run. Unresolved symbols: ")
-            + fg.brightmagenta(f"{unresolved_syms}"),
-        )
+        warning_msg = fg.brightyellow(
+            f"{source[0].path}: app won't run. Unresolved symbols: "
+        ) + fg.brightmagenta(f"{unresolved_syms}")
+        disabled_api_syms = unresolved_syms.intersection(sdk_cache.get_disabled_names())
+        if disabled_api_syms:
+            warning_msg += (
+                fg.brightyellow(" (in API, but disabled: ")
+                + fg.brightmagenta(f"{disabled_api_syms}")
+                + fg.brightyellow(")")
+            )
+        SCons.Warnings.warn(SCons.Warnings.LinkWarning, warning_msg),
 
 
 def GetExtAppFromPath(env, app_dir):
@@ -208,26 +232,26 @@ def GetExtAppFromPath(env, app_dir):
     if not app:
         raise UserError(f"Failed to resolve application for given APPSRC={app_dir}")
 
-    app_elf = env["_extapps"]["compact"].get(app.appid, None)
-    if not app_elf:
+    app_artifacts = env["EXT_APPS"].get(app.appid, None)
+    if not app_artifacts:
         raise UserError(
             f"Application {app.appid} is not configured for building as external"
         )
 
-    app_validator = env["_extapps"]["validators"].get(app.appid, None)
-
-    return (app, app_elf[0], app_validator[0])
+    return app_artifacts
 
 
 def fap_dist_emitter(target, source, env):
     target_dir = target[0]
 
     target = []
-    for dist_entry in env["_extapps"]["dist"].values():
-        target.append(target_dir.Dir(dist_entry[0]).File(dist_entry[1][0].name))
-
-    for compact_entry in env["_extapps"]["compact"].values():
-        source.extend(compact_entry)
+    for _, app_artifacts in env["EXT_APPS"].items():
+        source.extend(app_artifacts.compact)
+        target.append(
+            target_dir.Dir(app_artifacts.app.fap_category).File(
+                app_artifacts.compact[0].name
+            )
+        )
 
     return (target, source)
 
@@ -255,6 +279,10 @@ def generate(env, **kw):
             APPMETAEMBED_COMSTR="\tFAP\t${TARGET}",
             APPCHECK_COMSTR="\tAPPCHK\t${SOURCE}",
         )
+
+    env.SetDefault(
+        EXT_APPS={},  # appid -> FlipperExternalAppInfo
+    )
 
     env.AddMethod(BuildAppElf)
     env.AddMethod(GetExtAppFromPath)

@@ -142,12 +142,13 @@ for app_dir, _ in env["APPDIRS"]:
 
 fwenv.PrepareApplicationsBuild()
 
-# Build external apps
+# Build external apps + configure SDK
 if env["IS_BASE_FIRMWARE"]:
-    extapps = fwenv["FW_EXTAPPS"] = SConscript(
-        "site_scons/extapps.scons", exports={"ENV": fwenv}
+    fwenv["FW_EXTAPPS"] = SConscript(
+        "site_scons/extapps.scons",
+        exports={"ENV": fwenv},
     )
-    fw_artifacts.append(extapps["sdk_tree"])
+    fw_artifacts.append(fwenv["FW_EXTAPPS"].sdk_tree)
 
 
 # Add preprocessor definitions for current set of apps
