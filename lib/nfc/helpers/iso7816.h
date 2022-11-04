@@ -15,7 +15,7 @@ typedef struct {
     struct {
         uint16_t tag;
         uint8_t constructed : 1;
-        uint8_t class : 2;
+        uint8_t classVar : 2;
     } ber;
     size_t length;
     const uint8_t* value;

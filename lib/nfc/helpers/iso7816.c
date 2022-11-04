@@ -14,7 +14,7 @@ TlvInfo iso7816_tlv_parse(const uint8_t* data) {
 
     tlv.tag = *(data++);
     tlv.ber.constructed = ((tlv.tag & 0x20) != 0);
-    tlv.ber.class = (tlv.tag >> 6) & 0x03;
+    tlv.ber.classVar = (tlv.tag >> 6) & 0x03;
     if((tlv.tag & 0x1f) == 0x1f) {
         // BER-TLV, multi byte tag
         tlv.tag <<= 8;
