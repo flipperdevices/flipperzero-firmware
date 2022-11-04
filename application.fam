@@ -1,0 +1,14 @@
+App(
+    appid="unitemp",
+    name="Temp sensors reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="unitemp_app",
+    cdefines=["UNITEMP_APP"],
+    requires=[
+        "gui",
+    ],
+    fap_category="GPIO",
+    fap_icon="icon.png",
+    stack_size=2 * 1024,
+    order=100,
+)
