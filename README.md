@@ -31,6 +31,8 @@ data lines. A schematic for the GPIO board will be added to this repository soon
 4. Copy `build/f7-firmware-D/.extapps/coleco.fap` to `apps/Misc` on the SD card (directly or using [qFlipper]).
 
 [RC2014]: https://rc2014.co.uk/
+[TMS9918A Video Card]: https://github.com/jblang/TMS9918A
+[SN76489 Sound Card]: https://github.com/jblang/SN76489
 [ColecoVision]: http://www.atarihq.com/danb/files/CV-Tech.txt
 [flipperzero-firmware]: https://github.com/flipperdevices/flipperzero-firmware
 [qFlipper]: https://flipperzero.one/update
