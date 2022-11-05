@@ -16,7 +16,7 @@ port addresses.
 
 ## Hardware Setup
 
-The [interfaces](interfaces) directory contains Eagle schematics for a RC2014 module that handles the controller port
+The [interface](interface) directory contains Eagle schematics for a RC2014 module that handles the controller port
 addressing for two players, breaking out the 8 data line inputs as well as the mode select line. This can actually be
 used for different controller implementations and is slightly more flexible than the actual [ColecoVision] spec.
 
