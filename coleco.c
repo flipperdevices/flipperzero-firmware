@@ -26,7 +26,8 @@ const GpioPin* const pin_code0 = &gpio_ext_pa7;
 const GpioPin* const pin_code1 = &gpio_ext_pa4;
 const GpioPin* const pin_code2 = &ibutton_gpio;
 const GpioPin* const pin_code3 = &gpio_ext_pc1;
-const GpioPin* const pin_fire_alt = &gpio_ext_pb3;
+const GpioPin* const pin_fire = &gpio_ext_pb3;
+const GpioPin* const pin_alt = &gpio_usart_tx;
 
 typedef enum
 {
@@ -124,13 +125,15 @@ static void coleco_gpio_init()
   furi_hal_gpio_init(pin_code1, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_code2, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_code3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-  furi_hal_gpio_init(pin_fire_alt, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_fire, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_alt, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
   furi_hal_gpio_write(pin_up, true);
   furi_hal_gpio_write(pin_down, true);
   furi_hal_gpio_write(pin_right, true);
   furi_hal_gpio_write(pin_left, true);
-  furi_hal_gpio_write(pin_fire_alt, true);
+  furi_hal_gpio_write(pin_fire, true);
+  furi_hal_gpio_write(pin_alt, true);
 
   coleco_write_code(CODE_N);
 }
@@ -280,15 +283,15 @@ int32_t coleco_app(void* p)
             }
             break;
           case InputKeyOk:
-            if (coleco->dpad || (coleco->row == 0 && coleco->column == 2))
+            if (coleco->dpad)
             {
               if (event.input.type == InputTypePress)
               {
-                furi_hal_gpio_write(pin_fire_alt, false);
+                furi_hal_gpio_write(pin_fire, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                furi_hal_gpio_write(pin_fire_alt, true);
+                furi_hal_gpio_write(pin_fire, true);
               }
             }
             else
@@ -297,7 +300,14 @@ int32_t coleco_app(void* p)
               {
                 if (coleco->row == 0)
                 {
-                  coleco->dpad = true;
+                  if (coleco->column == 2)
+                  {
+                    furi_hal_gpio_write(pin_alt, false);
+                  }
+                  else
+                  {
+                    coleco->dpad = true;
+                  }
                 }
                 else if (coleco->row == 1)
                 {
@@ -362,6 +372,7 @@ int32_t coleco_app(void* p)
               }
               if (event.input.type == InputTypeRelease)
               {
+                furi_hal_gpio_write(pin_alt, true);
                 coleco_write_code(CODE_N);
               }
             }
