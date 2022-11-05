@@ -64,6 +64,8 @@ def generate(env, **kw):
             "-ex",
             "source ${FBT_DEBUG_DIR}/flipperapps.py",
             "-ex",
+            "fap-set-debug-elf-root ${FBT_FAP_DEBUG_ELF_ROOT}",
+            "-ex",
             "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py",
             "-ex",
             "svd_load ${SVD_FILE}",

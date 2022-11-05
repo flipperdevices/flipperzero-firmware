@@ -22,7 +22,7 @@ def GetProjetDirName(env, project=None):
 
 def create_fw_build_targets(env, configuration_name):
     flavor = GetProjetDirName(env, configuration_name)
-    build_dir = env.Dir("build").Dir(flavor).abspath
+    build_dir = env.Dir("build").Dir(flavor)
     return env.SConscript(
         "firmware.scons",
         variant_dir=build_dir,

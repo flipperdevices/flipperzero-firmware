@@ -9,14 +9,7 @@ from fbt.appmanifest import FlipperAppType
 
 appenv = ENV["APPENV"] = ENV.Clone(
     tools=[
-        (
-            "fbt_extapps",
-            {
-                "EXT_APPS_WORK_DIR": ENV.subst(
-                    "${BUILD_DIR}/.extapps",
-                )
-            },
-        ),
+        "fbt_extapps",
         "fbt_assets",
         "fbt_sdk",
     ]
@@ -108,7 +101,7 @@ if appsrc := appenv.subst("$APPSRC"):
     app_manifest, fap_file, app_validator = appenv.GetExtAppFromPath(appsrc)
     appenv.PhonyTarget(
         "launch_app",
-        '${PYTHON3} "${APP_RUN_SCRIPT}" ${SOURCE} --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
+        '${PYTHON3} "${APP_RUN_SCRIPT}" "${SOURCE}" --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
         source=fap_file,
         FAP_CATEGORY=app_manifest.fap_category,
     )
