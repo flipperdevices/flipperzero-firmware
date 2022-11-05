@@ -1,11 +1,41 @@
 #include "unitemp.h"
+#include "interfaces/OneWire.h"
 
 /* Статические переменные */
 //Данные приложения
 static Unitemp* app;
 
 /**
- * @brief Сохранение настроек
+ * @brief Функция загрузки датчиков с SD-карты
+ * 
+ * @return true Загрузка успешная
+ * @return false Произошла ошибка
+ */
+bool unitemp_loadSensors() {
+    //Сброс количества датчиков
+    app->sensors_count = 0;
+    //Очистка памяти датчиков
+    memset(app->sensors, 0, sizeof(app->sensors));
+
+    //Типа загружен датчик DHT11 на порте 10
+    app->sensors[app->sensors_count] = (Sensor){
+        .name = "DHT11",
+        .type = DHT11,
+        .instance = &(OneWireSensor){.interface = ONE_WIRE, .gpio = unitemp_getGPIOFormInt(10)}};
+    app->sensors_count++;
+
+    //Типа загружен датчик DHT21 на порте 2
+    app->sensors[app->sensors_count] = (Sensor){
+        .name = "DHT21",
+        .type = DHT21,
+        .instance = &(OneWireSensor){.interface = ONE_WIRE, .gpio = unitemp_getGPIOFormInt(2)}};
+    app->sensors_count++;
+
+    return true;
+}
+
+/**
+ * @brief Сохранение настроек на SD-карту
  * 
  * @return true Если сохранение прошло успешно
  * @return false Если во время сохранения произошла ошибка
@@ -180,6 +210,10 @@ static bool unitemp_alloc(void) {
 
     //Уведомления
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
+
+    //Установка значений по умолчанию
+    app->settings.infinityBacklight = true; //Подсветка горит всегда
+    app->settings.unit = CELSIUM; //Единица измерения - градусы Цельсия
     return true;
 }
 
@@ -187,6 +221,8 @@ static bool unitemp_alloc(void) {
  * @brief Освыбождение памяти после работы приложения
  */
 static void unitemp_free(void) {
+    //Очистка датчиков
+    free(app->sensors);
     //Закрытие уведомлений
     furi_record_close(RECORD_NOTIFICATION);
     //Закрытие хранилища
@@ -210,12 +246,24 @@ int32_t unitemp_app() {
         return 0;
     }
 
-    //Установка стандартных значений настроек
-    app->settings.infinityBacklight = true;
-    app->settings.unit = CELSIUM;
-
     //Загрузка настроек из SD-карты
     unitemp_loadSettings();
+    //Загрузка датчиков из SD-карты
+    unitemp_loadSensors();
+
+    while(1) {
+        FURI_LOG_D(APP_NAME, "Sensors values:");
+        for(uint8_t i = 0; i < app->sensors_count; i++) {
+            FURI_LOG_D(
+                APP_NAME,
+                "%s: %2.1f*C/%d%%",
+                app->sensors[i].name,
+                (double)app->sensors[i].temp,
+                (uint8_t)app->sensors[i].hum);
+        }
+
+        furi_delay_ms(1000);
+    }
 
     //Освобождение памяти
     unitemp_free();
