@@ -20,7 +20,7 @@ env = ENV.Clone(
     BUILD_DIR=fw_build_meta["build_dir"],
     IS_BASE_FIRMWARE=fw_build_meta["type"] == "firmware",
     FW_FLAVOR=fw_build_meta["flavor"],
-    LIB_DIST_DIR="${BUILD_DIR}/lib",
+    LIB_DIST_DIR=fw_build_meta["build_dir"].Dir("lib"),
     LINT_SOURCES=[
         "applications",
     ],
