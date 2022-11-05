@@ -14,4 +14,5 @@ App(
     fap_icon="U2FIcon.png",
     fap_category="Main",
     fap_icon_assets="images",
+    fap_libs=["assets"],
 )
