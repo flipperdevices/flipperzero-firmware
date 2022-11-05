@@ -1,4 +1,7 @@
 #include "Sensors.h"
+#include "OneWire.h"
+
+#include <furi_hal_power.h>
 
 //Порты ввода/вывода, которые не были обозначены в общем списке
 const GpioPin SWC_10 = {.pin = LL_GPIO_PIN_14, .port = GPIOA};
@@ -55,4 +58,66 @@ const GPIO* unitemp_getGPIOFormInt(uint8_t name) {
         }
     }
     return NULL;
+}
+
+Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
+    //Выделение памяти под датчик
+    Sensor* sensor = malloc(sizeof(Sensor));
+    sensor->name = name;
+    //Выделение памяти под инстанс DHT11, DHT12 (1W), DHT21, DHT22, AM2320 (1W)
+    if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
+        if(sensor == NULL) return false;
+        OneWireSensor* instance = malloc(sizeof(OneWireSensor));
+        instance->interface = ONE_WIRE;
+        instance->lastPollingTime = 0;
+        sensor->instance = instance;
+        sensor->interface = ONE_WIRE;
+    }
+    return sensor;
+}
+
+bool unitemp_sensors_init(void) {
+    bool result = true;
+    //Включение 5V если на порту 1 FZ его нет
+    if(furi_hal_power_is_otg_enabled() != true) {
+        furi_hal_power_enable_otg();
+        FURI_LOG_D(APP_NAME, "OTG enabled");
+    }
+
+    //Перебор датчиков из списка
+    for(size_t i = 0; i < app->sensors_count; i++) {
+        if(app->sensors[i]->interface == ONE_WIRE) {
+            if(!unitemp_oneWire_sensorInit(app->sensors[i]->instance)) {
+                FURI_LOG_W(
+                    APP_NAME,
+                    "An error occurred during sensor initialization %s",
+                    app->sensors[i]->name);
+                result = false;
+            }
+        }
+    }
+    return result;
+}
+
+bool unitemp_sensors_deInit(void) {
+    bool result = true;
+    //Выключение 5 В если до этого оно не было включено
+    if(app->settings.lastOTGState != true) {
+        furi_hal_power_disable_otg();
+        FURI_LOG_D(APP_NAME, "OTG disabled");
+    }
+
+    //Перебор датчиков из списка
+    for(size_t i = 0; i < app->sensors_count; i++) {
+        if(app->sensors[i]->interface == ONE_WIRE) {
+            if(!unitemp_oneWire_sensorDeInit(app->sensors[i]->instance)) {
+                FURI_LOG_W(
+                    APP_NAME,
+                    "An error occurred during sensor initialization %s",
+                    app->sensors[i]->name);
+                result = false;
+            }
+        }
+    }
+    return result;
 }

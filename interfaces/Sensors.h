@@ -3,12 +3,21 @@
 #include <furi.h>
 #include <input/input.h>
 
+//Статусы опроса датчика
+typedef enum {
+    UT_OK, //Всё хорошо, опрос успешен
+    UT_TIMEOUT, //Датчик не отозвался
+    UT_EARLYPOOL, //Опрос раньше положенной задержки
+    UT_BADCRC, //Неверная контрольная сумма
+    UT_ERROR, //Прочие ошибки
+} UnitempStatus;
+
 //Типы датчиков
 typedef enum {
     DHT11,
     DHT12_1W,
     DHT12_I2C,
-    DHT20,
+    DHT20, //AM2108
     DHT21, //AM2301
     DHT22, //AM2302
     AM2320_1W,
@@ -51,6 +60,8 @@ typedef struct {
 
     //Тип датчика
     SensorType type;
+    //Интерфейсы подключения
+    Interface interface;
     //Экземпляр датчика
     void* instance;
 } Sensor;
@@ -70,5 +81,28 @@ const char* unitemp_getSensorTypeName(SensorType st);
  * @return Указатель на GPIO при успехе, NULL при ошибке
  */
 const GPIO* unitemp_getGPIOFormInt(uint8_t name);
+
+/**
+ * @brief Выделение памяти под датчик
+ * 
+ * @param name Имя датчика
+ * @param st Тип датчика
+ * @return Указатель на датчик
+ */
+Sensor* unitemp_sensor_alloc(char* name, SensorType st);
+
+/**
+ * @brief Инициализация загруженных датчиков
+ * 
+ * @return Истина если всё прошло успешно
+ */
+bool unitemp_sensors_init(void);
+
+/**
+ * @brief Деинициализация загруженных датчиков
+ * 
+ * @return Истина если всё прошло успешно
+ */
+bool unitemp_sensors_deInit(void);
 
 #endif

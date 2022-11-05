@@ -1,9 +1,12 @@
 #include "unitemp.h"
 #include "interfaces/OneWire.h"
+#include "interfaces/Sensors.h"
+
+#include <furi_hal_power.h>
 
 /* Статические переменные */
 //Данные приложения
-static Unitemp* app;
+Unitemp* app;
 
 /**
  * @brief Функция загрузки датчиков с SD-карты
@@ -18,17 +21,16 @@ bool unitemp_loadSensors() {
     memset(app->sensors, 0, sizeof(app->sensors));
 
     //Типа загружен датчик DHT11 на порте 10
-    app->sensors[app->sensors_count] = (Sensor){
-        .name = "DHT11",
-        .type = DHT11,
-        .instance = &(OneWireSensor){.interface = ONE_WIRE, .gpio = unitemp_getGPIOFormInt(10)}};
+    app->sensors[app->sensors_count] = unitemp_sensor_alloc("DHT11", DHT11);
+
+    ((OneWireSensor*)(app->sensors[app->sensors_count]->instance))->gpio =
+        unitemp_getGPIOFormInt(10);
     app->sensors_count++;
 
     //Типа загружен датчик DHT21 на порте 2
-    app->sensors[app->sensors_count] = (Sensor){
-        .name = "DHT21",
-        .type = DHT21,
-        .instance = &(OneWireSensor){.interface = ONE_WIRE, .gpio = unitemp_getGPIOFormInt(2)}};
+    app->sensors[app->sensors_count] = unitemp_sensor_alloc("DHT21", DHT21);
+    ((OneWireSensor*)(app->sensors[app->sensors_count]->instance))->gpio =
+        unitemp_getGPIOFormInt(2);
     app->sensors_count++;
 
     return true;
@@ -191,6 +193,7 @@ static bool unitemp_loadSettings(void) {
         //Автоматическое управление
         notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
     }
+    app->settings.lastOTGState = furi_hal_power_is_otg_enabled();
 
     FURI_LOG_I(APP_NAME, "Settings have been successfully loaded\r\n");
     return true;
@@ -250,6 +253,8 @@ int32_t unitemp_app() {
     unitemp_loadSettings();
     //Загрузка датчиков из SD-карты
     unitemp_loadSensors();
+    //Инициализация датчиков
+    unitemp_sensors_init();
 
     while(1) {
         FURI_LOG_D(APP_NAME, "Sensors values:");
@@ -257,14 +262,16 @@ int32_t unitemp_app() {
             FURI_LOG_D(
                 APP_NAME,
                 "%s: %2.1f*C/%d%%",
-                app->sensors[i].name,
-                (double)app->sensors[i].temp,
-                (uint8_t)app->sensors[i].hum);
+                app->sensors[i]->name,
+                (double)app->sensors[i]->temp,
+                (uint8_t)app->sensors[i]->hum);
         }
 
         furi_delay_ms(1000);
     }
 
+    //Деинициализация датчиков
+    unitemp_sensors_deInit();
     //Освобождение памяти
     unitemp_free();
     //Выход

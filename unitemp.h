@@ -38,14 +38,16 @@ typedef struct {
     //Единица измерения температуры
     //Ложь - градусы Цельсия, истина - Фарeнгейты
     measureUnit unit;
+    //Последнее состояние OTG
+    bool lastOTGState;
 } UnitempSettings;
 
 //Основная структура плагина
 typedef struct {
     //Основные настройки
     UnitempSettings settings;
-    //Список датчиков
-    Sensor sensors[MAX_SENSORS];
+    //Список указателей на датчики
+    Sensor* sensors[MAX_SENSORS];
     //Количество загруженных датчиков
     size_t sensors_count;
 
@@ -59,4 +61,5 @@ typedef struct {
 
 /* Объявление прототипов функций */
 
+extern Unitemp* app;
 #endif
