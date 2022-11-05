@@ -2,7 +2,7 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_power.h>
 #include <gui/gui.h>
-#include <gui/modules/button_panel.h>
+#include "coleco_icons.h"
 
 #define CODE_0 0x0A
 #define CODE_1 0x0D
@@ -26,7 +26,7 @@ const GpioPin* const pin_code0 = &gpio_ext_pa7;
 const GpioPin* const pin_code1 = &gpio_ext_pa4;
 const GpioPin* const pin_code2 = &ibutton_gpio;
 const GpioPin* const pin_code3 = &gpio_ext_pc1;
-const GpioPin* const pin_fire = &gpio_ext_pb3;
+const GpioPin* const pin_fire_alt = &gpio_ext_pb3;
 
 typedef enum
 {
@@ -42,8 +42,9 @@ typedef struct
 
 typedef struct
 {
-  ButtonPanel* button_panel;
   bool dpad;
+  int row;
+  int column;
 } Coleco;
 
 static void render_callback(Canvas* const canvas, void* context)
@@ -54,19 +55,44 @@ static void render_callback(Canvas* const canvas, void* context)
     return;
   }
 
-  canvas_set_font(canvas, FontPrimary);
-  canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignBottom, "ColecoVision");
-
-  canvas_set_font(canvas, FontSecondary);
-
   if (coleco->dpad)
   {
-    canvas_draw_str_aligned(canvas, 64, 18, AlignCenter, AlignBottom, "d-pad");
+    canvas_draw_icon(canvas, 4, 16, &I_ColecoJoystick_sel_33x33);
   }
   else
   {
-    canvas_draw_str_aligned(canvas, 64, 18, AlignCenter, AlignBottom, "numbers");
+    canvas_draw_icon(canvas, 4, 16,
+        (coleco->row == 0 && coleco->column < 2) ? &I_ColecoJoystick_hvr_33x33 : &I_ColecoJoystick_33x33);
   }
+
+  canvas_draw_icon(canvas, 27, 52,
+      (coleco->row == 0 && coleco->column < 2) ? &I_ColecoFire_hvr_18x9 : &I_ColecoFire_18x9);
+  canvas_draw_icon(canvas, 27, 4,
+      (coleco->row == 0 && coleco->column == 2) ? &I_ColecoAlt_hvr_18x9 : &I_ColecoAlt_18x9);
+  canvas_draw_icon(canvas, 49, 44,
+      (coleco->row == 1 && coleco->column == 0) ? &I_Coleco1_hvr_17x17 : &I_Coleco1_17x17);
+  canvas_draw_icon(canvas, 49, 24,
+      (coleco->row == 1 && coleco->column == 1) ? &I_Coleco2_hvr_17x17 : &I_Coleco2_17x17);
+  canvas_draw_icon(canvas, 49, 4,
+      (coleco->row == 1 && coleco->column == 2) ? &I_Coleco3_hvr_17x17 : &I_Coleco3_17x17);
+  canvas_draw_icon(canvas, 69, 44,
+      (coleco->row == 2 && coleco->column == 0) ? &I_Coleco4_hvr_17x17 : &I_Coleco4_17x17);
+  canvas_draw_icon(canvas, 69, 24,
+      (coleco->row == 2 && coleco->column == 1) ? &I_Coleco5_hvr_17x17 : &I_Coleco5_17x17);
+  canvas_draw_icon(canvas, 69, 4,
+      (coleco->row == 2 && coleco->column == 2) ? &I_Coleco6_hvr_17x17 : &I_Coleco6_17x17);
+  canvas_draw_icon(canvas, 89, 44,
+      (coleco->row == 3 && coleco->column == 0) ? &I_Coleco7_hvr_17x17 : &I_Coleco7_17x17);
+  canvas_draw_icon(canvas, 89, 24,
+      (coleco->row == 3 && coleco->column == 1) ? &I_Coleco8_hvr_17x17 : &I_Coleco8_17x17);
+  canvas_draw_icon(canvas, 89, 4,
+      (coleco->row == 3 && coleco->column == 2) ? &I_Coleco9_hvr_17x17 : &I_Coleco9_17x17);
+  canvas_draw_icon(canvas, 109, 44,
+      (coleco->row == 4 && coleco->column == 0) ? &I_ColecoStar_hvr_17x17 : &I_ColecoStar_17x17);
+  canvas_draw_icon(canvas, 109, 24,
+      (coleco->row == 4 && coleco->column == 1) ? &I_Coleco0_hvr_17x17 : &I_Coleco0_17x17);
+  canvas_draw_icon(canvas, 109, 4,
+      (coleco->row == 4 && coleco->column == 2) ? &I_ColecoPound_hvr_17x17 : &I_ColecoPound_17x17);
 
   release_mutex((ValueMutex*)context, coleco);
 }
@@ -87,14 +113,8 @@ static void coleco_write_code(unsigned int code)
   furi_hal_gpio_write(pin_code3, (code & 8));
 }
 
-static Coleco* coleco_alloc()
+static void coleco_gpio_init()
 {
-  Coleco* coleco = malloc(sizeof(Coleco));
-
-  coleco->button_panel = button_panel_alloc();
-
-  coleco->dpad = false;
-
   // configure output pins
   furi_hal_gpio_init(pin_up, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_down, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
@@ -104,15 +124,24 @@ static Coleco* coleco_alloc()
   furi_hal_gpio_init(pin_code1, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_code2, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
   furi_hal_gpio_init(pin_code3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-  furi_hal_gpio_init(pin_fire, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+  furi_hal_gpio_init(pin_fire_alt, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
   furi_hal_gpio_write(pin_up, true);
   furi_hal_gpio_write(pin_down, true);
   furi_hal_gpio_write(pin_right, true);
   furi_hal_gpio_write(pin_left, true);
-  furi_hal_gpio_write(pin_fire, true);
+  furi_hal_gpio_write(pin_fire_alt, true);
 
   coleco_write_code(CODE_N);
+}
+
+static Coleco* coleco_alloc()
+{
+  Coleco* coleco = malloc(sizeof(Coleco));
+
+  coleco->dpad = false;
+  coleco->row = 0;
+  coleco->column = 1;
 
   return coleco;
 }
@@ -120,8 +149,6 @@ static Coleco* coleco_alloc()
 static void coleco_free(Coleco* coleco)
 {
   furi_assert(coleco);
-
-  button_panel_free(coleco->button_panel);
 
   free(coleco);
 }
@@ -151,6 +178,7 @@ int32_t coleco_app(void* p)
   Gui* gui = furi_record_open("gui");
   gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+  coleco_gpio_init();
   furi_hal_power_enable_otg();
 
   PluginEvent event;
@@ -179,14 +207,11 @@ int32_t coleco_app(void* p)
                 furi_hal_gpio_write(pin_up, true);
               }
             }
-            else  // FIXME: hack to allow the 1 to be pressed
+            else
             {
-              if (event.input.type == InputTypePress)
+              if (event.input.type == InputTypePress && coleco->column < 2)
               {
-                coleco_write_code(CODE_1);
-              }
-              else if (event.input.type == InputTypeRelease)
-              {
+                coleco->column++;
                 coleco_write_code(CODE_N);
               }
             }
@@ -203,14 +228,11 @@ int32_t coleco_app(void* p)
                 furi_hal_gpio_write(pin_down, true);
               }
             }
-            else  // FIXME: hack to allow the 2 to be pressed
+            else
             {
-              if (event.input.type == InputTypePress)
+              if (event.input.type == InputTypePress && coleco->column > 0)
               {
-                coleco_write_code(CODE_2);
-              }
-              else if (event.input.type == InputTypeRelease)
-              {
+                coleco->column--;
                 coleco_write_code(CODE_N);
               }
             }
@@ -227,14 +249,11 @@ int32_t coleco_app(void* p)
                 furi_hal_gpio_write(pin_right, true);
               }
             }
-            else  // FIXME: hack to allow the 3 to be pressed
+            else
             {
-              if (event.input.type == InputTypePress)
+              if (event.input.type == InputTypePress && coleco->row < 4)
               {
-                coleco_write_code(CODE_3);
-              }
-              else if (event.input.type == InputTypeRelease)
-              {
+                coleco->row++;
                 coleco_write_code(CODE_N);
               }
             }
@@ -251,33 +270,100 @@ int32_t coleco_app(void* p)
                 furi_hal_gpio_write(pin_left, true);
               }
             }
-            else  // FIXME: hack to allow the 4 to be pressed
+            else
             {
-              if (event.input.type == InputTypePress)
+              if (event.input.type == InputTypePress && coleco->row > 0)
               {
-                coleco_write_code(CODE_4);
-              }
-              else if (event.input.type == InputTypeRelease)
-              {
+                coleco->row--;
                 coleco_write_code(CODE_N);
               }
             }
             break;
           case InputKeyOk:
-            if (coleco->dpad)
+            if (coleco->dpad || (coleco->row == 0 && coleco->column == 2))
             {
               if (event.input.type == InputTypePress)
               {
-                furi_hal_gpio_write(pin_fire, false);
+                furi_hal_gpio_write(pin_fire_alt, false);
               }
               else if (event.input.type == InputTypeRelease)
               {
-                furi_hal_gpio_write(pin_fire, true);
+                furi_hal_gpio_write(pin_fire_alt, true);
               }
             }
             else
             {
-              coleco->dpad = true;
+              if (event.input.type == InputTypePress)
+              {
+                if (coleco->row == 0)
+                {
+                  coleco->dpad = true;
+                }
+                else if (coleco->row == 1)
+                {
+                  if (coleco->column == 0)
+                  {
+                    coleco_write_code(CODE_1);
+                  }
+                  else if (coleco->column == 1)
+                  {
+                    coleco_write_code(CODE_2);
+                  }
+                  else
+                  {
+                    coleco_write_code(CODE_3);
+                  }
+                }
+                else if (coleco->row == 2)
+                {
+                  if (coleco->column == 0)
+                  {
+                    coleco_write_code(CODE_4);
+                  }
+                  else if (coleco->column == 1)
+                  {
+                    coleco_write_code(CODE_5);
+                  }
+                  else
+                  {
+                    coleco_write_code(CODE_6);
+                  }
+                }
+                else if (coleco->row == 3)
+                {
+                  if (coleco->column == 0)
+                  {
+                    coleco_write_code(CODE_7);
+                  }
+                  else if (coleco->column == 1)
+                  {
+                    coleco_write_code(CODE_8);
+                  }
+                  else
+                  {
+                    coleco_write_code(CODE_9);
+                  }
+                }
+                else if (coleco->row == 4)
+                {
+                  if (coleco->column == 0)
+                  {
+                    coleco_write_code(CODE_S);
+                  }
+                  else if (coleco->column == 1)
+                  {
+                    coleco_write_code(CODE_0);
+                  }
+                  else
+                  {
+                    coleco_write_code(CODE_H);
+                  }
+                }
+              }
+              if (event.input.type == InputTypeRelease)
+              {
+                coleco_write_code(CODE_N);
+              }
             }
             break;
           case InputKeyBack:

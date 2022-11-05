@@ -8,5 +8,6 @@ App(
     stack_size=1 * 1024,
     order=35,
     fap_icon="coleco_10px.png",
+    fap_icon_assets="icons",
     fap_category="Games",
 )
