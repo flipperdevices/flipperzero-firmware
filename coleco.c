@@ -106,7 +106,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
   furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void coleco_write_code(unsigned int code)
+static void coleco_write_code(uint8_t code)
 {
   furi_hal_gpio_write(pin_code0, (code & 1));
   furi_hal_gpio_write(pin_code1, (code & 2));
