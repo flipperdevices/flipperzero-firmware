@@ -59,15 +59,15 @@ static void render_callback(Canvas* const canvas, void* context)
   if (coleco->dpad)
   {
     canvas_draw_icon(canvas, 4, 16, &I_ColecoJoystick_sel_33x33);
+    canvas_draw_icon(canvas, 27, 52, &I_ColecoFire_sel_18x9);
   }
   else
   {
-    canvas_draw_icon(canvas, 4, 16,
-        (coleco->row == 0 && coleco->column < 2) ? &I_ColecoJoystick_hvr_33x33 : &I_ColecoJoystick_33x33);
+    const bool hvr = coleco->row == 0 && coleco->column < 2;
+    canvas_draw_icon(canvas, 4, 16, hvr ? &I_ColecoJoystick_hvr_33x33 : &I_ColecoJoystick_33x33);
+    canvas_draw_icon(canvas, 27, 52, hvr ? &I_ColecoFire_hvr_18x9 : &I_ColecoFire_18x9);
   }
 
-  canvas_draw_icon(canvas, 27, 52,
-      (coleco->row == 0 && coleco->column < 2) ? &I_ColecoFire_hvr_18x9 : &I_ColecoFire_18x9);
   canvas_draw_icon(canvas, 27, 4,
       (coleco->row == 0 && coleco->column == 2) ? &I_ColecoAlt_hvr_18x9 : &I_ColecoAlt_18x9);
   canvas_draw_icon(canvas, 49, 44,
