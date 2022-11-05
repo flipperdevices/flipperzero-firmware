@@ -298,8 +298,33 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                    timer_stopped_seconds;
             snprintf(strings[2], 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+            int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
+            int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
+            // int32_t elapsed_secs_img3 = (elapsed_secs % 60) % 4;
+            static const Icon* const count_anim[5] = {
+                &I_HappyFlipper_128x64,
+                &I_G0ku,
+                &I_g0ku_1,
+                &I_g0ku_2,
+                &I_g0ku_3
+            };
+            static const Icon* const count_anim2[4] = {
+                &I_EviWaiting1_18x21,
+                &I_EviWaiting2_18x21,
+                &I_EviSmile1_18x21,
+                &I_EviSmile2_18x21
+            };
+            static const Icon* const count_anim3[4] = {
+                &I_frame_01,
+                &I_frame_02,
+                &I_frame_03,
+                &I_frame_02
+            };
+            canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
+            canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
+            canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
             canvas_draw_str_aligned(
-                canvas, 64, 40, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
+                canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
         }
         canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
         canvas_set_font(canvas, FontBatteryPercent);
@@ -332,8 +357,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             elements_button_right(canvas, "S:ByMin");
         }
     }
-    if(state->w_test && state->desktop_settings->is_dumbmode)
+    if(state->w_test && state->desktop_settings->is_dumbmode) {
         canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
+    }
 }
 
 static void clock_state_init(ClockState* const state) {
