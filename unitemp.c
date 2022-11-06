@@ -225,6 +225,9 @@ static bool unitemp_alloc(void) {
  */
 static void unitemp_free(void) {
     //Очистка датчиков
+    for(size_t i = 0; i < app->sensors_count; i++) {
+        free(app->sensors[i]);
+    }
     free(app->sensors);
     //Закрытие уведомлений
     furi_record_close(RECORD_NOTIFICATION);
@@ -256,7 +259,8 @@ int32_t unitemp_app() {
     //Инициализация датчиков
     unitemp_sensors_init();
 
-    while(1) {
+    uint32_t startTime = furi_get_tick();
+    while(furi_get_tick() - startTime < 10000) {
         FURI_LOG_D(APP_NAME, "Sensors values:");
         for(uint8_t i = 0; i < app->sensors_count; i++) {
             UnitempStatus s = unitemp_sensor_getValues(app->sensors[i]);
