@@ -40,20 +40,12 @@ typedef enum {
     ONETIME_LOW_RES_MODE = 0x23
 } BH1750_mode;
 
-typedef struct {
-    BH1750_mode mode;
-    uint8_t mt_reg;
-} BH1750;
-
-BH1750* bh1750_alloc();
-void bh1750_free(BH1750* bh1750);
-
-BH1750_STATUS bh1750_init(BH1750* bh1750);
-BH1750_STATUS bh1750_reset(BH1750* bh1750);
-BH1750_STATUS bh1750_set_power_state(BH1750* bh1750, uint8_t PowerOn);
-BH1750_STATUS bh1750_set_mt_reg(BH1750* bh1750, uint8_t MTreg);
-BH1750_STATUS bh1750_set_mode(BH1750* bh1750, BH1750_mode Mode);
-BH1750_STATUS bh1750_trigger_manual_conversion(BH1750* bh1750);
-BH1750_STATUS bh1750_read_light(BH1750* bh1750, float* Result);
+BH1750_STATUS bh1750_init();
+BH1750_STATUS bh1750_reset();
+BH1750_STATUS bh1750_set_power_state(uint8_t PowerOn);
+BH1750_STATUS bh1750_set_mt_reg(uint8_t MTreg);
+BH1750_STATUS bh1750_set_mode(BH1750_mode Mode);
+BH1750_STATUS bh1750_trigger_manual_conversion();
+BH1750_STATUS bh1750_read_light(float* Result);
 
 #endif /* BH1750_H_ */

@@ -11,24 +11,15 @@
 
 #include "BH1750.h"
 
-BH1750* bh1750_alloc() {
-    BH1750* bh1750 = malloc(sizeof(BH1750));
-    bh1750->mode = BH1750_DEFAULT_MODE;
-    bh1750->mt_reg = BH1750_DEFAULT_MTREG;
-    return bh1750;
-}
-
-void bh1750_free(BH1750* bh1750) {
-    furi_assert(bh1750);
-    free(bh1750);
-}
+BH1750_mode bh1750_mode = BH1750_DEFAULT_MODE; // Current sensor mode
+uint8_t bh1750_mt_reg = BH1750_DEFAULT_MTREG; // Current MT register value
 
 //
 //	Initialization.
 //
-BH1750_STATUS bh1750_init(BH1750* bh1750) {
-    if(BH1750_OK == bh1750_reset(bh1750)) {
-        if(BH1750_OK == bh1750_set_mt_reg(bh1750, BH1750_DEFAULT_MTREG)) // Set default value;
+BH1750_STATUS bh1750_init() {
+    if(BH1750_OK == bh1750_reset()) {
+        if(BH1750_OK == bh1750_set_mt_reg(BH1750_DEFAULT_MTREG)) // Set default value;
             return BH1750_OK;
     }
     return BH1750_ERROR;
@@ -37,8 +28,7 @@ BH1750_STATUS bh1750_init(BH1750* bh1750) {
 //
 //	Reset all registers to default value.
 //
-BH1750_STATUS bh1750_reset(BH1750* bh1750) {
-    UNUSED(bh1750);
+BH1750_STATUS bh1750_reset() {
     uint8_t command = 0x07;
     bool status;
 
@@ -58,8 +48,7 @@ BH1750_STATUS bh1750_reset(BH1750* bh1750) {
 //	0 - sleep, low power.
 //	1 - running.
 //
-BH1750_STATUS bh1750_set_power_state(BH1750* bh1750, uint8_t PowerOn) {
-    UNUSED(bh1750);
+BH1750_STATUS bh1750_set_power_state(uint8_t PowerOn) {
     PowerOn = (PowerOn ? 1 : 0);
     bool status;
 
@@ -77,7 +66,7 @@ BH1750_STATUS bh1750_set_power_state(BH1750* bh1750, uint8_t PowerOn) {
 //
 //	Set the mode of converting. Look into bh1750_mode enum.
 //
-BH1750_STATUS bh1750_set_mode(BH1750* bh1750, BH1750_mode mode) {
+BH1750_STATUS bh1750_set_mode(BH1750_mode mode) {
     if(!((mode >> 4) || (mode >> 5))) {
         return BH1750_ERROR;
     }
@@ -88,7 +77,7 @@ BH1750_STATUS bh1750_set_mode(BH1750* bh1750, BH1750_mode mode) {
 
     bool status;
 
-    bh1750->mode = mode;
+    bh1750_mode = mode;
 
     furi_hal_i2c_acquire(I2C_BUS);
     status = furi_hal_i2c_tx(I2C_BUS, BH1750_ADDRESS, &mode, 1, I2C_TIMEOUT);
@@ -104,12 +93,12 @@ BH1750_STATUS bh1750_set_mode(BH1750* bh1750, BH1750_mode mode) {
 //
 //	Set the Measurement Time register. It allows to increase or decrease the sensitivity.
 //
-BH1750_STATUS bh1750_set_mt_reg(BH1750* bh1750, uint8_t mt_reg) {
+BH1750_STATUS bh1750_set_mt_reg(uint8_t mt_reg) {
     if(mt_reg < 31 || mt_reg > 254) {
         return BH1750_ERROR;
     }
 
-    bh1750->mt_reg = mt_reg;
+    bh1750_mt_reg = mt_reg;
 
     uint8_t tmp[2];
     bool status;
@@ -140,8 +129,8 @@ BH1750_STATUS bh1750_set_mt_reg(BH1750* bh1750, uint8_t mt_reg) {
 //	for high resolution 120 ms. You need to wait until read the measurement value.
 //	There is no need to exit low power mode for manual conversion. It makes automatically.
 //
-BH1750_STATUS bh1750_trigger_manual_conversion(BH1750* bh1750) {
-    if(BH1750_OK == bh1750_set_mode(bh1750, bh1750->mode)) {
+BH1750_STATUS bh1750_trigger_manual_conversion() {
+    if(BH1750_OK == bh1750_set_mode(bh1750_mode)) {
         return BH1750_OK;
     }
     return BH1750_ERROR;
@@ -150,9 +139,7 @@ BH1750_STATUS bh1750_trigger_manual_conversion(BH1750* bh1750) {
 //
 //	Read the converted value and calculate the result.
 //
-BH1750_STATUS bh1750_read_light(BH1750* bh1750, float* result) {
-    uint8_t mt_reg = bh1750->mt_reg;
-    BH1750_mode mode = bh1750->mode;
+BH1750_STATUS bh1750_read_light(float* result) {
     float result_tmp;
     uint8_t rcv[2];
     bool status;
@@ -164,11 +151,11 @@ BH1750_STATUS bh1750_read_light(BH1750* bh1750, float* result) {
     if(status) {
         result_tmp = (rcv[0] << 8) | (rcv[1]);
 
-        if(mt_reg != BH1750_DEFAULT_MTREG) {
-            result_tmp *= (float)((uint8_t)BH1750_DEFAULT_MTREG / (float)mt_reg);
+        if(bh1750_mt_reg != BH1750_DEFAULT_MTREG) {
+            result_tmp *= (float)((uint8_t)BH1750_DEFAULT_MTREG / (float)bh1750_mt_reg);
         }
 
-        if(mode == ONETIME_HIGH_RES_MODE_2 || mode == CONTINUOUS_HIGH_RES_MODE_2) {
+        if(bh1750_mode == ONETIME_HIGH_RES_MODE_2 || bh1750_mode == CONTINUOUS_HIGH_RES_MODE_2) {
             result_tmp /= 2.0;
         }
 
