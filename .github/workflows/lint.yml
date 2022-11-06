@@ -1,0 +1,14 @@
+name: Check Code Format
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Check main format
+      uses: DoozyX/clang-format-lint-action@v0.14
+      with:
+        extensions: 'h,c'
