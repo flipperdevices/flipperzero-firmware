@@ -23,9 +23,10 @@ static void lightmeter_tick_event_callback(void* context) {
 LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     LightMeterApp* lightmeter = malloc(sizeof(LightMeterApp));
 
-    // send Power on command
-    uint8_t buffer[2] = {0x00};
-    send_command(COMMAND_POWER_UP, buffer);
+    // Sensor
+    bh1750_set_power_state(1);
+    bh1750_init();
+    bh1750_set_mode(ONETIME_HIGH_RES_MODE);
 
     lightmeter->config = malloc(sizeof(LightMeterConfig));
     lightmeter->config->iso = 0;
@@ -111,9 +112,7 @@ void lightmeter_app_free(LightMeterApp* lightmeter) {
         &sequence_display_backlight_enforce_auto); // set backlight back to auto
     furi_record_close(RECORD_NOTIFICATION);
 
-    uint8_t buffer[2] = {0x00};
-    // Send power down command
-    send_command(COMMAND_POWER_DOWN, buffer);
+    bh1750_set_power_state(0);
 
     free(lightmeter);
 }
@@ -129,34 +128,4 @@ int32_t lightmeter_app(void* p) {
 
 void lightmeter_app_set_config(LightMeterApp* lightmeter, LightMeterConfig* config) {
     lightmeter->config = config;
-}
-
-bool send_command(uint8_t command, uint8_t* buffer) {
-
-    uint32_t timeout = furi_ms_to_ticks(100);
-    bool ret = false;
-
-    // Acquire I2C and check if device is ready, then release
-    furi_hal_i2c_acquire(I2C_BUS);
-    if(furi_hal_i2c_is_device_ready(I2C_BUS, SENSOR_ADDRESS, timeout)) {
-        furi_hal_i2c_release(I2C_BUS);
-
-        furi_hal_i2c_acquire(I2C_BUS);
-        // Transmit given command
-        ret = furi_hal_i2c_tx(I2C_BUS, SENSOR_ADDRESS, &command, 1, timeout);
-        furi_hal_i2c_release(I2C_BUS);
-
-        if(ret) {
-            uint32_t wait_ticks = furi_ms_to_ticks(50);
-            furi_delay_tick(wait_ticks);
-
-            furi_hal_i2c_acquire(I2C_BUS);
-            // Receive data
-            ret = furi_hal_i2c_rx(I2C_BUS, SENSOR_ADDRESS, buffer, 2, timeout);
-            furi_hal_i2c_release(I2C_BUS);
-        }
-    } else
-        furi_hal_i2c_release(I2C_BUS);
-
-    return ret;
 }

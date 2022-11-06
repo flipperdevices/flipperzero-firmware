@@ -116,17 +116,18 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     canvas_clear(canvas);
 
     char str[12];
-    int lux = 0;
     float EV = 0;
     float A = 0;
     float T = 0;
     int iso = 0;
-    uint8_t buffer[2] = {0x00};
+    float lux;
+    bool response = 0;
 
-    bool response = send_command(COMMAND_MEASUREMENT, buffer);
+    if(bh1750_trigger_manual_conversion() == BH1750_OK) response = 1;
 
     if(response) {
-        lux = ((int)buffer[0] << 8) | ((int)buffer[1]);
+        furi_delay_ms(120);
+        bh1750_read_light(&lux);
         EV = lux2ev((float)lux);
         A = aperture_numbers[model->aperture];
         iso = iso_numbers[model->iso];
@@ -168,7 +169,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         canvas_draw_str_aligned(canvas, 19, 1, AlignLeft, AlignTop, str);
 
         canvas_set_font(canvas, FontSecondary);
-        snprintf(str, sizeof(str), "lx: %d", lux);
+        snprintf(str, sizeof(str), "lx: %.0f", (double)lux);
         canvas_draw_str_aligned(canvas, 87, 2, AlignLeft, AlignTop, str);
     }
 

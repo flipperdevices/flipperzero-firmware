@@ -1,0 +1,3 @@
+[submodule "lib/BH1750"]
+	path = lib/BH1750
+	url = https://github.com/oleksiikutuzov/flipperzero-BH1750

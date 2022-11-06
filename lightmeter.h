@@ -17,6 +17,7 @@
 #include <notification/notification_messages.h>
 
 #include "lightmeter_config.h"
+#include <BH1750.h>
 
 typedef struct {
     int iso;
@@ -51,4 +52,3 @@ typedef enum {
 
 void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config);
 
-bool send_command(uint8_t command, uint8_t* buffer);

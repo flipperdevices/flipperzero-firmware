@@ -4,11 +4,6 @@
 #define LM_DEVELOPED "Oleksii Kutuzov"
 #define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
 
-#define SENSOR_ADDRESS 0x23 << 1
-#define COMMAND_POWER_UP 0x01
-#define COMMAND_POWER_DOWN 0x00
-#define COMMAND_MEASUREMENT 0x20
-
 typedef enum {
     // ISO_6,
     // ISO_12,
