@@ -4,10 +4,6 @@
 #include "lightmeter_icons.h"
 #include "../../lightmeter_config.h"
 
-// I2C BUS
-#define I2C_BUS &furi_hal_i2c_handle_external
-#define I2C_TIMEOUT 3
-
 typedef struct MainView MainView;
 
 typedef void (*LightMeterMainViewButtonCallback)(void* context);

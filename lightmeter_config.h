@@ -1,5 +1,9 @@
 #pragma once
 
+#define LM_VERSION_APP "0.2"
+#define LM_DEVELOPED "Oleksii Kutuzov"
+#define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
+
 typedef enum {
     // ISO_6,
     // ISO_12,

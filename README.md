@@ -5,7 +5,7 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 > **Note**
 > FAP is still in development
 
-<img src="images/framed_gui_main.png" width="400px">  
+<img src="images/framed_gui_main.png" width="500px">  
 
 ## TODO:
 - [x] Ambient light metering
@@ -16,8 +16,8 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] Info screen
 - [x] Pinout screen
 - [x] ND correction
-- [ ] Popup window when no sensor detected
-- [ ] Flash light metering
+- [x] Popup when no sensor detected
+- [ ] Flash metering
 - [ ] Cleanup code
 - [x] Draw suitable icon
 
@@ -28,7 +28,8 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 ## Wiring
 
 ```
-C0 -> SCL
-C1 -> SDA
+VCC -> 3.3V
 GND -> GND
+SCL -> C0
+SDA -> C1
 ```
