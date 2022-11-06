@@ -1,12 +1,14 @@
-/*
- * BH1750.c
- *
- *	The MIT License.
- *  Created on: 06.11.2022
- *      Author: Oleksii Kutuzov
- *
- *	Ported from:
- *	https://github.com/lamik/Light_Sensors_STM32
+/**
+ * @file BH1750.h
+ * @author Oleksii Kutuzov (oleksii.kutuzov@icloud.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * Ported from:
+ * https://github.com/lamik/Light_Sensors_STM32
  */
 
 #include "BH1750.h"

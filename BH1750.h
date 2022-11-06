@@ -1,12 +1,14 @@
-/*
- * BH1750.h
- *
- *	The MIT License.
- *  Created on: 06.11.2022
- *      Author: Oleksii Kutuzov
- *
- *	Ported from:
- *	https://github.com/lamik/Light_Sensors_STM32
+/**
+ * @file BH1750.h
+ * @author Oleksii Kutuzov (oleksii.kutuzov@icloud.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * Ported from:
+ * https://github.com/lamik/Light_Sensors_STM32
  */
 
 #include <furi.h>
@@ -82,7 +84,7 @@ BH1750_STATUS bh1750_set_mode(BH1750_mode Mode);
 /**
  * @brief Trigger the conversion in manual modes. 
  * 
- * For a low-resolution mode, the conversion time is typically 16 ms, and for a high-resolution 
+ * @details a low-resolution mode, the conversion time is typically 16 ms, and for a high-resolution 
  * mode is 120 ms. You need to wait until reading the measurement value. There is no need 
  * to exit low-power mode for manual conversion. It makes automatically.
  * 
