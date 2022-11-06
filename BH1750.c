@@ -14,20 +14,15 @@
 BH1750_mode bh1750_mode = BH1750_DEFAULT_MODE; // Current sensor mode
 uint8_t bh1750_mt_reg = BH1750_DEFAULT_MTREG; // Current MT register value
 
-//
-//	Initialization.
-//
 BH1750_STATUS bh1750_init() {
     if(BH1750_OK == bh1750_reset()) {
-        if(BH1750_OK == bh1750_set_mt_reg(BH1750_DEFAULT_MTREG)) // Set default value;
+        if(BH1750_OK == bh1750_set_mt_reg(BH1750_DEFAULT_MTREG)) {
             return BH1750_OK;
+        }
     }
     return BH1750_ERROR;
 }
 
-//
-//	Reset all registers to default value.
-//
 BH1750_STATUS bh1750_reset() {
     uint8_t command = 0x07;
     bool status;
@@ -43,11 +38,6 @@ BH1750_STATUS bh1750_reset() {
     return BH1750_ERROR;
 }
 
-//
-//	Set the power state.
-//	0 - sleep, low power.
-//	1 - running.
-//
 BH1750_STATUS bh1750_set_power_state(uint8_t PowerOn) {
     PowerOn = (PowerOn ? 1 : 0);
     bool status;
@@ -63,9 +53,6 @@ BH1750_STATUS bh1750_set_power_state(uint8_t PowerOn) {
     return BH1750_ERROR;
 }
 
-//
-//	Set the mode of converting. Look into bh1750_mode enum.
-//
 BH1750_STATUS bh1750_set_mode(BH1750_mode mode) {
     if(!((mode >> 4) || (mode >> 5))) {
         return BH1750_ERROR;
@@ -90,9 +77,6 @@ BH1750_STATUS bh1750_set_mode(BH1750_mode mode) {
     return BH1750_ERROR;
 }
 
-//
-//	Set the Measurement Time register. It allows to increase or decrease the sensitivity.
-//
 BH1750_STATUS bh1750_set_mt_reg(uint8_t mt_reg) {
     if(mt_reg < 31 || mt_reg > 254) {
         return BH1750_ERROR;
@@ -123,12 +107,6 @@ BH1750_STATUS bh1750_set_mt_reg(uint8_t mt_reg) {
     return BH1750_ERROR;
 }
 
-//
-//	Trigger the conversion in manual modes.
-//	For low resolution conversion time is typical 16 ms,
-//	for high resolution 120 ms. You need to wait until read the measurement value.
-//	There is no need to exit low power mode for manual conversion. It makes automatically.
-//
 BH1750_STATUS bh1750_trigger_manual_conversion() {
     if(BH1750_OK == bh1750_set_mode(bh1750_mode)) {
         return BH1750_OK;
@@ -136,9 +114,6 @@ BH1750_STATUS bh1750_trigger_manual_conversion() {
     return BH1750_ERROR;
 }
 
-//
-//	Read the converted value and calculate the result.
-//
 BH1750_STATUS bh1750_read_light(float* result) {
     float result_tmp;
     uint8_t rcv[2];

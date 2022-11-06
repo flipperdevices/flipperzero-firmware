@@ -40,12 +40,62 @@ typedef enum {
     ONETIME_LOW_RES_MODE = 0x23
 } BH1750_mode;
 
+/**
+ * @brief Initialize the sensor. Sends the reset command and sets the measurement register to the default value.
+ * 
+ * @return BH1750_STATUS
+ */
 BH1750_STATUS bh1750_init();
+
+/**
+ * @brief Reset all registers to the default value.
+ * 
+ * @return BH1750_STATUS 
+ */
 BH1750_STATUS bh1750_reset();
+
+/**
+ * @brief Sets the power state. 1 - running; 0 - sleep, low power. 
+ * 
+ * @param PowerOn sensor state.
+ * @return BH1750_STATUS 
+ */
 BH1750_STATUS bh1750_set_power_state(uint8_t PowerOn);
+
+/**
+ * @brief Set the Measurement Time register. It allows to increase or decrease the sensitivity.
+ * 
+ * @param MTreg value from 31 to 254, defaults to 69.
+ * 
+ * @return BH1750_STATUS 
+ */
 BH1750_STATUS bh1750_set_mt_reg(uint8_t MTreg);
+
+/**
+ * @brief Set the mode of converting. Look into the bh1750_mode enum.
+ * 
+ * @param Mode mode enumerator
+ * @return BH1750_STATUS 
+ */
 BH1750_STATUS bh1750_set_mode(BH1750_mode Mode);
+
+/**
+ * @brief Trigger the conversion in manual modes. 
+ * 
+ * For a low-resolution mode, the conversion time is typically 16 ms, and for a high-resolution 
+ * mode is 120 ms. You need to wait until reading the measurement value. There is no need 
+ * to exit low-power mode for manual conversion. It makes automatically.
+ * 
+ * @return BH1750_STATUS 
+ */
 BH1750_STATUS bh1750_trigger_manual_conversion();
+
+/**
+ * @brief Read the converted value and calculate the result.
+ * 
+ * @param Result stores received value to this variable.
+ * @return BH1750_STATUS 
+ */
 BH1750_STATUS bh1750_read_light(float* Result);
 
 #endif /* BH1750_H_ */
