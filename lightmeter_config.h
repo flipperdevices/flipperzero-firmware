@@ -8,7 +8,7 @@
 #define DEFAULT_ISO ISO_100
 #define DEFAULT_ND ND_0
 #define DEFAULT_APERTURE AP_2_8
-#define DEFAULT_TIME TIME_125
+#define DEFAULT_SPEED SPEED_125
 #define DEFAULT_DOME WITHOUT_DOME
 
 typedef enum {
@@ -70,28 +70,28 @@ typedef enum {
 } LightMeterApertureNumbers;
 
 typedef enum {
-    TIME_8000,
-    TIME_4000,
-    TIME_2000,
-    TIME_1000,
-    TIME_500,
-    TIME_250,
-    TIME_125,
-    TIME_60,
-    TIME_30,
-    TIME_15,
-    TIME_8,
-    TIME_4,
-    TIME_2,
-    TIME_1S,
-    TIME_2S,
-    TIME_4S,
-    TIME_8S,
-    TIME_15S,
-    TIME_30S,
+    SPEED_8000,
+    SPEED_4000,
+    SPEED_2000,
+    SPEED_1000,
+    SPEED_500,
+    SPEED_250,
+    SPEED_125,
+    SPEED_60,
+    SPEED_30,
+    SPEED_15,
+    SPEED_8,
+    SPEED_4,
+    SPEED_2,
+    SPEED_1S,
+    SPEED_2S,
+    SPEED_4S,
+    SPEED_8S,
+    SPEED_15S,
+    SPEED_30S,
 
-    TIME_NUM,
-} LightMeterTimeNumbers;
+    SPEED_NUM,
+} LightMeterSpeedNumbers;
 
 typedef enum {
     WITHOUT_DOME,
