@@ -490,7 +490,7 @@ void furi_hal_subghz_stop_async_rx() {
 
 #define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
 #define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
-#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 333
+#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999 //333
 
 typedef struct {
     uint32_t* buffer;
@@ -510,7 +510,9 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
 
         if(level_duration_is_wait(ld)) {
-            return;
+            *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
+            buffer++;
+            samples--;
         } else if(level_duration_is_reset(ld)) {
             // One more even sample required to end at low level
             if(is_odd) {

@@ -142,7 +142,6 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
                     //to stop DMA correctly
                     subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
                     subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
-
                     break;
                 }
             } else {
