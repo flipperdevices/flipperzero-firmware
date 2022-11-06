@@ -64,7 +64,7 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     main_view_set_iso(app->main_view, app->config->iso);
     main_view_set_nd(app->main_view, app->config->nd);
     main_view_set_aperture(app->main_view, app->config->aperture);
-    main_view_set_speed(app->main_view, DEFAULT_TIME);
+    main_view_set_speed(app->main_view, DEFAULT_SPEED);
     main_view_set_dome(app->main_view, app->config->dome);
 
     // Variable item list

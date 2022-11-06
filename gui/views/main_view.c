@@ -59,14 +59,14 @@ static const float aperture_numbers[] = {
     [AP_128] = 128,
 };
 
-static const float time_numbers[] = {
-    [TIME_8000] = 1.0 / 8000, [TIME_4000] = 1.0 / 4000, [TIME_2000] = 1.0 / 2000,
-    [TIME_1000] = 1.0 / 1000, [TIME_500] = 1.0 / 500,   [TIME_250] = 1.0 / 250,
-    [TIME_125] = 1.0 / 125,   [TIME_60] = 1.0 / 60,     [TIME_30] = 1.0 / 30,
-    [TIME_15] = 1.0 / 15,     [TIME_8] = 1.0 / 8,       [TIME_4] = 1.0 / 4,
-    [TIME_2] = 1.0 / 2,       [TIME_1S] = 1.0,          [TIME_2S] = 2.0,
-    [TIME_4S] = 4.0,          [TIME_8S] = 8.0,          [TIME_15S] = 15.0,
-    [TIME_30S] = 30.0,
+static const float speed_numbers[] = {
+    [SPEED_8000] = 1.0 / 8000, [SPEED_4000] = 1.0 / 4000, [SPEED_2000] = 1.0 / 2000,
+    [SPEED_1000] = 1.0 / 1000, [SPEED_500] = 1.0 / 500,   [SPEED_250] = 1.0 / 250,
+    [SPEED_125] = 1.0 / 125,   [SPEED_60] = 1.0 / 60,     [SPEED_30] = 1.0 / 30,
+    [SPEED_15] = 1.0 / 15,     [SPEED_8] = 1.0 / 8,       [SPEED_4] = 1.0 / 4,
+    [SPEED_2] = 1.0 / 2,       [SPEED_1S] = 1.0,          [SPEED_2S] = 2.0,
+    [SPEED_4S] = 4.0,          [SPEED_8S] = 8.0,          [SPEED_15S] = 15.0,
+    [SPEED_30S] = 30.0,
 };
 
 struct MainView {
@@ -77,7 +77,7 @@ struct MainView {
 
 typedef enum {
     FIXED_APERTURE,
-    FIXED_TIME,
+    FIXED_SPEED,
 
     MODES_SIZE
 } MainViewMode;
@@ -132,7 +132,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         EV = lux2ev((float)lux);
         A = aperture_numbers[model->aperture];
         iso = iso_numbers[model->iso];
-        T = time_numbers[model->speed];
+        T = speed_numbers[model->speed];
 
         float ISO_ND = 0;
         if(model->nd > 0)
@@ -143,7 +143,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         if(lux > 0) {
             if(model->current_mode == FIXED_APERTURE) {
                 T = 100 * pow(A, 2) / (double)ISO_ND / pow(2, EV);
-            } else if(model->current_mode == FIXED_TIME) {
+            } else if(model->current_mode == FIXED_SPEED) {
                 A = sqrt(pow(2, EV) * (double)ISO_ND * (double)T / 100);
             }
         } else {
@@ -208,7 +208,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
         }
         canvas_draw_str_aligned(canvas, 27, 34, AlignLeft, AlignTop, str);
 
-    } else if(model->current_mode == FIXED_TIME) {
+    } else if(model->current_mode == FIXED_SPEED) {
         canvas_set_font(canvas, FontBigNumbers);
 
         // draw f icon
@@ -229,10 +229,10 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
         // draw T number
         if(response) {
-            if(model->speed < TIME_1S) {
-                snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)time_numbers[model->speed]);
+            if(model->speed < SPEED_1S) {
+                snprintf(str, sizeof(str), ":1/%.0f", 1 / (double)speed_numbers[model->speed]);
             } else {
-                snprintf(str, sizeof(str), ":%.0f", (double)time_numbers[model->speed]);
+                snprintf(str, sizeof(str), ":%.0f", (double)speed_numbers[model->speed]);
             }
         } else {
             snprintf(str, sizeof(str), " ---");
@@ -263,7 +263,7 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
 
     // draw mode indicator
     switch(model->current_mode) {
-    case FIXED_TIME:
+    case FIXED_SPEED:
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 3, 36, AlignLeft, AlignTop, "*");
         break;
@@ -289,8 +289,8 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                         if(model->aperture < AP_NUM - 1) {
                             model->aperture++;
                         }
-                    } else if(model->current_mode == FIXED_TIME) {
-                        if(model->speed < TIME_NUM - 1) {
+                    } else if(model->current_mode == FIXED_SPEED) {
+                        if(model->speed < SPEED_NUM - 1) {
                             model->speed++;
                         }
                     }
@@ -299,7 +299,7 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                         if(model->aperture > 0) {
                             model->aperture--;
                         }
-                    } else if(model->current_mode == FIXED_TIME) {
+                    } else if(model->current_mode == FIXED_SPEED) {
                         if(model->speed > 0) {
                             model->speed--;
                         }
@@ -307,10 +307,10 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
                 } else if(event->key == InputKeyLeft) {
                 } else if(event->key == InputKeyRight) {
                 } else if(event->key == InputKeyOk) {
-                    if(model->current_mode == FIXED_TIME) {
+                    if(model->current_mode == FIXED_SPEED) {
                         model->current_mode = FIXED_APERTURE;
                     } else if(model->current_mode == FIXED_APERTURE) {
-                        model->current_mode = FIXED_TIME;
+                        model->current_mode = FIXED_SPEED;
                     }
                 } else if(event->key == InputKeyBack) {
                 }

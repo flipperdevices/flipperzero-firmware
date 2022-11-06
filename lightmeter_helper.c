@@ -20,13 +20,13 @@ static const float aperture_numbers[] = {
 };
 
 static const float time_numbers[] = {
-    [TIME_8000] = 1.0 / 8000, [TIME_4000] = 1.0 / 4000, [TIME_2000] = 1.0 / 2000,
-    [TIME_1000] = 1.0 / 1000, [TIME_500] = 1.0 / 500,   [TIME_250] = 1.0 / 250,
-    [TIME_125] = 1.0 / 125,   [TIME_60] = 1.0 / 60,     [TIME_30] = 1.0 / 30,
-    [TIME_15] = 1.0 / 15,     [TIME_8] = 1.0 / 8,       [TIME_4] = 1.0 / 4,
-    [TIME_2] = 1.0 / 2,       [TIME_1S] = 1.0,          [TIME_2S] = 2.0,
-    [TIME_4S] = 4.0,          [TIME_8S] = 8.0,          [TIME_15S] = 15.0,
-    [TIME_30S] = 30.0,
+    [SPEED_8000] = 1.0 / 8000, [SPEED_4000] = 1.0 / 4000, [SPEED_2000] = 1.0 / 2000,
+    [SPEED_1000] = 1.0 / 1000, [SPEED_500] = 1.0 / 500,   [SPEED_250] = 1.0 / 250,
+    [SPEED_125] = 1.0 / 125,   [SPEED_60] = 1.0 / 60,     [SPEED_30] = 1.0 / 30,
+    [SPEED_15] = 1.0 / 15,     [SPEED_8] = 1.0 / 8,       [SPEED_4] = 1.0 / 4,
+    [SPEED_2] = 1.0 / 2,       [SPEED_1S] = 1.0,          [SPEED_2S] = 2.0,
+    [SPEED_4S] = 4.0,          [SPEED_8S] = 8.0,          [SPEED_15S] = 15.0,
+    [SPEED_30S] = 30.0,
 };
 
 float lux2ev(float lux) {
@@ -56,7 +56,7 @@ float normalizeAperture(float a) {
 }
 
 float normalizeTime(float a) {
-    for(int i = 0; i < TIME_NUM; i++) {
+    for(int i = 0; i < SPEED_NUM; i++) {
         float a1 = time_numbers[i];
         float a2 = time_numbers[i + 1];
 
