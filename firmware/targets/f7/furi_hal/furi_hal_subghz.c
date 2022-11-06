@@ -513,6 +513,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
             buffer++;
             samples--;
+            continue;
         } else if(level_duration_is_reset(ld)) {
             // One more even sample required to end at low level
             if(is_odd) {
