@@ -32,6 +32,13 @@ bool unitemp_oneWire_sensorDeInit(OneWireSensor* sensor) {
     return true;
 }
 
+bool unitemp_oneWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
+    if(sensor == NULL || gpio == NULL) return false;
+    OneWireSensor* instance = sensor->instance;
+    instance->gpio = gpio;
+    return true;
+}
+
 UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
     //Проверка на допустимость опроса датчика

@@ -9,34 +9,6 @@
 Unitemp* app;
 
 /**
- * @brief Функция загрузки датчиков с SD-карты
- * 
- * @return true Загрузка успешная
- * @return false Произошла ошибка
- */
-bool unitemp_loadSensors() {
-    //Сброс количества датчиков
-    app->sensors_count = 0;
-    //Очистка памяти датчиков
-    memset(app->sensors, 0, sizeof(app->sensors));
-
-    //Типа загружен датчик DHT11 на порте 10
-    app->sensors[app->sensors_count] = unitemp_sensor_alloc("DHT11", DHT11);
-
-    ((OneWireSensor*)(app->sensors[app->sensors_count]->instance))->gpio =
-        unitemp_getGPIOFormInt(10);
-    app->sensors_count++;
-
-    //Типа загружен датчик DHT21 на порте 2
-    app->sensors[app->sensors_count] = unitemp_sensor_alloc("DHT21", DHT21);
-    ((OneWireSensor*)(app->sensors[app->sensors_count]->instance))->gpio =
-        unitemp_getGPIOFormInt(2);
-    app->sensors_count++;
-
-    return true;
-}
-
-/**
  * @brief Сохранение настроек на SD-карту
  * 
  * @return true Если сохранение прошло успешно
@@ -255,7 +227,7 @@ int32_t unitemp_app() {
     //Загрузка настроек из SD-карты
     unitemp_loadSettings();
     //Загрузка датчиков из SD-карты
-    unitemp_loadSensors();
+    unitemp_sensors_load();
     //Инициализация датчиков
     unitemp_sensors_init();
 

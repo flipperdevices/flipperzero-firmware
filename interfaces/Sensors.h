@@ -80,7 +80,7 @@ const char* unitemp_getSensorTypeName(SensorType st);
  * @param name Номер порта на корпусе FZ
  * @return Указатель на GPIO при успехе, NULL при ошибке
  */
-const GPIO* unitemp_getGPIOFormInt(uint8_t name);
+const GPIO* unitemp_GPIO_getFromInt(uint8_t name);
 
 /**
  * @brief Выделение памяти под датчик
@@ -112,5 +112,12 @@ bool unitemp_sensors_deInit(void);
  * @return Статус опроса датчика
  */
 UnitempStatus unitemp_sensor_getValues(Sensor* sensor);
+
+/**
+ * @brief Функция загрузки датчиков с SD-карты
+ * 
+ * @return Истина если загрузка прошла успешно
+ */
+bool unitemp_sensors_load();
 
 #endif

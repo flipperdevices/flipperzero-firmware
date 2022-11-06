@@ -51,7 +51,7 @@ const char* unitemp_getSensorTypeName(SensorType st) {
     return sensorNames[st];
 }
 
-const GPIO* unitemp_getGPIOFormInt(uint8_t name) {
+const GPIO* unitemp_GPIO_getFromInt(uint8_t name) {
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         if(GPIOList[i].num == name) {
             return &GPIOList[i];
@@ -60,13 +60,114 @@ const GPIO* unitemp_getGPIOFormInt(uint8_t name) {
     return NULL;
 }
 
+bool unitemp_sensors_load() {
+    FURI_LOG_D(APP_NAME, "Loading sensors...");
+    app->sensors_count = 0;
+    memset(app->sensors, 0, sizeof(app->sensors));
+
+    //Выделение памяти на поток
+    app->file_stream = file_stream_alloc(app->storage);
+
+    //Переменная пути к файлу
+    char filepath[sizeof(APP_PATH_FOLDER) + sizeof(APP_FILENAME_SENSORS)] = {0};
+    //Составление пути к файлу
+    strcpy(filepath, APP_PATH_FOLDER);
+    strcat(filepath, "/");
+    strcat(filepath, APP_FILENAME_SENSORS);
+
+    //Открытие потока к файлу с датчиками
+    if(!file_stream_open(app->file_stream, filepath, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+        if(file_stream_get_error(app->file_stream) == FSE_NOT_EXIST) {
+            FURI_LOG_W(APP_NAME, "Missing sensors file");
+            //Закрытие потока и освобождение памяти
+            file_stream_close(app->file_stream);
+            stream_free(app->file_stream);
+            return false;
+        } else {
+            FURI_LOG_E(
+                APP_NAME,
+                "An error occurred while loading the sensors file: %d",
+                file_stream_get_error(app->file_stream));
+            //Закрытие потока и освобождение памяти
+            file_stream_close(app->file_stream);
+            stream_free(app->file_stream);
+            return false;
+        }
+    }
+
+    //Вычисление размера файла
+    size_t file_size = stream_size(app->file_stream);
+    FURI_LOG_D(APP_NAME, "Sensors file size: %d bytes", file_size);
+    //Если файл пустой, то:
+    if(file_size == (size_t)0) {
+        FURI_LOG_W(APP_NAME, "Sensors file is empty");
+        //Закрытие потока и освобождение памяти
+        file_stream_close(app->file_stream);
+        stream_free(app->file_stream);
+        return false;
+    }
+    //Выделение памяти под загрузку файла
+    uint8_t* file_buf = malloc(file_size);
+    //Опустошение буфера файла
+    memset(file_buf, 0, file_size);
+    //Загрузка файла
+    if(stream_read(app->file_stream, file_buf, file_size) != file_size) {
+        //Выход при ошибке чтения
+        FURI_LOG_E(APP_NAME, "Error reading sensors file");
+        //Закрытие потока и освобождение памяти
+        file_stream_close(app->file_stream);
+        stream_free(app->file_stream);
+        free(file_buf);
+        return false;
+    }
+
+    //Построчное чтение файла
+    char* line = strtok((char*)file_buf, "\n");
+    while(line != NULL) {
+        char name[11] = {0};
+        int type = 255, otherValue = 255;
+        sscanf(line, "%s %d %d", name, &type, &otherValue);
+        FURI_LOG_D(APP_NAME, "%s %d %d", name, type, otherValue);
+        //Проверка типа датчика
+        if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
+            app->sensors[app->sensors_count] = unitemp_sensor_alloc(name, type);
+            if(app->sensors[app->sensors_count]->interface == ONE_WIRE) {
+                if(unitemp_GPIO_getFromInt(otherValue) != NULL) {
+                    unitemp_oneWire_sensorSetGPIO(
+                        app->sensors[app->sensors_count], unitemp_GPIO_getFromInt(otherValue));
+                    //Сохранение датчика если всё ок
+                    app->sensors_count++;
+                }
+            }
+        }
+        line = strtok((char*)NULL, "\n");
+    }
+    free(file_buf);
+    file_stream_close(app->file_stream);
+    stream_free(app->file_stream);
+
+    //Применение настроек
+    if(app->settings.infinityBacklight) {
+        //Постоянное свечение подсветки
+        notification_message(app->notifications, &sequence_display_backlight_enforce_on);
+    } else {
+        //Автоматическое управление
+        notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
+    }
+    app->settings.lastOTGState = furi_hal_power_is_otg_enabled();
+
+    FURI_LOG_I(APP_NAME, "Settings have been successfully loaded");
+    return true;
+}
+
 Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));
-    sensor->name = name;
+    if(sensor == NULL) return false;
+    sensor->name = malloc(11);
+    strcpy(sensor->name, name);
     //Выделение памяти под инстанс DHT11, DHT12 (1W), DHT21, DHT22, AM2320 (1W)
     if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
-        if(sensor == NULL) return false;
         OneWireSensor* instance = malloc(sizeof(OneWireSensor));
         instance->interface = ONE_WIRE;
         instance->lastPollingTime = 0;
@@ -109,12 +210,9 @@ bool unitemp_sensors_deInit(void) {
 
     //Перебор датчиков из списка
     for(size_t i = 0; i < app->sensors_count; i++) {
+        free(app->sensors[i]);
         if(app->sensors[i]->interface == ONE_WIRE) {
             if(!unitemp_oneWire_sensorDeInit(app->sensors[i]->instance)) {
-                FURI_LOG_W(
-                    APP_NAME,
-                    "An error occurred during sensor initialization %s",
-                    app->sensors[i]->name);
                 result = false;
             }
         }

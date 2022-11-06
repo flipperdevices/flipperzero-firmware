@@ -37,4 +37,13 @@ bool unitemp_oneWire_sensorDeInit(OneWireSensor* sensor);
  */
 UnitempStatus unitemp_oneWire_getData(Sensor* sensor);
 
+/**
+ * @brief Установить порт датчика
+ * 
+ * @param sensor Указатель на датчик
+ * @param gpio Устанавливаемый порт
+ * @return Истина если всё ок
+ */
+bool unitemp_oneWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio);
+
 #endif
