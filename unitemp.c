@@ -259,10 +259,12 @@ int32_t unitemp_app() {
     while(1) {
         FURI_LOG_D(APP_NAME, "Sensors values:");
         for(uint8_t i = 0; i < app->sensors_count; i++) {
+            UnitempStatus s = unitemp_sensor_getValues(app->sensors[i]);
             FURI_LOG_D(
                 APP_NAME,
-                "%s: %2.1f*C/%d%%",
+                "%s (%d): %2.1f*C/%d%%",
                 app->sensors[i]->name,
+                s,
                 (double)app->sensors[i]->temp,
                 (uint8_t)app->sensors[i]->hum);
         }

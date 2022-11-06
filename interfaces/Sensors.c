@@ -71,7 +71,7 @@ Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
         instance->interface = ONE_WIRE;
         instance->lastPollingTime = 0;
         sensor->instance = instance;
-        sensor->interface = ONE_WIRE;
+        sensor->type = st;
     }
     return sensor;
 }
@@ -120,4 +120,13 @@ bool unitemp_sensors_deInit(void) {
         }
     }
     return result;
+}
+
+UnitempStatus unitemp_sensor_getValues(Sensor* sensor) {
+    if(sensor == NULL) return UT_ERROR;
+
+    if(sensor->interface == ONE_WIRE) {
+        return unitemp_oneWire_getData(sensor);
+    }
+    return UT_ERROR;
 }

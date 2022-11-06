@@ -33,7 +33,7 @@ typedef enum {
 } SensorType;
 
 //Типы подключения датчиков
-typedef enum {
+typedef enum Interface {
     ONE_WIRE, //Собственный однопроводной протокол датчиков DHTXX и AM23XX
     DALLAS, //Однопроводной протокол Dallas
     I2C,
@@ -43,14 +43,14 @@ typedef enum {
 } Interface;
 
 //Порт ввода/вывода Flipper Zero
-typedef struct {
+typedef struct GPIO {
     const uint8_t num;
     const char* name;
     const GpioPin* pin;
 } GPIO;
 
 //Датчик
-typedef struct {
+typedef struct Sensor {
     //Имя датчика
     char* name;
     //Температура
@@ -104,5 +104,13 @@ bool unitemp_sensors_init(void);
  * @return Истина если всё прошло успешно
  */
 bool unitemp_sensors_deInit(void);
+
+/**
+ * @brief Получение данных указанного датчика
+ * 
+ * @param sensor Указатель на датчик
+ * @return Статус опроса датчика
+ */
+UnitempStatus unitemp_sensor_getValues(Sensor* sensor);
 
 #endif

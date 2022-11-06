@@ -66,6 +66,9 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
+            //Запись неправильных значений
+            sensor->hum = -128.0f;
+            sensor->temp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -78,6 +81,9 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
+            //Запись неправильных значений
+            sensor->hum = -128.0f;
+            sensor->temp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -89,6 +95,9 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
+            //Запись неправильных значений
+            sensor->hum = -128.0f;
+            sensor->temp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -101,6 +110,9 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
+            //Запись неправильных значений
+            sensor->hum = -128.0f;
+            sensor->temp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -124,6 +136,9 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
 
     //Проверка контрольной суммы
     if((uint8_t)(data[0] + data[1] + data[2] + data[3]) != data[4]) {
+        //Запись неправильных значений
+        sensor->hum = -128.0f;
+        sensor->temp = -128.0f;
         //Если контрольная сумма не совпала, возврат ошибки
         return UT_BADCRC;
     }
@@ -151,13 +166,13 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
 
     //DHT21, DHT22, AM2320
     if(sensor->type == DHT21 || sensor->type == DHT22 || sensor->type == AM2320_1W) {
-        sensor->hum = (float)(((uint16_t)data[0] << 8) | data[1]) * 0.1f;
+        sensor->hum = (float)(((uint16_t)data[0] << 8) | data[1]) / 10;
         //Проверка на отрицательность температуры
         if(!(data[2] & (1 << 7))) {
-            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) * 0.1f;
+            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10;
         } else {
             data[2] &= ~(1 << 7);
-            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) * -0.1f;
+            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10 * -1;
         }
     }
 
