@@ -32,7 +32,8 @@
 #include <lfrfid/lfrfid_worker.h>
 
 #include <lfrfid/scenes/lfrfid_scene.h>
-#include <lfrfid_icons.h>
+#include <assets_icons.h>
+// #include <lfrfid_icons.h>
 
 #define LFRFID_KEY_NAME_SIZE 22
 #define LFRFID_TEXT_STORE_SIZE 40
