@@ -1,6 +1,6 @@
 # flipperzero-lightmeter 
 
-[![Build FAP](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build_fap.yml/badge.svg?branch=main)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build_fap.yml)
+[![Build FAP](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build_fap.yml/badge.svg?branch=main)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build_fap.yml) [![Check Code Format](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/lint.yml)
 
 <img src="images/framed_gui_main.png" width="500px">  
 
