@@ -46,4 +46,12 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor);
  */
 bool unitemp_oneWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio);
 
+/**
+ * @brief Получить порт датчика
+ * 
+ * @param sensor Указатель на датчик
+ * @return Указатель на GPIO
+ */
+const GPIO* unitemp_oneWire_sensorGetGPIO(Sensor* sensor);
+
 #endif

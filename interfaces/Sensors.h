@@ -83,6 +83,14 @@ const char* unitemp_getSensorTypeName(SensorType st);
 const GPIO* unitemp_GPIO_getFromInt(uint8_t name);
 
 /**
+ * @brief Конвертация GPIO в номер на корпусе FZ
+ * 
+ * @param gpio Указатель на порт
+ * @return Номер порта на корпусе FZ
+ */
+uint8_t unitemp_GPIO_toInt(const GpioPin* gpio);
+
+/**
  * @brief Выделение памяти под датчик
  * 
  * @param name Имя датчика
@@ -119,5 +127,12 @@ UnitempStatus unitemp_sensor_getValues(Sensor* sensor);
  * @return Истина если загрузка прошла успешно
  */
 bool unitemp_sensors_load();
+
+/**
+ * @brief Сохранение настроек на SD-карту
+ * 
+ * @return Истина если сохранение прошло успешно
+ */
+bool unitemp_sensors_save(void);
 
 #endif

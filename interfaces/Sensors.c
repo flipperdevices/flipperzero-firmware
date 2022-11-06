@@ -60,6 +60,16 @@ const GPIO* unitemp_GPIO_getFromInt(uint8_t name) {
     return NULL;
 }
 
+uint8_t unitemp_GPIO_toInt(const GpioPin* gpio) {
+    if(gpio == NULL) return 255;
+    for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
+        if(GPIOList[i].pin->pin == gpio->pin && GPIOList[i].pin->port == gpio->port) {
+            return GPIOList[i].num;
+        }
+    }
+    return 255;
+}
+
 bool unitemp_sensors_load() {
     FURI_LOG_D(APP_NAME, "Loading sensors...");
     app->sensors_count = 0;
@@ -127,6 +137,8 @@ bool unitemp_sensors_load() {
         char name[11] = {0};
         int type = 255, otherValue = 255;
         sscanf(line, "%s %d %d", name, &type, &otherValue);
+        //Ограничение длины имени
+        name[10] = '\0';
         FURI_LOG_D(APP_NAME, "%s %d %d", name, type, otherValue);
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
@@ -160,13 +172,59 @@ bool unitemp_sensors_load() {
     return true;
 }
 
+bool unitemp_sensors_save(void) {
+    FURI_LOG_D(APP_NAME, "Saving sensors...");
+
+    //Выделение памяти для потока
+    app->file_stream = file_stream_alloc(app->storage);
+
+    //Переменная пути к файлу
+    char filepath[sizeof(APP_PATH_FOLDER) + sizeof(APP_FILENAME_SENSORS)] = {0};
+    //Составление пути к файлу
+    strcpy(filepath, APP_PATH_FOLDER);
+    strcat(filepath, "/");
+    strcat(filepath, APP_FILENAME_SENSORS);
+    //Создание папки плагина
+    storage_common_mkdir(app->storage, APP_PATH_FOLDER);
+    //Открытие потока
+    if(!file_stream_open(app->file_stream, filepath, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+        FURI_LOG_E(
+            APP_NAME,
+            "An error occurred while saving the sensors file: %d",
+            file_stream_get_error(app->file_stream));
+        //Закрытие потока и освобождение памяти
+        file_stream_close(app->file_stream);
+        stream_free(app->file_stream);
+        return false;
+    }
+
+    //Сохранение датчиков
+    for(size_t i = 0; i < app->sensors_count; i++) {
+        if(app->sensors[i]->interface == ONE_WIRE) {
+            stream_write_format(
+                app->file_stream,
+                "%s %d %d\n",
+                app->sensors[i]->name,
+                app->sensors[i]->type,
+                unitemp_GPIO_toInt(unitemp_oneWire_sensorGetGPIO(app->sensors[i])->pin));
+        }
+    }
+
+    //Закрытие потока и освобождение памяти
+    file_stream_close(app->file_stream);
+    stream_free(app->file_stream);
+
+    FURI_LOG_I(APP_NAME, "Sensors have been successfully saved");
+    return true;
+}
+
 Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));
     if(sensor == NULL) return false;
     sensor->name = malloc(11);
     strcpy(sensor->name, name);
-    //Выделение памяти под инстанс DHT11, DHT12 (1W), DHT21, DHT22, AM2320 (1W)
+    //Выделение памяти под инстанс датчиков One Wire
     if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
         OneWireSensor* instance = malloc(sizeof(OneWireSensor));
         instance->interface = ONE_WIRE;

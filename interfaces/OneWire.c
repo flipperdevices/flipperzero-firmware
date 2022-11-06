@@ -38,6 +38,11 @@ bool unitemp_oneWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
     instance->gpio = gpio;
     return true;
 }
+const GPIO* unitemp_oneWire_sensorGetGPIO(Sensor* sensor) {
+    if(sensor == NULL) return NULL;
+    OneWireSensor* instance = sensor->instance;
+    return instance->gpio;
+}
 
 UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
