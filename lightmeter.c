@@ -27,6 +27,7 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     bh1750_set_power_state(1);
     bh1750_init();
     bh1750_set_mode(ONETIME_HIGH_RES_MODE);
+    bh1750_set_mt_reg(100);
 
     lightmeter->config = malloc(sizeof(LightMeterConfig));
     lightmeter->config->iso = 0;

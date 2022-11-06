@@ -92,6 +92,7 @@ typedef struct {
     int nd;
     int aperture;
     int speed;
+    bool dome;
 } MainViewModel;
 
 void lightmeter_main_view_set_left_callback(
@@ -128,6 +129,9 @@ static void main_view_draw_callback(Canvas* canvas, void* context) {
     if(response) {
         furi_delay_ms(120);
         bh1750_read_light(&lux);
+
+        if(model->dome) lux *= DOME_COEFFICIENT;
+
         EV = lux2ev((float)lux);
         A = aperture_numbers[model->aperture];
         iso = iso_numbers[model->iso];
@@ -392,4 +396,10 @@ void main_view_set_speed(MainView* main_view, int speed) {
     furi_assert(main_view);
     with_view_model(
         main_view->view, MainViewModel * model, { model->speed = speed; }, true);
+}
+
+void main_view_set_dome(MainView* main_view, bool dome) {
+    furi_assert(main_view);
+    with_view_model(
+        main_view->view, MainViewModel * model, { model->dome = dome; }, true);
 }

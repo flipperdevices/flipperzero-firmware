@@ -1,8 +1,10 @@
 #pragma once
 
-#define LM_VERSION_APP "0.3"
+#define LM_VERSION_APP "0.4"
 #define LM_DEVELOPED "Oleksii Kutuzov"
 #define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
+
+#define DOME_COEFFICIENT 2.3
 
 typedef enum {
     // ISO_6,
@@ -85,3 +87,8 @@ typedef enum {
 
     TIME_NUM,
 } LightMeterTimeNumbers;
+
+typedef enum {
+    WITHOUT_DOME,
+    WITH_DOME,
+} LightMeterDomePresence;
