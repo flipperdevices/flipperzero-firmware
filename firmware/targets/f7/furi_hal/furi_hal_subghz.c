@@ -490,7 +490,7 @@ void furi_hal_subghz_stop_async_rx() {
 
 #define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
 #define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
-#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999 //333
+#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999
 
 typedef struct {
     uint32_t* buffer;
