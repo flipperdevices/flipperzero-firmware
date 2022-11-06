@@ -5,12 +5,17 @@
 #define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
 
 #define DOME_COEFFICIENT 2.3
+#define DEFAULT_ISO ISO_100
+#define DEFAULT_ND ND_0
+#define DEFAULT_APERTURE AP_2_8
+#define DEFAULT_TIME TIME_125
+#define DEFAULT_DOME WITHOUT_DOME
 
 typedef enum {
-    // ISO_6,
-    // ISO_12,
-    // ISO_25,
-    // ISO_50,
+    ISO_6,
+    ISO_12,
+    ISO_25,
+    ISO_50,
     ISO_100,
     ISO_200,
     ISO_400,

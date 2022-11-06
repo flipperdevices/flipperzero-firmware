@@ -52,4 +52,3 @@ typedef enum {
 } LightMeterAppCustomEvent;
 
 void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config);
-

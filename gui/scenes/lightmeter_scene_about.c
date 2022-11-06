@@ -1,17 +1,17 @@
 #include "../../lightmeter.h"
 
 void lightmeter_scene_about_widget_callback(GuiButtonType result, InputType type, void* context) {
-    LightMeterApp* lightmeter = context;
-    UNUSED(lightmeter);
+    LightMeterApp* app = context;
+    UNUSED(app);
     UNUSED(result);
     UNUSED(type);
     if(type == InputTypeShort) {
-        view_dispatcher_send_custom_event(lightmeter->view_dispatcher, result);
+        view_dispatcher_send_custom_event(app->view_dispatcher, result);
     }
 }
 
 void lightmeter_scene_about_on_enter(void* context) {
-    LightMeterApp* lightmeter = context;
+    LightMeterApp* app = context;
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -27,7 +27,7 @@ void lightmeter_scene_about_on_enter(void* context) {
         "Showing suggested camera\nsettings based on ambient\nlight or flash.\n\nInspired by a lightmeter\nproject by vpominchuk\n");
 
     widget_add_text_box_element(
-        lightmeter->widget,
+        app->widget,
         0,
         0,
         128,
@@ -37,7 +37,7 @@ void lightmeter_scene_about_on_enter(void* context) {
         "\e#\e!                                                      \e!\n",
         false);
     widget_add_text_box_element(
-        lightmeter->widget,
+        app->widget,
         0,
         2,
         128,
@@ -47,24 +47,24 @@ void lightmeter_scene_about_on_enter(void* context) {
         "\e#\e!            Lightmeter            \e!\n",
         false);
     widget_add_text_scroll_element(
-        lightmeter->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
+        app->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
 
-    view_dispatcher_switch_to_view(lightmeter->view_dispatcher, LightMeterAppViewAbout);
+    view_dispatcher_switch_to_view(app->view_dispatcher, LightMeterAppViewAbout);
 }
 
 bool lightmeter_scene_about_on_event(void* context, SceneManagerEvent event) {
-    LightMeterApp* lightmeter = context;
+    LightMeterApp* app = context;
     bool consumed = false;
-    UNUSED(lightmeter);
+    UNUSED(app);
     UNUSED(event);
 
     return consumed;
 }
 
 void lightmeter_scene_about_on_exit(void* context) {
-    LightMeterApp* lightmeter = context;
+    LightMeterApp* app = context;
 
     // Clear views
-    widget_reset(lightmeter->widget);
+    widget_reset(app->widget);
 }
