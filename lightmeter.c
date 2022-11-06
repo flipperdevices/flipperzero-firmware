@@ -29,10 +29,12 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     bh1750_set_mode(ONETIME_HIGH_RES_MODE);
     bh1750_set_mt_reg(100);
 
+    // Set default values to config
     app->config = malloc(sizeof(LightMeterConfig));
-    app->config->iso = 0;
-    app->config->nd = 0;
-    app->config->aperture = 0;
+    app->config->iso = DEFAULT_ISO;
+    app->config->nd = DEFAULT_ND;
+    app->config->aperture = DEFAULT_APERTURE;
+    app->config->dome = DEFAULT_DOME;
 
     // Records
     app->gui = furi_record_open(RECORD_GUI);
@@ -58,11 +60,12 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     view_dispatcher_add_view(
         app->view_dispatcher, LightMeterAppViewMainView, main_view_get_view(app->main_view));
 
-    // Set default values
-    main_view_set_iso(app->main_view, ISO_100);
-    main_view_set_nd(app->main_view, ND_0);
-    main_view_set_aperture(app->main_view, AP_2_8);
-    main_view_set_speed(app->main_view, TIME_125);
+    // Set default values to main view from config
+    main_view_set_iso(app->main_view, app->config->iso);
+    main_view_set_nd(app->main_view, app->config->nd);
+    main_view_set_aperture(app->main_view, app->config->aperture);
+    main_view_set_speed(app->main_view, DEFAULT_TIME);
+    main_view_set_dome(app->main_view, app->config->dome);
 
     // Variable item list
     app->var_item_list = variable_item_list_alloc();

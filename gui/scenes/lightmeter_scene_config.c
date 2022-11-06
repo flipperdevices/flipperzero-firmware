@@ -1,10 +1,10 @@
 #include "../../lightmeter.h"
 
 static const char* iso_numbers[] = {
-    // [ISO_6] = "6",
-    // [ISO_12] = "12",
-    // [ISO_25] = "25",
-    // [ISO_50] = "50",
+    [ISO_6] = "6",
+    [ISO_12] = "12",
+    [ISO_25] = "25",
+    [ISO_50] = "50",
     [ISO_100] = "100",
     [ISO_200] = "200",
     [ISO_400] = "400",
@@ -133,12 +133,15 @@ bool lightmeter_scene_config_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeTick) {
         consumed = true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == LightMeterAppCustomEventHelp) {
+        switch(event.event) {
+        case LightMeterAppCustomEventHelp:
             scene_manager_next_scene(app->scene_manager, LightMeterAppSceneHelp);
             consumed = true;
-        } else if(event.event == LightMeterAppCustomEventAbout) {
+            break;
+        case LightMeterAppCustomEventAbout:
             scene_manager_next_scene(app->scene_manager, LightMeterAppSceneAbout);
             consumed = true;
+            break;
         }
     }
     return consumed;

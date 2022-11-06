@@ -4,16 +4,14 @@
 #include <gui/elements.h>
 #include "../../lightmeter.h"
 #include "../../lightmeter_helper.h"
-// #include <notification/notification.h>
-// #include <notification/notification_messages.h>
 
 #define WORKER_TAG "Main View"
 
 static const int iso_numbers[] = {
-    // [ISO_6] = 6,
-    // [ISO_12] = 12,
-    // [ISO_25] = 25,
-    // [ISO_50] = 50,
+    [ISO_6] = 6,
+    [ISO_12] = 12,
+    [ISO_25] = 25,
+    [ISO_50] = 50,
     [ISO_100] = 100,
     [ISO_200] = 200,
     [ISO_400] = 400,
@@ -81,7 +79,6 @@ typedef enum {
     FIXED_APERTURE,
     FIXED_TIME,
 
-    /* Know menu Size*/
     MODES_SIZE
 } MainViewMode;
 
