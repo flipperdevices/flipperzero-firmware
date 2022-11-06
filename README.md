@@ -5,7 +5,7 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 > **Note**
 > FAP is still in development
 
-<img src="images/framed_gui_main.png" width="500px">  
+<img src="images/framed_gui.gif" width="500px">  
 
 ## TODO:
 - [x] Ambient light metering
@@ -16,7 +16,7 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] Info screen
 - [x] Pinout screen
 - [x] ND correction
-- [x] Popup when no sensor detected
+- [x] Popup when sensor not detected
 - [x] Compensation for diffusion dome 
 - [ ] Cleanup code
 - [x] Draw suitable icon
