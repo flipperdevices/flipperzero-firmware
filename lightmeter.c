@@ -51,15 +51,12 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
         app->view_dispatcher, lightmeter_back_event_callback);
     view_dispatcher_set_tick_event_callback(
         app->view_dispatcher, lightmeter_tick_event_callback, furi_ms_to_ticks(200));
-    view_dispatcher_attach_to_gui(
-        app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Views
     app->main_view = main_view_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher,
-        LightMeterAppViewMainView,
-        main_view_get_view(app->main_view));
+        app->view_dispatcher, LightMeterAppViewMainView, main_view_get_view(app->main_view));
 
     // Set default values
     main_view_set_iso(app->main_view, ISO_100);

@@ -82,13 +82,11 @@ static void ok_cb(void* context, uint32_t index) {
     LightMeterApp* app = context;
     UNUSED(app);
     switch(index) {
-    case 2:
-        view_dispatcher_send_custom_event(
-            app->view_dispatcher, LightMeterAppCustomEventHelp);
-        break;
     case 3:
-        view_dispatcher_send_custom_event(
-            app->view_dispatcher, LightMeterAppCustomEventAbout);
+        view_dispatcher_send_custom_event(app->view_dispatcher, LightMeterAppCustomEventHelp);
+        break;
+    case 4:
+        view_dispatcher_send_custom_event(app->view_dispatcher, LightMeterAppCustomEventAbout);
         break;
     default:
         break;
@@ -101,8 +99,8 @@ void lightmeter_scene_config_on_enter(void* context) {
     VariableItem* item;
     LightMeterConfig* config = app->config;
 
-    item = variable_item_list_add(
-        var_item_list, "ISO", COUNT_OF(iso_numbers), iso_numbers_cb, app);
+    item =
+        variable_item_list_add(var_item_list, "ISO", COUNT_OF(iso_numbers), iso_numbers_cb, app);
     variable_item_set_current_value_index(item, config->iso);
     variable_item_set_current_value_text(item, iso_numbers[config->iso]);
 
