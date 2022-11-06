@@ -304,33 +304,9 @@ FuriHalUsbInterface midi_usb_interface = {
     .cfg_descr = (void*)&config_descriptor,
 };
 
-static void print_bytes(uint8_t* data, uint16_t len) {
-    for(uint16_t i = 0; i < len; i++) {
-        printf("%02x ", data[i]);
-    }
-    printf("\r\n");
-}
-
-#define STRUCT_AS_ARRAY(name) (uint8_t*)&name, sizeof(name)
-
 static void midi_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     UNUSED(intf);
     UNUSED(ctx);
-
-    FURI_LOG_I("MIDI", "Init");
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.config));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.audio_control_iface));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.audio_control_header));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_streaming_iface));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_jacks.header));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_jacks.in_embedded));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_jacks.in_external));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_jacks.out_embedded));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_jacks.out_external));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.bulk_out));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_bulk_out));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.bulk_in));
-    print_bytes(STRUCT_AS_ARRAY(config_descriptor.midi_bulk_in));
 
     midi_usb_interface.str_manuf_descr = (void*)&dev_manufacturer_string;
     midi_usb_interface.str_prod_descr = (void*)&dev_product_string;
