@@ -17,13 +17,12 @@ App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project f
 - [x] Pinout screen
 - [x] ND correction
 - [x] Popup when no sensor detected
-- [ ] Flash metering
+- [x] Compensation for diffusion dome 
 - [ ] Cleanup code
 - [x] Draw suitable icon
 
 ## TODO for later
 - [ ] Save settings to sd card
-- [ ] Backlight auto/on
 
 ## Wiring
 

@@ -34,9 +34,15 @@ static const char* nd_numbers[] = {
     [ND_4096] = "4096",
 };
 
+static const char* diffusion_dome[] = {
+    [WITHOUT_DOME] = "No",
+    [WITH_DOME] = "Yes",
+};
+
 enum LightMeterSubmenuIndex {
     LightMeterSubmenuIndexISO,
     LightMeterSubmenuIndexND,
+    LightMeterSubmenuIndexDome,
 };
 
 static void iso_numbers_cb(VariableItem* item) {
@@ -58,6 +64,17 @@ static void nd_numbers_cb(VariableItem* item) {
 
     LightMeterConfig* config = lightmeter->config;
     config->nd = index;
+    lightmeter_app_set_config(lightmeter, config);
+}
+
+static void dome_presence_cb(VariableItem* item) {
+    LightMeterApp* lightmeter = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, diffusion_dome[index]);
+
+    LightMeterConfig* config = lightmeter->config;
+    config->dome = index;
     lightmeter_app_set_config(lightmeter, config);
 }
 
@@ -93,6 +110,11 @@ void lightmeter_scene_config_on_enter(void* context) {
         var_item_list, "ND factor", COUNT_OF(nd_numbers), nd_numbers_cb, lightmeter);
     variable_item_set_current_value_index(item, config->nd);
     variable_item_set_current_value_text(item, nd_numbers[config->nd]);
+
+    item = variable_item_list_add(
+        var_item_list, "Diffusion dome", COUNT_OF(diffusion_dome), dome_presence_cb, lightmeter);
+    variable_item_set_current_value_index(item, config->dome);
+    variable_item_set_current_value_text(item, diffusion_dome[config->dome]);
 
     item = variable_item_list_add(var_item_list, "Help and Pinout", 0, NULL, NULL);
     item = variable_item_list_add(var_item_list, "About", 0, NULL, NULL);
@@ -131,4 +153,5 @@ void lightmeter_scene_config_on_exit(void* context) {
     variable_item_list_reset(lightmeter->var_item_list);
     main_view_set_iso(lightmeter->main_view, lightmeter->config->iso);
     main_view_set_nd(lightmeter->main_view, lightmeter->config->nd);
+    main_view_set_dome(lightmeter->main_view, lightmeter->config->dome);
 }
