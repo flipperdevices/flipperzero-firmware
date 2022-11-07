@@ -98,23 +98,15 @@ uint32_t protocol_dict_get_features(ProtocolDict* dict, size_t protocol_index) {
 }
 
 ProtocolId protocol_dict_decoders_feed(ProtocolDict* dict, bool level, uint32_t duration) {
-    bool done = false;
-    ProtocolId ready_protocol_id = PROTOCOL_NO;
-
     for(size_t i = 0; i < dict->count; i++) {
         ProtocolDecoderFeed fn = dict->base[i]->decoder.feed;
 
-        if(fn) {
-            if(fn(dict->data[i], level, duration)) {
-                if(!done) {
-                    ready_protocol_id = i;
-                    done = true;
-                }
-            }
+        if(fn && fn(dict->data[i], level, duration)) {
+            return i;
         }
     }
 
-    return ready_protocol_id;
+    return PROTOCOL_NO;
 }
 
 ProtocolId protocol_dict_decoders_feed_by_feature(
