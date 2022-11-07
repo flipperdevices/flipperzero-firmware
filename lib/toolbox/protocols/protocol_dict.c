@@ -176,7 +176,7 @@ void protocol_dict_render_data(ProtocolDict* dict, FuriString* result, size_t pr
     ProtocolRenderData fn = dict->base[protocol_index]->render_data;
 
     if(fn) {
-        return fn(dict->data[protocol_index], result);
+        fn(dict->data[protocol_index], result);
     }
 }
 
