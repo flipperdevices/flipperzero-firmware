@@ -522,11 +522,12 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
                 samples--;
                 furi_hal_subghz_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
             }
-            break;
+            memset(buffer, 0, samples * sizeof(uint32_t));
+            return;
         } else {
-            // Inject guard time if level is incorrect
+            // Inject guard time if level is incorrect, any method except size_buf-1
             bool level = level_duration_get_level(ld);
-            if(is_odd == level) {
+            if((is_odd == level) && (samples > 2)) {
                 *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 buffer++;
                 samples--;
@@ -535,9 +536,6 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
                 } else {
                     furi_hal_subghz_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 }
-                // This code must be invoked only once: when encoder starts with low level.
-                // Otherwise whole thing will crash.
-                furi_check(samples > 0);
             }
 
             uint32_t duration = level_duration_get_duration(ld);
@@ -553,8 +551,8 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             }
         }
     }
-
-    memset(buffer, 0, samples * sizeof(uint32_t));
+    // Check that the buffer for transmission is completely filled
+    furi_assert(samples == 0);
 }
 
 static void furi_hal_subghz_async_tx_dma_isr() {

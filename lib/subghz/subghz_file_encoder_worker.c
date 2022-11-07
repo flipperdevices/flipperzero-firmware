@@ -142,13 +142,16 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
                 if(!subghz_file_encoder_worker_data_parse(
                        instance, furi_string_get_cstr(instance->str_data))) {
                     //to stop DMA correctly
-                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
-                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                    for(uint8_t i = 0; i < 10; i++) {
+                        subghz_file_encoder_worker_add_level_duration(
+                            instance, LEVEL_DURATION_RESET);
+                    }
                     break;
                 }
             } else {
-                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
-                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                for(uint8_t i = 0; i < 10; i++) {
+                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
+                }
                 break;
             }
         } else {
