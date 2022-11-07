@@ -382,23 +382,21 @@ static void midi_on_suspend(usbd_device* dev) {
     }
 }
 
-static void midi_in(usbd_device* dev, uint8_t event, uint8_t ep) {
+static void midi_tx_rx(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(ep);
 
-    if(event == usbd_evt_eptx) {
+    switch(event) {
+    case usbd_evt_eptx:
         furi_semaphore_release(midi_usb.semaphore_tx);
-    }
-}
-
-static void midi_out(usbd_device* dev, uint8_t event, uint8_t ep) {
-    UNUSED(dev);
-    UNUSED(ep);
-
-    if(event == usbd_evt_eprx) {
+        break;
+    case usbd_evt_eprx:
         if(midi_usb.rx_callback != NULL) {
             midi_usb.rx_callback(midi_usb.context);
         }
+        break;
+    default:
+        break;
     }
 }
 
@@ -413,8 +411,8 @@ static usbd_respond midi_ep_config(usbd_device* dev, uint8_t cfg) {
     case EP_CFG_CONFIGURE:
         usbd_ep_config(dev, USB_MIDI_EP_OUT, USB_EPTYPE_BULK, USB_MIDI_EP_SIZE);
         usbd_ep_config(dev, USB_MIDI_EP_IN, USB_EPTYPE_BULK, USB_MIDI_EP_SIZE);
-        usbd_reg_endpoint(dev, USB_MIDI_EP_OUT, midi_out);
-        usbd_reg_endpoint(dev, USB_MIDI_EP_IN, midi_in);
+        usbd_reg_endpoint(dev, USB_MIDI_EP_OUT, midi_tx_rx);
+        usbd_reg_endpoint(dev, USB_MIDI_EP_IN, midi_tx_rx);
         return usbd_ack;
     default:
         return usbd_fail;
