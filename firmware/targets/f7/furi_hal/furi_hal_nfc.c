@@ -63,8 +63,6 @@ void furi_hal_nfc_exit_sleep() {
 bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
     furi_assert(nfc_data);
 
-    rfalNfcDevice* dev_list = NULL;
-    uint8_t dev_cnt = 0;
     bool detected = false;
 
     rfalLowPowerModeStop();
@@ -114,40 +112,44 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
         }
         furi_delay_tick(1);
     }
-    rfalNfcGetDevicesFound(&dev_list, &dev_cnt);
-    if(detected) {
-        if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA) {
-            nfc_data->type = FuriHalNfcTypeA;
-            nfc_data->atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
-            nfc_data->atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
-            nfc_data->sak = dev_list[0].dev.nfca.selRes.sak;
-            uint8_t* cuid_start = dev_list[0].nfcid;
-            if(dev_list[0].nfcidLen == 7) {
-                cuid_start = &dev_list[0].nfcid[3];
-            }
-            nfc_data->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
-                             (cuid_start[3]);
-        } else if(
-            dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCB ||
-            dev_list[0].type == RFAL_NFC_LISTEN_TYPE_ST25TB) {
-            nfc_data->type = FuriHalNfcTypeB;
-        } else if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCF) {
-            nfc_data->type = FuriHalNfcTypeF;
-        } else if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCV) {
-            nfc_data->type = FuriHalNfcTypeV;
-        }
-        if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_RF) {
-            nfc_data->interface = FuriHalNfcInterfaceRf;
-        } else if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
-            nfc_data->interface = FuriHalNfcInterfaceIsoDep;
-        } else if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_NFCDEP) {
-            nfc_data->interface = FuriHalNfcInterfaceNfcDep;
-        }
-        nfc_data->uid_len = dev_list[0].nfcidLen;
-        memcpy(nfc_data->uid, dev_list[0].nfcid, nfc_data->uid_len);
+    if(!detected) {
+        return false;
     }
 
-    return detected;
+    rfalNfcDevice* dev_list = NULL;
+    uint8_t dev_cnt = 0;
+    rfalNfcGetDevicesFound(&dev_list, &dev_cnt);
+    if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCA) {
+        nfc_data->type = FuriHalNfcTypeA;
+        nfc_data->atqa[0] = dev_list[0].dev.nfca.sensRes.anticollisionInfo;
+        nfc_data->atqa[1] = dev_list[0].dev.nfca.sensRes.platformInfo;
+        nfc_data->sak = dev_list[0].dev.nfca.selRes.sak;
+        uint8_t* cuid_start = dev_list[0].nfcid;
+        if(dev_list[0].nfcidLen == 7) {
+            cuid_start = &dev_list[0].nfcid[3];
+        }
+        nfc_data->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
+                            (cuid_start[3]);
+    } else if(
+        dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCB ||
+        dev_list[0].type == RFAL_NFC_LISTEN_TYPE_ST25TB) {
+        nfc_data->type = FuriHalNfcTypeB;
+    } else if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCF) {
+        nfc_data->type = FuriHalNfcTypeF;
+    } else if(dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCV) {
+        nfc_data->type = FuriHalNfcTypeV;
+    }
+    if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_RF) {
+        nfc_data->interface = FuriHalNfcInterfaceRf;
+    } else if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_ISODEP) {
+        nfc_data->interface = FuriHalNfcInterfaceIsoDep;
+    } else if(dev_list[0].rfInterface == RFAL_NFC_INTERFACE_NFCDEP) {
+        nfc_data->interface = FuriHalNfcInterfaceNfcDep;
+    }
+    nfc_data->uid_len = dev_list[0].nfcidLen;
+    memcpy(nfc_data->uid, dev_list[0].nfcid, nfc_data->uid_len);
+
+    return true;
 }
 
 bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid) {
