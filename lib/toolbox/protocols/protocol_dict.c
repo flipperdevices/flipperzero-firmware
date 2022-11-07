@@ -157,11 +157,7 @@ bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index) {
     furi_assert(protocol_index < dict->count);
     ProtocolEncoderStart fn = dict->base[protocol_index]->encoder.start;
 
-    if(fn) {
-        return fn(dict->data[protocol_index]);
-    } else {
-        return false;
-    }
+    return fn && fn(dict->data[protocol_index]);
 }
 
 LevelDuration protocol_dict_encoder_yield(ProtocolDict* dict, size_t protocol_index) {
