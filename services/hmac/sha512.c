@@ -1,4 +1,4 @@
-/* sha512.c - Functions to compute SHA512 and SHA384 message digest of files or
+/* sha512.c - Functions to compute SHA512 message digest of files or
    memory blocks according to the NIST specification FIPS-180-2.
 
    Copyright (C) 2005-2006, 2008-2022 Free Software Foundation, Inc.
@@ -21,9 +21,6 @@
 */
 
 /* Specification.  */
-#if HAVE_OPENSSL_SHA512
-#define GL_OPENSSL_INLINE _GL_EXTERN_INLINE
-#endif
 #include "sha512.h"
 
 #include <stdint.h>
@@ -35,8 +32,6 @@
 #include "byteswap.h"
 #define SWAP(n) swap_uint64(n)
 #endif
-
-#if !HAVE_OPENSSL_SHA512
 
 /* This array contains the bytes used to pad the buffer to the next
    128-byte boundary.  */
@@ -61,20 +56,6 @@ void sha512_init_ctx(struct sha512_ctx* ctx) {
     ctx->buflen = 0;
 }
 
-void sha384_init_ctx(struct sha512_ctx* ctx) {
-    ctx->state[0] = u64hilo(0xcbbb9d5d, 0xc1059ed8);
-    ctx->state[1] = u64hilo(0x629a292a, 0x367cd507);
-    ctx->state[2] = u64hilo(0x9159015a, 0x3070dd17);
-    ctx->state[3] = u64hilo(0x152fecd8, 0xf70e5939);
-    ctx->state[4] = u64hilo(0x67332667, 0xffc00b31);
-    ctx->state[5] = u64hilo(0x8eb44a87, 0x68581511);
-    ctx->state[6] = u64hilo(0xdb0c2e0d, 0x64f98fa7);
-    ctx->state[7] = u64hilo(0x47b5481d, 0xbefa4fa4);
-
-    ctx->total[0] = ctx->total[1] = u64lo(0);
-    ctx->buflen = 0;
-}
-
 /* Copy the value from V into the memory location pointed to by *CP,
    If your architecture allows unaligned access, this is equivalent to
    * (__typeof__ (v) *) cp = v  */
@@ -89,15 +70,6 @@ void* sha512_read_ctx(const struct sha512_ctx* ctx, void* resbuf) {
     char* r = resbuf;
 
     for(i = 0; i < 8; i++) set_uint64(r + i * sizeof ctx->state[0], SWAP(ctx->state[i]));
-
-    return resbuf;
-}
-
-void* sha384_read_ctx(const struct sha512_ctx* ctx, void* resbuf) {
-    int i;
-    char* r = resbuf;
-
-    for(i = 0; i < 6; i++) set_uint64(r + i * sizeof ctx->state[0], SWAP(ctx->state[i]));
 
     return resbuf;
 }
@@ -132,11 +104,6 @@ void* sha512_finish_ctx(struct sha512_ctx* ctx, void* resbuf) {
     return sha512_read_ctx(ctx, resbuf);
 }
 
-void* sha384_finish_ctx(struct sha512_ctx* ctx, void* resbuf) {
-    sha512_conclude_ctx(ctx);
-    return sha384_read_ctx(ctx, resbuf);
-}
-
 /* Compute SHA512 message digest for LEN bytes beginning at BUFFER.  The
    result is always in little endian byte order, so that a byte-wise
    output yields to the wanted ASCII representation of the message
@@ -152,19 +119,6 @@ void* sha512_buffer(const char* buffer, size_t len, void* resblock) {
 
     /* Put result in desired memory area.  */
     return sha512_finish_ctx(&ctx, resblock);
-}
-
-void* sha384_buffer(const char* buffer, size_t len, void* resblock) {
-    struct sha512_ctx ctx;
-
-    /* Initialize the computation context.  */
-    sha384_init_ctx(&ctx);
-
-    /* Process whole buffer but last len % 128 bytes.  */
-    sha512_process_bytes(buffer, len, &ctx);
-
-    /* Put result in desired memory area.  */
-    return sha384_finish_ctx(&ctx, resblock);
 }
 
 void sha512_process_bytes(const void* buffer, size_t len, struct sha512_ctx* ctx) {
@@ -352,8 +306,6 @@ void sha512_process_block(const void* buffer, size_t len, struct sha512_ctx* ctx
         h = ctx->state[7] = u64plus(ctx->state[7], h);
     }
 }
-
-#endif
 
 /*
  * Hey Emacs!

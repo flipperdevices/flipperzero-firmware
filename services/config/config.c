@@ -16,6 +16,7 @@ static uint8_t token_info_get_digits_as_int(const TokenInfo* token_info) {
         return 6;
     case TOTP_8_DIGITS:
         return 8;
+    default: break;
     }
 
     return 6;
@@ -29,6 +30,7 @@ static void token_info_set_digits_from_int(TokenInfo* token_info, uint8_t digits
     case 8:
         token_info->digits = TOTP_8_DIGITS;
         break;
+    default: break;
     }
 }
 
@@ -40,6 +42,7 @@ static char* token_info_get_algo_as_cstr(const TokenInfo* token_info) {
         return TOTP_CONFIG_TOKEN_ALGO_SHA256_NAME;
     case SHA512:
         return TOTP_CONFIG_TOKEN_ALGO_SHA512_NAME;
+    default: break;
     }
 
     return NULL;

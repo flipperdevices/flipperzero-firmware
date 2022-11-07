@@ -163,6 +163,7 @@ bool totp_scene_app_settings_handle_event(
         }
         break;
     }
+    default: break;
     }
 
     return true;

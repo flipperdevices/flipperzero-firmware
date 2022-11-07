@@ -73,6 +73,7 @@ TOTP_ALGO get_totp_algo_impl(TokenHashAlgo algo) {
         return TOTP_ALGO_SHA256;
     case SHA512:
         return TOTP_ALGO_SHA512;
+    default: break;
     }
 
     return NULL;
@@ -299,6 +300,7 @@ bool totp_scene_generate_token_handle_event(
         break;
     case InputKeyBack:
         break;
+    default: break;
     }
 
     return true;
