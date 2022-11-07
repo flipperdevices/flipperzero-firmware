@@ -152,7 +152,8 @@ bool totp_scene_authenticate_handle_event(
             scene_state->code_length--;
         }
         break;
-    default: break;
+    default:
+        break;
     }
 
     return true;

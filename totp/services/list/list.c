@@ -2,7 +2,7 @@
 
 ListNode* list_init_head(void* data) {
     ListNode* new = malloc(sizeof(ListNode));
-    if (new == NULL) return NULL;
+    if(new == NULL) return NULL;
     new->data = data;
     new->next = NULL;
     return new;
@@ -10,7 +10,7 @@ ListNode* list_init_head(void* data) {
 
 ListNode* list_add(ListNode* head, void* data) {
     ListNode* new = malloc(sizeof(ListNode));
-    if (new == NULL) return NULL;
+    if(new == NULL) return NULL;
     new->data = data;
     new->next = NULL;
 

@@ -30,7 +30,8 @@ void totp_scene_director_activate_scene(
         break;
     case TotpSceneNone:
         break;
-    default: break;
+    default:
+        break;
     }
 
     plugin_state->current_scene = scene;
@@ -56,7 +57,8 @@ void totp_scene_director_deactivate_active_scene(PluginState* const plugin_state
         break;
     case TotpSceneNone:
         break;
-    default: break;
+    default:
+        break;
     }
 }
 
@@ -87,7 +89,8 @@ void totp_scene_director_render(Canvas* const canvas, PluginState* const plugin_
         break;
     case TotpSceneNone:
         break;
-    default: break;
+    default:
+        break;
     }
 }
 
@@ -119,7 +122,8 @@ bool totp_scene_director_handle_event(PluginEvent* const event, PluginState* con
         break;
     case TotpSceneNone:
         break;
-    default: break;
+    default:
+        break;
     }
 
     return processing;

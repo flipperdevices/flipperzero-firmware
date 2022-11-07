@@ -51,7 +51,8 @@ uint8_t token_info_get_digits_count(const TokenInfo* token_info) {
         return 6;
     case TOTP_8_DIGITS:
         return 8;
-    default: break;
+    default:
+        break;
     }
 
     return 6;
