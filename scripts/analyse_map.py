@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
 from mapser import MapFileAnalyzer
+from datetime import datetime
 import argparse
+import cxxfilt
 import mariadb
 import sys
 import os
@@ -120,12 +121,16 @@ def insertHeader(header, cur, conn):
 
 def setAmapStylePath(line, arr):
     if line["library"].endswith(".a"):
-        arr.append(line["path"] + line["library"]) # lib
-        arr.append(line["object"]) # object
+        arr.append(line["path"] + '/' + line["library"])  # lib
+        arr.append(line["object"])  # object
     else:
         arr.append("")
-        arr.append(line["path"] + line["object"])
+        arr.append(line["path"] + '/' + line["object"])
     return arr
+
+def demangleName(mangledName):
+    demangledName = cxxfilt.demangle(mangledName)
+    demangledName = demangledName.replace("* (", "*(")
 
 
 def parseMap(mapser, headerID):
@@ -136,7 +141,7 @@ def parseMap(mapser, headerID):
         lineArr.append("." + line["segment"])  # section
         lineArr.append(line["origin"])  # address hex
         lineArr.append(line["size"])  # size
-        lineArr.append(line["symbol"])  # name
+        lineArr.append(demangleName(line["symbol"]))  # name
         lineArr = setAmapStylePath(line, lineArr)
         arr.append(tuple(lineArr))
     return arr
