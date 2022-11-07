@@ -122,26 +122,19 @@ ProtocolId protocol_dict_decoders_feed_by_feature(
     uint32_t feature,
     bool level,
     uint32_t duration) {
-    bool done = false;
-    ProtocolId ready_protocol_id = PROTOCOL_NO;
 
     for(size_t i = 0; i < dict->count; i++) {
-        uint32_t features = dict->base[i]->features;
-        if(features & feature) {
-            ProtocolDecoderFeed fn = dict->base[i]->decoder.feed;
+        if(!(dict->base[i]->features & feature)) {
+            continue;
+        }
+        ProtocolDecoderFeed fn = dict->base[i]->decoder.feed;
 
-            if(fn) {
-                if(fn(dict->data[i], level, duration)) {
-                    if(!done) {
-                        ready_protocol_id = i;
-                        done = true;
-                    }
-                }
-            }
+        if(fn && fn(dict->data[i], level, duration)) {
+            return i;
         }
     }
 
-    return ready_protocol_id;
+    return PROTOCOL_NO;
 }
 
 ProtocolId protocol_dict_decoders_feed_by_id(
