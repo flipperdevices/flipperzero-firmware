@@ -37,10 +37,23 @@ static void TempHum_draw_callback(Canvas* canvas, void* _model) {
         if(app->sensors_count == 0) canvas_draw_str(canvas, 0, 24, "Sensors not found");
     }
 }
+
+bool input_callback(InputEvent* event, void* context) {
+    Unitemp* app = context;
+
+    //Вход по короткому нажатию
+    if(event->key == InputKeyBack && event->type == InputTypeShort) {
+        app->processing = false;
+    }
+
+    return true;
+}
+
 void TempHum_secene_alloc(void) {
     view = view_alloc();
     view_set_context(view, app);
     view_set_draw_callback(view, TempHum_draw_callback);
+    view_set_input_callback(view, input_callback);
 
     view_dispatcher_add_view(app->view_dispatcher, TEMPHUM_VIEW, view);
 }

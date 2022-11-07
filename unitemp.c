@@ -185,7 +185,9 @@ static bool unitemp_loadSettings(void) {
 static bool unitemp_alloc(void) {
     //Выделение памяти под данные приложения
     app = malloc(sizeof(Unitemp));
+    //Разрешение работы приложения
     app->processing = true;
+
     //Открытие хранилища (?)
     app->storage = furi_record_open(RECORD_STORAGE);
 
@@ -202,7 +204,6 @@ static bool unitemp_alloc(void) {
 
     TempHum_secene_alloc();
 
-    view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     return true;
@@ -258,7 +259,6 @@ int32_t unitemp_app() {
 
     while(app->processing) {
         unitemp_sensors_updateValues();
-        furi_delay_ms(1000);
     }
 
     //Деинициализация датчиков

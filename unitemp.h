@@ -41,7 +41,6 @@ typedef struct {
     //Бесконечная работа подсветки
     bool infinityBacklight;
     //Единица измерения температуры
-    //Ложь - градусы Цельсия, истина - Фарeнгейты
     measureUnit unit;
     //Последнее состояние OTG
     bool lastOTGState;
@@ -49,8 +48,8 @@ typedef struct {
 
 //Основная структура плагина
 typedef struct {
-    bool processing;
-
+    //Система
+    bool processing; //Флаг работы приложения. При ложном значении приложение закрывается
     //Основные настройки
     UnitempSettings settings;
     //Список указателей на датчики
