@@ -56,5 +56,4 @@ openocd.log
 .PVS-Studio/
 PVS-Studio.log
 
-#TODO: remove
-applications/main/nfc/test_bac_creds.h
+.gdbinit
