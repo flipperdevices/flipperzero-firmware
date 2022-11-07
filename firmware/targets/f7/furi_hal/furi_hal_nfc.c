@@ -289,17 +289,15 @@ bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
 
     // Wait for interrupts
     uint32_t start = furi_get_tick();
-    bool data_received = false;
     while(true) {
-        if(furi_hal_gpio_read(&gpio_nfc_irq_rfid_pull) == true) {
+        if(furi_hal_gpio_read(&gpio_nfc_irq_rfid_pull)) {
             st25r3916CheckForReceivedInterrupts();
             if(st25r3916GetInterrupt(ST25R3916_IRQ_MASK_RXE)) {
                 furi_hal_nfc_read_fifo(tx_rx->rx_data, &tx_rx->rx_bits);
-                data_received = true;
                 if(tx_rx->sniff_rx) {
                     tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, false, tx_rx->sniff_context);
                 }
-                break;
+                return true;
             }
             continue;
         }
@@ -310,7 +308,7 @@ bool furi_hal_nfc_listen_rx(FuriHalNfcTxRxContext* tx_rx, uint32_t timeout_ms) {
         }
     }
 
-    return data_received;
+    return false;
 }
 
 void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
