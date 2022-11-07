@@ -514,11 +514,9 @@ static void lfrfid_cli_raw_emulate(Cli* cli, FuriString* args) {
                     break;
                 }
 
-                if(FURI_BIT(flags, LFRFIDWorkerEmulateRawOverrun)) {
-                    if(!overrun) {
-                        printf("Overrun\r\n");
-                        overrun = true;
-                    }
+                if(!overrun && FURI_BIT(flags, LFRFIDWorkerEmulateRawOverrun)) {
+                    printf("Overrun\r\n");
+                    overrun = true;
                 }
             }
 
