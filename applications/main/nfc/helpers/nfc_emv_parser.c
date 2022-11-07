@@ -38,15 +38,12 @@ bool nfc_emv_parser_get_aid_name(
     uint8_t aid_len,
     FuriString* aid_name) {
     furi_assert(storage);
-    bool parsed = false;
     FuriString* key;
     key = furi_string_alloc();
     for(uint8_t i = 0; i < aid_len; i++) {
         furi_string_cat_printf(key, "%02X", aid[i]);
     }
-    if(nfc_emv_parser_search_data(storage, EXT_PATH("nfc/assets/aid.nfc"), key, aid_name)) {
-        parsed = true;
-    }
+    bool parsed = nfc_emv_parser_search_data(storage, EXT_PATH("nfc/assets/aid.nfc"), key, aid_name);
     furi_string_free(key);
     return parsed;
 }
