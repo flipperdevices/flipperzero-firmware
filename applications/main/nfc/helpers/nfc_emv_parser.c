@@ -64,13 +64,10 @@ bool nfc_emv_parser_get_currency_name(
     Storage* storage,
     uint16_t currency_code,
     FuriString* currency_name) {
-    bool parsed = false;
     FuriString* key;
     key = furi_string_alloc_printf("%04X", currency_code);
-    if(nfc_emv_parser_search_data(
-           storage, EXT_PATH("nfc/assets/currency_code.nfc"), key, currency_name)) {
-        parsed = true;
-    }
+    bool parsed = nfc_emv_parser_search_data(
+        storage, EXT_PATH("nfc/assets/currency_code.nfc"), key, currency_name);
     furi_string_free(key);
     return parsed;
 }
