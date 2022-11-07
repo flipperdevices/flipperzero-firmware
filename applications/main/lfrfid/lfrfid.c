@@ -249,21 +249,16 @@ bool lfrfid_delete_key(LfRfid* app) {
 }
 
 bool lfrfid_load_key_data(LfRfid* app, FuriString* path, bool show_dialog) {
-    bool result = false;
-
-    do {
-        app->protocol_id = lfrfid_dict_file_load(app->dict, furi_string_get_cstr(path));
-        if(app->protocol_id == PROTOCOL_NO) break;
-
+    if(lfrfid_dict_file_load(app->dict, furi_string_get_cstr(path)) != PROTOCOL_NO) {
         path_extract_filename(path, app->file_name, true);
-        result = true;
-    } while(0);
+        return true;
+    }
 
-    if((!result) && (show_dialog)) {
+    if(show_dialog) {
         dialog_message_show_storage_error(app->dialogs, "Cannot load\nkey file");
     }
 
-    return result;
+    return false;
 }
 
 bool lfrfid_save_key_data(LfRfid* app, FuriString* path) {
