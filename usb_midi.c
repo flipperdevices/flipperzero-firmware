@@ -33,6 +33,8 @@ int32_t usb_midi_app(void* p) {
 
     MidiParser* parser = midi_parser_alloc();
     uint32_t events;
+    uint8_t current_note = 255;
+
     while(1) {
         events = furi_thread_flags_wait(MidiThreadEventAll, FuriFlagWaitAny, FuriWaitForever);
 
@@ -54,24 +56,14 @@ int32_t usb_midi_app(void* p) {
                             MidiEvent* event = midi_parser_get_message(parser);
                             if(event->type == NoteOn) {
                                 NoteOnEvent note_on = AsNoteOn(event);
-                                // FURI_LOG_I(
-                                //     "USB-MIDI",
-                                //     "NoteOn: %d %d %d",
-                                //     note_on.note,
-                                //     note_on.velocity,
-                                //     note_on.channel);
+                                current_note = note_on.note;
                                 furi_hal_speaker_start(
                                     note_to_frequency(note_on.note), note_on.velocity / 127.0f);
                             } else if(event->type == NoteOff) {
                                 NoteOffEvent note_off = AsNoteOff(event);
-                                UNUSED(note_off);
-                                // FURI_LOG_I(
-                                //     "USB-MIDI",
-                                //     "NoteOff: %d %d %d",
-                                //     note_off.note,
-                                //     note_off.velocity,
-                                //     note_off.channel);
-                                furi_hal_speaker_stop();
+                                if(note_off.note == current_note) {
+                                    furi_hal_speaker_stop();
+                                }
                             }
                         }
                     }
