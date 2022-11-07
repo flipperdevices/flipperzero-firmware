@@ -22,7 +22,8 @@ static bool token_info_set_digits_from_str(TokenInfo* token_info, const FuriStri
     case '8':
         token_info->digits = TOTP_8_DIGITS;
         return true;
-    default: break;
+    default:
+        break;
     }
 
     return false;

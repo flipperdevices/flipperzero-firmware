@@ -227,24 +227,24 @@ void sha1_process_block(const void* buffer, size_t len, struct sha1_ctx* ctx) {
             words++;
         }
 
-        for (int i = 0; i < 80; i++) {
+        for(int i = 0; i < 80; i++) {
             uint32_t xx = i < 16 ? x[i] : M(i);
             uint32_t ki = i / 20;
-            switch (ki) {
-                case 0:
+            switch(ki) {
+            case 0:
                 R(a, b, c, d, e, F1, K1, xx);
                 break;
-                case 1:
+            case 1:
                 R(a, b, c, d, e, F2, K2, xx);
                 break;
-                case 2:
+            case 2:
                 R(a, b, c, d, e, F3, K3, xx);
                 break;
-                default:
+            default:
                 R(a, b, c, d, e, F4, K4, xx);
                 break;
             }
-            
+
             uint32_t tt = a;
             a = e;
             e = d;

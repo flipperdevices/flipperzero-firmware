@@ -282,7 +282,7 @@ void sha512_process_block(const void* buffer, size_t len, struct sha512_ctx* ctx
             words++;
         }
 
-        for (int i = 0; i < 80; i++) {
+        for(int i = 0; i < 80; i++) {
             u64 xx = i < 16 ? x[i] : M(i);
             R(a, b, c, d, e, f, g, h, K(i), xx);
             u64 tt = a;

@@ -171,7 +171,8 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
             }
             break;
         }
-        default: break;
+        default:
+            break;
         }
         break;
     case InputKeyBack: {
@@ -185,7 +186,8 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
         }
         break;
     }
-    default: break;
+    default:
+        break;
     }
 
     return true;
