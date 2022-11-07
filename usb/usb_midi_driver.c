@@ -304,6 +304,42 @@ FuriHalUsbInterface midi_usb_interface = {
     .cfg_descr = (void*)&config_descriptor,
 };
 
+typedef struct {
+    usbd_device* dev;
+    MidiRxCallback rx_callback;
+    void* context;
+    FuriSemaphore* semaphore_tx;
+    bool connected;
+} MidiUsb;
+
+static MidiUsb midi_usb;
+
+void midi_usb_set_context(void* context) {
+    midi_usb.context = context;
+}
+
+void midi_usb_set_rx_callback(MidiRxCallback callback) {
+    midi_usb.rx_callback = callback;
+}
+
+size_t midi_usb_rx(uint8_t* buffer, size_t size) {
+    size_t len = usbd_ep_read(midi_usb.dev, USB_MIDI_EP_OUT, buffer, size);
+    return len;
+}
+
+size_t midi_usb_tx(uint8_t* buffer, uint8_t size) {
+    if((midi_usb.semaphore_tx == NULL) || (midi_usb.connected == false)) return 0;
+
+    furi_check(furi_semaphore_acquire(midi_usb.semaphore_tx, FuriWaitForever) == FuriStatusOk);
+
+    if(midi_usb.connected) {
+        int32_t len = usbd_ep_write(midi_usb.dev, USB_MIDI_EP_IN, buffer, size);
+        return len;
+    } else {
+        return 0;
+    }
+}
+
 static void midi_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     UNUSED(intf);
     UNUSED(ctx);
@@ -314,6 +350,9 @@ static void midi_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     midi_usb_interface.dev_descr->idVendor = USB_VID;
     midi_usb_interface.dev_descr->idProduct = USB_PID;
 
+    midi_usb.dev = dev;
+    if(midi_usb.semaphore_tx == NULL) midi_usb.semaphore_tx = furi_semaphore_alloc(1, 1);
+
     usbd_reg_config(dev, midi_ep_config);
     usbd_reg_control(dev, midi_control);
 
@@ -321,41 +360,45 @@ static void midi_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
 }
 
 static void midi_deinit(usbd_device* dev) {
+    midi_usb.connected = false;
+    midi_usb.dev = NULL;
+    furi_semaphore_free(midi_usb.semaphore_tx);
+
     usbd_reg_config(dev, NULL);
     usbd_reg_control(dev, NULL);
 }
 
 static void midi_on_wakeup(usbd_device* dev) {
     UNUSED(dev);
+    if(!midi_usb.connected) {
+        midi_usb.connected = true;
+    }
 }
 
 static void midi_on_suspend(usbd_device* dev) {
     UNUSED(dev);
+    if(midi_usb.connected) {
+        midi_usb.connected = false;
+    }
 }
 
 static void midi_in(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
-    UNUSED(event);
     UNUSED(ep);
+
+    if(event == usbd_evt_eptx) {
+        furi_semaphore_release(midi_usb.semaphore_tx);
+    }
 }
 
 static void midi_out(usbd_device* dev, uint8_t event, uint8_t ep) {
-    char buffer[64];
-    int len = 0;
-
     UNUSED(dev);
-    switch(event) {
-    case usbd_evt_eptx:
-        // tx complete
-        break;
-    case usbd_evt_eprx:
-        len = usbd_ep_read(dev, ep, buffer, 64);
-        if(len > 0) {
-            // process data
+    UNUSED(ep);
+
+    if(event == usbd_evt_eprx) {
+        if(midi_usb.rx_callback != NULL) {
+            midi_usb.rx_callback(midi_usb.context);
         }
-        break;
-    default:
-        break;
     }
 }
 
