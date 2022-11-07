@@ -52,13 +52,10 @@ bool nfc_emv_parser_get_country_name(
     Storage* storage,
     uint16_t country_code,
     FuriString* country_name) {
-    bool parsed = false;
     FuriString* key;
     key = furi_string_alloc_printf("%04X", country_code);
-    if(nfc_emv_parser_search_data(
-           storage, EXT_PATH("nfc/assets/country_code.nfc"), key, country_name)) {
-        parsed = true;
-    }
+    bool parsed = nfc_emv_parser_search_data(
+        storage, EXT_PATH("nfc/assets/country_code.nfc"), key, country_name);
     furi_string_free(key);
     return parsed;
 }
