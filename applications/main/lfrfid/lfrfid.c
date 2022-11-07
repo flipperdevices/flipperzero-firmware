@@ -262,13 +262,13 @@ bool lfrfid_load_key_data(LfRfid* app, FuriString* path, bool show_dialog) {
 }
 
 bool lfrfid_save_key_data(LfRfid* app, FuriString* path) {
-    bool result = lfrfid_dict_file_save(app->dict, app->protocol_id, furi_string_get_cstr(path));
-
-    if(!result) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot save\nkey file");
+    if(lfrfid_dict_file_save(app->dict, app->protocol_id, furi_string_get_cstr(path))) {
+        return true;
     }
 
-    return result;
+    dialog_message_show_storage_error(app->dialogs, "Cannot save\nkey file");
+
+    return false;
 }
 
 void lfrfid_make_app_folder(LfRfid* app) {
