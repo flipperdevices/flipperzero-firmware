@@ -1,5 +1,14 @@
 #include <furi.h>
+#include <furi_hal.h>
 #include "usb/usb_midi_driver.h"
+#include "midi/parser.h"
+#include "midi/usb_message.h"
+#include <math.h>
+
+float note_to_frequency(int note) {
+    float a = 440;
+    return (a / 32) * powf(2, ((note - 9) / 12.0));
+}
 
 typedef enum {
     MidiThreadEventStop = (1 << 0),
@@ -22,6 +31,7 @@ int32_t usb_midi_app(void* p) {
     midi_usb_set_rx_callback(midi_rx_callback);
     furi_hal_usb_set_config(&midi_usb_interface, NULL);
 
+    MidiParser* parser = midi_parser_alloc();
     uint32_t events;
     while(1) {
         events = furi_thread_flags_wait(MidiThreadEventAll, FuriFlagWaitAny, FuriWaitForever);
@@ -30,18 +40,48 @@ int32_t usb_midi_app(void* p) {
             if(events & MidiThreadEventRx) {
                 uint8_t buffer[64];
                 size_t size = midi_usb_rx(buffer, sizeof(buffer));
-                midi_usb_tx(buffer, size);
+                // loopback
+                // midi_usb_tx(buffer, size);
+                size_t start = 0;
+                while(start < size) {
+                    CodeIndex code_index = code_index_from_data(buffer[start]);
+                    uint8_t data_size = usb_message_data_size(code_index);
+                    if(data_size == 0) break;
 
-                FuriString* string = furi_string_alloc();
-                furi_string_printf(string, "MIDI RX: ");
-                for(size_t i = 0; i < size; i++) {
-                    furi_string_cat_printf(string, "%02X ", buffer[i]);
+                    start += 1;
+                    for(size_t j = 0; j < data_size; j++) {
+                        if(midi_parser_parse(parser, buffer[start + j])) {
+                            MidiEvent* event = midi_parser_get_message(parser);
+                            if(event->type == NoteOn) {
+                                NoteOnEvent note_on = AsNoteOn(event);
+                                // FURI_LOG_I(
+                                //     "USB-MIDI",
+                                //     "NoteOn: %d %d %d",
+                                //     note_on.note,
+                                //     note_on.velocity,
+                                //     note_on.channel);
+                                furi_hal_speaker_start(
+                                    note_to_frequency(note_on.note), note_on.velocity / 127.0f);
+                            } else if(event->type == NoteOff) {
+                                NoteOffEvent note_off = AsNoteOff(event);
+                                UNUSED(note_off);
+                                // FURI_LOG_I(
+                                //     "USB-MIDI",
+                                //     "NoteOff: %d %d %d",
+                                //     note_off.note,
+                                //     note_off.velocity,
+                                //     note_off.channel);
+                                furi_hal_speaker_stop();
+                            }
+                        }
+                    }
+                    start += data_size;
                 }
-                FURI_LOG_I("USB_MIDI", "%s", furi_string_get_cstr(string));
             }
         }
     }
 
+    midi_parser_free(parser);
     furi_hal_usb_set_config(usb_config_prev, NULL);
 
     return 0;
