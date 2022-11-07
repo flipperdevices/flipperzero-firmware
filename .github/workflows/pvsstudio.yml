@@ -1,5 +1,8 @@
 name: PVS-Studio build analysis
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   build-analyze:
     runs-on: ubuntu-latest

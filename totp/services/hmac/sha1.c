@@ -22,9 +22,6 @@
 */
 
 /* Specification.  */
-#if HAVE_OPENSSL_SHA1
-#define GL_OPENSSL_INLINE _GL_EXTERN_INLINE
-#endif
 #include "sha1.h"
 
 #include <stdint.h>
@@ -36,8 +33,6 @@
 #include "byteswap.h"
 #define SWAP(n) swap_uint32(n)
 #endif
-
-#if !HAVE_OPENSSL_SHA1
 
 /* This array contains the bytes used to pad the buffer to the next
    64-byte boundary.  (RFC 1321, 3.1: Step 1)  */
@@ -265,8 +260,6 @@ void sha1_process_block(const void* buffer, size_t len, struct sha1_ctx* ctx) {
         e = ctx->E += e;
     }
 }
-
-#endif
 
 /*
  * Hey Emacs!

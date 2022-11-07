@@ -67,7 +67,7 @@ void totp_scene_authenticate_render(Canvas* const canvas, PluginState* plugin_st
     const uint8_t PIN_ASTERISK_RADIUS = 3;
     const uint8_t PIN_ASTERISK_STEP = (PIN_ASTERISK_RADIUS << 1) + 2;
     if(scene_state->code_length > 0) {
-        uint8_t left_start_x = (scene_state->code_length - 1) * PIN_ASTERISK_STEP >> 1;
+        uint8_t left_start_x = ((scene_state->code_length - 1) * PIN_ASTERISK_STEP) >> 1;
         for(uint8_t i = 0; i < scene_state->code_length; i++) {
             canvas_draw_disc(
                 canvas,
@@ -152,6 +152,7 @@ bool totp_scene_authenticate_handle_event(
             scene_state->code_length--;
         }
         break;
+    default: break;
     }
 
     return true;

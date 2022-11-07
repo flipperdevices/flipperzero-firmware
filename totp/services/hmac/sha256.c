@@ -1,4 +1,4 @@
-/* sha256.c - Functions to compute SHA256 and SHA224 message digest of files or
+/* sha256.c - Functions to compute SHA256 message digest of files or
    memory blocks according to the NIST specification FIPS-180-2.
 
    Copyright (C) 2005-2006, 2008-2022 Free Software Foundation, Inc.
@@ -21,9 +21,6 @@
 */
 
 /* Specification.  */
-#if HAVE_OPENSSL_SHA256
-#define GL_OPENSSL_INLINE _GL_EXTERN_INLINE
-#endif
 #include "sha256.h"
 
 #include <stdint.h>
@@ -35,8 +32,6 @@
 #include "byteswap.h"
 #define SWAP(n) swap_uint32(n)
 #endif
-
-#if !HAVE_OPENSSL_SHA256
 
 /* This array contains the bytes used to pad the buffer to the next
    64-byte boundary.  */
@@ -61,20 +56,6 @@ void sha256_init_ctx(struct sha256_ctx* ctx) {
     ctx->buflen = 0;
 }
 
-void sha224_init_ctx(struct sha256_ctx* ctx) {
-    ctx->state[0] = 0xc1059ed8UL;
-    ctx->state[1] = 0x367cd507UL;
-    ctx->state[2] = 0x3070dd17UL;
-    ctx->state[3] = 0xf70e5939UL;
-    ctx->state[4] = 0xffc00b31UL;
-    ctx->state[5] = 0x68581511UL;
-    ctx->state[6] = 0x64f98fa7UL;
-    ctx->state[7] = 0xbefa4fa4UL;
-
-    ctx->total[0] = ctx->total[1] = 0;
-    ctx->buflen = 0;
-}
-
 /* Copy the value from v into the memory location pointed to by *CP,
    If your architecture allows unaligned access, this is equivalent to
    * (__typeof__ (v) *) cp = v  */
@@ -89,15 +70,6 @@ void* sha256_read_ctx(const struct sha256_ctx* ctx, void* resbuf) {
     char* r = resbuf;
 
     for(i = 0; i < 8; i++) set_uint32(r + i * sizeof ctx->state[0], SWAP(ctx->state[i]));
-
-    return resbuf;
-}
-
-void* sha224_read_ctx(const struct sha256_ctx* ctx, void* resbuf) {
-    int i;
-    char* r = resbuf;
-
-    for(i = 0; i < 7; i++) set_uint32(r + i * sizeof ctx->state[0], SWAP(ctx->state[i]));
 
     return resbuf;
 }
@@ -130,11 +102,6 @@ void* sha256_finish_ctx(struct sha256_ctx* ctx, void* resbuf) {
     return sha256_read_ctx(ctx, resbuf);
 }
 
-void* sha224_finish_ctx(struct sha256_ctx* ctx, void* resbuf) {
-    sha256_conclude_ctx(ctx);
-    return sha224_read_ctx(ctx, resbuf);
-}
-
 /* Compute SHA256 message digest for LEN bytes beginning at BUFFER.  The
    result is always in little endian byte order, so that a byte-wise
    output yields to the wanted ASCII representation of the message
@@ -150,19 +117,6 @@ void* sha256_buffer(const char* buffer, size_t len, void* resblock) {
 
     /* Put result in desired memory area.  */
     return sha256_finish_ctx(&ctx, resblock);
-}
-
-void* sha224_buffer(const char* buffer, size_t len, void* resblock) {
-    struct sha256_ctx ctx;
-
-    /* Initialize the computation context.  */
-    sha224_init_ctx(&ctx);
-
-    /* Process whole buffer but last len % 64 bytes.  */
-    sha256_process_bytes(buffer, len, &ctx);
-
-    /* Put result in desired memory area.  */
-    return sha224_finish_ctx(&ctx, resblock);
 }
 
 void sha256_process_bytes(const void* buffer, size_t len, struct sha256_ctx* ctx) {
@@ -323,8 +277,6 @@ void sha256_process_block(const void* buffer, size_t len, struct sha256_ctx* ctx
         h = ctx->state[7] += h;
     }
 }
-
-#endif
 
 /*
  * Hey Emacs!
