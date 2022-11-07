@@ -34,11 +34,7 @@ void cli_putc(Cli* cli, char c) {
 char cli_getc(Cli* cli) {
     furi_assert(cli);
     char c = 0;
-    if(cli->session != NULL) {
-        if(cli->session->rx((uint8_t*)&c, 1, FuriWaitForever) == 0) {
-            cli_reset(cli);
-        }
-    } else {
+    if(cli->session == NULL || cli->session->rx((uint8_t*)&c, 1, FuriWaitForever) == 0) {
         cli_reset(cli);
     }
     return c;
