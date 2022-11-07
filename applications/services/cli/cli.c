@@ -76,12 +76,11 @@ bool cli_is_connected(Cli* cli) {
 bool cli_cmd_interrupt_received(Cli* cli) {
     furi_assert(cli);
     char c = '\0';
-    if(cli_is_connected(cli)) {
-        if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
-            return c == CliSymbolAsciiETX;
-        }
-    } else {
+    if(!cli_is_connected(cli)) {
         return true;
+    }
+    if(cli->session->rx((uint8_t*)&c, 1, 0) == 1) {
+        return c == CliSymbolAsciiETX;
     }
     return false;
 }
