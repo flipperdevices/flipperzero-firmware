@@ -496,8 +496,6 @@ bool furi_hal_nfc_emulate_nfca(
 static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx->nfca_signal);
 
-    bool ret = false;
-
     // Start transparent mode
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
     // Reconfigure gpio for Transparent mode
@@ -542,6 +540,7 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
             break;
         }
     }
+
     if(irq) {
         uint8_t fifo_stat[2];
         st25r3916ReadMultipleRegisters(
@@ -560,16 +559,13 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
         if(tx_rx->sniff_rx) {
             tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, false, tx_rx->sniff_context);
         }
-
-        ret = true;
     } else {
         FURI_LOG_E(TAG, "Timeout error");
-        ret = false;
     }
 
     st25r3916ClearInterrupts();
 
-    return ret;
+    return irq;
 }
 
 static uint32_t furi_hal_nfc_tx_rx_get_flag(FuriHalNfcTxRxType type) {
