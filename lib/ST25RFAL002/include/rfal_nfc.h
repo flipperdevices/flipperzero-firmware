@@ -323,7 +323,7 @@ ReturnCode rfalNfcGetActiveDevice(rfalNfcDevice** dev);
  *  
  * It selects the device to be activated.
  * It shall be called when more than one device has been identified to 
- * indiacte which device shall be actived
+ * indicate which device shall be actived
  * 
  * \param[in]  devIdx       : device index to be activated
  *
