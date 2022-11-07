@@ -144,16 +144,13 @@ ProtocolId protocol_dict_decoders_feed_by_id(
     uint32_t duration) {
     furi_assert(protocol_index < dict->count);
 
-    ProtocolId ready_protocol_id = PROTOCOL_NO;
     ProtocolDecoderFeed fn = dict->base[protocol_index]->decoder.feed;
 
-    if(fn) {
-        if(fn(dict->data[protocol_index], level, duration)) {
-            ready_protocol_id = protocol_index;
-        }
+    if(fn && fn(dict->data[protocol_index], level, duration)) {
+        return protocol_index;
     }
 
-    return ready_protocol_id;
+    return PROTOCOL_NO;
 }
 
 bool protocol_dict_encoder_start(ProtocolDict* dict, size_t protocol_index) {
