@@ -211,20 +211,21 @@ static void lfrfid_cli_write(Cli* cli, FuriString* args) {
 
     while(!cli_cmd_interrupt_received(cli)) {
         uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
-        if(flags != FuriFlagErrorTimeout) {
-            if(FURI_BIT(flags, LFRFIDWorkerWriteOK)) {
-                printf("Written!\r\n");
-                break;
-            }
+        if(flags == FuriFlagErrorTimeout) {
+            continue;
+        }
+        if(FURI_BIT(flags, LFRFIDWorkerWriteOK)) {
+            printf("Written!\r\n");
+            break;
+        }
 
-            if(FURI_BIT(flags, LFRFIDWorkerWriteProtocolCannotBeWritten)) {
-                printf("This protocol cannot be written.\r\n");
-                break;
-            }
+        if(FURI_BIT(flags, LFRFIDWorkerWriteProtocolCannotBeWritten)) {
+            printf("This protocol cannot be written.\r\n");
+            break;
+        }
 
-            if(FURI_BIT(flags, LFRFIDWorkerWriteFobCannotBeWritten)) {
-                printf("Seems this fob cannot be written.\r\n");
-            }
+        if(FURI_BIT(flags, LFRFIDWorkerWriteFobCannotBeWritten)) {
+            printf("Seems this fob cannot be written.\r\n");
         }
     }
     printf("Writing stopped\r\n");
