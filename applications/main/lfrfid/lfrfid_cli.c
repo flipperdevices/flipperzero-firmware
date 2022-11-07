@@ -441,11 +441,9 @@ static void lfrfid_cli_raw_read(Cli* cli, FuriString* args) {
                     break;
                 }
 
-                if(FURI_BIT(flags, LFRFIDWorkerReadRawOverrun)) {
-                    if(!overrun) {
-                        printf("Overrun\r\n");
-                        overrun = true;
-                    }
+                if(!overrun && FURI_BIT(flags, LFRFIDWorkerReadRawOverrun)) {
+                    printf("Overrun\r\n");
+                    overrun = true;
                 }
             }
 
