@@ -573,7 +573,7 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
 }
 
 static uint32_t furi_hal_nfc_tx_rx_get_flag(FuriHalNfcTxRxType type) {
-    uint32_t flags = 0;
+    uint32_t flags = RFAL_TXRX_FLAGS_CRC_TX_AUTO;
 
     if(type == FuriHalNfcTxRxTypeRxNoCrc) {
         flags = RFAL_TXRX_FLAGS_CRC_RX_KEEP;
