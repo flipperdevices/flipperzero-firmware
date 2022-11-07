@@ -63,11 +63,10 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
             }
             strlcpy(nfc->dev->dev_name, nfc->text_store, strlen(nfc->text_store) + 1);
             // Create path by adding nfc/ to the dev_name or using the load path
-            char* path = malloc(strlen(nfc->text_store) + 5);
-            strcpy(path, ANY_PATH("nfc/"));
-            strcat(path, nfc->text_store);
-            strcat(path, NFC_APP_EXTENSION);
-            if(nfc_device_save(nfc->dev, path)) {
+            FuriString* path = furi_string_alloc();
+            furi_string_printf(
+                path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
+            if(nfc_device_save(nfc->dev, furi_string_get_cstr(path))) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 if(!scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSavedMenu)) {
                     // Nothing, do not count editing as saving
@@ -81,7 +80,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
                 consumed = scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneStart);
             }
-            free(path);
+            furi_string_free(path);
         }
     }
     return consumed;

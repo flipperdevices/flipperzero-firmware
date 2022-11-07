@@ -1064,7 +1064,11 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
 
 bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name) {
     dev->shadow_file_exist = true;
-    return nfc_device_save_file(dev, dev_name);
+    // Replace extension from .nfc to .shd if necessary
+    FuriString* path = furi_string_alloc();
+    furi_string_set(path, dev_name);
+    furi_string_replace_all(path, NFC_APP_EXTENSION, NFC_APP_SHADOW_EXTENSION);
+    return nfc_device_save_file(dev, furi_string_get_cstr(path));
 }
 
 static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dialog) {

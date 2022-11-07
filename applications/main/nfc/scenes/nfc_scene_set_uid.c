@@ -31,28 +31,16 @@ bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
         if(event.event == NfcCustomEventByteInputDone) {
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSavedMenu)) {
                 nfc->dev->dev_data.nfc_data = nfc->dev_edit_data;
-                // Create path by adding nfc/ to the dev_name or using the load path
-                if(furi_string_end_with(nfc->dev->load_path, NFC_APP_EXTENSION)) {
-                    if(nfc_device_save(nfc->dev, furi_string_get_cstr(nfc->dev->load_path))) {
-                        scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
-                        consumed = true;
-                    } else {
-                        scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
-                        consumed = true;
-                    }
+                if(strcmp(nfc->dev->dev_name, "")) {
+                    // Create path by adding nfc/ to the dev_name or using the load path
+                    FuriString* path = furi_string_alloc();
+                    furi_string_printf(
+                        path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
+                    consumed = true;
                 } else {
-                    char* path = malloc(strlen(nfc->dev->dev_name) + 5);
-                    strcpy(path, ANY_PATH("nfc/"));
-                    strcat(path, nfc->text_store);
-                    strcat(path, NFC_APP_EXTENSION);
-                    if(nfc_device_save(nfc->dev, path)) {
-                        scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
-                        consumed = true;
-                    } else {
-                        scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
-                        consumed = true;
-                    }
-                    free(path);
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
+                    consumed = true;
                 }
             }
         }
