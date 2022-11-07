@@ -168,7 +168,7 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     //DHT11 и DHT12
     if(sensor->type == DHT11 || sensor->type == DHT12_1W) {
         instance->lastHum = (float)data[0];
-        sensor->temp = (float)data[2];
+        instance->lastTemp = (float)data[2];
 
         //Проверка на отрицательность температуры
         if(data[3] != 0) {
