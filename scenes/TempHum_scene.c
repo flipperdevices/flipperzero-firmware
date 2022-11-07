@@ -25,8 +25,9 @@ static void TempHum_draw_callback(Canvas* canvas, void* _model) {
                 snprintf(
                     buff,
                     sizeof(buff),
-                    "%2.1f*C/%d%%",
+                    "%2.1f*%c/%d%%",
                     (double)app->sensors[i]->temp,
+                    app->settings.unit == CELSIUS ? 'C' : 'F',
                     (int8_t)app->sensors[i]->hum);
                 canvas_draw_str(canvas, 64, 24 + 10 * i, buff);
             }

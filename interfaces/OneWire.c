@@ -49,8 +49,15 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     //Проверка на допустимость опроса датчика
     if(furi_get_tick() - instance->lastPollingTime < POLLING_INTERVAL) {
         //Возврат ошибки если последний опрос датчика был неудачным
-        if(sensor->hum == -128.0f && sensor->temp == -128.0f) return UT_TIMEOUT;
+        if(instance->lastHum == -128.0f && instance->lastTemp == -128.0f) {
+            sensor->hum = instance->lastHum;
+            sensor->temp = instance->lastTemp;
+            return UT_TIMEOUT;
+        }
+
         //Выход в случае раннего опроса
+        sensor->hum = instance->lastHum;
+        sensor->temp = instance->lastTemp;
         return UT_EARLYPOOL;
     }
 
@@ -81,8 +88,8 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Запись неправильных значений
-            sensor->hum = -128.0f;
-            sensor->temp = -128.0f;
+            instance->lastHum = -128.0f;
+            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -96,8 +103,8 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Запись неправильных значений
-            sensor->hum = -128.0f;
-            sensor->temp = -128.0f;
+            instance->lastHum = -128.0f;
+            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -110,8 +117,8 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Запись неправильных значений
-            sensor->hum = -128.0f;
-            sensor->temp = -128.0f;
+            instance->lastHum = -128.0f;
+            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -125,8 +132,8 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Запись неправильных значений
-            sensor->hum = -128.0f;
-            sensor->temp = -128.0f;
+            instance->lastHum = -128.0f;
+            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -151,8 +158,8 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     //Проверка контрольной суммы
     if((uint8_t)(data[0] + data[1] + data[2] + data[3]) != data[4]) {
         //Запись неправильных значений
-        sensor->hum = -128.0f;
-        sensor->temp = -128.0f;
+        instance->lastHum = -128.0f;
+        instance->lastTemp = -128.0f;
         //Если контрольная сумма не совпала, возврат ошибки
         return UT_BADCRC;
     }
@@ -160,7 +167,7 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     /* Преобразование данных в явный вид */
     //DHT11 и DHT12
     if(sensor->type == DHT11 || sensor->type == DHT12_1W) {
-        sensor->hum = (float)data[0];
+        instance->lastHum = (float)data[0];
         sensor->temp = (float)data[2];
 
         //Проверка на отрицательность температуры
@@ -168,28 +175,30 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
             //Проверка знака
             if(!(data[3] & (1 << 7))) {
                 //Добавление положительной дробной части
-                sensor->temp += data[3] * 0.1f;
+                instance->lastTemp += data[3] * 0.1f;
             } else {
                 //А тут делаем отрицательное значение
                 data[3] &= ~(1 << 7);
-                sensor->temp += data[3] * 0.1f;
-                sensor->temp *= -1;
+                instance->lastTemp += data[3] * 0.1f;
+                instance->lastTemp *= -1;
             }
         }
     }
 
     //DHT21, DHT22, AM2320
     if(sensor->type == DHT21 || sensor->type == DHT22 || sensor->type == AM2320_1W) {
-        sensor->hum = (float)(((uint16_t)data[0] << 8) | data[1]) / 10;
+        instance->lastHum = (float)(((uint16_t)data[0] << 8) | data[1]) / 10;
         //Проверка на отрицательность температуры
         if(!(data[2] & (1 << 7))) {
-            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10;
+            instance->lastTemp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10;
         } else {
             data[2] &= ~(1 << 7);
-            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10 * -1;
+            instance->lastTemp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10 * -1;
         }
     }
 
+    sensor->hum = instance->lastHum;
+    sensor->temp = instance->lastTemp;
     //Возврат признака успешного опроса
     return UT_OK;
 }

@@ -11,6 +11,10 @@ typedef struct {
     const GPIO* gpio;
     //Время последнего опроса
     uint32_t lastPollingTime;
+    //Последнее успешное значение температуры
+    float lastTemp;
+    //Последнее успешное значение влажности
+    float lastHum;
 } OneWireSensor;
 
 /**

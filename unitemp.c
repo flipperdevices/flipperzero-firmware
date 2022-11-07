@@ -9,6 +9,10 @@
 //Данные приложения
 Unitemp* app;
 
+void uintemp_celsiumToFarengate(Sensor* sensor) {
+    sensor->temp = sensor->temp * (9.0 / 5.0) + 32;
+}
+
 /**
  * @brief Сохранение настроек на SD-карту
  * 
@@ -142,10 +146,10 @@ static bool unitemp_loadSettings(void) {
             //Чтение значения параметра
             int p = 0;
             sscanf(line, "UNIT %d", &p);
-            if(p == CELSIUM) {
-                app->settings.unit = CELSIUM;
+            if(p == CELSIUS) {
+                app->settings.unit = CELSIUS;
             } else {
-                app->settings.unit = FARENGATE;
+                app->settings.unit = FAHRENHEIT;
             }
             FURI_LOG_D(APP_NAME, "UNIT: %d\r\n", p);
         } else {
@@ -190,7 +194,7 @@ static bool unitemp_alloc(void) {
 
     //Установка значений по умолчанию
     app->settings.infinityBacklight = true; //Подсветка горит всегда
-    app->settings.unit = CELSIUM; //Единица измерения - градусы Цельсия
+    app->settings.unit = CELSIUS; //Единица измерения - градусы Цельсия
 
     app->gui = furi_record_open(RECORD_GUI);
     //Диспетчер окон

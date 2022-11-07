@@ -33,7 +33,7 @@
 
 /* Объявление перечислений */
 //Единицы измерения
-typedef enum { CELSIUM, FARENGATE } measureUnit;
+typedef enum { CELSIUS, FAHRENHEIT } measureUnit;
 
 /* Объявление структур */
 //Настройки плагина
@@ -69,6 +69,13 @@ typedef struct {
 } Unitemp;
 
 /* Объявление прототипов функций */
+
+/**
+ * @brief Перевод значения температуры датчика из Цельсия в Фаренгейты
+ * 
+ * @param sensor Указатель на датчик
+ */
+void uintemp_celsiumToFarengate(Sensor* sensor);
 
 extern Unitemp* app;
 #endif

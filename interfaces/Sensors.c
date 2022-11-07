@@ -279,6 +279,7 @@ UnitempStatus unitemp_sensor_getValues(Sensor* sensor) {
 
     if(sensor->interface == ONE_WIRE) {
         sensor->status = unitemp_oneWire_getData(sensor);
+        if(app->settings.unit == FAHRENHEIT) uintemp_celsiumToFarengate(sensor);
         return sensor->status;
     }
 
