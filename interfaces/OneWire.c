@@ -48,6 +48,8 @@ UnitempStatus unitemp_oneWire_getData(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
     //Проверка на допустимость опроса датчика
     if(furi_get_tick() - instance->lastPollingTime < POLLING_INTERVAL) {
+        //Возврат ошибки если последний опрос датчика был неудачным
+        if(sensor->hum == -128.0f && sensor->temp == -128.0f) return UT_TIMEOUT;
         //Выход в случае раннего опроса
         return UT_EARLYPOOL;
     }

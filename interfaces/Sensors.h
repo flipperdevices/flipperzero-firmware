@@ -62,6 +62,8 @@ typedef struct Sensor {
     SensorType type;
     //Интерфейсы подключения
     Interface interface;
+    //Статус последнего опроса датчика
+    UnitempStatus status;
     //Экземпляр датчика
     void* instance;
 } Sensor;
@@ -134,5 +136,10 @@ bool unitemp_sensors_load();
  * @return Истина если сохранение прошло успешно
  */
 bool unitemp_sensors_save(void);
+
+/**
+ * @brief Обновить данные со всех датчиков
+ */
+void unitemp_sensors_updateValues(void);
 
 #endif

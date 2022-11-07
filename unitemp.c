@@ -1,6 +1,7 @@
 #include "unitemp.h"
 #include "interfaces/OneWire.h"
 #include "interfaces/Sensors.h"
+#include "scenes/Scenes.h"
 
 #include <furi_hal_power.h>
 
@@ -180,6 +181,7 @@ static bool unitemp_loadSettings(void) {
 static bool unitemp_alloc(void) {
     //Выделение памяти под данные приложения
     app = malloc(sizeof(Unitemp));
+    app->processing = true;
     //Открытие хранилища (?)
     app->storage = furi_record_open(RECORD_STORAGE);
 
@@ -189,6 +191,16 @@ static bool unitemp_alloc(void) {
     //Установка значений по умолчанию
     app->settings.infinityBacklight = true; //Подсветка горит всегда
     app->settings.unit = CELSIUM; //Единица измерения - градусы Цельсия
+
+    app->gui = furi_record_open(RECORD_GUI);
+    //Диспетчер окон
+    app->view_dispatcher = view_dispatcher_alloc();
+
+    TempHum_secene_alloc();
+
+    view_dispatcher_enable_queue(app->view_dispatcher);
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+
     return true;
 }
 
@@ -196,6 +208,13 @@ static bool unitemp_alloc(void) {
  * @brief Освыбождение памяти после работы приложения
  */
 static void unitemp_free(void) {
+    //Автоматическое управление подсветкой
+    notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
+
+    TempHum_secene_free();
+
+    view_dispatcher_free(app->view_dispatcher);
+    furi_record_close(RECORD_GUI);
     //Очистка датчиков
     for(size_t i = 0; i < app->sensors_count; i++) {
         free(app->sensors[i]);
@@ -231,20 +250,10 @@ int32_t unitemp_app() {
     //Инициализация датчиков
     unitemp_sensors_init();
 
-    uint32_t startTime = furi_get_tick();
-    while(furi_get_tick() - startTime < 10000) {
-        FURI_LOG_D(APP_NAME, "Sensors values:");
-        for(uint8_t i = 0; i < app->sensors_count; i++) {
-            UnitempStatus s = unitemp_sensor_getValues(app->sensors[i]);
-            FURI_LOG_D(
-                APP_NAME,
-                "%s (%d): %2.1f*C/%d%%",
-                app->sensors[i]->name,
-                s,
-                (double)app->sensors[i]->temp,
-                (uint8_t)app->sensors[i]->hum);
-        }
+    view_dispatcher_switch_to_view(app->view_dispatcher, TEMPHUM_VIEW);
 
+    while(app->processing) {
+        unitemp_sensors_updateValues();
         furi_delay_ms(1000);
     }
 

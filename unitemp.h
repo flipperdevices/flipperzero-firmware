@@ -6,6 +6,11 @@
 /* Подключение API Flipper Zero */
 //Файловый поток
 #include <toolbox/stream/file_stream.h>
+//Экран
+#include <gui/gui.h>
+#include <gui/view_dispatcher.h>
+#include <gui/modules/widget.h>
+
 //Уведомления
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -44,6 +49,8 @@ typedef struct {
 
 //Основная структура плагина
 typedef struct {
+    bool processing;
+
     //Основные настройки
     UnitempSettings settings;
     //Список указателей на датчики
@@ -55,7 +62,9 @@ typedef struct {
     Storage* storage; //Хранилище
     Stream* file_stream; //Файловый поток
 
-    //Уведомления
+    //Экран
+    Gui* gui;
+    ViewDispatcher* view_dispatcher;
     NotificationApp* notifications;
 } Unitemp;
 

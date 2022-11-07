@@ -158,17 +158,7 @@ bool unitemp_sensors_load() {
     file_stream_close(app->file_stream);
     stream_free(app->file_stream);
 
-    //Применение настроек
-    if(app->settings.infinityBacklight) {
-        //Постоянное свечение подсветки
-        notification_message(app->notifications, &sequence_display_backlight_enforce_on);
-    } else {
-        //Автоматическое управление
-        notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
-    }
-    app->settings.lastOTGState = furi_hal_power_is_otg_enabled();
-
-    FURI_LOG_I(APP_NAME, "Settings have been successfully loaded");
+    FURI_LOG_I(APP_NAME, "Sensors have been successfully loaded");
     return true;
 }
 
@@ -224,6 +214,8 @@ Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
     if(sensor == NULL) return false;
     sensor->name = malloc(11);
     strcpy(sensor->name, name);
+    sensor->status = UT_ERROR;
+
     //Выделение памяти под инстанс датчиков One Wire
     if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
         OneWireSensor* instance = malloc(sizeof(OneWireSensor));
@@ -281,8 +273,21 @@ bool unitemp_sensors_deInit(void) {
 UnitempStatus unitemp_sensor_getValues(Sensor* sensor) {
     if(sensor == NULL) return UT_ERROR;
 
-    if(sensor->interface == ONE_WIRE) {
-        return unitemp_oneWire_getData(sensor);
+    if(!furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_enable_otg();
     }
-    return UT_ERROR;
+
+    if(sensor->interface == ONE_WIRE) {
+        sensor->status = unitemp_oneWire_getData(sensor);
+        return sensor->status;
+    }
+
+    sensor->status = UT_ERROR;
+    return sensor->status;
+}
+
+void unitemp_sensors_updateValues(void) {
+    for(size_t i = 0; i < app->sensors_count; i++) {
+        unitemp_sensor_getValues(app->sensors[i]);
+    }
 }
