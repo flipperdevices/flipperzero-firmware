@@ -430,7 +430,7 @@ bool subghz_keystore_raw_encrypted_save(
         //skip the end of the previous line "\n"
         stream_read(input_stream, buffer, 1);
 
-        do {
+        while(true) {
             memset(buffer, 0, FILE_BUFFER_SIZE);
             ret = stream_read(input_stream, buffer, FILE_BUFFER_SIZE);
             if(ret == 0) {
@@ -464,7 +464,7 @@ bool subghz_keystore_raw_encrypted_save(
             }
             stream_write_cstring(output_stream, encrypted_line);
 
-        } while(result);
+        };
 
         flipper_format_free(output_flipper_format);
 
