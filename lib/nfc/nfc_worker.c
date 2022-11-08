@@ -341,17 +341,15 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     NfcDeviceData* data = nfc_worker->dev_data;
     ReturnCode ret = rfalNfcaPollerInitialize();
     FURI_LOG_I(TAG, "Init ret: %d", ret);
+    ret = furi_hal_nfc_ll_field_on();
+    FURI_LOG_I(TAG, "Field on: %d", ret);
+    while(!rfalIsGTExpired());
     rfalNfcaListenDevice dev;
     uint8_t dev_cnt = 0;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        ret = rfalFieldOnAndStartGT();
-        FURI_LOG_I(TAG, "Start GT ret: %d", ret);
-        if(ret != ERR_NONE) {
-            continue;
-        }
-        ret = rfalNfcaPollerSleepFullCollisionResolution(1, &dev, &dev_cnt);
-        FURI_LOG_I(TAG, "Full col res ret: %d", ret);
+        ret = rfalNfcaPollerFullCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &dev, &dev_cnt);
+        FURI_LOG_I(TAG, "Full col res ret: %d, cnt: %d", ret, dev_cnt);
         if(ret == ERR_NONE) {
             data->nfc_data.type = FuriHalNfcTypeA;
             data->nfc_data.uid_len = dev.nfcId1Len;
@@ -360,8 +358,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             data->nfc_data.atqa[1] = dev.sensRes.platformInfo;
             data->nfc_data.sak = dev.selRes.sak;
             // nfc_worker->callback(NfcWorkerEventReadUidNfcA, nfc_worker->context);
-            FURI_LOG_I(TAG, "Success");
-            bool card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
+            ret = rfalNfcaPollerSleep();
+            FURI_LOG_I(TAG, "Success. Sleep: %d", ret);
+            // bool card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
         }
     }
 }

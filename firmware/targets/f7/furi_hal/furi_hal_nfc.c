@@ -380,6 +380,7 @@ void rfal_state_changed_callback(void* context) {
 }
 
 void furi_hal_nfc_stop() {
+    rfal_event_user_abort();
     if(event) {
         furi_event_flag_set(event, EVENT_FLAG_STOP);
     }
