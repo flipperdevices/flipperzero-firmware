@@ -121,16 +121,20 @@ def insertHeader(header, cur, conn):
 
 def setAmapStylePath(line, arr):
     if line["library"].endswith(".a"):
-        arr.append(line["path"] + '/' + line["library"])  # lib
+        arr.append(line["path"] + "/" + line["library"])  # lib
         arr.append(line["object"])  # object
     else:
         arr.append("")
-        arr.append(line["path"] + '/' + line["object"])
+        arr.append(line["path"] + "/" + line["object"])
     return arr
 
+
 def demangleName(mangledName):
-    demangledName = cxxfilt.demangle(mangledName)
-    demangledName = demangledName.replace("* (", "*(")
+    dotSplitted = mangledName.split(".", 1)
+    demangledName = cxxfilt.demangle(dotSplitted[0])
+    if len(dotSplitted > 1):
+        demangledName += "." + dotSplitted[1]
+    return demangledName
 
 
 def parseMap(mapser, headerID):
