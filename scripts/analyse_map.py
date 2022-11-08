@@ -132,7 +132,7 @@ def setAmapStylePath(line, arr):
 def demangleName(mangledName):
     dotSplitted = mangledName.split(".", 1)
     demangledName = cxxfilt.demangle(dotSplitted[0])
-    if len(dotSplitted > 1):
+    if len(dotSplitted) > 1:
         demangledName += "." + dotSplitted[1]
     return demangledName
 
