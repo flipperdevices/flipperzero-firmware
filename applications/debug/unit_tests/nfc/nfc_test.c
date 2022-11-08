@@ -298,8 +298,8 @@ MU_TEST(mf_classic_dict_load_test) {
 
 MU_TEST(nfca_file_test) {
     NfcDevice* nfc = nfc_device_alloc();
-    nfc->format = NfcDeviceSaveFormatUid;
     mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
+    nfc->format = NfcDeviceSaveFormatUid;
 
     // Fill the UID, sak, ATQA and type
     uint8_t uid[7] = {0x04, 0x01, 0x23, 0x45, 0x67, 0x89, 0x00};
@@ -337,8 +337,8 @@ MU_TEST(nfca_file_test) {
 
 MU_TEST(mf_classic_1k_4b_file_test) {
     NfcDevice* nfc = nfc_device_alloc();
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
     mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
+    nfc->format = NfcDeviceSaveFormatMifareClassic;
 
     // Create a test file
     nfc_generate_mf_classic(&nfc->dev_data, 4, MfClassicType1k);
@@ -459,12 +459,13 @@ MU_TEST(mf_classic_1k_4b_file_test) {
                 "data block is not 0xFF[16]\r\n");
         }
     }
+    nfc_device_free(nfc_validate);
 }
 
 MU_TEST(mf_classic_4k_4b_file_test) {
     NfcDevice* nfc = nfc_device_alloc();
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
     mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
+    nfc->format = NfcDeviceSaveFormatMifareClassic;
 
     // Create a test file
     nfc_generate_mf_classic(&nfc->dev_data, 4, MfClassicType4k);
@@ -624,12 +625,13 @@ MU_TEST(mf_classic_4k_4b_file_test) {
                 "data block is not 0xFF[16]\r\n");
         }
     }
+    nfc_device_free(nfc_validate);
 }
 
 MU_TEST(mf_classic_1k_7b_file_test) {
     NfcDevice* nfc = nfc_device_alloc();
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
     mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
+    nfc->format = NfcDeviceSaveFormatMifareClassic;
 
     // Create a test file
     nfc_generate_mf_classic(&nfc->dev_data, 7, MfClassicType1k);
@@ -750,12 +752,13 @@ MU_TEST(mf_classic_1k_7b_file_test) {
                 "data block is not 0xFF[16]\r\n");
         }
     }
+    nfc_device_free(nfc_validate);
 }
 
 MU_TEST(mf_classic_4k_7b_file_test) {
     NfcDevice* nfc = nfc_device_alloc();
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
     mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
+    nfc->format = NfcDeviceSaveFormatMifareClassic;
 
     // Create a test file
     nfc_generate_mf_classic(&nfc->dev_data, 7, MfClassicType4k);
@@ -915,6 +918,7 @@ MU_TEST(mf_classic_4k_7b_file_test) {
                 "data block is not 0xFF[16]\r\n");
         }
     }
+    nfc_device_free(nfc_validate);
 }
 
 MU_TEST_SUITE(nfc) {
