@@ -50,12 +50,12 @@ git clone https://github.com/csBlueChip/FlipperZero_plugin_howto.git ./
 Compile with:
 ```
 cd ~/flipperZero/official/
-./fbt firmware_bc_demo
+./fbt fap_bc_demo
 ```
 ...And/Or (Compile and) Upload with:
 ```
 cd ~/flipperZero/official/
-./fbt launch_app APPSRC=applications/bc_demo/
+./fbt launch_app APPSRC=bc_demo
 ```
 ...Flashing will fail if the FlipperZero is in the applications menu, or running an application!
 
