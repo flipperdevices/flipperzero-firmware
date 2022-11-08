@@ -20,6 +20,11 @@ In order to run the unit tests, follow these steps:
 See [test_index.c](applications/debug/unit_tests/test_index.c) for the complete list of test names.
 
 ## Adding unit tests
+### General
+#### Entry point
+The common entry point for all tests it the [unit_tests](applications/debug/unit_tests) application. Test-specific code is placed into an arbitrarily named subdirectory and is then called from the [test_index.c](applications/debug/unit_tests/test_index.c) source file.
+#### Test assets
+Some unit tests require external data in order to function. These files (commonly called assets) reside in the [assets/unit_tests](/assets/unit_tests) directory in their respective subdirectories. Asset files can be of any type (plain text, FlipperFormat(FFF), binary etc).
 ### Application-specific
 #### Infrared
 Each infrared protocol has a corresponding set of unit tests, so it makes sense to implement one when adding support for a new protocol.
@@ -29,12 +34,16 @@ In order to add unit tests for your protocol, follow these steps:
 3. Add the test code to [infrared_test.c](applications/debug/unit_tests/infrared/infrared_test.c).
 4. Update the [assets](assets/unit_tests/infrared) on your Flipper Zero and run the tests to see if they pass.
 
-**Test data format**
+##### Test data format
 Each unit test has 3 sections: 
 1. `decoder` - takes in raw signal and outputs decoded messages.
 2. `encoder` - takes in decoded messages and outputs raw signal.
 3. `encoder_decoder` - takes in decoded messages, turns them into raw signal and then decodes again. 
 
-Infrared test asset files have an extension `.irtest` and are basically regular `.ir` files with a few additions.
-Decoder input data has signal names `decoder_input_N` where N is a number of the sequence. Likewise, the expected data goes under the name `decoder_expected_N`. When testing the encoder these two are switched.
-Decoded data is represented in arrays (since a single raw signal may decode to several messages). If there is only one signal, then it has to be an array of size 1.
+Infrared test asset files have an `.irtest` extension and are regular `.ir` files with a few additions.
+Decoder input data has signal names `decoder_input_N`, where N is a test sequence number. Expected data goes under the name `decoder_expected_N`. When testing the encoder these two are switched.
+
+Decoded data is represented in arrays (since a single raw signal may decode to several messages). If there is only one signal, then it has to be an array of size 1. Use the existing files as syntax examples.
+
+##### Getting raw signals
+Recording raw IR signals is possible using Flipper Zero. Launch the CLI session, run `ir rx raw`, then point the remote towards Flipper's receiver and send the signals. The raw signal data will be printed to the console in a convenient format.
