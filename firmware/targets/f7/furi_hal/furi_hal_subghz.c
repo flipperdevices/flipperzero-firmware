@@ -494,7 +494,7 @@ void furi_hal_subghz_stop_async_rx() {
 
 typedef struct {
     uint32_t* buffer;
-    bool flip_flop;
+    bool is_old_level;
     FuriHalSubGhzAsyncTxCallback callback;
     void* callback_context;
     uint64_t duty_high;
@@ -505,7 +505,6 @@ static FuriHalSubGhzAsyncTx furi_hal_subghz_async_tx = {0};
 
 static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
     while(samples > 0) {
-        bool is_odd = samples % 2;
         LevelDuration ld =
             furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
 
@@ -513,21 +512,23 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
             buffer++;
             samples--;
+            furi_hal_subghz_async_tx.is_old_level = !furi_hal_subghz_async_tx.is_old_level;
             continue;
         } else if(level_duration_is_reset(ld)) {
             // One more even sample required to end at low level
-            if(is_odd) {
+            if(!furi_hal_subghz_async_tx.is_old_level) {
                 *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 buffer++;
                 samples--;
                 furi_hal_subghz_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
             }
+            furi_hal_subghz_async_tx.is_old_level = !furi_hal_subghz_async_tx.is_old_level;
             memset(buffer, 0, samples * sizeof(uint32_t));
             return;
         } else {
             // Inject guard time if level is incorrect, any method except size_buf-1
             bool level = level_duration_get_level(ld);
-            if((is_odd == level) && (samples > 2)) {
+            if((furi_hal_subghz_async_tx.is_old_level == level) && (samples > 2)) {
                 *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 buffer++;
                 samples--;
@@ -536,6 +537,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
                 } else {
                     furi_hal_subghz_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 }
+                furi_hal_subghz_async_tx.is_old_level = !furi_hal_subghz_async_tx.is_old_level;
             }
 
             uint32_t duration = level_duration_get_duration(ld);
@@ -543,6 +545,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             *buffer = duration;
             buffer++;
             samples--;
+            furi_hal_subghz_async_tx.is_old_level = !furi_hal_subghz_async_tx.is_old_level;
 
             if(level) {
                 furi_hal_subghz_async_tx.duty_high += duration;
@@ -603,6 +606,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     furi_hal_subghz_async_tx.duty_low = 0;
     furi_hal_subghz_async_tx.duty_high = 0;
+    furi_hal_subghz_async_tx.is_old_level = false;
 
     furi_hal_subghz_async_tx.buffer =
         malloc(API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * sizeof(uint32_t));
