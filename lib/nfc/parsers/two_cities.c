@@ -127,7 +127,7 @@ bool two_cities_parser_parse(NfcDeviceData* dev_data) {
     card_number_suffix = furi_string_alloc();
 
     furi_string_cat_printf(card_number_suffix, "-");
-    furi_string_cat_printf(card_number_str, furi_string_get_cstr(card_number_suffix));
+    furi_string_cat_printf(card_number_str, "%s", furi_string_get_cstr(card_number_suffix));
     // Free all not needed strings
     furi_string_free(card_number_suffix);
 
