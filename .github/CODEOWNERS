@@ -57,3 +57,6 @@
 /lib/nfc/ @skotopes @DrZlo13 @hedger @gornekich
 /lib/one_wire/ @skotopes @DrZlo13 @hedger @gsurkov
 /lib/subghz/ @skotopes @DrZlo13 @hedger @Skorpionm
+
+# CI/CD
+.github/workflows/ @drunkbatya
