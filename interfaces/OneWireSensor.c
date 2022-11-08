@@ -6,7 +6,7 @@
 //Максимальное количество попугаев ожидания датчика
 #define POLLING_TIMEOUT_TICKS 10000
 
-void unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st) {
+bool unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anotherValues) {
     OneWireSensor* instance = malloc(sizeof(OneWireSensor));
     instance->interface = ONE_WIRE;
     instance->lastPollingTime = 0xFFFFFFFF;
@@ -17,6 +17,12 @@ void unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st) {
 
     sensor->instance = instance;
     sensor->type = st;
+
+    if(unitemp_GPIO_getFromInt(anotherValues[0]) != NULL) {
+        unitemp_oneWire_sensorSetGPIO(sensor, unitemp_GPIO_getFromInt(anotherValues[0]));
+        return true;
+    }
+    return false;
 }
 
 bool unitemp_oneWire_sensorInit(void* sensor) {

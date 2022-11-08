@@ -140,16 +140,14 @@ bool unitemp_sensors_load() {
         //Ограничение длины имени
         name[10] = '\0';
         FURI_LOG_D(APP_NAME, "%s %d %d", name, type, otherValue);
+
+        uint16_t otherValues[] = {otherValue};
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
-            app->sensors[app->sensors_count] = unitemp_sensor_alloc(name, type);
-            if(app->sensors[app->sensors_count]->interface == ONE_WIRE) {
-                if(unitemp_GPIO_getFromInt(otherValue) != NULL) {
-                    unitemp_oneWire_sensorSetGPIO(
-                        app->sensors[app->sensors_count], unitemp_GPIO_getFromInt(otherValue));
-                    //Сохранение датчика если всё ок
-                    app->sensors_count++;
-                }
+            app->sensors[app->sensors_count] = unitemp_sensor_alloc(name, type, otherValues);
+            if(app->sensors[app->sensors_count] != NULL) {
+                //Сохранение датчика если всё ок
+                app->sensors_count++;
             }
         }
         line = strtok((char*)NULL, "\n");
@@ -208,7 +206,7 @@ bool unitemp_sensors_save(void) {
     return true;
 }
 
-Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
+Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues) {
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));
     if(sensor == NULL) return false;
@@ -218,7 +216,7 @@ Sensor* unitemp_sensor_alloc(char* name, SensorType st) {
 
     //Выделение памяти под инстанс датчиков One Wire
     if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
-        unitemp_oneWire_sensorAlloc(sensor, st);
+        unitemp_oneWire_sensorAlloc(sensor, st, anotherValues);
     }
     return sensor;
 }

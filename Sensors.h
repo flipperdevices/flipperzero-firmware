@@ -121,9 +121,10 @@ uint8_t unitemp_GPIO_toInt(const GpioPin* gpio);
  * 
  * @param name Имя датчика
  * @param st Тип датчика
+ * @param anotherValues Массив других различных значений
  * @return Указатель на датчик
  */
-Sensor* unitemp_sensor_alloc(char* name, SensorType st);
+Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues);
 
 /**
  * @brief Инициализация загруженных датчиков
