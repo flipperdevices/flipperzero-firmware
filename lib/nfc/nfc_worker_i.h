@@ -14,6 +14,15 @@
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/nfc/helpers/reader_analyzer.h>
 
+typedef enum {
+    NfcReadModeAuto,
+    NfcReadModeMfClassic,
+    NfcReadModeMfUltralight,
+    NfcReadModeMfDesfire,
+    NfcReadModeEMV,
+    NfcReadModeNFCA,
+} NfcReadMode;
+
 struct NfcWorker {
     FuriThread* thread;
     Storage* storage;
@@ -26,6 +35,8 @@ struct NfcWorker {
 
     NfcWorkerState state;
 
+    NfcReadMode read_mode;
+
     ReaderAnalyzer* reader_analyzer;
 };
 
@@ -35,7 +46,7 @@ int32_t nfc_worker_task(void* context);
 
 void nfc_worker_read(NfcWorker* nfc_worker);
 
-void nfc_worker_read_mifare_classic(NfcWorker* nfc_worker);
+void nfc_worker_read_type(NfcWorker* nfc_worker);
 
 void nfc_worker_emulate_uid(NfcWorker* nfc_worker);
 

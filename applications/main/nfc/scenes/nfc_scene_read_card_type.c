@@ -1,10 +1,12 @@
 #include "../nfc_i.h"
+#include "nfc_worker_i.h"
 
 enum SubmenuIndex {
     SubmenuIndexReadMifareClassic,
     SubmenuIndexReadMifareDesfire,
     SubmenuIndexReadMfUltralight,
     SubmenuIndexReadEMV,
+    SubmenuIndexReadNFCA,
 };
 
 void nfc_scene_read_card_type_submenu_callback(void* context, uint32_t index) {
@@ -41,6 +43,12 @@ void nfc_scene_read_card_type_on_enter(void* context) {
         SubmenuIndexReadEMV,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
+    submenu_add_item(
+        submenu,
+        "Read NFC-A data",
+        SubmenuIndexReadNFCA,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
@@ -51,7 +59,28 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexReadMifareClassic) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneReadMfClassic);
+            nfc->worker->read_mode = NfcReadModeMfClassic;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadMifareDesfire) {
+            nfc->worker->read_mode = NfcReadModeMfDesfire;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadMfUltralight) {
+            nfc->worker->read_mode = NfcReadModeMfUltralight;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadEMV) {
+            nfc->worker->read_mode = NfcReadModeEMV;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadNFCA) {
+            nfc->worker->read_mode = NfcReadModeNFCA;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCardType, event.event);
