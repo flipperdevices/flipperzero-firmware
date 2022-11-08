@@ -22,6 +22,7 @@ bool unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anothe
         unitemp_oneWire_sensorSetGPIO(sensor, unitemp_GPIO_getFromInt(anotherValues[0]));
         return true;
     }
+    free(instance);
     return false;
 }
 

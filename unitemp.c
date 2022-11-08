@@ -141,7 +141,6 @@ static bool unitemp_loadSettings(void) {
             } else {
                 app->settings.infinityBacklight = true;
             }
-            FURI_LOG_D(APP_NAME, "INFINITY_BACKLIGHT: %d\r\n", p);
         } else if(!strcmp(buff, "UNIT")) {
             //Чтение значения параметра
             int p = 0;
@@ -151,7 +150,6 @@ static bool unitemp_loadSettings(void) {
             } else {
                 app->settings.unit = FAHRENHEIT;
             }
-            FURI_LOG_D(APP_NAME, "UNIT: %d\r\n", p);
         } else {
             FURI_LOG_W(APP_NAME, "Unknown settings parameter: %s\r\n", buff);
         }

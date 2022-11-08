@@ -1,5 +1,6 @@
 #include "Sensors.h"
 #include "./interfaces/OneWireSensor.h"
+#include "./interfaces/I2CSensor.h"
 
 #include <furi_hal_power.h>
 
@@ -144,14 +145,13 @@ bool unitemp_sensors_load() {
         uint16_t otherValues[] = {otherValue};
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
-            app->sensors[app->sensors_count] = unitemp_sensor_alloc(name, type, otherValues);
-            if(app->sensors[app->sensors_count] != NULL) {
-                //Сохранение датчика если всё ок
-                app->sensors_count++;
-            }
+            unitemp_sensor_alloc(name, type, otherValues);
         }
         line = strtok((char*)NULL, "\n");
     }
+    uint16_t otherValues[] = {0x76};
+    unitemp_sensor_alloc("BMP280", BMP280, otherValues);
+
     free(file_buf);
     file_stream_close(app->file_stream);
     stream_free(app->file_stream);
@@ -207,6 +207,7 @@ bool unitemp_sensors_save(void) {
 }
 
 Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues) {
+    bool status = false;
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));
     if(sensor == NULL) return false;
@@ -216,9 +217,24 @@ Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues)
 
     //Выделение памяти под инстанс датчиков One Wire
     if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
-        unitemp_oneWire_sensorAlloc(sensor, st, anotherValues);
+        status = unitemp_oneWire_sensorAlloc(sensor, st, anotherValues);
     }
-    return sensor;
+    //Выделение памяти под инстанс датчиков I2C
+    if(st == BMP280) {
+        status = unitemp_I2C_sensorAlloc(sensor, st, anotherValues);
+    }
+
+    //Если датчик успешно развёрнут, то добавление его в общий список и выход
+    if(status) {
+        app->sensors[app->sensors_count] = sensor;
+        app->sensors_count++;
+        return sensor;
+    }
+    //Если ни один из типов не подошёл, то выход с очисткой
+    free(sensor->name);
+    free(sensor);
+    FURI_LOG_E(APP_NAME, "Sensor %s allocation error", name);
+    return NULL;
 }
 
 bool unitemp_sensors_init(void) {
