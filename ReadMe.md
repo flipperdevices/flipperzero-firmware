@@ -14,6 +14,7 @@
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-07 17:28 EST`
 - Updated Clock Animation In Konami Mode
 - Fixed RFID to be internally compiled for decreased access time for keys
+- [Barcode generator: rfct, ux improvements, implement EAN-8. #154 (By msvsergey)](https://github.com/DarkFlippers/unleashed-firmware/pull/154)
 
 <details>
   <summary><B>TO DO / REMOVED</b></summary><br/>
