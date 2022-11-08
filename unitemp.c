@@ -1,6 +1,6 @@
 #include "unitemp.h"
-#include "interfaces/OneWire.h"
-#include "interfaces/Sensors.h"
+#include "interfaces/OneWireSensor.h"
+#include "Sensors.h"
 #include "scenes/Scenes.h"
 
 #include <furi_hal_power.h>
