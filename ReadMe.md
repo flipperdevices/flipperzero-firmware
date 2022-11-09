@@ -195,6 +195,7 @@ $ ./fbt plugin_dist
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Minesweeper (By panki27)](https://github.com/panki27/minesweeper)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
+- [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Snake (By OlegSchwann)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/829)(With updates from DrZlo13, xMasterX, QtRoS and RogueMaster) [Snake Score Saving (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922) [Turns anywhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/125) [Food Spawns Anywwhere (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/130)
 - [T-Rex (By gelin)](https://github.com/gelin/t-rex-runner) WIP
 - [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
@@ -240,7 +241,6 @@ $ ./fbt plugin_dist
 - [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) [Changes by Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) [(More protocols thanks to darmiel & xMasterX)](https://github.com/darmiel/flipper-playlist/blob/feat/unirf-protocols/applications/unirfremix/unirfremix_app.c)
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
-- [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Signal Generator (By nminaylov)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
