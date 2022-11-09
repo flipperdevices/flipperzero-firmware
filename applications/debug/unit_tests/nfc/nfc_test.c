@@ -19,13 +19,7 @@
 #define NFC_TEST_SIGNAL_SHORT_FILE "nfc_nfca_signal_short.nfc"
 #define NFC_TEST_SIGNAL_LONG_FILE "nfc_nfca_signal_long.nfc"
 #define NFC_TEST_DICT_PATH EXT_PATH("unit_tests/mf_classic_dict.nfc")
-#define NFC_TEST_NFCA_PATH EXT_PATH("unit_tests/nfc/nfca.nfc")
-#define NFC_TEST_MFC_1K_4B_PATH EXT_PATH("unit_tests/nfc/mf_classic_1k_4b.nfc")
-#define NFC_TEST_MFC_4K_4B_PATH EXT_PATH("unit_tests/nfc/mf_classic_4k_4b.nfc")
-#define NFC_TEST_MFC_1K_7B_PATH EXT_PATH("unit_tests/nfc/mf_classic_1k_7b.nfc")
-#define NFC_TEST_MFC_4K_7B_PATH EXT_PATH("unit_tests/nfc/mf_classic_4k_7b.nfc")
-#define NFC_TEST_MFU_PATH EXT_PATH("unit_tests/nfc/mf_ultralight.nfc")
-#define NFC_TEST_MFDES_PATH EXT_PATH("unit_tests/nfc/mf_desfire.nfc")
+#define NFC_TEST_NFC_DEV_PATH EXT_PATH("unit_tests/nfc/nfc_dev_test.nfc")
 
 static const char* nfc_test_file_type = "Flipper NFC test";
 static const uint32_t nfc_test_file_version = 1;
@@ -313,13 +307,13 @@ MU_TEST(nfca_file_test) {
 
     // Save the NFC device data to the file
     mu_assert(
-        nfc_device_save(nfc, NFC_TEST_NFCA_PATH), "nfc_device_save == true assert failed\r\n");
+        nfc_device_save(nfc, NFC_TEST_NFC_DEV_PATH), "nfc_device_save == true assert failed\r\n");
     nfc_device_free(nfc);
 
     // Load the NFC device data from the file
     NfcDevice* nfc_validate = nfc_device_alloc();
     mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_NFCA_PATH, true),
+        nfc_device_load(nfc_validate, NFC_TEST_NFC_DEV_PATH, true),
         "nfc_device_load == true assert failed\r\n");
 
     // Check the UID, sak, ATQA and type
@@ -335,30 +329,34 @@ MU_TEST(nfca_file_test) {
     nfc_device_free(nfc_validate);
 }
 
-MU_TEST(mf_classic_1k_4b_file_test) {
-    NfcDevice* nfc = nfc_device_alloc();
-    mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
+static void mf_classic_generator_test(uint8_t uid_len, MfClassicType type) {
+    NfcDevice* nfc_dev = nfc_device_alloc();
+    mu_assert(nfc_dev != NULL, "nfc_device_data != NULL assert failed\r\n");
+    nfc_dev->format = NfcDeviceSaveFormatMifareClassic;
 
     // Create a test file
-    nfc_generate_mf_classic(&nfc->dev_data, 4, MfClassicType1k);
+    nfc_generate_mf_classic(&nfc_dev->dev_data, uid_len, type);
 
-    // Get the uid from the test file
-    uint8_t uid[4] = {0};
-    memcpy(uid, nfc->dev_data.nfc_data.uid, 4);
+    // Get the uid from generated MFC
+    uint8_t uid[7] = {0};
+    memcpy(uid, nfc_dev->dev_data.nfc_data.uid, uid_len);
+    uint8_t sak = nfc_dev->dev_data.nfc_data.sak;
+    uint8_t atqa[2] = {};
+    memcpy(atqa, nfc_dev->dev_data.nfc_data.atqa, 2);
 
-    // Check the manufacturer block (should be uid[4] + 0xFF[rest])
+    MfClassicData* mf_data = &nfc_dev->dev_data.mf_classic_data;
+    // Check the manufacturer block (should be uid[uid_len] + 0xFF[rest])
     uint8_t manufacturer_block[16] = {0};
-    memcpy(manufacturer_block, nfc->dev_data.mf_classic_data.block[0].value, 16);
+    memcpy(manufacturer_block, nfc_dev->dev_data.mf_classic_data.block[0].value, 16);
     mu_assert(
-        memcmp(manufacturer_block, uid, 4) == 0,
+        memcmp(manufacturer_block, uid, uid_len) == 0,
         "manufacturer_block uid doesn't match the file\r\n");
-    for(uint8_t i = 4; i < 16; i++) {
+    for(uint8_t i = uid_len; i < 16; i++) {
         mu_assert(
             manufacturer_block[i] == 0xFF, "manufacturer_block[i] == 0xFF assert failed\r\n");
     }
 
-    // Check sector trailers (should be 0xFF[6] + 0xFF + 0x07 + 0x80 + 0x69 + 0xFF[6])
+    // Reference sector trailers (should be 0xFF[6] + 0xFF + 0x07 + 0x80 + 0x69 + 0xFF[6])
     uint8_t sector_trailer[16] = {
         0xFF,
         0xFF,
@@ -376,50 +374,51 @@ MU_TEST(mf_classic_1k_4b_file_test) {
         0xFF,
         0xFF,
         0xFF};
-    for(uint8_t i = 0; i < 16; i++) {
-        mu_assert(
-            nfc->dev_data.mf_classic_data.block[4 * i + 3].value[i] == sector_trailer[i],
-            "sector_trailer[i] assert failed\r\n");
-    }
-
-    // Check data blocks (should be 0xFF[16])
-    uint8_t data_block[16];
-    memset(data_block, 0xFF, 16);
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 16; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
+    // Reference block data
+    uint8_t block_data[16] = {};
+    memset(block_data, 0xff, sizeof(block_data));
+    uint16_t total_blocks = mf_classic_get_total_block_num(type);
+    for(size_t i = 1; i < total_blocks; i++) {
+        if(mf_classic_is_sector_trailer(i)) {
             mu_assert(
-                memcmp(nfc->dev_data.mf_classic_data.block[4 * i + j].value, data_block, 16) == 0,
-                "data block is not 0xFF[16]\r\n");
+                memcmp(mf_data->block[i].value, sector_trailer, 16) == 0,
+                "Failed sector trailer compare");
+        } else {
+            mu_assert(memcmp(mf_data->block[i].value, block_data, 16) == 0, "Failed data compare");
         }
     }
-
     // Save the NFC device data to the file
     mu_assert(
-        nfc_device_save(nfc, NFC_TEST_MFC_1K_4B_PATH),
+        nfc_device_save(nfc_dev, NFC_TEST_NFC_DEV_PATH),
         "nfc_device_save == true assert failed\r\n");
-    nfc_device_free(nfc);
+    // Verify that key cache is saved
+    FuriString* key_cache_name = furi_string_alloc();
+    furi_string_set_str(key_cache_name, "/ext/nfc/cache/");
+    for(size_t i = 0; i < uid_len; i++) {
+        furi_string_cat_printf(key_cache_name, "%02X", uid[i]);
+    }
+    furi_string_cat_printf(key_cache_name, ".keys");
+    mu_assert(
+        storage_common_stat(nfc_dev->storage, furi_string_get_cstr(key_cache_name), NULL) ==
+            FSE_OK,
+        "Key cache file save failed");
+    nfc_device_free(nfc_dev);
 
     // Load the NFC device data from the file
     NfcDevice* nfc_validate = nfc_device_alloc();
+    mu_assert(nfc_validate, "Nfc device alloc assert");
     mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_MFC_1K_4B_PATH, true),
+        nfc_device_load(nfc_validate, NFC_TEST_NFC_DEV_PATH, false),
         "nfc_device_load == true assert failed\r\n");
 
     // Check the UID, sak, ATQA and type
-    mu_assert(memcmp(nfc_validate->dev_data.nfc_data.uid, uid, 4) == 0, "uid assert failed\r\n");
-    mu_assert(nfc_validate->dev_data.nfc_data.sak == 0x08, "sak == 0x08 assert failed\r\n");
     mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[0] == 0x44, "atqa[0] == 0x00 assert failed\r\n");
+        memcmp(nfc_validate->dev_data.nfc_data.uid, uid, uid_len) == 0,
+        "uid compare assert failed\r\n");
+    mu_assert(nfc_validate->dev_data.nfc_data.sak == sak, "sak compare assert failed\r\n");
     mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[1] == 0x00, "atqa[1] == 0x04 assert failed\r\n");
+        memcmp(nfc_validate->dev_data.nfc_data.atqa, atqa, 2) == 0,
+        "atqa compare assert failed\r\n");
     mu_assert(
         nfc_validate->dev_data.nfc_data.type == FuriHalNfcTypeA,
         "type == FuriHalNfcTypeA assert failed\r\n");
@@ -428,497 +427,56 @@ MU_TEST(mf_classic_1k_4b_file_test) {
     mu_assert(
         memcmp(nfc_validate->dev_data.mf_classic_data.block[0].value, manufacturer_block, 16) == 0,
         "manufacturer_block assert failed\r\n");
-
-    // Check sector trailers
-    for(uint8_t i = 0; i < 16; i++) {
-        mu_assert(
-            memcmp(
-                nfc_validate->dev_data.mf_classic_data.block[4 * i + 3].value,
-                sector_trailer,
-                16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc_validate->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc_validate->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 16; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
+    // Check other blocks
+    for(size_t i = 1; i < total_blocks; i++) {
+        if(mf_classic_is_sector_trailer(i)) {
             mu_assert(
-                memcmp(
-                    nfc_validate->dev_data.mf_classic_data.block[4 * i + j].value,
-                    data_block,
-                    16) == 0,
-                "data block is not 0xFF[16]\r\n");
+                memcmp(mf_data->block[i].value, sector_trailer, 16) == 0,
+                "Failed sector trailer compare");
+        } else {
+            mu_assert(memcmp(mf_data->block[i].value, block_data, 16) == 0, "Failed data compare");
         }
     }
     nfc_device_free(nfc_validate);
+
+    // Check saved key cache
+    NfcDevice* nfc_keys = nfc_device_alloc();
+    mu_assert(nfc_validate, "Nfc device alloc assert");
+    nfc_keys->dev_data.nfc_data.uid_len = uid_len;
+    memcpy(nfc_keys->dev_data.nfc_data.uid, uid, uid_len);
+    mu_assert(nfc_device_load_key_cache(nfc_keys), "Failed to load key cache");
+    uint8_t total_sec = mf_classic_get_total_sectors_num(type);
+    uint8_t default_key[6] = {};
+    memset(default_key, 0xff, 6);
+    for(size_t i = 0; i < total_sec; i++) {
+        MfClassicSectorTrailer* sec_tr =
+            mf_classic_get_sector_trailer_by_sector(&nfc_keys->dev_data.mf_classic_data, i);
+        mu_assert(memcmp(sec_tr->key_a, default_key, 6) == 0, "Failed key compare");
+        mu_assert(memcmp(sec_tr->key_b, default_key, 6) == 0, "Failed key compare");
+    }
+
+    // Delete key cache file
+    mu_assert(
+        storage_common_remove(nfc_keys->storage, furi_string_get_cstr(key_cache_name)) == FSE_OK,
+        "Failed to remove key cache file");
+    furi_string_free(key_cache_name);
+    nfc_device_free(nfc_keys);
+}
+
+MU_TEST(mf_classic_1k_4b_file_test) {
+    mf_classic_generator_test(4, MfClassicType1k);
 }
 
 MU_TEST(mf_classic_4k_4b_file_test) {
-    NfcDevice* nfc = nfc_device_alloc();
-    mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
-
-    // Create a test file
-    nfc_generate_mf_classic(&nfc->dev_data, 4, MfClassicType4k);
-
-    // Get the uid from the test file
-    uint8_t uid[4] = {0};
-    memcpy(uid, nfc->dev_data.nfc_data.uid, 4);
-
-    // Check the manufacturer block (should be uid[4] + 0xFF[rest])
-    uint8_t manufacturer_block[16] = {0};
-    memcpy(manufacturer_block, nfc->dev_data.mf_classic_data.block[0].value, 16);
-    mu_assert(memcmp(manufacturer_block, uid, 4) == 0, "manufacturer_block uid assert failed\r\n");
-    for(uint8_t i = 4; i < 16; i++) {
-        mu_assert(manufacturer_block[i] == 0xFF, "manufacturer_block 0xFF assert failed\r\n");
-    }
-
-    // Check sector trailers for the 2K part
-    uint8_t sector_trailer[16] = {
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0x07,
-        0x80,
-        0x69,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF};
-    for(uint8_t i = 0; i < 32; i++) {
-        mu_assert(
-            memcmp(nfc->dev_data.mf_classic_data.block[4 * i + 3].value, sector_trailer, 16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks
-    uint8_t data_block[16];
-    memset(data_block, 0xFF, 16);
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 32; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
-            mu_assert(
-                memcmp(nfc->dev_data.mf_classic_data.block[4 * i + j].value, data_block, 16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Check the sector trailer for the 4K part (sectors 32-40 contain 15 data blocks and 1 trailer)
-    for(uint8_t i = 32; i < 40; i++) {
-        mu_assert(
-            memcmp(
-                nfc->dev_data.mf_classic_data.block[16 * (i - 32) + 15].value,
-                sector_trailer,
-                16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks for the 4K part
-    for(uint8_t i = 0; i < 8; i++) {
-        for(uint8_t j = 0; j < 15; j++) {
-            mu_assert(
-                memcmp(
-                    nfc->dev_data.mf_classic_data.block[128 + (16 * i + j)].value,
-                    data_block,
-                    16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Save the test file
-    // Save the NFC device data to the file
-    mu_assert(
-        nfc_device_save(nfc, NFC_TEST_MFC_4K_4B_PATH),
-        "nfc_device_save == true assert failed\r\n");
-    nfc_device_free(nfc);
-
-    // Load the NFC device data from the file
-    NfcDevice* nfc_validate = nfc_device_alloc();
-    mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_MFC_4K_4B_PATH, true),
-        "nfc_device_load == true assert failed\r\n");
-
-    // Check the UID, sak, ATQA and type
-    mu_assert(memcmp(nfc_validate->dev_data.nfc_data.uid, uid, 4) == 0, "uid assert failed\r\n");
-    mu_assert(nfc_validate->dev_data.nfc_data.sak == 0x18, "sak == 0x18 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[0] == 0x44, "atqa[0] == 0x00 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[1] == 0x00, "atqa[1] == 0x04 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.type == FuriHalNfcTypeA,
-        "type == FuriHalNfcTypeA assert failed\r\n");
-
-    // Check the manufacturer block (should be uid[4] + 0xFF[rest])
-    memcpy(manufacturer_block, nfc->dev_data.mf_classic_data.block[0].value, 16);
-    mu_assert(memcmp(manufacturer_block, uid, 4) == 0, "manufacturer_block uid assert failed\r\n");
-    for(uint8_t i = 4; i < 16; i++) {
-        mu_assert(manufacturer_block[i] == 0xFF, "manufacturer_block 0xFF assert failed\r\n");
-    }
-
-    // Check sector trailers for the 2K part
-    for(uint8_t i = 0; i < 32; i++) {
-        mu_assert(
-            memcmp(nfc->dev_data.mf_classic_data.block[4 * i + 3].value, sector_trailer, 16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 32; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
-            mu_assert(
-                memcmp(nfc->dev_data.mf_classic_data.block[4 * i + j].value, data_block, 16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Check the sector trailer for the 4K part (sectors 32-40 contain 15 data blocks and 1 trailer)
-    for(uint8_t i = 32; i < 40; i++) {
-        mu_assert(
-            memcmp(
-                nfc->dev_data.mf_classic_data.block[16 * (i - 32) + 15].value,
-                sector_trailer,
-                16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks for the 4K part
-    for(uint8_t i = 0; i < 8; i++) {
-        for(uint8_t j = 0; j < 15; j++) {
-            mu_assert(
-                memcmp(
-                    nfc->dev_data.mf_classic_data.block[128 + (16 * i + j)].value,
-                    data_block,
-                    16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-    nfc_device_free(nfc_validate);
+    mf_classic_generator_test(4, MfClassicType4k);
 }
 
 MU_TEST(mf_classic_1k_7b_file_test) {
-    NfcDevice* nfc = nfc_device_alloc();
-    mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
-
-    // Create a test file
-    nfc_generate_mf_classic(&nfc->dev_data, 7, MfClassicType1k);
-
-    // Get the uid from the test file
-    uint8_t uid[7] = {0};
-    memcpy(uid, nfc->dev_data.nfc_data.uid, 7);
-
-    // Check the manufacturer block (should be uid[7] + 0xFF[rest])
-    uint8_t manufacturer_block[16] = {0};
-    memcpy(manufacturer_block, nfc->dev_data.mf_classic_data.block[0].value, 16);
-    mu_assert(
-        memcmp(manufacturer_block, uid, 7) == 0,
-        "manufacturer_block uid doesn't match the file\r\n");
-    for(uint8_t i = 7; i < 16; i++) {
-        mu_assert(
-            manufacturer_block[i] == 0xFF, "manufacturer_block[i] == 0xFF assert failed\r\n");
-    }
-
-    // Check sector trailers (should be 0xFF[6] + 0xFF + 0x07 + 0x80 + 0x69 + 0xFF[6])
-    uint8_t sector_trailer[16] = {
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0x07,
-        0x80,
-        0x69,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF};
-    for(uint8_t i = 0; i < 16; i++) {
-        mu_assert(
-            nfc->dev_data.mf_classic_data.block[4 * i + 3].value[i] == sector_trailer[i],
-            "sector_trailer[i] assert failed\r\n");
-    }
-
-    // Check data blocks (should be 0xFF[16])
-    uint8_t data_block[16];
-    memset(data_block, 0xFF, 16);
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 16; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
-            mu_assert(
-                memcmp(nfc->dev_data.mf_classic_data.block[4 * i + j].value, data_block, 16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Save the NFC device data to the file
-    mu_assert(
-        nfc_device_save(nfc, NFC_TEST_MFC_1K_7B_PATH),
-        "nfc_device_save == true assert failed\r\n");
-    nfc_device_free(nfc);
-
-    // Load the NFC device data from the file
-    NfcDevice* nfc_validate = nfc_device_alloc();
-    mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_MFC_1K_7B_PATH, true),
-        "nfc_device_load == true assert failed\r\n");
-
-    // Check the UID, sak, ATQA and type
-    mu_assert(memcmp(nfc_validate->dev_data.nfc_data.uid, uid, 7) == 0, "uid assert failed\r\n");
-    mu_assert(nfc_validate->dev_data.nfc_data.sak == 0x08, "sak == 0x08 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[0] == 0x44, "atqa[0] == 0x00 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[1] == 0x00, "atqa[1] == 0x04 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.type == FuriHalNfcTypeA,
-        "type == FuriHalNfcTypeA assert failed\r\n");
-
-    // Check the manufacturer block
-    mu_assert(
-        memcmp(nfc_validate->dev_data.mf_classic_data.block[0].value, manufacturer_block, 16) == 0,
-        "manufacturer_block assert failed\r\n");
-
-    // Check sector trailers
-    for(uint8_t i = 0; i < 16; i++) {
-        mu_assert(
-            memcmp(
-                nfc_validate->dev_data.mf_classic_data.block[4 * i + 3].value,
-                sector_trailer,
-                16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc_validate->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc_validate->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 16; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
-            mu_assert(
-                memcmp(
-                    nfc_validate->dev_data.mf_classic_data.block[4 * i + j].value,
-                    data_block,
-                    16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-    nfc_device_free(nfc_validate);
+    mf_classic_generator_test(7, MfClassicType1k);
 }
 
 MU_TEST(mf_classic_4k_7b_file_test) {
-    NfcDevice* nfc = nfc_device_alloc();
-    mu_assert(nfc != NULL, "nfc_device_data != NULL assert failed\r\n");
-    nfc->format = NfcDeviceSaveFormatMifareClassic;
-
-    // Create a test file
-    nfc_generate_mf_classic(&nfc->dev_data, 7, MfClassicType4k);
-
-    // Get the uid from the test file
-    uint8_t uid[7] = {0};
-    memcpy(uid, nfc->dev_data.nfc_data.uid, 7);
-
-    // Check the manufacturer block (should be uid[7] + 0xFF[rest])
-    uint8_t manufacturer_block[16] = {0};
-    memcpy(manufacturer_block, nfc->dev_data.mf_classic_data.block[0].value, 16);
-    mu_assert(memcmp(manufacturer_block, uid, 7) == 0, "manufacturer_block uid assert failed\r\n");
-    for(uint8_t i = 7; i < 16; i++) {
-        mu_assert(manufacturer_block[i] == 0xFF, "manufacturer_block 0xFF assert failed\r\n");
-    }
-
-    // Check sector trailers for the 2K part
-    uint8_t sector_trailer[16] = {
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0x07,
-        0x80,
-        0x69,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF,
-        0xFF};
-    for(uint8_t i = 0; i < 32; i++) {
-        mu_assert(
-            memcmp(nfc->dev_data.mf_classic_data.block[4 * i + 3].value, sector_trailer, 16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks
-    uint8_t data_block[16];
-    memset(data_block, 0xFF, 16);
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 32; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
-            mu_assert(
-                memcmp(nfc->dev_data.mf_classic_data.block[4 * i + j].value, data_block, 16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Check the sector trailer for the 4K part (sectors 32-40 contain 15 data blocks and 1 trailer)
-    for(uint8_t i = 32; i < 40; i++) {
-        mu_assert(
-            memcmp(
-                nfc->dev_data.mf_classic_data.block[16 * (i - 32) + 15].value,
-                sector_trailer,
-                16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks for the 4K part
-    for(uint8_t i = 0; i < 8; i++) {
-        for(uint8_t j = 0; j < 15; j++) {
-            mu_assert(
-                memcmp(
-                    nfc->dev_data.mf_classic_data.block[128 + (16 * i + j)].value,
-                    data_block,
-                    16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Save the test file
-    // Save the NFC device data to the file
-    mu_assert(
-        nfc_device_save(nfc, NFC_TEST_MFC_4K_7B_PATH),
-        "nfc_device_save == true assert failed\r\n");
-    nfc_device_free(nfc);
-
-    // Load the NFC device data from the file
-    NfcDevice* nfc_validate = nfc_device_alloc();
-    mu_assert(
-        nfc_device_load(nfc_validate, NFC_TEST_MFC_4K_7B_PATH, true),
-        "nfc_device_load == true assert failed\r\n");
-
-    // Check the UID, sak, ATQA and type
-    mu_assert(memcmp(nfc_validate->dev_data.nfc_data.uid, uid, 7) == 0, "uid assert failed\r\n");
-    mu_assert(nfc_validate->dev_data.nfc_data.sak == 0x18, "sak == 0x18 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[0] == 0x44, "atqa[0] == 0x00 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.atqa[1] == 0x00, "atqa[1] == 0x04 assert failed\r\n");
-    mu_assert(
-        nfc_validate->dev_data.nfc_data.type == FuriHalNfcTypeA,
-        "type == FuriHalNfcTypeA assert failed\r\n");
-
-    // Check the manufacturer block (should be uid[4] + 0xFF[rest])
-    memcpy(manufacturer_block, nfc->dev_data.mf_classic_data.block[0].value, 16);
-    mu_assert(memcmp(manufacturer_block, uid, 7) == 0, "manufacturer_block uid assert failed\r\n");
-    for(uint8_t i = 7; i < 16; i++) {
-        mu_assert(manufacturer_block[i] == 0xFF, "manufacturer_block 0xFF assert failed\r\n");
-    }
-
-    // Check sector trailers for the 2K part
-    for(uint8_t i = 0; i < 32; i++) {
-        mu_assert(
-            memcmp(nfc->dev_data.mf_classic_data.block[4 * i + 3].value, sector_trailer, 16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks
-    // Sector 0 is a special case
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[1].value, data_block, 16) == 0,
-        "block 1 in sector 0 is not 0xFF[16]\r\n");
-    mu_assert(
-        memcmp(nfc->dev_data.mf_classic_data.block[2].value, data_block, 16) == 0,
-        "block 2 in sector 0 is not 0xFF[16]\r\n");
-
-    // The rest of the sectors
-    for(uint8_t i = 1; i < 32; i++) {
-        for(uint8_t j = 0; j < 3; j++) {
-            mu_assert(
-                memcmp(nfc->dev_data.mf_classic_data.block[4 * i + j].value, data_block, 16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-
-    // Check the sector trailer for the 4K part (sectors 32-40 contain 15 data blocks and 1 trailer)
-    for(uint8_t i = 32; i < 40; i++) {
-        mu_assert(
-            memcmp(
-                nfc->dev_data.mf_classic_data.block[16 * (i - 32) + 15].value,
-                sector_trailer,
-                16) == 0,
-            "sector_trailer assert failed\r\n");
-    }
-
-    // Check data blocks for the 4K part
-    for(uint8_t i = 0; i < 8; i++) {
-        for(uint8_t j = 0; j < 15; j++) {
-            mu_assert(
-                memcmp(
-                    nfc->dev_data.mf_classic_data.block[128 + (16 * i + j)].value,
-                    data_block,
-                    16) == 0,
-                "data block is not 0xFF[16]\r\n");
-        }
-    }
-    nfc_device_free(nfc_validate);
+    mf_classic_generator_test(7, MfClassicType4k);
 }
 
 MU_TEST_SUITE(nfc) {
