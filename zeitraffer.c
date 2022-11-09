@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <furi.h>
+#include <../../applications/main/gpio/gpio_item.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
+
 //#include <notification/notification_messages_notes.h>
 
 int Time = 10;
@@ -76,6 +78,8 @@ int32_t zeitraffer_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     // Подключаем view port к GUI в полноэкранном режиме
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+	gpio_item_configure_all_pins(GpioModeOutputPushPull);
 
     // Создаем периодический таймер с коллбэком, куда в качестве
     // контекста будет передаваться наша очередь событий
@@ -177,14 +181,22 @@ int32_t zeitraffer_app(void* p) {
 			WorkTime--;
 			notification_message(notifications, &sequence_blink_blue_100);
             if( WorkTime < 1 ) {
-
 				WorkCount--;
+				view_port_update(view_port);
+				gpio_item_set_all_pins(true);
+				//gpio_item_set_pin(6, true);
+				furi_delay_ms(300);
+				//gpio_item_set_pin(6, false);
+				gpio_item_set_all_pins(false);
+
 				if (InfiniteShot) WorkCount++;
 				notification_message(notifications, &sequence_click);
 				WorkTime = Time;
+				view_port_update(view_port);
 				
 			}
 			if( WorkCount < 1 ) { 
+				gpio_item_set_all_pins(false);
 				furi_timer_stop(timer); 
 				notification_message(notifications, &sequence_audiovisual_alert);
 				WorkTime = 3;
