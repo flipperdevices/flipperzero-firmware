@@ -33,7 +33,8 @@ typedef struct {
 struct PwnDumpModel {
     MessageQueue *queue;
 
-    bool screen[FLIPPER_SCREEN_HEIGHT][FLIPPER_SCREEN_WIDTH];
+    bool* screen;
+    bool* workspace;
     bool update;
 };
 
@@ -62,17 +63,21 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
         // Draw a single pixel
         if (cmd.code == 0x01 || cmd.code == 0x00) {
             if ((cmd.i < FLIPPER_SCREEN_HEIGHT) && (cmd.j < FLIPPER_SCREEN_WIDTH)) {
-                model->screen[cmd.i][cmd.j] = cmd.code;
+                model->workspace[cmd.i * FLIPPER_SCREEN_WIDTH + cmd.j] = cmd.code;
             }
         }
         // Flush buffer to the screen
         else if (cmd.code == 0x0f) {
             model->update = true;
+            bool* tmp = model->screen;
+            model->screen = model->workspace;
+            model->workspace = tmp;
+
             return true;
         }
         // Wipe the buffer
         else if (cmd.code == 0xff) {
-            memset(model->screen, 0, PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE);
+            memset(model->workspace, 0, PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE);
         }
         else {
             FURI_LOG_D("PWNZERO", "Received an unrecognized command");
@@ -86,10 +91,10 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
 static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
     PwnDumpModel* model = _model;
 
-    if (model->update) {
+    if (true) {
         for (size_t ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
             for (size_t jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
-                if (model->screen[ii][jj]) {
+                if (model->screen[ii * FLIPPER_SCREEN_WIDTH + jj]) {
                     canvas_draw_dot(canvas, jj, ii);
                 }
             }
@@ -197,7 +202,10 @@ static PwnZeroApp* pwn_zero_app_alloc() {
         PwnDumpModel * model,
         {
             model->queue = message_queue_alloc();
+            model->screen = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+            model->workspace = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             memset(model->screen, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+            memset(model->workspace, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             model->update = false;
         },
         true);
@@ -238,6 +246,8 @@ static void pwn_zero_app_free(PwnZeroApp* app) {
         PwnDumpModel * model,
         {
             message_queue_free(model->queue);
+            free(model->screen);
+            free(model->workspace);
         },
         true);
     view_free(app->view);
