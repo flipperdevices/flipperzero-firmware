@@ -13,7 +13,7 @@ pwnagotchi-flipper
 
 ## Current state
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
-As of commit 23858cc (10/28/22) on rxBuffer branch the I have begun structuring a message queue which will ultimately leverage built in furi streams to process uart input. After restructuring and getting the receive to work I will merge into main and begin working on getting the screen to color as per the protocol's transmission.
+As of commit 3cca697 (11/8/22) I have gotten a semi-working version of the protocol. It uses a double buffer system which allows editting of the screen's contents and then later drawing to the screen. This may or may not be the final system. Currently this has many internal issues that I will look into soon and try and fix up. I am on the home stretch to finishing the Flipper side of the interface!
 
 ## Setup
 TODO: Explain setup process
