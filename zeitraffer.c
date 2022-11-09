@@ -190,7 +190,7 @@ int32_t zeitraffer_app(void* p) {
 				notification_message(notifications, &sequence_click);
 				gpio_item_set_all_pins(true);
 				//gpio_item_set_pin(6, true);
-				furi_delay_ms(200);
+				furi_delay_ms(400);
 				//gpio_item_set_pin(6, false);
 				gpio_item_set_all_pins(false);
 
