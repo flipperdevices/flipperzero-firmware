@@ -1006,7 +1006,7 @@ static void nfc_device_get_shadow_path(FuriString* orig_path, FuriString* shadow
     furi_string_cat_printf(shadow_path, "%s", NFC_APP_SHADOW_EXTENSION);
 }
 
-static bool nfc_device_save_file(NfcDevice* dev, const char* dev_name) {
+bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
     furi_assert(dev);
 
     bool saved = false;
@@ -1058,17 +1058,19 @@ static bool nfc_device_save_file(NfcDevice* dev, const char* dev_name) {
     return saved;
 }
 
-bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
-    return nfc_device_save_file(dev, dev_name);
-}
-
-bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name) {
+bool nfc_device_save_shadow(NfcDevice* dev, const char* path) {
     dev->shadow_file_exist = true;
     // Replace extension from .nfc to .shd if necessary
-    FuriString* path = furi_string_alloc();
-    furi_string_set(path, dev_name);
-    furi_string_replace_all(path, NFC_APP_EXTENSION, NFC_APP_SHADOW_EXTENSION);
-    return nfc_device_save_file(dev, furi_string_get_cstr(path));
+    FuriString* orig_path = furi_string_alloc();
+    furi_string_set_str(orig_path, path);
+    FuriString* shadow_path = furi_string_alloc();
+    nfc_device_get_shadow_path(orig_path, shadow_path);
+
+    bool file_saved = nfc_device_save(dev, furi_string_get_cstr(shadow_path));
+    furi_string_free(orig_path);
+    furi_string_free(shadow_path);
+
+    return file_saved;
 }
 
 static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dialog) {
