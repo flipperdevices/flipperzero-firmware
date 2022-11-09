@@ -1,6 +1,7 @@
 #include "I2CSensor.h"
+#include "../sensors/SensorsDriver.h"
 
-static uint8_t readReg(I2CSensor* i2c_sensor, uint8_t reg) {
+uint8_t readReg(I2CSensor* i2c_sensor, uint8_t reg) {
     //Блокировка шины
     furi_hal_i2c_acquire(i2c_sensor->i2c);
     uint8_t buff[1];
@@ -8,7 +9,15 @@ static uint8_t readReg(I2CSensor* i2c_sensor, uint8_t reg) {
     furi_hal_i2c_release(i2c_sensor->i2c);
     return buff[0];
 }
-static void writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
+
+bool readRegArray(I2CSensor* i2c_sensor, uint8_t startReg, uint8_t len, uint8_t* data) {
+    furi_hal_i2c_acquire(i2c_sensor->i2c);
+    bool status = furi_hal_i2c_read_mem(
+        i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, startReg, data, len, 0xFF);
+    furi_hal_i2c_release(i2c_sensor->i2c);
+    return status;
+}
+void writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
     //Блокировка шины
     furi_hal_i2c_acquire(i2c_sensor->i2c);
     uint8_t buff[1] = {value};
@@ -16,23 +25,15 @@ static void writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
     furi_hal_i2c_release(i2c_sensor->i2c);
 }
 
-bool unitemp_I2C_sensorInit(void* sensor) {
-    I2CSensor* i2c_sensor = (I2CSensor*)((Sensor*)sensor)->instance;
+bool unitemp_I2C_sensorInit(void* s) {
+    Sensor* sensor = (Sensor*)s;
+    I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
     //BMP280
-    if(((Sensor*)sensor)->type == BMP280) {
-        //Перезагрузка
-        writeReg(i2c_sensor, 0xE0, 0xB6);
-        //Чтение ID датчика
-        uint8_t id = readReg(i2c_sensor, 0xD0);
-        if(id != 0x58) {
-            ((Sensor*)sensor)->status = UT_ERROR;
-            return false;
+    if(sensor->type == BMP280) {
+        if(BMP280_init(i2c_sensor)) {
+            sensor->status = UT_OK;
+            return true;
         }
-
-        //TODO: Дальнейшая инициализация
-
-        ((Sensor*)sensor)->status = UT_OK;
-        return true;
     }
     return false;
 }
@@ -47,7 +48,7 @@ UnitempStatus unitemp_I2C_updateData(void* sensor) {
     if(((Sensor*)sensor)->status == UT_ERROR || ((Sensor*)sensor)->status == UT_TIMEOUT) {
         if(((Sensor*)sensor)->initializer(sensor) != true) return UT_ERROR;
     }
-    //I2CSensor* i2c_sensor = (I2CSensor*)((Sensor*)sensor)->instance;
+    BMP280_updateData(sensor);
     return UT_OK;
 }
 
