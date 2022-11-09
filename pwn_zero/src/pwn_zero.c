@@ -35,7 +35,6 @@ struct PwnDumpModel {
 
     bool* screen;
     bool* workspace;
-    bool update;
 };
 
 typedef enum {
@@ -54,7 +53,6 @@ const NotificationSequence sequence_notification = {
 };
 
 static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
-    model->update = false;
     if (message_queue_has_message(model->queue)) {
         PwnCommand cmd;
         message_queue_pop_message(model->queue, &cmd);
@@ -68,7 +66,6 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
         }
         // Flush buffer to the screen
         else if (cmd.code == 0x0f) {
-            model->update = true;
             bool* tmp = model->screen;
             model->screen = model->workspace;
             model->workspace = tmp;
@@ -77,7 +74,7 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
         }
         // Wipe the buffer
         else if (cmd.code == 0xff) {
-            memset(model->workspace, 0, PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE);
+            memset(model->workspace, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
         }
         else {
             FURI_LOG_D("PWNZERO", "Received an unrecognized command");
@@ -91,24 +88,13 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
 static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
     PwnDumpModel* model = _model;
 
-    if (true) {
-        for (size_t ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
-            for (size_t jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
-                if (model->screen[ii * FLIPPER_SCREEN_WIDTH + jj]) {
-                    canvas_draw_dot(canvas, jj, ii);
-                }
+    for (size_t ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
+        for (size_t jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
+            if (model->screen[ii * FLIPPER_SCREEN_WIDTH + jj]) {
+                canvas_draw_dot(canvas, jj, ii);
             }
         }
     }
-    else {
-        canvas_draw_dot(canvas, 0, 0);
-        canvas_draw_dot(canvas, 0, 63);
-        canvas_draw_dot(canvas, 127, 0);
-        canvas_draw_dot(canvas, 127, 63);
-
-
-    }
-    model->update = false;
 
 }
 
@@ -142,8 +128,6 @@ static int32_t pwn_zero_worker(void* context) {
     PwnZeroApp* app = context;
 
     while(1) {
-        // bool update = false;
-
         uint32_t events =
             furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
@@ -206,7 +190,6 @@ static PwnZeroApp* pwn_zero_app_alloc() {
             model->workspace = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             memset(model->screen, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             memset(model->workspace, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
-            model->update = false;
         },
         true);
 
