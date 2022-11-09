@@ -31,20 +31,17 @@ bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
         if(event.event == NfcCustomEventByteInputDone) {
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSavedMenu)) {
                 nfc->dev->dev_data.nfc_data = nfc->dev_edit_data;
-                if(strcmp(nfc->dev->dev_name, "")) {
-                    // Create path by adding nfc/ to the dev_name or using the load path
-                    FuriString* path = furi_string_alloc();
-                    furi_string_printf(
-                        path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
+                if(nfc_save_file(nfc)) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                     consumed = true;
-                } else {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
-                    consumed = true;
                 }
+            } else {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
+                consumed = true;
             }
         }
     }
+
     return consumed;
 }
 

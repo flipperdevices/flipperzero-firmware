@@ -220,6 +220,14 @@ void nfc_blink_stop(Nfc* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
+bool nfc_save_file(Nfc* nfc) {
+    FuriString* path = furi_string_alloc();
+    furi_string_printf(path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
+    bool file_saved = nfc_device_save(nfc->dev, furi_string_get_cstr(path));
+    furi_string_free(path);
+    return file_saved;
+}
+
 void nfc_show_loading_popup(void* context, bool show) {
     Nfc* nfc = context;
     TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
