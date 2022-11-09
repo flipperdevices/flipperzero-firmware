@@ -1,0 +1,30 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model CC0402KRX7R7BB104
+#/319043/987070/2.49/2/4/Capacitor
+DEF CC0402KRX7R7BB104 C 0 30 Y Y 1 F N
+F0 "C" 350 250 50 H V L CNN
+F1 "CC0402KRX7R7BB104" 350 150 50 H V L CNN
+F2 "CAPC1005X55N" 350 50 50 H I L CNN
+F3 "http://www.datasheets360.com/pdf/-5354154806277341459" 350 -50 50 H I L CNN
+F4 "Cap 100nF 16V 0402 SMD 10% X7R Phycomp 100nF Multilayer Ceramic Capacitor (MLCC) 16 V dc +/-10% X7R dielectric Standard max op. temp. +125C" 350 -150 50 H I L CNN "Description"
+F5 "0.55" 350 -250 50 H I L CNN "Height"
+F6 "KEMET" 350 -350 50 H I L CNN "Manufacturer_Name"
+F7 "CC0402KRX7R7BB104" 350 -450 50 H I L CNN "Manufacturer_Part_Number"
+F8 "603-CC402KRX7R7BB104" 350 -550 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/YAGEO/CC0402KRX7R7BB104?qs=AgBp2OyFlx%252BSOyhfyS7hpw%3D%3D" 350 -650 50 H I L CNN "Mouser Price/Stock"
+F10 "CC0402KRX7R7BB104" 350 -750 50 H I L CNN "Arrow Part Number"
+F11 "https://www.arrow.com/en/products/cc0402krx7r7bb104/yageo?region=nac" 350 -850 50 H I L CNN "Arrow Price/Stock"
+F12 "" 350 -950 50 H I L CNN "Mouser Testing Part Number"
+F13 "" 350 -1050 50 H I L CNN "Mouser Testing Price/Stock"
+DRAW
+X ~ 1 0 0 200 R 50 50 0 0 P
+X ~ 2 500 0 200 L 50 50 0 0 P
+P 2 0 1 6 220 100 220 -100 N
+P 2 0 1 6 280 100 280 -100 N
+P 2 0 1 6 200 0 220 0 N
+P 2 0 1 6 280 0 300 0 N
+ENDDRAW
+ENDDEF
+#
+#End Library
