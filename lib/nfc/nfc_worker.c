@@ -72,8 +72,8 @@ void nfc_worker_stop(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->thread);
     if(furi_thread_get_state(nfc_worker->thread) != FuriThreadStateStopped) {
-        nfc_worker_change_state(nfc_worker, NfcWorkerStateStop);
         furi_hal_nfc_stop();
+        nfc_worker_change_state(nfc_worker, NfcWorkerStateStop);
         furi_thread_join(nfc_worker->thread);
     }
 }
