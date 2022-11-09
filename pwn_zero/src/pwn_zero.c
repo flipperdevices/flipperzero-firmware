@@ -10,6 +10,7 @@
 
 #include "../include/protocol.h"
 #include "../include/constants.h"
+#include "../include/message_queue.h"
 
 #define LINES_ON_SCREEN 6
 #define COLUMNS_ON_SCREEN 21
@@ -30,9 +31,7 @@ typedef struct {
 } ListElement;
 
 struct PwnDumpModel {
-    uint8_t queue[PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE];
-    uint8_t* readIdx;
-    uint8_t* writeIdx;
+    MessageQueue *queue;
 
     bool screen[FLIPPER_SCREEN_HEIGHT][FLIPPER_SCREEN_WIDTH];
 };
@@ -55,25 +54,35 @@ const NotificationSequence sequence_notification = {
 static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
     PwnDumpModel* model = _model;
 
-    // Prepare canvas
-    canvas_clear(canvas);
+    if (message_queue_has_message(model->queue)) {
+        PwnCommand cmd;
+        message_queue_pop_message(model->queue, &cmd);
 
-    if (*model->readIdx == 0x02 && *(model->readIdx + 4) == 0x03) {
-        size_t i = *(model->readIdx + 1);
-        size_t j = *(model->readIdx + 2);
-
-        model->writeIdx = model->queue;
-
-        model->screen[i][j] = true;
-
-        for (size_t x = 0; x < FLIPPER_SCREEN_WIDTH; x++) {
-            for (size_t y = 0; y < FLIPPER_SCREEN_WIDTH; y++) {
-                if (model->screen[y][x]) {
-                    canvas_draw_dot(canvas, x, y);
-                }
-
+        canvas_draw_dot(canvas, cmd.j, cmd.i);
+        // See what the cmd wants
+        // Draw a single pixel
+        /*
+        if (cmd.code == 0x01 || cmd.code == 0x00) {
+            if ((cmd.i < FLIPPER_SCREEN_HEIGHT) && (cmd.j < FLIPPER_SCREEN_WIDTH)) {
+                model->screen[cmd.i][cmd.j] = cmd.code;
             }
         }
+        // Flush buffer to the screen
+        else if (cmd.code == 0x0f) {
+            for (size_t ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
+                for (size_t jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
+                    if (model->screen[ii][jj]) {
+                        canvas_draw_dot(canvas, jj, ii);
+                    }
+                }
+            }
+        }
+        // Wipe the buffer
+        else if (cmd.code == 0xff) {
+            memset(model->screen, 0, PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE);
+        }
+        */
+
     }
 
 }
@@ -100,8 +109,7 @@ static void pwn_zero_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 }
 
 static void pwn_zero_push_to_list(PwnDumpModel* model, const char data) {
-    *model->writeIdx = data;
-    model->writeIdx += 1;
+    message_queue_push_byte(model->queue, data);
 }
 
 static int32_t pwn_zero_worker(void* context) {
@@ -166,8 +174,7 @@ static PwnZeroApp* pwn_zero_app_alloc() {
         app->view,
         PwnDumpModel * model,
         {
-            model->readIdx = model->queue;
-            model->writeIdx = model->queue;
+            model->queue = message_queue_alloc();
             memset(model->screen, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
         },
         true);
@@ -207,7 +214,7 @@ static void pwn_zero_app_free(PwnZeroApp* app) {
         app->view,
         PwnDumpModel * model,
         {
-            UNUSED(model);
+            message_queue_free(model->queue);
         },
         true);
     view_free(app->view);

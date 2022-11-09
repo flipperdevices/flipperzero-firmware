@@ -39,7 +39,7 @@ void message_queue_push_byte(MessageQueue* queue, uint8_t data) {
     queue->writePtr += 1;
 
     // Check to make sure we didn't exceed the size
-    if (queue->writePtr >= queue->messageQueue + queue->queueSize - 1) {
+    if (queue->writePtr >= queue->messageQueue + queue->queueSize) {
         // Then start writing over the front again
         queue->writePtr = queue->messageQueue;
     }
@@ -78,10 +78,10 @@ bool message_queue_pop_message(MessageQueue* queue, PwnCommand* dest) {
     dest->code = *(queue->readPtr + 3);
 
     // Now increment the readPtr
-    queue->readPtr += 1;
+    queue->readPtr += PWNAGOTCHI_PROTOCOL_BYTE_LEN;
 
     // Check if we are overflowing!
-    if (queue->readPtr >= queue->messageQueue + queue->queueSize - 1) {
+    if (queue->readPtr >= queue->messageQueue + queue->queueSize) {
         // Then start reading back from the front
         queue->readPtr = queue->messageQueue;
     }
