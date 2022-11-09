@@ -9,7 +9,7 @@ typedef enum {
     NfcSceneNfcVUnlockStateNotSupportedCard,
 } NfcSceneNfcVUnlockState;
 
-bool nfc_scene_nfcv_unlock_worker_callback(NfcWorkerEvent event, void* context) {
+static bool nfc_scene_nfcv_unlock_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
 
     if(event == NfcWorkerEventNfcVPassKey) {
@@ -19,6 +19,45 @@ bool nfc_scene_nfcv_unlock_worker_callback(NfcWorkerEvent event, void* context) 
     }
     return true;
 }
+/*
+static void nfc_scene_nfcv_unlock_button_callback(GuiButtonType event, InputType type, void* context) {
+    furi_assert(context);
+    furi_assert(type);
+    Nfc* nfc = context;
+
+    if(event == GuiButtonTypeCenter) {
+        if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
+            nfc_worker_stop(nfc->worker);
+            nfc_worker_start(
+                nfc->worker,
+                NfcWorkerStateNfcVUnlock,
+                &nfc->dev->dev_data,
+                nfc_scene_nfcv_unlock_worker_callback,
+                nfc);
+            widget_add_button_element(
+                nfc->widget,
+                GuiButtonTypeCenter,
+                "Autosave",
+                nfc_scene_nfcv_unlock_button_callback,
+                nfc);
+        } else {
+            nfc_worker_stop(nfc->worker);
+            nfc_worker_start(
+                nfc->worker,
+                NfcWorkerStateNfcVUnlockAndSave,
+                &nfc->dev->dev_data,
+                nfc_scene_nfcv_unlock_worker_callback,
+                nfc);
+            widget_add_button_element(
+                nfc->widget,
+                GuiButtonTypeCenter,
+                "Unlock",
+                nfc_scene_nfcv_unlock_button_callback,
+                nfc);
+        }
+        notification_message(nfc->notifications, &sequence_single_vibro);
+    }
+}*/
 
 void nfc_scene_nfcv_unlock_popup_callback(void* context) {
     Nfc* nfc = context;
@@ -26,6 +65,7 @@ void nfc_scene_nfcv_unlock_popup_callback(void* context) {
 }
 
 void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
+    FuriHalNfcDevData* nfc_data = &(nfc->dev->dev_data.nfc_data);
     NfcVData* nfcv_data = &(nfc->dev->dev_data.nfcv_data);
 
     uint32_t curr_state =
@@ -40,14 +80,28 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
         } else if(state == NfcSceneNfcVUnlockStateUnlocked) {
             popup_reset(popup);
 
+            if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
+                nfc_text_store_set(nfc, "SLIX-L_%02X%02X%02X%02X%02X%02X%02X%02X", 
+                    nfc_data->uid[7], nfc_data->uid[6], nfc_data->uid[5], nfc_data->uid[4],
+                    nfc_data->uid[3], nfc_data->uid[2], nfc_data->uid[1], nfc_data->uid[0]);
+
+                nfc->dev->format = NfcDeviceSaveFormatSlixL;
+
+                if(nfc_device_save(nfc->dev, nfc->text_store)) {
+                    popup_set_header(popup, "Successfully\nsaved", 94, 3, AlignCenter, AlignTop);
+                } else {
+                    popup_set_header(popup, "Unlocked but\nsave failed!", 94, 3, AlignCenter, AlignTop);
+                }
+            } else {
+                popup_set_header(popup, "Successfully\nunlocked", 94, 3, AlignCenter, AlignTop);
+            }
+
             notification_message(nfc->notifications, &sequence_success);
 
-            popup_set_header(popup, "Successfully\nUnlocked!", 94, 3, AlignCenter, AlignTop);
             popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
             popup_set_context(popup, nfc);
             popup_set_callback(popup, nfc_scene_nfcv_unlock_popup_callback);
             popup_set_timeout(popup, 1500);
-            //popup_enable_timeout(popup);
 
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
@@ -85,10 +139,11 @@ void nfc_scene_nfcv_unlock_on_enter(void* context) {
     // Setup view
     nfc_scene_nfcv_unlock_set_state(nfc, NfcSceneNfcVUnlockStateDetecting);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
+
     // Start worker
     nfc_worker_start(
         nfc->worker,
-        NfcWorkerStateNfcVUnlock,
+        NfcWorkerStateNfcVUnlockAndSave,
         &nfc->dev->dev_data,
         nfc_scene_nfcv_unlock_worker_callback,
         nfc);

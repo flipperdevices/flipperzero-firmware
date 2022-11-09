@@ -54,7 +54,7 @@ ReturnCode nfcv_read_blocks(
     return ERR_NONE;
 }
 
-ReturnCode nfcv_read_sysinfo(NfcVData* data) {
+ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data) {
     uint8_t rxBuf[32];
     uint16_t received = 0;
 
@@ -65,6 +65,12 @@ ReturnCode nfcv_read_sysinfo(NfcVData* data) {
             rxBuf, sizeof(rxBuf), &received);
 
     if(ret == ERR_NONE) {
+        nfc_data->type = FuriHalNfcTypeV;
+        nfc_data->uid_len = 8;
+        /* UID is stored reversed in this structure */
+        for(int pos = 0; pos < nfc_data->uid_len; pos++) {
+            nfc_data->uid[pos] = rxBuf[2 + (7 - pos)];
+        }
         data->dsfid = rxBuf[10];
         data->afi = rxBuf[11];
         data->block_num = rxBuf[12] + 1;

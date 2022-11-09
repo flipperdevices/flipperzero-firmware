@@ -111,6 +111,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_analyze_reader(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVUnlock) {
         nfc_worker_nfcv_unlock(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
+        nfc_worker_nfcv_unlock(nfc_worker);
     }
     furi_hal_nfc_sleep();
     nfc_worker_change_state(nfc_worker, NfcWorkerStateReady);
@@ -133,7 +135,8 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
 
     furi_hal_nfc_sleep();
 
-    while(nfc_worker->state == NfcWorkerStateNfcVUnlock) {
+    while((nfc_worker->state == NfcWorkerStateNfcVUnlock) || 
+        (nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave)) {
 
         furi_hal_nfc_exit_sleep();
         furi_hal_nfc_ll_txrx_on();
@@ -195,12 +198,26 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                 }
                 if(ret == ERR_NONE) {
                     /* unlock succesful */
-                    furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
-                    nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
+                    if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
+                        NfcVReader reader;
+
+                        if(!slix_l_read_card(&reader, &nfc_worker->dev_data->nfc_data, nfcv_data)) {
+                            furi_hal_console_printf("    => failed, wait for chip to disappear.\r\n");
+                            snprintf(nfcv_data->error, sizeof(nfcv_data->error), "Read card\nfailed");
+                            nfc_worker->callback(NfcWorkerEventWrongCardDetected, nfc_worker->context);
+                        } else {
+                            furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
+                            nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
+                        }
+                    } else {
+                        furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
+                        nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
+                    }
 
                     while(slix_l_get_random(NULL) == ERR_NONE) {
                         furi_delay_ms(100);
                     }
+                    
                 } else {
                     /* unlock failed */
                     furi_hal_console_printf("    => failed, wait for chip to disappear.\r\n");
@@ -235,7 +252,6 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
 static bool nfc_worker_read_slix_l(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     NfcVReader reader = {};
-    NfcVData data = {};
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -244,9 +260,7 @@ static bool nfc_worker_read_slix_l(NfcWorker* nfc_worker, FuriHalNfcTxRxContext*
 
     do {
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
-        if(!slix_l_read_card(&reader, &data)) break;
-        // Copy data
-        nfc_worker->dev_data->nfcv_data = data;
+        if(!slix_l_read_card(&reader, &nfc_worker->dev_data->nfc_data, &nfc_worker->dev_data->nfcv_data)) break;
         read_success = true;
     } while(false);
 

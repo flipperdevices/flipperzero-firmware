@@ -49,6 +49,6 @@ typedef struct {
 } NfcVReader;
 
 ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data);    
-ReturnCode nfcv_read_sysinfo(NfcVData* data);
+ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data);
 ReturnCode nfcv_inventory(uint8_t* uid);
 
