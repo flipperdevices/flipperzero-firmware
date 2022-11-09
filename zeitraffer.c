@@ -114,18 +114,22 @@ int32_t zeitraffer_app(void* p) {
             }
 			if(event.input.key == InputKeyRight) {
 			Count++;
+			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
             }
 			if(event.input.key == InputKeyLeft) {
 			Count--;
+			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
             }
 			if(event.input.key == InputKeyUp) {
 			Time++;
+			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
             }
 			if(event.input.key == InputKeyDown) {
 			Time--;
+			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
             }
 			if(event.input.key == InputKeyOk) {
@@ -146,7 +150,7 @@ int32_t zeitraffer_app(void* p) {
 		if(event.input.type == InputTypeLong) {
             // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
             if(event.input.key == InputKeyBack) {
-			// notification_message(notifications, &sequence_audiovisual_alert);
+			notification_message(notifications, &sequence_click);
                 break;
             }
 			if(event.input.key == InputKeyOk) {
@@ -183,14 +187,15 @@ int32_t zeitraffer_app(void* p) {
             if( WorkTime < 1 ) {
 				WorkCount--;
 				view_port_update(view_port);
+				notification_message(notifications, &sequence_click);
 				gpio_item_set_all_pins(true);
 				//gpio_item_set_pin(6, true);
-				furi_delay_ms(250);
+				furi_delay_ms(200);
 				//gpio_item_set_pin(6, false);
 				gpio_item_set_all_pins(false);
 
 				if (InfiniteShot) WorkCount++;
-				notification_message(notifications, &sequence_click);
+				
 				WorkTime = Time;
 				view_port_update(view_port);
 				
