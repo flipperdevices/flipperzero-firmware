@@ -58,10 +58,8 @@ static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
         PwnCommand cmd;
         message_queue_pop_message(model->queue, &cmd);
 
-        canvas_draw_dot(canvas, cmd.j, cmd.i);
         // See what the cmd wants
         // Draw a single pixel
-        /*
         if (cmd.code == 0x01 || cmd.code == 0x00) {
             if ((cmd.i < FLIPPER_SCREEN_HEIGHT) && (cmd.j < FLIPPER_SCREEN_WIDTH)) {
                 model->screen[cmd.i][cmd.j] = cmd.code;
@@ -81,7 +79,9 @@ static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
         else if (cmd.code == 0xff) {
             memset(model->screen, 0, PWNAGOTCHI_PROTOCOL_BYTE_LEN * PWNAGOTCHI_PROTOCOL_QUEUE_SIZE);
         }
-        */
+        else {
+            FURI_LOG_D("PWNZERO", "Received an unrecognized command");
+        }
 
     }
 
