@@ -14,7 +14,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
-    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl)) {
+    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl)|| (protocol == NfcDeviceProtocolSlixL)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -40,19 +40,47 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             temp_str, "\e#%s\n", nfc_mf_classic_type(dev_data->mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
+    } else if(protocol == NfcDeviceProtocolSlixL) {
+        furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX-L\n");
     } else {
         furi_string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
     }
 
     // Set tag iso data
-    char iso_type = FURI_BIT(nfc_data->sak, 5) ? '4' : '3';
-    furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
-    furi_string_cat_printf(temp_str, "UID:");
-    for(size_t i = 0; i < nfc_data->uid_len; i++) {
-        furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+    if(protocol == NfcDeviceProtocolSlixL) {
+        NfcVData* nfcv_data = &nfc->dev->dev_data.nfcv_data;
+        
+        furi_string_cat_printf(temp_str, "UID:\n");
+        for(size_t i = 0; i < nfc_data->uid_len; i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+        }
+        furi_string_cat_printf(temp_str, "\n");
+        
+        furi_string_cat_printf(temp_str, "DSFID: %02X\n", nfcv_data->dsfid);
+        furi_string_cat_printf(temp_str, "AFI: %02X\n", nfcv_data->afi);
+        furi_string_cat_printf(temp_str, "IC Ref: %02X\n", nfcv_data->ic_ref);
+        furi_string_cat_printf(temp_str, "Blocks: %02X\n", nfcv_data->block_num);
+        furi_string_cat_printf(temp_str, "Blocksize: %02X\n", nfcv_data->block_size);
+
+        furi_string_cat_printf(temp_str, "Data (%d byte)\n", nfcv_data->block_num * nfcv_data->block_size);
+
+        for(int block = 0; block < nfcv_data->block_num; block++) {
+            for(int pos = 0; pos < nfcv_data->block_size; pos++) {
+                furi_string_cat_printf(temp_str, " %02X", nfcv_data->data[block * nfcv_data->block_size + pos]);
+            }
+            furi_string_cat_printf(temp_str, "\n");
+        }
+        furi_string_cat_printf(temp_str, "\n");
+    } else {
+        char iso_type = FURI_BIT(nfc_data->sak, 5) ? '4' : '3';
+        furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
+        furi_string_cat_printf(temp_str, "UID:");
+        for(size_t i = 0; i < nfc_data->uid_len; i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+        }
+        furi_string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[1], nfc_data->atqa[0]);
+        furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->sak);
     }
-    furi_string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[1], nfc_data->atqa[0]);
-    furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->sak);
 
     // Set application specific data
     if(protocol == NfcDeviceProtocolMifareDesfire) {
@@ -119,6 +147,9 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
+                consumed = true;
+            } else if(protocol == NfcDeviceProtocolSlixL) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);
                 consumed = true;
             }
         }

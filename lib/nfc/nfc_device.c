@@ -50,6 +50,8 @@ static void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_
         furi_string_set(format_string, "Mifare Classic");
     } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
         furi_string_set(format_string, "Mifare DESFire");
+    } else if(dev->format == NfcDeviceSaveFormatSlixL) {
+        furi_string_set(format_string, "NXP SLIX-L");
     } else {
         furi_string_set(format_string, "Unknown");
     }
@@ -83,6 +85,11 @@ static bool nfc_device_parse_format_string(NfcDevice* dev, FuriString* format_st
     if(furi_string_start_with_str(format_string, "Mifare DESFire")) {
         dev->format = NfcDeviceSaveFormatMifareDesfire;
         dev->dev_data.protocol = NfcDeviceProtocolMifareDesfire;
+        return true;
+    }
+    if(furi_string_start_with_str(format_string, "NXP SLIX-L")) {
+        dev->format = NfcDeviceSaveFormatSlixL;
+        dev->dev_data.protocol = NfcDeviceProtocolSlixL;
         return true;
     }
     return false;
@@ -636,7 +643,87 @@ bool nfc_device_load_mifare_df_data(FlipperFormat* file, NfcDevice* dev) {
     return parsed;
 }
 
-// Leave for backward compatibility
+static bool nfc_device_save_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
+    bool saved = false;
+    NfcVData* data = &dev->dev_data.nfcv_data;
+
+    do {
+        if(!flipper_format_write_comment_cstr(file, "SLIX-L specific data")) break;
+        if(!flipper_format_write_hex(file, "Password Privacy", data->key_privacy, sizeof(data->key_privacy))) break;
+        if(!flipper_format_write_hex(file, "Password Destroy", data->key_destroy, sizeof(data->key_destroy))) break;
+        if(!flipper_format_write_hex(file, "Password EAS", data->key_eas, sizeof(data->key_eas))) break;
+        if(!flipper_format_write_hex(file, "DSFID", &(data->dsfid), 1)) break;
+        if(!flipper_format_write_hex(file, "AFI", &(data->afi), 1)) break;
+        if(!flipper_format_write_hex(file, "IC Reference", &(data->ic_ref), 1)) break;
+        if(!flipper_format_write_hex(file, "Block Count", &(data->block_num), 1)) break;
+        if(!flipper_format_write_hex(file, "Block Size", &(data->block_size), 1)) break;
+        if(!flipper_format_write_hex(file, "Data Content", data->data, data->block_num * data->block_size)) break;
+        saved = true;
+    } while(false);
+
+    return saved;
+}
+
+bool nfc_device_load_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
+    bool parsed = false;
+    NfcVData* data = &dev->dev_data.nfcv_data;
+    memset(data, 0, sizeof(NfcVData));
+    
+    do {
+        if(!flipper_format_read_hex(
+               file, "Password Privacy", data->key_privacy, sizeof(data->key_privacy)))
+            break;
+        if(!flipper_format_read_hex(
+               file, "Password Destroy", data->key_destroy, sizeof(data->key_destroy)))
+            break;
+        if(!flipper_format_read_hex(
+               file, "Password EAS", data->key_eas, sizeof(data->key_eas)))
+            break;
+
+        if(!flipper_format_read_hex(file, "DSFID", &(data->dsfid), 1)) break;
+        if(!flipper_format_read_hex(file, "AFI", &(data->afi), 1)) break;
+        if(!flipper_format_read_hex(file, "IC Reference", &(data->ic_ref), 1)) break;
+        if(!flipper_format_read_hex(file, "Block Count", &(data->block_num), 1)) break;
+        if(!flipper_format_read_hex(file, "Block Size", &(data->block_size), 1)) break;
+        if(!flipper_format_read_hex(
+               file, "Data Content", data->data, data->block_num * data->block_size))
+            break;
+
+        parsed = true;
+    } while(false);
+
+    return parsed;
+}
+
+static bool nfc_device_save_bank_card_data(FlipperFormat* file, NfcDevice* dev) {
+    bool saved = false;
+    EmvData* data = &dev->dev_data.emv_data;
+    uint32_t data_temp = 0;
+
+    do {
+        // Write Bank card specific data
+        if(!flipper_format_write_comment_cstr(file, "Bank card specific data")) break;
+        if(!flipper_format_write_hex(file, "AID", data->aid, data->aid_len)) break;
+        if(!flipper_format_write_string_cstr(file, "Name", data->name)) break;
+        if(!flipper_format_write_hex(file, "Number", data->number, data->number_len)) break;
+        if(data->exp_mon) {
+            uint8_t exp_data[2] = {data->exp_mon, data->exp_year};
+            if(!flipper_format_write_hex(file, "Exp data", exp_data, sizeof(exp_data))) break;
+        }
+        if(data->country_code) {
+            data_temp = data->country_code;
+            if(!flipper_format_write_uint32(file, "Country code", &data_temp, 1)) break;
+        }
+        if(data->currency_code) {
+            data_temp = data->currency_code;
+            if(!flipper_format_write_uint32(file, "Currency code", &data_temp, 1)) break;
+        }
+        saved = true;
+    } while(false);
+
+    return saved;
+}
+
 bool nfc_device_load_bank_card_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     EmvData* data = &dev->dev_data.emv_data;
@@ -1044,17 +1131,25 @@ static bool nfc_device_save_file(
             break;
         nfc_device_prepare_format_string(dev, temp_str);
         if(!flipper_format_write_string(file, "Device type", temp_str)) break;
-        // Write UID, ATQA, SAK
-        if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
+        // Write UID
+        if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats except ISO15693"))
             break;
         if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
-        if(!flipper_format_write_hex(file, "ATQA", data->atqa, 2)) break;
-        if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
+
+        if(dev->format != NfcDeviceSaveFormatSlixL) {
+            // Write ATQA, SAK
+            if(!flipper_format_write_hex(file, "ATQA", data->atqa, 2)) break;
+            if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
+        }
         // Save more data if necessary
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_save_mifare_ul_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
             if(!nfc_device_save_mifare_df_data(file, dev)) break;
+        } else if(dev->format == NfcDeviceSaveFormatSlixL) {
+            if(!nfc_device_save_slix_l_data(file, dev)) break;
+        } else if(dev->format == NfcDeviceSaveFormatBankCard) {
+            if(!nfc_device_save_bank_card_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatMifareClassic) {
             // Save data
             if(!nfc_device_save_mifare_classic_data(file, dev)) break;
@@ -1117,11 +1212,13 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
         if(!nfc_device_parse_format_string(dev, temp_str)) break;
         // Read and parse UID, ATQA and SAK
         if(!flipper_format_get_value_count(file, "UID", &data_cnt)) break;
-        if(!(data_cnt == 4 || data_cnt == 7)) break;
+        if(!(data_cnt == 4 || data_cnt == 7 || data_cnt == 8)) break;
         data->uid_len = data_cnt;
         if(!flipper_format_read_hex(file, "UID", data->uid, data->uid_len)) break;
-        if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
-        if(!flipper_format_read_hex(file, "SAK", &data->sak, 1)) break;
+        if(dev->format != NfcDeviceSaveFormatSlixL) {
+            if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
+            if(!flipper_format_read_hex(file, "SAK", &data->sak, 1)) break;
+        }
         // Load CUID
         uint8_t* cuid_start = data->uid;
         if(data->uid_len == 7) {
@@ -1136,6 +1233,8 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
             if(!nfc_device_load_mifare_classic_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
             if(!nfc_device_load_mifare_df_data(file, dev)) break;
+        } else if(dev->format == NfcDeviceSaveFormatSlixL) {
+            if(!nfc_device_load_slix_l_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatBankCard) {
             if(!nfc_device_load_bank_card_data(file, dev)) break;
         }
