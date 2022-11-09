@@ -15,14 +15,7 @@
 - Updated Clock Animation In Konami Mode
 - Fixed RFID to be internally compiled for decreased access time for keys
 - [Barcode generator: rfct, ux improvements, implement EAN-8. #154 (By msvsergey)](https://github.com/DarkFlippers/unleashed-firmware/pull/154)
-
-<details>
-  <summary><B>TO DO / REMOVED</b></summary><br/>
-
-- [Keynote BT plugin: long press on OK to switch between Space and Retur… #1729 (By coded-with-claws)]
-- Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
-
-</details>
+- Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/409)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -145,6 +138,7 @@ $ ./fbt plugin_dist
 - Settings: Desktop => [Games Only Mode (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
 - - [UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT FROM CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)<== FULL LIST OF GAMES ONLY CONTROLS
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/notification/notification_settings_app.c)
+- Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/409)
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
 - Settings: Power: Fix for settings reload every second [(By lokiuox)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/364)
 - Settings: Scan names will have timestamp instead of random name assigned for [NFC](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/lib/toolbox/random_name.c) and [SubGHz](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/subghz/scenes/subghz_scene_read_raw.c) (By RogueMaster)
