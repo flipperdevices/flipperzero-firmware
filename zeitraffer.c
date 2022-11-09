@@ -185,7 +185,7 @@ int32_t zeitraffer_app(void* p) {
 				view_port_update(view_port);
 				gpio_item_set_all_pins(true);
 				//gpio_item_set_pin(6, true);
-				furi_delay_ms(300);
+				furi_delay_ms(250);
 				//gpio_item_set_pin(6, false);
 				gpio_item_set_all_pins(false);
 
