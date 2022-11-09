@@ -1674,7 +1674,12 @@ void MenuFunctions::RunSetup()
         addNodes(&wifiAPMenu, text09, TFT_LIGHTGREY, NULL, 0, [this]() {
         changeMenu(wifiAPMenu.parentMenu);
       });
-      for (int i = 0; i < access_points->size(); i++) {
+      int menu_limit;
+      if (access_points->size() <= BUTTON_ARRAY_LEN)
+        menu_limit = access_points->size();
+      else
+        menu_limit = BUTTON_ARRAY_LEN;
+      for (int i = 0; i < menu_limit - 1; i++) {
         addNodes(&wifiAPMenu, access_points->get(i).essid, TFT_CYAN, NULL, KEYBOARD_ICO, [this, i](){
         AccessPoint new_ap = access_points->get(i);
         new_ap.selected = !access_points->get(i).selected;
