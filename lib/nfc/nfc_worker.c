@@ -109,7 +109,7 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_mf_classic_dict_attack(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
         nfc_worker_analyze_reader(nfc_worker);
-    } else if(nfc_worker->state == NfcWorkerStateNfcVReadAuth) {
+    } else if(nfc_worker->state == NfcWorkerStateNfcVUnlock) {
         nfc_worker_nfcv_unlock(nfc_worker);
     }
     furi_hal_nfc_sleep();
@@ -133,7 +133,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
 
     furi_hal_nfc_sleep();
 
-    while(nfc_worker->state == NfcWorkerStateNfcVReadAuth) {
+    while(nfc_worker->state == NfcWorkerStateNfcVUnlock) {
 
         furi_hal_nfc_exit_sleep();
         furi_hal_nfc_ll_txrx_on();

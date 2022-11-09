@@ -30,7 +30,7 @@ bool nfc_scene_nfcv_key_input_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventByteInputDone) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVReadAuth);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVUnlock);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         }
