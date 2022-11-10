@@ -10,5 +10,5 @@ App(
     order=20,
     fap_icon="usb_midi.png",
     fap_category="Music",
-    fap_icon_assets="icons",
+    # fap_icon_assets="icons",
 )
