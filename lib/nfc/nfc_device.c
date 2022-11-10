@@ -1187,7 +1187,7 @@ bool nfc_file_select(NfcDevice* dev) {
     };
 
     bool res =
-        dialog_file_browser_show(dev->dialogs, dev->load_path, nfc_app_folder, &browser_options);
+        dialog_file_browser_show(dev->dialogs, dev->load_path, dev->load_path, &browser_options);
 
     furi_string_free(nfc_app_folder);
     if(res) {
