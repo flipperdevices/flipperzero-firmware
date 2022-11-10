@@ -2,6 +2,7 @@
 #include <lib/nfc/protocols/mifare_ultralight.h>
 
 #define NFC_SCENE_MF_ULTRALIGHT_EMULATE_LOG_SIZE_MAX (200)
+#define NFC_MF_UL_DATA_CHANGED (1UL)
 
 enum {
     // View states
