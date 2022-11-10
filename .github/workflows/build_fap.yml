@@ -7,20 +7,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout ufbt
-      uses: actions/checkout@v3
-      with:
-        repository: flipperdevices/flipperzero-ufbt
-        path: flipperzero-ufbt
-    
-    - name: Set path
-      run: echo "$GITHUB_WORKSPACE/flipperzero-ufbt" >> $GITHUB_PATH
-      
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        path: flipperzero-lightmeter
         submodules: 'true'
         
     - name: Build
-      run: cd flipperzero-lightmeter; ufbt
+      uses: oleksiikutuzov/flipperzero-ufbt-action@v0.1
