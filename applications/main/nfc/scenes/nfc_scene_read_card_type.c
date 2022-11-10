@@ -49,6 +49,8 @@ void nfc_scene_read_card_type_on_enter(void* context) {
         SubmenuIndexReadNFCA,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadCardType);
+    submenu_set_selected_item(submenu, state);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
