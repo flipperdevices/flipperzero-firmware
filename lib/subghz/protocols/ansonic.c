@@ -67,7 +67,7 @@ const SubGhzProtocolEncoder subghz_protocol_ansonic_encoder = {
 const SubGhzProtocol subghz_protocol_ansonic = {
     .name = SUBGHZ_PROTOCOL_ANSONIC_NAME,
     .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_AM |
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_FM |
             SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save |
             SubGhzProtocolFlag_Send,
 
