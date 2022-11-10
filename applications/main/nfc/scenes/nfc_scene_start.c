@@ -48,7 +48,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
-            nfc->worker->read_mode = NfcReadModeAuto;
+            nfc->dev->dev_data.read_mode = NfcReadModeAuto;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;

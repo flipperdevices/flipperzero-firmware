@@ -61,27 +61,27 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexReadMifareClassic) {
-            nfc->worker->read_mode = NfcReadModeMfClassic;
+            nfc->dev->dev_data.read_mode = NfcReadModeMfClassic;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadMifareDesfire) {
-            nfc->worker->read_mode = NfcReadModeMfDesfire;
+            nfc->dev->dev_data.read_mode = NfcReadModeMfDesfire;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadMfUltralight) {
-            nfc->worker->read_mode = NfcReadModeMfUltralight;
+            nfc->dev->dev_data.read_mode = NfcReadModeMfUltralight;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadEMV) {
-            nfc->worker->read_mode = NfcReadModeEMV;
+            nfc->dev->dev_data.read_mode = NfcReadModeEMV;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadNFCA) {
-            nfc->worker->read_mode = NfcReadModeNFCA;
+            nfc->dev->dev_data.read_mode = NfcReadModeNFCA;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }

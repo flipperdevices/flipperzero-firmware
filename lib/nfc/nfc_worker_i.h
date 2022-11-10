@@ -14,15 +14,6 @@
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/nfc/helpers/reader_analyzer.h>
 
-typedef enum {
-    NfcReadModeAuto,
-    NfcReadModeMfClassic,
-    NfcReadModeMfUltralight,
-    NfcReadModeMfDesfire,
-    NfcReadModeEMV,
-    NfcReadModeNFCA,
-} NfcReadMode;
-
 struct NfcWorker {
     FuriThread* thread;
     Storage* storage;
@@ -34,8 +25,6 @@ struct NfcWorker {
     void* context;
 
     NfcWorkerState state;
-
-    NfcReadMode read_mode;
 
     ReaderAnalyzer* reader_analyzer;
 };
