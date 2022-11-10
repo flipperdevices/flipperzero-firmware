@@ -413,6 +413,7 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
     while(nfc_worker->state == NfcWorkerStateRead) {
         if(furi_hal_nfc_detect(nfc_data, 300)) {
             FURI_LOG_D(TAG, "Card detected");
+            furi_hal_nfc_sleep();
             // Process first found device
             nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
             card_not_detected_notified = false;
