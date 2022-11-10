@@ -7,10 +7,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout ufbt
+      uses: actions/checkout@v3
+      with:
+        repository: flipperdevices/flipperzero-ufbt
+        path: ../flipperzero-ufbt
+    
+    - name: Set path
+      run: echo "$GITHUB_WORKSPACE/../flipperzero-ufbt" >> $GITHUB_PATH
+      
     - name: Checkout
       uses: actions/checkout@v3
       with:
         submodules: 'true'
         
     - name: Build
-      uses: oleksiikutuzov/flipperzero-ufbt-action@v0.2
+      run: ufbt
