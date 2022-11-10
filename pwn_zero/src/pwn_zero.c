@@ -56,16 +56,19 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
     if (message_queue_has_message(model->queue)) {
         PwnCommand cmd;
         message_queue_pop_message(model->queue, &cmd);
+        FURI_LOG_D("PWN", "Has message (code: %d), processing...", cmd.code);
 
         // See what the cmd wants
         // Draw a single pixel
         if (cmd.code == 0x01 || cmd.code == 0x00) {
+            FURI_LOG_D("PWN", "Drawing pixel at (i: %d, j: %d)", cmd.i, cmd.j);
             if ((cmd.i < FLIPPER_SCREEN_HEIGHT) && (cmd.j < FLIPPER_SCREEN_WIDTH)) {
                 model->workspace[cmd.i * FLIPPER_SCREEN_WIDTH + cmd.j] = cmd.code;
             }
         }
         // Flush buffer to the screen
         else if (cmd.code == 0x0f) {
+            FURI_LOG_D("PWN", "Flipping buffer...");
             bool* tmp = model->screen;
             model->screen = model->workspace;
             model->workspace = tmp;
@@ -74,10 +77,11 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
         }
         // Wipe the buffer
         else if (cmd.code == 0xff) {
+            FURI_LOG_D("PWN", "Wiping the buffer...");
             memset(model->workspace, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
         }
         else {
-            FURI_LOG_D("PWNZERO", "Received an unrecognized command");
+            FURI_LOG_D("PWN", "Received an unrecognized command");
         }
 
     }
@@ -128,6 +132,7 @@ static int32_t pwn_zero_worker(void* context) {
     PwnZeroApp* app = context;
 
     while(1) {
+        bool update = false;
         uint32_t events =
             furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
@@ -147,15 +152,15 @@ static int32_t pwn_zero_worker(void* context) {
                             for(size_t i = 0; i < length; i++) {
                                 pwn_zero_push_to_list(model, data[i]);
                             }
-                            pwn_zero_exec_cmd(model);
+                            update = pwn_zero_exec_cmd(model);
                         },
-                        false);
+                        update);
                 }
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            // with_view_model(
-                // app->view, PwnDumpModel * model, { UNUSED(model); }, false);
+            with_view_model(
+                app->view, PwnDumpModel * model, { UNUSED(model); }, true);
             
         }
     }
