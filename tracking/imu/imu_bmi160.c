@@ -70,7 +70,7 @@ bool bmi160_begin() {
     return true;
 }
 
-int bmi160_read(float* vec) {
+int bmi160_read(double* vec) {
     if(bmi160_get_sensor_data(
            (BMI160_ACCEL_SEL | BMI160_GYRO_SEL), &bmi160_accel, &bmi160_gyro, &bmi160dev) !=
        BMI160_OK) {

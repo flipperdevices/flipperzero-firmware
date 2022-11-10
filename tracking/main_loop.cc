@@ -126,9 +126,10 @@ bool calibration_step() {
     if (calibration.isComplete())
         return true;
 
-    double vec[6] = { 0, 0, 0, 0, 0, 0 };
+    double vec[6];
     if (imu_read(vec) & GYR_DATA_READY) {
-        cardboard::Vector3 data(vec[5], vec[3], vec[4]);
+        cardboard::Vector3 data(vec[3], vec[4], vec[5]);
+        furi_delay_ms(9); // Artificially limit to ~100Hz
         return calibration.add(data);
     }
 
@@ -160,20 +161,20 @@ void tracking_begin() {
 }
 
 void tracking_step(MouseMoveCallback mouse_move) {
-    double vec[6] = { 0, 0, 0, 0, 0, 0 };
+    double vec[6];
     int ret = imu_read(vec);
     if (ret != 0) {
         uint64_t t = (DWT->CYCCNT * 1000llu + ippms2) / ippms;
         if (ret & ACC_DATA_READY) {
             cardboard::AccelerometerData adata
                 = { .system_timestamp = t, .sensor_timestamp_ns = t,
-                    .data = cardboard::Vector3(vec[2], vec[0], vec[1]) };
+                    .data = cardboard::Vector3(vec[0], vec[1], vec[2]) };
             tracker.OnAccelerometerData(adata);
         }
         if (ret & GYR_DATA_READY) {
             cardboard::GyroscopeData gdata
                 = { .system_timestamp = t, .sensor_timestamp_ns = t,
-                    .data = cardboard::Vector3(vec[5], vec[3], vec[4]) };
+                    .data = cardboard::Vector3(vec[3], vec[4], vec[5]) };
             cardboard::Vector4 pose = tracker.OnGyroscopeData(gdata);
             onOrientation(pose);
             sendCurrentState(mouse_move);
