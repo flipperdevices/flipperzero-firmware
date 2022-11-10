@@ -122,15 +122,15 @@ static bool subghz_protocol_encoder_ansonic_get_upload(SubGhzProtocolEncoderAnso
         if(bit_read(instance->generic.data, i - 1)) {
             //send bit 1
             instance->encoder.upload[index++] =
-                level_duration_make(false, (uint32_t)subghz_protocol_ansonic_const.te_long);
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_ansonic_const.te_short);
-        } else {
-            //send bit 0
-            instance->encoder.upload[index++] =
                 level_duration_make(false, (uint32_t)subghz_protocol_ansonic_const.te_short);
             instance->encoder.upload[index++] =
                 level_duration_make(true, (uint32_t)subghz_protocol_ansonic_const.te_long);
+        } else {
+            //send bit 0
+            instance->encoder.upload[index++] =
+                level_duration_make(false, (uint32_t)subghz_protocol_ansonic_const.te_long);
+            instance->encoder.upload[index++] =
+                level_duration_make(true, (uint32_t)subghz_protocol_ansonic_const.te_short);
         }
     }
     return true;
