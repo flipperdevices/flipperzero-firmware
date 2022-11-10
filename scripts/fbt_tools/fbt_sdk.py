@@ -14,6 +14,7 @@ import json
 
 from fbt.sdk.collector import SdkCollector
 from fbt.sdk.cache import SdkCache
+from fbt.util import path_as_posix
 
 
 def ProcessSdkDepends(env, filename):
@@ -77,7 +78,7 @@ class SdkMeta:
             vars,
             target=Entry("dummy"),
         )
-        return expanded_vars.replace("\\", "/")
+        return path_as_posix(expanded_vars)
 
 
 class SdkTreeBuilder:
@@ -142,13 +143,15 @@ class SdkTreeBuilder:
         meta.save_to(self.target[0].path)
 
     def build_sdk_file_path(self, orig_path: str) -> str:
-        return posixpath.normpath(
-            posixpath.join(
-                self.SDK_DIR_SUBST,
-                self.target_sdk_dir_name,
-                orig_path,
+        return path_as_posix(
+            posixpath.normpath(
+                posixpath.join(
+                    self.SDK_DIR_SUBST,
+                    self.target_sdk_dir_name,
+                    orig_path,
+                )
             )
-        ).replace("\\", "/")
+        )
 
     def emitter(self, target, source, env):
         target_folder = target[0]
