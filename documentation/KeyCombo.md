@@ -60,7 +60,7 @@ There is 1 case when it's not working:
 
 ### Hardware Reset + Software DFU
 
-- Press `LEFT` and `BACK` and hold for couple of seconds
+- Press `LEFT` and `BACK` and hold for a couple of seconds
 - Release `BACK`
 - Device will enter DFU with indication (Blue LED + DFU Screen)
 - Release `LEFT`
@@ -76,7 +76,7 @@ There are 2 cases when it's not working:
 
 ### Hardware Reset + Hardware DFU
 
-- Press `LEFT` and `BACK` and `OK` and hold for couple of seconds
+- Press `LEFT` and `BACK` and `OK` and hold for a couple of seconds
 - Release `BACK` and `LEFT`
 - Device will enter DFU without indication
 
