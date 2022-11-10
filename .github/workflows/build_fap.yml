@@ -10,7 +10,7 @@ jobs:
     - name: Checkout ufbt
       uses: actions/checkout@v3
       with:
-        repository: https://github.com/flipperdevices/flipperzero-ufbt
+        repository: flipperdevices/flipperzero-ufbt
         path: flipperzero-ufbt
     
     - name: Set path
