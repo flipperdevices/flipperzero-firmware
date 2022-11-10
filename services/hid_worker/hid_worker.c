@@ -12,15 +12,23 @@ const uint8_t hid_number_keys[10] = {
     HID_KEYBOARD_8,
     HID_KEYBOARD_9};
 
+static void totp_hid_worker_restore_usb_mode(TotpHidWorkerTypeContext* context) {
+    if(context->usb_mode_prev != NULL) {
+        furi_hal_usb_set_config(context->usb_mode_prev, NULL);
+        context->usb_mode_prev = NULL;
+    }
+}
+
 static void totp_hid_worker_type_code(TotpHidWorkerTypeContext* context) {
-    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+    context->usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
     uint8_t i = 0;
     do {
         furi_delay_ms(500);
         i++;
-    } while(!furi_hal_hid_is_connected() && i < 100);
+    } while(!furi_hal_hid_is_connected() && i < 50);
+    furi_delay_ms(500);
 
     if(furi_hal_hid_is_connected() &&
        furi_mutex_acquire(context->string_sync, 500) == FuriStatusOk) {
@@ -37,14 +45,10 @@ static void totp_hid_worker_type_code(TotpHidWorkerTypeContext* context) {
 
         furi_mutex_release(context->string_sync);
 
-        furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
-        furi_delay_ms(30);
-        furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
-
         furi_delay_ms(100);
     }
 
-    furi_hal_usb_set_config(usb_mode_prev, NULL);
+    totp_hid_worker_restore_usb_mode(context);
 }
 
 static int32_t totp_hid_worker_callback(void* context) {
@@ -77,6 +81,7 @@ TotpHidWorkerTypeContext* totp_hid_worker_start() {
     furi_check(context != NULL);
     context->string_sync = furi_mutex_alloc(FuriMutexTypeNormal);
     context->thread = furi_thread_alloc();
+    context->usb_mode_prev = NULL;
     furi_thread_set_name(context->thread, "TOTPHidWorker");
     furi_thread_set_stack_size(context->thread, 1024);
     furi_thread_set_context(context->thread, context);
@@ -91,6 +96,7 @@ void totp_hid_worker_stop(TotpHidWorkerTypeContext* context) {
     furi_thread_join(context->thread);
     furi_thread_free(context->thread);
     furi_mutex_free(context->string_sync);
+    totp_hid_worker_restore_usb_mode(context);
     free(context);
 }
 
