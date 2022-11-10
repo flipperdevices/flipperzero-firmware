@@ -53,6 +53,8 @@ def prebuild_sdk_create_origin_file(target, source, env):
 
 
 class SdkMeta:
+    MAP_FILE_SUBST = "SDK_MAP_FILE_SUBST"
+
     def __init__(self, env, tree_builder: "SdkTreeBuilder"):
         self.env = env
         self.treebuilder = tree_builder
@@ -68,6 +70,7 @@ class SdkMeta:
             "linker_libs": self.env.subst("${LIBS}"),
             "app_ep_subst": self.env.subst("${APP_ENTRY}"),
             "sdk_path_subst": self.env.subst("${SDK_DIR_SUBST}"),
+            "map_file_subst": self.MAP_FILE_SUBST,
             "hardware": self.env.subst("${TARGET_HW}"),
         }
         with open(json_manifest_path, "wt") as f:
@@ -76,7 +79,7 @@ class SdkMeta:
     def _wrap_scons_vars(self, vars: str):
         expanded_vars = self.env.subst(
             vars,
-            target=Entry("dummy"),
+            target=Entry(self.MAP_FILE_SUBST),
         )
         return path_as_posix(expanded_vars)
 
