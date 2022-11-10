@@ -1,22 +1,22 @@
 #include "../spi_mem_app_i.h"
 
-static void spi_mem_scene_read_success_popup_callback(void* context) {
+static void spi_mem_scene_success_popup_callback(void* context) {
     SPIMemApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, SPIMemCustomEventPopupBack);
 }
 
-void spi_mem_scene_read_success_on_enter(void* context) {
+void spi_mem_scene_success_on_enter(void* context) {
     SPIMemApp* app = context;
     popup_set_icon(app->popup, 32, 5, &I_DolphinNice_96x59);
-    popup_set_header(app->popup, "Saved!", 5, 7, AlignLeft, AlignTop);
-    popup_set_callback(app->popup, spi_mem_scene_read_success_popup_callback);
+    popup_set_header(app->popup, "Success!", 5, 7, AlignLeft, AlignTop);
+    popup_set_callback(app->popup, spi_mem_scene_success_popup_callback);
     popup_set_context(app->popup, app);
     popup_set_timeout(app->popup, 1500);
     popup_enable_timeout(app->popup);
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewPopup);
 }
 
-bool spi_mem_scene_read_success_on_event(void* context, SceneManagerEvent event) {
+bool spi_mem_scene_success_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
     bool success = false;
     if(event.type == SceneManagerEventTypeCustom) {
@@ -29,7 +29,7 @@ bool spi_mem_scene_read_success_on_event(void* context, SceneManagerEvent event)
     return success;
 }
 
-void spi_mem_scene_read_success_on_exit(void* context) {
+void spi_mem_scene_success_on_exit(void* context) {
     SPIMemApp* app = context;
     popup_reset(app->popup);
 }

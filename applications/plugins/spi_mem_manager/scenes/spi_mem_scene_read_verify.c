@@ -36,7 +36,7 @@ bool spi_mem_scene_read_verify_on_event(void* context, SceneManagerEvent event) 
     } else if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == SPIMemCustomEventViewVerifySkip) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneReadSuccess);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_progress_inc_progress(app->view_read);
         } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
@@ -50,7 +50,7 @@ bool spi_mem_scene_read_verify_on_event(void* context, SceneManagerEvent event) 
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, SPIMemSceneChipDetect);
         } else if(event.event == SPIMemCustomEventWorkerVerifyDone) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneReadSuccess);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
         } else if(event.event == SPIMemCustomEventWorkerVerifyFail) {
             notification_message(app->notifications, &sequence_blink_stop);
             spi_mem_show_chip_error(app->dialogs, "Verification failed\nPlease restart process");
