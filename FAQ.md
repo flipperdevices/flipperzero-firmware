@@ -27,7 +27,14 @@ Detailed description of file format can be found [here](docs/conf-file_descripti
 ## Is there a CLI?
 
 **YES!**
+
 When Flipper Authenticator is running `totp` CLI is available for you to list, add or remove tokens. Run `totp help` to get list of available commands and arguments.
+
+## Manually typing codes is boring, is there Bad USB mode?
+
+**YES!**
+
+Just pick the token you would like to auto-type then hold "arrow down" button for 1-2sec. and Flipper Authenticator will type it instead of you :)
 
 ## How to change\recover PIN?
 
