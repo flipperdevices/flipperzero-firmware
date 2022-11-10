@@ -57,5 +57,4 @@ dkms.conf
 # repo
 dist
 .vscode
-.clang-format
 .editorconfig
