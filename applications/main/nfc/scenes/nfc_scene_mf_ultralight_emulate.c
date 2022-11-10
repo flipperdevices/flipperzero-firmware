@@ -117,37 +117,18 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightEmulate);
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventWorkerExit) {
-            if(state & NfcSceneMfUltralightEmulateStateAuthAttempted) {
-                if(!(state & NfcSceneMfUltralightEmulateStateLogButtonShown)) {
-                    // Add log button to widget not already showing
-                    nfc_scene_mf_ultralight_emulate_widget_config(nfc, true);
-                    state |= NfcSceneMfUltralightEmulateStateLogButtonShown;
-                }
-                // The text box update logic is handled in the worker callback
-                state &= ~NfcSceneMfUltralightEmulateStateAuthAttempted;
-                scene_manager_set_scene_state(
-                    nfc->scene_manager, NfcSceneMfUltralightEmulate, state);
-                consumed = true;
+    if(event.type == SceneManagerEventTypeBack) {
+        // Stop worker
+        nfc_worker_stop(nfc->worker);
+        // Check if data changed and save in shadow file
+        if(scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightEmulate) ==
+           NFC_MF_UL_DATA_CHANGED) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneMfUltralightEmulate, NFC_MF_UL_DATA_NOT_CHANGED);
+            // Save shadow file
+            if(furi_string_size(nfc->dev->load_path)) {
+                nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
             }
-        } else if(
-            event.event == GuiButtonTypeCenter && (state & NfcSceneMfUltralightEmulateStateMax) ==
-                                                      NfcSceneMfUltralightEmulateStateWidget) {
-            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
-            state = (state & ~NfcSceneMfUltralightEmulateStateMax) |
-                    NfcSceneMfUltralightEmulateStateTextBox;
-            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfUltralightEmulate, state);
-            consumed = true;
-        }
-    } else if(event.type == SceneManagerEventTypeBack) {
-        if((state & NfcSceneMfUltralightEmulateStateMax) ==
-           NfcSceneMfUltralightEmulateStateTextBox) {
-            view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
-            state = (state & ~NfcSceneMfUltralightEmulateStateMax) |
-                    NfcSceneMfUltralightEmulateStateWidget;
-            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfUltralightEmulate, state);
-            consumed = true;
         }
     }
     return consumed;
