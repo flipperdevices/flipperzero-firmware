@@ -53,3 +53,9 @@ dkms.conf
 
 # macOS
 .DS_Store
+
+# repo
+dist
+.vscode
+.clang-format
+.editorconfig
