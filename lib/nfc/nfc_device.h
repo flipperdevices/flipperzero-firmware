@@ -63,8 +63,8 @@ typedef enum {
 typedef struct {
     FuriHalNfcDevData nfc_data;
     NfcProtocol protocol;
+    NfcReadMode read_mode;
     union {
-        NfcReadMode read_mode;
         NfcReaderRequestData reader_data;
         NfcMfClassicDictAttackData mf_classic_dict_attack_data;
     };
