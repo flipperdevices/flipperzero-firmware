@@ -13,4 +13,4 @@ jobs:
         submodules: 'true'
         
     - name: Build
-      uses: oleksiikutuzov/flipperzero-ufbt-action@v0.1
+      uses: oleksiikutuzov/flipperzero-ufbt-action@v0.2
