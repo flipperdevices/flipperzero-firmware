@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <core/string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -205,6 +206,14 @@ typedef void (
  * @param[in]  context      context to pass to callback
  */
 void furi_hal_power_info_get(FuriHalPowerInfoCallback callback, void* context);
+
+/** Get power information
+ *
+ * @param[in]  callback     callback to provide with new data
+ * @param[in]  key          key to filter results
+ * @param[in]  context      context to pass to callback
+ */
+void furi_hal_power_info_get_by_key(FuriHalPowerInfoCallback callback, FuriString* key, void* context);
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <core/string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +29,13 @@ typedef void (
  * @param[in]  context      context to pass to callback
  */
 void furi_hal_info_get(FuriHalInfoValueCallback callback, void* context);
+
+/** Get device information
+ *
+ * @param[in]  callback     callback to provide with new data
+ * @param[in]  context      context to pass to callback
+ */
+void furi_hal_info_get_by_key(FuriHalInfoValueCallback callback, FuriString* key, void* context);
 
 #ifdef __cplusplus
 }

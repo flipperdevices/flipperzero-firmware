@@ -580,3 +580,10 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, void* context) {
 
     furi_string_free(value);
 }
+
+void furi_hal_power_info_get_by_key(FuriHalPowerInfoCallback out, FuriString* key, void* context) {
+    furi_assert(out);
+    UNUSED(key);
+    UNUSED(context);
+    out("power_info_major", "1", true, context);
+}
