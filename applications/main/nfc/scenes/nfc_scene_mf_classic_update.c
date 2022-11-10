@@ -57,15 +57,11 @@ bool nfc_scene_mf_classic_update_on_event(void* context, SceneManagerEvent event
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventSuccess) {
             nfc_worker_stop(nfc->worker);
-            FuriString* path = furi_string_alloc();
-            furi_string_cat_printf(
-                path, "%s/%s.%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
-            if(nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(path))) {
+            if(nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path))) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicUpdateSuccess);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicWrongCard);
             }
-            furi_string_free(path);
             consumed = true;
         } else if(event.event == NfcWorkerEventWrongCard) {
             nfc_worker_stop(nfc->worker);

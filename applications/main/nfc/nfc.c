@@ -116,7 +116,7 @@ void nfc_free(Nfc* nfc) {
         // Stop worker
         nfc_worker_stop(nfc->worker);
         // Save data in shadow file
-        if(nfc->dev->load_path) {
+        if(furi_string_size(nfc->dev->load_path)) {
             nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
         }
     }
