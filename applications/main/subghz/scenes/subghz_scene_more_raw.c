@@ -75,10 +75,18 @@ bool subghz_scene_more_raw_on_event(void* context, SceneManagerEvent event) {
                 }
             }
         } else if(event.event == SubmenuIndexDecode) {
-            scene_manager_set_scene_state(
-                subghz->scene_manager, SubGhzSceneMoreRAW, SubmenuIndexDecode);
-            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDecodeRAW);
-            return true;
+            if(subghz_file_available(subghz)) {
+                scene_manager_set_scene_state(
+                    subghz->scene_manager, SubGhzSceneMoreRAW, SubmenuIndexDecode);
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneDecodeRAW);
+                return true;
+            } else {
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                       subghz->scene_manager, SubGhzSceneStart)) {
+                    scene_manager_stop(subghz->scene_manager);
+                    view_dispatcher_stop(subghz->view_dispatcher);
+                }
+            }
         }
     }
     return false;
