@@ -9,6 +9,7 @@ typedef struct {
     uint8_t string_length;
     FuriThread* thread;
     FuriMutex* string_sync;
+    FuriHalUsbInterface* usb_mode_prev;
 } TotpHidWorkerTypeContext;
 
 typedef enum {
