@@ -69,16 +69,20 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
         // Flush buffer to the screen
         else if (cmd.code == 0x0f) {
             FURI_LOG_D("PWN", "Flipping buffer...");
-            bool* tmp = model->screen;
-            model->screen = model->workspace;
-            model->workspace = tmp;
+
+            bool* tmp = model->workspace;
+            model->workspace = model->screen;
+            model->screen = tmp;
+
+            // Copy new buffer to the workspace
+            memcpy(model->workspace, model->screen, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
 
             return true;
         }
         // Wipe the buffer
         else if (cmd.code == 0xff) {
             FURI_LOG_D("PWN", "Wiping the buffer...");
-            memset(model->workspace, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+            memset(model->workspace, 0, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
         }
         else {
             FURI_LOG_D("PWN", "Received an unrecognized command");
@@ -159,8 +163,8 @@ static int32_t pwn_zero_worker(void* context) {
             } while(length > 0);
 
             notification_message(app->notification, &sequence_notification);
-            with_view_model(
-                app->view, PwnDumpModel * model, { UNUSED(model); }, true);
+            // with_view_model(
+                // app->view, PwnDumpModel * model, { UNUSED(model); }, true);
             
         }
     }
@@ -193,8 +197,8 @@ static PwnZeroApp* pwn_zero_app_alloc() {
             model->queue = message_queue_alloc();
             model->screen = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             model->workspace = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
-            memset(model->screen, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
-            memset(model->workspace, 0, FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+            memset(model->screen, 0, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+            memset(model->workspace, 0, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
         },
         true);
 

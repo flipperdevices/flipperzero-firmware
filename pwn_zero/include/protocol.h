@@ -15,7 +15,7 @@ typedef struct {
 #define PWNAGOTCHI_PROTOCOL_BYTE_LEN 5
 
 /// Number or messages that can be stored in the queue at one time
-#define PWNAGOTCHI_PROTOCOL_QUEUE_SIZE 20
+#define PWNAGOTCHI_PROTOCOL_QUEUE_SIZE 1000
 
 /// Start byte at beginning of transmission
 #define PWNAGOTCHI_PROTOCOL_START 0x02
