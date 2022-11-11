@@ -1,5 +1,5 @@
 #include "unitemp.h"
-#include "interfaces/OneWireSensor.h"
+#include "interfaces/SingleWireSensor.h"
 #include "Sensors.h"
 #include "scenes/Scenes.h"
 

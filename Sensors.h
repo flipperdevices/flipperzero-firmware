@@ -34,8 +34,8 @@ typedef enum {
 
 //Типы подключения датчиков
 typedef enum Interface {
-    ONE_WIRE, //Собственный однопроводной протокол датчиков DHTXX и AM23XX
-    DALLAS, //Однопроводной протокол Dallas
+    SINGLE_WIRE, //Собственный однопроводной протокол датчиков DHTXX и AM23XX
+    ONE_WIRE, //Однопроводной протокол Dallas
     I2C,
     SPI,
 

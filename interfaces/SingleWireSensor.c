@@ -1,4 +1,4 @@
-#include "OneWireSensor.h"
+#include "SingleWireSensor.h"
 #include "../Sensors.h"
 
 //Интервал опроса датчиков (мс)
@@ -7,8 +7,8 @@
 #define POLLING_TIMEOUT_TICKS 10000
 
 bool unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anotherValues) {
-    OneWireSensor* instance = malloc(sizeof(OneWireSensor));
-    instance->interface = ONE_WIRE;
+    SingleWireSensor* instance = malloc(sizeof(SingleWireSensor));
+    instance->interface = SINGLE_WIRE;
     instance->lastPollingTime = 0xFFFFFFFF;
 
     sensor->initializer = unitemp_oneWire_sensorInit;
@@ -27,7 +27,7 @@ bool unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anothe
 }
 
 bool unitemp_oneWire_sensorInit(void* sensor) {
-    OneWireSensor* instance = ((Sensor*)sensor)->instance;
+    SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
         return false;
@@ -44,7 +44,7 @@ bool unitemp_oneWire_sensorInit(void* sensor) {
 }
 
 bool unitemp_oneWire_sensorDeInit(void* sensor) {
-    OneWireSensor* instance = ((Sensor*)sensor)->instance;
+    SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) return false;
     //Низкий уровень по умолчанию
     furi_hal_gpio_write(instance->gpio->pin, false);
@@ -59,18 +59,18 @@ bool unitemp_oneWire_sensorDeInit(void* sensor) {
 
 bool unitemp_oneWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
     if(sensor == NULL || gpio == NULL) return false;
-    OneWireSensor* instance = sensor->instance;
+    SingleWireSensor* instance = sensor->instance;
     instance->gpio = gpio;
     return true;
 }
 const GPIO* unitemp_oneWire_sensorGetGPIO(Sensor* sensor) {
     if(sensor == NULL) return NULL;
-    OneWireSensor* instance = sensor->instance;
+    SingleWireSensor* instance = sensor->instance;
     return instance->gpio;
 }
 
 UnitempStatus unitemp_oneWire_updateData(void* sensor) {
-    OneWireSensor* instance = ((Sensor*)sensor)->instance;
+    SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     //Проверка на допустимость опроса датчика
     if(furi_get_tick() - instance->lastPollingTime < POLLING_INTERVAL) {
         //Возврат ошибки если последний опрос датчика был неудачным

@@ -1,5 +1,5 @@
-#ifndef UNITEMP_ONE_WIRE
-#define UNITEMP_ONE_WIRE
+#ifndef UNITEMP_SINGLE_WIRE
+#define UNITEMP_SINGLE_WIRE
 
 #include "../unitemp.h"
 
@@ -15,7 +15,7 @@ typedef struct {
     float lastTemp;
     //Последнее успешное значение влажности
     float lastHum;
-} OneWireSensor;
+} SingleWireSensor;
 
 /**
  * @brief Инициализация датчика

@@ -1,5 +1,5 @@
 #include "Sensors.h"
-#include "./interfaces/OneWireSensor.h"
+#include "./interfaces/SingleWireSensor.h"
 #include "./interfaces/I2CSensor.h"
 
 #include <furi_hal_power.h>
@@ -192,7 +192,7 @@ bool unitemp_sensors_save(void) {
 
     //Сохранение датчиков
     for(size_t i = 0; i < app->sensors_count; i++) {
-        if(app->sensors[i]->interface == ONE_WIRE) {
+        if(app->sensors[i]->interface == SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
                 "%s %d %d\n",
