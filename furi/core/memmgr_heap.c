@@ -191,56 +191,14 @@ size_t memmgr_heap_get_thread_memory(FuriThreadId thread_id) {
 #undef traceMALLOC
 static inline void traceMALLOC(void* pointer, size_t size) {
     FuriThreadId thread_id = furi_thread_get_current_id();
-    volatile uint32_t ptr = 0;
-    volatile uint32_t sz = 0;
-    const uint32_t ram_start = 0x20000000;
-    const uint32_t ram_end = 0x20030000;
-
     if(thread_id && memmgr_heap_thread_trace_depth == 0) {
         memmgr_heap_thread_trace_depth++;
-
-        {
-            MemmgrHeapThreadDict_it_t thread_dict_it;
-            for(MemmgrHeapThreadDict_it(thread_dict_it, memmgr_heap_thread_dict);
-                !MemmgrHeapThreadDict_end_p(thread_dict_it);
-                MemmgrHeapThreadDict_next(thread_dict_it)) {
-                MemmgrHeapThreadDict_itref_t* data = MemmgrHeapThreadDict_ref(thread_dict_it);
-                if(data->key != 0) {
-                    MemmgrHeapAllocDict_t* alloc_dict = &data->value;
-                    MemmgrHeapAllocDict_it_t alloc_dict_it;
-                    for(MemmgrHeapAllocDict_it(alloc_dict_it, *alloc_dict);
-                        !MemmgrHeapAllocDict_end_p(alloc_dict_it);
-                        MemmgrHeapAllocDict_next(alloc_dict_it)) {
-                        MemmgrHeapAllocDict_itref_t* data = MemmgrHeapAllocDict_ref(alloc_dict_it);
-
-                        ptr = data->key;
-                        sz = data->value;
-
-                        if(ptr < ram_start || ptr > ram_end) {
-                            furi_crash("Invalid pointer");
-                        } else if(sz == 0 || sz > 0x10000) {
-                            furi_crash("Invalid size");
-                        }
-                    }
-                }
-            }
-        }
-
         MemmgrHeapAllocDict_t* alloc_dict =
             MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
         if(alloc_dict) {
             MemmgrHeapAllocDict_set_at(*alloc_dict, (uint32_t)pointer, (uint32_t)size);
         }
         memmgr_heap_thread_trace_depth--;
-    }
-
-    ptr = (uint32_t)pointer;
-    sz = (uint32_t)size;
-
-    if(ptr < ram_start || ptr > ram_end) {
-        furi_crash("^ Invalid pointer");
-    } else if(sz == 0 || sz > 0x10000) {
-        furi_crash("^ Invalid size");
     }
 }
 
