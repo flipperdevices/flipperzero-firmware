@@ -35,10 +35,11 @@ typedef enum {
 } SPIMemChipWriteMode;
 
 typedef enum {
-    SPIMemChipCMDWriteStatusReg1 = 0x01,
-    SPIMemChipCMDWriteStatusReg2 = 0x31,
     SPIMemChipCMDReadJEDECChipID = 0x9F,
-    SPIMemChipCMDReadData = 0x03
+    SPIMemChipCMDReadData = 0x03,
+    SPIMemChipCMDChipErase = 0xC7,
+    SPIMemChipCMDWriteEnable = 0x06,
+    SPIMemChipCMDWriteDisable = 0x04
 } SPIMemChipCMD;
 
 typedef struct {

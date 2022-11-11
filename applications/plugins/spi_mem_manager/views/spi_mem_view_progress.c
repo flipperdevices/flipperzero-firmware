@@ -15,6 +15,7 @@ typedef enum {
 
 typedef struct {
     size_t chip_size;
+    size_t file_size;
     size_t blocks_written;
     size_t block_size;
     float progress;
@@ -36,26 +37,37 @@ static void spi_mem_view_progress_draw_progress(Canvas* canvas, float progress) 
 }
 
 static void
-    spi_mem_view_progress_read_draw_callback(Canvas* canvas, SPIMemProgressViewModel* app) {
+    spi_mem_view_progress_read_draw_callback(Canvas* canvas, SPIMemProgressViewModel* model) {
     canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Reading dump");
-    spi_mem_view_progress_draw_progress(canvas, app->progress);
+    spi_mem_view_progress_draw_progress(canvas, model->progress);
     elements_button_left(canvas, "Cancel");
 }
 
 static void
-    spi_mem_view_progress_verify_draw_callback(Canvas* canvas, SPIMemProgressViewModel* app) {
-    canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Verifying dump");
-    spi_mem_view_progress_draw_progress(canvas, app->progress);
+    spi_mem_view_progress_verify_draw_size_warning(Canvas* canvas, SPIMemProgressViewModel* model) {
+    if(model->file_size > model->chip_size) {
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clampted to chip!");
+    }
+    if(model->chip_size > model->file_size) {
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clampted to file!");
+    }
+}
+
+static void
+    spi_mem_view_progress_verify_draw_callback(Canvas* canvas, SPIMemProgressViewModel* model) {
+    canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Verifying dump");
+    spi_mem_view_progress_verify_draw_size_warning(canvas, model);
+    spi_mem_view_progress_draw_progress(canvas, model->progress);
     elements_button_center(canvas, "Skip");
 }
 
-static void spi_mem_view_progress_draw_callback(Canvas* canvas, void* model) {
-    SPIMemProgressViewModel* app = model;
-    SPIMemProgressViewType view_type = app->view_type;
+static void spi_mem_view_progress_draw_callback(Canvas* canvas, void* context) {
+    SPIMemProgressViewModel* model = context;
+    SPIMemProgressViewType view_type = model->view_type;
     if(view_type == SPIMemProgressViewTypeRead) {
-        spi_mem_view_progress_read_draw_callback(canvas, app);
+        spi_mem_view_progress_read_draw_callback(canvas, model);
     } else if(view_type == SPIMemProgressViewTypeVerify) {
-        spi_mem_view_progress_verify_draw_callback(canvas, app);
+        spi_mem_view_progress_verify_draw_callback(canvas, model);
     }
 }
 
@@ -143,9 +155,22 @@ void spi_mem_view_progress_set_chip_size(SPIMemProgressView* app, size_t chip_si
         app->view, SPIMemProgressViewModel * model, { model->chip_size = chip_size; }, true);
 }
 
+void spi_mem_view_progress_set_file_size(SPIMemProgressView* app, size_t file_size) {
+    with_view_model(
+        app->view, SPIMemProgressViewModel * model, { model->file_size = file_size; }, true);
+}
+
 void spi_mem_view_progress_set_block_size(SPIMemProgressView* app, size_t block_size) {
     with_view_model(
         app->view, SPIMemProgressViewModel * model, { model->block_size = block_size; }, true);
+}
+
+static size_t spi_mem_view_progress_set_total_size(SPIMemProgressViewModel* model) {
+    size_t total_size = model->chip_size;
+    if((model->chip_size > model->file_size) && model->view_type != SPIMemProgressViewTypeRead) {
+        total_size = model->file_size;
+    }
+    return total_size;
 }
 
 void spi_mem_view_progress_inc_progress(SPIMemProgressView* app) {
@@ -153,9 +178,10 @@ void spi_mem_view_progress_inc_progress(SPIMemProgressView* app) {
         app->view,
         SPIMemProgressViewModel * model,
         {
+            size_t total_size = spi_mem_view_progress_set_total_size(model);
             model->blocks_written++;
-            model->progress = ((float)model->block_size * (float)model->blocks_written) /
-                              ((float)model->chip_size);
+            model->progress =
+                ((float)model->block_size * (float)model->blocks_written) / ((float)total_size);
         },
         true);
 }
@@ -168,6 +194,7 @@ void spi_mem_view_progress_reset(SPIMemProgressView* app) {
             model->blocks_written = 0;
             model->block_size = 0;
             model->chip_size = 0;
+            model->file_size = 0;
             model->progress = 0;
             model->view_type = SPIMemProgressViewTypeUnknown;
         },

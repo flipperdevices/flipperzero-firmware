@@ -19,6 +19,7 @@ void spi_mem_scene_verify_on_enter(void* context) {
         app->view_read, spi_mem_scene_verify_view_result_callback, app);
     notification_message(app->notifications, &sequence_blink_start_cyan);
     spi_mem_view_progress_set_chip_size(app->view_read, spi_mem_chip_get_size(app->chip_info));
+    spi_mem_view_progress_set_file_size(app->view_read, spi_mem_file_get_size(app));
     spi_mem_view_progress_set_block_size(
         app->view_read, spi_mem_tools_get_file_max_block_size(app->chip_info));
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewProgress);

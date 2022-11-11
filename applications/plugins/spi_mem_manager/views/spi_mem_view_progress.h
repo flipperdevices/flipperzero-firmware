@@ -16,6 +16,7 @@ void spi_mem_view_progress_set_verify_callback(
     SPIMemProgressViewCallback callback,
     void* cb_ctx);
 void spi_mem_view_progress_set_chip_size(SPIMemProgressView* app, size_t chip_size);
+void spi_mem_view_progress_set_file_size(SPIMemProgressView* app, size_t file_size);
 void spi_mem_view_progress_set_block_size(SPIMemProgressView* app, size_t block_size);
 void spi_mem_view_progress_inc_progress(SPIMemProgressView* app);
 void spi_mem_view_progress_reset(SPIMemProgressView* app);

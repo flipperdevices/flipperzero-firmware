@@ -3,6 +3,14 @@
 #include "spi_mem_tools.h"
 #include "../../spi_mem_files.h"
 
+static size_t spi_mem_worker_modes_get_total_size(SPIMemWorker* worker) {
+    size_t chip_size = spi_mem_chip_get_size(worker->chip_info);
+    size_t file_size = spi_mem_file_get_size(worker->cb_ctx);
+    size_t total_size = chip_size;
+    if(chip_size > file_size) total_size = file_size;
+    return total_size;
+}
+
 static void spi_mem_chip_detect_process(SPIMemWorker* worker);
 static void spi_mem_read_process(SPIMemWorker* worker);
 static void spi_mem_verify_process(SPIMemWorker* worker);
@@ -69,16 +77,16 @@ static void spi_mem_read_process(SPIMemWorker* worker) {
 static void spi_mem_verify_process(SPIMemWorker* worker) {
     uint8_t data_buffer_chip[SPI_MEM_FILE_BUFFER_SIZE];
     uint8_t data_buffer_file[SPI_MEM_FILE_BUFFER_SIZE];
-    size_t chip_size = spi_mem_chip_get_size(worker->chip_info);
     size_t offset = 0;
+    size_t total_size = spi_mem_worker_modes_get_total_size(worker);
     bool success = true;
     if(!spi_mem_file_open(worker->cb_ctx)) return;
     while(true) {
         furi_delay_tick(10);
         size_t block_size = SPI_MEM_FILE_BUFFER_SIZE;
         if(spi_mem_worker_check_for_stop(worker)) break;
-        if(offset >= chip_size) break;
-        if((offset + block_size) > chip_size) block_size = chip_size - offset;
+        if(offset >= total_size) break;
+        if((offset + block_size) > total_size) block_size = total_size - offset;
         if(!spi_mem_tools_read_block_data(
                worker->chip_info, offset, data_buffer_chip, block_size)) {
             spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerChipReadFail);
