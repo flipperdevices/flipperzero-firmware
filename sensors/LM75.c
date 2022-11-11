@@ -19,12 +19,17 @@ bool unitemp_LM75_alloc(Sensor* sensor) {
     sensor->initializer = unitemp_LM75_init;
     sensor->deinitializer = unitemp_LM75_deinit;
     sensor->updater = unitemp_LM75_update;
+    sensor->memoryfree = unitemp_LM75_free;
     sensor->pollingInterval = 1000;
 
     //Адреса на шине I2C (7 бит)
     i2c_sensor->minI2CAdr = 0b1001000;
     i2c_sensor->maxI2CAdr = 0b1001111;
     return true;
+}
+void unitemp_LM75_free(void* s) {
+    //Нечего высвобождать, так как ничего не было выделено
+    UNUSED(s);
 }
 
 bool unitemp_LM75_init(void* s) {
@@ -43,8 +48,6 @@ bool unitemp_LM75_deinit(void* s) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
     if(!writeReg(i2c_sensor, LM75_REG_CONFIG, LM75_CONFIG_FAULTQUEUE_1 | LM75_CONFIG_SHUTDOWN))
         return false;
-    UNUSED(sensor);
-    UNUSED(i2c_sensor);
     return true;
 }
 
@@ -61,8 +64,6 @@ UnitempStatus unitemp_LM75_update(void* s) {
         raw = (int8_t)raw;
     }
     sensor->temp = (float)raw / 2.0f;
-
-    FURI_LOG_D(APP_NAME, "Sensor %s updated %f", sensor->name, (double)raw / (double)2.0);
 
     return UT_OK;
 }

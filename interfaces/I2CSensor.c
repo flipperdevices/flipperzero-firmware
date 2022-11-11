@@ -40,10 +40,9 @@ bool unitemp_I2C_sensorInit(void* s) {
     return false;
 }
 
-bool unitemp_I2C_sensorDeInit(void* sensor) {
-    //TODO датчик в спячку, очистить память
-    UNUSED(sensor);
-    return true;
+bool unitemp_I2C_sensorDeInit(void* s) {
+    Sensor* sensor = (Sensor*)s;
+    return sensor->deinitializer(s);
 }
 
 UnitempStatus unitemp_I2C_updateData(void* sensor) {
@@ -81,4 +80,8 @@ bool unitemp_I2C_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anotherVal
         instance->currentI2CAdr = instance->minI2CAdr;
     }
     return status;
+}
+
+void unitemp_I2C_sensorFree(Sensor* sensor) {
+    free(sensor->instance);
 }

@@ -22,7 +22,7 @@ bool unitemp_LM75_alloc(Sensor* sensor);
 bool unitemp_LM75_init(void* sensor);
 
 /**
- * @brief Деинициализация датчика, очистка памяти
+ * @brief Деинициализация датчика
  * 
  * @param sensor Указатель на датчик (тип Sensor)
  */
@@ -35,5 +35,12 @@ bool unitemp_LM75_deinit(void* s);
  * @return Истина если данныее были получены
  */
 UnitempStatus unitemp_LM75_update(void* s);
+
+/**
+ * @brief Высвободить память датчика
+ * 
+ * @param sensor Указатель на датчик (тип Sensor)
+ */
+void unitemp_LM75_free(void* sensor);
 
 #endif

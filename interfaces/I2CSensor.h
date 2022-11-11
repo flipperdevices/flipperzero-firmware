@@ -71,4 +71,10 @@ bool readRegArray(I2CSensor* i2c_sensor, uint8_t startReg, uint8_t len, uint8_t*
  */
 bool writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value);
 
+/**
+ * @brief Высвобождение памяти инстанса датчика
+ * 
+ * @param sensor Указатель на датчик
+ */
+void unitemp_I2C_sensorFree(Sensor* sensor);
 #endif

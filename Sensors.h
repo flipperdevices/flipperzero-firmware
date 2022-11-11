@@ -53,7 +53,11 @@ struct Sensor;
 /**
  * @brief Указатель функции выделения памяти и подготовки экземпляра датчика
  */
-//typedef void (*SensorAllocator)(Sensor* sensor, SensorType st);
+typedef void(SensorAllocator)(void* sensor, SensorType st);
+/**
+ * @brief Указатель на функцию высвобождении памяти датчика
+ */
+typedef void(SensorFree)(void* sensor);
 /**
  * @brief Указатель функции инициализации датчика
  */
@@ -85,7 +89,8 @@ typedef struct Sensor {
 
     //Экземпляр датчика
     void* instance;
-    //SensorAllocator* allocator;
+    SensorAllocator* allocator;
+    SensorFree* memoryfree;
     SensorInitializer* initializer;
     SensorDeinitializer* deinitializer;
     SensorUpdater* updater;
@@ -169,5 +174,10 @@ bool unitemp_sensors_save(void);
  * @brief Обновить данные со всех датчиков
  */
 void unitemp_sensors_updateValues(void);
+
+/**
+ * @brief Высвыбождение памяти после датчиков
+ */
+void unitemp_sensors_free(void);
 
 #endif

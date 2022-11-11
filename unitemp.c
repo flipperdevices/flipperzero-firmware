@@ -219,9 +219,8 @@ static void unitemp_free(void) {
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
     //Очистка датчиков
-    for(size_t i = 0; i < app->sensors_count; i++) {
-        free(app->sensors[i]);
-    }
+    //Высвыбождение данных датчиков
+    unitemp_sensors_free();
     free(app->sensors);
     //Закрытие уведомлений
     furi_record_close(RECORD_NOTIFICATION);

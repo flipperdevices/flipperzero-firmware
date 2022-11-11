@@ -241,6 +241,22 @@ Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues)
     return NULL;
 }
 
+void unitemp_sensor_free(Sensor* sensor) {
+    //Высвобождение памяти под инстанс датчиков I2C
+    if(sensor->type == BMP280 || sensor->type == LM75) {
+        unitemp_I2C_sensorFree(sensor);
+    }
+    free(sensor->name);
+    free(sensor);
+}
+
+void unitemp_sensors_free(void) {
+    for(size_t i = 0; i < app->sensors_count; i++) {
+        unitemp_sensor_free(app->sensors[i]);
+    }
+    app->sensors_count = 0;
+}
+
 bool unitemp_sensors_init(void) {
     bool result = true;
 
