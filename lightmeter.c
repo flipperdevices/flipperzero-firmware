@@ -107,8 +107,8 @@ void lightmeter_app_free(LightMeterApp* app) {
     widget_free(app->widget);
 
     // View dispatcher
-    view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
+    view_dispatcher_free(app->view_dispatcher);
 
     // Records
     furi_record_close(RECORD_GUI);
@@ -119,6 +119,7 @@ void lightmeter_app_free(LightMeterApp* app) {
 
     bh1750_set_power_state(0);
 
+    free(app->config);
     free(app);
 }
 
