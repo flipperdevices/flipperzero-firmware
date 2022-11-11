@@ -28,12 +28,15 @@ See early prototype [in action](https://www.youtube.com/watch?v=DdxAmmsYfMA).
 Take a look into the [schematic](https://github.com/ginkage/FlippAirMouse/tree/main/schematic) folder for Gerber, BOM and CPL files, so you can order directly from JLCPCB.
 
 Original idea:
+
 ![What I thought it would look like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/schematic.png)
 
 Expectation:
+
 ![What EDA though it would look like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/render.png)
 
 Reality:
+
 ![What it looks like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/flipper.jpg)
 
 
