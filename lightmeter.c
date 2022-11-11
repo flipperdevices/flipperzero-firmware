@@ -48,7 +48,7 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, lightmeter_custom_event_callback)
+        app->view_dispatcher, lightmeter_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, lightmeter_back_event_callback);
     view_dispatcher_set_tick_event_callback(
