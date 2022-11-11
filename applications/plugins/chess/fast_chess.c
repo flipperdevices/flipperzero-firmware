@@ -2357,7 +2357,7 @@ Node iterativeDeepeningAlphaBeta(Position* position, char depth, int alpha, int 
         int score = iterativeDeepeningAlphaBeta(&newPosition, depth - 1, alpha, beta, FALSE).score;
 
         if(verbose) {
-            printf("%.2f\n", (double) score / (double) 100.00);
+            printf("%.2f\n", (double)score / (double)100.00);
             fflush(stdout);
         }
 
@@ -2850,8 +2850,8 @@ Move getAIMove(Game* game, int depth) {
     printf(
         " in %d seconds [%+.2f, %+.2f]\n",
         (int)(endTime - startTime),
-        (double) staticEvaluation(&game->position) / (double) 100.0,
-        (double) node.score / (double) 100.0);
+        (double)staticEvaluation(&game->position) / (double)100.0,
+        (double)node.score / (double)100.0);
     fflush(stdout);
 
     return node.move;

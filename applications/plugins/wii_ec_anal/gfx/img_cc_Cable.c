@@ -12,6 +12,14 @@
 
 #include "images.h"
 
-const image_t  img_cc_Cable = { 4, 11, true, 4, 0x00, {  // orig:6, comp:33.33%
-	0x00, 0x05, 0xDB, 0xD0
-}};
+const image_t img_cc_Cable = {
+    4,
+    11,
+    true,
+    4,
+    0x00,
+    {// orig:6, comp:33.33%
+     0x00,
+     0x05,
+     0xDB,
+     0xD0}};

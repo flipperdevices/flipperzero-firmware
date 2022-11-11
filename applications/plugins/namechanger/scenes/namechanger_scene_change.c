@@ -38,7 +38,8 @@ bool namechanger_scene_change_on_event(void* context, SceneManagerEvent event) {
         if(event.event == NameChangerCustomEventTextEditResult) {
             if(namechanger_make_app_folder(namechanger)) {
                 if(namechanger_name_read_write(namechanger, namechanger->text_store, 3)) {
-                    scene_manager_next_scene(namechanger->scene_manager, NameChangerSceneChangeSuccess);
+                    scene_manager_next_scene(
+                        namechanger->scene_manager, NameChangerSceneChangeSuccess);
                 } else {
                     scene_manager_search_and_switch_to_previous_scene(
                         namechanger->scene_manager, NameChangerSceneError);

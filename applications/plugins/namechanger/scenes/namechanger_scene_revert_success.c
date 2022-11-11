@@ -27,7 +27,8 @@ bool namechanger_scene_revert_success_on_event(void* context, SceneManagerEvent 
 
     if(event.type == SceneManagerEventTypeBack) {
         consumed = true;
-        scene_manager_search_and_switch_to_previous_scene(namechanger->scene_manager, NameChangerSceneStart);
+        scene_manager_search_and_switch_to_previous_scene(
+            namechanger->scene_manager, NameChangerSceneStart);
     } else if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == NameChangerCustomEventBack) {
@@ -49,6 +50,6 @@ void namechanger_scene_revert_success_on_exit(void* context) {
     popup_disable_timeout(popup);
     popup_set_context(popup, NULL);
     popup_set_callback(popup, NULL);
-	
-	furi_hal_power_reset();
+
+    furi_hal_power_reset();
 }

@@ -20,10 +20,7 @@ typedef enum {
     EventTypeKey,
 } EventType;
 
-typedef enum {
-    BadgerGetAddress,
-    BadgerSend
-} STATE;
+typedef enum { BadgerGetAddress, BadgerSend } STATE;
 
 typedef struct {
     EventType type;
@@ -56,22 +53,22 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     char str[32];
 
-    if (plugin_state->state == BadgerGetAddress) {
+    if(plugin_state->state == BadgerGetAddress) {
         sprintf(str, "Selected Address: %d", plugin_state->address);
         canvas_draw_str(canvas, ADDRESS_QUESTION_X, ADDRESS_QUESTION_Y, str);
 
-        if (plugin_state->get_failed) {
+        if(plugin_state->get_failed) {
             strcpy(str, "Error! Device not found!");
             canvas_draw_str(canvas, ERROR_X, ERROR_Y, str);
         }
-    } else if (plugin_state->state == BadgerSend) {
+    } else if(plugin_state->state == BadgerSend) {
         sprintf(str, "Sending to Address: %d", plugin_state->address);
         canvas_draw_str(canvas, ADDRESS_QUESTION_X, ADDRESS_QUESTION_Y, str);
 
         sprintf(str, "Data: %d", plugin_state->data);
         canvas_draw_str(canvas, DATA_X, DATA_Y, str);
 
-        if (plugin_state->send_failed) {
+        if(plugin_state->send_failed) {
             strcpy(str, "Error! Unable to send data!");
             canvas_draw_str(canvas, ERROR_X, ERROR_Y, str);
         }
@@ -88,22 +85,21 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 bool device_exists(int address) {
-    if (DEBUG) return true;
+    if(DEBUG) return true;
 
     uint32_t response_timeout_ticks = furi_ms_to_ticks(5.f);
 
     return furi_hal_i2c_is_device_ready(
-               &furi_hal_i2c_handle_external,
-               address << 1,
-               response_timeout_ticks);
+        &furi_hal_i2c_handle_external, address << 1, response_timeout_ticks);
 }
 
 bool sendData(uint8_t address, uint8_t data) {
-    if (DEBUG) return true;
+    if(DEBUG) return true;
 
     uint32_t response_timeout_ticks = furi_ms_to_ticks(5.f);
 
-    return furi_hal_i2c_tx(&furi_hal_i2c_handle_external, address, &data, 1, response_timeout_ticks);
+    return furi_hal_i2c_tx(
+        &furi_hal_i2c_handle_external, address, &data, 1, response_timeout_ticks);
 }
 
 int32_t badger2040_app(void* p) {
@@ -141,28 +137,27 @@ int32_t badger2040_app(void* p) {
             // press events
             if(event.type == EventTypeKey) {
                 if((event.input.type == InputTypePress) || (event.input.type == InputTypeRepeat)) {
-
                     // Reset failed status to clear display after key press
-                    if (plugin_state->state == BadgerGetAddress) {
+                    if(plugin_state->state == BadgerGetAddress) {
                         plugin_state->get_failed = false;
-                    } else if (plugin_state->state == BadgerSend) {
+                    } else if(plugin_state->state == BadgerSend) {
                         plugin_state->send_failed = false;
                     }
 
                     switch(event.input.key) {
                     case InputKeyUp:
-                        if (plugin_state->state == BadgerGetAddress) {
+                        if(plugin_state->state == BadgerGetAddress) {
                             uint8_t prevAddr = plugin_state->address;
 
-                            if (prevAddr == HIGHEST_I2C_ADDRESS) {
+                            if(prevAddr == HIGHEST_I2C_ADDRESS) {
                                 plugin_state->address = FIRST_NON_RESERVED_I2C_ADDRESS;
                             } else {
                                 plugin_state->address = prevAddr + 1;
                             }
-                        } else if (plugin_state->state == BadgerSend) {
+                        } else if(plugin_state->state == BadgerSend) {
                             uint8_t prevData = plugin_state->data;
 
-                            if (prevData == MAX_DATA) {
+                            if(prevData == MAX_DATA) {
                                 plugin_state->data = MIN_DATA;
                             } else {
                                 plugin_state->data = prevData + 1;
@@ -170,18 +165,18 @@ int32_t badger2040_app(void* p) {
                         }
                         break;
                     case InputKeyDown:
-                        if (plugin_state->state == BadgerGetAddress) {
+                        if(plugin_state->state == BadgerGetAddress) {
                             uint8_t prevAddr = plugin_state->address;
 
-                            if (prevAddr == FIRST_NON_RESERVED_I2C_ADDRESS) {
+                            if(prevAddr == FIRST_NON_RESERVED_I2C_ADDRESS) {
                                 plugin_state->address = HIGHEST_I2C_ADDRESS;
                             } else {
                                 plugin_state->address = prevAddr - 1;
                             }
-                        } else if (plugin_state->state == BadgerSend) {
+                        } else if(plugin_state->state == BadgerSend) {
                             uint8_t prevData = plugin_state->data;
 
-                            if (prevData == MIN_DATA) {
+                            if(prevData == MIN_DATA) {
                                 plugin_state->data = MAX_DATA;
                             } else {
                                 plugin_state->data = prevData - 1;
@@ -193,16 +188,16 @@ int32_t badger2040_app(void* p) {
                     case InputKeyLeft:
                         break;
                     case InputKeyOk:
-                        if (plugin_state->state == BadgerGetAddress) {
-                            if (device_exists(plugin_state->address)) {
-                                if (plugin_state->state == BadgerGetAddress) {
+                        if(plugin_state->state == BadgerGetAddress) {
+                            if(device_exists(plugin_state->address)) {
+                                if(plugin_state->state == BadgerGetAddress) {
                                     plugin_state->state = BadgerSend;
                                 }
                             } else {
                                 plugin_state->get_failed = true;
                             }
-                        } else if (plugin_state->state == BadgerSend) {
-                            if (!sendData) {
+                        } else if(plugin_state->state == BadgerSend) {
+                            if(!sendData) {
                                 plugin_state->send_failed = true;
                             }
                         }

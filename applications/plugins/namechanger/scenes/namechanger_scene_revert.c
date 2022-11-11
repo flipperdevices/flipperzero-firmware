@@ -16,7 +16,7 @@ void namechanger_scene_revert_on_enter(void* context) {
     FURI_LOG_I(TAG, "revert3");
     widget_add_text_box_element(
         widget, 0, 0, 128, 25, AlignCenter, AlignCenter, "\e#Revert Name?\e#", false);
-	widget_add_icon_element(widget, 48, 20, &I_MarioBlock);
+    widget_add_icon_element(widget, 48, 20, &I_MarioBlock);
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Cancel", namechanger_scene_revert_widget_callback, namechanger);
     FURI_LOG_I(TAG, "revert4");
@@ -44,7 +44,8 @@ bool namechanger_scene_revert_on_event(void* context, SceneManagerEvent event) {
             FURI_LOG_I(TAG, "revert9");
             if(namechanger_name_read_write(namechanger, "eraseerase", 3)) {
                 FURI_LOG_I(TAG, "revert10");
-                scene_manager_next_scene(namechanger->scene_manager, NameChangerSceneRevertSuccess);
+                scene_manager_next_scene(
+                    namechanger->scene_manager, NameChangerSceneRevertSuccess);
             } else {
                 FURI_LOG_I(TAG, "revert11");
                 scene_manager_search_and_switch_to_previous_scene(
