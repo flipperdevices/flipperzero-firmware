@@ -15,7 +15,6 @@
 - Added: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - Added: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - Cleanup for: Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/409)
-- Added: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 
 <table width="100%" border="0" cellspacing="0">
   <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
@@ -203,7 +202,6 @@ $ ./fbt plugin_dist
 <details>
   <summary><B>PLUGINS</b></summary><br/>
 
-- [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
