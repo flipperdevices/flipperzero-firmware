@@ -542,8 +542,8 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* conte
 
     // Power Info version, different syntax depending on separator character
     if(sep == '.' ) {
-        out("version.major", POWER_INFO_VERSION_MAJOR, false, context);
-        out("version.minor", POWER_INFO_VERSION_MINOR, false, context);
+        out("format.major", POWER_INFO_VERSION_MAJOR, false, context);
+        out("format.minor", POWER_INFO_VERSION_MINOR, false, context);
     } else {
         out("power_info_major", POWER_INFO_VERSION_MAJOR, false, context);
         out("power_info_minor", POWER_INFO_VERSION_MAJOR, false, context);
