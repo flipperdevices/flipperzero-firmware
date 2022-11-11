@@ -75,8 +75,6 @@ struct MainView {
     void* cb_context;
 };
 
-// TODO char str[] to FuriString
-
 void lightmeter_main_view_set_left_callback(
     MainView* lightmeter_main_view,
     LightMeterMainViewButtonCallback callback,
@@ -136,45 +134,44 @@ static void main_view_process(MainView* main_view, InputEvent* event) {
         {
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
-                    if(model->current_mode == FIXED_APERTURE) {
-                        if(model->aperture < AP_NUM - 1) {
-                            model->aperture++;
-                        }
-                    } else if(model->current_mode == FIXED_SPEED) {
-                        if(model->speed < SPEED_NUM - 1) {
-                            model->speed++;
-                        }
+                    switch(model->current_mode) {
+                    case FIXED_APERTURE:
+                        if(model->aperture < AP_NUM - 1) model->aperture++;
+                        break;
+
+                    case FIXED_SPEED:
+                        if(model->speed < SPEED_NUM - 1) model->speed++;
+                        break;
+
+                    default:
+                        break;
                     }
                 } else if(event->key == InputKeyDown) {
-                    if(model->current_mode == FIXED_APERTURE) {
-                        if(model->aperture > 0) {
-                            model->aperture--;
-                        }
-                    } else if(model->current_mode == FIXED_SPEED) {
-                        if(model->speed > 0) {
-                            model->speed--;
-                        }
+                    switch(model->current_mode) {
+                    case FIXED_APERTURE:
+                        if(model->aperture > 0) model->aperture--;
+                        break;
+
+                    case FIXED_SPEED:
+                        if(model->speed > 0) model->speed--;
+                        break;
+
+                    default:
+                        break;
                     }
-                } else if(event->key == InputKeyLeft) {
-                } else if(event->key == InputKeyRight) {
                 } else if(event->key == InputKeyOk) {
-                    if(model->current_mode == FIXED_SPEED) {
+                    switch(model->current_mode) {
+                    case FIXED_SPEED:
                         model->current_mode = FIXED_APERTURE;
-                    } else if(model->current_mode == FIXED_APERTURE) {
+                        break;
+
+                    case FIXED_APERTURE:
                         model->current_mode = FIXED_SPEED;
+                        break;
+
+                    default:
+                        break;
                     }
-                } else if(event->key == InputKeyBack) {
-                }
-            } else if(event->type == InputTypeRelease) {
-                if(event->key == InputKeyUp) {
-                } else if(event->key == InputKeyDown) {
-                } else if(event->key == InputKeyLeft) {
-                } else if(event->key == InputKeyRight) {
-                } else if(event->key == InputKeyOk) {
-                } else if(event->key == InputKeyBack) {
-                }
-            } else if(event->type == InputTypeShort) {
-                if(event->key == InputKeyBack) {
                 }
             }
         },
@@ -281,9 +278,6 @@ bool main_view_get_dome(MainView* main_view) {
 void draw_top_row(Canvas* canvas, MainViewModel* context) {
     MainViewModel* model = context;
 
-    // float lux = model->lux;
-    // float EV = model->EV;
-    // bool response = model->response;
     char str[12];
 
     if(!model->response) {
