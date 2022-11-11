@@ -10,7 +10,7 @@ Naturally, the quote above applies to [Flipper](https://flipperzero.one/) as wel
 
 ## What?
 
-The app allows you to turn your Flipper into a USB or Bluetooth air mouse...
+The app allows you to turn your Flipper into a USB or Bluetooth air mouse (you do need an extra module, see the Hardware section below)...
 
 Using it is really simple:
  * Connect the Flipper via a USB cable and pick `USB`, or pick `Bluetooth` and pair it with your PC;
