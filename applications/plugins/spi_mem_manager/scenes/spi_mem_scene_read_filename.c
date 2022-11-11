@@ -35,7 +35,7 @@ bool spi_mem_scene_read_filename_on_event(void* context, SceneManagerEvent event
     if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == SPIMemCustomEventTextEditResult) {
-            if(spi_mem_file_open(app)) {
+            if(spi_mem_file_create_open(app)) {
                 scene_manager_next_scene(app->scene_manager, SPIMemSceneRead);
             } else {
                 scene_manager_search_and_switch_to_previous_scene(

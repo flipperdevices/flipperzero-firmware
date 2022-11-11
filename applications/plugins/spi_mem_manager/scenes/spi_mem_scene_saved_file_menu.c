@@ -48,6 +48,11 @@ bool spi_mem_scene_saved_file_menu_on_event(void* context, SceneManagerEvent eve
     bool success = false;
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(app->scene_manager, SPIMemSceneSavedFileMenu, event.event);
+        if(event.event == SPIMemSceneSavedFileMenuSubmenuIndexCompare) {
+            app->mode = SPIMemModeCompare;
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
+            success = true;
+        }
         if(event.event == SPIMemSceneSavedFileMenuSubmenuIndexDelete) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneDeleteConfirm);
             success = true;
