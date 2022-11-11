@@ -48,7 +48,7 @@ typedef struct {
     FuriApiLock lock;
     UsbApiEventType type;
     UsbApiEventData data;
-    UsbApiEventReturnData return_data;
+    UsbApiEventReturnData* return_data;
 } UsbApiEventMessage;
 
 typedef struct {
@@ -57,12 +57,10 @@ typedef struct {
     bool enabled;
     bool connected;
     bool mode_lock;
-    FuriHalUsbInterface* if_cur;
-    FuriHalUsbInterface* if_next;
-    void* if_ctx;
+    FuriHalUsbInterface* interface;
+    void* interface_context;
     FuriHalUsbStateCallback callback;
-    void* cb_ctx;
-
+    void* callback_context;
     bool request_pending;
 } UsbSrv;
 
@@ -109,7 +107,7 @@ void furi_hal_usb_init(void) {
     // Reset callback will be enabled after first mode change to avoid getting false reset events
 
     usb.enabled = false;
-    usb.if_cur = NULL;
+    usb.interface = NULL;
     NVIC_SetPriority(USB_LP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
     NVIC_SetPriority(USB_HP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     NVIC_EnableIRQ(USB_LP_IRQn);
@@ -128,6 +126,10 @@ void furi_hal_usb_init(void) {
 }
 
 bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx) {
+    UsbApiEventReturnData return_data = {
+        .bool_value = false,
+    };
+
     UsbApiEventMessage msg = {
         .lock = api_lock_alloc_locked(),
         .type = UsbApiEventTypeSetConfig,
@@ -136,34 +138,32 @@ bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx) {
                 .interface = new_if,
                 .context = ctx,
             },
-        .return_data =
-            {
-                .bool_value = false,
-            },
+        .return_data = &return_data,
     };
 
     furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
     furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
     api_lock_wait_unlock_and_free(msg.lock);
 
-    return msg.return_data.bool_value;
+    return return_data.bool_value;
 }
 
 FuriHalUsbInterface* furi_hal_usb_get_config() {
+    UsbApiEventReturnData return_data = {
+        .void_value = NULL,
+    };
+
     UsbApiEventMessage msg = {
         .lock = api_lock_alloc_locked(),
         .type = UsbApiEventTypeGetConfig,
-        .return_data =
-            {
-                .void_value = NULL,
-            },
+        .return_data = &return_data,
     };
 
     furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
     furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
     api_lock_wait_unlock_and_free(msg.lock);
 
-    return msg.return_data.void_value;
+    return return_data.void_value;
 }
 
 void furi_hal_usb_lock() {
@@ -189,20 +189,21 @@ void furi_hal_usb_unlock() {
 }
 
 bool furi_hal_usb_is_locked() {
+    UsbApiEventReturnData return_data = {
+        .bool_value = false,
+    };
+
     UsbApiEventMessage msg = {
         .lock = api_lock_alloc_locked(),
         .type = UsbApiEventTypeIsLocked,
-        .return_data =
-            {
-                .bool_value = false,
-            },
+        .return_data = &return_data,
     };
 
     furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
     furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
     api_lock_wait_unlock_and_free(msg.lock);
 
-    return msg.return_data.bool_value;
+    return return_data.bool_value;
 }
 
 void furi_hal_usb_disable() {
@@ -260,29 +261,29 @@ static usbd_respond usb_descriptor_get(usbd_ctlreq* req, void** address, uint16_
     const uint8_t dnumber = req->wValue & 0xFF;
     const void* desc;
     uint16_t len = 0;
-    if(usb.if_cur == NULL) return usbd_fail;
+    if(usb.interface == NULL) return usbd_fail;
 
     switch(dtype) {
     case USB_DTYPE_DEVICE:
         furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventRequest);
         if(usb.callback != NULL) {
-            usb.callback(FuriHalUsbStateEventDescriptorRequest, usb.cb_ctx);
+            usb.callback(FuriHalUsbStateEventDescriptorRequest, usb.callback_context);
         }
-        desc = usb.if_cur->dev_descr;
+        desc = usb.interface->dev_descr;
         break;
     case USB_DTYPE_CONFIGURATION:
-        desc = usb.if_cur->cfg_descr;
-        len = ((struct usb_string_descriptor*)(usb.if_cur->cfg_descr))->wString[0];
+        desc = usb.interface->cfg_descr;
+        len = ((struct usb_string_descriptor*)(usb.interface->cfg_descr))->wString[0];
         break;
     case USB_DTYPE_STRING:
         if(dnumber == UsbDevLang) {
             desc = &dev_lang_desc;
-        } else if((dnumber == UsbDevManuf) && (usb.if_cur->str_manuf_descr != NULL)) {
-            desc = usb.if_cur->str_manuf_descr;
-        } else if((dnumber == UsbDevProduct) && (usb.if_cur->str_prod_descr != NULL)) {
-            desc = usb.if_cur->str_prod_descr;
-        } else if((dnumber == UsbDevSerial) && (usb.if_cur->str_serial_descr != NULL)) {
-            desc = usb.if_cur->str_serial_descr;
+        } else if((dnumber == UsbDevManuf) && (usb.interface->str_manuf_descr != NULL)) {
+            desc = usb.interface->str_manuf_descr;
+        } else if((dnumber == UsbDevProduct) && (usb.interface->str_prod_descr != NULL)) {
+            desc = usb.interface->str_prod_descr;
+        } else if((dnumber == UsbDevSerial) && (usb.interface->str_serial_descr != NULL)) {
+            desc = usb.interface->str_serial_descr;
         } else
             return usbd_fail;
         break;
@@ -305,7 +306,7 @@ static void reset_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(ep);
     furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventReset);
     if(usb.callback != NULL) {
-        usb.callback(FuriHalUsbStateEventReset, usb.cb_ctx);
+        usb.callback(FuriHalUsbStateEventReset, usb.callback_context);
     }
 }
 
@@ -313,14 +314,14 @@ static void susp_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(event);
     UNUSED(ep);
-    if((usb.if_cur != NULL) && (usb.connected == true)) {
+    if((usb.interface != NULL) && (usb.connected == true)) {
         usb.connected = false;
-        usb.if_cur->suspend(&udev);
+        usb.interface->suspend(&udev);
 
         furi_hal_power_insomnia_exit();
     }
     if(usb.callback != NULL) {
-        usb.callback(FuriHalUsbStateEventSuspend, usb.cb_ctx);
+        usb.callback(FuriHalUsbStateEventSuspend, usb.callback_context);
     }
 }
 
@@ -328,25 +329,25 @@ static void wkup_evt(usbd_device* dev, uint8_t event, uint8_t ep) {
     UNUSED(dev);
     UNUSED(event);
     UNUSED(ep);
-    if((usb.if_cur != NULL) && (usb.connected == false)) {
+    if((usb.interface != NULL) && (usb.connected == false)) {
         usb.connected = true;
-        usb.if_cur->wakeup(&udev);
+        usb.interface->wakeup(&udev);
 
         furi_hal_power_insomnia_enter();
     }
     if(usb.callback != NULL) {
-        usb.callback(FuriHalUsbStateEventWakeup, usb.cb_ctx);
+        usb.callback(FuriHalUsbStateEventWakeup, usb.callback_context);
     }
 }
 
 static void usb_process_mode_start(FuriHalUsbInterface* interface, void* context) {
-    if(usb.if_cur != NULL) {
-        usb.if_cur->deinit(&udev);
+    if(usb.interface != NULL) {
+        usb.interface->deinit(&udev);
     }
 
     __disable_irq();
-    usb.if_cur = interface;
-    usb.if_ctx = context;
+    usb.interface = interface;
+    usb.interface_context = context;
     __enable_irq();
 
     if(interface != NULL) {
@@ -358,7 +359,7 @@ static void usb_process_mode_start(FuriHalUsbInterface* interface, void* context
 }
 
 static void usb_process_mode_change(FuriHalUsbInterface* interface, void* context) {
-    if(interface != usb.if_cur) {
+    if(interface != usb.interface) {
         if(usb.enabled) {
             // Disable current interface
             susp_evt(&udev, 0, 0);
@@ -382,7 +383,7 @@ static void usb_process_mode_reinit() {
     usbd_enable(&udev, true);
 
     furi_delay_ms(USB_RECONNECT_DELAY);
-    usb_process_mode_start(usb.if_cur, usb.if_ctx);
+    usb_process_mode_start(usb.interface, usb.interface_context);
 }
 
 bool usb_process_set_config(FuriHalUsbInterface* interface, void* context) {
@@ -396,7 +397,7 @@ bool usb_process_set_config(FuriHalUsbInterface* interface, void* context) {
 
 void usb_process_enable(bool enable) {
     if(enable) {
-        if((!usb.enabled) && (usb.if_cur != NULL)) {
+        if((!usb.enabled) && (usb.interface != NULL)) {
             usbd_connect(&udev, true);
             usb.enabled = true;
             FURI_LOG_I(TAG, "USB Enable");
@@ -415,11 +416,11 @@ void usb_process_enable(bool enable) {
 void usb_process_message(UsbApiEventMessage* message) {
     switch(message->type) {
     case UsbApiEventTypeSetConfig:
-        message->return_data.bool_value = usb_process_set_config(
+        message->return_data->bool_value = usb_process_set_config(
             message->data.interface.interface, message->data.interface.context);
         break;
     case UsbApiEventTypeGetConfig:
-        message->return_data.void_value = usb.if_cur;
+        message->return_data->void_value = usb.interface;
         break;
     case UsbApiEventTypeLock:
         FURI_LOG_I(TAG, "Mode lock");
@@ -430,7 +431,7 @@ void usb_process_message(UsbApiEventMessage* message) {
         usb.mode_lock = false;
         break;
     case UsbApiEventTypeIsLocked:
-        message->return_data.bool_value = usb.mode_lock;
+        message->return_data->bool_value = usb.mode_lock;
         break;
     case UsbApiEventTypeDisable:
         usb_process_enable(false);
@@ -443,7 +444,7 @@ void usb_process_message(UsbApiEventMessage* message) {
         break;
     case UsbApiEventTypeSetStateCallback:
         usb.callback = message->data.state_callback.callback;
-        usb.cb_ctx = message->data.state_callback.context;
+        usb.callback_context = message->data.state_callback.context;
         break;
     }
 
