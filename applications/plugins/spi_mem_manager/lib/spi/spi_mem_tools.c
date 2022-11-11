@@ -75,7 +75,7 @@ bool spi_mem_tools_read_block_data(
     if(!spi_mem_tools_check_chip_info(chip)) return false;
     for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
         uint8_t cmd[3];
-        if((offset + SPI_MEM_MAX_BLOCK_SIZE) >= chip->size) return false;
+        if((offset + SPI_MEM_MAX_BLOCK_SIZE) > chip->size) return false;
         if(!spi_mem_tools_trx(
                SPIMemChipCMDReadData,
                cmd,
