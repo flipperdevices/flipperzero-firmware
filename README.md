@@ -25,6 +25,8 @@ See early prototype [in action](https://www.youtube.com/watch?v=DdxAmmsYfMA).
 
 ## Hardware
 
+The custom module is using Bosch BMI160 accelerometer/gyroscope chip connected via I2C.
+
 Take a look into the [schematic](https://github.com/ginkage/FlippAirMouse/tree/main/schematic) folder for Gerber, BOM and CPL files, so you can order directly from JLCPCB.
 
 Original idea:
@@ -41,6 +43,8 @@ Reality:
 
 
 ## Software
+
+The code is based on the original Bosch [driver](https://github.com/BoschSensortec/BMI160_driver/) and an orientation tracking implementation from the [Cardboard](https://github.com/googlevr/cardboard/tree/master/sdk/sensors) project
 
 If you're familiar with Flipper applications, start in the [firmware](https://github.com/flipperdevices/flipperzero-firmware) checkout folder and do the following:
 ```
