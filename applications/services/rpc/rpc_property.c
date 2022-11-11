@@ -17,7 +17,8 @@ typedef struct {
     FuriString* subkey;
 } RpcPropertyContext;
 
-static void rpc_system_property_get_callback(const char* key, const char* value, bool last, void* context) {
+static void
+    rpc_system_property_get_callback(const char* key, const char* value, bool last, void* context) {
     furi_assert(key);
     furi_assert(value);
     furi_assert(context);
@@ -79,7 +80,8 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
     } else if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_POWER)) {
         furi_hal_power_info_get(rpc_system_property_get_callback, '.', &property_context);
     } else {
-        rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
+        rpc_send_and_release_empty(
+            session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
     }
 
     furi_string_free(subkey);
@@ -89,7 +91,6 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
 }
 
 void* rpc_system_property_alloc(RpcSession* session) {
-
     furi_assert(session);
 
     RpcHandler rpc_handler = {

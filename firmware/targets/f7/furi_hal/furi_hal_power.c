@@ -536,7 +536,7 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* conte
     FuriString* key = furi_string_alloc();
 
     // Power Info version, different syntax depending on separator character
-    if(sep == '.' ) {
+    if(sep == '.') {
         out("format.major", POWER_INFO_VERSION_MAJOR, false, context);
         out("format.minor", POWER_INFO_VERSION_MINOR, false, context);
     } else {

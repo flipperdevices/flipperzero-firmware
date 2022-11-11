@@ -93,7 +93,10 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
         }
 
         furi_string_printf(key, "%s%c%s%c%s", "firmware", sep, "commit", sep, "dirty");
-        out(furi_string_get_cstr(key), version_get_dirty_flag(firmware_version) ? "true" : "false", false, context);
+        out(furi_string_get_cstr(key),
+            version_get_dirty_flag(firmware_version) ? "true" : "false",
+            false,
+            context);
 
         if(sep == '.') {
             furi_string_printf(key, "%s.%s.%s", "firmware", "branch", "name");
@@ -118,7 +121,10 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
         furi_string_printf(key, "%s%c%s", "radio", sep, "alive");
         out(furi_string_get_cstr(key), "true", false, context);
         furi_string_printf(key, "%s%c%s", "radio", sep, "mode");
-        out(furi_string_get_cstr(key), ble_c2_info->mode == BleGlueC2ModeFUS ? "FUS" : "Stack", false, context);
+        out(furi_string_get_cstr(key),
+            ble_c2_info->mode == BleGlueC2ModeFUS ? "FUS" : "Stack",
+            false,
+            context);
 
         // FUS Info
         furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "major");
