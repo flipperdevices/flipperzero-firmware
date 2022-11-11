@@ -12,6 +12,7 @@ int Count = 10;
 int WorkTime = 0;
 int WorkCount = 0;
 bool InfiniteShot = false;
+bool Bulb = false;
 
 const NotificationSequence sequence_click = {
     &message_note_c7,
@@ -35,7 +36,12 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 	char temp_str[36];
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
-    snprintf(temp_str,sizeof(temp_str),"Set: %i frames, %i sec",Count,Time);
+    if (Count == -1)
+		snprintf(temp_str,sizeof(temp_str),"Set: BULB %i sec",Time);		
+	else if (Count == 0)
+		snprintf(temp_str,sizeof(temp_str),"Set: infinite, %i sec",Time);
+	else
+		snprintf(temp_str,sizeof(temp_str),"Set: %i frames, %i sec",Count,Time);
 	canvas_draw_str(canvas, 3, 20, temp_str);
 	snprintf(temp_str,sizeof(temp_str),"Left: %i frames, %i sec",WorkCount,WorkTime);
 	canvas_draw_str(canvas, 3, 45, temp_str);
@@ -113,29 +119,49 @@ int32_t zeitraffer_app(void* p) {
                // break;
             }
 			if(event.input.key == InputKeyRight) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 			
 			Count++;
 			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
+			}
             }
 			if(event.input.key == InputKeyLeft) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Count--;
 			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
+			}
             }
 			if(event.input.key == InputKeyUp) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Time++;
 			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
             }
+			}
 			if(event.input.key == InputKeyDown) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Time--;
 			notification_message(notifications, &sequence_click);
 			//view_port_update(view_port);
             }
+			}
 			if(event.input.key == InputKeyOk) {
 			
 			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
+				notification_message(notifications, &sequence_click);
 				furi_timer_stop(timer); 
 			}
 			else { 
@@ -143,6 +169,7 @@ int32_t zeitraffer_app(void* p) {
 				if (WorkCount == 0) WorkCount = Count;
 				if (WorkTime == 0) WorkTime = 3;
 				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
+				if (Count == -1) {gpio_item_set_all_pins(true); Bulb = true; WorkCount = 1; WorkTime = Time;} else Bulb = false;
 				notification_message(notifications, &sequence_success); 
 				}
             }
@@ -163,21 +190,41 @@ int32_t zeitraffer_app(void* p) {
 			}
 		if(event.input.type == InputTypeRepeat) {
 			if(event.input.key == InputKeyRight) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Count = Count+10;
 			//view_port_update(view_port);
             }
+			}
 			if(event.input.key == InputKeyLeft) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Count = Count-10;
 			//view_port_update(view_port);
             }
+			}
 			if(event.input.key == InputKeyUp) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Time = Time+10;
 			//view_port_update(view_port);
             }
+			}
 			if(event.input.key == InputKeyDown) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else { 
 			Time = Time-10;
 			//view_port_update(view_port);
             }
+			}
 			}
             // Наше событие — это сработавший таймер
         } else if(event.type == EventTypeTick) {
@@ -185,6 +232,11 @@ int32_t zeitraffer_app(void* p) {
 			WorkTime--;
 			notification_message(notifications, &sequence_blink_blue_100);
             if( WorkTime < 1 ) {
+				
+				if (Bulb) {
+					gpio_item_set_all_pins(false); WorkCount = 0;
+					}
+				else {
 				WorkCount--;
 				view_port_update(view_port);
 				notification_message(notifications, &sequence_click);
@@ -198,8 +250,8 @@ int32_t zeitraffer_app(void* p) {
 				
 				WorkTime = Time;
 				view_port_update(view_port);
-				
-			}
+				}
+				}
 			if( WorkCount < 1 ) { 
 				gpio_item_set_all_pins(false);
 				furi_timer_stop(timer); 
@@ -209,7 +261,7 @@ int32_t zeitraffer_app(void* p) {
 				}
         }
     if (Time < 1) Time = 1;
-	if (Count < 0) Count = 0;
+	if (Count < -1) Count = 0;
 	}
 
     // Очищаем таймер
