@@ -627,14 +627,6 @@ static void hid_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
     usbd_connect(dev, true);
 }
 
-static bool deinit_flag = false;
-
-void dap_common_wait_for_deinit() {
-    while(!deinit_flag) {
-        furi_delay_ms(50);
-    }
-}
-
 static void hid_deinit(usbd_device* dev) {
     dap_state.usb_dev = NULL;
 
@@ -650,9 +642,6 @@ static void hid_deinit(usbd_device* dev) {
 
     free(usb_hid.str_manuf_descr);
     free(usb_hid.str_prod_descr);
-
-    FURI_SW_MEMBARRIER();
-    deinit_flag = true;
 }
 
 static void hid_on_wakeup(usbd_device* dev) {

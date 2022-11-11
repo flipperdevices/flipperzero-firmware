@@ -63,6 +63,7 @@ void furi_hal_init() {
 
     // USB
 #ifndef FURI_RAM_EXEC
+    // TODO: call furi_hal_memory_init before furi_hal_usb_init, to get more memory
     furi_hal_usb_init();
     FURI_LOG_I(TAG, "USB OK");
 #endif
@@ -79,7 +80,7 @@ void furi_hal_init() {
     furi_hal_rfid_init();
 #endif
     furi_hal_bt_init();
-    furi_hal_memory_init();
+    furi_hal_memory_init(); // must be called after furi_hal_bt_init
     furi_hal_compress_icon_init();
 
     // FatFS driver initialization
