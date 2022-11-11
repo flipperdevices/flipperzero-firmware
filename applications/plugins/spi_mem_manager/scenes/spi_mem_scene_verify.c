@@ -3,20 +3,20 @@
 #include "../lib/spi/spi_mem_chip.h"
 #include "../lib/spi/spi_mem_tools.h"
 
-void spi_mem_scene_read_verify_view_result_callback(void* context) {
+void spi_mem_scene_verify_view_result_callback(void* context) {
     SPIMemApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, SPIMemCustomEventViewVerifySkip);
 }
 
-static void spi_mem_scene_read_verify_callback(void* context, SPIMemCustomEventWorker event) {
+static void spi_mem_scene_verify_callback(void* context, SPIMemCustomEventWorker event) {
     SPIMemApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
-void spi_mem_scene_read_verify_on_enter(void* context) {
+void spi_mem_scene_verify_on_enter(void* context) {
     SPIMemApp* app = context;
     spi_mem_view_progress_set_verify_callback(
-        app->view_read, spi_mem_scene_read_verify_view_result_callback, app);
+        app->view_read, spi_mem_scene_verify_view_result_callback, app);
     notification_message(app->notifications, &sequence_blink_start_cyan);
     spi_mem_view_progress_set_chip_size(app->view_read, spi_mem_chip_get_size(app->chip_info));
     spi_mem_view_progress_set_block_size(
@@ -24,10 +24,10 @@ void spi_mem_scene_read_verify_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewProgress);
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_verify_start(
-        app->chip_info, app->worker, spi_mem_scene_read_verify_callback, app);
+        app->chip_info, app->worker, spi_mem_scene_verify_callback, app);
 }
 
-bool spi_mem_scene_read_verify_on_event(void* context, SceneManagerEvent event) {
+bool spi_mem_scene_verify_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
     UNUSED(app);
     bool success = false;
@@ -60,7 +60,7 @@ bool spi_mem_scene_read_verify_on_event(void* context, SceneManagerEvent event) 
     }
     return success;
 }
-void spi_mem_scene_read_verify_on_exit(void* context) {
+void spi_mem_scene_verify_on_exit(void* context) {
     SPIMemApp* app = context;
     spi_mem_worker_stop_thread(app->worker);
     spi_mem_view_progress_reset(app->view_read);

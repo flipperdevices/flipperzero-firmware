@@ -17,6 +17,7 @@ SPIMemWorker* spi_mem_worker_alloc() {
     worker->thread = furi_thread_alloc();
     worker->mode_index = SPIMemWorkerModeIdle;
     furi_thread_set_name(worker->thread, "SPIMemWorker");
+    furi_thread_set_priority(worker->thread, FuriThreadPriorityHigh);
     furi_thread_set_callback(worker->thread, spi_mem_worker_thread);
     furi_thread_set_context(worker->thread, worker);
     furi_thread_set_stack_size(worker->thread, 10240);

@@ -40,6 +40,7 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->chip_info = malloc(sizeof(SPIMemChip));
     instance->view_read = spi_mem_view_progress_alloc();
     instance->text_input = text_input_alloc();
+    instance->mode = SPIMemModeUnknown;
 
     furi_string_set(instance->file_path, SPI_MEM_FILE_FOLDER);
 

@@ -40,7 +40,7 @@ bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_progress_inc_progress(app->view_read);
         } else if(event.event == SPIMemCustomEventWorkerReadDone) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneReadVerify);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneVerify);
         } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
             spi_mem_worker_stop_thread(app->worker);
             notification_message(app->notifications, &sequence_blink_stop);

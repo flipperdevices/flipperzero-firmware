@@ -27,6 +27,13 @@
 #define SPI_MEM_FILE_NAME_SIZE 100
 #define SPI_MEM_TEXT_BUFFER_SIZE 128
 
+typedef enum {
+    SPIMemModeRead,
+    SPIMemModeWrite,
+    SPIMemModeCompare,
+    SPIMemModeUnknown
+} SPIMemMode;
+
 struct SPIMemApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
@@ -44,6 +51,7 @@ struct SPIMemApp {
     SPIMemChip* chip_info;
     SPIMemProgressView* view_read;
     TextInput* text_input;
+    SPIMemMode mode;
     char text_buffer[SPI_MEM_TEXT_BUFFER_SIZE + 1];
 };
 

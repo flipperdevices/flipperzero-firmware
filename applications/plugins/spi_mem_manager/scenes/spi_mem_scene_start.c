@@ -42,6 +42,7 @@ bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(app->scene_manager, SPIMemSceneStart, event.event);
         if(event.event == SPIMemSceneStartSubmenuIndexRead) {
+            app->mode = SPIMemModeRead;
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
             success = true;
         } else if(event.event == SPIMemSceneStartSubmenuIndexSaved) {
