@@ -52,8 +52,7 @@ static void spi_mem_scene_chip_detected_set_previous_scene(SPIMemApp* app) {
 static void spi_mem_scene_chip_detected_set_next_scene(SPIMemApp* app) {
     uint32_t scene = SPIMemSceneStart;
     if(app->mode == SPIMemModeRead) scene = SPIMemSceneReadFilename;
-    // if(app->mode == SPIMemModeWrite)
-    // scene = SPIMemSceneWrite;
+    if(app->mode == SPIMemModeWrite) scene = SPIMemSceneChipErase;
     if(app->mode == SPIMemModeCompare) scene = SPIMemSceneVerify;
     scene_manager_next_scene(app->scene_manager, scene);
 }

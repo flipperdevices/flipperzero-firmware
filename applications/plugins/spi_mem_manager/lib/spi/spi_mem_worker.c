@@ -5,8 +5,11 @@ typedef enum {
     SPIMemEventChipDetect = (1 << 1),
     SPIMemEventRead = (1 << 2),
     SPIMemEventVerify = (1 << 3),
+    SPIMemEventChipErase = (1 << 4),
+    SPIMemEventWrite = (1 << 5),
     SPIMemEventAll =
-        (SPIMemEventStopThread | SPIMemEventChipDetect | SPIMemEventRead | SPIMemEventVerify)
+        (SPIMemEventStopThread | SPIMemEventChipDetect | SPIMemEventRead | SPIMemEventVerify |
+         SPIMemEventChipErase | SPIMemEventWrite)
 } SPIMemEventEventType;
 
 static int32_t spi_mem_worker_thread(void* thread_context);
@@ -44,6 +47,7 @@ static int32_t spi_mem_worker_thread(void* thread_context) {
             if(flags & SPIMemEventChipDetect) worker->mode_index = SPIMemWorkerModeChipDetect;
             if(flags & SPIMemEventRead) worker->mode_index = SPIMemWorkerModeRead;
             if(flags & SPIMemEventVerify) worker->mode_index = SPIMemWorkerModeVerify;
+            if(flags & SPIMemEventChipErase) worker->mode_index = SPIMemWorkerModeChipErase;
             if(spi_mem_worker_modes[worker->mode_index].process) {
                 spi_mem_worker_modes[worker->mode_index].process(worker);
             }
@@ -96,4 +100,16 @@ void spi_mem_worker_verify_start(
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventVerify);
+}
+
+void spi_mem_worker_chip_erase_start(
+    SPIMemChip* chip_info,
+    SPIMemWorker* worker,
+    SPIMemWorkerCallback callback,
+    void* context) {
+    furi_check(worker->mode_index == SPIMemWorkerModeIdle);
+    worker->callback = callback;
+    worker->cb_ctx = context;
+    worker->chip_info = chip_info;
+    furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventChipErase);
 }
