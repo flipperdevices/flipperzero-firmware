@@ -306,7 +306,12 @@ static Loader* loader_alloc() {
     Loader* instance = malloc(sizeof(Loader));
 
     instance->application_thread = furi_thread_alloc();
-    furi_thread_enable_heap_trace(instance->application_thread);
+
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode == FuriHalRtcHeapTrackModeMain || mode == FuriHalRtcHeapTrackModeTree) {
+        furi_thread_enable_heap_trace(instance->application_thread);
+    }
+
     furi_thread_set_state_context(instance->application_thread, instance);
     furi_thread_set_state_callback(instance->application_thread, loader_thread_state_callback);
 

@@ -122,7 +122,10 @@ FuriThread* furi_thread_alloc() {
     thread->output.buffer = furi_string_alloc();
     thread->is_service = false;
 
-    if(furi_thread_get_current_id()) {
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode == FuriHalRtcHeapTrackModeAll) {
+        thread->heap_trace_enabled = true;
+    } else if(mode == FuriHalRtcHeapTrackModeTree && furi_thread_get_current_id()) {
         FuriThread* parent = pvTaskGetThreadLocalStoragePointer(NULL, 0);
         if(parent) thread->heap_trace_enabled = parent->heap_trace_enabled;
     }
