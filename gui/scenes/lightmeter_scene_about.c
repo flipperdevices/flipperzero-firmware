@@ -2,6 +2,7 @@
 
 void lightmeter_scene_about_widget_callback(GuiButtonType result, InputType type, void* context) {
     LightMeterApp* app = context;
+
     UNUSED(app);
     UNUSED(result);
     UNUSED(type);
@@ -54,6 +55,7 @@ void lightmeter_scene_about_on_enter(void* context) {
 
 bool lightmeter_scene_about_on_event(void* context, SceneManagerEvent event) {
     LightMeterApp* app = context;
+
     bool consumed = false;
     UNUSED(app);
     UNUSED(event);

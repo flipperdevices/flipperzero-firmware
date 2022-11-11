@@ -1,22 +1,26 @@
 #include "lightmeter.h"
+#include "lightmeter_helper.h"
 
-#define WORKER_TAG "Main app"
+#define WORKER_TAG "MAIN APP"
 
 static bool lightmeter_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     LightMeterApp* app = context;
+
     return scene_manager_handle_custom_event(app->scene_manager, event);
 }
 
 static bool lightmeter_back_event_callback(void* context) {
     furi_assert(context);
     LightMeterApp* app = context;
+
     return scene_manager_handle_back_event(app->scene_manager);
 }
 
 static void lightmeter_tick_event_callback(void* context) {
     furi_assert(context);
     LightMeterApp* app = context;
+
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
@@ -82,7 +86,7 @@ LightMeterApp* lightmeter_app_alloc(uint32_t first_scene) {
         app->view_dispatcher, LightMeterAppViewHelp, widget_get_view(app->widget));
 
     // Set first scene
-    scene_manager_next_scene(app->scene_manager, first_scene); //! this to switch
+    scene_manager_next_scene(app->scene_manager, first_scene);
     return app;
 }
 
@@ -103,8 +107,8 @@ void lightmeter_app_free(LightMeterApp* app) {
     widget_free(app->widget);
 
     // View dispatcher
-    view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
+    view_dispatcher_free(app->view_dispatcher);
 
     // Records
     furi_record_close(RECORD_GUI);
@@ -115,6 +119,7 @@ void lightmeter_app_free(LightMeterApp* app) {
 
     bh1750_set_power_state(0);
 
+    free(app->config);
     free(app);
 }
 
@@ -127,6 +132,30 @@ int32_t lightmeter_app(void* p) {
     return 0;
 }
 
-void lightmeter_app_set_config(LightMeterApp* app, LightMeterConfig* config) {
+void lightmeter_app_set_config(LightMeterApp* context, LightMeterConfig* config) {
+    LightMeterApp* app = context;
+
     app->config = config;
+}
+
+void lightmeter_app_i2c_callback(LightMeterApp* context) {
+    LightMeterApp* app = context;
+
+    float EV = 0;
+    float lux = 0;
+    bool response = 0;
+
+    if(bh1750_trigger_manual_conversion() == BH1750_OK) response = 1;
+
+    if(response) {
+        bh1750_read_light(&lux);
+
+        if(main_view_get_dome(app->main_view)) lux *= DOME_COEFFICIENT;
+
+        EV = lux2ev(lux);
+    }
+
+    main_view_set_lux(app->main_view, lux);
+    main_view_set_EV(app->main_view, EV);
+    main_view_set_response(app->main_view, response);
 }

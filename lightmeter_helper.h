@@ -1,4 +1,5 @@
 #pragma once
+
 #include <math.h>
 
 float lux2ev(float lux);
