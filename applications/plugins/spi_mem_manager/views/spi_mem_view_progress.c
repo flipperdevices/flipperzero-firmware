@@ -46,10 +46,10 @@ static void
 static void
     spi_mem_view_progress_verify_draw_size_warning(Canvas* canvas, SPIMemProgressViewModel* model) {
     if(model->file_size > model->chip_size) {
-        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clampted to chip!");
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clamped to chip!");
     }
     if(model->chip_size > model->file_size) {
-        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clampted to file!");
+        canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clamped to file!");
     }
 }
 
