@@ -1,0 +1,15 @@
+App(
+    appid="Badger2040",
+    name="Badger2040",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="badger2040_app",
+    cdefines=["APP_BADGER2040"],
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=1 * 1024,
+    order=30,
+    fap_icon="dap_link.png",
+    fap_category="NeedsTesting",
+)
