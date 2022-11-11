@@ -112,6 +112,7 @@ SystemSettings* system_settings_alloc() {
         app);
     value_index = value_index_uint32(
         furi_hal_rtc_get_heap_track_mode(), heap_trace_mode_value, COUNT_OF(heap_trace_mode_text));
+    furi_hal_rtc_set_heap_track_mode(heap_trace_mode_value[value_index]);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, heap_trace_mode_text[value_index]);
 
