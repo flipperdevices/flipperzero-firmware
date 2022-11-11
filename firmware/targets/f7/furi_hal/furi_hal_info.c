@@ -8,7 +8,8 @@
 #include <furi.h>
 #include <protobuf_version.h>
 
-void furi_hal_info_get(FuriHalInfoValueCallback out, void* context) {
+void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
+    UNUSED(sep);
     FuriString* value;
     value = furi_string_alloc();
 

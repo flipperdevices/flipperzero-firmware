@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.4,,
+Version,+,8.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1119,7 +1119,7 @@ Function,+,furi_hal_ibutton_start_drive_in_isr,void,
 Function,+,furi_hal_ibutton_start_interrupt,void,
 Function,+,furi_hal_ibutton_start_interrupt_in_isr,void,
 Function,+,furi_hal_ibutton_stop,void,
-Function,+,furi_hal_info_get,void,"FuriHalInfoValueCallback, void*"
+Function,+,furi_hal_info_get,void,"FuriHalInfoValueCallback, char, void*"
 Function,+,furi_hal_infrared_async_rx_set_capture_isr_callback,void,"FuriHalInfraredRxCaptureCallback, void*"
 Function,+,furi_hal_infrared_async_rx_set_timeout,void,uint32_t
 Function,+,furi_hal_infrared_async_rx_set_timeout_isr_callback,void,"FuriHalInfraredRxTimeoutCallback, void*"
@@ -1200,7 +1200,7 @@ Function,+,furi_hal_power_get_battery_temperature,float,FuriHalPowerIC
 Function,+,furi_hal_power_get_battery_voltage,float,FuriHalPowerIC
 Function,+,furi_hal_power_get_pct,uint8_t,
 Function,+,furi_hal_power_get_usb_voltage,float,
-Function,+,furi_hal_power_info_get,void,"FuriHalPowerInfoCallback, void*"
+Function,+,furi_hal_power_info_get,void,"FuriHalPowerInfoCallback, char, void*"
 Function,-,furi_hal_power_init,void,
 Function,+,furi_hal_power_insomnia_enter,void,
 Function,+,furi_hal_power_insomnia_exit,void,

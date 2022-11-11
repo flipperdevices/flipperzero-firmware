@@ -18,6 +18,14 @@
 
 #define TAG "FuriHalPower"
 
+#define POWER_INFO_VERSION_MAJOR "1"
+#define POWER_INFO_VERSION_MINOR "0"
+#define POWER_INFO_KEY_CHARGE "charge"
+#define POWER_INFO_KEY_BATTERY "battery"
+#define POWER_INFO_KEY_GAUGE "gauge"
+#define POWER_INFO_KEY_CAPACITY "capacity"
+
+
 #ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
 #define FURI_HAL_POWER_DEEP_INSOMNIA 0
 #else
@@ -526,21 +534,27 @@ void furi_hal_power_suppress_charge_exit() {
     }
 }
 
-void furi_hal_power_info_get(FuriHalPowerInfoCallback out, void* context) {
+void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* context) {
     furi_assert(out);
 
-    FuriString* value;
-    value = furi_string_alloc();
+    FuriString* value = furi_string_alloc();
+    FuriString* key = furi_string_alloc();
 
-    // Power Info version
-    out("power_info_major", "1", false, context);
-    out("power_info_minor", "0", false, context);
+    // Power Info version, different syntax depending on separator character
+    if(sep == '.' ) {
+        out("version.major", POWER_INFO_VERSION_MAJOR, false, context);
+        out("version.minor", POWER_INFO_VERSION_MINOR, false, context);
+    } else {
+        out("power_info_major", POWER_INFO_VERSION_MAJOR, false, context);
+        out("power_info_minor", POWER_INFO_VERSION_MAJOR, false, context);
+    }
 
     uint8_t charge = furi_hal_power_get_pct();
-
+    furi_string_printf(key, "%s%clevel", POWER_INFO_KEY_CHARGE, sep);
     furi_string_printf(value, "%u", charge);
-    out("charge_level", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
+    furi_string_printf(key, "%s%cstate", POWER_INFO_KEY_CHARGE, sep);
     if(furi_hal_power_is_charging()) {
         if(charge < 100) {
             furi_string_printf(value, "charging");
@@ -550,33 +564,41 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, void* context) {
     } else {
         furi_string_printf(value, "discharging");
     }
-    out("charge_state", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
     uint16_t voltage =
         (uint16_t)(furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge) * 1000.f);
+    furi_string_printf(key, "%s%cvoltage", POWER_INFO_KEY_BATTERY, sep);
     furi_string_printf(value, "%u", voltage);
-    out("battery_voltage", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
     int16_t current =
         (int16_t)(furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge) * 1000.f);
+    furi_string_printf(key, "%s%ccurrent", POWER_INFO_KEY_BATTERY, sep);
     furi_string_printf(value, "%d", current);
-    out("battery_current", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
     int16_t temperature = (int16_t)furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
+    furi_string_printf(key, "%s%ctemp", POWER_INFO_KEY_GAUGE, sep);
     furi_string_printf(value, "%d", temperature);
-    out("gauge_temp", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
+    furi_string_printf(key, "%s%chealth", POWER_INFO_KEY_BATTERY, sep);
     furi_string_printf(value, "%u", furi_hal_power_get_bat_health_pct());
-    out("battery_health", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
+    furi_string_printf(key, "%s%cremain", POWER_INFO_KEY_CAPACITY, sep);
     furi_string_printf(value, "%lu", furi_hal_power_get_battery_remaining_capacity());
-    out("capacity_remain", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
+    furi_string_printf(key, "%s%cfull", POWER_INFO_KEY_CAPACITY, sep);
     furi_string_printf(value, "%lu", furi_hal_power_get_battery_full_capacity());
-    out("capacity_full", furi_string_get_cstr(value), false, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
+    furi_string_printf(key, "%s%cdesign", POWER_INFO_KEY_CAPACITY, sep);
     furi_string_printf(value, "%lu", furi_hal_power_get_battery_design_capacity());
-    out("capacity_design", furi_string_get_cstr(value), true, context);
+    out(furi_string_get_cstr(key), furi_string_get_cstr(value), true, context);
 
+    furi_string_free(key);
     furi_string_free(value);
 }

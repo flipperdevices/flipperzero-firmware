@@ -203,9 +203,10 @@ typedef void (
 /** Get power information
  *
  * @param[in]  callback     callback to provide with new data
+ * @param[in]  sep          category separator character
  * @param[in]  context      context to pass to callback
  */
-void furi_hal_power_info_get(FuriHalPowerInfoCallback callback, void* context);
+void furi_hal_power_info_get(FuriHalPowerInfoCallback callback, char sep, void* context);
 
 #ifdef __cplusplus
 }

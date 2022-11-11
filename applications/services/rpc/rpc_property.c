@@ -7,46 +7,36 @@
 #include "rpc_i.h"
 
 #define TAG "RpcProperty"
+#define PROPERTY_CATEGORY_SYSTEM "system"
+#define PROPERTY_CATEGORY_POWER "power"
 
 typedef struct {
     RpcSession* session;
     PB_Main* response;
+    FuriString* topkey;
+    FuriString* subkey;
 } RpcPropertyContext;
 
-static void rpc_system_property_get_system_callback(const char* key, const char* value, bool last, void* context) {
+static void rpc_system_property_get_callback(const char* key, const char* value, bool last, void* context) {
     furi_assert(key);
     furi_assert(value);
+    furi_assert(context);
+    furi_assert(key);
+    furi_assert(value);
+
     RpcPropertyContext* ctx = context;
-    furi_assert(ctx);
+    RpcSession* session = ctx->session;
+    PB_Main* response = ctx->response;
 
-    furi_assert(key);
-    furi_assert(value);
-    char* str_key = strdup(key);
-    char* str_value = strdup(value);
+    if(!strncmp(key, furi_string_get_cstr(ctx->subkey), furi_string_size(ctx->subkey))) {
+        response->content.system_device_info_response.key = strdup(key);
+        response->content.system_device_info_response.value = strdup(value);
+        rpc_send_and_release(session, response);
+    }
 
-    ctx->response->has_next = !last;
-    ctx->response->content.system_device_info_response.key = str_key;
-    ctx->response->content.system_device_info_response.value = str_value;
-
-    rpc_send_and_release(ctx->session, ctx->response);
-}
-
-static void rpc_system_property_get_power_callback(const char* key, const char* value, bool last, void* context) {
-    furi_assert(key);
-    furi_assert(value);
-    RpcPropertyContext* ctx = context;
-    furi_assert(ctx);
-
-    furi_assert(key);
-    furi_assert(value);
-    char* str_key = strdup(key);
-    char* str_value = strdup(value);
-
-    ctx->response->has_next = !last;
-    ctx->response->content.system_device_info_response.key = str_key;
-    ctx->response->content.system_device_info_response.value = str_value;
-
-    rpc_send_and_release(ctx->session, ctx->response);
+    if(last) {
+        rpc_send_and_release_empty(session, response->command_id, PB_CommandStatus_OK);
+    }
 }
 
 static void rpc_system_property_get_process(const PB_Main* request, void* context) {
@@ -70,22 +60,24 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
         furi_string_right(subkey, sep_idx + 1);
     }
 
-    FURI_LOG_D(TAG, "Topkey: %s, Subkey: %s", furi_string_get_cstr(topkey), furi_string_size(subkey) ? furi_string_get_cstr(subkey) : "<empty>");
-
     PB_Main* response = malloc(sizeof(PB_Main));
+
     response->command_id = request->command_id;
-    response->which_content = PB_Main_property_get_response_tag;
     response->command_status = PB_CommandStatus_OK;
+    response->has_next = true;
+    response->which_content = PB_Main_property_get_response_tag;
 
-    // RpcPropertyContext property_context = {
-    //     .session = session,
-    //     .response = response,
-    // };
+    RpcPropertyContext property_context = {
+        .session = session,
+        .response = response,
+        .topkey = topkey,
+        .subkey = subkey,
+    };
 
-    if(!furi_string_cmp(topkey, "system")) {
-        // furi_hal_power_info_get_by_key(rpc_system_property_get_system_callback, subkey, &property_context);
-    } else if(!furi_string_cmp(topkey, "power")) {
-        // furi_hal_power_info_get_by_key(rpc_system_property_get_power_callback, subkey, &property_context);
+    if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_SYSTEM)) {
+        furi_hal_power_info_get(rpc_system_property_get_callback, '.', &property_context);
+    } else if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_POWER)) {
+        furi_hal_power_info_get(rpc_system_property_get_callback, '.', &property_context);
     } else {
         rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
     }

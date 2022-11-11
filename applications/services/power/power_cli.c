@@ -35,7 +35,7 @@ static void power_cli_info_callback(const char* key, const char* value, bool las
 void power_cli_info(Cli* cli, FuriString* args) {
     UNUSED(cli);
     UNUSED(args);
-    furi_hal_power_info_get(power_cli_info_callback, NULL);
+    furi_hal_power_info_get(power_cli_info_callback, '_', NULL);
 }
 
 void power_cli_debug(Cli* cli, FuriString* args) {
