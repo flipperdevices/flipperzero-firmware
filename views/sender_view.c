@@ -6,7 +6,7 @@ void draw_sender_view(Canvas* canvas, i2cSender* i2c_sender) {
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 3);
     canvas_draw_icon(canvas, 2, 13, &I_passport_happy2_46x49);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SEND_MENU_TEXT);
+    canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SEND_TEXT);
 
     if(!i2c_sender->scanner->scanned) {
         scan_i2c_bus(i2c_sender->scanner);

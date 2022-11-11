@@ -7,7 +7,7 @@ void draw_sniffer_view(Canvas* canvas, i2cSniffer* i2c_sniffer) {
     canvas_draw_icon(canvas, 2, 13, &I_passport_happy2_46x49);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SNIFF_MENU_TEXT);
+    canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, SNIFF_TEXT);
     canvas_set_font(canvas, FontSecondary);
 
     // Button
