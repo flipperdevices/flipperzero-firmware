@@ -178,7 +178,7 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
         for(size_t i = 0; i < 6; i++) {
             furi_string_cat_printf(value, "%02X", ble_mac[i]);
         }
-        furi_string_printf(key, "%s%c%s%c%s", "firmware", sep, "ble", sep, "mac");
+        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "ble", sep, "mac");
         out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
         // Signature verification
