@@ -66,18 +66,18 @@ bool BMP280_init(I2CSensor* i2c_sensor) {
 
 bool BMP280_updateData(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
-    if(furi_get_tick() - i2c_sensor->lastPollingTime < 500) {
-        sensor->status = UT_EARLYPOOL;
-        return false;
-    }
-    i2c_sensor->lastPollingTime = furi_get_tick();
+    // if(furi_get_tick() - i2c_sensor->lastPollingTime < 500) {
+    //     sensor->status = UT_EARLYPOOL;
+    //     return false;
+    // }
+    // i2c_sensor->lastPollingTime = furi_get_tick();
 
-    while(readReg(i2c_sensor, 0xF3) & 0b00001001) {
-        if(furi_get_tick() - i2c_sensor->lastPollingTime > 100) {
-            sensor->status = UT_TIMEOUT;
-            return false;
-        }
-    }
+    // while(readReg(i2c_sensor, 0xF3) & 0b00001001) {
+    //     if(furi_get_tick() - i2c_sensor->lastPollingTime > 100) {
+    //         sensor->status = UT_TIMEOUT;
+    //         return false;
+    //     }
+    // }
 
     uint8_t buff[3];
     if(!readRegArray(i2c_sensor, 0xFA, 3, buff)) return false;

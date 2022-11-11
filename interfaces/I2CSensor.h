@@ -8,8 +8,6 @@
 typedef struct I2CSensor {
     //Тип интерфейса подключения датчика
     Interface interface;
-    //Время последнего опроса
-    uint32_t lastPollingTime;
     //Последнее успешное значение температуры
     float lastTemp;
     //Последнее успешное значение влажности
@@ -69,7 +67,8 @@ bool readRegArray(I2CSensor* i2c_sensor, uint8_t startReg, uint8_t len, uint8_t*
  * @param i2c_sensor Указатель на датчик
  * @param reg Номер регистра
  * @param value Значение для записи
+ * @return Истина если значение записано
  */
-void writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value);
+bool writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value);
 
 #endif

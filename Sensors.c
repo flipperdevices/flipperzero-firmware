@@ -149,8 +149,12 @@ bool unitemp_sensors_load() {
         }
         line = strtok((char*)NULL, "\n");
     }
-    uint16_t otherValues[] = {0x76};
-    unitemp_sensor_alloc("BMP280", BMP280, otherValues);
+
+    // uint16_t otherValues[] = {0x76};
+    // unitemp_sensor_alloc("BMP280", BMP280, otherValues);
+    //Адрес 7 бит
+    uint16_t otherValues[] = {0b1001000};
+    unitemp_sensor_alloc("LM75", LM75, otherValues);
 
     free(file_buf);
     file_stream_close(app->file_stream);
@@ -220,7 +224,7 @@ Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues)
         status = unitemp_oneWire_sensorAlloc(sensor, st, anotherValues);
     }
     //Выделение памяти под инстанс датчиков I2C
-    if(st == BMP280) {
+    if(st == BMP280 || st == LM75) {
         status = unitemp_I2C_sensorAlloc(sensor, st, anotherValues);
     }
 
@@ -255,6 +259,7 @@ bool unitemp_sensors_init(void) {
                 app->sensors[i]->name);
             result = false;
         }
+        FURI_LOG_D(APP_NAME, "Sensor %s successfully initialized", app->sensors[i]->name);
     }
     return result;
 }
@@ -284,15 +289,24 @@ bool unitemp_sensors_deInit(void) {
 UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
     if(sensor == NULL) return UT_ERROR;
 
+    //Проверка на допустимость опроса датчика
+    if(furi_get_tick() - sensor->lastPollingTime < sensor->pollingInterval) {
+        //Возврат ошибки если последний опрос датчика был неудачным
+        if(sensor->status == UT_TIMEOUT) {
+            return UT_TIMEOUT;
+        }
+        return UT_EARLYPOOL;
+    }
+
+    sensor->lastPollingTime = furi_get_tick();
+
     if(!furi_hal_power_is_otg_enabled()) {
         furi_hal_power_enable_otg();
     }
 
     sensor->status = sensor->updater(sensor);
-    if(app->settings.unit == FAHRENHEIT) uintemp_celsiumToFarengate(sensor);
-    return sensor->status;
-
-    sensor->status = UT_ERROR;
+    if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
+        uintemp_celsiumToFarengate(sensor);
     return sensor->status;
 }
 

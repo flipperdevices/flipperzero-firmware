@@ -4,5 +4,6 @@
 #include "../Sensors.h"
 #include "../interfaces/I2CSensor.h"
 #include "BMP280.h"
+#include "LM75.h"
 
 #endif

@@ -90,6 +90,9 @@ typedef struct Sensor {
     SensorDeinitializer* deinitializer;
     SensorUpdater* updater;
 
+    uint32_t lastPollingTime;
+    uint16_t pollingInterval;
+
 } Sensor;
 
 /**
