@@ -77,15 +77,15 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
     response->which_content = PB_Main_property_get_response_tag;
     response->command_status = PB_CommandStatus_OK;
 
-    RpcPropertyContext property_context = {
-        .session = session,
-        .response = response,
-    };
+    // RpcPropertyContext property_context = {
+    //     .session = session,
+    //     .response = response,
+    // };
 
     if(!furi_string_cmp(topkey, "system")) {
-        furi_hal_power_info_get_by_key(rpc_system_property_get_system_callback, subkey, &property_context);
+        // furi_hal_power_info_get_by_key(rpc_system_property_get_system_callback, subkey, &property_context);
     } else if(!furi_string_cmp(topkey, "power")) {
-        furi_hal_power_info_get_by_key(rpc_system_property_get_power_callback, subkey, &property_context);
+        // furi_hal_power_info_get_by_key(rpc_system_property_get_power_callback, subkey, &property_context);
     } else {
         rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);
     }

@@ -139,10 +139,3 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, void* context) {
 
     furi_string_free(value);
 }
-
-void furi_hal_info_get_by_key(FuriHalInfoValueCallback out, FuriString* key, void* context) {
-    furi_assert(out);
-    UNUSED(key);
-    UNUSED(context);
-    out("device_info_major", "2", true, context);
-}
