@@ -23,8 +23,7 @@ void spi_mem_scene_verify_on_enter(void* context) {
         app->view_read, spi_mem_tools_get_file_max_block_size(app->chip_info));
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewProgress);
     spi_mem_worker_start_thread(app->worker);
-    spi_mem_worker_verify_start(
-        app->chip_info, app->worker, spi_mem_scene_verify_callback, app);
+    spi_mem_worker_verify_start(app->chip_info, app->worker, spi_mem_scene_verify_callback, app);
 }
 
 bool spi_mem_scene_verify_on_event(void* context, SceneManagerEvent event) {

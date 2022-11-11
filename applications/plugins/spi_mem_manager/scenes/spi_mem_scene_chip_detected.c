@@ -30,25 +30,25 @@ static void spi_mem_scene_chip_detected_print_chip_info(Widget* widget, SPIMemCh
 
 static void spi_mem_scene_chip_detect_draw_next_button(SPIMemApp* app) {
     FuriString* str = furi_string_alloc();
-    if(app->mode == SPIMemModeRead)
-        furi_string_printf(str, "%s", "Read");
-    if(app->mode == SPIMemModeWrite)
-        furi_string_printf(str, "%s", "Write");
-    if(app->mode == SPIMemModeCompare)
-        furi_string_printf(str, "%s", "Check");
+    if(app->mode == SPIMemModeRead) furi_string_printf(str, "%s", "Read");
+    if(app->mode == SPIMemModeWrite) furi_string_printf(str, "%s", "Write");
+    if(app->mode == SPIMemModeCompare) furi_string_printf(str, "%s", "Check");
     widget_add_button_element(
-        app->widget, GuiButtonTypeRight, furi_string_get_cstr(str), spi_mem_scene_chip_detected_widget_callback, app);
+        app->widget,
+        GuiButtonTypeRight,
+        furi_string_get_cstr(str),
+        spi_mem_scene_chip_detected_widget_callback,
+        app);
     furi_string_free(str);
 }
 
 static void spi_mem_scene_chip_detected_set_next_scene(SPIMemApp* app) {
     uint32_t scene = SPIMemSceneStart;
-    if(app->mode == SPIMemModeRead)
-        scene = SPIMemSceneReadFilename;
+    if(app->mode == SPIMemModeRead) scene = SPIMemSceneReadFilename;
     // if(app->mode == SPIMemModeWrite)
-        // scene = SPIMemSceneWrite;
+    // scene = SPIMemSceneWrite;
     // if(app->mode == SPIMemModeCompare)
-        // scene = SPIMemSceneCompare;
+    // scene = SPIMemSceneCompare;
     scene_manager_next_scene(app->scene_manager, scene);
 }
 
