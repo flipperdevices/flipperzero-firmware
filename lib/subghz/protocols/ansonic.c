@@ -15,8 +15,8 @@
         (dip & 0x0008 ? '1' : '0')
 
 static const SubGhzBlockConst subghz_protocol_ansonic_const = {
-    .te_short = 550,
-    .te_long = 1100,
+    .te_short = 555,
+    .te_long = 1111,
     .te_delta = 120,
     .min_count_bit_for_found = 12,
 };
@@ -113,7 +113,7 @@ static bool subghz_protocol_encoder_ansonic_get_upload(SubGhzProtocolEncoderAnso
     }
     //Send header
     instance->encoder.upload[index++] =
-        level_duration_make(false, (uint32_t)subghz_protocol_ansonic_const.te_short * 36);
+        level_duration_make(false, (uint32_t)subghz_protocol_ansonic_const.te_short * 35);
     //Send start bit
     instance->encoder.upload[index++] =
         level_duration_make(true, (uint32_t)subghz_protocol_ansonic_const.te_short);
@@ -212,8 +212,8 @@ void subghz_protocol_decoder_ansonic_feed(void* context, bool level, uint32_t du
 
     switch(instance->decoder.parser_step) {
     case AnsonicDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_ansonic_const.te_short * 36) <
-                        subghz_protocol_ansonic_const.te_delta * 36)) {
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_ansonic_const.te_short * 35) <
+                        subghz_protocol_ansonic_const.te_delta * 35)) {
             //Found header Ansonic
             instance->decoder.parser_step = AnsonicDecoderStepFoundStartBit;
         }
