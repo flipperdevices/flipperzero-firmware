@@ -20,6 +20,7 @@ bool lightmeter_scene_main_on_event(void* context, SceneManagerEvent event) {
             return true;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
+        lightmeter_app_i2c_callback(app);
         return true;
     }
 
