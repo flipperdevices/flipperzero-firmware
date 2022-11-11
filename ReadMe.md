@@ -206,6 +206,7 @@ $ ./fbt plugin_dist
 
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Badger 2040 (By jakebacker)](https://github.com/jakebacker/flipperzero-firmware-wPlugins)
 - [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
