@@ -20,11 +20,6 @@
 
 #define POWER_INFO_VERSION_MAJOR "1"
 #define POWER_INFO_VERSION_MINOR "0"
-#define POWER_INFO_KEY_CHARGE "charge"
-#define POWER_INFO_KEY_BATTERY "battery"
-#define POWER_INFO_KEY_GAUGE "gauge"
-#define POWER_INFO_KEY_CAPACITY "capacity"
-
 
 #ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
 #define FURI_HAL_POWER_DEEP_INSOMNIA 0
@@ -550,11 +545,11 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* conte
     }
 
     uint8_t charge = furi_hal_power_get_pct();
-    furi_string_printf(key, "%s%clevel", POWER_INFO_KEY_CHARGE, sep);
+    furi_string_printf(key, "%s%c%s", "charge", sep, "level");
     furi_string_printf(value, "%u", charge);
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
-    furi_string_printf(key, "%s%cstate", POWER_INFO_KEY_CHARGE, sep);
+    furi_string_printf(key, "%s%c%s", "charge", sep, "state");
     if(furi_hal_power_is_charging()) {
         if(charge < 100) {
             furi_string_printf(value, "charging");
@@ -568,34 +563,34 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* conte
 
     uint16_t voltage =
         (uint16_t)(furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge) * 1000.f);
-    furi_string_printf(key, "%s%cvoltage", POWER_INFO_KEY_BATTERY, sep);
+    furi_string_printf(key, "%s%c%s", "battery", sep, "voltage");
     furi_string_printf(value, "%u", voltage);
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
     int16_t current =
         (int16_t)(furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge) * 1000.f);
-    furi_string_printf(key, "%s%ccurrent", POWER_INFO_KEY_BATTERY, sep);
+    furi_string_printf(key, "%s%c%s", "battery", sep, "current");
     furi_string_printf(value, "%d", current);
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
     int16_t temperature = (int16_t)furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
-    furi_string_printf(key, "%s%ctemp", POWER_INFO_KEY_GAUGE, sep);
+    furi_string_printf(key, "%s%c%s", "gauge", sep, "temp");
     furi_string_printf(value, "%d", temperature);
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
-    furi_string_printf(key, "%s%chealth", POWER_INFO_KEY_BATTERY, sep);
+    furi_string_printf(key, "%s%c%s", "battery", sep, "health");
     furi_string_printf(value, "%u", furi_hal_power_get_bat_health_pct());
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
-    furi_string_printf(key, "%s%cremain", POWER_INFO_KEY_CAPACITY, sep);
+    furi_string_printf(key, "%s%c%s", "capacity", sep, "remain");
     furi_string_printf(value, "%lu", furi_hal_power_get_battery_remaining_capacity());
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
-    furi_string_printf(key, "%s%cfull", POWER_INFO_KEY_CAPACITY, sep);
+    furi_string_printf(key, "%s%c%s", "capacity", sep, "full");
     furi_string_printf(value, "%lu", furi_hal_power_get_battery_full_capacity());
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
-    furi_string_printf(key, "%s%cdesign", POWER_INFO_KEY_CAPACITY, sep);
+    furi_string_printf(key, "%s%c%s", "capacity", sep, "design");
     furi_string_printf(value, "%lu", furi_hal_power_get_battery_design_capacity());
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), true, context);
 
