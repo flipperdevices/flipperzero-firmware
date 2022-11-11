@@ -3,6 +3,7 @@
 ## Brief
 
 > "You can turn anything into an air mouse if you're brave enough"
+
 --- Piper, a.k.a. Pez
 
 Naturally, the quote above applies to [Flipper](https://flipperzero.one/) as well.
