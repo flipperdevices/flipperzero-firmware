@@ -42,7 +42,7 @@ Reality:
 
 ## Software
 
-If you're familiar with Flipper applications, start in the firmware checkout folder and do the following:
+If you're familiar with Flipper applications, start in the [firmware](https://github.com/flipperdevices/flipperzero-firmware) checkout folder and do the following:
 ```
 cd applications/plugins
 git clone https://github.com/ginkage/FlippAirMouse
