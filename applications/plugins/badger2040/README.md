@@ -1,1 +1,0 @@
-This is an extremely basic plugin for interacting with a [badger2040](https://shop.pimoroni.com/products/badger-2040).
