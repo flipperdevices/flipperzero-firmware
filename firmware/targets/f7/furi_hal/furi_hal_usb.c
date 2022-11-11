@@ -57,11 +57,11 @@ typedef struct {
     bool enabled;
     bool connected;
     bool mode_lock;
+    bool request_pending;
     FuriHalUsbInterface* interface;
     void* interface_context;
     FuriHalUsbStateCallback callback;
     void* callback_context;
-    bool request_pending;
 } UsbSrv;
 
 typedef enum {
@@ -125,6 +125,12 @@ void furi_hal_usb_init(void) {
     FURI_LOG_I(TAG, "Init OK");
 }
 
+static void furi_hal_usb_send_message(UsbApiEventMessage* message) {
+    furi_message_queue_put(usb.queue, message, FuriWaitForever);
+    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
+    api_lock_wait_unlock_and_free(message->lock);
+}
+
 bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx) {
     UsbApiEventReturnData return_data = {
         .bool_value = false,
@@ -141,10 +147,7 @@ bool furi_hal_usb_set_config(FuriHalUsbInterface* new_if, void* ctx) {
         .return_data = &return_data,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
-
+    furi_hal_usb_send_message(&msg);
     return return_data.bool_value;
 }
 
@@ -159,10 +162,7 @@ FuriHalUsbInterface* furi_hal_usb_get_config() {
         .return_data = &return_data,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
-
+    furi_hal_usb_send_message(&msg);
     return return_data.void_value;
 }
 
@@ -172,9 +172,7 @@ void furi_hal_usb_lock() {
         .type = UsbApiEventTypeLock,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
+    furi_hal_usb_send_message(&msg);
 }
 
 void furi_hal_usb_unlock() {
@@ -183,9 +181,7 @@ void furi_hal_usb_unlock() {
         .type = UsbApiEventTypeUnlock,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
+    furi_hal_usb_send_message(&msg);
 }
 
 bool furi_hal_usb_is_locked() {
@@ -199,10 +195,7 @@ bool furi_hal_usb_is_locked() {
         .return_data = &return_data,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
-
+    furi_hal_usb_send_message(&msg);
     return return_data.bool_value;
 }
 
@@ -212,9 +205,7 @@ void furi_hal_usb_disable() {
         .type = UsbApiEventTypeDisable,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
+    furi_hal_usb_send_message(&msg);
 }
 
 void furi_hal_usb_enable() {
@@ -223,9 +214,7 @@ void furi_hal_usb_enable() {
         .type = UsbApiEventTypeEnable,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
+    furi_hal_usb_send_message(&msg);
 }
 
 void furi_hal_usb_reinit() {
@@ -234,9 +223,7 @@ void furi_hal_usb_reinit() {
         .type = UsbApiEventTypeReinit,
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
+    furi_hal_usb_send_message(&msg);
 }
 
 void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx) {
@@ -250,9 +237,7 @@ void furi_hal_usb_set_state_callback(FuriHalUsbStateCallback cb, void* ctx) {
             },
     };
 
-    furi_message_queue_put(usb.queue, &msg, FuriWaitForever);
-    furi_thread_flags_set(furi_thread_get_id(usb.thread), UsbEventMessage);
-    api_lock_wait_unlock_and_free(msg.lock);
+    furi_hal_usb_send_message(&msg);
 }
 
 /* Get device / configuration descriptors */
@@ -386,7 +371,7 @@ static void usb_process_mode_reinit() {
     usb_process_mode_start(usb.interface, usb.interface_context);
 }
 
-bool usb_process_set_config(FuriHalUsbInterface* interface, void* context) {
+static bool usb_process_set_config(FuriHalUsbInterface* interface, void* context) {
     if(usb.mode_lock) {
         return false;
     } else {
@@ -395,7 +380,7 @@ bool usb_process_set_config(FuriHalUsbInterface* interface, void* context) {
     }
 }
 
-void usb_process_enable(bool enable) {
+static void usb_process_enable(bool enable) {
     if(enable) {
         if((!usb.enabled) && (usb.interface != NULL)) {
             usbd_connect(&udev, true);
@@ -413,7 +398,7 @@ void usb_process_enable(bool enable) {
     }
 }
 
-void usb_process_message(UsbApiEventMessage* message) {
+static void usb_process_message(UsbApiEventMessage* message) {
     switch(message->type) {
     case UsbApiEventTypeSetConfig:
         message->return_data->bool_value = usb_process_set_config(
