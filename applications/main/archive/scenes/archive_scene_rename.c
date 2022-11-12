@@ -64,7 +64,11 @@ bool archive_scene_rename_on_event(void* context, SceneManagerEvent event) {
             ArchiveFile_t* file = archive_get_current_file(archive->browser);
 
             FuriString* path_dst;
+
             path_dst = furi_string_alloc();
+            path_extract_dirname(path_src, path_dst);
+            furi_string_cat_printf(
+                path_dst, "/%s%s", archive->text_store, archive->file_extension);
 
             if(file->type == ArchiveFileTypeFolder) {
                 // Rename folder/dir
