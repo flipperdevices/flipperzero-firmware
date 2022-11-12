@@ -13,14 +13,20 @@
 #define LM75_CONFIG_FAULTQUEUE_4 0b00010000
 #define LM75_CONFIG_FAULTQUEUE_6 0b00011000
 
-bool unitemp_LM75_alloc(Sensor* sensor) {
+const SensorType LM75 = {
+    .typename = "LM75",
+    .interface = I2C,
+    .pollingInterval = 500,
+    .allocator = unitemp_LM75_alloc,
+    .mem_releaser = unitemp_LM75_free,
+    .initializer = unitemp_LM75_init,
+    .deinitializer = unitemp_LM75_deinit,
+    .updater = unitemp_LM75_update};
+
+bool unitemp_LM75_alloc(void* s, uint16_t* anotherValues) {
+    UNUSED(anotherValues);
+    Sensor* sensor = (Sensor*)s;
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
-    //Функции работы с датчиком
-    sensor->initializer = unitemp_LM75_init;
-    sensor->deinitializer = unitemp_LM75_deinit;
-    sensor->updater = unitemp_LM75_update;
-    sensor->memoryfree = unitemp_LM75_free;
-    sensor->pollingInterval = 1000;
 
     //Адреса на шине I2C (7 бит)
     i2c_sensor->minI2CAdr = 0b1001000;

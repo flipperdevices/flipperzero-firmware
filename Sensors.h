@@ -12,26 +12,6 @@ typedef enum {
     UT_ERROR, //Прочие ошибки
 } UnitempStatus;
 
-//Типы датчиков
-typedef enum {
-    DHT11,
-    DHT12_1W,
-    DHT12_I2C,
-    DHT20, //AM2108
-    DHT21, //AM2301
-    DHT22, //AM2302
-    AM2320_1W,
-    AM2320_I2C,
-    LM75,
-    DS18B20,
-    BMP180,
-    BMP280,
-    BME280,
-
-    //Порядок сенсоров сверху не менять!
-    SENSOR_TYPES_COUNT //Общее количество типов датчиков
-} SensorType;
-
 //Типы подключения датчиков
 typedef enum Interface {
     SINGLE_WIRE, //Собственный однопроводной протокол датчиков DHTXX и AM23XX
@@ -49,11 +29,10 @@ typedef struct GPIO {
     const GpioPin* pin;
 } GPIO;
 
-struct Sensor;
 /**
  * @brief Указатель функции выделения памяти и подготовки экземпляра датчика
  */
-typedef void(SensorAllocator)(void* sensor, SensorType st);
+typedef bool(SensorAllocator)(void* sensor, uint16_t* anotherValues);
 /**
  * @brief Указатель на функцию высвобождении памяти датчика
  */
@@ -71,6 +50,26 @@ typedef bool(SensorDeinitializer)(void* sensor);
  */
 typedef UnitempStatus(SensorUpdater)(void* sensor);
 
+//Типы датчиков
+typedef struct {
+    //Имя типа датчика
+    char* typename;
+    //Интерфейс подключения
+    Interface interface;
+    //Интервал опроса датчика
+    uint16_t pollingInterval;
+    //Функция выделения памяти для датчика
+    SensorAllocator* allocator;
+    //Функция высвыбождения памяти для датчика
+    SensorFree* mem_releaser;
+    //Функция инициализации датчика
+    SensorInitializer* initializer;
+    //Функция деинициализация датчика
+    SensorDeinitializer* deinitializer;
+    //Функция обновления значения датчка
+    SensorUpdater* updater;
+} SensorType;
+
 //Датчик
 typedef struct Sensor {
     //Имя датчика
@@ -81,32 +80,15 @@ typedef struct Sensor {
     float hum;
 
     //Тип датчика
-    SensorType type;
-    //Интерфейсы подключения
-    Interface interface;
+    const SensorType* type;
     //Статус последнего опроса датчика
     UnitempStatus status;
-
+    //Время последнего опроса датчика
+    uint32_t lastPollingTime;
     //Экземпляр датчика
     void* instance;
-    SensorAllocator* allocator;
-    SensorFree* memoryfree;
-    SensorInitializer* initializer;
-    SensorDeinitializer* deinitializer;
-    SensorUpdater* updater;
-
-    uint32_t lastPollingTime;
-    uint16_t pollingInterval;
 
 } Sensor;
-
-/**
- * @brief Получить имя типа датчика
- * 
- * @param st Тип датчика
- * @return Указатель на строку с именем типа датчика
- */
-const char* unitemp_getSensorTypeName(SensorType st);
 
 /**
  * @brief Конвертация номера порта на корпусе FZ в GPIO 
@@ -132,7 +114,7 @@ uint8_t unitemp_GPIO_toInt(const GpioPin* gpio);
  * @param anotherValues Массив других различных значений
  * @return Указатель на датчик
  */
-Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues);
+Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint16_t* anotherValues);
 
 /**
  * @brief Инициализация загруженных датчиков
@@ -180,4 +162,5 @@ void unitemp_sensors_updateValues(void);
  */
 void unitemp_sensors_free(void);
 
+const SensorType* unitemp_getTypeFromInt(int type);
 #endif

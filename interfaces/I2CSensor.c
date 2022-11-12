@@ -27,53 +27,21 @@ bool writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
     return status;
 }
 
-bool unitemp_I2C_sensorInit(void* s) {
+bool unitemp_I2C_sensorAlloc(void* s, uint16_t* anotherValues) {
     Sensor* sensor = (Sensor*)s;
-    I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
-    //BMP280
-    if(sensor->type == BMP280) {
-        if(BMP280_init(i2c_sensor)) {
-            sensor->status = UT_OK;
-            return true;
-        }
-    }
-    return false;
-}
-
-bool unitemp_I2C_sensorDeInit(void* s) {
-    Sensor* sensor = (Sensor*)s;
-    return sensor->deinitializer(s);
-}
-
-UnitempStatus unitemp_I2C_updateData(void* sensor) {
-    if(((Sensor*)sensor)->status == UT_ERROR || ((Sensor*)sensor)->status == UT_TIMEOUT) {
-        if(((Sensor*)sensor)->initializer(sensor) != true) return UT_ERROR;
-    }
-    BMP280_updateData(sensor);
-    return UT_OK;
-}
-
-bool unitemp_I2C_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anotherValues) {
     bool status = false;
     I2CSensor* instance = malloc(sizeof(I2CSensor));
-    instance->interface = I2C;
-    instance->i2c = &furi_hal_i2c_handle_external;
-
-    sensor->lastPollingTime = 0xFFFFFFFF;
-
-    sensor->instance = instance;
-    sensor->type = st;
-
-    // //Настройки для BMP280
-    // if(st == BMP280) {
-    //     instance->minI2CAdr = 0x76;
-    //     instance->maxI2CAdr = 0x77;
-    // }
-    if(st == LM75) {
-        //Указание функций инициализации, деинициализации и обновления данных, а так же адреса на шине I2C
-        status = unitemp_LM75_alloc(sensor);
+    if(instance == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
+        return false;
     }
+    instance->i2c = &furi_hal_i2c_handle_external;
+    sensor->instance = instance;
 
+    //Указание функций инициализации, деинициализации и обновления данных, а так же адреса на шине I2C
+    status = sensor->type->allocator(sensor, anotherValues);
+
+    //Установка адреса шины I2C
     if(anotherValues[0] >= instance->minI2CAdr && anotherValues[0] <= instance->maxI2CAdr) {
         instance->currentI2CAdr = anotherValues[0];
     } else {

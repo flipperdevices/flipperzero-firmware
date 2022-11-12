@@ -1,6 +1,7 @@
 #include "Sensors.h"
 #include "./interfaces/SingleWireSensor.h"
 #include "./interfaces/I2CSensor.h"
+#include "./sensors/SensorsDriver.h"
 
 #include <furi_hal_power.h>
 
@@ -12,6 +13,8 @@ const GpioPin RX_14 = {.pin = LL_GPIO_PIN_7, .port = GPIOB};
 
 //Количество доступных портов ввода/вывода
 #define GPIO_ITEMS (sizeof(GPIOList) / sizeof(GPIO))
+//Количество типов датчиков
+#define SENSOR_TYPES_COUNT (int)(sizeof(sensorTypes) / sizeof(const SensorType*))
 
 //Перечень достуных портов ввода/вывода
 //static
@@ -30,28 +33,22 @@ const GPIO GPIOList[] = {
     {16, "16 (C0)", &gpio_ext_pc0},
     {17, "17 (1W)", &ibutton_gpio}};
 
-//Перечень имён датчиков
-static const char* sensorNames[SENSOR_TYPES_COUNT] = {
-    "DHT11",
-    "DHT12 (1 Wire)",
-    "DHT12 (I2C)",
-    "DHT20",
-    "DHT21", //AM2301
-    "DHT22", //AM2302
-    "AM2320 (1W)",
-    "AM2320 (I2C)",
-    "LM75",
-    "DS18B20",
-    "BMP180",
-    "BMP280",
-    "BME280",
-};
+//Перечень датчиков
+static const SensorType* sensorTypes[] = {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75};
 
-const char* unitemp_getSensorTypeName(SensorType st) {
-    if(st >= SENSOR_TYPES_COUNT) return NULL;
-    return sensorNames[st];
+const SensorType* unitemp_getTypeFromInt(int type) {
+    if(type > SENSOR_TYPES_COUNT) return NULL;
+    return sensorTypes[type];
 }
 
+int unitemp_getIntFromType(const SensorType* type) {
+    for(int i = 0; i < SENSOR_TYPES_COUNT; i++) {
+        if(!strcmp(type->typename, sensorTypes[i]->typename)) {
+            return i;
+        }
+    }
+    return 255;
+}
 const GPIO* unitemp_GPIO_getFromInt(uint8_t name) {
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         if(GPIOList[i].num == name) {
@@ -145,16 +142,15 @@ bool unitemp_sensors_load() {
         uint16_t otherValues[] = {otherValue};
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
-            unitemp_sensor_alloc(name, type, otherValues);
+            unitemp_sensor_alloc(name, unitemp_getTypeFromInt(type), otherValues);
+        } else {
+            FURI_LOG_E(APP_NAME, "Unsupported sensor name (%s) or sensor type (%d)", name, type);
         }
         line = strtok((char*)NULL, "\n");
     }
 
     // uint16_t otherValues[] = {0x76};
     // unitemp_sensor_alloc("BMP280", BMP280, otherValues);
-    //Адрес 7 бит
-    uint16_t otherValues[] = {0b1001000};
-    unitemp_sensor_alloc("LM75", LM75, otherValues);
 
     free(file_buf);
     file_stream_close(app->file_stream);
@@ -192,13 +188,13 @@ bool unitemp_sensors_save(void) {
 
     //Сохранение датчиков
     for(size_t i = 0; i < app->sensors_count; i++) {
-        if(app->sensors[i]->interface == SINGLE_WIRE) {
+        if(app->sensors[i]->type->interface == SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
                 "%s %d %d\n",
                 app->sensors[i]->name,
-                app->sensors[i]->type,
-                unitemp_GPIO_toInt(unitemp_oneWire_sensorGetGPIO(app->sensors[i])->pin));
+                unitemp_getIntFromType(app->sensors[i]->type),
+                unitemp_GPIO_toInt(unitemp_singleWire_sensorGetGPIO(app->sensors[i])->pin));
         }
     }
 
@@ -210,40 +206,73 @@ bool unitemp_sensors_save(void) {
     return true;
 }
 
-Sensor* unitemp_sensor_alloc(char* name, SensorType st, uint16_t* anotherValues) {
+Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint16_t* anotherValues) {
     bool status = false;
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));
-    if(sensor == NULL) return false;
-    sensor->name = malloc(11);
-    strcpy(sensor->name, name);
-    sensor->status = UT_ERROR;
-
-    //Выделение памяти под инстанс датчиков One Wire
-    if(st == DHT11 || st == DHT12_1W || st == DHT21 || st == DHT22 || st == AM2320_1W) {
-        status = unitemp_oneWire_sensorAlloc(sensor, st, anotherValues);
+    if(sensor == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor %s allocation error", name);
+        return false;
     }
-    //Выделение памяти под инстанс датчиков I2C
-    if(st == BMP280 || st == LM75) {
-        status = unitemp_I2C_sensorAlloc(sensor, st, anotherValues);
+
+    //Выделение памяти под имя
+    sensor->name = malloc(11);
+    if(sensor->name == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor %s name allocation error", name);
+        return false;
+    }
+    //Запись имени датчка
+    strcpy(sensor->name, name);
+    //Тип датчика
+    sensor->type = type;
+    //Статус датчика по умолчанию - ошибка
+    sensor->status = UT_ERROR;
+    //Время последнего опроса
+    sensor->lastPollingTime =
+        furi_get_tick() - 10000; //чтобы первый опрос произошёл как можно раньше
+
+    sensor->temp = -128.0f;
+    sensor->hum = -128.0f;
+
+    //Выделение памяти под инстанс датчика в зависимости от его интерфейса
+    if(sensor->type->interface == SINGLE_WIRE) {
+        status = sensor->type->allocator(sensor, anotherValues);
+    }
+    if(sensor->type->interface == I2C) {
+        status = unitemp_I2C_sensorAlloc(sensor, anotherValues);
     }
 
     //Если датчик успешно развёрнут, то добавление его в общий список и выход
     if(status) {
-        app->sensors[app->sensors_count] = sensor;
-        app->sensors_count++;
+        app->sensors[app->sensors_count++] = sensor;
         return sensor;
     }
     //Если ни один из типов не подошёл, то выход с очисткой
     free(sensor->name);
     free(sensor);
-    FURI_LOG_E(APP_NAME, "Sensor %s allocation error", name);
+    FURI_LOG_E(APP_NAME, "Sensor %s type is unsupported: %s", name, type->typename);
     return NULL;
 }
 
 void unitemp_sensor_free(Sensor* sensor) {
-    //Высвобождение памяти под инстанс датчиков I2C
-    if(sensor->type == BMP280 || sensor->type == LM75) {
+    if(sensor == NULL) {
+        FURI_LOG_E(APP_NAME, "Null pointer sensor releasing");
+        return;
+    }
+    if(sensor->type == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor type is null");
+        return;
+    }
+    if(sensor->type->mem_releaser == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor releaser is null");
+        return;
+    }
+    //Высвобождение памяти под инстанс
+    if(sensor->type->interface == SINGLE_WIRE) {
+        sensor->type->mem_releaser(sensor);
+    }
+
+    if(sensor->type->interface == I2C) {
         unitemp_I2C_sensorFree(sensor);
     }
     free(sensor->name);
@@ -268,7 +297,7 @@ bool unitemp_sensors_init(void) {
             furi_hal_power_enable_otg();
             FURI_LOG_D(APP_NAME, "OTG enabled");
         }
-        if(!(*app->sensors[i]->initializer)(app->sensors[i])) {
+        if(!(*app->sensors[i]->type->initializer)(app->sensors[i])) {
             FURI_LOG_E(
                 APP_NAME,
                 "An error occurred during sensor initialization %s",
@@ -290,14 +319,13 @@ bool unitemp_sensors_deInit(void) {
 
     //Перебор датчиков из списка
     for(size_t i = 0; i < app->sensors_count; i++) {
-        if(!(*app->sensors[i]->deinitializer)(app->sensors[i])) {
+        if(!(*app->sensors[i]->type->deinitializer)(app->sensors[i])) {
             FURI_LOG_E(
                 APP_NAME,
                 "An error occurred during sensor deinitialization %s",
                 app->sensors[i]->name);
             result = false;
         }
-        free(app->sensors[i]);
     }
     return result;
 }
@@ -306,7 +334,7 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
     if(sensor == NULL) return UT_ERROR;
 
     //Проверка на допустимость опроса датчика
-    if(furi_get_tick() - sensor->lastPollingTime < sensor->pollingInterval) {
+    if(furi_get_tick() - sensor->lastPollingTime < sensor->type->pollingInterval) {
         //Возврат ошибки если последний опрос датчика был неудачным
         if(sensor->status == UT_TIMEOUT) {
             return UT_TIMEOUT;
@@ -320,7 +348,8 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         furi_hal_power_enable_otg();
     }
 
-    sensor->status = sensor->updater(sensor);
+    sensor->status = sensor->type->updater(sensor);
+    FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
     if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
         uintemp_celsiumToFarengate(sensor);
     return sensor->status;

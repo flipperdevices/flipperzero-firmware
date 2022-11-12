@@ -6,27 +6,78 @@
 //Максимальное количество попугаев ожидания датчика
 #define POLLING_TIMEOUT_TICKS 10000
 
-bool unitemp_oneWire_sensorAlloc(Sensor* sensor, SensorType st, uint16_t* anotherValues) {
+/* Типы датчиков и их параметры */
+//DHT11
+const SensorType DHT11 = {
+    .typename = "DHT11",
+    .interface = SINGLE_WIRE,
+    .pollingInterval = 2000,
+    .allocator = unitemp_singleWire_alloc,
+    .mem_releaser = unitemp_singleWire_free,
+    .initializer = unitemp_singleWire_init,
+    .deinitializer = unitemp_singleWire_deinit,
+    .updater = unitemp_singleWire_update};
+const SensorType DHT12_SW = {
+    .typename = "DHT12 (1 Wire)",
+    .interface = SINGLE_WIRE,
+    .pollingInterval = 2000,
+    .allocator = unitemp_singleWire_alloc,
+    .mem_releaser = unitemp_singleWire_free,
+    .initializer = unitemp_singleWire_init,
+    .deinitializer = unitemp_singleWire_deinit,
+    .updater = unitemp_singleWire_update};
+
+const SensorType DHT21 = {
+    .typename = "DHT21",
+    .interface = SINGLE_WIRE,
+    .pollingInterval = 2000,
+    .allocator = unitemp_singleWire_alloc,
+    .mem_releaser = unitemp_singleWire_free,
+    .initializer = unitemp_singleWire_init,
+    .deinitializer = unitemp_singleWire_deinit,
+    .updater = unitemp_singleWire_update};
+const SensorType DHT22 = {
+    .typename = "DHT22",
+    .interface = SINGLE_WIRE,
+    .pollingInterval = 2000,
+    .allocator = unitemp_singleWire_alloc,
+    .mem_releaser = unitemp_singleWire_free,
+    .initializer = unitemp_singleWire_init,
+    .deinitializer = unitemp_singleWire_deinit,
+    .updater = unitemp_singleWire_update};
+const SensorType AM2320_SW = {
+    .typename = "AM2320 (1 Wire)",
+    .interface = SINGLE_WIRE,
+    .pollingInterval = 2000,
+    .allocator = unitemp_singleWire_alloc,
+    .mem_releaser = unitemp_singleWire_free,
+    .initializer = unitemp_singleWire_init,
+    .deinitializer = unitemp_singleWire_deinit,
+    .updater = unitemp_singleWire_update};
+
+bool unitemp_singleWire_alloc(void* s, uint16_t* anotherValues) {
+    Sensor* sensor = (Sensor*)s;
     SingleWireSensor* instance = malloc(sizeof(SingleWireSensor));
-    instance->interface = SINGLE_WIRE;
-    instance->lastPollingTime = 0xFFFFFFFF;
-
-    sensor->initializer = unitemp_oneWire_sensorInit;
-    sensor->deinitializer = unitemp_oneWire_sensorDeInit;
-    sensor->updater = unitemp_oneWire_updateData;
-
+    if(instance == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
+        return false;
+    }
     sensor->instance = instance;
-    sensor->type = st;
 
-    if(unitemp_GPIO_getFromInt(anotherValues[0]) != NULL) {
-        unitemp_oneWire_sensorSetGPIO(sensor, unitemp_GPIO_getFromInt(anotherValues[0]));
+    if(unitemp_singleWire_sensorSetGPIO(sensor, unitemp_GPIO_getFromInt(anotherValues[0]))) {
         return true;
     }
+    FURI_LOG_E(APP_NAME, "Sensor %s GPIO setting error", sensor->name);
     free(instance);
     return false;
 }
+void unitemp_singleWire_free(void* s) {
+    Sensor* sensor = (Sensor*)s;
+    free(sensor->instance);
+    FURI_LOG_D(APP_NAME, "Sensor %s memory successfully released", sensor->name);
+}
 
-bool unitemp_oneWire_sensorInit(void* sensor) {
+bool unitemp_singleWire_init(void* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
@@ -43,7 +94,7 @@ bool unitemp_oneWire_sensorInit(void* sensor) {
     return true;
 }
 
-bool unitemp_oneWire_sensorDeInit(void* sensor) {
+bool unitemp_singleWire_deinit(void* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) return false;
     //Низкий уровень по умолчанию
@@ -57,40 +108,24 @@ bool unitemp_oneWire_sensorDeInit(void* sensor) {
     return true;
 }
 
-bool unitemp_oneWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
+bool unitemp_singleWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
     if(sensor == NULL || gpio == NULL) return false;
     SingleWireSensor* instance = sensor->instance;
     instance->gpio = gpio;
     return true;
 }
-const GPIO* unitemp_oneWire_sensorGetGPIO(Sensor* sensor) {
+const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor) {
     if(sensor == NULL) return NULL;
     SingleWireSensor* instance = sensor->instance;
     return instance->gpio;
 }
 
-UnitempStatus unitemp_oneWire_updateData(void* sensor) {
-    SingleWireSensor* instance = ((Sensor*)sensor)->instance;
-    //Проверка на допустимость опроса датчика
-    if(furi_get_tick() - instance->lastPollingTime < POLLING_INTERVAL) {
-        //Возврат ошибки если последний опрос датчика был неудачным
-        if(instance->lastHum == -128.0f && instance->lastTemp == -128.0f) {
-            ((Sensor*)sensor)->hum = instance->lastHum;
-            ((Sensor*)sensor)->temp = instance->lastTemp;
-            return UT_TIMEOUT;
-        }
-
-        //Выход в случае раннего опроса
-        ((Sensor*)sensor)->hum = instance->lastHum;
-        ((Sensor*)sensor)->temp = instance->lastTemp;
-        return UT_EARLYPOOL;
-    }
+UnitempStatus unitemp_singleWire_update(void* s) {
+    Sensor* sensor = (Sensor*)s;
+    SingleWireSensor* instance = sensor->instance;
 
     //Массив для приёма данных
     uint8_t data[5] = {0};
-
-    //Сохранение времени последнего опроса
-    instance->lastPollingTime = furi_get_tick();
 
     /* Запрос */
     //Опускание линии
@@ -112,9 +147,6 @@ UnitempStatus unitemp_oneWire_updateData(void* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
-            //Запись неправильных значений
-            instance->lastHum = -128.0f;
-            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -127,9 +159,6 @@ UnitempStatus unitemp_oneWire_updateData(void* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
-            //Запись неправильных значений
-            instance->lastHum = -128.0f;
-            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -141,9 +170,6 @@ UnitempStatus unitemp_oneWire_updateData(void* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
-            //Запись неправильных значений
-            instance->lastHum = -128.0f;
-            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -156,9 +182,6 @@ UnitempStatus unitemp_oneWire_updateData(void* sensor) {
         if(timeout > POLLING_TIMEOUT_TICKS) {
             //Включение прерываний
             __enable_irq();
-            //Запись неправильных значений
-            instance->lastHum = -128.0f;
-            instance->lastTemp = -128.0f;
             //Возврат признака отсутствующего датчика
             return UT_TIMEOUT;
         }
@@ -182,49 +205,42 @@ UnitempStatus unitemp_oneWire_updateData(void* sensor) {
 
     //Проверка контрольной суммы
     if((uint8_t)(data[0] + data[1] + data[2] + data[3]) != data[4]) {
-        //Запись неправильных значений
-        instance->lastHum = -128.0f;
-        instance->lastTemp = -128.0f;
         //Если контрольная сумма не совпала, возврат ошибки
         return UT_BADCRC;
     }
 
     /* Преобразование данных в явный вид */
     //DHT11 и DHT12
-    if(((Sensor*)sensor)->type == DHT11 || ((Sensor*)sensor)->type == DHT12_1W) {
-        instance->lastHum = (float)data[0];
-        instance->lastTemp = (float)data[2];
+    if(sensor->type == &DHT11 || sensor->type == &DHT12_SW) {
+        sensor->hum = (float)data[0];
+        sensor->temp = (float)data[2];
 
         //Проверка на отрицательность температуры
         if(data[3] != 0) {
             //Проверка знака
             if(!(data[3] & (1 << 7))) {
                 //Добавление положительной дробной части
-                instance->lastTemp += data[3] * 0.1f;
+                sensor->temp += data[3] * 0.1f;
             } else {
                 //А тут делаем отрицательное значение
                 data[3] &= ~(1 << 7);
-                instance->lastTemp += data[3] * 0.1f;
-                instance->lastTemp *= -1;
+                sensor->temp += data[3] * 0.1f;
+                sensor->temp *= -1;
             }
         }
     }
 
     //DHT21, DHT22, AM2320
-    if(((Sensor*)sensor)->type == DHT21 || ((Sensor*)sensor)->type == DHT22 ||
-       ((Sensor*)sensor)->type == AM2320_1W) {
-        instance->lastHum = (float)(((uint16_t)data[0] << 8) | data[1]) / 10;
+    if(sensor->type == &DHT21 || sensor->type == &DHT22 || sensor->type == &AM2320_SW) {
+        sensor->hum = (float)(((uint16_t)data[0] << 8) | data[1]) / 10;
         //Проверка на отрицательность температуры
         if(!(data[2] & (1 << 7))) {
-            instance->lastTemp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10;
+            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10;
         } else {
             data[2] &= ~(1 << 7);
-            instance->lastTemp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10 * -1;
+            sensor->temp = (float)(((uint16_t)data[2] << 8) | data[3]) / 10 * -1;
         }
     }
-
-    ((Sensor*)sensor)->hum = instance->lastHum;
-    ((Sensor*)sensor)->temp = instance->lastTemp;
     //Возврат признака успешного опроса
     return UT_OK;
 }
