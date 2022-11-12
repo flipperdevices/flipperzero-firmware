@@ -1,6 +1,6 @@
 name: Build FAP
 
-on: [push]
+on: [pull_request]
 
 jobs:
   build:
@@ -14,6 +14,6 @@ jobs:
         submodules: 'true'
         
     - name: Build
-      uses: oleksiikutuzov/flipperzero-ufbt-action@lint
+      uses: oleksiikutuzov/flipperzero-ufbt-action@v1
       with:
         fap-dir: flipperzero-lightmeter
