@@ -81,6 +81,7 @@ void furi_hal_usb_init(void) {
     NVIC_EnableIRQ(USB_HP_IRQn);
 
     usb.thread = furi_thread_alloc_ex("UsbDriver", 1024, furi_hal_usb_thread, NULL);
+    furi_thread_mark_as_service(usb.thread);
     furi_thread_start(usb.thread);
 
     FURI_LOG_I(TAG, "Init OK");
