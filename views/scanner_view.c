@@ -43,6 +43,6 @@ void draw_scanner_view(Canvas* canvas, i2cScanner* i2c_scanner) {
     canvas_draw_rbox(canvas, 45, 48, 45, 13, 3);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_icon(canvas, 50, 50, &I_Ok_btn_9x9);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 62, 50, AlignLeft, AlignTop, "Scan");
+    //canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 62, 51, AlignLeft, AlignTop, "Scan");
 }
