@@ -12,11 +12,12 @@ jobs:
       with:
         path: flipperzero-lightmeter
         submodules: 'true'
-
+        
     - name: Build
       uses: oleksiikutuzov/flipperzero-ufbt-action@lint
       with:
         fap-dir: flipperzero-lightmeter
+        channel: rc
         
   lint:
     runs-on: ubuntu-latest
@@ -27,9 +28,9 @@ jobs:
       with:
         path: flipperzero-lightmeter
         submodules: 'true'
-
-    - name: Build
+        
+    - name: Lint
       uses: oleksiikutuzov/flipperzero-ufbt-action@lint
       with:
         fap-dir: flipperzero-lightmeter
-        command: lint
+        lint: true
