@@ -1,9 +1,9 @@
-name: Build FAP
+name: Lint Code
 
 on: [pull_request]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -11,9 +11,11 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: flipperzero-lightmeter
-        submodules: 'true'
+        submodules: true
         
-    - name: Build
+    - name: Lint
       uses: oleksiikutuzov/flipperzero-ufbt-action@v1
       with:
         fap-dir: flipperzero-lightmeter
+        lint: true
+
