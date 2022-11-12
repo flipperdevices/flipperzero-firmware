@@ -6,10 +6,10 @@ void draw_scanner_view(Canvas* canvas, i2cScanner* i2c_scanner) {
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 3);
 
     char count_text[46];
-    char count_text_fmt[] = "Found: %d";
+    char count_text_fmt[] = "Peripherals Found: %d";
     canvas_set_font(canvas, FontSecondary);
     snprintf(count_text, sizeof(count_text), count_text_fmt, (int)i2c_scanner->nb_found);
-    canvas_draw_str_aligned(canvas, 50, 3, AlignLeft, AlignTop, count_text);
+    canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, count_text);
     uint8_t x_pos = 0;
     uint8_t y_pos = 0;
     uint8_t idx_to_print = 0;
@@ -20,7 +20,7 @@ void draw_scanner_view(Canvas* canvas, i2cScanner* i2c_scanner) {
         }
         snprintf(
             count_text, sizeof(count_text), "0x%02x ", (int)i2c_scanner->addresses[idx_to_print]);
-        const uint8_t x_start = 13;
+        const uint8_t x_start = 3;
         if(i < 4) {
             x_pos = x_start + (i * 26);
             y_pos = 15;

@@ -146,7 +146,9 @@ int32_t i2ctools_app(void* p) {
             }
         }
         // Long Down
-        else if(event.key == InputKeyDown && event.type == InputTypeLong) {
+        else if(
+            event.key == InputKeyDown &&
+            (event.type == InputTypeLong || event.type == InputTypeRepeat)) {
             if(i2ctools->main_view->current_view == SEND_VIEW) {
                 if(i2ctools->sender->value > 0x05) {
                     i2ctools->sender->value -= 5;
