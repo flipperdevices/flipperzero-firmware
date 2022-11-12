@@ -40,6 +40,10 @@ class Main(App):
         pattern = re.compile(SOURCE_CODE_DIR_PATTERN)
         for folder in folders:
             for dirpath, dirnames, filenames in os.walk(folder):
+                # Skipping 3rd-party code - usually resides in subfolder "lib"
+                if "lib" in dirnames:
+                    dirnames.remove("lib")
+
                 for dirname in dirnames:
                     if not pattern.match(dirname):
                         to_fix = os.path.join(dirpath, dirname)
