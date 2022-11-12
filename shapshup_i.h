@@ -34,24 +34,24 @@
 #include "scenes/shapshup_scene.h"
 #include "views/shapshup_main_view.h"
 
-#define shapshup_TEXT_STORE_SIZE 256
+#define SHAPSHUP_TEXT_STORE_SIZE 256
 
-#define shapshup_MAX_LEN_NAME 64
-#define shapshup_PATH EXT_PATH("subghz")
-#define shapshup_FILE_EXT ".sub"
+#define SHAPSHUP_MAX_LEN_NAME 64
+#define SHAPSHUP_PATH EXT_PATH("subghz")
+#define SHAPSHUP_FILE_EXT ".sub"
 
 typedef enum {
-    shapshupViewNone,
-    shapshupViewMain,
-    shapshupViewAttack,
-    shapshupViewTextInput,
-    shapshupViewDialogEx,
-    shapshupViewPopup,
-    shapshupViewWidget,
-    shapshupViewStack,
-} shapshupView;
+    ShapShupViewNone,
+    ShapShupViewMain,
+    ShapShupViewAttack,
+    ShapShupViewTextInput,
+    ShapShupViewDialogEx,
+    ShapShupViewPopup,
+    ShapShupViewWidget,
+    ShapShupViewStack,
+} ShapShupView;
 
-struct shapshupState {
+struct ShapShupState {
     // GUI elements
     NotificationApp* notifications;
     Gui* gui;
@@ -64,12 +64,12 @@ struct shapshupState {
     Loading* loading;
 
     // Other
-    char text_store[shapshup_MAX_LEN_NAME];
+    char text_store[SHAPSHUP_MAX_LEN_NAME];
     FuriString* file_path;
 
     // Views
-    shapshupMainView* view_main;
-    shapshupView current_view;
+    ShapShupMainView* view_main;
+    ShapShupView current_view;
 
     // Scene
     SceneManager* scene_manager;

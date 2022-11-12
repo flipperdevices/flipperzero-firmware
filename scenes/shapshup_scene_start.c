@@ -8,16 +8,16 @@
 void shapshup_scene_start_callback(shapshupCustomEvent event, void* context) {
     furi_assert(context);
 
-    shapshupState* instance = (shapshupState*)context;
+    ShapShupState* instance = (ShapShupState*)context;
     view_dispatcher_send_custom_event(instance->view_dispatcher, event);
 }
 
 void shapshup_scene_start_on_enter(void* context) {
     furi_assert(context);
 
-    shapshupState* instance = (shapshupState*)context;
-    shapshupMainView* view = instance->view_main;
-    instance->current_view = shapshupViewMain;
+    ShapShupState* instance = (ShapShupState*)context;
+    ShapShupMainView* view = instance->view_main;
+    instance->current_view = ShapShupViewMain;
     shapshup_main_view_set_callback(view, shapshup_scene_start_callback, instance);
     shapshup_main_view_set_index(view, 0);
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
@@ -28,7 +28,7 @@ void shapshup_scene_start_on_exit(void* context) {
 }
 
 bool shapshup_scene_start_on_event(void* context, SceneManagerEvent event) {
-    shapshupState* instance = (shapshupState*)context;
+    ShapShupState* instance = (ShapShupState*)context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {

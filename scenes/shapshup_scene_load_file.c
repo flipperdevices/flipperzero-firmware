@@ -6,17 +6,17 @@
 
 void shapshup_scene_load_file_on_enter(void* context) {
     furi_assert(context);
-    shapshupState* instance = (shapshupState*)context;
+    ShapShupState* instance = (ShapShupState*)context;
 
     // Input events and views are managed by file_browser
     FuriString* file_path;
     FuriString* app_folder;
 
     file_path = furi_string_alloc();
-    app_folder = furi_string_alloc_set_str(shapshup_PATH);
+    app_folder = furi_string_alloc_set_str(SHAPSHUP_PATH);
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, shapshup_FILE_EXT, &I_sub1_10px);
+    dialog_file_browser_set_basic_options(&browser_options, SHAPSHUP_FILE_EXT, &I_sub1_10px);
 
     uint8_t load_result = 255;
     bool res =

@@ -8,37 +8,41 @@
 #include <m-array.h>
 
 #define STATUS_BAR_Y_SHIFT 14
+#define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
 #define TAG "ShapShupMainView"
 
 typedef struct {
     FuriString* item_str;
     uint8_t type;
-} shapshupTextItem;
+} ShapShupTextItem;
 
-ARRAY_DEF(shapshupTextItemArray, shapshupTextItem, M_POD_OPLIST)
+ARRAY_DEF(ShapShupTextItemArray, ShapShupTextItem, M_POD_OPLIST)
 
-#define M_OPL_shapshupTextItemArray_t() ARRAY_OPLIST(shapshupTextItemArray, M_POD_OPLIST)
+#define M_OPL_ShapShupTextItemArray_t() ARRAY_OPLIST(ShapShupTextItemArray, M_POD_OPLIST)
 
-struct shapshupText {
-    shapshupTextItemArray_t data;
+struct ShapShupText {
+    ShapShupTextItemArray_t data;
 };
 
-typedef struct shapshupText shapshupText;
+typedef struct ShapShupText ShapShupText;
 
-struct shapshupMainView {
+struct ShapShupMainView {
     View* view;
-    shapshupMainViewCallback callback;
+    ShapShupMainViewCallback callback;
     void* context;
 };
 
 typedef struct {
     uint8_t index;
-    shapshupText* items;
-} shapshupMainViewModel;
+    ShapShupText* items;
+    bool rssi_history_end;
+    uint8_t offset;
+    uint8_t scale;
+} ShapShupMainViewModel;
 
 void shapshup_main_view_set_callback(
-    shapshupMainView* instance,
-    shapshupMainViewCallback callback,
+    ShapShupMainView* instance,
+    ShapShupMainViewCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -47,9 +51,9 @@ void shapshup_main_view_set_callback(
     instance->context = context;
 }
 
-void shapshup_main_view_draw(Canvas* canvas, shapshupMainViewModel* model) {
+void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model) {
     furi_assert(model);
-    shapshupMainViewModel* m = model;
+    ShapShupMainViewModel* m = model;
     furi_assert(m);
 
     // Title
@@ -59,13 +63,12 @@ void shapshup_main_view_draw(Canvas* canvas, shapshupMainViewModel* model) {
     canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "shapshup");
     canvas_invert_color(canvas);
 
-    size_t size = shapshupTextItemArray_size(m->items->data);
+    size_t size = ShapShupTextItemArray_size(m->items->data);
     const uint8_t line_height = 10;
 
     if(size > 0) {
         for(size_t item_position = 0; item_position < size; item_position++) {
-            shapshupTextItem* current =
-                shapshupTextItemArray_get(m->items->data, item_position);
+            ShapShupTextItem* current = ShapShupTextItemArray_get(m->items->data, item_position);
             canvas_draw_str_aligned(
                 canvas,
                 4,
@@ -89,11 +92,11 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
         return consumed;
     }
 
-    shapshupMainView* instance = context;
+    ShapShupMainView* instance = context;
     uint8_t index = 0;
 
     with_view_model(
-        instance->view, shapshupMainViewModel * model, { index = model->index; }, false);
+        instance->view, ShapShupMainViewModel * model, { index = model->index; }, false);
 
     furi_assert(index != 100);
     if((event->type == InputTypeShort) || (event->type == InputTypeRepeat)) {
@@ -101,12 +104,7 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
         FURI_LOG_D(TAG, "Index: %d", index);
 #endif
         with_view_model(
-            instance->view,
-            shapshupMainViewModel * model,
-            {
-                model->index = index;
-            },
-            true);
+            instance->view, ShapShupMainViewModel * model, { model->index = index; }, true);
 
         if(event->key == InputKeyOk && event->type == InputTypeShort) {
             if(instance->callback == NULL || instance->context == NULL) {
@@ -134,10 +132,10 @@ void shapshup_main_view_exit(void* context) {
     furi_assert(context);
 }
 
-shapshupMainView* shapshup_main_view_alloc() {
-    shapshupMainView* instance = malloc(sizeof(shapshupMainView));
+ShapShupMainView* shapshup_main_view_alloc() {
+    ShapShupMainView* instance = malloc(sizeof(ShapShupMainView));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(shapshupMainViewModel));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(ShapShupMainViewModel));
     view_set_context(instance->view, instance);
     view_set_draw_callback(instance->view, (ViewDrawCallback)shapshup_main_view_draw);
     view_set_input_callback(instance->view, shapshup_main_view_input);
@@ -146,30 +144,32 @@ shapshupMainView* shapshup_main_view_alloc() {
 
     with_view_model(
         instance->view,
-        shapshupMainViewModel * model,
+        ShapShupMainViewModel * model,
         {
             model->index = 0;
-            model->items = malloc(sizeof(shapshupText));
-            shapshupTextItemArray_init(model->items->data);
+            model->items = malloc(sizeof(ShapShupText));
+            model->offset = 0;
+            model->scale = 0;
+            ShapShupTextItemArray_init(model->items->data);
         },
         true);
 
     return instance;
 }
 
-void shapshup_main_view_free(shapshupMainView* instance) {
+void shapshup_main_view_free(ShapShupMainView* instance) {
     furi_assert(instance);
 
     with_view_model(
         instance->view,
-        shapshupMainViewModel * model,
+        ShapShupMainViewModel * model,
         {
                 for
-                    M_EACH(item_menu, model->items->data, shapshupTextItemArray_t) {
+                    M_EACH(item_menu, model->items->data, ShapShupTextItemArray_t) {
                         furi_string_free(item_menu->item_str);
                         item_menu->type = 0;
                     }
-                shapshupTextItemArray_clear(model->items->data);
+                ShapShupTextItemArray_clear(model->items->data);
                 free(model->items);
         },
         true);
@@ -178,24 +178,24 @@ void shapshup_main_view_free(shapshupMainView* instance) {
     free(instance);
 }
 
-View* shapshup_main_view_get_view(shapshupMainView* instance) {
+View* shapshup_main_view_get_view(ShapShupMainView* instance) {
     furi_assert(instance);
     return instance->view;
 }
 
-void shapshup_main_view_set_index(shapshupMainView* instance, uint8_t idx) {
+void shapshup_main_view_set_index(ShapShupMainView* instance, uint8_t idx) {
     furi_assert(instance);
     with_view_model(
-        instance->view, shapshupMainViewModel * model, { model->index = idx; }, true);
+        instance->view, ShapShupMainViewModel * model, { model->index = idx; }, true);
 }
 
-void shapshup_main_view_add_item(shapshupMainView* instance, const char* name, uint8_t type) {
+void shapshup_main_view_add_item(ShapShupMainView* instance, const char* name, uint8_t type) {
     furi_assert(instance);
     with_view_model(
         instance->view,
-        shapshupMainViewModel * model,
+        ShapShupMainViewModel * model,
         {
-            shapshupTextItem* item_menu = shapshupTextItemArray_push_raw(model->items->data);
+            ShapShupTextItem* item_menu = ShapShupTextItemArray_push_raw(model->items->data);
             item_menu->item_str = furi_string_alloc_printf("%s", name);
             item_menu->type = type;
             model->index++;
@@ -203,12 +203,36 @@ void shapshup_main_view_add_item(shapshupMainView* instance, const char* name, u
         true);
 }
 
-uint8_t shapshup_main_view_get_index(shapshupMainView* instance) {
+uint8_t shapshup_main_view_get_index(ShapShupMainView* instance) {
     furi_assert(instance);
 
     uint8_t idx = 0;
     with_view_model(
-        instance->view, shapshupMainViewModel * model, { idx = model->index; }, false);
+        instance->view, ShapShupMainViewModel * model, { idx = model->index; }, false);
 
     return idx;
+}
+
+void subghz_read_raw_draw_scale(Canvas* canvas, SubGhzReadRAWModel* model) {
+#define SUBGHZ_RAW_TOP_SCALE 14
+#define SUBGHZ_RAW_END_SCALE 115
+
+    if(model->rssi_history_end == false) {
+        for(int i = SUBGHZ_RAW_END_SCALE; i > 0; i -= 15) {
+            canvas_draw_line(canvas, i, SUBGHZ_RAW_TOP_SCALE, i, SUBGHZ_RAW_TOP_SCALE + 4);
+            canvas_draw_line(canvas, i - 5, SUBGHZ_RAW_TOP_SCALE, i - 5, SUBGHZ_RAW_TOP_SCALE + 2);
+            canvas_draw_line(
+                canvas, i - 10, SUBGHZ_RAW_TOP_SCALE, i - 10, SUBGHZ_RAW_TOP_SCALE + 2);
+        }
+    } else {
+        for(int i = SUBGHZ_RAW_END_SCALE - model->ind_write % 15; i > -15; i -= 15) {
+            canvas_draw_line(canvas, i, SUBGHZ_RAW_TOP_SCALE, i, SUBGHZ_RAW_TOP_SCALE + 4);
+            if(SUBGHZ_RAW_END_SCALE > i + 5)
+                canvas_draw_line(
+                    canvas, i + 5, SUBGHZ_RAW_TOP_SCALE, i + 5, SUBGHZ_RAW_TOP_SCALE + 2);
+            if(SUBGHZ_RAW_END_SCALE > i + 10)
+                canvas_draw_line(
+                    canvas, i + 10, SUBGHZ_RAW_TOP_SCALE, i + 10, SUBGHZ_RAW_TOP_SCALE + 2);
+        }
+    }
 }

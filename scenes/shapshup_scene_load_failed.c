@@ -3,7 +3,7 @@
 
 void shapshup_scene_save_success_on_enter(void* context) {
     furi_assert(context);
-    shapshupState* instance = context;
+    ShapShupState* instance = context;
 
     // Setup view
     Popup* popup = instance->popup;
@@ -13,14 +13,14 @@ void shapshup_scene_save_success_on_enter(void* context) {
     popup_set_context(popup, instance);
     popup_set_callback(popup, shapshup_popup_closed_callback);
     popup_enable_timeout(popup);
-    view_dispatcher_switch_to_view(instance->view_dispatcher, shapshupViewPopup);
+    view_dispatcher_switch_to_view(instance->view_dispatcher, ShapShupViewPopup);
 }
 
 bool shapshup_scene_save_success_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
 
-    shapshupState* instance = (shapshupState*)context;
-    //shapshupMainView* view = instance->view_main;
+    ShapShupState* instance = (ShapShupState*)context;
+    //ShapShupMainView* view = instance->view_main;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == shapshupCustomEventTypePopupClosed) {
@@ -37,7 +37,7 @@ bool shapshup_scene_save_success_on_event(void* context, SceneManagerEvent event
 void shapshup_scene_save_success_on_exit(void* context) {
     furi_assert(context);
 
-    shapshupState* instance = (shapshupState*)context;
+    ShapShupState* instance = (ShapShupState*)context;
 
     // Clear view
     Popup* popup = instance->popup;
