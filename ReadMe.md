@@ -1,4 +1,5 @@
-# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) with API v8.x
+# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) with API v7.x
+## Also apps from pack should be compatible with OFW with API v7.x (dev branch)
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -37,13 +38,15 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina)
+- [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - Music Beeper (By qqMajiKpp / Haseo)
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
 - [Wifi Deauth v2 for ESP8266 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
-- [Lightmeter plugin based on BH1750 sensor (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter)
+- [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
+- [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
