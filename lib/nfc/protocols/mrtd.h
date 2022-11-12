@@ -23,7 +23,22 @@ bool mrtd_select_app(MrtdApplication* app, AIDValue aid);
 bool mrtd_authenticate(MrtdApplication* app);
 bool mrtd_read_parse_file(MrtdApplication* app, EFFile file);
 
-bool mrtd_auth_params_save(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name);
-bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name, const char* folder, const char* extension);
+bool mrtd_auth_params_save(
+    Storage* storage,
+    DialogsApp* dialogs,
+    MrtdAuthData* auth_data,
+    const char* file_name);
+bool mrtd_auth_params_save_file(
+    Storage* storage,
+    DialogsApp* dialogs,
+    MrtdAuthData* auth_data,
+    const char* file_name,
+    const char* folder,
+    const char* extension);
 
-bool mrtd_auth_params_load(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_path, bool show_dialog);
+bool mrtd_auth_params_load(
+    Storage* storage,
+    DialogsApp* dialogs,
+    MrtdAuthData* auth_data,
+    const char* file_path,
+    bool show_dialog);

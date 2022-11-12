@@ -584,18 +584,18 @@ bool mrtd_authenticate(MrtdApplication* app) {
     app->mrtd_data->auth_method_used = MrtdAuthMethodNone;
     FURI_LOG_D(TAG, "Auth method: %d", method);
     switch(method) {
-        case MrtdAuthMethodAny:
-            //TODO: try PACE, then BAC. For now, fall through to just BAC
-        case MrtdAuthMethodBac:
-            app->mrtd_data->auth_success = mrtd_bac(app, &app->mrtd_data->auth);
-            app->mrtd_data->auth_method_used = MrtdAuthMethodBac;
-            break;
-        case MrtdAuthMethodPace:
-            FURI_LOG_E(TAG, "Auth method PACE not implemented");
-            break;
-        case MrtdAuthMethodNone:
-        default:
-            break;
+    case MrtdAuthMethodAny:
+        //TODO: try PACE, then BAC. For now, fall through to just BAC
+    case MrtdAuthMethodBac:
+        app->mrtd_data->auth_success = mrtd_bac(app, &app->mrtd_data->auth);
+        app->mrtd_data->auth_method_used = MrtdAuthMethodBac;
+        break;
+    case MrtdAuthMethodPace:
+        FURI_LOG_E(TAG, "Auth method PACE not implemented");
+        break;
+    case MrtdAuthMethodNone:
+    default:
+        break;
     }
 
     if(!app->mrtd_data->auth_success) {
@@ -605,16 +605,17 @@ bool mrtd_authenticate(MrtdApplication* app) {
     return true;
 }
 
-bool mrtd_auth_params_save(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name) {
-    return mrtd_auth_params_save_file(storage, dialogs, auth_data, file_name, MRTD_APP_FOLDER, MRTD_APP_EXTENSION);
+bool mrtd_auth_params_save(
+    Storage* storage,
+    DialogsApp* dialogs,
+    MrtdAuthData* auth_data,
+    const char* file_name) {
+    return mrtd_auth_params_save_file(
+        storage, dialogs, auth_data, file_name, MRTD_APP_FOLDER, MRTD_APP_EXTENSION);
 }
 
 void mrtd_date_prepare_format_string(MrtdDate date, FuriString* format_string) {
-    furi_string_printf(
-        format_string, "%02u%02u%02u",
-        date.year,
-        date.month,
-        date.day);
+    furi_string_printf(format_string, "%02u%02u%02u", date.year, date.month, date.day);
 }
 
 bool mrtd_date_parse_format_string(MrtdDate* date, FuriString* format_string) {
@@ -633,7 +634,13 @@ bool mrtd_date_parse_format_string(MrtdDate* date, FuriString* format_string) {
     return true;
 }
 
-bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_name, const char* folder, const char* extension) {
+bool mrtd_auth_params_save_file(
+    Storage* storage,
+    DialogsApp* dialogs,
+    MrtdAuthData* auth_data,
+    const char* file_name,
+    const char* folder,
+    const char* extension) {
     furi_assert(auth_data);
 
     bool saved = false;
@@ -646,11 +653,12 @@ bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthD
         if(!storage_simply_mkdir(storage, MRTD_APP_FOLDER)) break;
 
         furi_string_printf(temp_str, "%s/%s%s", folder, file_name, extension);
- 
+
         // Open file
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
         // Write header
-        if(!flipper_format_write_header_cstr(file, mrtd_auth_file_header, mrtd_auth_file_version)) break;
+        if(!flipper_format_write_header_cstr(file, mrtd_auth_file_header, mrtd_auth_file_version))
+            break;
 
         // Write auth method
         furi_string_set(temp_str, mrtd_auth_method_string(auth_data->method));
@@ -679,7 +687,12 @@ bool mrtd_auth_params_save_file(Storage* storage, DialogsApp* dialogs, MrtdAuthD
     return saved;
 }
 
-bool mrtd_auth_params_load(Storage* storage, DialogsApp* dialogs, MrtdAuthData* auth_data, const char* file_path, bool show_dialog) {
+bool mrtd_auth_params_load(
+    Storage* storage,
+    DialogsApp* dialogs,
+    MrtdAuthData* auth_data,
+    const char* file_path,
+    bool show_dialog) {
     furi_assert(storage);
     furi_assert(dialogs);
     furi_assert(auth_data);
@@ -702,7 +715,8 @@ bool mrtd_auth_params_load(Storage* storage, DialogsApp* dialogs, MrtdAuthData* 
         uint32_t version = 0;
         if(!flipper_format_read_header(file, temp_str, &version)) break;
         FURI_LOG_D(TAG, "Version: %s", furi_string_get_cstr(temp_str));
-        if(furi_string_cmp_str(temp_str, mrtd_auth_file_header) || (version != mrtd_auth_file_version)) {
+        if(furi_string_cmp_str(temp_str, mrtd_auth_file_header) ||
+           (version != mrtd_auth_file_version)) {
             deprecated_version = true;
             break;
         }
@@ -737,7 +751,7 @@ bool mrtd_auth_params_load(Storage* storage, DialogsApp* dialogs, MrtdAuthData* 
             dialog_message_show_storage_error(dialogs, "Can not parse\nfile");
         }
     }
-    
+
     furi_string_free(temp_str);
     flipper_format_free(file);
     return parsed;

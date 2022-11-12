@@ -468,8 +468,7 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
                         FURI_LOG_E(
                             WORKER_TAG, "Forbidden empty line at line %u", bad_usb->st.line_cur);
                     } else {
-                        FURI_LOG_E(
-                            WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
+                        FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
                     }
                     return SCRIPT_STATE_ERROR;
                 } else {

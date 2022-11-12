@@ -92,9 +92,11 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == NfcWorkerEventReadPassport) {
             notification_message(nfc->notifications, &sequence_success);
-            FURI_LOG_D("NFC", "Read passport, auth: %d, success: %d",
-                    nfc->dev->dev_data.mrtd_data.auth.method,
-                    nfc->dev->dev_data.mrtd_data.auth_success);
+            FURI_LOG_D(
+                "NFC",
+                "Read passport, auth: %d, success: %d",
+                nfc->dev->dev_data.mrtd_data.auth.method,
+                nfc->dev->dev_data.mrtd_data.auth_success);
             if(nfc->dev->dev_data.mrtd_data.auth_success) {
                 scene_manager_next_scene(nfc->scene_manager, NfcScenePassportReadAuthSuccess);
             } else {

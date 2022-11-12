@@ -43,20 +43,22 @@ bool nfc_scene_passport_auth_load(Nfc* nfc) {
     FuriString* file_path;
     file_path = furi_string_alloc();
 
-    bool res = dialog_file_browser_show(nfc->dev->dialogs, file_path, mrtd_app_folder, &browser_options);
+    bool res =
+        dialog_file_browser_show(nfc->dev->dialogs, file_path, mrtd_app_folder, &browser_options);
 
     furi_string_free(mrtd_app_folder);
 
     if(res) {
         mrtd_auth_params_load(
-                nfc->dev->storage,
-                nfc->dev->dialogs,
-                &nfc->dev->dev_data.mrtd_data.auth,
-                furi_string_get_cstr(file_path),
-                true);
+            nfc->dev->storage,
+            nfc->dev->dialogs,
+            &nfc->dev->dev_data.mrtd_data.auth,
+            furi_string_get_cstr(file_path),
+            true);
 
         nfc_scene_passport_auth_on_enter(nfc);
-        variable_item_list_set_selected_item(nfc->variable_item_list, NfcScenePassportAuthSelectAuth);
+        variable_item_list_set_selected_item(
+            nfc->variable_item_list, NfcScenePassportAuthSelectAuth);
     }
 
     return res;

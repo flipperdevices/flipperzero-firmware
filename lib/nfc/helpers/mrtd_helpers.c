@@ -13,16 +13,16 @@ static inline unsigned char* ucstr(const char* str) {
 
 const char* mrtd_auth_method_string(MrtdAuthMethod method) {
     switch(method) {
-        case MrtdAuthMethodBac:
-            return "BAC";
-        case MrtdAuthMethodPace:
-            return "PACE";
-        case MrtdAuthMethodNone:
-            return "None";
-        case MrtdAuthMethodAny:
-            return "Any";
-        default:
-            return "Unknown";
+    case MrtdAuthMethodBac:
+        return "BAC";
+    case MrtdAuthMethodPace:
+        return "PACE";
+    case MrtdAuthMethodNone:
+        return "None";
+    case MrtdAuthMethodAny:
+        return "Any";
+    default:
+        return "Unknown";
     }
 }
 
@@ -45,7 +45,6 @@ bool mrtd_auth_method_parse_string(MrtdAuthMethod* method, const char* str) {
     }
     return false;
 }
-
 
 uint8_t mrtd_bac_check_digit(const char* input, const uint8_t length) {
     const uint8_t num_weights = 3;

@@ -74,10 +74,10 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
             strcpy(result, tmpType);
             strcat(result, furi_string_get_cstr(selected->path));
             status = loader_start(loader, "Applications", result);
-        // } else if(strcmp(flipper_app_name[selected->type], "125 kHz RFID") == 0) {
+            // } else if(strcmp(flipper_app_name[selected->type], "125 kHz RFID") == 0) {
             // char* tmpType = "/ext/apps/Main/lfrfid.fap¯";
             // char* result =
-                // malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+            // malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
 
             // strcpy(result, tmpType);
             // strcat(result, furi_string_get_cstr(selected->path));

@@ -41,8 +41,8 @@ void nfc_scene_passport_auth_save_name_on_enter(void* context) {
         furi_string_set(folder_path, NFC_APP_FOLDER);
     }
 
-    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        furi_string_get_cstr(folder_path), NFC_APP_EXTENSION, NULL);
+    ValidatorIsFile* validator_is_file =
+        validator_is_file_alloc_init(furi_string_get_cstr(folder_path), NFC_APP_EXTENSION, NULL);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextInput);
@@ -57,7 +57,8 @@ bool nfc_scene_passport_auth_save_name_on_event(void* context, SceneManagerEvent
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventTextInputDone) {
-            if(mrtd_auth_params_save(nfc->dev->storage, nfc->dev->dialogs, &mrtd_data->auth, nfc->text_store)) {
+            if(mrtd_auth_params_save(
+                   nfc->dev->storage, nfc->dev->dialogs, &mrtd_data->auth, nfc->text_store)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
                 consumed = true;
             } else {

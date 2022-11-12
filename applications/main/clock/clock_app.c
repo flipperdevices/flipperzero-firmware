@@ -302,24 +302,11 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
             // int32_t elapsed_secs_img3 = (elapsed_secs % 60) % 4;
             static const Icon* const count_anim[5] = {
-                &I_HappyFlipper_128x64,
-                &I_G0ku,
-                &I_g0ku_1,
-                &I_g0ku_2,
-                &I_g0ku_3
-            };
+                &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
             static const Icon* const count_anim2[4] = {
-                &I_EviWaiting1_18x21,
-                &I_EviWaiting2_18x21,
-                &I_EviSmile1_18x21,
-                &I_EviSmile2_18x21
-            };
+                &I_EviWaiting1_18x21, &I_EviWaiting2_18x21, &I_EviSmile1_18x21, &I_EviSmile2_18x21};
             static const Icon* const count_anim3[4] = {
-                &I_frame_01,
-                &I_frame_02,
-                &I_frame_03,
-                &I_frame_02
-            };
+                &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
             canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
             canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
             canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
