@@ -14,10 +14,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-        path: flipperzero-lightmeter
         submodules: 'true'
         
     - name: Build
       uses: oleksiikutuzov/flipperzero-ufbt-action@v1
-      with:
-        fap-dir: flipperzero-lightmeter
