@@ -6,7 +6,6 @@ void draw_main_view(Canvas* canvas, i2cMainView* main_view) {
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 3);
     canvas_draw_icon(canvas, 2, 2, &I_i2ctools_main_76x59);
     canvas_set_font(canvas, FontPrimary);
-    //canvas_draw_str_aligned(canvas, 3, 3, AlignLeft, AlignTop, APP_NAME);
 
     switch(main_view->menu_index) {
     case SCAN_VIEW:
