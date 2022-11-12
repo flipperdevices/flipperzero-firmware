@@ -1,4 +1,4 @@
-name: Build and lint FAP
+name: Build FAP
 
 on: [push]
 
@@ -17,20 +17,3 @@ jobs:
       uses: oleksiikutuzov/flipperzero-ufbt-action@lint
       with:
         fap-dir: flipperzero-lightmeter
-        channel: rc
-        
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        path: flipperzero-lightmeter
-        submodules: 'true'
-        
-    - name: Lint
-      uses: oleksiikutuzov/flipperzero-ufbt-action@lint
-      with:
-        fap-dir: flipperzero-lightmeter
-        lint: true
