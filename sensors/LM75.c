@@ -33,9 +33,10 @@ bool unitemp_LM75_alloc(void* s, uint16_t* anotherValues) {
     i2c_sensor->maxI2CAdr = 0b1001111;
     return true;
 }
-void unitemp_LM75_free(void* s) {
+bool unitemp_LM75_free(void* s) {
     //Нечего высвобождать, так как ничего не было выделено
     UNUSED(s);
+    return true;
 }
 
 bool unitemp_LM75_init(void* s) {

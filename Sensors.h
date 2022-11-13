@@ -36,7 +36,7 @@ typedef bool(SensorAllocator)(void* sensor, uint16_t* anotherValues);
 /**
  * @brief Указатель на функцию высвобождении памяти датчика
  */
-typedef void(SensorFree)(void* sensor);
+typedef bool(SensorFree)(void* sensor);
 /**
  * @brief Указатель функции инициализации датчика
  */

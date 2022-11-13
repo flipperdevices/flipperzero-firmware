@@ -34,7 +34,8 @@ const GPIO GPIOList[] = {
     {17, "17 (1W)", &ibutton_gpio}};
 
 //Перечень датчиков
-static const SensorType* sensorTypes[] = {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75};
+static const SensorType* sensorTypes[] =
+    {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280};
 
 const SensorType* unitemp_getTypeFromInt(int type) {
     if(type > SENSOR_TYPES_COUNT) return NULL;
@@ -267,13 +268,19 @@ void unitemp_sensor_free(Sensor* sensor) {
         FURI_LOG_E(APP_NAME, "Sensor releaser is null");
         return;
     }
+    bool status = false;
     //Высвобождение памяти под инстанс
     if(sensor->type->interface == SINGLE_WIRE) {
-        sensor->type->mem_releaser(sensor);
+        status = sensor->type->mem_releaser(sensor);
     }
 
     if(sensor->type->interface == I2C) {
-        unitemp_I2C_sensorFree(sensor);
+        status = unitemp_I2C_sensorFree(sensor);
+    }
+    if(status) {
+        FURI_LOG_D(APP_NAME, "Sensor %s memory successfully released", sensor->name);
+    } else {
+        FURI_LOG_E(APP_NAME, "Sensor %s memory is not released", sensor->name);
     }
     free(sensor->name);
     free(sensor);
@@ -348,7 +355,13 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         furi_hal_power_enable_otg();
     }
 
-    sensor->status = sensor->type->updater(sensor);
+    if(sensor->type->interface == I2C) {
+        sensor->status = unitemp_I2C_sensor_update(sensor);
+    }
+    if(sensor->type->interface == SINGLE_WIRE) {
+        sensor->status = sensor->type->updater(sensor);
+    }
+
     FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
     if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
         uintemp_celsiumToFarengate(sensor);

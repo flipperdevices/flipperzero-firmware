@@ -41,6 +41,6 @@ UnitempStatus unitemp_LM75_update(void* s);
  *
  * @param sensor Указатель на датчик (тип Sensor)
  */
-void unitemp_LM75_free(void* sensor);
+bool unitemp_LM75_free(void* sensor);
 
 #endif

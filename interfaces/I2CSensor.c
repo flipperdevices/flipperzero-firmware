@@ -50,6 +50,16 @@ bool unitemp_I2C_sensorAlloc(void* s, uint16_t* anotherValues) {
     return status;
 }
 
-void unitemp_I2C_sensorFree(Sensor* sensor) {
+bool unitemp_I2C_sensorFree(Sensor* sensor) {
+    bool status = sensor->type->mem_releaser(sensor);
     free(sensor->instance);
+    return status;
+}
+
+UnitempStatus unitemp_I2C_sensor_update(void* s) {
+    Sensor* sensor = (Sensor*)s;
+    if(sensor->status != UT_OK) {
+        sensor->type->initializer(sensor);
+    }
+    return sensor->type->updater(sensor);
 }

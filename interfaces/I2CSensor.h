@@ -33,7 +33,15 @@ bool unitemp_I2C_sensorAlloc(void* s, uint16_t* anotherValues);
  * 
  * @param sensor Указатель на датчик
  */
-void unitemp_I2C_sensorFree(Sensor* sensor);
+bool unitemp_I2C_sensorFree(Sensor* sensor);
+
+/**
+ * @brief Обновить значение с датчка
+ * 
+ * @param sensor Указатель на датчик (тип Sensor)
+ * @return Статус обновления
+ */
+UnitempStatus unitemp_I2C_sensor_update(void* sensor);
 /**
  * @brief Прочитать значение регистра reg
  *

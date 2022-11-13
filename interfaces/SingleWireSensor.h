@@ -70,5 +70,5 @@ bool unitemp_singleWire_alloc(void* sensor, uint16_t* anotherValues);
  * 
  * @param sensor Указатель на датчик
  */
-void unitemp_singleWire_free(void* sensor);
+bool unitemp_singleWire_free(void* sensor);
 #endif

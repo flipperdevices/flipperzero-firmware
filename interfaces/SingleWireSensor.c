@@ -71,10 +71,11 @@ bool unitemp_singleWire_alloc(void* s, uint16_t* anotherValues) {
     free(instance);
     return false;
 }
-void unitemp_singleWire_free(void* s) {
+bool unitemp_singleWire_free(void* s) {
     Sensor* sensor = (Sensor*)s;
     free(sensor->instance);
-    FURI_LOG_D(APP_NAME, "Sensor %s memory successfully released", sensor->name);
+
+    return true;
 }
 
 bool unitemp_singleWire_init(void* sensor) {
