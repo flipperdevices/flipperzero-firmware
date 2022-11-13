@@ -590,6 +590,19 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
             }
             consumed = true;
         }
+    } else if(event->key == InputKeyBack) {
+        if(event->type == InputTypeShort) {
+            bool is_root = false;
+            with_view_model(
+                browser->view, FileBrowserModel * model, { is_root = model->is_root; }, false);
+
+            if(!is_root && !file_browser_worker_is_in_start_folder(browser->worker)) {
+                consumed = true;
+                if(!is_root) {
+                    file_browser_worker_folder_exit(browser->worker);
+                }
+            }
+        }
     }
 
     return consumed;
