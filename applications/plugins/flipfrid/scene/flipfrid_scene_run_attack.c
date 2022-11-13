@@ -94,8 +94,11 @@ void flipfrid_scene_run_attack_on_enter(FlipFridState* context) {
 }
 
 void flipfrid_scene_run_attack_on_exit(FlipFridState* context) {
-    lfrfid_worker_stop(context->worker);
-    lfrfid_worker_stop_thread(context->worker);
+    if(context->workr_rund) {
+        lfrfid_worker_stop(context->worker);
+        lfrfid_worker_stop_thread(context->worker);
+        context->workr_rund = false;
+    }
     lfrfid_worker_free(context->worker);
     protocol_dict_free(context->dict);
     notification_message(context->notify, &sequence_blink_stop);
@@ -109,9 +112,13 @@ void flipfrid_scene_run_attack_on_tick(FlipFridState* context) {
             context->worker = lfrfid_worker_alloc(context->dict);
             lfrfid_worker_start_thread(context->worker);
             lfrfid_worker_emulate_start(context->worker, context->protocol);
+            context->workr_rund = true;
         } else if(0 == counter) {
-            lfrfid_worker_stop(context->worker);
-            lfrfid_worker_stop_thread(context->worker);
+            if(context->workr_rund) {
+                lfrfid_worker_stop(context->worker);
+                lfrfid_worker_stop_thread(context->worker);
+                context->workr_rund = false;
+            }
             switch(context->attack) {
             case FlipFridAttackDefaultValues:
                 if(context->proto == EM4100) {
@@ -517,7 +524,7 @@ void flipfrid_scene_run_attack_on_event(FlipFridEvent event, FlipFridState* cont
                 break;
             case InputKeyRight:
                 if(!context->is_attacking) {
-                    if(context->time_between_cards < 60) {
+                    if(context->time_between_cards < 70) {
                         context->time_between_cards++;
                     }
                 }
@@ -547,6 +554,26 @@ void flipfrid_scene_run_attack_on_event(FlipFridEvent event, FlipFridState* cont
                 furi_string_reset(context->notification_msg);
                 notification_message(context->notify, &sequence_blink_stop);
                 context->current_scene = SceneEntryPoint;
+                break;
+            default:
+                break;
+            }
+        }
+        if(event.input_type == InputTypeLong) {
+            switch(event.key) {
+            case InputKeyLeft:
+                if(!context->is_attacking) {
+                    if(context->time_between_cards > 0) {
+                        context->time_between_cards -= 10;
+                    }
+                }
+                break;
+            case InputKeyRight:
+                if(!context->is_attacking) {
+                    if(context->time_between_cards < 70) {
+                        context->time_between_cards += 10;
+                    }
+                }
                 break;
             default:
                 break;
