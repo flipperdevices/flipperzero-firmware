@@ -12,16 +12,6 @@ typedef enum {
     UT_ERROR, //Прочие ошибки
 } UnitempStatus;
 
-//Типы подключения датчиков
-typedef enum Interface {
-    SINGLE_WIRE, //Собственный однопроводной протокол датчиков DHTXX и AM23XX
-    ONE_WIRE, //Однопроводной протокол Dallas
-    I2C,
-    SPI,
-
-    CONNECTION_TYPES_COUNT //Общее количество типов подключений
-} Interface;
-
 //Порт ввода/вывода Flipper Zero
 typedef struct GPIO {
     const uint8_t num;
@@ -50,12 +40,22 @@ typedef bool(SensorDeinitializer)(void* sensor);
  */
 typedef UnitempStatus(SensorUpdater)(void* sensor);
 
+//Типы подключения датчиков
+typedef struct Interface {
+    const char* name;
+    SensorAllocator* allocator;
+    //Функция высвыбождения памяти для датчика
+    SensorFree* mem_releaser;
+    //Функция обновления значения датчка
+    SensorUpdater* updater;
+} Interface;
+
 //Типы датчиков
 typedef struct {
     //Имя типа датчика
-    char* typename;
+    const char* typename;
     //Интерфейс подключения
-    Interface interface;
+    const Interface* interface;
     //Интервал опроса датчика
     uint16_t pollingInterval;
     //Функция выделения памяти для датчика
@@ -89,6 +89,11 @@ typedef struct Sensor {
     void* instance;
 
 } Sensor;
+
+extern const Interface SINGLE_WIRE; //Собственный однопроводной протокол датчиков DHTXX и AM23XX
+//extern const Interface ONE_WIRE; //Однопроводной протокол Dallas
+extern const Interface I2C; //I2C_2 (PC0, PC1)
+//extern const Interface SPI;
 
 /**
  * @brief Конвертация номера порта на корпусе FZ в GPIO 

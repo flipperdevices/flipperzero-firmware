@@ -15,7 +15,7 @@
 
 const SensorType LM75 = {
     .typename = "LM75",
-    .interface = I2C,
+    .interface = &I2C,
     .pollingInterval = 500,
     .allocator = unitemp_LM75_alloc,
     .mem_releaser = unitemp_LM75_free,

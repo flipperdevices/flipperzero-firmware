@@ -13,12 +13,13 @@ const GpioPin RX_14 = {.pin = LL_GPIO_PIN_7, .port = GPIOB};
 
 //Количество доступных портов ввода/вывода
 #define GPIO_ITEMS (sizeof(GPIOList) / sizeof(GPIO))
+//Количество интерфейсов
+#define INTERFACES_TYPES_COUNT (int)(sizeof(interfaces) / sizeof(const Interface*))
 //Количество типов датчиков
 #define SENSOR_TYPES_COUNT (int)(sizeof(sensorTypes) / sizeof(const SensorType*))
 
 //Перечень достуных портов ввода/вывода
-//static
-const GPIO GPIOList[] = {
+static const GPIO GPIOList[] = {
     {2, "2 (A7)", &gpio_ext_pa7},
     {3, "3 (A6)", &gpio_ext_pa6},
     {4, "4 (A4)", &gpio_ext_pa4},
@@ -33,6 +34,19 @@ const GPIO GPIOList[] = {
     {16, "16 (C0)", &gpio_ext_pc0},
     {17, "17 (1W)", &ibutton_gpio}};
 
+const Interface SINGLE_WIRE = {
+    .name = "Single wire",
+    .allocator = unitemp_singleWire_alloc,
+    .mem_releaser = unitemp_singleWire_free,
+    .updater = unitemp_singleWire_update};
+const Interface I2C = {
+    .name = "I2C",
+    .allocator = unitemp_I2C_sensor_alloc,
+    .mem_releaser = unitemp_I2C_sensor_free,
+    .updater = unitemp_I2C_sensor_update};
+
+//Перечень интерфейсов подключения
+//static const Interface* interfaces[] = {&SINGLE_WIRE, &I2C};
 //Перечень датчиков
 static const SensorType* sensorTypes[] =
     {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280};
@@ -189,13 +203,21 @@ bool unitemp_sensors_save(void) {
 
     //Сохранение датчиков
     for(size_t i = 0; i < app->sensors_count; i++) {
-        if(app->sensors[i]->type->interface == SINGLE_WIRE) {
+        if(app->sensors[i]->type->interface == &SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
                 "%s %d %d\n",
                 app->sensors[i]->name,
                 unitemp_getIntFromType(app->sensors[i]->type),
                 unitemp_GPIO_toInt(unitemp_singleWire_sensorGetGPIO(app->sensors[i])->pin));
+        }
+        if(app->sensors[i]->type->interface == &I2C) {
+            stream_write_format(
+                app->file_stream,
+                "%s %d %d\n",
+                app->sensors[i]->name,
+                unitemp_getIntFromType(app->sensors[i]->type),
+                ((I2CSensor*)app->sensors[i]->instance)->currentI2CAdr);
         }
     }
 
@@ -236,12 +258,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint16_t* anoth
     sensor->hum = -128.0f;
 
     //Выделение памяти под инстанс датчика в зависимости от его интерфейса
-    if(sensor->type->interface == SINGLE_WIRE) {
-        status = sensor->type->allocator(sensor, anotherValues);
-    }
-    if(sensor->type->interface == I2C) {
-        status = unitemp_I2C_sensorAlloc(sensor, anotherValues);
-    }
+    status = sensor->type->interface->allocator(sensor, anotherValues);
 
     //Если датчик успешно развёрнут, то добавление его в общий список и выход
     if(status) {
@@ -270,13 +287,7 @@ void unitemp_sensor_free(Sensor* sensor) {
     }
     bool status = false;
     //Высвобождение памяти под инстанс
-    if(sensor->type->interface == SINGLE_WIRE) {
-        status = sensor->type->mem_releaser(sensor);
-    }
-
-    if(sensor->type->interface == I2C) {
-        status = unitemp_I2C_sensorFree(sensor);
-    }
+    status = sensor->type->interface->mem_releaser(sensor);
     if(status) {
         FURI_LOG_D(APP_NAME, "Sensor %s memory successfully released", sensor->name);
     } else {
@@ -355,12 +366,7 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         furi_hal_power_enable_otg();
     }
 
-    if(sensor->type->interface == I2C) {
-        sensor->status = unitemp_I2C_sensor_update(sensor);
-    }
-    if(sensor->type->interface == SINGLE_WIRE) {
-        sensor->status = sensor->type->updater(sensor);
-    }
+    sensor->status = sensor->type->interface->updater(sensor);
 
     FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
     if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
