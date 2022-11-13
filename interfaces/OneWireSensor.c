@@ -137,6 +137,8 @@ bool unitemp_OneWire_init(void* s) {
         GpioPullUp, //Принудительная подтяжка линии данных к питанию
         GpioSpeedVeryHigh); //Скорость работы - максимальная
 
+    if(!oneWire_start(instance)) return false;
+
     //TODO: настройка разрядности преобразования
     return true;
 }
@@ -158,18 +160,18 @@ bool unitemp_OneWire_deinit(void* s) {
 UnitempStatus unitemp_OneWire_update(void* s) {
     Sensor* sensor = (Sensor*)s;
     OneWireSensor* instance = ((Sensor*)s)->instance;
-    oneWire_start(instance);
-    oneWire_write(instance, 0xCC); // skip ROM
-    oneWire_write(instance, 0x44); // convert t
-    furi_delay_ms(800);
-
-    oneWire_start(instance);
-    oneWire_write(instance, 0xCC); // skip ROM
-    oneWire_write(instance, 0xBE); // Read Scratch-pad
-    uint8_t Temp_byte1 = oneWire_read(instance);
-    uint8_t Temp_byte2 = oneWire_read(instance);
-    uint16_t TEMP = ((uint16_t)Temp_byte2 << 8) | Temp_byte1;
-    sensor->temp = (float)TEMP / 16;
+    if(sensor->status != UT_POLLING) {
+        if(!oneWire_start(instance)) return UT_TIMEOUT;
+        oneWire_write(instance, 0xCC); // skip ROM
+        oneWire_write(instance, 0x44); // convert t
+        return UT_POLLING;
+    } else {
+        if(!oneWire_start(instance)) return UT_TIMEOUT;
+        oneWire_write(instance, 0xCC); // skip ROM
+        oneWire_write(instance, 0xBE); // Read Scratch-pad
+        int16_t raw = oneWire_read(instance) | ((int16_t)oneWire_read(instance) << 8);
+        sensor->temp = (float)raw / 16.0f;
+    }
 
     return UT_OK;
 }

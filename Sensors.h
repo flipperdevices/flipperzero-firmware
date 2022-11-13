@@ -10,6 +10,7 @@ typedef enum {
     UT_EARLYPOOL, //Опрос раньше положенной задержки
     UT_BADCRC, //Неверная контрольная сумма
     UT_ERROR, //Прочие ошибки
+    UT_POLLING, //В датчике происходит преобразование
 } UnitempStatus;
 
 //Порт ввода/вывода Flipper Zero
