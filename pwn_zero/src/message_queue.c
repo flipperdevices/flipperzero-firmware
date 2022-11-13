@@ -55,7 +55,11 @@ void message_queue_wipe(MessageQueue* queue) {
 
 bool message_queue_validate(MessageQueue* queue) {
     // Loop through and confirm that each message is a valid byte
-    for (size_t ii = 0; ii < queue->queueSize; ii += PWNAGOTCHI_PROTOCOL_BYTE_LEN) {
+    for (size_t ii = 0; ii < queue->queueSize - PWNAGOTCHI_PROTOCOL_BYTE_LEN; ii += PWNAGOTCHI_PROTOCOL_BYTE_LEN) {
+        if (queue->messageQueue[ii] == 0 && queue->messageQueue[ii + PWNAGOTCHI_PROTOCOL_BYTE_LEN - 1] == 0) {
+            continue;
+        }
+
         if (!(queue->messageQueue[ii] == PWNAGOTCHI_PROTOCOL_START &&
             queue->messageQueue[ii + PWNAGOTCHI_PROTOCOL_BYTE_LEN - 1] == PWNAGOTCHI_PROTOCOL_END)) {
                 // This means it failed so we should wipe and breka
@@ -76,6 +80,9 @@ bool message_queue_pop_message(MessageQueue* queue, PwnCommand* dest) {
     dest->i = *(queue->readPtr + 1);
     dest->j = *(queue->readPtr + 2);
     dest->code = *(queue->readPtr + 3);
+
+    // Let's reset that message so we don't run across it again
+    memset(queue->readPtr, 0, PWNAGOTCHI_PROTOCOL_BYTE_LEN);
 
     // Now increment the readPtr
     queue->readPtr += PWNAGOTCHI_PROTOCOL_BYTE_LEN;
