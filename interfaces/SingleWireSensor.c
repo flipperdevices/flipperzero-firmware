@@ -7,7 +7,6 @@
 #define POLLING_TIMEOUT_TICKS 10000
 
 /* Типы датчиков и их параметры */
-//DHT11
 const SensorType DHT11 = {
     .typename = "DHT11",
     .interface = &SINGLE_WIRE,

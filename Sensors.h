@@ -91,7 +91,7 @@ typedef struct Sensor {
 } Sensor;
 
 extern const Interface SINGLE_WIRE; //Собственный однопроводной протокол датчиков DHTXX и AM23XX
-//extern const Interface ONE_WIRE; //Однопроводной протокол Dallas
+extern const Interface ONE_WIRE; //Однопроводной протокол Dallas
 extern const Interface I2C; //I2C_2 (PC0, PC1)
 //extern const Interface SPI;
 

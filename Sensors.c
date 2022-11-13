@@ -2,6 +2,7 @@
 #include "./interfaces/SingleWireSensor.h"
 #include "./interfaces/I2CSensor.h"
 #include "./sensors/SensorsDriver.h"
+#include "./interfaces/OneWireSensor.h"
 
 #include <furi_hal_power.h>
 
@@ -44,12 +45,17 @@ const Interface I2C = {
     .allocator = unitemp_I2C_sensor_alloc,
     .mem_releaser = unitemp_I2C_sensor_free,
     .updater = unitemp_I2C_sensor_update};
+const Interface ONE_WIRE = {
+    .name = "One wire",
+    .allocator = unitemp_OneWire_alloc,
+    .mem_releaser = unitemp_OneWire_free,
+    .updater = unitemp_OneWire_update};
 
 //Перечень интерфейсов подключения
-//static const Interface* interfaces[] = {&SINGLE_WIRE, &I2C};
+//static const Interface* interfaces[] = {&SINGLE_WIRE, &I2C, &ONE_WIRE};
 //Перечень датчиков
 static const SensorType* sensorTypes[] =
-    {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280};
+    {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280, &DS18B20};
 
 const SensorType* unitemp_getTypeFromInt(int type) {
     if(type > SENSOR_TYPES_COUNT) return NULL;
