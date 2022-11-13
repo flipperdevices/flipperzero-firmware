@@ -7,7 +7,7 @@ App(
     requires=["gui", "dialogs"],
     stack_size=2 * 1024,
     order=1,
-    fap_icon="shapshup_10px.png",
+    fap_icon="images/shapshup_10px.png",
     fap_category="Tools",
     fap_icon_assets="images",
 )

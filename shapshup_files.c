@@ -9,7 +9,6 @@
 
 #define TAG "ShapShupFiles"
 
-#define MAX_LINE 500
 #define RAW_KEY_NAME "RAW_Data"
 
 const size_t buffer_size = 32;
@@ -210,11 +209,10 @@ bool read_int32_shapshup(Stream* stream, int32_t* _data, const uint16_t data_siz
     return result;
 }
 
-ShapShupRawFile*
-    load_file_shapshup(Storage* storage, FlipperFormat* fff_data, const char* file_path) {
-    furi_assert(storage);
-    furi_assert(fff_data);
+ShapShupRawFile* load_file_shapshup(const char* file_path) {
     furi_assert(file_path);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
     ShapShupRawFile* instance = malloc(sizeof(ShapShupRawFile));
     instance->total_len = 0;
@@ -222,10 +220,9 @@ ShapShupRawFile*
     instance->min_value = 0;
     instance->max_value = 0;
     array_raw_init(instance->values);
-    size_t file_offset_start = 0;
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
-    Stream* fff_data_stream = flipper_format_get_raw_stream(fff_data);
+    Stream* fff_data_stream = NULL;
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -233,16 +230,17 @@ ShapShupRawFile*
     instance->result = ShapShupFileResultUnknown;
 
     do {
-        stream_clean(fff_data_stream);
         if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
             instance->result = ShapShupFileResultOpenError;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
+        fff_data_stream = flipper_format_get_raw_stream(fff_data_file);
+
         if(!flipper_format_read_header(fff_data_file, temp_str, &temp_data32)) {
             instance->result = ShapShupFileResultIncorrectHeader;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
@@ -250,40 +248,40 @@ ShapShupRawFile*
             temp_data32 == SUBGHZ_KEY_FILE_VERSION)) {
         } else {
             instance->result = ShapShupFileResultTypeOfVersionMismatch;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
         if(!furi_string_cmp_str(temp_str, SUBGHZ_RAW_FILE_TYPE)) {
             instance->result = ShapShupFileResultNotRawFile;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
         if(!flipper_format_read_uint32(fff_data_file, "Frequency", &temp_data32, 1)) {
             instance->result = ShapShupFileResultMissingFrequency;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
             instance->result = ShapShupFileResultMissingPreset;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
             instance->result = ShapShupFileResultMissingProtocol;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
         if(!stream_seek_to_key_shapshup(fff_data_stream, RAW_KEY_NAME, false)) {
             instance->result = ShapShupFileResultKeyNotFound;
-            FURI_LOG_E(TAG, shapshup_files_result_description(result));
+            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
-        file_offset_start = stream_tell(fff_data_stream);
+        // file_offset_start = stream_tell(fff_data_stream);
         instance->result = ShapShupFileResultOk;
     } while(false);
 
@@ -307,10 +305,24 @@ ShapShupRawFile*
         array_raw_clear(instance->values);
     }
 
+    FURI_LOG_I(
+        TAG, "total_count: %lld, total_len: %lld", instance->total_count, instance->total_len);
+
     furi_string_free(temp_str);
+    flipper_format_file_close(fff_data_file);
     flipper_format_free(fff_data_file);
 
+    furi_record_close(RECORD_STORAGE);
+
     return instance;
+}
+
+void clean_raw_values(ShapShupRawFile* raw_file) {
+    if(raw_file != NULL) {
+        array_raw_clear(raw_file->values);
+        free(raw_file);
+        raw_file = NULL;
+    }
 }
 
 static const char* shapshup_file_result_descriptions[] = {

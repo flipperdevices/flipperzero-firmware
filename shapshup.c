@@ -172,14 +172,14 @@ void shapshup_text_input_callback(void* context) {
     furi_assert(context);
     ShapShupState* instance = context;
     view_dispatcher_send_custom_event(
-        instance->view_dispatcher, shapshupCustomEventTypeTextEditDone);
+        instance->view_dispatcher, ShapShupCustomEventTypeTextEditDone);
 }
 
 void shapshup_popup_closed_callback(void* context) {
     furi_assert(context);
     ShapShupState* instance = context;
     view_dispatcher_send_custom_event(
-        instance->view_dispatcher, shapshupCustomEventTypePopupClosed);
+        instance->view_dispatcher, ShapShupCustomEventTypePopupClosed);
 }
 
 // ENTRYPOINT

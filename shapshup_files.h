@@ -30,7 +30,7 @@ typedef struct {
     array_raw_t values;
 } ShapShupRawFile;
 
-ShapShupRawFile*
-    load_file_shapshup(Storage* storage, FlipperFormat* fff_data, const char* file_path);
+ShapShupRawFile* load_file_shapshup(const char* file_path);
 bool read_int32_shapshup(Stream* stream, int32_t* _data, const uint16_t data_size);
 const char* shapshup_files_result_description(ShapShupFileResults index);
+void clean_raw_values(ShapShupRawFile* raw_file);

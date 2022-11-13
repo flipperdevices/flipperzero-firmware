@@ -23,7 +23,7 @@ bool shapshup_scene_save_success_on_event(void* context, SceneManagerEvent event
     //ShapShupMainView* view = instance->view_main;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == shapshupCustomEventTypePopupClosed) {
+        if(event.event == ShapShupCustomEventTypePopupClosed) {
             if(!scene_manager_search_and_switch_to_previous_scene(
                    instance->scene_manager, ShapshupSceneStart)) {
                 scene_manager_next_scene(instance->scene_manager, ShapshupSceneStart);

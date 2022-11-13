@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../shapshup_files.h"
 #include "../shapshup_custom_event.h"
 #include <gui/view.h>
 #include "assets_icons.h"
@@ -18,10 +19,5 @@ void shapshup_main_view_set_callback(
 ShapShupMainView* shapshup_main_view_alloc();
 void shapshup_main_view_free(ShapShupMainView* instance);
 View* shapshup_main_view_get_view(ShapShupMainView* instance);
-void shapshup_main_view_set_index(ShapShupMainView* instance, uint8_t idx);
-void shapshup_main_view_add_item(ShapShupMainView* instance, const char* name, uint8_t type);
-uint8_t shapshup_main_view_get_index(ShapShupMainView* instance);
-void shapshup_attack_view_enter(void* context);
-void shapshup_attack_view_exit(void* context);
-bool shapshup_attack_view_input(InputEvent* event, void* context);
-void shapshup_attack_view_draw(Canvas* canvas, void* context);
+ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, const char* name);
+bool shapshup_main_view_no_file(ShapShupMainView* instance);

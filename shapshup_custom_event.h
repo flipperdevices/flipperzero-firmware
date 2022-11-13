@@ -5,25 +5,25 @@
 
 typedef enum {
     // Reserve first 100 events for button types and indexes, starting from 0
-    shapshupCustomEventTypeReserved = 100,
+    ShapShupCustomEventTypeReserved = 100,
 
-    shapshupCustomEventTypeBackPressed,
-    shapshupCustomEventTypeIndexSelected,
-    shapshupCustomEventTypeTransmitStarted,
-    shapshupCustomEventTypeTransmitContinuousStarted,
-    shapshupCustomEventTypeTransmitFinished,
-    shapshupCustomEventTypeTransmitNotStarted,
-    shapshupCustomEventTypeTransmitCustom,
-    shapshupCustomEventTypeSaveFile,
-    shapshupCustomEventTypeUpdateView,
-    shapshupCustomEventTypeChangeStepUp,
-    shapshupCustomEventTypeChangeStepDown,
-    shapshupCustomEventTypeChangeStepUpMore,
-    shapshupCustomEventTypeChangeStepDownMore,
+    ShapShupCustomEventTypeBackPressed,
+    ShapShupCustomEventTypeIndexSelected,
+    ShapShupCustomEventTypeTransmitStarted,
+    ShapShupCustomEventTypeTransmitContinuousStarted,
+    ShapShupCustomEventTypeTransmitFinished,
+    ShapShupCustomEventTypeTransmitNotStarted,
+    ShapShupCustomEventTypeTransmitCustom,
+    ShapShupCustomEventTypeSaveFile,
+    ShapShupCustomEventTypeUpdateView,
+    ShapShupCustomEventTypeChangeStepUp,
+    ShapShupCustomEventTypeChangeStepDown,
+    ShapShupCustomEventTypeChangeStepUpMore,
+    ShapShupCustomEventTypeChangeStepDownMore,
 
-    shapshupCustomEventTypeMenuSelected,
-    shapshupCustomEventTypeTextEditDone,
-    shapshupCustomEventTypePopupClosed,
+    ShapShupCustomEventTypeMenuSelected,
+    ShapShupCustomEventTypeTextEditDone,
+    ShapShupCustomEventTypePopupClosed,
 
-    shapshupCustomEventTypeLoadFile,
+    ShapShupCustomEventTypeLoadFile,
 } shapshupCustomEvent;
