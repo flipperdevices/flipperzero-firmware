@@ -125,7 +125,7 @@ Connect your device via ST-Link and run:
 - `applications`    - Applications and services used in firmware
 - `assets`          - Assets used by applications and services
 - `furi`            - Furi Core: os level primitives and helpers
-- `debug`           - Debug tool: GDB-plugins, SVD-file and etc
+- `debug`           - Debug tool: GDB-plugins, SVD-file and etc.
 - `documentation`   - Documentation generation system configs and input files
 - `firmware`        - Firmware source code
 - `lib`             - Our and 3rd party libraries, drivers, etc.
