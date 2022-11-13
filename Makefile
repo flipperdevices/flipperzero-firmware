@@ -2,7 +2,7 @@ FLIPPER_FIRMWARE_PATH ?= /home/gelin/work/github/flipperzero-firmware/
 
 .PHONY: build
 build: $(FLIPPER_FIRMWARE_PATH)/applications_user/t-rex-runner
-	cd $(FLIPPER_FIRMWARE_PATH) && ./fbt firmware_t-rex-runner
+	cd $(FLIPPER_FIRMWARE_PATH) && ./fbt fap_t-rex-runner
 
 .PHONY: launch
 launch: $(FLIPPER_FIRMWARE_PATH)/applications_user/t-rex-runner

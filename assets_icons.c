@@ -20,6 +20,6 @@ const uint8_t* const _I_HorizonLine1[] = {_I_HorizonLine1_0};
 const Icon I_Dino = {.width=20,.height=22,.frame_count=1,.frame_rate=0,.frames=_I_Dino};
 const Icon I_DinoRun0 = {.width=20,.height=22,.frame_count=1,.frame_rate=0,.frames=_I_DinoRun0};
 const Icon I_DinoRun1 = {.width=20,.height=22,.frame_count=1,.frame_rate=0,.frames=_I_DinoRun1};
-const Icon I_HorizonLine0 = {.width=600,.height=12,.frame_count=1,.frame_rate=0,.frames=_I_HorizonLine0};
-const Icon I_HorizonLine1 = {.width=600,.height=12,.frame_count=1,.frame_rate=0,.frames=_I_HorizonLine1};
+//const Icon I_HorizonLine0 = {.width=600,.height=12,.frame_count=1,.frame_rate=0,.frames=_I_HorizonLine0};
+//const Icon I_HorizonLine1 = {.width=600,.height=12,.frame_count=1,.frame_rate=0,.frames=_I_HorizonLine1};
 
