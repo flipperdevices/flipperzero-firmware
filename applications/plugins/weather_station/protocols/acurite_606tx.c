@@ -151,41 +151,37 @@ void ws_protocol_decoder_acurite_606tx_feed(void* context, bool level, uint32_t 
 
     case Acurite_606TXDecoderStepCheckDuration:
         if(!level) {
-            if((DURATION_DIFF(instance->decoder.te_last, ws_protocol_acurite_606tx_const.te_short) <
-                ws_protocol_acurite_606tx_const.te_delta) &&
-               (DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_short) <
-                ws_protocol_acurite_606tx_const.te_delta)) {
-                //Found syncPostfix
-                instance->decoder.parser_step = Acurite_606TXDecoderStepReset;
-                if((instance->decoder.decode_count_bit ==
-                    ws_protocol_acurite_606tx_const.min_count_bit_for_found) &&
-                   ws_protocol_acurite_606tx_check(instance)) {
-                    instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
-                    ws_protocol_acurite_606tx_remote_controller(&instance->generic);
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
+            if(DURATION_DIFF(instance->decoder.te_last, ws_protocol_acurite_606tx_const.te_short) <
+               ws_protocol_acurite_606tx_const.te_delta) {
+                if((DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_short) <
+                    ws_protocol_acurite_606tx_const.te_delta) ||
+                   (duration > ws_protocol_acurite_606tx_const.te_long * 3)) {
+                    //Found syncPostfix
+                    instance->decoder.parser_step = Acurite_606TXDecoderStepReset;
+                    if((instance->decoder.decode_count_bit ==
+                        ws_protocol_acurite_606tx_const.min_count_bit_for_found) &&
+                       ws_protocol_acurite_606tx_check(instance)) {
+                        instance->generic.data = instance->decoder.decode_data;
+                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+                        ws_protocol_acurite_606tx_remote_controller(&instance->generic);
+                        if(instance->base.callback)
+                            instance->base.callback(&instance->base, instance->base.context);
+                    }
+                    instance->decoder.decode_data = 0;
+                    instance->decoder.decode_count_bit = 0;
+                } else if(
+                    DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_long) <
+                    ws_protocol_acurite_606tx_const.te_delta * 2) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                    instance->decoder.parser_step = Acurite_606TXDecoderStepSaveDuration;
+                } else if(
+                    DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_long * 2) <
+                    ws_protocol_acurite_606tx_const.te_delta * 4) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                    instance->decoder.parser_step = Acurite_606TXDecoderStepSaveDuration;
+                } else {
+                    instance->decoder.parser_step = Acurite_606TXDecoderStepReset;
                 }
-                instance->decoder.decode_data = 0;
-                instance->decoder.decode_count_bit = 0;
-
-                break;
-            } else if(
-                (DURATION_DIFF(
-                     instance->decoder.te_last, ws_protocol_acurite_606tx_const.te_short) <
-                 ws_protocol_acurite_606tx_const.te_delta) &&
-                (DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_long) <
-                 ws_protocol_acurite_606tx_const.te_delta * 2)) {
-                subghz_protocol_blocks_add_bit(&instance->decoder, 0);
-                instance->decoder.parser_step = Acurite_606TXDecoderStepSaveDuration;
-            } else if(
-                (DURATION_DIFF(
-                     instance->decoder.te_last, ws_protocol_acurite_606tx_const.te_short) <
-                 ws_protocol_acurite_606tx_const.te_delta) &&
-                (DURATION_DIFF(duration, ws_protocol_acurite_606tx_const.te_long * 2) <
-                 ws_protocol_acurite_606tx_const.te_delta * 4)) {
-                subghz_protocol_blocks_add_bit(&instance->decoder, 1);
-                instance->decoder.parser_step = Acurite_606TXDecoderStepSaveDuration;
             } else {
                 instance->decoder.parser_step = Acurite_606TXDecoderStepReset;
             }
@@ -238,7 +234,7 @@ void ws_protocol_decoder_acurite_606tx_get_string(void* context, FuriString* out
         "%s %dbit\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%lX Ch:%d  Bat:%d\r\n"
-        "Temp:%d.%d C Hum:%d%%",
+        "Temp:%3.1f C Hum:%d%%",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data >> 32),
@@ -246,7 +242,6 @@ void ws_protocol_decoder_acurite_606tx_get_string(void* context, FuriString* out
         instance->generic.id,
         instance->generic.channel,
         instance->generic.battery_low,
-        (int16_t)instance->generic.temp,
-        abs(((int16_t)(instance->generic.temp * 10) - (((int16_t)instance->generic.temp) * 10))),
+        (double)instance->generic.temp,
         instance->generic.humidity);
 }

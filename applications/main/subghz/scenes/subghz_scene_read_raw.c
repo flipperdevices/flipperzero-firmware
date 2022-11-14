@@ -198,20 +198,28 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case SubGhzCustomEventViewReadRAWMore:
-            if(subghz_scene_read_raw_update_filename(subghz)) {
-                scene_manager_set_scene_state(
-                    subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerSet);
-                subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
-                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneMoreRAW);
-                consumed = true;
+            if(subghz_file_available(subghz)) {
+                if(subghz_scene_read_raw_update_filename(subghz)) {
+                    scene_manager_set_scene_state(
+                        subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerSet);
+                    subghz->txrx->rx_key_state = SubGhzRxKeyStateRAWLoad;
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneMoreRAW);
+                    consumed = true;
+                } else {
+                    furi_crash("SubGhz: RAW file name update error.");
+                }
             } else {
-                furi_crash("SubGhz: RAW file name update error.");
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                       subghz->scene_manager, SubGhzSceneStart)) {
+                    scene_manager_stop(subghz->scene_manager);
+                    view_dispatcher_stop(subghz->view_dispatcher);
+                }
             }
             break;
 
         case SubGhzCustomEventViewReadRAWSendStart:
 
-            if(subghz_scene_read_raw_update_filename(subghz)) {
+            if(subghz_file_available(subghz) && subghz_scene_read_raw_update_filename(subghz)) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
                 if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
@@ -223,7 +231,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                         subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
                         scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     } else {
-                        DOLPHIN_DEED(DolphinDeedSubGhzSend);
+                        if(scene_manager_has_previous_scene(
+                               subghz->scene_manager, SubGhzSceneSaved) ||
+                           !scene_manager_has_previous_scene(
+                               subghz->scene_manager, SubGhzSceneStart)) {
+                            DOLPHIN_DEED(DolphinDeedSubGhzSend);
+                        }
                         // set callback end tx
                         subghz_protocol_raw_file_encoder_worker_set_callback_end(
                             (SubGhzProtocolEncoderRAW*)subghz_transmitter_get_protocol_instance(
@@ -232,6 +245,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                             subghz);
                         subghz->state_notifications = SubGhzNotificationStateTx;
                     }
+                }
+            } else {
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                       subghz->scene_manager, SubGhzSceneStart)) {
+                    scene_manager_stop(subghz->scene_manager);
+                    view_dispatcher_stop(subghz->view_dispatcher);
                 }
             }
             consumed = true;
@@ -309,11 +328,17 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case SubGhzCustomEventViewReadRAWSave:
-            if(subghz_scene_read_raw_update_filename(subghz)) {
+            if(subghz_file_available(subghz) && subghz_scene_read_raw_update_filename(subghz)) {
                 scene_manager_set_scene_state(
                     subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerSetRAW);
                 subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
+            } else {
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                       subghz->scene_manager, SubGhzSceneStart)) {
+                    scene_manager_stop(subghz->scene_manager);
+                    view_dispatcher_stop(subghz->view_dispatcher);
+                }
             }
             consumed = true;
             break;

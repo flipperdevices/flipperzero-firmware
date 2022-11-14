@@ -1,5 +1,6 @@
 #include "gui/canvas.h"
 #include "gui_i.h"
+#include <assets_icons.h>
 
 #define TAG "GuiSrv"
 
@@ -435,7 +436,7 @@ void gui_add_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, vo
     const CanvasCallbackPair p = {callback, context};
 
     gui_lock(gui);
-    furi_assert(CanvasCallbackPairArray_count(gui->canvas_callback_pair, p) == 0);
+    furi_assert(!CanvasCallbackPairArray_count(gui->canvas_callback_pair, p));
     CanvasCallbackPairArray_push_back(gui->canvas_callback_pair, p);
     gui_unlock(gui);
 

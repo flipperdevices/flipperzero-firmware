@@ -82,7 +82,7 @@ static const DuckyKey ducky_keys[] = {
     {"PAGEUP", HID_KEYBOARD_PAGE_UP},
     {"PAGEDOWN", HID_KEYBOARD_PAGE_DOWN},
     {"PRINTSCREEN", HID_KEYBOARD_PRINT_SCREEN},
-    {"SCROLLOCK", HID_KEYBOARD_SCROLL_LOCK},
+    {"SCROLLLOCK", HID_KEYBOARD_SCROLL_LOCK},
     {"SPACE", HID_KEYBOARD_SPACEBAR},
     {"TAB", HID_KEYBOARD_TAB},
     {"MENU", HID_KEYBOARD_APPLICATION},
@@ -237,12 +237,8 @@ static int32_t
     const char* line_tmp = furi_string_get_cstr(line);
     bool state = false;
 
-    for(uint32_t i = 0; i < line_len; i++) {
-        if((line_tmp[i] != ' ') && (line_tmp[i] != '\t') && (line_tmp[i] != '\n')) {
-            line_tmp = &line_tmp[i];
-            break; // Skip spaces and tabs
-        }
-        if(i == line_len - 1) return SCRIPT_STATE_NEXT_LINE; // Skip empty lines
+    if(line_len == 0) {
+        return SCRIPT_STATE_NEXT_LINE; // Skip empty lines
     }
 
     FURI_LOG_D(WORKER_TAG, "line:%s", line_tmp);
@@ -338,10 +334,6 @@ static int32_t
         furi_hal_hid_kb_release(key);
         return (0);
     }
-    if(error != NULL) {
-        strncpy(error, "Unknown error", error_len);
-    }
-    return SCRIPT_STATE_ERROR;
 }
 
 static bool ducky_set_usb_id(BadUsbScript* bad_usb, const char* line) {
@@ -454,10 +446,12 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
                 bad_usb->st.line_cur++;
                 bad_usb->buf_len = bad_usb->buf_len + bad_usb->buf_start - (i + 1);
                 bad_usb->buf_start = i + 1;
+                furi_string_trim(bad_usb->line);
                 delay_val = ducky_parse_line(
                     bad_usb, bad_usb->line, bad_usb->st.error, sizeof(bad_usb->st.error));
-
-                if(delay_val < 0) {
+                if(delay_val == SCRIPT_STATE_NEXT_LINE) { // Empty line
+                    return 0;
+                } else if(delay_val < 0) {
                     bad_usb->st.error_line = bad_usb->st.line_cur;
                     FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
                     return SCRIPT_STATE_ERROR;
@@ -524,12 +518,16 @@ static int32_t bad_usb_worker(void* context) {
 
         } else if(worker_state == BadUsbStateNotConnected) { // State: USB not connected
             uint32_t flags = furi_thread_flags_wait(
-                WorkerEvtEnd | WorkerEvtConnect, FuriFlagWaitAny, FuriWaitForever);
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
+                FuriFlagWaitAny,
+                FuriWaitForever);
             furi_check((flags & FuriFlagError) == 0);
             if(flags & WorkerEvtEnd) {
                 break;
             } else if(flags & WorkerEvtConnect) {
                 worker_state = BadUsbStateIdle; // Ready to run
+            } else if(flags & WorkerEvtToggle) {
+                worker_state = BadUsbStateWillRun; // Will run when USB is connected
             }
             bad_usb->st.state = worker_state;
 
@@ -553,6 +551,31 @@ static int32_t bad_usb_worker(void* context) {
                 worker_state = BadUsbStateRunning;
             } else if(flags & WorkerEvtDisconnect) {
                 worker_state = BadUsbStateNotConnected; // USB disconnected
+            }
+            bad_usb->st.state = worker_state;
+
+        } else if(worker_state == BadUsbStateWillRun) { // State: start on connection
+            uint32_t flags = furi_thread_flags_wait(
+                WorkerEvtEnd | WorkerEvtConnect | WorkerEvtToggle,
+                FuriFlagWaitAny,
+                FuriWaitForever);
+            furi_check((flags & FuriFlagError) == 0);
+            if(flags & WorkerEvtEnd) {
+                break;
+            } else if(flags & WorkerEvtConnect) { // Start executing script
+                DOLPHIN_DEED(DolphinDeedBadUsbPlayScript);
+                delay_val = 0;
+                bad_usb->buf_len = 0;
+                bad_usb->st.line_cur = 0;
+                bad_usb->defdelay = 0;
+                bad_usb->repeat_cnt = 0;
+                bad_usb->file_end = false;
+                storage_file_seek(script_file, 0, true);
+                // extra time for PC to recognize Flipper as keyboard
+                furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
+                worker_state = BadUsbStateRunning;
+            } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
+                worker_state = BadUsbStateNotConnected;
             }
             bad_usb->st.state = worker_state;
 
@@ -627,7 +650,7 @@ static int32_t bad_usb_worker(void* context) {
 BadUsbScript* bad_usb_script_open(FuriString* file_path) {
     furi_assert(file_path);
 
-    BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript));
+    BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript)); //-V773
     bad_usb->file_path = furi_string_alloc();
     furi_string_set(bad_usb->file_path, file_path);
 

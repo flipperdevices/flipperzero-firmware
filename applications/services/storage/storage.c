@@ -5,6 +5,7 @@
 #include "storage/storage_glue.h"
 #include "storages/storage_int.h"
 #include "storages/storage_ext.h"
+#include <assets_icons.h>
 
 #define STORAGE_TICK 1000
 
@@ -38,6 +39,7 @@ Storage* storage_app_alloc() {
 
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
         storage_data_init(&app->storage[i]);
+        storage_data_timestamp(&app->storage[i]);
     }
 
 #ifndef FURI_RAM_EXEC

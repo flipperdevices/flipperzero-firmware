@@ -13,6 +13,7 @@
 #include "views/subghz_test_packet.h"
 
 #include <gui/gui.h>
+#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
@@ -123,6 +124,7 @@ bool subghz_save_protocol_to_file(
     const char* dev_file_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
+bool subghz_file_available(SubGhz* subghz);
 bool subghz_delete_file(SubGhz* subghz);
 void subghz_file_name_clear(SubGhz* subghz);
 bool subghz_path_is_file(FuriString* path);
