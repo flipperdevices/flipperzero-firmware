@@ -1,3 +1,5 @@
+//Часть кода пренадлежит Погребняку Дмитрию: https://aterlux.ru/article/1wire
+
 #include "OneWireSensor.h"
 #include <furi.h>
 #include <furi_hal.h>
@@ -38,6 +40,26 @@ static bool oneWire_start(OneWireSensor* instance) {
     return status;
 }
 
+static void oneWire_send_bit(OneWireSensor* instance, bool state) {
+    if(state) {
+        // write 1
+        furi_hal_gpio_write(instance->gpio->pin, false);
+        furi_delay_us(1);
+        furi_hal_gpio_write(instance->gpio->pin, true);
+        furi_delay_us(90);
+    } else {
+        furi_hal_gpio_write(instance->gpio->pin, false);
+        furi_delay_us(90);
+        furi_hal_gpio_write(instance->gpio->pin, true);
+        //Ожидание подъёма шины
+        uint32_t t = furi_get_tick();
+        while(!furi_hal_gpio_read(instance->gpio->pin)) {
+            //Выход если шина не поднялась
+            if(furi_get_tick() - t > 100) return;
+        }
+    }
+}
+
 /**
  * @brief Запись байта на шину One Wire
  * 
@@ -46,23 +68,7 @@ static bool oneWire_start(OneWireSensor* instance) {
  */
 static void oneWire_write(OneWireSensor* instance, uint8_t data) {
     for(int i = 0; i < 8; i++) {
-        if((data & (1 << i)) != 0) {
-            // write 1
-            furi_hal_gpio_write(instance->gpio->pin, false);
-            furi_delay_us(1);
-            furi_hal_gpio_write(instance->gpio->pin, true);
-            furi_delay_us(90);
-        } else {
-            furi_hal_gpio_write(instance->gpio->pin, false);
-            furi_delay_us(90);
-            furi_hal_gpio_write(instance->gpio->pin, true);
-            //Ожидание подъёма шины
-            uint32_t t = furi_get_tick();
-            while(!furi_hal_gpio_read(instance->gpio->pin)) {
-                //Выход если шина не поднялась
-                if(furi_get_tick() - t > 100) return;
-            }
-        }
+        oneWire_send_bit(instance, (data & (1 << i)) != 0);
     }
 }
 
@@ -109,37 +115,6 @@ static void oneWire_readBytes(OneWireSensor* instance, uint8_t* data, size_t len
     }
 }
 
-/**
- * @brief Запись массива байт на шину One Wire
- * 
- * @param instance Указатель на инстанс датчика
- * @param data Указатель на массив, откуда будут записаны данные
- * @param len Количество байт
- */
-static void oneWire_writeBytes(OneWireSensor* instance, uint8_t* data, size_t len) {
-    for(size_t i = 0; i < len; i++) {
-        oneWire_write(instance, data[i]);
-    }
-}
-bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
-    Sensor* sensor = (Sensor*)s;
-    OneWireSensor* instance = malloc(sizeof(OneWireSensor));
-    if(instance == NULL) {
-        FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
-        return false;
-    }
-    sensor->instance = instance;
-
-    instance->powerMode = PWR_ACTIVE;
-    instance->gpio = unitemp_GPIO_getFromInt(anotherValues[0]);
-    if(instance->gpio != NULL) {
-        return true;
-    }
-    FURI_LOG_E(APP_NAME, "Sensor %s GPIO setting error", sensor->name);
-    free(instance);
-    return false;
-}
-
 static uint8_t onewire_CRC_update(uint8_t crc, uint8_t b) {
     for(uint8_t p = 8; p; p--) {
         crc = ((crc ^ b) & 1) ? (crc >> 1) ^ 0b10001100 : (crc >> 1);
@@ -154,6 +129,137 @@ static bool onewire_CRC_check(uint8_t* data, size_t len) {
         crc = onewire_CRC_update(crc, data[i]);
     }
     return !crc;
+}
+
+/**
+ * @brief Запись массива байт на шину One Wire
+ * 
+ * @param instance Указатель на инстанс датчика
+ * @param data Указатель на массив, откуда будут записаны данные
+ * @param len Количество байт
+ */
+static void oneWire_writeBytes(OneWireSensor* instance, uint8_t* data, size_t len) {
+    for(size_t i = 0; i < len; i++) {
+        oneWire_write(instance, data[i]);
+    }
+}
+
+/**
+ * @brief Чтение индификатора датчика. ID запишется в инстанс датчика
+ * 
+ * @param instance Указатель на инстанс датчика
+ * @return Истина, если код успешно прочитан, ложь если устройство отсутствует или устройств на шине больше одного
+ */
+static bool oneWire_readDeviceID(OneWireSensor* instance) {
+    if(!oneWire_start(instance)) return false;
+    oneWire_write(instance, 0x33); // Чтение ПЗУ
+    oneWire_readBytes(instance, instance->deviceID, 8);
+    if(!onewire_CRC_check(instance->deviceID, 8)) {
+        return false;
+    }
+    return true;
+}
+
+// Переменные для хранения промежуточного результата поиска
+uint8_t onewire_enum[8]; // найденный восьмибайтовый адрес
+uint8_t onewire_enum_fork_bit; // последний нулевой бит, где была неоднозначность (нумеруя с единицы)
+
+// Инициализирует процедуру поиска адресов устройств
+void onewire_enum_init(void) {
+    for(uint8_t p = 0; p < 8; p++) {
+        onewire_enum[p] = 0;
+    }
+    onewire_enum_fork_bit = 65; // правее правого
+}
+
+// Перечисляет устройства на шине 1-wire и получает очередной адрес.
+// Возвращает указатель на буфер, содержащий восьмибайтовое значение адреса, либо NULL, если поиск завешён
+uint8_t* onewire_enum_next(OneWireSensor* instance) {
+    furi_delay_ms(10);
+    if(!onewire_enum_fork_bit) { // Если на предыдущем шаге уже не было разногласий
+        FURI_LOG_D(APP_NAME, "All devices is found");
+        return 0; // то просто выходим ничего не возвращая
+    }
+    if(!oneWire_start(instance)) {
+        FURI_LOG_D(APP_NAME, "Wire is empty");
+        return 0;
+    }
+    uint8_t bp = 8;
+    uint8_t* pprev = &onewire_enum[0];
+    uint8_t prev = *pprev;
+    uint8_t next = 0;
+
+    uint8_t p = 1;
+    oneWire_write(instance, 0xF0);
+    uint8_t newfork = 0;
+    for(;;) {
+        uint8_t not0 = oneWire_read_bit(instance);
+        uint8_t not1 = oneWire_read_bit(instance);
+        if(!not0) { // Если присутствует в адресах бит ноль
+            if(!not1) { // Но также присустствует бит 1 (вилка)
+                if(p <
+                   onewire_enum_fork_bit) { // Если мы левее прошлого правого конфликтного бита,
+                    if(prev & 1) {
+                        next |= 0x80; // то копируем значение бита из прошлого прохода
+                    } else {
+                        newfork = p; // если ноль, то запомним конфликтное место
+                    }
+                } else if(p == onewire_enum_fork_bit) {
+                    next |=
+                        0x80; // если на этом месте в прошлый раз был правый конфликт с нулём, выведем 1
+                } else {
+                    newfork = p; // правее - передаём ноль и запоминаем конфликтное место
+                }
+            } // в противном случае идём, выбирая ноль в адресе
+        } else {
+            if(!not1) { // Присутствует единица
+                next |= 0x80;
+            } else { // Нет ни нулей ни единиц - ошибочная ситуация
+                FURI_LOG_D(APP_NAME, "Wrong situation");
+                return 0;
+            }
+        }
+        oneWire_send_bit(instance, next & 0x80);
+        bp--;
+        if(!bp) {
+            *pprev = next;
+            if(p >= 64) break;
+            next = 0;
+            pprev++;
+            prev = *pprev;
+            bp = 8;
+        } else {
+            if(p >= 64) break;
+            prev >>= 1;
+            next >>= 1;
+        }
+        p++;
+    }
+    onewire_enum_fork_bit = newfork;
+    return &onewire_enum[0];
+}
+
+bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
+    Sensor* sensor = (Sensor*)s;
+    OneWireSensor* instance = malloc(sizeof(OneWireSensor));
+    if(instance == NULL) {
+        FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
+        return false;
+    }
+    sensor->instance = instance;
+    //Очистка адреса
+    memset(instance->deviceID, 0, 8);
+    //Питание от внешнего источника
+    instance->powerMode = PWR_ACTIVE;
+
+    //Порт STM32
+    instance->gpio = unitemp_GPIO_getFromInt(anotherValues[0]);
+    if(instance->gpio != NULL) {
+        return true;
+    }
+    FURI_LOG_E(APP_NAME, "Sensor %s GPIO setting error", sensor->name);
+    free(instance);
+    return false;
 }
 
 bool unitemp_OneWire_free(void* s) {
@@ -178,21 +284,47 @@ bool unitemp_OneWire_init(void* s) {
         GpioPullUp, //Принудительная подтяжка линии данных к питанию
         GpioSpeedVeryHigh); //Скорость работы - максимальная
 
-    if(!oneWire_start(instance)) return false;
-    oneWire_write(instance, 0x33); // Чтение ПЗУ
-    uint8_t buff[8];
-    oneWire_readBytes(instance, buff, 8);
-    if(!onewire_CRC_check(buff, 8)) {
+    onewire_enum_init();
+    uint8_t* ids = onewire_enum_next(instance);
+
+    while(ids != NULL) {
+        FURI_LOG_D(
+            APP_NAME,
+            "Found sensor's ID: %02X%02X%02X%02X%02X%02X%02X%02X",
+            ids[0],
+            ids[1],
+            ids[2],
+            ids[3],
+            ids[4],
+            ids[5],
+            ids[6],
+            ids[7]);
+        ids = onewire_enum_next(instance);
+    }
+
+    if(!oneWire_readDeviceID(instance)) {
         return false;
     }
-    FURI_LOG_D(APP_NAME, "%s family code: 0x%02X", ((Sensor*)s)->name, buff[0]);
-    instance->familyCode = buff[0];
+    FURI_LOG_D(
+        APP_NAME,
+        "%s sensor ID: %02X%02X%02X%02X%02X%02X%02X%02X",
+        ((Sensor*)s)->name,
+        instance->deviceID[0],
+        instance->deviceID[1],
+        instance->deviceID[2],
+        instance->deviceID[3],
+        instance->deviceID[4],
+        instance->deviceID[5],
+        instance->deviceID[6],
+        instance->deviceID[7]);
+    instance->familyCode = instance->deviceID[0];
 
     if(instance->familyCode == FC_DS18B20 || instance->familyCode == FC_DS1822) {
         //Установка разрядности в 10 бит
         if(!oneWire_start(instance)) return false;
         oneWire_write(instance, 0xCC); // skip ROM
         oneWire_write(instance, 0x4E); // Запись в память
+        uint8_t buff[3];
         buff[0] = 0x4B; //Значение нижнего предела
         buff[1] = 0x46; //Значение высшего предела
         buff[2] = 0x3F; //10 бит разрядность преобразования

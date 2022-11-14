@@ -20,7 +20,7 @@ typedef struct OneWireSensor {
     //Порт подключения датчика
     const GPIO* gpio;
     //Текущий адрес устройства на шине OneWire
-    uint64_t addr;
+    uint8_t deviceID[8];
     //Код семейства устройств
     DallasFamilyCode familyCode;
     //Режим питания датчка
