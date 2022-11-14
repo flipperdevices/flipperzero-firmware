@@ -6,7 +6,7 @@
 const SensorType DS18B20 = {
     .typename = "DS18B20",
     .interface = &ONE_WIRE,
-    .pollingInterval = 500,
+    .pollingInterval = 250,
     .allocator = unitemp_OneWire_alloc,
     .mem_releaser = unitemp_OneWire_free,
     .initializer = unitemp_OneWire_init,
@@ -109,6 +109,18 @@ static void oneWire_readBytes(OneWireSensor* instance, uint8_t* data, size_t len
     }
 }
 
+/**
+ * @brief Запись массива байт на шину One Wire
+ * 
+ * @param instance Указатель на инстанс датчика
+ * @param data Указатель на массив, откуда будут записаны данные
+ * @param len Количество байт
+ */
+static void oneWire_writeBytes(OneWireSensor* instance, uint8_t* data, size_t len) {
+    for(size_t i = 0; i < len; i++) {
+        oneWire_write(instance, data[i]);
+    }
+}
 bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
     Sensor* sensor = (Sensor*)s;
     OneWireSensor* instance = malloc(sizeof(OneWireSensor));
@@ -166,9 +178,18 @@ bool unitemp_OneWire_init(void* s) {
         GpioPullUp, //Принудительная подтяжка линии данных к питанию
         GpioSpeedVeryHigh); //Скорость работы - максимальная
 
+    //Установка разрядности в 10 бит
     if(!oneWire_start(instance)) return false;
+    oneWire_write(instance, 0xCC); // skip ROM
+    oneWire_write(instance, 0x4E); // Запись в память
+    uint8_t buff[3] = {0x4B, 0x46, 0x3F}; //10 бит
+    oneWire_writeBytes(instance, buff, 3);
 
-    //TODO: настройка разрядности преобразования
+    //Сохранение значений в EEPROM для автоматического восстановления после сбоев питания
+    if(!oneWire_start(instance)) return false;
+    oneWire_write(instance, 0xCC); // skip ROM
+    oneWire_write(instance, 0x48); // Запись в EEPROM
+
     return true;
 }
 

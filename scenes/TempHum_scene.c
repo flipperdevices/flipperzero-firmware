@@ -20,7 +20,11 @@ static void TempHum_draw_callback(Canvas* canvas, void* _model) {
             canvas_set_font(canvas, FontSecondary);
             if(app->sensors[i]->status != UT_OK && app->sensors[i]->status != UT_EARLYPOOL &&
                app->sensors[i]->status != UT_POLLING) {
-                canvas_draw_str(canvas, 96, 24 + 10 * i, "timeout");
+                if(app->sensors[i]->status == UT_BADCRC) {
+                    canvas_draw_str(canvas, 96, 24 + 10 * i, "bad CRC");
+                } else {
+                    canvas_draw_str(canvas, 96, 24 + 10 * i, "timeout");
+                }
             } else {
                 char buff[20];
                 snprintf(
