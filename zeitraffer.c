@@ -169,7 +169,7 @@ int32_t zeitraffer_app(void* p) {
 				if (WorkCount == 0) WorkCount = Count;
 				if (WorkTime == 0) WorkTime = 3;
 				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
-				if (Count == -1) {gpio_item_set_all_pins(true); Bulb = true; WorkCount = 1; WorkTime = Time;} else Bulb = false;
+				if (Count == -1) {gpio_item_set_pin(4, true); gpio_item_set_pin(5, true); Bulb = true; WorkCount = 1; WorkTime = Time;} else Bulb = false;
 				notification_message(notifications, &sequence_success); 
 				}
             }
@@ -177,15 +177,18 @@ int32_t zeitraffer_app(void* p) {
 		if(event.input.type == InputTypeLong) {
             // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
             if(event.input.key == InputKeyBack) {
+			if(furi_timer_is_running(timer)) {
+				notification_message(notifications, &sequence_error);
+			}
+			else {
 			notification_message(notifications, &sequence_click);
+			gpio_item_set_all_pins(false);
+			furi_timer_stop(timer);
                 break;
             }
+			}
 			if(event.input.key == InputKeyOk) {
-				furi_timer_start(timer, 1000);
-				WorkCount = Count;
-				WorkTime = 3;
-				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
-				notification_message(notifications, &sequence_success); 
+				notification_message(notifications, &sequence_display_backlight_off_delay_1000);
             }
 			}
 		if(event.input.type == InputTypeRepeat) {
@@ -240,11 +243,13 @@ int32_t zeitraffer_app(void* p) {
 				WorkCount--;
 				view_port_update(view_port);
 				notification_message(notifications, &sequence_click);
-				gpio_item_set_all_pins(true);
-				//gpio_item_set_pin(6, true);
+				//gpio_item_set_all_pins(true);
+				gpio_item_set_pin(4, true);
+				gpio_item_set_pin(5, true);
 				furi_delay_ms(400);
-				//gpio_item_set_pin(6, false);
-				gpio_item_set_all_pins(false);
+				gpio_item_set_pin(4, false);
+				gpio_item_set_pin(5, false);
+				//gpio_item_set_all_pins(false);
 
 				if (InfiniteShot) WorkCount++;
 				
