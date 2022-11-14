@@ -29,7 +29,7 @@ static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_id) {
 }
 
 // vendor_id, model_name, vendor_name, size, write_mode,
-// type_id, capacity_id, erase_gran, erase_cmd, address_type
+// type_id, capacity_id, address_type
 static const SPIMemChip SPIMemChips[] = {
     {SPIMemChipVendorWinbond,
      "W25Q32BV",
@@ -38,8 +38,6 @@ static const SPIMemChip SPIMemChips[] = {
      SPIMemChipWriteModePage256Bytes,
      0x40,
      0x16,
-     4096,
-     0x20,
      SPIMemChipAddressType3byte},
     {SPIMemChipVendorWinbond,
      "W25Q64FV",
@@ -48,16 +46,12 @@ static const SPIMemChip SPIMemChips[] = {
      SPIMemChipWriteModePage256Bytes,
      0x40,
      0x17,
-     4096,
-     0x20,
      SPIMemChipAddressType3byte},
     {SPIMemChipVendorUnknown,
      NULL,
      NULL,
      0,
      SPIMemChipWriteModeUnknown,
-     0,
-     0,
      0,
      0,
      SPIMemChipAddressTypeUnknown}};
@@ -70,8 +64,6 @@ static void spi_mem_chip_copy_info(SPIMemChip* dest, const SPIMemChip* src) {
     dest->write_mode = src->write_mode;
     dest->type_id = src->type_id;
     dest->capacity_id = src->capacity_id;
-    dest->erase_gran = src->erase_gran;
-    dest->erase_gran_cmd = src->erase_gran_cmd;
 }
 
 bool spi_mem_chip_complete_info(SPIMemChip* chip_info) {

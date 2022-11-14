@@ -42,11 +42,7 @@ bool spi_mem_scene_read_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemCustomEventWorkerReadDone) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneVerify);
         } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
-            spi_mem_worker_stop_thread(app->worker);
-            notification_message(app->notifications, &sequence_blink_stop);
-            spi_mem_show_chip_error(app->dialogs, "Chip read error\nPlease try again");
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetect);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipError);
         } else if(event.event == SPIMemCustomEventWorkerWriteFileFail) {
             spi_mem_worker_stop_thread(app->worker);
             notification_message(app->notifications, &sequence_blink_stop);

@@ -39,8 +39,20 @@ typedef enum {
     SPIMemChipCMDReadData = 0x03,
     SPIMemChipCMDChipErase = 0xC7,
     SPIMemChipCMDWriteEnable = 0x06,
-    SPIMemChipCMDWriteDisable = 0x04
+    SPIMemChipCMDWriteDisable = 0x04,
+    SPIMemChipCMDReadStatus = 0x05
 } SPIMemChipCMD;
+
+typedef enum {
+    SPIMemChipStatusBitBusy = (1 << 0),
+    SPIMemChipStatusBitWriteEnabled = (1 << 1),
+    SPIMemChipStatusBitSoftwareProtection1 = (1 << 2),
+    SPIMemChipStatusBitSoftwareProtection2 = (1 << 3),
+    SPIMemChipStatusBitWriteProtect = (1 << 4),
+    SPIMemChipStatusBitEraseError = (1 << 5),
+    SPIMemChipStatusBitReserved = (1 << 6),
+    SPIMemChipStatusBitRegisterProtect = (1 << 7)
+} SPIMemChipStatusBit;
 
 typedef struct {
     const char* vendor_name;
@@ -62,7 +74,5 @@ struct SPIMemChip {
     SPIMemChipWriteMode write_mode;
     uint8_t type_id;
     uint8_t capacity_id;
-    size_t erase_gran;
-    uint8_t erase_gran_cmd;
     SPIMemChipAddressType address_type;
 };

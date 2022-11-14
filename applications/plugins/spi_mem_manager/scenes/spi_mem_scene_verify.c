@@ -40,10 +40,7 @@ bool spi_mem_scene_verify_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_progress_inc_progress(app->view_read);
         } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
-            notification_message(app->notifications, &sequence_blink_stop);
-            spi_mem_show_chip_error(app->dialogs, "Chip read error\nPlease try again");
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetect);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipError);
         } else if(event.event == SPIMemCustomEventWorkerReadFileFail) {
             notification_message(app->notifications, &sequence_blink_stop);
             spi_mem_file_show_storage_error(app, "Cannot read");
@@ -52,10 +49,7 @@ bool spi_mem_scene_verify_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemCustomEventWorkerVerifyDone) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
         } else if(event.event == SPIMemCustomEventWorkerVerifyFail) {
-            notification_message(app->notifications, &sequence_blink_stop);
-            spi_mem_show_chip_error(app->dialogs, "Data isn't match\nPlease restart process");
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetect);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneVerifyError);
         }
     }
     return success;

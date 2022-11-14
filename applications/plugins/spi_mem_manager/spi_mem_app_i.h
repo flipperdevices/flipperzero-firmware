@@ -65,5 +65,3 @@ typedef enum {
     SPIMemCustomEventTextEditResult,
     SPIMemCustomEventPopupBack
 } SPIMemCustomEvent;
-
-void spi_mem_show_chip_error(DialogsApp* context, const char* error_text);

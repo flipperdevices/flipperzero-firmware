@@ -43,7 +43,7 @@ bool spi_mem_scene_delete_confirm_on_event(void* context, SceneManagerEvent even
         success = true;
         if(event.event == GuiButtonTypeRight) {
             if(spi_mem_file_delete(app)) {
-                scene_manager_next_scene(app->scene_manager, SPIMemSceneDeleteSuccess);
+                scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
             } else {
                 scene_manager_search_and_switch_to_previous_scene(
                     app->scene_manager, SPIMemSceneSelectFile);

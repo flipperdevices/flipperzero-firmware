@@ -1,15 +1,6 @@
 #include "spi_mem_app_i.h"
 #include "lib/spi/spi_mem_chip_i.h"
 
-void spi_mem_show_chip_error(DialogsApp* context, const char* error_text) {
-    DialogMessage* message = dialog_message_alloc();
-    dialog_message_set_text(message, error_text, 88, 32, AlignCenter, AlignCenter);
-    dialog_message_set_icon(message, &I_Dip8_32x36, 5, 6);
-    dialog_message_set_buttons(message, "Back", NULL, NULL);
-    dialog_message_show(context, message);
-    dialog_message_free(message);
-}
-
 static bool spi_mem_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SPIMemApp* app = context;

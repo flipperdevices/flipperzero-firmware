@@ -89,3 +89,30 @@ size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip) {
     UNUSED(chip);
     return (SPI_MEM_FILE_BUFFER_SIZE);
 }
+
+SPIMemChipStatus spi_mem_tools_get_chip_status(SPIMemChip* chip) {
+    UNUSED(chip);
+    SPIMemChipStatusBit status = SPIMemChipStatusBitReserved;
+    if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, (uint8_t*)&status, 1))
+        return SPIMemChipStatusError;
+    if(status & SPIMemChipStatusBitBusy) return SPIMemChipStatusBusy;
+    return SPIMemChipStatusIdle;
+}
+
+bool spi_mem_tools_set_write_enabled(bool enable) {
+    SPIMemChipStatusBit status = SPIMemChipStatusBitReserved;
+    SPIMemChipCMD cmd = SPIMemChipCMDWriteDisable;
+    if(enable) cmd = SPIMemChipCMDWriteEnable;
+    if(!spi_mem_tools_trx(cmd, NULL, 0, NULL, 0)) return false;
+    furi_delay_ms(10);
+    if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, (uint8_t*)&status, 1)) return false;
+    if(!(status & SPIMemChipStatusBitWriteEnabled) && enable) return false;
+    if((status & SPIMemChipStatusBitWriteEnabled) && !enable) return false;
+    return true;
+}
+
+bool spi_mem_tools_erase_chip(SPIMemChip* chip) {
+    UNUSED(chip);
+    if(!spi_mem_tools_trx(SPIMemChipCMDChipErase, NULL, 0, NULL, 0)) return false;
+    return true;
+}

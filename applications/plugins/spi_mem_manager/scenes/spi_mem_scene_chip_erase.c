@@ -39,6 +39,10 @@ bool spi_mem_scene_chip_erase_on_event(void* context, SceneManagerEvent event) {
         success = true;
         if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(app->scene_manager);
+        } else if(event.event == SPIMemCustomEventWorkerEraseDone) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
+        } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipError);
         }
     }
     return success;
