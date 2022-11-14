@@ -23,6 +23,17 @@ static FlipperFormat* snake_game_open_file() {
             return NULL;
         }
     } else {
+        if(storage_common_stat(storage, APPS_DATA, NULL) == FSE_NOT_EXIST) {
+            if(!storage_simply_mkdir(storage, APPS_DATA)) {
+                return NULL;
+            }
+        }
+        if(storage_common_stat(storage, SNAKE_GAME_FILE_DIR_PATH, NULL) == FSE_NOT_EXIST) {
+            if(!storage_simply_mkdir(storage, SNAKE_GAME_FILE_DIR_PATH)) {
+                return NULL;
+            }
+        }
+
         if(!flipper_format_file_open_new(file, SNAKE_GAME_FILE_PATH)) {
             snake_game_close_file(file);
             return NULL;
