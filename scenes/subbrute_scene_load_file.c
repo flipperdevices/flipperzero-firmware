@@ -3,13 +3,6 @@
 
 #define TAG "SubBruteSceneLoadFile"
 
-//void subbrute_scene_load_file_callback(SubBruteCustomEvent event, void* context) {
-////    furi_assert(context);
-////
-////    SubBruteState* instance = (SubBruteState*)context;
-////    view_dispatcher_send_custom_event(instance->view_dispatcher, event);
-//}
-
 void subbrute_scene_load_file_on_enter(void* context) {
     furi_assert(context);
     SubBruteState* instance = (SubBruteState*)context;

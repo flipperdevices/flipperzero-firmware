@@ -1,6 +1,7 @@
 #include "subbrute_main_view.h"
 #include "../subbrute_i.h"
 #include "../subbrute_protocols.h"
+#include "../gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
@@ -47,42 +48,45 @@ FuriString* center_displayed_key(const char* key_cstr, uint8_t index) {
     char display_menu[] = {
         'X', 'X', ' ', 'X', 'X', ' ', '<', 'X', 'X', '>', ' ', 'X', 'X', ' ', 'X', 'X', '\0'};
 
-    if(key_cstr != NULL) {
-        if(index > 1) {
-            display_menu[0] = key_cstr[str_index - 6];
-            display_menu[1] = key_cstr[str_index - 5];
-        } else {
-            display_menu[0] = ' ';
-            display_menu[1] = ' ';
-        }
-
-        if(index > 0) {
-            display_menu[3] = key_cstr[str_index - 3];
-            display_menu[4] = key_cstr[str_index - 2];
-        } else {
-            display_menu[3] = ' ';
-            display_menu[4] = ' ';
-        }
-
-        display_menu[7] = key_cstr[str_index];
-        display_menu[8] = key_cstr[str_index + 1];
-
-        if((str_index + 4) <= (uint8_t)strlen(key_cstr)) {
-            display_menu[11] = key_cstr[str_index + 3];
-            display_menu[12] = key_cstr[str_index + 4];
-        } else {
-            display_menu[11] = ' ';
-            display_menu[12] = ' ';
-        }
-
-        if((str_index + 8) <= (uint8_t)strlen(key_cstr)) {
-            display_menu[14] = key_cstr[str_index + 6];
-            display_menu[15] = key_cstr[str_index + 7];
-        } else {
-            display_menu[14] = ' ';
-            display_menu[15] = ' ';
-        }
+    if(key_cstr == NULL) {
+        return furi_string_alloc_set(display_menu);
     }
+    if(index > 1) {
+        display_menu[0] = key_cstr[str_index - 6];
+        display_menu[1] = key_cstr[str_index - 5];
+    } else {
+        display_menu[0] = ' ';
+        display_menu[1] = ' ';
+    }
+
+    if(index > 0) {
+        display_menu[3] = key_cstr[str_index - 3];
+        display_menu[4] = key_cstr[str_index - 2];
+    } else {
+        display_menu[3] = ' ';
+        display_menu[4] = ' ';
+    }
+
+    display_menu[7] = key_cstr[str_index];
+    display_menu[8] = key_cstr[str_index + 1];
+    uint8_t key_len = (uint8_t)strlen(key_cstr);
+
+    if((str_index + 4) <= key_len) {
+        display_menu[11] = key_cstr[str_index + 3];
+        display_menu[12] = key_cstr[str_index + 4];
+    } else {
+        display_menu[11] = ' ';
+        display_menu[12] = ' ';
+    }
+
+    if((str_index + 8) <= key_len) {
+        display_menu[14] = key_cstr[str_index + 6];
+        display_menu[15] = key_cstr[str_index + 7];
+    } else {
+        display_menu[14] = ' ';
+        display_menu[15] = ' ';
+    }
+
     return furi_string_alloc_set(display_menu);
 }
 
@@ -91,7 +95,7 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_box(canvas, 0, 0, canvas_width(canvas), STATUS_BAR_Y_SHIFT);
     canvas_invert_color(canvas);
-    canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Sub-GHz BruteForcer 3.2");
+    canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Sub-GHz BruteForcer 3.3");
     canvas_invert_color(canvas);
 
     uint16_t screen_width = canvas_width(canvas);
@@ -102,8 +106,8 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
         //FURI_LOG_D(TAG, "key_field: %s", model->key_field);
 #endif
         char msg_index[18];
-        snprintf(msg_index, sizeof(msg_index), "Field index : %d", model->index);
-        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignTop, msg_index);
+        snprintf(msg_index, sizeof(msg_index), "Field index: %d", model->index);
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, msg_index);
 
         FuriString* menu_items;
 
@@ -113,9 +117,12 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
             canvas, 64, 40, AlignCenter, AlignTop, furi_string_get_cstr(menu_items));
 
         elements_button_center(canvas, "Select");
-        elements_button_left(canvas, "<");
-        elements_button_right(canvas, ">");
-
+        if(model->index > 0) {
+            elements_button_left(canvas, " ");
+        }
+        if(model->index < 7) {
+            elements_button_right(canvas, " ");
+        }
         furi_string_reset(menu_items);
         furi_string_free(menu_items);
     } else {

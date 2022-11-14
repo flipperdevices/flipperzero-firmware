@@ -483,9 +483,17 @@ void subbrute_protocol_file_generate_file(
     uint8_t load_index,
     const char* file_key) {
     FuriString* candidate = furi_string_alloc();
-    char subbrute_payload_byte[4];
+    char subbrute_payload_byte[8];
     furi_string_set_str(candidate, file_key);
-    snprintf(subbrute_payload_byte, 4, "%02X ", (uint8_t)step);
+
+    for(int8_t shift = 8 * sizeof(step) - 4; shift >= 0; shift -= 4) {
+        uint8_t hexDigit = (step >> shift) & 0xF;
+        snprintf(subbrute_payload_byte, 4, "%02X ", hexDigit);
+
+        if(((shift & 0xF) == 0) && (shift > 0)) {
+            //ptr->print(" ");
+        }
+    }
     furi_string_replace_at(candidate, load_index * 3, 3, subbrute_payload_byte);
 
 #ifdef FURI_DEBUG
@@ -521,7 +529,7 @@ void subbrute_protocol_file_generate_file(
 uint64_t subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits) {
     uint64_t max_value;
     if(attack_type == SubBruteAttackLoadFile) {
-        max_value = 0xFF;
+        max_value = 0xFFFF;
     } else {
         FuriString* max_value_s;
         max_value_s = furi_string_alloc();
