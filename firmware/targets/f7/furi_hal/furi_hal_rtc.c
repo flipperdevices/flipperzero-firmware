@@ -30,7 +30,8 @@ typedef struct {
     uint8_t log_reserved : 4;
     uint8_t flags;
     uint8_t boot_mode : 4;
-    uint16_t reserved : 12;
+    uint8_t heap_track_mode : 2;
+    uint16_t reserved : 10;
 } DeveloperReg;
 
 _Static_assert(sizeof(DeveloperReg) == 4, "DeveloperReg size mismatch");
@@ -224,6 +225,19 @@ FuriHalRtcBootMode furi_hal_rtc_get_boot_mode() {
     return (FuriHalRtcBootMode)data->boot_mode;
 }
 
+void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    DeveloperReg* data = (DeveloperReg*)&data_reg;
+    data->heap_track_mode = mode;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+}
+
+FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode() {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    DeveloperReg* data = (DeveloperReg*)&data_reg;
+    return (FuriHalRtcHeapTrackMode)data->heap_track_mode;
+}
+
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
     furi_assert(datetime);
 
@@ -316,6 +330,12 @@ void furi_hal_rtc_set_pin_fails(uint32_t value) {
 
 uint32_t furi_hal_rtc_get_pin_fails() {
     return furi_hal_rtc_get_register(FuriHalRtcRegisterPinFails);
+}
+
+uint32_t furi_hal_rtc_get_timestamp() {
+    FuriHalRtcDateTime datetime = {0};
+    furi_hal_rtc_get_datetime(&datetime);
+    return furi_hal_rtc_datetime_to_timestamp(&datetime);
 }
 
 uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {

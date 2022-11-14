@@ -1,5 +1,7 @@
 #include "input_i.h"
 
+// #define INPUT_DEBUG
+
 #define GPIO_Read(input_pin) (furi_hal_gpio_read(input_pin.pin->gpio) ^ (input_pin.pin->inverted))
 
 static Input* input = NULL;
@@ -60,8 +62,9 @@ const char* input_get_type_name(InputType type) {
         return "Long";
     case InputTypeRepeat:
         return "Repeat";
+    default:
+        return "Unknown";
     }
-    return "Unknown";
 }
 
 int32_t input_srv(void* p) {
@@ -70,6 +73,10 @@ int32_t input_srv(void* p) {
     input->thread_id = furi_thread_get_current_id();
     input->event_pubsub = furi_pubsub_alloc();
     furi_record_create(RECORD_INPUT_EVENTS, input->event_pubsub);
+
+#if INPUT_DEBUG
+    furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
+#endif
 
 #ifdef SRV_CLI
     input->cli = furi_record_open(RECORD_CLI);
@@ -94,10 +101,16 @@ int32_t input_srv(void* p) {
         bool is_changing = false;
         for(size_t i = 0; i < input_pins_count; i++) {
             bool state = GPIO_Read(input->pin_states[i]);
+            if(state) {
+                if(input->pin_states[i].debounce < INPUT_DEBOUNCE_TICKS)
+                    input->pin_states[i].debounce += 1;
+            } else {
+                if(input->pin_states[i].debounce > 0) input->pin_states[i].debounce -= 1;
+            }
+
             if(input->pin_states[i].debounce > 0 &&
                input->pin_states[i].debounce < INPUT_DEBOUNCE_TICKS) {
                 is_changing = true;
-                input->pin_states[i].debounce += (state ? 1 : -1);
             } else if(input->pin_states[i].state != state) {
                 input->pin_states[i].state = state;
 
@@ -128,8 +141,14 @@ int32_t input_srv(void* p) {
         }
 
         if(is_changing) {
+#if INPUT_DEBUG
+            furi_hal_gpio_write(&gpio_ext_pa4, 1);
+#endif
             furi_delay_tick(1);
         } else {
+#if INPUT_DEBUG
+            furi_hal_gpio_write(&gpio_ext_pa4, 0);
+#endif
             furi_thread_flags_wait(INPUT_THREAD_FLAG_ISR, FuriFlagWaitAny, FuriWaitForever);
         }
     }

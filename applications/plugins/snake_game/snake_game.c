@@ -318,7 +318,6 @@ static void
 
 int32_t snake_game_app(void* p) {
     UNUSED(p);
-    srand(DWT->CYCCNT);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SnakeEvent));
 
@@ -379,6 +378,8 @@ int32_t snake_game_app(void* p) {
                         break;
                     case InputKeyBack:
                         processing = false;
+                        break;
+                    default:
                         break;
                     }
                 }
