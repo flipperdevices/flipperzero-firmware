@@ -37,12 +37,13 @@ static void furi_hal_info_do_out(FuriHalInfoValueContext* ctx, const char* fmt, 
         furi_string_vprintf(ctx->value, fmt, args);
         value_str = furi_string_get_cstr(ctx->value);
      } else {
+        // C string passthrough (no formatting)
         value_str = va_arg(args, const char*);
     }
 
     va_end(args);
 
-    ctx->out(furi_string_get_cstr(ctx->key), value_str, false, ctx->context);
+    ctx->out(furi_string_get_cstr(ctx->key), value_str, ctx->last, ctx->context);
 }
 
 void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
@@ -54,6 +55,7 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
         .value = value,
         .out = out,
         .sep = sep,
+        .last = false,
         .context = context
     };
 
@@ -176,6 +178,7 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
     }
 
     furi_hal_info_do_out(&value_context, "%u", 3, "protobuf", "version", "major", PROTOBUF_MAJOR_VERSION);
+    value_context.last = true;
     furi_hal_info_do_out(&value_context, "%u", 3, "protobuf", "version", "minor", PROTOBUF_MINOR_VERSION);
 
     furi_string_free(key);
