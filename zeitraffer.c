@@ -5,7 +5,7 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
-//#include <notification/notification_messages_notes.h>
+// Половина кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
 int Time = 10;
 int Count = 10;
@@ -37,12 +37,16 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 	char temp_str[36];
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
-    if (Count == -1)
-		snprintf(temp_str,sizeof(temp_str),"Set: BULB %i sec",Time);		
-	else if (Count == 0)
+    switch (Count) {
+	case -1:
+		snprintf(temp_str,sizeof(temp_str),"Set: BULB %i sec",Time);
+		break;
+	case 0:
 		snprintf(temp_str,sizeof(temp_str),"Set: infinite, %i sec",Time);
-	else
+		break;
+	default:
 		snprintf(temp_str,sizeof(temp_str),"Set: %i frames, %i sec",Count,Time);
+	}
 	canvas_draw_str(canvas, 3, 15, temp_str);
 	snprintf(temp_str,sizeof(temp_str),"Left: %i frames, %i sec",WorkCount,WorkTime);
 	canvas_draw_str(canvas, 3, 35, temp_str);
@@ -108,28 +112,26 @@ int32_t zeitraffer_app(void* p) {
         // Наше событие — это нажатие кнопки
        if(event.type == EventTypeInput) {
 		if(event.input.type == InputTypeShort) {
-            // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
+
             if(event.input.key == InputKeyBack) {
-			if(furi_timer_is_running(timer)) {
+				if(furi_timer_is_running(timer)) { // Если таймер запущен - нефиг мацать кнопки!
 				notification_message(notifications, &sequence_error);
-			}
-			else {
+				}
+				else {
 				WorkCount = Count;
 				WorkTime = 3;
 				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
 				notification_message(notifications, &sequence_success); 
-			}
-               // break;
+				}
             }
 			if(event.input.key == InputKeyRight) {
-			if(furi_timer_is_running(timer)) {
+				if(furi_timer_is_running(timer)) {
 				notification_message(notifications, &sequence_error);
-			}
-			else { 			
-			Count++;
-			notification_message(notifications, &sequence_click);
-			//view_port_update(view_port);
-			}
+				}
+				else { 			
+				Count++;
+				notification_message(notifications, &sequence_click);
+				}
             }
 			if(event.input.key == InputKeyLeft) {
 			if(furi_timer_is_running(timer)) {
@@ -138,7 +140,6 @@ int32_t zeitraffer_app(void* p) {
 			else { 
 			Count--;
 			notification_message(notifications, &sequence_click);
-			//view_port_update(view_port);
 			}
             }
 			if(event.input.key == InputKeyUp) {
@@ -148,7 +149,6 @@ int32_t zeitraffer_app(void* p) {
 			else { 
 			Time++;
 			notification_message(notifications, &sequence_click);
-			//view_port_update(view_port);
             }
 			}
 			if(event.input.key == InputKeyDown) {
@@ -158,7 +158,6 @@ int32_t zeitraffer_app(void* p) {
 			else { 
 			Time--;
 			notification_message(notifications, &sequence_click);
-			//view_port_update(view_port);
             }
 			}
 			if(event.input.key == InputKeyOk) {
@@ -174,7 +173,6 @@ int32_t zeitraffer_app(void* p) {
 				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
 				if (Count == -1) {gpio_item_set_pin(4, true); gpio_item_set_pin(5, true); Bulb = true; WorkCount = 1; WorkTime = Time;} else Bulb = false;
 				notification_message(notifications, &sequence_success);
-				notification_message(notifications, &sequence_display_backlight_off_delay_1000);
 				}
             }
 			}
@@ -203,7 +201,6 @@ int32_t zeitraffer_app(void* p) {
 			}
 			else { 
 			Count = Count+10;
-			//view_port_update(view_port);
             }
 			}
 			if(event.input.key == InputKeyLeft) {
@@ -212,7 +209,6 @@ int32_t zeitraffer_app(void* p) {
 			}
 			else { 
 			Count = Count-10;
-			//view_port_update(view_port);
             }
 			}
 			if(event.input.key == InputKeyUp) {
@@ -221,7 +217,6 @@ int32_t zeitraffer_app(void* p) {
 			}
 			else { 
 			Time = Time+10;
-			//view_port_update(view_port);
             }
 			}
 			if(event.input.key == InputKeyDown) {
@@ -230,22 +225,24 @@ int32_t zeitraffer_app(void* p) {
 			}
 			else { 
 			Time = Time-10;
-			//view_port_update(view_port);
             }
 			}
 			}
             // Наше событие — это сработавший таймер
         } else if(event.type == EventTypeTick) {
-            // Отправляем нотификацию мигания синим светодиодом
+            
 			WorkTime--;
+			// Отправляем нотификацию мигания синим светодиодом
 			notification_message(notifications, &sequence_blink_blue_100);
-			if (Backlight) {
+			
+			if (Backlight) { // чо по подсветке?
 				notification_message(notifications, &sequence_display_backlight_on);
 			}
 			else {
 				notification_message(notifications, &sequence_display_backlight_off);
 			}
-            if( WorkTime < 1 ) {
+            
+			if( WorkTime < 1 ) { // фоткаем
 				
 				if (Bulb) {
 					gpio_item_set_all_pins(false); WorkCount = 0;
@@ -268,7 +265,7 @@ int32_t zeitraffer_app(void* p) {
 				view_port_update(view_port);
 				}
 				}
-			if( WorkCount < 1 ) { 
+			if( WorkCount < 1 ) { // закончили
 				gpio_item_set_all_pins(false);
 				furi_timer_stop(timer); 
 				notification_message(notifications, &sequence_audiovisual_alert);
