@@ -83,6 +83,20 @@ FIRMWARE_APPS = {
         "unit_tests",
         "nfc",
     ],
+    "nfc": [
+        # Svc
+        "basic_services",
+        # Apps
+        "nfc",
+        "system_apps",
+        # Settings
+        "settings_apps",
+        # Stock plugins - no longer built into fw, now they're .faps
+        # Yet you can still build them as a part of fw
+        # "basic_plugins",
+        # Debug
+        # "debug_apps",
+    ],
 }
 
 FIRMWARE_APP_SET = "default"

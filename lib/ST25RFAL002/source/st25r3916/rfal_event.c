@@ -22,6 +22,12 @@ void rfal_event_user_abort() {
     furi_event_flag_set(rfal_event_flag, RfalEventUserAbort);
 }
 
+void rfal_event_state_changed() {
+    furi_assert(rfal_event_flag);
+
+    furi_event_flag_set(rfal_event_flag, RflaEventStateChaged);
+}
+
 RfalEvent rfal_event_wait(uint32_t timeout) {
     RfalEvent event = furi_event_flag_wait(
         rfal_event_flag,

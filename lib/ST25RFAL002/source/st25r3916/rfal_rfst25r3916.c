@@ -690,6 +690,7 @@ ReturnCode rfalDeinitialize(void) {
     rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_DEINIT));
 
     gRFAL.state = RFAL_STATE_IDLE;
+    rfal_event_state_changed();
     return ERR_NONE;
 }
 
@@ -1032,6 +1033,7 @@ ReturnCode rfalSetMode(rfalMode mode, rfalBitRate txBR, rfalBitRate rxBR) {
 
     /* Set state as STATE_MODE_SET only if not initialized yet (PSL) */
     gRFAL.state = ((gRFAL.state < RFAL_STATE_MODE_SET) ? RFAL_STATE_MODE_SET : gRFAL.state);
+    rfal_event_state_changed();
     gRFAL.mode = mode;
 
     /* Apply the given bit rate */
@@ -1446,6 +1448,7 @@ ReturnCode rfalStartTransceive(const rfalTransceiveContext* ctx) {
         }
 
         gRFAL.state = RFAL_STATE_TXRX;
+        rfal_event_state_changed();
         gRFAL.TxRx.state = RFAL_TXRX_STATE_TX_IDLE;
         gRFAL.TxRx.status = ERR_BUSY;
 
@@ -1716,6 +1719,7 @@ void rfalWorker(void) {
         if(event == RfalEventInterruptReceived) {
             st25r3916Isr();
         } else if(event == RfalEventUserAbort) {
+            rfalDeinitialize();
             rfalLowPowerModeStart();
             gRFAL.TxRx.state = RFAL_TXRX_STATE_IDLE;
             return;
@@ -2889,6 +2893,7 @@ ReturnCode rfalISO14443ATransceiveShortFrame(
 
         /* Jump into a transceive Rx state for reception (bypass Tx states) */
         gRFAL.state = RFAL_STATE_TXRX;
+        rfal_event_state_changed();
         gRFAL.TxRx.state = RFAL_TXRX_STATE_RX_IDLE;
         gRFAL.TxRx.status = ERR_BUSY;
 
@@ -3224,6 +3229,7 @@ ReturnCode rfalFeliCaPoll(
                     /* Jump again into transceive Rx state for the following reception */
                     gRFAL.TxRx.status = ERR_BUSY;
                     gRFAL.state = RFAL_STATE_TXRX;
+                    rfal_event_state_changed();
                     gRFAL.TxRx.state = RFAL_TXRX_STATE_RX_IDLE;
                 }
             }
@@ -3451,6 +3457,7 @@ ReturnCode rfalListenStart(
     /* Check if one of the modes were selected */
     if((gRFAL.Lm.mdReg & ST25R3916_REG_MODE_targ) == ST25R3916_REG_MODE_targ_targ) {
         gRFAL.state = RFAL_STATE_LM;
+        rfal_event_state_changed();
         gRFAL.Lm.mdMask = lmMask;
 
         gRFAL.Lm.rxBuf = rxBuf;
@@ -3923,6 +3930,7 @@ ReturnCode
     /* Set the new Sleep State*/
     gRFAL.Lm.state = sleepSt;
     gRFAL.state = RFAL_STATE_LM;
+    rfal_event_state_changed();
 
     gRFAL.Lm.rxBuf = rxBuf;
     gRFAL.Lm.rxBufLen = rxBufLen;
@@ -4139,6 +4147,7 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
             /* Set Mode NFC-F only */
             ret = rfalSetMode(RFAL_MODE_LISTEN_NFCF, gRFAL.Lm.brDetected, gRFAL.Lm.brDetected);
             gRFAL.state = RFAL_STATE_LM; /* Keep in Listen Mode */
+            rfal_event_state_changed();
 
             /* ReEnable the receiver */
             st25r3916ExecuteCommand(ST25R3916_CMD_CLEAR_FIFO);
@@ -4181,6 +4190,7 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
             ret = rfalSetMode(RFAL_MODE_LISTEN_NFCA, gRFAL.Lm.brDetected, gRFAL.Lm.brDetected);
 
             gRFAL.state = RFAL_STATE_LM; /* Keep in Listen Mode */
+            rfal_event_state_changed();
             break;
 
         /*******************************************************************************/
@@ -4439,6 +4449,7 @@ ReturnCode rfalWakeUpModeStart(const rfalWakeUpConfig* config) {
 
     gRFAL.wum.state = RFAL_WUM_STATE_ENABLED;
     gRFAL.state = RFAL_STATE_WUM;
+    rfal_event_state_changed();
 
     return ERR_NONE;
 }
@@ -4657,6 +4668,8 @@ ReturnCode rfalLowPowerModeStart(void) {
     rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_LOWPOWER_ON));
 
     gRFAL.state = RFAL_STATE_IDLE;
+    rfal_event_state_changed();
+
     gRFAL.lpm.isRunning = true;
 
     platformDisableIrqCallback();
@@ -4685,6 +4698,8 @@ ReturnCode rfalLowPowerModeStop(void) {
     rfalSetAnalogConfig((RFAL_ANALOG_CONFIG_TECH_CHIP | RFAL_ANALOG_CONFIG_CHIP_LOWPOWER_OFF));
 
     gRFAL.state = RFAL_STATE_INIT;
+    rfal_event_state_changed();
+
     return ERR_NONE;
 }
 

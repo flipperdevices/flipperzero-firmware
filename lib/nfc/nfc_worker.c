@@ -342,6 +342,7 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     rfalNfcaListenDevice dev;
     uint8_t dev_cnt = 0;
 
+    // rfalLowPowerModeStop();
     while(nfc_worker->state == NfcWorkerStateRead) {
         ReturnCode ret = rfalNfcaPollerInitialize();
         FURI_LOG_I(TAG, "Init ret: %d", ret);
@@ -363,12 +364,12 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             FURI_LOG_I(TAG, "Success. Sleep: %d", ret);
             // bool card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
         } else {
-            rfalNfcaPollerSleep();
+            // rfalNfcaPollerSleep();
             furi_hal_nfc_ll_txrx_off();
         }
         furi_delay_ms(100);
     }
-    rfalLowPowerModeStart();
+    // rfalLowPowerModeStart();
 }
 
 void _nfc_worker_read(NfcWorker* nfc_worker) {

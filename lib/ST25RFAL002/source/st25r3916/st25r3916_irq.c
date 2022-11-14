@@ -164,7 +164,6 @@ uint32_t st25r3916WaitForInterruptsTimed(uint32_t mask, uint16_t tmo) {
     RfalEvent event = rfal_event_wait(tmo);
     if(event == RfalEventInterruptReceived) {
         st25r3916Isr();
-        // printf("Z\r\n");
     }
     /* Run until specific interrupt has happen or the timer has expired */
     do {
