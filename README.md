@@ -1,5 +1,5 @@
 # zeitraffer
-simple timelapse app
+simple timelapse app for Flipper Zero + Sony DSLR A100
 
 Я ненастоящий сварщик, не обессудьте.
 
