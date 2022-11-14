@@ -55,7 +55,7 @@ const Interface ONE_WIRE = {
 //static const Interface* interfaces[] = {&SINGLE_WIRE, &I2C, &ONE_WIRE};
 //Перечень датчиков
 static const SensorType* sensorTypes[] =
-    {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280, &DS18B20};
+    {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280, &DS18x2x};
 
 const SensorType* unitemp_getTypeFromInt(int type) {
     if(type > SENSOR_TYPES_COUNT) return NULL;

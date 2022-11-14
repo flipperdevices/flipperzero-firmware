@@ -3,8 +3,8 @@
 #include <furi_hal.h>
 #include <one_wire/one_wire_host.h>
 
-const SensorType DS18B20 = {
-    .typename = "DS18B20",
+const SensorType DS18x2x = {
+    .typename = "DS18x2x",
     .interface = &ONE_WIRE,
     .pollingInterval = 250,
     .allocator = unitemp_OneWire_alloc,
@@ -140,7 +140,6 @@ bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
 }
 
 static uint8_t onewire_CRC_update(uint8_t crc, uint8_t b) {
-    //  return pgm_read_byte(&onewire_crc_table[crc ^ b]);
     for(uint8_t p = 8; p; p--) {
         crc = ((crc ^ b) & 1) ? (crc >> 1) ^ 0b10001100 : (crc >> 1);
         b >>= 1;
@@ -178,17 +177,31 @@ bool unitemp_OneWire_init(void* s) {
         GpioPullUp, //Принудительная подтяжка линии данных к питанию
         GpioSpeedVeryHigh); //Скорость работы - максимальная
 
-    //Установка разрядности в 10 бит
     if(!oneWire_start(instance)) return false;
-    oneWire_write(instance, 0xCC); // skip ROM
-    oneWire_write(instance, 0x4E); // Запись в память
-    uint8_t buff[3] = {0x4B, 0x46, 0x3F}; //10 бит
-    oneWire_writeBytes(instance, buff, 3);
+    oneWire_write(instance, 0x33); // Чтение ПЗУ
+    uint8_t buff[8];
+    oneWire_readBytes(instance, buff, 8);
+    if(!onewire_CRC_check(buff, 8)) {
+        return false;
+    }
+    FURI_LOG_D(APP_NAME, "%s family code: 0x%02X", ((Sensor*)s)->name, buff[0]);
+    instance->familyCode = buff[0];
 
-    //Сохранение значений в EEPROM для автоматического восстановления после сбоев питания
-    if(!oneWire_start(instance)) return false;
-    oneWire_write(instance, 0xCC); // skip ROM
-    oneWire_write(instance, 0x48); // Запись в EEPROM
+    if(instance->familyCode == FC_DS18B20 || instance->familyCode == FC_DS1822) {
+        //Установка разрядности в 10 бит
+        if(!oneWire_start(instance)) return false;
+        oneWire_write(instance, 0xCC); // skip ROM
+        oneWire_write(instance, 0x4E); // Запись в память
+        buff[0] = 0x4B; //Значение нижнего предела
+        buff[1] = 0x46; //Значение высшего предела
+        buff[2] = 0x3F; //10 бит разрядность преобразования
+        oneWire_writeBytes(instance, buff, 3);
+
+        //Сохранение значений в EEPROM для автоматического восстановления после сбоев питания
+        if(!oneWire_start(instance)) return false;
+        oneWire_write(instance, 0xCC); // skip ROM
+        oneWire_write(instance, 0x48); // Запись в EEPROM
+    }
 
     return true;
 }
@@ -225,7 +238,11 @@ UnitempStatus unitemp_OneWire_update(void* s) {
             return UT_BADCRC;
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
-        sensor->temp = (float)raw / 16.0f;
+        if(instance->familyCode == FC_DS18S20) {
+            sensor->temp = (float)raw / 2.0f;
+        } else {
+            sensor->temp = (float)raw / 16.0f;
+        }
     }
 
     return UT_OK;

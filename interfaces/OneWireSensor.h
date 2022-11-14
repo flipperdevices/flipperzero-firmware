@@ -3,11 +3,18 @@
 
 #include "../unitemp.h"
 
+typedef enum DallasFamilyCode {
+    FC_DS18S20 = 0x10,
+    FC_DS1822 = 0x22,
+    FC_DS18B20 = 0x28,
+} DallasFamilyCode;
+
 typedef struct OneWireSensor {
     //Порт подключения датчика
     const GPIO* gpio;
     //Текущий адрес устройства на шине OneWire
     uint64_t addr;
+    DallasFamilyCode familyCode;
 } OneWireSensor;
 
 /**
@@ -49,5 +56,5 @@ bool unitemp_OneWire_deinit(void* s);
  */
 UnitempStatus unitemp_OneWire_update(void* sensor);
 
-extern const SensorType DS18B20;
+extern const SensorType DS18x2x;
 #endif
