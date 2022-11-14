@@ -13,7 +13,6 @@
 typedef struct {
     RpcSession* session;
     PB_Main* response;
-    FuriString* topkey;
     FuriString* subkey;
 } RpcPropertyContext;
 
@@ -71,7 +70,6 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
     RpcPropertyContext property_context = {
         .session = session,
         .response = response,
-        .topkey = topkey,
         .subkey = subkey,
     };
 
