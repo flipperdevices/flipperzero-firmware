@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <furi.h>
+#include <rfal_nfca.h>
 
 #define NFCA_CMD_RATS (0xE0U)
 
@@ -139,4 +140,15 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
             nfca_add_byte(nfca_signal, data[i], parity[i / 8] & (1 << (7 - (i & 0x07))));
         }
     }
+}
+
+bool nfca_poller_check_presence() {
+    return true;
+}
+
+bool nfca_poller_activate() {
+    return true;
+}
+
+void nfca_poller_sleep() {
 }
