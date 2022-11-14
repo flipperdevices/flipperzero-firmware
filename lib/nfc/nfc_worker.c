@@ -3,6 +3,7 @@
 
 #include <platform.h>
 #include "parsers/nfc_supported_card.h"
+#include "rfal_event.h"
 
 #define TAG "NfcWorker"
 
@@ -87,6 +88,8 @@ void nfc_worker_change_state(NfcWorker* nfc_worker, NfcWorkerState state) {
 
 int32_t nfc_worker_task(void* context) {
     NfcWorker* nfc_worker = context;
+    FuriThreadId thread_id = furi_thread_get_current_id();
+    rfal_event_init(thread_id);
 
     furi_hal_nfc_exit_sleep();
 
@@ -343,7 +346,6 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     uint8_t dev_cnt = 0;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        rfalLowPowerModeStop();
         ReturnCode ret = rfalNfcaPollerInitialize();
         FURI_LOG_I(TAG, "Init ret: %d", ret);
         ret = furi_hal_nfc_ll_field_on();
@@ -365,7 +367,6 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
             // bool card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
         } else {
         }
-        rfalLowPowerModeStart();
         furi_hal_nfc_ll_txrx_off();
         furi_delay_ms(100);
     }

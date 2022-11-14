@@ -1,13 +1,14 @@
 #pragma once
 
-#include <stdint.h>
-
+#include <furi/furi.h>
+#include <furi/core/log.h>
+    
 typedef enum {
     RfalEventInterruptReceived = 1 << 0,
     RfalEventUserAbort = 1 << 1,
 } RfalEvent;
 
-void rfal_event_init();
+void rfal_event_init(FuriThreadId thread);
 
 void rfal_event_interrupt_received();
 
