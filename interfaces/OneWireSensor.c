@@ -130,6 +130,7 @@ bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
     }
     sensor->instance = instance;
 
+    instance->powerMode = PWR_ACTIVE;
     instance->gpio = unitemp_GPIO_getFromInt(anotherValues[0]);
     if(instance->gpio != NULL) {
         return true;
@@ -227,8 +228,18 @@ UnitempStatus unitemp_OneWire_update(void* s) {
         if(!oneWire_start(instance)) return UT_TIMEOUT;
         oneWire_write(instance, 0xCC); // skip ROM
         oneWire_write(instance, 0x44); // convert t
+        if(instance->powerMode == PWR_PASSIVE) {
+            furi_hal_gpio_write(instance->gpio->pin, true);
+            furi_hal_gpio_init(
+                instance->gpio->pin, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
+        }
         return UT_POLLING;
     } else {
+        if(instance->powerMode == PWR_PASSIVE) {
+            furi_hal_gpio_write(instance->gpio->pin, true);
+            furi_hal_gpio_init(
+                instance->gpio->pin, GpioModeOutputOpenDrain, GpioPullUp, GpioSpeedVeryHigh);
+        }
         if(!oneWire_start(instance)) return UT_TIMEOUT;
         oneWire_write(instance, 0xCC); // skip ROM
         oneWire_write(instance, 0xBE); // Read Scratch-pad

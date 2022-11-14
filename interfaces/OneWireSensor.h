@@ -3,18 +3,29 @@
 
 #include "../unitemp.h"
 
+//Коды семейства устройств
 typedef enum DallasFamilyCode {
     FC_DS18S20 = 0x10,
     FC_DS1822 = 0x22,
     FC_DS18B20 = 0x28,
 } DallasFamilyCode;
 
+//Режим питания датчка
+typedef enum PowerMode {
+    PWR_PASSIVE, //Питание от линии данных
+    PWR_ACTIVE //Питание от источника питания
+} PowerMode;
+
 typedef struct OneWireSensor {
     //Порт подключения датчика
     const GPIO* gpio;
     //Текущий адрес устройства на шине OneWire
     uint64_t addr;
+    //Код семейства устройств
     DallasFamilyCode familyCode;
+    //Режим питания датчка
+    PowerMode powerMode;
+
 } OneWireSensor;
 
 /**
