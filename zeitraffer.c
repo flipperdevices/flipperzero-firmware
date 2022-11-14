@@ -13,6 +13,7 @@ int WorkTime = 0;
 int WorkCount = 0;
 bool InfiniteShot = false;
 bool Bulb = false;
+bool Backlight = true;
 
 const NotificationSequence sequence_click = {
     &message_note_c7,
@@ -42,9 +43,11 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 		snprintf(temp_str,sizeof(temp_str),"Set: infinite, %i sec",Time);
 	else
 		snprintf(temp_str,sizeof(temp_str),"Set: %i frames, %i sec",Count,Time);
-	canvas_draw_str(canvas, 3, 20, temp_str);
+	canvas_draw_str(canvas, 3, 15, temp_str);
 	snprintf(temp_str,sizeof(temp_str),"Left: %i frames, %i sec",WorkCount,WorkTime);
-	canvas_draw_str(canvas, 3, 45, temp_str);
+	canvas_draw_str(canvas, 3, 35, temp_str);
+	snprintf(temp_str,sizeof(temp_str),"Backlight: %i",Backlight);
+	canvas_draw_str(canvas, 3, 55, temp_str);	
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
@@ -170,7 +173,8 @@ int32_t zeitraffer_app(void* p) {
 				if (WorkTime == 0) WorkTime = 3;
 				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
 				if (Count == -1) {gpio_item_set_pin(4, true); gpio_item_set_pin(5, true); Bulb = true; WorkCount = 1; WorkTime = Time;} else Bulb = false;
-				notification_message(notifications, &sequence_success); 
+				notification_message(notifications, &sequence_success);
+				notification_message(notifications, &sequence_display_backlight_off_delay_1000);
 				}
             }
 			}
@@ -188,7 +192,8 @@ int32_t zeitraffer_app(void* p) {
             }
 			}
 			if(event.input.key == InputKeyOk) {
-				notification_message(notifications, &sequence_display_backlight_off_delay_1000);
+				//notification_message(notifications, &sequence_display_backlight_on);
+				Backlight = !Backlight;
             }
 			}
 		if(event.input.type == InputTypeRepeat) {
@@ -234,6 +239,12 @@ int32_t zeitraffer_app(void* p) {
             // Отправляем нотификацию мигания синим светодиодом
 			WorkTime--;
 			notification_message(notifications, &sequence_blink_blue_100);
+			if (Backlight) {
+				notification_message(notifications, &sequence_display_backlight_on);
+			}
+			else {
+				notification_message(notifications, &sequence_display_backlight_off);
+			}
             if( WorkTime < 1 ) {
 				
 				if (Bulb) {
