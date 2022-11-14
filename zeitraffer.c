@@ -91,7 +91,8 @@ int32_t zeitraffer_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     // Подключаем view port к GUI в полноэкранном режиме
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-
+	
+	// Конфигурим пины
 	gpio_item_configure_all_pins(GpioModeOutputPushPull);
 
     // Создаем периодический таймер с коллбэком, куда в качестве
@@ -109,127 +110,154 @@ int32_t zeitraffer_app(void* p) {
         // и проверяем, что у нас получилось это сделать
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
-        // Наше событие — это нажатие кнопки
-       if(event.type == EventTypeInput) {
-		if(event.input.type == InputTypeShort) {
-
-            if(event.input.key == InputKeyBack) {
-				if(furi_timer_is_running(timer)) { // Если таймер запущен - нефиг мацать кнопки!
-				notification_message(notifications, &sequence_error);
+       // Наше событие — это нажатие кнопки
+		if(event.type == EventTypeInput) {
+			if(event.input.type == InputTypeShort) { // Короткие нажатия
+	
+				if(event.input.key == InputKeyBack) {
+					if(furi_timer_is_running(timer)) { // Если таймер запущен - нефиг мацать кнопки!
+						notification_message(notifications, &sequence_error);
+					}
+					else {
+						WorkCount = Count;
+						WorkTime = 3;
+						if (Count == 0) {
+							InfiniteShot = true; 
+							WorkCount = 1;
+						} 
+						else 
+							InfiniteShot = false;
+					
+						notification_message(notifications, &sequence_success); 
+					}
 				}
-				else {
-				WorkCount = Count;
-				WorkTime = 3;
-				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
-				notification_message(notifications, &sequence_success); 
+				if(event.input.key == InputKeyRight) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 			
+						Count++;
+						notification_message(notifications, &sequence_click);
+					}
 				}
-            }
-			if(event.input.key == InputKeyRight) {
-				if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
+				if(event.input.key == InputKeyLeft) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Count--;
+					notification_message(notifications, &sequence_click);
+					}
 				}
-				else { 			
-				Count++;
-				notification_message(notifications, &sequence_click);
+				if(event.input.key == InputKeyUp) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Time++;
+						notification_message(notifications, &sequence_click);
+					}
 				}
-            }
-			if(event.input.key == InputKeyLeft) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Count--;
-			notification_message(notifications, &sequence_click);
-			}
-            }
-			if(event.input.key == InputKeyUp) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Time++;
-			notification_message(notifications, &sequence_click);
-            }
-			}
-			if(event.input.key == InputKeyDown) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Time--;
-			notification_message(notifications, &sequence_click);
-            }
-			}
-			if(event.input.key == InputKeyOk) {
+				if(event.input.key == InputKeyDown) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Time--;
+						notification_message(notifications, &sequence_click);
+					}
+				}
+				if(event.input.key == InputKeyOk) {
 			
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_click);
-				furi_timer_stop(timer); 
-			}
-			else { 
-				furi_timer_start(timer, 1000);
-				if (WorkCount == 0) WorkCount = Count;
-				if (WorkTime == 0) WorkTime = 3;
-				if (Count == 0) {InfiniteShot = true; WorkCount = 1;} else InfiniteShot = false;
-				if (Count == -1) {gpio_item_set_pin(4, true); gpio_item_set_pin(5, true); Bulb = true; WorkCount = 1; WorkTime = Time;} else Bulb = false;
-				notification_message(notifications, &sequence_success);
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_click);
+						furi_timer_stop(timer); 
+					}
+					else { 
+						furi_timer_start(timer, 1000);
+					
+						if (WorkCount == 0) 
+							WorkCount = Count;
+					
+						if (WorkTime == 0) 
+							WorkTime = 3;
+					
+						if (Count == 0) {
+							InfiniteShot = true; 
+							WorkCount = 1;
+						} 
+						else 
+							InfiniteShot = false;
+					
+						if (Count == -1) {
+							gpio_item_set_pin(4, true); 
+							gpio_item_set_pin(5, true); 
+							Bulb = true; 
+							WorkCount = 1; 
+							WorkTime = Time;
+							} 
+							else 
+								Bulb = false;
+					
+						notification_message(notifications, &sequence_success);
+					}
 				}
-            }
 			}
-		if(event.input.type == InputTypeLong) {
-            // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
-            if(event.input.key == InputKeyBack) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
+			if(event.input.type == InputTypeLong) { // Длинные нажатия
+				// Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
+				if(event.input.key == InputKeyBack) {
+					if(furi_timer_is_running(timer)) { // А если работает таймер - не выходим :D
+						notification_message(notifications, &sequence_error);
+					}
+					else {
+						notification_message(notifications, &sequence_click);
+						gpio_item_set_all_pins(false);
+						furi_timer_stop(timer);
+						break;
+					}
+				}
+				if(event.input.key == InputKeyOk) {
+					Backlight = !Backlight; // Нам ваша подсветка и нахой не нужна! Или нужна.
+				}
 			}
-			else {
-			notification_message(notifications, &sequence_click);
-			gpio_item_set_all_pins(false);
-			furi_timer_stop(timer);
-                break;
-            }
+			if(event.input.type == InputTypeRepeat) { // Зажатые кнопки
+				if(event.input.key == InputKeyRight) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Count = Count+10;
+					}
+				}
+				if(event.input.key == InputKeyLeft) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Count = Count-10;
+					}
+				}
+				if(event.input.key == InputKeyUp) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Time = Time+10;
+					}
+				}
+				if(event.input.key == InputKeyDown) {
+					if(furi_timer_is_running(timer)) {
+						notification_message(notifications, &sequence_error);
+					}
+					else { 
+						Time = Time-10;
+					}
+				}
 			}
-			if(event.input.key == InputKeyOk) {
-				//notification_message(notifications, &sequence_display_backlight_on);
-				Backlight = !Backlight;
-            }
-			}
-		if(event.input.type == InputTypeRepeat) {
-			if(event.input.key == InputKeyRight) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Count = Count+10;
-            }
-			}
-			if(event.input.key == InputKeyLeft) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Count = Count-10;
-            }
-			}
-			if(event.input.key == InputKeyUp) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Time = Time+10;
-            }
-			}
-			if(event.input.key == InputKeyDown) {
-			if(furi_timer_is_running(timer)) {
-				notification_message(notifications, &sequence_error);
-			}
-			else { 
-			Time = Time-10;
-            }
-			}
-			}
-            // Наше событие — это сработавший таймер
-        } else if(event.type == EventTypeTick) {
+        }
+		
+        // Наше событие — это сработавший таймер
+		else if(event.type == EventTypeTick) {
             
 			WorkTime--;
 			// Отправляем нотификацию мигания синим светодиодом
@@ -251,10 +279,11 @@ int32_t zeitraffer_app(void* p) {
 				WorkCount--;
 				view_port_update(view_port);
 				notification_message(notifications, &sequence_click);
+				// Дрыгаем ногами
 				//gpio_item_set_all_pins(true);
 				gpio_item_set_pin(4, true);
 				gpio_item_set_pin(5, true);
-				furi_delay_ms(400);
+				furi_delay_ms(400); // На короткие нажатия фотик плохо реагирует
 				gpio_item_set_pin(4, false);
 				gpio_item_set_pin(5, false);
 				//gpio_item_set_all_pins(false);
@@ -273,8 +302,8 @@ int32_t zeitraffer_app(void* p) {
 				WorkCount = 0;
 				}
         }
-    if (Time < 1) Time = 1;
-	if (Count < -1) Count = 0;
+		if (Time < 1) Time = 1; // Не даём открутить таймер меньше единицы
+		if (Count < -1) Count = 0; // А тут даём, бо 0 кадров это бесконечная съёмка, а -1 кадров - BULB
 	}
 
     // Очищаем таймер
