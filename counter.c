@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <counter_icons.h>
 
+#define MAX_COUNT 99
 #define BOXTIME 2
 #define BOXWIDTH 30
 #define MIDDLE_X 64 - BOXWIDTH / 2
@@ -89,10 +90,10 @@ int32_t counterapp(void) {
                 furi_mutex_release(c->mutex);
                 state_free(c);
                 return 0;
-            } else if(input.key == InputKeyUp) {
+            } else if(input.key == InputKeyUp && c->count < MAX_COUNT) {
                 c->pressed = true;
                 c->boxtimer = BOXTIME;
-                if(c->count <= INT_MAX) c->count++;
+                c->count++;
             } else if(input.key == InputKeyDown && c->count != 0) {
                 c->pressed = true;
                 c->boxtimer = BOXTIME;
