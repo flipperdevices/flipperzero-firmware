@@ -86,7 +86,7 @@ static bool oneWire_read_bit(OneWireSensor* instance) {
  * @brief Чтение байта с шины One Wire
  * 
  * @param instance Указатель на инстанс датчика
- * @return 
+ * @return Байт информации
  */
 static uint8_t oneWire_read(OneWireSensor* instance) {
     uint8_t r = 0;
@@ -95,6 +95,18 @@ static uint8_t oneWire_read(OneWireSensor* instance) {
         if(oneWire_read_bit(instance)) r |= 0x80;
     }
     return r;
+}
+/**
+ * @brief Чтение массива байт с шины One Wire
+ * 
+ * @param instance Указатель на инстанс датчика
+ * @param data Указатель на массив, куда будут записаны данные
+ * @param len Количество байт
+ */
+static void oneWire_readBytes(OneWireSensor* instance, uint8_t* data, size_t len) {
+    for(size_t i = 0; i < len; i++) {
+        data[i] = oneWire_read(instance);
+    }
 }
 
 bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
@@ -113,6 +125,23 @@ bool unitemp_OneWire_alloc(void* s, uint16_t* anotherValues) {
     FURI_LOG_E(APP_NAME, "Sensor %s GPIO setting error", sensor->name);
     free(instance);
     return false;
+}
+
+static uint8_t onewire_CRC_update(uint8_t crc, uint8_t b) {
+    //  return pgm_read_byte(&onewire_crc_table[crc ^ b]);
+    for(uint8_t p = 8; p; p--) {
+        crc = ((crc ^ b) & 1) ? (crc >> 1) ^ 0b10001100 : (crc >> 1);
+        b >>= 1;
+    }
+    return crc;
+}
+
+static bool onewire_CRC_check(uint8_t* data, size_t len) {
+    uint8_t crc = 0;
+    for(size_t i = 0; i < len; i++) {
+        crc = onewire_CRC_update(crc, data[i]);
+    }
+    return !crc;
 }
 
 bool unitemp_OneWire_free(void* s) {
@@ -169,7 +198,12 @@ UnitempStatus unitemp_OneWire_update(void* s) {
         if(!oneWire_start(instance)) return UT_TIMEOUT;
         oneWire_write(instance, 0xCC); // skip ROM
         oneWire_write(instance, 0xBE); // Read Scratch-pad
-        int16_t raw = oneWire_read(instance) | ((int16_t)oneWire_read(instance) << 8);
+        uint8_t buff[9];
+        oneWire_readBytes(instance, buff, 9);
+        if(!onewire_CRC_check(buff, 9)) {
+            return UT_BADCRC;
+        }
+        int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
         sensor->temp = (float)raw / 16.0f;
     }
 
