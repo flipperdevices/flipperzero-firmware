@@ -3,12 +3,6 @@
 bool nfc_scene_mf_ultralight_unlock_auto_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
 
-    if(event == NfcWorkerEventMfUltralightPwdAuth) {
-        MfUltralightAuth* auth = &nfc->dev->dev_data.mf_ul_auth;
-        memcpy(nfc->byte_input_store, auth->pwd.raw, sizeof(auth->pwd.raw));
-        nfc->dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodManual;
-    }
-
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     return true;
 }
@@ -38,6 +32,10 @@ bool nfc_scene_mf_ultralight_unlock_auto_on_event(void* context, SceneManagerEve
 
     if(event.type == SceneManagerEventTypeCustom) {
         if((event.event == NfcWorkerEventMfUltralightPwdAuth)) {
+            MfUltralightAuth* auth = &nfc->dev->dev_data.mf_ul_auth;
+            memcpy(nfc->byte_input_store, auth->pwd.raw, sizeof(auth->pwd.raw));
+            nfc->dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodManual;
+            nfc_worker_stop(nfc->worker);
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;

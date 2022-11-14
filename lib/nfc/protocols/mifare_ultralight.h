@@ -170,6 +170,9 @@ typedef struct {
     MfUltralightFeatures supported_features;
 } MfUltralightReader;
 
+// TODO rework with reader analyzer
+typedef void (*MfUltralightAuthReceivedCallback)(MfUltralightAuth auth, void* context);
+
 typedef struct {
     MfUltralightData data;
     MfUltralightConfigPages* config;
@@ -188,6 +191,10 @@ typedef struct {
     bool read_counter_incremented;
     bool auth_attempted;
     MfUltralightAuth auth_attempt;
+
+    // TODO rework with reader analyzer
+    MfUltralightAuthReceivedCallback auth_received_callback;
+    void* context;
 } MfUltralightEmulator;
 
 void mf_ul_reset(MfUltralightData* data);

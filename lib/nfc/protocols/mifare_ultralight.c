@@ -1741,6 +1741,10 @@ bool mf_ul_prepare_emulation_response(
                         &buff_rx[1],
                         sizeof(emulator->auth_attempt.pwd.raw));
                     emulator->auth_attempted = true;
+                    if(emulator->auth_received_callback) {
+                        emulator->auth_received_callback(
+                            emulator->auth_attempt, emulator->context);
+                    }
 
                     uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
                     if(scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
