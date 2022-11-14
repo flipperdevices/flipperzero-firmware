@@ -8,23 +8,58 @@
 #include <furi.h>
 #include <protobuf_version.h>
 
+typedef struct {
+    FuriString* key;
+    FuriString* value;
+    FuriHalInfoValueCallback out;
+    char sep;
+    void* context;
+} FuriHalInfoValueContext;
+
+static void furi_hal_info_do_out(FuriHalInfoValueContext* ctx, const char* fmt, unsigned int nparts, ...) {
+    va_list args;
+    va_start(args, nparts);
+
+    furi_string_reset(ctx->key);
+    for(size_t i = 0; i < nparts; ++i) {
+        const char* keypart = va_arg(args, const char*);
+        furi_string_cat(ctx->key, keypart);
+        if(i < (nparts - 1)) {
+            furi_string_push_back(ctx->key, ctx->sep);
+        }
+    }
+
+    unsigned int value = va_arg(args, unsigned int);
+    va_end(args);
+
+    furi_string_printf(ctx->value, fmt, value);
+
+    ctx->out(furi_string_get_cstr(ctx->key), furi_string_get_cstr(ctx->value), false, ctx->context);
+}
+
 void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
-    UNUSED(sep);
     FuriString* key = furi_string_alloc();
     FuriString* value = furi_string_alloc();
 
+    FuriHalInfoValueContext value_context = {
+        .key = key,
+        .value = value,
+        .out = out,
+        .sep = sep,
+        .context = context
+    };
+
     // Device Info version
     if(sep == '.') {
-        out("format.major", "2", false, context);
-        out("format.minor", "0", false, context);
+        furi_hal_info_do_out(&value_context, "%s", 2, "format", "major", "2");
+        furi_hal_info_do_out(&value_context, "%s", 2, "format", "minor", "0");
     } else {
-        out("device_info_major", "2", false, context);
-        out("device_info_minor", "0", false, context);
+        furi_hal_info_do_out(&value_context, "%s", 3, "device", "info", "major", "2");
+        furi_hal_info_do_out(&value_context, "%s", 3, "device", "info", "minor", "0");
     }
 
     // Model name
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "model");
-    out(furi_string_get_cstr(key), furi_hal_version_get_model_name(), false, context);
+    furi_hal_info_do_out(&value_context, "%s", 2, "hardware", "model", furi_hal_version_get_model_name());
 
     // Unique ID
     furi_string_reset(value);
@@ -34,149 +69,82 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
     }
     furi_string_printf(key, "%s%c%s", "hardware", sep, "uid");
     out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+    // furi_hal_info_do_out(&value_context, "%s", 2, "hardware", "uid", furi_string_get_cstr(value));
 
     // OTP Revision
-    furi_string_printf(key, "%s%c%s%c%s", "hardware", sep, "otp", sep, "ver");
-    furi_string_printf(value, "%d", furi_hal_version_get_otp_version());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "timestamp");
-    furi_string_printf(value, "%lu", furi_hal_version_get_hw_timestamp());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+    furi_hal_info_do_out(&value_context, "%d", 3, "hardware", "otp", "ver", furi_hal_version_get_otp_version());
+    furi_hal_info_do_out(&value_context, "%lu", 2, "hardware", "timestamp", furi_hal_version_get_hw_timestamp());
 
     // Board Revision
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "ver");
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_version());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "target");
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_target());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "body");
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_body());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "connect");
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_connect());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "display");
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_display());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+    furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "ver", furi_hal_version_get_hw_version());
+    furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "target", furi_hal_version_get_hw_target());
+    furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "body", furi_hal_version_get_hw_body());
+    furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "connect", furi_hal_version_get_hw_connect());
+    furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "display", furi_hal_version_get_hw_display());
 
     // Board Personification
-    furi_string_printf(key, "%s%c%s", "hardware", sep, "color");
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_color());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
-    furi_string_printf(value, "%d", furi_hal_version_get_hw_region());
+    furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "color", furi_hal_version_get_hw_color());
 
     if(sep == '.') {
-        furi_string_printf(key, "%s.%s.%s", "hardware", "region", "builtin");
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+        furi_hal_info_do_out(&value_context, "%d", 3, "hardware", "region", "builtin", furi_hal_version_get_hw_region());
     } else {
-        out("hardware_region", furi_string_get_cstr(value), false, context);
+        furi_hal_info_do_out(&value_context, "%d", 2, "hardware", "region", furi_hal_version_get_hw_region());
     }
-    furi_string_printf(key, "%s%c%s%c%s", "hardware", sep, "region", sep, "provisioned");
-    out(furi_string_get_cstr(key), furi_hal_region_get_name(), false, context);
+
+    furi_hal_info_do_out(&value_context, "%s", 3, "hardware", "region", "provisioned", furi_hal_region_get_name());
 
     const char* name = furi_hal_version_get_name_ptr();
     if(name) {
-        furi_string_printf(key, "%s%c%s", "hardware", sep, "name");
-        out(furi_string_get_cstr(key), name, false, context);
+        furi_hal_info_do_out(&value_context, "%s", 2, "hardware", "name", name);
     }
 
     // Firmware version
     const Version* firmware_version = furi_hal_version_get_firmware_version();
     if(firmware_version) {
         if(sep == '.') {
-            furi_string_printf(key, "%s.%s.%s", "firmware", "commit", "hash");
-            out(furi_string_get_cstr(key), version_get_githash(firmware_version), false, context);
+            furi_hal_info_do_out(&value_context, "%s", 3, "firmware", "commit", "hash", version_get_githash(firmware_version));
         } else {
-            out("firmware_commit", version_get_githash(firmware_version), false, context);
+            furi_hal_info_do_out(&value_context, "%s", 2, "firmware", "commit", version_get_githash(firmware_version));
         }
 
-        furi_string_printf(key, "%s%c%s%c%s", "firmware", sep, "commit", sep, "dirty");
-        out(furi_string_get_cstr(key),
-            version_get_dirty_flag(firmware_version) ? "true" : "false",
-            false,
-            context);
+        furi_hal_info_do_out(&value_context, "%s", 3, "firmware", "commit", "dirty", version_get_dirty_flag(firmware_version) ? "true" : "false");
 
         if(sep == '.') {
-            furi_string_printf(key, "%s.%s.%s", "firmware", "branch", "name");
-            out(furi_string_get_cstr(key), version_get_gitbranch(firmware_version), false, context);
+            furi_hal_info_do_out(&value_context, "%s", 3, "firmware", "branch", "name", version_get_gitbranch(firmware_version));
         } else {
-            out("firmware_branch", version_get_gitbranch(firmware_version), false, context);
+            furi_hal_info_do_out(&value_context, "%s", 2, "firmware", "branch", version_get_gitbranch(firmware_version));
         }
 
-        furi_string_printf(key, "%s%c%s%c%s", "firmware", sep, "branch", sep, "num");
-        out(furi_string_get_cstr(key), version_get_gitbranchnum(firmware_version), false, context);
-        furi_string_printf(key, "%s%c%s", "firmware", sep, "version");
-        out(furi_string_get_cstr(key), version_get_version(firmware_version), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "firmware", sep, "build", sep, "date");
-        out(furi_string_get_cstr(key), version_get_builddate(firmware_version), false, context);
-        furi_string_printf(key, "%s%c%s", "firmware", sep, "target");
-        furi_string_printf(value, "%d", version_get_target(firmware_version));
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+        furi_hal_info_do_out(&value_context, "%s", 3, "firmware", "branch", "num", version_get_gitbranchnum(firmware_version));
+        furi_hal_info_do_out(&value_context, "%s", 2, "firmware", "version", version_get_version(firmware_version));
+        furi_hal_info_do_out(&value_context, "%s", 3, "firmware", "build", "date", version_get_builddate(firmware_version));
+        furi_hal_info_do_out(&value_context, "%d", 2, "firmware", "target", version_get_target(firmware_version));
     }
 
     if(furi_hal_bt_is_alive()) {
         const BleGlueC2Info* ble_c2_info = ble_glue_get_c2_info();
-        furi_string_printf(key, "%s%c%s", "radio", sep, "alive");
-        out(furi_string_get_cstr(key), "true", false, context);
-        furi_string_printf(key, "%s%c%s", "radio", sep, "mode");
-        out(furi_string_get_cstr(key),
-            ble_c2_info->mode == BleGlueC2ModeFUS ? "FUS" : "Stack",
-            false,
-            context);
+        furi_hal_info_do_out(&value_context, "%s", 2, "radio", "alive", "true");
+        furi_hal_info_do_out(&value_context, "%s", 2, "radio", "mode", ble_c2_info->mode == BleGlueC2ModeFUS ? "FUS" : "Stack");
 
         // FUS Info
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "major");
-        furi_string_printf(value, "%d", ble_c2_info->FusVersionMajor);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "minor");
-        furi_string_printf(value, "%d", ble_c2_info->FusVersionMinor);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "sub");
-        furi_string_printf(value, "%d", ble_c2_info->FusVersionSub);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "sram2b");
-        furi_string_printf(value, "%dK", ble_c2_info->FusMemorySizeSram2B);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "sram2a");
-        furi_string_printf(value, "%dK", ble_c2_info->FusMemorySizeSram2A);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "fus", sep, "flash");
-        furi_string_printf(value, "%dK", ble_c2_info->FusMemorySizeFlash * 4);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "fus", "major", ble_c2_info->FusVersionMajor);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "fus", "minor", ble_c2_info->FusVersionMinor);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "fus", "sub", ble_c2_info->FusVersionSub);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "fus", "sram2b", ble_c2_info->FusMemorySizeSram2B);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "fus", "sram2a", ble_c2_info->FusMemorySizeSram2A);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "fus", "flash", ble_c2_info->FusMemorySizeFlash * 4);
 
         // Stack Info
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "type");
-        furi_string_printf(value, "%d", ble_c2_info->StackType);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "major");
-        furi_string_printf(value, "%d", ble_c2_info->VersionMajor);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "minor");
-        furi_string_printf(value, "%d", ble_c2_info->VersionMinor);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "sub");
-        furi_string_printf(value, "%d", ble_c2_info->VersionSub);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "branch");
-        furi_string_printf(value, "%d", ble_c2_info->VersionBranch);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "release");
-        furi_string_printf(value, "%d", ble_c2_info->VersionReleaseType);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "sram2b");
-        furi_string_printf(value, "%dK", ble_c2_info->MemorySizeSram2B);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "sram2a");
-        furi_string_printf(value, "%dK", ble_c2_info->MemorySizeSram2A);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "sram1");
-        furi_string_printf(value, "%dK", ble_c2_info->MemorySizeSram1);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-        furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "stack", sep, "flash");
-        furi_string_printf(value, "%dK", ble_c2_info->MemorySizeFlash * 4);
-        out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "stack", "type", ble_c2_info->StackType);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "stack", "major", ble_c2_info->VersionMajor);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "stack", "minor", ble_c2_info->VersionMinor);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "stack", "sub", ble_c2_info->VersionSub);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "stack", "branch", ble_c2_info->VersionBranch);
+        furi_hal_info_do_out(&value_context, "%d", 3, "radio", "stack", "release", ble_c2_info->VersionReleaseType);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "stack", "sram2b", ble_c2_info->MemorySizeSram2B);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "stack", "sram2a", ble_c2_info->MemorySizeSram2A);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "stack", "sram1", ble_c2_info->MemorySizeSram1);
+        furi_hal_info_do_out(&value_context, "%dK", 3, "radio", "stack", "flash", ble_c2_info->MemorySizeFlash * 4);
 
         // Mac address
         furi_string_reset(value);
@@ -186,30 +154,25 @@ void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
         }
         furi_string_printf(key, "%s%c%s%c%s", "radio", sep, "ble", sep, "mac");
         out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+        // furi_hal_info_do_out(&value_context, "%s", 3, "radio", "ble", "mac", furi_string_get_cstr(value));
 
         // Signature verification
         uint8_t enclave_keys = 0;
         uint8_t enclave_valid_keys = 0;
         bool enclave_valid = furi_hal_crypto_verify_enclave(&enclave_keys, &enclave_valid_keys);
-        furi_string_printf(value, "%d", enclave_valid_keys);
         if(sep == '.') {
-            out("enclave.keys.valid", furi_string_get_cstr(value), false, context);
+            furi_hal_info_do_out(&value_context, "%d", 3, "enclave", "keys", "valid", enclave_valid_keys);
         } else {
-            out("enclave_valid_keys", furi_string_get_cstr(value), false, context);
+            furi_hal_info_do_out(&value_context, "%d", 3, "enclave", "valid", "keys", enclave_valid_keys);
         }
-        furi_string_printf(key, "%s%c%s", "enclave", sep, "valid");
-        out(furi_string_get_cstr(key), enclave_valid ? "true" : "false", false, context);
+
+        furi_hal_info_do_out(&value_context, "%s", 2, "enclave", "valid", enclave_valid ? "true" : "false");
     } else {
-        furi_string_printf(key, "%s%c%s", "radio", sep, "alive");
-        out(furi_string_get_cstr(key), "false", false, context);
+        furi_hal_info_do_out(&value_context, "%s", 2, "radio", "alive", "false");
     }
 
-    furi_string_printf(key, "%s%c%s%c%s", "protobuf", sep, "version", sep, "major");
-    furi_string_printf(value, "%u", PROTOBUF_MAJOR_VERSION);
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-    furi_string_printf(key, "%s%c%s%c%s", "protobuf", sep, "version", sep, "minor");
-    furi_string_printf(value, "%u", PROTOBUF_MINOR_VERSION);
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), true, context);
+    furi_hal_info_do_out(&value_context, "%u", 3, "protobuf", "version", "major", PROTOBUF_MAJOR_VERSION);
+    furi_hal_info_do_out(&value_context, "%u", 3, "protobuf", "version", "minor", PROTOBUF_MINOR_VERSION);
 
     furi_string_free(key);
     furi_string_free(value);

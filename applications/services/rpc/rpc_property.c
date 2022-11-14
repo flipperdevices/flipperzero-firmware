@@ -75,6 +75,7 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
 
     if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_SYSTEM)) {
         furi_hal_info_get(rpc_system_property_get_callback, '.', &property_context);
+        rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
     } else if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_POWER)) {
         furi_hal_power_info_get(rpc_system_property_get_callback, '.', &property_context);
     } else {
