@@ -14,20 +14,6 @@ bool slix_l_check_card_type(uint8_t UID0, uint8_t UID1, uint8_t UID2) {
     return false;
 }
 
-bool slix_l_read_card(
-    NfcVReader* reader,
-    FuriHalNfcDevData* nfc_data,
-    NfcVData* nfcv_data) {
-    furi_assert(reader);
-    furi_assert(nfcv_data);
-
-    if(nfcv_read_sysinfo(nfc_data, nfcv_data) != ERR_NONE) {
-        return false;
-    }
-
-    reader->blocks_to_read = nfcv_data->block_num;
-    return (nfcv_read_blocks(reader, nfcv_data) == ERR_NONE);
-}
 
 ReturnCode slix_l_get_random(uint8_t* rand) {
     uint16_t received = 0;

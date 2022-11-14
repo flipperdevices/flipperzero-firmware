@@ -96,7 +96,8 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
                 popup_set_header(popup, "Successfully\nunlocked", 94, 3, AlignCenter, AlignTop);
             }
 
-            notification_message(nfc->notifications, &sequence_success);
+            notification_message(nfc->notifications, &sequence_single_vibro);
+            //notification_message(nfc->notifications, &sequence_success);
 
             popup_set_icon(popup, 0, 6, &I_RFIDDolphinSuccess_108x57);
             popup_set_context(popup, nfc);

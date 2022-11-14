@@ -93,6 +93,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_read(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateUidEmulate) {
         nfc_worker_emulate_uid(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
+        nfc_worker_emulate_nfcv(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateEmulateApdu) {
         nfc_worker_emulate_apdu(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfUltralightEmulate) {
@@ -134,6 +136,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
     }
 
     furi_hal_nfc_sleep();
+
 
     while((nfc_worker->state == NfcWorkerStateNfcVUnlock) || 
         (nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave)) {
@@ -201,7 +204,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                     if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
                         NfcVReader reader;
 
-                        if(!slix_l_read_card(&reader, &nfc_worker->dev_data->nfc_data, nfcv_data)) {
+                        if(!nfcv_read_card(&reader, &nfc_worker->dev_data->nfc_data, nfcv_data)) {
                             furi_hal_console_printf("    => failed, wait for chip to disappear.\r\n");
                             snprintf(nfcv_data->error, sizeof(nfcv_data->error), "Read card\nfailed");
                             nfc_worker->callback(NfcWorkerEventWrongCardDetected, nfc_worker->context);
@@ -249,7 +252,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
     }
 }
 
-static bool nfc_worker_read_slix_l(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+static bool nfc_worker_read_nfcv_content(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     NfcVReader reader = {};
 
@@ -260,7 +263,7 @@ static bool nfc_worker_read_slix_l(NfcWorker* nfc_worker, FuriHalNfcTxRxContext*
 
     do {
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
-        if(!slix_l_read_card(&reader, &nfc_worker->dev_data->nfc_data, &nfc_worker->dev_data->nfcv_data)) break;
+        if(!nfcv_read_card(&reader, &nfc_worker->dev_data->nfc_data, &nfc_worker->dev_data->nfcv_data)) break;
         read_success = true;
     } while(false);
 
@@ -270,6 +273,7 @@ static bool nfc_worker_read_slix_l(NfcWorker* nfc_worker, FuriHalNfcTxRxContext*
 
     return read_success;
 }
+
 
 static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
@@ -495,11 +499,11 @@ static bool nfc_worker_read_nfcv(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     if(slix_l_check_card_type(nfc_data->uid[7], nfc_data->uid[6], nfc_data->uid[5])) {
         FURI_LOG_I(TAG, "NXP SLIX-L detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolSlixL;
-        card_read = nfc_worker_read_slix_l(nfc_worker, tx_rx);
+        card_read = nfc_worker_read_nfcv_content(nfc_worker, tx_rx);
     } else {
         FURI_LOG_I(TAG, "unknown detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
-        card_read = true;
+        nfc_worker->dev_data->protocol = NfcDeviceProtocolNfcV;
+        card_read = nfc_worker_read_nfcv_content(nfc_worker, tx_rx);
     }
 
     return card_read;
@@ -555,10 +559,8 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                 FURI_LOG_I(TAG, "NfcV detected");
                 if(nfc_worker_read_nfcv(nfc_worker, &tx_rx)) {
                     FURI_LOG_I(TAG, "nfc_worker_read_nfcv success");
-                    if(dev_data->protocol == NfcDeviceProtocolSlixL) {
-                        event = NfcWorkerEventReadNfcV;
-                        break;
-                    }
+                    event = NfcWorkerEventReadNfcV;
+                    break;
                 }
                 event = NfcWorkerEventReadUidNfcV;
                 break;
@@ -601,6 +603,21 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
             }
         }
     }
+}
+
+void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker) {
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
+
+    nfcv_emu_init();
+    while(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
+        if(nfcv_emu_loop(nfc_data, nfcv_data, 1000)) {
+            if(nfc_worker->callback) {
+                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+            }
+        }
+    }
+    nfcv_emu_deinit();
 }
 
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {

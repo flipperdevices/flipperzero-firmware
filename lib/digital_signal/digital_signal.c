@@ -16,7 +16,7 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->start_level = true;
     signal->edges_max_cnt = max_edges_cnt;
     signal->edge_timings = malloc(max_edges_cnt * sizeof(uint32_t));
-    signal->reload_reg_buff = malloc(max_edges_cnt * sizeof(uint32_t));
+    signal->reload_reg_buff = malloc(signal->edges_max_cnt * sizeof(uint32_t));
     signal->edge_cnt = 0;
 
     return signal;
@@ -37,7 +37,10 @@ bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b) {
     if(signal_a->edges_max_cnt < signal_a->edge_cnt + signal_b->edge_cnt) {
         return false;
     }
-
+    /* in case there are no edges in our target signal, the signal to append makes the rules */
+    if(!signal_a->edge_cnt) {
+        signal_a->start_level = signal_b->start_level;
+    }
     bool end_level = signal_a->start_level;
     if(signal_a->edge_cnt) {
         end_level = signal_a->start_level ^ !(signal_a->edge_cnt % 2);
@@ -83,6 +86,7 @@ void digital_signal_prepare_arr(DigitalSignal* signal) {
     uint32_t t_signal_rest = signal->edge_timings[0];
     uint32_t r_count_tick_arr = 0;
     uint32_t r_rest_div = 0;
+
 
     for(size_t i = 0; i < signal->edge_cnt - 1; i++) {
         r_count_tick_arr = t_signal_rest / T_TIM;
@@ -162,7 +166,8 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     LL_TIM_EnableCounter(TIM2);
 
     while(!LL_DMA_IsActiveFlag_TC2(DMA1))
-        ;
+    {
+    }
 
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TC2(DMA1);

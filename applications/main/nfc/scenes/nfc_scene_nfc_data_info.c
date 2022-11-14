@@ -14,7 +14,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
-    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl)|| (protocol == NfcDeviceProtocolSlixL)) {
+    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) 
+        || (protocol == NfcDeviceProtocolSlixL) || (protocol == NfcDeviceProtocolNfcV)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -40,6 +41,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             temp_str, "\e#%s\n", nfc_mf_classic_type(dev_data->mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
+    } else if(protocol == NfcDeviceProtocolNfcV) {
+        furi_string_cat_printf(temp_str, "\e#ISO15693\n");
     } else if(protocol == NfcDeviceProtocolSlixL) {
         furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX-L\n");
     } else {
@@ -47,7 +50,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     }
 
     // Set tag iso data
-    if(protocol == NfcDeviceProtocolSlixL) {
+    if((protocol == NfcDeviceProtocolSlixL) || (protocol == NfcDeviceProtocolNfcV)) {
         NfcVData* nfcv_data = &nfc->dev->dev_data.nfcv_data;
         
         furi_string_cat_printf(temp_str, "UID:\n");
@@ -149,6 +152,9 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolSlixL) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);
+                consumed = true;
+            } else if(protocol == NfcDeviceProtocolNfcV) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);
                 consumed = true;
             }

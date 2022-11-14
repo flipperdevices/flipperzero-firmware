@@ -19,6 +19,7 @@ typedef enum {
     NfcWorkerStateReadMfUltralightReadAuth,
     NfcWorkerStateMfClassicDictAttack,
     NfcWorkerStateAnalyzeReader,
+    NfcWorkerStateNfcVEmulate,
     NfcWorkerStateNfcVUnlock,
     NfcWorkerStateNfcVUnlockAndSave,
     // Debug
@@ -91,4 +92,4 @@ void nfc_worker_start(
 
 void nfc_worker_stop(NfcWorker* nfc_worker);
 void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker);
-
+void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker);
