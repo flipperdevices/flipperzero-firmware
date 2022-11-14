@@ -717,7 +717,6 @@ ReturnCode rfalNfcaPollerFullCollisionResolution(
 
     EXIT_ON_ERR(
         ret, rfalNfcaPollerStartFullCollisionResolution(compMode, devLimit, nfcaDevList, devCnt));
-    printf("c\r\n");
     rfalNfcaRunBlocking(ret, rfalNfcaPollerGetFullCollisionResolutionStatus());
 
     return ret;
