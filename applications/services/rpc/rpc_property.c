@@ -7,8 +7,10 @@
 #include "rpc_i.h"
 
 #define TAG "RpcProperty"
-#define PROPERTY_CATEGORY_SYSTEM "system"
-#define PROPERTY_CATEGORY_POWER "power"
+
+#define PROPERTY_CATEGORY_DEVICE_INFO "devinfo"
+#define PROPERTY_CATEGORY_POWER_INFO "pwrinfo"
+#define PROPERTY_CATEGORY_POWER_DEBUG "pwrdebug"
 
 typedef struct {
     RpcSession* session;
@@ -73,10 +75,12 @@ static void rpc_system_property_get_process(const PB_Main* request, void* contex
         .subkey = subkey,
     };
 
-    if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_SYSTEM)) {
+    if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_DEVICE_INFO)) {
         furi_hal_info_get(rpc_system_property_get_callback, '.', &property_context);
-    } else if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_POWER)) {
+    } else if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_POWER_INFO)) {
         furi_hal_power_info_get(rpc_system_property_get_callback, '.', &property_context);
+    } else if(!furi_string_cmp(topkey, PROPERTY_CATEGORY_POWER_DEBUG)) {
+        furi_hal_power_debug_get(rpc_system_property_get_callback, &property_context);
     } else {
         rpc_send_and_release_empty(
             session, request->command_id, PB_CommandStatus_ERROR_INVALID_PARAMETERS);

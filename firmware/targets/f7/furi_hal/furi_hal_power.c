@@ -422,76 +422,6 @@ float furi_hal_power_get_usb_voltage() {
     return ret;
 }
 
-void furi_hal_power_dump_state() {
-    BatteryStatus battery_status;
-    OperationStatus operation_status;
-
-    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
-
-    if(bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) == BQ27220_ERROR ||
-       bq27220_get_operation_status(&furi_hal_i2c_handle_power, &operation_status) ==
-           BQ27220_ERROR) {
-        printf("Failed to get bq27220 status. Communication error.\r\n");
-    } else {
-        // Operation status register
-        printf(
-            "bq27220: CALMD: %d, SEC: %d, EDV2: %d, VDQ: %d, INITCOMP: %d, SMTH: %d, BTPINT: %d, CFGUPDATE: %d\r\n",
-            operation_status.CALMD,
-            operation_status.SEC,
-            operation_status.EDV2,
-            operation_status.VDQ,
-            operation_status.INITCOMP,
-            operation_status.SMTH,
-            operation_status.BTPINT,
-            operation_status.CFGUPDATE);
-        // Battery status register, part 1
-        printf(
-            "bq27220: CHGINH: %d, FC: %d, OTD: %d, OTC: %d, SLEEP: %d, OCVFAIL: %d, OCVCOMP: %d, FD: %d\r\n",
-            battery_status.CHGINH,
-            battery_status.FC,
-            battery_status.OTD,
-            battery_status.OTC,
-            battery_status.SLEEP,
-            battery_status.OCVFAIL,
-            battery_status.OCVCOMP,
-            battery_status.FD);
-        // Battery status register, part 2
-        printf(
-            "bq27220: DSG: %d, SYSDWN: %d, TDA: %d, BATTPRES: %d, AUTH_GD: %d, OCVGD: %d, TCA: %d, RSVD: %d\r\n",
-            battery_status.DSG,
-            battery_status.SYSDWN,
-            battery_status.TDA,
-            battery_status.BATTPRES,
-            battery_status.AUTH_GD,
-            battery_status.OCVGD,
-            battery_status.TCA,
-            battery_status.RSVD);
-        // Voltage and current info
-        printf(
-            "bq27220: Full capacity: %dmAh, Design capacity: %dmAh, Remaining capacity: %dmAh, State of Charge: %d%%, State of health: %d%%\r\n",
-            bq27220_get_full_charge_capacity(&furi_hal_i2c_handle_power),
-            bq27220_get_design_capacity(&furi_hal_i2c_handle_power),
-            bq27220_get_remaining_capacity(&furi_hal_i2c_handle_power),
-            bq27220_get_state_of_charge(&furi_hal_i2c_handle_power),
-            bq27220_get_state_of_health(&furi_hal_i2c_handle_power));
-        printf(
-            "bq27220: Voltage: %dmV, Current: %dmA, Temperature: %dC\r\n",
-            bq27220_get_voltage(&furi_hal_i2c_handle_power),
-            bq27220_get_current(&furi_hal_i2c_handle_power),
-            (int)furi_hal_power_get_battery_temperature_internal(FuriHalPowerICFuelGauge));
-    }
-
-    printf(
-        "bq25896: VBUS: %d, VSYS: %d, VBAT: %d, Current: %d, NTC: %ldm%%\r\n",
-        bq25896_get_vbus_voltage(&furi_hal_i2c_handle_power),
-        bq25896_get_vsys_voltage(&furi_hal_i2c_handle_power),
-        bq25896_get_vbat_voltage(&furi_hal_i2c_handle_power),
-        bq25896_get_vbat_current(&furi_hal_i2c_handle_power),
-        bq25896_get_ntc_mpct(&furi_hal_i2c_handle_power));
-
-    furi_hal_i2c_release(&furi_hal_i2c_handle_power);
-}
-
 void furi_hal_power_enable_external_3_3v() {
     furi_hal_gpio_write(&periph_power, 1);
 }
@@ -526,7 +456,7 @@ void furi_hal_power_suppress_charge_exit() {
     }
 }
 
-void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* context) {
+void furi_hal_power_info_get(RpcHelperPropertyCallback out, char sep, void* context) {
     furi_assert(out);
 
     FuriString* value = furi_string_alloc();
@@ -580,4 +510,91 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* conte
 
     furi_string_free(key);
     furi_string_free(value);
+}
+
+void furi_hal_power_debug_get(RpcHelperPropertyCallback out, void* context) {
+    furi_assert(out);
+
+    FuriString* value = furi_string_alloc();
+    FuriString* key = furi_string_alloc();
+
+    RpcHelperPropertyContext property_context = {
+        .key = key,
+        .value = value,
+        .out = out,
+        .sep = '.',
+        .last = false,
+        .context = context
+    };
+
+    BatteryStatus battery_status;
+    OperationStatus operation_status;
+
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
+
+    // Power Debug version
+    rpc_helper_property_out(&property_context, NULL, 2, "format", "major", "1");
+    rpc_helper_property_out(&property_context, NULL, 2, "format", "minor", "0");
+
+    rpc_helper_property_out(&property_context, "%d", 2, "charger", "vbus", bq25896_get_vbus_voltage(&furi_hal_i2c_handle_power));
+    rpc_helper_property_out(&property_context, "%d", 2, "charger", "vsys", bq25896_get_vsys_voltage(&furi_hal_i2c_handle_power));
+    rpc_helper_property_out(&property_context, "%d", 2, "charger", "vbat", bq25896_get_vbat_voltage(&furi_hal_i2c_handle_power));
+    rpc_helper_property_out(&property_context, "%d", 2, "charger", "current", bq25896_get_vbat_current(&furi_hal_i2c_handle_power));
+
+    const uint32_t ntc_mpct = bq25896_get_ntc_mpct(&furi_hal_i2c_handle_power);
+
+    if(bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) != BQ27220_ERROR &&
+       bq27220_get_operation_status(&furi_hal_i2c_handle_power, &operation_status) !=
+           BQ27220_ERROR) {
+        rpc_helper_property_out(&property_context, "%lu", 2, "charger", "ntc", ntc_mpct);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "calmd", operation_status.CALMD);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "sec", operation_status.SEC);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "edv2", operation_status.EDV2);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "vdq", operation_status.VDQ);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "initcomp", operation_status.INITCOMP);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "smth", operation_status.SMTH);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "btpint", operation_status.BTPINT);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "cfgupdate", operation_status.CFGUPDATE);
+
+        // Battery status register, part 1
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "chginh", battery_status.CHGINH);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "fc", battery_status.FC);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "otd", battery_status.OTD);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "otc", battery_status.OTC);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "sleep", battery_status.SLEEP);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "ocvfail", battery_status.OCVFAIL);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "ocvcomp", battery_status.OCVCOMP);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "fd", battery_status.FD);
+
+        // Battery status register, part 2
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "dsg", battery_status.DSG);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "sysdwn", battery_status.SYSDWN);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "tda", battery_status.TDA);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "battpres", battery_status.BATTPRES);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "authgd", battery_status.AUTH_GD);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "ocvgd", battery_status.OCVGD);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "tca", battery_status.TCA);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "rsvd", battery_status.RSVD);
+
+        // Voltage and current info
+        rpc_helper_property_out(&property_context, "%d", 3, "gauge", "capacity", "full", bq27220_get_full_charge_capacity(&furi_hal_i2c_handle_power));
+        rpc_helper_property_out(&property_context, "%d", 3, "gauge", "capacity", "design", bq27220_get_design_capacity(&furi_hal_i2c_handle_power));
+        rpc_helper_property_out(&property_context, "%d", 3, "gauge", "capacity", "remain", bq27220_get_remaining_capacity(&furi_hal_i2c_handle_power));
+        rpc_helper_property_out(&property_context, "%d", 3, "gauge", "state", "charge", bq27220_get_state_of_charge(&furi_hal_i2c_handle_power));
+        rpc_helper_property_out(&property_context, "%d", 3, "gauge", "state", "health", bq27220_get_state_of_health(&furi_hal_i2c_handle_power));
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "voltage", bq27220_get_voltage(&furi_hal_i2c_handle_power));
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "current", bq27220_get_current(&furi_hal_i2c_handle_power));
+
+        property_context.last = true;
+        const int battery_temp = (int)furi_hal_power_get_battery_temperature_internal(FuriHalPowerICFuelGauge);
+        rpc_helper_property_out(&property_context, "%d", 2, "gauge", "temperature", battery_temp);
+    } else {
+        property_context.last = true;
+        rpc_helper_property_out(&property_context, "%lu", 2, "charger", "ntc", ntc_mpct);
+    }
+
+    furi_string_free(key);
+    furi_string_free(value);
+
+    furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 }

@@ -169,10 +169,6 @@ float furi_hal_power_get_battery_temperature(FuriHalPowerIC ic);
  */
 float furi_hal_power_get_usb_voltage();
 
-/** Get power system component state
- */
-void furi_hal_power_dump_state();
-
 /** Enable 3.3v on external gpio and sd card
  */
 void furi_hal_power_enable_external_3_3v();
@@ -207,7 +203,14 @@ typedef void (
  * @param[in]  sep          category separator character
  * @param[in]  context      context to pass to callback
  */
-void furi_hal_power_info_get(FuriHalPowerInfoCallback callback, char sep, void* context);
+void furi_hal_power_info_get(RpcHelperPropertyCallback callback, char sep, void* context);
+
+/** Get power debug information
+ *
+ * @param[in]  callback     callback to provide with new data
+ * @param[in]  context      context to pass to callback
+ */
+void furi_hal_power_debug_get(RpcHelperPropertyCallback callback, void* context);
 
 #ifdef __cplusplus
 }
