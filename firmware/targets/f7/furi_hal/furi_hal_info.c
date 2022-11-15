@@ -8,7 +8,7 @@
 #include <furi.h>
 #include <protobuf_version.h>
 
-void furi_hal_info_get(FuriHalInfoValueCallback out, char sep, void* context) {
+void furi_hal_info_get(RpcHelperPropertyCallback out, char sep, void* context) {
     FuriString* key = furi_string_alloc();
     FuriString* value = furi_string_alloc();
 

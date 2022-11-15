@@ -187,16 +187,6 @@ void furi_hal_power_suppress_charge_enter();
  */
 void furi_hal_power_suppress_charge_exit();
 
-/** Callback type called by furi_hal_power_info_get every time another key-value pair of information is ready
- *
- * @param      key[in]      power information type identifier
- * @param      value[in]    power information value
- * @param      last[in]     whether the passed key-value pair is the last one
- * @param      context[in]  to pass to callback
- */
-typedef void (
-    *FuriHalPowerInfoCallback)(const char* key, const char* value, bool last, void* context);
-
 /** Get power information
  *
  * @param[in]  callback     callback to provide with new data
