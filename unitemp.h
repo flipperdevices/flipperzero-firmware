@@ -54,7 +54,7 @@ typedef struct {
     //Список указателей на датчики
     Sensor* sensors[MAX_SENSORS];
     //Количество загруженных датчиков
-    size_t sensors_count;
+    uint8_t sensors_count;
 
     //SD-карта
     Storage* storage; //Хранилище

@@ -21,7 +21,7 @@ typedef struct {
     const GPIO* gpio;
     //Количество устройств на шине
     //Обновляется при ручном добавлении датчика на эту шину
-    size_t device_count;
+    uint8_t device_count;
     //Режим питания датчиков на шине
     PowerMode powerMode;
 } OneWireBus;

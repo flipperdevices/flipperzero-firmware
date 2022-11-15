@@ -125,10 +125,10 @@ bool unitemp_sensors_load() {
     }
 
     //Вычисление размера файла
-    size_t file_size = stream_size(app->file_stream);
+    uint8_t file_size = stream_size(app->file_stream);
     FURI_LOG_D(APP_NAME, "Sensors file size: %d bytes", file_size);
     //Если файл пустой, то:
-    if(file_size == (size_t)0) {
+    if(file_size == (uint8_t)0) {
         FURI_LOG_W(APP_NAME, "Sensors file is empty");
         //Закрытие потока и освобождение памяти
         file_stream_close(app->file_stream);
@@ -208,7 +208,7 @@ bool unitemp_sensors_save(void) {
     }
 
     //Сохранение датчиков
-    for(size_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
         if(app->sensors[i]->type->interface == &SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
@@ -304,7 +304,7 @@ void unitemp_sensor_free(Sensor* sensor) {
 }
 
 void unitemp_sensors_free(void) {
-    for(size_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
         unitemp_sensor_free(app->sensors[i]);
     }
     app->sensors_count = 0;
@@ -314,7 +314,7 @@ bool unitemp_sensors_init(void) {
     bool result = true;
 
     //Перебор датчиков из списка
-    for(size_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
         //Включение 5V если на порту 1 FZ его нет
         //Может пропасть при отключении USB
         if(furi_hal_power_is_otg_enabled() != true) {
@@ -342,7 +342,7 @@ bool unitemp_sensors_deInit(void) {
     }
 
     //Перебор датчиков из списка
-    for(size_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
         if(!(*app->sensors[i]->type->deinitializer)(app->sensors[i])) {
             FURI_LOG_E(
                 APP_NAME,
@@ -381,7 +381,7 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
 }
 
 void unitemp_sensors_updateValues(void) {
-    for(size_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
         unitemp_sensor_updateData(app->sensors[i]);
     }
 }

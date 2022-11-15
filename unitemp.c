@@ -100,10 +100,10 @@ static bool unitemp_loadSettings(void) {
     }
 
     //Вычисление размера файла
-    size_t file_size = stream_size(app->file_stream);
+    uint8_t file_size = stream_size(app->file_stream);
     FURI_LOG_D(APP_NAME, "Settings file size: %d bytes\r\n", file_size);
     //Если файл пустой, то:
-    if(file_size == (size_t)0) {
+    if(file_size == (uint8_t)0) {
         FURI_LOG_W(APP_NAME, "Settings file is empty\r\n");
         //Закрытие потока и освобождение памяти
         file_stream_close(app->file_stream);

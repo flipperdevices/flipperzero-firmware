@@ -20,9 +20,10 @@ OneWireBus* uintemp_OneWire_bus_alloc(const GPIO* gpio) {
         return NULL;
     }
     //Проверка на наличие шины на этом порте
-    for(size_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
         if(app->sensors[i]->type == &DS18x2x &&
            ((OneWireBus*)(app->sensors[i]->instance))->gpio == gpio) {
+            ((OneWireBus*)(app->sensors[i]->instance))->device_count++;
             return ((OneWireBus*)(app->sensors[i]->instance));
         }
     }
@@ -36,9 +37,8 @@ OneWireBus* uintemp_OneWire_bus_alloc(const GPIO* gpio) {
         GpioSpeedVeryHigh); //Скорость работы - максимальная
 
     OneWireBus* bus = malloc(sizeof(OneWireBus));
-    bus->device_count = 0;
+    bus->device_count = 1;
     bus->gpio = gpio;
-
     bus->powerMode = PWR_ACTIVE;
 
     return bus;
@@ -132,8 +132,8 @@ static uint8_t oneWire_read(OneWireSensor* instance) {
  * @param data Указатель на массив, куда будут записаны данные
  * @param len Количество байт
  */
-static void oneWire_readBytes(OneWireSensor* instance, uint8_t* data, size_t len) {
-    for(size_t i = 0; i < len; i++) {
+static void oneWire_readBytes(OneWireSensor* instance, uint8_t* data, uint8_t len) {
+    for(uint8_t i = 0; i < len; i++) {
         data[i] = oneWire_read(instance);
     }
 }
@@ -146,9 +146,9 @@ static uint8_t onewire_CRC_update(uint8_t crc, uint8_t b) {
     return crc;
 }
 
-static bool onewire_CRC_check(uint8_t* data, size_t len) {
+static bool onewire_CRC_check(uint8_t* data, uint8_t len) {
     uint8_t crc = 0;
-    for(size_t i = 0; i < len; i++) {
+    for(uint8_t i = 0; i < len; i++) {
         crc = onewire_CRC_update(crc, data[i]);
     }
     return !crc;
@@ -161,8 +161,8 @@ static bool onewire_CRC_check(uint8_t* data, size_t len) {
  * @param data Указатель на массив, откуда будут записаны данные
  * @param len Количество байт
  */
-static void oneWire_writeBytes(OneWireSensor* instance, uint8_t* data, size_t len) {
-    for(size_t i = 0; i < len; i++) {
+static void oneWire_writeBytes(OneWireSensor* instance, uint8_t* data, uint8_t len) {
+    for(uint8_t i = 0; i < len; i++) {
         oneWire_write(instance, data[i]);
     }
 }
@@ -291,6 +291,9 @@ bool unitemp_OneWire_sensor_alloc(void* s, uint8_t* anotherValues) {
 
 bool unitemp_OneWire_sensor_free(void* s) {
     Sensor* sensor = (Sensor*)s;
+    if(((OneWireSensor*)sensor->instance)->bus->device_count == 0) {
+        free(((OneWireSensor*)sensor->instance)->bus);
+    }
     free(sensor->instance);
 
     return true;
@@ -363,14 +366,18 @@ bool unitemp_OneWire_sensor_init(void* s) {
 bool unitemp_OneWire_sensor_deinit(void* s) {
     OneWireSensor* instance = ((Sensor*)s)->instance;
     if(instance == NULL || instance->bus->gpio == NULL) return false;
-    //Низкий уровень по умолчанию
-    furi_hal_gpio_write(instance->bus->gpio->pin, false);
-    //Режим работы - аналог, подтяжка выключена
-    furi_hal_gpio_init(
-        instance->bus->gpio->pin, //Порт FZ
-        GpioModeAnalog, //Режим работы - аналог
-        GpioPullNo, //Подтяжка выключена
-        GpioSpeedLow); //Скорость работы - минимальная
+    instance->bus->device_count--;
+    if(instance->bus->device_count == 0) {
+        //Низкий уровень по умолчанию
+        furi_hal_gpio_write(instance->bus->gpio->pin, false);
+        //Режим работы - аналог, подтяжка выключена
+        furi_hal_gpio_init(
+            instance->bus->gpio->pin, //Порт FZ
+            GpioModeAnalog, //Режим работы - аналог
+            GpioPullNo, //Подтяжка выключена
+            GpioSpeedLow); //Скорость работы - минимальная
+    }
+
     return true;
 }
 
