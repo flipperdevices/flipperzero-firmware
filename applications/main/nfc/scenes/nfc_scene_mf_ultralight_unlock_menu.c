@@ -19,12 +19,14 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
 
     uint32_t state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
-    submenu_add_item(
-        submenu,
-        "Unlock With Reader",
-        SubmenuIndexMfUlUnlockMenuAuto,
-        nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
-        nfc);
+    if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareUl) {
+        submenu_add_item(
+            submenu,
+            "Unlock With Reader",
+            SubmenuIndexMfUlUnlockMenuAuto,
+            nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
+            nfc);
+    }
     submenu_add_item(
         submenu,
         "Auth As Ameebo",
@@ -65,11 +67,7 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuAuto) {
-            if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareUl) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockAuto);
-            } else {
-                // TODO: go to read scene and read card first
-            }
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockAuto);
             consumed = true;
         }
         scene_manager_set_scene_state(
