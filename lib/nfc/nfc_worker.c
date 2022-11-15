@@ -348,10 +348,8 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     while(nfc_worker->state == NfcWorkerStateRead) {
         ReturnCode ret = rfalNfcaPollerInitialize();
         FURI_LOG_I(TAG, "Init ret: %d", ret);
-        ret = furi_hal_nfc_ll_field_on();
+        ret = furi_hal_nfc_field_on_wait_gt();
         FURI_LOG_I(TAG, "Field on: %d", ret);
-        while(!rfalIsGTExpired())
-            ;
         ret = rfalNfcaPollerFullCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &dev, &dev_cnt);
         FURI_LOG_I(TAG, "Full col res ret: %d, cnt: %d", ret, dev_cnt);
         if(ret == ERR_NONE) {

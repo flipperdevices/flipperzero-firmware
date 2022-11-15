@@ -397,6 +397,8 @@ FuriHalNfcReturn furi_hal_nfc_ll_field_on();
 
 void furi_hal_nfc_ll_txrx_on();
 
+FuriHalNfcReturn furi_hal_nfc_field_on_wait_gt();
+
 void furi_hal_nfc_ll_txrx_off();
 
 // TODO rework all pollers with furi_hal_nfc_ll_txrx_bits

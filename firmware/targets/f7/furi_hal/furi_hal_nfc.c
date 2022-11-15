@@ -798,6 +798,16 @@ FuriHalNfcReturn furi_hal_nfc_ll_field_on() {
     return rfalFieldOnAndStartGT();
 }
 
+FuriHalNfcReturn furi_hal_nfc_field_on_wait_gt() {
+    FuriHalNfcReturn ret = rfalFieldOnAndStartGT();
+    if(ret == FuriHalNfcReturnOk) {
+        while(!rfalIsGTExpired()) {
+            furi_thread_yield();
+        }
+    }
+    return ret;
+}
+
 void furi_hal_nfc_ll_txrx_on() {
     st25r3916TxRxOn();
 }
