@@ -343,7 +343,7 @@ bool unitemp_OneWire_sensor_init(void* s) {
     if(instance->familyCode == FC_DS18B20 || instance->familyCode == FC_DS1822) {
         //Установка разрядности в 10 бит
         if(!unitemp_oneWire_sensor_start(instance)) return false;
-        oneWire_write(instance, 0xCC); // skip ROM
+        unitemp_OneWire_sensor_select(instance);
         oneWire_write(instance, 0x4E); // Запись в память
         uint8_t buff[3];
         buff[0] = 0x4B; //Значение нижнего предела
@@ -353,7 +353,7 @@ bool unitemp_OneWire_sensor_init(void* s) {
 
         //Сохранение значений в EEPROM для автоматического восстановления после сбоев питания
         if(!unitemp_oneWire_sensor_start(instance)) return false;
-        oneWire_write(instance, 0xCC); // skip ROM
+        unitemp_OneWire_sensor_select(instance);
         oneWire_write(instance, 0x48); // Запись в EEPROM
     }
 
@@ -399,7 +399,7 @@ UnitempStatus unitemp_OneWire_sensor_update(void* s) {
         uint8_t buff[9];
         oneWire_readBytes(instance, buff, 9);
         if(!onewire_CRC_check(buff, 9)) {
-            return UT_BADCRC;
+            return UT_TIMEOUT;
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
         if(instance->familyCode == FC_DS18S20) {
