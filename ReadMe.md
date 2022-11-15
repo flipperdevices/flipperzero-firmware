@@ -58,11 +58,13 @@ Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Fli
   ```shell
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 $ cd flipperzero-firmware-wPlugins/
-$ ./fbt resources icons
 $ ./fbt updater_package
 
 # If building FAPS:
-$ ./fbt plugin_dist
+$ ./fbt fap_dist
+
+# If building image assets:
+$ ./fbt resources icons dolphin_ext
 ```
 </details>
       </td> </tr>
