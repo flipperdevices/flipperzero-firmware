@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <core/string.h>
+#include <toolbox/rpc_helper.h>
 
 #ifdef __cplusplus
 extern "C" {

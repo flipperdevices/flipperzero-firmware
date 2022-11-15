@@ -18,9 +18,6 @@
 
 #define TAG "FuriHalPower"
 
-#define POWER_INFO_VERSION_MAJOR "1"
-#define POWER_INFO_VERSION_MINOR "0"
-
 #ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
 #define FURI_HAL_POWER_DEEP_INSOMNIA 0
 #else
@@ -535,64 +532,51 @@ void furi_hal_power_info_get(FuriHalPowerInfoCallback out, char sep, void* conte
     FuriString* value = furi_string_alloc();
     FuriString* key = furi_string_alloc();
 
-    // Power Info version, different syntax depending on separator character
+    RpcHelperPropertyContext property_context = {
+        .key = key,
+        .value = value,
+        .out = out,
+        .sep = sep,
+        .last = false,
+        .context = context
+    };
+
     if(sep == '.') {
-        out("format.major", POWER_INFO_VERSION_MAJOR, false, context);
-        out("format.minor", POWER_INFO_VERSION_MINOR, false, context);
+        rpc_helper_property_out(&property_context, NULL, 2, "format", "major", "1");
+        rpc_helper_property_out(&property_context, NULL, 2, "format", "minor", "0");
     } else {
-        out("power_info_major", POWER_INFO_VERSION_MAJOR, false, context);
-        out("power_info_minor", POWER_INFO_VERSION_MAJOR, false, context);
+        rpc_helper_property_out(&property_context, NULL, 3, "power", "info", "major", "1");
+        rpc_helper_property_out(&property_context, NULL, 3, "power", "info", "minor", "0");
     }
 
     uint8_t charge = furi_hal_power_get_pct();
-    furi_string_printf(key, "%s%c%s", "charge", sep, "level");
-    furi_string_printf(value, "%u", charge);
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
+    rpc_helper_property_out(&property_context, "%u", 2, "charge", "level", charge);
 
-    furi_string_printf(key, "%s%c%s", "charge", sep, "state");
+    const char* charge_state;
     if(furi_hal_power_is_charging()) {
         if(charge < 100) {
-            furi_string_printf(value, "charging");
+            charge_state = "charging";
         } else {
-            furi_string_printf(value, "charged");
+            charge_state = "charged";
         }
     } else {
-        furi_string_printf(value, "discharging");
+        charge_state = "discharging";
     }
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
 
+    rpc_helper_property_out(&property_context, NULL, 2, "charge", "state", charge_state);
     uint16_t voltage =
         (uint16_t)(furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge) * 1000.f);
-    furi_string_printf(key, "%s%c%s", "battery", sep, "voltage");
-    furi_string_printf(value, "%u", voltage);
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
+    rpc_helper_property_out(&property_context, "%u", 2, "battery", "voltage", voltage);
     int16_t current =
         (int16_t)(furi_hal_power_get_battery_current(FuriHalPowerICFuelGauge) * 1000.f);
-    furi_string_printf(key, "%s%c%s", "battery", sep, "current");
-    furi_string_printf(value, "%d", current);
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
+    rpc_helper_property_out(&property_context, "%d", 2, "battery", "current", current);
     int16_t temperature = (int16_t)furi_hal_power_get_battery_temperature(FuriHalPowerICFuelGauge);
-    furi_string_printf(key, "%s%c%s", "gauge", sep, "temp");
-    furi_string_printf(value, "%d", temperature);
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
-    furi_string_printf(key, "%s%c%s", "battery", sep, "health");
-    furi_string_printf(value, "%u", furi_hal_power_get_bat_health_pct());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
-    furi_string_printf(key, "%s%c%s", "capacity", sep, "remain");
-    furi_string_printf(value, "%lu", furi_hal_power_get_battery_remaining_capacity());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
-    furi_string_printf(key, "%s%c%s", "capacity", sep, "full");
-    furi_string_printf(value, "%lu", furi_hal_power_get_battery_full_capacity());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), false, context);
-
-    furi_string_printf(key, "%s%c%s", "capacity", sep, "design");
-    furi_string_printf(value, "%lu", furi_hal_power_get_battery_design_capacity());
-    out(furi_string_get_cstr(key), furi_string_get_cstr(value), true, context);
+    rpc_helper_property_out(&property_context, "%d", 2, "battery", "temp", temperature);
+    rpc_helper_property_out(&property_context, "%u", 2, "battery", "health", furi_hal_power_get_bat_health_pct());
+    rpc_helper_property_out(&property_context, "%lu", 2, "capacity", "remain", furi_hal_power_get_battery_remaining_capacity());
+    rpc_helper_property_out(&property_context, "%lu", 2, "capacity", "full", furi_hal_power_get_battery_full_capacity());
+    property_context.last = true;
+    rpc_helper_property_out(&property_context, "%lu", 2, "capacity", "design", furi_hal_power_get_battery_design_capacity());
 
     furi_string_free(key);
     furi_string_free(value);
