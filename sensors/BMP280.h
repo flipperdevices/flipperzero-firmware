@@ -35,7 +35,7 @@ extern const SensorType BMP280;
  * @param sensor Указатель на создаваемый датчик
  * @return Истина при успехе
  */
-bool unitemp_BMP280_alloc(void* s, uint8_t* anotherValues);
+bool unitemp_BMP280_alloc(Sensor* sensor, uint8_t* anotherValues);
 
 /**
  * @brief Инициализации датчика BMP280
@@ -43,14 +43,14 @@ bool unitemp_BMP280_alloc(void* s, uint8_t* anotherValues);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Истина если инициализация упспешная
  */
-bool unitemp_BMP280_init(void* sensor);
+bool unitemp_BMP280_init(Sensor* sensor);
 
 /**
  * @brief Деинициализация датчика
  *
  * @param sensor Указатель на датчик (тип Sensor)
  */
-bool unitemp_BMP280_deinit(void* s);
+bool unitemp_BMP280_deinit(Sensor* sensor);
 
 /**
  * @brief Обновление значений из датчика
@@ -58,13 +58,13 @@ bool unitemp_BMP280_deinit(void* s);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Истина если данныее были получены
  */
-UnitempStatus unitemp_BMP280_update(void* s);
+UnitempStatus unitemp_BMP280_update(Sensor* sensor);
 
 /**
  * @brief Высвободить память датчика
  *
  * @param sensor Указатель на датчик (тип Sensor)
  */
-bool unitemp_BMP280_free(void* sensor);
+bool unitemp_BMP280_free(Sensor* sensor);
 
 #endif

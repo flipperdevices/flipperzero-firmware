@@ -22,7 +22,7 @@ extern const SensorType AM2320_SW;
  * @param sensor Указатель на инициализируемый датчик
  * @return Истина если всё прошло успешно
  */
-bool unitemp_singleWire_init(void* sensor);
+bool unitemp_singleWire_init(Sensor* sensor);
 
 /**
  * @brief Деинициализация датчика
@@ -30,7 +30,7 @@ bool unitemp_singleWire_init(void* sensor);
  * @param sensor Указатель на инициализируемый датчик
  * @return Истина если всё прошло успешно
  */
-bool unitemp_singleWire_deinit(void* sensor);
+bool unitemp_singleWire_deinit(Sensor* sensor);
 
 /**
  * @brief Получение данных с датчика по однопроводному интерфейсу DHTxx и AM2xxx
@@ -38,7 +38,7 @@ bool unitemp_singleWire_deinit(void* sensor);
  * @param sensor Указатель на датчик
  * @return Статус опроса
  */
-UnitempStatus unitemp_singleWire_update(void* sensor);
+UnitempStatus unitemp_singleWire_update(Sensor* sensor);
 
 /**
  * @brief Установить порт датчика
@@ -63,12 +63,12 @@ const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor);
  * @param sensor Указатель на датчик
  * @param st Тип датчика
  */
-bool unitemp_singleWire_alloc(void* sensor, uint8_t* anotherValues);
+bool unitemp_singleWire_alloc(Sensor* sensor, uint8_t* anotherValues);
 
 /**
  * @brief Высвобождение памяти инстанса датчика
  * 
  * @param sensor Указатель на датчик
  */
-bool unitemp_singleWire_free(void* sensor);
+bool unitemp_singleWire_free(Sensor* sensor);
 #endif

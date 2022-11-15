@@ -269,8 +269,7 @@ void unitemp_OneWire_sensor_select(OneWireSensor* instance) {
     oneWire_writeBytes(instance, instance->deviceID, 8);
 }
 
-bool unitemp_OneWire_sensor_alloc(void* s, uint8_t* anotherValues) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_OneWire_sensor_alloc(Sensor* sensor, uint8_t* anotherValues) {
     OneWireSensor* instance = malloc(sizeof(OneWireSensor));
     if(instance == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
@@ -289,8 +288,7 @@ bool unitemp_OneWire_sensor_alloc(void* s, uint8_t* anotherValues) {
     return false;
 }
 
-bool unitemp_OneWire_sensor_free(void* s) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_OneWire_sensor_free(Sensor* sensor) {
     if(((OneWireSensor*)sensor->instance)->bus->device_count == 0) {
         free(((OneWireSensor*)sensor->instance)->bus);
     }
@@ -299,8 +297,8 @@ bool unitemp_OneWire_sensor_free(void* s) {
     return true;
 }
 
-bool unitemp_OneWire_sensor_init(void* s) {
-    OneWireSensor* instance = ((Sensor*)s)->instance;
+bool unitemp_OneWire_sensor_init(Sensor* sensor) {
+    OneWireSensor* instance = sensor->instance;
     if(instance == NULL || instance->bus->gpio == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
         return false;
@@ -332,7 +330,7 @@ bool unitemp_OneWire_sensor_init(void* s) {
         FURI_LOG_D(
             APP_NAME,
             "%s sensor ID: %02X%02X%02X%02X%02X%02X%02X%02X",
-            ((Sensor*)s)->name,
+            sensor->name,
             instance->deviceID[0],
             instance->deviceID[1],
             instance->deviceID[2],
@@ -363,8 +361,8 @@ bool unitemp_OneWire_sensor_init(void* s) {
     return true;
 }
 
-bool unitemp_OneWire_sensor_deinit(void* s) {
-    OneWireSensor* instance = ((Sensor*)s)->instance;
+bool unitemp_OneWire_sensor_deinit(Sensor* sensor) {
+    OneWireSensor* instance = sensor->instance;
     if(instance == NULL || instance->bus->gpio == NULL) return false;
     instance->bus->device_count--;
     if(instance->bus->device_count == 0) {
@@ -381,9 +379,8 @@ bool unitemp_OneWire_sensor_deinit(void* s) {
     return true;
 }
 
-UnitempStatus unitemp_OneWire_sensor_update(void* s) {
-    Sensor* sensor = (Sensor*)s;
-    OneWireSensor* instance = ((Sensor*)s)->instance;
+UnitempStatus unitemp_OneWire_sensor_update(Sensor* sensor) {
+    OneWireSensor* instance = sensor->instance;
     if(sensor->status != UT_POLLING) {
         if(!unitemp_oneWire_sensor_start(instance)) return UT_TIMEOUT;
         unitemp_OneWire_sensor_select(instance);

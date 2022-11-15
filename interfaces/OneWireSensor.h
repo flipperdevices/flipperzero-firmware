@@ -43,14 +43,14 @@ typedef struct OneWireSensor {
  * @param st Тип датчика
  * @return Истина если всё ок
  */
-bool unitemp_OneWire_sensor_alloc(void* s, uint8_t* anotherValues);
+bool unitemp_OneWire_sensor_alloc(Sensor* sensor, uint8_t* anotherValues);
 
 /**
  * @brief Высвобождение памяти инстанса датчика
  * 
  * @param sensor Указатель на датчик
  */
-bool unitemp_OneWire_sensor_free(void* sensor);
+bool unitemp_OneWire_sensor_free(Sensor* sensor);
 
 /**
  * @brief Инициализации датчика на шине One Wire
@@ -58,14 +58,14 @@ bool unitemp_OneWire_sensor_free(void* sensor);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Истина если инициализация упспешная
  */
-bool unitemp_OneWire_sensor_init(void* sensor);
+bool unitemp_OneWire_sensor_init(Sensor* sensor);
 
 /**
  * @brief Деинициализация датчика
  *
  * @param sensor Указатель на датчик (тип Sensor)
  */
-bool unitemp_OneWire_sensor_deinit(void* s);
+bool unitemp_OneWire_sensor_deinit(Sensor* sensor);
 
 /**
  * @brief Обновить значение с датчка
@@ -73,7 +73,7 @@ bool unitemp_OneWire_sensor_deinit(void* s);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Статус обновления
  */
-UnitempStatus unitemp_OneWire_sensor_update(void* sensor);
+UnitempStatus unitemp_OneWire_sensor_update(Sensor* sensor);
 
 /**
  * @brief Запуск общения с датчиком 

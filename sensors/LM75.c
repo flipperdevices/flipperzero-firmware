@@ -23,9 +23,8 @@ const SensorType LM75 = {
     .deinitializer = unitemp_LM75_deinit,
     .updater = unitemp_LM75_update};
 
-bool unitemp_LM75_alloc(void* s, uint8_t* anotherValues) {
+bool unitemp_LM75_alloc(Sensor* sensor, uint8_t* anotherValues) {
     UNUSED(anotherValues);
-    Sensor* sensor = (Sensor*)s;
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     //Адреса на шине I2C (7 бит)
@@ -33,14 +32,13 @@ bool unitemp_LM75_alloc(void* s, uint8_t* anotherValues) {
     i2c_sensor->maxI2CAdr = 0b1001111;
     return true;
 }
-bool unitemp_LM75_free(void* s) {
+bool unitemp_LM75_free(Sensor* sensor) {
     //Нечего высвобождать, так как ничего не было выделено
-    UNUSED(s);
+    UNUSED(sensor);
     return true;
 }
 
-bool unitemp_LM75_init(void* s) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_LM75_init(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     //Выход если не удалось записать значение в датчик
@@ -50,16 +48,14 @@ bool unitemp_LM75_init(void* s) {
     return true;
 }
 
-bool unitemp_LM75_deinit(void* s) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_LM75_deinit(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
     if(!writeReg(i2c_sensor, LM75_REG_CONFIG, LM75_CONFIG_FAULTQUEUE_1 | LM75_CONFIG_SHUTDOWN))
         return false;
     return true;
 }
 
-UnitempStatus unitemp_LM75_update(void* s) {
-    Sensor* sensor = (Sensor*)s;
+UnitempStatus unitemp_LM75_update(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     uint8_t buff[2];

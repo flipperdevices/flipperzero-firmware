@@ -19,27 +19,27 @@ typedef struct GPIO {
     const char* name;
     const GpioPin* pin;
 } GPIO;
-
+typedef struct Sensor Sensor;
 /**
  * @brief Указатель функции выделения памяти и подготовки экземпляра датчика
  */
-typedef bool(SensorAllocator)(void* sensor, uint8_t* anotherValues);
+typedef bool(SensorAllocator)(Sensor* sensor, uint8_t* anotherValues);
 /**
  * @brief Указатель на функцию высвобождении памяти датчика
  */
-typedef bool(SensorFree)(void* sensor);
+typedef bool(SensorFree)(Sensor* sensor);
 /**
  * @brief Указатель функции инициализации датчика
  */
-typedef bool(SensorInitializer)(void* sensor);
+typedef bool(SensorInitializer)(Sensor* sensor);
 /**
  * @brief Указатель функции деинициализации датчика
  */
-typedef bool(SensorDeinitializer)(void* sensor);
+typedef bool(SensorDeinitializer)(Sensor* sensor);
 /**
  * @brief Указатель функции обновления значения датчика
  */
-typedef UnitempStatus(SensorUpdater)(void* sensor);
+typedef UnitempStatus(SensorUpdater)(Sensor* sensor);
 
 //Типы подключения датчиков
 typedef struct Interface {

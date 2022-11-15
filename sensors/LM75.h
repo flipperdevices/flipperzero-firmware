@@ -11,7 +11,7 @@ extern const SensorType LM75;
  * @param sensor Указатель на создаваемый датчик
  * @return Истина при успехе
  */
-bool unitemp_LM75_alloc(void* s, uint8_t* anotherValues);
+bool unitemp_LM75_alloc(Sensor* sensor, uint8_t* anotherValues);
 
 /**
  * @brief Инициализации датчика LM75
@@ -19,14 +19,14 @@ bool unitemp_LM75_alloc(void* s, uint8_t* anotherValues);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Истина если инициализация упспешная
  */
-bool unitemp_LM75_init(void* sensor);
+bool unitemp_LM75_init(Sensor* sensor);
 
 /**
  * @brief Деинициализация датчика
  *
  * @param sensor Указатель на датчик (тип Sensor)
  */
-bool unitemp_LM75_deinit(void* s);
+bool unitemp_LM75_deinit(Sensor* sensor);
 
 /**
  * @brief Обновление значений из датчика
@@ -34,13 +34,13 @@ bool unitemp_LM75_deinit(void* s);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Истина если данныее были получены
  */
-UnitempStatus unitemp_LM75_update(void* s);
+UnitempStatus unitemp_LM75_update(Sensor* sensor);
 
 /**
  * @brief Высвободить память датчика
  *
  * @param sensor Указатель на датчик (тип Sensor)
  */
-bool unitemp_LM75_free(void* sensor);
+bool unitemp_LM75_free(Sensor* sensor);
 
 #endif

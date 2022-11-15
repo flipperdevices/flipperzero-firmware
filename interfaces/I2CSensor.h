@@ -26,14 +26,14 @@ typedef struct I2CSensor {
  * @param st Тип датчика
  * @return Истина если всё ок
  */
-bool unitemp_I2C_sensor_alloc(void* s, uint8_t* anotherValues);
+bool unitemp_I2C_sensor_alloc(Sensor* sensor, uint8_t* anotherValues);
 
 /**
  * @brief Высвобождение памяти инстанса датчика
  * 
  * @param sensor Указатель на датчик
  */
-bool unitemp_I2C_sensor_free(void* sensor);
+bool unitemp_I2C_sensor_free(Sensor* sensor);
 
 /**
  * @brief Обновить значение с датчка
@@ -41,7 +41,7 @@ bool unitemp_I2C_sensor_free(void* sensor);
  * @param sensor Указатель на датчик (тип Sensor)
  * @return Статус обновления
  */
-UnitempStatus unitemp_I2C_sensor_update(void* sensor);
+UnitempStatus unitemp_I2C_sensor_update(Sensor* sensor);
 /**
  * @brief Прочитать значение регистра reg
  *

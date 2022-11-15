@@ -54,8 +54,7 @@ const SensorType AM2320_SW = {
     .deinitializer = unitemp_singleWire_deinit,
     .updater = unitemp_singleWire_update};
 
-bool unitemp_singleWire_alloc(void* s, uint8_t* anotherValues) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_singleWire_alloc(Sensor* sensor, uint8_t* anotherValues) {
     SingleWireSensor* instance = malloc(sizeof(SingleWireSensor));
     if(instance == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
@@ -70,14 +69,13 @@ bool unitemp_singleWire_alloc(void* s, uint8_t* anotherValues) {
     free(instance);
     return false;
 }
-bool unitemp_singleWire_free(void* s) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_singleWire_free(Sensor* sensor) {
     free(sensor->instance);
 
     return true;
 }
 
-bool unitemp_singleWire_init(void* sensor) {
+bool unitemp_singleWire_init(Sensor* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
@@ -94,7 +92,7 @@ bool unitemp_singleWire_init(void* sensor) {
     return true;
 }
 
-bool unitemp_singleWire_deinit(void* sensor) {
+bool unitemp_singleWire_deinit(Sensor* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) return false;
     //Низкий уровень по умолчанию
@@ -120,8 +118,7 @@ const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor) {
     return instance->gpio;
 }
 
-UnitempStatus unitemp_singleWire_update(void* s) {
-    Sensor* sensor = (Sensor*)s;
+UnitempStatus unitemp_singleWire_update(Sensor* sensor) {
     SingleWireSensor* instance = sensor->instance;
 
     //Массив для приёма данных

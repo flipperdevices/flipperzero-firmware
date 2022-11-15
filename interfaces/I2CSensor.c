@@ -27,8 +27,7 @@ bool writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
     return status;
 }
 
-bool unitemp_I2C_sensor_alloc(void* s, uint8_t* anotherValues) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_I2C_sensor_alloc(Sensor* sensor, uint8_t* anotherValues) {
     bool status = false;
     I2CSensor* instance = malloc(sizeof(I2CSensor));
     if(instance == NULL) {
@@ -50,15 +49,13 @@ bool unitemp_I2C_sensor_alloc(void* s, uint8_t* anotherValues) {
     return status;
 }
 
-bool unitemp_I2C_sensor_free(void* s) {
-    Sensor* sensor = (Sensor*)s;
+bool unitemp_I2C_sensor_free(Sensor* sensor) {
     bool status = sensor->type->mem_releaser(sensor);
     free(sensor->instance);
     return status;
 }
 
-UnitempStatus unitemp_I2C_sensor_update(void* s) {
-    Sensor* sensor = (Sensor*)s;
+UnitempStatus unitemp_I2C_sensor_update(Sensor* sensor) {
     if(sensor->status != UT_OK) {
         sensor->type->initializer(sensor);
     }
