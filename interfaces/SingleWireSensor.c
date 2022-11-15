@@ -54,7 +54,7 @@ const SensorType AM2320_SW = {
     .deinitializer = unitemp_singleWire_deinit,
     .updater = unitemp_singleWire_update};
 
-bool unitemp_singleWire_alloc(void* s, uint16_t* anotherValues) {
+bool unitemp_singleWire_alloc(void* s, uint8_t* anotherValues) {
     Sensor* sensor = (Sensor*)s;
     SingleWireSensor* instance = malloc(sizeof(SingleWireSensor));
     if(instance == NULL) {

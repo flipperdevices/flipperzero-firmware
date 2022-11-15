@@ -63,7 +63,7 @@ const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor);
  * @param sensor Указатель на датчик
  * @param st Тип датчика
  */
-bool unitemp_singleWire_alloc(void* sensor, uint16_t* anotherValues);
+bool unitemp_singleWire_alloc(void* sensor, uint8_t* anotherValues);
 
 /**
  * @brief Высвобождение памяти инстанса датчика

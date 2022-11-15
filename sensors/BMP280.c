@@ -99,7 +99,7 @@ static bool bmp280_isMeasuring(Sensor* sensor) {
     return (bool)((readReg(i2c_sensor, BMP280_REG_STATUS) & 0x08) >> 3);
 }
 
-bool unitemp_BMP280_alloc(void* s, uint16_t* anotherValues) {
+bool unitemp_BMP280_alloc(void* s, uint8_t* anotherValues) {
     UNUSED(anotherValues);
     Sensor* sensor = (Sensor*)s;
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;

@@ -27,7 +27,7 @@ bool writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
     return status;
 }
 
-bool unitemp_I2C_sensor_alloc(void* s, uint16_t* anotherValues) {
+bool unitemp_I2C_sensor_alloc(void* s, uint8_t* anotherValues) {
     Sensor* sensor = (Sensor*)s;
     bool status = false;
     I2CSensor* instance = malloc(sizeof(I2CSensor));

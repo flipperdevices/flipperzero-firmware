@@ -35,7 +35,7 @@ extern const SensorType BMP280;
  * @param sensor Указатель на создаваемый датчик
  * @return Истина при успехе
  */
-bool unitemp_BMP280_alloc(void* s, uint16_t* anotherValues);
+bool unitemp_BMP280_alloc(void* s, uint8_t* anotherValues);
 
 /**
  * @brief Инициализации датчика BMP280

@@ -23,7 +23,7 @@ const SensorType LM75 = {
     .deinitializer = unitemp_LM75_deinit,
     .updater = unitemp_LM75_update};
 
-bool unitemp_LM75_alloc(void* s, uint16_t* anotherValues) {
+bool unitemp_LM75_alloc(void* s, uint8_t* anotherValues) {
     UNUSED(anotherValues);
     Sensor* sensor = (Sensor*)s;
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;

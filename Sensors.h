@@ -23,7 +23,7 @@ typedef struct GPIO {
 /**
  * @brief Указатель функции выделения памяти и подготовки экземпляра датчика
  */
-typedef bool(SensorAllocator)(void* sensor, uint16_t* anotherValues);
+typedef bool(SensorAllocator)(void* sensor, uint8_t* anotherValues);
 /**
  * @brief Указатель на функцию высвобождении памяти датчика
  */
@@ -120,7 +120,7 @@ uint8_t unitemp_GPIO_toInt(const GpioPin* gpio);
  * @param anotherValues Массив других различных значений
  * @return Указатель на датчик
  */
-Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint16_t* anotherValues);
+Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anotherValues);
 
 /**
  * @brief Инициализация загруженных датчиков

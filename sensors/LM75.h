@@ -11,7 +11,7 @@ extern const SensorType LM75;
  * @param sensor Указатель на создаваемый датчик
  * @return Истина при успехе
  */
-bool unitemp_LM75_alloc(void* s, uint16_t* anotherValues);
+bool unitemp_LM75_alloc(void* s, uint8_t* anotherValues);
 
 /**
  * @brief Инициализации датчика LM75

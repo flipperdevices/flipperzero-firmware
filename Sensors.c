@@ -47,9 +47,9 @@ const Interface I2C = {
     .updater = unitemp_I2C_sensor_update};
 const Interface ONE_WIRE = {
     .name = "One wire",
-    .allocator = unitemp_OneWire_alloc,
-    .mem_releaser = unitemp_OneWire_free,
-    .updater = unitemp_OneWire_update};
+    .allocator = unitemp_OneWire_sensor_alloc,
+    .mem_releaser = unitemp_OneWire_sensor_free,
+    .updater = unitemp_OneWire_sensor_update};
 
 //Перечень интерфейсов подключения
 //static const Interface* interfaces[] = {&SINGLE_WIRE, &I2C, &ONE_WIRE};
@@ -160,7 +160,7 @@ bool unitemp_sensors_load() {
         name[10] = '\0';
         FURI_LOG_D(APP_NAME, "%s %d %d", name, type, otherValue);
 
-        uint16_t otherValues[] = {otherValue};
+        uint8_t otherValues[] = {otherValue};
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
             unitemp_sensor_alloc(name, unitemp_getTypeFromInt(type), otherValues);
@@ -235,7 +235,7 @@ bool unitemp_sensors_save(void) {
     return true;
 }
 
-Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint16_t* anotherValues) {
+Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anotherValues) {
     bool status = false;
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));

@@ -26,7 +26,7 @@ typedef struct I2CSensor {
  * @param st Тип датчика
  * @return Истина если всё ок
  */
-bool unitemp_I2C_sensor_alloc(void* s, uint16_t* anotherValues);
+bool unitemp_I2C_sensor_alloc(void* s, uint8_t* anotherValues);
 
 /**
  * @brief Высвобождение памяти инстанса датчика
