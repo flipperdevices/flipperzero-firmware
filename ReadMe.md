@@ -1,13 +1,24 @@
-<h2>
 
-[Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe) & [support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸</h2>
-<table><tr><td width="75%">
+# Flipper Zero FW [ROGUEMASTER]
+This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware) and the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects.  
 
-#### Thank you to all the supporters; this firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware) & the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects. All features and projects pulled are listed in expandable sections below. Please do [support us](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md) and/or [xMasterX](https://github.com/DarkFlippers/unleashed-firmware)! Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
+This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
 
-</td><td><center><a href="https://github.com/DarkFlippers/unleashed-firmware" target="_blank"><img src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" align="center" alt="fzCUSTOM" border="0" width="95%" height="95%"></a></center></td></tr></table>
+<a href="https://github.com/DarkFlippers/unleashed-firmware" target="_blank"><img src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" align="center" alt="fzCUSTOM" border="0" width="95%" height="95%"></a>
 
-<b>Latest Updates:</b>
+
+## Support Us!
+Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
+Thank you to all the supporters!
+
+- [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
+- [Support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸
+- [xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
+- Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
+- Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
+
+
+## Latest Updates
 
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-14 18:55 EST`
@@ -16,13 +27,25 @@
 - Cleanup for: Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/409)
 - Added: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 
-<table width="100%" border="0" cellspacing="0">
-  <tr> <td colspan=2> <h3>This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.</h3> </td> </tr>
-  <tr> <td>
-<br><b>FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE<b>
+## Install from Release
+FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
+- To avoid Application errors, delete /ext/apps before doing the RM firmware update
+- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card, and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your extend_range.txt file.`UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!` On any update, you may need to update this file and your unirf map file, so keep backups. 😄
 
-<details>
-  <summary><B>HOW TOs</b></summary><br/>
+## Build
+```bash
+$ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
+$ cd flipperzero-firmware-wPlugins/
+$ ./fbt updater_package
+
+# If building FAPS:
+$ ./fbt fap_dist
+
+# If building image assets:
+$ ./fbt resources icons dolphin_ext
+```
+
+## How To
   
 - [HERE IS A GUIDE FOR INSTALL (BY PINGYWON)](https://flipper.pingywon.com/)
 - [HERE IS A NOOB GUIDE TO FLASH AND UNLOCK (BY interestingsoup)](https://interestingsoup.com/n00b-guide-flashing-flipper-zero-to-rougemaster/)
@@ -36,42 +59,14 @@
 - [How to add extra SubGHz frequencies](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/documentation/SubGHzSettings.md)
 - [💎 Extra plugins precompiled for Unleashed](https://github.com/UberGuidoZ/Flipper/tree/main/Applications/Unleashed)
 - [Configure Sub-GHz Remote App](https://github.com/RogueMaster/flipperzero-firmware/blob/420/documentation/SubGHzRemotePlugin.md)
-</details>
+- [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT IN CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
+- [FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
+- [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
+- Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
+- [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
-- To avoid Application errors, delete /ext/apps before doing the RM firmware update
-- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card, and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your extend_range.txt file. **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!** On any update, you may need to update this file and your unirf map file, so keep backups. 😄
-    - [<h2>GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT IN CLOCK</h2>](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
-<br>[FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md) - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
-<br>[`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
-</td> <td>
 
-<h2>DONATIONS ACCEPTED 😄🚀💸</h2>
-BTC: <B>3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a</B><br>
-ETH: <B>0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f</B>
-    <br> <br>
-    
-Contact me on [Discord](https://discord.gg/gF2bBUzAFe) if you want a renamed Flipper DFU. I can do custom names too!
-<br><h2>[Join my Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)</h2>
-<details>
-  <summary><B>You should clone with</B></summary></br>
-
-  ```shell
-$ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
-$ cd flipperzero-firmware-wPlugins/
-$ ./fbt updater_package
-
-# If building FAPS:
-$ ./fbt fap_dist
-
-# If building image assets:
-$ ./fbt resources icons dolphin_ext
-```
-</details>
-      </td> </tr>
-      <tr> <td>
-
-<details>
-  <summary><B>All Changes/Features</b></summary><br/>
+## All Changes/Features
 
 - Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
@@ -111,15 +106,15 @@ $ ./fbt resources icons dolphin_ext
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
 - Dolphin: Plugin Achivement +3 EXP for a total of up to 700 EXP daily. Plugin Achivements are:
-- - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
-- - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
-- - Games Only Mode from Lock Menu
-- - Getting 2048 in 2048
-- - Mouse Jacker Ducky Run
-- - NRFSniffer Found Address
-- - Stopwatch @ Alert
-- - Tetris, Snake, or Flappy Bird Score For EXP
-- - Zombiez for every 20 Zombie kills
+	- Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
+	- Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
+	- Games Only Mode from Lock Menu
+	- Getting 2048 in 2048
+	- Mouse Jacker Ducky Run
+	- NRFSniffer Found Address
+	- Stopwatch @ Alert
+	- Tetris, Snake, or Flappy Bird Score For EXP
+	- Zombiez for every 20 Zombie kills
 - Dolphin: SD dolphin manifest updated to weight animations differently
 - GPIO: Feature to read EEPROM of SFP Modules using I2C [(By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
 - GPIO: [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431)
@@ -137,7 +132,7 @@ $ ./fbt resources icons dolphin_ext
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
 - Settings: Custom name with this compile: CUSTOM_FLIPPER_NAME=name ./fbt updater_package [By Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
 - Settings: Desktop => [Games Only Mode (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
-- - [UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT FROM CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)<== FULL LIST OF GAMES ONLY CONTROLS
+- - [UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT FROM CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md) (FULL LIST OF GAMES ONLY CONTROLS)
 - Settings: LCD Timeout Options Added: 10s+90s+2min+5min+10min [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/notification/notification_settings_app.c)
 - Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/409)
 - Settings: Rename from SD `dolphin/name.txt` [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/259)
@@ -159,23 +154,7 @@ $ ./fbt resources icons dolphin_ext
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - U2F: U2F.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
 
- </details>
-
-
-<details>
-  <summary><B>Open PRs Checked Out & Not Merged In Main</b></summary><br/>
-  
-- [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
-- [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
-- [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
-- [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
-
-</details>
-
-</td><td>
-
-<details>
-  <summary><B>GAMES</b></summary><br/>
+## Games
   
 - [15 (By x27)](https://github.com/x27/flipperzero-game15)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
@@ -199,10 +178,8 @@ $ ./fbt resources icons dolphin_ext
 - [Tic Tac Toe (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Zombiez (Reworked By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/240) [(Original By Dooskington)](https://github.com/Dooskington/flipperzero-zombiez)
-</details>
 
-<details>
-  <summary><B>PLUGINS</b></summary><br/>
+## Plugins
 
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
@@ -252,6 +229,11 @@ $ ./fbt resources icons dolphin_ext
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
-</details>
 
-</td></tr></table>
+## Open PRs Checked Out & Not Merged In Main
+  
+- [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
+- [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
+- [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
+- [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
+
