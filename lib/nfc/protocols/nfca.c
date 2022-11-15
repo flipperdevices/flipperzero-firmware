@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <furi.h>
 #include <rfal_nfca.h>
+#include <furi_hal_nfc.h>
+
+#define TAG "NFCA"
 
 #define NFCA_CMD_RATS (0xE0U)
 
@@ -143,11 +146,71 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
 }
 
 bool nfca_poller_check_presence() {
-    return true;
+    FuriHalNfcReturn ret = FuriHalNfcReturnOk;
+    rfalNfcaSensRes sens = {};
+
+    bool present = false;
+    do {
+        ret = rfalNfcaPollerInitialize();
+        if(ret != FuriHalNfcReturnOk) {
+            FURI_LOG_D(TAG, "NFCA init failed: %d", ret);
+            break;
+        }
+        ret = furi_hal_nfc_field_on_wait_gt();
+        if(ret != FuriHalNfcReturnOk) {
+            FURI_LOG_D(TAG, "Field on and guard time failed: %d", ret);
+            break;
+        }
+        ret = rfalNfcaPollerCheckPresence(RFAL_14443A_SHORTFRAME_CMD_WUPA, &sens);
+        if(ret != FuriHalNfcReturnOk) {
+            FURI_LOG_D(TAG, "Check presence failed: %d", ret);
+            break;
+        }
+
+        FURI_LOG_D(TAG, "Tag detected");
+        present = true;
+    } while(false);
+
+    return present;
 }
 
-bool nfca_poller_activate() {
-    return true;
+bool nfca_poller_activate(NfcaData* nfca_data) {
+    furi_assert(nfca_data);
+
+    FuriHalNfcReturn ret = FuriHalNfcReturnOk;
+    rfalNfcaListenDevice dev;
+    uint8_t dev_cnt = 0;
+
+    bool activated = false;
+    do {
+        ret = rfalNfcaPollerInitialize();
+        if(ret != FuriHalNfcReturnOk) {
+            FURI_LOG_D(TAG, "NFCA init failed: %d", ret);
+            break;
+        }
+        ret = furi_hal_nfc_field_on_wait_gt();
+        if(ret != FuriHalNfcReturnOk) {
+            FURI_LOG_D(TAG, "Field on and guard time failed: %d", ret);
+            break;
+        }
+        ret = rfalNfcaPollerFullCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &dev, &dev_cnt);
+        if(ret != FuriHalNfcReturnOk) {
+            FURI_LOG_D(TAG, "Anticollision failed: %d", ret);
+            break;
+        }
+
+        nfca_data->uid_len = dev.nfcId1Len;
+        memcpy(nfca_data->uid, dev.nfcId1, nfca_data->uid_len);
+        nfca_data->atqa[0] = dev.sensRes.anticollisionInfo;
+        nfca_data->atqa[1] = dev.sensRes.platformInfo;
+        nfca_data->sak = dev.selRes.sak;
+        nfca_data->iso14443_4_compliant = FURI_BIT(nfca_data->sak, 5);
+
+        FURI_LOG_D(TAG, "Anticollision passed");
+        activated = true;
+    } while(false);
+
+    return activated;
 }
 
 void nfca_poller_sleep() {

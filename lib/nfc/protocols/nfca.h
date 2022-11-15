@@ -5,6 +5,16 @@
 
 #include <lib/digital_signal/digital_signal.h>
 
+#define NFCA_MAX_UID_LEN (10)
+
+typedef struct {
+    uint8_t uid[NFCA_MAX_UID_LEN];
+    uint8_t uid_len;
+    uint8_t atqa[2];
+    uint8_t sak;
+    bool iso14443_4_compliant;
+} NfcaData;
+
 typedef struct {
     DigitalSignal* one;
     DigitalSignal* zero;
@@ -29,6 +39,6 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
 
 bool nfca_poller_check_presence();
 
-bool nfca_poller_activate();
+bool nfca_poller_activate(NfcaData* nfca_data);
 
 void nfca_poller_sleep();

@@ -4,6 +4,7 @@
 #include <platform.h>
 #include "parsers/nfc_supported_card.h"
 #include "rfal_event.h"
+#include "protocols/nfca.h"
 
 #define TAG "NfcWorker"
 
@@ -341,29 +342,17 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
 
-    NfcDeviceData* data = nfc_worker->dev_data;
-    rfalNfcaListenDevice dev;
-    uint8_t dev_cnt = 0;
+    NfcaData nfca_data = {};
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        ReturnCode ret = rfalNfcaPollerInitialize();
-        FURI_LOG_I(TAG, "Init ret: %d", ret);
-        ret = furi_hal_nfc_field_on_wait_gt();
-        FURI_LOG_I(TAG, "Field on: %d", ret);
-        ret = rfalNfcaPollerFullCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &dev, &dev_cnt);
-        FURI_LOG_I(TAG, "Full col res ret: %d, cnt: %d", ret, dev_cnt);
-        if(ret == ERR_NONE) {
-            data->nfc_data.type = FuriHalNfcTypeA;
-            data->nfc_data.uid_len = dev.nfcId1Len;
-            memcpy(data->nfc_data.uid, dev.nfcId1, dev.nfcId1Len);
-            data->nfc_data.atqa[0] = dev.sensRes.anticollisionInfo;
-            data->nfc_data.atqa[1] = dev.sensRes.platformInfo;
-            data->nfc_data.sak = dev.selRes.sak;
-            // nfc_worker->callback(NfcWorkerEventReadUidNfcA, nfc_worker->context);
-            ret = rfalNfcaPollerSleep();
+        if(nfca_poller_check_presence()) {
+            FURI_LOG_I(TAG, "Nfca dev detected");
+            ReturnCode ret = rfalNfcaPollerSleep();
             FURI_LOG_I(TAG, "Success. Sleep: %d", ret);
-            // bool card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
-        } else {
+        }
+        if(nfca_poller_activate(&nfca_data)) {
+            ReturnCode ret = rfalNfcaPollerSleep();
+            FURI_LOG_I(TAG, "Success. Sleep: %d", ret);
         }
         furi_hal_nfc_ll_txrx_off();
         furi_delay_ms(100);
