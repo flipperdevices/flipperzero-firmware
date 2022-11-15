@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <core/string.h>
-#include <toolbox/rpc_helper.h>
+#include <toolbox/property.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -193,14 +193,14 @@ void furi_hal_power_suppress_charge_exit();
  * @param[in]  sep          category separator character
  * @param[in]  context      context to pass to callback
  */
-void furi_hal_power_info_get(RpcHelperPropertyCallback callback, char sep, void* context);
+void furi_hal_power_info_get(PropertyValueCallback callback, char sep, void* context);
 
 /** Get power debug information
  *
  * @param[in]  callback     callback to provide with new data
  * @param[in]  context      context to pass to callback
  */
-void furi_hal_power_debug_get(RpcHelperPropertyCallback callback, void* context);
+void furi_hal_power_debug_get(PropertyValueCallback callback, void* context);
 
 #ifdef __cplusplus
 }

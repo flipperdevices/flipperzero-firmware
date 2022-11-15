@@ -14,16 +14,16 @@ extern "C" {
  * @param      last[in]     whether the passed key-value pair is the last one
  * @param      context[in]  to pass to callback
  */
-typedef void (*RpcHelperPropertyCallback)(const char* key, const char* value, bool last, void* context);
+typedef void (*PropertyValueCallback)(const char* key, const char* value, bool last, void* context);
 
 typedef struct {
     FuriString* key;                /**< key string buffer, must be initialised before use */
     FuriString* value;              /**< value string buffer, must be initialised before use */
-    RpcHelperPropertyCallback out;  /**< output callback function */
+    PropertyValueCallback out;      /**< output callback function */
     char sep;                       /**< separator character between key parts */
     bool last;                      /**< flag to indicate last element */
     void* context;                  /**< user-defined context, passed through to out callback */
-} RpcHelperPropertyContext;
+} PropertyValueContext;
 
 /** Builds key and value strings and outputs them via a callback function
  *
@@ -32,7 +32,7 @@ typedef struct {
  * @param       nparts[in]  number of key parts (separated by character)
  * @param       ...[in]     list of key parts followed by value
  */
-void rpc_helper_property_out(RpcHelperPropertyContext* ctx, const char* fmt, unsigned int nparts, ...);
+void property_value_out(PropertyValueContext* ctx, const char* fmt, unsigned int nparts, ...);
 
 #ifdef __cplusplus
 }

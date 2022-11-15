@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <core/string.h>
-#include <toolbox/rpc_helper.h>
+#include <toolbox/property.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +20,7 @@ extern "C" {
  * @param[in]  sep          category separator character
  * @param[in]  context      context to pass to callback
  */
-void furi_hal_info_get(RpcHelperPropertyCallback callback, char sep, void* context);
+void furi_hal_info_get(PropertyValueCallback callback, char sep, void* context);
 
 #ifdef __cplusplus
 }
