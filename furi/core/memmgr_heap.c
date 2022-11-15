@@ -340,6 +340,10 @@ void* pvPortMalloc(size_t xWantedSize) {
     void* pvReturn = NULL;
     size_t to_wipe = xWantedSize;
 
+    if(FURI_IS_ISR()) {
+        furi_crash("malloc in ISR");
+    }
+
 #ifdef HEAP_PRINT_DEBUG
     BlockLink_t* print_heap_block = NULL;
 #endif
