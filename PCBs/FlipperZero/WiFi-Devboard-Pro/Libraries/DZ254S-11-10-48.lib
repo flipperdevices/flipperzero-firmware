@@ -1,0 +1,35 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model DZ254S-11-10-48
+#/17126707/987070/2.49/10/0/Connector
+DEF DZ254S-11-10-48 J 0 30 Y Y 1 F N
+F0 "J" 750 300 50 H V L CNN
+F1 "DZ254S-11-10-48" 750 200 50 H V L CNN
+F2 "HUSRSP10W66P254_2500X250X850P" 750 100 50 H I L CNN
+F3 "https://datasheet.lcsc.com/lcsc/2209141730_DEALON-DZ254S-11-10-48_C5160793.pdf" 750 0 50 H I L CNN
+F4 "Brick nogging Square Pins 1 10 2.54mm 1x10P SMD,P=2.54mm() Pin Headers ROHS" 750 -100 50 H I L CNN "Description"
+F5 "" 750 -200 50 H I L CNN "Height"
+F6 "DEALON" 750 -300 50 H I L CNN "Manufacturer_Name"
+F7 "DZ254S-11-10-48" 750 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "" 750 -500 50 H I L CNN "Mouser Part Number"
+F9 "" 750 -600 50 H I L CNN "Mouser Price/Stock"
+F10 "" 750 -700 50 H I L CNN "Arrow Part Number"
+F11 "" 750 -800 50 H I L CNN "Arrow Price/Stock"
+F12 "" 750 -900 50 H I L CNN "Mouser Testing Part Number"
+F13 "" 750 -1000 50 H I L CNN "Mouser Testing Price/Stock"
+DRAW
+X 1 1 0 0 200 R 50 50 0 0 P
+X 2 2 0 -100 200 R 50 50 0 0 P
+X 3 3 0 -200 200 R 50 50 0 0 P
+X 4 4 0 -300 200 R 50 50 0 0 P
+X 5 5 0 -400 200 R 50 50 0 0 P
+X 6 6 900 0 200 L 50 50 0 0 P
+X 7 7 900 -100 200 L 50 50 0 0 P
+X 8 8 900 -200 200 L 50 50 0 0 P
+X 9 9 900 -300 200 L 50 50 0 0 P
+X 10 10 900 -400 200 L 50 50 0 0 P
+P 5 0 1 6 200 100 700 100 700 -500 200 -500 200 100 N
+ENDDRAW
+ENDDEF
+#
+#End Library
