@@ -13,7 +13,7 @@ pwnagotchi-flipper
 
 ## Current state
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
-As of commit 3cca697 (11/8/22) I have gotten a semi-working version of the protocol. It uses a double buffer system which allows editting of the screen's contents and then later drawing to the screen. This may or may not be the final system. Currently this has many internal issues that I will look into soon and try and fix up. I am on the home stretch to finishing the Flipper side of the interface!
+As of commit f2df88c (11/14/22) I have a pretty much fully working pixel-by-pixel drawing interface. I have decided though that this is not the best approach. Instead I should have specific commands for drawing the face, number of access points, name, and so on. For this reason I will archive this current code in a branch called pixel-by-pixel and then continue development of a new protocol that will require less information transmission over UART.
 
 ## Setup
 TODO: Explain setup process
