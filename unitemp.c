@@ -1,7 +1,7 @@
 #include "unitemp.h"
 #include "interfaces/SingleWireSensor.h"
 #include "Sensors.h"
-#include "scenes/Scenes.h"
+#include "./views/UnitempViews.h"
 
 #include <furi_hal_power.h>
 
@@ -200,7 +200,8 @@ static bool unitemp_alloc(void) {
     //Диспетчер окон
     app->view_dispatcher = view_dispatcher_alloc();
 
-    TempHum_secene_alloc();
+    unitemp_Summary_alloc();
+    unitemp_MainMenu_alloc();
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -214,7 +215,8 @@ static void unitemp_free(void) {
     //Автоматическое управление подсветкой
     notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
 
-    TempHum_secene_free();
+    unitemp_Summary_free();
+    unitemp_MainMenu_free();
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
@@ -252,10 +254,11 @@ int32_t unitemp_app() {
     //Инициализация датчиков
     unitemp_sensors_init();
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, TEMPHUM_VIEW);
+    view_dispatcher_switch_to_view(app->view_dispatcher, SUMMARY_VIEW);
 
     while(app->processing) {
         unitemp_sensors_updateValues();
+        furi_delay_ms(100);
     }
 
     //Деинициализация датчиков

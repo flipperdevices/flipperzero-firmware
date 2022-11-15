@@ -1,8 +1,8 @@
-#include "Scenes.h"
+#include "UnitempViews.h"
 
 static View* view;
 
-static void TempHum_draw_callback(Canvas* canvas, void* _model) {
+static void _draw_callback(Canvas* canvas, void* _model) {
     UNUSED(_model);
 
     //Рисование бара
@@ -43,26 +43,30 @@ static void TempHum_draw_callback(Canvas* canvas, void* _model) {
     }
 }
 
-bool input_callback(InputEvent* event, void* context) {
+static bool _input_callback(InputEvent* event, void* context) {
     Unitemp* app = context;
 
-    //Вход по короткому нажатию
+    //Выход по короткому нажатию "назад"
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         app->processing = false;
+    }
+    //Вход в главное меню по короткому нажатию "Ок"
+    if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        view_dispatcher_switch_to_view(app->view_dispatcher, MAINMENU_VIEW);
     }
 
     return true;
 }
 
-void TempHum_secene_alloc(void) {
+void unitemp_Summary_alloc(void) {
     view = view_alloc();
     view_set_context(view, app);
-    view_set_draw_callback(view, TempHum_draw_callback);
-    view_set_input_callback(view, input_callback);
+    view_set_draw_callback(view, _draw_callback);
+    view_set_input_callback(view, _input_callback);
 
-    view_dispatcher_add_view(app->view_dispatcher, TEMPHUM_VIEW, view);
+    view_dispatcher_add_view(app->view_dispatcher, SUMMARY_VIEW, view);
 }
 
-void TempHum_secene_free(void) {
+void unitemp_Summary_free(void) {
     view_free(view);
 }
