@@ -27,7 +27,11 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
-    UNUSED(index);
+    if(index == 0) { //add new sensor
+    }
+    if(index == 1) { //Settings
+        unitemp_Settings_switch();
+    }
 }
 
 /**
@@ -52,6 +56,13 @@ void unitemp_MainMenu_alloc(void) {
     view_set_previous_callback(view, _exit_callback);
     //Добавление вида в диспетчер
     view_dispatcher_add_view(app->view_dispatcher, VIEW_ID, view);
+}
+
+void unitemp_MainMenu_switch(void) {
+    //Обнуление последнего выбранного пункта
+    variable_item_list_set_selected_item(variable_item_list, 0);
+    //Переключение в вид
+    view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_ID);
 }
 
 void unitemp_MainMenu_free(void) {

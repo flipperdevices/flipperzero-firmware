@@ -75,5 +75,18 @@ typedef struct {
  */
 void uintemp_celsiumToFarengate(Sensor* sensor);
 
+/**
+ * @brief Сохранение настроек на SD-карту
+ * 
+ * @return Истина если сохранение успешное
+ */
+bool unitemp_saveSettings(void);
+/**
+ * @brief Загрузка настроек с SD-карты
+ * 
+ * @return Истина если загрузка успешная
+ */
+bool unitemp_loadSettings(void);
+
 extern Unitemp* app;
 #endif

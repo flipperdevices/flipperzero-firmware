@@ -13,13 +13,7 @@ void uintemp_celsiumToFarengate(Sensor* sensor) {
     sensor->temp = sensor->temp * (9.0 / 5.0) + 32;
 }
 
-/**
- * @brief Сохранение настроек на SD-карту
- * 
- * @return true Если сохранение прошло успешно
- * @return false Если во время сохранения произошла ошибка
- */
-static bool unitemp_saveSettings(void) {
+bool unitemp_saveSettings(void) {
     FURI_LOG_D(APP_NAME, "Saving settings...\r\n");
 
     //Выделение памяти для потока
@@ -58,13 +52,7 @@ static bool unitemp_saveSettings(void) {
     return true;
 }
 
-/**
- * @brief Загрузка настроек с SD-карты
- * 
- * @return true Загрузка успешная
- * @return false Произошла ошибка
- */
-static bool unitemp_loadSettings(void) {
+bool unitemp_loadSettings(void) {
     FURI_LOG_D(APP_NAME, "Loading settings...");
     //Выделение памяти на поток
     app->file_stream = file_stream_alloc(app->storage);
@@ -168,7 +156,6 @@ static bool unitemp_loadSettings(void) {
         //Автоматическое управление
         notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
     }
-    app->settings.lastOTGState = furi_hal_power_is_otg_enabled();
 
     FURI_LOG_I(APP_NAME, "Settings have been successfully loaded\r\n");
     return true;
@@ -202,6 +189,7 @@ static bool unitemp_alloc(void) {
 
     unitemp_Summary_alloc();
     unitemp_MainMenu_alloc();
+    unitemp_Settings_alloc();
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -215,8 +203,9 @@ static void unitemp_free(void) {
     //Автоматическое управление подсветкой
     notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
 
-    unitemp_Summary_free();
+    unitemp_Settings_free();
     unitemp_MainMenu_free();
+    unitemp_Summary_free();
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
@@ -249,6 +238,7 @@ int32_t unitemp_app() {
 
     //Загрузка настроек из SD-карты
     unitemp_loadSettings();
+    app->settings.lastOTGState = furi_hal_power_is_otg_enabled();
     //Загрузка датчиков из SD-карты
     unitemp_sensors_load();
     //Инициализация датчиков

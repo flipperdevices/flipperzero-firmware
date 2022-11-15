@@ -52,7 +52,7 @@ static bool _input_callback(InputEvent* event, void* context) {
     }
     //Вход в главное меню по короткому нажатию "Ок"
     if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        view_dispatcher_switch_to_view(app->view_dispatcher, MAINMENU_VIEW);
+        unitemp_MainMenu_switch();
     }
 
     return true;
