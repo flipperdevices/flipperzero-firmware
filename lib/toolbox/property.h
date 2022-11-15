@@ -17,12 +17,12 @@ extern "C" {
 typedef void (*PropertyValueCallback)(const char* key, const char* value, bool last, void* context);
 
 typedef struct {
-    FuriString* key;                /**< key string buffer, must be initialised before use */
-    FuriString* value;              /**< value string buffer, must be initialised before use */
-    PropertyValueCallback out;      /**< output callback function */
-    char sep;                       /**< separator character between key parts */
-    bool last;                      /**< flag to indicate last element */
-    void* context;                  /**< user-defined context, passed through to out callback */
+    FuriString* key; /**< key string buffer, must be initialised before use */
+    FuriString* value; /**< value string buffer, must be initialised before use */
+    PropertyValueCallback out; /**< output callback function */
+    char sep; /**< separator character between key parts */
+    bool last; /**< flag to indicate last element */
+    void* context; /**< user-defined context, passed through to out callback */
 } PropertyValueContext;
 
 /** Builds key and value strings and outputs them via a callback function

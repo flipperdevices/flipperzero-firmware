@@ -22,7 +22,7 @@ void property_value_out(PropertyValueContext* ctx, const char* fmt, unsigned int
     if(fmt) {
         furi_string_vprintf(ctx->value, fmt, args);
         value_str = furi_string_get_cstr(ctx->value);
-     } else {
+    } else {
         // C string passthrough (no formatting)
         value_str = va_arg(args, const char*);
     }
