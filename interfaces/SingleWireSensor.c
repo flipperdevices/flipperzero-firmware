@@ -81,6 +81,7 @@ bool unitemp_singleWire_init(Sensor* sensor) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
         return false;
     }
+    unitemp_gpio_lock(instance->gpio, &SINGLE_WIRE);
     //Высокий уровень по умолчанию
     furi_hal_gpio_write(instance->gpio->pin, true);
     //Режим работы - OpenDrain, подтяжка включается на всякий случай
@@ -111,7 +112,6 @@ bool unitemp_singleWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
     if(sensor == NULL || gpio == NULL) return false;
     SingleWireSensor* instance = sensor->instance;
     instance->gpio = gpio;
-    unitemp_gpio_lock(gpio, &SINGLE_WIRE);
     return true;
 }
 const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor) {

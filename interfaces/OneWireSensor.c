@@ -20,7 +20,6 @@ OneWireBus* uintemp_OneWire_bus_alloc(const GPIO* gpio) {
         return NULL;
     }
 
-    unitemp_gpio_lock(gpio, &ONE_WIRE);
     //Проверка на наличие шины на этом порте
     for(uint8_t i = 0; i < app->sensors_count; i++) {
         if(app->sensors[i]->type == &DS18x2x &&
@@ -29,6 +28,7 @@ OneWireBus* uintemp_OneWire_bus_alloc(const GPIO* gpio) {
             return ((OneWireBus*)(app->sensors[i]->instance));
         }
     }
+    unitemp_gpio_lock(gpio, &ONE_WIRE);
     //Высокий уровень по умолчанию
     furi_hal_gpio_write(gpio->pin, true);
     //Режим работы - OpenDrain, подтяжка включается на всякий случай

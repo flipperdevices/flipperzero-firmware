@@ -254,7 +254,10 @@ bool unitemp_sensors_load() {
         uint8_t otherValues[] = {otherValue};
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
-            unitemp_sensor_alloc(name, unitemp_getTypeFromInt(type), otherValues);
+            Sensor* sensor = unitemp_sensor_alloc(name, unitemp_getTypeFromInt(type), otherValues);
+            if(sensor != NULL) {
+                app->sensors[app->sensors_count++] = sensor;
+            }
         } else {
             FURI_LOG_E(APP_NAME, "Unsupported sensor name (%s) or sensor type (%d)", name, type);
         }
@@ -354,9 +357,8 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anothe
     //Выделение памяти под инстанс датчика в зависимости от его интерфейса
     status = sensor->type->interface->allocator(sensor, anotherValues);
 
-    //Если датчик успешно развёрнут, то добавление его в общий список и выход
+    //Выход если датчик успешно развёрнут
     if(status) {
-        app->sensors[app->sensors_count++] = sensor;
         return sensor;
     }
     //Если ни один из типов не подошёл, то выход с очисткой
