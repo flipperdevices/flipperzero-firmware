@@ -1,0 +1,30 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model CL05A105KA5NQNC
+#/1601150/987070/2.49/2/3/Capacitor
+DEF CL05A105KA5NQNC C 0 30 Y Y 1 F N
+F0 "C" 350 250 50 H V L CNN
+F1 "CL05A105KA5NQNC" 350 150 50 H V L CNN
+F2 "CAPC1005X60N" 350 50 50 H I L CNN
+F3 "https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics" 350 -50 50 H I L CNN
+F4 "Cap Ceramic 1uF 25V X5R 10% Pad SMD 0402 85C T/R" 350 -150 50 H I L CNN "Description"
+F5 "0.6" 350 -250 50 H I L CNN "Height"
+F6 "Samsung Electro-Mechanics" 350 -350 50 H I L CNN "Manufacturer_Name"
+F7 "CL05A105KA5NQNC" 350 -450 50 H I L CNN "Manufacturer_Part_Number"
+F8 "187-CL05A105KA5NQNC" 350 -550 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A105KA5NQNC?qs=X6jEic%2FHinDIeFgZnm60Lw%3D%3D" 350 -650 50 H I L CNN "Mouser Price/Stock"
+F10 "CL05A105KA5NQNC" 350 -750 50 H I L CNN "Arrow Part Number"
+F11 "https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics?region=europe" 350 -850 50 H I L CNN "Arrow Price/Stock"
+F12 "" 350 -950 50 H I L CNN "Mouser Testing Part Number"
+F13 "" 350 -1050 50 H I L CNN "Mouser Testing Price/Stock"
+DRAW
+X ~ 1 0 0 200 R 50 50 0 0 P
+X ~ 2 500 0 200 L 50 50 0 0 P
+P 2 0 1 6 220 100 220 -100 N
+P 2 0 1 6 280 100 280 -100 N
+P 2 0 1 6 200 0 220 0 N
+P 2 0 1 6 280 0 300 0 N
+ENDDRAW
+ENDDEF
+#
+#End Library
