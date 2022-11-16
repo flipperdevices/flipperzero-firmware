@@ -41,4 +41,4 @@ bool nfca_poller_check_presence();
 
 bool nfca_poller_activate(NfcaData* nfca_data);
 
-void nfca_poller_sleep();
+bool nfca_poller_deactivate();

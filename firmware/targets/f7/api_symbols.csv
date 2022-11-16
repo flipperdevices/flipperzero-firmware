@@ -1958,7 +1958,7 @@ Function,-,nfca_emulation_handler,_Bool,"uint8_t*, uint16_t, uint8_t*, uint16_t*
 Function,-,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,+,nfca_poller_activate,_Bool,
 Function,+,nfca_poller_check_presence,_Bool,
-Function,+,nfca_poller_sleep,void,
+Function,+,nfca_poller_deactivate,void,
 Function,-,nfca_signal_alloc,NfcaSignal*,
 Function,-,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,-,nfca_signal_free,void,NfcaSignal*

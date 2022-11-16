@@ -50,8 +50,9 @@ void furi_hal_nfc_field_on() {
 }
 
 void furi_hal_nfc_field_off() {
-    st25r3916TxRxOff();
-    furi_hal_nfc_start_sleep();
+    rfalFieldOff();
+    // st25r3916TxRxOff();
+    // furi_hal_nfc_start_sleep();
 }
 
 void furi_hal_nfc_start_sleep() {

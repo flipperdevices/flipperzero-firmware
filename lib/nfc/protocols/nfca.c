@@ -153,21 +153,21 @@ bool nfca_poller_check_presence() {
     do {
         ret = rfalNfcaPollerInitialize();
         if(ret != FuriHalNfcReturnOk) {
-            FURI_LOG_D(TAG, "NFCA init failed: %d", ret);
+            FURI_LOG_T(TAG, "NFCA init failed: %d", ret);
             break;
         }
         ret = furi_hal_nfc_field_on_wait_gt();
         if(ret != FuriHalNfcReturnOk) {
-            FURI_LOG_D(TAG, "Field on and guard time failed: %d", ret);
+            FURI_LOG_T(TAG, "Field on and guard time failed: %d", ret);
             break;
         }
         ret = rfalNfcaPollerCheckPresence(RFAL_14443A_SHORTFRAME_CMD_WUPA, &sens);
         if(ret != FuriHalNfcReturnOk) {
-            FURI_LOG_D(TAG, "Check presence failed: %d", ret);
+            FURI_LOG_T(TAG, "Check presence failed: %d", ret);
             break;
         }
 
-        FURI_LOG_D(TAG, "Tag detected");
+        FURI_LOG_T(TAG, "Tag detected");
         present = true;
     } while(false);
 
@@ -185,17 +185,17 @@ bool nfca_poller_activate(NfcaData* nfca_data) {
     do {
         ret = rfalNfcaPollerInitialize();
         if(ret != FuriHalNfcReturnOk) {
-            FURI_LOG_D(TAG, "NFCA init failed: %d", ret);
+            FURI_LOG_T(TAG, "NFCA init failed: %d", ret);
             break;
         }
         ret = furi_hal_nfc_field_on_wait_gt();
         if(ret != FuriHalNfcReturnOk) {
-            FURI_LOG_D(TAG, "Field on and guard time failed: %d", ret);
+            FURI_LOG_T(TAG, "Field on and guard time failed: %d", ret);
             break;
         }
         ret = rfalNfcaPollerFullCollisionResolution(RFAL_COMPLIANCE_MODE_NFC, 1, &dev, &dev_cnt);
         if(ret != FuriHalNfcReturnOk) {
-            FURI_LOG_D(TAG, "Anticollision failed: %d", ret);
+            FURI_LOG_T(TAG, "Anticollision failed: %d", ret);
             break;
         }
 
@@ -206,12 +206,17 @@ bool nfca_poller_activate(NfcaData* nfca_data) {
         nfca_data->sak = dev.selRes.sak;
         nfca_data->iso14443_4_compliant = FURI_BIT(nfca_data->sak, 5);
 
-        FURI_LOG_D(TAG, "Anticollision passed");
+        FURI_LOG_T(TAG, "Anticollision passed");
         activated = true;
     } while(false);
 
     return activated;
 }
 
-void nfca_poller_sleep() {
+bool nfca_poller_deactivate() {
+    FuriHalNfcReturn ret = rfalNfcaPollerSleep();
+    if(ret != FuriHalNfcReturnOk) {
+        FURI_LOG_T(TAG, "Sleep failed: %d", ret);
+    }
+    return ret == FuriHalNfcReturnOk;
 }

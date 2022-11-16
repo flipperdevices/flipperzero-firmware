@@ -4,6 +4,7 @@
 #include <platform.h>
 #include "parsers/nfc_supported_card.h"
 #include "rfal_event.h"
+#include "protocols/nfc_poller.h"
 #include "protocols/nfca.h"
 
 #define TAG "NfcWorker"
@@ -342,19 +343,21 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
 
-    NfcaData nfca_data = {};
+    NfcPoller nfc_poller;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        if(nfca_poller_check_presence()) {
-            FURI_LOG_I(TAG, "Nfca dev detected");
-            ReturnCode ret = rfalNfcaPollerSleep();
-            FURI_LOG_I(TAG, "Success. Sleep: %d", ret);
+        nfc_poller_reset(&nfc_poller);
+        if(nfc_poller_activate(&nfc_poller)) {
+            if(nfc_poller.type == NfcTypeA) {
+                FURI_LOG_D(TAG, "NFC-A tag detected");
+            } else if(nfc_poller.type == NfcTypeB) {
+                FURI_LOG_D(TAG, "NFC-B tag detected");
+            } else if(nfc_poller.type == NfcTypeF) {
+                FURI_LOG_D(TAG, "NFC-F tag detected");
+            } else if(nfc_poller.type == NfcTypeV) {
+                FURI_LOG_D(TAG, "NFC-V tag detected");
+            }
         }
-        if(nfca_poller_activate(&nfca_data)) {
-            ReturnCode ret = rfalNfcaPollerSleep();
-            FURI_LOG_I(TAG, "Success. Sleep: %d", ret);
-        }
-        furi_hal_nfc_ll_txrx_off();
         furi_delay_ms(100);
     }
 }
