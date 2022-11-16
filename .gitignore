@@ -58,3 +58,4 @@ dkms.conf
 dist
 .vscode
 .editorconfig
+.clang-format
