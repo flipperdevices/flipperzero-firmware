@@ -35,6 +35,10 @@ static const GPIO GPIOList[] = {
     {16, "16 (C0)", &gpio_ext_pc0},
     {17, "17 (1W)", &ibutton_gpio}};
 
+//Список интерфейсов, которые прикреплены к GPIO (определяется индексом)
+//NULL - порт свободен, указатель на интерфейс - порт занят этим интерфейсом
+static const Interface* gpio_interfaces_list[GPIO_ITEMS] = {0};
+
 const Interface SINGLE_WIRE = {
     .name = "Single wire",
     .allocator = unitemp_singleWire_alloc,
@@ -86,6 +90,10 @@ const GPIO* unitemp_GPIO_getFromInt(uint8_t name) {
     return NULL;
 }
 
+const GPIO* unitemp_gpio_getFromIndex(uint8_t index) {
+    return &GPIOList[index];
+}
+
 uint8_t unitemp_GPIO_toInt(const GpioPin* gpio) {
     if(gpio == NULL) return 255;
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
@@ -94,6 +102,82 @@ uint8_t unitemp_GPIO_toInt(const GpioPin* gpio) {
         }
     }
     return 255;
+}
+
+uint8_t unitemp_gpio_to_index(const GpioPin* gpio) {
+    if(gpio == NULL) return 255;
+    for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
+        if(GPIOList[i].pin->pin == gpio->pin && GPIOList[i].pin->port == gpio->port) {
+            return i;
+        }
+    }
+    return 255;
+}
+
+uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface) {
+    uint8_t aviable_ports_count = 0;
+    for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
+        //Проверка для one wire
+        if(interface == &ONE_WIRE) {
+            if(gpio_interfaces_list[i] == NULL || gpio_interfaces_list[i] == &ONE_WIRE) {
+                aviable_ports_count++;
+            }
+        }
+
+        //Проверка для single wire
+        if(interface == &SINGLE_WIRE) {
+            if(gpio_interfaces_list[i] == NULL) {
+                aviable_ports_count++;
+            }
+        }
+
+        if(interface == &I2C) {
+            //У I2C два фиксированых порта
+            return 0;
+        }
+    }
+    return aviable_ports_count;
+}
+
+void unitemp_gpio_lock(const GPIO* gpio, const Interface* interface) {
+    uint8_t i = unitemp_gpio_to_index(gpio->pin);
+    if(i == 255) return;
+    gpio_interfaces_list[i] = interface;
+}
+
+void unitemp_gpio_unlock(const GPIO* gpio) {
+    uint8_t i = unitemp_gpio_to_index(gpio->pin);
+    if(i == 255) return;
+    gpio_interfaces_list[i] = NULL;
+}
+
+const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index) {
+    uint8_t aviable_index = 0;
+    uint8_t aviable_port_count = unitemp_gpio_getAviablePortsCount(interface);
+    FURI_LOG_D(APP_NAME, "Aviable ports: %d", aviable_port_count);
+    for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
+        //Проверка для one wire
+        if(interface == &ONE_WIRE) {
+            if(gpio_interfaces_list[i] == NULL || gpio_interfaces_list[i] == &ONE_WIRE) {
+                if(aviable_index == index) {
+                    return unitemp_gpio_getFromIndex(i);
+                } else {
+                    aviable_index++;
+                }
+            }
+        }
+        //Проверка для single wire
+        if(interface == &SINGLE_WIRE) {
+            if(gpio_interfaces_list[i] == NULL) {
+                if(aviable_index == index) {
+                    return unitemp_gpio_getFromIndex(i);
+                } else {
+                    aviable_index++;
+                }
+            }
+        }
+    }
+    return NULL;
 }
 
 bool unitemp_sensors_load() {
@@ -176,9 +260,6 @@ bool unitemp_sensors_load() {
         }
         line = strtok((char*)NULL, "\n");
     }
-
-    // uint16_t otherValues[] = {0x76};
-    // unitemp_sensor_alloc("BMP280", BMP280, otherValues);
 
     free(file_buf);
     file_stream_close(app->file_stream);

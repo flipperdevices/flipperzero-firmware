@@ -19,6 +19,8 @@ OneWireBus* uintemp_OneWire_bus_alloc(const GPIO* gpio) {
     if(gpio == NULL) {
         return NULL;
     }
+
+    unitemp_gpio_lock(gpio, &ONE_WIRE);
     //Проверка на наличие шины на этом порте
     for(uint8_t i = 0; i < app->sensors_count; i++) {
         if(app->sensors[i]->type == &DS18x2x &&
@@ -290,6 +292,7 @@ bool unitemp_OneWire_sensor_alloc(Sensor* sensor, uint8_t* anotherValues) {
 
 bool unitemp_OneWire_sensor_free(Sensor* sensor) {
     if(((OneWireSensor*)sensor->instance)->bus->device_count == 0) {
+        unitemp_gpio_unlock(((OneWireSensor*)sensor->instance)->bus->gpio);
         free(((OneWireSensor*)sensor->instance)->bus);
     }
     free(sensor->instance);

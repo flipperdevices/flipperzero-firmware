@@ -1,5 +1,6 @@
 #include "UnitempViews.h"
 #include <gui/modules/variable_item_list.h>
+#include <stdio.h>
 
 //Текущий вид
 static View* view;
@@ -28,7 +29,18 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
-    UNUSED(index);
+    //Имя датчка
+    char sensor_name[11];
+    snprintf(sensor_name, 11, "Sensor %d", app->sensors_count + 1);
+    const SensorType* st = unitemp_getSensorsTypes()[index];
+    uint8_t anotherValues[1] = {0};
+    //Выбор первого доступного порта для датчиков single wire и one wire
+    if(st->interface == &SINGLE_WIRE || st->interface == &ONE_WIRE) {
+        anotherValues[0] = unitemp_GPIO_toInt(unitemp_gpio_getAviablePort(st->interface, 0)->pin);
+    };
+    //Для I2C адрес выберится автоматически
+
+    unitemp_SensorEdit_switch(unitemp_sensor_alloc(sensor_name, st, anotherValues));
 }
 
 /**
@@ -59,12 +71,6 @@ void unitemp_SensorsList_alloc(void) {
 void unitemp_SensorsList_switch(void) {
     //Обнуление последнего выбранного пункта
     variable_item_list_set_selected_item(variable_item_list, 0);
-
-    // variable_item_set_current_value_index(
-    //     infinity_backlight_item, (uint8_t)app->SensorsList.infinityBacklight);
-    // variable_item_set_current_value_text(
-    //     infinity_backlight_item,
-    //     states[variable_item_get_current_value_index(infinity_backlight_item)]);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_ID);
 }

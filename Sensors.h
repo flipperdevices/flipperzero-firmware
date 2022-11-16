@@ -180,5 +180,20 @@ void unitemp_sensors_updateValues(void);
  */
 void unitemp_sensors_free(void);
 
+/**
+ * @brief Высвыбождение памяти конкретного датчка
+ * 
+ * @param sensor Указатель на датчик
+ */
+void unitemp_sensor_free(Sensor* sensor);
+
 const SensorType* unitemp_getTypeFromInt(int type);
+
+uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface);
+
+void unitemp_gpio_lock(const GPIO* gpio, const Interface* interface);
+
+void unitemp_gpio_unlock(const GPIO* gpio);
+
+const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index);
 #endif

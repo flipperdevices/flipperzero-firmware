@@ -17,7 +17,7 @@ const SensorType DHT11 = {
     .deinitializer = unitemp_singleWire_deinit,
     .updater = unitemp_singleWire_update};
 const SensorType DHT12_SW = {
-    .typename = "DHT12 (single wire)",
+    .typename = "DHT12",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
     .allocator = unitemp_singleWire_alloc,
@@ -45,7 +45,7 @@ const SensorType DHT22 = {
     .deinitializer = unitemp_singleWire_deinit,
     .updater = unitemp_singleWire_update};
 const SensorType AM2320_SW = {
-    .typename = "AM2320 (single wire)",
+    .typename = "AM2320",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
     .allocator = unitemp_singleWire_alloc,
@@ -95,6 +95,7 @@ bool unitemp_singleWire_init(Sensor* sensor) {
 bool unitemp_singleWire_deinit(Sensor* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) return false;
+    unitemp_gpio_unlock(instance->gpio);
     //Низкий уровень по умолчанию
     furi_hal_gpio_write(instance->gpio->pin, false);
     //Режим работы - аналог, подтяжка выключена
@@ -110,6 +111,7 @@ bool unitemp_singleWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
     if(sensor == NULL || gpio == NULL) return false;
     SingleWireSensor* instance = sensor->instance;
     instance->gpio = gpio;
+    unitemp_gpio_lock(gpio, &SINGLE_WIRE);
     return true;
 }
 const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor) {
