@@ -8,6 +8,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/dialog_ex.h>
 
+#include "../include/pwnagotchi.h"
 #include "../include/protocol.h"
 #include "../include/constants.h"
 #include "../include/message_queue.h"
@@ -34,6 +35,7 @@ struct PwnDumpModel {
     MessageQueue *queue;
 
     bool* screen;
+    Pwnagotchi* pwn;
     bool* workspace;
 };
 
@@ -52,57 +54,58 @@ const NotificationSequence sequence_notification = {
     NULL,
 };
 
-static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
-    if (message_queue_has_message(model->queue)) {
-        PwnCommand cmd;
-        message_queue_pop_message(model->queue, &cmd);
-        FURI_LOG_D("PWN", "Has message (code: %d), processing...", cmd.code);
+void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas) {
+    canvas_set_font(canvas, FontPrimary);
 
-        // See what the cmd wants
-        // Draw a single pixel
-        if (cmd.code == 0x01 || cmd.code == 0x00) {
-            FURI_LOG_D("PWN", "Drawing pixel at (i: %d, j: %d)", cmd.i, cmd.j);
-            if ((cmd.i < FLIPPER_SCREEN_HEIGHT) && (cmd.j < FLIPPER_SCREEN_WIDTH)) {
-                model->workspace[cmd.i * FLIPPER_SCREEN_WIDTH + cmd.j] = cmd.code;
-            }
-        }
-        // Flush buffer to the screen
-        else if (cmd.code == 0x0f) {
-            FURI_LOG_D("PWN", "Flipping buffer...");
-
-            bool* tmp = model->workspace;
-            model->workspace = model->screen;
-            model->screen = tmp;
-
-            // Copy new buffer to the workspace
-            memcpy(model->workspace, model->screen, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
-
-            return true;
-        }
-        // Wipe the buffer
-        else if (cmd.code == 0xff) {
-            FURI_LOG_D("PWN", "Wiping the buffer...");
-            memset(model->workspace, 0, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
-        }
-        else {
-            FURI_LOG_D("PWN", "Received an unrecognized command");
-        }
-
-    }
-
-    return false;
+    canvas_draw_str(canvas, PWNAGOTCHI_FACE_J, PWNAGOTCHI_FACE_I, pwn->faceStr);
 }
+
+// static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
+//     if (message_queue_has_message(model->queue)) {
+//         PwnCommand cmd;
+//         message_queue_pop_message(model->queue, &cmd);
+//         FURI_LOG_D("PWN", "Has message (code: %d), processing...", cmd.code);
+
+//         // See what the cmd wants
+//         // Draw a single pixel
+//         if (cmd.code == 0x01 || cmd.code == 0x00) {
+//             FURI_LOG_D("PWN", "Drawing pixel at (i: %d, j: %d)", cmd.i, cmd.j);
+//             if ((cmd.i < FLIPPER_SCREEN_HEIGHT) && (cmd.j < FLIPPER_SCREEN_WIDTH)) {
+//                 model->workspace[cmd.i * FLIPPER_SCREEN_WIDTH + cmd.j] = cmd.code;
+//             }
+//         }
+//         // Flush buffer to the screen
+//         else if (cmd.code == 0x0f) {
+//             FURI_LOG_D("PWN", "Flipping buffer...");
+
+//             bool* tmp = model->workspace;
+//             model->workspace = model->screen;
+//             model->screen = tmp;
+
+//             // Copy new buffer to the workspace
+//             memcpy(model->workspace, model->screen, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+
+//             return true;
+//         }
+//         // Wipe the buffer
+//         else if (cmd.code == 0xff) {
+//             FURI_LOG_D("PWN", "Wiping the buffer...");
+//             memset(model->workspace, 0, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
+//         }
+//         else {
+//             FURI_LOG_D("PWN", "Received an unrecognized command");
+//         }
+
+//     }
+
+//     return false;
+// }
 
 static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
     PwnDumpModel* model = _model;
 
-    for (size_t ii = 0; ii < FLIPPER_SCREEN_HEIGHT; ii++) {
-        for (size_t jj = 0; jj < FLIPPER_SCREEN_WIDTH; jj++) {
-            if (model->screen[ii * FLIPPER_SCREEN_WIDTH + jj]) {
-                canvas_draw_dot(canvas, jj, ii);
-            }
-        }
-    }
+    pwnagotchi_draw_face(model->pwn, canvas);
+    
 
 }
 
@@ -127,47 +130,24 @@ static void pwn_zero_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     }
 }
 
-static void pwn_zero_push_to_list(PwnDumpModel* model, const char data) {
-    message_queue_push_byte(model->queue, data);
-}
+// static void pwn_zero_push_to_list(PwnDumpModel* model, const char data) {
+//     message_queue_push_byte(model->queue, data);
+// }
 
 static int32_t pwn_zero_worker(void* context) {
     furi_assert(context);
     PwnZeroApp* app = context;
 
-    while(1) {
-        bool update = false;
-        uint32_t events =
-            furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
-        furi_check((events & FuriFlagError) == 0);
+    with_view_model(
+        app->view,
+        PwnDumpModel * model,
+        {
+            UNUSED(model);
+        },
+        true);
 
-        if(events & WorkerEventStop) break;
-        if(events & WorkerEventRx) {
-            size_t length = 0;
-            do {
-                uint8_t data[1];
-                length = furi_stream_buffer_receive(app->rx_stream, data, 1, 0);
-                if(length > 0) {
-                    furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
-                    with_view_model(
-                        app->view,
-                        PwnDumpModel * model,
-                        {
-                            for(size_t i = 0; i < length; i++) {
-                                pwn_zero_push_to_list(model, data[i]);
-                            }
-                            update = pwn_zero_exec_cmd(model);
-                        },
-                        update);
-                }
-            } while(length > 0);
 
-            notification_message(app->notification, &sequence_notification);
-            // with_view_model(
-                // app->view, PwnDumpModel * model, { UNUSED(model); }, true);
-            
-        }
-    }
+    while(1);
     return 0;
 }
 
@@ -195,6 +175,7 @@ static PwnZeroApp* pwn_zero_app_alloc() {
         PwnDumpModel * model,
         {
             model->queue = message_queue_alloc();
+            model->pwn = pwnagotchi_alloc();
             model->screen = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             model->workspace = malloc(sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
             memset(model->screen, 0, sizeof(bool) * FLIPPER_SCREEN_HEIGHT * FLIPPER_SCREEN_WIDTH);
@@ -238,6 +219,7 @@ static void pwn_zero_app_free(PwnZeroApp* app) {
         PwnDumpModel * model,
         {
             message_queue_free(model->queue);
+            pwnagotchi_free(model->pwn);
             free(model->screen);
             free(model->workspace);
         },
