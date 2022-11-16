@@ -37,7 +37,7 @@ static void _enter_callback(void* context, uint32_t index) {
     //Выбор первого доступного порта для датчиков single wire и one wire
     if(st->interface == &SINGLE_WIRE || st->interface == &ONE_WIRE) {
         anotherValues[0] = unitemp_GPIO_toInt(unitemp_gpio_getAviablePort(st->interface, 0)->pin);
-    };
+    }
     //Для I2C адрес выберится автоматически
 
     unitemp_SensorEdit_switch(unitemp_sensor_alloc(sensor_name, st, anotherValues));

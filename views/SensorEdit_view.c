@@ -3,6 +3,7 @@
 
 #include "../interfaces/SingleWireSensor.h"
 #include "../interfaces/OneWireSensor.h"
+#include "../interfaces/I2CSensor.h"
 
 //Текущий вид
 static View* view;
@@ -56,6 +57,19 @@ static void _gpio_change_callback(VariableItem* item) {
         variable_item_set_current_value_text(item, instance->bus->gpio->name);
     }
 }
+/**
+ * @brief Функция обработки изменения значения GPIO
+ * 
+ * @param item Указатель на элемент списка
+ */
+static void _i2caddr_change_callback(VariableItem* item) {
+    uint8_t index = variable_item_get_current_value_index(item);
+    ((I2CSensor*)editable_sensor->instance)->currentI2CAdr =
+        ((I2CSensor*)editable_sensor->instance)->minI2CAdr + index;
+    char buff[5];
+    snprintf(buff, 5, "0x%2X", ((I2CSensor*)editable_sensor->instance)->currentI2CAdr);
+    variable_item_set_current_value_text(item, buff);
+}
 
 /**
  * @brief Создание меню редактирования датчка
@@ -101,7 +115,19 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
         variable_item_set_current_value_text(
             item, unitemp_gpio_getAviablePort(sensor->type->interface, 0)->name);
     }
-
+    //Адрес устройства на шине I2C (для I2C)
+    if(sensor->type->interface == &I2C) {
+        item = variable_item_list_add(
+            variable_item_list,
+            "I2C address",
+            ((I2CSensor*)sensor->instance)->maxI2CAdr - ((I2CSensor*)sensor->instance)->minI2CAdr +
+                1,
+            _i2caddr_change_callback,
+            app);
+        char buff[5];
+        snprintf(buff, 5, "0x%2X", ((I2CSensor*)sensor->instance)->currentI2CAdr);
+        variable_item_set_current_value_text(item, buff);
+    }
     //Сохранение
     variable_item_list_add(variable_item_list, "Save", 1, NULL, NULL);
 
