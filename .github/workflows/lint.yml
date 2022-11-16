@@ -1,0 +1,20 @@
+name: Lint Code
+
+on:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Lint
+        uses: oleksiikutuzov/flipperzero-ufbt-action@v1
+        with:
+          lint: true
+          path: application
