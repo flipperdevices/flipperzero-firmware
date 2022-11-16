@@ -4,7 +4,7 @@ This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/
 
 This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
 
-<a href="https://github.com/DarkFlippers/unleashed-firmware" target="_blank"><img src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" align="center" alt="fzCUSTOM" border="0" width="95%" height="95%"></a>
+<a href="https://github.com/DarkFlippers/unleashed-firmware" target="_blank"><img style="align:center; margin: 0 auto; text-align:center;" src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" alt="fzCUSTOM" border="0" width="15%"></a>
 
 
 ## Support Us!
