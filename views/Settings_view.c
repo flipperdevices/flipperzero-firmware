@@ -23,6 +23,16 @@ VariableItem* temperature_unit_item;
  */
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
+    //Костыль с зависающей подсветкой
+    if((bool)variable_item_get_current_value_index(infinity_backlight_item) !=
+       app->settings.infinityBacklight) {
+        if((bool)variable_item_get_current_value_index(infinity_backlight_item)) {
+            notification_message(app->notifications, &sequence_display_backlight_enforce_on);
+        } else {
+            notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
+        }
+    }
+
     app->settings.infinityBacklight =
         (bool)variable_item_get_current_value_index(infinity_backlight_item);
     app->settings.unit = (bool)variable_item_get_current_value_index(temperature_unit_item);

@@ -148,15 +148,6 @@ bool unitemp_loadSettings(void) {
     file_stream_close(app->file_stream);
     stream_free(app->file_stream);
 
-    //Применение настроек
-    if(app->settings.infinityBacklight) {
-        //Постоянное свечение подсветки
-        notification_message(app->notifications, &sequence_display_backlight_enforce_on);
-    } else {
-        //Автоматическое управление
-        notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
-    }
-
     FURI_LOG_I(APP_NAME, "Settings have been successfully loaded\r\n");
     return true;
 }
@@ -201,9 +192,6 @@ static bool unitemp_alloc(void) {
  * @brief Освыбождение памяти после работы приложения
  */
 static void unitemp_free(void) {
-    //Автоматическое управление подсветкой
-    notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
-
     unitemp_SensorsList_free();
     unitemp_Settings_free();
     unitemp_MainMenu_free();
@@ -240,6 +228,11 @@ int32_t unitemp_app() {
 
     //Загрузка настроек из SD-карты
     unitemp_loadSettings();
+    //Применение настроек
+    if(app->settings.infinityBacklight == true) {
+        //Постоянное свечение подсветки
+        notification_message(app->notifications, &sequence_display_backlight_enforce_on);
+    }
     app->settings.lastOTGState = furi_hal_power_is_otg_enabled();
     //Загрузка датчиков из SD-карты
     unitemp_sensors_load();
@@ -255,6 +248,9 @@ int32_t unitemp_app() {
 
     //Деинициализация датчиков
     unitemp_sensors_deInit();
+    //Автоматическое управление подсветкой
+    if(app->settings.infinityBacklight == true)
+        notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
     //Освобождение памяти
     unitemp_free();
     //Выход
