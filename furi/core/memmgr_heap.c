@@ -340,7 +340,7 @@ void* pvPortMalloc(size_t xWantedSize) {
     void* pvReturn = NULL;
     size_t to_wipe = xWantedSize;
 
-    if(FURI_IS_ISR()) {
+    if(FURI_IS_IRQ_MODE()) {
         furi_crash("memmgt in ISR");
     }
 
@@ -490,7 +490,7 @@ void vPortFree(void* pv) {
     uint8_t* puc = (uint8_t*)pv;
     BlockLink_t* pxLink;
 
-    if(FURI_IS_ISR()) {
+    if(FURI_IS_IRQ_MODE()) {
         furi_crash("memmgt in ISR");
     }
 

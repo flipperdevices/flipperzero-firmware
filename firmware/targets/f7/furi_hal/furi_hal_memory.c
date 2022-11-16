@@ -81,7 +81,7 @@ void furi_hal_memory_init() {
 }
 
 void* furi_hal_memory_alloc(size_t size) {
-    if(FURI_IS_ISR()) {
+    if(FURI_IS_IRQ_MODE()) {
         furi_crash("memmgt in ISR");
     }
 
