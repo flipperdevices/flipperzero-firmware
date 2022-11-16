@@ -1,8 +1,8 @@
-# flipperzero-lightmeter 
+# flipperzero-lightmeter
 
 [![Build FAP](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build.yml)
 
-<img src="images/framed_gui_main.png" width="500px">  
+<img src="images/framed_gui_main.png" width="500px">
 
 ## Wiring
 
@@ -12,6 +12,11 @@ GND -> GND
 SCL -> C0
 SDA -> C1
 ```
+
+## Sensor module
+
+<img src="module/front.jpg" width="500px">
+
 
 ## TODO
 - [ ] Save settings to sd card
