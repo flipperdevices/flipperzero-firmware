@@ -6,8 +6,8 @@ Flipper zero exploiting vulnerability to open any Sentry Safe and Master Lock el
 
 ### Installation
 
-- Clone this repository in the applications folder of your firmware
-- Add "sentry_safe" in one of menus in applications/meta/application.fam
+- Download [last release fap file](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin/releases/latest)
+- Copy fap file to the apps folder of your flipper SD card
 
 ### Usage
 
@@ -15,3 +15,12 @@ Flipper zero exploiting vulnerability to open any Sentry Safe and Master Lock el
 - Place wires as described on the plugin screen
 - Press enter
 - Open safe
+
+### Build
+
+- Recursively clone your base firmware (official or not)
+- Clone this repository in `applications_user`
+- Build with `./fbt fap_dist APPSRC=applications_user/flipperzero-sentry-safe-plugin`
+- Retreive builed fap in dist subfolders
+
+(More info about build tool [here](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/fbt.md))
