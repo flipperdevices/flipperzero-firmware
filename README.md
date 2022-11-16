@@ -15,7 +15,7 @@ SDA -> C1
 
 ## Sensor module
 
-<img src="module/front.jpg" width="500px">
+<img src="module/back.jpg" width="500px">
 
 
 ## TODO
