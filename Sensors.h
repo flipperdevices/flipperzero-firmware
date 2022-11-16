@@ -97,6 +97,18 @@ extern const Interface I2C; //I2C_2 (PC0, PC1)
 //extern const Interface SPI;
 
 /**
+* @brief Получить количество доступных типов датчиков
+* @return Количество доступных типов датчиков
+*/
+uint8_t unitemp_getSensorsTypesCount(void);
+
+/**
+* @brief Получить списк доступных типов датчиков
+* @return Указатель на список датчиков
+*/
+const SensorType** unitemp_getSensorsTypes(void);
+
+/**
  * @brief Конвертация номера порта на корпусе FZ в GPIO 
  * 
  * @param name Номер порта на корпусе FZ

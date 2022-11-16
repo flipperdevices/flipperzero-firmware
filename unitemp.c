@@ -190,6 +190,7 @@ static bool unitemp_alloc(void) {
     unitemp_Summary_alloc();
     unitemp_MainMenu_alloc();
     unitemp_Settings_alloc();
+    unitemp_SensorsList_alloc();
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -203,6 +204,7 @@ static void unitemp_free(void) {
     //Автоматическое управление подсветкой
     notification_message(app->notifications, &sequence_display_backlight_enforce_auto);
 
+    unitemp_SensorsList_free();
     unitemp_Settings_free();
     unitemp_MainMenu_free();
     unitemp_Summary_free();

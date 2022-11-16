@@ -6,7 +6,7 @@ static View* view;
 //Список
 static VariableItemList* variable_item_list;
 
-#define VIEW_ID MAINMENU_VIEW
+#define VIEW_ID SENSORSLIST_VIEW
 
 /**
  * @brief Функция обработки нажатия кнопки "Назад"
@@ -16,8 +16,9 @@ static VariableItemList* variable_item_list;
  */
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
-    //Возврат в общий вид
-    return SUMMARY_VIEW;
+
+    //Возврат предыдущий вид
+    return MAINMENU_VIEW;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки
@@ -27,26 +28,22 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
-    if(index == 0) { //add new sensor
-        unitemp_SensorsList_switch();
-    }
-    if(index == 1) { //Settings
-        unitemp_Settings_switch();
-    }
+    UNUSED(index);
 }
 
 /**
- * @brief Создание списка действий с указанным датчиком
+ * @brief Создание меню редактирования настроек
  */
-void unitemp_MainMenu_alloc(void) {
+void unitemp_SensorsList_alloc(void) {
     variable_item_list = variable_item_list_alloc();
     //Сброс всех элементов меню
     variable_item_list_reset(variable_item_list);
 
-    variable_item_list_add(variable_item_list, "Add new sensor", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Settings", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "Help", 1, NULL, NULL);
-    variable_item_list_add(variable_item_list, "About", 1, NULL, NULL);
+    //Добавление в список доступных датчиков
+    for(uint8_t i = 0; i < unitemp_getSensorsTypesCount(); i++) {
+        variable_item_list_add(
+            variable_item_list, unitemp_getSensorsTypes()[i]->typename, 1, NULL, app);
+    }
 
     //Добавление колбека на нажатие средней кнопки
     variable_item_list_set_enter_callback(variable_item_list, _enter_callback, app);
@@ -59,14 +56,20 @@ void unitemp_MainMenu_alloc(void) {
     view_dispatcher_add_view(app->view_dispatcher, VIEW_ID, view);
 }
 
-void unitemp_MainMenu_switch(void) {
+void unitemp_SensorsList_switch(void) {
     //Обнуление последнего выбранного пункта
     variable_item_list_set_selected_item(variable_item_list, 0);
-    //Переключение в вид
+
+    // variable_item_set_current_value_index(
+    //     infinity_backlight_item, (uint8_t)app->SensorsList.infinityBacklight);
+    // variable_item_set_current_value_text(
+    //     infinity_backlight_item,
+    //     states[variable_item_get_current_value_index(infinity_backlight_item)]);
+
     view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_ID);
 }
 
-void unitemp_MainMenu_free(void) {
+void unitemp_SensorsList_free(void) {
     //Очистка списка элементов
     variable_item_list_free(variable_item_list);
     //Очистка вида

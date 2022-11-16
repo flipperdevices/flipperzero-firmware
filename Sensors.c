@@ -62,6 +62,13 @@ const SensorType* unitemp_getTypeFromInt(int type) {
     return sensorTypes[type];
 }
 
+uint8_t unitemp_getSensorsTypesCount(void) {
+    return SENSOR_TYPES_COUNT;
+}
+const SensorType** unitemp_getSensorsTypes(void) {
+    return sensorTypes;
+}
+
 int unitemp_getIntFromType(const SensorType* type) {
     for(int i = 0; i < SENSOR_TYPES_COUNT; i++) {
         if(!strcmp(type->typename, sensorTypes[i]->typename)) {

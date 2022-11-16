@@ -43,7 +43,7 @@ static void _enter_callback(void* context, uint32_t index) {
     UNUSED(index);
 }
 
-void _setting_change_callback(VariableItem* item) {
+static void _setting_change_callback(VariableItem* item) {
     if(item == infinity_backlight_item) {
         variable_item_set_current_value_text(
             infinity_backlight_item,
