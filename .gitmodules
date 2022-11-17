@@ -1,10 +1,15 @@
-[submodule "flipperzero-firmware_official"]
-	path = flipperzero-firmware_official
-	url = https://github.com/flipperdevices/flipperzero-firmware.git
-	branch = dev
-	ignore = dirty
 [submodule "flipperzero-firmware_unleashed"]
 	path = flipperzero-firmware_unleashed
 	url = https://github.com/Eng1n33r/flipperzero-firmware.git
 	branch = dev
+	ignore = dirty
+[submodule "flipperzero-firmware_official_dev"]
+	path = flipperzero-firmware_official_dev
+	url = https://github.com/flipperdevices/flipperzero-firmware.git
+	branch = dev
+	ignore = dirty
+[submodule "flipperzero-firmware_official_stable"]
+	path = flipperzero-firmware_official_stable
+	url = https://github.com/flipperdevices/flipperzero-firmware.git
+	branch = release
 	ignore = dirty

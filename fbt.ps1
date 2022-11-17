@@ -2,9 +2,13 @@ Push-Location $PSScriptRoot
 
 $firmware_path = ""
 $firmware_name = ""
-if (('official', 'off', 'o').Contains($args[0])) {
-    $firmware_path = "flipperzero-firmware_official"
-    $firmware_name = "Official"
+if (('official-dev', 'off-dev', 'od').Contains($args[0])) {
+    $firmware_path = "flipperzero-firmware_official_dev"
+    $firmware_name = "Official Dev"
+}
+elseif (('official-stable', 'off-stbl', 'os').Contains($args[0])) {
+    $firmware_path = "flipperzero-firmware_official_stable"
+    $firmware_name = "Official Stable"
 }
 elseif (('unleashed', 'un', 'u').Contains($args[0])) {
     $firmware_path = "flipperzero-firmware_unleashed"
