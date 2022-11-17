@@ -76,12 +76,49 @@ bool unitemp_OneWire_sensor_deinit(Sensor* sensor);
 UnitempStatus unitemp_OneWire_sensor_update(Sensor* sensor);
 
 /**
- * @brief Запуск общения с датчиком 
+ * @brief Запуск общения с датчиками на шине one wire
  * 
- * @param sensor Указатель на датчик 
- * @return Истина если датчик отозвался
+ * @param bus Указатель на шину 
+ * @return Истина если хотя бы одно устройство отозвалось
  */
-bool unitemp_oneWire_sensor_start(OneWireSensor* instance);
+bool unitemp_onewire_bus_start(OneWireBus* bus);
+
+/**
+ * @brief Выделение памяти для шины one wire и её инициализация
+ * 
+ * @param gpio Порт на котором необходимо создать шину
+ * @return При успехе возвращает указатель на шину one wire
+ */
+OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio);
+
+/**
+ * @brief Деинициализация шины one wire
+ * 
+ * @param bus Указатель на шину
+ * @return Истина если шина была деинициализирована, ложь если на шине остались устройства
+ */
+bool unitemp_onewire_bus_deinit(OneWireBus* bus);
+
+/**
+ * @brief Инициализация шины one wire
+ * 
+ * @param bus Указатель на шину
+ * @return Истина если инициализация успешна
+ */
+bool unitemp_onewire_bus_init(OneWireBus* bus);
+
+/**
+ * @brief Инициализация процесса поиска адресов на шине one wire
+ */
+void unitemp_onewire_enum_init(void);
+
+/**
+ * @brief Перечисляет устройства на шине one wire и получает очередной адрес
+ * 
+ * @param instance 
+ * @return Возвращает указатель на буфер, содержащий восьмибайтовое значение адреса, либо NULL, если поиск завешён
+ */
+uint8_t* unitemp_onewire_enum_next(OneWireBus* bus);
 
 extern const SensorType DS18x2x;
 #endif

@@ -119,7 +119,8 @@ uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface) {
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         //Проверка для one wire
         if(interface == &ONE_WIRE) {
-            if(gpio_interfaces_list[i] == NULL || gpio_interfaces_list[i] == &ONE_WIRE) {
+            if((gpio_interfaces_list[i] == NULL || gpio_interfaces_list[i] == &ONE_WIRE) &&
+               i != 12) { //Почему-то не работает на 17 порте
                 aviable_ports_count++;
             }
         }
@@ -158,7 +159,9 @@ const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t inde
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         //Проверка для one wire
         if(interface == &ONE_WIRE) {
-            if(gpio_interfaces_list[i] == NULL || gpio_interfaces_list[i] == &ONE_WIRE) {
+            //Почему-то не работает на 17 порте
+            if((gpio_interfaces_list[i] == NULL || gpio_interfaces_list[i] == &ONE_WIRE) &&
+               i != 12) { //Почему-то не работает на 17 порте
                 if(aviable_index == index) {
                     return unitemp_gpio_getFromIndex(i);
                 } else {
