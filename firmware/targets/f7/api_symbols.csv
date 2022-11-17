@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.12,,
+Version,+,7.13,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1960,7 +1960,7 @@ Function,-,nfca_signal_alloc,NfcaSignal*,
 Function,-,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,-,nfca_signal_free,void,NfcaSignal*
 Function,-,nfcv_emu_deinit,void,
-Function,-,nfcv_emu_init,void,
+Function,-,nfcv_emu_init,void,"FuriHalNfcDevData*, NfcVData*"
 Function,-,nfcv_emu_loop,_Bool,"FuriHalNfcDevData*, NfcVData*, uint32_t"
 Function,-,nfcv_inventory,ReturnCode,uint8_t*
 Function,-,nfcv_read_blocks,ReturnCode,"NfcVReader*, NfcVData*"

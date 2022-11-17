@@ -813,11 +813,15 @@ static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
         uint32_t temp_uint32 = 0;
         uint8_t temp_uint8 = 0;
 
+        if(!flipper_format_write_comment_cstr(file, "Data Storage Format Identifier")) break;
         if(!flipper_format_write_hex(file, "DSFID", &(data->dsfid), 1)) break;
+        if(!flipper_format_write_comment_cstr(file, "Application Family Identifier")) break;
         if(!flipper_format_write_hex(file, "AFI", &(data->afi), 1)) break;
         if(!flipper_format_write_hex(file, "IC Reference", &(data->ic_ref), 1)) break;
         temp_uint32 = data->block_num;
+        if(!flipper_format_write_comment_cstr(file, "Number of memory blocks, usually 0 to 256")) break;
         if(!flipper_format_write_uint32(file, "Block Count", &temp_uint32, 1)) break;
+        if(!flipper_format_write_comment_cstr(file, "Size of a single memory block, usually 4")) break;
         if(!flipper_format_write_hex(file, "Block Size", &(data->block_size), 1)) break;
         if(!flipper_format_write_hex(file, "Data Content", data->data, data->block_num * data->block_size)) break;
         if(!flipper_format_write_comment_cstr(file, "Subtype of this card (0 = ISO15693, 1 = SLIX, 2 = SLIX-S, 3 = SLIX-L, 4 = SLIX2)")) break;
