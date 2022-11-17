@@ -210,6 +210,8 @@ static void rpc_system_app_get_error_process(const PB_Main* request, void* conte
     RpcSession* session = rpc_app->session;
     furi_assert(session);
 
+    rpc_app->error_msg->command_id = request->command_id;
+
     FURI_LOG_D(TAG, "GetError");
     rpc_send(session, rpc_app->error_msg);
 }
