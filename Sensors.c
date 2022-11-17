@@ -428,6 +428,7 @@ bool unitemp_sensors_init(void) {
         }
         FURI_LOG_D(APP_NAME, "Sensor %s successfully initialized", app->sensors[i]->name);
     }
+    app->sensors_ready = true;
     return result;
 }
 

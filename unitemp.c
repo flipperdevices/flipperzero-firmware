@@ -241,10 +241,10 @@ int32_t unitemp_app() {
     //Инициализация датчиков
     unitemp_sensors_init();
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, SUMMARY_VIEW);
+    unitemp_Summary_switch();
 
     while(app->processing) {
-        unitemp_sensors_updateValues();
+        if(app->sensors_ready) unitemp_sensors_updateValues();
         furi_delay_ms(100);
     }
 

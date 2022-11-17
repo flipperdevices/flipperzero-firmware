@@ -24,7 +24,7 @@ VariableItem* sensor_name_item;
  */
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
-
+    unitemp_sensor_free(editable_sensor);
     //Возврат предыдущий вид
     return MAINMENU_VIEW;
 }
@@ -45,6 +45,7 @@ static void _enter_callback(void* context, uint32_t index) {
         app->sensors[app->sensors_count++] = editable_sensor;
         unitemp_sensors_save();
         unitemp_sensors_reload();
+
         unitemp_Summary_switch();
     }
 }

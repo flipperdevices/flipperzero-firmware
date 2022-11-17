@@ -28,6 +28,8 @@ static uint32_t _exit_callback(void* context) {
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     if(index == 0) { //add new sensor
+        //TODO: сообщение о максимальном количестве датчиков
+        if(app->sensors_count >= MAX_SENSORS) return;
         unitemp_SensorsList_switch();
     }
     if(index == 1) { //Settings

@@ -5,6 +5,8 @@ static View* view;
 static void _draw_callback(Canvas* canvas, void* _model) {
     UNUSED(_model);
 
+    app->sensors_ready = true;
+
     //Рисование бара
     canvas_draw_box(canvas, 0, 0, 128, 14);
     canvas_set_color(canvas, ColorWhite);
@@ -52,6 +54,7 @@ static bool _input_callback(InputEvent* event, void* context) {
     }
     //Вход в главное меню по короткому нажатию "Ок"
     if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        app->sensors_ready = false;
         unitemp_MainMenu_switch();
     }
 
@@ -68,6 +71,7 @@ void unitemp_Summary_alloc(void) {
 }
 
 void unitemp_Summary_switch(void) {
+    app->sensors_ready = true;
     view_dispatcher_switch_to_view(app->view_dispatcher, SUMMARY_VIEW);
 }
 

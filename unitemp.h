@@ -49,6 +49,7 @@ typedef struct {
 typedef struct {
     //Система
     bool processing; //Флаг работы приложения. При ложном значении приложение закрывается
+    bool sensors_ready; //Флаг готовности датчиков к опросу
     //Основные настройки
     UnitempSettings settings;
     //Список указателей на датчики

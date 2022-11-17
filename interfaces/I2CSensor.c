@@ -1,6 +1,8 @@
 #include "I2CSensor.h"
 #include "../sensors/SensorsDriver.h"
 
+static uint8_t sensors_count = 0;
+
 uint8_t readReg(I2CSensor* i2c_sensor, uint8_t reg) {
     //Блокировка шины
     furi_hal_i2c_acquire(i2c_sensor->i2c);
@@ -46,12 +48,23 @@ bool unitemp_I2C_sensor_alloc(Sensor* sensor, uint8_t* anotherValues) {
     } else {
         instance->currentI2CAdr = instance->minI2CAdr;
     }
+
+    //Блокировка портов GPIO
+    sensors_count++;
+    unitemp_gpio_lock(unitemp_GPIO_getFromInt(15), &I2C);
+    unitemp_gpio_lock(unitemp_GPIO_getFromInt(16), &I2C);
+
     return status;
 }
 
 bool unitemp_I2C_sensor_free(Sensor* sensor) {
     bool status = sensor->type->mem_releaser(sensor);
     free(sensor->instance);
+    if(--sensors_count == 0) {
+        unitemp_gpio_unlock(unitemp_GPIO_getFromInt(15));
+        unitemp_gpio_unlock(unitemp_GPIO_getFromInt(16));
+    }
+
     return status;
 }
 
