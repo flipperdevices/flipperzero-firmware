@@ -1,6 +1,7 @@
 # zeitraffer
 
-english version below
+english version [below](#eng)
+
 ![zeitraffer for flipper zero](https://theageoflove.ru/uploads/2022/11/photo_2022-11-10_15-54-25.jpg)
 Видео работы: https://youtube.com/shorts/QKyQa7_s7IE
 
@@ -9,6 +10,7 @@ english version below
 
  - **вверх-вниз** - время.
  - **влево-вправо** - количество кадров
+ 0 кадров - бесконечный режим, -1 кадров - BULB
  - **зажатие стрелок** - ±10 кадров/секунд
  - **ОК** - пуск/пауза
  - Длинное нажатие **ОК** - включить/выключить подсветку
@@ -31,7 +33,7 @@ english version below
 ![](https://theageoflove.ru/uploads/2022/11/camera_cable.jpg)
 Где какой пин у камеры, можно узнать например тут: https://www.doc-diy.net/photo/remote_pinout/
 
-# English
+# <a name="eng"></a>English
 Simple timelapse app for Flipper Zero.
 
 based on https://github.com/zmactep/flipperzero-hello-world
