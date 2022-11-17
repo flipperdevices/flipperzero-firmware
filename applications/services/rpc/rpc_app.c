@@ -314,7 +314,10 @@ void rpc_system_app_set_error(RpcAppSystem* rpc_app, uint32_t error_code, const 
     content->code = error_code;
 }
 
-void rpc_system_app_set_data_exchange_callback(RpcAppSystem* rpc_app, RpcAppSystemDataExchangeCallback callback, void* ctx) {
+void rpc_system_app_set_data_exchange_callback(
+    RpcAppSystem* rpc_app,
+    RpcAppSystemDataExchangeCallback callback,
+    void* ctx) {
     furi_assert(rpc_app);
 
     rpc_app->data_exchange_callback = callback;
