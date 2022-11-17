@@ -10,6 +10,7 @@ typedef enum UnitempViews {
     SETTINGS_VIEW,
     SENSORSLIST_VIEW,
     SENSOREDIT_VIEW,
+    SENSORNAMEEDIT_VIEW,
 
     VIEWS_COUNT
 } UnitempViews;
@@ -39,4 +40,9 @@ void unitemp_SensorEdit_alloc(void);
 //sensor - указатель на редактируемый датчик
 void unitemp_SensorEdit_switch(Sensor* sensor);
 void unitemp_SensorEdit_free(void);
+
+/* Редактор имени датчика */
+void unitemp_SensorNameEdit_alloc(void);
+void unitemp_SensorNameEdit_switch(Sensor* sensor);
+void unitemp_SensorNameEdit_free(void);
 #endif

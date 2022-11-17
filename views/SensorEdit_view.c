@@ -10,7 +10,7 @@ static View* view;
 //Список
 static VariableItemList* variable_item_list;
 //Текущий редактируемый датчик
-Sensor* editable_sensor;
+static Sensor* editable_sensor;
 
 //Элемент списка - имя датчика
 VariableItem* sensor_name_item;
@@ -38,7 +38,7 @@ static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     //Смена имени
     if(index == 0) {
-        //
+        unitemp_SensorNameEdit_switch(editable_sensor);
     }
     //Сохранение
     if(index == 3) {
