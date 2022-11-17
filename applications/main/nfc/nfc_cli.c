@@ -276,7 +276,7 @@ static void nfc_cli_st25r_trans(Cli* cli, FuriString* args) {
     printf("ISO15693 emulator...\r\nPress Ctrl+C to abort\r\n");
 
     FuriHalNfcDevData nfc_data = {
-        .uid = { 0x36, 0x78, 0x45, 0x0E, 0x50, 0x03, 0x04, 0xE0 },
+        .uid = { 0xE0, 0x04, 0x45, 0x03, 0x50, 0x0E, 0x78, 0x36 },
         .uid_len = 8,
         .type = FuriHalNfcTypeV,
     };
@@ -295,7 +295,7 @@ static void nfc_cli_st25r_trans(Cli* cli, FuriString* args) {
 
     memset(nfcv_data.data, 0xAE, 4 * 8);
 
-    nfcv_emu_init();
+    nfcv_emu_init(&nfc_data, &nfcv_data);
     while(!cli_cmd_interrupt_received(cli)) {
         if(nfcv_emu_loop(&nfc_data, &nfcv_data, 1000)) {
             printf("[NfcV-Emu] %s\r\n", nfcv_data.last_command);

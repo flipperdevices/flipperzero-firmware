@@ -14,6 +14,6 @@ bool slix_check_card_type(FuriHalNfcDevData* nfc_data);
 bool slix2_check_card_type(FuriHalNfcDevData* nfc_data);
 bool slix_s_check_card_type(FuriHalNfcDevData* nfc_data);
 bool slix_l_check_card_type(FuriHalNfcDevData* nfc_data);
-ReturnCode slix_l_get_random(uint8_t* rand);
-ReturnCode slix_l_unlock(uint32_t id, uint8_t* rand, uint32_t password);
+ReturnCode slix_l_get_random(NfcVData* data);
+ReturnCode slix_l_unlock(NfcVData* data, uint32_t password_id);
 

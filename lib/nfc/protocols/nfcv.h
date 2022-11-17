@@ -15,7 +15,7 @@
 #define DIGITAL_SIGNAL_UNIT_S        (100000000000.0f)
 #define DIGITAL_SIGNAL_UNIT_US       (100000.0f)
 
-#define NFCV_TOTAL_BLOCKS_MAX 32
+#define NFCV_TOTAL_BLOCKS_MAX 256
 #define NFCV_BLOCK_SIZE 4
 #define NFCV_MAX_DUMP_SIZE (NFCV_BLOCK_SIZE*NFCV_TOTAL_BLOCKS_MAX)
 
@@ -133,7 +133,7 @@ typedef struct {
     uint8_t dsfid;
     uint8_t afi;
     uint8_t ic_ref;
-    uint8_t block_num;
+    uint16_t block_num;
     uint8_t block_size;
     uint8_t data[NFCV_MAX_DUMP_SIZE];
 
@@ -158,6 +158,6 @@ ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data);
 ReturnCode nfcv_inventory(uint8_t* uid);
 bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* data);
 
-void nfcv_emu_init();
+void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
 void nfcv_emu_deinit();
 bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms);

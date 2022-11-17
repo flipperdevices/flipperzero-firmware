@@ -15,15 +15,24 @@
 
 #include "nfcv.h"
 #include "nfc_util.h"
+#include "slix.h"
 
 #define TAG "NfcV"
 
 ReturnCode nfcv_inventory(uint8_t* uid) {
     uint16_t received = 0;
     rfalNfcvInventoryRes res;
+    ReturnCode ret = ERR_NONE;
 
-    /* TODO: needs proper abstraction via fury_hal(_ll)_* */
-    ReturnCode ret = rfalNfcvPollerInventory(RFAL_NFCV_NUM_SLOTS_1, 0, NULL, &res, &received);
+    for(int tries = 0; tries < 5; tries++) {
+        /* TODO: needs proper abstraction via fury_hal(_ll)_* */
+        ret = rfalNfcvPollerInventory(
+            RFAL_NFCV_NUM_SLOTS_1, 0, NULL, &res, &received);
+
+        if(ret == ERR_NONE) {
+            break;
+        }
+    }
 
     if(ret == ERR_NONE) {
         if(uid != NULL) {
@@ -37,18 +46,24 @@ ReturnCode nfcv_inventory(uint8_t* uid) {
 ReturnCode nfcv_read_blocks(
     NfcVReader* reader,
     NfcVData* data) {
-    
-    reader->blocks_read = 0;
+
+    UNUSED(reader);
 
     uint16_t received = 0;
     for(size_t block = 0; block < data->block_num; block++) {
         uint8_t rxBuf[32];
-        FURI_LOG_D(TAG, "Reading block %d", block);
+        FURI_LOG_D(TAG, "Reading block %d/%d", block, (data->block_num - 1));
 
-        ReturnCode ret = rfalNfcvPollerReadSingleBlock(
-            RFAL_NFCV_REQ_FLAG_DEFAULT, NULL, block, 
-            rxBuf, sizeof(rxBuf), &received);
+        ReturnCode ret = ERR_NONE;
+        for(int tries = 0; tries < 5; tries++) {
+            ret = rfalNfcvPollerReadSingleBlock(
+                RFAL_NFCV_REQ_FLAG_DEFAULT, NULL, block, 
+                rxBuf, sizeof(rxBuf), &received);
 
+            if(ret == ERR_NONE) {
+                break;
+            }
+        }
         if(ret != ERR_NONE) {
             FURI_LOG_D(TAG, "failed to read: %d", ret);
             return ret;
@@ -57,11 +72,7 @@ ReturnCode nfcv_read_blocks(
         FURI_LOG_D(TAG, "  %02X %02X %02X %02X", 
             data->data[block * data->block_size + 0], data->data[block * data->block_size + 1], 
             data->data[block * data->block_size + 2], data->data[block * data->block_size + 3]);
-
-        reader->blocks_read++;
     }
-
-    FURI_LOG_D(TAG, "Read %d blocks", reader->blocks_read);
 
     return ERR_NONE;
 }
@@ -69,12 +80,19 @@ ReturnCode nfcv_read_blocks(
 ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data) {
     uint8_t rxBuf[32];
     uint16_t received = 0;
+    ReturnCode ret = ERR_NONE;
 
-    FURI_LOG_D(TAG, "Read SystemInformation...");
+    FURI_LOG_D(TAG, "Read SYSTEM INFORMATION...");
 
-    ReturnCode ret = rfalNfcvPollerGetSystemInformation(
-            RFAL_NFCV_REQ_FLAG_DEFAULT, NULL, 
-            rxBuf, sizeof(rxBuf), &received);
+    for(int tries = 0; tries < 5; tries++) {
+        /* TODO: needs proper abstraction via fury_hal(_ll)_* */
+        ret = rfalNfcvPollerGetSystemInformation(
+            RFAL_NFCV_REQ_FLAG_DEFAULT, NULL, rxBuf, sizeof(rxBuf), &received);
+
+        if(ret == ERR_NONE) {
+            break;
+        }
+    }
 
     if(ret == ERR_NONE) {
         nfc_data->type = FuriHalNfcTypeV;
@@ -88,6 +106,9 @@ ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data) {
         data->block_num = rxBuf[12] + 1;
         data->block_size = rxBuf[13] + 1;
         data->ic_ref = rxBuf[14];
+        FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
+            nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], 
+            nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
         FURI_LOG_D(TAG, "  DSFID %d, AFI %d, Blocks %d, Size %d, IC Ref %d", data->dsfid, data->afi, data->block_num, data->block_size, data->ic_ref);
         return ret;
     }
@@ -101,14 +122,34 @@ bool nfcv_read_card(
     FuriHalNfcDevData* nfc_data,
     NfcVData* nfcv_data) {
     furi_assert(reader);
+    furi_assert(nfc_data);
     furi_assert(nfcv_data);
 
     if(nfcv_read_sysinfo(nfc_data, nfcv_data) != ERR_NONE) {
         return false;
     }
 
-    reader->blocks_to_read = nfcv_data->block_num;
-    return (nfcv_read_blocks(reader, nfcv_data) == ERR_NONE);
+    if(nfcv_read_blocks(reader, nfcv_data) != ERR_NONE) {
+        return false;
+    }
+
+    if(slix_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX detected");
+        nfcv_data->type = NfcVTypeSlix;
+    } else if(slix2_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX2 detected");
+        nfcv_data->type = NfcVTypeSlix2;
+    } else if(slix_s_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX-S detected");
+        nfcv_data->type = NfcVTypeSlixS;
+    } else if(slix_l_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX-L detected");
+        nfcv_data->type = NfcVTypeSlixL;
+    } else {
+        nfcv_data->type = NfcVTypePlain;
+    }
+
+    return true;
 }
 
 /* emulation part */
@@ -296,7 +337,26 @@ int nfcv_uidcmp(uint8_t *dst, uint8_t *src) {
     return 0;
 }
 
+uint32_t nfcv_read_le(uint8_t *data, uint32_t length) {
+    uint32_t value = 0;
 
+    for(uint32_t pos = 0; pos < length; pos++) {
+        value |= data[pos] << ((int)pos * 8);
+    }
+
+    return value;
+}
+
+uint32_t nfcv_read_be(uint8_t *data, uint32_t length) {
+    uint32_t value = 0;
+
+    for(uint32_t pos = 0; pos < length; pos++) {
+        value <<= 8;
+        value |= data[pos];
+    }
+
+    return value;
+}
 
 void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint8_t* payload, uint32_t payload_length) {
 
@@ -307,7 +367,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     uint8_t flags = payload[0];
     uint8_t command = payload[1];
     bool addressed = !(flags & RFAL_NFCV_REQ_FLAG_INVENTORY) && (flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
-    bool advanced = addressed && (command >= 0xA0);
+    bool advanced = (command >= 0xA0);
     uint8_t address_offset = 2 + (advanced ? 1 : 0);
     uint8_t payload_offset = address_offset + (addressed ? 8 : 0);
     uint8_t *address = &payload[address_offset];
@@ -315,7 +375,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     if(addressed && nfcv_uidcmp(address, nfc_data->uid)) {
         printf("addressed packet, but not for us:\r\n");
         printf(" destination: %02X%02X%02X%02X%02X%02X%02X%02X\r\n", address[7], address[6], address[5], address[4], address[3], address[2], address[1], address[0]);
-        printf(" our UID:     %02X%02X%02X%02X%02X%02X%02X%02X\r\n", nfc_data->uid[7], nfc_data->uid[6], nfc_data->uid[5], nfc_data->uid[4], nfc_data->uid[3], nfc_data->uid[2], nfc_data->uid[1], nfc_data->uid[0]);
+        printf(" our UID:     %02X%02X%02X%02X%02X%02X%02X%02X\r\n", nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
         return;
     }
 
@@ -326,7 +386,9 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             if(nfcv_data->sub_data.slix_l.privacy && 
                 command != ISO15693_CMD_NXP_GET_RANDOM_NUMBER && 
                 command != ISO15693_CMD_NXP_SET_PASSWORD) {
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "(command ignored, privacy)");
+                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "command 0x%02X ignored, privacy mode", command);
+                FURI_LOG_D(TAG, "%s", nfcv_data->last_command);
+                return;
             }
             break;
 
@@ -434,8 +496,8 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             nfcv_data->sub_data.slix_l.rand[1] = 0x00;
 
             response_buffer[0] = ISO15693_NOERROR;
-            response_buffer[1] = nfcv_data->sub_data.slix_l.rand[0];
-            response_buffer[2] = nfcv_data->sub_data.slix_l.rand[1];
+            response_buffer[1] = nfcv_data->sub_data.slix_l.rand[1];
+            response_buffer[2] = nfcv_data->sub_data.slix_l.rand[0];
 
             nfcv_emu_send(response_buffer, 3);
             snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "GET_RANDOM_NUMBER");
@@ -466,14 +528,16 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             }
 
             for(int pos = 0; pos < 4; pos++) {
-                password_rcv[pos] = password_xored[pos] ^ rand[pos % 2];
+                password_rcv[pos] = password_xored[3 - pos] ^ rand[pos % 2];
             }
+            uint32_t pass_expect = nfcv_read_be(password, 4);
+            uint32_t pass_received = nfcv_read_be(password_rcv, 4);
 
-            if(!memcmp(password, password_rcv, 4)) {
+            if(pass_expect == pass_received) {
                 status = ISO15693_NOERROR;
                 nfcv_data->sub_data.slix_l.privacy = false;
             } else {
-                printf("pass mismatch: %08lX %08lX %02X", *((uint32_t *)password), *((uint32_t *)password_xored), *rand);
+                FURI_LOG_D(TAG, "Password #%d mismatch. Expected 0x%08lX, got 0x%08lX", password_id, pass_expect, pass_received);
             }
 
             response_buffer[0] = status;
@@ -505,7 +569,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
 uint32_t nfcv_timer_buffer_src[32];
 uint32_t nfcv_timer_buffer[1024];
 
-void nfcv_emu_init() {
+void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     nfcv_emu_alloc();
     rfal_platform_spi_acquire();
 
@@ -515,6 +579,15 @@ void nfcv_emu_init() {
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
+
+    
+    FURI_LOG_D(TAG, "Starting NfcV emulation");
+    FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
+        nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], 
+        nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
+    FURI_LOG_D(TAG, "  Card type:    %d", nfcv_data->type);
+    FURI_LOG_D(TAG, "  Privacy pass: 0x%08lX", nfcv_read_be(nfcv_data->sub_data.slix_l.key_privacy, 4));
+    FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix_l.privacy ? "ON" : "OFF");
 
 #if 0
     memset(nfcv_timer_buffer_src, 0xEE, sizeof(nfcv_timer_buffer_src));

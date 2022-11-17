@@ -807,23 +807,26 @@ bool nfc_device_load_slix2_data(FlipperFormat* file, NfcDevice* dev) {
 
 static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
-    uint8_t temp_value = 0;
     NfcVData* data = &dev->dev_data.nfcv_data;
 
     do {
+        uint32_t temp_uint32 = 0;
+        uint8_t temp_uint8 = 0;
+
         if(!flipper_format_write_hex(file, "DSFID", &(data->dsfid), 1)) break;
         if(!flipper_format_write_hex(file, "AFI", &(data->afi), 1)) break;
         if(!flipper_format_write_hex(file, "IC Reference", &(data->ic_ref), 1)) break;
-        if(!flipper_format_write_hex(file, "Block Count", &(data->block_num), 1)) break;
+        temp_uint32 = data->block_num;
+        if(!flipper_format_write_uint32(file, "Block Count", &temp_uint32, 1)) break;
         if(!flipper_format_write_hex(file, "Block Size", &(data->block_size), 1)) break;
         if(!flipper_format_write_hex(file, "Data Content", data->data, data->block_num * data->block_size)) break;
         if(!flipper_format_write_comment_cstr(file, "Subtype of this card (0 = ISO15693, 1 = SLIX, 2 = SLIX-S, 3 = SLIX-L, 4 = SLIX2)")) break;
-        
-        temp_value = data->type;
-        if(!flipper_format_write_hex(file, "Subtype", &temp_value, 1)) break;
+        temp_uint8 = (uint8_t)data->type;
+        if(!flipper_format_write_hex(file, "Subtype", &temp_uint8, 1)) break;
 
         switch(data->type) {
             case NfcVTypePlain:
+                if(!flipper_format_write_comment_cstr(file, "End of ISO15693 parameters")) break;
                 saved = true;
                 break;
             case NfcVTypeSlix:
@@ -846,16 +849,19 @@ static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
 
 bool nfc_device_load_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
-    uint8_t temp_value = 0;
     NfcVData* data = &dev->dev_data.nfcv_data;
 
     memset(data, 0, sizeof(NfcVData));
     
     do {
+        uint32_t temp_uint32 = 0;
+        uint8_t temp_value = 0;
+
         if(!flipper_format_read_hex(file, "DSFID", &(data->dsfid), 1)) break;
         if(!flipper_format_read_hex(file, "AFI", &(data->afi), 1)) break;
         if(!flipper_format_read_hex(file, "IC Reference", &(data->ic_ref), 1)) break;
-        if(!flipper_format_read_hex(file, "Block Count", &(data->block_num), 1)) break;
+        if(!flipper_format_read_uint32(file, "Block Count", &temp_uint32, 1)) break;
+        data->block_num = temp_uint32;
         if(!flipper_format_read_hex(file, "Block Size", &(data->block_size), 1)) break;
         if(!flipper_format_read_hex(
                file, "Data Content", data->data, data->block_num * data->block_size))

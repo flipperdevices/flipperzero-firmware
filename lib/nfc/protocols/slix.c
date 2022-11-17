@@ -46,7 +46,7 @@ bool slix_l_check_card_type(FuriHalNfcDevData* nfc_data) {
 }
 
 
-ReturnCode slix_l_get_random(uint8_t* rand) {
+ReturnCode slix_l_get_random(NfcVData* data) {
     uint16_t received = 0;
     uint8_t rxBuf[32];
 
@@ -65,26 +65,50 @@ ReturnCode slix_l_get_random(uint8_t* rand) {
         if(received != 3) {
             return ERR_PROTO;
         }
-        if(rand != NULL) {
-            memcpy(rand, &rxBuf[1], 2);
+        if(data != NULL) {
+            data->sub_data.slix_l.rand[0] = rxBuf[2];
+            data->sub_data.slix_l.rand[1] = rxBuf[1];
         }
     }
 
     return ret;
 }
 
-ReturnCode slix_l_unlock(uint32_t id, uint8_t* rand, uint32_t password) {
+ReturnCode slix_l_unlock(NfcVData* data, uint32_t password_id) {
     furi_assert(rand);
     
     uint16_t received = 0;
     uint8_t rxBuf[32];
     uint8_t cmd_set_pass[] = { 
-        id,
-        rand[0] ^ ((password >> 0) & 0xFF),
-        rand[1] ^ ((password >> 8) & 0xFF),
-        rand[0] ^ ((password >> 16) & 0xFF),
-        rand[1] ^ ((password >> 24) & 0xFF) 
+        password_id, 
+        data->sub_data.slix_l.rand[1], 
+        data->sub_data.slix_l.rand[0], 
+        data->sub_data.slix_l.rand[1], 
+        data->sub_data.slix_l.rand[0]
     };
+    uint8_t *password = NULL;
+
+    switch(password_id) {
+        case 4:
+            password = data->sub_data.slix_l.key_privacy;
+            break;
+        case 8:
+            password = data->sub_data.slix_l.key_destroy;
+            break;
+        case 10:
+            password = data->sub_data.slix_l.key_eas;
+            break;
+        default:
+            break;
+    }
+
+    if(!password) {
+        return ERR_NOTSUPP;
+    }
+
+    for(int pos = 0; pos < 4; pos++) {
+        cmd_set_pass[1 + pos] ^= password[3 - pos];
+    }
 
     ReturnCode ret = rfalNfcvPollerTransceiveReq(
         ISO15693_CMD_NXP_SET_PASSWORD, 
