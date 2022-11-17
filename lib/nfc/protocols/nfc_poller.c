@@ -11,11 +11,11 @@ void nfc_poller_reset(NfcPoller* nfc_poller) {
     furi_hal_nfc_field_off();
 }
 
-bool nfc_poller_activate(NfcPoller* nfc_poller) {
+bool nfc_poller_detect(NfcPoller* nfc_poller) {
     furi_assert(nfc_poller);
     memset(nfc_poller, 0, sizeof(NfcPoller));
 
-    bool activated = false;
+    bool detected = false;
 
     if(nfca_poller_check_presence()) {
         FURI_LOG_T(TAG, "NFC-A detected");
@@ -25,10 +25,11 @@ bool nfc_poller_activate(NfcPoller* nfc_poller) {
 
     if(nfc_poller->type == NfcTypeA) {
         if(nfca_poller_activate(&nfc_poller->nfca_data)) {
-            FURI_LOG_T(TAG, "NFC-A activated");
-            activated = true;
+            FURI_LOG_T(TAG, "NFC-A anticollision passed");
+            nfca_poller_deactivate();
+            detected = true;
         }
     }
 
-    return activated;
+    return detected;
 }

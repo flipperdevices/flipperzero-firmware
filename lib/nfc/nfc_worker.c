@@ -347,7 +347,7 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
 
     while(nfc_worker->state == NfcWorkerStateRead) {
         nfc_poller_reset(&nfc_poller);
-        if(nfc_poller_activate(&nfc_poller)) {
+        if(nfc_poller_detect(&nfc_poller)) {
             if(nfc_poller.type == NfcTypeA) {
                 FURI_LOG_D(TAG, "NFC-A tag detected");
             } else if(nfc_poller.type == NfcTypeB) {

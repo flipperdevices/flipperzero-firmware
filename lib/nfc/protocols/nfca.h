@@ -12,7 +12,6 @@ typedef struct {
     uint8_t uid_len;
     uint8_t atqa[2];
     uint8_t sak;
-    bool iso14443_4_compliant;
 } NfcaData;
 
 typedef struct {

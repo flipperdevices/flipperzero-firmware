@@ -204,7 +204,6 @@ bool nfca_poller_activate(NfcaData* nfca_data) {
         nfca_data->atqa[0] = dev.sensRes.anticollisionInfo;
         nfca_data->atqa[1] = dev.sensRes.platformInfo;
         nfca_data->sak = dev.selRes.sak;
-        nfca_data->iso14443_4_compliant = FURI_BIT(nfca_data->sak, 5);
 
         FURI_LOG_T(TAG, "Anticollision passed");
         activated = true;
