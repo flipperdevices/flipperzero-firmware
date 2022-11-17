@@ -126,15 +126,15 @@ int32_t nfc_worker_task(void* context) {
     return 0;
 }
 
-static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker) {
     bool read_success = false;
     MfUltralightReader reader = {};
     MfUltralightData data = {};
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
-        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
-    }
+    // if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    //     reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+    //     reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    // }
 
     do {
         // Try to read supported card
@@ -157,15 +157,17 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
 
         // // Otherwise, try to read as usual
         // if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
-        if(!mf_ul_read_card(tx_rx, &reader, &data)) break;
+        NfcaData nfca_data = {};
+        nfca_poller_activate(&nfca_data);
+        if(!mf_ul_read_card(&reader, &data)) break;
         // Copy data
         nfc_worker->dev_data->mf_ul_data = data;
         read_success = true;
     } while(false);
 
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        reader_analyzer_stop(nfc_worker->reader_analyzer);
-    }
+    // if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+    //     reader_analyzer_stop(nfc_worker->reader_analyzer);
+    // }
 
     return read_success;
 }
@@ -308,7 +310,7 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
         FURI_LOG_I(TAG, "Mifare Ultralight / NTAG detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareUl;
-        card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
+        card_read = nfc_worker_read_mf_ultralight(nfc_worker);
     } else if(mf_classic_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
         FURI_LOG_I(TAG, "Mifare Classic detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
@@ -344,12 +346,22 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker->callback);
 
     NfcPoller nfc_poller;
+    bool card_read = false;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
         nfc_poller_reset(&nfc_poller);
         if(nfc_poller_detect(&nfc_poller)) {
             if(nfc_poller.type == NfcTypeA) {
                 FURI_LOG_D(TAG, "NFC-A tag detected");
+                if(mf_ul_check_card_type(
+                       nfc_poller.nfca_data.atqa[0],
+                       nfc_poller.nfca_data.atqa[1],
+                       nfc_poller.nfca_data.sak)) {
+                    FURI_LOG_I(TAG, "Mifare Ultralight / NTAG detected");
+                    nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareUl;
+                    card_read = nfc_worker_read_mf_ultralight(nfc_worker);
+                    UNUSED(card_read);
+                }
             } else if(nfc_poller.type == NfcTypeB) {
                 FURI_LOG_D(TAG, "NFC-B tag detected");
             } else if(nfc_poller.type == NfcTypeF) {
@@ -358,7 +370,7 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                 FURI_LOG_D(TAG, "NFC-V tag detected");
             }
         }
-        furi_delay_ms(100);
+        furi_delay_ms(1000);
     }
 }
 
@@ -465,7 +477,7 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
                 } else if(read_mode == NfcReadModeMfUltralight) {
                     FURI_LOG_I(TAG, "Mifare Ultralight / NTAG");
                     nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareUl;
-                    if(nfc_worker_read_mf_ultralight(nfc_worker, &tx_rx)) {
+                    if(nfc_worker_read_mf_ultralight(nfc_worker)) {
                         event = NfcWorkerEventReadMfUltralight;
                         break;
                     }
@@ -924,6 +936,8 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     FuriHalNfcTxRxContext tx_rx = {};
     MfUltralightReader reader = {};
+    // TODO DELEDTE!!!
+    NfcaData nfca_data;
     mf_ul_reset(data);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -942,15 +956,15 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
                     nfc_worker->callback(NfcWorkerEventMfUltralightPassKey, nfc_worker->context);
                     key = nfc_util_bytes2num(data->auth_key, 4);
                 } else if(data->auth_method == MfUltralightAuthMethodAmeebo) {
-                    key = mf_ul_pwdgen_amiibo(nfc_data);
+                    key = mf_ul_pwdgen_amiibo(&nfca_data);
                 } else if(data->auth_method == MfUltralightAuthMethodXiaomi) {
-                    key = mf_ul_pwdgen_xiaomi(nfc_data);
+                    key = mf_ul_pwdgen_xiaomi(&nfca_data);
                 } else {
                     FURI_LOG_E(TAG, "Incorrect auth method");
                     break;
                 }
 
-                data->auth_success = mf_ultralight_authenticate(&tx_rx, key, &pack);
+                data->auth_success = mf_ultralight_authenticate(key, &pack);
 
                 if(!data->auth_success) {
                     // Reset card
@@ -961,7 +975,7 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
                     }
                 }
 
-                mf_ul_read_card(&tx_rx, &reader, data);
+                mf_ul_read_card(&reader, data);
                 if(data->auth_success) {
                     MfUltralightConfigPages* config_pages = mf_ultralight_get_config_pages(data);
                     if(config_pages != NULL) {

@@ -175,8 +175,6 @@ bool nfca_poller_check_presence() {
 }
 
 bool nfca_poller_activate(NfcaData* nfca_data) {
-    furi_assert(nfca_data);
-
     FuriHalNfcReturn ret = FuriHalNfcReturnOk;
     rfalNfcaListenDevice dev;
     uint8_t dev_cnt = 0;
@@ -199,11 +197,13 @@ bool nfca_poller_activate(NfcaData* nfca_data) {
             break;
         }
 
-        nfca_data->uid_len = dev.nfcId1Len;
-        memcpy(nfca_data->uid, dev.nfcId1, nfca_data->uid_len);
-        nfca_data->atqa[0] = dev.sensRes.anticollisionInfo;
-        nfca_data->atqa[1] = dev.sensRes.platformInfo;
-        nfca_data->sak = dev.selRes.sak;
+        if(nfca_data) {
+            nfca_data->uid_len = dev.nfcId1Len;
+            memcpy(nfca_data->uid, dev.nfcId1, nfca_data->uid_len);
+            nfca_data->atqa[0] = dev.sensRes.anticollisionInfo;
+            nfca_data->atqa[1] = dev.sensRes.platformInfo;
+            nfca_data->sak = dev.selRes.sak;
+        }
 
         FURI_LOG_T(TAG, "Anticollision passed");
         activated = true;
@@ -218,4 +218,33 @@ bool nfca_poller_deactivate() {
         FURI_LOG_T(TAG, "Sleep failed: %d", ret);
     }
     return ret == FuriHalNfcReturnOk;
+}
+
+bool nfca_poller_tx_rx(
+    uint8_t* tx_data,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint16_t rx_buff_size,
+    uint16_t* rx_bits,
+    uint32_t timeout_ms) {
+    furi_assert(tx_data);
+    furi_assert(rx_data);
+    furi_assert(rx_bits);
+
+    bool tx_rx_success = false;
+
+    FuriHalNfcReturn ret = furi_hal_nfc_ll_txrx_bits(
+        tx_data,
+        tx_bits,
+        rx_data,
+        rx_buff_size * 8,
+        rx_bits,
+        FURI_HAL_NFC_TXRX_DEFAULT,
+        furi_hal_nfc_ll_ms2fc(timeout_ms));
+    tx_rx_success = (ret == FuriHalNfcReturnOk) || (ret == FuriHalNfcReturnIncompleteByte);
+    if(!tx_rx_success) {
+        FURI_LOG_D(TAG, "Failed in tx rx: %d", ret);
+    }
+
+    return tx_rx_success;
 }

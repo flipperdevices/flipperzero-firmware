@@ -40,11 +40,12 @@ uint8_t all_in_one_get_layout(NfcDeviceData* dev_data) {
 
 bool all_in_one_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     UNUSED(nfc_worker);
+    UNUSED(tx_rx);
     // If this is a all_in_one pass, first 2 bytes of page 4 are 0x45 0xD9
     MfUltralightReader reader = {};
     MfUltralightData data = {};
 
-    if(!mf_ul_read_card(tx_rx, &reader, &data)) {
+    if(!mf_ul_read_card(&reader, &data)) {
         return false;
     } else {
         if(data.data[4 * 4] == 0x45 && data.data[4 * 4 + 1] == 0xD9) {
@@ -56,9 +57,10 @@ bool all_in_one_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_r
 }
 
 bool all_in_one_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    UNUSED(tx_rx);
     MfUltralightReader reader = {};
     MfUltralightData data = {};
-    if(!mf_ul_read_card(tx_rx, &reader, &data)) {
+    if(!mf_ul_read_card(&reader, &data)) {
         return false;
     } else {
         memcpy(&nfc_worker->dev_data->mf_ul_data, &data, sizeof(data));

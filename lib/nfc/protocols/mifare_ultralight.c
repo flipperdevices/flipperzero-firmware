@@ -3,14 +3,18 @@
 #include "mifare_ultralight.h"
 #include "nfc_util.h"
 #include <furi.h>
-#include "furi_hal_nfc.h"
+
+#include "nfca.h"
 
 #define TAG "MfUltralight"
 
+#define MIFARE_ULTRALIGHT_TX_BUFF_MAX (64)
+#define MIFARE_ULTRALIGHT_RX_BUFF_MAX (64)
+
 // Algorithms from: https://github.com/RfidResearchGroup/proxmark3/blob/0f6061c16f072372b7d4d381911f1542afbc3a69/common/generator.c#L110
-uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data) {
+uint32_t mf_ul_pwdgen_xiaomi(NfcaData* nfca_data) {
     uint8_t hash[20];
-    mbedtls_sha1(data->uid, data->uid_len, hash);
+    mbedtls_sha1(nfca_data->uid, nfca_data->uid_len, hash);
 
     uint32_t pwd = 0;
     pwd |= (hash[hash[0] % 20]) << 24;
@@ -21,8 +25,8 @@ uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data) {
     return pwd;
 }
 
-uint32_t mf_ul_pwdgen_amiibo(FuriHalNfcDevData* data) {
-    uint8_t* uid = data->uid;
+uint32_t mf_ul_pwdgen_amiibo(NfcaData* nfca_data) {
+    uint8_t* uid = nfca_data->uid;
 
     uint32_t pwd = 0;
     pwd |= (uid[1] ^ uid[3] ^ 0xAA) << 24;
@@ -95,25 +99,27 @@ static void mf_ul_set_version_ntag203(MfUltralightReader* reader, MfUltralightDa
     reader->pages_to_read = 42;
 }
 
-bool mf_ultralight_read_version(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data) {
-    bool version_read = false;
+bool mf_ultralight_read_version(MfUltralightReader* reader, MfUltralightData* data) {
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
 
+    bool version_read = false;
     do {
         FURI_LOG_D(TAG, "Reading version");
-        tx_rx->tx_data[0] = MF_UL_GET_VERSION_CMD;
-        tx_rx->tx_bits = 8;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits != 64) {
+        tx_data[0] = MF_UL_GET_VERSION_CMD;
+        tx_bits = 8;
+        bool tx_rx_success =
+            nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 50);
+        if(!tx_rx_success || rx_bits != 64) {
             FURI_LOG_D(TAG, "Failed reading version");
             mf_ul_set_default_version(reader, data);
-            furi_hal_nfc_sleep();
-            furi_hal_nfc_activate_nfca(300, NULL);
+            nfca_poller_deactivate();
+            nfca_poller_activate(NULL);
             break;
         }
-        MfUltralightVersion* version = (MfUltralightVersion*)tx_rx->rx_data;
+        MfUltralightVersion* version = (MfUltralightVersion*)rx_data;
         data->version = *version;
         if(version->storage_size == 0x0B || version->storage_size == 0x00) {
             data->type = MfUltralightTypeUL11;
@@ -169,28 +175,34 @@ bool mf_ultralight_read_version(
     return version_read;
 }
 
-bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint16_t* pack) {
-    bool authenticated = false;
+bool mf_ultralight_authenticate(uint32_t key, uint16_t* pack) {
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
 
+    bool authenticated = false;
     do {
         FURI_LOG_D(TAG, "Authenticating");
-        tx_rx->tx_data[0] = MF_UL_AUTH;
-        nfc_util_num2bytes(key, 4, &tx_rx->tx_data[1]);
-        tx_rx->tx_bits = 40;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        tx_data[0] = MF_UL_AUTH;
+        nfc_util_num2bytes(key, 4, &tx_data[1]);
+        tx_bits = 40;
+        bool tx_rx_success =
+            nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+
+        if(!tx_rx_success) {
             FURI_LOG_D(TAG, "Tag did not respond to authentication");
             break;
         }
 
         // PACK
-        if(tx_rx->rx_bits < 2 * 8) {
+        if(rx_bits < 2 * 8) {
             FURI_LOG_D(TAG, "Authentication failed");
             break;
         }
 
         if(pack != NULL) {
-            *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
+            *pack = (rx_data[1] << 8) | rx_data[0];
         }
 
         FURI_LOG_I(TAG, "Auth success. Password: %08lX. PACK: %04X", key, *pack);
@@ -521,25 +533,35 @@ static bool mf_ultralight_should_read_counters(MfUltralightData* data) {
     return config->access.nfc_cnt_en;
 }
 
-static bool mf_ultralight_sector_select(FuriHalNfcTxRxContext* tx_rx, uint8_t sector) {
+static bool mf_ultralight_sector_select(uint8_t sector) {
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
+
     FURI_LOG_D(TAG, "Selecting sector %u", sector);
-    tx_rx->tx_data[0] = MF_UL_SECTOR_SELECT;
-    tx_rx->tx_data[1] = 0xff;
-    tx_rx->tx_bits = 16;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-    if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+    tx_data[0] = MF_UL_SECTOR_SELECT;
+    tx_data[1] = 0xff;
+    tx_bits = 16;
+
+    bool tx_rx_success =
+        nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+
+    if(!tx_rx_success) {
         FURI_LOG_D(TAG, "Failed to issue sector select command");
         return false;
     }
 
-    tx_rx->tx_data[0] = sector;
-    tx_rx->tx_data[1] = 0x00;
-    tx_rx->tx_data[2] = 0x00;
-    tx_rx->tx_data[3] = 0x00;
-    tx_rx->tx_bits = 32;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+    tx_data[0] = sector;
+    tx_data[1] = 0x00;
+    tx_data[2] = 0x00;
+    tx_data[3] = 0x00;
+    tx_bits = 32;
+
+    tx_rx_success = nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+
     // This is NOT a typo! The tag ACKs by not sending a response within 1ms.
-    if(furi_hal_nfc_tx_rx(tx_rx, 20)) {
+    if(!tx_rx_success) {
         // TODO: what gets returned when an actual NAK is received?
         FURI_LOG_D(TAG, "Sector %u select NAK'd", sector);
         return false;
@@ -548,27 +570,35 @@ static bool mf_ultralight_sector_select(FuriHalNfcTxRxContext* tx_rx, uint8_t se
     return true;
 }
 
-bool mf_ultralight_read_pages_direct(
-    FuriHalNfcTxRxContext* tx_rx,
-    uint8_t start_index,
-    uint8_t* data) {
+bool mf_ultralight_read_pages_direct(uint8_t start_index, uint8_t* data) {
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
+
     FURI_LOG_D(TAG, "Reading pages %d - %d", start_index, start_index + 3);
-    tx_rx->tx_data[0] = MF_UL_READ_CMD;
-    tx_rx->tx_data[1] = start_index;
-    tx_rx->tx_bits = 16;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-    if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
+    tx_data[0] = MF_UL_READ_CMD;
+    tx_data[1] = start_index;
+    tx_bits = 16;
+    bool tx_rx_success =
+        nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+    if(!tx_rx_success || rx_bits < 16 * 8) {
         FURI_LOG_D(TAG, "Failed to read pages %d - %d", start_index, start_index + 3);
         return false;
     }
-    memcpy(data, tx_rx->rx_data, 16);
+    memcpy(data, rx_data, 16);
     return true;
 }
 
-bool mf_ultralight_read_pages(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data) {
+bool mf_ultralight_read_pages(MfUltralightReader* reader, MfUltralightData* data) {
+    furi_assert(reader);
+    furi_assert(data);
+
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
+
     uint8_t pages_read_cnt = 0;
     uint8_t curr_sector_index = 0xff;
     reader->pages_read = 0;
@@ -580,17 +610,18 @@ bool mf_ultralight_read_pages(
 
         furi_assert(tag_page != -1);
         if(curr_sector_index != tag_sector) {
-            if(!mf_ultralight_sector_select(tx_rx, tag_sector)) return false;
+            if(!mf_ultralight_sector_select(tag_sector)) return false;
             curr_sector_index = tag_sector;
         }
 
         FURI_LOG_D(TAG, "Reading pages %d - %d", i, i + (valid_pages > 4 ? 4 : valid_pages) - 1);
-        tx_rx->tx_data[0] = MF_UL_READ_CMD;
-        tx_rx->tx_data[1] = tag_page;
-        tx_rx->tx_bits = 16;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+        tx_data[0] = MF_UL_READ_CMD;
+        tx_data[1] = tag_page;
+        tx_bits = 16;
 
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
+        bool tx_rx_success =
+            nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+        if(!tx_rx_success || rx_bits < 16 * 8) {
             FURI_LOG_D(
                 TAG,
                 "Failed to read pages %d - %d",
@@ -605,7 +636,7 @@ bool mf_ultralight_read_pages(
             pages_read_cnt = valid_pages;
         }
         reader->pages_read += pages_read_cnt;
-        memcpy(&data->data[i * 4], tx_rx->rx_data, pages_read_cnt * 4);
+        memcpy(&data->data[i * 4], rx_data, pages_read_cnt * 4);
     }
     data->data_size = reader->pages_to_read * 4;
     data->data_read = reader->pages_read * 4;
@@ -613,10 +644,15 @@ bool mf_ultralight_read_pages(
     return reader->pages_read > 0;
 }
 
-bool mf_ultralight_fast_read_pages(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data) {
+bool mf_ultralight_fast_read_pages(MfUltralightReader* reader, MfUltralightData* data) {
+    furi_assert(reader);
+    furi_assert(data);
+
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
+
     uint8_t curr_sector_index = 0xff;
     reader->pages_read = 0;
     while(reader->pages_read < reader->pages_to_read) {
@@ -627,19 +663,21 @@ bool mf_ultralight_fast_read_pages(
 
         furi_assert(tag_page != -1);
         if(curr_sector_index != tag_sector) {
-            if(!mf_ultralight_sector_select(tx_rx, tag_sector)) return false;
+            if(!mf_ultralight_sector_select(tag_sector)) return false;
             curr_sector_index = tag_sector;
         }
 
         FURI_LOG_D(
             TAG, "Reading pages %d - %d", reader->pages_read, reader->pages_read + valid_pages - 1);
-        tx_rx->tx_data[0] = MF_UL_FAST_READ_CMD;
-        tx_rx->tx_data[1] = tag_page;
-        tx_rx->tx_data[2] = valid_pages - 1;
-        tx_rx->tx_bits = 24;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
-            memcpy(&data->data[reader->pages_read * 4], tx_rx->rx_data, valid_pages * 4);
+        tx_data[0] = MF_UL_FAST_READ_CMD;
+        tx_data[1] = tag_page;
+        tx_data[2] = valid_pages - 1;
+        tx_bits = 24;
+
+        bool tx_rx_success =
+            nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+        if(tx_rx_success) {
+            memcpy(&data->data[reader->pages_read * 4], rx_data, valid_pages * 4);
             reader->pages_read += valid_pages;
             data->data_size = reader->pages_read * 4;
         } else {
@@ -655,16 +693,24 @@ bool mf_ultralight_fast_read_pages(
     return reader->pages_read == reader->pages_to_read;
 }
 
-bool mf_ultralight_read_signature(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data) {
+bool mf_ultralight_read_signature(MfUltralightData* data) {
+    furi_assert(data);
+
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
+
     bool signature_read = false;
 
     FURI_LOG_D(TAG, "Reading signature");
-    tx_rx->tx_data[0] = MF_UL_READ_SIG;
-    tx_rx->tx_data[1] = 0;
-    tx_rx->tx_bits = 16;
-    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-    if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
-        memcpy(data->signature, tx_rx->rx_data, sizeof(data->signature));
+    tx_data[0] = MF_UL_READ_SIG;
+    tx_data[1] = 0;
+    tx_bits = 16;
+    bool tx_rx_success =
+        nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+    if(tx_rx_success) {
+        memcpy(data->signature, rx_data, sizeof(data->signature));
         signature_read = true;
     } else {
         FURI_LOG_D(TAG, "Failed redaing signature");
@@ -673,87 +719,97 @@ bool mf_ultralight_read_signature(FuriHalNfcTxRxContext* tx_rx, MfUltralightData
     return signature_read;
 }
 
-bool mf_ultralight_read_counters(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data) {
+bool mf_ultralight_read_counters(MfUltralightData* data) {
+    furi_assert(data);
+
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
     uint8_t counter_read = 0;
 
     FURI_LOG_D(TAG, "Reading counters");
     bool is_single_counter = (mf_ul_get_features(data->type) & MfUltralightSupportSingleCounter) !=
                              0;
     for(size_t i = is_single_counter ? 2 : 0; i < 3; i++) {
-        tx_rx->tx_data[0] = MF_UL_READ_CNT;
-        tx_rx->tx_data[1] = i;
-        tx_rx->tx_bits = 16;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        tx_data[0] = MF_UL_READ_CNT;
+        tx_data[1] = i;
+        tx_bits = 16;
+        bool tx_rx_success =
+            nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+        if(!tx_rx_success) {
             FURI_LOG_D(TAG, "Failed to read %d counter", i);
             break;
         }
-        data->counter[i] = (tx_rx->rx_data[2] << 16) | (tx_rx->rx_data[1] << 8) |
-                           tx_rx->rx_data[0];
+        data->counter[i] = (rx_data[2] << 16) | (rx_data[1] << 8) | rx_data[0];
         counter_read++;
     }
 
     return counter_read == (is_single_counter ? 1 : 3);
 }
 
-bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data) {
+bool mf_ultralight_read_tearing_flags(MfUltralightData* data) {
+    furi_assert(data);
+
+    uint8_t tx_data[MIFARE_ULTRALIGHT_TX_BUFF_MAX] = {};
+    uint8_t rx_data[MIFARE_ULTRALIGHT_RX_BUFF_MAX] = {};
+    uint16_t tx_bits = 0;
+    uint16_t rx_bits = 0;
+
     uint8_t flag_read = 0;
 
     FURI_LOG_D(TAG, "Reading tearing flags");
     for(size_t i = 0; i < 3; i++) {
-        tx_rx->tx_data[0] = MF_UL_CHECK_TEARING;
-        tx_rx->rx_data[1] = i;
-        tx_rx->tx_bits = 16;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-        if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        tx_data[0] = MF_UL_CHECK_TEARING;
+        rx_data[1] = i;
+        tx_bits = 16;
+        bool tx_rx_success =
+            nfca_poller_tx_rx(tx_data, tx_bits, rx_data, sizeof(rx_data), &rx_bits, 5);
+        if(!tx_rx_success) {
             FURI_LOG_D(TAG, "Failed to read %d tearing flag", i);
             break;
         }
-        data->tearing[i] = tx_rx->rx_data[0];
+        data->tearing[i] = rx_data[0];
         flag_read++;
     }
 
     return flag_read == 2;
 }
 
-bool mf_ul_read_card(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data) {
-    furi_assert(tx_rx);
+bool mf_ul_read_card(MfUltralightReader* reader, MfUltralightData* data) {
     furi_assert(reader);
     furi_assert(data);
 
     bool card_read = false;
 
     // Read Mifare Ultralight version
-    if(mf_ultralight_read_version(tx_rx, reader, data)) {
+    if(mf_ultralight_read_version(reader, data)) {
         if(reader->supported_features & MfUltralightSupportSignature) {
             // Read Signature
-            mf_ultralight_read_signature(tx_rx, data);
+            mf_ultralight_read_signature(data);
         }
     } else {
         // No GET_VERSION command, check for NTAG203 by reading last page (41)
         uint8_t dummy[16];
-        if(mf_ultralight_read_pages_direct(tx_rx, 41, dummy)) {
+        if(mf_ultralight_read_pages_direct(41, dummy)) {
             mf_ul_set_version_ntag203(reader, data);
             reader->supported_features = mf_ul_get_features(data->type);
         } else {
             // We're really an original Mifare Ultralight, reset tag for safety
-            furi_hal_nfc_sleep();
-            furi_hal_nfc_activate_nfca(300, NULL);
+            nfca_poller_deactivate();
+            nfca_poller_activate(NULL);
         }
     }
 
-    card_read = mf_ultralight_read_pages(tx_rx, reader, data);
+    card_read = mf_ultralight_read_pages(reader, data);
 
     if(card_read) {
         if(reader->supported_features & MfUltralightSupportReadCounter &&
            mf_ultralight_should_read_counters(data)) {
-            mf_ultralight_read_counters(tx_rx, data);
+            mf_ultralight_read_counters(data);
         }
         if(reader->supported_features & MfUltralightSupportTearingFlags) {
-            mf_ultralight_read_tearing_flags(tx_rx, data);
+            mf_ultralight_read_tearing_flags(data);
         }
         data->curr_authlim = 0;
     }

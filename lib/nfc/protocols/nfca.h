@@ -41,3 +41,11 @@ bool nfca_poller_check_presence();
 bool nfca_poller_activate(NfcaData* nfca_data);
 
 bool nfca_poller_deactivate();
+
+bool nfca_poller_tx_rx(
+    uint8_t* tx_data,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint16_t rx_buff_size,
+    uint16_t* rx_bits,
+    uint32_t timeout_ms);

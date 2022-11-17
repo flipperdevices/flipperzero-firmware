@@ -191,40 +191,25 @@ void mf_ul_reset(MfUltralightData* data);
 
 bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
 
-bool mf_ultralight_read_version(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data);
+bool mf_ultralight_read_version(MfUltralightReader* reader, MfUltralightData* data);
 
-bool mf_ultralight_read_pages_direct(
-    FuriHalNfcTxRxContext* tx_rx,
-    uint8_t start_index,
-    uint8_t* data);
+bool mf_ultralight_read_pages_direct(uint8_t start_index, uint8_t* data);
 
-bool mf_ultralight_read_pages(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data);
+bool mf_ultralight_read_pages(MfUltralightReader* reader, MfUltralightData* data);
 
-bool mf_ultralight_fast_read_pages(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data);
+bool mf_ultralight_fast_read_pages(MfUltralightReader* reader, MfUltralightData* data);
 
-bool mf_ultralight_read_signature(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data);
+bool mf_ultralight_read_signature(MfUltralightData* data);
 
-bool mf_ultralight_read_counters(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data);
+bool mf_ultralight_read_counters(MfUltralightData* data);
 
-bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralightData* data);
+bool mf_ultralight_read_tearing_flags(MfUltralightData* data);
 
-bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint16_t* pack);
+bool mf_ultralight_authenticate(uint32_t key, uint16_t* pack);
 
 MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData* data);
 
-bool mf_ul_read_card(
-    FuriHalNfcTxRxContext* tx_rx,
-    MfUltralightReader* reader,
-    MfUltralightData* data);
+bool mf_ul_read_card(MfUltralightReader* reader, MfUltralightData* data);
 
 void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle);
 
@@ -238,6 +223,6 @@ bool mf_ul_prepare_emulation_response(
     uint32_t* data_type,
     void* context);
 
-uint32_t mf_ul_pwdgen_amiibo(FuriHalNfcDevData* data);
+uint32_t mf_ul_pwdgen_amiibo(NfcaData* nfca_data);
 
-uint32_t mf_ul_pwdgen_xiaomi(FuriHalNfcDevData* data);
+uint32_t mf_ul_pwdgen_xiaomi(NfcaData* nfca_data);
