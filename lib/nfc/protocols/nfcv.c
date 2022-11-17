@@ -8,6 +8,10 @@
 #include <furi_hal_resources.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
+#include <stm32wbxx_ll_dma.h>
+#include <stm32wbxx_ll_dmamux.h>
+#include <stm32wbxx_ll_tim.h>
+#include <stm32wbxx_ll_exti.h>
 
 #include "nfcv.h"
 #include "nfc_util.h"
@@ -75,7 +79,7 @@ ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data) {
     if(ret == ERR_NONE) {
         nfc_data->type = FuriHalNfcTypeV;
         nfc_data->uid_len = 8;
-        /* UID is stored reversed in this structure */
+        /* UID is stored reversed in this response */
         for(int pos = 0; pos < nfc_data->uid_len; pos++) {
             nfc_data->uid[pos] = rxBuf[2 + (7 - pos)];
         }
@@ -316,41 +320,62 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     }
 
     uint8_t response_buffer[32];
+
+    switch(nfcv_data->type) {
+        case NfcVTypeSlixL:
+            if(nfcv_data->sub_data.slix_l.privacy && 
+                command != ISO15693_CMD_NXP_GET_RANDOM_NUMBER && 
+                command != ISO15693_CMD_NXP_SET_PASSWORD) {
+                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "(command ignored, privacy)");
+            }
+            break;
+
+        default:
+            break;
+    }
     
     switch(command) {
-        case ISO15693_GET_SYSTEM_INFO:
-        {
-            if(nfcv_data->privacy) {
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO (ignored, privacy)");
-            } else {
-                response_buffer[0] = ISO15693_NOERROR; 
-                response_buffer[1] = 0x0F;
-                nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
-                response_buffer[10] = nfcv_data->dsfid; /* DSFID */
-                response_buffer[11] = nfcv_data->afi; /* AFI */
-                response_buffer[12] = nfcv_data->block_num - 1; /* number of blocks */
-                response_buffer[13] = nfcv_data->block_size - 1; /* block size */
-                response_buffer[14] = nfcv_data->ic_ref; /* IC reference */
-
-                nfcv_emu_send(response_buffer, 15);
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO");
-            }
-
-            break;
-        }
 
         case ISO15693_INVENTORY:
         {
-            if(nfcv_data->privacy) {
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY (ignored, privacy)");
-            } else {
-                response_buffer[0] = ISO15693_NOERROR;
-                response_buffer[1] = nfcv_data->dsfid; /* DSFID */
-                nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
+            response_buffer[0] = ISO15693_NOERROR;
+            response_buffer[1] = nfcv_data->dsfid; /* DSFID */
+            nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
 
-                nfcv_emu_send(response_buffer, 10);
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
-            }
+            nfcv_emu_send(response_buffer, 10);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+            break;
+        }
+
+        case ISO15693_STAYQUIET:
+        {
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "STAYQUIET");
+            break;
+        }
+
+        case ISO15693_LOCKBLOCK:
+        {
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCKBLOCK");
+            break;
+        }
+
+        case ISO15693_READ_MULTI_BLOCK:
+        {
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ_MULTI_BLOCK");
+            break;
+        }
+
+        case ISO15693_WRITE_MULTI_BLOCK:
+        {
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE_MULTI_BLOCK");
+            break;
+        }
+
+        case ISO15693_SELECT:
+        {
+            response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(response_buffer, 1);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SELECT");
             break;
         }
 
@@ -386,11 +411,31 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             break;
         }
 
+        case ISO15693_GET_SYSTEM_INFO:
+        {
+            response_buffer[0] = ISO15693_NOERROR; 
+            response_buffer[1] = 0x0F;
+            nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
+            response_buffer[10] = nfcv_data->dsfid; /* DSFID */
+            response_buffer[11] = nfcv_data->afi; /* AFI */
+            response_buffer[12] = nfcv_data->block_num - 1; /* number of blocks */
+            response_buffer[13] = nfcv_data->block_size - 1; /* block size */
+            response_buffer[14] = nfcv_data->ic_ref; /* IC reference */
+
+            nfcv_emu_send(response_buffer, 15);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO");
+
+            break;
+        }
+
         case ISO15693_CMD_NXP_GET_RANDOM_NUMBER:
         {
+            nfcv_data->sub_data.slix_l.rand[0] = 0x00;
+            nfcv_data->sub_data.slix_l.rand[1] = 0x00;
+
             response_buffer[0] = ISO15693_NOERROR;
-            response_buffer[1] = 0x00; /* set number to 0x0000 so we get the key in plaintext */
-            response_buffer[2] = 0x00;
+            response_buffer[1] = nfcv_data->sub_data.slix_l.rand[0];
+            response_buffer[2] = nfcv_data->sub_data.slix_l.rand[1];
 
             nfcv_emu_send(response_buffer, 3);
             snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "GET_RANDOM_NUMBER");
@@ -399,17 +444,43 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
 
         case ISO15693_CMD_NXP_SET_PASSWORD:
         {
-            uint32_t pass = (payload[payload_offset + 1] << 24) 
-                | (payload[payload_offset + 2] << 16) 
-                | (payload[payload_offset + 3] << 8) 
-                | (payload[payload_offset + 4] << 0);
+            uint8_t password_id = payload[payload_offset];
+            uint8_t *password_xored = &payload[payload_offset + 1];
+            uint8_t *rand = nfcv_data->sub_data.slix_l.rand;
+            uint8_t status = ISO15693_ERROR_GENERIC;
+            uint8_t *password = NULL;
+            uint8_t password_rcv[4];
 
-            response_buffer[0] = ISO15693_NOERROR;
+            switch(password_id) {
+                case 4:
+                    password = nfcv_data->sub_data.slix_l.key_privacy;
+                    break;
+                case 8:
+                    password = nfcv_data->sub_data.slix_l.key_destroy;
+                    break;
+                case 10:
+                    password = nfcv_data->sub_data.slix_l.key_eas;
+                    break;
+                default:
+                    break;
+            }
+
+            for(int pos = 0; pos < 4; pos++) {
+                password_rcv[pos] = password_xored[pos] ^ rand[pos % 2];
+            }
+
+            if(!memcmp(password, password_rcv, 4)) {
+                status = ISO15693_NOERROR;
+                nfcv_data->sub_data.slix_l.privacy = false;
+            } else {
+                printf("pass mismatch: %08lX %08lX %02X", *((uint32_t *)password), *((uint32_t *)password_xored), *rand);
+            }
+
+            response_buffer[0] = status;
 
             nfcv_emu_send(response_buffer, 1);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X: %08lX", payload[payload_offset + 0], pass);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X", password_id);
 
-            nfcv_data->privacy = false;
             break;
         }
 
@@ -420,7 +491,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             nfcv_emu_send(response_buffer, 1);
             snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "ISO15693_CMD_NXP_ENABLE_PRIVACY");
 
-            nfcv_data->privacy = true;
+            nfcv_data->sub_data.slix_l.privacy = true;
             break;
         }
 
@@ -429,6 +500,10 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             break;
     }
 }
+
+#define COUNT(x) ((sizeof(x))/(sizeof(x[0])))
+uint32_t nfcv_timer_buffer_src[32];
+uint32_t nfcv_timer_buffer[1024];
 
 void nfcv_emu_init() {
     nfcv_emu_alloc();
@@ -440,6 +515,53 @@ void nfcv_emu_init() {
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
+
+#if 0
+    memset(nfcv_timer_buffer_src, 0xEE, sizeof(nfcv_timer_buffer_src));
+    memset(nfcv_timer_buffer, 0xFA, sizeof(nfcv_timer_buffer));
+
+    /* configure DMA to read from a timer peripheral */
+    LL_DMA_InitTypeDef dma_config = {};
+    dma_config.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) &(TIM2->CNT);
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstAddress = (uint32_t) nfcv_timer_buffer;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.Mode = LL_DMA_MODE_NORMAL;
+    dma_config.NbData = 32; /* executes LL_DMA_SetDataLength */
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_GENERATOR0; /* executes LL_DMA_SetPeriphRequest */
+    dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
+
+    /* now set up DMA with these settings */
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_4, &dma_config);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
+    
+    /* make some noise on the counter */
+    LL_TIM_DisableCounter(TIM2);
+    LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
+    LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
+    LL_TIM_SetPrescaler(TIM2, 0);
+    LL_TIM_SetAutoReload(TIM2, 0xFFF);
+    LL_TIM_SetCounter(TIM2, 0);
+    LL_TIM_EnableCounter(TIM2);
+    
+    /* make sure request generation is disabled before modifying registers */
+    LL_DMAMUX_DisableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
+    /* generator 0 gets fed by EXTI_LINE4 */
+    LL_DMAMUX_SetRequestSignalID(NULL, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_EXTI_LINE4);
+    /* trigger on any edge - for now. should be only one? */
+    LL_DMAMUX_SetRequestGenPolarity(NULL, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_POL_RISING);
+    /* now enable request generation again */
+    LL_DMAMUX_EnableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
+
+    /* configure PB4 as source for EXTI_LINE4. shall it rain. */
+    LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTB, LL_GPIO_PIN_4);
+
+#endif
+
 }
 
 void nfcv_emu_deinit() {
@@ -468,6 +590,7 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
 
     bool in_critical = false;
     FURI_CRITICAL_DEFINE();
+
 
     while(true) {
 
@@ -633,6 +756,7 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
         if(timeout && cur_time > timeout) {
             break;
         }
+
         /* might exit early on overflows. guess thats okay. */
         if(cur_time > next_sleep) {
             break;
@@ -659,8 +783,16 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
         nfcv_emu_handle_packet(nfc_data, nfcv_data, frame_payload, frame_pos);
         ret = true;
     }
-
-    furi_delay_ms(0);
+/*
+    printf("nfcv_timer_buffer: %ld", LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4));
+    for(uint32_t pos = 0; pos < 64; pos++) {
+        if((pos % 4) == 0) {
+            printf("\r\n");
+        }
+        printf(" 0x%08lX ", nfcv_timer_buffer[pos]);
+    }
+    furi_delay_ms(100);
+    */
 
     return ret;
 }

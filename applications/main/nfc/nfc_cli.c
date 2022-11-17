@@ -286,8 +286,11 @@ static void nfc_cli_st25r_trans(Cli* cli, FuriString* args) {
         .block_num = 8,
         .block_size = 4,
         .ic_ref = 3,
-        .key_privacy = { 0x0F, 0x0F, 0x0F, 0x0F },
-        .privacy = false
+        .type = NfcVTypeSlixL,
+        .sub_data.slix_l = {
+            .key_privacy = { 0x0F, 0x0F, 0x0F, 0x0F },
+            .privacy = false
+        }
     };
 
     memset(nfcv_data.data, 0xAE, 4 * 8);

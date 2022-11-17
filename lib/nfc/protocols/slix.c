@@ -1,14 +1,45 @@
 
 #include <limits.h>
 #include "nfcv.h"
-#include "slix_l.h"
+#include "slix.h"
 #include "nfc_util.h"
 #include <furi.h>
 #include "furi_hal_nfc.h"
 
 
-bool slix_l_check_card_type(uint8_t UID0, uint8_t UID1, uint8_t UID2) {
-    if((UID0 == 0xE0) && (UID1 == 0x04) && (UID2 == 0x03)) {
+bool slix_check_card_type(FuriHalNfcDevData* nfc_data) {
+    if((nfc_data->uid[0] == 0xE0) 
+        && (nfc_data->uid[1] == 0x04) 
+        && (nfc_data->uid[2] == 0x01)
+        && (((nfc_data->uid[3] >> 4) & 3) == 2)) {
+        return true;
+    }
+    return false;
+}
+
+bool slix2_check_card_type(FuriHalNfcDevData* nfc_data) {
+    if((nfc_data->uid[0] == 0xE0) 
+        && (nfc_data->uid[1] == 0x04) 
+        && (nfc_data->uid[2] == 0x01)
+        && (((nfc_data->uid[3] >> 4) & 3) == 1)) {
+        return true;
+    }
+    return false;
+}
+
+bool slix_s_check_card_type(FuriHalNfcDevData* nfc_data) {
+    if((nfc_data->uid[0] == 0xE0) 
+        && (nfc_data->uid[1] == 0x04) 
+        && (nfc_data->uid[2] == 0x02)) {
+        return true;
+    }
+    return false;
+}
+
+bool slix_l_check_card_type(FuriHalNfcDevData* nfc_data) {
+    if((nfc_data->uid[0] == 0xE0) 
+        && (nfc_data->uid[1] == 0x04) 
+        && (nfc_data->uid[2] == 0x03)) {
         return true;
     }
     return false;
@@ -49,10 +80,10 @@ ReturnCode slix_l_unlock(uint32_t id, uint8_t* rand, uint32_t password) {
     uint8_t rxBuf[32];
     uint8_t cmd_set_pass[] = { 
         id,
-        rand[0] ^ ((password>>0) & 0xFF),
-        rand[1] ^ ((password>>8) & 0xFF),
-        rand[0] ^ ((password>>16) & 0xFF),
-        rand[1] ^ ((password>>24) & 0xFF) 
+        rand[0] ^ ((password >> 0) & 0xFF),
+        rand[1] ^ ((password >> 8) & 0xFF),
+        rand[0] ^ ((password >> 16) & 0xFF),
+        rand[1] ^ ((password >> 24) & 0xFF) 
     };
 
     ReturnCode ret = rfalNfcvPollerTransceiveReq(

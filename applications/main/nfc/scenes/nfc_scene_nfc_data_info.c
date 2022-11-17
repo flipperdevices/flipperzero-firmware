@@ -15,7 +15,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
     if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) 
-        || (protocol == NfcDeviceProtocolSlixL) || (protocol == NfcDeviceProtocolNfcV)) {
+        || (protocol == NfcDeviceProtocolNfcV)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -42,15 +42,33 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
     } else if(protocol == NfcDeviceProtocolNfcV) {
-        furi_string_cat_printf(temp_str, "\e#ISO15693\n");
-    } else if(protocol == NfcDeviceProtocolSlixL) {
-        furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX-L\n");
+        switch (dev_data->nfcv_data.type)
+        {
+            case NfcVTypePlain:
+                furi_string_cat_printf(temp_str, "\e#ISO15693\n");
+                break;
+            case NfcVTypeSlix:
+                furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX\n");
+                break;
+            case NfcVTypeSlixS:
+                furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX-S\n");
+                break;
+            case NfcVTypeSlixL:
+                furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX-L\n");
+                break;
+            case NfcVTypeSlix2:
+                furi_string_cat_printf(temp_str, "\e#ISO15693 SLIX2\n");
+                break;
+            default:
+                furi_string_cat_printf(temp_str, "\e#ISO15693 (unknown)\n");
+                break;
+        }
     } else {
         furi_string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
     }
 
     // Set tag iso data
-    if((protocol == NfcDeviceProtocolSlixL) || (protocol == NfcDeviceProtocolNfcV)) {
+    if(protocol == NfcDeviceProtocolNfcV) {
         NfcVData* nfcv_data = &nfc->dev->dev_data.nfcv_data;
         
         furi_string_cat_printf(temp_str, "UID:\n");
@@ -150,9 +168,6 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
-                consumed = true;
-            } else if(protocol == NfcDeviceProtocolSlixL) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolNfcV) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVMenu);

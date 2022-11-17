@@ -81,31 +81,71 @@ typedef enum {
 } NfcVAuthMethod;
 
 typedef enum {
-    NfcVTypeSlix,
-    NfcVTypeSlixS,
-    NfcVTypeSlixL,
-    NfcVTypeSlix2,
+    NfcVTypePlain = 0,
+    NfcVTypeSlix  = 1,
+    NfcVTypeSlixS = 2,
+    NfcVTypeSlixL = 3,
+    NfcVTypeSlix2 = 4,
 } NfcVType;
 
 typedef struct {
-    NfcVType type;
-    NfcVAuthMethod auth_method;
-    bool auth_success;
+    uint8_t key_eas[4];
+    uint8_t rand[2];
+} NfcVSlixData;
 
+typedef struct {
+    uint8_t key_read[4];
+    uint8_t key_write[4];
     uint8_t key_privacy[4];
     uint8_t key_destroy[4];
     uint8_t key_eas[4];
+    uint8_t rand[2];
+    bool privacy;
+} NfcVSlix2Data;
 
+typedef struct {
+    uint8_t key_read[4];
+    uint8_t key_write[4];
+    uint8_t key_privacy[4];
+    uint8_t key_destroy[4];
+    uint8_t key_eas[4];
+    uint8_t rand[2];
+    bool privacy;
+} NfcVSlixSData;
+
+typedef struct {
+    uint8_t key_privacy[4];
+    uint8_t key_destroy[4];
+    uint8_t key_eas[4];
+    uint8_t rand[2];
+    bool privacy;
+} NfcVSlixLData;
+
+typedef union {
+    NfcVSlixData slix;
+    NfcVSlix2Data slix2;
+    NfcVSlixSData slix_s;
+    NfcVSlixLData slix_l;
+} NfcVSubtypeData;
+
+typedef struct {
+    /* common ISO15693 fields */
     uint8_t dsfid;
     uint8_t afi;
     uint8_t ic_ref;
     uint8_t block_num;
     uint8_t block_size;
     uint8_t data[NFCV_MAX_DUMP_SIZE];
-    bool privacy;
 
-    char error[32];
+    /* specfic variant infos */
+    NfcVType type;
+    NfcVSubtypeData sub_data;
+
+    /* runtime data */
     char last_command[128];
+    char error[32];
+    NfcVAuthMethod auth_method;
+    bool auth_success;
 } NfcVData;
 
 typedef struct {

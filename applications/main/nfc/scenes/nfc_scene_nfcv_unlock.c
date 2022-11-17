@@ -11,53 +11,15 @@ typedef enum {
 
 static bool nfc_scene_nfcv_unlock_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
+    NfcVSlixLData* data = &nfc->dev->dev_data.nfcv_data.sub_data.slix_l;
 
     if(event == NfcWorkerEventNfcVPassKey) {
-        memcpy(nfc->dev->dev_data.nfcv_data.key_privacy, nfc->byte_input_store, 4);
+        memcpy(data->key_privacy, nfc->byte_input_store, 4);
     } else {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     }
     return true;
 }
-/*
-static void nfc_scene_nfcv_unlock_button_callback(GuiButtonType event, InputType type, void* context) {
-    furi_assert(context);
-    furi_assert(type);
-    Nfc* nfc = context;
-
-    if(event == GuiButtonTypeCenter) {
-        if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
-            nfc_worker_stop(nfc->worker);
-            nfc_worker_start(
-                nfc->worker,
-                NfcWorkerStateNfcVUnlock,
-                &nfc->dev->dev_data,
-                nfc_scene_nfcv_unlock_worker_callback,
-                nfc);
-            widget_add_button_element(
-                nfc->widget,
-                GuiButtonTypeCenter,
-                "Autosave",
-                nfc_scene_nfcv_unlock_button_callback,
-                nfc);
-        } else {
-            nfc_worker_stop(nfc->worker);
-            nfc_worker_start(
-                nfc->worker,
-                NfcWorkerStateNfcVUnlockAndSave,
-                &nfc->dev->dev_data,
-                nfc_scene_nfcv_unlock_worker_callback,
-                nfc);
-            widget_add_button_element(
-                nfc->widget,
-                GuiButtonTypeCenter,
-                "Unlock",
-                nfc_scene_nfcv_unlock_button_callback,
-                nfc);
-        }
-        notification_message(nfc->notifications, &sequence_single_vibro);
-    }
-}*/
 
 void nfc_scene_nfcv_unlock_popup_callback(void* context) {
     Nfc* nfc = context;
@@ -82,10 +44,10 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
 
             if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
                 nfc_text_store_set(nfc, "SLIX-L_%02X%02X%02X%02X%02X%02X%02X%02X", 
-                    nfc_data->uid[7], nfc_data->uid[6], nfc_data->uid[5], nfc_data->uid[4],
-                    nfc_data->uid[3], nfc_data->uid[2], nfc_data->uid[1], nfc_data->uid[0]);
+                    nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3],
+                    nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
 
-                nfc->dev->format = NfcDeviceSaveFormatSlixL;
+                nfc->dev->format = NfcDeviceSaveFormatNfcV;
 
                 if(nfc_device_save(nfc->dev, nfc->text_store)) {
                     popup_set_header(popup, "Successfully\nsaved", 94, 3, AlignCenter, AlignTop);

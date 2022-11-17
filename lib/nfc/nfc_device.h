@@ -33,8 +33,7 @@ typedef enum {
     NfcDeviceProtocolMifareUl,
     NfcDeviceProtocolMifareClassic,
     NfcDeviceProtocolMifareDesfire,
-    NfcDeviceProtocolNfcV,
-    NfcDeviceProtocolSlixL,
+    NfcDeviceProtocolNfcV
 } NfcProtocol;
 
 typedef enum {
@@ -43,7 +42,7 @@ typedef enum {
     NfcDeviceSaveFormatMifareUl,
     NfcDeviceSaveFormatMifareClassic,
     NfcDeviceSaveFormatMifareDesfire,
-    NfcDeviceSaveFormatSlixL,
+    NfcDeviceSaveFormatNfcV,
 } NfcDeviceSaveFormat;
 
 typedef struct {

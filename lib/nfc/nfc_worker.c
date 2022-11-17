@@ -176,11 +176,12 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
 
                 if(nfcv_data->auth_method == NfcVAuthMethodManual) {
                     uint32_t key = 0;
+                    uint8_t *key_data = nfc_worker->dev_data->nfcv_data.sub_data.slix_l.key_privacy;
                     
-                    key |= nfc_worker->dev_data->nfcv_data.key_privacy[0] << 24;
-                    key |= nfc_worker->dev_data->nfcv_data.key_privacy[1] << 16;
-                    key |= nfc_worker->dev_data->nfcv_data.key_privacy[2] << 8;
-                    key |= nfc_worker->dev_data->nfcv_data.key_privacy[3] << 0;
+                    key |= key_data[0] << 24;
+                    key |= key_data[1] << 16;
+                    key |= key_data[2] << 8;
+                    key |= key_data[3] << 0;
                     ret = slix_l_unlock(4, rand, key);
                 } else {
                     ret = slix_l_unlock(4, rand, 0x7FFD6E5B);
@@ -493,17 +494,31 @@ static bool nfc_worker_read_nfcv(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     furi_assert(tx_rx);
     
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
 
     bool card_read = false;
     furi_hal_nfc_sleep();
-    if(slix_l_check_card_type(nfc_data->uid[7], nfc_data->uid[6], nfc_data->uid[5])) {
+
+    /* until here the UID field is reversed from the reader IC. 
+       we will read it here again and it will get placed in the right order. */
+    card_read = nfc_worker_read_nfcv_content(nfc_worker, tx_rx);
+
+    nfc_worker->dev_data->protocol = NfcDeviceProtocolNfcV;
+
+    if(slix_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX detected");
+        nfcv_data->type = NfcVTypeSlix;
+    } else if(slix2_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX2 detected");
+        nfcv_data->type = NfcVTypeSlix2;
+    } else if(slix_s_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX-L detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolSlixL;
-        card_read = nfc_worker_read_nfcv_content(nfc_worker, tx_rx);
+        nfcv_data->type = NfcVTypeSlixS;
+    } else if(slix_l_check_card_type(nfc_data)) {
+        FURI_LOG_I(TAG, "NXP SLIX-L detected");
+        nfcv_data->type = NfcVTypeSlixL;
     } else {
-        FURI_LOG_I(TAG, "unknown detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolNfcV;
-        card_read = nfc_worker_read_nfcv_content(nfc_worker, tx_rx);
+        nfcv_data->type = NfcVTypePlain;
     }
 
     return card_read;
