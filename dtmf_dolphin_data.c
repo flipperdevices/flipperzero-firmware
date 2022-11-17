@@ -85,9 +85,9 @@ DTMFDolphinSceneData DTMFDolphinSceneDataRedboxCA = {
     .block = DTMF_DOLPHIN_TONE_BLOCK_REDBOX_CA,
     .tone_count = 3,
     .tones = {
-      {"Nickel",  2200.0, {0, 0, 5}, 1, 66, 0},
-      {"Dime",    2200.0, {1, 0, 5}, 2, 66, 66},
-      {"Quarter", 2200.0, {2, 0, 5}, 5, 33, 33},
+      {"Nickel",  2200.0, 0.0, {0, 0, 5}, 1, 66, 0},
+      {"Dime",    2200.0, 0.0, {1, 0, 5}, 2, 66, 66},
+      {"Quarter", 2200.0, 0.0, {2, 0, 5}, 5, 33, 33},
     }
 };
 
