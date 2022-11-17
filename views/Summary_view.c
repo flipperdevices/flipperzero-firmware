@@ -67,6 +67,10 @@ void unitemp_Summary_alloc(void) {
     view_dispatcher_add_view(app->view_dispatcher, SUMMARY_VIEW, view);
 }
 
+void unitemp_Summary_switch(void) {
+    view_dispatcher_switch_to_view(app->view_dispatcher, SUMMARY_VIEW);
+}
+
 void unitemp_Summary_free(void) {
     view_free(view);
 }

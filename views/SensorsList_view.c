@@ -31,7 +31,7 @@ static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     //Имя датчка
     char sensor_name[11];
-    snprintf(sensor_name, 11, "Sensor %d", app->sensors_count + 1);
+    snprintf(sensor_name, 11, "Sensor_%d", app->sensors_count + 1);
     const SensorType* st = unitemp_getSensorsTypes()[index];
     uint8_t anotherValues[1] = {0};
     //Выбор первого доступного порта для датчиков single wire и one wire

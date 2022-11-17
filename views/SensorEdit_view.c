@@ -36,7 +36,17 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
-    UNUSED(index);
+    //Смена имени
+    if(index == 0) {
+        //
+    }
+    //Сохранение
+    if(index == 3) {
+        app->sensors[app->sensors_count++] = editable_sensor;
+        unitemp_sensors_save();
+        unitemp_sensors_reload();
+        unitemp_Summary_switch();
+    }
 }
 
 /**

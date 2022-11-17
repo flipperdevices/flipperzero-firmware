@@ -325,6 +325,13 @@ bool unitemp_sensors_save(void) {
     FURI_LOG_I(APP_NAME, "Sensors have been successfully saved");
     return true;
 }
+void unitemp_sensors_reload(void) {
+    unitemp_sensors_deInit();
+    unitemp_sensors_free();
+
+    unitemp_sensors_load();
+    unitemp_sensors_init();
+}
 
 Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anotherValues) {
     bool status = false;
@@ -398,6 +405,7 @@ void unitemp_sensors_free(void) {
         unitemp_sensor_free(app->sensors[i]);
     }
     app->sensors_count = 0;
+    free(app->sensors);
 }
 
 bool unitemp_sensors_init(void) {

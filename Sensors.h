@@ -164,6 +164,10 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor);
 bool unitemp_sensors_load();
 
 /**
+ * @brief Функция перезагрузки датчиков с SD-карты
+*/
+void unitemp_sensors_reload(void);
+/**
  * @brief Сохранение настроек на SD-карту
  * 
  * @return Истина если сохранение прошло успешно

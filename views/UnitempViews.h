@@ -16,6 +16,7 @@ typedef enum UnitempViews {
 
 /* Общий вид на датчики */
 void unitemp_Summary_alloc(void);
+void unitemp_Summary_switch(void);
 void unitemp_Summary_free(void);
 
 /* Главное меню */
