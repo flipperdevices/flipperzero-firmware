@@ -164,7 +164,27 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
             ret = nfcv_inventory(NULL);
 
             if(ret == ERR_NONE) {
-                /* chip is also visible, so no action required */
+                /* chip is also visible, so no action required, just save */
+                if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
+                    NfcVReader reader;
+
+                    if(!nfcv_read_card(&reader, &nfc_worker->dev_data->nfc_data, nfcv_data)) {
+                        furi_hal_console_printf("    => failed, wait for chip to disappear.\r\n");
+                        snprintf(nfcv_data->error, sizeof(nfcv_data->error), "Read card\nfailed");
+                        nfc_worker->callback(NfcWorkerEventWrongCardDetected, nfc_worker->context);
+                    } else {
+                        furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
+                        nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
+                    }
+                } else {
+                    furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
+                    nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
+                }
+
+                while(slix_l_get_random(NULL) == ERR_NONE) {
+                    furi_delay_ms(100);
+                }
+
                 furi_hal_console_printf("    => chip is already visible, wait for chip to disappear.\r\n");
                 nfc_worker->callback(NfcWorkerEventAborted, nfc_worker->context);
                 while(slix_l_get_random(NULL) == ERR_NONE) {
@@ -200,29 +220,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                         ret = slix_l_unlock(4, rand, 0x0F0F0F0F);
                     }
                 }
-                if(ret == ERR_NONE) {
-                    /* unlock succesful */
-                    if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
-                        NfcVReader reader;
-
-                        if(!nfcv_read_card(&reader, &nfc_worker->dev_data->nfc_data, nfcv_data)) {
-                            furi_hal_console_printf("    => failed, wait for chip to disappear.\r\n");
-                            snprintf(nfcv_data->error, sizeof(nfcv_data->error), "Read card\nfailed");
-                            nfc_worker->callback(NfcWorkerEventWrongCardDetected, nfc_worker->context);
-                        } else {
-                            furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
-                            nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
-                        }
-                    } else {
-                        furi_hal_console_printf("    => success, wait for chip to disappear.\r\n");
-                        nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
-                    }
-
-                    while(slix_l_get_random(NULL) == ERR_NONE) {
-                        furi_delay_ms(100);
-                    }
-                    
-                } else {
+                if(ret != ERR_NONE) {
                     /* unlock failed */
                     furi_hal_console_printf("    => failed, wait for chip to disappear.\r\n");
                     snprintf(nfcv_data->error, sizeof(nfcv_data->error), "Passwords not\naccepted");

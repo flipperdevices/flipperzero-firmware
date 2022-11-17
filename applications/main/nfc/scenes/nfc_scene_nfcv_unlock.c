@@ -43,7 +43,7 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
             popup_reset(popup);
 
             if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
-                nfc_text_store_set(nfc, "SLIX-L_%02X%02X%02X%02X%02X%02X%02X%02X", 
+                nfc_text_store_set(nfc, "SLIX_%02X%02X%02X%02X%02X%02X%02X%02X", 
                     nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3],
                     nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
 
