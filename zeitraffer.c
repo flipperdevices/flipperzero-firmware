@@ -5,7 +5,7 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
-// Половина кода покрадена из https://github.com/zmactep/flipperzero-hello-world
+// Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
 int Time = 10;
 int Count = 10;
