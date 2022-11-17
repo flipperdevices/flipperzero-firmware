@@ -3,7 +3,7 @@ simple timelapse app for Flipper Zero
 
 Я ненастоящий сварщик, не обессудьте. Делал для своей Sony DSLR A100, подходит для любых камер, поддерживающих проводной пульт с тремя контактами.
 
-Основано на хелловорлде с https://github.com/zmactep/flipperzero-hello-world
+Основано на хелловорлде https://github.com/zmactep/flipperzero-hello-world
 
 # Чо надо
  - две оптопары типа EL817C
