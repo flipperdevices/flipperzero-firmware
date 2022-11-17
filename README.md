@@ -1,3 +1,4 @@
+
 # zeitraffer
 
 english version [below](#eng)
@@ -37,15 +38,18 @@ english version [below](#eng)
 Simple timelapse app for Flipper Zero.
 
 based on https://github.com/zmactep/flipperzero-hello-world
+
 ### Control:
-Up and down - time.
-Left and right - number of frames
-Long press arrows - ±10 frames/seconds
-OK - start/pause
-Long press OK - turn on / off the backlight
-Back - reset
-Long press back - exit
+ - Up and down - time. 
+ - Left and right - number of frames 
+ - Long press arrows - ±10 frames/seconds 
+ - OK - start/pause 
+ - Long press OK - turn on/off the backlight 
+ - Back - reset 
+ - Long press back - exit
+
 When the timer is running, all buttons are blocked except OK.
+
 ## What you need:
   - two EL817C optocouplers
   - pin header connector 1x3 2,54mm male
