@@ -61,6 +61,8 @@ void tracker_speaker_play(float frequency, float pwm) {
 
     LL_TIM_SetAutoReload(FURI_HAL_SPEAKER_TIMER, autoreload);
     LL_TIM_OC_SetCompareCH1(FURI_HAL_SPEAKER_TIMER, compare_value);
+    LL_TIM_GenerateEvent_UPDATE(FURI_HAL_SPEAKER_TIMER);
+
     LL_TIM_EnableAllOutputs(FURI_HAL_SPEAKER_TIMER);
 }
 
@@ -77,17 +79,15 @@ void tracker_speaker_deinit() {
     furi_hal_speaker_stop();
 }
 
-void tracker_interrupt_init(FuriHalInterruptISR isr, void* context) {
+void tracker_interrupt_init(float freq, FuriHalInterruptISR isr, void* context) {
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, isr, context);
 
-    // setup TIM2 to genereate update event approximately 120 times per second
-    // Timer: base
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     // Prescaler to get 1kHz clock
     TIM_InitStruct.Prescaler = SystemCoreClock / 1000000 - 1;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    // Auto reload to get 120Hz interrupt
-    TIM_InitStruct.Autoreload = 8333 - 1;
+    // Auto reload to get freq Hz interrupt
+    TIM_InitStruct.Autoreload = (1000000 / freq) - 1;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
     LL_TIM_EnableIT_UPDATE(TIM2);
@@ -101,19 +101,35 @@ void tracker_interrupt_deinit() {
     FURI_CRITICAL_EXIT();
 }
 
+void tracker_debug_init() {
+    furi_hal_gpio_init(&gpio_ext_pc3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+}
+
+void tracker_debug_set(bool value) {
+    furi_hal_gpio_write(&gpio_ext_pc3, value);
+}
+
+void tracker_interrupt_body() {
+}
+
 void tracker_interrupt_cb(void* context) {
     UNUSED(context);
 
     if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
         LL_TIM_ClearFlag_UPDATE(TIM2);
+
+        tracker_debug_set(true);
+        tracker_interrupt_body();
+        tracker_debug_set(false);
     }
 }
 
 int32_t zero_tracker_app(void* p) {
     UNUSED(p);
 
+    tracker_debug_init();
     tracker_speaker_init();
-    tracker_interrupt_init(tracker_interrupt_cb, NULL);
+    tracker_interrupt_init(120.0f, tracker_interrupt_cb, NULL);
 
     while(1) {
         furi_delay_ms(1000);
