@@ -7,6 +7,9 @@ english version [below](#eng)
 Видео работы: https://youtube.com/shorts/QKyQa7_s7IE
 
 Я ненастоящий сварщик, не обессудьте. Делал для своей Sony DSLR A100, подходит для любых камер, поддерживающих проводной пульт с тремя контактами.
+
+Основано на хелловорлде https://github.com/zmactep/flipperzero-hello-world
+
 ### Управление: 
 
  - **вверх-вниз** - время.
@@ -20,8 +23,6 @@ english version [below](#eng)
  - длинное нажатие **назад** - выход
 
 При работающем таймере блокируются все кнопки кроме ОК.
-
-Основано на хелловорлде https://github.com/zmactep/flipperzero-hello-world
 
 ## Чо надо
  - две оптопары типа EL817C
