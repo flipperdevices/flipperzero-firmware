@@ -41,7 +41,7 @@ OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
 
 bool unitemp_onewire_bus_init(OneWireBus* bus) {
     if(bus == NULL) return false;
-    if(bus->device_count != 0) return true;
+    if(bus->device_count > 0) return true;
 
     unitemp_gpio_lock(bus->gpio, &ONE_WIRE);
     //Высокий уровень по умолчанию
@@ -58,7 +58,8 @@ bool unitemp_onewire_bus_init(OneWireBus* bus) {
 }
 bool unitemp_onewire_bus_deinit(OneWireBus* bus) {
     bus->device_count--;
-    if(bus->device_count == 0) {
+    if(bus->device_count <= 0) {
+        bus->device_count = 0;
         unitemp_gpio_lock(bus->gpio, &ONE_WIRE);
         //Режим работы - аналог, подтяжка выключена
         furi_hal_gpio_init(
@@ -336,43 +337,6 @@ bool unitemp_OneWire_sensor_init(Sensor* sensor) {
     unitemp_onewire_bus_init(instance->bus);
     furi_delay_ms(1);
 
-    // onewire_enum_init();
-    // uint8_t* ids = onewire_enum_next(instance);
-
-    // while(ids != NULL) {
-    //     FURI_LOG_D(
-    //         APP_NAME,
-    //         "Found sensor's ID: %02X%02X%02X%02X%02X%02X%02X%02X",
-    //         ids[0],
-    //         ids[1],
-    //         ids[2],
-    //         ids[3],
-    //         ids[4],
-    //         ids[5],
-    //         ids[6],
-    //         ids[7]);
-    //     ids = onewire_enum_next(instance);
-    // }
-    //Если ID не инициализирован, то чтение ID из датчика
-    // furi_delay_ms(1);
-    // if(instance->familyCode == 0) {
-    //     if(!oneWire_sensor_readID(instance)) {
-    //         return false;
-    //     }
-    //     FURI_LOG_D(
-    //         APP_NAME,
-    //         "%s sensor ID: %02X%02X%02X%02X%02X%02X%02X%02X",
-    //         sensor->name,
-    //         instance->deviceID[0],
-    //         instance->deviceID[1],
-    //         instance->deviceID[2],
-    //         instance->deviceID[3],
-    //         instance->deviceID[4],
-    //         instance->deviceID[5],
-    //         instance->deviceID[6],
-    //         instance->deviceID[7]);
-    // }
-
     if(instance->familyCode == FC_DS18B20 || instance->familyCode == FC_DS1822) {
         //Установка разрядности в 10 бит
         if(!unitemp_onewire_bus_start(instance->bus)) return false;
@@ -425,6 +389,7 @@ UnitempStatus unitemp_OneWire_sensor_update(Sensor* sensor) {
         uint8_t buff[9];
         oneWire_readBytes(instance->bus, buff, 9);
         if(!onewire_CRC_check(buff, 9)) {
+            FURI_LOG_D(APP_NAME, "Failed CRC check: %s", sensor->name);
             return UT_TIMEOUT;
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
