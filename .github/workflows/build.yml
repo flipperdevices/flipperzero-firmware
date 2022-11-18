@@ -12,12 +12,21 @@ jobs:
     name: Build application
     steps:
       - name: Checkout firmware
-        run: git clone https://github.com/flipperdevices/flipperzero-firmware.git --recursive --depth 1 flipperzero-firmware
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: git clone https://github.com/flipperdevices/flipperzero-firmware.git --recursive --depth 1 firmware
+      - name: Install toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: cd firmware && ./fbt
+      - name: Cache toolchain
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v3
+        id: toolchain-cache
+        with:
+          path: ./firmware
+          key: firmware
       - name: Checkout application
         uses: actions/checkout@v3
         with:
-          path: flipperzero-firmware/applications_user/usb_hid_autofire
-#      - name: Install toolchain
-#        run: cd flipperzero-firmware && ./fbt
+          path: firmware/applications_user/usb_hid_autofire
       - name: Build application
-        run: cd flipperzero-firmware && ./fbt build usb_hid_autofire
+        run: cd firmware && ./fbt build usb_hid_autofire
