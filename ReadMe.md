@@ -30,6 +30,7 @@ Thank you to all the supporters!
 - Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - Added: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
