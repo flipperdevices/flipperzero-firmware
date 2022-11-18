@@ -29,4 +29,4 @@ jobs:
         with:
           path: firmware/applications_user/usb_hid_autofire
       - name: Build application
-        run: cd firmware && ./fbt build fap_usb_hid_autofire
+        run: cd firmware && ./fbt fap_usb_hid_autofire
