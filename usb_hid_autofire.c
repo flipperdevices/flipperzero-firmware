@@ -1,7 +1,9 @@
+#include <string.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include "version.h"
 
 typedef enum {
     EventTypeInput,
@@ -14,7 +16,7 @@ typedef struct {
     EventType type;
 } UsbMouseEvent;
 
-bool bnt_left_autofire = false;
+bool btn_left_autofire = false;
 
 static void usb_hid_autofire_render_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
@@ -24,8 +26,10 @@ static void usb_hid_autofire_render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 0, 10, "USB HID Autofire");
 
     canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 90, 10, "v");
+    canvas_draw_str(canvas, 96, 10, VERSION);
     canvas_draw_str(canvas, 0, 22, "Press [ok] for auto left clicking");
-    canvas_draw_str(canvas, 0, 34, bnt_left_autofire ? "<active>" : "<inactive>");
+    canvas_draw_str(canvas, 0, 34, btn_left_autofire ? "<active>" : "<inactive>");
     canvas_draw_str(canvas, 0, 63, "Press [back] to exit");
 }
 
@@ -38,9 +42,9 @@ static void usb_hid_autofire_input_callback(InputEvent* input_event, void* ctx) 
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-void wait(int ticks) {
-    for (int i = 0; i < ticks; i++) {}
-}
+//void wait(int ticks) {
+//    for (int i = 0; i < ticks; i++) {}
+//}
 
 int32_t usb_hid_autofire_app(void* p) {
     UNUSED(p);
@@ -70,12 +74,12 @@ int32_t usb_hid_autofire_app(void* p) {
                 }
 
                 if(event.input.key == InputKeyOk && event.input.type == InputTypeRelease) {
-                    bnt_left_autofire = !bnt_left_autofire;
+                    btn_left_autofire = !btn_left_autofire;
                 }
             }
         }
 
-        if(bnt_left_autofire) {
+        if(btn_left_autofire) {
             furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
 //            wait(100);
             furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
