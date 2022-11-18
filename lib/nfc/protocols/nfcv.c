@@ -568,6 +568,13 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
 #define COUNT(x) ((sizeof(x))/(sizeof(x[0])))
 uint32_t nfcv_timer_buffer_src[32];
 uint32_t nfcv_timer_buffer[1024];
+volatile uint32_t nfcv_gpio_calls = 0;
+
+void nfcv_gpio_cb(void* ctx) {
+    UNUSED(ctx);
+
+    nfcv_gpio_calls++;
+}
 
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     nfcv_emu_alloc();
@@ -589,7 +596,6 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  Privacy pass: 0x%08lX", nfcv_read_be(nfcv_data->sub_data.slix_l.key_privacy, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix_l.privacy ? "ON" : "OFF");
 
-#if 0
     memset(nfcv_timer_buffer_src, 0xEE, sizeof(nfcv_timer_buffer_src));
     memset(nfcv_timer_buffer, 0xFA, sizeof(nfcv_timer_buffer));
 
@@ -602,8 +608,8 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     dma_config.MemoryOrM2MDstAddress = (uint32_t) nfcv_timer_buffer;
     dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.Mode = LL_DMA_MODE_NORMAL;
-    dma_config.NbData = 32; /* executes LL_DMA_SetDataLength */
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.NbData = COUNT(nfcv_timer_buffer); /* executes LL_DMA_SetDataLength */
     dma_config.PeriphRequest = LL_DMAMUX_REQ_GENERATOR0; /* executes LL_DMA_SetPeriphRequest */
     dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
 
@@ -617,7 +623,7 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
     LL_TIM_SetPrescaler(TIM2, 0);
-    LL_TIM_SetAutoReload(TIM2, 0xFFF);
+    LL_TIM_SetAutoReload(TIM2, 0xFFFFFFFF);
     LL_TIM_SetCounter(TIM2, 0);
     LL_TIM_EnableCounter(TIM2);
     
@@ -625,15 +631,13 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     LL_DMAMUX_DisableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
     /* generator 0 gets fed by EXTI_LINE4 */
     LL_DMAMUX_SetRequestSignalID(NULL, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_EXTI_LINE4);
-    /* trigger on any edge - for now. should be only one? */
+    /* trigger on any edge */
     LL_DMAMUX_SetRequestGenPolarity(NULL, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_POL_RISING);
     /* now enable request generation again */
     LL_DMAMUX_EnableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
 
-    /* configure PB4 as source for EXTI_LINE4. shall it rain. */
-    LL_SYSCFG_SetEXTISource(LL_SYSCFG_EXTI_PORTB, LL_GPIO_PIN_4);
-
-#endif
+    /* we need the EXTI to be configured as interrupt generating line, but no ISR registered */
+    furi_hal_gpio_init_ex(&gpio_spi_r_miso, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
 
 }
 
@@ -679,7 +683,7 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
             next_sleep = cur_time + (timeout_ms * clocks_in_ms);
 
             /* start edge counting on first rising edge */
-            if(state || edges_received) {
+            if(0 && (state || edges_received)) {
                 edges_received++;
 
                 /* ignore periods which are too long, might happen on field start */
@@ -693,8 +697,8 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
                         if(state) {
                             if(periods == 1) {
                                 FURI_CRITICAL_ENTER_ADV();
-                                timeout = cur_time + bit_time * 16;
                                 in_critical = true;
+                                timeout = cur_time + bit_time * 16;
                                 frame_state = NFCV_FRAME_STATE_SOF2;
                             } else {
                                 snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 1 period, got %lu", periods);
@@ -856,16 +860,23 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
         nfcv_emu_handle_packet(nfc_data, nfcv_data, frame_payload, frame_pos);
         ret = true;
     }
-/*
+
+    printf("edges_received:    %lu\r\n", edges_received);
+    printf("nfcv_gpio_calls:   %lu\r\n", nfcv_gpio_calls);
     printf("nfcv_timer_buffer: %ld", LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4));
-    for(uint32_t pos = 0; pos < 64; pos++) {
+
+    uint32_t prev_timer = 0;
+    for(uint32_t pos = 0; pos < COUNT(nfcv_timer_buffer) - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4); pos++) {
         if((pos % 4) == 0) {
             printf("\r\n");
         }
-        printf(" 0x%08lX ", nfcv_timer_buffer[pos]);
+        printf(" 0x%08lX ", (nfcv_timer_buffer[pos] - prev_timer));
+
+        prev_timer = nfcv_timer_buffer[pos];
     }
-    furi_delay_ms(100);
-    */
+    printf("\r\n");
+    //furi_delay_ms(100);
+    
 
     return ret;
 }
