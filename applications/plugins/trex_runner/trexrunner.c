@@ -12,7 +12,7 @@
 
 #define FPS 60
 
-#define DINO_RUNNING_TICKS 15
+#define DINO_RUNNING_MS_PER_FRAME 100
 
 typedef enum {
     EventTypeTick,
@@ -26,8 +26,9 @@ typedef struct {
 
 typedef struct {
     FuriTimer* timer;
+    uint32_t last_tick;
     const Icon* dino_icon;
-    int dino_tick;
+    int dino_frame_ms;
 } GameState;
 
 static void timer_callback(void* ctx) {
@@ -36,16 +37,19 @@ static void timer_callback(void* ctx) {
         return;
     }
 
-    // game update
-    game_state->dino_tick++;
+    uint32_t ticks_elapsed = furi_get_tick() - game_state->last_tick;
+    int delta_time_ms = ticks_elapsed * 1000 / furi_kernel_get_tick_frequency();
+
+    // dino update
+    game_state->dino_frame_ms += delta_time_ms;
     // TODO: switch by dino state
-    if(game_state->dino_tick >= DINO_RUNNING_TICKS) {
+    if(game_state->dino_frame_ms >= DINO_RUNNING_MS_PER_FRAME) {
         if(game_state->dino_icon == &I_DinoRun0) {
             game_state->dino_icon = &I_DinoRun1;
         } else {
             game_state->dino_icon = &I_DinoRun0;
         }
-        game_state->dino_tick = 0;
+        game_state->dino_frame_ms = 0;
     }
 
     release_mutex((ValueMutex*)ctx, game_state);
@@ -71,7 +75,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 }
 
 static void game_state_init(GameState* const game_state) {
-    game_state->dino_tick = 0;
+    game_state->last_tick = furi_get_tick();
+    game_state->dino_frame_ms = 0;
     game_state->dino_icon = &I_Dino;
 }
 
@@ -125,8 +130,6 @@ int32_t trexrunner_app(void* p) {
                     case InputKeyBack:
                         // Exit the app
                         processing = false;
-                        break;
-                    default:
                         break;
                     }
                 }
