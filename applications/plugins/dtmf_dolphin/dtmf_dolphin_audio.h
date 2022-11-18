@@ -24,13 +24,13 @@ typedef struct {
 typedef struct {
     size_t buffer_length;
     size_t half_buffer_length;
-    uint8_t* buffer_buffer;
-    uint16_t* sample_buffer;
+    uint8_t *buffer_buffer;
+    uint16_t *sample_buffer;
     float volume;
-    FuriMessageQueue* queue;
-    DTMFDolphinOsc* osc1;
-    DTMFDolphinOsc* osc2;
-    DTMFDolphinPulseFilter* filter;
+    FuriMessageQueue *queue;
+    DTMFDolphinOsc *osc1;
+    DTMFDolphinOsc *osc2;
+    DTMFDolphinPulseFilter *filter;
     bool playing;
 } DTMFDolphinAudio;
 
@@ -42,12 +42,7 @@ void dtmf_dolphin_audio_free(DTMFDolphinAudio* player);
 
 void dtmf_dolphin_osc_free(DTMFDolphinOsc* osc);
 
-bool dtmf_dolphin_audio_play_tones(
-    float freq1,
-    float freq2,
-    uint16_t pulses,
-    uint16_t pulse_ms,
-    uint16_t gap_ms);
+bool dtmf_dolphin_audio_play_tones(float freq1, float freq2, uint16_t pulses, uint16_t pulse_ms, uint16_t gap_ms);
 
 bool dtmf_dolphin_audio_stop_tones();
 

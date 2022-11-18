@@ -12,7 +12,4 @@ void dtmf_dolphin_dialer_free(DTMFDolphinDialer* dtmf_dolphin_dialer);
 
 View* dtmf_dolphin_dialer_get_view(DTMFDolphinDialer* dtmf_dolphin_dialer);
 
-void dtmf_dolphin_dialer_set_ok_callback(
-    DTMFDolphinDialer* dtmf_dolphin_dialer,
-    DTMFDolphinDialerOkCallback callback,
-    void* context);
+void dtmf_dolphin_dialer_set_ok_callback(DTMFDolphinDialer* dtmf_dolphin_dialer, DTMFDolphinDialerOkCallback callback, void* context);
