@@ -10,6 +10,8 @@ This is a simple Flipper Zero application to send left-clicks as a USB HID devic
 cd applications_user
 git clone https://github.com/pbek/usb_hid_autofire.git
 
+cd ..
+
 # Build the application
 ./fbt fap_usb_hid_autofire
 
