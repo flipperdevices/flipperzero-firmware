@@ -32,6 +32,7 @@ Thank you to all the supporters!
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - Added: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
+- Updated: [T-Rex (By gelin)](https://github.com/gelin/t-rex-runner) WIP
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
