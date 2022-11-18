@@ -27,6 +27,24 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: firmware/applications_user/usb_hid_autofire
+      - name: Set Env
+        run: |
+          cd firmware/applications_user/usb_hid_autofire
+          export VERSION=$(cat version.h | sed 's/[^0-9,.]//g')
+          export TAG=v${VERSION}
+          export RELEASE_TEXT=$(grep -Pzo "## ${VERSION}\n(\n|.)+?\n##" CHANGELOG.md | sed '$ d')
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          # add multiline release text
+          echo "RELEASE_TEXT<<EOF" >> $GITHUB_ENV
+          echo "${RELEASE_TEXT}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+      - name: Printenv
+        run: |
+          echo "VERSION=${VERSION}"
+          echo "TAG=${TAG}"
+          echo "RELEASE_TEXT=${RELEASE_TEXT}"
+          printenv
       - name: Build application
         run: cd firmware && ./fbt fap_usb_hid_autofire
       - name: Create Draft Release
@@ -35,8 +53,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
-          release_name: ${{ github.sha }}
+          tag_name: ${{ env.TAG }}
+          release_name: Release v${{ env.VERSION }}
+          body: ${{ env.RELEASE_TEXT }}
           draft: true
           prerelease: false
       - uses: actions/upload-release-asset@v1.0.1
