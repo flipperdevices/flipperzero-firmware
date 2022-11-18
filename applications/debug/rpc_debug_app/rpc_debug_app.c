@@ -26,23 +26,42 @@ static RpcDebugApp* rpc_debug_app_alloc() {
     app->view_dispatcher = view_dispatcher_alloc();
 
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_set_custom_event_callback(app->view_dispatcher, rpc_debug_app_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(app->view_dispatcher, rpc_debug_app_back_event_callback);
-    view_dispatcher_set_tick_event_callback(app->view_dispatcher, rpc_debug_app_tick_event_callback, 100);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, rpc_debug_app_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, rpc_debug_app_back_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, rpc_debug_app_tick_event_callback, 100);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_enable_queue(app->view_dispatcher);
 
     app->submenu = submenu_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, RpcDebugAppViewSubmenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, RpcDebugAppViewSubmenu, submenu_get_view(app->submenu));
+    app->text_box = text_box_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, RpcDebugAppViewTextBox, text_box_get_view(app->text_box));
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, RpcDebugAppViewTextInput, text_input_get_view(app->text_input));
+    app->byte_input = byte_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, RpcDebugAppViewByteInput, byte_input_get_view(app->byte_input));
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, RpcDebugAppViewSubmenu);
     return app;
 }
 
 static void rpc_debug_app_free(RpcDebugApp* app) {
+    view_dispatcher_remove_view(app->view_dispatcher, RpcDebugAppViewByteInput);
+    view_dispatcher_remove_view(app->view_dispatcher, RpcDebugAppViewTextInput);
+    view_dispatcher_remove_view(app->view_dispatcher, RpcDebugAppViewTextBox);
     view_dispatcher_remove_view(app->view_dispatcher, RpcDebugAppViewSubmenu);
 
+    free(app->byte_input);
+    free(app->text_input);
+    free(app->text_box);
     free(app->submenu);
+
     free(app->scene_manager);
     free(app->view_dispatcher);
 
