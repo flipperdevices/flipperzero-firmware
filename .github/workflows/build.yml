@@ -1,0 +1,23 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build application
+    steps:
+      - name: Checkout firmware
+        run: git clone https://github.com/flipperdevices/flipperzero-firmware.git --recursive --depth 1 flipperzero-firmware
+      - name: Checkout application
+        uses: actions/checkout@v3
+        with:
+          path: flipperzero-firmware/applications_user/usb_hid_autofire
+      - name: Build application
+        run: |
+          cd flipperzero-firmware
+          ./fbt && ./fbt build usb_hid_autofire
