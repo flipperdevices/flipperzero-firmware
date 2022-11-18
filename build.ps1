@@ -11,19 +11,13 @@ $build_commands = @(
         Name = "Official Dev";
         FbtSwitch = "od";
         FirmwarePath = "flipperzero-firmware_official_dev";
-        ArtifactName = "totp_official-dev-fw.fap"
+        ArtifactName = "totp_official-dev_unleashed_fw.fap"
     }
     [PSCustomObject]@{
         Name = "Official Stable";
         FbtSwitch = "os";
         FirmwarePath = "flipperzero-firmware_official_stable";
-        ArtifactName = "totp_official-stable-fw.fap"
-    }
-    [PSCustomObject]@{
-        Name = "Unleashed";
-        FbtSwitch = "u";
-        FirmwarePath = "flipperzero-firmware_unleashed";
-        ArtifactName = "totp_unleashed-fw.fap"
+        ArtifactName = "totp_official-stable_fw.fap"
     }
 )
 

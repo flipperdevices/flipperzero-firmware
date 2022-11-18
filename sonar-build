@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pushd flipperzero-firmware_unleashed
+pushd flipperzero-firmware_official_dev
 rm -rf applications/plugins/totp
 sed -i 's/applications_user/../' site_scons/commandline.scons
 ./fbt fap_totp

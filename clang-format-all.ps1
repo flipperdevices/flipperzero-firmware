@@ -1,9 +1,7 @@
-Get-ChildItem -Path "totp" -Directory -Recurse | ForEach-Object {
-    if ((Test-Path "$($_.FullName)/*.c") -or (Test-Path "$($_.FullName)/*.h")) {
-        Push-Location $_.FullName
-        Write-Host "Processing $($_.FullName)"
-        &clang-format -i -style=file *.c *.h
-        Pop-Location
-    }
-    
+$clang_format = Join-Path -Path $PSScriptRoot -ChildPath "flipperzero-firmware_unleashed/toolchain/x86_64-windows/bin/clang-format.exe"
+Push-Location $PSScriptRoot
+Get-ChildItem -Path "totp" -File -Recurse -Include "*.c", "*.h" | ForEach-Object {
+    Write-Host "Formatting $($_.FullName)"
+    & $clang_format -i -style=file $_.FullName
 }
+Pop-Location
