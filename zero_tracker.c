@@ -9,7 +9,7 @@
  * FEDCBA98 76543210
  * nnnnnnee eedddddd
  * -------- --------
- * nnnnnn            = [0] note kill, [1..60] note number, [61..63] service values
+ * nnnnnn            = [0] do nothing, [1..60] note number, [61] note kill, [62..63] not used
  *       ee ee       = [0..F] effect 
  *            111222 = [0..63] or [0..7, 0..7] effect data 
  */
