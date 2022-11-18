@@ -22,7 +22,7 @@ typedef enum {
     EventTypeKey,
 } EventType;
 
-typedef struct{
+typedef struct {
     uint32_t animation_duration;
     uint32_t message_duration;
     uint32_t starting_money;
@@ -71,7 +71,6 @@ typedef struct {
     Deck deck;
     PlayState state;
     QueueState queue_state;
-    Menu *menu;
+    Menu* menu;
     unsigned int last_tick;
 } GameState;
-
