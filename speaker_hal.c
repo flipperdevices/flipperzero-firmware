@@ -43,8 +43,7 @@ void tracker_speaker_deinit() {
 
 static FuriHalInterruptISR tracker_isr;
 static void* tracker_isr_context;
-
-void tracker_interrupt_cb(void* context) {
+static void tracker_interrupt_cb(void* context) {
     UNUSED(context);
 
     if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
