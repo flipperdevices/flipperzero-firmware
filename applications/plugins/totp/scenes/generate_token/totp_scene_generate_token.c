@@ -1,7 +1,7 @@
 #include <gui/gui.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <Authenticator_icons.h>
+#include <totp_icons.h>
 #include "totp_scene_generate_token.h"
 #include "../../types/token_info.h"
 #include "../../types/common.h"
@@ -293,7 +293,7 @@ bool totp_scene_generate_token_handle_event(
         return true;
     }
 
-    if(event->input.type != InputTypePress) {
+    if(event->input.type != InputTypePress && event->input.type != InputTypeRepeat) {
         return true;
     }
 

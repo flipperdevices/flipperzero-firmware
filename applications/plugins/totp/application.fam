@@ -1,5 +1,5 @@
 App(
-    appid="Authenticator",
+    appid="totp",
     name="Authenticator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="totp_app",
