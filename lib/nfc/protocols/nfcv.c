@@ -8,10 +8,6 @@
 #include <furi_hal_resources.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
-#include <stm32wbxx_ll_dma.h>
-#include <stm32wbxx_ll_dmamux.h>
-#include <stm32wbxx_ll_tim.h>
-#include <stm32wbxx_ll_exti.h>
 
 #include "nfcv.h"
 #include "nfc_util.h"
@@ -154,8 +150,11 @@ bool nfcv_read_card(
 
 /* emulation part */
 
-static const uint32_t clocks_in_ms = 64 * 1000;
-static const uint32_t bit_time = 64 * 9.44f;
+#define F_SC                13560000 /* MHz */
+#define PULSE_DURATION_PS  (128*1000000000000/F_SC) /* ps */
+
+
+PulseReader *reader_signal = NULL;
 
 DigitalSignal* nfcv_resp_pulse_32 = NULL;
 DigitalSignal* nfcv_resp_unmod = NULL;
@@ -565,17 +564,6 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     }
 }
 
-#define COUNT(x) ((sizeof(x))/(sizeof(x[0])))
-uint32_t nfcv_timer_buffer_src[32];
-uint32_t nfcv_timer_buffer[1024];
-volatile uint32_t nfcv_gpio_calls = 0;
-
-void nfcv_gpio_cb(void* ctx) {
-    UNUSED(ctx);
-
-    nfcv_gpio_calls++;
-}
-
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     nfcv_emu_alloc();
     rfal_platform_spi_acquire();
@@ -596,65 +584,26 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  Privacy pass: 0x%08lX", nfcv_read_be(nfcv_data->sub_data.slix_l.key_privacy, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix_l.privacy ? "ON" : "OFF");
 
-    memset(nfcv_timer_buffer_src, 0xEE, sizeof(nfcv_timer_buffer_src));
-    memset(nfcv_timer_buffer, 0xFA, sizeof(nfcv_timer_buffer));
-
-    /* configure DMA to read from a timer peripheral */
-    LL_DMA_InitTypeDef dma_config = {};
-    dma_config.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) &(TIM2->CNT);
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstAddress = (uint32_t) nfcv_timer_buffer;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.NbData = COUNT(nfcv_timer_buffer); /* executes LL_DMA_SetDataLength */
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_GENERATOR0; /* executes LL_DMA_SetPeriphRequest */
-    dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
-
-    /* now set up DMA with these settings */
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_4);
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_4, &dma_config);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_4);
-    
-    /* make some noise on the counter */
-    LL_TIM_DisableCounter(TIM2);
-    LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
-    LL_TIM_SetPrescaler(TIM2, 0);
-    LL_TIM_SetAutoReload(TIM2, 0xFFFFFFFF);
-    LL_TIM_SetCounter(TIM2, 0);
-    LL_TIM_EnableCounter(TIM2);
-    
-    /* make sure request generation is disabled before modifying registers */
-    LL_DMAMUX_DisableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
-    /* generator 0 gets fed by EXTI_LINE4 */
-    LL_DMAMUX_SetRequestSignalID(NULL, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_EXTI_LINE4);
-    /* trigger on any edge */
-    LL_DMAMUX_SetRequestGenPolarity(NULL, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_POL_RISING);
-    /* now enable request generation again */
-    LL_DMAMUX_EnableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
-
-    /* we need the EXTI to be configured as interrupt generating line, but no ISR registered */
-    furi_hal_gpio_init_ex(&gpio_spi_r_miso, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
-
+    /* allocate a 512 edge buffer, more than enough */
+    reader_signal = pulse_reader_alloc(&gpio_spi_r_miso, 512);
+    /* timebase shall be 1ps */
+    pulse_reader_set_timebase(reader_signal, PulseReaderUnitPicosecond);
+    /* and configure to already calculate the number of bits */
+    pulse_reader_set_bittime(reader_signal, PULSE_DURATION_PS);
+    pulse_reader_start(reader_signal);
 }
 
 void nfcv_emu_deinit() {
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     rfal_platform_spi_release();
     nfcv_emu_free();
+
+    pulse_reader_free(reader_signal);
 }
 
 bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms) {
     
     bool ret = false;
-    uint32_t next_sleep = DWT->CYCCNT + (timeout_ms * clocks_in_ms);
-    uint32_t timeout = 0;
-    uint32_t last_change = 0;
-    uint32_t edges_received = 0;
-
     uint32_t frame_state = NFCV_FRAME_STATE_SOF1;
     uint32_t periods_previous = 0;
     uint8_t frame_payload[128];
@@ -662,221 +611,140 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
     uint32_t byte_value = 0;
     uint32_t bits_received = 0;
     char reset_reason[128];
-
-    bool prev = furi_hal_gpio_read(&gpio_spi_r_miso);
-
-    bool in_critical = false;
-    FURI_CRITICAL_DEFINE();
-
+    bool wait_for_pulse = false;
 
     while(true) {
 
-        bool state = furi_hal_gpio_read(&gpio_spi_r_miso);
-        uint32_t cur_time = DWT->CYCCNT;
+        uint32_t periods = pulse_reader_receive(reader_signal, timeout_ms * 1000);
 
-        if(state != prev) {
-            uint32_t delta = cur_time - last_change;
-            uint32_t periods = (delta + bit_time/2) / bit_time;
-
-            last_change = cur_time;
-            prev = state;
-            next_sleep = cur_time + (timeout_ms * clocks_in_ms);
-
-            /* start edge counting on first rising edge */
-            if(0 && (state || edges_received)) {
-                edges_received++;
-
-                /* ignore periods which are too long, might happen on field start */
-                if(periods > 1024) {
-                    continue;
-                }
-
-                switch(frame_state) {
-                    case NFCV_FRAME_STATE_SOF1:
-                        /* got a rising edge, was it one period? */
-                        if(state) {
-                            if(periods == 1) {
-                                FURI_CRITICAL_ENTER_ADV();
-                                in_critical = true;
-                                timeout = cur_time + bit_time * 16;
-                                frame_state = NFCV_FRAME_STATE_SOF2;
-                            } else {
-                                snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 1 period, got %lu", periods);
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                        }
-                        break;
-
-                    case NFCV_FRAME_STATE_SOF2:
-                        /* waiting for the second low period, telling us about coding */
-                        if(!state) {
-                            timeout = cur_time + bit_time * 16;
-                            if(periods == 6) {
-                                frame_state = NFCV_FRAME_STATE_CODING_256;
-                                periods_previous = 0;
-                            } else if(periods == 4) {
-                                frame_state = NFCV_FRAME_STATE_CODING_4;
-                                periods_previous = 2;
-                            } else {
-                                snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 4/6 periods, got %lu", periods);
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                        }
-                        break;
-
-                    case NFCV_FRAME_STATE_CODING_256:
-                        if(!state) {
-                            timeout = cur_time + bit_time * 1024;
-                            if(periods_previous > periods) {
-                                snprintf(reset_reason, sizeof(reset_reason), "1oo256: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                            /* previous symbol left us with some pulse periods */
-                            periods -= periods_previous;
-
-                            if(periods > 512) {
-                                snprintf(reset_reason, sizeof(reset_reason), "1oo256: %lu periods is too much", periods);
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                            
-                            if(periods == 2) {
-                                frame_state = NFCV_FRAME_STATE_EOF;
-                                break;
-                            } 
-                            
-                            periods_previous = 512 - (periods + 1);
-                            byte_value = (periods - 1) / 2;
-                            frame_payload[frame_pos++] = (uint8_t)byte_value;
-
-                        } else {
-                            if(periods != 1) {
-                                snprintf(reset_reason, sizeof(reset_reason), "1oo256: Expected a single low pulse");
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                        }
-                        break;
-
-                    case NFCV_FRAME_STATE_CODING_4:
-                        /* evaluate high periods on falling edge */
-                        if(!state) {
-                            timeout = cur_time + bit_time * 16;
-                            if(periods_previous > periods) {
-                                snprintf(reset_reason, sizeof(reset_reason), "1oo4: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                            /* previous symbol left us with some pulse periods */
-                            periods -= periods_previous;
-                            periods_previous = 0;
-
-                            byte_value >>= 2;
-                            bits_received += 2;
-
-                            if(periods == 1) {
-                                byte_value |= 0x00 << 6;
-                                periods_previous = 6;
-                            } else if(periods == 3) {
-                                byte_value |= 0x01 << 6;
-                                periods_previous = 4;
-                            } else if(periods == 5) {
-                                byte_value |= 0x02 << 6;
-                                periods_previous = 2;
-                            } else if(periods == 7) {
-                                byte_value |= 0x03 << 6;
-                                periods_previous = 0;
-                            } else if(periods == 2) {
-                                frame_state = NFCV_FRAME_STATE_EOF;
-                                break;
-                            } else {
-                                snprintf(reset_reason, sizeof(reset_reason), "1oo4: Expected 1/3/5/7 low pulses, but got %lu", periods);
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-
-                            if(bits_received >= 8) {
-                                frame_payload[frame_pos++] = (uint8_t)byte_value;
-                                bits_received = 0;
-                            }
-                        } else {
-                            if(periods != 1) {
-                                snprintf(reset_reason, sizeof(reset_reason), "1oo4: Expected a single low pulse");
-                                frame_state = NFCV_FRAME_STATE_RESET;
-                                break;
-                            }
-                        }
-                        break;
-                }
-            }
+        if(periods == PULSE_READER_NO_EDGE) {
+            break;
         }
 
+        if(wait_for_pulse) {
+            wait_for_pulse = false;
+            if(periods != 1) {
+                snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected a single low pulse in state %lu, but got %lu", frame_state, periods);
+                frame_state = NFCV_FRAME_STATE_RESET;
+            }
+            continue;
+        }
+
+        switch(frame_state) {
+            case NFCV_FRAME_STATE_SOF1:
+                if(periods == 1) {
+                    frame_state = NFCV_FRAME_STATE_SOF2;
+                } else {
+                    frame_state = NFCV_FRAME_STATE_SOF1;
+                    break;
+                }
+                break;
+
+            case NFCV_FRAME_STATE_SOF2:
+                /* waiting for the second low period, telling us about coding */
+                if(periods == 6) {
+                    frame_state = NFCV_FRAME_STATE_CODING_256;
+                    periods_previous = 0;
+                    wait_for_pulse = true;
+                } else if(periods == 4) {
+                    frame_state = NFCV_FRAME_STATE_CODING_4;
+                    periods_previous = 2;
+                    wait_for_pulse = true;
+                } else {
+                    //snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 4/6 periods, got %lu", periods);
+                    frame_state = NFCV_FRAME_STATE_SOF1;
+                }
+                break;
+
+            case NFCV_FRAME_STATE_CODING_256:
+
+                if(periods_previous > periods) {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo256: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+                /* previous symbol left us with some pulse periods */
+                periods -= periods_previous;
+
+                if(periods > 512) {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo256: %lu periods is too much", periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+                
+                if(periods == 2) {
+                    frame_state = NFCV_FRAME_STATE_EOF;
+                    break;
+                } 
+                
+                periods_previous = 512 - (periods + 1);
+                byte_value = (periods - 1) / 2;
+                frame_payload[frame_pos++] = (uint8_t)byte_value;
+
+                wait_for_pulse = true;
+
+                break;
+
+            case NFCV_FRAME_STATE_CODING_4:
+                if(periods_previous > periods) {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo4: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+
+                /* previous symbol left us with some pulse periods */
+                periods -= periods_previous;
+                periods_previous = 0;
+
+                byte_value >>= 2;
+                bits_received += 2;
+
+                if(periods == 1) {
+                    byte_value |= 0x00 << 6;
+                    periods_previous = 6;
+                } else if(periods == 3) {
+                    byte_value |= 0x01 << 6;
+                    periods_previous = 4;
+                } else if(periods == 5) {
+                    byte_value |= 0x02 << 6;
+                    periods_previous = 2;
+                } else if(periods == 7) {
+                    byte_value |= 0x03 << 6;
+                    periods_previous = 0;
+                } else if(periods == 2) {
+                    frame_state = NFCV_FRAME_STATE_EOF;
+                    break;
+                } else {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo4: Expected 1/3/5/7 low pulses, but got %lu", periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+
+                if(bits_received >= 8) {
+                    frame_payload[frame_pos++] = (uint8_t)byte_value;
+                    bits_received = 0;
+                }
+                wait_for_pulse = true;
+                break;
+        }
+        
         /* post-state-machine cleanup and reset */
         if(frame_state == NFCV_FRAME_STATE_RESET) {
-            timeout = 0;
-            edges_received = 0;
             frame_state = NFCV_FRAME_STATE_SOF1;
-            FURI_CRITICAL_EXIT();
-            printf("Reset state machine, reason: %s\r\n", reset_reason);
-            in_critical = false;
-            furi_delay_ms(50);
+            
+            FURI_LOG_D(TAG, "Resetting state machine, reason: '%s'", reset_reason);
         } else if(frame_state == NFCV_FRAME_STATE_EOF) {
-            FURI_CRITICAL_EXIT();
-            in_critical = false;
             break;
         }
-
-        /* no edges detected */
-        if(timeout && cur_time > timeout) {
-            break;
-        }
-
-        /* might exit early on overflows. guess thats okay. */
-        if(cur_time > next_sleep) {
-            break;
-        }
-    }
-
-    if(in_critical) {
-        FURI_CRITICAL_EXIT();
-        in_critical = false;
     }
 
     if(frame_state == NFCV_FRAME_STATE_EOF) {
-
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        furi_delay_us(10);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, true);
-        furi_delay_us(10);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        furi_delay_us(10);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, true);
-        furi_delay_us(10);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-
+        /* we know that this code uses TIM2, so stop pulse reader */
+        pulse_reader_stop(reader_signal);
         nfcv_emu_handle_packet(nfc_data, nfcv_data, frame_payload, frame_pos);
+        pulse_reader_start(reader_signal);
         ret = true;
     }
-
-    printf("edges_received:    %lu\r\n", edges_received);
-    printf("nfcv_gpio_calls:   %lu\r\n", nfcv_gpio_calls);
-    printf("nfcv_timer_buffer: %ld", LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4));
-
-    uint32_t prev_timer = 0;
-    for(uint32_t pos = 0; pos < COUNT(nfcv_timer_buffer) - LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_4); pos++) {
-        if((pos % 4) == 0) {
-            printf("\r\n");
-        }
-        printf(" 0x%08lX ", (nfcv_timer_buffer[pos] - prev_timer));
-
-        prev_timer = nfcv_timer_buffer[pos];
-    }
-    printf("\r\n");
-    //furi_delay_ms(100);
-    
 
     return ret;
 }

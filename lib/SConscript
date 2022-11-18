@@ -4,6 +4,7 @@ env.Append(
     LINT_SOURCES=[
         "lib/app-scened-template",
         "lib/digital_signal",
+        "lib/pulse_reader",
         "lib/drivers",
         "lib/flipper_format",
         "lib/infrared",

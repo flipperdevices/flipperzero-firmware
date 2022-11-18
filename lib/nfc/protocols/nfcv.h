@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include <lib/digital_signal/digital_signal.h>
+#include <lib/pulse_reader/pulse_reader.h>
 #include "nfc_util.h"
 #include <furi_hal_nfc.h>
 

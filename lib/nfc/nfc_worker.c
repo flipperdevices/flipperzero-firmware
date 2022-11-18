@@ -627,7 +627,7 @@ void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker) {
 
     nfcv_emu_init(nfc_data, nfcv_data);
     while(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
-        if(nfcv_emu_loop(nfc_data, nfcv_data, 1000)) {
+        if(nfcv_emu_loop(nfc_data, nfcv_data, 50)) {
             if(nfc_worker->callback) {
                 nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
             }
