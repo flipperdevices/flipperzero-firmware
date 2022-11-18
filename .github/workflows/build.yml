@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -29,4 +30,4 @@ jobs:
         with:
           path: firmware/applications_user/usb_hid_autofire
       - name: Build application
-        run: cd firmware && ./fbt build usb_hid_autofire
+        run: cd firmware && ./fbt build fap_usb_hid_autofire
