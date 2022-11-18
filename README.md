@@ -1,7 +1,7 @@
 # USB HID Autofire
 
 [GitHub](https://github.com/pbek/usb_hid_autofire) |
-[Latest release](https://github.com/pbek/usb_hid_autofire/releases/latest)
+[Latest release](https://github.com/pbek/usb_hid_autofire/releases/latest) |
 [Changelog](CHANGELOG.md) |
 [License](LICENSE.md)
 
