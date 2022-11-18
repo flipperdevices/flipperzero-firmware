@@ -12,19 +12,18 @@ jobs:
     runs-on: ubuntu-latest
     name: Build application
     steps:
+      - name: Cache toolchain
+        uses: actions/cache@v3
+        id: toolchain-cache
+        with:
+          path: ./firmware
+          key: firmware
       - name: Checkout firmware
         if: steps.toolchain-cache.outputs.cache-hit != 'true'
         run: git clone https://github.com/flipperdevices/flipperzero-firmware.git --recursive --depth 1 firmware
       - name: Install toolchain
         if: steps.toolchain-cache.outputs.cache-hit != 'true'
         run: cd firmware && ./fbt
-      - name: Cache toolchain
-        if: steps.toolchain-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v3
-        id: toolchain-cache
-        with:
-          path: ./firmware
-          key: firmware
       - name: Checkout application
         uses: actions/checkout@v3
         with:
