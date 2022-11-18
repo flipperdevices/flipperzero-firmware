@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: flipperzero-firmware/applications_user/usb_hid_autofire
+#      - name: Install toolchain
+#        run: cd flipperzero-firmware && ./fbt
       - name: Build application
-        run: |
-          cd flipperzero-firmware
-          ./fbt && ./fbt build usb_hid_autofire
+        run: cd flipperzero-firmware && ./fbt build usb_hid_autofire
