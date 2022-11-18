@@ -31,6 +31,7 @@ Thank you to all the supporters!
 - Added: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
+- Added: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -206,6 +207,7 @@ $ ./fbt resources icons dolphin_ext
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
+- [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
