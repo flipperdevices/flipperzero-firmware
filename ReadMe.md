@@ -29,6 +29,7 @@ Thank you to all the supporters!
 - Added: [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - Added: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
+- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
