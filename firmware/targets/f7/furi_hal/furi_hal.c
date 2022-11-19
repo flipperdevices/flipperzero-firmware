@@ -60,27 +60,25 @@ void furi_hal_init() {
 
     furi_hal_crypto_init();
 
-    // USB
-#ifndef FURI_RAM_EXEC
-    // TODO: call furi_hal_memory_init before furi_hal_usb_init, to get more memory
-    furi_hal_usb_init();
-    FURI_LOG_I(TAG, "USB OK");
-#endif
-
     furi_hal_i2c_init();
 
     // High Level
     furi_hal_power_init();
     furi_hal_light_init();
+
+    furi_hal_bt_init();
+    furi_hal_memory_init();
+    furi_hal_compress_icon_init();
+
 #ifndef FURI_RAM_EXEC
+    // USB
+    furi_hal_usb_init();
+    FURI_LOG_I(TAG, "USB OK");
     furi_hal_vibro_init();
     furi_hal_subghz_init();
     furi_hal_nfc_init();
     furi_hal_rfid_init();
 #endif
-    furi_hal_bt_init();
-    furi_hal_memory_init(); // must be called after furi_hal_bt_init
-    furi_hal_compress_icon_init();
 
     // FatFS driver initialization
     MX_FATFS_Init();
