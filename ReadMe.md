@@ -23,17 +23,9 @@ Thank you to all the supporters!
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-17 11:40 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-17 11:40 EST`
-- Added: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
-- Cleanup for: Settings: Rename from App [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/409)
-- Added: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
-- Added: [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
-- Added: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
+- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
-- Added: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updated: [T-Rex (By gelin)](https://github.com/gelin/t-rex-runner) WIP
-- Updated: [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
