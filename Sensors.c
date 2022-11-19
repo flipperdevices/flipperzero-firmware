@@ -323,9 +323,9 @@ bool unitemp_sensors_save(void) {
         if(app->sensors[i]->type->interface == &SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
-                "%s %d %d\n",
+                "%s %s %d\n",
                 app->sensors[i]->name,
-                unitemp_getIntFromType(app->sensors[i]->type),
+                app->sensors[i]->type->typename,
                 unitemp_singlewire_sensorGetGPIO(app->sensors[i])->num);
         }
         if(app->sensors[i]->type->interface == &I2C) {
@@ -428,13 +428,14 @@ void unitemp_sensor_free(Sensor* sensor) {
     bool status = false;
     //Высвобождение памяти под инстанс
     status = sensor->type->interface->mem_releaser(sensor);
+
     if(status) {
         FURI_LOG_D(APP_NAME, "Sensor %s memory successfully released", sensor->name);
     } else {
         FURI_LOG_E(APP_NAME, "Sensor %s memory is not released", sensor->name);
     }
     free(sensor->name);
-    free(sensor);
+    //free(sensor);
 }
 
 void unitemp_sensors_free(void) {

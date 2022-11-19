@@ -32,15 +32,33 @@ static void _enter_callback(void* context, uint32_t index) {
     //Имя датчка
     char sensor_name[11];
     snprintf(sensor_name, 11, "Sensor%d", app->sensors_count + 1);
-    const SensorType* st = unitemp_sensors_getTypes()[index];
-    char args[1] = {0};
-    //Выбор первого доступного порта для датчиков single wire и one wire
-    if(st->interface == &SINGLE_WIRE || st->interface == &ONE_WIRE) {
-        args[0] = unitemp_gpio_toInt(unitemp_gpio_getAviablePort(st->interface, 0));
-    }
-    //Для I2C адрес выберится автоматически
+    const SensorType* type = unitemp_sensors_getTypes()[index];
 
-    unitemp_SensorEdit_switch(unitemp_sensor_alloc(sensor_name, st, args));
+    char args[22] = {0};
+    //Выбор первого доступного порта для датчика single wire
+    if(type->interface == &SINGLE_WIRE) {
+        snprintf(
+            args, 4, "%d", unitemp_gpio_toInt(unitemp_gpio_getAviablePort(type->interface, 0)));
+    }
+    //Выбор первого доступного порта для датчика one wire и запись нулевого ID
+    if(type->interface == &ONE_WIRE) {
+        snprintf(
+            args,
+            21,
+            "%d %02X%02X%02X%02X%02X%02X%02X%02X",
+            unitemp_gpio_toInt(unitemp_gpio_getAviablePort(type->interface, 0)),
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0);
+    }
+    //Для I2C адрес выберется автоматически
+
+    unitemp_SensorEdit_switch(unitemp_sensor_alloc(sensor_name, type, args));
 }
 
 /**
