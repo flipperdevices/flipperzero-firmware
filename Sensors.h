@@ -163,6 +163,12 @@ void unitemp_sensors_free(void);
 void unitemp_sensors_updateValues(void);
 
 /**
+* @brief Получить списк доступных типов датчиков
+* @return Указатель на список датчиков
+*/
+const SensorType** unitemp_sensors_getTypes(void);
+
+/**
 * @brief Получить количество доступных типов датчиков
 * @return Количество доступных типов датчиков
 */
@@ -170,17 +176,18 @@ uint8_t unitemp_sensors_getTypesCount(void);
 
 /**
  * @brief Получить тип сенсора по его индексу
- * 
  * @param index Индекс типа датчика (от 0 до SENSOR_TYPES_COUNT)
  * @return const SensorType* 
  */
 const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index);
 
 /**
-* @brief Получить списк доступных типов датчиков
-* @return Указатель на список датчиков
-*/
-const SensorType** unitemp_sensors_getTypes(void);
+ * @brief Преобразовать строчное название датчка в указатель
+ * 
+ * @param str Имя датчика в виде строки
+ * @return Указатель на тип датчика при успехе, иначе NULL
+ */
+const SensorType* unitemp_sensors_getTypeFromStr(char* str);
 
 /* ============================= GPIO ============================= */
 /**

@@ -269,7 +269,31 @@ bool unitemp_onewire_sensor_alloc(Sensor* sensor, char* args) {
     //Очистка адреса
     memset(instance->deviceID, 0, 8);
 
-    instance->bus = uintemp_onewire_bus_alloc(unitemp_gpio_getFromInt(args[0]));
+    int gpio, addr_0, addr_1, addr_2, addr_3, addr_4, addr_5, addr_6, addr_7;
+    sscanf(
+        args,
+        "%d %2X%2X%2X%2X%2X%2X%2X%2X",
+        &gpio,
+        &addr_0,
+        &addr_1,
+        &addr_2,
+        &addr_3,
+        &addr_4,
+        &addr_5,
+        &addr_6,
+        &addr_7);
+    instance->deviceID[0] = addr_0;
+    instance->deviceID[1] = addr_1;
+    instance->deviceID[2] = addr_2;
+    instance->deviceID[3] = addr_3;
+    instance->deviceID[4] = addr_4;
+    instance->deviceID[5] = addr_5;
+    instance->deviceID[6] = addr_6;
+    instance->deviceID[7] = addr_7;
+
+    instance->familyCode = instance->deviceID[0];
+
+    instance->bus = uintemp_onewire_bus_alloc(unitemp_gpio_getFromInt(gpio));
     if(instance != NULL) {
         return true;
     }

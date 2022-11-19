@@ -62,6 +62,17 @@ const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index) {
     return sensorTypes[index];
 }
 
+const SensorType* unitemp_sensors_getTypeFromStr(char* str) {
+    UNUSED(str);
+    if(str == NULL) return NULL;
+    for(uint8_t i = 0; i < unitemp_sensors_getTypesCount(); i++) {
+        if(!strcmp(str, sensorTypes[i]->typename)) {
+            return sensorTypes[i];
+        }
+    }
+    return NULL;
+}
+
 uint8_t unitemp_sensors_getTypesCount(void) {
     return SENSOR_TYPES_COUNT;
 }
@@ -247,27 +258,31 @@ bool unitemp_sensors_load(void) {
     while(line_end != STRING_FAILURE) {
         //Имя датчика
         char name[11] = {0};
-        //Переменные для типа датчика и его аргументов
-        int type = 255, arg = 255;
+        //Тип датчика
+        char type[11] = {0};
+        //Смещение по строке для отделения аргументов
+        int offset = 0;
         //Чтение из строки
-        sscanf(((char*)(file_buf + line_end)), "%s %d %d", name, &type, &arg);
+        sscanf(((char*)(file_buf + line_end)), "%s %s %n", name, type, &offset);
         //Ограничение длины имени
         name[10] = '\0';
-        FURI_LOG_D(APP_NAME, "%s %d %d", name, type, arg);
-        //Вычисление конца строки
-        line_end = furi_string_search_char(file, '\n', line_end + 1);
+        FURI_LOG_D(APP_NAME, "%s %s", name, type);
 
-        char args[] = {arg};
+        char* args = ((char*)(file_buf + line_end + offset));
         //Проверка типа датчика
-        if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
+        if(sizeof(name) <= 11) {
             Sensor* sensor =
-                unitemp_sensor_alloc(name, unitemp_sensors_getTypeFromInt(type), args);
+                unitemp_sensor_alloc(name, unitemp_sensors_getTypeFromStr(type), args);
             if(sensor != NULL) {
                 app->sensors[app->sensors_count++] = sensor;
+            } else {
+                FURI_LOG_E(APP_NAME, "Failed sensor (%s:%s) mem allocation", name, type);
             }
         } else {
-            FURI_LOG_E(APP_NAME, "Unsupported sensor name (%s) or sensor type (%d)", name, type);
+            FURI_LOG_E(APP_NAME, "Unsupported sensor name (%s) or sensor type (%s)", name, type);
         }
+        //Вычисление конца строки
+        line_end = furi_string_search_char(file, '\n', line_end + 1);
     }
 
     free(file_buf);
@@ -339,6 +354,7 @@ void unitemp_sensors_reload(void) {
 }
 
 Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
+    if(name == NULL || type == NULL) return NULL;
     bool status = false;
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));

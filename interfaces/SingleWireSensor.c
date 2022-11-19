@@ -51,6 +51,7 @@ const SensorType AM2320_SW = {
     .updater = unitemp_singlewire_update};
 
 bool unitemp_singlewire_alloc(Sensor* sensor, char* args) {
+    if(args == NULL) return false;
     SingleWireSensor* instance = malloc(sizeof(SingleWireSensor));
     if(instance == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
@@ -58,7 +59,10 @@ bool unitemp_singlewire_alloc(Sensor* sensor, char* args) {
     }
     sensor->instance = instance;
 
-    if(unitemp_singlewire_sensorSetGPIO(sensor, unitemp_gpio_getFromInt(args[0]))) {
+    int gpio;
+    sscanf(args, "%d", &gpio);
+
+    if(unitemp_singlewire_sensorSetGPIO(sensor, unitemp_gpio_getFromInt(gpio))) {
         return true;
     }
     FURI_LOG_E(APP_NAME, "Sensor %s GPIO setting error", sensor->name);

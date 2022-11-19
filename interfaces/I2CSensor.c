@@ -41,10 +41,12 @@ bool unitemp_I2C_sensor_alloc(Sensor* sensor, char* args) {
 
     //Указание функций инициализации, деинициализации и обновления данных, а так же адреса на шине I2C
     status = sensor->type->allocator(sensor, args);
+    int i2c_addr;
+    sscanf(args, "%d", &i2c_addr);
 
     //Установка адреса шины I2C
-    if(args[0] >= instance->minI2CAdr && args[0] <= instance->maxI2CAdr) {
-        instance->currentI2CAdr = args[0];
+    if(i2c_addr >= instance->minI2CAdr && i2c_addr <= instance->maxI2CAdr) {
+        instance->currentI2CAdr = i2c_addr;
     } else {
         instance->currentI2CAdr = instance->minI2CAdr;
     }
