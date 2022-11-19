@@ -13,7 +13,7 @@ int WorkTime = 0;
 int WorkCount = 0;
 bool InfiniteShot = false;
 bool Bulb = false;
-bool Backlight = true;
+int Backlight = 0;
 
 const NotificationSequence sequence_click = {
     &message_note_c7,
@@ -50,8 +50,20 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 	canvas_draw_str(canvas, 3, 15, temp_str);
 	snprintf(temp_str,sizeof(temp_str),"Left: %i frames, %i sec",WorkCount,WorkTime);
 	canvas_draw_str(canvas, 3, 35, temp_str);
-	snprintf(temp_str,sizeof(temp_str),"Backlight: %i",Backlight);
-	canvas_draw_str(canvas, 3, 55, temp_str);	
+	//snprintf(temp_str,sizeof(temp_str),"Backlight: %i",Backlight);
+	//canvas_draw_str(canvas, 3, 55, temp_str);	
+
+    switch (Backlight) {
+	case 1:
+		canvas_draw_str(canvas, 3, 55, "Backlight: ON");
+		break;
+	case 2:
+		canvas_draw_str(canvas, 3, 55, "Backlight: OFF");
+		break;
+	default:
+		canvas_draw_str(canvas, 3, 55, "Backlight: AUTO");
+	}
+
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
@@ -213,13 +225,18 @@ int32_t zeitraffer_app(void* p) {
 						notification_message(notifications, &sequence_click);
 						gpio_item_set_all_pins(false);
 						furi_timer_stop(timer);
+						notification_message(notifications, &sequence_display_backlight_enforce_auto);
 						break;
 					}
 				}
 				if(event.input.key == InputKeyOk) {
-					Backlight = !Backlight; // Нам ваша подсветка и нахой не нужна! Или нужна.
-				}
+					// Нам ваша подсветка и нахой не нужна! Или нужна?
+					Backlight++;
+					if (Backlight > 2) Backlight = 0;
+					}
+
 			}
+
 			if(event.input.type == InputTypeRepeat) { // Зажатые кнопки
 				if(event.input.key == InputKeyRight) {
 					if(furi_timer_is_running(timer)) {
@@ -260,47 +277,55 @@ int32_t zeitraffer_app(void* p) {
 		else if(event.type == EventTypeTick) {
             
 			WorkTime--;
-			// Отправляем нотификацию мигания синим светодиодом
-			notification_message(notifications, &sequence_blink_blue_100);
 			
-			if (Backlight) { // чо по подсветке?
-				notification_message(notifications, &sequence_display_backlight_on);
-			}
-			else {
-				notification_message(notifications, &sequence_display_backlight_off);
-			}
-            
 			if( WorkTime < 1 ) { // фоткаем
-				
+				notification_message(notifications, &sequence_blink_white_100);
 				if (Bulb) {
 					gpio_item_set_all_pins(false); WorkCount = 0;
-					}
+				}
 				else {
-				WorkCount--;
-				view_port_update(view_port);
-				notification_message(notifications, &sequence_click);
-				// Дрыгаем ногами
-				//gpio_item_set_all_pins(true);
-				gpio_item_set_pin(4, true);
-				gpio_item_set_pin(5, true);
-				furi_delay_ms(400); // На короткие нажатия фотик плохо реагирует
-				gpio_item_set_pin(4, false);
-				gpio_item_set_pin(5, false);
-				//gpio_item_set_all_pins(false);
+					WorkCount--;
+					view_port_update(view_port);
+					notification_message(notifications, &sequence_click);
+					// Дрыгаем ногами
+					//gpio_item_set_all_pins(true);
+					gpio_item_set_pin(4, true);
+					gpio_item_set_pin(5, true);
+					furi_delay_ms(400); // На короткие нажатия фотик плохо реагирует
+					gpio_item_set_pin(4, false);
+					gpio_item_set_pin(5, false);
+					//gpio_item_set_all_pins(false);
 
-				if (InfiniteShot) WorkCount++;
+					if (InfiniteShot) WorkCount++;
 				
-				WorkTime = Time;
-				view_port_update(view_port);
+					WorkTime = Time;
+					view_port_update(view_port);
 				}
-				}
+			}
+			else {
+				// Отправляем нотификацию мигания синим светодиодом
+				notification_message(notifications, &sequence_blink_blue_100);
+			}
+			
 			if( WorkCount < 1 ) { // закончили
 				gpio_item_set_all_pins(false);
 				furi_timer_stop(timer); 
 				notification_message(notifications, &sequence_audiovisual_alert);
 				WorkTime = 3;
 				WorkCount = 0;
-				}
+			}
+			
+			switch (Backlight) { // чо по подсветке?
+				case 1:
+					notification_message(notifications, &sequence_display_backlight_on);
+					break;
+				case 2: 
+					notification_message(notifications, &sequence_display_backlight_off);
+					break;
+				default:
+					notification_message(notifications, &sequence_display_backlight_enforce_auto);
+			}
+			
         }
 		if (Time < 1) Time = 1; // Не даём открутить таймер меньше единицы
 		if (Count < -1) Count = 0; // А тут даём, бо 0 кадров это бесконечная съёмка, а -1 кадров - BULB
