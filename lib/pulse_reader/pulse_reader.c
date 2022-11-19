@@ -33,8 +33,8 @@
 
 
 PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size) {
-    PulseReader* signal = malloc(sizeof(PulseReader));
 
+    PulseReader* signal = malloc(sizeof(PulseReader));
     signal->timer_buffer = malloc(size * sizeof(uint32_t));
     signal->dma_channel = LL_DMA_CHANNEL_4;
     signal->gpio = gpio;
@@ -42,14 +42,31 @@ PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size) {
     signal->timer_value = 0;
     signal->pos = 0;
 
-    signal->unit = PulseReaderUnitPicosecond;
-    signal->bit_time = 1;
+    pulse_reader_set_timebase(signal, PulseReaderUnit64MHz);
+    pulse_reader_set_bittime(signal, 1);
 
     return signal;
 }
 
 void pulse_reader_set_timebase(PulseReader* signal, PulseReaderUnit unit) {
-    signal->unit = unit;
+    switch(unit) {
+        case PulseReaderUnit64MHz:
+            signal->unit_multiplier = 1;
+            signal->unit_divider = 1;
+            break;
+        case PulseReaderUnitPicosecond:
+            signal->unit_multiplier = 15625;
+            signal->unit_divider = 1;
+            break;
+        case PulseReaderUnitNanosecond:
+            signal->unit_multiplier = 15625;
+            signal->unit_divider = 1000;
+            break;
+        case PulseReaderUnitMicrosecond:
+            signal->unit_multiplier = 15625;
+            signal->unit_divider = 1000000;
+            break;
+    }
 }
 
 void pulse_reader_set_bittime(PulseReader* signal, uint32_t bit_time) {
@@ -127,7 +144,7 @@ void pulse_reader_start(PulseReader* signal) {
 uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
 
     uint32_t start_time = DWT->CYCCNT;
-    uint32_t timeout_ticks = timeout_us * (F_CPU/1000000);
+    uint32_t timeout_ticks = timeout_us * (F_TIM2/1000000);
 
     do {
         /* get the DMA's next write position by reading "remaining length" register */
@@ -142,10 +159,21 @@ uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
             signal->pos++;
             signal->pos %= signal->size;
             
-            uint32_t delta_unit = delta * signal->unit;
-            uint32_t bits = (delta_unit + signal->bit_time / 2) / signal->bit_time;
+            uint32_t delta_unit = 0;
 
-            return bits;
+            /* probably larger values, so choose a wider data type */
+            if(signal->unit_divider > 1) {
+                delta_unit = (uint32_t)((uint64_t)delta * (uint64_t)signal->unit_multiplier / signal->unit_divider);
+            } else {
+                delta_unit = delta * signal->unit_multiplier;
+            }
+
+            /* if to be scaled to bit times, save a few instructions. should be faster */
+            if(signal->bit_time > 1) {
+                return (delta_unit + signal->bit_time / 2) / signal->bit_time;
+            }
+
+            return delta_unit;
         }
 
         /* check for timeout */

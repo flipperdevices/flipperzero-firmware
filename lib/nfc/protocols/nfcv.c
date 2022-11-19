@@ -150,10 +150,6 @@ bool nfcv_read_card(
 
 /* emulation part */
 
-#define F_SC                13560000 /* MHz */
-#define PULSE_DURATION_PS  (128*1000000000000/F_SC) /* ps */
-
-
 PulseReader *reader_signal = NULL;
 
 DigitalSignal* nfcv_resp_pulse_32 = NULL;
@@ -372,9 +368,9 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     uint8_t *address = &payload[address_offset];
 
     if(addressed && nfcv_uidcmp(address, nfc_data->uid)) {
-        printf("addressed packet, but not for us:\r\n");
-        printf(" destination: %02X%02X%02X%02X%02X%02X%02X%02X\r\n", address[7], address[6], address[5], address[4], address[3], address[2], address[1], address[0]);
-        printf(" our UID:     %02X%02X%02X%02X%02X%02X%02X%02X\r\n", nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
+        FURI_LOG_D(TAG, "addressed command 0x%02X, but not for us:", command);
+        FURI_LOG_D(TAG, "  dest:     %02X%02X%02X%02X%02X%02X%02X%02X", address[7], address[6], address[5], address[4], address[3], address[2], address[1], address[0]);
+        FURI_LOG_D(TAG, "  our UID:  %02X%02X%02X%02X%02X%02X%02X%02X", nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
         return;
     }
 
@@ -400,7 +396,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
         case ISO15693_INVENTORY:
         {
             response_buffer[0] = ISO15693_NOERROR;
-            response_buffer[1] = nfcv_data->dsfid; /* DSFID */
+            response_buffer[1] = nfcv_data->dsfid;
             nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
 
             nfcv_emu_send(response_buffer, 10);
@@ -491,15 +487,18 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
 
         case ISO15693_CMD_NXP_GET_RANDOM_NUMBER:
         {
-            nfcv_data->sub_data.slix_l.rand[0] = 0x00;
-            nfcv_data->sub_data.slix_l.rand[1] = 0x00;
+            nfcv_data->sub_data.slix_l.rand[0] = furi_hal_random_get();
+            nfcv_data->sub_data.slix_l.rand[1] = furi_hal_random_get();
 
             response_buffer[0] = ISO15693_NOERROR;
             response_buffer[1] = nfcv_data->sub_data.slix_l.rand[1];
             response_buffer[2] = nfcv_data->sub_data.slix_l.rand[0];
 
             nfcv_emu_send(response_buffer, 3);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "GET_RANDOM_NUMBER");
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
+                "GET_RANDOM_NUMBER -> 0x%02X%02X", 
+                nfcv_data->sub_data.slix_l.rand[0], 
+                nfcv_data->sub_data.slix_l.rand[1]);
             break;
         }
 
@@ -535,14 +534,15 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             if(pass_expect == pass_received) {
                 status = ISO15693_NOERROR;
                 nfcv_data->sub_data.slix_l.privacy = false;
+                FURI_LOG_D(TAG, "SET_PASSWORD #%d received correct password 0x%08lX", password_id, pass_received);
             } else {
-                FURI_LOG_D(TAG, "Password #%d mismatch. Expected 0x%08lX, got 0x%08lX", password_id, pass_expect, pass_received);
+                FURI_LOG_D(TAG, "SET_PASSWORD #%d mismatch. Expected password 0x%08lX, got 0x%08lX", password_id, pass_expect, pass_received);
             }
 
             response_buffer[0] = status;
 
             nfcv_emu_send(response_buffer, 1);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X", password_id);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X %s", password_id, (status == ISO15693_NOERROR) ? "SUCCESS" : "FAIL");
 
             break;
         }
@@ -561,6 +561,10 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
         default:
             snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "unsupported: %02X", command);
             break;
+    }
+
+    if(strlen(nfcv_data->last_command) > 0) {
+        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);        
     }
 }
 
@@ -586,10 +590,10 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
 
     /* allocate a 512 edge buffer, more than enough */
     reader_signal = pulse_reader_alloc(&gpio_spi_r_miso, 512);
-    /* timebase shall be 1ps */
-    pulse_reader_set_timebase(reader_signal, PulseReaderUnitPicosecond);
+    /* timebase shall be 1 ns */
+    pulse_reader_set_timebase(reader_signal, PulseReaderUnitNanosecond);
     /* and configure to already calculate the number of bits */
-    pulse_reader_set_bittime(reader_signal, PULSE_DURATION_PS);
+    pulse_reader_set_bittime(reader_signal, PULSE_DURATION_NS);
     pulse_reader_start(reader_signal);
 }
 
@@ -651,7 +655,7 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
                     periods_previous = 2;
                     wait_for_pulse = true;
                 } else {
-                    //snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 4/6 periods, got %lu", periods);
+                    snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 4/6 periods, got %lu", periods);
                     frame_state = NFCV_FRAME_STATE_SOF1;
                 }
                 break;

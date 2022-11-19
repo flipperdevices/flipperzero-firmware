@@ -11,14 +11,16 @@ extern "C" {
 #endif
 
 #define PULSE_READER_NO_EDGE 0xFFFFFFFFUL
-#define F_CPU                64000000UL
+#define F_TIM2                 64000000UL
 
 /**
  * unit of the edge durations to return
  */
 typedef enum {
-    PulseReaderUnit64MHz = 1,
-    PulseReaderUnitPicosecond = 15625
+    PulseReaderUnit64MHz,
+    PulseReaderUnitPicosecond,
+    PulseReaderUnitNanosecond,
+    PulseReaderUnitMicrosecond,
 } PulseReaderUnit;
 
 
@@ -28,7 +30,8 @@ typedef struct {
     uint32_t size;
     uint32_t pos;
     uint32_t timer_value;
-    PulseReaderUnit unit;
+    uint32_t unit_multiplier;
+    uint32_t unit_divider;
     uint32_t bit_time;
     uint32_t dma_channel;
     const GpioPin* gpio;

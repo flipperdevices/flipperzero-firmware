@@ -9,16 +9,20 @@
 #include <furi_hal_nfc.h>
 
 
-#define NFCV_FC                      (13560000.0f)
+
+
+#define NFCV_FC                      (13560000.0f) /* MHz */
 #define NFCV_RESP_SUBC1_PULSE_32     (1.0f / (NFCV_FC/32) / 2.0f) /*  1.1799 µs */
 #define NFCV_RESP_SUBC1_UNMOD_256    (256.0f / NFCV_FC)           /* 18.8791 µs */
+
+#define PULSE_DURATION_NS            (128.0f * 1000000000.0f / NFCV_FC) /* ns */
 
 #define DIGITAL_SIGNAL_UNIT_S        (100000000000.0f)
 #define DIGITAL_SIGNAL_UNIT_US       (100000.0f)
 
-#define NFCV_TOTAL_BLOCKS_MAX 256
-#define NFCV_BLOCK_SIZE 4
-#define NFCV_MAX_DUMP_SIZE (NFCV_BLOCK_SIZE*NFCV_TOTAL_BLOCKS_MAX)
+#define NFCV_TOTAL_BLOCKS_MAX        256
+#define NFCV_BLOCK_SIZE              4
+#define NFCV_MAX_DUMP_SIZE           (NFCV_BLOCK_SIZE*NFCV_TOTAL_BLOCKS_MAX)
 
 
 #define NFCV_FRAME_STATE_SOF1        0
