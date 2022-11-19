@@ -9,7 +9,7 @@
  * FEDCBA98 76543210
  * nnnnnnee eedddddd
  * -------- --------
- * nnnnnn            = [0] do nothing, [1..60] note number, [61] note kill, [62..63] not used
+ * nnnnnn            = [0] do nothing, [1..60] note number, [61] note off, [62..63] not used
  *       ee ee       = [0..F] effect 
  *            111222 = [0..63] or [0..7, 0..7] effect data 
  */
@@ -76,9 +76,11 @@ typedef uint16_t NoteRecord;
 #define NOTE_A6 58
 #define NOTE_As6 59
 #define NOTE_B6 60
-#define NOTE_KILL 63
+#define NOTE_OFF 63
 
-#define EFFECT_ARPEGGIO 0
+#define EFFECT_ARPEGGIO 0x00
+#define EFFECT_SLIDE_UP 0x01
+#define EFFECT_SLIDE_DOWN 0x02
 
 #define EFFECT_DATA_NONE 0
 
@@ -150,17 +152,17 @@ NoteRow _row = {
             RECORD_MAKE(NOTE_E4, 0, 0),
             RECORD_MAKE(NOTE_C3, 0, 0),
             RECORD_MAKE(NOTE_E4, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_E5, 0, 0),
             RECORD_MAKE(NOTE_E5, 0, 0),
             RECORD_MAKE(NOTE_E5, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_D5, 0, 0),
             RECORD_MAKE(NOTE_C3, 0, 0),
@@ -170,7 +172,7 @@ NoteRow _row = {
             RECORD_MAKE(NOTE_C5, 0, 0),
             RECORD_MAKE(NOTE_C3, 0, 0),
             RECORD_MAKE(NOTE_C5, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(0, 0, 0),
@@ -180,7 +182,7 @@ NoteRow _row = {
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_B4, 0, 0),
             RECORD_MAKE(NOTE_D3, 0, 0),
@@ -190,17 +192,17 @@ NoteRow _row = {
             RECORD_MAKE(NOTE_E4, 0, 0),
             RECORD_MAKE(NOTE_D3, 0, 0),
             RECORD_MAKE(NOTE_E4, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_E5, 0, 0),
             RECORD_MAKE(NOTE_E5, 0, 0),
             RECORD_MAKE(NOTE_E5, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_D5, 0, 0),
             RECORD_MAKE(NOTE_D3, 0, 0),
@@ -210,7 +212,7 @@ NoteRow _row = {
             RECORD_MAKE(NOTE_C5, 0, 0),
             RECORD_MAKE(NOTE_D3, 0, 0),
             RECORD_MAKE(NOTE_C5, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(0, 0, 0),
@@ -220,7 +222,7 @@ NoteRow _row = {
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
             RECORD_MAKE(NOTE_A4, 0, 0),
-            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
         },
 };
 
@@ -228,80 +230,80 @@ NoteRow row = {
     .notes =
         {
             //
-            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            //
-            RECORD_MAKE(NOTE_KILL, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_C4, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            //
-            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            //
-            RECORD_MAKE(NOTE_KILL, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_C4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            //
-            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            //
-            RECORD_MAKE(NOTE_KILL, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_C4, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            //
-            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
-            //
-            RECORD_MAKE(NOTE_KILL, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_C4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_C4, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_D4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_C4, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(0, EFFECT_SLIDE_DOWN, 0x3F),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_A3, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
@@ -324,15 +326,20 @@ void tracker_interrupt_body() {
 
     // load frequency from note at tick 0
     if(tick_counter == 0) {
-        if(note == NOTE_KILL) {
+        if(note == NOTE_OFF) {
             note_play = false;
-        } else if((note > 0) && (note < NOTE_KILL)) {
+        } else if((note > 0) && (note < NOTE_OFF)) {
             note_play = true;
             note_frequency = note_to_freq(note);
         }
     }
 
     if(note_play) {
+        if((effect == EFFECT_SLIDE_UP || effect == EFFECT_SLIDE_DOWN) &&
+           data != EFFECT_DATA_NONE) {
+            note_frequency += (effect == EFFECT_SLIDE_UP ? 1 : -1) * data;
+        }
+
         float frequency = note_frequency;
 
         // apply arpeggio effect
