@@ -7,7 +7,7 @@ It supports short press and long press input for different ir remote buttons. Te
 
 ## How to install
 
-1. Update unleashed firmware to the version unlshd-015, then download the `ir_remote.fap` from release
+1. Update unleashed firmware to the version unlshd-015, then download the `ir_remote.fap` from [releases](https://github.com/Hong5489/ir_remote/tags)
 
 2. Put the `ir_remote.fap` file in your flipper's SD card, under `apps` folder
 
