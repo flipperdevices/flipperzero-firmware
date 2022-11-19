@@ -83,6 +83,7 @@ typedef enum {
     EffectSlideUp = 0x01,
     EffectSlideDown = 0x02,
     EffectSlideToNote = 0x03,
+    EffectVibrato = 0x04,
 } Effect;
 
 #define EFFECT_DATA_NONE 0
@@ -145,7 +146,7 @@ typedef struct {
     NoteRow* rows;
 } NotePattern;
 
-NoteRow row = {
+NoteRow _row = {
     .notes =
         {
             //
@@ -233,89 +234,89 @@ NoteRow row = {
 
 const uint8_t test = 0x3F;
 
-NoteRow _row = {
+NoteRow row = {
     .notes =
         {
             //
             RECORD_MAKE(NOTE_C3, 0, 0),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            //
-            RECORD_MAKE(NOTE_C4, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(NOTE_C3, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
-            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(0, EffectSlideUp, 0x15),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            //
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
         },
 };
 
@@ -324,9 +325,17 @@ uint8_t tick_limit = 2;
 uint8_t row_counter = 0;
 
 typedef struct {
+    uint8_t speed;
+    uint8_t depth;
+    int8_t direction;
+    int8_t value;
+} Vibrato;
+
+typedef struct {
     float frequency;
     float frequency_target;
     bool play;
+    Vibrato vibrato;
 } ChannelState;
 
 ChannelState ch_state = {
@@ -347,6 +356,11 @@ void tracker_interrupt_body() {
         } else if((note > NOTE_NONE) && (note < NOTE_OFF)) {
             ch_state.play = true;
 
+            ch_state.vibrato.speed = 0;
+            ch_state.vibrato.depth = 0;
+            ch_state.vibrato.value = 0;
+            ch_state.vibrato.direction = 1;
+
             if(effect == EffectSlideToNote) {
                 ch_state.frequency_target = note_to_freq(note);
             } else {
@@ -357,6 +371,8 @@ void tracker_interrupt_body() {
     }
 
     if(ch_state.play) {
+        float frequency;
+
         if((effect == EffectSlideUp || effect == EffectSlideDown) && data != EFFECT_DATA_NONE) {
             // apply slide effect
             ch_state.frequency += (effect == EffectSlideUp ? 1 : -1) * data;
@@ -379,7 +395,7 @@ void tracker_interrupt_body() {
             }
         }
 
-        float frequency = ch_state.frequency;
+        frequency = ch_state.frequency;
 
         // apply arpeggio effect
         if(effect == EffectArpeggio && data != EFFECT_DATA_NONE) {
@@ -390,6 +406,22 @@ void tracker_interrupt_body() {
                 uint8_t note_offset = (data >> 3) & 0b000111;
                 frequency = frequency_offset(frequency, note_offset);
             }
+        } else if(effect == EffectVibrato) {
+            // apply vibrato effect, data = speed, depth
+            uint8_t vibrato_speed = data & 0b000111;
+            uint8_t vibrato_depth = (data >> 3) & 0b000111;
+
+            if(vibrato_speed != 0) ch_state.vibrato.speed = vibrato_speed;
+            if(vibrato_depth != 0) ch_state.vibrato.depth = vibrato_depth;
+
+            ch_state.vibrato.value += ch_state.vibrato.direction * ch_state.vibrato.speed;
+            if(ch_state.vibrato.value > ch_state.vibrato.depth) {
+                ch_state.vibrato.direction = -1;
+            } else if(ch_state.vibrato.value < -ch_state.vibrato.depth) {
+                ch_state.vibrato.direction = 1;
+            }
+
+            frequency = frequency * (1.0f + (((1.0f / 12.0f) / 7.0f) * ch_state.vibrato.value));
         }
 
         tracker_speaker_play(frequency, 0.5f);
