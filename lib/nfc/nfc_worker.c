@@ -1031,8 +1031,7 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
         if(furi_hal_nfc_detect(nfc_data, 300) && nfc_data->type == FuriHalNfcTypeA) {
             if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
                 nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
-                if(data->auth_method == MfUltralightAuthMethodManual ||
-                   data->auth_method == MfUltralightAuthMethodAuto) {
+                if(data->auth_method == MfUltralightAuthMethodManual) {
                     nfc_worker->callback(NfcWorkerEventMfUltralightPassKey, nfc_worker->context);
                     key = nfc_util_bytes2num(data->auth_key, 4);
                 } else if(data->auth_method == MfUltralightAuthMethodAmeebo) {

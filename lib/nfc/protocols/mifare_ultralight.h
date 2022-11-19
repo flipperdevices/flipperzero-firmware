@@ -34,7 +34,6 @@ typedef enum {
     MfUltralightAuthMethodManual,
     MfUltralightAuthMethodAmeebo,
     MfUltralightAuthMethodXiaomi,
-    MfUltralightAuthMethodAuto,
 } MfUltralightAuthMethod;
 
 // Important: order matters; some features are based on positioning in this enum
