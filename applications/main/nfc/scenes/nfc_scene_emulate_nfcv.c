@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-#define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (200)
+#define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (100)
 
 enum {
     NfcSceneEmulateNfcVStateWidget,
@@ -95,11 +95,17 @@ bool nfc_scene_emulate_nfcv_on_event(void* context, SceneManagerEvent event) {
             if(!furi_string_size(nfc->text_box_store)) {
                 nfc_scene_emulate_nfcv_widget_config(nfc, true);
             }
-            // Update TextBox data
-            if(furi_string_size(nfc->text_box_store) < NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX) {
+            if(strlen(nfcv_data->last_command) > 0) {
+                /* use the last n bytes from the log so there's enough space for the new log entry */
+                size_t maxSize = NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX - (strlen(nfcv_data->last_command) + 3);
+                if(furi_string_size(nfc->text_box_store) >= maxSize) {
+                    furi_string_right(nfc->text_box_store, maxSize);
+                }
                 furi_string_cat_printf(nfc->text_box_store, "%s", nfcv_data->last_command);
                 furi_string_push_back(nfc->text_box_store, '\n');
                 text_box_set_text(nfc->text_box, furi_string_get_cstr(nfc->text_box_store));
+
+                /* clear previously logged command */
                 strcpy(nfcv_data->last_command, "");
             }
             consumed = true;
