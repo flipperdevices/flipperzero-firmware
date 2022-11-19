@@ -97,9 +97,9 @@ bool nfc_scene_emulate_nfcv_on_event(void* context, SceneManagerEvent event) {
             }
             if(strlen(nfcv_data->last_command) > 0) {
                 /* use the last n bytes from the log so there's enough space for the new log entry */
-                size_t maxSize = NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX - (strlen(nfcv_data->last_command) + 3);
+                size_t maxSize = NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX - (strlen(nfcv_data->last_command) + 1);
                 if(furi_string_size(nfc->text_box_store) >= maxSize) {
-                    furi_string_right(nfc->text_box_store, maxSize);
+                    furi_string_right(nfc->text_box_store, (strlen(nfcv_data->last_command) + 1));
                 }
                 furi_string_cat_printf(nfc->text_box_store, "%s", nfcv_data->last_command);
                 furi_string_push_back(nfc->text_box_store, '\n');
