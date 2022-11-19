@@ -398,13 +398,15 @@ void tracker_interrupt_body() {
         frequency = ch_state.frequency;
 
         // apply arpeggio effect
-        if(effect == EffectArpeggio && data != EFFECT_DATA_NONE) {
-            if((tick_counter % 3) == 1) {
-                uint8_t note_offset = data & 0b000111;
-                frequency = frequency_offset(frequency, note_offset);
-            } else if((tick_counter % 3) == 2) {
-                uint8_t note_offset = (data >> 3) & 0b000111;
-                frequency = frequency_offset(frequency, note_offset);
+        if(effect == EffectArpeggio) {
+            if(data != EFFECT_DATA_NONE) {
+                if((tick_counter % 3) == 1) {
+                    uint8_t note_offset = data & 0b000111;
+                    frequency = frequency_offset(frequency, note_offset);
+                } else if((tick_counter % 3) == 2) {
+                    uint8_t note_offset = (data >> 3) & 0b000111;
+                    frequency = frequency_offset(frequency, note_offset);
+                }
             }
         } else if(effect == EffectVibrato) {
             // apply vibrato effect, data = speed, depth
