@@ -30,6 +30,7 @@ Thank you to all the supporters!
 - Added: [Blocking USB driver API #2009 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2009)
 - Added: [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
 - Added: [Core: thread allocation shortcut #2007 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2007)
+- Added: [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -252,3 +253,4 @@ $ ./fbt resources icons dolphin_ext
 - [Blocking USB driver API #2009 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2009)
 - [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
 - [Core: thread allocation shortcut #2007 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2007)
+- [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
