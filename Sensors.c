@@ -1,5 +1,6 @@
 #include "Sensors.h"
 #include <furi_hal_power.h>
+#include <m-string.h>
 
 //Порты ввода/вывода, которые не были обозначены в общем списке
 const GpioPin SWC_10 = {.pin = LL_GPIO_PIN_14, .port = GPIOA};
@@ -178,7 +179,7 @@ const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t inde
     return NULL;
 }
 
-bool unitemp_sensors_load() {
+bool unitemp_sensors_load(void) {
     FURI_LOG_D(APP_NAME, "Loading sensors...");
     app->sensors_count = 0;
     memset(app->sensors, 0, sizeof(app->sensors));
@@ -187,14 +188,13 @@ bool unitemp_sensors_load() {
     app->file_stream = file_stream_alloc(app->storage);
 
     //Переменная пути к файлу
-    char filepath[sizeof(APP_PATH_FOLDER) + sizeof(APP_FILENAME_SENSORS)] = {0};
+    FuriString* filepath = furi_string_alloc();
     //Составление пути к файлу
-    strcpy(filepath, APP_PATH_FOLDER);
-    strcat(filepath, "/");
-    strcat(filepath, APP_FILENAME_SENSORS);
+    furi_string_printf(filepath, "%s/%s", APP_PATH_FOLDER, APP_FILENAME_SENSORS);
 
     //Открытие потока к файлу с датчиками
-    if(!file_stream_open(app->file_stream, filepath, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+    if(!file_stream_open(
+           app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
         if(file_stream_get_error(app->file_stream) == FSE_NOT_EXIST) {
             FURI_LOG_W(APP_NAME, "Missing sensors file");
             //Закрытие потока и освобождение памяти
@@ -239,15 +239,23 @@ bool unitemp_sensors_load() {
         return false;
     }
 
-    //Построчное чтение файла
-    char* line = strtok((char*)file_buf, "\n");
-    while(line != NULL) {
+    //Указатель на начало строки
+    FuriString* file = furi_string_alloc_set_str((char*)file_buf);
+    //Сколько байт до конца строки
+    size_t line_end = 0;
+
+    while(line_end != STRING_FAILURE) {
+        //Имя датчика
         char name[11] = {0};
+        //Переменные для типа датчика и его аргументов
         int type = 255, arg = 255;
-        sscanf(line, "%s %d %d", name, &type, &arg);
+        //Чтение из строки
+        sscanf(((char*)(file_buf + line_end)), "%s %d %d", name, &type, &arg);
         //Ограничение длины имени
         name[10] = '\0';
         FURI_LOG_D(APP_NAME, "%s %d %d", name, type, arg);
+        //Вычисление конца строки
+        line_end = furi_string_search_char(file, '\n', line_end + 1);
 
         char args[] = {arg};
         //Проверка типа датчика
@@ -260,7 +268,6 @@ bool unitemp_sensors_load() {
         } else {
             FURI_LOG_E(APP_NAME, "Unsupported sensor name (%s) or sensor type (%d)", name, type);
         }
-        line = strtok((char*)NULL, "\n");
     }
 
     free(file_buf);
@@ -278,15 +285,14 @@ bool unitemp_sensors_save(void) {
     app->file_stream = file_stream_alloc(app->storage);
 
     //Переменная пути к файлу
-    char filepath[sizeof(APP_PATH_FOLDER) + sizeof(APP_FILENAME_SENSORS)] = {0};
+    FuriString* filepath = furi_string_alloc();
     //Составление пути к файлу
-    strcpy(filepath, APP_PATH_FOLDER);
-    strcat(filepath, "/");
-    strcat(filepath, APP_FILENAME_SENSORS);
+    furi_string_printf(filepath, "%s/%s", APP_PATH_FOLDER, APP_FILENAME_SENSORS);
     //Создание папки плагина
     storage_common_mkdir(app->storage, APP_PATH_FOLDER);
     //Открытие потока
-    if(!file_stream_open(app->file_stream, filepath, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(!file_stream_open(
+           app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
         FURI_LOG_E(
             APP_NAME,
             "An error occurred while saving the sensors file: %d",

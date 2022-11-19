@@ -4,8 +4,9 @@
 #include "./views/UnitempViews.h"
 
 #include <furi_hal_power.h>
+#include <m-string.h>
 
-/* Статические переменные */
+/* Переменные */
 //Данные приложения
 Unitemp* app;
 
@@ -14,21 +15,18 @@ void uintemp_celsiumToFarengate(Sensor* sensor) {
 }
 
 bool unitemp_saveSettings(void) {
-    FURI_LOG_D(APP_NAME, "Saving settings...\r\n");
-
     //Выделение памяти для потока
     app->file_stream = file_stream_alloc(app->storage);
 
     //Переменная пути к файлу
-    char filepath[sizeof(APP_PATH_FOLDER) + sizeof(APP_FILENAME_SETTINGS)] = {0};
+    FuriString* filepath = furi_string_alloc();
     //Составление пути к файлу
-    strcpy(filepath, APP_PATH_FOLDER);
-    strcat(filepath, "/");
-    strcat(filepath, APP_FILENAME_SETTINGS);
+    furi_string_printf(filepath, "%s/%s", APP_PATH_FOLDER, APP_FILENAME_SETTINGS);
     //Создание папки плагина
     storage_common_mkdir(app->storage, APP_PATH_FOLDER);
     //Открытие потока
-    if(!file_stream_open(app->file_stream, filepath, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+    if(!file_stream_open(
+           app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
         FURI_LOG_E(
             APP_NAME,
             "An error occurred while saving the settings file: %d\r\n",
@@ -58,14 +56,13 @@ bool unitemp_loadSettings(void) {
     app->file_stream = file_stream_alloc(app->storage);
 
     //Переменная пути к файлу
-    char filepath[sizeof(APP_PATH_FOLDER) + sizeof(APP_FILENAME_SETTINGS)] = {0};
+    FuriString* filepath = furi_string_alloc();
     //Составление пути к файлу
-    strcpy(filepath, APP_PATH_FOLDER);
-    strcat(filepath, "/");
-    strcat(filepath, APP_FILENAME_SETTINGS);
+    furi_string_printf(filepath, "%s/%s", APP_PATH_FOLDER, APP_FILENAME_SETTINGS);
 
     //Открытие потока к файлу настроек
-    if(!file_stream_open(app->file_stream, filepath, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+    if(!file_stream_open(
+           app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
         //Сохранение настроек по умолчанию в случае отсутствия файла
         if(file_stream_get_error(app->file_stream) == FSE_NOT_EXIST) {
             FURI_LOG_W(APP_NAME, "Missing settings file. Setting defaults and saving...\r\n");
@@ -115,15 +112,19 @@ bool unitemp_loadSettings(void) {
         return false;
     }
     //Построчное чтение файла
-    char* line = strtok((char*)file_buf, "\n");
-    while(line != NULL) {
-        char buff[20];
-        sscanf(line, "%s", buff);
+    //Указатель на начало строки
+    FuriString* file = furi_string_alloc_set_str((char*)file_buf);
+    //Сколько байт до конца строки
+    size_t line_end = 0;
+
+    while(line_end != STRING_FAILURE) {
+        char buff[20] = {0};
+        sscanf(((char*)(file_buf + line_end)), "%s", buff);
 
         if(!strcmp(buff, "INFINITY_BACKLIGHT")) {
             //Чтение значения параметра
             int p = 0;
-            sscanf(line, "INFINITY_BACKLIGHT %d", &p);
+            sscanf(((char*)(file_buf + line_end)), "INFINITY_BACKLIGHT %d", &p);
             if(p == 0) {
                 app->settings.infinityBacklight = false;
             } else {
@@ -132,7 +133,7 @@ bool unitemp_loadSettings(void) {
         } else if(!strcmp(buff, "UNIT")) {
             //Чтение значения параметра
             int p = 0;
-            sscanf(line, "UNIT %d", &p);
+            sscanf(((char*)(file_buf + line_end)), "\nUNIT %d", &p);
             if(p == CELSIUS) {
                 app->settings.unit = CELSIUS;
             } else {
@@ -142,7 +143,8 @@ bool unitemp_loadSettings(void) {
             FURI_LOG_W(APP_NAME, "Unknown settings parameter: %s\r\n", buff);
         }
 
-        line = strtok((char*)NULL, "\n");
+        //Вычисление конца строки
+        line_end = furi_string_search_char(file, '\n', line_end + 1);
     }
     free(file_buf);
     file_stream_close(app->file_stream);
