@@ -51,3 +51,5 @@ void dap_common_usb_set_state_callback(DapStateCallback callback);
 void dap_common_usb_alloc_name(const char* name);
 
 void dap_common_usb_free_name();
+
+void dap_common_wait_for_deinit();

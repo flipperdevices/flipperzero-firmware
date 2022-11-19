@@ -1,6 +1,6 @@
 #include "dialogs/dialogs_message.h"
 #include "dialogs_i.h"
-#include <toolbox/api_lock.h>
+#include "dialogs_api_lock.h"
 #include <assets_icons.h>
 
 /****************** File browser ******************/
@@ -10,7 +10,7 @@ bool dialog_file_browser_show(
     FuriString* result_path,
     FuriString* path,
     const DialogsFileBrowserOptions* options) {
-    FuriApiLock lock = api_lock_alloc_locked();
+    FuriApiLock lock = API_LOCK_INIT_LOCKED();
     furi_check(lock != NULL);
 
     DialogsAppData data = {
@@ -35,7 +35,7 @@ bool dialog_file_browser_show(
 
     furi_check(
         furi_message_queue_put(context->message_queue, &message, FuriWaitForever) == FuriStatusOk);
-    api_lock_wait_unlock_and_free(lock);
+    API_LOCK_WAIT_UNTIL_UNLOCK_AND_FREE(lock);
 
     return return_data.bool_value;
 }
@@ -43,7 +43,7 @@ bool dialog_file_browser_show(
 /****************** Message ******************/
 
 DialogMessageButton dialog_message_show(DialogsApp* context, const DialogMessage* dialog_message) {
-    FuriApiLock lock = api_lock_alloc_locked();
+    FuriApiLock lock = API_LOCK_INIT_LOCKED();
     furi_check(lock != NULL);
 
     DialogsAppData data = {
@@ -61,7 +61,7 @@ DialogMessageButton dialog_message_show(DialogsApp* context, const DialogMessage
 
     furi_check(
         furi_message_queue_put(context->message_queue, &message, FuriWaitForever) == FuriStatusOk);
-    api_lock_wait_unlock_and_free(lock);
+    API_LOCK_WAIT_UNTIL_UNLOCK_AND_FREE(lock);
 
     return return_data.dialog_value;
 }
