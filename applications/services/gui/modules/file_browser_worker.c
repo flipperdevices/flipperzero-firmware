@@ -371,7 +371,11 @@ BrowserWorker*
     browser->skip_assets = skip_assets;
     browser->path_next = furi_string_alloc_set(path);
 
-    browser->thread = furi_thread_alloc_ex("BrowserWorker", 2048, browser_worker, browser);
+    browser->thread = furi_thread_alloc();
+    furi_thread_set_name(browser->thread, "BrowserWorker");
+    furi_thread_set_stack_size(browser->thread, 2048);
+    furi_thread_set_context(browser->thread, browser);
+    furi_thread_set_callback(browser->thread, browser_worker);
     furi_thread_start(browser->thread);
 
     return browser;
