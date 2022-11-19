@@ -300,7 +300,9 @@ int32_t snake_game_app(void* p) {
     SnakeState* snake_state = malloc(sizeof(SnakeState));
     snake_state->isNewHighscore = false;
     snake_state->highscore = 0;
-    if(!snake_game_init_game_from_file(snake_state)) snake_game_init_game(snake_state);
+    if(!snake_game_init_game_from_file(snake_state)) {
+        snake_game_init_game(snake_state);
+    }
 
     ValueMutex state_mutex;
     if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
@@ -356,8 +358,9 @@ int32_t snake_game_app(void* p) {
                         }
                         break;
                     case InputKeyBack:
-                        if(snake_state->state == GameStateLife)
+                        if(snake_state->state == GameStateLife) {
                             snake_game_save_game_to_file(snake_state);
+                        }
                         processing = false;
                         break;
                     default:
@@ -375,7 +378,9 @@ int32_t snake_game_app(void* p) {
         release_mutex(&state_mutex, snake_state);
     }
 
-    if(snake_state->isNewHighscore) snake_game_save_score_to_file(snake_state->highscore);
+    if(snake_state->isNewHighscore) {
+        snake_game_save_score_to_file(snake_state->highscore);
+    }
     // Wait for all notifications to be played and return backlight to normal state
     notification_message_block(notification, &sequence_display_backlight_enforce_auto);
 
