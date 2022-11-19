@@ -1,9 +1,4 @@
 #include "Sensors.h"
-#include "./interfaces/SingleWireSensor.h"
-#include "./interfaces/I2CSensor.h"
-#include "./sensors/SensorsDriver.h"
-#include "./interfaces/OneWireSensor.h"
-
 #include <furi_hal_power.h>
 
 //Порты ввода/вывода, которые не были обозначены в общем списке
@@ -41,9 +36,9 @@ static const Interface* gpio_interfaces_list[GPIO_ITEMS] = {0};
 
 const Interface SINGLE_WIRE = {
     .name = "Single wire",
-    .allocator = unitemp_singleWire_alloc,
-    .mem_releaser = unitemp_singleWire_free,
-    .updater = unitemp_singleWire_update};
+    .allocator = unitemp_singlewire_alloc,
+    .mem_releaser = unitemp_singlewire_free,
+    .updater = unitemp_singlewire_update};
 const Interface I2C = {
     .name = "I2C",
     .allocator = unitemp_I2C_sensor_alloc,
@@ -51,9 +46,9 @@ const Interface I2C = {
     .updater = unitemp_I2C_sensor_update};
 const Interface ONE_WIRE = {
     .name = "One wire",
-    .allocator = unitemp_OneWire_sensor_alloc,
-    .mem_releaser = unitemp_OneWire_sensor_free,
-    .updater = unitemp_OneWire_sensor_update};
+    .allocator = unitemp_onewire_sensor_alloc,
+    .mem_releaser = unitemp_onewire_sensor_free,
+    .updater = unitemp_onewire_sensor_update};
 
 //Перечень интерфейсов подключения
 //static const Interface* interfaces[] = {&SINGLE_WIRE, &I2C, &ONE_WIRE};
@@ -61,15 +56,15 @@ const Interface ONE_WIRE = {
 static const SensorType* sensorTypes[] =
     {&DHT11, &DHT12_SW, &DHT21, &DHT22, &AM2320_SW, &LM75, &BMP280, &DS18x2x};
 
-const SensorType* unitemp_getTypeFromInt(int type) {
-    if(type > SENSOR_TYPES_COUNT) return NULL;
-    return sensorTypes[type];
+const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index) {
+    if(index > SENSOR_TYPES_COUNT) return NULL;
+    return sensorTypes[index];
 }
 
-uint8_t unitemp_getSensorsTypesCount(void) {
+uint8_t unitemp_sensors_getTypesCount(void) {
     return SENSOR_TYPES_COUNT;
 }
-const SensorType** unitemp_getSensorsTypes(void) {
+const SensorType** unitemp_sensors_getTypes(void) {
     return sensorTypes;
 }
 
@@ -81,7 +76,7 @@ int unitemp_getIntFromType(const SensorType* type) {
     }
     return 255;
 }
-const GPIO* unitemp_GPIO_getFromInt(uint8_t name) {
+const GPIO* unitemp_gpio_getFromInt(uint8_t name) {
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         if(GPIOList[i].num == name) {
             return &GPIOList[i];
@@ -94,10 +89,10 @@ const GPIO* unitemp_gpio_getFromIndex(uint8_t index) {
     return &GPIOList[index];
 }
 
-uint8_t unitemp_GPIO_toInt(const GpioPin* gpio) {
+uint8_t unitemp_gpio_toInt(const GPIO* gpio) {
     if(gpio == NULL) return 255;
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
-        if(GPIOList[i].pin->pin == gpio->pin && GPIOList[i].pin->port == gpio->port) {
+        if(GPIOList[i].pin->pin == gpio->pin->pin && GPIOList[i].pin->port == gpio->pin->port) {
             return GPIOList[i].num;
         }
     }
@@ -248,16 +243,17 @@ bool unitemp_sensors_load() {
     char* line = strtok((char*)file_buf, "\n");
     while(line != NULL) {
         char name[11] = {0};
-        int type = 255, otherValue = 255;
-        sscanf(line, "%s %d %d", name, &type, &otherValue);
+        int type = 255, arg = 255;
+        sscanf(line, "%s %d %d", name, &type, &arg);
         //Ограничение длины имени
         name[10] = '\0';
-        FURI_LOG_D(APP_NAME, "%s %d %d", name, type, otherValue);
+        FURI_LOG_D(APP_NAME, "%s %d %d", name, type, arg);
 
-        uint8_t otherValues[] = {otherValue};
+        char args[] = {arg};
         //Проверка типа датчика
         if(type < SENSOR_TYPES_COUNT && sizeof(name) <= 11) {
-            Sensor* sensor = unitemp_sensor_alloc(name, unitemp_getTypeFromInt(type), otherValues);
+            Sensor* sensor =
+                unitemp_sensor_alloc(name, unitemp_sensors_getTypeFromInt(type), args);
             if(sensor != NULL) {
                 app->sensors[app->sensors_count++] = sensor;
             }
@@ -309,7 +305,7 @@ bool unitemp_sensors_save(void) {
                 "%s %d %d\n",
                 app->sensors[i]->name,
                 unitemp_getIntFromType(app->sensors[i]->type),
-                unitemp_GPIO_toInt(unitemp_singleWire_sensorGetGPIO(app->sensors[i])->pin));
+                unitemp_gpio_toInt(unitemp_singlewire_sensorGetGPIO(app->sensors[i])));
         }
         if(app->sensors[i]->type->interface == &I2C) {
             stream_write_format(
@@ -336,7 +332,7 @@ void unitemp_sensors_reload(void) {
     unitemp_sensors_init();
 }
 
-Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anotherValues) {
+Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
     bool status = false;
     //Выделение памяти под датчик
     Sensor* sensor = malloc(sizeof(Sensor));
@@ -365,7 +361,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anothe
     sensor->hum = -128.0f;
 
     //Выделение памяти под инстанс датчика в зависимости от его интерфейса
-    status = sensor->type->interface->allocator(sensor, anotherValues);
+    status = sensor->type->interface->allocator(sensor, args);
 
     //Выход если датчик успешно развёрнут
     if(status) {

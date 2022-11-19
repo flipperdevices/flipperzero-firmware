@@ -1,4 +1,5 @@
 #include "LM75.h"
+#include "../interfaces/I2CSensor.h"
 
 #define LM75_REG_TEMP 0x00
 #define LM75_REG_CONFIG 0x01
@@ -23,8 +24,8 @@ const SensorType LM75 = {
     .deinitializer = unitemp_LM75_deinit,
     .updater = unitemp_LM75_update};
 
-bool unitemp_LM75_alloc(Sensor* sensor, uint8_t* anotherValues) {
-    UNUSED(anotherValues);
+bool unitemp_LM75_alloc(Sensor* sensor, char* args) {
+    UNUSED(args);
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     //Адреса на шине I2C (7 бит)
@@ -32,6 +33,7 @@ bool unitemp_LM75_alloc(Sensor* sensor, uint8_t* anotherValues) {
     i2c_sensor->maxI2CAdr = 0b1001111;
     return true;
 }
+
 bool unitemp_LM75_free(Sensor* sensor) {
     //Нечего высвобождать, так как ничего не было выделено
     UNUSED(sensor);
@@ -42,15 +44,15 @@ bool unitemp_LM75_init(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     //Выход если не удалось записать значение в датчик
-    if(!writeReg(i2c_sensor, LM75_REG_CONFIG, LM75_CONFIG_FAULTQUEUE_1)) return false;
-    //TODO: Работа с прерываниями и компаратором
+    if(!unitemp_i2c_writeReg(i2c_sensor, LM75_REG_CONFIG, LM75_CONFIG_FAULTQUEUE_1)) return false;
 
     return true;
 }
 
 bool unitemp_LM75_deinit(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
-    if(!writeReg(i2c_sensor, LM75_REG_CONFIG, LM75_CONFIG_FAULTQUEUE_1 | LM75_CONFIG_SHUTDOWN))
+    if(!unitemp_i2c_writeReg(
+           i2c_sensor, LM75_REG_CONFIG, LM75_CONFIG_FAULTQUEUE_1 | LM75_CONFIG_SHUTDOWN))
         return false;
     return true;
 }
@@ -59,7 +61,7 @@ UnitempStatus unitemp_LM75_update(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     uint8_t buff[2];
-    if(!readRegArray(i2c_sensor, LM75_REG_TEMP, 2, buff)) return UT_TIMEOUT;
+    if(!unitemp_i2c_readRegArray(i2c_sensor, LM75_REG_TEMP, 2, buff)) return UT_TIMEOUT;
     int16_t raw = ((((uint16_t)buff[0] << 8) | buff[1]) >> 7);
 
     if(FURI_BIT(raw, 8)) {

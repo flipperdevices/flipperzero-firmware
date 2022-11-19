@@ -1,4 +1,3 @@
-#include "SensorsDriver.h"
 #include "BMP280.h"
 
 const SensorType BMP280 = {
@@ -65,7 +64,8 @@ static double bmp280_compensate_T_double(I2CSensor* i2c_sensor, int32_t adc_T) {
 
 static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
     BMP280_instance* bmp280_instance = (BMP280_instance*)i2c_sensor->sensorInstance;
-    if(!readRegArray(i2c_sensor, TEMP_CAL_START_ADDR, 6, (uint8_t*)&bmp280_instance->temp_cal))
+    if(!unitemp_i2c_readRegArray(
+           i2c_sensor, TEMP_CAL_START_ADDR, 6, (uint8_t*)&bmp280_instance->temp_cal))
         return false;
     FURI_LOG_D(
         APP_NAME,
@@ -74,7 +74,7 @@ static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
         bmp280_instance->temp_cal.dig_T1,
         bmp280_instance->temp_cal.dig_T2,
         bmp280_instance->temp_cal.dig_T3);
-    // if(!readRegArray(i2c_sensor, PRESS_CAL_START_ADDR, 18, (uint8_t*)&bmp280_instance->press_cal))
+    // if(!unitemp_i2c_readRegArray(i2c_sensor, PRESS_CAL_START_ADDR, 18, (uint8_t*)&bmp280_instance->press_cal))
     //     return false;
     // FURI_LOG_D(
     //     APP_NAME,
@@ -96,11 +96,11 @@ static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
 }
 static bool bmp280_isMeasuring(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
-    return (bool)((readReg(i2c_sensor, BMP280_REG_STATUS) & 0x08) >> 3);
+    return (bool)((unitemp_i2c_readReg(i2c_sensor, BMP280_REG_STATUS) & 0x08) >> 3);
 }
 
-bool unitemp_BMP280_alloc(Sensor* sensor, uint8_t* anotherValues) {
-    UNUSED(anotherValues);
+bool unitemp_BMP280_alloc(Sensor* sensor, char* args) {
+    UNUSED(args);
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
     BMP280_instance* bmp280_instance = malloc(sizeof(BMP280_instance));
     if(bmp280_instance == NULL) {
@@ -117,9 +117,9 @@ bool unitemp_BMP280_alloc(Sensor* sensor, uint8_t* anotherValues) {
 bool unitemp_BMP280_init(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
     //Перезагрузка
-    writeReg(i2c_sensor, 0xE0, 0xB6);
+    unitemp_i2c_writeReg(i2c_sensor, 0xE0, 0xB6);
     //Чтение ID датчика
-    uint8_t id = readReg(i2c_sensor, 0xD0);
+    uint8_t id = unitemp_i2c_readReg(i2c_sensor, 0xD0);
     if(id != BMP280_ID) {
         FURI_LOG_E(
             APP_NAME,
@@ -136,9 +136,10 @@ bool unitemp_BMP280_init(Sensor* sensor) {
         return false;
     }
     //Настройка режимов работы
-    writeReg(i2c_sensor, BMP280_REG_CTRL_MEAS, BMP280_TEMP_OVERSAMPLING_2 | BMP280_MODE_NORMAL);
+    unitemp_i2c_writeReg(
+        i2c_sensor, BMP280_REG_CTRL_MEAS, BMP280_TEMP_OVERSAMPLING_2 | BMP280_MODE_NORMAL);
     //Настройка периода опроса и фильтрации значений
-    writeReg(
+    unitemp_i2c_writeReg(
         i2c_sensor,
         BMP280_REG_CONFIG,
         BMP280_STANDBY_TIME_500 | BMP280_FILTER_COEFF_16 | BMP280_SPI_3W_DISABLE);
@@ -149,7 +150,7 @@ bool unitemp_BMP280_init(Sensor* sensor) {
 bool unitemp_BMP280_deinit(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
     //Перевод в сон
-    writeReg(i2c_sensor, BMP280_REG_CTRL_MEAS, BMP280_MODE_SLEEP);
+    unitemp_i2c_writeReg(i2c_sensor, BMP280_REG_CTRL_MEAS, BMP280_MODE_SLEEP);
     return true;
 }
 
@@ -163,7 +164,7 @@ UnitempStatus unitemp_BMP280_update(Sensor* sensor) {
         }
     }
     uint8_t buff[3];
-    if(!readRegArray(i2c_sensor, 0xFA, 3, buff)) return UT_TIMEOUT;
+    if(!unitemp_i2c_readRegArray(i2c_sensor, 0xFA, 3, buff)) return UT_TIMEOUT;
     int32_t adc_T = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
     sensor->temp = bmp280_compensate_T_double(i2c_sensor, adc_T);
     return UT_OK;

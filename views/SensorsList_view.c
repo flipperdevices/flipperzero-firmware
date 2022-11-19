@@ -32,15 +32,15 @@ static void _enter_callback(void* context, uint32_t index) {
     //Имя датчка
     char sensor_name[11];
     snprintf(sensor_name, 11, "Sensor%d", app->sensors_count + 1);
-    const SensorType* st = unitemp_getSensorsTypes()[index];
-    uint8_t anotherValues[1] = {0};
+    const SensorType* st = unitemp_sensors_getTypes()[index];
+    char args[1] = {0};
     //Выбор первого доступного порта для датчиков single wire и one wire
     if(st->interface == &SINGLE_WIRE || st->interface == &ONE_WIRE) {
-        anotherValues[0] = unitemp_GPIO_toInt(unitemp_gpio_getAviablePort(st->interface, 0)->pin);
+        args[0] = unitemp_gpio_toInt(unitemp_gpio_getAviablePort(st->interface, 0));
     }
     //Для I2C адрес выберится автоматически
 
-    unitemp_SensorEdit_switch(unitemp_sensor_alloc(sensor_name, st, anotherValues));
+    unitemp_SensorEdit_switch(unitemp_sensor_alloc(sensor_name, st, args));
 }
 
 /**
@@ -52,9 +52,9 @@ void unitemp_SensorsList_alloc(void) {
     variable_item_list_reset(variable_item_list);
 
     //Добавление в список доступных датчиков
-    for(uint8_t i = 0; i < unitemp_getSensorsTypesCount(); i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getTypesCount(); i++) {
         variable_item_list_add(
-            variable_item_list, unitemp_getSensorsTypes()[i]->typename, 1, NULL, app);
+            variable_item_list, unitemp_sensors_getTypes()[i]->typename, 1, NULL, app);
     }
 
     //Добавление колбека на нажатие средней кнопки

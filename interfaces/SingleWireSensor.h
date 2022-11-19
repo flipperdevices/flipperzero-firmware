@@ -2,6 +2,7 @@
 #define UNITEMP_SINGLE_WIRE
 
 #include "../unitemp.h"
+#include "../Sensors.h"
 
 //Интерфейс Single Wire
 typedef struct {
@@ -22,7 +23,7 @@ extern const SensorType AM2320_SW;
  * @param sensor Указатель на инициализируемый датчик
  * @return Истина если всё прошло успешно
  */
-bool unitemp_singleWire_init(Sensor* sensor);
+bool unitemp_singlewire_init(Sensor* sensor);
 
 /**
  * @brief Деинициализация датчика
@@ -30,7 +31,7 @@ bool unitemp_singleWire_init(Sensor* sensor);
  * @param sensor Указатель на инициализируемый датчик
  * @return Истина если всё прошло успешно
  */
-bool unitemp_singleWire_deinit(Sensor* sensor);
+bool unitemp_singlewire_deinit(Sensor* sensor);
 
 /**
  * @brief Получение данных с датчика по однопроводному интерфейсу DHTxx и AM2xxx
@@ -38,7 +39,7 @@ bool unitemp_singleWire_deinit(Sensor* sensor);
  * @param sensor Указатель на датчик
  * @return Статус опроса
  */
-UnitempStatus unitemp_singleWire_update(Sensor* sensor);
+UnitempStatus unitemp_singlewire_update(Sensor* sensor);
 
 /**
  * @brief Установить порт датчика
@@ -47,7 +48,7 @@ UnitempStatus unitemp_singleWire_update(Sensor* sensor);
  * @param gpio Устанавливаемый порт
  * @return Истина если всё ок
  */
-bool unitemp_singleWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio);
+bool unitemp_singlewire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio);
 
 /**
  * @brief Получить порт датчика
@@ -55,20 +56,20 @@ bool unitemp_singleWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio);
  * @param sensor Указатель на датчик
  * @return Указатель на GPIO
  */
-const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor);
+const GPIO* unitemp_singlewire_sensorGetGPIO(Sensor* sensor);
 
 /**
  * @brief Выделение памяти под датчик на линии One Wire
  * 
  * @param sensor Указатель на датчик
- * @param st Тип датчика
+ * @param args Указатель на массив с аргументами параметров датчка
  */
-bool unitemp_singleWire_alloc(Sensor* sensor, uint8_t* anotherValues);
+bool unitemp_singlewire_alloc(Sensor* sensor, char* args);
 
 /**
  * @brief Высвобождение памяти инстанса датчика
  * 
  * @param sensor Указатель на датчик
  */
-bool unitemp_singleWire_free(Sensor* sensor);
+bool unitemp_singlewire_free(Sensor* sensor);
 #endif

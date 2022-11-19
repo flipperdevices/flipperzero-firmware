@@ -1,8 +1,5 @@
 #include "SingleWireSensor.h"
-#include "../Sensors.h"
 
-//Интервал опроса датчиков (мс)
-#define POLLING_INTERVAL 2000
 //Максимальное количество попугаев ожидания датчика
 #define POLLING_TIMEOUT_TICKS 10000
 
@@ -11,50 +8,49 @@ const SensorType DHT11 = {
     .typename = "DHT11",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
-    .allocator = unitemp_singleWire_alloc,
-    .mem_releaser = unitemp_singleWire_free,
-    .initializer = unitemp_singleWire_init,
-    .deinitializer = unitemp_singleWire_deinit,
-    .updater = unitemp_singleWire_update};
+    .allocator = unitemp_singlewire_alloc,
+    .mem_releaser = unitemp_singlewire_free,
+    .initializer = unitemp_singlewire_init,
+    .deinitializer = unitemp_singlewire_deinit,
+    .updater = unitemp_singlewire_update};
 const SensorType DHT12_SW = {
     .typename = "DHT12",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
-    .allocator = unitemp_singleWire_alloc,
-    .mem_releaser = unitemp_singleWire_free,
-    .initializer = unitemp_singleWire_init,
-    .deinitializer = unitemp_singleWire_deinit,
-    .updater = unitemp_singleWire_update};
-
+    .allocator = unitemp_singlewire_alloc,
+    .mem_releaser = unitemp_singlewire_free,
+    .initializer = unitemp_singlewire_init,
+    .deinitializer = unitemp_singlewire_deinit,
+    .updater = unitemp_singlewire_update};
 const SensorType DHT21 = {
     .typename = "DHT21",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
-    .allocator = unitemp_singleWire_alloc,
-    .mem_releaser = unitemp_singleWire_free,
-    .initializer = unitemp_singleWire_init,
-    .deinitializer = unitemp_singleWire_deinit,
-    .updater = unitemp_singleWire_update};
+    .allocator = unitemp_singlewire_alloc,
+    .mem_releaser = unitemp_singlewire_free,
+    .initializer = unitemp_singlewire_init,
+    .deinitializer = unitemp_singlewire_deinit,
+    .updater = unitemp_singlewire_update};
 const SensorType DHT22 = {
     .typename = "DHT22",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
-    .allocator = unitemp_singleWire_alloc,
-    .mem_releaser = unitemp_singleWire_free,
-    .initializer = unitemp_singleWire_init,
-    .deinitializer = unitemp_singleWire_deinit,
-    .updater = unitemp_singleWire_update};
+    .allocator = unitemp_singlewire_alloc,
+    .mem_releaser = unitemp_singlewire_free,
+    .initializer = unitemp_singlewire_init,
+    .deinitializer = unitemp_singlewire_deinit,
+    .updater = unitemp_singlewire_update};
 const SensorType AM2320_SW = {
     .typename = "AM2320",
     .interface = &SINGLE_WIRE,
     .pollingInterval = 2000,
-    .allocator = unitemp_singleWire_alloc,
-    .mem_releaser = unitemp_singleWire_free,
-    .initializer = unitemp_singleWire_init,
-    .deinitializer = unitemp_singleWire_deinit,
-    .updater = unitemp_singleWire_update};
+    .allocator = unitemp_singlewire_alloc,
+    .mem_releaser = unitemp_singlewire_free,
+    .initializer = unitemp_singlewire_init,
+    .deinitializer = unitemp_singlewire_deinit,
+    .updater = unitemp_singlewire_update};
 
-bool unitemp_singleWire_alloc(Sensor* sensor, uint8_t* anotherValues) {
+bool unitemp_singlewire_alloc(Sensor* sensor, char* args) {
     SingleWireSensor* instance = malloc(sizeof(SingleWireSensor));
     if(instance == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor %s instance allocation error", sensor->name);
@@ -62,20 +58,20 @@ bool unitemp_singleWire_alloc(Sensor* sensor, uint8_t* anotherValues) {
     }
     sensor->instance = instance;
 
-    if(unitemp_singleWire_sensorSetGPIO(sensor, unitemp_GPIO_getFromInt(anotherValues[0]))) {
+    if(unitemp_singlewire_sensorSetGPIO(sensor, unitemp_gpio_getFromInt(args[0]))) {
         return true;
     }
     FURI_LOG_E(APP_NAME, "Sensor %s GPIO setting error", sensor->name);
     free(instance);
     return false;
 }
-bool unitemp_singleWire_free(Sensor* sensor) {
+bool unitemp_singlewire_free(Sensor* sensor) {
     free(sensor->instance);
 
     return true;
 }
 
-bool unitemp_singleWire_init(Sensor* sensor) {
+bool unitemp_singlewire_init(Sensor* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
@@ -93,7 +89,7 @@ bool unitemp_singleWire_init(Sensor* sensor) {
     return true;
 }
 
-bool unitemp_singleWire_deinit(Sensor* sensor) {
+bool unitemp_singlewire_deinit(Sensor* sensor) {
     SingleWireSensor* instance = ((Sensor*)sensor)->instance;
     if(instance == NULL || instance->gpio == NULL) return false;
     unitemp_gpio_unlock(instance->gpio);
@@ -108,19 +104,19 @@ bool unitemp_singleWire_deinit(Sensor* sensor) {
     return true;
 }
 
-bool unitemp_singleWire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
+bool unitemp_singlewire_sensorSetGPIO(Sensor* sensor, const GPIO* gpio) {
     if(sensor == NULL || gpio == NULL) return false;
     SingleWireSensor* instance = sensor->instance;
     instance->gpio = gpio;
     return true;
 }
-const GPIO* unitemp_singleWire_sensorGetGPIO(Sensor* sensor) {
+const GPIO* unitemp_singlewire_sensorGetGPIO(Sensor* sensor) {
     if(sensor == NULL) return NULL;
     SingleWireSensor* instance = sensor->instance;
     return instance->gpio;
 }
 
-UnitempStatus unitemp_singleWire_update(Sensor* sensor) {
+UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
     SingleWireSensor* instance = sensor->instance;
 
     //Массив для приёма данных

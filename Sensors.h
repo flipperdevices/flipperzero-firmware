@@ -19,11 +19,13 @@ typedef struct GPIO {
     const char* name;
     const GpioPin* pin;
 } GPIO;
+
 typedef struct Sensor Sensor;
+
 /**
  * @brief Указатель функции выделения памяти и подготовки экземпляра датчика
  */
-typedef bool(SensorAllocator)(Sensor* sensor, uint8_t* anotherValues);
+typedef bool(SensorAllocator)(Sensor* sensor, char* args);
 /**
  * @brief Указатель на функцию высвобождении памяти датчика
  */
@@ -43,11 +45,13 @@ typedef UnitempStatus(SensorUpdater)(Sensor* sensor);
 
 //Типы подключения датчиков
 typedef struct Interface {
+    //Имя интерфейса
     const char* name;
+    //Функция выделения памяти интерфейса
     SensorAllocator* allocator;
-    //Функция высвыбождения памяти для датчика
+    //Функция высвыбождения памяти интерфейса
     SensorFree* mem_releaser;
-    //Функция обновления значения датчка
+    //Функция обновления значения датчика по интерфейсу
     SensorUpdater* updater;
 } Interface;
 
@@ -88,7 +92,6 @@ typedef struct Sensor {
     uint32_t lastPollingTime;
     //Экземпляр датчика
     void* instance;
-
 } Sensor;
 
 extern const Interface SINGLE_WIRE; //Собственный однопроводной протокол датчиков DHTXX и AM23XX
@@ -96,69 +99,32 @@ extern const Interface ONE_WIRE; //Однопроводной протокол D
 extern const Interface I2C; //I2C_2 (PC0, PC1)
 //extern const Interface SPI;
 
-/**
-* @brief Получить количество доступных типов датчиков
-* @return Количество доступных типов датчиков
-*/
-uint8_t unitemp_getSensorsTypesCount(void);
-
-/**
-* @brief Получить списк доступных типов датчиков
-* @return Указатель на список датчиков
-*/
-const SensorType** unitemp_getSensorsTypes(void);
-
-/**
- * @brief Конвертация номера порта на корпусе FZ в GPIO 
- * 
- * @param name Номер порта на корпусе FZ
- * @return Указатель на GPIO при успехе, NULL при ошибке
- */
-const GPIO* unitemp_GPIO_getFromInt(uint8_t name);
-
-/**
- * @brief Конвертация GPIO в номер на корпусе FZ
- * 
- * @param gpio Указатель на порт
- * @return Номер порта на корпусе FZ
- */
-uint8_t unitemp_GPIO_toInt(const GpioPin* gpio);
-
+/* ============================= Датчик(и) ============================= */
 /**
  * @brief Выделение памяти под датчик
  * 
  * @param name Имя датчика
- * @param st Тип датчика
- * @param anotherValues Массив других различных значений
- * @return Указатель на датчик
+ * @param type Тип датчика
+ * @param args Указатель на строку с парамерами датчика
+ * @return Указатель на датчик в случае успешного выделения памяти, NULL при ошибке
  */
-Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, uint8_t* anotherValues);
+Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args);
 
 /**
- * @brief Инициализация загруженных датчиков
- * 
- * @return Истина если всё прошло успешно
+ * @brief Высвыбождение памяти конкретного датчка
+ * @param sensor Указатель на датчик
  */
-bool unitemp_sensors_init(void);
+void unitemp_sensor_free(Sensor* sensor);
 
 /**
- * @brief Деинициализация загруженных датчиков
- * 
- * @return Истина если всё прошло успешно
- */
-bool unitemp_sensors_deInit(void);
-
-/**
- * @brief Получение данных указанного датчика
- * 
+ * @brief Обновление данных указанного датчика
  * @param sensor Указатель на датчик
  * @return Статус опроса датчика
  */
 UnitempStatus unitemp_sensor_updateData(Sensor* sensor);
 
 /**
- * @brief Функция загрузки датчиков с SD-карты
- * 
+ * @brief Загрузка датчиков с SD-карты
  * @return Истина если загрузка прошла успешно
  */
 bool unitemp_sensors_load();
@@ -167,37 +133,100 @@ bool unitemp_sensors_load();
  * @brief Функция перезагрузки датчиков с SD-карты
 */
 void unitemp_sensors_reload(void);
+
 /**
  * @brief Сохранение настроек на SD-карту
- * 
  * @return Истина если сохранение прошло успешно
  */
 bool unitemp_sensors_save(void);
 
 /**
- * @brief Обновить данные со всех датчиков
+ * @brief Инициализация загруженных датчиков
+ * @return Истина если всё прошло успешно
  */
-void unitemp_sensors_updateValues(void);
+bool unitemp_sensors_init(void);
 
 /**
- * @brief Высвыбождение памяти после датчиков
+ * @brief Деинициализация загруженных датчиков
+ * @return Истина если всё прошло успешно
+ */
+bool unitemp_sensors_deInit(void);
+
+/**
+ * @brief Высвыбождение памяти всех датчиков
  */
 void unitemp_sensors_free(void);
 
 /**
- * @brief Высвыбождение памяти конкретного датчка
- * 
- * @param sensor Указатель на датчик
+ * @brief Обновить данные всех датчиков
  */
-void unitemp_sensor_free(Sensor* sensor);
+void unitemp_sensors_updateValues(void);
 
-const SensorType* unitemp_getTypeFromInt(int type);
+/**
+* @brief Получить количество доступных типов датчиков
+* @return Количество доступных типов датчиков
+*/
+uint8_t unitemp_sensors_getTypesCount(void);
 
-uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface);
+/**
+ * @brief Получить тип сенсора по его индексу
+ * 
+ * @param index Индекс типа датчика (от 0 до SENSOR_TYPES_COUNT)
+ * @return const SensorType* 
+ */
+const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index);
 
+/**
+* @brief Получить списк доступных типов датчиков
+* @return Указатель на список датчиков
+*/
+const SensorType** unitemp_sensors_getTypes(void);
+
+/* ============================= GPIO ============================= */
+/**
+ * @brief Конвертация номера порта на корпусе FZ в GPIO 
+ * @param name Номер порта на корпусе FZ
+ * @return Указатель на GPIO при успехе, NULL при ошибке
+ */
+const GPIO* unitemp_gpio_getFromInt(uint8_t name);
+/**
+ * @brief Конвертация GPIO в номер на корпусе FZ
+ * @param gpio Указатель на порт
+ * @return Номер порта на корпусе FZ
+ */
+uint8_t unitemp_gpio_toInt(const GPIO* gpio);
+
+/**
+ * @brief Блокировка GPIO указанным интерфейсом
+ * @param gpio Указатель на порт
+ * @param interface Указатель на интерфейс, которым порт будет занят
+ */
 void unitemp_gpio_lock(const GPIO* gpio, const Interface* interface);
 
+/**
+ * @brief Разблокировка порта
+ * @param gpio Указатель на порт
+ */
 void unitemp_gpio_unlock(const GPIO* gpio);
-
+/**
+ * @brief Получить количество доступных портов для указанного интерфейса
+ * @param interface Указатель на интерфейс
+ * @return Количество доступных портов
+ */
+uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface);
+/**
+ * @brief Получить указатель на доступный для интерфейса порт по индексу 
+ * @param interface Указатель на интерфейс
+ * @param index Номер порта (от 0 до unitemp_gpio_getAviablePortsCount())
+ * @return Указатель на доступный порт
+ */
 const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index);
+
+/* Датчики */
+//DHTxx и их производные
+#include "./interfaces/SingleWireSensor.h"
+//DS18x2x
+#include "./interfaces/OneWireSensor.h"
+#include "./sensors/LM75.h"
+#include "./sensors/BMP280.h"
 #endif
