@@ -7,13 +7,13 @@
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
-int Time = 10;
-int Count = 10;
-int WorkTime = 0;
-int WorkCount = 0;
-bool InfiniteShot = false;
-bool Bulb = false;
-int Backlight = 0;
+int Time = 10; // Таймер
+int Count = 10; // Количество кадров
+int WorkTime = 0; // Счётчик таймера
+int WorkCount = 0; // Счётчик кадров
+bool InfiniteShot = false; // Бесконечная съёмка
+bool Bulb = false; // Режим BULB
+int Backlight = 0; // Подсветка: вкл/выкл/авто
 
 const NotificationSequence sequence_click = {
     &message_note_c7,
@@ -50,8 +50,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 	canvas_draw_str(canvas, 3, 15, temp_str);
 	snprintf(temp_str,sizeof(temp_str),"Left: %i frames, %i sec",WorkCount,WorkTime);
 	canvas_draw_str(canvas, 3, 35, temp_str);
-	//snprintf(temp_str,sizeof(temp_str),"Backlight: %i",Backlight);
-	//canvas_draw_str(canvas, 3, 55, temp_str);	
 
     switch (Backlight) {
 	case 1:
