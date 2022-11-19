@@ -68,7 +68,6 @@ typedef enum {
     // Mifare Ultralight events
     NfcWorkerEventMfUltralightPassKey, // NFC worker requesting manual key
     NfcWorkerEventMfUltralightPwdAuth, // Reader sent auth command
-
 } NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
