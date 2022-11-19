@@ -29,6 +29,7 @@ Thank you to all the supporters!
 - Updated: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - Updated: [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 - Added: [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
+- Added: [Blocking USB driver API #2009 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2009)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -249,3 +250,4 @@ $ ./fbt resources icons dolphin_ext
 - [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 - [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
+- [Blocking USB driver API #2009 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2009)
