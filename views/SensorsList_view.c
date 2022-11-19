@@ -29,10 +29,10 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
+    const SensorType* type = unitemp_sensors_getTypes()[index];
     //Имя датчка
     char sensor_name[11];
-    snprintf(sensor_name, 11, "Sensor%d", app->sensors_count + 1);
-    const SensorType* type = unitemp_sensors_getTypes()[index];
+    snprintf(sensor_name, 11, "%s", type->typename);
 
     char args[22] = {0};
     //Выбор первого доступного порта для датчика single wire
