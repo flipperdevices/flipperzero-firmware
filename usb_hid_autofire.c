@@ -5,6 +5,9 @@
 #include <input/input.h>
 #include "version.h"
 
+// Uncomment to be able to make a screenshot
+//#define USB_HID_AUTOFIRE_SCREENSHOT
+
 typedef enum {
     EventTypeInput,
 } EventType;
@@ -53,8 +56,10 @@ int32_t usb_hid_autofire_app(void* p) {
     ViewPort* view_port = view_port_alloc();
 
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+#ifndef USB_HID_AUTOFIRE_SCREENSHOT
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
+#endif
 
     view_port_draw_callback_set(view_port, usb_hid_autofire_render_callback, NULL);
     view_port_input_callback_set(view_port, usb_hid_autofire_input_callback, event_queue);
