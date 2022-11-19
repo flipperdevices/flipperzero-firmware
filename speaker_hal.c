@@ -21,9 +21,16 @@ void tracker_speaker_play(float frequency, float pwm) {
         compare_value = 1;
     }
 
-    LL_TIM_SetAutoReload(FURI_HAL_SPEAKER_TIMER, autoreload);
-    LL_TIM_OC_SetCompareCH1(FURI_HAL_SPEAKER_TIMER, compare_value);
-    LL_TIM_GenerateEvent_UPDATE(FURI_HAL_SPEAKER_TIMER);
+    if(LL_TIM_OC_GetCompareCH1(FURI_HAL_SPEAKER_TIMER) != compare_value) {
+        LL_TIM_OC_SetCompareCH1(FURI_HAL_SPEAKER_TIMER, compare_value);
+    }
+
+    if(LL_TIM_GetAutoReload(FURI_HAL_SPEAKER_TIMER) != autoreload) {
+        LL_TIM_SetAutoReload(FURI_HAL_SPEAKER_TIMER, autoreload);
+        if(LL_TIM_GetCounter(FURI_HAL_SPEAKER_TIMER) > autoreload) {
+            LL_TIM_SetCounter(FURI_HAL_SPEAKER_TIMER, 0);
+        }
+    }
 
     LL_TIM_EnableAllOutputs(FURI_HAL_SPEAKER_TIMER);
 }
