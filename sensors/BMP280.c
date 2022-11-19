@@ -10,6 +10,9 @@ const SensorType BMP280 = {
     .deinitializer = unitemp_BMP280_deinit,
     .updater = unitemp_BMP280_update};
 
+//Интервал обновления калибровочных значений
+#define BMP280_CAL_UPDATE_INTERVAL 60000
+
 #define TEMP_CAL_START_ADDR 0x88
 //#define PRESS_CAL_START_ADDR 0x8E
 #define BMP280_ID 0x58
@@ -92,6 +95,7 @@ static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
     //     bmp280_instance->press_cal.dig_P7,
     //     bmp280_instance->press_cal.dig_P8,
     //     bmp280_instance->press_cal.dig_P9);
+    bmp280_instance->last_cal_update_time = furi_get_tick();
     return true;
 }
 static bool bmp280_isMeasuring(Sensor* sensor) {
@@ -156,13 +160,20 @@ bool unitemp_BMP280_deinit(Sensor* sensor) {
 
 UnitempStatus unitemp_BMP280_update(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
+    BMP280_instance* instance = i2c_sensor->sensorInstance;
 
     uint32_t t = furi_get_tick();
+
+    if(furi_get_tick() - instance->last_cal_update_time > BMP280_CAL_UPDATE_INTERVAL) {
+        bmp280_readCalValues(i2c_sensor);
+    }
+
     while(bmp280_isMeasuring(sensor)) {
-        if(furi_get_tick() - t > 100) {
+        if(furi_get_tick() - t > 10) {
             return UT_TIMEOUT;
         }
     }
+
     uint8_t buff[3];
     if(!unitemp_i2c_readRegArray(i2c_sensor, 0xFA, 3, buff)) return UT_TIMEOUT;
     int32_t adc_T = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);

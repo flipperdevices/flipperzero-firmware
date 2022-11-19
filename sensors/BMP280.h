@@ -23,8 +23,12 @@ typedef struct {
 // } BMP280_press_cal;
 
 typedef struct {
+    //Калибровочные значения температуры
     BMP280_temp_cal temp_cal;
+    //Калибровочные значения давления
     // BMP280_press_cal press_cal;
+    //Время последнего обновления калибровочных значений
+    uint32_t last_cal_update_time;
 } BMP280_instance;
 
 extern const SensorType BMP280;
