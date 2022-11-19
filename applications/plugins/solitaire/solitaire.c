@@ -7,7 +7,7 @@
 #include "Solitaire_icons.h"
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-
+void init(GameState* game_state);
 const NotificationSequence sequence_fail = {
     &message_vibro_on,
     &message_note_c4,
@@ -271,16 +271,15 @@ void tick(GameState* game_state, NotificationApp* notification) {
     uint8_t column = game_state->selectColumn;
     if(game_state->state != GameStatePlay && game_state->state != GameStateAnimate) return;
     bool wasAction = false;
-
+    if(game_state->state == GameStatePlay) {
+        if(game_state->top_cards[0].character == 11 && game_state->top_cards[1].character == 11 &&
+           game_state->top_cards[2].character == 11 && game_state->top_cards[3].character == 11) {
+            game_state->state = GameStateAnimate;
+            return;
+        }
+    }
     if(handleInput(game_state)) {
         if(game_state->state == GameStatePlay) {
-            if(game_state->top_cards[0].character == 11 &&
-               game_state->top_cards[1].character == 11 &&
-               game_state->top_cards[2].character == 11 &&
-               game_state->top_cards[3].character == 11) {
-                game_state->state = GameStateAnimate;
-                return;
-            }
             if(game_state->longPress && game_state->dragging_hand.index == 1) {
                 for(uint8_t i = 0; i < 4; i++) {
                     if(place_on_top(
@@ -365,7 +364,11 @@ void tick(GameState* game_state, NotificationApp* notification) {
         }
     }
     if(game_state->state == GameStateAnimate) {
-        if(game_state->animation.started) game_state->state = GameStateStart;
+        if(game_state->animation.started && !game_state->longPress &&
+           game_state->input == InputKeyOk) {
+            init(game_state);
+            game_state->state = GameStateStart;
+        }
 
         game_state->animation.started = true;
         if(game_state->animation.x < -20 || game_state->animation.x > 128) {
@@ -375,6 +378,7 @@ void tick(GameState* game_state, NotificationApp* notification) {
 
             if(game_state->animation.indexes[0] == 13 && game_state->animation.indexes[1] == 13 &&
                game_state->animation.indexes[2] == 13 && game_state->animation.indexes[3] == 13) {
+                init(game_state);
                 game_state->state = GameStateStart;
                 return;
             }
@@ -499,6 +503,9 @@ int32_t solitaire_app(void* p) {
                     case InputKeyOk:
                         localstate->input = event.input.key;
                         break;
+                    case InputKeyBack:
+                        processing = false;
+                        return_code = 1;
                     default:
                         break;
                     }
@@ -519,6 +526,7 @@ int32_t solitaire_app(void* p) {
                         }
                         break;
                     case InputKeyBack:
+                        init(game_state);
                         processing = false;
                         return_code = 1;
                         break;

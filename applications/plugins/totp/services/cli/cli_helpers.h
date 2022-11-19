@@ -37,4 +37,11 @@
     TOTP_CLI_PRINTF(                       \
         "Invalid command arguments. use \"help\" command to get list of available commands")
 
+/**
+ * @brief Checks whether user is authenticated and entered correct PIN.
+ *        If user is not authenticated it prompts user to enter correct PIN to authenticate.
+ * @param plugin_state application state
+ * @param cli reference to the firmware CLI subsystem 
+ * @return \c true if user is already authenticated or successfully authenticated; \c false otherwise
+ */
 bool totp_cli_ensure_authenticated(const PluginState* plugin_state, Cli* cli);

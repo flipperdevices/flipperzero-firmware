@@ -127,11 +127,14 @@ void draw_card_back_at(int8_t pos_x, int8_t pos_y, Canvas* const canvas) {
 
 void generate_deck(Deck* deck_ptr, uint8_t deck_count) {
     uint16_t counter = 0;
-    if(deck_ptr->cards == NULL) {
-        deck_ptr->deck_count = deck_count;
-        deck_ptr->card_count = deck_count * 52;
-        deck_ptr->cards = malloc(sizeof(Card) * deck_ptr->card_count);
+    if(deck_ptr->cards != NULL) {
+        free(deck_ptr->cards);
     }
+
+    deck_ptr->deck_count = deck_count;
+    deck_ptr->card_count = deck_count * 52;
+    deck_ptr->cards = malloc(sizeof(Card) * deck_ptr->card_count);
+
     for(uint8_t deck = 0; deck < deck_count; deck++) {
         for(uint8_t pip = 0; pip < 4; pip++) {
             for(uint8_t label = 0; label < 13; label++) {
