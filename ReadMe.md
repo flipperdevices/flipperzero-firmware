@@ -27,7 +27,6 @@ Thank you to all the supporters!
 - Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
-- Added: [Core: thread allocation shortcut #2007 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2007)
 - Added: [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
 
 ## Install from Release
@@ -248,5 +247,4 @@ $ ./fbt resources icons dolphin_ext
 - [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 - [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
-- [Core: thread allocation shortcut #2007 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2007)
 - [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
