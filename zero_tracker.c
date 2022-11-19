@@ -78,6 +78,12 @@ typedef uint16_t NoteRecord;
 #define NOTE_B6 60
 #define NOTE_KILL 63
 
+#define EFFECT_ARPEGGIO 0
+
+#define EFFECT_DATA_NONE 0
+
+#define EFFECT_DATA_2(x, y) ((x) | ((y) << 3))
+
 uint8_t record_get_note(NoteRecord note) {
     return note & 0x3F;
 }
@@ -117,6 +123,10 @@ float note_to_freq(uint8_t note) {
     return notes_oct[note_in_oct] * (1 << octave);
 }
 
+float frequency_offset(float frequency, uint8_t semitones) {
+    return frequency * (1.0f + ((1.0f / 12.0f) * semitones));
+}
+
 #define PATTERN_SIZE 64
 
 typedef struct {
@@ -128,7 +138,7 @@ typedef struct {
     NoteRow* rows;
 } NotePattern;
 
-NoteRow row = {
+NoteRow _row = {
     .notes =
         {
             //
@@ -214,23 +224,140 @@ NoteRow row = {
         },
 };
 
-uint8_t counter = 0;
-uint8_t counter_limit = 2;
+NoteRow row = {
+    .notes =
+        {
+            //
+            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            //
+            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            //
+            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            //
+            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(NOTE_A4, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            RECORD_MAKE(0, EFFECT_ARPEGGIO, EFFECT_DATA_2(3, 7)),
+            //
+            RECORD_MAKE(NOTE_KILL, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            //
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+        },
+};
 
+uint8_t tick_counter = 0;
+uint8_t tick_limit = 2;
 uint8_t row_counter = 0;
 
+float note_frequency = 0;
+bool note_play = false;
+
 void tracker_interrupt_body() {
-    if(counter == 0) {
-        uint8_t note = record_get_note(row.notes[row_counter]);
+    uint8_t note = record_get_note(row.notes[row_counter]);
+    uint8_t effect = record_get_effect(row.notes[row_counter]);
+    uint8_t data = record_get_effect_data(row.notes[row_counter]);
+
+    // load frequency from note at tick 0
+    if(tick_counter == 0) {
         if(note == NOTE_KILL) {
-            tracker_speaker_stop();
-        } else if(note > 0 && note < NOTE_KILL) {
-            float freq = note_to_freq(note);
-            tracker_speaker_play(freq, 0.5f);
+            note_play = false;
+        } else if((note > 0) && (note < NOTE_KILL)) {
+            note_play = true;
+            note_frequency = note_to_freq(note);
         }
+    }
+
+    if(note_play) {
+        float frequency = note_frequency;
+
+        // apply arpeggio effect
+        if(effect == EFFECT_ARPEGGIO && data != EFFECT_DATA_NONE) {
+            if((tick_counter % 3) == 1) {
+                uint8_t note_offset = data & 0b000111;
+                frequency = frequency_offset(frequency, note_offset);
+            } else if((tick_counter % 3) == 2) {
+                uint8_t note_offset = (data >> 3) & 0b000111;
+                frequency = frequency_offset(frequency, note_offset);
+            }
+        }
+
+        tracker_speaker_play(frequency, 0.5f);
+    } else {
+        tracker_speaker_stop();
+    }
+
+    tick_counter++;
+    if(tick_counter >= tick_limit) {
+        tick_counter = 0;
+
+        // next note
         row_counter = (row_counter + 1) % PATTERN_SIZE;
     }
-    counter = (counter + 1) % counter_limit;
 }
 
 void tracker_interrupt_cb() {
@@ -239,12 +366,38 @@ void tracker_interrupt_cb() {
     tracker_debug_set(false);
 }
 
+void log_record(NoteRecord record) {
+    uint8_t note = record_get_note(record);
+    uint8_t effect = record_get_effect(record);
+    uint8_t data = record_get_effect_data(record);
+
+    printf("Note: %u, Effect: %u, Data: %u", note, effect, data);
+
+    if(effect == EFFECT_ARPEGGIO) {
+        uint8_t note_offset = data & 0b000111;
+        uint8_t note_offset2 = (data >> 3) & 0b000111;
+        printf(" (Arpeggio: %u, %u)", note_offset, note_offset2);
+
+        float frequency = note_to_freq(note);
+        float new_frequency = frequency_offset(frequency, note_offset);
+        float new_frequency2 = frequency_offset(frequency, note_offset2);
+        printf(
+            " (Freq: %f, %f, %f)",
+            (double)frequency,
+            (double)new_frequency,
+            (double)new_frequency2);
+    }
+
+    printf("\r\n");
+}
+
 int32_t zero_tracker_app(void* p) {
     UNUSED(p);
 
     tracker_debug_init();
     tracker_speaker_init();
     tracker_interrupt_init(60.0f, tracker_interrupt_cb, NULL);
+    // log_record(row.notes[0]);
 
     while(1) {
         furi_delay_ms(1000);
