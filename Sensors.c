@@ -326,15 +326,31 @@ bool unitemp_sensors_save(void) {
                 "%s %d %d\n",
                 app->sensors[i]->name,
                 unitemp_getIntFromType(app->sensors[i]->type),
-                unitemp_gpio_toInt(unitemp_singlewire_sensorGetGPIO(app->sensors[i])));
+                unitemp_singlewire_sensorGetGPIO(app->sensors[i])->num);
         }
         if(app->sensors[i]->type->interface == &I2C) {
             stream_write_format(
                 app->file_stream,
-                "%s %d %d\n",
+                "%s %s %X\n",
                 app->sensors[i]->name,
-                unitemp_getIntFromType(app->sensors[i]->type),
+                app->sensors[i]->type->typename,
                 ((I2CSensor*)app->sensors[i]->instance)->currentI2CAdr);
+        }
+        if(app->sensors[i]->type->interface == &ONE_WIRE) {
+            stream_write_format(
+                app->file_stream,
+                "%s %s %d %02X%02X%02X%02X%02X%02X%02X%02X\n",
+                app->sensors[i]->name,
+                app->sensors[i]->type->typename,
+                ((OneWireSensor*)app->sensors[i]->instance)->bus->gpio->num,
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[0],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[1],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[2],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[3],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[4],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[5],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[6],
+                ((OneWireSensor*)app->sensors[i]->instance)->deviceID[7]);
         }
     }
 
