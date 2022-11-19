@@ -29,6 +29,7 @@ Thank you to all the supporters!
 - Updated: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - Added: [Blocking USB driver API #2009 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2009)
 - Added: [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
+- Added: [Core: thread allocation shortcut #2007 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2007)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -250,3 +251,4 @@ $ ./fbt resources icons dolphin_ext
 - [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - [Blocking USB driver API #2009 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2009)
 - [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
+- [Core: thread allocation shortcut #2007 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2007)
