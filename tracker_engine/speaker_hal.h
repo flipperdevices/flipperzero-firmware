@@ -15,3 +15,5 @@ void tracker_interrupt_deinit();
 void tracker_debug_init();
 
 void tracker_debug_set(bool value);
+
+void tracker_debug_deinit();

@@ -85,6 +85,8 @@ void tracker_interrupt_deinit() {
     FURI_CRITICAL_ENTER();
     LL_TIM_DeInit(TIM2);
     FURI_CRITICAL_EXIT();
+
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 }
 
 void tracker_debug_init() {
@@ -93,4 +95,8 @@ void tracker_debug_init() {
 
 void tracker_debug_set(bool value) {
     furi_hal_gpio_write(&gpio_ext_pc3, value);
+}
+
+void tracker_debug_deinit() {
+    furi_hal_gpio_init(&gpio_ext_pc3, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
