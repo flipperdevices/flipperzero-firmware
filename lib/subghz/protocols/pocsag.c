@@ -21,6 +21,7 @@ static const SubGhzBlockConst pocsag_const = {
 #define POCSAG_FRAME_SYNC_CODE  0x7CD215D8
 #define POCSAG_IDLE_CODE_WORD   0x7A89C197
 
+#define POCSAG_MAX_MSG_LEN 40
 
 struct SubGhzProtocolDecoderPocsag {
     SubGhzProtocolDecoderBase base;
@@ -31,6 +32,13 @@ struct SubGhzProtocolDecoderPocsag {
     uint8_t codeword_idx;
     uint32_t addr;
     uint8_t func;
+
+    // partially decoded character
+    uint8_t char_bits;
+    uint8_t char_data;
+
+    uint8_t msg_len;
+    char msg[POCSAG_MAX_MSG_LEN];
 };
 
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
@@ -65,7 +73,18 @@ void subghz_protocol_decoder_pocsag_reset(void* context) {
     instance->decoder.decode_data = 0UL;
     instance->decoder.decode_count_bit = 0;
     instance->codeword_idx = 0;
+    instance->char_bits = 0;
+    instance->char_data = 0;
+    instance->msg_len = 0;
 }
+
+
+static void pocsag_decode_address_word(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
+    instance->addr = (data >> 13);
+    instance->addr = (instance->addr << 3) | (instance->codeword_idx >> 1);
+    instance->func = (data >> 11) & 0b11;
+}
+
 
 void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
@@ -123,10 +142,8 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                     break;
                 default:
                     if (instance->decoder.decode_data >> 31 == 0) {
-                        instance->addr = ((instance->decoder.decode_data & MASK_32_BITS) >> 13);
-                        instance->addr = (instance->addr << 3) | (instance->codeword_idx >> 1);
+                        pocsag_decode_address_word(instance, instance->decoder.decode_data & MASK_32_BITS);
                         FURI_LOG_I(TAG, "Address: %" PRIu32 , instance->addr);
-                        instance->func = ((instance->decoder.decode_data & MASK_32_BITS) >> 11) & 0b11;
                         FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
                     }
                     else {
