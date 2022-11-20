@@ -27,8 +27,6 @@ struct SubGhzProtocolDecoderPocsag {
 
     SubGhzBlockDecoder decoder;
     SubGhzBlockGeneric generic;
-
-    bool debug;
 };
 
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
@@ -62,7 +60,6 @@ void subghz_protocol_decoder_pocsag_reset(void* context) {
     instance->decoder.parser_step = PocsagDecoderStepReset;
     instance->decoder.decode_data = 0UL;
     instance->decoder.decode_count_bit = 0;
-    instance->debug = false;
 }
 
 void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t duration) {
