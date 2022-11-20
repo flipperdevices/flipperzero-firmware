@@ -85,6 +85,8 @@ typedef enum {
     EffectSlideToNote = 0x03,
     EffectVibrato = 0x04,
 
+    EffectPWM = 0x0C,
+
     EffectSetSpeed = 0x0F,
 } Effect;
 
@@ -95,7 +97,14 @@ typedef enum {
 #define EFFECT_DATA_GET_X(data) ((data)&0x07)
 #define EFFECT_DATA_GET_Y(data) (((data) >> 3) & 0x07)
 
+#define EFFECT_DATA_1_MAX 0x3F
+#define EFFECT_DATA_2_MAX 0x07
+
 #define FREQUENCY_UNSET -1.0f
+
+#define PWM_MIN 0.01f
+#define PWM_MAX 0.5f
+#define PWM_DEFAULT 0.5f
 
 uint8_t record_get_note(NoteRecord note) {
     return note & 0x3F;
@@ -136,8 +145,12 @@ float note_to_freq(uint8_t note) {
     return notes_oct[note_in_oct] * (1 << octave);
 }
 
-float frequency_offset(float frequency, uint8_t semitones) {
+float frequency_offset_semitones(float frequency, uint8_t semitones) {
     return frequency * (1.0f + ((1.0f / 12.0f) * semitones));
+}
+
+float frequency_get_seventh_of_a_semitone(float frequency) {
+    return frequency * ((1.0f / 12.0f) / 7.0f);
 }
 
 #define PATTERN_SIZE 64
@@ -243,8 +256,8 @@ NoteRow row = {
     .notes =
         {
             // 1/4
-            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(4, 7)),
+            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(4, 7)),
             RECORD_MAKE(NOTE_C4, EffectSlideToNote, test),
             RECORD_MAKE(0, EffectSlideToNote, test),
             //
@@ -283,8 +296,8 @@ NoteRow row = {
             RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             RECORD_MAKE(NOTE_OFF, EffectVibrato, EFFECT_DATA_2(3, 3)),
             // 3/4
-            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(3, 5)),
-            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(4, 7)),
+            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(4, 7)),
             RECORD_MAKE(NOTE_OFF, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
@@ -293,9 +306,9 @@ NoteRow row = {
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(NOTE_C2, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_C2, EffectPWM, 60),
+            RECORD_MAKE(0, EffectPWM, 32),
+            RECORD_MAKE(0, EffectPWM, 12),
             RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
@@ -313,9 +326,9 @@ NoteRow row = {
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(NOTE_C2, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_C2, EffectPWM, 60),
+            RECORD_MAKE(0, EffectPWM, 32),
+            RECORD_MAKE(0, EffectPWM, 12),
             RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
@@ -342,19 +355,28 @@ typedef struct {
     uint8_t depth;
     int8_t direction;
     int8_t value;
-} Vibrato;
+} IntegerOscillator;
 
 typedef struct {
     float frequency;
     float frequency_target;
+    float pwm;
     bool play;
-    Vibrato vibrato;
+    IntegerOscillator vibrato;
 } ChannelState;
 
 ChannelState ch_state = {
     .frequency = 0,
     .frequency_target = FREQUENCY_UNSET,
+    .pwm = PWM_DEFAULT,
     .play = false,
+    .vibrato =
+        {
+            .speed = 0,
+            .depth = 0,
+            .direction = 0,
+            .value = 0,
+        },
 };
 
 void tracker_interrupt_body() {
@@ -375,6 +397,9 @@ void tracker_interrupt_body() {
             ch_state.vibrato.value = 0;
             ch_state.vibrato.direction = 0;
 
+            // reset pwm
+            ch_state.pwm = PWM_DEFAULT;
+
             if(effect == EffectSlideToNote) {
                 ch_state.frequency_target = note_to_freq(note);
             } else {
@@ -383,13 +408,14 @@ void tracker_interrupt_body() {
             }
         }
 
+        // handle "on first tick" effects
         if(effect == EffectSetSpeed) {
             song_state.tick_limit = data;
         }
     }
 
     if(ch_state.play) {
-        float frequency;
+        float frequency, pwm;
 
         if((effect == EffectSlideUp || effect == EffectSlideDown) && data != EFFECT_DATA_NONE) {
             // apply slide effect
@@ -414,16 +440,17 @@ void tracker_interrupt_body() {
         }
 
         frequency = ch_state.frequency;
+        pwm = ch_state.pwm;
 
         // apply arpeggio effect
         if(effect == EffectArpeggio) {
             if(data != EFFECT_DATA_NONE) {
                 if((song_state.tick % 3) == 1) {
                     uint8_t note_offset = EFFECT_DATA_GET_X(data);
-                    frequency = frequency_offset(frequency, note_offset);
+                    frequency = frequency_offset_semitones(frequency, note_offset);
                 } else if((song_state.tick % 3) == 2) {
                     uint8_t note_offset = EFFECT_DATA_GET_Y(data);
-                    frequency = frequency_offset(frequency, note_offset);
+                    frequency = frequency_offset_semitones(frequency, note_offset);
                 }
             }
         } else if(effect == EffectVibrato) {
@@ -448,10 +475,12 @@ void tracker_interrupt_body() {
                 ch_state.vibrato.direction = 1;
             }
 
-            frequency += frequency * (((1.0f / 12.0f) / 7.0f) * ch_state.vibrato.value);
+            frequency += (frequency_get_seventh_of_a_semitone(frequency) * ch_state.vibrato.value);
+        } else if(effect == EffectPWM) {
+            pwm = (pwm - PWM_MIN) / EFFECT_DATA_1_MAX * data + PWM_MIN;
         }
 
-        tracker_speaker_play(frequency, 0.5f);
+        tracker_speaker_play(frequency, pwm);
     } else {
         tracker_speaker_stop();
     }
@@ -462,6 +491,8 @@ void tracker_interrupt_body() {
 
         // next note
         song_state.row = (song_state.row + 1) % PATTERN_SIZE;
+
+        // handle "on last tick" effects
     }
 }
 
@@ -471,38 +502,12 @@ void tracker_interrupt_cb() {
     tracker_debug_set(false);
 }
 
-void log_record(NoteRecord record) {
-    uint8_t note = record_get_note(record);
-    uint8_t effect = record_get_effect(record);
-    uint8_t data = record_get_effect_data(record);
-
-    printf("Note: %u, Effect: %u, Data: %u", note, effect, data);
-
-    if(effect == EffectArpeggio) {
-        uint8_t note_offset = EFFECT_DATA_GET_X(data);
-        uint8_t note_offset2 = EFFECT_DATA_GET_Y(data);
-        printf(" (Arpeggio: %u, %u)", note_offset, note_offset2);
-
-        float frequency = note_to_freq(note);
-        float new_frequency = frequency_offset(frequency, note_offset);
-        float new_frequency2 = frequency_offset(frequency, note_offset2);
-        printf(
-            " (Freq: %f, %f, %f)",
-            (double)frequency,
-            (double)new_frequency,
-            (double)new_frequency2);
-    }
-
-    printf("\r\n");
-}
-
 int32_t zero_tracker_app(void* p) {
     UNUSED(p);
 
     tracker_debug_init();
     tracker_speaker_init();
     tracker_interrupt_init(60.0f, tracker_interrupt_cb, NULL);
-    // log_record(row.notes[0]);
 
     while(1) {
         furi_delay_ms(1000);
