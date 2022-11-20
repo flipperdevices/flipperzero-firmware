@@ -5,6 +5,7 @@
 #include "../blocks/decoder.h"
 #include "../blocks/generic.h"
 #include "../blocks/math.h"
+#include <lib/flipper_format/flipper_format_i.h>
 
 
 #define TAG "POCSAG"
@@ -212,6 +213,8 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                         if (!pocsag_decode_message_word(instance, codeword)) {
                             instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                             FURI_LOG_I(TAG, "Msg done %d", instance->msg_len);
+                            if(instance->base.callback)
+                                instance->base.callback(&instance->base, instance->base.context);
                         }
                     }
                     instance->codeword_idx++;
@@ -224,11 +227,52 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
     }
 }
 
+uint8_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPocsag* instance = context;
+    uint8_t hash = 0;
+    uint8_t i;
+
+    for(i = 0; i < instance->msg_len; i++)
+        hash ^= instance->msg[i];
+    // address is 21 bit
+    hash ^= (instance->addr & 0xFF) ^
+            ((instance->addr >> 8) & 0xFF) ^
+            ((instance->addr >> 16) & 0xFF);
+    return hash;
+}
+
+bool subghz_protocol_decoder_pocsag_serialize(void* context, FlipperFormat* flipper_format, SubGhzRadioPreset* preset) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPocsag* instance = context;
+
+    if (!subghz_block_generic_serialize(&instance->generic, flipper_format, preset))
+        return false;
+    return true;
+}
+
+bool subghz_protocol_decoder_pocsag_deserialize(void* context, FlipperFormat* flipper_format) {
+    furi_assert(context);
+    SubGhzProtocolDecoderPocsag* instance = context;
+    bool ret = false;
+
+    do {
+        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
+            break;
+        }
+        ret = true;
+    } while(false);
+    return ret;
+}
+
 const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
     .alloc = subghz_protocol_decoder_pocsag_alloc,
     .free = subghz_protocol_decoder_pocsag_free,
     .reset = subghz_protocol_decoder_pocsag_reset,
     .feed = subghz_protocol_decoder_pocsag_feed,
+    .get_hash_data = subghz_protocol_decoder_pocsag_get_hash_data,
+    .serialize = subghz_protocol_decoder_pocsag_serialize,
+    .deserialize = subghz_protocol_decoder_pocsag_deserialize,
 };
 
 const SubGhzProtocol subghz_protocol_pocsag = {
