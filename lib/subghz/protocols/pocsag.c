@@ -85,6 +85,28 @@ static void pocsag_decode_address_word(SubGhzProtocolDecoderPocsag* instance, ui
     instance->func = (data >> 11) & 0b11;
 }
 
+// decode message word, maintaining instance state for partial decoding. Return true if more data
+// might follow or false if end of message reached.
+bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
+    for (uint8_t i = 0; i < 20; i++) {
+        instance->char_data >>= 1;
+        if (data & (1 << 30)) {
+            instance->char_data |= 1<<6;
+        }
+        instance->char_bits++;
+        if (instance->char_bits == 7) {
+            if (instance->char_data == 0)
+                return false;
+            FURI_LOG_I(TAG, "Msg: %c", instance->char_data);
+            instance->msg[instance->msg_len++] = instance->char_data;
+            instance->char_data = 0;
+            instance->char_bits = 0;
+        }
+        data <<= 1;
+    }
+    return true;
+}
+
 
 void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
@@ -147,7 +169,9 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                         FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
                     }
                     else {
-                        FURI_LOG_I(TAG, "Message code word");
+                        if (!pocsag_decode_message_word(instance, instance->decoder.decode_data & MASK_32_BITS)) {
+                            // push decoded message
+                        }
                     }
                     instance->codeword_idx++;
                 }
