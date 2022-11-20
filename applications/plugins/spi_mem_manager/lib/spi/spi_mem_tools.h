@@ -15,4 +15,4 @@ bool spi_mem_tools_read_block_data(
 size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip);
 SPIMemChipStatus spi_mem_tools_get_chip_status(SPIMemChip* chip);
 bool spi_mem_tools_erase_chip(SPIMemChip* chip);
-bool spi_mem_tools_set_write_enabled(bool enable);
+bool spi_mem_tools_set_write_enabled(SPIMemChip* chip, bool enable);

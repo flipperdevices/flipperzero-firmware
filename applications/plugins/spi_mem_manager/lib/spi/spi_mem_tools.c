@@ -92,19 +92,19 @@ size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip) {
 
 SPIMemChipStatus spi_mem_tools_get_chip_status(SPIMemChip* chip) {
     UNUSED(chip);
-    SPIMemChipStatusBit status = SPIMemChipStatusBitReserved;
+    uint8_t status;
     if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, (uint8_t*)&status, 1))
         return SPIMemChipStatusError;
     if(status & SPIMemChipStatusBitBusy) return SPIMemChipStatusBusy;
     return SPIMemChipStatusIdle;
 }
 
-bool spi_mem_tools_set_write_enabled(bool enable) {
-    SPIMemChipStatusBit status = SPIMemChipStatusBitReserved;
+bool spi_mem_tools_set_write_enabled(SPIMemChip* chip, bool enable) {
+    UNUSED(chip);
+    uint8_t status;
     SPIMemChipCMD cmd = SPIMemChipCMDWriteDisable;
     if(enable) cmd = SPIMemChipCMDWriteEnable;
     if(!spi_mem_tools_trx(cmd, NULL, 0, NULL, 0)) return false;
-    furi_delay_ms(10);
     if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, (uint8_t*)&status, 1)) return false;
     if(!(status & SPIMemChipStatusBitWriteEnabled) && enable) return false;
     if((status & SPIMemChipStatusBitWriteEnabled) && !enable) return false;

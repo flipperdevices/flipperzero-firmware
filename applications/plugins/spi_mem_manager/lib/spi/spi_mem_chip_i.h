@@ -43,16 +43,16 @@ typedef enum {
     SPIMemChipCMDReadStatus = 0x05
 } SPIMemChipCMD;
 
-typedef enum {
-    SPIMemChipStatusBitBusy = (1 << 0),
-    SPIMemChipStatusBitWriteEnabled = (1 << 1),
-    SPIMemChipStatusBitSoftwareProtection1 = (1 << 2),
-    SPIMemChipStatusBitSoftwareProtection2 = (1 << 3),
-    SPIMemChipStatusBitWriteProtect = (1 << 4),
-    SPIMemChipStatusBitEraseError = (1 << 5),
-    SPIMemChipStatusBitReserved = (1 << 6),
-    SPIMemChipStatusBitRegisterProtect = (1 << 7)
-} SPIMemChipStatusBit;
+enum SPIMemChipStatusBit {
+    SPIMemChipStatusBitBusy = (0x01 << 0),
+    SPIMemChipStatusBitWriteEnabled = (0x01 << 1),
+    SPIMemChipStatusBitBitProtection1 = (0x01 << 2),
+    SPIMemChipStatusBitBitProtection2 = (0x01 << 3),
+    SPIMemChipStatusBitBitProtection3 = (0x01 << 4),
+    SPIMemChipStatusBitTopBottomProtection = (0x01 << 5),
+    SPIMemChipStatusBitSectorProtect = (0x01 << 6),
+    SPIMemChipStatusBitRegisterProtect = (0x01 << 7)
+};
 
 typedef struct {
     const char* vendor_name;

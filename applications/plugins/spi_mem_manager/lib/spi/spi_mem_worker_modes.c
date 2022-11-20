@@ -125,10 +125,11 @@ static void spi_mem_verify_process(SPIMemWorker* worker) {
 static void spi_mem_chip_erase_process(SPIMemWorker* worker) {
     SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipReadFail;
     do {
-        if(!spi_mem_tools_set_write_enabled(true)) break;
+        if(!spi_mem_worker_await_chip_busy(worker)) break;
+        if(!spi_mem_tools_set_write_enabled(worker->chip_info, true)) break;
         if(!spi_mem_tools_erase_chip(worker->chip_info)) break;
         if(!spi_mem_worker_await_chip_busy(worker)) break;
-        if(!spi_mem_tools_set_write_enabled(false)) break;
+        if(!spi_mem_tools_set_write_enabled(worker->chip_info, false)) break;
         event = SPIMemCustomEventWorkerEraseDone;
     } while(0);
     spi_mem_run_worker_callback(worker, event);
