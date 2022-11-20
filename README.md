@@ -51,3 +51,13 @@ Or you can build and run it on your flipper with the command:
 ```
 ./fbt launch_app APPSRC=applications_user/ir_remote
 ```
+
+## Screenshots
+
+Choose config file to map
+
+![image](ir.png)
+
+Show all button name in the config file (If empty will show N/A). Upper part short press, Lower part long press
+
+![image2](ir2.png)
