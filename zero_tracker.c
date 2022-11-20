@@ -90,6 +90,9 @@ typedef enum {
 
 #define EFFECT_DATA_2(x, y) ((x) | ((y) << 3))
 
+#define EFFECT_DATA_GET_X(data) ((data)&0x07)
+#define EFFECT_DATA_GET_Y(data) (((data) >> 3) & 0x07)
+
 #define FREQUENCY_UNSET -1.0f
 
 uint8_t record_get_note(NoteRecord note) {
@@ -410,17 +413,17 @@ void tracker_interrupt_body() {
         if(effect == EffectArpeggio) {
             if(data != EFFECT_DATA_NONE) {
                 if((song_state.tick % 3) == 1) {
-                    uint8_t note_offset = data & 0b000111;
+                    uint8_t note_offset = EFFECT_DATA_GET_X(data);
                     frequency = frequency_offset(frequency, note_offset);
                 } else if((song_state.tick % 3) == 2) {
-                    uint8_t note_offset = (data >> 3) & 0b000111;
+                    uint8_t note_offset = EFFECT_DATA_GET_Y(data);
                     frequency = frequency_offset(frequency, note_offset);
                 }
             }
         } else if(effect == EffectVibrato) {
             // apply vibrato effect, data = speed, depth
-            uint8_t vibrato_speed = data & 0b000111;
-            uint8_t vibrato_depth = (data >> 3) & 0b000111;
+            uint8_t vibrato_speed = EFFECT_DATA_GET_X(data);
+            uint8_t vibrato_depth = EFFECT_DATA_GET_Y(data);
 
             // update vibrato parameters if speed or depth is non-zero
             if(vibrato_speed != 0) ch_state.vibrato.speed = vibrato_speed;
@@ -470,8 +473,8 @@ void log_record(NoteRecord record) {
     printf("Note: %u, Effect: %u, Data: %u", note, effect, data);
 
     if(effect == EffectArpeggio) {
-        uint8_t note_offset = data & 0b000111;
-        uint8_t note_offset2 = (data >> 3) & 0b000111;
+        uint8_t note_offset = EFFECT_DATA_GET_X(data);
+        uint8_t note_offset2 = EFFECT_DATA_GET_Y(data);
         printf(" (Arpeggio: %u, %u)", note_offset, note_offset2);
 
         float frequency = note_to_freq(note);
