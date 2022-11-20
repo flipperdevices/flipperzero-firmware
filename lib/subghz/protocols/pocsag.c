@@ -16,7 +16,8 @@ static const SubGhzBlockConst pocsag_const = {
 
 // Minimal amount of sync bits (interleaving zeros and ones)
 #define POCSAG_MIN_SYNC_BITS    32
-#define MASK_32_BITS            0xFFFFFFFF
+#define POCSAG_CW_BITS          32
+#define POCSAG_CW_MASK          0xFFFFFFFF
 #define POCSAG_FRAME_SYNC_CODE  0x7CD215D8
 #define POCSAG_IDLE_CODE_WORD   0x7A89C197
 #define POCSAG_MAX_MSG_LEN      80
@@ -140,13 +141,15 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         return;
     }
 
+    uint32_t codeword;
+
     // handle state machine for every incoming bit
     while (bits_count-- > 0) {
         subghz_protocol_blocks_add_bit(&instance->decoder, !level);
 
         switch(instance->decoder.parser_step) {
         case PocsagDecoderStepFoundSync:
-            if ((instance->decoder.decode_data & MASK_32_BITS) == POCSAG_FRAME_SYNC_CODE) {
+            if ((instance->decoder.decode_data & POCSAG_CW_MASK) == POCSAG_FRAME_SYNC_CODE) {
                 FURI_LOG_I(TAG, "Found preamble!");
                 instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                 instance->decoder.decode_count_bit = 0;
@@ -155,8 +158,9 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
             break;
         case PocsagDecoderStepFoundPreamble:
             // handle codewords
-            if (instance->decoder.decode_count_bit == 32) {
-                switch (instance->decoder.decode_data & MASK_32_BITS) {
+            if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
+                codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     FURI_LOG_I(TAG, "Idle");
                     instance->codeword_idx++;
@@ -166,14 +170,14 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                     instance->codeword_idx = 0;
                     break;
                 default:
-                    if (instance->decoder.decode_data >> 31 == 0) {
-                        pocsag_decode_address_word(instance, instance->decoder.decode_data & MASK_32_BITS);
+                    if (codeword >> 31 == 0) {
+                        pocsag_decode_address_word(instance, codeword);
                         FURI_LOG_I(TAG, "Address: %" PRIu32 , instance->addr);
                         FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
                     }
                     else {
                         FURI_LOG_I(TAG, "Msg");
-                        if (!pocsag_decode_message_word(instance, instance->decoder.decode_data & MASK_32_BITS)) {
+                        if (!pocsag_decode_message_word(instance, codeword)) {
                             // push decoded message
                             FURI_LOG_I(TAG, "Msg done %d", instance->msg_len);
                         }
