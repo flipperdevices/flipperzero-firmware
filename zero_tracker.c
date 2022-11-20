@@ -79,14 +79,47 @@ typedef uint16_t NoteRecord;
 #define NOTE_OFF 63
 
 typedef enum {
+    // 0xy, x - first semitones offset, y - second semitones offset. 0 - no offset .. 7 - +7 semitones...
+    // Play the arpeggio chord with three notes. The first note is the base note, the second and third are offset by x and y.
+    // Each note plays one tick.
     EffectArpeggio = 0x00,
+
+    // 1xx, xx - effect speed, 0 - no effect, 1 - slowest, 0x3F - fastest.
+    // Slide the note pitch up by xx Hz every tick.
     EffectSlideUp = 0x01,
+
+    // 2xx, xx - effect speed, 0 - no effect, 1 - slowest, 0x3F - fastest.
+    // Slide the note pitch down by xx Hz every tick.
     EffectSlideDown = 0x02,
+
+    // 3xx, xx - effect speed, 0 - no effect, 1 - slowest, 0x3F - fastest.
+    // Slide the already playing note pitch towards another one by xx Hz every tick.
+    // The note value is saved until the note is playing, so you don't have to repeat the note value to continue sliding.
     EffectSlideToNote = 0x03,
+
+    // 4xy, x - vibrato speed (0..7), y - vibrato depth (0..7).
+    // Vibrato effect. The pitch of the note increases by x Hz each tick to a positive vibrato depth, then decreases to a negative depth.
+    // Value 1 of depth means 1/7 of a semitone (about 14.28 ct), so value 7 means full semitone.
+    // Note will play without vibrato on the first tick at the beginning of the effect.
+    // Vibrato speed and depth are saved until the note is playing, and will be updated only if they are not zero, so you doesn't have to repeat them every tick.
     EffectVibrato = 0x04,
 
+    // Bxx, xx - pattern number
+    // Jump to the pattern number xx at first tick of current row.
+    // So if you want to jump to the pattern after note 4, you should put this effect on the 5th note.
+    EffectJumpToPattern = 0x0B,
+
+    // Cxx, xx - pwm value
+    // Set the PWM value to xx.
     EffectPWM = 0x0C,
 
+    // Bxx, xx - row number
+    // Jump to the row xx in next pattern at first tick of current row.
+    // So if you want to jump to the pattern after note 4, you should put this effect on the 5th note.
+    EffectBreakPattern = 0x0D,
+
+    // Fxx, xx - song speed, 0 - 1 tick per note, 1 - 2 ticks per note, 0x3F - 64 ticks per note.
+    // Set the speed of the song in terms of ticks per note.
     EffectSetSpeed = 0x0F,
 } Effect;
 
@@ -386,6 +419,32 @@ void tracker_interrupt_body() {
 
     // load frequency from note at tick 0
     if(song_state.tick == 0) {
+        // handle "on first tick" effects
+        if(effect == EffectBreakPattern) {
+            // TODO: advance to next pattern
+            song_state.row = data;
+
+            // reload note and effect
+            note = record_get_note(row.notes[song_state.row]);
+            effect = record_get_effect(row.notes[song_state.row]);
+            data = record_get_effect_data(row.notes[song_state.row]);
+        }
+
+        if(effect == EffectJumpToPattern) {
+            // TODO: advance to pattern[data]
+
+            // reload note and effect
+            note = record_get_note(row.notes[song_state.row]);
+            effect = record_get_effect(row.notes[song_state.row]);
+            data = record_get_effect_data(row.notes[song_state.row]);
+        }
+
+        // no "else", cos previous effects reloads the effect value
+        if(effect == EffectSetSpeed) {
+            song_state.tick_limit = data;
+        }
+
+        // handle note effects
         if(note == NOTE_OFF) {
             ch_state.play = false;
         } else if((note > NOTE_NONE) && (note < NOTE_OFF)) {
@@ -406,11 +465,6 @@ void tracker_interrupt_body() {
                 ch_state.frequency = note_to_freq(note);
                 ch_state.frequency_target = FREQUENCY_UNSET;
             }
-        }
-
-        // handle "on first tick" effects
-        if(effect == EffectSetSpeed) {
-            song_state.tick_limit = data;
         }
     }
 
@@ -491,8 +545,7 @@ void tracker_interrupt_body() {
 
         // next note
         song_state.row = (song_state.row + 1) % PATTERN_SIZE;
-
-        // handle "on last tick" effects
+        //TODO: advance to next pattern
     }
 }
 
