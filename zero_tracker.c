@@ -84,6 +84,8 @@ typedef enum {
     EffectSlideDown = 0x02,
     EffectSlideToNote = 0x03,
     EffectVibrato = 0x04,
+
+    EffectSetSpeed = 0x0F,
 } Effect;
 
 #define EFFECT_DATA_NONE 0
@@ -379,6 +381,10 @@ void tracker_interrupt_body() {
                 ch_state.frequency = note_to_freq(note);
                 ch_state.frequency_target = FREQUENCY_UNSET;
             }
+        }
+
+        if(effect == EffectSetSpeed) {
+            song_state.tick_limit = data;
         }
     }
 
