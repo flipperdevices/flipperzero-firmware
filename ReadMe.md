@@ -28,6 +28,9 @@ Thank you to all the supporters!
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - Added: [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
+- Added: [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) `video.bin NEEDED, Please LMK if you have it`
+- Added: [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
+- Added: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -186,6 +189,7 @@ $ ./fbt resources icons dolphin_ext
 
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) `video.bin NEEDED, Please LMK if you have it`
 - [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [Bluetooth Remote (By Cutch)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
@@ -231,8 +235,10 @@ $ ./fbt resources icons dolphin_ext
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU21D / SI7021`
 - [Temperature Sensor (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9c4612e571db42f5e6123a3f159e01337453a6af) `Req: AM2320`
+- [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)[OFW]](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
+- [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
