@@ -114,7 +114,7 @@ void unitemp_onewire_send_bit(OneWireBus* bus, bool state);
  * @param bus Указатель на шину one wire
  * @param data Записываемый байт
  */
-void unitemp_onewire_send_byte(OneWireBus* bus, uint8_t data);
+void unitemp_onewire_bus_send_byte(OneWireBus* bus, uint8_t data);
 
 /**
  * @brief Запись массива байт на шину one wire
@@ -123,7 +123,7 @@ void unitemp_onewire_send_byte(OneWireBus* bus, uint8_t data);
  * @param data Указатель на массив, откуда будут записаны данные
  * @param len Количество байт
  */
-void unitemp_onewire_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len);
+void unitemp_onewire_bus_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len);
 
 /**
  * @brief Чтение бита на шине one wire
@@ -171,7 +171,7 @@ bool unitemp_oneWire_sensor_readID(OneWireSensor* instance);
  * @brief Команда выбора определённого датчка по его ID
  * @param instance Указатель на датчик one wire
  */
-void unitemp_onewire_sensor_select(OneWireSensor* instance);
+void unitemp_onewire_bus_select_sensor(OneWireSensor* instance);
 
 /**
  * @brief Инициализация процесса поиска адресов на шине one wire
@@ -184,6 +184,15 @@ void unitemp_onewire_enum_init(void);
  * @return Возвращает указатель на буфер, содержащий восьмибайтовое значение адреса, либо NULL, если поиск завешён
  */
 uint8_t* unitemp_onewire_enum_next(OneWireBus* bus);
+
+/**
+ * @brief Сравнить ID датчиков
+ * 
+ * @param id1 Указатель на адрес первого датчика
+ * @param id2 Указатель на адрес второго датчика
+ * @return Истина если ID индентичны
+ */
+bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2);
 
 extern const SensorType DS18x2x;
 #endif

@@ -26,10 +26,10 @@ OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
 
     //Проверка на наличие шины на этом порте
     for(uint8_t i = 0; i < app->sensors_count; i++) {
-        if(app->sensors[i]->type == &DS18x2x &&
-           ((OneWireBus*)(app->sensors[i]->instance))->gpio == gpio) {
-            ((OneWireBus*)(app->sensors[i]->instance))->device_count++;
-            return ((OneWireBus*)(app->sensors[i]->instance));
+        if(app->sensors[i]->type->interface == &ONE_WIRE &&
+           ((OneWireSensor*)app->sensors[i]->instance)->bus->gpio->num == gpio->num) {
+            //Если шина на этом порту уже есть, то возврат указателя на шину
+            return ((OneWireSensor*)app->sensors[i]->instance)->bus;
         }
     }
 
@@ -38,14 +38,16 @@ OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
     bus->gpio = gpio;
     bus->powerMode = PWR_ACTIVE;
 
-    FURI_LOG_D(APP_NAME, "one wire bus (port %d) allocated", unitemp_gpio_toInt(gpio));
+    FURI_LOG_D(APP_NAME, "one wire bus (port %d) allocated", gpio->num);
 
     return bus;
 }
 
 bool unitemp_onewire_bus_init(OneWireBus* bus) {
     if(bus == NULL) return false;
-    if(bus->device_count > 0) return true;
+    bus->device_count++;
+    //Выход если шина уже была инициализирована
+    if(bus->device_count > 1) return true;
 
     unitemp_gpio_lock(bus->gpio, &ONE_WIRE);
     //Высокий уровень по умолчанию
@@ -56,15 +58,15 @@ bool unitemp_onewire_bus_init(OneWireBus* bus) {
         GpioModeOutputOpenDrain, //Режим работы - открытый сток
         GpioPullUp, //Принудительная подтяжка линии данных к питанию
         GpioSpeedVeryHigh); //Скорость работы - максимальная
-    bus->device_count++;
 
     return true;
 }
 bool unitemp_onewire_bus_deinit(OneWireBus* bus) {
+    FURI_LOG_D(APP_NAME, "devices on wire %d: %d", bus->gpio->num, bus->device_count);
     bus->device_count--;
     if(bus->device_count <= 0) {
         bus->device_count = 0;
-        unitemp_gpio_lock(bus->gpio, &ONE_WIRE);
+        unitemp_gpio_unlock(bus->gpio);
         //Режим работы - аналог, подтяжка выключена
         furi_hal_gpio_init(
             bus->gpio->pin, //Порт FZ
@@ -117,15 +119,15 @@ void unitemp_onewire_send_bit(OneWireBus* bus, bool state) {
     }
 }
 
-void unitemp_onewire_send_byte(OneWireBus* bus, uint8_t data) {
+void unitemp_onewire_bus_send_byte(OneWireBus* bus, uint8_t data) {
     for(int i = 0; i < 8; i++) {
         unitemp_onewire_send_bit(bus, (data & (1 << i)) != 0);
     }
 }
 
-void unitemp_onewire_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len) {
+void unitemp_onewire_bus_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len) {
     for(uint8_t i = 0; i < len; i++) {
-        unitemp_onewire_send_byte(bus, data[i]);
+        unitemp_onewire_bus_send_byte(bus, data[i]);
     }
 }
 
@@ -172,7 +174,7 @@ bool unitemp_onewire_CRC_check(uint8_t* data, uint8_t len) {
 
 bool unitemp_onewire_sensor_readID(OneWireSensor* instance) {
     if(!unitemp_onewire_bus_start(instance->bus)) return false;
-    unitemp_onewire_send_byte(instance->bus, 0x33); // Чтение ПЗУ
+    unitemp_onewire_bus_send_byte(instance->bus, 0x33); // Чтение ПЗУ
     unitemp_onewire_read_byteArray(instance->bus, instance->deviceID, 8);
     if(!unitemp_onewire_CRC_check(instance->deviceID, 8)) {
         memset(instance->deviceID, 0, 8);
@@ -205,7 +207,7 @@ uint8_t* unitemp_onewire_enum_next(OneWireBus* bus) {
     uint8_t next = 0;
 
     uint8_t p = 1;
-    unitemp_onewire_send_byte(bus, 0xF0);
+    unitemp_onewire_bus_send_byte(bus, 0xF0);
     uint8_t newfork = 0;
     for(;;) {
         uint8_t not0 = unitemp_onewire_read_bit(bus);
@@ -254,9 +256,9 @@ uint8_t* unitemp_onewire_enum_next(OneWireBus* bus) {
     return &onewire_enum[0];
 }
 
-void unitemp_onewire_sensor_select(OneWireSensor* instance) {
-    unitemp_onewire_send_byte(instance->bus, 0x55);
-    unitemp_onewire_send_byteArray(instance->bus, instance->deviceID, 8);
+void unitemp_onewire_bus_select_sensor(OneWireSensor* instance) {
+    unitemp_onewire_bus_send_byte(instance->bus, 0x55);
+    unitemp_onewire_bus_send_byteArray(instance->bus, instance->deviceID, 8);
 }
 
 bool unitemp_onewire_sensor_alloc(Sensor* sensor, char* args) {
@@ -294,6 +296,7 @@ bool unitemp_onewire_sensor_alloc(Sensor* sensor, char* args) {
     instance->familyCode = instance->deviceID[0];
 
     instance->bus = uintemp_onewire_bus_alloc(unitemp_gpio_getFromInt(gpio));
+
     if(instance != NULL) {
         return true;
     }
@@ -303,10 +306,12 @@ bool unitemp_onewire_sensor_alloc(Sensor* sensor, char* args) {
 }
 
 bool unitemp_onewire_sensor_free(Sensor* sensor) {
-    if(((OneWireSensor*)sensor->instance)->bus->device_count == 0) {
-        unitemp_gpio_unlock(((OneWireSensor*)sensor->instance)->bus->gpio);
-        free(((OneWireSensor*)sensor->instance)->bus);
+    if(((OneWireSensor*)sensor->instance)->bus != NULL) {
+        if(((OneWireSensor*)sensor->instance)->bus->device_count == 0) {
+            free(((OneWireSensor*)sensor->instance)->bus);
+        }
     }
+
     free(sensor->instance);
 
     return true;
@@ -314,28 +319,31 @@ bool unitemp_onewire_sensor_free(Sensor* sensor) {
 
 bool unitemp_onewire_sensor_init(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
-    if(instance == NULL || instance->bus->gpio == NULL) {
+    if(instance == NULL || instance->bus == NULL) {
         FURI_LOG_E(APP_NAME, "Sensor pointer is null!");
         return false;
     }
+
     unitemp_onewire_bus_init(instance->bus);
     furi_delay_ms(1);
 
     if(instance->familyCode == FC_DS18B20 || instance->familyCode == FC_DS1822) {
         //Установка разрядности в 10 бит
         if(!unitemp_onewire_bus_start(instance->bus)) return false;
-        unitemp_onewire_sensor_select(instance);
-        unitemp_onewire_send_byte(instance->bus, 0x4E); // Запись в память
+        unitemp_onewire_bus_select_sensor(instance);
+        unitemp_onewire_bus_send_byte(instance->bus, 0x4E); // Запись в память
         uint8_t buff[3];
-        buff[0] = 0x4B; //Значение нижнего предела
-        buff[1] = 0x46; //Значение высшего предела
+        //Значения тревоги
+        buff[0] = 0x4B; //Значение нижнего предела температуры
+        buff[1] = 0x46; //Значение верхнего предела температуры
+        //Конфигурация
         buff[2] = 0x3F; //10 бит разрядность преобразования
-        unitemp_onewire_send_byteArray(instance->bus, buff, 3);
+        unitemp_onewire_bus_send_byteArray(instance->bus, buff, 3);
 
         //Сохранение значений в EEPROM для автоматического восстановления после сбоев питания
         if(!unitemp_onewire_bus_start(instance->bus)) return false;
-        unitemp_onewire_sensor_select(instance);
-        unitemp_onewire_send_byte(instance->bus, 0x48); // Запись в EEPROM
+        unitemp_onewire_bus_select_sensor(instance);
+        unitemp_onewire_bus_send_byte(instance->bus, 0x48); // Запись в EEPROM
     }
 
     return true;
@@ -343,7 +351,7 @@ bool unitemp_onewire_sensor_init(Sensor* sensor) {
 
 bool unitemp_onewire_sensor_deinit(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
-    if(instance == NULL || instance->bus->gpio == NULL) return false;
+    if(instance == NULL || instance->bus == NULL) return false;
     unitemp_onewire_bus_deinit(instance->bus);
 
     return true;
@@ -353,8 +361,8 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
     if(sensor->status != UT_POLLING) {
         if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
-        unitemp_onewire_sensor_select(instance);
-        unitemp_onewire_send_byte(instance->bus, 0x44); // convert t
+        unitemp_onewire_bus_select_sensor(instance);
+        unitemp_onewire_bus_send_byte(instance->bus, 0x44); // convert t
         if(instance->bus->powerMode == PWR_PASSIVE) {
             furi_hal_gpio_write(instance->bus->gpio->pin, true);
             furi_hal_gpio_init(
@@ -368,8 +376,8 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
                 instance->bus->gpio->pin, GpioModeOutputOpenDrain, GpioPullUp, GpioSpeedVeryHigh);
         }
         if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
-        unitemp_onewire_sensor_select(instance);
-        unitemp_onewire_send_byte(instance->bus, 0xBE); // Read Scratch-pad
+        unitemp_onewire_bus_select_sensor(instance);
+        unitemp_onewire_bus_send_byte(instance->bus, 0xBE); // Read Scratch-pad
         uint8_t buff[9];
         unitemp_onewire_read_byteArray(instance->bus, buff, 9);
         if(!unitemp_onewire_CRC_check(buff, 9)) {
@@ -385,4 +393,12 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
     }
 
     return UT_OK;
+}
+
+bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2) {
+    if(id1 == NULL || id2 == NULL) return false;
+    for(uint8_t i = 0; i < 8; i++) {
+        if(id1[i] != id2[i]) return false;
+    }
+    return true;
 }

@@ -21,17 +21,37 @@ static VariableItem* onewire_type_item;
 
 #define VIEW_ID SENSOREDIT_VIEW
 
-void scan(void) {
-    OneWireSensor* ow_sensor = editable_sensor->instance;
+bool _onewire_id_exist(uint8_t* id) {
+    if(id == NULL) return false;
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
+        if(app->sensors[i]->type == &DS18x2x) {
+            if(unitemp_onewire_id_compare(
+                   id, ((OneWireSensor*)(app->sensors[i]->instance))->deviceID)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
+static void _onewire_scan(void) {
+    OneWireSensor* ow_sensor = editable_sensor->instance;
+    FURI_LOG_D(
+        APP_NAME,
+        "devices on wire %d: %d",
+        ow_sensor->bus->gpio->num,
+        ow_sensor->bus->device_count);
     //Сканирование шины one wire
     unitemp_onewire_bus_init(ow_sensor->bus);
-    uint8_t* id = unitemp_onewire_enum_next(ow_sensor->bus);
+    unitemp_onewire_enum_init();
+    uint8_t* id;
+    do {
+        id = unitemp_onewire_enum_next(ow_sensor->bus);
+    } while(_onewire_id_exist(id));
 
     if(id == NULL) {
-        unitemp_onewire_enum_init();
         id = unitemp_onewire_enum_next(ow_sensor->bus);
-        if(id == NULL) {
+        if(id == NULL || _onewire_id_exist(id)) {
             memset(ow_sensor->deviceID, 0, 8);
             ow_sensor->familyCode = 0;
             unitemp_onewire_bus_deinit(ow_sensor->bus);
@@ -115,6 +135,11 @@ static void _enter_callback(void* context, uint32_t index) {
     //Сохранение
     if((index == 3 && editable_sensor->type->interface != &ONE_WIRE) ||
        (index == 4 && editable_sensor->type->interface == &ONE_WIRE)) {
+        //Выход если датчик one wire не имеет ID
+        if(editable_sensor->type->interface == &ONE_WIRE &&
+           ((OneWireSensor*)(editable_sensor->instance))->familyCode == 0) {
+            return;
+        }
         app->sensors[app->sensors_count++] = editable_sensor;
         unitemp_sensors_save();
         unitemp_sensors_reload();
@@ -123,7 +148,7 @@ static void _enter_callback(void* context, uint32_t index) {
     }
     //Адрес устройства на шине one wire
     if(index == 3 && editable_sensor->type->interface == &ONE_WIRE) {
-        scan();
+        _onewire_scan();
     }
 }
 
@@ -174,7 +199,7 @@ static void _name_change_callback(VariableItem* item) {
  */
 static void _onwire_addr_change_callback(VariableItem* item) {
     variable_item_set_current_value_index(item, 0);
-    scan();
+    _onewire_scan();
 }
 
 /**
