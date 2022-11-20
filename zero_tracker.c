@@ -232,40 +232,35 @@ NoteRow _row = {
         },
 };
 
-const uint8_t test = 0x3F;
+const uint8_t test = 0x20;
 
 NoteRow row = {
     .notes =
         {
+            // 1/4
+            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_C4, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectSlideToNote, test),
             //
-            RECORD_MAKE(NOTE_C3, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectSlideToNote, test),
+            RECORD_MAKE(0, EffectSlideToNote, test),
             //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(1, 1)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(1, 1)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(1, 1)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(1, 1)),
             //
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            //
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            //
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            //
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(2, 2)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(2, 2)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(2, 2)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(2, 2)),
+            // 2/4
+            RECORD_MAKE(NOTE_C3, EffectSlideDown, 0x20),
+            RECORD_MAKE(0, EffectSlideDown, 0x20),
+            RECORD_MAKE(NOTE_C4, EffectVibrato, EFFECT_DATA_2(3, 3)),
             RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
             RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
@@ -278,19 +273,14 @@ NoteRow row = {
             RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
             //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            //
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
-            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            RECORD_MAKE(NOTE_OFF, EffectVibrato, EFFECT_DATA_2(3, 3)),
+            // 3/4
+            RECORD_MAKE(NOTE_C3, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(0, EffectArpeggio, EFFECT_DATA_2(3, 5)),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
@@ -298,31 +288,49 @@ NoteRow row = {
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
+            RECORD_MAKE(NOTE_C2, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
+            //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
+            // 4/4
+            RECORD_MAKE(NOTE_C3, EffectSlideDown, 0x20),
+            RECORD_MAKE(0, EffectSlideDown, 0x20),
+            RECORD_MAKE(0, EffectSlideDown, 0x20),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             RECORD_MAKE(0, 0, 0),
             //
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(NOTE_C2, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(NOTE_OFF, 0, 0),
             //
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
-            RECORD_MAKE(0, EffectVibrato, EFFECT_DATA_2(0, 0)),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
+            RECORD_MAKE(0, 0, 0),
         },
 };
 
-uint8_t tick_counter = 0;
-uint8_t tick_limit = 2;
-uint8_t row_counter = 0;
+typedef struct {
+    uint8_t tick;
+    uint8_t tick_limit;
+    uint8_t row;
+} SongState;
+
+SongState song_state = {
+    .tick = 0,
+    .tick_limit = 2,
+    .row = 0,
+};
 
 typedef struct {
     uint8_t speed;
@@ -345,21 +353,22 @@ ChannelState ch_state = {
 };
 
 void tracker_interrupt_body() {
-    uint8_t note = record_get_note(row.notes[row_counter]);
-    uint8_t effect = record_get_effect(row.notes[row_counter]);
-    uint8_t data = record_get_effect_data(row.notes[row_counter]);
+    uint8_t note = record_get_note(row.notes[song_state.row]);
+    uint8_t effect = record_get_effect(row.notes[song_state.row]);
+    uint8_t data = record_get_effect_data(row.notes[song_state.row]);
 
     // load frequency from note at tick 0
-    if(tick_counter == 0) {
+    if(song_state.tick == 0) {
         if(note == NOTE_OFF) {
             ch_state.play = false;
         } else if((note > NOTE_NONE) && (note < NOTE_OFF)) {
             ch_state.play = true;
 
+            // reset vibrato
             ch_state.vibrato.speed = 0;
             ch_state.vibrato.depth = 0;
             ch_state.vibrato.value = 0;
-            ch_state.vibrato.direction = 1;
+            ch_state.vibrato.direction = 0;
 
             if(effect == EffectSlideToNote) {
                 ch_state.frequency_target = note_to_freq(note);
@@ -400,10 +409,10 @@ void tracker_interrupt_body() {
         // apply arpeggio effect
         if(effect == EffectArpeggio) {
             if(data != EFFECT_DATA_NONE) {
-                if((tick_counter % 3) == 1) {
+                if((song_state.tick % 3) == 1) {
                     uint8_t note_offset = data & 0b000111;
                     frequency = frequency_offset(frequency, note_offset);
-                } else if((tick_counter % 3) == 2) {
+                } else if((song_state.tick % 3) == 2) {
                     uint8_t note_offset = (data >> 3) & 0b000111;
                     frequency = frequency_offset(frequency, note_offset);
                 }
@@ -413,17 +422,24 @@ void tracker_interrupt_body() {
             uint8_t vibrato_speed = data & 0b000111;
             uint8_t vibrato_depth = (data >> 3) & 0b000111;
 
+            // update vibrato parameters if speed or depth is non-zero
             if(vibrato_speed != 0) ch_state.vibrato.speed = vibrato_speed;
             if(vibrato_depth != 0) ch_state.vibrato.depth = vibrato_depth;
 
+            // update vibrato value
             ch_state.vibrato.value += ch_state.vibrato.direction * ch_state.vibrato.speed;
+
+            // change direction if value is at the limit
             if(ch_state.vibrato.value > ch_state.vibrato.depth) {
                 ch_state.vibrato.direction = -1;
             } else if(ch_state.vibrato.value < -ch_state.vibrato.depth) {
                 ch_state.vibrato.direction = 1;
+            } else if(ch_state.vibrato.direction == 0) {
+                // set initial direction, if it is not set
+                ch_state.vibrato.direction = 1;
             }
 
-            frequency = frequency * (1.0f + (((1.0f / 12.0f) / 7.0f) * ch_state.vibrato.value));
+            frequency += frequency * (((1.0f / 12.0f) / 7.0f) * ch_state.vibrato.value);
         }
 
         tracker_speaker_play(frequency, 0.5f);
@@ -431,12 +447,12 @@ void tracker_interrupt_body() {
         tracker_speaker_stop();
     }
 
-    tick_counter++;
-    if(tick_counter >= tick_limit) {
-        tick_counter = 0;
+    song_state.tick++;
+    if(song_state.tick >= song_state.tick_limit) {
+        song_state.tick = 0;
 
         // next note
-        row_counter = (row_counter + 1) % PATTERN_SIZE;
+        song_state.row = (song_state.row + 1) % PATTERN_SIZE;
     }
 }
 
