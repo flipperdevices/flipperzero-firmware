@@ -15,13 +15,11 @@ static const SubGhzBlockConst pocsag_const = {
 };
 
 // Minimal amount of sync bits (interleaving zeros and ones)
-#define POCSAG_MIN_SYNC_BITS 32
-#define MASK_32_BITS 0xFFFFFFFF
-
+#define POCSAG_MIN_SYNC_BITS    32
+#define MASK_32_BITS            0xFFFFFFFF
 #define POCSAG_FRAME_SYNC_CODE  0x7CD215D8
 #define POCSAG_IDLE_CODE_WORD   0x7A89C197
-
-#define POCSAG_MAX_MSG_LEN 40
+#define POCSAG_MAX_MSG_LEN      80
 
 struct SubGhzProtocolDecoderPocsag {
     SubGhzProtocolDecoderBase base;
@@ -38,7 +36,7 @@ struct SubGhzProtocolDecoderPocsag {
     uint8_t char_data;
 
     uint8_t msg_len;
-    char msg[POCSAG_MAX_MSG_LEN];
+    char msg[POCSAG_MAX_MSG_LEN+1];
 };
 
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
@@ -47,6 +45,7 @@ typedef enum {
     PocsagDecoderStepReset = 0,
     PocsagDecoderStepFoundSync,
     PocsagDecoderStepFoundPreamble,
+    PocsagDecoderStepMessage,
 } PocsagDecoderStep;
 
 
@@ -97,8 +96,10 @@ bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, uint32_t 
         if (instance->char_bits == 7) {
             if (instance->char_data == 0)
                 return false;
-            FURI_LOG_I(TAG, "Msg: %c", instance->char_data);
-            instance->msg[instance->msg_len++] = instance->char_data;
+            FURI_LOG_I(TAG, "%c", instance->char_data);
+            if (instance->msg_len < POCSAG_MAX_MSG_LEN) {
+                instance->msg[instance->msg_len++] = instance->char_data;
+            }
             instance->char_data = 0;
             instance->char_bits = 0;
         }
@@ -157,9 +158,11 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
             if (instance->decoder.decode_count_bit == 32) {
                 switch (instance->decoder.decode_data & MASK_32_BITS) {
                 case POCSAG_IDLE_CODE_WORD:
+                    FURI_LOG_I(TAG, "Idle");
                     instance->codeword_idx++;
                     break;
                 case POCSAG_FRAME_SYNC_CODE:
+                    FURI_LOG_I(TAG, "Sync");
                     instance->codeword_idx = 0;
                     break;
                 default:
@@ -169,8 +172,10 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                         FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
                     }
                     else {
+                        FURI_LOG_I(TAG, "Msg");
                         if (!pocsag_decode_message_word(instance, instance->decoder.decode_data & MASK_32_BITS)) {
                             // push decoded message
+                            FURI_LOG_I(TAG, "Msg done %d", instance->msg_len);
                         }
                     }
                     instance->codeword_idx++;
