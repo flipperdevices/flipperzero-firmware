@@ -16,6 +16,11 @@ static const SubGhzBlockConst pocsag_const = {
 
 // Minimal amount of sync bits (interleaving zeros and ones)
 #define POCSAG_MIN_SYNC_BITS 32
+#define MASK_32_BITS 0xFFFFFFFF
+
+#define POCSAG_FRAME_SYNC_CODE  0x7CD215D8
+#define POCSAG_IDLE_CODE_WORD   0x7A89C197
+
 
 struct SubGhzProtocolDecoderPocsag {
     SubGhzProtocolDecoderBase base;
@@ -91,39 +96,41 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         return;
     }
 
-    if (level)
-        FURI_LOG_I(TAG, "1 * %d", bits_count);
-    else
-        FURI_LOG_I(TAG, "0 * %d", bits_count);
-//
-//    // as we found sync bits of 32 bits (in fact it is longer), we have to do proper decoding
-//    // of 1200-bod signal. As it could be any sequence of 1s and 0s, duration might be the
-//    // multiple of 833 us
-//    while (true) {
-//        // signal is too short, but not shorter than delta - something is wrong, reset
-////        if (duration < pocsag_const.te_short &&
-////           DURATION_DIFF(duration, pocsag_const.te_short) > pocsag_const.te_delta)
-////        {
-////            subghz_protocol_decoder_pocsag_reset(context);
-////            return;
-////        }
-//
-//        subghz_protocol_blocks_add_bit(&instance->decoder, !level);
-//
-//        // new bit arrived, update the decoding state machine
-//        switch(instance->decoder.parser_step) {
-//        case PocsagDecoderStepFoundSync:
-//            if (instance->decoder.decode_count_bit == 64) {
-//                FURI_LOG_I(TAG, "%" PRIx64, instance->decoder.decode_data);
-//                instance->decoder.decode_count_bit = 0;
-//            }
-//            break;
-//        }
-//
-//        if (duration < pocsag_const.te_short)
-//            break;
-//        duration -= pocsag_const.te_short;
-//    }
+    // handle state machine for every incoming bit
+    while (bits_count-- > 0) {
+        subghz_protocol_blocks_add_bit(&instance->decoder, !level);
+
+        switch(instance->decoder.parser_step) {
+        case PocsagDecoderStepFoundSync:
+            if ((instance->decoder.decode_data & MASK_32_BITS) == POCSAG_FRAME_SYNC_CODE) {
+                FURI_LOG_I(TAG, "Found preamble!");
+                instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
+                instance->decoder.decode_count_bit = 0;
+                instance->decoder.decode_data = 0UL;
+            }
+            break;
+        case PocsagDecoderStepFoundPreamble:
+            // handle codewords
+            if (instance->decoder.decode_count_bit == 32) {
+                switch (instance->decoder.decode_data & MASK_32_BITS) {
+                case POCSAG_IDLE_CODE_WORD:
+                case POCSAG_FRAME_SYNC_CODE:
+                    break;
+                default:
+                    if (instance->decoder.decode_data >> 31 == 0) {
+                        FURI_LOG_I(TAG, "Address code word");
+                    }
+                    else {
+                        FURI_LOG_I(TAG, "Message code word");
+                    }
+                }
+
+                instance->decoder.decode_count_bit = 0;
+                instance->decoder.decode_data = 0UL;
+            }
+            break;
+        }
+    }
 }
 
 const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
