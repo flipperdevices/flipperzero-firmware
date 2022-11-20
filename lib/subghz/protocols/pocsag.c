@@ -170,21 +170,52 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                     instance->codeword_idx = 0;
                     break;
                 default:
+                    // Here we expect only address messages
                     if (codeword >> 31 == 0) {
                         pocsag_decode_address_word(instance, codeword);
                         FURI_LOG_I(TAG, "Address: %" PRIu32 , instance->addr);
                         FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
+                        instance->decoder.parser_step = PocsagDecoderStepMessage;
                     }
-                    else {
+                    instance->codeword_idx++;
+                }
+                instance->decoder.decode_count_bit = 0;
+                instance->decoder.decode_data = 0UL;
+            }
+            break;
+
+        case PocsagDecoderStepMessage:
+            if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
+                codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                switch (codeword) {
+                case POCSAG_IDLE_CODE_WORD:
+                    // Idle during the message stops the message
+                    FURI_LOG_I(TAG, "MIdle");
+                    instance->codeword_idx++;
+                    instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
+                    FURI_LOG_I(TAG, "Msg done %d", instance->msg_len);
+                    break;
+                case POCSAG_FRAME_SYNC_CODE:
+                    FURI_LOG_I(TAG, "MSync");
+                    instance->codeword_idx = 0;
+                    break;
+                default:
+                    // In this state, both address and message words can arrive
+                    if (codeword >> 31 == 0) {
+                        FURI_LOG_I(TAG, "MAddr");
+                        FURI_LOG_I(TAG, "Msg done %d", instance->msg_len);
+                        pocsag_decode_address_word(instance, codeword);
+                        FURI_LOG_I(TAG, "Address: %" PRIu32 , instance->addr);
+                        FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
+                    } else {
                         FURI_LOG_I(TAG, "Msg");
                         if (!pocsag_decode_message_word(instance, codeword)) {
-                            // push decoded message
+                            instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                             FURI_LOG_I(TAG, "Msg done %d", instance->msg_len);
                         }
                     }
                     instance->codeword_idx++;
                 }
-
                 instance->decoder.decode_count_bit = 0;
                 instance->decoder.decode_data = 0UL;
             }
