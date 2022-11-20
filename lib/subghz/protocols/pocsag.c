@@ -27,6 +27,10 @@ struct SubGhzProtocolDecoderPocsag {
 
     SubGhzBlockDecoder decoder;
     SubGhzBlockGeneric generic;
+
+    uint8_t codeword_idx;
+    uint32_t addr;
+    uint8_t func;
 };
 
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
@@ -60,6 +64,7 @@ void subghz_protocol_decoder_pocsag_reset(void* context) {
     instance->decoder.parser_step = PocsagDecoderStepReset;
     instance->decoder.decode_data = 0UL;
     instance->decoder.decode_count_bit = 0;
+    instance->codeword_idx = 0;
 }
 
 void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t duration) {
@@ -111,15 +116,23 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
             if (instance->decoder.decode_count_bit == 32) {
                 switch (instance->decoder.decode_data & MASK_32_BITS) {
                 case POCSAG_IDLE_CODE_WORD:
+                    instance->codeword_idx++;
+                    break;
                 case POCSAG_FRAME_SYNC_CODE:
+                    instance->codeword_idx = 0;
                     break;
                 default:
                     if (instance->decoder.decode_data >> 31 == 0) {
-                        FURI_LOG_I(TAG, "Address code word");
+                        instance->addr = ((instance->decoder.decode_data & MASK_32_BITS) >> 13);
+                        instance->addr = (instance->addr << 3) | (instance->codeword_idx >> 1);
+                        FURI_LOG_I(TAG, "Address: %" PRIu32 , instance->addr);
+                        instance->func = ((instance->decoder.decode_data & MASK_32_BITS) >> 11) & 0b11;
+                        FURI_LOG_I(TAG, "Function: %" PRIu8, instance->func);
                     }
                     else {
                         FURI_LOG_I(TAG, "Message code word");
                     }
+                    instance->codeword_idx++;
                 }
 
                 instance->decoder.decode_count_bit = 0;
