@@ -43,14 +43,14 @@ static void _onewire_scan(void) {
         ow_sensor->bus->device_count);
     //Сканирование шины one wire
     unitemp_onewire_bus_init(ow_sensor->bus);
-    unitemp_onewire_enum_init();
+    unitemp_onewire_bus_enum_init();
     uint8_t* id;
     do {
-        id = unitemp_onewire_enum_next(ow_sensor->bus);
+        id = unitemp_onewire_bus_enum_next(ow_sensor->bus);
     } while(_onewire_id_exist(id));
 
     if(id == NULL) {
-        id = unitemp_onewire_enum_next(ow_sensor->bus);
+        id = unitemp_onewire_bus_enum_next(ow_sensor->bus);
         if(id == NULL || _onewire_id_exist(id)) {
             memset(ow_sensor->deviceID, 0, 8);
             ow_sensor->familyCode = 0;

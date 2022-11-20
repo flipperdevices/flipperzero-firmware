@@ -106,7 +106,7 @@ bool unitemp_onewire_bus_start(OneWireBus* bus);
  * @param bus Указатель на шину
  * @param state Логический уровень
  */
-void unitemp_onewire_send_bit(OneWireBus* bus, bool state);
+void unitemp_onewire_bus_send_bit(OneWireBus* bus, bool state);
 
 /**
  * @brief Запись байта на шину one wire
@@ -131,7 +131,7 @@ void unitemp_onewire_bus_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t 
  * @param bus Указатель на шину one wire
  * @return Логический уровень бита
  */
-bool unitemp_oneWire_read_bit(OneWireBus* bus);
+bool unitemp_onewire_bus_read_bit(OneWireBus* bus);
 
 /**
  * @brief Чтение байта с шины One Wire
@@ -139,7 +139,7 @@ bool unitemp_oneWire_read_bit(OneWireBus* bus);
  * @param bus Указатель на шину one wire
  * @return Байт информации
  */
-uint8_t unitemp_onewire_read_byte(OneWireBus* bus);
+uint8_t unitemp_onewire_bus_read_byte(OneWireBus* bus);
 
 /**
  * @brief Чтение массива байт с шины One Wire
@@ -148,7 +148,7 @@ uint8_t unitemp_onewire_read_byte(OneWireBus* bus);
  * @param data Указатель на массив, куда будут записаны данные
  * @param len Количество байт
  */
-void unitemp_onewire_read_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len);
+void unitemp_onewire_bus_read_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len);
 
 /**
  * @brief Проверить контрольную сумму массива данных
@@ -176,14 +176,14 @@ void unitemp_onewire_bus_select_sensor(OneWireSensor* instance);
 /**
  * @brief Инициализация процесса поиска адресов на шине one wire
  */
-void unitemp_onewire_enum_init(void);
+void unitemp_onewire_bus_enum_init(void);
 
 /**
  * @brief Перечисляет устройства на шине one wire и получает очередной адрес
  * @param bus Указатель на шину one wire
  * @return Возвращает указатель на буфер, содержащий восьмибайтовое значение адреса, либо NULL, если поиск завешён
  */
-uint8_t* unitemp_onewire_enum_next(OneWireBus* bus);
+uint8_t* unitemp_onewire_bus_enum_next(OneWireBus* bus);
 
 /**
  * @brief Сравнить ID датчиков

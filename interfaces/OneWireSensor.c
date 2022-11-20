@@ -99,7 +99,7 @@ bool unitemp_onewire_bus_start(OneWireBus* bus) {
     return status;
 }
 
-void unitemp_onewire_send_bit(OneWireBus* bus, bool state) {
+void unitemp_onewire_bus_send_bit(OneWireBus* bus, bool state) {
     if(state) {
         // write 1
         furi_hal_gpio_write(bus->gpio->pin, false);
@@ -121,7 +121,7 @@ void unitemp_onewire_send_bit(OneWireBus* bus, bool state) {
 
 void unitemp_onewire_bus_send_byte(OneWireBus* bus, uint8_t data) {
     for(int i = 0; i < 8; i++) {
-        unitemp_onewire_send_bit(bus, (data & (1 << i)) != 0);
+        unitemp_onewire_bus_send_bit(bus, (data & (1 << i)) != 0);
     }
 }
 
@@ -131,7 +131,7 @@ void unitemp_onewire_bus_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t 
     }
 }
 
-bool unitemp_onewire_read_bit(OneWireBus* bus) {
+bool unitemp_onewire_bus_read_bit(OneWireBus* bus) {
     furi_hal_gpio_write(bus->gpio->pin, false);
     furi_delay_us(2); // Длительность низкого уровня, минимум 1 мкс
     furi_hal_gpio_write(bus->gpio->pin, true);
@@ -141,18 +141,18 @@ bool unitemp_onewire_read_bit(OneWireBus* bus) {
     return r;
 }
 
-uint8_t unitemp_onewire_read_byte(OneWireBus* bus) {
+uint8_t unitemp_onewire_bus_read_byte(OneWireBus* bus) {
     uint8_t r = 0;
     for(uint8_t p = 8; p; p--) {
         r >>= 1;
-        if(unitemp_onewire_read_bit(bus)) r |= 0x80;
+        if(unitemp_onewire_bus_read_bit(bus)) r |= 0x80;
     }
     return r;
 }
 
-void unitemp_onewire_read_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len) {
+void unitemp_onewire_bus_read_byteArray(OneWireBus* bus, uint8_t* data, uint8_t len) {
     for(uint8_t i = 0; i < len; i++) {
-        data[i] = unitemp_onewire_read_byte(bus);
+        data[i] = unitemp_onewire_bus_read_byte(bus);
     }
 }
 
@@ -175,7 +175,7 @@ bool unitemp_onewire_CRC_check(uint8_t* data, uint8_t len) {
 bool unitemp_onewire_sensor_readID(OneWireSensor* instance) {
     if(!unitemp_onewire_bus_start(instance->bus)) return false;
     unitemp_onewire_bus_send_byte(instance->bus, 0x33); // Чтение ПЗУ
-    unitemp_onewire_read_byteArray(instance->bus, instance->deviceID, 8);
+    unitemp_onewire_bus_read_byteArray(instance->bus, instance->deviceID, 8);
     if(!unitemp_onewire_CRC_check(instance->deviceID, 8)) {
         memset(instance->deviceID, 0, 8);
         return false;
@@ -184,14 +184,14 @@ bool unitemp_onewire_sensor_readID(OneWireSensor* instance) {
     return true;
 }
 
-void unitemp_onewire_enum_init(void) {
+void unitemp_onewire_bus_enum_init(void) {
     for(uint8_t p = 0; p < 8; p++) {
         onewire_enum[p] = 0;
     }
     onewire_enum_fork_bit = 65; // правее правого
 }
 
-uint8_t* unitemp_onewire_enum_next(OneWireBus* bus) {
+uint8_t* unitemp_onewire_bus_enum_next(OneWireBus* bus) {
     furi_delay_ms(10);
     if(!onewire_enum_fork_bit) { // Если на предыдущем шаге уже не было разногласий
         FURI_LOG_D(APP_NAME, "All devices on wire %d is found", unitemp_gpio_toInt(bus->gpio));
@@ -210,8 +210,8 @@ uint8_t* unitemp_onewire_enum_next(OneWireBus* bus) {
     unitemp_onewire_bus_send_byte(bus, 0xF0);
     uint8_t newfork = 0;
     for(;;) {
-        uint8_t not0 = unitemp_onewire_read_bit(bus);
-        uint8_t not1 = unitemp_onewire_read_bit(bus);
+        uint8_t not0 = unitemp_onewire_bus_read_bit(bus);
+        uint8_t not1 = unitemp_onewire_bus_read_bit(bus);
         if(!not0) { // Если присутствует в адресах бит ноль
             if(!not1) { // Но также присустствует бит 1 (вилка)
                 if(p <
@@ -236,7 +236,7 @@ uint8_t* unitemp_onewire_enum_next(OneWireBus* bus) {
                 return 0;
             }
         }
-        unitemp_onewire_send_bit(bus, next & 0x80);
+        unitemp_onewire_bus_send_bit(bus, next & 0x80);
         bp--;
         if(!bp) {
             *pprev = next;
@@ -359,7 +359,20 @@ bool unitemp_onewire_sensor_deinit(Sensor* sensor) {
 
 UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
+    uint8_t buff[9] = {0};
     if(sensor->status != UT_POLLING) {
+        //Если датчик в прошлый раз не отозвался, проверка его наличия на шине
+        if(sensor->status == UT_TIMEOUT || sensor->status == UT_BADCRC) {
+            if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
+            unitemp_onewire_bus_select_sensor(instance);
+            unitemp_onewire_bus_send_byte(instance->bus, 0xBE); // Read Scratch-pad
+            unitemp_onewire_bus_read_byteArray(instance->bus, buff, 9);
+            if(!unitemp_onewire_CRC_check(buff, 9)) {
+                FURI_LOG_D(APP_NAME, "Sensor %s is not found", sensor->name);
+                return UT_TIMEOUT;
+            }
+        }
+
         if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
         unitemp_onewire_bus_select_sensor(instance);
         unitemp_onewire_bus_send_byte(instance->bus, 0x44); // convert t
@@ -378,11 +391,10 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
         if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
         unitemp_onewire_bus_select_sensor(instance);
         unitemp_onewire_bus_send_byte(instance->bus, 0xBE); // Read Scratch-pad
-        uint8_t buff[9];
-        unitemp_onewire_read_byteArray(instance->bus, buff, 9);
+        unitemp_onewire_bus_read_byteArray(instance->bus, buff, 9);
         if(!unitemp_onewire_CRC_check(buff, 9)) {
             FURI_LOG_D(APP_NAME, "Failed CRC check: %s", sensor->name);
-            return UT_TIMEOUT;
+            return UT_BADCRC;
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
         if(instance->familyCode == FC_DS18S20) {

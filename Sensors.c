@@ -269,8 +269,9 @@ bool unitemp_sensors_load(void) {
         FURI_LOG_D(APP_NAME, "%s %s", name, type);
 
         char* args = ((char*)(file_buf + line_end + offset));
+        const SensorType* stype = unitemp_sensors_getTypeFromStr(type);
         //Проверка типа датчика
-        if(sizeof(name) <= 11) {
+        if(stype != NULL && sizeof(name) > 0 && sizeof(name) <= 11) {
             Sensor* sensor =
                 unitemp_sensor_alloc(name, unitemp_sensors_getTypeFromStr(type), args);
             if(sensor != NULL) {
