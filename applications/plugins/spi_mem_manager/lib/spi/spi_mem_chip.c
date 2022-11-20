@@ -64,6 +64,7 @@ static void spi_mem_chip_copy_info(SPIMemChip* dest, const SPIMemChip* src) {
     dest->write_mode = src->write_mode;
     dest->type_id = src->type_id;
     dest->capacity_id = src->capacity_id;
+    dest->address_type = src->address_type;
 }
 
 bool spi_mem_chip_complete_info(SPIMemChip* chip_info) {

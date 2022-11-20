@@ -46,7 +46,7 @@ static uint8_t spi_mem_tools_addr_to_byte_arr(
     uint32_t addr,
     uint8_t* cmd) {
     uint8_t len = 4;
-    if(address_type == SPIMemChipAddressType3byte || address_type == SPIMemChipAddressTypeAll)
+    if((address_type == SPIMemChipAddressType3byte) || (address_type == SPIMemChipAddressTypeAll))
         len = 3;
     for(uint8_t i = 0; i < len; i++) {
         cmd[i] = (addr >> ((len - (i + 1)) * 8)) & 0xFF;
@@ -70,7 +70,7 @@ bool spi_mem_tools_read_block_data(
     size_t block_size) {
     if(!spi_mem_tools_check_chip_info(chip)) return false;
     for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
-        uint8_t cmd[3];
+        uint8_t cmd[4];
         if((offset + SPI_MEM_MAX_BLOCK_SIZE) > chip->size) return false;
         if(!spi_mem_tools_trx(
                SPIMemChipCMDReadData,
@@ -93,7 +93,7 @@ size_t spi_mem_tools_get_file_max_block_size(SPIMemChip* chip) {
 SPIMemChipStatus spi_mem_tools_get_chip_status(SPIMemChip* chip) {
     UNUSED(chip);
     uint8_t status;
-    if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, (uint8_t*)&status, 1))
+    if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, &status, 1))
         return SPIMemChipStatusError;
     if(status & SPIMemChipStatusBitBusy) return SPIMemChipStatusBusy;
     return SPIMemChipStatusIdle;
@@ -105,7 +105,7 @@ bool spi_mem_tools_set_write_enabled(SPIMemChip* chip, bool enable) {
     SPIMemChipCMD cmd = SPIMemChipCMDWriteDisable;
     if(enable) cmd = SPIMemChipCMDWriteEnable;
     if(!spi_mem_tools_trx(cmd, NULL, 0, NULL, 0)) return false;
-    if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, (uint8_t*)&status, 1)) return false;
+    if(!spi_mem_tools_trx(SPIMemChipCMDReadStatus, NULL, 0, &status, 1)) return false;
     if(!(status & SPIMemChipStatusBitWriteEnabled) && enable) return false;
     if((status & SPIMemChipStatusBitWriteEnabled) && !enable) return false;
     return true;
