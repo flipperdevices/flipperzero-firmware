@@ -123,8 +123,8 @@ void digital_signal_prepare(DigitalSignal* signal) {
         uint32_t pulse_ticks = (pulse_duration + T_TIM_DIV2) / T_TIM;
         remainder = pulse_duration - (pulse_ticks * T_TIM);
 
-        if(pulse_ticks > 0) {
-            signal->reload_reg_buff[signal->reload_reg_entries++] = pulse_ticks;
+        if(pulse_ticks > 1) {
+            signal->reload_reg_buff[signal->reload_reg_entries++] = pulse_ticks - 1;
         }
     }
 
