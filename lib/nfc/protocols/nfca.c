@@ -7,11 +7,10 @@
 
 #define NFCA_CRC_INIT (0x6363)
 
-#define NFCA_F_SIG (13560000.0)
-#define T_SIG 7374 //73.746ns*100
-#define T_SIG_x8 58992 //T_SIG*8
-#define T_SIG_x8_x8 471936 //T_SIG*8*8
-#define T_SIG_x8_x9 530928 //T_SIG*8*9
+#define NFCA_F_SIG  (13560000.0)                    /* [Hz] NFC frequency */
+#define NFCA_F_SUB  (NFCA_F_SIG/16)                 /* [Hz] NFC subcarrier frequency fs/16 */
+#define T_SUB       (1000000000000.0f / NFCA_F_SUB) /* [ps] subcarrier period = 1/NFCA_F_SUB */
+#define T_SUB_PHASE (T_SUB/2)                       /* [ps] a single subcarrier phase */
 
 #define NFCA_SIGNAL_MAX_EDGES (1350)
 
@@ -64,35 +63,25 @@ bool nfca_emulation_handler(
 }
 
 static void nfca_add_bit(DigitalSignal* signal, bool bit) {
-    if(bit) {
-        signal->start_level = true;
-        for(size_t i = 0; i < 7; i++) {
-            signal->edge_timings[i] = T_SIG_x8;
-        }
-        signal->edge_timings[7] = T_SIG_x8_x9;
-        signal->edge_cnt = 8;
-    } else {
-        signal->start_level = false;
-        signal->edge_timings[0] = T_SIG_x8_x8;
-        for(size_t i = 1; i < 9; i++) {
-            signal->edge_timings[i] = T_SIG_x8;
-        }
-        signal->edge_cnt = 9;
+
+    signal->start_level = bit;
+    for(size_t i = 0; i < 16; i++) {
+        signal->edge_timings[signal->edge_cnt++] = T_SUB_PHASE;
     }
 }
 
 static void nfca_add_byte(NfcaSignal* nfca_signal, uint8_t byte, bool parity) {
     for(uint8_t i = 0; i < 8; i++) {
         if(byte & (1 << i)) {
-            digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
+            digital_sequence_add(nfca_signal->tx_signal, 1);
         } else {
-            digital_signal_append(nfca_signal->tx_signal, nfca_signal->zero);
+            digital_sequence_add(nfca_signal->tx_signal, 0);
         }
     }
     if(parity) {
-        digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
+        digital_sequence_add(nfca_signal->tx_signal, 1);
     } else {
-        digital_signal_append(nfca_signal->tx_signal, nfca_signal->zero);
+        digital_sequence_add(nfca_signal->tx_signal, 0);
     }
 }
 
@@ -102,7 +91,7 @@ NfcaSignal* nfca_signal_alloc() {
     nfca_signal->zero = digital_signal_alloc(10);
     nfca_add_bit(nfca_signal->one, true);
     nfca_add_bit(nfca_signal->zero, false);
-    nfca_signal->tx_signal = digital_signal_alloc(NFCA_SIGNAL_MAX_EDGES);
+    nfca_signal->tx_signal = digital_sequence_alloc(NFCA_SIGNAL_MAX_EDGES);
 
     return nfca_signal;
 }
@@ -112,7 +101,7 @@ void nfca_signal_free(NfcaSignal* nfca_signal) {
 
     digital_signal_free(nfca_signal->one);
     digital_signal_free(nfca_signal->zero);
-    digital_signal_free(nfca_signal->tx_signal);
+    digital_sequence_free(nfca_signal->tx_signal);
     free(nfca_signal);
 }
 
@@ -121,17 +110,19 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
     furi_assert(data);
     furi_assert(parity);
 
-    nfca_signal->tx_signal->edge_cnt = 0;
-    nfca_signal->tx_signal->start_level = true;
-    // Start of frame
-    digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
+    digital_sequence_clear(nfca_signal->tx_signal);
+
+    /* add a >80/fs phase with no transition, which is >10 1-bits */
+    for(int tr1_bit = 0; tr1_bit < 11; tr1_bit++) {
+        digital_sequence_add(nfca_signal->tx_signal, 1);
+    }
 
     if(bits < 8) {
         for(size_t i = 0; i < bits; i++) {
             if(FURI_BIT(data[0], i)) {
-                digital_signal_append(nfca_signal->tx_signal, nfca_signal->one);
+                digital_sequence_add(nfca_signal->tx_signal, 1);
             } else {
-                digital_signal_append(nfca_signal->tx_signal, nfca_signal->zero);
+                digital_sequence_add(nfca_signal->tx_signal, 0);
             }
         }
     } else {

@@ -215,7 +215,7 @@ void nfcv_emu_alloc() {
     
     if(!nfcv_signal) {
         /* assuming max frame length is 255 bytes */
-        nfcv_signal = digital_sequence_alloc(8 * 255 + 2, nfcv_out_io);
+        nfcv_signal = digital_sequence_alloc(8 * 255 + 2);
     }
 
     if(!nfcv_resp_unmod_256) {
@@ -297,7 +297,7 @@ void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
     digital_sequence_add(nfcv_signal, SIG_EOF);
 
     FURI_CRITICAL_ENTER();
-    digital_sequence_send(nfcv_signal);
+    digital_sequence_send(nfcv_signal, nfcv_out_io);
     FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(nfcv_out_io, false);
 }

@@ -8,7 +8,7 @@
 typedef struct {
     DigitalSignal* one;
     DigitalSignal* zero;
-    DigitalSignal* tx_signal;
+    DigitalSequence* tx_signal;
 } NfcaSignal;
 
 uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len);

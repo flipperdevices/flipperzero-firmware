@@ -536,7 +536,7 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
     // Send signal
     FURI_CRITICAL_ENTER();
     nfca_signal_encode(tx_rx->nfca_signal, tx_rx->tx_data, tx_rx->tx_bits, tx_rx->tx_parity);
-    digital_signal_send(tx_rx->nfca_signal->tx_signal, &gpio_spi_r_mosi);
+    digital_sequence_send(tx_rx->nfca_signal->tx_signal, &gpio_spi_r_mosi);
     FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 

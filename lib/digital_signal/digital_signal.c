@@ -15,7 +15,6 @@
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
-    signal->prepared = false;
     signal->start_level = true;
     signal->edges_max_cnt = max_edges_cnt;
     signal->edge_timings = malloc(signal->edges_max_cnt * sizeof(uint32_t));
@@ -64,8 +63,6 @@ bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b) {
         signal_a->edge_timings[signal_a->edge_cnt + i] = signal_b->edge_timings[start_copy + i];
     }
     signal_a->edge_cnt += signal_b->edge_cnt - start_copy;
-
-    signal_a->prepared = false;
 
     return true;
 }
@@ -236,6 +233,8 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     /* Configure gpio as output */
     furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
+    /* single signal, add a temporary, terminating edge at the end */
+    signal->edge_timings[signal->edge_cnt++] = 10;
     digital_signal_prepare(signal);
 
     digital_signal_setup_dma(signal);
@@ -247,14 +246,15 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
 
     digital_signal_stop_timer();
     digital_signal_stop_dma();
+
+    signal->edge_cnt--;
 }
 
 
-DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
+DigitalSequence* digital_sequence_alloc(uint32_t size) {
 
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
-    sequence->gpio = gpio;
     sequence->signals_size = 32;
     sequence->signals = malloc(sequence->signals_size * sizeof(DigitalSignal*));
 
@@ -282,7 +282,6 @@ void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index
 
     /* all signals will use the sequence's GPIO */
     signal->gpio = sequence->gpio;
-    signal->prepared = false;
 
     digital_signal_prepare(signal);
 }
@@ -327,10 +326,12 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
     return true;
 }
 
-bool digital_sequence_send(DigitalSequence* sequence) {
+bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
     furi_assert(sequence);
 
     uint32_t remainder = 0;
+
+    sequence->gpio = gpio;
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         DigitalSignal *sig = sequence->signals[sequence->sequence[pos]];
