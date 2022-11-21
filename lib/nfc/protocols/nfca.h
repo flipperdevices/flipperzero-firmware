@@ -6,8 +6,9 @@
 #include <lib/digital_signal/digital_signal.h>
 
 typedef struct {
-    DigitalSignal* one;
-    DigitalSignal* zero;
+    DigitalSignal* seq_d; /* sequence D, modulation with subcarrier during first half */
+    DigitalSignal* seq_e; /* sequence E, modulation with subcarrier during second half */
+    DigitalSignal* seq_f; /* sequence F, no modulation at all */
     DigitalSequence* tx_signal;
 } NfcaSignal;
 

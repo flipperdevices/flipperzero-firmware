@@ -1,6 +1,7 @@
 #include "digital_signal.h"
 
 #include <furi.h>
+#include <furi_hal_resources.h>
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
 #include <math.h>
@@ -300,7 +301,6 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
     
     /* the first iteration has to set up the whole machinery */
     if(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1)) {
-        furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
         if(!digital_signal_setup_dma(signal)) {
             FURI_LOG_D(TAG, "digital_sequence_send_signal: Signal has no entries, aborting");
@@ -323,8 +323,42 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
     return true;
 }
 
+DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
+    
+    uint32_t edges = 0;
+
+    for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
+        uint8_t signal_index = sequence->sequence[pos];
+        DigitalSignal *sig = sequence->signals[signal_index];
+
+        edges += sig->edge_cnt;
+    }
+
+    DigitalSignal* ret = digital_signal_alloc(edges);
+    
+    for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
+        uint8_t signal_index = sequence->sequence[pos];
+        DigitalSignal *sig = sequence->signals[signal_index];
+
+        digital_signal_append(ret, sig);
+    }
+
+    return ret;
+}
+
 bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
     furi_assert(sequence);
+
+    //gpio = &gpio_ext_pb2;
+    furi_hal_gpio_init(gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+
+    if(true) {
+        DigitalSignal* sig = digital_sequence_bake(sequence);
+
+        digital_signal_send(sig, gpio);
+        digital_signal_free(sig);
+        return true;
+    }
 
     uint32_t remainder = 0;
 

@@ -14,6 +14,13 @@
 
 #define NFCA_SIGNAL_MAX_EDGES (1350)
 
+#define SEQ_SOF  0
+#define SEQ_BIT0 1
+#define SEQ_BIT1 2
+#define SEQ_EOF  3
+#define SEQ_IDLE 4
+
+
 typedef struct {
     uint8_t cmd;
     uint8_t param;
@@ -62,49 +69,63 @@ bool nfca_emulation_handler(
     return sleep;
 }
 
-static void nfca_add_bit(DigitalSignal* signal, bool bit) {
-
-    signal->start_level = bit;
-	signal->edge_cnt = 0;
-
-    if(bit) {
-        for(size_t i = 0; i < 7; i++) {
-            signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE);
-        }
-        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE * 9);
-    } else {
-        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE * 8);
-        for(size_t i = 0; i < 8; i++) {
-            signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE);
-        }
-    }
-}
-
 static void nfca_add_byte(NfcaSignal* nfca_signal, uint8_t byte, bool parity) {
     for(uint8_t i = 0; i < 8; i++) {
         if(byte & (1 << i)) {
-            digital_sequence_add(nfca_signal->tx_signal, 1);
+            digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT1);
         } else {
-            digital_sequence_add(nfca_signal->tx_signal, 0);
+            digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT0);
         }
     }
     if(parity) {
-        digital_sequence_add(nfca_signal->tx_signal, 1);
+        digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT1);
     } else {
-        digital_sequence_add(nfca_signal->tx_signal, 0);
+        digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT0);
     }
+}
+
+static void nfca_add_modulation(DigitalSignal* signal, size_t phases) {
+    for(size_t i = 0; i < phases; i++) {
+        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE);
+    }
+}
+
+static void nfca_add_silence(DigitalSignal* signal, size_t phases) {
+    signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
 }
 
 NfcaSignal* nfca_signal_alloc() {
     NfcaSignal* nfca_signal = malloc(sizeof(NfcaSignal));
-    nfca_signal->one = digital_signal_alloc(10);
-    nfca_signal->zero = digital_signal_alloc(10);
-    nfca_add_bit(nfca_signal->one, true);
-    nfca_add_bit(nfca_signal->zero, false);
+
+    /* ISO14443-2 defines 3 sequences for type A communication */
+    nfca_signal->seq_d = digital_signal_alloc(10);
+    nfca_signal->seq_e = digital_signal_alloc(10);
+    nfca_signal->seq_f = digital_signal_alloc(10);
+
+    /* start all sequences without load. polarity is not defined by standard, 
+       so pick the polarity the best for us */
+    nfca_signal->seq_d->start_level = false;
+    nfca_signal->seq_e->start_level = false;
+    nfca_signal->seq_f->start_level = false;
+    
+    /* SEQ D has the first half modulated, used as SOF */
+    nfca_add_modulation(nfca_signal->seq_d, 4);
+    nfca_add_silence(nfca_signal->seq_d, 4);
+
+    /* SEQ E has the second half modulated */
+    nfca_add_silence(nfca_signal->seq_e, 4);
+    nfca_add_modulation(nfca_signal->seq_e, 4);
+
+    /* SEQ F is just no modulation, used as EOF */
+    nfca_add_silence(nfca_signal->seq_f, 8);
+
     nfca_signal->tx_signal = digital_sequence_alloc(NFCA_SIGNAL_MAX_EDGES);
 
-    digital_sequence_set_signal(nfca_signal->tx_signal, 0, nfca_signal->zero);
-    digital_sequence_set_signal(nfca_signal->tx_signal, 1, nfca_signal->one);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_SOF, nfca_signal->seq_d);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_BIT0, nfca_signal->seq_e);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_BIT1, nfca_signal->seq_d);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_EOF, nfca_signal->seq_f);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_IDLE, nfca_signal->seq_f);
 
     return nfca_signal;
 }
@@ -112,8 +133,9 @@ NfcaSignal* nfca_signal_alloc() {
 void nfca_signal_free(NfcaSignal* nfca_signal) {
     furi_assert(nfca_signal);
 
-    digital_signal_free(nfca_signal->one);
-    digital_signal_free(nfca_signal->zero);
+    digital_signal_free(nfca_signal->seq_d);
+    digital_signal_free(nfca_signal->seq_e);
+    digital_signal_free(nfca_signal->seq_f);
     digital_sequence_free(nfca_signal->tx_signal);
     free(nfca_signal);
 }
@@ -125,14 +147,18 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
 
     digital_sequence_clear(nfca_signal->tx_signal);
 
-    digital_sequence_add(nfca_signal->tx_signal, 1);
+    /* add some idle bit times before SOF */
+    for(int pos = 0; pos < 4; pos++) {
+        digital_sequence_add(nfca_signal->tx_signal, SEQ_IDLE);
+    }
+    digital_sequence_add(nfca_signal->tx_signal, SEQ_SOF);
 
     if(bits < 8) {
         for(size_t i = 0; i < bits; i++) {
             if(FURI_BIT(data[0], i)) {
-                digital_sequence_add(nfca_signal->tx_signal, 1);
+                digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT1);
             } else {
-                digital_sequence_add(nfca_signal->tx_signal, 0);
+                digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT0);
             }
         }
     } else {
@@ -140,4 +166,6 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
             nfca_add_byte(nfca_signal, data[i], parity[i / 8] & (1 << (7 - (i & 0x07))));
         }
     }
+
+    digital_sequence_add(nfca_signal->tx_signal, SEQ_EOF);
 }
