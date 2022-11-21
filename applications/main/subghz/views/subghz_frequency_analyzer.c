@@ -35,6 +35,7 @@ struct SubGhzFrequencyAnalyzer {
     void* context;
     bool locked;
     uint32_t last_frequency;
+    bool log_to_file;
 };
 
 typedef struct {
@@ -350,6 +351,13 @@ void subghz_frequency_analyzer_pair_callback(
             },
             false);
     } else if((rssi != 0.f) && (!instance->locked)) {
+
+        // If logging to file is enabled
+        if(instance->log_to_file) {
+            // Log captured frequency and rssi to file
+            subghz_frequency_analyzer_log(rssi, frequency);
+        }
+
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerLock, instance->context);
         }
@@ -372,6 +380,103 @@ void subghz_frequency_analyzer_pair_callback(
         true);
 }
 
+/// @brief Check if we have to enable logging to file
+/// @return true or false
+bool subghz_frequency_analyzer_log_to_file() {
+
+    const char* flag_file_on = STORAGE_EXT_PATH_PREFIX "/subghz/fqalogon.txt";
+    const char* flag_file_off = STORAGE_EXT_PATH_PREFIX "/subghz/fqalogoff.txt";
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* file = flipper_format_file_alloc(storage);
+
+    // If flag_file_ON exists enable logging
+    bool ret = flipper_format_file_open_existing(file, flag_file_on);
+    flipper_format_file_close(file);
+    flipper_format_free(file);
+    
+    // If flag_file_ON does not exists, check if flag_file_OFF does,
+    // and, if not, create it (default is to not enable logging)
+    if(!ret) {
+        file = flipper_format_file_alloc(storage);
+        bool create_log_file=!flipper_format_file_open_existing(file, flag_file_off);
+        flipper_format_file_close(file);
+        flipper_format_free(file);
+        if(create_log_file) {
+            file = flipper_format_file_alloc(storage);
+            if(flipper_format_file_open_new(file, flag_file_off)){
+                flipper_format_write_comment_cstr(file, "Rename this file to:");
+                flipper_format_write_comment_cstr(file, "- fqalogon.txt to enable log");
+                flipper_format_write_comment_cstr(file, "- fqalogoff.txt to disable log");
+            }
+            flipper_format_file_close(file);
+            flipper_format_free(file);
+        }
+    }
+
+    furi_record_close(RECORD_STORAGE);
+    return ret;
+}
+
+// @brief Do the dirty work of writing the logged rssi and frequency to file
+/// @param rssi 
+/// @param frequency 
+void subghz_frequency_analyzer_log(float rssi, uint32_t frequency) {
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* file= flipper_format_file_alloc(storage);
+    FuriString *temp_str;
+
+    do {
+
+        FuriHalRtcDateTime datetime = {0};
+
+        // Get datetime
+        furi_hal_rtc_get_datetime(&datetime);
+
+        // Alloc temp_str
+        temp_str = furi_string_alloc();
+
+        // Prepare filename
+        furi_string_printf(
+            temp_str,
+            "%s/subghz/freq-analyzer_%04d-%02d-%02d.txt",
+            STORAGE_EXT_PATH_PREFIX,
+            datetime.year,
+            datetime.month,
+            datetime.day
+        );
+        // Open file for logging
+        if(!flipper_format_file_open_append(file, furi_string_get_cstr(temp_str))) { break; }
+
+        // Prepare log line
+        furi_string_printf(
+            temp_str,
+            ",%04d-%02d-%02d,%02d:%02d:%02d,rssi,%.2f,freq,%03d.%03d",
+            datetime.year,
+            datetime.month,
+            datetime.day,
+            datetime.hour,
+            datetime.minute,
+            datetime.second,
+            (double)rssi,
+            (int)frequency / 1000000 % 1000,
+            (int)frequency / 1000 % 1000
+            );
+        // Write log line
+        if(!flipper_format_write_string_cstr(file, "fqalog", furi_string_get_cstr(temp_str))) { break; }
+
+        // Close file
+        if (!flipper_format_file_close(file)) { break; };
+
+    } while(false);
+
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    furi_record_close(RECORD_STORAGE);
+
+}
+
 void subghz_frequency_analyzer_enter(void* context) {
     furi_assert(context);
     SubGhzFrequencyAnalyzer* instance = context;
@@ -385,6 +490,9 @@ void subghz_frequency_analyzer_enter(void* context) {
         instance);
 
     subghz_frequency_analyzer_worker_start(instance->worker);
+
+    // Check if we need to enable log to file
+    instance->log_to_file = subghz_frequency_analyzer_log_to_file();
 
     with_view_model(
         instance->view,
