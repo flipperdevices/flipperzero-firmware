@@ -225,16 +225,13 @@ void digital_signal_start_timer() {
 void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     furi_assert(signal);
 
-    /* if selected GPIO changed, force reconfiguration of buffers */
-    if(gpio && (signal->gpio != gpio)) {
-        signal->gpio = gpio;
-    }
 
     /* Configure gpio as output */
     furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
     /* single signal, add a temporary, terminating edge at the end */
     signal->edge_timings[signal->edge_cnt++] = 10;
+    signal->gpio = gpio;
     digital_signal_prepare(signal);
 
     digital_signal_setup_dma(signal);
@@ -279,9 +276,6 @@ void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index
     furi_assert(signal_index < sequence->signals_size);
 
     sequence->signals[signal_index] = signal;
-
-    /* all signals will use the sequence's GPIO */
-    signal->gpio = sequence->gpio;
 
     digital_signal_prepare(signal);
 }
@@ -331,14 +325,14 @@ bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
 
     uint32_t remainder = 0;
 
-    sequence->gpio = gpio;
-
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         DigitalSignal *sig = sequence->signals[sequence->sequence[pos]];
 
         /* take over previous remainder */
         sig->reload_reg_remainder = remainder;
+        sig->gpio = gpio;
         digital_signal_prepare(sig);
+        remainder = sig->reload_reg_remainder;
 
         if(!digital_sequence_send_signal(sig)) {
             digital_signal_stop_timer();

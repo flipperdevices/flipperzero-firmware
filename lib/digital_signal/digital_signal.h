@@ -33,7 +33,6 @@ typedef struct {
     uint8_t signals_size;
     uint32_t sequence_used;
     uint32_t sequence_size;
-    const GpioPin* gpio;
     DigitalSignal** signals;
     uint8_t* sequence;
 } DigitalSequence;
