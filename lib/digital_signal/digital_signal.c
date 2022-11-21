@@ -22,6 +22,7 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->edge_cnt = 0;
     signal->reload_reg_buff = malloc(signal->edges_max_cnt * sizeof(uint32_t));
     signal->reload_reg_entries = 0;
+    signal->reload_reg_remainder = 0;
 
     return signal;
 }
@@ -98,10 +99,6 @@ uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
 void digital_signal_prepare(DigitalSignal* signal) {
     furi_assert(signal);
     
-    if(signal->prepared) {
-        return;
-    }
-
     /* set up signal polarities */
     uint32_t bit_set = signal->gpio->pin;
     uint32_t bit_reset = signal->gpio->pin << 16;
@@ -115,20 +112,30 @@ void digital_signal_prepare(DigitalSignal* signal) {
     }
 
     /* set up edge timings */
-    uint32_t remainder = 0;
     signal->reload_reg_entries = 0;
 
     for(size_t pos = 0; pos < signal->edge_cnt; pos++) {
-        uint32_t pulse_duration = signal->edge_timings[pos] + remainder;
+        uint32_t pulse_duration = signal->edge_timings[pos] + signal->reload_reg_remainder;
         uint32_t pulse_ticks = (pulse_duration + T_TIM_DIV2) / T_TIM;
-        remainder = pulse_duration - (pulse_ticks * T_TIM);
+        signal->reload_reg_remainder = pulse_duration - (pulse_ticks * T_TIM);
 
         if(pulse_ticks > 1) {
             signal->reload_reg_buff[signal->reload_reg_entries++] = pulse_ticks - 1;
         }
     }
+}
 
-    signal->prepared = true;
+
+void digital_signal_stop_dma() {
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
+    LL_DMA_ClearFlag_TC1(DMA1);
+    LL_DMA_ClearFlag_TC2(DMA1);
+}
+
+void digital_signal_stop_timer() {
+    LL_TIM_DisableCounter(TIM2);
+    LL_TIM_SetCounter(TIM2, 0);
 }
 
 bool digital_signal_setup_dma(DigitalSignal* signal) {
@@ -166,6 +173,8 @@ bool digital_signal_setup_dma(DigitalSignal* signal) {
     dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
 
+    digital_signal_stop_dma();
+
     /* set up DMA channel 1 and 2 for GPIO and timer copy operations */
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config_gpio);
     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config_timer);
@@ -178,13 +187,14 @@ bool digital_signal_setup_dma(DigitalSignal* signal) {
 }
 
 
-void digital_signal_update_dma(DigitalSignal* signal) {
+bool digital_signal_update_dma(DigitalSignal* signal) {
     furi_assert(signal);
 
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-    LL_DMA_ClearFlag_TC1(DMA1);
-    LL_DMA_ClearFlag_TC2(DMA1);
+    if(!signal->reload_reg_entries) {
+        return false;
+    }
+
+    digital_signal_stop_dma();
 
     LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)signal->gpio_buff);
     LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t)signal->reload_reg_buff);
@@ -193,18 +203,8 @@ void digital_signal_update_dma(DigitalSignal* signal) {
 
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-}
 
-void digital_signal_stop_dma() {
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-    LL_DMA_ClearFlag_TC1(DMA1);
-    LL_DMA_ClearFlag_TC2(DMA1);
-}
-
-void digital_signal_stop_timer() {
-    LL_TIM_DisableCounter(TIM2);
-    LL_TIM_SetCounter(TIM2, 0);
+    return true;
 }
 
 void digital_signal_setup_timer() {
@@ -231,7 +231,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     /* if selected GPIO changed, force reconfiguration of buffers */
     if(gpio && (signal->gpio != gpio)) {
         signal->gpio = gpio;
-        signal->prepared = false;
     }
 
     /* Configure gpio as output */
@@ -303,7 +302,7 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
 bool digital_sequence_send_signal(DigitalSignal* signal) {
     furi_assert(signal);
     
-    /* the first iteration has to set up the whol machinery */
+    /* the first iteration has to set up the whole machinery */
     if(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1)) {
         furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
@@ -314,12 +313,15 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
         digital_signal_setup_timer();
         digital_signal_start_timer();
     } else {
-        /* it was already active, wait till DMA is done and the last timer ticks are running */
+        /* transfer was already active, wait till DMA is done and the last timer ticks are running */
         while(!LL_DMA_IsActiveFlag_TC2(DMA1)) {
         }
 
         /* configure next polarities and timings */
-        digital_signal_update_dma(signal);
+        if(!digital_signal_update_dma(signal)) {
+            FURI_LOG_D(TAG, "Signal has no entries, aborting");
+            return false;
+        }
     }
 
     return true;
@@ -328,8 +330,14 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
 bool digital_sequence_send(DigitalSequence* sequence) {
     furi_assert(sequence);
 
+    uint32_t remainder = 0;
+
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         DigitalSignal *sig = sequence->signals[sequence->sequence[pos]];
+
+        /* take over previous remainder */
+        sig->reload_reg_remainder = remainder;
+        digital_signal_prepare(sig);
 
         if(!digital_sequence_send_signal(sig)) {
             digital_signal_stop_timer();

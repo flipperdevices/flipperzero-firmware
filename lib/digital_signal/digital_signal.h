@@ -24,6 +24,7 @@ typedef struct {
     uint32_t* edge_timings;
     uint32_t* reload_reg_buff;
     uint32_t reload_reg_entries;
+    uint32_t reload_reg_remainder;
     uint32_t gpio_buff[2];
     const GpioPin* gpio;
 } DigitalSignal;

@@ -161,6 +161,11 @@ DigitalSignal* nfcv_resp_eof = NULL;
 DigitalSignal* nfcv_resp_unmod_256 = NULL;
 DigitalSignal* nfcv_resp_unmod_768 = NULL;
 
+//DigitalSignal* nfcv_signal = NULL;
+
+//const GpioPin* nfcv_out_io = &gpio_ext_pb2;
+const GpioPin* nfcv_out_io = &gpio_spi_r_mosi;
+
 DigitalSequence* nfcv_signal = NULL;
 
 #define SIG_SOF  0
@@ -192,6 +197,7 @@ void nfcv_crc(uint8_t* data, uint32_t length, uint8_t* out) {
 }
 
 void nfcv_emu_free() {
+    //digital_signal_free(nfcv_signal);
     digital_sequence_free(nfcv_signal);
     digital_signal_free(nfcv_resp_unmod_256);
     digital_signal_free(nfcv_resp_pulse_32);
@@ -212,8 +218,9 @@ void nfcv_emu_free() {
 void nfcv_emu_alloc() {
     
     if(!nfcv_signal) {
+        //nfcv_signal = digital_signal_alloc(8192);
         /* assuming max frame length is 255 bytes */
-        nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
+        nfcv_signal = digital_sequence_alloc(8 * 255 + 2, nfcv_out_io);
     }
 
     if(!nfcv_resp_unmod_256) {
@@ -283,12 +290,11 @@ void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
     
     int bits = length * 8;
 
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-    furi_delay_us(10);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, true);
-    furi_delay_us(10);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    //nfcv_signal->start_level = false;
+    //nfcv_signal->edge_cnt = 0;
 
+    //digital_signal_append(nfcv_signal, nfcv_resp_sof);
+	
     digital_sequence_clear(nfcv_signal);
     digital_sequence_add(nfcv_signal, SIG_SOF);
 
@@ -297,26 +303,17 @@ void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
         uint32_t bit_pos = bit_total % 8;
         uint8_t bit_val = 0x01 << bit_pos;
 
-        if(data[byte_pos] & bit_val) {
-            digital_sequence_add(nfcv_signal, SIG_BIT1);
-        } else {
-            digital_sequence_add(nfcv_signal, SIG_BIT0);
-        }
+        //digital_signal_append(nfcv_signal, nfcv_resp_one);
+        digital_sequence_add(nfcv_signal, (data[byte_pos] & bit_val) ? SIG_BIT1 : SIG_BIT0);
     }
 
+    //digital_signal_append(nfcv_signal, nfcv_resp_eof);
     digital_sequence_add(nfcv_signal, SIG_EOF);
-
-    /* digital signal setup will take some time. win some time by tricking the VCD into thinking that something happens */
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-    furi_delay_us(10);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, true);
-    furi_delay_us(10);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-    
     FURI_CRITICAL_ENTER();
+    //digital_signal_send(nfcv_signal, nfcv_out_io);
     digital_sequence_send(nfcv_signal);
     FURI_CRITICAL_EXIT();
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    furi_hal_gpio_write(nfcv_out_io, false);
 }
 
 void nfcv_emu_send(uint8_t* data, uint8_t length) {
@@ -579,7 +576,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     }
 
     if(strlen(nfcv_data->last_command) > 0) {
-        //FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);        
+        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);        
     }
 }
 
@@ -594,7 +591,6 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
 
-    
     FURI_LOG_D(TAG, "Starting NfcV emulation");
     FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
         nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], 
@@ -676,7 +672,6 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
                 break;
 
             case NFCV_FRAME_STATE_CODING_256:
-
                 if(periods_previous > periods) {
                     snprintf(reset_reason, sizeof(reset_reason), "1oo256: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
                     frame_state = NFCV_FRAME_STATE_RESET;
@@ -758,13 +753,9 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
     }
 
     if(frame_state == NFCV_FRAME_STATE_EOF) {
+        FURI_LOG_D(TAG, "Received valid frame");
+
         /* we know that this code uses TIM2, so stop pulse reader */
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-    furi_delay_us(10);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, true);
-    furi_delay_us(10);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-    
         pulse_reader_stop(reader_signal);
         nfcv_emu_handle_packet(nfc_data, nfcv_data, frame_payload, frame_pos);
         pulse_reader_start(reader_signal);
