@@ -38,7 +38,12 @@ Just pick the token you would like to auto-type then hold "arrow down" button fo
 
 ## How to change\recover PIN?
 
-For now there is no way to change or recover PIN once it is set without loosing all the token secrets. If you would like to completely reset app settings including PIN and all the tokens - just delete `/ext/apps/Misc/totp.conf` file. Flipper Authenticator will create new empty file and you will be able to setup everything from scratch.
+There is no way to "recover" PIN once it is set. However it is possible to change\remove PIN if you know existing PIN.
+
+To do that you may use following CLI commands:
+
+* `totp pin set` - to set new PIN
+* `totp pin remove` - to remove existing PIN
 
 ## How to backup?
 
