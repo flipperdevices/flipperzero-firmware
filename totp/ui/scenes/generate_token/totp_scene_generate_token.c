@@ -196,7 +196,8 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
                              ->data);
 
         if(tokenInfo->token != NULL && tokenInfo->token_length > 0) {
-            furi_mutex_acquire(scene_state->type_code_worker_context->string_sync, FuriWaitForever);
+            furi_mutex_acquire(
+                scene_state->type_code_worker_context->string_sync, FuriWaitForever);
             size_t key_length;
             uint8_t* key = totp_crypto_decrypt(
                 tokenInfo->token, tokenInfo->token_length, &plugin_state->iv[0], &key_length);
@@ -215,7 +216,8 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
             memset_s(key, key_length, 0, key_length);
             free(key);
         } else {
-            furi_mutex_acquire(scene_state->type_code_worker_context->string_sync, FuriWaitForever);
+            furi_mutex_acquire(
+                scene_state->type_code_worker_context->string_sync, FuriWaitForever);
             i_token_to_str(0, scene_state->last_code, tokenInfo->digits);
         }
 
@@ -288,7 +290,8 @@ bool totp_scene_generate_token_handle_event(
     SceneState* scene_state;
     if(event->input.type == InputTypeLong && event->input.key == InputKeyDown) {
         scene_state = (SceneState*)plugin_state->current_scene_state;
-        totp_type_code_worker_notify(scene_state->type_code_worker_context, TotpTypeCodeWorkerEvtType);
+        totp_type_code_worker_notify(
+            scene_state->type_code_worker_context, TotpTypeCodeWorkerEvtType);
         notification_message(plugin_state->notification, &notification_sequence_badusb);
         return true;
     }

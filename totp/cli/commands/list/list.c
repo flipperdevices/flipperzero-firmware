@@ -53,13 +53,11 @@ void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
         return;
     }
 
-    ListNode* node = plugin_state->tokens_list;
-
     TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
     TOTP_CLI_PRINTF("| %-*s | %-*s | %-*s | %-s |\r\n", 3, "#", 27, "Name", 6, "Algo", "Digits");
     TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
     uint16_t index = 1;
-    while(node != NULL) {
+    TOTP_LIST_FOREACH(plugin_state->tokens_list, node, {
         TokenInfo* token_info = (TokenInfo*)node->data;
         token_info_get_digits_count(token_info);
         TOTP_CLI_PRINTF(
@@ -68,8 +66,7 @@ void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
             token_info->name,
             get_algo_as_cstr(token_info->algo),
             get_digits_as_int(token_info->digits));
-        node = node->next;
         index++;
-    }
+    });
     TOTP_CLI_PRINTF("+-----+-----------------------------+--------+--------+\r\n");
 }

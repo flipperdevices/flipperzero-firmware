@@ -63,7 +63,9 @@ static int32_t totp_type_code_worker_callback(void* context) {
 
     while(true) {
         uint32_t flags = furi_thread_flags_wait(
-            TotpTypeCodeWorkerEvtStop | TotpTypeCodeWorkerEvtType, FuriFlagWaitAny, FuriWaitForever);
+            TotpTypeCodeWorkerEvtStop | TotpTypeCodeWorkerEvtType,
+            FuriFlagWaitAny,
+            FuriWaitForever);
         furi_check((flags & FuriFlagError) == 0); //-V562
         if(flags & TotpTypeCodeWorkerEvtStop) break;
 
@@ -104,7 +106,9 @@ void totp_type_code_worker_stop(TotpTypeCodeWorkerContext* context) {
     free(context);
 }
 
-void totp_type_code_worker_notify(TotpTypeCodeWorkerContext* context, TotpTypeCodeWorkerEvtFlags event) {
+void totp_type_code_worker_notify(
+    TotpTypeCodeWorkerContext* context,
+    TotpTypeCodeWorkerEvtFlags event) {
     furi_assert(context != NULL);
     furi_thread_flags_set(furi_thread_get_id(context->thread), event);
 }

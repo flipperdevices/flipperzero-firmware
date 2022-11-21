@@ -20,4 +20,6 @@ typedef enum {
 
 TotpTypeCodeWorkerContext* totp_type_code_worker_start();
 void totp_type_code_worker_stop(TotpTypeCodeWorkerContext* context);
-void totp_type_code_worker_notify(TotpTypeCodeWorkerContext* context, TotpTypeCodeWorkerEvtFlags event);
+void totp_type_code_worker_notify(
+    TotpTypeCodeWorkerContext* context,
+    TotpTypeCodeWorkerEvtFlags event);
