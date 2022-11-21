@@ -95,6 +95,8 @@ uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
 
 void digital_signal_prepare(DigitalSignal* signal) {
     furi_assert(signal);
+    furi_assert(signal->gpio);
+    furi_assert(signal->gpio->pin);
     
     /* set up signal polarities */
     uint32_t bit_set = signal->gpio->pin;
@@ -225,7 +227,6 @@ void digital_signal_start_timer() {
 void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     furi_assert(signal);
 
-
     /* Configure gpio as output */
     furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
@@ -276,8 +277,6 @@ void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index
     furi_assert(signal_index < sequence->signals_size);
 
     sequence->signals[signal_index] = signal;
-
-    digital_signal_prepare(signal);
 }
 
 void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
@@ -326,7 +325,15 @@ bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
     uint32_t remainder = 0;
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
-        DigitalSignal *sig = sequence->signals[sequence->sequence[pos]];
+        uint8_t signal_index = sequence->sequence[pos];
+        DigitalSignal *sig = sequence->signals[signal_index];
+
+        if(!sig) {
+            FURI_LOG_D(TAG, "Signal at index %u, used at pos %lu is NULL, aborting", signal_index, pos);
+            digital_signal_stop_timer();
+            digital_signal_stop_dma();
+            return false;
+        }
 
         /* take over previous remainder */
         sig->reload_reg_remainder = remainder;
