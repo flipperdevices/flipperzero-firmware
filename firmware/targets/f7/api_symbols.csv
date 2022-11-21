@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.20,,
+Version,+,7.26,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -707,13 +707,21 @@ Function,+,dialog_message_set_text,void,"DialogMessage*, const char*, uint8_t, u
 Function,+,dialog_message_show,DialogMessageButton,"DialogsApp*, const DialogMessage*"
 Function,+,dialog_message_show_storage_error,void,"DialogsApp*, const char*"
 Function,-,difftime,double,"time_t, time_t"
+Function,-,digital_sequence_add,void,"DigitalSequence*, uint8_t"
+Function,-,digital_sequence_alloc,DigitalSequence*,"uint32_t, const GpioPin*"
+Function,-,digital_sequence_clear,void,DigitalSequence*
+Function,-,digital_sequence_free,void,DigitalSequence*
+Function,-,digital_sequence_send_signal,_Bool,DigitalSignal*
+Function,-,digital_sequence_set_signal,void,"DigitalSequence*, uint8_t, DigitalSignal*"
+Function,-,digital_sequence_send,_Bool,DigitalSequence*
+Function,-,digital_signal_add,void,"DigitalSignal*, uint32_t"
 Function,-,digital_signal_alloc,DigitalSignal*,uint32_t
 Function,-,digital_signal_append,_Bool,"DigitalSignal*, DigitalSignal*"
 Function,-,digital_signal_free,void,DigitalSignal*
 Function,-,digital_signal_get_edge,uint32_t,"DigitalSignal*, uint32_t"
 Function,-,digital_signal_get_edges_cnt,uint32_t,DigitalSignal*
 Function,-,digital_signal_get_start_level,_Bool,DigitalSignal*
-Function,-,digital_signal_prepare_arr,void,DigitalSignal*
+Function,-,digital_signal_prepare,void,DigitalSignal*
 Function,-,digital_signal_send,void,"DigitalSignal*, const GpioPin*"
 Function,-,diprintf,int,"int, const char*, ..."
 Function,+,dir_walk_alloc,DirWalk*,Storage*

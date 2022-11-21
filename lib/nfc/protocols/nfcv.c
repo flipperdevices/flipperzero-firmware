@@ -161,7 +161,12 @@ DigitalSignal* nfcv_resp_eof = NULL;
 DigitalSignal* nfcv_resp_unmod_256 = NULL;
 DigitalSignal* nfcv_resp_unmod_768 = NULL;
 
-DigitalSignal* nfcv_signal = NULL;
+DigitalSequence* nfcv_signal = NULL;
+
+#define SIG_SOF  0
+#define SIG_BIT0 1
+#define SIG_BIT1 2
+#define SIG_EOF  3
 
 
 void nfcv_crc(uint8_t* data, uint32_t length, uint8_t* out) {
@@ -187,7 +192,7 @@ void nfcv_crc(uint8_t* data, uint32_t length, uint8_t* out) {
 }
 
 void nfcv_emu_free() {
-    digital_signal_free(nfcv_signal);
+    digital_sequence_free(nfcv_signal);
     digital_signal_free(nfcv_resp_unmod_256);
     digital_signal_free(nfcv_resp_pulse_32);
     digital_signal_free(nfcv_resp_one);
@@ -207,7 +212,8 @@ void nfcv_emu_free() {
 void nfcv_emu_alloc() {
     
     if(!nfcv_signal) {
-        nfcv_signal = digital_signal_alloc(8192);
+        /* assuming max frame length is 255 bytes */
+        nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
     }
 
     if(!nfcv_resp_unmod_256) {
@@ -265,6 +271,11 @@ void nfcv_emu_alloc() {
         /* add extra silence */
         digital_signal_append(nfcv_resp_eof, nfcv_resp_unmod_256);
     }
+
+    digital_sequence_set_signal(nfcv_signal, SIG_SOF, nfcv_resp_sof);
+    digital_sequence_set_signal(nfcv_signal, SIG_BIT0, nfcv_resp_zero);
+    digital_sequence_set_signal(nfcv_signal, SIG_BIT1, nfcv_resp_one);
+    digital_sequence_set_signal(nfcv_signal, SIG_EOF, nfcv_resp_eof);
 }
 
 
@@ -272,10 +283,14 @@ void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
     
     int bits = length * 8;
 
-    nfcv_signal->start_level = false;
-    nfcv_signal->edge_cnt = 0;
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    furi_delay_us(10);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, true);
+    furi_delay_us(10);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
-    digital_signal_append(nfcv_signal, nfcv_resp_sof);
+    digital_sequence_clear(nfcv_signal);
+    digital_sequence_add(nfcv_signal, SIG_SOF);
 
     for(int bit_total = 0; bit_total < bits; bit_total++) {
         uint32_t byte_pos = bit_total / 8;
@@ -283,13 +298,13 @@ void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
         uint8_t bit_val = 0x01 << bit_pos;
 
         if(data[byte_pos] & bit_val) {
-            digital_signal_append(nfcv_signal, nfcv_resp_one);
+            digital_sequence_add(nfcv_signal, SIG_BIT1);
         } else {
-            digital_signal_append(nfcv_signal, nfcv_resp_zero);
+            digital_sequence_add(nfcv_signal, SIG_BIT0);
         }
     }
 
-    digital_signal_append(nfcv_signal, nfcv_resp_eof);
+    digital_sequence_add(nfcv_signal, SIG_EOF);
 
     /* digital signal setup will take some time. win some time by tricking the VCD into thinking that something happens */
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
@@ -299,7 +314,7 @@ void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
     
     FURI_CRITICAL_ENTER();
-    digital_signal_send(nfcv_signal, &gpio_spi_r_mosi);
+    digital_sequence_send(nfcv_signal);
     FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 }
@@ -564,7 +579,7 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
     }
 
     if(strlen(nfcv_data->last_command) > 0) {
-        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);        
+        //FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);        
     }
 }
 
@@ -744,6 +759,12 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
 
     if(frame_state == NFCV_FRAME_STATE_EOF) {
         /* we know that this code uses TIM2, so stop pulse reader */
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    furi_delay_us(10);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, true);
+    furi_delay_us(10);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    
         pulse_reader_stop(reader_signal);
         nfcv_emu_handle_packet(nfc_data, nfcv_data, frame_payload, frame_pos);
         pulse_reader_start(reader_signal);
