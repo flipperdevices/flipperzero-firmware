@@ -303,7 +303,13 @@ void rpc_system_app_set_callback(RpcAppSystem* rpc_app, RpcAppSystemCallback cal
     rpc_app->app_context = ctx;
 }
 
-void rpc_system_app_set_error(RpcAppSystem* rpc_app, uint32_t error_code, const char* error_text) {
+void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code) {
+    furi_assert(rpc_app);
+    PB_App_GetErrorResponse* content = &rpc_app->error_msg->content.app_get_error_response;
+    content->code = error_code;
+}
+
+void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text) {
     furi_assert(rpc_app);
     PB_App_GetErrorResponse* content = &rpc_app->error_msg->content.app_get_error_response;
 
@@ -313,7 +319,6 @@ void rpc_system_app_set_error(RpcAppSystem* rpc_app, uint32_t error_code, const 
     if(error_text) {
         content->text = strdup(error_text);
     }
-    content->code = error_code;
 }
 
 void rpc_system_app_set_data_exchange_callback(

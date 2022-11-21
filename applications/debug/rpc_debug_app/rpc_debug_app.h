@@ -6,6 +6,7 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
+#include <gui/modules/widget.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
@@ -24,6 +25,7 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
 
+    Widget* widget;
     Submenu* submenu;
     TextBox* text_box;
     TextInput* text_input;
@@ -34,6 +36,7 @@ typedef struct {
 } RpcDebugApp;
 
 typedef enum {
+    RpcDebugAppViewWidget,
     RpcDebugAppViewSubmenu,
     RpcDebugAppViewTextBox,
     RpcDebugAppViewTextInput,

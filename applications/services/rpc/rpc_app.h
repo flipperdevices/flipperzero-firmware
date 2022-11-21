@@ -29,7 +29,9 @@ const char* rpc_system_app_get_data(RpcAppSystem* rpc_app);
 
 void rpc_system_app_confirm(RpcAppSystem* rpc_app, RpcAppSystemEvent event, bool result);
 
-void rpc_system_app_set_error(RpcAppSystem* rpc_app, uint32_t error_code, const char* error_text);
+void rpc_system_app_set_error_code(RpcAppSystem* rpc_app, uint32_t error_code);
+
+void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text);
 
 void rpc_system_app_set_data_exchange_callback(
     RpcAppSystem* rpc_app,

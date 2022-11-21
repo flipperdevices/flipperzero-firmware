@@ -4,7 +4,6 @@ static bool rpc_debug_app_scene_input_error_code_validator_callback(
     const char* text,
     FuriString* error,
     void* context) {
-    UNUSED(error);
     UNUSED(context);
 
     for(; *text; ++text) {
@@ -41,12 +40,12 @@ void rpc_debug_app_scene_input_error_code_on_enter(void* context) {
 
 bool rpc_debug_app_scene_input_error_code_on_event(void* context, SceneManagerEvent event) {
     RpcDebugApp* app = context;
-    UNUSED(app);
-
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == RpcDebugAppCustomEventInputErrorCode) {
+            rpc_system_app_set_error_code(app->rpc, (uint32_t)atol(app->text_store));
+            scene_manager_previous_scene(app->scene_manager);
             consumed = true;
         }
     }

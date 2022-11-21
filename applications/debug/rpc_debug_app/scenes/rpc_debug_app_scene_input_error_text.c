@@ -21,12 +21,12 @@ void rpc_debug_app_scene_input_error_text_on_enter(void* context) {
 
 bool rpc_debug_app_scene_input_error_text_on_event(void* context, SceneManagerEvent event) {
     RpcDebugApp* app = context;
-    UNUSED(app);
-
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == RpcDebugAppCustomEventInputErrorText) {
+            rpc_system_app_set_error_text(app->rpc, app->text_store);
+            scene_manager_previous_scene(app->scene_manager);
             consumed = true;
         }
     }
