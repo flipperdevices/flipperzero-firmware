@@ -15,9 +15,11 @@ const SensorType DS18x2x = {
     .deinitializer = unitemp_onewire_sensor_deinit,
     .updater = unitemp_onewire_sensor_update};
 
-// Переменные для хранения промежуточного результата поиска
-uint8_t onewire_enum[8]; // найденный восьмибайтовый адрес
-uint8_t onewire_enum_fork_bit; // последний нулевой бит, где была неоднозначность (нумеруя с единицы)
+// Переменные для хранения промежуточного результата сканирования шины
+// найденный восьмибайтовый адрес
+static uint8_t onewire_enum[8] = {0};
+// последний нулевой бит, где была неоднозначность (нумеруя с единицы)
+uint8_t onewire_enum_fork_bit = 65;
 
 OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
     if(gpio == NULL) {
