@@ -149,7 +149,6 @@ bool nfcv_read_card(
 }
 
 /* emulation part */
-
 PulseReader *reader_signal = NULL;
 
 DigitalSignal* nfcv_resp_pulse_32 = NULL;
@@ -160,8 +159,6 @@ DigitalSignal* nfcv_resp_sof = NULL;
 DigitalSignal* nfcv_resp_eof = NULL;
 DigitalSignal* nfcv_resp_unmod_256 = NULL;
 DigitalSignal* nfcv_resp_unmod_768 = NULL;
-
-//DigitalSignal* nfcv_signal = NULL;
 
 //const GpioPin* nfcv_out_io = &gpio_ext_pb2;
 const GpioPin* nfcv_out_io = &gpio_spi_r_mosi;
@@ -197,7 +194,6 @@ void nfcv_crc(uint8_t* data, uint32_t length, uint8_t* out) {
 }
 
 void nfcv_emu_free() {
-    //digital_signal_free(nfcv_signal);
     digital_sequence_free(nfcv_signal);
     digital_signal_free(nfcv_resp_unmod_256);
     digital_signal_free(nfcv_resp_pulse_32);
@@ -218,7 +214,6 @@ void nfcv_emu_free() {
 void nfcv_emu_alloc() {
     
     if(!nfcv_signal) {
-        //nfcv_signal = digital_signal_alloc(8192);
         /* assuming max frame length is 255 bytes */
         nfcv_signal = digital_sequence_alloc(8 * 255 + 2, nfcv_out_io);
     }
@@ -287,30 +282,21 @@ void nfcv_emu_alloc() {
 
 
 void nfcv_emu_send_raw(uint8_t* data, uint8_t length) {
-    
-    int bits = length * 8;
 
-    //nfcv_signal->start_level = false;
-    //nfcv_signal->edge_cnt = 0;
-
-    //digital_signal_append(nfcv_signal, nfcv_resp_sof);
-	
     digital_sequence_clear(nfcv_signal);
     digital_sequence_add(nfcv_signal, SIG_SOF);
 
-    for(int bit_total = 0; bit_total < bits; bit_total++) {
+    for(int bit_total = 0; bit_total < length * 8; bit_total++) {
         uint32_t byte_pos = bit_total / 8;
         uint32_t bit_pos = bit_total % 8;
         uint8_t bit_val = 0x01 << bit_pos;
 
-        //digital_signal_append(nfcv_signal, nfcv_resp_one);
         digital_sequence_add(nfcv_signal, (data[byte_pos] & bit_val) ? SIG_BIT1 : SIG_BIT0);
     }
 
-    //digital_signal_append(nfcv_signal, nfcv_resp_eof);
     digital_sequence_add(nfcv_signal, SIG_EOF);
+
     FURI_CRITICAL_ENTER();
-    //digital_signal_send(nfcv_signal, nfcv_out_io);
     digital_sequence_send(nfcv_signal);
     FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(nfcv_out_io, false);
