@@ -30,6 +30,7 @@ typedef struct {
 
     uint8_t pattern_index;
     uint8_t row_index;
+    uint8_t order_list_index;
 } SongState;
 
 typedef struct {
@@ -60,8 +61,9 @@ static void channels_state_init(ChannelState* channel) {
 static void tracker_song_state_init(Tracker* tracker) {
     tracker->song_state.tick = 0;
     tracker->song_state.tick_limit = 2;
-    tracker->song_state.pattern_index = 0;
     tracker->song_state.row_index = 0;
+    tracker->song_state.order_list_index = 0;
+    tracker->song_state.pattern_index = tracker->song->order_list[0];
 
     if(tracker->song_state.channels != NULL) {
         free(tracker->song_state.channels);
@@ -117,7 +119,7 @@ static float frequency_get_seventh_of_a_semitone(float frequency) {
     return frequency * ((1.0f / 12.0f) / 7.0f);
 }
 
-UnpackedRow get_current_row(Song* song, SongState* song_state, uint8_t channel) {
+static UnpackedRow get_current_row(Song* song, SongState* song_state, uint8_t channel) {
     Pattern* pattern = &song->patterns[song_state->pattern_index];
     Row row = pattern->channels[channel].rows[song_state->row_index];
     return (UnpackedRow){
@@ -127,7 +129,72 @@ UnpackedRow get_current_row(Song* song, SongState* song_state, uint8_t channel) 
     };
 }
 
-void tracker_interrupt_body(Tracker* tracker) {
+static int16_t advance_order_and_get_next_pattern_index(Song* song, SongState* song_state) {
+    song_state->order_list_index++;
+    if(song_state->order_list_index >= song->order_list_size) {
+        return -1;
+    } else {
+        return song->order_list[song_state->order_list_index];
+    }
+}
+
+typedef struct {
+    int16_t pattern;
+    int16_t row;
+    bool change_pattern;
+    bool change_row;
+} Location;
+
+static void tracker_send_position_message(Tracker* tracker) {
+    if(tracker->callback != NULL) {
+        tracker->callback(
+            (TrackerMessage){
+                .type = TrackerPositionChanged,
+                .data =
+                    {
+                        .position =
+                            {
+                                .order_list_index = tracker->song_state.order_list_index,
+                                .row = tracker->song_state.row_index,
+                            },
+                    },
+            },
+            tracker->context);
+    }
+}
+
+static void tracker_send_end_message(Tracker* tracker) {
+    if(tracker->callback != NULL) {
+        tracker->callback((TrackerMessage){.type = TrackerEndOfSong}, tracker->context);
+    }
+}
+
+static void advance_to_pattern(Tracker* tracker, Location advance) {
+    if(advance.change_pattern) {
+        if(advance.pattern < 0 || advance.pattern >= tracker->song->patterns_count) {
+            tracker->playing = false;
+            tracker_send_end_message(tracker);
+        } else {
+            tracker->song_state.pattern_index = advance.pattern;
+            tracker->song_state.row_index = 0;
+        }
+    }
+
+    if(advance.change_row) {
+        if(advance.row < 0) advance.row = 0;
+        if(advance.row >= PATTERN_SIZE) advance.row = PATTERN_SIZE - 1;
+        tracker->song_state.row_index = advance.row;
+    }
+
+    tracker_send_position_message(tracker);
+}
+
+static void tracker_interrupt_body(Tracker* tracker) {
+    if(!tracker->playing) {
+        tracker_speaker_stop();
+        return;
+    }
+
     const uint8_t channel_index = 0;
     SongState* song_state = &tracker->song_state;
     ChannelState* channel_state = &song_state->channels[channel_index];
@@ -136,25 +203,50 @@ void tracker_interrupt_body(Tracker* tracker) {
 
     // load frequency from note at tick 0
     if(song_state->tick == 0) {
+        bool invalidate_row = false;
         // handle "on first tick" effects
         if(row.effect == EffectBreakPattern) {
-            // TODO: advance to next pattern
-            song_state->row_index = row.data;
+            int16_t next_row_index = row.data;
+            int16_t next_pattern_index =
+                advance_order_and_get_next_pattern_index(song, song_state);
+            advance_to_pattern(
+                tracker,
+                (Location){
+                    .pattern = next_pattern_index,
+                    .row = next_row_index,
+                    .change_pattern = true,
+                    .change_row = true,
+                });
 
-            // reload note and effect
-            row = get_current_row(song, song_state, channel_index);
+            invalidate_row = true;
         }
 
-        if(row.effect == EffectJumpToPattern) {
-            // TODO: advance to pattern[data]
+        if(row.effect == EffectJumpToOrder) {
+            song_state->order_list_index = row.data;
+            int16_t next_pattern_index = song->order_list[song_state->order_list_index];
 
-            // reload note and effect
-            row = get_current_row(song, song_state, channel_index);
+            advance_to_pattern(
+                tracker,
+                (Location){
+                    .pattern = next_pattern_index,
+                    .change_pattern = true,
+                });
+
+            invalidate_row = true;
         }
 
-        // no "else", cos previous effects reloads the effect value
-        if(row.effect == EffectSetSpeed) {
-            song_state->tick_limit = row.data;
+        // tracker state can be affected by effects
+        if(!tracker->playing) {
+            tracker_speaker_stop();
+            return;
+        }
+
+        if(invalidate_row) {
+            row = get_current_row(song, song_state, channel_index);
+
+            if(row.effect == EffectSetSpeed) {
+                song_state->tick_limit = row.data;
+            }
         }
 
         // handle note effects
@@ -260,12 +352,24 @@ void tracker_interrupt_body(Tracker* tracker) {
         song_state->tick = 0;
 
         // next note
-        song_state->row_index = (song_state->row_index + 1) % PATTERN_SIZE;
-        //TODO: advance to next pattern
+        song_state->row_index = (song_state->row_index + 1);
+
+        if(song_state->row_index >= PATTERN_SIZE) {
+            int16_t next_pattern_index =
+                advance_order_and_get_next_pattern_index(song, song_state);
+            advance_to_pattern(
+                tracker,
+                (Location){
+                    .pattern = next_pattern_index,
+                    .change_pattern = true,
+                });
+        } else {
+            tracker_send_position_message(tracker);
+        }
     }
 }
 
-void tracker_interrupt_cb(void* context) {
+static void tracker_interrupt_cb(void* context) {
     Tracker* tracker = (Tracker*)context;
     tracker_debug_set(true);
     tracker_interrupt_body(tracker);
@@ -297,10 +401,11 @@ void tracker_set_song(Tracker* tracker, Song* song) {
     tracker_song_state_init(tracker);
 }
 
-void tracker_set_pattern(Tracker* tracker, uint8_t pattern) {
+void tracker_set_order_index(Tracker* tracker, uint8_t order_index) {
     furi_check(tracker->playing == false);
-    furi_check(pattern < tracker->song->patterns_count);
-    tracker->song_state.pattern_index = pattern;
+    furi_check(order_index < tracker->song->order_list_size);
+    tracker->song_state.order_list_index = order_index;
+    tracker->song_state.pattern_index = tracker->song->order_list[order_index];
 }
 
 void tracker_set_row(Tracker* tracker, uint8_t row) {
@@ -313,7 +418,7 @@ void tracker_start(Tracker* tracker) {
     furi_check(tracker->song != NULL);
 
     tracker->playing = true;
-
+    tracker_send_position_message(tracker);
     tracker_debug_init();
     tracker_speaker_init();
     tracker_interrupt_init(tracker->song->ticks_per_second, tracker_interrupt_cb, tracker);

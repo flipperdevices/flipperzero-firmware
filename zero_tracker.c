@@ -88,7 +88,7 @@
 //         },
 // };
 
-Channel channels[] = {
+Channel p_0_channels[] = {
     {
         .rows =
             {
@@ -176,41 +176,155 @@ Channel channels[] = {
     },
 };
 
+Channel p_1_channels[] = {
+    {
+        .rows =
+            {
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_C3, 0, 0),
+                ROW_MAKE(NOTE_F2, 0, 0),
+                ROW_MAKE(NOTE_C3, 0, 0),
+                //
+                ROW_MAKE(NOTE_E4, 0, 0),
+                ROW_MAKE(NOTE_C3, 0, 0),
+                ROW_MAKE(NOTE_E4, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_E5, 0, 0),
+                ROW_MAKE(NOTE_E5, 0, 0),
+                ROW_MAKE(NOTE_E5, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_D5, 0, 0),
+                ROW_MAKE(NOTE_C3, 0, 0),
+                ROW_MAKE(NOTE_F2, 0, 0),
+                ROW_MAKE(NOTE_C3, 0, 0),
+                //
+                ROW_MAKE(NOTE_C5, 0, 0),
+                ROW_MAKE(NOTE_C3, 0, 0),
+                ROW_MAKE(NOTE_C5, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(0, 0, 0),
+                ROW_MAKE(0, 0, 0),
+                ROW_MAKE(0, 0, 0),
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_B4, 0, 0),
+                ROW_MAKE(NOTE_D3, 0, 0),
+                ROW_MAKE(NOTE_G2, 0, 0),
+                ROW_MAKE(NOTE_D3, 0, 0),
+                //
+                ROW_MAKE(NOTE_E4, 0, 0),
+                ROW_MAKE(NOTE_D3, 0, 0),
+                ROW_MAKE(NOTE_E4, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_E5, 0, 0),
+                ROW_MAKE(NOTE_E5, 0, 0),
+                ROW_MAKE(NOTE_E5, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_D5, 0, 0),
+                ROW_MAKE(NOTE_D3, 0, 0),
+                ROW_MAKE(NOTE_G2, 0, 0),
+                ROW_MAKE(NOTE_D3, 0, 0),
+                //
+                ROW_MAKE(NOTE_C5, 0, 0),
+                ROW_MAKE(NOTE_D3, 0, 0),
+                ROW_MAKE(NOTE_C5, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(0, 0, 0),
+                ROW_MAKE(0, 0, 0),
+                ROW_MAKE(0, 0, 0),
+                //
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_A4, 0, 0),
+                ROW_MAKE(NOTE_OFF, 0, 0),
+            },
+    },
+};
+
 Pattern patterns[] = {
     {
-        .channels = channels,
+        .channels = p_0_channels,
+    },
+    {
+        .channels = p_1_channels,
     },
 };
 
 uint8_t order_list[] = {
     0,
     0,
+    1,
+    0,
 };
 
 Song song = {
     .channels_count = 1,
-    .patterns_count = 1,
+    .patterns_count = 2,
     .patterns = patterns,
 
-    .order_list_size = 2,
+    .order_list_size = 4,
     .order_list = order_list,
 
     .ticks_per_second = 60,
 };
 
+void tracker_message(TrackerMessage message, void* context) {
+    FuriMessageQueue* queue = context;
+    furi_assert(queue);
+    furi_message_queue_put(queue, &message, 0);
+}
+
 int32_t zero_tracker_app(void* p) {
     UNUSED(p);
 
+    FuriMessageQueue* queue = furi_message_queue_alloc(8, sizeof(TrackerMessage));
     Tracker* tracker = tracker_alloc();
+    tracker_set_message_callback(tracker, tracker_message, queue);
     tracker_set_song(tracker, &song);
     tracker_start(tracker);
 
     while(1) {
-        furi_delay_ms(1000);
+        TrackerMessage message;
+        FuriStatus status = furi_message_queue_get(queue, &message, portMAX_DELAY);
+        if(status == FuriStatusOk) {
+            if(message.type == TrackerPositionChanged) {
+                uint8_t order_list_index = message.data.position.order_list_index;
+                uint8_t row = message.data.position.row;
+                uint8_t pattern = song.order_list[order_list_index];
+                FURI_LOG_I("Tracker", "O:%d P:%d R:%d", order_list_index, pattern, row);
+            } else if(message.type == TrackerEndOfSong) {
+                FURI_LOG_I("Tracker", "End of song");
+                break;
+            }
+        }
     }
 
     tracker_stop(tracker);
     tracker_free(tracker);
+    furi_message_queue_free(queue);
 
     return 0;
 }

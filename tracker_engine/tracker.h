@@ -11,7 +11,7 @@ typedef struct {
     TrackerMessageType type;
     union tracker_message_data {
         struct {
-            uint8_t pattern;
+            uint8_t order_list_index;
             uint8_t row;
         } position;
     } data;
@@ -29,7 +29,7 @@ void tracker_set_message_callback(Tracker* tracker, TrackerMessageCallback callb
 
 void tracker_set_song(Tracker* tracker, Song* song);
 
-void tracker_set_pattern(Tracker* tracker, uint8_t pattern);
+void tracker_set_order_index(Tracker* tracker, uint8_t order_index);
 
 void tracker_set_row(Tracker* tracker, uint8_t row);
 

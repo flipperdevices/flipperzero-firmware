@@ -52,12 +52,12 @@ typedef enum {
     // Effect0A = 0x0A,
 
     // Bxx, xx - pattern number
-    // Jump to the pattern number xx at first tick of current row.
+    // Jump to the order xx in the pattern order table at first tick of current row.
     // So if you want to jump to the pattern after note 4, you should put this effect on the 5th note.
-    EffectJumpToPattern = 0x0B,
+    EffectJumpToOrder = 0x0B,
 
     // Cxx, xx - pwm value
-    // Set the PWM value to xx.
+    // Set the PWM value to xx for current row.
     EffectPWM = 0x0C,
 
     // Bxx, xx - row number
