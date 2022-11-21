@@ -33,7 +33,7 @@ typedef struct {
     BtHidMouse* bt_hid_mouse;
     BtHidTikTok* bt_hid_tiktok;
     HidError* hid_error;
-    HidKeyboardConnectionType hid_conn_type;
+    HidKeyboardConnectionType* hid_conn_type;
     uint32_t view_id;
 } BtHid;
 

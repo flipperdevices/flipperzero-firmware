@@ -42,11 +42,13 @@ void bt_hid_submenu_callback(void* context, uint32_t index) {
 void hid_conn_type_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     BtHid* app = context;
+    HidKeyboardConnectionType hid_keyboard_type_enum;
     app->view_id = BtHidViewSubmenu;
     app->hid_conn_type = HidKeyboardConnectionTypeNone;
     if(index == ConnTypeSubmenuIndexBluetooth) {
         //furi_crash("I just set myself as Bluetooth");
-        app->hid_conn_type = HidKeyboardConnectionTypeBluetooth;
+        hid_keyboard_type_enum = HidKeyboardConnectionTypeUsb;
+        app->hid_conn_type = &hid_keyboard_type_enum;
         // Change profile
         if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
             FURI_LOG_E(TAG, "Failed to switch profile");
@@ -54,7 +56,9 @@ void hid_conn_type_submenu_callback(void* context, uint32_t index) {
         furi_hal_bt_start_advertising();
     } else if(index == ConnTypeSubmenuIndexUsb) {
         //furi_crash("I just set myself as USB");
-        app->hid_conn_type = HidKeyboardConnectionTypeUsb;
+        hid_keyboard_type_enum = HidKeyboardConnectionTypeUsb;
+        app->hid_conn_type = &hid_keyboard_type_enum;
+        furi_crash(app->hid_conn_type);
         furi_hal_usb_unlock();
         furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
     } else {
@@ -100,7 +104,7 @@ void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
     bt_hid_tiktok_set_connected_status(bt_hid->bt_hid_tiktok, connected);
 }
 
-BtHid* bt_hid_app_alloc() {
+BtHid* bt_hid_app_alloc_submenu() {
     BtHid* app = malloc(sizeof(BtHid));
 
     // Gui
@@ -136,7 +140,13 @@ BtHid* bt_hid_app_alloc() {
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), bt_hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->device_type_submenu));
-
+    app->view_id = HidViewConnTypeSubMenu;
+    view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
+    return app;
+}
+BtHid* bt_hid_app_alloc_view(void* context) {
+    furi_assert(context);
+    BtHid* app = context;
     // Dialog view
     app->dialog = dialog_ex_alloc();
     dialog_ex_set_result_callback(app->dialog, bt_hid_dialog_callback);
@@ -187,8 +197,6 @@ BtHid* bt_hid_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewError, hid_error_get_view(app->hid_error));
     // TODO switch to menu after Media is done
-    app->view_id = HidViewConnTypeSubMenu;
-    view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
 
     return app;
 }
@@ -234,7 +242,8 @@ void bt_hid_app_free(BtHid* app) {
 int32_t bt_hid_app(void* p) {
     UNUSED(p);
     // Switch profile to Hid
-    BtHid* app = bt_hid_app_alloc();
+    BtHid* app = bt_hid_app_alloc_submenu();
+    app = bt_hid_app_alloc_view(app);
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
 
