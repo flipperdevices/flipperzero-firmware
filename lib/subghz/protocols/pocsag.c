@@ -249,7 +249,6 @@ uint8_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
 bool subghz_protocol_decoder_pocsag_serialize(void* context, FlipperFormat* flipper_format, SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
-    FURI_LOG_I(TAG, "ser: %s", furi_string_get_cstr(instance->done_msg));
 
     if(!subghz_block_generic_serialize(&instance->generic, flipper_format, preset))
         return false;
@@ -283,8 +282,6 @@ bool subghz_protocol_decoder_pocsag_deserialize(void* context, FlipperFormat* fl
             FURI_LOG_E(TAG, "Missing Msg");
             break;
         }
-        FURI_LOG_I(TAG, "deser: %d", furi_string_size(instance->done_msg));
-        FURI_LOG_I(TAG, "deser: %s", furi_string_get_cstr(instance->done_msg));
         ret = true;
     } while(false);
     return ret;
@@ -302,7 +299,6 @@ void subhz_protocol_decoder_pocsag_get_string(void* context, FuriString* output)
         instance->ric
     );
     furi_string_cat(output, instance->done_msg);
-    FURI_LOG_I(TAG, "str: %s", furi_string_get_cstr(output));
 }
 
 const SubGhzProtocolDecoder subghz_protocol_pocsag_decoder = {
