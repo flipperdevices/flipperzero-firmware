@@ -8,7 +8,7 @@ function Get-LatestDirectory {
 
 $build_commands = @(
     [PSCustomObject]@{
-        Name = "Official Dev";
+        Name = "Official Dev \ Unleashed";
         FbtSwitch = "od";
         FirmwarePath = "flipperzero-firmware_official_dev";
         ArtifactName = "totp_official-dev_unleashed_fw.fap"

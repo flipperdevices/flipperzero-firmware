@@ -1,4 +1,4 @@
-$clang_format = Join-Path -Path $PSScriptRoot -ChildPath "flipperzero-firmware_unleashed/toolchain/x86_64-windows/bin/clang-format.exe"
+$clang_format = Join-Path -Path $PSScriptRoot -ChildPath "flipperzero-firmware_official_dev/toolchain/x86_64-windows/bin/clang-format.exe"
 Push-Location $PSScriptRoot
 Get-ChildItem -Path "totp" -File -Recurse -Include "*.c", "*.h" | ForEach-Object {
     Write-Host "Formatting $($_.FullName)"
