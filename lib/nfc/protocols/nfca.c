@@ -7,10 +7,10 @@
 
 #define NFCA_CRC_INIT (0x6363)
 
-#define NFCA_F_SIG  (13560000.0)                    /* [Hz] NFC frequency */
-#define NFCA_F_SUB  (NFCA_F_SIG/16)                 /* [Hz] NFC subcarrier frequency fs/16 */
-#define T_SUB       (1000000000000.0f / NFCA_F_SUB) /* [ps] subcarrier period = 1/NFCA_F_SUB */
-#define T_SUB_PHASE (T_SUB/2)                       /* [ps] a single subcarrier phase */
+#define NFCA_F_SIG    (13560000.0)                    /* [Hz] NFC frequency */
+#define NFCA_F_SUB    (NFCA_F_SIG/16)                 /* [Hz] NFC subcarrier frequency fs/16 (847500 Hz) */
+#define T_SUB         (1000000000000.0f / NFCA_F_SUB) /* [ps] subcarrier period = 1/NFCA_F_SUB (1.18 µs) */
+#define T_SUB_PHASE   (T_SUB/2)                       /* [ps] a single subcarrier phase (590 µs) */
 
 #define NFCA_SIGNAL_MAX_EDGES (1350)
 
@@ -65,8 +65,18 @@ bool nfca_emulation_handler(
 static void nfca_add_bit(DigitalSignal* signal, bool bit) {
 
     signal->start_level = bit;
-    for(size_t i = 0; i < 16; i++) {
-        signal->edge_timings[signal->edge_cnt++] = T_SUB_PHASE;
+	signal->edge_cnt = 0;
+
+    if(bit) {
+        for(size_t i = 0; i < 7; i++) {
+            signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE);
+        }
+        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE * 9);
+    } else {
+        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE * 8);
+        for(size_t i = 0; i < 8; i++) {
+            signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE);
+        }
     }
 }
 
@@ -112,10 +122,7 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
 
     digital_sequence_clear(nfca_signal->tx_signal);
 
-    /* add a >80/fs phase with no transition, which is >10 1-bits */
-    for(int tr1_bit = 0; tr1_bit < 11; tr1_bit++) {
-        digital_sequence_add(nfca_signal->tx_signal, 1);
-    }
+    digital_sequence_add(nfca_signal->tx_signal, 1);
 
     if(bits < 8) {
         for(size_t i = 0; i < bits; i++) {
