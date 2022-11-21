@@ -1,5 +1,7 @@
 #include "bt_hid.h"
+//#include "views.h"
 #include <furi_hal_bt.h>
+#include <furi_hal_usb.h>
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
 
@@ -12,6 +14,10 @@ enum BtDebugSubmenuIndex {
     BtHidSubmenuIndexTikTok,
     BtHidSubmenuIndexMouse,
 };
+typedef enum {
+    ConnTypeSubmenuIndexBluetooth,
+    ConnTypeSubmenuIndexUsb
+} ConnTypeDebugSubmenuIndex;
 
 void bt_hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -33,7 +39,29 @@ void bt_hid_submenu_callback(void* context, uint32_t index) {
         view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewTikTok);
     }
 }
-
+void hid_conn_type_submenu_callback(void* context, uint32_t index) {
+    furi_assert(context);
+    BtHid* app = context;
+    app->view_id = BtHidViewSubmenu;
+    app->hid_conn_type = HidKeyboardConnectionTypeNone;
+    if(index == ConnTypeSubmenuIndexBluetooth) {
+        //furi_crash("I just set myself as Bluetooth");
+        app->hid_conn_type = HidKeyboardConnectionTypeBluetooth;
+        // Change profile
+        if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
+            FURI_LOG_E(TAG, "Failed to switch profile");
+        }
+        furi_hal_bt_start_advertising();
+    } else if(index == ConnTypeSubmenuIndexUsb) {
+        //furi_crash("I just set myself as USB");
+        app->hid_conn_type = HidKeyboardConnectionTypeUsb;
+        furi_hal_usb_unlock();
+        furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
+    } else {
+        furi_crash("Neither connection type specified");
+    }
+    view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewSubmenu);
+}
 void bt_hid_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
     BtHid* app = context;
@@ -88,20 +116,26 @@ BtHid* bt_hid_app_alloc() {
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-
-    // Submenu view
-    app->submenu = submenu_alloc();
-    submenu_add_item(
-        app->submenu, "Keynote", BtHidSubmenuIndexKeynote, bt_hid_submenu_callback, app);
-    submenu_add_item(
-        app->submenu, "Keyboard", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
-    submenu_add_item(app->submenu, "Media", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
-    submenu_add_item(
-        app->submenu, "TikTok Controller", BtHidSubmenuIndexTikTok, bt_hid_submenu_callback, app);
-    submenu_add_item(app->submenu, "Mouse", BtHidSubmenuIndexMouse, bt_hid_submenu_callback, app);
-    view_set_previous_callback(submenu_get_view(app->submenu), bt_hid_exit);
+    // Connection Type Submenu view
+    app->conn_type_submenu = submenu_alloc();
+    submenu_add_item(app->conn_type_submenu, "Bluetooth", ConnTypeSubmenuIndexBluetooth, hid_conn_type_submenu_callback, app);
+    submenu_add_item(app->conn_type_submenu, "USB", ConnTypeSubmenuIndexUsb, hid_conn_type_submenu_callback, app);
+    view_set_previous_callback(submenu_get_view(app->conn_type_submenu), bt_hid_exit);
     view_dispatcher_add_view(
-        app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->submenu));
+        app->view_dispatcher, HidViewConnTypeSubMenu, submenu_get_view(app->conn_type_submenu));
+    // Device Type Submenu view
+    app->device_type_submenu = submenu_alloc();
+    submenu_add_item(
+        app->device_type_submenu, "Keynote", BtHidSubmenuIndexKeynote, bt_hid_submenu_callback, app);
+    submenu_add_item(
+        app->device_type_submenu, "Keyboard", BtHidSubmenuIndexKeyboard, bt_hid_submenu_callback, app);
+    submenu_add_item(app->device_type_submenu, "Media", BtHidSubmenuIndexMedia, bt_hid_submenu_callback, app);
+    submenu_add_item(
+        app->device_type_submenu, "TikTok Controller", BtHidSubmenuIndexTikTok, bt_hid_submenu_callback, app);
+    submenu_add_item(app->device_type_submenu, "Mouse", BtHidSubmenuIndexMouse, bt_hid_submenu_callback, app);
+    view_set_previous_callback(submenu_get_view(app->device_type_submenu), bt_hid_exit);
+    view_dispatcher_add_view(
+        app->view_dispatcher, BtHidViewSubmenu, submenu_get_view(app->device_type_submenu));
 
     // Dialog view
     app->dialog = dialog_ex_alloc();
@@ -122,7 +156,7 @@ BtHid* bt_hid_app_alloc() {
         app->view_dispatcher, BtHidViewKeynote, bt_hid_keynote_get_view(app->bt_hid_keynote));
 
     // Keyboard view
-    app->bt_hid_keyboard = bt_hid_keyboard_alloc();
+    app->bt_hid_keyboard = bt_hid_keyboard_alloc(app);
     view_set_previous_callback(
         bt_hid_keyboard_get_view(app->bt_hid_keyboard), bt_hid_exit_confirm_view);
     view_dispatcher_add_view(
@@ -147,8 +181,13 @@ BtHid* bt_hid_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewMouse, bt_hid_mouse_get_view(app->bt_hid_mouse));
 
+    // Error View
+    app->hid_error = hid_error_alloc();
+    view_set_previous_callback(hid_error_get_view(app->hid_error), bt_hid_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher, HidViewError, hid_error_get_view(app->hid_error));
     // TODO switch to menu after Media is done
-    app->view_id = BtHidViewSubmenu;
+    app->view_id = HidViewConnTypeSubMenu;
     view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
 
     return app;
@@ -162,7 +201,8 @@ void bt_hid_app_free(BtHid* app) {
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewSubmenu);
-    submenu_free(app->submenu);
+    submenu_free(app->device_type_submenu);
+    submenu_free(app->conn_type_submenu);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewExitConfirm);
     dialog_ex_free(app->dialog);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewKeynote);
@@ -175,6 +215,8 @@ void bt_hid_app_free(BtHid* app) {
     bt_hid_mouse_free(app->bt_hid_mouse);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikTok);
     bt_hid_tiktok_free(app->bt_hid_tiktok);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewError);
+    hid_error_free(app->hid_error);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
@@ -193,21 +235,16 @@ int32_t bt_hid_app(void* p) {
     UNUSED(p);
     // Switch profile to Hid
     BtHid* app = bt_hid_app_alloc();
+    FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
-    // Change profile
-    if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
-        FURI_LOG_E(TAG, "Failed to switch profile");
-        bt_hid_app_free(app);
-        return -1;
-    }
-    furi_hal_bt_start_advertising();
 
     DOLPHIN_DEED(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
     bt_set_status_changed_callback(app->bt, NULL, NULL);
-    // Change back profile to Serial
+
+    furi_hal_usb_set_config(usb_mode_prev, NULL);
     bt_set_profile(app->bt, BtProfileSerial);
 
     bt_hid_app_free(app);
