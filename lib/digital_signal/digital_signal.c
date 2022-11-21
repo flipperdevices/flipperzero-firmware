@@ -9,9 +9,9 @@
 
 #pragma GCC optimize("O3,unroll-loops,Ofast")
 
-#define F_TIM (64000000.0)
-#define T_TIM 1562 //15.625 ns *100
-#define T_TIM_DIV2 781 //15.625 ns / 2 *100
+#define F_TIM       (64000000.0)
+#define T_TIM       1562 /* 15.625 ns *100     */
+#define T_TIM_DIV2   781 /* 15.625 ns / 2 *100 */
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
@@ -227,12 +227,16 @@ void digital_signal_start_timer() {
 void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     furi_assert(signal);
 
+    if(!signal->edge_cnt) {
+        return;
+    }
+
     /* Configure gpio as output */
+    signal->gpio = gpio;
     furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
     /* single signal, add a temporary, terminating edge at the end */
     signal->edge_timings[signal->edge_cnt++] = 10;
-    signal->gpio = gpio;
     digital_signal_prepare(signal);
 
     digital_signal_setup_dma(signal);
