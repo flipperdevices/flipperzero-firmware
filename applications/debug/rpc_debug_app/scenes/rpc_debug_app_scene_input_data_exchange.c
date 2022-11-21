@@ -2,7 +2,7 @@
 
 static void rpc_debug_app_scene_input_data_exchange_result_callback(void* context) {
     RpcDebugApp* app = context;
-    UNUSED(app);
+    view_dispatcher_send_custom_event(app->view_dispatcher, RpcDebugAppCustomEventInputDataExchange);
 }
 
 void rpc_debug_app_scene_input_data_exchange_on_enter(void* context) {
@@ -20,12 +20,14 @@ void rpc_debug_app_scene_input_data_exchange_on_enter(void* context) {
 
 bool rpc_debug_app_scene_input_data_exchange_on_event(void* context, SceneManagerEvent event) {
     RpcDebugApp* app = context;
-    UNUSED(app);
-
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        consumed = true;
+        if(event.event == RpcDebugAppCustomEventInputDataExchange) {
+            rpc_system_app_exchange_data(app->rpc, app->data_store, DATA_STORE_SIZE);
+            scene_manager_previous_scene(app->scene_manager);
+            consumed = true;
+        }
     }
 
     return consumed;

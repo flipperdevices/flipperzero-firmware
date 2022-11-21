@@ -23,7 +23,24 @@ static void rpc_debug_app_tick_event_callback(void* context) {
 
 static void rpc_debug_app_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
-    UNUSED(event);
+    RpcDebugApp* app = context;
+    furi_assert(app->rpc);
+
+    if(event == RpcAppEventSessionClose) {
+        scene_manager_stop(app->scene_manager);
+        view_dispatcher_stop(app->view_dispatcher);
+        rpc_system_app_set_callback(app->rpc, NULL, NULL);
+        app->rpc = NULL;
+    } else if(event == RpcAppEventAppExit) {
+        scene_manager_stop(app->scene_manager);
+        view_dispatcher_stop(app->view_dispatcher);
+        rpc_system_app_confirm(app->rpc, RpcAppEventAppExit, true);
+    } else if(event == RpcAppEventLoadFile) {
+    } else if(event == RpcAppEventButtonPress) {
+    } else if(event == RpcAppEventButtonRelease) {
+    } else {
+        rpc_system_app_confirm(app->rpc, event, false);
+    }
 }
 
 static bool rpc_debug_app_rpc_init_rpc(RpcDebugApp* app, const char* args) {
@@ -94,6 +111,12 @@ static void rpc_debug_app_free(RpcDebugApp* app) {
 
     furi_record_close(RECORD_GUI);
     app->gui = NULL;
+
+    if(app->rpc) {
+        rpc_system_app_set_callback(app->rpc, NULL, NULL);
+        rpc_system_app_send_exited(app->rpc);
+        app->rpc = NULL;
+    }
 
     free(app);
 }

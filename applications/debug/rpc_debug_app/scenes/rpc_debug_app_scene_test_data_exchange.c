@@ -44,6 +44,7 @@ bool rpc_debug_app_scene_test_data_exchange_on_event(void* context, SceneManager
             scene_manager_next_scene(scene_manager, RpcDebugAppSceneInputDataExchange);
             consumed = true;
         } else if(submenu_index == SubmenuIndexReceiveData) {
+            scene_manager_next_scene(scene_manager, RpcDebugAppSceneReceiveDataExchange);
             consumed = true;
         }
     }

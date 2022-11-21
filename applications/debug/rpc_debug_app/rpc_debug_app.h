@@ -16,8 +16,8 @@
 
 #include "scenes/rpc_debug_app_scene.h"
 
-#define TEXT_STORE_SIZE 64
-#define DATA_STORE_SIZE 64
+#define DATA_STORE_SIZE 64U
+#define TEXT_STORE_SIZE 64U
 
 typedef struct {
     Gui* gui;
@@ -48,4 +48,5 @@ typedef enum {
     RpcDebugAppCustomEventInputErrorCode = 100,
     RpcDebugAppCustomEventInputErrorText,
     RpcDebugAppCustomEventInputDataExchange,
+    RpcDebugAppCustomEventRpcDataExchange,
 } RpcDebugAppCustomEvent;
