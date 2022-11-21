@@ -75,6 +75,13 @@ static void tracker_song_state_init(Tracker* tracker) {
     }
 }
 
+static void tracker_song_state_clear(Tracker* tracker) {
+    if(tracker->song_state.channels != NULL) {
+        free(tracker->song_state.channels);
+        tracker->song_state.channels = NULL;
+    }
+}
+
 static uint8_t record_get_note(Row note) {
     return note & ROW_NOTE_MASK;
 }
@@ -386,6 +393,7 @@ Tracker* tracker_alloc() {
 }
 
 void tracker_free(Tracker* tracker) {
+    tracker_song_state_clear(tracker);
     free(tracker);
 }
 
