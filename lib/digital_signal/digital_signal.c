@@ -5,7 +5,7 @@
 #include <stm32wbxx_ll_tim.h>
 #include <math.h>
 
-#define TAG "[DigitalSignal]"
+#define TAG "DigitalSignal"
 
 #pragma GCC optimize("O3,unroll-loops,Ofast")
 
@@ -299,7 +299,7 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
         furi_hal_gpio_init(signal->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
         if(!digital_signal_setup_dma(signal)) {
-            FURI_LOG_D(TAG, "Signal has no entries, aborting");
+            FURI_LOG_D(TAG, "digital_sequence_send_signal: Signal has no entries, aborting");
             return false;
         }
         digital_signal_setup_timer();
@@ -311,7 +311,7 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
 
         /* configure next polarities and timings */
         if(!digital_signal_update_dma(signal)) {
-            FURI_LOG_D(TAG, "Signal has no entries, aborting");
+            FURI_LOG_D(TAG, "digital_sequence_send_signal: Signal has no entries, aborting");
             return false;
         }
     }
@@ -329,7 +329,7 @@ bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
         DigitalSignal *sig = sequence->signals[signal_index];
 
         if(!sig) {
-            FURI_LOG_D(TAG, "Signal at index %u, used at pos %lu is NULL, aborting", signal_index, pos);
+            FURI_LOG_D(TAG, "digital_sequence_send: Signal at index %u, used at pos %lu is NULL, aborting", signal_index, pos);
             digital_signal_stop_timer();
             digital_signal_stop_dma();
             return false;

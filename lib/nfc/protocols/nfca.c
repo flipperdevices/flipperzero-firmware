@@ -103,6 +103,9 @@ NfcaSignal* nfca_signal_alloc() {
     nfca_add_bit(nfca_signal->zero, false);
     nfca_signal->tx_signal = digital_sequence_alloc(NFCA_SIGNAL_MAX_EDGES);
 
+    digital_sequence_set_signal(nfca_signal->tx_signal, 0, nfca_signal->zero);
+    digital_sequence_set_signal(nfca_signal->tx_signal, 1, nfca_signal->one);
+
     return nfca_signal;
 }
 
