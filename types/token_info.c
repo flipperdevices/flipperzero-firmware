@@ -3,9 +3,9 @@
 #include "token_info.h"
 #include "stdlib.h"
 #include "common.h"
-#include "../services/base32/base32.h"
+#include "../lib/base32/base32.h"
 #include "../services/crypto/crypto.h"
-#include "../services/crypto/memset_s.h"
+#include "../lib/polyfills/memset_s.h"
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
