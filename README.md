@@ -1,2 +1,2 @@
 # Flipper Zero music tracker
--=-=- WIP -=-=-
+-=-=- MVP Stage: minimum viable player -=-=-
