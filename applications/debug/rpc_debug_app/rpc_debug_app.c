@@ -58,6 +58,7 @@ static RpcDebugApp* rpc_debug_app_alloc() {
     RpcDebugApp* app = malloc(sizeof(RpcDebugApp));
 
     app->gui = furi_record_open(RECORD_GUI);
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
     app->scene_manager = scene_manager_alloc(&rpc_debug_app_scene_handlers, app);
     app->view_dispatcher = view_dispatcher_alloc();
 
@@ -106,6 +107,8 @@ static void rpc_debug_app_free(RpcDebugApp* app) {
     free(app->scene_manager);
     free(app->view_dispatcher);
 
+    furi_record_close(RECORD_NOTIFICATION);
+    app->notifications = NULL;
     furi_record_close(RECORD_GUI);
     app->gui = NULL;
 
@@ -122,6 +125,7 @@ int32_t rpc_debug_app(void* args) {
     RpcDebugApp* app = rpc_debug_app_alloc();
 
     if(rpc_debug_app_rpc_init_rpc(app, args)) {
+        notification_message(app->notifications, &sequence_display_backlight_on);
         scene_manager_next_scene(app->scene_manager, RpcDebugAppSceneStart);
     } else {
         scene_manager_next_scene(app->scene_manager, RpcDebugAppSceneStartDummy);

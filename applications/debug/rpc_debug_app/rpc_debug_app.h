@@ -13,6 +13,7 @@
 #include <gui/modules/byte_input.h>
 
 #include <rpc/rpc_app.h>
+#include <notification/notification_messages.h>
 
 #include "scenes/rpc_debug_app_scene.h"
 
@@ -24,6 +25,7 @@ typedef struct {
     RpcAppSystem* rpc;
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
+    NotificationApp* notifications;
 
     Widget* widget;
     Submenu* submenu;

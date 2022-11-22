@@ -51,6 +51,8 @@ bool rpc_debug_app_scene_receive_data_exchange_on_event(void* context, SceneMana
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == RpcDebugAppCustomEventRpcDataExchange) {
+            notification_message(app->notifications, &sequence_blink_cyan_100);
+            notification_message(app->notifications, &sequence_display_backlight_on);
             text_box_set_text(app->text_box, app->text_store);
             consumed = true;
         }
