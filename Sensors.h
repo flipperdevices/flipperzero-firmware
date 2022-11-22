@@ -83,7 +83,6 @@ typedef struct Sensor {
     float temp;
     //Относительная влажность
     float hum;
-
     //Тип датчика
     const SensorType* type;
     //Статус последнего опроса датчика

@@ -54,7 +54,8 @@ typedef struct {
     UnitempSettings settings;
     //Массив указателей на датчики
     Sensor** sensors;
-
+    //Количество загруженных датчиков
+    uint8_t sensors_count;
     //SD-карта
     Storage* storage; //Хранилище
     Stream* file_stream; //Файловый поток

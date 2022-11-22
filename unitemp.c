@@ -214,6 +214,7 @@ static void unitemp_free(void) {
     //Очистка датчиков
     //Высвыбождение данных датчиков
     unitemp_sensors_free();
+    free(app->sensors);
 
     //Закрытие уведомлений
     furi_record_close(RECORD_NOTIFICATION);
