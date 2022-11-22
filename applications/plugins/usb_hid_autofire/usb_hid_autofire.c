@@ -86,9 +86,9 @@ int32_t usb_hid_autofire_app(void* p) {
 
         if(btn_left_autofire) {
             furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
-//            wait(100);
+            //            wait(100);
             furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
-//            wait(100);
+            //            wait(100);
         }
 
         view_port_update(view_port);
