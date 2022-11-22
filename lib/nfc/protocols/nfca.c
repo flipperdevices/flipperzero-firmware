@@ -91,7 +91,7 @@ static void nfca_add_modulation(DigitalSignal* signal, size_t phases) {
 }
 
 static void nfca_add_silence(DigitalSignal* signal, size_t phases) {
-    bool end_level = signal->start_level ^ (signal->edge_cnt % 2);
+    bool end_level = signal->start_level ^ ((signal->edge_cnt % 2) == 0);
 
     if((signal->edge_cnt == 0) || end_level) {
         signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
@@ -123,6 +123,9 @@ NfcaSignal* nfca_signal_alloc() {
     nfca_add_silence(nfca_signal->seq_f, 16);
 
     nfca_signal->tx_signal = digital_sequence_alloc(NFCA_SIGNAL_MAX_EDGES);
+
+    /* we are dealing with shorter sequences, enable bake-before-sending */
+    nfca_signal->tx_signal->bake = true;
 
     digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_SOF, nfca_signal->seq_d);
     digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_BIT0, nfca_signal->seq_e);

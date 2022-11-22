@@ -352,7 +352,7 @@ bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
     //gpio = &gpio_ext_pb2;
     furi_hal_gpio_init(gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
-    if(true) {
+    if(sequence->bake) {
         DigitalSignal* sig = digital_sequence_bake(sequence);
 
         digital_signal_send(sig, gpio);

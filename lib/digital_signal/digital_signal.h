@@ -31,6 +31,7 @@ typedef struct {
 
 typedef struct {
     uint8_t signals_size;
+    bool bake;
     uint32_t sequence_used;
     uint32_t sequence_size;
     DigitalSignal** signals;
