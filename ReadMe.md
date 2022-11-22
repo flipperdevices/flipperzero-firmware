@@ -35,6 +35,7 @@ Thank you to all the supporters!
 - Added Typos fix in PRs: #434, #433, #432 & #431
 - Added: [htu21d falsely reading temp as humidity #175 (By GottZ)](https://github.com/DarkFlippers/unleashed-firmware/pull/175)
 - Added: [Power: Show battery percentile while charging #178 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/178)
+- Added: [Fix U2F HID vulnerability #2042 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2042)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -261,3 +262,4 @@ $ ./fbt resources icons dolphin_ext
 - [Infrared: Add Olimpia Splendid AC #2038 (By asprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/2038)
 - [SubGhz: add protocol Nice_Flo 20bit #1983 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1983)
 - [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
+- [Fix U2F HID vulnerability #2042 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2042)
