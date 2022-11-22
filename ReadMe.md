@@ -17,22 +17,6 @@ Thank you to all the supporters!
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-22 16:04 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-22 16:04 EST`
-- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
-- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
-- Added: [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
-- Added: [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) `video.bin NEEDED, Please LMK if you have it`
-- Added: [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
-- Added: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
-- Added: [Infrared: Add Olimpia Splendid AC #2038 (By asprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/2038)
-- Added: [SubGhz: add protocol Nice_Flo 20bit #1983 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1983)
-- Added: [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
-- Added Typos fix in PRs: #434, #433, #432 & #431
-- Added: [htu21d falsely reading temp as humidity #175 (By GottZ)](https://github.com/DarkFlippers/unleashed-firmware/pull/175)
-- Added: [Power: Show battery percentile while charging #178 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/178)
-- Added: [Fix U2F HID vulnerability #2042 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2042)
-- Updated: [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 - Added: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
 ## Install from Release
