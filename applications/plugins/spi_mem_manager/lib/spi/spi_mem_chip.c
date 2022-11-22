@@ -47,6 +47,14 @@ static const SPIMemChip SPIMemChips[] = {
      0x40,
      0x17,
      SPIMemChipAddressType3byte},
+    {SPIMemChipVendorGigadevice,
+     "25Q80BSIG",
+     NULL,
+     1L * 1024L * 1024L,
+     SPIMemChipWriteModePage256Bytes,
+     0x40,
+     0x14,
+     SPIMemChipAddressType3byte},
     {SPIMemChipVendorUnknown,
      NULL,
      NULL,
@@ -97,4 +105,16 @@ const char* spi_mem_chip_get_vendor_name(SPIMemChip* chip) {
 
 const char* spi_mem_chip_get_model_name(SPIMemChip* chip) {
     return (chip->model_name);
+}
+
+uint8_t spi_mem_chip_get_vendor_id(SPIMemChip* chip) {
+    return ((uint8_t)chip->vendor_id);
+}
+
+uint8_t spi_mem_chip_get_type_id(SPIMemChip* chip) {
+    return (chip->type_id);
+}
+
+uint8_t spi_mem_chip_get_capacity_id(SPIMemChip* chip) {
+    return (chip->capacity_id);
 }

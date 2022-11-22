@@ -24,7 +24,7 @@ bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) 
         if(event.event == SPIMemCustomEventWorkerChipIdentified) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetected);
         } else if(event.event == SPIMemCustomEventWorkerChipUnknown) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetectFailed);
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetectFail);
         }
     }
     return success;
