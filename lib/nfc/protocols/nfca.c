@@ -91,7 +91,13 @@ static void nfca_add_modulation(DigitalSignal* signal, size_t phases) {
 }
 
 static void nfca_add_silence(DigitalSignal* signal, size_t phases) {
-    signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
+    bool end_level = signal->start_level ^ (signal->edge_cnt % 2);
+
+    if((signal->edge_cnt == 0) || end_level) {
+        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
+    } else {
+        signal->edge_timings[signal->edge_cnt - 1] += DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
+    }
 }
 
 NfcaSignal* nfca_signal_alloc() {
@@ -102,22 +108,19 @@ NfcaSignal* nfca_signal_alloc() {
     nfca_signal->seq_e = digital_signal_alloc(10);
     nfca_signal->seq_f = digital_signal_alloc(10);
 
-    /* start all sequences without load. polarity is not defined by standard, 
-       so pick the polarity the best for us */
-    nfca_signal->seq_d->start_level = false;
-    nfca_signal->seq_e->start_level = false;
-    nfca_signal->seq_f->start_level = false;
-    
     /* SEQ D has the first half modulated, used as SOF */
-    nfca_add_modulation(nfca_signal->seq_d, 4);
-    nfca_add_silence(nfca_signal->seq_d, 4);
+    nfca_signal->seq_d->start_level = true;
+    nfca_add_modulation(nfca_signal->seq_d, 8);
+    nfca_add_silence(nfca_signal->seq_d, 8);
 
     /* SEQ E has the second half modulated */
-    nfca_add_silence(nfca_signal->seq_e, 4);
-    nfca_add_modulation(nfca_signal->seq_e, 4);
+    nfca_signal->seq_e->start_level = false;
+    nfca_add_silence(nfca_signal->seq_e, 8);
+    nfca_add_modulation(nfca_signal->seq_e, 8);
 
     /* SEQ F is just no modulation, used as EOF */
-    nfca_add_silence(nfca_signal->seq_f, 8);
+    nfca_signal->seq_f->start_level = false;
+    nfca_add_silence(nfca_signal->seq_f, 16);
 
     nfca_signal->tx_signal = digital_sequence_alloc(NFCA_SIGNAL_MAX_EDGES);
 
@@ -147,10 +150,8 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
 
     digital_sequence_clear(nfca_signal->tx_signal);
 
-    /* add some idle bit times before SOF */
-    for(int pos = 0; pos < 4; pos++) {
-        digital_sequence_add(nfca_signal->tx_signal, SEQ_IDLE);
-    }
+    /* add some idle bit times before SOF in case the GPIO was active */
+    digital_sequence_add(nfca_signal->tx_signal, SEQ_IDLE);
     digital_sequence_add(nfca_signal->tx_signal, SEQ_SOF);
 
     if(bits < 8) {
