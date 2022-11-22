@@ -163,6 +163,18 @@ void unitemp_sensors_free(void);
 void unitemp_sensors_updateValues(void);
 
 /**
+ * @brief Получить количество загруженных датчиков
+ * @return Количество датчиков
+ */
+uint8_t unitemp_sensors_getCount(void);
+
+/**
+ * @brief Добавить датчик в общий список
+ * @param sensor Указатель на датчик
+ */
+void unitemp_sensors_add(Sensor* sensor);
+
+/**
 * @brief Получить списк доступных типов датчиков
 * @return Указатель на список датчиков
 */

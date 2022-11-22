@@ -52,10 +52,8 @@ typedef struct {
     bool sensors_ready; //Флаг готовности датчиков к опросу
     //Основные настройки
     UnitempSettings settings;
-    //Список указателей на датчики
-    Sensor* sensors[MAX_SENSORS];
-    //Количество загруженных датчиков
-    uint8_t sensors_count;
+    //Массив указателей на датчики
+    Sensor** sensors;
 
     //SD-карта
     Storage* storage; //Хранилище

@@ -27,7 +27,7 @@ OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
     }
 
     //Проверка на наличие шины на этом порте
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         if(app->sensors[i]->type->interface == &ONE_WIRE &&
            ((OneWireSensor*)app->sensors[i]->instance)->bus->gpio->num == gpio->num) {
             //Если шина на этом порту уже есть, то возврат указателя на шину

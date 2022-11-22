@@ -8,6 +8,7 @@
 
 //TODO: Реализовать ограничение на добавление датчиков если интерфейс недоступен
 //TODO: Не выкидывать датчик в ошибку при первом же неудачном опросе
+//TODO: Динамический размер массива с датчиками
 
 /* Переменные */
 //Данные приложения
@@ -182,6 +183,8 @@ static bool unitemp_alloc(void) {
     app->gui = furi_record_open(RECORD_GUI);
     //Диспетчер окон
     app->view_dispatcher = view_dispatcher_alloc();
+
+    app->sensors = NULL;
 
     unitemp_Summary_alloc();
     unitemp_MainMenu_alloc();

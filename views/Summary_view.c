@@ -14,8 +14,8 @@ static void _draw_callback(Canvas* canvas, void* _model) {
     canvas_draw_str_aligned(canvas, 64, 7, AlignCenter, AlignCenter, "Unitemp");
 
     canvas_set_color(canvas, ColorBlack);
-    if(app->sensors_count > 0) {
-        for(uint8_t i = 0; i < app->sensors_count; i++) {
+    if(unitemp_sensors_getCount() > 0) {
+        for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 0, 24 + 10 * i, app->sensors[i]->name);
 
@@ -41,7 +41,7 @@ static void _draw_callback(Canvas* canvas, void* _model) {
         }
     } else {
         canvas_set_font(canvas, FontSecondary);
-        if(app->sensors_count == 0) canvas_draw_str(canvas, 0, 24, "Sensors not found");
+        if(unitemp_sensors_getCount() == 0) canvas_draw_str(canvas, 0, 24, "Sensors not found");
     }
 }
 
