@@ -11,3 +11,5 @@ void bt_hid_keyboard_free(BtHidKeyboard* bt_hid_keyboard);
 View* bt_hid_keyboard_get_view(BtHidKeyboard* bt_hid_keyboard);
 
 void bt_hid_keyboard_set_connected_status(BtHidKeyboard* bt_hid_keyboard, bool connected);
+
+void bt_hid_keyboard_set_conn_type(BtHidKeyboard* bt_hid_keyboard, bool is_bluetooth);

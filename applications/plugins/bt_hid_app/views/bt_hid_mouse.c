@@ -3,11 +3,15 @@
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
+#include "../bt_hid.h"
 
 #include "bt_hid_icons.h"
 
+#define TAG "BtHidApp"
+
 struct BtHidMouse {
     View* view;
+    BtHid* bt_hid;
 };
 #define MOUSE_MOVE_SHORT 5
 #define MOUSE_MOVE_LONG 20
@@ -21,14 +25,16 @@ typedef struct {
     bool left_mouse_held;
     bool right_mouse_pressed;
     bool connected;
+    bool is_bluetooth;
 } BtHidMouseModel;
 
 static void bt_hid_mouse_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     BtHidMouseModel* model = context;
+    bool is_bluetooth = model->is_bluetooth;
 
     // Header
-    if(model->connected) {
+    if(model->connected && is_bluetooth) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
     } else {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
@@ -104,14 +110,20 @@ static void bt_hid_mouse_draw_callback(Canvas* canvas, void* context) {
 }
 
 static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
+    bool is_bluetooth = bt_hid_mouse->bt_hid->is_bluetooth;
     with_view_model(
         bt_hid_mouse->view,
         BtHidMouseModel * model,
         {
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
-                    furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
-                    furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
+                        furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
+                        furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
+                    }
                 } else if(event->type == InputTypePress) {
                     model->right_mouse_pressed = true;
                 } else if(event->type == InputTypeRelease) {
@@ -120,11 +132,21 @@ static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
             } else if(event->key == InputKeyOk) {
                 if(event->type == InputTypeShort) {
                     // Just release if it was being held before
-                    if(!model->left_mouse_held) furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
-                    furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+                    if(is_bluetooth) {
+                        if(!model->left_mouse_held)
+                            furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+                        furi_hal_bt_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+                    } else if(!is_bluetooth) {
+                        if(!model->left_mouse_held) furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+                        furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+                    }
                     model->left_mouse_held = false;
                 } else if(event->type == InputTypeLong) {
-                    furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
+                    }
                     model->left_mouse_held = true;
                     model->left_mouse_pressed = true;
                 } else if(event->type == InputTypePress) {
@@ -137,36 +159,68 @@ static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
             } else if(event->key == InputKeyRight) {
                 if(event->type == InputTypePress) {
                     model->right_pressed = true;
-                    furi_hal_bt_hid_mouse_move(MOUSE_MOVE_SHORT, 0);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(MOUSE_MOVE_SHORT, 0);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(MOUSE_MOVE_SHORT, 0);
+                    }
                 } else if(event->type == InputTypeRepeat) {
-                    furi_hal_bt_hid_mouse_move(MOUSE_MOVE_LONG, 0);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(MOUSE_MOVE_LONG, 0);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(MOUSE_MOVE_LONG, 0);
+                    }
                 } else if(event->type == InputTypeRelease) {
                     model->right_pressed = false;
                 }
             } else if(event->key == InputKeyLeft) {
                 if(event->type == InputTypePress) {
                     model->left_pressed = true;
-                    furi_hal_bt_hid_mouse_move(-MOUSE_MOVE_SHORT, 0);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(-MOUSE_MOVE_SHORT, 0);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(-MOUSE_MOVE_SHORT, 0);
+                    }
                 } else if(event->type == InputTypeRepeat) {
-                    furi_hal_bt_hid_mouse_move(-MOUSE_MOVE_LONG, 0);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(-MOUSE_MOVE_LONG, 0);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(-MOUSE_MOVE_LONG, 0);
+                    }
                 } else if(event->type == InputTypeRelease) {
                     model->left_pressed = false;
                 }
             } else if(event->key == InputKeyDown) {
                 if(event->type == InputTypePress) {
                     model->down_pressed = true;
-                    furi_hal_bt_hid_mouse_move(0, MOUSE_MOVE_SHORT);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(0, MOUSE_MOVE_SHORT);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(0, MOUSE_MOVE_SHORT);
+                    }
                 } else if(event->type == InputTypeRepeat) {
-                    furi_hal_bt_hid_mouse_move(0, MOUSE_MOVE_LONG);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(0, MOUSE_MOVE_LONG);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(0, MOUSE_MOVE_LONG);
+                    }
                 } else if(event->type == InputTypeRelease) {
                     model->down_pressed = false;
                 }
             } else if(event->key == InputKeyUp) {
                 if(event->type == InputTypePress) {
                     model->up_pressed = true;
-                    furi_hal_bt_hid_mouse_move(0, -MOUSE_MOVE_SHORT);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(0, -MOUSE_MOVE_SHORT);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(0, -MOUSE_MOVE_SHORT);
+                    }
                 } else if(event->type == InputTypeRepeat) {
-                    furi_hal_bt_hid_mouse_move(0, -MOUSE_MOVE_LONG);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_mouse_move(0, -MOUSE_MOVE_LONG);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_mouse_move(0, -MOUSE_MOVE_LONG);
+                    }
                 } else if(event->type == InputTypeRelease) {
                     model->up_pressed = false;
                 }
@@ -178,10 +232,16 @@ static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
 static bool bt_hid_mouse_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     BtHidMouse* bt_hid_mouse = context;
+    bool is_bluetooth = bt_hid_mouse->bt_hid->is_bluetooth;
     bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
-        furi_hal_bt_hid_mouse_release_all();
+        if(is_bluetooth) {
+            furi_hal_bt_hid_mouse_release_all();
+        } else if(!is_bluetooth) {
+            furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
+            furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
+        }
     } else {
         bt_hid_mouse_process(bt_hid_mouse, event);
         consumed = true;
@@ -190,9 +250,10 @@ static bool bt_hid_mouse_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-BtHidMouse* bt_hid_mouse_alloc() {
+BtHidMouse* bt_hid_mouse_alloc(BtHid* bt_hid) {
     BtHidMouse* bt_hid_mouse = malloc(sizeof(BtHidMouse));
     bt_hid_mouse->view = view_alloc();
+    bt_hid_mouse->bt_hid = bt_hid;
     view_set_context(bt_hid_mouse->view, bt_hid_mouse);
     view_allocate_model(bt_hid_mouse->view, ViewModelTypeLocking, sizeof(BtHidMouseModel));
     view_set_draw_callback(bt_hid_mouse->view, bt_hid_mouse_draw_callback);
@@ -216,4 +277,10 @@ void bt_hid_mouse_set_connected_status(BtHidMouse* bt_hid_mouse, bool connected)
     furi_assert(bt_hid_mouse);
     with_view_model(
         bt_hid_mouse->view, BtHidMouseModel * model, { model->connected = connected; }, true);
+}
+
+void bt_hid_mouse_set_conn_type(BtHidMouse* bt_hid_mouse, bool is_bluetooth) {
+    furi_assert(bt_hid_mouse);
+    with_view_model(
+        bt_hid_mouse->view, BtHidMouseModel * model, { model->is_bluetooth = is_bluetooth; }, true);
 }

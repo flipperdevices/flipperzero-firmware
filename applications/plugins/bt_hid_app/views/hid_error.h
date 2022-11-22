@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <gui/modules/popup.h>
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>

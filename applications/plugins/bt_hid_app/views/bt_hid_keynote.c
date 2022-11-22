@@ -3,11 +3,15 @@
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
+#include "../bt_hid.h"
 
 #include "bt_hid_icons.h"
 
+#define TAG "BtHidApp"
+
 struct BtHidKeynote {
     View* view;
+    BtHid* bt_hid;
 };
 
 typedef struct {
@@ -18,6 +22,7 @@ typedef struct {
     bool ok_pressed;
     bool back_pressed;
     bool connected;
+    bool is_bluetooth;
 } BtHidKeynoteModel;
 
 static void bt_hid_keynote_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
@@ -36,9 +41,10 @@ static void bt_hid_keynote_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, Canv
 static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     BtHidKeynoteModel* model = context;
+    bool is_bluetooth = model->is_bluetooth;
 
     // Header
-    if(model->connected) {
+    if(model->connected && is_bluetooth) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
     } else {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
@@ -107,6 +113,7 @@ static void bt_hid_keynote_draw_callback(Canvas* canvas, void* context) {
 }
 
 static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* event) {
+    bool is_bluetooth = bt_hid_keynote->bt_hid->is_bluetooth;
     with_view_model(
         bt_hid_keynote->view,
         BtHidKeynoteModel * model,
@@ -114,47 +121,94 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_UP_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_UP_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_press(HID_KEYBOARD_UP_ARROW);
+                    }
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_DOWN_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_DOWN_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_press(HID_KEYBOARD_DOWN_ARROW);
+                    }
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_LEFT_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_LEFT_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_press(HID_KEYBOARD_LEFT_ARROW);
+                    }
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_RIGHT_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_RIGHT_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_press(HID_KEYBOARD_RIGHT_ARROW);
+                    }
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = true;
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_SPACEBAR);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_SPACEBAR);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_press(HID_KEYBOARD_SPACEBAR);
+                    }
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = true;
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = false;
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_UP_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_UP_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_release(HID_KEYBOARD_UP_ARROW);
+                    }
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = false;
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_DOWN_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_DOWN_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_release(HID_KEYBOARD_DOWN_ARROW);
+                    }
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = false;
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_LEFT_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_LEFT_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_release(HID_KEYBOARD_LEFT_ARROW);
+                    }
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = false;
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_RIGHT_ARROW);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_RIGHT_ARROW);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_release(HID_KEYBOARD_RIGHT_ARROW);
+                    }
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = false;
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_SPACEBAR);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_SPACEBAR);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_release(HID_KEYBOARD_SPACEBAR);
+                    }
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = false;
                 }
             } else if(event->type == InputTypeShort) {
                 if(event->key == InputKeyBack) {
-                    furi_hal_bt_hid_kb_press(HID_KEYBOARD_DELETE);
-                    furi_hal_bt_hid_kb_release(HID_KEYBOARD_DELETE);
-                    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_AC_BACK);
-                    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
+                    if(is_bluetooth) {
+                        furi_hal_bt_hid_kb_press(HID_KEYBOARD_DELETE);
+                        furi_hal_bt_hid_kb_release(HID_KEYBOARD_DELETE);
+                        furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_AC_BACK);
+                        furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
+                    } else if(!is_bluetooth) {
+                        furi_hal_hid_kb_press(HID_KEYBOARD_DELETE);
+                        furi_hal_hid_kb_release(HID_KEYBOARD_DELETE);
+                        furi_hal_hid_consumer_key_press(HID_CONSUMER_AC_BACK);
+                        furi_hal_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
+                    }
                 }
             }
         },
@@ -164,10 +218,15 @@ static void bt_hid_keynote_process(BtHidKeynote* bt_hid_keynote, InputEvent* eve
 static bool bt_hid_keynote_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     BtHidKeynote* bt_hid_keynote = context;
+    bool is_bluetooth = bt_hid_keynote->bt_hid->is_bluetooth;
     bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
-        furi_hal_bt_hid_kb_release_all();
+        if(is_bluetooth) {
+            furi_hal_bt_hid_kb_release_all();
+        } else if(!is_bluetooth) {
+            furi_hal_hid_kb_release_all();
+        }
     } else {
         bt_hid_keynote_process(bt_hid_keynote, event);
         consumed = true;
@@ -176,9 +235,10 @@ static bool bt_hid_keynote_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-BtHidKeynote* bt_hid_keynote_alloc() {
+BtHidKeynote* bt_hid_keynote_alloc(BtHid* bt_hid) {
     BtHidKeynote* bt_hid_keynote = malloc(sizeof(BtHidKeynote));
     bt_hid_keynote->view = view_alloc();
+    bt_hid_keynote->bt_hid = bt_hid;
     view_set_context(bt_hid_keynote->view, bt_hid_keynote);
     view_allocate_model(bt_hid_keynote->view, ViewModelTypeLocking, sizeof(BtHidKeynoteModel));
     view_set_draw_callback(bt_hid_keynote->view, bt_hid_keynote_draw_callback);
@@ -202,4 +262,13 @@ void bt_hid_keynote_set_connected_status(BtHidKeynote* bt_hid_keynote, bool conn
     furi_assert(bt_hid_keynote);
     with_view_model(
         bt_hid_keynote->view, BtHidKeynoteModel * model, { model->connected = connected; }, true);
+}
+
+void bt_hid_keynote_set_conn_type(BtHidKeynote* bt_hid_keynote, bool is_bluetooth) {
+    furi_assert(bt_hid_keynote);
+    with_view_model(
+        bt_hid_keynote->view,
+        BtHidKeynoteModel * model,
+        { model->is_bluetooth = is_bluetooth; },
+        true);
 }

@@ -17,7 +17,6 @@
 #include "views/bt_hid_tiktok.h"
 #include "views/hid_error.h"
 
-
 typedef struct {
     Bt* bt;
     Gui* gui;
@@ -36,4 +35,3 @@ typedef struct {
     bool hid_conn_selected;
     uint32_t view_id;
 } BtHid;
-

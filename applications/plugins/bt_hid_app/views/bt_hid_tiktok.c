@@ -6,6 +6,8 @@
 
 #include "bt_hid_icons.h"
 
+#define TAG "BtHidApp"
+
 struct BtHidTikTok {
     View* view;
 };

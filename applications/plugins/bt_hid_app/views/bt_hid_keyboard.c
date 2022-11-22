@@ -7,6 +7,8 @@
 #include "../bt_hid.h"
 #include "bt_hid_icons.h"
 
+#define TAG "BtHidApp"
+
 struct BtHidKeyboard {
     View* view;
     BtHid* bt_hid;
@@ -205,11 +207,9 @@ static void bt_hid_keyboard_draw_key(
 
 static void bt_hid_keyboard_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
-    BtHidKeyboard* bt_keyboard = context;
-    bool is_bluetooth = bt_keyboard->bt_hid->is_bluetooth;
-    furi_assert(context);
     BtHidKeyboardModel* model = context;
-    
+    bool is_bluetooth = model->is_bluetooth;
+
     // Header
     if(!model->connected && is_bluetooth) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
@@ -320,15 +320,19 @@ static void bt_hid_keyboard_process(BtHidKeyboard* bt_hid_keyboard, InputEvent* 
                             model->modifier_code &= ~KEY_MOD_LEFT_GUI;
                     }
                     if(is_bluetooth) {
+                        FURI_LOG_D(TAG, "Sent bluetooth key press");
                         furi_hal_bt_hid_kb_press(model->modifier_code | model->last_key_code);
                     } else if(!is_bluetooth) {
+                        FURI_LOG_D(TAG, "Sent USB key press");
                         furi_hal_hid_kb_press(model->modifier_code | model->last_key_code);
                     }
                 } else if(event->type == InputTypeRelease) {
                     // Release happens after short and long presses
                     if(is_bluetooth) {
+                        FURI_LOG_D(TAG, "Released bluetooth key press");
                         furi_hal_bt_hid_kb_release(model->modifier_code | model->last_key_code);
                     } else if(!is_bluetooth) {
+                        FURI_LOG_D(TAG, "Released USB key press");
                         furi_hal_hid_kb_release(model->modifier_code | model->last_key_code);
                     }
                     model->ok_pressed = false;
@@ -369,7 +373,7 @@ static bool bt_hid_keyboard_input_callback(InputEvent* event, void* context) {
     BtHidKeyboard* bt_hid_keyboard = context;
     bool is_bluetooth = bt_hid_keyboard->bt_hid->is_bluetooth;
     bool consumed = false;
-    
+
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         if(is_bluetooth) {
             furi_hal_bt_hid_kb_release_all();
@@ -411,4 +415,12 @@ void bt_hid_keyboard_set_connected_status(BtHidKeyboard* bt_hid_keyboard, bool c
     furi_assert(bt_hid_keyboard);
     with_view_model(
         bt_hid_keyboard->view, BtHidKeyboardModel * model, { model->connected = connected; }, true);
+}
+void bt_hid_keyboard_set_conn_type(BtHidKeyboard* bt_hid_keyboard, bool is_bluetooth) {
+    furi_assert(bt_hid_keyboard);
+    with_view_model(
+        bt_hid_keyboard->view,
+        BtHidKeyboardModel * model,
+        { model->is_bluetooth = is_bluetooth; },
+        true);
 }
