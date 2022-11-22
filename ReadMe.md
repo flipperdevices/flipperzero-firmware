@@ -11,12 +11,10 @@ This software is for experimental purposes only and is not meant for any illegal
 Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
 Thank you to all the supporters!
 
-- [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 - [Support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸
-- [xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
-
+- [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
 ## Latest Updates
 
