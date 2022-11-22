@@ -7,11 +7,11 @@
 
 #include "bt_hid_icons.h"
 
-#define TAG "BtHidApp"
+#define TAG "HidApp"
 
-struct BtHidMedia {
+struct HidMedia {
     View* view;
-    BtHid* bt_hid;
+    Hid* hid;
 };
 
 typedef struct {
@@ -22,9 +22,9 @@ typedef struct {
     bool ok_pressed;
     bool connected;
     bool is_bluetooth;
-} BtHidMediaModel;
+} HidMediaModel;
 
-static void bt_hid_media_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
+static void hid_media_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
     canvas_draw_triangle(canvas, x, y, 5, 3, dir);
     if(dir == CanvasDirectionBottomToTop) {
         canvas_draw_dot(canvas, x, y - 1);
@@ -37,9 +37,9 @@ static void bt_hid_media_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, Canvas
     }
 }
 
-static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
+static void hid_media_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
-    BtHidMediaModel* model = context;
+    HidMediaModel* model = context;
     bool is_bluetooth = model->is_bluetooth;
 
     // Header
@@ -82,8 +82,8 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    bt_hid_media_draw_arrow(canvas, 82, 31, CanvasDirectionRightToLeft);
-    bt_hid_media_draw_arrow(canvas, 86, 31, CanvasDirectionRightToLeft);
+    hid_media_draw_arrow(canvas, 82, 31, CanvasDirectionRightToLeft);
+    hid_media_draw_arrow(canvas, 86, 31, CanvasDirectionRightToLeft);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
@@ -93,8 +93,8 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    bt_hid_media_draw_arrow(canvas, 112, 31, CanvasDirectionLeftToRight);
-    bt_hid_media_draw_arrow(canvas, 116, 31, CanvasDirectionLeftToRight);
+    hid_media_draw_arrow(canvas, 112, 31, CanvasDirectionLeftToRight);
+    hid_media_draw_arrow(canvas, 116, 31, CanvasDirectionLeftToRight);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
@@ -102,7 +102,7 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
         canvas_draw_icon(canvas, 93, 25, &I_Pressed_Button_13x13);
         canvas_set_color(canvas, ColorWhite);
     }
-    bt_hid_media_draw_arrow(canvas, 96, 31, CanvasDirectionLeftToRight);
+    hid_media_draw_arrow(canvas, 96, 31, CanvasDirectionLeftToRight);
     canvas_draw_line(canvas, 100, 29, 100, 33);
     canvas_draw_line(canvas, 102, 29, 102, 33);
     canvas_set_color(canvas, ColorBlack);
@@ -113,11 +113,11 @@ static void bt_hid_media_draw_callback(Canvas* canvas, void* context) {
     elements_multiline_text_aligned(canvas, 13, 62, AlignLeft, AlignBottom, "Hold to exit");
 }
 
-static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* event) {
-    bool is_bluetooth = bt_hid_media->bt_hid->is_bluetooth;
+static void hid_media_process_press(HidMedia* hid_media, InputEvent* event) {
+    bool is_bluetooth = hid_media->hid->is_bluetooth;
     with_view_model(
-        bt_hid_media->view,
-        BtHidMediaModel * model,
+        hid_media->view,
+        HidMediaModel * model,
         {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
@@ -159,11 +159,11 @@ static void bt_hid_media_process_press(BtHidMedia* bt_hid_media, InputEvent* eve
         true);
 }
 
-static void bt_hid_media_process_release(BtHidMedia* bt_hid_media, InputEvent* event) {
-    bool is_bluetooth = bt_hid_media->bt_hid->is_bluetooth;
+static void hid_media_process_release(HidMedia* hid_media, InputEvent* event) {
+    bool is_bluetooth = hid_media->hid->is_bluetooth;
     with_view_model(
-        bt_hid_media->view,
-        BtHidMediaModel * model,
+        hid_media->view,
+        HidMediaModel * model,
         {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
@@ -205,17 +205,17 @@ static void bt_hid_media_process_release(BtHidMedia* bt_hid_media, InputEvent* e
         true);
 }
 
-static bool bt_hid_media_input_callback(InputEvent* event, void* context) {
+static bool hid_media_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
-    BtHidMedia* bt_hid_media = context;
-    bool is_bluetooth = bt_hid_media->bt_hid->is_bluetooth;
+    HidMedia* hid_media = context;
+    bool is_bluetooth = hid_media->hid->is_bluetooth;
     bool consumed = false;
 
     if(event->type == InputTypePress) {
-        bt_hid_media_process_press(bt_hid_media, event);
+        hid_media_process_press(hid_media, event);
         consumed = true;
     } else if(event->type == InputTypeRelease) {
-        bt_hid_media_process_release(bt_hid_media, event);
+        hid_media_process_release(hid_media, event);
         consumed = true;
     } else if(event->type == InputTypeShort) {
         if(event->key == InputKeyBack) {
@@ -230,36 +230,36 @@ static bool bt_hid_media_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-BtHidMedia* bt_hid_media_alloc(BtHid* bt_hid) {
-    BtHidMedia* bt_hid_media = malloc(sizeof(BtHidMedia));
-    bt_hid_media->view = view_alloc();
-    bt_hid_media->bt_hid = bt_hid;
-    view_set_context(bt_hid_media->view, bt_hid_media);
-    view_allocate_model(bt_hid_media->view, ViewModelTypeLocking, sizeof(BtHidMediaModel));
-    view_set_draw_callback(bt_hid_media->view, bt_hid_media_draw_callback);
-    view_set_input_callback(bt_hid_media->view, bt_hid_media_input_callback);
+HidMedia* hid_media_alloc(Hid* hid) {
+    HidMedia* hid_media = malloc(sizeof(HidMedia));
+    hid_media->view = view_alloc();
+    hid_media->hid = hid;
+    view_set_context(hid_media->view, hid_media);
+    view_allocate_model(hid_media->view, ViewModelTypeLocking, sizeof(HidMediaModel));
+    view_set_draw_callback(hid_media->view, hid_media_draw_callback);
+    view_set_input_callback(hid_media->view, hid_media_input_callback);
 
-    return bt_hid_media;
+    return hid_media;
 }
 
-void bt_hid_media_free(BtHidMedia* bt_hid_media) {
-    furi_assert(bt_hid_media);
-    view_free(bt_hid_media->view);
-    free(bt_hid_media);
+void hid_media_free(HidMedia* hid_media) {
+    furi_assert(hid_media);
+    view_free(hid_media->view);
+    free(hid_media);
 }
 
-View* bt_hid_media_get_view(BtHidMedia* bt_hid_media) {
-    furi_assert(bt_hid_media);
-    return bt_hid_media->view;
+View* hid_media_get_view(HidMedia* hid_media) {
+    furi_assert(hid_media);
+    return hid_media->view;
 }
 
-void bt_hid_media_set_connected_status(BtHidMedia* bt_hid_media, bool connected) {
-    furi_assert(bt_hid_media);
+void hid_media_set_connected_status(HidMedia* hid_media, bool connected) {
+    furi_assert(hid_media);
     with_view_model(
-        bt_hid_media->view, BtHidMediaModel * model, { model->connected = connected; }, true);
+        hid_media->view, HidMediaModel * model, { model->connected = connected; }, true);
 }
-void bt_hid_media_set_conn_type(BtHidMedia* bt_hid_media, bool is_bluetooth) {
-    furi_assert(bt_hid_media);
+void hid_media_set_conn_type(HidMedia* hid_media, bool is_bluetooth) {
+    furi_assert(hid_media);
     with_view_model(
-        bt_hid_media->view, BtHidMediaModel * model, { model->is_bluetooth = is_bluetooth; }, true);
+        hid_media->view, HidMediaModel * model, { model->is_bluetooth = is_bluetooth; }, true);
 }

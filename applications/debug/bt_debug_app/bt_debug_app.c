@@ -3,7 +3,7 @@
 
 #define TAG "BtDebugApp"
 
-enum BtDebugSubmenuIndex {
+enum HidDebugSubmenuIndex {
     BtDebugSubmenuIndexCarrierTest,
     BtDebugSubmenuIndexPacketTest,
 };

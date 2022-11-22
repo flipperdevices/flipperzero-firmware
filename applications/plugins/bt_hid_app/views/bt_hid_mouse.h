@@ -2,14 +2,14 @@
 
 #include <gui/view.h>
 
-typedef struct BtHidMouse BtHidMouse;
+typedef struct HidMouse HidMouse;
 
-BtHidMouse* bt_hid_mouse_alloc();
+HidMouse* hid_mouse_alloc();
 
-void bt_hid_mouse_free(BtHidMouse* bt_hid_mouse);
+void hid_mouse_free(HidMouse* hid_mouse);
 
-View* bt_hid_mouse_get_view(BtHidMouse* bt_hid_mouse);
+View* hid_mouse_get_view(HidMouse* hid_mouse);
 
-void bt_hid_mouse_set_connected_status(BtHidMouse* bt_hid_mouse, bool connected);
+void hid_mouse_set_connected_status(HidMouse* hid_mouse, bool connected);
 
-void bt_hid_mouse_set_conn_type(BtHidMouse* bt_hid_mouse, bool is_bluetooth);
+void hid_mouse_set_conn_type(HidMouse* hid_mouse, bool is_bluetooth);

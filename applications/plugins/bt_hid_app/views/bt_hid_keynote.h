@@ -2,14 +2,14 @@
 
 #include <gui/view.h>
 
-typedef struct BtHidKeynote BtHidKeynote;
+typedef struct HidKeynote HidKeynote;
 
-BtHidKeynote* bt_hid_keynote_alloc();
+HidKeynote* hid_keynote_alloc();
 
-void bt_hid_keynote_free(BtHidKeynote* bt_hid_keynote);
+void hid_keynote_free(HidKeynote* hid_keynote);
 
-View* bt_hid_keynote_get_view(BtHidKeynote* bt_hid_keynote);
+View* hid_keynote_get_view(HidKeynote* hid_keynote);
 
-void bt_hid_keynote_set_connected_status(BtHidKeynote* bt_hid_keynote, bool connected);
+void hid_keynote_set_connected_status(HidKeynote* hid_keynote, bool connected);
 
-void bt_hid_keynote_set_conn_type(BtHidKeynote* bt_hid_keynote, bool is_bluetooth);
+void hid_keynote_set_conn_type(HidKeynote* hid_keynote, bool is_bluetooth);

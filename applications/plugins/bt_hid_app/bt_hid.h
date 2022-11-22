@@ -25,13 +25,13 @@ typedef struct {
     Submenu* device_type_submenu;
     Submenu* conn_type_submenu;
     DialogEx* dialog;
-    BtHidKeynote* bt_hid_keynote;
-    BtHidKeyboard* bt_hid_keyboard;
-    BtHidMedia* bt_hid_media;
-    BtHidMouse* bt_hid_mouse;
+    HidKeynote* hid_keynote;
+    HidKeyboard* hid_keyboard;
+    HidMedia* hid_media;
+    HidMouse* hid_mouse;
     BtHidTikTok* bt_hid_tiktok;
     HidError* hid_error;
     bool is_bluetooth;
     bool hid_conn_selected;
     uint32_t view_id;
-} BtHid;
+} Hid;

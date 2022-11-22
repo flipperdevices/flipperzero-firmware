@@ -2,14 +2,14 @@
 
 #include <gui/view.h>
 
-typedef struct BtHidMedia BtHidMedia;
+typedef struct HidMedia HidMedia;
 
-BtHidMedia* bt_hid_media_alloc();
+HidMedia* hid_media_alloc();
 
-void bt_hid_media_free(BtHidMedia* bt_hid_media);
+void hid_media_free(HidMedia* hid_media);
 
-View* bt_hid_media_get_view(BtHidMedia* bt_hid_media);
+View* hid_media_get_view(HidMedia* hid_media);
 
-void bt_hid_media_set_connected_status(BtHidMedia* bt_hid_media, bool connected);
+void hid_media_set_connected_status(HidMedia* hid_media, bool connected);
 
-void bt_hid_media_set_conn_type(BtHidMedia* bt_hid_media, bool is_bluetooth);
+void hid_media_set_conn_type(HidMedia* hid_media, bool is_bluetooth);

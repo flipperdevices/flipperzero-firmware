@@ -7,11 +7,11 @@
 
 #include "bt_hid_icons.h"
 
-#define TAG "BtHidApp"
+#define TAG "HidApp"
 
-struct BtHidMouse {
+struct HidMouse {
     View* view;
-    BtHid* bt_hid;
+    Hid* hid;
 };
 #define MOUSE_MOVE_SHORT 5
 #define MOUSE_MOVE_LONG 20
@@ -26,11 +26,11 @@ typedef struct {
     bool right_mouse_pressed;
     bool connected;
     bool is_bluetooth;
-} BtHidMouseModel;
+} HidMouseModel;
 
-static void bt_hid_mouse_draw_callback(Canvas* canvas, void* context) {
+static void hid_mouse_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
-    BtHidMouseModel* model = context;
+    HidMouseModel* model = context;
     bool is_bluetooth = model->is_bluetooth;
 
     // Header
@@ -109,11 +109,11 @@ static void bt_hid_mouse_draw_callback(Canvas* canvas, void* context) {
     }
 }
 
-static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
-    bool is_bluetooth = bt_hid_mouse->bt_hid->is_bluetooth;
+static void hid_mouse_process(HidMouse* hid_mouse, InputEvent* event) {
+    bool is_bluetooth = hid_mouse->hid->is_bluetooth;
     with_view_model(
-        bt_hid_mouse->view,
-        BtHidMouseModel * model,
+        hid_mouse->view,
+        HidMouseModel * model,
         {
             if(event->key == InputKeyBack) {
                 if(event->type == InputTypeShort) {
@@ -229,10 +229,10 @@ static void bt_hid_mouse_process(BtHidMouse* bt_hid_mouse, InputEvent* event) {
         true);
 }
 
-static bool bt_hid_mouse_input_callback(InputEvent* event, void* context) {
+static bool hid_mouse_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
-    BtHidMouse* bt_hid_mouse = context;
-    bool is_bluetooth = bt_hid_mouse->bt_hid->is_bluetooth;
+    HidMouse* hid_mouse = context;
+    bool is_bluetooth = hid_mouse->hid->is_bluetooth;
     bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
@@ -243,44 +243,44 @@ static bool bt_hid_mouse_input_callback(InputEvent* event, void* context) {
             furi_hal_hid_mouse_release(HID_MOUSE_BTN_RIGHT);
         }
     } else {
-        bt_hid_mouse_process(bt_hid_mouse, event);
+        hid_mouse_process(hid_mouse, event);
         consumed = true;
     }
 
     return consumed;
 }
 
-BtHidMouse* bt_hid_mouse_alloc(BtHid* bt_hid) {
-    BtHidMouse* bt_hid_mouse = malloc(sizeof(BtHidMouse));
-    bt_hid_mouse->view = view_alloc();
-    bt_hid_mouse->bt_hid = bt_hid;
-    view_set_context(bt_hid_mouse->view, bt_hid_mouse);
-    view_allocate_model(bt_hid_mouse->view, ViewModelTypeLocking, sizeof(BtHidMouseModel));
-    view_set_draw_callback(bt_hid_mouse->view, bt_hid_mouse_draw_callback);
-    view_set_input_callback(bt_hid_mouse->view, bt_hid_mouse_input_callback);
+HidMouse* hid_mouse_alloc(Hid* hid) {
+    HidMouse* hid_mouse = malloc(sizeof(HidMouse));
+    hid_mouse->view = view_alloc();
+    hid_mouse->hid = hid;
+    view_set_context(hid_mouse->view, hid_mouse);
+    view_allocate_model(hid_mouse->view, ViewModelTypeLocking, sizeof(HidMouseModel));
+    view_set_draw_callback(hid_mouse->view, hid_mouse_draw_callback);
+    view_set_input_callback(hid_mouse->view, hid_mouse_input_callback);
 
-    return bt_hid_mouse;
+    return hid_mouse;
 }
 
-void bt_hid_mouse_free(BtHidMouse* bt_hid_mouse) {
-    furi_assert(bt_hid_mouse);
-    view_free(bt_hid_mouse->view);
-    free(bt_hid_mouse);
+void hid_mouse_free(HidMouse* hid_mouse) {
+    furi_assert(hid_mouse);
+    view_free(hid_mouse->view);
+    free(hid_mouse);
 }
 
-View* bt_hid_mouse_get_view(BtHidMouse* bt_hid_mouse) {
-    furi_assert(bt_hid_mouse);
-    return bt_hid_mouse->view;
+View* hid_mouse_get_view(HidMouse* hid_mouse) {
+    furi_assert(hid_mouse);
+    return hid_mouse->view;
 }
 
-void bt_hid_mouse_set_connected_status(BtHidMouse* bt_hid_mouse, bool connected) {
-    furi_assert(bt_hid_mouse);
+void hid_mouse_set_connected_status(HidMouse* hid_mouse, bool connected) {
+    furi_assert(hid_mouse);
     with_view_model(
-        bt_hid_mouse->view, BtHidMouseModel * model, { model->connected = connected; }, true);
+        hid_mouse->view, HidMouseModel * model, { model->connected = connected; }, true);
 }
 
-void bt_hid_mouse_set_conn_type(BtHidMouse* bt_hid_mouse, bool is_bluetooth) {
-    furi_assert(bt_hid_mouse);
+void hid_mouse_set_conn_type(HidMouse* hid_mouse, bool is_bluetooth) {
+    furi_assert(hid_mouse);
     with_view_model(
-        bt_hid_mouse->view, BtHidMouseModel * model, { model->is_bluetooth = is_bluetooth; }, true);
+        hid_mouse->view, HidMouseModel * model, { model->is_bluetooth = is_bluetooth; }, true);
 }

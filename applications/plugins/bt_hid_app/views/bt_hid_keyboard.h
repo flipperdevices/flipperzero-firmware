@@ -2,14 +2,14 @@
 
 #include <gui/view.h>
 
-typedef struct BtHidKeyboard BtHidKeyboard;
+typedef struct HidKeyboard HidKeyboard;
 
-BtHidKeyboard* bt_hid_keyboard_alloc();
+HidKeyboard* hid_keyboard_alloc();
 
-void bt_hid_keyboard_free(BtHidKeyboard* bt_hid_keyboard);
+void hid_keyboard_free(HidKeyboard* hid_keyboard);
 
-View* bt_hid_keyboard_get_view(BtHidKeyboard* bt_hid_keyboard);
+View* hid_keyboard_get_view(HidKeyboard* hid_keyboard);
 
-void bt_hid_keyboard_set_connected_status(BtHidKeyboard* bt_hid_keyboard, bool connected);
+void hid_keyboard_set_connected_status(HidKeyboard* hid_keyboard, bool connected);
 
-void bt_hid_keyboard_set_conn_type(BtHidKeyboard* bt_hid_keyboard, bool is_bluetooth);
+void hid_keyboard_set_conn_type(HidKeyboard* hid_keyboard, bool is_bluetooth);
