@@ -33,6 +33,7 @@ Thank you to all the supporters!
 - Added: [Power: Show battery percentile while charging #178 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/178)
 - Added: [Fix U2F HID vulnerability #2042 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2042)
 - Updated: [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
+- Added: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -247,6 +248,7 @@ $ ./fbt resources icons dolphin_ext
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
+- [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
 ## Open PRs Checked Out & Not Merged In Main
   
