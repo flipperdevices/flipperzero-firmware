@@ -63,11 +63,7 @@ bool spi_mem_tools_check_chip_info(SPIMemChip* chip) {
     return true;
 }
 
-bool spi_mem_tools_read_block_data(
-    SPIMemChip* chip,
-    size_t offset,
-    uint8_t* data,
-    size_t block_size) {
+bool spi_mem_tools_read_block(SPIMemChip* chip, size_t offset, uint8_t* data, size_t block_size) {
     if(!spi_mem_tools_check_chip_info(chip)) return false;
     for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
         uint8_t cmd[4];
@@ -114,5 +110,34 @@ bool spi_mem_tools_set_write_enabled(SPIMemChip* chip, bool enable) {
 bool spi_mem_tools_erase_chip(SPIMemChip* chip) {
     UNUSED(chip);
     if(!spi_mem_tools_trx(SPIMemChipCMDChipErase, NULL, 0, NULL, 0)) return false;
+    return true;
+}
+
+static bool spi_mem_tools_write_block_256_bytes(
+    SPIMemChip* chip,
+    size_t offset,
+    uint8_t* data,
+    size_t block_size) {
+    for(size_t i = 0; i < block_size; i += SPI_MEM_MAX_BLOCK_SIZE) {
+        uint8_t cmd[4];
+        if((offset + SPI_MEM_MAX_BLOCK_SIZE) > chip->size) return false;
+        if(!spi_mem_tools_trx(
+               SPIMemChipCMDWriteData,
+               cmd,
+               spi_mem_tools_addr_to_byte_arr(chip->address_type, offset, cmd),
+               data,
+               SPI_MEM_MAX_BLOCK_SIZE))
+            return false;
+        offset += SPI_MEM_MAX_BLOCK_SIZE;
+        data += SPI_MEM_MAX_BLOCK_SIZE;
+    }
+    return true;
+}
+
+bool spi_mem_tools_write_block(SPIMemChip* chip, size_t offset, uint8_t* data, size_t block_size) {
+    if(!spi_mem_tools_check_chip_info(chip)) return false;
+    if(chip->write_mode == SPIMemChipWriteModeOneOrPage256Bytes) {
+        if(!spi_mem_tools_write_block_256_bytes(chip, offset, data, block_size)) return false;
+    }
     return true;
 }

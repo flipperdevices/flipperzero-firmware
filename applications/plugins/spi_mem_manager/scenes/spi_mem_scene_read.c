@@ -17,7 +17,7 @@ void spi_mem_scene_read_on_enter(void* context) {
     SPIMemApp* app = context;
     spi_mem_view_progress_set_read_callback(
         app->view_progress, spi_mem_scene_read_progress_view_result_callback, app);
-    notification_message(app->notifications, &sequence_blink_start_cyan);
+    notification_message(app->notifications, &sequence_blink_start_blue);
     spi_mem_view_progress_set_chip_size(app->view_progress, spi_mem_chip_get_size(app->chip_info));
     spi_mem_view_progress_set_block_size(
         app->view_progress, spi_mem_tools_get_file_max_block_size(app->chip_info));

@@ -45,7 +45,7 @@ static void
 }
 
 static void
-    spi_mem_view_progress_verify_draw_size_warning(Canvas* canvas, SPIMemProgressViewModel* model) {
+    spi_mem_view_progress_draw_size_warning(Canvas* canvas, SPIMemProgressViewModel* model) {
     if(model->file_size > model->chip_size) {
         canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Size clamped to chip!");
     }
@@ -57,7 +57,7 @@ static void
 static void
     spi_mem_view_progress_verify_draw_callback(Canvas* canvas, SPIMemProgressViewModel* model) {
     canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "Verifying dump");
-    spi_mem_view_progress_verify_draw_size_warning(canvas, model);
+    spi_mem_view_progress_draw_size_warning(canvas, model);
     spi_mem_view_progress_draw_progress(canvas, model->progress);
     elements_button_center(canvas, "Skip");
 }
@@ -65,6 +65,7 @@ static void
 static void
     spi_mem_view_progress_write_draw_callback(Canvas* canvas, SPIMemProgressViewModel* model) {
     canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Writing dump");
+    spi_mem_view_progress_draw_size_warning(canvas, model);
     spi_mem_view_progress_draw_progress(canvas, model->progress);
     elements_button_left(canvas, "Cancel");
 }

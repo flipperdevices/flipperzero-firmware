@@ -28,7 +28,7 @@ typedef enum {
 
 typedef enum {
     SPIMemChipWriteModeUnknown = 0,
-    SPIMemChipWriteModePage256Bytes = 0x01,
+    SPIMemChipWriteModeOneOrPage256Bytes = 0x01,
     SPIMemChipWriteModeByte = 0x02,
     SPIMemChipWriteModeAAI = 0x04,
     SPIMemChipWriteModeDualBuffer = 0x08
@@ -40,7 +40,8 @@ typedef enum {
     SPIMemChipCMDChipErase = 0xC7,
     SPIMemChipCMDWriteEnable = 0x06,
     SPIMemChipCMDWriteDisable = 0x04,
-    SPIMemChipCMDReadStatus = 0x05
+    SPIMemChipCMDReadStatus = 0x05,
+    SPIMemChipCMDWriteData = 0x02
 } SPIMemChipCMD;
 
 enum SPIMemChipStatusBit {
