@@ -36,6 +36,7 @@ Thank you to all the supporters!
 - Added: [htu21d falsely reading temp as humidity #175 (By GottZ)](https://github.com/DarkFlippers/unleashed-firmware/pull/175)
 - Added: [Power: Show battery percentile while charging #178 (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/178)
 - Added: [Fix U2F HID vulnerability #2042 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2042)
+- Updated: [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
