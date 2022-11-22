@@ -205,13 +205,6 @@ Hid* hid_app_alloc_view(void* context) {
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMouse, hid_mouse_get_view(app->hid_mouse));
 
-    // Error View
-    app->hid_error = hid_error_alloc();
-    view_set_previous_callback(hid_error_get_view(app->hid_error), hid_exit_confirm_view);
-    view_dispatcher_add_view(
-        app->view_dispatcher, HidViewError, hid_error_get_view(app->hid_error));
-    // TODO switch to menu after Media is done
-
     return app;
 }
 
