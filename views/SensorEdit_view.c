@@ -23,7 +23,7 @@ static VariableItem* onewire_type_item;
 
 bool _onewire_id_exist(uint8_t* id) {
     if(id == NULL) return false;
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         if(app->sensors[i]->type == &DS18x2x) {
             if(unitemp_onewire_id_compare(
                    id, ((OneWireSensor*)(app->sensors[i]->instance))->deviceID)) {
@@ -145,7 +145,7 @@ static void _enter_callback(void* context, uint32_t index) {
            ((OneWireSensor*)(editable_sensor->instance))->familyCode == 0) {
             return;
         }
-        app->sensors[app->sensors_count++] = editable_sensor;
+        unitemp_sensors_add(editable_sensor);
         unitemp_sensors_save();
         unitemp_sensors_reload();
 

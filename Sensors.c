@@ -190,10 +190,23 @@ const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t inde
     return NULL;
 }
 
+uint8_t unitemp_sensors_getCount(void) {
+    if(app->sensors == NULL) return 0;
+    return app->sensors_count;
+}
+
+void unitemp_sensors_add(Sensor* sensor) {
+    FURI_LOG_D(APP_NAME, "realloc to %d", unitemp_sensors_getCount() + 1);
+    app->sensors =
+        (Sensor**)realloc(app->sensors, (unitemp_sensors_getCount() + 1) * sizeof(Sensor*));
+    FURI_LOG_D(APP_NAME, "adding to %d", unitemp_sensors_getCount());
+    app->sensors[unitemp_sensors_getCount()] = sensor;
+    app->sensors_count++;
+}
+
 bool unitemp_sensors_load(void) {
     FURI_LOG_D(APP_NAME, "Loading sensors...");
-    app->sensors_count = 0;
-    memset(app->sensors, 0, sizeof(app->sensors));
+    //memset(app->sensors, 0, (unitemp_sensors_getCount() + 1) * sizeof(Sensor*));
 
     //Выделение памяти на поток
     app->file_stream = file_stream_alloc(app->storage);
@@ -270,12 +283,13 @@ bool unitemp_sensors_load(void) {
 
         char* args = ((char*)(file_buf + line_end + offset));
         const SensorType* stype = unitemp_sensors_getTypeFromStr(type);
+
         //Проверка типа датчика
         if(stype != NULL && sizeof(name) > 0 && sizeof(name) <= 11) {
             Sensor* sensor =
                 unitemp_sensor_alloc(name, unitemp_sensors_getTypeFromStr(type), args);
             if(sensor != NULL) {
-                app->sensors[app->sensors_count++] = sensor;
+                unitemp_sensors_add(sensor);
             } else {
                 FURI_LOG_E(APP_NAME, "Failed sensor (%s:%s) mem allocation", name, type);
             }
@@ -320,7 +334,7 @@ bool unitemp_sensors_save(void) {
     }
 
     //Сохранение датчиков
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         if(app->sensors[i]->type->interface == &SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
@@ -404,6 +418,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
 
     //Выход если датчик успешно развёрнут
     if(status) {
+        FURI_LOG_I(APP_NAME, "Sensor %s allocated", name);
         return sensor;
     }
     //Если ни один из типов не подошёл, то выход с очисткой
@@ -440,18 +455,17 @@ void unitemp_sensor_free(Sensor* sensor) {
 }
 
 void unitemp_sensors_free(void) {
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         unitemp_sensor_free(app->sensors[i]);
     }
     app->sensors_count = 0;
-    free(app->sensors);
 }
 
 bool unitemp_sensors_init(void) {
     bool result = true;
 
     //Перебор датчиков из списка
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         //Включение 5V если на порту 1 FZ его нет
         //Может пропасть при отключении USB
         if(furi_hal_power_is_otg_enabled() != true) {
@@ -480,7 +494,7 @@ bool unitemp_sensors_deInit(void) {
     }
 
     //Перебор датчиков из списка
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         if(!(*app->sensors[i]->type->deinitializer)(app->sensors[i])) {
             FURI_LOG_E(
                 APP_NAME,
@@ -519,7 +533,7 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
 }
 
 void unitemp_sensors_updateValues(void) {
-    for(uint8_t i = 0; i < app->sensors_count; i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
         unitemp_sensor_updateData(app->sensors[i]);
     }
 }
