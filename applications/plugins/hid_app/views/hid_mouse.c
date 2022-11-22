@@ -1,4 +1,4 @@
-#include "bt_hid_mouse.h"
+#include "hid_mouse.h"
 #include <furi.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
