@@ -34,6 +34,7 @@ Thank you to all the supporters!
 - Added: [Infrared: Add Olimpia Splendid AC #2038 (By asprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/2038)
 - Added: [SubGhz: add protocol Nice_Flo 20bit #1983 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1983)
 - Added: [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
+- Added Typos fix in PRs: #434, #433, #432 & #431
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
