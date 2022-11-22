@@ -7,18 +7,16 @@
 #include <flipper_format/flipper_format.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include "services/base32/base32.h"
-#include "services/list/list.h"
 #include "services/config/config.h"
 #include "types/plugin_state.h"
 #include "types/token_info.h"
 #include "types/plugin_event.h"
 #include "types/event_type.h"
 #include "types/common.h"
-#include "scenes/scene_director.h"
-#include "services/ui/constants.h"
+#include "ui/scene_director.h"
+#include "ui/constants.h"
 #include "services/crypto/crypto.h"
-#include "services/cli/cli.h"
+#include "cli/cli.h"
 
 #define IDLE_TIMEOUT 60000
 
