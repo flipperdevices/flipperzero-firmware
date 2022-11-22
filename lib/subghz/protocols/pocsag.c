@@ -40,10 +40,8 @@ struct SubGhzProtocolDecoderPocsag {
     // message being decoded
     FuriString* msg;
 
-    // Done message, ready to be serialized/deserialized
-    uint32_t done_ric;
+    // Done messages, ready to be serialized/deserialized
     FuriString* done_msg;
-
 };
 
 typedef struct SubGhzProtocolDecoderPocsag SubGhzProtocolDecoderPocsag;
@@ -86,6 +84,7 @@ void subghz_protocol_decoder_pocsag_reset(void* context) {
     instance->char_bits = 0;
     instance->char_data = 0;
     furi_string_reset(instance->msg);
+    furi_string_reset(instance->done_msg);
 }
 
 
@@ -117,17 +116,20 @@ static bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, ui
 }
 
 
+// Function called when current message got decoded, but other messages might follow
 static void pocsag_message_done(SubGhzProtocolDecoderPocsag* instance) {
-    furi_string_set(instance->done_msg, instance->msg);
-    instance->done_ric = instance->ric;
+    // append the message to the long-term storage string
+    furi_string_cat_printf(
+        instance->done_msg,
+        "RIC: %" PRIu32 ", msg: %s\r\n",
+        instance->ric,
+        furi_string_get_cstr(instance->msg)
+    );
 
+    // reset the state
     instance->char_bits = 0;
     instance->char_data = 0;
     furi_string_reset(instance->msg);
-    FURI_LOG_I(TAG, "d");
-
-//    if(instance->base.callback)
-//        instance->base.callback(&instance->base, instance->base.context);
 }
 
 
@@ -145,7 +147,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                 instance->decoder.parser_step = PocsagDecoderStepFoundSync;
             }
         }
-        else if (instance->decoder.decode_count_bit > 0) {
+        else if (instance->decoder.decode_count_bit > 0 ) {
             subghz_protocol_decoder_pocsag_reset(context);
         }
         return;
@@ -157,6 +159,11 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
     if (DURATION_DIFF(extra, pocsag_const.te_short) < pocsag_const.te_delta)
         bits_count++;
     else if (extra > pocsag_const.te_delta) {
+        // in non-reset state we faced the error signal - we reached the end of the packet, flush data
+        if (furi_string_size(instance->done_msg) > 0) {
+            if(instance->base.callback)
+                instance->base.callback(&instance->base, instance->base.context);
+        }
         subghz_protocol_decoder_pocsag_reset(context);
         return;
     }
@@ -173,27 +180,22 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                 instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                 instance->decoder.decode_count_bit = 0;
                 instance->decoder.decode_data = 0UL;
-                FURI_LOG_I(TAG, "s0");
             }
             break;
         case PocsagDecoderStepFoundPreamble:
             // handle codewords
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
-                FURI_LOG_I(TAG, "cw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
-                    FURI_LOG_I(TAG, "idle");
                     instance->codeword_idx++;
                     break;
                 case POCSAG_FRAME_SYNC_CODE:
-                    FURI_LOG_I(TAG, "sync");
                     instance->codeword_idx = 0;
                     break;
                 default:
                     // Here we expect only address messages
                     if (codeword >> 31 == 0) {
-                        FURI_LOG_I(TAG, "addr");
                         pocsag_decode_address_word(instance, codeword);
                         instance->decoder.parser_step = PocsagDecoderStepMessage;
                     }
@@ -207,27 +209,22 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         case PocsagDecoderStepMessage:
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
-                FURI_LOG_I(TAG, "mcw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     // Idle during the message stops the message
-                    FURI_LOG_I(TAG, "midle");
                     instance->codeword_idx++;
                     instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                     pocsag_message_done(instance);
                     break;
                 case POCSAG_FRAME_SYNC_CODE:
-                    FURI_LOG_I(TAG, "msync");
                     instance->codeword_idx = 0;
                     break;
                 default:
                     // In this state, both address and message words can arrive
                     if (codeword >> 31 == 0) {
-                        FURI_LOG_I(TAG, "maddr");
                         pocsag_message_done(instance);
                         pocsag_decode_address_word(instance, codeword);
                     } else {
-                        FURI_LOG_I(TAG, "msg");
                         if (!pocsag_decode_message_word(instance, codeword)) {
                             instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                             pocsag_message_done(instance);
@@ -247,29 +244,28 @@ uint8_t subghz_protocol_decoder_pocsag_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
     uint8_t hash = 0;
-
     for(size_t i = 0; i < furi_string_size(instance->done_msg); i++)
         hash ^= furi_string_get_char(instance->done_msg, i);
-    // address is 21 bit
-    hash ^= (instance->done_ric & 0xFF) ^
-            ((instance->done_ric >> 8) & 0xFF) ^
-            ((instance->done_ric >> 16) & 0xFF);
     return hash;
 }
 
 bool subghz_protocol_decoder_pocsag_serialize(void* context, FlipperFormat* flipper_format, SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
+    uint32_t msg_len;
 
     if(!subghz_block_generic_serialize(&instance->generic, flipper_format, preset))
         return false;
 
-    if(!flipper_format_write_uint32(flipper_format, "RIC", &instance->done_ric, 1)) {
-        FURI_LOG_E(TAG, "Error adding RIC");
+    msg_len = furi_string_size(instance->done_msg);
+    if(!flipper_format_write_uint32(flipper_format, "MsgLen", &msg_len, 1)) {
+        FURI_LOG_E(TAG, "Error adding MsgLen");
         return false;
     }
 
-    if(!flipper_format_write_string(flipper_format, "Msg", instance->done_msg)) {
+    if(!flipper_format_write_hex(flipper_format, "Msg", (uint8_t*)furi_string_get_cstr(instance->done_msg),
+                                 msg_len))
+    {
         FURI_LOG_E(TAG, "Error adding Msg");
         return false;
     }
@@ -280,19 +276,28 @@ bool subghz_protocol_decoder_pocsag_deserialize(void* context, FlipperFormat* fl
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
     bool ret = false;
+    uint32_t msg_len;
+    uint8_t* buf;
 
     do {
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             break;
         }
-        if(!flipper_format_read_uint32(flipper_format, "RIC", &instance->ric, 1)) {
-            FURI_LOG_E(TAG, "Missing RIC");
+
+        if(!flipper_format_read_uint32(flipper_format, "MsgLen", &msg_len, 1)) {
+            FURI_LOG_E(TAG, "Missing MsgLen");
             break;
         }
-        if(!flipper_format_read_string(flipper_format, "Msg", instance->done_msg)) {
+
+        buf = malloc(msg_len);
+        if(!flipper_format_read_hex(flipper_format, "Msg", buf, msg_len)) {
             FURI_LOG_E(TAG, "Missing Msg");
+            free(buf);
             break;
         }
+        furi_string_set_strn(instance->done_msg, (const char*)buf, msg_len);
+        free(buf);
+
         ret = true;
     } while(false);
     return ret;
@@ -301,14 +306,6 @@ bool subghz_protocol_decoder_pocsag_deserialize(void* context, FlipperFormat* fl
 void subhz_protocol_decoder_pocsag_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
-
-    furi_string_cat_printf(
-        output,
-        "%s\r\n"
-        "RIC: %" PRIu32 "\r\n",
-        instance->generic.protocol_name,
-        instance->ric
-    );
     furi_string_cat(output, instance->done_msg);
 }
 
