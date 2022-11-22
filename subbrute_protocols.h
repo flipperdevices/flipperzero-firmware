@@ -94,6 +94,7 @@ void subbrute_protocol_file_generate_file(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat,
-    uint8_t load_index,
-    const char* file_key);
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes);
 uint64_t subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits);

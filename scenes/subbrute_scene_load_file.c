@@ -17,8 +17,14 @@ void subbrute_scene_load_file_on_enter(void* context) {
     dialog_file_browser_set_basic_options(&browser_options, SUBBRUTE_FILE_EXT, &I_sub1_10px);
 
     SubBruteFileResult load_result = SubBruteFileResultUnknown;
+    // TODO: DELETE IT
+#ifdef SUBBRUTE_FAST_TRACK
+    bool res = true;
+    furi_string_printf(load_path, "%s", "/ext/subghz/princeton.sub");
+#else
     bool res =
         dialog_file_browser_show(instance->dialogs, load_path, app_folder, &browser_options);
+#endif
 #ifdef FURI_DEBUG
     FURI_LOG_D(
         TAG,
@@ -37,8 +43,8 @@ void subbrute_scene_load_file_on_enter(void* context) {
             if(load_result == SubBruteFileResultOk) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
-                       instance->device->key_index,
-                       instance->device->load_index,
+                       instance->device->current_step,
+                       instance->device->current_step,
                        instance->device->file_key,
                        instance->device->file_protocol_info,
                        extra_repeats)) {

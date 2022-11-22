@@ -264,18 +264,18 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
                 }
             }
         }
-    } else {
-        if(event->key == InputKeyLeft && is_short) {
+    } else if (is_short) {
+        if(event->key == InputKeyLeft) {
             if(instance->index > 0) {
                 instance->index--;
             }
             updated = true;
-        } else if(event->key == InputKeyRight && is_short) {
+        } else if(event->key == InputKeyRight) {
             if(instance->index < 7) {
                 instance->index++;
             }
             updated = true;
-        } else if(event->key == InputKeyOk && is_short) {
+        } else if(event->key == InputKeyOk) {
             instance->callback(SubBruteCustomEventTypeIndexSelected, instance->context);
             consumed = true;
             updated = true;
