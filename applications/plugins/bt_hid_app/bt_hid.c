@@ -42,25 +42,20 @@ void bt_hid_submenu_callback(void* context, uint32_t index) {
 void hid_conn_type_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
     BtHid* app = context;
-    HidKeyboardConnectionType hid_keyboard_type_enum;
     app->view_id = BtHidViewSubmenu;
-    app->hid_conn_type = HidKeyboardConnectionTypeNone;
     if(index == ConnTypeSubmenuIndexBluetooth) {
-        //furi_crash("I just set myself as Bluetooth");
-        hid_keyboard_type_enum = HidKeyboardConnectionTypeUsb;
-        app->hid_conn_type = &hid_keyboard_type_enum;
+        app->is_bluetooth = true;
         // Change profile
         if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
             FURI_LOG_E(TAG, "Failed to switch profile");
         }
         furi_hal_bt_start_advertising();
+        app->hid_conn_selected = true;
     } else if(index == ConnTypeSubmenuIndexUsb) {
-        //furi_crash("I just set myself as USB");
-        hid_keyboard_type_enum = HidKeyboardConnectionTypeUsb;
-        app->hid_conn_type = &hid_keyboard_type_enum;
-        furi_crash(app->hid_conn_type);
+        app->is_bluetooth = false;
         furi_hal_usb_unlock();
         furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
+        app->hid_conn_selected = true;
     } else {
         furi_crash("Neither connection type specified");
     }
@@ -106,6 +101,7 @@ void bt_hid_connection_status_changed_callback(BtStatus status, void* context) {
 
 BtHid* bt_hid_app_alloc_submenu() {
     BtHid* app = malloc(sizeof(BtHid));
+    app->hid_conn_selected = false;
 
     // Gui
     app->gui = furi_record_open(RECORD_GUI);
@@ -148,6 +144,7 @@ BtHid* bt_hid_app_alloc_view(void* context) {
     furi_assert(context);
     BtHid* app = context;
     // Dialog view
+    furi_delay_ms(10000);
     app->dialog = dialog_ex_alloc();
     dialog_ex_set_result_callback(app->dialog, bt_hid_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
@@ -241,20 +238,23 @@ void bt_hid_app_free(BtHid* app) {
 
 int32_t bt_hid_app(void* p) {
     UNUSED(p);
-    // Switch profile to Hid
+    //furi_crash("bad things");
     BtHid* app = bt_hid_app_alloc_submenu();
     app = bt_hid_app_alloc_view(app);
     FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
+    if(app->is_bluetooth) {
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
+    }
 
     DOLPHIN_DEED(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
-
+    if(app->is_bluetooth) {
     bt_set_status_changed_callback(app->bt, NULL, NULL);
-
-    furi_hal_usb_set_config(usb_mode_prev, NULL);
     bt_set_profile(app->bt, BtProfileSerial);
+    } else if (!app->is_bluetooth) {
+        furi_hal_usb_set_config(usb_mode_prev, NULL);
+    }
 
     bt_hid_app_free(app);
 

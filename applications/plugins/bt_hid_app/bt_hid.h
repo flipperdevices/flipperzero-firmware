@@ -17,7 +17,6 @@
 #include "views/bt_hid_tiktok.h"
 #include "views/hid_error.h"
 
-typedef enum { HidKeyboardConnectionTypeNone, HidKeyboardConnectionTypeBluetooth, HidKeyboardConnectionTypeUsb } HidKeyboardConnectionType;
 
 typedef struct {
     Bt* bt;
@@ -33,7 +32,8 @@ typedef struct {
     BtHidMouse* bt_hid_mouse;
     BtHidTikTok* bt_hid_tiktok;
     HidError* hid_error;
-    HidKeyboardConnectionType* hid_conn_type;
+    bool is_bluetooth;
+    bool hid_conn_selected;
     uint32_t view_id;
 } BtHid;
 
