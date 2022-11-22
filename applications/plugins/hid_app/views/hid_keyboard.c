@@ -1,11 +1,11 @@
-#include "bt_hid_keyboard.h"
+#include "hid_keyboard.h"
 #include <furi.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 #include <gui/icon_i.h>
-#include "../bt_hid.h"
-#include "bt_hid_icons.h"
+#include "../hid.h"
+#include "hid_icons.h"
 
 #define TAG "HidApp"
 

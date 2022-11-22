@@ -10,12 +10,11 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
-#include "views/bt_hid_keynote.h"
-#include "views/bt_hid_keyboard.h"
-#include "views/bt_hid_media.h"
-#include "views/bt_hid_mouse.h"
+#include "views/hid_keynote.h"
+#include "views/hid_keyboard.h"
+#include "views/hid_media.h"
+#include "views/hid_mouse.h"
 #include "views/bt_hid_tiktok.h"
-#include "views/hid_error.h"
 
 typedef struct {
     Bt* bt;

@@ -1,5 +1,5 @@
 App(
-    appid="bt_hid",
+    appid="hid",
     name="HID Remote",
     apptype=FlipperAppType.PLUGIN,
     entry_point="hid_app",

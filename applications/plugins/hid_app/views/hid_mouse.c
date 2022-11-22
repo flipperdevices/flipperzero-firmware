@@ -3,9 +3,9 @@
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
-#include "../bt_hid.h"
+#include "../hid.h"
 
-#include "bt_hid_icons.h"
+#include "hid_icons.h"
 
 #define TAG "HidApp"
 
