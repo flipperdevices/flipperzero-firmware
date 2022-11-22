@@ -18,6 +18,7 @@ Thank you to all the supporters!
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-22 16:04 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-22 16:04 EST`
 - Added: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
+- Updated: [DHT Temp Monitor (By quen0n)](https://github.com/quen0n/FipperZero-DHT-Monitor) `Req: DHT11/DHT22(AM2302)/AM2301`
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
