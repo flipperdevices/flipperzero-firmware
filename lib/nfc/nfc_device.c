@@ -627,7 +627,11 @@ bool nfc_device_load_mifare_df_data(FlipperFormat* file, NfcDevice* dev) {
                 *app_head = app;
                 app_head = &app->next;
             }
-            if(!parsed_apps) break;
+            if(!parsed_apps) {
+                // break;
+                // accept non-parsed apps.
+                FURI_LOG_W("nfc_device.c", "Non-parsed apps found!");
+            }
         }
         parsed = true;
     } while(false);
