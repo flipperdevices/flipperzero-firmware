@@ -230,8 +230,6 @@ void hid_app_free(Hid* app) {
     hid_mouse_free(app->hid_mouse);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikTok);
     bt_hid_tiktok_free(app->bt_hid_tiktok);
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewError);
-    hid_error_free(app->hid_error);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records
