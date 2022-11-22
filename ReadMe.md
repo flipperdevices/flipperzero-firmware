@@ -33,6 +33,7 @@ Thank you to all the supporters!
 - Added: [SubGhz: add protocol Nice_Flo 20bit #1983 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1983)
 - Added: [SubGhz: add protocol "Ansonic" #2000 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2000)
 - Added Typos fix in PRs: #434, #433, #432 & #431
+- Added: [htu21d falsely reading temp as humidity #175 (By GottZ)](https://github.com/DarkFlippers/unleashed-firmware/pull/175)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
