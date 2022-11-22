@@ -29,7 +29,6 @@ typedef struct {
     HidMedia* hid_media;
     HidMouse* hid_mouse;
     BtHidTikTok* bt_hid_tiktok;
-    HidError* hid_error;
     bool is_bluetooth;
     bool hid_conn_selected;
     uint32_t view_id;
