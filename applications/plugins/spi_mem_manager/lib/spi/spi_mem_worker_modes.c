@@ -6,14 +6,16 @@
 static void spi_mem_chip_detect_process(SPIMemWorker* worker);
 static void spi_mem_read_process(SPIMemWorker* worker);
 static void spi_mem_verify_process(SPIMemWorker* worker);
-static void spi_mem_chip_erase_process(SPIMemWorker* worker);
+static void spi_mem_erase_process(SPIMemWorker* worker);
+static void spi_mem_write_process(SPIMemWorker* worker);
 
 const SPIMemWorkerModeType spi_mem_worker_modes[] = {
     [SPIMemWorkerModeIdle] = {.process = NULL},
     [SPIMemWorkerModeChipDetect] = {.process = spi_mem_chip_detect_process},
     [SPIMemWorkerModeRead] = {.process = spi_mem_read_process},
     [SPIMemWorkerModeVerify] = {.process = spi_mem_verify_process},
-    [SPIMemWorkerModeChipErase] = {.process = spi_mem_chip_erase_process}};
+    [SPIMemWorkerModeErase] = {.process = spi_mem_erase_process},
+    [SPIMemWorkerModeWrite] = {.process = spi_mem_write_process}};
 
 static void spi_mem_run_worker_callback(SPIMemWorker* worker, SPIMemCustomEventWorker event) {
     if(worker->callback) {
@@ -122,7 +124,7 @@ static void spi_mem_verify_process(SPIMemWorker* worker) {
 }
 
 // Erase
-static void spi_mem_chip_erase_process(SPIMemWorker* worker) {
+static void spi_mem_erase_process(SPIMemWorker* worker) {
     SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipReadFail;
     do {
         if(!spi_mem_worker_await_chip_busy(worker)) break;
@@ -133,4 +135,20 @@ static void spi_mem_chip_erase_process(SPIMemWorker* worker) {
         event = SPIMemCustomEventWorkerEraseDone;
     } while(0);
     spi_mem_run_worker_callback(worker, event);
+}
+
+// Write
+static void spi_mem_write_process(SPIMemWorker* worker) {
+    // uint8_t data_buffer[SPI_MEM_FILE_BUFFER_SIZE];
+    // size_t chip_size = spi_mem_chip_get_size(worker->chip_info);
+    // size_t offset = 0;
+    bool success = true;
+    if(!spi_mem_file_open(worker->cb_ctx)) return;
+    while(true) {
+        furi_delay_tick(10); // to give some time to OS
+        // size_t block_size = SPI_MEM_FILE_BUFFER_SIZE;
+        if(spi_mem_worker_check_for_stop(worker)) break;
+    }
+    spi_mem_file_close(worker->cb_ctx);
+    if(success) spi_mem_run_worker_callback(worker, SPIMemCustomEventWorkerReadDone);
 }

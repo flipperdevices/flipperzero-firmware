@@ -7,7 +7,8 @@ typedef enum {
     SPIMemWorkerModeChipDetect,
     SPIMemWorkerModeRead,
     SPIMemWorkerModeVerify,
-    SPIMemWorkerModeChipErase,
+    SPIMemWorkerModeErase,
+    SPIMemWorkerModeWrite
 } SPIMemWorkerMode;
 
 struct SPIMemWorker {

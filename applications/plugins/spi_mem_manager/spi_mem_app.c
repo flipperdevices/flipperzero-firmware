@@ -1,4 +1,5 @@
 #include "spi_mem_app_i.h"
+#include "spi_mem_files.h"
 #include "lib/spi/spi_mem_chip_i.h"
 
 static bool spi_mem_custom_event_callback(void* context, uint32_t event) {
@@ -29,7 +30,7 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->widget = widget_alloc();
     instance->chip_info = malloc(sizeof(SPIMemChip));
-    instance->view_read = spi_mem_view_progress_alloc();
+    instance->view_progress = spi_mem_view_progress_alloc();
     instance->text_input = text_input_alloc();
     instance->mode = SPIMemModeUnknown;
 
@@ -54,7 +55,7 @@ SPIMemApp* spi_mem_alloc(void) {
     view_dispatcher_add_view(
         instance->view_dispatcher,
         SPIMemViewProgress,
-        spi_mem_view_progress_get_view(instance->view_read));
+        spi_mem_view_progress_get_view(instance->view_progress));
     view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemViewTextInput, text_input_get_view(instance->text_input));
 
@@ -70,7 +71,7 @@ void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewWidget);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewProgress);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewTextInput);
-    spi_mem_view_progress_free(instance->view_read);
+    spi_mem_view_progress_free(instance->view_progress);
     submenu_free(instance->submenu);
     dialog_ex_free(instance->dialog_ex);
     popup_free(instance->popup);
@@ -92,7 +93,7 @@ void spi_mem_free(SPIMemApp* instance) {
 int32_t spi_mem_app(void* p) {
     UNUSED(p);
     SPIMemApp* instance = spi_mem_alloc();
-    // spi_mem_file_create_folder(instance);
+    spi_mem_file_create_folder(instance);
     view_dispatcher_run(instance->view_dispatcher);
     spi_mem_free(instance);
     return 0;

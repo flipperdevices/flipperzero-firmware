@@ -44,7 +44,7 @@ struct SPIMemApp {
     Widget* widget;
     SPIMemWorker* worker;
     SPIMemChip* chip_info;
-    SPIMemProgressView* view_read;
+    SPIMemProgressView* view_progress;
     TextInput* text_input;
     SPIMemMode mode;
     char text_buffer[SPI_MEM_TEXT_BUFFER_SIZE + 1];

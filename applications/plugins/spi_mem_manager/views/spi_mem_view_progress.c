@@ -10,6 +10,7 @@ struct SPIMemProgressView {
 typedef enum {
     SPIMemProgressViewTypeRead,
     SPIMemProgressViewTypeVerify,
+    SPIMemProgressViewTypeWrite,
     SPIMemProgressViewTypeUnknown
 } SPIMemProgressViewType;
 
@@ -61,6 +62,13 @@ static void
     elements_button_center(canvas, "Skip");
 }
 
+static void
+    spi_mem_view_progress_write_draw_callback(Canvas* canvas, SPIMemProgressViewModel* model) {
+    canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Writing dump");
+    spi_mem_view_progress_draw_progress(canvas, model->progress);
+    elements_button_left(canvas, "Cancel");
+}
+
 static void spi_mem_view_progress_draw_callback(Canvas* canvas, void* context) {
     SPIMemProgressViewModel* model = context;
     SPIMemProgressViewType view_type = model->view_type;
@@ -68,6 +76,8 @@ static void spi_mem_view_progress_draw_callback(Canvas* canvas, void* context) {
         spi_mem_view_progress_read_draw_callback(canvas, model);
     } else if(view_type == SPIMemProgressViewTypeVerify) {
         spi_mem_view_progress_verify_draw_callback(canvas, model);
+    } else if(view_type == SPIMemProgressViewTypeWrite) {
+        spi_mem_view_progress_write_draw_callback(canvas, model);
     }
 }
 
@@ -94,6 +104,18 @@ static bool
     return success;
 }
 
+static bool
+    spi_mem_view_progress_write_input_callback(InputEvent* event, SPIMemProgressView* app) {
+    bool success = false;
+    if(event->type == InputTypeShort && event->key == InputKeyLeft) {
+        if(app->callback) {
+            app->callback(app->cb_ctx);
+        }
+        success = true;
+    }
+    return success;
+}
+
 static bool spi_mem_view_progress_input_callback(InputEvent* event, void* context) {
     SPIMemProgressView* app = context;
     bool success = false;
@@ -104,6 +126,8 @@ static bool spi_mem_view_progress_input_callback(InputEvent* event, void* contex
         success = spi_mem_view_progress_read_input_callback(event, app);
     } else if(view_type == SPIMemProgressViewTypeVerify) {
         success = spi_mem_view_progress_verify_input_callback(event, app);
+    } else if(view_type == SPIMemProgressViewTypeWrite) {
+        success = spi_mem_view_progress_write_input_callback(event, app);
     }
     return success;
 }
@@ -147,6 +171,19 @@ void spi_mem_view_progress_set_verify_callback(
         app->view,
         SPIMemProgressViewModel * model,
         { model->view_type = SPIMemProgressViewTypeVerify; },
+        true);
+}
+
+void spi_mem_view_progress_set_write_callback(
+    SPIMemProgressView* app,
+    SPIMemProgressViewCallback callback,
+    void* cb_ctx) {
+    app->callback = callback;
+    app->cb_ctx = cb_ctx;
+    with_view_model(
+        app->view,
+        SPIMemProgressViewModel * model,
+        { model->view_type = SPIMemProgressViewTypeWrite; },
         true);
 }
 
