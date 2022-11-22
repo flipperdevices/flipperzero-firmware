@@ -1,5 +1,5 @@
 #include "hid.h"
-//#include "views.h"
+#include "views.h"
 #include <furi_hal_bt.h>
 #include <furi_hal_usb.h>
 #include <notification/notification_messages.h>

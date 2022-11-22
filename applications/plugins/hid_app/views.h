@@ -7,5 +7,4 @@ typedef enum {
     HidViewMouse,
     BtHidViewTikTok,
     HidViewExitConfirm,
-    HidViewError
 } HidView;
