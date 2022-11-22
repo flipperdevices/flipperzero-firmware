@@ -1,11 +1,7 @@
-
 # Flipper Zero FW [ROGUEMASTER]
 This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware) and the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects.  
 
 This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
-
-<a href="https://github.com/DarkFlippers/unleashed-firmware" target="_blank"><img src="https://user-images.githubusercontent.com/10697207/186202043-26947e28-b1cc-459a-8f20-ffcc7fc0c71c.png" alt="fzCUSTOM" border="0" width="15%"></a>
-
 
 ## Support Us!
 Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
