@@ -124,9 +124,10 @@ static void pocsag_message_done(SubGhzProtocolDecoderPocsag* instance) {
     instance->char_bits = 0;
     instance->char_data = 0;
     furi_string_reset(instance->msg);
+    FURI_LOG_I(TAG, "d");
 
-    if(instance->base.callback)
-        instance->base.callback(&instance->base, instance->base.context);
+//    if(instance->base.callback)
+//        instance->base.callback(&instance->base, instance->base.context);
 }
 
 
@@ -144,7 +145,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                 instance->decoder.parser_step = PocsagDecoderStepFoundSync;
             }
         }
-        else {
+        else if (instance->decoder.decode_count_bit > 0) {
             subghz_protocol_decoder_pocsag_reset(context);
         }
         return;
@@ -172,22 +173,27 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
                 instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                 instance->decoder.decode_count_bit = 0;
                 instance->decoder.decode_data = 0UL;
+                FURI_LOG_I(TAG, "s0");
             }
             break;
         case PocsagDecoderStepFoundPreamble:
             // handle codewords
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                FURI_LOG_I(TAG, "cw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
+                    FURI_LOG_I(TAG, "idle");
                     instance->codeword_idx++;
                     break;
                 case POCSAG_FRAME_SYNC_CODE:
+                    FURI_LOG_I(TAG, "sync");
                     instance->codeword_idx = 0;
                     break;
                 default:
                     // Here we expect only address messages
                     if (codeword >> 31 == 0) {
+                        FURI_LOG_I(TAG, "addr");
                         pocsag_decode_address_word(instance, codeword);
                         instance->decoder.parser_step = PocsagDecoderStepMessage;
                     }
@@ -201,22 +207,27 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         case PocsagDecoderStepMessage:
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                FURI_LOG_I(TAG, "mcw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     // Idle during the message stops the message
+                    FURI_LOG_I(TAG, "midle");
                     instance->codeword_idx++;
                     instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                     pocsag_message_done(instance);
                     break;
                 case POCSAG_FRAME_SYNC_CODE:
+                    FURI_LOG_I(TAG, "msync");
                     instance->codeword_idx = 0;
                     break;
                 default:
                     // In this state, both address and message words can arrive
                     if (codeword >> 31 == 0) {
+                        FURI_LOG_I(TAG, "maddr");
                         pocsag_message_done(instance);
                         pocsag_decode_address_word(instance, codeword);
                     } else {
+                        FURI_LOG_I(TAG, "msg");
                         if (!pocsag_decode_message_word(instance, codeword)) {
                             instance->decoder.parser_step = PocsagDecoderStepFoundPreamble;
                             pocsag_message_done(instance);
