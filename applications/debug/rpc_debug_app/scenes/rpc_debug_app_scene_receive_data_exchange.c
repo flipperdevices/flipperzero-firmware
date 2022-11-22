@@ -1,11 +1,35 @@
 #include "../rpc_debug_app.h"
 
-#include <core/log.h>
+static void rpc_debug_app_scene_start_format_hex(
+    const uint8_t* data,
+    size_t data_size,
+    char* buf,
+    size_t buf_size) {
+    furi_assert(data);
+    furi_assert(buf);
 
-static void rpc_debug_app_scene_receive_data_exchange_callback(const uint8_t* data, size_t data_size, void* context) {
+    const size_t byte_width = 3;
+    const size_t line_width = 7;
+
+    data_size = MIN(data_size, buf_size * byte_width + 1);
+
+    for(size_t i = 0; i < data_size; ++i) {
+        char* p = buf + (i * byte_width);
+        char sep = !((i + 1) % line_width) ? '\n' : ' ';
+        snprintf(p, byte_width + 1, "%02X%c", data[i], sep);
+    }
+
+    buf[buf_size - 1] = '\0';
+}
+
+static void rpc_debug_app_scene_receive_data_exchange_callback(
+    const uint8_t* data,
+    size_t data_size,
+    void* context) {
     RpcDebugApp* app = context;
-    memset(app->data_store, 0, DATA_STORE_SIZE);
-    memcpy(app->data_store, data, MIN(data_size, DATA_STORE_SIZE));
+    if(data) {
+        rpc_debug_app_scene_start_format_hex(data, data_size, app->text_store, TEXT_STORE_SIZE);
+    }
     view_dispatcher_send_custom_event(app->view_dispatcher, RpcDebugAppCustomEventRpcDataExchange);
 }
 
@@ -16,7 +40,8 @@ void rpc_debug_app_scene_receive_data_exchange_on_enter(void* context) {
     text_box_set_text(app->text_box, app->text_store);
     text_box_set_font(app->text_box, TextBoxFontHex);
 
-    rpc_system_app_set_data_exchange_callback(app->rpc, rpc_debug_app_scene_receive_data_exchange_callback, app);
+    rpc_system_app_set_data_exchange_callback(
+        app->rpc, rpc_debug_app_scene_receive_data_exchange_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, RpcDebugAppViewTextBox);
 }
 
@@ -26,10 +51,6 @@ bool rpc_debug_app_scene_receive_data_exchange_on_event(void* context, SceneMana
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == RpcDebugAppCustomEventRpcDataExchange) {
-            for(size_t i = 0; i < DATA_STORE_SIZE / 3; ++i) {
-                snprintf(app->text_store + (i * 3), 4, "%02X ", app->data_store[i]);
-            }
-            app->text_store[TEXT_STORE_SIZE - 1] = '\0';
             text_box_set_text(app->text_box, app->text_store);
             consumed = true;
         }

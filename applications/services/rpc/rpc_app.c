@@ -229,9 +229,13 @@ static void rpc_system_app_data_exchange_process(const PB_Main* request, void* c
     pb_bytes_array_t* data = request->content.app_data_exchange_request.data;
 
     if(rpc_app->data_exchange_callback) {
+        uint8_t* data_bytes = NULL;
+        size_t data_size = 0;
         if(data) {
-            rpc_app->data_exchange_callback(data->bytes, data->size, rpc_app->data_exchange_context);
+            data_bytes = data->bytes;
+            data_size = data->size;
         }
+        rpc_app->data_exchange_callback(data_bytes, data_size, rpc_app->data_exchange_context);
         command_status = PB_CommandStatus_OK;
     } else {
         command_status = PB_CommandStatus_ERROR_APP_CMD_ERROR;

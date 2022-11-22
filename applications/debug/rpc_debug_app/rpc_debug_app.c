@@ -35,9 +35,6 @@ static void rpc_debug_app_rpc_command_callback(RpcAppSystemEvent event, void* co
         scene_manager_stop(app->scene_manager);
         view_dispatcher_stop(app->view_dispatcher);
         rpc_system_app_confirm(app->rpc, RpcAppEventAppExit, true);
-    } else if(event == RpcAppEventLoadFile) {
-    } else if(event == RpcAppEventButtonPress) {
-    } else if(event == RpcAppEventButtonRelease) {
     } else {
         rpc_system_app_confirm(app->rpc, event, false);
     }
