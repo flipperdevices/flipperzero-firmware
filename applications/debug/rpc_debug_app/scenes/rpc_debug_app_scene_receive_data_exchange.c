@@ -11,7 +11,7 @@ static void rpc_debug_app_scene_start_format_hex(
     const size_t byte_width = 3;
     const size_t line_width = 7;
 
-    data_size = MIN(data_size, buf_size * byte_width + 1);
+    data_size = MIN(data_size, buf_size / (byte_width + 1));
 
     for(size_t i = 0; i < data_size; ++i) {
         char* p = buf + (i * byte_width);
@@ -29,6 +29,8 @@ static void rpc_debug_app_scene_receive_data_exchange_callback(
     RpcDebugApp* app = context;
     if(data) {
         rpc_debug_app_scene_start_format_hex(data, data_size, app->text_store, TEXT_STORE_SIZE);
+    } else {
+        strncpy(app->text_store, "<Data empty>", TEXT_STORE_SIZE);
     }
     view_dispatcher_send_custom_event(app->view_dispatcher, RpcDebugAppCustomEventRpcDataExchange);
 }
