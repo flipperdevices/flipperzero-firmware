@@ -32,6 +32,7 @@ Thank you to all the supporters!
 - Added: [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - Added: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - Added: [Infrared: Add Olimpia Splendid AC #2038 (By asprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/2038)
+- Added: [SubGhz: add protocol Nice_Flo 20bit #1983 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1983)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -256,3 +257,4 @@ $ ./fbt resources icons dolphin_ext
 - [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - [WS: add protocol GT-WT02 #2001 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2001)
 - [Infrared: Add Olimpia Splendid AC #2038 (By asprosvetova)](https://github.com/flipperdevices/flipperzero-firmware/pull/2038)
+- [SubGhz: add protocol Nice_Flo 20bit #1983 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/1983)
