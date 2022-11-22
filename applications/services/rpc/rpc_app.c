@@ -322,9 +322,8 @@ void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text
     if(content->text) {
         free(content->text);
     }
-    if(error_text) {
-        content->text = strdup(error_text);
-    }
+
+    content->text = error_text ? strdup(error_text) : NULL;
 }
 
 void rpc_system_app_set_data_exchange_callback(
