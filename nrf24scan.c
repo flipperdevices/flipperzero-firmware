@@ -242,7 +242,7 @@ static bool load_settings_file(Stream* file_stream) {
 				ConvertHexToArray(line_ptr, addrs.addr_count==1? &addrs.addr_P1[0] : addrs.addr_count==2? &addrs.addr_P2 : addrs.addr_count==3? &addrs.addr_P3 : addrs.addr_count==4? &addrs.addr_P4: &addrs.addr_P5, addrs.addr_count==1? 5 : 1);
 				FURI_LOG_D(TAG, " +Addr_LSB: %s", line_ptr);
 				if(++addrs.addr_count == MAX_ADDR) break;
-			} else if(end_ptr - line_ptr < 6) { // Rate or Channel
+			} else if(end_ptr - line_ptr < 4) { // Rate or Channel
 				if(line_num == 0) { // 1st line - Rate
 					NRF_rate = atoi(line_ptr);
 					FURI_LOG_D(TAG, " Rate: %d", NRF_rate);
