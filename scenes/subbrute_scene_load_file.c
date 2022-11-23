@@ -17,8 +17,14 @@ void subbrute_scene_load_file_on_enter(void* context) {
     dialog_file_browser_set_basic_options(&browser_options, SUBBRUTE_FILE_EXT, &I_sub1_10px);
 
     SubBruteFileResult load_result = SubBruteFileResultUnknown;
+    // TODO: DELETE IT
+#ifdef FURI_DEBUG
+    bool res = true;
+    furi_string_printf(load_path, "%s", "/ext/subghz/princeton.sub");
+#else
     bool res =
         dialog_file_browser_show(instance->dialogs, load_path, app_folder, &browser_options);
+#endif
 #ifdef FURI_DEBUG
     FURI_LOG_D(
         TAG,

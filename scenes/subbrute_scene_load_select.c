@@ -38,6 +38,10 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubBruteCustomEventTypeIndexSelected) {
+#ifdef FURI_DEBUG
+            view_dispatcher_stop(instance->view_dispatcher);
+            consumed = true;
+#else
             instance->device->load_index = subbrute_main_view_get_index(instance->view_main);
             uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
 
@@ -51,6 +55,7 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
                 furi_crash("Invalid attack set!");
             }
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSetupAttack);
+#endif
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {

@@ -481,7 +481,8 @@ void subbrute_protocol_file_generate_file(
     uint8_t te,
     uint8_t repeat,
     uint8_t load_index,
-    const char* file_key) {
+    bool two_bytes,
+    uint64_t file_key) {
     FuriString* candidate = furi_string_alloc();
     char subbrute_payload_byte[8];
     furi_string_set_str(candidate, file_key);

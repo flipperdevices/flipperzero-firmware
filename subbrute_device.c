@@ -25,7 +25,7 @@ SubBruteDevice* subbrute_device_alloc() {
 #ifdef FURI_DEBUG
     subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
 #else
-    subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
+    subbrute_device_attack_set_default_values(instance, SubBruteAttackLoadFile);
 #endif
     return instance;
 }
@@ -339,6 +339,52 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             FURI_LOG_D(TAG, "Key: %s", instance->file_key);
 #endif
         }
+
+        flipper_format_rewind(fff_data_file);
+
+        uint8_t key_data[sizeof(uint64_t)] = {0};
+        if(!flipper_format_read_hex(fff_data_file, "Key", key_data, sizeof(uint64_t))) {
+            FURI_LOG_E(TAG, "Missing Key");
+            result = SubBruteFileResultMissingOrIncorrectKey;
+            break;
+        }
+        uint64_t data = 0;
+        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+            data = (data << 8) | key_data[i];
+        }
+        instance->key_from_file = data;
+
+        uint16_t add_value = 0x0001;
+        uint8_t bit_index = 7;
+        bool two_bytes = true;
+
+        uint8_t p[8];
+        for(int i = 0; i < 8; i++) {
+            p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
+        }
+        uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
+        FURI_LOG_D(TAG, "num: 0x%04X", num);
+        num += add_value;
+        FURI_LOG_D(TAG, "num added: 0x%04X", num);
+        uint8_t low_byte = num & (0xff);
+        uint8_t high_byte = (num >> 8) & 0xff;
+
+        data = 0;
+        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+            if(i == bit_index - 1 && two_bytes) {
+                data = (data << 8) | high_byte;
+                data = (data << 8) | low_byte;
+                i++;
+            } else if(i == bit_index) {
+                data = (data << 8) | low_byte;
+            } else {
+                data = (data << 8) | p[i];
+            }
+        }
+
+        furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
+        FURI_LOG_D(
+            TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
 
         // TE
         if(!flipper_format_read_uint32(fff_data_file, "TE", &temp_data32, 1)) {

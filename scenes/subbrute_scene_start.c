@@ -26,6 +26,11 @@ void subbrute_scene_start_on_enter(void* context) {
     subbrute_main_view_set_index(view, instance->device->attack, false, NULL);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
+
+    // TODO: DELETE IT
+#ifdef FURI_DEBUG
+    scene_manager_next_scene(instance->scene_manager, SubBruteSceneLoadFile);
+#endif
 }
 
 void subbrute_scene_start_on_exit(void* context) {
