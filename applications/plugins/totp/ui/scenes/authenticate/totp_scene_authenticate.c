@@ -139,7 +139,7 @@ bool totp_scene_authenticate_handle_event(
                 AlignCenter,
                 AlignCenter);
             dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
-            dialog_message_show(plugin_state->dialogs, message);
+            dialog_message_show(plugin_state->dialogs_app, message);
             dialog_message_free(message);
         }
         break;

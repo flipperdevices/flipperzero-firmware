@@ -21,8 +21,6 @@ void totp_cli_command_timezone_docopt_usage() {
 void totp_cli_command_timezone_docopt_arguments() {
     TOTP_CLI_PRINTF("  " TOTP_CLI_COMMAND_TIMEZONE_ARG_TIMEZONE
                     "    Timezone offset in hours to be set.\r\n");
-    TOTP_CLI_PRINTF(
-        "              If not provided then current timezone offset will be printed\r\n");
 }
 
 void totp_cli_command_timezone_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {

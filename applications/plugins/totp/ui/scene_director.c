@@ -10,7 +10,6 @@ void totp_scene_director_activate_scene(
     PluginState* const plugin_state,
     Scene scene,
     const void* context) {
-    plugin_state->changing_scene = true;
     totp_scene_director_deactivate_active_scene(plugin_state);
     switch(scene) {
     case TotpSceneGenerateToken:
@@ -35,7 +34,6 @@ void totp_scene_director_activate_scene(
     }
 
     plugin_state->current_scene = scene;
-    plugin_state->changing_scene = false;
 }
 
 void totp_scene_director_deactivate_active_scene(PluginState* const plugin_state) {
