@@ -389,6 +389,9 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             break;
     }
     
+    /* unfortunately the response is quicker than the original NFC tag which causes frame misses */
+    furi_delay_us(270);
+
     switch(command) {
 
         case ISO15693_INVENTORY:
@@ -505,7 +508,6 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             uint8_t password_id = payload[payload_offset];
             uint8_t *password_xored = &payload[payload_offset + 1];
             uint8_t *rand = nfcv_data->sub_data.slix_l.rand;
-            uint8_t status = ISO15693_ERROR_GENERIC;
             uint8_t *password = NULL;
             uint8_t password_rcv[4];
 
@@ -530,18 +532,13 @@ void nfcv_emu_handle_packet(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, ui
             uint32_t pass_received = nfcv_read_be(password_rcv, 4);
 
             if(pass_expect == pass_received) {
-                status = ISO15693_NOERROR;
                 nfcv_data->sub_data.slix_l.privacy = false;
-                FURI_LOG_D(TAG, "SET_PASSWORD #%d received correct password 0x%08lX", password_id, pass_received);
+                response_buffer[0] = ISO15693_NOERROR;
+                nfcv_emu_send(response_buffer, 1);
+                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X 0x%08lX OK", password_id, pass_received);
             } else {
-                FURI_LOG_D(TAG, "SET_PASSWORD #%d mismatch. Expected password 0x%08lX, got 0x%08lX", password_id, pass_expect, pass_received);
+                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X 0x%08lX/%08lX FAIL", password_id, pass_received, pass_expect);
             }
-
-            response_buffer[0] = status;
-
-            nfcv_emu_send(response_buffer, 1);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X %s", password_id, (status == ISO15693_NOERROR) ? "SUCCESS" : "FAIL");
-
             break;
         }
 
@@ -739,8 +736,6 @@ bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t ti
     }
 
     if(frame_state == NFCV_FRAME_STATE_EOF) {
-        FURI_LOG_D(TAG, "Received valid frame");
-
         /* we know that this code uses TIM2, so stop pulse reader */
         pulse_reader_stop(reader_signal);
         nfcv_emu_handle_packet(nfc_data, nfcv_data, frame_payload, frame_pos);
