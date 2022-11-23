@@ -17,7 +17,7 @@ static VariableItemList* variable_item_list;
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
     //Возврат в общий вид
-    return SUMMARY_VIEW;
+    return GENERAL_VIEW;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

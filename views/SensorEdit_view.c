@@ -149,7 +149,7 @@ static void _enter_callback(void* context, uint32_t index) {
         unitemp_sensors_save();
         unitemp_sensors_reload();
 
-        unitemp_Summary_switch();
+        unitemp_General_switch();
     }
     //Адрес устройства на шине one wire
     if(index == 3 && editable_sensor->type->interface == &ONE_WIRE) {

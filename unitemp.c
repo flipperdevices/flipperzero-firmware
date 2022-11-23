@@ -186,7 +186,7 @@ static bool unitemp_alloc(void) {
 
     app->sensors = NULL;
 
-    unitemp_Summary_alloc();
+    unitemp_General_alloc();
     unitemp_MainMenu_alloc();
     unitemp_Settings_alloc();
     unitemp_SensorsList_alloc();
@@ -207,7 +207,7 @@ static void unitemp_free(void) {
     unitemp_SensorsList_free();
     unitemp_Settings_free();
     unitemp_MainMenu_free();
-    unitemp_Summary_free();
+    unitemp_General_free();
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
@@ -252,7 +252,7 @@ int32_t unitemp_app() {
     //Инициализация датчиков
     unitemp_sensors_init();
 
-    unitemp_Summary_switch();
+    unitemp_General_switch();
 
     while(app->processing) {
         if(app->sensors_ready) unitemp_sensors_updateValues();

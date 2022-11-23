@@ -5,7 +5,7 @@
 
 //Виды менюшек
 typedef enum UnitempViews {
-    SUMMARY_VIEW,
+    GENERAL_VIEW,
     MAINMENU_VIEW,
     SETTINGS_VIEW,
     SENSORSLIST_VIEW,
@@ -16,9 +16,9 @@ typedef enum UnitempViews {
 } UnitempViews;
 
 /* Общий вид на датчики */
-void unitemp_Summary_alloc(void);
-void unitemp_Summary_switch(void);
-void unitemp_Summary_free(void);
+void unitemp_General_alloc(void);
+void unitemp_General_switch(void);
+void unitemp_General_free(void);
 
 /* Главное меню */
 void unitemp_MainMenu_alloc(void);
