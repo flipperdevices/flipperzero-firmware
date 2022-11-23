@@ -37,14 +37,14 @@ void subbrute_scene_setup_attack_on_enter(void* context) {
         instance->worker, subbrute_scene_setup_attack_device_state_changed, context);
     if(subbrute_worker_is_running(instance->worker)) {
         subbrute_worker_stop(instance->worker);
-        instance->device->key_index = subbrute_worker_get_step(instance->worker);
+        instance->device->current_step = subbrute_worker_get_step(instance->worker);
     }
 
     subbrute_attack_view_init_values(
         view,
         instance->device->attack,
         instance->device->max_value,
-        instance->device->key_index,
+        instance->device->current_step,
         false,
         instance->device->extra_repeats);
 
@@ -77,7 +77,7 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 view,
                 instance->device->attack,
                 instance->device->max_value,
-                instance->device->key_index,
+                instance->device->current_step,
                 false,
                 instance->device->extra_repeats);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSaveName);
@@ -86,7 +86,7 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 view,
                 instance->device->attack,
                 instance->device->max_value,
-                instance->device->key_index,
+                instance->device->current_step,
                 false,
                 instance->device->extra_repeats);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneStart);
@@ -99,7 +99,7 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 // Blink
                 notification_message(instance->notifications, &sequence_blink_green_100);
                 subbrute_worker_transmit_current_key(
-                    instance->worker, instance->device->key_index);
+                    instance->worker, instance->device->current_step);
                 // Stop
                 notification_message(instance->notifications, &sequence_blink_stop);
             }
@@ -128,9 +128,9 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
         if(subbrute_worker_is_running(instance->worker)) {
-            instance->device->key_index = subbrute_worker_get_step(instance->worker);
+            instance->device->current_step = subbrute_worker_get_step(instance->worker);
         }
-        subbrute_attack_view_set_current_step(view, instance->device->key_index);
+        subbrute_attack_view_set_current_step(view, instance->device->current_step);
         consumed = true;
     }
 

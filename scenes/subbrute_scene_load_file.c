@@ -18,7 +18,7 @@ void subbrute_scene_load_file_on_enter(void* context) {
 
     SubBruteFileResult load_result = SubBruteFileResultUnknown;
     // TODO: DELETE IT
-#ifdef FURI_DEBUG
+#ifdef SUBBRUTE_FAST_TRACK
     bool res = true;
     furi_string_printf(load_path, "%s", "/ext/subghz/princeton.sub");
 #else
@@ -43,8 +43,8 @@ void subbrute_scene_load_file_on_enter(void* context) {
             if(load_result == SubBruteFileResultOk) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
-                       instance->device->key_index,
-                       instance->device->load_index,
+                       instance->device->current_step,
+                       instance->device->current_step,
                        instance->device->file_key,
                        instance->device->file_protocol_info,
                        extra_repeats)) {

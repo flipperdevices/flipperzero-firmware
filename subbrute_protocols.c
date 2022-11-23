@@ -480,22 +480,43 @@ void subbrute_protocol_file_generate_file(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat,
-    uint8_t load_index,
-    bool two_bytes,
-    uint64_t file_key) {
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes) {
     FuriString* candidate = furi_string_alloc();
-    char subbrute_payload_byte[8];
-    furi_string_set_str(candidate, file_key);
+    // char subbrute_payload_byte[8];
+    //furi_string_set_str(candidate, file_key);
 
-    for(int8_t shift = 8 * sizeof(step) - 4; shift >= 0; shift -= 4) {
-        uint8_t hexDigit = (step >> shift) & 0xF;
-        snprintf(subbrute_payload_byte, 4, "%02X ", hexDigit);
+    uint8_t p[8];
+    for(int i = 0; i < 8; i++) {
+        p[i] = (uint8_t)(file_key >> 8 * (7 - i)) & 0xFF;
+    }
+    uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
+#ifdef FURI_DEBUG
+    FURI_LOG_D(TAG, "num: 0x%04X", num);
+#endif
+    num += step;
+#ifdef FURI_DEBUG
+    FURI_LOG_D(TAG, "num added: 0x%04X", num);
+#endif
+    uint8_t low_byte = num & (0xff);
+    uint8_t high_byte = (num >> 8) & 0xff;
 
-        if(((shift & 0xF) == 0) && (shift > 0)) {
-            //ptr->print(" ");
+    size_t size = sizeof(uint64_t);
+    for(uint8_t i = 0; i < size; i++) {
+        if(i == bit_index - 1 && two_bytes) {
+            furi_string_cat_printf(candidate, "%02X %02X", high_byte, low_byte);
+            i++;
+        } else if(i == bit_index) {
+            furi_string_cat_printf(candidate, "%02X", low_byte);
+        } else {
+            furi_string_cat_printf(candidate, "%02X", p[i]);
+        }
+
+        if(i < size - 1) {
+            furi_string_push_back(candidate, ' ');
         }
     }
-    furi_string_replace_at(candidate, load_index * 3, 3, subbrute_payload_byte);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
