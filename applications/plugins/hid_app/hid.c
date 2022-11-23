@@ -217,6 +217,7 @@ void hid_app_free(Hid* app) {
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
     submenu_free(app->device_type_submenu);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewConnTypeSubMenu);
     submenu_free(app->conn_type_submenu);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewExitConfirm);
     dialog_ex_free(app->dialog);
