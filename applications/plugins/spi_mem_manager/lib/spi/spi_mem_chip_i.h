@@ -27,14 +27,6 @@ typedef enum {
 } SPIMemChipVendor;
 
 typedef enum {
-    SPIMemChipWriteModeUnknown = 0,
-    SPIMemChipWriteModeOneOrPage256Bytes = 0x01,
-    SPIMemChipWriteModeByte = 0x02,
-    SPIMemChipWriteModeAAI = 0x04,
-    SPIMemChipWriteModeDualBuffer = 0x08
-} SPIMemChipWriteMode;
-
-typedef enum {
     SPIMemChipCMDReadJEDECChipID = 0x9F,
     SPIMemChipCMDReadData = 0x03,
     SPIMemChipCMDChipErase = 0xC7,

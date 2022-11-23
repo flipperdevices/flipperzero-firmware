@@ -32,6 +32,7 @@ static void spi_mem_scene_chip_detect_draw_next_button(SPIMemApp* app) {
     FuriString* str = furi_string_alloc();
     if(app->mode == SPIMemModeRead) furi_string_printf(str, "%s", "Read");
     if(app->mode == SPIMemModeWrite) furi_string_printf(str, "%s", "Write");
+    if(app->mode == SPIMemModeErase) furi_string_printf(str, "%s", "Erase");
     if(app->mode == SPIMemModeCompare) furi_string_printf(str, "%s", "Check");
     widget_add_button_element(
         app->widget,
@@ -46,13 +47,14 @@ static void spi_mem_scene_chip_detected_set_previous_scene(SPIMemApp* app) {
     uint32_t scene = SPIMemSceneStart;
     if(app->mode == SPIMemModeCompare || app->mode == SPIMemModeWrite)
         scene = SPIMemSceneSavedFileMenu;
-    scene_manager_search_and_switch_to_another_scene(app->scene_manager, scene);
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, scene);
 }
 
 static void spi_mem_scene_chip_detected_set_next_scene(SPIMemApp* app) {
     uint32_t scene = SPIMemSceneStart;
     if(app->mode == SPIMemModeRead) scene = SPIMemSceneReadFilename;
     if(app->mode == SPIMemModeWrite) scene = SPIMemSceneErase;
+    if(app->mode == SPIMemModeErase) scene = SPIMemSceneErase;
     if(app->mode == SPIMemModeCompare) scene = SPIMemSceneVerify;
     scene_manager_next_scene(app->scene_manager, scene);
 }

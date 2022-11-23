@@ -27,7 +27,13 @@
 #define SPI_MEM_FILE_NAME_SIZE 100
 #define SPI_MEM_TEXT_BUFFER_SIZE 128
 
-typedef enum { SPIMemModeRead, SPIMemModeWrite, SPIMemModeCompare, SPIMemModeUnknown } SPIMemMode;
+typedef enum {
+    SPIMemModeRead,
+    SPIMemModeWrite,
+    SPIMemModeCompare,
+    SPIMemModeErase,
+    SPIMemModeUnknown
+} SPIMemMode;
 
 struct SPIMemApp {
     Gui* gui;

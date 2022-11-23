@@ -3,6 +3,7 @@
 typedef enum {
     SPIMemSceneStartSubmenuIndexRead,
     SPIMemSceneStartSubmenuIndexSaved,
+    SPIMemSceneStartSubmenuIndexErase,
     SPIMemSceneStartSubmenuIndexAbout
 } SPIMemSceneStartSubmenuIndex;
 
@@ -23,6 +24,12 @@ void spi_mem_scene_start_on_enter(void* context) {
         app->submenu,
         "Saved",
         SPIMemSceneStartSubmenuIndexSaved,
+        spi_mem_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
+        "Erase",
+        SPIMemSceneStartSubmenuIndexErase,
         spi_mem_scene_start_submenu_callback,
         app);
     submenu_add_item(
@@ -48,6 +55,10 @@ bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemSceneStartSubmenuIndexSaved) {
             furi_string_set(app->file_path, SPI_MEM_FILE_FOLDER);
             scene_manager_next_scene(app->scene_manager, SPIMemSceneSelectFile);
+            success = true;
+        } else if(event.event == SPIMemSceneStartSubmenuIndexErase) {
+            app->mode = SPIMemModeErase;
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
             success = true;
         } else if(event.event == SPIMemSceneStartSubmenuIndexAbout) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneAbout);

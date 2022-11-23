@@ -27,20 +27,30 @@ void spi_mem_scene_erase_on_enter(void* context) {
     spi_mem_worker_erase_start(app->chip_info, app->worker, spi_mem_scene_erase_callback, app);
 }
 
+static void spi_mem_scene_erase_set_previous_scene(SPIMemApp* app) {
+    uint32_t scene = SPIMemSceneStart;
+    if(app->mode == SPIMemModeWrite) scene = SPIMemSceneSavedFileMenu;
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, scene);
+}
+
+static void spi_mem_scene_erase_set_next_scene(SPIMemApp* app) {
+    uint32_t scene = SPIMemSceneSuccess;
+    if(app->mode == SPIMemModeWrite) scene = SPIMemSceneWrite;
+    scene_manager_next_scene(app->scene_manager, scene);
+}
+
 bool spi_mem_scene_erase_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
     bool success = false;
     if(event.type == SceneManagerEventTypeBack) {
         success = true;
-        scene_manager_search_and_switch_to_previous_scene(
-            app->scene_manager, SPIMemSceneSavedFileMenu);
+        spi_mem_scene_erase_set_previous_scene(app);
     } else if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(app->scene_manager);
         } else if(event.event == SPIMemCustomEventWorkerEraseDone) {
-            // scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneWrite);
+            spi_mem_scene_erase_set_next_scene(app);
         } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipError);
         }

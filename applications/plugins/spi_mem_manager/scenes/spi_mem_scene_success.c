@@ -16,14 +16,19 @@ void spi_mem_scene_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewPopup);
 }
 
+static void spi_mem_scene_success_set_previous_scene(SPIMemApp* app) {
+    uint32_t scene = SPIMemSceneSelectFile;
+    if(app->mode == SPIMemModeErase) scene = SPIMemSceneStart;
+    scene_manager_search_and_switch_to_another_scene(app->scene_manager, scene);
+}
+
 bool spi_mem_scene_success_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
     bool success = false;
     if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == SPIMemCustomEventPopupBack) {
-            scene_manager_search_and_switch_to_another_scene(
-                app->scene_manager, SPIMemSceneSelectFile);
+            spi_mem_scene_success_set_previous_scene(app);
         }
     }
     return success;

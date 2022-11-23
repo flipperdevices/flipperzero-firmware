@@ -26,18 +26,22 @@ void spi_mem_scene_chip_error_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewWidget);
 }
 
+static void spi_mem_scene_chip_error_set_previous_scene(SPIMemApp* app) {
+    uint32_t scene = SPIMemSceneStart;
+    if(app->mode == SPIMemModeWrite) scene = SPIMemSceneChipDetect;
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, scene);
+}
+
 bool spi_mem_scene_chip_error_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
     bool success = false;
     if(event.type == SceneManagerEventTypeBack) {
         success = true;
-        scene_manager_search_and_switch_to_previous_scene(
-            app->scene_manager, SPIMemSceneChipDetect);
+        spi_mem_scene_chip_error_set_previous_scene(app);
     } else if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == GuiButtonTypeLeft) {
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetect);
+            spi_mem_scene_chip_error_set_previous_scene(app);
         }
     }
     return success;

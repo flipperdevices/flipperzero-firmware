@@ -118,3 +118,7 @@ uint8_t spi_mem_chip_get_type_id(SPIMemChip* chip) {
 uint8_t spi_mem_chip_get_capacity_id(SPIMemChip* chip) {
     return (chip->capacity_id);
 }
+
+SPIMemChipWriteMode spi_mem_chip_get_write_mode(SPIMemChip* chip) {
+    return (chip->write_mode);
+}
