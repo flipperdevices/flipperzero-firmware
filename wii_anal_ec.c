@@ -23,7 +23,7 @@ bool  evWiiEC (const eventMsg_t* const msg,  state_t* const state)
 			case WIIEC_RELEASE:  s = "Release";     break ;
 			case WIIEC_ANALOG:   s = "Analog";      break ;
 			case WIIEC_ACCEL:    s = "Accel";       break ;
-			default:            s = "Bug";         break ;
+			default:             s = "Bug";         break ;
 		}
 		INFO("WIIP : %s '%c' = %d", s, (isprint((int)msg->wiiEc.in) ? msg->wiiEc.in : '_'), msg->wiiEc.val);
 		if ((msg->wiiEc.type == WIIEC_CONN) || (msg->wiiEc.type == WIIEC_DISCONN))
@@ -38,6 +38,17 @@ bool  evWiiEC (const eventMsg_t* const msg,  state_t* const state)
 			state->calib = CAL_TRACK;
 			sceneSet(state, ecId[msg->wiiEc.val].scene);
 			redraw = true ;
+
+#if 1  // Workaround for Classic Controller Pro, which shows 00's for Factory Calibration Data!?
+			if (state->ec.pidx == PID_CLASSIC_PRO) {
+				// Simulate a Long-OK keypress, to start Software Calibration mode
+				eventMsg_t  msg = {
+					input.type = InputTypeLong,
+					input.key  = InputKeyOk
+				};
+				key_calib(&msg, state);
+			}
+#endif
 			break;
 
 		case WIIEC_DISCONN:
@@ -59,7 +70,7 @@ bool  evWiiEC (const eventMsg_t* const msg,  state_t* const state)
 			}
 
 #if 1  //! factory calibration method not known for classic triggers - this will set the digital switch point
-			if (state->ec.pidx == PID_CLASSIC) {
+			if ((state->ec.pidx == PID_CLASSIC) || (state->ec.pidx == PID_CLASSIC_PRO)) {
 				if (msg->wiiEc.in == 'l')  state->ec.calS.classic[2].trgZL = msg->wiiEc.val ;
 				if (msg->wiiEc.in == 'r')  state->ec.calS.classic[2].trgZR = msg->wiiEc.val ;
 			}
