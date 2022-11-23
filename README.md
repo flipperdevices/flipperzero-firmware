@@ -2,6 +2,10 @@
 
 An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors. This library is not currently complete, but functional.
 
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-1.png">
+<br>
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-2.png">
+
 ## PinOut from from NoComp/Frog
 <img src="https://media.discordapp.net/attachments/937479784726949900/994495234618687509/unknown.png?width=567&height=634">
 
