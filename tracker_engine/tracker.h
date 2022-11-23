@@ -27,7 +27,7 @@ void tracker_free(Tracker* tracker);
 
 void tracker_set_message_callback(Tracker* tracker, TrackerMessageCallback callback, void* context);
 
-void tracker_set_song(Tracker* tracker, Song* song);
+void tracker_set_song(Tracker* tracker, const Song* song);
 
 void tracker_set_order_index(Tracker* tracker, uint8_t order_index);
 

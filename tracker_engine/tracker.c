@@ -40,7 +40,7 @@ typedef struct {
 } UnpackedRow;
 
 struct Tracker {
-    Song* song;
+    const Song* song;
     bool playing;
     TrackerMessageCallback callback;
     void* context;
@@ -126,9 +126,9 @@ static float frequency_get_seventh_of_a_semitone(float frequency) {
     return frequency * ((1.0f / 12.0f) / 7.0f);
 }
 
-static UnpackedRow get_current_row(Song* song, SongState* song_state, uint8_t channel) {
-    Pattern* pattern = &song->patterns[song_state->pattern_index];
-    Row row = pattern->channels[channel].rows[song_state->row_index];
+static UnpackedRow get_current_row(const Song* song, SongState* song_state, uint8_t channel) {
+    const Pattern* pattern = &song->patterns[song_state->pattern_index];
+    const Row row = pattern->channels[channel].rows[song_state->row_index];
     return (UnpackedRow){
         .note = record_get_note(row),
         .effect = record_get_effect(row),
@@ -136,7 +136,7 @@ static UnpackedRow get_current_row(Song* song, SongState* song_state, uint8_t ch
     };
 }
 
-static int16_t advance_order_and_get_next_pattern_index(Song* song, SongState* song_state) {
+static int16_t advance_order_and_get_next_pattern_index(const Song* song, SongState* song_state) {
     song_state->order_list_index++;
     if(song_state->order_list_index >= song->order_list_size) {
         return -1;
@@ -205,7 +205,7 @@ static void tracker_interrupt_body(Tracker* tracker) {
     const uint8_t channel_index = 0;
     SongState* song_state = &tracker->song_state;
     ChannelState* channel_state = &song_state->channels[channel_index];
-    Song* song = tracker->song;
+    const Song* song = tracker->song;
     UnpackedRow row = get_current_row(song, song_state, channel_index);
 
     // load frequency from note at tick 0
@@ -403,7 +403,7 @@ void tracker_set_message_callback(Tracker* tracker, TrackerMessageCallback callb
     tracker->context = context;
 }
 
-void tracker_set_song(Tracker* tracker, Song* song) {
+void tracker_set_song(Tracker* tracker, const Song* song) {
     furi_check(tracker->playing == false);
     tracker->song = song;
     tracker_song_state_init(tracker);
