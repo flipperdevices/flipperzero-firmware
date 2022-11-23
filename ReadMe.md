@@ -31,7 +31,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
-- [Blackjack (By teeebor)](https://github.com/teeebor/flipper_games)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -39,6 +38,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
+- [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - Music Beeper (By qqMajiKpp / Haseo)
 
 ## GPIO
@@ -54,6 +54,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
+- [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
+- [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
+- [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 
 --- 
 
