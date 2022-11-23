@@ -87,6 +87,25 @@ void digital_signal_add(DigitalSignal* signal, uint32_t ticks) {
     signal->edge_timings[signal->edge_cnt++] = ticks;
 }
 
+void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level) {
+    furi_assert(signal);
+    furi_assert(signal->edge_cnt < signal->edges_max_cnt);
+
+    /* virgin signal? add it as the only level */
+    if(signal->edge_cnt == 0) {
+        signal->start_level = level;
+        signal->edge_timings[signal->edge_cnt++] = ticks;
+    } else {
+        bool end_level = signal->start_level ^ !(signal->edge_cnt % 2);
+
+        if(level != end_level) {
+            signal->edge_timings[signal->edge_cnt++] = ticks;
+        } else {
+            signal->edge_timings[signal->edge_cnt - 1] += ticks;
+        }
+    }
+}
+
 uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
     furi_assert(signal);
     furi_assert(edge_num < signal->edge_cnt);
@@ -126,19 +145,19 @@ void digital_signal_prepare(DigitalSignal* signal) {
 }
 
 
-void digital_signal_stop_dma() {
+static void digital_signal_stop_dma() {
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TC2(DMA1);
 }
 
-void digital_signal_stop_timer() {
+static void digital_signal_stop_timer() {
     LL_TIM_DisableCounter(TIM2);
     LL_TIM_SetCounter(TIM2, 0);
 }
 
-bool digital_signal_setup_dma(DigitalSignal* signal) {
+static bool digital_signal_setup_dma(DigitalSignal* signal) {
     furi_assert(signal);
 
     if(!signal->reload_reg_entries) {
@@ -186,28 +205,7 @@ bool digital_signal_setup_dma(DigitalSignal* signal) {
     return true;
 }
 
-
-bool digital_signal_update_dma(DigitalSignal* signal) {
-    furi_assert(signal);
-
-    if(!signal->reload_reg_entries) {
-        return false;
-    }
-
-    digital_signal_stop_dma();
-
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)signal->gpio_buff);
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t)signal->reload_reg_buff);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, 2);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, signal->reload_reg_entries);
-
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-
-    return true;
-}
-
-void digital_signal_setup_timer() {
+static void digital_signal_setup_timer() {
     
     digital_signal_stop_timer();
 
@@ -220,7 +218,7 @@ void digital_signal_setup_timer() {
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
 }
 
-void digital_signal_start_timer() {
+static void digital_signal_start_timer() {
     LL_TIM_GenerateEvent_UPDATE(TIM2);
     LL_TIM_EnableCounter(TIM2);
 }
@@ -254,16 +252,34 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
 }
 
 
-DigitalSequence* digital_sequence_alloc(uint32_t size) {
 
-    DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
-    sequence->signals_size = 32;
+void digital_sequence_alloc_signals(DigitalSequence* sequence, uint32_t size) {
+    sequence->signals_size = size;
     sequence->signals = malloc(sequence->signals_size * sizeof(DigitalSignal*));
+    sequence->signals_prolonged = malloc(sequence->signals_size * sizeof(bool));
+}
 
+void digital_sequence_alloc_sequence(DigitalSequence* sequence, uint32_t size) {
     sequence->sequence_used = 0;
     sequence->sequence_size = size;
     sequence->sequence = malloc(sequence->sequence_size);
+}
+
+DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
+
+    DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
+
+    //gpio = &gpio_ext_pb2;
+    //furi_hal_gpio_init(&gpio_ext_pb2, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    //furi_hal_gpio_init(&gpio_ext_pc3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    //furi_hal_gpio_write(&gpio_ext_pb2, false);
+    //furi_hal_gpio_write(&gpio_ext_pc3, false);
+
+    sequence->gpio = gpio;
+
+    digital_sequence_alloc_signals(sequence, 32);
+    digital_sequence_alloc_sequence(sequence, size);
 
     return sequence;
 }
@@ -282,6 +298,10 @@ void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index
     furi_assert(signal_index < sequence->signals_size);
 
     sequence->signals[signal_index] = signal;
+    signal->gpio = sequence->gpio;
+    signal->reload_reg_remainder = 0;
+
+    digital_signal_prepare(signal);
 }
 
 void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
@@ -296,12 +316,63 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
     sequence->sequence[sequence->sequence_used++] = signal_index;
 }
 
-bool digital_sequence_send_signal(DigitalSignal* signal) {
+void digital_signal_update_dma(DigitalSignal* signal) {
+
+    volatile uint32_t dma1_data[] = {
+        /* R6  */ (uint32_t)&(DMA1_Channel1->CCR),
+        /* R7  */ DMA1_Channel1->CCR & ~DMA_CCR_EN,
+        /* R8  */ 2,
+        /* R9  */ (uint32_t)&(signal->gpio->port->BSRR),
+        /* R10 */ (uint32_t)signal->gpio_buff,
+        /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN };
+
+    volatile uint32_t dma2_data[] = {
+        /* R0 */ (uint32_t)&(DMA1_Channel2->CCR),
+        /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN,
+        /* R2 */ (uint32_t)signal->reload_reg_entries,
+        /* R3 */ (uint32_t)&(TIM2->ARR),
+        /* R4 */ (uint32_t)signal->reload_reg_buff,
+        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN };
+
+    
+    /* hurry when setting up next transfer */
+    asm volatile("\t"
+        "MOV     r6, %[data1]\n\t"
+        "MOV     r7, %[data2]\n\t"
+
+        "PUSH    {r0-r12}\n\t"
+
+        "LDM     r7, {r0-r5}\n\t"
+        "LDM     r6, {r6-r11}\n\t"
+
+        "loop:\n\t"
+        "LDR     r12, [r0, #4]\n\t"
+        "CMP     r12, #0\n\t"
+        "BNE     loop\n\t"
+
+        "STM     r6, {r7-r10}\n\t"  /* disable channel and set up new parameters */
+        "STR     r11, [r6, #0]\n\t" /* enable channel again */
+        "STM     r0, {r1-r4}\n\t"   /* disable channel and set up new parameters */ 
+        "STR     r5, [r0, #0]\n\t"  /* enable channel again */
+
+        "POP     {r0-r12}\n\t"
+
+        : /* no outputs*/ 
+        : /* inputs */
+            [data1] "r" (dma1_data),
+            [data2] "r" (dma2_data)
+        : "r6", "r7" );
+        
+
+    LL_DMA_ClearFlag_TC1(DMA1);
+    LL_DMA_ClearFlag_TC2(DMA1);
+}
+
+static bool digital_sequence_send_signal(DigitalSignal* signal) {
     furi_assert(signal);
     
     /* the first iteration has to set up the whole machinery */
     if(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1)) {
-
         if(!digital_signal_setup_dma(signal)) {
             FURI_LOG_D(TAG, "digital_sequence_send_signal: Signal has no entries, aborting");
             return false;
@@ -309,15 +380,9 @@ bool digital_sequence_send_signal(DigitalSignal* signal) {
         digital_signal_setup_timer();
         digital_signal_start_timer();
     } else {
-        /* transfer was already active, wait till DMA is done and the last timer ticks are running */
-        while(!LL_DMA_IsActiveFlag_TC2(DMA1)) {
-        }
 
         /* configure next polarities and timings */
-        if(!digital_signal_update_dma(signal)) {
-            FURI_LOG_D(TAG, "digital_sequence_send_signal: Signal has no entries, aborting");
-            return false;
-        }
+        digital_signal_update_dma(signal);
     }
 
     return true;
@@ -346,21 +411,20 @@ DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
     return ret;
 }
 
-bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
+bool digital_sequence_send(DigitalSequence* sequence) {
     furi_assert(sequence);
 
-    //gpio = &gpio_ext_pb2;
-    furi_hal_gpio_init(gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(sequence->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
     if(sequence->bake) {
         DigitalSignal* sig = digital_sequence_bake(sequence);
 
-        digital_signal_send(sig, gpio);
+        digital_signal_send(sig, sequence->gpio);
         digital_signal_free(sig);
         return true;
     }
 
-    uint32_t remainder = 0;
+    int32_t remainder = 0;
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         uint8_t signal_index = sequence->sequence[pos];
@@ -373,24 +437,51 @@ bool digital_sequence_send(DigitalSequence* sequence, const GpioPin* gpio) {
             return false;
         }
 
-        /* take over previous remainder */
-        sig->reload_reg_remainder = remainder;
-        sig->gpio = gpio;
-        digital_signal_prepare(sig);
-        remainder = sig->reload_reg_remainder;
+        /* when we are too late more than half a tick, make the first edge temporarily longer */
+        bool needs_prolongation = false;
 
-        if(!digital_sequence_send_signal(sig)) {
+        if(remainder >= T_TIM_DIV2) {
+            remainder -= T_TIM;
+            needs_prolongation = true;
+        }
+
+        /* update the total remainder */
+        remainder += sig->reload_reg_remainder;
+
+        /* do we need to update the prolongation? */
+        if(needs_prolongation != sequence->signals_prolonged[signal_index]) {
+            if(needs_prolongation) {
+                sig->edge_timings[0]++;
+            } else {
+                sig->edge_timings[0]--;
+            }
+            sequence->signals_prolonged[signal_index] = needs_prolongation;
+        }
+
+        bool success = digital_sequence_send_signal(sig);
+
+        if(!success) {
             digital_signal_stop_timer();
             digital_signal_stop_dma();
             return false;
         }
     }
 
-    while(!LL_DMA_IsActiveFlag_TC2(DMA1)) {
+    while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
     }
 
     digital_signal_stop_timer();
     digital_signal_stop_dma();
+        
+    /* undo previously prolonged edges */
+    for(uint32_t pos = 0; pos < sequence->signals_size; pos++) {
+        DigitalSignal *sig = sequence->signals[pos];
+
+        if(sig && sequence->signals_prolonged[pos]) {
+            sig->edge_timings[0]--;
+            sequence->signals_prolonged[pos] = false;
+        }
+    }
 
     return true;
 }
