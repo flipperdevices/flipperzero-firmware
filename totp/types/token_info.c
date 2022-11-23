@@ -45,15 +45,17 @@ bool token_info_set_secret(
     return result;
 }
 
-uint8_t token_info_get_digits_count(const TokenInfo* token_info) {
-    switch(token_info->digits) {
-    case TOTP_6_DIGITS:
-        return 6;
-    case TOTP_8_DIGITS:
-        return 8;
+bool token_info_set_digits_from_int(TokenInfo* token_info, uint8_t digits) {
+    switch(digits) {
+    case 6:
+        token_info->digits = TOTP_6_DIGITS;
+        return true;
+    case 8:
+        token_info->digits = TOTP_8_DIGITS;
+        return true;
     default:
         break;
     }
 
-    return 6;
+    return false;
 }

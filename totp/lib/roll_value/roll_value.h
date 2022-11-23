@@ -2,7 +2,9 @@
 
 #include <stdint.h>
 
-typedef enum {
+typedef uint8_t TotpRollValueOverflowBehavior;
+
+enum TotpRollValueOverflowBehaviors {
     /**
      * @brief Do not change value if it reached constraint
      */
@@ -12,7 +14,7 @@ typedef enum {
      * @brief Set value to opposite constraint value if it reached constraint
      */
     RollOverflowBehaviorRoll
-} TotpRollValueOverflowBehavior;
+};
 
 #define TOTP_ROLL_VALUE_FN_HEADER(type, step_type) \
     void totp_roll_value_##type(                   \

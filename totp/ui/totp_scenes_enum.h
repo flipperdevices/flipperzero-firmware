@@ -1,9 +1,11 @@
 #pragma once
 
+typedef uint8_t Scene;
+
 /**
  * @brief TOTP application scenes
  */
-typedef enum {
+enum Scenes {
     /**
      * @brief Empty scene which does nothing 
      */
@@ -33,4 +35,4 @@ typedef enum {
      * @brief Scene where user can change application settings 
      */
     TotpSceneAppSettings
-} Scene;
+};
