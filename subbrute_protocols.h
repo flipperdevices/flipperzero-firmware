@@ -18,6 +18,7 @@ typedef enum {
     GateTXFileProtocol,
     MagellanFileProtocol,
     IntertechnoV3FileProtocol,
+    AnsonicFileProtocol,
     UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;
@@ -29,6 +30,9 @@ typedef enum {
     SubBruteAttackCAME12bit868,
     SubBruteAttackNICE12bit433,
     SubBruteAttackNICE12bit868,
+    SubBruteAttackAnsonic12bit433075,
+    SubBruteAttackAnsonic12bit433,
+    SubBruteAttackAnsonic12bit434,
     SubBruteAttackChamberlain9bit300,
     SubBruteAttackChamberlain9bit315,
     SubBruteAttackChamberlain9bit390,
