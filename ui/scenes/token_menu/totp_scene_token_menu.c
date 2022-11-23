@@ -143,7 +143,7 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
                 AlignCenter,
                 AlignCenter);
             DialogMessageButton dialog_result =
-                dialog_message_show(plugin_state->dialogs, message);
+                dialog_message_show(plugin_state->dialogs_app, message);
             dialog_message_free(message);
             if(dialog_result == DialogMessageButtonRight &&
                !scene_state->current_token_index.is_null) {

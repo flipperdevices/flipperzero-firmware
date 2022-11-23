@@ -4,6 +4,8 @@
 #include <furi/furi.h>
 #include <furi_hal.h>
 
+typedef uint8_t TotpTypeCodeWorkerEvent;
+
 typedef struct {
     char* string;
     uint8_t string_length;
@@ -12,14 +14,14 @@ typedef struct {
     FuriHalUsbInterface* usb_mode_prev;
 } TotpTypeCodeWorkerContext;
 
-typedef enum {
-    TotpTypeCodeWorkerEvtReserved = (1 << 0),
-    TotpTypeCodeWorkerEvtStop = (1 << 1),
-    TotpTypeCodeWorkerEvtType = (1 << 2)
-} TotpTypeCodeWorkerEvtFlags;
+enum TotpTypeCodeWorkerEvents {
+    TotpTypeCodeWorkerEventReserved = (1 << 0),
+    TotpTypeCodeWorkerEventStop = (1 << 1),
+    TotpTypeCodeWorkerEventType = (1 << 2)
+};
 
 TotpTypeCodeWorkerContext* totp_type_code_worker_start();
 void totp_type_code_worker_stop(TotpTypeCodeWorkerContext* context);
 void totp_type_code_worker_notify(
     TotpTypeCodeWorkerContext* context,
-    TotpTypeCodeWorkerEvtFlags event);
+    TotpTypeCodeWorkerEvent event);

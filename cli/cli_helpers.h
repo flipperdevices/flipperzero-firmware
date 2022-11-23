@@ -6,6 +6,7 @@
 #define TOTP_CLI_COMMAND_NAME "totp"
 
 #define DOCOPT_ARGUMENT(arg) "<" arg ">"
+#define DOCOPT_MULTIPLE(arg) arg "..."
 #define DOCOPT_OPTIONAL(param) "[" param "]"
 #define DOCOPT_REQUIRED(param) "(" param ")"
 #define DOCOPT_OPTION(option, value) option " " value
