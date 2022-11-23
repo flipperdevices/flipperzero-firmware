@@ -3,7 +3,9 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include "gpio/gpio_item.h"
+//#include "gpio/gpio_item.h"
+#include "gpio_item.h"
+
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
