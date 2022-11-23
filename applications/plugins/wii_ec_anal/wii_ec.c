@@ -39,9 +39,31 @@ const ecId_t ecId[PID_CNT] = {
          nunchuck_show,
          nunchuck_key},
 
+    [PID_NUNCHUCK_R2] =
+        {{0xFF, 0x00, 0xA4, 0x20, 0x00, 0x00},
+         "Nunchuck (rev2)",
+         SCENE_NUNCHUCK,
+         NULL,
+         nunchuck_decode,
+         nunchuck_msg,
+         nunchuck_calib,
+         nunchuck_show,
+         nunchuck_key},
+
     [PID_CLASSIC] =
         {{0x00, 0x00, 0xA4, 0x20, 0x01, 0x01},
          "Classic Controller",
+         SCENE_CLASSIC,
+         NULL,
+         classic_decode,
+         classic_msg,
+         classic_calib,
+         classic_show,
+         classic_key},
+
+    [PID_CLASSIC_PRO] =
+        {{0x01, 0x00, 0xA4, 0x20, 0x01, 0x01},
+         "Classic Controller Pro",
          SCENE_CLASSIC,
          NULL,
          classic_decode,

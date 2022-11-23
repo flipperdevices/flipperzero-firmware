@@ -66,7 +66,9 @@ typedef enum ecPid {
     PID_NUNCHUCK = PID_FIRST,
 
     // If you're wise, ONLY edit this section
+    PID_NUNCHUCK_R2,
     PID_CLASSIC,
+    PID_CLASSIC_PRO,
     PID_BALANCE,
     PID_GH_GUITAR,
     PID_GH_DRUMS,
