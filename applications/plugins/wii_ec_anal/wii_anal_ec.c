@@ -61,7 +61,7 @@ bool evWiiEC(const eventMsg_t* const msg, state_t* const state) {
 #if 1 // Workaround for Classic Controller Pro, which shows 00's for Factory Calibration Data!?
         if(state->ec.pidx == PID_CLASSIC_PRO) {
             // Simulate a Long-OK keypress, to start Software Calibration mode
-            eventMsg_t msg = {input.type = InputTypeLong, input.key = InputKeyOk};
+            eventMsg_t msg = {wiiEc.type = InputTypeLong, wiiEc.key = InputKeyOk};
             key_calib(&msg, state);
         }
 #endif
