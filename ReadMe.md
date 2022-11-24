@@ -15,8 +15,8 @@ Thank you to all the supporters!
 ## Latest Updates
 
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-23 21:01 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-23 21:01 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-24 14:48 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-24 14:48 EST`
 - Added: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - Updated: [DHT Temp Monitor (By quen0n)](https://github.com/quen0n/FipperZero-DHT-Monitor) `Req: DHT11/DHT22(AM2302)/AM2301`
 - Updated: [Sub-GHz Bruteforcer (By Ganapati & xMasterX)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
@@ -27,6 +27,8 @@ Thank you to all the supporters!
 - Added: [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - Updated: [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - Added: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
+- Some new Mifare Possible keys for transport cards by novacard.ru [from vadrozh](https://github.com/DarkFlippers/unleashed-firmware/pull/181)
+- Animation fixes [by TalkingSasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
