@@ -19,7 +19,10 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
 
     //Рисование иконки
     canvas_draw_icon(
-        canvas, temp_positions[pos][0] + 3, temp_positions[pos][1] + 3, &I_temp_C_11x14);
+        canvas,
+        temp_positions[pos][0] + 3,
+        temp_positions[pos][1] + 3,
+        (app->settings.unit == CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
     if((int8_t)temp == -128) {
         snprintf(buff, 5, "--");
