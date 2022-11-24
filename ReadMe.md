@@ -57,6 +57,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
+- [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 
 --- 
 
