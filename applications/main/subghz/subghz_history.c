@@ -29,7 +29,7 @@ typedef struct {
     FuriString* protocol_name;
     bool is_file;
     uint8_t type;
-    SubGhzPresetDefinition* preset;
+    SubGhzRadioPreset* preset;
 } SubGhzHistoryItem;
 
 ARRAY_DEF(SubGhzHistoryItemArray, SubGhzHistoryItem, M_POD_OPLIST)
@@ -63,9 +63,9 @@ FuriString* subghz_history_generate_temp_filename(uint32_t index) {
 
 bool subghz_history_is_tmp_dir_exists(SubGhzHistory* instance) {
     FileInfo file_info;
-    storage_common_stat(instance->storage, SUBGHZ_HISTORY_TMP_DIR, &file_info);
+    FS_Error error = storage_common_stat(instance->storage, SUBGHZ_HISTORY_TMP_DIR, &file_info);
 
-    if(storage_common_stat(instance->storage, SUBGHZ_HISTORY_TMP_DIR, &file_info) == FSE_OK) {
+    if(error == FSE_OK) {
         if(file_info.flags & FSF_DIRECTORY) {
             return true;
         }
@@ -123,7 +123,7 @@ void subghz_history_clear_tmp_dir(SubGhzHistory* instance) {
     }
 
     // Stage 2 - create dir if necessary
-    res = !storage_simply_mkdir(instance->storage, SUBGHZ_HISTORY_TMP_DIR);
+    res = storage_simply_mkdir(instance->storage, SUBGHZ_HISTORY_TMP_DIR);
     if(!res) {
         FURI_LOG_E(TAG, "Cannot process temp dir!");
     }
@@ -194,7 +194,7 @@ uint32_t subghz_history_get_frequency(SubGhzHistory* instance, uint16_t idx) {
     return item->preset->frequency;
 }
 
-SubGhzPresetDefinition* subghz_history_get_preset_def(SubGhzHistory* instance, uint16_t idx) {
+SubGhzRadioPreset* subghz_history_get_radio_preset(SubGhzHistory* instance, uint16_t idx) {
     furi_assert(instance);
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_get(instance->history->data, idx);
     return item->preset;
@@ -321,7 +321,7 @@ void subghz_history_get_text_item_menu(SubGhzHistory* instance, FuriString* outp
 bool subghz_history_add_to_history(
     SubGhzHistory* instance,
     void* context,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(instance);
     furi_assert(context);
 
@@ -342,7 +342,7 @@ bool subghz_history_add_to_history(
     FuriString* text;
     text = furi_string_alloc();
     SubGhzHistoryItem* item = SubGhzHistoryItemArray_push_raw(instance->history->data);
-    item->preset = malloc(sizeof(SubGhzPresetDefinition));
+    item->preset = malloc(sizeof(SubGhzRadioPreset));
     item->type = decoder_base->protocol->type;
     item->preset->frequency = preset->frequency;
     item->preset->name = furi_string_alloc();

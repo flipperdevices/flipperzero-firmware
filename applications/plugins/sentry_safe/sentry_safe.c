@@ -143,16 +143,19 @@ int32_t sentry_safe_app(void* p) {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 }
             }
-        } else {
-            // event timeout
         }
 
         view_port_update(view_port);
         release_mutex(&state_mutex, sentry_state);
     }
+
+    // Reset GPIO pins to default state
+    furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);

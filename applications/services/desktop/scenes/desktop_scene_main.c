@@ -46,6 +46,13 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
         return;
     }
 
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode > FuriHalRtcHeapTrackModeNone) {
+        furi_thread_enable_heap_trace(desktop->scene_thread);
+    } else {
+        furi_thread_disable_heap_trace(desktop->scene_thread);
+    }
+
     furi_thread_set_name(desktop->scene_thread, flipper_app->name);
     furi_thread_set_stack_size(desktop->scene_thread, flipper_app->stack_size);
     furi_thread_set_callback(desktop->scene_thread, flipper_app->app);
@@ -228,8 +235,21 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
+        case DesktopMainEventOpenArkanoid: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/Arkanoid.fap"));
+            consumed = true;
+            break;
+        }
+        case DesktopMainEventOpenHeap: {
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Games/Heap_Defence.fap"));
+            consumed = true;
+            break;
+        }
         case DesktopMainEventOpenSubRemote: {
-            loader_start(desktop->loader, FLIPPER_APPS[1].name, NULL);
+            LoaderStatus status = loader_start(
+                desktop->loader, "Applications", EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
             consumed = true;
             break;
         }

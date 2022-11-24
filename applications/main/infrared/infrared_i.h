@@ -32,6 +32,8 @@
 
 #include "rpc/rpc_app.h"
 
+#include <infrared_icons.h>
+
 #define INFRARED_FILE_NAME_SIZE 100
 #define INFRARED_TEXT_STORE_NUM 2
 #define INFRARED_TEXT_STORE_SIZE 128

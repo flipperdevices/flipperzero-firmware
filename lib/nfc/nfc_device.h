@@ -8,9 +8,14 @@
 #include <furi_hal_nfc.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/protocols/emv.h>
+#include <lib/nfc/protocols/mrtd.h>
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define NFC_DEV_NAME_MAX_LEN 22
 #define NFC_READER_DATA_MAX_SIZE 64
@@ -25,6 +30,7 @@ typedef void (*NfcLoadingCallback)(void* context, bool state);
 typedef enum {
     NfcDeviceProtocolUnknown,
     NfcDeviceProtocolEMV,
+    NfcDeviceProtocolMRTD,
     NfcDeviceProtocolMifareUl,
     NfcDeviceProtocolMifareClassic,
     NfcDeviceProtocolMifareDesfire,
@@ -47,15 +53,27 @@ typedef struct {
     MfClassicDict* dict;
 } NfcMfClassicDictAttackData;
 
+typedef enum {
+    NfcReadModeAuto,
+    NfcReadModeMfClassic,
+    NfcReadModeMfUltralight,
+    NfcReadModeMfDesfire,
+    NfcReadModeEMV,
+    NfcReadModeNFCA,
+} NfcReadMode;
+
 typedef struct {
     FuriHalNfcDevData nfc_data;
     NfcProtocol protocol;
+    NfcReadMode read_mode;
     union {
         NfcReaderRequestData reader_data;
         NfcMfClassicDictAttackData mf_classic_dict_attack_data;
+        MfUltralightAuth mf_ul_auth;
     };
     union {
         EmvData emv_data;
+        MrtdData mrtd_data;
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
         MifareDesfireData mf_df_data;
@@ -101,3 +119,7 @@ bool nfc_device_delete(NfcDevice* dev, bool use_load_path);
 bool nfc_device_restore(NfcDevice* dev, bool use_load_path);
 
 void nfc_device_set_loading_callback(NfcDevice* dev, NfcLoadingCallback callback, void* context);
+
+#ifdef __cplusplus
+}
+#endif

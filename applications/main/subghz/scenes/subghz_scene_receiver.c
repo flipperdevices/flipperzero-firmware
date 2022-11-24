@@ -1,5 +1,6 @@
 #include "../subghz_i.h"
 #include "../views/receiver.h"
+#include <dolphin/dolphin.h>
 
 #define TAG "SubGhzSceneReceiver"
 
@@ -116,12 +117,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     str_buff = furi_string_alloc();
 
     if(subghz->txrx->rx_key_state == SubGhzRxKeyStateIDLE) {
-        subghz_preset_init(
-            subghz,
-            subghz_setting_get_preset_name(subghz->setting, subghz->last_settings->preset),
-            subghz->last_settings->frequency,
-            NULL,
-            0);
+        subghz_preset_init(subghz, "AM650", subghz->last_settings->frequency, NULL, 0);
         subghz_history_reset(subghz->txrx->history);
         subghz->txrx->rx_key_state = SubGhzRxKeyStateStart;
     }
@@ -186,12 +182,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
-                subghz_preset_init(
-                    subghz,
-                    subghz_setting_get_preset_name(subghz->setting, subghz->last_settings->preset),
-                    subghz->last_settings->frequency,
-                    NULL,
-                    0);
+                subghz_preset_init(subghz, "AM650", subghz->last_settings->frequency, NULL, 0);
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             }
@@ -202,6 +193,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz->txrx->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
+            DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverConfig:

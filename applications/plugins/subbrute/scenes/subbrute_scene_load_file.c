@@ -37,14 +37,18 @@ void subbrute_scene_load_file_on_enter(void* context) {
         load_result =
             subbrute_device_load_from_file(instance->device, furi_string_get_cstr(load_path));
         if(load_result == SubBruteFileResultOk) {
-            load_result = subbrute_device_attack_set(instance->device, SubBruteAttackLoadFile);
+            uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
+
+            load_result = subbrute_device_attack_set(
+                instance->device, SubBruteAttackLoadFile, extra_repeats);
             if(load_result == SubBruteFileResultOk) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
                        instance->device->key_index,
                        instance->device->load_index,
                        instance->device->file_key,
-                       instance->device->file_protocol_info)) {
+                       instance->device->file_protocol_info,
+                       extra_repeats)) {
                     furi_crash("Invalid attack set!");
                 }
                 // Ready to run!

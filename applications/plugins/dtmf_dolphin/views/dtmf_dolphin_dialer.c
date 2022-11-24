@@ -15,6 +15,9 @@ typedef struct {
     float freq1;
     float freq2;
     bool playing;
+    uint16_t pulses;
+    uint16_t pulse_ms;
+    uint16_t gap_ms;
 } DTMFDolphinDialerModel;
 
 static bool dtmf_dolphin_dialer_process_up(DTMFDolphinDialer* dtmf_dolphin_dialer);
@@ -93,6 +96,8 @@ void draw_dialer(Canvas* canvas, void* _model) {
 
 void update_frequencies(DTMFDolphinDialerModel* model) {
     dtmf_dolphin_data_get_tone_frequencies(&model->freq1, &model->freq2, model->row, model->col);
+    dtmf_dolphin_data_get_filter_data(
+        &model->pulses, &model->pulse_ms, &model->gap_ms, model->row, model->col);
 }
 
 static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
@@ -133,8 +138,7 @@ static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
 
     draw_dialer(canvas, model);
 
-    FuriString* output;
-    output = furi_string_alloc();
+    FuriString* output = furi_string_alloc();
 
     if(model->freq1 && model->freq2) {
         furi_string_cat_printf(
@@ -148,6 +152,12 @@ static void dtmf_dolphin_dialer_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontSecondary);
     canvas_set_color(canvas, ColorBlack);
+    if(model->pulse_ms) {
+        furi_string_cat_printf(output, "P: %u * %u ms\n", model->pulses, model->pulse_ms);
+    }
+    if(model->gap_ms) {
+        furi_string_cat_printf(output, "Gaps: %u ms\n", model->gap_ms);
+    }
     elements_multiline_text(
         canvas, (max_span * DTMF_DOLPHIN_BUTTON_WIDTH) + 4, 21, furi_string_get_cstr(output));
 
@@ -272,7 +282,8 @@ static bool
         DTMFDolphinDialerModel * model,
         {
             if(event->type == InputTypePress) {
-                model->playing = dtmf_dolphin_audio_play_tones(model->freq1, model->freq2);
+                model->playing = dtmf_dolphin_audio_play_tones(
+                    model->freq1, model->freq2, model->pulses, model->pulse_ms, model->gap_ms);
             } else if(event->type == InputTypeRelease) {
                 model->playing = !dtmf_dolphin_audio_stop_tones();
             }

@@ -3,6 +3,7 @@
 #include <toolbox/stream/stream.h>
 #include <flipper_format.h>
 #include <flipper_format_i.h>
+#include <lib/subghz/protocols/protocol_items.h>
 
 #define TAG "SubBruteWorker"
 #define SUBBRUTE_TX_TIMEOUT 5
@@ -30,6 +31,8 @@ SubBruteWorker* subbrute_worker_alloc() {
     instance->decoder_result = NULL;
     instance->transmitter = NULL;
     instance->environment = subghz_environment_alloc();
+    subghz_environment_set_protocol_registry(
+        instance->environment, (void*)&subghz_protocol_registry);
 
     instance->transmit_mode = false;
 
@@ -75,7 +78,8 @@ bool subbrute_worker_init_default_attack(
     SubBruteWorker* instance,
     SubBruteAttacks attack_type,
     uint64_t step,
-    const SubBruteProtocol* protocol) {
+    const SubBruteProtocol* protocol,
+    uint8_t extra_repeats) {
     furi_assert(instance);
 
     if(instance->worker_running) {
@@ -90,7 +94,7 @@ bool subbrute_worker_init_default_attack(
     instance->step = step;
     instance->bits = protocol->bits;
     instance->te = protocol->te;
-    instance->repeat = protocol->repeat;
+    instance->repeat = protocol->repeat + extra_repeats;
     instance->load_index = 0;
     instance->file_key = NULL;
     instance->max_value = subbrute_protocol_calc_max_value(instance->attack, instance->bits);
@@ -119,7 +123,8 @@ bool subbrute_worker_init_file_attack(
     uint64_t step,
     uint8_t load_index,
     const char* file_key,
-    SubBruteProtocol* protocol) {
+    SubBruteProtocol* protocol,
+    uint8_t extra_repeats) {
     furi_assert(instance);
 
     if(instance->worker_running) {
@@ -135,7 +140,7 @@ bool subbrute_worker_init_file_attack(
     instance->bits = protocol->bits;
     instance->te = protocol->te;
     instance->load_index = load_index;
-    instance->repeat = protocol->repeat;
+    instance->repeat = protocol->repeat + extra_repeats;
     instance->file_key = file_key;
     instance->max_value = subbrute_protocol_calc_max_value(instance->attack, instance->bits);
 
@@ -185,8 +190,11 @@ bool subbrute_worker_start(SubBruteWorker* instance) {
 void subbrute_worker_stop(SubBruteWorker* instance) {
     furi_assert(instance);
 
-    instance->worker_running = false;
+    if(!instance->worker_running) {
+        return;
+    }
 
+    instance->worker_running = false;
     furi_thread_join(instance->thread);
 
     furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);

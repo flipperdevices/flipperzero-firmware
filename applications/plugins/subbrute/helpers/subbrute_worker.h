@@ -22,13 +22,15 @@ bool subbrute_worker_init_default_attack(
     SubBruteWorker* instance,
     SubBruteAttacks attack_type,
     uint64_t step,
-    const SubBruteProtocol* protocol);
+    const SubBruteProtocol* protocol,
+    uint8_t extra_repeats);
 bool subbrute_worker_init_file_attack(
     SubBruteWorker* instance,
     uint64_t step,
     uint8_t load_index,
     const char* file_key,
-    SubBruteProtocol* protocol);
+    SubBruteProtocol* protocol,
+    uint8_t extra_repeats);
 bool subbrute_worker_start(SubBruteWorker* instance);
 void subbrute_worker_stop(SubBruteWorker* instance);
 bool subbrute_worker_transmit_current_key(SubBruteWorker* instance, uint64_t step);

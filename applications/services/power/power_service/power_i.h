@@ -5,10 +5,11 @@
 #include <stdint.h>
 #include <gui/view_dispatcher.h>
 #include <gui/gui.h>
+#include <assets_icons.h>
 
 #include <gui/modules/popup.h>
 #include "views/power_off.h"
-#include "applications/settings/power_settings_app/power_settings.h"
+#include <power/power_settings.h>
 #include "views/power_unplug_usb.h"
 
 #include <notification/notification_messages.h>
@@ -30,6 +31,7 @@ struct Power {
     Gui* gui;
     NotificationApp* notification;
     FuriPubSub* event_pubsub;
+    FuriPubSub* settings_events;
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
     PowerEvent event;

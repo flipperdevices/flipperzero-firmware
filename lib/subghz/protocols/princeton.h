@@ -4,6 +4,10 @@
 
 #define SUBGHZ_PROTOCOL_PRINCETON_NAME "Princeton"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SubGhzProtocolDecoderPrinceton SubGhzProtocolDecoderPrinceton;
 typedef struct SubGhzProtocolEncoderPrinceton SubGhzProtocolEncoderPrinceton;
 
@@ -83,13 +87,13 @@ uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context);
  * Serialize data SubGhzProtocolDecoderPrinceton.
  * @param context Pointer to a SubGhzProtocolDecoderPrinceton instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return true On success
  */
 bool subghz_protocol_decoder_princeton_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderPrinceton.
@@ -105,3 +109,7 @@ bool subghz_protocol_decoder_princeton_deserialize(void* context, FlipperFormat*
  * @param output Resulting text
  */
 void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* output);
+
+#ifdef __cplusplus
+}
+#endif

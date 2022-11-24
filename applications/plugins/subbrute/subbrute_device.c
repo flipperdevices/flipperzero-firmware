@@ -5,6 +5,7 @@
 #include <lib/toolbox/stream/stream.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/flipper_format/flipper_format_i.h>
+#include <lib/subghz/protocols/protocol_items.h>
 
 #define TAG "SubBruteDevice"
 
@@ -18,6 +19,8 @@ SubBruteDevice* subbrute_device_alloc() {
     instance->decoder_result = NULL;
     instance->receiver = NULL;
     instance->environment = subghz_environment_alloc();
+    subghz_environment_set_protocol_registry(
+        instance->environment, (void*)&subghz_protocol_registry);
 
 #ifdef FURI_DEBUG
     subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
@@ -130,10 +133,13 @@ bool subbrute_device_save_file(SubBruteDevice* instance, const char* dev_file_na
     return result;
 }
 
-SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBruteAttacks type) {
+SubBruteFileResult subbrute_device_attack_set(
+    SubBruteDevice* instance,
+    SubBruteAttacks type,
+    uint8_t extra_repeats) {
     furi_assert(instance);
 #ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "subbrute_device_attack_set: %d", type);
+    FURI_LOG_D(TAG, "subbrute_device_attack_set: %d, extra_repeats: %d", type, extra_repeats);
 #endif
     subbrute_device_attack_set_default_values(instance, type);
 
@@ -141,6 +147,8 @@ SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBrute
         subbrute_device_free_protocol_info(instance);
         instance->protocol_info = subbrute_protocol(type);
     }
+
+    instance->extra_repeats = extra_repeats;
 
     // For non-file types we didn't set SubGhzProtocolDecoderBase
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
@@ -172,7 +180,7 @@ SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBrute
 #ifdef FURI_DEBUG
         bits = instance->protocol_info->bits;
         te = instance->protocol_info->te;
-        repeat = instance->protocol_info->repeat;
+        repeat = instance->protocol_info->repeat + instance->extra_repeats;
         preset = instance->protocol_info->preset;
         file = instance->protocol_info->file;
 #endif
@@ -186,7 +194,7 @@ SubBruteFileResult subbrute_device_attack_set(SubBruteDevice* instance, SubBrute
 #ifdef FURI_DEBUG
         bits = instance->file_protocol_info->bits;
         te = instance->file_protocol_info->te;
-        repeat = instance->file_protocol_info->repeat;
+        repeat = instance->file_protocol_info->repeat + instance->extra_repeats;
         preset = instance->file_protocol_info->preset;
         file = instance->file_protocol_info->file;
 #endif
@@ -283,11 +291,12 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
 #endif
         }
 
-        instance->decoder_result =
-            subghz_receiver_search_decoder_base_by_name(instance->receiver, protocol_file);
+        instance->decoder_result = subghz_receiver_search_decoder_base_by_name(
+            instance->receiver, furi_string_get_cstr(temp_str));
 
-        if(!instance->decoder_result || strcmp(protocol_file, "RAW") == 0) {
-            FURI_LOG_E(TAG, "RAW unsupported");
+        if((!instance->decoder_result) || (strcmp(protocol_file, "RAW") == 0) ||
+           (strcmp(protocol_file, "Unknown") == 0)) {
+            FURI_LOG_E(TAG, "Protocol unsupported");
             result = SubBruteFileResultProtocolNotSupported;
             break;
         }
@@ -387,6 +396,7 @@ void subbrute_device_attack_set_default_values(
     instance->attack = default_attack;
     instance->key_index = 0x00;
     instance->load_index = 0x00;
+    instance->extra_repeats = 0;
     memset(instance->current_key, 0, sizeof(instance->current_key));
 
     if(default_attack != SubBruteAttackLoadFile) {
@@ -421,7 +431,7 @@ const char* subbrute_device_error_get_desc(SubBruteFileResult error_id) {
         result = "Missing Protocol";
         break;
     case(SubBruteFileResultProtocolNotSupported):
-        result = "RAW unsupported";
+        result = "Protocol unsupported";
         break;
     case(SubBruteFileResultDynamicProtocolNotValid):
         result = "Dynamic protocol unsupported";

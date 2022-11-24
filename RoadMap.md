@@ -6,9 +6,9 @@
 - I tried to organize them in terms of difficulty.
 
 ## WISH LIST ITEMS:
+- Battery Type moved to Power Settings
 - `Notepad` APP to allow taking quick notes and saving to SD.
 - - Also can possibly open/edit .md,.txt,.fmf and other text friendly formats
-- `UART` Move UART Echo app from Debug to GPIO section.
 - `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper
 - - Also can possibly support larger URLs than the ones in samples (due to length limits on NFC types)
 - - Also can possibly create other types of tags, like WIFI configurations

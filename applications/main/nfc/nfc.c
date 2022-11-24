@@ -1,5 +1,6 @@
 #include "nfc_i.h"
 #include "furi_hal_nfc.h"
+#include <dolphin/dolphin.h>
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -85,6 +86,13 @@ Nfc* nfc_alloc() {
         nfc->view_dispatcher, NfcViewTextBox, text_box_get_view(nfc->text_box));
     nfc->text_box_store = furi_string_alloc();
 
+    // Variable Item List
+    nfc->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        nfc->view_dispatcher,
+        NfcViewVarItemList,
+        variable_item_list_get_view(nfc->variable_item_list));
+
     // Custom Widget
     nfc->widget = widget_alloc();
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewWidget, widget_get_view(nfc->widget));
@@ -115,7 +123,9 @@ void nfc_free(Nfc* nfc) {
         // Stop worker
         nfc_worker_stop(nfc->worker);
         // Save data in shadow file
-        nfc_device_save_shadow(nfc->dev, nfc->dev->dev_name);
+        if(furi_string_size(nfc->dev->load_path)) {
+            nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
+        }
     }
     if(nfc->rpc_ctx) {
         rpc_system_app_send_exited(nfc->rpc_ctx);
@@ -154,6 +164,10 @@ void nfc_free(Nfc* nfc) {
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewTextBox);
     text_box_free(nfc->text_box);
     furi_string_free(nfc->text_box_store);
+
+    // Variable Item List
+    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewVarItemList);
+    variable_item_list_free(nfc->variable_item_list);
 
     // Custom Widget
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
@@ -217,6 +231,13 @@ void nfc_blink_stop(Nfc* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
+bool nfc_save_file(Nfc* nfc) {
+    furi_string_printf(
+        nfc->dev->load_path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
+    bool file_saved = nfc_device_save(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
+    return file_saved;
+}
+
 void nfc_show_loading_popup(void* context, bool show) {
     Nfc* nfc = context;
     TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
@@ -275,12 +296,13 @@ int32_t nfc_app(void* p) {
             if(nfc_device_load(nfc->dev, p, true)) {
                 if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
-                } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 } else {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 }
             } else {
                 // Exit app

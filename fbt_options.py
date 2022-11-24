@@ -49,14 +49,12 @@ OPENOCD_OPTS = [
     "-c",
     "transport select hla_swd",
     "-f",
-    "debug/stm32wbx.cfg",
+    "${FBT_DEBUG_DIR}/stm32wbx.cfg",
     "-c",
     "stm32wbx.cpu configure -rtos auto",
-    "-c",
-    "init",
 ]
 
-SVD_FILE = "debug/STM32WB55_CM4.svd"
+SVD_FILE = "${FBT_DEBUG_DIR}/STM32WB55_CM4.svd"
 
 # Look for blackmagic probe on serial ports and local network
 BLACKMAGIC = "auto"
@@ -79,6 +77,12 @@ FIRMWARE_APPS = {
         # Debug
         # "debug_apps",
     ],
+    "unit_tests": [
+        "basic_services",
+        "updater_app",
+        "unit_tests",
+        "nfc",
+    ],
     "debug_pack": [
         # Svc
         "basic_services",
@@ -91,6 +95,9 @@ FIRMWARE_APPS = {
         # "basic_plugins",
         # Debug
         # "debug_apps",
+        # "updater_app",
+        # "unit_tests",
+        # "nfc",
     ],
 }
 

@@ -14,6 +14,7 @@
 static const GpioPin* flow_pins[][2] = {
     {&gpio_ext_pa7, &gpio_ext_pa6}, // 2, 3
     {&gpio_ext_pb2, &gpio_ext_pc3}, // 6, 7
+    {&gpio_ext_pc0, &gpio_ext_pc1}, // 16, 15
 };
 
 typedef enum {
@@ -158,11 +159,8 @@ static int32_t usb_uart_worker(void* context) {
     usb_uart->tx_sem = furi_semaphore_alloc(1, 1);
     usb_uart->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    usb_uart->tx_thread = furi_thread_alloc();
-    furi_thread_set_name(usb_uart->tx_thread, "UsbUartTxWorker");
-    furi_thread_set_stack_size(usb_uart->tx_thread, 512);
-    furi_thread_set_context(usb_uart->tx_thread, usb_uart);
-    furi_thread_set_callback(usb_uart->tx_thread, usb_uart_tx_thread);
+    usb_uart->tx_thread =
+        furi_thread_alloc_ex("UsbUartTxWorker", 512, usb_uart_tx_thread, usb_uart);
 
     usb_uart_vcp_init(usb_uart, usb_uart->cfg.vcp_ch);
     usb_uart_serial_init(usb_uart, usb_uart->cfg.uart_ch);
@@ -183,7 +181,7 @@ static int32_t usb_uart_worker(void* context) {
     while(1) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
-        furi_check((events & FuriFlagError) == 0);
+        furi_check(!(events & FuriFlagError));
         if(events & WorkerEvtStop) break;
         if(events & WorkerEvtRxDone) {
             size_t len = furi_stream_buffer_receive(
@@ -287,7 +285,7 @@ static int32_t usb_uart_tx_thread(void* context) {
     while(1) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
-        furi_check((events & FuriFlagError) == 0);
+        furi_check(!(events & FuriFlagError));
         if(events & WorkerEvtTxStop) break;
         if(events & WorkerEvtCdcRx) {
             furi_check(furi_mutex_acquire(usb_uart->usb_mutex, FuriWaitForever) == FuriStatusOk);
@@ -337,11 +335,7 @@ UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
 
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
 
-    usb_uart->thread = furi_thread_alloc();
-    furi_thread_set_name(usb_uart->thread, "UsbUartWorker");
-    furi_thread_set_stack_size(usb_uart->thread, 1024);
-    furi_thread_set_context(usb_uart->thread, usb_uart);
-    furi_thread_set_callback(usb_uart->thread, usb_uart_worker);
+    usb_uart->thread = furi_thread_alloc_ex("UsbUartWorker", 1024, usb_uart_worker, usb_uart);
 
     furi_thread_start(usb_uart->thread);
     return usb_uart;

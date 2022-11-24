@@ -4,15 +4,6 @@
 #include <furi_hal_subghz.h>
 #include <core/string.h>
 #include <toolbox/stream/stream.h>
-//typedef enum {
-//    FrequencyProtocolField,
-//    BitsProtocolField,
-//    HasTeProtocolField,
-//    RepeatProtocolField,
-//    PresetProtocolField,
-//    FileProtocolField,
-//    TotalProtocolFields
-//} ProtocolFields;
 
 typedef enum {
     CAMEFileProtocol,
@@ -21,6 +12,14 @@ typedef enum {
     LinearFileProtocol,
     PrincetonFileProtocol,
     RAWFileProtocol,
+    BETTFileProtocol,
+    ClemsaFileProtocol,
+    DoitrandFileProtocol,
+    GateTXFileProtocol,
+    MagellanFileProtocol,
+    IntertechnoV3FileProtocol,
+    AnsonicFileProtocol,
+    UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;
 
@@ -31,9 +30,19 @@ typedef enum {
     SubBruteAttackCAME12bit868,
     SubBruteAttackNICE12bit433,
     SubBruteAttackNICE12bit868,
+    SubBruteAttackAnsonic12bit433075,
+    SubBruteAttackAnsonic12bit433,
+    SubBruteAttackAnsonic12bit434,
     SubBruteAttackChamberlain9bit300,
     SubBruteAttackChamberlain9bit315,
     SubBruteAttackChamberlain9bit390,
+    SubBruteAttackChamberlain9bit433,
+    SubBruteAttackChamberlain8bit300,
+    SubBruteAttackChamberlain8bit315,
+    SubBruteAttackChamberlain8bit390,
+    SubBruteAttackChamberlain7bit300,
+    SubBruteAttackChamberlain7bit315,
+    SubBruteAttackChamberlain7bit390,
     SubBruteAttackLinear10bit300,
     SubBruteAttackLinear10bit310,
     SubBruteAttackLoadFile,
@@ -54,6 +63,7 @@ const char* subbrute_protocol_preset(FuriHalSubGhzPreset preset);
 const char* subbrute_protocol_file(SubBruteFileProtocol protocol);
 FuriHalSubGhzPreset subbrute_protocol_convert_preset(FuriString* preset_name);
 SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name);
+uint8_t subbrute_protocol_repeats_count(SubBruteAttacks index);
 const char* subbrute_protocol_name(SubBruteAttacks index);
 
 void subbrute_protocol_default_payload(

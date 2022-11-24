@@ -1,4 +1,5 @@
 #include "lfrfid_i.h"
+#include <dolphin/dolphin.h>
 
 static bool lfrfid_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -31,7 +32,7 @@ static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
 }
 
 static LfRfid* lfrfid_alloc() {
-    LfRfid* lfrfid = malloc(sizeof(LfRfid));
+    LfRfid* lfrfid = malloc(sizeof(LfRfid)); //-V773
 
     lfrfid->storage = furi_record_open(RECORD_STORAGE);
     lfrfid->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -182,12 +183,14 @@ int32_t lfrfid_app(void* p) {
             view_dispatcher_attach_to_gui(
                 app->view_dispatcher, app->gui, ViewDispatcherTypeDesktop);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRpc);
+            DOLPHIN_DEED(DolphinDeedRfidEmulate);
         } else {
             furi_string_set(app->file_path, args);
             lfrfid_load_key_data(app, app->file_path, true);
             view_dispatcher_attach_to_gui(
                 app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
+            DOLPHIN_DEED(DolphinDeedRfidEmulate);
         }
 
     } else {

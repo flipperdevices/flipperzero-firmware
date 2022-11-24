@@ -466,6 +466,8 @@ int32_t game_2048_app(void* p) {
                 case InputKeyBack:
                     loop = false;
                     break;
+                default:
+                    break;
                 }
             } else if(event.type == InputTypeLong) {
                 if(event.key == InputKeyOk) {

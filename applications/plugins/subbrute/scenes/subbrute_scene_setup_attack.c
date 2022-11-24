@@ -27,16 +27,17 @@ void subbrute_scene_setup_attack_on_enter(void* context) {
     SubBruteState* instance = (SubBruteState*)context;
     SubBruteAttackView* view = instance->view_attack;
 
+    notification_message(instance->notifications, &sequence_reset_vibro);
+
 #ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "Enter Attack: %d", instance->device->attack);
+    FURI_LOG_D(TAG, "Enter Attack: %s", subbrute_protocol_name(instance->device->attack));
 #endif
 
     subbrute_worker_set_callback(
         instance->worker, subbrute_scene_setup_attack_device_state_changed, context);
-
     if(subbrute_worker_is_running(instance->worker)) {
-        instance->device->key_index = subbrute_worker_get_step(instance->worker);
         subbrute_worker_stop(instance->worker);
+        instance->device->key_index = subbrute_worker_get_step(instance->worker);
     }
 
     subbrute_attack_view_init_values(
@@ -44,7 +45,8 @@ void subbrute_scene_setup_attack_on_enter(void* context) {
         instance->device->attack,
         instance->device->max_value,
         instance->device->key_index,
-        false);
+        false,
+        instance->device->extra_repeats);
 
     instance->current_view = SubBruteViewAttack;
     subbrute_attack_view_set_callback(view, subbrute_scene_setup_attack_callback, instance);
@@ -59,6 +61,7 @@ void subbrute_scene_setup_attack_on_exit(void* context) {
     SubBruteState* instance = (SubBruteState*)context;
     subbrute_worker_stop(instance->worker);
     notification_message(instance->notifications, &sequence_blink_stop);
+    notification_message(instance->notifications, &sequence_reset_vibro);
 }
 
 bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event) {
@@ -68,7 +71,6 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubBruteCustomEventTypeTransmitStarted) {
-            subbrute_attack_view_set_worker_type(view, false);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneRunAttack);
         } else if(event.event == SubBruteCustomEventTypeSaveFile) {
             subbrute_attack_view_init_values(
@@ -76,7 +78,8 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 instance->device->attack,
                 instance->device->max_value,
                 instance->device->key_index,
-                false);
+                false,
+                instance->device->extra_repeats);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSaveName);
         } else if(event.event == SubBruteCustomEventTypeBackPressed) {
             subbrute_attack_view_init_values(
@@ -84,7 +87,8 @@ bool subbrute_scene_setup_attack_on_event(void* context, SceneManagerEvent event
                 instance->device->attack,
                 instance->device->max_value,
                 instance->device->key_index,
-                false);
+                false,
+                instance->device->extra_repeats);
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneStart);
         } else if(event.event == SubBruteCustomEventTypeError) {
             notification_message(instance->notifications, &sequence_error);

@@ -70,6 +70,39 @@ const SubBruteProtocol subbrute_protocol_nice_12bit_868 = {
     .file = NICEFileProtocol};
 
 /**
+ * Ansonic 12bit 433.075MHz
+ */
+const SubBruteProtocol subbrute_protocol_ansonic_12bit_433075 = {
+    .frequency = 433075000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPreset2FSKDev238Async,
+    .file = AnsonicFileProtocol};
+
+/**
+ * Ansonic 12bit 433.92MHz
+ */
+const SubBruteProtocol subbrute_protocol_ansonic_12bit_433 = {
+    .frequency = 433920000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPreset2FSKDev238Async,
+    .file = AnsonicFileProtocol};
+
+/**
+ * Ansonic 12bit 434.075MHz
+ */
+const SubBruteProtocol subbrute_protocol_ansonic_12bit_434 = {
+    .frequency = 434075000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPreset2FSKDev238Async,
+    .file = AnsonicFileProtocol};
+
+/**
  * Chamberlain 9bit 300MHz
  */
 const SubBruteProtocol subbrute_protocol_chamberlain_9bit_300 = {
@@ -103,6 +136,83 @@ const SubBruteProtocol subbrute_protocol_chamberlain_9bit_390 = {
     .file = ChamberlainFileProtocol};
 
 /**
+ * Chamberlain 9bit 433MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_9bit_433 = {
+    .frequency = 433920000,
+    .bits = 9,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 8bit 300MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_8bit_300 = {
+    .frequency = 300000000,
+    .bits = 8,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 8bit 315MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_8bit_315 = {
+    .frequency = 315000000,
+    .bits = 8,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 8bit 390MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_8bit_390 = {
+    .frequency = 390000000,
+    .bits = 8,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 7bit 300MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_7bit_300 = {
+    .frequency = 300000000,
+    .bits = 7,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 7bit 315MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_7bit_315 = {
+    .frequency = 315000000,
+    .bits = 7,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
+ * Chamberlain 7bit 390MHz
+ */
+const SubBruteProtocol subbrute_protocol_chamberlain_7bit_390 = {
+    .frequency = 390000000,
+    .bits = 7,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = ChamberlainFileProtocol};
+
+/**
  * Linear 10bit 300MHz
  */
 const SubBruteProtocol subbrute_protocol_linear_10bit_300 = {
@@ -128,7 +238,7 @@ const SubBruteProtocol subbrute_protocol_linear_10bit_310 = {
  * BF existing dump
  */
 const SubBruteProtocol subbrute_protocol_load_file =
-    {0, 0, 0, 3, FuriHalSubGhzPresetOok650Async, RAWFileProtocol};
+    {0, 0, 0, 3, FuriHalSubGhzPresetOok650Async, UnknownFileProtocol};
 
 static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit303] = "CAME 12bit 303MHz",
@@ -137,9 +247,19 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit868] = "CAME 12bit 868MHz",
     [SubBruteAttackNICE12bit433] = "NICE 12bit 433MHz",
     [SubBruteAttackNICE12bit868] = "NICE 12bit 868MHz",
+    [SubBruteAttackAnsonic12bit433075] = "Ansonic 12bit 433.07MHz",
+    [SubBruteAttackAnsonic12bit433] = "Ansonic 12bit 433.92MHz",
+    [SubBruteAttackAnsonic12bit434] = "Ansonic 12bit 434.07MHz",
     [SubBruteAttackChamberlain9bit300] = "Chamberlain 9bit 300MHz",
     [SubBruteAttackChamberlain9bit315] = "Chamberlain 9bit 315MHz",
     [SubBruteAttackChamberlain9bit390] = "Chamberlain 9bit 390MHz",
+    [SubBruteAttackChamberlain9bit433] = "Chamberlain 9bit 433MHz",
+    [SubBruteAttackChamberlain8bit300] = "Chamberlain 8bit 300MHz",
+    [SubBruteAttackChamberlain8bit315] = "Chamberlain 8bit 315MHz",
+    [SubBruteAttackChamberlain8bit390] = "Chamberlain 8bit 390MHz",
+    [SubBruteAttackChamberlain7bit300] = "Chamberlain 7bit 300MHz",
+    [SubBruteAttackChamberlain7bit315] = "Chamberlain 7bit 315MHz",
+    [SubBruteAttackChamberlain7bit390] = "Chamberlain 7bit 390MHz",
     [SubBruteAttackLinear10bit300] = "Linear 10bit 300MHz",
     [SubBruteAttackLinear10bit310] = "Linear 10bit 310MHz",
     [SubBruteAttackLoadFile] = "BF existing dump",
@@ -163,9 +283,19 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackCAME12bit868] = &subbrute_protocol_came_12bit_868,
     [SubBruteAttackNICE12bit433] = &subbrute_protocol_nice_12bit_433,
     [SubBruteAttackNICE12bit868] = &subbrute_protocol_nice_12bit_868,
+    [SubBruteAttackAnsonic12bit433075] = &subbrute_protocol_ansonic_12bit_433075,
+    [SubBruteAttackAnsonic12bit433] = &subbrute_protocol_ansonic_12bit_433,
+    [SubBruteAttackAnsonic12bit434] = &subbrute_protocol_ansonic_12bit_434,
     [SubBruteAttackChamberlain9bit300] = &subbrute_protocol_chamberlain_9bit_300,
     [SubBruteAttackChamberlain9bit315] = &subbrute_protocol_chamberlain_9bit_315,
     [SubBruteAttackChamberlain9bit390] = &subbrute_protocol_chamberlain_9bit_390,
+    [SubBruteAttackChamberlain9bit433] = &subbrute_protocol_chamberlain_9bit_433,
+    [SubBruteAttackChamberlain8bit300] = &subbrute_protocol_chamberlain_8bit_300,
+    [SubBruteAttackChamberlain8bit315] = &subbrute_protocol_chamberlain_8bit_315,
+    [SubBruteAttackChamberlain8bit390] = &subbrute_protocol_chamberlain_8bit_390,
+    [SubBruteAttackChamberlain7bit300] = &subbrute_protocol_chamberlain_7bit_300,
+    [SubBruteAttackChamberlain7bit315] = &subbrute_protocol_chamberlain_7bit_315,
+    [SubBruteAttackChamberlain7bit390] = &subbrute_protocol_chamberlain_7bit_390,
     [SubBruteAttackLinear10bit300] = &subbrute_protocol_linear_10bit_300,
     [SubBruteAttackLinear10bit310] = &subbrute_protocol_linear_10bit_310,
     [SubBruteAttackLoadFile] = &subbrute_protocol_load_file};
@@ -176,7 +306,15 @@ static const char* subbrute_protocol_file_types[] = {
     [ChamberlainFileProtocol] = "Cham_Code",
     [LinearFileProtocol] = "Linear",
     [PrincetonFileProtocol] = "Princeton",
-    [RAWFileProtocol] = "RAW"};
+    [RAWFileProtocol] = "RAW",
+    [BETTFileProtocol] = "BETT",
+    [ClemsaFileProtocol] = "Clemsa",
+    [DoitrandFileProtocol] = "Doitrand",
+    [GateTXFileProtocol] = "GateTX",
+    [MagellanFileProtocol] = "Magellan",
+    [IntertechnoV3FileProtocol] = "Intertechno_V3",
+    [AnsonicFileProtocol] = "Ansonic",
+    [UnknownFileProtocol] = "Unknown"};
 
 /**
  * Values to not use less memory for packet parse operations
@@ -194,6 +332,10 @@ const char* subbrute_protocol_name(SubBruteAttacks index) {
 
 const SubBruteProtocol* subbrute_protocol(SubBruteAttacks index) {
     return subbrute_protocol_registry[index];
+}
+
+uint8_t subbrute_protocol_repeats_count(SubBruteAttacks index) {
+    return subbrute_protocol_registry[index]->repeat;
 }
 
 const char* subbrute_protocol_preset(FuriHalSubGhzPreset preset) {
@@ -221,7 +363,7 @@ SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name) {
         }
     }
 
-    return RAWFileProtocol;
+    return UnknownFileProtocol;
 }
 
 void subbrute_protocol_default_payload(
@@ -247,7 +389,13 @@ void subbrute_protocol_default_payload(
     furi_string_free(buffer);
 
 #ifdef FURI_DEBUG
-    //FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
+    FURI_LOG_D(
+        TAG,
+        "candidate: %s, step: %lld, repeat: %d, te: %s",
+        furi_string_get_cstr(candidate),
+        step,
+        repeat,
+        te ? "true" : "false");
 #endif
     stream_clean(stream);
     if(te) {
@@ -281,7 +429,13 @@ void subbrute_protocol_file_payload(
     furi_string_replace_at(candidate, load_index * 3, 3, subbrute_payload_byte);
 
 #ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
+    FURI_LOG_D(
+        TAG,
+        "candidate: %s, step: %lld, repeat: %d, te: %s",
+        furi_string_get_cstr(candidate),
+        step,
+        repeat,
+        te ? "true" : "false");
 #endif
     stream_clean(stream);
 

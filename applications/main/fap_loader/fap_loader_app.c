@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
+#include <assets_icons.h>
 #include <gui/view_dispatcher.h>
 #include <storage/storage.h>
 #include <gui/modules/loading.h>
@@ -16,6 +17,7 @@ struct FapLoader {
     DialogsApp* dialogs;
     Gui* gui;
     FuriString* fap_path;
+    FuriString* fap_args;
     ViewDispatcher* view_dispatcher;
     Loading* loading;
 };
@@ -101,16 +103,28 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
         }
 
         FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
-        FURI_LOG_I(TAG, "FAP Loader is staring app");
+        FURI_LOG_I(TAG, "FAP Loader is starting app");
 
-        FuriThread* thread = flipper_application_spawn(loader->app, NULL);
-        furi_thread_start(thread);
-        furi_thread_join(thread);
+        if(strcmp(furi_string_get_cstr(loader->fap_args), "false") == 0) {
+            FuriThread* thread = flipper_application_spawn(loader->app, NULL);
+            furi_thread_start(thread);
+            furi_thread_join(thread);
 
-        show_error = false;
-        int ret = furi_thread_get_return_code(thread);
+            show_error = false;
+            int ret = furi_thread_get_return_code(thread);
 
-        FURI_LOG_I(TAG, "FAP app returned: %i", ret);
+            FURI_LOG_I(TAG, "FAP app returned: %i", ret);
+        } else {
+            FuriThread* thread = flipper_application_spawn(
+                loader->app, (void*)furi_string_get_cstr(loader->fap_args));
+            furi_thread_start(thread);
+            furi_thread_join(thread);
+
+            show_error = false;
+            int ret = furi_thread_get_return_code(thread);
+
+            FURI_LOG_I(TAG, "FAP app returned: %i", ret);
+        }
     } while(0);
 
     if(show_error) {
@@ -154,8 +168,28 @@ static bool fap_loader_select_app(FapLoader* loader) {
 }
 
 static FapLoader* fap_loader_alloc(const char* path) {
-    FapLoader* loader = malloc(sizeof(FapLoader));
-    loader->fap_path = furi_string_alloc_set(path);
+    FapLoader* loader = malloc(sizeof(FapLoader)); //-V773
+
+    char* tmp = malloc(strlen(path) + 1);
+    strcpy(tmp, path);
+    char* new_path;
+
+    new_path = strtok(tmp, "¯");
+
+    if(new_path) {
+        loader->fap_path = furi_string_alloc_set(new_path);
+    } else {
+        loader->fap_path = furi_string_alloc_set(path);
+    }
+
+    new_path = strtok(NULL, "¯");
+
+    if(new_path) {
+        loader->fap_args = furi_string_alloc_set(new_path);
+    } else {
+        loader->fap_args = furi_string_alloc_set("false");
+    }
+
     loader->storage = furi_record_open(RECORD_STORAGE);
     loader->dialogs = furi_record_open(RECORD_DIALOGS);
     loader->gui = furi_record_open(RECORD_GUI);
@@ -172,6 +206,7 @@ static void fap_loader_free(FapLoader* loader) {
     loading_free(loader->loading);
     view_dispatcher_free(loader->view_dispatcher);
     furi_string_free(loader->fap_path);
+    furi_string_free(loader->fap_args);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_STORAGE);

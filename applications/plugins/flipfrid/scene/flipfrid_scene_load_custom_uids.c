@@ -1,6 +1,7 @@
 #include "flipfrid_scene_load_custom_uids.h"
 #include "flipfrid_scene_run_attack.h"
 #include "flipfrid_scene_entrypoint.h"
+#include "RFID_Fuzzer_icons.h"
 
 #define LFRFID_UIDS_EXTENSION ".txt"
 #define RFIDFUZZER_APP_PATH_FOLDER "/ext/rfidfuzzer"
@@ -70,6 +71,8 @@ void flipfrid_scene_load_custom_uids_on_event(FlipFridEvent event, FlipFridState
             case InputKeyOk:
             case InputKeyBack:
                 context->current_scene = SceneEntryPoint;
+                break;
+            default:
                 break;
             }
         }

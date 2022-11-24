@@ -30,7 +30,7 @@ typedef struct {
     uint8_t playerOneScore;
     uint8_t playerTwoScore;
     char rollTime[1][15];
-    char diceType[1][8];
+    char diceType[1][11];
     char strings[5][45];
     char theScores[1][45];
     bool letsRoll;
@@ -52,7 +52,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     }
 
     canvas_set_font(canvas, FontSecondary);
-    if(state->diceSelect < 229) {
+    if(state->diceSelect < 220) {
         if(state->diceQty == 1) {
             elements_button_left(canvas, "x1");
         } else if(state->diceQty == 2) {
@@ -68,11 +68,6 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         }
     }
     if(state->letsRoll) {
-        static bool rand_generator_inited = false;
-        if(!rand_generator_inited) {
-            srand(furi_get_tick());
-            rand_generator_inited = true;
-        }
         furi_hal_rtc_get_datetime(&state->datetime);
         uint8_t hour = state->datetime.hour;
         char strAMPM[3];
@@ -114,6 +109,39 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             state->diceRoll =
                 ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
             snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "8BALL");
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%s at %s",
+                state->diceType[0],
+                state->rollTime[0]);
+            uint8_t d1_i = rand() % COUNT_OF(eightBall);
+            snprintf(state->strings[1], sizeof(state->strings[1]), "%s", eightBall[d1_i]);
+        } else if(state->diceSelect == 228) {
+            const char* eightBall[] = {
+                "I'd do it.",
+                "Hell, yeah!",
+                "You bet your life!",
+                "What are you waiting for?",
+                "You could do worse things.",
+                "Sure, I won't tell.",
+                "Yeah, you got this. Would I lie to you?",
+                "Looks like fun to me. ",
+                "Yeah, sure, why not?",
+                "DO IT!!!",
+                "Who's it gonna hurt?",
+                "Can you blame someone else?",
+                "Ask me again later.",
+                "Maybe, maybe not, I can't tell right now. ",
+                "Are you the betting type? ",
+                "Don't blame me if you get caught.",
+                "What have you got to lose?",
+                "I wouldn't if I were you.",
+                "My money's on the snowball.",
+                "Oh Hell no!"};
+            state->diceRoll =
+                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
+            snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "Devil Ball");
             snprintf(
                 state->strings[0],
                 sizeof(state->strings[0]),
@@ -328,6 +356,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, state->strings[2]);
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->strings[3]);
             canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignCenter, state->strings[4]);
+        } else if(state->diceSelect == 228 || state->diceSelect == 229) {
+            canvas_set_font(canvas, FontBatteryPercent);
+            canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, state->strings[0]);
         } else {
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
@@ -346,7 +379,7 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->theScores[0]);
         }
     }
-    if(state->diceSelect == 229) {
+    if(state->diceSelect == 229 || state->diceSelect == 228) {
         elements_button_center(canvas, "Shake");
     } else if(state->diceSelect == 231) {
         elements_button_center(canvas, "Draw");
@@ -377,6 +410,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "d100");
     } else if(state->diceSelect == 229) {
         elements_button_right(canvas, "8BALL");
+    } else if(state->diceSelect == 228) {
+        elements_button_right(canvas, "DBALL");
     } else if(state->diceSelect == 230) {
         elements_button_right(canvas, "SEX");
     } else if(state->diceSelect == 231) {
@@ -487,6 +522,8 @@ int32_t dice_app(void* p) {
                         } else if(plugin_state->diceSelect == 231) {
                             plugin_state->diceSelect = 229;
                         } else if(plugin_state->diceSelect == 229) {
+                            plugin_state->diceSelect = 228;
+                        } else if(plugin_state->diceSelect == 228) {
                             if(plugin_state->desktop_settings->is_dumbmode) {
                                 plugin_state->diceSelect = 59;
                             } else {
@@ -512,6 +549,8 @@ int32_t dice_app(void* p) {
                         break;
                     case InputKeyBack:
                         processing = false;
+                        break;
+                    default:
                         break;
                     }
                 }

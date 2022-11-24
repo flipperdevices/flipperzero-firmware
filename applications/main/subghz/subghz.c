@@ -3,6 +3,7 @@
 #include <subghz/types.h>
 #include <lib/toolbox/path.h>
 #include "subghz_i.h"
+#include <lib/subghz/protocols/protocol_items.h>
 
 #define TAG "SubGhzApp"
 
@@ -190,8 +191,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     // Load last used values for Read, Read RAW, etc. or default
     if(!alloc_for_tx_only) {
         subghz->last_settings = subghz_last_settings_alloc();
-        subghz_last_settings_load(
-            subghz->last_settings, subghz_setting_get_preset_count(subghz->setting));
+        subghz_last_settings_load(subghz->last_settings, 0);
 #if FURI_DEBUG
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
         FURI_LOG_D(
@@ -213,15 +213,10 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
-    subghz->txrx->preset = malloc(sizeof(SubGhzPresetDefinition));
+    subghz->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
     subghz->txrx->preset->name = furi_string_alloc();
     if(!alloc_for_tx_only) {
-        subghz_preset_init(
-            subghz,
-            subghz_setting_get_preset_name(subghz->setting, subghz->last_settings->preset),
-            subghz->last_settings->frequency,
-            NULL,
-            0);
+        subghz_preset_init(subghz, "AM650", subghz->last_settings->frequency, NULL, 0);
     } else {
         subghz_preset_init(
             subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
@@ -233,6 +228,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
         subghz->txrx->history = subghz_history_alloc();
     }
 
+    subghz->txrx->raw_threshold_rssi = SUBGHZ_RAW_TRESHOLD_MIN;
     subghz->txrx->worker = subghz_worker_alloc();
 
     subghz->txrx->fff_data = flipper_format_string_alloc();
@@ -243,7 +239,8 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
         subghz->txrx->environment, EXT_PATH("subghz/assets/came_atomo"));
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         subghz->txrx->environment, EXT_PATH("subghz/assets/nice_flor_s"));
-
+    subghz_environment_set_protocol_registry(
+        subghz->txrx->environment, (void*)&subghz_protocol_registry);
     subghz->txrx->receiver = subghz_receiver_alloc_init(subghz->txrx->environment);
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
     subghz_last_settings_set_detect_raw_values(subghz);

@@ -15,6 +15,13 @@ typedef struct {
 } DTMFDolphinOsc;
 
 typedef struct {
+    float duration;
+    size_t period;
+    bool* lookup_table;
+    uint16_t offset;
+} DTMFDolphinPulseFilter;
+
+typedef struct {
     size_t buffer_length;
     size_t half_buffer_length;
     uint8_t* buffer_buffer;
@@ -23,6 +30,8 @@ typedef struct {
     FuriMessageQueue* queue;
     DTMFDolphinOsc* osc1;
     DTMFDolphinOsc* osc2;
+    DTMFDolphinPulseFilter* filter;
+    bool playing;
 } DTMFDolphinAudio;
 
 DTMFDolphinOsc* dtmf_dolphin_osc_alloc();
@@ -33,7 +42,12 @@ void dtmf_dolphin_audio_free(DTMFDolphinAudio* player);
 
 void dtmf_dolphin_osc_free(DTMFDolphinOsc* osc);
 
-bool dtmf_dolphin_audio_play_tones(float freq1, float freq2);
+bool dtmf_dolphin_audio_play_tones(
+    float freq1,
+    float freq2,
+    uint16_t pulses,
+    uint16_t pulse_ms,
+    uint16_t gap_ms);
 
 bool dtmf_dolphin_audio_stop_tones();
 

@@ -39,12 +39,15 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubBruteCustomEventTypeIndexSelected) {
             instance->device->load_index = subbrute_main_view_get_index(instance->view_main);
+            uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
+
             if(!subbrute_worker_init_file_attack(
                    instance->worker,
                    instance->device->key_index,
                    instance->device->load_index,
                    instance->device->file_key,
-                   instance->device->file_protocol_info)) {
+                   instance->device->file_protocol_info,
+                   extra_repeats)) {
                 furi_crash("Invalid attack set!");
             }
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSetupAttack);

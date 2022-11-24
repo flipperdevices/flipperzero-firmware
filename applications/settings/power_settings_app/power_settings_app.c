@@ -25,6 +25,9 @@ PowerSettingsApp* power_settings_app_alloc(uint32_t first_scene) {
     app->gui = furi_record_open(RECORD_GUI);
     app->power = furi_record_open(RECORD_POWER);
 
+    //PubSub
+    app->settings_events = power_get_settings_events_pubsub(app->power);
+
     // View dispatcher
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&power_settings_scene_handlers, app);
@@ -66,18 +69,24 @@ void power_settings_app_free(PowerSettingsApp* app) {
     // Views
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewBatteryInfo);
     battery_info_free(app->batery_info);
+
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewSubmenu);
     submenu_free(app->submenu);
-    variable_item_list_free(app->variable_item_list);
+
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewDialog);
     dialog_ex_free(app->dialog);
+
     view_dispatcher_remove_view(app->view_dispatcher, PowerSettingsAppViewVariableItemList);
+    variable_item_list_free(app->variable_item_list);
+
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
+
     // Records
     furi_record_close(RECORD_POWER);
     furi_record_close(RECORD_GUI);
+
     free(app);
 }
 

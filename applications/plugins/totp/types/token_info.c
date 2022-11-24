@@ -3,10 +3,13 @@
 #include "token_info.h"
 #include "stdlib.h"
 #include "common.h"
-#include "../services/base32/base32.h"
+#include "../lib/base32/base32.h"
+#include "../services/crypto/crypto.h"
+#include "../lib/polyfills/memset_s.h"
 
 TokenInfo* token_info_alloc() {
     TokenInfo* tokenInfo = malloc(sizeof(TokenInfo));
+    furi_check(tokenInfo != NULL);
     tokenInfo->algo = SHA1;
     tokenInfo->digits = TOTP_6_DIGITS;
     return tokenInfo;
@@ -19,43 +22,40 @@ void token_info_free(TokenInfo* token_info) {
     free(token_info);
 }
 
-void token_info_set_secret(
+bool token_info_set_secret(
     TokenInfo* token_info,
     const char* base32_token_secret,
-    uint8_t token_secret_length,
-    uint8_t* iv) {
+    size_t token_secret_length,
+    const uint8_t* iv) {
     uint8_t* plain_secret = malloc(token_secret_length);
+    furi_check(plain_secret != NULL);
     int plain_secret_length =
-        base32_decode((uint8_t*)base32_token_secret, plain_secret, token_secret_length);
-    token_info->token_length = plain_secret_length;
-
-    size_t remain = token_info->token_length % 16;
-    if(remain) {
-        token_info->token_length = token_info->token_length - remain + 16;
-        uint8_t* plain_secret_aligned = malloc(token_info->token_length);
-        memcpy(plain_secret_aligned, plain_secret, plain_secret_length);
-        memset(plain_secret, 0, plain_secret_length);
-        free(plain_secret);
-        plain_secret = plain_secret_aligned;
+        base32_decode((const uint8_t*)base32_token_secret, plain_secret, token_secret_length);
+    bool result;
+    if(plain_secret_length >= 0) {
+        token_info->token =
+            totp_crypto_encrypt(plain_secret, plain_secret_length, iv, &token_info->token_length);
+        result = true;
+    } else {
+        result = false;
     }
 
-    token_info->token = malloc(token_info->token_length);
-
-    furi_hal_crypto_store_load_key(CRYPTO_KEY_SLOT, iv);
-    furi_hal_crypto_encrypt(plain_secret, token_info->token, token_info->token_length);
-    furi_hal_crypto_store_unload_key(CRYPTO_KEY_SLOT);
-
-    memset(plain_secret, 0, token_info->token_length);
+    memset_s(plain_secret, token_secret_length, 0, token_secret_length);
     free(plain_secret);
+    return result;
 }
 
-uint8_t token_info_get_digits_count(TokenInfo* token_info) {
-    switch(token_info->digits) {
-    case TOTP_6_DIGITS:
-        return 6;
-    case TOTP_8_DIGITS:
-        return 8;
+bool token_info_set_digits_from_int(TokenInfo* token_info, uint8_t digits) {
+    switch(digits) {
+    case 6:
+        token_info->digits = TOTP_6_DIGITS;
+        return true;
+    case 8:
+        token_info->digits = TOTP_8_DIGITS;
+        return true;
+    default:
+        break;
     }
 
-    return 6;
+    return false;
 }

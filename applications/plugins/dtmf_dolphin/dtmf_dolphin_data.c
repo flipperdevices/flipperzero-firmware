@@ -77,13 +77,23 @@ DTMFDolphinSceneData DTMFDolphinSceneDataRedboxUS = {
         {"Dollar", 1700.0, 2200.0, {3, 0, 5}, 1, 650, 0},
     }};
 
+DTMFDolphinSceneData DTMFDolphinSceneDataRedboxCA = {
+    .name = "Redbox (CA)",
+    .block = DTMF_DOLPHIN_TONE_BLOCK_REDBOX_CA,
+    .tone_count = 3,
+    .tones = {
+        {"Nickel", 2200.0, 0.0, {0, 0, 5}, 1, 66, 0},
+        {"Dime", 2200.0, 0.0, {1, 0, 5}, 2, 66, 66},
+        {"Quarter", 2200.0, 0.0, {2, 0, 5}, 5, 33, 33},
+    }};
+
 DTMFDolphinSceneData DTMFDolphinSceneDataRedboxUK = {
     .name = "Redbox (UK)",
     .block = DTMF_DOLPHIN_TONE_BLOCK_REDBOX_UK,
     .tone_count = 2,
     .tones = {
-        {"10p", 1000.0, 0.0, {0, 0, 3}, 1, 200, 0},
-        {"50p", 1000.0, 0.0, {1, 0, 3}, 1, 350, 0},
+        {"10p", 1000.0, 0.0, {0, 0, 5}, 1, 200, 0},
+        {"50p", 1000.0, 0.0, {1, 0, 5}, 1, 350, 0},
     }};
 
 DTMFDolphinSceneData DTMFDolphinSceneDataMisc = {
@@ -108,6 +118,9 @@ void dtmf_dolphin_data_set_current_section(DTMFDolphinToneSection section) {
         break;
     case DTMF_DOLPHIN_TONE_BLOCK_REDBOX_US:
         current_scene_data = &DTMFDolphinSceneDataRedboxUS;
+        break;
+    case DTMF_DOLPHIN_TONE_BLOCK_REDBOX_CA:
+        current_scene_data = &DTMFDolphinSceneDataRedboxCA;
         break;
     case DTMF_DOLPHIN_TONE_BLOCK_REDBOX_UK:
         current_scene_data = &DTMFDolphinSceneDataRedboxUK;
@@ -135,6 +148,24 @@ bool dtmf_dolphin_data_get_tone_frequencies(float* freq1, float* freq2, uint8_t 
         if(tones.pos.row == row && tones.pos.col == col) {
             freq1[0] = tones.frequency_1;
             freq2[0] = tones.frequency_2;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool dtmf_dolphin_data_get_filter_data(
+    uint16_t* pulses,
+    uint16_t* pulse_ms,
+    uint16_t* gap_ms,
+    uint8_t row,
+    uint8_t col) {
+    for(size_t i = 0; i < current_scene_data->tone_count; i++) {
+        DTMFDolphinTones tones = current_scene_data->tones[i];
+        if(tones.pos.row == row && tones.pos.col == col) {
+            pulses[0] = tones.pulses;
+            pulse_ms[0] = tones.pulse_ms;
+            gap_ms[0] = tones.gap_duration;
             return true;
         }
     }

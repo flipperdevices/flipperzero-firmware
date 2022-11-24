@@ -12,10 +12,8 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Battery_26x8);
 
     if(power->info.gauge_is_ok) {
-        char batteryPercentile[5];
+        char batteryPercentile[4];
         snprintf(batteryPercentile, sizeof(batteryPercentile), "%d", power->info.charge);
-        strcat(batteryPercentile, "%");
-
         if((power->displayBatteryPercentage == 1) &&
            (power->state !=
             PowerStateCharging)) { //if display battery percentage, black background white text
@@ -23,14 +21,14 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_box(canvas, 1, 1, 22, 6);
             canvas_set_color(canvas, ColorWhite);
-            canvas_draw_str_aligned(canvas, 12, 4, AlignCenter, AlignCenter, batteryPercentile);
+            canvas_draw_str_aligned(canvas, 11, 4, AlignCenter, AlignCenter, batteryPercentile);
         } else if(
             (power->displayBatteryPercentage == 2) &&
             (power->state !=
              PowerStateCharging)) { //if display inverted percentage, white background black text
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_set_color(canvas, ColorBlack);
-            canvas_draw_str_aligned(canvas, 12, 4, AlignCenter, AlignCenter, batteryPercentile);
+            canvas_draw_str_aligned(canvas, 11, 4, AlignCenter, AlignCenter, batteryPercentile);
         } else if(
             (power->displayBatteryPercentage == 3) &&
             (power->state != PowerStateCharging)) { //Retro style segmented display, 3 parts
@@ -66,11 +64,31 @@ void power_draw_battery_callback(Canvas* canvas, void* context) {
         }
         if(power->state == PowerStateCharging) {
             canvas_set_bitmap_mode(canvas, 1);
-            canvas_set_color(canvas, ColorWhite);
             // TODO: replace -1 magic for uint8_t with re-framing
-            canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_mask_9x10);
-            canvas_set_color(canvas, ColorBlack);
-            canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_9x10);
+            if(power->displayBatteryPercentage == 1) {
+                canvas_set_color(canvas, ColorBlack);
+                canvas_draw_box(canvas, 1, 1, 22, 6);
+                canvas_draw_icon(canvas, 2, -1, &I_Charging_lightning_9x10);
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_icon(canvas, 2, -1, &I_Charging_lightning_mask_9x10);
+                canvas_set_font(canvas, FontBatteryPercent);
+                canvas_draw_str_aligned(
+                    canvas, 16, 4, AlignCenter, AlignCenter, batteryPercentile);
+            } else if(power->displayBatteryPercentage == 2) {
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_box(canvas, 1, 1, 22, 6);
+                canvas_draw_icon(canvas, 2, -1, &I_Charging_lightning_9x10);
+                canvas_set_color(canvas, ColorBlack);
+                canvas_draw_icon(canvas, 2, -1, &I_Charging_lightning_mask_9x10);
+                canvas_set_font(canvas, FontBatteryPercent);
+                canvas_draw_str_aligned(
+                    canvas, 16, 4, AlignCenter, AlignCenter, batteryPercentile);
+            } else {
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_mask_9x10);
+                canvas_set_color(canvas, ColorBlack);
+                canvas_draw_icon(canvas, 8, -1, &I_Charging_lightning_9x10);
+            }
             canvas_set_bitmap_mode(canvas, 0);
         }
     } else {
@@ -94,6 +112,10 @@ static void power_stop_auto_shutdown_timer(Power* power) {
     furi_timer_stop(power->auto_shutdown_timer);
 }
 
+static uint32_t power_is_running_auto_shutdown_timer(Power* power) {
+    return furi_timer_is_running(power->auto_shutdown_timer);
+}
+
 static void power_input_event_callback(const void* value, void* context) {
     furi_assert(value);
     furi_assert(context);
@@ -106,8 +128,10 @@ static void power_input_event_callback(const void* value, void* context) {
 
 static void power_auto_shutdown_arm(Power* power) {
     if(power->shutdown_idle_delay_ms) {
-        power->input_events_subscription =
-            furi_pubsub_subscribe(power->input_events_pubsub, power_input_event_callback, power);
+        if(power->input_events_subscription == NULL) {
+            power->input_events_subscription = furi_pubsub_subscribe(
+                power->input_events_pubsub, power_input_event_callback, power);
+        }
         power_start_auto_shutdown_timer(power);
     }
 }
@@ -127,18 +151,14 @@ static void power_auto_shutdown_timer_callback(void* context) {
     power_off(power);
 }
 
-static void auto_shutdown_update(Power* power) {
-    uint32_t old_time = power->shutdown_idle_delay_ms;
-    LOAD_POWER_SETTINGS(&power->shutdown_idle_delay_ms);
+static void power_shutdown_time_changed_callback(const void* event, void* context) {
+    furi_assert(event);
+    furi_assert(context);
+    Power* power = context;
+    power->shutdown_idle_delay_ms = *(uint32_t*)event;
     if(power->shutdown_idle_delay_ms) {
-        if(power->shutdown_idle_delay_ms != old_time) {
-            if(old_time) {
-                power_start_auto_shutdown_timer(power);
-            } else {
-                power_auto_shutdown_arm(power);
-            }
-        }
-    } else if(old_time) {
+        power_auto_shutdown_arm(power);
+    } else if(power_is_running_auto_shutdown_timer(power)) {
         power_auto_shutdown_inhibit(power);
     }
 }
@@ -151,6 +171,10 @@ Power* power_alloc() {
     power->gui = furi_record_open(RECORD_GUI);
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
+    power->settings_events = furi_pubsub_alloc();
+    furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
+    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
+    power->input_events_subscription = NULL;
 
     power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     power->input_events_subscription = NULL;
@@ -201,12 +225,16 @@ void power_free(Power* power) {
 
     // FuriPubSub
     furi_pubsub_free(power->event_pubsub);
+    furi_pubsub_free(power->settings_events);
     furi_pubsub_free(power->input_events_pubsub);
 
     if(power->input_events_subscription) {
         furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
         power->input_events_subscription = NULL;
     }
+
+    //Auto shutdown timer
+    furi_timer_free(power->auto_shutdown_timer);
 
     // Records
     furi_record_close(RECORD_NOTIFICATION);
@@ -338,9 +366,6 @@ int32_t power_srv(void* p) {
     free(settings);
 
     while(1) {
-        //Check current setting for automatic shutdown
-        auto_shutdown_update(power);
-
         // Update data from gauge and charger
         bool need_refresh = power_update_info(power);
 

@@ -77,7 +77,7 @@ const SubGhzProtocol subghz_protocol_star_line = {
     .name = SUBGHZ_PROTOCOL_STAR_LINE_NAME,
     .type = SubGhzProtocolTypeDynamic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable |
-            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save,
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
 
     .decoder = &subghz_protocol_star_line_decoder,
     .encoder = &subghz_protocol_star_line_encoder,
@@ -138,7 +138,11 @@ void subghz_protocol_encoder_star_line_free(void* context) {
  */
 static bool
     subghz_protocol_star_line_gen_data(SubGhzProtocolEncoderStarLine* instance, uint8_t btn) {
-    instance->generic.cnt++;
+    if(instance->generic.cnt < 0xFFFF) {
+        instance->generic.cnt++;
+    } else if(instance->generic.cnt >= 0xFFFF) {
+        instance->generic.cnt = 0;
+    }
     uint32_t fix = btn << 24 | instance->generic.serial;
     uint32_t decrypt = btn << 24 | (instance->generic.serial & 0xFF) << 16 | instance->generic.cnt;
     uint32_t hop = 0;
@@ -204,7 +208,7 @@ bool subghz_protocol_star_line_create_data(
     uint8_t btn,
     uint16_t cnt,
     const char* manufacture_name,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolEncoderStarLine* instance = context;
     instance->generic.serial = serial;
@@ -236,7 +240,7 @@ static bool subghz_protocol_encoder_star_line_get_upload(
     }
 
     size_t index = 0;
-    size_t size_upload = 6 * 2 + (instance->generic.data_count_bit * 2) + 4;
+    size_t size_upload = 6 * 2 + (instance->generic.data_count_bit * 2);
     if(size_upload > instance->encoder.size_upload) {
         FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
         return false;
@@ -697,7 +701,7 @@ uint8_t subghz_protocol_decoder_star_line_get_hash_data(void* context) {
 bool subghz_protocol_decoder_star_line_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderStarLine* instance = context;
     subghz_protocol_star_line_check_remote_controller(
@@ -763,8 +767,7 @@ void subghz_protocol_decoder_star_line_get_string(void* context, FuriString* out
         "Key:%08lX%08lX\r\n"
         "Fix:0x%08lX    Cnt:%04lX\r\n"
         "Hop:0x%08lX    Btn:%02X\r\n"
-        "MF:%s\r\n"
-        "Sn:0x%07lX \r\n",
+        "MF:%s\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         code_found_hi,
@@ -773,6 +776,5 @@ void subghz_protocol_decoder_star_line_get_string(void* context, FuriString* out
         instance->generic.cnt,
         code_found_reverse_lo,
         instance->generic.btn,
-        instance->manufacture_name,
-        instance->generic.serial);
+        instance->manufacture_name);
 }

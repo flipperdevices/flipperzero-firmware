@@ -137,7 +137,11 @@ void subghz_protocol_encoder_keeloq_free(void* context) {
  * @param btn Button number, 4 bit
  */
 static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
-    instance->generic.cnt++;
+    if(instance->generic.cnt < 0xFFFF) {
+        instance->generic.cnt++;
+    } else if(instance->generic.cnt >= 0xFFFF) {
+        instance->generic.cnt = 0;
+    }
     uint32_t fix = btn << 28 | instance->generic.serial;
     uint32_t decrypt = btn << 28 |
                        (instance->generic.serial & 0x3FF)
@@ -151,15 +155,18 @@ static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instanc
         instance->manufacture_name = "";
     }
 
-    // DTM Neo uses 12bit, simple learning
-    if((strcmp(instance->manufacture_name, "DTM_Neo") == 0)) {
+    // DTM Neo uses 12bit -> simple learning -- FAAC_RC,XT , Mutanco_Mutancode -> 12bit normal learning
+    if((strcmp(instance->manufacture_name, "DTM_Neo") == 0) ||
+       (strcmp(instance->manufacture_name, "FAAC_RC,XT") == 0) ||
+       (strcmp(instance->manufacture_name, "Mutanco_Mutancode") == 0)) {
         decrypt = btn << 28 | (instance->generic.serial & 0xFFF) << 16 | instance->generic.cnt;
     }
 
-    // Nice Smilo, MHouse, JCM has 8bit serial - simple learning
+    // Nice Smilo, MHouse, JCM, Normstahl -> 8bit serial - simple learning
     if((strcmp(instance->manufacture_name, "NICE_Smilo") == 0) ||
        (strcmp(instance->manufacture_name, "NICE_MHOUSE") == 0) ||
-       (strcmp(instance->manufacture_name, "JCM_Tech") == 0)) {
+       (strcmp(instance->manufacture_name, "JCM_Tech") == 0) ||
+       (strcmp(instance->manufacture_name, "Normstahl") == 0)) {
         decrypt = btn << 28 | (instance->generic.serial & 0xFF) << 16 | instance->generic.cnt;
     }
 
@@ -247,7 +254,7 @@ bool subghz_protocol_keeloq_create_data(
     uint8_t btn,
     uint16_t cnt,
     const char* manufacture_name,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
     instance->generic.serial = serial;
@@ -269,7 +276,7 @@ bool subghz_protocol_keeloq_bft_create_data(
     uint16_t cnt,
     uint32_t seed,
     const char* manufacture_name,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
     instance->generic.serial = serial;
@@ -368,15 +375,6 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
             break;
         }
 
-        // Read manufacturer from file
-        if(flipper_format_read_string(
-               flipper_format, "Manufacture", instance->manufacture_from_file)) {
-            instance->manufacture_name = furi_string_get_cstr(instance->manufacture_from_file);
-            mfname = furi_string_get_cstr(instance->manufacture_from_file);
-        } else {
-            FURI_LOG_D(TAG, "ENCODER: Missing Manufacture");
-        }
-
         uint8_t seed_data[sizeof(uint32_t)] = {0};
         for(size_t i = 0; i < sizeof(uint32_t); i++) {
             seed_data[sizeof(uint32_t) - i - 1] = (instance->generic.seed >> i * 8) & 0xFF;
@@ -386,6 +384,20 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         }
         instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
                                  seed_data[3];
+
+        // Read manufacturer from file
+        if(flipper_format_read_string(
+               flipper_format, "Manufacture", instance->manufacture_from_file)) {
+            instance->manufacture_name = furi_string_get_cstr(instance->manufacture_from_file);
+            mfname = furi_string_get_cstr(instance->manufacture_from_file);
+        } else {
+            FURI_LOG_D(TAG, "ENCODER: Missing Manufacture");
+        }
+
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
 
         subghz_protocol_keeloq_check_remote_controller(
             &instance->generic, instance->keystore, &instance->manufacture_name);
@@ -649,6 +661,26 @@ static uint8_t subghz_protocol_keeloq_check_remote_controller_selector(
                 break;
             case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_1:
                 man = subghz_protocol_keeloq_common_magic_serial_type1_learning(
+                    fix, manufacture_code->key);
+                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                    mfname = *manufacture_name;
+                    return 1;
+                }
+                break;
+            case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_2:
+                man = subghz_protocol_keeloq_common_magic_serial_type2_learning(
+                    fix, manufacture_code->key);
+                decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
+                if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
+                    *manufacture_name = furi_string_get_cstr(manufacture_code->name);
+                    mfname = *manufacture_name;
+                    return 1;
+                }
+                break;
+            case KEELOQ_LEARNING_MAGIC_SERIAL_TYPE_3:
+                man = subghz_protocol_keeloq_common_magic_serial_type3_learning(
                     fix, manufacture_code->key);
                 decrypt = subghz_protocol_keeloq_common_decrypt(hop, man);
                 if(subghz_protocol_keeloq_check_decrypt(instance, decrypt, btn, end_serial)) {
@@ -947,7 +979,7 @@ uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context) {
 bool subghz_protocol_decoder_keeloq_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;
 
@@ -956,9 +988,22 @@ bool subghz_protocol_decoder_keeloq_serialize(
     subghz_protocol_keeloq_check_remote_controller(
         &instance->generic, instance->keystore, &instance->manufacture_name);
 
+    if(strcmp(instance->manufacture_name, "BFT") == 0) {
+        uint8_t seed_data[sizeof(uint32_t)] = {0};
+        for(size_t i = 0; i < sizeof(uint32_t); i++) {
+            seed_data[sizeof(uint32_t) - i - 1] = (instance->generic.seed >> i * 8) & 0xFF;
+        }
+        if(res && !flipper_format_write_hex(flipper_format, "Seed", seed_data, sizeof(uint32_t))) {
+            FURI_LOG_E(TAG, "DECODER Serialize: Unable to add Seed");
+            res = false;
+        }
+        instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
+                                 seed_data[3];
+    }
+
     if(res && !flipper_format_write_string_cstr(
                   flipper_format, "Manufacture", instance->manufacture_name)) {
-        FURI_LOG_E(TAG, "Unable to add manufacture name");
+        FURI_LOG_E(TAG, "DECODER Serialize: Unable to add manufacture name");
         res = false;
     }
     return res;
@@ -978,19 +1023,6 @@ bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* fl
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
         }
-        if(!flipper_format_rewind(flipper_format)) {
-            FURI_LOG_E(TAG, "Rewind error");
-            break;
-        }
-
-        // Read manufacturer from file
-        if(flipper_format_read_string(
-               flipper_format, "Manufacture", instance->manufacture_from_file)) {
-            instance->manufacture_name = furi_string_get_cstr(instance->manufacture_from_file);
-            mfname = furi_string_get_cstr(instance->manufacture_from_file);
-        } else {
-            FURI_LOG_D(TAG, "DECODER: Missing Manufacture");
-        }
 
         uint8_t seed_data[sizeof(uint32_t)] = {0};
         for(size_t i = 0; i < sizeof(uint32_t); i++) {
@@ -1001,6 +1033,21 @@ bool subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* fl
         }
         instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
                                  seed_data[3];
+
+        // Read manufacturer from file
+        if(flipper_format_read_string(
+               flipper_format, "Manufacture", instance->manufacture_from_file)) {
+            instance->manufacture_name = furi_string_get_cstr(instance->manufacture_from_file);
+            mfname = furi_string_get_cstr(instance->manufacture_from_file);
+        } else {
+            FURI_LOG_D(TAG, "DECODER: Missing Manufacture");
+        }
+
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+
         res = true;
     } while(false);
 

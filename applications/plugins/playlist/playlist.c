@@ -6,8 +6,9 @@
 #include <storage/storage.h>
 
 #include <lib/toolbox/path.h>
-#include <assets_icons.h>
+#include <SubGHz_Playlist_icons.h>
 
+#include <lib/subghz/protocols/protocol_items.h>
 #include <flipper_format/flipper_format_i.h>
 #include <applications/main/subghz/subghz_i.h>
 
@@ -158,6 +159,7 @@ static int playlist_worker_process(
 
     // (try to) send file
     SubGhzEnvironment* environment = subghz_environment_alloc();
+    subghz_environment_set_protocol_registry(environment, (void*)&subghz_protocol_registry);
     SubGhzTransmitter* transmitter =
         subghz_transmitter_alloc_init(environment, furi_string_get_cstr(protocol));
 
@@ -588,6 +590,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
                     canvas, 3, 37, AlignLeft, AlignTop, furi_string_get_cstr(temp_str));
             }
         }
+        break;
+    default:
         break;
     }
 

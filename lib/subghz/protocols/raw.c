@@ -17,7 +17,7 @@
 #define SUBGHZ_DOWNLOAD_MAX_SIZE 512
 #define SUBGHZ_AUTO_DETECT_DOWNLOAD_MAX_SIZE 2048
 #define SUBGHZ_AUTO_DETECT_RAW_THRESHOLD -72.0f
-#define SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES 30
+#define SUBGHZ_AUTO_DETECT_RAW_POSTROLL_FRAMES 40
 
 static const SubGhzBlockConst subghz_protocol_raw_const = {
     .te_short = 50,
@@ -43,6 +43,7 @@ struct SubGhzProtocolDecoderRAW {
     bool has_rssi_above_threshold;
     int rssi_threshold;
     uint8_t postroll_frames;
+    bool pause;
 };
 
 struct SubGhzProtocolEncoderRAW {
@@ -95,7 +96,7 @@ const SubGhzProtocol subghz_protocol_raw = {
 bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(instance);
 
     instance->storage = furi_record_open(RECORD_STORAGE);
@@ -169,6 +170,7 @@ bool subghz_protocol_raw_save_to_file_init(
         instance->upload_raw = malloc(SUBGHZ_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
         instance->file_is_open = RAWFileIsOpenWrite;
         instance->sample_write = 0;
+        instance->pause = false;
         init = true;
     } while(0);
 
@@ -214,7 +216,7 @@ void subghz_protocol_decoder_raw_set_rssi_threshold(void* context, int rssi_thre
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
-    FURI_LOG_E(TAG, "RSSI set: (%d)", rssi_threshold);
+    FURI_LOG_D(TAG, "RSSI set: (%d)", rssi_threshold);
 
     instance->rssi_threshold = rssi_threshold;
 
@@ -238,6 +240,14 @@ void subghz_protocol_decoder_raw_set_auto_mode(void* context, bool auto_mode) {
     }
 
     subghz_protocol_decoder_raw_reset(context);
+}
+
+void subghz_protocol_raw_save_to_file_pause(SubGhzProtocolDecoderRAW* instance, bool pause) {
+    furi_assert(instance);
+
+    if(instance->pause != pause) {
+        instance->pause = pause;
+    }
 }
 
 size_t subghz_protocol_raw_get_sample_write(SubGhzProtocolDecoderRAW* instance) {
@@ -306,7 +316,8 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
 
-    if(instance->upload_raw != NULL && duration > subghz_protocol_raw_const.te_short) {
+    if(instance->upload_raw != NULL && !instance->pause &&
+       duration > subghz_protocol_raw_const.te_short) {
         if(instance->auto_mode) {
             float rssi = furi_hal_subghz_get_rssi();
 
@@ -437,7 +448,7 @@ void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char*
 bool subghz_protocol_decoder_raw_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderRAW* instance = context;
     if(instance->auto_mode) {

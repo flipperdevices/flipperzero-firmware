@@ -92,7 +92,7 @@ void* subghz_protocol_encoder_nice_flor_s_alloc(SubGhzEnvironment* environment) 
     instance->nice_flor_s_rainbow_table_file_name =
         subghz_environment_get_nice_flor_s_rainbow_table_file_name(environment);
     if(instance->nice_flor_s_rainbow_table_file_name) {
-        FURI_LOG_I(
+        FURI_LOG_D(
             TAG, "Loading rainbow table from %s", instance->nice_flor_s_rainbow_table_file_name);
     }
     instance->encoder.repeat = 10;
@@ -343,7 +343,7 @@ void* subghz_protocol_decoder_nice_flor_s_alloc(SubGhzEnvironment* environment) 
     instance->nice_flor_s_rainbow_table_file_name =
         subghz_environment_get_nice_flor_s_rainbow_table_file_name(environment);
     if(instance->nice_flor_s_rainbow_table_file_name) {
-        FURI_LOG_I(
+        FURI_LOG_D(
             TAG, "Loading rainbow table from %s", instance->nice_flor_s_rainbow_table_file_name);
     }
     return instance;
@@ -493,7 +493,7 @@ uint8_t subghz_protocol_decoder_nice_flor_s_get_hash_data(void* context) {
 bool subghz_protocol_decoder_nice_flor_s_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlorS* instance = context;
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);

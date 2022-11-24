@@ -1,6 +1,5 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
-#include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
 
@@ -31,8 +30,8 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
             subghz->txrx->decoder_result,
             subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
 
-        SubGhzPresetDefinition* preset =
-            subghz_history_get_preset_def(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
+        SubGhzRadioPreset* preset =
+            subghz_history_get_radio_preset(subghz->txrx->history, subghz->txrx->idx_menu_chosen);
         subghz_preset_init(
             subghz,
             furi_string_get_cstr(preset->name),
@@ -115,7 +114,6 @@ void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
 void subghz_scene_receiver_info_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
     subghz_scene_receiver_info_draw_widget(subghz);
 }
 
@@ -172,9 +170,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
             //CC1101 Stop RX -> Save
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            if(subghz->txrx->hopper_state != SubGhzHopperStateOFF) {
-                subghz->txrx->hopper_state = SubGhzHopperStateOFF;
-            }
+            subghz->txrx->hopper_state = SubGhzHopperStateOFF;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
                 subghz_rx_end(subghz);
                 subghz_sleep(subghz);

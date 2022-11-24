@@ -14,6 +14,7 @@
 #define SUBGHZ_LAST_SETTING_DEFAULT_PRESET 1
 #define SUBGHZ_LAST_SETTING_DEFAULT_FREQUENCY 433920000
 #define SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_FEEDBACK_LEVEL 2
+#define SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_TRIGGER -93.0f
 
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
 #define SUBGHZ_LAST_SETTING_DEFAULT_READ_RAW 0
@@ -21,8 +22,9 @@
 #endif
 
 #define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY "Frequency"
-#define SUBGHZ_LAST_SETTING_FIELD_PRESET "Preset"
+//#define SUBGHZ_LAST_SETTING_FIELD_PRESET "Preset"
 #define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_FEEDBACK_LEVEL "FeedbackLevel"
+#define SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER "FATrigger"
 
 SubGhzLastSettings* subghz_last_settings_alloc(void) {
     SubGhzLastSettings* instance = malloc(sizeof(SubGhzLastSettings));
@@ -35,6 +37,7 @@ void subghz_last_settings_free(SubGhzLastSettings* instance) {
 }
 
 void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count) {
+    UNUSED(preset_count);
     furi_assert(instance);
 #ifdef FURI_DEBUG
     FURI_LOG_I(TAG, "subghz_last_settings_load");
@@ -45,22 +48,30 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
 
     uint32_t temp_frequency = 0;
     uint32_t temp_frequency_analyzer_feedback_level = 0;
-    int32_t temp_preset = 0;
+    float temp_frequency_analyzer_trigger = 0;
+    //int32_t temp_preset = 0;
     bool frequency_analyzer_feedback_level_was_read = false;
+    bool frequency_analyzer_trigger_was_read = false;
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
     uint32_t temp_read_raw = 0;
 #endif
 
     if(FSE_OK == storage_sd_status(storage) && SUBGHZ_LAST_SETTINGS_PATH &&
        flipper_format_file_open_existing(fff_data_file, SUBGHZ_LAST_SETTINGS_PATH)) {
+        /*
         flipper_format_read_int32(
-            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_PRESET, (int32_t*)&temp_preset, 1);
+            fff_data_file, SUBGHZ_LAST_SETTING_FIELD_PRESET, (int32_t*)&temp_preset, 1);*/
         flipper_format_read_uint32(
             fff_data_file, SUBGHZ_LAST_SETTING_FIELD_FREQUENCY, (uint32_t*)&temp_frequency, 1);
         frequency_analyzer_feedback_level_was_read = flipper_format_read_uint32(
             fff_data_file,
             SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_FEEDBACK_LEVEL,
             (uint32_t*)&temp_frequency_analyzer_feedback_level,
+            1);
+        frequency_analyzer_trigger_was_read = flipper_format_read_float(
+            fff_data_file,
+            SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER,
+            (float*)&temp_frequency_analyzer_trigger,
             1);
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
         flipper_format_read_uint32(
@@ -76,6 +87,7 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
         instance->preset = SUBGHZ_LAST_SETTING_DEFAULT_PRESET;
         instance->frequency_analyzer_feedback_level =
             SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_FEEDBACK_LEVEL;
+        instance->frequency_analyzer_trigger = SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_TRIGGER;
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
         instance->detect_raw = SUBGHZ_LAST_SETTING_DEFAULT_READ_RAW;
 #endif
@@ -85,16 +97,20 @@ void subghz_last_settings_load(SubGhzLastSettings* instance, size_t preset_count
             frequency_analyzer_feedback_level_was_read ?
                 temp_frequency_analyzer_feedback_level :
                 SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_FEEDBACK_LEVEL;
+
+        instance->frequency_analyzer_trigger = frequency_analyzer_trigger_was_read ?
+                                                   temp_frequency_analyzer_trigger :
+                                                   SUBGHZ_LAST_SETTING_FREQUENCY_ANALYZER_TRIGGER;
 #ifdef SUBGHZ_SAVE_DETECT_RAW_SETTING
         instance->detect_raw = temp_read_raw;
 #endif
 
-        if(temp_preset > (int32_t)preset_count - 1 || temp_preset < 0) {
-            FURI_LOG_W(TAG, "Last used preset no found");
-            instance->preset = SUBGHZ_LAST_SETTING_DEFAULT_PRESET;
-        } else {
+        /*if(temp_preset > (int32_t)preset_count - 1 || temp_preset < 0) {
+            FURI_LOG_W(TAG, "Last used preset no found");*/
+        instance->preset = SUBGHZ_LAST_SETTING_DEFAULT_PRESET;
+        /*/} else {
             instance->preset = temp_preset;
-        }
+        }*/
     }
 
     flipper_format_file_close(fff_data_file);
@@ -125,10 +141,11 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                file, SUBGHZ_LAST_SETTING_FILE_TYPE, SUBGHZ_LAST_SETTING_FILE_VERSION))
             break;
 
+        /*
         if(!flipper_format_insert_or_update_int32(
                file, SUBGHZ_LAST_SETTING_FIELD_PRESET, &instance->preset, 1)) {
             break;
-        }
+        }*/
         if(!flipper_format_insert_or_update_uint32(
                file, SUBGHZ_LAST_SETTING_FIELD_FREQUENCY, &instance->frequency, 1)) {
             break;
@@ -137,6 +154,13 @@ bool subghz_last_settings_save(SubGhzLastSettings* instance) {
                file,
                SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_FEEDBACK_LEVEL,
                &instance->frequency_analyzer_feedback_level,
+               1)) {
+            break;
+        }
+        if(!flipper_format_insert_or_update_float(
+               file,
+               SUBGHZ_LAST_SETTING_FIELD_FREQUENCY_ANALYZER_TRIGGER,
+               &instance->frequency_analyzer_trigger,
                1)) {
             break;
         }

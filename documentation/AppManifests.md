@@ -40,6 +40,7 @@ Only 2 parameters are mandatory: ***appid*** and ***apptype***, others are optio
 * **icon**: Animated icon name from built-in assets to be used when building app as a part of firmware.
 * **order**: Order of an application within its group when sorting entries in it. The lower the order is, the closer to the start of the list the item is placed. *Used for ordering startup hooks and menu entries.* 
 * **sdk_headers**: List of C header files from this app's code to include in API definitions for external applications.
+* **targets**: list of strings, target names, which this application is compatible with. If not specified, application is built for all targets. Default value is `["all"]`.
 
 
 #### Parameters for external applications
@@ -76,10 +77,10 @@ Each library is defined as a call to `Lib()` function, accepting the following p
 
     - **name**: name of library's folder. Required.
     - **fap_include_paths**: list of library's relative paths to add to parent fap's include path list. Default value is `["."]` meaning  library's source root.
-    - **sources**: list of filename masks to be used for gathering include files for this library. Default value is `["*.c*"]`.
+    - **sources**: list of filename masks to be used for gathering include files for this library. Paths are relative to library's source root. Default value is `["*.c*"]`.
     - **cflags**: list of additional compiler flags to be used for building this library. Default value is `[]`.
     - **cdefines**: list of additional preprocessor definitions to be used for building this library. Default value is `[]`.
-    - **cincludes**: list of additional include paths to be used for building this library. Can be used for providing external search paths for this library's code - for configuration headers. Default value is `[]`.
+    - **cincludes**: list of additional include paths to be used for building this library. Paths are relative to application's root. Can be used for providing external search paths for this library's code - for configuration headers. Default value is `[]`.
 
 Example for building an app with a private library:
 

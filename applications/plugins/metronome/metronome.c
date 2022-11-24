@@ -158,6 +158,8 @@ static void timer_callback(void* ctx) {
             break;
         case Silent:
             break;
+        default:
+            break;
         }
     } else {
         // unpronounced beat
@@ -170,6 +172,8 @@ static void timer_callback(void* ctx) {
             notification_message(metronome_state->notifications, &sequence_set_vibro_on);
             break;
         case Silent:
+            break;
+        default:
             break;
         }
     };
@@ -191,6 +195,8 @@ static void timer_callback(void* ctx) {
         }
         break;
     case Silent:
+        break;
+    default:
         break;
     }
     notification_message(metronome_state->notifications, &sequence_reset_rgb);
@@ -320,6 +326,8 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 } else if(event.input.type == InputTypeLong) {
                     // hold events
@@ -340,6 +348,8 @@ int32_t metronome_app() {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 } else if(event.input.type == InputTypeRepeat) {
                     // repeat events
@@ -358,6 +368,8 @@ int32_t metronome_app() {
                         break;
                     case InputKeyBack:
                         processing = false;
+                        break;
+                    default:
                         break;
                     }
                 }

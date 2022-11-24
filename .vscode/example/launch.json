@@ -38,6 +38,7 @@
             "postAttachCommands": [
                 // "compare-sections",
                 "source debug/flipperapps.py",
+                "fap-set-debug-elf-root build/latest/.extapps",
                 // "source debug/FreeRTOS/FreeRTOS.py",
                 // "svd_load debug/STM32WB55_CM4.svd"
             ]
@@ -59,6 +60,7 @@
                 "set confirm off",
                 "set mem inaccessible-by-default off",
                 "source debug/flipperapps.py",
+                "fap-set-debug-elf-root build/latest/.extapps",
                 // "compare-sections",
             ]
             // "showDevDebugOutput": "raw",
@@ -76,7 +78,28 @@
             "rtos": "FreeRTOS",
             "postAttachCommands": [
                 "source debug/flipperapps.py",
+                "fap-set-debug-elf-root build/latest/.extapps",
             ]
+            // "showDevDebugOutput": "raw",
+        },
+        {
+            "name": "Attach FW (DAP)",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/latest/firmware.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "cmsis-dap",
+            "svdFile": "./debug/STM32WB55_CM4.svd",
+            "rtos": "FreeRTOS",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "./debug/stm32wbx.cfg",
+            ],
+            "postAttachCommands": [
+                "source debug/flipperapps.py",
+                "fap-set-debug-elf-root build/latest/.extapps",
+            ],
             // "showDevDebugOutput": "raw",
         },
         {

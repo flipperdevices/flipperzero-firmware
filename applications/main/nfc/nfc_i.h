@@ -7,6 +7,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
+#include <assets_icons.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <cli/cli.h>
@@ -20,6 +21,7 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/variable_item_list.h>
 
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_worker.h>
@@ -77,6 +79,7 @@ struct Nfc {
     TextInput* text_input;
     ByteInput* byte_input;
     TextBox* text_box;
+    VariableItemList* variable_item_list;
     Widget* widget;
     DictAttack* dict_attack;
     DetectReader* detect_reader;
@@ -92,6 +95,7 @@ typedef enum {
     NfcViewTextInput,
     NfcViewByteInput,
     NfcViewTextBox,
+    NfcViewVarItemList,
     NfcViewWidget,
     NfcViewDictAttack,
     NfcViewDetectReader,
@@ -112,5 +116,7 @@ void nfc_blink_emulate_start(Nfc* nfc);
 void nfc_blink_detect_start(Nfc* nfc);
 
 void nfc_blink_stop(Nfc* nfc);
+
+bool nfc_save_file(Nfc* nfc);
 
 void nfc_show_loading_popup(void* context, bool show);

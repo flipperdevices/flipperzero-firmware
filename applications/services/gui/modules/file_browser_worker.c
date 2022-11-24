@@ -363,7 +363,7 @@ static int32_t browser_worker(void* context) {
 
 BrowserWorker*
     file_browser_worker_alloc(FuriString* path, const char* filter_ext, bool skip_assets) {
-    BrowserWorker* browser = malloc(sizeof(BrowserWorker));
+    BrowserWorker* browser = malloc(sizeof(BrowserWorker)); //-V773
 
     idx_last_array_init(browser->idx_last);
 
@@ -371,11 +371,7 @@ BrowserWorker*
     browser->skip_assets = skip_assets;
     browser->path_next = furi_string_alloc_set(path);
 
-    browser->thread = furi_thread_alloc();
-    furi_thread_set_name(browser->thread, "BrowserWorker");
-    furi_thread_set_stack_size(browser->thread, 2048);
-    furi_thread_set_context(browser->thread, browser);
-    furi_thread_set_callback(browser->thread, browser_worker);
+    browser->thread = furi_thread_alloc_ex("BrowserWorker", 2048, browser_worker, browser);
     furi_thread_start(browser->thread);
 
     return browser;

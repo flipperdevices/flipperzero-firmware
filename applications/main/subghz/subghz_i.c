@@ -102,8 +102,8 @@ static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
     furi_hal_subghz_set_frequency_and_path(frequency);
+    furi_hal_gpio_write(&gpio_cc1101_g0, false);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_write(&gpio_cc1101_g0, true);
     bool ret = furi_hal_subghz_tx();
     subghz->txrx->txrx_state = SubGhzTxRxStateTx;
     return ret;
@@ -497,6 +497,23 @@ bool subghz_rename_file(SubGhz* subghz) {
     return ret;
 }
 
+bool subghz_file_available(SubGhz* subghz) {
+    furi_assert(subghz);
+    bool ret = true;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    FS_Error fs_result =
+        storage_common_stat(storage, furi_string_get_cstr(subghz->file_path), NULL);
+
+    if(fs_result != FSE_OK) {
+        dialog_message_show_storage_error(subghz->dialogs, "File not available\n file/directory");
+        ret = false;
+    }
+
+    furi_record_close(RECORD_STORAGE);
+    return ret;
+}
+
 bool subghz_delete_file(SubGhz* subghz) {
     furi_assert(subghz);
 
@@ -520,12 +537,6 @@ bool subghz_path_is_file(FuriString* path) {
 }
 
 uint32_t subghz_random_serial(void) {
-    static bool rand_generator_inited = false;
-
-    if(!rand_generator_inited) {
-        srand(DWT->CYCCNT);
-        rand_generator_inited = true;
-    }
     return (uint32_t)rand();
 }
 

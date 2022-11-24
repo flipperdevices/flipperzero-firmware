@@ -23,13 +23,13 @@ extern const SubGhzProtocol subghz_protocol_raw;
  * Open file for writing
  * @param instance Pointer to a SubGhzProtocolDecoderRAW instance
  * @param dev_name  File name
- * @param preset The modulation on which the signal was received, SubGhzPresetDefinition
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return true On success
  */
 bool subghz_protocol_raw_save_to_file_init(
     SubGhzProtocolDecoderRAW* instance,
     const char* dev_name,
-    SubGhzPresetDefinition* preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Set SubGhzProtocolDecoderRAW to auto mode, which allows subghz_scene_receiver to capture RAW.
@@ -143,13 +143,13 @@ void subghz_protocol_encoder_raw_free(void* context);
 void subghz_protocol_encoder_raw_stop(void* context);
 
 /**
- * Сallback on completion of file transfer.
+ * pause writing to flash.
  * @param context Pointer to a SubGhzProtocolEncoderRAW instance
+ * @param pause pause writing
  */
-// void subghz_protocol_raw_file_encoder_worker_callback_end(void* context);
+void subghz_protocol_raw_save_to_file_pause(SubGhzProtocolDecoderRAW* instance, bool pause);
 
 /**
-
  * Set callback on completion of file transfer.
  * @param instance Pointer to a SubGhzProtocolEncoderRAW instance
  * @param callback_end Callback, SubGhzProtocolEncoderRAWCallbackEnd
@@ -178,7 +178,7 @@ void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char*
 bool subghz_protocol_decoder_raw_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    SubGhzPresetDefinition* preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize and generating an upload to send.

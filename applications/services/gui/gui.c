@@ -1,5 +1,6 @@
 #include "gui/canvas.h"
 #include "gui_i.h"
+#include <assets_icons.h>
 
 #define TAG "GuiSrv"
 
@@ -113,7 +114,6 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             2,
             canvas_width(gui->canvas) - 1,
             canvas_height(gui->canvas) - 4);
-
     }
 
     // Left side
@@ -128,7 +128,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             canvas_frame_set(
                 gui->canvas,
                 x - 1,
-				// SASQUACH SAYS : This is the white box behind the left bar, move it 64 to hide it
+                // SASQUACH SAYS : This is the white box behind the left bar, move it 64 to hide it
                 GUI_STATUS_BAR_Y + 64,
                 width + 2,
                 GUI_STATUS_BAR_WORKAREA_HEIGHT + 2);
@@ -138,8 +138,12 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
             canvas_set_color(gui->canvas, ColorBlack);
             // ViewPort draw
             canvas_frame_set(
-			// SASQUACH SAYS : This is where you move the Icons for the left bar, 64 to hide it
-                gui->canvas, x, GUI_STATUS_BAR_Y + 64, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
+                // SASQUACH SAYS : This is where you move the Icons for the left bar, 64 to hide it
+                gui->canvas,
+                x,
+                GUI_STATUS_BAR_Y + 64,
+                width,
+                GUI_STATUS_BAR_WORKAREA_HEIGHT);
             view_port_draw(view_port, gui->canvas);
             // Recalculate next position
             left_used += (width + 2);
@@ -149,7 +153,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     }
     // Extra notification
     if(need_attention) {
-        width = icon_get_width(&I_Attention_5x8);
+        width = icon_get_width(&I_Hidden_window_9x8);
         // Prepare work area background
         canvas_frame_set(
             gui->canvas,
@@ -163,7 +167,7 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
         // Draw Icon
         canvas_frame_set(
             gui->canvas, x, GUI_STATUS_BAR_Y + 2, width, GUI_STATUS_BAR_WORKAREA_HEIGHT);
-        canvas_draw_icon(gui->canvas, 0, 0, &I_Attention_5x8);
+        canvas_draw_icon(gui->canvas, 0, 0, &I_Hidden_window_9x8);
         // Recalculate next position
         left_used += (width + 2);
         x += (width + 2);
@@ -302,7 +306,9 @@ void gui_add_view_port(Gui* gui, ViewPort* view_port, GuiLayer layer) {
     furi_check(layer < GuiLayerMAX);
     // Only fullscreen supports Vertical orientation for now
     furi_assert(
-        (layer == GuiLayerFullscreen) || (view_port->orientation != ViewPortOrientationVertical));
+        (layer == GuiLayerFullscreen) ||
+        ((view_port->orientation != ViewPortOrientationVertical) &&
+         (view_port->orientation != ViewPortOrientationVerticalFlip)));
 
     gui_lock(gui);
     // Verify that view port is not yet added
@@ -413,7 +419,7 @@ void gui_add_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback, vo
     const CanvasCallbackPair p = {callback, context};
 
     gui_lock(gui);
-    furi_assert(CanvasCallbackPairArray_count(gui->canvas_callback_pair, p) == 0);
+    furi_assert(!CanvasCallbackPairArray_count(gui->canvas_callback_pair, p));
     CanvasCallbackPairArray_push_back(gui->canvas_callback_pair, p);
     gui_unlock(gui);
 

@@ -3,16 +3,32 @@
 #include <furi.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include "card.h"
+#include <flipper_format/flipper_format.h>
+#include <flipper_format/flipper_format_i.h>
+#include "common/card.h"
+#include "common/queue.h"
+#include "common/menu.h"
 
-#define ANIMATION_TIME furi_ms_to_ticks(1500)
-#define ANIMATION_END_MARGIN furi_ms_to_ticks(200)
-#define ROUND_PRICE 10
+#define APP_NAME "Blackjack"
+
+#define CONF_ANIMATION_DURATION "AnimationDuration"
+#define CONF_MESSAGE_DURATION "MessageDuration"
+#define CONF_STARTING_MONEY "StartingMoney"
+#define CONF_ROUND_PRICE "RoundPrice"
+#define CONF_SOUND_EFFECTS "SoundEffects"
 
 typedef enum {
     EventTypeTick,
     EventTypeKey,
 } EventType;
+
+typedef struct {
+    uint32_t animation_duration;
+    uint32_t message_duration;
+    uint32_t starting_money;
+    uint32_t round_price;
+    bool sound_effects;
+} Settings;
 
 typedef struct {
     EventType type;
@@ -23,15 +39,17 @@ typedef enum {
     GameStateGameOver,
     GameStateStart,
     GameStatePlay,
+    GameStateSettings,
     GameStateDealer,
 } PlayState;
 
 typedef enum {
     DirectionUp,
-    DirectionRight,
     DirectionDown,
+    DirectionRight,
     DirectionLeft,
     Select,
+    Back,
     None
 } Direction;
 
@@ -42,20 +60,17 @@ typedef struct {
     uint8_t dealer_card_count;
 
     Direction selectDirection;
+    Settings settings;
 
     uint32_t player_score;
-    uint8_t multiplier;
     uint32_t bet;
-    uint8_t player_time;
-    bool doubled;
-    bool animating;
-    bool started;
     uint8_t selectedMenu;
+    bool doubled;
+    bool started;
+    bool processing;
     Deck deck;
     PlayState state;
+    QueueState queue_state;
+    Menu* menu;
     unsigned int last_tick;
-    unsigned int animationStart;
-    bool dealer_animating;
-    unsigned int delay_tick;
 } GameState;
-

@@ -1,10 +1,11 @@
-#include <furi.h>
-#include <gui/gui.h>
-#include <input/input.h>
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
 
-#include "bird.h"
+#include <FlappyBird_icons.h>
+#include <furi.h>
+#include <gui/gui.h>
+#include <gui/icon_animation_i.h>
+#include <input/input.h>
 
 #define TAG "Flappy"
 #define DEBUG false
@@ -13,10 +14,10 @@
 #define FLAPPY_BIRD_WIDTH 10
 
 #define FLAPPY_PILAR_MAX 6
-#define FLAPPY_PILAR_DIST 40
+#define FLAPPY_PILAR_DIST 35
 
 #define FLAPPY_GAB_HEIGHT 25
-#define FLAPPY_GAB_WIDTH 5
+#define FLAPPY_GAB_WIDTH 10
 
 #define FLAPPY_GRAVITY_JUMP -1.1
 #define FLAPPY_GRAVITY_TICK 0.15
@@ -37,6 +38,7 @@ typedef struct {
 typedef struct {
     float gravity;
     POINT point;
+    IconAnimation* sprite;
 } BIRD;
 
 typedef struct {
@@ -90,6 +92,7 @@ static void flappy_game_state_init(GameState* const game_state) {
     bird.gravity = 0.0f;
     bird.point.x = 15;
     bird.point.y = 32;
+    bird.sprite = icon_animation_alloc(&A_bird);
 
     game_state->debug = DEBUG;
     game_state->bird = bird;
@@ -101,9 +104,10 @@ static void flappy_game_state_init(GameState* const game_state) {
     flappy_game_random_pilar(game_state);
 }
 
-// static void flappy_game_reset(GameState* const game_state) {
-// FURI_LOG_I(TAG, "Reset Game State\r\n"); // Resetting State
-// }
+static void flappy_game_state_free(GameState* const game_state) {
+    icon_animation_free(game_state->bird.sprite);
+    free(game_state);
+}
 
 static void flappy_game_tick(GameState* const game_state) {
     if(game_state->state == GameStateLife) {
@@ -137,11 +141,12 @@ static void flappy_game_tick(GameState* const game_state) {
                 }
                 if(pilar->point.x < -FLAPPY_GAB_WIDTH) pilar->visible = 0;
 
-                // Checking out of bounds
-                if(game_state->bird.point.y < 0 - FLAPPY_BIRD_WIDTH ||
-                   game_state->bird.point.y > FLIPPER_LCD_HEIGHT) {
-                    game_state->state = GameStateGameOver;
-                    break;
+                if(game_state->bird.point.y <= 0 - FLAPPY_BIRD_WIDTH) {
+                    game_state->bird.point.y = 64;
+                }
+
+                if(game_state->bird.point.y > 64 - FLAPPY_BIRD_WIDTH) {
+                    game_state->bird.point.y = FLIPPER_LCD_HEIGHT - FLAPPY_BIRD_WIDTH;
                 }
 
                 // Bird inbetween pipes
@@ -186,34 +191,47 @@ static void flappy_game_render_callback(Canvas* const canvas, void* ctx) {
                     canvas, pilar->point.x, pilar->point.y, FLAPPY_GAB_WIDTH, pilar->height);
 
                 canvas_draw_frame(
+                    canvas, pilar->point.x + 1, pilar->point.y, FLAPPY_GAB_WIDTH, pilar->height);
+
+                canvas_draw_frame(
+                    canvas,
+                    pilar->point.x + 2,
+                    pilar->point.y,
+                    FLAPPY_GAB_WIDTH - 1,
+                    pilar->height);
+
+                canvas_draw_frame(
                     canvas,
                     pilar->point.x,
                     pilar->point.y + pilar->height + FLAPPY_GAB_HEIGHT,
                     FLAPPY_GAB_WIDTH,
                     FLIPPER_LCD_HEIGHT - pilar->height - FLAPPY_GAB_HEIGHT);
-            }
-        }
-        // Flappy
-        for(int h = 0; h < FLAPPY_BIRD_HEIGHT; h++) {
-            for(int w = 0; w < FLAPPY_BIRD_WIDTH; w++) {
-                // Switch animation
-                int bird = 0;
-                if(game_state->bird.gravity < -0.5)
-                    bird = 1;
-                else
-                    bird = 2;
 
-                // Draw bird pixels
-                if(bird_array[bird][h][w] == 1) {
-                    int x = game_state->bird.point.x + h;
-                    int y = game_state->bird.point.y + w;
+                canvas_draw_frame(
+                    canvas,
+                    pilar->point.x + 1,
+                    pilar->point.y + pilar->height + FLAPPY_GAB_HEIGHT,
+                    FLAPPY_GAB_WIDTH - 1,
+                    FLIPPER_LCD_HEIGHT - pilar->height - FLAPPY_GAB_HEIGHT);
 
-                    canvas_draw_dot(canvas, x, y);
-                }
+                canvas_draw_frame(
+                    canvas,
+                    pilar->point.x + 2,
+                    pilar->point.y + pilar->height + FLAPPY_GAB_HEIGHT,
+                    FLAPPY_GAB_WIDTH - 1,
+                    FLIPPER_LCD_HEIGHT - pilar->height - FLAPPY_GAB_HEIGHT);
             }
         }
 
-        // Stats
+        // Switch animation
+        game_state->bird.sprite->frame = 1;
+        if(game_state->bird.gravity < -0.5)
+            game_state->bird.sprite->frame = 0;
+        else if(game_state->bird.gravity > 0.5)
+            game_state->bird.sprite->frame = 2;
+
+        canvas_draw_icon_animation(
+            canvas, game_state->bird.point.x, game_state->bird.point.y, game_state->bird.sprite);
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
@@ -305,16 +323,16 @@ int32_t flappy_game_app(void* p) {
                 if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
                     case InputKeyUp:
-                        game_state->bird.point.y--;
+                        if(game_state->state == GameStateLife) {
+                            flappy_game_flap(game_state);
+                        }
+
                         break;
                     case InputKeyDown:
-                        game_state->bird.point.y++;
                         break;
                     case InputKeyRight:
-                        game_state->bird.point.x++;
                         break;
                     case InputKeyLeft:
-                        game_state->bird.point.x--;
                         break;
                     case InputKeyOk:
                         if(game_state->state == GameStateGameOver) {
@@ -329,14 +347,13 @@ int32_t flappy_game_app(void* p) {
                     case InputKeyBack:
                         processing = false;
                         break;
+                    default:
+                        break;
                     }
                 }
             } else if(event.type == EventTypeTick) {
                 flappy_game_tick(game_state);
             }
-        } else {
-            // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
-            // event timeout
         }
 
         view_port_update(view_port);
@@ -351,7 +368,7 @@ int32_t flappy_game_app(void* p) {
     delete_mutex(&state_mutex);
 
 free_and_exit:
-    free(game_state);
+    flappy_game_state_free(game_state);
     furi_message_queue_free(event_queue);
 
     return return_code;
