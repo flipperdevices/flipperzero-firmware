@@ -3,8 +3,9 @@
 static View* view;
 
 static const uint8_t temp_positions[3][2] = {{37, 24}, {37, 16}, {9, 16}};
+static const uint8_t hum_positions[2][2] = {{37, 38}, {65, 16}};
 static uint8_t sensor_index = 0;
-
+static char buff[5];
 static void _draw_noSensors(Canvas* canvas) {
     canvas_draw_str(canvas, 0, 24, "Sensors not found");
 }
@@ -20,7 +21,6 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
     canvas_draw_icon(
         canvas, temp_positions[pos][0] + 3, temp_positions[pos][1] + 3, &I_temp_C_11x14);
 
-    char buff[5];
     if((int8_t)temp == -128) {
         snprintf(buff, 5, "--");
         canvas_set_font(canvas, FontBigNumbers);
@@ -31,20 +31,19 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
             AlignCenter,
             AlignCenter,
             buff);
-        uint8_t int_len = canvas_string_width(canvas, buff);
         snprintf(buff, 4, ". -");
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(
             canvas,
-            temp_positions[pos][0] + 27 + int_len,
+            temp_positions[pos][0] + 50,
             temp_positions[pos][1] + 10 + 3,
             AlignRight,
             AlignCenter,
             buff);
         return;
     }
-    //Целая часть температуры
 
+    //Целая часть температуры
     snprintf(buff, 5, "%d", temp_int);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
@@ -59,14 +58,59 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
         uint8_t int_len = canvas_string_width(canvas, buff);
         snprintf(buff, 4, ".%d", temp_dec);
         canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(
+            canvas,
+            temp_positions[pos][0] + 27 + int_len / 2 + 2,
+            temp_positions[pos][1] + 10 + 7,
+            buff);
+    }
+}
+
+static void _draw_hum(Canvas* canvas, float hum, uint8_t pos) {
+    //Рисование рамки
+    canvas_draw_rframe(canvas, hum_positions[pos][0], hum_positions[pos][1], 54, 20, 3);
+    canvas_draw_rframe(canvas, hum_positions[pos][0], hum_positions[pos][1], 54, 19, 3);
+
+    //Рисование иконки
+    canvas_draw_icon(canvas, hum_positions[pos][0] + 3, hum_positions[pos][1] + 2, &I_hum_9x15);
+
+    if((int8_t)hum == -128) {
+        snprintf(buff, 5, "--");
+        canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(
             canvas,
-            temp_positions[pos][0] + 27 + int_len + ((temp_int >= 0 && temp_int < 10) ? 5 : 0),
-            temp_positions[pos][1] + 10 + 3,
+            hum_positions[pos][0] + 27,
+            hum_positions[pos][1] + 10,
+            AlignCenter,
+            AlignCenter,
+            buff);
+        snprintf(buff, 4, ". -");
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(
+            canvas,
+            hum_positions[pos][0] + 50,
+            hum_positions[pos][1] + 10 + 3,
             AlignRight,
             AlignCenter,
             buff);
+        return;
     }
+
+    //Целая часть влажности
+    snprintf(buff, 5, "%d", (uint8_t)hum);
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(
+        canvas,
+        hum_positions[pos][0] + 27,
+        hum_positions[pos][1] + 10,
+        AlignCenter,
+        AlignCenter,
+        buff);
+    uint8_t int_len = canvas_string_width(canvas, buff);
+    //Единица измерения
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(
+        canvas, hum_positions[pos][0] + 27 + int_len / 2 + 2, hum_positions[pos][1] + 10 + 7, "%");
 }
 
 static void _draw_sensorsCarousel(Canvas* canvas) {
@@ -92,7 +136,8 @@ static void _draw_sensorsCarousel(Canvas* canvas) {
     }
 
     //Печать значения температуры
-    _draw_temp(canvas, app->sensors[sensor_index]->temp, 0);
+    _draw_temp(canvas, app->sensors[sensor_index]->temp, 1);
+    _draw_hum(canvas, app->sensors[sensor_index]->hum, 0);
 }
 
 static void _draw_callback(Canvas* canvas, void* _model) {
