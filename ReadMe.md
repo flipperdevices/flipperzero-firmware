@@ -25,6 +25,7 @@ Thank you to all the supporters!
 - Updated: [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU2XD, SHT2X, SI702X, SI700X, SI701X or AM2320`
 - Updated: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - Added: [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
+- Updated: [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
