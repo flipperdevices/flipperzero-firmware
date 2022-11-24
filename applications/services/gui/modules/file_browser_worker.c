@@ -377,11 +377,7 @@ BrowserWorker*
         browser_path_trim(browser->path_start);
     }
 
-    browser->thread = furi_thread_alloc();
-    furi_thread_set_name(browser->thread, "BrowserWorker");
-    furi_thread_set_stack_size(browser->thread, 2048);
-    furi_thread_set_context(browser->thread, browser);
-    furi_thread_set_callback(browser->thread, browser_worker);
+    browser->thread = furi_thread_alloc_ex("BrowserWorker", 2048, browser_worker, browser);
     furi_thread_start(browser->thread);
 
     return browser;
