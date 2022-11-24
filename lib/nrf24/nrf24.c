@@ -35,12 +35,7 @@ uint8_t nrf24_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data) 
     uint8_t tx[2] = {W_REGISTER | (REGISTER_MASK & reg), data};
     uint8_t rx[2] = {0};
     nrf24_spi_trx(handle, tx, rx, 2, nrf24_TIMEOUT);
-
-
-    FURI_LOG_D("NRF_WR", " #%02X=%02X", reg, data);
-
-
-
+    //FURI_LOG_D("NRF_WR", " #%02X=%02X", reg, data);
     return rx[0];
 }
 
@@ -52,13 +47,7 @@ uint8_t
     tx[0] = W_REGISTER | (REGISTER_MASK & reg);
     memcpy(&tx[1], data, size);
     nrf24_spi_trx(handle, tx, rx, size + 1, nrf24_TIMEOUT);
-
-
-
-    FURI_LOG_D("NRF_WR", " #%02X(%02X)=0x%02X%02X%02X%02X%02X", reg, size, data[0], data[1], data[2], data[3], data[4] );
-
-
-
+    //FURI_LOG_D("NRF_WR", " #%02X(%02X)=0x%02X%02X%02X%02X%02X", reg, size, data[0], data[1], data[2], data[3], data[4] );
     return rx[0];
 }
 
@@ -231,6 +220,7 @@ uint8_t
     return status;
 }
 
+// Return 0 when error
 uint8_t nrf24_txpacket(FuriHalSpiBusHandle* handle, uint8_t* payload, uint8_t size, bool ack) {
     uint8_t status = 0;
     uint8_t tx[size + 1];
@@ -247,7 +237,8 @@ uint8_t nrf24_txpacket(FuriHalSpiBusHandle* handle, uint8_t* payload, uint8_t si
     nrf24_spi_trx(handle, tx, rx, size + 1, nrf24_TIMEOUT);
     nrf24_set_tx_mode(handle);
 
-    while(!(status & (TX_DS | MAX_RT))) status = nrf24_status(handle);
+    uint32_t start_time = furi_get_tick();
+    while(!(status & (TX_DS | MAX_RT)) && furi_get_tick() - start_time < 2000UL) status = nrf24_status(handle);
 
     if(status & MAX_RT) nrf24_flush_tx(handle);
 
