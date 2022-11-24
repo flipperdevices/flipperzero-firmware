@@ -61,6 +61,7 @@ bool nfc_scene_mf_classic_menu_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDetectReader);
+            DOLPHIN_DEED(DolphinDeedNfcDetectReader);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
