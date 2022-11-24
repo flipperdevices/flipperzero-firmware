@@ -1,10 +1,14 @@
 
 # zeitraffer
 
+[![Build FAP](https://github.com/theageoflove/flipperzero-zeitraffer/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/theageoflove/flipperzero-zeitraffer/actions/workflows/build.yml)
+
 english version [below](#eng)
 
 ![zeitraffer for flipper zero](https://theageoflove.ru/uploads/2022/11/photo_2022-11-10_15-54-25.jpg)
 Видео работы: https://youtube.com/shorts/QKyQa7_s7IE
+
+Готовый фап под последнюю релизную прошивку [можно скачать здесь](https://nightly.link/theageoflove/flipperzero-zeitraffer/workflows/build/main/zeitraffer.fap.zip).
 
 Я ненастоящий сварщик, не обессудьте. Делал для своей Sony DSLR A100, подходит для любых камер, поддерживающих проводной пульт с тремя контактами.
 
@@ -40,6 +44,8 @@ english version [below](#eng)
 
 # <a name="eng"></a>English
 Simple timelapse app for Flipper Zero.
+
+[Get latest release](https://nightly.link/theageoflove/flipperzero-zeitraffer/workflows/build/main/zeitraffer.fap.zip)
 
 based on https://github.com/zmactep/flipperzero-hello-world
 
