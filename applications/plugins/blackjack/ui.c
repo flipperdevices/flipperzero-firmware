@@ -81,7 +81,7 @@ void draw_score(Canvas* const canvas, bool top, uint8_t amount) {
 
 void draw_money(Canvas* const canvas, uint32_t score) {
     canvas_set_font(canvas, FontSecondary);
-    char drawChar[10];
+    char drawChar[11];
     uint32_t currAmount = score;
     if(currAmount < 1000) {
         snprintf(drawChar, sizeof(drawChar), "$%lu", currAmount);

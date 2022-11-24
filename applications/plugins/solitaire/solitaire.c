@@ -540,7 +540,7 @@ int32_t solitaire_app(void* p) {
                 localstate->input = InputKeyMAX;
             }
         } else {
-            FURI_LOG_W(APP_NAME, "osMessageQueue: event timeout");
+            //FURI_LOG_W(APP_NAME, "osMessageQueue: event timeout");
             // event timeout
         }
         if(hadChange || game_state->state == GameStateAnimate) view_port_update(view_port);

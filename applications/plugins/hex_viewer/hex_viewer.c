@@ -6,12 +6,8 @@
 #include <gui/elements.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
-
 #include <stream/stream.h>
 #include <stream/buffered_file_stream.h>
-
-#include <lib/flipper_format/flipper_format.h>
-
 #include <toolbox/stream/file_stream.h>
 
 #define TAG "HexViewer"
@@ -54,7 +50,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     elements_button_right(canvas, "Info");
 
     int ROW_HEIGHT = 12;
-    int TOP_OFFSET = 10; // 24
+    int TOP_OFFSET = 10;
     int LEFT_OFFSET = 3;
 
     uint32_t line_count = hex_viewer->model->file_size / HEX_VIEWER_BYTES_PER_ROW;
@@ -113,7 +109,7 @@ static void input_callback(InputEvent* input_event, void* ctx) {
     }
 }
 
-HexViewer* hex_viewer_alloc() {
+static HexViewer* hex_viewer_alloc() {
     HexViewer* instance = malloc(sizeof(HexViewer));
 
     instance->model = malloc(sizeof(HexViewerModel));
@@ -135,7 +131,7 @@ HexViewer* hex_viewer_alloc() {
     return instance;
 }
 
-void hex_viewer_free(HexViewer* instance) {
+static void hex_viewer_free(HexViewer* instance) {
     furi_record_close(RECORD_STORAGE);
 
     gui_remove_view_port(instance->gui, instance->view_port);
@@ -152,44 +148,7 @@ void hex_viewer_free(HexViewer* instance) {
     free(instance);
 }
 
-// bool hex_viewer_read_file2(HexViewer* hex_viewer, const char* file_path) {
-//     furi_assert(hex_viewer);
-//     furi_assert(file_path);
-
-//     memset(hex_viewer->model->file_bytes, 0x0, HEX_VIEWER_BUF_SIZE);
-
-//     Storage* storage = furi_record_open(RECORD_STORAGE);
-//     File* file = storage_file_alloc(storage);
-
-//     bool isOk = true;
-
-//     do {
-//         if(!storage_file_open(file, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
-//             FURI_LOG_E(TAG, "Unable to open file: %s", file_path);
-//             isOk = false;
-//             break;
-//         };
-
-//         hex_viewer->model->file_size = storage_file_size(file);
-
-//         uint32_t offset = hex_viewer->model->line * HEX_VIEWER_BYTES_PER_ROW;
-//         if(!storage_file_seek(file, offset, true)) {
-//             FURI_LOG_E(TAG, "Unable to seek file: %s", file_path);
-//             isOk = false;
-//             break;
-//         }
-
-//         hex_viewer->model->read_bytes =
-//             storage_file_read(file, hex_viewer->model->file_bytes, HEX_VIEWER_BUF_SIZE);
-//     } while(false);
-
-//     storage_file_free(file);
-//     furi_record_close(RECORD_STORAGE);
-
-//     return isOk;
-// }
-
-bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
+static bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
     furi_assert(hex_viewer);
     furi_assert(file_path);
 
@@ -210,9 +169,9 @@ bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
     return isOk;
 }
 
-bool hex_viewer_read_file(HexViewer* hex_viewer) {
+static bool hex_viewer_read_file(HexViewer* hex_viewer) {
     furi_assert(hex_viewer);
-    // furi_assert(file_path);
+    furi_assert(hex_viewer->model->stream);
 
     memset(hex_viewer->model->file_bytes, 0x0, HEX_VIEWER_BUF_SIZE);
     bool isOk = true;

@@ -98,17 +98,6 @@ steps:
         from_secret: dep_target_noanim
       source: flipper-z-f7-update-${DRONE_TAG}n.tgz
 
-  - name: "Trigger update server reindex"
-    image: hfdj/fztools
-    pull: never
-    environment:
-      UPD_KEY:
-        from_secret: git_update_serv_token
-      UPD_URL:
-        from_secret: git_update_server_url
-    commands:
-      - curl -X POST -F 'key='$UPD_KEY'' $UPD_URL
-
   - name: "Do Github release"
     image: ddplugins/github-release
     pull: never
@@ -129,6 +118,17 @@ steps:
         - sha1
         - crc32
 
+  - name: "Trigger update server reindex"
+    image: hfdj/fztools
+    pull: never
+    environment:
+      UPD_KEY:
+        from_secret: git_update_serv_token
+      UPD_URL:
+        from_secret: git_update_server_url
+    commands:
+      - curl -X POST -F 'key='$UPD_KEY'' $UPD_URL
+
   - name: "Send files to telegram"
     image: appleboy/drone-telegram
     settings:
@@ -147,6 +147,9 @@ steps:
 
 
         [-How to install firmware-](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/HowToInstall.md)
+
+
+        [-Download latest extra apps pack-](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps)
 
 
         [-Version without custom animations - Install via Web Updater-](https://lab.flipper.net/?url=https://unleashedflip.com/fw_no_anim/flipper-z-f7-update-${DRONE_TAG}n.tgz&channel=release-cfw&version=${DRONE_TAG}n)
@@ -175,14 +178,15 @@ steps:
         [-How to install firmware-](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/documentation/HowToInstall.md)
 
 
+        [-Download latest extra apps pack-](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps)
+
+
         [-Version without custom animations - Install via Web Updater-](https://lab.flipper.net/?url=https://unleashedflip.com/fw_no_anim/flipper-z-f7-update-${DRONE_TAG}n.tgz&channel=release-cfw&version=${DRONE_TAG}n)
 
 
         [-Install via Web Updater-](https://lab.flipper.net/?url=https://unleashedflip.com/fw/${DRONE_TAG}/flipper-z-f7-update-${DRONE_TAG}.tgz&channel=release-cfw&version=${DRONE_TAG})"
 
 trigger:
-  branch:
-    - release
   event:
     - tag
 
