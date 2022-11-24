@@ -373,6 +373,10 @@ BrowserWorker*
     browser->path_current = furi_string_alloc_set(path);
     browser->path_next = furi_string_alloc_set(path);
 
+    if(browser_path_is_file(browser->path_start)) {
+        browser_path_trim(browser->path_start);
+    }
+
     browser->thread = furi_thread_alloc();
     furi_thread_set_name(browser->thread, "BrowserWorker");
     furi_thread_set_stack_size(browser->thread, 2048);
