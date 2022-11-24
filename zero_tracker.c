@@ -1,6 +1,10 @@
 #include <furi.h>
+#include <gui/gui.h>
+#include <gui/view_dispatcher.h>
+#include <notification/notification_messages.h>
 #include "zero_tracker.h"
 #include "tracker_engine/tracker.h"
+#include "view/tracker_view.h"
 
 // Channel p_0_channels[] = {
 //     {
@@ -479,6 +483,17 @@ void tracker_message(TrackerMessage message, void* context) {
 int32_t zero_tracker_app(void* p) {
     UNUSED(p);
 
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, &sequence_display_backlight_enforce_on);
+
+    Gui* gui = furi_record_open(RECORD_GUI);
+    ViewDispatcher* view_dispatcher = view_dispatcher_alloc();
+    TrackerView* tracker_view = tracker_view_alloc();
+    tracker_view_set_song(tracker_view, &song);
+    view_dispatcher_add_view(view_dispatcher, 0, tracker_view_get_view(tracker_view));
+    view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_switch_to_view(view_dispatcher, 0);
+
     FuriMessageQueue* queue = furi_message_queue_alloc(8, sizeof(TrackerMessage));
     Tracker* tracker = tracker_alloc();
     tracker_set_message_callback(tracker, tracker_message, queue);
@@ -493,6 +508,7 @@ int32_t zero_tracker_app(void* p) {
                 uint8_t order_list_index = message.data.position.order_list_index;
                 uint8_t row = message.data.position.row;
                 uint8_t pattern = song.order_list[order_list_index];
+                tracker_view_set_position(tracker_view, order_list_index, row);
                 FURI_LOG_I("Tracker", "O:%d P:%d R:%d", order_list_index, pattern, row);
             } else if(message.type == TrackerEndOfSong) {
                 FURI_LOG_I("Tracker", "End of song");
@@ -504,6 +520,15 @@ int32_t zero_tracker_app(void* p) {
     tracker_stop(tracker);
     tracker_free(tracker);
     furi_message_queue_free(queue);
+
+    view_dispatcher_remove_view(view_dispatcher, 0);
+    tracker_view_free(tracker_view);
+    view_dispatcher_free(view_dispatcher);
+
+    notification_message(notification, &sequence_display_backlight_enforce_auto);
+
+    furi_record_close(RECORD_NOTIFICATION);
+    furi_record_close(RECORD_GUI);
 
     return 0;
 }
