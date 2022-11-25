@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.28,,
+Version,+,7.33,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -669,7 +669,6 @@ Function,-,coshl,long double,long double
 Function,-,cosl,long double,long double
 Function,+,crc32_calc_buffer,uint32_t,"uint32_t, const void*, size_t"
 Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
-Function,-,crypto1_bit,uint8_t,"Crypto1*, uint8_t, int"
 Function,-,crypto1_byte,uint8_t,"Crypto1*, uint8_t, int"
 Function,-,crypto1_decrypt,void,"Crypto1*, uint8_t*, uint16_t, uint8_t*"
 Function,-,crypto1_encrypt,void,"Crypto1*, uint8_t*, uint8_t*, uint16_t, uint8_t*, uint8_t*"
@@ -708,13 +707,13 @@ Function,+,dialog_message_show,DialogMessageButton,"DialogsApp*, const DialogMes
 Function,+,dialog_message_show_storage_error,void,"DialogsApp*, const char*"
 Function,-,difftime,double,"time_t, time_t"
 Function,-,digital_sequence_add,void,"DigitalSequence*, uint8_t"
-Function,-,digital_sequence_alloc,DigitalSequence*,uint32_t
+Function,-,digital_sequence_alloc,DigitalSequence*,"uint32_t, const GpioPin*"
 Function,-,digital_sequence_clear,void,DigitalSequence*
 Function,-,digital_sequence_free,void,DigitalSequence*
-Function,-,digital_sequence_send,_Bool,"DigitalSequence*, const GpioPin*"
-Function,-,digital_sequence_send_signal,_Bool,DigitalSignal*
+Function,-,digital_sequence_send,_Bool,DigitalSequence*
 Function,-,digital_sequence_set_signal,void,"DigitalSequence*, uint8_t, DigitalSignal*"
 Function,-,digital_signal_add,void,"DigitalSignal*, uint32_t"
+Function,-,digital_signal_add_pulse,void,"DigitalSignal*, uint32_t, _Bool"
 Function,-,digital_signal_alloc,DigitalSignal*,uint32_t
 Function,-,digital_signal_append,_Bool,"DigitalSignal*, DigitalSignal*"
 Function,-,digital_signal_free,void,DigitalSignal*
@@ -1166,6 +1165,7 @@ Function,+,furi_hal_nfc_emulate_nfca,_Bool,"uint8_t*, uint8_t, uint8_t*, uint8_t
 Function,+,furi_hal_nfc_exit_sleep,void,
 Function,+,furi_hal_nfc_field_off,void,
 Function,+,furi_hal_nfc_field_on,void,
+Function,-,furi_hal_nfc_gen_bitstream,void,"FuriHalNfcTxRxContext*, uint8_t*, size_t"
 Function,-,furi_hal_nfc_init,void,
 Function,+,furi_hal_nfc_is_busy,_Bool,
 Function,+,furi_hal_nfc_is_init,_Bool,
@@ -1967,6 +1967,11 @@ Function,-,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,-,nfca_signal_alloc,NfcaSignal*,
 Function,-,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,-,nfca_signal_free,void,NfcaSignal*
+Function,-,nfca_trans_rx_continue,void,NfcaTransRxState*
+Function,-,nfca_trans_rx_deinit,void,NfcaTransRxState*
+Function,-,nfca_trans_rx_init,void,NfcaTransRxState*
+Function,-,nfca_trans_rx_loop,_Bool,"NfcaTransRxState*, uint32_t"
+Function,-,nfca_trans_rx_pause,void,NfcaTransRxState*
 Function,-,nfcv_emu_deinit,void,
 Function,-,nfcv_emu_init,void,"FuriHalNfcDevData*, NfcVData*"
 Function,-,nfcv_emu_loop,_Bool,"FuriHalNfcDevData*, NfcVData*, uint32_t"

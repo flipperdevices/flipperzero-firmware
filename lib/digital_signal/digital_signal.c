@@ -2,17 +2,15 @@
 
 #include <furi.h>
 #include <furi_hal_resources.h>
-#include <stm32wbxx_ll_dma.h>
-#include <stm32wbxx_ll_tim.h>
 #include <math.h>
 
 #define TAG "DigitalSignal"
 
-#pragma GCC optimize("O3,unroll-loops,Ofast")
 
 #define F_TIM       (64000000.0)
 #define T_TIM       1562 /* 15.625 ns *100     */
 #define T_TIM_DIV2   781 /* 15.625 ns / 2 *100 */
+
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
@@ -23,6 +21,26 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->reload_reg_buff = malloc(signal->edges_max_cnt * sizeof(uint32_t));
     signal->reload_reg_entries = 0;
     signal->reload_reg_remainder = 0;
+    
+    signal->dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    signal->dma_config_gpio.Mode = LL_DMA_MODE_CIRCULAR;
+    signal->dma_config_gpio.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    signal->dma_config_gpio.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    signal->dma_config_gpio.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    signal->dma_config_gpio.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    signal->dma_config_gpio.NbData = 2;
+    signal->dma_config_gpio.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    signal->dma_config_gpio.Priority = LL_DMA_PRIORITY_VERYHIGH;
+
+    signal->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) &(TIM2->ARR);
+    signal->dma_config_timer.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    signal->dma_config_timer.Mode = LL_DMA_MODE_NORMAL;
+    signal->dma_config_timer.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    signal->dma_config_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    signal->dma_config_timer.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    signal->dma_config_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    signal->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    signal->dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
 
     return signal;
 }
@@ -144,7 +162,6 @@ void digital_signal_prepare(DigitalSignal* signal) {
     }
 }
 
-
 static void digital_signal_stop_dma() {
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
@@ -164,39 +181,14 @@ static bool digital_signal_setup_dma(DigitalSignal* signal) {
         return false;
     }
 
-    LL_DMA_InitTypeDef dma_config_gpio = {};
-    LL_DMA_InitTypeDef dma_config_timer = {};
-
-    dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t) signal->gpio_buff;
-    dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) &(signal->gpio->port->BSRR);
-    dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config_gpio.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config_gpio.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config_gpio.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config_gpio.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config_gpio.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config_gpio.NbData = 2;
-    dma_config_gpio.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    dma_config_gpio.Priority = LL_DMA_PRIORITY_VERYHIGH;
-
-    // Init timer arr register buffer and DMA channel
-    dma_config_timer.MemoryOrM2MDstAddress = (uint32_t)signal->reload_reg_buff;
-    dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) &(TIM2->ARR);
-    dma_config_timer.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config_timer.Mode = LL_DMA_MODE_NORMAL;
-    dma_config_timer.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config_timer.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config_timer.NbData = signal->reload_reg_entries;
-    dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
-
-    digital_signal_stop_dma();
+    signal->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t) signal->gpio_buff;
+    signal->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) &(signal->gpio->port->BSRR);
+    signal->dma_config_timer.MemoryOrM2MDstAddress = (uint32_t)signal->reload_reg_buff;
+    signal->dma_config_timer.NbData = signal->reload_reg_entries;
 
     /* set up DMA channel 1 and 2 for GPIO and timer copy operations */
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config_gpio);
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &dma_config_timer);
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &signal->dma_config_gpio);
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &signal->dma_config_timer);
 
     /* enable both DMA channels */
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
@@ -251,9 +243,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     signal->edge_cnt--;
 }
 
-
-
-
 void digital_sequence_alloc_signals(DigitalSequence* sequence, uint32_t size) {
     sequence->signals_size = size;
     sequence->signals = malloc(sequence->signals_size * sizeof(DigitalSignal*));
@@ -270,13 +259,8 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
 
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
-    //gpio = &gpio_ext_pb2;
-    //furi_hal_gpio_init(&gpio_ext_pb2, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    //furi_hal_gpio_init(&gpio_ext_pc3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    //furi_hal_gpio_write(&gpio_ext_pb2, false);
-    //furi_hal_gpio_write(&gpio_ext_pc3, false);
-
     sequence->gpio = gpio;
+    sequence->bake = false;
 
     digital_sequence_alloc_signals(sequence, 32);
     digital_sequence_alloc_sequence(sequence, size);
@@ -380,7 +364,6 @@ static bool digital_sequence_send_signal(DigitalSignal* signal) {
         digital_signal_setup_timer();
         digital_signal_start_timer();
     } else {
-
         /* configure next polarities and timings */
         digital_signal_update_dma(signal);
     }
@@ -425,6 +408,7 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     }
 
     int32_t remainder = 0;
+    FURI_CRITICAL_ENTER();
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         uint8_t signal_index = sequence->sequence[pos];
@@ -432,9 +416,7 @@ bool digital_sequence_send(DigitalSequence* sequence) {
 
         if(!sig) {
             FURI_LOG_D(TAG, "digital_sequence_send: Signal at index %u, used at pos %lu is NULL, aborting", signal_index, pos);
-            digital_signal_stop_timer();
-            digital_signal_stop_dma();
-            return false;
+            break;
         }
 
         /* when we are too late more than half a tick, make the first edge temporarily longer */
@@ -461,11 +443,10 @@ bool digital_sequence_send(DigitalSequence* sequence) {
         bool success = digital_sequence_send_signal(sig);
 
         if(!success) {
-            digital_signal_stop_timer();
-            digital_signal_stop_dma();
-            return false;
+            break;
         }
     }
+    FURI_CRITICAL_EXIT();
 
     while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
     }

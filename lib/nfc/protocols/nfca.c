@@ -2,17 +2,26 @@
 #include <string.h>
 #include <stdio.h>
 #include <furi.h>
+#include <furi_hal_gpio.h>
+#include <furi_hal_resources.h>
 
 #define NFCA_CMD_RATS (0xE0U)
 
 #define NFCA_CRC_INIT (0x6363)
 
 #define NFCA_F_SIG    (13560000.0)                    /* [Hz] NFC frequency */
-#define NFCA_F_SUB    (NFCA_F_SIG / 16)               /* [Hz] NFC subcarrier frequency fs/16 (847500 Hz) */
+#define NFCA_F_SUB    (NFCA_F_SIG/16)                 /* [Hz] NFC subcarrier frequency fs/16 (847500 Hz) */
 #define T_SUB         (1000000000000.0f / NFCA_F_SUB) /* [ps] subcarrier period = 1/NFCA_F_SUB (1.18 µs) */
-#define T_SUB_PHASE   (T_SUB / 2)                     /* [ps] a single subcarrier phase (590 µs) */
+#define T_SUB_PHASE   (T_SUB/2)                       /* [ps] a single subcarrier phase (590 µs) */
 
 #define NFCA_SIGNAL_MAX_EDGES (1350)
+
+#define SEQ_SOF  0
+#define SEQ_BIT0 1
+#define SEQ_BIT1 2
+#define SEQ_EOF  3
+#define SEQ_IDLE 4
+
 
 typedef struct {
     uint8_t cmd;
@@ -65,27 +74,32 @@ bool nfca_emulation_handler(
 static void nfca_add_byte(NfcaSignal* nfca_signal, uint8_t byte, bool parity) {
     for(uint8_t i = 0; i < 8; i++) {
         if(byte & (1 << i)) {
-            digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_d);
+            digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT1);
         } else {
-            digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_e);
+            digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT0);
         }
     }
     if(parity) {
-        digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_d);
+        digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT1);
     } else {
-        digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_e);
+        digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT0);
     }
 }
 
 static void nfca_add_modulation(DigitalSignal* signal, size_t phases) {
     for(size_t i = 0; i < phases; i++) {
-        bool modulated = (i % 2 == 0);
-        digital_signal_add_pulse(signal, DIGITAL_SIGNAL_PS(T_SUB_PHASE), modulated);
+        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(T_SUB_PHASE);
     }
 }
 
 static void nfca_add_silence(DigitalSignal* signal, size_t phases) {
-    digital_signal_add_pulse(signal, DIGITAL_SIGNAL_PS(phases*T_SUB_PHASE), false);
+    bool end_level = signal->start_level ^ ((signal->edge_cnt % 2) == 0);
+
+    if((signal->edge_cnt == 0) || end_level) {
+        signal->edge_timings[signal->edge_cnt++] = DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
+    } else {
+        signal->edge_timings[signal->edge_cnt - 1] += DIGITAL_SIGNAL_PS(phases * T_SUB_PHASE);
+    }
 }
 
 NfcaSignal* nfca_signal_alloc() {
@@ -97,16 +111,29 @@ NfcaSignal* nfca_signal_alloc() {
     nfca_signal->seq_f = digital_signal_alloc(10);
 
     /* SEQ D has the first half modulated, used as SOF */
+    nfca_signal->seq_d->start_level = true;
     nfca_add_modulation(nfca_signal->seq_d, 8);
     nfca_add_silence(nfca_signal->seq_d, 8);
 
     /* SEQ E has the second half modulated */
+    nfca_signal->seq_e->start_level = false;
     nfca_add_silence(nfca_signal->seq_e, 8);
     nfca_add_modulation(nfca_signal->seq_e, 8);
 
     /* SEQ F is just no modulation, used as EOF */
+    nfca_signal->seq_f->start_level = false;
     nfca_add_silence(nfca_signal->seq_f, 16);
-    nfca_signal->tx_signal = digital_signal_alloc(NFCA_SIGNAL_MAX_EDGES);
+
+    nfca_signal->tx_signal = digital_sequence_alloc(NFCA_SIGNAL_MAX_EDGES, &gpio_spi_r_mosi);
+
+    /* we are dealing with shorter sequences, enable bake-before-sending */
+    //nfca_signal->tx_signal->bake = true;
+
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_SOF, nfca_signal->seq_d);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_BIT0, nfca_signal->seq_e);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_BIT1, nfca_signal->seq_d);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_EOF, nfca_signal->seq_f);
+    digital_sequence_set_signal(nfca_signal->tx_signal, SEQ_IDLE, nfca_signal->seq_f);
 
     return nfca_signal;
 }
@@ -117,7 +144,7 @@ void nfca_signal_free(NfcaSignal* nfca_signal) {
     digital_signal_free(nfca_signal->seq_d);
     digital_signal_free(nfca_signal->seq_e);
     digital_signal_free(nfca_signal->seq_f);
-    digital_signal_free(nfca_signal->tx_signal);
+    digital_sequence_free(nfca_signal->tx_signal);
     free(nfca_signal);
 }
 
@@ -126,21 +153,18 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
     furi_assert(data);
     furi_assert(parity);
 
-    nfca_signal->tx_signal->edge_cnt = 0;
-    nfca_signal->tx_signal->start_level = true;
+    digital_sequence_clear(nfca_signal->tx_signal);
 
-    // Start of frame
-    digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_f);
-    digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_f);
-    digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_f);
-    digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_d);
+    /* add some idle bit times before SOF in case the GPIO was active */
+    digital_sequence_add(nfca_signal->tx_signal, SEQ_IDLE);
+    digital_sequence_add(nfca_signal->tx_signal, SEQ_SOF);
 
     if(bits < 8) {
         for(size_t i = 0; i < bits; i++) {
             if(FURI_BIT(data[0], i)) {
-                digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_d);
+                digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT1);
             } else {
-                digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_e);
+                digital_sequence_add(nfca_signal->tx_signal, SEQ_BIT0);
             }
         }
     } else {
@@ -148,5 +172,6 @@ void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, u
             nfca_add_byte(nfca_signal, data[i], parity[i / 8] & (1 << (7 - (i & 0x07))));
         }
     }
-    digital_signal_append(nfca_signal->tx_signal, nfca_signal->seq_f);
+
+    digital_sequence_add(nfca_signal->tx_signal, SEQ_EOF);
 }

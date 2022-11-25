@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stm32wbxx_ll_dma.h>
+#include <stm32wbxx_ll_dmamux.h>
+#include <stm32wbxx_ll_tim.h>
+#include <stm32wbxx_ll_exti.h>
 
 #include <furi_hal_gpio.h>
 
@@ -10,8 +14,9 @@
 extern "C" {
 #endif
 
-#define PULSE_READER_NO_EDGE 0xFFFFFFFFUL
-#define F_TIM2                 64000000UL
+#define PULSE_READER_NO_EDGE    0xFFFFFFFFUL
+#define PULSE_READER_LOST_EDGE  0xFFFFFFFEUL
+#define F_TIM2                  64000000UL
 
 /**
  * unit of the edge durations to return
@@ -27,14 +32,19 @@ typedef enum {
 typedef struct {
     bool start_level;
     uint32_t* timer_buffer;
+    uint32_t* gpio_buffer;
     uint32_t size;
     uint32_t pos;
     uint32_t timer_value;
+    uint32_t gpio_value;
+    uint32_t gpio_mask;
     uint32_t unit_multiplier;
     uint32_t unit_divider;
     uint32_t bit_time;
     uint32_t dma_channel;
     const GpioPin* gpio;
+    LL_DMA_InitTypeDef dma_config_timer;
+    LL_DMA_InitTypeDef dma_config_gpio;
 } PulseReader;
 
 

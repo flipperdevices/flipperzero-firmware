@@ -857,6 +857,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
+
     FuriHalNfcTxRxContext tx_rx = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     MfClassicEmulator emulator = {
@@ -870,11 +871,67 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     rfal_platform_spi_acquire();
 
     furi_hal_nfc_listen_start(nfc_data);
+    nfca_trans_rx_init(&tx_rx.nfca_trans_state);
+
+    tx_rx.tx_rx_type = FuriHalNfcTxRxFullyTransparent;
+
+    uint8_t tx_buffer_aticoll[32];
+    memcpy(tx_buffer_aticoll, &nfc_data->uid, 4);
+    nfca_append_crc16(tx_buffer_aticoll, 4);
+
+    uint8_t tx_buffer_ack[8];
+    tx_buffer_ack[0] = nfc_data->sak;
+    nfca_append_crc16(tx_buffer_ack, 1);
+
     while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) {
-        if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
+        tx_rx.tx_bits = 0;
+        tx_rx.rx_bits = 0;
+        if(furi_hal_nfc_tx_rx(&tx_rx, 300)) {
+            FURI_LOG_D(TAG, "Command: %02X", tx_rx.rx_data[0]);
+
+            if(tx_rx.rx_bits == 7) {
+                switch(tx_rx.rx_data[0]) {
+                    /* MAGIC WUPC1 */
+                    case 0x40:
+                        continue;
+
+                    /* WUPA */
+                    case 0x52:
+                        furi_hal_nfc_gen_bitstream(&tx_rx, nfc_data->atqa, 2);
+                        furi_hal_nfc_tx_rx(&tx_rx, 0);
+                        continue;
+                }
+            }
+
+            if(tx_rx.rx_bits >= 16) {
+                switch(tx_rx.rx_data[0]) {
+                    /* SELECT */
+                    case 0x93:
+                        switch(tx_rx.rx_data[1]) {
+                            /* ANTICOLL */
+                            case 0x20:
+                                furi_hal_nfc_gen_bitstream(&tx_rx, tx_buffer_aticoll, 6);
+                                furi_hal_nfc_tx_rx(&tx_rx, 0);
+                                continue;
+                                
+                            /* SELECT UID */
+                            case 0x70:
+                                furi_hal_nfc_gen_bitstream(&tx_rx, tx_buffer_ack, 3);
+                                furi_hal_nfc_tx_rx(&tx_rx, 0);
+                                continue;
+                        }
+                        break;
+                        
+                    /* HALS */
+                    case 0x50:
+                                continue;
+                }
+            }
+
             mf_classic_emulator(&emulator, &tx_rx);
         }
     }
+
     if(emulator.data_changed) {
         nfc_worker->dev_data->mf_classic_data = emulator.data;
         if(nfc_worker->callback) {
@@ -883,9 +940,12 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
         emulator.data_changed = false;
     }
 
-    nfca_signal_free(nfca_signal);
+    nfca_trans_rx_deinit(&tx_rx.nfca_trans_state);
 
     rfal_platform_spi_release();
+
+    
+    nfca_signal_free(nfca_signal);
 }
 
 void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {

@@ -5,6 +5,8 @@
 #include <stdbool.h>
 
 #include <furi_hal_gpio.h>
+#include <stm32wbxx_ll_dma.h>
+#include <stm32wbxx_ll_tim.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +29,8 @@ typedef struct {
     uint32_t reload_reg_remainder;
     uint32_t gpio_buff[2];
     const GpioPin* gpio;
+    LL_DMA_InitTypeDef dma_config_gpio;
+    LL_DMA_InitTypeDef dma_config_timer;
 } DigitalSignal;
 
 typedef struct {
