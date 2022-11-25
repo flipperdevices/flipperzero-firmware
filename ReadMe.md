@@ -34,7 +34,6 @@ Thank you to all the supporters!
 - Added: [NFC: Accept non-parsed apps in Mifare DESFire. #2041 (By mh-)](https://github.com/flipperdevices/flipperzero-firmware/pull/2041)
 - Added: [Allow "Detect reader" for unsaved card #2045 (By niki-timofe)](https://github.com/flipperdevices/flipperzero-firmware/pull/2045)
 - Added: [Gui: proper navigation in file browser dialog #2014 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2014)
-- Added: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 - Added: [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
 - Updated: [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware) location for file storage
 - Updated: [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) location for file storage and included video.bin
@@ -269,4 +268,3 @@ $ ./fbt resources icons dolphin_ext
 - [NFC: Accept non-parsed apps in Mifare DESFire. #2041 (By mh-)](https://github.com/flipperdevices/flipperzero-firmware/pull/2041)
 - [Allow "Detect reader" for unsaved card #2045 (By niki-timofe)](https://github.com/flipperdevices/flipperzero-firmware/pull/2045)
 - [Gui: proper navigation in file browser dialog #2014 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2014)
-- [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
