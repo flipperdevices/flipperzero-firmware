@@ -8,13 +8,13 @@ TARGET_HW = 7
 
 # Optimization flags
 ## Optimize for size
-COMPACT = 1
+COMPACT = 0
 ## Optimize for debugging experience
-DEBUG = 0
+DEBUG = 1
 
 # Suffix to add to files when building distribution
 # If OS environment has DIST_SUFFIX set, it will be used instead
-DIST_SUFFIX = "RevvoX"
+DIST_SUFFIX = "local"
 
 # Coprocessor firmware
 COPRO_OB_DATA = "scripts/ob.data"

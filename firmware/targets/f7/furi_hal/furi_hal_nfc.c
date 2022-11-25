@@ -523,7 +523,6 @@ bool furi_hal_nfc_emulate_nfca(
     return true;
 }
 
-
 static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx->nfca_signal);
 
@@ -743,6 +742,13 @@ void furi_hal_nfc_gen_bitstream(FuriHalNfcTxRxContext* tx_rx, uint8_t *buffer, s
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx);
 
+    ReturnCode ret;
+    rfalNfcState state = RFAL_NFC_STATE_ACTIVATED;
+    uint8_t temp_tx_buff[FURI_HAL_NFC_DATA_BUFF_SIZE] = {};
+    uint16_t temp_tx_bits = 0;
+    uint8_t* temp_rx_buff = NULL;
+    uint16_t* temp_rx_bits = NULL;
+
     /* send and receive data using transparent mode */
     if(tx_rx->tx_rx_type == FuriHalNfcTxRxFullyTransparent) {
         return furi_hal_nfc_fully_transparent_tx_rx(tx_rx, timeout_ms);
@@ -751,15 +757,6 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     if(tx_rx->tx_rx_type == FuriHalNfcTxRxTransparent) {
         return furi_hal_nfc_transparent_tx_rx(tx_rx, timeout_ms);
     }
-
-    ReturnCode ret;
-    rfalNfcState state = RFAL_NFC_STATE_ACTIVATED;
-    uint8_t temp_tx_buff[FURI_HAL_NFC_DATA_BUFF_SIZE] = {};
-    uint16_t temp_tx_bits = 0;
-    uint8_t* temp_rx_buff = NULL;
-    uint16_t* temp_rx_bits = NULL;
-
-    //FURI_LOG_D(TAG, "furi_hal_nfc_tx_rx %u", tx_rx->tx_rx_type);
 
     // Prepare data for FIFO if necessary
     uint32_t flags = furi_hal_nfc_tx_rx_get_flag(tx_rx->tx_rx_type);

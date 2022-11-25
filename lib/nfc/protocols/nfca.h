@@ -27,4 +27,3 @@ NfcaSignal* nfca_signal_alloc();
 void nfca_signal_free(NfcaSignal* nfca_signal);
 
 void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, uint8_t* parity);
-
