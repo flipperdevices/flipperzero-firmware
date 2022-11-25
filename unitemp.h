@@ -76,6 +76,14 @@ typedef struct {
 void uintemp_celsiumToFarengate(Sensor* sensor);
 
 /**
+ * @brief Конвертация давления из паскалей в мм/рт
+ * 
+ * @param sensor Указатель на датчик
+ * @return Давление в мм рт.ст.
+ */
+void unitemp_pascalToMmHg(Sensor* sensor);
+
+/**
  * @brief Сохранение настроек на SD-карту
  * 
  * @return Истина если сохранение успешное

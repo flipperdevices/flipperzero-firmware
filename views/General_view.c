@@ -14,7 +14,7 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
     //Рисование рамки
     canvas_draw_rframe(canvas, temp_positions[pos][0], temp_positions[pos][1], 54, 20, 3);
     canvas_draw_rframe(canvas, temp_positions[pos][0], temp_positions[pos][1], 54, 19, 3);
-    int8_t temp_int = temp;
+    int16_t temp_int = temp;
     int8_t temp_dec = abs((int16_t)(temp * 10) % 10);
 
     //Рисование иконки
@@ -24,7 +24,7 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
         temp_positions[pos][1] + 3,
         (app->settings.unit == CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
-    if((int8_t)temp == -128) {
+    if((int16_t)temp == -128) {
         snprintf(buff, 5, "--");
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(
@@ -47,7 +47,7 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
     }
 
     //Целая часть температуры
-    snprintf(buff, 5, "%d", temp_int);
+    snprintf(buff, 7, "%d", temp_int);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
         canvas,
@@ -139,7 +139,7 @@ static void _draw_sensorsCarousel(Canvas* canvas) {
     }
 
     //Печать значения температуры
-    _draw_temp(canvas, app->sensors[sensor_index]->temp, 1);
+    _draw_temp(canvas, app->sensors[sensor_index]->pressure, 1);
     _draw_hum(canvas, app->sensors[sensor_index]->hum, 0);
 }
 

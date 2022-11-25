@@ -10,25 +10,27 @@ typedef struct {
     int16_t dig_T3;
 } BMP280_temp_cal;
 
-// typedef struct {
-//     uint16_t dig_P1;
-//     int16_t dig_P2;
-//     int16_t dig_P3;
-//     int16_t dig_P4;
-//     int16_t dig_P5;
-//     int16_t dig_P6;
-//     int16_t dig_P7;
-//     int16_t dig_P8;
-//     int16_t dig_P9;
-// } BMP280_press_cal;
+typedef struct {
+    uint16_t dig_P1;
+    int16_t dig_P2;
+    int16_t dig_P3;
+    int16_t dig_P4;
+    int16_t dig_P5;
+    int16_t dig_P6;
+    int16_t dig_P7;
+    int16_t dig_P8;
+    int16_t dig_P9;
+} BMP280_press_cal;
 
 typedef struct {
     //Калибровочные значения температуры
     BMP280_temp_cal temp_cal;
     //Калибровочные значения давления
-    // BMP280_press_cal press_cal;
+    BMP280_press_cal press_cal;
     //Время последнего обновления калибровочных значений
     uint32_t last_cal_update_time;
+    //Корректировочное значение температуры
+    uint32_t t_fine;
 } BMP280_instance;
 
 extern const SensorType BMP280;

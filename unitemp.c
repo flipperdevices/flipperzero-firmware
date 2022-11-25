@@ -8,7 +8,6 @@
 
 //TODO: Реализовать ограничение на добавление датчиков если интерфейс недоступен
 //TODO: Не выкидывать датчик в ошибку при первом же неудачном опросе
-//TODO: Динамический размер массива с датчиками
 
 /* Переменные */
 //Данные приложения
@@ -16,6 +15,10 @@ Unitemp* app;
 
 void uintemp_celsiumToFarengate(Sensor* sensor) {
     sensor->temp = sensor->temp * (9.0 / 5.0) + 32;
+}
+
+void unitemp_pascalToMmHg(Sensor* sensor) {
+    sensor->pressure = sensor->pressure * 0.00750061683f;
 }
 
 bool unitemp_saveSettings(void) {

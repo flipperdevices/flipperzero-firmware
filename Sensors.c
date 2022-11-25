@@ -412,7 +412,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
 
     sensor->temp = -128.0f;
     sensor->hum = -128.0f;
-
+    sensor->pressure = -128.0f;
     //Выделение памяти под инстанс датчика в зависимости от его интерфейса
     status = sensor->type->interface->allocator(sensor, args);
 
@@ -529,6 +529,9 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
     FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
     if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
         uintemp_celsiumToFarengate(sensor);
+    if(sensor->status == UT_OK) {
+        unitemp_pascalToMmHg(sensor);
+    }
     return sensor->status;
 }
 
