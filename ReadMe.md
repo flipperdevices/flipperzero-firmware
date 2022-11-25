@@ -5,7 +5,7 @@
 ![Show me the code](https://habrastorage.org/webt/eo/m0/e4/eom0e4btudte7nrhnyic-laiog0.png)
 
 Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
-Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
+Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with. If you find anything to add/revise please submit a Pull Request, If you wind a bug please create a Issue with PROPER tags.
 
 # Clone the Repository
 
@@ -113,12 +113,16 @@ Connect your device via ST-Link and run:
 ./fbt firmware_flash
 ```
 
-# Links
+# Social Links
 
 * Discord: [flipp.dev/discord](https://flipp.dev/discord)
 * Website: [flipperzero.one](https://flipperzero.one)
 * Kickstarter page: [kickstarter.com](https://www.kickstarter.com/projects/flipper-devices/flipper-zero-tamagochi-for-hackers)
 * Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
+* IOS App [Download Here](https://apps.apple.com/app/flipper-mobile-app/id1534655259)
+* Android App [Here](https://play.google.com/store/apps/details?id=com.flipperdevices.app&pli=1)
+* IOS App Github [Here](https://github.com/flipperdevices/Flipper-iOS-App)
+* Android App Github [Here](https://github.com/flipperdevices/Flipper-Android-App)
 
 # Project structure
 
@@ -131,4 +135,4 @@ Connect your device via ST-Link and run:
 - `lib`             - Our and 3rd party libraries, drivers, etc.
 - `scripts`         - Supplementary scripts and python libraries home
 
-Also pay attention to `ReadMe.md` files inside those directories.
+Also pay attention to `ReadMe.md` files inside those directories for help.
