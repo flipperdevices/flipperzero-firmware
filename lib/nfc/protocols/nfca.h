@@ -6,10 +6,9 @@
 #include <lib/digital_signal/digital_signal.h>
 
 typedef struct {
-    DigitalSignal* seq_d; /* sequence D, modulation with subcarrier during first half */
-    DigitalSignal* seq_e; /* sequence E, modulation with subcarrier during second half */
-    DigitalSignal* seq_f; /* sequence F, no modulation at all */
-    DigitalSequence* tx_signal;
+    DigitalSignal* one;
+    DigitalSignal* zero;
+    DigitalSignal* tx_signal;
 } NfcaSignal;
 
 uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len);
