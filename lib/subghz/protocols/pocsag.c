@@ -22,6 +22,12 @@ static const SubGhzBlockConst pocsag_const = {
 #define POCSAG_FRAME_SYNC_CODE  0x7CD215D8
 #define POCSAG_IDLE_CODE_WORD   0x7A89C197
 
+#define POCSAG_FUNC_NUM         0
+#define POCSAG_FUNC_ALERT1      1
+#define POCSAG_FUNC_ALERT2      2
+#define POCSAG_FUNC_ALPHANUM    3
+
+static const char* bcd_chars = "*U -)(";
 
 struct SubGhzProtocolDecoderPocsag {
     SubGhzProtocolDecoderBase base;
@@ -94,9 +100,8 @@ static void pocsag_decode_address_word(SubGhzProtocolDecoderPocsag* instance, ui
     instance->func = (data >> 11) & 0b11;
 }
 
-// decode message word, maintaining instance state for partial decoding. Return true if more data
-// might follow or false if end of message reached.
-static bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
+
+static bool decode_message_alphanumeric(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
     for (uint8_t i = 0; i < 20; i++) {
         instance->char_data >>= 1;
         if (data & (1 << 30)) {
@@ -113,6 +118,47 @@ static bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, ui
         data <<= 1;
     }
     return true;
+}
+
+
+static void decode_message_numeric(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
+    // 5 groups with 4 bits each
+    uint8_t val;
+    for (uint8_t i = 0; i < 5; i++) {
+        val = (data >> (27 - i*4)) & 0b1111;
+        // reverse the order of 4 bits
+        val = (val & 0x5) << 1 | (val & 0xA) >> 1;
+        val = (val & 0x3) << 2 | (val & 0xC) >> 2;
+
+        if (val <= 9)
+            val += '0';
+        else
+            val = bcd_chars[val-10];
+        furi_string_push_back(instance->msg, val);
+    }
+}
+
+
+// decode message word, maintaining instance state for partial decoding. Return true if more data
+// might follow or false if end of message reached.
+static bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
+    switch (instance->func) {
+        case POCSAG_FUNC_ALPHANUM:
+            return decode_message_alphanumeric(instance, data);
+
+        case POCSAG_FUNC_NUM:
+            decode_message_numeric(instance, data);
+            return true;
+
+        case POCSAG_FUNC_ALERT1:
+            FURI_LOG_I(TAG, "Alert1");
+            return true;
+
+        case POCSAG_FUNC_ALERT2:
+            FURI_LOG_I(TAG, "Alert2");
+            return true;
+    }
+    return false;
 }
 
 
@@ -186,6 +232,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
             // handle codewords
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                FURI_LOG_I(TAG, "cw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     instance->codeword_idx++;
@@ -209,6 +256,7 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         case PocsagDecoderStepMessage:
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
+                FURI_LOG_I(TAG, "mw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     // Idle during the message stops the message
