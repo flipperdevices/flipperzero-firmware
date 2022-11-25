@@ -4,8 +4,9 @@ static View* view;
 
 static const uint8_t temp_positions[3][2] = {{37, 24}, {37, 16}, {9, 16}};
 static const uint8_t hum_positions[2][2] = {{37, 38}, {65, 16}};
+
 static uint8_t sensor_index = 0;
-static char buff[5];
+static char buff[7];
 static void _draw_noSensors(Canvas* canvas) {
     canvas_draw_str(canvas, 0, 24, "Sensors not found");
 }
@@ -69,7 +70,7 @@ static void _draw_temp(Canvas* canvas, float temp, uint8_t pos) {
     }
 }
 
-static void _draw_hum(Canvas* canvas, float hum, uint8_t pos) {
+void _draw_hum(Canvas* canvas, float hum, uint8_t pos) {
     //Рисование рамки
     canvas_draw_rframe(canvas, hum_positions[pos][0], hum_positions[pos][1], 54, 20, 3);
     canvas_draw_rframe(canvas, hum_positions[pos][0], hum_positions[pos][1], 54, 19, 3);
@@ -116,6 +117,24 @@ static void _draw_hum(Canvas* canvas, float hum, uint8_t pos) {
         canvas, hum_positions[pos][0] + 27 + int_len / 2 + 2, hum_positions[pos][1] + 10 + 7, "%");
 }
 
+static void _draw_press(Canvas* canvas, float press) {
+    UNUSED(press);
+    const uint8_t x = 29, y = 39;
+    //Рисование рамки
+    canvas_draw_rframe(canvas, x, y, 69, 20, 3);
+    canvas_draw_rframe(canvas, x, y, 69, 19, 3);
+
+    //Рисование иконки
+    canvas_draw_icon(canvas, x + 3, y + 4, &I_arrow_up_7x13);
+
+    //Давление
+    snprintf(buff, 6, "%d", (uint16_t)press);
+    canvas_set_font(canvas, FontBigNumbers);
+    canvas_draw_str_aligned(canvas, x + 30, y + 10, AlignCenter, AlignCenter, buff);
+    //Единица измерения
+    canvas_draw_icon(canvas, x + 50, y + 3, &I_mm_hg_17x15);
+}
+
 static void _draw_sensorsCarousel(Canvas* canvas) {
     //Рисование рамки
     canvas_draw_rframe(canvas, 3, 0, 122, 63, 7);
@@ -139,8 +158,9 @@ static void _draw_sensorsCarousel(Canvas* canvas) {
     }
 
     //Печать значения температуры
-    _draw_temp(canvas, app->sensors[sensor_index]->pressure, 1);
-    _draw_hum(canvas, app->sensors[sensor_index]->hum, 0);
+    _draw_temp(canvas, app->sensors[sensor_index]->temp, 1);
+    //_draw_hum(canvas, app->sensors[sensor_index]->hum, 1);
+    _draw_press(canvas, app->sensors[sensor_index]->pressure);
 }
 
 static void _draw_callback(Canvas* canvas, void* _model) {
