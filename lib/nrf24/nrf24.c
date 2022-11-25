@@ -1,3 +1,5 @@
+// Modified by vad7, 25.11.2022
+//
 #include "nrf24.h"
 #include <furi.h>
 #include <furi_hal.h>
@@ -176,9 +178,10 @@ uint8_t nrf24_set_dst_mac(FuriHalSpiBusHandle* handle, uint8_t* mac, uint8_t siz
     return status;
 }
 
-uint8_t nrf24_get_packetlen(FuriHalSpiBusHandle* handle) {
+uint8_t nrf24_get_packetlen(FuriHalSpiBusHandle* handle, uint8_t pipe) {
     uint8_t len = 0;
-    nrf24_read_reg(handle, RX_PW_P0, &len, 1);
+    if(pipe > 5) pipe = 0;
+    nrf24_read_reg(handle, RX_PW_P0 + pipe, &len, 1);
     return len;
 }
 
@@ -200,7 +203,7 @@ uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* pa
 
     if(status & 0x40) {
         if(full)
-            size = nrf24_get_packetlen(handle);
+            size = nrf24_get_packetlen(handle, (status >> 1) & 7);
         else {
             nrf24_spi_trx(handle, tx_pl_wid, rx_pl_wid, 2, nrf24_TIMEOUT);
             size = rx_pl_wid[1];
@@ -276,7 +279,7 @@ uint8_t nrf24_set_rx_mode(FuriHalSpiBusHandle* handle) {
     status = nrf24_write_reg(handle, REG_CONFIG, cfg);
     //nr204_write_reg(REG_EN_RXADDR, 0x03) // Set RX Pipe 0 and 1
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    furi_delay_ms(2000);
+    furi_delay_ms(2);
     return status;
 }
 
