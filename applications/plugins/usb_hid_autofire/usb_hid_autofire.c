@@ -20,9 +20,13 @@ typedef struct {
 } UsbMouseEvent;
 
 bool btn_left_autofire = false;
+uint32_t autofire_delay = 10;
 
 static void usb_hid_autofire_render_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
+    char autofire_delay_str[12];
+    itoa(autofire_delay, autofire_delay_str, 10);
+
     canvas_clear(canvas);
 
     canvas_set_font(canvas, FontPrimary);
@@ -33,6 +37,8 @@ static void usb_hid_autofire_render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 96, 10, VERSION);
     canvas_draw_str(canvas, 0, 22, "Press [ok] for auto left clicking");
     canvas_draw_str(canvas, 0, 34, btn_left_autofire ? "<active>" : "<inactive>");
+    canvas_draw_str(canvas, 0, 46, "delay [ms]:");
+    canvas_draw_str(canvas, 50, 46, autofire_delay_str);
     canvas_draw_str(canvas, 0, 63, "Press [back] to exit");
 }
 
@@ -44,10 +50,6 @@ static void usb_hid_autofire_input_callback(InputEvent* input_event, void* ctx) 
     event.input = *input_event;
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
-
-//void wait(int ticks) {
-//    for (int i = 0; i < ticks; i++) {}
-//}
 
 int32_t usb_hid_autofire_app(void* p) {
     UNUSED(p);
@@ -78,17 +80,34 @@ int32_t usb_hid_autofire_app(void* p) {
                     break;
                 }
 
-                if(event.input.key == InputKeyOk && event.input.type == InputTypeRelease) {
-                    btn_left_autofire = !btn_left_autofire;
+                if(event.input.type != InputTypeRelease) {
+                    continue;
+                }
+
+                switch(event.input.key) {
+                    case InputKeyOk:
+                        btn_left_autofire = !btn_left_autofire;
+                        break;
+                    case InputKeyLeft:
+                        if(autofire_delay > 0) {
+                            autofire_delay -= 10;
+                        }
+                        break;
+                    case InputKeyRight:
+                        autofire_delay += 10;
+                        break;
+                    default:
+                        break;
                 }
             }
         }
 
         if(btn_left_autofire) {
             furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
-            //            wait(100);
+            // TODO: Don't wait, but use the timer directly to just don't send the release event (see furi_hal_cortex_delay_us)
+            furi_delay_us(autofire_delay * 500);
             furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
-            //            wait(100);
+            furi_delay_us(autofire_delay * 500);
         }
 
         view_port_update(view_port);
