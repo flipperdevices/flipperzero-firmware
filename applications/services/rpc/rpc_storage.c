@@ -137,7 +137,9 @@ static void rpc_system_storage_info_process(const PB_Main* request, void* contex
     free(response);
     furi_record_close(RECORD_STORAGE);
 }
-
+        if(command_status == PB_CommandStatus_OK) {
+            command_status = PB_CommandStatus_ERROR_STORAGE_INTERNAL;
+        }
 static void rpc_system_storage_timestamp_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
