@@ -188,8 +188,7 @@ uint8_t nrf24_set_packetlen(FuriHalSpiBusHandle* handle, uint8_t len) {
     return status;
 }
 
-uint8_t
-    nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* packetsize, bool full) {
+uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* packetsize, bool full) {
     uint8_t status = 0;
     uint8_t size = 0;
     uint8_t tx_pl_wid[] = {R_RX_PL_WID, 0};
@@ -206,7 +205,7 @@ uint8_t
             nrf24_spi_trx(handle, tx_pl_wid, rx_pl_wid, 2, nrf24_TIMEOUT);
             size = rx_pl_wid[1];
         }
-
+        if(size > 32) size = 32;
         tx_cmd[0] = R_RX_PAYLOAD;
         nrf24_spi_trx(handle, tx_cmd, tmp_packet, size + 1, nrf24_TIMEOUT);
         nrf24_write_reg(handle, REG_STATUS, 0x50); // clear RX_DR, MAX_RT.

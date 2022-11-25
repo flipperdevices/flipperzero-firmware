@@ -2,15 +2,22 @@
 
 An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors. This library is not currently complete, but functional.
 
-Settings file (default addr.txt) format:<br>
-1: <Rate (0/1/2)><br>
-2: <Channel (0..125)><br>
-3: <address P0 (5 bytes in hex)><br>
-4: [address P1 (5 bytes in hex)]<br>
-5: [LSB address P2, MSB like P1]<br>
-6: [LSB address P3, MSB like P1]<br>
-7: [LSB address P4, MSB like P1]<br>
-8: [LSB address P5, MSB like P1]<br>
+Settings file (default addr.txt) format:<br><br>
+
+Rate: 0/1/2 - rate in Mbps (=0.25/1/2)<br>
+Ch: 0..125 - default channel          <br>
+ESB: 0/1 (1 - Enhanced ShockBurst)    <br>
+DPL: 0/1 (1 - Dynamic Payload Length) <br>
+Payload: 1..32 (bytes)                <br>
+P0: address pipe #0 in hex (max 5 bytes, LSB last)<br>
+P1: address pipe #1 in hex (max 5 bytes, LSB last)<br>
+P2: address pipe #2, LSB in hex (1 byte)   <br>
+P3: address pipe #3, LSB in hex (1 byte)   <br>
+P4: address pipe #4, LSB in hex (1 byte)   <br>
+P5: address pipe #5, LSB in hex (1 byte)   <br>
+captured data in raw format, first byte = address # 0..5, Payload len if DPL   
+... up to MAX_LOG_RECORDS-1                                                    
+<br>
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-1.png">
 <br>
