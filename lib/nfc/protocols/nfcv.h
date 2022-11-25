@@ -32,6 +32,12 @@
 #define NFCV_FRAME_STATE_EOF         4
 #define NFCV_FRAME_STATE_RESET       5
 
+
+#define NFCV_SIG_SOF  0
+#define NFCV_SIG_BIT0 1
+#define NFCV_SIG_BIT1 2
+#define NFCV_SIG_EOF  3
+
 /*  */
 #define ISO15693_INVENTORY                   0x01
 #define ISO15693_STAYQUIET                   0x02
@@ -133,6 +139,20 @@ typedef union {
     NfcVSlixLData slix_l;
 } NfcVSubtypeData;
 
+
+typedef struct {
+    PulseReader *reader_signal;
+    DigitalSignal* nfcv_resp_pulse_32;
+    DigitalSignal* nfcv_resp_unmod;
+    DigitalSignal* nfcv_resp_one;
+    DigitalSignal* nfcv_resp_zero;
+    DigitalSignal* nfcv_resp_sof;
+    DigitalSignal* nfcv_resp_eof;
+    DigitalSignal* nfcv_resp_unmod_256;
+    DigitalSignal* nfcv_resp_unmod_768;
+    DigitalSequence* nfcv_signal;
+} NfcVEmuData;
+
 typedef struct {
     /* common ISO15693 fields */
     uint8_t dsfid;
@@ -145,6 +165,7 @@ typedef struct {
     /* specfic variant infos */
     NfcVType type;
     NfcVSubtypeData sub_data;
+    NfcVEmuData emulation;
 
     /* runtime data */
     char last_command[128];
@@ -164,5 +185,5 @@ ReturnCode nfcv_inventory(uint8_t* uid);
 bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* data);
 
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
-void nfcv_emu_deinit();
-bool nfcv_emu_loop(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms);
+void nfcv_emu_deinit(NfcVData* nfcv_data);
+bool nfcv_emu_loop(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms);

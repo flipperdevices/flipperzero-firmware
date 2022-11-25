@@ -622,19 +622,29 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker) {
+    FuriHalNfcTxRxContext tx_rx = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
 
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, &tx_rx, true);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
     nfcv_emu_init(nfc_data, nfcv_data);
     while(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
-        if(nfcv_emu_loop(nfc_data, nfcv_data, 50)) {
+        if(nfcv_emu_loop(&tx_rx, nfc_data, nfcv_data, 50)) {
             if(nfc_worker->callback) {
                 nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
             }
         }
         furi_delay_ms(0);
     }
-    nfcv_emu_deinit();
+    nfcv_emu_deinit(nfcv_data);
+    
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
 }
 
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
@@ -887,8 +897,6 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
         tx_rx.tx_bits = 0;
         tx_rx.rx_bits = 0;
         if(furi_hal_nfc_tx_rx(&tx_rx, 300)) {
-            FURI_LOG_D(TAG, "Command: %02X", tx_rx.rx_data[0]);
-
             if(tx_rx.rx_bits == 7) {
                 switch(tx_rx.rx_data[0]) {
                     /* MAGIC WUPC1 */
