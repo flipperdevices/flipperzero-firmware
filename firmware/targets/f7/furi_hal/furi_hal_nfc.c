@@ -367,39 +367,6 @@ void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
     st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
 }
 
-void furi_hal_nfcv_listen_start() {
-
-    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
-    // Clear interrupts
-    st25r3916ClearInterrupts();
-    // Mask all interrupts
-    st25r3916DisableInterrupts(ST25R3916_IRQ_MASK_ALL);
-    // RESET
-    st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
-    // Setup registers
-    st25r3916WriteRegister(
-        ST25R3916_REG_OP_CONTROL,
-        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
-            ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
-    st25r3916WriteRegister(
-        ST25R3916_REG_MODE,
-        ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om3 | ST25R3916_REG_MODE_om0);
-    st25r3916WriteRegister(
-        ST25R3916_REG_PASSIVE_TARGET,
-        ST25R3916_REG_PASSIVE_TARGET_fdel_2 | ST25R3916_REG_PASSIVE_TARGET_fdel_0 |
-            ST25R3916_REG_PASSIVE_TARGET_d_ac_ap2p | ST25R3916_REG_PASSIVE_TARGET_d_212_424_1r);
-    st25r3916WriteRegister(ST25R3916_REG_MASK_RX_TIMER, 0x02);
-
-    // Mask interrupts
-    uint32_t clear_irq_mask =
-        (ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_RXE_PTA | ST25R3916_IRQ_MASK_WU_A_X |
-         ST25R3916_IRQ_MASK_WU_A);
-    st25r3916EnableInterrupts(clear_irq_mask);
-
-    // Go to sense
-    st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
-}
-
 void rfal_interrupt_callback_handler() {
     furi_event_flag_set(event, EVENT_FLAG_INTERRUPT);
 }
@@ -523,7 +490,6 @@ bool furi_hal_nfc_emulate_nfca(
     return true;
 }
 
-
 static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx->nfca_signal);
 
@@ -537,8 +503,9 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
     // Send signal
     FURI_CRITICAL_ENTER();
     nfca_signal_encode(tx_rx->nfca_signal, tx_rx->tx_data, tx_rx->tx_bits, tx_rx->tx_parity);
-    digital_sequence_send(tx_rx->nfca_signal->tx_signal);
+    digital_signal_send(tx_rx->nfca_signal->tx_signal, &gpio_spi_r_mosi);
     FURI_CRITICAL_EXIT();
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
     // Configure gpio back to SPI and exit transparent
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
@@ -601,94 +568,6 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
 
     return ret;
 }
-
-static bool furi_hal_nfc_fully_transparent_raw_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
-    furi_assert(tx_rx);
-
-    bool received = false;
-
-    tx_rx->rx_bits = 0;
-
-    if(tx_rx->tx_bits) {
-        nfca_trans_rx_pause(&tx_rx->nfca_trans_state);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        digital_sequence_send(tx_rx->nfca_signal->tx_signal);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        nfca_trans_rx_continue(&tx_rx->nfca_trans_state);
-
-        if(tx_rx->sniff_tx) {
-            tx_rx->sniff_tx(tx_rx->tx_data, tx_rx->tx_bits, false, tx_rx->sniff_context);
-        }
-    }
-    
-    if(timeout_ms) {
-        tx_rx->nfca_trans_state.bits_received = 0;
-        received = nfca_trans_rx_loop(&tx_rx->nfca_trans_state, timeout_ms);
-
-        if(received) {
-            if(tx_rx->nfca_trans_state.bits_received > 7) {
-                tx_rx->rx_bits = tx_rx->nfca_trans_state.bits_received/9 * 8;
-                for(size_t pos = 0; pos < tx_rx->rx_bits/8; pos++) {
-                    tx_rx->rx_data[pos] = tx_rx->nfca_trans_state.frame_data[pos];
-                }
-            } else {
-                tx_rx->rx_bits = tx_rx->nfca_trans_state.bits_received;
-                tx_rx->rx_data[0] = tx_rx->nfca_trans_state.frame_data[0] & ~(0xFF << tx_rx->rx_bits);
-            }
-            
-            if(tx_rx->sniff_rx) {
-                tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, false, tx_rx->sniff_context);
-            }
-        }
-    }
-
-    return received;
-}
-
-static bool furi_hal_nfc_fully_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
-    furi_assert(tx_rx);
-
-    bool received = false;
-
-    tx_rx->rx_bits = 0;
-
-    if(tx_rx->tx_bits) {
-        nfca_trans_rx_pause(&tx_rx->nfca_trans_state);
-        FURI_CRITICAL_ENTER();
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        nfca_signal_encode(tx_rx->nfca_signal, tx_rx->tx_data, tx_rx->tx_bits, tx_rx->tx_parity);
-        digital_sequence_send(tx_rx->nfca_signal->tx_signal);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        FURI_CRITICAL_EXIT();
-        nfca_trans_rx_continue(&tx_rx->nfca_trans_state);
-
-        if(tx_rx->sniff_tx) {
-            tx_rx->sniff_tx(tx_rx->tx_data, tx_rx->tx_bits, false, tx_rx->sniff_context);
-        }
-    }
-    
-    if(timeout_ms) {
-        tx_rx->nfca_trans_state.bits_received = 0;
-        received = nfca_trans_rx_loop(&tx_rx->nfca_trans_state, timeout_ms);
-
-        if(received) {
-            if(tx_rx->nfca_trans_state.bits_received > 7) {
-                tx_rx->rx_bits = tx_rx->nfca_trans_state.bits_received/9 * 8;
-                memcpy(tx_rx->rx_data, tx_rx->nfca_trans_state.frame_data, tx_rx->nfca_trans_state.bits_received/9);
-            } else {
-                tx_rx->rx_bits = tx_rx->nfca_trans_state.bits_received;
-                tx_rx->rx_data[0] = tx_rx->nfca_trans_state.frame_data[0] & ~(0xFF << tx_rx->rx_bits);
-            }
-            
-            if(tx_rx->sniff_rx) {
-                tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, false, tx_rx->sniff_context);
-            }
-        }
-    }
-
-    return received;
-}
-
 
 static uint32_t furi_hal_nfc_tx_rx_get_flag(FuriHalNfcTxRxType type) {
     uint32_t flags = 0;
@@ -763,38 +642,8 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     return curr_byte * 8;
 }
 
-static uint8_t furi_hal_nfc_gen_parity(uint8_t value) {
-    value ^= (value >> 4);
-    value ^= (value >> 2);
-    value ^= (value >> 1);
-
-    return (value ^ 1) & 1;
-}
-
-void furi_hal_nfc_gen_bitstream(FuriHalNfcTxRxContext* tx_rx, uint8_t *buffer, size_t len) {
-    for(size_t pos = 0; pos < len; pos++) {
-        uint32_t parity_bit_num = pos % 8;
-        uint8_t bit = furi_hal_nfc_gen_parity(buffer[pos]);
-
-        tx_rx->tx_data[pos] = buffer[pos];
-        tx_rx->tx_parity[pos / 8] &= ~(1 << (7 - parity_bit_num));
-        tx_rx->tx_parity[pos / 8] |= bit << (7 - parity_bit_num);
-    }
-    tx_rx->tx_bits = len * 8;
-}
-
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx);
-
-    if(tx_rx->tx_rx_type == FuriHalNfcTxRxFullyRawTransparent) {
-        return furi_hal_nfc_fully_transparent_raw_tx_rx(tx_rx, timeout_ms);
-    }
-    if(tx_rx->tx_rx_type == FuriHalNfcTxRxFullyTransparent) {
-        return furi_hal_nfc_fully_transparent_tx_rx(tx_rx, timeout_ms);
-    }
-    if(tx_rx->tx_rx_type == FuriHalNfcTxRxTransparent) {
-        return furi_hal_nfc_transparent_tx_rx(tx_rx, timeout_ms);
-    }
 
     ReturnCode ret;
     rfalNfcState state = RFAL_NFC_STATE_ACTIVATED;
@@ -803,7 +652,9 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     uint8_t* temp_rx_buff = NULL;
     uint16_t* temp_rx_bits = NULL;
 
-    //FURI_LOG_D(TAG, "furi_hal_nfc_tx_rx %u", tx_rx->tx_rx_type);
+    if(tx_rx->tx_rx_type == FuriHalNfcTxRxTransparent) {
+        return furi_hal_nfc_transparent_tx_rx(tx_rx, timeout_ms);
+    }
 
     // Prepare data for FIFO if necessary
     uint32_t flags = furi_hal_nfc_tx_rx_get_flag(tx_rx->tx_rx_type);

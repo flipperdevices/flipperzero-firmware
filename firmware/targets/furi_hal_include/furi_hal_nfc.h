@@ -14,7 +14,6 @@ extern "C" {
 #endif
 #include <rfal_nfc.h>
 #include <lib/nfc/protocols/nfca.h>
-#include <lib/nfc/protocols/nfca_trans_rx.h>
 
 #define FURI_HAL_NFC_UID_MAX_LEN 10
 #define FURI_HAL_NFC_DATA_BUFF_SIZE (512)
@@ -47,8 +46,6 @@ typedef enum {
     FuriHalNfcTxRxTypeRaw,
     FuriHalNfcTxRxTypeRxRaw,
     FuriHalNfcTxRxTransparent,
-    FuriHalNfcTxRxFullyRawTransparent,
-    FuriHalNfcTxRxFullyTransparent
 } FuriHalNfcTxRxType;
 
 typedef bool (*FuriHalNfcEmulateCallback)(
@@ -94,8 +91,6 @@ typedef struct {
     uint16_t rx_bits;
     FuriHalNfcTxRxType tx_rx_type;
     NfcaSignal* nfca_signal;
-    NfcaTransRxState nfca_trans_state;
-    bool nfca_trans_initialized;
 
     FuriHalNfcTxRxSniffCallback sniff_tx;
     FuriHalNfcTxRxSniffCallback sniff_rx;
@@ -181,12 +176,6 @@ bool furi_hal_nfc_listen(
  * @param       nfc_data            FuriHalNfcDevData instance
  */
 void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data);
-
-/** Start Target Listen mode
- * @note RFAL free implementation
- *
- */
-void furi_hal_nfcv_listen_start();
 
 /** Read data in Target Listen mode
  * @note Must be called only after furi_hal_nfc_listen_start()
@@ -429,9 +418,6 @@ FuriHalNfcReturn furi_hal_nfc_ll_txrx_bits(
     uint32_t fwt);
 
 void furi_hal_nfc_ll_poll();
-
-
-void furi_hal_nfc_gen_bitstream(FuriHalNfcTxRxContext* tx_rx, uint8_t *buffer, size_t len);
 
 #ifdef __cplusplus
 }

@@ -1,22 +1,10 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <furi_hal_nfc.h>
 #include <cli/cli.h>
 #include <lib/toolbox/args.h>
-#include <st25r3916.h>
-#include <st25r3916_irq.h>
-#include <furi_hal_spi.h>
-#include <furi_hal_gpio.h>
-#include <furi_hal_cortex.h>
-#include <furi_hal_resources.h>
 
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_device.h>
-
-
-#include <lib/digital_signal/digital_signal.h>
-#include <lib/pulse_reader/pulse_reader.h>
-
 
 static void nfc_cli_print_usage() {
     printf("Usage:\r\n");
@@ -109,7 +97,6 @@ static void nfc_cli_field(Cli* cli, FuriString* args) {
     furi_hal_nfc_field_off();
     furi_hal_nfc_sleep();
 }
-
 
 static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
