@@ -527,7 +527,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
                                 model->item_idx - ITEM_LIST_LEN_MAX / 4 * 3,
-                                (int32_t)model->item_cnt - ITEM_LIST_LEN_MAX,
+                                (int32_t)model->item_cnt,
                                 0);
                             file_browser_worker_load(
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
@@ -538,7 +538,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
                                 model->item_idx - ITEM_LIST_LEN_MAX / 4 * 1,
-                                (int32_t)model->item_cnt - ITEM_LIST_LEN_MAX,
+                                (int32_t)model->item_cnt,
                                 0);
                             file_browser_worker_load(
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
