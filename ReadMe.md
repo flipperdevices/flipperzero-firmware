@@ -23,12 +23,12 @@ Thank you to all the supporters!
 - Updated: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU2XD, SHT2X, SI702X, SI700X, SI701X or AM2320`
-- Updated: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - Added: [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - Updated: [Timelapse (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - Added: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - Some new Mifare Possible keys for transport cards by novacard.ru [from vadrozh](https://github.com/DarkFlippers/unleashed-firmware/pull/181)
 - Animation fixes [by TalkingSasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
+- Updated: [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - Added: [Improve file name filtering #2047 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2047)
 - Added: [NFC: Accept non-parsed apps in Mifare DESFire. #2041 (By mh-)](https://github.com/flipperdevices/flipperzero-firmware/pull/2041)
