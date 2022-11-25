@@ -521,6 +521,8 @@ int32_t zero_tracker_app(void* p) {
     tracker_free(tracker);
     furi_message_queue_free(queue);
 
+    furi_delay_ms(500);
+
     view_dispatcher_remove_view(view_dispatcher, 0);
     tracker_view_free(tracker_view);
     view_dispatcher_free(view_dispatcher);
