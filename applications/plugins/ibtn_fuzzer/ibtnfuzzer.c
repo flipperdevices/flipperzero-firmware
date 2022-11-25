@@ -6,7 +6,7 @@
 #include "scene/ibtnfuzzer_scene_run_attack.h"
 #include "scene/ibtnfuzzer_scene_load_custom_uids.h"
 
-#define IBTNFUZZER_APP_FOLDER "/ext/ibtnfuzzer"
+#define IBTNFUZZER_APP_FOLDER "/ext/ibutton/ibtnfuzzer"
 
 static void ibtnfuzzer_draw_callback(Canvas* const canvas, void* ctx) {
     iBtnFuzzerState* ibtnfuzzer_state = (iBtnFuzzerState*)acquire_mutex((ValueMutex*)ctx, 100);

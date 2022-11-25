@@ -9,7 +9,7 @@
 #define VIDEO_WIDTH 104
 #define VIDEO_HEIGHT 80
 #define FILE_BUFFER_SIZE (1024 * 64)
-#define VIDEO_PATH EXT_PATH("bad_apple/video.bin")
+#define VIDEO_PATH EXT_PATH("apps_data/bad_apple/video.bin")
 #define VIDEO_X ((SCREEN_WIDTH - VIDEO_WIDTH) / 2)
 #define VIDEO_Y 0
 
