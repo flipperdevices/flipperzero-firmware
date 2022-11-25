@@ -31,6 +31,9 @@ Thank you to all the supporters!
 - Animation fixes [by TalkingSasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
 - Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - Added: [Improve file name filtering #2047 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2047)
+- Added: [NFC: Accept non-parsed apps in Mifare DESFire. #2041 (By mh-)](https://github.com/flipperdevices/flipperzero-firmware/pull/2041)
+- Added: [Allow "Detect reader" for unsaved card #2045 (By niki-timofe)](https://github.com/flipperdevices/flipperzero-firmware/pull/2045)
+- Added: [Fixed Storage Full Error To Properly Be Handled #2024 (By imsneo)](https://github.com/flipperdevices/flipperzero-firmware/pull/2024)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -257,6 +260,8 @@ $ ./fbt resources icons dolphin_ext
 - [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 - [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - [Improve file name filtering #2047 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2047)
-
+- [NFC: Accept non-parsed apps in Mifare DESFire. #2041 (By mh-)](https://github.com/flipperdevices/flipperzero-firmware/pull/2041)
+- [Allow "Detect reader" for unsaved card #2045 (By niki-timofe)](https://github.com/flipperdevices/flipperzero-firmware/pull/2045)
+- [Fixed Storage Full Error To Properly Be Handled #2024 (By imsneo)](https://github.com/flipperdevices/flipperzero-firmware/pull/2024)
 
 
