@@ -104,9 +104,6 @@ bool plantain_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
 }
 
 uint8_t plantain_calculate_luhn_str(const char* num) {
-    // No.
-    // Yes :)
-
     uint8_t sum = 0;
     uint8_t len = strlen(num);
     for(uint8_t i = 0; i < len; i++) {
@@ -280,7 +277,7 @@ bool plantain_parser_parse(NfcDeviceData* dev_data) {
     FuriString* card_number_str;
     card_number_str = furi_string_alloc();
 
-    furi_string_printf(card_number_str, "%llu", card_number);
+    furi_string_printf(card_number_str, "%017llu", card_number);
 
     FuriString* plantain_card_prefix;
     FuriString* full_number;

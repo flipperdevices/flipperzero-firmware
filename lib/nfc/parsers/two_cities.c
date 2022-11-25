@@ -123,15 +123,23 @@ bool two_cities_parser_parse(NfcDeviceData* dev_data) {
     FuriString* card_number_str;
     card_number_str = furi_string_alloc();
     // Should look like "361301047292848684"
-    furi_string_printf(card_number_str, "%llu", card_number);
+    furi_string_printf(card_number_str, "%017llu", card_number); // add leading zeros if needed
     // Add suffix with luhn checksum (1 digit) to the card number string
-    FuriString* card_number_suffix;
-    card_number_suffix = furi_string_alloc();
 
-    furi_string_cat_printf(card_number_suffix, "-");
-    furi_string_cat_printf(card_number_str, furi_string_get_cstr(card_number_suffix));
-    // Free all not needed strings
-    furi_string_free(card_number_suffix);
+    FuriString* plantain_card_prefix;
+    FuriString* full_number;
+    plantain_card_prefix = furi_string_alloc();
+    full_number = furi_string_alloc();
+    uint8_t luhn;
+
+    furi_string_printf(plantain_card_prefix, "96433078"); // default prefix
+    furi_string_printf(
+        full_number,
+        "%s%s",
+        furi_string_get_cstr(plantain_card_prefix),
+        furi_string_get_cstr(card_number_str));
+    luhn = plantain_calculate_luhn_str(
+        furi_string_get_cstr(full_number)); // calculate luhn from full number
 
     // =====
     // --PLANTAIN--
@@ -141,22 +149,27 @@ bool two_cities_parser_parse(NfcDeviceData* dev_data) {
 
     uint8_t* troika_temp_ptr = &data->block[8 * 4 + 1].value[5];
     uint16_t troika_balance = ((troika_temp_ptr[0] << 8) | troika_temp_ptr[1]) / 25;
-    troika_temp_ptr = &data->block[8 * 4].value[3];
-    uint32_t troika_number = 0;
-    for(size_t i = 0; i < 4; i++) {
+    troika_temp_ptr = &data->block[8 * 4].value[2];
+    uint64_t troika_number = 0;
+    for(size_t i = 0; i < 5; i++) {
         troika_number <<= 8;
         troika_number |= troika_temp_ptr[i];
     }
+    troika_number &= 0x0FFFFFFFFF;
     troika_number >>= 4;
 
     furi_string_printf(
         dev_data->parsed_data,
-        "\e#Troika+Plantain\nPN: %s\nPB: %ld rur.\nTN: %ld\nTB: %d rur.\n",
+        "\e#Troika+Plantain\nPN: %s\n%s%01d\nPB: %ld rur.\nTN: %010lld\nTB: %d rur.\n",
+        furi_string_get_cstr(plantain_card_prefix),
         furi_string_get_cstr(card_number_str),
+        luhn,
         balance,
         troika_number,
         troika_balance);
+    furi_string_free(plantain_card_prefix);
     furi_string_free(card_number_str);
+    furi_string_free(full_number);
 
     return true;
 }

@@ -78,7 +78,9 @@ bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
             mf_classic_data, troika_keys[i].sector, MfClassicKeyB, troika_keys[i].key_b);
     }
 
-    return mf_classic_update_card(tx_rx, mf_classic_data) == sectors;
+    uint8_t res = mf_classic_update_card(tx_rx, mf_classic_data);
+    FURI_LOG_D("Troika", "Update card res: %d", res);
+    return res == sectors;
 }
 
 bool troika_parser_parse(NfcDeviceData* dev_data) {
@@ -92,21 +94,22 @@ bool troika_parser_parse(NfcDeviceData* dev_data) {
         if(key != troika_keys[8].key_a) break;
 
         // Verify card type
-        if(data->type != MfClassicType1k) break;
+        if(data->type != MfClassicType1k && data->type != MfClassicType4k) break;
 
         // Parse data
         uint8_t* temp_ptr = &data->block[8 * 4 + 1].value[5];
         uint16_t balance = ((temp_ptr[0] << 8) | temp_ptr[1]) / 25;
-        temp_ptr = &data->block[8 * 4].value[3];
-        uint32_t number = 0;
-        for(size_t i = 0; i < 4; i++) {
+        temp_ptr = &data->block[8 * 4].value[2];
+        uint64_t number = 0;
+        for(size_t i = 0; i < 5; i++) {
             number <<= 8;
             number |= temp_ptr[i];
         }
+        number &= 0x0FFFFFFFFF;
         number >>= 4;
 
         furi_string_printf(
-            dev_data->parsed_data, "\e#Troika\nNum: %ld\nBalance: %d rur.", number, balance);
+            dev_data->parsed_data, "\e#Troika\nNum: %010lld\nBalance: %d rur.", number, balance);
         troika_parsed = true;
     } while(false);
 
