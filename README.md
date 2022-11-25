@@ -8,6 +8,7 @@ Rate: 0/1/2 - rate in Mbps (=0.25/1/2)<br>
 Ch: 0..125 - default channel          <br>
 ESB: 0/1 (1 - Enhanced ShockBurst)    <br>
 DPL: 0/1 (1 - Dynamic Payload Length) <br>
+CRC: 0/1/2 (CRC length)<br>
 Payload: 1..32 (bytes)                <br>
 P0: address pipe #0 in hex (max 5 bytes, LSB last)<br>
 P1: address pipe #1 in hex (max 5 bytes, LSB last)<br>
