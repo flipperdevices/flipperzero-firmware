@@ -300,6 +300,11 @@ int32_t nfc_app(void* p) {
                 } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
                     DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatNfcV) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateNfcV);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
                 } else {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
                     DOLPHIN_DEED(DolphinDeedNfcEmulate);

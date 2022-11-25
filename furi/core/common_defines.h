@@ -23,18 +23,33 @@ extern "C" {
 #define FURI_IS_ISR() (FURI_IS_IRQ_MODE() || FURI_IS_IRQ_MASKED())
 #endif
 
+#ifndef FURI_CRITICAL_DEFINE
+#define FURI_CRITICAL_DEFINE()          \
+    uint32_t __isrm = 0;                \
+    bool __from_isr = false;            \
+    bool __kernel_running = false;
+#endif
+    
+#ifndef FURI_CRITICAL_ENTER_ADV
+#define FURI_CRITICAL_ENTER_ADV()                                                    \
+    do {                                                                             \
+        __isrm = 0;                                                                  \
+        __from_isr = FURI_IS_ISR();                                                  \
+        __kernel_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING);      \
+        if(__from_isr) {                                                             \
+            __isrm = taskENTER_CRITICAL_FROM_ISR();                                  \
+        } else if(__kernel_running) {                                                \
+            taskENTER_CRITICAL();                                                    \
+        } else {                                                                     \
+            __disable_irq();                                                         \
+        }                                                                            \
+    } while(0)
+#endif
+
 #ifndef FURI_CRITICAL_ENTER
-#define FURI_CRITICAL_ENTER()                                                    \
-    uint32_t __isrm = 0;                                                         \
-    bool __from_isr = FURI_IS_ISR();                                             \
-    bool __kernel_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING); \
-    if(__from_isr) {                                                             \
-        __isrm = taskENTER_CRITICAL_FROM_ISR();                                  \
-    } else if(__kernel_running) {                                                \
-        taskENTER_CRITICAL();                                                    \
-    } else {                                                                     \
-        __disable_irq();                                                         \
-    }
+#define FURI_CRITICAL_ENTER()               \
+    FURI_CRITICAL_DEFINE();                 \
+    FURI_CRITICAL_ENTER_ADV();
 #endif
 
 #ifndef FURI_CRITICAL_EXIT
