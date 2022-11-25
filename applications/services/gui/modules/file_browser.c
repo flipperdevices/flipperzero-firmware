@@ -232,7 +232,10 @@ static bool browser_is_item_in_array(FileBrowserModel* model, uint32_t idx) {
 
 static bool browser_is_list_load_required(FileBrowserModel* model) {
     size_t array_size = items_array_size(model->items);
-    uint32_t item_cnt = (model->is_root) ? model->item_cnt : model->item_cnt - 1;
+    if((array_size > 0) && (!model->is_root) && (model->array_offset == 0)) {
+        array_size--;
+    }
+    uint32_t item_cnt = (model->is_root) ? (model->item_cnt) : (model->item_cnt - 1);
 
     if((model->list_loading) || (array_size >= item_cnt)) {
         return false;
