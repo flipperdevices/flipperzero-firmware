@@ -641,7 +641,7 @@ void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker) {
         furi_delay_ms(0);
     }
     nfcv_emu_deinit(nfcv_data);
-    
+
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_stop(nfc_worker->reader_analyzer);
     }
@@ -867,7 +867,37 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
 }
 
 void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
+    FuriHalNfcTxRxContext tx_rx = {};
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    MfClassicEmulator emulator = {
+        .cuid = nfc_util_bytes2num(&nfc_data->uid[nfc_data->uid_len - 4], 4),
+        .data = nfc_worker->dev_data->mf_classic_data,
+        .data_changed = false,
+    };
+    NfcaSignal* nfca_signal = nfca_signal_alloc();
+    tx_rx.nfca_signal = nfca_signal;
 
+    rfal_platform_spi_acquire();
+
+    furi_hal_nfc_listen_start(nfc_data);
+    while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) {
+        if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
+            mf_classic_emulator(&emulator, &tx_rx);
+        }
+    }
+    if(emulator.data_changed) {
+        nfc_worker->dev_data->mf_classic_data = emulator.data;
+        if(nfc_worker->callback) {
+            nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+        }
+        emulator.data_changed = false;
+    }
+
+    nfca_signal_free(nfca_signal);
+}
+
+/* software-defined variant of MFC emulation, seems to also struggle with frame errors etc */
+void nfc_worker_emulate_mf_classic_trans(NfcWorker* nfc_worker) {
     FuriHalNfcTxRxContext tx_rx = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     MfClassicEmulator emulator = {
@@ -883,8 +913,10 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     furi_hal_nfc_listen_start(nfc_data);
     nfca_trans_rx_init(&tx_rx.nfca_trans_state);
 
+    /* we are usingthe  fully transparent ISO14443-A mode */
     tx_rx.tx_rx_type = FuriHalNfcTxRxFullyTransparent;
 
+    /* prepare some answers to save time */
     uint8_t tx_buffer_aticoll[32];
     memcpy(tx_buffer_aticoll, &nfc_data->uid, 4);
     nfca_append_crc16(tx_buffer_aticoll, 4);

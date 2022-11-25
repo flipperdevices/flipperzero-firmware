@@ -150,14 +150,12 @@ bool nfcv_read_card(
 
 
 
-void nfcv_crc(uint8_t* data, uint32_t length, uint8_t* out) {
+void nfcv_crc(uint8_t* data, uint32_t length) {
     uint32_t reg = 0xFFFF;
-    uint32_t i = 0;
-    uint32_t j = 0;
 
-    for (i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         reg = reg ^ ((uint32_t)data[i]);
-        for (j = 0; j < 8; j++) {
+        for (size_t j = 0; j < 8; j++) {
             if (reg & 0x0001) {
                 reg = (reg >> 1) ^ 0x8408;
             } else {
@@ -168,8 +166,8 @@ void nfcv_crc(uint8_t* data, uint32_t length, uint8_t* out) {
 
     uint16_t crc = ~(uint16_t)(reg & 0xffff);
 
-    out[0] = crc & 0xFF;
-    out[1] = crc >> 8;
+    data[length + 0] = crc & 0xFF;
+    data[length + 1] = crc >> 8;
 }
 
 void nfcv_emu_free(NfcVData* data) {
@@ -191,7 +189,6 @@ void nfcv_emu_free(NfcVData* data) {
 }
 
 void nfcv_emu_alloc(NfcVData* data) {
-    
     if(!data->emulation.nfcv_signal) {
         /* assuming max frame length is 255 bytes */
         data->emulation.nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
@@ -260,8 +257,7 @@ void nfcv_emu_alloc(NfcVData* data) {
 }
 
 
-void nfcv_emu_send_raw(NfcVData* nfcv, uint8_t* data, uint8_t length) {
-
+static void nfcv_emu_send_raw(NfcVData* nfcv, uint8_t* data, uint8_t length) {
     digital_sequence_clear(nfcv->emulation.nfcv_signal);
     digital_sequence_add(nfcv->emulation.nfcv_signal, NFCV_SIG_SOF);
 
@@ -281,28 +277,22 @@ void nfcv_emu_send_raw(NfcVData* nfcv, uint8_t* data, uint8_t length) {
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 }
 
-void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length) {
-    uint8_t buffer[64];
+static void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length) {
 
-    if(length + 2 > (uint8_t)sizeof(buffer)) {
-        return;
-    }
-
-    memcpy(buffer, data, length);
-    nfcv_crc(buffer, length, &buffer[length]);
-    nfcv_emu_send_raw(nfcv, buffer, length + 2);
+    nfcv_crc(data, length);
+    nfcv_emu_send_raw(nfcv, data, length + 2);
     if(tx_rx->sniff_tx) {
-        tx_rx->sniff_tx(buffer, (length + 2) * 8, false, tx_rx->sniff_context);
+        tx_rx->sniff_tx(data, (length + 2) * 8, false, tx_rx->sniff_context);
     }
 }
 
-void nfcv_uidcpy(uint8_t *dst, uint8_t *src) {
+static void nfcv_uidcpy(uint8_t *dst, uint8_t *src) {
     for(int pos = 0; pos < 8; pos++) {
         dst[pos] = src[7-pos];
     }
 }
 
-int nfcv_uidcmp(uint8_t *dst, uint8_t *src) {
+static int nfcv_uidcmp(uint8_t *dst, uint8_t *src) {
     for(int pos = 0; pos < 8; pos++) {
         if(dst[pos] != src[7-pos]) {
             return 1;
@@ -311,17 +301,7 @@ int nfcv_uidcmp(uint8_t *dst, uint8_t *src) {
     return 0;
 }
 
-uint32_t nfcv_read_le(uint8_t *data, uint32_t length) {
-    uint32_t value = 0;
-
-    for(uint32_t pos = 0; pos < length; pos++) {
-        value |= data[pos] << ((int)pos * 8);
-    }
-
-    return value;
-}
-
-uint32_t nfcv_read_be(uint8_t *data, uint32_t length) {
+static uint32_t nfcv_read_be(uint8_t *data, uint32_t length) {
     uint32_t value = 0;
 
     for(uint32_t pos = 0; pos < length; pos++) {
@@ -345,6 +325,7 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
     uint8_t address_offset = 2 + (advanced ? 1 : 0);
     uint8_t payload_offset = address_offset + (addressed ? 8 : 0);
     uint8_t *address = &payload[address_offset];
+    uint8_t response_buffer[32];
 
     if(addressed && nfcv_uidcmp(address, nfc_data->uid)) {
         FURI_LOG_D(TAG, "addressed command 0x%02X, but not for us:", command);
@@ -353,7 +334,6 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
         return;
     }
 
-    uint8_t response_buffer[32];
 
     switch(nfcv_data->type) {
         case NfcVTypeSlixL:
@@ -511,7 +491,8 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
             uint32_t pass_expect = nfcv_read_be(password, 4);
             uint32_t pass_received = nfcv_read_be(password_rcv, 4);
 
-            if(pass_expect == pass_received) {
+            /* if the password is all-zeroes, just accept any password*/
+            if(!pass_expect || pass_expect == pass_received) {
                 nfcv_data->sub_data.slix_l.privacy = false;
                 response_buffer[0] = ISO15693_NOERROR;
                 nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1);

@@ -602,49 +602,6 @@ static bool furi_hal_nfc_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_
     return ret;
 }
 
-static bool furi_hal_nfc_fully_transparent_raw_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
-    furi_assert(tx_rx);
-
-    bool received = false;
-
-    tx_rx->rx_bits = 0;
-
-    if(tx_rx->tx_bits) {
-        nfca_trans_rx_pause(&tx_rx->nfca_trans_state);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        digital_sequence_send(tx_rx->nfca_signal->tx_signal);
-        furi_hal_gpio_write(&gpio_spi_r_mosi, false);
-        nfca_trans_rx_continue(&tx_rx->nfca_trans_state);
-
-        if(tx_rx->sniff_tx) {
-            tx_rx->sniff_tx(tx_rx->tx_data, tx_rx->tx_bits, false, tx_rx->sniff_context);
-        }
-    }
-    
-    if(timeout_ms) {
-        tx_rx->nfca_trans_state.bits_received = 0;
-        received = nfca_trans_rx_loop(&tx_rx->nfca_trans_state, timeout_ms);
-
-        if(received) {
-            if(tx_rx->nfca_trans_state.bits_received > 7) {
-                tx_rx->rx_bits = tx_rx->nfca_trans_state.bits_received/9 * 8;
-                for(size_t pos = 0; pos < tx_rx->rx_bits/8; pos++) {
-                    tx_rx->rx_data[pos] = tx_rx->nfca_trans_state.frame_data[pos];
-                }
-            } else {
-                tx_rx->rx_bits = tx_rx->nfca_trans_state.bits_received;
-                tx_rx->rx_data[0] = tx_rx->nfca_trans_state.frame_data[0] & ~(0xFF << tx_rx->rx_bits);
-            }
-            
-            if(tx_rx->sniff_rx) {
-                tx_rx->sniff_rx(tx_rx->rx_data, tx_rx->rx_bits, false, tx_rx->sniff_context);
-            }
-        }
-    }
-
-    return received;
-}
-
 static bool furi_hal_nfc_fully_transparent_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx);
 
@@ -786,12 +743,11 @@ void furi_hal_nfc_gen_bitstream(FuriHalNfcTxRxContext* tx_rx, uint8_t *buffer, s
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
     furi_assert(tx_rx);
 
-    if(tx_rx->tx_rx_type == FuriHalNfcTxRxFullyRawTransparent) {
-        return furi_hal_nfc_fully_transparent_raw_tx_rx(tx_rx, timeout_ms);
-    }
+    /* send and receive data using transparent mode */
     if(tx_rx->tx_rx_type == FuriHalNfcTxRxFullyTransparent) {
         return furi_hal_nfc_fully_transparent_tx_rx(tx_rx, timeout_ms);
     }
+    /* send data using transparent mode and receive data in standard mode */
     if(tx_rx->tx_rx_type == FuriHalNfcTxRxTransparent) {
         return furi_hal_nfc_transparent_tx_rx(tx_rx, timeout_ms);
     }

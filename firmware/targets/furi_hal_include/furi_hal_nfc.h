@@ -47,7 +47,6 @@ typedef enum {
     FuriHalNfcTxRxTypeRaw,
     FuriHalNfcTxRxTypeRxRaw,
     FuriHalNfcTxRxTransparent,
-    FuriHalNfcTxRxFullyRawTransparent,
     FuriHalNfcTxRxFullyTransparent
 } FuriHalNfcTxRxType;
 
