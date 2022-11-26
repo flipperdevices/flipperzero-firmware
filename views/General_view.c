@@ -2,7 +2,7 @@
 #include "unitemp_icons.h"
 static View* view;
 
-static const uint8_t temp_positions[3][2] = {{37, 24}, {37, 16}, {9, 16}};
+static const uint8_t temp_positions[3][2] = {{37, 23}, {37, 16}, {9, 16}};
 static const uint8_t hum_positions[2][2] = {{37, 38}, {65, 16}};
 
 static uint8_t sensor_index = 0;
@@ -114,7 +114,7 @@ void _draw_hum(Canvas* canvas, float hum, uint8_t pos) {
     //Единица измерения
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(
-        canvas, hum_positions[pos][0] + 27 + int_len / 2 + 2, hum_positions[pos][1] + 10 + 7, "%");
+        canvas, hum_positions[pos][0] + 27 + int_len / 2 + 4, hum_positions[pos][1] + 10 + 7, "%");
 }
 
 static void _draw_press(Canvas* canvas, float press) {
@@ -150,11 +150,17 @@ static void _draw_sensorsCarousel(Canvas* canvas) {
 
     //Стрелка вправо
     if(unitemp_sensors_getTypesCount() > 0 && sensor_index < unitemp_sensors_getCount() - 1) {
-        canvas_draw_icon(canvas, 64 + line_len / 2 + 4, 3, &I_arrow_right_5x9);
+        canvas_draw_icon(canvas, 117, 28, &I_arrow_right_5x9);
     }
     //Стрелка влево
     if(sensor_index > 0) {
-        canvas_draw_icon(canvas, 64 - line_len / 2 - 8, 3, &I_arrow_left_5x9);
+        canvas_draw_icon(canvas, 6, 28, &I_arrow_left_5x9);
+    }
+
+    if(app->sensors[sensor_index]->status == UT_TIMEOUT) {
+        const Icon* frames[] = {&I_happy_2_78x46, &I_happy_78x46, &I_sad_78x46};
+        canvas_draw_icon(canvas, 25, 15, frames[furi_get_tick() % 2250 / 750]);
+        return;
     }
 
     //Селектор значений для отображения
