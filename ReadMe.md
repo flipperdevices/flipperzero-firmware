@@ -21,6 +21,7 @@ Thank you to all the supporters!
 - Added: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 - Updated: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [Gui: proper navigation in file browser dialog #2014 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2014)
+- Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
