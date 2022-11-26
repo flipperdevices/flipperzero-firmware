@@ -22,7 +22,7 @@
 
 typedef struct {
     uint8_t file_bytes[HEX_VIEWER_ROW_COUNT][HEX_VIEWER_ROW_COUNT];
-    uint32_t line;
+    uint32_t file_offset;
     uint32_t read_bytes;
     uint32_t file_size;
     Stream* stream;
@@ -56,6 +56,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     uint32_t line_count = hex_viewer->model->file_size / HEX_VIEWER_BYTES_PER_ROW;
     if(hex_viewer->model->file_size % HEX_VIEWER_BYTES_PER_ROW != 0) line_count += 1;
+    uint32_t first_line_on_screen = hex_viewer->model->file_offset / HEX_VIEWER_BYTES_PER_ROW;
     if(line_count > HEX_VIEWER_ROW_COUNT) {
         uint8_t width = canvas_width(canvas);
         elements_scrollbar_pos(
@@ -63,7 +64,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
             width,
             0,
             ROW_HEIGHT * HEX_VIEWER_ROW_COUNT,
-            hex_viewer->model->line,
+            first_line_on_screen, // TODO
             line_count - (HEX_VIEWER_ROW_COUNT - 1));
     }
 
@@ -85,8 +86,8 @@ static void render_callback(Canvas* canvas, void* ctx) {
             canvas_set_font(canvas, FontKeyboard);
             canvas_draw_str(canvas, LEFT_OFFSET, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
         } else {
-            int addr = (i + hex_viewer->model->line) * HEX_VIEWER_BYTES_PER_ROW;
-            snprintf(temp_buf, 32, "%04X", addr);
+            uint32_t addr = hex_viewer->model->file_offset + i * HEX_VIEWER_BYTES_PER_ROW;
+            snprintf(temp_buf, 32, "%04lX", addr);
 
             canvas_set_font(canvas, FontKeyboard);
             canvas_draw_str(canvas, LEFT_OFFSET, TOP_OFFSET + i * ROW_HEIGHT, temp_buf);
@@ -173,12 +174,13 @@ static bool hex_viewer_open_file(HexViewer* hex_viewer, const char* file_path) {
 static bool hex_viewer_read_file(HexViewer* hex_viewer) {
     furi_assert(hex_viewer);
     furi_assert(hex_viewer->model->stream);
+    furi_assert(hex_viewer->model->file_offset % HEX_VIEWER_BYTES_PER_ROW == 0);
 
     memset(hex_viewer->model->file_bytes, 0x0, HEX_VIEWER_BUF_SIZE);
     bool isOk = true;
 
     do {
-        uint32_t offset = hex_viewer->model->line * HEX_VIEWER_BYTES_PER_ROW;
+        uint32_t offset = hex_viewer->model->file_offset;
         if(!stream_seek(hex_viewer->model->stream, offset, true)) {
             FURI_LOG_E(TAG, "Unable to seek stream");
             isOk = false;
@@ -233,19 +235,18 @@ int32_t hex_viewer_app(void* p) {
                 break;
             } else if(input.key == InputKeyUp) {
                 furi_check(furi_mutex_acquire(hex_viewer->mutex, FuriWaitForever) == FuriStatusOk);
-                if(hex_viewer->model->line > 0) {
-                    hex_viewer->model->line--;
-
+                if(hex_viewer->model->file_offset > 0) {
+                    hex_viewer->model->file_offset -= HEX_VIEWER_BYTES_PER_ROW;
                     if(!hex_viewer_read_file(hex_viewer)) break;
                 }
                 furi_mutex_release(hex_viewer->mutex);
             } else if(input.key == InputKeyDown) {
                 furi_check(furi_mutex_acquire(hex_viewer->mutex, FuriWaitForever) == FuriStatusOk);
-                uint32_t cur_pos = hex_viewer->model->line * HEX_VIEWER_BYTES_PER_ROW +
-                                   hex_viewer->model->read_bytes;
+                uint32_t last_byte_on_screen =
+                    hex_viewer->model->file_offset + hex_viewer->model->read_bytes;
 
-                if(hex_viewer->model->file_size > cur_pos) {
-                    hex_viewer->model->line++;
+                if(hex_viewer->model->file_size > last_byte_on_screen) {
+                    hex_viewer->model->file_offset += HEX_VIEWER_BYTES_PER_ROW;
                     if(!hex_viewer_read_file(hex_viewer)) break;
                 }
                 furi_mutex_release(hex_viewer->mutex);
