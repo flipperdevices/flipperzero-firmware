@@ -24,6 +24,7 @@ Thank you to all the supporters!
 - Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - Updated: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 - [Adding Slovenian, Bosnian and Croatian layout #187 (By StellaStoic)](https://github.com/DarkFlippers/unleashed-firmware/pull/187)
+- [Add protocol Auriol hg0601a #451 (By LY2NEO)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/451)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
