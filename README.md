@@ -16,8 +16,14 @@ P2: address pipe #2, LSB in hex (1 byte)   <br>
 P3: address pipe #3, LSB in hex (1 byte)   <br>
 P4: address pipe #4, LSB in hex (1 byte)   <br>
 P5: address pipe #5, LSB in hex (1 byte)   <br>
-captured data in raw format, first byte = address # 0..5, Payload len if DPL   
-... up to MAX_LOG_RECORDS-1                                                    
+captured data in raw format, first byte = address # 0..5, Payload len if DPL<br>
+... up to MAX_LOG_RECORDS-1<br>
+<br><br>
+In the list of the received:<br>
+Press OK - send the packet,<br>
+Long press OK - view addresses.<br>
+<br>
+<br>
 <br>
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-1.png">
