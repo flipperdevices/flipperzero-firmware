@@ -1,6 +1,6 @@
 //
 // Written by vad7, 20.11.2022.
-// ver. 1.1
+// ver. 1.2
 //
 #include "nrf24scan.h"
 
@@ -51,6 +51,7 @@ char SettingsFld_Addr = 'P';
 Nrf24Scan* APP;
 uint8_t what_doing = 0; // 0 - setup, 1 - view log, 2 - view addresses
 uint8_t what_to_do = 1; // 0 - view, 1 - view & scan
+uint32_t key_press_seq_ok = 0;
 char screen_buf[64];
 char addr_file_name[32];
 uint8_t NRF_rate = 1; // 0 - 250Kbps, 1 - 1Mbps, 2 - 2Mbps
@@ -92,7 +93,7 @@ enum {
     Menu_ok
 };
 
-#define MIN(a, b) ((a < b) ? a : b)
+//#define MIN(a, b)  ((a<b)?a:b)
 
 static uint8_t GetHexVal(char hex) {
     return (uint8_t)hex - ((uint8_t)hex < 58 ? 48 : ((uint8_t)hex < 97 ? 55 : 87));
@@ -101,13 +102,14 @@ static uint8_t GetHexVal(char hex) {
 // Return num bytes in array
 static uint8_t ConvertHexToArray(char* hex, uint8_t* array, uint8_t maxlen) {
     uint8_t len = 0;
-    do {
+    while(maxlen) {
         uint8_t ch = *hex++;
         if(ch == 0) break;
         if(ch < '0') continue;
         *array++ = (GetHexVal(ch) << 4) + GetHexVal(*hex++);
         len++;
-    } while(--maxlen);
+        maxlen--;
+    }
     return len;
 }
 
@@ -231,7 +233,9 @@ void write_to_log_file(Storage* storage) {
             for(; i < log_arr_idx; i++) {
                 furi_string_reset(str);
                 add_to_furi_str_hex_bytes(
-                    str, (char*)APP->log_arr + i * LOG_REC_SIZE, LOG_REC_SIZE);
+                    str,
+                    (char*)APP->log_arr + i * LOG_REC_SIZE,
+                    MIN(NRF_Payload + 1, LOG_REC_SIZE));
                 furi_string_cat(str, "\n");
                 if(stream_write_string(file_stream, str) != furi_string_size(str)) {
                     FURI_LOG_E(TAG, "Failed to write to log!");
@@ -288,24 +292,25 @@ static bool select_settings_file(Stream* stream) {
 static uint8_t load_settings_file(Stream* file_stream) {
     size_t file_size = 0;
     char* file_buf;
-    bool loaded = false;
+    uint8_t err = 5;
     file_size = stream_size(file_stream);
     if(file_size == (size_t)0) {
         FURI_LOG_D(TAG, "load failed. file_size: %d", file_size);
         return 1;
     }
-    file_buf = malloc(MIN(file_size + 1, LOG_REC_SIZE * MAX_LOG_RECORDS * 2 + 100));
+    file_size = MIN(file_size, LOG_REC_SIZE * MAX_LOG_RECORDS * 2 + 100);
+    file_buf = malloc(file_size + 1);
     if(file_buf == NULL) {
         FURI_LOG_D(TAG, "Memory low, need: %d", file_size);
         return 2;
     }
-    memset(file_buf, 0, file_size);
+    memset(file_buf, 0, file_size + 1);
     if(stream_read(file_stream, (uint8_t*)file_buf, file_size) == file_size) {
         FURI_LOG_D(TAG, "Loading settings file");
         char* line_ptr = file_buf;
         int16_t line_num = 0;
         memset((uint8_t*)&addrs, 0, sizeof(addrs));
-        bool log_loaded = 3;
+        bool log_loaded = false;
         while(line_ptr && line_ptr - file_buf < file_size) {
             char* end_ptr = strstr((char*)line_ptr, "\n");
             if(end_ptr == NULL)
@@ -348,7 +353,7 @@ static uint8_t load_settings_file(Stream* file_stream) {
                         addrs.addr_P0[0],
                         addrs.addr_P0[1],
                         addrs.addr_P0[2]);
-                    loaded = true;
+                    if(addrs.addr_len >= 2) err = 0;
                     break;
                 case '1':
                     ConvertHexToArray(line_ptr, addrs.addr_P1, 5);
@@ -376,15 +381,15 @@ static uint8_t load_settings_file(Stream* file_stream) {
                     break;
                 }
                 if(a) addrs.addr_count = a - '0' + 1;
-            } else if(line_len >= LOG_REC_SIZE * 2) { // data
+            } else if(line_len >= (NRF_Payload + 1) * 2) { // data
                 if(!log_loaded) {
                     clear_log();
                     what_to_do = 0;
-                    log_loaded = 0;
+                    log_loaded = true;
                 }
                 if(log_arr_idx < MAX_LOG_RECORDS - 1) {
                     ConvertHexToArray(
-                        line_ptr, APP->log_arr + log_arr_idx * LOG_REC_SIZE, LOG_REC_SIZE);
+                        line_ptr, APP->log_arr + log_arr_idx * LOG_REC_SIZE, MIN(NRF_Payload, 32));
                     log_arr_idx++;
                 }
             }
@@ -393,10 +398,10 @@ static uint8_t load_settings_file(Stream* file_stream) {
         }
     } else {
         FURI_LOG_D(TAG, "load failed. file size: %d", file_size);
-        loaded = 4;
+        err = 4;
     }
     free(file_buf);
-    return loaded;
+    return err;
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -424,7 +429,7 @@ static void prepare_nrf24() {
     for(int i = 0; i < addrs.addr_len; i++) addr[i] = addrs.addr_P0[addrs.addr_len - i - 1];
     nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P0, &addr[0], addrs.addr_len);
     nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, NRF_Payload);
-    if(addrs.addr_count == 1)
+    if(addrs.addr_count > 0)
         nrf24_write_reg(
             nrf24_HANDLE, REG_DYNPD, NRF_DPL ? (1 << 0) : 0); // Enable dynamic payload reg
     if(addrs.addr_count > 1) {
@@ -575,7 +580,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             addrs.addr_count); // menu_selected = 5
         canvas_draw_str(canvas, 10, 60, screen_buf);
         canvas_draw_str(canvas, 0, menu_selected * 10 + 10, ">");
-    } else {
+    } else if(what_doing == 1) {
         canvas_set_font(canvas, FontBatteryPercent); // 5x7 font, 9 lines
         bool ch2 = false;
         screen_buf[0] = '\0';
@@ -599,15 +604,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             if(view_log_arr_idx >= log_arr_idx) view_log_arr_idx = log_arr_idx - 1;
             uint16_t page = view_log_arr_idx & ~7;
             for(uint8_t i = 0; i < 8 && page + i < log_arr_idx; i++) {
-                snprintf(
-                    screen_buf,
-                    sizeof(screen_buf),
-                    "%d:%c",
-                    page + i + 1,
-                    (view_log_arr_idx & 7) != i          ? ' ' :
-                    last_packet_send != view_log_arr_idx ? '>' :
-                    last_packet_send_st                  ? '+' :
-                                                           '!');
+                snprintf(screen_buf, sizeof(screen_buf), "%d:", page + i + 1);
+                canvas_draw_str(canvas, 0, 14 + i * 7, screen_buf);
+                screen_buf[0] = (view_log_arr_idx & 7) != i          ? ' ' :
+                                last_packet_send != view_log_arr_idx ? '>' :
+                                last_packet_send_st                  ? '*' :
+                                                                       '!';
+                screen_buf[1] = '\0';
                 char* ptr = (char*)APP->log_arr + (page + i) * LOG_REC_SIZE;
                 uint8_t dpl = *ptr++;
                 uint8_t pipe = dpl & 7;
@@ -624,8 +627,40 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                         add_to_str_hex_bytes(screen_buf, ptr, count);
                     }
                 }
-                canvas_draw_str(canvas, 0, 14 + i * 7, screen_buf);
+                canvas_draw_str(canvas, 3 * 5, 14 + i * 7, screen_buf);
             }
+        }
+    } else {
+        canvas_set_font(canvas, FontBatteryPercent); // 5x7 font
+        if(addrs.addr_count > 0) {
+            snprintf(screen_buf, sizeof(screen_buf), "P0: ");
+            add_to_str_hex_bytes(screen_buf, (char*)addrs.addr_P0, addrs.addr_len);
+            canvas_draw_str(canvas, 0, 10, screen_buf);
+        }
+        if(addrs.addr_count > 1) {
+            snprintf(screen_buf, sizeof(screen_buf), "P1: ");
+            add_to_str_hex_bytes(screen_buf, (char*)addrs.addr_P1, addrs.addr_len);
+            canvas_draw_str(canvas, 0, 20, screen_buf);
+        }
+        if(addrs.addr_count > 2) {
+            canvas_draw_str(canvas, 0, 30, "P2: ");
+            snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P2);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 30, screen_buf);
+        }
+        if(addrs.addr_count > 3) {
+            canvas_draw_str(canvas, 0, 40, "P3: ");
+            snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P3);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 40, screen_buf);
+        }
+        if(addrs.addr_count > 4) {
+            canvas_draw_str(canvas, 0, 50, "P4: ");
+            snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P4);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 50, screen_buf);
+        }
+        if(addrs.addr_count > 5) {
+            canvas_draw_str(canvas, 0, 60, "P5: ");
+            snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P5);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 60, screen_buf);
         }
     }
     release_mutex((ValueMutex*)ctx, plugin_state);
@@ -684,6 +719,7 @@ int32_t nrf24scan_app(void* p) {
         if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
+                //FURI_LOG_D(TAG, "Key: %d Type: %d Sec: %u", event.input.key, event.input.type, event.input.sequence);
                 switch(event.input.key) {
                 case InputKeyUp:
                     if(event.input.type == InputTypePress || event.input.type == InputTypeRepeat) {
@@ -692,7 +728,7 @@ int32_t nrf24scan_app(void* p) {
                                 menu_selected--;
                             else
                                 menu_selected = menu_selected_max;
-                        } else {
+                        } else if(what_doing == 1) {
                             view_log_arr_idx -= event.input.type == InputTypeRepeat ? 10 : 1;
                             if(view_log_arr_idx >= log_arr_idx) view_log_arr_idx = 0;
                         }
@@ -705,7 +741,7 @@ int32_t nrf24scan_app(void* p) {
                                 menu_selected++;
                             else
                                 menu_selected = 0;
-                        } else {
+                        } else if(what_doing == 1) {
                             view_log_arr_idx += event.input.type == InputTypeRepeat ? 10 : 1;
                             if(view_log_arr_idx >= log_arr_idx) view_log_arr_idx = log_arr_idx - 1;
                         }
@@ -734,7 +770,7 @@ int32_t nrf24scan_app(void* p) {
                                 what_to_do = !what_to_do;
                                 break;
                             }
-                        } else {
+                        } else if(what_doing == 1) {
                             if(view_log_arr_x < VIEW_LOG_MAX_X) view_log_arr_x++;
                         }
                     }
@@ -763,7 +799,7 @@ int32_t nrf24scan_app(void* p) {
                                 what_to_do = !what_to_do;
                                 break;
                             }
-                        } else {
+                        } else if(what_doing == 1) {
                             if(view_log_arr_x > 0) view_log_arr_x--;
                         }
                     }
@@ -801,26 +837,21 @@ int32_t nrf24scan_app(void* p) {
                                 if(++NRF_CRC > 2) NRF_CRC = 0;
                                 break;
                             case Menu_ok:
-                                what_doing = !what_doing;
-                                if(what_doing) {
-                                    if(what_to_do) {
-                                        if(addrs.addr_count == 0)
-                                            what_doing = 0;
-                                        else {
-                                            if(log_to_file == -1) {
-                                                clear_log();
-                                                save_to_new_log = true;
-                                            } else if(log_to_file == 1)
-                                                save_to_new_log = true;
-                                            start_scanning();
-                                        }
+                                if(what_to_do) {
+                                    if(addrs.addr_count) {
+                                        what_doing = 1;
+                                        if(log_to_file == -1) {
+                                            clear_log();
+                                            save_to_new_log = true;
+                                        } else if(log_to_file == 1)
+                                            save_to_new_log = true;
+                                        start_scanning();
                                     }
                                 } else
-                                    nrf24_set_idle(nrf24_HANDLE);
+                                    what_doing = 1;
+                                key_press_seq_ok = event.input.sequence;
                                 break;
                             }
-                        } else { // Send
-                            nrf24_send_packet();
                         }
                     } else if(event.input.type == InputTypeLong) {
                         if(what_doing == 0) {
@@ -832,15 +863,22 @@ int32_t nrf24scan_app(void* p) {
                             }
                             nrf24_set_idle(nrf24_HANDLE);
                         } else if(what_doing == 1) {
+                            what_doing = 2;
+                        }
+                    } else if(event.input.type == InputTypeRelease) {
+                        if(what_doing == 1 && key_press_seq_ok != event.input.sequence) { // Send
+                            nrf24_send_packet();
                         }
                     }
                     break;
                 case InputKeyBack:
                     if(event.input.type == InputTypeLong)
                         processing = false;
-                    else
-                        what_doing = 0;
-                    nrf24_set_idle(nrf24_HANDLE);
+                    else if(event.input.type == InputTypeRelease) {
+                        if(what_doing) what_doing--;
+                        if(what_doing == 0) nrf24_set_idle(nrf24_HANDLE);
+                        ;
+                    }
                     break;
                 default:
                     break;
@@ -859,6 +897,7 @@ int32_t nrf24scan_app(void* p) {
         view_port_update(APP->view_port);
         release_mutex(&state_mutex, plugin_state);
     }
+    nrf24_set_idle(nrf24_HANDLE);
     if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
         write_to_log_file(APP->storage);
     }
