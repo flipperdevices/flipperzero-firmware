@@ -437,19 +437,18 @@ MU_TEST(subghz_decoder_clemsa_test) {
         "Test decoder " SUBGHZ_PROTOCOL_CLEMSA_NAME " error\r\n");
 }
 
-<<<<<<< HEAD
-MU_TEST(subghz_decoder_pocsag_test) {
-	mu_assert(
-			subghz_decoder_test(
-					EXT_PATH("unit_tests/subghz/pocsag.sub"), SUBGHZ_PROTOCOL_POCSAG_NAME),
-			"Test decoder " SUBGHZ_PROTOCOL_POCSAG_NAME " error\r\n");
-=======
 MU_TEST(subghz_decoder_ansonic_test) {
     mu_assert(
         subghz_decoder_test(
             EXT_PATH("unit_tests/subghz/ansonic_raw.sub"), SUBGHZ_PROTOCOL_ANSONIC_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_ANSONIC_NAME " error\r\n");
->>>>>>> dev
+}
+
+MU_TEST(subghz_decoder_pocsag_test) {
+	mu_assert(
+			subghz_decoder_test(
+					EXT_PATH("unit_tests/subghz/pocsag.sub"), SUBGHZ_PROTOCOL_POCSAG_NAME),
+			"Test decoder " SUBGHZ_PROTOCOL_POCSAG_NAME " error\r\n");
 }
 
 //test encoders
@@ -619,11 +618,8 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_magellan_test);
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
-<<<<<<< HEAD
-	MU_RUN_TEST(subghz_decoder_pocsag_test);
-=======
     MU_RUN_TEST(subghz_decoder_ansonic_test);
->>>>>>> dev
+	MU_RUN_TEST(subghz_decoder_pocsag_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
