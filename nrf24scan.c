@@ -742,6 +742,7 @@ int32_t nrf24scan_app(void* p) {
 					} else if(event.input.type == InputTypeRelease) {
 						if(what_doing == 1 && key_press_seq_ok != event.input.sequence) { // Send
 							nrf24_send_packet();
+							key_press_seq_ok--;
 						}
 					}
 					break;
