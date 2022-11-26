@@ -13,7 +13,7 @@
 #define CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
 #define NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
 #define TEST_RANDOM_DIR_NAME EXT_PATH("unit_tests/subghz/test_random_raw.sub")
-#define TEST_RANDOM_COUNT_PARSE 232
+#define TEST_RANDOM_COUNT_PARSE 236
 #define TEST_TIMEOUT 10000
 
 static SubGhzEnvironment* environment_handler;
@@ -437,6 +437,13 @@ MU_TEST(subghz_decoder_clemsa_test) {
         "Test decoder " SUBGHZ_PROTOCOL_CLEMSA_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_pocsag_test) {
+	mu_assert(
+			subghz_decoder_test(
+					EXT_PATH("unit_tests/subghz/pocsag.sub"), SUBGHZ_PROTOCOL_POCSAG_NAME),
+			"Test decoder " SUBGHZ_PROTOCOL_POCSAG_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
@@ -598,6 +605,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_magellan_test);
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
+	MU_RUN_TEST(subghz_decoder_pocsag_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
