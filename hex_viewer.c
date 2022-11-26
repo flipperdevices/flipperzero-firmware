@@ -106,7 +106,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
 static void input_callback(InputEvent* input_event, void* ctx) {
     HexViewer* hex_viewer = ctx;
-    if(input_event->type == InputTypeShort) {
+    if(input_event->type == InputTypeShort || input_event->type == InputTypeRepeat) {
         furi_message_queue_put(hex_viewer->input_queue, input_event, 0);
     }
 }
@@ -266,7 +266,7 @@ int32_t hex_viewer_app(void* p) {
 
                 DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
                 DialogMessage* message = dialog_message_alloc();
-                dialog_message_set_header(message, "Hex Viewer v1.0", 16, 2, AlignLeft, AlignTop);
+                dialog_message_set_header(message, "Hex Viewer v1.1", 16, 2, AlignLeft, AlignTop);
                 dialog_message_set_icon(message, &I_hex_10px, 3, 2);
                 dialog_message_set_text(
                     message, furi_string_get_cstr(buffer), 3, 16, AlignLeft, AlignTop);
