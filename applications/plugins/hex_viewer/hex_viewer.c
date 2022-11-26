@@ -221,6 +221,8 @@ int32_t hex_viewer_app(void* p) {
             }
         }
 
+        FURI_LOG_I(TAG, "File selected: %s", furi_string_get_cstr(file_path));
+
         if(!hex_viewer_open_file(hex_viewer, furi_string_get_cstr(file_path))) break;
         hex_viewer_read_file(hex_viewer);
 
@@ -256,13 +258,14 @@ int32_t hex_viewer_app(void* p) {
                 buffer = furi_string_alloc();
                 furi_string_printf(
                     buffer,
-                    "File path: %s\nFile size: %lu bytes",
+                    "File path: %s\nFile size: %lu (0x%lX)",
                     furi_string_get_cstr(file_path),
+                    hex_viewer->model->file_size,
                     hex_viewer->model->file_size);
 
                 DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
                 DialogMessage* message = dialog_message_alloc();
-                dialog_message_set_header(message, "Hex Viewer", 16, 2, AlignLeft, AlignTop);
+                dialog_message_set_header(message, "Hex Viewer v1.0", 16, 2, AlignLeft, AlignTop);
                 dialog_message_set_icon(message, &I_hex_10px, 3, 2);
                 dialog_message_set_text(
                     message, furi_string_get_cstr(buffer), 3, 16, AlignLeft, AlignTop);
