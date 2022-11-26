@@ -18,7 +18,7 @@
 #define MAX_ADDR 6
 
 #define SCAN_APP_PATH_FOLDER "/ext/nrf24scan"
-#define ADDR_FILENAME                                                                   \
+#define ADDR_FILENAME \
     "addr.txt" // File format (1 parameter per line):                                   \
         // Rate: 0/1/2 - rate in Mbps (=0.25/1/2)                                       \
         // Ch: 0..125 - default channel                                                 \
