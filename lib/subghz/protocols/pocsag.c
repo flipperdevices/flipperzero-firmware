@@ -27,6 +27,13 @@ static const SubGhzBlockConst pocsag_const = {
 #define POCSAG_FUNC_ALERT2      2
 #define POCSAG_FUNC_ALPHANUM    3
 
+static const char* func_msg[] = {
+		"num: ",
+		"alert",
+		"alert: ",
+		"msg: ",
+};
+
 static const char* bcd_chars = "*U -)(";
 
 struct SubGhzProtocolDecoderPocsag {
@@ -143,19 +150,12 @@ static void decode_message_numeric(SubGhzProtocolDecoderPocsag* instance, uint32
 // might follow or false if end of message reached.
 static bool pocsag_decode_message_word(SubGhzProtocolDecoderPocsag* instance, uint32_t data) {
     switch (instance->func) {
+		case POCSAG_FUNC_ALERT2:
         case POCSAG_FUNC_ALPHANUM:
             return decode_message_alphanumeric(instance, data);
 
         case POCSAG_FUNC_NUM:
             decode_message_numeric(instance, data);
-            return true;
-
-        case POCSAG_FUNC_ALERT1:
-            FURI_LOG_I(TAG, "Alert1");
-            return true;
-
-        case POCSAG_FUNC_ALERT2:
-            FURI_LOG_I(TAG, "Alert2");
             return true;
     }
     return false;
@@ -167,10 +167,14 @@ static void pocsag_message_done(SubGhzProtocolDecoderPocsag* instance) {
     // append the message to the long-term storage string
     furi_string_cat_printf(
         instance->done_msg,
-        "RIC: %" PRIu32 ", msg: %s\r\n",
-        instance->ric,
-        furi_string_get_cstr(instance->msg)
+        "RIC: %" PRIu32 ", ",
+        instance->ric
     );
+
+	furi_string_cat_str(instance->done_msg, func_msg[instance->func]);
+	if (instance->func != POCSAG_FUNC_ALERT1)
+		furi_string_cat(instance->done_msg, instance->msg);
+	furi_string_cat_str(instance->done_msg, "\r\n");
 
     // reset the state
     instance->char_bits = 0;
