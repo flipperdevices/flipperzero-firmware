@@ -150,10 +150,10 @@ uint8_t nrf24_flush_tx(FuriHalSpiBusHandle* handle);
 /** Gets the RX packet length in data pipe 0
  * 
  * @param      handle  - pointer to FuriHalSpiHandle
- * 
+ *             pipe - pipe index (0..5)
  * @return     packet length in data pipe 0
  */
-uint8_t nrf24_get_packetlen(FuriHalSpiBusHandle* handle);
+uint8_t nrf24_get_packetlen(FuriHalSpiBusHandle* handle, uint8_t pipe);
 
 /** Sets the RX packet length in data pipe 0
  * 

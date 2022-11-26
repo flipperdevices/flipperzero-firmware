@@ -1,4 +1,4 @@
-#  Scanner NRF24 scanner with logging and resend ability for Flipper Zero
+#  NRF24 scanner with logging and resend ability for Flipper Zero
 
 An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors. This library is not currently complete, but functional.
 
@@ -29,6 +29,12 @@ Long press OK - view addresses.<br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-1.png">
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-2.png">
+<br>
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-3.png">
+<br>
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-4.png">
+<br>
+<br>
 
 ## PinOut from from NoComp/Frog
 <img src="https://media.discordapp.net/attachments/937479784726949900/994495234618687509/unknown.png?width=567&height=634">
@@ -45,3 +51,4 @@ IRQ/8 is left disconnected on nrf24l01
 ![NRF_Pins](https://user-images.githubusercontent.com/57457139/178093717-39effd5c-ebe2-4253-b13c-70517d7902f9.png)
 If the nRF module is acting a bit flakey, try adding a capacitor to the vcc/gnd lines! I've not tried the Plus model so it may have a bigger need for a cap. Otherwise, I haven't had any major issues. Anything from a 3.3 uF to 10 uF should do. (Watch your positive/negative placement! Negative to ground.) I learned if you wanna get fancy, include a 0.1 uF cap in parallel. The 3.3 uF to 10 uF will respond to slow freq changes while the 0.1 uF will respond to the high freq switching spikes that the larger one cannot. That said, a single 10 uF will likely suffice for the Mousejack attack. ¯\\\_(ツ)_/¯
 ![NRF_Capacitor](https://user-images.githubusercontent.com/57457139/178169959-d030f9a6-d2ac-46af-af8b-470ff092c8a7.jpg)
+
