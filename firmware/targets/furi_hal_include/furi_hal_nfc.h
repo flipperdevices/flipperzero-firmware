@@ -177,6 +177,12 @@ bool furi_hal_nfc_listen(
  */
 void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data);
 
+/** Start Target Listen mode
+ * @note RFAL free implementation
+ *
+ */
+void furi_hal_nfcv_listen_start();
+
 /** Read data in Target Listen mode
  * @note Must be called only after furi_hal_nfc_listen_start()
  *

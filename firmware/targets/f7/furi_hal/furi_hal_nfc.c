@@ -367,6 +367,38 @@ void furi_hal_nfc_listen_start(FuriHalNfcDevData* nfc_data) {
     st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
 }
 
+void furi_hal_nfcv_listen_start() {
+    furi_hal_gpio_init(&gpio_nfc_irq_rfid_pull, GpioModeInput, GpioPullDown, GpioSpeedVeryHigh);
+    // Clear interrupts
+    st25r3916ClearInterrupts();
+    // Mask all interrupts
+    st25r3916DisableInterrupts(ST25R3916_IRQ_MASK_ALL);
+    // RESET
+    st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
+    // Setup registers
+    st25r3916WriteRegister(
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
+            ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
+    st25r3916WriteRegister(
+        ST25R3916_REG_MODE,
+        ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om3 | ST25R3916_REG_MODE_om0);
+    st25r3916WriteRegister(
+        ST25R3916_REG_PASSIVE_TARGET,
+        ST25R3916_REG_PASSIVE_TARGET_fdel_2 | ST25R3916_REG_PASSIVE_TARGET_fdel_0 |
+            ST25R3916_REG_PASSIVE_TARGET_d_ac_ap2p | ST25R3916_REG_PASSIVE_TARGET_d_212_424_1r);
+    st25r3916WriteRegister(ST25R3916_REG_MASK_RX_TIMER, 0x02);
+
+    // Mask interrupts
+    uint32_t clear_irq_mask =
+        (ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_RXE_PTA | ST25R3916_IRQ_MASK_WU_A_X |
+         ST25R3916_IRQ_MASK_WU_A);
+    st25r3916EnableInterrupts(clear_irq_mask);
+
+    // Go to sense
+    st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
+}
+
 void rfal_interrupt_callback_handler() {
     furi_event_flag_set(event, EVENT_FLAG_INTERRUPT);
 }
