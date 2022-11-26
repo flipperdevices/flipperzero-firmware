@@ -19,9 +19,10 @@ Thank you to all the supporters!
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-25 01:09 EST`
 - Updated: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - Added: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
-- Updated: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [Gui: proper navigation in file browser dialog #2014 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2014)
+- Updated: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
+- Updated: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
