@@ -35,6 +35,7 @@
 #include "magellan.h"
 #include "intertechno_v3.h"
 #include "clemsa.h"
+#include "ansonic.h"
 #include "pocsag.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
