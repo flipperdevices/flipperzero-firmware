@@ -276,10 +276,16 @@ void nfcv_emu_alloc(NfcVData* data) {
         data->emulation.nfcv_signal, NFCV_SIG_EOF, data->emulation.nfcv_resp_eof);
 }
 
-static void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length, NfcVSendFlags flags) {
+static void nfcv_emu_send(
+    FuriHalNfcTxRxContext* tx_rx,
+    NfcVData* nfcv,
+    uint8_t* data,
+    uint8_t length,
+    NfcVSendFlags flags) {
     /* picked default value (0) to match the most common format */
     if(!flags) {
-        flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof | NfcVSendFlagsOneSubcarrier | NfcVSendFlagsHighRate;
+        flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof |
+                NfcVSendFlagsOneSubcarrier | NfcVSendFlagsHighRate;
     }
 
     if(flags & NfcVSendFlagsCrc) {
@@ -462,7 +468,8 @@ void nfcv_emu_handle_packet(
                 &response_buffer[1],
                 &nfcv_data->data[nfcv_data->block_size * block],
                 nfcv_data->block_size);
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1 + nfcv_data->block_size, response_flags);
+            nfcv_emu_send(
+                tx_rx, nfcv_data, response_buffer, 1 + nfcv_data->block_size, response_flags);
         }
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
         break;

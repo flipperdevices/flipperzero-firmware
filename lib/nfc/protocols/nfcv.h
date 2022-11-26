@@ -99,14 +99,14 @@ typedef struct {
 } NfcVSlixData;
 
 typedef enum {
-    NfcVSendFlagsNormal         = 0,
-    NfcVSendFlagsSof            = 1<<0,
-    NfcVSendFlagsCrc            = 1<<1,
-    NfcVSendFlagsEof            = 1<<2,
-    NfcVSendFlagsOneSubcarrier  = 0,
-    NfcVSendFlagsTwoSubcarrier  = 1<<3,
-    NfcVSendFlagsLowRate        = 0,
-    NfcVSendFlagsHighRate       = 1<<4
+    NfcVSendFlagsNormal = 0,
+    NfcVSendFlagsSof = 1 << 0,
+    NfcVSendFlagsCrc = 1 << 1,
+    NfcVSendFlagsEof = 1 << 2,
+    NfcVSendFlagsOneSubcarrier = 0,
+    NfcVSendFlagsTwoSubcarrier = 1 << 3,
+    NfcVSendFlagsLowRate = 0,
+    NfcVSendFlagsHighRate = 1 << 4
 } NfcVSendFlags;
 
 typedef struct {

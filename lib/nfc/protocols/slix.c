@@ -10,22 +10,17 @@ uint8_t slix_get_ti(FuriHalNfcDevData* nfc_data) {
     return (nfc_data->uid[3] >> 3) & 3;
 }
 
-
 bool slix_check_card_type(FuriHalNfcDevData* nfc_data) {
-    if((nfc_data->uid[0] == 0xE0) 
-        && (nfc_data->uid[1] == 0x04) 
-        && (nfc_data->uid[2] == 0x01)
-        && slix_get_ti(nfc_data) == 2) {
+    if((nfc_data->uid[0] == 0xE0) && (nfc_data->uid[1] == 0x04) && (nfc_data->uid[2] == 0x01) &&
+       slix_get_ti(nfc_data) == 2) {
         return true;
     }
     return false;
 }
 
 bool slix2_check_card_type(FuriHalNfcDevData* nfc_data) {
-    if((nfc_data->uid[0] == 0xE0) 
-        && (nfc_data->uid[1] == 0x04) 
-        && (nfc_data->uid[2] == 0x01)
-        && slix_get_ti(nfc_data) == 1) {
+    if((nfc_data->uid[0] == 0xE0) && (nfc_data->uid[1] == 0x04) && (nfc_data->uid[2] == 0x01) &&
+       slix_get_ti(nfc_data) == 1) {
         return true;
     }
     return false;
