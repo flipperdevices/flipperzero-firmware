@@ -14,8 +14,7 @@
 
 #define TAG "NfcA-trans-rx"
 
-
-void nfca_trans_rx_init(NfcaTransRxState *state) {
+void nfca_trans_rx_init(NfcaTransRxState* state) {
     FURI_LOG_D(TAG, "Starting NfcA transparent rx");
 
     st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
@@ -29,7 +28,7 @@ void nfca_trans_rx_init(NfcaTransRxState *state) {
     state->reader_signal = pulse_reader_alloc(&gpio_spi_r_miso, 512);
     /* timebase shall be 1 ns */
     pulse_reader_set_timebase(state->reader_signal, PulseReaderUnitNanosecond);
-    
+
     pulse_reader_start(state->reader_signal);
 
     /* set start values */
@@ -38,21 +37,20 @@ void nfca_trans_rx_init(NfcaTransRxState *state) {
     state->valid_frame = false;
 }
 
-void nfca_trans_rx_deinit(NfcaTransRxState *state) {
+void nfca_trans_rx_deinit(NfcaTransRxState* state) {
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     pulse_reader_free(state->reader_signal);
 }
 
-void nfca_trans_rx_pause(NfcaTransRxState *state) {
+void nfca_trans_rx_pause(NfcaTransRxState* state) {
     pulse_reader_stop(state->reader_signal);
 }
 
-void nfca_trans_rx_continue(NfcaTransRxState *state) {
+void nfca_trans_rx_continue(NfcaTransRxState* state) {
     pulse_reader_start(state->reader_signal);
 }
 
-static void nfca_bit_received(NfcaTransRxState *state, uint8_t bit) {
-    
+static void nfca_bit_received(NfcaTransRxState* state, uint8_t bit) {
     /* According to ISO14443-3 short frames have 7 bits and standard 9 bits per byte,
        where the 9th bit is odd parity. Data is transmitted LSB first. */
     uint32_t byte_num = (state->bits_received / 9);
@@ -75,10 +73,9 @@ static void nfca_bit_received(NfcaTransRxState *state, uint8_t bit) {
     state->bits_received++;
 }
 
-
-bool nfca_trans_rx_loop(NfcaTransRxState *state, uint32_t timeout_ms) {
+bool nfca_trans_rx_loop(NfcaTransRxState* state, uint32_t timeout_ms) {
     furi_assert(state);
-    
+
     state->valid_frame = false;
     state->have_sof = false;
     state->bits_received = 0;

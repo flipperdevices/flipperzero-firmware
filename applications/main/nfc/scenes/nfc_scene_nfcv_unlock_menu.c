@@ -16,8 +16,7 @@ void nfc_scene_nfcv_unlock_menu_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    uint32_t state =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneNfcVUnlockMenu);
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneNfcVUnlockMenu);
     submenu_add_item(
         submenu,
         "Enter PWD Manually",
@@ -49,8 +48,7 @@ bool nfc_scene_nfcv_unlock_menu_on_event(void* context, SceneManagerEvent event)
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         }
-        scene_manager_set_scene_state(
-            nfc->scene_manager, NfcSceneNfcVUnlockMenu, event.event);
+        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneNfcVUnlockMenu, event.event);
     }
     return consumed;
 }
