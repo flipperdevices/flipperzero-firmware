@@ -39,14 +39,11 @@ bool spi_mem_scene_verify_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_progress_inc_progress(app->view_progress);
-        } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
+        } else if(event.event == SPIMemCustomEventWorkerChipFail) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipError);
-        } else if(event.event == SPIMemCustomEventWorkerReadFileFail) {
-            notification_message(app->notifications, &sequence_blink_stop);
-            spi_mem_file_show_storage_error(app, "Cannot read");
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetect);
-        } else if(event.event == SPIMemCustomEventWorkerVerifyDone) {
+        } else if(event.event == SPIMemCustomEventWorkerFileFail) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneStorageError);
+        } else if(event.event == SPIMemCustomEventWorkerDone) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneSuccess);
         } else if(event.event == SPIMemCustomEventWorkerVerifyFail) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneVerifyError);

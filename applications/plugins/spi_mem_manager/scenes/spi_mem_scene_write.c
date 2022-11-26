@@ -40,16 +40,12 @@ bool spi_mem_scene_write_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, SPIMemSceneChipDetect);
         } else if(event.event == SPIMemCustomEventWorkerBlockReaded) {
             spi_mem_view_progress_inc_progress(app->view_progress);
-        } else if(event.event == SPIMemCustomEventWorkerReadDone) {
+        } else if(event.event == SPIMemCustomEventWorkerDone) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneVerify);
-        } else if(event.event == SPIMemCustomEventWorkerChipReadFail) {
+        } else if(event.event == SPIMemCustomEventWorkerChipFail) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipError);
-        } else if(event.event == SPIMemCustomEventWorkerWriteFileFail) {
-            spi_mem_worker_stop_thread(app->worker);
-            notification_message(app->notifications, &sequence_blink_stop);
-            spi_mem_file_show_storage_error(app, "Cannot write");
-            scene_manager_search_and_switch_to_previous_scene(
-                app->scene_manager, SPIMemSceneChipDetect);
+        } else if(event.event == SPIMemCustomEventWorkerFileFail) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneStorageError);
         }
     }
     return success;

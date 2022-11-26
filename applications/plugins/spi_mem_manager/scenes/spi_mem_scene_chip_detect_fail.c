@@ -21,9 +21,9 @@ void spi_mem_scene_chip_detect_fail_on_enter(void* context) {
         spi_mem_scene_chip_detect_fail_widget_callback,
         app);
     widget_add_string_element(
-        app->widget, 64, 8, AlignCenter, AlignBottom, FontPrimary, "Detected");
+        app->widget, 64, 9, AlignCenter, AlignBottom, FontPrimary, "Detected");
     widget_add_string_element(
-        app->widget, 64, 18, AlignCenter, AlignBottom, FontPrimary, "unknown SPI chip");
+        app->widget, 64, 20, AlignCenter, AlignBottom, FontPrimary, "unknown SPI chip");
     furi_string_printf(str, "Vendor\nid: 0x%02X", spi_mem_chip_get_vendor_id(app->chip_info));
     widget_add_string_multiline_element(
         app->widget, 16, 44, AlignCenter, AlignBottom, FontSecondary, furi_string_get_cstr(str));

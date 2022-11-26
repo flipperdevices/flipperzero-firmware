@@ -13,14 +13,10 @@ typedef enum {
     SPIMemCustomEventWorkerChipIdentified,
     SPIMemCustomEventWorkerChipUnknown,
     SPIMemCustomEventWorkerBlockReaded,
-    SPIMemCustomEventWorkerChipReadFail,
-    SPIMemCustomEventWorkerReadDone,
-    SPIMemCustomEventWorkerWriteFileFail,
-    SPIMemCustomEventWorkerReadFileFail,
-    SPIMemCustomEventWorkerVerifyDone,
+    SPIMemCustomEventWorkerChipFail,
+    SPIMemCustomEventWorkerFileFail,
+    SPIMemCustomEventWorkerDone,
     SPIMemCustomEventWorkerVerifyFail,
-    SPIMemCustomEventWorkerEraseDone,
-    SPIMemCustomEventWorkerEraseFail
 } SPIMemCustomEventWorker;
 
 typedef void (*SPIMemWorkerCallback)(void* context, SPIMemCustomEventWorker event);

@@ -4,6 +4,7 @@ typedef enum {
     SPIMemSceneStartSubmenuIndexRead,
     SPIMemSceneStartSubmenuIndexSaved,
     SPIMemSceneStartSubmenuIndexErase,
+    SPIMemSceneStartSubmenuIndexWiring,
     SPIMemSceneStartSubmenuIndexAbout
 } SPIMemSceneStartSubmenuIndex;
 
@@ -34,6 +35,12 @@ void spi_mem_scene_start_on_enter(void* context) {
         app);
     submenu_add_item(
         app->submenu,
+        "Wiring",
+        SPIMemSceneStartSubmenuIndexWiring,
+        spi_mem_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        app->submenu,
         "About",
         SPIMemSceneStartSubmenuIndexAbout,
         spi_mem_scene_start_submenu_callback,
@@ -59,6 +66,9 @@ bool spi_mem_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SPIMemSceneStartSubmenuIndexErase) {
             app->mode = SPIMemModeErase;
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetect);
+            success = true;
+        } else if(event.event == SPIMemSceneStartSubmenuIndexWiring) {
+            scene_manager_next_scene(app->scene_manager, SPIMemSceneWiring);
             success = true;
         } else if(event.event == SPIMemSceneStartSubmenuIndexAbout) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneAbout);

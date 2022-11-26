@@ -57,7 +57,7 @@ static void spi_mem_worker_chip_detect_process(SPIMemWorker* worker) {
 }
 
 // Read
-static bool spi_mem_worker_read(SPIMemWorker* worker) {
+static bool spi_mem_worker_read(SPIMemWorker* worker, SPIMemCustomEventWorker* event) {
     uint8_t data_buffer[SPI_MEM_FILE_BUFFER_SIZE];
     size_t chip_size = spi_mem_chip_get_size(worker->chip_info);
     size_t offset = 0;
@@ -69,6 +69,7 @@ static bool spi_mem_worker_read(SPIMemWorker* worker) {
         if(offset >= chip_size) break;
         if((offset + block_size) > chip_size) block_size = chip_size - offset;
         if(!spi_mem_tools_read_block(worker->chip_info, offset, data_buffer, block_size)) {
+            *event = SPIMemCustomEventWorkerChipFail;
             success = false;
             break;
         }
@@ -79,15 +80,15 @@ static bool spi_mem_worker_read(SPIMemWorker* worker) {
         offset += block_size;
         spi_mem_worker_run_callback(worker, SPIMemCustomEventWorkerBlockReaded);
     }
+    if(success) *event = SPIMemCustomEventWorkerDone;
     return success;
 }
 
 static void spi_mem_worker_read_process(SPIMemWorker* worker) {
-    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipReadFail;
+    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerFileFail;
     do {
         if(!spi_mem_file_create_open(worker->cb_ctx)) break;
-        if(!spi_mem_worker_read(worker)) break;
-        event = SPIMemCustomEventWorkerReadDone;
+        if(!spi_mem_worker_read(worker, &event)) break;
     } while(0);
     spi_mem_file_close(worker->cb_ctx);
     spi_mem_worker_run_callback(worker, event);
@@ -95,7 +96,7 @@ static void spi_mem_worker_read_process(SPIMemWorker* worker) {
 
 // Verify
 static bool
-    spi_mem_worker_erase(SPIMemWorker* worker, size_t total_size, SPIMemCustomEventWorker* event) {
+    spi_mem_worker_verify(SPIMemWorker* worker, size_t total_size, SPIMemCustomEventWorker* event) {
     uint8_t data_buffer_chip[SPI_MEM_FILE_BUFFER_SIZE];
     uint8_t data_buffer_file[SPI_MEM_FILE_BUFFER_SIZE];
     size_t offset = 0;
@@ -107,11 +108,11 @@ static bool
         if(offset >= total_size) break;
         if((offset + block_size) > total_size) block_size = total_size - offset;
         if(!spi_mem_tools_read_block(worker->chip_info, offset, data_buffer_chip, block_size)) {
+            *event = SPIMemCustomEventWorkerChipFail;
             success = false;
             break;
         }
         if(!spi_mem_file_read_block(worker->cb_ctx, data_buffer_file, block_size)) {
-            *event = SPIMemCustomEventWorkerReadFileFail;
             success = false;
             break;
         }
@@ -123,16 +124,16 @@ static bool
         offset += block_size;
         spi_mem_worker_run_callback(worker, SPIMemCustomEventWorkerBlockReaded);
     }
+    if(success) *event = SPIMemCustomEventWorkerDone;
     return success;
 }
 
 static void spi_mem_worker_verify_process(SPIMemWorker* worker) {
-    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerVerifyFail;
+    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerFileFail;
     size_t total_size = spi_mem_worker_modes_get_total_size(worker);
     do {
         if(!spi_mem_file_open(worker->cb_ctx)) break;
-        if(!spi_mem_worker_erase(worker, total_size, &event)) break;
-        event = SPIMemCustomEventWorkerVerifyDone;
+        if(!spi_mem_worker_verify(worker, total_size, &event)) break;
     } while(0);
     spi_mem_file_close(worker->cb_ctx);
     spi_mem_worker_run_callback(worker, event);
@@ -140,12 +141,12 @@ static void spi_mem_worker_verify_process(SPIMemWorker* worker) {
 
 // Erase
 static void spi_mem_worker_erase_process(SPIMemWorker* worker) {
-    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipReadFail;
+    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipFail;
     do {
         if(!spi_mem_worker_await_chip_busy(worker)) break;
         if(!spi_mem_tools_erase_chip(worker->chip_info)) break;
         if(!spi_mem_worker_await_chip_busy(worker)) break;
-        event = SPIMemCustomEventWorkerEraseDone;
+        event = SPIMemCustomEventWorkerDone;
     } while(0);
     spi_mem_worker_run_callback(worker, event);
 }
@@ -178,7 +179,8 @@ static bool spi_mem_worker_write_block(
     return true;
 }
 
-static bool spi_mem_worker_write(SPIMemWorker* worker, size_t total_size) {
+static bool
+    spi_mem_worker_write(SPIMemWorker* worker, size_t total_size, SPIMemCustomEventWorker* event) {
     bool success = true;
     uint8_t data_buffer[SPI_MEM_FILE_BUFFER_SIZE];
     size_t offset = 0;
@@ -189,6 +191,7 @@ static bool spi_mem_worker_write(SPIMemWorker* worker, size_t total_size) {
         if(offset >= total_size) break;
         if((offset + block_size) > total_size) block_size = total_size - offset;
         if(!spi_mem_file_read_block(worker->cb_ctx, data_buffer, block_size)) {
+            *event = SPIMemCustomEventWorkerFileFail;
             success = false;
             break;
         }
@@ -203,15 +206,15 @@ static bool spi_mem_worker_write(SPIMemWorker* worker, size_t total_size) {
 }
 
 static void spi_mem_worker_write_process(SPIMemWorker* worker) {
-    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipReadFail;
+    SPIMemCustomEventWorker event = SPIMemCustomEventWorkerChipFail;
     size_t total_size =
         spi_mem_worker_modes_get_total_size(worker); // need to be executed before opening file
     do {
         if(!spi_mem_file_open(worker->cb_ctx)) break;
         if(!spi_mem_worker_await_chip_busy(worker)) break;
-        if(!spi_mem_worker_write(worker, total_size)) break;
+        if(!spi_mem_worker_write(worker, total_size, &event)) break;
         if(!spi_mem_worker_await_chip_busy(worker)) break;
-        event = SPIMemCustomEventWorkerReadDone;
+        event = SPIMemCustomEventWorkerDone;
     } while(0);
     spi_mem_file_close(worker->cb_ctx);
     spi_mem_worker_run_callback(worker, event);

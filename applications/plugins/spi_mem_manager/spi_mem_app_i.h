@@ -32,6 +32,7 @@ typedef enum {
     SPIMemModeWrite,
     SPIMemModeCompare,
     SPIMemModeErase,
+    SPIMemModeDelete,
     SPIMemModeUnknown
 } SPIMemMode;
 
