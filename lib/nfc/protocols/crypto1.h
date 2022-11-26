@@ -12,7 +12,7 @@ void crypto1_reset(Crypto1* crypto1);
 
 void crypto1_init(Crypto1* crypto1, uint64_t key);
 
-uint8_t crypto1_bit(Crypto1* crypto1, uint8_t in, int is_encrypted);
+//uint8_t crypto1_bit(Crypto1* crypto1, uint8_t in, int is_encrypted);
 
 uint8_t crypto1_byte(Crypto1* crypto1, uint8_t in, int is_encrypted);
 

@@ -36,7 +36,7 @@ uint32_t crypto1_filter(uint32_t in) {
     return FURI_BIT(0xEC57E80A, out);
 }
 
-uint8_t crypto1_bit(Crypto1* crypto1, uint8_t in, int is_encrypted) {
+static inline uint8_t crypto1_bit(Crypto1* crypto1, uint8_t in, int is_encrypted) {
     furi_assert(crypto1);
     uint8_t out = crypto1_filter(crypto1->odd);
     uint32_t feed = out & (!!is_encrypted);
@@ -50,6 +50,15 @@ uint8_t crypto1_bit(Crypto1* crypto1, uint8_t in, int is_encrypted) {
 }
 
 uint8_t crypto1_byte(Crypto1* crypto1, uint8_t in, int is_encrypted) {
+    furi_assert(crypto1);
+    uint8_t out = 0;
+    for(uint8_t i = 0; i < 8; i++) {
+        out |= crypto1_bit(crypto1, FURI_BIT(in, i), is_encrypted) << i;
+    }
+    return out;
+}
+
+static inline uint8_t crypto1_byte_inline(Crypto1* crypto1, uint8_t in, int is_encrypted) {
     furi_assert(crypto1);
     uint8_t out = 0;
     for(uint8_t i = 0; i < 8; i++) {
@@ -92,7 +101,7 @@ void crypto1_decrypt(
         decrypted_data[0] = decrypted_byte;
     } else {
         for(size_t i = 0; i < encrypted_data_bits / 8; i++) {
-            decrypted_data[i] = crypto1_byte(crypto, 0, 0) ^ encrypted_data[i];
+            decrypted_data[i] = crypto1_byte_inline(crypto, 0, 0) ^ encrypted_data[i];
         }
     }
 }
@@ -117,7 +126,7 @@ void crypto1_encrypt(
     } else {
         memset(encrypted_parity, 0, plain_data_bits / 8 + 1);
         for(uint8_t i = 0; i < plain_data_bits / 8; i++) {
-            encrypted_data[i] = crypto1_byte(crypto, keystream ? keystream[i] : 0, 0) ^
+            encrypted_data[i] = crypto1_byte_inline(crypto, keystream ? keystream[i] : 0, 0) ^
                                 plain_data[i];
             encrypted_parity[i / 8] |=
                 (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_data[i])) & 0x01)
