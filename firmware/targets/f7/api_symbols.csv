@@ -688,6 +688,7 @@ Function,-,coshl,long double,long double
 Function,-,cosl,long double,long double
 Function,+,crc32_calc_buffer,uint32_t,"uint32_t, const void*, size_t"
 Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
+Function,-,crypto1_bit,uint8_t,"Crypto1*, uint8_t, int"
 Function,-,crypto1_byte,uint8_t,"Crypto1*, uint8_t, int"
 Function,-,crypto1_decrypt,void,"Crypto1*, uint8_t*, uint16_t, uint8_t*"
 Function,-,crypto1_encrypt,void,"Crypto1*, uint8_t*, uint8_t*, uint16_t, uint8_t*, uint8_t*"
@@ -2031,9 +2032,9 @@ Function,-,nfca_trans_rx_deinit,void,NfcaTransRxState*
 Function,-,nfca_trans_rx_init,void,NfcaTransRxState*
 Function,-,nfca_trans_rx_loop,_Bool,"NfcaTransRxState*, uint32_t"
 Function,-,nfca_trans_rx_pause,void,NfcaTransRxState*
-Function,-,nfcv_emu_deinit,void,
+Function,-,nfcv_emu_deinit,void,NfcVData*
 Function,-,nfcv_emu_init,void,"FuriHalNfcDevData*, NfcVData*"
-Function,-,nfcv_emu_loop,_Bool,"FuriHalNfcDevData*, NfcVData*, uint32_t"
+Function,-,nfcv_emu_loop,_Bool,"FuriHalNfcTxRxContext*, FuriHalNfcDevData*, NfcVData*, uint32_t"
 Function,-,nfcv_inventory,ReturnCode,uint8_t*
 Function,-,nfcv_read_blocks,ReturnCode,"NfcVReader*, NfcVData*"
 Function,-,nfcv_read_card,_Bool,"NfcVReader*, FuriHalNfcDevData*, NfcVData*"

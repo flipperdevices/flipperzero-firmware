@@ -46,14 +46,23 @@ typedef struct {
 
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt);
+
 void digital_signal_free(DigitalSignal* signal);
+
 void digital_signal_add(DigitalSignal* signal, uint32_t ticks);
+
 void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level);
+
 bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b);
+
 void digital_signal_prepare(DigitalSignal* signal);
+
 bool digital_signal_get_start_level(DigitalSignal* signal);
+
 uint32_t digital_signal_get_edges_cnt(DigitalSignal* signal);
+
 uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num);
+
 void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio);
 
 
