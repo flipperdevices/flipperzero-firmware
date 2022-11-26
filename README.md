@@ -1,6 +1,11 @@
 # Flipper Zero Dice App
 
+<div style="text-align:center"><img src="images/flopper-screen.png"/></div>
+
 ## Screenshots
+
+<div style="text-align:center"><img src="images/main-screen.png"/></div>
+<div style="text-align:center"><img src="images/result-screen.png"/></div>
 
 ## Compiling
 

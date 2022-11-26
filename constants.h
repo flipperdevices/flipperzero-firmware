@@ -17,42 +17,30 @@
 
 #define SWIPE_DIST 11
 
-const Icon* coin_heads_start[] = {
-    &I_DiceCoin_35x35_1,
-    &I_DiceCoin_35x35_2,
-};
-const Icon* coin_heads_end[] = {
-    &I_DiceCoin_35x35_7,
-    &I_DiceCoin_35x35_1,
-};
-const Icon* coin_tails_start[] = {
-    &I_DiceCoin_35x35_5,
-    &I_DiceCoin_35x35_6,
-};
-const Icon* coin_tails_end[] = {
-    &I_DiceCoin_35x35_4,
-    &I_DiceCoin_35x35_5,
-};
+const Icon* coin_heads_start[] = {&I_coin_1, &I_coin_2};
+const Icon* coin_heads_end[] = {&I_coin_7, &I_coin_1};
+const Icon* coin_tails_start[] = {&I_coin_5, &I_coin_6};
+const Icon* coin_tails_end[] = {&I_coin_4, &I_coin_5};
 const Icon* coin_frames[] = {
-    &I_DiceCoin_35x35_1,
-    &I_DiceCoin_35x35_2,
-    &I_DiceCoin_35x35_3,
-    &I_DiceCoin_35x35_4,
-    &I_DiceCoin_35x35_5,
-    &I_DiceCoin_35x35_6,
-    &I_DiceCoin_35x35_3,
-    &I_DiceCoin_35x35_7,
-    &I_DiceCoin_35x35_1,
+    &I_coin_1,
+    &I_coin_2,
+    &I_coin_3,
+    &I_coin_4,
+    &I_coin_5,
+    &I_coin_6,
+    &I_coin_3,
+    &I_coin_7,
+    &I_coin_1,
 };
 
 const Icon* dice_frames[] = {
-    &I_DiceD4_35x35_1,   &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d4
-    &I_DiceCoin_35x35_2, &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d6
-    &I_DiceD4_35x35_2,   &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d8
-    &I_DiceCoin_35x35_5, &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d10
-    &I_DiceD4_35x35_3,   &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d12
-    &I_DiceCoin_35x35_7, &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d20
-    &I_DiceD4_35x35_1,   &I_DiceD4_35x35_2, &I_DiceD4_35x35_3, &I_DiceD4_35x35_1, // d100
+    &I_d4_1,   &I_d4_2,   &I_d4_3,   &I_d4_1, // d4
+    &I_coin_1, &I_d4_2,   &I_d4_3,   &I_d4_1, // d6
+    &I_d4_2,   &I_d4_2,   &I_d4_3,   &I_d4_1, // d8
+    &I_coin_1, &I_d4_2,   &I_d4_3,   &I_d4_1, // d10
+    &I_d4_1,   &I_d4_2,   &I_d4_3,   &I_d4_1, // d12
+    &I_coin_7, &I_d4_2,   &I_d4_3,   &I_d4_1, // d20
+    &I_d100_1, &I_d100_2, &I_d100_3, &I_d100_4, // d100
 };
 
 typedef struct {
