@@ -18,6 +18,7 @@ Thank you to all the supporters!
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-11-25 01:09 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-11-25 01:09 EST`
 - Updated: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
+- Added: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -248,3 +249,4 @@ $ ./fbt resources icons dolphin_ext
 - [NFC: Accept non-parsed apps in Mifare DESFire. #2041 (By mh-)](https://github.com/flipperdevices/flipperzero-firmware/pull/2041)
 - [Allow "Detect reader" for unsaved card #2045 (By niki-timofe)](https://github.com/flipperdevices/flipperzero-firmware/pull/2045)
 - [Gui: proper navigation in file browser dialog #2014 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2014)
+- [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
