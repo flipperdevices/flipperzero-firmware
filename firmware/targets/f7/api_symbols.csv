@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.36,,
+Version,+,7.37,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1166,7 +1166,6 @@ Function,+,furi_hal_nfc_emulate_nfca,_Bool,"uint8_t*, uint8_t, uint8_t*, uint8_t
 Function,+,furi_hal_nfc_exit_sleep,void,
 Function,+,furi_hal_nfc_field_off,void,
 Function,+,furi_hal_nfc_field_on,void,
-Function,-,furi_hal_nfc_gen_bitstream,void,"FuriHalNfcTxRxContext*, uint8_t*, size_t"
 Function,-,furi_hal_nfc_init,void,
 Function,+,furi_hal_nfc_is_busy,_Bool,
 Function,+,furi_hal_nfc_is_init,_Bool,
@@ -1190,7 +1189,6 @@ Function,+,furi_hal_nfc_stop,void,
 Function,+,furi_hal_nfc_stop_cmd,void,
 Function,+,furi_hal_nfc_tx_rx,_Bool,"FuriHalNfcTxRxContext*, uint16_t"
 Function,+,furi_hal_nfc_tx_rx_full,_Bool,FuriHalNfcTxRxContext*
-Function,-,furi_hal_nfcv_listen_start,void,
 Function,-,furi_hal_os_init,void,
 Function,+,furi_hal_os_tick,void,
 Function,+,furi_hal_power_check_otg_status,void,
@@ -1968,11 +1966,6 @@ Function,-,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,-,nfca_signal_alloc,NfcaSignal*,
 Function,-,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,-,nfca_signal_free,void,NfcaSignal*
-Function,-,nfca_trans_rx_continue,void,NfcaTransRxState*
-Function,-,nfca_trans_rx_deinit,void,NfcaTransRxState*
-Function,-,nfca_trans_rx_init,void,NfcaTransRxState*
-Function,-,nfca_trans_rx_loop,_Bool,"NfcaTransRxState*, uint32_t"
-Function,-,nfca_trans_rx_pause,void,NfcaTransRxState*
 Function,-,nfcv_emu_deinit,void,NfcVData*
 Function,-,nfcv_emu_init,void,"FuriHalNfcDevData*, NfcVData*"
 Function,-,nfcv_emu_loop,_Bool,"FuriHalNfcTxRxContext*, FuriHalNfcDevData*, NfcVData*, uint32_t"
