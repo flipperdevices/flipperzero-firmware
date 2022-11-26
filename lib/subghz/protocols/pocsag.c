@@ -236,7 +236,6 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
             // handle codewords
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
-                FURI_LOG_I(TAG, "cw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     instance->codeword_idx++;
@@ -260,7 +259,6 @@ void subghz_protocol_decoder_pocsag_feed(void* context, bool level, uint32_t dur
         case PocsagDecoderStepMessage:
             if (instance->decoder.decode_count_bit == POCSAG_CW_BITS) {
                 codeword = (uint32_t)(instance->decoder.decode_data & POCSAG_CW_MASK);
-                FURI_LOG_I(TAG, "mw: %" PRIx32, codeword);
                 switch (codeword) {
                 case POCSAG_IDLE_CODE_WORD:
                     // Idle during the message stops the message
