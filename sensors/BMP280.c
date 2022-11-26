@@ -3,6 +3,7 @@
 const SensorType BMP280 = {
     .typename = "BMP280",
     .interface = &I2C,
+    .datatype = UT_DATA_TYPE_TEMP_PRESS,
     .pollingInterval = 500,
     .allocator = unitemp_BMP280_alloc,
     .mem_releaser = unitemp_BMP280_free,

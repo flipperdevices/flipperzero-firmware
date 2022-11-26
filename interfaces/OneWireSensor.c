@@ -8,6 +8,7 @@
 const SensorType DS18x2x = {
     .typename = "DS18x2x",
     .interface = &ONE_WIRE,
+    .datatype = UT_DATA_TYPE_TEMP,
     .pollingInterval = 250,
     .allocator = unitemp_onewire_sensor_alloc,
     .mem_releaser = unitemp_onewire_sensor_free,

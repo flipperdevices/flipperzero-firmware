@@ -157,10 +157,25 @@ static void _draw_sensorsCarousel(Canvas* canvas) {
         canvas_draw_icon(canvas, 64 - line_len / 2 - 8, 3, &I_arrow_left_5x9);
     }
 
-    //Печать значения температуры
-    _draw_temp(canvas, app->sensors[sensor_index]->temp, 1);
-    //_draw_hum(canvas, app->sensors[sensor_index]->hum, 1);
-    _draw_press(canvas, app->sensors[sensor_index]->pressure);
+    //Селектор значений для отображения
+    switch(app->sensors[sensor_index]->type->datatype) {
+    case UT_DATA_TYPE_TEMP:
+        _draw_temp(canvas, app->sensors[sensor_index]->temp, 0);
+        break;
+    case UT_DATA_TYPE_TEMP_HUM:
+        _draw_temp(canvas, app->sensors[sensor_index]->temp, 1);
+        _draw_hum(canvas, app->sensors[sensor_index]->hum, 0);
+        break;
+    case UT_DATA_TYPE_TEMP_PRESS:
+        _draw_temp(canvas, app->sensors[sensor_index]->temp, 1);
+        _draw_press(canvas, app->sensors[sensor_index]->pressure);
+        break;
+    case UT_DATA_TYPE_TEMP_HUM_PRESS:
+        _draw_temp(canvas, app->sensors[sensor_index]->temp, 2);
+        _draw_hum(canvas, app->sensors[sensor_index]->hum, 1);
+        _draw_press(canvas, app->sensors[sensor_index]->pressure);
+        break;
+    }
 }
 
 static void _draw_callback(Canvas* canvas, void* _model) {

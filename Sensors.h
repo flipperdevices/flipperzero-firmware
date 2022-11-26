@@ -3,7 +3,20 @@
 #include <furi.h>
 #include <input/input.h>
 
+//Маски бит для определения типов возвращаемых значений
+#define UT_TEMPERATURE 0b00000001
+#define UT_HUMIDITY 0b00000010
+#define UT_PRESSURE 0b00000100
+
 //Статусы опроса датчика
+typedef enum {
+    UT_DATA_TYPE_TEMP = UT_TEMPERATURE,
+    UT_DATA_TYPE_TEMP_HUM = UT_TEMPERATURE | UT_HUMIDITY,
+    UT_DATA_TYPE_TEMP_PRESS = UT_TEMPERATURE | UT_PRESSURE,
+    UT_DATA_TYPE_TEMP_HUM_PRESS = UT_TEMPERATURE | UT_HUMIDITY | UT_PRESSURE,
+} SensorDataType;
+
+//Типы возвращаемых данных
 typedef enum {
     UT_OK, //Всё хорошо, опрос успешен
     UT_TIMEOUT, //Датчик не отозвался
@@ -59,6 +72,8 @@ typedef struct Interface {
 typedef struct {
     //Имя типа датчика
     const char* typename;
+    //Тип возвращаемых данных
+    SensorDataType datatype;
     //Интерфейс подключения
     const Interface* interface;
     //Интервал опроса датчика
