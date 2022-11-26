@@ -48,7 +48,7 @@ const char SettingsFld_Payload[] = "Payload:";
 char SettingsFld_Addr = 'P';
 
 Nrf24Scan* APP;
-uint8_t what_doing = 0; // 0 - setup, 1 - view log
+uint8_t what_doing = 0; // 0 - setup, 1 - view log, 2 - view addresses
 uint8_t what_to_do = 1; // 0 - view, 1 - view & scan
 char screen_buf[64];
 char addr_file_name[32];
@@ -90,6 +90,8 @@ enum {
 	Menu_log,
 	Menu_ok
 };
+
+#define MIN(a, b)  ((a<b)?a:b)
 
 static uint8_t GetHexVal(char hex) {
 	return (uint8_t)hex - ((uint8_t)hex < 58 ? 48 : ((uint8_t)hex < 97 ? 55 : 87));
@@ -256,7 +258,7 @@ static uint8_t load_settings_file(Stream* file_stream) {
 		FURI_LOG_D(TAG, "load failed. file_size: %d", file_size);
 		return 1;
 	}
-	file_buf = malloc(file_size + 1);
+	file_buf = malloc(MIN(file_size + 1, LOG_REC_SIZE * MAX_LOG_RECORDS * 2 + 100));
 	if(file_buf == NULL) {
 		FURI_LOG_D(TAG, "Memory low, need: %d", file_size);
 		return 2;
@@ -361,7 +363,7 @@ static void prepare_nrf24()
 	nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
 	nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 1 : 0); // Disable Automatic Retransmission
 	nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_ESB ? 0x3F : 0); // Auto acknowledgement
-	nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 1 + (NRF_DPL || NRF_ESB ? 4 : 0)); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+	nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 1 + (NRF_DPL || NRF_ESB ? 4 : 1)); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 	nrf24_set_maclen(nrf24_HANDLE, addrs.addr_len);
 	for(int i = 0; i < addrs.addr_len; i++) addr[i] = addrs.addr_P0[addrs.addr_len - i - 1];
 	nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P0, &addr[0], addrs.addr_len);
@@ -556,7 +558,8 @@ int32_t nrf24scan_app(void* p) {
 	furi_string_cat(path, "/");
 	furi_string_cat(path, ADDR_FILENAME);
 	if(file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
-		if(load_settings_file(file_stream)) strcpy(addr_file_name, ADDR_FILENAME); else strcpy(addr_file_name, "LOAD ERROR");
+		uint8_t err = load_settings_file(file_stream);
+		if(!err) strcpy(addr_file_name, ADDR_FILENAME); else snprintf(addr_file_name, sizeof(addr_file_name), "LOAD ERROR#%d", err);
 	} else {
 		strcpy(addr_file_name, "NONE");
 	}
@@ -656,7 +659,8 @@ int32_t nrf24scan_app(void* p) {
 								case Menu_open_file:
 									file_stream = file_stream_alloc(APP->storage);
 									if(select_settings_file(file_stream)) {
-										if(load_settings_file(file_stream)) save_to_new_log = true; else strcpy(addr_file_name, "LOAD ERROR");
+										uint8_t err = load_settings_file(file_stream);
+										if(!err) save_to_new_log = true; else snprintf(addr_file_name, sizeof(addr_file_name), "LOAD ERROR#%d", err);
 										file_stream_close(file_stream);
 									}
 									stream_free(file_stream);
@@ -689,7 +693,7 @@ int32_t nrf24scan_app(void* p) {
 							nrf24_send_packet();
 						}
 					} else if(event.input.type == InputTypeLong) {
-						if(!what_doing) {
+						if(what_doing == 0) {
 							if(menu_selected == Menu_log) { // Log
 								if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
 									write_to_log_file(APP->storage);
@@ -697,6 +701,8 @@ int32_t nrf24scan_app(void* p) {
 								}
 							}
 							nrf24_set_idle(nrf24_HANDLE);
+						} else if(what_doing == 1) {
+
 						}
 					}
 					break;
