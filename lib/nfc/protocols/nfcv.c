@@ -418,10 +418,10 @@ void nfcv_emu_handle_packet(
         response_buffer[1] = nfcv_data->dsfid;
         nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
 
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 10, response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
-            break;
-        }
+        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 10, response_flags);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+        break;
+    }
 
     case ISO15693_STAYQUIET: {
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "STAYQUIET");
@@ -443,78 +443,26 @@ void nfcv_emu_handle_packet(
         break;
     }
 
-        case ISO15693_SELECT:
-        {
-            response_buffer[0] = ISO15693_NOERROR;
+    case ISO15693_SELECT: {
+        response_buffer[0] = ISO15693_NOERROR;
+        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SELECT");
+        break;
+    }
+
+    case ISO15693_READBLOCK: {
+        uint8_t block = payload[payload_offset];
+
+        if(block >= nfcv_data->block_num) {
+            response_buffer[0] = ISO15693_ERROR_BLOCK_WRITE;
             nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SELECT");
-            break;
-        }
-
-        case ISO15693_READBLOCK:
-        {
-            uint8_t block = payload[payload_offset];
-
-            if(block >= nfcv_data->block_num) {
-                response_buffer[0] = ISO15693_ERROR_BLOCK_WRITE;
-                nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-            } else {
-                response_buffer[0] = ISO15693_NOERROR;
-                memcpy(&response_buffer[1], &nfcv_data->data[nfcv_data->block_size * block], nfcv_data->block_size);
-                nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1 + nfcv_data->block_size, response_flags);
-            }
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
-            break;
-        }
-
-        case ISO15693_WRITEBLOCK:
-        {
-            uint8_t block = payload[payload_offset];
-            uint8_t *data = &payload[payload_offset + 1];
-
-            if(block >= nfcv_data->block_num) {
-                response_buffer[0] = ISO15693_ERROR_BLOCK_WRITE;
-            } else {
-                response_buffer[0] = ISO15693_NOERROR;
-                memcpy(&nfcv_data->data[nfcv_data->block_size * block], &response_buffer[1], nfcv_data->block_size);
-            }
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE BLOCK %d <- %02X %02X %02X %02X", block, data[0], data[1], data[2], data[3]);
-            break;
-        }
-
-        case ISO15693_GET_SYSTEM_INFO:
-        {
-            response_buffer[0] = ISO15693_NOERROR; 
-            response_buffer[1] = 0x0F;
-            nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
-            response_buffer[10] = nfcv_data->dsfid; /* DSFID */
-            response_buffer[11] = nfcv_data->afi; /* AFI */
-            response_buffer[12] = nfcv_data->block_num - 1; /* number of blocks */
-            response_buffer[13] = nfcv_data->block_size - 1; /* block size */
-            response_buffer[14] = nfcv_data->ic_ref; /* IC reference */
-
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 15, response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO");
-
-            break;
-        }
-
-        case ISO15693_CMD_NXP_GET_RANDOM_NUMBER:
-        {
-            nfcv_data->sub_data.slix_l.rand[0] = furi_hal_random_get();
-            nfcv_data->sub_data.slix_l.rand[1] = furi_hal_random_get();
-
+        } else {
             response_buffer[0] = ISO15693_NOERROR;
-            response_buffer[1] = nfcv_data->sub_data.slix_l.rand[1];
-            response_buffer[2] = nfcv_data->sub_data.slix_l.rand[0];
-
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 3, response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
-                "GET_RANDOM_NUMBER -> 0x%02X%02X", 
-                nfcv_data->sub_data.slix_l.rand[0], 
-                nfcv_data->sub_data.slix_l.rand[1]);
-            break;
+            memcpy(
+                &response_buffer[1],
+                &nfcv_data->data[nfcv_data->block_size * block],
+                nfcv_data->block_size);
+            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1 + nfcv_data->block_size, response_flags);
         }
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
         break;
@@ -524,49 +472,16 @@ void nfcv_emu_handle_packet(
         uint8_t block = payload[payload_offset];
         uint8_t* data = &payload[payload_offset + 1];
 
-            switch(password_id) {
-                case 4:
-                    password = nfcv_data->sub_data.slix_l.key_privacy;
-                    break;
-                case 8:
-                    password = nfcv_data->sub_data.slix_l.key_destroy;
-                    break;
-                case 10:
-                    password = nfcv_data->sub_data.slix_l.key_eas;
-                    break;
-                default:
-                    break;
-            }
-
-            for(int pos = 0; pos < 4; pos++) {
-                password_rcv[pos] = password_xored[3 - pos] ^ rand[pos % 2];
-            }
-            uint32_t pass_expect = nfcv_read_be(password, 4);
-            uint32_t pass_received = nfcv_read_be(password_rcv, 4);
-
-            /* if the password is all-zeroes, just accept any password*/
-            if(!pass_expect || pass_expect == pass_received) {
-                nfcv_data->sub_data.slix_l.privacy = false;
-                response_buffer[0] = ISO15693_NOERROR;
-                nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X 0x%08lX OK", password_id, pass_received);
-            } else {
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SET_PASSWORD #%02X 0x%08lX/%08lX FAIL", password_id, pass_received, pass_expect);
-            }
-            break;
-        }
-
-        case ISO15693_CMD_NXP_ENABLE_PRIVACY:
-        {
+        if(block >= nfcv_data->block_num) {
+            response_buffer[0] = ISO15693_ERROR_BLOCK_WRITE;
+        } else {
             response_buffer[0] = ISO15693_NOERROR;
-
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "ISO15693_CMD_NXP_ENABLE_PRIVACY");
-
-            nfcv_data->sub_data.slix_l.privacy = true;
-            break;
+            memcpy(
+                &nfcv_data->data[nfcv_data->block_size * block],
+                &response_buffer[1],
+                nfcv_data->block_size);
         }
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1);
+        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
         snprintf(
             nfcv_data->last_command,
             sizeof(nfcv_data->last_command),
@@ -589,7 +504,7 @@ void nfcv_emu_handle_packet(
         response_buffer[13] = nfcv_data->block_size - 1; /* block size */
         response_buffer[14] = nfcv_data->ic_ref; /* IC reference */
 
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 15);
+        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 15, response_flags);
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO");
 
         break;
@@ -603,7 +518,7 @@ void nfcv_emu_handle_packet(
         response_buffer[1] = nfcv_data->sub_data.slix_l.rand[1];
         response_buffer[2] = nfcv_data->sub_data.slix_l.rand[0];
 
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 3);
+        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 3, response_flags);
         snprintf(
             nfcv_data->last_command,
             sizeof(nfcv_data->last_command),
@@ -644,7 +559,7 @@ void nfcv_emu_handle_packet(
         if(!pass_expect || pass_expect == pass_received) {
             nfcv_data->sub_data.slix_l.privacy = false;
             response_buffer[0] = ISO15693_NOERROR;
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1);
+            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
             snprintf(
                 nfcv_data->last_command,
                 sizeof(nfcv_data->last_command),
@@ -666,7 +581,7 @@ void nfcv_emu_handle_packet(
     case ISO15693_CMD_NXP_ENABLE_PRIVACY: {
         response_buffer[0] = ISO15693_NOERROR;
 
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1);
+        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
         snprintf(
             nfcv_data->last_command,
             sizeof(nfcv_data->last_command),
