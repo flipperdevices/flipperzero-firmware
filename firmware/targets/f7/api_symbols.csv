@@ -2031,7 +2031,6 @@ Function,-,nfca_trans_rx_continue,void,NfcaTransRxState*
 Function,-,nfca_trans_rx_deinit,void,NfcaTransRxState*
 Function,-,nfca_trans_rx_init,void,NfcaTransRxState*
 Function,-,nfca_trans_rx_loop,_Bool,"NfcaTransRxState*, uint32_t"
-Function,-,nfca_trans_rx_pause,void,NfcaTransRxState*
 Function,-,nfcv_emu_deinit,void,NfcVData*
 Function,-,nfcv_emu_init,void,"FuriHalNfcDevData*, NfcVData*"
 Function,-,nfcv_emu_loop,_Bool,"FuriHalNfcTxRxContext*, FuriHalNfcDevData*, NfcVData*, uint32_t"
