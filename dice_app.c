@@ -95,7 +95,9 @@ static void draw_ui(const State* state, Canvas* canvas) {
 
 static void draw_dice(const State* state, Canvas* canvas) {
     for(uint8_t i = 0; i < DICE_TYPES; i++) {
-        if(state->dices[i].x > 128 || state->dices[i].x < -35) continue;
+        if(state->app_state == ResultState && state->dice_index == i && state->dice_index != 0)
+            continue; // draw results except coin
+        if(state->dices[i].x > 128 || state->dices[i].x < -35) continue; // outside the screen
 
         if(i == state->dice_index) { // draw dice with animation
             if(i == 0) { // coin
@@ -117,13 +119,22 @@ static void draw_dice(const State* state, Canvas* canvas) {
 
 static void draw_results(const State* state, Canvas* canvas) {
     if(state->app_state != ResultState) return;
+    if(state->dice_index == 0) return; // skip for coin
 
     canvas_set_font(canvas, FontPrimary);
 
     FuriString* sum = furi_string_alloc();
     furi_string_printf(sum, "%01d", state->roll_result);
 
-    canvas_draw_str_aligned(canvas, 38, 44, AlignCenter, AlignCenter, furi_string_get_cstr(sum));
+    // result text
+    canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, furi_string_get_cstr(sum));
+    // ui frame
+    if(state->roll_result > 99)
+        canvas_draw_icon(canvas, 53, 26, &I_ui_result_3);
+    else if(state->roll_result > 9)
+        canvas_draw_icon(canvas, 56, 26, &I_ui_result_2);
+    else
+        canvas_draw_icon(canvas, 58, 26, &I_ui_result_1);
 
     furi_string_free(sum);
 }
