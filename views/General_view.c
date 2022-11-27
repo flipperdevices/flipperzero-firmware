@@ -159,7 +159,7 @@ static void _draw_sensorsCarousel(Canvas* canvas) {
 
     if(app->sensors[sensor_index]->status == UT_TIMEOUT) {
         const Icon* frames[] = {&I_happy_2_78x46, &I_happy_78x46, &I_sad_78x46};
-        canvas_draw_icon(canvas, 25, 15, frames[furi_get_tick() % 2250 / 750]);
+        canvas_draw_icon(canvas, 24, 15, frames[furi_get_tick() % 2250 / 750]);
         return;
     }
 
