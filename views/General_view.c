@@ -215,10 +215,16 @@ static bool _input_callback(InputEvent* event, void* context) {
         if(--sensor_index >= unitemp_sensors_getCount())
             sensor_index = unitemp_sensors_getCount() - 1;
     }
-    //Вход в главное меню по короткому нажатию "Ок"
+    //Вход в главное меню по короткому нажатию "ок"
     if(event->key == InputKeyOk && event->type == InputTypeShort) {
         app->sensors_ready = false;
         unitemp_MainMenu_switch();
+    }
+
+    //Редактирование датчика при длинном нажатии "ок"
+    if(event->key == InputKeyOk && event->type == InputTypeLong) {
+        app->sensors_ready = false;
+        unitemp_SensorEdit_switch(app->sensors[sensor_index]);
     }
 
     return true;

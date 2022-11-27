@@ -11,6 +11,8 @@ static View* view;
 static VariableItemList* variable_item_list;
 //Текущий редактируемый датчик
 static Sensor* editable_sensor;
+//Изначальный GPIO датчика
+static const GPIO* initial_gpio;
 //Элемент списка - имя датчика
 static VariableItem* sensor_name_item;
 //Элемент списка - адрес датчика one wire
@@ -121,7 +123,8 @@ static void _onewire_scan(void) {
  */
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
-    unitemp_sensor_free(editable_sensor);
+
+    if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
     //Возврат предыдущий вид
     return MAINMENU_VIEW;
 }
@@ -145,7 +148,8 @@ static void _enter_callback(void* context, uint32_t index) {
            ((OneWireSensor*)(editable_sensor->instance))->familyCode == 0) {
             return;
         }
-        unitemp_sensors_add(editable_sensor);
+        unitemp_gpio_unlock(initial_gpio);
+        if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensors_add(editable_sensor);
         unitemp_sensors_save();
         unitemp_sensors_reload();
 
@@ -166,12 +170,14 @@ static void _gpio_change_callback(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     if(editable_sensor->type->interface == &SINGLE_WIRE) {
         SingleWireSensor* instance = editable_sensor->instance;
-        instance->gpio = unitemp_gpio_getAviablePort(editable_sensor->type->interface, index);
+        instance->gpio =
+            unitemp_gpio_getAviablePort(editable_sensor->type->interface, index, initial_gpio);
         variable_item_set_current_value_text(item, instance->gpio->name);
     }
     if(editable_sensor->type->interface == &ONE_WIRE) {
         OneWireSensor* instance = editable_sensor->instance;
-        instance->bus->gpio = unitemp_gpio_getAviablePort(editable_sensor->type->interface, index);
+        instance->bus->gpio =
+            unitemp_gpio_getAviablePort(editable_sensor->type->interface, index, NULL);
         variable_item_set_current_value_text(item, instance->bus->gpio->name);
     }
 }
@@ -246,12 +252,26 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
 
     //Порт подключения датчка (для one wire и single wire)
     if(sensor->type->interface == &ONE_WIRE || sensor->type->interface == &SINGLE_WIRE) {
-        uint8_t aviable_gpio_count = unitemp_gpio_getAviablePortsCount(sensor->type->interface);
+        initial_gpio = ((SingleWireSensor*)editable_sensor->instance)->gpio;
+        uint8_t aviable_gpio_count =
+            unitemp_gpio_getAviablePortsCount(sensor->type->interface, initial_gpio);
         VariableItem* item = variable_item_list_add(
             variable_item_list, "GPIO", aviable_gpio_count, _gpio_change_callback, app);
-        variable_item_set_current_value_index(item, 0);
+
+        uint8_t gpio_index = 0;
+        if(unitemp_sensor_isContains(editable_sensor)) {
+            for(uint8_t i = 0; i < aviable_gpio_count; i++) {
+                if(unitemp_gpio_getAviablePort(sensor->type->interface, i, initial_gpio) ==
+                   initial_gpio) {
+                    gpio_index = i;
+                    break;
+                }
+            }
+        }
+        variable_item_set_current_value_index(item, gpio_index);
         variable_item_set_current_value_text(
-            item, unitemp_gpio_getAviablePort(sensor->type->interface, 0)->name);
+            item,
+            unitemp_gpio_getAviablePort(sensor->type->interface, gpio_index, initial_gpio)->name);
     }
     //Адрес устройства на шине I2C (для датчиков I2C)
     if(sensor->type->interface == &I2C) {

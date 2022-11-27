@@ -27,10 +27,13 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
-    if(index == 0) { //add new sensor
+    if(index == 0) { //Add new sensor
         unitemp_SensorsList_switch();
     }
-    if(index == 1) { //Settings
+    if(index == 1) { //Edit sensor
+        //
+    }
+    if(index == 2) { //Settings
         unitemp_Settings_switch();
     }
 }
@@ -44,6 +47,7 @@ void unitemp_MainMenu_alloc(void) {
     variable_item_list_reset(variable_item_list);
 
     variable_item_list_add(variable_item_list, "Add new sensor", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Edit sensor", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Settings", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Help", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "About", 1, NULL, NULL);

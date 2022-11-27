@@ -38,7 +38,10 @@ static void _enter_callback(void* context, uint32_t index) {
     //Выбор первого доступного порта для датчика single wire
     if(type->interface == &SINGLE_WIRE) {
         snprintf(
-            args, 4, "%d", unitemp_gpio_toInt(unitemp_gpio_getAviablePort(type->interface, 0)));
+            args,
+            4,
+            "%d",
+            unitemp_gpio_toInt(unitemp_gpio_getAviablePort(type->interface, 0, NULL)));
     }
     //Выбор первого доступного порта для датчика one wire и запись нулевого ID
     if(type->interface == &ONE_WIRE) {
@@ -46,7 +49,7 @@ static void _enter_callback(void* context, uint32_t index) {
             args,
             21,
             "%d %02X%02X%02X%02X%02X%02X%02X%02X",
-            unitemp_gpio_toInt(unitemp_gpio_getAviablePort(type->interface, 0)),
+            unitemp_gpio_toInt(unitemp_gpio_getAviablePort(type->interface, 0, NULL)),
             0,
             0,
             0,

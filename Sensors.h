@@ -140,6 +140,14 @@ void unitemp_sensor_free(Sensor* sensor);
 UnitempStatus unitemp_sensor_updateData(Sensor* sensor);
 
 /**
+ * @brief Проверка наличия датчика в памяти
+ * 
+ * @param sensor Указатель на датчик
+ * @return Истина если этот датчик уже загружен, ложь если это новый датчик
+ */
+bool unitemp_sensor_isContains(Sensor* sensor);
+
+/**
  * @brief Загрузка датчиков с SD-карты
  * @return Истина если загрузка прошла успешно
  */
@@ -248,14 +256,16 @@ void unitemp_gpio_unlock(const GPIO* gpio);
  * @param interface Указатель на интерфейс
  * @return Количество доступных портов
  */
-uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface);
+uint8_t unitemp_gpio_getAviablePortsCount(const Interface* interface, const GPIO* extraport);
 /**
  * @brief Получить указатель на доступный для интерфейса порт по индексу 
  * @param interface Указатель на интерфейс
  * @param index Номер порта (от 0 до unitemp_gpio_getAviablePortsCount())
+ * @param extraport Указатель на дополнительный порт, который будет принудительно считаться доступным. Можно указать NULL если не требуется
  * @return Указатель на доступный порт
  */
-const GPIO* unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index);
+const GPIO*
+    unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index, const GPIO* extraport);
 
 /* Датчики */
 //DHTxx и их производные
