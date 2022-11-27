@@ -54,12 +54,6 @@ const NotificationSequence sequence_notification = {
     NULL,
 };
 
-void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas) {
-    canvas_set_font(canvas, FontPrimary);
-
-    canvas_draw_str(canvas, PWNAGOTCHI_FACE_J, PWNAGOTCHI_FACE_I, pwn->faceStr);
-}
-
 // static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
 //     if (message_queue_has_message(model->queue)) {
 //         PwnCommand cmd;
@@ -105,6 +99,9 @@ static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
     PwnDumpModel* model = _model;
 
     pwnagotchi_draw_face(model->pwn, canvas);
+    pwnagotchi_draw_lines(model->pwn, canvas);
+    pwnagotchi_draw_name(model->pwn, canvas);
+    pwnagotchi_draw_channel(model->pwn, canvas);
     
 
 }
@@ -147,7 +144,6 @@ static int32_t pwn_zero_worker(void* context) {
         true);
 
 
-    while(1);
     return 0;
 }
 
