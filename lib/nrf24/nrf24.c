@@ -41,8 +41,7 @@ uint8_t nrf24_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data) 
     return rx[0];
 }
 
-uint8_t
-    nrf24_write_buf_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size) {
+uint8_t nrf24_write_buf_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size) {
     uint8_t tx[size + 1];
     uint8_t rx[size + 1];
     memset(rx, 0, size + 1);
@@ -194,28 +193,31 @@ uint8_t nrf24_set_packetlen(FuriHalSpiBusHandle* handle, uint8_t len) {
 uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* packetsize, bool full) {
     uint8_t status = 0;
     uint8_t size = 0;
-    uint8_t tx_pl_wid[] = {R_RX_PL_WID, 0};
-    uint8_t rx_pl_wid[] = {0, 0};
     uint8_t tx_cmd[33] = {0}; // 32 max payload size + 1 for command
     uint8_t tmp_packet[33] = {0};
 
     status = nrf24_status(handle);
-
-    if(status & 0x40) {
+    if(!(status & RX_DR)) {
+        tx_cmd[0] = R_REGISTER | (REGISTER_MASK & REG_FIFO_STATUS);
+        nrf24_spi_trx(handle, tx_cmd, tmp_packet, 2, nrf24_TIMEOUT);
+        if((tmp_packet[1] & 1) == 0) status |= RX_DR; // packet in FIFO buffer
+    }
+    if(status & RX_DR) {
         if(full)
             size = nrf24_get_packetlen(handle, (status >> 1) & 7);
         else {
-            nrf24_spi_trx(handle, tx_pl_wid, rx_pl_wid, 2, nrf24_TIMEOUT);
-            size = rx_pl_wid[1];
+            tx_cmd[0] = R_RX_PL_WID; tx_cmd[1] = 0;
+            nrf24_spi_trx(handle, tx_cmd, tmp_packet, 2, nrf24_TIMEOUT);
+            size = tmp_packet[1];
         }
         if(size > 32) size = 32;
-        tx_cmd[0] = R_RX_PAYLOAD;
+        if(size == 0) size = 32;
+        tx_cmd[0] = R_RX_PAYLOAD; tx_cmd[1] = 0;
         nrf24_spi_trx(handle, tx_cmd, tmp_packet, size + 1, nrf24_TIMEOUT);
-        nrf24_write_reg(handle, REG_STATUS, 0x50); // clear RX_DR, MAX_RT.
         memcpy(packet, &tmp_packet[1], size);
-    } else if(status == 0 || (status & 0x11)) {
-        nrf24_flush_rx(handle);
-        nrf24_write_reg(handle, REG_STATUS, 0x50); // clear RX_DR, MAX_RT.
+        nrf24_write_reg(handle, REG_STATUS, RX_DR); // clear RX_DR
+    } else if(status & (TX_DS | MAX_RT)) { // MAX_RT, TX_DS
+        nrf24_write_reg(handle, REG_STATUS, (TX_DS | MAX_RT)); // clear RX_DR, MAX_RT.
     }
 
     *packetsize = size;

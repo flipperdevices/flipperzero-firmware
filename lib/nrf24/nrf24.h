@@ -38,6 +38,7 @@ extern "C" {
 #define REG_RX_ADDR_P5 0x0F
 #define REG_RF_CH 0x05
 #define REG_TX_ADDR 0x10
+#define REG_FIFO_STATUS 0x17
 
 #define RX_PW_P0 0x11
 #define RX_PW_P1 0x12
@@ -45,8 +46,9 @@ extern "C" {
 #define RX_PW_P3 0x14
 #define RX_PW_P4 0x15
 #define RX_PW_P5 0x16
-#define TX_DS 0x20
-#define MAX_RT 0x10
+#define RX_DR    0x40
+#define TX_DS    0x20
+#define MAX_RT   0x10
 
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2

@@ -1,6 +1,6 @@
 //
 // Written by vad7, 20.11.2022.
-// ver. 1.2
+// ver. 1.3
 //
 #include "nrf24scan.h"
  
@@ -363,8 +363,7 @@ static void prepare_nrf24()
 	uint8_t addr[5];
 	uint8_t erx_addr = (1<<0); // Enable RX_P0
 	if(addrs.addr_count == 0) return;
-	nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0);
-	nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
+	nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
 	nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 1 : 0); // Disable Automatic Retransmission
 	nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_ESB ? 0x3F : 0); // Auto acknowledgement
 	nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 1 + (NRF_DPL || NRF_ESB ? 4 : 1)); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
@@ -404,7 +403,7 @@ static void prepare_nrf24()
 		nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? (1<<5) : 0);
 		erx_addr |= (1<<5); // Enable RX_P5
 	} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
-	nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x50); // clear RX_DR, MAX_RT.
+	nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
 	nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
 	nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 	nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
@@ -428,7 +427,7 @@ bool nrf24_read_newpacket() {
 	uint8_t packet[32] = {0};
 	uint8_t *ptr = APP->log_arr + log_arr_idx * LOG_REC_SIZE;
 	uint8_t status = nrf24_rxpacket(nrf24_HANDLE, ptr + 1, &packetsize, !NRF_DPL);
-	if(status & 0x40) {
+	if(status & RX_DR) {
 		*ptr = ((packetsize & 0x1F) << 3) | ((status >> 1) & 7); // payload size + pipe #
 		if(packetsize < 32) memset(ptr + packetsize + 1, 0, 32 - packetsize);
 		if(log_arr_idx < MAX_LOG_RECORDS - 1) {
@@ -756,7 +755,7 @@ int32_t nrf24scan_app(void* p) {
 				}
 			}
 		}
-		if(what_to_do) {
+		if(what_doing && what_to_do) {
 			nrf24_read_newpacket();
 			if(find_channel_period && furi_get_tick() - start_time >= (uint32_t)find_channel_period * 1000UL) {
 				if(++NRF_channel > MAX_CHANNEL) NRF_channel = 0;
