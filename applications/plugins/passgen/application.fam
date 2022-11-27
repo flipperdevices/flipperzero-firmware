@@ -1,5 +1,5 @@
 App(
-    appid="passgen",
+    appid="Password_Generator",
     name="Password Generator",
     apptype=FlipperAppType.PLUGIN,
     entry_point="passgenapp",
