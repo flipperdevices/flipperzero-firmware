@@ -41,7 +41,7 @@ static const int nd_numbers[] = {
     [ND_4096] = 4096,
 };
 
-static const float aperture_numbers[] = {
+const float aperture_numbers[] = {
     [AP_1] = 1.0,
     [AP_1_4] = 1.4,
     [AP_2] = 2.0,
@@ -59,7 +59,7 @@ static const float aperture_numbers[] = {
     [AP_128] = 128,
 };
 
-static const float speed_numbers[] = {
+const float speed_numbers[] = {
     [SPEED_8000] = 1.0 / 8000, [SPEED_4000] = 1.0 / 4000, [SPEED_2000] = 1.0 / 2000,
     [SPEED_1000] = 1.0 / 1000, [SPEED_500] = 1.0 / 500,   [SPEED_250] = 1.0 / 250,
     [SPEED_125] = 1.0 / 125,   [SPEED_60] = 1.0 / 60,     [SPEED_30] = 1.0 / 30,
@@ -307,7 +307,7 @@ void draw_top_row(Canvas* canvas, MainViewModel* context) {
 
         canvas_set_font(canvas, FontPrimary);
         // metering mode A – ambient, F – flash
-        canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, "A");
+        // canvas_draw_str_aligned(canvas, 1, 1, AlignLeft, AlignTop, "A");
 
         snprintf(str, sizeof(str), "ISO: %d", iso_numbers[model->iso]);
         canvas_draw_str_aligned(canvas, 19, 1, AlignLeft, AlignTop, str);
