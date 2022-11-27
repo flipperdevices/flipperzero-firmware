@@ -29,6 +29,7 @@ Thank you to all the supporters!
 - Added: [POCSAG protocol decoder for subghz #2055 (By Shuma)](https://github.com/flipperdevices/flipperzero-firmware/pull/2055)
 - Added: [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - Added: [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet`
+- Updated: [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!

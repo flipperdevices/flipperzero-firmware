@@ -270,8 +270,7 @@ static void vb_migrate_scene_register_set_state(VbMigrate* inst, RegisterState s
 
             view_dispatcher_switch_to_view(inst->view_dispatcher, VbMigrateViewWidget);
 
-            // inst->nfc_dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodAuto;
-            inst->nfc_dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethod; // HOPE THIS WORKS...
+            inst->nfc_dev->dev_data.mf_ul_data.auth_method = MfUltralightAuthMethodAuto;
             nfc_worker_start(
                 inst->worker,
                 NfcWorkerStateReadMfUltralightReadAuth,
