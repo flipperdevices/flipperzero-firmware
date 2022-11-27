@@ -2,7 +2,7 @@
 
 App(
 	# --- App Info
-	appid="wii_ec_anal",
+	appid="Wii_EC_Analyser",
 	name="Wii EC Analyser",
 
 	# --- Entry point

@@ -1,5 +1,5 @@
 App(
-    appid="badapple",
+    appid="BadApple",
     name="Bad Apple",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bad_apple_main",

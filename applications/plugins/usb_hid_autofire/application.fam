@@ -1,5 +1,5 @@
 App(
-    appid="usb_hid_autofire",
+    appid="USB_HID_Autofire",
     name="USB HID Autofire",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="usb_hid_autofire_app",

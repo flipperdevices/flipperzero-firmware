@@ -1,5 +1,5 @@
 App(
-    appid="counter",
+    appid="Counter",
     name="Counter",
     apptype=FlipperAppType.PLUGIN,
     entry_point="counterapp",
