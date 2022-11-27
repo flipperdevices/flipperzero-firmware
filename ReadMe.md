@@ -47,6 +47,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
+- [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
+- [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
