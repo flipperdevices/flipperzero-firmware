@@ -130,7 +130,7 @@ static void draw_results(const State* state, Canvas* canvas) {
     canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, furi_string_get_cstr(sum));
     // ui frame
     if(state->roll_result > 99)
-        canvas_draw_icon(canvas, 53, 26, &I_ui_result_3);
+        canvas_draw_icon(canvas, 52, 26, &I_ui_result_3);
     else if(state->roll_result > 9)
         canvas_draw_icon(canvas, 56, 26, &I_ui_result_2);
     else
