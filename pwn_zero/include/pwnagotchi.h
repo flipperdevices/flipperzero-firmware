@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include <gui/canvas_i.h>
 #include <stdbool.h>
 
 #include "constants.h"
@@ -146,15 +147,71 @@ void pwnagotchi_free(Pwnagotchi* pwn);
  * @param pwn Pwnagotchi device to draw
  * @param canvas Canvas to draw on
  */
-// void pwnagotchi_draw_blank(Pwnagotchi* pwn, Canvas* canvas);
+void pwnagotchi_draw_blank(Pwnagotchi* pwn, Canvas* canvas);
 
-// /**
-//  * Draw the stored pwnagotchi's face on the device
-//  * 
-//  * @param pwn Pwnagotchi to draw
-//  * @param canvas Canvas to draw on
-//  */
-// void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas);
+/**
+ * Draw the stored pwnagotchi's face on the device
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw the name of the pwnagotchi
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_name(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw channel on pwnagotchi
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_channel(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw aps on pwnagotchi
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_aps(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw uptime on pwnagotchi
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_uptime(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw lines on pwnagotchi
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_lines(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw friend of pwnagotchi on screen
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_friend(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw current mode of pwnagotchi
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_mode(Pwnagotchi* pwn, Canvas* canvas);
 
 /**
  * Clears the screen buffer of the pwnagotchi
