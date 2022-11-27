@@ -27,6 +27,8 @@ Thank you to all the supporters!
 - [Add protocol Auriol hg0601a #451 (By LY2NEO)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/451)
 - Added: [SubGhz: fix duration pricenton protocol #2054 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2054)
 - Added: [POCSAG protocol decoder for subghz #2055 (By Shuma)](https://github.com/flipperdevices/flipperzero-firmware/pull/2055)
+- Added: [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
+- Added: [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet`
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -163,6 +165,7 @@ $ ./fbt resources icons dolphin_ext
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW  `Broken?`
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
+- [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
@@ -239,6 +242,7 @@ $ ./fbt resources icons dolphin_ext
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
+- [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet`
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
