@@ -35,7 +35,7 @@ const Icon* coin_frames[] = {
 
 const Icon* dice_frames[] = {
     &I_d4_1,   &I_d4_2,   &I_d4_3,   &I_d4_1, // d4
-    &I_coin_1, &I_d4_2,   &I_d4_3,   &I_d4_1, // d6
+    &I_d6_1,   &I_d6_2,   &I_d6_3,   &I_d6_4, // d6
     &I_d4_2,   &I_d4_2,   &I_d4_3,   &I_d4_1, // d8
     &I_coin_1, &I_d4_2,   &I_d4_3,   &I_d4_1, // d10
     &I_d4_1,   &I_d4_2,   &I_d4_3,   &I_d4_1, // d12
