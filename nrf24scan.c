@@ -33,11 +33,12 @@
 									// P5: address P5, LSB in hex (1 byte)
 									// captured data in raw format, first byte = address # 0..5, Payload len if DPL
 									// ... up to MAX_LOG_RECORDS-1
-#define LOG_FILENAME "log"
-#define LOG_FILEEXT	 ".txt"
-#define MAX_LOG_RECORDS	100
-#define LOG_REC_SIZE	33				// max packet size
-#define VIEW_LOG_MAX_X	22
+#define LOG_FILENAME 		"log"
+#define LOG_FILEEXT	 		".txt"
+#define MAX_LOG_RECORDS		100
+#define LOG_REC_SIZE		33		// max packet size
+#define VIEW_LOG_MAX_X		22
+#define VIEW_LOG_WIDTH_B	10		// bytes
 
 const char SettingsFld_Rate[] = "Rate:";
 const char SettingsFld_Ch[] = "Ch:";
@@ -515,15 +516,12 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 				dpl >>= 3;
 				if(dpl == 0) dpl = 32;
 				int count = dpl - view_log_arr_x;
-				if(count > 10) count = 10;
+				uint8_t max_width = view_log_arr_x == 0 && addrs.addr_count > 1 ? VIEW_LOG_WIDTH_B - 1 : VIEW_LOG_WIDTH_B;
+				if(count > max_width) count = max_width;
 				ptr += view_log_arr_x;
 				if(count > 0) {
-					if(view_log_arr_x == 0 && addrs.addr_count > 1) {
-						snprintf(screen_buf + strlen(screen_buf), sizeof(screen_buf), "%d-", pipe);
-						add_to_str_hex_bytes(screen_buf, ptr, count - 1);
-					} else {
-						add_to_str_hex_bytes(screen_buf, ptr, count);
-					}
+					if(max_width < VIEW_LOG_WIDTH_B) snprintf(screen_buf + 1, sizeof(screen_buf), "%d-", pipe);
+					add_to_str_hex_bytes(screen_buf, ptr, count);
 				}
 				canvas_draw_str(canvas, 3 * 5, 14 + i * 7, screen_buf);
 			}
