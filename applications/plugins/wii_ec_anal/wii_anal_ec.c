@@ -58,13 +58,15 @@ bool evWiiEC(const eventMsg_t* const msg, state_t* const state) {
         sceneSet(state, ecId[msg->wiiEc.val].scene);
         redraw = true;
 
-// #if 1 // Workaround for Classic Controller Pro, which shows 00's for Factory Calibration Data!?
-        // if(state->ec.pidx == PID_CLASSIC_PRO) {
+#if 1 // Workaround for Classic Controller Pro, which shows 00's for Factory Calibration Data!?
+        if(state->ec.pidx == PID_CLASSIC_PRO) {
             // Simulate a Long-OK keypress, to start Software Calibration mode
-            // eventMsg_t msg = {input.type = InputTypeLong, input.key = InputKeyOk};
-            // key_calib(&msg, state);
-        // }
-// #endif
+            eventMsg_t msg = {//					.id         = EVID_KEY,
+                              .input.type = InputTypeLong,
+                              .input.key = InputKeyOk};
+            key_calib(&msg, state);
+        }
+#endif
         break;
 
     case WIIEC_DISCONN:

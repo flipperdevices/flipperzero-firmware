@@ -1,6 +1,6 @@
 //
 // Written by vad7, 20.11.2022.
-// ver. 1.2
+// ver. 1.3
 //
 #include "nrf24scan.h"
 
@@ -18,7 +18,7 @@
 #define MAX_ADDR 6
 
 #define SCAN_APP_PATH_FOLDER "/ext/nrf24scan"
-#define ADDR_FILENAME \
+#define ADDR_FILENAME                                                                   \
     "addr.txt" // File format (1 parameter per line):                                   \
         // Rate: 0/1/2 - rate in Mbps (=0.25/1/2)                                       \
         // Ch: 0..125 - default channel                                                 \
@@ -39,6 +39,7 @@
 #define MAX_LOG_RECORDS 100
 #define LOG_REC_SIZE 33 // max packet size
 #define VIEW_LOG_MAX_X 22
+#define VIEW_LOG_WIDTH_B 10 // bytes
 
 const char SettingsFld_Rate[] = "Rate:";
 const char SettingsFld_Ch[] = "Ch:";
@@ -414,8 +415,12 @@ static void prepare_nrf24() {
     uint8_t addr[5];
     uint8_t erx_addr = (1 << 0); // Enable RX_P0
     if(addrs.addr_count == 0) return;
-    nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0);
-    nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
+    nrf24_write_reg(
+        nrf24_HANDLE,
+        REG_CONFIG,
+        0x70 | ((NRF_CRC == 1 ? 0b1000 :
+                 NRF_CRC == 2 ? 0b1100 :
+                                0))); // Mask all interrupts
     nrf24_write_reg(
         nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 1 : 0); // Disable Automatic Retransmission
     nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_ESB ? 0x3F : 0); // Auto acknowledgement
@@ -468,7 +473,7 @@ static void prepare_nrf24() {
         erx_addr |= (1 << 5); // Enable RX_P5
     } else
         nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
-    nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x50); // clear RX_DR, MAX_RT.
+    nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
     nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
     nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
     nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
@@ -491,7 +496,7 @@ bool nrf24_read_newpacket() {
     uint8_t packet[32] = {0};
     uint8_t* ptr = APP->log_arr + log_arr_idx * LOG_REC_SIZE;
     uint8_t status = nrf24_rxpacket(nrf24_HANDLE, ptr + 1, &packetsize, !NRF_DPL);
-    if(status & 0x40) {
+    if(status & RX_DR) {
         *ptr = ((packetsize & 0x1F) << 3) | ((status >> 1) & 7); // payload size + pipe #
         if(packetsize < 32) memset(ptr + packetsize + 1, 0, 32 - packetsize);
         if(log_arr_idx < MAX_LOG_RECORDS - 1) {
@@ -617,15 +622,15 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 dpl >>= 3;
                 if(dpl == 0) dpl = 32;
                 int count = dpl - view_log_arr_x;
-                if(count > 10) count = 10;
+                uint8_t max_width = view_log_arr_x == 0 && addrs.addr_count > 1 ?
+                                        VIEW_LOG_WIDTH_B - 1 :
+                                        VIEW_LOG_WIDTH_B;
+                if(count > max_width) count = max_width;
                 ptr += view_log_arr_x;
                 if(count > 0) {
-                    if(view_log_arr_x == 0 && addrs.addr_count > 1) {
-                        snprintf(screen_buf + strlen(screen_buf), sizeof(screen_buf), "%d-", pipe);
-                        add_to_str_hex_bytes(screen_buf, ptr, count - 1);
-                    } else {
-                        add_to_str_hex_bytes(screen_buf, ptr, count);
-                    }
+                    if(max_width < VIEW_LOG_WIDTH_B)
+                        snprintf(screen_buf + 1, sizeof(screen_buf), "%d-", pipe);
+                    add_to_str_hex_bytes(screen_buf, ptr, count);
                 }
                 canvas_draw_str(canvas, 3 * 5, 14 + i * 7, screen_buf);
             }
@@ -886,7 +891,7 @@ int32_t nrf24scan_app(void* p) {
                 }
             }
         }
-        if(what_to_do) {
+        if(what_doing && what_to_do) {
             nrf24_read_newpacket();
             if(find_channel_period &&
                furi_get_tick() - start_time >= (uint32_t)find_channel_period * 1000UL) {

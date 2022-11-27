@@ -21,7 +21,6 @@ Thank you to all the supporters!
 - Added: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 - Updated: [Gui: proper navigation in file browser dialog #2014 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2014)
 - Updated: [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - Updated: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 - [Adding Slovenian, Bosnian and Croatian layout #187 (By StellaStoic)](https://github.com/DarkFlippers/unleashed-firmware/pull/187)
 - [Add protocol Auriol hg0601a #451 (By LY2NEO)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/451)
@@ -32,6 +31,9 @@ Thank you to all the supporters!
 - Updated: [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 - Renamed some FAPs to fix ordering in Applications, delete your `/ext/apps` folder to get rid of duplicates
 - Removed: [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet` (due to fap error)
+- Updated: [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
+- Updated: [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
+- Updated: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!

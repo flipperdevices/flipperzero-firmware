@@ -1,5 +1,11 @@
 # Flipper Zero Dice App
 
+<div style="text-align:center"><img src="sources/flipper-screen.png"/></div>
+
+## Screenshots
+
+<div style="text-align:center"><img src="sources/main-screen.png"/></div>
+
 ## Compiling
 
 1. Clone the [flipperzero-firmware](https://github.com/flipperdevices/flipperzero-firmware) repository or another firmware that you use.
