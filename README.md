@@ -1,10 +1,10 @@
 # Flipper Zero Dice App
 
-<div style="text-align:center"><img src="images/flipper-screen.png"/></div>
+<div style="text-align:center"><img src="sources/flipper-screen.png"/></div>
 
 ## Screenshots
 
-<div style="text-align:center"><img src="images/main-screen.png"/></div>
+<div style="text-align:center"><img src="sources/main-screen.png"/></div>
 
 ## Compiling
 

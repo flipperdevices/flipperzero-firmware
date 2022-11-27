@@ -74,21 +74,21 @@ static void draw_ui(const State* state, Canvas* canvas) {
         canvas_draw_str_aligned(
             canvas, 63, 50, AlignCenter, AlignBottom, dice_types[state->dice_index].name);
 
-        if(state->dice_index > 0) canvas_draw_icon(canvas, 45, 44, &I_ButtonLeft_4x7);
+        if(state->dice_index > 0) canvas_draw_icon(canvas, 45, 44, &I_ui_button_left);
         if(state->dice_index < DICE_TYPES - 1)
-            canvas_draw_icon(canvas, 78, 44, &I_ButtonRight_4x7);
+            canvas_draw_icon(canvas, 78, 44, &I_ui_button_right);
     }
 
     // dice settings
     if(state->dice_index == 0)
-        canvas_draw_icon(canvas, 48, 51, &I_DiceCount_30x13_One);
+        canvas_draw_icon(canvas, 48, 51, &I_ui_count_1);
     else
-        canvas_draw_icon(canvas, 48, 51, &I_DiceCount_30x13);
+        canvas_draw_icon(canvas, 48, 51, &I_ui_count);
     canvas_draw_str_aligned(canvas, 58, 61, AlignCenter, AlignBottom, furi_string_get_cstr(count));
 
     // buttons
-    canvas_draw_icon(canvas, 92, 54, &I_ButtonRoll_35x10);
-    canvas_draw_icon(canvas, 0, 54, &I_ButtonExit_35x10);
+    canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+    canvas_draw_icon(canvas, 0, 54, &I_ui_button_exit);
 
     furi_string_free(count);
 }
