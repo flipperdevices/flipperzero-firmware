@@ -43,8 +43,9 @@ bool  evWiiEC (const eventMsg_t* const msg,  state_t* const state)
 			if (state->ec.pidx == PID_CLASSIC_PRO) {
 				// Simulate a Long-OK keypress, to start Software Calibration mode
 				eventMsg_t  msg = {
-					input.type = InputTypeLong,
-					input.key  = InputKeyOk
+//					.id         = EVID_KEY,
+					.input.type = InputTypeLong,
+					.input.key  = InputKeyOk
 				};
 				key_calib(&msg, state);
 			}
