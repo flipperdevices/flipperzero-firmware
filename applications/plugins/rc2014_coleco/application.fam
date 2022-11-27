@@ -1,5 +1,5 @@
 App(
-    appid="coleco",
+    appid="RC2014_Coleco",
     name="RC2014 ColecoVision",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="coleco_app",
