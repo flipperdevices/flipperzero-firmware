@@ -31,6 +31,7 @@ Thank you to all the supporters!
 - Added: [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet`
 - Updated: [nfc: NTAG password auto capture (and other password-related changes) #1843 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/1843)
 - Renamed some FAPs to fix ordering in Applications, delete your `/ext/apps` folder to get rid of duplicates
+- Removed: [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet`
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -244,7 +245,6 @@ $ ./fbt resources icons dolphin_ext
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
-- [VB Lab Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) `Req: Vital Bracelet`
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
