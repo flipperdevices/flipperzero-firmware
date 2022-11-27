@@ -1,5 +1,7 @@
 #include "../../lightmeter.h"
 
+#define TAG "Scene Config"
+
 static const char* iso_numbers[] = {
     [ISO_6] = "6",
     [ISO_12] = "12",
@@ -37,6 +39,11 @@ static const char* nd_numbers[] = {
 static const char* diffusion_dome[] = {
     [WITHOUT_DOME] = "No",
     [WITH_DOME] = "Yes",
+};
+
+static const char* backlight[] = {
+    [BACKLIGHT_AUTO] = "Auto",
+    [BACKLIGHT_ON] = "On",
 };
 
 enum LightMeterSubmenuIndex {
@@ -78,14 +85,36 @@ static void dome_presence_cb(VariableItem* item) {
     lightmeter_app_set_config(app, config);
 }
 
+static void backlight_cb(VariableItem* item) {
+    LightMeterApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, backlight[index]);
+
+    LightMeterConfig* config = app->config;
+    if(index != config->backlight) {
+        if(index == BACKLIGHT_ON) {
+            notification_message(
+                app->notifications,
+                &sequence_display_backlight_enforce_on); // force on backlight
+        } else {
+            notification_message(
+                app->notifications,
+                &sequence_display_backlight_enforce_auto); // force auto backlight
+        }
+    }
+    config->backlight = index;
+    lightmeter_app_set_config(app, config);
+}
+
 static void ok_cb(void* context, uint32_t index) {
     LightMeterApp* app = context;
     UNUSED(app);
     switch(index) {
-    case 3:
+    case 4:
         view_dispatcher_send_custom_event(app->view_dispatcher, LightMeterAppCustomEventHelp);
         break;
-    case 4:
+    case 5:
         view_dispatcher_send_custom_event(app->view_dispatcher, LightMeterAppCustomEventAbout);
         break;
     default:
@@ -113,6 +142,11 @@ void lightmeter_scene_config_on_enter(void* context) {
         var_item_list, "Diffusion dome", COUNT_OF(diffusion_dome), dome_presence_cb, app);
     variable_item_set_current_value_index(item, config->dome);
     variable_item_set_current_value_text(item, diffusion_dome[config->dome]);
+
+    item =
+        variable_item_list_add(var_item_list, "Backlight", COUNT_OF(backlight), backlight_cb, app);
+    variable_item_set_current_value_index(item, config->backlight);
+    variable_item_set_current_value_text(item, backlight[config->backlight]);
 
     item = variable_item_list_add(var_item_list, "Help and Pinout", 0, NULL, NULL);
     item = variable_item_list_add(var_item_list, "About", 0, NULL, NULL);

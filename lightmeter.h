@@ -24,6 +24,7 @@ typedef struct {
     int nd;
     int aperture;
     int dome;
+    int backlight;
 } LightMeterConfig;
 
 typedef struct {
