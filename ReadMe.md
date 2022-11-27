@@ -31,6 +31,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
+- [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
