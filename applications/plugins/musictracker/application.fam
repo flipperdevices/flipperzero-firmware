@@ -1,7 +1,7 @@
 App(
-    appid="zero_tracker",
+    appid="Zero_Tracker",
     name="Zero Tracker",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="zero_tracker_app",
     requires=[
         "gui",

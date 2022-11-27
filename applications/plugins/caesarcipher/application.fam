@@ -1,7 +1,7 @@
 App(
     appid="Caesar_Cipher",
     name="Caesar Cipher",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="caesar_cipher_app",
     cdefines=["APP_CAESAR_CIPHER"],
     requires=[

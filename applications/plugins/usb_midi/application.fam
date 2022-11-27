@@ -1,7 +1,7 @@
 App(
     appid="USB_Midi",
     name="USB Midi",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="usb_midi_app",
     requires=[
         "gui",
