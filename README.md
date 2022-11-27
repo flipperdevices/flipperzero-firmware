@@ -5,6 +5,8 @@
 ## Screenshots
 
 <div style="text-align:center"><img src="sources/main-screen.png"/></div>
+ <br />
+<div style="text-align:center"><img src="sources/roll-screen.png"/></div>
 
 ## Compiling
 
