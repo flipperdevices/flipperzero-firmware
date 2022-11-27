@@ -24,10 +24,11 @@ void nfc_scene_mf_ultralight_read_auth_result_on_enter(void* context) {
     temp_str = furi_string_alloc();
 
     if((mf_ul_data->data_read == mf_ul_data->data_size) && (mf_ul_data->data_read > 0)) {
-        if(mf_ul_data->auth_success)
+        if(mf_ul_data->auth_success) {
             title = "All pages are unlocked!";
-        else
+        } else {
             title = "All unlocked but failed auth!";
+        }
     } else {
         title = "Not all pages unlocked!";
     }
@@ -84,8 +85,21 @@ bool nfc_scene_mf_ultralight_read_auth_result_on_event(void* context, SceneManag
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_search_and_switch_to_previous_scene(
-            nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
+        MfUltralightData* mf_ul_data = &nfc->dev->dev_data.mf_ul_data;
+        if(mf_ul_data->auth_method == MfUltralightAuthMethodManual ||
+           mf_ul_data->auth_method == MfUltralightAuthMethodAuto) {
+            consumed = scene_manager_previous_scene(nfc->scene_manager);
+        } else {
+            NfcScene next_scene;
+            if((mf_ul_data->data_read == mf_ul_data->data_size) && (mf_ul_data->data_read > 0)) {
+                next_scene = NfcSceneMfUltralightMenu;
+            } else {
+                next_scene = NfcSceneMfUltralightUnlockMenu;
+            }
+
+            consumed =
+                scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, next_scene);
+        }
     }
 
     return consumed;
