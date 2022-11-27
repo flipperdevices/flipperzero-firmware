@@ -17,7 +17,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "../vb_migrate_i.h"
-#include "vb_migrate_icons.h"
+#include "VB_migrate_icons.h"
 
 static void vb_migrate_scene_delete_success_popup_callback(void* context) {
     VbMigrate* inst = context;

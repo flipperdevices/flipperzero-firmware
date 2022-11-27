@@ -20,7 +20,7 @@
 
 #include "../vb_migrate_i.h"
 #include "../vb_tag.h"
-#include "vb_migrate_icons.h"
+#include "VB_migrate_icons.h"
 
 #define TAG "vb_migrate_scene_to_app"
 
