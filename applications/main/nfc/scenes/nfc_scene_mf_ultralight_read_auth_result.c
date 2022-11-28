@@ -69,6 +69,7 @@ void nfc_scene_mf_ultralight_read_auth_result_on_enter(void* context) {
         nfc);
 
     furi_string_free(temp_str);
+    notification_message(nfc->notifications, &sequence_set_green_255);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
@@ -110,4 +111,6 @@ void nfc_scene_mf_ultralight_read_auth_result_on_exit(void* context) {
 
     // Clean views
     widget_reset(nfc->widget);
+
+    notification_message_block(nfc->notifications, &sequence_reset_green);
 }
