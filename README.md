@@ -37,9 +37,9 @@ Decode the Packet Control Field (long press OK in the list and then press '>'):
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-5.png">
 <br>
-1 - pipe #
-2 - Payload length (for valide packet must be 1..20 hex)
-3 - PID (2 bit) + NO_ACK (1 bit)
+1 - pipe #<br>
+2 - Payload length (for valide packet must be 1..20 hex)<br>
+3 - PID (2 bit) + NO_ACK (1 bit)<br>
 <br>
 <br>
 <br>
