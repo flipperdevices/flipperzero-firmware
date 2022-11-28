@@ -3,7 +3,6 @@
 An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors. This library is not currently complete, but functional.
 
 Settings file (default addr.txt) format:<br><br>
-
 Rate: 0/1/2 - rate in Mbps (=0.25/1/2)<br>
 Ch: 0..125 - default channel          <br>
 ESB: 0/1 (1 - Enhanced ShockBurst)    <br>
