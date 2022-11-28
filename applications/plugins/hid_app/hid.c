@@ -328,11 +328,7 @@ int32_t hid_usb_app(void* p) {
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
 
-    hid_keynote_set_connected_status(app->hid_keynote, true);
-    hid_keyboard_set_connected_status(app->hid_keyboard, true);
-    hid_media_set_connected_status(app->hid_media, true);
-    hid_mouse_set_connected_status(app->hid_mouse, true);
-    bt_hid_tiktok_set_connected_status(app->bt_hid_tiktok, true);
+    bt_hid_connection_status_changed_callback(BtStatusConnected, app);
 
     DOLPHIN_DEED(DolphinDeedPluginStart);
 
