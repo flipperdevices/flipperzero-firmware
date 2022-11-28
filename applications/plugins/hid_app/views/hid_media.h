@@ -11,5 +11,3 @@ void hid_media_free(HidMedia* hid_media);
 View* hid_media_get_view(HidMedia* hid_media);
 
 void hid_media_set_connected_status(HidMedia* hid_media, bool connected);
-
-void hid_media_set_conn_type(HidMedia* hid_media, bool is_bluetooth);

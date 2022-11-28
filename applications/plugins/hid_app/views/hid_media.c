@@ -21,7 +21,6 @@ typedef struct {
     bool down_pressed;
     bool ok_pressed;
     bool connected;
-    bool is_bluetooth;
 } HidMediaModel;
 
 static void hid_media_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDirection dir) {
@@ -40,10 +39,9 @@ static void hid_media_draw_arrow(Canvas* canvas, uint8_t x, uint8_t y, CanvasDir
 static void hid_media_draw_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     HidMediaModel* model = context;
-    bool is_bluetooth = model->is_bluetooth;
 
     // Header
-    if(model->connected && is_bluetooth) {
+    if(model->connected) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_connected_15x15);
     } else {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
@@ -114,92 +112,50 @@ static void hid_media_draw_callback(Canvas* canvas, void* context) {
 }
 
 static void hid_media_process_press(HidMedia* hid_media, InputEvent* event) {
-    bool is_bluetooth = hid_media->hid->is_bluetooth;
     with_view_model(
         hid_media->view,
         HidMediaModel * model,
         {
             if(event->key == InputKeyUp) {
                 model->up_pressed = true;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
-                }
+                hid_hal_consumer_key_press(hid_media->hid, HID_CONSUMER_VOLUME_INCREMENT);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = true;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_DECREMENT);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_press(HID_CONSUMER_VOLUME_DECREMENT);
-                }
+                hid_hal_consumer_key_press(hid_media->hid, HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = true;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_SCAN_PREVIOUS_TRACK);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_press(HID_CONSUMER_SCAN_PREVIOUS_TRACK);
-                }
+                hid_hal_consumer_key_press(hid_media->hid, HID_CONSUMER_SCAN_PREVIOUS_TRACK);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = true;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_SCAN_NEXT_TRACK);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_press(HID_CONSUMER_SCAN_NEXT_TRACK);
-                }
+                hid_hal_consumer_key_press(hid_media->hid, HID_CONSUMER_SCAN_NEXT_TRACK);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = true;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_PLAY_PAUSE);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_press(HID_CONSUMER_PLAY_PAUSE);
-                }
+                hid_hal_consumer_key_press(hid_media->hid, HID_CONSUMER_PLAY_PAUSE);
             }
         },
         true);
 }
 
 static void hid_media_process_release(HidMedia* hid_media, InputEvent* event) {
-    bool is_bluetooth = hid_media->hid->is_bluetooth;
     with_view_model(
         hid_media->view,
         HidMediaModel * model,
         {
             if(event->key == InputKeyUp) {
                 model->up_pressed = false;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
-                }
+                hid_hal_consumer_key_release(hid_media->hid, HID_CONSUMER_VOLUME_INCREMENT);
             } else if(event->key == InputKeyDown) {
                 model->down_pressed = false;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_DECREMENT);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_release(HID_CONSUMER_VOLUME_DECREMENT);
-                }
+                hid_hal_consumer_key_release(hid_media->hid, HID_CONSUMER_VOLUME_DECREMENT);
             } else if(event->key == InputKeyLeft) {
                 model->left_pressed = false;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_SCAN_PREVIOUS_TRACK);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_release(HID_CONSUMER_SCAN_PREVIOUS_TRACK);
-                }
+                hid_hal_consumer_key_release(hid_media->hid, HID_CONSUMER_SCAN_PREVIOUS_TRACK);
             } else if(event->key == InputKeyRight) {
                 model->right_pressed = false;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_SCAN_NEXT_TRACK);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_release(HID_CONSUMER_SCAN_NEXT_TRACK);
-                }
+                hid_hal_consumer_key_release(hid_media->hid, HID_CONSUMER_SCAN_NEXT_TRACK);
             } else if(event->key == InputKeyOk) {
                 model->ok_pressed = false;
-                if(is_bluetooth) {
-                    furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_PLAY_PAUSE);
-                } else if(!is_bluetooth) {
-                    furi_hal_hid_consumer_key_release(HID_CONSUMER_PLAY_PAUSE);
-                }
+                hid_hal_consumer_key_release(hid_media->hid, HID_CONSUMER_PLAY_PAUSE);
             }
         },
         true);
@@ -208,7 +164,6 @@ static void hid_media_process_release(HidMedia* hid_media, InputEvent* event) {
 static bool hid_media_input_callback(InputEvent* event, void* context) {
     furi_assert(context);
     HidMedia* hid_media = context;
-    bool is_bluetooth = hid_media->hid->is_bluetooth;
     bool consumed = false;
 
     if(event->type == InputTypePress) {
@@ -219,11 +174,7 @@ static bool hid_media_input_callback(InputEvent* event, void* context) {
         consumed = true;
     } else if(event->type == InputTypeShort) {
         if(event->key == InputKeyBack) {
-            if(is_bluetooth) {
-                furi_hal_bt_hid_consumer_key_release_all();
-            } else if(!is_bluetooth) {
-                furi_hal_hid_kb_release_all();
-            }
+            hid_hal_consumer_key_release_all(hid_media->hid);
         }
     }
 
@@ -257,9 +208,4 @@ void hid_media_set_connected_status(HidMedia* hid_media, bool connected) {
     furi_assert(hid_media);
     with_view_model(
         hid_media->view, HidMediaModel * model, { model->connected = connected; }, true);
-}
-void hid_media_set_conn_type(HidMedia* hid_media, bool is_bluetooth) {
-    furi_assert(hid_media);
-    with_view_model(
-        hid_media->view, HidMediaModel * model, { model->is_bluetooth = is_bluetooth; }, true);
 }

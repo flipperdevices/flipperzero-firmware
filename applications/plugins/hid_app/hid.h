@@ -1,6 +1,11 @@
 #pragma once
 
 #include <furi.h>
+#include <furi_hal_bt.h>
+#include <furi_hal_bt_hid.h>
+#include <furi_hal_usb.h>
+#include <furi_hal_usb_hid.h>
+
 #include <bt/bt_service/bt.h>
 #include <gui/gui.h>
 #include <gui/view.h>
@@ -16,20 +21,40 @@
 #include "views/hid_mouse.h"
 #include "views/bt_hid_tiktok.h"
 
-typedef struct {
+typedef enum {
+    HidTransportUsb,
+    HidTransportBle,
+} HidTransport;
+
+typedef struct Hid Hid;
+
+struct Hid {
     Bt* bt;
     Gui* gui;
     NotificationApp* notifications;
     ViewDispatcher* view_dispatcher;
     Submenu* device_type_submenu;
-    Submenu* conn_type_submenu;
     DialogEx* dialog;
     HidKeynote* hid_keynote;
     HidKeyboard* hid_keyboard;
     HidMedia* hid_media;
     HidMouse* hid_mouse;
     BtHidTikTok* bt_hid_tiktok;
-    bool is_bluetooth;
-    bool hid_conn_selected;
+
+    HidTransport transport;
     uint32_t view_id;
-} Hid;
+};
+
+void hid_hal_keyboard_press(Hid* instance, uint16_t event);
+void hid_hal_keyboard_release(Hid* instance, uint16_t event);
+void hid_hal_keyboard_release_all(Hid* instance);
+
+void hid_hal_consumer_key_press(Hid* instance, uint16_t event);
+void hid_hal_consumer_key_release(Hid* instance, uint16_t event);
+void hid_hal_consumer_key_release_all(Hid* instance);
+
+void hid_hal_mouse_move(Hid* instance, int8_t dx, int8_t dy);
+void hid_hal_mouse_scroll(Hid* instance, int8_t delta);
+void hid_hal_mouse_press(Hid* instance, uint16_t event);
+void hid_hal_mouse_release(Hid* instance, uint16_t event);
+void hid_hal_mouse_release_all(Hid* instance);

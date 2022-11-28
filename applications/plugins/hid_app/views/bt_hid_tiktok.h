@@ -2,9 +2,10 @@
 
 #include <gui/view.h>
 
+typedef struct Hid Hid;
 typedef struct BtHidTikTok BtHidTikTok;
 
-BtHidTikTok* bt_hid_tiktok_alloc();
+BtHidTikTok* bt_hid_tiktok_alloc(Hid* bt_hid);
 
 void bt_hid_tiktok_free(BtHidTikTok* bt_hid_tiktok);
 
