@@ -1,6 +1,5 @@
 //
 // Written by vad7, 20.11.2022.
-// ver. 1.3
 //
 #include "nrf24scan.h"
 
@@ -14,26 +13,26 @@
 #include <nrf24.h>
 
 #define TAG "nrf24scan"
+#define VERSION "1.4"
 #define MAX_CHANNEL 125
 #define MAX_ADDR 6
 
 #define SCAN_APP_PATH_FOLDER "/ext/nrf24scan"
-#define ADDR_FILENAME \
-    "addr.txt" // File format (1 parameter per line):                                   \
-        // Rate: 0/1/2 - rate in Mbps (=0.25/1/2)                                       \
-        // Ch: 0..125 - default channel                                                 \
-        // ESB: 0/1 (1 - Enhanced ShockBurst)                                           \
-        // DPL: 0/1 (1 - Dynamic Payload Length)                                        \
-        // CRC: 0/1/2 (CRC length)                                                      \
-        // Payload: 1..32 (bytes)                                                       \
-        // P0: address P0 in hex (5 byte, LSB last)                                     \
-        // P1: address P1 in hex (5 byte, LSB last)                                     \
-        // P2: address P2, LSB in hex (1 byte)                                          \
-        // P3: address P3, LSB in hex (1 byte)                                          \
-        // P4: address P4, LSB in hex (1 byte)                                          \
-        // P5: address P5, LSB in hex (1 byte)                                          \
-        // captured data in raw format, first byte = address # 0..5, Payload len if DPL \
-        // ... up to MAX_LOG_RECORDS-1
+#define SETTINGS_FILENAME "settings.txt" // File format (1 parameter per line):
+// Rate: 0/1/2 - rate in Mbps (=0.25/1/2)
+// Ch: 0..125 - default channel
+// ESB: 0/1 (1 - Enhanced ShockBurst)
+// DPL: 0/1 (1 - Dynamic Payload Length)
+// CRC: 0/1/2 (CRC length)
+// Payload: 1..32 (bytes)
+// P0: address P0 in hex (5 byte, LSB last)
+// P1: address P1 in hex (5 byte, LSB last)
+// P2: address P2, LSB in hex (1 byte)
+// P3: address P3, LSB in hex (1 byte)
+// P4: address P4, LSB in hex (1 byte)
+// P5: address P5, LSB in hex (1 byte)
+// captured data in raw format, first byte = address # 0..5, Payload len if DPL
+// ... up to MAX_LOG_RECORDS-1
 #define LOG_FILENAME "log"
 #define LOG_FILEEXT ".txt"
 #define MAX_LOG_RECORDS 100
@@ -53,6 +52,7 @@ Nrf24Scan* APP;
 uint8_t what_doing = 0; // 0 - setup, 1 - view log, 2 - view addresses
 uint8_t what_to_do = 1; // 0 - view, 1 - view & scan
 uint32_t key_press_seq_ok = 0;
+uint8_t save_settings = 0;
 char screen_buf[64];
 char addr_file_name[32];
 uint8_t NRF_rate = 1; // 0 - 250Kbps, 1 - 1Mbps, 2 - 2Mbps
@@ -61,6 +61,7 @@ uint8_t NRF_ESB = 0; // 0 - ShockBurst, 1 - Enhanced ShockBurst
 uint8_t NRF_DPL = 0; // 1 - Dynamic Payload Length
 uint8_t NRF_CRC = 0; // 1 - No, 1 - CRC 1byte, 2 - CRC 2byte
 uint8_t NRF_Payload = 32; // len in bytes, max 32
+bool NRF_ERROR = 0;
 
 struct {
     uint8_t addr_P0[5]; // MSB first
@@ -83,6 +84,8 @@ uint8_t last_packet_send_st = 0;
 int16_t find_channel_period = 0; // sec
 uint8_t menu_selected = 0;
 uint32_t start_time;
+uint8_t view_log_decode_PCF =
+    0; // view log: 1 - decode packet control field (9b) when ESB off. After pipe # (hex): <Payload len 6b><PID_2b+NO_ACK_1b>
 
 #define menu_selected_max 5
 enum {
@@ -130,6 +133,17 @@ static void add_to_furi_str_hex_bytes(FuriString* str, char* arr, int bytes) {
     } while(--bytes);
 }
 
+static void add_to_str_hex_bytes_shift_9b(char* out, char* arr, int bytes) {
+    if(bytes <= 0) return;
+    out += strlen(out);
+    arr++; // +8b
+    do {
+        snprintf(out, 4, "%02X", (((*arr) & 0x7F) << 1) | (*(arr + 1) >> 7));
+        arr++;
+        out += 2;
+    } while(--bytes);
+}
+
 void clear_log() {
     log_arr_idx = 0;
     view_log_arr_idx = 0;
@@ -145,43 +159,50 @@ void allocate_log_array() {
     clear_log();
 }
 
-void write_to_log_file(Storage* storage) {
-    if(log_arr_idx == 0) return;
+void write_to_log_file(Storage* storage, bool f_settings) {
+    if(log_arr_idx == 0 && !f_settings) return;
     Stream* file_stream = file_stream_alloc(storage);
     FuriString* str = furi_string_alloc();
     furi_string_set(str, SCAN_APP_PATH_FOLDER);
     furi_string_cat(str, "/");
-    furi_string_cat(str, LOG_FILENAME);
-    furi_string_cat(str, LOG_FILEEXT);
     bool fl;
-    if(save_to_new_log) {
-        int cnt = 1;
-        do {
-            fl = file_stream_open(
-                file_stream, furi_string_get_cstr(str), FSAM_READ_WRITE, FSOM_CREATE_NEW);
-            if(fl) break;
-            file_stream_close(file_stream);
-            furi_string_set(str, SCAN_APP_PATH_FOLDER);
-            furi_string_cat(str, "/");
-            furi_string_cat(str, LOG_FILENAME);
-            furi_string_cat_printf(str, "-%02d", cnt);
-            furi_string_cat(str, LOG_FILEEXT);
-        } while(++cnt < 100);
-        if(!fl) {
-            FURI_LOG_E(TAG, "Failed to create new log file");
-            notification_message(APP->notification, &sequence_blink_red_100);
-        }
-    } else {
+    if(f_settings) {
+        furi_string_cat(str, SETTINGS_FILENAME);
         fl = file_stream_open(
-            file_stream, furi_string_get_cstr(str), FSAM_READ_WRITE, FSOM_OPEN_APPEND);
-        if(fl) {
-            if(stream_size(file_stream) == 0) save_to_new_log = true;
-        } else
-            file_stream_close(file_stream);
+            file_stream, furi_string_get_cstr(str), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
+        if(!fl) file_stream_close(file_stream);
+    } else {
+        furi_string_cat(str, LOG_FILENAME);
+        furi_string_cat(str, LOG_FILEEXT);
+        if(save_to_new_log) {
+            int cnt = 1;
+            do {
+                fl = file_stream_open(
+                    file_stream, furi_string_get_cstr(str), FSAM_READ_WRITE, FSOM_CREATE_NEW);
+                if(fl) break;
+                file_stream_close(file_stream);
+                furi_string_set(str, SCAN_APP_PATH_FOLDER);
+                furi_string_cat(str, "/");
+                furi_string_cat(str, LOG_FILENAME);
+                furi_string_cat_printf(str, "-%02d", cnt);
+                furi_string_cat(str, LOG_FILEEXT);
+            } while(++cnt < 100);
+            if(!fl) {
+                FURI_LOG_E(TAG, "Failed to create new log file");
+                notification_message(APP->notification, &sequence_blink_red_100);
+            }
+        } else {
+            fl = file_stream_open(
+                file_stream, furi_string_get_cstr(str), FSAM_READ_WRITE, FSOM_OPEN_APPEND);
+            if(fl) {
+                if(stream_size(file_stream) == 0) save_to_new_log = true;
+            } else
+                file_stream_close(file_stream);
+        }
     }
     if(fl) {
-        FURI_LOG_D(TAG, "Save to log %s", furi_string_get_cstr(str));
-        if(save_to_new_log) {
+        FURI_LOG_D(TAG, "Save to %s", furi_string_get_cstr(str));
+        if(save_to_new_log || f_settings) {
             furi_string_printf(
                 str,
                 "%s %d\n%s %d\n%s %d\n",
@@ -225,33 +246,38 @@ void write_to_log_file(Storage* storage) {
                 furi_string_cat_printf(str, "%02X\n", addrs.addr_P5);
             }
             if(!(fl = stream_write_string(file_stream, str) == furi_string_size(str))) {
-                FURI_LOG_E(TAG, "Failed to write header to log!");
+                FURI_LOG_E(TAG, "Failed to write header to file!");
                 notification_message(APP->notification, &sequence_blink_red_100);
             }
         }
         if(fl) {
-            int i = 0;
-            for(; i < log_arr_idx; i++) {
-                furi_string_reset(str);
-                add_to_furi_str_hex_bytes(
-                    str,
-                    (char*)APP->log_arr + i * LOG_REC_SIZE,
-                    MIN(NRF_Payload + 1, LOG_REC_SIZE));
-                furi_string_cat(str, "\n");
-                if(stream_write_string(file_stream, str) != furi_string_size(str)) {
-                    FURI_LOG_E(TAG, "Failed to write to log!");
-                    break;
+            if(f_settings) {
+                save_settings = 0;
+                if(strcmp(addr_file_name, "NONE") == 0) strcpy(addr_file_name, SETTINGS_FILENAME);
+            } else {
+                int i = 0;
+                for(; i < log_arr_idx; i++) {
+                    furi_string_reset(str);
+                    add_to_furi_str_hex_bytes(
+                        str,
+                        (char*)APP->log_arr + i * LOG_REC_SIZE,
+                        MIN(NRF_Payload + 1, LOG_REC_SIZE));
+                    furi_string_cat(str, "\n");
+                    if(stream_write_string(file_stream, str) != furi_string_size(str)) {
+                        FURI_LOG_E(TAG, "Failed to write to file!");
+                        break;
+                    }
                 }
-            }
-            if(i == log_arr_idx) {
-                notification_message(APP->notification, &sequence_blink_yellow_100);
-                FURI_LOG_D(TAG, "Log saved");
+                if(i == log_arr_idx) {
+                    notification_message(APP->notification, &sequence_blink_yellow_100);
+                    FURI_LOG_D(TAG, "File saved");
+                }
+                save_to_new_log = false;
             }
         }
-        save_to_new_log = false;
         file_stream_close(file_stream);
     } else {
-        FURI_LOG_E(TAG, "Failed to open log file");
+        FURI_LOG_E(TAG, "Failed to open file %s", furi_string_get_cstr(str));
         notification_message(APP->notification, &sequence_blink_red_100);
     }
     stream_free(file_stream);
@@ -381,7 +407,7 @@ static uint8_t load_settings_file(Stream* file_stream) {
                     a = 0;
                     break;
                 }
-                if(a) addrs.addr_count = a - '0' + 1;
+                if(err == 0 && a) addrs.addr_count = a - '0' + 1;
             } else if(line_len >= (NRF_Payload + 1) * 2) { // data
                 if(!log_loaded) {
                     clear_log();
@@ -421,25 +447,27 @@ static void prepare_nrf24() {
         0x70 | ((NRF_CRC == 1 ? 0b1000 :
                  NRF_CRC == 2 ? 0b1100 :
                                 0))); // Mask all interrupts
-    nrf24_write_reg(
-        nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 1 : 0); // Disable Automatic Retransmission
-    nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_ESB ? 0x3F : 0); // Auto acknowledgement
+    nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 1 : 0); // Automatic Retransmission
+    nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Disable auto acknowledgement
     nrf24_write_reg(
         nrf24_HANDLE,
         REG_FEATURE,
-        1 + (NRF_DPL || NRF_ESB ?
+        1 + (NRF_DPL ?
                  4 :
                  1)); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
     nrf24_set_maclen(nrf24_HANDLE, addrs.addr_len);
     for(int i = 0; i < addrs.addr_len; i++) addr[i] = addrs.addr_P0[addrs.addr_len - i - 1];
-    nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P0, &addr[0], addrs.addr_len);
+    nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P0, addr, addrs.addr_len);
+    uint8_t tmp[5];
+    nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, addrs.addr_len);
+    NRF_ERROR = memcmp(addr, tmp, addrs.addr_len) != 0;
     nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, NRF_Payload);
     if(addrs.addr_count > 0)
         nrf24_write_reg(
             nrf24_HANDLE, REG_DYNPD, NRF_DPL ? (1 << 0) : 0); // Enable dynamic payload reg
     if(addrs.addr_count > 1) {
         for(int i = 0; i < addrs.addr_len; i++) addr[i] = addrs.addr_P1[addrs.addr_len - i - 1];
-        nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P1, &addr[0], addrs.addr_len);
+        nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P1, addr, addrs.addr_len);
         nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, NRF_Payload);
         nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? (1 << 1) : 0);
         erx_addr |= (1 << 1); // Enable RX_P1
@@ -484,6 +512,10 @@ static void prepare_nrf24() {
 
 static void start_scanning() {
     prepare_nrf24();
+    if(NRF_ERROR) {
+        FURI_LOG_E(TAG, "NRF R/W ERROR!");
+        return;
+    }
     nrf24_set_rx_mode(nrf24_HANDLE);
     start_time = furi_get_tick();
     FURI_LOG_D(TAG, "Start scan: Ch=%d Rate=%d", NRF_channel, NRF_rate);
@@ -503,7 +535,7 @@ bool nrf24_read_newpacket() {
             log_arr_idx++;
         } else {
             if(log_to_file == 1 || log_to_file == 2) {
-                write_to_log_file(APP->storage);
+                write_to_log_file(APP->storage, false);
                 clear_log();
             } else {
                 memmove(APP->log_arr, APP->log_arr + LOG_REC_SIZE, log_arr_idx * LOG_REC_SIZE);
@@ -535,8 +567,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     //canvas_draw_frame(canvas, 0, 0, 128, 64); // border around the edge of the screen
     if(what_doing == 0) {
         canvas_set_font(canvas, FontSecondary); // 8x10 font
-        snprintf(
-            screen_buf, sizeof(screen_buf), "Settings: %s", addr_file_name); // menu_selected = 0
+        if(save_settings)
+            snprintf(
+                screen_buf, sizeof(screen_buf), "Save: %s", SETTINGS_FILENAME); // menu_selected = 0
+        else
+            snprintf(screen_buf, sizeof(screen_buf), "Load: %s", addr_file_name);
         canvas_draw_str(canvas, 10, 10, screen_buf);
         snprintf(screen_buf, sizeof(screen_buf), "Ch: %d", NRF_channel); // menu_selected = 1
         canvas_draw_str(canvas, 10, 20, screen_buf);
@@ -577,12 +612,17 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             log_to_file == 2 ? "Append" :
                                "Clear"); // menu_selected = 4
         canvas_draw_str(canvas, 10, 50, screen_buf);
-        snprintf(
-            screen_buf,
-            sizeof(screen_buf),
-            "%s (pipes: %d)",
-            what_to_do ? "Start scan" : "View log",
-            addrs.addr_count); // menu_selected = 5
+        if(what_to_do) {
+            if(NRF_ERROR)
+                snprintf(screen_buf, sizeof(screen_buf), "nRF24L01+ R/W ERROR!");
+            else
+                snprintf(
+                    screen_buf,
+                    sizeof(screen_buf),
+                    "Start scan (pipes: %d)",
+                    addrs.addr_count); // menu_selected = 5
+        } else
+            snprintf(screen_buf, sizeof(screen_buf), "View log (pipes: %d)", addrs.addr_count);
         canvas_draw_str(canvas, 10, 60, screen_buf);
         canvas_draw_str(canvas, 0, menu_selected * 10 + 10, ">");
     } else if(what_doing == 1) {
@@ -621,16 +661,29 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 uint8_t pipe = dpl & 7;
                 dpl >>= 3;
                 if(dpl == 0) dpl = 32;
+                if(view_log_decode_PCF && dpl == 32) dpl -= 2;
                 int count = dpl - view_log_arr_x;
                 uint8_t max_width = view_log_arr_x == 0 && addrs.addr_count > 1 ?
-                                        VIEW_LOG_WIDTH_B - 1 :
+                                        view_log_decode_PCF ? VIEW_LOG_WIDTH_B - 3 :
+                                                              VIEW_LOG_WIDTH_B - 1 :
                                         VIEW_LOG_WIDTH_B;
                 if(count > max_width) count = max_width;
                 ptr += view_log_arr_x;
                 if(count > 0) {
-                    if(max_width < VIEW_LOG_WIDTH_B)
-                        snprintf(screen_buf + 1, sizeof(screen_buf), "%d-", pipe);
-                    add_to_str_hex_bytes(screen_buf, ptr, count);
+                    if(max_width < VIEW_LOG_WIDTH_B) {
+                        snprintf(screen_buf + 1, 10, "%X-", pipe);
+                        if(view_log_decode_PCF)
+                            snprintf(
+                                screen_buf + strlen(screen_buf),
+                                10,
+                                "%02X%01X-",
+                                *ptr >> 2,
+                                ((*ptr & 3) << 1) | (*(ptr + 1) >> 7));
+                    }
+                    if(view_log_decode_PCF)
+                        add_to_str_hex_bytes_shift_9b(screen_buf, ptr, count);
+                    else
+                        add_to_str_hex_bytes(screen_buf, ptr, count);
                 }
                 canvas_draw_str(canvas, 3 * 5, 14 + i * 7, screen_buf);
             }
@@ -640,33 +693,37 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         if(addrs.addr_count > 0) {
             snprintf(screen_buf, sizeof(screen_buf), "P0: ");
             add_to_str_hex_bytes(screen_buf, (char*)addrs.addr_P0, addrs.addr_len);
-            canvas_draw_str(canvas, 0, 10, screen_buf);
+            canvas_draw_str(canvas, 0, 1 * 7, screen_buf);
         }
         if(addrs.addr_count > 1) {
             snprintf(screen_buf, sizeof(screen_buf), "P1: ");
             add_to_str_hex_bytes(screen_buf, (char*)addrs.addr_P1, addrs.addr_len);
-            canvas_draw_str(canvas, 0, 20, screen_buf);
+            canvas_draw_str(canvas, 0, 2 * 7, screen_buf);
         }
         if(addrs.addr_count > 2) {
-            canvas_draw_str(canvas, 0, 30, "P2: ");
+            canvas_draw_str(canvas, 0, 3 * 7, "P2: ");
             snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P2);
-            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 30, screen_buf);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 3 * 7, screen_buf);
         }
         if(addrs.addr_count > 3) {
-            canvas_draw_str(canvas, 0, 40, "P3: ");
+            canvas_draw_str(canvas, 0, 4 * 7, "P3: ");
             snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P3);
-            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 40, screen_buf);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 4 * 7, screen_buf);
         }
         if(addrs.addr_count > 4) {
-            canvas_draw_str(canvas, 0, 50, "P4: ");
+            canvas_draw_str(canvas, 0, 5 * 7, "P4: ");
             snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P4);
-            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 50, screen_buf);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 5 * 7, screen_buf);
         }
         if(addrs.addr_count > 5) {
-            canvas_draw_str(canvas, 0, 60, "P5: ");
+            canvas_draw_str(canvas, 0, 6 * 7, "P5: ");
             snprintf(screen_buf, sizeof(screen_buf), "%02X", addrs.addr_P5);
-            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 60, screen_buf);
+            canvas_draw_str(canvas, (4 + (addrs.addr_len - 1) * 2) * 5, 6 * 7, screen_buf);
         }
+        screen_buf[0] = 'v';
+        strcpy(screen_buf + 1, VERSION);
+        canvas_draw_str(canvas, 108, 7, screen_buf);
+        if(view_log_decode_PCF) canvas_draw_str(canvas, 78, 64, "Decode PCF");
     }
     release_mutex((ValueMutex*)ctx, plugin_state);
 }
@@ -701,17 +758,17 @@ int32_t nrf24scan_app(void* p) {
     FuriString* path = furi_string_alloc();
     furi_string_set(path, SCAN_APP_PATH_FOLDER);
     furi_string_cat(path, "/");
-    furi_string_cat(path, ADDR_FILENAME);
+    furi_string_cat(path, SETTINGS_FILENAME);
     if(file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint8_t err = load_settings_file(file_stream);
         if(!err)
-            strcpy(addr_file_name, ADDR_FILENAME);
+            strcpy(addr_file_name, SETTINGS_FILENAME);
         else
             snprintf(addr_file_name, sizeof(addr_file_name), "LOAD ERROR#%d", err);
     } else {
         strcpy(addr_file_name, "NONE");
     }
-    //file_stream_close(file_stream);
+    file_stream_close(file_stream);
     stream_free(file_stream);
     furi_string_free(path);
     allocate_log_array();
@@ -756,6 +813,9 @@ int32_t nrf24scan_app(void* p) {
                     if(event.input.type == InputTypePress || event.input.type == InputTypeRepeat) {
                         if(what_doing == 0) {
                             switch(menu_selected) {
+                            case Menu_open_file:
+                                save_settings ^= 1;
+                                break;
                             case Menu_enter_channel:
                                 NRF_channel += event.input.type == InputTypeRepeat ? 10 : 1;
                                 if(NRF_channel > MAX_CHANNEL) NRF_channel = 0;
@@ -777,6 +837,8 @@ int32_t nrf24scan_app(void* p) {
                             }
                         } else if(what_doing == 1) {
                             if(view_log_arr_x < VIEW_LOG_MAX_X) view_log_arr_x++;
+                        } else if(what_doing == 2) {
+                            if(NRF_ESB == 0) view_log_decode_PCF ^= 1;
                         }
                     }
                     break;
@@ -814,20 +876,24 @@ int32_t nrf24scan_app(void* p) {
                         if(what_doing == 0) {
                             switch(menu_selected) {
                             case Menu_open_file:
-                                file_stream = file_stream_alloc(APP->storage);
-                                if(select_settings_file(file_stream)) {
-                                    uint8_t err = load_settings_file(file_stream);
-                                    if(!err)
-                                        save_to_new_log = true;
-                                    else
-                                        snprintf(
-                                            addr_file_name,
-                                            sizeof(addr_file_name),
-                                            "LOAD ERROR#%d",
-                                            err);
-                                    file_stream_close(file_stream);
+                                if(save_settings) {
+                                    write_to_log_file(APP->storage, true);
+                                } else {
+                                    file_stream = file_stream_alloc(APP->storage);
+                                    if(select_settings_file(file_stream)) {
+                                        uint8_t err = load_settings_file(file_stream);
+                                        if(!err)
+                                            save_to_new_log = true;
+                                        else
+                                            snprintf(
+                                                addr_file_name,
+                                                sizeof(addr_file_name),
+                                                "LOAD ERROR#%d",
+                                                err);
+                                        file_stream_close(file_stream);
+                                    }
+                                    stream_free(file_stream);
                                 }
-                                stream_free(file_stream);
                                 break;
                             case Menu_enter_channel:
                                 if(NRF_ESB) {
@@ -837,6 +903,7 @@ int32_t nrf24scan_app(void* p) {
                                         NRF_DPL = 1;
                                 } else
                                     NRF_ESB = 1;
+                                if(NRF_ESB) view_log_decode_PCF = 0;
                                 break;
                             case Menu_enter_rate:
                                 if(++NRF_CRC > 2) NRF_CRC = 0;
@@ -862,7 +929,7 @@ int32_t nrf24scan_app(void* p) {
                         if(what_doing == 0) {
                             if(menu_selected == Menu_log) { // Log
                                 if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
-                                    write_to_log_file(APP->storage);
+                                    write_to_log_file(APP->storage, false);
                                     clear_log();
                                 }
                             }
@@ -905,7 +972,7 @@ int32_t nrf24scan_app(void* p) {
     }
     nrf24_set_idle(nrf24_HANDLE);
     if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
-        write_to_log_file(APP->storage);
+        write_to_log_file(APP->storage, false);
     }
     nrf24_deinit();
 

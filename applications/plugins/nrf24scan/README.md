@@ -2,7 +2,7 @@
 
 An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors. This library is not currently complete, but functional.
 
-Settings file (default addr.txt) format:<br><br>
+Settings file (default addr.txt) format:<br>
 
 Rate: 0/1/2 - rate in Mbps (=0.25/1/2)<br>
 Ch: 0..125 - default channel          <br>
@@ -18,11 +18,10 @@ P4: address pipe #4, LSB in hex (1 byte)   <br>
 P5: address pipe #5, LSB in hex (1 byte)   <br>
 captured data in raw format, first byte = address # 0..5, Payload len if DPL<br>
 ... up to MAX_LOG_RECORDS-1<br>
-<br><br>
+<br>
 In the list of the received:<br>
 Press OK - send the packet,<br>
 Long press OK - view addresses.<br>
-<br>
 <br>
 <br>
 <br>
@@ -31,11 +30,20 @@ Long press OK - view addresses.<br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-2.png">
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-3.png">
+<br><br>
+Decode the Packet Control Field (long press OK in the list and then press '>').<br>
+ESB (Enhanced Shockburst) option must be turned off.
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-4.png">
 <br>
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-5.png">
 <br>
-
+1 - pipe #<br>
+2 - Payload length (for valide packet must be 1..20 hex, or 0x33 if not DPL)<br>
+3 - PID (2 bit) + NO_ACK (1 bit)<br>
+<br>
+<br>
+<br>
 ## PinOut from from NoComp/Frog
 <img src="https://media.discordapp.net/attachments/937479784726949900/994495234618687509/unknown.png?width=567&height=634">
 
