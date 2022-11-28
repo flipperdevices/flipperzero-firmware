@@ -31,7 +31,8 @@ Long press OK - view addresses.<br>
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-3.png">
 <br><br>
-Decode the Packet Control Field (long press OK in the list and then press '>'):
+Decode the Packet Control Field (long press OK in the list and then press '>').<br>
+ESB (Enhanced Shockburst) option must be turned off.
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-4.png">
 <br>

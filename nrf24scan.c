@@ -706,7 +706,7 @@ int32_t nrf24scan_app(void* p) {
 						} else if(what_doing == 1) {
 							if(view_log_arr_x < VIEW_LOG_MAX_X) view_log_arr_x++;
 						} else if(what_doing == 2) {
-							view_log_decode_PCF ^= 1;
+							if(NRF_ESB == 0) view_log_decode_PCF ^= 1;
 						}
 					}
 					break;
