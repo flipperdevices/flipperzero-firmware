@@ -7,7 +7,7 @@
 
 #include "hid_icons.h"
 
-#define TAG "HidApp"
+#define TAG "HidMedia"
 
 struct HidMedia {
     View* view;

@@ -19,7 +19,7 @@
 #include "views/hid_keyboard.h"
 #include "views/hid_media.h"
 #include "views/hid_mouse.h"
-#include "views/bt_hid_tiktok.h"
+#include "views/hid_tiktok.h"
 
 typedef enum {
     HidTransportUsb,
@@ -39,7 +39,7 @@ struct Hid {
     HidKeyboard* hid_keyboard;
     HidMedia* hid_media;
     HidMouse* hid_mouse;
-    BtHidTikTok* bt_hid_tiktok;
+    BtHidTikTok* hid_tiktok;
 
     HidTransport transport;
     uint32_t view_id;

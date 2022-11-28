@@ -4,7 +4,7 @@
 
 #include "hid_icons.h"
 
-#define TAG "HidApp"
+#define TAG "HidMouse"
 
 struct HidMouse {
     View* view;

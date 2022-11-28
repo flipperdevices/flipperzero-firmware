@@ -48,7 +48,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_keyboard_set_connected_status(hid->hid_keyboard, connected);
     hid_media_set_connected_status(hid->hid_media, connected);
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
-    bt_hid_tiktok_set_connected_status(hid->bt_hid_tiktok, connected);
+    hid_tiktok_set_connected_status(hid->hid_tiktok, connected);
 }
 
 static void hid_dialog_callback(DialogExResult result, void* context) {
@@ -149,10 +149,10 @@ Hid* hid_app_alloc_view(void* context) {
         app->view_dispatcher, HidViewMedia, hid_media_get_view(app->hid_media));
 
     // TikTok view
-    app->bt_hid_tiktok = bt_hid_tiktok_alloc(app);
-    view_set_previous_callback(bt_hid_tiktok_get_view(app->bt_hid_tiktok), hid_exit_confirm_view);
+    app->hid_tiktok = hid_tiktok_alloc(app);
+    view_set_previous_callback(hid_tiktok_get_view(app->hid_tiktok), hid_exit_confirm_view);
     view_dispatcher_add_view(
-        app->view_dispatcher, BtHidViewTikTok, bt_hid_tiktok_get_view(app->bt_hid_tiktok));
+        app->view_dispatcher, BtHidViewTikTok, hid_tiktok_get_view(app->hid_tiktok));
 
     // Mouse view
     app->hid_mouse = hid_mouse_alloc(app);
@@ -183,7 +183,7 @@ void hid_free(Hid* app) {
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouse);
     hid_mouse_free(app->hid_mouse);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikTok);
-    bt_hid_tiktok_free(app->bt_hid_tiktok);
+    hid_tiktok_free(app->hid_tiktok);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records

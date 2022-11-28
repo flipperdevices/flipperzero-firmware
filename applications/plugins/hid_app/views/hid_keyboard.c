@@ -5,7 +5,7 @@
 #include "../hid.h"
 #include "hid_icons.h"
 
-#define TAG "HidApp"
+#define TAG "HidKeyboard"
 
 struct HidKeyboard {
     View* view;
