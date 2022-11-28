@@ -5,7 +5,7 @@
 #include "../hid.h"
 #include "hid_icons.h"
 
-#include "Bluetooth_Remote_icons.h"
+#include "hid_icons.h"
 #define TAG "HidKeyboard"
 
 struct HidKeyboard {

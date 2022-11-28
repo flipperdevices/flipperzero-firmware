@@ -5,7 +5,7 @@
 #include <gui/elements.h>
 #include "../hid.h"
 
-#include "Bluetooth_Remote_icons.h"
+#include "hid_icons.h"
 
 #define TAG "HidMedia"
 
