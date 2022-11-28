@@ -102,10 +102,8 @@ static void hid_tiktok_reset_cursor(HidTikTok* hid_tiktok) {
     furi_delay_ms(50);
 }
 
-static void hid_tiktok_process_press(
-    HidTikTok* hid_tiktok,
-    HidTikTokModel* model,
-    InputEvent* event) {
+static void
+    hid_tiktok_process_press(HidTikTok* hid_tiktok, HidTikTokModel* model, InputEvent* event) {
     if(event->key == InputKeyUp) {
         model->up_pressed = true;
     } else if(event->key == InputKeyDown) {
@@ -121,10 +119,8 @@ static void hid_tiktok_process_press(
     }
 }
 
-static void hid_tiktok_process_release(
-    HidTikTok* hid_tiktok,
-    HidTikTokModel* model,
-    InputEvent* event) {
+static void
+    hid_tiktok_process_release(HidTikTok* hid_tiktok, HidTikTokModel* model, InputEvent* event) {
     if(event->key == InputKeyUp) {
         model->up_pressed = false;
     } else if(event->key == InputKeyDown) {

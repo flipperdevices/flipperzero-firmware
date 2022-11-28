@@ -39,7 +39,7 @@ struct Hid {
     HidKeyboard* hid_keyboard;
     HidMedia* hid_media;
     HidMouse* hid_mouse;
-    BtHidTikTok* hid_tiktok;
+    HidTikTok* hid_tiktok;
 
     HidTransport transport;
     uint32_t view_id;
