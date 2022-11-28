@@ -44,7 +44,7 @@ FBT keeps track of internal dependencies, so you only need to build the highest-
  
 - `fw_dist` - build & publish firmware to `dist` folder. This is a default target, when no other are specified
 - `fap_dist` - build external plugins & publish to `dist` folder  
-- `updater_package`, `updater_minpackage` - build self-update package. Minimal version only inclues firmware's DFU file; full version also includes radio stack & resources for SD card
+- `updater_package`, `updater_minpackage` - build self-update package. Minimal version only includes firmware's DFU file; full version also includes radio stack & resources for SD card
 - `copro_dist` - bundle Core2 FUS+stack binaries for qFlipper
 - `flash` - flash attached device with OpenOCD over ST-Link
 - `flash_usb`, `flash_usb_full` - build, upload and install update package to device over USB. See details on `updater_package`, `updater_minpackage` 

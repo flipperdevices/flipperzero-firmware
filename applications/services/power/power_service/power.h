@@ -94,7 +94,7 @@ FuriPubSub* power_get_settings_events_pubsub(Power* power);
  */
 bool power_is_battery_healthy(Power* power);
 
-/** Enable or disable battery low level notification mesage
+/** Enable or disable battery low level notification message
  *
  * @param power     Power instance
  * @param enable    true - enable, false - disable
