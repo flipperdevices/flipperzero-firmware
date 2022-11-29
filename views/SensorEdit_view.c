@@ -13,11 +13,11 @@ static VariableItemList* variable_item_list;
 static Sensor* editable_sensor;
 //Изначальный GPIO датчика
 static const GPIO* initial_gpio;
+
 //Элемент списка - имя датчика
 static VariableItem* sensor_name_item;
 //Элемент списка - адрес датчика one wire
 static VariableItem* onewire_addr_item;
-
 //Элемент списка - адрес датчика one wire
 static VariableItem* onewire_type_item;
 
@@ -289,7 +289,6 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
 
     //Адрес устройства на шине one wire (для датчиков one wire)
     if(sensor->type->interface == &ONE_WIRE) {
-        //Сохранение
         onewire_addr_item = variable_item_list_add(
             variable_item_list, "Address", 2, _onwire_addr_change_callback, NULL);
         OneWireSensor* ow_sensor = sensor->instance;
