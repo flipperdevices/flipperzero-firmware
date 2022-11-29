@@ -154,7 +154,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
 
     NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
     FuriHalNfcTxRxContext tx_rx = {};
-    uint8_t *key_data = nfcv_data->sub_data.slix_l.key_privacy;
+    uint8_t *key_data = nfcv_data->sub_data.slix.key_privacy;
     uint32_t key = 0;
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
