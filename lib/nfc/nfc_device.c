@@ -7,6 +7,7 @@
 #include <lib/nfc/protocols/nfc_util.h>
 #include <flipper_format/flipper_format.h>
 
+#define TAG "NfcDevice"
 #define NFC_DEVICE_KEYS_FOLDER EXT_PATH("nfc/cache")
 #define NFC_DEVICE_KEYS_EXTENSION ".keys"
 
@@ -213,6 +214,9 @@ bool nfc_device_load_mifare_ul_data(FlipperFormat* file, NfcDevice* dev) {
         uint32_t auth_counter;
         if(!flipper_format_read_uint32(file, "Failed authentication attempts", &auth_counter, 1))
             auth_counter = 0;
+        data->curr_authlim = auth_counter;
+
+        data->auth_success = mf_ul_is_full_capture(data);
 
         parsed = true;
     } while(false);
@@ -627,7 +631,10 @@ bool nfc_device_load_mifare_df_data(FlipperFormat* file, NfcDevice* dev) {
                 *app_head = app;
                 app_head = &app->next;
             }
-            if(!parsed_apps) break;
+            if(!parsed_apps) {
+                // accept non-parsed apps, just log a warning:
+                FURI_LOG_W(TAG, "Non-parsed apps found!");
+            }
         }
         parsed = true;
     } while(false);
@@ -1006,12 +1013,7 @@ static void nfc_device_get_shadow_path(FuriString* orig_path, FuriString* shadow
     furi_string_cat_printf(shadow_path, "%s", NFC_APP_SHADOW_EXTENSION);
 }
 
-static bool nfc_device_save_file(
-    NfcDevice* dev,
-    const char* dev_name,
-    const char* folder,
-    const char* extension,
-    bool use_load_path) {
+bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
     furi_assert(dev);
 
     bool saved = false;
@@ -1021,19 +1023,10 @@ static bool nfc_device_save_file(
     temp_str = furi_string_alloc();
 
     do {
-        if(use_load_path && !furi_string_empty(dev->load_path)) {
-            // Get directory name
-            path_extract_dirname(furi_string_get_cstr(dev->load_path), temp_str);
-            // Create nfc directory if necessary
-            if(!storage_simply_mkdir(dev->storage, furi_string_get_cstr(temp_str))) break;
-            // Make path to file to save
-            furi_string_cat_printf(temp_str, "/%s%s", dev_name, extension);
-        } else {
-            // Create nfc directory if necessary
-            if(!storage_simply_mkdir(dev->storage, NFC_APP_FOLDER)) break;
-            // First remove nfc device file if it was saved
-            furi_string_printf(temp_str, "%s/%s%s", folder, dev_name, extension);
-        }
+        // Create nfc directory if necessary
+        if(!storage_simply_mkdir(dev->storage, NFC_APP_FOLDER)) break;
+        // First remove nfc device file if it was saved
+        furi_string_printf(temp_str, "%s", dev_name);
         // Open file
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
         // Write header
@@ -1072,13 +1065,19 @@ static bool nfc_device_save_file(
     return saved;
 }
 
-bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
-    return nfc_device_save_file(dev, dev_name, NFC_APP_FOLDER, NFC_APP_EXTENSION, true);
-}
-
-bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name) {
+bool nfc_device_save_shadow(NfcDevice* dev, const char* path) {
     dev->shadow_file_exist = true;
-    return nfc_device_save_file(dev, dev_name, NFC_APP_FOLDER, NFC_APP_SHADOW_EXTENSION, true);
+    // Replace extension from .nfc to .shd if necessary
+    FuriString* orig_path = furi_string_alloc();
+    furi_string_set_str(orig_path, path);
+    FuriString* shadow_path = furi_string_alloc();
+    nfc_device_get_shadow_path(orig_path, shadow_path);
+
+    bool file_saved = nfc_device_save(dev, furi_string_get_cstr(shadow_path));
+    furi_string_free(orig_path);
+    furi_string_free(shadow_path);
+
+    return file_saved;
 }
 
 static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dialog) {
@@ -1195,7 +1194,7 @@ bool nfc_file_select(NfcDevice* dev) {
     };
 
     bool res =
-        dialog_file_browser_show(dev->dialogs, dev->load_path, nfc_app_folder, &browser_options);
+        dialog_file_browser_show(dev->dialogs, dev->load_path, dev->load_path, &browser_options);
 
     furi_string_free(nfc_app_folder);
     if(res) {
