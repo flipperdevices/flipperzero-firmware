@@ -22,7 +22,8 @@ ReturnCode nfcv_inventory(uint8_t* uid) {
 
     for(int tries = 0; tries < 5; tries++) {
         /* TODO: needs proper abstraction via fury_hal(_ll)_* */
-        ret = rfalNfcvPollerInventory(RFAL_NFCV_NUM_SLOTS_1, 0, NULL, &res, &received);
+        ret = rfalNfcvPollerInventory(
+            RFAL_NFCV_NUM_SLOTS_1, 0, NULL, &res, &received);
 
         if(ret == ERR_NONE) {
             break;
@@ -38,7 +39,10 @@ ReturnCode nfcv_inventory(uint8_t* uid) {
     return ret;
 }
 
-ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data) {
+ReturnCode nfcv_read_blocks(
+    NfcVReader* reader,
+    NfcVData* data) {
+
     UNUSED(reader);
 
     uint16_t received = 0;
@@ -49,7 +53,8 @@ ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data) {
         ReturnCode ret = ERR_NONE;
         for(int tries = 0; tries < 5; tries++) {
             ret = rfalNfcvPollerReadSingleBlock(
-                RFAL_NFCV_REQ_FLAG_DEFAULT, NULL, block, rxBuf, sizeof(rxBuf), &received);
+                RFAL_NFCV_REQ_FLAG_DEFAULT, NULL, block, 
+                rxBuf, sizeof(rxBuf), &received);
 
             if(ret == ERR_NONE) {
                 break;
@@ -60,13 +65,9 @@ ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data) {
             return ret;
         }
         memcpy(&(data->data[block * data->block_size]), &rxBuf[1], data->block_size);
-        FURI_LOG_D(
-            TAG,
-            "  %02X %02X %02X %02X",
-            data->data[block * data->block_size + 0],
-            data->data[block * data->block_size + 1],
-            data->data[block * data->block_size + 2],
-            data->data[block * data->block_size + 3]);
+        FURI_LOG_D(TAG, "  %02X %02X %02X %02X", 
+            data->data[block * data->block_size + 0], data->data[block * data->block_size + 1], 
+            data->data[block * data->block_size + 2], data->data[block * data->block_size + 3]);
     }
 
     return ERR_NONE;
@@ -101,25 +102,10 @@ ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data) {
         data->block_num = rxBuf[12] + 1;
         data->block_size = rxBuf[13] + 1;
         data->ic_ref = rxBuf[14];
-        FURI_LOG_D(
-            TAG,
-            "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X",
-            nfc_data->uid[0],
-            nfc_data->uid[1],
-            nfc_data->uid[2],
-            nfc_data->uid[3],
-            nfc_data->uid[4],
-            nfc_data->uid[5],
-            nfc_data->uid[6],
-            nfc_data->uid[7]);
-        FURI_LOG_D(
-            TAG,
-            "  DSFID %d, AFI %d, Blocks %d, Size %d, IC Ref %d",
-            data->dsfid,
-            data->afi,
-            data->block_num,
-            data->block_size,
-            data->ic_ref);
+        FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
+            nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], 
+            nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
+        FURI_LOG_D(TAG, "  DSFID %d, AFI %d, Blocks %d, Size %d, IC Ref %d", data->dsfid, data->afi, data->block_num, data->block_size, data->ic_ref);
         return ret;
     }
     FURI_LOG_D(TAG, "Failed: %d", ret);
@@ -127,7 +113,10 @@ ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data) {
     return ret;
 }
 
-bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+bool nfcv_read_card(
+    NfcVReader* reader,
+    FuriHalNfcDevData* nfc_data,
+    NfcVData* nfcv_data) {
     furi_assert(reader);
     furi_assert(nfc_data);
     furi_assert(nfcv_data);
@@ -159,13 +148,15 @@ bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* n
     return true;
 }
 
+
+
 void nfcv_crc(uint8_t* data, uint32_t length) {
     uint32_t reg = 0xFFFF;
 
-    for(size_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         reg = reg ^ ((uint32_t)data[i]);
-        for(size_t j = 0; j < 8; j++) {
-            if(reg & 0x0001) {
+        for (size_t j = 0; j < 8; j++) {
+            if (reg & 0x0001) {
                 reg = (reg >> 1) ^ 0x8408;
             } else {
                 reg = (reg >> 1);
@@ -268,8 +259,7 @@ void nfcv_emu_alloc(NfcVData* data) {
 void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length, NfcVSendFlags flags) {
     /* picked default value (0) to match the most common format */
     if(!flags) {
-        flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof |
-                NfcVSendFlagsOneSubcarrier | NfcVSendFlagsHighRate;
+        flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof | NfcVSendFlagsOneSubcarrier | NfcVSendFlagsHighRate;
     }
 
     if(flags & NfcVSendFlagsCrc) {
@@ -305,15 +295,15 @@ void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, 
     }
 }
 
-static void nfcv_uidcpy(uint8_t* dst, uint8_t* src) {
+static void nfcv_uidcpy(uint8_t *dst, uint8_t *src) {
     for(int pos = 0; pos < 8; pos++) {
-        dst[pos] = src[7 - pos];
+        dst[pos] = src[7-pos];
     }
 }
 
-static int nfcv_uidcmp(uint8_t* dst, uint8_t* src) {
+static int nfcv_uidcmp(uint8_t *dst, uint8_t *src) {
     for(int pos = 0; pos < 8; pos++) {
-        if(dst[pos] != src[7 - pos]) {
+        if(dst[pos] != src[7-pos]) {
             return 1;
         }
     }
@@ -355,7 +345,7 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
             return;
         }
     }
-
+    
     /* unfortunately our response is quicker than the original NFC tag which causes frame misses */
     furi_delay_us(270);
 
@@ -452,125 +442,14 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
             snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO");
             break;
         }
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-        snprintf(
-            nfcv_data->last_command,
-            sizeof(nfcv_data->last_command),
-            "WRITE BLOCK %d <- %02X %02X %02X %02X",
-            block,
-            data[0],
-            data[1],
-            data[2],
-            data[3]);
-        break;
-    }
 
-    case ISO15693_GET_SYSTEM_INFO: {
-        response_buffer[0] = ISO15693_NOERROR;
-        response_buffer[1] = 0x0F;
-        nfcv_uidcpy(&response_buffer[2], nfc_data->uid);
-        response_buffer[10] = nfcv_data->dsfid; /* DSFID */
-        response_buffer[11] = nfcv_data->afi; /* AFI */
-        response_buffer[12] = nfcv_data->block_num - 1; /* number of blocks */
-        response_buffer[13] = nfcv_data->block_size - 1; /* block size */
-        response_buffer[14] = nfcv_data->ic_ref; /* IC reference */
-
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 15, response_flags);
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SYSTEMINFO");
-
-        break;
-    }
-
-    case ISO15693_CMD_NXP_GET_RANDOM_NUMBER: {
-        nfcv_data->sub_data.slix_l.rand[0] = furi_hal_random_get();
-        nfcv_data->sub_data.slix_l.rand[1] = furi_hal_random_get();
-
-        response_buffer[0] = ISO15693_NOERROR;
-        response_buffer[1] = nfcv_data->sub_data.slix_l.rand[1];
-        response_buffer[2] = nfcv_data->sub_data.slix_l.rand[0];
-
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 3, response_flags);
-        snprintf(
-            nfcv_data->last_command,
-            sizeof(nfcv_data->last_command),
-            "GET_RANDOM_NUMBER -> 0x%02X%02X",
-            nfcv_data->sub_data.slix_l.rand[0],
-            nfcv_data->sub_data.slix_l.rand[1]);
-        break;
-    }
-
-    case ISO15693_CMD_NXP_SET_PASSWORD: {
-        uint8_t password_id = payload[payload_offset];
-        uint8_t* password_xored = &payload[payload_offset + 1];
-        uint8_t* rand = nfcv_data->sub_data.slix_l.rand;
-        uint8_t* password = NULL;
-        uint8_t password_rcv[4];
-
-        switch(password_id) {
-        case 4:
-            password = nfcv_data->sub_data.slix_l.key_privacy;
-            break;
-        case 8:
-            password = nfcv_data->sub_data.slix_l.key_destroy;
-            break;
-        case 10:
-            password = nfcv_data->sub_data.slix_l.key_eas;
-            break;
         default:
             snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "unsupported: %02X", ctx->command);
             break;
-        }
-
-        for(int pos = 0; pos < 4; pos++) {
-            password_rcv[pos] = password_xored[3 - pos] ^ rand[pos % 2];
-        }
-        uint32_t pass_expect = nfcv_read_be(password, 4);
-        uint32_t pass_received = nfcv_read_be(password_rcv, 4);
-
-        /* if the password is all-zeroes, just accept any password*/
-        if(!pass_expect || pass_expect == pass_received) {
-            nfcv_data->sub_data.slix_l.privacy = false;
-            response_buffer[0] = ISO15693_NOERROR;
-            nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-            snprintf(
-                nfcv_data->last_command,
-                sizeof(nfcv_data->last_command),
-                "SET_PASSWORD #%02X 0x%08lX OK",
-                password_id,
-                pass_received);
-        } else {
-            snprintf(
-                nfcv_data->last_command,
-                sizeof(nfcv_data->last_command),
-                "SET_PASSWORD #%02X 0x%08lX/%08lX FAIL",
-                password_id,
-                pass_received,
-                pass_expect);
-        }
-        break;
-    }
-
-    case ISO15693_CMD_NXP_ENABLE_PRIVACY: {
-        response_buffer[0] = ISO15693_NOERROR;
-
-        nfcv_emu_send(tx_rx, nfcv_data, response_buffer, 1, response_flags);
-        snprintf(
-            nfcv_data->last_command,
-            sizeof(nfcv_data->last_command),
-            "ISO15693_CMD_NXP_ENABLE_PRIVACY");
-
-        nfcv_data->sub_data.slix_l.privacy = true;
-        break;
-    }
-
-    default:
-        snprintf(
-            nfcv_data->last_command, sizeof(nfcv_data->last_command), "unsupported: %02X", command);
-        break;
     }
 
     if(strlen(nfcv_data->last_command) > 0) {
-        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);
+        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);        
     }
 }
 
@@ -588,17 +467,9 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
 
     FURI_LOG_D(TAG, "Starting NfcV emulation");
-    FURI_LOG_D(
-        TAG,
-        "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X",
-        nfc_data->uid[0],
-        nfc_data->uid[1],
-        nfc_data->uid[2],
-        nfc_data->uid[3],
-        nfc_data->uid[4],
-        nfc_data->uid[5],
-        nfc_data->uid[6],
-        nfc_data->uid[7]);
+    FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
+        nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], 
+        nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
 
     switch(nfcv_data->type) {
         case NfcVTypeSlixL:
@@ -639,11 +510,8 @@ void nfcv_emu_deinit(NfcVData* nfcv_data) {
     pulse_reader_free(nfcv_data->emu_air.reader_signal);
 }
 
-bool nfcv_emu_loop(
-    FuriHalNfcTxRxContext* tx_rx,
-    FuriHalNfcDevData* nfc_data,
-    NfcVData* nfcv_data,
-    uint32_t timeout_ms) {
+bool nfcv_emu_loop(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms) {
+    
     bool ret = false;
     uint32_t frame_state = NFCV_FRAME_STATE_SOF1;
     uint32_t periods_previous = 0;
@@ -665,137 +533,113 @@ bool nfcv_emu_loop(
         if(wait_for_pulse) {
             wait_for_pulse = false;
             if(periods != 1) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "SOF: Expected a single low pulse in state %lu, but got %lu",
-                    frame_state,
-                    periods);
+                snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected a single low pulse in state %lu, but got %lu", frame_state, periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
             }
             continue;
         }
 
         switch(frame_state) {
-        case NFCV_FRAME_STATE_SOF1:
-            if(periods == 1) {
-                frame_state = NFCV_FRAME_STATE_SOF2;
-            } else {
-                frame_state = NFCV_FRAME_STATE_SOF1;
+            case NFCV_FRAME_STATE_SOF1:
+                if(periods == 1) {
+                    frame_state = NFCV_FRAME_STATE_SOF2;
+                } else {
+                    frame_state = NFCV_FRAME_STATE_SOF1;
+                    break;
+                }
                 break;
-            }
-            break;
 
-        case NFCV_FRAME_STATE_SOF2:
-            /* waiting for the second low period, telling us about coding */
-            if(periods == 6) {
-                frame_state = NFCV_FRAME_STATE_CODING_256;
-                periods_previous = 0;
-                wait_for_pulse = true;
-            } else if(periods == 4) {
-                frame_state = NFCV_FRAME_STATE_CODING_4;
-                periods_previous = 2;
-                wait_for_pulse = true;
-            } else {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "SOF: Expected 4/6 periods, got %lu",
-                    periods);
-                frame_state = NFCV_FRAME_STATE_SOF1;
-            }
-            break;
-
-        case NFCV_FRAME_STATE_CODING_256:
-            if(periods_previous > periods) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo256: Missing %lu periods from previous symbol, got %lu",
-                    periods_previous,
-                    periods);
-                frame_state = NFCV_FRAME_STATE_RESET;
+            case NFCV_FRAME_STATE_SOF2:
+                /* waiting for the second low period, telling us about coding */
+                if(periods == 6) {
+                    frame_state = NFCV_FRAME_STATE_CODING_256;
+                    periods_previous = 0;
+                    wait_for_pulse = true;
+                } else if(periods == 4) {
+                    frame_state = NFCV_FRAME_STATE_CODING_4;
+                    periods_previous = 2;
+                    wait_for_pulse = true;
+                } else {
+                    snprintf(reset_reason, sizeof(reset_reason), "SOF: Expected 4/6 periods, got %lu", periods);
+                    frame_state = NFCV_FRAME_STATE_SOF1;
+                }
                 break;
-            }
-            /* previous symbol left us with some pulse periods */
-            periods -= periods_previous;
 
-            if(periods > 512) {
-                snprintf(
-                    reset_reason, sizeof(reset_reason), "1oo256: %lu periods is too much", periods);
-                frame_state = NFCV_FRAME_STATE_RESET;
-                break;
-            }
+            case NFCV_FRAME_STATE_CODING_256:
+                if(periods_previous > periods) {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo256: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+                /* previous symbol left us with some pulse periods */
+                periods -= periods_previous;
 
-            if(periods == 2) {
-                frame_state = NFCV_FRAME_STATE_EOF;
-                break;
-            }
-
-            periods_previous = 512 - (periods + 1);
-            byte_value = (periods - 1) / 2;
-            frame_payload[frame_pos++] = (uint8_t)byte_value;
-
-            wait_for_pulse = true;
-
-            break;
-
-        case NFCV_FRAME_STATE_CODING_4:
-            if(periods_previous > periods) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo4: Missing %lu periods from previous symbol, got %lu",
-                    periods_previous,
-                    periods);
-                frame_state = NFCV_FRAME_STATE_RESET;
-                break;
-            }
-
-            /* previous symbol left us with some pulse periods */
-            periods -= periods_previous;
-            periods_previous = 0;
-
-            byte_value >>= 2;
-            bits_received += 2;
-
-            if(periods == 1) {
-                byte_value |= 0x00 << 6;
-                periods_previous = 6;
-            } else if(periods == 3) {
-                byte_value |= 0x01 << 6;
-                periods_previous = 4;
-            } else if(periods == 5) {
-                byte_value |= 0x02 << 6;
-                periods_previous = 2;
-            } else if(periods == 7) {
-                byte_value |= 0x03 << 6;
-                periods_previous = 0;
-            } else if(periods == 2) {
-                frame_state = NFCV_FRAME_STATE_EOF;
-                break;
-            } else {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo4: Expected 1/3/5/7 low pulses, but got %lu",
-                    periods);
-                frame_state = NFCV_FRAME_STATE_RESET;
-                break;
-            }
-
-            if(bits_received >= 8) {
+                if(periods > 512) {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo256: %lu periods is too much", periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+                
+                if(periods == 2) {
+                    frame_state = NFCV_FRAME_STATE_EOF;
+                    break;
+                } 
+                
+                periods_previous = 512 - (periods + 1);
+                byte_value = (periods - 1) / 2;
                 frame_payload[frame_pos++] = (uint8_t)byte_value;
-                bits_received = 0;
-            }
-            wait_for_pulse = true;
-            break;
-        }
 
+                wait_for_pulse = true;
+
+                break;
+
+            case NFCV_FRAME_STATE_CODING_4:
+                if(periods_previous > periods) {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo4: Missing %lu periods from previous symbol, got %lu", periods_previous, periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+
+                /* previous symbol left us with some pulse periods */
+                periods -= periods_previous;
+                periods_previous = 0;
+
+                byte_value >>= 2;
+                bits_received += 2;
+
+                if(periods == 1) {
+                    byte_value |= 0x00 << 6;
+                    periods_previous = 6;
+                } else if(periods == 3) {
+                    byte_value |= 0x01 << 6;
+                    periods_previous = 4;
+                } else if(periods == 5) {
+                    byte_value |= 0x02 << 6;
+                    periods_previous = 2;
+                } else if(periods == 7) {
+                    byte_value |= 0x03 << 6;
+                    periods_previous = 0;
+                } else if(periods == 2) {
+                    frame_state = NFCV_FRAME_STATE_EOF;
+                    break;
+                } else {
+                    snprintf(reset_reason, sizeof(reset_reason), "1oo4: Expected 1/3/5/7 low pulses, but got %lu", periods);
+                    frame_state = NFCV_FRAME_STATE_RESET;
+                    break;
+                }
+
+                if(bits_received >= 8) {
+                    frame_payload[frame_pos++] = (uint8_t)byte_value;
+                    bits_received = 0;
+                }
+                wait_for_pulse = true;
+                break;
+        }
+        
         /* post-state-machine cleanup and reset */
         if(frame_state == NFCV_FRAME_STATE_RESET) {
             frame_state = NFCV_FRAME_STATE_SOF1;
-
+            
             FURI_LOG_D(TAG, "Resetting state machine, reason: '%s'", reset_reason);
         } else if(frame_state == NFCV_FRAME_STATE_EOF) {
             break;
