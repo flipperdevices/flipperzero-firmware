@@ -122,19 +122,22 @@ typedef struct {
 
 
 typedef struct {
-    uint8_t* payload;
-    uint8_t flags;
-    uint8_t command;
-    bool addressed;
-    bool advanced;
-    uint8_t address_offset;
-    uint8_t payload_offset;
-    uint8_t* address;
-    uint8_t response_buffer[128];
-    NfcVSendFlags response_flags;
+    uint8_t* frame;                /* ISO15693-2 incoming raw data from air layer */
+    uint8_t frame_length;          /* ISO15693-2 length of incoming data */
+
+    uint8_t flags;                 /* ISO15693-3 flags of the header as specified */
+    uint8_t command;               /* ISO15693-3 command at offset 1 as specified */
+    bool addressed;                /* ISO15693-3 flags: addressed frame */
+    bool advanced;                 /* ISO15693-3 command: advanced command */
+    uint8_t address_offset;        /* ISO15693-3 offset of the address in frame, if addressed is set */
+    uint8_t payload_offset;        /* ISO15693-3 offset of the payload in frame */
+
+    uint8_t response_buffer[128];  /* pre-allocated response buffer */
+    NfcVSendFlags response_flags;  /* flags to use when sending response */
 } NfcVEmuProtocolCtx;
 
-typedef bool (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
+typedef void (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data, uint8_t* payload, uint32_t payload_length);
+typedef bool (*NfcVEmuProtocolFilter) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
 
 typedef struct {
     /* common ISO15693 fields */
@@ -151,6 +154,7 @@ typedef struct {
     NfcVEmuAir emu_air;
     NfcVEmuProtocolCtx emu_protocol_ctx;
     NfcVEmuProtocolHandler emu_protocol_handler;
+    NfcVEmuProtocolFilter emu_protocol_filter;
 
     /* runtime data */
     char last_command[128];

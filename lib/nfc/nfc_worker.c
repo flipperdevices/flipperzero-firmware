@@ -181,7 +181,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
         furi_hal_nfc_ll_set_guard_time(FURI_HAL_NFC_LL_GT_NFCV);
         
         furi_hal_console_printf("Detect presence\r\n");
-        ReturnCode ret = slix_l_get_random(nfcv_data);
+        ReturnCode ret = slix_get_random(nfcv_data);
 
         if(ret == ERR_NONE) {
             /* there is some chip, responding with a RAND */
@@ -207,13 +207,13 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                     nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);                            
                 }
 
-                while(slix_l_get_random(NULL) == ERR_NONE) {
+                while(slix_get_random(NULL) == ERR_NONE) {
                     furi_delay_ms(100);
                 }
 
                 furi_hal_console_printf("    => chip is already visible, wait for chip to disappear.\r\n");
                 nfc_worker->callback(NfcWorkerEventAborted, nfc_worker->context);
-                while(slix_l_get_random(NULL) == ERR_NONE) {
+                while(slix_get_random(NULL) == ERR_NONE) {
                     furi_delay_ms(100);
                 }
 
@@ -233,14 +233,14 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                     key |= key_data[2] << 8;
                     key |= key_data[3] << 0;
 
-                    ret = slix_l_unlock(nfcv_data, 4);
+                    ret = slix_unlock(nfcv_data, 4);
                 } else {
                     key = 0x7FFD6E5B;
                     key_data[0] = key >> 24;
                     key_data[1] = key >> 16;
                     key_data[2] = key >> 8;
                     key_data[3] = key >> 0;
-                    ret = slix_l_unlock(nfcv_data, 4);
+                    ret = slix_unlock(nfcv_data, 4);
 
                     if(ret != ERR_NONE) {
                         /* main key failed, trying second one */
@@ -251,7 +251,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                         furi_delay_ms(20);
                         furi_hal_nfc_ll_txrx_on();
 
-                        if(slix_l_get_random(nfcv_data) != ERR_NONE) {
+                        if(slix_get_random(nfcv_data) != ERR_NONE) {
                             furi_hal_console_printf("    reset failed\r\n");
                         }
 
@@ -260,7 +260,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                         key_data[1] = key >> 16;
                         key_data[2] = key >> 8;
                         key_data[3] = key >> 0;
-                        ret = slix_l_unlock(nfcv_data, 4);
+                        ret = slix_unlock(nfcv_data, 4);
                     }
                 }
                 if(ret != ERR_NONE) {
@@ -275,7 +275,7 @@ void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
                     furi_hal_nfc_ll_txrx_on();
 
                     /* wait for disappearing */
-                    while(slix_l_get_random(NULL) == ERR_NONE) {
+                    while(slix_get_random(NULL) == ERR_NONE) {
                         furi_delay_ms(100);
                     }
                 }

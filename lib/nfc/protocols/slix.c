@@ -63,7 +63,7 @@ bool slix_l_check_card_type(FuriHalNfcDevData* nfc_data) {
 }
 
 
-ReturnCode slix_l_get_random(NfcVData* data) {
+ReturnCode slix_get_random(NfcVData* data) {
     uint16_t received = 0;
     uint8_t rxBuf[32];
 
@@ -91,7 +91,7 @@ ReturnCode slix_l_get_random(NfcVData* data) {
     return ret;
 }
 
-ReturnCode slix_l_unlock(NfcVData* data, uint32_t password_id) {
+ReturnCode slix_unlock(NfcVData* data, uint32_t password_id) {
     furi_assert(rand);
     
     uint16_t received = 0;
@@ -148,7 +148,7 @@ ReturnCode slix_l_unlock(NfcVData* data, uint32_t password_id) {
 }
 
 
-bool slix_generic_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in, uint32_t password_supported) {
+bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in, uint32_t password_supported) {
     furi_assert(tx_rx);
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
@@ -186,13 +186,13 @@ bool slix_generic_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevD
         }
 
         case ISO15693_CMD_NXP_SET_PASSWORD: {
-            uint8_t password_id = ctx->payload[ctx->payload_offset];
+            uint8_t password_id = ctx->frame[ctx->payload_offset];
 
             if(!(password_id & password_supported)) {
                 break;
             }
 
-            uint8_t *password_xored = &ctx->payload[ctx->payload_offset + 1];
+            uint8_t *password_xored = &ctx->frame[ctx->payload_offset + 1];
             uint8_t *rand = slix->rand;
             uint8_t *password = NULL;
             uint8_t password_rcv[4];
@@ -269,7 +269,7 @@ bool slix_generic_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevD
     return handled;
 }
 
-bool slix_l_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
+bool slix_l_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
     furi_assert(tx_rx);
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
@@ -277,7 +277,7 @@ bool slix_l_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* n
     bool handled = false;
     
     /* many SLIX share some of the functions, place that in a generic handler */
-    if(slix_generic_protocol_handler(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_PRIVACY | SLIX_PASS_DESTROY | SLIX_PASS_EASAFI)) {
+    if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_PRIVACY | SLIX_PASS_DESTROY | SLIX_PASS_EASAFI)) {
         return true;
     }
 
@@ -290,10 +290,10 @@ void slix_l_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_handler = &slix_l_protocol_handler;
+    nfcv_data->emu_protocol_filter = &slix_l_protocol_filter;
 }
 
-bool slix_s_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
+bool slix_s_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
     furi_assert(tx_rx);
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
@@ -301,7 +301,7 @@ bool slix_s_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* n
     bool handled = false;
     
     /* many SLIX share some of the functions, place that in a generic handler */
-    if(slix_generic_protocol_handler(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
+    if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
         return true;
     }
 
@@ -314,10 +314,10 @@ void slix_s_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_handler = &slix_s_protocol_handler;
+    nfcv_data->emu_protocol_filter = &slix_s_protocol_filter;
 }
 
-bool slix_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
+bool slix_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
     furi_assert(tx_rx);
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
@@ -325,7 +325,7 @@ bool slix_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
     bool handled = false;
     
     /* many SLIX share some of the functions, place that in a generic handler */
-    if(slix_generic_protocol_handler(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_EASAFI)) {
+    if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_EASAFI)) {
         return true;
     }
 
@@ -338,10 +338,10 @@ void slix_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_handler = &slix_protocol_handler;
+    nfcv_data->emu_protocol_filter = &slix_protocol_filter;
 }
 
-bool slix2_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
+bool slix2_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
     furi_assert(tx_rx);
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
@@ -349,7 +349,7 @@ bool slix2_protocol_handler (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nf
     bool handled = false;
     
     /* many SLIX share some of the functions, place that in a generic handler */
-    if(slix_generic_protocol_handler(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
+    if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
         return true;
     }
 
@@ -362,5 +362,5 @@ void slix2_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_handler = &slix2_protocol_handler;
+    nfcv_data->emu_protocol_filter = &slix2_protocol_filter;
 }

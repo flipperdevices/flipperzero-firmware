@@ -310,40 +310,40 @@ static int nfcv_uidcmp(uint8_t *dst, uint8_t *src) {
     return 0;
 }
 
-void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint8_t* payload, uint32_t payload_length) {
+void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in, uint8_t* payload, uint32_t payload_length) {
 
     if(!payload_length) {
         return;
     }
 
+    NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
     NfcVEmuProtocolCtx* ctx = &nfcv_data->emu_protocol_ctx;
     
-    ctx->payload = payload;
-    ctx->flags = ctx->payload[0];
-    ctx->command = ctx->payload[1];
+    ctx->frame = payload;
+    ctx->frame_length = payload_length;
+    ctx->flags = ctx->frame[0];
+    ctx->command = ctx->frame[1];
     ctx->addressed = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) && (ctx->flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
     ctx->advanced = (ctx->command >= 0xA0);
     ctx->address_offset = 2 + (ctx->advanced ? 1 : 0);
     ctx->payload_offset = ctx->address_offset + (ctx->addressed ? 8 : 0);
-    ctx->address = &ctx->payload[ctx->address_offset];
     ctx->response_flags = NfcVSendFlagsNormal;
 
-    bool handled = false;
-
     /* first give control to the card specific protocol handler */
-    if(nfcv_data->emu_protocol_handler != NULL) {
-        handled = nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
+    if(nfcv_data->emu_protocol_filter != NULL) {
+        if(nfcv_data->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
+            return;
+        }
     }
 
-    if(handled) {
-        return;
-    }
-
-    if(ctx->addressed && nfcv_uidcmp(ctx->address, nfc_data->uid)) {
-        FURI_LOG_D(TAG, "addressed command 0x%02X, but not for us:", ctx->command);
-        FURI_LOG_D(TAG, "  dest:     %02X%02X%02X%02X%02X%02X%02X%02X", ctx->address[7], ctx->address[6], ctx->address[5], ctx->address[4], ctx->address[3], ctx->address[2], ctx->address[1], ctx->address[0]);
-        FURI_LOG_D(TAG, "  our UID:  %02X%02X%02X%02X%02X%02X%02X%02X", nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
-        return;
+    if(ctx->addressed) {
+        uint8_t* address = &ctx->frame[ctx->address_offset];
+        if(nfcv_uidcmp(address, nfc_data->uid)) {
+            FURI_LOG_D(TAG, "addressed command 0x%02X, but not for us:", ctx->command);
+            FURI_LOG_D(TAG, "  dest:     %02X%02X%02X%02X%02X%02X%02X%02X", address[7], address[6], address[5], address[4], address[3], address[2], address[1], address[0]);
+            FURI_LOG_D(TAG, "  our UID:  %02X%02X%02X%02X%02X%02X%02X%02X", nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
+            return;
+        }
     }
     
     /* unfortunately our response is quicker than the original NFC tag which causes frame misses */
@@ -379,11 +379,11 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
 
         case ISO15693_READ_MULTI_BLOCK:
         case ISO15693_READBLOCK: {
-            uint8_t block = ctx->payload[ctx->payload_offset];
+            uint8_t block = ctx->frame[ctx->payload_offset];
             uint8_t blocks = 1;
 
             if(ctx->command == ISO15693_READ_MULTI_BLOCK) {
-                blocks = ctx->payload[ctx->payload_offset + 1] + 1;
+                blocks = ctx->frame[ctx->payload_offset + 1] + 1;
             }
 
             if(block + blocks > nfcv_data->block_num) {
@@ -400,23 +400,23 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
 
         case ISO15693_WRITE_MULTI_BLOCK:
         case ISO15693_WRITEBLOCK: {
-            uint8_t block = ctx->payload[ctx->payload_offset];
+            uint8_t block = ctx->frame[ctx->payload_offset];
             uint8_t blocks = 1;
             uint8_t data_pos = 1;
 
             if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
-                blocks = ctx->payload[ctx->payload_offset + 1] + 1;
+                blocks = ctx->frame[ctx->payload_offset + 1] + 1;
                 data_pos++;
             }
 
-            uint8_t *data = &ctx->payload[ctx->payload_offset + data_pos];
+            uint8_t *data = &ctx->frame[ctx->payload_offset + data_pos];
             uint32_t data_len = nfcv_data->block_size * blocks;
 
             if(block + blocks > nfcv_data->block_num || ctx->payload_offset + data_len + 2 > payload_length) {
                 ctx->response_buffer[0] = ISO15693_ERROR_CMD_NOT_REC;
             } else {
                 ctx->response_buffer[0] = ISO15693_NOERROR;
-                memcpy(&nfcv_data->data[nfcv_data->block_size * block], &ctx->payload[ctx->payload_offset + data_pos], data_len);
+                memcpy(&nfcv_data->data[nfcv_data->block_size * block], &ctx->frame[ctx->payload_offset + data_pos], data_len);
             }
             nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags);
 
@@ -463,6 +463,8 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
+
+    nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
 
     FURI_LOG_D(TAG, "Starting NfcV emulation");
     FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
@@ -650,7 +652,7 @@ bool nfcv_emu_loop(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, Nf
         if(tx_rx->sniff_rx) {
             tx_rx->sniff_rx(frame_payload, frame_pos * 8, false, tx_rx->sniff_context);
         }
-        nfcv_emu_handle_packet(tx_rx, nfc_data, nfcv_data, frame_payload, frame_pos);
+        nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data, frame_payload, frame_pos);
         pulse_reader_start(nfcv_data->emu_air.reader_signal);
         ret = true;
     }
