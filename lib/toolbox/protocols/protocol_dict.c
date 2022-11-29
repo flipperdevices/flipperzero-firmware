@@ -114,7 +114,6 @@ ProtocolId protocol_dict_decoders_feed_by_feature(
     uint32_t feature,
     bool level,
     uint32_t duration) {
-
     for(size_t i = 0; i < dict->count; i++) {
         if(!(dict->base[i]->features & feature)) {
             continue;

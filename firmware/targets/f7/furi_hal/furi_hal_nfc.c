@@ -129,7 +129,7 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
             cuid_start = &dev_list[0].nfcid[3];
         }
         nfc_data->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
-                            (cuid_start[3]);
+                         (cuid_start[3]);
     } else if(
         dev_list[0].type == RFAL_NFC_LISTEN_TYPE_NFCB ||
         dev_list[0].type == RFAL_NFC_LISTEN_TYPE_ST25TB) {
@@ -436,10 +436,10 @@ bool furi_hal_nfc_emulate_nfca(
         rfalTransceiveBlockingRx();
         if(nfca_emulation_handler(buff_rx, buff_rx_len, buff_tx, &buff_tx_len)) {
             if(rfalListenSleepStart(
-                    RFAL_LM_STATE_SLEEP_A,
-                    buff_rx,
-                    rfalConvBytesToBits(buff_rx_size),
-                    &buff_rx_len)) {
+                   RFAL_LM_STATE_SLEEP_A,
+                   buff_rx,
+                   rfalConvBytesToBits(buff_rx_size),
+                   &buff_rx_len)) {
                 FURI_LOG_E(TAG, "Failed to enter sleep mode");
                 break;
             } else {

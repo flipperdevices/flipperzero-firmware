@@ -43,7 +43,8 @@ bool nfc_emv_parser_get_aid_name(
     for(uint8_t i = 0; i < aid_len; i++) {
         furi_string_cat_printf(key, "%02X", aid[i]);
     }
-    bool parsed = nfc_emv_parser_search_data(storage, EXT_PATH("nfc/assets/aid.nfc"), key, aid_name);
+    bool parsed =
+        nfc_emv_parser_search_data(storage, EXT_PATH("nfc/assets/aid.nfc"), key, aid_name);
     furi_string_free(key);
     return parsed;
 }

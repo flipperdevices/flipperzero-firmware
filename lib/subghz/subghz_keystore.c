@@ -463,7 +463,6 @@ bool subghz_keystore_raw_encrypted_save(
                 encrypted_line[hex_cursor - 1] = xx[(encrypted_line[cursor] >> 4) & 0xF];
             }
             stream_write_cstring(output_stream, encrypted_line);
-
         };
 
         flipper_format_free(output_flipper_format);
