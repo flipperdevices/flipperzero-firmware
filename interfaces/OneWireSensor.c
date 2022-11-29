@@ -401,7 +401,7 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
         if(instance->familyCode == FC_DS18S20) {
-            sensor->temp = ((float)raw / 2.0f) - 0.25 + ((float)(buff[7] - buff[6]) / buff[7]);
+            sensor->temp = ((float)raw / 2.0f) - 0.25 + ((float)(buff[6]) / 16);
         } else {
             sensor->temp = (float)raw / 16.0f;
         }
