@@ -34,33 +34,33 @@
 #define NFCV_SIG_EOF 3
 
 /* ISO15693 command codes */
-#define ISO15693_INVENTORY                   0x01
-#define ISO15693_STAYQUIET                   0x02
-#define ISO15693_READBLOCK                   0x20
-#define ISO15693_WRITEBLOCK                  0x21
-#define ISO15693_LOCKBLOCK                   0x22
-#define ISO15693_READ_MULTI_BLOCK            0x23
-#define ISO15693_WRITE_MULTI_BLOCK           0x24
-#define ISO15693_SELECT                      0x25
-#define ISO15693_RESET_TO_READY              0x26
-#define ISO15693_WRITE_AFI                   0x27
-#define ISO15693_LOCK_AFI                    0x28
-#define ISO15693_WRITE_DSFID                 0x29
-#define ISO15693_LOCK_DSFID                  0x2A
-#define ISO15693_GET_SYSTEM_INFO             0x2B
-#define ISO15693_READ_MULTI_SECSTATUS        0x2C
+#define ISO15693_INVENTORY 0x01
+#define ISO15693_STAYQUIET 0x02
+#define ISO15693_READBLOCK 0x20
+#define ISO15693_WRITEBLOCK 0x21
+#define ISO15693_LOCKBLOCK 0x22
+#define ISO15693_READ_MULTI_BLOCK 0x23
+#define ISO15693_WRITE_MULTI_BLOCK 0x24
+#define ISO15693_SELECT 0x25
+#define ISO15693_RESET_TO_READY 0x26
+#define ISO15693_WRITE_AFI 0x27
+#define ISO15693_LOCK_AFI 0x28
+#define ISO15693_WRITE_DSFID 0x29
+#define ISO15693_LOCK_DSFID 0x2A
+#define ISO15693_GET_SYSTEM_INFO 0x2B
+#define ISO15693_READ_MULTI_SECSTATUS 0x2C
 
 /* ISO15693 RESPONSE ERROR CODES */
-#define ISO15693_NOERROR                     0x00
-#define ISO15693_ERROR_CMD_NOT_SUP           0x01 // Command not supported
-#define ISO15693_ERROR_CMD_NOT_REC           0x02 // Command not recognized (eg. parameter error)
-#define ISO15693_ERROR_CMD_OPTION            0x03 // Command option not supported
-#define ISO15693_ERROR_GENERIC               0x0F // No additional Info about this error
-#define ISO15693_ERROR_BLOCK_UNAVAILABLE     0x10
-#define ISO15693_ERROR_BLOCK_LOCKED_ALREADY  0x11 // cannot lock again
-#define ISO15693_ERROR_BLOCK_LOCKED          0x12 // cannot be changed
-#define ISO15693_ERROR_BLOCK_WRITE           0x13 // Writing was unsuccessful
-#define ISO15693_ERROR_BLOCL_WRITELOCK       0x14 // Locking was unsuccessful
+#define ISO15693_NOERROR 0x00
+#define ISO15693_ERROR_CMD_NOT_SUP 0x01 // Command not supported
+#define ISO15693_ERROR_CMD_NOT_REC 0x02 // Command not recognized (eg. parameter error)
+#define ISO15693_ERROR_CMD_OPTION 0x03 // Command option not supported
+#define ISO15693_ERROR_GENERIC 0x0F // No additional Info about this error
+#define ISO15693_ERROR_BLOCK_UNAVAILABLE 0x10
+#define ISO15693_ERROR_BLOCK_LOCKED_ALREADY 0x11 // cannot lock again
+#define ISO15693_ERROR_BLOCK_LOCKED 0x12 // cannot be changed
+#define ISO15693_ERROR_BLOCK_WRITE 0x13 // Writing was unsuccessful
+#define ISO15693_ERROR_BLOCL_WRITELOCK 0x14 // Locking was unsuccessful
 
 typedef enum {
     NfcVAuthMethodManual,
@@ -113,24 +113,31 @@ typedef struct {
     DigitalSequence* nfcv_signal;
 } NfcVEmuAir;
 
-
 typedef struct {
-    uint8_t* frame;                /* ISO15693-2 incoming raw data from air layer */
-    uint8_t frame_length;          /* ISO15693-2 length of incoming data */
+    uint8_t* frame; /* ISO15693-2 incoming raw data from air layer */
+    uint8_t frame_length; /* ISO15693-2 length of incoming data */
 
-    uint8_t flags;                 /* ISO15693-3 flags of the header as specified */
-    uint8_t command;               /* ISO15693-3 command at offset 1 as specified */
-    bool addressed;                /* ISO15693-3 flags: addressed frame */
-    bool advanced;                 /* ISO15693-3 command: advanced command */
-    uint8_t address_offset;        /* ISO15693-3 offset of the address in frame, if addressed is set */
-    uint8_t payload_offset;        /* ISO15693-3 offset of the payload in frame */
+    uint8_t flags; /* ISO15693-3 flags of the header as specified */
+    uint8_t command; /* ISO15693-3 command at offset 1 as specified */
+    bool addressed; /* ISO15693-3 flags: addressed frame */
+    bool advanced; /* ISO15693-3 command: advanced command */
+    uint8_t address_offset; /* ISO15693-3 offset of the address in frame, if addressed is set */
+    uint8_t payload_offset; /* ISO15693-3 offset of the payload in frame */
 
-    uint8_t response_buffer[128];  /* pre-allocated response buffer */
-    NfcVSendFlags response_flags;  /* flags to use when sending response */
+    uint8_t response_buffer[128]; /* pre-allocated response buffer */
+    NfcVSendFlags response_flags; /* flags to use when sending response */
 } NfcVEmuProtocolCtx;
 
-typedef void (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data, uint8_t* payload, uint32_t payload_length);
-typedef bool (*NfcVEmuProtocolFilter) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
+typedef void (*NfcVEmuProtocolHandler)(
+    FuriHalNfcTxRxContext* tx_rx,
+    FuriHalNfcDevData* nfc_data,
+    void* nfcv_data,
+    uint8_t* payload,
+    uint32_t payload_length);
+typedef bool (*NfcVEmuProtocolFilter)(
+    FuriHalNfcTxRxContext* tx_rx,
+    FuriHalNfcDevData* nfc_data,
+    void* nfcv_data);
 
 typedef struct {
     /* common ISO15693 fields */
@@ -161,7 +168,7 @@ typedef struct {
     int16_t blocks_read;
 } NfcVReader;
 
-ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data);    
+ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data);
 ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data);
 ReturnCode nfcv_inventory(uint8_t* uid);
 bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* data);
@@ -169,5 +176,14 @@ bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* d
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
 void nfcv_emu_deinit(NfcVData* nfcv_data);
 
-bool nfcv_emu_loop(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms);
-void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length, NfcVSendFlags flags);
+bool nfcv_emu_loop(
+    FuriHalNfcTxRxContext* tx_rx,
+    FuriHalNfcDevData* nfc_data,
+    NfcVData* nfcv_data,
+    uint32_t timeout_ms);
+void nfcv_emu_send(
+    FuriHalNfcTxRxContext* tx_rx,
+    NfcVData* nfcv,
+    uint8_t* data,
+    uint8_t length,
+    NfcVSendFlags flags);

@@ -114,39 +114,81 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         furi_string_cat_printf(temp_str, "\n");
 
         switch(dev_data->nfcv_data.type) {
-		case NfcVTypePlain:
-			furi_string_cat_printf(temp_str, "Type: Plain\n");
-			break;
-		case NfcVTypeSlix:
-			furi_string_cat_printf(temp_str, "Type: SLIX\n");
-			furi_string_cat_printf(temp_str, "Keys:\n");
-			furi_string_cat_printf(temp_str, " EAS      %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
-			break;
-		case NfcVTypeSlixS:
-			furi_string_cat_printf(temp_str, "Type: SLIX-S\n");
-			furi_string_cat_printf(temp_str, "Keys:\n");
-			furi_string_cat_printf(temp_str, " Read     %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_read));
-			furi_string_cat_printf(temp_str, " Write    %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_write));
-			furi_string_cat_printf(temp_str, " Privacy  %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_privacy));
-			furi_string_cat_printf(temp_str, " Destroy  %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_destroy));
-			furi_string_cat_printf(temp_str, " EAS      %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
-			break;
-		case NfcVTypeSlixL:
-			furi_string_cat_printf(temp_str, "Type: SLIX-L\n");
-			furi_string_cat_printf(temp_str, "Keys:\n");
-			furi_string_cat_printf(temp_str, " Privacy  %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_privacy));
-			furi_string_cat_printf(temp_str, " Destroy  %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_destroy));
-			furi_string_cat_printf(temp_str, " EAS      %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
-			break;
-		case NfcVTypeSlix2:
-			furi_string_cat_printf(temp_str, "Type: SLIX2\n");
-			furi_string_cat_printf(temp_str, "Keys:\n");
-			furi_string_cat_printf(temp_str, " Read     %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_read));
-			furi_string_cat_printf(temp_str, " Write    %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_write));
-			furi_string_cat_printf(temp_str, " Privacy  %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_privacy));
-			furi_string_cat_printf(temp_str, " Destroy  %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_destroy));
-			furi_string_cat_printf(temp_str, " EAS      %08lX\n", nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
-			break;
+        case NfcVTypePlain:
+            furi_string_cat_printf(temp_str, "Type: Plain\n");
+            break;
+        case NfcVTypeSlix:
+            furi_string_cat_printf(temp_str, "Type: SLIX\n");
+            furi_string_cat_printf(temp_str, "Keys:\n");
+            furi_string_cat_printf(
+                temp_str,
+                " EAS      %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
+            break;
+        case NfcVTypeSlixS:
+            furi_string_cat_printf(temp_str, "Type: SLIX-S\n");
+            furi_string_cat_printf(temp_str, "Keys:\n");
+            furi_string_cat_printf(
+                temp_str,
+                " Read     %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_read));
+            furi_string_cat_printf(
+                temp_str,
+                " Write    %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_write));
+            furi_string_cat_printf(
+                temp_str,
+                " Privacy  %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_privacy));
+            furi_string_cat_printf(
+                temp_str,
+                " Destroy  %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_destroy));
+            furi_string_cat_printf(
+                temp_str,
+                " EAS      %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
+            break;
+        case NfcVTypeSlixL:
+            furi_string_cat_printf(temp_str, "Type: SLIX-L\n");
+            furi_string_cat_printf(temp_str, "Keys:\n");
+            furi_string_cat_printf(
+                temp_str,
+                " Privacy  %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_privacy));
+            furi_string_cat_printf(
+                temp_str,
+                " Destroy  %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_destroy));
+            furi_string_cat_printf(
+                temp_str,
+                " EAS      %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
+            break;
+        case NfcVTypeSlix2:
+            furi_string_cat_printf(temp_str, "Type: SLIX2\n");
+            furi_string_cat_printf(temp_str, "Keys:\n");
+            furi_string_cat_printf(
+                temp_str,
+                " Read     %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_read));
+            furi_string_cat_printf(
+                temp_str,
+                " Write    %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_write));
+            furi_string_cat_printf(
+                temp_str,
+                " Privacy  %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_privacy));
+            furi_string_cat_printf(
+                temp_str,
+                " Destroy  %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_destroy));
+            furi_string_cat_printf(
+                temp_str,
+                " EAS      %08lX\n",
+                nfc_scene_nfc_data_info_get_key(nfcv_data->sub_data.slix.key_eas));
+            break;
         default:
             furi_string_cat_printf(temp_str, "\e#ISO15693 (unknown)\n");
             break;
