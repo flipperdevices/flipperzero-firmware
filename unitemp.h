@@ -27,8 +27,6 @@
 #define APP_FILENAME_SETTINGS "settings.cfg"
 //Имя файла с датчиками
 #define APP_FILENAME_SENSORS "sensors.cfg"
-//Максимальное количество датчиков
-#define MAX_SENSORS 5 //Больше на экран не лезет
 
 /* Объявление перечислений */
 //Единицы измерения

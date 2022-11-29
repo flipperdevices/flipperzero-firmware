@@ -97,8 +97,23 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
 
 static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos[2], Color color) {
     canvas_set_font(canvas, FontPrimary);
+
+    const uint8_t max_width = 61;
+
+    char sensor_name[12] = {0};
+    memcpy(sensor_name, sensor->name, 10);
+
+    if(canvas_string_width(canvas, sensor_name) > max_width) {
+        uint8_t i = 10;
+        while((canvas_string_width(canvas, sensor_name) > max_width - 6) && (i != 0)) {
+            sensor_name[i--] = '\0';
+        }
+        sensor_name[++i] = '.';
+        sensor_name[++i] = '.';
+    }
+
     canvas_draw_str_aligned(
-        canvas, pos[0] + 27, pos[1] + 3, AlignCenter, AlignCenter, sensor->name);
+        canvas, pos[0] + 27, pos[1] + 3, AlignCenter, AlignCenter, sensor_name);
     _draw_temperature(canvas, sensor, pos[0], pos[1] + 8, color);
 }
 
