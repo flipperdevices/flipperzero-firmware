@@ -48,7 +48,7 @@ typedef int32_t (*FuriThreadCallback)(void* context);
  */
 typedef void (*FuriThreadStdoutWriteCallback)(const char* data, size_t size);
 
-/** FuriThread state change calback called upon thread state change
+/** FuriThread state change callback called upon thread state change
  * @param      state    new thread state
  * @param      context  callback context
  */
@@ -59,6 +59,20 @@ typedef void (*FuriThreadStateCallback)(FuriThreadState state, void* context);
  * @return     FuriThread instance
  */
 FuriThread* furi_thread_alloc();
+
+/** Allocate FuriThread, shortcut version
+ * 
+ * @param name 
+ * @param stack_size 
+ * @param callback 
+ * @param context 
+ * @return FuriThread* 
+ */
+FuriThread* furi_thread_alloc_ex(
+    const char* name,
+    uint32_t stack_size,
+    FuriThreadCallback callback,
+    void* context);
 
 /** Release FuriThread
  *
@@ -180,7 +194,7 @@ size_t furi_thread_get_heap_size(FuriThread* thread);
  */
 int32_t furi_thread_get_return_code(FuriThread* thread);
 
-/** Thread releated methods that doesn't involve FuriThread directly */
+/** Thread related methods that doesn't involve FuriThread directly */
 
 /** Get FreeRTOS FuriThreadId for current thread
  *
