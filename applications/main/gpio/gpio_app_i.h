@@ -33,6 +33,7 @@ struct GpioApp {
     UsbUartBridge* usb_uart_bridge;
     GpioI2CScanner* gpio_i2c_scanner;
     GpioI2CSfp* gpio_i2c_sfp;
+    UsbUartConfig* usb_uart_cfg;
 };
 
 typedef enum {
