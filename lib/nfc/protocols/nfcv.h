@@ -80,7 +80,7 @@ typedef enum {
     NfcVTypeSlixS = 2,
     NfcVTypeSlixL = 3,
     NfcVTypeSlix2 = 4,
-} NfcVType;
+} NfcVSubtype;
 
 typedef enum {
     NfcVSendFlagsNormal         = 0,
@@ -121,6 +121,9 @@ typedef struct {
 } NfcVEmuAir;
 
 
+typedef void (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data, uint8_t* payload, uint32_t payload_length);
+typedef bool (*NfcVEmuProtocolFilter) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
+
 typedef struct {
     uint8_t* frame;                /* ISO15693-2 incoming raw data from air layer */
     uint8_t frame_length;          /* ISO15693-2 length of incoming data */
@@ -134,13 +137,12 @@ typedef struct {
 
     uint8_t response_buffer[128];  /* pre-allocated response buffer */
     NfcVSendFlags response_flags;  /* flags to use when sending response */
+
+    NfcVEmuProtocolFilter emu_protocol_filter;
 } NfcVEmuProtocolCtx;
 
-typedef void (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data, uint8_t* payload, uint32_t payload_length);
-typedef bool (*NfcVEmuProtocolFilter) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
-
 typedef struct {
-    /* common ISO15693 fields */
+    /* common ISO15693 fields, being specified in ISO15693-3 */
     uint8_t dsfid;
     uint8_t afi;
     uint8_t ic_ref;
@@ -149,18 +151,20 @@ typedef struct {
     uint8_t data[NFCV_MAX_DUMP_SIZE];
 
     /* specfic variant infos */
-    NfcVType type;
+    NfcVSubtype sub_type;
     NfcVSubtypeData sub_data;
+    NfcVAuthMethod auth_method;
+
+    /* precalced air level data */
     NfcVEmuAir emu_air;
-    NfcVEmuProtocolCtx emu_protocol_ctx;
+
+    /* handler for the protocol layer as specified in ISO15693-3 */
     NfcVEmuProtocolHandler emu_protocol_handler;
-    NfcVEmuProtocolFilter emu_protocol_filter;
+    void *emu_protocol_ctx;
 
     /* runtime data */
     char last_command[128];
     char error[32];
-    NfcVAuthMethod auth_method;
-    bool auth_success;
 } NfcVData;
 
 typedef struct {

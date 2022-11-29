@@ -131,18 +131,18 @@ bool nfcv_read_card(
 
     if(slix_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX detected");
-        nfcv_data->type = NfcVTypeSlix;
+        nfcv_data->sub_type = NfcVTypeSlix;
     } else if(slix2_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX2 detected");
-        nfcv_data->type = NfcVTypeSlix2;
+        nfcv_data->sub_type = NfcVTypeSlix2;
     } else if(slix_s_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX-S detected");
-        nfcv_data->type = NfcVTypeSlixS;
+        nfcv_data->sub_type = NfcVTypeSlixS;
     } else if(slix_l_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX-L detected");
-        nfcv_data->type = NfcVTypeSlixL;
+        nfcv_data->sub_type = NfcVTypeSlixL;
     } else {
-        nfcv_data->type = NfcVTypePlain;
+        nfcv_data->sub_type = NfcVTypePlain;
     }
 
     return true;
@@ -186,6 +186,8 @@ void nfcv_emu_free(NfcVData* data) {
     data->emu_air.nfcv_resp_zero = NULL;
     data->emu_air.nfcv_resp_sof = NULL;
     data->emu_air.nfcv_resp_eof = NULL;
+
+    free(data->emu_protocol_ctx);
 }
 
 void nfcv_emu_alloc(NfcVData* data) {
@@ -317,8 +319,9 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
     }
 
     NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
-    NfcVEmuProtocolCtx* ctx = &nfcv_data->emu_protocol_ctx;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     
+    /* parse the frame data for the upcoming part 3 handling */
     ctx->frame = payload;
     ctx->frame_length = payload_length;
     ctx->flags = ctx->frame[0];
@@ -328,14 +331,22 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
     ctx->address_offset = 2 + (ctx->advanced ? 1 : 0);
     ctx->payload_offset = ctx->address_offset + (ctx->addressed ? 8 : 0);
     ctx->response_flags = NfcVSendFlagsNormal;
+    
+    /* unfortunately our response is quicker than the original NFC tag which causes frame misses */
+    /* ToDo: need to implement a send timestamp feature, like i.e. proxmark uses */
+    furi_delay_us(270);
 
-    /* first give control to the card specific protocol handler */
-    if(nfcv_data->emu_protocol_filter != NULL) {
-        if(nfcv_data->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
+    /* first give control to the card subtype specific protocol filter */
+    if(ctx->emu_protocol_filter != NULL) {
+        if(ctx->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
+            if(strlen(nfcv_data->last_command) > 0) {
+                FURI_LOG_D(TAG, "Received command %s (handled by filter)", nfcv_data->last_command);        
+            }
             return;
         }
     }
 
+    /* now standard behavior is implemented */
     if(ctx->addressed) {
         uint8_t* address = &ctx->frame[ctx->address_offset];
         if(nfcv_uidcmp(address, nfc_data->uid)) {
@@ -345,9 +356,6 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
             return;
         }
     }
-    
-    /* unfortunately our response is quicker than the original NFC tag which causes frame misses */
-    furi_delay_us(270);
 
     switch(ctx->command) {
         case ISO15693_INVENTORY: {
@@ -464,14 +472,16 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
 
+    nfcv_data->emu_protocol_ctx = malloc(sizeof(NfcVEmuProtocolCtx));
     nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
+
 
     FURI_LOG_D(TAG, "Starting NfcV emulation");
     FURI_LOG_D(TAG, "  UID:          %02X %02X %02X %02X %02X %02X %02X %02X", 
         nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], 
         nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
 
-    switch(nfcv_data->type) {
+    switch(nfcv_data->sub_type) {
         case NfcVTypeSlixL:
             FURI_LOG_D(TAG, "  Card type:    SLIX-L");
             slix_l_prepare(nfcv_data);

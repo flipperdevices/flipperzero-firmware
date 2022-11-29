@@ -154,7 +154,7 @@ bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevDa
     furi_assert(nfcv_data_in);
     
     NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
-    NfcVEmuProtocolCtx* ctx = &nfcv_data->emu_protocol_ctx;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     NfcVSlixData* slix = &nfcv_data->sub_data.slix;
 
     if(slix->privacy && 
@@ -290,7 +290,8 @@ void slix_l_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_filter = &slix_l_protocol_filter;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+    ctx->emu_protocol_filter = &slix_l_protocol_filter;
 }
 
 bool slix_s_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
@@ -314,7 +315,8 @@ void slix_s_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_filter = &slix_s_protocol_filter;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+    ctx->emu_protocol_filter = &slix_s_protocol_filter;
 }
 
 bool slix_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
@@ -338,7 +340,8 @@ void slix_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_filter = &slix_protocol_filter;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+    ctx->emu_protocol_filter = &slix_protocol_filter;
 }
 
 bool slix2_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data_in) {
@@ -362,5 +365,6 @@ void slix2_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
     FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
 
-    nfcv_data->emu_protocol_filter = &slix2_protocol_filter;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+    ctx->emu_protocol_filter = &slix2_protocol_filter;
 }
