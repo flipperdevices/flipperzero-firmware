@@ -9,6 +9,7 @@ Supported **host** microcontrollers:
 - STM32
 - Raspberry Pi
 - ESP32
+- MCU running Zephyr OS
 
 Supported **target** microcontrollers:
 
@@ -38,7 +39,7 @@ Following functions are part of serial_io.h header for convenience, however, use
 - loader_port_debug_print()
 
 Prototypes of all function mentioned above can be found in [serial_io.h](include/serial_io.h).
-Please refer to ports in `port` directory. Currently, only ports for [ESP32 port](port/esp32_port.c) and [STM32 port](port/stm32_port.c) are available.
+Please refer to ports in `port` directory. Currently, only ports for [ESP32 port](port/esp32_port.c), [STM32 port](port/stm32_port.c), and [Zephyr port](port/zephyr_port.c) are available.
 
 ## Configuration
 
@@ -103,6 +104,28 @@ set(STM32Cube_DIR       path_to_stm32_HAL)
 set(STM32_CHIP          STM32F407VG)
 set(PORT                STM32)
 ```
+
+### Zephyr support
+
+The Zephyr port is ready to be integrated into your Zephyr app as a Zephyr module. In the manifest file (west.yml), add:
+
+```
+    - name: esp-flasher
+      url: https://github.com/espressif/esp-serial-flasher
+      revision: <insert current revision here>
+      path: modules/lib/esp_flasher
+```
+
+And add
+
+```
+CONFIG_ESP_SERIAL_FLASHER=y
+CONFIG_CONSOLE_GETCHAR=y
+```
+
+to your project configuration `prj.conf`.
+
+For your C/C++ source code, you can use the example code provided in `examples/zephyr_example` as a starting point.
 
 ## Licence
 
