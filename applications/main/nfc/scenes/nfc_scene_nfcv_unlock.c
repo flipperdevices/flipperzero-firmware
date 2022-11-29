@@ -11,7 +11,7 @@ typedef enum {
 
 static bool nfc_scene_nfcv_unlock_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;
-    NfcVSlixLData* data = &nfc->dev->dev_data.nfcv_data.sub_data.slix_l;
+    NfcVSlixData* data = &nfc->dev->dev_data.nfcv_data.sub_data.slix;
 
     if(event == NfcWorkerEventNfcVPassKey) {
         memcpy(data->key_privacy, nfc->byte_input_store, 4);

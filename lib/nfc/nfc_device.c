@@ -681,7 +681,7 @@ bool nfc_device_load_slix_data(FlipperFormat* file, NfcDevice* dev) {
 
 static bool nfc_device_save_slix_s_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
-    NfcVSlixSData* data = &dev->dev_data.nfcv_data.sub_data.slix_s;
+    NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
 
     do {
         if(!flipper_format_write_comment_cstr(file, "SLIX-S specific data")) break;
@@ -707,7 +707,7 @@ static bool nfc_device_save_slix_s_data(FlipperFormat* file, NfcDevice* dev) {
 
 bool nfc_device_load_slix_s_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
-    NfcVSlixSData* data = &dev->dev_data.nfcv_data.sub_data.slix_s;
+    NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
     memset(data, 0, sizeof(NfcVData));
 
     do {
@@ -734,7 +734,7 @@ bool nfc_device_load_slix_s_data(FlipperFormat* file, NfcDevice* dev) {
 
 static bool nfc_device_save_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
-    NfcVSlixLData* data = &dev->dev_data.nfcv_data.sub_data.slix_l;
+    NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
 
     do {
         if(!flipper_format_write_comment_cstr(file, "SLIX-L specific data")) break;
@@ -755,7 +755,7 @@ static bool nfc_device_save_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
 
 bool nfc_device_load_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
-    NfcVSlixLData* data = &dev->dev_data.nfcv_data.sub_data.slix_l;
+    NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
     memset(data, 0, sizeof(NfcVData));
 
     do {
@@ -777,7 +777,7 @@ bool nfc_device_load_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
 
 static bool nfc_device_save_slix2_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
-    NfcVSlix2Data* data = &dev->dev_data.nfcv_data.sub_data.slix2;
+    NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
 
     do {
         if(!flipper_format_write_comment_cstr(file, "SLIX2 specific data")) break;
@@ -803,7 +803,7 @@ static bool nfc_device_save_slix2_data(FlipperFormat* file, NfcDevice* dev) {
 
 bool nfc_device_load_slix2_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
-    NfcVSlix2Data* data = &dev->dev_data.nfcv_data.sub_data.slix2;
+    NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
     memset(data, 0, sizeof(NfcVData));
 
     do {

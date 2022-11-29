@@ -3,7 +3,7 @@
 
 void nfc_scene_nfcv_key_input_byte_input_callback(void* context) {
     Nfc* nfc = context;
-    NfcVSlixLData* data = &nfc->dev->dev_data.nfcv_data.sub_data.slix_l;
+    NfcVSlixData* data = &nfc->dev->dev_data.nfcv_data.sub_data.slix;
 
     memcpy(data->key_privacy, nfc->byte_input_store, 4);
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventByteInputDone);
