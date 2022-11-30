@@ -164,7 +164,6 @@ const GPIO*
     unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index, const GPIO* extraport) {
     uint8_t aviable_index = 0;
     uint8_t aviable_port_count = unitemp_gpio_getAviablePortsCount(interface, extraport);
-    FURI_LOG_D(APP_NAME, "Aviable ports: %d", aviable_port_count);
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         //Проверка для one wire
         if(interface == &ONE_WIRE) {
@@ -199,17 +198,14 @@ uint8_t unitemp_sensors_getCount(void) {
 }
 
 void unitemp_sensors_add(Sensor* sensor) {
-    FURI_LOG_D(APP_NAME, "realloc to %d", unitemp_sensors_getCount() + 1);
     app->sensors =
         (Sensor**)realloc(app->sensors, (unitemp_sensors_getCount() + 1) * sizeof(Sensor*));
-    FURI_LOG_D(APP_NAME, "adding to %d", unitemp_sensors_getCount());
     app->sensors[unitemp_sensors_getCount()] = sensor;
     app->sensors_count++;
 }
 
 bool unitemp_sensors_load(void) {
     FURI_LOG_D(APP_NAME, "Loading sensors...");
-    //memset(app->sensors, 0, (unitemp_sensors_getCount() + 1) * sizeof(Sensor*));
 
     //Выделение памяти на поток
     app->file_stream = file_stream_alloc(app->storage);
@@ -242,7 +238,6 @@ bool unitemp_sensors_load(void) {
 
     //Вычисление размера файла
     uint8_t file_size = stream_size(app->file_stream);
-    FURI_LOG_D(APP_NAME, "Sensors file size: %d bytes", file_size);
     //Если файл пустой, то:
     if(file_size == (uint8_t)0) {
         FURI_LOG_W(APP_NAME, "Sensors file is empty");
@@ -282,7 +277,6 @@ bool unitemp_sensors_load(void) {
         sscanf(((char*)(file_buf + line_end)), "%s %s %n", name, type, &offset);
         //Ограничение длины имени
         name[10] = '\0';
-        FURI_LOG_D(APP_NAME, "%s %s", name, type);
 
         char* args = ((char*)(file_buf + line_end + offset));
         const SensorType* stype = unitemp_sensors_getTypeFromStr(type);

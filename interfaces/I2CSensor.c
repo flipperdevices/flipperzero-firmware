@@ -6,7 +6,7 @@ uint8_t unitemp_i2c_readReg(I2CSensor* i2c_sensor, uint8_t reg) {
     //Блокировка шины
     furi_hal_i2c_acquire(i2c_sensor->i2c);
     uint8_t buff[1];
-    furi_hal_i2c_read_mem(i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, reg, buff, 1, 0xFF);
+    furi_hal_i2c_read_mem(i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, reg, buff, 1, 10);
     furi_hal_i2c_release(i2c_sensor->i2c);
     return buff[0];
 }
@@ -14,7 +14,7 @@ uint8_t unitemp_i2c_readReg(I2CSensor* i2c_sensor, uint8_t reg) {
 bool unitemp_i2c_readRegArray(I2CSensor* i2c_sensor, uint8_t startReg, uint8_t len, uint8_t* data) {
     furi_hal_i2c_acquire(i2c_sensor->i2c);
     bool status = furi_hal_i2c_read_mem(
-        i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, startReg, data, len, 0xFF);
+        i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, startReg, data, len, 10);
     furi_hal_i2c_release(i2c_sensor->i2c);
     return status;
 }
@@ -23,8 +23,8 @@ bool unitemp_i2c_writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value) {
     //Блокировка шины
     furi_hal_i2c_acquire(i2c_sensor->i2c);
     uint8_t buff[1] = {value};
-    bool status = furi_hal_i2c_write_mem(
-        i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, reg, buff, 1, 0xFF);
+    bool status =
+        furi_hal_i2c_write_mem(i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, reg, buff, 1, 10);
     furi_hal_i2c_release(i2c_sensor->i2c);
     return status;
 }

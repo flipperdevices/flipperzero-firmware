@@ -1,7 +1,7 @@
 #include "SingleWireSensor.h"
 
 //Максимальное количество попугаев ожидания датчика
-#define POLLING_TIMEOUT_TICKS 10000
+#define POLLING_TIMEOUT_TICKS 500
 
 /* Типы датчиков и их параметры */
 const SensorType DHT11 = {

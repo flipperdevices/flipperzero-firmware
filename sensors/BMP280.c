@@ -74,25 +74,8 @@ static double bmp280_compensate_T_double(I2CSensor* i2c_sensor, int32_t adc_T) {
     return T;
 }
 
-static double bmp280_compensate_P_double(I2CSensor* i2c_sensor, int32_t adc_P) {
+static uint32_t bmp280_compensate_P_int(I2CSensor* i2c_sensor, int32_t adc_P) {
     BMP280_instance* bmp280_instance = (BMP280_instance*)i2c_sensor->sensorInstance;
-    // double var1, var2, p;
-    // var1 = ((double)bmp280_instance->t_fine / (double)2.0) - (double)64000.0;
-    // var2 = var1 * var1 * ((double)bmp280_instance->press_cal.dig_P6) / (double)32768.0;
-    // var2 = var2 + var1 * ((double)bmp280_instance->press_cal.dig_P5) * (double)2.0;
-    // var2 = (var2 / (double)4.0) + (((double)bmp280_instance->press_cal.dig_P4) * (double)65536.0);
-    // var1 = (((double)bmp280_instance->press_cal.dig_P3) * var1 * var1 / (double)524288.0 +
-    //         ((double)bmp280_instance->press_cal.dig_P2) * var1) /
-    //        (double)524288.0;
-    // var1 = ((double)1.0 + var1 / (double)32768.0) * ((double)bmp280_instance->press_cal.dig_P1);
-    // if(var1 == (double)0.0) {
-    //     return 0; // avoid exception caused by division by zero
-    // }
-    // p = (double)1048576.0 - (double)adc_P;
-    // p = (p - (var2 / (double)4096.0)) * (double)6250.0 / var1;
-    // var1 = ((double)bmp280_instance->press_cal.dig_P9) * p * p / (double)2147483648.0;
-    // var2 = p * ((double)bmp280_instance->press_cal.dig_P8) / (double)32768.0;
-    // p = p + (var1 + var2 + ((double)bmp280_instance->press_cal.dig_P7)) / (double)16.0;
     int64_t value_1 = (bmp280_instance->t_fine) - 128000;
     int64_t value_2 = value_1 * value_1 * (int64_t)bmp280_instance->press_cal.dig_P6;
     value_2 = value_2 + ((value_1 * (int64_t)bmp280_instance->press_cal.dig_P5) << 17);
@@ -227,7 +210,7 @@ UnitempStatus unitemp_BMP280_update(Sensor* sensor) {
     if(!unitemp_i2c_readRegArray(i2c_sensor, 0xF7, 3, buff)) return UT_TIMEOUT;
     int32_t adc_P = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
     sensor->temp = bmp280_compensate_T_double(i2c_sensor, adc_T);
-    sensor->pressure = bmp280_compensate_P_double(i2c_sensor, adc_P);
+    sensor->pressure = bmp280_compensate_P_int(i2c_sensor, adc_P);
     FURI_LOG_D(APP_NAME, "pressure: %d pa ", (int)sensor->pressure);
     return UT_OK;
 }
