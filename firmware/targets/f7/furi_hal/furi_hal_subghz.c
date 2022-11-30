@@ -557,7 +557,6 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             }
         }
     }
-    memset(buffer, 0, samples * sizeof(uint32_t));
 }
 
 static void furi_hal_subghz_async_tx_dma_isr() {
