@@ -524,19 +524,19 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             LL_TIM_EnableIT_UPDATE(TIM2);
             break;
         } else {
-            // Inject guard time if level is incorrect, any method except size_buf-1
             bool level = level_duration_get_level(ld);
 
+            // Inject guard time if level is incorrect
             if(is_odd != level) {
-                // Prevent buffer overflow
                 *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 buffer++;
                 samples--;
-                if(!level) {
+                if(is_odd) {
                     furi_hal_subghz_async_tx.duty_high += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 } else {
                     furi_hal_subghz_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
                 }
+
                 // Special case: prevent buffer overflow if sample is last
                 if(samples == 0) {
                     furi_hal_subghz_async_tx.carry_ld = ld;
@@ -550,7 +550,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
             buffer++;
             samples--;
 
-            if(level) {
+            if(is_odd) {
                 furi_hal_subghz_async_tx.duty_high += duration;
             } else {
                 furi_hal_subghz_async_tx.duty_low += duration;
