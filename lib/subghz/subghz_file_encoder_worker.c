@@ -18,7 +18,7 @@ struct SubGhzFileEncoderWorker {
     volatile bool worker_running;
     volatile bool worker_stoping;
     bool level;
-    bool slow_flash_read;
+    bool is_storage_slow;
     FuriString* str_data;
     FuriString* file_path;
 
@@ -97,7 +97,7 @@ LevelDuration subghz_file_encoder_worker_get_level_duration(void* context) {
         }
         return level_duration;
     } else {
-        instance->slow_flash_read = true;
+        instance->is_storage_slow = true;
         return level_duration_wait();
     }
 }
@@ -111,7 +111,7 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
     SubGhzFileEncoderWorker* instance = context;
     FURI_LOG_I(TAG, "Worker start");
     bool res = false;
-    instance->slow_flash_read = false;
+    instance->is_storage_slow = false;
     Stream* stream = flipper_format_get_raw_stream(instance->flipper_format);
     do {
         if(!flipper_format_file_open_existing(
@@ -141,17 +141,11 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
                 furi_string_trim(instance->str_data);
                 if(!subghz_file_encoder_worker_data_parse(
                        instance, furi_string_get_cstr(instance->str_data))) {
-                    //to stop DMA correctly
-                    for(uint8_t i = 0; i < 10; i++) {
-                        subghz_file_encoder_worker_add_level_duration(
-                            instance, LEVEL_DURATION_RESET);
-                    }
+                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
                     break;
                 }
             } else {
-                for(uint8_t i = 0; i < 10; i++) {
-                    subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
-                }
+                subghz_file_encoder_worker_add_level_duration(instance, LEVEL_DURATION_RESET);
                 break;
             }
         } else {
@@ -159,8 +153,8 @@ static int32_t subghz_file_encoder_worker_thread(void* context) {
         }
     }
     //waiting for the end of the transfer
-    if(instance->slow_flash_read) {
-        FURI_LOG_E(TAG, "Slow flash read");
+    if(instance->is_storage_slow) {
+        FURI_LOG_E(TAG, "Storage is slow");
     }
     FURI_LOG_I(TAG, "End read file");
     while(!furi_hal_subghz_is_async_tx_complete() && instance->worker_running) {
