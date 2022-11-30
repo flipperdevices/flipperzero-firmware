@@ -12,4 +12,5 @@ App(
     fap_icon_assets="assets",
     stack_size=2 * 1024,
     order=100,
+    fap_libs=["assets"],
 )
