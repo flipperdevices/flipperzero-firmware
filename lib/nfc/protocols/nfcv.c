@@ -355,24 +355,23 @@ void nfcv_emu_handle_packet(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
     ctx->response_flags = NfcVSendFlagsNormal;
     ctx->send_time = nfcv_data->eof_timestamp + NFCV_FDT_FC(4130);
 
-
-    /* first give control to the card subtype specific protocol filter */
-    if(ctx->emu_protocol_filter != NULL) {
-        if(ctx->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
-            if(strlen(nfcv_data->last_command) > 0) {
-                FURI_LOG_D(TAG, "Received command %s (handled by filter)", nfcv_data->last_command);
-            }
-            return;
-        }
-    }
-
-    /* now standard behavior is implemented */
+    /* standard behavior is implemented */
     if(ctx->addressed) {
         uint8_t* address = &nfcv_data->frame[ctx->address_offset];
         if(nfcv_revuidcmp(address, nfc_data->uid)) {
             FURI_LOG_D(TAG, "addressed command 0x%02X, but not for us:", ctx->command);
             FURI_LOG_D(TAG, "  dest:     %02X%02X%02X%02X%02X%02X%02X%02X", address[7], address[6], address[5], address[4], address[3], address[2], address[1], address[0]);
             FURI_LOG_D(TAG, "  our UID:  %02X%02X%02X%02X%02X%02X%02X%02X", nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3], nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
+            return;
+        }
+    }
+
+    /* then give control to the card subtype specific protocol filter */
+    if(ctx->emu_protocol_filter != NULL) {
+        if(ctx->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
+            if(strlen(nfcv_data->last_command) > 0) {
+                FURI_LOG_D(TAG, "Received command %s (handled by filter)", nfcv_data->last_command);
+            }
             return;
         }
     }
