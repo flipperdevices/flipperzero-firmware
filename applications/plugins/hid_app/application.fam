@@ -10,7 +10,6 @@ App(
     fap_icon_assets_symbol="hid",
 )
 
-
 App(
     appid="Bluetooth_Remote",
     name="Bluetooth Remote",
