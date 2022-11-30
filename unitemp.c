@@ -15,7 +15,6 @@
 //TODO: Добавить настройку единицы измерения давления
 //TODO: Обновлять данные только с тех датчиков, которые присутствуют на экране
 //TODO: Исправить сканирование one wire существующего датчика
-//TODO: Исправить крах при добавлении I2C датчика при отсутствии других датчиков
 
 /* Переменные */
 //Данные приложения
@@ -44,7 +43,7 @@ bool unitemp_saveSettings(void) {
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
         FURI_LOG_E(
             APP_NAME,
-            "An error occurred while saving the settings file: %d\r\n",
+            "An error occurred while saving the settings file: %d",
             file_stream_get_error(app->file_stream));
         //Закрытие потока и освобождение памяти
         file_stream_close(app->file_stream);
@@ -61,7 +60,7 @@ bool unitemp_saveSettings(void) {
     file_stream_close(app->file_stream);
     stream_free(app->file_stream);
 
-    FURI_LOG_I(APP_NAME, "Settings have been successfully saved\r\n");
+    FURI_LOG_I(APP_NAME, "Settings have been successfully saved");
     return true;
 }
 
@@ -80,7 +79,7 @@ bool unitemp_loadSettings(void) {
            app->file_stream, furi_string_get_cstr(filepath), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
         //Сохранение настроек по умолчанию в случае отсутствия файла
         if(file_stream_get_error(app->file_stream) == FSE_NOT_EXIST) {
-            FURI_LOG_W(APP_NAME, "Missing settings file. Setting defaults and saving...\r\n");
+            FURI_LOG_W(APP_NAME, "Missing settings file. Setting defaults and saving...");
             //Закрытие потока и освобождение памяти
             file_stream_close(app->file_stream);
             stream_free(app->file_stream);
@@ -90,7 +89,7 @@ bool unitemp_loadSettings(void) {
         } else {
             FURI_LOG_E(
                 APP_NAME,
-                "An error occurred while loading the settings file: %d. Standard values have been applied\r\n",
+                "An error occurred while loading the settings file: %d. Standard values have been applied",
                 file_stream_get_error(app->file_stream));
             //Закрытие потока и освобождение памяти
             file_stream_close(app->file_stream);
@@ -103,7 +102,7 @@ bool unitemp_loadSettings(void) {
     uint8_t file_size = stream_size(app->file_stream);
     //Если файл пустой, то:
     if(file_size == (uint8_t)0) {
-        FURI_LOG_W(APP_NAME, "Settings file is empty\r\n");
+        FURI_LOG_W(APP_NAME, "Settings file is empty");
         //Закрытие потока и освобождение памяти
         file_stream_close(app->file_stream);
         stream_free(app->file_stream);
@@ -118,7 +117,7 @@ bool unitemp_loadSettings(void) {
     //Загрузка файла
     if(stream_read(app->file_stream, file_buf, file_size) != file_size) {
         //Выход при ошибке чтения
-        FURI_LOG_E(APP_NAME, "Error reading settings file\r\n");
+        FURI_LOG_E(APP_NAME, "Error reading settings file");
         //Закрытие потока и освобождение памяти
         file_stream_close(app->file_stream);
         stream_free(app->file_stream);
@@ -154,7 +153,7 @@ bool unitemp_loadSettings(void) {
                 app->settings.unit = FAHRENHEIT;
             }
         } else {
-            FURI_LOG_W(APP_NAME, "Unknown settings parameter: %s\r\n", buff);
+            FURI_LOG_W(APP_NAME, "Unknown settings parameter: %s", buff);
         }
 
         //Вычисление конца строки
@@ -164,7 +163,7 @@ bool unitemp_loadSettings(void) {
     file_stream_close(app->file_stream);
     stream_free(app->file_stream);
 
-    FURI_LOG_I(APP_NAME, "Settings have been successfully loaded\r\n");
+    FURI_LOG_I(APP_NAME, "Settings have been successfully loaded");
     return true;
 }
 

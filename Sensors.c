@@ -163,7 +163,6 @@ void unitemp_gpio_unlock(const GPIO* gpio) {
 const GPIO*
     unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index, const GPIO* extraport) {
     uint8_t aviable_index = 0;
-    uint8_t aviable_port_count = unitemp_gpio_getAviablePortsCount(interface, extraport);
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         //Проверка для one wire
         if(interface == &ONE_WIRE) {

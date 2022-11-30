@@ -12,7 +12,7 @@ static VariableItemList* variable_item_list;
 //Текущий редактируемый датчик
 static Sensor* editable_sensor;
 //Изначальный GPIO датчика
-static const GPIO* initial_gpio;
+static const GPIO* initial_gpio = NULL;
 
 //Элемент списка - имя датчика
 static VariableItem* sensor_name_item;
@@ -148,13 +148,17 @@ static void _enter_callback(void* context, uint32_t index) {
            ((OneWireSensor*)(editable_sensor->instance))->familyCode == 0) {
             return;
         }
-        unitemp_gpio_unlock(initial_gpio);
+        if(initial_gpio != NULL) {
+            unitemp_gpio_unlock(initial_gpio);
+            initial_gpio = NULL;
+        }
         if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensors_add(editable_sensor);
         unitemp_sensors_save();
         unitemp_sensors_reload();
 
         unitemp_General_switch();
     }
+
     //Адрес устройства на шине one wire
     if(index == 3 && editable_sensor->type->interface == &ONE_WIRE) {
         _onewire_scan();
