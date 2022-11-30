@@ -52,7 +52,7 @@ PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size) {
     signal->dma_config_timer.Mode = LL_DMA_MODE_CIRCULAR;
     signal->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_GENERATOR0; /* executes LL_DMA_SetPeriphRequest */
     signal->dma_config_timer.Priority = LL_DMA_PRIORITY_VERYHIGH;
-    
+
     signal->dma_config_gpio.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
     signal->dma_config_gpio.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
     signal->dma_config_gpio.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
@@ -116,7 +116,7 @@ void pulse_reader_start(PulseReader* signal) {
     signal->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) &(signal->gpio->port->IDR);
     signal->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t) signal->gpio_buffer;
     signal->dma_config_gpio.NbData = signal->size;
-    
+
     /* start counter */
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
@@ -143,9 +143,9 @@ void pulse_reader_start(PulseReader* signal) {
 
     /* now set up DMA with these settings */
     LL_DMA_Init(DMA1, signal->dma_channel, &signal->dma_config_timer);
-    LL_DMA_Init(DMA1, signal->dma_channel+1, &signal->dma_config_gpio);
+    LL_DMA_Init(DMA1, signal->dma_channel + 1, &signal->dma_config_gpio);
     LL_DMA_EnableChannel(DMA1, signal->dma_channel);
-    LL_DMA_EnableChannel(DMA1, signal->dma_channel+1);
+    LL_DMA_EnableChannel(DMA1, signal->dma_channel + 1);
 }
 
 uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
@@ -174,7 +174,7 @@ uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
 
             signal->pos++;
             signal->pos %= signal->size;
-            
+
             uint32_t delta_unit = 0;
 
             /* probably larger values, so choose a wider data type */
@@ -198,8 +198,5 @@ uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us) {
         if(elapsed > timeout_ticks) {
             return PULSE_READER_NO_EDGE;
         }
-
-        //furi_delay_ms(0);
-
     } while(true);
 }

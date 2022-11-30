@@ -24,6 +24,10 @@
 #define NFCV_BLOCK_SIZE              4
 #define NFCV_MAX_DUMP_SIZE           (NFCV_BLOCK_SIZE*NFCV_TOTAL_BLOCKS_MAX)
 
+/* helpers to calculate the send time based on DWT->CYCCNT */
+#define NFCV_FDT_USEC(usec)          (usec*64)
+#define NFCV_FDT_FC(ticks)           (ticks*6400/1356)
+
 
 #define NFCV_FRAME_STATE_SOF1        0
 #define NFCV_FRAME_STATE_SOF2        1
@@ -121,13 +125,10 @@ typedef struct {
 } NfcVEmuAir;
 
 
-typedef void (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data, uint8_t* payload, uint32_t payload_length);
+typedef void (*NfcVEmuProtocolHandler) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
 typedef bool (*NfcVEmuProtocolFilter) (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, void* nfcv_data);
 
 typedef struct {
-    uint8_t* frame;                /* ISO15693-2 incoming raw data from air layer */
-    uint8_t frame_length;          /* ISO15693-2 length of incoming data */
-
     uint8_t flags;                 /* ISO15693-3 flags of the header as specified */
     uint8_t command;               /* ISO15693-3 command at offset 1 as specified */
     bool addressed;                /* ISO15693-3 flags: addressed frame */
@@ -137,6 +138,7 @@ typedef struct {
 
     uint8_t response_buffer[128];  /* pre-allocated response buffer */
     NfcVSendFlags response_flags;  /* flags to use when sending response */
+    uint32_t send_time;            /* timestamp when to send the response */
 
     NfcVEmuProtocolFilter emu_protocol_filter;
 } NfcVEmuProtocolCtx;
@@ -158,6 +160,10 @@ typedef struct {
     /* precalced air level data */
     NfcVEmuAir emu_air;
 
+    uint8_t* frame;                /* ISO15693-2 incoming raw data from air layer */
+    uint8_t frame_length;          /* ISO15693-2 length of incoming data */
+    uint32_t eof_timestamp;        /* ISO15693-2 EOF timestamp, read from DWT->CYCCNT */
+
     /* handler for the protocol layer as specified in ISO15693-3 */
     NfcVEmuProtocolHandler emu_protocol_handler;
     void *emu_protocol_ctx;
@@ -173,7 +179,7 @@ typedef struct {
 } NfcVReader;
 
 
-ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data);    
+ReturnCode nfcv_read_blocks(NfcVReader* reader, NfcVData* data);
 ReturnCode nfcv_read_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* data);
 ReturnCode nfcv_inventory(uint8_t* uid);
 bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* data);
@@ -181,7 +187,7 @@ bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* d
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
 void nfcv_emu_deinit(NfcVData* nfcv_data);
 bool nfcv_emu_loop(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, uint32_t timeout_ms);
-void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length, NfcVSendFlags flags);
+void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length, NfcVSendFlags flags, uint32_t send_time);
 
 
 

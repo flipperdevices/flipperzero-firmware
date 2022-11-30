@@ -25,8 +25,8 @@ uint8_t slix_get_ti(FuriHalNfcDevData* nfc_data) {
 }
 
 bool slix_check_card_type(FuriHalNfcDevData* nfc_data) {
-    if((nfc_data->uid[0] == 0xE0) 
-        && (nfc_data->uid[1] == 0x04) 
+    if((nfc_data->uid[0] == 0xE0)
+        && (nfc_data->uid[1] == 0x04)
         && (nfc_data->uid[2] == 0x01)
         && slix_get_ti(nfc_data) == 2) {
         return true;
@@ -35,8 +35,8 @@ bool slix_check_card_type(FuriHalNfcDevData* nfc_data) {
 }
 
 bool slix2_check_card_type(FuriHalNfcDevData* nfc_data) {
-    if((nfc_data->uid[0] == 0xE0) 
-        && (nfc_data->uid[1] == 0x04) 
+    if((nfc_data->uid[0] == 0xE0)
+        && (nfc_data->uid[1] == 0x04)
         && (nfc_data->uid[2] == 0x01)
         && slix_get_ti(nfc_data) == 1) {
         return true;
@@ -45,8 +45,8 @@ bool slix2_check_card_type(FuriHalNfcDevData* nfc_data) {
 }
 
 bool slix_s_check_card_type(FuriHalNfcDevData* nfc_data) {
-    if((nfc_data->uid[0] == 0xE0) 
-        && (nfc_data->uid[1] == 0x04) 
+    if((nfc_data->uid[0] == 0xE0)
+        && (nfc_data->uid[1] == 0x04)
         && (nfc_data->uid[2] == 0x02)) {
         return true;
     }
@@ -54,8 +54,8 @@ bool slix_s_check_card_type(FuriHalNfcDevData* nfc_data) {
 }
 
 bool slix_l_check_card_type(FuriHalNfcDevData* nfc_data) {
-    if((nfc_data->uid[0] == 0xE0) 
-        && (nfc_data->uid[1] == 0x04) 
+    if((nfc_data->uid[0] == 0xE0)
+        && (nfc_data->uid[1] == 0x04)
         && (nfc_data->uid[2] == 0x03)) {
         return true;
     }
@@ -68,14 +68,14 @@ ReturnCode slix_get_random(NfcVData* data) {
     uint8_t rxBuf[32];
 
     ReturnCode ret = rfalNfcvPollerTransceiveReq(
-        ISO15693_CMD_NXP_GET_RANDOM_NUMBER, 
-        RFAL_NFCV_REQ_FLAG_DEFAULT, 
-        ISO15693_MANUFACTURER_NXP, 
-        NULL, 
+        ISO15693_CMD_NXP_GET_RANDOM_NUMBER,
+        RFAL_NFCV_REQ_FLAG_DEFAULT,
+        ISO15693_MANUFACTURER_NXP,
         NULL,
-        0, 
-        rxBuf, 
-        sizeof(rxBuf), 
+        NULL,
+        0,
+        rxBuf,
+        sizeof(rxBuf),
         &received);
 
     if(ret == ERR_NONE) {
@@ -93,14 +93,14 @@ ReturnCode slix_get_random(NfcVData* data) {
 
 ReturnCode slix_unlock(NfcVData* data, uint32_t password_id) {
     furi_assert(rand);
-    
+
     uint16_t received = 0;
     uint8_t rxBuf[32];
-    uint8_t cmd_set_pass[] = { 
-        password_id, 
-        data->sub_data.slix.rand[1], 
-        data->sub_data.slix.rand[0], 
-        data->sub_data.slix.rand[1], 
+    uint8_t cmd_set_pass[] = {
+        password_id,
+        data->sub_data.slix.rand[1],
+        data->sub_data.slix.rand[0],
+        data->sub_data.slix.rand[1],
         data->sub_data.slix.rand[0]
     };
     uint8_t *password = NULL;
@@ -134,14 +134,14 @@ ReturnCode slix_unlock(NfcVData* data, uint32_t password_id) {
     }
 
     ReturnCode ret = rfalNfcvPollerTransceiveReq(
-        ISO15693_CMD_NXP_SET_PASSWORD, 
-        RFAL_NFCV_REQ_FLAG_DATA_RATE, 
-        ISO15693_MANUFACTURER_NXP, 
-        NULL, 
+        ISO15693_CMD_NXP_SET_PASSWORD,
+        RFAL_NFCV_REQ_FLAG_DATA_RATE,
+        ISO15693_MANUFACTURER_NXP,
+        NULL,
         cmd_set_pass,
-        sizeof(cmd_set_pass), 
-        rxBuf, 
-        sizeof(rxBuf), 
+        sizeof(cmd_set_pass),
+        rxBuf,
+        sizeof(rxBuf),
         &received);
 
     return ret;
@@ -152,15 +152,15 @@ bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevDa
     furi_assert(tx_rx);
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
-    
+
     NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     NfcVSlixData* slix = &nfcv_data->sub_data.slix;
 
-    if(slix->privacy && 
-        ctx->command != ISO15693_CMD_NXP_GET_RANDOM_NUMBER && 
+    if(slix->privacy &&
+        ctx->command != ISO15693_CMD_NXP_GET_RANDOM_NUMBER &&
         ctx->command != ISO15693_CMD_NXP_SET_PASSWORD) {
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command),
             "command 0x%02X ignored, privacy mode", ctx->command);
         FURI_LOG_D(TAG, "%s", nfcv_data->last_command);
         return true;
@@ -177,8 +177,8 @@ bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevDa
             ctx->response_buffer[1] = slix->rand[1];
             ctx->response_buffer[2] = slix->rand[0];
 
-            nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 3, ctx->response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
+            nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 3, ctx->response_flags, ctx->send_time);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command),
                 "GET_RANDOM_NUMBER -> 0x%02X%02X", slix->rand[0], slix->rand[1]);
 
             handled = true;
@@ -186,13 +186,13 @@ bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevDa
         }
 
         case ISO15693_CMD_NXP_SET_PASSWORD: {
-            uint8_t password_id = ctx->frame[ctx->payload_offset];
+            uint8_t password_id = nfcv_data->frame[ctx->payload_offset];
 
             if(!(password_id & password_supported)) {
                 break;
             }
 
-            uint8_t *password_xored = &ctx->frame[ctx->payload_offset + 1];
+            uint8_t *password_xored = &nfcv_data->frame[ctx->payload_offset + 1];
             uint8_t *rand = slix->rand;
             uint8_t *password = NULL;
             uint8_t password_rcv[4];
@@ -242,11 +242,12 @@ bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevDa
                         break;
                 }
                 ctx->response_buffer[0] = ISO15693_NOERROR;
-                nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags);
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
+                
+                nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command),
                     "SET_PASSWORD #%02X 0x%08lX OK", password_id, pass_received);
             } else {
-                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
+                snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command),
                     "SET_PASSWORD #%02X 0x%08lX/%08lX FAIL", password_id, pass_received, pass_expect);
             }
             handled = true;
@@ -256,8 +257,8 @@ bool slix_generic_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevDa
         case ISO15693_CMD_NXP_ENABLE_PRIVACY: {
             ctx->response_buffer[0] = ISO15693_NOERROR;
 
-            nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags);
-            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), 
+            nfcv_emu_send(tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command),
                 "ISO15693_CMD_NXP_ENABLE_PRIVACY");
 
             slix->privacy = true;
@@ -275,7 +276,7 @@ bool slix_l_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nf
     furi_assert(nfcv_data_in);
 
     bool handled = false;
-    
+
     /* many SLIX share some of the functions, place that in a generic handler */
     if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_PRIVACY | SLIX_PASS_DESTROY | SLIX_PASS_EASAFI)) {
         return true;
@@ -300,7 +301,7 @@ bool slix_s_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nf
     furi_assert(nfcv_data_in);
 
     bool handled = false;
-    
+
     /* many SLIX share some of the functions, place that in a generic handler */
     if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
         return true;
@@ -325,7 +326,7 @@ bool slix_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_
     furi_assert(nfcv_data_in);
 
     bool handled = false;
-    
+
     /* many SLIX share some of the functions, place that in a generic handler */
     if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_EASAFI)) {
         return true;
@@ -350,7 +351,7 @@ bool slix2_protocol_filter (FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc
     furi_assert(nfcv_data_in);
 
     bool handled = false;
-    
+
     /* many SLIX share some of the functions, place that in a generic handler */
     if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
         return true;
