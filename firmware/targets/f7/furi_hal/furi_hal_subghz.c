@@ -490,7 +490,7 @@ void furi_hal_subghz_stop_async_rx() {
 
 typedef struct {
     uint32_t* buffer;
-    LevelDuration odd_taxi;
+    LevelDuration carry_ld;
     FuriHalSubGhzAsyncTxCallback callback;
     void* callback_context;
     uint64_t duty_high;
@@ -504,11 +504,11 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
     while(samples > 0) {
         bool is_odd = samples % 2;
         LevelDuration ld;
-        if(level_duration_is_reset(furi_hal_subghz_async_tx.odd_taxi)) {
+        if(level_duration_is_reset(furi_hal_subghz_async_tx.carry_ld)) {
             ld = furi_hal_subghz_async_tx.callback(furi_hal_subghz_async_tx.callback_context);
         } else {
-            ld = furi_hal_subghz_async_tx.odd_taxi;
-            furi_hal_subghz_async_tx.odd_taxi = level_duration_reset();
+            ld = furi_hal_subghz_async_tx.carry_ld;
+            furi_hal_subghz_async_tx.carry_ld = level_duration_reset();
         }
 
         if(level_duration_is_wait(ld)) {
@@ -539,7 +539,7 @@ static void furi_hal_subghz_async_tx_refill(uint32_t* buffer, size_t samples) {
                 }
                 // Special case: prevent buffer overflow if sample is last
                 if(samples == 0) {
-                    furi_hal_subghz_async_tx.odd_taxi = ld;
+                    furi_hal_subghz_async_tx.carry_ld = ld;
                     break;
                 }
             }
