@@ -481,7 +481,7 @@ void furi_hal_power_info_get(PropertyValueCallback out, char sep, void* context)
 
     const char* charge_state;
     if(furi_hal_power_is_charging()) {
-        if(charge < 100) {
+        if((charge < 100) && (!furi_hal_power_is_charging_done())) {
             charge_state = "charging";
         } else {
             charge_state = "charged";
