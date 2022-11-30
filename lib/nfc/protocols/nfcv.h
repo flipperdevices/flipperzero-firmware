@@ -9,6 +9,9 @@
 #include <furi_hal_nfc.h>
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 #define NFCV_FC                      (13560000.0f) /* MHz */
@@ -190,4 +193,6 @@ bool nfcv_emu_loop(FuriHalNfcTxRxContext* tx_rx, FuriHalNfcDevData* nfc_data, Nf
 void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, uint8_t length, NfcVSendFlags flags, uint32_t send_time);
 
 
-
+#ifdef __cplusplus
+}
+#endif
