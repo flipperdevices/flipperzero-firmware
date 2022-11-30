@@ -247,7 +247,8 @@ bool lfrfid_delete_key(LfRfid* app) {
 }
 
 bool lfrfid_load_key_data(LfRfid* app, FuriString* path, bool show_dialog) {
-    if(lfrfid_dict_file_load(app->dict, furi_string_get_cstr(path)) != PROTOCOL_NO) {
+    app->protocol_id = lfrfid_dict_file_load(app->dict, furi_string_get_cstr(path));
+    if(app->protocol_id != PROTOCOL_NO) {
         path_extract_filename(path, app->file_name, true);
         return true;
     }
