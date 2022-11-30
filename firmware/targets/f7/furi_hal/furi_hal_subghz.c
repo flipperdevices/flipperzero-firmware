@@ -581,6 +581,7 @@ static void furi_hal_subghz_async_tx_timer_isr() {
         if(LL_TIM_GetAutoReload(TIM2) == 0) {
             if(furi_hal_subghz.state == SubGhzStateAsyncTx) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxLast;
+                LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
             } else if(furi_hal_subghz.state == SubGhzStateAsyncTxLast) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 //forcibly pulls the pin to the ground so that there is no carrier
@@ -634,9 +635,6 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
 
-    furi_hal_subghz_async_tx_refill(
-        furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
-
     // Configure TIM2
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     TIM_InitStruct.Prescaler = 64 - 1;
@@ -659,6 +657,9 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     LL_TIM_DisableMasterSlaveMode(TIM2);
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_subghz_async_tx_timer_isr, NULL);
+
+    furi_hal_subghz_async_tx_refill(
+        furi_hal_subghz_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
 
     LL_TIM_EnableDMAReq_UPDATE(TIM2);
     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
