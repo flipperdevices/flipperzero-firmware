@@ -87,9 +87,9 @@ if __name__ == '__main__':
             f'Preamble: {preamble}',
             f'Address: {address_length} bytes - {bin2hex(address)}',
             f'Payload length in packet: {int(payload_length, 2)}, used: {(payload_len_default if int(payload_length, 2) > 32 else int(payload_length, 2))}',
-            f'Payload: {bin2hex(payload)}',
             f'Pid: {int(pid, 2)}',
             f'No_ack: {int(no_ack, 2) == 1}',
+            f'Payload: {bin2hex(payload)}',
             f'CRC{crc_size}: {crc_received}')))
         crc_calculated = hex(crc(address + payload_length + pid + no_ack + payload, size=crc_size))
         if crc_received == crc_calculated:
