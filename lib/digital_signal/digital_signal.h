@@ -42,6 +42,7 @@ typedef struct {
     bool* signals_prolonged;
     uint8_t* sequence;
     const GpioPin* gpio;
+    uint32_t send_time;
 } DigitalSequence;
 
 
@@ -69,6 +70,7 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio);
 DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio);
 void digital_sequence_free(DigitalSequence* sequence);
 void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index, DigitalSignal* signal);
+void digital_sequence_set_sendtime(DigitalSequence* sequence, uint32_t send_time);
 void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index);
 bool digital_sequence_send(DigitalSequence* sequence);
 void digital_sequence_clear(DigitalSequence* sequence);
