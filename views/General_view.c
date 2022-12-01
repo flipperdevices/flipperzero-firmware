@@ -293,9 +293,14 @@ static bool _input_callback(InputEvent* event, void* context) {
             app->sensors_ready = false;
             unitemp_SensorsList_switch();
         } else if(current_view == G_LIST_VIEW) {
-            //Вход в главное меню по короткому нажатию "ок"
-            app->sensors_ready = false;
-            unitemp_MainMenu_switch();
+            if(selector) {
+                //Переход в карусель
+                current_view = G_CAROUSEL_VIEW;
+            } else {
+                //Переход в главное меню при выключенном селекторе
+                app->sensors_ready = false;
+                unitemp_MainMenu_switch();
+            }
         }
     }
 
@@ -319,22 +324,28 @@ static bool _input_callback(InputEvent* event, void* context) {
         }
     }
 
-    // //Пролистывание карусели по короткому нажатию "право"
-    // if(event->key == InputKeyRight && event->type == InputTypeShort) {
-    // }
-    // //Пролистывание карусели по короткому нажатию "лево"
-    // if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-    // }
+    //Обработка короткого нажатия "вправо"
+    if(event->key == InputKeyRight && event->type == InputTypeShort) {
+        //Пролистывание карусели вперёд
+        if(current_view == G_CAROUSEL_VIEW) {
+            if(++sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
+        }
+    }
+    //Обработка короткого нажатия "влево"
+    if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+        //Пролистывание карусели назад
+        if(current_view == G_CAROUSEL_VIEW) {
+            if(--sensor_index >= unitemp_sensors_getCount())
+                sensor_index = unitemp_sensors_getCount() - 1;
+        }
+    }
 
-    // //Редактирование датчика при длинном нажатии "ок"
-    // if(event->key == InputKeyOk && event->type == InputTypeLong) {
-    //     app->sensors_ready = false;
-    //     unitemp_SensorEdit_switch(app->sensors[sensor_index]);
-    // }
-
-    //Выход по короткому нажатию "назад"
+    //Обработка короткого нажатия "назад"
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        app->processing = false;
+        //Выход из приложения при виде списка датчиков
+        if(current_view == G_LIST_VIEW) app->processing = false;
+        //Переход в список датчиков
+        if(current_view == G_CAROUSEL_VIEW) current_view = G_LIST_VIEW;
     }
 
     return true;
