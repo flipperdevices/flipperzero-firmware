@@ -120,25 +120,21 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 }
 
 static void _draw_view_noSensors(Canvas* canvas) {
-    canvas_draw_icon(canvas, 6, 31, &I_Error_62x31);
-    canvas_invert_color(canvas);
-    canvas_draw_box(canvas, 53, 40, 15, 15);
-    canvas_invert_color(canvas);
-    canvas_draw_str(canvas, 20, 28, "?");
+    canvas_draw_icon(canvas, 7, 17, &I_sherlok);
     //Рисование рамки
     canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 63, 10, AlignCenter, AlignCenter, "No sensors found");
     canvas_set_font(canvas, FontSecondary);
-    const uint8_t x = 64, y = 32;
-    canvas_draw_rframe(canvas, x - 4, y - 11, 54, 35, 3);
-    canvas_draw_rframe(canvas, x - 4, y - 11, 54, 36, 3);
+    const uint8_t x = 65, y = 32;
+    canvas_draw_rframe(canvas, x - 4, y - 11, 54, 33, 3);
+    canvas_draw_rframe(canvas, x - 4, y - 11, 54, 34, 3);
     canvas_draw_str(canvas, x, y, "To add the");
-    canvas_draw_str(canvas, x, y + 10, "new sensor");
-    canvas_draw_str(canvas, x, y + 20, "press OK");
+    canvas_draw_str(canvas, x, y + 9, "new sensor");
+    canvas_draw_str(canvas, x, y + 18, "press OK");
 
-    canvas_draw_icon(canvas, x + 37, y + 12, &I_Ok_btn_9x9);
+    canvas_draw_icon(canvas, x + 37, y + 10, &I_Ok_btn_9x9);
 }
 
 static void _draw_view_sensorsList(Canvas* canvas) {
