@@ -306,13 +306,7 @@ void nfcv_emu_send(FuriHalNfcTxRxContext* tx_rx, NfcVData* nfcv, uint8_t* data, 
     }
 
     FURI_CRITICAL_ENTER();
-    while(true) {
-        uint32_t delta = send_time - DWT->CYCCNT;
-
-        if(delta > 0x80000000) {
-            break;
-        }
-    }
+    digital_sequence_set_sendtime(nfcv->emu_air.nfcv_signal, send_time);
     digital_sequence_send(nfcv->emu_air.nfcv_signal);
     FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);

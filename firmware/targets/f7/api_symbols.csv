@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,7.39,,
+Version,+,7.40,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -108,6 +108,7 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_tim.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
+Header,+,lib/digital_signal/digital_signal.h,,
 Header,+,lib/flipper_application/flipper_application.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
 Header,+,lib/flipper_format/flipper_format_i.h,,
@@ -156,6 +157,7 @@ Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_host_timing.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
 Header,+,lib/print/wrappers.h,,
+Header,+,lib/pulse_reader/pulse_reader.h,,
 Header,+,lib/subghz/blocks/const.h,,
 Header,+,lib/subghz/blocks/decoder.h,,
 Header,+,lib/subghz/blocks/encoder.h,,
@@ -712,6 +714,7 @@ Function,+,digital_sequence_alloc,DigitalSequence*,"uint32_t, const GpioPin*"
 Function,+,digital_sequence_clear,void,DigitalSequence*
 Function,+,digital_sequence_free,void,DigitalSequence*
 Function,+,digital_sequence_send,_Bool,DigitalSequence*
+Function,+,digital_sequence_set_sendtime,void,"DigitalSequence*, uint32_t"
 Function,+,digital_sequence_set_signal,void,"DigitalSequence*, uint8_t, DigitalSignal*"
 Function,+,digital_signal_add,void,"DigitalSignal*, uint32_t"
 Function,+,digital_signal_add_pulse,void,"DigitalSignal*, uint32_t, _Bool"
