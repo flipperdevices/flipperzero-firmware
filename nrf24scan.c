@@ -899,16 +899,18 @@ int32_t nrf24scan_app(void* p) {
 						} else if(what_doing == 1) {
 							what_doing = 2;
 						}
-					} else if(event.input.type == InputTypeRelease && key_press_seq_ok != event.input.sequence) {
-						if(what_doing == 0) {
-							if(menu_selected == Menu_enter_channel) {
-								if(NRF_ESB) {
-									if(NRF_DPL) NRF_DPL = NRF_ESB = 0; else NRF_DPL = 1;
-								} else NRF_ESB = 1;
-								//if(NRF_ESB) view_log_decode_PCF = 0;
+					} else if(event.input.type == InputTypeRelease) {
+						if(key_press_seq_ok != event.input.sequence) {
+							if(what_doing == 0) {
+								if(menu_selected == Menu_enter_channel) {
+									if(NRF_ESB) {
+										if(NRF_DPL) NRF_DPL = NRF_ESB = 0; else NRF_DPL = 1;
+									} else NRF_ESB = 1;
+									//if(NRF_ESB) view_log_decode_PCF = 0;
+								}
+							} else if(what_doing == 1) { // Send
+								nrf24_send_packet();
 							}
-						} else if(what_doing == 1) { // Send
-							nrf24_send_packet();
 						}
 						key_press_seq_ok--;
 					}
