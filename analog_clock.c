@@ -59,7 +59,7 @@ static void analog_clock_app_draw_callback(Canvas* canvas, void* context) {
         canvas_draw_str_aligned(canvas, pos.x, pos.y, AlignCenter, AlignCenter, str);
     }
 
-    Vector2 hour_vec = angle_to_vector2((app->date_time.hour / 24.f * 360.f), RADIUS - 8);
+    Vector2 hour_vec = angle_to_vector2(((app->date_time.hour % 12) / 12.f * 360.f), RADIUS - 8);
     canvas_draw_line(canvas, CENTER_X, CENTER_Y, hour_vec.x, hour_vec.y);
 
     Vector2 minute_vec = angle_to_vector2((app->date_time.minute / 60.f * 360.f), RADIUS - 4);
