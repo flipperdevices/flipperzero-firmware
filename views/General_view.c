@@ -5,7 +5,18 @@
 static View* view;
 
 static uint8_t sensor_index = 0;
+static bool selector = false;
+static uint32_t lastSelectTime = 0;
+static const uint16_t selector_timeout = 2000;
 static char buff[7];
+
+typedef enum general_views {
+    G_NO_SENSORS_VIEW, //Нет датчиков
+    G_LIST_VIEW, //Вид в ввиде списка
+    G_CAROUSEL_VIEW, //Карусель
+} general_view;
+
+static general_view current_view;
 
 static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t y, Color color) {
     //Рисование рамки
@@ -120,7 +131,7 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 }
 
 static void _draw_view_noSensors(Canvas* canvas) {
-    canvas_draw_icon(canvas, 7, 17, &I_sherlok);
+    canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x55);
     //Рисование рамки
     canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);
@@ -160,6 +171,13 @@ static void _draw_view_sensorsList(Canvas* canvas) {
         canvas_draw_icon(canvas, 60, 56, &I_arrow_down_5x9);
     }
 
+    //Включение/выключение селектора
+    if(furi_get_tick() - lastSelectTime > selector_timeout) {
+        selector = false;
+    } else {
+        selector = true;
+    }
+
     const uint8_t value_positions[][4][2] = {
         {{36, 18}}, //1 датчик
         {{4, 18}, {70, 18}}, //2 датчика
@@ -173,7 +191,7 @@ static void _draw_view_sensorsList(Canvas* canvas) {
             canvas,
             app->sensors[page * 4 + i],
             value_positions[page_sensors_count - 1][i],
-            (i == sensor_index % 4 ? ColorBlack : ColorWhite));
+            ((i == sensor_index % 4) && selector ? ColorBlack : ColorWhite));
     }
 }
 
@@ -256,50 +274,67 @@ static void _draw_callback(Canvas* canvas, void* _model) {
     uint8_t sensors_count = unitemp_sensors_getCount();
 
     if(sensors_count == 0) {
+        current_view = G_NO_SENSORS_VIEW;
         _draw_view_noSensors(canvas);
+    } else {
+        if(current_view == G_NO_SENSORS_VIEW) current_view = G_LIST_VIEW;
+        if(current_view == G_LIST_VIEW) _draw_view_sensorsList(canvas);
+        if(current_view == G_CAROUSEL_VIEW) _draw_view_sensorsCarousel(canvas);
     }
-    if(sensors_count > 0) {
-        _draw_view_sensorsList(canvas);
-    }
-    if(0) _draw_view_sensorsCarousel(canvas);
 }
 
 static bool _input_callback(InputEvent* event, void* context) {
     Unitemp* app = context;
 
+    //Обработка короткого нажатия "ок"
+    if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        //Меню добавления датчика при их отсутствии
+        if(current_view == G_NO_SENSORS_VIEW) {
+            app->sensors_ready = false;
+            unitemp_SensorsList_switch();
+        } else if(current_view == G_LIST_VIEW) {
+            //Вход в главное меню по короткому нажатию "ок"
+            app->sensors_ready = false;
+            unitemp_MainMenu_switch();
+        }
+    }
+
+    //Обработка короткого нажатия "вниз"
+    if(event->key == InputKeyDown && event->type == InputTypeShort) {
+        //Листание селектора вниз в режиме списка
+        if(current_view == G_LIST_VIEW) {
+            lastSelectTime = furi_get_tick();
+            if(selector) sensor_index++;
+            if(sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
+        }
+    }
+    //Обработка короткого нажатия "вверх"
+    if(event->key == InputKeyUp && event->type == InputTypeShort) {
+        //Листание селектора вверх в режиме списка
+        if(current_view == G_LIST_VIEW) {
+            lastSelectTime = furi_get_tick();
+            if(selector) sensor_index--;
+            if(sensor_index >= unitemp_sensors_getCount())
+                sensor_index = unitemp_sensors_getCount() - 1;
+        }
+    }
+
+    // //Пролистывание карусели по короткому нажатию "право"
+    // if(event->key == InputKeyRight && event->type == InputTypeShort) {
+    // }
+    // //Пролистывание карусели по короткому нажатию "лево"
+    // if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+    // }
+
+    // //Редактирование датчика при длинном нажатии "ок"
+    // if(event->key == InputKeyOk && event->type == InputTypeLong) {
+    //     app->sensors_ready = false;
+    //     unitemp_SensorEdit_switch(app->sensors[sensor_index]);
+    // }
+
     //Выход по короткому нажатию "назад"
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         app->processing = false;
-    }
-
-    //Пролистывание списка по короткому нажатию "вниз"
-    if(event->key == InputKeyDown && event->type == InputTypeShort) {
-        if(++sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
-    }
-    //Пролистывание списка по короткому нажатию "вверх"
-    if(event->key == InputKeyUp && event->type == InputTypeShort) {
-        if(--sensor_index >= unitemp_sensors_getCount())
-            sensor_index = unitemp_sensors_getCount() - 1;
-    }
-
-    //Пролистывание карусели по короткому нажатию "право"
-    if(event->key == InputKeyRight && event->type == InputTypeShort) {
-        if(++sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
-    }
-    //Пролистывание карусели по короткому нажатию "лево"
-    if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-        if(--sensor_index >= unitemp_sensors_getCount())
-            sensor_index = unitemp_sensors_getCount() - 1;
-    }
-    //Вход в главное меню по короткому нажатию "ок"
-    if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        app->sensors_ready = false;
-        unitemp_MainMenu_switch();
-    }
-    //Редактирование датчика при длинном нажатии "ок"
-    if(event->key == InputKeyOk && event->type == InputTypeLong) {
-        app->sensors_ready = false;
-        unitemp_SensorEdit_switch(app->sensors[sensor_index]);
     }
 
     return true;
