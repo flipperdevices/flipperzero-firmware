@@ -11,7 +11,8 @@
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
 #include <nrf24.h>
-#include <u8g2.h>
+
+static uint8_t xxx = -1;
 
 #define TAG 		"nrf24scan"
 #define VERSION		"1.5"
@@ -87,7 +88,7 @@ int16_t find_channel_period = 0; // sec
 uint8_t menu_selected = 0;
 uint32_t start_time; 
 uint8_t view_log_decode_PCF = 0;	// view log: 1 - decode packet control field (9b) when ESB off. After pipe # (hex): <Payload len 6b><PID_2b+NO_ACK_1b>
-uint8_t view_log_decode_CRC = 0;	// CRC bytes - 1/2, 0 - none
+uint8_t view_log_decode_CRC = 0;	// CRC bytes, 0 - none
 
 #define menu_selected_max 5
 enum {
@@ -315,7 +316,7 @@ static uint8_t load_settings_file(Stream* file_stream) {
 				*(end_ptr - 1) = '\0';
 				line_len--;
 			}
-			//FURI_LOG_D(TAG, " L#%d: [%d]%s", line_num, line_len, line_ptr);
+			FURI_LOG_D(TAG, " L#%d: [%d]%s", line_num, line_len, line_ptr);
 			if(strncmp(line_ptr, SettingsFld_Rate, sizeof(SettingsFld_Rate)-1) == 0) {
 				NRF_rate = atoi(line_ptr + sizeof(SettingsFld_Rate));
 			} else if(strncmp(line_ptr, SettingsFld_Ch, sizeof(SettingsFld_Ch)-1) == 0) {
@@ -335,12 +336,12 @@ static uint8_t load_settings_file(Stream* file_stream) {
 				switch(a) {
 					case '0':
 						addrs.addr_len = ConvertHexToArray(line_ptr, addrs.addr_P0, 5);
-						//FURI_LOG_D(TAG, " +Addr(%d): %02X%02X%02X...", addrs.addr_len, addrs.addr_P0[0], addrs.addr_P0[1], addrs.addr_P0[2]);
+						FURI_LOG_D(TAG, " +Addr(%d): %02X%02X%02X...", addrs.addr_len, addrs.addr_P0[0], addrs.addr_P0[1], addrs.addr_P0[2]);
 						if(addrs.addr_len >= 2) err = 0;
 						break;
 					case '1':
 						ConvertHexToArray(line_ptr, addrs.addr_P1, 5);
-						//FURI_LOG_D(TAG, " +Addr: %02X%02X%02X...", addrs.addr_P0[1], addrs.addr_P1[1], addrs.addr_P1[2]);
+						FURI_LOG_D(TAG, " +Addr: %02X%02X%02X...", addrs.addr_P0[1], addrs.addr_P1[1], addrs.addr_P1[2]);
 						break;
 					case '2':
 						ConvertHexToArray(line_ptr, &addrs.addr_P2, 1);
@@ -542,7 +543,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 			if(NRF_DPL) strcat(screen_buf, " DPL");
 			canvas_draw_str(canvas, 80, 20, screen_buf);
 		}
-		if(NRF_AA_OFF) { canvas_draw_str(canvas, 61, 20, "AA"); canvas_draw_line(canvas, 60, 21, 72, 12); }
+		if(NRF_AA_OFF) { canvas_draw_str(canvas, 61, 20, "AA"); canvas_draw_line(canvas, 60, 19, 72, 11); }
 		snprintf(screen_buf, sizeof(screen_buf), "Rate: %sbps",  NRF_rate == 2 ? "2M" : NRF_rate == 1 ? "1M" : "250K");	// menu_selected = 2
 		canvas_draw_str(canvas, 10, 30, screen_buf);
 		snprintf(screen_buf, sizeof(screen_buf), "Payload: %d", NRF_Payload);
@@ -550,8 +551,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 		strcpy(screen_buf, "Next Ch time: ");																			// menu_selected = 3
 		if(find_channel_period == 0) strcat(screen_buf, "off"); else snprintf(screen_buf + strlen(screen_buf), sizeof(screen_buf), "%d s", find_channel_period);
 		canvas_draw_str(canvas, 10, 40, screen_buf);
-		if(NRF_CRC == 1) canvas_draw_str(canvas, 99, 40, "CRC1");
-		else if(NRF_CRC == 2) canvas_draw_str(canvas, 99, 40, "CRC2");
+		if(NRF_CRC == 1) canvas_draw_str(canvas, 95, 40, "CRC1");
+		else if(NRF_CRC == 2) canvas_draw_str(canvas, 95, 40, "CRC2");
 		snprintf(screen_buf, sizeof(screen_buf), "Log: %s", log_to_file == 0 ? "No" : log_to_file == 1 ? "Yes" : log_to_file == 2 ? "Append" : "Clear");// menu_selected = 4
 		canvas_draw_str(canvas, 10, 50, screen_buf);
 		if(what_to_do) {
@@ -584,27 +585,25 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 				dpl >>= 3;
 				if(dpl == 0) dpl = 32;
 				int count = dpl - view_log_arr_x;
-				if(view_log_decode_PCF) count--;
 				uint8_t max_width = VIEW_LOG_WIDTH_B;
 				if(view_log_arr_x == 0) {
 					if(addrs.addr_count > 1) max_width--;
 					if(view_log_decode_PCF) max_width -= 2; 
-				}
+				} else if(view_log_decode_PCF) max_width--; 
 				if(count > max_width) count = max_width;
 				ptr += view_log_arr_x;
 				uint8_t *crcptr = NULL;
-				uint8_t pre = 0;
+				static uint16_t prev_addr_CRC;
+				static int8_t prev_pipe = -1;
 				if(count > 0) {
 					if(view_log_decode_CRC) {
-						static uint16_t prev_addr_CRC;
-						static int8_t prev_pipe = -1;
 						uint8_t *pcrc = APP->log_arr + (page + i) * LOG_REC_SIZE + 1;
 						uint16_t crc;
-						if(prev_pipe == pipe) { crc = prev_addr_CRC;
+						if(prev_pipe == pipe) crc = prev_addr_CRC;
 						} else {
 							crc = view_log_decode_CRC == 2 ? 0xFFFF : 0xFF;
-							if(pipe <= 1) { crc = calc_crc(crc, pipe == 0 ? addrs.addr_P0 : addrs.addr_P1, 7, addrs.addr_len * 8);
-							} else {
+							if(pipe <= 1) crc = calc_crc(crc, pipe == 0 ? addrs.addr_P0 : addrs.addr_P1, 7, addrs.addr_len * 8);
+							else {
 								crc = calc_crc(crc, addrs.addr_P1, 7, (addrs.addr_len - 1) * 8);
 								crc = calc_crc(crc, pipe == 2 ? &addrs.addr_P2 : pipe == 3 ? &addrs.addr_P3 : pipe == 4 ? &addrs.addr_P4 : &addrs.addr_P5, 7, 8);
 							}
@@ -614,9 +613,18 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 						if(view_log_decode_PCF) {
 							crc = calc_crc(crc, pcrc++, 7, 9);
 							if(crc == get_shifted_crc(pcrc)) crcptr = pcrc;
+
+if(xxx != view_log_arr_idx && view_log_arr_idx == (page + i)) FURI_LOG_D(TAG, ">> %02X %02X. CRC: %04X == %04X", *pcrc, *(pcrc+1), crc, get_shifted_crc(pcrc));
+
+
 							if(crcptr == NULL) {
 								for(int8_t j = 0; j < (int8_t)dpl - view_log_decode_CRC - 1; j++) {
 									crc = calc_crc(crc, pcrc++, 6, 8);
+
+
+if(xxx != view_log_arr_idx && view_log_arr_idx == (page + i)) FURI_LOG_D(TAG, "CRC: %04X == %04X", crc, get_shifted_crc(pcrc));
+
+
 									if(crc == get_shifted_crc(pcrc)) {
 										crcptr = pcrc;
 										break;
@@ -632,37 +640,28 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 								}
 							}
 						}
+
+if(xxx != view_log_arr_idx && view_log_arr_idx == (page + i)) xxx = view_log_arr_idx;
+
 					}
 					if(max_width < VIEW_LOG_WIDTH_B) {
-						pre += snprintf(screen_buf + 1, 10, "%X-", pipe);
+						snprintf(screen_buf + 1, 10, "%X-", pipe);
 						if(view_log_decode_PCF) {
-							pre += snprintf(screen_buf + strlen(screen_buf), 10, "%02X%01X-", *ptr >> 2, ((*ptr & 3) << 1) | (*(ptr+1) >> 7));
+							snprintf(screen_buf + strlen(screen_buf), 10, "%02X%01X-", *ptr >> 2, ((*ptr & 3) << 1) | (*(ptr+1) >> 7));
 						}
 					}
 					if(view_log_decode_PCF) add_to_str_hex_bytes_shift_9b(screen_buf, ptr, count); else add_to_str_hex_bytes(screen_buf, ptr, count);
 				}
-				uint16_t y = 14 + i * 7;
+				uint8_t y = 14 + i * 7;
 				canvas_draw_str(canvas, 3 * 5, y, screen_buf);
-				uint16_t x = snprintf(screen_buf, sizeof(screen_buf), "%d", page + i + 1);
+				snprintf(screen_buf, sizeof(screen_buf), "%d%c", page + i + 1, crcptr ? ':' : '.');
 				canvas_draw_str(canvas, 0, y, screen_buf);
-				if(crcptr) { // 5x7 font, 9 lines
-					canvas_draw_str(canvas, x * 5, y, "=");
-					int n = crcptr - (uint8_t*)ptr - 1;
- 					if(n > -view_log_decode_CRC && n < count) {
-						int len;
-						x = (4 + pre) * 5;
-						if(n < 0) {
-							len = view_log_decode_CRC + n;
-							n = 0;
-						} else {
-							len = MIN(view_log_decode_CRC, count - n);
-							x += n * 2 * 5;
-							canvas_draw_line(canvas, x - 1, y, x - 1, y - 1);
-						}
-						canvas_draw_line(canvas, x - 1, y, n = x + len * 2 * 5 - 1, y);
-						canvas_draw_line(canvas, n, y, n, y - 1);
-					}
-				} else canvas_draw_str(canvas, x * 5, y, ":");
+				if(crcptr && crcptr > (uint8_t*)ptr && crcptr - (uint8_t*)ptr < count) {
+					uint8_t x = 3 + crcptr - (uint8_t*)ptr;
+					if(max_width < VIEW_LOG_WIDTH_B) x++;
+					if(view_log_decode_PCF) x += 2;
+					canvas_draw_str(canvas, x * 5, y, view_log_decode_CRC == 2 ? "____" : "__");
+				}
 			}
 		}
 	} else {
@@ -793,7 +792,7 @@ int32_t nrf24scan_app(void* p) {
 									break;
 								case Menu_enter_rate:
 									NRF_Payload -= event.input.type == InputTypeRepeat ? 10 : 1;
-									if(NRF_Payload == 0 || NRF_Payload > 32) NRF_Payload = 1;
+									if(NRF_Payload == 0 || NRF_Payload > 32) NRF_Payload = 32;
 									break;
 								case Menu_enter_scan_period:
 									find_channel_period -= event.input.type == InputTypeRepeat ? 10 : 1;
