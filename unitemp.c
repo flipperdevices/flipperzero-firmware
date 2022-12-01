@@ -201,6 +201,7 @@ static bool unitemp_alloc(void) {
     unitemp_SensorsList_alloc();
     unitemp_SensorEdit_alloc();
     unitemp_SensorNameEdit_alloc();
+    unitemp_SensorActions_alloc();
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -211,6 +212,7 @@ static bool unitemp_alloc(void) {
  * @brief Освыбождение памяти после работы приложения
  */
 static void unitemp_free(void) {
+    unitemp_SensorActions_free();
     unitemp_SensorNameEdit_free();
     unitemp_SensorEdit_free();
     unitemp_SensorsList_free();

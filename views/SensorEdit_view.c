@@ -126,7 +126,7 @@ static uint32_t _exit_callback(void* context) {
 
     if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
     //Возврат предыдущий вид
-    return MAINMENU_VIEW;
+    return GENERAL_VIEW;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

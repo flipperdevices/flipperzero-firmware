@@ -11,6 +11,7 @@ typedef enum UnitempViews {
     SENSORSLIST_VIEW,
     SENSOREDIT_VIEW,
     SENSORNAMEEDIT_VIEW,
+    SENSORACTIONS_VIEW,
 
     VIEWS_COUNT
 } UnitempViews;
@@ -45,4 +46,9 @@ void unitemp_SensorEdit_free(void);
 void unitemp_SensorNameEdit_alloc(void);
 void unitemp_SensorNameEdit_switch(Sensor* sensor);
 void unitemp_SensorNameEdit_free(void);
+
+/* Список действий с датчиком */
+void unitemp_SensorActions_alloc(void);
+void unitemp_SensorActions_switch(Sensor* sensor);
+void unitemp_SensorActions_free(void);
 #endif

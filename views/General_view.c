@@ -301,6 +301,8 @@ static bool _input_callback(InputEvent* event, void* context) {
                 app->sensors_ready = false;
                 unitemp_MainMenu_switch();
             }
+        } else if(current_view == G_CAROUSEL_VIEW) {
+            unitemp_SensorActions_switch(app->sensors[sensor_index]);
         }
     }
 
