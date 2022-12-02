@@ -175,6 +175,23 @@ bool unitemp_onewire_CRC_check(uint8_t* data, uint8_t len) {
     return !crc;
 }
 
+char* unitemp_onewire_sensor_getModel(Sensor* sensor) {
+    OneWireSensor* ow_sensor = sensor->instance;
+    switch(ow_sensor->deviceID[0]) {
+    case FC_DS18B20:
+        return "DS18B20";
+        break;
+    case FC_DS18S20:
+        return "DS18S20";
+        break;
+    case FC_DS1822:
+        return "DS1822";
+        break;
+    default:
+        return "unknown";
+    }
+}
+
 bool unitemp_onewire_sensor_readID(OneWireSensor* instance) {
     if(!unitemp_onewire_bus_start(instance->bus)) return false;
     unitemp_onewire_bus_send_byte(instance->bus, 0x33); // Чтение ПЗУ

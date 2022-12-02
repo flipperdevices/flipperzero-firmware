@@ -5,13 +5,14 @@
 
 //Виды менюшек
 typedef enum UnitempViews {
-    GENERAL_VIEW,
-    MAINMENU_VIEW,
-    SETTINGS_VIEW,
-    SENSORSLIST_VIEW,
-    SENSOREDIT_VIEW,
-    SENSORNAMEEDIT_VIEW,
-    SENSORACTIONS_VIEW,
+    VIEW_GENERAL,
+    VIEW_MAIN_MENU,
+    VIEW_SETTINGS,
+    VIEW_SENSORS_LIST,
+    VIEW_SENSOR_EDIT,
+    VIEW_SENSOR_NAME_EDIT,
+    VIEW_SENSOR_ACTIONS,
+    VIEW_SENSOR_INFO,
 
     VIEWS_COUNT
 } UnitempViews;
@@ -51,4 +52,5 @@ void unitemp_SensorNameEdit_free(void);
 void unitemp_SensorActions_alloc(void);
 void unitemp_SensorActions_switch(Sensor* sensor);
 void unitemp_SensorActions_free(void);
+
 #endif

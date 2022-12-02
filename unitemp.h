@@ -9,7 +9,6 @@
 //Экран
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
-#include <gui/modules/widget.h>
 //Уведомления
 #include <notification/notification.h>
 #include <notification/notification_messages.h>

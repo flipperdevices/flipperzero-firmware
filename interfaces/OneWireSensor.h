@@ -160,6 +160,14 @@ void unitemp_onewire_bus_read_byteArray(OneWireBus* bus, uint8_t* data, uint8_t 
 bool unitemp_onewire_CRC_check(uint8_t* data, uint8_t len);
 
 /**
+ * @brief Получить имя модели датчика на шине One Wire
+ * 
+ * @param sensor Указатель на датчик
+ * @return Указатель на строку с названием
+ */
+char* unitemp_onewire_sensor_getModel(Sensor* sensor);
+
+/**
  * @brief Чтение индификатора единственного датчика. ID запишется в инстанс датчика
  * 
  * @param instance Указатель на инстанс датчика

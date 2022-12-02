@@ -2,19 +2,30 @@
 #include "unitemp_icons.h"
 
 #include <assets_icons.h>
-static View* view;
 
-static uint8_t sensor_index = 0;
-static bool selector = false;
-static uint32_t lastSelectTime = 0;
-static const uint16_t selector_timeout = 2000;
-static char buff[7];
+#define BUFF_SIZE 17
+
+static View* view;
 
 typedef enum general_views {
     G_NO_SENSORS_VIEW, //Нет датчиков
     G_LIST_VIEW, //Вид в ввиде списка
     G_CAROUSEL_VIEW, //Карусель
 } general_view;
+
+typedef enum carousel_info {
+    CAROUSEL_VALUES, //Отображение значений датчиков
+    CAROUSEL_INFO, //Отображение информации о датчике
+} carousel_info;
+
+static uint8_t sensor_index = 0;
+static bool selector = false;
+static uint32_t lastSelectTime = 0;
+static const uint16_t selector_timeout = 2000;
+
+static carousel_info carousel_info_selector = CAROUSEL_VALUES;
+
+static char* buff;
 
 static general_view current_view;
 
@@ -37,10 +48,10 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
         canvas, x + 3, y + 3, (app->settings.unit == CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
     if((int16_t)sensor->temp == -128 || sensor->status == UT_TIMEOUT) {
-        snprintf(buff, 5, "--");
+        snprintf(buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, x + 27, y + 10, AlignCenter, AlignCenter, buff);
-        snprintf(buff, 4, ". -");
+        snprintf(buff, BUFF_SIZE, ". -");
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, x + 50, y + 10 + 3, AlignRight, AlignCenter, buff);
         if(color == ColorBlack) canvas_invert_color(canvas);
@@ -48,14 +59,14 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
     }
 
     //Целая часть температуры
-    snprintf(buff, 7, "%d", temp_int);
+    snprintf(buff, BUFF_SIZE, "%d", temp_int);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
         canvas, x + 27 + ((temp_int <= -10) ? 5 : 0), y + 10, AlignCenter, AlignCenter, buff);
     //Печать дробной части температуры в диапазоне от -9 до 99 (когда два знака в числе)
     if(temp_int > -10 && temp_int <= 99) {
         uint8_t int_len = canvas_string_width(canvas, buff);
-        snprintf(buff, 4, ".%d", temp_dec);
+        snprintf(buff, BUFF_SIZE, ".%d", temp_dec);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, x + 27 + int_len / 2 + 2, y + 10 + 7, buff);
     }
@@ -71,10 +82,10 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
     canvas_draw_icon(canvas, pos[0] + 3, pos[1] + 2, &I_hum_9x15);
 
     if((int8_t)sensor->hum == -128 || sensor->status == UT_TIMEOUT) {
-        snprintf(buff, 5, "--");
+        snprintf(buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, buff);
-        snprintf(buff, 4, ". -");
+        snprintf(buff, BUFF_SIZE, ". -");
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(
             canvas, pos[0] + 50, pos[1] + 10 + 3, AlignRight, AlignCenter, buff);
@@ -82,7 +93,7 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
     }
 
     //Целая часть влажности
-    snprintf(buff, 5, "%d", (uint8_t)sensor->hum);
+    snprintf(buff, BUFF_SIZE, "%d", (uint8_t)sensor->hum);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, buff);
     uint8_t int_len = canvas_string_width(canvas, buff);
@@ -101,7 +112,7 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
     canvas_draw_icon(canvas, x + 3, y + 4, &I_pressure_7x13);
 
     //Давление
-    snprintf(buff, 6, "%d", (uint16_t)sensor->pressure);
+    snprintf(buff, BUFF_SIZE, "%d", (uint16_t)sensor->pressure);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(canvas, x + 30, y + 10, AlignCenter, AlignCenter, buff);
     //Единица измерения
@@ -131,7 +142,7 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 }
 
 static void _draw_view_noSensors(Canvas* canvas) {
-    canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x55);
+    canvas_draw_icon(canvas, BUFF_SIZE, 17, &I_sherlok_53x55);
     //Рисование рамки
     canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);
@@ -195,36 +206,15 @@ static void _draw_view_sensorsList(Canvas* canvas) {
     }
 }
 
-static void _draw_view_sensorsCarousel(Canvas* canvas) {
-    static const uint8_t temp_positions[3][2] = {{37, 23}, {37, 16}, {9, 16}};
-    static const uint8_t hum_positions[2][2] = {{37, 38}, {65, 16}};
-    //Рисование рамки
-    canvas_draw_rframe(canvas, 3, 0, 122, 63, 7);
-    canvas_draw_rframe(canvas, 3, 0, 122, 64, 7);
-
-    //Печать имени
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(
-        canvas, 64, 7, AlignCenter, AlignCenter, app->sensors[sensor_index]->name);
-    //Подчёркивание
-    uint8_t line_len = canvas_string_width(canvas, app->sensors[sensor_index]->name) + 2;
-    canvas_draw_line(canvas, 64 - line_len / 2, 12, 64 + line_len / 2, 12);
-
-    //Стрелка вправо
-    if(unitemp_sensors_getTypesCount() > 0 && sensor_index < unitemp_sensors_getCount() - 1) {
-        canvas_draw_icon(canvas, 117, 28, &I_arrow_right_5x9);
-    }
-    //Стрелка влево
-    if(sensor_index > 0) {
-        canvas_draw_icon(canvas, 6, 28, &I_arrow_left_5x9);
-    }
-
+static void _draw_carousel_values(Canvas* canvas) {
     if(app->sensors[sensor_index]->status == UT_TIMEOUT) {
         const Icon* frames[] = {&I_happy_2_78x46, &I_happy_78x46, &I_sad_78x46};
         canvas_draw_icon(canvas, 24, 15, frames[furi_get_tick() % 2250 / 750]);
         return;
     }
 
+    static const uint8_t temp_positions[3][2] = {{37, 23}, {37, 16}, {9, 16}};
+    static const uint8_t hum_positions[2][2] = {{37, 38}, {65, 16}};
     //Селектор значений для отображения
     switch(app->sensors[sensor_index]->type->datatype) {
     case UT_DATA_TYPE_TEMP:
@@ -262,6 +252,90 @@ static void _draw_view_sensorsCarousel(Canvas* canvas) {
             ColorWhite);
         _draw_humidity(canvas, app->sensors[sensor_index], hum_positions[1]);
         _draw_pressure(canvas, app->sensors[sensor_index]);
+        break;
+    }
+}
+static void _draw_carousel_info(Canvas* canvas) {
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 10, 23, "Type:");
+
+    if(app->sensors[sensor_index]->type->interface == &ONE_WIRE) {
+        OneWireSensor* s = app->sensors[sensor_index]->instance;
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 10, 35, "GPIO:");
+        canvas_draw_str(canvas, 10, 47, "ID:");
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(
+            canvas, 41, 23, unitemp_onewire_sensor_getModel(app->sensors[sensor_index]));
+        canvas_draw_str(canvas, 41, 35, s->bus->gpio->name);
+        snprintf(
+            buff,
+            BUFF_SIZE,
+            "%02X%02X%02X%02X%02X%02X%02X%02X",
+            s->deviceID[0],
+            s->deviceID[1],
+            s->deviceID[2],
+            s->deviceID[3],
+            s->deviceID[4],
+            s->deviceID[5],
+            s->deviceID[6],
+            s->deviceID[7]);
+        canvas_draw_str(canvas, 24, 47, buff);
+    }
+
+    if(app->sensors[sensor_index]->type->interface == &SINGLE_WIRE) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 10, 35, "GPIO:");
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 41, 23, app->sensors[sensor_index]->type->typename);
+        canvas_draw_str(
+            canvas, 41, 35, ((SingleWireSensor*)app->sensors[sensor_index]->instance)->gpio->name);
+    }
+
+    if(app->sensors[sensor_index]->type->interface == &I2C) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 10, 35, "I2C addr:");
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 41, 23, app->sensors[sensor_index]->type->typename);
+        snprintf(
+            buff,
+            BUFF_SIZE,
+            "0x%02X",
+            ((I2CSensor*)app->sensors[sensor_index]->instance)->currentI2CAdr);
+        canvas_draw_str(canvas, 57, 35, buff);
+    }
+}
+static void _draw_view_sensorsCarousel(Canvas* canvas) {
+    //Рисование рамки
+    canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
+    canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);
+
+    //Печать имени
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(
+        canvas, 64, 7, AlignCenter, AlignCenter, app->sensors[sensor_index]->name);
+    //Подчёркивание
+    uint8_t line_len = canvas_string_width(canvas, app->sensors[sensor_index]->name) + 2;
+    canvas_draw_line(canvas, 64 - line_len / 2, 12, 64 + line_len / 2, 12);
+
+    //Стрелка вправо
+    if(unitemp_sensors_getTypesCount() > 0 && sensor_index < unitemp_sensors_getCount() - 1) {
+        canvas_draw_icon(canvas, 120, 28, &I_arrow_right_5x9);
+    }
+    //Стрелка влево
+    if(sensor_index > 0) {
+        canvas_draw_icon(canvas, 3, 28, &I_arrow_left_5x9);
+    }
+
+    switch(carousel_info_selector) {
+    case CAROUSEL_VALUES:
+        _draw_carousel_values(canvas);
+        break;
+    case CAROUSEL_INFO:
+        _draw_carousel_info(canvas);
         break;
     }
 }
@@ -314,6 +388,9 @@ static bool _input_callback(InputEvent* event, void* context) {
             if(selector) sensor_index++;
             if(sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
         }
+        if(current_view == G_CAROUSEL_VIEW) {
+            carousel_info_selector = !carousel_info_selector;
+        }
     }
     //Обработка короткого нажатия "вверх"
     if(event->key == InputKeyUp && event->type == InputTypeShort) {
@@ -324,22 +401,31 @@ static bool _input_callback(InputEvent* event, void* context) {
             if(sensor_index >= unitemp_sensors_getCount())
                 sensor_index = unitemp_sensors_getCount() - 1;
         }
+        if(current_view == G_CAROUSEL_VIEW) {
+            carousel_info_selector = !carousel_info_selector;
+        }
     }
 
     //Обработка короткого нажатия "вправо"
     if(event->key == InputKeyRight && event->type == InputTypeShort) {
         //Пролистывание карусели вперёд
         if(current_view == G_CAROUSEL_VIEW) {
+            carousel_info_selector = CAROUSEL_VALUES;
             if(++sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
         }
+        //Переход в карусель
+        if(current_view == G_LIST_VIEW) current_view = G_CAROUSEL_VIEW;
     }
     //Обработка короткого нажатия "влево"
     if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         //Пролистывание карусели назад
         if(current_view == G_CAROUSEL_VIEW) {
+            carousel_info_selector = CAROUSEL_VALUES;
             if(--sensor_index >= unitemp_sensors_getCount())
                 sensor_index = unitemp_sensors_getCount() - 1;
         }
+        //Переход в карусель
+        if(current_view == G_LIST_VIEW) current_view = G_CAROUSEL_VIEW;
     }
 
     //Обработка короткого нажатия "назад"
@@ -359,14 +445,17 @@ void unitemp_General_alloc(void) {
     view_set_draw_callback(view, _draw_callback);
     view_set_input_callback(view, _input_callback);
 
-    view_dispatcher_add_view(app->view_dispatcher, GENERAL_VIEW, view);
+    view_dispatcher_add_view(app->view_dispatcher, VIEW_GENERAL, view);
+
+    buff = malloc(10);
 }
 
 void unitemp_General_switch(void) {
     app->sensors_ready = true;
-    view_dispatcher_switch_to_view(app->view_dispatcher, GENERAL_VIEW);
+    view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_GENERAL);
 }
 
 void unitemp_General_free(void) {
     view_free(view);
+    free(buff);
 }

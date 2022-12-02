@@ -7,7 +7,7 @@ static View* view;
 //Список
 static VariableItemList* variable_item_list;
 
-#define VIEW_ID SENSORSLIST_VIEW
+#define VIEW_ID VIEW_SENSORS_LIST
 
 /**
  * @brief Функция обработки нажатия кнопки "Назад"
@@ -19,7 +19,7 @@ static uint32_t _exit_callback(void* context) {
     UNUSED(context);
 
     //Возврат предыдущий вид
-    return MAINMENU_VIEW;
+    return VIEW_MAIN_MENU;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

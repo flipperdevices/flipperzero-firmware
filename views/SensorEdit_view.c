@@ -21,7 +21,7 @@ static VariableItem* onewire_addr_item;
 //Элемент списка - адрес датчика one wire
 static VariableItem* onewire_type_item;
 
-#define VIEW_ID SENSOREDIT_VIEW
+#define VIEW_ID VIEW_SENSOR_EDIT
 
 bool _onewire_id_exist(uint8_t* id) {
     if(id == NULL) return false;
@@ -96,19 +96,8 @@ static void _onewire_scan(void) {
             ow_sensor->deviceID[3]);
         //А больше не лезет(
         variable_item_set_current_value_text(onewire_addr_item, id_buff);
-        switch(ow_sensor->deviceID[0]) {
-        case FC_DS18B20:
-            variable_item_set_current_value_text(onewire_type_item, "DS18B20");
-            break;
-        case FC_DS18S20:
-            variable_item_set_current_value_text(onewire_type_item, "DS18S20");
-            break;
-        case FC_DS1822:
-            variable_item_set_current_value_text(onewire_type_item, "DS1822");
-            break;
-        default:
-            variable_item_set_current_value_text(onewire_type_item, "unknown");
-        }
+        variable_item_set_current_value_text(
+            onewire_type_item, unitemp_onewire_sensor_getModel(editable_sensor));
     } else {
         variable_item_set_current_value_text(onewire_addr_item, "empty");
         variable_item_set_current_value_text(onewire_type_item, editable_sensor->type->typename);
@@ -126,7 +115,7 @@ static uint32_t _exit_callback(void* context) {
 
     if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
     //Возврат предыдущий вид
-    return GENERAL_VIEW;
+    return VIEW_GENERAL;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

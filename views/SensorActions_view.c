@@ -9,7 +9,7 @@ static VariableItemList* variable_item_list;
 //Текущий датчик
 static Sensor* current_sensor;
 
-#define VIEW_ID SENSORACTIONS_VIEW
+#define VIEW_ID VIEW_SENSOR_ACTIONS
 
 /**
  * @brief Функция обработки нажатия кнопки "Назад"
@@ -21,7 +21,7 @@ static uint32_t _exit_callback(void* context) {
     UNUSED(context);
 
     //Возврат предыдущий вид
-    return GENERAL_VIEW;
+    return VIEW_GENERAL;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки
@@ -32,7 +32,7 @@ static uint32_t _exit_callback(void* context) {
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     switch(index) {
-    case 1:
+    case 0:
         unitemp_SensorEdit_switch(current_sensor);
         break;
     }
@@ -46,7 +46,6 @@ void unitemp_SensorActions_alloc(void) {
     //Сброс всех элементов меню
     variable_item_list_reset(variable_item_list);
 
-    variable_item_list_add(variable_item_list, "Info", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Edit", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Delete", 1, NULL, NULL);
 

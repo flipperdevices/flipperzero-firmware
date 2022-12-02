@@ -6,7 +6,7 @@ static TextInput* text_input;
 //Текущий редактируемый датчик
 static Sensor* editable_sensor;
 
-#define VIEW_ID SENSORNAMEEDIT_VIEW
+#define VIEW_ID VIEW_SENSOR_NAME_EDIT
 
 static void _sensor_name_changed_callback(void* context) {
     UNUSED(context);
