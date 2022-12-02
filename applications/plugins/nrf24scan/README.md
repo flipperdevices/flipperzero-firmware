@@ -1,7 +1,10 @@
 #  NRF24 scanner with logging and resend ability for Flipper Zero
 
-An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors. This library is not currently complete, but functional.
-
+An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors.<br>
+NRF24L01+ Enhanced ShockBurst packet decoder example using Python: [nrf24_packet_decoder.py](https://raw.githubusercontent.com/vad7/nrf24scan/master/nrf24_packet_decoder.py)<br>
+<br>
+Flipper Zero FAP file: [Nrf24_Scanner.fap](https://raw.githubusercontent.com/vad7/nrf24scan/master/Nrf24_Scanner.fap)<br>
+                                        
 Settings file (default addr.txt) format:<br>
 
 Rate: 0/1/2 - rate in Mbps (=0.25/1/2)<br>
@@ -31,15 +34,16 @@ Long press OK - view addresses.<br>
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-3.png">
 <br><br>
-Decode the Packet Control Field (long press OK in the list and then press '>').<br>
+Decode the Packet Control Field and check CRC (long press OK in the list and then press '<' / '>').<br>
 ESB (Enhanced Shockburst) option must be turned off.
+Press '>' to decode CRC.<br>
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-4.png">
 <br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-5.png">
 <br>
 1 - pipe #<br>
-2 - Payload length (for valide packet must be 1..20 hex, or 0x33 if not DPL)<br>
+2 - Payload length (for valide packet must be 1..20 or 33 hex)<br>
 3 - PID (2 bit) + NO_ACK (1 bit)<br>
 <br>
 <br>
