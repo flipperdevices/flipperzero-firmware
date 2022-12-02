@@ -5,10 +5,14 @@ SubGhz Bruteforcer from [Unleashed Firmware](https://github.com/DarkFlippers/unl
 ### Supported Protocols:
 - CAME 12bit 303MHz
 - CAME 12bit 307MHz
+- CAME 12bit 315MHz
 - CAME 12bit 433MHz
 - CAME 12bit 868MHz
 - NICE 12bit 433MHz
 - NICE 12bit 868MHz
+- Ansonic 12bit 433.075MHz
+- Ansonic 12bit 433.920MHz
+- Ansonic 12bit 434.075MHz
 - Chamberlain 9bit 300MHz
 - Chamberlain 9bit 315MHz
 - Chamberlain 9bit 390MHz
