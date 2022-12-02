@@ -16,7 +16,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/loading.h>
 
-#include <SubGHz_Bruteforcer_icons.h>
+#include "SubGHz_Bruteforcer_icons.h"
 
 #include <dialogs/dialogs.h>
 
@@ -28,6 +28,10 @@
 #include "helpers/subbrute_worker.h"
 #include "views/subbrute_attack_view.h"
 #include "views/subbrute_main_view.h"
+
+#ifdef FURI_DEBUG
+//#define SUBBRUTE_FAST_TRACK false
+#endif
 
 typedef enum {
     SubBruteViewNone,

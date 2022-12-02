@@ -3,13 +3,6 @@
 
 #define TAG "SubBruteSceneLoadFile"
 
-//void subbrute_scene_load_file_callback(SubBruteCustomEvent event, void* context) {
-////    furi_assert(context);
-////
-////    SubBruteState* instance = (SubBruteState*)context;
-////    view_dispatcher_send_custom_event(instance->view_dispatcher, event);
-//}
-
 void subbrute_scene_load_file_on_enter(void* context) {
     furi_assert(context);
     SubBruteState* instance = (SubBruteState*)context;
@@ -24,8 +17,14 @@ void subbrute_scene_load_file_on_enter(void* context) {
     dialog_file_browser_set_basic_options(&browser_options, SUBBRUTE_FILE_EXT, &I_sub1_10px);
 
     SubBruteFileResult load_result = SubBruteFileResultUnknown;
+    // TODO: DELETE IT
+#ifdef SUBBRUTE_FAST_TRACK
+    bool res = true;
+    furi_string_printf(load_path, "%s", "/ext/subghz/princeton.sub");
+#else
     bool res =
         dialog_file_browser_show(instance->dialogs, load_path, app_folder, &browser_options);
+#endif
 #ifdef FURI_DEBUG
     FURI_LOG_D(
         TAG,
@@ -44,11 +43,12 @@ void subbrute_scene_load_file_on_enter(void* context) {
             if(load_result == SubBruteFileResultOk) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
-                       instance->device->key_index,
-                       instance->device->load_index,
-                       instance->device->file_key,
+                       instance->device->current_step,
+                       instance->device->bit_index,
+                       instance->device->key_from_file,
                        instance->device->file_protocol_info,
-                       extra_repeats)) {
+                       extra_repeats,
+                       instance->device->two_bytes)) {
                     furi_crash("Invalid attack set!");
                 }
                 // Ready to run!

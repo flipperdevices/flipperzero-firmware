@@ -96,8 +96,11 @@ bool subbrute_worker_init_default_attack(
     instance->te = protocol->te;
     instance->repeat = protocol->repeat + extra_repeats;
     instance->load_index = 0;
-    instance->file_key = NULL;
-    instance->max_value = subbrute_protocol_calc_max_value(instance->attack, instance->bits);
+    instance->file_key = 0;
+    instance->two_bytes = false;
+
+    instance->max_value =
+        subbrute_protocol_calc_max_value(instance->attack, instance->bits, instance->two_bytes);
 
     instance->initiated = true;
     instance->state = SubBruteWorkerStateReady;
@@ -122,9 +125,10 @@ bool subbrute_worker_init_file_attack(
     SubBruteWorker* instance,
     uint64_t step,
     uint8_t load_index,
-    const char* file_key,
+    uint64_t file_key,
     SubBruteProtocol* protocol,
-    uint8_t extra_repeats) {
+    uint8_t extra_repeats,
+    bool two_bytes) {
     furi_assert(instance);
 
     if(instance->worker_running) {
@@ -142,7 +146,10 @@ bool subbrute_worker_init_file_attack(
     instance->load_index = load_index;
     instance->repeat = protocol->repeat + extra_repeats;
     instance->file_key = file_key;
-    instance->max_value = subbrute_protocol_calc_max_value(instance->attack, instance->bits);
+    instance->two_bytes = two_bytes;
+
+    instance->max_value =
+        subbrute_protocol_calc_max_value(instance->attack, instance->bits, instance->two_bytes);
 
     instance->initiated = true;
     instance->state = SubBruteWorkerStateReady;
@@ -150,14 +157,15 @@ bool subbrute_worker_init_file_attack(
 #ifdef FURI_DEBUG
     FURI_LOG_I(
         TAG,
-        "subbrute_worker_init_file_attack: %s, bits: %d, preset: %s, file: %s, te: %d, repeat: %d, max_value: %lld",
+        "subbrute_worker_init_file_attack: %s, bits: %d, preset: %s, file: %s, te: %d, repeat: %d, max_value: %lld, key: %llX",
         subbrute_protocol_name(instance->attack),
         instance->bits,
         subbrute_protocol_preset(instance->preset),
         subbrute_protocol_file(instance->file),
         instance->te,
         instance->repeat,
-        instance->max_value);
+        instance->max_value,
+        instance->file_key);
 #endif
 
     return true;
@@ -244,7 +252,8 @@ bool subbrute_worker_transmit_current_key(SubBruteWorker* instance, uint64_t ste
             instance->te,
             instance->repeat,
             instance->load_index,
-            instance->file_key);
+            instance->file_key,
+            instance->two_bytes);
     } else {
         subbrute_protocol_default_payload(
             stream, step, instance->bits, instance->te, instance->repeat);
@@ -373,7 +382,8 @@ int32_t subbrute_worker_thread(void* context) {
                 instance->te,
                 instance->repeat,
                 instance->load_index,
-                instance->file_key);
+                instance->file_key,
+                instance->two_bytes);
         } else {
             subbrute_protocol_default_payload(
                 stream, instance->step, instance->bits, instance->te, instance->repeat);

@@ -23,9 +23,14 @@ void subbrute_scene_start_on_enter(void* context) {
 
     instance->current_view = SubBruteViewMain;
     subbrute_main_view_set_callback(view, subbrute_scene_start_callback, instance);
-    subbrute_main_view_set_index(view, instance->device->attack, false, NULL);
+    subbrute_main_view_set_index(view, instance->device->attack, false, instance->device->two_bytes, 0);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
+
+    // TODO: DELETE IT
+#ifdef SUBBRUTE_FAST_TRACK
+    scene_manager_next_scene(instance->scene_manager, SubBruteSceneLoadFile);
+#endif
 }
 
 void subbrute_scene_start_on_exit(void* context) {
@@ -57,7 +62,7 @@ bool subbrute_scene_start_on_event(void* context, SceneManagerEvent event) {
                (!subbrute_worker_init_default_attack(
                    instance->worker,
                    attack,
-                   instance->device->key_index,
+                   instance->device->current_step,
                    instance->device->protocol_info,
                    instance->device->extra_repeats))) {
                 furi_crash("Invalid attack set!");

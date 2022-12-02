@@ -26,6 +26,7 @@ typedef enum {
 typedef enum {
     SubBruteAttackCAME12bit303,
     SubBruteAttackCAME12bit307,
+    SubBruteAttackCAME12bit315,
     SubBruteAttackCAME12bit433,
     SubBruteAttackCAME12bit868,
     SubBruteAttackNICE12bit433,
@@ -78,8 +79,9 @@ void subbrute_protocol_file_payload(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat,
-    uint8_t load_index,
-    const char* file_key);
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes);
 void subbrute_protocol_default_generate_file(
     Stream* stream,
     uint32_t frequency,
@@ -98,6 +100,8 @@ void subbrute_protocol_file_generate_file(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat,
-    uint8_t load_index,
-    const char* file_key);
-uint64_t subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits);
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes);
+uint64_t
+    subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits, bool two_bytes);

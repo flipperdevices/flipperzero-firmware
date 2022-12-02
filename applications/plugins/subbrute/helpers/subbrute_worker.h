@@ -28,9 +28,10 @@ bool subbrute_worker_init_file_attack(
     SubBruteWorker* instance,
     uint64_t step,
     uint8_t load_index,
-    const char* file_key,
+    uint64_t file_key,
     SubBruteProtocol* protocol,
-    uint8_t extra_repeats);
+    uint8_t extra_repeats,
+    bool two_bytes);
 bool subbrute_worker_start(SubBruteWorker* instance);
 void subbrute_worker_stop(SubBruteWorker* instance);
 bool subbrute_worker_transmit_current_key(SubBruteWorker* instance, uint64_t step);
