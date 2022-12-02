@@ -70,6 +70,39 @@ const SubBruteProtocol subbrute_protocol_nice_12bit_868 = {
     .file = NICEFileProtocol};
 
 /**
+ * Ansonic 12bit 433.075MHz
+ */
+const SubBruteProtocol subbrute_protocol_ansonic_12bit_433075 = {
+    .frequency = 433075000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPreset2FSKDev238Async,
+    .file = AnsonicFileProtocol};
+
+/**
+ * Ansonic 12bit 433.92MHz
+ */
+const SubBruteProtocol subbrute_protocol_ansonic_12bit_433 = {
+    .frequency = 433920000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPreset2FSKDev238Async,
+    .file = AnsonicFileProtocol};
+
+/**
+ * Ansonic 12bit 434.075MHz
+ */
+const SubBruteProtocol subbrute_protocol_ansonic_12bit_434 = {
+    .frequency = 434075000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPreset2FSKDev238Async,
+    .file = AnsonicFileProtocol};
+
+/**
  * Chamberlain 9bit 300MHz
  */
 const SubBruteProtocol subbrute_protocol_chamberlain_9bit_300 = {
@@ -214,6 +247,9 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit868] = "CAME 12bit 868MHz",
     [SubBruteAttackNICE12bit433] = "NICE 12bit 433MHz",
     [SubBruteAttackNICE12bit868] = "NICE 12bit 868MHz",
+    [SubBruteAttackAnsonic12bit433075] = "Ansonic 12bit 433.07MHz",
+    [SubBruteAttackAnsonic12bit433] = "Ansonic 12bit 433.92MHz",
+    [SubBruteAttackAnsonic12bit434] = "Ansonic 12bit 434.07MHz",
     [SubBruteAttackChamberlain9bit300] = "Chamberlain 9bit 300MHz",
     [SubBruteAttackChamberlain9bit315] = "Chamberlain 9bit 315MHz",
     [SubBruteAttackChamberlain9bit390] = "Chamberlain 9bit 390MHz",
@@ -247,6 +283,9 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackCAME12bit868] = &subbrute_protocol_came_12bit_868,
     [SubBruteAttackNICE12bit433] = &subbrute_protocol_nice_12bit_433,
     [SubBruteAttackNICE12bit868] = &subbrute_protocol_nice_12bit_868,
+    [SubBruteAttackAnsonic12bit433075] = &subbrute_protocol_ansonic_12bit_433075,
+    [SubBruteAttackAnsonic12bit433] = &subbrute_protocol_ansonic_12bit_433,
+    [SubBruteAttackAnsonic12bit434] = &subbrute_protocol_ansonic_12bit_434,
     [SubBruteAttackChamberlain9bit300] = &subbrute_protocol_chamberlain_9bit_300,
     [SubBruteAttackChamberlain9bit315] = &subbrute_protocol_chamberlain_9bit_315,
     [SubBruteAttackChamberlain9bit390] = &subbrute_protocol_chamberlain_9bit_390,
@@ -274,6 +313,7 @@ static const char* subbrute_protocol_file_types[] = {
     [GateTXFileProtocol] = "GateTX",
     [MagellanFileProtocol] = "Magellan",
     [IntertechnoV3FileProtocol] = "Intertechno_V3",
+    [AnsonicFileProtocol] = "Ansonic",
     [UnknownFileProtocol] = "Unknown"};
 
 /**
