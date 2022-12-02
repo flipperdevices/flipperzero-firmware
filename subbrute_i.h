@@ -30,7 +30,7 @@
 #include "views/subbrute_main_view.h"
 
 #ifdef FURI_DEBUG
-#define SUBBRUTE_FAST_TRACK true
+//#define SUBBRUTE_FAST_TRACK false
 #endif
 
 typedef enum {

@@ -50,7 +50,6 @@ typedef struct {
 
     // Loaded info for attack type
     char current_key[SUBBRUTE_PAYLOAD_SIZE];
-    char file_key[SUBBRUTE_MAX_LEN_NAME];
     uint64_t key_from_file;
     uint64_t current_key_from_file;
     bool two_bytes;

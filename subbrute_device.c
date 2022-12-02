@@ -175,8 +175,8 @@ SubBruteFileResult subbrute_device_attack_set(
             protocol_check_result = SubBruteFileResultOk;
 
             // Calc max value
-            instance->max_value =
-                subbrute_protocol_calc_max_value(instance->attack, instance->protocol_info->bits);
+            instance->max_value = subbrute_protocol_calc_max_value(
+                instance->attack, instance->protocol_info->bits, instance->two_bytes);
         }
 #ifdef FURI_DEBUG
         bits = instance->protocol_info->bits;
@@ -190,8 +190,8 @@ SubBruteFileResult subbrute_device_attack_set(
         protocol_check_result = SubBruteFileResultOk;
 
         // Calc max value
-        instance->max_value =
-            subbrute_protocol_calc_max_value(instance->attack, instance->file_protocol_info->bits);
+        instance->max_value = subbrute_protocol_calc_max_value(
+            instance->attack, instance->file_protocol_info->bits, instance->two_bytes);
 #ifdef FURI_DEBUG
         bits = instance->file_protocol_info->bits;
         te = instance->file_protocol_info->te;
@@ -258,15 +258,14 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         }
 
         // Frequency
-        if(flipper_format_read_uint32(fff_data_file, "Frequency", &temp_data32, 1)) {
-            instance->file_protocol_info->frequency = temp_data32;
-            if(!furi_hal_subghz_is_tx_allowed(instance->file_protocol_info->frequency)) {
-                result = SubBruteFileResultFrequencyNotAllowed;
-                break;
-            }
-        } else {
+        if(!flipper_format_read_uint32(fff_data_file, "Frequency", &temp_data32, 1)) {
             FURI_LOG_E(TAG, "Missing or incorrect Frequency");
             result = SubBruteFileResultMissingOrIncorrectFrequency;
+            break;
+        }
+        instance->file_protocol_info->frequency = temp_data32;
+        if(!furi_hal_subghz_is_tx_allowed(instance->file_protocol_info->frequency)) {
+            result = SubBruteFileResultFrequencyNotAllowed;
             break;
         }
 
@@ -274,9 +273,9 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {
             FURI_LOG_E(TAG, "Preset FAIL");
             result = SubBruteFileResultPresetInvalid;
-        } else {
-            instance->file_protocol_info->preset = subbrute_protocol_convert_preset(temp_str);
+            break;
         }
+        instance->file_protocol_info->preset = subbrute_protocol_convert_preset(temp_str);
 
         const char* protocol_file = NULL;
         // Protocol
@@ -284,13 +283,12 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             FURI_LOG_E(TAG, "Missing Protocol");
             result = SubBruteFileResultMissingProtocol;
             break;
-        } else {
-            instance->file_protocol_info->file = subbrute_protocol_file_protocol_name(temp_str);
-            protocol_file = subbrute_protocol_file(instance->file_protocol_info->file);
-#ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "Protocol: %s", protocol_file);
-#endif
         }
+        instance->file_protocol_info->file = subbrute_protocol_file_protocol_name(temp_str);
+        protocol_file = subbrute_protocol_file(instance->file_protocol_info->file);
+#ifdef FURI_DEBUG
+        FURI_LOG_D(TAG, "Protocol: %s", protocol_file);
+#endif
 
         instance->decoder_result = subghz_receiver_search_decoder_base_by_name(
             instance->receiver, furi_string_get_cstr(temp_str));
@@ -308,9 +306,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             break;
         }
 #ifdef FURI_DEBUG
-        else {
-            FURI_LOG_D(TAG, "Decoder: %s", instance->decoder_result->protocol->name);
-        }
+        FURI_LOG_D(TAG, "Decoder: %s", instance->decoder_result->protocol->name);
 #endif
 
         // Bit
@@ -318,12 +314,11 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             FURI_LOG_E(TAG, "Missing or incorrect Bit");
             result = SubBruteFileResultMissingOrIncorrectBit;
             break;
-        } else {
-            instance->file_protocol_info->bits = temp_data32;
-#ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "Bit: %d", instance->file_protocol_info->bits);
-#endif
         }
+        instance->file_protocol_info->bits = temp_data32;
+#ifdef FURI_DEBUG
+        FURI_LOG_D(TAG, "Bit: %d", instance->file_protocol_info->bits);
+#endif
 
         // TODO: Delete this
         // Key
@@ -333,12 +328,12 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         //             break;
         //         } else {
         //             snprintf(
-        //                 instance->file_key,
-        //                 sizeof(instance->file_key),
+        //                 instance->current_key_from_file,
+        //                 sizeof(instance->current_key_from_file),
         //                 "%s",
         //                 furi_string_get_cstr(temp_str));
         // #ifdef FURI_DEBUG
-        //             FURI_LOG_D(TAG, "Key: %s", instance->file_key);
+        //             FURI_LOG_D(TAG, "Key: %s", instance->current_key_from_file);
         // #endif
         //         }
         //
@@ -354,85 +349,85 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
             data = (data << 8) | key_data[i];
         }
+#if FURI_DEBUG
+        FURI_LOG_D(TAG, "Key: %.16llX", data);
+#endif
         instance->key_from_file = data;
 
-        uint16_t add_value = 0x0001;
-        uint8_t bit_index = 7;
-        bool two_bytes = true;
+        //         uint16_t add_value = 0x0001;
+        //         uint8_t bit_index = 7;
+        //         bool two_bytes = true;
+        //         uint8_t p[8];
+        //         for(int i = 0; i < 8; i++) {
+        //             p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
+        //         }
+        //         uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
+        //         FURI_LOG_D(TAG, "num: 0x%04X", num);
+        //         num += add_value;
+        //         FURI_LOG_D(TAG, "num added: 0x%04X", num);
+        //         uint8_t low_byte = num & (0xff);
+        //         uint8_t high_byte = (num >> 8) & 0xff;
 
-        uint8_t p[8];
-        for(int i = 0; i < 8; i++) {
-            p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
-        }
-        uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
-        FURI_LOG_D(TAG, "num: 0x%04X", num);
-        num += add_value;
-        FURI_LOG_D(TAG, "num added: 0x%04X", num);
-        uint8_t low_byte = num & (0xff);
-        uint8_t high_byte = (num >> 8) & 0xff;
+        //         data = 0;
+        //         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+        //             if(i == bit_index - 1 && two_bytes) {
+        //                 data = (data << 8) | high_byte;
+        //                 data = (data << 8) | low_byte;
+        //                 i++;
+        //             } else if(i == bit_index) {
+        //                 data = (data << 8) | low_byte;
+        //             } else {
+        //                 data = (data << 8) | p[i];
+        //             }
+        //         }
+        // #if FURI_DEBUG
+        //         furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
+        //         FURI_LOG_D(
+        //             TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
+        // #endif
+        // uint8_t key_data[sizeof(uint64_t)] = {0};
+        // if(!flipper_format_read_hex(fff_data_file, "Key", key_data, sizeof(uint64_t))) {
+        //     FURI_LOG_E(TAG, "Missing Key");
+        //     result = SubBruteFileResultMissingOrIncorrectKey;
+        //     break;
+        // }
+        // uint64_t data = 0;
+        // for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+        //     data = (data << 8) | key_data[i];
+        // }
+        // instance->key_from_file = data;
 
-        data = 0;
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-            if(i == bit_index - 1 && two_bytes) {
-                data = (data << 8) | high_byte;
-                data = (data << 8) | low_byte;
-                i++;
-            } else if(i == bit_index) {
-                data = (data << 8) | low_byte;
-            } else {
-                data = (data << 8) | p[i];
-            }
-        }
+        // uint16_t add_value = 0x0001;
+        // uint8_t bit_index = 7;
+        // bool two_bytes = true;
 
-        furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
-        FURI_LOG_D(
-            TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
+        // uint8_t p[8];
+        // for(int i = 0; i < 8; i++) {
+        //     p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
+        // }
+        // uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
+        // FURI_LOG_D(TAG, "num: 0x%04X", num);
+        // num += add_value;
+        // FURI_LOG_D(TAG, "num added: 0x%04X", num);
+        // uint8_t low_byte = num & (0xff);
+        // uint8_t high_byte = (num >> 8) & 0xff;
 
-        flipper_format_rewind(fff_data_file);
+        // data = 0;
+        // for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
+        //     if(i == bit_index - 1 && two_bytes) {
+        //         data = (data << 8) | high_byte;
+        //         data = (data << 8) | low_byte;
+        //         i++;
+        //     } else if(i == bit_index) {
+        //         data = (data << 8) | low_byte;
+        //     } else {
+        //         data = (data << 8) | p[i];
+        //     }
+        // }
 
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        if(!flipper_format_read_hex(fff_data_file, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Missing Key");
-            result = SubBruteFileResultMissingOrIncorrectKey;
-            break;
-        }
-        uint64_t data = 0;
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-            data = (data << 8) | key_data[i];
-        }
-        instance->key_from_file = data;
-
-        uint16_t add_value = 0x0001;
-        uint8_t bit_index = 7;
-        bool two_bytes = true;
-
-        uint8_t p[8];
-        for(int i = 0; i < 8; i++) {
-            p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
-        }
-        uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
-        FURI_LOG_D(TAG, "num: 0x%04X", num);
-        num += add_value;
-        FURI_LOG_D(TAG, "num added: 0x%04X", num);
-        uint8_t low_byte = num & (0xff);
-        uint8_t high_byte = (num >> 8) & 0xff;
-
-        data = 0;
-        for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-            if(i == bit_index - 1 && two_bytes) {
-                data = (data << 8) | high_byte;
-                data = (data << 8) | low_byte;
-                i++;
-            } else if(i == bit_index) {
-                data = (data << 8) | low_byte;
-            } else {
-                data = (data << 8) | p[i];
-            }
-        }
-
-        furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
-        FURI_LOG_D(
-            TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
+        // furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
+        // FURI_LOG_D(
+        //     TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
 
         // TE
         if(!flipper_format_read_uint32(fff_data_file, "TE", &temp_data32, 1)) {
@@ -495,9 +490,8 @@ void subbrute_device_attack_set_default_values(
     memset(instance->current_key, 0, sizeof(instance->current_key));
 
     if(default_attack != SubBruteAttackLoadFile) {
-        memset(instance->file_key, 0, sizeof(instance->file_key));
-
-        instance->max_value = (uint64_t)0x00;
+        instance->max_value = subbrute_protocol_calc_max_value(
+            instance->attack, instance->bit_index, instance->two_bytes);
     }
 }
 

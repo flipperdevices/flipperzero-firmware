@@ -44,10 +44,11 @@ void subbrute_scene_load_file_on_enter(void* context) {
                 if(!subbrute_worker_init_file_attack(
                        instance->worker,
                        instance->device->current_step,
-                       instance->device->current_step,
-                       instance->device->file_key,
+                       instance->device->bit_index,
+                       instance->device->key_from_file,
                        instance->device->file_protocol_info,
-                       extra_repeats)) {
+                       extra_repeats,
+                       instance->device->two_bytes)) {
                     furi_crash("Invalid attack set!");
                 }
                 // Ready to run!

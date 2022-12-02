@@ -1,7 +1,7 @@
 #include "subbrute_attack_view.h"
 #include "../subbrute_i.h"
 #include "../subbrute_protocols.h"
-#include "../gui_top_buttons.h"
+#include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
@@ -272,9 +272,27 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
     }
 
     // Current Step / Max value
-    canvas_set_font(canvas, FontBigNumbers);
-    snprintf(buffer, sizeof(buffer), "%04d/%04d", (int)model->current_step, (int)model->max_value);
-    canvas_draw_str_aligned(canvas, 64, 17, AlignCenter, AlignTop, buffer);
+    const uint8_t y_frequency = 17;
+    if(model->max_value > 9999) {
+        canvas_set_font(canvas, FontBigNumbers);
+        snprintf(buffer, sizeof(buffer), "%05d/", (int)model->current_step);
+        canvas_draw_str_aligned(canvas, 5, y_frequency, AlignLeft, AlignTop, buffer);
+
+        // Second part with another font, because BigNumber is out of screen bounds
+        canvas_set_font(canvas, FontPrimary);
+        snprintf(buffer, sizeof(buffer), "%05d", (int)model->max_value);
+        canvas_draw_str_aligned(canvas, 107, y_frequency + 13, AlignRight, AlignBottom, buffer);
+    } else if(model->max_value <= 0xFF) {
+        canvas_set_font(canvas, FontBigNumbers);
+        snprintf(
+            buffer, sizeof(buffer), "%03d/%03d", (int)model->current_step, (int)model->max_value);
+        canvas_draw_str_aligned(canvas, 64, y_frequency, AlignCenter, AlignTop, buffer);
+    } else {
+        canvas_set_font(canvas, FontBigNumbers);
+        snprintf(
+            buffer, sizeof(buffer), "%04d/%04d", (int)model->current_step, (int)model->max_value);
+        canvas_draw_str_aligned(canvas, 64, y_frequency, AlignCenter, AlignTop, buffer);
+    }
     canvas_set_font(canvas, FontSecondary);
 
     memset(buffer, 0, sizeof(buffer));
