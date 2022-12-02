@@ -370,6 +370,7 @@ static bool _input_callback(InputEvent* event, void* context) {
             if(selector) {
                 //Переход в карусель
                 current_view = G_CAROUSEL_VIEW;
+                carousel_info_selector = CAROUSEL_VALUES;
             } else {
                 //Переход в главное меню при выключенном селекторе
                 app->sensors_ready = false;

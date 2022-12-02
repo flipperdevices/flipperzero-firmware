@@ -11,6 +11,116 @@ static Sensor* current_sensor;
 
 #define VIEW_ID VIEW_SENSOR_ACTIONS
 
+/* ================== Подтверждение удаления ================== */
+/**
+ * @brief Функция обработки нажатия кнопки "Назад"
+ * 
+ * @param context Указатель на данные приложения
+ * @return ID вида в который нужно переключиться
+ */
+static uint32_t _delete_exit_callback(void* context) {
+    UNUSED(context);
+    //Возвращаем ID вида, в который нужно вернуться
+    return VIEW_SENSOR_ACTIONS;
+}
+/**
+ * @brief Обработчик нажатий на кнопку в виджете
+ * 
+ * @param result Какая из кнопок была нажата
+ * @param type Тип нажатия
+ * @param context Указатель на данные плагина
+ */
+static void _delete_click_callback(GuiButtonType result, InputType type, void* context) {
+    UNUSED(context);
+    //Коротко нажата левая кнопка (Cancel)
+    if(result == GuiButtonTypeLeft && type == InputTypeShort) {
+        unitemp_SensorActions_switch(current_sensor);
+    }
+    //Коротко нажата правая кнопка (Delete)
+    if(result == GuiButtonTypeRight && type == InputTypeShort) {
+        //Удаление датчика
+        //
+        //Выход из меню
+        unitemp_General_switch();
+    }
+}
+/**
+ * @brief Переключение в виджет удаления датчика
+ */
+static void _delete_widget_switch(void) {
+    //Очистка виджета
+    widget_reset(app->widget);
+    //Добавление кнопок
+    widget_add_button_element(
+        app->widget, GuiButtonTypeLeft, "Cancel", _delete_click_callback, app);
+    widget_add_button_element(
+        app->widget, GuiButtonTypeRight, "Delete", _delete_click_callback, app);
+
+    char delete_str[32];
+    snprintf(delete_str, sizeof(delete_str), "\e#Delete %s?\e#", current_sensor->name);
+    widget_add_text_box_element(
+        app->widget, 0, 0, 128, 23, AlignCenter, AlignCenter, delete_str, false);
+
+    if(current_sensor->type->interface == &ONE_WIRE) {
+        OneWireSensor* s = current_sensor->instance;
+
+        snprintf(
+            delete_str,
+            sizeof(delete_str),
+            "\e#Type:\e# %s",
+            unitemp_onewire_sensor_getModel(current_sensor));
+        widget_add_text_box_element(
+            app->widget, 0, 16, 128, 23, AlignLeft, AlignTop, delete_str, false);
+        snprintf(delete_str, sizeof(delete_str), "\e#GPIO:\e# %s", s->bus->gpio->name);
+        widget_add_text_box_element(
+            app->widget, 0, 28, 128, 23, AlignLeft, AlignTop, delete_str, false);
+
+        snprintf(
+            delete_str,
+            sizeof(delete_str),
+            "\e#ID:\e# %02X%02X%02X%02X%02X%02X%02X%02X",
+            s->deviceID[0],
+            s->deviceID[1],
+            s->deviceID[2],
+            s->deviceID[3],
+            s->deviceID[4],
+            s->deviceID[5],
+            s->deviceID[6],
+            s->deviceID[7]);
+        widget_add_text_box_element(
+            app->widget, 0, 40, 128, 23, AlignLeft, AlignTop, delete_str, false);
+    }
+
+    if(current_sensor->type->interface == &SINGLE_WIRE) {
+        snprintf(delete_str, sizeof(delete_str), "\e#Type:\e# %s", current_sensor->type->typename);
+        widget_add_text_box_element(
+            app->widget, 0, 16, 128, 23, AlignLeft, AlignTop, delete_str, false);
+        snprintf(
+            delete_str,
+            sizeof(delete_str),
+            "\e#GPIO:\e# %s",
+            ((SingleWireSensor*)current_sensor->instance)->gpio->name);
+        widget_add_text_box_element(
+            app->widget, 0, 28, 128, 23, AlignLeft, AlignTop, delete_str, false);
+    }
+
+    if(current_sensor->type->interface == &I2C) {
+        snprintf(delete_str, sizeof(delete_str), "\e#Type:\e# %s", current_sensor->type->typename);
+        widget_add_text_box_element(
+            app->widget, 0, 16, 128, 23, AlignLeft, AlignTop, delete_str, false);
+        snprintf(
+            delete_str,
+            sizeof(delete_str),
+            "\e#I2C addr:\e# 0x%02X",
+            ((I2CSensor*)current_sensor->instance)->currentI2CAdr);
+        widget_add_text_box_element(
+            app->widget, 0, 28, 128, 23, AlignLeft, AlignTop, delete_str, false);
+    }
+
+    view_set_previous_callback(widget_get_view(app->widget), _delete_exit_callback);
+    view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_SENSOR_DELETE);
+}
+
 /**
  * @brief Функция обработки нажатия кнопки "Назад"
  *
@@ -34,6 +144,9 @@ static void _enter_callback(void* context, uint32_t index) {
     switch(index) {
     case 0:
         unitemp_SensorEdit_switch(current_sensor);
+        break;
+    case 1:
+        _delete_widget_switch();
         break;
     }
 }

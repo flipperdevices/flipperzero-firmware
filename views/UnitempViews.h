@@ -12,7 +12,7 @@ typedef enum UnitempViews {
     VIEW_SENSOR_EDIT,
     VIEW_SENSOR_NAME_EDIT,
     VIEW_SENSOR_ACTIONS,
-    VIEW_SENSOR_INFO,
+    VIEW_SENSOR_DELETE,
 
     VIEWS_COUNT
 } UnitempViews;
