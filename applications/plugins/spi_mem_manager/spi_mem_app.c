@@ -31,6 +31,7 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->widget = widget_alloc();
     instance->chip_info = malloc(sizeof(SPIMemChip));
     instance->view_progress = spi_mem_view_progress_alloc();
+    instance->view_detect = spi_mem_view_detect_alloc();
     instance->text_input = text_input_alloc();
     instance->mode = SPIMemModeUnknown;
 
@@ -57,6 +58,10 @@ SPIMemApp* spi_mem_alloc(void) {
         SPIMemViewProgress,
         spi_mem_view_progress_get_view(instance->view_progress));
     view_dispatcher_add_view(
+        instance->view_dispatcher,
+        SPIMemViewDetect,
+        spi_mem_view_detect_get_view(instance->view_detect));
+    view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemViewTextInput, text_input_get_view(instance->text_input));
 
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_external);
@@ -70,8 +75,10 @@ void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewPopup);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewWidget);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewProgress);
+    view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewDetect);
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewTextInput);
     spi_mem_view_progress_free(instance->view_progress);
+    spi_mem_view_detect_free(instance->view_detect);
     submenu_free(instance->submenu);
     dialog_ex_free(instance->dialog_ex);
     popup_free(instance->popup);

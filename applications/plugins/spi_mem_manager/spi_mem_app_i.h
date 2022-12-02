@@ -20,6 +20,7 @@
 #include "lib/spi/spi_mem_worker.h"
 #include "spi_mem_manager_icons.h"
 #include "views/spi_mem_view_progress.h"
+#include "views/spi_mem_view_detect.h"
 
 #define TAG "SPIMem"
 #define SPI_MEM_FILE_EXTENSION ".bin"
@@ -52,6 +53,7 @@ struct SPIMemApp {
     SPIMemWorker* worker;
     SPIMemChip* chip_info;
     SPIMemProgressView* view_progress;
+    SPIMemDetectView* view_detect;
     TextInput* text_input;
     SPIMemMode mode;
     char text_buffer[SPI_MEM_TEXT_BUFFER_SIZE + 1];
@@ -63,7 +65,8 @@ typedef enum {
     SPIMemViewPopup,
     SPIMemViewWidget,
     SPIMemViewTextInput,
-    SPIMemViewProgress
+    SPIMemViewProgress,
+    SPIMemViewDetect
 } SPIMemView;
 
 typedef enum {

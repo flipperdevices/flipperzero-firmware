@@ -46,6 +46,7 @@ static size_t spi_mem_worker_modes_get_total_size(SPIMemWorker* worker) {
 static void spi_mem_worker_chip_detect_process(SPIMemWorker* worker) {
     SPIMemCustomEventWorker event;
     while(!spi_mem_tools_read_chip_info(worker->chip_info)) {
+        furi_delay_tick(10);
         if(spi_mem_worker_check_for_stop(worker)) return;
     }
     if(spi_mem_chip_complete_info(worker->chip_info)) {
