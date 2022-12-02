@@ -392,21 +392,8 @@ void subbrute_protocol_default_payload(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat) {
-    FuriString* candidate = furi_string_alloc_set_str("                       ");
-
-    FuriString* buffer = furi_string_alloc_printf("%16llX", step);
-    int j = 0;
-    for(uint8_t i = 0; i < 16; i++) {
-        if(furi_string_get_char(buffer, i) != ' ') {
-            furi_string_set_char(candidate, i + j, furi_string_get_char(buffer, i));
-        } else {
-            furi_string_set_char(candidate, i + j, '0');
-        }
-        if(i % 2 != 0) {
-            j++;
-        }
-    }
-    furi_string_free(buffer);
+    FuriString* candidate = furi_string_alloc();
+    subbrute_protocol_create_candidate_for_default(candidate, step);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(
@@ -483,21 +470,8 @@ void subbrute_protocol_default_generate_file(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat) {
-    FuriString* candidate = furi_string_alloc_set_str("                       ");
-
-    FuriString* buffer = furi_string_alloc_printf("%16llX", step);
-    int j = 0;
-    for(uint8_t i = 0; i < 16; i++) {
-        if(furi_string_get_char(buffer, i) != ' ') {
-            furi_string_set_char(candidate, i + j, furi_string_get_char(buffer, i));
-        } else {
-            furi_string_set_char(candidate, i + j, '0');
-        }
-        if(i % 2 != 0) {
-            j++;
-        }
-    }
-    furi_string_free(buffer);
+    FuriString* candidate = furi_string_alloc();
+    subbrute_protocol_create_candidate_for_default(candidate, step);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
