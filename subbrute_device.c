@@ -23,9 +23,9 @@ SubBruteDevice* subbrute_device_alloc() {
         instance->environment, (void*)&subghz_protocol_registry);
 
 #ifdef FURI_DEBUG
-    subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
-#else
     subbrute_device_attack_set_default_values(instance, SubBruteAttackLoadFile);
+#else
+    subbrute_device_attack_set_default_values(instance, SubBruteAttackCAME12bit433);
 #endif
     return instance;
 }
