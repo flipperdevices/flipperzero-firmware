@@ -20,7 +20,8 @@ void subbrute_scene_load_select_on_enter(void* context) {
 
     instance->current_view = SubBruteViewMain;
     subbrute_main_view_set_callback(view, subbrute_scene_load_select_callback, instance);
-    subbrute_main_view_set_index(view, 7, true, instance->device->file_key);
+    subbrute_main_view_set_index(
+        view, 7, true, instance->device->two_bytes, instance->device->key_from_file);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, instance->current_view);
 }
@@ -38,21 +39,37 @@ bool subbrute_scene_load_select_on_event(void* context, SceneManagerEvent event)
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubBruteCustomEventTypeIndexSelected) {
-            instance->device->load_index = subbrute_main_view_get_index(instance->view_main);
+            /*#ifdef FURI_DEBUG && !SUBBRUTE_FAST_TRACK
+            view_dispatcher_stop(instance->view_dispatcher);
+            consumed = true;
+#else*/
+            instance->device->current_step = 0;
+            instance->device->bit_index = subbrute_main_view_get_index(instance->view_main);
+            instance->device->two_bytes = subbrute_main_view_get_two_bytes(instance->view_main);
             uint8_t extra_repeats = subbrute_main_view_get_extra_repeats(instance->view_main);
+            instance->device->max_value = subbrute_protocol_calc_max_value(
+                instance->device->attack,
+                instance->device->bit_index,
+                instance->device->two_bytes);
 
             if(!subbrute_worker_init_file_attack(
                    instance->worker,
-                   instance->device->key_index,
-                   instance->device->load_index,
-                   instance->device->file_key,
+                   instance->device->current_step,
+                   instance->device->bit_index,
+                   instance->device->key_from_file,
                    instance->device->file_protocol_info,
-                   extra_repeats)) {
+                   extra_repeats,
+                   instance->device->two_bytes)) {
                 furi_crash("Invalid attack set!");
             }
             scene_manager_next_scene(instance->scene_manager, SubBruteSceneSetupAttack);
+            /*#endif*/
             consumed = true;
-        }
+        } /* else if(event.event == SubBruteCustomEventTypeChangeStepUp) {
+            instance->device->two_bytes = true;
+        } else if(event.event == SubBruteCustomEventTypeChangeStepDown) {
+            instance->device->two_bytes = false;
+        }*/
     } else if(event.type == SceneManagerEventTypeBack) {
         if(!scene_manager_search_and_switch_to_previous_scene(
                instance->scene_manager, SubBruteSceneStart)) {

@@ -1,6 +1,7 @@
 #include "subbrute_attack_view.h"
 #include "../subbrute_i.h"
 #include "../subbrute_protocols.h"
+#include "../helpers/gui_top_buttons.h"
 
 #include <input/input.h>
 #include <gui/elements.h>
@@ -255,74 +256,6 @@ void subbrute_attack_view_exit(void* context) {
         false);
 }
 
-/**
- * Thanks to the author of metronome
- * @param canvas
- * @param str
- */
-void elements_button_top_left(Canvas* canvas, const char* str) {
-    const Icon* icon = &I_ButtonUp_7x4;
-
-    const uint8_t button_height = 12;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
-    const uint8_t string_width = canvas_string_width(canvas, str);
-    const uint8_t icon_h_offset = 3;
-    const uint8_t icon_width_with_offset = icon_get_width(icon) + icon_h_offset;
-    const uint8_t icon_v_offset = icon_get_height(icon) + vertical_offset;
-    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
-
-    const uint8_t x = 0;
-    const uint8_t y = 0 + button_height;
-
-    uint8_t line_x = x + button_width;
-    uint8_t line_y = y - button_height;
-    canvas_draw_box(canvas, x, line_y, button_width, button_height);
-    canvas_draw_line(canvas, line_x + 0, line_y, line_x + 0, y - 1);
-    canvas_draw_line(canvas, line_x + 1, line_y, line_x + 1, y - 2);
-    canvas_draw_line(canvas, line_x + 2, line_y, line_x + 2, y - 3);
-
-    canvas_invert_color(canvas);
-    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, icon);
-    canvas_draw_str(
-        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
-    canvas_invert_color(canvas);
-}
-
-/**
- * Thanks to the author of metronome
- * @param canvas
- * @param str
- */
-void elements_button_top_right(Canvas* canvas, const char* str) {
-    const Icon* icon = &I_ButtonDown_7x4;
-
-    const uint8_t button_height = 12;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
-    const uint8_t string_width = canvas_string_width(canvas, str);
-    const uint8_t icon_h_offset = 3;
-    const uint8_t icon_width_with_offset = icon_get_width(icon) + icon_h_offset;
-    const uint8_t icon_v_offset = icon_get_height(icon) + vertical_offset + 1;
-    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
-
-    const uint8_t x = canvas_width(canvas);
-    const uint8_t y = 0 + button_height;
-
-    uint8_t line_x = x - button_width;
-    uint8_t line_y = y - button_height;
-    canvas_draw_box(canvas, line_x, line_y, button_width, button_height);
-    canvas_draw_line(canvas, line_x - 1, line_y, line_x - 1, y - 1);
-    canvas_draw_line(canvas, line_x - 2, line_y, line_x - 2, y - 2);
-    canvas_draw_line(canvas, line_x - 3, line_y, line_x - 3, y - 3);
-
-    canvas_invert_color(canvas);
-    canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
-    canvas_draw_icon(
-        canvas, x - horizontal_offset - icon_get_width(icon), y - icon_v_offset, icon);
-    canvas_invert_color(canvas);
-}
-
 void subbrute_attack_view_draw(Canvas* canvas, void* context) {
     furi_assert(context);
     SubBruteAttackViewModel* model = (SubBruteAttackViewModel*)context;
@@ -339,9 +272,27 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
     }
 
     // Current Step / Max value
-    canvas_set_font(canvas, FontBigNumbers);
-    snprintf(buffer, sizeof(buffer), "%04d/%04d", (int)model->current_step, (int)model->max_value);
-    canvas_draw_str_aligned(canvas, 64, 17, AlignCenter, AlignTop, buffer);
+    const uint8_t y_frequency = 17;
+    if(model->max_value > 9999) {
+        canvas_set_font(canvas, FontBigNumbers);
+        snprintf(buffer, sizeof(buffer), "%05d/", (int)model->current_step);
+        canvas_draw_str_aligned(canvas, 5, y_frequency, AlignLeft, AlignTop, buffer);
+
+        // Second part with another font, because BigNumber is out of screen bounds
+        canvas_set_font(canvas, FontPrimary);
+        snprintf(buffer, sizeof(buffer), "%05d", (int)model->max_value);
+        canvas_draw_str_aligned(canvas, 107, y_frequency + 13, AlignRight, AlignBottom, buffer);
+    } else if(model->max_value <= 0xFF) {
+        canvas_set_font(canvas, FontBigNumbers);
+        snprintf(
+            buffer, sizeof(buffer), "%03d/%03d", (int)model->current_step, (int)model->max_value);
+        canvas_draw_str_aligned(canvas, 64, y_frequency, AlignCenter, AlignTop, buffer);
+    } else {
+        canvas_set_font(canvas, FontBigNumbers);
+        snprintf(
+            buffer, sizeof(buffer), "%04d/%04d", (int)model->current_step, (int)model->max_value);
+        canvas_draw_str_aligned(canvas, 64, y_frequency, AlignCenter, AlignTop, buffer);
+    }
     canvas_set_font(canvas, FontSecondary);
 
     memset(buffer, 0, sizeof(buffer));

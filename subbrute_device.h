@@ -36,9 +36,7 @@ typedef struct {
     SubBruteProtocol* file_protocol_info;
 
     // Current step
-    uint64_t key_index;
-    // Index of group to bruteforce in loaded file
-    uint8_t load_index;
+    uint64_t current_step;
 
     // SubGhz
     SubGhzReceiver* receiver;
@@ -52,7 +50,11 @@ typedef struct {
 
     // Loaded info for attack type
     char current_key[SUBBRUTE_PAYLOAD_SIZE];
-    char file_key[SUBBRUTE_MAX_LEN_NAME];
+    uint64_t key_from_file;
+    uint64_t current_key_from_file;
+    bool two_bytes;
+    // Index of group to bruteforce in loaded file
+    uint8_t bit_index;
 } SubBruteDevice;
 
 SubBruteDevice* subbrute_device_alloc();

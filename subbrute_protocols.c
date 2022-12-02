@@ -26,6 +26,17 @@ const SubBruteProtocol subbrute_protocol_came_12bit_307 = {
     .file = CAMEFileProtocol};
 
 /**
+ * CAME 12bit 315MHz
+ */
+const SubBruteProtocol subbrute_protocol_came_12bit_315 = {
+    .frequency = 315000000,
+    .bits = 12,
+    .te = 0,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = CAMEFileProtocol};
+
+/**
  * CAME 12bit 433MHz
  */
 const SubBruteProtocol subbrute_protocol_came_12bit_433 = {
@@ -243,6 +254,7 @@ const SubBruteProtocol subbrute_protocol_load_file =
 static const char* subbrute_protocol_names[] = {
     [SubBruteAttackCAME12bit303] = "CAME 12bit 303MHz",
     [SubBruteAttackCAME12bit307] = "CAME 12bit 307MHz",
+    [SubBruteAttackCAME12bit315] = "CAME 12bit 315MHz",
     [SubBruteAttackCAME12bit433] = "CAME 12bit 433MHz",
     [SubBruteAttackCAME12bit868] = "CAME 12bit 868MHz",
     [SubBruteAttackNICE12bit433] = "NICE 12bit 433MHz",
@@ -279,6 +291,7 @@ static const char* subbrute_protocol_presets[] = {
 const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackCAME12bit303] = &subbrute_protocol_came_12bit_303,
     [SubBruteAttackCAME12bit307] = &subbrute_protocol_came_12bit_307,
+    [SubBruteAttackCAME12bit315] = &subbrute_protocol_came_12bit_315,
     [SubBruteAttackCAME12bit433] = &subbrute_protocol_came_12bit_433,
     [SubBruteAttackCAME12bit868] = &subbrute_protocol_came_12bit_868,
     [SubBruteAttackNICE12bit433] = &subbrute_protocol_nice_12bit_433,
@@ -366,27 +379,74 @@ SubBruteFileProtocol subbrute_protocol_file_protocol_name(FuriString* name) {
     return UnknownFileProtocol;
 }
 
+void subbrute_protocol_create_candidate_for_existing_file(
+    FuriString* candidate,
+    uint64_t step,
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes) {
+    uint8_t p[8];
+    for(int i = 0; i < 8; i++) {
+        p[i] = (uint8_t)(file_key >> 8 * (7 - i)) & 0xFF;
+    }
+    uint8_t low_byte = step & (0xff);
+    uint8_t high_byte = (step >> 8) & 0xff;
+
+    size_t size = sizeof(uint64_t);
+    for(uint8_t i = 0; i < size; i++) {
+        if(i == bit_index - 1 && two_bytes) {
+            furi_string_cat_printf(candidate, "%02X %02X", high_byte, low_byte);
+            i++;
+        } else if(i == bit_index) {
+            furi_string_cat_printf(candidate, "%02X", low_byte);
+        } else if(p[i] != 0) {
+            furi_string_cat_printf(candidate, "%02X", p[i]);
+        } else {
+            furi_string_cat_printf(candidate, "%s", "00");
+        }
+
+        if(i < size - 1) {
+            furi_string_push_back(candidate, ' ');
+        }
+    }
+
+#ifdef FURI_DEBUG
+    FURI_LOG_D(TAG, "file candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
+#endif
+}
+
+void subbrute_protocol_create_candidate_for_default(FuriString* candidate, uint64_t step) {
+    uint8_t p[8];
+    for(int i = 0; i < 8; i++) {
+        p[i] = (uint8_t)(step >> 8 * (7 - i)) & 0xFF;
+    }
+
+    size_t size = sizeof(uint64_t);
+    for(uint8_t i = 0; i < size; i++) {
+        if(p[i] != 0) {
+            furi_string_cat_printf(candidate, "%02X", p[i]);
+        } else {
+            furi_string_cat_printf(candidate, "%s", "00");
+        }
+
+        if(i < size - 1) {
+            furi_string_push_back(candidate, ' ');
+        }
+    }
+
+#ifdef FURI_DEBUG
+    FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
+#endif
+}
+
 void subbrute_protocol_default_payload(
     Stream* stream,
     uint64_t step,
     uint8_t bits,
     uint8_t te,
     uint8_t repeat) {
-    FuriString* candidate = furi_string_alloc_set_str("                       ");
-
-    FuriString* buffer = furi_string_alloc_printf("%16llX", step);
-    int j = 0;
-    for(uint8_t i = 0; i < 16; i++) {
-        if(furi_string_get_char(buffer, i) != ' ') {
-            furi_string_set_char(candidate, i + j, furi_string_get_char(buffer, i));
-        } else {
-            furi_string_set_char(candidate, i + j, '0');
-        }
-        if(i % 2 != 0) {
-            j++;
-        }
-    }
-    furi_string_free(buffer);
+    FuriString* candidate = furi_string_alloc();
+    subbrute_protocol_create_candidate_for_default(candidate, step);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(
@@ -420,13 +480,12 @@ void subbrute_protocol_file_payload(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat,
-    uint8_t load_index,
-    const char* file_key) {
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes) {
     FuriString* candidate = furi_string_alloc();
-    char subbrute_payload_byte[4];
-    furi_string_set_str(candidate, file_key);
-    snprintf(subbrute_payload_byte, 4, "%02X ", (uint8_t)step);
-    furi_string_replace_at(candidate, load_index * 3, 3, subbrute_payload_byte);
+    subbrute_protocol_create_candidate_for_existing_file(
+        candidate, step, bit_index, file_key, two_bytes);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(
@@ -464,21 +523,8 @@ void subbrute_protocol_default_generate_file(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat) {
-    FuriString* candidate = furi_string_alloc_set_str("                       ");
-
-    FuriString* buffer = furi_string_alloc_printf("%16llX", step);
-    int j = 0;
-    for(uint8_t i = 0; i < 16; i++) {
-        if(furi_string_get_char(buffer, i) != ' ') {
-            furi_string_set_char(candidate, i + j, furi_string_get_char(buffer, i));
-        } else {
-            furi_string_set_char(candidate, i + j, '0');
-        }
-        if(i % 2 != 0) {
-            j++;
-        }
-    }
-    furi_string_free(buffer);
+    FuriString* candidate = furi_string_alloc();
+    subbrute_protocol_create_candidate_for_default(candidate, step);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
@@ -520,17 +566,15 @@ void subbrute_protocol_file_generate_file(
     uint8_t bits,
     uint8_t te,
     uint8_t repeat,
-    uint8_t load_index,
-    const char* file_key) {
+    uint8_t bit_index,
+    uint64_t file_key,
+    bool two_bytes) {
     FuriString* candidate = furi_string_alloc();
-    char subbrute_payload_byte[4];
-    furi_string_set_str(candidate, file_key);
-    snprintf(subbrute_payload_byte, 4, "%02X ", (uint8_t)step);
-    furi_string_replace_at(candidate, load_index * 3, 3, subbrute_payload_byte);
+    // char subbrute_payload_byte[8];
+    //furi_string_set_str(candidate, file_key);
+    subbrute_protocol_create_candidate_for_existing_file(
+        candidate, step, bit_index, file_key, two_bytes);
 
-#ifdef FURI_DEBUG
-    FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
-#endif
     stream_clean(stream);
     if(te) {
         stream_write_format(
@@ -558,10 +602,11 @@ void subbrute_protocol_file_generate_file(
     furi_string_free(candidate);
 }
 
-uint64_t subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits) {
+uint64_t
+    subbrute_protocol_calc_max_value(SubBruteAttacks attack_type, uint8_t bits, bool two_bytes) {
     uint64_t max_value;
     if(attack_type == SubBruteAttackLoadFile) {
-        max_value = 0xFF;
+        max_value = two_bytes ? 0xFFFF : 0xFF;
     } else {
         FuriString* max_value_s;
         max_value_s = furi_string_alloc();

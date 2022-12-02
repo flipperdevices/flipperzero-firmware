@@ -31,8 +31,9 @@ struct SubBruteWorker {
     uint8_t te;
     uint8_t repeat;
     uint8_t load_index; // Index of group to bruteforce in loaded file
-    const char* file_key;
+    uint64_t file_key;
     uint64_t max_value; // Max step
+    bool two_bytes;
 
     // Manual transmit
     uint32_t last_time_tx_data;
