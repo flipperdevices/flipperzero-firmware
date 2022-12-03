@@ -142,7 +142,7 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 }
 
 static void _draw_view_noSensors(Canvas* canvas) {
-    canvas_draw_icon(canvas, BUFF_SIZE, 17, &I_sherlok_53x55);
+    canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x55);
     //Рисование рамки
     canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);
@@ -440,8 +440,9 @@ static bool _input_callback(InputEvent* event, void* context) {
 
     //Обработка короткого нажатия "назад"
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        //Выход из приложения при виде списка датчиков
-        if(current_view == G_LIST_VIEW) app->processing = false;
+        //Выход из приложения при листе или отсутствии датчиков
+        if(current_view == G_LIST_VIEW || current_view == G_NO_SENSORS_VIEW)
+            app->processing = false;
         //Переход в список датчиков
         if(current_view == G_CAROUSEL_VIEW) current_view = G_LIST_VIEW;
     }
