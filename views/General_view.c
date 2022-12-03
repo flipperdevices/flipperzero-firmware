@@ -164,14 +164,15 @@ static void _draw_view_sensorsList(Canvas* canvas) {
     uint8_t page = sensor_index / 4;
     //Количество датчиков, которые будут отображаться на странице
     uint8_t page_sensors_count;
-    if((app->sensors_count - page * 4) / 4) {
+    if((unitemp_sensors_getActiveCount() - page * 4) / 4) {
         page_sensors_count = 4;
     } else {
-        page_sensors_count = (app->sensors_count - page * 4) % 4;
+        page_sensors_count = (unitemp_sensors_getActiveCount() - page * 4) % 4;
     }
 
     //Количество страниц
-    uint8_t pages = app->sensors_count / 4 + (app->sensors_count % 4 ? 1 : 0);
+    uint8_t pages =
+        unitemp_sensors_getActiveCount() / 4 + (unitemp_sensors_getActiveCount() % 4 ? 1 : 0);
 
     //Стрелка вверх
     if(page > 0) {
@@ -200,14 +201,14 @@ static void _draw_view_sensorsList(Canvas* canvas) {
     for(uint8_t i = 0; i < page_sensors_count; i++) {
         _draw_singleSensor(
             canvas,
-            app->sensors[page * 4 + i],
+            unitemp_sensor_getActive(page * 4 + i),
             value_positions[page_sensors_count - 1][i],
             ((i == sensor_index % 4) && selector ? ColorBlack : ColorWhite));
     }
 }
 
 static void _draw_carousel_values(Canvas* canvas) {
-    if(app->sensors[sensor_index]->status == UT_TIMEOUT) {
+    if(unitemp_sensor_getActive(sensor_index)->status == UT_TIMEOUT) {
         const Icon* frames[] = {&I_happy_2_78x46, &I_happy_78x46, &I_sad_78x46};
         canvas_draw_icon(canvas, 24, 15, frames[furi_get_tick() % 2250 / 750]);
         return;
@@ -216,11 +217,11 @@ static void _draw_carousel_values(Canvas* canvas) {
     static const uint8_t temp_positions[3][2] = {{37, 23}, {37, 16}, {9, 16}};
     static const uint8_t hum_positions[2][2] = {{37, 38}, {65, 16}};
     //Селектор значений для отображения
-    switch(app->sensors[sensor_index]->type->datatype) {
+    switch(unitemp_sensor_getActive(sensor_index)->type->datatype) {
     case UT_DATA_TYPE_TEMP:
         _draw_temperature(
             canvas,
-            app->sensors[sensor_index],
+            unitemp_sensor_getActive(sensor_index),
             temp_positions[0][0],
             temp_positions[0][1],
             ColorWhite);
@@ -228,30 +229,30 @@ static void _draw_carousel_values(Canvas* canvas) {
     case UT_DATA_TYPE_TEMP_HUM:
         _draw_temperature(
             canvas,
-            app->sensors[sensor_index],
+            unitemp_sensor_getActive(sensor_index),
             temp_positions[1][0],
             temp_positions[1][1],
             ColorWhite);
-        _draw_humidity(canvas, app->sensors[sensor_index], hum_positions[0]);
+        _draw_humidity(canvas, unitemp_sensor_getActive(sensor_index), hum_positions[0]);
         break;
     case UT_DATA_TYPE_TEMP_PRESS:
         _draw_temperature(
             canvas,
-            app->sensors[sensor_index],
+            unitemp_sensor_getActive(sensor_index),
             temp_positions[1][0],
             temp_positions[1][1],
             ColorWhite);
-        _draw_pressure(canvas, app->sensors[sensor_index]);
+        _draw_pressure(canvas, unitemp_sensor_getActive(sensor_index));
         break;
     case UT_DATA_TYPE_TEMP_HUM_PRESS:
         _draw_temperature(
             canvas,
-            app->sensors[sensor_index],
+            unitemp_sensor_getActive(sensor_index),
             temp_positions[2][0],
             temp_positions[2][1],
             ColorWhite);
-        _draw_humidity(canvas, app->sensors[sensor_index], hum_positions[1]);
-        _draw_pressure(canvas, app->sensors[sensor_index]);
+        _draw_humidity(canvas, unitemp_sensor_getActive(sensor_index), hum_positions[1]);
+        _draw_pressure(canvas, unitemp_sensor_getActive(sensor_index));
         break;
     }
 }
@@ -259,15 +260,18 @@ static void _draw_carousel_info(Canvas* canvas) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 10, 23, "Type:");
 
-    if(app->sensors[sensor_index]->type->interface == &ONE_WIRE) {
-        OneWireSensor* s = app->sensors[sensor_index]->instance;
+    if(unitemp_sensor_getActive(sensor_index)->type->interface == &ONE_WIRE) {
+        OneWireSensor* s = unitemp_sensor_getActive(sensor_index)->instance;
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 10, 35, "GPIO:");
         canvas_draw_str(canvas, 10, 47, "ID:");
 
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(
-            canvas, 41, 23, unitemp_onewire_sensor_getModel(app->sensors[sensor_index]));
+            canvas,
+            41,
+            23,
+            unitemp_onewire_sensor_getModel(unitemp_sensor_getActive(sensor_index)));
         canvas_draw_str(canvas, 41, 35, s->bus->gpio->name);
         snprintf(
             buff,
@@ -284,27 +288,30 @@ static void _draw_carousel_info(Canvas* canvas) {
         canvas_draw_str(canvas, 24, 47, buff);
     }
 
-    if(app->sensors[sensor_index]->type->interface == &SINGLE_WIRE) {
+    if(unitemp_sensor_getActive(sensor_index)->type->interface == &SINGLE_WIRE) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 10, 35, "GPIO:");
 
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 41, 23, app->sensors[sensor_index]->type->typename);
+        canvas_draw_str(canvas, 41, 23, unitemp_sensor_getActive(sensor_index)->type->typename);
         canvas_draw_str(
-            canvas, 41, 35, ((SingleWireSensor*)app->sensors[sensor_index]->instance)->gpio->name);
+            canvas,
+            41,
+            35,
+            ((SingleWireSensor*)unitemp_sensor_getActive(sensor_index)->instance)->gpio->name);
     }
 
-    if(app->sensors[sensor_index]->type->interface == &I2C) {
+    if(unitemp_sensor_getActive(sensor_index)->type->interface == &I2C) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 10, 35, "I2C addr:");
 
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 41, 23, app->sensors[sensor_index]->type->typename);
+        canvas_draw_str(canvas, 41, 23, unitemp_sensor_getActive(sensor_index)->type->typename);
         snprintf(
             buff,
             BUFF_SIZE,
             "0x%02X",
-            ((I2CSensor*)app->sensors[sensor_index]->instance)->currentI2CAdr);
+            ((I2CSensor*)unitemp_sensor_getActive(sensor_index)->instance)->currentI2CAdr);
         canvas_draw_str(canvas, 57, 35, buff);
     }
 }
@@ -316,13 +323,15 @@ static void _draw_view_sensorsCarousel(Canvas* canvas) {
     //Печать имени
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(
-        canvas, 64, 7, AlignCenter, AlignCenter, app->sensors[sensor_index]->name);
+        canvas, 64, 7, AlignCenter, AlignCenter, unitemp_sensor_getActive(sensor_index)->name);
     //Подчёркивание
-    uint8_t line_len = canvas_string_width(canvas, app->sensors[sensor_index]->name) + 2;
+    uint8_t line_len =
+        canvas_string_width(canvas, unitemp_sensor_getActive(sensor_index)->name) + 2;
     canvas_draw_line(canvas, 64 - line_len / 2, 12, 64 + line_len / 2, 12);
 
     //Стрелка вправо
-    if(unitemp_sensors_getTypesCount() > 0 && sensor_index < unitemp_sensors_getCount() - 1) {
+    if(unitemp_sensors_getTypesCount() > 0 &&
+       sensor_index < unitemp_sensors_getActiveCount() - 1) {
         canvas_draw_icon(canvas, 120, 28, &I_arrow_right_5x9);
     }
     //Стрелка влево
@@ -345,7 +354,7 @@ static void _draw_callback(Canvas* canvas, void* _model) {
 
     app->sensors_ready = true;
 
-    uint8_t sensors_count = unitemp_sensors_getCount();
+    uint8_t sensors_count = unitemp_sensors_getActiveCount();
 
     if(sensors_count == 0) {
         current_view = G_NO_SENSORS_VIEW;
@@ -377,7 +386,7 @@ static bool _input_callback(InputEvent* event, void* context) {
                 unitemp_MainMenu_switch();
             }
         } else if(current_view == G_CAROUSEL_VIEW) {
-            unitemp_SensorActions_switch(app->sensors[sensor_index]);
+            unitemp_SensorActions_switch(unitemp_sensor_getActive(sensor_index));
         }
     }
 
@@ -387,7 +396,7 @@ static bool _input_callback(InputEvent* event, void* context) {
         if(current_view == G_LIST_VIEW) {
             lastSelectTime = furi_get_tick();
             if(selector) sensor_index++;
-            if(sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
+            if(sensor_index >= unitemp_sensors_getActiveCount()) sensor_index = 0;
         }
         if(current_view == G_CAROUSEL_VIEW) {
             carousel_info_selector = !carousel_info_selector;
@@ -399,8 +408,8 @@ static bool _input_callback(InputEvent* event, void* context) {
         if(current_view == G_LIST_VIEW) {
             lastSelectTime = furi_get_tick();
             if(selector) sensor_index--;
-            if(sensor_index >= unitemp_sensors_getCount())
-                sensor_index = unitemp_sensors_getCount() - 1;
+            if(sensor_index >= unitemp_sensors_getActiveCount())
+                sensor_index = unitemp_sensors_getActiveCount() - 1;
         }
         if(current_view == G_CAROUSEL_VIEW) {
             carousel_info_selector = !carousel_info_selector;
@@ -412,7 +421,7 @@ static bool _input_callback(InputEvent* event, void* context) {
         //Пролистывание карусели вперёд
         if(current_view == G_CAROUSEL_VIEW) {
             carousel_info_selector = CAROUSEL_VALUES;
-            if(++sensor_index >= unitemp_sensors_getCount()) sensor_index = 0;
+            if(++sensor_index >= unitemp_sensors_getActiveCount()) sensor_index = 0;
         }
         //Переход в карусель
         if(current_view == G_LIST_VIEW) current_view = G_CAROUSEL_VIEW;
@@ -422,8 +431,8 @@ static bool _input_callback(InputEvent* event, void* context) {
         //Пролистывание карусели назад
         if(current_view == G_CAROUSEL_VIEW) {
             carousel_info_selector = CAROUSEL_VALUES;
-            if(--sensor_index >= unitemp_sensors_getCount())
-                sensor_index = unitemp_sensors_getCount() - 1;
+            if(--sensor_index >= unitemp_sensors_getActiveCount())
+                sensor_index = unitemp_sensors_getActiveCount() - 1;
         }
         //Переход в карусель
         if(current_view == G_LIST_VIEW) current_view = G_CAROUSEL_VIEW;

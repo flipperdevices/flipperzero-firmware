@@ -270,6 +270,8 @@ int32_t unitemp_app() {
 
     unitemp_General_switch();
 
+    app->sensors[0]->status = UT_INACTIVE;
+
     while(app->processing) {
         if(app->sensors_ready) unitemp_sensors_updateValues();
         furi_delay_ms(100);

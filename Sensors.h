@@ -24,6 +24,8 @@ typedef enum {
     UT_BADCRC, //Неверная контрольная сумма
     UT_ERROR, //Прочие ошибки
     UT_POLLING, //В датчике происходит преобразование
+    UT_INACTIVE, //Датчик на редактировании или удалён
+
 } UnitempStatus;
 
 //Порт ввода/вывода Flipper Zero
@@ -148,6 +150,14 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor);
 bool unitemp_sensor_isContains(Sensor* sensor);
 
 /**
+ * @brief Получить датчик из списка по индексу
+ * 
+ * @param index Индекс датчика (0 - unitemp_sensors_getCount())
+ * @return Указатель на датчик при успехе, NULL при неудаче
+ */
+Sensor* unitemp_sensor_getActive(uint8_t index);
+
+/**
  * @brief Загрузка датчиков с SD-карты
  * @return Истина если загрузка прошла успешно
  */
@@ -224,6 +234,13 @@ const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index);
  * @return Указатель на тип датчика при успехе, иначе NULL
  */
 const SensorType* unitemp_sensors_getTypeFromStr(char* str);
+
+/**
+ * @brief Получить количество активных датчиков
+ * 
+ * @return Количество активных датчиков
+ */
+uint8_t unitemp_sensors_getActiveCount(void);
 
 /* ============================= GPIO ============================= */
 /**

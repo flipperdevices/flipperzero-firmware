@@ -25,10 +25,10 @@ static VariableItem* onewire_type_item;
 
 bool _onewire_id_exist(uint8_t* id) {
     if(id == NULL) return false;
-    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
-        if(app->sensors[i]->type == &DS18x2x) {
+    for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
+        if(unitemp_sensor_getActive(i)->type == &DS18x2x) {
             if(unitemp_onewire_id_compare(
-                   id, ((OneWireSensor*)(app->sensors[i]->instance))->deviceID)) {
+                   id, ((OneWireSensor*)(unitemp_sensor_getActive(i)->instance))->deviceID)) {
                 return true;
             }
         }
