@@ -1,11 +1,12 @@
 App(
-    appid="APPS_wifi_deauther",
-    name="WiFi (Deauther)",
-    apptype=FlipperAppType.APP,
+    appid="ESP8266_Wifi_Deauther",
+    name="[ESP8266] WiFi (Deauther)",
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_deauther_app",
     cdefines=["APP_WIFI_deauther"],
     requires=["gui"],
     stack_size=1 * 1024,
-    icon="A_Infrared_14",
-    order=49,
+    order=30,
+    fap_icon="wifi_10px.png",
+    fap_category="GPIO",
 )
