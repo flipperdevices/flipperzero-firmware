@@ -148,6 +148,18 @@ static void _enter_callback(void* context, uint32_t index) {
     case 1:
         _delete_widget_switch();
         break;
+    case 2:
+        unitemp_SensorsList_switch();
+        break;
+    case 3:
+        unitemp_Settings_switch();
+        break;
+    case 4:
+        //Help
+        break;
+    case 5:
+        //About
+        break;
     }
 }
 
@@ -162,9 +174,13 @@ void unitemp_SensorActions_alloc(void) {
     variable_item_list_add(variable_item_list, "Edit", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Delete", 1, NULL, NULL);
 
+    variable_item_list_add(variable_item_list, "Add new sensor", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Settings", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "Help", 1, NULL, NULL);
+    variable_item_list_add(variable_item_list, "About", 1, NULL, NULL);
+
     //Добавление колбека на нажатие средней кнопки
     variable_item_list_set_enter_callback(variable_item_list, _enter_callback, app);
-
     //Создание вида из списка
     view = variable_item_list_get_view(variable_item_list);
     //Добавление колбека на нажатие кнопки "Назад"

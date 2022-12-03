@@ -360,6 +360,7 @@ static void _draw_callback(Canvas* canvas, void* _model) {
         current_view = G_NO_SENSORS_VIEW;
         _draw_view_noSensors(canvas);
     } else {
+        if(sensors_count == 1) current_view = G_CAROUSEL_VIEW;
         if(current_view == G_NO_SENSORS_VIEW) current_view = G_LIST_VIEW;
         if(current_view == G_LIST_VIEW) _draw_view_sensorsList(canvas);
         if(current_view == G_CAROUSEL_VIEW) _draw_view_sensorsCarousel(canvas);
@@ -441,10 +442,12 @@ static bool _input_callback(InputEvent* event, void* context) {
     //Обработка короткого нажатия "назад"
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         //Выход из приложения при листе или отсутствии датчиков
-        if(current_view == G_LIST_VIEW || current_view == G_NO_SENSORS_VIEW)
+        if(current_view == G_LIST_VIEW || current_view == G_NO_SENSORS_VIEW ||
+           ((current_view == G_CAROUSEL_VIEW) && (unitemp_sensors_getActiveCount() == 1)))
             app->processing = false;
         //Переход в список датчиков
-        if(current_view == G_CAROUSEL_VIEW) current_view = G_LIST_VIEW;
+        if((current_view == G_CAROUSEL_VIEW) && (unitemp_sensors_getActiveCount() != 1))
+            current_view = G_LIST_VIEW;
     }
 
     return true;

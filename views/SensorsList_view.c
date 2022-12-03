@@ -19,7 +19,7 @@ static uint32_t _exit_callback(void* context) {
     UNUSED(context);
 
     //Возврат предыдущий вид
-    return VIEW_MAIN_MENU;
+    return VIEW_GENERAL;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки
