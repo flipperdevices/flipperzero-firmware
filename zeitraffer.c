@@ -3,19 +3,22 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-//#include "gpio/gpio_item.h"
+#include <flipper_format/flipper_format.h>
 #include "gpio_item.h"
 
+#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps/Misc"
+#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/zeitraffer.conf"
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 
-int Time = 10; // Таймер
-int Count = 10; // Количество кадров
-int WorkTime = 0; // Счётчик таймера
-int WorkCount = 0; // Счётчик кадров
+int32_t Time = 10; // Таймер
+int32_t Count = 10; // Количество кадров
+int32_t WorkTime = 0; // Счётчик таймера
+int32_t WorkCount = 0; // Счётчик кадров
 bool InfiniteShot = false; // Бесконечная съёмка
 bool Bulb = false; // Режим BULB
-int Backlight = 0; // Подсветка: вкл/выкл/авто
+int32_t Backlight = 0; // Подсветка: вкл/выкл/авто
+int32_t Delay = 3; // Задержка на отскочить
 
 const NotificationSequence sequence_click = {
     &message_note_c7,
@@ -41,16 +44,16 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     switch (Count) {
 	case -1:
-		snprintf(temp_str,sizeof(temp_str),"Set: BULB %i sec",Time);
+		snprintf(temp_str,sizeof(temp_str),"Set: BULB %li sec",Time);
 		break;
 	case 0:
-		snprintf(temp_str,sizeof(temp_str),"Set: infinite, %i sec",Time);
+		snprintf(temp_str,sizeof(temp_str),"Set: infinite, %li sec",Time);
 		break;
 	default:
-		snprintf(temp_str,sizeof(temp_str),"Set: %i frames, %i sec",Count,Time);
+		snprintf(temp_str,sizeof(temp_str),"Set: %li frames, %li sec",Count,Time);
 	}
 	canvas_draw_str(canvas, 3, 15, temp_str);
-	snprintf(temp_str,sizeof(temp_str),"Left: %i frames, %i sec",WorkCount,WorkTime);
+	snprintf(temp_str,sizeof(temp_str),"Left: %li frames, %li sec",WorkCount,WorkTime);
 	canvas_draw_str(canvas, 3, 35, temp_str);
 
     switch (Backlight) {
@@ -115,7 +118,26 @@ int32_t zeitraffer_app(void* p) {
 
     // Включаем нотификации
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
+	
+	
+	Storage* storage = furi_record_open(RECORD_STORAGE);
+	
+	// Загружаем настройки
+	FlipperFormat* load = flipper_format_file_alloc(storage);
+  
+	do {
 
+		if(!flipper_format_file_open_existing(load, CONFIG_FILE_PATH)) {notification_message(notifications, &sequence_error); break;}
+		if(!flipper_format_read_int32(load, "Time", &Time, 1)) {notification_message(notifications, &sequence_error); break;}
+		if(!flipper_format_read_int32(load, "Count", &Count, 1)) {notification_message(notifications, &sequence_error); break;}
+		if(!flipper_format_read_int32(load, "Backlight", &Backlight, 1)) {notification_message(notifications, &sequence_error); break;}
+		if(!flipper_format_read_int32(load, "Delay", &Delay, 1)) {notification_message(notifications, &sequence_error); break;}
+		notification_message(notifications, &sequence_success);
+		
+	} while(0);
+ 
+	flipper_format_free(load);
+	
     // Бесконечный цикл обработки очереди событий
     while(1) {
         // Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
@@ -192,7 +214,7 @@ int32_t zeitraffer_app(void* p) {
 							WorkCount = Count;
 					
 						if (WorkTime == 0) 
-							WorkTime = 3;
+							WorkTime = Delay;
 					
 						if (Count == 0) {
 							InfiniteShot = true; 
@@ -330,6 +352,26 @@ int32_t zeitraffer_app(void* p) {
 		if (Time < 1) Time = 1; // Не даём открутить таймер меньше единицы
 		if (Count < -1) Count = 0; // А тут даём, бо 0 кадров это бесконечная съёмка, а -1 кадров - BULB
 	}
+
+
+	// Схороняем настройки
+	FlipperFormat* save = flipper_format_file_alloc(storage);
+
+	do {
+
+     if(!flipper_format_file_open_always(save, CONFIG_FILE_PATH)) {notification_message(notifications, &sequence_error); break;}
+     if(!flipper_format_write_header_cstr(save, "Zeitraffer", 1)) {notification_message(notifications, &sequence_error); break;}
+     if(!flipper_format_write_comment_cstr(save, "Zeitraffer app settings: № of frames, interval time, backlight type, Delay")) {notification_message(notifications, &sequence_error); break;}     
+     if(!flipper_format_write_int32(save, "Time", &Time, 1)) {notification_message(notifications, &sequence_error); break;}
+     if(!flipper_format_write_int32(save, "Count", &Count, 1)) {notification_message(notifications, &sequence_error); break;}
+     if(!flipper_format_write_int32(save, "Backlight", &Backlight, 1)) {notification_message(notifications, &sequence_error); break;}
+	 if(!flipper_format_write_int32(save, "Delay", &Delay, 1)) {notification_message(notifications, &sequence_error); break;}
+	 
+	} while(0);
+
+	flipper_format_free(save);
+
+	furi_record_close(RECORD_STORAGE);
 
     // Очищаем таймер
     furi_timer_free(timer);
