@@ -112,7 +112,7 @@ static void _onewire_scan(void) {
  */
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
-
+    editable_sensor->status = UT_TIMEOUT;
     if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
     //Возврат предыдущий вид
     return VIEW_GENERAL;
@@ -141,6 +141,7 @@ static void _enter_callback(void* context, uint32_t index) {
             unitemp_gpio_unlock(initial_gpio);
             initial_gpio = NULL;
         }
+        editable_sensor->status = UT_TIMEOUT;
         if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensors_add(editable_sensor);
         unitemp_sensors_save();
         unitemp_sensors_reload();
@@ -227,6 +228,9 @@ void unitemp_SensorEdit_alloc(void) {
 
 void unitemp_SensorEdit_switch(Sensor* sensor) {
     editable_sensor = sensor;
+
+    editable_sensor->status = UT_INACTIVE;
+
     //Сброс всех элементов меню
     variable_item_list_reset(variable_item_list);
     //Обнуление последнего выбранного пункта
@@ -241,7 +245,10 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
     //Тип датчика (не редактируется)
     onewire_type_item = variable_item_list_add(variable_item_list, "Type", 1, NULL, NULL);
     variable_item_set_current_value_index(onewire_type_item, 0);
-    variable_item_set_current_value_text(onewire_type_item, sensor->type->typename);
+    variable_item_set_current_value_text(
+        onewire_type_item,
+        (sensor->type->interface == &ONE_WIRE ? unitemp_onewire_sensor_getModel(editable_sensor) :
+                                                sensor->type->typename));
 
     //Порт подключения датчка (для one wire и single wire)
     if(sensor->type->interface == &ONE_WIRE || sensor->type->interface == &SINGLE_WIRE) {
@@ -275,9 +282,8 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
                 1,
             _i2caddr_change_callback,
             app);
-        char buff[5];
-        snprintf(buff, 5, "0x%2X", ((I2CSensor*)sensor->instance)->currentI2CAdr);
-        variable_item_set_current_value_text(item, buff);
+        snprintf(app->buff, 5, "0x%2X", ((I2CSensor*)sensor->instance)->currentI2CAdr);
+        variable_item_set_current_value_text(item, app->buff);
     }
 
     //Адрес устройства на шине one wire (для датчиков one wire)
@@ -288,15 +294,14 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
         if(ow_sensor->familyCode == 0) {
             variable_item_set_current_value_text(onewire_addr_item, "Scan");
         } else {
-            char id_buff[10];
             snprintf(
-                id_buff,
+                app->buff,
                 10,
-                "%2X..%2X%2X",
-                ow_sensor->deviceID[0],
-                ow_sensor->deviceID[6],
-                ow_sensor->deviceID[7]);
-            variable_item_set_current_value_text(onewire_addr_item, id_buff);
+                "%02X%02X%02X",
+                ow_sensor->deviceID[1],
+                ow_sensor->deviceID[2],
+                ow_sensor->deviceID[3]);
+            variable_item_set_current_value_text(onewire_addr_item, app->buff);
         }
     }
     variable_item_list_add(variable_item_list, "Save", 1, NULL, NULL);

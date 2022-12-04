@@ -75,7 +75,7 @@ typedef struct {
     //Модель датчика
     const char* typename;
     //Полное имя с аналогами
-    const char* fullname;
+    const char* altname;
     //Тип возвращаемых данных
     SensorDataType datatype;
     //Интерфейс подключения
