@@ -6,7 +6,7 @@
 #include <one_wire/one_wire_host.h>
 
 const SensorType DS18x2x = {
-    .typename = "DS18x2x",
+    .typename = "Dallas",
     .interface = &ONE_WIRE,
     .datatype = UT_DATA_TYPE_TEMP,
     .pollingInterval = 250,

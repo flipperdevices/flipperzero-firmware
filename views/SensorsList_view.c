@@ -30,10 +30,18 @@ static uint32_t _exit_callback(void* context) {
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     const SensorType* type = unitemp_sensors_getTypes()[index];
+    uint8_t sensor_type_count = 0;
+    for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
+        if(unitemp_sensor_getActive(i)->type == type) {
+            sensor_type_count++;
+        }
+    }
     //Имя датчка
     char sensor_name[11];
-    snprintf(sensor_name, 11, "%s", type->typename);
-
+    if(sensor_type_count == 0)
+        snprintf(sensor_name, 11, "%s", type->typename);
+    else
+        snprintf(sensor_name, 11, "%s_%d", type->typename, sensor_type_count);
     char args[22] = {0};
     //Выбор первого доступного порта для датчика single wire
     if(type->interface == &SINGLE_WIRE) {
