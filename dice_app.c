@@ -168,7 +168,7 @@ static void timer_callback(FuriMessageQueue* event_queue) {
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-int32_t dice_tool_app(void* p) {
+int32_t dice_dnd_app(void* p) {
     UNUSED(p);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(AppEvent));
