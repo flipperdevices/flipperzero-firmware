@@ -6,18 +6,17 @@
 
 #define DATA_SIZE 4
 
-static void test_setup() {
+static void furi_hal_i2c_int_setup() {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
 }
 
-static void test_teardown() {
+static void furi_hal_i2c_int_teardown() {
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 }
 
-MU_TEST(furi_hal_i2c) {
+MU_TEST(furi_hal_i2c_int_1b) {
     bool ret = false;
     uint8_t data_one = 0;
-    uint8_t data_many[DATA_SIZE] = {0};
 
     // 1 byte: read, write, read
     ret = furi_hal_i2c_read_reg_8(
@@ -43,6 +42,11 @@ MU_TEST(furi_hal_i2c) {
         LP5562_I2C_TIMEOUT);
     mu_assert(ret, "2 read_reg_8 failed");
     mu_assert(data_one != 0, "2 invalid data");
+}
+
+MU_TEST(furi_hal_i2c_int_3b) {
+    bool ret = false;
+    uint8_t data_many[DATA_SIZE] = {0};
 
     // 3 byte: read, write, read
     data_many[0] = LP5562_CHANNEL_BLUE_CURRENT_REGISTER;
@@ -73,6 +77,11 @@ MU_TEST(furi_hal_i2c) {
         LP5562_I2C_TIMEOUT);
     mu_assert(ret, "7 rx failed");
     for(size_t i = 0; i < DATA_SIZE; i++) mu_assert(data_many[i] != 0, "7 invalid data_many");
+}
+
+MU_TEST(furi_hal_i2c_int_1b_fail) {
+    bool ret = false;
+    uint8_t data_one = 0;
 
     // 1 byte: fail, read, fail, write, fail, read
     data_one = 0;
@@ -94,13 +103,14 @@ MU_TEST(furi_hal_i2c) {
     mu_assert(data_one != 0, "9 invalid data");
 }
 
-MU_TEST_SUITE(test_suite) {
-    MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
-    MU_RUN_TEST(furi_hal_i2c);
+MU_TEST_SUITE(furi_hal_i2c_int_suite) {
+    MU_SUITE_CONFIGURE(&furi_hal_i2c_int_setup, &furi_hal_i2c_int_teardown);
+    MU_RUN_TEST(furi_hal_i2c_int_1b);
+    MU_RUN_TEST(furi_hal_i2c_int_3b);
+    MU_RUN_TEST(furi_hal_i2c_int_1b_fail);
 }
 
 int run_minunit_test_furi_hal() {
-    MU_RUN_SUITE(test_suite);
-
+    MU_RUN_SUITE(furi_hal_i2c_int_suite);
     return MU_EXIT_CODE;
 }
