@@ -82,8 +82,13 @@ void unitemp_SensorsList_alloc(void) {
 
     //Добавление в список доступных датчиков
     for(uint8_t i = 0; i < unitemp_sensors_getTypesCount(); i++) {
-        variable_item_list_add(
-            variable_item_list, unitemp_sensors_getTypes()[i]->typename, 1, NULL, app);
+        if(unitemp_sensors_getTypes()[i]->altname == NULL) {
+            variable_item_list_add(
+                variable_item_list, unitemp_sensors_getTypes()[i]->typename, 1, NULL, app);
+        } else {
+            variable_item_list_add(
+                variable_item_list, unitemp_sensors_getTypes()[i]->altname, 1, NULL, app);
+        }
     }
 
     //Добавление колбека на нажатие средней кнопки

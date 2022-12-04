@@ -202,5 +202,5 @@ uint8_t* unitemp_onewire_bus_enum_next(OneWireBus* bus);
  */
 bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2);
 
-extern const SensorType DS18x2x;
+extern const SensorType Dallas;
 #endif

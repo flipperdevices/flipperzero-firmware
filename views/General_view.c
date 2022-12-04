@@ -3,8 +3,6 @@
 
 #include <assets_icons.h>
 
-#define BUFF_SIZE 17
-
 static View* view;
 
 typedef enum general_views {
@@ -24,8 +22,6 @@ static uint32_t lastSelectTime = 0;
 static const uint16_t selector_timeout = 2000;
 
 static carousel_info carousel_info_selector = CAROUSEL_VALUES;
-
-static char* buff;
 
 static general_view current_view;
 
@@ -48,27 +44,27 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
         canvas, x + 3, y + 3, (app->settings.unit == CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
     if((int16_t)sensor->temp == -128 || sensor->status == UT_TIMEOUT) {
-        snprintf(buff, BUFF_SIZE, "--");
+        snprintf(app->buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, x + 27, y + 10, AlignCenter, AlignCenter, buff);
-        snprintf(buff, BUFF_SIZE, ". -");
+        canvas_draw_str_aligned(canvas, x + 27, y + 10, AlignCenter, AlignCenter, app->buff);
+        snprintf(app->buff, BUFF_SIZE, ". -");
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, x + 50, y + 10 + 3, AlignRight, AlignCenter, buff);
+        canvas_draw_str_aligned(canvas, x + 50, y + 10 + 3, AlignRight, AlignCenter, app->buff);
         if(color == ColorBlack) canvas_invert_color(canvas);
         return;
     }
 
     //Целая часть температуры
-    snprintf(buff, BUFF_SIZE, "%d", temp_int);
+    snprintf(app->buff, BUFF_SIZE, "%d", temp_int);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
-        canvas, x + 27 + ((temp_int <= -10) ? 5 : 0), y + 10, AlignCenter, AlignCenter, buff);
+        canvas, x + 27 + ((temp_int <= -10) ? 5 : 0), y + 10, AlignCenter, AlignCenter, app->buff);
     //Печать дробной части температуры в диапазоне от -9 до 99 (когда два знака в числе)
     if(temp_int > -10 && temp_int <= 99) {
-        uint8_t int_len = canvas_string_width(canvas, buff);
-        snprintf(buff, BUFF_SIZE, ".%d", temp_dec);
+        uint8_t int_len = canvas_string_width(canvas, app->buff);
+        snprintf(app->buff, BUFF_SIZE, ".%d", temp_dec);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, x + 27 + int_len / 2 + 2, y + 10 + 7, buff);
+        canvas_draw_str(canvas, x + 27 + int_len / 2 + 2, y + 10 + 7, app->buff);
     }
     if(color == ColorBlack) canvas_invert_color(canvas);
 }
@@ -82,21 +78,22 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
     canvas_draw_icon(canvas, pos[0] + 3, pos[1] + 2, &I_hum_9x15);
 
     if((int8_t)sensor->hum == -128 || sensor->status == UT_TIMEOUT) {
-        snprintf(buff, BUFF_SIZE, "--");
+        snprintf(app->buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, buff);
-        snprintf(buff, BUFF_SIZE, ". -");
+        canvas_draw_str_aligned(
+            canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
+        snprintf(app->buff, BUFF_SIZE, ". -");
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(
-            canvas, pos[0] + 50, pos[1] + 10 + 3, AlignRight, AlignCenter, buff);
+            canvas, pos[0] + 50, pos[1] + 10 + 3, AlignRight, AlignCenter, app->buff);
         return;
     }
 
     //Целая часть влажности
-    snprintf(buff, BUFF_SIZE, "%d", (uint8_t)sensor->hum);
+    snprintf(app->buff, BUFF_SIZE, "%d", (uint8_t)sensor->hum);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, buff);
-    uint8_t int_len = canvas_string_width(canvas, buff);
+    canvas_draw_str_aligned(canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
+    uint8_t int_len = canvas_string_width(canvas, app->buff);
     //Единица измерения
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, pos[0] + 27 + int_len / 2 + 4, pos[1] + 10 + 7, "%");
@@ -112,9 +109,9 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
     canvas_draw_icon(canvas, x + 3, y + 4, &I_pressure_7x13);
 
     //Давление
-    snprintf(buff, BUFF_SIZE, "%d", (uint16_t)sensor->pressure);
+    snprintf(app->buff, BUFF_SIZE, "%d", (uint16_t)sensor->pressure);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, x + 30, y + 10, AlignCenter, AlignCenter, buff);
+    canvas_draw_str_aligned(canvas, x + 30, y + 10, AlignCenter, AlignCenter, app->buff);
     //Единица измерения
     canvas_draw_icon(canvas, x + 50, y + 3, &I_mm_hg_17x15);
 }
@@ -274,7 +271,7 @@ static void _draw_carousel_info(Canvas* canvas) {
             unitemp_onewire_sensor_getModel(unitemp_sensor_getActive(sensor_index)));
         canvas_draw_str(canvas, 41, 35, s->bus->gpio->name);
         snprintf(
-            buff,
+            app->buff,
             BUFF_SIZE,
             "%02X%02X%02X%02X%02X%02X%02X%02X",
             s->deviceID[0],
@@ -285,7 +282,7 @@ static void _draw_carousel_info(Canvas* canvas) {
             s->deviceID[5],
             s->deviceID[6],
             s->deviceID[7]);
-        canvas_draw_str(canvas, 24, 47, buff);
+        canvas_draw_str(canvas, 24, 47, app->buff);
     }
 
     if(unitemp_sensor_getActive(sensor_index)->type->interface == &SINGLE_WIRE) {
@@ -308,11 +305,11 @@ static void _draw_carousel_info(Canvas* canvas) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 41, 23, unitemp_sensor_getActive(sensor_index)->type->typename);
         snprintf(
-            buff,
+            app->buff,
             BUFF_SIZE,
             "0x%02X",
             ((I2CSensor*)unitemp_sensor_getActive(sensor_index)->instance)->currentI2CAdr);
-        canvas_draw_str(canvas, 57, 35, buff);
+        canvas_draw_str(canvas, 57, 35, app->buff);
     }
 }
 static void _draw_view_sensorsCarousel(Canvas* canvas) {
@@ -463,8 +460,6 @@ void unitemp_General_alloc(void) {
     view_set_input_callback(view, _input_callback);
 
     view_dispatcher_add_view(app->view_dispatcher, VIEW_GENERAL, view);
-
-    buff = malloc(10);
 }
 
 void unitemp_General_switch(void) {
@@ -474,5 +469,4 @@ void unitemp_General_switch(void) {
 
 void unitemp_General_free(void) {
     view_free(view);
-    free(buff);
 }

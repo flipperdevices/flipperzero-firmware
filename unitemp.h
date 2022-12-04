@@ -27,6 +27,8 @@
 #define APP_FILENAME_SETTINGS "settings.cfg"
 //Имя файла с датчиками
 #define APP_FILENAME_SENSORS "sensors.cfg"
+//Размер буффера текста
+#define BUFF_SIZE 32
 
 /* Объявление перечислений */
 //Единицы измерения
@@ -63,6 +65,9 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     NotificationApp* notifications;
     Widget* widget;
+
+    //Буффер для различного текста
+    char* buff;
 } Unitemp;
 
 /* Объявление прототипов функций */

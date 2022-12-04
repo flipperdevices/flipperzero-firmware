@@ -1,12 +1,13 @@
-//Использован код Дмитрия Погребняка: https://aterlux.ru/article/1wire
+//Использован код Дмитрия Погребняка: https://aterlux.ru/article/1wireDS18x2x
 
 #include "OneWireSensor.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <one_wire/one_wire_host.h>
 
-const SensorType DS18x2x = {
+const SensorType Dallas = {
     .typename = "Dallas",
+    .altname = "Dallas (DS18x2x)",
     .interface = &ONE_WIRE,
     .datatype = UT_DATA_TYPE_TEMP,
     .pollingInterval = 250,

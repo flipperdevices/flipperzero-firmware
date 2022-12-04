@@ -72,8 +72,10 @@ typedef struct Interface {
 
 //Типы датчиков
 typedef struct {
-    //Имя типа датчика
+    //Модель датчика
     const char* typename;
+    //Полное имя с аналогами
+    const char* fullname;
     //Тип возвращаемых данных
     SensorDataType datatype;
     //Интерфейс подключения
