@@ -356,6 +356,8 @@ static void _draw_callback(Canvas* canvas, void* _model) {
 
     uint8_t sensors_count = unitemp_sensors_getActiveCount();
 
+    if(sensor_index + 1 > sensors_count) sensor_index = 0;
+
     if(sensors_count == 0) {
         current_view = G_NO_SENSORS_VIEW;
         _draw_view_noSensors(canvas);

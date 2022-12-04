@@ -39,7 +39,7 @@ static void _delete_click_callback(GuiButtonType result, InputType type, void* c
     //Коротко нажата правая кнопка (Delete)
     if(result == GuiButtonTypeRight && type == InputTypeShort) {
         //Удаление датчика
-        //
+        unitemp_sensor_delete(current_sensor);
         //Выход из меню
         unitemp_General_switch();
     }

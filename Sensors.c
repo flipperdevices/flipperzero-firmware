@@ -191,6 +191,17 @@ const GPIO*
     return NULL;
 }
 
+void unitemp_sensor_delete(Sensor* sensor) {
+    for(uint8_t i = 0; i < app->sensors_count; i++) {
+        if(app->sensors[i] == sensor) {
+            app->sensors[i]->status = UT_INACTIVE;
+            unitemp_sensors_save();
+            unitemp_sensors_reload();
+            return;
+        }
+    }
+}
+
 Sensor* unitemp_sensor_getActive(uint8_t index) {
     uint8_t aviable_index = 0;
     for(uint8_t i = 0; i < app->sensors_count; i++) {
@@ -353,7 +364,7 @@ bool unitemp_sensors_save(void) {
     }
 
     //Сохранение датчиков
-    for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
+    for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
         if(unitemp_sensor_getActive(i)->type->interface == &SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,

@@ -169,10 +169,17 @@ bool unitemp_sensors_load();
 void unitemp_sensors_reload(void);
 
 /**
- * @brief Сохранение настроек на SD-карту
+ * @brief Сохранение датчиков на SD-карту
  * @return Истина если сохранение прошло успешно
  */
 bool unitemp_sensors_save(void);
+
+/**
+ * @brief Удаление датчика
+ * 
+ * @param sensor Указатель на датчик
+ */
+void unitemp_sensor_delete(Sensor* sensor);
 
 /**
  * @brief Инициализация загруженных датчиков
