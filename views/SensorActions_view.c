@@ -9,6 +9,12 @@ static VariableItemList* variable_item_list;
 //Текущий датчик
 static Sensor* current_sensor;
 
+typedef enum carousel_info {
+    CAROUSEL_VALUES, //Отображение значений датчиков
+    CAROUSEL_INFO, //Отображение информации о датчике
+} carousel_info;
+extern carousel_info carousel_info_selector;
+
 #define VIEW_ID VIEW_SENSOR_ACTIONS
 
 /* ================== Подтверждение удаления ================== */
@@ -143,21 +149,25 @@ static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     switch(index) {
     case 0:
+        carousel_info_selector = CAROUSEL_INFO;
+        unitemp_General_switch();
+        return;
+    case 1:
         unitemp_SensorEdit_switch(current_sensor);
         break;
-    case 1:
+    case 2:
         _delete_widget_switch();
         break;
-    case 2:
+    case 3:
         unitemp_SensorsList_switch();
         break;
-    case 3:
+    case 4:
         unitemp_Settings_switch();
         break;
-    case 4:
+    case 5:
         //Help
         break;
-    case 5:
+    case 6:
         //About
         break;
     }
@@ -171,6 +181,7 @@ void unitemp_SensorActions_alloc(void) {
     //Сброс всех элементов меню
     variable_item_list_reset(variable_item_list);
 
+    variable_item_list_add(variable_item_list, "Info", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Edit", 1, NULL, NULL);
     variable_item_list_add(variable_item_list, "Delete", 1, NULL, NULL);
 
