@@ -13,6 +13,8 @@ typedef enum {
 
 struct SPIMemWorker {
     SPIMemChip* chip_info;
+    const SPIMemChip** found_chips_arr;
+    size_t* found_chips_size;
     SPIMemWorkerMode mode_index;
     SPIMemWorkerCallback callback;
     void* cb_ctx;

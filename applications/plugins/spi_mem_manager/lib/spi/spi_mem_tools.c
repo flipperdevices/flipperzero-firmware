@@ -64,7 +64,7 @@ bool spi_mem_tools_read_chip_info(SPIMemChip* chip) {
     do {
         if(!spi_mem_tools_trx(SPIMemChipCMDReadJEDECChipID, NULL, 0, rx_buf, 3)) break;
         if(rx_buf[0] == 0 || rx_buf[0] == 255) break;
-        chip->vendor_id = (SPIMemChipVendor)rx_buf[0];
+        chip->vendor_id = rx_buf[0];
         chip->type_id = rx_buf[1];
         chip->capacity_id = rx_buf[2];
         return true;

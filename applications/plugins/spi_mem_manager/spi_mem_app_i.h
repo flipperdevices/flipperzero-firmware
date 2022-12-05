@@ -52,6 +52,8 @@ struct SPIMemApp {
     Widget* widget;
     SPIMemWorker* worker;
     SPIMemChip* chip_info;
+    const SPIMemChip** found_chips_arr;
+    size_t found_chips_size;
     SPIMemProgressView* view_progress;
     SPIMemDetectView* view_detect;
     TextInput* text_input;

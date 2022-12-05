@@ -4,40 +4,6 @@ import argparse
 import xml.etree.ElementTree as XML
 import sys
 
-vendors = {
-    "01": "SPIMemChipVendorCypress",
-    "04": "SPIMemChipVendorFujitsu",
-    "1C": "SPIMemChipVendorEon",
-    "1F": "SPIMemChipVendorAtmel",
-    "20": "SPIMemChipVendorMicron1",
-    "37": "SPIMemChipVendorAmic",
-    "52": "SPIMemChipVendorNormem",
-    "62": "SPIMemChipVendorSanyo",
-    "89": "SPIMemChipVendorIntel",
-    "8C": "SPIMemChipVendorEsmt",
-    "A1": "SPIMemChipVendorFudan1",
-    "F8": "SPIMemChipVendorFudan2",
-    "AD": "SPIMemChipVendorHyundai",
-    "BF": "SPIMemChipVendorSst",
-    "C2": "SPIMemChipVendorMicronix",
-    "C8": "SPIMemChipVendorGigadevice1",
-    "D5": "SPIMemChipVendorIssi",
-    "EF": "SPIMemChipVendorWinbond",
-    "68": "SPIMemChipVendorBoya",
-    "0D": "SPIMemChipVendorAPMemory",
-    "9D": "SPIMemChipVendorPMCSierra1",
-    "7F": "SPIMemChipVendorPMCSierra2",
-    "4A": "SPIMemChipVendorExcelSemi",
-    "51": "SPIMemChipVendorGigadevice2",
-    "2C": "SPIMemChipVendorMicron2",
-    "5E": "SPIMemChipVendorZbitSemi",
-    "E0": "SPIMemChipVendorBergMicro",
-    "9B": "SPIMemChipVendorATO",
-    "54": "SPIMemChipVendorDOUQI",
-    "0E": "SPIMemChipVendorFremont",
-}
-
-
 def getArgs():
     parser = argparse.ArgumentParser(
         description="chiplist.xml to C array converter",
@@ -52,18 +18,18 @@ def getXML(file):
     return root
 
 
-def parseChip(cur, arr):
+def parseChip(cur, arr, vendor, vendorCodeArr):
     chip = {}
     chipAttr = cur.attrib
-    if "page" not in chipAttr: # chip without page size not supported
+    if "page" not in chipAttr:  # chip without page size not supported
         return
     if "id" not in chipAttr:  # I2C not supported yet
         return
     if len(chipAttr["id"]) < 6:  # ID wihout capacity id not supported yet
         return
-    vendor = chipAttr["id"][0] + chipAttr["id"][1]
     chip["modelName"] = cur.tag
-    chip["vendorID"] = getVendorNameEnum(vendor)
+    chip["vendorEnum"] = "SPIMemChipVendor" + vendor
+    chip["vendorID"] = "0x" + chipAttr["id"][0] + chipAttr["id"][1]
     chip["typeID"] = chipAttr["id"][2] + chipAttr["id"][3]
     chip["capacityID"] = chipAttr["id"][4] + chipAttr["id"][5]
     chip["size"] = chipAttr["size"]
@@ -77,13 +43,27 @@ def parseChip(cur, arr):
         chip["writeMode"] = "SPIMemChipWriteModePage"
         chip["pageSize"] = chipAttr["page"]
     arr.append(chip)
+    vendorCodeArr[vendor].add(chip["vendorID"])
 
 
-def parseXML(xml, interface):
+def cleanEmptyVendors(vendors):
+    for cur in list(vendors):
+        if not vendors[cur]:
+            vendors.pop(cur)
+
+
+def getVendors(xml, interface):
+    arr = {}
+    for cur in xml.find(interface):
+        arr[cur.tag] = set()
+    return arr
+
+
+def parseXML(xml, interface, vendorCodeArr):
     arr = []
     for vendor in xml.find(interface):
         for cur in vendor:
-            parseChip(cur, arr)
+            parseChip(cur, arr, vendor.tag, vendorCodeArr)
     return arr
 
 
@@ -100,24 +80,29 @@ def generateCArr(arr, filename):
         print('#include "spi_mem_chip_i.h"', file=out)
         print("const SPIMemChip SPIMemChips[] = {", file=out)
         for cur in arr:
-            print("    {" + cur["vendorID"] + ",", file=out)
-            print('    "' + cur["modelName"] + '",', file=out)
-            print("    NULL,", file=out)
-            print("    " + cur["size"] + ",", file=out)
-            print("    " + cur["writeMode"] + ",", file=out)
-            print("    0x" + cur["typeID"] + ",", file=out)
-            print("    0x" + cur["capacityID"] + ",", file=out)
+            print("    {" + cur["vendorEnum"] + ",", file=out, end="")
+            print(" " + cur["vendorID"] + ",", file=out, end="")
+            print(' "' + cur["modelName"] + '",', file=out, end="")
+            print(" NULL,", file=out, end="")
+            print(" " + cur["size"] + ",", file=out, end="")
+            print(" " + cur["writeMode"] + ",", file=out, end="")
+            print(" 0x" + cur["typeID"] + ",", file=out, end="")
+            print(" 0x" + cur["capacityID"] + ",", file=out, end="")
             if cur == arr[-1]:
-                print("    " + cur["pageSize"] + "}};", file=out)
+                print(" " + cur["pageSize"] + "}};", file=out)
             else:
-                print("    " + cur["pageSize"] + "},", file=out)
+                print(" " + cur["pageSize"] + "},", file=out)
 
 
 def main():
     filename = "spi_mem_chip_arr.c"
     args = getArgs()
     xml = getXML(args.file)
-    chipArr = parseXML(xml, "SPI")
+    vendors = getVendors(xml, "SPI")
+    chipArr = parseXML(xml, "SPI", vendors)
+    cleanEmptyVendors(vendors)
+    for cur in vendors:
+        print('    {"'+cur+'", SPIMemChipVendor' + cur + '},')
     generateCArr(chipArr, filename)
 
 

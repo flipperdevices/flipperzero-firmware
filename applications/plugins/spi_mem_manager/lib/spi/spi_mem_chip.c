@@ -1,63 +1,68 @@
 #include "spi_mem_chip_i.h"
 
 const SPIMemChipVendorName spi_mem_chip_vendor_names[] = {
-    {"Cypress", SPIMemChipVendorCypress},
-    {"Fujitsu", SPIMemChipVendorFujitsu},
-    {"EON", SPIMemChipVendorEon},
-    {"Atmel", SPIMemChipVendorAtmel},
-    {"Micron", SPIMemChipVendorMicron1},
-    {"Micron", SPIMemChipVendorMicron2},
-    {"AMIC", SPIMemChipVendorAmic},
-    {"Nor-Mem", SPIMemChipVendorNormem},
-    {"Sanyo", SPIMemChipVendorSanyo},
-    {"Intel", SPIMemChipVendorIntel},
-    {"ESMT", SPIMemChipVendorEsmt},
-    {"Fudan", SPIMemChipVendorFudan1},
-    {"Fudan", SPIMemChipVendorFudan2},
-    {"Hyundai", SPIMemChipVendorHyundai},
-    {"SST", SPIMemChipVendorSst},
-    {"Micronix", SPIMemChipVendorMicronix},
-    {"GigaDevice", SPIMemChipVendorGigadevice1},
-    {"GigaDevice", SPIMemChipVendorGigadevice2},
-    {"ISSI", SPIMemChipVendorIssi},
-    {"Winbond", SPIMemChipVendorWinbond},
-    {"BOYA", SPIMemChipVendorBoya},
-    {"AP Memory", SPIMemChipVendorAPMemory},
-    {"PMC-Sierra", SPIMemChipVendorPMCSierra1},
-    {"PMC-Sierra", SPIMemChipVendorPMCSierra2},
-    {"Excel Semicond.", SPIMemChipVendorExcelSemi},
-    {"Zbit Semicond.", SPIMemChipVendorZbitSemi},
-    {"Berg Micro.", SPIMemChipVendorBergMicro},
-    {"ATO-Solution", SPIMemChipVendorATO},
-    {"DOUQI", SPIMemChipVendorDOUQI},
+    {"Adesto", SPIMemChipVendorADESTO},
+    {"AMIC", SPIMemChipVendorAMIC},
+    {"Boya", SPIMemChipVendorBoya},
+    {"EON", SPIMemChipVendorEON},
+    {"PFlash", SPIMemChipVendorPFLASH},
+    {"Terra", SPIMemChipVendorTERRA},
+    {"Generalplus", SPIMemChipVendorGeneralplus},
+    {"Deutron", SPIMemChipVendorDEUTRON},
+    {"EFST", SPIMemChipVendorEFST},
+    {"Excel Semi.", SPIMemChipVendorEXCELSEMI},
+    {"Fidelix", SPIMemChipVendorFIDELIX},
+    {"GigaDevice", SPIMemChipVendorGIGADEVICE},
+    {"ICE", SPIMemChipVendorICE},
+    {"Intel", SPIMemChipVendorINTEL},
+    {"KHIC", SPIMemChipVendorKHIC},
+    {"Macronix", SPIMemChipVendorMACRONIX},
+    {"Micron", SPIMemChipVendorMICRON},
+    {"Mshine", SPIMemChipVendorMSHINE},
+    {"Nantronics", SPIMemChipVendorNANTRONICS},
+    {"Nexflash", SPIMemChipVendorNEXFLASH},
+    {"Numonyx", SPIMemChipVendorNUMONYX},
+    {"PCT", SPIMemChipVendorPCT},
+    {"Spansion", SPIMemChipVendorSPANSION},
+    {"SST", SPIMemChipVendorSST},
+    {"ST", SPIMemChipVendorST},
+    {"Winbond", SPIMemChipVendorWINBOND},
+    {"Zempro", SPIMemChipVendorZEMPRO},
+    {"Zbit", SPIMemChipVendorZbit},
+    {"Berg Micro.", SPIMemChipVendorBerg_Micro},
+    {"Atmel", SPIMemChipVendorATMEL},
+    {"ACE", SPIMemChipVendorACE},
+    {"ATO", SPIMemChipVendorATO},
+    {"Douqi", SPIMemChipVendorDOUQI},
     {"Fremont", SPIMemChipVendorFremont},
+    {"Fudan", SPIMemChipVendorFudan},
+    {"Genitop", SPIMemChipVendorGenitop},
+    {"Paragon", SPIMemChipVendorParagon},
     {"Unknown", SPIMemChipVendorUnknown}};
 
-static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_id) {
+static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_enum) {
     const SPIMemChipVendorName* vendor = spi_mem_chip_vendor_names;
-    while(vendor->vendor_id != SPIMemChipVendorUnknown && vendor->vendor_id != vendor_id) vendor++;
+    while(vendor->vendor_enum != SPIMemChipVendorUnknown && vendor->vendor_enum != vendor_enum)
+        vendor++;
     return vendor->vendor_name;
 }
 
-static void spi_mem_chip_copy_info(SPIMemChip* dest, const SPIMemChip* src) {
-    dest->vendor_id = src->vendor_id;
-    dest->model_name = src->model_name;
-    dest->vendor_name = src->vendor_name;
-    dest->size = src->size;
-    dest->write_mode = src->write_mode;
-    dest->type_id = src->type_id;
-    dest->capacity_id = src->capacity_id;
-    dest->page_size = src->page_size;
-}
-
-bool spi_mem_chip_complete_info(SPIMemChip* chip_info) {
+bool spi_mem_chip_find_all(SPIMemChip* chip_info, const SPIMemChip*** chips, size_t* chips_count) {
     const SPIMemChip* chip_info_arr;
+    *chips_count = 0;
+    free(*chips);
+    *chips = malloc(sizeof(SPIMemChip*));
     for(chip_info_arr = SPIMemChips; chip_info_arr->model_name != NULL; chip_info_arr++) {
         if(chip_info->vendor_id != chip_info_arr->vendor_id) continue;
         if(chip_info->type_id != chip_info_arr->type_id) continue;
         if(chip_info->capacity_id != chip_info_arr->capacity_id) continue;
-        spi_mem_chip_copy_info(chip_info, chip_info_arr);
-        chip_info->vendor_name = spi_mem_chip_search_vendor_name(chip_info->vendor_id);
+        *(*chips + *chips_count) = chip_info_arr;
+        ++*chips_count;
+        *chips = realloc((void*)*chips, (sizeof(SPIMemChip*) * (*chips_count)) + 1);
+    }
+    if(*chips_count) {
+        memcpy(chip_info, **chips, sizeof(SPIMemChip)); // TEMP
+        chip_info->vendor_name = spi_mem_chip_search_vendor_name(chip_info->vendor_enum); // TEMP
         return true;
     }
     return false;
@@ -83,7 +88,7 @@ const char* spi_mem_chip_get_model_name(SPIMemChip* chip) {
 }
 
 uint8_t spi_mem_chip_get_vendor_id(SPIMemChip* chip) {
-    return ((uint8_t)chip->vendor_id);
+    return (chip->vendor_id);
 }
 
 uint8_t spi_mem_chip_get_type_id(SPIMemChip* chip) {

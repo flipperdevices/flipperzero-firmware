@@ -49,7 +49,12 @@ static void spi_mem_worker_chip_detect_process(SPIMemWorker* worker) {
         furi_delay_tick(10);
         if(spi_mem_worker_check_for_stop(worker)) return;
     }
-    if(spi_mem_chip_complete_info(worker->chip_info)) {
+    if(spi_mem_chip_find_all(
+           worker->chip_info, &(worker->found_chips_arr), worker->found_chips_size)) {
+        FuriString* str = furi_string_alloc();
+        furi_string_printf(str, "Found %u chips", *(worker->found_chips_size));
+        FURI_LOG_E("SPIMem", furi_string_get_cstr(str));
+        furi_string_free(str);
         event = SPIMemCustomEventWorkerChipIdentified;
     } else {
         event = SPIMemCustomEventWorkerChipUnknown;
