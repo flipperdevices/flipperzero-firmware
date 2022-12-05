@@ -23,7 +23,7 @@ static VariableItem* onewire_type_item;
 
 extern uint8_t generalview_sensor_index;
 
-#define VIEW_ID VIEW_SENSOR_EDIT
+#define VIEW_ID UnitempViewSensorEdit
 
 bool _onewire_id_exist(uint8_t* id) {
     if(id == NULL) return false;
@@ -118,7 +118,7 @@ static uint32_t _exit_callback(void* context) {
     if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
     unitemp_sensors_reload();
     //Возврат предыдущий вид
-    return VIEW_GENERAL;
+    return UnitempViewGeneral;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

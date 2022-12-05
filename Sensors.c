@@ -162,6 +162,18 @@ void unitemp_gpio_unlock(const GPIO* gpio) {
 
 const GPIO*
     unitemp_gpio_getAviablePort(const Interface* interface, uint8_t index, const GPIO* extraport) {
+    //Проверка для I2C
+    if(interface == &I2C) {
+        if((gpio_interfaces_list[10] == NULL || gpio_interfaces_list[10] == &I2C) &&
+           (gpio_interfaces_list[11] == NULL || gpio_interfaces_list[11] == &I2C)) {
+            //Возврат истины
+            return unitemp_gpio_getFromIndex(0);
+        } else {
+            //Возврат лжи
+            return NULL;
+        }
+    }
+
     uint8_t aviable_index = 0;
     for(uint8_t i = 0; i < GPIO_ITEMS; i++) {
         //Проверка для one wire
@@ -188,6 +200,7 @@ const GPIO*
             }
         }
     }
+
     return NULL;
 }
 
@@ -270,7 +283,7 @@ bool unitemp_sensors_load(void) {
     }
 
     //Вычисление размера файла
-    uint8_t file_size = stream_size(app->file_stream);
+    uint16_t file_size = stream_size(app->file_stream);
     //Если файл пустой, то:
     if(file_size == (uint8_t)0) {
         FURI_LOG_W(APP_NAME, "Sensors file is empty");
@@ -458,10 +471,10 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
         FURI_LOG_I(APP_NAME, "Sensor %s allocated", name);
         return sensor;
     }
-    //Если ни один из типов не подошёл, то выход с очисткой
+    //Выход с очисткой если память для датчика не была выделена
     free(sensor->name);
     free(sensor);
-    FURI_LOG_E(APP_NAME, "Sensor %s type is unsupported: %s", name, type->typename);
+    FURI_LOG_E(APP_NAME, "Sensor %s(%s) allocation error", name, type->typename);
     return NULL;
 }
 
@@ -563,7 +576,9 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
 
     sensor->status = sensor->type->interface->updater(sensor);
 
-    FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
+    if(sensor->status != UT_OK && sensor->status != UT_POLLING)
+        FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
+
     if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
         uintemp_celsiumToFarengate(sensor);
     if(sensor->status == UT_OK) {

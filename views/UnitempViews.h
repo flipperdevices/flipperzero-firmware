@@ -5,17 +5,28 @@
 
 //Виды менюшек
 typedef enum UnitempViews {
-    VIEW_GENERAL,
-    VIEW_MAIN_MENU,
-    VIEW_SETTINGS,
-    VIEW_SENSORS_LIST,
-    VIEW_SENSOR_EDIT,
-    VIEW_SENSOR_NAME_EDIT,
-    VIEW_SENSOR_ACTIONS,
-    VIEW_SENSOR_DELETE,
+    UnitempViewGeneral,
+    UnitempViewMainMenu,
+    UnitempViewSettings,
+    UnitempViewSensorsList,
+    UnitempViewSensorEdit,
+    UnitempViewSensorNameEdit,
+    UnitempViewSensorActions,
+    UnitempViewSensorDelete,
+    UnitempViewPopup,
 
-    VIEWS_COUNT
+    UnitempViewsCount
 } UnitempViews;
+
+/**
+ * @brief Вывести всплывающее окно
+ * 
+ * @param icon Указатель на иконку
+ * @param header Заголовок
+ * @param message Сообщение
+ * @param prev_view_id ID вида куда в который нужно вернуться
+ */
+void unitemp_popup(const Icon* icon, char* header, char* message, uint32_t prev_view_id);
 
 /* Общий вид на датчики */
 void unitemp_General_alloc(void);

@@ -10,6 +10,7 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/popup.h>
 //Уведомления
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -65,7 +66,7 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     NotificationApp* notifications;
     Widget* widget;
-
+    Popup* popup;
     //Буффер для различного текста
     char* buff;
 } Unitemp;

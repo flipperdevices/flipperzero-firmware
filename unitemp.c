@@ -7,11 +7,8 @@
 #include <m-string.h>
 
 /* ****************************** Интерфейс ****************************** */
-//TODO: Вынести информирующих дельфинов в отдельную функцию
-//TODO: Реализовать ограничение на добавление датчиков если интерфейс недоступен
-
-//TODO: Ограничение на добавление датчика I2C с адресом уже имеющегося датчика
 //TODO: В режиме ожидания датчика указать в какому пину цепляться
+//TODO: Исправить: при редактировании датчика индекс GPIO нулевой
 //TODO: В меню выбора нового датчика добавить помогалку выбора датчика
 //TODO: Добавить настройку единицы измерения давления
 //TODO: Ограничивать длину имени датчика только тогда, когда имя действительно не вмещается
@@ -20,6 +17,7 @@
 /* ******************************* Датчики ******************************* */
 //TODO: Исправить зависание BMP280
 
+//TODO: Ограничение на добавление датчика I2C с адресом уже имеющегося датчика
 //TODO: Не выкидывать датчик в ошибку при первом же неудачном опросе
 //TODO: BMP280 SPI
 
@@ -212,9 +210,15 @@ static bool unitemp_alloc(void) {
     unitemp_SensorEdit_alloc();
     unitemp_SensorNameEdit_alloc();
     unitemp_SensorActions_alloc();
+
+    //Виджет
     app->widget = widget_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, VIEW_SENSOR_DELETE, widget_get_view(app->widget));
+        app->view_dispatcher, UnitempViewSensorDelete, widget_get_view(app->widget));
+
+    //Всплывающее окно
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, UnitempViewPopup, popup_get_view(app->popup));
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -225,7 +229,9 @@ static bool unitemp_alloc(void) {
  * @brief Освыбождение памяти после работы приложения
  */
 static void unitemp_free(void) {
+    popup_free(app->popup);
     widget_free(app->widget);
+
     unitemp_SensorActions_free();
     unitemp_SensorNameEdit_free();
     unitemp_SensorEdit_free();

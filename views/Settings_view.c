@@ -13,7 +13,7 @@ static const char units[2][3] = {"*C", "*F"};
 VariableItem* infinity_backlight_item;
 //Единица измерения температуры
 VariableItem* temperature_unit_item;
-#define VIEW_ID VIEW_SETTINGS
+#define VIEW_ID UnitempViewSettings
 
 /**
  * @brief Функция обработки нажатия кнопки "Назад"
@@ -40,7 +40,7 @@ static uint32_t _exit_callback(void* context) {
     unitemp_loadSettings();
 
     //Возврат предыдущий вид
-    return VIEW_MAIN_MENU;
+    return UnitempViewMainMenu;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

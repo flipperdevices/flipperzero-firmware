@@ -67,7 +67,7 @@ bool unitemp_singlewire_alloc(Sensor* sensor, char* args) {
     }
     sensor->instance = instance;
 
-    int gpio;
+    int gpio = 255;
     sscanf(args, "%d", &gpio);
 
     if(unitemp_singlewire_sensorSetGPIO(sensor, unitemp_gpio_getFromInt(gpio))) {

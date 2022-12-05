@@ -1,13 +1,14 @@
 #include "UnitempViews.h"
 #include <gui/modules/variable_item_list.h>
 #include <stdio.h>
+#include <assets_icons.h>
 
 //Текущий вид
 static View* view;
 //Список
 static VariableItemList* variable_item_list;
 
-#define VIEW_ID VIEW_SENSORS_LIST
+#define VIEW_ID UnitempViewSensorsList
 
 /**
  * @brief Функция обработки нажатия кнопки "Назад"
@@ -19,7 +20,7 @@ static uint32_t _exit_callback(void* context) {
     UNUSED(context);
 
     //Возврат предыдущий вид
-    return VIEW_GENERAL;
+    return UnitempViewGeneral;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки
@@ -31,18 +32,37 @@ static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
     const SensorType* type = unitemp_sensors_getTypes()[index];
     uint8_t sensor_type_count = 0;
+
+    //Подсчёт имеющихся датчиков данного типа
     for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
         if(unitemp_sensor_getActive(i)->type == type) {
             sensor_type_count++;
         }
     }
+
     //Имя датчка
     char sensor_name[11];
+    //Добавление счётчика к имени если такой датчик имеется
     if(sensor_type_count == 0)
         snprintf(sensor_name, 11, "%s", type->typename);
     else
         snprintf(sensor_name, 11, "%s_%d", type->typename, sensor_type_count);
+
     char args[22] = {0};
+
+    //Проверка доступности датчика
+    if(unitemp_gpio_getAviablePort(type->interface, 0, NULL) == NULL) {
+        if(type->interface == &SINGLE_WIRE || type->interface == &ONE_WIRE) {
+            unitemp_popup(
+                &I_Cry_dolph_55x52, "Sensor is unavailable", "All GPIOs\nare busy", VIEW_ID);
+        }
+        if(type->interface == &I2C) {
+            unitemp_popup(
+                &I_Cry_dolph_55x52, "Sensor is unavailable", "GPIOs 15 or 16\nare busy", VIEW_ID);
+        }
+        return;
+    }
+
     //Выбор первого доступного порта для датчика single wire
     if(type->interface == &SINGLE_WIRE) {
         snprintf(

@@ -15,7 +15,7 @@ typedef enum carousel_info {
 } carousel_info;
 extern carousel_info carousel_info_selector;
 
-#define VIEW_ID VIEW_SENSOR_ACTIONS
+#define VIEW_ID UnitempViewSensorActions
 
 /* ================== Подтверждение удаления ================== */
 /**
@@ -27,7 +27,7 @@ extern carousel_info carousel_info_selector;
 static uint32_t _delete_exit_callback(void* context) {
     UNUSED(context);
     //Возвращаем ID вида, в который нужно вернуться
-    return VIEW_SENSOR_ACTIONS;
+    return UnitempViewSensorActions;
 }
 /**
  * @brief Обработчик нажатий на кнопку в виджете
@@ -124,7 +124,7 @@ static void _delete_widget_switch(void) {
     }
 
     view_set_previous_callback(widget_get_view(app->widget), _delete_exit_callback);
-    view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_SENSOR_DELETE);
+    view_dispatcher_switch_to_view(app->view_dispatcher, UnitempViewSensorDelete);
 }
 
 /**
@@ -137,7 +137,7 @@ static uint32_t _exit_callback(void* context) {
     UNUSED(context);
 
     //Возврат предыдущий вид
-    return VIEW_GENERAL;
+    return UnitempViewGeneral;
 }
 /**
  * @brief Функция обработки нажатия средней кнопки

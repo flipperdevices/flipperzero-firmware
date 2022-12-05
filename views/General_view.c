@@ -476,12 +476,12 @@ void unitemp_General_alloc(void) {
     view_set_draw_callback(view, _draw_callback);
     view_set_input_callback(view, _input_callback);
 
-    view_dispatcher_add_view(app->view_dispatcher, VIEW_GENERAL, view);
+    view_dispatcher_add_view(app->view_dispatcher, UnitempViewGeneral, view);
 }
 
 void unitemp_General_switch(void) {
     app->sensors_ready = true;
-    view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_GENERAL);
+    view_dispatcher_switch_to_view(app->view_dispatcher, UnitempViewGeneral);
 }
 
 void unitemp_General_free(void) {
