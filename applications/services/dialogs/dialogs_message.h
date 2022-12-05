@@ -16,6 +16,7 @@ typedef struct {
     FuriString* preselected_filename;
     FileBrowserLoadItemCallback item_callback;
     void* item_callback_context;
+    const char* base_path;
 } DialogsAppMessageDataFileBrowser;
 
 typedef struct {

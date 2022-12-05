@@ -18,6 +18,7 @@ typedef struct DialogsApp DialogsApp;
 /**
  * File browser dialog extra options
  * @param extension file extension to be offered for selection
+ * @param base_path root folder path for navigation with back key
  * @param skip_assets true - do not show assets folders
  * @param icon file icon pointer, NULL for default icon
  * @param hide_ext true - hide extensions for files
@@ -26,6 +27,7 @@ typedef struct DialogsApp DialogsApp;
  */
 typedef struct {
     const char* extension;
+    const char* base_path;
     bool skip_assets;
     const Icon* icon;
     bool hide_ext;
