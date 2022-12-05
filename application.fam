@@ -7,10 +7,13 @@ App(
     requires=[
         "gui",
     ],
+    stack_size=2 * 1024,
+    order=100,
+    fap_description = "Universal temperature sensors reader",
+    fap_author = "Quenon",
+    fap_weburl = "https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin",
     fap_category="GPIO",
     fap_icon="icon.png",
     fap_icon_assets="assets",
-    stack_size=2 * 1024,
-    order=100,
     fap_libs=["assets"],
 )
