@@ -198,13 +198,20 @@ UnitempStatus unitemp_BMP280_update(Sensor* sensor) {
         bmp280_readCalValues(i2c_sensor);
     }
 
+    uint8_t buff[3];
+    //Проверка инициализированности датчика
+    unitemp_i2c_readRegArray(i2c_sensor, 0xF4, 2, buff);
+    if(buff[0] == 0) {
+        FURI_LOG_W(APP_NAME, "Sensor %s is not initialized!", sensor->name);
+        return UT_ERROR;
+    }
+
     while(bmp280_isMeasuring(sensor)) {
         if(furi_get_tick() - t > 100) {
             return UT_TIMEOUT;
         }
     }
 
-    uint8_t buff[3];
     if(!unitemp_i2c_readRegArray(i2c_sensor, 0xFA, 3, buff)) return UT_TIMEOUT;
     int32_t adc_T = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
     if(!unitemp_i2c_readRegArray(i2c_sensor, 0xF7, 3, buff)) return UT_TIMEOUT;

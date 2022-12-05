@@ -5,7 +5,7 @@ static uint8_t sensors_count = 0;
 uint8_t unitemp_i2c_readReg(I2CSensor* i2c_sensor, uint8_t reg) {
     //Блокировка шины
     furi_hal_i2c_acquire(i2c_sensor->i2c);
-    uint8_t buff[1];
+    uint8_t buff[1] = {0};
     furi_hal_i2c_read_mem(i2c_sensor->i2c, i2c_sensor->currentI2CAdr << 1, reg, buff, 1, 10);
     furi_hal_i2c_release(i2c_sensor->i2c);
     return buff[0];
