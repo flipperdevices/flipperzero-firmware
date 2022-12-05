@@ -2,8 +2,10 @@
 
 import os
 
-def main():
-    print(os.getenv("COMMIT_MSG"))
 
-if __name__ == '__main__':
+def main():
+    print(os.getenv("PULL_NAME"))
+
+
+if __name__ == "__main__":
     main()

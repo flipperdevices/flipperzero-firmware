@@ -1,13 +1,12 @@
 name: 'Check FL ticket in description'
 
 on:
-  push:
-    branches:
-      - dev
-  pull_request: # temp!
-
+  pull_request:
+    #types:
+    #  - closed
 jobs:
-  main:
+  merge_report:
+    #if: github.event.pull_request.merged == true
     runs-on: [self-hosted,FlipperZeroShell]
     steps:
       - name: 'Decontaminate previous build leftovers'
@@ -35,5 +34,6 @@ jobs:
 
       - name: 'Check ticket and report'
         run: |
-           python3 scripts/merge_report_qa.py
+          FBT_TOOLCHAIN_PATH=/runner/_work source scripts/toolchain/fbtenv.sh
+          python3 scripts/merge_report_qa.py
 
