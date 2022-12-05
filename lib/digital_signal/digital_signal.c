@@ -131,19 +131,19 @@ uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
 
 void digital_signal_prepare_arr(DigitalSignal* signal) {
     furi_assert(signal);
-    furi_assert(signal->gpio);
-    furi_assert(signal->gpio->pin);
 
     /* set up signal polarities */
-    uint32_t bit_set = signal->gpio->pin;
-    uint32_t bit_reset = signal->gpio->pin << 16;
+    if(signal->gpio) {
+        uint32_t bit_set = signal->gpio->pin;
+        uint32_t bit_reset = signal->gpio->pin << 16;
 
-    if(signal->start_level) {
-        signal->gpio_buff[0] = bit_set;
-        signal->gpio_buff[1] = bit_reset;
-    } else {
-        signal->gpio_buff[0] = bit_reset;
-        signal->gpio_buff[1] = bit_set;
+        if(signal->start_level) {
+            signal->gpio_buff[0] = bit_set;
+            signal->gpio_buff[1] = bit_reset;
+        } else {
+            signal->gpio_buff[0] = bit_reset;
+            signal->gpio_buff[1] = bit_set;
+        }
     }
 
     /* set up edge timings */
