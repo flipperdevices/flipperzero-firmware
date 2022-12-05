@@ -54,7 +54,7 @@ void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level)
 
 bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b);
 
-void digital_signal_prepare(DigitalSignal* signal);
+void digital_signal_prepare_arr(DigitalSignal* signal);
 
 bool digital_signal_get_start_level(DigitalSignal* signal);
 
