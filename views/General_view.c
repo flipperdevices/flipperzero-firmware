@@ -16,9 +16,6 @@ typedef enum carousel_info {
     CAROUSEL_INFO, //Отображение информации о датчике
 } carousel_info;
 
-static bool selector = false;
-static uint32_t lastSelectTime = 0;
-static const uint16_t selector_timeout = 2000;
 static general_view current_view;
 
 carousel_info carousel_info_selector = CAROUSEL_VALUES;
@@ -34,7 +31,6 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
     } else {
         canvas_draw_rframe(canvas, x, y, 54, 19, 3);
     }
-
     int16_t temp_int = sensor->temp;
     int8_t temp_dec = abs((int16_t)(sensor->temp * 10) % 10);
 
@@ -57,7 +53,12 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
     snprintf(app->buff, BUFF_SIZE, "%d", temp_int);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
-        canvas, x + 27 + ((temp_int <= -10) ? 5 : 0), y + 10, AlignCenter, AlignCenter, app->buff);
+        canvas,
+        x + 27 + ((temp_int <= -10 || temp_int > 99) ? 5 : 0),
+        y + 10,
+        AlignCenter,
+        AlignCenter,
+        app->buff);
     //Печать дробной части температуры в диапазоне от -9 до 99 (когда два знака в числе)
     if(temp_int > -10 && temp_int <= 99) {
         uint8_t int_len = canvas_string_width(canvas, app->buff);
@@ -179,13 +180,6 @@ static void _draw_view_sensorsList(Canvas* canvas) {
         canvas_draw_icon(canvas, 122, 32, &I_ButtonRight_4x7);
     }
 
-    //Включение/выключение селектора
-    if(furi_get_tick() - lastSelectTime > selector_timeout) {
-        selector = false;
-    } else {
-        selector = true;
-    }
-
     const uint8_t value_positions[][4][2] = {
         {{36, 18}}, //1 датчик
         {{7, 18}, {67, 18}}, //2 датчика
@@ -199,7 +193,7 @@ static void _draw_view_sensorsList(Canvas* canvas) {
             canvas,
             unitemp_sensor_getActive(page * 4 + i),
             value_positions[page_sensors_count - 1][i],
-            ((i == generalview_sensor_index % 4) && selector ? ColorBlack : ColorWhite));
+            ColorWhite);
     }
 }
 
@@ -386,15 +380,9 @@ static bool _input_callback(InputEvent* event, void* context) {
             app->sensors_ready = false;
             unitemp_SensorsList_switch();
         } else if(current_view == G_LIST_VIEW) {
-            if(selector) {
-                //Переход в карусель
-                current_view = G_CAROUSEL_VIEW;
-                carousel_info_selector = CAROUSEL_VALUES;
-            } else {
-                //Переход в главное меню при выключенном селекторе
-                app->sensors_ready = false;
-                unitemp_MainMenu_switch();
-            }
+            //Переход в главное меню при выключенном селекторе
+            app->sensors_ready = false;
+            unitemp_MainMenu_switch();
         } else if(current_view == G_CAROUSEL_VIEW) {
             app->sensors_ready = false;
             unitemp_SensorActions_switch(unitemp_sensor_getActive(generalview_sensor_index));
