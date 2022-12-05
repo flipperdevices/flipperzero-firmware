@@ -247,7 +247,6 @@ static int32_t dap_process(void* p) {
 
     // deinit usb
     furi_hal_usb_set_config(usb_config_prev, NULL);
-    dap_common_wait_for_deinit();
     dap_common_usb_free_name();
     dap_deinit_gpio(swd_pins_prev);
     return 0;
@@ -440,19 +439,6 @@ static int32_t cdc_process(void* p) {
 /***************************************************************************/
 /******************************* MAIN APP **********************************/
 /***************************************************************************/
-
-static FuriThread* furi_thread_alloc_ex(
-    const char* name,
-    uint32_t stack_size,
-    FuriThreadCallback callback,
-    void* context) {
-    FuriThread* thread = furi_thread_alloc();
-    furi_thread_set_name(thread, name);
-    furi_thread_set_stack_size(thread, stack_size);
-    furi_thread_set_callback(thread, callback);
-    furi_thread_set_context(thread, context);
-    return thread;
-}
 
 static DapApp* dap_app_alloc() {
     DapApp* dap_app = malloc(sizeof(DapApp));
