@@ -199,8 +199,31 @@ static void _draw_view_sensorsList(Canvas* canvas) {
 
 static void _draw_carousel_values(Canvas* canvas) {
     if(unitemp_sensor_getActive(generalview_sensor_index)->status == UT_TIMEOUT) {
-        const Icon* frames[] = {&I_happy_2_78x46, &I_happy_78x46, &I_sad_78x46};
-        canvas_draw_icon(canvas, 24, 15, frames[furi_get_tick() % 2250 / 750]);
+        const Icon* frames[] = {
+            &I_flipper_happy_60x38, &I_flipper_happy_2_60x38, &I_flipper_sad_60x38};
+        canvas_draw_icon(canvas, 34, 23, frames[furi_get_tick() % 2250 / 750]);
+
+        canvas_set_font(canvas, FontSecondary);
+        if(unitemp_sensor_getActive(generalview_sensor_index)->type->interface == &SINGLE_WIRE) {
+            snprintf(
+                app->buff,
+                BUFF_SIZE,
+                "Waiting for module on pin %d",
+                ((SingleWireSensor*)unitemp_sensor_getActive(generalview_sensor_index)->instance)
+                    ->gpio->num);
+        }
+        if(unitemp_sensor_getActive(generalview_sensor_index)->type->interface == &ONE_WIRE) {
+            snprintf(
+                app->buff,
+                BUFF_SIZE,
+                "Waiting for module on pin %d",
+                ((OneWireSensor*)unitemp_sensor_getActive(generalview_sensor_index)->instance)
+                    ->bus->gpio->num);
+        }
+        if(unitemp_sensor_getActive(generalview_sensor_index)->type->interface == &I2C) {
+            snprintf(app->buff, BUFF_SIZE, "Waiting for module on I2C pins");
+        }
+        canvas_draw_str_aligned(canvas, 64, 19, AlignCenter, AlignCenter, app->buff);
         return;
     }
 
