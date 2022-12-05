@@ -43,10 +43,7 @@ const FuriHalNfcDevData reader_analyzer_nfc_data[] = {
          .type = FuriHalNfcTypeA,
          .uid_len = 7,
          .uid = {0x04, 0x77, 0x70, 0x2A, 0x23, 0x4F, 0x80},
-         .a_data = {
-            .sak = 0x08,
-            .atqa = {0x44, 0x00},
-            .cuid = 0x2A234F80}},
+         .a_data = {.sak = 0x08, .atqa = {0x44, 0x00}, .cuid = 0x2A234F80}},
 };
 
 void reader_analyzer_parse(ReaderAnalyzer* instance, uint8_t* buffer, size_t size) {

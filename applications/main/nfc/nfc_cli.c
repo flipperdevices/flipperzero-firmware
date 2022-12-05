@@ -74,15 +74,17 @@ static void nfc_cli_emulate(Cli* cli, FuriString* args) {
     FuriHalNfcDevData params = {
         .uid = {0x36, 0x9C, 0xe7, 0xb1, 0x0A, 0xC1, 0x34},
         .uid_len = 7,
-        .a_data = {
-            .atqa = {0x44, 0x00},
-            .sak = 0x00,
-        },
+        .a_data =
+            {
+                .atqa = {0x44, 0x00},
+                .sak = 0x00,
+            },
         .type = FuriHalNfcTypeA,
     };
 
     while(!cli_cmd_interrupt_received(cli)) {
-        if(furi_hal_nfc_listen(params.uid, params.uid_len, params.a_data.atqa, params.a_data.sak, false, 100)) {
+        if(furi_hal_nfc_listen(
+               params.uid, params.uid_len, params.a_data.atqa, params.a_data.sak, false, 100)) {
             printf("Reader detected\r\n");
             furi_hal_nfc_sleep();
         }

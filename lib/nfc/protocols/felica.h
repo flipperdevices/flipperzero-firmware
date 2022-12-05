@@ -43,7 +43,7 @@
 
 #define RANDOM_TYPE_SERVICE_ATTRIBUTE (0b0010 << 2)
 #define CYCLIC_TYPE_SERVICE_ATTRIBUTE (0b0011 << 2)
-#define PURSE_TYPE_SERVICE_ATTRIBUTE  (0b010  << 3)
+#define PURSE_TYPE_SERVICE_ATTRIBUTE (0b010 << 3)
 
 #define AUTH_RW_SERVICE_ATTRIBUTE (0b00)
 #define UNAUTH_RW_SERVICE_ATTRIBUTE (0b01)
@@ -51,7 +51,7 @@
 #define UNAUTH_RO_SERVICE_ATTRIBUTE (0b11)
 
 #define AUTH_DIRECT_ACCESS_SERVICE_ATTRIBUTE (0b000)
-#define UNAUTH_DIRECT_ACCESS_SERVICE_ATTRIBUTE  (0b001)
+#define UNAUTH_DIRECT_ACCESS_SERVICE_ATTRIBUTE (0b001)
 #define AUTH_CASHBACK_DECREMENT_SERVICE_ATTRIBUTE (0b010)
 #define UNAUTH_CASHBACK_DECREMENT_SERVICE_ATTRIBUTE (0b011)
 #define AUTH_DECREMENT_SERVICE_ATTRIBUTE (0b100)
@@ -97,10 +97,10 @@ typedef enum {
 } FelicaICType;
 
 typedef struct {
-    uint8_t exponent: 2;
+    uint8_t exponent : 2;
     // Incremented at read
-    uint8_t real_a: 4;
-    uint8_t real_b: 4;
+    uint8_t real_a : 4;
+    uint8_t real_b : 4;
 } FelicaMRTParts;
 
 typedef enum {
@@ -150,7 +150,7 @@ typedef struct _FelicaSystem_t {
     FelicaMRTParameters maximum_response_times;
 
     FelicaService* services;
-    
+
     struct _FelicaSystem_t* next;
 } FelicaSystem;
 
@@ -170,4 +170,8 @@ typedef struct {
 
 bool felica_check_ic_type(uint8_t* PMm);
 FelicaICType felica_get_ic_type(uint8_t* PMm);
-bool felica_read_card(FuriHalNfcTxRxContext* tx_rx, FelicaData* data, uint8_t* polled_idm, uint8_t* polled_pmm);
+bool felica_read_card(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    uint8_t* polled_idm,
+    uint8_t* polled_pmm);

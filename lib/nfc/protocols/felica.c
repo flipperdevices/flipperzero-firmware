@@ -12,49 +12,49 @@ bool felica_check_ic_type(uint8_t* PMm) {
     uint8_t rom_type = PMm[1];
 
     bool is_valid_ic = false;
-    if (ic_type == 0xff) { // RC-S967 in nfc-dep
+    if(ic_type == 0xff) { // RC-S967 in nfc-dep
         is_valid_ic = true;
-    } else if (ic_type == 0xf0 || ic_type == 0xf2) { // Lite(S)
+    } else if(ic_type == 0xf0 || ic_type == 0xf2) { // Lite(S)
         is_valid_ic = true;
-    } else if (ic_type == 0xe1) { // RC-S967 in plug mode
+    } else if(ic_type == 0xe1) { // RC-S967 in plug mode
         is_valid_ic = true;
-    } else if (ic_type == 0xe0) { // RC-S926
+    } else if(ic_type == 0xe0) { // RC-S926
         is_valid_ic = true;
-    } else if (ic_type >= 0x44 && ic_type <= 0x48) { // SD2
+    } else if(ic_type >= 0x44 && ic_type <= 0x48) { // SD2
         is_valid_ic = true;
-    } else if (ic_type == 0x3e && rom_type == 0x03) { // RC-SA08
+    } else if(ic_type == 0x3e && rom_type == 0x03) { // RC-SA08
         return true;
-    } else if (ic_type == 0x35) { // RC-SA01
+    } else if(ic_type == 0x35) { // RC-SA01
         is_valid_ic = true;
-    } else if (ic_type == 0x32) { // RC-SA00
+    } else if(ic_type == 0x32) { // RC-SA00
         is_valid_ic = true;
-    } else if (ic_type == 0x31) { // Suica/PASMO
+    } else if(ic_type == 0x31) { // Suica/PASMO
         is_valid_ic = true;
-    } else if (ic_type == 0x20) { // RC-S962
+    } else if(ic_type == 0x20) { // RC-S962
         is_valid_ic = true;
-    } else if (ic_type >= 0x10 && ic_type <= 0x1f) { // Mobile IC version 2/3
+    } else if(ic_type >= 0x10 && ic_type <= 0x1f) { // Mobile IC version 2/3
         is_valid_ic = true;
-    } else if (ic_type == 0x0d) { // RC-S960
+    } else if(ic_type == 0x0d) { // RC-S960
         is_valid_ic = true;
-    } else if (ic_type == 0x0c) { // RC-S954
+    } else if(ic_type == 0x0c) { // RC-S954
         is_valid_ic = true;
-    } else if (ic_type == 0x0b) { // Old Suica?
+    } else if(ic_type == 0x0b) { // Old Suica?
         is_valid_ic = true;
-    } else if (ic_type == 0x09) { // RC-S953
+    } else if(ic_type == 0x09) { // RC-S953
         is_valid_ic = true;
-    } else if (ic_type == 0x08) { // RC-S952
+    } else if(ic_type == 0x08) { // RC-S952
         is_valid_ic = true;
-    } else if (ic_type == 0x06 || ic_type == 0x07) { // Mobile IC version 1
+    } else if(ic_type == 0x06 || ic_type == 0x07) { // Mobile IC version 1
         is_valid_ic = true;
-    } else if (ic_type == 0x02) { // RC-S919
+    } else if(ic_type == 0x02) { // RC-S919
         is_valid_ic = true;
-    } else if (ic_type == 0x01) { // RC-S915
+    } else if(ic_type == 0x01) { // RC-S915
         is_valid_ic = true;
-    } else if (ic_type == 0x00) { // RC-S830
+    } else if(ic_type == 0x00) { // RC-S830
         is_valid_ic = true;
     }
 
-    if (!is_valid_ic) {
+    if(!is_valid_ic) {
         return false;
     }
 
@@ -71,11 +71,13 @@ bool felica_check_ic_type(uint8_t* PMm) {
 uint8_t felica_prepare_unencrypted_read(
     uint8_t* dest,
     const FelicaReader* reader,
-    const uint16_t* service_code_list, uint8_t service_count, 
-    const uint32_t* block_list, uint8_t block_count) {
+    const uint16_t* service_code_list,
+    uint8_t service_count,
+    const uint32_t* block_list,
+    uint8_t block_count) {
     dest[0] = FELICA_UNENCRYPTED_READ_CMD;
     memcpy(&dest[1], reader->current_idm, 8);
-    
+
     dest[9] = service_count;
     uint8_t msg_len = 10;
     for(int i = 0; i < service_count; i++) {
@@ -90,7 +92,7 @@ uint8_t felica_prepare_unencrypted_read(
         dest[msg_len++] = block_num & 0xFF;
         dest[msg_len++] = block_num >> 8;
     }
-    
+
     return msg_len;
 }
 
@@ -98,17 +100,16 @@ uint8_t felica_lite_prepare_unencrypted_read(
     uint8_t* dest,
     const FelicaReader* reader,
     bool is_read_only,
-    const uint8_t* block_list, uint8_t block_count) {
-
+    const uint8_t* block_list,
+    uint8_t block_count) {
     dest[0] = FELICA_UNENCRYPTED_READ_CMD;
     memcpy(&dest[1], reader->current_idm, 8);
-    
+
     dest[9] = 1;
     uint8_t msg_len = 10;
-    uint8_t service_code = RANDOM_TYPE_SERVICE_ATTRIBUTE | (
-        (is_read_only)
-        ? UNAUTH_RO_SERVICE_ATTRIBUTE
-        : UNAUTH_RW_SERVICE_ATTRIBUTE);
+    uint8_t service_code =
+        RANDOM_TYPE_SERVICE_ATTRIBUTE |
+        ((is_read_only) ? UNAUTH_RO_SERVICE_ATTRIBUTE : UNAUTH_RW_SERVICE_ATTRIBUTE);
 
     dest[msg_len++] = service_code & 0xFF;
     dest[msg_len++] = service_code >> 8;
@@ -118,14 +119,16 @@ uint8_t felica_lite_prepare_unencrypted_read(
         dest[msg_len++] = IS_2_BYTE_BLOCK_LIST_ELEMENT;
         dest[msg_len++] = block_list[i];
     }
-    
+
     return msg_len;
 }
 
 uint16_t felica_parse_unencrypted_read(
-    uint8_t* buf, uint8_t len,
+    uint8_t* buf,
+    uint8_t len,
     FelicaReader* reader,
-    uint8_t* out, uint16_t out_len) {
+    uint8_t* out,
+    uint16_t out_len) {
     if(len < 12) {
         return false;
     }
@@ -160,10 +163,10 @@ uint16_t felica_parse_unencrypted_read(
     len--;
     buf++;
 
-    if (len < data_length || out_len < data_length) {
+    if(len < data_length || out_len < data_length) {
         return 0;
     }
-    
+
     memcpy(out, buf, data_length);
 
     return data_length;
@@ -172,12 +175,14 @@ uint16_t felica_parse_unencrypted_read(
 uint8_t felica_prepare_unencrypted_write(
     uint8_t* dest,
     FelicaReader* reader,
-    const uint16_t* service_code_list, uint8_t service_count,
-    const uint32_t* block_list, uint8_t block_count,
+    const uint16_t* service_code_list,
+    uint8_t service_count,
+    const uint32_t* block_list,
+    uint8_t block_count,
     const uint8_t* block_data) {
     dest[0] = FELICA_UNENCRYPTED_WRITE_CMD;
     memcpy(&dest[1], reader->current_idm, 8);
-    
+
     dest[9] = service_count;
     uint8_t msg_len = 10;
     for(int i = 0; i < service_count; i++) {
@@ -192,7 +197,7 @@ uint8_t felica_prepare_unencrypted_write(
         dest[msg_len++] = block_num & 0xFF;
         dest[msg_len++] = block_num >> 8;
     }
-    
+
     uint16_t data_length = block_count * FELICA_BLOCK_SIZE;
     memcpy(dest + msg_len, block_data, data_length);
     msg_len += data_length;
@@ -202,12 +207,12 @@ uint8_t felica_prepare_unencrypted_write(
 uint8_t felica_lite_prepare_unencrypted_write(
     uint8_t* dest,
     const FelicaReader* reader,
-    const uint8_t* block_list, uint8_t block_count,
+    const uint8_t* block_list,
+    uint8_t block_count,
     const uint8_t* block_data) {
-
     dest[0] = FELICA_UNENCRYPTED_WRITE_CMD;
     memcpy(&dest[1], reader->current_idm, 8);
-    
+
     dest[9] = 1;
     uint8_t msg_len = 10;
     uint8_t service_code = RANDOM_TYPE_SERVICE_ATTRIBUTE | UNAUTH_RW_SERVICE_ATTRIBUTE;
@@ -226,9 +231,7 @@ uint8_t felica_lite_prepare_unencrypted_write(
     return msg_len;
 }
 
-bool felica_parse_unencrypted_write(
-    uint8_t* buf, uint8_t len,
-    FelicaReader* reader) {
+bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader) {
     if(len < 12) {
         return false;
     }
@@ -259,83 +262,82 @@ bool felica_parse_unencrypted_write(
     return true;
 }
 
-
 FelicaICType felica_get_ic_type(uint8_t* PMm) {
     uint8_t rom_type = PMm[0];
     uint8_t ic_type = PMm[1];
 
     UNUSED(rom_type);
     switch(ic_type) {
-        case 0xff:
-            return FelicaICTypeLink;
-        case 0xf2:
-            return FelicaICTypeLink;
-        case 0xf1:
-            return FelicaICTypeLiteS;
-        case 0xf0:
-            return FelicaICTypeLite;
-        case 0xe1:
-            return FelicaICTypeLink;
-        case 0xe0:
-            return FelicaICTypePlug;
-        case 0x48:
-            return FelicaICTypeSD2_6K;
-        case 0x47:
-            return FelicaICTypeRC_SA24_6K;
-        case 0x46:
-            return FelicaICTypeSD2_4K;
-        case 0x45:
-        case 0x44:
-            return FelicaICTypeSD2WithDES;
-        case 0x3e:
-            return FelicaICTypeRC_SA08;
-        case 0x35:
-            return FelicaICTypeSD1;
-        case 0x32:
-            return FelicaICTypeSD1WithDES;
-        case 0x31:
-            return FelicaICTypeSuica;
-        case 0x20:
-            return FelicaICTypeFRAM_4K;
-        case 0x1f:
-        case 0x1e:
-        case 0x1d:
-        case 0x1c:
-        case 0x1b:
-        case 0x1a:
-        case 0x19:
-        case 0x18:
-             return FelicaICTypeMobileIC_V4_1;
-        case 0x17:
-             return FelicaICTypeMobileIC_V4;
-        case 0x16:
-        case 0x15:
-        case 0x14:
-             return FelicaICTypeMobileIC_V3;
-        case 0x13:
-        case 0x12:
-        case 0x11:
-        case 0x10:
-             return FelicaICTypeMobileIC_V2;
-        case 0x0d:
-            return FelicaICTypeFRAM_9K;
-        case 0x0c:
-            return FelicaICTypeEMV_36K;
-        case 0x0b: // Old Suica?
-            return FelicaICTypeSuica;
-        case 0x09:
-            return FelicaICTypeEMV_16K;
-        case 0x08:
-            return FelicaICTypeEMV_32K;
-        case 0x07:
-        case 0x06:
-            return FelicaICTypeMobileIC_V1;
-        case 0x02:
-            return FelicaICType576B;
-        case 0x01:
-            return FelicaICType4K;
-        case 0x00:
-            return FelicaICType2K;
+    case 0xff:
+        return FelicaICTypeLink;
+    case 0xf2:
+        return FelicaICTypeLink;
+    case 0xf1:
+        return FelicaICTypeLiteS;
+    case 0xf0:
+        return FelicaICTypeLite;
+    case 0xe1:
+        return FelicaICTypeLink;
+    case 0xe0:
+        return FelicaICTypePlug;
+    case 0x48:
+        return FelicaICTypeSD2_6K;
+    case 0x47:
+        return FelicaICTypeRC_SA24_6K;
+    case 0x46:
+        return FelicaICTypeSD2_4K;
+    case 0x45:
+    case 0x44:
+        return FelicaICTypeSD2WithDES;
+    case 0x3e:
+        return FelicaICTypeRC_SA08;
+    case 0x35:
+        return FelicaICTypeSD1;
+    case 0x32:
+        return FelicaICTypeSD1WithDES;
+    case 0x31:
+        return FelicaICTypeSuica;
+    case 0x20:
+        return FelicaICTypeFRAM_4K;
+    case 0x1f:
+    case 0x1e:
+    case 0x1d:
+    case 0x1c:
+    case 0x1b:
+    case 0x1a:
+    case 0x19:
+    case 0x18:
+        return FelicaICTypeMobileIC_V4_1;
+    case 0x17:
+        return FelicaICTypeMobileIC_V4;
+    case 0x16:
+    case 0x15:
+    case 0x14:
+        return FelicaICTypeMobileIC_V3;
+    case 0x13:
+    case 0x12:
+    case 0x11:
+    case 0x10:
+        return FelicaICTypeMobileIC_V2;
+    case 0x0d:
+        return FelicaICTypeFRAM_9K;
+    case 0x0c:
+        return FelicaICTypeEMV_36K;
+    case 0x0b: // Old Suica?
+        return FelicaICTypeSuica;
+    case 0x09:
+        return FelicaICTypeEMV_16K;
+    case 0x08:
+        return FelicaICTypeEMV_32K;
+    case 0x07:
+    case 0x06:
+        return FelicaICTypeMobileIC_V1;
+    case 0x02:
+        return FelicaICType576B;
+    case 0x01:
+        return FelicaICType4K;
+    case 0x00:
+        return FelicaICType2K;
     }
 
     return FelicaICType2K;
@@ -370,7 +372,11 @@ void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t
     service->blocks[number] = block;
 }
 
-bool felica_read_lite_system(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, FelicaData* data, FelicaSystem* system) {
+bool felica_read_lite_system(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaData* data,
+    FelicaSystem* system) {
     const uint8_t fixed_services[] = {
         SYS_CODE_LITE_BLOCK,
         RC_LITE_BLOCK,
@@ -380,24 +386,22 @@ bool felica_read_lite_system(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader,
         CARD_KEY_VER_LITE_BLOCK,
         MEM_CONFIG_LITE_BLOCK,
     };
-    
+
     uint8_t block_data[FELICA_BLOCK_SIZE * 4];
 
-    tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-        tx_rx->tx_data,
-        reader,
-        true,
-        fixed_services, 1 
-    );
+    tx_rx->tx_bits =
+        8 * felica_lite_prepare_unencrypted_read(tx_rx->tx_data, reader, true, fixed_services, 1);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_W(TAG, "Bad exchange verifying Lite system code");
         return false;
     }
-    if(felica_parse_unencrypted_read(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) != FELICA_BLOCK_SIZE) {
+    if(felica_parse_unencrypted_read(
+           tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+       FELICA_BLOCK_SIZE) {
         FURI_LOG_W(TAG, "Bad response to Read without Encryption (SYS_C)");
         return false;
     }
-    if (block_data[0] != (LITE_SYSTEM_CODE >> 8) && block_data[1] != (LITE_SYSTEM_CODE & 0xFF)) {
+    if(block_data[0] != (LITE_SYSTEM_CODE >> 8) && block_data[1] != (LITE_SYSTEM_CODE & 0xFF)) {
         FURI_LOG_W(TAG, "Unexpected SYS_C value");
         return false;
     }
@@ -411,16 +415,12 @@ bool felica_read_lite_system(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader,
     for(int i = 0; i < service->block_count; i++) {
         service->blocks[i] = NULL;
     }
-    
+
     felica_define_normal_block(service, SYS_CODE_LITE_BLOCK, block_data);
 
     memset(block_data, 0, FELICA_BLOCK_SIZE);
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_write(
-        tx_rx->tx_data,
-        reader,
-        &fixed_services[1], 1,
-        block_data
-    );
+                             tx_rx->tx_data, reader, &fixed_services[1], 1, block_data);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_W(TAG, "Bad exchange writing random challenge");
         return false;
@@ -432,16 +432,14 @@ bool felica_read_lite_system(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader,
     felica_define_normal_block(service, RC_LITE_BLOCK, block_data);
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-        tx_rx->tx_data,
-        reader,
-        true,
-        &fixed_services[2], 2 
-    );
+                             tx_rx->tx_data, reader, true, &fixed_services[2], 2);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_W(TAG, "Bad exchange reading ID with MAC");
         return false;
     }
-    if(felica_parse_unencrypted_read(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) != FELICA_BLOCK_SIZE * 2) {
+    if(felica_parse_unencrypted_read(
+           tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+       FELICA_BLOCK_SIZE * 2) {
         FURI_LOG_W(TAG, "Bad response to Read without Encryption (ID, MAC)");
         return false;
     }
@@ -457,47 +455,43 @@ bool felica_read_lite_system(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader,
     }
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-        tx_rx->tx_data,
-        reader,
-        true,
-        &fixed_services[4], 3 
-    );
+                             tx_rx->tx_data, reader, true, &fixed_services[4], 3);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_W(TAG, "Bad exchange reading blocks");
         return false;
     }
-    if(felica_parse_unencrypted_read(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) != FELICA_BLOCK_SIZE * 3) {
+    if(felica_parse_unencrypted_read(
+           tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+       FELICA_BLOCK_SIZE * 3) {
         FURI_LOG_W(TAG, "Bad response to Read without Encryption (D_ID, CKV, MC)");
         return false;
     }
     felica_define_normal_block(service, DEVICE_ID_LITE_BLOCK, block_data);
     felica_define_normal_block(service, CARD_KEY_VER_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
     felica_define_normal_block(service, MEM_CONFIG_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE * 2);
-    
+
     // Read SPAD and REG accordingly to MC
     uint8_t* mc_data = block_data + (FELICA_BLOCK_SIZE * 2);
-    for (uint8_t block_number = 0; block_number <= REG_LITE_BLOCK; block_number++) {
+    for(uint8_t block_number = 0; block_number <= REG_LITE_BLOCK; block_number++) {
         if(!felica_lite_can_read_without_mac(mc_data + 6, block_number)) {
             continue;
         }
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-            tx_rx->tx_data,
-            reader,
-            true,
-            &block_number, 1 
-        );
+                                 tx_rx->tx_data, reader, true, &block_number, 1);
         if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
             FURI_LOG_W(TAG, "Bad exchange reading blocks");
             return false;
         }
-        if(felica_parse_unencrypted_read(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) != FELICA_BLOCK_SIZE) {
+        if(felica_parse_unencrypted_read(
+               tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+           FELICA_BLOCK_SIZE) {
             FURI_LOG_W(TAG, "Bad response to Read without Encryption (block %d)", block_number);
             return false;
         }
         felica_define_normal_block(service, block_number, block_data);
     }
-    if (data->type == FelicaICTypeLiteS) {
+    if(data->type == FelicaICTypeLiteS) {
         const uint8_t fixed_s_services[] = {
             ID_LITE_BLOCK,
             MAC_A_LITE_BLOCK,
@@ -506,44 +500,44 @@ bool felica_read_lite_system(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader,
         };
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-            tx_rx->tx_data,
-            reader,
-            true,
-            fixed_s_services, 2 
-        );
+                                 tx_rx->tx_data, reader, true, fixed_s_services, 2);
         if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
             FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
             return false;
         }
-        if(felica_parse_unencrypted_read(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) != FELICA_BLOCK_SIZE * 2) {
+        if(felica_parse_unencrypted_read(
+               tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+           FELICA_BLOCK_SIZE * 2) {
             FURI_LOG_W(TAG, "Bad response to Read without Encryption (ID, MAC_A)");
             return false;
         }
         felica_define_normal_block(service, ID_LITE_BLOCK, block_data);
         felica_define_normal_block(service, MAC_A_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
-        
+
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-            tx_rx->tx_data,
-            reader,
-            true,
-            &fixed_s_services[2], 2 
-        );
+                                 tx_rx->tx_data, reader, true, &fixed_s_services[2], 2);
         if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
             FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
             return false;
         }
-        if(felica_parse_unencrypted_read(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) != FELICA_BLOCK_SIZE * 2) {
+        if(felica_parse_unencrypted_read(
+               tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+           FELICA_BLOCK_SIZE * 2) {
             FURI_LOG_W(TAG, "Bad response to Read without Encryption (WC, CRC_CHECK)");
             return false;
         }
         felica_define_normal_block(service, WRITE_COUNT_LITE_BLOCK, block_data);
         felica_define_normal_block(service, CRC_CHECK_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
     }
-    
+
     return true;
 }
 
-bool felica_read_card(FuriHalNfcTxRxContext* tx_rx, FelicaData* data, uint8_t* polled_idm, uint8_t* polled_pmm) {
+bool felica_read_card(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    uint8_t* polled_idm,
+    uint8_t* polled_pmm) {
     furi_assert(tx_rx);
     furi_assert(polled_idm);
     furi_assert(polled_pmm);
@@ -560,7 +554,7 @@ bool felica_read_card(FuriHalNfcTxRxContext* tx_rx, FelicaData* data, uint8_t* p
         felica_parse_system_info(current_system, polled_idm, polled_pmm);
         current_system->next = NULL;
 
-        if (data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS) {
+        if(data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS) {
             FURI_LOG_I(TAG, "Reading Felica Lite system");
             felica_read_lite_system(tx_rx, &reader, data, current_system);
             card_read = true;

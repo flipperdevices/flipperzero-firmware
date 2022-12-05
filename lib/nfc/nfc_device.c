@@ -1127,7 +1127,7 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
             cuid_start = &data->uid[3];
         }
         data->a_data.cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
-                     (cuid_start[3]);
+                            (cuid_start[3]);
         // Parse other data
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_load_mifare_ul_data(file, dev)) break;

@@ -499,6 +499,17 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
                     event = NfcWorkerEventReadUidNfcA;
                     break;
                 }
+            } else if(nfc_data->type == FuriHalNfcTypeF) {
+                if(read_mode == NfcReadModeFelica) {
+                    nfc_worker->dev_data->protocol = NfcDeviceProtocolFelica;
+                    if(nfc_worker_read_felica(nfc_worker, &tx_rx)) {
+                        nfc_worker->dev_data->protocol = NfcDeviceProtocolFelica;
+                        if(nfc_worker_read_felica(nfc_worker, &tx_rx)) {
+                            event = NfcWorkerEventReadFelica;
+                            break;
+                        }
+                    }
+                }
             } else {
                 if(!card_not_detected_notified) {
                     nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);

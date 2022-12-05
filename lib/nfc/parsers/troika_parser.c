@@ -44,7 +44,8 @@ bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
 
     MfClassicReader reader = {};
     FuriHalNfcADevData* nfc_a_data = &nfc_worker->dev_data->nfc_data.a_data;
-    reader.type = mf_classic_get_classic_type(nfc_a_data->atqa[0], nfc_a_data->atqa[1], nfc_a_data->sak);
+    reader.type =
+        mf_classic_get_classic_type(nfc_a_data->atqa[0], nfc_a_data->atqa[1], nfc_a_data->sak);
 
     for(size_t i = 0; i < COUNT_OF(troika_keys); i++) {
         mf_classic_reader_add_sector(

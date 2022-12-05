@@ -61,7 +61,7 @@ typedef enum {
     NfcReadModeMfDesfire,
     NfcReadModeEMV,
     NfcReadModeNFCA,
-    NfcReadModeNFCF,
+    NfcReadModeFelica,
 } NfcReadMode;
 
 typedef struct {

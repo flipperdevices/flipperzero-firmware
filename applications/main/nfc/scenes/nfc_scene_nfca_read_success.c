@@ -30,7 +30,8 @@ void nfc_scene_nfca_read_success_on_enter(void* context) {
     for(size_t i = 0; i < data->uid_len; i++) {
         furi_string_cat_printf(temp_str, " %02X", data->uid[i]);
     }
-    furi_string_cat_printf(temp_str, "\nATQA: %02X %02X ", data->a_data.atqa[1], data->a_data.atqa[0]);
+    furi_string_cat_printf(
+        temp_str, "\nATQA: %02X %02X ", data->a_data.atqa[1], data->a_data.atqa[0]);
     furi_string_cat_printf(temp_str, " SAK: %02X", data->a_data.sak);
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));

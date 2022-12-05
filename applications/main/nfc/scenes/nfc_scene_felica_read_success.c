@@ -29,7 +29,8 @@ void nfc_scene_felica_read_success_on_enter(void* context) {
 
         FelicaSystem* current_system = felica_data->systems;
         while(current_system) {
-            furi_string_cat_printf(temp_str, "\nSystem %04X (#%d):", current_system->code, current_system->number);
+            furi_string_cat_printf(
+                temp_str, "\nSystem %04X (#%d):", current_system->code, current_system->number);
             furi_string_cat_printf(temp_str, "\nIDm:\n    ");
             for(size_t i = 0; i < 8; i++) {
                 furi_string_cat_printf(temp_str, "%02X", current_system->idm[i]);
