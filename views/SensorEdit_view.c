@@ -116,6 +116,7 @@ static uint32_t _exit_callback(void* context) {
     UNUSED(context);
     editable_sensor->status = UT_TIMEOUT;
     if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
+    unitemp_sensors_reload();
     //Возврат предыдущий вид
     return VIEW_GENERAL;
 }
