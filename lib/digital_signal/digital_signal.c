@@ -6,11 +6,9 @@
 
 #define TAG "DigitalSignal"
 
-
-#define F_TIM       (64000000.0)
-#define T_TIM       1562 /* 15.625 ns *100     */
-#define T_TIM_DIV2   781 /* 15.625 ns / 2 *100 */
-
+#define F_TIM (64000000.0)
+#define T_TIM 1562 /* 15.625 ns *100     */
+#define T_TIM_DIV2 781 /* 15.625 ns / 2 *100 */
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
@@ -21,7 +19,7 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->reload_reg_buff = malloc(signal->edges_max_cnt * sizeof(uint32_t));
     signal->reload_reg_entries = 0;
     signal->reload_reg_remainder = 0;
-    
+
     signal->dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     signal->dma_config_gpio.Mode = LL_DMA_MODE_CIRCULAR;
     signal->dma_config_gpio.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
@@ -32,7 +30,7 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->dma_config_gpio.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     signal->dma_config_gpio.Priority = LL_DMA_PRIORITY_VERYHIGH;
 
-    signal->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) &(TIM2->ARR);
+    signal->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->ARR);
     signal->dma_config_timer.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
     signal->dma_config_timer.Mode = LL_DMA_MODE_NORMAL;
     signal->dma_config_timer.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
@@ -131,11 +129,11 @@ uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
     return signal->edge_timings[edge_num];
 }
 
-void digital_signal_prepare(DigitalSignal* signal) {
+void digital_signal_prepare_arr(DigitalSignal* signal) {
     furi_assert(signal);
     furi_assert(signal->gpio);
     furi_assert(signal->gpio->pin);
-    
+
     /* set up signal polarities */
     uint32_t bit_set = signal->gpio->pin;
     uint32_t bit_reset = signal->gpio->pin << 16;
@@ -181,8 +179,8 @@ static bool digital_signal_setup_dma(DigitalSignal* signal) {
         return false;
     }
 
-    signal->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t) signal->gpio_buff;
-    signal->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) &(signal->gpio->port->BSRR);
+    signal->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t)signal->gpio_buff;
+    signal->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) & (signal->gpio->port->BSRR);
     signal->dma_config_timer.MemoryOrM2MDstAddress = (uint32_t)signal->reload_reg_buff;
     signal->dma_config_timer.NbData = signal->reload_reg_entries;
 
@@ -198,7 +196,6 @@ static bool digital_signal_setup_dma(DigitalSignal* signal) {
 }
 
 static void digital_signal_setup_timer() {
-    
     digital_signal_stop_timer();
 
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
@@ -228,7 +225,7 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
 
     /* single signal, add a temporary, terminating edge at the end */
     signal->edge_timings[signal->edge_cnt++] = 10;
-    digital_signal_prepare(signal);
+    digital_signal_prepare_arr(signal);
 
     digital_signal_setup_dma(signal);
     digital_signal_setup_timer();
@@ -257,7 +254,6 @@ void digital_sequence_alloc_sequence(DigitalSequence* sequence, uint32_t size) {
 }
 
 DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
-
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
     sequence->gpio = gpio;
@@ -277,7 +273,10 @@ void digital_sequence_free(DigitalSequence* sequence) {
     free(sequence);
 }
 
-void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index, DigitalSignal* signal) {
+void digital_sequence_set_signal(
+    DigitalSequence* sequence,
+    uint8_t signal_index,
+    DigitalSignal* signal) {
     furi_assert(sequence);
     furi_assert(signal);
     furi_assert(signal_index < sequence->signals_size);
@@ -286,7 +285,7 @@ void digital_sequence_set_signal(DigitalSequence* sequence, uint8_t signal_index
     signal->gpio = sequence->gpio;
     signal->reload_reg_remainder = 0;
 
-    digital_signal_prepare(signal);
+    digital_signal_prepare_arr(signal);
 }
 
 void digital_sequence_set_sendtime(DigitalSequence* sequence, uint32_t send_time) {
@@ -306,52 +305,48 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
 }
 
 void digital_signal_update_dma(DigitalSignal* signal) {
-
     volatile uint32_t dma1_data[] = {
-        /* R6  */ (uint32_t)&(DMA1_Channel1->CCR),
+        /* R6  */ (uint32_t) & (DMA1_Channel1->CCR),
         /* R7  */ DMA1_Channel1->CCR & ~DMA_CCR_EN,
         /* R8  */ 2,
-        /* R9  */ (uint32_t)&(signal->gpio->port->BSRR),
+        /* R9  */ (uint32_t) & (signal->gpio->port->BSRR),
         /* R10 */ (uint32_t)signal->gpio_buff,
-        /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN };
+        /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN};
 
     volatile uint32_t dma2_data[] = {
-        /* R0 */ (uint32_t)&(DMA1_Channel2->CCR),
+        /* R0 */ (uint32_t) & (DMA1_Channel2->CCR),
         /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN,
         /* R2 */ (uint32_t)signal->reload_reg_entries,
-        /* R3 */ (uint32_t)&(TIM2->ARR),
+        /* R3 */ (uint32_t) & (TIM2->ARR),
         /* R4 */ (uint32_t)signal->reload_reg_buff,
-        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN };
+        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN};
 
-    
     /* hurry when setting up next transfer */
     asm volatile("\t"
-        "MOV     r6, %[data1]\n\t"
-        "MOV     r7, %[data2]\n\t"
+                 "MOV     r6, %[data1]\n\t"
+                 "MOV     r7, %[data2]\n\t"
 
-        "PUSH    {r0-r12}\n\t"
+                 "PUSH    {r0-r12}\n\t"
 
-        "LDM     r7, {r0-r5}\n\t"
-        "LDM     r6, {r6-r11}\n\t"
+                 "LDM     r7, {r0-r5}\n\t"
+                 "LDM     r6, {r6-r11}\n\t"
 
-        "loop:\n\t"
-        "LDR     r12, [r0, #4]\n\t"
-        "CMP     r12, #0\n\t"
-        "BNE     loop\n\t"
+                 "loop:\n\t"
+                 "LDR     r12, [r0, #4]\n\t"
+                 "CMP     r12, #0\n\t"
+                 "BNE     loop\n\t"
 
-        "STM     r6, {r7-r10}\n\t"  /* disable channel and set up new parameters */
-        "STR     r11, [r6, #0]\n\t" /* enable channel again */
-        "STM     r0, {r1-r4}\n\t"   /* disable channel and set up new parameters */ 
-        "STR     r5, [r0, #0]\n\t"  /* enable channel again */
+                 "STM     r6, {r7-r10}\n\t" /* disable channel and set up new parameters */
+                 "STR     r11, [r6, #0]\n\t" /* enable channel again */
+                 "STM     r0, {r1-r4}\n\t" /* disable channel and set up new parameters */
+                 "STR     r5, [r0, #0]\n\t" /* enable channel again */
 
-        "POP     {r0-r12}\n\t"
+                 "POP     {r0-r12}\n\t"
 
-        : /* no outputs*/ 
-        : /* inputs */
-            [data1] "r" (dma1_data),
-            [data2] "r" (dma2_data)
-        : "r6", "r7" );
-        
+                 : /* no outputs*/
+                 : /* inputs */
+                 [data1] "r"(dma1_data), [data2] "r"(dma2_data)
+                 : "r6", "r7");
 
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TC2(DMA1);
@@ -360,7 +355,7 @@ void digital_signal_update_dma(DigitalSignal* signal) {
 static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSignal* signal) {
     furi_assert(sequence);
     furi_assert(signal);
-    
+
     /* the first iteration has to set up the whole machinery */
     if(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1)) {
         if(!digital_signal_setup_dma(signal)) {
@@ -389,21 +384,20 @@ static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSigna
 }
 
 DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
-    
     uint32_t edges = 0;
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         uint8_t signal_index = sequence->sequence[pos];
-        DigitalSignal *sig = sequence->signals[signal_index];
+        DigitalSignal* sig = sequence->signals[signal_index];
 
         edges += sig->edge_cnt;
     }
 
     DigitalSignal* ret = digital_signal_alloc(edges);
-    
+
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         uint8_t signal_index = sequence->sequence[pos];
-        DigitalSignal *sig = sequence->signals[signal_index];
+        DigitalSignal* sig = sequence->signals[signal_index];
 
         digital_signal_append(ret, sig);
     }
@@ -429,10 +423,14 @@ bool digital_sequence_send(DigitalSequence* sequence) {
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         uint8_t signal_index = sequence->sequence[pos];
-        DigitalSignal *sig = sequence->signals[signal_index];
+        DigitalSignal* sig = sequence->signals[signal_index];
 
         if(!sig) {
-            FURI_LOG_D(TAG, "digital_sequence_send: Signal at index %u, used at pos %lu is NULL, aborting", signal_index, pos);
+            FURI_LOG_D(
+                TAG,
+                "digital_sequence_send: Signal at index %u, used at pos %lu is NULL, aborting",
+                signal_index,
+                pos);
             break;
         }
 
@@ -470,10 +468,10 @@ bool digital_sequence_send(DigitalSequence* sequence) {
 
     digital_signal_stop_timer();
     digital_signal_stop_dma();
-        
+
     /* undo previously prolonged edges */
     for(uint32_t pos = 0; pos < sequence->signals_size; pos++) {
-        DigitalSignal *sig = sequence->signals[pos];
+        DigitalSignal* sig = sequence->signals[pos];
 
         if(sig && sequence->signals_prolonged[pos]) {
             sig->edge_timings[0]--;

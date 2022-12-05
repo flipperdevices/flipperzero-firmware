@@ -14,9 +14,9 @@
 extern "C" {
 #endif
 
-#define PULSE_READER_NO_EDGE    0xFFFFFFFFUL
-#define PULSE_READER_LOST_EDGE  0xFFFFFFFEUL
-#define F_TIM2                  64000000UL
+#define PULSE_READER_NO_EDGE 0xFFFFFFFFUL
+#define PULSE_READER_LOST_EDGE 0xFFFFFFFEUL
+#define F_TIM2 64000000UL
 
 /**
  * unit of the edge durations to return
@@ -27,7 +27,6 @@ typedef enum {
     PulseReaderUnitNanosecond,
     PulseReaderUnitMicrosecond,
 } PulseReaderUnit;
-
 
 typedef struct {
     bool start_level;
@@ -47,7 +46,6 @@ typedef struct {
     LL_DMA_InitTypeDef dma_config_gpio;
 } PulseReader;
 
-
 /** Allocate a PulseReader object
  *
  * Allocates memory for a ringbuffer and initalizes the object
@@ -57,7 +55,6 @@ typedef struct {
  */
 PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size);
 
-
 /** Free a PulseReader object
  *
  * Frees all memory of the given object
@@ -65,7 +62,6 @@ PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size);
  * @param[in]  signal      previously allocated PulseReader object.
  */
 void pulse_reader_free(PulseReader* signal);
-
 
 /** Start signal capturing
  *
@@ -75,7 +71,6 @@ void pulse_reader_free(PulseReader* signal);
  */
 void pulse_reader_start(PulseReader* signal);
 
-
 /** Stop signal capturing
  *
  * Frees DMA1, TIM2 and DMAMUX_REQ_GEN_0
@@ -83,7 +78,6 @@ void pulse_reader_start(PulseReader* signal);
  * @param[in]  signal      previously allocated PulseReader object.
  */
 void pulse_reader_stop(PulseReader* signal);
-
 
 /** Recevie a sample from ringbuffer
  *
@@ -99,7 +93,6 @@ void pulse_reader_stop(PulseReader* signal);
  */
 uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us);
 
-
 /** Get available samples
  *
  * Get the number of available samples in the ringbuffer
@@ -110,7 +103,6 @@ uint32_t pulse_reader_receive(PulseReader* signal, int timeout_us);
  */
 uint32_t pulse_reader_samples(PulseReader* signal);
 
-
 /** Set timebase
  *
  * Set the timebase to be used when returning pulse duration.
@@ -119,7 +111,6 @@ uint32_t pulse_reader_samples(PulseReader* signal);
  * @param[in]  unit  PulseReaderUnit64MHz or PulseReaderUnitPicosecond
  */
 void pulse_reader_set_timebase(PulseReader* signal, PulseReaderUnit unit);
-
 
 /** Set bit time
  *
@@ -133,7 +124,6 @@ void pulse_reader_set_timebase(PulseReader* signal, PulseReaderUnit unit);
  * @param[in]  bit_time
  */
 void pulse_reader_set_bittime(PulseReader* signal, uint32_t bit_time);
-
 
 #ifdef __cplusplus
 }
