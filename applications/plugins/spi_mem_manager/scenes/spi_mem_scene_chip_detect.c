@@ -12,7 +12,7 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_chip_detect_start(
         app->chip_info,
-        app->found_chips_arr,
+        &app->found_chips_arr,
         &app->found_chips_size,
         app->worker,
         spi_mem_scene_chip_detect_callback,

@@ -4,6 +4,7 @@ import argparse
 import xml.etree.ElementTree as XML
 import sys
 
+
 def getArgs():
     parser = argparse.ArgumentParser(
         description="chiplist.xml to C array converter",
@@ -102,7 +103,7 @@ def main():
     chipArr = parseXML(xml, "SPI", vendors)
     cleanEmptyVendors(vendors)
     for cur in vendors:
-        print('    {"'+cur+'", SPIMemChipVendor' + cur + '},')
+        print('    {"' + cur + '", SPIMemChipVendor' + cur + "},")
     generateCArr(chipArr, filename)
 
 

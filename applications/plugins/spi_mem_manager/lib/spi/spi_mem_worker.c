@@ -69,7 +69,7 @@ void spi_mem_worker_stop_thread(SPIMemWorker* worker) {
 
 void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
-    const SPIMemChip** found_chips_arr,
+    const SPIMemChip*** found_chips_arr,
     size_t* found_chips_size,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
