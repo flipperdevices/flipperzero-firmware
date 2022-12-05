@@ -1041,8 +1041,8 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         if(!flipper_format_write_comment_cstr(file, "UID, ATQA and SAK are common for all formats"))
             break;
         if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
-        if(!flipper_format_write_hex(file, "ATQA", data->atqa, 2)) break;
-        if(!flipper_format_write_hex(file, "SAK", &data->sak, 1)) break;
+        if(!flipper_format_write_hex(file, "ATQA", data->a_data.atqa, 2)) break;
+        if(!flipper_format_write_hex(file, "SAK", &data->a_data.sak, 1)) break;
         // Save more data if necessary
         if(dev->format == NfcDeviceSaveFormatMifareUl) {
             if(!nfc_device_save_mifare_ul_data(file, dev)) break;
@@ -1119,14 +1119,14 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
         if(!(data_cnt == 4 || data_cnt == 7)) break;
         data->uid_len = data_cnt;
         if(!flipper_format_read_hex(file, "UID", data->uid, data->uid_len)) break;
-        if(!flipper_format_read_hex(file, "ATQA", data->atqa, 2)) break;
-        if(!flipper_format_read_hex(file, "SAK", &data->sak, 1)) break;
+        if(!flipper_format_read_hex(file, "ATQA", data->a_data.atqa, 2)) break;
+        if(!flipper_format_read_hex(file, "SAK", &data->a_data.sak, 1)) break;
         // Load CUID
         uint8_t* cuid_start = data->uid;
         if(data->uid_len == 7) {
             cuid_start = &data->uid[3];
         }
-        data->cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
+        data->a_data.cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
                      (cuid_start[3]);
         // Parse other data
         if(dev->format == NfcDeviceSaveFormatMifareUl) {

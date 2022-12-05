@@ -45,14 +45,14 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     }
 
     // Set tag iso data
-    char iso_type = FURI_BIT(nfc_data->sak, 5) ? '4' : '3';
+    char iso_type = FURI_BIT(nfc_data->a_data.sak, 5) ? '4' : '3';
     furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
     furi_string_cat_printf(temp_str, "UID:");
     for(size_t i = 0; i < nfc_data->uid_len; i++) {
         furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
     }
-    furi_string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->atqa[1], nfc_data->atqa[0]);
-    furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->sak);
+    furi_string_cat_printf(temp_str, "\nATQA: %02X %02X ", nfc_data->a_data.atqa[1], nfc_data->a_data.atqa[0]);
+    furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->a_data.sak);
 
     // Set application specific data
     if(protocol == NfcDeviceProtocolMifareDesfire) {

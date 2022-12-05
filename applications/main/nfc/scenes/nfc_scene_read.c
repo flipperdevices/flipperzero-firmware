@@ -97,6 +97,11 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
             }
             consumed = true;
+        } else if(event.event == NfcWorkerEventReadFelica) {
+            notification_message(nfc->notifications, &sequence_success);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            consumed = true;
         } else if(event.event == NfcWorkerEventCardDetected) {
             nfc_scene_read_set_state(nfc, NfcSceneReadStateReading);
             nfc_blink_detect_start(nfc);
