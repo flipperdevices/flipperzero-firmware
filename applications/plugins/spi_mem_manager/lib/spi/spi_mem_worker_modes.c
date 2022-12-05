@@ -153,17 +153,17 @@ static void spi_mem_worker_erase_process(SPIMemWorker* worker) {
 }
 
 // Write
-static bool spi_mem_worker_write_block_by_bytes(
+static bool spi_mem_worker_write_block_by_page(
     SPIMemWorker* worker,
     size_t offset,
     uint8_t* data,
     size_t block_size,
-    size_t bytes) {
-    for(size_t i = 0; i < block_size; i += bytes) {
+    size_t page_size) {
+    for(size_t i = 0; i < block_size; i += page_size) {
         if(!spi_mem_worker_await_chip_busy(worker)) return false;
-        if(!spi_mem_tools_write_bytes(worker->chip_info, offset, data, bytes)) return false;
-        offset += bytes;
-        data += bytes;
+        if(!spi_mem_tools_write_bytes(worker->chip_info, offset, data, page_size)) return false;
+        offset += page_size;
+        data += page_size;
     }
     return true;
 }
@@ -173,8 +173,9 @@ static bool spi_mem_worker_write_block(
     uint8_t* data,
     size_t block_size) {
     SPIMemChipWriteMode write_mode = spi_mem_chip_get_write_mode(worker->chip_info);
-    if(write_mode == SPIMemChipWriteModeOneOrPage256Bytes) {
-        if(!spi_mem_worker_write_block_by_bytes(worker, offset, data, block_size, 256))
+    size_t page_size = spi_mem_chip_get_page_size(worker->chip_info);
+    if(write_mode == SPIMemChipWriteModePage) {
+        if(!spi_mem_worker_write_block_by_page(worker, offset, data, block_size, page_size))
             return false;
     }
     return true;

@@ -9,21 +9,32 @@ typedef enum {
     SPIMemChipVendorFujitsu = 0x04,
     SPIMemChipVendorEon = 0x1C,
     SPIMemChipVendorAtmel = 0x1F,
-    SPIMemChipVendorMicron = 0x20,
+    SPIMemChipVendorMicron1 = 0x20,
+    SPIMemChipVendorMicron2 = 0x2C,
     SPIMemChipVendorAmic = 0x37,
     SPIMemChipVendorNormem = 0x52,
     SPIMemChipVendorSanyo = 0x62,
     SPIMemChipVendorIntel = 0x89,
     SPIMemChipVendorEsmt = 0x8C,
-    SPIMemChipVendorFudan = 0xA1,
+    SPIMemChipVendorFudan1 = 0xA1,
+    SPIMemChipVendorFudan2 = 0xF8,
     SPIMemChipVendorHyundai = 0xAD,
     SPIMemChipVendorSst = 0xBF,
     SPIMemChipVendorMicronix = 0xC2,
-    SPIMemChipVendorGigadevice = 0xC8,
+    SPIMemChipVendorGigadevice1 = 0xC8,
+    SPIMemChipVendorGigadevice2 = 0x51,
     SPIMemChipVendorIssi = 0xD5,
     SPIMemChipVendorWinbond = 0xEF,
     SPIMemChipVendorBoya = 0x68,
-    SPIMemChipVendorAPMemory = 0x0D
+    SPIMemChipVendorAPMemory = 0x0D,
+    SPIMemChipVendorPMCSierra1 = 0x9D,
+    SPIMemChipVendorPMCSierra2 = 0x7F,
+    SPIMemChipVendorExcelSemi = 0x4A,
+    SPIMemChipVendorZbitSemi = 0x5E,
+    SPIMemChipVendorBergMicro = 0xE0,
+    SPIMemChipVendorATO = 0x9B,
+    SPIMemChipVendorDOUQI = 0x54,
+    SPIMemChipVendorFremont = 0x0E,
 } SPIMemChipVendor;
 
 typedef enum {
@@ -52,13 +63,6 @@ typedef struct {
     SPIMemChipVendor vendor_id;
 } SPIMemChipVendorName;
 
-typedef enum {
-    SPIMemChipAddressTypeUnknown,
-    SPIMemChipAddressType3byte,
-    SPIMemChipAddressType4byte,
-    SPIMemChipAddressTypeAll
-} SPIMemChipAddressType;
-
 struct SPIMemChip {
     SPIMemChipVendor vendor_id;
     const char* model_name;
@@ -67,5 +71,7 @@ struct SPIMemChip {
     SPIMemChipWriteMode write_mode;
     uint8_t type_id;
     uint8_t capacity_id;
-    SPIMemChipAddressType address_type;
+    size_t page_size;
 };
+
+extern const SPIMemChip SPIMemChips[];

@@ -3,13 +3,8 @@
 #include "spi_mem_chip_i.h"
 #include "spi_mem_tools.h"
 
-static uint8_t spi_mem_tools_addr_to_byte_arr(
-    SPIMemChipAddressType address_type,
-    uint32_t addr,
-    uint8_t* cmd) {
-    uint8_t len = 4;
-    if((address_type == SPIMemChipAddressType3byte) || (address_type == SPIMemChipAddressTypeAll))
-        len = 3;
+static uint8_t spi_mem_tools_addr_to_byte_arr(uint32_t addr, uint8_t* cmd) {
+    uint8_t len = 3; // TODO(add support of 4 bytes address mode)
     for(uint8_t i = 0; i < len; i++) {
         cmd[i] = (addr >> ((len - (i + 1)) * 8)) & 0xFF;
     }
@@ -44,12 +39,11 @@ static bool spi_mem_tools_trx(
     return success;
 }
 
-static bool
-    spi_mem_tools_write_buffer(SPIMemChip* chip, uint8_t* data, size_t size, size_t offset) {
+static bool spi_mem_tools_write_buffer(uint8_t* data, size_t size, size_t offset) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
     uint8_t cmd = (uint8_t)SPIMemChipCMDWriteData;
     uint8_t address[4];
-    uint8_t address_size = spi_mem_tools_addr_to_byte_arr(chip->address_type, offset, address);
+    uint8_t address_size = spi_mem_tools_addr_to_byte_arr(offset, address);
     bool success = false;
     do {
         if(!furi_hal_spi_bus_tx(&furi_hal_spi_bus_handle_external, &cmd, 1, SPI_MEM_SPI_TIMEOUT))
@@ -98,7 +92,7 @@ bool spi_mem_tools_read_block(SPIMemChip* chip, size_t offset, uint8_t* data, si
         if(!spi_mem_tools_trx(
                SPIMemChipCMDReadData,
                cmd,
-               spi_mem_tools_addr_to_byte_arr(chip->address_type, offset, cmd),
+               spi_mem_tools_addr_to_byte_arr(offset, cmd),
                data,
                SPI_MEM_MAX_BLOCK_SIZE))
             return false;
@@ -151,7 +145,7 @@ bool spi_mem_tools_write_bytes(SPIMemChip* chip, size_t offset, uint8_t* data, s
         if(!spi_mem_tools_check_chip_info(chip)) break;
         if(!spi_mem_tools_set_write_enabled(chip, true)) break;
         if((offset + block_size) > chip->size) break;
-        if(!spi_mem_tools_write_buffer(chip, data, block_size, offset)) break;
+        if(!spi_mem_tools_write_buffer(data, block_size, offset)) break;
         return true;
     } while(0);
     return false;

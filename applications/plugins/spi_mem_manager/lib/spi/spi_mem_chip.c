@@ -5,21 +5,32 @@ const SPIMemChipVendorName spi_mem_chip_vendor_names[] = {
     {"Fujitsu", SPIMemChipVendorFujitsu},
     {"EON", SPIMemChipVendorEon},
     {"Atmel", SPIMemChipVendorAtmel},
-    {"Micron", SPIMemChipVendorMicron},
+    {"Micron", SPIMemChipVendorMicron1},
+    {"Micron", SPIMemChipVendorMicron2},
     {"AMIC", SPIMemChipVendorAmic},
     {"Nor-Mem", SPIMemChipVendorNormem},
     {"Sanyo", SPIMemChipVendorSanyo},
     {"Intel", SPIMemChipVendorIntel},
     {"ESMT", SPIMemChipVendorEsmt},
-    {"Fudan", SPIMemChipVendorFudan},
+    {"Fudan", SPIMemChipVendorFudan1},
+    {"Fudan", SPIMemChipVendorFudan2},
     {"Hyundai", SPIMemChipVendorHyundai},
     {"SST", SPIMemChipVendorSst},
     {"Micronix", SPIMemChipVendorMicronix},
-    {"GigaDevice", SPIMemChipVendorGigadevice},
+    {"GigaDevice", SPIMemChipVendorGigadevice1},
+    {"GigaDevice", SPIMemChipVendorGigadevice2},
     {"ISSI", SPIMemChipVendorIssi},
     {"Winbond", SPIMemChipVendorWinbond},
     {"BOYA", SPIMemChipVendorBoya},
     {"AP Memory", SPIMemChipVendorAPMemory},
+    {"PMC-Sierra", SPIMemChipVendorPMCSierra1},
+    {"PMC-Sierra", SPIMemChipVendorPMCSierra2},
+    {"Excel Semicond.", SPIMemChipVendorExcelSemi},
+    {"Zbit Semicond.", SPIMemChipVendorZbitSemi},
+    {"Berg Micro.", SPIMemChipVendorBergMicro},
+    {"ATO-Solution", SPIMemChipVendorATO},
+    {"DOUQI", SPIMemChipVendorDOUQI},
+    {"Fremont", SPIMemChipVendorFremont},
     {"Unknown", SPIMemChipVendorUnknown}};
 
 static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_id) {
@@ -27,42 +38,6 @@ static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_id) {
     while(vendor->vendor_id != SPIMemChipVendorUnknown && vendor->vendor_id != vendor_id) vendor++;
     return vendor->vendor_name;
 }
-
-// vendor_id, model_name, vendor_name, size, write_mode,
-// type_id, capacity_id, address_type
-static const SPIMemChip SPIMemChips[] = {
-    {SPIMemChipVendorWinbond,
-     "W25Q32BV",
-     NULL,
-     4L * 1024L * 1024L,
-     SPIMemChipWriteModeOneOrPage256Bytes,
-     0x40,
-     0x16,
-     SPIMemChipAddressType3byte},
-    {SPIMemChipVendorWinbond,
-     "W25Q64FV",
-     NULL,
-     8L * 1024L * 1024L,
-     SPIMemChipWriteModeOneOrPage256Bytes,
-     0x40,
-     0x17,
-     SPIMemChipAddressType3byte},
-    {SPIMemChipVendorGigadevice,
-     "25Q80BSIG",
-     NULL,
-     1L * 1024L * 1024L,
-     SPIMemChipWriteModeOneOrPage256Bytes,
-     0x40,
-     0x14,
-     SPIMemChipAddressType3byte},
-    {SPIMemChipVendorUnknown,
-     NULL,
-     NULL,
-     0,
-     SPIMemChipWriteModeUnknown,
-     0,
-     0,
-     SPIMemChipAddressTypeUnknown}};
 
 static void spi_mem_chip_copy_info(SPIMemChip* dest, const SPIMemChip* src) {
     dest->vendor_id = src->vendor_id;
@@ -72,7 +47,7 @@ static void spi_mem_chip_copy_info(SPIMemChip* dest, const SPIMemChip* src) {
     dest->write_mode = src->write_mode;
     dest->type_id = src->type_id;
     dest->capacity_id = src->capacity_id;
-    dest->address_type = src->address_type;
+    dest->page_size = src->page_size;
 }
 
 bool spi_mem_chip_complete_info(SPIMemChip* chip_info) {
@@ -121,4 +96,8 @@ uint8_t spi_mem_chip_get_capacity_id(SPIMemChip* chip) {
 
 SPIMemChipWriteMode spi_mem_chip_get_write_mode(SPIMemChip* chip) {
     return (chip->write_mode);
+}
+
+size_t spi_mem_chip_get_page_size(SPIMemChip* chip) {
+    return (chip->page_size);
 }
