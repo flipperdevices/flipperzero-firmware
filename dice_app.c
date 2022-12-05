@@ -105,7 +105,8 @@ static void draw_ui(const State* state, Canvas* canvas) {
     canvas_draw_str_aligned(canvas, 58, 61, AlignCenter, AlignBottom, furi_string_get_cstr(count));
 
     // buttons
-    canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+    if(isAnimState(state->app_state) == false) canvas_draw_icon(canvas, 92, 54, &I_ui_button_roll);
+
     if(state->app_state != AnimResultState && state->app_state != ResultState) {
         canvas_draw_icon(canvas, 0, 54, &I_ui_button_exit);
     } else {
@@ -278,7 +279,8 @@ int32_t dice_dnd_app(void* p) {
                         if(isOneDice(state->dice_index)) state->dice_count = 1;
                     }
                     // dice count
-                    if(isDiceSettingsDisabled(state->app_state, state->dice_index) == false) {
+                    if(isDiceSettingsDisabled(state->app_state, state->dice_index) == false &&
+                       isAnimState(state->app_state) == false) {
                         if(event.input.key == InputKeyUp) {
                             if(state->dice_index != 0) {
                                 state->dice_count += 1;

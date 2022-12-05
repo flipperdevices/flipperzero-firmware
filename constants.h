@@ -136,7 +136,8 @@ bool isDiceNameVisible(AppState state) {
 }
 
 bool isDiceButtonsVisible(AppState state) {
-    return isDiceNameVisible(state) && state != AnimResultState && state != ResultState;
+    return isDiceNameVisible(state) && state != AnimResultState && state != ResultState &&
+           state != AnimState;
 }
 
 bool isOneDice(uint8_t dice_index) {
@@ -144,7 +145,8 @@ bool isOneDice(uint8_t dice_index) {
 }
 
 bool isDiceSettingsDisabled(AppState state, uint8_t dice_index) {
-    return isOneDice(dice_index) || state == ResultState || state == AnimResultState;
+    return isOneDice(dice_index) || state == ResultState || state == AnimResultState ||
+           state == AnimState;
 }
 
 bool isAnimState(AppState state) {
