@@ -445,15 +445,20 @@ static bool _input_callback(InputEvent* event, void* context) {
     if(event->key == InputKeyRight && event->type == InputTypeShort) {
         //Пролистывание карусели вперёд
         if(current_view == G_CAROUSEL_VIEW) {
-            if(++generalview_sensor_index >= unitemp_sensors_getActiveCount())
+            if(++generalview_sensor_index >= unitemp_sensors_getActiveCount()) {
                 generalview_sensor_index = 0;
+                current_view = G_LIST_VIEW;
+            }
+
             return true;
         }
         //Пролистывание списка вперёд
         if(current_view == G_LIST_VIEW) {
             generalview_sensor_index += 4;
-            if(generalview_sensor_index >= unitemp_sensors_getActiveCount())
+            if(generalview_sensor_index >= unitemp_sensors_getActiveCount()) {
                 generalview_sensor_index = 0;
+                current_view = G_CAROUSEL_VIEW;
+            }
             return true;
         }
     }
@@ -462,23 +467,29 @@ static bool _input_callback(InputEvent* event, void* context) {
     if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         //Пролистывание карусели назад
         if(current_view == G_CAROUSEL_VIEW) {
-            if(--generalview_sensor_index >= unitemp_sensors_getActiveCount())
+            if(--generalview_sensor_index >= unitemp_sensors_getActiveCount()) {
                 generalview_sensor_index = unitemp_sensors_getActiveCount() - 1;
+                current_view = G_LIST_VIEW;
+            }
+
             return true;
         }
         //Пролистывание списка назад
         if(current_view == G_LIST_VIEW) {
             generalview_sensor_index -= 4;
-            if(generalview_sensor_index >= unitemp_sensors_getActiveCount())
+            if(generalview_sensor_index >= unitemp_sensors_getActiveCount()) {
                 generalview_sensor_index = unitemp_sensors_getActiveCount() - 1;
+                current_view = G_CAROUSEL_VIEW;
+            }
+
             return true;
         }
     }
 
     //Обработка короткого нажатия "назад"
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        //Выход из приложения при листе или отсутствии датчиков
-        if(current_view == G_LIST_VIEW || current_view == G_NO_SENSORS_VIEW ||
+        //Выход из приложения при карусели или отсутствии датчиков
+        if(current_view == G_NO_SENSORS_VIEW ||
            ((current_view == G_CAROUSEL_VIEW) && (carousel_info_selector == CAROUSEL_VALUES))) {
             app->processing = false;
             return true;
@@ -486,6 +497,11 @@ static bool _input_callback(InputEvent* event, void* context) {
         //Переключение селектора вида карусели
         if((current_view == G_CAROUSEL_VIEW) && (carousel_info_selector != CAROUSEL_VALUES)) {
             carousel_info_selector = CAROUSEL_VALUES;
+            return true;
+        }
+        //Переход в карусель из списка
+        if(current_view == G_LIST_VIEW) {
+            current_view = G_CAROUSEL_VIEW;
             return true;
         }
     }
