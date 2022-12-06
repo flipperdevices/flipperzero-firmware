@@ -1,8 +1,8 @@
 # flipperzero-yatzee
-Yatzee game for flipperzero
+Yahtzee game for flipperzero
 
 
-Installation: 
+<b>Installation: </b>
 
 Download Yatzee folder and copy to firmware_name/applications_user
 
