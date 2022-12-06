@@ -6,7 +6,7 @@ Installation:
 
 Download Yatzee folder and copy to firmware_name/applications_user
 
-plugin flipper and run 
+connect flipper to PC and run:
 
 ./fbt launchapp APPSRC=yatzee
 
