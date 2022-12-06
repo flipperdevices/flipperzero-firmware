@@ -21,12 +21,16 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
 
 bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {
     SPIMemApp* app = context;
-    UNUSED(app);
     bool success = false;
     if(event.type == SceneManagerEventTypeCustom) {
         success = true;
         if(event.event == SPIMemCustomEventWorkerChipIdentified) {
-            scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetected);
+            if(app->found_chips_size == 1) {
+                spi_mem_chip_copy_chip_info(app->chip_info, app->found_chips_arr[0]);
+                scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetected);
+            } else {
+                scene_manager_next_scene(app->scene_manager, SPIMemSceneSelectVendor);
+            }
         } else if(event.event == SPIMemCustomEventWorkerChipUnknown) {
             scene_manager_next_scene(app->scene_manager, SPIMemSceneChipDetectFail);
         }

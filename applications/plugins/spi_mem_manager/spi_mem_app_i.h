@@ -54,6 +54,7 @@ struct SPIMemApp {
     SPIMemChip* chip_info;
     const SPIMemChip** found_chips_arr;
     size_t found_chips_size;
+    uint32_t chip_vendor_enum;
     SPIMemProgressView* view_progress;
     SPIMemDetectView* view_detect;
     TextInput* text_input;

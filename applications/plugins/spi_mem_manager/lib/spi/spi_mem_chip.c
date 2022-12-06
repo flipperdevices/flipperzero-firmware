@@ -50,39 +50,35 @@ static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_enum)
 bool spi_mem_chip_find_all(SPIMemChip* chip_info, const SPIMemChip*** chips, size_t* chips_count) {
     const SPIMemChip* chip_info_arr;
     *chips_count = 0;
-    free(*chips);
-    *chips = malloc(sizeof(SPIMemChip*));
     for(chip_info_arr = SPIMemChips; chip_info_arr->model_name != NULL; chip_info_arr++) {
         if(chip_info->vendor_id != chip_info_arr->vendor_id) continue;
         if(chip_info->type_id != chip_info_arr->type_id) continue;
         if(chip_info->capacity_id != chip_info_arr->capacity_id) continue;
+        *chips = realloc((void*)*chips, (sizeof(SPIMemChip*) * (*chips_count)) + 1);
         *(*chips + *chips_count) = chip_info_arr;
         ++*chips_count;
-        *chips = realloc((void*)*chips, (sizeof(SPIMemChip*) * (*chips_count)) + 1);
     }
-    if(*chips_count) {
-        memcpy(chip_info, **chips, sizeof(SPIMemChip)); // TEMP
-        return true;
-    }
+    if(*chips_count) return true;
     return false;
 }
 
-void spi_mem_chip_print_chip_models(FuriString* str) {
-    const SPIMemChip* chip_info_arr;
-    for(chip_info_arr = SPIMemChips; chip_info_arr->model_name != NULL; chip_info_arr++) {
-        furi_string_cat_printf(str, "%s\n", chip_info_arr->model_name);
-    }
+void spi_mem_chip_copy_chip_info(SPIMemChip* dest, const SPIMemChip* src) {
+    memcpy(dest, src, sizeof(SPIMemChip));
 }
 
 size_t spi_mem_chip_get_size(SPIMemChip* chip) {
     return (chip->size);
 }
 
-const char* spi_mem_chip_get_vendor_name(SPIMemChip* chip) {
+const char* spi_mem_chip_get_vendor_name(const SPIMemChip* chip) {
     return (spi_mem_chip_search_vendor_name(chip->vendor_enum));
 }
 
-const char* spi_mem_chip_get_model_name(SPIMemChip* chip) {
+const char* spi_mem_chip_get_vendor_name_by_enum(uint32_t vendor_enum) {
+    return (spi_mem_chip_search_vendor_name(vendor_enum));
+}
+
+const char* spi_mem_chip_get_model_name(const SPIMemChip* chip) {
     return (chip->model_name);
 }
 
@@ -104,4 +100,8 @@ SPIMemChipWriteMode spi_mem_chip_get_write_mode(SPIMemChip* chip) {
 
 size_t spi_mem_chip_get_page_size(SPIMemChip* chip) {
     return (chip->page_size);
+}
+
+uint32_t spi_mem_chip_get_vendor_enum(const SPIMemChip* chip) {
+    return ((uint32_t)chip->vendor_enum);
 }

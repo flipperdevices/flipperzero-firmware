@@ -25,8 +25,6 @@ void spi_mem_scene_about_on_enter(void* context) {
         "SPI memory dumper\n"
         "Originally written by Hedger, ghettorce and x893 at\n"
         "Flipper Hackathon 2021\n\n");
-    furi_string_cat_printf(tmp_string, "Supported chips:\n");
-    spi_mem_chip_print_chip_models(tmp_string);
     widget_add_text_scroll_element(app->widget, 0, 16, 128, 50, furi_string_get_cstr(tmp_string));
 
     furi_string_free(tmp_string);
