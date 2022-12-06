@@ -84,7 +84,6 @@ def generateCArr(arr, filename):
             print("    {" + cur["vendorEnum"] + ",", file=out, end="")
             print(" " + cur["vendorID"] + ",", file=out, end="")
             print(' "' + cur["modelName"] + '",', file=out, end="")
-            print(" NULL,", file=out, end="")
             print(" " + cur["size"] + ",", file=out, end="")
             print(" " + cur["writeMode"] + ",", file=out, end="")
             print(" 0x" + cur["typeID"] + ",", file=out, end="")

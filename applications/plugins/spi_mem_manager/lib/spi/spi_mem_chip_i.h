@@ -74,7 +74,6 @@ struct SPIMemChip {
     SPIMemChipVendor vendor_enum;
     uint8_t vendor_id;
     const char* model_name;
-    const char* vendor_name;
     size_t size;
     SPIMemChipWriteMode write_mode;
     uint8_t type_id;

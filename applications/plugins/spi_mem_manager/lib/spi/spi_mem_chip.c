@@ -62,7 +62,6 @@ bool spi_mem_chip_find_all(SPIMemChip* chip_info, const SPIMemChip*** chips, siz
     }
     if(*chips_count) {
         memcpy(chip_info, **chips, sizeof(SPIMemChip)); // TEMP
-        chip_info->vendor_name = spi_mem_chip_search_vendor_name(chip_info->vendor_enum); // TEMP
         return true;
     }
     return false;
@@ -80,7 +79,7 @@ size_t spi_mem_chip_get_size(SPIMemChip* chip) {
 }
 
 const char* spi_mem_chip_get_vendor_name(SPIMemChip* chip) {
-    return (chip->vendor_name);
+    return (spi_mem_chip_search_vendor_name(chip->vendor_enum));
 }
 
 const char* spi_mem_chip_get_model_name(SPIMemChip* chip) {
