@@ -26,32 +26,25 @@ static void gpio_reader_draw_callback(Canvas* canvas, void* _model) {
     canvas_set_font(canvas, FontSecondary);
     elements_multiline_text_aligned(
         canvas, 64, 16, AlignCenter, AlignTop, "A7  A6  A4  B3  B2  C3  C1  C0");
-    elements_multiline_text_aligned(
-        canvas, 64, 40, AlignCenter, AlignTop, "Pull Up");
+    elements_multiline_text_aligned(canvas, 64, 40, AlignCenter, AlignTop, "Pull Up");
     int charOffset = 10;
     for(uint8_t i = 0; i < GPIO_ITEM_COUNT; i++) {
         bool high = gpio_item_get_pin(i);
         if(high) {
-            elements_multiline_text_aligned(
-                canvas, charOffset, 25, AlignCenter, AlignTop, "1");
+            elements_multiline_text_aligned(canvas, charOffset, 25, AlignCenter, AlignTop, "1");
         } else {
-            elements_multiline_text_aligned(
-                canvas, charOffset, 25, AlignCenter, AlignTop, "0");
-        }
-        
-        if(model->pullUp[i]) {
-            elements_multiline_text_aligned(
-                canvas, charOffset, 50, AlignCenter, AlignTop, "1");
-        } else {
-            elements_multiline_text_aligned(
-                canvas, charOffset, 50, AlignCenter, AlignTop, "0");
-        }
-        if(i == model->pin_idx) {
-            elements_multiline_text_aligned(
-                canvas, charOffset, 53, AlignCenter, AlignTop, "_");
+            elements_multiline_text_aligned(canvas, charOffset, 25, AlignCenter, AlignTop, "0");
         }
 
-        
+        if(model->pullUp[i]) {
+            elements_multiline_text_aligned(canvas, charOffset, 50, AlignCenter, AlignTop, "1");
+        } else {
+            elements_multiline_text_aligned(canvas, charOffset, 50, AlignCenter, AlignTop, "0");
+        }
+        if(i == model->pin_idx) {
+            elements_multiline_text_aligned(canvas, charOffset, 53, AlignCenter, AlignTop, "_");
+        }
+
         charOffset += 16;
     }
     //~ free(charOffset);
@@ -93,7 +86,7 @@ static bool gpio_reader_process_right(GpioReader* gpio_reader) {
         gpio_reader->view,
         GpioReaderModel * model,
         {
-            if(model->pin_idx < GPIO_ITEM_COUNT-1) {
+            if(model->pin_idx < GPIO_ITEM_COUNT - 1) {
                 model->pin_idx++;
             }
         },
@@ -109,11 +102,11 @@ static bool gpio_reader_process_ok(GpioReader* gpio_reader, InputEvent* event) {
         GpioReaderModel * model,
         {
             if(event->type == InputTypePress) {
-                if(model->pullUp[model->pin_idx]){
+                if(model->pullUp[model->pin_idx]) {
                     gpio_item_configure_pin(model->pin_idx, GpioModeInput, GpioPullDown);
                     model->pullUp[model->pin_idx] = 0;
                     consumed = true;
-                }else{
+                } else {
                     gpio_item_configure_pin(model->pin_idx, GpioModeInput, GpioPullUp);
                     model->pullUp[model->pin_idx] = 1;
                     consumed = true;
@@ -149,7 +142,10 @@ View* gpio_reader_get_view(GpioReader* gpio_reader) {
     return gpio_reader->view;
 }
 
-void gpio_reader_set_ok_callback(GpioReader* gpio_reader, GpioReaderOkCallback callback, void* context) {
+void gpio_reader_set_ok_callback(
+    GpioReader* gpio_reader,
+    GpioReaderOkCallback callback,
+    void* context) {
     furi_assert(gpio_reader);
     furi_assert(callback);
     with_view_model(

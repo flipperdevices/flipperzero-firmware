@@ -26,7 +26,7 @@ void gpio_item_configure_pin(uint8_t index, GpioMode mode, GpioPull pull) {
 
 void gpio_item_configure_all_pins(GpioMode mode) {
     GpioPull pull = GpioPullNo;
-    if(mode == GpioModeInput){
+    if(mode == GpioModeInput) {
         pull = GpioPullDown;
     }
     for(uint8_t i = 0; i < GPIO_ITEM_COUNT; i++) {

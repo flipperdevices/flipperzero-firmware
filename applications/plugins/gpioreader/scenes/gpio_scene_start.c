@@ -56,7 +56,7 @@ void gpio_scene_start_on_enter(void* context) {
     variable_item_list_add(var_item_list, "USB-UART Bridge", 0, NULL, NULL);
 
     variable_item_list_add(var_item_list, "GPIO Manual Control", 0, NULL, NULL);
-    
+
     variable_item_list_add(var_item_list, "GPIO Manual Read", 0, NULL, NULL);
 
     item = variable_item_list_add(
