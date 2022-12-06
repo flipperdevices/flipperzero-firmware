@@ -8,7 +8,7 @@
 #include <flipper_format/flipper_format.h>
 
 #define TAG "NfcDevice"
-#define NFC_DEVICE_KEYS_FOLDER EXT_PATH("nfc/cache")
+#define NFC_DEVICE_KEYS_FOLDER EXT_PATH("nfc/.cache")
 #define NFC_DEVICE_KEYS_EXTENSION ".keys"
 
 static const char* nfc_file_header = "Flipper NFC device";
@@ -27,6 +27,11 @@ NfcDevice* nfc_device_alloc() {
     nfc_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     nfc_dev->load_path = furi_string_alloc();
     nfc_dev->dev_data.parsed_data = furi_string_alloc();
+
+    // Rename cache folder name for backward compatibility
+    if(storage_common_stat(nfc_dev->storage, "/ext/nfc/cache", NULL) == FSE_OK) {
+        storage_common_rename(nfc_dev->storage, "/ext/nfc/cache", NFC_DEVICE_KEYS_FOLDER);
+    }
     return nfc_dev;
 }
 
