@@ -1,0 +1,12 @@
+App(
+    appid="GPIOReader",
+    name="GPIO Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_app",
+    cdefines=["APP_GPIOREADER"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=50,
+    fap_libs=["assets"],
+    fap_category="GPIO",
+)
