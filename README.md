@@ -13,13 +13,13 @@ connect flipper to PC and run:
 
 <b>Controls: </b>
 
-Up to Roll
-Left/Right to move cursor
-OK to Hold a die
-Moving cursor past the dice will move the cursor up to the scorecard. Moving the scores cursor will show you the potential score you would get.
+- Up to Roll
+- Left/Right to move cursor
+- OK to Hold a die
+- Moving cursor past the dice will move the cursor up to the scorecard. Moving the scores cursor will show you the potential score you would get.
 
 
-Rules & Scoring:
+<b>Rules & Scoring:</b>
 
 - Between rolls, move the cursor and use the OK button to select which dice you will hold for the next roll
 - 3 rolls per round and then you are forced to select a score. 
