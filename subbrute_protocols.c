@@ -246,6 +246,50 @@ const SubBruteProtocol subbrute_protocol_linear_10bit_310 = {
     .file = LinearFileProtocol};
 
 /**
+ * UNILARM 24bit 330MHz
+ */
+const SubBruteProtocol subbrute_protocol_unilarm_24bit_330 = {
+    .frequency = 330000000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = RAWFileProtocol};
+
+/**
+ * UNILARM 24bit 433MHz
+ */
+const SubBruteProtocol subbrute_protocol_unilarm_24bit_433 = {
+    .frequency = 433920000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = RAWFileProtocol};
+
+/**
+ * SMC5326 24bit 330MHz
+ */
+const SubBruteProtocol subbrute_protocol_smc5326_24bit_330 = {
+    .frequency = 330000000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = RAWFileProtocol};
+
+/**
+ * SMC5326 24bit 433MHz
+ */
+const SubBruteProtocol subbrute_protocol_smc5326_24bit_433 = {
+    .frequency = 433920000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = RAWFileProtocol};
+
+/**
  * BF existing dump
  */
 const SubBruteProtocol subbrute_protocol_load_file =
@@ -274,6 +318,10 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackChamberlain7bit390] = "Chamberlain 7bit 390MHz",
     [SubBruteAttackLinear10bit300] = "Linear 10bit 300MHz",
     [SubBruteAttackLinear10bit310] = "Linear 10bit 310MHz",
+    [SubBruteAttackUNILARM24bit330] = "UNILARM 24bit 330MHz",
+    [SubBruteAttackUNILARM24bit433] = "UNILARM 24bit 433MHz",
+    [SubBruteAttackSMC532624bit330] = "SMC5326 24bit 330MHz",
+    [SubBruteAttackSMC532624bit433] = "SMC5326 24bit 433MHz",
     [SubBruteAttackLoadFile] = "BF existing dump",
     [SubBruteAttackTotalCount] = "Total Count",
 };
@@ -311,6 +359,10 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackChamberlain7bit390] = &subbrute_protocol_chamberlain_7bit_390,
     [SubBruteAttackLinear10bit300] = &subbrute_protocol_linear_10bit_300,
     [SubBruteAttackLinear10bit310] = &subbrute_protocol_linear_10bit_310,
+    [SubBruteAttackUNILARM24bit330] = &subbrute_protocol_unilarm_24bit_330,
+    [SubBruteAttackUNILARM24bit433] = &subbrute_protocol_unilarm_24bit_433,
+    [SubBruteAttackSMC532624bit330] = &subbrute_protocol_smc5326_24bit_330,
+    [SubBruteAttackSMC532624bit433] = &subbrute_protocol_smc5326_24bit_433,
     [SubBruteAttackLoadFile] = &subbrute_protocol_load_file};
 
 static const char* subbrute_protocol_file_types[] = {
@@ -337,6 +389,8 @@ static const char* subbrute_key_file_start_no_tail =
 static const char* subbrute_key_file_start_with_tail =
     "Filetype: Flipper SubGhz Key File\nVersion: 1\nFrequency: %u\nPreset: %s\nProtocol: %s\nBit: %d\nKey: %s\nTE: %d\nRepeat: %d\n";
 static const char* subbrute_key_small_no_tail = "Bit: %d\nKey: %s\nRepeat: %d\n";
+//static const char* subbrute_key_small_raw =
+//    "Filetype: Flipper SubGhz Key File\nVersion: 1\nFrequency: %u\nPreset: %s\nProtocol: %s\nBit: %d\n";
 static const char* subbrute_key_small_with_tail = "Bit: %d\nKey: %s\nTE: %d\nRepeat: %d\n";
 
 const char* subbrute_protocol_name(SubBruteAttacks index) {
