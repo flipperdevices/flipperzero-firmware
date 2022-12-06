@@ -23,7 +23,10 @@ void spi_mem_scene_select_vendor_on_enter(void* context) {
     vendors_t vendors_arr;
     vendors_init(vendors_arr);
     spi_mem_scene_select_vendor_sort_vendors(app, vendors_arr);
-    for(size_t index = 0; index < vendors_size(vendors_arr); index++) {
+    size_t vendors_arr_size = vendors_size(vendors_arr);
+    if(vendors_arr_size == 1)
+        spi_mem_scene_select_vendor_submenu_callback(context, *vendors_get(vendors_arr, 0));
+    for(size_t index = 0; index < vendors_arr_size; index++) {
         uint32_t vendor_enum = *vendors_get(vendors_arr, index);
         submenu_add_item(
             app->submenu,
