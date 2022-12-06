@@ -394,7 +394,7 @@ static void _draw_callback(Canvas* canvas, void* _model) {
 }
 
 static bool _input_callback(InputEvent* event, void* context) {
-    Unitemp* app = context;
+    UNUSED(context);
 
     //Обработка короткого нажатия "ок"
     if(event->key == InputKeyOk && event->type == InputTypeShort) {

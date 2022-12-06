@@ -31,6 +31,8 @@
 //Размер буффера текста
 #define BUFF_SIZE 32
 
+#define UNITEMP_DEBUG
+
 /* Объявление перечислений */
 //Единицы измерения
 typedef enum { CELSIUS, FAHRENHEIT } measureUnit;

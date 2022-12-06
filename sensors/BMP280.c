@@ -100,6 +100,7 @@ static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
     if(!unitemp_i2c_readRegArray(
            i2c_sensor, TEMP_CAL_START_ADDR, 6, (uint8_t*)&bmp280_instance->temp_cal))
         return false;
+#ifdef UNITEMP_DEBUG
     FURI_LOG_D(
         APP_NAME,
         "Sensor BMP280 (0x%02X) calibration values: T1: %d, T2: %d, T3: %d",
@@ -107,9 +108,12 @@ static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
         bmp280_instance->temp_cal.dig_T1,
         bmp280_instance->temp_cal.dig_T2,
         bmp280_instance->temp_cal.dig_T3);
+#endif
+
     if(!unitemp_i2c_readRegArray(
            i2c_sensor, PRESS_CAL_START_ADDR, 18, (uint8_t*)&bmp280_instance->press_cal))
         return false;
+#ifdef UNITEMP_DEBUG
     FURI_LOG_D(
         APP_NAME,
         "Sensor BMP280 (0x%02X): P1-9: %d, %d, %d, %d, %d, %d, %d, %d, %d",
@@ -123,6 +127,8 @@ static bool bmp280_readCalValues(I2CSensor* i2c_sensor) {
         bmp280_instance->press_cal.dig_P7,
         bmp280_instance->press_cal.dig_P8,
         bmp280_instance->press_cal.dig_P9);
+#endif
+
     bmp280_instance->last_cal_update_time = furi_get_tick();
     return true;
 }

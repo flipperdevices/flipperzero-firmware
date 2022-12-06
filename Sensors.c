@@ -251,7 +251,9 @@ void unitemp_sensors_add(Sensor* sensor) {
 }
 
 bool unitemp_sensors_load(void) {
+#ifdef UNITEMP_DEBUG
     FURI_LOG_D(APP_NAME, "Loading sensors...");
+#endif
 
     //Выделение памяти на поток
     app->file_stream = file_stream_alloc(app->storage);
@@ -352,7 +354,9 @@ bool unitemp_sensors_load(void) {
 }
 
 bool unitemp_sensors_save(void) {
+#ifdef UNITEMP_DEBUG
     FURI_LOG_D(APP_NAME, "Saving sensors...");
+#endif
 
     //Выделение памяти для потока
     app->file_stream = file_stream_alloc(app->storage);
@@ -429,7 +433,7 @@ void unitemp_sensors_reload(void) {
 
 bool unitemp_sensor_isContains(Sensor* sensor) {
     for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
-        if(unitemp_sensor_getActive(i) == sensor) return true;
+        if(app->sensors[i] == sensor) return true;
     }
     return false;
 }
@@ -494,12 +498,15 @@ void unitemp_sensor_free(Sensor* sensor) {
     bool status = false;
     //Высвобождение памяти под инстанс
     status = sensor->type->interface->mem_releaser(sensor);
+    UNUSED(status);
+#ifdef UNITEMP_DEBUG
 
     if(status) {
         FURI_LOG_D(APP_NAME, "Sensor %s memory successfully released", sensor->name);
     } else {
         FURI_LOG_E(APP_NAME, "Sensor %s memory is not released", sensor->name);
     }
+#endif
     free(sensor->name);
     //free(sensor);
 }
@@ -520,7 +527,9 @@ bool unitemp_sensors_init(void) {
         //Может пропасть при отключении USB
         if(furi_hal_power_is_otg_enabled() != true) {
             furi_hal_power_enable_otg();
+#ifdef UNITEMP_DEBUG
             FURI_LOG_D(APP_NAME, "OTG enabled");
+#endif
         }
         if(!(*app->sensors[i]->type->initializer)(app->sensors[i])) {
             FURI_LOG_E(
@@ -529,7 +538,9 @@ bool unitemp_sensors_init(void) {
                 app->sensors[i]->name);
             result = false;
         }
+#ifdef UNITEMP_DEBUG
         FURI_LOG_D(APP_NAME, "Sensor %s successfully initialized", app->sensors[i]->name);
+#endif
     }
     app->sensors_ready = true;
     return result;
@@ -540,7 +551,9 @@ bool unitemp_sensors_deInit(void) {
     //Выключение 5 В если до этого оно не было включено
     if(app->settings.lastOTGState != true) {
         furi_hal_power_disable_otg();
+#ifdef UNITEMP_DEBUG
         FURI_LOG_D(APP_NAME, "OTG disabled");
+#endif
     }
 
     //Перебор датчиков из списка
@@ -576,8 +589,10 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
 
     sensor->status = sensor->type->interface->updater(sensor);
 
+#ifdef UNITEMP_DEBUG
     if(sensor->status != UT_OK && sensor->status != UT_POLLING)
         FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
+#endif
 
     if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
         uintemp_celsiumToFarengate(sensor);
