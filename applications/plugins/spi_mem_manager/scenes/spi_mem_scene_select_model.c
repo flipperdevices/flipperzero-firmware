@@ -1,5 +1,4 @@
 #include "../spi_mem_app_i.h"
-#include <m-array.h>
 
 static void spi_mem_scene_select_model_submenu_callback(void* context, uint32_t index) {
     SPIMemApp* app = context;
