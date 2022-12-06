@@ -1,5 +1,5 @@
 #include <gui/icon.h>
-#include "dice_dnd_app_icons.h"
+#include "Dice_app_app_icons.h"
 
 #define TAG "DiceApp"
 
