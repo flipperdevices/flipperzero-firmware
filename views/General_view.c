@@ -139,7 +139,7 @@ static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos
 }
 
 static void _draw_view_noSensors(Canvas* canvas) {
-    canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x55);
+    canvas_draw_icon(canvas, 7, 17, &I_sherlok_53x45);
     //Рисование рамки
     canvas_draw_rframe(canvas, 0, 0, 128, 63, 7);
     canvas_draw_rframe(canvas, 0, 0, 128, 64, 7);

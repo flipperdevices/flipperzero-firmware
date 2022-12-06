@@ -30,6 +30,11 @@ static uint32_t _exit_callback(void* context) {
  */
 static void _enter_callback(void* context, uint32_t index) {
     UNUSED(context);
+    if(index == unitemp_sensors_getTypesCount()) {
+        unitemp_widget_help_switch();
+        return;
+    }
+
     const SensorType* type = unitemp_sensors_getTypes()[index];
     uint8_t sensor_type_count = 0;
 
@@ -110,6 +115,7 @@ void unitemp_SensorsList_alloc(void) {
                 variable_item_list, unitemp_sensors_getTypes()[i]->altname, 1, NULL, app);
         }
     }
+    variable_item_list_add(variable_item_list, "I don't know what to choose", 1, NULL, app);
 
     //Добавление колбека на нажатие средней кнопки
     variable_item_list_set_enter_callback(variable_item_list, _enter_callback, app);

@@ -12,7 +12,7 @@ typedef enum UnitempViews {
     UnitempViewSensorEdit,
     UnitempViewSensorNameEdit,
     UnitempViewSensorActions,
-    UnitempViewSensorDelete,
+    UnitempViewWidget,
     UnitempViewPopup,
 
     UnitempViewsCount
@@ -64,4 +64,12 @@ void unitemp_SensorActions_alloc(void);
 void unitemp_SensorActions_switch(Sensor* sensor);
 void unitemp_SensorActions_free(void);
 
+/* Виджеты */
+void unitemp_widgets_alloc(void);
+void unitemp_widgets_free(void);
+
+/* Подтверждение удаления */
+void unitemp_widget_delete_switch(Sensor* sensor);
+/* Помощь */
+void unitemp_widget_help_switch(void);
 #endif

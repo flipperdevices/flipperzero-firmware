@@ -10,12 +10,18 @@
 //TODO: В меню выбора нового датчика добавить помогалку выбора датчика
 //TODO: Help, about
 //TODO: Добавить настройку единицы измерения давления
-//TODO: Ограничивать длину имени датчика только тогда, когда имя действительно не вмещается
 //TODO: Обновлять данные только с тех датчиков, которые присутствуют на экране
 
 /* ******************************* Датчики ******************************* */
+//TODO: Исправить некорректное отображение пина при редактировании (отловлено на DHT11)
+
 //TODO: Ограничение на добавление датчика I2C с адресом уже имеющегося датчика
 //TODO: BMP280 SPI
+
+/* ******************************** Общее ******************************** */
+//TODO: Описание на Github
+//TODO: Описание подключения датчиков
+//TODO: Лицензия и авторство в каждом файле
 
 /* Переменные */
 //Данные приложения
@@ -206,11 +212,7 @@ static bool unitemp_alloc(void) {
     unitemp_SensorEdit_alloc();
     unitemp_SensorNameEdit_alloc();
     unitemp_SensorActions_alloc();
-
-    //Виджет
-    app->widget = widget_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, UnitempViewSensorDelete, widget_get_view(app->widget));
+    unitemp_widgets_alloc();
 
     //Всплывающее окно
     app->popup = popup_alloc();
@@ -226,7 +228,7 @@ static bool unitemp_alloc(void) {
  */
 static void unitemp_free(void) {
     popup_free(app->popup);
-    widget_free(app->widget);
+    unitemp_widgets_free();
 
     unitemp_SensorActions_free();
     unitemp_SensorNameEdit_free();
