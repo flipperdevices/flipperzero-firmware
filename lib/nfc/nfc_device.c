@@ -1207,6 +1207,7 @@ bool nfc_file_select(NfcDevice* dev) {
     const DialogsFileBrowserOptions browser_options = {
         .extension = NFC_APP_EXTENSION,
         .skip_assets = true,
+        .hide_dot_files = true,
         .icon = &I_Nfc_10px,
         .hide_ext = true,
         .item_loader_callback = NULL,
