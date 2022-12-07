@@ -44,13 +44,11 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 if(result) subghz_blink_start(subghz);
             }
             if(!result) {
+                rpc_system_app_set_error_code(subghz->rpc_ctx, SubGhzErrorTypeOnlyRX);
                 rpc_system_app_set_error_text(
                     subghz->rpc_ctx,
                     "Transmission on\nthis frequency is\nrestricted in\nyour region");
-            } else {
-                rpc_system_app_set_error_text(subghz->rpc_ctx, NULL);
             }
-
             rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventButtonPress, result);
         } else if(event.event == SubGhzCustomEventSceneRpcButtonRelease) {
             bool result = false;
@@ -83,6 +81,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
 
                     furi_string_free(file_name);
                 } else {
+                    rpc_system_app_set_error_code(subghz->rpc_ctx, SubGhzErrorTypeParseFile);
                     rpc_system_app_set_error_text(subghz->rpc_ctx, "Cannot parse\nfile");
                 }
             }
@@ -106,6 +105,4 @@ void subghz_scene_rpc_on_exit(void* context) {
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 0, NULL);
-
-    rpc_system_app_set_error_text(subghz->rpc_ctx, NULL);
 }
