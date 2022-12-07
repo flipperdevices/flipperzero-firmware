@@ -333,7 +333,7 @@ void rpc_system_app_set_error_text(RpcAppSystem* rpc_app, const char* error_text
     content->text = error_text ? strdup(error_text) : NULL;
 }
 
-void rpc_system_app_error_reset(RpcAppSystem* rpc_app){
+void rpc_system_app_error_reset(RpcAppSystem* rpc_app) {
     furi_assert(rpc_app);
 
     rpc_system_app_set_error_code(rpc_app, 0);
