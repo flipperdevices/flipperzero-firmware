@@ -38,7 +38,7 @@ static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
     info_str = furi_string_alloc();
 
     widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
-    widget_add_string_element(widget, 53, 9, AlignLeft, AlignTop, FontPrimary, "Emulating UID");
+    widget_add_string_element(widget, 57, 13, AlignLeft, AlignTop, FontPrimary, "Emulating UID");
     if(strcmp(nfc->dev->dev_name, "")) {
         furi_string_printf(info_str, "%s", nfc->dev->dev_name);
     } else {
@@ -48,7 +48,7 @@ static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
     }
     furi_string_trim(info_str);
     widget_add_text_box_element(
-        widget, 53, 24, 70, 25, AlignCenter, AlignTop, furi_string_get_cstr(info_str), true);
+        widget, 57, 28, 67, 25, AlignCenter, AlignTop, furi_string_get_cstr(info_str), true);
     furi_string_free(info_str);
     if(data_received) {
         widget_add_button_element(
