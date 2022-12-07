@@ -42,6 +42,7 @@ bool dialogs_app_process_module_file_browser(const DialogsAppMessageDataFileBrow
         data->extension,
         data->base_path,
         data->skip_assets,
+        data->hide_dot_files,
         data->file_icon,
         data->hide_ext);
     file_browser_set_item_callback(file_browser, data->item_callback, data->item_callback_context);

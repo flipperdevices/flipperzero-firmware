@@ -31,6 +31,7 @@ void file_browser_configure(
     const char* extension,
     const char* base_path,
     bool skip_assets,
+    bool hide_dot_files,
     const Icon* file_icon,
     bool hide_ext);
 
