@@ -190,7 +190,11 @@ void file_browser_configure(
 void file_browser_start(FileBrowser* browser, FuriString* path) {
     furi_assert(browser);
     browser->worker = file_browser_worker_alloc(
-        path, browser->base_path, browser->ext_filter, browser->skip_assets, browser->hide_dot_files);
+        path,
+        browser->base_path,
+        browser->ext_filter,
+        browser->skip_assets,
+        browser->hide_dot_files);
     file_browser_worker_set_callback_context(browser->worker, browser);
     file_browser_worker_set_folder_callback(browser->worker, browser_folder_open_cb);
     file_browser_worker_set_list_callback(browser->worker, browser_list_load_cb);
