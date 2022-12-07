@@ -11,12 +11,7 @@ void spi_mem_scene_chip_detect_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, SPIMemViewDetect);
     spi_mem_worker_start_thread(app->worker);
     spi_mem_worker_chip_detect_start(
-        app->chip_info,
-        &app->found_chips_arr,
-        &app->found_chips_size,
-        app->worker,
-        spi_mem_scene_chip_detect_callback,
-        app);
+        app->chip_info, &app->found_chips, app->worker, spi_mem_scene_chip_detect_callback, app);
 }
 
 bool spi_mem_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {

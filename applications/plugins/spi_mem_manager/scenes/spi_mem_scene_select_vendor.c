@@ -12,8 +12,9 @@ static void spi_mem_scene_select_vendor_submenu_callback(void* context, uint32_t
 }
 
 static void spi_mem_scene_select_vendor_sort_vendors(SPIMemApp* app, vendors_t vendors_arr) {
-    for(size_t index = 0; index < app->found_chips_size; index++) {
-        vendors_push_back(vendors_arr, spi_mem_chip_get_vendor_enum(app->found_chips_arr[index]));
+    for(size_t index = 0; index < found_chips_size(app->found_chips); index++) {
+        vendors_push_back(
+            vendors_arr, spi_mem_chip_get_vendor_enum(*found_chips_get(app->found_chips, index)));
     }
     vendors_uniq(vendors_arr);
 }

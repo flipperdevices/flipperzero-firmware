@@ -30,8 +30,7 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->widget = widget_alloc();
     instance->chip_info = malloc(sizeof(SPIMemChip));
-    instance->found_chips_arr = NULL;
-    instance->found_chips_size = 0;
+    found_chips_init(instance->found_chips);
     instance->view_progress = spi_mem_view_progress_alloc();
     instance->view_detect = spi_mem_view_detect_alloc();
     instance->text_input = text_input_alloc();
@@ -90,7 +89,7 @@ void spi_mem_free(SPIMemApp* instance) {
     scene_manager_free(instance->scene_manager);
     spi_mem_worker_free(instance->worker);
     free(instance->chip_info);
-    free(instance->found_chips_arr);
+    found_chips_clear(instance->found_chips);
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
     furi_record_close(RECORD_NOTIFICATION);

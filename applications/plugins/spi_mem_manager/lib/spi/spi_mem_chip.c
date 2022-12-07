@@ -47,18 +47,16 @@ static const char* spi_mem_chip_search_vendor_name(SPIMemChipVendor vendor_enum)
     return vendor->vendor_name;
 }
 
-bool spi_mem_chip_find_all(SPIMemChip* chip_info, const SPIMemChip*** chips, size_t* chips_count) {
+bool spi_mem_chip_find_all(SPIMemChip* chip_info, found_chips_t found_chips) {
     const SPIMemChip* chip_info_arr;
-    *chips_count = 0;
+    found_chips_reset(found_chips);
     for(chip_info_arr = SPIMemChips; chip_info_arr->model_name != NULL; chip_info_arr++) {
         if(chip_info->vendor_id != chip_info_arr->vendor_id) continue;
         if(chip_info->type_id != chip_info_arr->type_id) continue;
         if(chip_info->capacity_id != chip_info_arr->capacity_id) continue;
-        *chips = realloc((void*)*chips, (sizeof(SPIMemChip*) * (*chips_count)) + 1);
-        *(*chips + *chips_count) = chip_info_arr;
-        ++*chips_count;
+        found_chips_push_back(found_chips, chip_info_arr);
     }
-    if(*chips_count) return true;
+    if(found_chips_size(found_chips)) return true;
     return false;
 }
 

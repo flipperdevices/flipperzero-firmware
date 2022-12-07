@@ -28,8 +28,7 @@ void spi_mem_worker_stop_thread(SPIMemWorker* worker);
 bool spi_mem_worker_check_for_stop(SPIMemWorker* worker);
 void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
-    const SPIMemChip*** found_chips_arr,
-    size_t* found_chips_size,
+    found_chips_t* found_chips,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
     void* context);

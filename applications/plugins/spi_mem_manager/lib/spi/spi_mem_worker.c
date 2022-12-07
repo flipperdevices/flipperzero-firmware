@@ -69,8 +69,7 @@ void spi_mem_worker_stop_thread(SPIMemWorker* worker) {
 
 void spi_mem_worker_chip_detect_start(
     SPIMemChip* chip_info,
-    const SPIMemChip*** found_chips_arr,
-    size_t* found_chips_size,
+    found_chips_t* found_chips,
     SPIMemWorker* worker,
     SPIMemWorkerCallback callback,
     void* context) {
@@ -78,8 +77,7 @@ void spi_mem_worker_chip_detect_start(
     worker->callback = callback;
     worker->cb_ctx = context;
     worker->chip_info = chip_info;
-    worker->found_chips_arr = found_chips_arr;
-    worker->found_chips_size = found_chips_size;
+    worker->found_chips = found_chips;
     furi_thread_flags_set(furi_thread_get_id(worker->thread), SPIMemEventChipDetect);
 }
 

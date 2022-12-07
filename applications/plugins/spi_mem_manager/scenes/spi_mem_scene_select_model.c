@@ -2,19 +2,20 @@
 
 static void spi_mem_scene_select_model_submenu_callback(void* context, uint32_t index) {
     SPIMemApp* app = context;
-    spi_mem_chip_copy_chip_info(app->chip_info, app->found_chips_arr[index]);
+    spi_mem_chip_copy_chip_info(app->chip_info, *found_chips_get(app->found_chips, index));
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
 void spi_mem_scene_select_model_on_enter(void* context) {
     SPIMemApp* app = context;
     size_t models_on_vendor = 0;
-    for(size_t index = 0; index < app->found_chips_size; index++) {
-        if(spi_mem_chip_get_vendor_enum(app->found_chips_arr[index]) != app->chip_vendor_enum)
+    for(size_t index = 0; index < found_chips_size(app->found_chips); index++) {
+        if(spi_mem_chip_get_vendor_enum(*found_chips_get(app->found_chips, index)) !=
+           app->chip_vendor_enum)
             continue;
         submenu_add_item(
             app->submenu,
-            spi_mem_chip_get_model_name(app->found_chips_arr[index]),
+            spi_mem_chip_get_model_name(*found_chips_get(app->found_chips, index)),
             index,
             spi_mem_scene_select_model_submenu_callback,
             app);

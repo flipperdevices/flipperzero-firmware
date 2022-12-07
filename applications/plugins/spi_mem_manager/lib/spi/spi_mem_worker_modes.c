@@ -49,8 +49,7 @@ static void spi_mem_worker_chip_detect_process(SPIMemWorker* worker) {
         furi_delay_tick(10);
         if(spi_mem_worker_check_for_stop(worker)) return;
     }
-    if(spi_mem_chip_find_all(
-           worker->chip_info, worker->found_chips_arr, worker->found_chips_size)) {
+    if(spi_mem_chip_find_all(worker->chip_info, *worker->found_chips)) {
         event = SPIMemCustomEventWorkerChipIdentified;
     } else {
         event = SPIMemCustomEventWorkerChipUnknown;
