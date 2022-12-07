@@ -71,12 +71,12 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
     canvas_draw_str(canvas, 5, 32, buffer);
 
     //DATA AGE
-    if((int)model->generic->agedata > 0) {
+    if((int)model->generic->timestamp > 0) {
         FuriHalRtcDateTime curr_dt;
         furi_hal_rtc_get_datetime(&curr_dt);
         uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
 
-        int diffold = (int)curr_ts - (int)model->generic->agedata;
+        int ts_diff = (int)curr_ts - (int)model->generic->timestamp;
 
         uint8_t tmp_x_frame = 101;
         uint8_t tmp_y_frame = 23;
@@ -101,8 +101,8 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
             }
         }
 
-        if(diffold > 60) {
-            int tmp_sec = diffold;
+        if(ts_diff > 60) {
+            int tmp_sec = ts_diff;
             int cnt_min = 1;
             for(int i = 1; tmp_sec > 60; i++) {
                 tmp_sec = tmp_sec - 60;
@@ -137,7 +137,7 @@ void ws_view_receiver_info_draw(Canvas* canvas, WSReceiverInfoModel* model) {
             canvas_set_color(canvas, ColorBlack);
             canvas_draw_rframe(canvas, tmp_x_frame, tmp_y_frame, 26, 11, 1);
             canvas_set_color(canvas, ColorBlack);
-            snprintf(buffer, sizeof(buffer), "%d", diffold);
+            snprintf(buffer, sizeof(buffer), "%d", ts_diff);
             canvas_draw_str_aligned(
                 canvas, tmp_x_text, tmp_y_text, AlignCenter, AlignCenter, buffer);
         }
