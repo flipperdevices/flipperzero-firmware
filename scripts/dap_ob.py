@@ -3,6 +3,8 @@ import logging
 import socket
 import subprocess
 import time
+import struct
+from dataclasses import dataclass
 
 from flipper.assets.obdata import (
     OptionBytesData,
@@ -76,7 +78,7 @@ class OpenOCD:
 
     def _wait_for_openocd_tcl(self):
         """Wait for OpenOCD to start"""
-
+        # TODO: timeout
         while True:
             stderr = self.process.stderr
             if not stderr:
@@ -102,7 +104,6 @@ class OpenOCD:
         """Send a command string to TCL RPC. Return the result that was read."""
 
         try:
-            self.logger.debug(cmd)
             data = (cmd + OpenOCD.COMMAND_TOKEN).encode("utf-8")
             self.logger.debug(f"<- {data}")
 
@@ -159,14 +160,173 @@ class OpenOCD:
     def read_32(self, addr: int) -> int:
         """Read 32-bit value from memory"""
         data = self.send_tcl(f"mdw {addr}").strip()
-        data = data.split(" ")[-1]
+        data = data.split(": ")[-1]
         data = int(data, 16)
         return data
 
+    def write_32(self, addr: int, value: int) -> None:
+        """Write 32-bit value to memory"""
+        self.send_tcl(f"mww {addr} {value}")
+
+
+@dataclass
+class RegisterBitDefinition:
+    name: str
+    offset: int
+    size: int
+    value: int = 0
+
+
+class Register32:
+    def __init__(self, address: int, definition_list: list[RegisterBitDefinition]):
+        self.__dict__["names"] = [definition.name for definition in definition_list]
+        self.names = [definition.name for definition in definition_list]  # typecheck
+        self.address = address
+        self.definition_list = definition_list
+        # self.names = [definition.name for definition in definition_list]
+
+        # Validate that the definitions are not overlapping
+        for i in range(len(definition_list)):
+            for j in range(i + 1, len(definition_list)):
+                if self._is_overlapping(definition_list[i], definition_list[j]):
+                    raise ValueError("Register definitions are overlapping")
+
+    def _is_overlapping(
+        self, a: RegisterBitDefinition, b: RegisterBitDefinition
+    ) -> bool:
+        if a.offset + a.size <= b.offset:
+            return False
+        if b.offset + b.size <= a.offset:
+            return False
+        return True
+
+    def _get_definition(self, name: str) -> RegisterBitDefinition:
+        for definition in self.definition_list:
+            if definition.name == name:
+                return definition
+        raise ValueError(f"Register definition '{name}' not found")
+
+    def get_definition_list(self) -> list[RegisterBitDefinition]:
+        return self.definition_list
+
+    def get_address(self) -> int:
+        return self.address
+
+    def set_reg_value(self, name: str, value: int):
+        definition = self._get_definition(name)
+        if value > (1 << definition.size) - 1:
+            raise ValueError(
+                f"Value {value} is too large for register definition '{name}'"
+            )
+        definition.value = value
+
+    def get_reg_value(self, name: str) -> int:
+        definition = self._get_definition(name)
+        return definition.value
+
+    def __getattr__(self, attr):
+        if str(attr) in self.names:
+            return self.get_reg_value(str(attr))
+        else:
+            return self.__dict__[attr]
+
+    def __setattr__(self, attr, value):
+        if str(attr) in self.names:
+            self.set_reg_value(str(attr), value)
+        else:
+            self.__dict__[attr] = value
+
+    def set(self, value: int):
+        for definition in self.definition_list:
+            definition.value = (value >> definition.offset) & (
+                (1 << definition.size) - 1
+            )
+
+    def get(self) -> int:
+        value = 0
+        for definition in self.definition_list:
+            value |= definition.value << definition.offset
+        return value
+
+
+class STM32WB55:
+    OPTION_BYTE_BASE = 0x1FFF8000
+    FLASH_BASE = 0x58004000
+    FLASH_KEYR = FLASH_BASE + 0x08
+    FLASH_OPTKEYR = FLASH_BASE + 0x0C
+
+    FLASH_UNLOCK_KEY1 = 0x45670123
+    FLASH_UNLOCK_KEY2 = 0xCDEF89AB
+    FLASH_UNLOCK_OPTKEY1 = 0x08192A3B
+    FLASH_UNLOCK_OPTKEY2 = 0x4C5D6E7F
+
+    FLASH_CR = Register32(
+        FLASH_BASE + 0x14,
+        [
+            RegisterBitDefinition("PG", 0, 1),
+            RegisterBitDefinition("PER", 1, 1),
+            RegisterBitDefinition("MER", 2, 1),
+            RegisterBitDefinition("PNB", 3, 8),
+            RegisterBitDefinition("_", 11, 5),
+            RegisterBitDefinition("STRT", 16, 1),
+            RegisterBitDefinition("OPT_STRT", 17, 1),
+            RegisterBitDefinition("FSTPG", 18, 1),
+            RegisterBitDefinition("_", 19, 5),
+            RegisterBitDefinition("EOPIE", 24, 1),
+            RegisterBitDefinition("ERRIE", 25, 1),
+            RegisterBitDefinition("RD_ERRIE", 26, 1),
+            RegisterBitDefinition("OBL_LAUNCH", 27, 1),
+            RegisterBitDefinition("_", 28, 2),
+            RegisterBitDefinition("OPT_LOCK", 30, 1),
+            RegisterBitDefinition("LOCK", 31, 1),
+        ],
+    )
+
+    FLASH_SR = Register32(
+        FLASH_BASE + 0x10,
+        [
+            RegisterBitDefinition("EOP", 0, 1),
+            RegisterBitDefinition("OP_ERR", 1, 1),
+            RegisterBitDefinition("_", 2, 1),
+            RegisterBitDefinition("PROG_ERR", 3, 1),
+            RegisterBitDefinition("WRP_ERR", 4, 1),
+            RegisterBitDefinition("PGA_ERR", 5, 1),
+            RegisterBitDefinition("SIZE_ERR", 6, 1),
+            RegisterBitDefinition("PGS_ERR", 7, 1),
+            RegisterBitDefinition("MISS_ERR", 8, 1),
+            RegisterBitDefinition("FAST_ERR", 9, 1),
+            RegisterBitDefinition("_", 10, 3),
+            RegisterBitDefinition("OPTNV", 13, 1),
+            RegisterBitDefinition("RD_ERR", 14, 1),
+            RegisterBitDefinition("OPTV_ERR", 15, 1),
+            RegisterBitDefinition("BSY", 16, 1),
+            RegisterBitDefinition("_", 17, 1),
+            RegisterBitDefinition("CFGBSY", 18, 1),
+            RegisterBitDefinition("PESD", 19, 1),
+            RegisterBitDefinition("_", 20, 12),
+        ],
+    )
+
+    FLASH_OPTR = FLASH_BASE + 0x20
+    FLASH_PCROP1ASR = FLASH_BASE + 0x24
+    FLASH_PCROP1AER = FLASH_BASE + 0x28
+    FLASH_WRP1AR = FLASH_BASE + 0x2C
+    FLASH_WRP1BR = FLASH_BASE + 0x30
+    FLASH_PCROP1BSR = FLASH_BASE + 0x34
+    FLASH_PCROP1BER = FLASH_BASE + 0x38
+
+    OPTION_BYTE_MAP_TO_REGS = {
+        0: FLASH_OPTR,
+        1: FLASH_PCROP1ASR,
+        2: FLASH_PCROP1AER,
+        3: FLASH_WRP1AR,
+        4: FLASH_WRP1BR,
+        5: FLASH_PCROP1BSR,
+        6: FLASH_PCROP1BER,
+    }
+
 
 class Main(App):
-    OPTION_BYTE_BASE = 0x1FFF8000
-
     def init(self):
         # Subparsers
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
@@ -202,8 +362,10 @@ class Main(App):
         # OpenOCD
         oocd = OpenOCD(self._get_dap_params())
         oocd.start()
-
         oocd.send_tcl("reset init")
+
+        # Registers
+        stm32 = STM32WB55()
 
         # Generate Option Bytes data
         ob_data = OptionBytesData(self.args.ob_path)
@@ -216,7 +378,7 @@ class Main(App):
         # Read Option Bytes
         ob_read = bytes()
         for i in range(ob_words):
-            addr = self.OPTION_BYTE_BASE + i * 4
+            addr = stm32.OPTION_BYTE_BASE + i * 4
             value = oocd.read_32(addr)
             ob_read += value.to_bytes(4, "little")
 
@@ -235,13 +397,180 @@ class Main(App):
             self.logger.error(f"Compare:   {ob_compare.hex()}")
             return_code = 1
 
+        # Stop OpenOCD
         oocd.send_tcl("reset run")
         oocd.stop()
 
         return return_code
 
+    def flash_unlock(self, oocd: OpenOCD, stm32: STM32WB55):
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        if stm32.FLASH_CR.LOCK == 0:
+            self.logger.debug("Flash is already unlocked")
+            return
+
+        self.logger.debug("Unlocking Flash")
+        oocd.write_32(stm32.FLASH_KEYR, stm32.FLASH_UNLOCK_KEY1)
+        oocd.write_32(stm32.FLASH_KEYR, stm32.FLASH_UNLOCK_KEY2)
+
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+
+        if stm32.FLASH_CR.LOCK == 0:
+            self.logger.debug("Flash unlocked")
+        else:
+            self.logger.error("Flash unlock failed")
+            raise Exception("Flash unlock failed")
+
+    def option_bytes_unlock(self, oocd: OpenOCD, stm32: STM32WB55):
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        if stm32.FLASH_CR.OPT_LOCK == 0:
+            self.logger.debug("Options is already unlocked")
+            return
+
+        self.logger.debug("Unlocking Options")
+        oocd.write_32(stm32.FLASH_OPTKEYR, stm32.FLASH_UNLOCK_OPTKEY1)
+        oocd.write_32(stm32.FLASH_OPTKEYR, stm32.FLASH_UNLOCK_OPTKEY2)
+
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+
+        if stm32.FLASH_CR.OPT_LOCK == 0:
+            self.logger.debug("Options unlocked")
+        else:
+            self.logger.error("Options unlock failed")
+            raise Exception("Options unlock failed")
+
+    def option_bytes_lock(self, oocd: OpenOCD, stm32: STM32WB55):
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        if stm32.FLASH_CR.OPT_LOCK == 1:
+            self.logger.debug("Options is already locked")
+            return
+
+        self.logger.debug("Locking Options")
+        stm32.FLASH_CR.OPT_LOCK = 1
+        oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        if stm32.FLASH_CR.OPT_LOCK == 1:
+            self.logger.debug("Options locked")
+        else:
+            self.logger.error("Options lock failed")
+            raise Exception("Options lock failed")
+
+    def flash_lock(self, oocd: OpenOCD, stm32: STM32WB55):
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        if stm32.FLASH_CR.LOCK == 1:
+            self.logger.debug("Flash is already locked")
+            return
+
+        self.logger.debug("Locking Flash")
+        stm32.FLASH_CR.LOCK = 1
+        oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        if stm32.FLASH_CR.LOCK == 1:
+            self.logger.debug("Flash locked")
+        else:
+            self.logger.error("Flash lock failed")
+            raise Exception("Flash lock failed")
+
+    def _unpack_u32(self, data: bytes, offset: int):
+        return int.from_bytes(data[offset : offset + 4], "little")
+
     def set(self):
-        self.logger.error(f"TODO: Set Option Bytes")
+        self.logger.info(f"Setting Option Bytes")
+
+        # OpenOCD
+        oocd = OpenOCD(self._get_dap_params())
+        oocd.start()
+        oocd.send_tcl("reset init")
+
+        # Registers
+        stm32 = STM32WB55()
+
+        # Generate Option Bytes data
+        ob_data = OptionBytesData(self.args.ob_path)
+        ob_values = ob_data.gen_values().export()
+        ob_reference_bytes = ob_values.reference
+        ob_compare_mask_bytes = ob_values.compare_mask
+        ob_write_mask_bytes = ob_values.write_mask
+        ob_length = len(ob_reference_bytes)
+        ob_words = int(ob_length / 4)
+        ob_dwords = int(ob_length / 8)
+
+        # Unlock Flash and Option Bytes
+        self.flash_unlock(oocd, stm32)
+        self.option_bytes_unlock(oocd, stm32)
+
+        ob_need_to_apply = False
+
+        for i in range(ob_dwords):
+            device_addr = stm32.OPTION_BYTE_BASE + i * 8
+            device_value = oocd.read_32(device_addr)
+            ob_write_mask = self._unpack_u32(ob_write_mask_bytes, i * 8)
+            ob_compare_mask = self._unpack_u32(ob_compare_mask_bytes, i * 8)
+            ob_value_ref = self._unpack_u32(ob_reference_bytes, i * 8)
+            ob_value_masked = device_value & ob_compare_mask
+
+            need_patch = ((ob_value_masked ^ ob_value_ref) & ob_write_mask) != 0
+            if need_patch:
+                ob_need_to_apply = True
+
+                self.logger.info(
+                    f"Need to patch: {device_addr:08X}: {device_value:08X} = {ob_value_masked:08X}"
+                )
+
+                device_reg_addr = stm32.OPTION_BYTE_MAP_TO_REGS.get(i, None)
+                if device_reg_addr is None:
+                    raise Exception(f"Option Byte {i} is not mapped to a register")
+
+                ob_value = (device_value & (~ob_write_mask)) | (
+                    ob_value_ref & ob_write_mask
+                )
+
+                self.logger.info(f"Writing {ob_value:08X} to {device_reg_addr:08X}")
+                oocd.write_32(device_reg_addr, ob_value)
+
+        # Errata 2.2.9: Option Bytes programming sequence
+        stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
+        stm32.FLASH_SR.OP_ERR = 1
+        stm32.FLASH_SR.PROG_ERR = 1
+        stm32.FLASH_SR.WRP_ERR = 1
+        stm32.FLASH_SR.PGA_ERR = 1
+        stm32.FLASH_SR.SIZE_ERR = 1
+        stm32.FLASH_SR.PGS_ERR = 1
+        stm32.FLASH_SR.MISS_ERR = 1
+        stm32.FLASH_SR.FAST_ERR = 1
+        stm32.FLASH_SR.RD_ERR = 1
+        stm32.FLASH_SR.OPTV_ERR = 1
+        oocd.write_32(stm32.FLASH_SR.get_address(), stm32.FLASH_SR.get())
+
+        if ob_need_to_apply:
+            self.logger.debug(f"Applying Option Bytes")
+
+            stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+            stm32.FLASH_CR.OPT_STRT = 1
+            oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+
+            # Wait for Option Bytes to be applied
+            # TODO: timeout
+            while True:
+                stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
+                if stm32.FLASH_SR.BSY == 0:
+                    break
+
+            stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
+
+        # Load Option Bytes
+        # That will also lock the Option Bytes and the Flash
+        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        stm32.FLASH_CR.OBL_LAUNCH = 1
+        oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+
+        # Stop OpenOCD
+        oocd.send_tcl("reset run")
+        oocd.stop()
+
+        return 0
 
 
 if __name__ == "__main__":
