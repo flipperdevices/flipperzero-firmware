@@ -1,6 +1,10 @@
 #include "mifare_common.h"
+#include "furi_hal_nfc.h"
 
-MifareType mifare_common_get_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+MifareType mifare_common_get_type(FuriHalNfcADevData* data) {
+    uint8_t ATQA0 = data->atqa[0];
+    uint8_t ATQA1 = data->atqa[1];
+    uint8_t SAK = data->sak;
     MifareType type = MifareTypeUnknown;
 
     if((ATQA0 == 0x44) && (ATQA1 == 0x00) && (SAK == 0x00)) {

@@ -351,7 +351,10 @@ static bool mf_classic_is_allowed_access(
     }
 }
 
-bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+bool mf_classic_check_card_type(FuriHalNfcADevData* data) {
+    uint8_t ATQA0 = data->atqa[0];
+    uint8_t ATQA1 = data->atqa[1];
+    uint8_t SAK = data->sak;
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return true;
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
@@ -364,7 +367,10 @@ bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     }
 }
 
-MfClassicType mf_classic_get_classic_type(int8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+MfClassicType mf_classic_get_classic_type(FuriHalNfcADevData* data) {
+    uint8_t ATQA0 = data->atqa[0];
+    uint8_t ATQA1 = data->atqa[1];
+    uint8_t SAK = data->sak;
     if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
         return MfClassicType1k;
     } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
