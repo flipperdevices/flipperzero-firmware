@@ -18,13 +18,13 @@ typedef enum {
 
 //Типы возвращаемых данных
 typedef enum {
-    UT_OK, //Всё хорошо, опрос успешен
-    UT_TIMEOUT, //Датчик не отозвался
-    UT_EARLYPOOL, //Опрос раньше положенной задержки
-    UT_BADCRC, //Неверная контрольная сумма
-    UT_ERROR, //Прочие ошибки
-    UT_POLLING, //В датчике происходит преобразование
-    UT_INACTIVE, //Датчик на редактировании или удалён
+    UT_SENSORSTATUS_OK, //Всё хорошо, опрос успешен
+    UT_SENSORSTATUS_TIMEOUT, //Датчик не отозвался
+    UT_SENSORSTATUS_EARLYPOOL, //Опрос раньше положенной задержки
+    UT_SENSORSTATUS_BADCRC, //Неверная контрольная сумма
+    UT_SENSORSTATUS_ERROR, //Прочие ошибки
+    UT_SENSORSTATUS_POLLING, //В датчике происходит преобразование
+    UT_SENSORSTATUS_INACTIVE, //Датчик на редактировании или удалён
 
 } UnitempStatus;
 

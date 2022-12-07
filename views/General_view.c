@@ -38,7 +38,7 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
     canvas_draw_icon(
         canvas, x + 3, y + 3, (app->settings.unit == CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
-    if((int16_t)sensor->temp == -128 || sensor->status == UT_TIMEOUT) {
+    if((int16_t)sensor->temp == -128 || sensor->status == UT_SENSORSTATUS_TIMEOUT) {
         snprintf(app->buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, x + 27, y + 10, AlignCenter, AlignCenter, app->buff);
@@ -77,7 +77,7 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
     //Рисование иконки
     canvas_draw_icon(canvas, pos[0] + 3, pos[1] + 2, &I_hum_9x15);
 
-    if((int8_t)sensor->hum == -128 || sensor->status == UT_TIMEOUT) {
+    if((int8_t)sensor->hum == -128 || sensor->status == UT_SENSORSTATUS_TIMEOUT) {
         snprintf(app->buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(
@@ -198,7 +198,8 @@ static void _draw_view_sensorsList(Canvas* canvas) {
 }
 
 static void _draw_carousel_values(Canvas* canvas) {
-    if(unitemp_sensor_getActive(generalview_sensor_index)->status == UT_TIMEOUT) {
+    UnitempStatus sensor_status = unitemp_sensor_getActive(generalview_sensor_index)->status;
+    if(sensor_status == UT_SENSORSTATUS_ERROR || sensor_status == UT_SENSORSTATUS_TIMEOUT) {
         const Icon* frames[] = {
             &I_flipper_happy_60x38, &I_flipper_happy_2_60x38, &I_flipper_sad_60x38};
         canvas_draw_icon(canvas, 34, 23, frames[furi_get_tick() % 2250 / 750]);
@@ -321,7 +322,8 @@ static void _draw_carousel_info(Canvas* canvas) {
     if(unitemp_sensor_getActive(generalview_sensor_index)->type->interface == &I2C) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 10, 35, "I2C addr:");
-
+        canvas_draw_str(canvas, 10, 46, "SDA pin:");
+        canvas_draw_str(canvas, 10, 58, "SCL pin:");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(
             canvas, 41, 23, unitemp_sensor_getActive(generalview_sensor_index)->type->typename);
@@ -332,6 +334,8 @@ static void _draw_carousel_info(Canvas* canvas) {
             ((I2CSensor*)unitemp_sensor_getActive(generalview_sensor_index)->instance)
                 ->currentI2CAdr);
         canvas_draw_str(canvas, 57, 35, app->buff);
+        canvas_draw_str(canvas, 54, 46, "16 (C1)");
+        canvas_draw_str(canvas, 54, 58, "15 (C0)");
     }
 }
 static void _draw_view_sensorsCarousel(Canvas* canvas) {
@@ -447,7 +451,7 @@ static bool _input_callback(InputEvent* event, void* context) {
         if(current_view == G_CAROUSEL_VIEW) {
             if(++generalview_sensor_index >= unitemp_sensors_getActiveCount()) {
                 generalview_sensor_index = 0;
-                current_view = G_LIST_VIEW;
+                if(carousel_info_selector == CAROUSEL_VALUES) current_view = G_LIST_VIEW;
             }
 
             return true;
@@ -469,7 +473,7 @@ static bool _input_callback(InputEvent* event, void* context) {
         if(current_view == G_CAROUSEL_VIEW) {
             if(--generalview_sensor_index >= unitemp_sensors_getActiveCount()) {
                 generalview_sensor_index = unitemp_sensors_getActiveCount() - 1;
-                current_view = G_LIST_VIEW;
+                if(carousel_info_selector == CAROUSEL_VALUES) current_view = G_LIST_VIEW;
             }
 
             return true;

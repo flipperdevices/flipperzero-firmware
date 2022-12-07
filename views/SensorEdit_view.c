@@ -118,7 +118,7 @@ static void _onewire_scan(void) {
  */
 static uint32_t _exit_callback(void* context) {
     UNUSED(context);
-    editable_sensor->status = UT_TIMEOUT;
+    editable_sensor->status = UT_SENSORSTATUS_TIMEOUT;
     if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensor_free(editable_sensor);
     unitemp_sensors_reload();
     //Возврат предыдущий вид
@@ -148,7 +148,7 @@ static void _enter_callback(void* context, uint32_t index) {
             unitemp_gpio_unlock(initial_gpio);
             initial_gpio = NULL;
         }
-        editable_sensor->status = UT_TIMEOUT;
+        editable_sensor->status = UT_SENSORSTATUS_TIMEOUT;
         if(!unitemp_sensor_isContains(editable_sensor)) unitemp_sensors_add(editable_sensor);
         unitemp_sensors_save();
         unitemp_sensors_reload();
@@ -237,7 +237,7 @@ void unitemp_SensorEdit_alloc(void) {
 void unitemp_SensorEdit_switch(Sensor* sensor) {
     editable_sensor = sensor;
 
-    editable_sensor->status = UT_INACTIVE;
+    editable_sensor->status = UT_SENSORSTATUS_INACTIVE;
 
     //Сброс всех элементов меню
     variable_item_list_reset(variable_item_list);

@@ -209,22 +209,22 @@ UnitempStatus unitemp_BMP280_update(Sensor* sensor) {
     unitemp_i2c_readRegArray(i2c_sensor, 0xF4, 2, buff);
     if(buff[0] == 0) {
         FURI_LOG_W(APP_NAME, "Sensor %s is not initialized!", sensor->name);
-        return UT_ERROR;
+        return UT_SENSORSTATUS_ERROR;
     }
 
     while(bmp280_isMeasuring(sensor)) {
         if(furi_get_tick() - t > 100) {
-            return UT_TIMEOUT;
+            return UT_SENSORSTATUS_TIMEOUT;
         }
     }
 
-    if(!unitemp_i2c_readRegArray(i2c_sensor, 0xFA, 3, buff)) return UT_TIMEOUT;
+    if(!unitemp_i2c_readRegArray(i2c_sensor, 0xFA, 3, buff)) return UT_SENSORSTATUS_TIMEOUT;
     int32_t adc_T = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
-    if(!unitemp_i2c_readRegArray(i2c_sensor, 0xF7, 3, buff)) return UT_TIMEOUT;
+    if(!unitemp_i2c_readRegArray(i2c_sensor, 0xF7, 3, buff)) return UT_SENSORSTATUS_TIMEOUT;
     int32_t adc_P = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
     sensor->temp = bmp280_compensate_T_double(i2c_sensor, adc_T);
     sensor->pressure = bmp280_compensate_P_int(i2c_sensor, adc_P);
-    return UT_OK;
+    return UT_SENSORSTATUS_OK;
 }
 
 bool unitemp_BMP280_free(Sensor* sensor) {

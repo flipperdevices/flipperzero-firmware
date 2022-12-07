@@ -62,7 +62,8 @@ UnitempStatus unitemp_LM75_update(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     uint8_t buff[2];
-    if(!unitemp_i2c_readRegArray(i2c_sensor, LM75_REG_TEMP, 2, buff)) return UT_TIMEOUT;
+    if(!unitemp_i2c_readRegArray(i2c_sensor, LM75_REG_TEMP, 2, buff))
+        return UT_SENSORSTATUS_TIMEOUT;
     int16_t raw = ((((uint16_t)buff[0] << 8) | buff[1]) >> 7);
 
     if(FURI_BIT(raw, 8)) {
@@ -71,5 +72,5 @@ UnitempStatus unitemp_LM75_update(Sensor* sensor) {
     }
     sensor->temp = (float)raw / 2.0f;
 
-    return UT_OK;
+    return UT_SENSORSTATUS_OK;
 }

@@ -394,10 +394,10 @@ bool unitemp_onewire_sensor_deinit(Sensor* sensor) {
 UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
     OneWireSensor* instance = sensor->instance;
     uint8_t buff[9] = {0};
-    if(sensor->status != UT_POLLING) {
+    if(sensor->status != UT_SENSORSTATUS_POLLING) {
         //Если датчик в прошлый раз не отозвался, проверка его наличия на шине
-        if(sensor->status == UT_TIMEOUT || sensor->status == UT_BADCRC) {
-            if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
+        if(sensor->status == UT_SENSORSTATUS_TIMEOUT || sensor->status == UT_SENSORSTATUS_BADCRC) {
+            if(!unitemp_onewire_bus_start(instance->bus)) return UT_SENSORSTATUS_TIMEOUT;
             unitemp_onewire_bus_select_sensor(instance);
             unitemp_onewire_bus_send_byte(instance->bus, 0xBE); // Read Scratch-pad
             unitemp_onewire_bus_read_byteArray(instance->bus, buff, 9);
@@ -406,11 +406,11 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
                 FURI_LOG_D(APP_NAME, "Sensor %s is not found", sensor->name);
 #endif
 
-                return UT_TIMEOUT;
+                return UT_SENSORSTATUS_TIMEOUT;
             }
         }
 
-        if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
+        if(!unitemp_onewire_bus_start(instance->bus)) return UT_SENSORSTATUS_TIMEOUT;
         unitemp_onewire_bus_select_sensor(instance);
         unitemp_onewire_bus_send_byte(instance->bus, 0x44); // convert t
         if(instance->bus->powerMode == PWR_PASSIVE) {
@@ -418,14 +418,14 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
             furi_hal_gpio_init(
                 instance->bus->gpio->pin, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
         }
-        return UT_POLLING;
+        return UT_SENSORSTATUS_POLLING;
     } else {
         if(instance->bus->powerMode == PWR_PASSIVE) {
             furi_hal_gpio_write(instance->bus->gpio->pin, true);
             furi_hal_gpio_init(
                 instance->bus->gpio->pin, GpioModeOutputOpenDrain, GpioPullUp, GpioSpeedVeryHigh);
         }
-        if(!unitemp_onewire_bus_start(instance->bus)) return UT_TIMEOUT;
+        if(!unitemp_onewire_bus_start(instance->bus)) return UT_SENSORSTATUS_TIMEOUT;
         unitemp_onewire_bus_select_sensor(instance);
         unitemp_onewire_bus_send_byte(instance->bus, 0xBE); // Read Scratch-pad
         unitemp_onewire_bus_read_byteArray(instance->bus, buff, 9);
@@ -434,7 +434,7 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
             FURI_LOG_D(APP_NAME, "Failed CRC check: %s", sensor->name);
 #endif
 
-            return UT_BADCRC;
+            return UT_SENSORSTATUS_BADCRC;
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
         if(instance->familyCode == FC_DS18S20) {
@@ -444,7 +444,7 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
         }
     }
 
-    return UT_OK;
+    return UT_SENSORSTATUS_OK;
 }
 
 bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2) {

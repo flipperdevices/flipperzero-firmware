@@ -71,7 +71,7 @@ bool unitemp_I2C_sensor_free(Sensor* sensor) {
 }
 
 UnitempStatus unitemp_I2C_sensor_update(Sensor* sensor) {
-    if(sensor->status != UT_OK) {
+    if(sensor->status != UT_SENSORSTATUS_OK) {
         sensor->type->initializer(sensor);
     }
     return sensor->type->updater(sensor);

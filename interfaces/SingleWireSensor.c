@@ -155,7 +155,7 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Возврат признака отсутствующего датчика
-            return UT_TIMEOUT;
+            return UT_SENSORSTATUS_TIMEOUT;
         }
     }
     timeout = 0;
@@ -167,7 +167,7 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Возврат признака отсутствующего датчика
-            return UT_TIMEOUT;
+            return UT_SENSORSTATUS_TIMEOUT;
         }
     }
 
@@ -178,7 +178,7 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Возврат признака отсутствующего датчика
-            return UT_TIMEOUT;
+            return UT_SENSORSTATUS_TIMEOUT;
         }
     }
     timeout = 0;
@@ -190,7 +190,7 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
             //Включение прерываний
             __enable_irq();
             //Возврат признака отсутствующего датчика
-            return UT_TIMEOUT;
+            return UT_SENSORSTATUS_TIMEOUT;
         }
     }
 
@@ -213,7 +213,7 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
     //Проверка контрольной суммы
     if((uint8_t)(data[0] + data[1] + data[2] + data[3]) != data[4]) {
         //Если контрольная сумма не совпала, возврат ошибки
-        return UT_BADCRC;
+        return UT_SENSORSTATUS_BADCRC;
     }
 
     /* Преобразование данных в явный вид */
@@ -249,5 +249,5 @@ UnitempStatus unitemp_singlewire_update(Sensor* sensor) {
         }
     }
     //Возврат признака успешного опроса
-    return UT_OK;
+    return UT_SENSORSTATUS_OK;
 }

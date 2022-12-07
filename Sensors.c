@@ -207,7 +207,7 @@ const GPIO*
 void unitemp_sensor_delete(Sensor* sensor) {
     for(uint8_t i = 0; i < app->sensors_count; i++) {
         if(app->sensors[i] == sensor) {
-            app->sensors[i]->status = UT_INACTIVE;
+            app->sensors[i]->status = UT_SENSORSTATUS_INACTIVE;
             unitemp_sensors_save();
             unitemp_sensors_reload();
             return;
@@ -218,7 +218,7 @@ void unitemp_sensor_delete(Sensor* sensor) {
 Sensor* unitemp_sensor_getActive(uint8_t index) {
     uint8_t aviable_index = 0;
     for(uint8_t i = 0; i < app->sensors_count; i++) {
-        if(app->sensors[i]->status != UT_INACTIVE) {
+        if(app->sensors[i]->status != UT_SENSORSTATUS_INACTIVE) {
             if(aviable_index == index) {
                 return app->sensors[i];
             } else {
@@ -238,7 +238,7 @@ uint8_t unitemp_sensors_getActiveCount(void) {
     if(app->sensors == NULL) return 0;
     uint8_t counter = 0;
     for(uint8_t i = 0; i < unitemp_sensors_getCount(); i++) {
-        if(app->sensors[i]->status != UT_INACTIVE) counter++;
+        if(app->sensors[i]->status != UT_SENSORSTATUS_INACTIVE) counter++;
     }
     return counter;
 }
@@ -459,7 +459,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
     //Тип датчика
     sensor->type = type;
     //Статус датчика по умолчанию - ошибка
-    sensor->status = UT_ERROR;
+    sensor->status = UT_SENSORSTATUS_ERROR;
     //Время последнего опроса
     sensor->lastPollingTime =
         furi_get_tick() - 10000; //чтобы первый опрос произошёл как можно раньше
@@ -570,15 +570,15 @@ bool unitemp_sensors_deInit(void) {
 }
 
 UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
-    if(sensor == NULL) return UT_ERROR;
+    if(sensor == NULL) return UT_SENSORSTATUS_ERROR;
 
     //Проверка на допустимость опроса датчика
     if(furi_get_tick() - sensor->lastPollingTime < sensor->type->pollingInterval) {
         //Возврат ошибки если последний опрос датчика был неудачным
-        if(sensor->status == UT_TIMEOUT) {
-            return UT_TIMEOUT;
+        if(sensor->status == UT_SENSORSTATUS_TIMEOUT) {
+            return UT_SENSORSTATUS_TIMEOUT;
         }
-        return UT_EARLYPOOL;
+        return UT_SENSORSTATUS_EARLYPOOL;
     }
 
     sensor->lastPollingTime = furi_get_tick();
@@ -590,13 +590,13 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
     sensor->status = sensor->type->interface->updater(sensor);
 
 #ifdef UNITEMP_DEBUG
-    if(sensor->status != UT_OK && sensor->status != UT_POLLING)
+    if(sensor->status != UT_SENSORSTATUS_OK && sensor->status != UT_SENSORSTATUS_POLLING)
         FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
 #endif
 
-    if(app->settings.unit == FAHRENHEIT && sensor->status == UT_OK)
+    if(app->settings.unit == FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK)
         uintemp_celsiumToFarengate(sensor);
-    if(sensor->status == UT_OK) {
+    if(sensor->status == UT_SENSORSTATUS_OK) {
         unitemp_pascalToMmHg(sensor);
     }
     return sensor->status;
