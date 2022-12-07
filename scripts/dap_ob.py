@@ -30,10 +30,10 @@ class OpenOCD:
         self.tcl_port = 6666
 
         # Port
-        if "port_base" in config and config["port_base"]:
-            self.gdb_port = config["port_base"]
-            self.tcl_port = config["port_base"] + 1
-            self.telnet_port = config["port_base"] + 2
+        if port_base := config.get("port_base", None):
+            self.gdb_port = port_base
+            self.tcl_port = port_base + 1
+            self.telnet_port = port_base + 2
 
         self._add_command(f"gdb_port {self.gdb_port}")
         self._add_command(f"tcl_port {self.tcl_port}")
@@ -44,8 +44,8 @@ class OpenOCD:
         self._add_file("target/stm32wbx.cfg")
 
         # DAP settings
-        if "serial" in config and config["serial"]:
-            self._add_command(f"cmsis_dap_serial {config['serial']}")
+        if serial := config.get("serial", None):
+            self._add_command(f"cmsis_dap_serial {serial}")
 
         # Other params
         if "params" in config:
@@ -183,7 +183,6 @@ class Register32:
         self.names = [definition.name for definition in definition_list]  # typecheck
         self.address = address
         self.definition_list = definition_list
-        # self.names = [definition.name for definition in definition_list]
 
         # Validate that the definitions are not overlapping
         for i in range(len(definition_list)):
@@ -530,7 +529,8 @@ class Main(App):
                 self.logger.info(f"Writing {ob_value:08X} to {device_reg_addr:08X}")
                 oocd.write_32(device_reg_addr, ob_value)
 
-        # Errata 2.2.9: Option Bytes programming sequence
+        # Errata 2.2.9: Flash OPTVERR flag is always set after system reset
+        self.logger.debug(f"Errata 2.2.9 workaround")
         stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
         stm32.FLASH_SR.OP_ERR = 1
         stm32.FLASH_SR.PROG_ERR = 1
