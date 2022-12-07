@@ -34,8 +34,10 @@ static void _enter_callback(void* context, uint32_t index) {
         unitemp_Settings_switch();
     }
     if(index == 2) {
-        //Help
         unitemp_widget_help_switch();
+    }
+    if(index == 3) {
+        unitemp_widget_about_switch();
     }
 }
 

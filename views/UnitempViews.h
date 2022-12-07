@@ -72,4 +72,6 @@ void unitemp_widgets_free(void);
 void unitemp_widget_delete_switch(Sensor* sensor);
 /* Помощь */
 void unitemp_widget_help_switch(void);
+/* О приложении */
+void unitemp_widget_about_switch(void);
 #endif

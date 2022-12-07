@@ -157,3 +157,31 @@ void unitemp_widget_help_switch(void) {
     view_set_previous_callback(widget_get_view(app->widget), _help_exit_callback);
     view_dispatcher_switch_to_view(app->view_dispatcher, UnitempViewWidget);
 }
+
+/* ========================== О приложении ========================== */
+
+/**
+ * @brief Переключение в виджет о приложении
+ */
+void unitemp_widget_about_switch(void) {
+    //Очистка виджета
+    widget_reset(app->widget);
+
+    widget_add_frame_element(app->widget, 0, 0, 128, 63, 7);
+    widget_add_frame_element(app->widget, 0, 0, 128, 64, 7);
+
+    snprintf(app->buff, BUFF_SIZE, "#Unitemp %s#", UNITEMP_APP_VER);
+    widget_add_text_box_element(
+        app->widget, 0, 4, 128, 12, AlignCenter, AlignCenter, app->buff, false);
+
+    widget_add_text_scroll_element(
+        app->widget,
+        4,
+        16,
+        121,
+        44,
+        "Universal plugin for viewing the values of temperature\nsensors\n\e#Author: Quenon\ngithub.com/quen0n\n\e#Designer: Svaarich\ngithub.com/Svaarich\n\e#Issues & suggestions\ntiny.one/unitemp");
+
+    view_set_previous_callback(widget_get_view(app->widget), _help_exit_callback);
+    view_dispatcher_switch_to_view(app->view_dispatcher, UnitempViewWidget);
+}

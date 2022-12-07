@@ -58,7 +58,7 @@ static void _enter_callback(void* context, uint32_t index) {
         unitemp_widget_help_switch();
         break;
     case 6:
-        //About
+        unitemp_widget_about_switch();
         break;
     }
 }
