@@ -23,6 +23,8 @@ class Register32:
                 if self._is_overlapping(definition_list[i], definition_list[j]):
                     raise ValueError("Register definitions are overlapping")
 
+        self.freezed = True
+
     def _is_overlapping(
         self, a: RegisterBitDefinition, b: RegisterBitDefinition
     ) -> bool:
@@ -66,7 +68,10 @@ class Register32:
         if str(attr) in self.names:
             self.set_reg_value(str(attr), value)
         else:
-            self.__dict__[attr] = value
+            if attr in self.__dict__ or "freezed" not in self.__dict__:
+                self.__dict__[attr] = value
+            else:
+                raise AttributeError(f"Attribute '{attr}' not found")
 
     def __dir__(self):
         return self.names
