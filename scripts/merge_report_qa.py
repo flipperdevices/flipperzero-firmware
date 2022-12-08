@@ -14,7 +14,7 @@ def checkCommitMessage(msg):
     return False
 
 
-def reportSlack(commit_hash, slack_token, slack_channel):
+def reportSlack(commit_hash, slack_token, slack_channel, message):
     client = WebClient(token=slack_token)
     try:
         client.chat_postMessage(channel="#" + slack_channel, text=message)
