@@ -305,7 +305,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.mutliboardS3.bin
+          asset_path: ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.multiboardS3.bin
           asset_name: esp32_marauder.mutliboardS3.bin
           asset_content_type: application/bin
           
