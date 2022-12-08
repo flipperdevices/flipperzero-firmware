@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - dev
-  pull_request: # temp!
-
 jobs:
   merge_report:
     runs-on: [self-hosted,FlipperZeroShell]
