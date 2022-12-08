@@ -2,9 +2,10 @@
 
 An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Preliminary_Product_Specification_v1_0.pdf) driver for the [Flipper Zero](https://flipperzero.one/) device. The NRF24 is a popular line of 2.4GHz radio transceivers from Nordic Semiconductors.<br>
 NRF24L01+ Enhanced ShockBurst packet decoder example using Python: [nrf24_packet_decoder.py](https://raw.githubusercontent.com/vad7/nrf24scan/master/nrf24_packet_decoder.py)<br>
-_____________________________________________________________________________________________________
 <br>
-Flipper Zero FAP file: [Nrf24_Scanner.fap]<br>
+Flipper Zero FAP file: [Nrf24_Scanner.fap](https://raw.githubusercontent.com/vad7/nrf24scan/master/Nrf24_Scanner.fap)
+<br><br>
+___________________________________________________________________________
 <br>
 <b>Приложение для Flipper Zero, читающее эфир на радиомодулях nRF24L01.</b><br>
 Выбор пукта меню - стрелки вверх/вниз, стрелки влево/вправо либо изменют настройки либо управляют видом списка, кнопка ОК либо выбирает режим (короткое нажатие), либо выполняет дополнительное действие (длительное нажатие).<br><br>
@@ -43,7 +44,7 @@ OK - отправка пакета<br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-5.png">
 <br>
 <br>
-_____________________________________________________________________________________________
+_________________________________________________________________________________
 <br>
 <br>
 Settings file (default addr.txt) format:<br>
