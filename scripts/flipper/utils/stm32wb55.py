@@ -225,13 +225,10 @@ class STM32WB55:
         self.FLASH_CR.store(oocd)
 
         # Wait for Option Bytes to be applied
-        # TODO: timeout
-        while True:
-            self.FLASH_SR.load(oocd)
-            if self.FLASH_SR.BSY == 0:
-                break
+        self.flash_wait_for_operation(oocd)
 
     def option_bytes_load(self, oocd: OpenOCD):
+        self.logger.debug(f"Loading Option Bytes")
         self.FLASH_CR.load(oocd)
         self.FLASH_CR.OBL_LAUNCH = 1
         self.FLASH_CR.store(oocd)
@@ -243,3 +240,113 @@ class STM32WB55:
             raise Exception(f"Option Byte {id} is not mapped to a register")
 
         return device_reg_addr
+
+    def flash_wait_for_operation(self, oocd: OpenOCD):
+        # Wait for flash operation to complete
+        # TODO: timeout
+        while True:
+            self.FLASH_SR.load(oocd)
+            if self.FLASH_SR.BSY == 0:
+                break
+
+    def flash_dump_status_register(self, oocd: OpenOCD):
+        self.FLASH_SR.load(oocd)
+        self.logger.info(f"FLASH_SR: {self.FLASH_SR.get():08x}")
+        if self.FLASH_SR.EOP:
+            self.logger.info("    End of operation")
+        if self.FLASH_SR.OP_ERR:
+            self.logger.error("    Operation error")
+        if self.FLASH_SR.PROG_ERR:
+            self.logger.error("    Programming error")
+        if self.FLASH_SR.WRP_ERR:
+            self.logger.error("    Write protection error")
+        if self.FLASH_SR.PGA_ERR:
+            self.logger.error("    Programming alignment error")
+        if self.FLASH_SR.SIZE_ERR:
+            self.logger.error("    Size error")
+        if self.FLASH_SR.PGS_ERR:
+            self.logger.error("    Programming sequence error")
+        if self.FLASH_SR.MISS_ERR:
+            self.logger.error("    Fast programming data miss error")
+        if self.FLASH_SR.FAST_ERR:
+            self.logger.error("    Fast programming error")
+        if self.FLASH_SR.OPTNV:
+            self.logger.info("    User option OPTVAL indication")
+        if self.FLASH_SR.RD_ERR:
+            self.logger.info("    PCROP read error")
+        if self.FLASH_SR.OPTV_ERR:
+            self.logger.info("    Option and Engineering bits loading validity error")
+        if self.FLASH_SR.BSY:
+            self.logger.info("    Busy")
+        if self.FLASH_SR.CFGBSY:
+            self.logger.info("    Programming or erase configuration busy")
+        if self.FLASH_SR.PESD:
+            self.logger.info("    Programming / erase operation suspended.")
+
+    def write_flash(self, oocd: OpenOCD, address: int, word_1: int, word_2: int):
+        self.logger.debug(f"Writing flash at address {address:08x}")
+
+        if address % 8 != 0:
+            self.logger.error("Address must be aligned to 8 bytes")
+            raise Exception("Address must be aligned to 8 bytes")
+
+        if word_1 == oocd.read_32(address) and word_2 == oocd.read_32(address + 4):
+            self.logger.info("Data is already programmed")
+            return
+
+        self.flash_unlock(oocd)
+
+        # Check that no flash main memory operation is ongoing by checking the BSY bit
+        self.FLASH_SR.load(oocd)
+        if self.FLASH_SR.BSY:
+            self.logger.error("Flash is busy")
+            self.flash_dump_status_register(oocd)
+            raise Exception("Flash is busy")
+
+        # Enable end of operation interrupts and error interrupts
+        self.FLASH_CR.load(oocd)
+        self.FLASH_CR.EOPIE = 1
+        self.FLASH_CR.ERRIE = 1
+        self.FLASH_CR.store(oocd)
+
+        # Check that flash memory program and erase operations are allowed
+        if self.FLASH_SR.PESD:
+            self.logger.error("Flash operations are not allowed")
+            self.flash_dump_status_register(oocd)
+            raise Exception("Flash operations are not allowed")
+
+        # Check and clear all error programming flags due to a previous programming.
+        self.clear_flash_errors(oocd)
+
+        # Set the PG bit in the Flash memory control register (FLASH_CR)
+        self.FLASH_CR.load(oocd)
+        self.FLASH_CR.PG = 1
+        self.FLASH_CR.store(oocd)
+
+        # Perform the data write operation at the desired memory address, only double word (64 bits) can be programmed.
+        # Write the first word
+        oocd.send_tcl(f"mww 0x{address:08x} 0x{word_1:08x}")
+        # Write the second word
+        oocd.send_tcl(f"mww 0x{(address + 4):08x} 0x{word_2:08x}")
+
+        # Wait for the BSY bit to be cleared
+        self.flash_wait_for_operation(oocd)
+
+        # Check that EOP flag is set in the FLASH_SR register
+        self.FLASH_SR.load(oocd)
+        if not self.FLASH_SR.EOP:
+            self.logger.error("Flash operation failed")
+            self.flash_dump_status_register(oocd)
+            raise Exception("Flash operation failed")
+
+        # Clear the EOP flag
+        self.FLASH_SR.load(oocd)
+        self.FLASH_SR.EOP = 1
+        self.FLASH_SR.store(oocd)
+
+        # Clear the PG bit in the FLASH_CR register
+        self.FLASH_CR.load(oocd)
+        self.FLASH_CR.PG = 0
+        self.FLASH_CR.store(oocd)
+
+        self.flash_lock(oocd)
