@@ -487,9 +487,6 @@ void CommandLine::runCommand(String input) {
           return;
         }
         wifi_scan_obj.currentScanMode = OTA_UPDATE;
-        #ifdef HAS_SCREEN
-          changeMenu(&failedUpdateMenu);
-        #endif
         sd_obj.runUpdate();
       }
     }
