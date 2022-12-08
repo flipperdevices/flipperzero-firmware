@@ -1,0 +1,35 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model 503398-1892
+#/269057/987070/2.49/10/4/Connector
+DEF 503398-1892 J 0 30 Y Y 1 F N
+F0 "J" 1550 300 50 H V L CNN
+F1 "503398-1892" 1550 200 50 H V L CNN
+F2 "503398-1892" 1550 100 50 H I L CNN
+F3 "http://www.molex.com/webdocs/datasheets/pdf/en-us//5033981892_MEMORY_CARD_SOCKET.pdf" 1550 0 50 H I L CNN
+F4 "MicroSD SMT Push-Push 1.28mm height MicroSD SMT Push-Push 1.28mm height" 1550 -100 50 H I L CNN "Description"
+F5 "" 1550 -200 50 H I L CNN "Height"
+F6 "Molex" 1550 -300 50 H I L CNN "Manufacturer_Name"
+F7 "503398-1892" 1550 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "538-503398-1892" 1550 -500 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/Molex/503398-1892?qs=b0v8CoHHvSMxV%252BW12iKaSg%3D%3D" 1550 -600 50 H I L CNN "Mouser Price/Stock"
+F10 "" 1550 -700 50 H I L CNN "Arrow Part Number"
+F11 "" 1550 -800 50 H I L CNN "Arrow Price/Stock"
+F12 "" 1550 -900 50 H I L CNN "Mouser Testing Part Number"
+F13 "" 1550 -1000 50 H I L CNN "Mouser Testing Price/Stock"
+DRAW
+X DAT2 1 0 0 200 R 50 50 0 0 P
+X CD/DAT3 2 0 -100 200 R 50 50 0 0 P
+X CMD 3 0 -200 200 R 50 50 0 0 P
+X VDD 4 0 -300 200 R 50 50 0 0 P
+X CLK 5 0 -400 200 R 50 50 0 0 P
+X VSS 6 1700 0 200 L 50 50 0 0 P
+X DAT0 7 1700 -100 200 L 50 50 0 0 P
+X DAT1 8 1700 -200 200 L 50 50 0 0 P
+X DETECT_LEVER 9 1700 -300 200 L 50 50 0 0 P
+X DETECT_SWITCH 10 1700 -400 200 L 50 50 0 0 P
+P 5 0 1 6 200 100 1500 100 1500 -500 200 -500 200 100 N
+ENDDRAW
+ENDDEF
+#
+#End Library

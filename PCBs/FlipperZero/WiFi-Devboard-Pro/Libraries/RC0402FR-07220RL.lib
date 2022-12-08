@@ -1,0 +1,27 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model RC0402FR-07220RL
+#/349197/987070/2.49/2/5/Resistor
+DEF RC0402FR-07220RL R 0 30 Y Y 1 F N
+F0 "R" 550 250 50 H V L CNN
+F1 "RC0402FR-07220RL" 550 150 50 H V L CNN
+F2 "RESC1005X40N" 550 50 50 H I L CNN
+F3 "https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf" 550 -50 50 H I L CNN
+F4 "YAGEO (PHYCOMP) - RC0402FR-07220RL - RES, THICK FILM, 220R, 1%, 0.063W, 0402" 550 -150 50 H I L CNN "Description"
+F5 "0.4" 550 -250 50 H I L CNN "Height"
+F6 "KEMET" 550 -350 50 H I L CNN "Manufacturer_Name"
+F7 "RC0402FR-07220RL" 550 -450 50 H I L CNN "Manufacturer_Part_Number"
+F8 "603-RC0402FR-07220RL" 550 -550 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07220RL?qs=UOUeRUa%252B8Wkw9iNOZEwgHw%3D%3D" 550 -650 50 H I L CNN "Mouser Price/Stock"
+F10 "RC0402FR-07220RL" 550 -750 50 H I L CNN "Arrow Part Number"
+F11 "https://www.arrow.com/en/products/rc0402fr-07220rl/yageo?region=nac" 550 -850 50 H I L CNN "Arrow Price/Stock"
+F12 "" 550 -950 50 H I L CNN "Mouser Testing Part Number"
+F13 "" 550 -1050 50 H I L CNN "Mouser Testing Price/Stock"
+DRAW
+X ~ 1 0 0 200 R 50 50 0 0 P
+X ~ 2 700 0 200 L 50 50 0 0 P
+P 5 0 1 6 200 50 500 50 500 -50 200 -50 200 50 N
+ENDDRAW
+ENDDEF
+#
+#End Library

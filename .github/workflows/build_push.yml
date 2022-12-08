@@ -96,20 +96,24 @@ jobs:
         with:
           sketch-names: MarauderOTA.ino
           arduino-board-fqbn: esp32:esp32:esp32s2
-          platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
+          platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.3/package_esp32_dev_index.json
           
       - name: Replace SD lib
         run: |
-          rm -rf /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
-          cp -R /home/runner/work/ESP32Marauder/ESP32Marauder/2.0.4arduino-esp32/libraries/SD /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
-          ls -la /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.0-rc1/libraries/SD
+          rm -rf /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.3/libraries/SD
+          cp -R /home/runner/work/ESP32Marauder/ESP32Marauder/2.0.4arduino-esp32/libraries/SD /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.3/libraries/SD
+          ls -la /home/runner/.arduino15/packages/esp32/hardware/esp32/2.0.3/libraries/SD
           
       - name: Modify platform.txt
         run: |
           echo "Chicken"
           for i in $(find /home/runner/.arduino15/packages/esp32/hardware/esp32/ -name "platform.txt"); do
+            sed -i 's/compiler.c.elf.libs.esp32c3=/compiler.c.elf.libs.esp32c3=-zmuldefs /' "$i"
+            sed -i 's/compiler.c.elf.libs.esp32s3=/compiler.c.elf.libs.esp32s3=-zmuldefs /' "$i"
             sed -i 's/compiler.c.elf.libs.esp32s2=/compiler.c.elf.libs.esp32s2=-zmuldefs /' "$i"
             sed -i 's/compiler.c.elf.libs.esp32=/compiler.c.elf.libs.esp32=-zmuldefs /' "$i"
+            cat "$i" | grep compiler.c.elf.libs.esp32c3
+            cat "$i" | grep compiler.c.elf.libs.esp32s3
             cat "$i" | grep compiler.c.elf.libs.esp32s2
             cat "$i" | grep compiler.c.elf.libs.esp32
           done
@@ -118,15 +122,24 @@ jobs:
         uses: ArminJo/arduino-test-compile@v3.2.0
         with:
           sketch-names: esp32_marauder.ino
-          arduino-board-fqbn: esp32:esp32:esp32s2:PartitionScheme=min_spiffs,FlashSize=16M,PSRAM=enabled
-          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
+          arduino-board-fqbn: esp32:esp32:esp32s2:PartitionScheme=min_spiffs,FlashSize=4M,PSRAM=enabled
           extra-arduino-cli-args: "--warnings none"
-          #extra-arduino-lib-install-args: "-zmuldefs"
           
       - name: Rename Marauder Flipper bin
         run: |
           mv ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.flipper.bin
           
+      - name: Build Marauder for Flipper Zero Multi Board
+        uses: ArminJo/arduino-test-compile@v3.2.0
+        with:
+          sketch-names: esp32_marauder.ino
+          arduino-board-fqbn: esp32:esp32:esp32s3:PartitionScheme=min_spiffs,FlashSize=8M,PSRAM=enabled
+          extra-arduino-cli-args: "--warnings none"
+          
+      - name: Rename Marauder Multi Board bin
+        run: |
+          mv ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.multiboardS3.bin
+         
       - name: Configure TFT_eSPI and configs.h for OG Marauder
         run: |
           pwd
@@ -145,9 +158,7 @@ jobs:
         with:
           sketch-names: esp32_marauder.ino
           arduino-board-fqbn: esp32:esp32:d32:PartitionScheme=min_spiffs
-          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
-          #extra-arduino-lib-install-args: "-zmuldefs"
           
       - name: Rename OG Marauder bin
         run: |
@@ -169,9 +180,7 @@ jobs:
         with:
           sketch-names: esp32_marauder.ino
           arduino-board-fqbn: esp32:esp32:d32:PartitionScheme=min_spiffs
-          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
-          #extra-arduino-lib-install-args: "-zmuldefs"
           
       - name: Rename v6 Marauder bin
         run: |
@@ -193,9 +202,7 @@ jobs:
         with:
           sketch-names: esp32_marauder.ino
           arduino-board-fqbn: esp32:esp32:d32:PartitionScheme=min_spiffs
-          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
-          #extra-arduino-lib-install-args: "-zmuldefs"
           
       - name: Rename Marauder Kit bin
         run: |
@@ -217,9 +224,7 @@ jobs:
         with:
           sketch-names: esp32_marauder.ino
           arduino-board-fqbn: esp32:esp32:d32:PartitionScheme=min_spiffs
-          #platform-url: https://github.com/espressif/arduino-esp32/releases/download/2.0.0-rc1/package_esp32_dev_index.json
           extra-arduino-cli-args: "--warnings none"
-          #extra-arduino-lib-install-args: "-zmuldefs"
           
       - name: Rename Marauder Mini bin
         run: |
@@ -234,6 +239,13 @@ jobs:
         with:
           name: esp32_marauder.flipper.bin
           path: ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.flipper.bin
+          retention-days: 5
+          
+      - name: 'Upload MultiboardS3 Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: esp32_marauder.multiboardS3.bin
+          path: ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.multiboardS3.bin
           retention-days: 5
           
       - name: 'Upload OG Artifact'
@@ -284,6 +296,17 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.flipper.bin
           asset_name: esp32_marauder.flipper.bin
+          asset_content_type: application/bin
+          
+      - name: Upload MultiboardS3 Asset
+        id: upload-flipper-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.mutliboardS3.bin
+          asset_name: esp32_marauder.mutliboardS3.bin
           asset_content_type: application/bin
           
       - name: Upload OG Asset

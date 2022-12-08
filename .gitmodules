@@ -1,0 +1,24 @@
+[submodule "esp32_marauder/libraries/lv_arduino"]
+	path = esp32_marauder/libraries/lv_arduino
+	url = git@github.com:lvgl/lv_arduino.git
+[submodule "esp32_marauder/libraries/LinkedList"]
+	path = esp32_marauder/libraries/LinkedList
+	url = git@github.com:ivanseidel/LinkedList.git
+[submodule "esp32_marauder/libraries/TFT_eSPI"]
+	path = esp32_marauder/libraries/TFT_eSPI
+	url = git@github.com:justcallmekoko/TFT_eSPI.git
+[submodule "esp32_marauder/libraries/JPEGDecoder"]
+	path = esp32_marauder/libraries/JPEGDecoder
+	url = git@github.com:Bodmer/JPEGDecoder.git
+[submodule "esp32_marauder/libraries/NimBLE-Arduino"]
+	path = esp32_marauder/libraries/NimBLE-Arduino
+	url = git@github.com:h2zero/NimBLE-Arduino.git
+[submodule "esp32_marauder/libraries/Adafruit_NeoPixel"]
+	path = esp32_marauder/libraries/Adafruit_NeoPixel
+	url = git@github.com:adafruit/Adafruit_NeoPixel.git
+[submodule "esp32_marauder/libraries/ArduinoJson"]
+	path = esp32_marauder/libraries/ArduinoJson
+	url = git@github.com:bblanchon/ArduinoJson.git
+[submodule "esp32_marauder/libraries/SwitchLib"]
+	path = esp32_marauder/libraries/SwitchLib
+	url = git@github.com:justcallmekoko/SwitchLib.git

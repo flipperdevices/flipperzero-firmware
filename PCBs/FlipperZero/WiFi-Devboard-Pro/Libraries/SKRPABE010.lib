@@ -1,0 +1,29 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model SKRPABE010
+#/13010270/987070/2.49/4/0/Switch
+DEF SKRPABE010 S 0 30 Y Y 1 F N
+F0 "S" 950 300 50 H V L CNN
+F1 "SKRPABE010" 950 200 50 H V L CNN
+F2 "SKRPABE010" 950 100 50 H I L CNN
+F3 "https://datasheet.lcsc.com/szlcsc/ALPS-Electric-SKRPABE010_C115360.pdf" 950 0 50 H I L CNN
+F4 "Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R" 950 -100 50 H I L CNN "Description"
+F5 "2.5" 950 -200 50 H I L CNN "Height"
+F6 "ALPS Electric" 950 -300 50 H I L CNN "Manufacturer_Name"
+F7 "SKRPABE010" 950 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "688-SKRPAB" 950 -500 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/Alps-Alpine/SKRPABE010?qs=m0BA540hBPe1GpcSf%2FZ5Yw%3D%3D" 950 -600 50 H I L CNN "Mouser Price/Stock"
+F10 "" 950 -700 50 H I L CNN "Arrow Part Number"
+F11 "" 950 -800 50 H I L CNN "Arrow Price/Stock"
+F12 "" 950 -900 50 H I L CNN "Mouser Testing Part Number"
+F13 "" 950 -1000 50 H I L CNN "Mouser Testing Price/Stock"
+DRAW
+X NO_1 1 0 0 200 R 50 50 0 0 P
+X NO_2 2 1100 0 200 L 50 50 0 0 P
+X NO_3 3 0 -100 200 R 50 50 0 0 P
+X NO_4 4 1100 -100 200 L 50 50 0 0 P
+P 5 0 1 6 200 100 900 100 900 -200 200 -200 200 100 N
+ENDDRAW
+ENDDEF
+#
+#End Library
