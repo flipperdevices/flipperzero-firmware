@@ -138,7 +138,7 @@ jobs:
           
       - name: Rename Marauder Multi Board bin
         run: |
-          mv ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.multiboardS3.bin
+          mv ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.multiboardS3.bin
          
       - name: Configure TFT_eSPI and configs.h for OG Marauder
         run: |
