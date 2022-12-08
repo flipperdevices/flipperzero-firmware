@@ -4,7 +4,7 @@ An [NRF24](https://www.sparkfun.com/datasheets/Components/SMD/nRF24L01Pluss_Prel
 NRF24L01+ Enhanced ShockBurst packet decoder example using Python: [nrf24_packet_decoder.py](https://raw.githubusercontent.com/vad7/nrf24scan/master/nrf24_packet_decoder.py)<br>
 _____________________________________________________________________________________________________
 <br>
-Flipper Zero FAP file: [Nrf24_Scanner.fap](https://raw.githubusercontent.com/vad7/nrf24scan/master/Nrf24_Scanner.fap)<br>
+Flipper Zero FAP file: [Nrf24_Scanner.fap]<br>
 <br>
 <b>Приложение для Flipper Zero, читающее эфир на радиомодулях nRF24L01.</b><br>
 Выбор пукта меню - стрелки вверх/вниз, стрелки влево/вправо либо изменют настройки либо управляют видом списка, кнопка ОК либо выбирает режим (короткое нажатие), либо выполняет дополнительное действие (длительное нажатие).<br><br>
