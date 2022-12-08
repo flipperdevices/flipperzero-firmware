@@ -28,6 +28,7 @@ It is like [Google Authenticator](https://play.google.com/store/apps/details?id=
 * BTC: `bc1qu9k48q93uhvr9w5cn8fzz5yxuvh4e27c6hnczq`
 * ETH: `0xa12163eD56e35d3B38F7087B573384E40b2785e1`
 * DOGE: `DAa3nu1RCWwxZdAnGVga77bgxDFP1nhahj`
+* TON: `EQCSBzoTb1B7RhXnka5RegmdjHR3gQwRVgZHNPPqzjjvlW9T`
 
 ## Still have questions?
 
