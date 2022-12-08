@@ -3662,3 +3662,38 @@ frequency: 38000
 duty_cycle: 0.330000
 data: 3505 1690 483 416 454 1258 483 416 454 416 454 417 428 442 428 442 428 441 455 416 454 416 454 416 454 417 452 419 450 1289 451 421 448 423 447 448 422 448 422 448 422 448 422 448 422 448 422 448 422 1319 422 448 422 448 422 448 422 448 423 448 422 448 423 448 422 448 422 1319 422 448 422 1319 422 448 422 1319 422 1319 422 448 422 448 423 1319 422 448 422 1319 422 448 422 1319 422 1320 421 449 421 1319 422
 #
+name: POWER
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 0C 00 00 00
+# 
+name: MUTE
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 0D 00 00 00
+# 
+name: VOL+
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 10 00 00 00
+# 
+name: VOL-
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 11 00 00 00
+# 
+name: CH+
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 20 00 00 00
+# 
+name: CH-
+type: parsed
+protocol: RC5
+address: 01 00 00 00
+command: 21 00 00 00
