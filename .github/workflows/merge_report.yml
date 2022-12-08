@@ -1,12 +1,13 @@
-name: 'Check FL ticket in description'
+name: 'Check FL ticket in PR name'
 
 on:
-  pull_request:
-    #types:
-    #  - closed
+  push:
+    branches:
+      - dev
+  pull_request: # temp!
+
 jobs:
   merge_report:
-    #if: github.event.pull_request.merged == true
     runs-on: [self-hosted,FlipperZeroShell]
     steps:
       - name: 'Decontaminate previous build leftovers'
@@ -35,5 +36,6 @@ jobs:
       - name: 'Check ticket and report'
         run: |
           FBT_TOOLCHAIN_PATH=/runner/_work source scripts/toolchain/fbtenv.sh
+          python3 -m pip install slack_sdk
           python3 scripts/merge_report_qa.py
 
