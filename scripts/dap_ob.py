@@ -2,14 +2,11 @@
 import logging
 import socket
 import subprocess
-import time
-import struct
+
 from dataclasses import dataclass
 
 from flipper.assets.obdata import (
     OptionBytesData,
-    ObReferenceValues,
-    ObReferenceValuesGenerator,
 )
 from flipper.app import App
 
@@ -235,6 +232,9 @@ class Register32:
         else:
             self.__dict__[attr] = value
 
+    def __dir__(self):
+        return self.names
+
     def set(self, value: int):
         for definition in self.definition_list:
             definition.value = (value >> definition.offset) & (
@@ -247,18 +247,35 @@ class Register32:
             value |= definition.value << definition.offset
         return value
 
+    def load(self, openocd: OpenOCD):
+        self.set(openocd.read_32(self.address))
+
+    def store(self, openocd: OpenOCD):
+        openocd.write_32(self.address, self.get())
+
 
 class STM32WB55:
+    # Address of Option byte in flash
     OPTION_BYTE_BASE = 0x1FFF8000
+
+    # Flash base address
     FLASH_BASE = 0x58004000
+
+    # Flash unlock register
     FLASH_KEYR = FLASH_BASE + 0x08
+
+    # Option byte unlock register
     FLASH_OPTKEYR = FLASH_BASE + 0x0C
 
+    # Flash unlock keys
     FLASH_UNLOCK_KEY1 = 0x45670123
     FLASH_UNLOCK_KEY2 = 0xCDEF89AB
+
+    # Option byte unlock keys
     FLASH_UNLOCK_OPTKEY1 = 0x08192A3B
     FLASH_UNLOCK_OPTKEY2 = 0x4C5D6E7F
 
+    # Flash control register
     FLASH_CR = Register32(
         FLASH_BASE + 0x14,
         [
@@ -281,6 +298,7 @@ class STM32WB55:
         ],
     )
 
+    # Flash status register
     FLASH_SR = Register32(
         FLASH_BASE + 0x10,
         [
@@ -306,6 +324,7 @@ class STM32WB55:
         ],
     )
 
+    # Option byte registers
     FLASH_OPTR = FLASH_BASE + 0x20
     FLASH_PCROP1ASR = FLASH_BASE + 0x24
     FLASH_PCROP1AER = FLASH_BASE + 0x28
@@ -313,7 +332,9 @@ class STM32WB55:
     FLASH_WRP1BR = FLASH_BASE + 0x30
     FLASH_PCROP1BSR = FLASH_BASE + 0x34
     FLASH_PCROP1BER = FLASH_BASE + 0x38
+    FLASH_IPCCBR = FLASH_BASE + 0x3C
 
+    # Map option byte dword index to register address
     OPTION_BYTE_MAP_TO_REGS = {
         0: FLASH_OPTR,
         1: FLASH_PCROP1ASR,
@@ -322,6 +343,15 @@ class STM32WB55:
         4: FLASH_WRP1BR,
         5: FLASH_PCROP1BSR,
         6: FLASH_PCROP1BER,
+        7: None,  # Invalid Options
+        8: None,  # Invalid Options
+        9: None,  # Invalid Options
+        10: None,  # Invalid Options
+        11: None,  # Invalid Options
+        12: None,  # Invalid Options
+        13: FLASH_IPCCBR,
+        14: None,  # Secure Flash
+        15: None,  # Core 2 Options
     }
 
 
@@ -354,6 +384,36 @@ class Main(App):
             "serial": self.args.serial,
             "port_base": self.args.port_base,
         }
+
+    def _ob_print_diff_table(self, ob_reference: bytes, ob_read: bytes, print_fn):
+        print_fn(
+            f'{"Reference": <20} {"Device": <20} {"Diff Reference": <20} {"Diff Device": <20}'
+        )
+
+        diff1 = bytes()
+        diff2 = bytes()
+
+        # Split into 8 byte, word + word
+        for i in range(0, len(ob_reference), 8):
+            ref = ob_reference[i : i + 8]
+            read = ob_read[i : i + 8]
+
+            diff_str1 = ""
+            diff_str2 = ""
+            for j in range(0, len(ref.hex()), 2):
+                byte_str_1 = ref.hex()[j : j + 2]
+                byte_str_2 = read.hex()[j : j + 2]
+
+                if byte_str_1 == byte_str_2:
+                    diff_str1 += "__"
+                    diff_str2 += "__"
+                else:
+                    diff_str1 += byte_str_1
+                    diff_str2 += byte_str_2
+
+            print_fn(
+                f"{ref.hex(): <20} {read.hex(): <20} {diff_str1: <20} {diff_str2: <20}"
+            )
 
     def check(self):
         self.logger.info(f"Checking Option Bytes")
@@ -392,8 +452,7 @@ class Main(App):
             return_code = 0
         else:
             self.logger.error("Option Bytes are invalid")
-            self.logger.error(f"Reference: {ob_reference.hex()}")
-            self.logger.error(f"Compare:   {ob_compare.hex()}")
+            self._ob_print_diff_table(ob_reference, ob_compare, self.logger.error)
             return_code = 1
 
         # Stop OpenOCD
@@ -403,17 +462,19 @@ class Main(App):
         return return_code
 
     def flash_unlock(self, oocd: OpenOCD, stm32: STM32WB55):
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # Check if flash is already unlocked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.LOCK == 0:
             self.logger.debug("Flash is already unlocked")
             return
 
+        # Unlock flash
         self.logger.debug("Unlocking Flash")
         oocd.write_32(stm32.FLASH_KEYR, stm32.FLASH_UNLOCK_KEY1)
         oocd.write_32(stm32.FLASH_KEYR, stm32.FLASH_UNLOCK_KEY2)
 
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
-
+        # Check if flash is unlocked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.LOCK == 0:
             self.logger.debug("Flash unlocked")
         else:
@@ -421,17 +482,19 @@ class Main(App):
             raise Exception("Flash unlock failed")
 
     def option_bytes_unlock(self, oocd: OpenOCD, stm32: STM32WB55):
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # Check if options is already unlocked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.OPT_LOCK == 0:
             self.logger.debug("Options is already unlocked")
             return
 
+        # Unlock options
         self.logger.debug("Unlocking Options")
         oocd.write_32(stm32.FLASH_OPTKEYR, stm32.FLASH_UNLOCK_OPTKEY1)
         oocd.write_32(stm32.FLASH_OPTKEYR, stm32.FLASH_UNLOCK_OPTKEY2)
 
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
-
+        # Check if options is unlocked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.OPT_LOCK == 0:
             self.logger.debug("Options unlocked")
         else:
@@ -439,16 +502,19 @@ class Main(App):
             raise Exception("Options unlock failed")
 
     def option_bytes_lock(self, oocd: OpenOCD, stm32: STM32WB55):
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # Check if options is already locked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.OPT_LOCK == 1:
             self.logger.debug("Options is already locked")
             return
 
+        # Lock options
         self.logger.debug("Locking Options")
         stm32.FLASH_CR.OPT_LOCK = 1
-        oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+        stm32.FLASH_CR.store(oocd)
 
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # Check if options is locked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.OPT_LOCK == 1:
             self.logger.debug("Options locked")
         else:
@@ -456,21 +522,41 @@ class Main(App):
             raise Exception("Options lock failed")
 
     def flash_lock(self, oocd: OpenOCD, stm32: STM32WB55):
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # Check if flash is already locked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.LOCK == 1:
             self.logger.debug("Flash is already locked")
             return
 
+        # Lock flash
         self.logger.debug("Locking Flash")
         stm32.FLASH_CR.LOCK = 1
-        oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+        stm32.FLASH_CR.store(oocd)
 
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # Check if flash is locked
+        stm32.FLASH_CR.load(oocd)
         if stm32.FLASH_CR.LOCK == 1:
             self.logger.debug("Flash locked")
         else:
             self.logger.error("Flash lock failed")
             raise Exception("Flash lock failed")
+
+    def clear_flash_errors(self, oocd: OpenOCD, stm32: STM32WB55):
+        # Errata 2.2.9: Flash OPTVERR flag is always set after system reset
+        # And also clear all other flash error flags
+        self.logger.debug(f"Errata 2.2.9 workaround")
+        stm32.FLASH_SR.load(oocd)
+        stm32.FLASH_SR.OP_ERR = 1
+        stm32.FLASH_SR.PROG_ERR = 1
+        stm32.FLASH_SR.WRP_ERR = 1
+        stm32.FLASH_SR.PGA_ERR = 1
+        stm32.FLASH_SR.SIZE_ERR = 1
+        stm32.FLASH_SR.PGS_ERR = 1
+        stm32.FLASH_SR.MISS_ERR = 1
+        stm32.FLASH_SR.FAST_ERR = 1
+        stm32.FLASH_SR.RD_ERR = 1
+        stm32.FLASH_SR.OPTV_ERR = 1
+        stm32.FLASH_SR.store(oocd)
 
     def _unpack_u32(self, data: bytes, offset: int):
         return int.from_bytes(data[offset : offset + 4], "little")
@@ -493,8 +579,10 @@ class Main(App):
         ob_compare_mask_bytes = ob_values.compare_mask
         ob_write_mask_bytes = ob_values.write_mask
         ob_length = len(ob_reference_bytes)
-        ob_words = int(ob_length / 4)
         ob_dwords = int(ob_length / 8)
+
+        # Clear flash errors
+        self.clear_flash_errors(oocd, stm32)
 
         # Unlock Flash and Option Bytes
         self.flash_unlock(oocd, stm32)
@@ -513,58 +601,51 @@ class Main(App):
             need_patch = ((ob_value_masked ^ ob_value_ref) & ob_write_mask) != 0
             if need_patch:
                 ob_need_to_apply = True
+                device_register_index = int(i / 1)
 
                 self.logger.info(
-                    f"Need to patch: {device_addr:08X}: {device_value:08X} = {ob_value_masked:08X}"
+                    f"Need to patch: {device_addr:08X}: {ob_value_masked:08X} != {ob_value_ref:08X}, REG[{device_register_index}]"
                 )
 
-                device_reg_addr = stm32.OPTION_BYTE_MAP_TO_REGS.get(i, None)
+                # Check if this option byte (dword) is mapped to a register
+                device_reg_addr = stm32.OPTION_BYTE_MAP_TO_REGS.get(
+                    device_register_index, None
+                )
                 if device_reg_addr is None:
-                    raise Exception(f"Option Byte {i} is not mapped to a register")
+                    # self.logger.error(f"Option Byte {i} is not mapped to a register")
+                    # continue
+                    raise Exception(
+                        f"Option Byte {device_register_index} is not mapped to a register"
+                    )
 
-                ob_value = (device_value & (~ob_write_mask)) | (
-                    ob_value_ref & ob_write_mask
-                )
+                # Construct new value for the OB register
+                ob_value = device_value & (~ob_write_mask)
+                ob_value |= ob_value_ref & ob_write_mask
 
                 self.logger.info(f"Writing {ob_value:08X} to {device_reg_addr:08X}")
                 oocd.write_32(device_reg_addr, ob_value)
 
-        # Errata 2.2.9: Flash OPTVERR flag is always set after system reset
-        self.logger.debug(f"Errata 2.2.9 workaround")
-        stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
-        stm32.FLASH_SR.OP_ERR = 1
-        stm32.FLASH_SR.PROG_ERR = 1
-        stm32.FLASH_SR.WRP_ERR = 1
-        stm32.FLASH_SR.PGA_ERR = 1
-        stm32.FLASH_SR.SIZE_ERR = 1
-        stm32.FLASH_SR.PGS_ERR = 1
-        stm32.FLASH_SR.MISS_ERR = 1
-        stm32.FLASH_SR.FAST_ERR = 1
-        stm32.FLASH_SR.RD_ERR = 1
-        stm32.FLASH_SR.OPTV_ERR = 1
-        oocd.write_32(stm32.FLASH_SR.get_address(), stm32.FLASH_SR.get())
-
         if ob_need_to_apply:
             self.logger.debug(f"Applying Option Bytes")
 
-            stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+            stm32.FLASH_CR.load(oocd)
             stm32.FLASH_CR.OPT_STRT = 1
-            oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+            stm32.FLASH_CR.store(oocd)
 
             # Wait for Option Bytes to be applied
             # TODO: timeout
             while True:
-                stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
+                stm32.FLASH_SR.load(oocd)
                 if stm32.FLASH_SR.BSY == 0:
                     break
-
-            stm32.FLASH_SR.set(oocd.read_32(stm32.FLASH_SR.get_address()))
+        else:
+            self.logger.info(f"Option Bytes are already correct")
 
         # Load Option Bytes
-        # That will also lock the Option Bytes and the Flash
-        stm32.FLASH_CR.set(oocd.read_32(stm32.FLASH_CR.get_address()))
+        # That will reset and also lock the Option Bytes and the Flash
+        stm32.FLASH_CR.load(oocd)
         stm32.FLASH_CR.OBL_LAUNCH = 1
-        oocd.write_32(stm32.FLASH_CR.get_address(), stm32.FLASH_CR.get())
+        stm32.FLASH_CR.store(oocd)
 
         # Stop OpenOCD
         oocd.send_tcl("reset run")
