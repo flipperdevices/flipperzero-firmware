@@ -486,6 +486,11 @@ void CommandLine::runCommand(String input) {
           Serial.println("SD card is not connected. Cannot perform SD Update");
           return;
         }
+        wifi_scan_obj.currentScanMode = OTA_UPDATE;
+        #ifdef HAS_SCREEN
+          changeMenu(&failedUpdateMenu);
+        #endif
+        sd_obj.runUpdate();
       }
     }
   }
