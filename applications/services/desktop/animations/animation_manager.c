@@ -33,6 +33,7 @@ typedef enum {
 } AnimationManagerState;
 
 struct AnimationManager {
+    bool dummy_mode;
     bool sd_show_url;
     bool sd_shown_no_db;
     bool sd_shown_sd_ok;
@@ -363,7 +364,9 @@ static bool animation_manager_is_valid_idle_animation(
 
 static StorageAnimation*
     animation_manager_select_idle_animation(AnimationManager* animation_manager) {
-    UNUSED(animation_manager);
+    if(animation_manager->dummy_mode) {
+        return animation_storage_find_animation(HARDCODED_ANIMATION_NAME);
+    }
     StorageAnimationList_t animation_list;
     StorageAnimationList_init(animation_list);
     animation_storage_fill_animation_list(&animation_list);

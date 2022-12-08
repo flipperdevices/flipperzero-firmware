@@ -145,6 +145,8 @@ void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
     view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
     desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
     desktop->settings.dummy_mode = enabled;
+    *(bool *)(desktop->animation_manager) = enabled;
+    animation_manager_new_idle_process(desktop->animation_manager);
     DESKTOP_SETTINGS_SAVE(&desktop->settings);
 }
 
