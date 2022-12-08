@@ -102,7 +102,10 @@ static bool nfc_test_digital_signal_test_encode(
 
     do {
         // Read test data
-        if(!nfc_test_read_signal_from_file(file_name)) break;
+        if(!nfc_test_read_signal_from_file(file_name)) {
+            FURI_LOG_E(TAG, "Failed to read signal from file");
+            break;
+        }
 
         // Encode signal
         FURI_CRITICAL_ENTER();
