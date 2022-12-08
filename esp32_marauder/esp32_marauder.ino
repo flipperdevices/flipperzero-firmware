@@ -142,10 +142,6 @@ void setup()
   //  Serial.println("Does not have screen");
   //#endif
 
-  #ifdef MARAUDER_FLIPPER
-    flipper_led.RunSetup();
-  #endif
-
   #ifdef HAS_SCREEN
     display_obj.RunSetup();
     display_obj.tft.setTextColor(TFT_WHITE, TFT_BLACK);
@@ -190,6 +186,10 @@ void setup()
   //Serial.println("Internal Temp: " + (String)((temprature_sens_read() - 32) / 1.8));
 
   settings_obj.begin();
+
+  #ifdef MARAUDER_FLIPPER
+    flipper_led.RunSetup();
+  #endif
 
   //Serial.println("This is a test Channel: " + (String)settings_obj.loadSetting<uint8_t>("Channel"));
   //if (settings_obj.loadSetting<bool>( "Force PMKID"))
@@ -314,6 +314,9 @@ void loop()
       #ifdef HAS_SCREEN
         menu_function_obj.main(currentTime);
       #endif
+      #ifndef MARAUDER_FLIPPER
+        led_obj.main(currentTime);
+      #endif
       //cli_obj.main(currentTime);
     }
       if (wifi_scan_obj.currentScanMode == OTA_UPDATE)
@@ -335,6 +338,9 @@ void loop()
     #ifdef HAS_SCREEN
       display_obj.main(wifi_scan_obj.currentScanMode);
       menu_function_obj.main(currentTime);
+    #endif
+    #ifndef MARAUDER_FLIPPER
+      led_obj.main(currentTime);
     #endif
     //cli_obj.main(currentTime);
     delay(1);

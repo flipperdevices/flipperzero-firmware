@@ -363,6 +363,8 @@ void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_
   this->wifi_initialized = true;
   #ifdef MARAUDER_FLIPPER
     flipper_led.attackLED();
+  #else
+    led_obj.setMode(MODE_ATTACK);
   #endif
   initTime = millis();
 }
@@ -381,6 +383,8 @@ bool WiFiScan::shutdownWiFi() {
 
     #ifdef MARAUDER_FLIPPER
       flipper_led.offLED();
+    #else
+      led_obj.setMode(MODE_OFF);
     #endif
   
     this->wifi_initialized = false;
@@ -401,6 +405,8 @@ bool WiFiScan::shutdownBLE() {
 
       #ifdef MARAUDER_FLIPPER
         flipper_led.offLED();
+      #else
+        led_obj.setMode(MODE_OFF);
       #endif
     
       this->ble_initialized = false;
@@ -524,6 +530,8 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
 
   Serial.println(text_table4[9] + (String)access_points->size());
@@ -759,6 +767,8 @@ void WiFiScan::RunEspressifScan(uint8_t scan_mode, uint16_t color) {
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
 
   #ifdef HAS_SCREEN
@@ -794,6 +804,8 @@ void WiFiScan::RunPacketMonitor(uint8_t scan_mode, uint16_t color)
 {
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
 
   sd_obj.openCapture("packet_monitor");
@@ -867,6 +879,8 @@ void WiFiScan::RunEapolScan(uint8_t scan_mode, uint16_t color)
 {
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
   
   num_eapol = 0;
@@ -1000,6 +1014,8 @@ void WiFiScan::RunPwnScan(uint8_t scan_mode, uint16_t color)
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
 
   #ifdef HAS_SCREEN
@@ -1038,6 +1054,8 @@ void WiFiScan::RunBeaconScan(uint8_t scan_mode, uint16_t color)
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
   
   #ifdef HAS_SCREEN
@@ -1075,6 +1093,8 @@ void WiFiScan::RunRawScan(uint8_t scan_mode, uint16_t color)
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
   
   #ifdef HAS_SCREEN
@@ -1112,6 +1132,8 @@ void WiFiScan::RunDeauthScan(uint8_t scan_mode, uint16_t color)
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
   
   #ifdef HAS_SCREEN
@@ -1151,6 +1173,8 @@ void WiFiScan::RunProbeScan(uint8_t scan_mode, uint16_t color)
 
   #ifdef MARAUDER_FLIPPER
     flipper_led.sniffLED();
+  #else
+    led_obj.setMode(MODE_SNIFF);
   #endif
   
   #ifdef HAS_SCREEN

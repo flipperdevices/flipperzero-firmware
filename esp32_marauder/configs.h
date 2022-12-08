@@ -9,9 +9,10 @@
   //#define MARAUDER_V6
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
-  #define MARAUDER_FLIPPER
+  //#define MARAUDER_FLIPPER
+  #define ESP32_LDDB
 
-  #define MARAUDER_VERSION "v0.9.18"
+  #define MARAUDER_VERSION "v0.9.19"
 
   //// BUTTON DEFINITIONS
   #ifdef MARAUDER_MINI
@@ -353,6 +354,10 @@
   #ifdef MARAUDER_FLIPPER
     #define SD_CS 10
   #endif
+
+  #ifdef ESP32_LDDB
+    #define SD_CS 4
+  #endif
   //// END SD DEFINITIONS
 
   //// SCREEN STUFF
@@ -402,5 +407,13 @@
     #include "Assets.h"
   #endif
   //// END SCREEN STUFF
+
+  //// NEOPIXEL STUFF
+  #ifdef ESP32_LDDB
+    #define PIN 17
+  #else
+    #define PIN 25
+  #endif
+  
 
 #endif
