@@ -3,8 +3,17 @@
 import os
 import re
 import sys
+import argparse
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("slack_token")
+    parser.add_argument("slack_channel")
+    args = parser.parse_args()
+    return args
 
 
 def checkCommitMessage(msg):
@@ -24,11 +33,10 @@ def reportSlack(commit_hash, slack_token, slack_channel, message):
 
 
 def main():
+    args = parse_args()
     commit_msg = os.getenv("COMMIT_MSG")
     commit_hash = os.getenv("COMMIT_HASH")
     commit_sha = os.getenv("COMMIT_SHA")
-    slack_token = os.getenv("QA_REPORT_SLACK_TOKEN")
-    slack_channel = os.getenv("QA_REPORT_SLACK_CHANNEL")
     commit_link = (
         "<https://github.com/flipperdevices/flipperzero-firmware/commit/"
         + commit_hash
@@ -38,7 +46,7 @@ def main():
     )
     message = "Commit " + commit_link + " merged to dev without 'FL' ticket!"
     if not checkCommitMessage(commit_msg):
-        reportSlack(commit_hash, slack_token, slack_channel, message)
+        reportSlack(commit_hash, args.slack_token, args.slack_channel, message)
 
 
 if __name__ == "__main__":
