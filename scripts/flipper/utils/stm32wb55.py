@@ -2,6 +2,9 @@ from flipper.utils.register import Register32, RegisterBitDefinition
 
 
 class STM32WB55:
+    # Address of OTP memory in flash
+    OTP_BASE = 0x1FFF7000
+
     # Address of Option byte in flash
     OPTION_BYTE_BASE = 0x1FFF8000
 
