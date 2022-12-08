@@ -299,7 +299,7 @@ jobs:
           asset_content_type: application/bin
           
       - name: Upload MultiboardS3 Asset
-        id: upload-flipper-release-asset 
+        id: upload-mutliboardS3-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
