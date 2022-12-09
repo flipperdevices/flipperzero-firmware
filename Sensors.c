@@ -611,10 +611,17 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
         FURI_LOG_D(APP_NAME, "Sensor %s update status %d", sensor->name, sensor->status);
 #endif
 
-    if(app->settings.unit == FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK)
+    if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK)
         uintemp_celsiumToFarengate(sensor);
     if(sensor->status == UT_SENSORSTATUS_OK) {
-        unitemp_pascalToMmHg(sensor);
+        FURI_LOG_D(APP_NAME, "Pressure: %f Pa", (double)sensor->pressure);
+        if(app->settings.pressure_unit == UT_PRESSURE_MM_HG) {
+            unitemp_pascalToMmHg(sensor);
+        } else if(app->settings.pressure_unit == UT_PRESSURE_IN_HG) {
+            unitemp_pascalToInHg(sensor);
+        } else if(app->settings.pressure_unit == UT_PRESSURE_KPA) {
+            unitemp_pascalToKPa(sensor);
+        }
     }
     return sensor->status;
 }

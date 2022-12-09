@@ -53,7 +53,10 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
 
     //Рисование иконки
     canvas_draw_icon(
-        canvas, x + 3, y + 3, (app->settings.unit == CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
+        canvas,
+        x + 3,
+        y + 3,
+        (app->settings.temp_unit == UT_TEMP_CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
     if((int16_t)sensor->temp == -128 || sensor->status == UT_SENSORSTATUS_TIMEOUT) {
         snprintf(app->buff, BUFF_SIZE, "--");
@@ -125,12 +128,30 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
     //Рисование иконки
     canvas_draw_icon(canvas, x + 3, y + 4, &I_pressure_7x13);
 
-    //Давление
-    snprintf(app->buff, BUFF_SIZE, "%d", (uint16_t)sensor->pressure);
+    int16_t press_int = sensor->pressure;
+    int8_t press_dec = (int16_t)(sensor->temp * 10) % 10;
+
+    //Целая часть давления
+    snprintf(app->buff, BUFF_SIZE, "%d", press_int);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, x + 30, y + 10, AlignCenter, AlignCenter, app->buff);
+    canvas_draw_str_aligned(
+        canvas, x + 27 + ((press_int > 99) ? 5 : 0), y + 10, AlignCenter, AlignCenter, app->buff);
+    //Печать дробной части давления в диапазоне от 0 до 99 (когда два знака в числе)
+    if(press_int <= 99) {
+        uint8_t int_len = canvas_string_width(canvas, app->buff);
+        snprintf(app->buff, BUFF_SIZE, ".%d", press_dec);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, x + 27 + int_len / 2 + 2, y + 10 + 7, app->buff);
+    }
+    canvas_set_font(canvas, FontSecondary);
     //Единица измерения
-    canvas_draw_icon(canvas, x + 50, y + 3, &I_mm_hg_17x15);
+    if(app->settings.pressure_unit == UT_PRESSURE_MM_HG) {
+        canvas_draw_icon(canvas, x + 50, y + 2, &I_mm_hg_15x15);
+    } else if(app->settings.pressure_unit == UT_PRESSURE_IN_HG) {
+        canvas_draw_icon(canvas, x + 50, y + 2, &I_in_hg_15x15);
+    } else if(app->settings.pressure_unit == UT_PRESSURE_KPA) {
+        canvas_draw_str(canvas, x + 52, y + 13, "kPa");
+    }
 }
 
 static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos[2], Color color) {

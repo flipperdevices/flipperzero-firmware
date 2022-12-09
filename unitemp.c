@@ -32,7 +32,13 @@ void uintemp_celsiumToFarengate(Sensor* sensor) {
 }
 
 void unitemp_pascalToMmHg(Sensor* sensor) {
-    sensor->pressure = sensor->pressure * 0.00750061683f;
+    sensor->pressure = sensor->pressure * 0.007500638;
+}
+void unitemp_pascalToKPa(Sensor* sensor) {
+    sensor->pressure = sensor->pressure / 1000.0f;
+}
+void unitemp_pascalToInHg(Sensor* sensor) {
+    sensor->pressure = sensor->pressure * 0.0002953007;
 }
 
 bool unitemp_saveSettings(void) {
@@ -61,7 +67,8 @@ bool unitemp_saveSettings(void) {
     //Сохранение настроек
     stream_write_format(
         app->file_stream, "INFINITY_BACKLIGHT %d\n", app->settings.infinityBacklight);
-    stream_write_format(app->file_stream, "UNIT %d\n", app->settings.unit);
+    stream_write_format(app->file_stream, "TEMP_UNIT %d\n", app->settings.temp_unit);
+    stream_write_format(app->file_stream, "PRESSURE_UNIT %d\n", app->settings.pressure_unit);
 
     //Закрытие потока и освобождение памяти
     file_stream_close(app->file_stream);
@@ -148,20 +155,17 @@ bool unitemp_loadSettings(void) {
             //Чтение значения параметра
             int p = 0;
             sscanf(((char*)(file_buf + line_end)), "INFINITY_BACKLIGHT %d", &p);
-            if(p == 0) {
-                app->settings.infinityBacklight = false;
-            } else {
-                app->settings.infinityBacklight = true;
-            }
-        } else if(!strcmp(buff, "UNIT")) {
+            app->settings.infinityBacklight = p;
+        } else if(!strcmp(buff, "TEMP_UNIT")) {
             //Чтение значения параметра
             int p = 0;
-            sscanf(((char*)(file_buf + line_end)), "\nUNIT %d", &p);
-            if(p == CELSIUS) {
-                app->settings.unit = CELSIUS;
-            } else {
-                app->settings.unit = FAHRENHEIT;
-            }
+            sscanf(((char*)(file_buf + line_end)), "\nTEMP_UNIT %d", &p);
+            app->settings.temp_unit = p;
+        } else if(!strcmp(buff, "PRESSURE_UNIT")) {
+            //Чтение значения параметра
+            int p = 0;
+            sscanf(((char*)(file_buf + line_end)), "\nPRESSURE_UNIT %d", &p);
+            app->settings.pressure_unit = p;
         } else {
             FURI_LOG_W(APP_NAME, "Unknown settings parameter: %s", buff);
         }
@@ -197,7 +201,8 @@ static bool unitemp_alloc(void) {
 
     //Установка значений по умолчанию
     app->settings.infinityBacklight = true; //Подсветка горит всегда
-    app->settings.unit = CELSIUS; //Единица измерения - градусы Цельсия
+    app->settings.temp_unit = UT_TEMP_CELSIUS; //Единица измерения температуры - градусы Цельсия
+    app->settings.pressure_unit = UT_PRESSURE_MM_HG; //Единица измерения давления - мм рт. ст.
 
     app->gui = furi_record_open(RECORD_GUI);
     //Диспетчер окон

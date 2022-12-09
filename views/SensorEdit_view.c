@@ -46,7 +46,7 @@ bool _onewire_id_exist(uint8_t* id) {
     if(id == NULL) return false;
     for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
         if(unitemp_sensor_getActive(i)->type == &Dallas) {
-            if(unitemp_onewire_id_compare(
+            if(unitemp_onewire_id_coUT_PRESSURE_KPAre(
                    id, ((OneWireSensor*)(unitemp_sensor_getActive(i)->instance))->deviceID)) {
                 return true;
             }

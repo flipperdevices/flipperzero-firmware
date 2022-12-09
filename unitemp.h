@@ -46,7 +46,7 @@
 //Имя файла с датчиками
 #define APP_FILENAME_SENSORS "sensors.cfg"
 //Версия приложения
-#define UNITEMP_APP_VER "0.9 alfa"
+#define UNITEMP_APP_VER "0.91 alpha"
 
 //Размер буффера текста
 #define BUFF_SIZE 32
@@ -54,16 +54,25 @@
 #define UNITEMP_DEBUG
 
 /* Объявление перечислений */
-//Единицы измерения
-typedef enum { CELSIUS, FAHRENHEIT } measureUnit;
+//Единицы измерения температуры
+typedef enum { UT_TEMP_CELSIUS, UT_TEMP_FAHRENHEIT, UT_TEMP_COUNT } tempMeasureUnit;
+//Единицы измерения давления
+typedef enum {
+    UT_PRESSURE_MM_HG,
+    UT_PRESSURE_IN_HG,
+    UT_PRESSURE_KPA,
 
+    UT_PRESSURE_COUNT
+} pressureMeasureUnit;
 /* Объявление структур */
 //Настройки плагина
 typedef struct {
     //Бесконечная работа подсветки
     bool infinityBacklight;
     //Единица измерения температуры
-    measureUnit unit;
+    tempMeasureUnit temp_unit;
+    //Единица измерения давления
+    pressureMeasureUnit pressure_unit;
     //Последнее состояние OTG
     bool lastOTGState;
 } UnitempSettings;
@@ -103,12 +112,24 @@ typedef struct {
 void uintemp_celsiumToFarengate(Sensor* sensor);
 
 /**
- * @brief Конвертация давления из паскалей в мм/рт
+ * @brief Конвертация давления из паскалей в мм рт.ст.
  * 
  * @param sensor Указатель на датчик
- * @return Давление в мм рт.ст.
  */
 void unitemp_pascalToMmHg(Sensor* sensor);
+
+/**
+ * @brief Конвертация давления из паскалей в килопаскали
+ * 
+ * @param sensor Указатель на датчик
+ */
+void unitemp_pascalToKPa(Sensor* sensor);
+/**
+ * @brief Конвертация давления из паскалей в дюйм рт.ст.
+ * 
+ * @param sensor Указатель на датчик
+ */
+void unitemp_pascalToInHg(Sensor* sensor);
 
 /**
  * @brief Сохранение настроек на SD-карту

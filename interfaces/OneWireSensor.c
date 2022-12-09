@@ -464,7 +464,7 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
     return UT_SENSORSTATUS_OK;
 }
 
-bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2) {
+bool unitemp_onewire_id_coUT_PRESSURE_KPAre(uint8_t* id1, uint8_t* id2) {
     if(id1 == NULL || id2 == NULL) return false;
     for(uint8_t i = 0; i < 8; i++) {
         if(id1[i] != id2[i]) return false;

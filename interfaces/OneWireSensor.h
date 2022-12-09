@@ -217,7 +217,7 @@ uint8_t* unitemp_onewire_bus_enum_next(OneWireBus* bus);
  * @param id2 Указатель на адрес второго датчика
  * @return Истина если ID индентичны
  */
-bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2);
+bool unitemp_onewire_id_coUT_PRESSURE_KPAre(uint8_t* id1, uint8_t* id2);
 
 extern const SensorType Dallas;
 #endif
