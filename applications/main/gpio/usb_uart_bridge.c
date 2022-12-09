@@ -3,6 +3,7 @@
 #include <furi_hal_usb_cdc.h>
 #include "usb_cdc.h"
 #include "cli/cli_vcp.h"
+#include <toolbox/api_lock.h>
 #include "cli/cli.h"
 
 #define USB_CDC_PKT_LEN CDC_DATA_SZ
@@ -50,6 +51,8 @@ struct UsbUartBridge {
     FuriSemaphore* tx_sem;
 
     UsbUartState st;
+
+    FuriApiLock cfg_lock;
 
     uint8_t rx_buf[USB_CDC_PKT_LEN];
 };
@@ -159,11 +162,8 @@ static int32_t usb_uart_worker(void* context) {
     usb_uart->tx_sem = furi_semaphore_alloc(1, 1);
     usb_uart->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    usb_uart->tx_thread = furi_thread_alloc();
-    furi_thread_set_name(usb_uart->tx_thread, "UsbUartTxWorker");
-    furi_thread_set_stack_size(usb_uart->tx_thread, 512);
-    furi_thread_set_context(usb_uart->tx_thread, usb_uart);
-    furi_thread_set_callback(usb_uart->tx_thread, usb_uart_tx_thread);
+    usb_uart->tx_thread =
+        furi_thread_alloc_ex("UsbUartTxWorker", 512, usb_uart_tx_thread, usb_uart);
 
     usb_uart_vcp_init(usb_uart, usb_uart->cfg.vcp_ch);
     usb_uart_serial_init(usb_uart, usb_uart->cfg.uart_ch);
@@ -247,6 +247,7 @@ static int32_t usb_uart_worker(void* context) {
                 usb_uart->cfg.flow_pins = usb_uart->cfg_new.flow_pins;
                 events |= WorkerEvtCtrlLineSet;
             }
+            api_lock_unlock(usb_uart->cfg_lock);
         }
         if(events & WorkerEvtLineCfgSet) {
             if(usb_uart->cfg.baudrate == 0)
@@ -338,11 +339,7 @@ UsbUartBridge* usb_uart_enable(UsbUartConfig* cfg) {
 
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
 
-    usb_uart->thread = furi_thread_alloc();
-    furi_thread_set_name(usb_uart->thread, "UsbUartWorker");
-    furi_thread_set_stack_size(usb_uart->thread, 1024);
-    furi_thread_set_context(usb_uart->thread, usb_uart);
-    furi_thread_set_callback(usb_uart->thread, usb_uart_worker);
+    usb_uart->thread = furi_thread_alloc_ex("UsbUartWorker", 1024, usb_uart_worker, usb_uart);
 
     furi_thread_start(usb_uart->thread);
     return usb_uart;
@@ -359,8 +356,10 @@ void usb_uart_disable(UsbUartBridge* usb_uart) {
 void usb_uart_set_config(UsbUartBridge* usb_uart, UsbUartConfig* cfg) {
     furi_assert(usb_uart);
     furi_assert(cfg);
+    usb_uart->cfg_lock = api_lock_alloc_locked();
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
     furi_thread_flags_set(furi_thread_get_id(usb_uart->thread), WorkerEvtCfgChange);
+    api_lock_wait_unlock_and_free(usb_uart->cfg_lock);
 }
 
 void usb_uart_get_config(UsbUartBridge* usb_uart, UsbUartConfig* cfg) {
