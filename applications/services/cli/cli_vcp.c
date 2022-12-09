@@ -231,6 +231,10 @@ static size_t cli_vcp_rx(uint8_t* buffer, size_t size, uint32_t timeout) {
         FURI_LOG_D(TAG, "rx %u ", batch_size);
 #endif
         if(len == 0) break;
+        if(vcp->thread == NULL) {
+            rx_cnt += len;
+            break;
+        }
         furi_thread_flags_set(furi_thread_get_id(vcp->thread), VcpEvtStreamRx);
         size -= len;
         buffer += len;
