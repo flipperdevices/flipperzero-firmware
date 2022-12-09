@@ -123,7 +123,10 @@ const FuriHalRegionBand* furi_hal_region_get_band(uint32_t frequency) {
     if(!furi_hal_region) {
         return NULL;
     }
-
+    //430mhz-440mhz is the ZL 70cm band, change the below if your 70cm band is larger
+    if(frequency >= 430000000 && frequency <= 440000000) {
+        return &furi_hal_region->bands[1];
+    }
     for(size_t i = 0; i < furi_hal_region->bands_count; i++) {
         if(furi_hal_region->bands[i].start <= frequency &&
            furi_hal_region->bands[i].end >= frequency) {

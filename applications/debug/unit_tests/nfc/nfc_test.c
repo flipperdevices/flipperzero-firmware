@@ -136,7 +136,7 @@ static bool nfc_test_digital_signal_test_encode(
             ref_timings_sum += ref[i];
             if(timings_diff > timing_tolerance) {
                 FURI_LOG_E(
-                    TAG, "Too big differece in %d timings. Ref: %ld, DUT: %ld", i, ref[i], dut[i]);
+                    TAG, "Too big difference in %d timings. Ref: %ld, DUT: %ld", i, ref[i], dut[i]);
                 timing_check_success = false;
                 break;
             }
@@ -393,7 +393,7 @@ static void mf_classic_generator_test(uint8_t uid_len, MfClassicType type) {
         "nfc_device_save == true assert failed\r\n");
     // Verify that key cache is saved
     FuriString* key_cache_name = furi_string_alloc();
-    furi_string_set_str(key_cache_name, "/ext/nfc/cache/");
+    furi_string_set_str(key_cache_name, "/ext/nfc/.cache/");
     for(size_t i = 0; i < uid_len; i++) {
         furi_string_cat_printf(key_cache_name, "%02X", uid[i]);
     }

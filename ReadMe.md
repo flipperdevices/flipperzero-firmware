@@ -1,5 +1,9 @@
 # Flipper Zero Firmware
 
+This firmware includes hacks to allow TX on the ham bands. As of 2022-11-20 this is a giant hack in furi_hal_region_get_band(). If your local 70cm ham band is different from the ZL, modify the line ```if(frequency >= 430000000 && frequency <= 440000000) {``` to change the band edges.
+ONLY USE THIS FIRMWARE FORK IF YOU ARE A LICENSED HAM RADIO OPERATOR.
+
+
 [![Discord](https://img.shields.io/discord/740930220399525928.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](http://flipperzero.one/discord)
 
 ![Show me the code](https://habrastorage.org/webt/eo/m0/e4/eom0e4btudte7nrhnyic-laiog0.png)
