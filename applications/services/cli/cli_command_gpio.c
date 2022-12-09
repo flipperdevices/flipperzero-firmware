@@ -39,7 +39,7 @@ void cli_command_gpio_print_usage() {
 static bool pin_name_to_int(FuriString* pin_name, size_t* result) {
     bool is_debug_mode = furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug);
     for(size_t i = 0; i < COUNT_OF(cli_command_gpio_pins); i++) {
-        if(!furi_string_cmp(pin_name, cli_command_gpio_pins[i].name)) {
+        if(furi_string_equal(pin_name, cli_command_gpio_pins[i].name)) {
             if(!cli_command_gpio_pins[i].debug || is_debug_mode) {
                 *result = i;
                 return true;
