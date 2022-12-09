@@ -138,7 +138,7 @@ jobs:
           
       - name: Rename Marauder Multi Board bin
         run: |
-          mv ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.esp32s2/esp32_marauder.multiboardS3.bin
+          mv ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.multiboardS3.bin
          
       - name: Configure TFT_eSPI and configs.h for OG Marauder
         run: |
@@ -299,13 +299,13 @@ jobs:
           asset_content_type: application/bin
           
       - name: Upload MultiboardS3 Asset
-        id: upload-flipper-release-asset 
+        id: upload-mutliboardS3-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.mutliboardS3.bin
+          asset_path: ./esp32_marauder/build/esp32.esp32.esp32s3/esp32_marauder.multiboardS3.bin
           asset_name: esp32_marauder.mutliboardS3.bin
           asset_content_type: application/bin
           
