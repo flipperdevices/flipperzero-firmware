@@ -13,6 +13,8 @@
 #include "dap_config.h"
 #include "gui/dap_gui.h"
 #include "usb/dap_v2_usb.h"
+#include <dialogs/dialogs.h>
+#include "dap_link_icons.h"
 
 /***************************************************************************/
 /****************************** DAP COMMON *********************************/
@@ -245,7 +247,6 @@ static int32_t dap_process(void* p) {
 
     // deinit usb
     furi_hal_usb_set_config(usb_config_prev, NULL);
-    dap_common_wait_for_deinit();
     dap_common_usb_free_name();
     dap_deinit_gpio(swd_pins_prev);
     return 0;
@@ -439,19 +440,6 @@ static int32_t cdc_process(void* p) {
 /******************************* MAIN APP **********************************/
 /***************************************************************************/
 
-static FuriThread* furi_thread_alloc_ex(
-    const char* name,
-    uint32_t stack_size,
-    FuriThreadCallback callback,
-    void* context) {
-    FuriThread* thread = furi_thread_alloc();
-    furi_thread_set_name(thread, name);
-    furi_thread_set_stack_size(thread, stack_size);
-    furi_thread_set_callback(thread, callback);
-    furi_thread_set_context(thread, context);
-    return thread;
-}
-
 static DapApp* dap_app_alloc() {
     DapApp* dap_app = malloc(sizeof(DapApp));
     dap_app->dap_thread = furi_thread_alloc_ex("DAP Process", 1024, dap_process, dap_app);
@@ -494,6 +482,24 @@ DapConfig* dap_app_get_config(DapApp* app) {
 
 int32_t dap_link_app(void* p) {
     UNUSED(p);
+
+    if(furi_hal_usb_is_locked()) {
+        DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_header(message, "Connection\nis active!", 3, 2, AlignLeft, AlignTop);
+        dialog_message_set_text(
+            message,
+            "Disconnect from\nPC or phone to\nuse this function.",
+            3,
+            30,
+            AlignLeft,
+            AlignTop);
+        dialog_message_set_icon(message, &I_ActiveConnection_50x64, 78, 0);
+        dialog_message_show(dialogs, message);
+        dialog_message_free(message);
+        furi_record_close(RECORD_DIALOGS);
+        return -1;
+    }
 
     // alloc app
     DapApp* app = dap_app_alloc();

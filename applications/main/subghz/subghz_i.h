@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers/subghz_types.h"
+#include "helpers/subghz_error_type.h"
 #include <lib/subghz/types.h>
 #include "subghz.h"
 #include "views/receiver.h"
@@ -124,6 +125,7 @@ bool subghz_save_protocol_to_file(
     const char* dev_file_name);
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
+bool subghz_file_available(SubGhz* subghz);
 bool subghz_delete_file(SubGhz* subghz);
 void subghz_file_name_clear(SubGhz* subghz);
 bool subghz_path_is_file(FuriString* path);

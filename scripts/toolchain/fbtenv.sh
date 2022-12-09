@@ -5,7 +5,7 @@
 # public variables
 DEFAULT_SCRIPT_PATH="$(pwd -P)";
 SCRIPT_PATH="${SCRIPT_PATH:-$DEFAULT_SCRIPT_PATH}";
-FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"17"}";
+FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"19"}";
 FBT_TOOLCHAIN_PATH="${FBT_TOOLCHAIN_PATH:-$SCRIPT_PATH}";
 
 fbtenv_show_usage()
@@ -13,7 +13,7 @@ fbtenv_show_usage()
     echo "Running this script manually is wrong, please source it";
     echo "Example:";
     printf "\tsource scripts/toolchain/fbtenv.sh\n";
-    echo "To restore your enviroment source fbtenv.sh with '--restore'."
+    echo "To restore your environment source fbtenv.sh with '--restore'."
     echo "Example:";
     printf "\tsource scripts/toolchain/fbtenv.sh --restore\n";
 }
@@ -227,7 +227,7 @@ fbtenv_curl_wget_check()
             echo;
             echo "$TOOLCHAIN_URL";
             echo;
-            echo "And place in $FBT_TOOLCHAIN_PATH/toolchain/ dir mannualy";
+            echo "And place in $FBT_TOOLCHAIN_PATH/toolchain/ dir manually";
             return 1;
         fi
         echo "yes"

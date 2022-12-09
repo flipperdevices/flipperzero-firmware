@@ -32,7 +32,7 @@ static void rpc_command_callback(RpcAppSystemEvent rpc_event, void* context) {
 }
 
 static LfRfid* lfrfid_alloc() {
-    LfRfid* lfrfid = malloc(sizeof(LfRfid));
+    LfRfid* lfrfid = malloc(sizeof(LfRfid)); //-V773
 
     lfrfid->storage = furi_record_open(RECORD_STORAGE);
     lfrfid->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -230,6 +230,7 @@ bool lfrfid_load_key_from_file_select(LfRfid* app) {
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, LFRFID_APP_EXTENSION, &I_125_10px);
+    browser_options.base_path = LFRFID_APP_FOLDER;
 
     // Input events and views are managed by file_browser
     bool result =

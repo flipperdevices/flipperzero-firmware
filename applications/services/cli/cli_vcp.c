@@ -68,10 +68,7 @@ static void cli_vcp_init() {
 
     vcp->connected = false;
 
-    vcp->thread = furi_thread_alloc();
-    furi_thread_set_name(vcp->thread, "CliVcpWorker");
-    furi_thread_set_stack_size(vcp->thread, 1024);
-    furi_thread_set_callback(vcp->thread, vcp_worker);
+    vcp->thread = furi_thread_alloc_ex("CliVcpWorker", 1024, vcp_worker, NULL);
     furi_thread_start(vcp->thread);
 
     FURI_LOG_I(TAG, "Init OK");
@@ -103,7 +100,7 @@ static int32_t vcp_worker(void* context) {
     while(1) {
         uint32_t flags =
             furi_thread_flags_wait(VCP_THREAD_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
-        furi_assert((flags & FuriFlagError) == 0);
+        furi_assert(!(flags & FuriFlagError));
 
         // VCP session opened
         if(flags & VcpEvtConnect) {
@@ -303,7 +300,7 @@ static void vcp_on_cdc_control_line(void* context, uint8_t state) {
 static void vcp_on_cdc_rx(void* context) {
     UNUSED(context);
     uint32_t ret = furi_thread_flags_set(furi_thread_get_id(vcp->thread), VcpEvtRx);
-    furi_check((ret & FuriFlagError) == 0);
+    furi_check(!(ret & FuriFlagError));
 }
 
 static void vcp_on_cdc_tx_complete(void* context) {

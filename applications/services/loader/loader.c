@@ -21,6 +21,13 @@ static bool
 
     FURI_LOG_I(TAG, "Starting: %s", loader_instance->application->name);
 
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode > FuriHalRtcHeapTrackModeNone) {
+        furi_thread_enable_heap_trace(loader_instance->application_thread);
+    } else {
+        furi_thread_disable_heap_trace(loader_instance->application_thread);
+    }
+
     furi_thread_set_name(loader_instance->application_thread, loader_instance->application->name);
     furi_thread_set_stack_size(
         loader_instance->application_thread, loader_instance->application->stack_size);
@@ -269,22 +276,18 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader_instance->pubsub, &event);
 
-        if(!loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe) {
+        if(!(loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe)) {
             furi_hal_power_insomnia_enter();
         }
     } else if(thread_state == FuriThreadStateStopped) {
-        FURI_LOG_I(
-            TAG,
-            "Application thread stopped. Free heap: %d. Thread allocation balance: %d.",
-            memmgr_get_free_heap(),
-            furi_thread_get_heap_size(instance->application_thread));
+        FURI_LOG_I(TAG, "Application stopped. Free heap: %d", memmgr_get_free_heap());
 
         if(loader_instance->application_arguments) {
             free(loader_instance->application_arguments);
             loader_instance->application_arguments = NULL;
         }
 
-        if(!loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe) {
+        if(!(loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe)) {
             furi_hal_power_insomnia_exit();
         }
         loader_unlock(instance);
@@ -310,7 +313,7 @@ static Loader* loader_alloc() {
     Loader* instance = malloc(sizeof(Loader));
 
     instance->application_thread = furi_thread_alloc();
-    furi_thread_enable_heap_trace(instance->application_thread);
+
     furi_thread_set_state_context(instance->application_thread, instance);
     furi_thread_set_state_callback(instance->application_thread, loader_thread_state_callback);
 
