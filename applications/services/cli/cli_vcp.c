@@ -231,7 +231,8 @@ static size_t cli_vcp_rx(uint8_t* buffer, size_t size, uint32_t timeout) {
         FURI_LOG_D(TAG, "rx %u ", batch_size);
 #endif
         if(len == 0) break;
-        if(vcp->thread == NULL) {
+        if(vcp->running == false) {
+            // EOT command is received after VCP session close
             rx_cnt += len;
             break;
         }
