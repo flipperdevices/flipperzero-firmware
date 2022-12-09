@@ -11,6 +11,7 @@ enum HidDebugSubmenuIndex {
     HidSubmenuIndexMedia,
     BtHidSubmenuIndexTikTok,
     HidSubmenuIndexMouse,
+    HidSubmenuIndexMouseJiggler,
 };
 typedef enum { ConnTypeSubmenuIndexBluetooth, ConnTypeSubmenuIndexUsb } ConnTypeDebugSubmenuIndex;
 
@@ -29,6 +30,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     } else if(index == HidSubmenuIndexMouse) {
         app->view_id = HidViewMouse;
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouse);
+    } else if(index == HidSubmenuIndexMouseJiggler) {
+        app->view_id = HidViewMouseJiggler;
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewMouseJiggler);
     } else if(index == BtHidSubmenuIndexTikTok) {
         app->view_id = BtHidViewTikTok;
         view_dispatcher_switch_to_view(app->view_dispatcher, BtHidViewTikTok);
@@ -48,6 +52,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     hid_keyboard_set_connected_status(hid->hid_keyboard, connected);
     hid_media_set_connected_status(hid->hid_media, connected);
     hid_mouse_set_connected_status(hid->hid_mouse, connected);
+    hid_mouse_jiggler_set_connected_status(hid->hid_mouse_jiggler, connected);
     hid_tiktok_set_connected_status(hid->hid_tiktok, connected);
 }
 
@@ -100,6 +105,12 @@ Hid* hid_alloc(HidTransport transport) {
         app->device_type_submenu, "Media", HidSubmenuIndexMedia, hid_submenu_callback, app);
     submenu_add_item(
         app->device_type_submenu, "Mouse", HidSubmenuIndexMouse, hid_submenu_callback, app);
+    submenu_add_item(
+        app->device_type_submenu,
+        "Mouse Jiggler",
+        HidSubmenuIndexMouseJiggler,
+        hid_submenu_callback,
+        app);
     if(app->transport == HidTransportBle) {
         submenu_add_item(
             app->device_type_submenu,
@@ -160,6 +171,15 @@ Hid* hid_app_alloc_view(void* context) {
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewMouse, hid_mouse_get_view(app->hid_mouse));
 
+    // Mouse jiggler view
+    app->hid_mouse_jiggler = hid_mouse_jiggler_alloc(app);
+    view_set_previous_callback(
+        hid_mouse_jiggler_get_view(app->hid_mouse_jiggler), hid_exit_confirm_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        HidViewMouseJiggler,
+        hid_mouse_jiggler_get_view(app->hid_mouse_jiggler));
+
     return app;
 }
 
@@ -182,6 +202,8 @@ void hid_free(Hid* app) {
     hid_media_free(app->hid_media);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewMouse);
     hid_mouse_free(app->hid_mouse);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewMouseJiggler);
+    hid_mouse_jiggler_free(app->hid_mouse_jiggler);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewTikTok);
     hid_tiktok_free(app->hid_tiktok);
     view_dispatcher_free(app->view_dispatcher);
