@@ -650,7 +650,7 @@ static int32_t bad_usb_worker(void* context) {
 BadUsbScript* bad_usb_script_open(FuriString* file_path) {
     furi_assert(file_path);
 
-    BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript)); //-V773
+    BadUsbScript* bad_usb = malloc(sizeof(BadUsbScript));
     bad_usb->file_path = furi_string_alloc();
     furi_string_set(bad_usb->file_path, file_path);
 
@@ -660,7 +660,7 @@ BadUsbScript* bad_usb_script_open(FuriString* file_path) {
     bad_usb->thread = furi_thread_alloc_ex("BadUsbWorker", 2048, bad_usb_worker, bad_usb);
     furi_thread_start(bad_usb->thread);
     return bad_usb;
-}
+} //-V773
 
 void bad_usb_script_close(BadUsbScript* bad_usb) {
     furi_assert(bad_usb);

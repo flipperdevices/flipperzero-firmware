@@ -790,7 +790,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
     furi_string_free(cur_dir);
     free(name);
     return result;
-}
+} //-V773
 
 bool storage_simply_remove(Storage* storage, const char* path) {
     FS_Error result;

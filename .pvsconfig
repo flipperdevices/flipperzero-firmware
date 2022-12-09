@@ -21,3 +21,6 @@
 
 # For loop warning on M_FOREACH
 //-V:for:1044
+
+# Bitwise OR
+//-V:bit:792
