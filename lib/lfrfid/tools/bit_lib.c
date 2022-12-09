@@ -69,7 +69,7 @@ uint32_t bit_lib_get_bits_32(const uint8_t* data, size_t position, uint8_t lengt
         value |= bit_lib_get_bits(data, position + 8, 8) << (length - 16);
         value |= bit_lib_get_bits(data, position + 16, length - 16);
     } else {
-        value  = (uint32_t)bit_lib_get_bits(data, position, 8) << (length - 8);
+        value = (uint32_t)bit_lib_get_bits(data, position, 8) << (length - 8);
         value |= (uint32_t)bit_lib_get_bits(data, position + 8, 8) << (length - 16);
         value |= (uint32_t)bit_lib_get_bits(data, position + 16, 8) << (length - 24);
         value |= bit_lib_get_bits(data, position + 24, length - 24);

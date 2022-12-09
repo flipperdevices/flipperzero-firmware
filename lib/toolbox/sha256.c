@@ -70,7 +70,7 @@ static void memcpy_output_bswap32(unsigned char* dst, const uint32_t* p) {
 /* round transforms for SHA256 compression functions */
 #define vf(n, i) v[((n) - (i)) & 7]
 
-#define hf(i) (p[(i) & 15] += g_1(p[((i) + 14) & 15]) + p[((i) + 9) & 15] + g_0(p[((i) + 1) & 15]))
+#define hf(i) (p[(i)&15] += g_1(p[((i) + 14) & 15]) + p[((i) + 9) & 15] + g_0(p[((i) + 1) & 15]))
 
 #define v_cycle0(i)                                                               \
     p[i] = __builtin_bswap32(p[i]);                                               \
