@@ -68,6 +68,87 @@ bool felica_check_ic_type(uint8_t* PMm) {
     return true;
 }
 
+FelicaICType felica_get_ic_type(uint8_t* PMm) {
+    uint8_t rom_type = PMm[0];
+    uint8_t ic_type = PMm[1];
+
+    UNUSED(rom_type);
+    switch(ic_type) {
+    case 0xff:
+        return FelicaICTypeLink;
+    case 0xf2:
+        return FelicaICTypeLink;
+    case 0xf1:
+        return FelicaICTypeLiteS;
+    case 0xf0:
+        return FelicaICTypeLite;
+    case 0xe1:
+        return FelicaICTypeLink;
+    case 0xe0:
+        return FelicaICTypePlug;
+    case 0x48:
+        return FelicaICTypeSD2_6K;
+    case 0x47:
+        return FelicaICTypeRC_SA24_6K;
+    case 0x46:
+        return FelicaICTypeSD2_4K;
+    case 0x45:
+    case 0x44:
+        return FelicaICTypeSD2WithDES;
+    case 0x3e:
+        return FelicaICTypeRC_SA08;
+    case 0x35:
+        return FelicaICTypeSD1;
+    case 0x32:
+        return FelicaICTypeSD1WithDES;
+    case 0x31:
+        return FelicaICTypeSuica;
+    case 0x20:
+        return FelicaICTypeFRAM_4K;
+    case 0x1f:
+    case 0x1e:
+    case 0x1d:
+    case 0x1c:
+    case 0x1b:
+    case 0x1a:
+    case 0x19:
+    case 0x18:
+        return FelicaICTypeMobileIC_V4_1;
+    case 0x17:
+        return FelicaICTypeMobileIC_V4;
+    case 0x16:
+    case 0x15:
+    case 0x14:
+        return FelicaICTypeMobileIC_V3;
+    case 0x13:
+    case 0x12:
+    case 0x11:
+    case 0x10:
+        return FelicaICTypeMobileIC_V2;
+    case 0x0d:
+        return FelicaICTypeFRAM_9K;
+    case 0x0c:
+        return FelicaICTypeEMV_36K;
+    case 0x0b: // Old Suica?
+        return FelicaICTypeSuica;
+    case 0x09:
+        return FelicaICTypeEMV_16K;
+    case 0x08:
+        return FelicaICTypeEMV_32K;
+    case 0x07:
+    case 0x06:
+        return FelicaICTypeMobileIC_V1;
+    case 0x02:
+        return FelicaICType576B;
+    case 0x01:
+        return FelicaICType4K;
+    case 0x00:
+        return FelicaICType2K;
+    }
+
+    return FelicaICType2K;
+}
+
 uint8_t felica_prepare_unencrypted_read(
     uint8_t* dest,
     const FelicaReader* reader,
@@ -262,87 +343,6 @@ bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* rea
     return true;
 }
 
-FelicaICType felica_get_ic_type(uint8_t* PMm) {
-    uint8_t rom_type = PMm[0];
-    uint8_t ic_type = PMm[1];
-
-    UNUSED(rom_type);
-    switch(ic_type) {
-    case 0xff:
-        return FelicaICTypeLink;
-    case 0xf2:
-        return FelicaICTypeLink;
-    case 0xf1:
-        return FelicaICTypeLiteS;
-    case 0xf0:
-        return FelicaICTypeLite;
-    case 0xe1:
-        return FelicaICTypeLink;
-    case 0xe0:
-        return FelicaICTypePlug;
-    case 0x48:
-        return FelicaICTypeSD2_6K;
-    case 0x47:
-        return FelicaICTypeRC_SA24_6K;
-    case 0x46:
-        return FelicaICTypeSD2_4K;
-    case 0x45:
-    case 0x44:
-        return FelicaICTypeSD2WithDES;
-    case 0x3e:
-        return FelicaICTypeRC_SA08;
-    case 0x35:
-        return FelicaICTypeSD1;
-    case 0x32:
-        return FelicaICTypeSD1WithDES;
-    case 0x31:
-        return FelicaICTypeSuica;
-    case 0x20:
-        return FelicaICTypeFRAM_4K;
-    case 0x1f:
-    case 0x1e:
-    case 0x1d:
-    case 0x1c:
-    case 0x1b:
-    case 0x1a:
-    case 0x19:
-    case 0x18:
-        return FelicaICTypeMobileIC_V4_1;
-    case 0x17:
-        return FelicaICTypeMobileIC_V4;
-    case 0x16:
-    case 0x15:
-    case 0x14:
-        return FelicaICTypeMobileIC_V3;
-    case 0x13:
-    case 0x12:
-    case 0x11:
-    case 0x10:
-        return FelicaICTypeMobileIC_V2;
-    case 0x0d:
-        return FelicaICTypeFRAM_9K;
-    case 0x0c:
-        return FelicaICTypeEMV_36K;
-    case 0x0b: // Old Suica?
-        return FelicaICTypeSuica;
-    case 0x09:
-        return FelicaICTypeEMV_16K;
-    case 0x08:
-        return FelicaICTypeEMV_32K;
-    case 0x07:
-    case 0x06:
-        return FelicaICTypeMobileIC_V1;
-    case 0x02:
-        return FelicaICType576B;
-    case 0x01:
-        return FelicaICType4K;
-    case 0x00:
-        return FelicaICType2K;
-    }
-
-    return FelicaICType2K;
-}
-
 void felica_parse_system_info(FelicaSystem* system, uint8_t* IDm, uint8_t* PMm) {
     memcpy(system->idm, IDm, 8);
     memcpy(system->pmm, PMm, 8);
@@ -369,7 +369,7 @@ void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t
     FelicaBlock* block = malloc(sizeof(FelicaBlock));
     block->type = FelicaBlockTypeNormal;
     memcpy(block->data, data, FELICA_BLOCK_SIZE);
-    service->blocks[number] = block;
+    FelicaBlockList_set_at(service->blocks, number, block);
 }
 
 bool felica_read_lite_system(
@@ -407,14 +407,22 @@ bool felica_read_lite_system(
     }
     system->code = LITE_SYSTEM_CODE;
 
+    FelicaArea* area = &system->root_area;
     FelicaService* service = malloc(sizeof(FelicaService));
-    system->services = service;
-    service->number = 0;
-    service->block_count = CRC_CHECK_LITE_BLOCK;
-    service->blocks = malloc(sizeof(FelicaBlock*) * service->block_count);
-    for(int i = 0; i < service->block_count; i++) {
-        service->blocks[i] = NULL;
+    FelicaBlockList_init(service->blocks);
+    for(int i = 0; i < CRC_CHECK_LITE_BLOCK; i++) {
+        FelicaBlockList_push_back(service->blocks, NULL);
     }
+
+    area->number = 0;
+    area->end_service_code = 0x000f;
+    FelicaNodeList_init(area->nodes);
+    FelicaNode* node = malloc(sizeof(node));
+    node->type = FelicaNodeTypeService,
+    node->ptr.service = service;
+    FelicaNodeList_push_back(area->nodes, node);
+
+    service->number = 0;
 
     felica_define_normal_block(service, SYS_CODE_LITE_BLOCK, block_data);
 
@@ -549,10 +557,10 @@ bool felica_read_card(
         memcpy(reader.current_pmm, polled_pmm, 8);
 
         FelicaSystem* current_system = malloc(sizeof(FelicaSystem));
-        data->systems = current_system;
+        FelicaSystemList_init(data->systems);
+        FelicaSystemList_push_back(data->systems, current_system);
 
         felica_parse_system_info(current_system, polled_idm, polled_pmm);
-        current_system->next = NULL;
 
         if(data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS) {
             FURI_LOG_I(TAG, "Reading Felica Lite system");
@@ -563,4 +571,36 @@ bool felica_read_card(
     } while(false);
 
     return card_read;
+}
+
+void felica_service_clear(FelicaService* service) {
+    FelicaBlockList_it_t it;
+    for(FelicaBlockList_it(it, service->blocks); !FelicaBlockList_end_p(it); FelicaBlockList_next(it)) {
+        FelicaBlock* block = *FelicaBlockList_ref(it);
+        free(block);
+    }
+    FelicaBlockList_clear(service->blocks);
+}
+
+void felica_area_clear(FelicaArea* area) {
+    FelicaNodeList_it_t it;
+    for(FelicaNodeList_it(it, area->nodes); !FelicaNodeList_end_p(it); FelicaNodeList_next(it)) {
+        FelicaNode* node = *FelicaNodeList_ref(it);
+        if (node->type == FelicaNodeTypeArea) {
+            felica_area_clear(node->ptr.area);
+        } else if(node->type == FelicaNodeTypeService) {
+            felica_service_clear(node->ptr.service);
+        }
+        free(node);
+    }
+    FelicaNodeList_clear(area->nodes);
+}
+
+void felica_clear(FelicaData* data) {
+    FelicaSystemList_it_t it;
+    for(FelicaSystemList_it(it, data->systems); !FelicaSystemList_end_p(it); FelicaSystemList_next(it)) {
+        FelicaSystem* system = *FelicaSystemList_ref(it);
+        felica_area_clear(&system->root_area);
+    }
+    FelicaSystemList_clear(data->systems);
 }

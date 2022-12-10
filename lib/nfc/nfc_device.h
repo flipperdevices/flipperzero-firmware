@@ -12,6 +12,7 @@
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
 #include <lib/nfc/protocols/felica.h>
+#include <lib/nfc/protocols/felica_util.h>
 
 #ifdef __cplusplus
 extern "C" {

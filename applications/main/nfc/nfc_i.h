@@ -40,9 +40,22 @@
 
 #include <m-array.h>
 
+ARRAY_DEF(FelicaAreaPath, FelicaArea*, M_PTR_OPLIST);
+ARRAY_DEF(FuriStringStack, FuriString*, M_PTR_OPLIST);
 ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
 
 #define NFC_TEXT_STORE_SIZE 128
+
+
+typedef struct {
+    FuriStringStack_t strings;
+
+    FelicaSystem* selected_system;
+
+    FelicaAreaPath_t selected_areas;
+
+    FelicaService* selected_service;
+} FelicaSelectState;
 
 typedef enum {
     NfcRpcStateIdle,
@@ -66,6 +79,7 @@ struct Nfc {
     FuriString* text_box_store;
     uint8_t byte_input_store[6];
     MfClassicUserKeys_t mfc_key_strs; // Used in MFC key listing
+    FelicaSelectState felica_select;
 
     void* rpc_ctx;
     NfcRpcState rpc_state;

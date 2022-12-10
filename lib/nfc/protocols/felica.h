@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi_hal_nfc.h>
+#include <m-array.h>
 
 #define NFCF_F_SIG (13560000.0)
 #define MRT_T_SIG 302064.89 //ns, 256 * 16 / NFC_F_SIG * 1e9
@@ -113,12 +114,6 @@ typedef enum {
 } FelicaMRTCommandType;
 
 typedef FelicaMRTParts FelicaMRTParameters[6];
-
-typedef struct {
-    uint16_t number;
-    uint16_t end_service_code;
-} FelicaArea;
-
 typedef enum {
     FelicaBlockTypeNormal,
     FelicaBlockTypeOverlap,
@@ -134,13 +129,36 @@ typedef struct {
 
 // typedef struct {} FelicaOverlapBlock;
 
-typedef struct _FelicaService_t {
-    uint16_t number;
-    uint16_t block_count;
-    FelicaBlock** blocks;
+ARRAY_DEF(FelicaBlockList, FelicaBlock*, M_PTR_OPLIST);
 
-    struct _FelicaService_t* next;
+typedef struct {
+    uint16_t number;
+    FelicaBlockList_t blocks;
 } FelicaService;
+
+typedef enum {
+    FelicaNodeTypeArea,
+    FelicaNodeTypeService,
+} FelicaNodeType;
+
+struct _FelicaArea_t;
+typedef struct {
+    FelicaNodeType type;
+    union {
+        struct _FelicaArea_t* area;
+        FelicaService* service;
+    } ptr;
+} FelicaNode;
+ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST);
+
+typedef struct _FelicaArea_t {
+    uint16_t number;
+    bool can_create_subareas;
+    uint16_t end_service_code;
+
+    FelicaNodeList_t nodes;
+
+} FelicaArea;
 
 typedef struct _FelicaSystem_t {
     uint8_t number;
@@ -149,16 +167,18 @@ typedef struct _FelicaSystem_t {
     uint8_t pmm[8];
     FelicaMRTParameters maximum_response_times;
 
-    FelicaService* services;
-
-    struct _FelicaSystem_t* next;
+    /** This struct represents area 0,
+     * which always exists on a given system
+     */
+    FelicaArea root_area;
 } FelicaSystem;
+
+ARRAY_DEF(FelicaSystemList, FelicaSystem*, M_PTR_OPLIST);
 
 typedef struct {
     FelicaICType type;
     uint8_t subtype;
-    uint8_t system_count;
-    FelicaSystem* systems;
+    FelicaSystemList_t systems;
 } FelicaData;
 
 typedef struct {
@@ -170,8 +190,56 @@ typedef struct {
 
 bool felica_check_ic_type(uint8_t* PMm);
 FelicaICType felica_get_ic_type(uint8_t* PMm);
+
+uint8_t felica_prepare_unencrypted_read(
+    uint8_t* dest,
+    const FelicaReader* reader,
+    const uint16_t* service_code_list,
+    uint8_t service_count,
+    const uint32_t* block_list,
+    uint8_t block_count);
+uint8_t felica_lite_prepare_unencrypted_read(
+    uint8_t* dest,
+    const FelicaReader* reader,
+    bool is_read_only,
+    const uint8_t* block_list,
+    uint8_t block_count);
+uint16_t felica_parse_unencrypted_read(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    uint8_t* out,
+    uint16_t out_len);
+
+uint8_t felica_prepare_unencrypted_write(
+    uint8_t* dest,
+    FelicaReader* reader,
+    const uint16_t* service_code_list,
+    uint8_t service_count,
+    const uint32_t* block_list,
+    uint8_t block_count,
+    const uint8_t* block_data);
+uint8_t felica_lite_prepare_unencrypted_write(
+    uint8_t* dest,
+    const FelicaReader* reader,
+    const uint8_t* block_list,
+    uint8_t block_count,
+    const uint8_t* block_data);
+bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader);
+
+bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number);
+
+void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data);
+
+bool felica_read_lite_system(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaData* data,
+    FelicaSystem* system);
+
 bool felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
     uint8_t* polled_idm,
     uint8_t* polled_pmm);
+void felica_clear(FelicaData* data);
