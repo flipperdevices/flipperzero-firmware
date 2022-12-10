@@ -27,10 +27,6 @@ static Sensor* editable_sensor;
 
 static void _sensor_name_changed_callback(void* context) {
     UNUSED(context);
-    //Удаление пробелов из имени
-    for(uint8_t i = 0; i < 10; i++) {
-        if(editable_sensor->name[i] == ' ') editable_sensor->name[i] = '_';
-    }
     unitemp_SensorEdit_switch(editable_sensor);
 }
 

@@ -343,6 +343,11 @@ bool unitemp_sensors_load(void) {
         //Ограничение длины имени
         name[10] = '\0';
 
+        //Замена ? на пробел
+        for(uint8_t i = 0; i < 10; i++) {
+            if(name[i] == '?') name[i] = ' ';
+        }
+
         char* args = ((char*)(file_buf + line_end + offset));
         const SensorType* stype = unitemp_sensors_getTypeFromStr(type);
 
@@ -399,37 +404,42 @@ bool unitemp_sensors_save(void) {
 
     //Сохранение датчиков
     for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
-        if(unitemp_sensor_getActive(i)->type->interface == &SINGLE_WIRE) {
+        Sensor* sensor = unitemp_sensor_getActive(i);
+        //Замена пробела на ?
+        for(uint8_t i = 0; i < 10; i++) {
+            if(sensor->name[i] == ' ') sensor->name[i] = '?';
+        }
+        if(sensor->type->interface == &SINGLE_WIRE) {
             stream_write_format(
                 app->file_stream,
                 "%s %s %d\n",
-                unitemp_sensor_getActive(i)->name,
-                unitemp_sensor_getActive(i)->type->typename,
-                unitemp_singlewire_sensorGetGPIO(unitemp_sensor_getActive(i))->num);
+                sensor->name,
+                sensor->type->typename,
+                unitemp_singlewire_sensorGetGPIO(sensor)->num);
         }
-        if(unitemp_sensor_getActive(i)->type->interface == &I2C) {
+        if(sensor->type->interface == &I2C) {
             stream_write_format(
                 app->file_stream,
                 "%s %s %X\n",
-                unitemp_sensor_getActive(i)->name,
-                unitemp_sensor_getActive(i)->type->typename,
-                ((I2CSensor*)unitemp_sensor_getActive(i)->instance)->currentI2CAdr);
+                sensor->name,
+                sensor->type->typename,
+                ((I2CSensor*)sensor->instance)->currentI2CAdr);
         }
-        if(unitemp_sensor_getActive(i)->type->interface == &ONE_WIRE) {
+        if(sensor->type->interface == &ONE_WIRE) {
             stream_write_format(
                 app->file_stream,
                 "%s %s %d %02X%02X%02X%02X%02X%02X%02X%02X\n",
-                unitemp_sensor_getActive(i)->name,
-                unitemp_sensor_getActive(i)->type->typename,
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->bus->gpio->num,
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[0],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[1],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[2],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[3],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[4],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[5],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[6],
-                ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->deviceID[7]);
+                sensor->name,
+                sensor->type->typename,
+                ((OneWireSensor*)sensor->instance)->bus->gpio->num,
+                ((OneWireSensor*)sensor->instance)->deviceID[0],
+                ((OneWireSensor*)sensor->instance)->deviceID[1],
+                ((OneWireSensor*)sensor->instance)->deviceID[2],
+                ((OneWireSensor*)sensor->instance)->deviceID[3],
+                ((OneWireSensor*)sensor->instance)->deviceID[4],
+                ((OneWireSensor*)sensor->instance)->deviceID[5],
+                ((OneWireSensor*)sensor->instance)->deviceID[6],
+                ((OneWireSensor*)sensor->instance)->deviceID[7]);
         }
     }
 
