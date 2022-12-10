@@ -13,8 +13,4 @@ To add new presets and frequencies create file `yourMicroSD/pocsag/settings.txt`
 And put [THIS](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/assets/resources/subghz/assets/setting_user.example) file contents into it, and edit this example for yourself, add needed frequencies
 
 
-If you want to build Plugin straight from the repo - its currently compatible only with Unleashed firmware
-To build for OFW please comment line 9 in `pocsag_pager/pocsag_pager_app.c`
-
-
 All contributions are welcome!
