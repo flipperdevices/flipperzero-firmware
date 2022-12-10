@@ -120,7 +120,7 @@ POCSAGPagerApp* pocsag_pager_app_alloc() {
 
     // custom presets loading - end
 
-    pcsg_preset_init(app, "FM95", subghz_setting_get_default_frequency(app->setting), NULL, 0);
+    pcsg_preset_init(app, "FM95", 439987500, NULL, 0);
 
     app->txrx->hopper_state = PCSGHopperStateOFF;
     app->txrx->history = pcsg_history_alloc();
