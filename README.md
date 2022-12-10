@@ -5,7 +5,7 @@ Plugin based on [Weather Station](https://github.com/flipperdevices/flipperzero-
 
 Icons by @Svaarich
 
-Includes two FM presets built into code - with 9.5khz and 15khz deviation
+Includes new FM preset built into code - 2FSK with 9.5KHz freq deviation.
 
 Default frequency is set to DAPNET - `439987500` 
 
