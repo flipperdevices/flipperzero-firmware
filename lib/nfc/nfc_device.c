@@ -860,10 +860,10 @@ static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
                file,
                "Subtype of this card (0 = ISO15693, 1 = SLIX, 2 = SLIX-S, 3 = SLIX-L, 4 = SLIX2)"))
             break;
-        temp_uint8 = (uint8_t)data->type;
+        temp_uint8 = (uint8_t)data->sub_type;
         if(!flipper_format_write_hex(file, "Subtype", &temp_uint8, 1)) break;
 
-        switch(data->type) {
+        switch(data->sub_type) {
         case NfcVTypePlain:
             if(!flipper_format_write_comment_cstr(file, "End of ISO15693 parameters")) break;
             saved = true;
@@ -906,9 +906,9 @@ bool nfc_device_load_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
                file, "Data Content", data->data, data->block_num * data->block_size))
             break;
         if(!flipper_format_read_hex(file, "Subtype", &temp_value, 1)) break;
-        data->type = temp_value;
+        data->sub_type = temp_value;
 
-        switch(data->type) {
+        switch(data->sub_type) {
         case NfcVTypePlain:
             parsed = true;
             break;

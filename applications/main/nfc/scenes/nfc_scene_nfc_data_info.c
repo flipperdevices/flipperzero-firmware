@@ -55,7 +55,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
     } else if(protocol == NfcDeviceProtocolNfcV) {
-        switch(dev_data->nfcv_data.type) {
+        switch(dev_data->nfcv_data.sub_type) {
         case NfcVTypePlain:
             furi_string_cat_printf(temp_str, "\e#ISO15693\n");
             break;
@@ -113,7 +113,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
         furi_string_cat_printf(temp_str, "\n");
 
-        switch(dev_data->nfcv_data.type) {
+        switch(dev_data->nfcv_data.sub_type) {
         case NfcVTypePlain:
             furi_string_cat_printf(temp_str, "Type: Plain\n");
             break;
