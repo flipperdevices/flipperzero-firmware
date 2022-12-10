@@ -59,12 +59,10 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
         (app->settings.temp_unit == UT_TEMP_CELSIUS ? &I_temp_C_11x14 : &I_temp_F_11x14));
 
     if((int16_t)sensor->temp == -128 || sensor->status == UT_SENSORSTATUS_TIMEOUT) {
-        snprintf(app->buff, BUFF_SIZE, "--");
         canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(canvas, x + 27, y + 10, AlignCenter, AlignCenter, app->buff);
-        snprintf(app->buff, BUFF_SIZE, ". -");
+        canvas_draw_str_aligned(canvas, x + 27, y + 10, AlignCenter, AlignCenter, "--");
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, x + 50, y + 10 + 3, AlignRight, AlignCenter, app->buff);
+        canvas_draw_str_aligned(canvas, x + 50, y + 10 + 3, AlignRight, AlignCenter, ". -");
         if(color == ColorBlack) canvas_invert_color(canvas);
         return;
     }
@@ -96,18 +94,6 @@ static void _draw_humidity(Canvas* canvas, Sensor* sensor, const uint8_t pos[2])
 
     //Рисование иконки
     canvas_draw_icon(canvas, pos[0] + 3, pos[1] + 2, &I_hum_9x15);
-
-    if((int8_t)sensor->hum == -128 || sensor->status == UT_SENSORSTATUS_TIMEOUT) {
-        snprintf(app->buff, BUFF_SIZE, "--");
-        canvas_set_font(canvas, FontBigNumbers);
-        canvas_draw_str_aligned(
-            canvas, pos[0] + 27, pos[1] + 10, AlignCenter, AlignCenter, app->buff);
-        snprintf(app->buff, BUFF_SIZE, ". -");
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(
-            canvas, pos[0] + 50, pos[1] + 10 + 3, AlignRight, AlignCenter, app->buff);
-        return;
-    }
 
     //Целая часть влажности
     snprintf(app->buff, BUFF_SIZE, "%d", (uint8_t)sensor->hum);

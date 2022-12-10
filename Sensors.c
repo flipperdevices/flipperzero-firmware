@@ -614,7 +614,6 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
     if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK)
         uintemp_celsiumToFarengate(sensor);
     if(sensor->status == UT_SENSORSTATUS_OK) {
-        FURI_LOG_D(APP_NAME, "Pressure: %f Pa", (double)sensor->pressure);
         if(app->settings.pressure_unit == UT_PRESSURE_MM_HG) {
             unitemp_pascalToMmHg(sensor);
         } else if(app->settings.pressure_unit == UT_PRESSURE_IN_HG) {
