@@ -352,7 +352,14 @@ void WiFiScan::startWiFiAttacks(uint8_t scan_mode, uint16_t color, String title_
     display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
   #endif
   packets_sent = 0;
-  WiFi.mode(WIFI_AP_STA);
+  esp_wifi_init(&cfg);
+  esp_wifi_set_storage(WIFI_STORAGE_RAM);
+  esp_wifi_set_mode(WIFI_AP_STA);
+  esp_wifi_start();
+  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
+  
+  //WiFi.mode(WIFI_AP_STA);
+  
   //esp_wifi_init(&cfg);
   //esp_wifi_set_storage(WIFI_STORAGE_RAM);
   //esp_wifi_set_mode(WIFI_AP_STA);

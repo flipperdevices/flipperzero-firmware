@@ -5,8 +5,12 @@ void flipperLED::RunSetup() {
   pinMode(G_PIN, OUTPUT);
   pinMode(R_PIN, OUTPUT);
 
-  if (!settings_obj.loadSetting<bool>("EnableLED"))
+  if (!settings_obj.loadSetting<bool>("EnableLED")) {
+    digitalWrite(B_PIN, HIGH);
+    digitalWrite(G_PIN, HIGH);
+    digitalWrite(R_PIN, HIGH);
     return;
+  }
     
   delay(50);
 
