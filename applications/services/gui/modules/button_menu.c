@@ -342,7 +342,7 @@ void button_menu_set_selected_item(ButtonMenu* button_menu, uint32_t index) {
         button_menu->view,
         ButtonMenuModel * model,
         {
-            uint8_t item_position = 0;
+            size_t item_position = 0;
             ButtonMenuItemArray_it_t it;
             for(ButtonMenuItemArray_it(it, model->items); !ButtonMenuItemArray_end_p(it);
                 ButtonMenuItemArray_next(it), ++item_position) {
