@@ -27,7 +27,7 @@ const SensorType Dallas = {
     .altname = "Dallas (DS18x2x)",
     .interface = &ONE_WIRE,
     .datatype = UT_DATA_TYPE_TEMP,
-    .pollingInterval = 250,
+    .pollingInterval = 1000,
     .allocator = unitemp_onewire_sensor_alloc,
     .mem_releaser = unitemp_onewire_sensor_free,
     .initializer = unitemp_onewire_sensor_init,
@@ -385,7 +385,7 @@ bool unitemp_onewire_sensor_init(Sensor* sensor) {
         buff[0] = 0x4B; //Значение нижнего предела температуры
         buff[1] = 0x46; //Значение верхнего предела температуры
         //Конфигурация
-        buff[2] = 0x3F; //10 бит разрядность преобразования
+        buff[2] = 0b01111111; //12 бит разрядность преобразования
         unitemp_onewire_bus_send_byteArray(instance->bus, buff, 3);
 
         //Сохранение значений в EEPROM для автоматического восстановления после сбоев питания

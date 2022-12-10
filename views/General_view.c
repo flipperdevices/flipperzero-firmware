@@ -143,7 +143,7 @@ static void _draw_pressure(Canvas* canvas, Sensor* sensor) {
 static void _draw_singleSensor(Canvas* canvas, Sensor* sensor, const uint8_t pos[2], Color color) {
     canvas_set_font(canvas, FontPrimary);
 
-    const uint8_t max_width = 61;
+    const uint8_t max_width = 56;
 
     char sensor_name[12] = {0};
     memcpy(sensor_name, sensor->name, 10);
