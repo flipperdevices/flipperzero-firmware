@@ -38,7 +38,7 @@ const SensorType Dallas = {
 // найденный восьмибайтовый адрес
 static uint8_t onewire_enum[8] = {0};
 // последний нулевой бит, где была неоднозначность (нумеруя с единицы)
-uint8_t onewire_enum_fork_bit = 65;
+static uint8_t onewire_enum_fork_bit = 65;
 
 OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
     if(gpio == NULL) {
@@ -57,7 +57,7 @@ OneWireBus* uintemp_onewire_bus_alloc(const GPIO* gpio) {
     OneWireBus* bus = malloc(sizeof(OneWireBus));
     bus->device_count = 0;
     bus->gpio = gpio;
-    bus->powerMode = PWR_ACTIVE;
+    bus->powerMode = PWR_PASSIVE;
 #ifdef UNITEMP_DEBUG
     FURI_LOG_D(APP_NAME, "one wire bus (port %d) allocated", gpio->num);
 #endif
@@ -87,7 +87,6 @@ bool unitemp_onewire_bus_deinit(OneWireBus* bus) {
 #ifdef UNITEMP_DEBUG
     FURI_LOG_D(APP_NAME, "devices on wire %d: %d", bus->gpio->num, bus->device_count);
 #endif
-
     bus->device_count--;
     if(bus->device_count <= 0) {
         bus->device_count = 0;
@@ -115,7 +114,7 @@ bool unitemp_onewire_bus_start(OneWireBus* bus) {
     uint32_t t = furi_get_tick();
     while(!furi_hal_gpio_read(bus->gpio->pin)) {
         //Выход если шина не поднялась
-        if(furi_get_tick() - t > 100) return false;
+        if(furi_get_tick() - t > 10) return false;
     }
 
     furi_delay_us(100);
@@ -125,6 +124,9 @@ bool unitemp_onewire_bus_start(OneWireBus* bus) {
 }
 
 void unitemp_onewire_bus_send_bit(OneWireBus* bus, bool state) {
+    //Необходимо для стабильной работы при пассивном питании
+    if(bus->powerMode == PWR_PASSIVE) furi_delay_us(100);
+
     if(state) {
         // write 1
         furi_hal_gpio_write(bus->gpio->pin, false);
@@ -157,6 +159,7 @@ void unitemp_onewire_bus_send_byteArray(OneWireBus* bus, uint8_t* data, uint8_t 
 }
 
 bool unitemp_onewire_bus_read_bit(OneWireBus* bus) {
+    furi_delay_ms(1);
     furi_hal_gpio_write(bus->gpio->pin, false);
     furi_delay_us(2); // Длительность низкого уровня, минимум 1 мкс
     furi_hal_gpio_write(bus->gpio->pin, true);
@@ -181,7 +184,7 @@ void unitemp_onewire_bus_read_byteArray(OneWireBus* bus, uint8_t* data, uint8_t 
     }
 }
 
-uint8_t onewire_CRC_update(uint8_t crc, uint8_t b) {
+static uint8_t onewire_CRC_update(uint8_t crc, uint8_t b) {
     for(uint8_t p = 8; p; p--) {
         crc = ((crc ^ b) & 1) ? (crc >> 1) ^ 0b10001100 : (crc >> 1);
         b >>= 1;
@@ -202,13 +205,10 @@ char* unitemp_onewire_sensor_getModel(Sensor* sensor) {
     switch(ow_sensor->deviceID[0]) {
     case FC_DS18B20:
         return "DS18B20";
-        break;
     case FC_DS18S20:
         return "DS18S20";
-        break;
     case FC_DS1822:
         return "DS1822";
-        break;
     default:
         return "unknown";
     }
@@ -239,14 +239,12 @@ uint8_t* unitemp_onewire_bus_enum_next(OneWireBus* bus) {
 #ifdef UNITEMP_DEBUG
         FURI_LOG_D(APP_NAME, "All devices on wire %d is found", unitemp_gpio_toInt(bus->gpio));
 #endif
-
         return 0; // то просто выходим ничего не возвращая
     }
     if(!unitemp_onewire_bus_start(bus)) {
 #ifdef UNITEMP_DEBUG
         FURI_LOG_D(APP_NAME, "Wire %d is empty", unitemp_gpio_toInt(bus->gpio));
 #endif
-
         return 0;
     }
     uint8_t bp = 8;
@@ -283,7 +281,6 @@ uint8_t* unitemp_onewire_bus_enum_next(OneWireBus* bus) {
 #ifdef UNITEMP_DEBUG
                 FURI_LOG_D(APP_NAME, "Wrong wire %d situation", unitemp_gpio_toInt(bus->gpio));
 #endif
-
                 return 0;
             }
         }
@@ -409,6 +406,11 @@ bool unitemp_onewire_sensor_deinit(Sensor* sensor) {
 }
 
 UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
+    //Снятие особого статуса с датчика при пассивном режиме питания
+    if(sensor->status == UT_SENSORSTATUS_EARLYPOOL) {
+        return UT_SENSORSTATUS_POLLING;
+    }
+
     OneWireSensor* instance = sensor->instance;
     uint8_t buff[9] = {0};
     if(sensor->status != UT_SENSORSTATUS_POLLING) {
@@ -422,13 +424,26 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
 #ifdef UNITEMP_DEBUG
                 FURI_LOG_D(APP_NAME, "Sensor %s is not found", sensor->name);
 #endif
-
                 return UT_SENSORSTATUS_TIMEOUT;
             }
         }
 
         if(!unitemp_onewire_bus_start(instance->bus)) return UT_SENSORSTATUS_TIMEOUT;
-        unitemp_onewire_bus_select_sensor(instance);
+        //Запуск преобразования на всех датчиках в режиме пассивного питания
+        if(instance->bus->powerMode == PWR_PASSIVE) {
+            unitemp_onewire_bus_send_byte(instance->bus, 0xCC); // skip addr
+            //Установка на всех датчиках этой шины особого статуса, чтобы не запускать преобразование ещё раз
+            for(uint8_t i = 0; i < unitemp_sensors_getActiveCount(); i++) {
+                if(unitemp_sensor_getActive(i)->type->interface == &ONE_WIRE &&
+                   ((OneWireSensor*)unitemp_sensor_getActive(i)->instance)->bus == instance->bus) {
+                    unitemp_sensor_getActive(i)->status = UT_SENSORSTATUS_EARLYPOOL;
+                }
+            }
+
+        } else {
+            unitemp_onewire_bus_select_sensor(instance);
+        }
+
         unitemp_onewire_bus_send_byte(instance->bus, 0x44); // convert t
         if(instance->bus->powerMode == PWR_PASSIVE) {
             furi_hal_gpio_write(instance->bus->gpio->pin, true);
@@ -450,7 +465,6 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
 #ifdef UNITEMP_DEBUG
             FURI_LOG_D(APP_NAME, "Failed CRC check: %s", sensor->name);
 #endif
-
             return UT_SENSORSTATUS_BADCRC;
         }
         int16_t raw = buff[0] | ((int16_t)buff[1] << 8);
@@ -464,7 +478,7 @@ UnitempStatus unitemp_onewire_sensor_update(Sensor* sensor) {
     return UT_SENSORSTATUS_OK;
 }
 
-bool unitemp_onewire_id_coUT_PRESSURE_KPAre(uint8_t* id1, uint8_t* id2) {
+bool unitemp_onewire_id_compare(uint8_t* id1, uint8_t* id2) {
     if(id1 == NULL || id2 == NULL) return false;
     for(uint8_t i = 0; i < 8; i++) {
         if(id1[i] != id2[i]) return false;
