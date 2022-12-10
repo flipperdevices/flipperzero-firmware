@@ -12,6 +12,7 @@ App(
     ],
     stack_size=2 * 1024,
     order=90,
+	fap_icon_assets="icons",
 	fap_icon="zeitraffer.png",
     fap_category="Misc",
 	fap_description="Simple intervalometer app",
