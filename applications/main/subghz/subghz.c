@@ -188,7 +188,7 @@ SubGhz* subghz_alloc(bool alloc_for_tx_only) {
         subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user.txt"), true);
     }
 
-    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
+    // subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
 
     // Custom Presets load without using config file
 
