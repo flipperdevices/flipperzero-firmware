@@ -15,8 +15,8 @@ Thank you to all the supporters!
 ## Latest Updates
 
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-09 12:28 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-09 12:28 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-10 04:20 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-10 04:20 EST`
 - Added: [NFC bug fixes #2098 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2098)
 
 ## Install from Release
@@ -216,6 +216,7 @@ $ ./fbt resources icons dolphin_ext
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
+- [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)()
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) [Changes by Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) [(More protocols thanks to darmiel & xMasterX)](https://github.com/darmiel/flipper-playlist/blob/feat/unirf-protocols/applications/unirfremix/unirfremix_app.c)
