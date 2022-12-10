@@ -5,9 +5,6 @@
 #include <lib/flipper_format/flipper_format.h>
 #include "protocols/protocol_items.h"
 
-// Comment next line to build on OFW
-//#define IS_UNLEASHED
-
 static bool pocsag_pager_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     POCSAGPagerApp* app = context;
@@ -84,12 +81,10 @@ POCSAGPagerApp* pocsag_pager_app_alloc() {
     //init setting
     app->setting = subghz_setting_alloc();
 
-//ToDo FIX  file name setting
-#ifdef IS_UNLEASHED
-    subghz_setting_load(app->setting, EXT_PATH("pocsag/settings.txt"), true);
-#else
+    //ToDo FIX  file name setting
+
     subghz_setting_load(app->setting, EXT_PATH("pocsag/settings.txt"));
-#endif
+
     //init Worker & Protocol & History
     app->lock = PCSGLockOff;
     app->txrx = malloc(sizeof(POCSAGPagerTxRx));
