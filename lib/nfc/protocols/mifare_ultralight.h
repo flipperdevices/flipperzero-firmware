@@ -200,7 +200,7 @@ typedef struct {
 
 void mf_ul_reset(MfUltralightData* data);
 
-bool mf_ul_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK);
+bool mf_ul_check_card_type(FuriHalNfcADevData* data);
 
 bool mf_ultralight_read_version(
     FuriHalNfcTxRxContext* tx_rx,
