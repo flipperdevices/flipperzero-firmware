@@ -33,7 +33,6 @@ typedef enum {
 } AnimationManagerState;
 
 struct AnimationManager {
-    bool dummy_mode;
     bool sd_show_url;
     bool sd_shown_no_db;
     bool sd_shown_sd_ok;
@@ -53,6 +52,7 @@ struct AnimationManager {
     FuriString* freezed_animation_name;
     int32_t freezed_animation_time_left;
     ViewStack* view_stack;
+    bool dummy_mode;
 };
 
 static StorageAnimation*
@@ -92,6 +92,12 @@ void animation_manager_set_interact_callback(
     AnimationManagerInteractCallback callback) {
     furi_assert(animation_manager);
     animation_manager->interact_callback = callback;
+}
+
+void animation_manager_set_dummy_mode_state(AnimationManager* animation_manager, bool enabled) {
+    furi_assert(animation_manager);
+    animation_manager->dummy_mode = enabled;
+    animation_manager_start_new_idle(animation_manager);
 }
 
 static void animation_manager_check_blocking_callback(const void* message, void* context) {
