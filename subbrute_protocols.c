@@ -290,6 +290,50 @@ const SubBruteProtocol subbrute_protocol_smc5326_24bit_433 = {
     .file = RAWFileProtocol};
 
 /**
+ * PT2260 (Princeton) 24bit 315MHz
+ */
+const SubBruteProtocol subbrute_protocol_pt2260_24bit_315 = {
+    .frequency = 315000000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = PrincetonFileProtocol};
+
+/**
+ * PT2260 (Princeton) 24bit 330MHz
+ */
+const SubBruteProtocol subbrute_protocol_pt2260_24bit_330 = {
+    .frequency = 330000000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = PrincetonFileProtocol};
+
+/**
+ * PT2260 (Princeton) 24bit 390MHz
+ */
+const SubBruteProtocol subbrute_protocol_pt2260_24bit_390 = {
+    .frequency = 390000000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = PrincetonFileProtocol};
+
+/**
+ * PT2260 (Princeton) 24bit 433MHz
+ */
+const SubBruteProtocol subbrute_protocol_pt2260_24bit_433 = {
+    .frequency = 433920000,
+    .bits = 24,
+    .te = 0,
+    .repeat = 5,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = PrincetonFileProtocol};
+
+/**
  * BF existing dump
  */
 const SubBruteProtocol subbrute_protocol_load_file =
@@ -322,6 +366,10 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackUNILARM24bit433] = "UNILARM 24bit 433MHz",
     [SubBruteAttackSMC532624bit330] = "SMC5326 24bit 330MHz",
     [SubBruteAttackSMC532624bit433] = "SMC5326 24bit 433MHz",
+    [SubBruteAttackPT226024bit315] = "PT2260 24bit 315MHz",
+    [SubBruteAttackPT226024bit330] = "PT2260 24bit 330MHz",
+    [SubBruteAttackPT226024bit390] = "PT2260 24bit 390MHz",
+    [SubBruteAttackPT226024bit433] = "PT2260 24bit 433MHz",
     [SubBruteAttackLoadFile] = "BF existing dump",
     [SubBruteAttackTotalCount] = "Total Count",
 };
@@ -363,6 +411,10 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackUNILARM24bit433] = &subbrute_protocol_unilarm_24bit_433,
     [SubBruteAttackSMC532624bit330] = &subbrute_protocol_smc5326_24bit_330,
     [SubBruteAttackSMC532624bit433] = &subbrute_protocol_smc5326_24bit_433,
+    [SubBruteAttackPT226024bit315] = &subbrute_protocol_pt2260_24bit_315,
+    [SubBruteAttackPT226024bit330] = &subbrute_protocol_pt2260_24bit_330,
+    [SubBruteAttackPT226024bit390] = &subbrute_protocol_pt2260_24bit_390,
+    [SubBruteAttackPT226024bit433] = &subbrute_protocol_pt2260_24bit_433,
     [SubBruteAttackLoadFile] = &subbrute_protocol_load_file};
 
 static const char* subbrute_protocol_file_types[] = {
