@@ -47,7 +47,7 @@ typedef struct {
     //Время последнего обновления калибровочных значений
     uint32_t last_cal_update_time;
     //Корректировочное значение температуры
-    uint32_t t_fine;
+    int32_t t_fine;
 } BMP280_instance;
 
 extern const SensorType BMP280;

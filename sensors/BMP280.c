@@ -75,41 +75,48 @@ const SensorType BMP280 = {
 #define BMP280_SPI_3W_ENABLE 0b00000001
 #define BMP280_SPI_3W_DISABLE 0b00000000
 
-static double bmp280_compensate_T_double(I2CSensor* i2c_sensor, int32_t adc_T) {
+static float bmp280_compensate_T_float(I2CSensor* i2c_sensor, int32_t adc_T) {
     BMP280_instance* bmp280_instance = (BMP280_instance*)i2c_sensor->sensorInstance;
-    double var1, var2, T;
-    var1 = (((double)adc_T) / (double)16384.0 -
-            ((double)bmp280_instance->temp_cal.dig_T1) / (double)1024.0) *
-           ((double)bmp280_instance->temp_cal.dig_T2);
-    var2 = ((((double)adc_T) / (double)131072.0 -
-             ((double)bmp280_instance->temp_cal.dig_T1) / (double)8192.0) *
-            (((double)adc_T) / (double)131072.0 -
-             ((double)bmp280_instance->temp_cal.dig_T1) / (double)8192.0)) *
-           ((double)bmp280_instance->temp_cal.dig_T3);
+    int32_t var1, var2;
+    var1 = ((((adc_T >> 3) - ((int32_t)bmp280_instance->temp_cal.dig_T1 << 1))) *
+            ((int32_t)bmp280_instance->temp_cal.dig_T2)) >>
+           11;
+    var2 = (((((adc_T >> 4) - ((int32_t)bmp280_instance->temp_cal.dig_T1)) *
+              ((adc_T >> 4) - ((int32_t)bmp280_instance->temp_cal.dig_T1))) >>
+             12) *
+            ((int32_t)bmp280_instance->temp_cal.dig_T3)) >>
+           14;
     bmp280_instance->t_fine = var1 + var2;
-    T = (var1 + var2) / (double)5120.0;
-    return T;
+    return ((bmp280_instance->t_fine * 5 + 128) >> 8) / 100.0f;
 }
 
-static double bmp280_compensate_P_double(I2CSensor* i2c_sensor, int32_t adc_P) {
+static float bmp280_compensate_P_float(I2CSensor* i2c_sensor, int32_t adc_P) {
     BMP280_instance* bmp280_instance = (BMP280_instance*)i2c_sensor->sensorInstance;
-    double var1, var2, p;
-    var1 = ((double)bmp280_instance->t_fine / (double)2.0) - (double)64000.0;
-    var2 = var1 * var1 * ((double)bmp280_instance->press_cal.dig_P6) / (double)32768.0;
-    var2 = var2 + var1 * ((double)bmp280_instance->press_cal.dig_P5) * (double)2.0;
-    var2 = (var2 / (double)4.0) + (((double)bmp280_instance->press_cal.dig_P4) * (double)65536.0);
-    var1 = (((double)bmp280_instance->press_cal.dig_P3) * var1 * var1 / (double)524288.0 +
-            ((double)bmp280_instance->press_cal.dig_P2) * var1) /
-           (double)524288.0;
-    var1 = ((double)1.0 + var1 / (double)32768.0) * ((double)bmp280_instance->press_cal.dig_P1);
-    if(var1 == (double)0.0) {
+
+    int32_t var1, var2;
+    uint32_t p;
+    var1 = (((int32_t)bmp280_instance->t_fine) >> 1) - (int32_t)64000;
+    var2 = (((var1 >> 2) * (var1 >> 2)) >> 11) * ((int32_t)bmp280_instance->press_cal.dig_P6);
+    var2 = var2 + ((var1 * ((int32_t)bmp280_instance->press_cal.dig_P5)) << 1);
+    var2 = (var2 >> 2) + (((int32_t)bmp280_instance->press_cal.dig_P4) << 16);
+    var1 = (((bmp280_instance->press_cal.dig_P3 * (((var1 >> 2) * (var1 >> 2)) >> 13)) >> 3) +
+            ((((int32_t)bmp280_instance->press_cal.dig_P2) * var1) >> 1)) >>
+           18;
+    var1 = ((((32768 + var1)) * ((int32_t)bmp280_instance->press_cal.dig_P1)) >> 15);
+    if(var1 == 0) {
         return 0; // avoid exception caused by division by zero
     }
-    p = (double)1048576.0 - (double)adc_P;
-    p = (p - (var2 / (double)4096.0)) * (double)6250.0 / var1;
-    var1 = ((double)bmp280_instance->press_cal.dig_P9) * p * p / (double)2147483648.0;
-    var2 = p * ((double)bmp280_instance->press_cal.dig_P8) / (double)32768.0;
-    p = p + (var1 + var2 + ((double)bmp280_instance->press_cal.dig_P7)) / (double)16.0;
+    p = (((uint32_t)(((int32_t)1048576) - adc_P) - (var2 >> 12))) * 3125;
+    if(p < 0x80000000) {
+        p = (p << 1) / ((uint32_t)var1);
+    } else {
+        p = (p / (uint32_t)var1) * 2;
+    }
+    var1 = (((int32_t)bmp280_instance->press_cal.dig_P9) *
+            ((int32_t)(((p >> 3) * (p >> 3)) >> 13))) >>
+           12;
+    var2 = (((int32_t)(p >> 2)) * ((int32_t)bmp280_instance->press_cal.dig_P8)) >> 13;
+    p = (uint32_t)((int32_t)p + ((var1 + var2 + bmp280_instance->press_cal.dig_P7) >> 4));
     return p;
 }
 
@@ -240,8 +247,8 @@ UnitempStatus unitemp_BMP280_update(Sensor* sensor) {
     int32_t adc_T = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
     if(!unitemp_i2c_readRegArray(i2c_sensor, 0xF7, 3, buff)) return UT_SENSORSTATUS_TIMEOUT;
     int32_t adc_P = ((int32_t)buff[0] << 12) | ((int32_t)buff[1] << 4) | ((int32_t)buff[2] >> 4);
-    sensor->temp = bmp280_compensate_T_double(i2c_sensor, adc_T);
-    sensor->pressure = bmp280_compensate_P_double(i2c_sensor, adc_P);
+    sensor->temp = bmp280_compensate_T_float(i2c_sensor, adc_T);
+    sensor->pressure = bmp280_compensate_P_float(i2c_sensor, adc_P);
     return UT_SENSORSTATUS_OK;
 }
 
