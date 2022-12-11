@@ -363,6 +363,7 @@ int32_t zeitraffer_app(void* p) {
 			}
 			
 			if( WorkCount < 1 ) { // закончили
+				Work = false;
 				gpio_item_set_all_pins(false);
 				furi_timer_stop(timer); 
 				notification_message(notifications, &sequence_audiovisual_alert);
