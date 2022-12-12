@@ -982,7 +982,7 @@ uint8_t SD_GoIdleState(void) {
             SD_IO_WriteByte(SD_DUMMY_BYTE);
 
             /* Send ACMD41 (SD_CMD_SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors) */
-            response = SD_SendCmd(SD_CMD_SD_APP_OP_COND, 0x00000000, 0xFF, SD_ANSWER_R1_EXPECTED);
+            response = SD_SendCmd(SD_CMD_SD_APP_OP_COND, 0x00000000, 0xFF, SD_ANSWER_R1_EXPECTED); //-V519
             SD_IO_CSState(1);
             SD_IO_WriteByte(SD_DUMMY_BYTE);
             if(counter >= SD_MAX_TRY) {
@@ -1001,7 +1001,7 @@ uint8_t SD_GoIdleState(void) {
             SD_IO_WriteByte(SD_DUMMY_BYTE);
 
             /* Send ACMD41 (SD_CMD_SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors) */
-            response = SD_SendCmd(SD_CMD_SD_APP_OP_COND, 0x40000000, 0xFF, SD_ANSWER_R1_EXPECTED);
+            response = SD_SendCmd(SD_CMD_SD_APP_OP_COND, 0x40000000, 0xFF, SD_ANSWER_R1_EXPECTED); //-V519
             SD_IO_CSState(1);
             SD_IO_WriteByte(SD_DUMMY_BYTE);
             if(counter >= SD_MAX_TRY) {

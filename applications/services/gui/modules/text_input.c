@@ -481,7 +481,6 @@ void text_input_reset(TextInput* text_input) {
         text_input->view,
         TextInputModel * model,
         {
-            model->text_buffer_size = 0;
             model->header = "";
             model->selected_row = 0;
             model->selected_column = 0;

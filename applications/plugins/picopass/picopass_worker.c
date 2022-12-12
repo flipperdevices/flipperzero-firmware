@@ -143,7 +143,7 @@ ReturnCode picopass_read_preauth(PicopassBlock* AA1) {
         AA1[PICOPASS_CSN_BLOCK_INDEX].data[7]);
 
     rfalPicoPassReadBlockRes cfg = {0};
-    err = rfalPicoPassPollerReadBlock(PICOPASS_CONFIG_BLOCK_INDEX, &cfg);
+    rfalPicoPassPollerReadBlock(PICOPASS_CONFIG_BLOCK_INDEX, &cfg);
     memcpy(AA1[PICOPASS_CONFIG_BLOCK_INDEX].data, cfg.data, sizeof(cfg.data));
     FURI_LOG_D(
         TAG,
@@ -158,7 +158,7 @@ ReturnCode picopass_read_preauth(PicopassBlock* AA1) {
         AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7]);
 
     rfalPicoPassReadBlockRes aia;
-    err = rfalPicoPassPollerReadBlock(PICOPASS_AIA_BLOCK_INDEX, &aia);
+    rfalPicoPassPollerReadBlock(PICOPASS_AIA_BLOCK_INDEX, &aia);
     memcpy(AA1[PICOPASS_AIA_BLOCK_INDEX].data, aia.data, sizeof(aia.data));
     FURI_LOG_D(
         TAG,
