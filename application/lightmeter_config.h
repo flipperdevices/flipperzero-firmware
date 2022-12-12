@@ -1,6 +1,6 @@
 #pragma once
 
-#define LM_VERSION_APP "0.6"
+#define LM_VERSION_APP "0.7"
 #define LM_DEVELOPED "Oleksii Kutuzov"
 #define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
 
@@ -98,5 +98,10 @@ typedef enum {
     WITHOUT_DOME,
     WITH_DOME,
 } LightMeterDomePresence;
+
+typedef enum {
+    LUX_ONLY_OFF,
+    LUX_ONLY_ON,
+} LightMeterLuxOnlyMode;
 
 typedef enum { BACKLIGHT_AUTO, BACKLIGHT_ON } LightMeterBacklight;
