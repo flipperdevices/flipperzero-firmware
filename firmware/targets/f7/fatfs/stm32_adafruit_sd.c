@@ -405,9 +405,9 @@ uint8_t BSP_SD_GetCardInfo(SD_CardInfo* pCardInfo) {
         pCardInfo->LogBlockNbr = (pCardInfo->CardCapacity) / (pCardInfo->LogBlockSize);
     } else {
         pCardInfo->CardCapacity = (pCardInfo->Csd.version.v1.DeviceSize + 1);
-        pCardInfo->CardCapacity *= (1 << (pCardInfo->Csd.version.v1.DeviceSizeMul + 2));
+        pCardInfo->CardCapacity *= (1UL << (pCardInfo->Csd.version.v1.DeviceSizeMul + 2));
         pCardInfo->LogBlockSize = 512;
-        pCardInfo->CardBlockSize = 1 << (pCardInfo->Csd.RdBlockLen);
+        pCardInfo->CardBlockSize = 1UL << (pCardInfo->Csd.RdBlockLen);
         pCardInfo->CardCapacity *= pCardInfo->CardBlockSize;
         pCardInfo->LogBlockNbr = (pCardInfo->CardCapacity) / (pCardInfo->LogBlockSize);
     }
@@ -541,7 +541,7 @@ uint8_t BSP_SD_WriteBlocks(
         }
 
         /* Send dummy byte for NWR timing : one byte between CMDWRITE and TOKEN */
-        SD_IO_WriteByte(SD_DUMMY_BYTE);
+        SD_IO_WriteByte(SD_DUMMY_BYTE); //-V525
         SD_IO_WriteByte(SD_DUMMY_BYTE);
 
         /* Send the data token to signify the start of the data */
