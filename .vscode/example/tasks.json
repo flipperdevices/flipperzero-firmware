@@ -132,7 +132,7 @@
         {
             "label": "[Debug] Launch App on Flipper with Serial Console",
             "dependsOrder": "sequence",
-            "problemMatcher": [],
+            "group": "build",
             "dependsOn": [
                 "[Debug] Launch App on Flipper",
                 "Serial Console"
@@ -142,9 +142,14 @@
             // Press Ctrl+] to quit
             "label": "Serial Console",
             "type": "shell",
-            "command": "./scripts/serial_cli.py",
+            "command": "./fbt cli",
             "group": "none",
             "isBackground": true,
+			"options": {
+                "env": {
+                    "FBT_NO_SYNC": "0"
+                }
+            },
             "presentation": {
                 "reveal": "always",
                 "revealProblems": "never",
