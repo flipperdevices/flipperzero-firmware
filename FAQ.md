@@ -20,7 +20,7 @@ Pull the repo with recursive submodule initialization and then run `./build.ps1`
 
 ## Where is config file?
 
-At first start app will create new config file (default location is [`/ext/apps/Misc/totp.conf`](https://github.com/akopachov/flipper-zero_authenticator/blob/master/totp/services/config/config.c#:~:text=%23define%20CONFIG_FILE_DIRECTORY_PATH,totp.conf%22)).
+At first start app will create new config file (default location is [`/ext/authenticator/totp.conf`](https://github.com/akopachov/flipper-zero_authenticator/blob/master/totp/services/config/config.c#:~:text=%23define%20CONFIG_FILE_DIRECTORY_PATH,totp.conf%22)).
 
 Detailed description of file format can be found [here](docs/conf-file_description.md)
 
