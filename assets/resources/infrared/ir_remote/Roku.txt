@@ -7,6 +7,6 @@ OK: Ok
 BACK: Back
 UPHOLD: V_up
 DOWNHOLD: V_down
-LEFTHOLD: Opt
-RIGHTHOLD: Return
+LEFTHOLD: Play
+RIGHTHOLD: Home
 OKHOLD: Power
