@@ -48,9 +48,9 @@ size_t pocsag_tx_rx_worker_read(PocsagTxRxWorker* instance, uint8_t* data, size_
  * @param context
  */
 void pocsag_tx_rx_worker_set_callback_have_read(
-        PocsagTxRxWorker* instance,
-        PocsagTxRxWorkerCallbackHaveRead callback,
-        void* context);
+    PocsagTxRxWorker* instance,
+    PocsagTxRxWorkerCallbackHaveRead callback,
+    void* context);
 
 /**
  * Allocate SubGhzTxRxWorker

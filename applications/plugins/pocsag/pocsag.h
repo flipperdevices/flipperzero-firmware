@@ -9,7 +9,6 @@
 #include <gui/modules/submenu.h>
 #include "core/pocsag_tx_rx_worker.h"
 
-
 typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
@@ -18,7 +17,6 @@ typedef struct {
     uint32_t view_id;
     PocsagTxRxWorker* subghz_tx_rx;
 } PocsagApp;
-
 
 enum {
     PocsagViewSubmenu,

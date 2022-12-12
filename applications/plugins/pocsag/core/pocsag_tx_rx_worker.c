@@ -32,7 +32,7 @@ bool pocsag_tx_rx_worker_write(PocsagTxRxWorker* instance, uint8_t* data, size_t
     size_t stream_tx_free_byte = furi_stream_buffer_spaces_available(instance->stream_tx);
     if(size && (stream_tx_free_byte >= size)) {
         if(furi_stream_buffer_send(
-                instance->stream_tx, data, size, POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF) ==
+               instance->stream_tx, data, size, POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF) ==
            size) {
             ret = true;
         }
@@ -51,9 +51,9 @@ size_t pocsag_tx_rx_worker_read(PocsagTxRxWorker* instance, uint8_t* data, size_
 }
 
 void pocsag_tx_rx_worker_set_callback_have_read(
-        PocsagTxRxWorker* instance,
-        PocsagTxRxWorkerCallbackHaveRead callback,
-        void* context) {
+    PocsagTxRxWorker* instance,
+    PocsagTxRxWorkerCallbackHaveRead callback,
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
     furi_assert(context);
@@ -82,10 +82,10 @@ bool pocsag_tx_rx_worker_rx(PocsagTxRxWorker* instance, uint8_t* data, uint8_t* 
 
     if(furi_hal_subghz_rx_pipe_not_empty()) {
         FURI_LOG_I(
-                TAG,
-                "RSSI: %03.1fdbm LQI: %d",
-                (double)furi_hal_subghz_get_rssi(),
-                furi_hal_subghz_get_lqi());
+            TAG,
+            "RSSI: %03.1fdbm LQI: %d",
+            (double)furi_hal_subghz_get_rssi(),
+            furi_hal_subghz_get_lqi());
         if(furi_hal_subghz_is_rx_data_crc_valid()) {
             furi_hal_subghz_read_packet(data, size);
             ret = true;
@@ -130,9 +130,9 @@ static int32_t pocsag_tx_rx_worker_thread(void* context) {
     PocsagTxRxWorker* instance = context;
     FURI_LOG_I(TAG, "Worker start");
 
-//    furi_hal_subghz_reset();
-//    furi_hal_subghz_idle();
-//    furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
+    //    furi_hal_subghz_reset();
+    //    furi_hal_subghz_idle();
+    //    furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
     pocsag_hal_reset();
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
@@ -152,15 +152,15 @@ static int32_t pocsag_tx_rx_worker_thread(void* context) {
             timeout_tx = 10; //20ms
             if(size_tx > POCSAG_TXRX_WORKER_MAX_TXRX_SIZE) {
                 furi_stream_buffer_receive(
-                        instance->stream_tx,
-                        &data,
-                        POCSAG_TXRX_WORKER_MAX_TXRX_SIZE,
-                        POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
+                    instance->stream_tx,
+                    &data,
+                    POCSAG_TXRX_WORKER_MAX_TXRX_SIZE,
+                    POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
                 pocsag_tx_rx_worker_tx(instance, data, POCSAG_TXRX_WORKER_MAX_TXRX_SIZE);
             } else {
                 //todo checking that he managed to write all the data to the TX buffer
                 furi_stream_buffer_receive(
-                        instance->stream_tx, &data, size_tx, POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
+                    instance->stream_tx, &data, size_tx, POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
                 pocsag_tx_rx_worker_tx(instance, data, size_tx);
             }
         } else {
@@ -173,10 +173,10 @@ static int32_t pocsag_tx_rx_worker_thread(void* context) {
                     }
                     //todo checking that he managed to write all the data to the RX buffer
                     furi_stream_buffer_send(
-                            instance->stream_rx,
-                            &data,
-                            size_rx[0],
-                            POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
+                        instance->stream_rx,
+                        &data,
+                        size_rx[0],
+                        POCSAG_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
                     if(callback_rx) {
                         instance->callback_have_read(instance->context_have_read);
                         callback_rx = false;
@@ -202,11 +202,11 @@ PocsagTxRxWorker* pocsag_tx_rx_worker_alloc() {
     PocsagTxRxWorker* instance = malloc(sizeof(PocsagTxRxWorker));
 
     instance->thread =
-            furi_thread_alloc_ex("PocsagTxRxWorker", 2048, pocsag_tx_rx_worker_thread, instance);
+        furi_thread_alloc_ex("PocsagTxRxWorker", 2048, pocsag_tx_rx_worker_thread, instance);
     instance->stream_tx =
-            furi_stream_buffer_alloc(sizeof(uint8_t) * POCSAG_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
+        furi_stream_buffer_alloc(sizeof(uint8_t) * POCSAG_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
     instance->stream_rx =
-            furi_stream_buffer_alloc(sizeof(uint8_t) * POCSAG_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
+        furi_stream_buffer_alloc(sizeof(uint8_t) * POCSAG_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
 
     instance->status = PocsagTxRxWorkerStatusIDLE;
     instance->worker_stoping = true;
