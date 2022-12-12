@@ -7,8 +7,8 @@
 #include "gpio_item.h"
 #include "GPIO_Intervalometer_icons.h"
 
-#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/intravalometer"
-#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/intravalometer.conf"
+#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps_data/intravelometer"
+#define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/intravelometer.conf"
 
 // Часть кода покрадена из https://github.com/zmactep/flipperzero-hello-world
 

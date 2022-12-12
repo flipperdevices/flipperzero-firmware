@@ -22,6 +22,7 @@ Thank you to all the supporters!
 - Fixed Cannot Parse File error thanks to @ClaraCrazy
 - Fixed snake scoring showing +7
 - Added: [POCSAG (By Shmuma)](https://github.com/Shmuma/flipper-zero-pocsag)
+- Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
