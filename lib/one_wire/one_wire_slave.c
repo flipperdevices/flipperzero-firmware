@@ -155,8 +155,10 @@ bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
     uint8_t cmd;
     onewire_slave_receive(bus, &cmd, 1);
 
-    if(bus->error == RESET_IN_PROGRESS) return true;
-    else if(bus->error != NO_ERROR) return false;
+    if(bus->error == RESET_IN_PROGRESS)
+        return true;
+    else if(bus->error != NO_ERROR)
+        return false;
 
     switch(cmd) {
     case 0xF0:
