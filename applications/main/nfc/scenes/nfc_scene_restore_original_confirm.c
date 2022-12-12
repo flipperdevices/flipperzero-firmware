@@ -28,7 +28,7 @@ bool nfc_scene_restore_original_confirm_on_event(void* context, SceneManagerEven
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultRight) {
-            if(!nfc_device_restore(nfc->dev, true)) {
+            if(!nfc_device_restore(nfc->dev, NFC_APP_FOLDER, true)) {
                 scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneStart);
             } else {

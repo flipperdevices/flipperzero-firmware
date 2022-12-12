@@ -8,7 +8,7 @@ void nfc_scene_file_select_on_enter(void* context) {
     if(!furi_string_size(nfc->dev->load_path)) {
         furi_string_set_str(nfc->dev->load_path, NFC_APP_FOLDER);
     }
-    if(nfc_file_select(nfc->dev)) {
+    if(nfc_file_select(nfc->dev, NFC_APP_FOLDER)) {
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, 0);
         scene_manager_next_scene(nfc->scene_manager, NfcSceneSavedMenu);
     } else {
