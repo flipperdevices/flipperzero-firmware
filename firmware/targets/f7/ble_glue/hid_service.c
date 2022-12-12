@@ -86,7 +86,7 @@ void hid_svc_start() {
     }
 
 #if(HID_SVC_REPORT_COUNT != 0)
-    for(uint8_t i = 0; i < HID_SVC_REPORT_COUNT; i++) {
+    for(uint8_t i = 0; i < HID_SVC_REPORT_COUNT; i++) { //-V547
         if(i < HID_SVC_INPUT_REPORT_COUNT) {
             uint8_t buf[2] = {i + 1, 1}; // 1 input
             char_uuid.Char_UUID_16 = REPORT_CHAR_UUID;
