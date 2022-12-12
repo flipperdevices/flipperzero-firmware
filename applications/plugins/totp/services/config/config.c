@@ -6,9 +6,10 @@
 #include "../../types/token_info.h"
 #include "migrations/config_migration_v1_to_v2.h"
 
-#define CONFIG_FILE_DIRECTORY_PATH "/ext/apps/Misc"
+#define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/authenticator")
 #define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/totp.conf"
 #define CONFIG_FILE_BACKUP_PATH CONFIG_FILE_PATH ".backup"
+#define CONFIG_FILE_PATH_PREVIOUS EXT_PATH("apps/Misc") "/totp.conf"
 
 static char* token_info_get_algo_as_cstr(const TokenInfo* token_info) {
     switch(token_info->algo) {
@@ -53,6 +54,24 @@ FlipperFormat* totp_open_config_file(Storage* storage) {
             totp_close_config_file(fff_data_file);
             return NULL;
         }
+    } else if(storage_common_stat(storage, CONFIG_FILE_PATH_PREVIOUS, NULL) == FSE_OK) {
+        FURI_LOG_D(LOGGING_TAG, "Old config file %s found", CONFIG_FILE_PATH_PREVIOUS);
+        if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
+            FURI_LOG_D(
+                LOGGING_TAG,
+                "Directory %s doesn't exist. Will create new.",
+                CONFIG_FILE_DIRECTORY_PATH);
+            if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
+                FURI_LOG_E(LOGGING_TAG, "Error creating directory %s", CONFIG_FILE_DIRECTORY_PATH);
+                return NULL;
+            }
+        }
+        if(storage_common_rename(storage, CONFIG_FILE_PATH_PREVIOUS, CONFIG_FILE_PATH) != FSE_OK) {
+            FURI_LOG_E(LOGGING_TAG, "Error moving config to %s", CONFIG_FILE_PATH);
+            return NULL;
+        }
+        FURI_LOG_I(LOGGING_TAG, "Applied config file path migration");
+        return totp_open_config_file(storage);
     } else {
         FURI_LOG_D(LOGGING_TAG, "Config file %s is not found. Will create new.", CONFIG_FILE_PATH);
         if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
