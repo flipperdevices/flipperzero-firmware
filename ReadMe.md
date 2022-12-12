@@ -24,6 +24,7 @@ Thank you to all the supporters!
 - Added: [POCSAG (By Shmuma)](https://github.com/Shmuma/flipper-zero-pocsag)
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - Added: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
+- Removed: [POCSAG (By Shmuma)](https://github.com/Shmuma/flipper-zero-pocsag)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -222,7 +223,6 @@ $ ./fbt resources icons dolphin_ext
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
-- [POCSAG (By Shmuma)](https://github.com/Shmuma/flipper-zero-pocsag)
 - [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) [Changes by Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
