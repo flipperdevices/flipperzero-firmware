@@ -161,6 +161,18 @@ static void power_auto_shutdown_inhibit(Power* power) {
     }
 }
 
+static void power_loader_callback(const void* message, void* context) {
+    furi_assert(context);
+    Power* power = context;
+    const LoaderEvent* event = message;
+
+    if(event->type == LoaderEventTypeApplicationStarted) {
+        power_auto_shutdown_inhibit(power);
+    } else if(event->type == LoaderEventTypeApplicationStopped) {
+        power_auto_shutdown_arm(power);
+    }
+}
+
 static void power_auto_shutdown_timer_callback(void* context) {
     furi_assert(context);
     Power* power = context;
@@ -189,9 +201,13 @@ Power* power_alloc() {
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
     power->settings_events = furi_pubsub_alloc();
-    furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
+    power->loader = furi_record_open(RECORD_LOADER);
     power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     power->input_events_subscription = NULL;
+    power->app_start_stop_subscription =
+        furi_pubsub_subscribe(loader_get_pubsub(power->loader), power_loader_callback, power);
+    power->settings_events_subscription =
+        furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
 
     power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     power->input_events_subscription = NULL;
@@ -241,14 +257,18 @@ void power_free(Power* power) {
     furi_mutex_free(power->api_mtx);
 
     // FuriPubSub
-    furi_pubsub_free(power->event_pubsub);
-    furi_pubsub_free(power->settings_events);
-    furi_pubsub_free(power->input_events_pubsub);
+    furi_pubsub_unsubscribe(loader_get_pubsub(power->loader), power->app_start_stop_subscription);
+    furi_pubsub_unsubscribe(power->settings_events, power->settings_events_subscription);
 
     if(power->input_events_subscription) {
         furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
         power->input_events_subscription = NULL;
     }
+
+    furi_pubsub_free(power->event_pubsub);
+    furi_pubsub_free(power->settings_events);
+    power->loader = NULL;
+    power->input_events_pubsub = NULL;
 
     //Auto shutdown timer
     furi_timer_free(power->auto_shutdown_timer);
@@ -256,6 +276,8 @@ void power_free(Power* power) {
     // Records
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_LOADER);
+    furi_record_close(RECORD_INPUT_EVENTS);
 
     free(power);
 }
