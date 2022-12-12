@@ -22,6 +22,7 @@ struct SubGhzFrequencyAnalyzerWorker {
 
     volatile bool worker_running;
     uint8_t sample_hold_counter;
+    float rssi_min_thresh;
     FrequencyRSSI frequency_rssi_buf;
     SubGhzSetting* setting;
 
@@ -154,7 +155,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             (double)rssi_min);
 
         // Second stage: fine scan
-        if(frequency_rssi.rssi_coarse > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
+        if(frequency_rssi.rssi_coarse > instance->rssi_min_thresh) {
             furi_hal_subghz_idle();
             subghz_frequency_analyzer_worker_load_registers(subghz_preset_ook_58khz);
             //for example -0.3 ... 433.92 ... +0.3 step 20KHz
@@ -189,7 +190,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
         }
 
         // Deliver results fine
-        if(frequency_rssi.rssi_fine > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) {
+        if(frequency_rssi.rssi_fine > instance->rssi_min_thresh) {
             FURI_LOG_D(
                 TAG, "=:%lu:%f", frequency_rssi.frequency_fine, (double)frequency_rssi.rssi_fine);
 
@@ -205,10 +206,14 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             // Deliver callback
             if(instance->pair_callback) {
                 instance->pair_callback(
-                    instance->context, frequency_rssi.frequency_fine, rssi_temp, true);
+                    instance->context,
+                    frequency_rssi.frequency_fine,
+                    rssi_temp,
+                    true,
+                    &instance->rssi_min_thresh);
             }
         } else if( // Deliver results coarse
-            (frequency_rssi.rssi_coarse > SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) &&
+            (frequency_rssi.rssi_coarse > instance->rssi_min_thresh) &&
             (instance->sample_hold_counter < 10)) {
             FURI_LOG_D(
                 TAG,
@@ -227,7 +232,11 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
             // Deliver callback
             if(instance->pair_callback) {
                 instance->pair_callback(
-                    instance->context, frequency_rssi.frequency_coarse, rssi_temp, true);
+                    instance->context,
+                    frequency_rssi.frequency_coarse,
+                    rssi_temp,
+                    true,
+                    &instance->rssi_min_thresh);
             }
         } else {
             if(instance->sample_hold_counter > 0) {
@@ -235,13 +244,18 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                 if(instance->sample_hold_counter == 15) {
                     if(instance->pair_callback) {
                         instance->pair_callback(
-                            instance->context, frequency_temp, rssi_temp, false);
+                            instance->context,
+                            frequency_temp,
+                            rssi_temp,
+                            false,
+                            &instance->rssi_min_thresh);
                     }
                 }
             } else {
                 instance->filVal = 0;
                 rssi_temp = -127.0f;
-                instance->pair_callback(instance->context, 0, 0, false);
+                instance->pair_callback(
+                    instance->context, 0, 0, false, &instance->rssi_min_thresh);
             }
         }
     }
@@ -261,6 +275,7 @@ SubGhzFrequencyAnalyzerWorker* subghz_frequency_analyzer_worker_alloc(void* cont
         "SubGhzFAWorker", 2048, subghz_frequency_analyzer_worker_thread, instance);
     SubGhz* subghz = context;
     instance->setting = subghz->setting;
+    instance->rssi_min_thresh = SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD;
     return instance;
 }
 
