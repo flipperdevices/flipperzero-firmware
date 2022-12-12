@@ -9,6 +9,7 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
+    fap_version=(0, 7),
     fap_icon="lightmeter.png",
     fap_category="GPIO",
     fap_private_libs=[
