@@ -17,7 +17,7 @@ void storage_file_init_set(StorageFile* obj, const StorageFile* src) {
     obj->path = furi_string_alloc_set(src->path);
 }
 
-void storage_file_set(StorageFile* obj, const StorageFile* src) {
+void storage_file_set(StorageFile* obj, const StorageFile* src) { //-V524
     obj->file = src->file;
     obj->type = src->type;
     obj->file_data = src->file_data;
