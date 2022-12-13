@@ -179,9 +179,13 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
     } else {
         canvas_draw_str(canvas, 20, 8, "Frequency Analyzer");
         canvas_draw_str(canvas, 0, 64, "RSSI");
-        canvas_draw_str(canvas, 0, 38, "Threshold:");
-        snprintf(buffer, sizeof(buffer), "%.1f", (double)model->rssi_min_thresh);
-        canvas_draw_str(canvas, 0, 47, buffer);
+        canvas_draw_str(canvas, 8, 40, "Threshold:");
+        snprintf(buffer, sizeof(buffer), "%.1fdB", (double)model->rssi_min_thresh);
+
+        canvas_draw_triangle(canvas, 3, 38, 6, 6, CanvasDirectionBottomToTop);
+        canvas_draw_triangle(canvas, 3, 42, 6, 6, CanvasDirectionTopToBottom);
+
+        canvas_draw_str(canvas, 8, 49, buffer);
 
         subghz_frequency_analyzer_draw_rssi(canvas, model->rssi, 20, 64);
 
@@ -369,6 +373,7 @@ void subghz_frequency_analyzer_pair_callback(
     bool signal,
     float* rssi_thresh) {
     SubGhzFrequencyAnalyzer* instance = context;
+
     if((rssi == 0.f) && (instance->locked)) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
