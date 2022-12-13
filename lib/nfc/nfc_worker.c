@@ -404,7 +404,6 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     FuriHalNfcTxRxContext tx_rx = {};
     NfcWorkerEvent event = 0;
-    bool card_not_detected_notified = false;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
         if(furi_hal_nfc_detect(nfc_data, 300)) {
@@ -412,7 +411,6 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
             furi_hal_nfc_sleep();
             // Process first found device
             nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
-            card_not_detected_notified = false;
             if(nfc_data->type == FuriHalNfcTypeA) {
                 if(read_mode == NfcReadModeMfClassic) {
                     nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
@@ -454,10 +452,7 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
                     break;
                 }
             } else {
-                if(!card_not_detected_notified) {
-                    nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
-                    card_not_detected_notified = true;
-                }
+                nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
             }
         }
         furi_hal_nfc_sleep();
