@@ -6,7 +6,7 @@ Based off the WiFi Marauder App from 0xchocolate.
 
 Thanks to Roguemaster for fixing some issues I had with the code and didnt get a chance to get to. I have now uploaded these changes into the source. 
 
-I have also successfully built this with unleashed souce as well and included the FAP file here. unleashed version unlshd-018.
+I have also successfully built this with unleashed souce as well and included the FAP file here. unleashed version unlshd-020.
 
 https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion
 
