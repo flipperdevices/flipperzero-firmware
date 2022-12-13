@@ -30,9 +30,9 @@
  *      - u: unknown;
  *      - b: battery low; flag to indicate low battery voltage
  *      - s: temperature sign
- *      - T: Temperature; in °C * 10
- *      - t: Temperature; in °C * 1
- *      - z: Temperature; in °C * 0.1
+ *      - T: BCD, Temperature; in °C * 10
+ *      - t: BCD, Temperature; in °C * 1
+ *      - z: BCD, Temperature; in °C * 0.1
  *      - c: Channel 00=CH1, 01=CH2, 10=CH3
  * 
  */
