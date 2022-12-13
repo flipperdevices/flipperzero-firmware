@@ -37,6 +37,12 @@ static VariableItem* sensor_name_item;
 static VariableItem* onewire_addr_item;
 //Элемент списка - адрес датчика one wire
 static VariableItem* onewire_type_item;
+//Элемент списка - смещение температуры
+VariableItem* temp_offset_item;
+
+#define OFFSET_BUFF_SIZE 5
+//Буффер для текста смещения
+static char* offset_buff;
 
 extern uint8_t generalview_sensor_index;
 
@@ -154,8 +160,8 @@ static void _enter_callback(void* context, uint32_t index) {
         unitemp_SensorNameEdit_switch(editable_sensor);
     }
     //Сохранение
-    if((index == 3 && editable_sensor->type->interface != &ONE_WIRE) ||
-       (index == 4 && editable_sensor->type->interface == &ONE_WIRE)) {
+    if((index == 4 && editable_sensor->type->interface != &ONE_WIRE) ||
+       (index == 5 && editable_sensor->type->interface == &ONE_WIRE)) {
         //Выход если датчик one wire не имеет ID
         if(editable_sensor->type->interface == &ONE_WIRE &&
            ((OneWireSensor*)(editable_sensor->instance))->familyCode == 0) {
@@ -175,7 +181,7 @@ static void _enter_callback(void* context, uint32_t index) {
     }
 
     //Адрес устройства на шине one wire
-    if(index == 3 && editable_sensor->type->interface == &ONE_WIRE) {
+    if(index == 4 && editable_sensor->type->interface == &ONE_WIRE) {
         _onewire_scan();
     }
 }
@@ -233,6 +239,18 @@ static void _onwire_addr_change_callback(VariableItem* item) {
 }
 
 /**
+ * @brief Функция обработки изменения значения смещения температуры
+ * 
+ * @param item Указатель на элемент списка
+ */
+static void _offset_change_callback(VariableItem* item) {
+    editable_sensor->temp_offset = variable_item_get_current_value_index(item) - 20;
+    snprintf(
+        offset_buff, OFFSET_BUFF_SIZE, "%+1.1f", (double)(editable_sensor->temp_offset / 10.0));
+    variable_item_set_current_value_text(item, offset_buff);
+}
+
+/**
  * @brief Создание меню редактирования датчка
  */
 void unitemp_SensorEdit_alloc(void) {
@@ -249,6 +267,8 @@ void unitemp_SensorEdit_alloc(void) {
     view_set_previous_callback(view, _exit_callback);
     //Добавление вида в диспетчер
     view_dispatcher_add_view(app->view_dispatcher, VIEW_ID, view);
+
+    offset_buff = malloc(OFFSET_BUFF_SIZE);
 }
 
 void unitemp_SensorEdit_switch(Sensor* sensor) {
@@ -274,6 +294,13 @@ void unitemp_SensorEdit_switch(Sensor* sensor) {
         onewire_type_item,
         (sensor->type->interface == &ONE_WIRE ? unitemp_onewire_sensor_getModel(editable_sensor) :
                                                 sensor->type->typename));
+    //Смещение температуры
+    temp_offset_item = variable_item_list_add(
+        variable_item_list, "Temp. offset", 41, _offset_change_callback, NULL);
+    variable_item_set_current_value_index(temp_offset_item, sensor->temp_offset + 20);
+    snprintf(
+        offset_buff, OFFSET_BUFF_SIZE, "%+1.1f", (double)(editable_sensor->temp_offset / 10.0));
+    variable_item_set_current_value_text(temp_offset_item, offset_buff);
 
     //Порт подключения датчка (для one wire и single wire)
     if(sensor->type->interface == &ONE_WIRE || sensor->type->interface == &SINGLE_WIRE) {
@@ -345,4 +372,5 @@ void unitemp_SensorEdit_free(void) {
     view_free(view);
     //Удаление вида после обработки
     view_dispatcher_remove_view(app->view_dispatcher, VIEW_ID);
+    free(offset_buff);
 }

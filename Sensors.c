@@ -336,10 +336,12 @@ bool unitemp_sensors_load(void) {
         char name[11] = {0};
         //Тип датчика
         char type[11] = {0};
+        //Смещение по температуре
+        int temp_offset = 0;
         //Смещение по строке для отделения аргументов
         int offset = 0;
         //Чтение из строки
-        sscanf(((char*)(file_buf + line_end)), "%s %s %n", name, type, &offset);
+        sscanf(((char*)(file_buf + line_end)), "%s %s %d %n", name, type, &temp_offset, &offset);
         //Ограничение длины имени
         name[10] = '\0';
 
@@ -356,6 +358,7 @@ bool unitemp_sensors_load(void) {
             Sensor* sensor =
                 unitemp_sensor_alloc(name, unitemp_sensors_getTypeFromStr(type), args);
             if(sensor != NULL) {
+                sensor->temp_offset = temp_offset;
                 unitemp_sensors_add(sensor);
             } else {
                 FURI_LOG_E(APP_NAME, "Failed sensor (%s:%s) mem allocation", name, type);
@@ -409,28 +412,26 @@ bool unitemp_sensors_save(void) {
         for(uint8_t i = 0; i < 10; i++) {
             if(sensor->name[i] == ' ') sensor->name[i] = '?';
         }
+
+        stream_write_format(
+            app->file_stream,
+            "%s %s %d ",
+            sensor->name,
+            sensor->type->typename,
+            sensor->temp_offset);
+
         if(sensor->type->interface == &SINGLE_WIRE) {
             stream_write_format(
-                app->file_stream,
-                "%s %s %d\n",
-                sensor->name,
-                sensor->type->typename,
-                unitemp_singlewire_sensorGetGPIO(sensor)->num);
+                app->file_stream, "%d\n", unitemp_singlewire_sensorGetGPIO(sensor)->num);
         }
         if(sensor->type->interface == &I2C) {
             stream_write_format(
-                app->file_stream,
-                "%s %s %X\n",
-                sensor->name,
-                sensor->type->typename,
-                ((I2CSensor*)sensor->instance)->currentI2CAdr);
+                app->file_stream, "%X\n", ((I2CSensor*)sensor->instance)->currentI2CAdr);
         }
         if(sensor->type->interface == &ONE_WIRE) {
             stream_write_format(
                 app->file_stream,
-                "%s %s %d %02X%02X%02X%02X%02X%02X%02X%02X\n",
-                sensor->name,
-                sensor->type->typename,
+                "%d %02X%02X%02X%02X%02X%02X%02X%02X\n",
                 ((OneWireSensor*)sensor->instance)->bus->gpio->num,
                 ((OneWireSensor*)sensor->instance)->deviceID[0],
                 ((OneWireSensor*)sensor->instance)->deviceID[1],
@@ -494,6 +495,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
     sensor->temp = -128.0f;
     sensor->hum = -128.0f;
     sensor->pressure = -128.0f;
+    sensor->temp_offset = 0;
     //Выделение памяти под инстанс датчика в зависимости от его интерфейса
     status = sensor->type->interface->allocator(sensor, args);
 
@@ -624,6 +626,7 @@ UnitempStatus unitemp_sensor_updateData(Sensor* sensor) {
     if(app->settings.temp_unit == UT_TEMP_FAHRENHEIT && sensor->status == UT_SENSORSTATUS_OK)
         uintemp_celsiumToFarengate(sensor);
     if(sensor->status == UT_SENSORSTATUS_OK) {
+        sensor->temp += sensor->temp_offset / 10.f;
         if(app->settings.pressure_unit == UT_PRESSURE_MM_HG) {
             unitemp_pascalToMmHg(sensor);
         } else if(app->settings.pressure_unit == UT_PRESSURE_IN_HG) {

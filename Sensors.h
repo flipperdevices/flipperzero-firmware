@@ -127,6 +127,8 @@ typedef struct Sensor {
     UnitempStatus status;
     //Время последнего опроса датчика
     uint32_t lastPollingTime;
+    //Смещение по температуре (x10)
+    int8_t temp_offset;
     //Экземпляр датчика
     void* instance;
 } Sensor;
