@@ -24,3 +24,6 @@
 
 # Bitwise OR
 //-V:bit:792
+
+# Do not complain about similar code
+//-V::V525

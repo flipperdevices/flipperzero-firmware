@@ -541,7 +541,7 @@ uint8_t BSP_SD_WriteBlocks(
         }
 
         /* Send dummy byte for NWR timing : one byte between CMDWRITE and TOKEN */
-        SD_IO_WriteByte(SD_DUMMY_BYTE); //-V525
+        SD_IO_WriteByte(SD_DUMMY_BYTE);
         SD_IO_WriteByte(SD_DUMMY_BYTE);
 
         /* Send the data token to signify the start of the data */

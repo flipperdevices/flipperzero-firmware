@@ -242,7 +242,7 @@ static bool
     }
     // +send 2 status bit
     instance->encoder.upload[index++] =
-        level_duration_make(true, (uint32_t)subghz_protocol_keeloq_const.te_short); //-V525
+        level_duration_make(true, (uint32_t)subghz_protocol_keeloq_const.te_short);
     instance->encoder.upload[index++] =
         level_duration_make(false, (uint32_t)subghz_protocol_keeloq_const.te_long);
     // send end
