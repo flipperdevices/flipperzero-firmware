@@ -160,7 +160,7 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
 
         if(subghz->txrx->transmitter) {
             if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format)) {
-                if(strcmp(furi_string_get_cstr(subghz->txrx->preset->name), "")) {
+                if(strcmp(furi_string_get_cstr(subghz->txrx->preset->name), "") != 0) {
                     subghz_begin(
                         subghz,
                         subghz_setting_get_preset_data_by_name(
