@@ -31,4 +31,4 @@ Screenshots:
 ![](./misc/5.png)
 
 
-Compatible with firmware v. 9CD0592A from 28 Oct. 2022
+Compatible with firmware v. 0.73.1 from 6 Dec. 2022
