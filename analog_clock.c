@@ -101,7 +101,7 @@ int32_t analog_clock_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     FuriTimer* timer = furi_timer_alloc(analog_clock_app_tick, FuriTimerTypePeriodic, event_queue);
-    furi_timer_start(timer, 100);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10); // 10 times per second
 
     AppEvent event;
     for(bool running = true; running;) {
