@@ -574,7 +574,7 @@ static bool nfc_device_save_mifare_df_data(FlipperFormat* file, NfcDevice* dev) 
             tmp = malloc(n_apps * 3);
             int i = 0;
             for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
-                memcpy(tmp + i, app->id, 3);
+                memcpy(tmp + i, app->id, 3); //-V769
                 i += 3;
             }
             if(!flipper_format_write_hex(file, "Application IDs", tmp, n_apps * 3)) break;
