@@ -47,7 +47,7 @@ static int32_t music_player_worker_thread_callback(void* context) {
 
     NoteBlockArray_it_t it;
     NoteBlockArray_it(it, instance->notes);
-    if(furi_hal_speaker_acquire(&furi_hal_speaker_handle, 100)) {
+    if(furi_hal_speaker_acquire(1000)) {
         while(instance->should_work) {
             if(NoteBlockArray_end_p(it)) {
                 NoteBlockArray_it(it, instance->notes);
@@ -76,19 +76,19 @@ static int32_t music_player_worker_thread_callback(void* context) {
                         instance->callback_context);
                 }
 
-                furi_hal_speaker_stop(&furi_hal_speaker_handle);
-                furi_hal_speaker_start(&furi_hal_speaker_handle, frequency, volume);
+                furi_hal_speaker_stop();
+                furi_hal_speaker_start(frequency, volume);
                 while(instance->should_work && furi_get_tick() < next_tick) {
                     volume *= 0.9945679;
-                    furi_hal_speaker_set_volume(&furi_hal_speaker_handle, volume);
+                    furi_hal_speaker_set_volume(volume);
                     furi_delay_ms(2);
                 }
                 NoteBlockArray_next(it);
             }
         }
 
-        furi_hal_speaker_stop(&furi_hal_speaker_handle);
-        furi_hal_speaker_release(&furi_hal_speaker_handle);
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
     } else {
         FURI_LOG_E(TAG, "Speaker system is busy with another process.");
         furi_crash("MusicPlayerWorker: Speaker system is busy with another process.");
