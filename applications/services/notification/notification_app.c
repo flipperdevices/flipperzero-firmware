@@ -150,7 +150,7 @@ void notification_vibro_off() {
 }
 
 void notification_sound_on(float freq, float volume) {
-    if(furi_hal_speaker_acquire(10)) {
+    if(furi_hal_speaker_acquire(0)) {
         furi_hal_speaker_start(freq, volume);
     }
 }

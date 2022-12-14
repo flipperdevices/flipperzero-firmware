@@ -30,25 +30,22 @@ void furi_hal_speaker_deinit() {
 }
 
 bool furi_hal_speaker_acquire(uint32_t timeout) {
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
-    while(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) != 0) {
-        if(furi_hal_cortex_timer_is_expired(timer)) {
-            return false;
-        }
+    if(furi_mutex_acquire(furi_hal_speaker_bus_mutex, timeout) == FuriStatusOk) {
+        furi_hal_power_insomnia_enter();
+        furi_hal_gpio_init_ex(
+            &gpio_speaker, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
+        return true;
+    } else {
+        return false;
     }
-    furi_hal_power_insomnia_enter();
-    furi_check(furi_mutex_acquire(furi_hal_speaker_bus_mutex, FuriWaitForever) == FuriStatusOk);
-    furi_hal_gpio_init_ex(
-        &gpio_speaker, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
-    return true;
 }
 
 void furi_hal_speaker_release() {
-    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
-    furi_check(furi_mutex_release(furi_hal_speaker_bus_mutex) == FuriStatusOk);
+    furi_check(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
     furi_hal_speaker_stop();
     furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_power_insomnia_exit();
+    furi_check(furi_mutex_release(furi_hal_speaker_bus_mutex) == FuriStatusOk);
 }
 
 bool furi_hal_speaker_is_mine() {
@@ -89,7 +86,7 @@ static inline uint32_t furi_hal_speaker_calculate_compare(float volume) {
 }
 
 void furi_hal_speaker_start(float frequency, float volume) {
-    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
+    furi_check(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
 
     if(volume <= 0) {
         furi_hal_speaker_stop();
@@ -112,7 +109,7 @@ void furi_hal_speaker_start(float frequency, float volume) {
 }
 
 void furi_hal_speaker_set_volume(float volume) {
-    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
+    furi_check(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
     if(volume <= 0) {
         furi_hal_speaker_stop();
         return;
@@ -126,7 +123,7 @@ void furi_hal_speaker_set_volume(float volume) {
 }
 
 void furi_hal_speaker_stop() {
-    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
+    furi_check(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
     LL_TIM_DisableAllOutputs(FURI_HAL_SPEAKER_TIMER);
     LL_TIM_DisableCounter(FURI_HAL_SPEAKER_TIMER);
 }
