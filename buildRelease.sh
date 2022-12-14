@@ -1,4 +1,4 @@
-rm -rf RM*-*-*.tgz RM*-*-*.zip .sconsign.dblite dist build assets/resources/apps
+rm -rf RM*-*-*.tgz RM*-*-*.zip .sconsign.dblite dist build assets/resources/apps latest.tgz latest.zip
 git pull
 ./fbt updater_package
 DATE_VAR=`date +%m%d`
