@@ -16,7 +16,10 @@
 # Potentially null argument warnings
 //-V:memset:575
 //-V:memcpy:575
+//-V:memcmp:575
+//-V:strlen:575
 //-V:strcpy:575
+//-V:strncpy:575
 //-V:strchr:575
 
 # For loop warning on M_FOREACH

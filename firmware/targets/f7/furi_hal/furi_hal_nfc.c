@@ -609,9 +609,9 @@ static uint16_t furi_hal_nfc_data_and_parity_to_bitstream(
             out[curr_bit_pos / 8] = next_par_bit;
             curr_bit_pos++;
         } else {
-            out[curr_bit_pos / 8] |= data[i] << curr_bit_pos % 8;
+            out[curr_bit_pos / 8] |= data[i] << (curr_bit_pos % 8);
             out[curr_bit_pos / 8 + 1] = data[i] >> (8 - curr_bit_pos % 8);
-            out[curr_bit_pos / 8 + 1] |= next_par_bit << curr_bit_pos % 8;
+            out[curr_bit_pos / 8 + 1] |= next_par_bit << (curr_bit_pos % 8);
             curr_bit_pos += 9;
         }
     }
@@ -635,7 +635,7 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     uint16_t bit_processed = 0;
     memset(out_parity, 0, in_buff_bits / 9);
     while(bit_processed < in_buff_bits) {
-        out_data[curr_byte] = in_buff[bit_processed / 8] >> bit_processed % 8;
+        out_data[curr_byte] = in_buff[bit_processed / 8] >> (bit_processed % 8);
         out_data[curr_byte] |= in_buff[bit_processed / 8 + 1] << (8 - bit_processed % 8);
         out_parity[curr_byte / 8] |= FURI_BIT(in_buff[bit_processed / 8 + 1], bit_processed % 8)
                                      << (7 - curr_byte % 8);
