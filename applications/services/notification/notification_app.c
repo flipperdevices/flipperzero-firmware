@@ -150,17 +150,16 @@ void notification_vibro_off() {
 }
 
 void notification_sound_on(float freq, float volume) {
-    if(furi_hal_speaker_acquire(&furi_hal_speaker_handle, 0)){
-        furi_hal_speaker_start(&furi_hal_speaker_handle, freq, volume);
-    }   
+    if(furi_hal_speaker_acquire(10)) {
+        furi_hal_speaker_start(freq, volume);
+    }
 }
 
 void notification_sound_off() {
-    if(furi_hal_speaker_is_mine(&furi_hal_speaker_handle)){
-        furi_hal_speaker_stop(&furi_hal_speaker_handle);
-        furi_hal_speaker_release(&furi_hal_speaker_handle);
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
     }
-    
 }
 
 // display timer

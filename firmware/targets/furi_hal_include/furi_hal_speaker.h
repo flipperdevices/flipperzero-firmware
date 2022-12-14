@@ -4,7 +4,6 @@
  */
 #pragma once
 
-#include <furi_hal_speaker_config.h>
 #include <furi.h>
 
 #ifdef __cplusplus
@@ -15,17 +14,17 @@ void furi_hal_speaker_init();
 
 void furi_hal_speaker_deinit();
 
-bool furi_hal_speaker_acquire(FuriHalSpeakerBusHandle* handle, uint32_t timeout);
+bool furi_hal_speaker_acquire(uint32_t timeout);
 
-void furi_hal_speaker_release(FuriHalSpeakerBusHandle* handle);
+void furi_hal_speaker_release();
 
-bool furi_hal_speaker_is_mine(FuriHalSpeakerBusHandle* handle);
+bool furi_hal_speaker_is_mine();
 
-void furi_hal_speaker_start(FuriHalSpeakerBusHandle* handle, float frequency, float volume);
+void furi_hal_speaker_start(float frequency, float volume);
 
-void furi_hal_speaker_set_volume(FuriHalSpeakerBusHandle* handle, float volume);
+void furi_hal_speaker_set_volume(float volume);
 
-void furi_hal_speaker_stop(FuriHalSpeakerBusHandle* handle);
+void furi_hal_speaker_stop();
 
 #ifdef __cplusplus
 }

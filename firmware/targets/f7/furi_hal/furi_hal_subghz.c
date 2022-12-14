@@ -8,6 +8,7 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_speaker.h>
 
 #include <stm32wbxx_ll_dma.h>
 
@@ -33,7 +34,7 @@
  * Make sure it is not connected directly to power or ground
  */
 
-//#define SUBGHZ_DEBUG_CC1101_PIN gpio_ext_pa7
+#define SUBGHZ_DEBUG_CC1101_PIN gpio_speaker //gpio_ext_pa7
 #ifdef SUBGHZ_DEBUG_CC1101_PIN
 uint32_t subghz_debug_gpio_buff[2];
 #endif
@@ -460,8 +461,10 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     LL_TIM_EnableCounter(TIM2);
 
 #ifdef SUBGHZ_DEBUG_CC1101_PIN
-    furi_hal_gpio_init(
-        &SUBGHZ_DEBUG_CC1101_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    if(furi_hal_speaker_acquire(0)) {
+        furi_hal_gpio_init(
+            &SUBGHZ_DEBUG_CC1101_PIN, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    }
 #endif
 
     // Switch to RX
@@ -479,7 +482,11 @@ void furi_hal_subghz_stop_async_rx() {
     LL_TIM_DeInit(TIM2);
 
 #ifdef SUBGHZ_DEBUG_CC1101_PIN
-    furi_hal_gpio_init(&SUBGHZ_DEBUG_CC1101_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_gpio_init(&SUBGHZ_DEBUG_CC1101_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_speaker_release();
+    }
+
 #endif
 
     FURI_CRITICAL_EXIT();

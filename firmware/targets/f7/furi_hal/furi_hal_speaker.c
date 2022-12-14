@@ -8,55 +8,51 @@
 
 #define TAG "FuriHalSpeaker"
 
+#define FURI_HAL_SPEAKER_TIMER TIM16
+#define FURI_HAL_SPEAKER_CHANNEL LL_TIM_CHANNEL_CH1
+#define FURI_HAL_SPEAKER_PRESCALER 500
+#define FURI_HAL_SPEAKER_MAX_VOLUME 60
+
+FuriMutex* furi_hal_speaker_bus_mutex = NULL;
+
 // #define FURI_HAL_SPEAKER_NEW_VOLUME
 
 void furi_hal_speaker_init() {
-    furi_hal_speaker_bus.callback(&furi_hal_speaker_bus, FuriHalSpeakerBusEventInit);
+    furi_hal_speaker_bus_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    LL_TIM_DeInit(FURI_HAL_SPEAKER_TIMER);
     FURI_LOG_I(TAG, "Init OK");
 }
 
 void furi_hal_speaker_deinit() {
-    furi_hal_speaker_bus.callback(&furi_hal_speaker_bus, FuriHalSpeakerBusEventDeinit);
+    LL_TIM_DeInit(FURI_HAL_SPEAKER_TIMER);
+    furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_mutex_free(furi_hal_speaker_bus_mutex);
 }
 
-bool furi_hal_speaker_acquire(FuriHalSpeakerBusHandle* handle, uint32_t timeout) {
-    furi_assert(handle);
+bool furi_hal_speaker_acquire(uint32_t timeout) {
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout * 1000);
-    while(handle->bus->current_handle != NULL) {
+    while(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) != 0) {
         if(furi_hal_cortex_timer_is_expired(timer)) {
             return false;
         }
     }
     furi_hal_power_insomnia_enter();
-    // Lock bus access
-    handle->bus->callback(handle->bus, FuriHalSpeakerBusEventLock);
-    // Ensuree that no active handle set
-    furi_check(handle->bus->current_handle == NULL);
-    // Set current handle
-    handle->bus->current_handle = handle;
-    // Activate bus
-    handle->bus->callback(handle->bus, FuriHalSpeakerBusEventActivate);
-    // Activate handle
-    handle->callback(handle, FuriHalSpeakerBusHandleEventActivate);
+    furi_check(furi_mutex_acquire(furi_hal_speaker_bus_mutex, FuriWaitForever) == FuriStatusOk);
+    furi_hal_gpio_init_ex(
+        &gpio_speaker, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
     return true;
 }
 
-void furi_hal_speaker_release(FuriHalSpeakerBusHandle* handle) {
-    // Ensure that current handle is our handle
-    furi_check(handle->bus->current_handle == handle);
-    // Deactivate handle
-    handle->callback(handle, FuriHalSpeakerBusHandleEventDeactivate);
-    // Deactivate bus
-    handle->bus->callback(handle->bus, FuriHalSpeakerBusEventDeactivate);
-    // Reset current handle
-    handle->bus->current_handle = NULL;
-    // Unlock bus
-    handle->bus->callback(handle->bus, FuriHalSpeakerBusEventUnlock);
+void furi_hal_speaker_release() {
+    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
+    furi_check(furi_mutex_release(furi_hal_speaker_bus_mutex) == FuriStatusOk);
+    furi_hal_speaker_stop();
+    furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_power_insomnia_exit();
 }
 
-bool furi_hal_speaker_is_mine(FuriHalSpeakerBusHandle* handle) {
-    return handle->bus->current_handle == handle;
+bool furi_hal_speaker_is_mine() {
+    return furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id();
 }
 
 static inline uint32_t furi_hal_speaker_calculate_autoreload(float frequency) {
@@ -92,12 +88,11 @@ static inline uint32_t furi_hal_speaker_calculate_compare(float volume) {
     return compare_value;
 }
 
-void furi_hal_speaker_start(FuriHalSpeakerBusHandle* handle, float frequency, float volume) {
-    // Ensure that current handle is our handle
-    furi_check(handle->bus->current_handle == handle);
+void furi_hal_speaker_start(float frequency, float volume) {
+    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
 
     if(volume <= 0) {
-        furi_hal_speaker_stop(handle);
+        furi_hal_speaker_stop();
         return;
     }
 
@@ -116,11 +111,10 @@ void furi_hal_speaker_start(FuriHalSpeakerBusHandle* handle, float frequency, fl
     LL_TIM_EnableCounter(FURI_HAL_SPEAKER_TIMER);
 }
 
-void furi_hal_speaker_set_volume(FuriHalSpeakerBusHandle* handle, float volume) {
-    // Ensure that current handle is our handle
-    furi_check(handle->bus->current_handle == handle);
+void furi_hal_speaker_set_volume(float volume) {
+    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
     if(volume <= 0) {
-        furi_hal_speaker_stop(handle);
+        furi_hal_speaker_stop();
         return;
     }
 
@@ -131,9 +125,8 @@ void furi_hal_speaker_set_volume(FuriHalSpeakerBusHandle* handle, float volume) 
 #endif
 }
 
-void furi_hal_speaker_stop(FuriHalSpeakerBusHandle* handle) {
-    // Ensure that current handle is our handle
-    furi_check(handle->bus->current_handle == handle);
+void furi_hal_speaker_stop() {
+    furi_assert(furi_mutex_get_owner(furi_hal_speaker_bus_mutex) == furi_thread_get_current_id());
     LL_TIM_DisableAllOutputs(FURI_HAL_SPEAKER_TIMER);
     LL_TIM_DisableCounter(FURI_HAL_SPEAKER_TIMER);
 }
