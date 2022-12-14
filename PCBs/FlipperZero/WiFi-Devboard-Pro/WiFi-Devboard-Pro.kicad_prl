@@ -1,6 +1,6 @@
 {
   "board": {
-    "active_layer": 0,
+    "active_layer": 31,
     "active_layer_preset": "",
     "auto_track_width": false,
     "hidden_nets": [
@@ -41,6 +41,7 @@
       5,
       9,
       10,
+      11,
       12,
       13,
       14,
@@ -66,7 +67,7 @@
       36
     ],
     "visible_layers": "80217ba_ffffffff",
-    "zone_display_mode": 0
+    "zone_display_mode": 1
   },
   "meta": {
     "filename": "WiFi-Devboard-Pro.kicad_prl",
