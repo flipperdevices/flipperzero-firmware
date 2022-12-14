@@ -294,9 +294,6 @@ static bool subghz_frequency_analyzer_log_frequency_insert(SubGhzFrequencyAnalyz
     if(items_count < LOG_FREQUENCY_MAX_ITEMS) {
         SubGhzFrequencyAnalyzerLogItem_t* item =
             SubGhzFrequencyAnalyzerLogItemArray_push_new(model->log_frequency);
-        if(item == NULL) {
-            return false;
-        }
         (*item)->frequency = model->frequency;
         (*item)->count = 1;
         (*item)->rssi_max = model->rssi;

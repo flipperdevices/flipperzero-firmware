@@ -105,7 +105,7 @@ void cli_command_gpio_mode(Cli* cli, FuriString* args, void* context) {
     if(err == GpioParseReturnCmdSyntaxError) {
         cli_print_usage("gpio mode", "<pin_name> <0|1>", furi_string_get_cstr(args));
         return;
-    } else if(err == GpioParseReturnPinError) {
+    } else if(err == GpioParseReturnPinError) { //-V547
         gpio_print_pins();
         return;
     } else if(err == GpioParseReturnValueError) {
@@ -165,7 +165,7 @@ void cli_command_gpio_set(Cli* cli, FuriString* args, void* context) {
     if(err == GpioParseReturnCmdSyntaxError) {
         cli_print_usage("gpio set", "<pin_name> <0|1>", furi_string_get_cstr(args));
         return;
-    } else if(err == GpioParseReturnPinError) {
+    } else if(err == GpioParseReturnPinError) { //-V547
         gpio_print_pins();
         return;
     } else if(err == GpioParseReturnValueError) {

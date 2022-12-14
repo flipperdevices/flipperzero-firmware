@@ -225,7 +225,7 @@ static void cli_handle_enter(Cli* cli) {
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     CliCommand* cli_command_ptr = CliCommandTree_get(cli->commands, command);
 
-    if(cli_command_ptr) {
+    if(cli_command_ptr) { //-V547
         CliCommand cli_command;
         memcpy(&cli_command, cli_command_ptr, sizeof(CliCommand));
         furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);

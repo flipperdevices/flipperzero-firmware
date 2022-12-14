@@ -249,9 +249,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         }
     }
 
-    if(dict) {
-        iclass_elite_dict_free(dict);
-    }
+    iclass_elite_dict_free(dict);
 
     return err;
 }

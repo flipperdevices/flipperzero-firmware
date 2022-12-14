@@ -382,7 +382,7 @@ static void infrared_cli_list_remote_signals(FuriString* remote_name) {
         while(flipper_format_read_string(ff, "name", signal_name)) {
             furi_string_set_str(key, furi_string_get_cstr(signal_name));
             int* v = dict_signals_get(signals_dict, key);
-            if(v != NULL) {
+            if(v != NULL) { //-V547
                 (*v)++;
                 max = M_MAX(*v, max);
             } else {

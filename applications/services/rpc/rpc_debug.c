@@ -110,9 +110,9 @@ void rpc_debug_print_message(const PB_Main* message) {
     }
     case PB_Main_storage_md5sum_response_tag: {
         furi_string_cat_printf(str, "\tmd5sum_response {\r\n");
-        const char* path = message->content.storage_md5sum_response.md5sum;
-        if(path) {
-            furi_string_cat_printf(str, "\t\tmd5sum: %s\r\n", path);
+        const char* md5sum = message->content.storage_md5sum_response.md5sum;
+        if(md5sum) { //-V547
+            furi_string_cat_printf(str, "\t\tmd5sum: %s\r\n", md5sum);
         }
         break;
     }

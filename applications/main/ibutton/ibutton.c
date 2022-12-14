@@ -278,7 +278,7 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
 
     flipper_format_free(file);
 
-    if(!result) {
+    if(!result) { //-V547
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot save\nkey file");
     }
 
@@ -343,7 +343,7 @@ int32_t ibutton_app(void* p) {
     } else {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeFullscreen);
-        if(key_loaded) {
+        if(key_loaded) { //-V547
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
             DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
         } else {

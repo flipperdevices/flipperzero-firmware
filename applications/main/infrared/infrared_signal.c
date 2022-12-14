@@ -275,7 +275,7 @@ bool infrared_signal_search_and_read(
             is_name_found = furi_string_equal(name, tmp);
             if(is_name_found) break;
         }
-        if(!is_name_found) break;
+        if(!is_name_found) break; //-V547
         if(!infrared_signal_read_body(signal, ff)) break;
         success = true;
     } while(false);
