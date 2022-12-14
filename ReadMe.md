@@ -25,8 +25,9 @@ Thank you to all the supporters!
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - Added: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 - Removed: [POCSAG (By Shmuma)](https://github.com/Shmuma/flipper-zero-pocsag)
-- Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - Added: [WS: fix protocol and add new #2116 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2116)
+- Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
+- Updated: [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
