@@ -5482,24 +5482,6 @@
     (pin "2" (uuid 64997ce6-dc01-40fb-8351-21d3a1b0d56a))
   )
 
-  (symbol (lib_id "power:+5V") (at 160.02 234.95 180) (unit 1)
-    (in_bom yes) (on_board yes) (fields_autoplaced)
-    (uuid 8ed88628-5c3f-4ae7-9b4b-beb883cfb4f0)
-    (property "Reference" "#PWR019" (id 0) (at 160.02 231.14 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Value" "+5V" (id 1) (at 162.56 236.2199 0)
-      (effects (font (size 1.27 1.27)) (justify right))
-    )
-    (property "Footprint" "" (id 2) (at 160.02 234.95 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (property "Datasheet" "" (id 3) (at 160.02 234.95 0)
-      (effects (font (size 1.27 1.27)) hide)
-    )
-    (pin "1" (uuid 6eff7306-6f88-41ef-b2d3-fb64314660c4))
-  )
-
   (symbol (lib_id "SamacSys_Parts:DMP1045U-7") (at 422.91 102.87 90) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 92132767-5beb-424d-bfe4-5601c811c410)
@@ -6283,6 +6265,24 @@
     )
     (pin "1" (uuid 3f971b48-6e15-4127-b44b-6f98d5dc34b6))
     (pin "2" (uuid ca85d89a-b337-497a-b532-aa1156d09a98))
+  )
+
+  (symbol (lib_id "power:+3V3") (at 160.02 234.95 180) (unit 1)
+    (in_bom yes) (on_board yes) (fields_autoplaced)
+    (uuid d3edf629-33c1-45ba-9af4-caa80199d7c4)
+    (property "Reference" "#PWR?" (id 0) (at 160.02 231.14 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Value" "+3V3" (id 1) (at 162.56 236.2199 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Footprint" "" (id 2) (at 160.02 234.95 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "" (id 3) (at 160.02 234.95 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 71303e31-5f90-43fb-8154-1453cad723db))
   )
 
   (symbol (lib_id "power:GND") (at 138.43 232.41 270) (unit 1)
@@ -7221,9 +7221,6 @@
     (path "/da9618c6-0d08-4aa7-b4b3-c668ac316540"
       (reference "#PWR018") (unit 1) (value "GND") (footprint "")
     )
-    (path "/8ed88628-5c3f-4ae7-9b4b-beb883cfb4f0"
-      (reference "#PWR019") (unit 1) (value "+5V") (footprint "")
-    )
     (path "/fb4a82ab-fad5-4134-bb57-c6e9036e7754"
       (reference "#PWR020") (unit 1) (value "GND") (footprint "")
     )
@@ -7313,6 +7310,9 @@
     )
     (path "/c2fe62be-4319-4010-b7cd-bfcbb1d41f84"
       (reference "#PWR0102") (unit 1) (value "+ext_3V3") (footprint "")
+    )
+    (path "/d3edf629-33c1-45ba-9af4-caa80199d7c4"
+      (reference "#PWR?") (unit 1) (value "+3V3") (footprint "")
     )
     (path "/40adbb6d-87aa-405c-ba38-fc70c2bcc5dc"
       (reference "C1") (unit 1) (value "1u") (footprint "CAPC1005X60N")
