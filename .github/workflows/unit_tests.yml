@@ -36,14 +36,14 @@ jobs:
       - name: 'First full flash'
         id: first_full_flash
         run: |
-          ./fbt flash_full OPENOCD_ADAPTER_SERIAL=ADAPTER_SERIAL FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FIRMWARE_APP_SET=unit_tests FORCE=1
           . scripts/toolchain/fbtenv.sh
           ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
       - name: 'Second full flash'
         id: second_full_flash
         run: |
-          ./fbt flash_full OPENOCD_ADAPTER_SERIAL=ADAPTER_SERIAL FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}}  FIRMWARE_APP_SET=unit_tests FORCE=1
           . scripts/toolchain/fbtenv.sh
           ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
