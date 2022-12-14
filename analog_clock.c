@@ -68,6 +68,13 @@ static void analog_clock_app_draw_callback(Canvas* canvas, void* context) {
     Vector2 second_vec = angle_to_vector2((app->date_time.second / 60.f * 360.f), RADIUS - 2);
     canvas_draw_line(canvas, CENTER_X, CENTER_Y, second_vec.x, second_vec.y);
 
+    canvas_draw_frame(canvas, 0, 51, 25, 13);
+    canvas_set_font(canvas, FontSecondary);
+
+    char dateStr[8];
+    snprintf(dateStr, 8, "%02d.%02d", app->date_time.day, app->date_time.month);
+    canvas_draw_str(canvas, 3, 61, dateStr);
+
     furi_mutex_release(app->mutex);
 }
 
