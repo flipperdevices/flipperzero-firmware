@@ -2,10 +2,15 @@ name: 'Unit tests'
 
 on:
   pull_request:
+  push:
+    branches:
+      - doom/fix_units_and_toolchain_env
 
 env:
   TARGETS: f7
   DEFAULT_TARGET: f7
+  FBT_TOOLCHAIN_PATH: /opt
+  ADAPTER_SERIAL: 2A0906016415303030303032
 
 jobs:
   run_units_on_test_bench:
@@ -28,10 +33,24 @@ jobs:
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
 
+      - name: 'First full flash'
+        id: first_full_flash
+        run: |
+          ./fbt flash_full OPENOCD_ADAPTER_SERIAL=ADAPTER_SERIAL FIRMWARE_APP_SET=unit_tests FORCE=1
+          . scripts/toolchain/fbtenv.sh
+          ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+
+      - name: 'Second full flash'
+        id: second_full_flash
+        run: |
+          ./fbt flash_full OPENOCD_ADAPTER_SERIAL=ADAPTER_SERIAL FIRMWARE_APP_SET=unit_tests FORCE=1
+          . scripts/toolchain/fbtenv.sh
+          ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+
       - name: 'Flash unit tests firmware'
         id: flashing
         run: |
-          FBT_TOOLCHAIN_PATH=/opt ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt flash OPENOCD_ADAPTER_SERIAL=ADAPTER_SERIAL FIRMWARE_APP_SET=unit_tests FORCE=1
 
       - name: 'Wait for flipper to finish updating'
         id: connect
