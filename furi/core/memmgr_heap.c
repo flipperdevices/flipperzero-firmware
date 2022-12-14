@@ -520,8 +520,8 @@ void vPortFree(void* pv) {
                 {
                     furi_assert((size_t)pv >= SRAM_BASE);
                     furi_assert((size_t)pv < SRAM_BASE + 1024 * 256);
+                    furi_assert(pxLink->xBlockSize >= xHeapStructSize);
                     furi_assert((pxLink->xBlockSize - xHeapStructSize) < 1024 * 256);
-                    furi_assert((int32_t)(pxLink->xBlockSize - xHeapStructSize) >= 0);
 
                     /* Add this block to the list of free blocks. */
                     xFreeBytesRemaining += pxLink->xBlockSize;
