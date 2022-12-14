@@ -15,8 +15,8 @@ Thank you to all the supporters!
 ## Latest Updates
 
 - Known Issues:	 `Chess`
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-12 13:33 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-12 13:33 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-13 22:01 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-13 22:01 EST`
 - Added: [NFC bug fixes #2098 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2098)
 - Updated: [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - Fixed Cannot Parse File error thanks to @ClaraCrazy
@@ -26,6 +26,7 @@ Thank you to all the supporters!
 - Added: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 - Removed: [POCSAG (By Shmuma)](https://github.com/Shmuma/flipper-zero-pocsag)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
+- Added: [WS: fix protocol and add new #2116 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2116)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -256,3 +257,4 @@ $ ./fbt resources icons dolphin_ext
 - [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
 - [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
+- [WS: fix protocol and add new #2116 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2116)
