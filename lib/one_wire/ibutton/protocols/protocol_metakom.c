@@ -248,7 +248,7 @@ static LevelDuration protocol_metakom_encoder_yield(ProtocolMetakom* proto) {
     if(proto->encoder.index == 0) {
         // sync bit
         result = level_duration_make(false, METAKOM_PERIOD);
-    } else if(proto->encoder.index >= 1 && proto->encoder.index <= 6) {
+    } else if(proto->encoder.index <= 6) {
         // start word (0b010)
         switch(proto->encoder.index) {
         case 1:

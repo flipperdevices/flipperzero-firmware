@@ -987,9 +987,9 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
     switch(emulator->data.type) {
     // low byte LSB range, MSB range
     case MfUltralightTypeNTAG203:
-        if(write_page >= 16 && write_page <= 27)
+        if(write_page >= 16 && write_page <= 27) //-V560
             shift = (write_page - 16) / 4 + 1;
-        else if(write_page >= 28 && write_page <= 39)
+        else if(write_page >= 28 && write_page <= 39) //-V560
             shift = (write_page - 28) / 4 + 5;
         else if(write_page == 41)
             shift = 12;

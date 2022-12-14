@@ -550,7 +550,7 @@ bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed) {
 
     do {
         if(id1 == 0) return false;
-        if(!(btn == 0 || btn == 1 || btn == 2)) return false;
+        if(!(btn == 0 || btn == 1 || btn == 2)) return false; //-V560
     } while(false);
     return true;
 }
@@ -588,7 +588,7 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, FuriString* ou
 
         if(pin <= 9999) {
             furi_string_cat_printf(output, " pin:%d", pin);
-        } else if(10000 <= pin && pin <= 11029) {
+        } else if(pin <= 11029) {
             furi_string_cat_printf(output, " pin:enter");
         }
 
