@@ -69,9 +69,11 @@ jobs:
         id: copy
         if: steps.format.outcome == 'success'
         run: |
+          echo "$FBT_TOOLCHAIN_PATH"
           . scripts/toolchain/fbtenv.sh
-          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          echo "done with env"
           ./scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/resources /ext
+          echo "done with resources"
           ./scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
