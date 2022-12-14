@@ -70,8 +70,9 @@ jobs:
         if: steps.format.outcome == 'success'
         run: |
           . scripts/toolchain/fbtenv.sh
-          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} send assets/resources /ext
-          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} send assets/unit_tests /ext/unit_tests
+          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
+          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/resources /ext
+          ./scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
         if: steps.copy.outcome == 'success'
