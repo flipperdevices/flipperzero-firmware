@@ -88,11 +88,11 @@ jobs:
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          FILES=$(for CUR in $(ls artifacts/); do echo "-F @files=artifacts/$CUR"; done)
-          curl -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+          FILES=$(for CUR in $(ls artifacts/); do echo "-F files=@artifacts/$CUR"; done)
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
               -F "branch=${BRANCH_NAME}" \
               ${FILES[@]} \
-              ${{ secrets.INDEXER_UPLOAD_URL }}
+              "${{ secrets.INDEXER_UPLOAD_URL }}"
 
       - name: 'Find Previous Comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
