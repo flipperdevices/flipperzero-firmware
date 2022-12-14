@@ -41,7 +41,7 @@ static void rpc_system_app_start_process(const PB_Main* request, void* context) 
 
     FURI_LOG_D(TAG, "StartProcess: id %ld", request->command_id);
 
-    PB_CommandStatus result = PB_CommandStatus_ERROR_APP_CANT_START;
+    PB_CommandStatus result;
 
     Loader* loader = furi_record_open(RECORD_LOADER);
     const char* app_name = request->content.app_start_request.name;

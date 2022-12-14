@@ -240,7 +240,7 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
 /****************** Common Functions ******************/
 
 static FS_Error storage_int_parse_error(int error) {
-    FS_Error result = FSE_INTERNAL;
+    FS_Error result;
 
     if(error >= LFS_ERR_OK) {
         result = FSE_OK;
@@ -289,7 +289,7 @@ static FS_Error storage_int_parse_error(int error) {
             result = FSE_INVALID_NAME;
             break;
         default:
-            break;
+            result = FSE_INTERNAL;
         }
     }
 

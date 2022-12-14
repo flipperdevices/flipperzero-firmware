@@ -360,7 +360,6 @@ static bool animation_storage_load_bubbles(BubbleAnimation* animation, FlipperFo
         if(u32value > 20) break;
         animation->frame_bubble_sequences_count = u32value;
         if(animation->frame_bubble_sequences_count == 0) {
-            animation->frame_bubble_sequences = NULL;
             success = true;
             break;
         }

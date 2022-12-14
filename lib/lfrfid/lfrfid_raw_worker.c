@@ -114,7 +114,6 @@ void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
     worker->emulate_callback = NULL;
     worker->context = NULL;
     worker->read_callback = NULL;
-    worker->context = NULL;
     furi_event_flag_set(worker->events, 1 << LFRFIDRawWorkerEventStop);
     furi_thread_join(worker->thread);
 }

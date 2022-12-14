@@ -177,7 +177,7 @@ static bool u2f_hid_parse_request(U2fHid* u2f_hid) {
     } else if(u2f_hid->packet.cmd == U2F_HID_WINK) { // WINK - notify user
         if(u2f_hid->packet.len != 0) return false;
         u2f_wink(u2f_hid->u2f_instance);
-        u2f_hid->packet.len = 0;
+        u2f_hid->packet.len = 0; //-V1048
         u2f_hid_send_response(u2f_hid);
     } else
         return false;

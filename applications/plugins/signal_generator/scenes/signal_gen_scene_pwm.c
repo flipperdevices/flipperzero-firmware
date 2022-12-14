@@ -20,7 +20,7 @@ static void
         app->pwm_ch = pwm_ch_id[channel_id];
         view_dispatcher_send_custom_event(app->view_dispatcher, SignalGenPwmEventChannelChange);
     } else {
-        app->pwm_ch = pwm_ch_id[channel_id];
+        app->pwm_ch = pwm_ch_id[channel_id]; //-V1048
         view_dispatcher_send_custom_event(app->view_dispatcher, SignalGenPwmEventUpdate);
     }
 }

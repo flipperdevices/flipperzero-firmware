@@ -1,4 +1,5 @@
 # MLib macros we can't do much about.
+//-V:M_LET:1048,1044
 //-V:M_EACH:1048,1044
 //-V:ARRAY_DEF:760,747,568,776,729,712,654
 //-V:LIST_DEF:760,747,568,712,729,654,776
@@ -36,3 +37,9 @@
 
 # Warnings about length mismatch
 //-V:property_value_out:666
+
+# Model-related warnings
+//-V:with_view_model:1044,1048
+
+# Functions that always return the same error code
+//-V:picopass_device_decrypt:1048

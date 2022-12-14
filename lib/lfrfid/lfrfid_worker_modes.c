@@ -335,9 +335,9 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
 }
 
 static void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
-    LFRFIDFeature feature = LFRFIDFeatureASK;
     ProtocolId read_result = PROTOCOL_NO;
     LFRFIDWorkerReadState state;
+    LFRFIDFeature feature;
 
     if(worker->read_type == LFRFIDWorkerReadTypePSKOnly) {
         feature = LFRFIDFeaturePSK;

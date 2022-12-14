@@ -771,7 +771,8 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
             furi_hal_nfc_sleep();
 
             FURI_LOG_I(TAG, "Check low level nfc data");
-            if(memcmp(&nfc_data, &nfc_worker->dev_data->nfc_data, sizeof(FuriHalNfcDevData)) != 0) {
+            if(memcmp(&nfc_data, &nfc_worker->dev_data->nfc_data, sizeof(FuriHalNfcDevData)) !=
+               0) {
                 FURI_LOG_E(TAG, "Wrong card");
                 nfc_worker->callback(NfcWorkerEventWrongCard, nfc_worker->context);
                 break;
@@ -843,7 +844,8 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
             furi_hal_nfc_sleep();
 
             FURI_LOG_I(TAG, "Check low level nfc data");
-            if(memcmp(&nfc_data, &nfc_worker->dev_data->nfc_data, sizeof(FuriHalNfcDevData)) != 0) {
+            if(memcmp(&nfc_data, &nfc_worker->dev_data->nfc_data, sizeof(FuriHalNfcDevData)) !=
+               0) {
                 FURI_LOG_E(TAG, "Low level nfc data mismatch");
                 nfc_worker->callback(NfcWorkerEventWrongCard, nfc_worker->context);
                 break;
