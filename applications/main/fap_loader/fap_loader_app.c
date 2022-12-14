@@ -156,7 +156,7 @@ static bool fap_loader_select_app(FapLoader* loader) {
 }
 
 static FapLoader* fap_loader_alloc(const char* path) {
-    FapLoader* loader = malloc(sizeof(FapLoader));
+    FapLoader* loader = malloc(sizeof(FapLoader)); //-V799
     loader->fap_path = furi_string_alloc_set(path);
     loader->storage = furi_record_open(RECORD_STORAGE);
     loader->dialogs = furi_record_open(RECORD_DIALOGS);

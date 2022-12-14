@@ -743,7 +743,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
         return true;
     }
 
-    char* name = malloc(MAX_NAME_LENGTH + 1);
+    char* name = malloc(MAX_NAME_LENGTH + 1); //-V799
     File* dir = storage_file_alloc(storage);
     cur_dir = furi_string_alloc_set(path);
     bool go_deeper = false;
