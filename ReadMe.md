@@ -3,9 +3,6 @@ This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/
 
 This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
 
-# [RELEASE TGZ](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.tgz)
-# [RELEASE ZIP](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.zip)
-
 ## [Support Us!](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)
 Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
 Thank you to all the supporters!
@@ -16,6 +13,7 @@ Thank you to all the supporters!
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
 ## Latest Updates
+# [RELEASE TGZ](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.tgz) & [RELEASE ZIP](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.zip)
 
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-13 22:01 EST`
