@@ -3,6 +3,9 @@ This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/
 
 This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
 
+# [RELEASSE TGZ](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.tgz)
+# [RELEASSE ZIP](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.zip)
+
 ## [Support Us!](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)
 Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
 Thank you to all the supporters!
