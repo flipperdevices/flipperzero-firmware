@@ -33,3 +33,6 @@
 
 # We love casting ints to pointers
 //-V::566
+
+# Warnings about length mismatch
+//-V:property_value_out:666
