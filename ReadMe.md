@@ -12,8 +12,7 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates
-# [RELEASE TGZ](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.tgz) & [RELEASE ZIP](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.zip)
+## Latest Updates - [RELEASE TGZ](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.tgz) & [RELEASE ZIP](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/latest.zip)
 
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-13 22:01 EST`
