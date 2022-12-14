@@ -24,7 +24,7 @@ void wifi_deauther_scene_console_output_on_enter(void* context) {
     // Register callback to receive data
     wifi_deauther_uart_set_handle_rx_data_cb(
         app->uart, wifi_deauther_console_output_handle_rx_data_cb); // setup callback for rx thread
-    
+
     // Give a small delay to allow UART to settle.
     furi_delay_ms(600);
 
@@ -46,8 +46,6 @@ void wifi_deauther_scene_console_output_on_enter(void* context) {
 
     scene_manager_set_scene_state(app->scene_manager, WifideautherSceneConsoleOutput, 0);
     view_dispatcher_switch_to_view(app->view_dispatcher, WifideautherAppViewConsoleOutput);
-
-    
 
     // Send command with newline '\n'
     if(app->is_command && app->selected_tx_string) {
