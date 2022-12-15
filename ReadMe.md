@@ -13,7 +13,7 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [LATEST RELEASE on PATREON: 2022-12-15 17:10 PM](https://www.patreon.com/posts/75971328)
+## Latest Updates - [LATEST RELEASE on PATREON: 2022-12-15 17:45 PM](https://www.patreon.com/posts/75972594)
 
 - Known Issues:	 `Chess`
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-15 17:40 EST`
