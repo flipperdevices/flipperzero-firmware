@@ -2,7 +2,7 @@
 
 #include "base.h"
 
-#define SUBGHZ_PROTOCOL_SMC_5326_NAME "SMC5326"
+#define SUBGHZ_PROTOCOL_SMC5326_NAME "SMC5326"
 
 typedef struct SubGhzProtocolDecoderSMC5326 SubGhzProtocolDecoderSMC5326;
 typedef struct SubGhzProtocolEncoderSMC5326 SubGhzProtocolEncoderSMC5326;

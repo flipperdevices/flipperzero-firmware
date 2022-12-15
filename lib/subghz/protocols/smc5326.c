@@ -84,7 +84,7 @@ const SubGhzProtocolEncoder subghz_protocol_smc5326_encoder = {
 };
 
 const SubGhzProtocol subghz_protocol_smc5326 = {
-    .name = SUBGHZ_PROTOCOL_SMC_5326_NAME,
+    .name = SUBGHZ_PROTOCOL_SMC5326_NAME,
     .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_868 | SubGhzProtocolFlag_315 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_Load |
@@ -261,11 +261,6 @@ void subghz_protocol_decoder_smc5326_feed(void* context, bool level, uint32_t du
         if(!level) {
             if(duration >= ((uint32_t)subghz_protocol_smc5326_const.te_long * 2)) {
                 instance->decoder.parser_step = SMC5326DecoderStepSaveDuration;
-                FURI_LOG_E(
-                    "a",
-                    "%llx %d",
-                    instance->decoder.decode_data,
-                    instance->decoder.decode_count_bit);
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_smc5326_const.min_count_bit_for_found) {
                     if((instance->last_data == instance->decoder.decode_data) &&
