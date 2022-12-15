@@ -309,6 +309,9 @@ void nrf24_configure(
     bool noack,
     bool disable_aa);
 
+// Set mac address (MSB first), Return: Status
+uint8_t  nrf24_set_mac(uint8_t mac_addr, uint8_t *mac, uint8_t mlen);
+
 /** Configures the radio for "promiscuous mode" and primes it for rx
  * This is not an actual mode of the nrf24, but this function exploits a few bugs in the chip that allows it to act as if it were.
  * See http://travisgoodspeed.blogspot.com/2011/02/promiscuity-is-nrf24l01s-duty.html for details.

@@ -1,0 +1,6 @@
+SNIFF
+Rate: 1
+Ch: 2
+ESB: 1
+CRC: 2
+P0: 00AA
