@@ -48,7 +48,7 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
     } else {
         canvas_draw_rframe(canvas, x, y, 54, 19, 3);
     }
-    int16_t temp_int = sensor->temp;
+
     int8_t temp_dec = abs((int16_t)(sensor->temp * 10) % 10);
 
     //Рисование иконки
@@ -68,17 +68,23 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
     }
 
     //Целая часть температуры
-    snprintf(app->buff, BUFF_SIZE, "%d", temp_int);
+    //Костыль для отображения знака числа меньше 0
+    uint8_t offset = 0;
+    if(sensor->temp < 0 && sensor->temp > -1) {
+        app->buff[0] = '-';
+        offset = 1;
+    }
+    snprintf((char*)(app->buff + offset), BUFF_SIZE, "%d", (int8_t)sensor->temp);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
         canvas,
-        x + 27 + ((temp_int <= -10 || temp_int > 99) ? 5 : 0),
+        x + 27 + ((sensor->temp <= -10 || sensor->temp > 99) ? 5 : 0),
         y + 10,
         AlignCenter,
         AlignCenter,
         app->buff);
     //Печать дробной части температуры в диапазоне от -9 до 99 (когда два знака в числе)
-    if(temp_int > -10 && temp_int <= 99) {
+    if(sensor->temp > -10 && sensor->temp <= 99) {
         uint8_t int_len = canvas_string_width(canvas, app->buff);
         snprintf(app->buff, BUFF_SIZE, ".%d", temp_dec);
         canvas_set_font(canvas, FontPrimary);
