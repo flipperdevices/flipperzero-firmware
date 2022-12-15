@@ -1,6 +1,6 @@
 App(
     appid="GPIOReader",
-    name="GPIO Reader",
+    name="GPIO Reader (biotinker)",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_app",
     cdefines=["APP_GPIOREADER"],
