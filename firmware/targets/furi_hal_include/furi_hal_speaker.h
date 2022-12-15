@@ -14,7 +14,7 @@ void furi_hal_speaker_init();
 
 void furi_hal_speaker_deinit();
 
-bool furi_hal_speaker_acquire(uint32_t timeout);
+bool __attribute__((warn_unused_result)) furi_hal_speaker_acquire(uint32_t timeout);
 
 void furi_hal_speaker_release();
 
