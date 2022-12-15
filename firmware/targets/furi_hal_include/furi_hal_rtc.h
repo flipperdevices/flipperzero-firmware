@@ -90,6 +90,18 @@ void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode);
 
 FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode();
 
+void furi_hal_rtc_set_locale_units(uint8_t mode);
+
+uint8_t furi_hal_rtc_get_locale_units();
+
+void furi_hal_rtc_set_locale_timeformat(uint8_t mode);
+
+uint8_t furi_hal_rtc_get_locale_timeformat();
+
+void furi_hal_rtc_set_locale_dateformat(uint8_t mode);
+
+uint8_t furi_hal_rtc_get_locale_dateformat();
+
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime);
 
 void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime);
