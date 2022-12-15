@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <toolbox/level_duration.h>
+#include <furi_hal_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,6 +60,28 @@ typedef enum {
     SubGhzRegulationOnlyRx, /**only Rx*/
     SubGhzRegulationTxRx, /**TxRx*/
 } SubGhzRegulation;
+
+/*
+ * IO GO0 CC1101 to an external comb.
+ * Debug pin can be assigned
+ *      gpio_ext_pc0
+ *      gpio_ext_pc1
+ *      gpio_ext_pc3
+ *      gpio_ext_pb2
+ *      gpio_ext_pb3
+ *      gpio_ext_pa4
+ *      gpio_ext_pa6
+ *      gpio_ext_pa7
+ * Attention this setting switches pin to output. 
+ * Make sure it is not connected directly to power or ground
+ * And
+ *      gpio_speaker     
+ * To output sound to the internal speaker
+ * 
+ * To turn off, you need to pass NULL to gpio_debug_pin
+ */
+
+void furi_hal_subghz_set_debug_pin(const GpioPin* gpio_debug_pin);
 
 /** Initialize and switch to power save mode Used by internal API-HAL
  * initalization routine Can be used to reinitialize device to safe state and

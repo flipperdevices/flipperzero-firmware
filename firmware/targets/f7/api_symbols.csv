@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,13.0,,
+Version,+,13.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1320,6 +1320,7 @@ Function,+,furi_hal_subghz_read_packet,void,"uint8_t*, uint8_t*"
 Function,+,furi_hal_subghz_reset,void,
 Function,+,furi_hal_subghz_rx,void,
 Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
+Function,+,furi_hal_subghz_set_debug_pin,void,const GpioPin*
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath

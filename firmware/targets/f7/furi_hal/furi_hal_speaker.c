@@ -19,7 +19,9 @@ FuriMutex* furi_hal_speaker_bus_mutex = NULL;
 
 void furi_hal_speaker_init() {
     furi_hal_speaker_bus_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    FURI_CRITICAL_ENTER();
     LL_TIM_DeInit(FURI_HAL_SPEAKER_TIMER);
+    FURI_CRITICAL_EXIT();
     FURI_LOG_I(TAG, "Init OK");
 }
 
