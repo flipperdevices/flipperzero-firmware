@@ -561,7 +561,7 @@ bool mf_ultralight_read_pages_direct(
         FURI_LOG_D(TAG, "Failed to read pages %d - %d", start_index, start_index + 3);
         return false;
     }
-    memcpy(data, tx_rx->rx_data, 16);
+    memcpy(data, tx_rx->rx_data, 16); //-V1086
     return true;
 }
 

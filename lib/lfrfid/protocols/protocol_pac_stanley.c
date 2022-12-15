@@ -128,7 +128,7 @@ bool protocol_pac_stanley_decoder_feed(ProtocolPACStanley* protocol, bool level,
 }
 
 bool protocol_pac_stanley_encoder_start(ProtocolPACStanley* protocol) {
-    memset(protocol->encoded_data, 0, PAC_STANLEY_ENCODED_BYTE_SIZE);
+    memset(protocol->encoded_data, 0, sizeof(protocol->encoded_data));
 
     uint8_t idbytes[10];
     idbytes[0] = '2';

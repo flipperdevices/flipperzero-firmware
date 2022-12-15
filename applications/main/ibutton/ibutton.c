@@ -302,7 +302,7 @@ void ibutton_text_store_set(iButton* ibutton, const char* text, ...) {
 }
 
 void ibutton_text_store_clear(iButton* ibutton) {
-    memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE);
+    memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE + 1);
 }
 
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {

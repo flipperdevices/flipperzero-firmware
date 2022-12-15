@@ -360,7 +360,7 @@ void infrared_text_store_set(Infrared* infrared, uint32_t bank, const char* text
 }
 
 void infrared_text_store_clear(Infrared* infrared, uint32_t bank) {
-    memset(infrared->text_store[bank], 0, INFRARED_TEXT_STORE_SIZE);
+    memset(infrared->text_store[bank], 0, INFRARED_TEXT_STORE_SIZE + 1);
 }
 
 void infrared_play_notification_message(Infrared* infrared, uint32_t message) {
