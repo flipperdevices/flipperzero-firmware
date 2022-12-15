@@ -455,7 +455,7 @@ int32_t infrared_app(void* p) {
     } else {
         view_dispatcher_attach_to_gui(
             infrared->view_dispatcher, infrared->gui, ViewDispatcherTypeFullscreen);
-        if(is_remote_loaded) {
+        if(is_remote_loaded) { //-V547
             scene_manager_next_scene(infrared->scene_manager, InfraredSceneRemote);
         } else {
             scene_manager_next_scene(infrared->scene_manager, InfraredSceneStart);
