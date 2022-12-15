@@ -4,7 +4,7 @@
     "active_layer_preset": "",
     "auto_track_width": false,
     "hidden_nets": [
-      "GND"
+      "+ext_3V3"
     ],
     "high_contrast_mode": 0,
     "net_color_mode": 1,
@@ -63,7 +63,7 @@
       36
     ],
     "visible_layers": "80216ba_ffffffff",
-    "zone_display_mode": 1
+    "zone_display_mode": 0
   },
   "meta": {
     "filename": "WiFi-Devboard-Pro.kicad_prl",
