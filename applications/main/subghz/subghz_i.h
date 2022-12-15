@@ -134,4 +134,3 @@ uint32_t subghz_random_serial(void);
 void subghz_hopper_update(SubGhz* subghz);
 void subghz_speaker_on(SubGhz* subghz);
 void subghz_speaker_off(SubGhz* subghz);
-
