@@ -11,6 +11,7 @@
 #include "../helpers/subghz_frequency_analyzer_log_item_array.h"
 
 #include <assets_icons.h>
+#include <float_tools.h>
 
 #define LOG_FREQUENCY_MAX_ITEMS 60 // uint8_t (limited by 'seq' of SubGhzFrequencyAnalyzerLogItem)
 
@@ -337,7 +338,7 @@ void subghz_frequency_analyzer_pair_callback(
     float rssi,
     bool signal) {
     SubGhzFrequencyAnalyzer* instance = context;
-    if((rssi == 0.f) && (instance->locked)) {
+    if(float_is_equal(rssi,  0.f) && instance->locked) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
         }
@@ -352,13 +353,13 @@ void subghz_frequency_analyzer_pair_callback(
                 model->history_frequency[0] = model->frequency;
             },
             false);
-    } else if((rssi != 0.f) && (!instance->locked)) {
+    } else if(!float_is_equal(rssi,  0.f) && !instance->locked) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerLock, instance->context);
         }
     }
 
-    instance->locked = (rssi != 0.f);
+    instance->locked = !float_is_equal(rssi,  0.f);
     with_view_model(
         instance->view,
         SubGhzFrequencyAnalyzerModel * model,

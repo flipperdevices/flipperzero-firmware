@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <stdint.h>
 #include <furi.h>
+#include <float_tools.h>
 
 #include <notification/notification_messages.h>
 
@@ -398,7 +399,7 @@ static bool infrared_get_new_signal(InfraredWorker* instance) {
 
         instance->tx.tx_raw_cnt = 0;
         instance->tx.need_reinitialization = (new_tx_frequency != instance->tx.frequency) ||
-                                             (new_tx_duty_cycle != instance->tx.duty_cycle);
+                                             !float_is_equal(new_tx_duty_cycle, instance->tx.duty_cycle);
         instance->tx.frequency = new_tx_frequency;
         instance->tx.duty_cycle = new_tx_duty_cycle;
         if(instance->signal.decoded) {
