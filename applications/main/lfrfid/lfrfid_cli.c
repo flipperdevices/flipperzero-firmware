@@ -335,7 +335,7 @@ static void lfrfid_cli_raw_analyze(Cli* cli, FuriString* args) {
                 total_pulse += pulse;
                 total_duration += duration;
 
-                if(total_protocol != PROTOCOL_NO) {
+                if(total_protocol != PROTOCOL_NO) { //-V1051
                     break;
                 }
             } else {

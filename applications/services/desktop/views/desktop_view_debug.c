@@ -52,7 +52,7 @@ void desktop_debug_render(Canvas* canvas, void* model) {
 #ifdef SRV_BT
         c2_ver = ble_glue_get_c2_info();
 #endif
-        if(!ver) {
+        if(!ver) { //-V1051
             canvas_draw_str(canvas, 0, 30 + STATUS_BAR_Y_SHIFT, "No info");
             return;
         }
