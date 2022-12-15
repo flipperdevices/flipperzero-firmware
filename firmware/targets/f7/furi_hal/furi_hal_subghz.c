@@ -382,8 +382,6 @@ static bool furi_hal_subghz_stop_degug() {
     bool ret = false;
     if(furi_hal_subghz.gpio_debug_pin == &gpio_speaker) {
         if(furi_hal_speaker_is_mine()) {
-            furi_hal_gpio_init(
-                furi_hal_subghz.gpio_debug_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
             furi_hal_speaker_release();
             ret = true;
         }

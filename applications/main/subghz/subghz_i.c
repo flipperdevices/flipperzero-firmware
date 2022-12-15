@@ -86,6 +86,7 @@ uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency) {
     uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_flush_rx();
+    subghz_speaker_on(subghz);
     furi_hal_subghz_rx();
 
     furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, subghz->txrx->worker);
@@ -104,6 +105,7 @@ static bool subghz_tx(SubGhz* subghz, uint32_t frequency) {
     furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_gpio_write(&gpio_cc1101_g0, false);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    subghz_speaker_on(subghz);
     bool ret = furi_hal_subghz_tx();
     subghz->txrx->txrx_state = SubGhzTxRxStateTx;
     return ret;
@@ -119,11 +121,13 @@ void subghz_idle(SubGhz* subghz) {
 void subghz_rx_end(SubGhz* subghz) {
     furi_assert(subghz);
     furi_assert(subghz->txrx->txrx_state == SubGhzTxRxStateRx);
+
     if(subghz_worker_is_running(subghz->txrx->worker)) {
         subghz_worker_stop(subghz->txrx->worker);
         furi_hal_subghz_stop_async_rx();
     }
     furi_hal_subghz_idle();
+    subghz_speaker_off(subghz);
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
@@ -212,6 +216,7 @@ void subghz_tx_stop(SubGhz* subghz) {
             subghz, subghz->txrx->fff_data, furi_string_get_cstr(subghz->file_path));
     }
     subghz_idle(subghz);
+    subghz_speaker_off(subghz);
     notification_message(subghz->notifications, &sequence_reset_red);
 }
 
@@ -584,4 +589,15 @@ void subghz_hopper_update(SubGhz* subghz) {
             subghz->setting, subghz->txrx->hopper_idx_frequency);
         subghz_rx(subghz, subghz->txrx->preset->frequency);
     }
+}
+
+void subghz_speaker_on(SubGhz* subghz) {
+    if(subghz->txrx->speaker_state == SubGhzSpeakerStateOn) {
+        furi_hal_subghz_set_debug_pin(&gpio_speaker);
+    }
+}
+
+void subghz_speaker_off(SubGhz* subghz) {
+    UNUSED(subghz);
+    furi_hal_subghz_set_debug_pin(NULL);
 }
