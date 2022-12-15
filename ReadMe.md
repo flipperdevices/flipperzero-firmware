@@ -21,6 +21,7 @@ Thank you to all the supporters!
 - Updated: [NRF24 Scanner v1.8 (By vad7)](https://github.com/vad7/nrf24scan)
 - Added: [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - Added: [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
+- Added: [Dolphin: add new animation #2139 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2139)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
