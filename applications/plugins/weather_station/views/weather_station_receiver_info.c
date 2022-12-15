@@ -5,8 +5,6 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-#define abs(x) ((x) > 0 ? (x) : -(x))
-
 struct WSReceiverInfo {
     View* view;
     FuriTimer* timer;
