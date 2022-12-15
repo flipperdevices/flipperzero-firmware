@@ -83,6 +83,7 @@ typedef struct {
     NfcDeviceData dev_data;
     char dev_name[NFC_DEV_NAME_MAX_LEN + 1];
     FuriString* load_path;
+    FuriString* folder;
     NfcDeviceSaveFormat format;
     bool shadow_file_exist;
 
@@ -104,15 +105,15 @@ bool nfc_device_load(NfcDevice* dev, const char* file_path, bool show_dialog);
 
 bool nfc_device_load_key_cache(NfcDevice* dev);
 
-bool nfc_file_select(NfcDevice* dev, const char* folder);
+bool nfc_file_select(NfcDevice* dev);
 
 void nfc_device_data_clear(NfcDeviceData* dev);
 
 void nfc_device_clear(NfcDevice* dev);
 
-bool nfc_device_delete(NfcDevice* dev, const char* folder, bool use_load_path);
+bool nfc_device_delete(NfcDevice* dev, bool use_load_path);
 
-bool nfc_device_restore(NfcDevice* dev, const char* folder, bool use_load_path);
+bool nfc_device_restore(NfcDevice* dev, bool use_load_path);
 
 void nfc_device_set_loading_callback(NfcDevice* dev, NfcLoadingCallback callback, void* context);
 

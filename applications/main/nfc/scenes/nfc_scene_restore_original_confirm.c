@@ -24,11 +24,12 @@ void nfc_scene_restore_original_confirm_on_enter(void* context) {
 
 bool nfc_scene_restore_original_confirm_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
+    furi_string_printf(nfc->dev->folder, "%s", NFC_APP_FOLDER);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == DialogExResultRight) {
-            if(!nfc_device_restore(nfc->dev, NFC_APP_FOLDER, true)) {
+            if(!nfc_device_restore(nfc->dev, true)) {
                 scene_manager_search_and_switch_to_previous_scene(
                     nfc->scene_manager, NfcSceneStart);
             } else {
