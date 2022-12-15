@@ -21,6 +21,7 @@ Thank you to all the supporters!
 - Added: [WS: fix protocol and add new #2116 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2116)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - Updated: [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
+- Updated: [NRF24 Scanner v1.7 (By vad7)](https://github.com/vad7/nrf24scan)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -215,7 +216,7 @@ $ ./fbt resources icons dolphin_ext
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
-- [NRF24 Scanner v1.5 (By vad7)](https://github.com/vad7/nrf24scan)
+- [NRF24 Scanner v1.7 (By vad7)](https://github.com/vad7/nrf24scan)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
