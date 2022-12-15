@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG "nrf24scan"
-#define VERSION "1.7"
+#define VERSION "1.8"
 #define MAX_CHANNEL 125
 #define MAX_ADDR 6
 
@@ -212,7 +212,10 @@ void write_to_log_file(Storage* storage, bool f_settings) {
     if(fl) {
         FURI_LOG_D(TAG, "Save to %s", furi_string_get_cstr(str));
         if(save_to_new_log || f_settings) {
-            furi_string_set(str, what_to_do == 1 ? SettingsFld_Sniff : "");
+            if(what_to_do == 1)
+                furi_string_printf(str, "%s\n", SettingsFld_Sniff);
+            else
+                furi_string_reset(str);
             furi_string_cat_printf(
                 str,
                 "%s %d\n%s %d\n%s %d\n",
@@ -268,8 +271,17 @@ void write_to_log_file(Storage* storage, bool f_settings) {
                 int i = 0;
                 for(; i < log_arr_idx; i++) {
                     furi_string_reset(str);
-                    add_to_furi_str_hex_bytes(
-                        str, (char*)APP->log_arr + i * LOG_REC_SIZE, LOG_REC_SIZE);
+                    uint8_t* ptr = APP->log_arr + i * LOG_REC_SIZE;
+                    int len;
+                    if(ptr[0] & 0x80) { // RAW
+                        len = (ptr[1] & 0b11) + 2 + ((ptr[1] & 0b100) ? 2 : 0) + (ptr[1] >> 3) +
+                              2; // addr + PCF? + payload + crcmax
+                    } else {
+                        len = (ptr[1] >> 3);
+                        if(len == 0) len = 32;
+                    }
+                    if(len < NRF_Payload) len = NRF_Payload;
+                    add_to_furi_str_hex_bytes(str, (char*)ptr, len + 2);
                     furi_string_cat(str, "\n");
                     if(stream_write_string(file_stream, str) != furi_string_size(str)) {
                         FURI_LOG_E(TAG, "Failed to write to file!");
@@ -410,7 +422,7 @@ static uint8_t load_settings_file(Stream* file_stream) {
                     break;
                 }
                 if(err == 0 && a) addrs.addr_count = a - '0' + 1;
-            } else if(line_len >= (NRF_Payload + 1) * 2) { // data
+            } else if(line_len >= 3 * 2) { // data
                 if(!log_loaded) {
                     clear_log();
                     what_to_do = 0;
@@ -440,6 +452,8 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void prepare_nrf24(bool fsend_packet) {
+    nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
+    nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
     uint8_t erx_addr = (1 << 0); // Enable RX_P0
     if(!fsend_packet) {
         if(addrs.addr_count == 0) return;
@@ -449,8 +463,6 @@ static void prepare_nrf24(bool fsend_packet) {
             if(NRF_ESB) payload += 2;
             if(payload > 32) payload = 32;
             nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts
-            nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
-            nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
             nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
             nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
             nrf24_write_reg(
@@ -464,8 +476,6 @@ static void prepare_nrf24(bool fsend_packet) {
                 0x70 | ((NRF_CRC == 1 ? 0b1000 :
                          NRF_CRC == 2 ? 0b1100 :
                                         0))); // Mask all interrupts
-            nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
-            nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
             nrf24_write_reg(
                 nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x11 : 0); // Automatic Retransmission
             nrf24_write_reg(
@@ -489,46 +499,39 @@ static void prepare_nrf24(bool fsend_packet) {
             tmp[addrs.addr_len - i - 1] = tb;
         }
         NRF_ERROR = memcmp(addrs.addr_P0, tmp, addrs.addr_len) != 0;
-        uint8_t dyn = 0;
-        if(addrs.addr_count > 0 && NRF_DPL) dyn |= (1 << 0);
         FURI_LOG_D(TAG, "Payload: %d", payload);
         nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload);
         if(addrs.addr_count > 1) {
             nrf24_set_mac(REG_RX_ADDR_P1, addrs.addr_P1, addrs.addr_len);
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, payload);
-            if(NRF_DPL) dyn |= (1 << 1);
             erx_addr |= (1 << 1); // Enable RX_P1
         } else
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, 0);
         if(addrs.addr_count > 2) {
             nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P2, &addrs.addr_P2, 1);
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, payload);
-            if(NRF_DPL) dyn |= (1 << 2);
             erx_addr |= (1 << 2); // Enable RX_P2
         } else
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, 0);
         if(addrs.addr_count > 3) {
             nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P3, &addrs.addr_P3, 1);
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, payload);
-            if(NRF_DPL) dyn |= (1 << 3);
             erx_addr |= (1 << 3); // Enable RX_P3
         } else
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, 0);
         if(addrs.addr_count > 4) {
             nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P4, &addrs.addr_P4, 1);
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, payload);
-            if(NRF_DPL) dyn |= (1 << 4);
             erx_addr |= (1 << 4); // Enable RX_P4
         } else
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, 0);
         if(addrs.addr_count > 5) {
             nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P5, &addrs.addr_P5, 1);
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, payload);
-            if(NRF_DPL) dyn |= (1 << 5);
             erx_addr |= (1 << 5); // Enable RX_P5
         } else
             nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
-        nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, dyn); // Enable dynamic payload reg
+        nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
         nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
         nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
     }
@@ -586,33 +589,33 @@ uint16_t get_shifted_crc(uint8_t* pcrc) {
 }
 
 bool check_packet(uint8_t* pkt, uint8_t size) {
+    if(furi_log_get_level() == FuriLogLevelDebug) {
+        char dbuf[65];
+        dbuf[0] = 0;
+        add_to_str_hex_bytes(dbuf, (char*)pkt, size);
+        FURI_LOG_D(TAG, "PKT%d: %s (%d)", *(pkt - 1), dbuf, size);
+    }
     for(uint8_t addr_size = 3; addr_size <= 5; addr_size++) {
         if(NRF_ESB) {
             uint8_t b = *(pkt + addr_size) >> 2;
-            if((b > NRF_Sniff_payload_max && b != 0x33)) continue;
-            if(furi_log_get_level() == FuriLogLevelDebug && addr_size == 3) {
-                char dbuf[70];
-                dbuf[0] = 0;
-                add_to_str_hex_bytes(dbuf, (char*)pkt, size);
-                FURI_LOG_D(TAG, "PKT%d: %s (%d)", *(pkt - 1), dbuf, size);
-            }
+            if((b > NRF_Payload - (addr_size - 3) && b != 0x33)) continue;
             if(b != 0x33) { // DPL
                 uint16_t crc = view_log_decode_CRC == 2 ? 0xFFFF : 0xFF;
-                crc = calc_crc(crc, pkt, 7, 9 + b * 8);
-                FURI_LOG_D(TAG, "DCRC: %X - %X", crc, get_shifted_crc(pkt + b + 1));
-                if(crc == get_shifted_crc(pkt + b + 1)) {
+                crc = calc_crc(crc, pkt, 7, 9 + (b + addr_size) * 8);
+                //FURI_LOG_D(TAG, "DCRC: %X - %X", crc, get_shifted_crc(pkt + b + 1));
+                if(crc == get_shifted_crc(pkt + b + addr_size + 1)) {
                     *(pkt - 1) = ((b & 0x1F) << 3) + 0b100 + (addr_size - 2);
-                    FURI_LOG_D(TAG, "VALID: pl: %d, addr: %d", b, addr_size);
+                    FURI_LOG_D(TAG, "VALID CRC %X: dpl: %d, addr: %d", crc, b, addr_size);
                     return true;
                 }
             } else {
                 for(uint8_t i = 0; i < size - view_log_decode_CRC; i++) {
                     uint16_t crc = view_log_decode_CRC == 2 ? 0xFFFF : 0xFF;
-                    crc = calc_crc(crc, pkt, 7, 9 + i * 8);
-                    FURI_LOG_D(TAG, "CRC: %X - %X", crc, get_shifted_crc(pkt + i + 1));
-                    if(crc == get_shifted_crc(pkt + i + 1)) {
+                    crc = calc_crc(crc, pkt, 7, (addr_size + i) * 8 + 9);
+                    //FURI_LOG_D(TAG, "CRC: %X - %X", crc, get_shifted_crc(pkt + addr_size + i + 1));
+                    if(crc == get_shifted_crc(pkt + addr_size + i + 1)) {
                         *(pkt - 1) = ((i & 0x1F) << 3) + 0b100 + (addr_size - 2);
-                        FURI_LOG_D(TAG, "VALID: pl: %d, addr: %d", i, addr_size);
+                        FURI_LOG_D(TAG, "VALID CRC %X: pl: %d, addr: %d", crc, i, addr_size);
                         return true;
                     }
                 }
@@ -620,10 +623,12 @@ bool check_packet(uint8_t* pkt, uint8_t size) {
         } else {
             for(uint8_t i = 0; i < size - view_log_decode_CRC; i++) {
                 uint16_t crc = view_log_decode_CRC == 2 ? 0xFFFF : 0xFF;
-                crc = calc_crc(crc, pkt, 7, i * 8);
-                if((view_log_decode_CRC == 1 && crc == *(pkt + i + 1)) ||
-                   (view_log_decode_CRC == 2 && crc == ((*(pkt + i + 1) << 8) | *(pkt + i + 2)))) {
+                crc = calc_crc(crc, pkt, 7, (addr_size + i) * 8);
+                if((view_log_decode_CRC == 1 && crc == *(pkt + addr_size + i + 1)) ||
+                   (view_log_decode_CRC == 2 &&
+                    crc == ((*(pkt + addr_size + i + 1) << 8) | *(pkt + addr_size + i + 2)))) {
                     *(pkt - 1) = ((i & 0x1F) << 3) + 0b000 + (addr_size - 2);
+                    FURI_LOG_D(TAG, "VALID CRC %X: pl: %d, addr: %d", crc, i, addr_size);
                     return true;
                 }
             }
@@ -651,6 +656,9 @@ bool nrf24_read_newpacket() {
                        st == 3 ? addrs.addr_P3 :
                        st == 4 ? addrs.addr_P4 :
                                  addrs.addr_P5;
+            } else {
+                if(*ptr == 0x55 || *ptr == 0xAA || *ptr == 0x00 || *ptr == 0xFF)
+                    return found; // skip pkt when address begin with
             }
             if(!check_packet(ptr, packetsize)) {
                 if(addrs.addr_len > 2) return false; // skip if mac MSB added to preamble
@@ -695,17 +703,18 @@ bool nrf24_send_packet() {
     if(*ptr & 0x80) { // RAW packet
         //uint8_t pktinfo = *(ptr + 1);
         //nrf24_set_maclen(nrf24_HANDLE, (pktinfo & 0b11) + 2);
-        nrf24_set_maclen(nrf24_HANDLE, 2);
         //if(pktinfo & 0b100) { // ESB
         nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // No Automatic Retransmission
         nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // No Auto acknowledgement
         //}
         //uint8_t alen = (*(ptr + 2) & 0b11) + 2;
-        uint8_t adr[2] = {0x55, 0x55}; // NOT TESTED!
-        if(*(ptr + 2) & 0x80) adr[0] = adr[1] = 0xAA;
+        uint8_t adr[2];
+        adr[0] = ptr[2];
+        adr[1] = ptr[3];
+        nrf24_set_maclen(nrf24_HANDLE, 2);
         nrf24_set_mac(REG_RX_ADDR_P0, adr, 2);
         nrf24_set_mac(REG_TX_ADDR, adr, 2);
-        last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2, 32, false);
+        last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2 + 2, 32 - 2, false);
     } else {
         nrf24_write_reg(
             nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x11 : 0); // Automatic Retransmission
@@ -732,6 +741,13 @@ bool nrf24_send_packet() {
         }
         a = *(ptr + 1) >> 3;
         if(a == 0) a = 32;
+        nrf24_write_reg(
+            nrf24_HANDLE,
+            REG_CONFIG,
+            0x70 | ((NRF_CRC == 1 ? 0b1000 :
+                     NRF_CRC == 2 ? 0b1100 :
+                                    0))); // Mask all interrupts
+        nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
         last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2, a, false);
     }
     last_packet_send = view_log_arr_idx;
@@ -848,10 +864,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 if(channel & 0x80) { // RAW packet: nn:>{.address..}-xxxxxxxx
                     uint8_t pktinfo = *ptr++;
                     bool _PCF = pktinfo & 0b100;
-                    uint8_t count = (pktinfo >> 3);
+                    uint8_t plen = count = (pktinfo >> 3);
                     uint8_t adrsize = (pktinfo & 0b11) + 2;
-                    uint8_t plen = adrsize + count;
-                    count -= view_log_arr_x;
+                    plen += adrsize;
+                    count += view_log_decode_CRC;
+                    if(view_log_arr_x > 0) count -= view_log_arr_x - 1;
                     uint8_t max_width = VIEW_LOG_WIDTH_B;
                     if(view_log_arr_x == 0) max_width -= 5;
                     if(count > max_width) count = max_width;
@@ -880,7 +897,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                         }
                         ptr += adrsize;
                         if(_PCF)
-                            add_to_str_hex_bytes_shift_9b(screen_buf, (char*)ptr, count);
+                            add_to_str_hex_bytes_shift_9b(screen_buf, (char*)ptr++, count);
                         else
                             add_to_str_hex_bytes(screen_buf, (char*)ptr, count);
                     }
@@ -901,7 +918,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                         if(view_log_decode_CRC) {
                             static uint16_t prev_addr_CRC;
                             static int8_t prev_pipe = -1;
-                            uint8_t* pcrc = APP->log_arr + (page + i) * LOG_REC_SIZE + 2;
+                            uint8_t* pcrc = ptr;
                             uint16_t crc;
                             if(prev_pipe == pipe) {
                                 crc = prev_addr_CRC;
@@ -967,7 +984,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                         }
                     }
                     if(view_log_decode_PCF)
-                        add_to_str_hex_bytes_shift_9b(screen_buf, (char*)ptr, count);
+                        add_to_str_hex_bytes_shift_9b(screen_buf, (char*)ptr++, count);
                     else
                         add_to_str_hex_bytes(screen_buf, (char*)ptr, count);
                 }
@@ -977,7 +994,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 canvas_draw_str(canvas, 0, y, screen_buf);
                 if(crcptr) { // 5x7 font, 9 lines
                     canvas_draw_str(canvas, x * 5, y, "=");
-                    int n = crcptr - (uint8_t*)ptr - 1;
+                    int n = crcptr - (uint8_t*)ptr;
                     if(n > -view_log_decode_CRC && n < count) {
                         int len;
                         x = (4 + pre) * 5;
@@ -1030,12 +1047,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         }
         if(log_arr_idx) {
             uint8_t* ptr = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
-            snprintf(
-                screen_buf,
-                sizeof(screen_buf),
-                "Current Ch: %d, size: %d",
-                *ptr & 0x7F,
-                *(ptr + 1) >> 3);
+            uint8_t pktinfo = *(ptr + 1);
+            snprintf(screen_buf, 32, ">> Ch: %d, size: %d", *ptr & 0x7F, pktinfo >> 3);
+            if(*ptr & 0x80)
+                snprintf(
+                    screen_buf + strlen(screen_buf), 32, " RAW %s", (pktinfo & 0b100) ? "PCF" : "");
             canvas_draw_str(canvas, 0, 7 * 7, screen_buf);
         }
         screen_buf[0] = 'v';
@@ -1230,6 +1246,7 @@ int32_t nrf24scan_app(void* p) {
                                                 "LOAD ERROR#%d",
                                                 err);
                                         file_stream_close(file_stream);
+                                        menu_selected = Menu_ok;
                                     }
                                     stream_free(file_stream);
                                 }
