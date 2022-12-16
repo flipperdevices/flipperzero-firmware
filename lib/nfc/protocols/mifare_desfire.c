@@ -548,7 +548,8 @@ bool mf_df_read_card(FuriHalNfcTxRxContext* tx_rx, MifareDesfireData* data) {
         for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
             tx_rx->tx_bits = 8 * mf_df_prepare_select_application(tx_rx->tx_data, app->id);
             if(!furi_hal_nfc_tx_rx_full(tx_rx) ||
-               !mf_df_parse_select_application_response(tx_rx->rx_data, tx_rx->rx_bits / 8)) { //-V1051
+               !mf_df_parse_select_application_response(
+                   tx_rx->rx_data, tx_rx->rx_bits / 8)) { //-V1051
                 FURI_LOG_W(TAG, "Bad exchange selecting application");
                 continue;
             }

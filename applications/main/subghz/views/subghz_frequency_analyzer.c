@@ -48,7 +48,8 @@ typedef struct {
 } SubGhzFrequencyAnalyzerModel;
 
 static inline uint8_t rssi_sanitize(float rssi) {
-    return (!float_is_equal(rssi, 0.f) ? (uint8_t)(rssi - SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) : 0);
+    return (
+        !float_is_equal(rssi, 0.f) ? (uint8_t)(rssi - SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) : 0);
 }
 
 void subghz_frequency_analyzer_set_callback(
@@ -338,7 +339,7 @@ void subghz_frequency_analyzer_pair_callback(
     float rssi,
     bool signal) {
     SubGhzFrequencyAnalyzer* instance = context;
-    if(float_is_equal(rssi,  0.f) && instance->locked) {
+    if(float_is_equal(rssi, 0.f) && instance->locked) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
         }
@@ -353,13 +354,13 @@ void subghz_frequency_analyzer_pair_callback(
                 model->history_frequency[0] = model->frequency;
             },
             false);
-    } else if(!float_is_equal(rssi,  0.f) && !instance->locked) {
+    } else if(!float_is_equal(rssi, 0.f) && !instance->locked) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerLock, instance->context);
         }
     }
 
-    instance->locked = !float_is_equal(rssi,  0.f);
+    instance->locked = !float_is_equal(rssi, 0.f);
     with_view_model(
         instance->view,
         SubGhzFrequencyAnalyzerModel * model,

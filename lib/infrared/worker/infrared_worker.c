@@ -398,8 +398,9 @@ static bool infrared_get_new_signal(InfraredWorker* instance) {
         }
 
         instance->tx.tx_raw_cnt = 0;
-        instance->tx.need_reinitialization = (new_tx_frequency != instance->tx.frequency) ||
-                                             !float_is_equal(new_tx_duty_cycle, instance->tx.duty_cycle);
+        instance->tx.need_reinitialization =
+            (new_tx_frequency != instance->tx.frequency) ||
+            !float_is_equal(new_tx_duty_cycle, instance->tx.duty_cycle);
         instance->tx.frequency = new_tx_frequency;
         instance->tx.duty_cycle = new_tx_duty_cycle;
         if(instance->signal.decoded) {

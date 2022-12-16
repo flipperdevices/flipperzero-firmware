@@ -583,7 +583,8 @@ bool mf_ultralight_read_pages(
             curr_sector_index = tag_sector;
         }
 
-        FURI_LOG_D(TAG, "Reading pages %zu - %zu", i, i + (valid_pages > 4 ? 4 : valid_pages) - 1U);
+        FURI_LOG_D(
+            TAG, "Reading pages %zu - %zu", i, i + (valid_pages > 4 ? 4 : valid_pages) - 1U);
         tx_rx->tx_data[0] = MF_UL_READ_CMD;
         tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_bits = 16;

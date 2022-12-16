@@ -324,11 +324,9 @@ bool subghz_keystore_save(SubGhzKeystore* instance, const char* file_name, uint8
         size_t total_keys = SubGhzKeyArray_size(instance->data);
         result = encrypted_line_count == total_keys;
         if(result) {
-            FURI_LOG_I(
-                TAG, "Success. Encrypted: %zu of %zu", encrypted_line_count, total_keys);
+            FURI_LOG_I(TAG, "Success. Encrypted: %zu of %zu", encrypted_line_count, total_keys);
         } else {
-            FURI_LOG_E(
-                TAG, "Failure. Encrypted: %zu of %zu", encrypted_line_count, total_keys);
+            FURI_LOG_E(TAG, "Failure. Encrypted: %zu of %zu", encrypted_line_count, total_keys);
         }
     } while(0);
     flipper_format_free(flipper_format);

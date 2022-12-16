@@ -276,7 +276,9 @@ static bool infrared_cli_decode_file(FlipperFormat* input_file, FlipperFormat* o
         }
         InfraredRawSignal* raw_signal = infrared_signal_get_raw_signal(signal);
         printf(
-            "Raw signal: %s, %zu samples\r\n", furi_string_get_cstr(tmp), raw_signal->timings_size);
+            "Raw signal: %s, %zu samples\r\n",
+            furi_string_get_cstr(tmp),
+            raw_signal->timings_size);
         if(!infrared_cli_decode_raw_signal(
                raw_signal, decoder, output_file, furi_string_get_cstr(tmp)))
             break;
