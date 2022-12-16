@@ -362,7 +362,10 @@ static bool furi_hal_subghz_start_debug() {
     bool ret = false;
     if(furi_hal_subghz.async_mirror_pin != NULL) {
         furi_hal_gpio_init(
-            furi_hal_subghz.async_mirror_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+            furi_hal_subghz.async_mirror_pin,
+            GpioModeOutputPushPull,
+            GpioPullNo,
+            GpioSpeedVeryHigh);
         ret = true;
     }
     return ret;
