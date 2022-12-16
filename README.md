@@ -1,7 +1,7 @@
 # flipperzero-yatzee
 Yahtzee game for flipperzero
 
-I just wanted to be able to play a quick game of Yahtzee for when I shit at work.
+Code is bad, I should feel bad, but it works and now I can play Yahtzee on my flipper while I shit at work.
 
 <b>Installation: </b>
 
