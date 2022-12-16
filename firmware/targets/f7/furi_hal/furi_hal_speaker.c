@@ -27,10 +27,11 @@ void furi_hal_speaker_init() {
 }
 
 void furi_hal_speaker_deinit() {
-    furi_check(furi_hal_speaker_mutex = NULL);
+    furi_check(furi_hal_speaker_mutex != NULL);
     LL_TIM_DeInit(FURI_HAL_SPEAKER_TIMER);
     furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_mutex_free(furi_hal_speaker_mutex);
+    furi_hal_speaker_mutex = NULL;
 }
 
 bool furi_hal_speaker_acquire(uint32_t timeout) {

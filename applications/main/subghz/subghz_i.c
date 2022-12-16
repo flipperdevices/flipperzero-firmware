@@ -604,8 +604,8 @@ void subghz_speaker_on(SubGhz* subghz) {
 void subghz_speaker_off(SubGhz* subghz) {
     if(subghz->txrx->speaker_state != SubGhzSpeakerStateDisable) {
         if(furi_hal_speaker_is_mine()) {
-            furi_hal_speaker_release();
             furi_hal_subghz_set_async_mirror_pin(NULL);
+            furi_hal_speaker_release();
             if(subghz->txrx->speaker_state == SubGhzSpeakerStateShutdown)
                 subghz->txrx->speaker_state = SubGhzSpeakerStateDisable;
         }
