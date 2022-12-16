@@ -16,46 +16,51 @@ void furi_hal_speaker_init();
 /** Deinit speaker */
 void furi_hal_speaker_deinit();
 
-/** Acquire speaker 
- * @warning Speaker control is only given to 1 process at a time
- * 
- * @param  timeout Timeout during which acquire speaker
- * @return   bool  returns true if the attempt was successful
+/** Acquire speaker ownership
+ *
+ * @warning    You must acquire speaker ownership before use
+ *
+ * @param      timeout  Timeout during which speaker ownership must be acquired
+ *
+ * @return     bool  returns true on success
  */
-bool __attribute__((warn_unused_result)) furi_hal_speaker_acquire(uint32_t timeout);
+FURI_WARN_UNUSED bool furi_hal_speaker_acquire(uint32_t timeout);
 
-/** Release speaker 
- * 
- * @warning No check is made that the current thread owns the process when called from an interrupt
-*/
+/** Release speaker ownership
+ *
+ * @warning    You must release speaker ownership after use
+ */
 void furi_hal_speaker_release();
 
-/** Ñheck that the current process owns the speaker
- * 
- * @warning Returns always True when called from an interrupt
- * @return   bool
+/** Check current process speaker ownership
+ *
+ * @warning    always returns true if called from ISR
+ *
+ * @return     bool returns true if process owns speaker
  */
 bool furi_hal_speaker_is_mine();
 
 /** Play a note
- * 
- * @warning No check is made that the current thread owns the process when called from an interrupt
- * @param  frequency 
- * @param  volume 
+ *
+ * @warning    no ownership check if called from ISR
+ *
+ * @param      frequency  The frequency
+ * @param      volume     The volume
  */
 void furi_hal_speaker_start(float frequency, float volume);
 
 /** Set volume
- * 
- * @warning No check is made that the current thread owns the process when called from an interrupt
- * @param  volume 
+ *
+ * @warning    no ownership check if called from ISR
+ *
+ * @param      volume  The volume
  */
 void furi_hal_speaker_set_volume(float volume);
 
-/** Stop playback  
- * 
- * @warning No check is made that the current thread owns the process when called from an interrupt
-*/
+/** Stop playback
+ *
+ * @warning    no ownership check if called from ISR
+ */
 void furi_hal_speaker_stop();
 
 #ifdef __cplusplus
