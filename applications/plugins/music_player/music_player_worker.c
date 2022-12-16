@@ -47,7 +47,7 @@ static int32_t music_player_worker_thread_callback(void* context) {
 
     NoteBlockArray_it_t it;
     NoteBlockArray_it(it, instance->notes);
-    if(furi_hal_speaker_acquire(30)) {
+    if(furi_hal_speaker_acquire(1000)) {
         while(instance->should_work) {
             if(NoteBlockArray_end_p(it)) {
                 NoteBlockArray_it(it, instance->notes);
@@ -91,7 +91,6 @@ static int32_t music_player_worker_thread_callback(void* context) {
         furi_hal_speaker_release();
     } else {
         FURI_LOG_E(TAG, "Speaker system is busy with another process.");
-        furi_crash("MusicPlayerWorker: Speaker system is busy with another process.");
     }
 
     return 0;

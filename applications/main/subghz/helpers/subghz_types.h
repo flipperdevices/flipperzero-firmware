@@ -30,9 +30,9 @@ typedef enum {
 
 /** SubGhzSpeakerState state */
 typedef enum {
-    SubGhzSpeakerStateOFF,
+    SubGhzSpeakerStateDisable,
     SubGhzSpeakerStateShutdown,
-    SubGhzSpeakerStateOn,
+    SubGhzSpeakerStateEnable,
 } SubGhzSpeakerState;
 
 /** SubGhzRxKeyState state */

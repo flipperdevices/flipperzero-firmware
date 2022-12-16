@@ -56,7 +56,7 @@ const char* const speaker_text[SPEAKER_COUNT] = {
 };
 const uint32_t speaker_value[SPEAKER_COUNT] = {
     SubGhzSpeakerStateShutdown,
-    SubGhzSpeakerStateOn,
+    SubGhzSpeakerStateEnable,
 };
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {

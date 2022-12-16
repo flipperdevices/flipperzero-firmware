@@ -22,18 +22,18 @@ typedef struct {
     volatile SubGhzState state;
     volatile SubGhzRegulation regulation;
     volatile FuriHalSubGhzPreset preset;
-    const GpioPin* gpio_debug_pin;
+    const GpioPin* async_mirror_pin;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
     .state = SubGhzStateInit,
     .regulation = SubGhzRegulationTxRx,
     .preset = FuriHalSubGhzPresetIDLE,
-    .gpio_debug_pin = NULL,
+    .async_mirror_pin = NULL,
 };
 
-void furi_hal_subghz_set_debug_pin(const GpioPin* gpio_debug_pin) {
-    furi_hal_subghz.gpio_debug_pin = gpio_debug_pin;
+void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
+    furi_hal_subghz.async_mirror_pin = pin;
 }
 
 void furi_hal_subghz_init() {
@@ -360,9 +360,9 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
 
 static bool furi_hal_subghz_start_debug() {
     bool ret = false;
-    if(furi_hal_subghz.gpio_debug_pin != NULL) {
+    if(furi_hal_subghz.async_mirror_pin != NULL) {
         furi_hal_gpio_init(
-            furi_hal_subghz.gpio_debug_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+            furi_hal_subghz.async_mirror_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
         ret = true;
     }
     return ret;
@@ -370,9 +370,9 @@ static bool furi_hal_subghz_start_debug() {
 
 static bool furi_hal_subghz_stop_debug() {
     bool ret = false;
-    if(furi_hal_subghz.gpio_debug_pin != NULL) {
+    if(furi_hal_subghz.async_mirror_pin != NULL) {
         furi_hal_gpio_init(
-            furi_hal_subghz.gpio_debug_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+            furi_hal_subghz.async_mirror_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         ret = true;
     }
     return ret;
@@ -388,8 +388,8 @@ static void furi_hal_subghz_capture_ISR() {
         LL_TIM_ClearFlag_CC1(TIM2);
         furi_hal_subghz_capture_delta_duration = LL_TIM_IC_GetCaptureCH1(TIM2);
         if(furi_hal_subghz_capture_callback) {
-            if(furi_hal_subghz.gpio_debug_pin != NULL)
-                furi_hal_gpio_write(furi_hal_subghz.gpio_debug_pin, false);
+            if(furi_hal_subghz.async_mirror_pin != NULL)
+                furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, false);
 
             furi_hal_subghz_capture_callback(
                 true,
@@ -401,8 +401,8 @@ static void furi_hal_subghz_capture_ISR() {
     if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
         LL_TIM_ClearFlag_CC2(TIM2);
         if(furi_hal_subghz_capture_callback) {
-            if(furi_hal_subghz.gpio_debug_pin != NULL)
-                furi_hal_gpio_write(furi_hal_subghz.gpio_debug_pin, true);
+            if(furi_hal_subghz.async_mirror_pin != NULL)
+                furi_hal_gpio_write(furi_hal_subghz.async_mirror_pin, true);
 
             furi_hal_subghz_capture_callback(
                 false,
@@ -678,7 +678,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     // Start debug
     if(furi_hal_subghz_start_debug()) {
-        const GpioPin* gpio = furi_hal_subghz.gpio_debug_pin;
+        const GpioPin* gpio = furi_hal_subghz.async_mirror_pin;
         furi_hal_subghz_debug_gpio_buff[0] = (uint32_t)gpio->pin << GPIO_NUMBER;
         furi_hal_subghz_debug_gpio_buff[1] = gpio->pin;
 

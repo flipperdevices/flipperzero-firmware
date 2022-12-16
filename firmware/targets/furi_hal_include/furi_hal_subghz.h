@@ -61,30 +61,20 @@ typedef enum {
     SubGhzRegulationTxRx, /**TxRx*/
 } SubGhzRegulation;
 
-/*
- * Output of raw data from IO GO0 CC1101 
- * 
- * e.g. for external comb, debug pin can be assigned
- *      gpio_ext_pc0
- *      gpio_ext_pc1
- *      gpio_ext_pc3
- *      gpio_ext_pb2
- *      gpio_ext_pb3
- *      gpio_ext_pa4
- *      gpio_ext_pa6
- *      gpio_ext_pa7
- * Attention this setting switches pin to output. 
- * Make sure it is not connected directly to power or ground
- * And
- *      gpio_speaker     
- * To output sound to the internal speaker
- * 
- * To turn off, you need to pass NULL to gpio_debug_pin
+/* Mirror RX/TX async modulation signal to specified pin
+ *
+ * Attention this setting switches pin to output. Make sure it is not connected
+ * directly to power or ground And gpio_speaker To output sound to the internal
+ * speaker
+ *
+ * Pass NULL to turn off
+ *
+ * @param[in]  pin   The pin
  */
-void furi_hal_subghz_set_debug_pin(const GpioPin* gpio_debug_pin);
+void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin);
 
 /** Initialize and switch to power save mode Used by internal API-HAL
- * initalization routine Can be used to reinitialize device to safe state and
+ * initialization routine Can be used to reinitialize device to safe state and
  * send it to sleep
  */
 void furi_hal_subghz_init();
