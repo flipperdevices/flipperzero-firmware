@@ -149,30 +149,11 @@ static void loclass_opt_suc(
     uint8_t length,
     bool add32Zeroes) {
     for(int i = 0; i < length; i++) {
-        uint8_t head;
-        head = in[i];
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
-
-        head >>= 1;
-        loclass_opt_successor(k, s, head);
+        uint8_t head = in[i];
+        for(int j = 0; j < 8; j++) {
+            loclass_opt_successor(k, s, head);
+            head >>= 1;
+        }
     }
     //For tag MAC, an additional 32 zeroes
     if(add32Zeroes) {
