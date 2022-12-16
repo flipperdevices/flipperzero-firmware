@@ -36,7 +36,7 @@ CountDownTimerApp* countdown_app_new(void) {
 
     // 2.3 attach views to the dispatcher
     // helloworld view
-    app->helloworld_view = helloworld_view_new();
+    app->helloworld_view = countdown_timer_view_new();
     register_view(app->view_dispatcher, countdown_timer_view_get_view(app->helloworld_view), 0xff);
 
     // 2.5 switch to default view

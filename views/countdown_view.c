@@ -2,10 +2,13 @@
 #include "../utils/utils.h"
 
 // internal
-static void handle_cmd(CountDownTimView* hw, CountDownViewCmd cmd);
-static void handle_time_setting_updown(CountDownTimView* hwv, CountDownViewCmd cmd);
-static void handle_time_setting_select(InputKey key, CountDownTimView* hwv);
+static void handle_misc_cmd(CountDownTimView* hw, CountDownViewCmd cmd);
+static void handle_time_setting_updown(CountDownTimView* cdv, CountDownViewCmd cmd);
+static void handle_time_setting_select(InputKey key, CountDownTimView* cdv);
 static void draw_selection(Canvas* canvas, CountDownViewSelect selection);
+
+static void countdown_timer_start_counting(CountDownTimView* cdv);
+static void countdown_timer_pause_counting(CountDownTimView* cdv);
 
 // callbacks
 static void countdown_timer_view_on_enter(void* ctx);
@@ -13,64 +16,67 @@ static void countdown_timer_view_on_draw(Canvas* canvas, void* ctx);
 static bool countdown_timer_view_on_input(InputEvent* event, void* ctx);
 static void timer_cb(void* ctx);
 
-CountDownTimView* helloworld_view_new() {
-    CountDownTimView* hwv = (CountDownTimView*)(malloc(sizeof(CountDownTimView)));
+CountDownTimView* countdown_timer_view_new() {
+    CountDownTimView* cdv = (CountDownTimView*)(malloc(sizeof(CountDownTimView)));
 
-    hwv->view = view_alloc();
+    cdv->view = view_alloc();
 
-    hwv->timer = furi_timer_alloc(timer_cb, FuriTimerTypePeriodic, hwv);
+    cdv->timer = furi_timer_alloc(timer_cb, FuriTimerTypePeriodic, cdv);
 
-    hwv->counting = false;
+    cdv->counting = false;
 
-    view_set_context(hwv->view, hwv);
+    view_set_context(cdv->view, cdv);
 
-    view_allocate_model(hwv->view, ViewModelTypeLocking, sizeof(CountDownModel));
+    view_allocate_model(cdv->view, ViewModelTypeLocking, sizeof(CountDownModel));
 
-    view_set_draw_callback(hwv->view, countdown_timer_view_on_draw);
-    view_set_input_callback(hwv->view, countdown_timer_view_on_input);
-    view_set_enter_callback(hwv->view, countdown_timer_view_on_enter);
+    view_set_draw_callback(cdv->view, countdown_timer_view_on_draw);
+    view_set_input_callback(cdv->view, countdown_timer_view_on_input);
+    view_set_enter_callback(cdv->view, countdown_timer_view_on_enter);
 
-    return hwv;
+    return cdv;
 }
 
-void countdown_timer_view_delete(CountDownTimView* hwv) {
-    furi_assert(hwv);
+void countdown_timer_view_delete(CountDownTimView* cdv) {
+    furi_assert(cdv);
 
-    view_free(hwv->view);
-    furi_timer_stop(hwv->timer);
-    furi_timer_free(hwv->timer);
+    view_free(cdv->view);
+    furi_timer_stop(cdv->timer);
+    furi_timer_free(cdv->timer);
 
-    free(hwv);
+    free(cdv);
 }
 
-View* countdown_timer_view_get_view(CountDownTimView* hwv) {
-    return hwv->view;
+View* countdown_timer_view_get_view(CountDownTimView* cdv) {
+    return cdv->view;
 }
 
-void countdown_timer_view_state_reset(CountDownTimView* hwv) {
-    hwv->counting = false;
+void countdown_timer_view_state_reset(CountDownTimView* cdv) {
+    cdv->counting = false;
+
     with_view_model(
-        hwv->view, CountDownModel * model, { model->sec_expected = 10; }, true);
+        cdv->view, CountDownModel * model, { model->count = model->saved_count_setting; }, true)
 }
 
-void countdown_timer_state_toggle(CountDownTimView* hwv) {
-    bool on = hwv->counting;
+void countdown_timer_state_toggle(CountDownTimView* cdv) {
+    bool on = cdv->counting;
     if(!on) {
-        furi_timer_start(hwv->timer, furi_kernel_get_tick_frequency() * 1); // 1s
+        countdown_timer_start_counting(cdv);
     } else {
-        furi_timer_stop(hwv->timer);
-        notification_off();
+        countdown_timer_pause_counting(cdv);
     }
 
-    hwv->counting = !on;
+    cdv->counting = !on;
 }
 
 // on enter callback, CountDownTimView as ctx
 static void countdown_timer_view_on_enter(void* ctx) {
     furi_assert(ctx);
 
-    CountDownTimView* hwv = (CountDownTimView*)ctx;
-    countdown_timer_view_state_reset(hwv);
+    CountDownTimView* cdv = (CountDownTimView*)ctx;
+
+    // set current count to 10 seconds
+    with_view_model(
+        cdv->view, CountDownModel * model, { model->count = 10; }, true);
 }
 
 // view draw callback, CountDownModel as ctx
@@ -80,7 +86,7 @@ static void countdown_timer_view_on_draw(Canvas* canvas, void* ctx) {
 
     char buffer[64];
 
-    int32_t sec = model->sec_expected;
+    int32_t sec = model->count;
     CountDownViewSelect select = model->select;
 
     elements_frame(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -116,7 +122,7 @@ static bool countdown_timer_view_on_input(InputEvent* event, void* ctx) {
 
         case InputKeyOk:
             if(event->type == InputTypeShort) {
-                handle_cmd(hw, CountDownTimerToggleCounting);
+                handle_misc_cmd(hw, CountDownTimerToggleCounting);
             }
             break;
 
@@ -130,7 +136,7 @@ static bool countdown_timer_view_on_input(InputEvent* event, void* ctx) {
     if(event->type == InputTypeLong) {
         switch(event->key) {
         case InputKeyOk:
-            handle_cmd(hw, CountDownTimerReset);
+            handle_misc_cmd(hw, CountDownTimerReset);
             break;
 
         case InputKeyBack:
@@ -150,17 +156,17 @@ static bool countdown_timer_view_on_input(InputEvent* event, void* ctx) {
 static void timer_cb(void* ctx) {
     furi_assert(ctx);
 
-    CountDownTimView* hwv = (CountDownTimView*)ctx;
+    CountDownTimView* cdv = (CountDownTimView*)ctx;
 
     int32_t sec;
     bool timeup = false;
 
     // decrement counter
     with_view_model(
-        hwv->view,
+        cdv->view,
         CountDownModel * model,
         {
-            sec = model->sec_expected;
+            sec = model->count;
             sec--;
 
             // check timeup
@@ -169,56 +175,60 @@ static void timer_cb(void* ctx) {
                 timeup = true;
             }
 
-            model->sec_expected = sec;
+            model->count = sec;
         },
         true);
 
     if(timeup) {
-        handle_cmd(hwv, CountDownTimerTimeUp);
+        handle_misc_cmd(cdv, CountDownTimerTimeUp);
     }
 }
 
-static void handle_time_setting_updown(CountDownTimView* hwv, CountDownViewCmd cmd) {
-    int32_t sec_expected;
+static void handle_time_setting_updown(CountDownTimView* cdv, CountDownViewCmd cmd) {
+    int32_t count;
 
     with_view_model(
-        hwv->view,
+        cdv->view,
         CountDownModel * model,
         {
-            sec_expected = model->sec_expected;
+            count = model->count;
             switch(cmd) {
             case CountDownTimerMinuteUp:
-                sec_expected += 60;
+                count += 60;
                 break;
             case CountDownTimerMinuteDown:
-                sec_expected -= 60;
+                count -= 60;
                 break;
             case CountDownTimerHourDown:
-                sec_expected -= 3600;
+                count -= 3600;
                 break;
             case CountDownTimerHourUp:
-                sec_expected += 3600;
+                count += 3600;
                 break;
             case CountDownTimerSecUp:
-                sec_expected++;
+                count++;
                 break;
             case CountDownTimerSecDown:
-                sec_expected--;
+                count--;
                 break;
             default:
                 break;
             }
 
-            if(sec_expected < 0) {
-                sec_expected = 0;
+            if(count < 0) {
+                count = 0;
             }
 
-            model->sec_expected = sec_expected;
+            // update count state
+            model->count = count;
+
+            // save the count time setting
+            model->saved_count_setting = count;
         },
         true);
 }
 
-static void handle_cmd(CountDownTimView* hw, CountDownViewCmd cmd) {
+static void handle_misc_cmd(CountDownTimView* hw, CountDownViewCmd cmd) {
     switch(cmd) {
     case CountDownTimerTimeUp:
         notification_timeup();
@@ -242,8 +252,8 @@ static void handle_cmd(CountDownTimView* hw, CountDownViewCmd cmd) {
     return;
 }
 
-static void handle_time_setting_select(InputKey key, CountDownTimView* hwv) {
-    bool counting = hwv->counting;
+static void handle_time_setting_select(InputKey key, CountDownTimView* cdv) {
+    bool counting = cdv->counting;
     CountDownViewCmd setting_cmd = CountDownTimerSecUp;
     CountDownViewSelect selection;
 
@@ -253,7 +263,7 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* hwv) {
 
     // load current selection from model context
     with_view_model(
-        hwv->view, CountDownModel * model, { selection = model->select; }, false);
+        cdv->view, CountDownModel * model, { selection = model->select; }, false);
 
     // select
     switch(key) {
@@ -270,7 +280,7 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* hwv) {
             break;
         }
 
-        handle_time_setting_updown(hwv, setting_cmd);
+        handle_time_setting_updown(cdv, setting_cmd);
         break;
 
     case InputKeyDown:
@@ -286,7 +296,7 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* hwv) {
             break;
         }
 
-        handle_time_setting_updown(hwv, setting_cmd);
+        handle_time_setting_updown(cdv, setting_cmd);
         break;
 
     case InputKeyRight:
@@ -305,7 +315,7 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* hwv) {
 
     // save selection to model context
     with_view_model(
-        hwv->view, CountDownModel * model, { model->select = selection; }, false);
+        cdv->view, CountDownModel * model, { model->select = selection; }, false);
 }
 
 static void draw_selection(Canvas* canvas, CountDownViewSelect selection) {
@@ -320,4 +330,13 @@ static void draw_selection(Canvas* canvas, CountDownViewSelect selection) {
         elements_slightly_rounded_box(canvas, SCREEN_CENTER_X - 47, SCREEN_CENTER_Y + 11, 21, 2);
         break;
     }
+}
+
+static void countdown_timer_start_counting(CountDownTimView* cdv) {
+    furi_timer_start(cdv->timer, furi_kernel_get_tick_frequency() * 1); // 1s
+}
+
+static void countdown_timer_pause_counting(CountDownTimView* cdv) {
+    furi_timer_stop(cdv->timer);
+    notification_off();
 }
