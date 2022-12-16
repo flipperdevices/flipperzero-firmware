@@ -1,6 +1,7 @@
 # flipperzero-yatzee
 Yahtzee game for flipperzero
 
+I just wanted to be able to play a quick game of Yahtzee for when I shit at work.
 
 <b>Installation: </b>
 
@@ -33,6 +34,18 @@ connect flipper to PC and run:
 - Large Straight (Lg) = 40
 - Chance (Ch) = total of all dice in roll
 - Yatzee (Yz) = 50 for the first yatzee. Successive Yatzees do not show in the score card, but add 100 each to the total score
-
 - Game ends when every scoring value has been selected once.
 - If sub score is at least 63, 35 points are added to the total score.
+
+<b>Todo</b>
+- Redo the scorecard now that I understand a little better how this works
+  - Would like to make it a grid with 4 rows, and 4 columns
+    - Rows 0 and 2 will have the scores 'names'
+    - Rows 1 and 3 will be empty until filled by a score.
+    - Column 3 will span all rows and show each bonus yatzee as an icon like a star or something.
+  - Once grided score card is implemented, identify a better mechanism to show that a score has already been counted- instead of the '.' that shows up now.
+    - Maybe invert the grid color to show which score is being selected by the cursor.
+- If upper score >= 63, add a pop-up message at the end game to give a visual indication that a bonus for the top row is being.
+- Redo button mapping so that 
+  - the middle button can be used to both hold on dice or confirm score. Leaves the down arrow open for something else.
+  - Would be nice 
