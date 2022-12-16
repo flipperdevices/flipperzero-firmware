@@ -492,7 +492,7 @@ MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData* data) 
     } else if(
         data->type >= MfUltralightTypeNTAGI2CPlus1K &&
         data->type <= MfUltralightTypeNTAGI2CPlus2K) {
-        return (MfUltralightConfigPages*)&data->data[0xe3 * 4];
+        return (MfUltralightConfigPages*)&data->data[0xe3 * 4]; //-V641
     } else {
         return NULL;
     }
@@ -857,7 +857,7 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
     }
 
     if(apply) {
-        while(tx_page_offset < 0 && page_length > 0) {
+        while(tx_page_offset < 0 && page_length > 0) { //-V614
             ++tx_page_offset;
             ++data_page_offset;
             --page_length;

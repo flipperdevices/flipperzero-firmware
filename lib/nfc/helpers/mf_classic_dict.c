@@ -193,7 +193,7 @@ bool mf_classic_dict_is_key_present_str(MfClassicDict* dict, FuriString* key) {
 
     bool key_found = false;
     stream_rewind(dict->stream);
-    while(!key_found) {
+    while(!key_found) { //-V654
         if(!stream_read_line(dict->stream, next_line)) break;
         if(furi_string_get_char(next_line, 0) == '#') continue;
         if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
@@ -294,7 +294,7 @@ bool mf_classic_dict_find_index_str(MfClassicDict* dict, FuriString* key, uint32
     bool key_found = false;
     uint32_t index = 0;
     stream_rewind(dict->stream);
-    while(!key_found) {
+    while(!key_found) { //-V654
         if(!stream_read_line(dict->stream, next_line)) break;
         if(furi_string_get_char(next_line, 0) == '#') continue;
         if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
