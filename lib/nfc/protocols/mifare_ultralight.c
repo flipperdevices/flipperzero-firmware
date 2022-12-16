@@ -170,6 +170,7 @@ bool mf_ultralight_read_version(
 }
 
 bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint16_t* pack) {
+    furi_assert(pack);
     bool authenticated = false;
 
     do {
@@ -189,9 +190,7 @@ bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint
             break;
         }
 
-        if(pack != NULL) {
-            *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
-        }
+        *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
 
         FURI_LOG_I(TAG, "Auth success. Password: %08lX. PACK: %04X", key, *pack);
         authenticated = true;
@@ -1216,7 +1215,7 @@ static void mf_ul_emulate_write(
             page_buff[0] = new_locks & 0xff;
             page_buff[1] = new_locks >> 8;
             page_buff[2] = new_block_locks;
-            if(emulator->data.type >= MfUltralightTypeUL21 &&
+            if(emulator->data.type >= MfUltralightTypeUL21 && //-V1016
                emulator->data.type <= MfUltralightTypeNTAG216)
                 page_buff[3] = MF_UL_TEARING_FLAG_DEFAULT;
             else
