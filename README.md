@@ -5,11 +5,7 @@ Code is bad, I should feel bad, but it works and now I can play Yahtzee on my fl
 
 <b>Installation: </b>
 
-Download Yatzee folder and copy to firmware_name/applications_user
-
-connect flipper to PC and run:
-
-./fbt launchapp APPSRC=yatzee
+Download fap from releases. Copy fap to flipper sd at <b>ext > apps > Games</b>
 
 
 <b>Controls: </b>
