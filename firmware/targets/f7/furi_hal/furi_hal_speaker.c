@@ -35,6 +35,8 @@ void furi_hal_speaker_deinit() {
 }
 
 bool furi_hal_speaker_acquire(uint32_t timeout) {
+    furi_check(!FURI_IS_IRQ_MODE());
+
     if(furi_mutex_acquire(furi_hal_speaker_mutex, timeout) == FuriStatusOk) {
         furi_hal_power_insomnia_enter();
         furi_hal_gpio_init_ex(
@@ -46,10 +48,13 @@ bool furi_hal_speaker_acquire(uint32_t timeout) {
 }
 
 void furi_hal_speaker_release() {
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_check(furi_hal_speaker_is_mine());
+
     furi_hal_speaker_stop();
     furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_power_insomnia_exit();
+
     furi_check(furi_mutex_release(furi_hal_speaker_mutex) == FuriStatusOk);
 }
 
