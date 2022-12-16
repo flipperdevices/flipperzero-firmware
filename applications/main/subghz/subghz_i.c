@@ -593,11 +593,35 @@ void subghz_hopper_update(SubGhz* subghz) {
 
 void subghz_speaker_on(SubGhz* subghz) {
     if(subghz->txrx->speaker_state == SubGhzSpeakerStateOn) {
-        furi_hal_subghz_set_debug_pin(&gpio_speaker);
+        if(furi_hal_speaker_acquire(0)) {
+            furi_hal_subghz_set_debug_pin(&gpio_speaker);
+        } else {
+            subghz->txrx->speaker_state = SubGhzSpeakerStateOFF;
+        }
     }
 }
 
 void subghz_speaker_off(SubGhz* subghz) {
-    UNUSED(subghz);
-    furi_hal_subghz_set_debug_pin(NULL);
+    if(subghz->txrx->speaker_state != SubGhzSpeakerStateOFF) {
+        if(furi_hal_speaker_is_mine()) {
+            furi_hal_speaker_release();
+            furi_hal_subghz_set_debug_pin(NULL);
+            if(subghz->txrx->speaker_state == SubGhzSpeakerStateShutdown)
+                subghz->txrx->speaker_state = SubGhzSpeakerStateOFF;
+        }
+    }
+}
+
+void subghz_speaker_mute(SubGhz* subghz) {
+    if(subghz->txrx->speaker_state == SubGhzSpeakerStateOn) {
+        furi_check(furi_hal_speaker_is_mine());
+        furi_hal_subghz_set_debug_pin(NULL);
+    }
+}
+
+void subghz_speaker_unmute(SubGhz* subghz) {
+    if(subghz->txrx->speaker_state == SubGhzSpeakerStateOn) {
+        furi_check(furi_hal_speaker_is_mine());
+        furi_hal_subghz_set_debug_pin(&gpio_speaker);
+    }
 }

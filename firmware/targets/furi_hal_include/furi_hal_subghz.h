@@ -62,8 +62,9 @@ typedef enum {
 } SubGhzRegulation;
 
 /*
- * IO GO0 CC1101 to an external comb.
- * Debug pin can be assigned
+ * Output of raw data from IO GO0 CC1101 
+ * 
+ * e.g. for external comb, debug pin can be assigned
  *      gpio_ext_pc0
  *      gpio_ext_pc1
  *      gpio_ext_pc3
@@ -80,7 +81,6 @@ typedef enum {
  * 
  * To turn off, you need to pass NULL to gpio_debug_pin
  */
-
 void furi_hal_subghz_set_debug_pin(const GpioPin* gpio_debug_pin);
 
 /** Initialize and switch to power save mode Used by internal API-HAL

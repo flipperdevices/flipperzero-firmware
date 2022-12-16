@@ -55,7 +55,7 @@ const char* const speaker_text[SPEAKER_COUNT] = {
     "ON",
 };
 const uint32_t speaker_value[SPEAKER_COUNT] = {
-    SubGhzSpeakerStateOFF,
+    SubGhzSpeakerStateShutdown,
     SubGhzSpeakerStateOn,
 };
 

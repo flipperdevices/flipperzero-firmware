@@ -7,7 +7,6 @@
 #include <furi_hal_spi.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
-#include <furi_hal_speaker.h>
 
 #include <stm32wbxx_ll_dma.h>
 
@@ -17,7 +16,7 @@
 
 #define TAG "FuriHalSubGhz"
 
-uint32_t subghz_debug_gpio_buff[2];
+static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 
 typedef struct {
     volatile SubGhzState state;
@@ -361,16 +360,7 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
 
 static bool furi_hal_subghz_start_debug() {
     bool ret = false;
-    if(furi_hal_subghz.gpio_debug_pin == &gpio_speaker) {
-        if(furi_hal_speaker_acquire(0)) {
-            furi_hal_gpio_init(
-                furi_hal_subghz.gpio_debug_pin,
-                GpioModeOutputPushPull,
-                GpioPullNo,
-                GpioSpeedVeryHigh);
-            ret = true;
-        }
-    } else if(furi_hal_subghz.gpio_debug_pin != NULL) {
+    if(furi_hal_subghz.gpio_debug_pin != NULL) {
         furi_hal_gpio_init(
             furi_hal_subghz.gpio_debug_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
         ret = true;
@@ -378,14 +368,9 @@ static bool furi_hal_subghz_start_debug() {
     return ret;
 }
 
-static bool furi_hal_subghz_stop_degug() {
+static bool furi_hal_subghz_stop_debug() {
     bool ret = false;
-    if(furi_hal_subghz.gpio_debug_pin == &gpio_speaker) {
-        if(furi_hal_speaker_is_mine()) {
-            furi_hal_speaker_release();
-            ret = true;
-        }
-    } else if(furi_hal_subghz.gpio_debug_pin != NULL) {
+    if(furi_hal_subghz.gpio_debug_pin != NULL) {
         furi_hal_gpio_init(
             furi_hal_subghz.gpio_debug_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         ret = true;
@@ -498,7 +483,7 @@ void furi_hal_subghz_stop_async_rx() {
     LL_TIM_DeInit(TIM2);
 
     // Stop debug
-    furi_hal_subghz_stop_degug();
+    furi_hal_subghz_stop_debug();
 
     FURI_CRITICAL_EXIT();
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
@@ -694,10 +679,10 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
     // Start debug
     if(furi_hal_subghz_start_debug()) {
         const GpioPin* gpio = furi_hal_subghz.gpio_debug_pin;
-        subghz_debug_gpio_buff[0] = (uint32_t)gpio->pin << GPIO_NUMBER;
-        subghz_debug_gpio_buff[1] = gpio->pin;
+        furi_hal_subghz_debug_gpio_buff[0] = (uint32_t)gpio->pin << GPIO_NUMBER;
+        furi_hal_subghz_debug_gpio_buff[1] = gpio->pin;
 
-        dma_config.MemoryOrM2MDstAddress = (uint32_t)subghz_debug_gpio_buff;
+        dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_subghz_debug_gpio_buff;
         dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
         dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
         dma_config.Mode = LL_DMA_MODE_CIRCULAR;
@@ -746,7 +731,7 @@ void furi_hal_subghz_stop_async_tx() {
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // Stop debug
-    if(furi_hal_subghz_stop_degug()) {
+    if(furi_hal_subghz_stop_debug()) {
         LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     }
 

@@ -13,7 +13,7 @@
 #define FURI_HAL_SPEAKER_PRESCALER 500
 #define FURI_HAL_SPEAKER_MAX_VOLUME 60
 
-FuriMutex* furi_hal_speaker_mutex = NULL;
+static FuriMutex* furi_hal_speaker_mutex = NULL;
 
 // #define FURI_HAL_SPEAKER_NEW_VOLUME
 
@@ -45,7 +45,7 @@ bool furi_hal_speaker_acquire(uint32_t timeout) {
 }
 
 void furi_hal_speaker_release() {
-    furi_check(furi_mutex_get_owner(furi_hal_speaker_mutex) == furi_thread_get_current_id());
+    furi_check(furi_hal_speaker_is_mine());
     furi_hal_speaker_stop();
     furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_power_insomnia_exit();
@@ -53,7 +53,8 @@ void furi_hal_speaker_release() {
 }
 
 bool furi_hal_speaker_is_mine() {
-    return furi_mutex_get_owner(furi_hal_speaker_mutex) == furi_thread_get_current_id();
+    return (FURI_IS_IRQ_MODE()) ||
+           (furi_mutex_get_owner(furi_hal_speaker_mutex) == furi_thread_get_current_id());
 }
 
 static inline uint32_t furi_hal_speaker_calculate_autoreload(float frequency) {
@@ -90,7 +91,7 @@ static inline uint32_t furi_hal_speaker_calculate_compare(float volume) {
 }
 
 void furi_hal_speaker_start(float frequency, float volume) {
-    furi_check(furi_mutex_get_owner(furi_hal_speaker_mutex) == furi_thread_get_current_id());
+    furi_check(furi_hal_speaker_is_mine());
 
     if(volume <= 0) {
         furi_hal_speaker_stop();
@@ -113,7 +114,7 @@ void furi_hal_speaker_start(float frequency, float volume) {
 }
 
 void furi_hal_speaker_set_volume(float volume) {
-    furi_check(furi_mutex_get_owner(furi_hal_speaker_mutex) == furi_thread_get_current_id());
+    furi_check(furi_hal_speaker_is_mine());
     if(volume <= 0) {
         furi_hal_speaker_stop();
         return;
@@ -127,7 +128,7 @@ void furi_hal_speaker_set_volume(float volume) {
 }
 
 void furi_hal_speaker_stop() {
-    furi_check(furi_mutex_get_owner(furi_hal_speaker_mutex) == furi_thread_get_current_id());
+    furi_check(furi_hal_speaker_is_mine());
     LL_TIM_DisableAllOutputs(FURI_HAL_SPEAKER_TIMER);
     LL_TIM_DisableCounter(FURI_HAL_SPEAKER_TIMER);
 }
