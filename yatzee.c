@@ -22,7 +22,6 @@ bool game_over = false;
 bool bonus_added = false;
 int8_t num_bonus_yatzees = 0;
 
-//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
 // struct to hold image posistion for dice
 typedef struct {
     //    +-----x
