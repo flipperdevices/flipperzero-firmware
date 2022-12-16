@@ -74,9 +74,15 @@ static void countdown_timer_view_on_enter(void* ctx) {
 
     CountDownTimView* cdv = (CountDownTimView*)ctx;
 
-    // set current count to 10 seconds
+    // set current count to a initial value
     with_view_model(
-        cdv->view, CountDownModel * model, { model->count = 10; }, true);
+        cdv->view,
+        CountDownModel * model,
+        {
+            model->count = INIT_COUNT;
+            model->saved_count_setting = INIT_COUNT;
+        },
+        true);
 }
 
 // view draw callback, CountDownModel as ctx
@@ -86,23 +92,21 @@ static void countdown_timer_view_on_draw(Canvas* canvas, void* ctx) {
 
     char buffer[64];
 
-    int32_t sec = model->count;
+    int32_t count = model->count;
+    int32_t expected_count = model->saved_count_setting;
+
     CountDownViewSelect select = model->select;
 
-    elements_frame(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    // elements_frame(canvas, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     canvas_set_font(canvas, FontBigNumbers);
     draw_selection(canvas, select);
 
-    snprintf(
-        buffer,
-        sizeof(buffer),
-        "%02ld:%02ld:%02ld",
-        (sec % (60 * 60 * 24)) / (60 * 60), // hour
-        (sec % (60 * 60)) / 60, // minute
-        sec % 60); // second
+    parse_sec_to_time_str(buffer, sizeof(buffer), count);
     canvas_draw_str_aligned(
         canvas, SCREEN_CENTER_X, SCREEN_CENTER_Y, AlignCenter, AlignCenter, buffer);
+
+    elements_progress_bar(canvas, 0, 0, SCREEN_WIDTH, (1.0 * count / expected_count));
 }
 
 // keys input event callback, CountDownTimView as ctx
@@ -158,7 +162,7 @@ static void timer_cb(void* ctx) {
 
     CountDownTimView* cdv = (CountDownTimView*)ctx;
 
-    int32_t sec;
+    int32_t count;
     bool timeup = false;
 
     // decrement counter
@@ -166,16 +170,16 @@ static void timer_cb(void* ctx) {
         cdv->view,
         CountDownModel * model,
         {
-            sec = model->count;
-            sec--;
+            count = model->count;
+            count--;
 
             // check timeup
-            if(sec <= 0) {
-                sec = 0;
+            if(count <= 0) {
+                count = 0;
                 timeup = true;
             }
 
-            model->count = sec;
+            model->count = count;
         },
         true);
 
@@ -321,13 +325,13 @@ static void handle_time_setting_select(InputKey key, CountDownTimView* cdv) {
 static void draw_selection(Canvas* canvas, CountDownViewSelect selection) {
     switch(selection) {
     case CountDownTimerSelectSec:
-        elements_slightly_rounded_box(canvas, SCREEN_CENTER_X + 25, SCREEN_CENTER_Y + 11, 21, 2);
+        elements_slightly_rounded_box(canvas, SCREEN_CENTER_X + 25, SCREEN_CENTER_Y + 11, 24, 2);
         break;
     case CountDownTimerSelectMinute:
         elements_slightly_rounded_box(canvas, SCREEN_CENTER_X - 10, SCREEN_CENTER_Y + 11, 21, 2);
         break;
     case CountDownTimerSelectHour:
-        elements_slightly_rounded_box(canvas, SCREEN_CENTER_X - 47, SCREEN_CENTER_Y + 11, 21, 2);
+        elements_slightly_rounded_box(canvas, SCREEN_CENTER_X - 47, SCREEN_CENTER_Y + 11, 24, 2);
         break;
     }
 }

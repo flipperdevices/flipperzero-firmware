@@ -11,9 +11,7 @@
 #define SCREEN_CENTER_X (SCREEN_WIDTH / 2)
 #define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2)
 
-#define MAX_SCALE 80
-#define MAX_MOVE_STEP 16
-#define MIN_MOVE_STEP 2
+#define INIT_COUNT 10
 
 typedef enum {
     CountDownTimerMinuteUp,
