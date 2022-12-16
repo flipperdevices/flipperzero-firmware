@@ -1,4 +1,5 @@
 #include "subbrute_protocols.h"
+#include "math.h"
 #include <string.h>
 
 #define TAG "SubBruteProtocols"
@@ -250,44 +251,44 @@ const SubBruteProtocol subbrute_protocol_linear_10bit_310 = {
  */
 const SubBruteProtocol subbrute_protocol_unilarm_24bit_330 = {
     .frequency = 330000000,
-    .bits = 24,
-    .te = 0,
+    .bits = 25,
+    .te = 200,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = RAWFileProtocol};
+    .file = UNILARMFileProtocol};
 
 /**
  * UNILARM 24bit 433MHz
  */
 const SubBruteProtocol subbrute_protocol_unilarm_24bit_433 = {
     .frequency = 433920000,
-    .bits = 24,
-    .te = 0,
+    .bits = 25,
+    .te = 200,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = RAWFileProtocol};
+    .file = UNILARMFileProtocol};
 
 /**
  * SMC5326 24bit 330MHz
  */
 const SubBruteProtocol subbrute_protocol_smc5326_24bit_330 = {
     .frequency = 330000000,
-    .bits = 24,
-    .te = 0,
+    .bits = 25,
+    .te = 306,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = RAWFileProtocol};
+    .file = SMC5326FileProtocol};
 
 /**
  * SMC5326 24bit 433MHz
  */
 const SubBruteProtocol subbrute_protocol_smc5326_24bit_433 = {
     .frequency = 433920000,
-    .bits = 24,
-    .te = 0,
+    .bits = 25,
+    .te = 306,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = RAWFileProtocol};
+    .file = SMC5326FileProtocol};
 
 /**
  * PT2260 (Princeton) 24bit 315MHz
@@ -295,10 +296,10 @@ const SubBruteProtocol subbrute_protocol_smc5326_24bit_433 = {
 const SubBruteProtocol subbrute_protocol_pt2260_24bit_315 = {
     .frequency = 315000000,
     .bits = 24,
-    .te = 0,
+    .te = 288,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = PrincetonFileProtocol};
+    .file = PT2260FileProtocol};
 
 /**
  * PT2260 (Princeton) 24bit 330MHz
@@ -306,10 +307,10 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_315 = {
 const SubBruteProtocol subbrute_protocol_pt2260_24bit_330 = {
     .frequency = 330000000,
     .bits = 24,
-    .te = 0,
+    .te = 288,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = PrincetonFileProtocol};
+    .file = PT2260FileProtocol};
 
 /**
  * PT2260 (Princeton) 24bit 390MHz
@@ -317,10 +318,10 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_330 = {
 const SubBruteProtocol subbrute_protocol_pt2260_24bit_390 = {
     .frequency = 390000000,
     .bits = 24,
-    .te = 0,
+    .te = 280,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = PrincetonFileProtocol};
+    .file = PT2260FileProtocol};
 
 /**
  * PT2260 (Princeton) 24bit 433MHz
@@ -328,10 +329,10 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_390 = {
 const SubBruteProtocol subbrute_protocol_pt2260_24bit_433 = {
     .frequency = 433920000,
     .bits = 24,
-    .te = 0,
+    .te = 280,
     .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
-    .file = PrincetonFileProtocol};
+    .file = PT2260FileProtocol};
 
 /**
  * BF existing dump
@@ -431,6 +432,9 @@ static const char* subbrute_protocol_file_types[] = {
     [MagellanFileProtocol] = "Magellan",
     [IntertechnoV3FileProtocol] = "Intertechno_V3",
     [AnsonicFileProtocol] = "Ansonic",
+    [SMC5326FileProtocol] = "SMC5326",
+    [UNILARMFileProtocol] = "SMC5326",
+    [PT2260FileProtocol] = "Princeton",
     [UnknownFileProtocol] = "Unknown"};
 
 /**
@@ -521,10 +525,68 @@ void subbrute_protocol_create_candidate_for_existing_file(
 #endif
 }
 
-void subbrute_protocol_create_candidate_for_default(FuriString* candidate, uint64_t step) {
+void subbrute_protocol_create_candidate_for_default(
+    FuriString* candidate,
+    SubBruteFileProtocol file,
+    uint64_t step) {
     uint8_t p[8];
-    for(int i = 0; i < 8; i++) {
-        p[i] = (uint8_t)(step >> 8 * (7 - i)) & 0xFF;
+    if(file == SMC5326FileProtocol) {
+        const uint8_t lut[] = {0x00, 0x02, 0x03}; // 00, 10, 11
+        const uint64_t gate1 = 0x01D5; // 111010101
+        //const uint8_t gate2 = 0x0175; // 101110101
+
+        uint64_t total = 0;
+        for(size_t j = 0; j < 8; j++) {
+            total |= lut[step % 3] << (2 * j);
+            double sub_step = step / 3;
+            step = (uint64_t)floor(sub_step);
+        }
+        total <<= 9;
+        total |= gate1;
+
+        for(int i = 0; i < 8; i++) {
+            p[i] = (uint8_t)(total >> 8 * (7 - i)) & 0xFF;
+        }
+    } else if(file == UNILARMFileProtocol) {
+        const uint8_t lut[] = {0x00, 0x02, 0x03}; // 00, 10, 11
+        const uint64_t gate1 = 3 << 7;
+        //const uint8_t gate2 = 3 << 5;
+
+        uint64_t total = 0;
+        for(size_t j = 0; j < 8; j++) {
+            total |= lut[step % 3] << (2 * j);
+            double sub_step = step / 3;
+            step = (uint64_t)floor(sub_step);
+        }
+        total <<= 9;
+        total |= gate1;
+
+        for(int i = 0; i < 8; i++) {
+            p[i] = (uint8_t)(total >> 8 * (7 - i)) & 0xFF;
+        }
+    } else if(file == PT2260FileProtocol) {
+        const uint8_t lut[] = {0x00, 0x01, 0x03}; // 00, 01, 11
+        const uint64_t button_open = 0x03; // 11
+        //const uint8_t button_lock = 0x0C; // 1100
+        //const uint8_t button_stop = 0x30; // 110000
+        //const uint8_t button_close = 0xC0; // 11000000
+
+        uint64_t total = 0;
+        for(size_t j = 0; j < 8; j++) {
+            total |= lut[step % 3] << (2 * j);
+            double sub_step = step / 3;
+            step = (uint64_t)floor(sub_step);
+        }
+        total <<= 8;
+        total |= button_open;
+
+        for(int i = 0; i < 8; i++) {
+            p[i] = (uint8_t)(total >> 8 * (7 - i)) & 0xFF;
+        }
+    } else {
+        for(int i = 0; i < 8; i++) {
+            p[i] = (uint8_t)(step >> 8 * (7 - i)) & 0xFF;
+        }
     }
 
     size_t size = sizeof(uint64_t);
@@ -547,12 +609,13 @@ void subbrute_protocol_create_candidate_for_default(FuriString* candidate, uint6
 
 void subbrute_protocol_default_payload(
     Stream* stream,
+    SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
     uint8_t te,
     uint8_t repeat) {
     FuriString* candidate = furi_string_alloc();
-    subbrute_protocol_create_candidate_for_default(candidate, step);
+    subbrute_protocol_create_candidate_for_default(candidate, file, step);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(
@@ -630,7 +693,7 @@ void subbrute_protocol_default_generate_file(
     uint8_t te,
     uint8_t repeat) {
     FuriString* candidate = furi_string_alloc();
-    subbrute_protocol_create_candidate_for_default(candidate, step);
+    subbrute_protocol_create_candidate_for_default(candidate, file, step);
 
 #ifdef FURI_DEBUG
     FURI_LOG_D(TAG, "candidate: %s, step: %lld", furi_string_get_cstr(candidate), step);
@@ -713,6 +776,16 @@ uint64_t
     uint64_t max_value;
     if(attack_type == SubBruteAttackLoadFile) {
         max_value = two_bytes ? 0xFFFF : 0xFF;
+    } else if(
+        attack_type == SubBruteAttackSMC532624bit330 ||
+        attack_type == SubBruteAttackSMC532624bit433 ||
+        attack_type == SubBruteAttackUNILARM24bit330 ||
+        attack_type == SubBruteAttackUNILARM24bit433 ||
+        attack_type == SubBruteAttackPT226024bit315 ||
+        attack_type == SubBruteAttackPT226024bit330 ||
+        attack_type == SubBruteAttackPT226024bit390 ||
+        attack_type == SubBruteAttackPT226024bit433) {
+        max_value = 6561;
     } else {
         FuriString* max_value_s;
         max_value_s = furi_string_alloc();

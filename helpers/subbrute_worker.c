@@ -256,7 +256,7 @@ bool subbrute_worker_transmit_current_key(SubBruteWorker* instance, uint64_t ste
             instance->two_bytes);
     } else {
         subbrute_protocol_default_payload(
-            stream, step, instance->bits, instance->te, instance->repeat);
+            stream, instance->file, step, instance->bits, instance->te, instance->repeat);
     }
 
     //    size_t written = stream_write_string(stream, payload);
@@ -386,7 +386,12 @@ int32_t subbrute_worker_thread(void* context) {
                 instance->two_bytes);
         } else {
             subbrute_protocol_default_payload(
-                stream, instance->step, instance->bits, instance->te, instance->repeat);
+                stream,
+                instance->file,
+                instance->step,
+                instance->bits,
+                instance->te,
+                instance->repeat);
         }
 #ifdef FURI_DEBUG
         //FURI_LOG_I(TAG, "Payload: %s", furi_string_get_cstr(payload));

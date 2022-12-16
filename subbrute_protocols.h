@@ -19,6 +19,9 @@ typedef enum {
     MagellanFileProtocol,
     IntertechnoV3FileProtocol,
     AnsonicFileProtocol,
+    SMC5326FileProtocol,
+    UNILARMFileProtocol,
+    PT2260FileProtocol,
     UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;
@@ -77,6 +80,7 @@ const char* subbrute_protocol_name(SubBruteAttacks index);
 
 void subbrute_protocol_default_payload(
     Stream* stream,
+    SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
     uint8_t te,
