@@ -303,7 +303,7 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
 
 static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, bool shift) {
     char selected = get_selected_char(model);
-    uint8_t text_length = strlen(model->text_buffer);
+    size_t text_length = strlen(model->text_buffer);
 
     if(shift) {
         selected = char_to_uppercase(selected);

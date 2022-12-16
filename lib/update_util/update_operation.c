@@ -110,7 +110,7 @@ bool update_operation_get_current_package_manifest_path(Storage* storage, FuriSt
 }
 
 static bool update_operation_persist_manifest_path(Storage* storage, const char* manifest_path) {
-    const uint16_t manifest_path_len = strlen(manifest_path);
+    const size_t manifest_path_len = strlen(manifest_path);
     furi_check(manifest_path && manifest_path_len);
     bool success = false;
     File* file = storage_file_alloc(storage);
