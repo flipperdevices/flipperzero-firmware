@@ -271,7 +271,7 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         subghz_protocol_keeloq_check_remote_controller(
             &instance->generic, instance->keystore, &instance->manufacture_name);
 
-        if(strcmp(instance->manufacture_name, "DoorHan") == 0) {
+        if(strcmp(instance->manufacture_name, "DoorHan") != 0) {
             FURI_LOG_E(TAG, "Wrong manufacturer name");
             break;
         }
