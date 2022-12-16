@@ -87,7 +87,7 @@ static void lfrfid_cli_read(Cli* cli, FuriString* args) {
         uint32_t flags =
             furi_event_flag_wait(context.event, available_flags, FuriFlagWaitAny, 100);
 
-        if(flags != FuriFlagErrorTimeout) {
+        if(flags != (unsigned)FuriFlagErrorTimeout) {
             if(FURI_BIT(flags, LFRFIDWorkerReadDone)) {
                 break;
             }
@@ -211,7 +211,7 @@ static void lfrfid_cli_write(Cli* cli, FuriString* args) {
 
     while(!cli_cmd_interrupt_received(cli)) {
         uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
-        if(flags != FuriFlagErrorTimeout) {
+        if(flags != (unsigned)FuriFlagErrorTimeout) {
             if(FURI_BIT(flags, LFRFIDWorkerWriteOK)) {
                 printf("Written!\r\n");
                 break;
@@ -435,7 +435,7 @@ static void lfrfid_cli_raw_read(Cli* cli, FuriString* args) {
         while(true) {
             uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
 
-            if(flags != FuriFlagErrorTimeout) {
+            if(flags != (unsigned)FuriFlagErrorTimeout) {
                 if(FURI_BIT(flags, LFRFIDWorkerReadRawFileError)) {
                     printf("File is not RFID raw file\r\n");
                     break;
@@ -510,7 +510,7 @@ static void lfrfid_cli_raw_emulate(Cli* cli, FuriString* args) {
         while(true) {
             uint32_t flags = furi_event_flag_wait(event, available_flags, FuriFlagWaitAny, 100);
 
-            if(flags != FuriFlagErrorTimeout) {
+            if(flags != (unsigned)FuriFlagErrorTimeout) {
                 if(FURI_BIT(flags, LFRFIDWorkerEmulateRawFileError)) {
                     printf("File is not RFID raw file\r\n");
                     break;

@@ -425,7 +425,7 @@ bool furi_hal_nfc_emulate_nfca(
         buff_rx_len = 0;
         buff_tx_len = 0;
         uint32_t flag = furi_event_flag_wait(event, EVENT_FLAG_ALL, FuriFlagWaitAny, timeout);
-        if(flag == FuriFlagErrorTimeout || flag == EVENT_FLAG_STOP) {
+        if(flag == (unsigned)FuriFlagErrorTimeout || flag == EVENT_FLAG_STOP) {
             break;
         }
         bool data_received = false;

@@ -596,7 +596,7 @@ static int32_t bad_usb_worker(void* context) {
                 }
                 bad_usb->st.state = worker_state;
                 continue;
-            } else if((flags == FuriFlagErrorTimeout) || (flags == FuriFlagErrorResource)) {
+            } else if((flags == (unsigned)FuriFlagErrorTimeout) || (flags == (unsigned)FuriFlagErrorResource)) {
                 if(delay_val > 0) {
                     bad_usb->st.delay_remain--;
                     continue;
