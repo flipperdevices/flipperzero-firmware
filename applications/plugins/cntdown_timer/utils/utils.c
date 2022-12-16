@@ -1,22 +1,5 @@
+#include <furi.h>
 #include "utils.h"
-
-static const NotificationSequence sequence_finish = {
-    &message_display_backlight_on,
-    &message_blue_255,
-    &message_vibro_on,
-    &message_note_c5,
-    &message_delay_250,
-    &message_note_c5,
-    &message_delay_500,
-    &message_note_c5,
-    &message_delay_100,
-    &message_note_c5,
-    &message_delay_500,
-    &message_sound_off,
-    &message_vibro_off,
-    &message_delay_250,
-    NULL,
-};
 
 static const NotificationSequence sequence_beep = {
     &message_blue_255,
@@ -37,5 +20,15 @@ void notification_off() {
 }
 
 void notification_timeup() {
-    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_finish);
+    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_audiovisual_alert);
+}
+
+void parse_sec_to_time_str(char* buffer, size_t len, int32_t sec) {
+    snprintf(
+        buffer,
+        len,
+        "%02ld:%02ld:%02ld",
+        (sec % (60 * 60 * 24)) / (60 * 60), // hour
+        (sec % (60 * 60)) / 60, // minute
+        sec % 60); // second
 }

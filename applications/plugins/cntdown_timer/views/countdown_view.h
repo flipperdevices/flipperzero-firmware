@@ -11,9 +11,7 @@
 #define SCREEN_CENTER_X (SCREEN_WIDTH / 2)
 #define SCREEN_CENTER_Y (SCREEN_HEIGHT / 2)
 
-#define MAX_SCALE 80
-#define MAX_MOVE_STEP 16
-#define MIN_MOVE_STEP 2
+#define INIT_COUNT 10
 
 typedef enum {
     CountDownTimerMinuteUp,
@@ -34,8 +32,9 @@ typedef enum {
 } CountDownViewSelect;
 
 typedef struct {
-    int32_t sec_expected;
-    uint8_t select; // setting
+    int32_t count;
+    int32_t saved_count_setting;
+    CountDownViewSelect select; // setting
 } CountDownModel;
 
 typedef struct {
@@ -47,14 +46,14 @@ typedef struct {
 
 // functions
 // allocate helloworld view
-CountDownTimView* helloworld_view_new();
+CountDownTimView* countdown_timer_view_new();
 
 // delete helloworld view
-void countdown_timer_view_delete(CountDownTimView* hwv);
+void countdown_timer_view_delete(CountDownTimView* cdv);
 
 // return view
-View* countdown_timer_view_get_view(CountDownTimView* hwv);
+View* countdown_timer_view_get_view(CountDownTimView* cdv);
 
-void countdown_timer_view_state_reset(CountDownTimView* hwv); // set initial state
-void countdown_timer_state_toggle(CountDownTimView* hwv);
+void countdown_timer_view_state_reset(CountDownTimView* cdv); // set initial state
+void countdown_timer_state_toggle(CountDownTimView* cdv);
 #endif // __COUNTDOWN_VIEW_H__
