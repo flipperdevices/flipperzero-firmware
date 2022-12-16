@@ -32,10 +32,8 @@
 # Do not complain about similar code
 //-V::525
 
-# We love casting ints to pointers ...
+# Common embedded development pointer operations
 //-V::566
-
-# ... And mapping structs to integers
 //-V::1032
 
 # Warnings about length mismatch
