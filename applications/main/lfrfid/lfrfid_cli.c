@@ -153,7 +153,7 @@ static bool lfrfid_cli_parse_args(FuriString* args, ProtocolDict* dict, Protocol
 
             for(ProtocolId i = 0; i < LFRFIDProtocolMax; i++) {
                 printf(
-                    "\t%s, %d bytes long\r\n",
+                    "\t%s, %zu bytes long\r\n",
                     protocol_dict_get_name(dict, i),
                     protocol_dict_get_data_size(dict, i));
             }
@@ -165,7 +165,7 @@ static bool lfrfid_cli_parse_args(FuriString* args, ProtocolDict* dict, Protocol
         // check data arg
         if(!args_read_hex_bytes(data_text, data, data_size)) {
             printf(
-                "%s data needs to be %d bytes long\r\n",
+                "%s data needs to be %zu bytes long\r\n",
                 protocol_dict_get_name(dict, *protocol),
                 data_size);
             break;
@@ -309,9 +309,9 @@ static void lfrfid_cli_raw_analyze(Cli* cli, FuriString* args) {
                     warn = true;
                 }
 
-                furi_string_printf(info_string, "[%ld %ld]", pulse, duration);
+                furi_string_printf(info_string, "[%lu %lu]", pulse, duration);
                 printf("%-16s", furi_string_get_cstr(info_string));
-                furi_string_printf(info_string, "[%ld %ld]", pulse, duration - pulse);
+                furi_string_printf(info_string, "[%lu %lu]", pulse, duration - pulse);
                 printf("%-16s", furi_string_get_cstr(info_string));
 
                 if(warn) {
@@ -346,9 +346,9 @@ static void lfrfid_cli_raw_analyze(Cli* cli, FuriString* args) {
 
         printf("   Frequency: %f\r\n", (double)frequency);
         printf("  Duty Cycle: %f\r\n", (double)duty_cycle);
-        printf("       Warns: %ld\r\n", total_warns);
-        printf("   Pulse sum: %ld\r\n", total_pulse);
-        printf("Duration sum: %ld\r\n", total_duration);
+        printf("       Warns: %lu\r\n", total_warns);
+        printf("   Pulse sum: %lu\r\n", total_pulse);
+        printf("Duration sum: %lu\r\n", total_duration);
         printf("     Average: %f\r\n", (double)((float)total_pulse / (float)total_duration));
         printf("    Protocol: ");
 

@@ -69,7 +69,7 @@ static DirWalkResult
 
             if(dir_walk_filter(dir_walk, name, &info)) {
                 if(return_path != NULL) {
-                    furi_string_printf(
+                    furi_string_printf( //-V576
                         return_path, "%s/%s", furi_string_get_cstr(dir_walk->path), name);
                 }
 

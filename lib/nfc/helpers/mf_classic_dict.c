@@ -90,7 +90,7 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
             }
             FURI_LOG_T(
                 TAG,
-                "Read line: %s, len: %d",
+                "Read line: %s, len: %zu",
                 furi_string_get_cstr(next_line),
                 furi_string_size(next_line));
             if(furi_string_get_char(next_line, 0) == '#') continue;
@@ -101,7 +101,7 @@ MfClassicDict* mf_classic_dict_alloc(MfClassicDictType dict_type) {
         stream_rewind(dict->stream);
 
         dict_loaded = true;
-        FURI_LOG_I(TAG, "Loaded dictionary with %ld keys", dict->total_keys);
+        FURI_LOG_I(TAG, "Loaded dictionary with %lu keys", dict->total_keys);
     } while(false);
 
     if(!dict_loaded) {

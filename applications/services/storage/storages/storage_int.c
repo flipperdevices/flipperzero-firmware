@@ -77,7 +77,7 @@ static int storage_int_device_read(
 
     FURI_LOG_T(
         TAG,
-        "Device read: block %ld, off %ld, buffer: %p, size %ld, translated address: %p",
+        "Device read: block %lu, off %lu, buffer: %p, size %lu, translated address: %p",
         block,
         off,
         buffer,
@@ -100,7 +100,7 @@ static int storage_int_device_prog(
 
     FURI_LOG_T(
         TAG,
-        "Device prog: block %ld, off %ld, buffer: %p, size %ld, translated address: %p",
+        "Device prog: block %lu, off %lu, buffer: %p, size %lu, translated address: %p",
         block,
         off,
         buffer,
@@ -122,7 +122,7 @@ static int storage_int_device_erase(const struct lfs_config* c, lfs_block_t bloc
     LFSData* lfs_data = c->context;
     size_t page = lfs_data->start_page + block;
 
-    FURI_LOG_D(TAG, "Device erase: page %ld, translated page: %x", block, page);
+    FURI_LOG_D(TAG, "Device erase: page %lu, translated page: %zx", block, page);
 
     furi_hal_flash_erase(page);
     return 0;
@@ -740,7 +740,7 @@ void storage_int_init(StorageData* storage) {
     LFSData* lfs_data = storage_int_lfs_data_alloc();
     FURI_LOG_I(
         TAG,
-        "Config: start %p, read %ld, write %ld, page size: %ld, page count: %ld, cycles: %ld",
+        "Config: start %p, read %lu, write %lu, page size: %lu, page count: %lu, cycles: %ld",
         (void*)lfs_data->start_address,
         lfs_data->config.read_size,
         lfs_data->config.prog_size,

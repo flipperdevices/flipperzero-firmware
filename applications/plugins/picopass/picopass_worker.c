@@ -221,7 +221,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
     while(iclass_elite_dict_get_next_key(dict, key)) {
         FURI_LOG_D(
             TAG,
-            "Try to auth with key %d %02x%02x%02x%02x%02x%02x%02x%02x",
+            "Try to auth with key %zu %02x%02x%02x%02x%02x%02x%02x%02x",
             index++,
             key[0],
             key[1],

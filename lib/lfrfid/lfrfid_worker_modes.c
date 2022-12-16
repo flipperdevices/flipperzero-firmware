@@ -276,7 +276,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
 
                         FURI_LOG_D(
                             TAG,
-                            "%s, %d, [%s]",
+                            "%s, %zu, [%s]",
                             protocol_dict_get_name(worker->protocols, protocol),
                             last_read_count,
                             furi_string_get_cstr(string_info));

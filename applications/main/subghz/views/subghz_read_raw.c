@@ -91,7 +91,7 @@ void subghz_read_raw_update_sample_write(SubGhzReadRAW* instance, size_t sample)
     with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
-        { furi_string_printf(model->sample_write, "%d spl.", sample); },
+        { furi_string_printf(model->sample_write, "%zu spl.", sample); },
         false);
 }
 
