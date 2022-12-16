@@ -504,7 +504,7 @@ void nfc_worker_emulate_apdu(NfcWorker* nfc_worker) {
         reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
     }
 
-    while(nfc_worker->state == NfcWorkerStateEmulateApdu) {
+    while(nfc_worker->state == NfcWorkerStateEmulateApdu) { //-V1044
         if(furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 300)) {
             FURI_LOG_D(TAG, "POS terminal detected");
             if(emv_card_emulation(&tx_rx)) {
@@ -737,7 +737,7 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     rfal_platform_spi_acquire();
 
     furi_hal_nfc_listen_start(nfc_data);
-    while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) {
+    while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) { //-V1044
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
             mf_classic_emulator(&emulator, &tx_rx);
         }
