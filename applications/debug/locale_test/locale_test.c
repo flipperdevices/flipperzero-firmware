@@ -33,10 +33,10 @@ static void locale_test_view_draw_callback(Canvas* canvas, void* _model) {
     FuriHalRtcDateTime datetime;
     furi_hal_rtc_get_datetime(&datetime);
 
-    locale_format_time(tmp_string, &datetime, false);
+    locale_format_time(tmp_string, &datetime, locale_get_time_format(), false);
     canvas_draw_str(canvas, 0, 25, furi_string_get_cstr(tmp_string));
 
-    locale_format_date(tmp_string, &datetime, "/");
+    locale_format_date(tmp_string, &datetime, locale_get_date_format(), "/");
     canvas_draw_str(canvas, 0, 40, furi_string_get_cstr(tmp_string));
 
     furi_string_free(tmp_string);

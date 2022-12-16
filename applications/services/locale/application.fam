@@ -1,10 +1,9 @@
 App(
     appid="locale",
     name="LocaleSrv",
-    apptype=FlipperAppType.SERVICE,
-    entry_point="locale_srv",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="locale_on_system_start",
     cdefines=["SRV_LOCALE"],
-    stack_size=1 * 1024,
     order=90,
     sdk_headers=["locale.h"],
 )

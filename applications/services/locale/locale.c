@@ -34,13 +34,17 @@ float locale_celsius_to_fahrenheit(float temp_c) {
     return (temp_c * 1.8f + 32.f);
 }
 
-void locale_format_time(FuriString* out_str, FuriHalRtcDateTime* datetime, bool show_seconds) {
+void locale_format_time(
+    FuriString* out_str,
+    FuriHalRtcDateTime* datetime,
+    LocaleTimeFormat format,
+    bool show_seconds) {
     furi_assert(out_str);
     furi_assert(datetime);
 
     uint8_t hours = datetime->hour;
     uint8_t am_pm = 0;
-    if(locale_get_time_format() == LocaleTimeFormat12h) {
+    if(format == LocaleTimeFormat12h) {
         if(hours > 12) {
             hours -= 12;
             am_pm = 2;
@@ -60,12 +64,14 @@ void locale_format_time(FuriString* out_str, FuriHalRtcDateTime* datetime, bool 
     }
 }
 
-void locale_format_date(FuriString* out_str, FuriHalRtcDateTime* datetime, char* separator) {
+void locale_format_date(
+    FuriString* out_str,
+    FuriHalRtcDateTime* datetime,
+    LocaleDateFormat format,
+    char* separator) {
     furi_assert(out_str);
     furi_assert(datetime);
     furi_assert(separator);
-
-    LocaleDateFormat format = locale_get_date_format();
 
     if(format == LocaleDateFormatDMY) {
         furi_string_printf(
@@ -97,7 +103,7 @@ void locale_format_date(FuriString* out_str, FuriHalRtcDateTime* datetime, char*
     }
 }
 
-int32_t locale_srv(void* p) {
+int32_t locale_on_system_start(void* p) {
     UNUSED(p);
     return 0;
 }

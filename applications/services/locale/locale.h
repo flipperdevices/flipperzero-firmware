@@ -33,12 +33,20 @@ float locale_celsius_to_fahrenheit(float temp_c);
 LocaleTimeFormat locale_get_time_format(void);
 void locale_set_time_format(LocaleTimeFormat format);
 
-void locale_format_time(FuriString* out_str, FuriHalRtcDateTime* datetime, bool show_seconds);
+void locale_format_time(
+    FuriString* out_str,
+    FuriHalRtcDateTime* datetime,
+    LocaleTimeFormat format,
+    bool show_seconds);
 
 LocaleDateFormat locale_get_date_format(void);
 void locale_set_date_format(LocaleDateFormat format);
 
-void locale_format_date(FuriString* out_str, FuriHalRtcDateTime* datetime, char* separator);
+void locale_format_date(
+    FuriString* out_str,
+    FuriHalRtcDateTime* datetime,
+    LocaleDateFormat format,
+    char* separator);
 
 #ifdef __cplusplus
 }
