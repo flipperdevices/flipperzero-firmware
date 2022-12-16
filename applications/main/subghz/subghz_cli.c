@@ -788,7 +788,7 @@ static bool subghz_on_system_start_istream_decode_band(
 
     region->bands_count += 1;
     region =
-        realloc(region, sizeof(FuriHalRegion) + sizeof(FuriHalRegionBand) * region->bands_count);
+        realloc(region, sizeof(FuriHalRegion) + sizeof(FuriHalRegionBand) * region->bands_count); //-V701
     size_t pos = region->bands_count - 1;
     region->bands[pos].start = band.start;
     region->bands[pos].end = band.end;
