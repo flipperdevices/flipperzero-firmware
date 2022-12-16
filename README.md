@@ -48,4 +48,5 @@ connect flipper to PC and run:
 - If upper score >= 63, add a pop-up message at the end game to give a visual indication that a bonus for the top row is being.
 - Redo button mapping so that 
   - the middle button can be used to both hold on dice or confirm score. Leaves the down arrow open for something else.
-  - Would be nice 
+  - Would be nice if up/down could be used to move through the scorecard and left/right move through the dice, but then theres not enough buttons for ROLL so idk yet.
+- Learn more about C so that I can move stuff to a header file like everyone else does.
