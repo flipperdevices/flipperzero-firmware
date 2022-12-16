@@ -108,7 +108,7 @@ bool subbrute_worker_init_default_attack(
 #ifdef FURI_DEBUG
     FURI_LOG_I(
         TAG,
-        "subbrute_worker_init_default_attack: %s, bits: %d, preset: %s, file: %s, te: %d, repeat: %d, max_value: %lld",
+        "subbrute_worker_init_default_attack: %s, bits: %d, preset: %s, file: %s, te: %ld, repeat: %d, max_value: %lld",
         subbrute_protocol_name(instance->attack),
         instance->bits,
         subbrute_protocol_preset(instance->preset),
@@ -157,7 +157,7 @@ bool subbrute_worker_init_file_attack(
 #ifdef FURI_DEBUG
     FURI_LOG_I(
         TAG,
-        "subbrute_worker_init_file_attack: %s, bits: %d, preset: %s, file: %s, te: %d, repeat: %d, max_value: %lld, key: %llX",
+        "subbrute_worker_init_file_attack: %s, bits: %d, preset: %s, file: %s, te: %ld, repeat: %d, max_value: %lld, key: %llX",
         subbrute_protocol_name(instance->attack),
         instance->bits,
         subbrute_protocol_preset(instance->preset),

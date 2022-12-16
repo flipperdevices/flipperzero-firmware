@@ -64,7 +64,7 @@ typedef enum {
 typedef struct {
     uint32_t frequency;
     uint8_t bits;
-    uint8_t te;
+    uint32_t te;
     uint8_t repeat;
     FuriHalSubGhzPreset preset;
     SubBruteFileProtocol file;
@@ -83,13 +83,13 @@ void subbrute_protocol_default_payload(
     SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
-    uint8_t te,
+    uint32_t te,
     uint8_t repeat);
 void subbrute_protocol_file_payload(
     Stream* stream,
     uint64_t step,
     uint8_t bits,
-    uint8_t te,
+    uint32_t te,
     uint8_t repeat,
     uint8_t bit_index,
     uint64_t file_key,
@@ -101,7 +101,7 @@ void subbrute_protocol_default_generate_file(
     SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
-    uint8_t te,
+    uint32_t te,
     uint8_t repeat);
 void subbrute_protocol_file_generate_file(
     Stream* stream,
@@ -110,7 +110,7 @@ void subbrute_protocol_file_generate_file(
     SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
-    uint8_t te,
+    uint32_t te,
     uint8_t repeat,
     uint8_t bit_index,
     uint64_t file_key,

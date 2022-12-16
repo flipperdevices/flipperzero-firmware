@@ -159,7 +159,7 @@ SubBruteFileResult subbrute_device_attack_set(
     uint8_t protocol_check_result = SubBruteFileResultProtocolNotFound;
 #ifdef FURI_DEBUG
     uint8_t bits;
-    uint8_t te;
+    uint32_t te;
     uint8_t repeat;
     FuriHalSubGhzPreset preset;
     SubBruteFileProtocol file;
@@ -211,7 +211,7 @@ SubBruteFileResult subbrute_device_attack_set(
 #ifdef FURI_DEBUG
     FURI_LOG_I(
         TAG,
-        "subbrute_device_attack_set: %s, bits: %d, preset: %s, file: %s, te: %d, repeat: %d, max_value: %lld",
+        "subbrute_device_attack_set: %s, bits: %d, preset: %s, file: %s, te: %ld, repeat: %d, max_value: %lld",
         subbrute_protocol_name(instance->attack),
         bits,
         subbrute_protocol_preset(preset),

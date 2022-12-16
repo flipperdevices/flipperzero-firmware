@@ -28,7 +28,7 @@ struct SubBruteWorker {
     FuriHalSubGhzPreset preset;
     SubBruteFileProtocol file;
     uint8_t bits;
-    uint8_t te;
+    uint32_t te;
     uint8_t repeat;
     uint8_t load_index; // Index of group to bruteforce in loaded file
     uint64_t file_key;
