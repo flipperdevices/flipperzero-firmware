@@ -108,6 +108,8 @@ typedef struct {
     int32_t array_offset;
     int32_t list_offset;
 
+    uint32_t animation_begin_frame;
+
     const Icon* file_icon;
     bool hide_ext;
 } FileBrowserModel;
@@ -468,8 +470,30 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
             furi_string_set(filename, ". .");
         }
 
-        elements_string_fit_width(
-            canvas, filename, (show_scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX));
+        uint8_t frame_width = (show_scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX);
+        uint32_t current_frame_tick = furi_get_tick();
+
+        bool is_long_filename = canvas_string_width(canvas, furi_string_get_cstr(filename)) >
+                                frame_width;
+
+        if(is_long_filename && model->item_idx == idx &&
+           current_frame_tick - model->animation_begin_frame > 1000) {
+            // Begin animating the file name 1 second after selection...
+            size_t name_length = furi_string_size(filename);
+            uint8_t offset = ((int)furi_get_tick() / 250) % (int)name_length;
+            FuriString* offset_string;
+
+            offset_string = furi_string_alloc();
+            furi_string_set(offset_string, filename);
+
+            furi_string_right(filename, offset);
+            furi_string_left(offset_string, offset);
+            furi_string_cat(filename, offset_string);
+
+            furi_string_free(offset_string);
+        }
+
+        elements_string_fit_width(canvas, filename, frame_width);
 
         if(model->item_idx == idx) {
             browser_draw_frame(canvas, i, show_scrollbar);
@@ -540,6 +564,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 model->item_idx - ITEM_LIST_LEN_MAX / 4 * 3,
                                 (int32_t)model->item_cnt,
                                 0);
+                            model->animation_begin_frame = furi_get_tick();
                             file_browser_worker_load(
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
@@ -551,6 +576,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 model->item_idx - ITEM_LIST_LEN_MAX / 4 * 1,
                                 (int32_t)model->item_cnt,
                                 0);
+                            model->animation_begin_frame = furi_get_tick();
                             file_browser_worker_load(
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
