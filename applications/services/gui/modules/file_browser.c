@@ -476,21 +476,29 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
         bool is_long_filename = canvas_string_width(canvas, furi_string_get_cstr(filename)) >
                                 frame_width;
 
-        if(is_long_filename && model->item_idx == idx &&
-           current_frame_tick - model->animation_begin_frame > 1000) {
+        if(is_long_filename && model->item_idx == idx) {
+            int elapsed_time = (current_frame_tick - model->animation_begin_frame);
+
             // Begin animating the file name 1 second after selection...
-            size_t name_length = furi_string_size(filename);
-            uint8_t offset = ((int)furi_get_tick() / 250) % (int)name_length;
-            FuriString* offset_string;
+            if(elapsed_time > 1000) {
+                elapsed_time = elapsed_time - 1000;
 
-            offset_string = furi_string_alloc();
-            furi_string_set(offset_string, filename);
+                size_t name_length = furi_string_size(filename);
+                uint8_t offset = (elapsed_time / 250) % (uint8_t)name_length;
 
-            furi_string_right(filename, offset);
-            furi_string_left(offset_string, offset);
-            furi_string_cat(filename, offset_string);
+                FuriString* offset_string;
 
-            furi_string_free(offset_string);
+                offset_string = furi_string_alloc();
+                furi_string_set(offset_string, filename);
+
+                furi_string_right(filename, offset);
+                furi_string_left(offset_string, offset);
+
+                furi_string_cat(filename, "   ");
+                furi_string_cat(filename, offset_string);
+
+                furi_string_free(offset_string);
+            }
         }
 
         elements_string_fit_width(canvas, filename, frame_width);
@@ -558,25 +566,25 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                     if(event->key == InputKeyUp) {
                         model->item_idx =
                             ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
+                        model->animation_begin_frame = furi_get_tick();
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
                                 model->item_idx - ITEM_LIST_LEN_MAX / 4 * 3,
                                 (int32_t)model->item_cnt,
                                 0);
-                            model->animation_begin_frame = furi_get_tick();
                             file_browser_worker_load(
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
                     } else if(event->key == InputKeyDown) {
                         model->item_idx = (model->item_idx + 1) % model->item_cnt;
+                        model->animation_begin_frame = furi_get_tick();
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
                                 model->item_idx - ITEM_LIST_LEN_MAX / 4 * 1,
                                 (int32_t)model->item_cnt,
                                 0);
-                            model->animation_begin_frame = furi_get_tick();
                             file_browser_worker_load(
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
