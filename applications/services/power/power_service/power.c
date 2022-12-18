@@ -5,6 +5,8 @@
 
 #define POWER_OFF_TIMEOUT 90
 
+static void power_loader_callback(const void*, void*);
+
 void power_draw_battery_callback(Canvas* canvas, void* context) {
     furi_assert(context);
     Power* power = context;
@@ -76,6 +78,10 @@ static void power_auto_shutdown_arm(Power* power) {
             power->input_events_subscription = furi_pubsub_subscribe(
                 power->input_events_pubsub, power_input_event_callback, power);
         }
+        if(power->app_start_stop_subscription == NULL) {
+            power->app_start_stop_subscription = furi_pubsub_subscribe(
+                loader_get_pubsub(power->loader), power_loader_callback, power);
+        }
         power_start_auto_shutdown_timer(power);
     }
 }
@@ -115,6 +121,10 @@ static void power_shutdown_time_changed_callback(const void* event, void* contex
     if(power->shutdown_idle_delay_ms) {
         power_auto_shutdown_arm(power);
     } else if(power_is_running_auto_shutdown_timer(power)) {
+        if(power->app_start_stop_subscription) {
+            furi_pubsub_unsubscribe(
+                loader_get_pubsub(power->loader), power->app_start_stop_subscription);
+        }
         power_auto_shutdown_inhibit(power);
     }
 }
@@ -136,8 +146,7 @@ Power* power_alloc() {
     power->loader = furi_record_open(RECORD_LOADER);
     power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     power->input_events_subscription = NULL;
-    power->app_start_stop_subscription =
-        furi_pubsub_subscribe(loader_get_pubsub(power->loader), power_loader_callback, power);
+    power->app_start_stop_subscription = NULL;
     power->settings_events_subscription =
         furi_pubsub_subscribe(power->settings_events, power_shutdown_time_changed_callback, power);
 
@@ -182,12 +191,14 @@ void power_free(Power* power) {
     furi_mutex_free(power->api_mtx);
 
     // FuriPubSub
-    furi_pubsub_unsubscribe(loader_get_pubsub(power->loader), power->app_start_stop_subscription);
     furi_pubsub_unsubscribe(power->settings_events, power->settings_events_subscription);
-
     if(power->input_events_subscription) {
         furi_pubsub_unsubscribe(power->input_events_pubsub, power->input_events_subscription);
         power->input_events_subscription = NULL;
+    }
+    if(power->app_start_stop_subscription) {
+        furi_pubsub_unsubscribe(
+            loader_get_pubsub(power->loader), power->app_start_stop_subscription);
     }
 
     furi_pubsub_free(power->event_pubsub);
