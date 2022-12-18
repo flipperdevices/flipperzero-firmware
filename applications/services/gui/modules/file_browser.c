@@ -70,8 +70,8 @@ static void BrowserItem_t_clear(BrowserItem_t* obj) {
         free(obj->custom_icon_data);
     }
 }
-
 ARRAY_DEF(
+
     items_array,
     BrowserItem_t,
     (INIT(API_2(BrowserItem_t_init)),
@@ -94,6 +94,8 @@ struct FileBrowser {
     FileBrowserLoadItemCallback item_callback;
     void* item_context;
 
+    FuriTimer* timer;
+
     FuriString* result_path;
 };
 
@@ -108,7 +110,7 @@ typedef struct {
     int32_t array_offset;
     int32_t list_offset;
 
-    uint32_t animation_begin_frame;
+    FuriString* current_filename;
 
     const Icon* file_icon;
     bool hide_ext;
@@ -123,6 +125,9 @@ static const Icon* BrowserItemIcons[] = {
 
 static void file_browser_view_draw_callback(Canvas* canvas, void* _model);
 static bool file_browser_view_input_callback(InputEvent* event, void* context);
+static void file_browser_animate_filename_callback(void* context);
+
+static const char* file_browser_get_selected_filename(FileBrowserModel* model);
 
 static void
     browser_folder_open_cb(void* context, uint32_t item_cnt, int32_t file_idx, bool is_root);
@@ -141,9 +146,17 @@ FileBrowser* file_browser_alloc(FuriString* result_path) {
     view_set_input_callback(browser->view, file_browser_view_input_callback);
 
     browser->result_path = result_path;
+    browser->timer =
+        furi_timer_alloc(file_browser_animate_filename_callback, FuriTimerTypePeriodic, browser);
 
     with_view_model(
-        browser->view, FileBrowserModel * model, { items_array_init(model->items); }, false);
+        browser->view,
+        FileBrowserModel * model,
+        {
+            items_array_init(model->items);
+            model->current_filename = furi_string_alloc();
+        },
+        false);
 
     return browser;
 }
@@ -152,9 +165,16 @@ void file_browser_free(FileBrowser* browser) {
     furi_assert(browser);
 
     with_view_model(
-        browser->view, FileBrowserModel * model, { items_array_clear(model->items); }, false);
+        browser->view,
+        FileBrowserModel * model,
+        {
+            items_array_clear(model->items);
+            furi_string_free(model->current_filename);
+        },
+        false);
 
     view_free(browser->view);
+    furi_timer_free(browser->timer);
     free(browser);
 }
 
@@ -216,8 +236,10 @@ void file_browser_stop(FileBrowser* browser) {
             model->item_idx = 0;
             model->array_offset = 0;
             model->list_offset = 0;
+            furi_string_set(model->current_filename, "");
         },
         false);
+    furi_timer_stop(browser->timer);
 }
 
 void file_browser_set_callback(FileBrowser* browser, FileBrowserCallback callback, void* context) {
@@ -320,6 +342,7 @@ static void
             model->is_root = is_root;
             model->list_loading = true;
             model->folder_loading = false;
+            furi_string_set(model->current_filename, file_browser_get_selected_filename(model));
         },
         true);
     browser_update_offset(browser);
@@ -471,37 +494,16 @@ static void browser_draw_list(Canvas* canvas, FileBrowserModel* model) {
         }
 
         uint8_t frame_width = (show_scrollbar ? MAX_LEN_PX - 6 : MAX_LEN_PX);
-        uint32_t current_frame_tick = furi_get_tick();
 
         bool is_long_filename = canvas_string_width(canvas, furi_string_get_cstr(filename)) >
                                 frame_width;
 
         if(is_long_filename && model->item_idx == idx) {
-            int elapsed_time = (current_frame_tick - model->animation_begin_frame);
-
-            // Begin animating the file name 1 second after selection...
-            if(elapsed_time > 1000) {
-                elapsed_time = elapsed_time - 1000;
-
-                size_t name_length = furi_string_size(filename);
-                uint8_t offset = (elapsed_time / 250) % (uint8_t)name_length;
-
-                FuriString* offset_string;
-
-                offset_string = furi_string_alloc();
-                furi_string_set(offset_string, filename);
-
-                furi_string_right(filename, offset);
-                furi_string_left(offset_string, offset);
-
-                furi_string_cat(filename, "   ");
-                furi_string_cat(filename, offset_string);
-
-                furi_string_free(offset_string);
-            }
+            furi_string_set(filename, model->current_filename);
+            elements_string_fit_width_trunc(canvas, filename, frame_width);
+        } else {
+            elements_string_fit_width(canvas, filename, frame_width);
         }
-
-        elements_string_fit_width(canvas, filename, frame_width);
 
         if(model->item_idx == idx) {
             browser_draw_frame(canvas, i, show_scrollbar);
@@ -546,6 +548,36 @@ static void file_browser_view_draw_callback(Canvas* canvas, void* _model) {
     }
 }
 
+static void file_browser_animate_filename_callback(void* context) {
+    furi_assert(context);
+    FileBrowser* browser = context;
+    with_view_model(
+        browser->view,
+        FileBrowserModel * model,
+        {
+            FuriString* old_filename;
+            old_filename = furi_string_alloc();
+            furi_string_set(old_filename, model->current_filename);
+            furi_string_left(old_filename, 1);
+            furi_string_right(model->current_filename, 1);
+            furi_string_cat(model->current_filename, old_filename);
+            furi_string_free(old_filename);
+        },
+        true);
+}
+
+static const char* file_browser_get_selected_filename(FileBrowserModel* model) {
+    furi_assert(model);
+    BrowserItem_t* selected_item = NULL;
+
+    if(browser_is_item_in_array(model, model->item_idx)) {
+        selected_item = items_array_get(model->items, model->item_idx - model->array_offset);
+        return furi_string_get_cstr(selected_item->display_name);
+    }
+
+    return "";
+}
+
 static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     FileBrowser* browser = context;
     furi_assert(browser);
@@ -566,7 +598,10 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                     if(event->key == InputKeyUp) {
                         model->item_idx =
                             ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
-                        model->animation_begin_frame = furi_get_tick();
+                        furi_string_set(
+                            model->current_filename, file_browser_get_selected_filename(model));
+                        furi_string_cat(model->current_filename, "  ");
+                        furi_timer_start(browser->timer, 250);
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
@@ -578,7 +613,10 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                         }
                     } else if(event->key == InputKeyDown) {
                         model->item_idx = (model->item_idx + 1) % model->item_cnt;
-                        model->animation_begin_frame = furi_get_tick();
+                        furi_string_set(
+                            model->current_filename, file_browser_get_selected_filename(model));
+                        furi_string_cat(model->current_filename, "  ");
+                        furi_timer_start(browser->timer, 250);
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(

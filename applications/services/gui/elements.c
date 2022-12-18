@@ -547,6 +547,19 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
     }
 }
 
+void elements_string_fit_width_trunc(Canvas* canvas, FuriString* string, uint8_t width) {
+    furi_assert(canvas);
+    furi_assert(string);
+
+    uint16_t len_px = canvas_string_width(canvas, furi_string_get_cstr(string));
+    if(len_px > width) {
+        do {
+            furi_string_left(string, furi_string_size(string) - 1);
+            len_px = canvas_string_width(canvas, furi_string_get_cstr(string));
+        } while(len_px > width);
+    }
+}
+
 void elements_text_box(
     Canvas* canvas,
     uint8_t x,

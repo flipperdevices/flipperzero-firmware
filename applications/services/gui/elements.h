@@ -192,6 +192,14 @@ void elements_bubble_str(
  */
 void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width);
 
+/** Trim string buffer to fit width in pixels. If the string is longer it truncates without ellipsis (...)
+ *
+ * @param   canvas  Canvas instance
+ * @param   string  string to trim
+ * @param   width   max width
+ */
+void elements_string_fit_width_trunc(Canvas* canvas, FuriString* string, uint8_t width);
+
 /** Draw text box element
  *
  * @param       canvas          Canvas instance
