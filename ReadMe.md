@@ -24,6 +24,8 @@ Thank you to all the supporters!
 - Updated: [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - Added: [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - Added: [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
+- Updated: [NRF24 Scanner v2.0b (By vad7)](https://github.com/vad7/nrf24scan)
+- Updated: [Sub-GHz Bruteforcer (By Ganapati & xMasterX)](https://github.com/derskythe/flipperzero-subbrute/tree/master) with [Honeywell Protocol](https://github.com/derskythe/flipperzero-subbrute/pull/4)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
