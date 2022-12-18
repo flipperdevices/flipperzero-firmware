@@ -19,6 +19,7 @@ typedef enum {
     MagellanFileProtocol,
     IntertechnoV3FileProtocol,
     AnsonicFileProtocol,
+    HoneywellFileProtocol,
     UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;

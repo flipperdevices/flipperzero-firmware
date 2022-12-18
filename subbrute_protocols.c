@@ -327,6 +327,7 @@ static const char* subbrute_protocol_file_types[] = {
     [MagellanFileProtocol] = "Magellan",
     [IntertechnoV3FileProtocol] = "Intertechno_V3",
     [AnsonicFileProtocol] = "Ansonic",
+    [HoneywellFileProtocol] = "Honeywell",
     [UnknownFileProtocol] = "Unknown"};
 
 /**
