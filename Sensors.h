@@ -319,4 +319,5 @@ const GPIO*
 #include "./interfaces/OneWireSensor.h"
 #include "./sensors/LM75.h"
 #include "./sensors/BMP280.h"
+#include "./sensors/AM2320.h"
 #endif

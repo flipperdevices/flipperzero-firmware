@@ -47,8 +47,8 @@ bool unitemp_LM75_alloc(Sensor* sensor, char* args) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
     //Адреса на шине I2C (7 бит)
-    i2c_sensor->minI2CAdr = 0b1001000;
-    i2c_sensor->maxI2CAdr = 0b1001111;
+    i2c_sensor->minI2CAdr = 0b1001000 << 1;
+    i2c_sensor->maxI2CAdr = 0b1001111 << 1;
     return true;
 }
 

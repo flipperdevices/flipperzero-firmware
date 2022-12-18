@@ -37,6 +37,21 @@ typedef struct I2CSensor {
 } I2CSensor;
 
 /**
+ * @brief Заблокировать шину I2C
+ * 
+ * @param handle Указатель на шину
+ */
+void unitemp_i2c_acquire(FuriHalI2cBusHandle* handle);
+
+/**
+ * @brief Проверить наличие датчика на шине
+ * 
+ * @param i2c_sensor Указатель на датчик
+ * @return Истина если устройство отозвалось
+ */
+bool unitemp_i2c_isDeviceReady(I2CSensor* i2c_sensor);
+
+/**
  * @brief Выделение памяти для датчика на шине I2C
  * @param sensor Указатель на датчик
  * @param st Тип датчика
@@ -83,4 +98,31 @@ bool unitemp_i2c_readRegArray(I2CSensor* i2c_sensor, uint8_t startReg, uint8_t l
  */
 bool unitemp_i2c_writeReg(I2CSensor* i2c_sensor, uint8_t reg, uint8_t value);
 
+/**
+ * @brief Записать масссив значений в память
+ * @param i2c_sensor Указатель на инстанс датчика
+ * @param startReg Адрес регистра с которого начнётся запись
+ * @param len Количество байт для считывания из регистра
+ * @param data Указатель на массив откуда будут записаны данные
+ * @return Истина если устройство вернуло данные
+ */
+bool unitemp_i2c_writeRegArray(I2CSensor* i2c_sensor, uint8_t startReg, uint8_t len, uint8_t* data);
+
+/**
+ * @brief Прочитать массив данных по шине I2C
+ * @param i2c_sensor Указатель на инстанс датчика
+ * @param startReg Адрес регистра с которого начнётся чтение
+ * @param data Указатель на массив куда будут считаны данные
+ * @return Истина если устройство вернуло данные
+ */
+bool unitemp_i2c_readArray(I2CSensor* i2c_sensor, uint8_t len, uint8_t* data);
+
+/**
+ * @brief Записать масссив данных по шине I2C
+ * @param i2c_sensor Указатель на инстанс датчика
+ * @param len Количество байт для считывания из регистра
+ * @param data Указатель на массив откуда будут записаны данные
+ * @return Истина если устройство вернуло данные
+ */
+bool unitemp_i2c_writeArray(I2CSensor* i2c_sensor, uint8_t len, uint8_t* data);
 #endif
