@@ -139,12 +139,12 @@ Power* power_alloc() {
     // Records
     power->notification = furi_record_open(RECORD_NOTIFICATION);
     power->gui = furi_record_open(RECORD_GUI);
+    power->loader = furi_record_open(RECORD_LOADER);
+    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
 
     // Pubsub
     power->event_pubsub = furi_pubsub_alloc();
     power->settings_events = furi_pubsub_alloc();
-    power->loader = furi_record_open(RECORD_LOADER);
-    power->input_events_pubsub = furi_record_open(RECORD_INPUT_EVENTS);
     power->input_events_subscription = NULL;
     power->app_start_stop_subscription = NULL;
     power->settings_events_subscription =
