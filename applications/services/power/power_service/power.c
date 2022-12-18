@@ -122,6 +122,10 @@ static void power_shutdown_time_changed_callback(const void* event, void* contex
 Power* power_alloc() {
     Power* power = malloc(sizeof(Power));
 
+    //Auto shutdown timer
+    power->auto_shutdown_timer =
+        furi_timer_alloc(power_auto_shutdown_timer_callback, FuriTimerTypeOnce, power);
+
     // Records
     power->notification = furi_record_open(RECORD_NOTIFICATION);
     power->gui = furi_record_open(RECORD_GUI);
@@ -159,10 +163,6 @@ Power* power_alloc() {
     // Battery view port
     power->battery_view_port = power_battery_view_port_alloc(power);
     power->show_low_bat_level_message = true;
-
-    //Auto shutdown timer
-    power->auto_shutdown_timer =
-        furi_timer_alloc(power_auto_shutdown_timer_callback, FuriTimerTypeOnce, power);
 
     return power;
 }
