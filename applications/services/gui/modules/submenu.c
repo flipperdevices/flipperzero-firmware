@@ -245,8 +245,7 @@ void submenu_process_up(Submenu* submenu) {
 
             if(model->position > 0) {
                 model->position--;
-                if((model->position == model->window_position) &&
-                   (model->window_position > 0)) {
+                if((model->position == model->window_position) && (model->window_position > 0)) {
                     model->window_position--;
                 }
             } else {
