@@ -2,9 +2,6 @@ name: 'Unit tests'
 
 on:
   pull_request:
-  push:
-    branches:
-      - doom/fix_units_and_toolchain_env
 
 env:
   TARGETS: f7
@@ -32,17 +29,17 @@ jobs:
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
 
-      - name: 'First full flash'
+      - name: 'Flashing target firmware'
         id: first_full_flash
         run: |
-          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
           . scripts/toolchain/fbtenv.sh
           ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
-      - name: 'Second full flash'
+      - name: 'Validating updater'
         id: second_full_flash
         run: |
-          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}}  FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
           . scripts/toolchain/fbtenv.sh
           ./scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
@@ -81,3 +78,9 @@ jobs:
         run: |
           . scripts/toolchain/fbtenv.sh
           ./scripts/testing/units.py ${{steps.device.outputs.flipper}}
+
+      - name: 'Flash last release'
+        if: always()
+        run: |
+          git checkout $(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)
+          ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
