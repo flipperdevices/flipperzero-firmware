@@ -46,7 +46,7 @@
 //Имя файла с датчиками
 #define APP_FILENAME_SENSORS "sensors.cfg"
 //Версия приложения
-#define UNITEMP_APP_VER "0.91 alpha"
+#define UNITEMP_APP_VER "1.0"
 
 //Размер буффера текста
 #define BUFF_SIZE 32
