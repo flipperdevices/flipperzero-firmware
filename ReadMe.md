@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware) with API v10.x
-## Apps from this pack should be compatible with OFW with API v10.x (release 0.73.1, or dev branch)
+# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware) with API v11.x
+## Apps from this pack should be compatible with OFW with API v11.x (dev branch)
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -32,6 +32,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
+- [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -50,6 +51,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
 - [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
+- [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -61,6 +63,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
+- [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 
 --- 
 
