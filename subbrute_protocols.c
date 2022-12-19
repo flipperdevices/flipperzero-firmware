@@ -435,6 +435,7 @@ static const char* subbrute_protocol_file_types[] = {
     [SMC5326FileProtocol] = "SMC5326",
     [UNILARMFileProtocol] = "SMC5326",
     [PT2260FileProtocol] = "Princeton",
+    [HoneywellFileProtocol] = "Honeywell",
     [UnknownFileProtocol] = "Unknown"};
 
 /**

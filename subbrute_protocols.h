@@ -22,6 +22,7 @@ typedef enum {
     SMC5326FileProtocol,
     UNILARMFileProtocol,
     PT2260FileProtocol,
+    HoneywellFileProtocol,
     UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;
