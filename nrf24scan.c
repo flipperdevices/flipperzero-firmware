@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24scan"
-#define VERSION		"2.0b"
+#define VERSION		"2.0"
 #define MAX_CHANNEL	125
 #define MAX_ADDR	6
 
@@ -84,9 +84,9 @@ struct ADDRS {
 
 struct ADDRS addrs;
 struct ADDRS addrs_sniff;
-struct ADDRS addrs_found;
-uint16_t found_total[6];
 bool sniff_loaded = 0;
+int16_t found_total;
+int16_t view_found = 0;
 
 int8_t log_to_file = 0;	// 0 - no, 1 - yes(new), 2 - append, -1 - only clear
 uint16_t log_arr_idx;
@@ -97,7 +97,6 @@ uint16_t last_packet_send = -1;
 uint8_t last_packet_send_st = 0;
 int16_t find_channel_period = 0; // sec
 uint8_t menu_selected = 0;
-uint8_t view_details_type = 1;	// 0 - sniff addrs, 1 - found addrs
 uint32_t start_time; 
 uint8_t view_log_decode_PCF = 0;	// view log: 1 - decode packet control field (9b) when ESB off. After pipe # (hex): <Payload len 6b><PID_2b+NO_ACK_1b>
 uint8_t view_log_decode_CRC = 0;	// CRC bytes - 1/2, 0 - none
@@ -167,19 +166,8 @@ void clear_log()
 	log_arr_idx = 0;
 	view_log_arr_idx = 0;
 	last_packet_send = -1;
-	memset(&addrs_found, 0, sizeof(addrs_found));
-	view_details_type = 0;
-	memset(&found_total, 0, sizeof(found_total));
-}
-
-void allocate_log_array() 
-{
-	APP->log_arr = malloc(LOG_REC_SIZE * MAX_LOG_RECORDS);
-	if(APP->log_arr == NULL) {
-		FURI_LOG_E(TAG, "Not enouch memory: %d", LOG_REC_SIZE * MAX_LOG_RECORDS);
-		strcpy(addr_file_name, "MEMORY LOW!");
-	}
-	clear_log();
+	found_total = 0;
+	view_found = 0;
 }
 
 void write_to_log_file(Storage* storage, bool f_settings)
@@ -517,6 +505,7 @@ static void start_scanning()
 	start_time = furi_get_tick();
 }
 
+/*
 bool check_addr_found(uint8_t *pkt)
 {
 	uint8_t idx = 255;
@@ -534,6 +523,7 @@ x_end:
 		return true;
 	} else return false;
 }
+*/
 
 // start bitnum = 7
 uint32_t calc_crc(uint32_t crc, uint8_t *ptr, uint8_t bitnum, uint16_t bits)
@@ -573,7 +563,7 @@ bool check_packet(uint8_t *pkt, uint16_t size)
 	if(size < 3 || size > 32) return false;
 	uint8_t b = *pkt; 
 	if(b == 0x55 || b == 0xAA || b == 0x00 || b == 0xFF) return false; // skip pkt when address begin with
-	uint32_t prevcrc;
+	uint32_t prevcrc = 0xFFFFFFFF;
 	bool found = false;
 	uint8_t addr_size = 3;
 	for(; addr_size <= 5; addr_size++) {
@@ -581,12 +571,11 @@ bool check_packet(uint8_t *pkt, uint16_t size)
 			uint8_t _payload = *(pkt + addr_size) >> 2;
 			if((_payload > size - addr_size - 2 - view_log_decode_CRC && _payload != 0x33)) continue;
 			uint8_t *p = pkt + addr_size;
-			if(addr_size == 3) {
+			if(prevcrc == 0xFFFFFFFF) {
 				prevcrc = calc_crc(view_log_decode_CRC == 2 ? 0xFFFF : 0xFF, pkt, 7, 3 * 8); // crc for smallest addr
-			} else {
-				prevcrc = calc_crc(prevcrc, p - 1, 7, 8);
 			}
-			uint32_t crc = prevcrc;
+			uint32_t crc;
+			if(addr_size > 3) crc = calc_crc(prevcrc, p - (addr_size - 3), 7, 8 * (addr_size - 3)); else crc = prevcrc;
 			if(_payload != 0x33) { // DPL
 				crc = calc_crc(crc, p, 7, 9 + _payload * 8);
 				if(crc == get_shifted_crc(p + _payload + 1)) {
@@ -644,13 +633,38 @@ bool check_packet(uint8_t *pkt, uint16_t size)
 			if(found) break;
 		}
 	}
-	if(found && furi_log_get_level() == FuriLogLevelDebug) {
-		char dbuf[65];
-		dbuf[0] = 0;
-		add_to_str_hex_bytes(dbuf, (char*)pkt, size);
-		FURI_LOG_D(TAG, "PKT%02X: %s (%d)", *(pkt - 1), dbuf, size);
-	}
-	if(found && addrs_found.addr_count < 6) {
+	if(found) {
+		if(furi_log_get_level() == FuriLogLevelDebug) {
+			char dbuf[65];
+			dbuf[0] = 0;
+			add_to_str_hex_bytes(dbuf, (char*)pkt, size);
+			FURI_LOG_D(TAG, "PKT%02X: %s (%d)", *(pkt - 1), dbuf, size);
+		}
+		int16_t i = 0;
+		for(; i < found_total; i++) {
+			if(APP->found[i].addr_size != addr_size) continue;
+			if(memcmp(APP->found[i].addr, pkt, addr_size) == 0) break;
+		}
+		if(i != found_total) { // found
+			APP->found[i].total++;
+		} else {
+			pkt--;
+			uint8_t *p = APP->log_arr;
+			for(i = 0; i < log_arr_idx; i++, p += LOG_REC_SIZE) {
+				if(*p & 0x80 && (*(p+1) & 0b11) + 2 == addr_size && pkt != p) {
+					if(memcmp(p, pkt, addr_size) == 0) break;
+				}
+			}
+			if(i != log_arr_idx && found_total < MAX_LOG_RECORDS) { // found -> 2
+				memset(&APP->found[found_total], 0, sizeof(struct FOUND));
+				memcpy(APP->found[found_total].addr, pkt, addr_size);
+				APP->found[found_total].addr_size = addr_size;
+				APP->found[found_total].total = 2;
+				if(found_total == 0) view_found = 0;
+				found_total++;
+			}
+		}
+/*
 		if(addrs_found.addr_count == 0) {
 			memcpy(addrs_found.addr_P0, pkt, addr_size);
 			addrs_found.addr_len = addr_size;
@@ -698,7 +712,9 @@ bool check_packet(uint8_t *pkt, uint16_t size)
 				}
 			}
 		}
+*/
 	}
+
 	return found;
 }
 
@@ -710,7 +726,7 @@ bool nrf24_read_newpacket() {
 	uint8_t st;
 /* test pkts	
 	static int iii = 0;
-    char ppp[][65] = { 	"42E4A65544CC4AD9B25655A93E25669895572162DDA295524660D2",
+    char ppp[][65] = { 	"54A545109411544BAAE50110A3282512A9A1152A565B22AAA48AB751A5",
 						"C8C8C0CE7A81018007202FFFFC", 
 						"EAEC8C8C2CE3C0101006FB737A",
 						"BEBFFFEC8C8C1CC00542AF7CFF7DBEAFE3397FEAFEF1DDFA4AEF7FDBB7CDEABC",
@@ -1015,54 +1031,57 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 		}
 	} else {
 		canvas_set_font(canvas, FontBatteryPercent); // 5x7 font, 9 lines
-		struct ADDRS *a;
-		if(what_to_do == 1) {
-			if(view_details_type && addrs_found.addr_count) {
-				a = &addrs_found;
-				canvas_draw_str(canvas, 0, 1 * 7, "Found addr:");
-			} else {
-				a = &addrs_sniff;
-				canvas_draw_str(canvas, 0, 1 * 7, "Sniff prefix:");
+		if(view_found >= 0) {
+			snprintf(screen_buf, 50, "Found > 1: %d", found_total);
+			canvas_draw_str(canvas, 0, 1 * 7, screen_buf);
+			int16_t idx = view_found * 7;
+			for(uint8_t i = 0; i < 7; i++) {
+				if(idx++ >= found_total) break;
+				snprintf(screen_buf, 16, "%d. ", idx);
+				add_to_str_hex_bytes(screen_buf, (char*)APP->found[idx].addr, APP->found[idx].addr_size);
+				if(APP->found[idx].addr_size == 3) strcat(screen_buf, "    "); else if(APP->found[idx].addr_size == 4) strcat(screen_buf, "  ");
+				snprintf(screen_buf + strlen(screen_buf), 16, " - %d", APP->found[idx].total);
+				canvas_draw_str(canvas, 0, 2 + i * 7, screen_buf);
 			}
 		} else {
-			a = &addrs;
-			canvas_draw_str(canvas, 0, 1 * 7, "Addresses:");
-		}
-		if(a->addr_count > 0) {
-			snprintf(screen_buf, sizeof(screen_buf), "P0: ");
-			add_to_str_hex_bytes(screen_buf, (char*)a->addr_P0, a->addr_len);
-			snprintf(screen_buf + strlen(screen_buf), 16, " - %d", found_total[0]); 
-			canvas_draw_str(canvas, 0, 2 * 7, screen_buf);
-		} 
-		if(a->addr_count > 1) { 
-			snprintf(screen_buf, sizeof(screen_buf), "P1: "); 
-			add_to_str_hex_bytes(screen_buf, (char*)a->addr_P1, a->addr_len);
-			snprintf(screen_buf + strlen(screen_buf), 16, " - %d", found_total[1]); 
-			canvas_draw_str(canvas, 0, 3 * 7, screen_buf);
-		}
-		if(a->addr_count > 2) { 
-			canvas_draw_str(canvas, 0, 4 * 7, "P2: ");
-			snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P2); 
-			snprintf(screen_buf + strlen(screen_buf), 16, " - %d", found_total[2]); 
-			canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 4 * 7, screen_buf);
-		}
-		if(a->addr_count > 3) { 
-			canvas_draw_str(canvas, 0, 5 * 7, "P3: ");
-			snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P3);
-			snprintf(screen_buf + strlen(screen_buf), 16, " - %d", found_total[3]); 
-			canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 5 * 7, screen_buf);
-		}
-		if(a->addr_count > 4) { 
-			canvas_draw_str(canvas, 0, 6 * 7, "P4: ");
-			snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P4); 
-			snprintf(screen_buf + strlen(screen_buf), 16, " - %d", found_total[4]); 
-			canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 6 * 7, screen_buf);
-		}
-		if(a->addr_count > 5) { 
-			canvas_draw_str(canvas, 0, 7 * 7, "P5: ");
-			snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P5); 
-			snprintf(screen_buf + strlen(screen_buf), 16, " - %d", found_total[5]); 
-			canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 7 * 7, screen_buf);
+			struct ADDRS *a;
+			if(what_to_do == 1) {
+				a = &addrs_sniff;
+				canvas_draw_str(canvas, 0, 1 * 7, "Sniff prefix:");
+			} else {
+				a = &addrs;
+				canvas_draw_str(canvas, 0, 1 * 7, "Addresses:");
+			}
+			if(a->addr_count > 0) {
+				snprintf(screen_buf, sizeof(screen_buf), "P0: ");
+				add_to_str_hex_bytes(screen_buf, (char*)a->addr_P0, a->addr_len);
+				canvas_draw_str(canvas, 0, 2 * 7, screen_buf);
+			} 
+			if(a->addr_count > 1) { 
+				snprintf(screen_buf, sizeof(screen_buf), "P1: "); 
+				add_to_str_hex_bytes(screen_buf, (char*)a->addr_P1, a->addr_len);
+				canvas_draw_str(canvas, 0, 3 * 7, screen_buf);
+			}
+			if(a->addr_count > 2) { 
+				canvas_draw_str(canvas, 0, 4 * 7, "P2: ");
+				snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P2); 
+				canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 4 * 7, screen_buf);
+			}
+			if(a->addr_count > 3) { 
+				canvas_draw_str(canvas, 0, 5 * 7, "P3: ");
+				snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P3);
+				canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 5 * 7, screen_buf);
+			}
+			if(a->addr_count > 4) { 
+				canvas_draw_str(canvas, 0, 6 * 7, "P4: ");
+				snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P4); 
+				canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 6 * 7, screen_buf);
+			}
+			if(a->addr_count > 5) { 
+				canvas_draw_str(canvas, 0, 7 * 7, "P5: ");
+				snprintf(screen_buf, sizeof(screen_buf), "%02X", a->addr_P5); 
+				canvas_draw_str(canvas, (4 + (a->addr_len - 1) * 2) * 5, 7 * 7, screen_buf);
+			}
 		}
 		if(log_arr_idx) {
 			uint8_t *ptr = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
@@ -1102,9 +1121,20 @@ int32_t nrf24scan_app(void* p) {
 		free(APP->plugin_state);
 		return 255;
 	}
+	APP->log_arr = malloc(LOG_REC_SIZE * MAX_LOG_RECORDS);
+	if(APP->log_arr == NULL) {
+		FURI_LOG_E(TAG, "Not enouch memory: %d", LOG_REC_SIZE * MAX_LOG_RECORDS);
+		strcpy(addr_file_name, "MEMORY LOW!");
+	}
+	clear_log();
+	APP->found = malloc(sizeof(struct FOUND) * MAX_LOG_RECORDS);
+	if(APP->found == NULL) {
+		FURI_LOG_E(TAG, "Not enouch memory: %d", sizeof(struct FOUND) * MAX_LOG_RECORDS);
+		strcpy(addr_file_name, "MEMORY LOW!!");
+	}
+
 	memset((uint8_t*)&addrs, 0, sizeof(addrs));
 	memset((uint8_t*)&addrs_sniff, 0, sizeof(addrs_sniff));
-	memset((uint8_t*)&addrs_found, 0, sizeof(addrs_found));
 	nrf24_init();
 
 	// Set system callbacks
@@ -1141,7 +1171,6 @@ int32_t nrf24scan_app(void* p) {
 	file_stream_close(file_stream);
 	stream_free(file_stream);
 	furi_string_free(path);
-	allocate_log_array();
 
 	PluginEvent event;
 	for(bool processing = true; processing;) {
@@ -1161,7 +1190,7 @@ int32_t nrf24scan_app(void* p) {
 							view_log_arr_idx -= event.input.type == InputTypeRepeat ? 10 : 1;
 							if(view_log_arr_idx >= log_arr_idx) view_log_arr_idx = 0;
 						} else if(what_doing == 2) {
-							view_details_type = 0;
+							if(view_found > -1) view_found--;
 						}
 					}
 					break;
@@ -1173,7 +1202,7 @@ int32_t nrf24scan_app(void* p) {
 							view_log_arr_idx += event.input.type == InputTypeRepeat ? 10 : 1;
 							if(view_log_arr_idx >= log_arr_idx) view_log_arr_idx = log_arr_idx - 1;
 						} else if(what_doing == 2) {
-							view_details_type = 1;
+							if(view_found < found_total / 7) view_found++;
 						}
 					}
 					break;
@@ -1325,7 +1354,6 @@ int32_t nrf24scan_app(void* p) {
 					else if(event.input.type == InputTypeShort) {
 						if(what_doing) what_doing--;
 						if(what_doing == 0) {
-							memcpy(&addrs, &addrs_found, sizeof(addrs));
 							nrf24_set_idle(nrf24_HANDLE);
 						}
 					}
@@ -1361,6 +1389,7 @@ int32_t nrf24scan_app(void* p) {
 	furi_message_queue_free(APP->event_queue);
 	free(APP->plugin_state);
 	if(APP->log_arr) free(APP->log_arr);
+	if(APP->found) free(APP->found);
 	free(APP);
 	return 0;
 }
