@@ -110,7 +110,7 @@ static void power_auto_shutdown_timer_callback(void* context) {
     furi_assert(context);
     Power* power = context;
     power_auto_shutdown_inhibit(power);
-    power_off(power);
+    furi_hal_power_off();
 }
 
 static void power_shutdown_time_changed_callback(const void* event, void* context) {
