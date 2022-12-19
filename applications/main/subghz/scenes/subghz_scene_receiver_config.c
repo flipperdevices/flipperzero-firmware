@@ -360,16 +360,6 @@ void subghz_scene_receiver_config_on_enter(void* context) {
     variable_item_set_current_value_text(
         item, subghz_setting_get_preset_name(subghz->setting, value_index));
 
-    item = variable_item_list_add(
-        subghz->variable_item_list,
-        "Sound:",
-        SPEAKER_COUNT,
-        subghz_scene_receiver_config_set_speaker,
-        subghz);
-    value_index = value_index_uint32(subghz->txrx->speaker_state, speaker_value, SPEAKER_COUNT);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, speaker_text[value_index]);
-
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
        SubGhzCustomEventManagerSet) {
         // Hopping
@@ -418,6 +408,16 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_text(item, rssi_threshold_text[value_index]);
 
         // Lock keyboard
+    item = variable_item_list_add(
+        subghz->variable_item_list,
+        "Sound:",
+        SPEAKER_COUNT,
+        subghz_scene_receiver_config_set_speaker,
+        subghz);
+    value_index = value_index_uint32(subghz->txrx->speaker_state, speaker_value, SPEAKER_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, speaker_text[value_index]);
+
         variable_item_list_add(subghz->variable_item_list, "Lock Keyboard", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             subghz->variable_item_list,
