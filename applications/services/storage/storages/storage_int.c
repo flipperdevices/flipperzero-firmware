@@ -246,48 +246,30 @@ static FS_Error storage_int_parse_error(int error) {
         result = FSE_OK;
     } else {
         switch(error) {
-        case LFS_ERR_IO:
-            result = FSE_INTERNAL;
-            break;
-        case LFS_ERR_CORRUPT:
-            result = FSE_INTERNAL;
-            break;
         case LFS_ERR_NOENT:
             result = FSE_NOT_EXIST;
             break;
         case LFS_ERR_EXIST:
             result = FSE_EXIST;
             break;
-        case LFS_ERR_NOTDIR:
-            result = FSE_INVALID_NAME;
-            break;
-        case LFS_ERR_ISDIR:
-            result = FSE_INVALID_NAME;
-            break;
         case LFS_ERR_NOTEMPTY:
             result = FSE_DENIED;
             break;
-        case LFS_ERR_BADF:
-            result = FSE_INVALID_NAME;
-            break;
-        case LFS_ERR_FBIG:
-            result = FSE_INTERNAL;
-            break;
         case LFS_ERR_INVAL:
-            result = FSE_INVALID_PARAMETER;
-            break;
-        case LFS_ERR_NOSPC:
-            result = FSE_INTERNAL;
-            break;
-        case LFS_ERR_NOMEM:
-            result = FSE_INTERNAL;
-            break;
         case LFS_ERR_NOATTR:
             result = FSE_INVALID_PARAMETER;
             break;
+        case LFS_ERR_BADF:
+        case LFS_ERR_ISDIR:
+        case LFS_ERR_NOTDIR:
         case LFS_ERR_NAMETOOLONG:
             result = FSE_INVALID_NAME;
             break;
+        case LFS_ERR_IO:
+        case LFS_ERR_FBIG:
+        case LFS_ERR_NOSPC:
+        case LFS_ERR_NOMEM:
+        case LFS_ERR_CORRUPT:
         default:
             result = FSE_INTERNAL;
         }

@@ -544,11 +544,8 @@ void subghz_hopper_update(SubGhz* subghz) {
 
     switch(subghz->txrx->hopper_state) {
     case SubGhzHopperStateOFF:
-        return;
-        break;
     case SubGhzHopperStatePause:
         return;
-        break;
     case SubGhzHopperStateRSSITimeOut:
         if(subghz->txrx->hopper_timeout != 0) {
             subghz->txrx->hopper_timeout--;

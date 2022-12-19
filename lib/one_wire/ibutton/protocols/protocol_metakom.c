@@ -252,10 +252,10 @@ static LevelDuration protocol_metakom_encoder_yield(ProtocolMetakom* proto) {
         // start word (0b010)
         switch(proto->encoder.index) {
         case 1:
-            result = level_duration_make(true, METAKOM_0_LOW);
+            result = level_duration_make(true, METAKOM_0_LOW); //-V1037
             break;
         case 2:
-            result = level_duration_make(false, METAKOM_0_HI);
+            result = level_duration_make(false, METAKOM_0_HI); //-V1037
             break;
         case 3:
             result = level_duration_make(true, METAKOM_1_LOW);
