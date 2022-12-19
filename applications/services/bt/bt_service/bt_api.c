@@ -3,6 +3,10 @@
 bool bt_set_profile(Bt* bt, BtProfile profile) {
     furi_assert(bt);
 
+    bt_disconnect(bt);
+
+    furi_delay_ms(100);
+
     // Send message
     bool result = false;
     BtMessage message = {

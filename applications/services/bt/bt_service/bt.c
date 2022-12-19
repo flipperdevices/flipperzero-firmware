@@ -322,7 +322,6 @@ static void bt_close_rpc_connection(Bt* bt) {
 static void bt_change_profile(Bt* bt, BtMessage* message) {
     if(furi_hal_bt_is_ble_gatt_gap_supported()) {
         bt_settings_load(&bt->bt_settings);
-        bt_close_rpc_connection(bt);
 
         FuriHalBtProfile furi_profile;
         if(message->data.profile == BtProfileHidKeyboard) {
@@ -358,6 +357,7 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
 
 static void bt_close_connection(Bt* bt) {
     bt_close_rpc_connection(bt);
+    furi_hal_bt_stop_advertising();
     furi_event_flag_set(bt->api_event, BT_API_UNLOCK_EVENT);
 }
 
@@ -420,6 +420,7 @@ int32_t bt_srv(void* p) {
         } else if(message.type == BtMessageTypeKeysStorageUpdated) {
             bt_keys_storage_save(bt);
         } else if(message.type == BtMessageTypeSetProfile) {
+
             bt_change_profile(bt, &message);
         } else if(message.type == BtMessageTypeDisconnect) {
             bt_close_connection(bt);
