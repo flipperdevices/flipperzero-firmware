@@ -25,7 +25,7 @@ MU_TEST(float_tools_equal_test) {
     mu_check(one_third != one_third_dec);
     mu_check(float_is_equal(one_third, one_third_dec));
 
-    const float big_num =  1.e12f;
+    const float big_num = 1.e12f;
     const float med_num = 95.389f;
     const float smol_num = 1.e-12f;
     mu_check(float_is_equal(big_num, big_num));
@@ -44,10 +44,10 @@ MU_TEST(float_tools_equal_test) {
 
     const float slightly_more_than_one = 1.f + FLT_EPSILON / 2.f;
     const float slightly_less_than_one = 1.f - FLT_EPSILON / 2.f;
-    mu_check(float_is_equal(slightly_more_than_one , slightly_less_than_one));
-    mu_check(float_is_equal(-slightly_more_than_one , -slightly_less_than_one));
-    mu_check(!float_is_equal(slightly_more_than_one , -slightly_less_than_one));
-    mu_check(!float_is_equal(-slightly_more_than_one , slightly_less_than_one));
+    mu_check(float_is_equal(slightly_more_than_one, slightly_less_than_one));
+    mu_check(float_is_equal(-slightly_more_than_one, -slightly_less_than_one));
+    mu_check(!float_is_equal(slightly_more_than_one, -slightly_less_than_one));
+    mu_check(!float_is_equal(-slightly_more_than_one, slightly_less_than_one));
 }
 
 MU_TEST_SUITE(float_tools_suite) {
