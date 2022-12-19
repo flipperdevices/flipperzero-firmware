@@ -334,8 +334,9 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
             furi_profile = FuriHalBtProfileSerial;
         }
 
+        bt_keys_storage_load(bt->keys_storage);
+
         if(furi_hal_bt_change_app(furi_profile, bt_on_gap_event_callback, bt)) {
-            bt_keys_storage_load(bt->keys_storage);
             FURI_LOG_I(TAG, "Bt App started");
             if(bt->bt_settings.enabled) {
                 furi_hal_bt_start_advertising();
@@ -377,7 +378,7 @@ int32_t bt_srv(void* p) {
         return 0;
     }
 
-    // Read keys
+    // Load keys
     if(!bt_keys_storage_load(bt->keys_storage)) {
         FURI_LOG_W(TAG, "Failed to load bonding keys");
     }
