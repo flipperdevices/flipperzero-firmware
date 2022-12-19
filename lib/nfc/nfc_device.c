@@ -1043,7 +1043,7 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         // Create directory if necessary
         FuriString* folder = furi_string_alloc();
         // Get folder from filename (filename is in the form of "folder/filename.nfc", so the folder is "folder/")
-        furi_string_printf(temp_str, "%s", dev_name);
+        furi_string_set(temp_str, dev_name);
         // Get folder from filename
         nfc_device_get_folder_from_path(temp_str, folder);
         FURI_LOG_I("Nfc", "Saving to folder %s", furi_string_get_cstr(folder));
@@ -1053,7 +1053,6 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         }
         furi_string_free(folder);
         // First remove nfc device file if it was saved
-        furi_string_printf(temp_str, "%s", dev_name);
         // Open file
         if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
         // Write header

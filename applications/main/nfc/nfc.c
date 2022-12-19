@@ -39,7 +39,6 @@ Nfc* nfc_alloc() {
     nfc->worker = nfc_worker_alloc();
     nfc->view_dispatcher = view_dispatcher_alloc();
     nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
-    furi_string_set(nfc_magic->nfc_dev->folder, NFC_APP_FOLDER);
     view_dispatcher_enable_queue(nfc->view_dispatcher);
     view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
@@ -47,6 +46,7 @@ Nfc* nfc_alloc() {
 
     // Nfc device
     nfc->dev = nfc_device_alloc();
+    furi_string_set(nfc->dev->folder, NFC_APP_FOLDER);
 
     // Open GUI record
     nfc->gui = furi_record_open(RECORD_GUI);

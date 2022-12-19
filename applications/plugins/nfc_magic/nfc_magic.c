@@ -38,7 +38,6 @@ NfcMagic* nfc_magic_alloc() {
     nfc_magic->worker = nfc_magic_worker_alloc();
     nfc_magic->view_dispatcher = view_dispatcher_alloc();
     nfc_magic->scene_manager = scene_manager_alloc(&nfc_magic_scene_handlers, nfc_magic);
-    furi_string_set(nfc_magic->nfc_dev->folder, NFC_APP_FOLDER);
     view_dispatcher_enable_queue(nfc_magic->view_dispatcher);
     view_dispatcher_set_event_callback_context(nfc_magic->view_dispatcher, nfc_magic);
     view_dispatcher_set_custom_event_callback(
@@ -50,6 +49,7 @@ NfcMagic* nfc_magic_alloc() {
 
     // Nfc device
     nfc_magic->nfc_dev = nfc_device_alloc();
+    furi_string_set(nfc_magic->nfc_dev->folder, NFC_APP_FOLDER);
 
     // Open GUI record
     nfc_magic->gui = furi_record_open(RECORD_GUI);
