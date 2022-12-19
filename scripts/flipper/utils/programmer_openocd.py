@@ -1,47 +1,66 @@
-#!/usr/bin/env python3
-from flipper.app import App
-from flipper.assets.obdata import OptionBytesData
+import logging
+import os
+
+from flipper.utils.programmer import Programmer
 from flipper.utils.openocd import OpenOCD
 from flipper.utils.stm32wb55 import STM32WB55
+from flipper.assets.obdata import OptionBytesData
 
 
-class Main(App):
-    def init(self):
-        # Subparsers
-        self.subparsers = self.parser.add_subparsers(help="sub-command help")
+class OpenOCDProgrammer(Programmer):
+    def __init__(
+        self,
+        interface: str = "interface/cmsis-dap.cfg",
+        port_base: int | None = None,
+        serial: str | None = None,
+    ):
+        super().__init__()
 
-        # Check command
-        self.parser_check = self.subparsers.add_parser(
-            "check", help="Check Option Bytes"
+        config = {}
+
+        config["interface"] = interface
+        config["target"] = "target/stm32wbx.cfg"
+
+        if not serial is None:
+            if interface == "interface/cmsis-dap.cfg":
+                config["serial"] = f"cmsis_dap_serial {serial}"
+            elif "stlink" in interface:
+                config["serial"] = f"stlink_serial {serial}"
+
+        if not port_base is None:
+            config["port_base"] = port_base
+
+        self.openocd = OpenOCD(config)
+        self.logger = logging.getLogger()
+
+    def reset(self, mode: Programmer.RunMode = Programmer.RunMode.Run) -> bool:
+        stm32 = STM32WB55()
+        if mode == Programmer.RunMode.Run:
+            stm32.reset(self.openocd, stm32.RunMode.Run)
+        elif mode == Programmer.RunMode.Stop:
+            stm32.reset(self.openocd, stm32.RunMode.Init)
+        else:
+            raise Exception("Unknown mode")
+
+        return True
+
+    def flash(self, address: int, file_path: str, verify: bool = True) -> bool:
+        if not os.path.exists(file_path):
+            raise Exception(f"File {file_path} not found")
+
+        self.openocd.start()
+        self.openocd.send_tcl(f"init")
+        self.openocd.send_tcl(
+            f"program {file_path} 0x{address:08x}{' verify' if verify else ''} reset exit"
         )
-        self._add_args(self.parser_check)
-        self.parser_check.set_defaults(func=self.check)
+        self.openocd.stop()
 
-        # Set command
-        self.parser_set = self.subparsers.add_parser("set", help="Set Option Bytes")
-        self._add_args(self.parser_set)
-        self.parser_set.set_defaults(func=self.set)
-
-    def _add_args(self, parser):
-        parser.add_argument("--port-base", type=int, help="OpenOCD port base")
-        parser.add_argument("--serial", type=str, help="DAP-Link Serial Number")
-        parser.add_argument(
-            "--ob-path", type=str, help="DAP-Link Serial Number", default="ob.data"
-        )
-
-    def _get_dap_params(self):
-        return {
-            "serial": self.args.serial,
-            "port_base": self.args.port_base,
-        }
+        return True
 
     def _ob_print_diff_table(self, ob_reference: bytes, ob_read: bytes, print_fn):
         print_fn(
             f'{"Reference": <20} {"Device": <20} {"Diff Reference": <20} {"Diff Device": <20}'
         )
-
-        diff1 = bytes()
-        diff2 = bytes()
 
         # Split into 8 byte, word + word
         for i in range(0, len(ob_reference), 8):
@@ -65,19 +84,16 @@ class Main(App):
                 f"{ref.hex(): <20} {read.hex(): <20} {diff_str1: <20} {diff_str2: <20}"
             )
 
-    def check(self):
-        self.logger.info(f"Checking Option Bytes")
-
+    def option_bytes_validate(self, file_path: str) -> bool:
         # Registers
         stm32 = STM32WB55()
 
         # OpenOCD
-        oocd = OpenOCD(self._get_dap_params())
-        oocd.start()
-        stm32.reset(oocd, stm32.RunMode.Init)
+        self.openocd.start()
+        stm32.reset(self.openocd, stm32.RunMode.Init)
 
         # Generate Option Bytes data
-        ob_data = OptionBytesData(self.args.ob_path)
+        ob_data = OptionBytesData(file_path)
         ob_values = ob_data.gen_values().export()
         ob_reference = ob_values.reference
         ob_compare_mask = ob_values.compare_mask
@@ -88,7 +104,7 @@ class Main(App):
         ob_read = bytes()
         for i in range(ob_words):
             addr = stm32.OPTION_BYTE_BASE + i * 4
-            value = oocd.read_32(addr)
+            value = self.openocd.read_32(addr)
             ob_read += value.to_bytes(4, "little")
 
         # Compare Option Bytes with reference by mask
@@ -97,36 +113,36 @@ class Main(App):
             ob_compare += bytes([ob_read[i] & ob_compare_mask[i]])
 
         # Compare Option Bytes
+        return_code = False
+
         if ob_reference == ob_compare:
             self.logger.info("Option Bytes are valid")
-            return_code = 0
         else:
             self.logger.error("Option Bytes are invalid")
             self._ob_print_diff_table(ob_reference, ob_compare, self.logger.error)
-            return_code = 1
+            return_code = True
 
         # Stop OpenOCD
-        stm32.reset(oocd, stm32.RunMode.Run)
-        oocd.stop()
+        stm32.reset(self.openocd, stm32.RunMode.Run)
+        self.openocd.stop()
 
         return return_code
 
     def _unpack_u32(self, data: bytes, offset: int):
         return int.from_bytes(data[offset : offset + 4], "little")
 
-    def set(self):
+    def option_bytes_set(self, file_path: str) -> bool:
         self.logger.info(f"Setting Option Bytes")
 
         # Registers
         stm32 = STM32WB55()
 
         # OpenOCD
-        oocd = OpenOCD(self._get_dap_params())
-        oocd.start()
-        stm32.reset(oocd, stm32.RunMode.Init)
+        self.openocd.start()
+        stm32.reset(self.openocd, stm32.RunMode.Init)
 
         # Generate Option Bytes data
-        ob_data = OptionBytesData(self.args.ob_path)
+        ob_data = OptionBytesData(file_path)
         ob_values = ob_data.gen_values().export()
         ob_reference_bytes = ob_values.reference
         ob_compare_mask_bytes = ob_values.compare_mask
@@ -135,17 +151,17 @@ class Main(App):
         ob_dwords = int(ob_length / 8)
 
         # Clear flash errors
-        stm32.clear_flash_errors(oocd)
+        stm32.clear_flash_errors(self.openocd)
 
         # Unlock Flash and Option Bytes
-        stm32.flash_unlock(oocd)
-        stm32.option_bytes_unlock(oocd)
+        stm32.flash_unlock(self.openocd)
+        stm32.option_bytes_unlock(self.openocd)
 
         ob_need_to_apply = False
 
         for i in range(ob_dwords):
             device_addr = stm32.OPTION_BYTE_BASE + i * 8
-            device_value = oocd.read_32(device_addr)
+            device_value = self.openocd.read_32(device_addr)
             ob_write_mask = self._unpack_u32(ob_write_mask_bytes, i * 8)
             ob_compare_mask = self._unpack_u32(ob_compare_mask_bytes, i * 8)
             ob_value_ref = self._unpack_u32(ob_reference_bytes, i * 8)
@@ -167,23 +183,46 @@ class Main(App):
                 ob_value |= ob_value_ref & ob_write_mask
 
                 self.logger.info(f"Writing {ob_value:08X} to {device_reg_addr:08X}")
-                oocd.write_32(device_reg_addr, ob_value)
+                self.openocd.write_32(device_reg_addr, ob_value)
 
         if ob_need_to_apply:
-            stm32.option_bytes_apply(oocd)
+            stm32.option_bytes_apply(self.openocd)
         else:
             self.logger.info(f"Option Bytes are already correct")
 
         # Load Option Bytes
         # That will reset and also lock the Option Bytes and the Flash
-        stm32.option_bytes_load(oocd)
+        stm32.option_bytes_load(self.openocd)
+
+        # Stop OpenOCD
+        stm32.reset(self.openocd, stm32.RunMode.Run)
+        self.openocd.stop()
+
+        return True
+
+    def otp_write(self, address: int, data: bytes) -> bool:
+        oocd = self.openocd
+        oocd.start()
+
+        # Registers
+        stm32 = STM32WB55()
+
+        self.reset(self.RunMode.Stop)
+        stm32.clear_flash_errors(oocd)
+
+        # Read OTP memory
+        self.logger.info(oocd.send_tcl(f"mdw {address} 2").strip())
+        self.logger.info(oocd.send_tcl(f"mdw {address + 8} 2").strip())
+
+        # Write OTP memory
+        stm32.write_flash(oocd, address, 0x12345678, 0x9ABCDEF1)
+        stm32.write_flash(oocd, address + 8, 0x9ABCDEF1, 0x12345678)
+
+        # Read OTP memory again
+        self.logger.info(oocd.send_tcl(f"mdw {address} 2").strip())
+        self.logger.info(oocd.send_tcl(f"mdw {address + 8} 2").strip())
 
         # Stop OpenOCD
         stm32.reset(oocd, stm32.RunMode.Run)
         oocd.stop()
-
-        return 0
-
-
-if __name__ == "__main__":
-    Main()()
+        return True

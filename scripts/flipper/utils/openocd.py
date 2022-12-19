@@ -29,12 +29,23 @@ class OpenOCD:
         self._add_command(f"telnet_port {self.telnet_port}")
 
         # Config files
-        self._add_file("interface/cmsis-dap.cfg")
-        self._add_file("target/stm32wbx.cfg")
 
-        # DAP settings
+        if interface := config.get("interface", None):
+            pass
+        else:
+            interface = "interface/stlink.cfg"
+
+        if target := config.get("target", None):
+            pass
+        else:
+            target = "target/stm32wbx.cfg"
+
+        self._add_file(interface)
+        self._add_file(target)
+
+        # Programmer settings
         if serial := config.get("serial", None):
-            self._add_command(f"cmsis_dap_serial {serial}")
+            self._add_command(f"{serial}")
 
         # Other params
         if "params" in config:
@@ -88,6 +99,8 @@ class OpenOCD:
             self.process.wait(timeout=10)
         except subprocess.TimeoutExpired:
             self.process.kill()
+            self.logger.error("Failed to stop OpenOCD")
+            self.postmortem()
 
     def send_tcl(self, cmd) -> str:
         """Send a command string to TCL RPC. Return the result that was read."""
