@@ -8,7 +8,6 @@ static bool nfc_magic_scene_file_select_is_file_suitable(NfcDevice* nfc_dev) {
 
 void nfc_magic_scene_file_select_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
-    furi_string_printf(nfc_magic->nfc_dev->folder, "%s", NFC_APP_FOLDER);
     // Process file_select return
     nfc_device_set_loading_callback(nfc_magic->nfc_dev, nfc_magic_show_loading_popup, nfc_magic);
 
