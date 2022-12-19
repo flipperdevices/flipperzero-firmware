@@ -276,7 +276,7 @@ bool infrared_signal_search_and_read(
             if(is_name_found) break;
         }
         if(!is_name_found) break; //-V547
-        if(!infrared_signal_read_body(signal, ff)) break;
+        if(!infrared_signal_read_body(signal, ff)) break; //-V779
         success = true;
     } while(false);
 

@@ -480,7 +480,7 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
         if(!animation_storage_load_frames(storage, name, animation, u32array, width, height))
             break;
 
-        if(!flipper_format_read_uint32(ff, "Active cycles", &u32value, 1)) break;
+        if(!flipper_format_read_uint32(ff, "Active cycles", &u32value, 1)) break; //-V779
         animation->active_cycles = u32value;
         if(!flipper_format_read_uint32(ff, "Frame rate", &u32value, 1)) break;
         FURI_CONST_ASSIGN(animation->icon_animation.frame_rate, u32value);

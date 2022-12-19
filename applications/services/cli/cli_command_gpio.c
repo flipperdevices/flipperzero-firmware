@@ -80,7 +80,7 @@ static GpioParseReturn gpio_command_parse(FuriString* args, size_t* pin_num, uin
             break;
         }
 
-        int pin_mode;
+        int pin_mode; //-V779
         if(!args_read_int_and_trim(args, &pin_mode) || pin_mode < 0 || pin_mode > 1) {
             ret = GpioParseReturnValueError;
             break;
@@ -113,7 +113,7 @@ void cli_command_gpio_mode(Cli* cli, FuriString* args, void* context) {
         return;
     }
 
-    if(cli_command_gpio_pins[num].debug) {
+    if(cli_command_gpio_pins[num].debug) { //-V779
         printf(
             "Changing this pin mode may damage hardware. Are you sure you want to continue? (y/n)?\r\n");
         char c = cli_getc(cli);
@@ -143,7 +143,7 @@ void cli_command_gpio_read(Cli* cli, FuriString* args, void* context) {
         return;
     }
 
-    if(LL_GPIO_MODE_INPUT !=
+    if(LL_GPIO_MODE_INPUT != //-V779
        LL_GPIO_GetPinMode(
            cli_command_gpio_pins[num].pin->port, cli_command_gpio_pins[num].pin->pin)) {
         printf("Err: pin %s is not set as an input.", cli_command_gpio_pins[num].name);
@@ -173,7 +173,7 @@ void cli_command_gpio_set(Cli* cli, FuriString* args, void* context) {
         return;
     }
 
-    if(LL_GPIO_MODE_OUTPUT !=
+    if(LL_GPIO_MODE_OUTPUT != //-V779
        LL_GPIO_GetPinMode(
            cli_command_gpio_pins[num].pin->port, cli_command_gpio_pins[num].pin->pin)) {
         printf("Err: pin %s is not set as an output.", cli_command_gpio_pins[num].name);
