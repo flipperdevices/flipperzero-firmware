@@ -21,8 +21,8 @@ static void locale_test_view_draw_callback(Canvas* canvas, void* _model) {
     FuriString* tmp_string = furi_string_alloc();
 
     float temp = 25.3f;
-    LocaleMeasurementUnit units = locale_get_measurement_unit();
-    if(units == LocaleMeasurementUnitMetric) {
+    LocaleMeasurementUnits units = locale_get_measurement_unit();
+    if(units == LocaleMeasurementUnitsMetric) {
         furi_string_printf(tmp_string, "Temp: %5.1fC", (double)temp);
     } else {
         temp = locale_celsius_to_fahrenheit(temp);

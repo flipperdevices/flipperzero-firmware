@@ -77,8 +77,8 @@ const char* const mesurement_units_text[] = {
 };
 
 const uint32_t mesurement_units_value[] = {
-    LocaleMeasurementUnitMetric,
-    LocaleMeasurementUnitImperial,
+    LocaleMeasurementUnitsMetric,
+    LocaleMeasurementUnitsImperial,
 };
 
 static void mesurement_units_changed(VariableItem* item) {

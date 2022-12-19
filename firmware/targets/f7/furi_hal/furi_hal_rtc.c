@@ -29,11 +29,11 @@ typedef struct {
     uint8_t log_level : 4;
     uint8_t log_reserved : 4;
     uint8_t flags;
-    uint8_t boot_mode : 4;
-    uint8_t heap_track_mode : 2;
-    uint8_t locale_units : 1;
-    uint8_t locale_timeformat : 1;
-    uint8_t locale_dateformat : 2;
+    FuriHalRtcBootMode boot_mode : 4;
+    FuriHalRtcHeapTrackMode heap_track_mode : 2;
+    FuriHalRtcLocaleUnits locale_units : 1;
+    FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
+    FuriHalRtcLocaleDateFormat locale_dateformat : 2;
     uint8_t reserved : 6;
 } SystemReg;
 
@@ -225,7 +225,7 @@ void furi_hal_rtc_set_boot_mode(FuriHalRtcBootMode mode) {
 FuriHalRtcBootMode furi_hal_rtc_get_boot_mode() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    return (FuriHalRtcBootMode)data->boot_mode;
+    return data->boot_mode;
 }
 
 void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode) {
@@ -238,47 +238,48 @@ void furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackMode mode) {
 FuriHalRtcHeapTrackMode furi_hal_rtc_get_heap_track_mode() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    return (FuriHalRtcHeapTrackMode)data->heap_track_mode;
+    return data->heap_track_mode;
 }
 
-void furi_hal_rtc_set_locale_units(uint8_t mode) {
+void furi_hal_rtc_set_locale_units(FuriHalRtcLocaleUnits value) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    data->locale_units = mode;
+    data->locale_units = value;
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-uint8_t furi_hal_rtc_get_locale_units() {
+FuriHalRtcLocaleUnits furi_hal_rtc_get_locale_units() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    return (uint8_t)data->locale_units;
+    return data->locale_units;
 }
 
-void furi_hal_rtc_set_locale_timeformat(uint8_t mode) {
+void furi_hal_rtc_set_locale_timeformat(FuriHalRtcLocaleTimeFormat value) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    data->locale_timeformat = mode;
+    data->locale_timeformat = value;
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-uint8_t furi_hal_rtc_get_locale_timeformat() {
+FuriHalRtcLocaleTimeFormat furi_hal_rtc_get_locale_timeformat() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    return (uint8_t)data->locale_timeformat;
+    return data->locale_timeformat;
 }
 
-void furi_hal_rtc_set_locale_dateformat(uint8_t mode) {
+void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value) {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    data->locale_dateformat = mode;
+    data->locale_dateformat = value;
     furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
 }
 
-uint8_t furi_hal_rtc_get_locale_dateformat() {
+FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
-    return (uint8_t)data->locale_dateformat;
+    return data->locale_dateformat;
 }
+
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
     furi_assert(datetime);
 

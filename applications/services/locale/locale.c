@@ -2,28 +2,28 @@
 
 #define TAG "LocaleSrv"
 
-LocaleMeasurementUnit locale_get_measurement_unit(void) {
-    return furi_hal_rtc_get_locale_units();
+LocaleMeasurementUnits locale_get_measurement_unit(void) {
+    return (LocaleMeasurementUnits)furi_hal_rtc_get_locale_units();
 }
 
-void locale_set_measurement_unit(LocaleMeasurementUnit format) {
-    furi_hal_rtc_set_locale_units(format);
+void locale_set_measurement_unit(LocaleMeasurementUnits format) {
+    furi_hal_rtc_set_locale_units((FuriHalRtcLocaleUnits)format);
 }
 
 LocaleTimeFormat locale_get_time_format(void) {
-    return furi_hal_rtc_get_locale_timeformat();
+    return (LocaleTimeFormat)furi_hal_rtc_get_locale_timeformat();
 }
 
 void locale_set_time_format(LocaleTimeFormat format) {
-    furi_hal_rtc_set_locale_timeformat(format);
+    furi_hal_rtc_set_locale_timeformat((FuriHalRtcLocaleTimeFormat)format);
 }
 
 LocaleDateFormat locale_get_date_format(void) {
-    return furi_hal_rtc_get_locale_dateformat();
+    return (LocaleDateFormat)furi_hal_rtc_get_locale_dateformat();
 }
 
 void locale_set_date_format(LocaleDateFormat format) {
-    furi_hal_rtc_set_locale_dateformat(format);
+    furi_hal_rtc_set_locale_dateformat((FuriHalRtcLocaleDateFormat)format);
 }
 
 float locale_fahrenheit_to_celsius(float temp_f) {
@@ -36,9 +36,9 @@ float locale_celsius_to_fahrenheit(float temp_c) {
 
 void locale_format_time(
     FuriString* out_str,
-    FuriHalRtcDateTime* datetime,
-    LocaleTimeFormat format,
-    bool show_seconds) {
+    const FuriHalRtcDateTime* datetime,
+    const LocaleTimeFormat format,
+    const bool show_seconds) {
     furi_assert(out_str);
     furi_assert(datetime);
 
@@ -66,9 +66,9 @@ void locale_format_time(
 
 void locale_format_date(
     FuriString* out_str,
-    FuriHalRtcDateTime* datetime,
-    LocaleDateFormat format,
-    char* separator) {
+    const FuriHalRtcDateTime* datetime,
+    const LocaleDateFormat format,
+    const char* separator) {
     furi_assert(out_str);
     furi_assert(datetime);
     furi_assert(separator);
