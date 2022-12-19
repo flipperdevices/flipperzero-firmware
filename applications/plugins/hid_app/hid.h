@@ -23,6 +23,7 @@
 #include "views/hid_mouse_jiggler.h"
 #include "views/hid_tiktok.h"
 
+// TODO change file path!
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH(".bt_hid.keys")
 
 typedef enum {

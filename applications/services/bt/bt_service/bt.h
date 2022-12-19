@@ -56,14 +56,14 @@ void bt_set_status_changed_callback(Bt* bt, BtStatusChangedCallback callback, vo
  */
 void bt_forget_bonded_devices(Bt* bt);
 
-/** Load keys from file
+/** Set keys storage file path
  *
  * @param bt                    Bt instance
  * @param keys_storage_path     Path to file with saved keys
  */
 void bt_keys_storage_set_storage_path(Bt* bt, const char* keys_storage_path);
 
-/** Load keys from default path
+/** Set default keys storage file path
  *
  * @param bt                    Bt instance
  */

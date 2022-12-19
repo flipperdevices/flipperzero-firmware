@@ -35,7 +35,7 @@ BtKeysStorage* bt_keys_storage_alloc(const char* keys_storage_path) {
     furi_assert(keys_storage_path);
 
     BtKeysStorage* instance = malloc(sizeof(BtKeysStorage));
-    // Set nvm ram parameters
+    // Set default nvm ram parameters
     furi_hal_bt_get_key_storage_buff(&instance->nvm_sram_buff, &instance->nvm_sram_buff_size);
     // Set key storage file
     instance->file_path = furi_string_alloc();
@@ -81,8 +81,6 @@ bool bt_keys_storage_load(BtKeysStorage* instance) {
             FURI_LOG_E(TAG, "Failed to read payload size");
             break;
         }
-        // TODO delete!!!
-        FURI_LOG_W(TAG, "Payload size: %d", payload_size);
 
         if(payload_size > instance->nvm_sram_buff_size) {
             FURI_LOG_E(TAG, "Saved data doesn't fit ram buffer");
