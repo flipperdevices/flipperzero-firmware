@@ -100,7 +100,7 @@ def add_envs(data, gh_env_file, gh_out_file, args):
         add_env("PULL_ID", data["pull_id"], gh_env_file)
         add_env("PULL_NAME", data["pull_name"], gh_env_file)
         add_set_output_var("pull_id", data["pull_id"], gh_out_file)
-        add_set_output_var("pull_name", os.getenv("pull_name"), gh_out_file)
+        add_set_output_var("pull_name", data["pull_name"], gh_out_file)
 
 
 def main():
