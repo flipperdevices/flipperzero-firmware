@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <gui/icon_animation.h>
-#include <assets_icons.h>
+#include <gui/icon.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +42,9 @@ typedef enum {
 /** Canvas Orientation */
 typedef enum {
     CanvasOrientationHorizontal,
+    CanvasOrientationHorizontalFlip,
     CanvasOrientationVertical,
+    CanvasOrientationVerticalFlip,
 } CanvasOrientation;
 
 /** Font Direction */

@@ -38,7 +38,7 @@ void path_extract_extension(FuriString* path, char* ext, size_t ext_len_max) {
     size_t dot = furi_string_search_rchar(path, '.');
     size_t filename_start = furi_string_search_rchar(path, '/');
 
-    if((dot > 0) && (filename_start < dot)) {
+    if((dot != FURI_STRING_FAILURE) && (filename_start < dot)) {
         strlcpy(ext, &(furi_string_get_cstr(path))[dot], ext_len_max);
     }
 }
@@ -95,22 +95,17 @@ bool path_contains_only_ascii(const char* path) {
         name_pos++;
     }
 
-    while(*name_pos != '\0') {
-        if((*name_pos >= '0') && (*name_pos <= '9')) {
-            name_pos++;
-            continue;
-        } else if((*name_pos >= 'A') && (*name_pos <= 'Z')) {
-            name_pos++;
-            continue;
-        } else if((*name_pos >= 'a') && (*name_pos <= 'z')) {
-            name_pos++;
-            continue;
-        } else if(strchr(" .!#\\$%&'()-@^_`{}~", *name_pos) != NULL) {
-            name_pos++;
-            continue;
-        }
+    for(; *name_pos; ++name_pos) {
+        const char c = *name_pos;
 
-        return false;
+        // Regular ASCII characters from 0x20 to 0x7e
+        const bool is_out_of_range = (c < ' ') || (c > '~');
+        // Cross-platform forbidden character set
+        const bool is_forbidden = strchr("\\<>*|\":?", c);
+
+        if(is_out_of_range || is_forbidden) {
+            return false;
+        }
     }
 
     return true;

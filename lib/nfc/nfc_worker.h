@@ -7,13 +7,14 @@ typedef struct NfcWorker NfcWorker;
 typedef enum {
     // Init states
     NfcWorkerStateNone,
-    NfcWorkerStateBroken,
     NfcWorkerStateReady,
     // Main worker states
     NfcWorkerStateRead,
     NfcWorkerStateUidEmulate,
     NfcWorkerStateMfUltralightEmulate,
     NfcWorkerStateMfClassicEmulate,
+    NfcWorkerStateMfClassicWrite,
+    NfcWorkerStateMfClassicUpdate,
     NfcWorkerStateReadMfUltralightReadAuth,
     NfcWorkerStateMfClassicDictAttack,
     NfcWorkerStateAnalyzeReader,
@@ -48,12 +49,15 @@ typedef enum {
     NfcWorkerEventNoCardDetected,
     NfcWorkerEventWrongCardDetected,
 
-    // Mifare Classic events
+    // Read Mifare Classic events
     NfcWorkerEventNoDictFound,
     NfcWorkerEventNewSector,
     NfcWorkerEventNewDictKeyBatch,
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
+
+    // Write Mifare Classic events
+    NfcWorkerEventWrongCard,
 
     // Detect Reader events
     NfcWorkerEventDetectReaderDetected,
@@ -61,8 +65,8 @@ typedef enum {
     NfcWorkerEventDetectReaderMfkeyCollected,
 
     // Mifare Ultralight events
-    NfcWorkerEventMfUltralightPassKey,
-
+    NfcWorkerEventMfUltralightPassKey, // NFC worker requesting manual key
+    NfcWorkerEventMfUltralightPwdAuth, // Reader sent auth command
 } NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);

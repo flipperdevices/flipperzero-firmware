@@ -52,7 +52,12 @@ static RpcSystemCallbacks rpc_systems[] = {
     {
         .alloc = rpc_system_gpio_alloc,
         .free = NULL,
-    }};
+    },
+    {
+        .alloc = rpc_system_property_alloc,
+        .free = NULL,
+    },
+};
 
 struct RpcSession {
     Rpc* rpc;
@@ -148,7 +153,8 @@ size_t
     rpc_session_feed(RpcSession* session, uint8_t* encoded_bytes, size_t size, TickType_t timeout) {
     furi_assert(session);
     furi_assert(encoded_bytes);
-    furi_assert(size > 0);
+
+    if(!size) return 0;
 
     size_t bytes_sent = furi_stream_buffer_send(session->stream, encoded_bytes, size, timeout);
 
@@ -369,11 +375,7 @@ RpcSession* rpc_session_open(Rpc* rpc) {
     };
     rpc_add_handler(session, PB_Main_stop_session_tag, &rpc_handler);
 
-    session->thread = furi_thread_alloc();
-    furi_thread_set_name(session->thread, "RpcSessionWorker");
-    furi_thread_set_stack_size(session->thread, 2048);
-    furi_thread_set_context(session->thread, session);
-    furi_thread_set_callback(session->thread, rpc_session_worker);
+    session->thread = furi_thread_alloc_ex("RpcSessionWorker", 3072, rpc_session_worker, session);
 
     furi_thread_set_state_context(session->thread, session);
     furi_thread_set_state_callback(session->thread, rpc_session_free_callback);

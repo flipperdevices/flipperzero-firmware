@@ -22,7 +22,7 @@ static const uint8_t reset_blink_mask = 1 << 6;
 
 void notification_vibro_on();
 void notification_vibro_off();
-void notification_sound_on(float pwm, float freq);
+void notification_sound_on(float freq, float volume);
 void notification_sound_off();
 
 uint8_t notification_settings_get_display_brightness(NotificationApp* app, uint8_t value);
@@ -150,11 +150,16 @@ void notification_vibro_off() {
 }
 
 void notification_sound_on(float freq, float volume) {
-    furi_hal_speaker_start(freq, volume);
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(freq, volume);
+    }
 }
 
 void notification_sound_off() {
-    furi_hal_speaker_stop();
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
 }
 
 // display timer

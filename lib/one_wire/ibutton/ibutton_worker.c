@@ -37,11 +37,7 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->emulate_cb = NULL;
     worker->cb_ctx = NULL;
 
-    worker->thread = furi_thread_alloc();
-    furi_thread_set_name(worker->thread, "ibutton_worker");
-    furi_thread_set_callback(worker->thread, ibutton_worker_thread);
-    furi_thread_set_context(worker->thread, worker);
-    furi_thread_set_stack_size(worker->thread, 2048);
+    worker->thread = furi_thread_alloc_ex("iButtonWorker", 2048, ibutton_worker_thread, worker);
 
     worker->protocols = protocol_dict_alloc(ibutton_protocols, iButtonProtocolMax);
 
@@ -135,7 +131,9 @@ void ibutton_worker_switch_mode(iButtonWorker* worker, iButtonWorkerMode mode) {
 
 void ibutton_worker_notify_emulate(iButtonWorker* worker) {
     iButtonMessage message = {.type = iButtonMessageNotifyEmulate};
-    furi_check(furi_message_queue_put(worker->messages, &message, 0) == FuriStatusOk);
+    // we're running in an interrupt context, so we can't wait
+    // and we can drop message if queue is full, that's ok for that message
+    furi_message_queue_put(worker->messages, &message, 0);
 }
 
 void ibutton_worker_set_key_p(iButtonWorker* worker, iButtonKey* key) {

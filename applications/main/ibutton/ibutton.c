@@ -5,6 +5,7 @@
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 #include <rpc/rpc_app.h>
+#include <dolphin/dolphin.h>
 
 #define TAG "iButtonApp"
 
@@ -217,6 +218,7 @@ void ibutton_free(iButton* ibutton) {
 bool ibutton_file_select(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
+    browser_options.base_path = IBUTTON_APP_FOLDER;
 
     bool success = dialog_file_browser_show(
         ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options);
@@ -337,11 +339,13 @@ int32_t ibutton_app(void* p) {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeDesktop);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneRpc);
+        DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
     } else {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeFullscreen);
         if(key_loaded) {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
+            DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
         } else {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneStart);
         }

@@ -1,5 +1,6 @@
 #include "u2f_view.h"
 #include <gui/elements.h>
+#include <assets_icons.h>
 
 struct U2fView {
     View* view;
@@ -36,10 +37,10 @@ static void u2f_view_draw_callback(Canvas* canvas, void* _model) {
     } else if(model->display_msg == U2fMsgSuccess) {
         canvas_draw_icon(canvas, 22, 15, &I_Connected_62x31);
         canvas_draw_str_aligned(
-            canvas, 128 / 2, 3, AlignCenter, AlignTop, "Authentication successfull!");
+            canvas, 128 / 2, 3, AlignCenter, AlignTop, "Authentication successful!");
     } else if(model->display_msg == U2fMsgError) {
         canvas_draw_icon(canvas, 22, 15, &I_Error_62x31);
-        canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Ceritficate error");
+        canvas_draw_str_aligned(canvas, 128 / 2, 3, AlignCenter, AlignTop, "Certificate error");
     }
 }
 
@@ -85,18 +86,17 @@ void u2f_view_set_ok_callback(U2fView* u2f, U2fOkCallback callback, void* contex
     furi_assert(u2f);
     furi_assert(callback);
     with_view_model(
-        u2f->view, (U2fModel * model) {
+        u2f->view,
+        U2fModel * model,
+        {
             UNUSED(model);
             u2f->callback = callback;
             u2f->context = context;
-            return false;
-        });
+        },
+        false);
 }
 
 void u2f_view_set_state(U2fView* u2f, U2fViewMsg msg) {
     with_view_model(
-        u2f->view, (U2fModel * model) {
-            model->display_msg = msg;
-            return true;
-        });
+        u2f->view, U2fModel * model, { model->display_msg = msg; }, true);
 }

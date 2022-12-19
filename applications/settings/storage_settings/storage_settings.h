@@ -4,6 +4,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <assets_icons.h>
 #include <notification/notification_messages.h>
 
 #include <gui/modules/submenu.h>
@@ -25,7 +26,7 @@ typedef struct {
     NotificationApp* notification;
     Storage* fs_api;
 
-    // view managment
+    // view management
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
 

@@ -22,12 +22,12 @@
 [submodule "lib/microtar"]
 	path = lib/microtar
 	url = https://github.com/amachronic/microtar.git
-[submodule "lib/scons"]
-	path = lib/scons
-	url = https://github.com/SCons/scons.git
 [submodule "lib/mbedtls"]
 	path = lib/mbedtls
 	url = https://github.com/Mbed-TLS/mbedtls.git
 [submodule "lib/cxxheaderparser"]
 	path = lib/cxxheaderparser
 	url = https://github.com/robotpy/cxxheaderparser.git
+[submodule "applications/plugins/dap_link/lib/free-dap"]
+	path = applications/plugins/dap_link/lib/free-dap
+	url = https://github.com/ataradov/free-dap.git

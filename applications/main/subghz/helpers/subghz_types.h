@@ -28,6 +28,13 @@ typedef enum {
     SubGhzHopperStateRSSITimeOut,
 } SubGhzHopperState;
 
+/** SubGhzSpeakerState state */
+typedef enum {
+    SubGhzSpeakerStateDisable,
+    SubGhzSpeakerStateShutdown,
+    SubGhzSpeakerStateEnable,
+} SubGhzSpeakerState;
+
 /** SubGhzRxKeyState state */
 typedef enum {
     SubGhzRxKeyStateIDLE,
@@ -69,12 +76,3 @@ typedef enum {
     SubGhzViewIdTestCarrier,
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
-
-struct SubGhzPresetDefinition {
-    FuriString* name;
-    uint32_t frequency;
-    uint8_t* data;
-    size_t data_size;
-};
-
-typedef struct SubGhzPresetDefinition SubGhzPresetDefinition;

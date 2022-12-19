@@ -238,9 +238,9 @@ class FlipperStorage:
         while read_size < size:
             self.read.until("Ready?" + self.CLI_EOL)
             self.send("y")
-            read_size = min(size - read_size, buffer_size)
-            filedata.extend(self.port.read(read_size))
-            read_size = read_size + read_size
+            chunk_size = min(size - read_size, buffer_size)
+            filedata.extend(self.port.read(chunk_size))
+            read_size = read_size + chunk_size
 
             percent = str(math.ceil(read_size / size * 100))
             total_chunks = str(math.ceil(size / buffer_size))
@@ -331,6 +331,19 @@ class FlipperStorage:
     def mkdir(self, path):
         """Create a directory on Flipper"""
         self.send_and_wait_eol('storage mkdir "' + path + '"\r')
+        answer = self.read.until(self.CLI_EOL)
+        self.read.until(self.CLI_PROMPT)
+
+        if self.has_error(answer):
+            self.last_error = self.get_error(answer)
+            return False
+        else:
+            return True
+
+    def format_ext(self):
+        """Create a directory on Flipper"""
+        self.send_and_wait_eol("storage format /ext\r")
+        self.send_and_wait_eol("y\r")
         answer = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
 

@@ -32,7 +32,7 @@ COPRO_STACK_TYPE = "ble_light"
 # Leave 0 to let scripts automatically calculate it
 COPRO_STACK_ADDR = "0x0"
 
-# If you override COPRO_CUBE_DIR on commandline, override this aswell
+# If you override COPRO_CUBE_DIR on commandline, override this as well
 COPRO_STACK_BIN_DIR = posixpath.join(
     COPRO_CUBE_DIR,
     "Projects",
@@ -49,14 +49,12 @@ OPENOCD_OPTS = [
     "-c",
     "transport select hla_swd",
     "-f",
-    "debug/stm32wbx.cfg",
+    "${FBT_DEBUG_DIR}/stm32wbx.cfg",
     "-c",
     "stm32wbx.cpu configure -rtos auto",
-    "-c",
-    "init",
 ]
 
-SVD_FILE = "debug/STM32WB55_CM4.svd"
+SVD_FILE = "${FBT_DEBUG_DIR}/STM32WB55_CM4.svd"
 
 # Look for blackmagic probe on serial ports and local network
 BLACKMAGIC = "auto"

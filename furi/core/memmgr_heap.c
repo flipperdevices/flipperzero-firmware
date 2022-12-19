@@ -150,8 +150,7 @@ void memmgr_heap_disable_thread_trace(FuriThreadId thread_id) {
     vTaskSuspendAll();
     {
         memmgr_heap_thread_trace_depth++;
-        furi_check(MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id) != NULL);
-        MemmgrHeapThreadDict_erase(memmgr_heap_thread_dict, (uint32_t)thread_id);
+        furi_check(MemmgrHeapThreadDict_erase(memmgr_heap_thread_dict, (uint32_t)thread_id));
         memmgr_heap_thread_trace_depth--;
     }
     (void)xTaskResumeAll();
@@ -212,7 +211,8 @@ static inline void traceFREE(void* pointer, size_t size) {
         MemmgrHeapAllocDict_t* alloc_dict =
             MemmgrHeapThreadDict_get(memmgr_heap_thread_dict, (uint32_t)thread_id);
         if(alloc_dict) {
-            MemmgrHeapAllocDict_erase(*alloc_dict, (uint32_t)pointer);
+            // In some cases thread may want to release memory that was not allocated by it
+            (void)MemmgrHeapAllocDict_erase(*alloc_dict, (uint32_t)pointer);
         }
         memmgr_heap_thread_trace_depth--;
     }
@@ -339,6 +339,10 @@ void* pvPortMalloc(size_t xWantedSize) {
     BlockLink_t *pxBlock, *pxPreviousBlock, *pxNewBlockLink;
     void* pvReturn = NULL;
     size_t to_wipe = xWantedSize;
+
+    if(FURI_IS_IRQ_MODE()) {
+        furi_crash("memmgt in ISR");
+    }
 
 #ifdef HEAP_PRINT_DEBUG
     BlockLink_t* print_heap_block = NULL;
@@ -485,6 +489,10 @@ void* pvPortMalloc(size_t xWantedSize) {
 void vPortFree(void* pv) {
     uint8_t* puc = (uint8_t*)pv;
     BlockLink_t* pxLink;
+
+    if(FURI_IS_IRQ_MODE()) {
+        furi_crash("memmgt in ISR");
+    }
 
     if(pv != NULL) {
         /* The memory being freed will have an BlockLink_t structure immediately

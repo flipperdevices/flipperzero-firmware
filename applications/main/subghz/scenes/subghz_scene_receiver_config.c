@@ -1,10 +1,42 @@
 #include "../subghz_i.h"
+#include <lib/toolbox/value_index.h>
 
 enum SubGhzSettingIndex {
     SubGhzSettingIndexFrequency,
     SubGhzSettingIndexHopping,
     SubGhzSettingIndexModulation,
+    SubGhzSettingIndexSound,
     SubGhzSettingIndexLock,
+    SubGhzSettingIndexRAWThesholdRSSI,
+};
+
+#define RAW_THRESHOLD_RSSI_COUNT 11
+const char* const raw_theshold_rssi_text[RAW_THRESHOLD_RSSI_COUNT] = {
+    "-----",
+    "-85.0",
+    "-80.0",
+    "-75.0",
+    "-70.0",
+    "-65.0",
+    "-60.0",
+    "-55.0",
+    "-50.0",
+    "-45.0",
+    "-40.0",
+
+};
+const float raw_theshold_rssi_value[RAW_THRESHOLD_RSSI_COUNT] = {
+    -90.0f,
+    -85.0f,
+    -80.0f,
+    -75.0f,
+    -70.0f,
+    -65.0f,
+    -60.0f,
+    -55.0f,
+    -50.0f,
+    -45.0f,
+    -40.0f,
 };
 
 #define HOPPING_COUNT 2
@@ -15,6 +47,16 @@ const char* const hopping_text[HOPPING_COUNT] = {
 const uint32_t hopping_value[HOPPING_COUNT] = {
     SubGhzHopperStateOFF,
     SubGhzHopperStateRunnig,
+};
+
+#define SPEAKER_COUNT 2
+const char* const speaker_text[SPEAKER_COUNT] = {
+    "OFF",
+    "ON",
+};
+const uint32_t speaker_value[SPEAKER_COUNT] = {
+    SubGhzSpeakerStateShutdown,
+    SubGhzSpeakerStateEnable,
 };
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
@@ -136,6 +178,22 @@ static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item)
     subghz->txrx->hopper_state = hopping_value[index];
 }
 
+static void subghz_scene_receiver_config_set_speaker(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, speaker_text[index]);
+    subghz->txrx->speaker_state = speaker_value[index];
+}
+
+static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, raw_theshold_rssi_text[index]);
+    subghz->txrx->raw_threshold_rssi = raw_theshold_rssi_value[index];
+}
+
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -196,6 +254,16 @@ void subghz_scene_receiver_config_on_enter(void* context) {
     variable_item_set_current_value_text(
         item, subghz_setting_get_preset_name(subghz->setting, value_index));
 
+    item = variable_item_list_add(
+        subghz->variable_item_list,
+        "Sound:",
+        SPEAKER_COUNT,
+        subghz_scene_receiver_config_set_speaker,
+        subghz);
+    value_index = value_index_uint32(subghz->txrx->speaker_state, speaker_value, SPEAKER_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, speaker_text[value_index]);
+
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
        SubGhzCustomEventManagerSet) {
         variable_item_list_add(subghz->variable_item_list, "Lock Keyboard", 1, NULL, NULL);
@@ -203,6 +271,19 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz->variable_item_list,
             subghz_scene_receiver_config_var_list_enter_callback,
             subghz);
+    }
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) ==
+       SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "RSSI Threshold:",
+            RAW_THRESHOLD_RSSI_COUNT,
+            subghz_scene_receiver_config_set_raw_threshold_rssi,
+            subghz);
+        value_index = value_index_float(
+            subghz->txrx->raw_threshold_rssi, raw_theshold_rssi_value, RAW_THRESHOLD_RSSI_COUNT);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, raw_theshold_rssi_text[value_index]);
     }
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }

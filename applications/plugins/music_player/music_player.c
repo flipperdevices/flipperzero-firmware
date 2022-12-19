@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <assets_icons.h>
+#include <music_player_icons.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -313,6 +313,7 @@ int32_t music_player_app(void* p) {
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);
             browser_options.hide_ext = false;
+            browser_options.base_path = MUSIC_PLAYER_APP_PATH_FOLDER;
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);

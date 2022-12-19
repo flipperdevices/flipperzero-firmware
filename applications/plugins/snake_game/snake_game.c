@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
@@ -317,7 +318,6 @@ static void
 
 int32_t snake_game_app(void* p) {
     UNUSED(p);
-    srand(DWT->CYCCNT);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SnakeEvent));
 
@@ -345,6 +345,8 @@ int32_t snake_game_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
+
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
 
     SnakeEvent event;
     for(bool processing = true; processing;) {
@@ -376,6 +378,8 @@ int32_t snake_game_app(void* p) {
                         break;
                     case InputKeyBack:
                         processing = false;
+                        break;
+                    default:
                         break;
                     }
                 }

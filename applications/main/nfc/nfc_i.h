@@ -7,6 +7,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
+#include <assets_icons.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <cli/cli.h>
@@ -26,6 +27,7 @@
 #include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/parsers/nfc_supported_card.h>
+#include <lib/nfc/helpers/nfc_generators.h>
 
 #include "views/dict_attack.h"
 #include "views/detect_reader.h"
@@ -42,15 +44,13 @@
 ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
 
 #define NFC_TEXT_STORE_SIZE 128
+#define NFC_APP_FOLDER ANY_PATH("nfc")
 
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,
     NfcRpcStateEmulated,
 } NfcRpcState;
-
-// Forward declaration due to circular dependency
-typedef struct NfcGenerator NfcGenerator;
 
 struct Nfc {
     NfcWorker* worker;
@@ -112,5 +112,7 @@ void nfc_blink_emulate_start(Nfc* nfc);
 void nfc_blink_detect_start(Nfc* nfc);
 
 void nfc_blink_stop(Nfc* nfc);
+
+bool nfc_save_file(Nfc* nfc);
 
 void nfc_show_loading_popup(void* context, bool show);
