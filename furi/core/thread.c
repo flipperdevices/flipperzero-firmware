@@ -12,6 +12,8 @@
 #include <furi_hal_rtc.h>
 #include <furi_hal_console.h>
 
+#define TAG "FuriThread"
+
 #define THREAD_NOTIFY_INDEX 1 // Index 0 is used for stream buffers
 
 typedef struct FuriThreadStdout FuriThreadStdout;
@@ -82,6 +84,12 @@ static void furi_thread_body(void* context) {
     if(thread->heap_trace_enabled == true) {
         furi_delay_ms(33);
         thread->heap_size = memmgr_heap_get_thread_memory((FuriThreadId)task_handle);
+        furi_log_print_format(
+            thread->heap_size ? FuriLogLevelError : FuriLogLevelInfo,
+            TAG,
+            "%s allocation balance: %d",
+            thread->name ? thread->name : "Thread",
+            thread->heap_size);
         memmgr_heap_disable_thread_trace((FuriThreadId)task_handle);
     }
 
@@ -89,8 +97,8 @@ static void furi_thread_body(void* context) {
 
     if(thread->is_service) {
         FURI_LOG_E(
-            "Service",
-            "%s thread exited. Thread memory cannot be reclaimed.",
+            TAG,
+            "%s service thread exited. Thread memory cannot be reclaimed.",
             thread->name ? thread->name : "<unknown service>");
     }
 
@@ -114,11 +122,29 @@ FuriThread* furi_thread_alloc() {
     thread->output.buffer = furi_string_alloc();
     thread->is_service = false;
 
-    if(furi_thread_get_current_id()) {
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode == FuriHalRtcHeapTrackModeAll) {
+        thread->heap_trace_enabled = true;
+    } else if(mode == FuriHalRtcHeapTrackModeTree && furi_thread_get_current_id()) {
         FuriThread* parent = pvTaskGetThreadLocalStoragePointer(NULL, 0);
         if(parent) thread->heap_trace_enabled = parent->heap_trace_enabled;
+    } else {
+        thread->heap_trace_enabled = false;
     }
 
+    return thread;
+}
+
+FuriThread* furi_thread_alloc_ex(
+    const char* name,
+    uint32_t stack_size,
+    FuriThreadCallback callback,
+    void* context) {
+    FuriThread* thread = furi_thread_alloc();
+    furi_thread_set_name(thread, name);
+    furi_thread_set_stack_size(thread, stack_size);
+    furi_thread_set_callback(thread, callback);
+    furi_thread_set_context(thread, context);
     return thread;
 }
 
@@ -235,14 +261,12 @@ FuriThreadId furi_thread_get_id(FuriThread* thread) {
 void furi_thread_enable_heap_trace(FuriThread* thread) {
     furi_assert(thread);
     furi_assert(thread->state == FuriThreadStateStopped);
-    furi_assert(thread->heap_trace_enabled == false);
     thread->heap_trace_enabled = true;
 }
 
 void furi_thread_disable_heap_trace(FuriThread* thread) {
     furi_assert(thread);
     furi_assert(thread->state == FuriThreadStateStopped);
-    furi_assert(thread->heap_trace_enabled == true);
     thread->heap_trace_enabled = false;
 }
 

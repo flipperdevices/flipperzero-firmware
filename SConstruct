@@ -7,6 +7,7 @@
 # construction of certain targets behind command-line options.
 
 import os
+from fbt.util import path_as_posix
 
 DefaultEnvironment(tools=[])
 
@@ -200,9 +201,7 @@ firmware_debug = distenv.PhonyTarget(
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
-    FBT_FAP_DEBUG_ELF_ROOT=firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT").replace(
-        "\\", "/"
-    ),
+    FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
 distenv.Depends(firmware_debug, firmware_flash)
 
@@ -212,9 +211,7 @@ distenv.PhonyTarget(
     source=firmware_env["FW_ELF"],
     GDBOPTS="${GDBOPTS_BASE} ${GDBOPTS_BLACKMAGIC}",
     GDBREMOTE="${BLACKMAGIC_ADDR}",
-    FBT_FAP_DEBUG_ELF_ROOT=firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT").replace(
-        "\\", "/"
-    ),
+    FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(firmware_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
 
 # Debug alien elf
@@ -244,13 +241,13 @@ distenv.PhonyTarget(
 distenv.PhonyTarget(
     "lint",
     "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py check ${LINT_SOURCES}",
-    LINT_SOURCES=firmware_env["LINT_SOURCES"],
+    LINT_SOURCES=[n.srcnode() for n in firmware_env["LINT_SOURCES"]],
 )
 
 distenv.PhonyTarget(
     "format",
     "${PYTHON3} ${FBT_SCRIPT_DIR}/lint.py format ${LINT_SOURCES}",
-    LINT_SOURCES=firmware_env["LINT_SOURCES"],
+    LINT_SOURCES=[n.srcnode() for n in firmware_env["LINT_SOURCES"]],
 )
 
 # PY_LINT_SOURCES contains recursively-built modules' SConscript files + application manifests

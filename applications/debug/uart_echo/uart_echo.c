@@ -215,17 +215,13 @@ static UartEchoApp* uart_echo_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, 0, app->view);
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
 
+    app->worker_thread = furi_thread_alloc_ex("UsbUartWorker", 1024, uart_echo_worker, app);
+    furi_thread_start(app->worker_thread);
+
     // Enable uart listener
     furi_hal_console_disable();
     furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
-
-    app->worker_thread = furi_thread_alloc();
-    furi_thread_set_name(app->worker_thread, "UsbUartWorker");
-    furi_thread_set_stack_size(app->worker_thread, 1024);
-    furi_thread_set_context(app->worker_thread, app);
-    furi_thread_set_callback(app->worker_thread, uart_echo_worker);
-    furi_thread_start(app->worker_thread);
 
     return app;
 }
@@ -233,11 +229,11 @@ static UartEchoApp* uart_echo_app_alloc() {
 static void uart_echo_app_free(UartEchoApp* app) {
     furi_assert(app);
 
+    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
+
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
     furi_thread_free(app->worker_thread);
-
-    furi_hal_console_enable();
 
     // Free views
     view_dispatcher_remove_view(app->view_dispatcher, 0);
