@@ -51,7 +51,6 @@ void nfc_scene_save_name_on_enter(void* context) {
 
 bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
-    furi_string_printf(nfc->dev->folder, "%s", NFC_APP_FOLDER);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {

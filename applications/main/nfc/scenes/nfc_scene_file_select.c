@@ -3,7 +3,6 @@
 
 void nfc_scene_file_select_on_enter(void* context) {
     Nfc* nfc = context;
-    furi_string_printf(nfc->dev->folder, "%s", NFC_APP_FOLDER);
     // Process file_select return
     nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
     if(!furi_string_size(nfc->dev->load_path)) {
