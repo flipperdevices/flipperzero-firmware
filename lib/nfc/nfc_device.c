@@ -1022,7 +1022,7 @@ static void nfc_device_get_shadow_path(FuriString* orig_path, FuriString* shadow
 
 static void nfc_device_get_folder_from_path(FuriString* path, FuriString* folder) {
     size_t last_slash = furi_string_search_rchar(path, '/');
-    if (last_slash == FURI_STRING_FAILURE) {
+    if(last_slash == FURI_STRING_FAILURE) {
         // No slashes in the path, treat the whole path as a folder
         furi_string_set(folder, path);
     } else {
