@@ -24,6 +24,8 @@ env.Append(
         File("one_wire/one_wire_device.h"),
         File("one_wire/ibutton/ibutton_worker.h"),
         File("one_wire/maxim_crc.h"),
+        File("digital_signal/digital_signal.h"),
+        File("pulse_reader/pulse_reader.h"),
     ],
 )
 

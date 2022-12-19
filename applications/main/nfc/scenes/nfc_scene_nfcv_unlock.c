@@ -30,29 +30,39 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
     FuriHalNfcDevData* nfc_data = &(nfc->dev->dev_data.nfc_data);
     NfcVData* nfcv_data = &(nfc->dev->dev_data.nfcv_data);
 
-    uint32_t curr_state =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneNfcVUnlock);
+    uint32_t curr_state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneNfcVUnlock);
     if(curr_state != state) {
         Popup* popup = nfc->popup;
         if(state == NfcSceneNfcVUnlockStateDetecting) {
             popup_reset(popup);
             popup_set_text(
-                popup, "Put Tonie On\nFlipper's Back", 97, 24, AlignCenter, AlignTop);
+                popup, "Put figurine on\nFlipper's back", 97, 24, AlignCenter, AlignTop);
             popup_set_icon(popup, 0, 8, &I_NFC_manual_60x50);
         } else if(state == NfcSceneNfcVUnlockStateUnlocked) {
             popup_reset(popup);
 
             if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
-                nfc_text_store_set(nfc, "SLIX_%02X%02X%02X%02X%02X%02X%02X%02X", 
-                    nfc_data->uid[0], nfc_data->uid[1], nfc_data->uid[2], nfc_data->uid[3],
-                    nfc_data->uid[4], nfc_data->uid[5], nfc_data->uid[6], nfc_data->uid[7]);
+                nfc_text_store_set(
+                    nfc,
+                    "%s/SLIX_%02X%02X%02X%02X%02X%02X%02X%02X%s",
+                    NFC_APP_FOLDER,
+                    nfc_data->uid[0],
+                    nfc_data->uid[1],
+                    nfc_data->uid[2],
+                    nfc_data->uid[3],
+                    nfc_data->uid[4],
+                    nfc_data->uid[5],
+                    nfc_data->uid[6],
+                    nfc_data->uid[7],
+                    NFC_APP_EXTENSION);
 
                 nfc->dev->format = NfcDeviceSaveFormatNfcV;
 
                 if(nfc_device_save(nfc->dev, nfc->text_store)) {
                     popup_set_header(popup, "Successfully\nsaved", 94, 3, AlignCenter, AlignTop);
                 } else {
-                    popup_set_header(popup, "Unlocked but\nsave failed!", 94, 3, AlignCenter, AlignTop);
+                    popup_set_header(
+                        popup, "Unlocked but\nsave failed!", 94, 3, AlignCenter, AlignTop);
                 }
             } else {
                 popup_set_header(popup, "Successfully\nunlocked", 94, 3, AlignCenter, AlignTop);
@@ -82,13 +92,7 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
         } else if(state == NfcSceneNfcVUnlockStateNotSupportedCard) {
             popup_reset(popup);
             popup_set_header(popup, "Wrong Type Of Card!", 64, 3, AlignCenter, AlignTop);
-            popup_set_text(
-                popup,
-                nfcv_data->error,
-                4,
-                22,
-                AlignLeft,
-                AlignTop);
+            popup_set_text(popup, nfcv_data->error, 4, 22, AlignLeft, AlignTop);
             popup_set_icon(popup, 73, 20, &I_DolphinCommon_56x48);
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneNfcVUnlock, state);
