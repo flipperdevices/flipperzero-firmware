@@ -102,7 +102,6 @@ jobs:
           ref: ${{ steps.release_tag.outputs.tag }}
 
       - name: 'Flash last release'
-        id: release_tag
         if: success()
         run: |
           ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
