@@ -3,7 +3,7 @@
 [![GitHub release](https://img.shields.io/github/release/quen0n/unitemp-flipperzero?include_prereleases=&sort=semver&color=blue)](https://github.com/quen0n/unitemp-flipperzero/releases/)
 [![GitHub all releases](https://img.shields.io/github/downloads/quen0n/unitemp-flipperzero/total)]()
 [![GitHub](https://img.shields.io/github/license/quen0n/unitemp-flipperzero)](https://github.com/quen0n/unitemp-flipperzero/blob/dev/LICENSE.md)  
-[Flipper Zero](https://flipperzero.one/) application for reading temperature, pressure and pressure sensors using Onewire, Singlewire, I2C protocols.   
+[Flipper Zero](https://flipperzero.one/) application for reading temperature, humidity and pressure sensors using Onewire, Singlewire, I2C protocols.   
 ## List of supported sensors (supplemented)
 ![image](https://user-images.githubusercontent.com/10090793/208480561-e98a6192-d44d-4ad9-8692-a91ccaae47c7.png)
 ## Installation
