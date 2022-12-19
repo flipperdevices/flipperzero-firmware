@@ -159,7 +159,7 @@ SubBruteFileResult subbrute_device_attack_set(
     uint8_t protocol_check_result = SubBruteFileResultProtocolNotFound;
 #ifdef FURI_DEBUG
     uint8_t bits;
-    uint8_t te;
+    uint32_t te;
     uint8_t repeat;
     FuriHalSubGhzPreset preset;
     SubBruteFileProtocol file;
@@ -211,7 +211,7 @@ SubBruteFileResult subbrute_device_attack_set(
 #ifdef FURI_DEBUG
     FURI_LOG_I(
         TAG,
-        "subbrute_device_attack_set: %s, bits: %d, preset: %s, file: %s, te: %d, repeat: %d, max_value: %lld",
+        "subbrute_device_attack_set: %s, bits: %d, preset: %s, file: %s, te: %ld, repeat: %d, max_value: %lld",
         subbrute_protocol_name(instance->attack),
         bits,
         subbrute_protocol_preset(preset),
@@ -320,25 +320,6 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         FURI_LOG_D(TAG, "Bit: %d", instance->file_protocol_info->bits);
 #endif
 
-        // TODO: Delete this
-        // Key
-        //         if(!flipper_format_read_string(fff_data_file, "Key", temp_str)) {
-        //             FURI_LOG_E(TAG, "Missing or incorrect Key");
-        //             result = SubBruteFileResultMissingOrIncorrectKey;
-        //             break;
-        //         } else {
-        //             snprintf(
-        //                 instance->current_key_from_file,
-        //                 sizeof(instance->current_key_from_file),
-        //                 "%s",
-        //                 furi_string_get_cstr(temp_str));
-        // #ifdef FURI_DEBUG
-        //             FURI_LOG_D(TAG, "Key: %s", instance->current_key_from_file);
-        // #endif
-        //         }
-        //
-        //         flipper_format_rewind(fff_data_file);
-
         uint8_t key_data[sizeof(uint64_t)] = {0};
         if(!flipper_format_read_hex(fff_data_file, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Missing Key");
@@ -353,81 +334,6 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
         FURI_LOG_D(TAG, "Key: %.16llX", data);
 #endif
         instance->key_from_file = data;
-
-        //         uint16_t add_value = 0x0001;
-        //         uint8_t bit_index = 7;
-        //         bool two_bytes = true;
-        //         uint8_t p[8];
-        //         for(int i = 0; i < 8; i++) {
-        //             p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
-        //         }
-        //         uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
-        //         FURI_LOG_D(TAG, "num: 0x%04X", num);
-        //         num += add_value;
-        //         FURI_LOG_D(TAG, "num added: 0x%04X", num);
-        //         uint8_t low_byte = num & (0xff);
-        //         uint8_t high_byte = (num >> 8) & 0xff;
-
-        //         data = 0;
-        //         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-        //             if(i == bit_index - 1 && two_bytes) {
-        //                 data = (data << 8) | high_byte;
-        //                 data = (data << 8) | low_byte;
-        //                 i++;
-        //             } else if(i == bit_index) {
-        //                 data = (data << 8) | low_byte;
-        //             } else {
-        //                 data = (data << 8) | p[i];
-        //             }
-        //         }
-        // #if FURI_DEBUG
-        //         furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
-        //         FURI_LOG_D(
-        //             TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
-        // #endif
-        // uint8_t key_data[sizeof(uint64_t)] = {0};
-        // if(!flipper_format_read_hex(fff_data_file, "Key", key_data, sizeof(uint64_t))) {
-        //     FURI_LOG_E(TAG, "Missing Key");
-        //     result = SubBruteFileResultMissingOrIncorrectKey;
-        //     break;
-        // }
-        // uint64_t data = 0;
-        // for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-        //     data = (data << 8) | key_data[i];
-        // }
-        // instance->key_from_file = data;
-
-        // uint16_t add_value = 0x0001;
-        // uint8_t bit_index = 7;
-        // bool two_bytes = true;
-
-        // uint8_t p[8];
-        // for(int i = 0; i < 8; i++) {
-        //     p[i] = (uint8_t)(instance->key_from_file >> 8 * (7 - i)) & 0xFF;
-        // }
-        // uint16_t num = two_bytes ? (p[bit_index - 1] << 8) | p[bit_index] : p[bit_index];
-        // FURI_LOG_D(TAG, "num: 0x%04X", num);
-        // num += add_value;
-        // FURI_LOG_D(TAG, "num added: 0x%04X", num);
-        // uint8_t low_byte = num & (0xff);
-        // uint8_t high_byte = (num >> 8) & 0xff;
-
-        // data = 0;
-        // for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
-        //     if(i == bit_index - 1 && two_bytes) {
-        //         data = (data << 8) | high_byte;
-        //         data = (data << 8) | low_byte;
-        //         i++;
-        //     } else if(i == bit_index) {
-        //         data = (data << 8) | low_byte;
-        //     } else {
-        //         data = (data << 8) | p[i];
-        //     }
-        // }
-
-        // furi_string_printf(temp_str, "Key: %lX", (uint32_t)(data & 0xFFFFFFFF));
-        // FURI_LOG_D(
-        //     TAG, "H: 0x%02X, L: 0x%02X, %s", high_byte, low_byte, furi_string_get_cstr(temp_str));
 
         // TE
         if(!flipper_format_read_uint32(fff_data_file, "TE", &temp_data32, 1)) {
@@ -487,7 +393,6 @@ void subbrute_device_attack_set_default_values(
     instance->bit_index = 0x00;
     instance->extra_repeats = 0;
     instance->two_bytes = false;
-    memset(instance->current_key, 0, sizeof(instance->current_key));
 
     if(default_attack != SubBruteAttackLoadFile) {
         instance->max_value = subbrute_protocol_calc_max_value(

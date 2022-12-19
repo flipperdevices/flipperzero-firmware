@@ -46,6 +46,23 @@ We do not condone illegal activity and strongly encourage keeping transmissions 
 - Linear 10bit 300MHz
 - Linear 10bit 310MHz
 
+#### UNILARM
+
+- UNILARM 25bit 330MHz
+- UNILARM 25bit 433MHz
+
+#### SMC5326
+
+- SMC5326 25bit 330MHz
+- SMC5326 25bit 433MHz
+
+#### PT2260
+
+- PT2260 24bit 315MHz
+- PT2260 24bit 330MHz
+- PT2260 24bit 390MHz
+- PT2260 24bit 433MHz
+
 #### Additional
 
-- BF Existing dump works for all other static protocols supported by Flipper Zero
+- BF Existing dump works for most other static protocols supported by Flipper Zero
