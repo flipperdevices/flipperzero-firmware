@@ -364,8 +364,8 @@ static void _draw_carousel_info(Canvas* canvas) {
             ((I2CSensor*)unitemp_sensor_getActive(generalview_sensor_index)->instance)
                 ->currentI2CAdr);
         canvas_draw_str(canvas, 57, 35, app->buff);
-        canvas_draw_str(canvas, 54, 46, "16 (C1)");
-        canvas_draw_str(canvas, 54, 58, "15 (C0)");
+        canvas_draw_str(canvas, 54, 46, "15 (C0)");
+        canvas_draw_str(canvas, 54, 58, "16 (C1)");
     }
 }
 static void _draw_view_sensorsCarousel(Canvas* canvas) {
