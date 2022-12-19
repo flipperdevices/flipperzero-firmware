@@ -50,7 +50,7 @@ jobs:
 
       - name: 'Generate compile_comands.json'
         run: |
-          ./fbt COMPACT=1 version_json proto_ver icons firmware_cdb dolphin_internal dolphin_blocking _fap_icons
+          ./fbt COMPACT=1 version_json proto_ver icons firmware_cdb dolphin_internal dolphin_blocking _fap_icons api_syms
 
       - name: 'Static code analysis'
         run: |
