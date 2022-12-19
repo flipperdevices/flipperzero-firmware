@@ -9,4 +9,5 @@ App(
     order=50,
     fap_libs=["assets"],
     fap_category="GPIO",
+    fap_icon="icon.png",
 )
