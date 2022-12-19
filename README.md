@@ -5,6 +5,6 @@
 [![GitHub](https://img.shields.io/github/license/quen0n/unitemp-flipperzero)](https://github.com/quen0n/unitemp-flipperzero/blob/dev/LICENSE.md)  
 [Flipper Zero](https://flipperzero.one/) application for reading temperature, pressure and pressure sensors using Onewire, Singlewire, I2C protocols.   
 ## List of supported sensors (supplemented)
-![image](https://user-images.githubusercontent.com/10090793/206618435-8b6ee389-d3c7-4ac8-94ee-d2dc8ddba1ee.png)
+![image](https://user-images.githubusercontent.com/10090793/208480561-e98a6192-d44d-4ad9-8692-a91ccaae47c7.png)
 ## Installation
 Copy the contents of the repository to the `applications/plugins/unitemp` folder and build the project. Flash FZ along with resources. [More...](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/fbt.md)
