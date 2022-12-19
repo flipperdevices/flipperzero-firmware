@@ -11,7 +11,6 @@ App(
         "subghz",
         "bad_usb",
         "u2f",
-        "clock",
         "fap_loader",
         "archive",
     ],
