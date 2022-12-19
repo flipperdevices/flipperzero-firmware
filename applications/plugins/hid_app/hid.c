@@ -367,9 +367,16 @@ int32_t hid_ble_app(void* p) {
     Hid* app = hid_alloc(HidTransportBle);
     app = hid_app_alloc_view(app);
 
+    bt_disconnect(app->bt);
+
+    furi_delay_ms(100);
+
+    bt_keys_storage_set_storage_path(app->bt, HID_BT_KEYS_STORAGE_PATH);
+
     if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
         FURI_LOG_E(TAG, "Failed to switch profile");
     }
+
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
 
@@ -378,6 +385,13 @@ int32_t hid_ble_app(void* p) {
     view_dispatcher_run(app->view_dispatcher);
 
     bt_set_status_changed_callback(app->bt, NULL, NULL);
+
+    bt_disconnect(app->bt);
+
+    furi_delay_ms(100);
+
+    bt_keys_storage_set_default_path(app->bt);
+
     bt_set_profile(app->bt, BtProfileSerial);
 
     hid_free(app);
