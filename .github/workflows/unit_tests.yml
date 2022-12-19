@@ -38,6 +38,7 @@ jobs:
 
       - name: 'Validating updater'
         id: second_full_flash
+        if: success()
         run: |
           ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
           . scripts/toolchain/fbtenv.sh
@@ -45,6 +46,7 @@ jobs:
 
       - name: 'Flash unit tests firmware'
         id: flashing
+        if: success()
         run: |
           ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
 
@@ -79,8 +81,28 @@ jobs:
           . scripts/toolchain/fbtenv.sh
           ./scripts/testing/units.py ${{steps.device.outputs.flipper}}
 
-      - name: 'Flash last release'
-        if: always()
+      - name: 'Get last release tag'
+        id: release_tag
+        if: success()
         run: |
-          git checkout $(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)
+          echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
+
+      - name: 'Decontaminate previous build leftovers'
+        if: success()
+        run: |
+          if [ -d .git ]; then
+            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          fi
+
+      - name: 'Checkout latest release'
+        uses: actions/checkout@v3
+        if: success()
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.release_tag.outputs.tag }}
+
+      - name: 'Flash last release'
+        id: release_tag
+        if: success()
+        run: |
           ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
