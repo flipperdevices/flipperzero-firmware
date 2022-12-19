@@ -92,14 +92,16 @@ static uint8_t get_row_size(uint8_t row_index) {
 
     switch(row_index + 1) {
     case 1:
-        row_size = sizeof(keyboard_keys_row_1) / sizeof(TextInputKey);
+        row_size = COUNT_OF(keyboard_keys_row_1);
         break;
     case 2:
-        row_size = sizeof(keyboard_keys_row_2) / sizeof(TextInputKey);
+        row_size = COUNT_OF(keyboard_keys_row_2);
         break;
     case 3:
-        row_size = sizeof(keyboard_keys_row_3) / sizeof(TextInputKey);
+        row_size = COUNT_OF(keyboard_keys_row_3);
         break;
+    default:
+        furi_assert(false);
     }
 
     return row_size;
@@ -118,6 +120,8 @@ static const TextInputKey* get_row(uint8_t row_index) {
     case 3:
         row = keyboard_keys_row_3;
         break;
+    default:
+        furi_assert(false);
     }
 
     return row;
