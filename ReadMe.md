@@ -13,7 +13,7 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [LATEST RELEASE on PATREON: 2022-12-19 18:15 PM](https://www.patreon.com/posts/76130800)
+## Latest Updates - [PATREON: LATEST RELEASE Latest Release RM1219-1815-0.73.2-f6a0bb6](https://www.patreon.com/posts/76130800)
 # [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM MINIMAL (default) and RM 18PLUS ANIMATIONS](https://www.patreon.com/RogueMaster)
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-19 18:15 EST`
