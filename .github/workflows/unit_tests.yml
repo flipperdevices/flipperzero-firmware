@@ -57,19 +57,11 @@ jobs:
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
-      - name: 'Format flipper SD card'
-        id: format
-        if: steps.connect.outcome == 'success'
-        run: |
-          source scripts/toolchain/fbtenv.sh
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
-
       - name: 'Copy assets and unit tests data to flipper'
         id: copy
         if: steps.format.outcome == 'success'
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/resources /ext
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/unit_tests /ext/unit_tests
 
       - name: 'Run units and validate results'
@@ -102,3 +94,10 @@ jobs:
         if: success()
         run: |
           ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+
+      - name: 'Format flipper SD card'
+        id: format
+        if: success()
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} format_ext
