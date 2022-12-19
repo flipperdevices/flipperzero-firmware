@@ -59,7 +59,7 @@ jobs:
 
       - name: 'Copy assets and unit tests data to flipper'
         id: copy
-        if: steps.format.outcome == 'success'
+        if: steps.connect.outcome == 'success'
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/storage.py -p ${{steps.device.outputs.flipper}} -f send assets/unit_tests /ext/unit_tests
@@ -94,6 +94,12 @@ jobs:
         if: success()
         run: |
           ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+
+      - name: 'Wait for flipper to finish updating'
+        if: success()
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
       - name: 'Format flipper SD card'
         id: format
