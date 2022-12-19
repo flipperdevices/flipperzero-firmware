@@ -51,6 +51,7 @@ bool ble_app_init() {
     hci_init(ble_app_hci_event_handler, (void*)&hci_tl_config);
 
     // Configure NVM store for pairing data
+    memset(ble_app_nvm, 0, sizeof(ble_app_nvm));
     SHCI_C2_CONFIG_Cmd_Param_t config_param = {
         .PayloadCmdSize = SHCI_C2_CONFIG_PAYLOAD_CMD_SIZE,
         .Config1 = SHCI_C2_CONFIG_CONFIG1_BIT0_BLE_NVM_DATA_TO_SRAM,

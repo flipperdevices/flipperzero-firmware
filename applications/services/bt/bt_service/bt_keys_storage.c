@@ -5,7 +5,6 @@
 #include <lib/toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define BT_KEYS_STORAGE_PATH INT_PATH(BT_KEYS_STORAGE_FILE_NAME)
 #define BT_KEYS_STORAGE_VERSION (0)
 #define BT_KEYS_STORAGE_MAGIC (0x18)
 
@@ -32,13 +31,15 @@ bool bt_keys_storage_delete(BtKeysStorage* instance) {
     return delete_succeed;
 }
 
-BtKeysStorage* bt_keys_storage_alloc() {
+BtKeysStorage* bt_keys_storage_alloc(const char* keys_storage_path) {
+    furi_assert(keys_storage_path);
+
     BtKeysStorage* instance = malloc(sizeof(BtKeysStorage));
     // Set nvm ram parameters
     furi_hal_bt_get_key_storage_buff(&instance->nvm_sram_buff, &instance->nvm_sram_buff_size);
     // Set key storage file
     instance->file_path = furi_string_alloc();
-    furi_string_set_str(instance->file_path, BT_KEYS_STORAGE_PATH);
+    furi_string_set_str(instance->file_path, keys_storage_path);
 
     return instance;
 }

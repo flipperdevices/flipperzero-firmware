@@ -3,11 +3,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "bt_keys_filename.h"
-
 typedef struct BtKeysStorage BtKeysStorage;
 
-BtKeysStorage* bt_keys_storage_alloc();
+BtKeysStorage* bt_keys_storage_alloc(const char* keys_storage_path);
 
 void bt_keys_storage_free(BtKeysStorage* instance);
 

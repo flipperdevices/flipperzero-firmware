@@ -118,7 +118,7 @@ Bt* bt_alloc() {
         bt_settings_save(&bt->bt_settings);
     }
     // Keys storage
-    bt->keys_storage = bt_keys_storage_alloc();
+    bt->keys_storage = bt_keys_storage_alloc(BT_KEYS_STORAGE_PATH);
     // Alloc queue
     bt->message_queue = furi_message_queue_alloc(8, sizeof(BtMessage));
 
@@ -335,6 +335,7 @@ static void bt_change_profile(Bt* bt, BtMessage* message) {
         }
 
         if(furi_hal_bt_change_app(furi_profile, bt_on_gap_event_callback, bt)) {
+            bt_keys_storage_load(bt->keys_storage);
             FURI_LOG_I(TAG, "Bt App started");
             if(bt->bt_settings.enabled) {
                 furi_hal_bt_start_advertising();

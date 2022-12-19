@@ -3,10 +3,6 @@
 bool bt_set_profile(Bt* bt, BtProfile profile) {
     furi_assert(bt);
 
-    bt_disconnect(bt);
-
-    furi_delay_ms(100);
-
     // Send message
     bool result = false;
     BtMessage message = {
@@ -42,4 +38,21 @@ void bt_forget_bonded_devices(Bt* bt) {
     BtMessage message = {.type = BtMessageTypeForgetBondedDevices};
     furi_check(
         furi_message_queue_put(bt->message_queue, &message, FuriWaitForever) == FuriStatusOk);
+}
+
+void bt_keys_storage_set_storage_path(Bt* bt, const char* keys_storage_path) {
+    furi_assert(bt);
+    furi_assert(bt->keys_storage);
+    furi_assert(keys_storage_path);
+
+    bt_keys_storage_set_file_path(bt->keys_storage, keys_storage_path);
+    // bt_keys_storage_load(bt->keys_storage);
+}
+
+void bt_keys_storage_set_default_path(Bt* bt) {
+    furi_assert(bt);
+    furi_assert(bt->keys_storage);
+
+    bt_keys_storage_set_file_path(bt->keys_storage, BT_KEYS_STORAGE_PATH);
+    // bt_keys_storage_load(bt->keys_storage);
 }
