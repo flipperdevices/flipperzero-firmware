@@ -49,7 +49,6 @@ typedef struct {
     uint8_t extra_repeats;
 
     // Loaded info for attack type
-    char current_key[SUBBRUTE_PAYLOAD_SIZE];
     uint64_t key_from_file;
     uint64_t current_key_from_file;
     bool two_bytes;
