@@ -29,7 +29,7 @@ Thank you to all the supporters!
 - Updated: [Sub-GHz Bruteforcer (By Ganapati & xMasterX)](https://github.com/derskythe/flipperzero-subbrute/tree/master) with [Honeywell Protocol](https://github.com/derskythe/flipperzero-subbrute/pull/4)
 - Removed: [DHT Temp Monitor (By quen0n)](https://github.com/quen0n/FipperZero-DHT-Monitor) `Req: DHT11/DHT22(AM2302)/AM2301`
 - Removed: [Temperature Sensor (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9c4612e571db42f5e6123a3f159e01337453a6af) `Req: AM2320`
-- Added (From Unleashed): [Temp Sensors Reader (By quen0n)](https://github.com/DarkFlippers/unleashed-firmware/commit/cbc972073860e4e944ab68a0998220dfa7ccdfdf) `Req: DHT11/DHT22(AM2302)/AM2301/AM2320`
+- Added (From Unleashed): [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: DHT11/DHT22(AM2302)/AM2301/AM2320`
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
