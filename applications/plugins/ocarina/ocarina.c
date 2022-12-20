@@ -110,6 +110,10 @@ int32_t ocarina_app(void* p) {
                     }
                     break;
                 case InputKeyBack:
+                    if(furi_hal_speaker_is_mine()) {
+                        furi_hal_speaker_stop();
+                        furi_hal_speaker_release();
+                    }
                     processing = false;
                     break;
                 default:
