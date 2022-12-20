@@ -97,9 +97,10 @@ class OpenOCD:
         self.socket.close()
         try:
             self.process.wait(timeout=10)
-        except subprocess.TimeoutExpired:
+        except subprocess.TimeoutExpired as e:
             self.process.kill()
             self.logger.error("Failed to stop OpenOCD")
+            self.logger.exception(e)
             self.postmortem()
 
     def send_tcl(self, cmd) -> str:
@@ -110,8 +111,9 @@ class OpenOCD:
             self.logger.debug(f"<- {data}")
 
             self.socket.send(data)
-        except:
+        except Exception as e:
             self.logger.error("Failed to send command to OpenOCD")
+            self.logger.exception(e)
             self.postmortem()
             raise
 
@@ -120,7 +122,7 @@ class OpenOCD:
             return data
         except Exception as e:
             self.logger.error("Failed to receive response from OpenOCD")
-            self.logger.error(e)
+            self.logger.exception(e)
             self.postmortem()
             raise
 

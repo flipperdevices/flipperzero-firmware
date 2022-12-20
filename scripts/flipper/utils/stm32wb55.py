@@ -283,7 +283,7 @@ class STM32WB55:
         if self.FLASH_SR.PESD:
             self.logger.info("    Programming / erase operation suspended.")
 
-    def write_flash(self, oocd: OpenOCD, address: int, word_1: int, word_2: int):
+    def write_flash_64(self, oocd: OpenOCD, address: int, word_1: int, word_2: int):
         self.logger.debug(f"Writing flash at address {address:08x}")
 
         if address % 8 != 0:
@@ -291,7 +291,7 @@ class STM32WB55:
             raise Exception("Address must be aligned to 8 bytes")
 
         if word_1 == oocd.read_32(address) and word_2 == oocd.read_32(address + 4):
-            self.logger.info("Data is already programmed")
+            self.logger.debug("Data is already programmed")
             return
 
         self.flash_unlock(oocd)

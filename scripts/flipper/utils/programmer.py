@@ -27,5 +27,5 @@ class Programmer(ABC):
         pass
 
     @abstractmethod
-    def otp_write(self, address: int, data: bytes) -> bool:
+    def otp_write(self, address: int, file_path: str) -> bool:
         pass

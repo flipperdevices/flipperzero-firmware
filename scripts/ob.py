@@ -47,7 +47,9 @@ class Main(App):
             self.args.serial,
         )
 
-        return_code = openocd.option_bytes_validate(self.args.ob_path)
+        return_code = 1
+        if openocd.option_bytes_validate(self.args.ob_path):
+            return_code = 0
 
         return return_code
 
@@ -61,7 +63,9 @@ class Main(App):
             self.args.serial,
         )
 
-        return_code = openocd.option_bytes_set(self.args.ob_path)
+        return_code = 1
+        if openocd.option_bytes_set(self.args.ob_path):
+            return_code = 0
 
         return return_code
 

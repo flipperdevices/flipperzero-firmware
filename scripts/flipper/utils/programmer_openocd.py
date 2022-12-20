@@ -117,10 +117,10 @@ class OpenOCDProgrammer(Programmer):
 
         if ob_reference == ob_compare:
             self.logger.info("Option Bytes are valid")
+            return_code = True
         else:
             self.logger.error("Option Bytes are invalid")
             self._ob_print_diff_table(ob_reference, ob_compare, self.logger.error)
-            return_code = True
 
         # Stop OpenOCD
         stm32.reset(self.openocd, stm32.RunMode.Run)
@@ -132,8 +132,6 @@ class OpenOCDProgrammer(Programmer):
         return int.from_bytes(data[offset : offset + 4], "little")
 
     def option_bytes_set(self, file_path: str) -> bool:
-        self.logger.info(f"Setting Option Bytes")
-
         # Registers
         stm32 = STM32WB55()
 
@@ -200,7 +198,30 @@ class OpenOCDProgrammer(Programmer):
 
         return True
 
-    def otp_write(self, address: int, data: bytes) -> bool:
+    def otp_write(self, address: int, file_path: str) -> bool:
+        # Open file, check that it aligned to 8 bytes
+        with open(file_path, "rb") as f:
+            data = f.read()
+            if len(data) % 8 != 0:
+                self.logger.error(f"File {file_path} is not aligned to 8 bytes")
+                return False
+
+        # Check that address is aligned to 8 bytes
+        if address % 8 != 0:
+            self.logger.error(f"Address {address} is not aligned to 8 bytes")
+            return False
+
+        # Get size of data
+        data_size = len(data)
+
+        # Check that data size is aligned to 8 bytes
+        if data_size % 8 != 0:
+            self.logger.error(f"Data size {data_size} is not aligned to 8 bytes")
+            return False
+
+        self.logger.debug(f"Writing {data_size} bytes to OTP at {address:08X}")
+        self.logger.debug(f"Data: {data.hex().upper()}")
+
         oocd = self.openocd
         oocd.start()
 
@@ -210,19 +231,26 @@ class OpenOCDProgrammer(Programmer):
         self.reset(self.RunMode.Stop)
         stm32.clear_flash_errors(oocd)
 
-        # Read OTP memory
-        self.logger.info(oocd.send_tcl(f"mdw {address} 2").strip())
-        self.logger.info(oocd.send_tcl(f"mdw {address + 8} 2").strip())
+        # Write OTP memory by 8 bytes
+        for i in range(0, data_size, 8):
+            word_1 = int.from_bytes(data[i : i + 4], "little")
+            word_2 = int.from_bytes(data[i + 4 : i + 8], "little")
+            self.logger.debug(f"Writing {word_1:08X} {word_2:08X} to {address + i:08X}")
+            stm32.write_flash_64(oocd, address + i, word_1, word_2)
 
-        # Write OTP memory
-        stm32.write_flash(oocd, address, 0x12345678, 0x9ABCDEF1)
-        stm32.write_flash(oocd, address + 8, 0x9ABCDEF1, 0x12345678)
+        # Validate OTP memory
+        validation_result = True
 
-        # Read OTP memory again
-        self.logger.info(oocd.send_tcl(f"mdw {address} 2").strip())
-        self.logger.info(oocd.send_tcl(f"mdw {address + 8} 2").strip())
+        for i in range(0, data_size, 4):
+            file_word = int.from_bytes(data[i : i + 4], "little")
+            device_word = oocd.read_32(address + i)
+            if file_word != device_word:
+                self.logger.error(
+                    f"Validation failed: {file_word:08X} != {device_word:08X} at {address + i:08X}"
+                )
+                validation_result = False
 
         # Stop OpenOCD
         stm32.reset(oocd, stm32.RunMode.Run)
         oocd.stop()
-        return True
+        return validation_result
