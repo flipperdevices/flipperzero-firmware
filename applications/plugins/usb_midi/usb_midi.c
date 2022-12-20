@@ -59,7 +59,8 @@ int32_t usb_midi_app(void* p) {
                                 current_note = note_on.note;
                                 if(furi_hal_speaker_acquire(30)) {
                                     furi_hal_speaker_start(
-                                        note_to_frequency(note_on.note), note_on.velocity / 127.0f);
+                                        note_to_frequency(note_on.note),
+                                        note_on.velocity / 127.0f);
                                 }
                             } else if(event->type == NoteOff) {
                                 NoteOffEvent note_off = AsNoteOff(event);
