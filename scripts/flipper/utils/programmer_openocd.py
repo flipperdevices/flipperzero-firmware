@@ -222,35 +222,59 @@ class OpenOCDProgrammer(Programmer):
         self.logger.debug(f"Writing {data_size} bytes to OTP at {address:08X}")
         self.logger.debug(f"Data: {data.hex().upper()}")
 
+        # Start OpenOCD
         oocd = self.openocd
         oocd.start()
 
         # Registers
         stm32 = STM32WB55()
 
-        self.reset(self.RunMode.Stop)
-        stm32.clear_flash_errors(oocd)
+        try:
+            # Check that OTP is empty for the given address
+            # Also check that data is already written
+            already_written = True
+            for i in range(0, data_size, 4):
+                file_word = int.from_bytes(data[i : i + 4], "little")
+                device_word = oocd.read_32(address + i)
+                if device_word != 0xFFFFFFFF and device_word != file_word:
+                    self.logger.error(
+                        f"OTP memory at {address + i:08X} is not empty: {device_word:08X}"
+                    )
+                    raise Exception("OTP memory is not empty")
 
-        # Write OTP memory by 8 bytes
-        for i in range(0, data_size, 8):
-            word_1 = int.from_bytes(data[i : i + 4], "little")
-            word_2 = int.from_bytes(data[i + 4 : i + 8], "little")
-            self.logger.debug(f"Writing {word_1:08X} {word_2:08X} to {address + i:08X}")
-            stm32.write_flash_64(oocd, address + i, word_1, word_2)
+                if device_word != file_word:
+                    already_written = False
 
-        # Validate OTP memory
-        validation_result = True
+            if already_written:
+                self.logger.info(f"OTP memory is already written with the given data")
+                return True
 
-        for i in range(0, data_size, 4):
-            file_word = int.from_bytes(data[i : i + 4], "little")
-            device_word = oocd.read_32(address + i)
-            if file_word != device_word:
-                self.logger.error(
-                    f"Validation failed: {file_word:08X} != {device_word:08X} at {address + i:08X}"
+            self.reset(self.RunMode.Stop)
+            stm32.clear_flash_errors(oocd)
+
+            # Write OTP memory by 8 bytes
+            for i in range(0, data_size, 8):
+                word_1 = int.from_bytes(data[i : i + 4], "little")
+                word_2 = int.from_bytes(data[i + 4 : i + 8], "little")
+                self.logger.debug(
+                    f"Writing {word_1:08X} {word_2:08X} to {address + i:08X}"
                 )
-                validation_result = False
+                stm32.write_flash_64(oocd, address + i, word_1, word_2)
 
-        # Stop OpenOCD
-        stm32.reset(oocd, stm32.RunMode.Run)
-        oocd.stop()
+            # Validate OTP memory
+            validation_result = True
+
+            for i in range(0, data_size, 4):
+                file_word = int.from_bytes(data[i : i + 4], "little")
+                device_word = oocd.read_32(address + i)
+                if file_word != device_word:
+                    self.logger.error(
+                        f"Validation failed: {file_word:08X} != {device_word:08X} at {address + i:08X}"
+                    )
+                    validation_result = False
+        finally:
+            # Stop OpenOCD
+            stm32.reset(oocd, stm32.RunMode.Run)
+            oocd.stop()
+
         return validation_result

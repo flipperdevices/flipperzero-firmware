@@ -187,10 +187,11 @@ class Main(App):
                 raise Exception("Failed to flash OTP")
 
             self.logger.info(f"Flashed Successfully")
-            os.remove(filename)
         except Exception as e:
             self.logger.exception(e)
             return 1
+        finally:
+            os.remove(filename)
 
         return 0
 
@@ -218,10 +219,11 @@ class Main(App):
                 raise Exception("Failed to flash OTP")
 
             self.logger.info(f"Flashed Successfully")
-            os.remove(filename)
         except Exception as e:
             self.logger.exception(e)
             return 1
+        finally:
+            os.remove(filename)
 
         return 0
 
@@ -251,10 +253,11 @@ class Main(App):
                 raise Exception("Failed to flash OTP")
 
             self.logger.info(f"Flashed Successfully")
-            os.remove(filename)
         except Exception as e:
             self.logger.exception(e)
             return 1
+        finally:
+            os.remove(filename)
 
         return 0
 
