@@ -369,8 +369,8 @@ int32_t hid_ble_app(void* p) {
 
     bt_disconnect(app->bt);
 
-    // TODO change
-    furi_delay_ms(100);
+    // Wait 2nd core to update nvm storage
+    furi_delay_ms(200);
 
     bt_keys_storage_set_storage_path(app->bt, HID_BT_KEYS_STORAGE_PATH);
 
@@ -389,8 +389,8 @@ int32_t hid_ble_app(void* p) {
 
     bt_disconnect(app->bt);
 
-    // TODO change
-    furi_delay_ms(100);
+    // Wait 2nd core to update nvm storage
+    furi_delay_ms(200);
 
     bt_keys_storage_set_default_path(app->bt);
 
