@@ -237,11 +237,13 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenHeap: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Heap_Defence.fap"));
+            desktop_scene_main_open_app_or_profile(
+                desktop, EXT_PATH("/apps/Games/Heap_Defence.fap"));
             break;
         }
         case DesktopMainEventOpenSubRemote: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
+            desktop_scene_main_open_app_or_profile(
+                desktop, EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
             break;
         }
         case DesktopMainEventOpenClock: {
