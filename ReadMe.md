@@ -37,9 +37,11 @@ Thank you to all the supporters!
 - [New Animation Pack Release on Patreon: RM Select + 18PLUS](https://www.patreon.com/RogueMaster)
 - Fix path for Music Beeper
 - Fix some sound crash issues in FAPs.
-- Optimized some FAPs and fixed Air Mouse with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
+- Optimized some FAPs thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
 - Added: [SAM WTF (By Unknown)][Original?](https://github.com/ctoth/SAM)
-- Fixed: [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) (With Changes By qqMajiKpp/Haseo)
+- Fixed: [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) (With Changes By qqMajiKpp/Haseo) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
+- Fixed: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
+- Fixed: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -260,6 +262,7 @@ $ ./fbt resources icons dolphin_ext
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
+- [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
 - [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
