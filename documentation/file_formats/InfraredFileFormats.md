@@ -43,8 +43,8 @@ Known protocols are represented in the `parsed` form, whereas non-recognised sig
 | protocol   | parsed  | string | Name of the infrared protocol. Refer to `ir` console command for the complete list of supported protocols. |
 | address    | parsed  | hex    | Payload address. Must be 4 bytes long. |
 | command    | parsed  | hex    | Payload command. Must be 4 bytes long. |
-| frequency  | raw     | uint32 | Carrier frequency, in the units of Hertz. Usually 38000 Hz. |
-| duty_cycle | raw     | float  | Modulation duty cycle, usually 0.33. |
+| frequency  | raw     | uint32 | Carrier frequency, in Hertz, usually 38000 Hz. |
+| duty_cycle | raw     | float  | Carrier duty cycle, usually 0.33. |
 | data       | raw     | uint32 | Raw signal timings, in microseconds between logic level changes. Individual elements must be space-separated. Maximum timings amount is 1024. |
 
 ## Infrared Library File Format
@@ -64,13 +64,16 @@ See [Universal Remotes](/documentation/UniversalRemotes.md) for more information
 1. Initial version.
 
 ## Infrared Test File Format
-### Example
-
+### Examples
+See [Infrared Unit Tests](/assets/unit_tests/infrared/) for various examples.
 ### Description
 Filename extension: `.irtest`
 
 This file format is used to store technical test data that is too large to keep directly in the firmware. 
 Each infrared protocol must have corresponding unit tests complete with an `.irtest` file.
+
+Known protocols are represented in the `parsed_array` form, whereas raw data has the `raw` type.\
+Note: a single parsed signal must be represented as an array of size 1.
 
 ### Version history:
 1. Initial version.
@@ -90,8 +93,17 @@ Each infrared protocol must have corresponding unit tests complete with an `.irt
 | data       | raw          | uint32 | Ditto. |
 
 #### Signal names
+The signal names in an `.irtest` file folow a convention `<name><test_number>`, where the name is one of:
+- decoder_input
+- decoder_expected
+- encoder_decoder_input,
+
+and the number is a sequential integer: 1, 2, 3...etc, which produces names like `decoder_input1`, `encoder_decoder_input3`, and so on.
+
 | Name                  | Type         | Description |
 | --------------------- | ------------ | ----------- |
 | decoder_input         | raw          | A raw signal contaning the decoder input. Is also used as the expected encoder output. |
 | decoder_expected      | parsed_array | An array of parsed signals containing the expected decoder output. Is also used as the encoder input. |
 | encoder_decoder_input | parsed_array | An array of parsed signals containing both the encoder-decoder input and expected output. |
+
+See [Unit Tests](/documentation/UnitTests.md#infrared) for more info.
