@@ -13,11 +13,11 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release Latest Release RM1219-2056](https://www.patreon.com/posts/76136239)
+## Latest Updates - [PATREON: Latest Release RM1219-2145](https://www.patreon.com/posts/76137534)
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster)
 
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-19 18:15 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-19 18:15 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-19 21:45 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-19 21:45 EST`
 - Updated: [NRF24 Scanner v1.8 (By vad7)](https://github.com/vad7/nrf24scan)
 - Added: [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - Added: [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
