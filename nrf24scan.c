@@ -419,9 +419,9 @@ static void prepare_nrf24(bool fsend_packet)
 	uint8_t erx_addr = (1<<0); // Enable RX_P0
 	struct ADDRS *adr = what_to_do == 1 ? &addrs_sniff : &addrs;
 	if(!fsend_packet) {
-		if(adr->addr_count == 0) return;
 		uint8_t payload = NRF_Payload;
 		if(what_to_do == 1) { // SNIFF
+			if(adr->addr_count == 0) return;
 			//payload += 5 + NRF_CRC; // + addr_max + CRC
 			//if(NRF_ESB)	payload += 2;
 			//if(payload > 32) payload = 32;
@@ -430,7 +430,8 @@ static void prepare_nrf24(bool fsend_packet)
 			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
 			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-		} else {
+		} else if(what_to_do == 2) {
+			if(adr->addr_count == 0) return;
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
 			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x01 : 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_AA_OFF || !NRF_ESB ? 0 : 0x3F); // Auto acknowledgement
@@ -441,6 +442,9 @@ static void prepare_nrf24(bool fsend_packet)
 			uint8_t addr_size = (*(p + 1) & 0b11) + 2;
 			nrf24_set_maclen(nrf24_HANDLE, addr_size);
 			nrf24_set_mac(REG_RX_ADDR_P0, p + 2, addr_size);
+			memcpy(addrs.addr_P0, p + 2, addr_size);
+			addrs.addr_count = 1;
+			addrs.addr_len = addr_size;
 			nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, *(p + 1) >> 3);
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
 			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, *p & 0x7F);
@@ -514,6 +518,7 @@ static void start_scanning()
 		correct_NRF_Payload_sniff_min();
 		view_log_decode_CRC = NRF_CRC;
 	} else if(sniff_loaded) { // Switch from sniff to scan/view
+		// to do...
 	}
 	prepare_nrf24(false);
 	if(NRF_ERROR) {
