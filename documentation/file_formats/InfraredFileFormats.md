@@ -56,7 +56,7 @@ Known protocols are represented in the `parsed` form, whereas non-recognised sig
 ### Description
 Filename extension: `.ir`
 
-This file format is used to store universal remote libraries. It is identical to the previous format, differing only in the `Filetype` key.\
+This file format is used to store universal remote libraries. It is identical to the previous format, differing only in the `Filetype` field.\
 It also has predefined button names for each universal library type, so that the universal remote application could understand them.
 See [Universal Remotes](/documentation/UniversalRemotes.md) for more information.
 
@@ -69,7 +69,9 @@ See [Infrared Unit Tests](/assets/unit_tests/infrared/) for various examples.
 ### Description
 Filename extension: `.irtest`
 
-This file format is used to store technical test data that is too large to keep directly in the firmware. 
+This file format is used to store technical test data that is too large to keep directly in the firmware.
+It is mostly similar to the two previous formats, with the main difference being the addition of the parsed signal arrays.
+
 Each infrared protocol must have corresponding unit tests complete with an `.irtest` file.
 
 Known protocols are represented in the `parsed_array` form, whereas raw data has the `raw` type.\
