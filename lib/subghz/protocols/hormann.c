@@ -8,6 +8,8 @@
 
 #define TAG "SubGhzProtocolHormannHSM"
 
+#define HORMANN_HSM_PATTERN 0xFF000000003
+
 static const SubGhzBlockConst subghz_protocol_hormann_const = {
     .te_short = 500,
     .te_long = 1000,
@@ -202,6 +204,10 @@ void subghz_protocol_decoder_hormann_free(void* context) {
     free(instance);
 }
 
+static bool subghz_protocol_decoder_hormann_check_pattern(SubGhzProtocolDecoderHormann* instance) {
+    return (instance->decoder.decode_data & HORMANN_HSM_PATTERN) == HORMANN_HSM_PATTERN;
+}
+
 void subghz_protocol_decoder_hormann_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderHormann* instance = context;
@@ -231,7 +237,8 @@ void subghz_protocol_decoder_hormann_feed(void* context, bool level, uint32_t du
         break;
     case HormannDecoderStepSaveDuration:
         if(level) { //save interval
-            if(duration >= (subghz_protocol_hormann_const.te_short * 5)) {
+            if(duration >= (subghz_protocol_hormann_const.te_short * 5) &&
+               subghz_protocol_decoder_hormann_check_pattern(instance)) {
                 instance->decoder.parser_step = HormannDecoderStepFoundStartBit;
                 if(instance->decoder.decode_count_bit >=
                    subghz_protocol_hormann_const.min_count_bit_for_found) {
