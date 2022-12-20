@@ -70,7 +70,28 @@ See [Universal Remotes](/documentation/UniversalRemotes.md) for more information
 Filename extension: `.irtest`
 
 This file format is used to store technical test data that is too large to keep directly in the firmware. 
-Each infraed protocol must have corresponding unit tests complete with an `.irtest` file.
+Each infrared protocol must have corresponding unit tests complete with an `.irtest` file.
 
 ### Version history:
 1. Initial version.
+
+#### Format fields
+| Name       | Use          | Type   | Description |
+| ---------- | ------------ | ------ |------------ |
+| name       | both         | string | Name of the signal. Only printable ASCII characters are allowed. |
+| type       | both         | string | Type of the signal. Must be `parsed_array` or `raw`.  |
+| count      | parsed_array | uint32 | The number of parsed signals in an array. Must be at least 1. |
+| protocol   | parsed_array | string | Same as in previous formats. |
+| address    | parsed_array | hex    | Ditto. |
+| command    | parsed_array | hex    | Ditto. |
+| repeat     | parsed_array | bool   | Indicates whether the signal is a repeated button press. |
+| frequency  | raw          | uint32 | Same as in previous formats. |
+| duty_cycle | raw          | float  | Ditto. |
+| data       | raw          | uint32 | Ditto. |
+
+#### Signal names
+| Name                  | Type         | Description |
+| --------------------- | ------------ | ----------- |
+| decoder_input         | raw          | A raw signal contaning the decoder input. Is also used as the expected encoder output. |
+| decoder_expected      | parsed_array | An array of parsed signals containing the expected decoder output. Is also used as the encoder input. |
+| encoder_decoder_input | parsed_array | An array of parsed signals containing both the encoder-decoder input and expected output. |
