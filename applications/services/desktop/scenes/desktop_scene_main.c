@@ -11,7 +11,10 @@
 #include "desktop_scene_i.h"
 
 #define TAG "DesktopSrv"
-#define SNAKE_GAME EXT_PATH("/apps/Games/snake_game.fap")
+
+#define MUSIC_PLAYER_APP EXT_PATH("/apps/Misc/music_player.fap")
+#define SNAKE_GAME_APP EXT_PATH("/apps/Games/snake_game.fap")
+#define CLOCK_APP EXT_PATH("/apps/Tools/clock.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -60,6 +63,19 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
     furi_thread_start(desktop->scene_thread);
 }
 #endif
+
+static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
+    do {
+        LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, path);
+        if(status == LoaderStatusOk) break;
+        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+
+        status = loader_start(desktop->loader, "Passport", NULL);
+        if(status != LoaderStatusOk) {
+            FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        }
+    } while(false);
+}
 
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -182,25 +198,16 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             }
             break;
         }
-        case DesktopMainEventOpenGameMenu: {
-            bool game_exists = false;
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            if(FSE_OK == storage_sd_status(storage) && storage_file_exists(storage, SNAKE_GAME))
-                game_exists = true;
-            furi_record_close(RECORD_STORAGE);
-
-            if(game_exists) {
-                LoaderStatus status =
-                    loader_start(desktop->loader, FAP_LOADER_APP_NAME, SNAKE_GAME);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+        case DesktopMainEventOpenGame: {
+            desktop_scene_main_open_app_or_profile(desktop, SNAKE_GAME_APP);
+            break;
+        }
+        case DesktopMainEventOpenClock: {
+            desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
+            break;
+        }
+        case DesktopMainEventOpenMusicPlayer: {
+            desktop_scene_main_open_app_or_profile(desktop, MUSIC_PLAYER_APP);
             break;
         }
         case DesktopLockedEventUpdate:
