@@ -23,7 +23,17 @@ const SensorType DHT20 = {
     .altname = "DHT20/AM2108/AHT20",
     .interface = &I2C,
     .datatype = UT_TEMPERATURE | UT_HUMIDITY,
-    .pollingInterval = 2000,
+    .pollingInterval = 1000,
+    .allocator = unitemp_DHT20_I2C_alloc,
+    .mem_releaser = unitemp_DHT20_I2C_free,
+    .initializer = unitemp_DHT20_init,
+    .deinitializer = unitemp_DHT20_I2C_deinit,
+    .updater = unitemp_DHT20_I2C_update};
+const SensorType AHT10 = {
+    .typename = "AHT10",
+    .interface = &I2C,
+    .datatype = UT_TEMPERATURE | UT_HUMIDITY,
+    .pollingInterval = 1000,
     .allocator = unitemp_DHT20_I2C_alloc,
     .mem_releaser = unitemp_DHT20_I2C_free,
     .initializer = unitemp_DHT20_init,
@@ -73,7 +83,7 @@ bool unitemp_DHT20_I2C_alloc(Sensor* sensor, char* args) {
 
     //Адреса на шине I2C (7 бит)
     i2c_sensor->minI2CAdr = 0x38 << 1;
-    i2c_sensor->maxI2CAdr = 0x38 << 1;
+    i2c_sensor->maxI2CAdr = (sensor->type == &DHT20) ? (0x38 << 1) : (0x39 << 1);
     return true;
 }
 
@@ -89,7 +99,7 @@ bool unitemp_DHT20_init(Sensor* sensor) {
     uint8_t data[3] = {0xA8, 0x00, 0x00};
     if(!unitemp_i2c_writeArray(i2c_sensor, 3, data)) return false;
     furi_delay_ms(10);
-    data[0] = 0xBE;
+    data[0] = (sensor->type == &DHT20) ? 0xBE : 0xE1;
     data[1] = 0x08;
     if(!unitemp_i2c_writeArray(i2c_sensor, 3, data)) return false;
     furi_delay_ms(10);

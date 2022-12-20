@@ -77,12 +77,13 @@ static const SensorType* sensorTypes[] = {
     &DHT20,
     &DHT21,
     &DHT22,
+    &Dallas,
     &AM2320_SW,
     &AM2320_I2C,
+    &AHT10,
     &LM75,
     &BMP280,
-    &BME280,
-    &Dallas};
+    &BME280};
 
 const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index) {
     if(index > SENSOR_TYPES_COUNT) return NULL;
