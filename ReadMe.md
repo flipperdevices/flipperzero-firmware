@@ -16,12 +16,13 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release RM1220-1016-0.73.2-9cb920d](https://www.patreon.com/posts/latest-release-0-76156262) 
+## Latest Updates - [PATREON: Latest Release RM1220-1504-0.73.2-22a61e0](https://www.patreon.com/posts/latest-release-0-76167598) 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-20 10:15 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-20 10:15 EST`
 - Updated: [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
+- New Animation: [Hentai (By qqMajikpp)](https://github.com/qqmajikpp/) for [PATREON members](https://www.patreon.com/RogueMaster/membership) now included on 18Plus releases
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -66,7 +67,7 @@ $ ./fbt resources icons dolphin_ext
 - Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: iButton and RFID P0kem0n images [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/)
-- Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp]
+- Animations: Idle animations will show all animations regardless of level and butthurt [Thanks to qqMajiKpp](https://github.com/qqmajikpp/)
 - Animations: Painting speech bubbles updated from FalsePhilosopher
 - Animations: RM FW Update image [(Thanks to E_Surge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/257)
 - Animations: SubGHZ Scanning image with Pikachu [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/blob/3a548ea9bb181c9348d8afb427890c411456134e/assets/icons/SubGhz/Scanning_123x52.png)
@@ -214,7 +215,7 @@ $ ./fbt resources icons dolphin_ext
 - [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
 - [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
-- [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) (With Changes By qqMajiKpp/Haseo)
+- [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) [With Changes By qqMajiKpp/Haseo](https://github.com/qqmajikpp/)
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
