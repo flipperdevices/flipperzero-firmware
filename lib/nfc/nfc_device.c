@@ -1085,7 +1085,7 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         saved = true;
     } while(0);
 
-    if(!saved) {
+    if(!saved) { //-V547
         dialog_message_show_storage_error(dev->dialogs, "Can not save\nkey file");
     }
     furi_string_free(temp_str);
