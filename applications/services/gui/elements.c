@@ -559,7 +559,9 @@ void elements_scrollable_text_line(
 
     size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
     if(len_px > width) {
-        if(ellipsis) width -= canvas_string_width(canvas, "...");
+        if(ellipsis) {
+            width -= canvas_string_width(canvas, "...");
+        }
 
         // Calculate scroll size
         size_t scroll_size = furi_string_size(string);
@@ -582,7 +584,9 @@ void elements_scrollable_text_line(
             len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
         } while(len_px > width);
 
-        if(ellipsis) furi_string_cat(line, "...");
+        if(ellipsis) {
+            furi_string_cat(line, "...");
+        }
     }
 
     canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
