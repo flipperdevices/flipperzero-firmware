@@ -63,7 +63,10 @@ void ocarina_free(Ocarina* instance) {
 
     furi_mutex_free(instance->model_mutex);
 
-    furi_hal_speaker_stop();
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
 
     free(instance);
 }
@@ -110,10 +113,6 @@ int32_t ocarina_app(void* p) {
                     }
                     break;
                 case InputKeyBack:
-                    if(furi_hal_speaker_is_mine()) {
-                        furi_hal_speaker_stop();
-                        furi_hal_speaker_release();
-                    }
                     processing = false;
                     break;
                 default:
