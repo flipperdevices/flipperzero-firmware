@@ -45,6 +45,7 @@ Thank you to all the supporters!
 - Fixed: [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) (With Changes By qqMajiKpp/Haseo) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
 - Fixed: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
 - Fixed: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
+- Updated: [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -241,7 +242,7 @@ $ ./fbt resources icons dolphin_ext
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
-- [NRF24 Scanner v1.8 (By vad7)](https://github.com/vad7/nrf24scan)
+- [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
