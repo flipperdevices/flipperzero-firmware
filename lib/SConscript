@@ -15,6 +15,7 @@ env.Append(
         Dir("u8g2"),
         Dir("update_util"),
         Dir("print"),
+        Dir("pulse_reader"),
     ],
 )
 
@@ -94,6 +95,7 @@ libs = env.BuildModules(
         "mbedtls",
         "subghz",
         "nfc",
+        "pulse_reader",
         "appframe",
         "misc",
         "lfrfid",
