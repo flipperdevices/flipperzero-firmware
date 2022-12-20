@@ -1,4 +1,4 @@
-<center><a href='https://www.patreon.com/RogueMaster'><img src="patreon.png" width="30%"></a></center>
+<a href='https://www.patreon.com/RogueMaster'><img src="patreon.png" width="30%"></a>
 
 # Flipper Zero FW [ROGUEMASTER]
 This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware) and the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects.  
