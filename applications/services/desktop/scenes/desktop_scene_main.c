@@ -11,6 +11,7 @@
 #include "desktop_scene_i.h"
 
 #define TAG "DesktopSrv"
+#define SNAKE_GAME EXT_PATH("/apps/Games/snake_game.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -182,10 +183,23 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenGameMenu: {
-            LoaderStatus status = loader_start(
-                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("/apps/Games/snake_game.fap"));
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            bool game_exists = false;
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            if(FSE_OK == storage_sd_status(storage) && storage_file_exists(storage, SNAKE_GAME))
+                game_exists = true;
+            furi_record_close(RECORD_STORAGE);
+
+            if(game_exists) {
+                LoaderStatus status =
+                    loader_start(desktop->loader, FAP_LOADER_APP_NAME, SNAKE_GAME);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            } else {
+                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
             }
             break;
         }
