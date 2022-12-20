@@ -47,8 +47,10 @@ void tracker_speaker_init() {
 }
 
 void tracker_speaker_deinit() {
-    furi_hal_speaker_stop();
-    furi_hal_speaker_release();
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
 }
 
 static FuriHalInterruptISR tracker_isr;

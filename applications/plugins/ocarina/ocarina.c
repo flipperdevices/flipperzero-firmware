@@ -116,8 +116,10 @@ int32_t ocarina_app(void* p) {
                     break;
                 }
             } else if(event.type == InputTypeRelease) {
-                furi_hal_speaker_stop();
-                furi_hal_speaker_release();
+                if(furi_hal_speaker_is_mine()) {
+                    furi_hal_speaker_stop();
+                    furi_hal_speaker_release();
+                }
             }
         }
 

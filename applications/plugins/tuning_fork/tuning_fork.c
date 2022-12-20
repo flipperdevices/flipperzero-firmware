@@ -120,8 +120,10 @@ static void play(TuningForkState* tuning_fork_state) {
 }
 
 static void stop() {
-    furi_hal_speaker_stop();
-    furi_hal_speaker_release();
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
 }
 
 static void replay(TuningForkState* tuning_fork_state) {

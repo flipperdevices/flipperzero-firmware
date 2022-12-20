@@ -63,7 +63,7 @@ int32_t usb_midi_app(void* p) {
                                 }
                             } else if(event->type == NoteOff) {
                                 NoteOffEvent note_off = AsNoteOff(event);
-                                if(note_off.note == current_note) {
+                                if(furi_hal_speaker_is_mine() && note_off.note == current_note) {
                                     furi_hal_speaker_stop();
                                     furi_hal_speaker_release();
                                 }
