@@ -219,6 +219,7 @@ fwelf = fwenv["FW_ELF"] = fwenv.Program(
         "mbedtls",
         "lfrfid",
         "flipper_application",
+        "pulse_reader",
         # 2nd round
         "flipperformat",
         "toolbox",
