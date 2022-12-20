@@ -40,7 +40,8 @@
 #define SNIFF_FILENAME "sniff.txt"	// settings for sniff mode
 #define LOG_FILENAME 		"log"
 #define LOG_FILEEXT	 		".txt"
-#define MAX_LOG_RECORDS		100
+#define MAX_LOG_RECORDS		200
+#define MAX_FOUND_RECORDS	100
 #define LOG_REC_SIZE		34		// max packet size
 #define VIEW_LOG_MAX_X		22
 #define VIEW_LOG_WIDTH_B	10		// bytes
@@ -57,7 +58,6 @@ char SettingsFld_Addr = 'P';
 Nrf24Scan* APP;
 uint8_t what_doing = 0; // 0 - setup, 1 - view log, 2 - view addresses
 uint8_t what_to_do = 1; // 0 - view, 1 - view & sniff, 2 - view & read, 3 - view & read selected addr
-uint32_t key_press_seq_ok = 0;
 uint8_t save_settings = 0;
 char screen_buf[64];
 char addr_file_name[32];
@@ -86,7 +86,7 @@ struct ADDRS addrs;
 struct ADDRS addrs_sniff;
 bool sniff_loaded = 0;
 int16_t found_total;
-int16_t view_found = 0;
+int16_t view_found = -1;
 
 int8_t log_to_file = 0;	// 0 - no, 1 - yes(new), 2 - append, -1 - only clear
 uint16_t log_arr_idx;
@@ -432,50 +432,69 @@ static void prepare_nrf24(bool fsend_packet)
 			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 		} else {
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
-			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x11 : 0); // Automatic Retransmission
+			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x01 : 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_AA_OFF || !NRF_ESB ? 0 : 0x3F); // Auto acknowledgement
 			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, NRF_DPL ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 		}
-		nrf24_set_maclen(nrf24_HANDLE, adr->addr_len);
-		nrf24_set_mac(REG_RX_ADDR_P0, adr->addr_P0, adr->addr_len);
-		uint8_t tmp[5] = { 0 };
-		nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, adr->addr_len);
-		for(uint8_t i = 0; i < adr->addr_len / 2; i++) {
-			uint8_t tb = tmp[i];
-			tmp[i] = tmp[adr->addr_len - i - 1];
-			tmp[adr->addr_len - i - 1] = tb;
+		if(what_to_do == 3) {
+			uint8_t *p = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
+			uint8_t addr_size = (*(p + 1) & 0b11) + 2;
+			nrf24_set_maclen(nrf24_HANDLE, addr_size);
+			nrf24_set_mac(REG_RX_ADDR_P0, p + 2, addr_size);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, *(p + 1) >> 3);
+			nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
+			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, *p & 0x7F);
+			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
+			if(*(p + 1) & 0b100) { // ESB
+				nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0x01); // Automatic Retransmission
+				nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x3F); // Auto acknowledgement
+				nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, *(p + 2 + addr_size) >> 2 != 0x33 ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+			} else {
+				nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
+				nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
+			}
+		} else {
+			nrf24_set_maclen(nrf24_HANDLE, adr->addr_len);
+			nrf24_set_mac(REG_RX_ADDR_P0, adr->addr_P0, adr->addr_len);
+			uint8_t tmp[5] = { 0 };
+			nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, adr->addr_len);
+			for(uint8_t i = 0; i < adr->addr_len / 2; i++) {
+				uint8_t tb = tmp[i];
+				tmp[i] = tmp[adr->addr_len - i - 1];
+				tmp[adr->addr_len - i - 1] = tb;
+			}
+			NRF_ERROR = memcmp(adr->addr_P0, tmp, adr->addr_len) != 0;
+			FURI_LOG_D(TAG, "Payload: %d", payload);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload);
+			if(adr->addr_count > 1) {
+				nrf24_set_mac(REG_RX_ADDR_P1, adr->addr_P1, adr->addr_len);
+				nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, payload);
+				erx_addr |= (1<<1); // Enable RX_P1
+			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, 0);
+			if(adr->addr_count > 2) {
+				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P2, &adr->addr_P2, 1);
+				nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, payload);
+				erx_addr |= (1<<2); // Enable RX_P2
+			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, 0);
+			if(adr->addr_count > 3) {
+				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P3, &adr->addr_P3, 1);
+				nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, payload);
+				erx_addr |= (1<<3); // Enable RX_P3
+			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, 0);
+			if(adr->addr_count > 4) {
+				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P4, &adr->addr_P4, 1);
+				nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, payload);
+				erx_addr |= (1<<4); // Enable RX_P4
+			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, 0);
+			if(adr->addr_count > 5) {
+				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P5, &adr->addr_P5, 1);
+				nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, payload);
+				erx_addr |= (1<<5); // Enable RX_P5
+			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
+			nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
+			nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
+			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 		}
-		NRF_ERROR = memcmp(adr->addr_P0, tmp, adr->addr_len) != 0;
-		FURI_LOG_D(TAG, "Payload: %d", payload);
-		nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload);
-		if(adr->addr_count > 1) {
-			nrf24_set_mac(REG_RX_ADDR_P1, adr->addr_P1, adr->addr_len);
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, payload);
-			erx_addr |= (1<<1); // Enable RX_P1
-		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, 0);
-		if(adr->addr_count > 2) {
-			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P2, &adr->addr_P2, 1);
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, payload);
-			erx_addr |= (1<<2); // Enable RX_P2
-		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, 0);
-		if(adr->addr_count > 3) {
-			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P3, &adr->addr_P3, 1);
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, payload);
-			erx_addr |= (1<<3); // Enable RX_P3
-		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, 0);
-		if(adr->addr_count > 4) {
-			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P4, &adr->addr_P4, 1);
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, payload);
-			erx_addr |= (1<<4); // Enable RX_P4
-		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, 0);
-		if(adr->addr_count > 5) {
-			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P5, &adr->addr_P5, 1);
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, payload);
-			erx_addr |= (1<<5); // Enable RX_P5
-		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
-		nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
-		nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
-		nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 	}
 	nrf24_flush_rx(nrf24_HANDLE);
 	nrf24_flush_tx(nrf24_HANDLE);
@@ -648,14 +667,13 @@ bool check_packet(uint8_t *pkt, uint16_t size)
 		if(i != found_total) { // found
 			APP->found[i].total++;
 		} else {
-			pkt--;
-			uint8_t *p = APP->log_arr;
+			uint8_t *p = APP->log_arr + 2;
 			for(i = 0; i < log_arr_idx; i++, p += LOG_REC_SIZE) {
-				if(*p & 0x80 && (*(p+1) & 0b11) + 2 == addr_size && pkt != p) {
+				if((*(p - 2) & 0x80) && (*(p - 1) & 0b11) + 2 == addr_size && pkt != p) {
 					if(memcmp(p, pkt, addr_size) == 0) break;
 				}
 			}
-			if(i != log_arr_idx && found_total < MAX_LOG_RECORDS) { // found -> 2
+			if(i != log_arr_idx && found_total < MAX_FOUND_RECORDS) { // found -> 2
 				memset(&APP->found[found_total], 0, sizeof(struct FOUND));
 				memcpy(APP->found[found_total].addr, pkt, addr_size);
 				APP->found[found_total].addr_size = addr_size;
@@ -860,7 +878,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 		snprintf(screen_buf, sizeof(screen_buf), "Rate: %sbps",  NRF_rate == 2 ? "2M" : NRF_rate == 1 ? "1M" : "250K");	// menu_selected = 2
 		canvas_draw_str(canvas, 10, 30, screen_buf);
 		if(what_to_do == 1) snprintf(screen_buf, sizeof(screen_buf), "Min Payl: %d", NRF_Payload_sniff_min);
-		else snprintf(screen_buf, sizeof(screen_buf), "Payload: %d", NRF_Payload);
+		else if(what_to_do == 3) {
+			uint8_t *p = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
+			snprintf(screen_buf, sizeof(screen_buf), "Payload: %d", log_arr_idx && (*p & 0x80) ? *(p + 1) >> 3 : NRF_Payload);
+		} else snprintf(screen_buf, sizeof(screen_buf), "Payload: %d", NRF_Payload);
 		canvas_draw_str(canvas, 78, 30, screen_buf);
 		strcpy(screen_buf, "Next Ch time: ");																			// menu_selected = 3
 		if(find_channel_period == 0) strcat(screen_buf, "off"); else snprintf(screen_buf + strlen(screen_buf), sizeof(screen_buf), "%d s", find_channel_period);
@@ -870,7 +891,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 		snprintf(screen_buf, sizeof(screen_buf), "Log: %s", log_to_file == 0 ? "No" : log_to_file == 1 ? "Yes" : log_to_file == 2 ? "Append" : "Clear");// menu_selected = 4
 		canvas_draw_str(canvas, 10, 50, screen_buf);
 		if(what_to_do) {																								// menu_selected = 5
-			if(NRF_ERROR) snprintf(screen_buf, sizeof(screen_buf), "nRF24L01+ R/W ERROR!");
+			if(NRF_ERROR) snprintf(screen_buf, sizeof(screen_buf), "nRF24L01+ r/w ERROR!");
 			else {
 				if(what_to_do == 1) snprintf(screen_buf, sizeof(screen_buf), "Start sniff");							
 				else {
@@ -1007,8 +1028,16 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 				}
 				uint16_t y = 14 + i * 7;
 				canvas_draw_str(canvas, 3 * 5, y, screen_buf);
-				uint16_t x = snprintf(screen_buf, sizeof(screen_buf), "%d", page + i + 1);
-				canvas_draw_str(canvas, 0, y, screen_buf);
+				uint16_t x = page + i + 1;
+				if(x > 99) { 
+					snprintf(screen_buf, 16, "%d", x); 
+					canvas_draw_str(canvas, 1, y, screen_buf + 1);
+					canvas_draw_frame(canvas, 0, y - 2, 1, 2);
+					x = 2;
+				} else {
+					x = snprintf(screen_buf, 16, "%d", x);
+					canvas_draw_str(canvas, 0, y, screen_buf);
+				}
 				if(crcptr) { // 5x7 font, 9 lines
 					canvas_draw_str(canvas, x * 5, y, "=");
 					int n = crcptr - (uint8_t*)ptr;
@@ -1035,13 +1064,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 			snprintf(screen_buf, 50, "Found > 1: %d", found_total);
 			canvas_draw_str(canvas, 0, 1 * 7, screen_buf);
 			int16_t idx = view_found * 7;
-			for(uint8_t i = 0; i < 7; i++) {
-				if(idx++ >= found_total) break;
-				snprintf(screen_buf, 16, "%d. ", idx);
+			for(uint8_t i = 0; i < 7; i++, idx++) {
+				if(idx >= found_total) break;
+				snprintf(screen_buf, 16, "%d. ", idx + 1);
 				add_to_str_hex_bytes(screen_buf, (char*)APP->found[idx].addr, APP->found[idx].addr_size);
 				if(APP->found[idx].addr_size == 3) strcat(screen_buf, "    "); else if(APP->found[idx].addr_size == 4) strcat(screen_buf, "  ");
 				snprintf(screen_buf + strlen(screen_buf), 16, " - %d", APP->found[idx].total);
-				canvas_draw_str(canvas, 0, 2 + i * 7, screen_buf);
+				canvas_draw_str(canvas, 0, (2 + i) * 7, screen_buf);
 			}
 		} else {
 			struct ADDRS *a;
@@ -1097,7 +1126,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 		}
 		screen_buf[0] = 'v';
 		strcpy(screen_buf + 1, VERSION);
-		canvas_draw_str(canvas, 104, 7, screen_buf);
+		canvas_draw_str(canvas, 105, 7, screen_buf);
 		if(view_log_decode_PCF || view_log_decode_CRC) {
 			strcpy(screen_buf, "Decode: ");
 			if(view_log_decode_PCF) strcat(screen_buf, "ESB ");
@@ -1127,9 +1156,9 @@ int32_t nrf24scan_app(void* p) {
 		strcpy(addr_file_name, "MEMORY LOW!");
 	}
 	clear_log();
-	APP->found = malloc(sizeof(struct FOUND) * MAX_LOG_RECORDS);
+	APP->found = malloc(sizeof(struct FOUND) * MAX_FOUND_RECORDS);
 	if(APP->found == NULL) {
-		FURI_LOG_E(TAG, "Not enouch memory: %d", sizeof(struct FOUND) * MAX_LOG_RECORDS);
+		FURI_LOG_E(TAG, "Not enouch memory: %d", sizeof(struct FOUND) * MAX_FOUND_RECORDS);
 		strcpy(addr_file_name, "MEMORY LOW!!");
 	}
 
@@ -1315,7 +1344,7 @@ int32_t nrf24scan_app(void* p) {
 									break;
 								case Menu_ok:
 									if(what_to_do) {
-										if(addrs.addr_count || what_to_do == 1) {
+										if((addrs.addr_count || (what_to_do == 3 && log_arr_idx && *(APP->log_arr + view_log_arr_idx * LOG_REC_SIZE) & 0x80)) || what_to_do == 1) {
 											if(log_to_file == -1) {
 												log_to_file = 0;
 												clear_log();
@@ -1325,7 +1354,6 @@ int32_t nrf24scan_app(void* p) {
 											if(!NRF_ERROR) what_doing = 1;
 										}
 									} else what_doing = 1;
-									key_press_seq_ok = event.input.sequence; 
 									break;
 							}
 						} else if(what_doing == 1) {
@@ -1337,7 +1365,6 @@ int32_t nrf24scan_app(void* p) {
 						if(what_doing == 0) {
 							if(menu_selected == Menu_enter_channel) {
 								NRF_AA_OFF ^= 1;
-								key_press_seq_ok = event.input.sequence; 
 							} else if(menu_selected == Menu_log) { // Log
 								if(log_arr_idx && (log_to_file == 1 || log_to_file == 2)) {
 									write_to_log_file(APP->storage, false);
