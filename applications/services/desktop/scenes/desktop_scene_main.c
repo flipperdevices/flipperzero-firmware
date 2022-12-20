@@ -13,6 +13,8 @@
 
 #define TAG "DesktopSrv"
 
+#define CLOCK_APP EXT_PATH("/apps/Main/Clock.fap")
+
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -60,6 +62,19 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
     furi_thread_start(desktop->scene_thread);
 }
 #endif
+
+static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
+    do {
+        LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, path);
+        if(status == LoaderStatusOk) break;
+        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+
+        status = loader_start(desktop->loader, "Passport", NULL);
+        if(status != LoaderStatusOk) {
+            FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        }
+    } while(false);
+}
 
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
@@ -131,12 +146,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         }
-        case DesktopMainEventOpenClock: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Main/Clock.fap"));
-            consumed = true;
-            break;
-        }
         case DesktopMainEventOpenFavoritePrimary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
             if(desktop->settings.favorite_primary.is_external) {
@@ -200,57 +209,43 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenSnake: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Snake.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Snake.fap"));
             break;
         }
         case DesktopMainEventOpen2048: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/2048.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/2048.fap"));
             break;
         }
         case DesktopMainEventOpenZombiez: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Zombiez.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Zombiez.fap"));
             break;
         }
         case DesktopMainEventOpenTetris: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Tetris.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Tetris.fap"));
             break;
         }
         case DesktopMainEventOpenDOOM: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/DOOM.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/DOOM.fap"));
             break;
         }
         case DesktopMainEventOpenDice: {
-            LoaderStatus status =
-                loader_start(desktop->loader, "Applications", EXT_PATH("/apps/Games/Dice.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Dice.fap"));
             break;
         }
         case DesktopMainEventOpenArkanoid: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/Arkanoid.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Arkanoid.fap"));
             break;
         }
         case DesktopMainEventOpenHeap: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Games/Heap_Defence.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Heap_Defence.fap"));
             break;
         }
         case DesktopMainEventOpenSubRemote: {
-            LoaderStatus status = loader_start(
-                desktop->loader, "Applications", EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
-            consumed = true;
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
+            break;
+        }
+        case DesktopMainEventOpenClock: {
+            desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
             break;
         }
         case DesktopLockedEventUpdate:
