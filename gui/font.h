@@ -19,14 +19,14 @@ static uint8_t font[10][15] = {
     {1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1}, // 9
 };
 
-static uint8_t draw_digit(Canvas* const canvas, uint8_t digit, uint8_t x, uint8_t y) {
+static uint8_t draw_digit(uint8_t digit, uint8_t x, uint8_t y) {
     uint8_t x_shift = 0;
     uint8_t index = 0;
 
     for(int n = 0; n < FONT_HEIGHT; n++) {
         for(int i = 0; i < FONT_WIDTH; i++) {
             if(font[digit][index] == 1) {
-                draw_point(canvas, x + i, y + n);
+                draw_point(x + i, y + n);
             }
             index++;
         }
@@ -50,14 +50,14 @@ static void parse_number(uint16_t number, uint8_t* digits, uint8_t size) {
     }
 }
 
-static void draw_number(Canvas* const canvas, uint8_t x, uint8_t y, int number, uint8_t size) {
+static void draw_number(uint8_t x, uint8_t y, int number, uint8_t size) {
     uint8_t digits[size];
 
     parse_number(number, digits, size);
 
     y += 0;
     for(int i = 0; i < size; ++i) {
-        x += draw_digit(canvas, digits[i], x, y);
+        x += draw_digit(digits[i], x, y);
         x++;
     }
 }

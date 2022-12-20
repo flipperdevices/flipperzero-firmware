@@ -1,7 +1,7 @@
+#include "levels.h"
+
 #define TAG "SpaceImpact"
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
 #define HERO_SIZE 8
 
 #define HERO_MIN_Y 7
@@ -36,8 +36,7 @@ typedef struct {
 
 typedef struct {
     PlayerState player;
-
-    bool hasB;
+    Level level;
     bool fire;
     bool rocket;
     bool up;
@@ -51,4 +50,6 @@ void game_init(GameState* const state) {
 
     state->player.position.x = 1;
     state->player.position.y = (HERO_MAX_Y) / 2;
+
+    state->level = levels[0];
 }

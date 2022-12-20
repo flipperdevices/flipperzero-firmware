@@ -29,29 +29,30 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         return;
     }
 
+    render_clear(game_state->level.isInvertedColor);
+
     // life
     for(int i = 0; i < game_state->player.life; i++) {
-        draw_ui_asset(canvas, i * 6 + 1, 1, ui_heart);
+        draw_ui_asset(i * 6 + 1, 1, ui_heart);
     }
     // rockets
-    draw_ui_asset(canvas, 50, 1, ui_rocket);
-    draw_number(canvas, 58, 1, game_state->player.rockets, 2);
+    draw_ui_asset(50, 1, ui_rocket);
+    draw_number(58, 1, game_state->player.rockets, 2);
     // score
-    draw_number(canvas, 90, 1, game_state->player.score, 5);
+    draw_number(90, 1, game_state->player.score, 5);
     // player
-    draw_ui_asset(canvas, game_state->player.position.x, game_state->player.position.y, ui_hero);
+    draw_ui_asset(game_state->player.position.x, game_state->player.position.y, ui_hero);
     // bullets
     for(int i = 0; i < BULLET_PULL; i++) {
         if(game_state->player.bullets[i].x >= BULLET_X)
             draw_ui_asset(
-                canvas,
-                game_state->player.bullets[i].x,
-                game_state->player.bullets[i].y,
-                ui_bullet);
+                game_state->player.bullets[i].x, game_state->player.bullets[i].y, ui_bullet);
     }
 
     // enemies
-    draw_ui_asset(canvas, 90, 30, enemy_1);
+    draw_ui_asset(90, 30, enemy_1);
+
+    render_draw(canvas);
 
     release_mutex((ValueMutex*)ctx, game_state);
 }
