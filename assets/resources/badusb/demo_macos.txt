@@ -18,7 +18,7 @@ UP
 CTRL c
 
 REM Bigger shell script example
-STRING cat > /dev/null << EOF
+STRING cat 2> /dev/null << EOF
 ENTER
 
 STRING Hello World!
@@ -34,7 +34,7 @@ ENTER
 STRING               _.-------.._                    -,
 ENTER
 HOME
-STRING           .-"```"--..,,_/ /`-,               -,  \ 
+STRING           .-"```"--..,,_/ /`-,               -,  \
 ENTER
 HOME
 STRING        .:"          /:/  /'\  \     ,_...,  `. |  |
@@ -43,7 +43,7 @@ HOME
 STRING       /       ,----/:/  /`\ _\~`_-"`     _;
 ENTER
 HOME
-STRING      '      / /`"""'\ \ \.~`_-'      ,-"'/ 
+STRING      '      / /`"""'\ \ \.~`_-'      ,-"'/
 ENTER
 HOME
 STRING     |      | |  0    | | .-'      ,/`  /
@@ -64,13 +64,13 @@ HOME
 STRING  _L_  _     ___  ___  ___  ___  ____--"`
 ENTER
 HOME
-STRING | __|| |   |_ _|| _ \| _ \| __|| _ \ 
+STRING | __|| |   |_ _|| _ \| _ \| __|| _ \
 ENTER
 HOME
-STRING | _| | |__  | | |  _/|  _/| _| |   / 
+STRING | _| | |__  | | |  _/|  _/| _| |   /
 ENTER
 HOME
-STRING |_|  |____||___||_|  |_|  |___||_|_\ 
+STRING |_|  |____||___||_|  |_|  |___||_|_\
 ENTER
 HOME
 ENTER
