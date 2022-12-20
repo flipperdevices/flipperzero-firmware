@@ -18,7 +18,7 @@ UP
 CTRL c
 
 REM Bigger shell script example
-STRING cat 2> /dev/null << EOF
+STRING cat > /dev/null << EOF
 ENTER
 
 STRING Hello World!
@@ -34,34 +34,34 @@ ENTER
 STRING               _.-------.._                    -,
 ENTER
 HOME
-STRING           .-"```"--..,,_/ /`-,               -,  \
+STRING           .-"'''"--..,,_/ /'-,               -,  \
 ENTER
 HOME
-STRING        .:"          /:/  /'\  \     ,_...,  `. |  |
+STRING        .:"          /:/  /'\  \     ,_...,  '. |  |
 ENTER
 HOME
-STRING       /       ,----/:/  /`\ _\~`_-"`     _;
+STRING       /       ,----/:/  /'\ _\~'_-"'     _;
 ENTER
 HOME
-STRING      '      / /`"""'\ \ \.~`_-'      ,-"'/
+STRING      '      / /'"""'\ \ \.~'_-'      ,-"'/
 ENTER
 HOME
-STRING     |      | |  0    | | .-'      ,/`  /
+STRING     |      | |  0    | | .-'      ,/'  /
 ENTER
 HOME
-STRING    |    ,..\ \     ,.-"`       ,/`    /
+STRING    |    ,..\ \     ,.-"'       ,/'    /
 ENTER
 HOME
-STRING   ;    :    `/`""\`           ,/--==,/-----,
+STRING   ;    :    '/'""\'           ,/--==,/-----,
 ENTER
 HOME
-STRING   |    `-...|        -.___-Z:_______J...---;
+STRING   |    '-...|        -.___-Z:_______J...---;
 ENTER
 HOME
-STRING   :         `                           _-'
+STRING   :         '                           _-'
 ENTER
 HOME
-STRING  _L_  _     ___  ___  ___  ___  ____--"`
+STRING  _L_  _     ___  ___  ___  ___  ____--"'
 ENTER
 HOME
 STRING | __|| |   |_ _|| _ \| _ \| __|| _ \
