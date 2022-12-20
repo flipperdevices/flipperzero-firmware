@@ -36,6 +36,7 @@ Thank you to all the supporters!
 - Fixed Sound Issues for some FAPs.
 - [New Animation Pack Release on Patreon: RM Select + 18PLUS](https://www.patreon.com/RogueMaster)
 - Fix path for Music Beeper
+- Fix some sound crash issues in FAPs.
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
