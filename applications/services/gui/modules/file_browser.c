@@ -134,14 +134,14 @@ static void
     browser_list_item_cb(void* context, FuriString* item_path, bool is_folder, bool is_last);
 static void browser_long_load_cb(void* context);
 
-static void file_browser_scroll_timer(void* context) {
+static void file_browser_scroll_timer_callback(void* context) {
     furi_assert(context);
     FileBrowser* browser = context;
     with_view_model(
         browser->view, FileBrowserModel * model, { model->scroll_counter++; }, true);
 }
 
-static void file_browser_view_enter(void* context) {
+static void file_browser_view_enter_callback(void* context) {
     furi_assert(context);
     FileBrowser* browser = context;
     with_view_model(
@@ -149,7 +149,7 @@ static void file_browser_view_enter(void* context) {
     furi_timer_start(browser->scroll_timer, SCROLL_INTERVAL);
 }
 
-static void file_browser_view_exit(void* context) {
+static void file_browser_view_exit_callback(void* context) {
     furi_assert(context);
     FileBrowser* browser = context;
     furi_timer_stop(browser->scroll_timer);
@@ -163,11 +163,11 @@ FileBrowser* file_browser_alloc(FuriString* result_path) {
     view_set_context(browser->view, browser);
     view_set_draw_callback(browser->view, file_browser_view_draw_callback);
     view_set_input_callback(browser->view, file_browser_view_input_callback);
-    view_set_enter_callback(browser->view, file_browser_view_enter);
-    view_set_exit_callback(browser->view, file_browser_view_exit);
+    view_set_enter_callback(browser->view, file_browser_view_enter_callback);
+    view_set_exit_callback(browser->view, file_browser_view_exit_callback);
 
     browser->scroll_timer =
-        furi_timer_alloc(file_browser_scroll_timer, FuriTimerTypePeriodic, browser);
+        furi_timer_alloc(file_browser_scroll_timer_callback, FuriTimerTypePeriodic, browser);
 
     browser->result_path = result_path;
 

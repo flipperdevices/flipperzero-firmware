@@ -572,6 +572,7 @@ void elements_scrollable_text_line(
         }
         // Ensure that we have something to scroll
         if(scroll_size) {
+            scroll_size += 3;
             scroll = scroll % scroll_size;
             furi_string_right(line, scroll);
         }
