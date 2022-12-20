@@ -1,4 +1,4 @@
-<a href='https://www.patreon.com/RogueMaster'><img src="patreon.png" width="30%"></a>
+<a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="30%"></a>
 
 # Flipper Zero FW [ROGUEMASTER]
 This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware) and the main Flipper Devices FW! I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects.  
@@ -10,13 +10,14 @@ Everyone gives much of their uncompensated free time to ensure the success of th
 Thank you to all the supporters!
 
 - [PATREON for compiled releases for any updates](https://www.patreon.com/RogueMaster) - releases will occur weekly or with main FW version updates.
+- Contact me on [Patreon](https://www.patreon.com/RogueMaster/membership) if you want a renamed Flipper. I can do custom names!
 - [Support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
 ## Latest Updates - [PATREON: Latest Release RM1219-2313-0.73.2-5a642f3](https://www.patreon.com/posts/latest-release-0-76139893)
-## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster)
+## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-19 23:13 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-19 23:13 EST`
@@ -36,7 +37,7 @@ Thank you to all the supporters!
 - Updated: [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Added some FAP icons and fixed some FAP ordering.
 - Fixed Sound Issues for some FAPs.
-- [New Animation Pack Release on Patreon: RM Select + 18PLUS](https://www.patreon.com/RogueMaster)
+- [New Animation Pack Release on Patreon: RM Select + 18PLUS](https://www.patreon.com/RogueMaster/membership)
 - Fix path for Music Beeper
 - Fix some sound crash issues in FAPs.
 - Optimized some FAPs thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
@@ -80,7 +81,6 @@ $ ./fbt resources icons dolphin_ext
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT IN CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
 - [FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
 - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
-- Contact me on [Patreon](https://www.patreon.com/RogueMaster) if you want a renamed Flipper DFU. I can do custom names!
 - [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
 
