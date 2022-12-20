@@ -40,12 +40,15 @@ void tracker_speaker_stop() {
 }
 
 void tracker_speaker_init() {
-    furi_hal_speaker_start(200.0f, 0.01f);
+    if(furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(200.0f, 0.01f);
+    }
     tracker_speaker_stop();
 }
 
 void tracker_speaker_deinit() {
     furi_hal_speaker_stop();
+    furi_hal_speaker_release();
 }
 
 static FuriHalInterruptISR tracker_isr;

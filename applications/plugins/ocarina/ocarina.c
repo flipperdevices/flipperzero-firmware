@@ -85,19 +85,29 @@ int32_t ocarina_app(void* p) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
-                    furi_hal_speaker_start(NOTE_UP, volume);
+                    if(furi_hal_speaker_acquire(30)) {
+                        furi_hal_speaker_start(NOTE_UP, volume);
+                    }
                     break;
                 case InputKeyDown:
-                    furi_hal_speaker_start(NOTE_DOWN, volume);
+                    if(furi_hal_speaker_acquire(30)) {
+                        furi_hal_speaker_start(NOTE_DOWN, volume);
+                    }
                     break;
                 case InputKeyLeft:
-                    furi_hal_speaker_start(NOTE_LEFT, volume);
+                    if(furi_hal_speaker_acquire(30)) {
+                        furi_hal_speaker_start(NOTE_LEFT, volume);
+                    }
                     break;
                 case InputKeyRight:
-                    furi_hal_speaker_start(NOTE_RIGHT, volume);
+                    if(furi_hal_speaker_acquire(30)) {
+                        furi_hal_speaker_start(NOTE_RIGHT, volume);
+                    }
                     break;
                 case InputKeyOk:
-                    furi_hal_speaker_start(NOTE_OK, volume);
+                    if(furi_hal_speaker_acquire(30)) {
+                        furi_hal_speaker_start(NOTE_OK, volume);
+                    }
                     break;
                 case InputKeyBack:
                     processing = false;
@@ -107,6 +117,7 @@ int32_t ocarina_app(void* p) {
                 }
             } else if(event.type == InputTypeRelease) {
                 furi_hal_speaker_stop();
+                furi_hal_speaker_release();
             }
         }
 
