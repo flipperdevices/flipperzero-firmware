@@ -1,0 +1,76 @@
+# Infrared Flipper File Formats
+
+## Infrared Remote File Format
+### Example
+
+    Filetype: IR signals file
+    Version: 1
+    # 
+    name: Button_1
+    type: parsed
+    protocol: NECext
+    address: EE 87 00 00
+    command: 5D A0 00 00
+    #
+    name: Button_2
+    type: raw
+    frequency: 38000
+    duty_cycle: 0.330000
+    data: 504 3432 502 483 500 484 510 502 502 482 501 485 509 1452 504 1458 509 1452 504 481 501 474 509 3420 503
+    #
+    name: Button_3
+    type: parsed
+    protocol: SIRC
+    address: 01 00 00 00
+    command: 15 00 00 00
+
+### Description
+Filename extension: `.ir`
+
+This file format is used to store an infrared remote that consists of an arbitrary number of buttons. 
+Each button is separated from others by a comment character (`#`) for better readability.
+
+Known protocols are represented in the `parsed` form, whereas non-recognised signals may be saved and re-transmitted as `raw` data.
+
+#### Version history:
+1. Initial version.
+
+#### Format fields
+| Name       | Use     | Type   | Description |
+| ---------- | ------- | ------ |------------ |
+| name       | both    | string | Name of the button. Only printable ASCII characters are allowed. |
+| type       | both    | string | Type of the signal. Must be `parsed` or `raw`.  |
+| protocol   | parsed  | string | Name of the infrared protocol. Refer to `ir` console command for the complete list of supported protocols. |
+| address    | parsed  | hex    | Payload address. Must be 4 bytes long. |
+| command    | parsed  | hex    | Payload command. Must be 4 bytes long. |
+| frequency  | raw     | uint32 | Carrier frequency, in the units of Hertz. Usually 38000 Hz. |
+| duty_cycle | raw     | float  | Modulation duty cycle, usually 0.33. |
+| data       | raw     | uint32 | Raw signal timings, in microseconds between logic level changes. Individual elements must be space-separated. Maximum timings amount is 1024. |
+
+## Infrared Library File Format
+### Examples
+- [TV Universal Library](/assets/resources/infrared/assets/tv.ir)
+- [A/C Universal Library](/assets/resources/infrared/assets/ac.ir)
+- [Audio Universal Library](/assets/resources/infrared/assets/audio.ir)
+
+### Description
+Filename extension: `.ir`
+
+This file format is used to store universal remote libraries. It is identical to the previous format, differing only in the `Filetype` key.\
+It also has predefined button names for each universal library type, so that the universal remote application could understand them.
+See [Universal Remotes](/documentation/UniversalRemotes.md) for more information.
+
+### Version history:
+1. Initial version.
+
+## Infrared Test File Format
+### Example
+
+### Description
+Filename extension: `.irtest`
+
+This file format is used to store technical test data that is too large to keep directly in the firmware. 
+Each infraed protocol must have corresponding unit tests complete with an `.irtest` file.
+
+### Version history:
+1. Initial version.
