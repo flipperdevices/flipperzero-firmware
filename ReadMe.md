@@ -21,31 +21,6 @@ Thank you to all the supporters!
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-20 10:15 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-20 10:15 EST`
-- Updated: [NRF24 Scanner v1.8 (By vad7)](https://github.com/vad7/nrf24scan)
-- Added: [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
-- Added: [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
-- Added: [Dolphin: add new animation #2139 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2139)
-- Updated: [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
-- Added: [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
-- Added: [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
-- Updated: [NRF24 Scanner v2.0b (By vad7)](https://github.com/vad7/nrf24scan)
-- Updated: [Sub-GHz Bruteforcer (By Ganapati & xMasterX)](https://github.com/derskythe/flipperzero-subbrute/tree/master) with [Honeywell Protocol](https://github.com/derskythe/flipperzero-subbrute/pull/4)
-- Removed: [DHT Temp Monitor (By quen0n)](https://github.com/quen0n/FipperZero-DHT-Monitor) `Req: DHT11/DHT22(AM2302)/AM2301`
-- Removed: [Temperature Sensor (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9c4612e571db42f5e6123a3f159e01337453a6af) `Req: AM2320`
-- Added (From Unleashed): [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
-- Added (From OFW): [Clock (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)
-- Updated: [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Added some FAP icons and fixed some FAP ordering.
-- Fixed Sound Issues for some FAPs.
-- [New Animation Pack Release on Patreon: RM Select + 18PLUS](https://www.patreon.com/RogueMaster/membership)
-- Fix path for Music Beeper
-- Fix some sound crash issues in FAPs.
-- Optimized some FAPs thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
-- Added: [SAM WTF (By Unknown)][Original?](https://github.com/ctoth/SAM)
-- Fixed: [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) (With Changes By qqMajiKpp/Haseo) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
-- Fixed: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
-- Fixed: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
-- Updated: [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
