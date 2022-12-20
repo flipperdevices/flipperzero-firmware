@@ -101,20 +101,13 @@ static bool subghz_protocol_encoder_hormann_get_upload(SubGhzProtocolEncoderHorm
     furi_assert(instance);
 
     size_t index = 0;
-    size_t size_upload = 3 + (instance->generic.data_count_bit * 2 + 2) * 20 + 1;
+    size_t size_upload = (instance->generic.data_count_bit * 2 + 2) * 20 + 1;
     if(size_upload > instance->encoder.size_upload) {
         FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
         return false;
     } else {
         instance->encoder.size_upload = size_upload;
     }
-    //Send header
-    instance->encoder.upload[index++] =
-        level_duration_make(false, (uint32_t)subghz_protocol_hormann_const.te_short * 64);
-    instance->encoder.upload[index++] =
-        level_duration_make(true, (uint32_t)subghz_protocol_hormann_const.te_short * 64);
-    instance->encoder.upload[index++] =
-        level_duration_make(false, (uint32_t)subghz_protocol_hormann_const.te_short * 64);
     instance->encoder.repeat = 10; //original remote does 10 repeats
 
     for(size_t repeat = 0; repeat < 20; repeat++) {
@@ -221,25 +214,9 @@ void subghz_protocol_decoder_hormann_feed(void* context, bool level, uint32_t du
 
     switch(instance->decoder.parser_step) {
     case HormannDecoderStepReset:
-        if((level) && (DURATION_DIFF(duration, subghz_protocol_hormann_const.te_short * 64) <
-                       subghz_protocol_hormann_const.te_delta * 64)) {
-            instance->decoder.parser_step = HormannDecoderStepFoundStartHeader;
-        }
-        break;
-    case HormannDecoderStepFoundStartHeader:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_hormann_const.te_short * 64) <
-                        subghz_protocol_hormann_const.te_delta * 64)) {
-            instance->decoder.parser_step = HormannDecoderStepFoundHeader;
-        } else {
-            instance->decoder.parser_step = HormannDecoderStepReset;
-        }
-        break;
-    case HormannDecoderStepFoundHeader:
         if((level) && (DURATION_DIFF(duration, subghz_protocol_hormann_const.te_short * 24) <
                        subghz_protocol_hormann_const.te_delta * 24)) {
             instance->decoder.parser_step = HormannDecoderStepFoundStartBit;
-        } else {
-            instance->decoder.parser_step = HormannDecoderStepReset;
         }
         break;
     case HormannDecoderStepFoundStartBit:
