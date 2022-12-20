@@ -43,9 +43,5 @@ void gpio_item_set_all_pins(bool level) {
 
 const char* gpio_item_get_pin_name(uint8_t index) {
     furi_assert(index < GPIO_ITEM_COUNT + 1);
-    if(index == GPIO_ITEM_COUNT) {
-        return "ALL";
-    } else {
-        return gpio_item[index].name;
-    }
+    return (index == GPIO_ITEM_COUNT) ? "ALL" : gpio_item[index].name;
 }
