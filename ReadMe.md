@@ -7,14 +7,14 @@ This software is for experimental purposes only and is not meant for any illegal
 Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
 Thank you to all the supporters!
 
-- [PATREON for compiled releases for any updates](https://www.patreon.com/RogueMaster) - regular releases will occur weekly or with main FW version updates.
+- [PATREON for compiled releases for any updates](https://www.patreon.com/RogueMaster) - releases will occur weekly or with main FW version updates.
 - [Support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
 ## Latest Updates - [PATREON: Latest Release Latest Release RM1219-2056](https://www.patreon.com/posts/76136239)
-# [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATIONS](https://www.patreon.com/RogueMaster)
+## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster)
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-19 18:15 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-19 18:15 EST`
@@ -35,6 +35,7 @@ Thank you to all the supporters!
 - Added some FAP icons and fixed some FAP ordering.
 - Fixed Sound Issues for some FAPs.
 - [New Animation Pack Release on Patreon: RM Select + 18PLUS](https://www.patreon.com/RogueMaster)
+- Fix path for Music Beeper
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
