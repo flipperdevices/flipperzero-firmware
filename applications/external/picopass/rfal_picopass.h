@@ -38,6 +38,8 @@ typedef struct {
     uint8_t crc[2];
 } rfalPicoPassReadBlockRes;
 
+uint16_t rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length);
+
 FuriHalNfcReturn rfalPicoPassPollerInitialize(void);
 FuriHalNfcReturn rfalPicoPassPollerCheckPresence(void);
 FuriHalNfcReturn rfalPicoPassPollerIdentify(rfalPicoPassIdentifyRes* idRes);

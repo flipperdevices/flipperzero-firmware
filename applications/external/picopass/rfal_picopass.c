@@ -29,8 +29,7 @@ static uint16_t rfalPicoPassUpdateCcitt(uint16_t crcSeed, uint8_t dataByte) {
     return crc;
 }
 
-static uint16_t
-    rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
+uint16_t rfalPicoPassCalculateCcitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
     uint16_t crc = preloadValue;
     uint16_t index;
 
