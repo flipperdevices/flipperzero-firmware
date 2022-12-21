@@ -11,18 +11,19 @@ class OpenOCDProgrammer(Programmer):
     def __init__(
         self,
         interface: str = "interface/cmsis-dap.cfg",
-        port_base: int | None = None,
-        serial: str | None = None,
+        port_base: int = 3333,
+        serial: str = "",
     ):
         super().__init__()
+        self.logger = logging.getLogger()
 
         config = {}
 
         config["interface"] = interface
         config["target"] = "target/stm32wbx.cfg"
 
-        if not serial is None:
-            if interface == "interface/cmsis-dap.cfg":
+        if serial != "" and not serial is None:
+            if "cmsis-dap" in interface:
                 config["serial"] = f"cmsis_dap_serial {serial}"
             elif "stlink" in interface:
                 config["serial"] = f"stlink_serial {serial}"
@@ -31,7 +32,6 @@ class OpenOCDProgrammer(Programmer):
             config["port_base"] = port_base
 
         self.openocd = OpenOCD(config)
-        self.logger = logging.getLogger()
 
     def reset(self, mode: Programmer.RunMode = Programmer.RunMode.Run) -> bool:
         stm32 = STM32WB55()
