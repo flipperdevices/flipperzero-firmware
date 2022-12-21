@@ -137,9 +137,9 @@ void pulse_reader_start(PulseReader* signal) {
 
     /* capture current timer */
     signal->pos = 0;
-    signal->start_level = furi_hal_gpio_read(signal->gpio);
     signal->timer_value = TIM2->CNT;
     signal->gpio_mask = signal->gpio->pin;
+    signal->gpio_value = signal->gpio->port->IDR & signal->gpio_mask;
 
     /* now set up DMA with these settings */
     LL_DMA_Init(DMA1, signal->dma_channel, &signal->dma_config_timer);

@@ -1,10 +1,12 @@
 #include <furi.h>
 #include <furi_hal.h>
+#include <stm32wbxx_ll_tim.h>
 #include <storage/storage.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/nfc/protocols/nfca.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/digital_signal/digital_signal.h>
+#include <lib/pulse_reader/pulse_reader.h>
 #include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/nfc_generators.h>
 
@@ -177,6 +179,153 @@ MU_TEST(nfc_digital_signal_test) {
         nfc_test_digital_signal_test_encode(
             NFC_TEST_RESOURCES_DIR NFC_TEST_SIGNAL_LONG_FILE, 2000, 1, 37),
         "NFC long digital signal test failed\r\n");
+}
+
+static bool nfc_test_pulse_reader_toggle(
+    uint32_t usec_low,
+    uint32_t usec_high,
+    uint32_t period_count,
+    uint32_t tolerance) {
+    furi_assert(nfc_test);
+
+    bool success = false;
+    uint32_t pulses = 0;
+    const GpioPin* gpio_in = &gpio_ext_pa6;
+    const GpioPin* gpio_out = &gpio_ext_pa7;
+    PulseReader* reader = NULL;
+
+    do {
+        reader = pulse_reader_alloc(gpio_in, 512);
+
+        if(!reader) {
+            FURI_LOG_E(TAG, "failed to allocate pulse reader");
+            break;
+        }
+
+        /* use TIM1 to create a specific number of pulses with defined duty cycle 
+           but first set the IO to high, so the low/high pulse can get detected */
+        furi_hal_gpio_init(gpio_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+        furi_hal_gpio_write(gpio_out, true);
+
+        LL_TIM_DeInit(TIM1);
+
+        LL_TIM_SetCounterMode(TIM1, LL_TIM_COUNTERMODE_UP);
+        LL_TIM_SetRepetitionCounter(TIM1, 0);
+        LL_TIM_SetClockDivision(TIM1, LL_TIM_CLOCKDIVISION_DIV1);
+        LL_TIM_SetClockSource(TIM1, LL_TIM_CLOCKSOURCE_INTERNAL);
+        LL_TIM_DisableARRPreload(TIM1);
+
+        LL_TIM_OC_DisablePreload(TIM1, LL_TIM_CHANNEL_CH1);
+        LL_TIM_OC_SetMode(TIM1, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM2);
+        LL_TIM_OC_SetPolarity(TIM1, LL_TIM_CHANNEL_CH1N, LL_TIM_OCPOLARITY_HIGH);
+        LL_TIM_OC_DisableFast(TIM1, LL_TIM_CHANNEL_CH1);
+        LL_TIM_CC_EnableChannel(TIM1, LL_TIM_CHANNEL_CH1N);
+
+        LL_TIM_EnableAllOutputs(TIM1);
+
+        /* now calculate the TIM1 period and compare values */
+        uint32_t freq_div = 64 * (usec_low + usec_high);
+        uint32_t prescaler = freq_div / 0x10000LU;
+        uint32_t period = freq_div / (prescaler + 1);
+        uint32_t compare = 64 * usec_low / (prescaler + 1);
+
+        LL_TIM_SetPrescaler(TIM1, prescaler);
+        LL_TIM_SetAutoReload(TIM1, period - 1);
+        LL_TIM_SetCounter(TIM1, period - 1);
+        LL_TIM_OC_SetCompareCH1(TIM1, compare);
+
+        /* timer is ready to launch, now start the pulse reader */
+        pulse_reader_set_timebase(reader, PulseReaderUnitMicrosecond);
+        pulse_reader_start(reader);
+
+        /* and quickly enable and switch over the GPIO to the generated signal */
+        LL_TIM_EnableCounter(TIM1);
+        furi_hal_gpio_init_ex(
+            gpio_out, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn1TIM1);
+
+        /* now it's time to parse the pulses received by the reader */
+        uint32_t timer_pulses = period_count;
+        uint32_t prev_cnt = 0;
+
+        while(timer_pulses > 0) {
+            /* whenever the counter gets reset, we went through a full period */
+            uint32_t cur_cnt = LL_TIM_GetCounter(TIM1);
+            if(cur_cnt < prev_cnt) {
+                timer_pulses--;
+            }
+            prev_cnt = cur_cnt;
+        }
+        /* quickly halt the counter to keep a static signal. we might get some delay here due to scheduling,
+        causing the timer to continue racing. there is currently no workaround, as disabling interrupts will 
+        defunct the pulse_reader */
+        LL_TIM_DisableCounter(TIM1);
+
+        do {
+            /* as all edges were sampled asynchronously, the timeout can be zero */
+            uint32_t length = pulse_reader_receive(reader, 0);
+
+            /* in the last pulse, we expect a "no edge" return value. if seen that, test succeeded. */
+            if(pulses > period_count * 2) {
+                if(length != PULSE_READER_NO_EDGE) {
+                    FURI_LOG_E(
+                        TAG,
+                        "last pulse expected to be PULSE_READER_NO_EDGE, but was %lu.",
+                        length);
+                    break;
+                }
+                success = true;
+                break;
+            }
+
+            /* else we shall never see "no edge" or "lost edge" */
+            if(length == PULSE_READER_NO_EDGE) {
+                FURI_LOG_E(TAG, "%lu. pulse not expected to be PULSE_READER_NO_EDGE", pulses);
+                break;
+            }
+            if(length == PULSE_READER_LOST_EDGE) {
+                FURI_LOG_E(TAG, "%lu. pulse not expected to be PULSE_READER_LOST_EDGE", pulses);
+                break;
+            }
+
+            if(pulses > 0) {
+                /* throw away the first pulse, which is the 1->0 from the first start and will be irrelevant for our test */
+                bool phase = ((pulses - 1) % 2) == 1;
+                uint32_t expected = phase ? usec_high : usec_low;
+                uint32_t deviation = abs((int32_t)length - (int32_t)expected);
+
+                if(deviation > tolerance) {
+                    FURI_LOG_E(
+                        TAG,
+                        "%lu. pulse expected %lu, but pulse was %lu.",
+                        pulses,
+                        expected,
+                        length);
+                    break;
+                }
+            }
+            pulses++;
+        } while(true);
+    } while(false);
+
+    if(reader != NULL) {
+        pulse_reader_stop(reader);
+        pulse_reader_free(reader);
+    }
+
+    LL_TIM_DeInit(TIM1);
+    furi_hal_gpio_init_simple(gpio_in, GpioModeAnalog);
+    furi_hal_gpio_init_simple(gpio_out, GpioModeAnalog);
+
+    return success;
+}
+
+MU_TEST(nfc_pulse_reader_test) {
+    mu_assert(nfc_test_pulse_reader_toggle(5000, 5000, 10, 10), "10 ms signal failed\r\n");
+    mu_assert(nfc_test_pulse_reader_toggle(50000, 50000, 5, 50), "100 ms signal failed\r\n");
+    mu_assert(
+        nfc_test_pulse_reader_toggle(3333, 6667, 10, 10), "10 ms asymmetric signal failed\r\n");
+    mu_assert(
+        nfc_test_pulse_reader_toggle(25000, 75000, 5, 10), "100 ms asymmetric signal failed\r\n");
 }
 
 MU_TEST(mf_classic_dict_test) {
@@ -485,6 +634,7 @@ MU_TEST(mf_classic_4k_7b_file_test) {
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
+    MU_RUN_TEST(nfc_pulse_reader_test);
     MU_RUN_TEST(nfca_file_test);
     MU_RUN_TEST(mf_classic_1k_4b_file_test);
     MU_RUN_TEST(mf_classic_4k_4b_file_test);

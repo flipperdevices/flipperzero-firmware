@@ -29,7 +29,6 @@ typedef enum {
 } PulseReaderUnit;
 
 typedef struct {
-    bool start_level;
     uint32_t* timer_buffer;
     uint32_t* gpio_buffer;
     uint32_t size;
@@ -65,7 +64,8 @@ void pulse_reader_free(PulseReader* signal);
 
 /** Start signal capturing
  *
- * Initializes DMA1, TIM2 and DMAMUX_REQ_GEN_0 to automatically capture timer values
+ * Initializes DMA1, TIM2 and DMAMUX_REQ_GEN_0 to automatically capture timer values.
+ * Ensure that interrupts are always enabled, as the used EXTI line is handled as one.
  *
  * @param[in]  signal      previously allocated PulseReader object.
  */
