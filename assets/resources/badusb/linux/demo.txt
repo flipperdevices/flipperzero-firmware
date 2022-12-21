@@ -1,31 +1,19 @@
-REM This is BadUSB demo script for windows
+REM This is BadUSB demo script for linux
 
-REM Open windows notepad
+REM Open terminal window
 DELAY 1000
-GUI r
-DELAY 500
-STRING notepad
-DELAY 500
+ALT T
+DELAY 1000
+STRING cd ~
 ENTER
-DELAY 750
+DELAY 500
+STRING nano flipperzero.txt
+ENTER
 
 STRING Hello World!
 ENTER
+
 DEFAULT_DELAY 50
-
-REM Copy-Paste previous string
-UP
-HOME
-SHIFT DOWN
-CTRL c
-RIGHT
-CTRL v
-CTRL v
-
-REM Alt code input demo
-ALTCHAR 7
-ALTSTRING This line was print using Alt+Numpad input method. It works even if non-US keyboard layout is selected
-ENTER
 
 STRING =
 REPEAT 59
@@ -78,7 +66,15 @@ ENTER
 
 STRING Flipper Zero BadUSB feature is compatible with USB Rubber Ducky script format
 ENTER
-STRING More information about script synax can be found here:
+STRING More information about script syntax can be found here:
 ENTER
 STRING https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript
+ENTER
+
+CONTROL X
+STRING y
+ENTER
+
+DELAY 500
+STRING cat flipperzero.txt
 ENTER

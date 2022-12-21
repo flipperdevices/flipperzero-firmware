@@ -1,0 +1,10 @@
+REM The classic rick roll
+DEFAULT_DELAY 700
+REM Open video:
+ALT T
+STRING xdg-open https://vimeo.com/375468729
+ENTER
+REM Fullscren video and play it:
+DELAY 5000
+STRING f
+SPACE

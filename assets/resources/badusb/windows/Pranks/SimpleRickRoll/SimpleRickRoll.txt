@@ -1,0 +1,12 @@
+REM Title: Simple Rick Roll
+REM Author: LingLingAZN
+REM Description: start RickRoll in browser.
+REM Target: Windows 10 & 11
+REM Version: 1.0
+REM Category: Prank
+REM ---------------------
+GUI R
+DELAY 200
+STRING https://rebrand.ly/r1ckr0l13r
+DELAY 200
+ENTER

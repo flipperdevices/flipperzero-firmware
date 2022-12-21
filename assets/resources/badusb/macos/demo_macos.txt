@@ -1,31 +1,30 @@
-REM This is BadUSB demo script for windows
+ID 1234:5678 Apple:Keyboard
+REM You can change these values to VID/PID of original Apple keyboard
+REM to bypass Keyboard Setup Assistant
 
-REM Open windows notepad
+REM This is BadUSB demo script for macOS
+
+REM Open terminal window
 DELAY 1000
-GUI r
+GUI SPACE
 DELAY 500
-STRING notepad
+STRING terminal
 DELAY 500
 ENTER
 DELAY 750
 
-STRING Hello World!
-ENTER
-DEFAULT_DELAY 50
-
 REM Copy-Paste previous string
 UP
-HOME
-SHIFT DOWN
 CTRL c
-RIGHT
-CTRL v
-CTRL v
 
-REM Alt code input demo
-ALTCHAR 7
-ALTSTRING This line was print using Alt+Numpad input method. It works even if non-US keyboard layout is selected
+REM Bigger shell script example
+STRING cat > /dev/null << EOF
 ENTER
+
+STRING Hello World!
+ENTER
+
+DEFAULT_DELAY 50
 
 STRING =
 REPEAT 59
@@ -78,7 +77,10 @@ ENTER
 
 STRING Flipper Zero BadUSB feature is compatible with USB Rubber Ducky script format
 ENTER
-STRING More information about script synax can be found here:
+STRING More information about script syntax can be found here:
 ENTER
 STRING https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript
+ENTER
+
+STRING EOF
 ENTER

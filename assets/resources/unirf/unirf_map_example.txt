@@ -1,0 +1,10 @@
+UP: /any/subghz/Up.sub
+DOWN: /any/subghz/Down.sub
+LEFT: /any/subghz/Left.sub
+RIGHT: /any/subghz/Right.sub
+OK: /any/subghz/Ok.sub
+ULABEL: Up Label
+DLABEL: Down Label
+LLABEL: Left Label
+RLABEL: Right Label
+OKLABEL: Ok Label
