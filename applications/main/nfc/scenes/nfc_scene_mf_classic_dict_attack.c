@@ -53,10 +53,10 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackSt
     // Setup view
     if(state == DictAttackStateUserDictInProgress) {
         worker_state = NfcWorkerStateMfClassicDictAttack;
-        dict_attack_set_header(nfc->dict_attack, "Mf Classic User Dict.");
+        dict_attack_set_header(nfc->dict_attack, "MF Classic User Dictuionary");
         dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
 
-        // If failed to load user dictionary - try flipper dictionary
+        // If failed to load user dictionary - try the system dictionary
         if(!dict) {
             FURI_LOG_E(TAG, "User dictionary not found");
             state = DictAttackStateFlipperDictInProgress;
@@ -64,11 +64,11 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackSt
     }
     if(state == DictAttackStateFlipperDictInProgress) {
         worker_state = NfcWorkerStateMfClassicDictAttack;
-        dict_attack_set_header(nfc->dict_attack, "Mf Classic Flipper Dict.");
+        dict_attack_set_header(nfc->dict_attack, "MF Classic System Dictionary");
         dict = mf_classic_dict_alloc(MfClassicDictTypeFlipper);
         if(!dict) {
             FURI_LOG_E(TAG, "Flipper dictionary not found");
-            // Pass through to let worker handle the failure
+            // Pass through to let the worker handle the failure
         }
     }
     // Free previous dictionary
