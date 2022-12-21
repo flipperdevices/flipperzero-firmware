@@ -318,9 +318,9 @@ static bool nfc_test_pulse_reader_toggle(
 }
 
 MU_TEST(nfc_pulse_reader_test) {
-    mu_assert(nfc_test_pulse_reader_toggle(1500, 2500, 50, 10), "1 ms signal failed\r\n");
-    mu_assert(nfc_test_pulse_reader_toggle(10000, 10000, 10, 10), "10 ms signal failed\r\n");
-    mu_assert(nfc_test_pulse_reader_toggle(100000, 100000, 5, 50), "100 ms signal failed\r\n");
+    mu_assert(nfc_test_pulse_reader_toggle(500, 500, 50, 10), "1 ms signal failed\r\n");
+    mu_assert(nfc_test_pulse_reader_toggle(5000, 5000, 10, 10), "10 ms signal failed\r\n");
+    mu_assert(nfc_test_pulse_reader_toggle(50000, 50000, 5, 50), "100 ms signal failed\r\n");
     mu_assert(nfc_test_pulse_reader_toggle(100, 900, 50, 10), "1 ms asymmetric signal failed\r\n");
     mu_assert(
         nfc_test_pulse_reader_toggle(3333, 6666, 10, 10), "10 ms asymmetric signal failed\r\n");
