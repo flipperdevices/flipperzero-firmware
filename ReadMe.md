@@ -27,6 +27,7 @@ Thank you to all the supporters!
 - [PATREON ONLY UPDATES: For STOCK Animations Release: Not Stoned, Passport display closer to OFW, Passport avatar from OFW, Top desktop bar from OFW & Internal Apps have OFW animation scenes](https://www.patreon.com/posts/76185159)
 - [PATREON ONLY UPDATES: For STOCK Animations Release: Desktop bar transparent, but the icons are shown](https://www.patreon.com/posts/76188388)
 - Swapped favorite buttons to fix Favorite location bug.
+- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
