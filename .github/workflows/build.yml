@@ -33,7 +33,9 @@ jobs:
       - name: 'Make artifacts directory'
         run: |
           rm -rf artifacts
+          rm -rf map-analyse
           mkdir artifacts
+          mkdir map-analyse
 
       - name: 'Get commit details'
         id: names
@@ -46,6 +48,7 @@ jobs:
             TYPE="other"
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
+          echo random_hash=$(openssl rand -base64 40 | shasum -a 256 | awk '{print $1}') >> $GITHUB_OUTPUT
 
       - name: 'Bundle scripts'
         if: ${{ !github.event.pull_request.head.repo.fork }}
@@ -94,7 +97,17 @@ jobs:
         with:
           command: cp
           source: ${{steps.mapfile.outputs.name}}
-          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map"
+          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.random_hash}}/firmware.elf.map"
+          aws_access_key_id: "${{ secrets.MAP_REPORT_AWS_ACCESS_KEY }}"
+          aws_secret_access_key: "${{ secrets.MAP_REPORT_AWS_SECRET_KEY }}"
+          aws_region: "${{ secrets.MAP_REPORT_AWS_REGION }}"
+
+      - name: 'Upload github event file to storage'
+        uses: keithweaver/aws-s3-github-action@v1.0.0
+        with:
+          command: cp
+          source: ${{ github.event_path }}
+          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.random_hash}}/event.json"
           aws_access_key_id: "${{ secrets.MAP_REPORT_AWS_ACCESS_KEY }}"
           aws_secret_access_key: "${{ secrets.MAP_REPORT_AWS_SECRET_KEY }}"
           aws_region: "${{ secrets.MAP_REPORT_AWS_REGION }}"
@@ -105,7 +118,7 @@ jobs:
           repository: flipperdevices/flipper-map-reporter
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           event-type: map-file-analyse
-          client-payload: '{"github-event": ${{ toJson(github.event_path)}}'
+          client-payload: '{"random_hash": ${{steps.names.outputs.random_hash}}}'
 
 
       - name: 'Upload artifacts to update server'
