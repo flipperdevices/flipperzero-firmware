@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24scan"
-#define VERSION		"2.0"
+#define VERSION		"2.1"
 #define MAX_CHANNEL	125
 #define MAX_ADDR	6
 
@@ -41,7 +41,7 @@
 #define LOG_FILENAME 		"log"
 #define LOG_FILEEXT	 		".txt"
 #define MAX_LOG_RECORDS		200
-#define MAX_FOUND_RECORDS	100
+#define MAX_FOUND_RECORDS	70
 #define LOG_REC_SIZE		34		// max packet size
 #define VIEW_LOG_MAX_X		22
 #define VIEW_LOG_WIDTH_B	10		// bytes
@@ -86,7 +86,7 @@ struct ADDRS addrs;
 struct ADDRS addrs_sniff;
 bool sniff_loaded = 0;
 int16_t found_total;
-int16_t view_found = -1;
+int16_t view_found;
 
 int8_t log_to_file = 0;	// 0 - no, 1 - yes(new), 2 - append, -1 - only clear
 uint16_t log_arr_idx;
@@ -167,7 +167,7 @@ void clear_log()
 	view_log_arr_idx = 0;
 	last_packet_send = -1;
 	found_total = 0;
-	view_found = 0;
+	view_found = -1;
 }
 
 void write_to_log_file(Storage* storage, bool f_settings)
@@ -412,6 +412,24 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 	furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+void check_add_addr(uint8_t *pkt)
+{
+	if(addrs.addr_count > 0 && memcmp(addrs.addr_P0, pkt, addrs.addr_len) == 0) return;
+	if(addrs.addr_count > 1 && memcmp(addrs.addr_P1, pkt, addrs.addr_len - 1) == 0) {
+		if(addrs.addr_P1[addrs.addr_len - 1] == pkt[addrs.addr_len - 1]) return;
+		if(addrs.addr_count > 2 && addrs.addr_P2 == pkt[addrs.addr_len - 1]) return;
+		if(addrs.addr_count > 3 && addrs.addr_P3 == pkt[addrs.addr_len - 1]) return;
+		if(addrs.addr_count > 4 && addrs.addr_P4 == pkt[addrs.addr_len - 1]) return;
+		if(addrs.addr_count > 5 && addrs.addr_P5 == pkt[addrs.addr_len - 1]) return;
+	}
+	if(addrs.addr_count == 1) memcpy(addrs.addr_P1, pkt, addrs.addr_len);
+	else if(addrs.addr_count == 2) addrs.addr_P2 = pkt[addrs.addr_len - 1];
+	else if(addrs.addr_count == 3) addrs.addr_P3 = pkt[addrs.addr_len - 1];
+	else if(addrs.addr_count == 4) addrs.addr_P4 = pkt[addrs.addr_len - 1];
+	else if(addrs.addr_count == 5) addrs.addr_P5 = pkt[addrs.addr_len - 1];
+	addrs.addr_count++;
+}
+
 static void prepare_nrf24(bool fsend_packet)
 {
 	nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
@@ -420,85 +438,95 @@ static void prepare_nrf24(bool fsend_packet)
 	struct ADDRS *adr = what_to_do == 1 ? &addrs_sniff : &addrs;
 	if(!fsend_packet) {
 		uint8_t payload = NRF_Payload;
+		uint8_t *rec = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
+		uint8_t addr_size = (*(rec + 1) & 0b11) + 2;
+		bool setup_from_log = false;
+		if(what_to_do >= 2) {
+			if(log_arr_idx && (*rec & 0x80)) {
+				setup_from_log = true;
+				memcpy(addrs.addr_P0, rec + 2, addr_size);
+				addrs.addr_count = 1;
+				addrs.addr_len = addr_size;
+				payload = *(rec + 1) >> 3;
+				if(what_to_do == 2) {
+					uint8_t *p = APP->log_arr + 2;
+					int16_t i = 0;
+					for(i = 0; i < log_arr_idx; i++, p += LOG_REC_SIZE) {
+						if((*(p - 2) & 0x80) && (*(p - 1) & 0b11) + 2 == addr_size && rec + 2 != p) {
+							if(memcmp(p, addrs.addr_P0, addr_size - 1) == 0) {
+								check_add_addr(rec + 2);
+								if(addrs.addr_count >= 6) break;
+							}
+						}
+					}
+				}
+			} 
+		}
 		if(what_to_do == 1) { // SNIFF
-			if(adr->addr_count == 0) return;
-			//payload += 5 + NRF_CRC; // + addr_max + CRC
-			//if(NRF_ESB)	payload += 2;
-			//if(payload > 32) payload = 32;
 			payload = 32;
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts
 			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
 			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-		} else if(what_to_do == 2) {
-			if(adr->addr_count == 0) return;
+		} else if(setup_from_log) { // Scan
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
-			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x01 : 0); // Automatic Retransmission
-			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_AA_OFF || !NRF_ESB ? 0 : 0x3F); // Auto acknowledgement
-			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, NRF_DPL ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-		}
-		if(what_to_do == 3) {
-			uint8_t *p = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
-			uint8_t addr_size = (*(p + 1) & 0b11) + 2;
-			nrf24_set_maclen(nrf24_HANDLE, addr_size);
-			nrf24_set_mac(REG_RX_ADDR_P0, p + 2, addr_size);
-			memcpy(addrs.addr_P0, p + 2, addr_size);
-			addrs.addr_count = 1;
-			addrs.addr_len = addr_size;
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, *(p + 1) >> 3);
-			nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
-			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, *p & 0x7F);
-			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
-			if(*(p + 1) & 0b100) { // ESB
+			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, *rec & 0x7F);
+			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, *(rec + 2 + addr_size) >> 2 != 0x33 ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+			if(*(rec + 1) & 0b100) { // ESB
 				nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0x01); // Automatic Retransmission
 				nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x3F); // Auto acknowledgement
-				nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, *(p + 2 + addr_size) >> 2 != 0x33 ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 			} else {
 				nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
 				nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
 			}
 		} else {
-			nrf24_set_maclen(nrf24_HANDLE, adr->addr_len);
-			nrf24_set_mac(REG_RX_ADDR_P0, adr->addr_P0, adr->addr_len);
-			uint8_t tmp[5] = { 0 };
-			nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, adr->addr_len);
-			for(uint8_t i = 0; i < adr->addr_len / 2; i++) {
-				uint8_t tb = tmp[i];
-				tmp[i] = tmp[adr->addr_len - i - 1];
-				tmp[adr->addr_len - i - 1] = tb;
-			}
-			NRF_ERROR = memcmp(adr->addr_P0, tmp, adr->addr_len) != 0;
-			FURI_LOG_D(TAG, "Payload: %d", payload);
-			nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload);
-			if(adr->addr_count > 1) {
-				nrf24_set_mac(REG_RX_ADDR_P1, adr->addr_P1, adr->addr_len);
-				nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, payload);
-				erx_addr |= (1<<1); // Enable RX_P1
-			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, 0);
-			if(adr->addr_count > 2) {
-				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P2, &adr->addr_P2, 1);
-				nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, payload);
-				erx_addr |= (1<<2); // Enable RX_P2
-			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, 0);
-			if(adr->addr_count > 3) {
-				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P3, &adr->addr_P3, 1);
-				nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, payload);
-				erx_addr |= (1<<3); // Enable RX_P3
-			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, 0);
-			if(adr->addr_count > 4) {
-				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P4, &adr->addr_P4, 1);
-				nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, payload);
-				erx_addr |= (1<<4); // Enable RX_P4
-			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, 0);
-			if(adr->addr_count > 5) {
-				nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P5, &adr->addr_P5, 1);
-				nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, payload);
-				erx_addr |= (1<<5); // Enable RX_P5
-			} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
+			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
+			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x01 : 0); // Automatic Retransmission
+			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_AA_OFF || !NRF_ESB ? 0 : 0x3F); // Auto acknowledgement
+			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, NRF_DPL ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 			nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
-			nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
 			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 		}
+		if(adr->addr_count == 0) return;
+		nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload);
+		nrf24_set_maclen(nrf24_HANDLE, adr->addr_len);
+		nrf24_set_mac(REG_RX_ADDR_P0, adr->addr_P0, adr->addr_len);
+		uint8_t tmp[5] = { 0 };
+		nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, adr->addr_len);
+		for(uint8_t i = 0; i < adr->addr_len / 2; i++) {
+			uint8_t tb = tmp[i];
+			tmp[i] = tmp[adr->addr_len - i - 1];
+			tmp[adr->addr_len - i - 1] = tb;
+		}
+		NRF_ERROR = memcmp(adr->addr_P0, tmp, adr->addr_len) != 0;
+		FURI_LOG_D(TAG, "Payload: %d", payload);
+		nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload);
+		if(adr->addr_count > 1) {
+			nrf24_set_mac(REG_RX_ADDR_P1, adr->addr_P1, adr->addr_len);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, payload);
+			erx_addr |= (1<<1); // Enable RX_P1
+		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P1, 0);
+		if(adr->addr_count > 2) {
+			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P2, &adr->addr_P2, 1);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, payload);
+			erx_addr |= (1<<2); // Enable RX_P2
+		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P2, 0);
+		if(adr->addr_count > 3) {
+			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P3, &adr->addr_P3, 1);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, payload);
+			erx_addr |= (1<<3); // Enable RX_P3
+		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P3, 0);
+		if(adr->addr_count > 4) {
+			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P4, &adr->addr_P4, 1);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, payload);
+			erx_addr |= (1<<4); // Enable RX_P4
+		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P4, 0);
+		if(adr->addr_count > 5) {
+			nrf24_write_buf_reg(nrf24_HANDLE, REG_RX_ADDR_P5, &adr->addr_P5, 1);
+			nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, payload);
+			erx_addr |= (1<<5); // Enable RX_P5
+		} else nrf24_write_reg(nrf24_HANDLE, RX_PW_P5, 0);
+		nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, erx_addr);
 	}
 	nrf24_flush_rx(nrf24_HANDLE);
 	nrf24_flush_tx(nrf24_HANDLE);
@@ -528,26 +556,6 @@ static void start_scanning()
 	nrf24_set_rx_mode(nrf24_HANDLE);
 	start_time = furi_get_tick();
 }
-
-/*
-bool check_addr_found(uint8_t *pkt)
-{
-	uint8_t idx = 255;
-	if(addrs_found.addr_count > 0 && memcmp(addrs_found.addr_P0, pkt, addrs_found.addr_len) == 0) { idx = 0; goto x_end; }
-	if(addrs_found.addr_count > 1 && memcmp(addrs_found.addr_P1, pkt, addrs_found.addr_len - 1) == 0) {
-		if(addrs_found.addr_P1[addrs_found.addr_len - 1] == pkt[addrs_found.addr_len - 1]) { idx = 1; goto x_end; }
-		if(addrs_found.addr_count > 2 && addrs_found.addr_P2 == pkt[addrs_found.addr_len - 1]) { idx = 2; goto x_end; }
-		if(addrs_found.addr_count > 3 && addrs_found.addr_P3 == pkt[addrs_found.addr_len - 1]) { idx = 3; goto x_end; }
-		if(addrs_found.addr_count > 4 && addrs_found.addr_P4 == pkt[addrs_found.addr_len - 1]) { idx = 4; goto x_end; }
-		if(addrs_found.addr_count > 5 && addrs_found.addr_P5 == pkt[addrs_found.addr_len - 1]) { idx = 5; goto x_end; }
-	}
-x_end:
-	if(idx < sizeof(found_total) / sizeof(found_total[0])) {
-		found_total[idx]++;
-		return true;
-	} else return false;
-}
-*/
 
 // start bitnum = 7
 uint32_t calc_crc(uint32_t crc, uint8_t *ptr, uint8_t bitnum, uint16_t bits)
@@ -687,55 +695,6 @@ bool check_packet(uint8_t *pkt, uint16_t size)
 				found_total++;
 			}
 		}
-/*
-		if(addrs_found.addr_count == 0) {
-			memcpy(addrs_found.addr_P0, pkt, addr_size);
-			addrs_found.addr_len = addr_size;
-			found_total[0]++;
-			addrs_found.addr_count++;
-		} else if(addr_size == addrs_found.addr_len) {
-			if(!check_addr_found(pkt)) {
-				if(addrs_found.addr_count == 1) {
-					memcpy(addrs_found.addr_P1, pkt, addr_size);
-					found_total[1]++;
-					addrs_found.addr_count++;
-				} else if(addrs_found.addr_count == 2) {
-					if(memcmp(addrs_found.addr_P1, pkt, addr_size - 1) == 0) {
-						addrs_found.addr_P2 = pkt[addr_size - 1];
-						found_total[2]++;
-						addrs_found.addr_count++;
-					} else if(memcmp(addrs_found.addr_P0, pkt, addr_size - 1) == 0) {
-						uint8_t tmp[5];
-						memcpy(tmp, addrs_found.addr_P1, addr_size); // swap P0-P1
-						memcpy(addrs_found.addr_P1, addrs_found.addr_P0, addr_size);
-						memcpy(addrs_found.addr_P0, tmp, addr_size);
-						uint32_t n = found_total[0];
-						found_total[0] = found_total[1];
-						found_total[1] = n;
-						addrs_found.addr_P2 = pkt[addr_size - 1];
-						found_total[2]++;
-						addrs_found.addr_count++;
-					}
-				} else if(addrs_found.addr_count >= 3) {
-					if(memcmp(addrs_found.addr_P1, pkt, addr_size - 1) == 0) {
-						if(addrs_found.addr_count == 3) {
-							addrs_found.addr_P3 = pkt[addr_size - 1];
-							found_total[3]++;
-							addrs_found.addr_count++;
-						} else if(addrs_found.addr_count == 4) {
-							addrs_found.addr_P4 = pkt[addr_size - 1];
-							found_total[4]++;
-							addrs_found.addr_count++;
-						} else if(addrs_found.addr_count == 5) {
-							addrs_found.addr_P5 = pkt[addr_size - 1];
-							found_total[5]++;
-							addrs_found.addr_count++;
-						}
-					}
-				}
-			}
-		}
-*/
 	}
 
 	return found;
@@ -883,7 +842,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 		snprintf(screen_buf, sizeof(screen_buf), "Rate: %sbps",  NRF_rate == 2 ? "2M" : NRF_rate == 1 ? "1M" : "250K");	// menu_selected = 2
 		canvas_draw_str(canvas, 10, 30, screen_buf);
 		if(what_to_do == 1) snprintf(screen_buf, sizeof(screen_buf), "Min Payl: %d", NRF_Payload_sniff_min);
-		else if(what_to_do == 3) {
+		else if(what_to_do >= 2) {
 			uint8_t *p = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
 			snprintf(screen_buf, sizeof(screen_buf), "Payload: %d", log_arr_idx && (*p & 0x80) ? *(p + 1) >> 3 : NRF_Payload);
 		} else snprintf(screen_buf, sizeof(screen_buf), "Payload: %d", NRF_Payload);
@@ -900,10 +859,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 			else {
 				if(what_to_do == 1) snprintf(screen_buf, sizeof(screen_buf), "Start sniff");							
 				else {
-					uint8_t *p;
-					if(what_to_do == 3 && log_arr_idx && *(p = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE) & 0x80) { // +RAW
+					uint8_t *p = APP->log_arr + view_log_arr_idx * LOG_REC_SIZE;
+					if(log_arr_idx && (*p & 0x80)) {  // +RAW
 						snprintf(screen_buf, sizeof(screen_buf), "Start read: ");
 						add_to_str_hex_bytes(screen_buf, (char*)p + 2, (*(p + 1) & 0b11) + 2);
+						if(what_to_do == 3) strcpy(screen_buf + strlen(screen_buf) - 2, "* ");
 					} else snprintf(screen_buf, sizeof(screen_buf), "Start scan (pipes: %d)", addrs.addr_count);
 				}
 			}
@@ -1349,7 +1309,7 @@ int32_t nrf24scan_app(void* p) {
 									break;
 								case Menu_ok:
 									if(what_to_do) {
-										if((addrs.addr_count || (what_to_do == 3 && log_arr_idx && *(APP->log_arr + view_log_arr_idx * LOG_REC_SIZE) & 0x80)) || what_to_do == 1) {
+										if((addrs.addr_count || (what_to_do >= 2 && log_arr_idx && *(APP->log_arr + view_log_arr_idx * LOG_REC_SIZE) & 0x80)) || what_to_do == 1) {
 											if(log_to_file == -1) {
 												log_to_file = 0;
 												clear_log();

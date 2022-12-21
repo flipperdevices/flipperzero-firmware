@@ -1,0 +1,6 @@
+SNIFF
+ESB: 1
+CRC: 2
+P0: FFAA
+P1: 0055
+P2: AA
