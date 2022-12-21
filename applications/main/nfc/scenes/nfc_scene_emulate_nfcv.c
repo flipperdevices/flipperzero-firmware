@@ -38,7 +38,8 @@ static void nfc_scene_emulate_nfcv_widget_config(Nfc* nfc, bool data_received) {
     info_str = furi_string_alloc();
 
     widget_add_icon_element(widget, 0, 3, &I_RFIDDolphinSend_97x61);
-    widget_add_string_element(widget, 89, 32, AlignCenter, AlignTop, FontPrimary, "Emulating NfcV");
+    widget_add_string_element(
+        widget, 89, 32, AlignCenter, AlignTop, FontPrimary, "Emulating NfcV");
     if(strcmp(nfc->dev->dev_name, "")) {
         furi_string_printf(info_str, "%s", nfc->dev->dev_name);
     } else {
@@ -97,7 +98,8 @@ bool nfc_scene_emulate_nfcv_on_event(void* context, SceneManagerEvent event) {
             }
             if(strlen(nfcv_data->last_command) > 0) {
                 /* use the last n bytes from the log so there's enough space for the new log entry */
-                size_t maxSize = NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX - (strlen(nfcv_data->last_command) + 1);
+                size_t maxSize =
+                    NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX - (strlen(nfcv_data->last_command) + 1);
                 if(furi_string_size(nfc->text_box_store) >= maxSize) {
                     furi_string_right(nfc->text_box_store, (strlen(nfcv_data->last_command) + 1));
                 }

@@ -71,24 +71,24 @@ typedef enum {
     // Mifare Ultralight events
     NfcWorkerEventMfUltralightPassKey, // NFC worker requesting manual key
     NfcWorkerEventMfUltralightPwdAuth, // Reader sent auth command
-    NfcWorkerEventNfcVPassKey, // NFC worker requesting manual key} NfcWorkerEvent;
+    NfcWorkerEventNfcVPassKey, // NFC worker requesting manual key
+} NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
 
-NfcWorker* nfc_worker_alloc();
+NfcWorker * nfc_worker_alloc();
 
-NfcWorkerState nfc_worker_get_state(NfcWorker* nfc_worker);
+NfcWorkerState nfc_worker_get_state(NfcWorker * nfc_worker);
 
-void nfc_worker_free(NfcWorker* nfc_worker);
+void nfc_worker_free(NfcWorker * nfc_worker);
 
 void nfc_worker_start(
-    NfcWorker* nfc_worker,
+    NfcWorker * nfc_worker,
     NfcWorkerState state,
     NfcDeviceData* dev_data,
     NfcWorkerCallback callback,
     void* context);
 
-void nfc_worker_stop(NfcWorker* nfc_worker);
-void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker);
-void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker);
-
+void nfc_worker_stop(NfcWorker * nfc_worker);
+void nfc_worker_nfcv_unlock(NfcWorker * nfc_worker);
+void nfc_worker_emulate_nfcv(NfcWorker * nfc_worker);
