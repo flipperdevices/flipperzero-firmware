@@ -62,8 +62,8 @@
       "rule_severities": {
         "annular_width": "error",
         "clearance": "error",
-        "copper_edge_clearance": "error",
-        "courtyards_overlap": "error",
+        "copper_edge_clearance": "ignore",
+        "courtyards_overlap": "ignore",
         "diff_pair_gap_out_of_range": "error",
         "diff_pair_uncoupled_length_too_long": "error",
         "drill_out_of_range": "error",
@@ -85,12 +85,12 @@
         "padstack": "error",
         "pth_inside_courtyard": "ignore",
         "shorting_items": "error",
-        "silk_over_copper": "warning",
-        "silk_overlap": "warning",
+        "silk_over_copper": "ignore",
+        "silk_overlap": "ignore",
         "skew_out_of_range": "error",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
-        "track_dangling": "warning",
+        "track_dangling": "ignore",
         "track_width": "error",
         "tracks_crossing": "error",
         "unconnected_items": "error",
@@ -110,7 +110,7 @@
         "min_microvia_diameter": 0.19999999999999998,
         "min_microvia_drill": 0.09999999999999999,
         "min_silk_clearance": 0.0,
-        "min_through_hole_diameter": 0.5,
+        "min_through_hole_diameter": 0.19999999999999998,
         "min_track_width": 0.127,
         "min_via_annular_width": 0.049999999999999996,
         "min_via_diameter": 0.5,
@@ -132,12 +132,20 @@
           "drill": 0.0
         },
         {
-          "diameter": 0.5,
+          "diameter": 0.4,
           "drill": 0.2
+        },
+        {
+          "diameter": 0.5,
+          "drill": 0.3
         },
         {
           "diameter": 1.0,
           "drill": 0.5
+        },
+        {
+          "diameter": 2.0,
+          "drill": 1.0
         }
       ],
       "zones_allow_external_fillets": false,
@@ -378,7 +386,7 @@
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.127,
         "via_diameter": 0.5,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6.0
       },
       {
@@ -398,7 +406,7 @@
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
         "via_diameter": 0.5,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6.0
       },
       {
@@ -422,7 +430,7 @@
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
         "via_diameter": 0.5,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6.0
       }
     ],
