@@ -1656,6 +1656,7 @@ type: parsed
 protocol: RC5
 address: 01 00 00 00
 command: 21 00 00 00
+#
 # Model: VIZIO
 name: Mute
 type: parsed
