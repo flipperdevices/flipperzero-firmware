@@ -105,6 +105,7 @@ void pulse_reader_stop(PulseReader* signal) {
     LL_DMA_DisableChannel(DMA1, signal->dma_channel + 1);
     LL_DMAMUX_DisableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
     LL_TIM_DisableCounter(TIM2);
+    furi_hal_gpio_init_simple(signal->gpio, GpioModeAnalog);
 }
 
 void pulse_reader_start(PulseReader* signal) {
