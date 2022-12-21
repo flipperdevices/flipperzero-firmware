@@ -25,6 +25,7 @@ Thank you to all the supporters!
 - New Animation: [Hentai (By qqMajikpp)](https://github.com/qqmajikpp/) for [PATREON members](https://www.patreon.com/RogueMaster/membership) now included on 18Plus releases
 - [PATREON ONLY UPDATES: For STOCK Animations Release: Not Stoned, Passport display closer to OFW, Passport avatar from OFW, Top desktop bar from OFW & Internal Apps have OFW animation scenes](https://www.patreon.com/posts/76185159)
 - [PATREON ONLY UPDATES: For STOCK Animations Release: Desktop bar transparent, but the icons are shown](https://www.patreon.com/posts/76188388)
+- Swapped favorite buttons to fix Favorite location bug.
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
