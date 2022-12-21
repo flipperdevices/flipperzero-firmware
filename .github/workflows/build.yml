@@ -82,12 +82,19 @@ jobs:
         run: |
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
+      - name: 'Get map file name'
+        id: mapfile
+        run: |
+          FILENAME=$(printf "%s%s\n" "name=" build/f7-firmware-*/firmware.elf.map)
+          test -f $(echo $FILENAME | awk -F '=' '{print $2}') || ( echo "Map file not found" && exit 1 )
+          echo "$FILENAME" >> $GITHUB_OUTPUT
+
       - name: 'Upload map file to storage'
         uses: keithweaver/aws-s3-github-action@v1.0.0
         with:
           command: cp
-          source: build/f7-firmware-*/firmware.elf.map
-          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/folder/flipper-z-f7-firmware-${SUFFIX}.elf.map"
+          source: ${{steps.mapfile.outputs.name}}
+          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${BRANCH_NAME}/flipper-z-f7-firmware-${SUFFIX}.elf.map"
           aws_access_key_id: "${{ secrets.MAP_REPORT_AWS_ACCESS_KEY }}"
           aws_secret_access_key: "${{ secrets.MAP_REPORT_AWS_SECRET_KEY }}"
           aws_region: "${{ secrets.MAP_REPORT_AWS_REGION }}"
