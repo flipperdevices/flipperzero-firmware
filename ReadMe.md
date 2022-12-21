@@ -16,13 +16,14 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release RM1220-1504-0.73.2-22a61e0](https://www.patreon.com/posts/latest-release-0-76167598) 
+## Latest Updates - [PATREON: Latest Release RM1221-0015-0.73.2-15ca7f6](https://www.patreon.com/posts/76185159)
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md): `2022-12-20 10:15 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-20 10:15 EST`
 - Updated: [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
 - New Animation: [Hentai (By qqMajikpp)](https://github.com/qqmajikpp/) for [PATREON members](https://www.patreon.com/RogueMaster/membership) now included on 18Plus releases
+- [PATREON ONLY UPDATES: For STOCK Animations Release: Not Stoned, Passport display closer to OFW, Passport avatar from OFW, Top desktop bar from OFW & Internal Apps have OFW animation scenes](https://www.patreon.com/posts/76185159)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
