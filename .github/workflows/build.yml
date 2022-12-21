@@ -94,7 +94,7 @@ jobs:
         with:
           command: cp
           source: ${{steps.mapfile.outputs.name}}
-          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${BRANCH_NAME}/flipper-z-f7-firmware-${SUFFIX}.elf.map"
+          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}/flipper-z-f7-firmware-${{steps.names.outputs.suffix}}.elf.map"
           aws_access_key_id: "${{ secrets.MAP_REPORT_AWS_ACCESS_KEY }}"
           aws_secret_access_key: "${{ secrets.MAP_REPORT_AWS_SECRET_KEY }}"
           aws_region: "${{ secrets.MAP_REPORT_AWS_REGION }}"
@@ -105,7 +105,7 @@ jobs:
           repository: flipperdevices/flipper-map-reporter
           token: ${{ secrets.REPOSITORY_DISPATCH_TOKEN }}
           event-type: map-file-analyse
-          client-payload: '{"github": ${{ toJson(github) }}}'
+          client-payload: '{"github-event": ${{ toJson(github.event_path)}}'
 
 
       - name: 'Upload artifacts to update server'
