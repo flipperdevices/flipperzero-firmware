@@ -64,7 +64,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     DESKTOP_SETTINGS_LOAD(desktop_settings);
 
     char level_str[12];
-    char xp_str[12];
+    char xp_str[14];
     char mood_str[20];
     uint8_t mood = 0;
     uint8_t moodStrIndex = stats->butthurt;
@@ -99,7 +99,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
-    snprintf(xp_str, 12, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
+    snprintf(xp_str, 14, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 58, 10, my_name ? my_name : "Unknown");
     canvas_draw_str(canvas, 58, 22, mood_str);
