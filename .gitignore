@@ -59,5 +59,6 @@ PVS-Studio.log
 .gdbinit
 
 PATREONbuildRelease.sh
-RM*.tgz
-RM*.zip
+RM*-*.tgz
+RM*-*.zip
+RM*-*-*/
