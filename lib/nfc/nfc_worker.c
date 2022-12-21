@@ -695,7 +695,6 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         FURI_LOG_D(TAG, "Key found");
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
                         nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
-                        deactivated = true;
                     }
                     furi_hal_nfc_sleep();
                     deactivated = true;
@@ -707,7 +706,6 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         mf_classic_set_key_found(data, i, MfClassicKeyB, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
                         nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
-                        deactivated = true;
                     }
                     deactivated = true;
                 }
