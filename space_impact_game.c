@@ -22,12 +22,16 @@ static void game_update(GameState* game_state) {
     }
 }
 
-// draw here ui
 static void draw_callback(Canvas* canvas, void* ctx) {
     GameState* game_state = acquire_mutex((ValueMutex*)ctx, 25);
     if(game_state == NULL) {
         return;
     }
+
+    canvas_clear(canvas);
+    if(game_state->level.isInvertedColor) canvas_draw_box(canvas, 0, 0, 128, 64);
+
+    level_draw_bg(canvas, game_state->level.index, game_state->level.isInvertedColor);
 
     render_clear(game_state->level.isInvertedColor);
 

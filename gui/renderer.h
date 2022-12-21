@@ -10,7 +10,10 @@ static bool level[SCREEN_WIDTH][SCREEN_HEIGHT];
 static void render_draw(Canvas* const canvas) {
     for(int x = 0; x < SCREEN_WIDTH; x++) {
         for(int y = 0; y < SCREEN_HEIGHT; y++) {
-            if(level[x][y] != isInverted) canvas_draw_dot(canvas, x, y);
+            if(level[x][y]) {
+                canvas_set_color(canvas, isInverted ? ColorWhite : ColorBlack);
+                canvas_draw_dot(canvas, x, y);
+            }
         }
     }
 }
@@ -31,7 +34,7 @@ static void draw_point(uint8_t x, uint8_t y) {
     level[x][y] = true;
 }
 
-static void draw_ui_asset(uint8_t x, uint8_t y, uint8_t* asset) {
+static void draw_ui_asset(uint8_t x, uint8_t y, uint8_t* const asset) {
     uint8_t index = 2;
 
     for(int n = 0; n < asset[1]; n++) {
