@@ -29,6 +29,7 @@ Thank you to all the supporters!
 - Swapped favorite buttons to fix Favorite location bug.
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
+- Fixed passport to show more data for EXP
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
