@@ -179,11 +179,10 @@ On any Controller-specific screen with a Peak/Trough menu displayed:
 # Calibration
 <img src="_images/NUNCHUCK_cal.gif" width="256"/><br/>
 
-* __This project handles Calibration of Analogue Controls, but has NO understanding of Accelerometer values (yet).__
-
 Digital buttons do NOT require Calibration.
 
-Some Calibration data is calculated at the factory, and stored in memory (¿OTP?) on the Controller.
+Some controllers have Calibration data which is calculated at the factory, and stored in memory (¿OTP?) on the Controller.
+EG. Classic Controller HAS Calibration data, but Classic Controller Pro does NOT!
 
 Each device has a different way to interpret the Calibration Data.<br/>
 EG. A Nunchuck has one joystick, and an accelerometer ...whereas a Classic Controller has 2 joysticks and 2 analogue buttons.
