@@ -1,26 +1,13 @@
-# Flipper Zero Firmware
+# Korai Firmware
 
-[![Discord](https://img.shields.io/discord/740930220399525928.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](http://flipperzero.one/discord)
-
-![Show me the code](https://habrastorage.org/webt/eo/m0/e4/eom0e4btudte7nrhnyic-laiog0.png)
-
-Welcome to [Flipper Zero](https://flipperzero.one/)'s Firmware repo!
-Our goal is to create nice and clean code with good documentation, to make it a pleasure for everyone to work with.
-
-# Clone the Repository
-
-You should clone with 
-```shell
-$ git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
-```
-
+Fork of https://github.com/flipperdevices/flipperzero-firmware
 # Read the Docs
 
 Check out details on [how to build firmware](documentation/fbt.md), [write applications](documentation/AppsOnSDCard.md), [un-brick your device](documentation/KeyCombo.md) and more in `documentation` folder. 
 
 # Update firmware
 
-[Get Latest Firmware from Update Server](https://update.flipperzero.one/)
+[Get Latest Firmware from releases](https://github.com/ankris812/Korai/releases)
 
 Flipper Zero's firmware consists of two components:
 
@@ -112,13 +99,6 @@ Connect your device via ST-Link and run:
 ```sh
 ./fbt firmware_flash
 ```
-
-# Links
-
-* Discord: [flipp.dev/discord](https://flipp.dev/discord)
-* Website: [flipperzero.one](https://flipperzero.one)
-* Kickstarter page: [kickstarter.com](https://www.kickstarter.com/projects/flipper-devices/flipper-zero-tamagochi-for-hackers)
-* Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
 
 # Project structure
 
