@@ -16,11 +16,11 @@ class Main(App):
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
         self.parser.add_argument(
-            "-l",
-            "--launch",
+            "-n",
+            "--no-launch",
             dest="launch_app",
-            action="store_true",
-            help="Launch app",
+            action="store_false",
+            help="Don't launch app",
         )
 
         self.parser.add_argument("fap_src_path", help="App file to upload")
