@@ -1023,7 +1023,8 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     (uint32_t)key);
                 if(!is_key_a_found) {
                     is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
-                    if(mf_classic_authenticate_skip_activate(&tx_rx, block_num, key, MfClassicKeyA, !deactivated, cuid)) {
+                    if(mf_classic_authenticate_skip_activate(
+                           &tx_rx, block_num, key, MfClassicKeyA, !deactivated, cuid)) {
                         mf_classic_set_key_found(data, i, MfClassicKeyA, key);
                         FURI_LOG_D(TAG, "Key found");
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
@@ -1035,7 +1036,8 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                 }
                 if(!is_key_b_found) {
                     is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
-                    if(mf_classic_authenticate_skip_activate(&tx_rx, block_num, key, MfClassicKeyB, !deactivated, cuid)) {
+                    if(mf_classic_authenticate_skip_activate(
+                           &tx_rx, block_num, key, MfClassicKeyB, !deactivated, cuid)) {
                         FURI_LOG_D(TAG, "Key found");
                         mf_classic_set_key_found(data, i, MfClassicKeyB, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);

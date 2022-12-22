@@ -480,7 +480,8 @@ bool mf_classic_authenticate_skip_activate(
     furi_assert(tx_rx);
 
     Crypto1 crypto = {};
-    bool key_found = mf_classic_auth(tx_rx, block_num, key, key_type, &crypto, skip_activate, cuid);
+    bool key_found =
+        mf_classic_auth(tx_rx, block_num, key, key_type, &crypto, skip_activate, cuid);
     furi_hal_nfc_sleep();
     return key_found;
 }
