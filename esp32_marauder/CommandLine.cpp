@@ -109,11 +109,8 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_CH_CMD);
     Serial.println(HELP_SETTINGS_CMD);
     Serial.println(HELP_CLEARAP_CMD_A);
-    Serial.println(HELP_CLEARAP_CMD_B);
-    Serial.println(HELP_CLEARAP_CMD_C);
     Serial.println(HELP_REBOOT_CMD);
     Serial.println(HELP_UPDATE_CMD_A);
-    Serial.println(HELP_UPDATE_CMD_B);
     
     // WiFi sniff/scan
     Serial.println(HELP_SCANAP_CMD);
@@ -361,6 +358,7 @@ void CommandLine::runCommand(String input) {
       int ap_beacon_sw = this->argSearch(&cmd_args, "-a");
       int src_addr_sw = this->argSearch(&cmd_args, "-s");
       int dst_addr_sw = this->argSearch(&cmd_args, "-d");
+      int targ_sw = this->argSearch(&cmd_args, "-c");
   
       if (attack_type_switch == -1) {
         Serial.println("You must specify an attack type");
@@ -372,14 +370,21 @@ void CommandLine::runCommand(String input) {
         // Branch on attack type
         // Deauth
         if (attack_type == ATTACK_TYPE_DEAUTH) {
-          if (dst_addr_sw == -1) {
+          // Default to broadcast
+          if ((dst_addr_sw == -1) && (targ_sw == -1)) {
             Serial.println("Sending to broadcast...");
             wifi_scan_obj.dst_mac = "ff:ff:ff:ff:ff:ff";
           }
-          else {
+          // Dest addr specified
+          else if (dst_addr_sw != -1) {
             wifi_scan_obj.dst_mac = cmd_args.get(dst_addr_sw + 1);
             Serial.println("Sending to " + wifi_scan_obj.dst_mac + "...");
           }
+          // Station list specified
+          else if (targ_sw != -1)
+            Serial.println("Sending to Station list");
+
+          // Source addr not specified
           if (src_addr_sw == -1) {
             if (!this->apSelected()) {
               Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
@@ -390,8 +395,14 @@ void CommandLine::runCommand(String input) {
               menu_function_obj.drawStatusBar();
             #endif
             Serial.println("Starting Deauthentication attack. Stop with " + (String)STOPSCAN_CMD);
-            wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
+            // Station list not specified
+            if (targ_sw == -1)
+              wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
+            // Station list specified
+            else
+              wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_TARGETED, TFT_ORANGE);
           }
+          // Source addr specified
           else {
             String src_mac_str = cmd_args.get(src_addr_sw + 1);
             sscanf(src_mac_str.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 

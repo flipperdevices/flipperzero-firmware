@@ -889,6 +889,7 @@ void MenuFunctions::main(uint32_t currentTime)
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH_MANUAL) &&
+      (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH_TARGETED) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
       (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
     display_obj.displayBuffer();
@@ -898,7 +899,6 @@ void MenuFunctions::main(uint32_t currentTime)
   int pre_getTouch = millis();
 
   // getTouch causes a 10ms delay which makes beacon spam less effective
-  //if (wifi_scan_obj.currentScanMode == WIFI_SCAN_OFF)
   #ifndef MARAUDER_MINI
     pressed = display_obj.tft.getTouch(&t_x, &t_y);
   #endif
@@ -928,13 +928,13 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH_MANUAL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH_TARGETED) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_ALL) ||
           (wifi_scan_obj.currentScanMode == BT_SCAN_SKIMMERS))
       {
-        //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
         // If we don't do this, the text and button coordinates will be off
@@ -977,6 +977,7 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_AUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH_MANUAL) ||
+          (wifi_scan_obj.currentScanMode == WIFI_ATTACK_DEAUTH_TARGETED) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_MIMIC) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
           (wifi_scan_obj.currentScanMode == WIFI_ATTACK_BEACON_LIST) ||
@@ -986,7 +987,6 @@ void MenuFunctions::main(uint32_t currentTime)
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_ACTIVE_EAPOL) ||
           (wifi_scan_obj.currentScanMode == WIFI_PACKET_MONITOR))
       {
-        //Serial.println("Stopping scan...");
         wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
   
         // If we don't do this, the text and button coordinates will be off
@@ -1013,9 +1013,9 @@ void MenuFunctions::main(uint32_t currentTime)
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_AUTH) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH_MANUAL) &&
+        (wifi_scan_obj.currentScanMode != WIFI_ATTACK_DEAUTH_TARGETED) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_MIMIC) &&
         (wifi_scan_obj.currentScanMode != WIFI_ATTACK_RICK_ROLL))
-        //(wifi_scan_obj.currentScanMode != WIFI_ATTACK_BEACON_LIST))
     {
       // Need this to set all keys to false
       for (uint8_t b = 0; b < BUTTON_ARRAY_LEN; b++) {
@@ -1030,8 +1030,6 @@ void MenuFunctions::main(uint32_t currentTime)
       for (uint8_t b = 0; b < current_menu->list->size(); b++) {
         display_obj.tft.setFreeFont(MENU_FONT);
         if (display_obj.key[b].justPressed()) {
-          //display_obj.key[b].drawButton2(current_menu->list->get(b).name, true);  // draw invert
-          //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name, true);
           display_obj.key[b].drawButton(true, current_menu->list->get(b).name);
           if (current_menu->list->get(b).name != text09)
             display_obj.tft.drawXBitmap(0,
@@ -1042,14 +1040,10 @@ void MenuFunctions::main(uint32_t currentTime)
                                         current_menu->list->get(b).color,
                                         TFT_BLACK);
         }
-        //else if (pressed)
-        //  display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
   
         // If button was just release, execute the button's function
         if ((display_obj.key[b].justReleased()) && (!pressed))
         {
-          //display_obj.key[b].drawButton2(current_menu->list->get(b).name);     // draw normal
-          //display_obj.key[b].drawButton(ML_DATUM, BUTTON_PADDING, current_menu->list->get(b).name);
           display_obj.key[b].drawButton(false, current_menu->list->get(b).name);
           current_menu->list->get(b).callable();
         }
@@ -1670,6 +1664,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_ATTACK_AP_SPAM, TFT_MAGENTA);
+  });
+  addNodes(&wifiAttackMenu, text_table1[62], TFT_RED, NULL, DEAUTH_SNIFF, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_TARGETED, TFT_ORANGE);
   });
   //addNodes(&wifiAttackMenu, "AP Mimic Flood", TFT_PURPLE, NULL, DEAUTH_SNIFF, [this]() {
   //  display_obj.clearScreen();

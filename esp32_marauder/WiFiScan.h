@@ -66,6 +66,7 @@
 #define WIFI_ATTACK_DEAUTH_MANUAL 24
 #define WIFI_SCAN_RAW_CAPTURE 25
 #define WIFI_SCAN_STATION 26
+#define WIFI_ATTACK_DEAUTH_TARGETED 27
 
 #define GRAPH_REFRESH 100
 
@@ -246,6 +247,7 @@ class WiFiScan
     void sendProbeAttack(uint32_t currentTime);
     void sendDeauthAttack(uint32_t currentTime, String dst_mac_str = "ff:ff:ff:ff:ff:ff");
     void sendDeauthFrame(uint8_t bssid[6], int channel, String dst_mac_str = "ff:ff:ff:ff:ff:ff");
+    void sendDeauthFrame(int bssid[6], int channel, uint8_t mac[6]);
     void broadcastRandomSSID(uint32_t currentTime);
     void broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid);
     void broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_ssid);

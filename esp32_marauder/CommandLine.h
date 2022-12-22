@@ -70,12 +70,9 @@ const char PROGMEM BT_SKIM_CMD[] = "sniffskim";
 // Admin
 const char PROGMEM HELP_HEAD[] = "============ Commands ============";
 const char PROGMEM HELP_CH_CMD[] = "channel [-s <channel>]";
-const char PROGMEM HELP_CLEARAP_CMD_A[] = "clearlist -a";
-const char PROGMEM HELP_CLEARAP_CMD_B[] = "clearlist -s";
-const char PROGMEM HELP_CLEARAP_CMD_C[] = "clearlist -c";
+const char PROGMEM HELP_CLEARAP_CMD_A[] = "clearlist -a/-c/-s";
 const char PROGMEM HELP_REBOOT_CMD[] = "reboot";
-const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s";
-const char PROGMEM HELP_UPDATE_CMD_B[] = "update -w";
+const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s/-w";
 const char PROGMEM HELP_SETTINGS_CMD[] = "settings [-s <setting> enable/disable>]/[-r]";
 
 // WiFi sniff/scan
@@ -91,7 +88,7 @@ const char PROGMEM HELP_SNIFF_PMKID_CMD[] = "sniffpmkid [-c <channel>]";
 const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan";
 
 // WiFi attack
-const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-s <src mac>] [-d <dst mac>]/probe/rickroll>";
+const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-c]/[-s <src mac>] [-d <dst mac>]/probe/rickroll>";
 
 // WiFi Aux
 const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
