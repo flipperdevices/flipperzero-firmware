@@ -1,4 +1,4 @@
-# File Formats for Flipper's SubGhz Files
+# File Formats for Flipper's SubGhz Subsystem
 
 ## `.sub` File Format
 
@@ -7,7 +7,7 @@ Flipper uses `.sub` files to store SubGhz transmissions. They are text files in 
 A `.sub` files consist of 3 parts:
 
 - **header**: contains file type, version, and frequency;
-- **preset information**: preset type and, in case of custom preset, transceiver configuration data;
+- **preset information**: preset type and, in case of a custom preset, transceiver configuration data;
 - **protocol and its data**: contains protocol name and its specific data, such as key, bit length, etc., or RAW data.
 
 Flipper's SubGhz subsystem uses presets to configure radio transceiver. Presets are used to configure modulation, bandwidth, filters, etc. There are several presets available in stock firmware, and there is a way to create custom presets. See [SubGhz Presets](#adding-a-custom-preset) for more details.
@@ -69,7 +69,7 @@ TE: 400
 Protocol-specific fields in this example:
 | Field | Description |
 | --- | --- |
-| `Bit` | Princeton payload length |
+| `Bit` | Princeton payload length, in bits |
 | `Key` | Princeton payload data |
 | `TE` | Princeton quantization interval |
 
@@ -199,8 +199,8 @@ File contains a header, basic options, and optional lists of presets and frequen
 
 Header must contain following fields:
 
- *  `Filetype`: SubGhz setting file format, must be `Flipper SubGhz Setting File`.
- * `Version`: file format version, current is `1`.
+- `Filetype`: SubGhz setting file format, must be `Flipper SubGhz Setting File`.
+- `Version`: file format version, current is `1`.
 
 #### Basic Settings
 
@@ -225,7 +225,7 @@ Each preset is defined by following fields:
 | Field | Description |
 | --- | --- |
 | `Custom_preset_name` | string, preset name that will be shown in SubGHz application |
-| `Custom_preset_module` | string, transceiver identifier, set to `CC1101` for Flipper Zero |
+| `Custom_preset_module` | string, transceiver identifier. Set to `CC1101` for Flipper Zero |
 | `Custom_preset_data` | transceiver configuration data. See [Transceiver Configuration Data](#transceiver-configuration-data) for details. |
 
 ### Example
