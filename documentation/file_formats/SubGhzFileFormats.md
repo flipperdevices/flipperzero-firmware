@@ -31,9 +31,11 @@ When using one of the standard presets, only `Preset` field is required. When us
 
 | Field | Description |
 | --- | --- |
-| `Preset` | Radio preset name (configures modulation, bandwidth, filters and etc...). When using a custom preset, must be `FuriHalSubGhzPresetCustom` |
+| `Preset` | Radio preset name (configures modulation, bandwidth, filters, etc.). When using a custom preset, must be `FuriHalSubGhzPresetCustom` |
 | `Custom_preset_module` | Transceiver identifier, `CC1101` for Flipper Zero |
 | `Custom_preset_data` | Transceiver configuration data | 
+
+Built-in presets names are `FuriHalSubGhzPresetOok270Async`, `FuriHalSubGhzPresetOok650Async`, `FuriHalSubGhzPreset2FSKDev238Async`, `FuriHalSubGhzPreset2FSKDev476Async`.
 
 ### Transceiver Configuration Data
 
