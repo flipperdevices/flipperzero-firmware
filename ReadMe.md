@@ -33,6 +33,7 @@ Thank you to all the supporters!
 - [New PAXGOD Build: Unlocked, 1 New Custom PaxGod animation and non-anime/RM animations from Minimal, and Mountains Passport Theme (from Kuranons) on PATREON](https://www.patreon.com/posts/76225261) - Custom FW Builds available for [PATREON subscribers](https://www.patreon.com/RogueMaster/membership)
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
 - Added: [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
+- Fixed game mode 2048 to new version
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
