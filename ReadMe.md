@@ -16,7 +16,7 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release RM1222-1225-0.73.2-e8ffe6d](https://www.patreon.com/posts/76247707) 
+## Latest Updates - [PATREON: Latest Release RM1222-1449-0.73.2-c045f19](https://www.patreon.com/posts/76253078) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
@@ -34,6 +34,7 @@ Thank you to all the supporters!
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
 - Added: [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
 - Fixed game mode 2048 to new version
+- [18 Plus Build Update: 5 New Animations included on 18 Plus releases](https://www.patreon.com/posts/76253078)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
