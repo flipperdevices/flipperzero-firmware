@@ -12,7 +12,7 @@
   //#define MARAUDER_FLIPPER
   //#define ESP32_LDDB
 
-  #define MARAUDER_VERSION "v0.9.21"
+  #define MARAUDER_VERSION "v0.10.0"
 
   //// BUTTON DEFINITIONS
   #ifdef MARAUDER_MINI
