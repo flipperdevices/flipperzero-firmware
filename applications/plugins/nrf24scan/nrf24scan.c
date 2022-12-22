@@ -501,7 +501,7 @@ static void prepare_nrf24(bool fsend_packet) {
                         if((*(p - 2) & 0x80) && (*(p - 1) & 0b11) + 2 == addr_size &&
                            rec + 2 != p) {
                             if(memcmp(p, addrs.addr_P0, addr_size - 1) == 0) {
-                                check_add_addr(rec + 2);
+                                check_add_addr(p);
                                 if(addrs.addr_count >= 6) break;
                             }
                         }

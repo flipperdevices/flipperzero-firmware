@@ -31,6 +31,7 @@ Thank you to all the supporters!
 - Fixed passport to show more data for EXP
 - Added: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
 - [New PAXGOD Build: Unlocked, 1 New Custom PaxGod animation and non-anime/RM animations from Minimal, and Mountains Passport Theme (from Kuranons) on PATREON](https://www.patreon.com/posts/76225261) - Custom FW Builds available for [PATREON subscribers](https://www.patreon.com/RogueMaster/membership)
+- Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
