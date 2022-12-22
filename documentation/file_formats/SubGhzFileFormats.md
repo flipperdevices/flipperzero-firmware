@@ -2,7 +2,7 @@
 
 ## `.sub` File Format
 
-Flipper uses `.sub` files to store SubGhz key data. They are text files in Flipper File Format. `.sub` files can contain either a SubGhz Key with a certain protocol or SubGhz RAW data.
+Flipper uses `.sub` files to store SubGhz transmissions. They are text files in Flipper File Format. `.sub` files can contain either a SubGhz Key with a certain protocol or SubGhz RAW data.
 
 A `.sub` files consist of 3 parts:
 
@@ -144,7 +144,7 @@ Long payload not fitting into internal memory buffer and consisting of short dur
 	RAW_Data: -424 205 -412 159 -412 381 -240 181 ...
 	RAW_Data: -1448 361 -17056 131 -134 233 -1462 131 -166 953 -100 ...
 
-# SubGhz Setting File
+# SubGhz Configuration Files
 
 SubGhz application provides support for adding extra radio presets and additional keys for decoding transmissions in certain protocols.
 
