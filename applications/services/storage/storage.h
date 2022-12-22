@@ -246,6 +246,15 @@ FS_Error storage_common_fs_info(
     uint64_t* total_space,
     uint64_t* free_space);
 
+/**
+ * @brief Get path to the current app data directory
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+bool storage_common_get_my_data_path(Storage* storage, FuriString* path);
+
 /******************* Error Functions *******************/
 
 /** Retrieves the error text from the error id

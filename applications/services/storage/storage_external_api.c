@@ -638,6 +638,29 @@ FS_Error storage_common_fs_info(
     return S_RETURN_ERROR;
 }
 
+bool storage_common_get_my_data_path(Storage* storage, FuriString* path) {
+    furi_assert(storage);
+    furi_assert(path);
+
+    FuriThreadId thread_id = furi_thread_get_current_id();
+    FuriString* app_name = furi_string_alloc_set(furi_thread_get_appid(thread_id));
+    FuriString* app_path =
+        furi_string_alloc_printf("%s/%s", EXT_PATH("appsdata"), furi_string_get_cstr(app_name));
+    furi_string_free(app_name);
+
+    bool result = false;
+
+    do {
+        if(!storage_simply_mkdir(storage, EXT_PATH("appsdata"))) break;
+        if(!storage_simply_mkdir(storage, furi_string_get_cstr(app_path))) break;
+        furi_string_set(path, app_path);
+        result = true;
+    } while(false);
+
+    furi_string_free(app_path);
+    return result;
+}
+
 /****************** ERROR ******************/
 
 const char* storage_error_get_desc(FS_Error error_id) {

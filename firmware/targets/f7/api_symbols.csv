@@ -2395,6 +2395,7 @@ Function,-,srandom,void,unsigned
 Function,+,sscanf,int,"const char*, const char*, ..."
 Function,+,storage_common_copy,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_fs_info,FS_Error,"Storage*, const char*, uint64_t*, uint64_t*"
+Function,+,storage_common_get_my_data_path,_Bool,"Storage*, FuriString*"
 Function,+,storage_common_merge,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_mkdir,FS_Error,"Storage*, const char*"
 Function,+,storage_common_remove,FS_Error,"Storage*, const char*"

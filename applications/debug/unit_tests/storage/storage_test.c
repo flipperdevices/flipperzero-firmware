@@ -303,9 +303,35 @@ MU_TEST_SUITE(storage_rename) {
     furi_record_close(RECORD_STORAGE);
 }
 
+MU_TEST(test_storage_common_get_my_data_path) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* path = furi_string_alloc();
+    FileInfo fileinfo;
+    mu_check(storage_common_get_my_data_path(storage, path));
+
+    // we runned from "cli" app, so path should be "/ext/appsdata/cli"
+    mu_assert_string_eq(furi_string_get_cstr(path), "/ext/appsdata/cli");
+
+    // check that appsdata folder exists
+    mu_check(storage_common_stat(storage, "/ext/appsdata", &fileinfo) == FSE_OK);
+    mu_check(fileinfo.flags & FSF_DIRECTORY);
+
+    // check that cli folder exists
+    mu_check(storage_common_stat(storage, "/ext/appsdata/cli", &fileinfo) == FSE_OK);
+    mu_check(fileinfo.flags & FSF_DIRECTORY);
+
+    furi_string_free(path);
+    furi_record_close(RECORD_STORAGE);
+}
+
+MU_TEST_SUITE(test_storage_common) {
+    MU_RUN_TEST(test_storage_common_get_my_data_path);
+}
+
 int run_minunit_test_storage() {
     MU_RUN_SUITE(storage_file);
     MU_RUN_SUITE(storage_dir);
     MU_RUN_SUITE(storage_rename);
+    MU_RUN_SUITE(test_storage_common);
     return MU_EXIT_CODE;
 }
