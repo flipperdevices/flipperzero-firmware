@@ -102,6 +102,11 @@ static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
     pwnagotchi_draw_lines(model->pwn, canvas);
     pwnagotchi_draw_name(model->pwn, canvas);
     pwnagotchi_draw_channel(model->pwn, canvas);
+    pwnagotchi_draw_aps(model->pwn, canvas);
+    pwnagotchi_draw_handshakes(model->pwn, canvas);
+    pwnagotchi_draw_uptime(model->pwn, canvas);
+    pwnagotchi_draw_mode(model->pwn, canvas);
+    pwnagotchi_draw_message(model->pwn, canvas);
     
 
 }

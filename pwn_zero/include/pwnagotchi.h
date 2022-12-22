@@ -11,27 +11,35 @@
 #define PWNAGOTCHI_FACE_I           43
 #define PWNAGOTCHI_FACE_J           3
 #define PWNAGOTCHI_NAME_I           17
-#define PWNAGOTCHI_NAME_J           64
-#define PWNAGOTCHI_CHANNEL_I        6
-#define PWNAGOTCHI_CHANNEL_J        3
-#define PWNAGOTCHI_APS_I            6
-#define PWNAGOTCHI_APS_J            18
-#define PWNAGOTCHI_UPTIME_I         6
-#define PWNAGOTCHI_UPTIME_J         93
+#define PWNAGOTCHI_NAME_J           60
+#define PWNAGOTCHI_CHANNEL_I        7
+#define PWNAGOTCHI_CHANNEL_J        0
+#define PWNAGOTCHI_APS_I            7
+#define PWNAGOTCHI_APS_J            25
+#define PWNAGOTCHI_UPTIME_I         7
+#define PWNAGOTCHI_UPTIME_J         75
 #define PWNAGOTCHI_LINE1_START_I    8
-#define PWNAGOTCHI_LINE1_START_J    3
+#define PWNAGOTCHI_LINE1_START_J    0
 #define PWNAGOTCHI_LINE1_END_I      8
-#define PWNAGOTCHI_LINE1_END_J      122
-#define PWNAGOTCHI_LINE2_START_I    55
-#define PWNAGOTCHI_LINE2_START_J    3
-#define PWNAGOTCHI_LINE2_END_I      55
-#define PWNAGOTCHI_LINE2_END_J      122
+#define PWNAGOTCHI_LINE1_END_J      127
+#define PWNAGOTCHI_LINE2_START_I    54
+#define PWNAGOTCHI_LINE2_START_J    0
+#define PWNAGOTCHI_LINE2_END_I      54
+#define PWNAGOTCHI_LINE2_END_J      127
+#define PWNAGOTCHI_HANDSHAKES_I     63
+#define PWNAGOTCHI_HANDSHAKES_J     0
 #define PWNAGOTCHI_FRIEND_FACE_I    52
 #define PWNAGOTCHI_FRIEND_FACE_J    3
 #define PWNAGOTCHI_FRIEND_STAT_I    52
 #define PWNAGOTCHI_FRIEND_STAT_J    24
-#define PWNAGOTCHI_MODE_I           60
-#define PWNAGOTCHI_MODE_J           106
+#define PWNAGOTCHI_MODE_AI_I        63
+#define PWNAGOTCHI_MODE_AI_J        121
+#define PWNAGOTCHI_MODE_AUTO_I      63
+#define PWNAGOTCHI_MODE_AUTO_J      105
+#define PWNAGOTCHI_MODE_MANU_I      63
+#define PWNAGOTCHI_MODE_MANU_J      103
+#define PWNAGOTCHI_MESSAGE_I        30
+#define PWNAGOTCHI_MESSAGE_J        60
 
 
 /**
@@ -97,9 +105,9 @@ enum PwnagotchiFace {
  * Enum for current mode of the pwnagotchi
  */
 enum PwnagotchiMode {
-    Auto,
-    Ai,
-    Manual
+    PwnMode_Auto,
+    PwnMode_Ai,
+    PwnMode_Manual
 };
 
 typedef struct {
@@ -212,6 +220,22 @@ void pwnagotchi_draw_friend(Pwnagotchi* pwn, Canvas* canvas);
  * @param canvas Canvas to draw on
  */
 void pwnagotchi_draw_mode(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw the number of handshakes in the PWND portion as well as the last handshake
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_handshakes(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
+ * Draw the message that the pwnagotchi is showing on the screen
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_message(Pwnagotchi* pwn, Canvas* canvas);
 
 /**
  * Clears the screen buffer of the pwnagotchi

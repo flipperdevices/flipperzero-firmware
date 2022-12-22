@@ -23,6 +23,9 @@
 /// Maximum length of pwnagotchi message
 #define PWNAGOTCHI_MAX_MESSAGE_LEN 101
 
+/// Maximum length of handshakes info at the bottom
+#define PWNAGOTCHI_MAX_HANDSHAKES_LEN 21
+
 /// Maximum length of a pwnagotchi SSID info displayed at the bottom
 #define PWNAGOTCHI_MAX_SSID_LEN 26
 
