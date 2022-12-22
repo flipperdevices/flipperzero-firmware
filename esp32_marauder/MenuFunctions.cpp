@@ -213,34 +213,6 @@ MenuFunctions::MenuFunctions()
         }
       }
     }
-  
-    /*
-    if (event == LV_EVENT_VALUE_CHANGED) {      
-      if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
-        //Serial.print("Toggle on: ");
-        //Serial.println(btn_text);
-        for (int i = 0; i < access_points->size(); i++) {
-          if (access_points->get(i).essid == btn_text) {
-            Serial.println("Adding AP: " + (String)access_points->get(i).essid);
-            AccessPoint ap = access_points->get(i);
-            ap.selected = true;
-            access_points->set(i, ap);
-          }
-        }
-      }
-      else {
-        //Serial.print("Toggle off: ");
-        //Serial.println(btn_text);
-        for (int i = 0; i < access_points->size(); i++) {
-          if (access_points->get(i).essid == btn_text) {
-            Serial.println("Removing AP: " + (String)access_points->get(i).essid);
-            AccessPoint ap = access_points->get(i);
-            ap.selected = false;
-            access_points->set(i, ap);
-          }
-        }
-      }
-    }*/
   }
   
   void MenuFunctions::displaySettingsGFX(){
@@ -273,35 +245,119 @@ MenuFunctions::MenuFunctions()
       list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, buf);
       lv_btn_set_checkable(list_btn, false);
       lv_obj_set_event_cb(list_btn, settings_list_cb);
+    }
+  }
+
+  // GFX Function to build a list showing all Stations scanned
+  void MenuFunctions::addStationGFX(){
+    extern LinkedList<Station>* stations;
+    extern LinkedList<AccessPoint>* access_points;
+    extern WiFiScan wifi_scan_obj;
   
-      //lv_list_add_text(list1, buf);
+    lv_obj_t * list1 = lv_list_create(lv_scr_act(), NULL);
+    lv_obj_set_size(list1, 160, 200);
+    lv_obj_set_width(list1, LV_HOR_RES);
+    lv_obj_align(list1, NULL, LV_ALIGN_CENTER, 0, 0);
   
-      // Create the dropdown menu
-      /*lv_obj_t * dd = lv_dropdown_create(list1, NULL);
-      lv_dropdown_set_options(dd, "Apple\n"
-                                  "Banana\n"
-                                  "Orange\n"
-                                  "Cherry\n"
-                                  "Grape\n"
-                                  "Raspberry\n"
-                                  "Melon\n"
-                                  "Orange\n"
-                                  "Lemon\n"
-                                  "Nuts");
+    lv_obj_t * list_btn;
   
-      //lv_obj_align(dd, LV_ALIGN_IN_RIGHT_MID, 0, 20);
-      lv_obj_align(dd, NULL, LV_ALIGN_IN_RIGHT_MID, 0, 0);
-      lv_obj_set_width(dd, LV_HOR_RES / 3);
-      lv_obj_set_event_cb(dd, setting_dropdown_cb);
-      //lv_obj_add_event_cb(dd, setting_dropdown_cb, LV_EVENT_ALL, NULL);*/
+    lv_obj_t * label;
+  
+    list_btn = lv_list_add_btn(list1, LV_SYMBOL_CLOSE, text09);
+    lv_obj_set_event_cb(list_btn, station_list_cb);
+
+    char addr[] = "00:00:00:00:00:00";
+    for (int x = 0; x < access_points->size(); x++) {
+      AccessPoint cur_ap = access_points->get(x);
+
+      // Add non clickable button for AP
+      String full_label = "AP: " + cur_ap.essid;
+      char buf[full_label.length() + 1] = {};
+      full_label.toCharArray(buf, full_label.length() + 1);
+      list_btn = lv_list_add_btn(list1, NULL, buf);
+      lv_btn_set_checkable(list_btn, false);
       
-      //if (access_points->get(i).selected)
-      //  lv_btn_toggle(list_btn);
+      int cur_ap_sta_len = access_points->get(x).stations->size();
+      for (int y = 0; y < cur_ap_sta_len; y++) {
+        Station cur_sta = stations->get(cur_ap.stations->get(y));
+        // Convert uint8_t MAC to char array
+        wifi_scan_obj.getMAC(addr, cur_sta.mac, 0);
+        
+        //char buf[stations->get(i).mac.length() + 1] = {};
+        //stations->get(i).mac.toCharArray(buf, stations->get(i).mac.length() + 1);
+        
+        list_btn = lv_list_add_btn(list1, LV_SYMBOL_WIFI, addr);
+        lv_btn_set_checkable(list_btn, true);
+        lv_obj_set_event_cb(list_btn, station_list_cb);
+    
+        if (cur_sta.selected)
+          lv_btn_toggle(list_btn);
+      }
+    }
+  }
+
+  // Function to work with list of Stations
+  void station_list_cb(lv_obj_t * btn, lv_event_t event) {
+    extern LinkedList<Station>* stations;
+    extern MenuFunctions menu_function_obj;
+    extern WiFiScan wifi_scan_obj;
   
-      //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
-      //lv_obj_set_event_cb(btn1, ap_list_cb);
-      //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
-      //lv_btn_set_checkable(btn1, true);
+    String btn_text = lv_list_get_btn_text(btn);
+    String display_string = "";
+    char addr[] = "00:00:00:00:00:00";
+    
+    if (event == LV_EVENT_CLICKED) {
+      if (btn_text != text09) {
+        //lv_list_focus_btn(lv_obj_get_parent(lv_obj_get_parent(btn)), btn);
+      }
+      else {
+        Serial.println("Exiting...");
+        lv_obj_del_async(lv_obj_get_parent(lv_obj_get_parent(btn)));
+  
+        for (int i = 0; i < stations->size(); i++) {
+          if (stations->get(i).selected) {
+            wifi_scan_obj.getMAC(addr, stations->get(i).mac, 0);
+            Serial.print("Selected: ");
+            Serial.println(addr);
+          }
+        }
+  
+        printf("LV_EVENT_CANCEL\n");
+        menu_function_obj.deinitLVGL();
+        wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
+        display_obj.exit_draw = true; // set everything back to normal
+      }
+    }
+    
+    if (event == LV_EVENT_VALUE_CHANGED) {     
+      if (lv_btn_get_state(btn) == LV_BTN_STATE_CHECKED_RELEASED) {
+        //Serial.print("Toggle on: ");
+        //Serial.println(btn_text);
+        for (int i = 0; i < stations->size(); i++) {
+          wifi_scan_obj.getMAC(addr, stations->get(i).mac, 0); 
+          if (strcmp(addr, btn_text.c_str()) == 0) {
+            Serial.print("Adding Station: ");
+            Serial.println(addr);
+            Station sta = stations->get(i);
+            sta.selected = true;
+            stations->set(i, sta);
+          }
+        }
+      }
+      else {
+        //Serial.print("Toggle off: ");
+        //Serial.println(btn_text);
+        for (int i = 0; i < stations->size(); i++) {
+          wifi_scan_obj.getMAC(addr, stations->get(i).mac, 0); 
+          if (strcmp(addr, btn_text.c_str()) == 0) {
+            Serial.print("Removing Station: ");
+            Serial.println(addr);
+            Station sta = stations->get(i);
+            sta.selected = false;
+            stations->set(i, sta);
+          }
+        }
+      }
     }
   }
   
@@ -331,14 +387,6 @@ MenuFunctions::MenuFunctions()
   
       if (access_points->get(i).selected)
         lv_btn_toggle(list_btn);
-  
-      //lv_obj_t * btn1 = lv_btn_create(list_btn, NULL);
-      //lv_obj_set_event_cb(btn1, ap_list_cb);
-      //lv_obj_align(btn1, NULL, LV_ALIGN_CENTER, 0, 0);
-      //lv_btn_set_checkable(btn1, true);
-  
-      //label = lv_label_create(btn1, NULL);
-      //lv_label_set_text(label, buf);
     }
   }
   
@@ -1677,6 +1725,12 @@ void MenuFunctions::RunSetup()
       wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
       wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
       addAPGFX();
+    });
+    addNodes(&wifiGeneralMenu, text_table1[61], TFT_LIGHTGREY, NULL, KEYBOARD_ICO, [this](){
+      display_obj.clearScreen(); 
+      wifi_scan_obj.currentScanMode = LV_ADD_SSID; 
+      wifi_scan_obj.StartScan(LV_ADD_SSID, TFT_RED);  
+      addStationGFX();
     });
   #else
     // Select APs on Mini
