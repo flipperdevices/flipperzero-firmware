@@ -48,7 +48,7 @@ More details can be found in [CC1101 datasheet](https://www.ti.com/lit/ds/symlin
 
 ## File Data
 
- `.sub` file data section contains either key data - protocol name and its specific data, bit length, etc., or RAW data - array of signal timings, without any protocol-specific processing.
+ `.sub` file data section contains either key data — protocol name and its specific data, bit length, etc., or RAW data — an array of signal timings, recorded without any protocol-specific processing.
 
 ### Key Files 
 
@@ -76,7 +76,7 @@ This file may contain additional fields, more details on available fields can be
 
 ### RAW Files
 
-RAW  `.sub` files contain raw data, that are not processed through protocol-specific decoding. They are useful for testing purposes, or for sending data that is not supported by any known protocol.
+RAW  `.sub` files contain raw signal data that is not processed through protocol-specific decoding. These files are useful for testing purposes, or for sending data that is not supported by any known protocol.
 
 For RAW files, 2 fields are requied: 
  * `Protocol`, must be `RAW`;
@@ -211,7 +211,7 @@ Header must contain following fields:
 
 #### Adding More Hopper Frequencies
 
-- `Hopper_frequency`: int (multi) - additional frequency for subghz application frequency hopping. Used in Frequency Analyzer. Repeating same frequency will cause Flipper to listen this frequency more often.
+- `Hopper_frequency`: int (multi) — additional frequency for subghz application frequency hopping. Used in Frequency Analyzer. Repeating same frequency will cause Flipper to listen this frequency more often.
 
 #### Adding a Custom Preset
 
