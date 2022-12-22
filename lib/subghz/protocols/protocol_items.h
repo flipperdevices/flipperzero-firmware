@@ -37,5 +37,6 @@
 #include "clemsa.h"
 #include "ansonic.h"
 #include "smc5326.h"
+#include "dooya.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
