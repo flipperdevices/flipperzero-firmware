@@ -32,6 +32,7 @@ Thank you to all the supporters!
 - Added: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
 - [New PAXGOD Build: Unlocked, 1 New Custom PaxGod animation and non-anime/RM animations from Minimal, and Mountains Passport Theme (from Kuranons) on PATREON](https://www.patreon.com/posts/76225261) - Custom FW Builds available for [PATREON subscribers](https://www.patreon.com/RogueMaster/membership)
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
+- Added: [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -164,6 +165,7 @@ $ ./fbt resources icons dolphin_ext
 
 - [15 (By x27)](https://github.com/x27/flipperzero-game15)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
+- [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) Crashes 1st load if FW <~750KB or every load on larger FW  `Broken Unfortunately`
