@@ -152,6 +152,7 @@ jobs:
           sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
           sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
           sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
+          sed -i 's/^  #define ESP32_LDDB/  \/\/#define ESP32_LDDB/' esp32_marauder/configs.h
           
       - name: Build Marauder for OG Marauder
         uses: ArminJo/arduino-test-compile@v3.2.0
@@ -174,6 +175,7 @@ jobs:
           sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
           sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
           sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
+          sed -i 's/^  #define ESP32_LDDB/  \/\/#define ESP32_LDDB/' esp32_marauder/configs.h
           
       - name: Build Marauder for v6 Marauder
         uses: ArminJo/arduino-test-compile@v3.2.0
@@ -196,6 +198,7 @@ jobs:
           sed -i 's/^  \/\/#define MARAUDER_KIT/  #define MARAUDER_KIT/' esp32_marauder/configs.h
           sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
           sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
+          sed -i 's/^  #define ESP32_LDDB/  \/\/#define ESP32_LDDB/' esp32_marauder/configs.h
           
       - name: Build Marauder for Marauder Kit
         uses: ArminJo/arduino-test-compile@v3.2.0
@@ -218,6 +221,7 @@ jobs:
           sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
           sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
           sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
+          sed -i 's/^  #define ESP32_LDDB/  \/\/#define ESP32_LDDB/' esp32_marauder/configs.h
           
       - name: Build Marauder for Marauder Mini
         uses: ArminJo/arduino-test-compile@v3.2.0
@@ -229,6 +233,27 @@ jobs:
       - name: Rename Marauder Mini bin
         run: |
           mv ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.mini.bin
+          
+      - name: Configure TFT_eSPI and configs.h for ESP32 LDDB
+        run: |
+          sed -i 's/^  #define MARAUDER_MINI/  \/\/#define MARAUDER_MINI/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_V4/  \/\/#define MARAUDER_V4/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_V6/  \/\/#define MARAUDER_V6/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
+          sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
+          sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
+          sed -i 's/^  \/\/#define ESP32_LDDB/  #define ESP32_LDDB/' esp32_marauder/configs.h
+          
+      - name: Build Marauder for ESP32 LDDB
+        uses: ArminJo/arduino-test-compile@v3.2.0
+        with:
+          sketch-names: esp32_marauder.ino
+          arduino-board-fqbn: esp32:esp32:d32:PartitionScheme=min_spiffs
+          extra-arduino-cli-args: "--warnings none"
+          
+      - name: Rename Marauder ESP32 LDDB bin
+        run: |
+          mv ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.ino.bin ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.esp32_lddb.bin
 
       - name: Display finished bins
         run: |
@@ -274,6 +299,13 @@ jobs:
         with:
           name: esp32_marauder.mini.bin
           path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.mini.bin
+          retention-days: 5
+          
+      - name: 'Upload ESP32 LDDB Artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: esp32_marauder.mini.bin
+          path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.esp32_lddb.bin
           retention-days: 5
           
       - name: Create Release
@@ -351,4 +383,15 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.mini.bin
           asset_name: esp32_marauder.mini.bin
+          asset_content_type: application/bin
+          
+      - name: Upload ESP32 LDDB Asset
+        id: upload-esp32-lddb-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./esp32_marauder/build/esp32.esp32.d32/esp32_marauder.esp32_lddb.bin
+          asset_name: esp32_marauder.esp32_lddb.bin
           asset_content_type: application/bin

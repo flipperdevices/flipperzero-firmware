@@ -24,6 +24,7 @@ extern SDInterface sd_obj;
 extern Settings settings_obj;
 extern LinkedList<AccessPoint>* access_points;
 extern LinkedList<ssid>* ssids;
+extern LinkedList<Station>* stations;
 extern const String PROGMEM version_number;
 
 //// Commands
@@ -38,6 +39,7 @@ const char PROGMEM SETTINGS_CMD[] = "settings";
 
 // WiFi sniff/scan
 const char PROGMEM SCANAP_CMD[] = "scanap";
+const char PROGMEM SCANSTA_CMD[] = "scansta";
 const char PROGMEM SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM SNIFF_PROBE_CMD[] = "sniffprobe";
@@ -68,15 +70,14 @@ const char PROGMEM BT_SKIM_CMD[] = "sniffskim";
 // Admin
 const char PROGMEM HELP_HEAD[] = "============ Commands ============";
 const char PROGMEM HELP_CH_CMD[] = "channel [-s <channel>]";
-const char PROGMEM HELP_CLEARAP_CMD_A[] = "clearlist -a";
-const char PROGMEM HELP_CLEARAP_CMD_B[] = "clearlist -s";
+const char PROGMEM HELP_CLEARAP_CMD_A[] = "clearlist -a/-c/-s";
 const char PROGMEM HELP_REBOOT_CMD[] = "reboot";
-const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s";
-const char PROGMEM HELP_UPDATE_CMD_B[] = "update -w";
+const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s/-w";
 const char PROGMEM HELP_SETTINGS_CMD[] = "settings [-s <setting> enable/disable>]/[-r]";
 
 // WiFi sniff/scan
 const char PROGMEM HELP_SCANAP_CMD[] = "scanap";
+const char PROGMEM HELP_SCANSTA_CMD[] = "scansta";
 const char PROGMEM HELP_SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM HELP_SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM HELP_SNIFF_PROBE_CMD[] = "sniffprobe";
@@ -87,13 +88,13 @@ const char PROGMEM HELP_SNIFF_PMKID_CMD[] = "sniffpmkid [-c <channel>]";
 const char PROGMEM HELP_STOPSCAN_CMD[] = "stopscan";
 
 // WiFi attack
-const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-s <src mac>] [-d <dst mac>]/probe/rickroll>";
+const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-c]/[-s <src mac>] [-d <dst mac>]/probe/rickroll>";
 
 // WiFi Aux
 const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
 const char PROGMEM HELP_LIST_AP_CMD_B[] = "list -a";
-const char PROGMEM HELP_SEL_CMD_A[] = "select -a <index (comma separated)>";
-const char PROGMEM HELP_SEL_CMD_B[] = "select -s <index (comma separated)>";
+const char PROGMEM HELP_LIST_AP_CMD_C[] = "list -c";
+const char PROGMEM HELP_SEL_CMD_A[] = "select -a/-s/-c <index (comma separated)>";
 const char PROGMEM HELP_SSID_CMD_A[] = "ssid -a [-g <count>/-n <name>]";
 const char PROGMEM HELP_SSID_CMD_B[] = "ssid -r <index>";
 

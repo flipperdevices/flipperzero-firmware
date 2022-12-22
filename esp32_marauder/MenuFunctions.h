@@ -93,6 +93,7 @@ PROGMEM static void write_bad_usb_keyboard_event_cb(lv_obj_t * keyboard, lv_even
 PROGMEM static void load_btn_cb(lv_obj_t * load_btn, lv_event_t event);
 PROGMEM static void test_btn_cb(lv_obj_t * load_btn, lv_event_t event);
 PROGMEM static void ap_list_cb(lv_obj_t * btn, lv_event_t event);
+PROGMEM static void station_list_cb(lv_obj_t * btn, lv_event_t event);
 PROGMEM static void setting_dropdown_cb(lv_obj_t * btn, lv_event_t event);
 PROGMEM static void save_as_keyboard_event_cb(lv_obj_t * keyboard, lv_event_t event);
 
@@ -167,8 +168,6 @@ class MenuFunctions
     Menu shutdownWiFiMenu;
     Menu shutdownBLEMenu;
     Menu generateSSIDsMenu;
-    Menu clearSSIDsMenu;
-    Menu clearAPsMenu;
 
     static void lv_tick_handler();
 
@@ -192,6 +191,8 @@ class MenuFunctions
     MenuFunctions();
 
     Menu* current_menu;
+    Menu clearSSIDsMenu;
+    Menu clearAPsMenu;
 
     Ticker tick;
 
@@ -205,6 +206,7 @@ class MenuFunctions
     void joinWiFiGFX();
     void addSSIDGFX();
     void addAPGFX();
+    void addStationGFX();
     void displaySettingsGFX();
     void writeBadUSB();
 

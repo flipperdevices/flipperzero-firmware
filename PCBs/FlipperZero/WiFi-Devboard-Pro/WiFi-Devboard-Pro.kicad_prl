@@ -3,7 +3,9 @@
     "active_layer": 0,
     "active_layer_preset": "",
     "auto_track_width": false,
-    "hidden_nets": [],
+    "hidden_nets": [
+      "+ext_3V3"
+    ],
     "high_contrast_mode": 0,
     "net_color_mode": 1,
     "opacity": {
@@ -18,7 +20,7 @@
       "footprints": true,
       "graphics": true,
       "keepouts": true,
-      "lockedItems": false,
+      "lockedItems": true,
       "otherItems": true,
       "pads": true,
       "text": true,
@@ -33,16 +35,15 @@
       3,
       4,
       5,
-      8,
       9,
       10,
+      11,
       12,
       13,
       14,
       15,
       16,
       17,
-      18,
       19,
       20,
       21,
@@ -61,8 +62,8 @@
       35,
       36
     ],
-    "visible_layers": "ffebeaa_7fffffff",
-    "zone_display_mode": 0
+    "visible_layers": "8001130_ffffffff",
+    "zone_display_mode": 1
   },
   "meta": {
     "filename": "WiFi-Devboard-Pro.kicad_prl",

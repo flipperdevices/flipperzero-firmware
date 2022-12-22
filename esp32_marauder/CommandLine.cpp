@@ -109,13 +109,12 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_CH_CMD);
     Serial.println(HELP_SETTINGS_CMD);
     Serial.println(HELP_CLEARAP_CMD_A);
-    Serial.println(HELP_CLEARAP_CMD_B);
     Serial.println(HELP_REBOOT_CMD);
     Serial.println(HELP_UPDATE_CMD_A);
-    Serial.println(HELP_UPDATE_CMD_B);
     
     // WiFi sniff/scan
     Serial.println(HELP_SCANAP_CMD);
+    Serial.println(HELP_SCANSTA_CMD);
     Serial.println(HELP_SNIFF_RAW_CMD);
     Serial.println(HELP_SNIFF_BEACON_CMD);
     Serial.println(HELP_SNIFF_PROBE_CMD);
@@ -131,8 +130,8 @@ void CommandLine::runCommand(String input) {
     // WiFi Aux
     Serial.println(HELP_LIST_AP_CMD_A);
     Serial.println(HELP_LIST_AP_CMD_B);
+    Serial.println(HELP_LIST_AP_CMD_C);
     Serial.println(HELP_SEL_CMD_A);
-    Serial.println(HELP_SEL_CMD_B);
     Serial.println(HELP_SSID_CMD_A);
     Serial.println(HELP_SSID_CMD_B);
     
@@ -183,12 +182,28 @@ void CommandLine::runCommand(String input) {
   else if (cmd_args.get(0) == CLEARAP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a"); // APs
     int ss_sw = this->argSearch(&cmd_args, "-s"); // SSIDs
+    int cl_sw = this->argSearch(&cmd_args, "-c"); // Stations
 
-    if (ap_sw != -1)
+    if (ap_sw != -1) {
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
+      #endif
       wifi_scan_obj.RunClearAPs();
+    }
 
-    if (ss_sw != -1)
+    if (ss_sw != -1) {
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(&menu_function_obj.clearSSIDsMenu);
+      #endif
       wifi_scan_obj.RunClearSSIDs();
+    }
+
+    if (cl_sw != -1) {
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
+      #endif
+      wifi_scan_obj.RunClearStations();
+    }
   }
 
   else if (cmd_args.get(0) == SETTINGS_CMD) {
@@ -257,6 +272,15 @@ void CommandLine::runCommand(String input) {
         menu_function_obj.drawStatusBar();
       #endif
       wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
+    }
+    // Scan stations
+    else if (cmd_args.get(0) == SCANSTA_CMD) {    
+      Serial.println("Starting Station scan. Stop with " + (String)STOPSCAN_CMD);  
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(WIFI_SCAN_STATION, TFT_ORANGE);
     }
     // Beacon sniff
     else if (cmd_args.get(0) == SNIFF_BEACON_CMD) {
@@ -334,6 +358,7 @@ void CommandLine::runCommand(String input) {
       int ap_beacon_sw = this->argSearch(&cmd_args, "-a");
       int src_addr_sw = this->argSearch(&cmd_args, "-s");
       int dst_addr_sw = this->argSearch(&cmd_args, "-d");
+      int targ_sw = this->argSearch(&cmd_args, "-c");
   
       if (attack_type_switch == -1) {
         Serial.println("You must specify an attack type");
@@ -345,14 +370,21 @@ void CommandLine::runCommand(String input) {
         // Branch on attack type
         // Deauth
         if (attack_type == ATTACK_TYPE_DEAUTH) {
-          if (dst_addr_sw == -1) {
+          // Default to broadcast
+          if ((dst_addr_sw == -1) && (targ_sw == -1)) {
             Serial.println("Sending to broadcast...");
             wifi_scan_obj.dst_mac = "ff:ff:ff:ff:ff:ff";
           }
-          else {
+          // Dest addr specified
+          else if (dst_addr_sw != -1) {
             wifi_scan_obj.dst_mac = cmd_args.get(dst_addr_sw + 1);
             Serial.println("Sending to " + wifi_scan_obj.dst_mac + "...");
           }
+          // Station list specified
+          else if (targ_sw != -1)
+            Serial.println("Sending to Station list");
+
+          // Source addr not specified
           if (src_addr_sw == -1) {
             if (!this->apSelected()) {
               Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
@@ -363,8 +395,14 @@ void CommandLine::runCommand(String input) {
               menu_function_obj.drawStatusBar();
             #endif
             Serial.println("Starting Deauthentication attack. Stop with " + (String)STOPSCAN_CMD);
-            wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
+            // Station list not specified
+            if (targ_sw == -1)
+              wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH, TFT_RED);
+            // Station list specified
+            else
+              wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_TARGETED, TFT_ORANGE);
           }
+          // Source addr specified
           else {
             String src_mac_str = cmd_args.get(src_addr_sw + 1);
             sscanf(src_mac_str.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 
@@ -498,6 +536,7 @@ void CommandLine::runCommand(String input) {
   if (cmd_args.get(0) == LIST_AP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a");
     int ss_sw = this->argSearch(&cmd_args, "-s");
+    int cl_sw = this->argSearch(&cmd_args, "-c");
 
     // List APs
     if (ap_sw != -1) {
@@ -517,6 +556,25 @@ void CommandLine::runCommand(String input) {
           Serial.println("[" + (String)i + "] " + ssids->get(i).essid);
       }
     }
+    // List Stations
+    else if (cl_sw != -1) {
+      char sta_mac[] = "00:00:00:00:00:00";
+      for (int x = 0; x < access_points->size(); x++) {
+        Serial.println("[" + (String)x + "] " + access_points->get(x).essid + " " + (String)access_points->get(x).rssi + ":");
+        for (int i = 0; i < access_points->get(x).stations->size(); i++) {
+          wifi_scan_obj.getMAC(sta_mac, stations->get(access_points->get(x).stations->get(i)).mac, 0);
+          if (stations->get(access_points->get(x).stations->get(i)).selected) {
+            Serial.print("  [" + (String)access_points->get(x).stations->get(i) + "] ");
+            Serial.print(sta_mac);
+            Serial.println(" (selected)");
+          }
+          else {
+            Serial.print("  [" + (String)access_points->get(x).stations->get(i) + "] ");
+            Serial.println(sta_mac);
+          }
+        }
+      }
+    }
     else {
       Serial.println("You did not specify which list to show");
       return;
@@ -527,6 +585,7 @@ void CommandLine::runCommand(String input) {
     // Get switches
     int ap_sw = this->argSearch(&cmd_args, "-a");
     int ss_sw = this->argSearch(&cmd_args, "-s");
+    int cl_sw = this->argSearch(&cmd_args, "-c");
 
     // select Access points
     if (ap_sw != -1) {
@@ -570,6 +629,50 @@ void CommandLine::runCommand(String input) {
             AccessPoint new_ap = access_points->get(index);
             new_ap.selected = true;
             access_points->set(index, new_ap);
+          }
+        }
+      }
+    }
+    else if (cl_sw != -1) {
+      LinkedList<String> sta_index = this->parseCommand(cmd_args.get(cl_sw + 1), ",");
+      
+      // Select all Stations
+      if (cmd_args.get(cl_sw + 1) == "all") {
+        for (int i = 0; i < stations->size(); i++) {
+          if (stations->get(i).selected) {
+            // Unselect "selected" ap
+            Station new_sta = stations->get(i);
+            new_sta.selected = false;
+            stations->set(i, new_sta);
+          }
+          else {
+            // Select "unselected" ap
+            Station new_sta = stations->get(i);
+            new_sta.selected = true;
+            stations->set(i, new_sta);
+          }
+        }
+      }
+      // Select specific Stations
+      else {
+        // Mark Stations as selected
+        for (int i = 0; i < sta_index.size(); i++) {
+          int index = sta_index.get(i).toInt();
+          if (!this->inRange(stations->size(), index)) {
+            Serial.println("Index not in range: " + (String)index);
+            continue;
+          }
+          if (stations->get(index).selected) {
+            // Unselect "selected" ap
+            Station new_sta = stations->get(index);
+            new_sta.selected = false;
+            stations->set(index, new_sta);
+          }
+          else {
+            // Select "unselected" ap
+            Station new_sta = stations->get(index);
+            new_sta.selected = true;
+            stations->set(index, new_sta);
           }
         }
       }
