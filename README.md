@@ -13,7 +13,9 @@ pwnagotchi-flipper
 
 ## Current state
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
-As of commit 5361ca1 (11/14/22) I have a pretty much fully working pixel-by-pixel drawing interface. I have decided though that this is not the best approach. Instead I should have specific commands for drawing the face, number of access points, name, and so on. For this reason I will archive this current code in a branch called pixel-by-pixel and then continue development of a new protocol that will require less information transmission over UART.
+As of commit 31ed7bf (12/22/22) The non-pixel-by-pixel version of the Flipper app now defaults to drawing the elements in a base state as seen in the picture below. Next task will be to fix the face drawing, adjust message drawing to wrap text, and then allow commands over UART. Hopefully there will soon be a way to control font size so that the font is more reasonable.
+
+<img src='doc/attachments/PwnZeroBase.png' alt='Flipper screen showing base Pwnagotchi display' height="128" width="256"/>
 
 ## Setup
 TODO: Explain setup process
