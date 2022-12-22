@@ -33,7 +33,10 @@ jobs:
       - name: 'Make artifacts directory'
         run: |
           rm -rf artifacts
+          rm -rf map_analyser_misc
           mkdir artifacts
+          mkdir map_analyser_misc
+
 
       - name: 'Get commit details'
         id: names
@@ -84,29 +87,18 @@ jobs:
         run: |
           cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
 
-      - name: 'Get map file name'
-        id: mapfile
+      - name: 'Copy map analyser files'
         run: |
-          FILENAME=$(printf "%s%s\n" "name=" build/f7-firmware-*/firmware.elf.map)
-          test -f $(echo $FILENAME | awk -F '=' '{print $2}') || ( echo "Map file not found" && exit 1 )
-          echo "$FILENAME" >> $GITHUB_OUTPUT
+          cp build/f7-firmware-*/firmware.elf.map map_analyser_misc/firmware.elf.map
+          cp build/f7-firmware-*/firmware.elf map_analyser_misc/firmware.elf
+          cp ${{ github.event_path }} map_analyser_misc/event.json
 
-      - name: 'Upload map file to storage'
+      - name: 'Upload map analyser files to storage'
         uses: keithweaver/aws-s3-github-action@v1.0.0
         with:
           command: cp
-          source: ${{steps.mapfile.outputs.name}}
-          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.random_hash}}/firmware.elf.map"
-          aws_access_key_id: "${{ secrets.MAP_REPORT_AWS_ACCESS_KEY }}"
-          aws_secret_access_key: "${{ secrets.MAP_REPORT_AWS_SECRET_KEY }}"
-          aws_region: "${{ secrets.MAP_REPORT_AWS_REGION }}"
-
-      - name: 'Upload github event file to storage'
-        uses: keithweaver/aws-s3-github-action@v1.0.0
-        with:
-          command: cp
-          source: ${{ github.event_path }}
-          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.random_hash}}/event.json"
+          source: map_analyser_misc/*
+          destination: "s3://${{ secrets.MAP_REPORT_AWS_BUCKET }}/${{steps.names.outputs.random_hash}}/"
           aws_access_key_id: "${{ secrets.MAP_REPORT_AWS_ACCESS_KEY }}"
           aws_secret_access_key: "${{ secrets.MAP_REPORT_AWS_SECRET_KEY }}"
           aws_region: "${{ secrets.MAP_REPORT_AWS_REGION }}"
