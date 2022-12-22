@@ -213,7 +213,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpen2048: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/2048.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/2048_improved.fap"));
             break;
         }
         case DesktopMainEventOpenZombiez: {
