@@ -135,7 +135,6 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_LIST_AP_CMD_B);
     Serial.println(HELP_LIST_AP_CMD_C);
     Serial.println(HELP_SEL_CMD_A);
-    Serial.println(HELP_SEL_CMD_B);
     Serial.println(HELP_SSID_CMD_A);
     Serial.println(HELP_SSID_CMD_B);
     
@@ -546,13 +545,14 @@ void CommandLine::runCommand(String input) {
           Serial.println("[" + (String)i + "] " + ssids->get(i).essid);
       }
     }
+    // List Stations
     else if (cl_sw != -1) {
       char sta_mac[] = "00:00:00:00:00:00";
       for (int x = 0; x < access_points->size(); x++) {
         Serial.println("[" + (String)x + "] " + access_points->get(x).essid + " " + (String)access_points->get(x).rssi + ":");
         for (int i = 0; i < access_points->get(x).stations->size(); i++) {
           wifi_scan_obj.getMAC(sta_mac, stations->get(access_points->get(x).stations->get(i)).mac, 0);
-          if (stations->get(i).selected) {
+          if (stations->get(access_points->get(x).stations->get(i)).selected) {
             Serial.print("  [" + (String)access_points->get(x).stations->get(i) + "] ");
             Serial.print(sta_mac);
             Serial.println(" (selected)");
@@ -574,6 +574,7 @@ void CommandLine::runCommand(String input) {
     // Get switches
     int ap_sw = this->argSearch(&cmd_args, "-a");
     int ss_sw = this->argSearch(&cmd_args, "-s");
+    int cl_sw = this->argSearch(&cmd_args, "-c");
 
     // select Access points
     if (ap_sw != -1) {
@@ -617,6 +618,50 @@ void CommandLine::runCommand(String input) {
             AccessPoint new_ap = access_points->get(index);
             new_ap.selected = true;
             access_points->set(index, new_ap);
+          }
+        }
+      }
+    }
+    else if (cl_sw != -1) {
+      LinkedList<String> sta_index = this->parseCommand(cmd_args.get(cl_sw + 1), ",");
+      
+      // Select all Stations
+      if (cmd_args.get(cl_sw + 1) == "all") {
+        for (int i = 0; i < stations->size(); i++) {
+          if (stations->get(i).selected) {
+            // Unselect "selected" ap
+            Station new_sta = stations->get(i);
+            new_sta.selected = false;
+            stations->set(i, new_sta);
+          }
+          else {
+            // Select "unselected" ap
+            Station new_sta = stations->get(i);
+            new_sta.selected = true;
+            stations->set(i, new_sta);
+          }
+        }
+      }
+      // Select specific Stations
+      else {
+        // Mark Stations as selected
+        for (int i = 0; i < sta_index.size(); i++) {
+          int index = sta_index.get(i).toInt();
+          if (!this->inRange(stations->size(), index)) {
+            Serial.println("Index not in range: " + (String)index);
+            continue;
+          }
+          if (stations->get(index).selected) {
+            // Unselect "selected" ap
+            Station new_sta = stations->get(index);
+            new_sta.selected = false;
+            stations->set(index, new_sta);
+          }
+          else {
+            // Select "unselected" ap
+            Station new_sta = stations->get(index);
+            new_sta.selected = true;
+            stations->set(index, new_sta);
           }
         }
       }

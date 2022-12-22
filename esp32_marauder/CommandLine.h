@@ -97,8 +97,7 @@ const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-s 
 const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
 const char PROGMEM HELP_LIST_AP_CMD_B[] = "list -a";
 const char PROGMEM HELP_LIST_AP_CMD_C[] = "list -c";
-const char PROGMEM HELP_SEL_CMD_A[] = "select -a <index (comma separated)>";
-const char PROGMEM HELP_SEL_CMD_B[] = "select -s <index (comma separated)>";
+const char PROGMEM HELP_SEL_CMD_A[] = "select -a/-s/-c <index (comma separated)>";
 const char PROGMEM HELP_SSID_CMD_A[] = "ssid -a [-g <count>/-n <name>]";
 const char PROGMEM HELP_SSID_CMD_B[] = "ssid -r <index>";
 
