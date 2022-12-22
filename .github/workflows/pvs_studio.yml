@@ -73,7 +73,7 @@ jobs:
               PVS-Studio.log \
               -o reports/${DEFAULT_TARGET}-${SUFFIX} || WARNINGS=1
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
-          echo "$WARNINGS"
+          WARNINGS=0 # debug
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
@@ -89,7 +89,7 @@ jobs:
 
       - name: 'Find Previous Comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request && (steps.pvs-warn.outputs.warnings != 0) }}
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
