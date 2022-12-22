@@ -16,21 +16,21 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release RM1221-2026-0.73.2-e339eec](https://www.patreon.com/posts/76222331) 
+## Latest Updates - [PATREON: Latest Release RM1221-2234-0.73.2-c6c5566](https://www.patreon.com/posts/76225261) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-21 10:55 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-21 10:55 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-21 22:37 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-21 22:37 EST`
 - Updated: [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
 - New Animation: [Hentai (By qqMajikpp)](https://github.com/qqmajikpp/) for [PATREON members](https://www.patreon.com/RogueMaster/membership) now included on 18Plus releases
-- [PATREON ONLY UPDATES: For STOCK Animations Release: Not Stoned, Passport display closer to OFW, Passport avatar from OFW, Top desktop bar from OFW & Internal Apps have OFW animation scenes](https://www.patreon.com/posts/76185159)
-- [PATREON ONLY UPDATES: For STOCK Animations Release: Desktop bar transparent, but the icons are shown](https://www.patreon.com/posts/76188388)
+- [PATREON ONLY UPDATES: For STOCK Animations Release: Not Stoned, Passport display closer to OFW, Passport avatar from OFW, Top desktop bar from OFW & Internal Apps have OFW animation scenes](https://www.patreon.com/RogueMaster/)
 - Swapped favorite buttons to fix Favorite location bug.
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
 - Fixed passport to show more data for EXP
 - Added: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
+- [New PAXGOD Build: Unlocked, 1 New Custom PaxGod animation and non-anime/RM animations from Minimal, and Mountains Passport Theme on PATREON](https://www.patreon.com/posts/76225261) - Custom FW Builds available for [PATREON subscribers](https://www.patreon.com/RogueMaster/membership)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
