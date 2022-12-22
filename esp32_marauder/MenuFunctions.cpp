@@ -964,7 +964,7 @@ void MenuFunctions::main(uint32_t currentTime)
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
-          (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_STATION) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
