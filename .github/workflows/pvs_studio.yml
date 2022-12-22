@@ -72,7 +72,6 @@ jobs:
               --indicate-warnings \
               PVS-Studio.log \
               -o reports/${DEFAULT_TARGET}-${SUFFIX} || WARNINGS=1
-          WARNINGS=0 # debug
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
 
       - name: 'Upload artifacts to update server'
