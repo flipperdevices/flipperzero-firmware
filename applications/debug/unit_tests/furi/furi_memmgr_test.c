@@ -26,11 +26,7 @@ void test_furi_memmgr() {
         mu_assert_int_eq(66, ((uint8_t*)ptr)[i]);
     }
 
-    // test that memory is zero-initialized after reallocation
     // TODO: fix realloc to copy only old size, and write testcase that leftover of reallocated memory is zero-initialized
-    for(int i = 100; i < 200; i++) {
-        mu_assert_int_eq(0, ((uint8_t*)ptr)[i]);
-    }
     free(ptr);
 
     // allocate and zero-initialize array (calloc)
