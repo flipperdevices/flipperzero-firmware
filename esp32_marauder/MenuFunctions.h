@@ -167,8 +167,6 @@ class MenuFunctions
     Menu shutdownWiFiMenu;
     Menu shutdownBLEMenu;
     Menu generateSSIDsMenu;
-    Menu clearSSIDsMenu;
-    Menu clearAPsMenu;
 
     static void lv_tick_handler();
 
@@ -192,6 +190,8 @@ class MenuFunctions
     MenuFunctions();
 
     Menu* current_menu;
+    Menu clearSSIDsMenu;
+    Menu clearAPsMenu;
 
     Ticker tick;
 

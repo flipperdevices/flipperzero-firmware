@@ -110,6 +110,7 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_SETTINGS_CMD);
     Serial.println(HELP_CLEARAP_CMD_A);
     Serial.println(HELP_CLEARAP_CMD_B);
+    Serial.println(HELP_CLEARAP_CMD_C);
     Serial.println(HELP_REBOOT_CMD);
     Serial.println(HELP_UPDATE_CMD_A);
     Serial.println(HELP_UPDATE_CMD_B);
@@ -185,12 +186,28 @@ void CommandLine::runCommand(String input) {
   else if (cmd_args.get(0) == CLEARAP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a"); // APs
     int ss_sw = this->argSearch(&cmd_args, "-s"); // SSIDs
+    int cl_sw = this->argSearch(&cmd_args, "-c"); // Stations
 
-    if (ap_sw != -1)
+    if (ap_sw != -1) {
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
+      #endif
       wifi_scan_obj.RunClearAPs();
+    }
 
-    if (ss_sw != -1)
+    if (ss_sw != -1) {
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(&menu_function_obj.clearSSIDsMenu);
+      #endif
       wifi_scan_obj.RunClearSSIDs();
+    }
+
+    if (cl_sw != -1) {
+      #ifdef HAS_SCREEN
+        menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
+      #endif
+      wifi_scan_obj.RunClearStations();
+    }
   }
 
   else if (cmd_args.get(0) == SETTINGS_CMD) {
@@ -536,12 +553,12 @@ void CommandLine::runCommand(String input) {
         for (int i = 0; i < access_points->get(x).stations->size(); i++) {
           wifi_scan_obj.getMAC(sta_mac, stations->get(access_points->get(x).stations->get(i)).mac, 0);
           if (stations->get(i).selected) {
-            Serial.print("  [" + (String)i + "] ");
+            Serial.print("  [" + (String)access_points->get(x).stations->get(i) + "] ");
             Serial.print(sta_mac);
             Serial.println(" (selected)");
           }
           else {
-            Serial.print("  [" + (String)i + "] ");
+            Serial.print("  [" + (String)access_points->get(x).stations->get(i) + "] ");
             Serial.println(sta_mac);
           }
         }

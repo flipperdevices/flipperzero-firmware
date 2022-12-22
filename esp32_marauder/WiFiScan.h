@@ -304,6 +304,7 @@ class WiFiScan
     void RunSetup();
     int clearSSIDs();
     int clearAPs();
+    int clearStations();
     bool addSSID(String essid);
     int generateSSIDs(int count = 20);
     bool shutdownWiFi();
@@ -321,6 +322,7 @@ class WiFiScan
     void RunGenerateSSIDs(int count = 20);
     void RunClearSSIDs();
     void RunClearAPs();
+    void RunClearStations();
     void channelHop();
     uint8_t currentScanMode = 0;
     void main(uint32_t currentTime);

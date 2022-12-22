@@ -1666,6 +1666,10 @@ void MenuFunctions::RunSetup()
     changeMenu(&clearAPsMenu);
     wifi_scan_obj.RunClearAPs();
   });
+  addNodes(&wifiGeneralMenu, text_table1[60], TFT_BLUE, NULL, CLEAR_ICO, [this]() {
+    changeMenu(&clearAPsMenu);
+    wifi_scan_obj.RunClearStations();
+  });
   #ifndef MARAUDER_MINI
     // Select APs on OG
     addNodes(&wifiGeneralMenu, text_table1[56], TFT_NAVY, NULL, KEYBOARD_ICO, [this](){

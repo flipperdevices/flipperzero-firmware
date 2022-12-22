@@ -72,6 +72,7 @@ const char PROGMEM HELP_HEAD[] = "============ Commands ============";
 const char PROGMEM HELP_CH_CMD[] = "channel [-s <channel>]";
 const char PROGMEM HELP_CLEARAP_CMD_A[] = "clearlist -a";
 const char PROGMEM HELP_CLEARAP_CMD_B[] = "clearlist -s";
+const char PROGMEM HELP_CLEARAP_CMD_C[] = "clearlist -c";
 const char PROGMEM HELP_REBOOT_CMD[] = "reboot";
 const char PROGMEM HELP_UPDATE_CMD_A[] = "update -s";
 const char PROGMEM HELP_UPDATE_CMD_B[] = "update -w";

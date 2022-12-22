@@ -149,6 +149,18 @@ void WiFiScan::RunSetup() {
   this->initWiFi(1);
 }
 
+int WiFiScan::clearStations() {
+  int num_cleared = stations->size();
+  stations->clear();
+  Serial.println("stations: " + (String)stations->size());
+
+  // Now clear stations list from APs
+  for (int i = 0; i < access_points->size(); i++)
+    access_points->get(i).stations->clear();
+    
+  return num_cleared;
+}
+
 int WiFiScan::clearAPs() {
   int num_cleared = access_points->size();
   access_points->clear();
@@ -600,6 +612,21 @@ void WiFiScan::RunAPScan(uint8_t scan_mode, uint16_t color)
   }
 #endif
 
+void WiFiScan::RunClearStations() {
+  #ifdef HAS_SCREEN
+    display_obj.tft.setTextWrap(false);
+    display_obj.tft.setFreeFont(NULL);
+    display_obj.tft.setCursor(0, 100);
+    display_obj.tft.setTextSize(1);
+    display_obj.tft.setTextColor(TFT_CYAN);
+  
+    display_obj.tft.println(F(text_table4[45]));
+    display_obj.tft.println(text_table4[46] + (String)this->clearStations());
+  #else
+    this->clearStations();
+  #endif
+}
+
 void WiFiScan::RunClearAPs() {
   #ifdef HAS_SCREEN
     display_obj.tft.setTextWrap(false);
@@ -610,8 +637,11 @@ void WiFiScan::RunClearAPs() {
   
     display_obj.tft.println(F(text_table4[9]));
     display_obj.tft.println(text_table4[10] + (String)this->clearAPs());
+    display_obj.tft.println(F(text_table4[45]));
+    display_obj.tft.println(text_table4[46] + (String)this->clearStations());
   #else
     this->clearAPs();
+    this->clearStations();
   #endif
 }
 
@@ -1119,7 +1149,7 @@ void WiFiScan::RunStationScan(uint8_t scan_mode, uint16_t color)
     display_obj.tft.setTextColor(TFT_WHITE, color);
     #ifndef MARAUDER_MINI
       display_obj.tft.fillRect(0,16,240,16, color);
-      display_obj.tft.drawCentreString(text_table1[58],120,16,2);
+      display_obj.tft.drawCentreString(text_table1[59],120,16,2);
       display_obj.touchToExit();
     #endif
     display_obj.tft.setTextColor(TFT_GREEN, TFT_BLACK);
@@ -1939,25 +1969,6 @@ void WiFiScan::stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t typ
     else
       frame_offset = 10;
   }
-  /*else {
-    // Check to make sure frame does not go to broadcast
-    char sta_addr[] = "00:00:00:00:00:00";
-    getMAC(dst_addr, snifferPacket->payload, 4);
-    if (strcmp(dst_addr, "ff:ff:ff:ff:ff:ff") == 0)
-      Serial.print("Frame destination is broadcast -> ");
-    if (ap_is_src) {
-      Serial.print("src: ");
-      getMAC(sta_addr, snifferPacket->payload, 4);
-    }
-    else {
-      Serial.print("dst: ");
-      getMAC(sta_addr, snifferPacket->payload, 10);
-    }
-    Serial.print(ap_addr);
-    Serial.print(" sta: ");
-    Serial.println(sta_addr);
-  }*/
-
   /*  Stuff to care about now
    *  ap_is_src
    *  ap_index
@@ -2020,6 +2031,25 @@ void WiFiScan::stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t typ
     Serial.print(" -> ap: ");
     Serial.println(ap_addr);
   }
+  display_string.concat(sta_addr);
+
+  int temp_len = display_string.length();
+
+  #ifdef HAS_SCREEN
+    for (int i = 0; i < 40 - temp_len; i++)
+    {
+      display_string.concat(" ");
+    }
+
+    Serial.print(" ");
+
+    if (display_obj.display_buffer->size() == 0)
+    {
+      display_obj.loading = true;
+      display_obj.display_buffer->add(display_string);
+      display_obj.loading = false;
+    }
+  #endif
 
   // Add station index to AP in list
   //access_points->get(ap_index).stations->add(stations->size() - 1);
@@ -2029,7 +2059,8 @@ void WiFiScan::stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t typ
 
   access_points->set(ap_index, ap);
 
-  //Serial.println(access_points->get(ap_index).essid + ": " + (String)access_points->get(ap_index).stations->size());
+  if (save_packet)
+    sd_obj.addPacket(snifferPacket->payload, len);
 }
 
 void WiFiScan::rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type)
