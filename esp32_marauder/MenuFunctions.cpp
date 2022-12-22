@@ -867,6 +867,7 @@ void MenuFunctions::main(uint32_t currentTime)
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_STATION) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP_FULL) ||
@@ -914,6 +915,7 @@ void MenuFunctions::main(uint32_t currentTime)
     {
       // Stop the current scan
       if ((wifi_scan_obj.currentScanMode == WIFI_SCAN_PROBE) ||
+          (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_RAW_CAPTURE) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_AP) ||
           (wifi_scan_obj.currentScanMode == WIFI_SCAN_TARGET_AP) ||
@@ -1565,11 +1567,11 @@ void MenuFunctions::RunSetup()
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_RED);
   });
-  addNodes(&wifiSnifferMenu, text_table1[48], TFT_ORANGE, NULL, ESPRESSIF, [this]() {
+  /*addNodes(&wifiSnifferMenu, text_table1[48], TFT_ORANGE, NULL, ESPRESSIF, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_ESPRESSIF, TFT_ORANGE);
-  });
+  });*/
   addNodes(&wifiSnifferMenu, text_table1[49], TFT_MAGENTA, NULL, BEACON_SNIFF, [this]() {
     display_obj.clearScreen();
     this->drawStatusBar();
@@ -1579,6 +1581,11 @@ void MenuFunctions::RunSetup()
     display_obj.clearScreen();
     this->drawStatusBar();
     wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
+  });
+  addNodes(&wifiSnifferMenu, text_table1[59], TFT_ORANGE, NULL, PACKET_MONITOR, [this]() {
+    display_obj.clearScreen();
+    this->drawStatusBar();
+    wifi_scan_obj.StartScan(WIFI_SCAN_STATION, TFT_WHITE);
   });
 
   // Build WiFi attack menu

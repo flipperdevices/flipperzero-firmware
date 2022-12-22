@@ -116,6 +116,7 @@ void CommandLine::runCommand(String input) {
     
     // WiFi sniff/scan
     Serial.println(HELP_SCANAP_CMD);
+    Serial.println(HELP_SCANSTA_CMD);
     Serial.println(HELP_SNIFF_RAW_CMD);
     Serial.println(HELP_SNIFF_BEACON_CMD);
     Serial.println(HELP_SNIFF_PROBE_CMD);
@@ -131,6 +132,7 @@ void CommandLine::runCommand(String input) {
     // WiFi Aux
     Serial.println(HELP_LIST_AP_CMD_A);
     Serial.println(HELP_LIST_AP_CMD_B);
+    Serial.println(HELP_LIST_AP_CMD_C);
     Serial.println(HELP_SEL_CMD_A);
     Serial.println(HELP_SEL_CMD_B);
     Serial.println(HELP_SSID_CMD_A);
@@ -257,6 +259,15 @@ void CommandLine::runCommand(String input) {
         menu_function_obj.drawStatusBar();
       #endif
       wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
+    }
+    // Scan stations
+    else if (cmd_args.get(0) == SCANSTA_CMD) {    
+      Serial.println("Starting Station scan. Stop with " + (String)STOPSCAN_CMD);  
+      #ifdef HAS_SCREEN
+        display_obj.clearScreen();
+        menu_function_obj.drawStatusBar();
+      #endif
+      wifi_scan_obj.StartScan(WIFI_SCAN_STATION, TFT_ORANGE);
     }
     // Beacon sniff
     else if (cmd_args.get(0) == SNIFF_BEACON_CMD) {
@@ -498,6 +509,7 @@ void CommandLine::runCommand(String input) {
   if (cmd_args.get(0) == LIST_AP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a");
     int ss_sw = this->argSearch(&cmd_args, "-s");
+    int cl_sw = this->argSearch(&cmd_args, "-c");
 
     // List APs
     if (ap_sw != -1) {
@@ -515,6 +527,24 @@ void CommandLine::runCommand(String input) {
           Serial.println("[" + (String)i + "] " + ssids->get(i).essid + " (selected)");
         else
           Serial.println("[" + (String)i + "] " + ssids->get(i).essid);
+      }
+    }
+    else if (cl_sw != -1) {
+      char sta_mac[] = "00:00:00:00:00:00";
+      for (int x = 0; x < access_points->size(); x++) {
+        Serial.println("[" + (String)x + "] " + access_points->get(x).essid + " " + (String)access_points->get(x).rssi + ":");
+        for (int i = 0; i < access_points->get(x).stations->size(); i++) {
+          wifi_scan_obj.getMAC(sta_mac, stations->get(access_points->get(x).stations->get(i)).mac, 0);
+          if (stations->get(i).selected) {
+            Serial.print("  [" + (String)i + "] ");
+            Serial.print(sta_mac);
+            Serial.println(" (selected)");
+          }
+          else {
+            Serial.print("  [" + (String)i + "] ");
+            Serial.println(sta_mac);
+          }
+        }
       }
     }
     else {

@@ -65,6 +65,7 @@
 #define WIFI_SCAN_ACTIVE_EAPOL 23
 #define WIFI_ATTACK_DEAUTH_MANUAL 24
 #define WIFI_SCAN_RAW_CAPTURE 25
+#define WIFI_SCAN_STATION 26
 
 #define GRAPH_REFRESH 100
 
@@ -97,6 +98,12 @@ struct AccessPoint {
   bool selected;
   LinkedList<char>* beacon;
   int rssi;
+  LinkedList<int>* stations;
+};
+
+struct Station {
+  uint8_t mac[6];
+  bool selected;
 };
 
 class WiFiScan
@@ -254,6 +261,7 @@ class WiFiScan
     void RunPwnScan(uint8_t scan_mode, uint16_t color);
     void RunBeaconScan(uint8_t scan_mode, uint16_t color);
     void RunRawScan(uint8_t scan_mode, uint16_t color);
+    void RunStationScan(uint8_t scan_mode, uint16_t color);
     void RunDeauthScan(uint8_t scan_mode, uint16_t color);
     void RunEapolScan(uint8_t scan_mode, uint16_t color);
     void RunProbeScan(uint8_t scan_mode, uint16_t color);
@@ -324,6 +332,7 @@ class WiFiScan
     static void pwnSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void beaconSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void rawSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
+    static void stationSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void apSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);
     static void apSnifferCallbackFull(void* buf, wifi_promiscuous_pkt_type_t type);
     static void deauthSnifferCallback(void* buf, wifi_promiscuous_pkt_type_t type);

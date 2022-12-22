@@ -24,6 +24,7 @@ extern SDInterface sd_obj;
 extern Settings settings_obj;
 extern LinkedList<AccessPoint>* access_points;
 extern LinkedList<ssid>* ssids;
+extern LinkedList<Station>* stations;
 extern const String PROGMEM version_number;
 
 //// Commands
@@ -38,6 +39,7 @@ const char PROGMEM SETTINGS_CMD[] = "settings";
 
 // WiFi sniff/scan
 const char PROGMEM SCANAP_CMD[] = "scanap";
+const char PROGMEM SCANSTA_CMD[] = "scansta";
 const char PROGMEM SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM SNIFF_PROBE_CMD[] = "sniffprobe";
@@ -77,6 +79,7 @@ const char PROGMEM HELP_SETTINGS_CMD[] = "settings [-s <setting> enable/disable>
 
 // WiFi sniff/scan
 const char PROGMEM HELP_SCANAP_CMD[] = "scanap";
+const char PROGMEM HELP_SCANSTA_CMD[] = "scansta";
 const char PROGMEM HELP_SNIFF_RAW_CMD[] = "sniffraw";
 const char PROGMEM HELP_SNIFF_BEACON_CMD[] = "sniffbeacon";
 const char PROGMEM HELP_SNIFF_PROBE_CMD[] = "sniffprobe";
@@ -92,6 +95,7 @@ const char PROGMEM HELP_ATTACK_CMD[] = "attack -t <beacon [-l/-r/-a]/deauth [-s 
 // WiFi Aux
 const char PROGMEM HELP_LIST_AP_CMD_A[] = "list -s";
 const char PROGMEM HELP_LIST_AP_CMD_B[] = "list -a";
+const char PROGMEM HELP_LIST_AP_CMD_C[] = "list -c";
 const char PROGMEM HELP_SEL_CMD_A[] = "select -a <index (comma separated)>";
 const char PROGMEM HELP_SEL_CMD_B[] = "select -s <index (comma separated)>";
 const char PROGMEM HELP_SSID_CMD_A[] = "ssid -a [-g <count>/-n <name>]";
