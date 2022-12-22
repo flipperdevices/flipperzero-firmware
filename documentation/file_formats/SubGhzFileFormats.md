@@ -1,10 +1,10 @@
-# File Formats for Flipper's SubGhz Files  
+# File Formats for Flipper's SubGhz Files
 
 ## `.sub` File Format
 
-Flipper uses  `.sub` files to store SubGhz key data. They are text files in Flipper File Format. `.sub` files can contain either a SubGhz Key defined by a certain protocol or SubGhz RAW data.
+Flipper uses `.sub` files to store SubGhz key data. They are text files in Flipper File Format. `.sub` files can contain either a SubGhz Key with a certain protocol or SubGhz RAW data.
 
- `.sub` files consist of 3 parts:
+A `.sub` files consist of 3 parts:
 
 - **header**: contains file type, version, and frequency;
 - **preset information**: preset type and, in case of custom preset, transceiver configuration data;
@@ -14,7 +14,7 @@ Flipper's SubGhz subsystem uses presets to configure radio transceiver. Presets 
 
 ## Header Format
 
-Header is a mandatory part of  `.sub` file. It contains file type, version, and frequency.
+Header is a mandatory part of `.sub` file. It contains file type, version, and frequency.
 
 
 | Field | Description |
@@ -25,36 +25,35 @@ Header is a mandatory part of  `.sub` file. It contains file type, version, and 
 
 ## Preset Information
 
-Preset information is a mandatory part of  `.sub` file. It contains preset type and, in case of custom preset, transceiver configuration data.
+Preset information is a mandatory part of `.sub` file. It contains preset type and, in case of custom preset, transceiver configuration data.
 
-When using one of the standard presets, only `Preset` field is required. When using custom preset, `Custom_preset_module` and `Custom_preset_data` fields are required. 
+When using one of the standard presets, only `Preset` field is required. When using custom preset, `Custom_preset_module` and `Custom_preset_data` fields are required.
 
 | Field | Description |
 | --- | --- |
 | `Preset` | Radio preset name (configures modulation, bandwidth, filters, etc.). When using a custom preset, must be `FuriHalSubGhzPresetCustom` |
 | `Custom_preset_module` | Transceiver identifier, `CC1101` for Flipper Zero |
-| `Custom_preset_data` | Transceiver configuration data | 
+| `Custom_preset_data` | Transceiver configuration data |
 
 Built-in presets names are `FuriHalSubGhzPresetOok270Async`, `FuriHalSubGhzPresetOok650Async`, `FuriHalSubGhzPreset2FSKDev238Async`, `FuriHalSubGhzPreset2FSKDev476Async`.
 
 ### Transceiver Configuration Data
 
-Transceiver configuration data is a string of bytes, separated by spaces. For CC1101 data structure is: `XX YY XX YY .. 00 00 ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`, where:
+Transceiver configuration data is a string of bytes, encoded in hex format, separated by spaces. For CC1101 data structure is: `XX YY XX YY .. 00 00 ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`, where:
 
-- XX holds register address, 
+- XX holds register address,
 - YY contains register value,
-- 00 00: marks register block end, 
-- `ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`: 8 byte PA table (Power amplifier ramp table). 
+- 00 00: marks register block end,
+- `ZZ ZZ ZZ ZZ ZZ ZZ ZZ ZZ`: 8 byte PA table (Power amplifier ramp table).
 
 More details can be found in [CC1101 datasheet](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and `furi_hal_subghz` code.
 
 ## File Data
+`.sub` file data section contains either key data — protocol name and its specific data, bit length, etc., or RAW data — an array of signal timings, recorded without any protocol-specific processing.
 
- `.sub` file data section contains either key data — protocol name and its specific data, bit length, etc., or RAW data — an array of signal timings, recorded without any protocol-specific processing.
+### Key Files
 
-### Key Files 
-
- `.sub` files with key data files contain protocol name and its specific data, such as key value, bit length, etc.
+`.sub` files with key data files contain protocol name and its specific data, such as key value, bit length, etc.
 Check out protocol registry for full list of supported protocol names.
 
 Example of key data block in Princeton format:
@@ -78,9 +77,10 @@ This file may contain additional fields, more details on available fields can be
 
 ### RAW Files
 
-RAW  `.sub` files contain raw signal data that is not processed through protocol-specific decoding. These files are useful for testing purposes, or for sending data that is not supported by any known protocol.
+RAW `.sub` files contain raw signal data that is not processed through protocol-specific decoding. These files are useful for testing purposes, or for sending data that is not supported by any known protocol.
 
-For RAW files, 2 fields are requied: 
+For RAW files, 2 fields are requied:
+
  * `Protocol`, must be `RAW`;
  * `RAW_Data`, contains an array of durations, specified in micro seconds. Values must be non-zero, start with a positive number, and interleaved (change sign with each value). Up to 512 values per line. Can be specified multiple times to store multiple lines of data.
 
@@ -146,7 +146,7 @@ Long payload not fitting into internal memory buffer and consisting of short dur
 
 # SubGhz Setting File
 
-SubGhz application provides support for adding extra radio presets and additional keys for decoding transmissions in certain protocols.  
+SubGhz application provides support for adding extra radio presets and additional keys for decoding transmissions in certain protocols.
 
 ## SubGhz `keeloq_mfcodes_user` File
 
@@ -165,8 +165,8 @@ File header format:
 | `Version` | File format version, 0 |
 | `Encryption` | File encryption: for user-provided file, set to 0 (disabled) |
 
-Following the header, file contains a list of user-provided manufacture keys, one key per line. 
-For each key, a name and encryption method must be specified, according to comment in file header. More information can be found in keeloq decoder source code. 
+Following the header, file contains a list of user-provided manufacture keys, one key per line.
+For each key, a name and encryption method must be specified, according to comment in file header. More information can be found in keeloq decoder source code.
 
 ### Example
 
@@ -199,7 +199,7 @@ File contains a header, basic options, and optional lists of presets and frequen
 
 Header must contain following fields:
 
- *  `Filetype`:  SubGhz setting file format, always `Flipper SubGhz Setting File` .
+ *  `Filetype`: SubGhz setting file format, must be `Flipper SubGhz Setting File`.
  * `Version`: file format version, current is `1`.
 
 #### Basic Settings
@@ -213,20 +213,20 @@ Header must contain following fields:
 
 #### Adding More Hopper Frequencies
 
-- `Hopper_frequency`: uint — additional frequency for subghz application frequency hopping. Used in Frequency Analyzer. You can specify multiple frequencies, one per line. 
+- `Hopper_frequency`: uint — additional frequency for subghz application frequency hopping. Used in Frequency Analyzer. You can specify multiple frequencies, one per line.
 
-Repeating same frequency will cause Flipper to listen this frequency more often.
+Repeating same frequency will cause Flipper to listen on this frequency more often.
 
 #### Adding a Custom Preset
 
-You can have as many presets as you want. Presets are embedded into  `.sub` files, so another Flipper can load them directly from that file.
+You can have as many presets as you want. Presets are embedded into `.sub` files, so another Flipper can load them directly from that file.
 Each preset is defined by following fields:
 
 | Field | Description |
 | --- | --- |
 | `Custom_preset_name` | string, preset name that will be shown in SubGHz application |
 | `Custom_preset_module` | string, transceiver identifier, set to `CC1101` for Flipper Zero |
-| `Custom_preset_data` | transceiver configuration data. See  [Transceiver Configuration Data](#transceiver-configuration-data) for details. |
+| `Custom_preset_data` | transceiver configuration data. See [Transceiver Configuration Data](#transceiver-configuration-data) for details. |
 
 ### Example
 
