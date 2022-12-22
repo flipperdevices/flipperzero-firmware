@@ -487,6 +487,35 @@
         )
       )
     )
+    (symbol "Mechanical:MountingHole" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+      (property "Reference" "H" (id 0) (at 0 5.08 0)
+        (effects (font (size 1.27 1.27)))
+      )
+      (property "Value" "MountingHole" (id 1) (at 0 3.175 0)
+        (effects (font (size 1.27 1.27)))
+      )
+      (property "Footprint" "" (id 2) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "Datasheet" "~" (id 3) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_keywords" "mounting hole" (id 4) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_description" "Mounting Hole without connection" (id 5) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (property "ki_fp_filters" "MountingHole*" (id 6) (at 0 0 0)
+        (effects (font (size 1.27 1.27)) hide)
+      )
+      (symbol "MountingHole_0_1"
+        (circle (center 0 0) (radius 1.27)
+          (stroke (width 1.27) (type default) (color 0 0 0 0))
+          (fill (type none))
+        )
+      )
+    )
     (symbol "SamacSys_Parts:19-217_R6C-AL1M2VY_3T" (pin_names (offset 0.762)) (in_bom yes) (on_board yes)
       (property "Reference" "LED" (id 0) (at 12.7 8.89 0)
         (effects (font (size 1.27 1.27)) (justify left bottom))
@@ -4528,6 +4557,23 @@
     (pin "1" (uuid df229359-f292-44cf-8a2d-78ba196eeac7))
   )
 
+  (symbol (lib_id "Mechanical:MountingHole") (at 355.6 187.96 0) (unit 1)
+    (in_bom yes) (on_board yes) (fields_autoplaced)
+    (uuid 26d34c7a-663c-44ce-bf5d-9011a0023f0c)
+    (property "Reference" "H1" (id 0) (at 358.14 186.6899 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Value" "" (id 1) (at 358.14 189.2299 0)
+      (effects (font (size 1.27 1.27)) (justify left))
+    )
+    (property "Footprint" "" (id 2) (at 355.6 187.96 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (id 3) (at 355.6 187.96 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+  )
+
   (symbol (lib_id "power:GND") (at 176.53 198.12 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 2d5f2f7b-5d4f-43b4-9512-88cb8699d542)
@@ -5366,7 +5412,7 @@
   (symbol (lib_id "power:+3V3") (at 107.95 224.79 270) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 873b26cb-57d8-496a-ba6d-014c367acc65)
-    (property "Reference" "#PWR?" (id 0) (at 104.14 224.79 0)
+    (property "Reference" "#PWR01" (id 0) (at 104.14 224.79 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3V3" (id 1) (at 111.76 224.7899 90)
@@ -6142,7 +6188,7 @@
   (symbol (lib_id "power:GND") (at 107.95 227.33 90) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid cd0ef08e-1e0a-463d-934f-188987274c87)
-    (property "Reference" "#PWR?" (id 0) (at 114.3 227.33 0)
+    (property "Reference" "#PWR03" (id 0) (at 114.3 227.33 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (id 1) (at 115.57 227.33 90)
@@ -6270,7 +6316,7 @@
   (symbol (lib_id "power:+3V3") (at 160.02 234.95 180) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid d3edf629-33c1-45ba-9af4-caa80199d7c4)
-    (property "Reference" "#PWR?" (id 0) (at 160.02 231.14 0)
+    (property "Reference" "#PWR010" (id 0) (at 160.02 231.14 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "+3V3" (id 1) (at 162.56 236.2199 0)
@@ -7173,8 +7219,14 @@
   )
 
   (symbol_instances
+    (path "/873b26cb-57d8-496a-ba6d-014c367acc65"
+      (reference "#PWR01") (unit 1) (value "+3V3") (footprint "")
+    )
     (path "/fb596e4c-6b9f-4b73-8d91-d86ee0192628"
       (reference "#PWR02") (unit 1) (value "GND") (footprint "")
+    )
+    (path "/cd0ef08e-1e0a-463d-934f-188987274c87"
+      (reference "#PWR03") (unit 1) (value "GND") (footprint "")
     )
     (path "/d89013f9-d116-49ba-99c6-65da9c27ad5e"
       (reference "#PWR04") (unit 1) (value "GND") (footprint "")
@@ -7193,6 +7245,9 @@
     )
     (path "/2670da6a-90f4-4a17-be50-ed9d4a439aa2"
       (reference "#PWR09") (unit 1) (value "GND") (footprint "")
+    )
+    (path "/d3edf629-33c1-45ba-9af4-caa80199d7c4"
+      (reference "#PWR010") (unit 1) (value "+3V3") (footprint "")
     )
     (path "/b0228299-0eb8-4913-914c-6bb8874973f2"
       (reference "#PWR012") (unit 1) (value "GND") (footprint "")
@@ -7305,15 +7360,6 @@
     (path "/c2fe62be-4319-4010-b7cd-bfcbb1d41f84"
       (reference "#PWR0102") (unit 1) (value "+ext_3V3") (footprint "")
     )
-    (path "/873b26cb-57d8-496a-ba6d-014c367acc65"
-      (reference "#PWR?") (unit 1) (value "+3V3") (footprint "")
-    )
-    (path "/cd0ef08e-1e0a-463d-934f-188987274c87"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/d3edf629-33c1-45ba-9af4-caa80199d7c4"
-      (reference "#PWR?") (unit 1) (value "+3V3") (footprint "")
-    )
     (path "/40adbb6d-87aa-405c-ba38-fc70c2bcc5dc"
       (reference "C1") (unit 1) (value "1u") (footprint "CAPC1005X60N")
     )
@@ -7346,6 +7392,9 @@
     )
     (path "/5497b75c-55bf-439f-8614-477cac66d4dc"
       (reference "C11") (unit 1) (value "100n") (footprint "CAPC1005X55N")
+    )
+    (path "/26d34c7a-663c-44ce-bf5d-9011a0023f0c"
+      (reference "H1") (unit 1) (value "MountingHole") (footprint "")
     )
     (path "/7756c211-5286-4d10-828b-c4ad5bcfbce7"
       (reference "IC1") (unit 1) (value "ESP32-WROOM-32E-N4") (footprint "ESP32WROOM32EN4")
