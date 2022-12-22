@@ -85,10 +85,10 @@ For RAW files, 2 fields are requied:
  * `RAW_Data`, contains an array of durations, specified in micro seconds. Values must be non-zero, start with a positive number, and interleaved (change sign with each value). Up to 512 values per line. Can be specified multiple times to store multiple lines of data.
 
 Example of RAW data:
-```
+
 	Protocol: RAW
 	RAW_Data: 29262 361 -68 2635 -66 24113 -66 11 ...
-```
+
 
 Long payload not fitting into internal memory buffer and consisting of short duration timings (<10us) may not be read fast enough from SD Card. That might cause signal transmission to stop before reaching the end of the payload. Ensure that your SD Card has good performance before transmitting long or complex RAW payloads.
 
@@ -205,15 +205,17 @@ Header must contain following fields:
 #### Basic Settings
 
 - `Add_standard_frequencies`: bool, flag indicating whether to load standard frequencies shipped with firmware. If set to `false`, only frequencies specified in this file will be used.
-- `Default_frequency`: int, default frequency used in SubGhz application.
+- `Default_frequency`: uint, default frequency used in SubGhz application.
 
 #### Adding More Frequencies
 
-- `Frequency`: int, additional frequency for the subghz application frequency list. Used in Read and Read RAW. You can specify multiple frequencies, one per line.
+- `Frequency`: uint — additional frequency for the subghz application frequency list. Used in Read and Read RAW. You can specify multiple frequencies, one per line.
 
 #### Adding More Hopper Frequencies
 
-- `Hopper_frequency`: int (multi) — additional frequency for subghz application frequency hopping. Used in Frequency Analyzer. Repeating same frequency will cause Flipper to listen this frequency more often.
+- `Hopper_frequency`: uint — additional frequency for subghz application frequency hopping. Used in Frequency Analyzer. You can specify multiple frequencies, one per line. 
+
+Repeating same frequency will cause Flipper to listen this frequency more often.
 
 #### Adding a Custom Preset
 
