@@ -16,7 +16,7 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release RM1221-2234-0.73.2-c6c5566](https://www.patreon.com/posts/76225261) 
+## Latest Updates - [PATREON: Latest Release RM1222-1225-0.73.2-e8ffe6d](https://www.patreon.com/posts/76247707) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
