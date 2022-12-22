@@ -62,15 +62,13 @@ jobs:
               -f build/f7-firmware-DC/compile_commands.json \
               -o PVS-Studio.log
 
-      - name: 'Detect warnings'
+      - name: 'Convert PVS-Studio output to html and detect warnings'
         id: pvs-warn
         run: |
           WARNINGS=0
-          plog-converter -a GA:1,2,3 --indicate-warnings PVS-Studio.log || WARNINGS=1
+          plog-converter -a GA:1,2,3 -t fullhtml --indicate-warnings PVS-Studio.log -o reports/${DEFAULT_TARGET}-${SUFFIX}
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
-
-      - name: 'Convert PVS-Studio output to html page'
-        run: plog-converter -a GA:1,2,3 -t fullhtml PVS-Studio.log -o reports/${DEFAULT_TARGET}-${SUFFIX}
+          echo "$WARNINGS"
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
