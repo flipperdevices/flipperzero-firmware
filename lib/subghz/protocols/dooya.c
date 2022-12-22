@@ -236,6 +236,7 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
             instance->decoder.parser_step = DooyaDecoderStepFoundStartBit;
         }
         break;
+
     case DooyaDecoderStepFoundStartBit:
         if(!level) {
             if(DURATION_DIFF(duration, subghz_protocol_dooya_const.te_long * 2) <
@@ -288,12 +289,6 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
                     }
 
                     if(subghz_protocol_decoder_dooya_check_parity(instance)) {
-                        FURI_LOG_E(
-                            "W!",
-                            "%llX, %d",
-                            instance->decoder.decode_data,
-                            instance->decoder.decode_count_bit);
-
                         instance->generic.data = instance->decoder.decode_data;
                         instance->generic.data_count_bit = instance->decoder.decode_count_bit;
                         if(instance->base.callback)
