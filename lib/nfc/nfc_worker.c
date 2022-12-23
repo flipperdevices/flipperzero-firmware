@@ -573,6 +573,7 @@ static void nfc_worker_mf_classic_key_attack(
     FuriHalNfcTxRxContext* tx_rx,
     uint16_t start_sector) {
     furi_assert(nfc_worker);
+    furi_assert(nfc_worker->callback);
 
     bool card_found_notified = true;
     bool card_removed_notified = false;
@@ -582,8 +583,11 @@ static void nfc_worker_mf_classic_key_attack(
 
     furi_assert(start_sector < total_sectors);
 
+    nfc_worker->callback(NfcWorkerEventKeyAttackStart, nfc_worker->context);
+
     // Check every sector's A and B keys with the given key
     for(size_t i = start_sector; i < total_sectors; i++) {
+        nfc_worker->callback(NfcWorkerEventKeyAttackNextSector, nfc_worker->context);
         furi_hal_nfc_sleep();
         if(furi_hal_nfc_activate_nfca(200, NULL)) {
             furi_hal_nfc_sleep();
@@ -632,6 +636,7 @@ static void nfc_worker_mf_classic_key_attack(
         }
         if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
     }
+    nfc_worker->callback(NfcWorkerEventKeyAttackStop, nfc_worker->context);
 }
 
 void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {

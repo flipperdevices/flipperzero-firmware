@@ -153,6 +153,12 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 nfc_worker_stop(nfc->worker);
                 consumed = true;
             }
+        } else if(event.event == NfcWorkerEventKeyAttackStart) {
+            dict_attack_set_key_attack(nfc->dict_attack, true);
+        } else if(event.event == NfcWorkerEventKeyAttackStop) {
+            dict_attack_set_key_attack(nfc->dict_attack, false);
+        } else if(event.event == NfcWorkerEventKeyAttackNextSector) {
+            dict_attack_inc_key_attack_current_sector(nfc->dict_attack);
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
