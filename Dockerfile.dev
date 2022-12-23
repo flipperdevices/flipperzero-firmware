@@ -1,0 +1,5 @@
+FROM python:latest
+
+RUN git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
+
+RUN ls
