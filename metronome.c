@@ -135,7 +135,9 @@ static void timer_callback(void* ctx) {
     notification_message(metronome_state->notifications, &sequence_set_only_red_255);
     switch(metronome_state->output_mode) {
       case Loud:
-        furi_hal_speaker_start(440.0f, 1.0f);
+        if (furi_hal_speaker_acquire(1000)) {
+          furi_hal_speaker_start(440.0f, 1.0f);
+        }
         break;
       case Vibro:
         notification_message(metronome_state->notifications, &sequence_set_vibro_on);
@@ -148,7 +150,9 @@ static void timer_callback(void* ctx) {
     notification_message(metronome_state->notifications, &sequence_set_only_green_255);
     switch(metronome_state->output_mode) {
       case Loud:
-        furi_hal_speaker_start(220.0f, 1.0f);
+        if (furi_hal_speaker_acquire(1000)) {
+          furi_hal_speaker_start(220.0f, 1.0f);
+        }
         break;
       case Vibro:
         notification_message(metronome_state->notifications, &sequence_set_vibro_on);
@@ -162,7 +166,10 @@ static void timer_callback(void* ctx) {
   switch(metronome_state->output_mode) {
     case Loud:
       furi_delay_ms(BEEP_DELAY_MS);
-      furi_hal_speaker_stop();
+      if (furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+      }
       break;
     case Vibro:
       if (metronome_state->current_beat == 1) {
@@ -269,6 +276,7 @@ int32_t metronome_app() {
   metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, &state_mutex);
 
   // Open GUI and register view_port
+  //
   Gui* gui = furi_record_open("gui");
   gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
@@ -306,6 +314,8 @@ int32_t metronome_app() {
             case InputKeyBack:
                 processing = false;
                 break;
+            case InputKeyMAX:
+                break;
           }
         } else if (event.input.type == InputTypeLong) {
           // hold events
@@ -326,6 +336,8 @@ int32_t metronome_app() {
             case InputKeyBack:
               processing = false;
               break;
+            case InputKeyMAX:
+              break;
           }
         } else if (event.input.type == InputTypeRepeat) {
           // repeat events
@@ -344,6 +356,8 @@ int32_t metronome_app() {
               break;
             case InputKeyBack:
               processing = false;
+              break;
+            case InputKeyMAX:
               break;
           }
         }

@@ -8,6 +8,7 @@ App(
         "gui",
     ],
     fap_icon="metronome_icon.png",
+    fap_icon_assets="icons",
     fap_category="Music",
     stack_size=2 * 1024,
     order=20,
