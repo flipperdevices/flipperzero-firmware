@@ -17,5 +17,5 @@ A metronome for the [Flipper Zero](https://flipperzero.one/) device. Goes along 
 ## Compiling
 
 ```
-./fbt firmware_metronome
+./fbt fap_metronome
 ```
