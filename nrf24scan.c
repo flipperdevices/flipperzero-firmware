@@ -211,11 +211,10 @@ void write_to_log_file(Storage* storage, bool f_settings)
 	if(fl) {
 		FURI_LOG_D(TAG, "Save to %s", furi_string_get_cstr(str));
 		if(save_to_new_log || f_settings) {
-			//if(what_to_do == 1) furi_string_printf(str, "%s\n", SettingsFld_Sniff); else furi_string_reset(str);
-			furi_string_printf(str, "%s %d\n%s %d\n%s %d\n", SettingsFld_Rate, NRF_rate, SettingsFld_Ch, NRF_channel, SettingsFld_ESB, NRF_ESB);
+			if(what_to_do == 1) furi_string_printf(str, "%s\n", SettingsFld_Sniff); else furi_string_reset(str);
+			furi_string_cat_printf(str, "%s %d\n%s %d\n%s %d\n", SettingsFld_Rate, NRF_rate, SettingsFld_Ch, NRF_channel, SettingsFld_ESB, NRF_ESB);
 			furi_string_cat_printf(str, "%s %d\n%s %d\n%s %d\n", SettingsFld_DPL, NRF_DPL, SettingsFld_CRC, NRF_CRC, SettingsFld_Payload, what_to_do == 1 ? NRF_Payload_sniff_min : NRF_Payload);
-			furi_string_cat_printf(str, "P0: ");
-			add_to_furi_str_hex_bytes(str, (char*)addrs.addr_P0, addrs.addr_len); furi_string_cat(str, "\n");
+			if(addrs.addr_count > 0) { furi_string_cat_printf(str, "P0: ");	add_to_furi_str_hex_bytes(str, (char*)addrs.addr_P0, addrs.addr_len); furi_string_cat(str, "\n"); }
 			if(addrs.addr_count > 1) { furi_string_cat_printf(str, "P1: "); add_to_furi_str_hex_bytes(str, (char*)addrs.addr_P1, addrs.addr_len); furi_string_cat(str, "\n"); }
 			if(addrs.addr_count > 2) { furi_string_cat_printf(str, "P2: "); furi_string_cat_printf(str, "%02X\n", addrs.addr_P2); }
 			if(addrs.addr_count > 3) { furi_string_cat_printf(str, "P3: "); furi_string_cat_printf(str, "%02X\n", addrs.addr_P3); }
@@ -386,12 +385,12 @@ static uint8_t load_settings_file(Stream* file_stream) {
 				if(err == 0 && a) adr->addr_count = a - '0' + 1;
 			} else if(line_len >= 3 * 2) { // data
 				if(!log_loaded) {
+					log_loaded = true;
 					clear_log();
 					what_to_do = 0;
-					log_loaded = true;
 				}
 				if(log_arr_idx < MAX_LOG_RECORDS - 1) {
-					ConvertHexToArray(line_ptr, APP->log_arr + log_arr_idx * LOG_REC_SIZE, LOG_REC_SIZE);
+					if(ConvertHexToArray(line_ptr, APP->log_arr + log_arr_idx * LOG_REC_SIZE, LOG_REC_SIZE) > 0) err = 0;
 					log_arr_idx++;
 				}
 			}
@@ -863,7 +862,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 					if(log_arr_idx && (*p & 0x80)) {  // +RAW
 						snprintf(screen_buf, sizeof(screen_buf), "Start read: ");
 						add_to_str_hex_bytes(screen_buf, (char*)p + 2, (*(p + 1) & 0b11) + 2);
-						if(what_to_do == 3) strcpy(screen_buf + strlen(screen_buf) - 2, "* ");
+						if(what_to_do == 2) strcpy(screen_buf + strlen(screen_buf) - 2, "* ");
 					} else snprintf(screen_buf, sizeof(screen_buf), "Start scan (pipes: %d)", addrs.addr_count);
 				}
 			}
