@@ -6,6 +6,6 @@ TIME_VAR=`date +%H%M`
 VER_VAR=`cat scripts/version.py | awk '/VERSION/{ gsub(/[",]/,"",$2); print $2}' | tail -1`
 HASH_VAR=`git rev-parse \`git branch -r --sort=committerdate | tail -1\` | awk '{print substr($0,1,7)}' | tail -1`
 mv dist/f7-C/f7-update-RM420FAP "RM$DATE_VAR-$TIME_VAR"
-zip -rq "RM$DATE_VAR-$TIME_VAR-$HASH_VAR.zip" "$RMDATE_VAR-$TIME_VAR"
-tar -czf "RM$DATE_VAR-$TIME_VAR-$HASH_VAR.tgz" "RM$DATE_VAR-$TIME_VAR"
-echo " BUILD COMPLETED, ZIP AND TGZ GENERATED FOR RM$DATE_VAR-$TIME_VAR-$HASH_VAR"
+zip -rq "RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR.zip" "$RMDATE_VAR-$TIME_VAR"
+tar -czf "RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR.tgz" "RM$DATE_VAR-$TIME_VAR"
+echo " BUILD COMPLETED, ZIP AND TGZ GENERATED FOR RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR"
