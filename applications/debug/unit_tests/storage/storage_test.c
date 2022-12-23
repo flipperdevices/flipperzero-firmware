@@ -303,6 +303,67 @@ MU_TEST_SUITE(storage_rename) {
     furi_record_close(RECORD_STORAGE);
 }
 
+#define APPSDATA_APP_PATH(path) APPSDATA_PATH "/" path
+
+static const char* storage_test_apps[] = {
+    "twilight",
+    "ranbow",
+    "pinkie",
+    "apple",
+    "flutter",
+    "rare",
+};
+
+static size_t storage_test_apps_count = COUNT_OF(storage_test_apps);
+
+static int32_t storage_test_app(void* arg) {
+    FuriString* result = arg;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FuriString* path = furi_string_alloc();
+
+    int32_t ret;
+    if(storage_common_get_my_data_path(storage, path)) {
+        furi_string_set(result, path);
+        ret = 0;
+    } else {
+        furi_string_set(result, "");
+        ret = -1;
+    }
+
+    furi_string_free(path);
+    furi_record_close(RECORD_STORAGE);
+    return ret;
+}
+
+MU_TEST(test_storage_common_get_my_data_path_apps) {
+    for(size_t i = 0; i < storage_test_apps_count; i++) {
+        FuriString* result = furi_string_alloc();
+
+        FuriThread* thread =
+            furi_thread_alloc_ex(storage_test_apps[i], 1024, storage_test_app, result);
+        furi_thread_set_appid(thread, storage_test_apps[i]);
+        furi_thread_start(thread);
+        furi_thread_join(thread);
+
+        mu_assert_int_eq(0, furi_thread_get_return_code(thread));
+
+        FuriString* expected = furi_string_alloc();
+        furi_string_printf(expected, APPSDATA_APP_PATH("%s"), storage_test_apps[i]);
+        mu_assert_string_eq(furi_string_get_cstr(expected), furi_string_get_cstr(result));
+
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        FileInfo fileinfo;
+        mu_check(
+            storage_common_stat(storage, furi_string_get_cstr(expected), &fileinfo) == FSE_OK);
+        mu_check(fileinfo.flags & FSF_DIRECTORY);
+        furi_record_close(RECORD_STORAGE);
+
+        furi_string_free(expected);
+        furi_string_free(result);
+        furi_thread_free(thread);
+    }
+}
+
 MU_TEST(test_storage_common_get_my_data_path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* path = furi_string_alloc();
@@ -310,14 +371,14 @@ MU_TEST(test_storage_common_get_my_data_path) {
     mu_check(storage_common_get_my_data_path(storage, path));
 
     // we runned from "cli" app, so path should be "/ext/appsdata/cli"
-    mu_assert_string_eq(furi_string_get_cstr(path), "/ext/appsdata/cli");
+    mu_assert_string_eq(furi_string_get_cstr(path), APPSDATA_APP_PATH("cli"));
 
     // check that appsdata folder exists
-    mu_check(storage_common_stat(storage, "/ext/appsdata", &fileinfo) == FSE_OK);
+    mu_check(storage_common_stat(storage, APPSDATA_PATH, &fileinfo) == FSE_OK);
     mu_check(fileinfo.flags & FSF_DIRECTORY);
 
     // check that cli folder exists
-    mu_check(storage_common_stat(storage, "/ext/appsdata/cli", &fileinfo) == FSE_OK);
+    mu_check(storage_common_stat(storage, APPSDATA_APP_PATH("cli"), &fileinfo) == FSE_OK);
     mu_check(fileinfo.flags & FSF_DIRECTORY);
 
     furi_string_free(path);
@@ -326,6 +387,7 @@ MU_TEST(test_storage_common_get_my_data_path) {
 
 MU_TEST_SUITE(test_storage_common) {
     MU_RUN_TEST(test_storage_common_get_my_data_path);
+    MU_RUN_TEST(test_storage_common_get_my_data_path_apps);
 }
 
 int run_minunit_test_storage() {

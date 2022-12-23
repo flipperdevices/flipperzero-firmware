@@ -15,6 +15,8 @@ extern "C" {
 #define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
 #define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
 
+#define APPSDATA_PATH EXT_PATH("appsdata")
+
 #define RECORD_STORAGE "storage"
 
 typedef struct Storage Storage;
