@@ -307,7 +307,7 @@ MU_TEST_SUITE(storage_rename) {
 
 static const char* storage_test_apps[] = {
     "twilight",
-    "ranbow",
+    "rainbow",
     "pinkie",
     "apple",
     "flutter",
