@@ -46,6 +46,7 @@ struct BtMouse {
 
 #define MOUSE_MOVE_SHORT 5
 #define MOUSE_MOVE_LONG 20
+#define MOUSE_SCROLL 20
 
 static void bt_mouse_notify_event(BtMouse* bt_mouse) {
     FuriThreadId thread_id = furi_thread_get_id(bt_mouse->thread);
@@ -82,13 +83,13 @@ static void bt_mouse_process(BtMouse* bt_mouse, InputEvent* event) {
         void* model,
         {
             UNUSED(model);
-            if(event->key == InputKeyUp) {
+            if(event->key == InputKeyLeft) {
                 if(event->type == InputTypePress) {
                     bt_mouse_button_state(bt_mouse, HID_MOUSE_BTN_LEFT, true);
                 } else if(event->type == InputTypeRelease) {
                     bt_mouse_button_state(bt_mouse, HID_MOUSE_BTN_LEFT, false);
                 }
-            } else if(event->key == InputKeyDown) {
+            } else if(event->key == InputKeyRight) {
                 if(event->type == InputTypePress) {
                     bt_mouse_button_state(bt_mouse, HID_MOUSE_BTN_RIGHT, true);
                 } else if(event->type == InputTypeRelease) {
@@ -99,6 +100,14 @@ static void bt_mouse_process(BtMouse* bt_mouse, InputEvent* event) {
                     bt_mouse_button_state(bt_mouse, HID_MOUSE_BTN_WHEEL, true);
                 } else if(event->type == InputTypeRelease) {
                     bt_mouse_button_state(bt_mouse, HID_MOUSE_BTN_WHEEL, false);
+                }
+            } else if(event->key == InputKeyUp) {
+                if(event->type == InputTypePress) {
+                    bt_mouse->wheel = MOUSE_SCROLL;
+                }
+            } else if(event->key == InputKeyDown) {
+                if(event->type == InputTypePress) {
+                    bt_mouse->wheel = -MOUSE_SCROLL;
                 }
             }
         },

@@ -21,19 +21,21 @@ static void usb_mouse_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str(canvas, 0, 63, "Hold [back] to exit");
 }
 
+#define MOUSE_SCROLL 20
+
 static void usb_mouse_process(UsbMouse* usb_mouse, InputEvent* event) {
     with_view_model(
         usb_mouse->view,
         void* model,
         {
             UNUSED(model);
-            if(event->key == InputKeyUp) {
+            if(event->key == InputKeyLeft) {
                 if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
                 } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
                 }
-            } else if(event->key == InputKeyDown) {
+            } else if(event->key == InputKeyRight) {
                 if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
                 } else if(event->type == InputTypeRelease) {
@@ -44,6 +46,14 @@ static void usb_mouse_process(UsbMouse* usb_mouse, InputEvent* event) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_WHEEL);
                 } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_WHEEL);
+                }
+            } else if(event->key == InputKeyUp) {
+                if(event->type == InputTypePress) {
+                    furi_hal_hid_mouse_scroll(MOUSE_SCROLL);
+                }
+            } else if(event->key == InputKeyDown) {
+                if(event->type == InputTypePress) {
+                    furi_hal_hid_mouse_scroll(-MOUSE_SCROLL);
                 }
             }
         },
