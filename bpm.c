@@ -5,6 +5,7 @@
 #include <input/input.h>
 #include <m-string.h>
 #include <stdlib.h>
+#include "bpm_tapper_icons.h"
 
 typedef enum {
     EventTypeTick,
@@ -236,6 +237,8 @@ int32_t bpm_tapper_app(void* p) {
             case InputKeyBack:
                 // Exit the plugin
                 processing = false;
+                break;
+            default:
                 break;
           }
         }
