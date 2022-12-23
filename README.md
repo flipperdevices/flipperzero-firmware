@@ -5,6 +5,12 @@
 
 english version [below](#eng)
 
+
+Blog: [theageoflove.ru](https://theageoflove.ru)
+
+TG: [t.me/scuko_bled](https://t.me/scuko_bled)
+
+
 ![zeitraffer for flipper zero](https://theageoflove.ru/uploads/2022/11/photo_2022-11-10_15-54-25.jpg)
 Видео работы: https://youtu.be/VPSpRLJXYAc
 
