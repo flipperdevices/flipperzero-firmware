@@ -4,7 +4,7 @@ import subprocess
 import logging
 import time
 import os
-import select
+import socket
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -24,6 +24,10 @@ class Programmer(ABC):
     def get_name(self) -> str:
         pass
 
+    @abstractmethod
+    def set_serial(self, serial: str):
+        pass
+
 
 @dataclass
 class OpenOCDInterface:
@@ -37,6 +41,7 @@ class OpenOCDProgrammer(Programmer):
     def __init__(self, interface: OpenOCDInterface):
         self.interface = interface
         self.logger = logging.getLogger("OpenOCD")
+        self.serial: typing.Optional[str] = None
 
     def _add_file(self, params: list[str], file: str):
         params.append("-f")
@@ -49,11 +54,16 @@ class OpenOCDProgrammer(Programmer):
     def _add_serial(self, params: list[str], serial: str):
         self._add_command(params, f"{self.interface.serial_cmd} {serial}")
 
+    def set_serial(self, serial: str):
+        self.serial = serial
+
     def flash(self, bin: str) -> bool:
         i = self.interface
 
         openocd_launch_params = ["openocd"]
         self._add_file(openocd_launch_params, i.file)
+        if self.serial:
+            self._add_serial(openocd_launch_params, self.serial)
         if i.additional_args:
             for a in i.additional_args:
                 self._add_command(openocd_launch_params, a)
@@ -88,6 +98,8 @@ class OpenOCDProgrammer(Programmer):
 
         openocd_launch_params = ["openocd"]
         self._add_file(openocd_launch_params, i.file)
+        if self.serial:
+            self._add_serial(openocd_launch_params, self.serial)
         if i.additional_args:
             for a in i.additional_args:
                 self._add_command(openocd_launch_params, a)
@@ -99,7 +111,7 @@ class OpenOCDProgrammer(Programmer):
 
         process = subprocess.Popen(
             openocd_launch_params,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             stdout=subprocess.PIPE,
         )
 
@@ -107,9 +119,8 @@ class OpenOCDProgrammer(Programmer):
         process.wait()
         found = process.returncode == 0
 
-        if not found:
-            if process.stderr:
-                self.logger.debug(process.stderr.read().decode("utf-8").strip())
+        if process.stdout:
+            self.logger.debug(process.stdout.read().decode("utf-8").strip())
 
         return found
 
@@ -117,33 +128,65 @@ class OpenOCDProgrammer(Programmer):
         return self.interface.name
 
 
-def blackmagic_find_serial():
+def blackmagic_find_serial(serial: str):
     import serial.tools.list_ports as list_ports
 
     ports = list(list_ports.grep("blackmagic"))
     if len(ports) == 0:
         return None
     elif len(ports) > 2:
-        raise Exception("More than one Blackmagic probe found")
-    else:
-        # If you're getting any issues with auto lookup, uncomment this
-        # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
-        port = sorted(ports, key=lambda p: f"{p.location}_{p.name}")[0]
-        if os.name == "nt":
-            port.device = f"\\\\.\\{port.device}"
-        return port.device
+        if serial:
+            ports = list(
+                filter(
+                    lambda p: p.serial_number == serial
+                    or p.name == serial
+                    or p.device == serial,
+                    ports,
+                )
+            )
+            if len(ports) == 0:
+                return None
 
+        if len(ports) > 2:
+            raise Exception("More than one Blackmagic probe found")
 
-def blackmagic_find_networked():
-    def _resolve_hostname():
-        import socket
+    # If you're getting any issues with auto lookup, uncomment this
+    # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
+    port = sorted(ports, key=lambda p: f"{p.location}_{p.name}")[0]
 
-        try:
-            return socket.gethostbyname("blackmagic.local")
-        except socket.gaierror:
+    if serial:
+        if (
+            serial != port.serial_number
+            and serial != port.name
+            and serial != port.device
+        ):
             return None
 
-    if not (probe := _resolve_hostname()):
+    if os.name == "nt":
+        port.device = f"\\\\.\\{port.device}"
+    return port.device
+
+
+def _resolve_hostname(hostname):
+    try:
+        return socket.gethostbyname(hostname)
+    except socket.gaierror:
+        return None
+
+
+def blackmagic_find_networked(serial: str):
+    if not serial:
+        serial = "blackmagic.local"
+
+    # remove the tcp: prefix if it's there
+    if serial.startswith("tcp:"):
+        serial = serial[4:]
+
+    # remove the port if it's there
+    if ":" in serial:
+        serial = serial.split(":")[0]
+
+    if not (probe := _resolve_hostname(serial)):
         return None
 
     return f"tcp:{probe}:2345"
@@ -151,7 +194,9 @@ def blackmagic_find_networked():
 
 class BlackmagicProgrammer(Programmer):
     def __init__(
-        self, port_resolver: typing.Callable[[], typing.Optional[str]], name: str
+        self,
+        port_resolver,  # typing.Callable[typing.Union[str, None], typing.Optional[str]]
+        name: str,
     ):
         self.port_resolver = port_resolver
         self.name = name
@@ -161,6 +206,21 @@ class BlackmagicProgrammer(Programmer):
     def _add_command(self, params: list[str], command: str):
         params.append("-ex")
         params.append(command)
+
+    def _valid_ip(self, address):
+        try:
+            socket.inet_aton(address)
+            return True
+        except:
+            return False
+
+    def set_serial(self, serial: str):
+        if self._valid_ip(serial):
+            self.port = f"{serial}:2345"
+        elif ip := _resolve_hostname(serial):
+            self.port = f"{ip}:2345"
+        else:
+            self.port = serial
 
     def flash(self, bin: str) -> bool:
         if not self.port:
@@ -178,8 +238,9 @@ class BlackmagicProgrammer(Programmer):
             return False
 
         # arm-none-eabi-gdb build/f7-firmware-D/firmware.bin
+        # -ex 'set pagination off'
         # -ex 'target extended-remote /dev/cu.usbmodem21201'
-        # -ex "set confirm off"
+        # -ex 'set confirm off'
         # -ex 'monitor swdp_scan'
         # -ex 'attach 1'
         # -ex 'set mem inaccessible-by-default off'
@@ -189,6 +250,7 @@ class BlackmagicProgrammer(Programmer):
 
         gdb_launch_params = ["arm-none-eabi-gdb", elf]
         self._add_command(gdb_launch_params, f"target extended-remote {self.port}")
+        self._add_command(gdb_launch_params, "set pagination off")
         self._add_command(gdb_launch_params, "set confirm off")
         self._add_command(gdb_launch_params, "monitor swdp_scan")
         self._add_command(gdb_launch_params, "attach 1")
@@ -217,8 +279,10 @@ class BlackmagicProgrammer(Programmer):
         flashed = "Loading section .text," in output
 
         # Check flash verification
-        # Look for "MIS-MATCHED!" in the output
         if "MIS-MATCHED!" in output:
+            flashed = False
+
+        if "target image does not match the loaded file" in output:
             flashed = False
 
         if not flashed:
@@ -228,7 +292,7 @@ class BlackmagicProgrammer(Programmer):
         return flashed
 
     def probe(self) -> bool:
-        if not (port := self.port_resolver()):
+        if not (port := self.port_resolver(self.port)):
             return False
 
         self.port = port
@@ -275,20 +339,31 @@ class Main(App):
             help="Binary to flash",
             required=True,
         )
+        interfaces = [i.get_name() for i in programmers]
+        interfaces.extend([i.get_name() for i in network_programmers])
         self.parser_flash.add_argument(
             "--interface",
-            choices=[i.get_name() for i in programmers],
+            choices=interfaces,
             type=str,
             help="Interface to use",
         )
+        self.parser_flash.add_argument(
+            "--serial",
+            type=str,
+            help="Serial number or port of the programmer",
+        )
         self.parser_flash.set_defaults(func=self.flash)
 
-    def _search_interface(self) -> list[Programmer]:
+    def _search_interface(self, serial: typing.Optional[str]) -> list[Programmer]:
         found_programmers = []
 
         for p in programmers:
             name = p.get_name()
-            self.logger.debug(f"Trying {name}")
+            if serial:
+                p.set_serial(serial)
+                self.logger.debug(f"Trying {name} with {serial}")
+            else:
+                self.logger.debug(f"Trying {name}")
 
             if p.probe():
                 self.logger.debug(f"Found {name}")
@@ -298,12 +373,19 @@ class Main(App):
 
         return found_programmers
 
-    def _search_network_interface(self) -> list[Programmer]:
+    def _search_network_interface(
+        self, serial: typing.Optional[str]
+    ) -> list[Programmer]:
         found_programmers = []
 
         for p in network_programmers:
             name = p.get_name()
-            self.logger.debug(f"Trying {name}")
+
+            if serial:
+                p.set_serial(serial)
+                self.logger.debug(f"Trying {name} with {serial}")
+            else:
+                self.logger.debug(f"Trying {name}")
 
             if p.probe():
                 self.logger.debug(f"Found {name}")
@@ -321,15 +403,18 @@ class Main(App):
             return 1
 
         if self.args.interface:
-            interfaces = [p for p in programmers if p.get_name() == self.args.interface]
+            i_name = self.args.interface
+            interfaces = [p for p in programmers if p.get_name() == i_name]
+            if len(interfaces) == 0:
+                interfaces = [p for p in network_programmers if p.get_name() == i_name]
         else:
             self.logger.info(f"Probing for interfaces...")
-            interfaces = self._search_interface()
+            interfaces = self._search_interface(self.args.serial)
 
             if len(interfaces) == 0:
                 # Probe network blackmagic
                 self.logger.info(f"Probing for network interfaces...")
-                interfaces = self._search_network_interface()
+                interfaces = self._search_network_interface(self.args.serial)
 
             if len(interfaces) == 0:
                 self.logger.error("No interface found")
@@ -343,9 +428,17 @@ class Main(App):
                 return 1
 
         interface = interfaces[0]
-        self.logger.info(f"Flashing {self.args.bin} via {interface.get_name()}")
+
+        if self.args.serial:
+            interface.set_serial(self.args.serial)
+            self.logger.info(
+                f"Flashing {self.args.bin} via {interface.get_name()} with {self.args.serial}"
+            )
+        else:
+            self.logger.info(f"Flashing {self.args.bin} via {interface.get_name()}")
+
         if not interface.flash(self.args.bin):
-            self.logger.error("Failed to flash")
+            self.logger.error(f"Failed to flash via {interface.get_name()}")
             return 1
 
         flash_time = time.time() - start_time
