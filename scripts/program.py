@@ -117,8 +117,44 @@ class OpenOCDProgrammer(Programmer):
         return self.interface.name
 
 
-class BlackmagicUSBProgrammer(Programmer):
-    def __init__(self):
+def blackmagic_find_serial():
+    import serial.tools.list_ports as list_ports
+
+    ports = list(list_ports.grep("blackmagic"))
+    if len(ports) == 0:
+        return None
+    elif len(ports) > 2:
+        raise Exception("More than one Blackmagic probe found")
+    else:
+        # If you're getting any issues with auto lookup, uncomment this
+        # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
+        port = sorted(ports, key=lambda p: f"{p.location}_{p.name}")[0]
+        if os.name == "nt":
+            port.device = f"\\\\.\\{port.device}"
+        return port.device
+
+
+def blackmagic_find_networked():
+    def _resolve_hostname():
+        import socket
+
+        try:
+            return socket.gethostbyname("blackmagic.local")
+        except socket.gaierror:
+            return None
+
+    if not (probe := _resolve_hostname()):
+        return None
+
+    return f"tcp:{probe}:2345"
+
+
+class BlackmagicProgrammer(Programmer):
+    def __init__(
+        self, port_resolver: typing.Callable[[], typing.Optional[str]], name: str
+    ):
+        self.port_resolver = port_resolver
+        self.name = name
         self.logger = logging.getLogger("BlackmagicUSB")
         self.port: typing.Optional[str] = None
 
@@ -191,31 +227,15 @@ class BlackmagicUSBProgrammer(Programmer):
 
         return flashed
 
-    def _find_probe(self):
-        import serial.tools.list_ports as list_ports
-
-        ports = list(list_ports.grep("blackmagic"))
-        if len(ports) == 0:
-            # Blackmagic probe serial port not found, will be handled later
-            pass
-        elif len(ports) > 2:
-            raise Exception("More than one Blackmagic probe found")
-        else:
-            # If you're getting any issues with auto lookup, uncomment this
-            # print("\n".join([f"{p.device} {vars(p)}" for p in ports]))
-            return sorted(ports, key=lambda p: f"{p.location}_{p.name}")[0]
-
     def probe(self) -> bool:
-        if not (probe := self._find_probe()):
+        if not (port := self.port_resolver()):
             return False
 
-        if os.name == "nt":
-            self.port = f"\\\\.\\{probe.device}"
-        self.port = probe.device
+        self.port = port
         return True
 
     def get_name(self) -> str:
-        return "blackmagic_usb"
+        return self.name
 
 
 programmers: list[Programmer] = [
@@ -229,7 +249,10 @@ programmers: list[Programmer] = [
             "cmsis-dap",
             "interface/cmsis-dap.cfg",
             "cmsis_dap_serial",
-            ["transport select swd"],
+            [
+                "transport select swd",
+                "cmsis_dap_backend bulk",
+            ],
         ),
     ),
     OpenOCDProgrammer(
@@ -237,7 +260,11 @@ programmers: list[Programmer] = [
             "stlink", "interface/stlink.cfg", "hla_serial", ["transport select hla_swd"]
         ),
     ),
-    BlackmagicUSBProgrammer(),
+    BlackmagicProgrammer(blackmagic_find_serial, "blackmagic_usb"),
+]
+
+network_programmers = [
+    BlackmagicProgrammer(blackmagic_find_networked, "blackmagic_wifi")
 ]
 
 
@@ -274,8 +301,23 @@ class Main(App):
 
         return found_programmers
 
+    def _search_network_interface(self) -> list[Programmer]:
+        found_programmers = []
+
+        for p in network_programmers:
+            name = p.get_name()
+            self.logger.debug(f"Trying {name}")
+
+            if p.probe():
+                self.logger.debug(f"Found {name}")
+                found_programmers += [p]
+            else:
+                self.logger.debug(f"Failed to probe {name}")
+
+        return found_programmers
+
     def flash(self):
-        strat_time = time.time()
+        start_time = time.time()
 
         if not os.path.exists(self.args.bin):
             self.logger.error(f"Binary file not found: {self.args.bin}")
@@ -286,6 +328,11 @@ class Main(App):
         else:
             self.logger.info(f"Probing for interfaces...")
             interfaces = self._search_interface()
+
+            if len(interfaces) == 0:
+                # Probe network blackmagic
+                self.logger.info(f"Probing for network interfaces...")
+                interfaces = self._search_network_interface()
 
             if len(interfaces) == 0:
                 self.logger.error("No interface found")
@@ -299,12 +346,15 @@ class Main(App):
                 return 1
 
         interface = interfaces[0]
-        self.logger.info(f"Flashing {self.args.bin} using {interface.get_name()}")
+        self.logger.info(f"Flashing {self.args.bin} via {interface.get_name()}")
         if not interface.flash(self.args.bin):
             self.logger.error("Failed to flash")
             return 1
 
-        self.logger.info("Flashed successfully in %.2fs" % (time.time() - strat_time))
+        flash_time = time.time() - start_time
+        bin_size = os.path.getsize(self.args.bin)
+        self.logger.info(f"Flashed successfully in {flash_time:.2f}s")
+        self.logger.info(f"Effective speed: {bin_size / flash_time / 1024:.2f} KiB/s")
         return 0
 
 
