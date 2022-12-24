@@ -201,13 +201,6 @@ static void subghz_frequency_analyzer_log_frequency_sort(SubGhzFrequencyAnalyzer
         model->log_frequency, SubGhzFrequencyAnalyzerLogItemArray_compare_by_as_interface(cmp));
 }
 
-static void subghz_frequency_analyzer_log_frequency_sort(SubGhzFrequencyAnalyzerModel* model) {
-    furi_assert(model);
-    M_LET((cmp, model->log_frequency_order_by), SubGhzFrequencyAnalyzerLogItemArray_compare_by_t)
-    SubGhzFrequencyAnalyzerLogItemArray_sort_fo(
-        model->log_frequency, SubGhzFrequencyAnalyzerLogItemArray_compare_by_as_interface(cmp));
-}
-
 bool subghz_frequency_analyzer_input(InputEvent* event, void* context) {
     furi_assert(context);
     SubGhzFrequencyAnalyzer* instance = context;
