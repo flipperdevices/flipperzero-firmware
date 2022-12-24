@@ -1,5 +1,7 @@
 #include "../include/pwnagotchi.h"
 
+#include "../include/faces_xbm.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -25,16 +27,16 @@ Pwnagotchi* pwnagotchi_alloc() {
 }
 
 void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas) {
-    canvas_set_font(canvas, FontKeyboard);
+    UNUSED(pwn);
 
-    canvas_draw_str(canvas, PWNAGOTCHI_FACE_J, PWNAGOTCHI_FACE_I, pwn->faceStr);
+    canvas_draw_xbm(canvas, PWNAGOTCHI_FACE_J, PWNAGOTCHI_FACE_I, smart_width, smart_height, smart_xbm);
 }
 
 void pwnagotchi_draw_name(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatName = malloc(sizeof(char) * (PWNAGOTCHI_MAX_HOSTNAME_LEN + 2));
     strncpy(formatName, pwn->hostname, PWNAGOTCHI_MAX_HOSTNAME_LEN);
     strncat(formatName, ">", 2);
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_NAME_J, PWNAGOTCHI_NAME_I, formatName);
     free(formatName);
 }
@@ -43,7 +45,7 @@ void pwnagotchi_draw_channel(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatChannel = malloc(sizeof(char) * (PWNAGOTCHI_MAX_CHANNEL_LEN + 4));
     strncpy(formatChannel, "CH ", 4);
     strcat(formatChannel, pwn->channel);
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_CHANNEL_J, PWNAGOTCHI_CHANNEL_I, formatChannel);
     free(formatChannel);
 }
@@ -52,7 +54,7 @@ void pwnagotchi_draw_aps(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatAP = malloc(sizeof(char) * (PWNAGOTCHI_MAX_APS_LEN + 5));
     strncpy(formatAP, "APS ", 5);
     strcat(formatAP, pwn->apStat);
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_APS_J, PWNAGOTCHI_APS_I, formatAP);
     free(formatAP);
 }
@@ -61,7 +63,7 @@ void pwnagotchi_draw_uptime(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatUp = malloc(sizeof(char) * (PWNAGOTCHI_MAX_UPTIME_LEN + 4));
     strncpy(formatUp, "UP ", 4);
     strcat(formatUp, pwn->uptime);
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_UPTIME_J, PWNAGOTCHI_UPTIME_I, formatUp);
     free(formatUp);
 }
@@ -79,7 +81,7 @@ void pwnagotchi_draw_handshakes(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatShakes = malloc(sizeof(char) * (PWNAGOTCHI_MAX_HANDSHAKES_LEN + 5));
     strncpy(formatShakes, "PWND ", 6);
     strcat(formatShakes, pwn->handshakes);
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_HANDSHAKES_J, PWNAGOTCHI_HANDSHAKES_I, formatShakes);
     free(formatShakes);
 }
@@ -90,7 +92,7 @@ void pwnagotchi_draw_friend(Pwnagotchi* pwn, Canvas* canvas) {
 }
 
 void pwnagotchi_draw_mode(Pwnagotchi* pwn, Canvas* canvas) {
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, PWNAGOTCHI_FONT);
     switch (pwn->mode) {
         case PwnMode_Manual:
             canvas_draw_str(canvas, PWNAGOTCHI_MODE_MANU_J, PWNAGOTCHI_MODE_MANU_I, "MANU");

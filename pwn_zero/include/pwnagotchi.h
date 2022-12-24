@@ -8,8 +8,8 @@
 
 #define PWNAGOTCHI_HEIGHT FLIPPER_SCREEN_HEIGHT
 #define PWNAGOTCHI_WIDTH FLIPPER_SCREEN_WIDTH
-#define PWNAGOTCHI_FACE_I           43
-#define PWNAGOTCHI_FACE_J           3
+#define PWNAGOTCHI_FACE_I           25
+#define PWNAGOTCHI_FACE_J           0
 #define PWNAGOTCHI_NAME_I           17
 #define PWNAGOTCHI_NAME_J           60
 #define PWNAGOTCHI_CHANNEL_I        7
@@ -40,6 +40,8 @@
 #define PWNAGOTCHI_MODE_MANU_J      103
 #define PWNAGOTCHI_MESSAGE_I        30
 #define PWNAGOTCHI_MESSAGE_J        60
+
+#define PWNAGOTCHI_FONT             FontSecondary
 
 
 /**
