@@ -249,10 +249,7 @@ programmers: list[Programmer] = [
             "cmsis-dap",
             "interface/cmsis-dap.cfg",
             "cmsis_dap_serial",
-            [
-                "transport select swd",
-                "cmsis_dap_backend bulk",
-            ],
+            ["transport select swd"],
         ),
     ),
     OpenOCDProgrammer(
