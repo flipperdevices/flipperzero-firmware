@@ -22,19 +22,7 @@ Thank you to all the supporters!
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-23 10:44 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-23 10:44 EST`
-- Updated: [NRF24 Scanner v2.0 (By vad7)](https://github.com/vad7/nrf24scan)
-- New Animation: [Hentai (By qqMajikpp)](https://github.com/qqmajikpp/) for [PATREON members](https://www.patreon.com/RogueMaster/membership) now included on 18Plus releases
-- [PATREON ONLY UPDATES: For STOCK Animations Release: Not Stoned, Passport display closer to OFW, Passport avatar from OFW, Top desktop bar from OFW & Internal Apps have OFW animation scenes](https://www.patreon.com/RogueMaster/)
-- Swapped favorite buttons to fix Favorite location bug.
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
-- Fixed passport to show more data for EXP
-- Added: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
-- [New PAXGOD Build: Unlocked, 1 New Custom PaxGod animation and non-anime/RM animations from Minimal, and Mountains Passport Theme (from Kuranons) on PATREON](https://www.patreon.com/posts/76225261) - Custom FW Builds available for [PATREON subscribers](https://www.patreon.com/RogueMaster/membership)
-- Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
-- Added: [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
-- Fixed game mode 2048 to new version
-- [18 Plus Build Update: 5 New Animations included on 18 Plus releases](https://www.patreon.com/posts/76253078)
+- Updated: [WiFi (Marauder) v3.0 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -258,7 +246,7 @@ $ ./fbt resources icons dolphin_ext
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
-- [WiFi (Marauder) (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
+- [WiFi (Marauder) v3.0 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - [WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266) `Req: ESP8266 or ESP32`
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
