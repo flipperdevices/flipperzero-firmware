@@ -53,7 +53,7 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackSt
     // Setup view
     if(state == DictAttackStateUserDictInProgress) {
         worker_state = NfcWorkerStateMfClassicDictAttack;
-        dict_attack_set_header(nfc->dict_attack, "MF Classic User Dictuionary");
+        dict_attack_set_header(nfc->dict_attack, "MF Classic User Dictionary");
         dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
 
         // If failed to load user dictionary - try the system dictionary
