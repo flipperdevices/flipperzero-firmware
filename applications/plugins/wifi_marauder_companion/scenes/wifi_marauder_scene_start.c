@@ -26,7 +26,13 @@ typedef struct {
 // NUM_MENU_ITEMS defined in wifi_marauder_app_i.h - if you add an entry here, increment it!
 const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     {"View Log from", {"start", "end"}, 2, {"", ""}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP},
-    {"Scan", {"ap", "station"}, 2, {"scanap", "scansta"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP},
+    {"Scan",
+     {"ap", "station"},
+     2,
+     {"scanap", "scansta"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     SHOW_STOPSCAN_TIP},
     {"SSID",
      {"add rand", "add name", "remove"},
      3,
