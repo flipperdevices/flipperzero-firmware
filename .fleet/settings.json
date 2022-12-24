@@ -1,0 +1,10 @@
+{
+    "toolchains": [
+        {
+            "name": "Clang",
+        },
+        {
+            "name": "Python",
+        },
+    ],
+}

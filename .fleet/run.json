@@ -1,0 +1,147 @@
+{
+    "configurations": [
+        {
+            "type": "command",
+            "name": "[Release] Build",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Build",
+            "program": "./fbt",
+        },
+        {
+            "type": "command",
+            "name": "[Release] Flash (ST-Link)",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "FORCE=1", "flash"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Flash (ST-Link)",
+            "program": "./fbt",
+            "args": ["FORCE=1", "flash"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Flash (blackmagic)",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "FORCE=1", "flash_blackmagic"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Flash (blackmagic)",
+            "program": "./fbt",
+            "args": ["FORCE=1", "flash_blackmagic"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Flash (JLink)",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "FORCE=1", "jflash"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Flash (JLink)",
+            "program": "./fbt",
+            "args": ["FORCE=1", "jflash"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Build update bundle",
+            "program": "./fbt",
+            "args": ["updater_package", "COMPACT=1", "DEBUG=0"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Build update bundle",
+            "program": "./fbt",
+            "args": ["updater_package"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Build updater",
+            "program": "./fbt",
+            "args": ["updater_all", "COMPACT=1", "DEBUG=0"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Build updater",
+            "program": "./fbt",
+            "args": ["updater_all"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Flash (USB, w/o resources)",
+            "program": "./fbt",
+            "args": ["FORCE=1", "flash_usb"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Flash (USB, w/o resources)",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "FORCE=1", "flash_usb"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug:unit_tests] Flash (USB)",
+            "program": "./fbt",
+            "args": ["FIRMWARE_APP_SET=unit_tests", "FORCE=1", "flash_usb"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Flash (USB, with resources)",
+            "program": "./fbt",
+            "args": ["FORCE=1", "flash_usb_full"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Flash (USB, with resources)",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "FORCE=1", "flash_usb_full"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Build FAPs",
+            "program": "./fbt",
+            "args": ["fap_dist"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Build FAPs",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "fap_dist"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Launch App on Flipper",
+            "program": "./fbt",
+            "args": ["launch_app", "APPSRC=$FILE$"],
+        },
+        {
+            "type": "command",
+            "name": "[Release] Launch App on Flipper",
+            "program": "./fbt",
+            "args": ["COMPACT=1", "DEBUG=0", "launch_app", "APPSRC=$FILE$"],
+        },
+        {
+            "type": "command",
+            "name": "[Debug] Launch App on Flipper with Serial Console",
+            "program": "",
+            "dependsOn": [
+                "[Debug] Launch App on Flipper",
+                "Serial Console",
+            ],
+        },
+        {
+            "type": "command",
+            "name": "Serial Console",
+            "program": "./fbt",
+            "args": ["cli"],
+            "environment": {
+                "FBT_NO_SYNC": "0",
+            },
+        },
+    ],
+}
