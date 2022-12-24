@@ -53,11 +53,7 @@ FuriTimer* furi_timer_alloc(FuriTimerCallback func, FuriTimerType type, void* co
     // TimerCallback function is always provided as a callback and is used to call application
     // specified function with its context both stored in structure callb.
     hTimer = xTimerCreate(NULL, 1, reload, callb, TimerCallback);
-    if(hTimer == NULL) {
-        /* Failed to create a timer, release allocated resources */
-        callb = (TimerCallback_t*)((uint32_t)callb & ~1U);
-        free(callb);
-    }
+    furi_check(hTimer);
 
     /* Return timer ID */
     return ((FuriTimer*)hTimer);
