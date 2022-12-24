@@ -47,6 +47,8 @@ def generate(env, **kw):
             "target extended-remote ${GDBREMOTE}",
             "-ex",
             "set confirm off",
+            "-ex",
+            "source ${FBT_DEBUG_DIR}/gdbinit",
         ],
         GDBOPTS_BLACKMAGIC=[
             "-ex",

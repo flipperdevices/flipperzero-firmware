@@ -188,7 +188,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontKeyboard);
 
-    for(uint8_t row = 0; row <= keyboard_row_count; row++) {
+    for(uint8_t row = 0; row < keyboard_row_count; row++) {
         const uint8_t column_count = get_row_size(row);
         const TextInputKey* keys = get_row(row);
 
