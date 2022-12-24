@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  flipper-development:
+    volumes:
+      - ./.flipperzero-firmware:/development_root/.flipperzero-firmware
+      - ./flipp_pomodoro:/development_root/flipp_pomodoro
+    build:
+      dockerfile: Dockerfile.dev
+    command: bash tools/install.sh && tail -f /dev/null
+    platform: "linux/amd64"
+    tty: true

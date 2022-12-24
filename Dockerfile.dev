@@ -1,5 +1,8 @@
+# syntax=docker/dockerfile:1
 FROM python:latest
 
-RUN git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git
+WORKDIR /development_root
 
-RUN ls
+COPY ./tools /development_root/tools
+
+CMD bash tools/install.sh
