@@ -463,10 +463,11 @@ static void prepare_nrf24(bool fsend_packet)
 		}
 		if(what_to_do == 1) { // SNIFF
 			payload = 32;
-			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts
+			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts, NO CRC
 			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
 			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 		} else if(setup_from_log) { // Scan
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
 			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, *rec & 0x7F);
