@@ -131,6 +131,10 @@ class OpenOCDProgrammer(Programmer):
 def blackmagic_find_serial(serial: str):
     import serial.tools.list_ports as list_ports
 
+    if serial and os.name == "nt":
+        if not serial.startswith("\\\\.\\"):
+            serial = f"\\\\.\\{serial}"
+
     ports = list(list_ports.grep("blackmagic"))
     if len(ports) == 0:
         return None
