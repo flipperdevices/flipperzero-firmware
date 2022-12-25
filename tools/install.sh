@@ -1,9 +1,9 @@
 #!/bin/bash
 
-rm -rf .flipper-firmware
+rm -rf .flipperzero-firmware
 
-git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ./.flipper-firmware
+git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ./.flipperzero-firmware
 
-cd .flipper-firmware
+cd .flipperzero-firmware
 
 ./fbt -h

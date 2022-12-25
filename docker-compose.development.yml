@@ -5,8 +5,9 @@ services:
     volumes:
       - ./.flipperzero-firmware:/development_root/.flipperzero-firmware
       - ./flipp_pomodoro:/development_root/flipp_pomodoro
+      - ./dist:/development_root/dist
     build:
       dockerfile: Dockerfile.dev
-    command: bash tools/install.sh && tail -f /dev/null
+    command: tail -f /dev/null
     platform: "linux/amd64"
     tty: true
