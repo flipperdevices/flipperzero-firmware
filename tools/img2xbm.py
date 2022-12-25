@@ -2,6 +2,22 @@ import os
 import numpy as np
 from PIL import Image
 from pathlib import Path
+import math
+
+
+def fixImg(img: np.ndarray) -> np.ndarray:
+    """
+    This is a bit of a hacky fix. Basically it can only draw bitmaps with widths divisible by 8
+    The function will add empty pixels to the width in order to get to a valid width
+    """
+    remainingWidth = (math.ceil(len(img[0]) / 8) * 8) - len(img[0])
+    height = len(img)
+
+    padding = np.zeros((height, remainingWidth, 4))
+
+    fixedImg = np.hstack((img, padding))
+
+    return fixedImg
 
 
 def openImage(imgPath: str) -> tuple[np.ndarray, str]:
@@ -15,6 +31,8 @@ def openImage(imgPath: str) -> tuple[np.ndarray, str]:
     """
     img = Image.open(imgPath)
     imgArr = np.array(img)
+
+    imgArr = fixImg(imgArr)
 
     # Get file name without extension
     name = Path(imgPath).stem
