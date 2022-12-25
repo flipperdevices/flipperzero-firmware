@@ -27,6 +27,7 @@ Thank you to all the supporters!
 - Updated: [Metronome (By panki27)](https://github.com/panki27/Metronome)
 - Updated: [Minesweeper (By panki27)](https://github.com/panki27/minesweeper)
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
+- Updated: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (from Unleashed/gid9798)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
