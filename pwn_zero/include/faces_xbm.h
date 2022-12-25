@@ -10,6 +10,12 @@
 
 #include <furi.h>
 
+#define noface_height 1
+#define noface_width 1
+static uint8_t noface_xbm[] = {
+	0x0,
+};
+
 #define angry_height 14
 #define angry_width 64
 static uint8_t angry_xbm[] = {
