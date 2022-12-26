@@ -24,7 +24,6 @@ void shapshup_main_view_set_callback(
 void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model) {
     furi_assert(model);
 
-    // Title
     if(model->raw_file != NULL) {
         char buffer[64];
         uint8_t width = canvas_width(canvas);
@@ -74,22 +73,6 @@ void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model) {
             canvas_draw_box(canvas, item->x, item->y, item->width, item->height);
         }
     }
-
-    //    size_t size = ShapShupTextItemArray_size(m->items->data);
-    //    const uint8_t line_height = 10;
-    //
-    //    if(size > 0) {
-    //        for(size_t item_position = 0; item_position < size; item_position++) {
-    //            // ShapShupTextItem* current = ShapShupTextItemArray_get(m->items->data, item_position);
-    //            // canvas_draw_str_aligned(
-    //            //     canvas,
-    //            //     4,
-    //            //     9 + (item_position * line_height) + STATUS_BAR_Y_SHIFT,
-    //            //     AlignLeft,
-    //            //     AlignCenter,
-    //            //     furi_string_get_cstr(current->item_str));
-    //        }
-    //    }
 }
 
 bool shapshup_main_view_input(InputEvent* event, void* context) {
@@ -200,12 +183,12 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
     } else if(event->key == InputKeyUp) {
         if(instance->scale < SCALE_STEP) {
             instance->scale = SCALE_STEP;
-        } else if(DEFAULT_SCALE_STEP - instance->scale > 0.01f) {
+        } else if(SHAPSHUP_DEFAULT_SCALE_STEP - instance->scale > 0.01f) {
             instance->scale += SCALE_STEP;
         }
 
-        if(instance->scale > DEFAULT_SCALE_STEP) {
-            instance->scale = DEFAULT_SCALE_STEP;
+        if(instance->scale > SHAPSHUP_DEFAULT_SCALE_STEP) {
+            instance->scale = SHAPSHUP_DEFAULT_SCALE_STEP;
         }
         offset_per_page =
             instance->raw_file != NULL ?
@@ -255,7 +238,7 @@ ShapShupMainView* shapshup_main_view_alloc() {
     view_set_exit_callback(instance->view, shapshup_main_view_exit);
     instance->raw_file = NULL;
     instance->offset = 0;
-    instance->scale = DEFAULT_SCALE_STEP;
+    instance->scale = SHAPSHUP_DEFAULT_SCALE_STEP;
 
     instance->shape_list = malloc(sizeof(ShapShupShapeStruct));
     ShapShupShapeItemArray_init(instance->shape_list->data);
@@ -271,7 +254,7 @@ ShapShupMainView* shapshup_main_view_alloc() {
             model->offset_per_page = 0;
             model->calc_total_len = 0;
             model->is_ms = false;
-            model->scale = DEFAULT_SCALE_STEP;
+            model->scale = SHAPSHUP_DEFAULT_SCALE_STEP;
         },
         true);
 
@@ -337,7 +320,7 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
                     model->is_ms = false;
                 }
             }
-            model->scale = DEFAULT_SCALE_STEP;
+            model->scale = SHAPSHUP_DEFAULT_SCALE_STEP;
         },
         true);
     }
@@ -349,7 +332,6 @@ void shapshup_main_view_create_shapes(ShapShupMainView* instance, uint64_t offse
     uint64_t current_offset = 0;
     uint64_t current_x = 0;
     bool is_negative = false;
-    //bool before_negative = !is_negative;
     bool last = false;
     uint32_t chunk = (uint32_t)offset_per_page / SCREEN_WIDTH;
     uint64_t skip_value = 0;
@@ -367,17 +349,13 @@ void shapshup_main_view_create_shapes(ShapShupMainView* instance, uint64_t offse
     //FURI_LOG_D(TAG, "value: %ld, step: %lld", value, i);
 #endif
     uint64_t current_value = 0;
-    //uint64_t y = 0;
-    //before_negative = is_negative;
 
     if(value < 0) {
         current_value = value * -1;
         is_negative = true;
-        //y = CHART_LOWEST_POINT;
     } else {
         current_value = value;
         is_negative = false;
-        //y = CHART_HIGHTEST_POINT;
     }
     if(current_offset + current_value < instance->offset) {
         current_offset += current_value;
@@ -424,14 +402,14 @@ void shapshup_main_view_create_shapes(ShapShupMainView* instance, uint64_t offse
     ShapShupShapeItem* item = ShapShupShapeItemArray_push_raw(instance->shape_list->data);
     if(is_negative) {
         item->x = current_x;
-        item->y = CHART_LOWEST_POINT - 2;
+        item->y = SHAPSHUP_CHART_LOWEST_POINT - 2;
         item->width = current_value + 1;
         item->height = 2;
     } else {
         item->x = current_x;
-        item->y = CHART_HIGHTEST_POINT;
+        item->y = SHAPSHUP_CHART_HIGHTEST_POINT;
         item->width = current_value + 1;
-        item->height = CHART_LOWEST_POINT - CHART_HIGHTEST_POINT;
+        item->height = SHAPSHUP_CHART_LOWEST_POINT - SHAPSHUP_CHART_HIGHTEST_POINT;
     }
 
     current_x += current_value == 0 ? 1 : current_value;
@@ -448,22 +426,22 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     uint8_t width = canvas_width(canvas);
 
     // First and last scale pin
-    canvas_draw_line(canvas, 1, SUBGHZ_RAW_TOP_SCALE, 1, SUBGHZ_RAW_TOP_SCALE + 4);
-    canvas_draw_line(canvas, width - 1, SUBGHZ_RAW_TOP_SCALE, width - 1, SUBGHZ_RAW_TOP_SCALE + 4);
-    for(int i = width; i > SUBGHZ_RAW_START_SCALE; i -= 16) {
-    canvas_draw_line(canvas, i, SUBGHZ_RAW_TOP_SCALE, i, SUBGHZ_RAW_TOP_SCALE + 4);
-    canvas_draw_line(canvas, i - 5, SUBGHZ_RAW_TOP_SCALE, i - 5, SUBGHZ_RAW_TOP_SCALE + 2);
-    canvas_draw_line(canvas, i - 10, SUBGHZ_RAW_TOP_SCALE, i - 10, SUBGHZ_RAW_TOP_SCALE + 2);
+    canvas_draw_line(canvas, 1, SHAPSHUP_TOP_SCALE, 1, SHAPSHUP_TOP_SCALE + 4);
+    canvas_draw_line(canvas, width - 1, SHAPSHUP_TOP_SCALE, width - 1, SHAPSHUP_TOP_SCALE + 4);
+    for(int i = width; i > 0; i -= 16) {
+    canvas_draw_line(canvas, i, SHAPSHUP_TOP_SCALE, i, SHAPSHUP_TOP_SCALE + 4);
+    canvas_draw_line(canvas, i - 5, SHAPSHUP_TOP_SCALE, i - 5, SHAPSHUP_TOP_SCALE + 2);
+    canvas_draw_line(canvas, i - 10, SHAPSHUP_TOP_SCALE, i - 10, SHAPSHUP_TOP_SCALE + 2);
     }
 
-    canvas_draw_line(canvas, 0, SUBGHZ_RAW_TOP_SCALE, width, SUBGHZ_RAW_TOP_SCALE);
-    canvas_draw_line(canvas, 0, SUBGHZ_RAW_BOTTOM_SCALE, width, SUBGHZ_RAW_BOTTOM_SCALE);
+    canvas_draw_line(canvas, 0, SHAPSHUP_TOP_SCALE, width, SHAPSHUP_TOP_SCALE);
+    canvas_draw_line(canvas, 0, SHAPSHUP_BOTTOM_SCALE, width, SHAPSHUP_BOTTOM_SCALE);
 
     char format_buffer[32];
     format_number(model->offset, format_buffer);
     snprintf(buffer, sizeof(buffer), "%s us", format_buffer);
     uint16_t font_height = canvas_current_font_height(canvas);
-    canvas_draw_str(canvas, 0, SUBGHZ_RAW_BOTTOM_SCALE + font_height + 1, buffer);
+    canvas_draw_str(canvas, 0, SHAPSHUP_BOTTOM_SCALE + font_height + 1, buffer);
 
     memset(buffer, 0, sizeof(buffer));
     memset(format_buffer, 0, sizeof(format_buffer));
@@ -471,7 +449,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     snprintf(buffer, sizeof(buffer), "%s us", format_buffer);
     uint16_t last_value_width = canvas_string_width(canvas, buffer);
     canvas_draw_str(
-        canvas, width - last_value_width, SUBGHZ_RAW_BOTTOM_SCALE + font_height + 1, buffer);
+        canvas, width - last_value_width, SHAPSHUP_BOTTOM_SCALE + font_height + 1, buffer);
 
     if(model->raw_file != NULL) {
     //         uint64_t current_offset = 0;
@@ -509,7 +487,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     //             } else {
     //                 current_value = value;
     //                 is_negative = false;
-    //                 //y = CHART_HIGHTEST_POINT;
+    //                 //y = SHAPSHUP_CHART_HIGHTEST_POINT;
     //             }
     //             if(current_offset + current_value < model->offset) {
     //                 current_offset += current_value;
@@ -557,16 +535,16 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     //             if(is_negative) {
     //                 canvas_draw_box(canvas, current_x, CHART_LOWEST_POINT - 2, current_value + 1, 2);
     //                 // canvas_draw_line(
-    //                 //     canvas, current_x, CHART_HIGHTEST_POINT, current_x, CHART_LOWEST_POINT);
+    //                 //     canvas, current_x, SHAPSHUP_CHART_HIGHTEST_POINT, current_x, CHART_LOWEST_POINT);
     //             } else {
     //                 canvas_draw_box(
     //                     canvas,
     //                     current_x,
-    //                     CHART_HIGHTEST_POINT,
+    //                     SHAPSHUP_CHART_HIGHTEST_POINT,
     //                     current_value + 1,
-    //                     CHART_LOWEST_POINT - CHART_HIGHTEST_POINT);
+    //                     CHART_LOWEST_POINT - SHAPSHUP_CHART_HIGHTEST_POINT);
     //                 // canvas_draw_line(
-    //                 //     canvas, current_x, CHART_LOWEST_POINT, current_x, CHART_HIGHTEST_POINT);
+    //                 //     canvas, current_x, CHART_LOWEST_POINT, current_x, SHAPSHUP_CHART_HIGHTEST_POINT);
     //             }
     //             // canvas_draw_line(canvas, current_x, y, current_x + current_value, y);
 
@@ -583,17 +561,6 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     // #endif
     //         }
     }
-    /*} else {
-        for(int i = SUBGHZ_RAW_END_SCALE - model->ind_write % 15; i > -15; i -= 15) {
-            canvas_draw_line(canvas, i, SUBGHZ_RAW_TOP_SCALE, i, SUBGHZ_RAW_TOP_SCALE + 4);
-            if(SUBGHZ_RAW_END_SCALE > i + 5)
-                canvas_draw_line(
-                    canvas, i + 5, SUBGHZ_RAW_TOP_SCALE, i + 5, SUBGHZ_RAW_TOP_SCALE + 2);
-            if(SUBGHZ_RAW_END_SCALE > i + 10)
-                canvas_draw_line(
-                    canvas, i + 10, SUBGHZ_RAW_TOP_SCALE, i + 10, SUBGHZ_RAW_TOP_SCALE + 2);
-        }
-    }*/
 }
 
 bool shapshup_main_view_no_file(ShapShupMainView* instance) {
