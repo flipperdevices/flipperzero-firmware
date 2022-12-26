@@ -47,11 +47,10 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
                 sizeof(draw_str),
                 "Reuse key check for sector: %d",
                 m->key_attack_current_sector);
-            canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, draw_str);
         } else {
             snprintf(draw_str, sizeof(draw_str), "Unlocking sector: %d", m->sector_current);
-            canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, draw_str);
         }
+        canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, draw_str);
         float dict_progress = m->dict_keys_total == 0 ?
                                   0 :
                                   (float)(m->dict_keys_current) / (float)(m->dict_keys_total);

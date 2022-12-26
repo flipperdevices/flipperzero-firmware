@@ -12,7 +12,7 @@ void nfc_scene_mf_classic_keys_on_enter(void* context) {
 
     // Load flipper dict keys total
     uint32_t flipper_dict_keys_total = 0;
-    MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeFlipper);
+    MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeSystem);
     if(dict) {
         flipper_dict_keys_total = mf_classic_dict_get_total_keys(dict);
         mf_classic_dict_free(dict);

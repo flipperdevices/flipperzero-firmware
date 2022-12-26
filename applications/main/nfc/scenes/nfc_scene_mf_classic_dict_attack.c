@@ -65,7 +65,7 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackSt
     if(state == DictAttackStateFlipperDictInProgress) {
         worker_state = NfcWorkerStateMfClassicDictAttack;
         dict_attack_set_header(nfc->dict_attack, "MF Classic System Dictionary");
-        dict = mf_classic_dict_alloc(MfClassicDictTypeFlipper);
+        dict = mf_classic_dict_alloc(MfClassicDictTypeSystem);
         if(!dict) {
             FURI_LOG_E(TAG, "Flipper dictionary not found");
             // Pass through to let the worker handle the failure
