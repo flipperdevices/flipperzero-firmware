@@ -359,17 +359,17 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
         uint64_t current_offset = 0;
         uint64_t current_x = 0;
         bool is_negative = false;
-        bool before_negative = false;
+        //bool before_negative = !is_negative;
         bool last = false;
         uint32_t chunk = (uint32_t)model->offset_per_page / SCREEN_WIDTH;
         uint64_t skip_value = 0;
 #ifdef FURI_DEBUG
-        FURI_LOG_W(
-            TAG,
-            "offset: %lld, offset_per_page: %lld, chunk: %ld",
-            model->offset,
-            model->offset_per_page,
-            chunk);
+        // FURI_LOG_W(
+        //     TAG,
+        //     "offset: %lld, offset_per_page: %lld, chunk: %ld",
+        //     model->offset,
+        //     model->offset_per_page,
+        //     chunk);
 #endif
 #ifdef FURI_DEBUG
         for(uint64_t i = 0; i < 1000 && !last; i++) {
@@ -381,27 +381,27 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
             //FURI_LOG_D(TAG, "value: %ld, step: %lld", value, i);
 #endif
             uint64_t current_value = 0;
-            uint64_t y = 0;
-            before_negative = is_negative;
+            //uint64_t y = 0;
+            //before_negative = is_negative;
 
             if(value < 0) {
                 current_value = value * -1;
                 is_negative = true;
-                y = CHART_LOWEST_POINT;
+                //y = CHART_LOWEST_POINT;
             } else {
                 current_value = value;
                 is_negative = false;
-                y = CHART_HIGHTEST_POINT;
+                //y = CHART_HIGHTEST_POINT;
             }
             if(current_offset + current_value < model->offset) {
                 current_offset += current_value;
                 skip_value = 0;
 #ifdef FURI_DEBUG
-                FURI_LOG_I(
-                    TAG,
-                    "continue current_offset: %lld, current_value: %lld",
-                    current_offset,
-                    current_value);
+                // FURI_LOG_I(
+                //     TAG,
+                //     "continue current_offset: %lld, current_value: %lld",
+                //     current_offset,
+                //     current_value);
 #endif
                 continue;
                 /*} else if(model->offset > current_offset) {
@@ -412,41 +412,48 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
 
             current_value = skip_value + current_value;
 #ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "skip_value: %lld, current_value: %lld", skip_value, current_value);
+            // FURI_LOG_D(TAG, "skip_value: %lld, current_value: %lld", skip_value, current_value);
 #endif
             if(current_value > model->offset_per_page) {
                 last = true;
                 current_value = current_value - (current_value - model->offset_per_page);
-                FURI_LOG_I(
-                    TAG,
-                    "current_value > model->offset_per_page: %lld, model->offset_per_page: %lld",
-                    current_value,
-                    model->offset_per_page);
+                // FURI_LOG_I(
+                //     TAG,
+                //     "current_value > model->offset_per_page: %lld, model->offset_per_page: %lld",
+                //     current_value,
+                //     model->offset_per_page);
             } else if(current_offset + current_value > model->offset + model->offset_per_page) {
                 last = true;
                 current_value = current_value - ((current_offset + current_value) -
                                                  (model->offset + model->offset_per_page));
-                FURI_LOG_I(
-                    TAG,
-                    "current_offset + current_value > current_offset + model->offset_per_page: %lld, model->offset_per_page: %lld",
-                    current_value,
-                    model->offset_per_page);
+                // FURI_LOG_I(
+                //     TAG,
+                //     "current_offset + current_value > current_offset + model->offset_per_page: %lld, model->offset_per_page: %lld",
+                //     current_value,
+                //     model->offset_per_page);
             }
             //uint64_t from_offset = current_offset;
             current_offset += current_value;
             current_value = (uint64_t)(current_value / chunk);
 
-            if(is_negative && !before_negative) {
-                canvas_draw_line(
-                    canvas, current_x, CHART_HIGHTEST_POINT, current_x, CHART_LOWEST_POINT);
-            } else if(!is_negative && before_negative) {
-                canvas_draw_line(
-                    canvas, current_x, CHART_LOWEST_POINT, current_x, CHART_HIGHTEST_POINT);
+            if(is_negative) {
+                canvas_draw_box(canvas, current_x, CHART_LOWEST_POINT - 2, current_value + 1, 2);
+                // canvas_draw_line(
+                //     canvas, current_x, CHART_HIGHTEST_POINT, current_x, CHART_LOWEST_POINT);
+            } else {
+                canvas_draw_box(
+                    canvas,
+                    current_x,
+                    CHART_HIGHTEST_POINT,
+                    current_value + 1,
+                    CHART_LOWEST_POINT - CHART_HIGHTEST_POINT);
+                // canvas_draw_line(
+                //     canvas, current_x, CHART_LOWEST_POINT, current_x, CHART_HIGHTEST_POINT);
             }
-            current_x++;
-            canvas_draw_line(canvas, current_x, y, current_x + current_value, y);
+            // canvas_draw_line(canvas, current_x, y, current_x + current_value, y);
 
             current_x += current_value == 0 ? 1 : current_value;
+            current_x++;
 
 #ifdef FURI_DEBUG
             FURI_LOG_D(
