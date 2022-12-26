@@ -49,6 +49,7 @@
  */
 enum PwnagotchiFace {
     NoFace = 0,
+    DefaultFace,
     Look_r,
     Look_l,
     Look_r_happy,

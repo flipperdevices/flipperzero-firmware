@@ -36,6 +36,11 @@ void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas) {
             height = noface_height;
             xbm = noface_xbm;
             break;
+        case DefaultFace:
+            width = awake_width;
+            height = awake_height;
+            xbm = awake_xbm;
+            break;
         case Look_r:
             width = look_r_width;
             height = look_r_height;
