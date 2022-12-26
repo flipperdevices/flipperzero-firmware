@@ -248,7 +248,7 @@ ShapShupMainView* shapshup_main_view_alloc() {
     view_set_exit_callback(instance->view, shapshup_main_view_exit);
     instance->raw_file = NULL;
     instance->offset = 0;
-    instance->scale = 1.0;
+    instance->scale = DEFAULT_SCALE_STEP;
 
     with_view_model(
         instance->view,
@@ -257,7 +257,7 @@ ShapShupMainView* shapshup_main_view_alloc() {
             model->raw_file = NULL;
             model->offset = 0;
             model->offset_per_page = 0;
-            model->scale = 1.0;
+            model->scale = DEFAULT_SCALE_STEP;
         },
         true);
 
@@ -296,7 +296,7 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
                 if(model->raw_file != NULL) {
                     model->offset_per_page = model->raw_file->total_len;
                 }
-                model->scale = 1.0;
+                model->scale = DEFAULT_SCALE_STEP;
             },
             true);
     }
@@ -343,8 +343,20 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
         bool is_negative = false;
         bool before_negative = false;
         bool last = false;
-        uint32_t chunk = model->offset_per_page - model->offset / 128;
+        uint32_t chunk = (model->offset_per_page - model->offset) / 128;
+#ifdef FURI_DEBUG
+        FURI_LOG_W(
+            TAG,
+            "offset: %lld, offset_per_page: %lld, chunk: %ld",
+            model->offset,
+            model->offset_per_page,
+            chunk);
+#endif
+#ifdef FURI_DEBUG
+        for(uint64_t i = 0; i < 1000 && !last; i++) {
+#else
         for(uint64_t i = 0; i < model->raw_file->total_count && !last; i++) {
+#endif
             int32_t value = *array_raw_get(model->raw_file->values, i);
 #ifdef FURI_DEBUG
             FURI_LOG_D(TAG, "value: %ld, step: %lld", value, i);
@@ -354,7 +366,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
             before_negative = is_negative;
 
             if(value < 0) {
-                abs_value = abs_value * -1;
+                abs_value = value * -1;
                 is_negative = true;
                 y = CHART_LOWEST_POINT;
             } else {
@@ -378,12 +390,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
                                                                    model->offset - current_offset;
             uint64_t taken_value = skip_value + abs_value;
 #ifdef FURI_DEBUG
-            FURI_LOG_D(
-                TAG,
-                "skip_value: %lld, taken_value: %lld, offset: %lld",
-                skip_value,
-                taken_value,
-                model->offset);
+            FURI_LOG_D(TAG, "skip_value: %lld, taken_value: %lld", skip_value, taken_value);
 #endif
             if(taken_value > model->offset_per_page) {
                 last = true;
@@ -394,11 +401,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
             taken_value = (uint64_t)taken_value / chunk;
 #ifdef FURI_DEBUG
             FURI_LOG_D(
-                TAG,
-                "taken_value: %lld, current_offset: %lld, chunk: %ld",
-                taken_value,
-                current_offset,
-                chunk);
+                TAG, "taken_value: %lld, current_offset: %lld", taken_value, current_offset);
 #endif
             if(is_negative && !before_negative) {
                 canvas_draw_line(

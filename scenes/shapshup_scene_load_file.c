@@ -16,7 +16,7 @@ void shapshup_scene_load_file_on_enter(void* context) {
 
 #ifdef SHAPSHUP_FAST_TRACK
     bool res = true;
-    furi_string_printf(file_path, "%s", "/ext/subghz/temp/noise.sub");
+    furi_string_printf(file_path, "%s", "/ext/subghz/temp/Light_All_On.sub");
 #else
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, SHAPSHUP_FILE_EXT, &I_sub1_10px);
