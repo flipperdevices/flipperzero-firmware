@@ -16,7 +16,7 @@ Thank you to all the supporters!
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 
-## Latest Updates - [PATREON: Latest Release RM1225-0136-0.74.2-133a5b8](https://www.patreon.com/posts/76346398) 
+## Latest Updates - [PATREON: Latest Release RM1226-0325-0.74.3-a1807bc](https://www.patreon.com/posts/76378401) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
@@ -30,6 +30,7 @@ Thank you to all the supporters!
 - Updated: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (from Unleashed/gid9798)
 - Added Assets: Includes Fun SubGHz files: CVS/Walgreens CS Buttons & Honda Lock/Unlock.
 - AC Remote Update from OFW
+- [Patreon Build ONLY](https://www.patreon.com/posts/76378401) 18 Plus and Select 18 Plus builds have 28 new animations added [THANKS TO ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/main/assets/resources/dolphin) - Animations excluded from this source where either repeated or already in RM and renamed (Kazoku Haha). Some others of these may be removed, will do some testing...
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
