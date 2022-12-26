@@ -19,12 +19,29 @@
 #define SUBGHZ_RAW_START_SCALE 0
 #define SCREEN_WIDTH 128
 
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+    uint8_t width;
+    uint8_t height;
+} ShapShupShapeItem;
+
+ARRAY_DEF(ShapShupShapeItemArray, ShapShupShapeItem, M_POD_OPLIST)
+
+#define M_OPL_ShapShupShapeItemArray_t() ARRAY_OPLIST(ShapShupShapeItemArray, M_POD_OPLIST)
+
+typedef struct {
+    ShapShupShapeItemArray_t data;
+} ShapShupShapeStruct;
+
 struct ShapShupMainView {
     View* view;
     ShapShupMainViewCallback callback;
     ShapShupRawFile* raw_file;
     uint64_t offset;
     float scale;
+    ShapShupShapeStruct* shape_list;
+    uint8_t count_shapes;
     void* context;
 };
 
@@ -36,11 +53,16 @@ typedef struct {
     bool is_ms;
     float scale;
     ShapShupRawFile* raw_file;
+    ShapShupShapeStruct* shape_list;
+    uint8_t count_shapes;
 } ShapShupMainViewModel;
 
 void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model);
 void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model);
 uint64_t calc_offset_per_page(uint64_t total, uint64_t min_len, float scale);
+void format_number(uint64_t n, char* out);
 bool shapshup_main_view_input(InputEvent* event, void* context);
 void shapshup_main_view_enter(void* context);
 void shapshup_main_view_exit(void* context);
+void shapshup_main_view_array_reset(ShapShupMainView* instance);
+void shapshup_main_view_create_shapes(ShapShupMainView* instance, uint64_t offset_per_page);
