@@ -11,13 +11,13 @@
 #define STATUS_BAR_INFO_SHIFT 9
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
 #define SCALE_STEP 0.2
-#define DEFAULT_SCALE_STEP 0.01
+#define DEFAULT_SCALE_STEP 1.00
 #define SUBGHZ_RAW_TOP_SCALE 13
 #define SUBGHZ_RAW_BOTTOM_SCALE 42
 #define CHART_LOWEST_POINT 40
 #define CHART_HIGHTEST_POINT 20
 #define SUBGHZ_RAW_START_SCALE 0
-#define SUBGHZ_RAW_END_SCALE 130
+#define SCREEN_WIDTH 128
 
 struct ShapShupMainView {
     View* view;
@@ -40,7 +40,7 @@ typedef struct {
 
 void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model);
 void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model);
-uint64_t calc_offset_per_page(uint64_t total, float scale);
+uint64_t calc_offset_per_page(uint64_t total, uint64_t min_len, float scale);
 bool shapshup_main_view_input(InputEvent* event, void* context);
 void shapshup_main_view_enter(void* context);
 void shapshup_main_view_exit(void* context);

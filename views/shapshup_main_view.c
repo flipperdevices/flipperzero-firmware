@@ -21,8 +21,12 @@ void shapshup_main_view_set_callback(
     instance->context = context;
 }
 
-uint64_t calc_offset_per_page(uint64_t total, float scale) {
-    return (uint64_t)(total * scale);
+uint64_t calc_offset_per_page(uint64_t total, uint64_t min_len, float scale) {
+    uint64_t result = (uint64_t)(total / min_len * scale);
+    // if(result > min_len) {
+    //     result = min_len;
+    // }
+    return result;
 }
 
 void format_number(uint64_t n, char* out) {
@@ -121,7 +125,8 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
     if(is_clicked) {
         uint64_t offset_per_page =
             instance->raw_file != NULL ?
-                calc_offset_per_page(instance->raw_file->total_len, instance->scale) :
+                calc_offset_per_page(
+                    instance->raw_file->total_len, instance->raw_file->min_len, instance->scale) :
                 0;
         if(event->key == InputKeyOk) {
 #ifdef FURI_DEBUG
@@ -129,17 +134,17 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
 #endif
             instance->callback(ShapShupCustomEventTypeLoadFile, instance->context);
         } else if(event->key == InputKeyLeft && instance->offset > 0) {
+            instance->offset =
+                instance->offset < offset_per_page ? 0 : instance->offset - offset_per_page;
 #ifdef FURI_DEBUG
             FURI_LOG_D(
                 TAG,
-                "L offset_per_page: %lld, offset: %lld, total_len: %lld",
+                "L offset: %lld, offset_per_page: %lld, offset: %lld, total_len: %lld",
+                instance->offset,
                 offset_per_page,
                 instance->offset,
                 instance->raw_file->total_len);
 #endif
-            instance->offset =
-                instance->offset < offset_per_page ? 0 : instance->offset - offset_per_page;
-
             with_view_model(
                 instance->view,
                 ShapShupMainViewModel * model,
@@ -153,7 +158,8 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
 #ifdef FURI_DEBUG
             FURI_LOG_D(
                 TAG,
-                "R offset_per_page: %lld, calc: %lld, total_len: %lld",
+                "R offset: %lld, offset_per_page: %lld, calc: %lld, total_len: %lld",
+                instance->offset,
                 offset_per_page,
                 calc,
                 instance->raw_file->total_len);
@@ -179,10 +185,11 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
             if(instance->scale < SCALE_STEP) {
                 instance->scale = 0.1f;
             }
-            offset_per_page =
-                instance->raw_file != NULL ?
-                    calc_offset_per_page(instance->raw_file->total_len, instance->scale) :
-                    0;
+            offset_per_page = instance->raw_file != NULL ? calc_offset_per_page(
+                                                               instance->raw_file->total_len,
+                                                               instance->raw_file->min_len,
+                                                               instance->scale) :
+                                                           0;
 #ifdef FURI_DEBUG
             FURI_LOG_D(TAG, "Scale: %f", (double)instance->scale);
 #endif
@@ -205,10 +212,11 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
             if(instance->scale > DEFAULT_SCALE_STEP) {
                 instance->scale = DEFAULT_SCALE_STEP;
             }
-            offset_per_page =
-                instance->raw_file != NULL ?
-                    calc_offset_per_page(instance->raw_file->total_len, instance->scale) :
-                    0;
+            offset_per_page = instance->raw_file != NULL ? calc_offset_per_page(
+                                                               instance->raw_file->total_len,
+                                                               instance->raw_file->min_len,
+                                                               instance->scale) :
+                                                           0;
 #ifdef FURI_DEBUG
             FURI_LOG_D(TAG, "Scale: %f", (double)instance->scale);
 #endif
@@ -289,6 +297,8 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
     instance->raw_file = load_file_shapshup(name);
 
     if(instance->raw_file->result == ShapShupFileResultOk) {
+        uint64_t offset_per_page = calc_offset_per_page(
+            instance->raw_file->total_len, instance->raw_file->min_len, instance->scale);
         with_view_model(
             instance->view,
             ShapShupMainViewModel * model,
@@ -296,9 +306,9 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
                 model->raw_file = instance->raw_file;
                 model->offset = 0;
                 if(model->raw_file != NULL) {
-                    model->offset_per_page = model->raw_file->total_len;
-                    if(model->offset_per_page > 1000) {
-                        model->calc_total_len = (uint64_t)model->offset_per_page / 1000;
+                    model->offset_per_page = offset_per_page;
+                    if(model->raw_file->total_len > 1000) {
+                        model->calc_total_len = (uint64_t)model->raw_file->total_len / 1000;
                         model->is_ms = true;
                     } else {
                         model->is_ms = false;
@@ -333,7 +343,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
 
     char format_buffer[32];
     format_number(model->offset, format_buffer);
-    snprintf(buffer, sizeof(buffer), "%s", format_buffer);
+    snprintf(buffer, sizeof(buffer), "%s us", format_buffer);
     uint16_t font_height = canvas_current_font_height(canvas);
     canvas_draw_str(canvas, 0, SUBGHZ_RAW_BOTTOM_SCALE + font_height + 1, buffer);
 
@@ -351,7 +361,8 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
         bool is_negative = false;
         bool before_negative = false;
         bool last = false;
-        uint32_t chunk = (model->offset_per_page - model->offset) / 128;
+        uint32_t chunk = (uint32_t)model->offset_per_page / SCREEN_WIDTH;
+        uint64_t skip_value = 0;
 #ifdef FURI_DEBUG
         FURI_LOG_W(
             TAG,
@@ -384,6 +395,7 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
             }
             if(current_offset + abs_value < model->offset) {
                 current_offset += abs_value;
+                skip_value = 0;
 #ifdef FURI_DEBUG
                 FURI_LOG_D(
                     TAG,
@@ -392,10 +404,12 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
                     abs_value);
 #endif
                 continue;
+            } else if(model->offset > current_offset) {
+                skip_value = model->offset - current_offset;
+            } else {
+                skip_value = 0;
             }
 
-            uint64_t skip_value = model->offset < current_offset ? 0 :
-                                                                   model->offset - current_offset;
             uint64_t taken_value = skip_value + abs_value;
 #ifdef FURI_DEBUG
             FURI_LOG_D(TAG, "skip_value: %lld, taken_value: %lld", skip_value, taken_value);
@@ -403,6 +417,10 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
             if(taken_value > model->offset_per_page) {
                 last = true;
                 taken_value = taken_value - (taken_value - model->offset_per_page);
+            } else if(current_offset + taken_value > current_offset + model->offset_per_page) {
+                last = true;
+                taken_value = taken_value - ((current_offset + taken_value) -
+                                             (current_offset + model->offset_per_page));
             }
             //uint64_t from_offset = current_offset;
             current_offset += taken_value;

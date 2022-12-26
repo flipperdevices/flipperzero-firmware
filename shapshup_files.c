@@ -290,6 +290,9 @@ ShapShupRawFile* load_file_shapshup(const char* file_path) {
         instance->result = ShapShupFileResultOk;
     } while(false);
 
+    uint64_t min_len = 0 - 1;
+    uint64_t max_len = 0;
+
     if(instance->result == ShapShupFileResultOk) {
         int32_t value = 0;
         do {
@@ -304,15 +307,17 @@ ShapShupRawFile* load_file_shapshup(const char* file_path) {
             } else if(value > instance->max_value) {
                 instance->max_value = value;
             }
-            if(abs_value > instance->max_len) {
-                instance->max_len = abs_value;
-            } else if(abs_value < instance->min_len) {
-                instance->min_len = abs_value;
+            if(abs_value > max_len) {
+                max_len = abs_value;
+            } else if(abs_value < min_len) {
+                min_len = abs_value;
             }
             array_raw_push_back(instance->values, value);
             instance->total_count++;
             instance->total_len += abs_value;
         } while(true);
+        instance->max_len = max_len;
+        instance->min_len = min_len;
     } else {
         array_raw_clear(instance->values);
     }
