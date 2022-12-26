@@ -3,7 +3,15 @@ This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/
 
 This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
 
-<a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="30%"></a>
+<table>
+<tr>
+<th><a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" ></a></th>
+<th>
+
+### For those who don't know GitHub, this firmware is NOT "paywalled." You are free to download the latest code that is posted and compile it with the instructions provided to you in this ReadMe. All pre-compiled releases on Patreon use the code in this repository and only have additional animations and customizations requested by supporters. PATREON subscription is for support of RM development, and for those that want their flipper customized for them without doing the coding.
+</th>
+</tr>
+</table>
 
 ## [Support Us!](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)
 Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
