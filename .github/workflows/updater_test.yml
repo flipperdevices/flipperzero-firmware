@@ -10,7 +10,7 @@ env:
 
 jobs:
   test_updater_on_bench:
-    runs-on: [self-hosted, FlipperZeroTest2]
+    runs-on: [self-hosted, FlipperZeroTest] # currently on same bench as units, needs different bench
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
