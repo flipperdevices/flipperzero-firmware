@@ -30,7 +30,6 @@ Thank you to all the supporters!
 - Updated: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (from Unleashed/gid9798)
 - Added Assets: Includes Fun SubGHz files: CVS/Walgreens CS Buttons & Honda Lock/Unlock.
 - AC Remote Update from OFW
-- [Patreon Build ONLY](https://www.patreon.com/posts/76378401) 18 Plus and Select 18 Plus builds have 28 new animations added [THANKS TO ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/tree/main/assets/resources/dolphin) - Animations excluded from this source where either repeated or already in RM and renamed (Kazoku Haha). Some others of these may be removed, will do some testing...
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
