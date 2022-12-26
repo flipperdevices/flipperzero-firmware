@@ -16,7 +16,8 @@ At the moment following functionality implemented:
 * Energy Saving workflow
 
 Will do(if I've got time):
-* Publish a .fap package to let anyone download and install the app.
+* ~~Publish a .fap package to let anyone download and install the app.~~
+* * Done, now you can [DOWNLOAD application from releases](https://github.com/Th3Un1q3/flipp_pomodoro/releases)
 * Configure CI pipeline for automatic releases
 * Stats on exit(how many pomodoros complete)
 * Background work or restore from last state
