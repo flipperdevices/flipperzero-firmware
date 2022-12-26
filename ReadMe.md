@@ -30,6 +30,7 @@ Thank you to all the supporters!
 - Updated: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (from Unleashed/gid9798)
 - Added Assets: Includes Fun SubGHz files: CVS/Walgreens CS Buttons & Honda Lock/Unlock.
 - AC Remote Update from OFW
+- Primary/Secondary App Settings Label Fix [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/pull/32/files)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
