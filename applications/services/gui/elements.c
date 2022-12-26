@@ -49,7 +49,7 @@ void elements_progress_bar_with_text(
     float progress,
     const char* text) {
     furi_assert(canvas);
-    furi_assert((progress >= 0) && (progress <= 1.0));
+    furi_assert((progress >= 0.0f) && (progress <= 1.0f));
     uint8_t height = 11;
 
     uint8_t progress_length = roundf(progress * (width - 2));
