@@ -39,6 +39,7 @@ Thank you to all the supporters!
 - Added Assets: Includes Fun SubGHz files: CVS/Walgreens CS Buttons & Honda Lock/Unlock.
 - AC Remote Update from OFW
 - Primary/Secondary App Settings Label Fix [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/pull/32/files)
+- Archive: Empty folder declaration [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/dc8329704a72dc662586e70e196608fadbf26952)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
