@@ -24,7 +24,7 @@ Thank you to all the supporters!
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 - Contact me on [Patreon](https://www.patreon.com/RogueMaster/membership) if you want a renamed Flipper. I can do custom names!
 
-## Latest Updates - [PATREON: Latest Release RM1226-0351-0.74.3-22fe32d](https://www.patreon.com/posts/76378849) 
+## Latest Updates - [PATREON: Latest Release RM1226-1643-0.74.3-aa53e74](https://www.patreon.com/posts/76399306) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
