@@ -85,6 +85,21 @@
         "elements.h": "c",
         "stdint.h": "c",
         "timer.h": "c",
-        "check.h": "c"
+        "check.h": "c",
+        "time.h": "c",
+        "notification_messages.h": "c",
+        "dolphin.h": "c",
+        "string.h": "c",
+        "infrared_i.h": "c",
+        "furi.h": "c",
+        "stream_buffer.h": "c",
+        "flipp_pomodoro_icons.h": "c",
+        "notification.h": "c",
+        "stdbool.h": "c",
+        "cli.h": "c",
+        "flipp_pomodoro.h": "c",
+        "stddef.h": "c",
+        "view_port.h": "c",
+        "assets_icons.h": "c"
     }
 }

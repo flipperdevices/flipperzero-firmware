@@ -1,9 +1,30 @@
+![Banner Image](docs/generic-screenshot.png)
 # Flipp Pomodoro
 
-Your productivity best friend.
+Your productivity best friend. Don't let your flipper get borred, let him help you instead.
 
 ## Development
 
+### Current state and plans
+
+At the moment following functionality implemented:
+![Working Screen](docs/working.png)
+![Resting Screen](docs/resting.png)
+* Generic pomodoro cycle with two stages (Work: 25 min and rest 5 minutes)
+* Automatic and manual phases switch
+* Notification(sound, vibration, backlight, led) on stage change.
+* Energy Saving workflow
+
+Will do(if I've got time):
+* Publish a .fap package to let anyone download and install the app.
+* Configure CI pipeline for automatic releases
+* Stats on exit(how many pomodoros complete)
+* Background work or restore from last state
+* Integration with passport to develop your flipper profile by completing pomodoros
+* Configuration of notifications
+* Blind mode(no timer updates, just background and notification) for more energy saving
+
+###  Build and Package
 Run application build in docker environment
 ```shell
 # This will leave container runnning with a tag flipp-pomodoro-flipper-development-1
@@ -19,3 +40,5 @@ bash tools/install.sh
 bash tools/build.sh
 # Build artifacts will be copied to dist directory.
 ```
+
+Alternatively you may use local environment for defelopment. You can find actual instructions [here](https://github.com/flipperdevices/flipperzero-firmware).
