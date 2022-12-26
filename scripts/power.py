@@ -12,13 +12,19 @@ class Main(App):
 
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
 
-        self.parser_power_off = self.subparsers.add_parser("power_off", help="Power off command, won't return to CLI")
+        self.parser_power_off = self.subparsers.add_parser(
+            "power_off", help="Power off command, won't return to CLI"
+        )
         self.parser_power_off.set_defaults(func=self.power_off)
 
-        self.parser_reboot = self.subparsers.add_parser("reboot", help="Reboot command help")
+        self.parser_reboot = self.subparsers.add_parser(
+            "reboot", help="Reboot command help"
+        )
         self.parser_reboot.set_defaults(func=self.reboot)
 
-        self.parser_reboot2dfu = self.subparsers.add_parser("reboot2dfu", help="Reboot to DFU, won't return to CLI")
+        self.parser_reboot2dfu = self.subparsers.add_parser(
+            "reboot2dfu", help="Reboot to DFU, won't return to CLI"
+        )
         self.parser_reboot2dfu.set_defaults(func=self.reboot2dfu)
 
     def _get_flipper(self):

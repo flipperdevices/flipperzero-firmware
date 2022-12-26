@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import sys, os
-import serial
+import os
 import re
+import sys
 
+import serial
 from await_flipper import flp_serial_by_name
-
 
 LEAK_THRESHOLD = 3000  # added until units are fixed
 

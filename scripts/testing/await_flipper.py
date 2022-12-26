@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import logging
-import sys, os, time
+import os
+import sys
+import time
 
 
 def flp_serial_by_name(flp_name):
@@ -32,9 +34,10 @@ def main():
     elapsed = 0
     flipper = flp_serial_by_name(flipper_name)
     logging.basicConfig(
-        format='%(asctime)s %(levelname)-8s %(message)s',
+        format="%(asctime)s %(levelname)-8s %(message)s",
         level=logging.INFO,
-        datefmt='%Y-%m-%d %H:%M:%S')
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     logging.log(logging.INFO, "Waiting for Flipper to be ready...")
 
     while flipper == "" and elapsed < UPDATE_TIMEOUT:
