@@ -8,7 +8,6 @@
 #include <subghz/types.h>
 
 #define TAG "ShapShupFiles"
-
 #define RAW_KEY_NAME "RAW_Data"
 
 const size_t buffer_size = 32;
@@ -244,17 +243,19 @@ ShapShupRawFile* load_file_shapshup(const char* file_path) {
             break;
         }
 
-        if((!furi_string_cmp_str(temp_str, SUBGHZ_KEY_FILE_TYPE) &&
-            temp_data32 == SUBGHZ_KEY_FILE_VERSION)) {
-        } else {
+        if(temp_data32 != SUBGHZ_KEY_FILE_VERSION) {
             instance->result = ShapShupFileResultTypeOfVersionMismatch;
             FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
         }
 
-        if(!furi_string_cmp_str(temp_str, SUBGHZ_RAW_FILE_TYPE)) {
+        if(furi_string_cmp_str(temp_str, SUBGHZ_RAW_FILE_TYPE) != 0) {
             instance->result = ShapShupFileResultNotRawFile;
-            FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
+            FURI_LOG_E(
+                TAG,
+                "%s, Value: %s",
+                shapshup_files_result_description(instance->result),
+                furi_string_get_cstr(temp_str));
             break;
         }
 
@@ -262,6 +263,8 @@ ShapShupRawFile* load_file_shapshup(const char* file_path) {
             instance->result = ShapShupFileResultMissingFrequency;
             FURI_LOG_E(TAG, shapshup_files_result_description(instance->result));
             break;
+        } else {
+            instance->frequency = temp_data32;
         }
 
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {

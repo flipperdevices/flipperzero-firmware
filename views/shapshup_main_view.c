@@ -1,6 +1,7 @@
 #include "shapshup_main_view_private.h"
 #include "shapshup_main_view.h"
 #include "../shapshup_i.h"
+#include "../helpers/gui_top_buttons.h"
 #include <input/input.h>
 #include <gui/elements.h>
 #include "assets_icons.h"
@@ -20,20 +21,72 @@ void shapshup_main_view_set_callback(
     instance->context = context;
 }
 
-uint32_t calc_offset_per_page(uint32_t total, float scale) {
-    return (uint32_t)(total * scale);
+uint64_t calc_offset_per_page(uint64_t total, float scale) {
+    return (uint64_t)(total * scale);
+}
+
+void format_number(uint64_t n, char* out) {
+    int c;
+    char buf[32];
+    char* p;
+
+    snprintf(buf, sizeof(buf), "%lld", n);
+    c = 2 - strlen(buf) % 3;
+    for(p = buf; *p != 0; p++) {
+        *out++ = *p;
+        if(c == 1) {
+            *out++ = ',';
+        }
+        c = (c + 1) % 3;
+    }
+    *--out = 0;
 }
 
 void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model) {
     furi_assert(model);
 
     // Title
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_box(canvas, 0, 0, canvas_width(canvas), STATUS_BAR_Y_SHIFT);
-    canvas_invert_color(canvas);
-    canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Shap-Shup");
-    canvas_invert_color(canvas);
+    if(model->raw_file != NULL) {
+        char buffer[64];
+        uint8_t width = canvas_width(canvas);
+        canvas_draw_rbox(canvas, 0, 0, width, STATUS_BAR_Y_SHIFT, 2);
+        canvas_invert_color(canvas);
 
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "%03ld.%03ld MHz",
+            model->raw_file->frequency / 1000000 % 1000,
+            model->raw_file->frequency / 1000 % 1000);
+        canvas_draw_str(canvas, 2, STATUS_BAR_INFO_SHIFT, buffer);
+
+        memset(buffer, 0, sizeof(buffer));
+        char format_buffer[32];
+        format_number(model->raw_file->total_len, format_buffer);
+        snprintf(buffer, sizeof(buffer), "%s us", format_buffer);
+        FURI_LOG_D(TAG, "%s", buffer);
+
+        uint16_t value_width = canvas_string_width(canvas, buffer);
+        canvas_draw_str(canvas, width - value_width - 2, STATUS_BAR_INFO_SHIFT, buffer);
+        canvas_invert_color(canvas);
+
+        if(model->offset > 0) {
+            elements_button_left(canvas, " ");
+        }
+        if(model->offset + model->offset_per_page < model->raw_file->total_len) {
+            elements_button_right(canvas, " ");
+        }
+        elements_button_center(canvas, "Load");
+        // elements_button_top_left(canvas, "Zoom out");
+        // elements_button_top_right(canvas, "Zoom in");
+    } else {
+        // canvas_set_font(canvas, FontPrimary);
+        // canvas_draw_box(canvas, 0, 0, canvas_width(canvas), STATUS_BAR_Y_SHIFT);
+        // canvas_invert_color(canvas);
+        // canvas_draw_str_aligned(canvas, 64, 3, AlignCenter, AlignTop, "Shap-Shup");
+        // canvas_invert_color(canvas);
+    }
     shapshup_main_view_draw_scale(canvas, model);
 
     //    size_t size = ShapShupTextItemArray_size(m->items->data);
@@ -66,8 +119,10 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
     bool is_clicked = (event->type == InputTypeShort) || (event->type == InputTypeRepeat);
 
     if(is_clicked) {
-        uint32_t offset_per_page =
-            calc_offset_per_page(instance->raw_file->total_len, instance->scale);
+        uint64_t offset_per_page =
+            instance->raw_file != NULL ?
+                calc_offset_per_page(instance->raw_file->total_len, instance->scale) :
+                0;
         if(event->key == InputKeyOk) {
 #ifdef FURI_DEBUG
             FURI_LOG_D(TAG, "InputKeyOk");
@@ -77,14 +132,13 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
 #ifdef FURI_DEBUG
             FURI_LOG_D(
                 TAG,
-                "L offset_per_page: %ld, offset: %ld, total_len: %lld",
+                "L offset_per_page: %lld, offset: %lld, total_len: %lld",
                 offset_per_page,
                 instance->offset,
                 instance->raw_file->total_len);
 #endif
-            instance->offset = instance->offset < offset_per_page / 2 ?
-                                   0 :
-                                   instance->offset - offset_per_page / 2;
+            instance->offset =
+                instance->offset < offset_per_page ? 0 : instance->offset - offset_per_page;
 
             with_view_model(
                 instance->view,
@@ -95,11 +149,11 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
                 },
                 true);
         } else if(event->key == InputKeyRight) {
-            uint32_t calc = instance->offset + offset_per_page / 2;
+            uint64_t calc = instance->offset + offset_per_page;
 #ifdef FURI_DEBUG
             FURI_LOG_D(
                 TAG,
-                "R offset_per_page: %ld, calc: %ld, total_len: %lld",
+                "R offset_per_page: %lld, calc: %lld, total_len: %lld",
                 offset_per_page,
                 calc,
                 instance->raw_file->total_len);
@@ -109,7 +163,7 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
             } else if(
                 calc > instance->raw_file->total_len &&
                 instance->raw_file->total_len - calc < offset_per_page) {
-                instance->offset = calc;
+                instance->offset = instance->offset > 0 ? calc : 0;
             }
 
             with_view_model(
@@ -120,32 +174,52 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
                     model->offset_per_page = offset_per_page;
                 },
                 true);
-        } else if(event->key == InputKeyDown && 1.0 - instance->scale > 0.01f) {
+        } else if(event->key == InputKeyDown) {
             instance->scale -= SCALE_STEP;
             if(instance->scale < SCALE_STEP) {
                 instance->scale = 0.1f;
             }
+            offset_per_page =
+                instance->raw_file != NULL ?
+                    calc_offset_per_page(instance->raw_file->total_len, instance->scale) :
+                    0;
+#ifdef FURI_DEBUG
+            FURI_LOG_D(TAG, "Scale: %f", (double)instance->scale);
+#endif
 
             with_view_model(
                 instance->view,
                 ShapShupMainViewModel * model,
-                { model->scale = instance->scale; },
+                {
+                    model->scale = instance->scale;
+                    model->offset_per_page = offset_per_page;
+                },
                 true);
         } else if(event->key == InputKeyUp) {
             if(instance->scale < SCALE_STEP) {
                 instance->scale = SCALE_STEP;
-            } else if(1.0 - instance->scale > 0.01f) {
+            } else if(DEFAULT_SCALE_STEP - instance->scale > 0.01f) {
                 instance->scale += SCALE_STEP;
             }
 
-            if(instance->scale > 1.0) {
-                instance->scale = 1.0;
+            if(instance->scale > DEFAULT_SCALE_STEP) {
+                instance->scale = DEFAULT_SCALE_STEP;
             }
+            offset_per_page =
+                instance->raw_file != NULL ?
+                    calc_offset_per_page(instance->raw_file->total_len, instance->scale) :
+                    0;
+#ifdef FURI_DEBUG
+            FURI_LOG_D(TAG, "Scale: %f", (double)instance->scale);
+#endif
 
             with_view_model(
                 instance->view,
                 ShapShupMainViewModel * model,
-                { model->scale = instance->scale; },
+                {
+                    model->scale = instance->scale;
+                    model->offset_per_page = offset_per_page;
+                },
                 true);
         }
 
@@ -182,6 +256,7 @@ ShapShupMainView* shapshup_main_view_alloc() {
         {
             model->raw_file = NULL;
             model->offset = 0;
+            model->offset_per_page = 0;
             model->scale = 1.0;
         },
         true);
@@ -206,6 +281,9 @@ View* shapshup_main_view_get_view(ShapShupMainView* instance) {
 
 ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, const char* name) {
     furi_assert(instance);
+    if(instance->raw_file != NULL) {
+        free(instance->raw_file);
+    }
     instance->raw_file = load_file_shapshup(name);
 
     if(instance->raw_file->result == ShapShupFileResultOk) {
@@ -215,6 +293,9 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
             {
                 model->raw_file = instance->raw_file;
                 model->offset = 0;
+                if(model->raw_file != NULL) {
+                    model->offset_per_page = model->raw_file->total_len;
+                }
                 model->scale = 1.0;
             },
             true);
@@ -228,19 +309,109 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
 
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontBatteryPercent);
+    uint8_t width = canvas_width(canvas);
 
-    for(int i = SUBGHZ_RAW_END_SCALE; i > SUBGHZ_RAW_START_SCALE; i -= 15) {
+    // First and last scale pin
+    canvas_draw_line(canvas, 1, SUBGHZ_RAW_TOP_SCALE, 1, SUBGHZ_RAW_TOP_SCALE + 4);
+    canvas_draw_line(canvas, width - 1, SUBGHZ_RAW_TOP_SCALE, width - 1, SUBGHZ_RAW_TOP_SCALE + 4);
+    for(int i = width; i > SUBGHZ_RAW_START_SCALE; i -= 16) {
         canvas_draw_line(canvas, i, SUBGHZ_RAW_TOP_SCALE, i, SUBGHZ_RAW_TOP_SCALE + 4);
         canvas_draw_line(canvas, i - 5, SUBGHZ_RAW_TOP_SCALE, i - 5, SUBGHZ_RAW_TOP_SCALE + 2);
         canvas_draw_line(canvas, i - 10, SUBGHZ_RAW_TOP_SCALE, i - 10, SUBGHZ_RAW_TOP_SCALE + 2);
     }
 
-    snprintf(buffer, sizeof(buffer), "%ld", model->offset);
-    canvas_draw_str(canvas, SUBGHZ_RAW_START_SCALE, SUBGHZ_RAW_TOP_SCALE + 5, buffer);
+    canvas_draw_line(canvas, 0, SUBGHZ_RAW_TOP_SCALE, width, SUBGHZ_RAW_TOP_SCALE);
+    canvas_draw_line(canvas, 0, SUBGHZ_RAW_BOTTOM_SCALE, width, SUBGHZ_RAW_BOTTOM_SCALE);
 
-    snprintf(buffer, sizeof(buffer), "%ld", model->offset + model->offset_per_page);
-    canvas_draw_str(canvas, SUBGHZ_RAW_END_SCALE, SUBGHZ_RAW_TOP_SCALE + 5, buffer);
+    char format_buffer[32];
+    format_number(model->offset, format_buffer);
+    snprintf(buffer, sizeof(buffer), "%s", format_buffer);
+    uint16_t font_height = canvas_current_font_height(canvas);
+    canvas_draw_str(canvas, 0, SUBGHZ_RAW_BOTTOM_SCALE + font_height + 1, buffer);
 
+    memset(buffer, 0, sizeof(buffer));
+    memset(format_buffer, 0, sizeof(format_buffer));
+    format_number(model->offset + model->offset_per_page, format_buffer);
+    snprintf(buffer, sizeof(buffer), "%s us", format_buffer);
+    uint16_t last_value_width = canvas_string_width(canvas, buffer);
+    canvas_draw_str(
+        canvas, width - last_value_width, SUBGHZ_RAW_BOTTOM_SCALE + font_height + 1, buffer);
+
+    if(model->raw_file != NULL) {
+        uint64_t current_offset = 0;
+        uint64_t current_x = 0;
+        bool is_negative = false;
+        bool before_negative = false;
+        bool last = false;
+        uint32_t chunk = model->offset_per_page - model->offset / 128;
+        for(uint64_t i = 0; i < model->raw_file->total_count && !last; i++) {
+            int32_t value = *array_raw_get(model->raw_file->values, i);
+#ifdef FURI_DEBUG
+            FURI_LOG_D(TAG, "value: %ld, step: %lld", value, i);
+#endif
+            uint64_t abs_value = 0;
+            uint64_t y = 0;
+            before_negative = is_negative;
+
+            if(value < 0) {
+                abs_value = abs_value * -1;
+                is_negative = true;
+                y = CHART_LOWEST_POINT;
+            } else {
+                abs_value = value;
+                is_negative = false;
+                y = CHART_HIGHTEST_POINT;
+            }
+            if(current_offset + abs_value < model->offset) {
+                current_offset += abs_value;
+#ifdef FURI_DEBUG
+                FURI_LOG_D(
+                    TAG,
+                    "continue current_offset: %lld, abs_value: %lld",
+                    current_offset,
+                    abs_value);
+#endif
+                continue;
+            }
+
+            uint64_t skip_value = model->offset < current_offset ? 0 :
+                                                                   model->offset - current_offset;
+            uint64_t taken_value = skip_value + abs_value;
+#ifdef FURI_DEBUG
+            FURI_LOG_D(
+                TAG,
+                "skip_value: %lld, taken_value: %lld, offset: %lld",
+                skip_value,
+                taken_value,
+                model->offset);
+#endif
+            if(taken_value > model->offset_per_page) {
+                last = true;
+                taken_value = taken_value - (taken_value - model->offset_per_page);
+            }
+            //uint64_t from_offset = current_offset;
+            current_offset += taken_value;
+            taken_value = (uint64_t)taken_value / chunk;
+#ifdef FURI_DEBUG
+            FURI_LOG_D(
+                TAG,
+                "taken_value: %lld, current_offset: %lld, chunk: %ld",
+                taken_value,
+                current_offset,
+                chunk);
+#endif
+            if(is_negative && !before_negative) {
+                canvas_draw_line(
+                    canvas, current_x, CHART_HIGHTEST_POINT, current_x, CHART_LOWEST_POINT);
+            } else if(!is_negative && before_negative) {
+                canvas_draw_line(
+                    canvas, current_x, CHART_LOWEST_POINT, current_x, CHART_HIGHTEST_POINT);
+            }
+            canvas_draw_line(canvas, current_x, y, current_x + taken_value, y);
+
+            current_x += taken_value == 0 ? 1 : taken_value;
+        }
+    }
     /*} else {
         for(int i = SUBGHZ_RAW_END_SCALE - model->ind_write % 15; i > -15; i -= 15) {
             canvas_draw_line(canvas, i, SUBGHZ_RAW_TOP_SCALE, i, SUBGHZ_RAW_TOP_SCALE + 4);
@@ -254,64 +425,6 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
     }*/
 }
 
-void elements_button_top_left(Canvas* canvas, const char* str) {
-    const Icon* icon = &I_ButtonUp_7x4;
-
-    const uint8_t button_height = 12;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
-    const uint8_t string_width = canvas_string_width(canvas, str);
-    const uint8_t icon_h_offset = 3;
-    const uint8_t icon_width_with_offset = icon_get_width(icon) + icon_h_offset;
-    const uint8_t icon_v_offset = icon_get_height(icon) + vertical_offset;
-    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
-
-    const uint8_t x = 0;
-    const uint8_t y = 0 + button_height;
-
-    uint8_t line_x = x + button_width;
-    uint8_t line_y = y - button_height;
-    canvas_draw_box(canvas, x, line_y, button_width, button_height);
-    canvas_draw_line(canvas, line_x + 0, line_y, line_x + 0, y - 1);
-    canvas_draw_line(canvas, line_x + 1, line_y, line_x + 1, y - 2);
-    canvas_draw_line(canvas, line_x + 2, line_y, line_x + 2, y - 3);
-
-    canvas_invert_color(canvas);
-    canvas_draw_icon(canvas, x + horizontal_offset, y - icon_v_offset, icon);
-    canvas_draw_str(
-        canvas, x + horizontal_offset + icon_width_with_offset, y - vertical_offset, str);
-    canvas_invert_color(canvas);
-}
-
-void elements_button_top_right(Canvas* canvas, const char* str) {
-    const Icon* icon = &I_ButtonDown_7x4;
-
-    const uint8_t button_height = 12;
-    const uint8_t vertical_offset = 3;
-    const uint8_t horizontal_offset = 3;
-    const uint8_t string_width = canvas_string_width(canvas, str);
-    const uint8_t icon_h_offset = 3;
-    const uint8_t icon_width_with_offset = icon_get_width(icon) + icon_h_offset;
-    const uint8_t icon_v_offset = icon_get_height(icon) + vertical_offset + 1;
-    const uint8_t button_width = string_width + horizontal_offset * 2 + icon_width_with_offset;
-
-    const uint8_t x = canvas_width(canvas);
-    const uint8_t y = 0 + button_height;
-
-    uint8_t line_x = x - button_width;
-    uint8_t line_y = y - button_height;
-    canvas_draw_box(canvas, line_x, line_y, button_width, button_height);
-    canvas_draw_line(canvas, line_x - 1, line_y, line_x - 1, y - 1);
-    canvas_draw_line(canvas, line_x - 2, line_y, line_x - 2, y - 2);
-    canvas_draw_line(canvas, line_x - 3, line_y, line_x - 3, y - 3);
-
-    canvas_invert_color(canvas);
-    canvas_draw_str(canvas, x - button_width + horizontal_offset, y - vertical_offset, str);
-    canvas_draw_icon(
-        canvas, x - horizontal_offset - icon_get_width(icon), y - icon_v_offset, icon);
-    canvas_invert_color(canvas);
-}
-
 bool shapshup_main_view_no_file(ShapShupMainView* instance) {
-    return instance->raw_file == NULL;
+    return instance->raw_file == NULL || instance->raw_file->result != ShapShupFileResultOk;
 }

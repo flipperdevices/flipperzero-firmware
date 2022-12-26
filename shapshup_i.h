@@ -40,6 +40,7 @@
 #define SHAPSHUP_MAX_LEN_NAME 64
 #define SHAPSHUP_PATH EXT_PATH("subghz")
 #define SHAPSHUP_FILE_EXT ".sub"
+#define SHAPSHUP_FAST_TRACK true
 
 typedef enum {
     ShapShupViewNone,

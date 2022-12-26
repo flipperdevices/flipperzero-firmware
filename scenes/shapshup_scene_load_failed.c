@@ -1,7 +1,7 @@
 #include "../shapshup_i.h"
 #include "../shapshup_custom_event.h"
 
-void shapshup_scene_save_success_on_enter(void* context) {
+void shapshup_scene_load_failed_on_enter(void* context) {
     furi_assert(context);
     ShapShupState* instance = context;
 
@@ -16,7 +16,7 @@ void shapshup_scene_save_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(instance->view_dispatcher, ShapShupViewPopup);
 }
 
-bool shapshup_scene_save_success_on_event(void* context, SceneManagerEvent event) {
+bool shapshup_scene_load_failed_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
 
     ShapShupState* instance = (ShapShupState*)context;
@@ -34,7 +34,7 @@ bool shapshup_scene_save_success_on_event(void* context, SceneManagerEvent event
     return false;
 }
 
-void shapshup_scene_save_success_on_exit(void* context) {
+void shapshup_scene_load_failed_on_exit(void* context) {
     furi_assert(context);
 
     ShapShupState* instance = (ShapShupState*)context;

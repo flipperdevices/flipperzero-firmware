@@ -23,6 +23,7 @@ ARRAY_DEF(array_raw, int32_t)
 
 typedef struct {
     ShapShupFileResults result;
+    uint32_t frequency;
     uint64_t total_len;
     uint64_t total_count;
     int32_t min_value;
