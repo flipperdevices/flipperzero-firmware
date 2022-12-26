@@ -41,6 +41,8 @@ Thank you to all the supporters!
 - Primary/Secondary App Settings Label Fix [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/pull/32/files)
 - Archive: Empty folder declaration [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/dc8329704a72dc662586e70e196608fadbf26952)
 - Dolphin State Code Optimizations [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/blob/main/applications/services/dolphin/helpers/dolphin_state.c) with corrections to the level thresholds that were too low.
+- Added all OFW changes ported by [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
+- Added IR Remote loader from main menu
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -78,7 +80,6 @@ $ ./fbt resources icons dolphin_ext
 - [FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
 - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
 - [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
-
 
 ## All Changes/Features
 
