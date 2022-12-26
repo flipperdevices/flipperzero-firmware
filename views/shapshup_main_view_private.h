@@ -32,6 +32,8 @@ typedef struct {
     bool rssi_history_end;
     uint64_t offset;
     uint64_t offset_per_page;
+    uint64_t calc_total_len;
+    bool is_ms;
     float scale;
     ShapShupRawFile* raw_file;
 } ShapShupMainViewModel;

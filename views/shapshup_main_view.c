@@ -63,8 +63,8 @@ void shapshup_main_view_draw(Canvas* canvas, ShapShupMainViewModel* model) {
 
         memset(buffer, 0, sizeof(buffer));
         char format_buffer[32];
-        format_number(model->raw_file->total_len, format_buffer);
-        snprintf(buffer, sizeof(buffer), "%s us", format_buffer);
+        format_number(model->calc_total_len, format_buffer);
+        snprintf(buffer, sizeof(buffer), "%s %s", format_buffer, model->is_ms ? "ms" : "us");
         FURI_LOG_D(TAG, "%s", buffer);
 
         uint16_t value_width = canvas_string_width(canvas, buffer);
@@ -257,6 +257,8 @@ ShapShupMainView* shapshup_main_view_alloc() {
             model->raw_file = NULL;
             model->offset = 0;
             model->offset_per_page = 0;
+            model->calc_total_len = 0;
+            model->is_ms = false;
             model->scale = DEFAULT_SCALE_STEP;
         },
         true);
@@ -295,6 +297,12 @@ ShapShupFileResults shapshup_main_view_load_file(ShapShupMainView* instance, con
                 model->offset = 0;
                 if(model->raw_file != NULL) {
                     model->offset_per_page = model->raw_file->total_len;
+                    if(model->offset_per_page > 1000) {
+                        model->calc_total_len = (uint64_t)model->offset_per_page / 1000;
+                        model->is_ms = true;
+                    } else {
+                        model->is_ms = false;
+                    }
                 }
                 model->scale = DEFAULT_SCALE_STEP;
             },

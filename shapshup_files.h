@@ -28,6 +28,8 @@ typedef struct {
     uint64_t total_count;
     int32_t min_value;
     int32_t max_value;
+    uint64_t min_len;
+    uint64_t max_len;
     array_raw_t values;
 } ShapShupRawFile;
 

@@ -218,6 +218,8 @@ ShapShupRawFile* load_file_shapshup(const char* file_path) {
     instance->total_count = 0;
     instance->min_value = 0;
     instance->max_value = 0;
+    instance->max_len = 0;
+    instance->min_len = 0;
     array_raw_init(instance->values);
 
     FlipperFormat* fff_data_file = flipper_format_file_alloc(storage);
@@ -295,14 +297,21 @@ ShapShupRawFile* load_file_shapshup(const char* file_path) {
                 break;
             }
 
+            uint64_t abs_value = value < 0 ? value * -1 : value;
+
             if(value < instance->min_value) {
                 instance->min_value = value;
             } else if(value > instance->max_value) {
                 instance->max_value = value;
             }
+            if(abs_value > instance->max_len) {
+                instance->max_len = abs_value;
+            } else if(abs_value < instance->min_len) {
+                instance->min_len = abs_value;
+            }
             array_raw_push_back(instance->values, value);
             instance->total_count++;
-            instance->total_len += value < 0 ? value * -1 : value;
+            instance->total_len += abs_value;
         } while(true);
     } else {
         array_raw_clear(instance->values);
