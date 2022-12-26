@@ -378,30 +378,30 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
 #endif
             int32_t value = *array_raw_get(model->raw_file->values, i);
 #ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "value: %ld, step: %lld", value, i);
+            //FURI_LOG_D(TAG, "value: %ld, step: %lld", value, i);
 #endif
-            uint64_t abs_value = 0;
+            uint64_t current_value = 0;
             uint64_t y = 0;
             before_negative = is_negative;
 
             if(value < 0) {
-                abs_value = value * -1;
+                current_value = value * -1;
                 is_negative = true;
                 y = CHART_LOWEST_POINT;
             } else {
-                abs_value = value;
+                current_value = value;
                 is_negative = false;
                 y = CHART_HIGHTEST_POINT;
             }
-            if(current_offset + abs_value < model->offset) {
-                current_offset += abs_value;
+            if(current_offset + current_value < model->offset) {
+                current_offset += current_value;
                 skip_value = 0;
 #ifdef FURI_DEBUG
-                FURI_LOG_D(
+                FURI_LOG_I(
                     TAG,
-                    "continue current_offset: %lld, abs_value: %lld",
+                    "continue current_offset: %lld, current_value: %lld",
                     current_offset,
-                    abs_value);
+                    current_value);
 #endif
                 continue;
             } else if(model->offset > current_offset) {
@@ -410,24 +410,34 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
                 skip_value = 0;
             }
 
-            uint64_t taken_value = skip_value + abs_value;
+            current_value = skip_value + current_value;
 #ifdef FURI_DEBUG
-            FURI_LOG_D(TAG, "skip_value: %lld, taken_value: %lld", skip_value, taken_value);
+            FURI_LOG_D(TAG, "skip_value: %lld, current_value: %lld", skip_value, current_value);
 #endif
-            if(taken_value > model->offset_per_page) {
+            if(current_value > model->offset_per_page) {
                 last = true;
-                taken_value = taken_value - (taken_value - model->offset_per_page);
-            } else if(current_offset + taken_value > current_offset + model->offset_per_page) {
+                current_value = current_value - (current_value - model->offset_per_page);
+                FURI_LOG_I(
+                    TAG,
+                    "current_value > model->offset_per_page: %lld, model->offset_per_page: %lld",
+                    current_value,
+                    model->offset_per_page);
+            } else if(current_offset + current_value > current_offset + model->offset_per_page) {
                 last = true;
-                taken_value = taken_value - ((current_offset + taken_value) -
-                                             (current_offset + model->offset_per_page));
+                current_value = current_value - ((current_offset + current_value) -
+                                                 (current_offset + model->offset_per_page));
+                FURI_LOG_I(
+                    TAG,
+                    "current_offset + current_value > current_offset + model->offset_per_page: %lld, model->offset_per_page: %lld",
+                    current_value,
+                    model->offset_per_page);
             }
             //uint64_t from_offset = current_offset;
-            current_offset += taken_value;
-            taken_value = (uint64_t)taken_value / chunk;
+            current_offset += current_value;
+            current_value = (uint64_t)current_value / chunk;
 #ifdef FURI_DEBUG
             FURI_LOG_D(
-                TAG, "taken_value: %lld, current_offset: %lld", taken_value, current_offset);
+                TAG, "current_value: %lld, current_offset: %lld", current_value, current_offset);
 #endif
             if(is_negative && !before_negative) {
                 canvas_draw_line(
@@ -436,9 +446,9 @@ void shapshup_main_view_draw_scale(Canvas* canvas, ShapShupMainViewModel* model)
                 canvas_draw_line(
                     canvas, current_x, CHART_LOWEST_POINT, current_x, CHART_HIGHTEST_POINT);
             }
-            canvas_draw_line(canvas, current_x, y, current_x + taken_value, y);
+            canvas_draw_line(canvas, current_x, y, current_x + current_value, y);
 
-            current_x += taken_value == 0 ? 1 : taken_value;
+            current_x += current_value == 0 ? 1 : current_value;
         }
     }
     /*} else {
