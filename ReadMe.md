@@ -29,6 +29,7 @@ Thank you to all the supporters!
 - Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
 - Updated: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (from Unleashed/gid9798)
 - Added Assets: Includes Fun SubGHz files: CVS/Walgreens CS Buttons & Honda Lock/Unlock.
+- AC Remote Update from OFW
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
