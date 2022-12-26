@@ -14,8 +14,8 @@
 #define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-int level_array[30] = {450,  700,  1100,  1800,  2300,  2900,  3900,  5000, 5900, 7200,
-                       8400, 10000, 11500, 13000, 15000, 18000, 20000, 22000, 25000, 33000,
+int level_array[30] = {450,   700,   1100,  1800,  2300,  2900,   3900,   5000,   5900,  7200,
+                       8400,  10000, 11500, 13000, 15000, 18000,  20000,  22000,  25000, 33000,
                        41000, 50000, 62000, 75000, 90000, 105000, 120000, 135000, 155000};
 
 #define BUTTHURT_MAX 14
@@ -82,8 +82,8 @@ uint64_t dolphin_state_timestamp() {
 }
 
 bool dolphin_state_is_levelup(uint32_t icounter) {
-    for (int i = 0; i<30; ++i) {
-        if ((icounter == level_array[i])) {
+    for(int i = 0; i < 30; ++i) {
+        if((icounter == level_array[i])) {
             return true;
         }
     };
@@ -91,12 +91,12 @@ bool dolphin_state_is_levelup(uint32_t icounter) {
 }
 
 uint8_t dolphin_get_level(uint32_t icounter) {
-for (int i = 0; i < 29; ++i) {
-    if (icounter <= level_array[i]) {
-        return i + 1;
+    for(int i = 0; i < 29; ++i) {
+        if(icounter <= level_array[i]) {
+            return i + 1;
+        }
     }
-}
-return 30;
+    return 30;
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {

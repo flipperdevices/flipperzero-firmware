@@ -524,7 +524,7 @@ static void prepare_nrf24(bool fsend_packet) {
                 nrf24_HANDLE,
                 REG_FEATURE,
                 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
+            nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
         } else if(setup_from_log) { // Scan
             nrf24_write_reg(
                 nrf24_HANDLE,
