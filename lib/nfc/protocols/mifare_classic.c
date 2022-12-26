@@ -914,7 +914,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                     memcpy(block_data, plain_data, MF_CLASSIC_BLOCK_SIZE);
                 }
             }
-            if(memcmp(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE) == 0) {
+            if(memcmp(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE) != 0) {
                 memcpy(emulator->data.block[block].value, block_data, MF_CLASSIC_BLOCK_SIZE);
                 emulator->data_changed = true;
             }
