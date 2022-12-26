@@ -115,7 +115,7 @@ enum PwnagotchiMode {
 typedef struct {
     /// Current face
     enum PwnagotchiFace face;
-    char* faceStr;
+    // char* faceStr;
     /// CH channel display at top left
     char channel[PWNAGOTCHI_MAX_CHANNEL_LEN];
     /// AP text shown at the top
