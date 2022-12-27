@@ -29,13 +29,13 @@ static void usb_mouse_process(UsbMouse* usb_mouse, InputEvent* event) {
         void* model,
         {
             UNUSED(model);
-            if(event->key == InputKeyLeft) {
+            if(event->key == InputKeyUp) {
                 if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_LEFT);
                 } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_LEFT);
                 }
-            } else if(event->key == InputKeyRight) {
+            } else if(event->key == InputKeyDown) {
                 if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_press(HID_MOUSE_BTN_RIGHT);
                 } else if(event->type == InputTypeRelease) {
@@ -47,11 +47,11 @@ static void usb_mouse_process(UsbMouse* usb_mouse, InputEvent* event) {
                 } else if(event->type == InputTypeRelease) {
                     furi_hal_hid_mouse_release(HID_MOUSE_BTN_WHEEL);
                 }
-            } else if(event->key == InputKeyUp) {
+            } else if(event->key == InputKeyRight) {
                 if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_scroll(MOUSE_SCROLL);
                 }
-            } else if(event->key == InputKeyDown) {
+            } else if(event->key == InputKeyLeft) {
                 if(event->type == InputTypePress) {
                     furi_hal_hid_mouse_scroll(-MOUSE_SCROLL);
                 }
