@@ -34,6 +34,8 @@ Thank you to all the supporters!
 - Assets: Includes SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - [Patreon Only: New 18 Plus animation Pool Time 2 (Second New 18 Plus Animation Today)](https://www.patreon.com/posts/76407683)
+- Assets: Includes SubGHz Gas Sign Captures by [0day](https://github.com/0dayCTF)
+- Assets: Includes SubGHz Remote config for Gas_Sign_Edit [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
@@ -93,7 +95,9 @@ $ ./fbt resources icons dolphin_ext
 - Assets: Includes sample SubGHz assets for Crosswalk, CVS/Walgreens CS Buttons, Handicap Doors, Honda Lock/Unlock, Sextoys, Tesla Charge Port & Unitree Go1 Robot Dog.
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
 - Assets: Running DolphinRestorer.fap on new install will auto-level to Level 7.
+- Assets: Includes SubGHz Gas Sign Captures by [0day](https://github.com/0dayCTF)
 - Assets: Includes SubGHz Playlist config and SubGHz Remote config for CVS & Walgreens.
+- Assets: Includes SubGHz Remote config for Gas_Sign_Edit [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - [BadUSB: BadUSB as FAP #396 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/396)
