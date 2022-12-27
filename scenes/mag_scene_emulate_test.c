@@ -3,8 +3,10 @@
 #define PIN_A 0
 #define PIN_B 1 // currently unused
 #define CLOCK_US 250 // typically set between 200-500us
+#define TEST_STR "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?"
 
 uint8_t magspoof_bit_dir = 0;
+const char* test_str = TEST_STR;
 
 void mag_scene_emulate_test_dialog_callback(DialogExResult result, void* context) {
     Mag* mag = context;
@@ -66,6 +68,8 @@ static void mag_spoof(FuriString* track_str, uint8_t track) {
     furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_low();
 
+    // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting
+
     // this doesn't seem to make a difference, leaving it in
     furi_hal_gpio_init(&gpio_rfid_data_in, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_write(&gpio_rfid_data_in, false);
@@ -81,8 +85,11 @@ static void mag_spoof(FuriString* track_str, uint8_t track) {
     // A7 GPIO pin for debugging purposes
     //furi_hal_gpio_init(&gpio_ext_pa7, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
+    // TODO: initialize pins on scene enter, perhaps, so as to avoid this delay each time the button is pressed?
+    // Also, why is such a long delay needed?
     furi_delay_ms(300);
 
+    // prevents interrupts &c. from impacting critical timings
     FURI_CRITICAL_ENTER();
 
     const uint8_t bitlen[] = {7, 5, 5};
@@ -126,6 +133,7 @@ static void mag_spoof(FuriString* track_str, uint8_t track) {
     gpio_item_set_rfid_pin(PIN_A, 0);
     gpio_item_set_rfid_pin(PIN_B, 0);
 
+    // end critical timing section
     FURI_CRITICAL_EXIT();
 
     furi_hal_rfid_pins_reset();
@@ -140,11 +148,11 @@ void mag_scene_emulate_test_on_enter(void* context) {
     tmp_string = furi_string_alloc();
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
-    widget_add_button_element(widget, GuiButtonTypeCenter, "Emulate", mag_widget_callback, mag);
+    widget_add_button_element(widget, GuiButtonTypeRight, "Emulate", mag_widget_callback, mag);
 
-    furi_string_printf(tmp_string, "Emulate?");
+    furi_string_printf(tmp_string, test_str);
     widget_add_string_element(
-        widget, 64, 0, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(tmp_string));
+        widget, 64, 0, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
     furi_string_reset(tmp_string);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
@@ -157,15 +165,15 @@ bool mag_scene_emulate_test_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == DialogExResultCenter) {
+        if(event.event == GuiButtonTypeRight) {
             consumed = true;
 
             // Hardcoding a test string for the time being, while we debug/improve LF RFID TX
             FuriString* v = furi_string_alloc();
-            furi_string_set_str(
-                v,
-                "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?");
+            furi_string_set_str(v, test_str);
+            notification_message(mag->notifications, &sequence_blink_start_magenta);
             mag_spoof(v, 0);
+            notification_message(mag->notifications, &sequence_blink_stop);
             furi_string_free(v);
         } else if(event.event == GuiButtonTypeLeft) {
             consumed = true;
