@@ -3,10 +3,15 @@
 # Where we are (0.x.x branch)
 
 Our goal for 0.x.x branch is to build stable usable apps and API.
-First public release that we support in this branch is 0.43.1. Your device most likely came with this version.
-You can develop applications but keep in mind that API is not final yet.
+First public release in this branch is 0.43.1.
 
 ## What's already implemented
+
+**System and HAL**
+
+- Furi Core
+- Furi HAL
+- Loading applications from SD
 
 **Applications**
 
@@ -19,15 +24,10 @@ You can develop applications but keep in mind that API is not final yet.
 - Bad USB: Full USB Rubber Ducky support, some extras for windows alt codes
 - U2F: Full U2F specification support
 
-**Extras**
+**External applications**
 
-- BLE Keyboard
+- Bluetooth
 - Snake game
-
-**System and HAL**
-
-- Furi Core
-- Furi HAL 
 
 # Where we're going (Version 1)
 
@@ -35,16 +35,14 @@ Main goal for 1.0.0 is to provide first stable version for both Users and Develo
 
 ## What we're planning to implement in 1.0.0
 
-- Loading applications from SD (tested as PoC, work scheduled for Q2)
 - More protocols (gathering feedback)
 - User documentation (work in progress)
-- FuriCore: get rid of CMSIS API, replace hard real time timers, improve stability and performance (work in progress)
 - FuriHal: deep sleep mode, stable API, examples, documentation (work in progress)
 - Application improvements (a ton of things that we want to add and improve that are too numerous to list here)
 
 ## When will it happen and where I can see the progress?
 
-Release 1.0.0 will most likely happen around the end of Q3
+Release 1.0.0 will most likely happen around the end of 2023Q1
 
 Development progress can be tracked in our public Miro board:
 
