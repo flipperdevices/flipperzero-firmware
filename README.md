@@ -2,7 +2,7 @@
 Allows CLI control from GUI, giving untethered access to sub-ghz chat, system diagnostics, and more.
 # Installation
 ## Easy way - get a .fap file from the releases page
-Swing by the [releases](https://github.com/ranchordo/flipperzero-cli-bridge/releases) page, and download a pre-built .fap file for the latest flipperzero firmware. MAKE SURE TO UPGRADE FLIPPERZERO FIRMWARE TO NEWEST VERSION BEFORE INSTALLING.
+Swing by the [releases](https://github.com/ranchordo/flipperzero-cli-bridge/releases) page, and download a pre-built .fap file for the latest flipperzero firmware. Use [qFlipper](https://flipperzero.one/update) to copy the .fap file into SD Card/apps/Tools/. MAKE SURE TO UPGRADE FLIPPERZERO FIRMWARE TO NEWEST VERSION BEFORE INSTALLING.
 ## Hard way - building from source
 The following commands will (probably) not work on Windows. If you run Windows, use wsl or a linux vm or something.
 ```sh
