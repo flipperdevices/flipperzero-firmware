@@ -28,6 +28,10 @@ We do not condone illegal activity and strongly encourage keeping transmissions 
 - Ansonic 12bit 433.920MHz
 - Ansonic 12bit 434.075MHz
 
+#### Holtek
+
+- Holtek HT12X 12bit 433.920MHz
+
 #### Chamberlain
 
 - Chamberlain 9bit 300MHz
