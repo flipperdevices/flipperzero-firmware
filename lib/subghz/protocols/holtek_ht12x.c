@@ -394,7 +394,7 @@ void subghz_protocol_decoder_holtek_th12x_get_string(void* context, FuriString* 
     furi_string_cat_printf(
         output,
         "DIP:" DIP_PATTERN "\r\n"
-        "Te:%ldus\r\n",
+        "Te:%luus\r\n",
         CNT_TO_DIP(instance->generic.cnt),
         instance->te);
 }
