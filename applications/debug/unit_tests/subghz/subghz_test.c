@@ -731,6 +731,7 @@ MU_TEST(subghz_encoder_smc5326_test) {
 }
 
 MU_TEST(subghz_random_test) {
+    while(1) {}
     mu_assert(subghz_decode_random_test(TEST_RANDOM_DIR_NAME), "Random test error\r\n");
 }
 
