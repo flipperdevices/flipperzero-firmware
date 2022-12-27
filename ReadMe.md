@@ -26,11 +26,11 @@ If you found issue and you want to report it please check our [Issues](https://g
 
 ## I want to contribute code
 
-Before opening PR make sure that your changes really must be in the firmware itself. Many ideas can easily be implemented as external applications and place to flipper application catalog. If you are not sure you can ask on [Discord Server](https://flipp.dev/discord) or in [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) and we'll help you to find right place for your code. Also please read [Contribution Guide](/CONTRIBUTING.md), [Coding Style](/CODING_STYLE.md) and ensure that your code is compatible with project [License](/LICENSE). After you make sure that everything is good to go feel free to open [Pull Request](https://github.com/flipperdevices/flipperzero-firmware/pulls).
+Before opening PR make sure that your changes really must be in the firmware itself. Many ideas can easily be implemented as external applications and placed in flipper application catalog. If you are not sure you can ask on [Discord Server](https://flipp.dev/discord) or in [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) and we'll help you to find right place for your code. Also please read [Contribution Guide](/CONTRIBUTING.md), [Coding Style](/CODING_STYLE.md) and ensure that your code is compatible with project [License](/LICENSE). After you make sure that everything is good to go feel free to open [Pull Request](https://github.com/flipperdevices/flipperzero-firmware/pulls).
 
 # Development
 
-Flipper Zero Firmware is written in C with some bits and pieces written in armv7m assembly language. Intermediate level will be the best for comfortable programming. Flipper applications can be developer using C/C++.  
+Flipper Zero Firmware is written in C with some bits and pieces written in C++ and armv7m assembly languages. intermediate level C is the best for comfortable programming. For Flipper Applications we officially support C, C++ and armv7m assembly languages.
 
 ## Requirements
 
