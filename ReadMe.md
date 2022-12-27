@@ -24,7 +24,7 @@ Thank you to all the supporters!
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 - Contact me on [Patreon](https://www.patreon.com/RogueMaster/membership) if you want a renamed Flipper. I can do custom names!
 
-## Latest Updates - [PATREON: Latest Release RM1226-1643-0.74.3-aa53e74](https://www.patreon.com/posts/76399306) 
+## Latest Updates - [PATREON: Latest Release RM1226-1952-0.74.3-c47c8ad](https://www.patreon.com/posts/76404764) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
@@ -46,6 +46,7 @@ Thank you to all the supporters!
 - Reflipped Primary/Secondary shortcuts since they are still swapped.
 - Fixed swapped versions of 2048.
 - Updated Universal IR assets thanks to amec0e and [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
+- [Patreon Only: New 18 Plus animation](https://www.patreon.com/posts/76404764)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
