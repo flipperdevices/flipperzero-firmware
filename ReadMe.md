@@ -30,24 +30,9 @@ Thank you to all the supporters!
 
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-26 19:25 EST`
 - Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-26 19:25 EST`
-- Updated: [WiFi (Marauder) v3.0 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
-- Updated: [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
-- Updated: [Metronome (By panki27)](https://github.com/panki27/Metronome)
-- Updated: [Minesweeper (By panki27)](https://github.com/panki27/minesweeper)
-- Updated: [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
-- Updated: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (from Unleashed/gid9798)
-- Added Assets: Includes Fun SubGHz files: CVS/Walgreens CS Buttons & Honda Lock/Unlock.
-- AC Remote Update from OFW
-- Primary/Secondary App Settings Label Fix [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/pull/32/files)
-- Archive: Empty folder declaration [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/dc8329704a72dc662586e70e196608fadbf26952)
-- Dolphin State Code Optimizations [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/blob/main/applications/services/dolphin/helpers/dolphin_state.c) with corrections to the level thresholds that were too low.
-- Added all OFW changes ported by [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
-- Added IR Remote loader from main menu
-- Reflipped Primary/Secondary shortcuts since they are still swapped.
-- Fixed swapped versions of 2048.
-- Updated Universal IR assets thanks to amec0e and [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
-- [Patreon Only: New 18 Plus animation](https://www.patreon.com/posts/76404764)
 - New SubGHz Playlist config and SubGHz Remote config for CVS & Walgreens.
+- Added SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
+- Added SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
