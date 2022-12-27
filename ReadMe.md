@@ -43,6 +43,7 @@ Thank you to all the supporters!
 - Dolphin State Code Optimizations [From ClaraCrazy](https://github.com/ClaraCrazy/Flipper-Xtreme/blob/main/applications/services/dolphin/helpers/dolphin_state.c) with corrections to the level thresholds that were too low.
 - Added all OFW changes ported by [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
 - Added IR Remote loader from main menu
+- Reflipped Primary/Secondary shortcuts since they are still swapped.
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
