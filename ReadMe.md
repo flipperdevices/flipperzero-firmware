@@ -28,8 +28,8 @@ Thank you to all the supporters!
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
-- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-26 16:15 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-26 16:15 EST`
+- Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-26 19:25 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-26 19:25 EST`
 - Updated: [WiFi (Marauder) v3.0 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED`
 - Updated: [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - Updated: [Metronome (By panki27)](https://github.com/panki27/Metronome)
@@ -45,6 +45,7 @@ Thank you to all the supporters!
 - Added IR Remote loader from main menu
 - Reflipped Primary/Secondary shortcuts since they are still swapped.
 - Fixed swapped versions of 2048.
+- Updated Universal IR assets thanks to amec0e and [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
