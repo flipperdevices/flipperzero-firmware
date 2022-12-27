@@ -6,6 +6,8 @@
         src="/.github/assets/light_theme_banner.png">
 </picture>
 
+# Flipper Zero Firmware
+
 - [Flipper Zero Official Website](https://flipperzero.one). Simple way to explain your friends what Flipper can do.
 - [Flipper Zero Firmware Update](https://update.flipperzero.one). Improvements for your dolphin: latest firmware releases, upgrade tools for PC and Mobile.
 - [User Documentation](https://docs.flipperzero.one). Learn more about your dolphin: specs, usage guides, and everything that you wanted to ask.
