@@ -2,7 +2,7 @@
 
 #define PIN_A 0
 #define PIN_B 1      // currently unused
-#define CLOCK_US 250 // typically set between 200-500us
+#define CLOCK_US 240 // typically set between 200-500us
 #define TEST_STR "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?"
 // TODO: better way of setting temp test str,
 //       text wrapping on screen? (Will be relevant for any loaded data too)
@@ -167,9 +167,12 @@ bool mag_scene_emulate_test_on_event(void *context, SceneManagerEvent event) {
             // Hardcoding a test string for the time being, while we debug/improve LF RFID TX
             FuriString *v = furi_string_alloc();
             furi_string_set_str(v, test_str);
+
+            // blink led while spoofing
             notification_message(mag->notifications, &sequence_blink_start_magenta);
             mag_spoof(v, 0);
             notification_message(mag->notifications, &sequence_blink_stop);
+
             furi_string_free(v);
         } else if (event.event == GuiButtonTypeLeft) {
             consumed = true;
