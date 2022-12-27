@@ -47,6 +47,7 @@ Thank you to all the supporters!
 - Fixed swapped versions of 2048.
 - Updated Universal IR assets thanks to amec0e and [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
 - [Patreon Only: New 18 Plus animation](https://www.patreon.com/posts/76404764)
+- New SubGHz Playlist config and SubGHz Remote config for CVS & Walgreens.
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
