@@ -41,7 +41,7 @@ jobs:
         if: success()
         run: |
           source scripts/toolchain/fbtenv.sh
-          ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
+          ./fbt flash_usb PORT=${{steps.device.outputs.flipper}} FORCE=1
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
       - name: 'Get last release tag'
