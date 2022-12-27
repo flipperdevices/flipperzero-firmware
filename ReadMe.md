@@ -44,6 +44,7 @@ Thank you to all the supporters!
 - Added all OFW changes ported by [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware).
 - Added IR Remote loader from main menu
 - Reflipped Primary/Secondary shortcuts since they are still swapped.
+- Fixed swapped versions of 2048.
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
