@@ -1,6 +1,5 @@
 #include "cligui_main_i.h"
 #include "cli_control.h"
-#include "events.h"
 #include "text_input.h"
 #include "console_output.h"
 
@@ -35,7 +34,7 @@ static void cligui_tick_event_cb(void* context) {
         if (furi_string_get_char(app->text_box_store, idx) == '\n') {
             idx++;
             break;
-        } 
+        }
         idx--;
     }
     text_input_set_header_text(app->text_input, furi_string_get_cstr(app->text_box_store) + idx);
@@ -43,9 +42,15 @@ static void cligui_tick_event_cb(void* context) {
 }
 
 ViewPortInputCallback prev_input_callback;
+volatile bool persistent_exit = false;
 static void input_callback_wrapper(InputEvent* event, void* context) {
     CliguiApp* app = context;
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
+        persistent_exit = false;
+        view_dispatcher_stop(app->view_dispatcher);
+    }
+    if(event->type == InputTypeLong && event->key == InputKeyOk) {
+        persistent_exit = true;
         view_dispatcher_stop(app->view_dispatcher);
     }
     if(app->data->state == ViewTextInput) {
@@ -88,6 +93,7 @@ int32_t cligui_main(void* p) {
         cligui->view_dispatcher, ViewConsoleOutput, text_box_get_view(cligui->text_box));
     cligui->text_box_store = furi_string_alloc();
     furi_string_reserve(cligui->text_box_store, TEXT_BOX_STORE_SIZE);
+    furi_string_set_char(cligui->text_box_store, 0, 0);
     text_box_set_text(cligui->text_box, furi_string_get_cstr(cligui->text_box_store));
     text_box_set_focus(cligui->text_box, TextBoxFocusEnd);
 
@@ -107,14 +113,14 @@ int32_t cligui_main(void* p) {
 
     view_dispatcher_run(cligui->view_dispatcher);
 
-    unlatch_tx_handler();
-
     view_dispatcher_remove_view(cligui->view_dispatcher, ViewConsoleOutput);
     view_dispatcher_remove_view(cligui->view_dispatcher, ViewTextInput);
     text_box_free(cligui->text_box);
     furi_string_free(cligui->text_box_store);
     text_input_free(cligui->text_input);
     view_dispatcher_free(cligui->view_dispatcher);
+
+    unlatch_tx_handler(persistent_exit);
 
     furi_record_close(RECORD_GUI);
 
