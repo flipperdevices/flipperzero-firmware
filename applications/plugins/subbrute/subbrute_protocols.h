@@ -23,6 +23,7 @@ typedef enum {
     UNILARMFileProtocol,
     PT2260FileProtocol,
     HoneywellFileProtocol,
+    HoltekFileProtocol,
     UnknownFileProtocol,
     TotalFileProtocol,
 } SubBruteFileProtocol;
@@ -38,6 +39,7 @@ typedef enum {
     SubBruteAttackAnsonic12bit433075,
     SubBruteAttackAnsonic12bit433,
     SubBruteAttackAnsonic12bit434,
+    SubBruteAttackHoltek12bit433,
     SubBruteAttackChamberlain9bit300,
     SubBruteAttackChamberlain9bit315,
     SubBruteAttackChamberlain9bit390,
