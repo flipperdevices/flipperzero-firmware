@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+from os import path
+
 from flipper.app import App
 from flipper.utils.programmer_openocd import OpenOCDProgrammer
 
@@ -34,7 +37,10 @@ class Main(App):
             "--serial", type=str, help="OpenOCD interface serial number"
         )
         parser.add_argument(
-            "--ob-path", type=str, help="Option bytes file", default="ob.data"
+            "--ob-path",
+            type=str,
+            help="Option bytes file",
+            default=path.join(path.dirname(__file__), "ob.data"),
         )
 
     def check(self):
