@@ -579,6 +579,8 @@ static void nfc_worker_mf_classic_key_attack(
     bool card_removed_notified = false;
 
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
+    NfcMfClassicDictAttackData* dict_attack_data =
+        &nfc_worker->dev_data->mf_classic_dict_attack_data;
     uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
 
     furi_assert(start_sector < total_sectors);
@@ -588,6 +590,7 @@ static void nfc_worker_mf_classic_key_attack(
     // Check every sector's A and B keys with the given key
     for(size_t i = start_sector; i < total_sectors; i++) {
         nfc_worker->callback(NfcWorkerEventKeyAttackNextSector, nfc_worker->context);
+        dict_attack_data->current_sector = i;
         furi_hal_nfc_sleep();
         if(furi_hal_nfc_activate_nfca(200, NULL)) {
             furi_hal_nfc_sleep();

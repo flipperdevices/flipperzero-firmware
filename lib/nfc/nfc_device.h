@@ -48,6 +48,7 @@ typedef struct {
 
 typedef struct {
     MfClassicDict* dict;
+    uint8_t current_sector;
 } NfcMfClassicDictAttackData;
 
 typedef enum {

@@ -249,14 +249,14 @@ void dict_attack_inc_current_dict_key(DictAttack* dict_attack, uint16_t keys_tri
         true);
 }
 
-void dict_attack_set_key_attack(DictAttack* dict_attack, bool is_key_attack) {
+void dict_attack_set_key_attack(DictAttack* dict_attack, bool is_key_attack, uint8_t sector) {
     furi_assert(dict_attack);
     with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
             model->is_key_attack = is_key_attack;
-            model->key_attack_current_sector = 1;
+            model->key_attack_current_sector = sector;
         },
         true);
 }
