@@ -24,7 +24,7 @@ Thank you to all the supporters!
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 - Contact me on [Patreon](https://www.patreon.com/RogueMaster/membership) if you want a renamed Flipper. I can do custom names!
 
-## Latest Updates - [PATREON: Latest Release RM1226-1952-0.74.3-c47c8ad](https://www.patreon.com/posts/76404764) 
+## Latest Updates - [PATREON: Latest Release RM1226-2212-0.74.3-2bba99e](https://www.patreon.com/posts/76407683) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
@@ -33,6 +33,7 @@ Thank you to all the supporters!
 - Assets: Includes SubGHz Playlist config and SubGHz Remote config for CVS & Walgreens.
 - Assets: Includes SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
+- [Patreon Only: New 18 Plus animation Pool Time 2 (Second New 18 Plus Animation Today)](https://www.patreon.com/posts/76407683)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
