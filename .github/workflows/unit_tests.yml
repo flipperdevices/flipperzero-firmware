@@ -61,7 +61,6 @@ jobs:
           python3 scripts/testing/units.py ${{steps.device.outputs.flipper}}
 
       - name: 'Check GDB output'
-        id: gdb
-        if: steps.copy.outcome == 'success' && steps.run_units.outcome == 'failure'
+        if: steps.run_units.outcome == 'failure'
         run: |
-          ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 currently not working
+          ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032
