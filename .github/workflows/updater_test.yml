@@ -67,7 +67,7 @@ jobs:
       - name: 'Flash last release'
         if: failure()
         run: |
-          ./fbt flash OPENOCD_ADAPTER_SERIAL=0F020D026415303030303032 FORCE=1
+          ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FORCE=1
 
       - name: 'Wait for flipper and format ext'
         if: failure()
