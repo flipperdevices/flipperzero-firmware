@@ -1,6 +1,9 @@
 #include "nfc_magic_worker_i.h"
 
-#include "lib/magic/magic.h"
+#include "nfc_magic_i.h"
+#include "lib/magic/common.h"
+#include "lib/magic/classic_gen1.h"
+#include "lib/magic/gen4.h"
 
 #define TAG "NfcMagicWorker"
 
@@ -86,13 +89,14 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
             }
             furi_hal_nfc_sleep();
 
-            if(!magic_wupa()) {
+            magic_activate();
+            if(!magic_gen1_wupa()) {
                 FURI_LOG_E(TAG, "Not Magic card");
                 nfc_magic_worker->callback(
                     NfcMagicWorkerEventWrongCard, nfc_magic_worker->context);
                 break;
             }
-            if(!magic_data_access_cmd()) {
+            if(!magic_gen1_data_access_cmd()) {
                 FURI_LOG_E(TAG, "Not Magic card");
                 nfc_magic_worker->callback(
                     NfcMagicWorkerEventWrongCard, nfc_magic_worker->context);
@@ -100,7 +104,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
             }
             for(size_t i = 0; i < 64; i++) {
                 FURI_LOG_D(TAG, "Writing block %d", i);
-                if(!magic_write_blk(i, &src_data->block[i])) {
+                if(!magic_gen1_write_blk(i, &src_data->block[i])) {
                     FURI_LOG_E(TAG, "Failed to write %d block", i);
                     nfc_magic_worker->callback(NfcMagicWorkerEventFail, nfc_magic_worker->context);
                     break;
@@ -121,10 +125,14 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
 }
 
 void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
+    NfcMagic* nfc_magic = nfc_magic_worker->context;
     bool card_found_notified = false;
+    uint8_t gen4_config[MAGIC_GEN4_CONFIG_LEN];
 
     while(nfc_magic_worker->state == NfcMagicWorkerStateCheck) {
-        if(magic_wupa()) {
+        magic_activate();
+        if(magic_gen1_wupa()) {
+            nfc_magic->card_type = MagicTypeClassicGen1A;
             if(!card_found_notified) {
                 nfc_magic_worker->callback(
                     NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
@@ -133,12 +141,30 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
 
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
-        } else {
-            if(card_found_notified) {
+        }
+
+        magic_deactivate();
+        furi_delay_ms(300);
+        magic_activate();
+
+        uint32_t cuid;
+        furi_hal_nfc_activate_nfca(200, &cuid);
+        if(magic_gen4_get_cfg(MAGIC_GEN4_DEFAULT_PWD, gen4_config)) {
+            nfc_magic->card_type = MagicTypeGen4;
+            if(!card_found_notified) {
                 nfc_magic_worker->callback(
-                    NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
-                card_found_notified = false;
+                    NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
+                card_found_notified = true;
             }
+
+            nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
+            break;
+        }
+
+        if(card_found_notified) {
+            nfc_magic_worker->callback(
+                NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
+            card_found_notified = false;
         }
         furi_delay_ms(300);
     }
@@ -159,10 +185,11 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
     while(nfc_magic_worker->state == NfcMagicWorkerStateWipe) {
         magic_deactivate();
         furi_delay_ms(300);
-        if(!magic_wupa()) continue;
-        if(!magic_wipe()) continue;
-        if(!magic_data_access_cmd()) continue;
-        if(!magic_write_blk(0, &block)) continue;
+        if(!magic_activate()) continue;
+        if(!magic_gen1_wupa()) continue;
+        if(!magic_gen1_wipe()) continue;
+        if(!magic_gen1_data_access_cmd()) continue;
+        if(!magic_gen1_write_blk(0, &block)) continue;
         nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
         break;
     }

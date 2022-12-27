@@ -1,4 +1,5 @@
 #include "../nfc_magic_i.h"
+#include "../lib/magic/types.h"
 
 void nfc_magic_scene_magic_info_widget_callback(
     GuiButtonType result,
@@ -13,12 +14,14 @@ void nfc_magic_scene_magic_info_widget_callback(
 void nfc_magic_scene_magic_info_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
     Widget* widget = nfc_magic->widget;
+    const char* card_type = nfc_magic_type(nfc_magic->card_type);
 
     notification_message(nfc_magic->notifications, &sequence_success);
 
     widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(
         widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Magic card detected");
+    widget_add_string_element(widget, 3, 17, AlignLeft, AlignTop, FontSecondary, card_type);
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_magic_info_widget_callback, nfc_magic);
 

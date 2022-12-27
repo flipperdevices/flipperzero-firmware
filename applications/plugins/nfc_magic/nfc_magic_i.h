@@ -3,7 +3,8 @@
 #include "nfc_magic.h"
 #include "nfc_magic_worker.h"
 
-#include "lib/magic/magic.h"
+#include "lib/magic/types.h"
+#include "lib/magic/classic_gen1.h"
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -47,6 +48,9 @@ struct NfcMagic {
     SceneManager* scene_manager;
     // NfcMagicDevice* dev;
     NfcDevice* nfc_dev;
+
+    MagicType card_type;
+    uint32_t magic_pwd;
 
     FuriString* text_box_store;
 
