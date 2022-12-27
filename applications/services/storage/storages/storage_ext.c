@@ -26,7 +26,7 @@ static FS_Error storage_ext_parse_error(SDError error);
 
 static bool sd_mount_card(StorageData* storage, bool notify) {
     bool result = false;
-    uint8_t counter = BSP_SD_MaxMountRetryCount();
+    uint8_t counter = sd_max_mount_retry_count();
     uint8_t bsp_result;
     SDData* sd_data = storage->data;
 
@@ -41,9 +41,9 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
 
         if((counter % 2) == 0) {
             // power reset sd card
-            bsp_result = BSP_SD_Init(true);
+            bsp_result = sd_init(true);
         } else {
-            bsp_result = BSP_SD_Init(false);
+            bsp_result = sd_init(false);
         }
 
         if(bsp_result) {
