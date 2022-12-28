@@ -418,8 +418,7 @@ bool felica_read_lite_system(
     area->end_service_code = 0x000f;
     FelicaNodeList_init(area->nodes);
     FelicaNode* node = malloc(sizeof(node));
-    node->type = FelicaNodeTypeService,
-    node->ptr.service = service;
+    node->type = FelicaNodeTypeService, node->ptr.service = service;
     FelicaNodeList_push_back(area->nodes, node);
 
     service->number = 0;
@@ -575,7 +574,8 @@ bool felica_read_card(
 
 void felica_service_clear(FelicaService* service) {
     FelicaBlockList_it_t it;
-    for(FelicaBlockList_it(it, service->blocks); !FelicaBlockList_end_p(it); FelicaBlockList_next(it)) {
+    for(FelicaBlockList_it(it, service->blocks); !FelicaBlockList_end_p(it);
+        FelicaBlockList_next(it)) {
         FelicaBlock* block = *FelicaBlockList_ref(it);
         free(block);
     }
@@ -586,7 +586,7 @@ void felica_area_clear(FelicaArea* area) {
     FelicaNodeList_it_t it;
     for(FelicaNodeList_it(it, area->nodes); !FelicaNodeList_end_p(it); FelicaNodeList_next(it)) {
         FelicaNode* node = *FelicaNodeList_ref(it);
-        if (node->type == FelicaNodeTypeArea) {
+        if(node->type == FelicaNodeTypeArea) {
             felica_area_clear(node->ptr.area);
         } else if(node->type == FelicaNodeTypeService) {
             felica_service_clear(node->ptr.service);
@@ -598,7 +598,8 @@ void felica_area_clear(FelicaArea* area) {
 
 void felica_clear(FelicaData* data) {
     FelicaSystemList_it_t it;
-    for(FelicaSystemList_it(it, data->systems); !FelicaSystemList_end_p(it); FelicaSystemList_next(it)) {
+    for(FelicaSystemList_it(it, data->systems); !FelicaSystemList_end_p(it);
+        FelicaSystemList_next(it)) {
         FelicaSystem* system = *FelicaSystemList_ref(it);
         felica_area_clear(&system->root_area);
     }

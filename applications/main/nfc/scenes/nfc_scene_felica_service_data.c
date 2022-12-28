@@ -17,7 +17,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
                     furi_string_push_back(nfc->text_box_store, '\n');
                 }
                 if(block != NULL) {
-                    furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+                    furi_string_cat_printf(
+                        nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
                 } else {
                     furi_string_cat_printf(nfc->text_box_store, "???? ");
                 }
@@ -31,7 +32,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
             if(block != NULL) {
-                furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+                furi_string_cat_printf(
+                    nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
             } else {
                 furi_string_cat_printf(nfc->text_box_store, "???? ");
             }
@@ -43,7 +45,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "MAC:\n");
@@ -52,7 +55,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "ID:\n");
@@ -61,7 +65,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "D_ID:\n");
@@ -70,7 +75,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "CKV:\n");
@@ -79,7 +85,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "MC:\n");
@@ -88,7 +95,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "WCNT:\n");
@@ -97,7 +105,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "MAC_A:\n");
@@ -106,7 +115,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
 
         furi_string_cat_str(nfc->text_box_store, "CRC_CHECK:\n");
@@ -115,7 +125,8 @@ void nfc_scene_felica_service_data_on_enter(void* context) {
             if(!(i % 8) && i) {
                 furi_string_push_back(nfc->text_box_store, '\n');
             }
-            furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
+            furi_string_cat_printf(
+                nfc->text_box_store, "%02X%02X ", block->data[i], block->data[i + 1]);
         }
     }
     text_box_set_text(text_box, furi_string_get_cstr(nfc->text_box_store));

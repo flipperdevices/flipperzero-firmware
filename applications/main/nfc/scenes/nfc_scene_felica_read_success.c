@@ -30,7 +30,8 @@ void nfc_scene_felica_read_success_on_enter(void* context) {
         temp_str = furi_string_alloc_printf("\e#%s", nfc_felica_type(felica_data->type));
 
         FelicaSystemList_it_t it;
-        for(FelicaSystemList_it(it, felica_data->systems); !FelicaSystemList_end_p(it); FelicaSystemList_next(it)) {
+        for(FelicaSystemList_it(it, felica_data->systems); !FelicaSystemList_end_p(it);
+            FelicaSystemList_next(it)) {
             FelicaSystem* current_system = *FelicaSystemList_ref(it);
             furi_string_cat_printf(
                 temp_str, "\nSystem %04X (#%d):", current_system->code, current_system->number);
