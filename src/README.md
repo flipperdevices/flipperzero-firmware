@@ -1,17 +1,16 @@
-# The code 😎
+# Setting up the Rubik's Cube Scrambler 
 
-## Where to start?
-Put the rubiks_cube_scrambler to your `application_users` folder
+## Installation
+To install the Rubik's Cube Scrambler, simply add the `rubiks_cube_scrambler` folder to your `application_users` folder.
 
-## Clean the code and remove old binaries/compilation artefact 
-`./fbt -c fap_rubiks_cube_scrambler`
+## Cleaning the code and removing old files
+Run `./fbt -c fap_rubiks_cube_scrambler` to clean the code and remove any old binaries or compilation artifacts.
 
-## Compile FAP
-`./fbt fap_rubiks_cube_scrambler`
+## Compiling the FAP
+To compile the FAP, run `./fbt fap_rubiks_cube_scrambler`.
 
-## Run application directly inside the Flip.x0
-`./fbt launch_app APPSRC=rubiks_cube_scrambler`
+## Launching the app
+To run the Rubik's Cube Scrambler directly from the Flip.x0, use `./fbt launch_app APPSRC=rubiks_cube_scrambler`.
 
-
-# A special thanks to Tanish for their c scrambler example :)
+# A special thanks to Tanish for their c scrambler example 🙏
 https://github.com/TanishBhongade/RubiksCubeScrambler-C/
