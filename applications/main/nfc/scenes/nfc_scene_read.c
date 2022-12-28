@@ -68,11 +68,6 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
-        } else if(event.event == NfcWorkerEventReadNfcV) {
-            notification_message(nfc->notifications, &sequence_success);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
-            consumed = true;
         } else if(event.event == NfcWorkerEventReadMfUltralight) {
             notification_message(nfc->notifications, &sequence_success);
             // Set unlock password input to 0xFFFFFFFF only on fresh read
@@ -94,19 +89,6 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneEmvReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
-            consumed = true;
-        } else if(event.event == NfcWorkerEventReadPassport) {
-            notification_message(nfc->notifications, &sequence_success);
-            FURI_LOG_D(
-                "NFC",
-                "Read passport, auth: %d, success: %d",
-                nfc->dev->dev_data.mrtd_data.auth.method,
-                nfc->dev->dev_data.mrtd_data.auth_success);
-            if(nfc->dev->dev_data.mrtd_data.auth_success) {
-                scene_manager_next_scene(nfc->scene_manager, NfcScenePassportReadAuthSuccess);
-            } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcScenePassportReadSuccess);
-            }
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDictAttackRequired) {
             if(mf_classic_dict_check_presence(MfClassicDictTypeSystem)) {
