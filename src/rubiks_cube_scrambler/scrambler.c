@@ -1,3 +1,9 @@
+/*
+Authors: Tanish Bhongade and RaZe
+*/
+
+
+
 #include <stdio.h>
 #include <furi.h>
 #include <gui/gui.h>

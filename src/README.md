@@ -11,3 +11,7 @@ Put the rubiks_cube_scrambler to your `application_users` folder
 
 ## Run application directly inside the Flip.x0
 `./fbt launch_app APPSRC=rubiks_cube_scrambler`
+
+
+# Also all credits to Tanish for their c scrambler example :)
+https://github.com/TanishBhongade/RubiksCubeScrambler-C/
