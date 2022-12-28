@@ -11,3 +11,11 @@ const char* furi_hal_version_get_model_name() {
 const char* furi_hal_version_get_model_code() {
     return "FZ.1";
 }
+
+const char* furi_hal_version_get_fcc_id() {
+    return "2A2V6-FZ";
+}
+
+const char* furi_hal_version_get_ic_id() {
+    return "27624-FZ";
+}

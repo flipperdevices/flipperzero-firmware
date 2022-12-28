@@ -73,6 +73,18 @@ const char* furi_hal_version_get_model_name();
  */
 const char* furi_hal_version_get_model_code();
 
+/** Get FCC ID
+ *
+ * @return     FCC id as C-string
+ */
+const char* furi_hal_version_get_fcc_id();
+
+/** Get IC id
+ *
+ * @return     IC id as C-string
+ */
+const char* furi_hal_version_get_ic_id();
+
 /** Get OTP version
  *
  * @return     OTP Version

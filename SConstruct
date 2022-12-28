@@ -230,25 +230,6 @@ distenv.PhonyTarget(
     GDBREMOTE="$${BLACKMAGIC_ADDR}",
 )
 
-# Thread trace
-
-db_backtrade_all_threads = distenv.PhonyTarget(
-    "gdb_trace_all",
-    "$GDB $GDBOPTS $SOURCES $GDBFLASH",
-    source=firmware_env["FW_ELF"],
-    GDBOPTS="${GDBOPTS_BASE}",
-    GDBREMOTE="${OPENOCD_GDB_PIPE}",
-    GDBFLASH=[
-        "-ex",
-        "set pagination off",
-        "-ex",
-        "set height unlimited",
-        "-ex",
-        "thread apply all bt",
-        "-ex",
-        "quit",
-    ],
-)
 
 # Just start OpenOCD
 distenv.PhonyTarget(
