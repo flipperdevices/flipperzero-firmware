@@ -18,6 +18,9 @@ typedef enum {
     NfcWorkerStateReadMfUltralightReadAuth,
     NfcWorkerStateMfClassicDictAttack,
     NfcWorkerStateAnalyzeReader,
+    NfcWorkerStateNfcVEmulate,
+    NfcWorkerStateNfcVUnlock,
+    NfcWorkerStateNfcVUnlockAndSave,
     // Debug
     NfcWorkerStateEmulateApdu,
     NfcWorkerStateField,
@@ -39,6 +42,7 @@ typedef enum {
     NfcWorkerEventReadMfClassicDone,
     NfcWorkerEventReadMfClassicLoadKeyCache,
     NfcWorkerEventReadMfClassicDictAttackRequired,
+    NfcWorkerEventReadNfcV,
 
     // Nfc worker common events
     NfcWorkerEventSuccess,
@@ -69,6 +73,7 @@ typedef enum {
     // Mifare Ultralight events
     NfcWorkerEventMfUltralightPassKey, // NFC worker requesting manual key
     NfcWorkerEventMfUltralightPwdAuth, // Reader sent auth command
+    NfcWorkerEventNfcVPassKey, // NFC worker requesting manual key
 } NfcWorkerEvent;
 
 typedef bool (*NfcWorkerCallback)(NfcWorkerEvent event, void* context);
@@ -87,3 +92,5 @@ void nfc_worker_start(
     void* context);
 
 void nfc_worker_stop(NfcWorker* nfc_worker);
+void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker);
+void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker);
