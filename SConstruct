@@ -194,7 +194,7 @@ firmware_bm_flash = distenv.PhonyTarget(
     ],
 )
 
-gdb_backtrade_all_threads = distenv.PhonyTarget(
+gdb_backtrace_all_threads = distenv.PhonyTarget(
     "gdb_trace_all",
     "$GDB $GDBOPTS $SOURCES $GDBFLASH",
     source=firmware_env["FW_ELF"],
