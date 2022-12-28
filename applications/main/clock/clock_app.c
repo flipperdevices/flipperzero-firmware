@@ -347,7 +347,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
-        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
+        canvas_draw_str_aligned(
+            canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
         canvas_set_font(canvas, FontBatteryPercent);
         if(state->time_format == LocaleTimeFormat12h)
             canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, meridian_string);

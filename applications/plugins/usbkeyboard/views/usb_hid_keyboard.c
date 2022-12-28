@@ -149,8 +149,7 @@ const UsbHidKeyboardKey usb_hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
         {.width = 1, .icon = NULL, .key = "0", .shift_key = "0", .value = HID_KEYBOARD_F10},
         {.width = 1, .icon = NULL, .key = "1", .shift_key = "1", .value = HID_KEYBOARD_F11},
         {.width = 1, .icon = NULL, .key = "2", .shift_key = "2", .value = HID_KEYBOARD_F12},
-    }
-};
+    }};
 
 static void usb_hid_keyboard_to_upper(char* str) {
     while(*str) {
