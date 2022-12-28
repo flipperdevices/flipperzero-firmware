@@ -13,5 +13,5 @@ Put the rubiks_cube_scrambler to your `application_users` folder
 `./fbt launch_app APPSRC=rubiks_cube_scrambler`
 
 
-# Also all credits to Tanish for their c scrambler example :)
+# A special thanks to Tanish for their c scrambler example :)
 https://github.com/TanishBhongade/RubiksCubeScrambler-C/
