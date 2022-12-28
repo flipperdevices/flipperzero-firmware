@@ -56,6 +56,9 @@ typedef enum {
     NfcWorkerEventNewDictKeyBatch,
     NfcWorkerEventFoundKeyA,
     NfcWorkerEventFoundKeyB,
+    NfcWorkerEventKeyAttackStart,
+    NfcWorkerEventKeyAttackStop,
+    NfcWorkerEventKeyAttackNextSector,
 
     // Write Mifare Classic events
     NfcWorkerEventWrongCard,
