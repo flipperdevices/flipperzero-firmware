@@ -31,6 +31,7 @@ Thank you to all the supporters!
 - New Animation: RM_G0G375_128x64, this animation was made possible by one of our RM Animation Coordinator Patrons with RogueMaster Extreme.
 - Removed Animations for Happy Holidays and Halloween from RM Minimal build included on GitHub releases.
 - [Patreon Update: Future builds for RM Minimal, RM Select, RM Select + 18 Plus, DBZ and the new build ALL will have the new animation RM_G0G375_128x64](https://www.patreon.com/RogueMaster)
+- RM Clock updated to use locale settings (changed with example from ClaraCrazy)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!

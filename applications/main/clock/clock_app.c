@@ -1,8 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
-#include <gui/elements.h>
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
+#include <locale/locale.h>
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -10,6 +11,15 @@
 #include "Clock_icons.h"
 
 #define TAG "Clock"
+#define CLOCK_ISO_DATE_FORMAT "%.4d-%.2d-%.2d"
+#define CLOCK_RFC_DATE_FORMAT "%.2d-%.2d-%.4d"
+#define CLOCK_TIME_FORMAT "%.2d:%.2d:%.2d"
+#define MERIDIAN_FORMAT "%s"
+#define MERIDIAN_STRING_AM "AM"
+#define MERIDIAN_STRING_PM "PM"
+#define TIME_LEN 12
+#define DATE_LEN 14
+#define MERIDIAN_LEN 3
 
 typedef enum {
     EventTypeTick,
@@ -33,8 +43,10 @@ typedef struct {
     uint32_t timerSecs;
     uint32_t alert_time;
     bool timer_running;
-    bool militaryTime; // 24 hour
     bool w_test;
+    LocaleDateFormat date_format;
+    LocaleTimeFormat time_format;
+    FuriHalRtcDateTime datetime;
 } ClockState;
 
 const NotificationSequence clock_alert_silent = {
@@ -252,7 +264,6 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
     ClockState* state = ctx;
     if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
-        // Can't obtain mutex, requeue render
         PluginEvent event = {.type = EventTypeTick};
         furi_message_queue_put(state->event_queue, &event, 0);
         return;
@@ -260,16 +271,40 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     FuriHalRtcDateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
     uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-    char strings[3][20];
-    snprintf(strings[0], 20, "%.4d-%.2d-%.2d", curr_dt.year, curr_dt.month, curr_dt.day);
-    uint8_t hour = curr_dt.hour;
-    char strAMPM[3];
-    snprintf(strAMPM, sizeof(strAMPM), "%s", "AM");
-    if(!state->militaryTime && hour >= 12) {
-        if(hour > 12) hour -= 12;
-        snprintf(strAMPM, sizeof(strAMPM), "%s", "PM");
+    char time_string[TIME_LEN];
+    char date_string[DATE_LEN];
+    char meridian_string[MERIDIAN_LEN];
+    char timer_string[20];
+    if(state->time_format == LocaleTimeFormat24h) {
+        snprintf(
+            time_string, TIME_LEN, CLOCK_TIME_FORMAT, curr_dt.hour, curr_dt.minute, curr_dt.second);
+    } else {
+        bool pm = curr_dt.hour > 12;
+        bool pm12 = curr_dt.hour >= 12;
+        snprintf(
+            time_string,
+            TIME_LEN,
+            CLOCK_TIME_FORMAT,
+            pm ? curr_dt.hour - 12 : curr_dt.hour,
+            curr_dt.minute,
+            curr_dt.second);
+
+        snprintf(
+            meridian_string,
+            MERIDIAN_LEN,
+            MERIDIAN_FORMAT,
+            pm12 ? MERIDIAN_STRING_PM : MERIDIAN_STRING_AM);
     }
-    snprintf(strings[1], 20, "%.2d:%.2d:%.2d", hour, curr_dt.minute, curr_dt.second);
+    if(state->date_format == LocaleDateFormatYMD) {
+        snprintf(
+            date_string, DATE_LEN, CLOCK_ISO_DATE_FORMAT, curr_dt.year, curr_dt.month, curr_dt.day);
+    } else if(state->date_format == LocaleDateFormatMDY) {
+        snprintf(
+            date_string, DATE_LEN, CLOCK_RFC_DATE_FORMAT, curr_dt.month, curr_dt.day, curr_dt.year);
+    } else {
+        snprintf(
+            date_string, DATE_LEN, CLOCK_RFC_DATE_FORMAT, curr_dt.day, curr_dt.month, curr_dt.year);
+    }
     bool timer_running = state->timer_running;
     uint32_t songSelect = state->songSelect;
     int alert_time = (int)state->alert_time;
@@ -282,14 +317,14 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     if(timer_start_timestamp != 0 && !state->w_test) {
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                timer_stopped_seconds;
-        snprintf(strings[2], 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
-        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
+        snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         canvas_set_font(canvas, FontBatteryPercent);
-        if(!state->militaryTime)
-            canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, strAMPM);
+        if(state->time_format == LocaleTimeFormat12h)
+            canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
         canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, strings[0]); // DRAW DATE
+        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "Reset");
     } else {
@@ -297,10 +332,9 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         if(state->w_test && timer_start_timestamp != 0) {
             int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                    timer_stopped_seconds;
-            snprintf(strings[2], 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+            snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
             int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
             int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
-            // int32_t elapsed_secs_img3 = (elapsed_secs % 60) % 4;
             static const Icon* const count_anim[5] = {
                 &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
             static const Icon* const count_anim2[4] = {
@@ -311,20 +345,16 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
             canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
             canvas_draw_str_aligned(
-                canvas, 64, 32, AlignCenter, AlignTop, strings[2]); // DRAW TIMER
+                canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
-        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, strings[1]); // DRAW TIME
+        canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
         canvas_set_font(canvas, FontBatteryPercent);
-        if(!state->militaryTime) {
-            canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, strAMPM);
-        }
+        if(state->time_format == LocaleTimeFormat12h)
+            canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, meridian_string);
         if(!state->w_test)
             canvas_draw_str_aligned(
-                canvas, 64, 38, AlignCenter, AlignTop, strings[0]); // DRAW DATE
+                canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
-
-        if(!state->desktop_settings->is_dumbmode && !state->w_test)
-            elements_button_left(canvas, state->militaryTime ? "12h" : "24h");
     }
     if(!state->desktop_settings->is_dumbmode && !state->w_test) {
         if(timer_running) {
@@ -351,7 +381,6 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
 
 static void clock_state_init(ClockState* const state) {
     memset(state, 0, sizeof(ClockState));
-    state->militaryTime = false;
     state->songSelect = 2;
     state->codeSequence = 0;
     state->lastexp_timestamp = 0;
@@ -361,6 +390,8 @@ static void clock_state_init(ClockState* const state) {
     state->alert_time = 80;
     state->desktop_settings = malloc(sizeof(DesktopSettings));
     state->w_test = false;
+    state->time_format = locale_get_time_format();
+    state->date_format = locale_get_date_format();
 }
 
 // Runs every 1000ms by default
@@ -474,10 +505,6 @@ int32_t clock_app(void* p) {
                                 plugin_state->timer_start_timestamp = curr_ts;
                                 plugin_state->timer_stopped_seconds = 0;
                                 plugin_state->timerSecs = 0;
-                            } else {
-                                // Toggle 12/24 hours
-                                if(!plugin_state->desktop_settings->is_dumbmode)
-                                    plugin_state->militaryTime = !plugin_state->militaryTime;
                             }
                         }
                         break;
@@ -539,7 +566,6 @@ int32_t clock_app(void* p) {
                             notification_message(notification, &sequence_rainbow);
                             notification_message(notification, &sequence_rainbow);
                         }
-                        plugin_state->militaryTime = true; // 24 HR TIME FOR THIS
                         DOLPHIN_DEED(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
@@ -619,11 +645,10 @@ int32_t clock_app(void* p) {
                     }
                 }
             }
-            view_port_update(view_port);
-            furi_mutex_release(plugin_state->mutex);
         }
+        view_port_update(view_port);
+        furi_mutex_release(plugin_state->mutex);
     }
-    // Cleanup
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
