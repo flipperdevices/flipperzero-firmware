@@ -241,6 +241,14 @@ void pwnagotchi_draw_handshakes(Pwnagotchi* pwn, Canvas* canvas);
 void pwnagotchi_draw_message(Pwnagotchi* pwn, Canvas* canvas);
 
 /**
+ * Runs all drawing functions to update the screen completely
+ * 
+ * @param pwn Pwnagotchi to draw
+ * @param canvas Canvas to draw on
+ */
+void pwnagotchi_draw_all(Pwnagotchi* pwn, Canvas* canvas);
+
+/**
  * Clears the screen buffer of the pwnagotchi
  * 
  * @param pwn Pwn to clear

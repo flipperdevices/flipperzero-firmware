@@ -296,6 +296,20 @@ void pwnagotchi_draw_message(Pwnagotchi* pwn, Canvas* canvas) {
 
 }
 
+void pwnagotchi_draw_all(Pwnagotchi* pwn, Canvas* canvas) {
+    pwnagotchi_draw_face(pwn, canvas);
+    pwnagotchi_draw_name(pwn, canvas);
+    pwnagotchi_draw_channel(pwn, canvas);
+    pwnagotchi_draw_aps(pwn, canvas);
+    pwnagotchi_draw_uptime(pwn, canvas);
+    pwnagotchi_draw_lines(pwn, canvas);
+    pwnagotchi_draw_friend(pwn, canvas);
+    pwnagotchi_draw_mode(pwn, canvas);
+    pwnagotchi_draw_handshakes(pwn, canvas);
+    pwnagotchi_draw_message(pwn, canvas);
+
+}
+
 void pwnagotchi_free(Pwnagotchi* pwn) {
     free(pwn);
     pwn = NULL;
