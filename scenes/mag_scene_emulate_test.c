@@ -4,6 +4,7 @@
 #define PIN_B 1      // currently unused
 #define CLOCK_US 240 // typically set between 200-500us
 #define TEST_STR "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?"
+#define TEST_TRACK 0
 // TODO: better way of setting temp test str,
 //       text wrapping on screen? (Will be relevant for any loaded data too)
 
@@ -170,7 +171,7 @@ bool mag_scene_emulate_test_on_event(void *context, SceneManagerEvent event) {
 
             // blink led while spoofing
             notification_message(mag->notifications, &sequence_blink_start_magenta);
-            mag_spoof(v, 0);
+            mag_spoof(v, TEST_TRACK);
             notification_message(mag->notifications, &sequence_blink_stop);
 
             furi_string_free(v);

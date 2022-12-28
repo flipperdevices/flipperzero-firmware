@@ -17,4 +17,8 @@ Other misc things to investigate / build:
 - Reverse-track emulate?
 - Tuning of parameters like pre-signal zeros?
 - "Interpacket delay" like the RedSpoof implementation?
-- (Less important) Any way to easily wrap text on screen, without having to manually calculate the number of chars that fit and splicing the string accordingly into lines? 
+- (Less important) Any way to easily wrap text on screen, without having to manually calculate the number of chars that fit and splicing the string accordingly into lines?
+
+
+HF coil notes:
+NFC reader field can be turned on / off with furi_hal_nfc_field_on(); and furi_hal_nfc_field_off(); respectively, as seen in nfc_scene_field.c (used for debug purposes). At a lower level, that consists of furi_hal_nfc_exit_sleep(); and st25r3916TxRxOn(); to turn on, and st25r3916TxRxOff(); and furi_hal_nfc_start_sleep(); to turn off. May be worth trying directly (wake from sleep at setup, toggle on and off corresponding with bit direction, send to sleep on exit). If this doesn't work, will likely need to consider lower-level control.
