@@ -71,7 +71,7 @@ jobs:
         run: |
           set -e
           for TARGET_CONFIG in ${TARGET_CONFIGS}; do
-            TARGET=`echo ${TARGET_CFG} | cut -d, -f1`
+            TARGET=`echo ${TARGET_CONFIG} | cut -d, -f1`
             mv dist/${TARGET}-*/* artifacts/
           done
 
