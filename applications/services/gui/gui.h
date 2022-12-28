@@ -106,6 +106,23 @@ size_t gui_get_framebuffer_size(Gui* gui);
  */
 void gui_set_lockdown(Gui* gui, bool lockdown);
 
+/** Acquire Direct Draw lock and get Canvas instance for direct drawing
+ *
+ * @param      gui   The graphical user interface
+ *
+ * @return     Canvas instance
+ */
+Canvas* gui_direct_draw_acquire(Gui* gui);
+
+/** Release Direct Draw Lock
+ *
+ * Canvas acquired in gui_direct_draw_acquire will become invalid after this
+ * call
+ *
+ * @param      gui   Gui instance
+ */
+void gui_direct_draw_release(Gui* gui);
+
 #ifdef __cplusplus
 }
 #endif
