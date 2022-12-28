@@ -13,15 +13,15 @@ def main():
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S",
     )
-    logging.log(logging.INFO, "Trying to run units on flipper")
+    logging.info("Trying to run units on flipper")
     flp_serial = flp_serial_by_name(sys.argv[1])
 
     if flp_serial == "":
-        logging.log(logging.ERROR, "Flipper not found!")
+        logging.error("Flipper not found!")
         sys.exit(1)
 
     with serial.Serial(flp_serial, timeout=1) as flipper:
-        logging.log(logging.INFO, f"Found Flipper at {flp_serial}")
+        logging.info(f"Found Flipper at {flp_serial}")
         flipper.baudrate = 230400
         flipper.flushOutput()
         flipper.flushInput()
@@ -48,7 +48,7 @@ def main():
         total = 0
 
         for line in lines:
-            logging.log(logging.INFO, line)
+            logging.info(line)
             if "()" in line:
                 total += 1
 
@@ -61,8 +61,8 @@ def main():
             if not status:
                 status = re.match(status_pattern, line)
 
-        if leak is None or time is None or leak is None or status is None:
-            logging.log(logging.ERROR, "Failed to parse output")
+        if None in (tests, time, leak, status):
+            logging.error(f"Failed to parse output: {leak} {time} {leak} {status}")
             sys.exit(1)
 
         leak = int(re.findall(r"[- ]\d+", leak.group(0))[0])
@@ -71,17 +71,14 @@ def main():
         time = int(re.findall(r"\d+", time.group(0))[0])
 
         if tests > 0 or status != "PASSED":
-            logging.log(logging.ERROR, f"Got {tests} failed tests.")
-            logging.log(logging.ERROR, f"Leaked (not failing on this stat): {leak}")
-            logging.log(logging.ERROR, f"Status: {status}")
-            logging.log(logging.ERROR, f"Time: {time/1000} seconds")
+            logging.error(f"Got {tests} failed tests.")
+            logging.error(f"Leaked (not failing on this stat): {leak}")
+            logging.error(f"Status: {status}")
+            logging.error(f"Time: {time/1000} seconds")
             sys.exit(1)
 
-        logging.log(logging.INFO, f"Leaked (not failing on this stat): {leak}")
-        logging.log(
-            logging.INFO,
-            f"Tests ran successfully! Time elapsed {time/1000} seconds. Passed {total} tests.",
-        )
+        logging.info(f"Leaked (not failing on this stat): {leak}")
+        logging.info(f"Tests ran successfully! Time elapsed {time/1000} seconds. Passed {total} tests.")
 
         sys.exit(0)
 
