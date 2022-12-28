@@ -140,19 +140,19 @@ void mag_scene_emulate_test_on_enter(void *context) {
     Mag *mag = context;
     Widget *widget = mag->widget;
 
-    FuriString *tmp_string;
-    tmp_string = furi_string_alloc();
+    //FuriString *tmp_string;
+    //tmp_string = furi_string_alloc();
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
     widget_add_button_element(widget, GuiButtonTypeRight, "Emulate", mag_widget_callback, mag);
 
-    furi_string_printf(tmp_string, test_str);
-    widget_add_string_element(
-        widget, 64, 0, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
-    furi_string_reset(tmp_string);
+    //furi_string_printf(tmp_string, test_str);
+    //widget_add_string_element(
+    //    widget, 64, 0, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
+    //furi_string_reset(tmp_string);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
-    furi_string_free(tmp_string);
+    //furi_string_free(tmp_string);
 }
 
 bool mag_scene_emulate_test_on_event(void *context, SceneManagerEvent event) {

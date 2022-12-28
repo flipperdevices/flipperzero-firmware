@@ -17,3 +17,4 @@ Other misc things to investigate / build:
 - Reverse-track emulate?
 - Tuning of parameters like pre-signal zeros?
 - "Interpacket delay" like the RedSpoof implementation?
+- (Less important) Any way to easily wrap text on screen, without having to manually calculate the number of chars that fit and splicing the string accordingly into lines? 

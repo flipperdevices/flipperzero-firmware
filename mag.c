@@ -185,6 +185,7 @@ bool mag_load_key_data(Mag* mag, FuriString* path, bool show_dialog) {
     UNUSED(show_dialog);
 
     // TODO: Needs reworking from LFRFID version, as that goes through some custom protocol by key type.
+    //       Alternatively, co-opt the "protocol" typing as our way of encoding track # (Track 1, 2, 3, or some combination thereof)
 
     return result;
 }
