@@ -16,7 +16,7 @@ Thank you to all the supporters!
 - [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
 - Contact me on [Patreon](https://www.patreon.com/RogueMaster/membership) if you want a renamed Flipper. I can do custom names!
 
-## Latest Updates - [PATREON: Latest Release RM1227-2108-0.74.3-537aaf1](https://www.patreon.com/posts/76446672) 
+## Latest Updates - [PATREON: Latest Release RM1228-0029-0.74.3-e179646](https://www.patreon.com/posts/76451482) 
 
 ## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
 
@@ -32,6 +32,7 @@ Thank you to all the supporters!
 - Removed Animations for Happy Holidays and Halloween from RM Minimal build included on GitHub releases.
 - [Patreon Update: Future builds for RM Minimal, RM Select, RM Select + 18 Plus, DBZ and the new build ALL will have the new animation RM_G0G375_128x64](https://www.patreon.com/RogueMaster)
 - RM Clock updated to use locale settings (changed with example from ClaraCrazy)
+- [Patreon Update: New DBZ and ALL animation builds](https://www.patreon.com/RogueMaster)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
