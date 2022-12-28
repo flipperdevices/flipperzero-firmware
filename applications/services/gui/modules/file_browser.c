@@ -4,7 +4,7 @@
 #include <core/check.h>
 #include <core/common_defines.h>
 #include <core/log.h>
-#include "furi_hal_resources.h"
+#include <furi_hal_resources.h>
 #include <m-array.h>
 #include <gui/elements.h>
 #include <furi.h>

@@ -1,5 +1,5 @@
 #include <core/check.h>
-#include "furi_hal_resources.h"
+#include <furi_hal_resources.h>
 #include "assets_icons.h"
 #include "gui/canvas.h"
 #include "gui/view.h"

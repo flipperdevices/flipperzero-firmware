@@ -1,7 +1,7 @@
 #include "elements.h"
 #include "m-core.h"
 #include <assets_icons.h>
-#include "furi_hal_resources.h"
+#include <furi_hal_resources.h>
 #include <furi_hal.h>
 #include "gui/canvas.h"
 

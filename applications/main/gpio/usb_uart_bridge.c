@@ -1,5 +1,5 @@
 #include "usb_uart_bridge.h"
-#include "furi_hal.h"
+#include <furi_hal.h>
 #include <furi_hal_usb_cdc.h>
 #include "usb_cdc.h"
 #include "cli/cli_vcp.h"

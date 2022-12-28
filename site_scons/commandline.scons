@@ -79,6 +79,7 @@ vars.AddVariables(
         default="7",
         allowed_values=[
             "7",
+            "18",
         ],
     ),
     BoolVariable(
