@@ -53,7 +53,7 @@ This protocol is focused on being able to transmit to the Flipper a parameter to
 ## Protocol Usage
 This section will explain the usage of each parameter and they're associated arguments.
 
-**Face:**
+### Face:
 To change the display's face a message with the following structure should be sent:
 ```
 0x02 0x04 [Face_code] 0x03
@@ -94,7 +94,7 @@ Setting the face to Smart looks like this:
 0x02 0x04 0x15 0x03
 ```
 
-**Name:**
+### Name:
 Changing the hostname of the Pwnagotchi:
 ```
 0x02 0x05 [ASCII_char_1] [ASCII_char_2]..[ASCII_char_N] 0x03
@@ -106,7 +106,7 @@ Setting the hostname to "Pwn":
 0x02 0x05 0x50 0x77 0x6e 0x03
 ```
 
-**Channel:**
+### Channel:
 The channel can be any number between 1 and 255 (6 GHz supports up to 233).
 To set the channel to * (all channels) a 0 should be sent
 Setting channel:
@@ -119,7 +119,7 @@ Setting channel to 11:
 0x02 0x06 0x0b 0x03
 ```
 
-**APS (Access Points):**
+### APS (Access Points):
 The APS section of the Pwnagotchi access points is displayed as ```[APS_this_session] ([total_APS])```
 For this reason the APS should be transmitted as ASCII characters. Including ASCII for the numbers, space, and parentheses
 Setting APS:
@@ -133,7 +133,7 @@ Setting APS to 5 (10)
 0x02 0x07 0x35 0x20 0x28 0x31 0x30 0x29 0x03
 ```
 
-**Uptime:**
+### Uptime:
 Uptime is displayed on the Pwnagotchi as ```hh:mm:ss```
 Just like above this will be transmitted as ASCII
 
@@ -149,10 +149,10 @@ Setting uptime to "05:12:36"
 0x02 0x08 0x30 0x35 0x3a 0x31 0x32 0x3a 0x33 0x36 0x03
 ```
 
-**Friend:**
+### Friend:
 This parameter is not yet implemented.
 
-**Mode:**
+### Mode:
 This parameter sets the display Pwnagotchi mode between MANU, AUTO, and AI
 
 Setting mode:
@@ -171,7 +171,7 @@ Setting mode to AI:
 0x02 0x0a 0x06 0x03
 ```
 
-**Handshakes:**
+### Handshakes:
 This parameter is displayed as PWND on the Pwnagotchi.
 It has a similar format to APS in that: ```[shakes_this_session] ([total_shakes])```
 It will also be transmitted as ASCII like in APS
@@ -187,7 +187,7 @@ Setting handshakes to "3 (12)":
 0x02 0x11 0x33 0x20 0x28 0x31 0x32 0x29 0x03
 ```
 
-**Message:**
+### Message:
 This parameter is displayed underneath the hostname of the Pwnagotchi and confers the current
 status of the program. It is a variable length ASCII message.
 
