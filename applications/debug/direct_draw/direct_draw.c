@@ -87,11 +87,11 @@ static void direct_draw_run(DirectDraw* instance) {
 
         canvas_reset(instance->canvas);
         canvas_set_color(instance->canvas, ColorXOR);
-        direct_draw_block(instance->canvas, instance->counter%16, instance->counter);
-        direct_draw_block(instance->canvas, instance->counter*2%16, instance->counter*2);
-        direct_draw_block(instance->canvas, instance->counter*3%16, instance->counter*3);
-        direct_draw_block(instance->canvas, instance->counter*4%16, instance->counter*4);
-        direct_draw_block(instance->canvas, instance->counter*5%16, instance->counter*5);
+        direct_draw_block(instance->canvas, instance->counter % 16, instance->counter);
+        direct_draw_block(instance->canvas, instance->counter * 2 % 16, instance->counter * 2);
+        direct_draw_block(instance->canvas, instance->counter * 3 % 16, instance->counter * 3);
+        direct_draw_block(instance->canvas, instance->counter * 4 % 16, instance->counter * 4);
+        direct_draw_block(instance->canvas, instance->counter * 5 % 16, instance->counter * 5);
         canvas_draw_str(instance->canvas, 10, 10, buffer);
         canvas_commit(instance->canvas);
 

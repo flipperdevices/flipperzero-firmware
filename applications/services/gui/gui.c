@@ -274,42 +274,48 @@ static void gui_input(Gui* gui, InputEvent* input_event) {
 
     gui_lock(gui);
 
-    ViewPort* view_port = NULL;
+    do {
+        if(gui->direct_draw && !gui->ongoing_input_view_port) {
+            break;
+        }
 
-    if(gui->lockdown) {
-        view_port = gui_view_port_find_enabled(gui->layers[GuiLayerDesktop]);
-    } else {
-        view_port = gui_view_port_find_enabled(gui->layers[GuiLayerFullscreen]);
-        if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerWindow]);
-        if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerDesktop]);
-    }
+        ViewPort* view_port = NULL;
 
-    if(!(gui->ongoing_input & ~key_bit) && input_event->type == InputTypePress) {
-        gui->ongoing_input_view_port = view_port;
-    }
+        if(gui->lockdown) {
+            view_port = gui_view_port_find_enabled(gui->layers[GuiLayerDesktop]);
+        } else {
+            view_port = gui_view_port_find_enabled(gui->layers[GuiLayerFullscreen]);
+            if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerWindow]);
+            if(!view_port) view_port = gui_view_port_find_enabled(gui->layers[GuiLayerDesktop]);
+        }
 
-    if(view_port && view_port == gui->ongoing_input_view_port) {
-        view_port_input(view_port, input_event);
-    } else if(gui->ongoing_input_view_port && input_event->type == InputTypeRelease) {
-        FURI_LOG_D(
-            TAG,
-            "ViewPort changed while key press %p -> %p. Sending key: %s, type: %s, sequence: %p to previous view port",
-            gui->ongoing_input_view_port,
-            view_port,
-            input_get_key_name(input_event->key),
-            input_get_type_name(input_event->type),
-            (void*)input_event->sequence);
-        view_port_input(gui->ongoing_input_view_port, input_event);
-    } else {
-        FURI_LOG_D(
-            TAG,
-            "ViewPort changed while key press %p -> %p. Discarding key: %s, type: %s, sequence: %p",
-            gui->ongoing_input_view_port,
-            view_port,
-            input_get_key_name(input_event->key),
-            input_get_type_name(input_event->type),
-            (void*)input_event->sequence);
-    }
+        if(!(gui->ongoing_input & ~key_bit) && input_event->type == InputTypePress) {
+            gui->ongoing_input_view_port = view_port;
+        }
+
+        if(view_port && view_port == gui->ongoing_input_view_port) {
+            view_port_input(view_port, input_event);
+        } else if(gui->ongoing_input_view_port && input_event->type == InputTypeRelease) {
+            FURI_LOG_D(
+                TAG,
+                "ViewPort changed while key press %p -> %p. Sending key: %s, type: %s, sequence: %p to previous view port",
+                gui->ongoing_input_view_port,
+                view_port,
+                input_get_key_name(input_event->key),
+                input_get_type_name(input_event->type),
+                (void*)input_event->sequence);
+            view_port_input(gui->ongoing_input_view_port, input_event);
+        } else {
+            FURI_LOG_D(
+                TAG,
+                "ViewPort changed while key press %p -> %p. Discarding key: %s, type: %s, sequence: %p",
+                gui->ongoing_input_view_port,
+                view_port,
+                input_get_key_name(input_event->key),
+                input_get_type_name(input_event->type),
+                (void*)input_event->sequence);
+        }
+    } while(false);
 
     gui_unlock(gui);
 }
