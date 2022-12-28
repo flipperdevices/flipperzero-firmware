@@ -28,6 +28,9 @@ Thank you to all the supporters!
 - [Patreon Only: New 18 Plus animation Pool Time 2 (Second New 18 Plus Animation Today)](https://www.patreon.com/posts/76407683)
 - Assets: Includes SubGHz Gas Sign Captures by [0day](https://github.com/0dayCTF)
 - Assets: Includes SubGHz Remote config for Gas_Sign_Edit [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
+- New Animation: RM_G0G375_128x64, this animation was made possible by one of our RM Animation Coordinator Patrons with RogueMaster Extreme.
+- Removed Animations for Happy Holidays and Halloween from RM Minimal build included on GitHub releases.
+- [Patreon Update: Future builds for RM Minimal, RM Select, RM Select + 18 Plus, DBZ and the new build ALL will have the new animation RM_G0G375_128x64](https://www.patreon.com/RogueMaster)
 
 ## Install from Release
 FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
