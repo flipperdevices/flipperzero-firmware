@@ -7,7 +7,6 @@ env:
   TARGETS: f7
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /opt
-  TERM: xterm-256color
 
 jobs:
   run_units_on_bench:
@@ -64,7 +63,4 @@ jobs:
       - name: 'Check GDB output'
         if: failure()
         run: |
-          export TERM=xterm-256color
-          env
           ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
-          toe -a | lessb
