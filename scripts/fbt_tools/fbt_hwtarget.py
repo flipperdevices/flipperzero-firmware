@@ -21,6 +21,7 @@ class HardwareTargetLoader:
         self.linker_dependencies = []
         self.excluded_sources = []
         self.excluded_headers = []
+        self.excluded_modules = []
         self._processTargetDefinitions(target_id)
 
     def _getTargetDir(self, target_id):
@@ -46,6 +47,8 @@ class HardwareTargetLoader:
             )
 
         self.excluded_sources.extend(config.get("excluded_sources", []))
+        self.excluded_headers.extend(config.get("excluded_headers", []))
+        self.excluded_modules.extend(config.get("excluded_modules", []))
 
         file_attrs = (
             # (name, use_src_node)
@@ -104,6 +107,7 @@ def ConfigureForTarget(env, target_id):
     env.Replace(
         TARGET_CFG=target_loader,
         SDK_DEFINITION=target_loader.sdk_symbols,
+        SKIP_MODULES=target_loader.excluded_modules,
     )
 
     env.Append(
