@@ -113,9 +113,8 @@ class SdkTreeBuilder:
             self.header_depends = list(
                 filter(lambda fname: fname.endswith(".h"), depends.split()),
             )
-            # self.header_depends.append(self.sdk_env.subst("${LINKER_SCRIPT_PATH}"))
+            self.header_depends.append(self.sdk_env.subst("${LINKER_SCRIPT_PATH}"))
             self.header_depends.append(self.sdk_env.subst("${SDK_DEFINITION}"))
-            print("pre", self.header_depends)
             self.header_dirs = sorted(
                 set(map(os.path.normpath, map(os.path.dirname, self.header_depends)))
             )
@@ -163,7 +162,6 @@ class SdkTreeBuilder:
         return target, source
 
     def _run_deploy_commands(self):
-        print(self.header_dirs, self.header_depends)
         dirs_to_create = set(
             self.sdk_deploy_dir.Dir(dirpath).path for dirpath in self.header_dirs
         )
@@ -177,17 +175,12 @@ class SdkTreeBuilder:
             shutil.copy2(header, self.sdk_deploy_dir.File(header).path)
 
     def deploy_action(self):
-        print("1kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         self._parse_sdk_depends()
-        print("2kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         self._run_deploy_commands()
-        print("3kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
         self._generate_sdk_meta()
-        print("4kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
 
 
 def deploy_sdk_tree_action(target, source, env):
-    print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
     sdk_tree = SdkTreeBuilder(env, target, source)
     return sdk_tree.deploy_action()
 

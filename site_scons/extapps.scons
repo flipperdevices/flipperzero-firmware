@@ -16,7 +16,7 @@ appenv = ENV["APPENV"] = ENV.Clone(
 )
 
 appenv.Replace(
-    LINKER_SCRIPT_PATH=appenv.subst("$APP_LINKER_SCRIPT_PATH"),
+    LINKER_SCRIPT_PATH=appenv["APP_LINKER_SCRIPT_PATH"],
 )
 
 appenv.AppendUnique(
