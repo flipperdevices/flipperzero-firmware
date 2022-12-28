@@ -139,6 +139,8 @@ class AppManager:
         self.known_apps[app.appid] = app
 
     def filter_apps(self, applist: List[str], hw_target: str):
+        if not applist:
+            raise FlipperManifestException("Application list is empty")
         return AppBuildset(self, applist, hw_target)
 
 

@@ -11,6 +11,7 @@
 #include <furi.h>
 #include "canvas_i.h"
 
+#include <math.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>

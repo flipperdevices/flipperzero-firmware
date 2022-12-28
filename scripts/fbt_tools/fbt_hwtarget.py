@@ -20,6 +20,7 @@ class HardwareTargetLoader:
         self.sdk_symbols = None
         self.linker_dependencies = []
         self.excluded_sources = []
+        self.excluded_headers = []
         self._processTargetDefinitions(target_id)
 
     def _getTargetDir(self, target_id):
@@ -85,6 +86,18 @@ class HardwareTargetLoader:
         # print(f"Found {len(sources)} sources: {list(f.name for f in sources)}")
         return sources
 
+    def gatherSdkHeaders(self):
+        sdk_headers = []
+        seen_sdk_headers = set(self.excluded_headers)
+        for sdk_path in self.sdk_header_paths:
+            # dirty, but fast - exclude headers from overlayed targets by name
+            # proper way would be to use relative paths, but names will do for now
+            for header in self.env.GlobRecursive("*.h", sdk_path, "*_i.h"):
+                if header.name not in seen_sdk_headers:
+                    seen_sdk_headers.add(header.name)
+                    sdk_headers.append(header)
+        return sdk_headers
+
 
 def ConfigureForTarget(env, target_id):
     target_loader = HardwareTargetLoader(env, env.Dir("#/firmware/targets"), target_id)
@@ -93,13 +106,9 @@ def ConfigureForTarget(env, target_id):
         SDK_DEFINITION=target_loader.sdk_symbols,
     )
 
-    sdk_headers = []
-    for sdk_path in target_loader.sdk_header_paths:
-        sdk_headers.extend(env.GlobRecursive("*.h", sdk_path, "*_i.h"))
-
     env.Append(
         CPPPATH=target_loader.include_paths,
-        SDK_HEADERS=sdk_headers,
+        SDK_HEADERS=target_loader.gatherSdkHeaders(),
     )
 
 

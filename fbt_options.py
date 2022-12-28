@@ -77,6 +77,15 @@ FIRMWARE_APPS = {
         # Debug
         # "debug_apps",
     ],
+    "komi": (
+        # Svc
+        "basic_services",
+        # Apps
+        "komi_apps",
+        "system_apps",
+        # Settings
+        "settings_apps",
+    ),
     "unit_tests": [
         "basic_services",
         "updater_app",

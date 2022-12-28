@@ -208,7 +208,7 @@ vars.AddVariables(
                 # "basic_plugins",
                 # Debug
                 # "debug_apps",
-            )
+            ),
         },
     ),
     (

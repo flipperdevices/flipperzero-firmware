@@ -34,6 +34,7 @@
         "infrared",
         "appframe",
         "assets",
+        "one_wire",
         "misc",
         "mbedtls",
         "lfrfid",
