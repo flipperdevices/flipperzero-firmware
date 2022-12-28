@@ -2,8 +2,8 @@
 
 # Where we are (0.x.x branch)
 
-Our goal for 0.x.x branch is to build stable usable apps and API.
-First public release in this branch is 0.43.1.
+Our goal for 0.x.x branch is to build stable, usable apps and API.
+The first public release in this branch is 0.43.1.
 
 ## What's already implemented
 
@@ -17,7 +17,7 @@ First public release in this branch is 0.43.1.
 
 - SubGhz: all most common protocols, reading RAW for everything else
 - 125kHz RFID: all most common protocols
-- NFC: reading/emulating Mifare Ultralight, reading MiFare Classic and DESFire, basic EMV, basic NFC-B,F,V
+- NFC: reading/emulating Mifare Ultralight, reading MiFare Classic and DESFire, basic EMV, basic NFC-B/F/V
 - Infrared: all most common RC protocols, RAW format for everything else
 - GPIO: UART bridge, basic GPIO controls
 - iButton: DS1990, Cyfral, Metacom
@@ -31,7 +31,7 @@ First public release in this branch is 0.43.1.
 
 # Where we're going (Version 1)
 
-Main goal for 1.0.0 is to provide first stable version for both Users and Developers.
+The main goal for 1.0.0 is to provide the first stable version for both Users and Developers.
 
 ## What we're planning to implement in 1.0.0
 
@@ -40,7 +40,7 @@ Main goal for 1.0.0 is to provide first stable version for both Users and Develo
 - FuriHal: deep sleep mode, stable API, examples, documentation (work in progress)
 - Application improvements (a ton of things that we want to add and improve that are too numerous to list here)
 
-## When will it happen and where I can see the progress?
+## When will it happen, and where can I see the progress?
 
 Release 1.0.0 will most likely happen around the end of 2023Q1
 

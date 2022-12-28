@@ -8,29 +8,33 @@
 
 # Flipper Zero Firmware
 
-- [Flipper Zero Official Website](https://flipperzero.one). Simple way to explain to your friends what the Flipper Zero can do.
-- [Flipper Zero Firmware Update](https://update.flipperzero.one). Improvements for your dolphin: latest firmware releases, upgrade tools for PC and Mobile devices.
-- [User Documentation](https://docs.flipperzero.one). Learn more about your dolphin: specs, usage guides, and everything that you wanted to ask.
+- [Flipper Zero Official Website](https://flipperzero.one). A simple way to explain to your friends what the Flipper Zero can do
+- [Flipper Zero Firmware Update](https://update.flipperzero.one). Improvements for your dolphin: latest firmware releases, upgrade tools for PC and Mobile devices
+- [User Documentation](https://docs.flipperzero.one). Learn more about your dolphin: specs, usage guides, and everything that you wanted to ask
 
 # Contributing
 
-Our main goal is to build healthy, sustainable community around the Flipper, and to be open to any new ideas and contributions. We also have a couple of rules and taboos here, so please read this page and our [Code Of Conduct](/CODE_OF_CONDUCT.md) carefully.
+Our main goal is to build a healthy, sustainable community around the Flipper and be open to any new ideas and contributions. We also have some rules and taboos here, so please read this page and our [Code Of Conduct](/CODE_OF_CONDUCT.md) carefully.
 
 ## I need help
 
-The best place to search for an answers is our [User Documentation](https://docs.flipperzero.one). If you can't find the answer there, then you can check our [Discord Server](https://flipp.dev/discord) or our [Forum](https://forum.flipperzero.one/).
+The best place to search for answers is our [User Documentation](https://docs.flipperzero.one). If you can't find the answer there, you can check our [Discord Server](https://flipp.dev/discord) or our [Forum](https://forum.flipperzero.one/).
 
 ## I want to report an issue
 
-If you've found an issue and you want to report it, then please check our [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page. Make sure that the description contains information about the firmware version you're using, your platform, and proper steps to reproduce the issue.
+If you've found an issue and want to report it, please check our [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page. Make sure that the description contains information about the firmware version you're using, your platform, and the proper steps to reproduce the issue.
 
 ## I want to contribute code
 
-Before opening a PR please make sure that your changes really must be in the firmware itself. Many ideas can easily be implemented as external applications and placed in flipper application catalog. If you are not sure you can ask on the [Discord Server](https://flipp.dev/discord) or in the [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page, and we'll help you find the right place for your code. Also please read our [Contribution Guide](/CONTRIBUTING.md), our [Coding Style](/CODING_STYLE.md) and ensure that your code is compatible with our project [License](/LICENSE). Finally open a [Pull Request](https://github.com/flipperdevices/flipperzero-firmware/pulls) and ensure that CI/CD statuses are all green.
+Before opening a PR, please confirm that your changes must be contained in the firmware. Many ideas can easily be implemented as external applications and published in the Flipper Application Catalog (coming soon). If you are unsure, you can ask on the [Discord Server](https://flipp.dev/discord) or the [Issues](https://github.com/flipperdevices/flipperzero-firmware/issues) page, and we'll help you find the right place for your code.
+
+Also, please read our [Contribution Guide](/CONTRIBUTING.md), and our [Coding Style](/CODING_STYLE.md), and ensure that your code is compatible with our project [License](/LICENSE).
+
+Finally, open a [Pull Request](https://github.com/flipperdevices/flipperzero-firmware/pulls) and ensure that CI/CD statuses are all green.
 
 # Development
 
-The Flipper Zero Firmware is written in C, with some bits and pieces written in C++ and armv7m assembly languages. Intermediate level of C knowledge is recommended for comfortable programming. For Flipper Applications we support C, C++ and armv7m assembly languages.
+The Flipper Zero Firmware is written in C, with some bits and pieces written in C++ and armv7m assembly languages. An intermediate level of C knowledge is recommended for comfortable programming. For Flipper applications, we support C, C++, and armv7m assembly languages.
 
 ## Requirements
 
@@ -40,9 +44,9 @@ Supported development platforms:
 - macOS 12+ with Command Line tools (x86_64, arm64)
 - Ubuntu 20.04+ with build-essential and Git (x86_64)
 
-Supported in-circuit debuggers (optional, but highly recommended):
+Supported in-circuit debuggers (optional but highly recommended):
 
-- Flipper Zero Wi-Fi Development Board
+- [Flipper Zero Wi-Fi Development Board](https://shop.flipperzero.one/products/wifi-devboard)
 - ST-Link
 - J-Link
 
@@ -74,7 +78,7 @@ Connect your in-circuit debugger to the Flipper and flash firmware using Flipper
 
 ## Flashing Firmware using USB
 
-Ensure that your flipper is working, connect it using USB cable and flash firmware using Flipper Build Tool:
+Ensure that your Flipper is working, connect it using a USB cable and flash firmware using Flipper Build Tool:
 
 ```shell
 ./fbt flash_usb
