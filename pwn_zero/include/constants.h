@@ -6,7 +6,7 @@
 #define PWNAGOTCHI_UART_CHANNEL FuriHalUartIdUSART1
 
 /// Defines the baudrate that the pwnagotchi will use
-#define PWNAGOTCHI_UART_BAUD 57600
+#define PWNAGOTCHI_UART_BAUD 115200
 
 /// Max length of channel data at top left
 #define PWNAGOTCHI_MAX_CHANNEL_LEN 3
