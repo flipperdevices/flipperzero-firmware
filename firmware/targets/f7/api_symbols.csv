@@ -2172,6 +2172,7 @@ Function,-,pulse_reader_free,void,PulseReader*
 Function,-,pulse_reader_receive,uint32_t,"PulseReader*, int"
 Function,-,pulse_reader_samples,uint32_t,PulseReader*
 Function,-,pulse_reader_set_bittime,void,"PulseReader*, uint32_t"
+Function,-,pulse_reader_set_pull,void,"PulseReader*, GpioPull"
 Function,-,pulse_reader_set_timebase,void,"PulseReader*, PulseReaderUnit"
 Function,-,pulse_reader_start,void,PulseReader*
 Function,-,pulse_reader_stop,void,PulseReader*

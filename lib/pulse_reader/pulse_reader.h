@@ -41,6 +41,7 @@ typedef struct {
     uint32_t bit_time;
     uint32_t dma_channel;
     const GpioPin* gpio;
+    GpioPull pull;
     LL_DMA_InitTypeDef dma_config_timer;
     LL_DMA_InitTypeDef dma_config_gpio;
 } PulseReader;
@@ -124,6 +125,16 @@ void pulse_reader_set_timebase(PulseReader* signal, PulseReaderUnit unit);
  * @param[in]  bit_time
  */
 void pulse_reader_set_bittime(PulseReader* signal, uint32_t bit_time);
+
+/** Set GPIO pull direction
+ *
+ * Some GPIOs need pulldown, others don't. By default the
+ * pull direction is GpioPullNo.
+ *
+ * @param[in]  signal    previously allocated PulseReader object.
+ * @param[in]  pull      GPIO pull direction
+ */
+void pulse_reader_set_pull(PulseReader* signal, GpioPull pull);
 
 #ifdef __cplusplus
 }
