@@ -78,7 +78,9 @@ def main():
             sys.exit(1)
 
         logging.info(f"Leaked (not failing on this stat): {leak}")
-        logging.info(f"Tests ran successfully! Time elapsed {time/1000} seconds. Passed {total} tests.")
+        logging.info(
+            f"Tests ran successfully! Time elapsed {time/1000} seconds. Passed {total} tests."
+        )
 
         sys.exit(0)
 
