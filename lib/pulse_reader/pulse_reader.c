@@ -31,6 +31,7 @@ PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size) {
     signal->gpio_buffer = malloc(size * sizeof(uint32_t));
     signal->dma_channel = LL_DMA_CHANNEL_4;
     signal->gpio = gpio;
+    signal->pull = GpioPullNo;
     signal->size = size;
     signal->timer_value = 0;
     signal->pos = 0;
@@ -88,6 +89,10 @@ void pulse_reader_set_bittime(PulseReader* signal, uint32_t bit_time) {
     signal->bit_time = bit_time;
 }
 
+void pulse_reader_set_pull(PulseReader* signal, GpioPull pull) {
+    signal->pull = pull;
+}
+
 void pulse_reader_free(PulseReader* signal) {
     free(signal->timer_buffer);
     free(signal->gpio_buffer);
@@ -134,7 +139,7 @@ void pulse_reader_start(PulseReader* signal) {
 
     /* we need the EXTI to be configured as interrupt generating line, but no ISR registered */
     furi_hal_gpio_init_ex(
-        signal->gpio, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+        signal->gpio, GpioModeInterruptRiseFall, signal->pull, GpioSpeedVeryHigh, GpioAltFnUnused);
 
     /* capture current timer */
     signal->pos = 0;
