@@ -39,11 +39,12 @@
 
 #include "rpc/rpc_app.h"
 
+#include <m-list.h>
 #include <m-array.h>
 
-ARRAY_DEF(FelicaAreaPath, FelicaArea*, M_PTR_OPLIST);
-ARRAY_DEF(FuriStringStack, FuriString*, M_PTR_OPLIST);
-ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
+ARRAY_DEF(FelicaAreaPath, FelicaArea*, M_PTR_OPLIST)
+LIST_DEF(FuriStringStack, FuriString*, FURI_STRING_OPLIST)
+ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST)
 
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")

@@ -2,6 +2,7 @@
 
 #include <furi_hal_nfc.h>
 #include <m-array.h>
+#include <m-dict.h>
 
 #define NFCF_F_SIG (13560000.0)
 #define MRT_T_SIG 302064.89 //ns, 256 * 16 / NFC_F_SIG * 1e9
@@ -9,21 +10,29 @@
 #define MRT_T_SIG_x16 4833038.24 //ns, MRT_T_SIG * (4 ** 2)
 #define MRT_T_SIG_x64 19332152.96 //ns, MRT_T_SIG * (4 ** 2)
 
+#define FELICA_VARIABLE_MRT 0
+#define FELICA_FIXED_MRT 1
+#define FELICA_MUTUAL_AUTH_MRT 2
+#define FELICA_READ_MRT 3
+#define FELICA_WRITE_MRT 4
+#define FELICA_OTHER_MRT 5
+
 #define FELICA_BLOCK_SIZE 16
 
-#define SUICA_SYSTEM_CODE 0x0003
+#define CYBERNET_SYSTEM_CODE 0x0003
 #define NDEF_SYSTEM_CODE 0x12fc
 #define HCE_F_SYSTEM_CODE 0x4000
 #define OCTOPUS_SYSTEM_CODE 0x8008
+#define IRUCA_SYSTEM_CODE 0x80de
 #define EDY_SYSTEM_CODE 0x811d
 #define PASPY_SYSTEM_CODE 0x8592
 #define BLACKBOARD_SYSTEM_CODE 0x8620
 #define SAPICA_SYSTEM_CODE 0x865e
+#define SUICA_SYSTEM_CODE 0x86a7
 #define LITE_SYSTEM_CODE 0x88b4
 #define RYUTO_SYSTEM_CODE 0x8b5d
 #define OKICA_SYSTEM_CODE 0x8fc1
 #define SECURE_ID_SYSTEM_CODE 0x957a
-#define IRUCA_SYSTEM_CODE 0xde80
 #define COMMON_AREA_SYSTEM_CODE 0xfe00
 #define PLUG_SYSTEM_CODE 0xfee1
 
@@ -41,24 +50,6 @@
 #define MAC_A_LITE_BLOCK 0x91
 #define STATE_LITE_BLOCK 0x92
 #define CRC_CHECK_LITE_BLOCK 0xA0
-
-#define RANDOM_TYPE_SERVICE_ATTRIBUTE (0b0010 << 2)
-#define CYCLIC_TYPE_SERVICE_ATTRIBUTE (0b0011 << 2)
-#define PURSE_TYPE_SERVICE_ATTRIBUTE (0b010 << 3)
-
-#define AUTH_RW_SERVICE_ATTRIBUTE (0b00)
-#define UNAUTH_RW_SERVICE_ATTRIBUTE (0b01)
-#define AUTH_RO_SERVICE_ATTRIBUTE (0b10)
-#define UNAUTH_RO_SERVICE_ATTRIBUTE (0b11)
-
-#define AUTH_DIRECT_ACCESS_SERVICE_ATTRIBUTE (0b000)
-#define UNAUTH_DIRECT_ACCESS_SERVICE_ATTRIBUTE (0b001)
-#define AUTH_CASHBACK_DECREMENT_SERVICE_ATTRIBUTE (0b010)
-#define UNAUTH_CASHBACK_DECREMENT_SERVICE_ATTRIBUTE (0b011)
-#define AUTH_DECREMENT_SERVICE_ATTRIBUTE (0b100)
-#define UNAUTH_DECREMENT_SERVICE_ATTRIBUTE (0b101)
-#define AUTH_RO_PURSE_SERVICE_ATTRIBUTE (0b110)
-#define UNAUTH_RO_PURSE_SERVICE_ATTRIBUTE (0b111)
 
 #define IS_2_BYTE_BLOCK_LIST_ELEMENT 0x80
 
@@ -105,35 +96,51 @@ typedef struct {
 } FelicaMRTParts;
 
 typedef enum {
-    FelicaMRTCommandTypeVariable = 0,
-    FelicaMRTCommandTypeFixed = 1,
-    FelicaMRTCommandTypeMutualAuth = 2,
-    FelicaMRTCommandTypeDataRead = 3,
-    FelicaMRTCommandTypeDataWrite = 4,
-    FelicaMRTCommandTypeDataOther = 4,
-} FelicaMRTCommandType;
+    FelicaServiceTypeRandom = (0b0010 << 2),
+    FelicaServiceTypeCyclic = (0b0011 << 2),
+    FelicaServiceTypePurse = (0b010 << 3),
+} FelicaServiceType;
+typedef enum {
+    FelicaServiceAttributeAuthRW = 0b00,
+    FelicaServiceAttributeUnauthRW = 0b01,
+    FelicaServiceAttributeAuthRO = 0b10,
+    FelicaServiceAttributeUnauthRO = 0b11,
+
+    FelicaServiceAttributeAuthDirectAccess = 0b000,
+    FelicaServiceAttributeUnauthDirectAccess = 0b001,
+    FelicaServiceAttributeAuthCashbackDecrement = 0b010,
+    FelicaServiceAttributeUnauthCashbackDecrement = 0b011,
+    FelicaServiceAttributeAuthDecrement = 0b100,
+    FelicaServiceAttributeUnauthDecrement = 0b101,
+    FelicaServiceAttributeAuthPurseRO = 0b110,
+    FelicaServiceAttributeUnauthPurseRO = 0b111,
+} FelicaServiceAttribute;
+
+DICT_SET_DEF(
+    FelicaServiceAttributeList,
+    FelicaServiceAttribute,
+    M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
 
 typedef FelicaMRTParts FelicaMRTParameters[6];
-typedef enum {
-    FelicaBlockTypeNormal,
-    FelicaBlockTypeOverlap,
-    FelicaBlockTypeExtended,
-} FelicaBlockType;
 
 typedef struct {
-    FelicaBlockType type;
-    union {
-        uint8_t data[FELICA_BLOCK_SIZE];
-    };
+    uint8_t data[FELICA_BLOCK_SIZE];
 } FelicaBlock;
 
-// typedef struct {} FelicaOverlapBlock;
-
-ARRAY_DEF(FelicaBlockList, FelicaBlock*, M_PTR_OPLIST);
+ARRAY_DEF(FelicaBlockList, FelicaBlock*, M_PTR_OPLIST)
 
 typedef struct {
     uint16_t number;
-    FelicaBlockList_t blocks;
+    FelicaServiceAttributeList_t access_control_list; // accounts for overlap services
+    bool is_extended_overlap;
+    union {
+        FelicaBlockList_t blocks;
+        struct {
+            uint16_t overlap_target;
+            uint8_t block_start;
+            uint8_t block_count;
+        };
+    };
 } FelicaService;
 
 typedef enum {
@@ -147,9 +154,10 @@ typedef struct {
     union {
         struct _FelicaArea_t* area;
         FelicaService* service;
-    } ptr;
+    };
 } FelicaNode;
-ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST);
+
+ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST)
 
 typedef struct _FelicaArea_t {
     uint16_t number;
@@ -157,8 +165,25 @@ typedef struct _FelicaArea_t {
     uint16_t end_service_code;
 
     FelicaNodeList_t nodes;
-
 } FelicaArea;
+
+typedef struct {
+    uint8_t* S_PAD[14];
+    uint8_t* REG;
+    // MACs of all zero bytes (read from CK)
+    uint8_t MAC[8];
+    uint16_t data_format_code;
+    uint8_t ID_value[6];
+    uint8_t* card_key_1;
+    uint8_t* card_key_2;
+    uint16_t card_key_version;
+    uint8_t memory_config[FELICA_BLOCK_SIZE];
+
+    // Lite-S only
+    uint8_t MAC_A[8];
+    uint32_t write_count;
+    bool crc_valid;
+} FelicaLiteInfo;
 
 typedef struct _FelicaSystem_t {
     uint8_t number;
@@ -167,13 +192,13 @@ typedef struct _FelicaSystem_t {
     uint8_t pmm[8];
     FelicaMRTParameters maximum_response_times;
 
-    /** This struct represents area 0,
-     * which always exists on a given system
-     */
-    FelicaArea root_area;
+    union {
+        FelicaLiteInfo lite_info;
+        FelicaArea root_area;
+    };
 } FelicaSystem;
 
-ARRAY_DEF(FelicaSystemList, FelicaSystem*, M_PTR_OPLIST);
+ARRAY_DEF(FelicaSystemList, FelicaSystem*, M_PTR_OPLIST)
 
 typedef struct {
     FelicaICType type;

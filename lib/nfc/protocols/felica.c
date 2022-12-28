@@ -189,8 +189,8 @@ uint8_t felica_lite_prepare_unencrypted_read(
     dest[9] = 1;
     uint8_t msg_len = 10;
     uint8_t service_code =
-        RANDOM_TYPE_SERVICE_ATTRIBUTE |
-        ((is_read_only) ? UNAUTH_RO_SERVICE_ATTRIBUTE : UNAUTH_RW_SERVICE_ATTRIBUTE);
+        FelicaServiceTypeRandom |
+        ((is_read_only) ? FelicaServiceAttributeUnauthRO : FelicaServiceAttributeUnauthRO);
 
     dest[msg_len++] = service_code & 0xFF;
     dest[msg_len++] = service_code >> 8;
@@ -240,7 +240,7 @@ uint16_t felica_parse_unencrypted_read(
     if(len < 1) {
         return 0;
     }
-    uint16_t data_length = *buf * 16;
+    uint16_t data_length = *buf * FELICA_BLOCK_SIZE;
     len--;
     buf++;
 
@@ -296,7 +296,7 @@ uint8_t felica_lite_prepare_unencrypted_write(
 
     dest[9] = 1;
     uint8_t msg_len = 10;
-    uint8_t service_code = RANDOM_TYPE_SERVICE_ATTRIBUTE | UNAUTH_RW_SERVICE_ATTRIBUTE;
+    uint8_t service_code = FelicaServiceTypeRandom | FelicaServiceAttributeUnauthRW;
     dest[msg_len++] = service_code & 0xFF;
     dest[msg_len++] = service_code >> 8;
 
@@ -367,7 +367,6 @@ bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number)
 
 void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data) {
     FelicaBlock* block = malloc(sizeof(FelicaBlock));
-    block->type = FelicaBlockTypeNormal;
     memcpy(block->data, data, FELICA_BLOCK_SIZE);
     FelicaBlockList_set_at(service->blocks, number, block);
 }
@@ -377,12 +376,13 @@ bool felica_read_lite_system(
     FelicaReader* reader,
     FelicaData* data,
     FelicaSystem* system) {
-    const uint8_t fixed_services[] = {
+    const uint8_t fixed_blocks[] = {
         SYS_CODE_LITE_BLOCK,
-        RC_LITE_BLOCK,
-        ID_LITE_BLOCK,
-        MAC_LITE_BLOCK,
         DEVICE_ID_LITE_BLOCK,
+        ID_LITE_BLOCK,
+        RC_LITE_BLOCK,
+        CARD_KEY_LITE_BLOCK,
+        MAC_LITE_BLOCK,
         CARD_KEY_VER_LITE_BLOCK,
         MEM_CONFIG_LITE_BLOCK,
     };
@@ -390,7 +390,7 @@ bool felica_read_lite_system(
     uint8_t block_data[FELICA_BLOCK_SIZE * 4];
 
     tx_rx->tx_bits =
-        8 * felica_lite_prepare_unencrypted_read(tx_rx->tx_data, reader, true, fixed_services, 1);
+        8 * felica_lite_prepare_unencrypted_read(tx_rx->tx_data, reader, true, fixed_blocks, 1);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_W(TAG, "Bad exchange verifying Lite system code");
         return false;
@@ -401,33 +401,56 @@ bool felica_read_lite_system(
         FURI_LOG_W(TAG, "Bad response to Read without Encryption (SYS_C)");
         return false;
     }
-    if(block_data[0] != (LITE_SYSTEM_CODE >> 8) && block_data[1] != (LITE_SYSTEM_CODE & 0xFF)) {
+    if(nfc_util_bytes2num(block_data, 2) != LITE_SYSTEM_CODE) {
         FURI_LOG_W(TAG, "Unexpected SYS_C value");
         return false;
     }
-    system->code = LITE_SYSTEM_CODE;
 
-    FelicaArea* area = &system->root_area;
-    FelicaService* service = malloc(sizeof(FelicaService));
-    FelicaBlockList_init(service->blocks);
-    for(int i = 0; i < CRC_CHECK_LITE_BLOCK; i++) {
-        FelicaBlockList_push_back(service->blocks, NULL);
+    tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
+                             tx_rx->tx_data, reader, true, &fixed_blocks[1], 1);
+    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        FURI_LOG_W(TAG, "Bad exchange reading D_ID");
+        return false;
+    }
+    if(felica_parse_unencrypted_read(
+           tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+       FELICA_BLOCK_SIZE) {
+        FURI_LOG_W(TAG, "Bad response to Read without Encryption (D_ID)");
+        return false;
+    }
+    if(memcmp(system->idm, block_data, 8) != 0 || memcmp(system->pmm, block_data + 8, 8) != 0) {
+        FURI_LOG_W(TAG, "Mismatching values for D_ID");
+        return false;
     }
 
-    area->number = 0;
-    area->end_service_code = 0x000f;
-    FelicaNodeList_init(area->nodes);
-    FelicaNode* node = malloc(sizeof(node));
-    node->type = FelicaNodeTypeService, node->ptr.service = service;
-    FelicaNodeList_push_back(area->nodes, node);
+    system->code = LITE_SYSTEM_CODE;
 
-    service->number = 0;
+    FelicaLiteInfo* lite_info = &system->lite_info;
+    lite_info->card_key_1 = NULL;
+    lite_info->card_key_2 = NULL;
 
-    felica_define_normal_block(service, SYS_CODE_LITE_BLOCK, block_data);
+    tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
+                             tx_rx->tx_data, reader, true, &fixed_blocks[2], 1);
+    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        FURI_LOG_W(TAG, "Bad exchange reading ID");
+        return false;
+    }
+    if(felica_parse_unencrypted_read(
+           tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
+       FELICA_BLOCK_SIZE) {
+        FURI_LOG_W(TAG, "Bad response to Read without Encryption (ID)");
+        return false;
+    }
+    lite_info->data_format_code = nfc_util_bytes2num(block_data + 8, 2);
+    memcpy(lite_info->ID_value, block_data + 10, 6);
+    FURI_LOG_I(TAG, "ID:");
+    for(int i = 0; i < FELICA_BLOCK_SIZE; i++) {
+        FURI_LOG_I(TAG, "%02X", block_data[i]);
+    }
 
     memset(block_data, 0, FELICA_BLOCK_SIZE);
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_write(
-                             tx_rx->tx_data, reader, &fixed_services[1], 1, block_data);
+                             tx_rx->tx_data, reader, &fixed_blocks[3], 1, block_data);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_W(TAG, "Bad exchange writing random challenge");
         return false;
@@ -436,51 +459,49 @@ bool felica_read_lite_system(
         FURI_LOG_W(TAG, "Bad response to Write without Encryption (RC)");
         return false;
     }
-    felica_define_normal_block(service, RC_LITE_BLOCK, block_data);
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-                             tx_rx->tx_data, reader, true, &fixed_services[2], 2);
+                             tx_rx->tx_data, reader, true, &fixed_blocks[4], 2);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
-        FURI_LOG_W(TAG, "Bad exchange reading ID with MAC");
+        FURI_LOG_W(TAG, "Bad exchange reading CK and MAC");
         return false;
     }
     if(felica_parse_unencrypted_read(
            tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
        FELICA_BLOCK_SIZE * 2) {
-        FURI_LOG_W(TAG, "Bad response to Read without Encryption (ID, MAC)");
+        FURI_LOG_W(TAG, "Bad response to Read without Encryption (CK, MAC)");
         return false;
     }
-    felica_define_normal_block(service, ID_LITE_BLOCK, block_data);
-    felica_define_normal_block(service, MAC_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
-    FURI_LOG_I(TAG, "ID:");
-    for(int i = 0; i < 16; i++) {
-        FURI_LOG_I(TAG, "%02X", block_data[i]);
-    }
+    memcpy(lite_info->MAC, block_data + FELICA_BLOCK_SIZE, 8);
     FURI_LOG_I(TAG, "MAC:");
-    for(int i = 0; i < 16; i++) {
+    for(int i = 0; i < FELICA_BLOCK_SIZE; i++) {
         FURI_LOG_I(TAG, "%02X", block_data[i + FELICA_BLOCK_SIZE]);
     }
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-                             tx_rx->tx_data, reader, true, &fixed_services[4], 3);
+                             tx_rx->tx_data, reader, true, &fixed_blocks[6], 2);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
-        FURI_LOG_W(TAG, "Bad exchange reading blocks");
+        FURI_LOG_W(TAG, "Bad exchange reading CKV and MC");
         return false;
     }
     if(felica_parse_unencrypted_read(
            tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
-       FELICA_BLOCK_SIZE * 3) {
-        FURI_LOG_W(TAG, "Bad response to Read without Encryption (D_ID, CKV, MC)");
+       FELICA_BLOCK_SIZE * 2) {
+        FURI_LOG_W(TAG, "Bad response to Read without Encryption (CKV, MC)");
         return false;
     }
-    felica_define_normal_block(service, DEVICE_ID_LITE_BLOCK, block_data);
-    felica_define_normal_block(service, CARD_KEY_VER_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
-    felica_define_normal_block(service, MEM_CONFIG_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE * 2);
+    lite_info->card_key_version = nfc_util_bytes2num(block_data, 2);
+    memcpy(lite_info->memory_config, block_data + FELICA_BLOCK_SIZE, FELICA_BLOCK_SIZE);
 
     // Read SPAD and REG accordingly to MC
-    uint8_t* mc_data = block_data + (FELICA_BLOCK_SIZE * 2);
+    uint8_t* mc_data = lite_info->memory_config;
     for(uint8_t block_number = 0; block_number <= REG_LITE_BLOCK; block_number++) {
         if(!felica_lite_can_read_without_mac(mc_data + 6, block_number)) {
+            if(block_number < REG_LITE_BLOCK) {
+                lite_info->S_PAD[block_number] = NULL;
+            } else {
+                lite_info->REG = NULL;
+            }
             continue;
         }
 
@@ -496,18 +517,24 @@ bool felica_read_lite_system(
             FURI_LOG_W(TAG, "Bad response to Read without Encryption (block %d)", block_number);
             return false;
         }
-        felica_define_normal_block(service, block_number, block_data);
+        uint8_t* block = malloc(FELICA_BLOCK_SIZE);
+        memcpy(block, block_data, FELICA_BLOCK_SIZE);
+        if(block_number < REG_LITE_BLOCK) {
+            lite_info->S_PAD[block_number] = block;
+        } else {
+            lite_info->REG = block;
+        }
     }
     if(data->type == FelicaICTypeLiteS) {
-        const uint8_t fixed_s_services[] = {
-            ID_LITE_BLOCK,
+        const uint8_t fixed_s_blocks[] = {
+            CARD_KEY_LITE_BLOCK,
             MAC_A_LITE_BLOCK,
             WRITE_COUNT_LITE_BLOCK,
             CRC_CHECK_LITE_BLOCK,
         };
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-                                 tx_rx->tx_data, reader, true, fixed_s_services, 2);
+                                 tx_rx->tx_data, reader, true, fixed_s_blocks, 2);
         if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
             FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
             return false;
@@ -515,14 +542,13 @@ bool felica_read_lite_system(
         if(felica_parse_unencrypted_read(
                tx_rx->rx_data, tx_rx->rx_bits / 8, reader, block_data, sizeof(block_data)) !=
            FELICA_BLOCK_SIZE * 2) {
-            FURI_LOG_W(TAG, "Bad response to Read without Encryption (ID, MAC_A)");
+            FURI_LOG_W(TAG, "Bad response to Read without Encryption (CK, MAC_A)");
             return false;
         }
-        felica_define_normal_block(service, ID_LITE_BLOCK, block_data);
-        felica_define_normal_block(service, MAC_A_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
+        memcpy(lite_info->MAC_A, block_data + FELICA_BLOCK_SIZE, FELICA_BLOCK_SIZE);
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
-                                 tx_rx->tx_data, reader, true, &fixed_s_services[2], 2);
+                                 tx_rx->tx_data, reader, true, &fixed_s_blocks[2], 2);
         if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
             FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
             return false;
@@ -533,8 +559,8 @@ bool felica_read_lite_system(
             FURI_LOG_W(TAG, "Bad response to Read without Encryption (WC, CRC_CHECK)");
             return false;
         }
-        felica_define_normal_block(service, WRITE_COUNT_LITE_BLOCK, block_data);
-        felica_define_normal_block(service, CRC_CHECK_LITE_BLOCK, block_data + FELICA_BLOCK_SIZE);
+        lite_info->write_count = nfc_util_bytes2num(block_data, 3);
+        lite_info->crc_valid = block_data[FELICA_BLOCK_SIZE] == 0x00;
     }
 
     return true;
@@ -582,14 +608,34 @@ void felica_service_clear(FelicaService* service) {
     FelicaBlockList_clear(service->blocks);
 }
 
+void felica_lite_clear(FelicaLiteInfo* lite_info) {
+    for(int i = 0; i < REG_LITE_BLOCK; i++) {
+        uint8_t* block = lite_info->S_PAD[i];
+        if(block != NULL) {
+            free(block);
+        }
+    }
+
+    if(lite_info->REG != NULL) {
+        free(lite_info->REG);
+    }
+
+    if(lite_info->card_key_1 != NULL) {
+        free(lite_info->card_key_1);
+    }
+    if(lite_info->card_key_2 != NULL) {
+        free(lite_info->card_key_2);
+    }
+}
+
 void felica_area_clear(FelicaArea* area) {
     FelicaNodeList_it_t it;
     for(FelicaNodeList_it(it, area->nodes); !FelicaNodeList_end_p(it); FelicaNodeList_next(it)) {
         FelicaNode* node = *FelicaNodeList_ref(it);
         if(node->type == FelicaNodeTypeArea) {
-            felica_area_clear(node->ptr.area);
+            felica_area_clear(node->area);
         } else if(node->type == FelicaNodeTypeService) {
-            felica_service_clear(node->ptr.service);
+            felica_service_clear(node->service);
         }
         free(node);
     }
@@ -601,7 +647,12 @@ void felica_clear(FelicaData* data) {
     for(FelicaSystemList_it(it, data->systems); !FelicaSystemList_end_p(it);
         FelicaSystemList_next(it)) {
         FelicaSystem* system = *FelicaSystemList_ref(it);
-        felica_area_clear(&system->root_area);
+        if(system->code == LITE_SYSTEM_CODE) {
+            felica_lite_clear(&system->lite_info);
+            ;
+        } else {
+            felica_area_clear(&system->root_area);
+        }
     }
     FelicaSystemList_clear(data->systems);
 }
