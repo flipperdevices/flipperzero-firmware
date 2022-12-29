@@ -7,10 +7,10 @@
 #define SD_TIMEOUT_MS (1000)
 
 typedef enum {
-    SDStatusOK,
-    SDStatusError,
-    SDStatusTimeout,
-} SDStatus;
+    SdSpiStatusOK,
+    SdSpiStatusError,
+    SdSpiStatusTimeout,
+} SdSpiStatus;
 
 /**
  * @brief Card Specific Data: CSD Register
@@ -106,24 +106,24 @@ uint8_t sd_max_mount_retry_count();
  * @brief Init sd card
  * 
  * @param power_reset reset card power
- * @return SDStatus 
+ * @return SdSpiStatus 
  */
-SDStatus sd_init(bool power_reset);
+SdSpiStatus sd_init(bool power_reset);
 
 /**
  * @brief Get card state
  * 
- * @return SDStatus 
+ * @return SdSpiStatus 
  */
-SDStatus sd_get_card_state(void);
+SdSpiStatus sd_get_card_state(void);
 
 /**
  * @brief Get card info
  * 
  * @param card_info 
- * @return SDStatus 
+ * @return SdSpiStatus 
  */
-SDStatus sd_get_card_info(SD_CardInfo* card_info);
+SdSpiStatus sd_get_card_info(SD_CardInfo* card_info);
 
 /**
  * @brief Read blocks
@@ -131,10 +131,10 @@ SDStatus sd_get_card_info(SD_CardInfo* card_info);
  * @param data 
  * @param address 
  * @param blocks 
- * @param timeout 
- * @return SDStatus 
+ * @param timeout_ms 
+ * @return SdSpiStatus 
  */
-SDStatus sd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout);
+SdSpiStatus sd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms);
 
 /**
  * @brief Write blocks
@@ -142,7 +142,7 @@ SDStatus sd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint3
  * @param data 
  * @param address 
  * @param blocks 
- * @param timeout 
- * @return SDStatus 
+ * @param timeout_ms 
+ * @return SdSpiStatus 
  */
-SDStatus sd_write_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout);
+SdSpiStatus sd_write_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms);

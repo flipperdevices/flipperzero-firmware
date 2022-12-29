@@ -46,7 +46,7 @@ static volatile DSTATUS Stat = STA_NOINIT;
 static DSTATUS User_CheckStatus(BYTE lun) {
     UNUSED(lun);
     Stat = STA_NOINIT;
-    if(sd_get_card_state() == SDStatusOK) {
+    if(sd_get_card_state() == SdSpiStatusOK) {
         Stat &= ~STA_NOINIT;
     }
 
@@ -128,9 +128,10 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
-    if(sd_read_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) == SDStatusOK) {
+    if(sd_read_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) ==
+       SdSpiStatusOK) {
         /* wait until the read operation is finished */
-        while(sd_get_card_state() != SDStatusOK) {
+        while(sd_get_card_state() != SdSpiStatusOK) {
         }
         res = RES_OK;
     }
@@ -160,9 +161,10 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
-    if(sd_write_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) == SDStatusOK) {
+    if(sd_write_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) ==
+       SdSpiStatusOK) {
         /* wait until the Write operation is finished */
-        while(sd_get_card_state() != SDStatusOK) {
+        while(sd_get_card_state() != SdSpiStatusOK) {
         }
         res = RES_OK;
     }
