@@ -145,4 +145,5 @@ SdSpiStatus sd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, ui
  * @param timeout_ms 
  * @return SdSpiStatus 
  */
-SdSpiStatus sd_write_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms);
+SdSpiStatus
+    sd_write_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms);
