@@ -21,11 +21,11 @@ extern const SubGhzProtocolRegistry protoview_protocol_registry;
  *
  * The 'idx' argument is the first sample to render in the circular
  * buffer. */
-void render_signal(Canvas *const canvas, RawSamplesBuffer *buf, uint32_t idx) {
+void render_signal(ProtoViewApp *app, Canvas *const canvas, RawSamplesBuffer *buf, uint32_t idx) {
     canvas_set_color(canvas, ColorBlack);
 
     int rows = 8;
-    uint32_t time_per_pixel = 100;
+    uint32_t time_per_pixel = app->us_scale;
     bool level = 0;
     uint32_t dur = 0;
     for (int row = 0; row < rows ; row++) {
@@ -71,7 +71,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
     } classes[SEARCH_CLASSES];
 
     memset(classes,0,sizeof(classes));
-    uint32_t minlen = 80, maxlen = 4000; /* Depends on data rate, here we
+    uint32_t minlen = 40, maxlen = 4000; /* Depends on data rate, here we
                                             allow for high and low. */
     uint32_t len = 0; /* Observed len of coherent samples. */
     s->short_pulse_dur = 0;
@@ -79,7 +79,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
         bool level;
         uint32_t dur;
         raw_samples_get(s, j, &level, &dur);
-        if (dur < minlen || dur > maxlen) return len;
+        if (dur < minlen || dur > maxlen) break; /* return. */
 
         /* Let's see if it matches a class we already have or if we
          * can populate a new (yet empty) class. */
@@ -88,7 +88,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
             if (classes[k].count[level] == 0) {
                 classes[k].dur[level] = dur;
                 classes[k].count[level] = 1;
-                break;
+                break; /* Sample accepted. */
             } else {
                 uint32_t classavg = classes[k].dur[level];
                 uint32_t count = classes[k].count[level];
@@ -103,21 +103,29 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
                     classavg = ((classavg * count) + dur) / (count+1);
                     classes[k].dur[level] = classavg;
                     classes[k].count[level]++;
-                    break;
+                    break; /* Sample accepted. */
                 }
             }
         }
 
-        if (k == SEARCH_CLASSES) { /* No match, return. */
-            return len;
-        } else {
-            /* Update the buffer setting the shortest pulse we found
-             * among the three classes. This will be used when scaling
-             * for visualization. */
-            if (s->short_pulse_dur == 0 || dur < s->short_pulse_dur)
-                s->short_pulse_dur = dur;
-        }
+        if (k == SEARCH_CLASSES) break; /* No match, return. */
+
+        /* If we are here, we accepted this sample. Try with the next
+         * one. */
         len++;
+    }
+
+    /* Update the buffer setting the shortest pulse we found
+     * among the three classes. This will be used when scaling
+     * for visualization. */
+    for (int j = 0; j < SEARCH_CLASSES; j++) {
+        for (int level = 0; level < 2; level++) {
+            if (s->short_pulse_dur == 0 ||
+                s->short_pulse_dur > classes[j].dur[level])
+            {
+                s->short_pulse_dur = classes[j].dur[level];
+            }
+        }
     }
     return len;
 }
@@ -134,7 +142,9 @@ void scan_for_signal(ProtoViewApp *app) {
 
     /* Try to seek on data that looks to have a regular high low high low
      * pattern. */
-    uint32_t minlen = 10;           /* Min run of coherent samples. */
+    uint32_t minlen = 13;           /* Min run of coherent samples. Up to
+                                       12 samples it's very easy to mistake
+                                       noise for signal. */
 
     for (uint32_t i = 0; i < copy->total-1; i++) {
         uint32_t thislen = search_coherent_signal(copy,i);
@@ -143,7 +153,8 @@ void scan_for_signal(ProtoViewApp *app) {
             raw_samples_copy(DetectedSamples,copy);
             DetectedSamples->idx = (DetectedSamples->idx+i)%
                                    DetectedSamples->total;
-            FURI_LOG_E(TAG, "Displayed sample updated");
+            FURI_LOG_E(TAG, "Displayed sample updated (%d samples)",
+                (int)thislen);
         }
     }
     raw_samples_free(copy);
@@ -177,14 +188,14 @@ void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const cha
 }
 
 static void render_callback(Canvas *const canvas, void *ctx) {
-    UNUSED(ctx);
+    ProtoViewApp *app = ctx;
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 127, 63);
 
     /* Show signal. */
-    render_signal(canvas, DetectedSamples, 0);
+    render_signal(app, canvas, DetectedSamples, 0);
 
     /* Show signal information. */
     char buf[64];
@@ -223,8 +234,9 @@ ProtoViewApp* protoview_app_alloc() {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-    // Signal found
+    // Signal found and visualization defaults
     app->signal_bestlen = 0;
+    app->us_scale = 100;
 
     //init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
@@ -306,12 +318,18 @@ int32_t protoview_app_entry(void* p) {
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if (qstat == FuriStatusOk) {
+            uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
             if (input.key == InputKeyBack) {
                 app->running = 0;
             } else if (input.key == InputKeyOk) {
                 app->signal_bestlen = 0;
                 raw_samples_reset(DetectedSamples);
+            } else if (input.key == InputKeyDown) {
+                if (app->us_scale < 500) app->us_scale += scale_step;
+            } else if (input.key == InputKeyUp) {
+                if (app->us_scale > 10) app->us_scale -= scale_step;
             }
+
             FURI_LOG_E(TAG, "Main Loop - Input: %u", input.key);
         } else {
             static int c = 0;

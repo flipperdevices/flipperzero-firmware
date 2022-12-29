@@ -45,6 +45,7 @@ struct ProtoViewApp {
     SubGhzSetting *setting;
     int running;             /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
+    uint32_t us_scale;       /* microseconds per pixel. */
 };
 
 void radio_begin(ProtoViewApp* app);
