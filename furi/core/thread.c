@@ -192,6 +192,9 @@ void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority) {
     furi_assert(thread);
     furi_assert(priority >= FuriThreadPriorityIdle && priority <= FuriThreadPriorityIsr);
     thread->priority = priority;
+
+    while(thread->state == FuriThreadStateStarting) furi_delay_tick(1);
+
     if(thread->state == FuriThreadStateRunning) {
         vTaskPrioritySet(thread->task_handle, priority);
     }
