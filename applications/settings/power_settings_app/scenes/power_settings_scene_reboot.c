@@ -15,7 +15,7 @@ void power_settings_scene_reboot_on_enter(void* context) {
     PowerSettingsApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_set_header_cstr(submenu, "Reboot type");
+    submenu_set_header(submenu, "Reboot type");
     submenu_add_item(
         submenu,
         "Firmware upgrade",

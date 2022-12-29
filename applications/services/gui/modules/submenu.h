@@ -66,19 +66,12 @@ void submenu_reset(Submenu* submenu);
  */
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 
-/** Set optional header for submenu
- *
- * @param      submenu  Submenu instance
- * @param      header   header to set
- */
-void submenu_set_header(Submenu* submenu, FuriString* header);
-
 /** Set optional header for submenu from cstring
  *
  * @param      submenu  Submenu instance
  * @param      header   header to set
  */
-void submenu_set_header_cstr(Submenu* submenu, const char* header);
+void submenu_set_header(Submenu* submenu, const char* header);
 
 #ifdef __cplusplus
 }

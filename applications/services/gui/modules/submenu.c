@@ -336,14 +336,7 @@ void submenu_process_ok(Submenu* submenu) {
     }
 }
 
-void submenu_set_header(Submenu* submenu, FuriString* header) {
-    furi_assert(submenu);
-
-    with_view_model(
-        submenu->view, SubmenuModel * model, { furi_string_set(model->header, header); }, true);
-}
-
-void submenu_set_header_cstr(Submenu* submenu, const char* header) {
+void submenu_set_header(Submenu* submenu, const char* header) {
     furi_assert(submenu);
 
     with_view_model(

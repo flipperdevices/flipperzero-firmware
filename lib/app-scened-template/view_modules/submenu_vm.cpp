@@ -29,5 +29,5 @@ void SubmenuVM::set_selected_item(uint32_t index) {
 }
 
 void SubmenuVM::set_header(const char* header) {
-    submenu_set_header_cstr(submenu, header);
+    submenu_set_header(submenu, header);
 }

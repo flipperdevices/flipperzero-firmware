@@ -22,7 +22,7 @@ void nfc_scene_mf_classic_keys_list_prepare(Nfc* nfc, MfClassicDict* dict) {
     FuriString* temp_key;
     temp_key = furi_string_alloc();
 
-    submenu_set_header_cstr(submenu, "Select key to delete:");
+    submenu_set_header(submenu, "Select key to delete:");
     while(mf_classic_dict_get_next_key_str(dict, temp_key)) {
         char* current_key = (char*)malloc(sizeof(char) * 13);
         strncpy(current_key, furi_string_get_cstr(temp_key), 12);
