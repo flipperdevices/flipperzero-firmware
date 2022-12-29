@@ -202,7 +202,7 @@ void nfcv_emu_free_signals(NfcVEmuAirSignals* signals) {
 void nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_t slowdown) {
     if(!signals->nfcv_resp_one) {
         /* logical one: unmodulated then 8 pulses */
-        signals->nfcv_resp_one = digital_signal_alloc(40);
+        signals->nfcv_resp_one = digital_signal_alloc(slowdown * 9);
         for(size_t i = 0; i < slowdown; i++) {
             digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_unmod);
         }
@@ -212,7 +212,7 @@ void nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
     }
     if(!signals->nfcv_resp_zero) {
         /* logical zero: 8 pulses then unmodulated */
-        signals->nfcv_resp_zero = digital_signal_alloc(40);
+        signals->nfcv_resp_zero = digital_signal_alloc(slowdown * 9);
         for(size_t i = 0; i < slowdown * 8; i++) {
             digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_pulse);
         }
@@ -222,7 +222,8 @@ void nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
     }
     if(!signals->nfcv_resp_sof) {
         /* SOF: unmodulated, 24 pulses, logic 1 */
-        signals->nfcv_resp_sof = digital_signal_alloc(160);
+        signals->nfcv_resp_sof =
+            digital_signal_alloc(slowdown * 27 + signals->nfcv_resp_one->edge_cnt);
         for(size_t i = 0; i < slowdown * 3; i++) {
             digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_unmod);
         }
@@ -233,7 +234,8 @@ void nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
     }
     if(!signals->nfcv_resp_eof) {
         /* EOF: logic 0, 24 pulses, unmodulated */
-        signals->nfcv_resp_eof = digital_signal_alloc(160);
+        signals->nfcv_resp_eof =
+            digital_signal_alloc(slowdown * 27 + signals->nfcv_resp_zero->edge_cnt);
         digital_signal_append(signals->nfcv_resp_eof, signals->nfcv_resp_zero);
         for(size_t i = 0; i < slowdown * 24; i++) {
             digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_pulse);
