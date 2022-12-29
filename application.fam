@@ -6,7 +6,7 @@ App(
     fap_weburl="https://github.com/bmatcuk/flipperzero-qrcode",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="qrcode_app",
-    stack_size=1024,
+    stack_size=2 * 1024,
     cdefines=["APP_QRCODE"],
     requires=[
         "gui",

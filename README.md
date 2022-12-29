@@ -1,35 +1,19 @@
 # flipperzero-qrcode
 Display qrcodes on the [Flipper Zero]
 
-## Building
-First, clone the [flipperzero-firmware] repo and then clone this repo in the
-`applications_user` directory:
-
-```bash
-git clone git@github.com:flipperdevices/flipperzero-firmware.git
-cd flipperzero-firmware/applications_user
-git clone git@github.com:bmatcuk/flipperzero-qrcode.git
-```
-
-Next, in the base of the [flipperzero-firmware] directory, run fbt:
-
-```bash
-cd ..
-./fbt fap_qrcode
-```
-
-This will automatically install dependencies and build the application. When it
-has finished building, the .fap will be in
-`build/f7-firmware-D/.extapps/qrcode.fap` (fbt output will tell you where to
-find the .fap, should it change in the future).
+## Download
+Grab the latest `qrcode.fap` from [Releases].
 
 ## Installation
 Copy the `qrcode.fap` file onto your [Flipper Zero] sd card in the `apps/Tools`
 directory. Then create a top level directory called `qrcodes` to store your
-qrcode files.
+qrcode files. This can be done using [qFlipper], for example, by
+draging-and-dropping `qrcode.fap` into `apps/Tools` and then navigating back to
+the top level (where the directories like `infrared` and `nfc` live), right
+click, and create a new folder called `qrcodes`.
 
 ## Creating QR Codes
-qrcode files are simple text files with the extension .qrcode. This app will
+qrcode files are simple text files with the extension `.qrcode`. This app will
 expect them to live in a top-level directory on your sd card called `qrcodes`.
 They should have the following content:
 
@@ -76,7 +60,77 @@ A qrcode in binary mode can encode ~60% less data than numeric mode, and ~30%
 less than alpha-numeric.
 
 #### Kanji Mode
-This mode is unsupported, so I won't go into detail.
+This mode is unsupported, so I won't go into detail. A limitation of the
+underlying qrcode library that I'm using, unfortunately. If there's interest,
+perhaps I'll hack in support sometime.
+
+## Using the App
+The app is fairly straightforward. When it first starts, the file browser will
+automatically open to the `qrcodes` directory and display any `.qrcode` files.
+Select one using the arrow keys and the center button. The qrcode will display.
+If you push the right arrow, some stats will display: the qrcode "Version" -
+which corresponds to how big it is; the ECC level - which determines the
+qrcode's resilience to damage, such as a dirty screen (Low, Medium, Quartile,
+and High); and the qrcode Mode (Numeric, Alpha-Numeric, Binary, or Kanji). You
+can hide the stats by pressing the left arrow.
+
+When you're done viewing the qrcode, press the back button to return to the
+file browser. If you push the back button in the file browser, the app will
+exit.
+
+I will ask that you temper your expectations: the Flipper Zero screen is small
+and many readers may have difficulty reading the qrcodes, especially if they
+are encoding a lot of data. I have successfully got my iPhone to read qrcodes
+encoding phone numbers and wifi info, both of which are relatively short.
+
+## Wifi QRCodes
+Most phones can automatically connect to wifi networks from a qrcode. If you
+should like to encode your wifi's connection info into a qrcode, here's how
+you'd do it:
+
+```
+Filetype: QRCode
+Version: 0
+Message: WIFI:S:<ssid>;P:<password>;T:<encryption>;
+```
+
+Replace `<ssid>` with the name of your wifi, `<password>` with the password.
+`<encryption>` would be "WPA" or "WEP". If your wifi is open (no password),
+this can be "None" and you can remove `P:<password>;` from the message. If your
+wifi is hidden (ie, does not broadcast the ssid), you can add `H:true;` to the
+end.
+
+Note that if your ssid or password contain any of these characters: `\";,:`,
+you'll need to "escape" it by placing a backslash (`\`) before it.
+
+For example, if my ssid was "wifiball" and not broadcast, and the password was
+"pa$$:word" with WPA encryption, the message would be:
+
+```
+Message: WIFI:S:wifiball;P:pa$$\:word;T:WPA;H:true;
+```
+
+## Building
+First, clone the [flipperzero-firmware] repo and then clone this repo in the
+`applications_user` directory:
+
+```bash
+git clone git@github.com:flipperdevices/flipperzero-firmware.git
+cd flipperzero-firmware/applications_user
+git clone git@github.com:bmatcuk/flipperzero-qrcode.git
+```
+
+Next, in the base of the [flipperzero-firmware] directory, run fbt:
+
+```bash
+cd ..
+./fbt fap_qrcode
+```
+
+This will automatically install dependencies and build the application. When it
+has finished building, the .fap will be in
+`build/f7-firmware-D/.extapps/qrcode.fap` (fbt output will tell you where to
+find the .fap, should it change in the future).
 
 ## qrcode library
 This application uses the [QRCode] library by ricmoo. This is the same library
@@ -88,3 +142,5 @@ compiler errors.
 [flipperzero-firmware]: https://github.com/flipperdevices/flipperzero-firmware
 [Flipper Zero]: https://flipperzero.one/
 [QRCode]: https://github.com/ricmoo/QRCode
+[qFlipper]: https://docs.flipperzero.one/qflipper
+[Releases]: https://github.com/bmatcuk/flipperzero-qrcode/releases/latest
