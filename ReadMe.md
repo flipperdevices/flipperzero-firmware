@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1229-1551-0.74.3-1cc5d29](https://www.patreon.com/posts/76519504)
+## Latest Updates - [PATREON: Latest Release RM1229-1850-0.74.3-5d53607](https://www.patreon.com/posts/76525879)
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-28 20:33 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-29 06:39 EST`
@@ -55,6 +55,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Readded: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - Readded: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
 - Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
+- Fixed SubGhz Bruteforcer Inclusion
+- [Patreon Only: New Build - One Piece](https://www.patreon.com/posts/76525879)
 
 <a name="release">
 
