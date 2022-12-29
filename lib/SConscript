@@ -17,6 +17,7 @@ env.Append(
     ],
 )
 
+
 env.Append(
     CPPPATH=[
         "#/",
@@ -24,6 +25,23 @@ env.Append(
         "#/lib/mlib",
         # Ugly hack
         Dir("../assets/compiled"),
+    ],
+    SDK_HEADERS=[
+        *(
+            File(f"#/lib/mlib/m-{name}.h")
+            for name in (
+                "algo",
+                "array",
+                "bptree",
+                "core",
+                "deque",
+                "dict",
+                "list",
+                "rbtree",
+                "tuple",
+                "variant",
+            )
+        ),
     ],
     CPPDEFINES=[
         '"M_MEMORY_FULL(x)=abort()"',
