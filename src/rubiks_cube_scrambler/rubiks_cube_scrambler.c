@@ -49,7 +49,9 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         genScramble ();
         scrambleReplace();
         valid();
-        strcpy(scramble, printData());
+        char *data = printData();
+        strcpy(scramble, data);
+        free(data);
         if (notifications_enabled) {
             success_vibration();
         }
