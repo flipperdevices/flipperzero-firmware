@@ -207,6 +207,7 @@ uint8_t
 uint8_t BSP_SD_Erase(uint32_t StartAddr, uint32_t EndAddr);
 uint8_t BSP_SD_GetCardState(void);
 uint8_t BSP_SD_GetCardInfo(SD_CardInfo* pCardInfo);
+uint8_t BSP_SD_GetCIDRegister(SD_CID* Cid);
 
 /* Link functions for SD Card peripheral*/
 void SD_SPI_Slow_Init(void);

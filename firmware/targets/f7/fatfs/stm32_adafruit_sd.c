@@ -823,6 +823,22 @@ uint8_t SD_GetCIDRegister(SD_CID* Cid) {
     return retr;
 }
 
+
+uint8_t BSP_SD_GetCIDRegister(SD_CID* Cid) {
+    uint8_t retr = BSP_SD_ERROR;
+
+    /* Slow speed init */
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_slow);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_slow;
+
+    memset(Cid, 0, sizeof(SD_CID));
+    retr = SD_GetCIDRegister(Cid);
+
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_slow);
+    return retr;
+}
+
 /**
   * @brief  Sends 5 bytes command to the SD card and get response
   * @param  Cmd: The user expected command to send to SD card.
