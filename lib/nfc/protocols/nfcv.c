@@ -181,71 +181,71 @@ void nfcv_crc(uint8_t* data, uint32_t length) {
 }
 
 void nfcv_emu_free_signals(NfcVEmuAirSignals* signals) {
-    if(signals->nfcv_resp_one) {
-        digital_signal_free(signals->nfcv_resp_one);
-        signals->nfcv_resp_one = NULL;
-    }
-    if(signals->nfcv_resp_zero) {
-        digital_signal_free(signals->nfcv_resp_zero);
-        signals->nfcv_resp_zero = NULL;
-    }
-    if(signals->nfcv_resp_sof) {
-        digital_signal_free(signals->nfcv_resp_sof);
-        signals->nfcv_resp_sof = NULL;
-    }
-    if(signals->nfcv_resp_eof) {
-        digital_signal_free(signals->nfcv_resp_eof);
-        signals->nfcv_resp_eof = NULL;
-    }
+    digital_signal_free(signals->nfcv_resp_one);
+    digital_signal_free(signals->nfcv_resp_zero);
+    digital_signal_free(signals->nfcv_resp_sof);
+    digital_signal_free(signals->nfcv_resp_eof);
+    signals->nfcv_resp_one = NULL;
+    signals->nfcv_resp_zero = NULL;
+    signals->nfcv_resp_sof = NULL;
+    signals->nfcv_resp_eof = NULL;
 }
 
-void nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_t slowdown) {
+bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_t slowdown) {
+    bool ret = true;
+
     if(!signals->nfcv_resp_one) {
         /* logical one: unmodulated then 8 pulses */
-        signals->nfcv_resp_one = digital_signal_alloc(slowdown * 9);
+        signals->nfcv_resp_one = digital_signal_alloc(
+            slowdown * (air->nfcv_resp_unmod->edge_cnt + 8 * air->nfcv_resp_pulse->edge_cnt));
         for(size_t i = 0; i < slowdown; i++) {
-            digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_unmod);
+            ret &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_unmod);
         }
         for(size_t i = 0; i < slowdown * 8; i++) {
-            digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_pulse);
+            ret &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_pulse);
         }
     }
     if(!signals->nfcv_resp_zero) {
         /* logical zero: 8 pulses then unmodulated */
-        signals->nfcv_resp_zero = digital_signal_alloc(slowdown * 9);
+        signals->nfcv_resp_zero = digital_signal_alloc(
+            slowdown * (8 * air->nfcv_resp_pulse->edge_cnt + air->nfcv_resp_unmod->edge_cnt));
         for(size_t i = 0; i < slowdown * 8; i++) {
-            digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_pulse);
+            ret &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_pulse);
         }
         for(size_t i = 0; i < slowdown; i++) {
-            digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_unmod);
+            ret &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_unmod);
         }
     }
     if(!signals->nfcv_resp_sof) {
         /* SOF: unmodulated, 24 pulses, logic 1 */
-        signals->nfcv_resp_sof =
-            digital_signal_alloc(slowdown * 27 + signals->nfcv_resp_one->edge_cnt);
+        signals->nfcv_resp_sof = digital_signal_alloc(
+            slowdown * (3 * air->nfcv_resp_unmod->edge_cnt + 24 * air->nfcv_resp_pulse->edge_cnt) +
+            signals->nfcv_resp_one->edge_cnt);
         for(size_t i = 0; i < slowdown * 3; i++) {
-            digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_unmod);
+            ret &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_unmod);
         }
         for(size_t i = 0; i < slowdown * 24; i++) {
-            digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_pulse);
+            ret &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_pulse);
         }
-        digital_signal_append(signals->nfcv_resp_sof, signals->nfcv_resp_one);
+        ret &= digital_signal_append(signals->nfcv_resp_sof, signals->nfcv_resp_one);
     }
     if(!signals->nfcv_resp_eof) {
         /* EOF: logic 0, 24 pulses, unmodulated */
-        signals->nfcv_resp_eof =
-            digital_signal_alloc(slowdown * 27 + signals->nfcv_resp_zero->edge_cnt);
-        digital_signal_append(signals->nfcv_resp_eof, signals->nfcv_resp_zero);
+        signals->nfcv_resp_eof = digital_signal_alloc(
+            signals->nfcv_resp_zero->edge_cnt +
+            slowdown * (24 * air->nfcv_resp_pulse->edge_cnt + 3 * air->nfcv_resp_unmod->edge_cnt) +
+            air->nfcv_resp_unmod->edge_cnt);
+        ret &= digital_signal_append(signals->nfcv_resp_eof, signals->nfcv_resp_zero);
         for(size_t i = 0; i < slowdown * 24; i++) {
-            digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_pulse);
+            ret &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_pulse);
         }
         for(size_t i = 0; i < slowdown * 3; i++) {
-            digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
+            ret &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
         }
         /* add extra silence */
-        digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
+        ret &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
     }
+    return ret;
 }
 
 void nfcv_emu_alloc(NfcVData* nfcv_data) {
@@ -272,8 +272,14 @@ void nfcv_emu_alloc(NfcVData* nfcv_data) {
         nfcv_data->emu_air.nfcv_resp_pulse->edge_cnt = 2;
     }
 
-    nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_high, 1);
-    nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_low, 4);
+    bool success = true;
+
+    success &= nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_high, 1);
+    success &= nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_low, 4);
+
+    if(!success) {
+        FURI_LOG_E(TAG, "Failed to allocate signals");
+    }
 
     digital_sequence_set_signal(
         nfcv_data->emu_air.nfcv_signal,
@@ -310,22 +316,15 @@ void nfcv_emu_alloc(NfcVData* nfcv_data) {
 }
 
 void nfcv_emu_free(NfcVData* nfcv_data) {
-    if(nfcv_data->emu_air.nfcv_resp_unmod) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod);
-        nfcv_data->emu_air.nfcv_resp_unmod = NULL;
-    }
-    if(nfcv_data->emu_air.nfcv_resp_pulse) {
-        digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse);
-        nfcv_data->emu_air.nfcv_resp_pulse = NULL;
-    }
-    if(nfcv_data->emu_air.nfcv_signal) {
-        digital_sequence_free(nfcv_data->emu_air.nfcv_signal);
-        nfcv_data->emu_air.nfcv_signal = NULL;
-    }
-    if(nfcv_data->emu_air.reader_signal) {
-        pulse_reader_free(nfcv_data->emu_air.reader_signal);
-        nfcv_data->emu_air.reader_signal = NULL;
-    }
+    digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod);
+    digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse);
+    digital_sequence_free(nfcv_data->emu_air.nfcv_signal);
+    pulse_reader_free(nfcv_data->emu_air.reader_signal);
+
+    nfcv_data->emu_air.nfcv_resp_unmod = NULL;
+    nfcv_data->emu_air.nfcv_resp_pulse = NULL;
+    nfcv_data->emu_air.nfcv_signal = NULL;
+    nfcv_data->emu_air.reader_signal = NULL;
 
     nfcv_emu_free_signals(&nfcv_data->emu_air.signals_high);
     nfcv_emu_free_signals(&nfcv_data->emu_air.signals_low);
