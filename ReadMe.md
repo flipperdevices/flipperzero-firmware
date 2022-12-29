@@ -1,27 +1,33 @@
-<a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="35%"></a>
 
-# Flipper Zero FW [ROGUEMASTER]
-This firmware is a fork of [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware) and the main Flipper Devices FW! We are NOT paywalled. I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from active community projects.  
+<a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="40%"></a>
 
+## What Is Not In The Firmware? [SD CARD EXTRA FILES AND OTHER RESEARCH SOURCES](https://github.com/RogueMaster/awesome-flipperzero-withModules)
+
+# RogueMaster Flipper Zero FW [Support Us!](https://www.patreon.com/RogueMaster/membership)
+## Thank you to all the supporters!
+
+<table><tr><th><div align="left">
+This firmware is a fork of <a href='https://github.com/DarkFlippers/unleashed-firmware' target="_blank">Unleashed/xMasterX</a> and the main Flipper Devices FW! We are NOT paywalled. I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from nearly all active community projects. See the RM <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#Games'>Games</a> and <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#Plugins'>Plugins</a> for a list of most of those projects.
+<br><a href='https://discord.gg/gF2bBUzAFe' target="_blank">Discord</a> - <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#Build'>Build</a> - <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#install'>Install Instructions</a> - <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#howto'>More Links And How To</a> - <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#all'>All Changes from OFW</a> - <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#support'>Support RM Custom Firmware</a> - <a href='https://www.patreon.com/RogueMaster' target="_blank">Patreon</a>
+</div></th><th style='width:50%;'>
 This software is for experimental purposes only and is not meant for any illegal activity/purposes. We do not condone illegal activity and strongly encourage keeping transmissions to legal/valid uses allowed by law.
+</th></tr></table>
 
-## [Support Us!](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)
-Everyone gives much of their uncompensated free time to ensure the success of the Flipper Zero!
-Thank you to all the supporters!
+<a name="support"></a>
 
-- [PATREON for compiled releases for any updates](https://www.patreon.com/RogueMaster) - releases will occur weekly or with main FW version updates.
-- [Support us if you like what you see](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/SUPPORT.md)! 😄🚀💸
+- Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster)
+- [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
+- [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, DBZ, STOCK, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
-- [Join THE Flipper Uncensored Discord](https://discord.gg/gF2bBUzAFe)
-- Contact me on [Patreon](https://www.patreon.com/RogueMaster/membership) if you want a renamed Flipper. I can do custom names!
+
+<a name="latest">
 
 ## Latest Updates - [PATREON: Latest Release RM1228-1610-0.74.3-1e41fc8](https://www.patreon.com/posts/76478592) 
 
-## [BUILDS NOW AVAILABLE WITH STOCK, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default) and RM 18PLUS ANIMATION SETS](https://www.patreon.com/RogueMaster/membership)
-
 - Last Synced/Checked [Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware), changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-28 20:33 EST`
-- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-28 20:33 EST`
+- Last Synced/Checked [OFW](https://github.com/flipperdevices/flipperzero-firmware), changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-29 00:44 EST`
 - Assets: Includes SubGHz Playlist config and SubGHz Remote config for CVS & Walgreens.
 - Assets: Includes SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
@@ -37,24 +43,43 @@ Thank you to all the supporters!
 - - Reverted: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
 - - Reverted: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - - Reverted: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
+- OFW UPDATE, UNREVERTED: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
+- Added: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 
-## Install from Release
-FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
-- To avoid Application errors, delete /ext/apps before doing the RM firmware update
-- To install new FW, extract the [latest release zip file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases) to a folder, put the folder in the update folder on your SD card, and run the update file inside the folder using the Archive app (down from flipper desktop). If you were previously unleashed, you need to update your extend_range.txt file.`UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!` On any update, you may need to update this file and your unirf map file, so keep backups. 😄
+<a name="release">
+
+## Install Latest GitHub Release
+
+- FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
+- To avoid Application errors, delete /ext/apps before doing the any RM firmware update
+- Get <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases/latest' target="_blank">Latest GitHub Release</a> or for PATREON members <a href='https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release' target="_blank">Latest Patreon Release</a>.
+- See <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#install'>Install Instructions</a>
+
+<a name="install"></a>
+
+## Install Instructions
+
+- Extract/unzip the downloaded file from above to a folder on your computer (Use 7Zip or WinRAR)
+- Copy the entire folder to the update folder onto the SD card you're using in your FlipperZero
+- Once the SD card is back in the Flipper (or you've copied the files successfully via qFlipper), press down at the Desktop (the screen with the animations)
+- This opens the Archive app, press left/right to get to the Browser section
+- Locate the update folder, and the folder you copied earlier
+- Locate the update file and select it
+- Select Run in App
 
 ## Build
+
 ```bash
 $ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git
 $ cd flipperzero-firmware-wPlugins/
 $ ./fbt updater_package
-
-# If building FAPS:
-$ ./fbt fap_dist
-
-# If building image assets:
-$ ./fbt resources icons dolphin_ext
+# FAPS placed at assets/resources/apps on BUILD
+# Install this folder on your flipper dist/f7-C/f7-update-RM420FAP
+# If building animation assets:
+$ ./fbt dolphin_ext
 ```
+
+<a name="howto"></a>
 
 ## How To
 
@@ -73,9 +98,10 @@ $ ./fbt resources icons dolphin_ext
 - [GAMES ONLY MODE PASSWORD: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT IN CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
 - [FLIPPER PROJECT WISH LIST](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
 - [SAMPLE EDUCATIONAL PROJECTS 😄](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/RoadMap.md)
-- [`FUN Links HERE` Collection for your Flipper SD](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
-## All Changes/Features
+<a name="all">
+
+## All Changes and Features
 
 - Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
@@ -250,6 +276,7 @@ $ ./fbt resources icons dolphin_ext
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
 - [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
+- [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) [Changes by Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
 - [RF Remix (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox) [(More protocols thanks to darmiel & xMasterX)](https://github.com/darmiel/flipper-playlist/blob/feat/unirf-protocols/applications/unirfremix/unirfremix_app.c)
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
