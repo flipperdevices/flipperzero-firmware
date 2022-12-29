@@ -50,10 +50,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [USB Midi Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - OFW Added: [Direct Draw Debug App (by skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2215)
 - Patreon Poll results call for removal of bad apps. [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) and [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) are removed.
+- Readded Chess & Bad Apple as uncompiled apps with hopes that they get fixed.
 
 <a name="release">
 
-## Install Latest GitHub Release
+## Install Latest Release
 
 - FLASH STOCK FIRST BEFORE UPDATING TO CUSTOM FIRMWARE!
 - To avoid Application errors, delete /ext/apps before doing the any RM firmware update
