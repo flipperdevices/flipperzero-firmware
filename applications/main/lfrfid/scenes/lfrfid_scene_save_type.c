@@ -28,7 +28,7 @@ void lfrfid_scene_save_type_on_enter(void* context) {
             state->menu_item_name[i] =
                 furi_string_alloc_printf("%s", protocol_dict_get_name(app->dict, i));
         }
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             furi_string_get_cstr(state->menu_item_name[i]),
             i,

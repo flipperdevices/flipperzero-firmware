@@ -16,15 +16,15 @@ void picopass_scene_saved_menu_on_enter(void* context) {
     Picopass* picopass = context;
     Submenu* submenu = picopass->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Delete",
         SubmenuIndexDelete,
         picopass_scene_saved_menu_submenu_callback,
         picopass);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Info", SubmenuIndexInfo, picopass_scene_saved_menu_submenu_callback, picopass);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Write", SubmenuIndexWrite, picopass_scene_saved_menu_submenu_callback, picopass);
 
     submenu_set_selected_item(

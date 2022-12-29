@@ -27,14 +27,14 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 
     if(nfc->dev->format == NfcDeviceSaveFormatUid ||
        nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Emulate UID",
             SubmenuIndexEmulate,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
         if(nfc->dev->dev_data.protocol == NfcDeviceProtocolUnknown) {
-            submenu_add_item(
+            submenu_add_item_cstr(
                 submenu,
                 "Edit UID",
                 SubmenuIndexEditUid,
@@ -44,42 +44,42 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     } else if(
         nfc->dev->format == NfcDeviceSaveFormatMifareUl ||
         nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
     }
     if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
         if(!mf_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data)) {
-            submenu_add_item(
+            submenu_add_item_cstr(
                 submenu,
                 "Detect reader",
                 SubmenuIndexDetectReader,
                 nfc_scene_saved_menu_submenu_callback,
                 nfc);
         }
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Write To Initial Card",
             SubmenuIndexWrite,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Update From Initial Card",
             SubmenuIndexUpdate,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
     }
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_saved_menu_submenu_callback, nfc);
     if(nfc->dev->format == NfcDeviceSaveFormatMifareUl &&
        !mf_ul_is_full_capture(&nfc->dev->dev_data.mf_ul_data)) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Unlock With Reader",
             SubmenuIndexMfUlUnlockByReader,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Unlock With Password",
             SubmenuIndexMfUlUnlockByPassword,
@@ -87,16 +87,16 @@ void nfc_scene_saved_menu_on_enter(void* context) {
             nfc);
     }
     if(nfc->dev->shadow_file_exist) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Restore to original",
             SubmenuIndexRestoreOriginal,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
     }
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Rename", SubmenuIndexRename, nfc_scene_saved_menu_submenu_callback, nfc);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Delete", SubmenuIndexDelete, nfc_scene_saved_menu_submenu_callback, nfc);
     submenu_set_selected_item(
         nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneSavedMenu));

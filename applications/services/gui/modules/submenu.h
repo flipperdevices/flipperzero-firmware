@@ -37,7 +37,7 @@ void submenu_free(Submenu* submenu);
  */
 View* submenu_get_view(Submenu* submenu);
 
-/** Add item to submenu
+/** Add item to submenu using label
  *
  * @param      submenu           Submenu instance
  * @param      label             menu item label
@@ -47,6 +47,22 @@ View* submenu_get_view(Submenu* submenu);
  * @param      callback_context  menu item callback context
  */
 void submenu_add_item(
+    Submenu* submenu,
+    FuriString* label,
+    uint32_t index,
+    SubmenuItemCallback callback,
+    void* callback_context);
+
+/** Add item to submenu using cstring label
+ *
+ * @param      submenu           Submenu instance
+ * @param      label             menu item label
+ * @param      index             menu item index, used for callback, may be
+ *                               the same with other items
+ * @param      callback          menu item callback
+ * @param      callback_context  menu item callback context
+ */
+void submenu_add_item_cstr(
     Submenu* submenu,
     const char* label,
     uint32_t index,
@@ -71,7 +87,14 @@ void submenu_set_selected_item(Submenu* submenu, uint32_t index);
  * @param      submenu  Submenu instance
  * @param      header   header to set
  */
-void submenu_set_header(Submenu* submenu, const char* header);
+void submenu_set_header(Submenu* submenu, FuriString* header);
+
+/** Set optional header for submenu from cstring
+ *
+ * @param      submenu  Submenu instance
+ * @param      header   header to set
+ */
+void submenu_set_header_cstr(Submenu* submenu, const char* header);
 
 #ifdef __cplusplus
 }

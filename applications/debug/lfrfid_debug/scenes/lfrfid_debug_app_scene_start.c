@@ -14,7 +14,7 @@ void lfrfid_debug_scene_start_on_enter(void* context) {
     LfRfidDebug* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Tune", SubmenuIndexTune, lfrfid_debug_scene_start_submenu_callback, app);
 
     submenu_set_selected_item(

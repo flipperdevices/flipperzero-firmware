@@ -14,15 +14,15 @@ void subghz_scene_test_submenu_callback(void* context, uint32_t index) {
 void subghz_scene_test_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Carrier",
         SubmenuIndexCarrier,
         subghz_scene_test_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu, "Packet", SubmenuIndexPacket, subghz_scene_test_submenu_callback, subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu, "Static", SubmenuIndexStatic, subghz_scene_test_submenu_callback, subghz);
 
     submenu_set_selected_item(

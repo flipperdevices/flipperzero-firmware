@@ -15,9 +15,9 @@ void picopass_scene_start_on_enter(void* context) {
     Picopass* picopass = context;
 
     Submenu* submenu = picopass->submenu;
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Read Card", SubmenuIndexRead, picopass_scene_start_submenu_callback, picopass);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Saved", SubmenuIndexSaved, picopass_scene_start_submenu_callback, picopass);
 
     submenu_set_selected_item(

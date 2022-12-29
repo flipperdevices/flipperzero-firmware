@@ -18,29 +18,29 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Emulate",
         SubmenuIndexEmulate,
         ibutton_scene_saved_key_menu_submenu_callback,
         ibutton);
     if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Write",
             SubmenuIndexWrite,
             ibutton_scene_saved_key_menu_submenu_callback,
             ibutton);
     }
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Edit", SubmenuIndexEdit, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Delete",
         SubmenuIndexDelete,
         ibutton_scene_saved_key_menu_submenu_callback,
         ibutton);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Info", SubmenuIndexInfo, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
 
     submenu_set_selected_item(

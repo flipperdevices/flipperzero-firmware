@@ -26,7 +26,7 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
 
     text_box_set_font(nfc->text_box, TextBoxFontHex);
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Card info",
         SubmenuIndexCardInfo,
@@ -46,7 +46,8 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
         char* label = buf;
         cap -= size + 1;
         buf += size + 1;
-        submenu_add_item(submenu, label, idx++, nfc_scene_mf_desfire_data_submenu_callback, nfc);
+        submenu_add_item_cstr(
+            submenu, label, idx++, nfc_scene_mf_desfire_data_submenu_callback, nfc);
     }
 
     if(state >= MifareDesfireDataStateItem) {

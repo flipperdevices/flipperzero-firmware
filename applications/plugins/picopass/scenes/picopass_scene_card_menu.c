@@ -15,10 +15,10 @@ void picopass_scene_card_menu_on_enter(void* context) {
     Picopass* picopass = context;
     Submenu* submenu = picopass->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Save", SubmenuIndexSave, picopass_scene_card_menu_submenu_callback, picopass);
     if(picopass->dev->dev_data.pacs.record.valid) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Save as LF",
             SubmenuIndexSaveAsLF,

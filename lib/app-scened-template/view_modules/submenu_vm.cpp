@@ -21,7 +21,7 @@ void SubmenuVM::add_item(
     uint32_t index,
     SubmenuItemCallback callback,
     void* callback_context) {
-    submenu_add_item(submenu, label, index, callback, callback_context);
+    submenu_add_item_cstr(submenu, label, index, callback, callback_context);
 }
 
 void SubmenuVM::set_selected_item(uint32_t index) {
@@ -29,5 +29,5 @@ void SubmenuVM::set_selected_item(uint32_t index) {
 }
 
 void SubmenuVM::set_header(const char* header) {
-    submenu_set_header(submenu, header);
+    submenu_set_header_cstr(submenu, header);
 }

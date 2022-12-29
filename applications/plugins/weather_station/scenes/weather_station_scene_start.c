@@ -15,13 +15,13 @@ void weather_station_scene_start_on_enter(void* context) {
     WeatherStationApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Read Weather Station",
         SubmenuIndexWeatherStationReceiver,
         weather_station_scene_start_submenu_callback,
         app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "About",
         SubmenuIndexWeatherStationAbout,

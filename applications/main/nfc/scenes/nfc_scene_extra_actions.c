@@ -16,19 +16,19 @@ void nfc_scene_extra_actions_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Read Specific Card Type",
         SubmenuIndexReadCardType,
         nfc_scene_extra_actions_submenu_callback,
         nfc);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Mifare Classic Keys",
         SubmenuIndexMfClassicKeys,
         nfc_scene_extra_actions_submenu_callback,
         nfc);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Unlock NTAG/Ultralight",
         SubmenuIndexMfUltralightUnlock,

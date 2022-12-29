@@ -20,30 +20,30 @@ void subghz_scene_start_on_enter(void* context) {
     if(subghz->state_notifications == SubGhzNotificationStateStarting) {
         subghz->state_notifications = SubGhzNotificationStateIDLE;
     }
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu, "Read", SubmenuIndexRead, subghz_scene_start_submenu_callback, subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Read RAW",
         SubmenuIndexReadRAW,
         subghz_scene_start_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu, "Saved", SubmenuIndexSaved, subghz_scene_start_submenu_callback, subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Add Manually",
         SubmenuIndexAddManualy,
         subghz_scene_start_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Frequency Analyzer",
         SubmenuIndexFrequencyAnalyzer,
         subghz_scene_start_submenu_callback,
         subghz);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             subghz->submenu, "Test", SubmenuIndexTest, subghz_scene_start_submenu_callback, subghz);
     }
     submenu_set_selected_item(

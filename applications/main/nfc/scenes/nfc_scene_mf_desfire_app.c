@@ -44,7 +44,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     } else {
         text_box_set_font(nfc->text_box, TextBoxFontHex);
-        submenu_add_item(
+        submenu_add_item_cstr(
             nfc->submenu,
             "App info",
             SubmenuIndexAppInfo,
@@ -65,7 +65,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
             char* label = buf;
             cap -= size + 1;
             buf += size + 1;
-            submenu_add_item(
+            submenu_add_item_cstr(
                 nfc->submenu, label, idx++, nfc_scene_mf_desfire_app_submenu_callback, nfc);
         }
 

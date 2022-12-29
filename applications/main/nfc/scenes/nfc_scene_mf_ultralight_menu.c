@@ -20,22 +20,22 @@ void nfc_scene_mf_ultralight_menu_on_enter(void* context) {
     MfUltralightData* data = &nfc->dev->dev_data.mf_ul_data;
 
     if(!mf_ul_is_full_capture(data)) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             "Unlock",
             SubmenuIndexUnlock,
             nfc_scene_mf_ultralight_menu_submenu_callback,
             nfc);
     }
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_ultralight_menu_submenu_callback, nfc);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Emulate",
         SubmenuIndexEmulate,
         nfc_scene_mf_ultralight_menu_submenu_callback,
         nfc);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_mf_ultralight_menu_submenu_callback, nfc);
 
     submenu_set_selected_item(

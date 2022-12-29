@@ -17,19 +17,19 @@ void infrared_scene_start_on_enter(void* context) {
     Submenu* submenu = infrared->submenu;
     SceneManager* scene_manager = infrared->scene_manager;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Universal Remotes",
         SubmenuIndexUniversalRemotes,
         infrared_scene_start_submenu_callback,
         infrared);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Learn New Remote",
         SubmenuIndexLearnNewRemote,
         infrared_scene_start_submenu_callback,
         infrared);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Saved Remotes",
         SubmenuIndexSavedRemotes,
@@ -37,7 +37,7 @@ void infrared_scene_start_on_enter(void* context) {
         infrared);
 
     if(infrared->app_state.is_debug_enabled) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu, "Debug", SubmenuIndexDebug, infrared_scene_start_submenu_callback, infrared);
     }
 

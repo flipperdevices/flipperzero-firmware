@@ -68,25 +68,25 @@ UsbTestApp* usb_test_app_alloc() {
 
     // Views
     app->submenu = submenu_alloc();
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "Enable", UsbTestSubmenuIndexEnable, usb_test_submenu_callback, app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "Disable", UsbTestSubmenuIndexDisable, usb_test_submenu_callback, app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "Restart", UsbTestSubmenuIndexRestart, usb_test_submenu_callback, app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "Single VCP", UsbTestSubmenuIndexVcpSingle, usb_test_submenu_callback, app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "Dual VCP", UsbTestSubmenuIndexVcpDual, usb_test_submenu_callback, app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "HID KB+Mouse", UsbTestSubmenuIndexHid, usb_test_submenu_callback, app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu,
         "HID KB+Mouse custom ID",
         UsbTestSubmenuIndexHidWithParams,
         usb_test_submenu_callback,
         app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         app->submenu, "HID U2F", UsbTestSubmenuIndexHidU2F, usb_test_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), usb_test_exit);
     view_dispatcher_add_view(app->view_dispatcher, 0, submenu_get_view(app->submenu));

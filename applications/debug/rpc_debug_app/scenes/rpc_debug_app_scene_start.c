@@ -14,13 +14,13 @@ void rpc_debug_app_scene_start_on_enter(void* context) {
     RpcDebugApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Test App Error",
         SubmenuIndexTestAppError,
         rpc_debug_app_scene_start_submenu_callback,
         app);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu,
         "Test Data Exchange",
         SubmenuIndexTestDataExchange,

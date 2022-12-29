@@ -46,7 +46,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     uint32_t pre_select_item = 0;
 
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        submenu_add_item(
+        submenu_add_item_cstr(
             submenu,
             FLIPPER_APPS[i].name,
             i,
@@ -68,7 +68,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         }
     }
 
-    submenu_set_header(
+    submenu_set_header_cstr(
         submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
     submenu_set_selected_item(submenu, pre_select_item); // If set during loop, visual glitch.
 

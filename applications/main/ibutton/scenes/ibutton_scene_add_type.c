@@ -15,11 +15,11 @@ void ibutton_scene_add_type_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Cyfral", SubmenuIndexCyfral, ibutton_scene_add_type_submenu_callback, ibutton);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Dallas", SubmenuIndexDallas, ibutton_scene_add_type_submenu_callback, ibutton);
-    submenu_add_item(
+    submenu_add_item_cstr(
         submenu, "Metakom", SubmenuIndexMetakom, ibutton_scene_add_type_submenu_callback, ibutton);
 
     submenu_set_selected_item(

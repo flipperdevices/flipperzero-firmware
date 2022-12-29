@@ -65,95 +65,95 @@ void subghz_scene_set_type_submenu_callback(void* context, uint32_t index) {
 void subghz_scene_set_type_on_enter(void* context) {
     SubGhz* subghz = context;
 
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Princeton_433",
         SubmenuIndexPricenton,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Nice Flo 12bit_433",
         SubmenuIndexNiceFlo12bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Nice Flo 24bit_433",
         SubmenuIndexNiceFlo24bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "CAME 12bit_433",
         SubmenuIndexCAME12bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "CAME 24bit_433",
         SubmenuIndexCAME24bit,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Linear_300",
         SubmenuIndexLinear_300_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "CAME TWEE",
         SubmenuIndexCAMETwee,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    // submenu_add_item(
+    // submenu_add_item_cstr(
     //     subghz->submenu, "Nero Sketch", SubmenuIndexNeroSketch, subghz_scene_set_type_submenu_callback, subghz);
-    // submenu_add_item(
+    // submenu_add_item_cstr(
     //     subghz->submenu, "Nero Radio", SubmenuIndexNeroRadio, subghz_scene_set_type_submenu_callback, subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Gate TX_433",
         SubmenuIndexGateTX,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "DoorHan_315",
         SubmenuIndexDoorHan_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "DoorHan_433",
         SubmenuIndexDoorHan_433_92,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "LiftMaster_315",
         SubmenuIndexLiftMaster_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "LiftMaster_390",
         SubmenuIndexLiftMaster_390_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Security+2.0_310",
         SubmenuIndexSecPlus_v2_310_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Security+2.0_315",
         SubmenuIndexSecPlus_v2_315_00,
         subghz_scene_set_type_submenu_callback,
         subghz);
-    submenu_add_item(
+    submenu_add_item_cstr(
         subghz->submenu,
         "Security+2.0_390",
         SubmenuIndexSecPlus_v2_390_00,
