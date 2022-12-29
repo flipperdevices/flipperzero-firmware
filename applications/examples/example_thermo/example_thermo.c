@@ -1,6 +1,9 @@
 #include <gui/gui.h>
 #include <gui/view_port.h>
 
+#include <core/thread.h>
+#include <core/kernel.h>
+
 #include <locale/locale.h>
 
 #include <one_wire/one_wire_host.h>
@@ -16,6 +19,10 @@
 #define DS18B20_DECIMAL_PART_MASK 0x0fU
 
 #define DS18B20_SIGN_MASK 0xf0U
+
+typedef enum {
+    ReaderThreadFlagExit = 1,
+} ReaderThreadFlag;
 
 typedef union {
     struct {
@@ -33,83 +40,13 @@ typedef union {
 typedef struct {
     Gui* gui;
     ViewPort* view_port;
+    FuriThread* reader_thread;
     FuriMessageQueue* event_queue;
     OneWireHost* onewire;
     char text_store[TEXT_STORE_SIZE];
     float temp_celsius;
     bool is_connected;
-    bool is_running;
 } ExampleThermoContext;
-
-static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
-    ExampleThermoContext* context = ctx;
-
-    const size_t middle_x = canvas_width(canvas) / 2U;
-
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, middle_x, 12, AlignCenter, AlignBottom, "Thermometer Demo");
-    canvas_draw_line(canvas, 0, 16, 128, 16);
-
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(
-        canvas, middle_x, 30, AlignCenter, AlignBottom, "Connnect thermometer");
-    canvas_draw_str_aligned(canvas, middle_x, 42, AlignCenter, AlignBottom, "to GPIO pin 17");
-
-    canvas_set_font(canvas, FontKeyboard);
-
-    if(context->is_connected) {
-        float temp;
-        char temp_units;
-
-        switch(locale_get_measurement_unit()) {
-        case LocaleMeasurementUnitsMetric:
-            temp = context->temp_celsius;
-            temp_units = 'C';
-            break;
-        case LocaleMeasurementUnitsImperial:
-            temp = locale_celsius_to_fahrenheit(context->temp_celsius);
-            temp_units = 'F';
-            break;
-        default:
-            furi_crash("Illegal measurement units");
-        }
-        snprintf(
-            context->text_store, TEXT_STORE_SIZE, "Temperature: %+.1f%c", (double)temp, temp_units);
-    } else {
-        strncpy(context->text_store, "-- No data --", TEXT_STORE_SIZE);
-    }
-
-    canvas_draw_str_aligned(canvas, middle_x, 58, AlignCenter, AlignBottom, context->text_store);
-}
-
-static void example_thermo_input_callback(InputEvent* event, void* ctx) {
-    ExampleThermoContext* context = ctx;
-    furi_message_queue_put(context->event_queue, event, FuriWaitForever);
-}
-
-static void example_thermo_handle_input(ExampleThermoContext* context) {
-    InputEvent event;
-    const FuriStatus status =
-        furi_message_queue_get(context->event_queue, &event, UPDATE_PERIOD_MS);
-
-    if((status != FuriStatusOk) || (event.type != InputTypeShort)) {
-        return;
-    }
-
-    if(event.key == InputKeyBack) {
-        context->is_running = false;
-    }
-}
-
-static void example_thermo_setup(ExampleThermoContext* context) {
-    OneWireHost* onewire = context->onewire;
-    onewire_host_start(onewire);
-}
-
-static void example_thermo_wrapup(ExampleThermoContext* context) {
-    OneWireHost* onewire = context->onewire;
-    onewire_host_stop(onewire);
-}
 
 static void example_thermo_request_temperature(ExampleThermoContext* context) {
     OneWireHost* onewire = context->onewire;
@@ -165,14 +102,102 @@ static void example_thermo_read_temperature(ExampleThermoContext* context) {
     context->is_connected = success;
 }
 
-static void example_thermo_run(ExampleThermoContext* context) {
-    context->is_running = true;
+static int32_t example_thermo_reader_thread_callback(void* ctx) {
+    ExampleThermoContext* context = ctx;
 
-    while(context->is_running) {
+    for(;;) {
+        /* Tell the termometer to start measuring the temperature. The process may take up to 750ms. */
         example_thermo_request_temperature(context);
+
+        /* Wait for the measurement to finish. At the same time wait for an exit signal. */
+        const uint32_t flags = furi_thread_flags_wait(ReaderThreadFlagExit, FuriFlagWaitAny, UPDATE_PERIOD_MS);
+
+        /* If an exit signal was received, return from this thread. */
+        if(flags != FuriFlagErrorTimeout) break;
+
+        /* The measurement is now ready, read it from the termometer. */
         example_thermo_read_temperature(context);
-        example_thermo_handle_input(context);
     }
+
+    return 0;
+}
+
+static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
+    ExampleThermoContext* context = ctx;
+
+    const size_t middle_x = canvas_width(canvas) / 2U;
+
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, middle_x, 12, AlignCenter, AlignBottom, "Thermometer Demo");
+    canvas_draw_line(canvas, 0, 16, 128, 16);
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(
+        canvas, middle_x, 30, AlignCenter, AlignBottom, "Connnect thermometer");
+    canvas_draw_str_aligned(canvas, middle_x, 42, AlignCenter, AlignBottom, "to GPIO pin 17");
+
+    canvas_set_font(canvas, FontKeyboard);
+
+    if(context->is_connected) {
+        float temp;
+        char temp_units;
+
+        switch(locale_get_measurement_unit()) {
+        case LocaleMeasurementUnitsMetric:
+            temp = context->temp_celsius;
+            temp_units = 'C';
+            break;
+        case LocaleMeasurementUnitsImperial:
+            temp = locale_celsius_to_fahrenheit(context->temp_celsius);
+            temp_units = 'F';
+            break;
+        default:
+            furi_crash("Illegal measurement units");
+        }
+        snprintf(
+            context->text_store, TEXT_STORE_SIZE, "Temperature: %+.1f%c", (double)temp, temp_units);
+    } else {
+        strncpy(context->text_store, "-- No data --", TEXT_STORE_SIZE);
+    }
+
+    canvas_draw_str_aligned(canvas, middle_x, 58, AlignCenter, AlignBottom, context->text_store);
+}
+
+static void example_thermo_input_callback(InputEvent* event, void* ctx) {
+    ExampleThermoContext* context = ctx;
+    furi_message_queue_put(context->event_queue, event, FuriWaitForever);
+}
+
+
+static void example_thermo_run(ExampleThermoContext* context) {
+    furi_thread_start(context->reader_thread);
+
+    for(bool is_running = true; is_running;) {
+        InputEvent event;
+        const FuriStatus status =
+            furi_message_queue_get(context->event_queue, &event, FuriWaitForever);
+
+        if((status != FuriStatusOk) || (event.type != InputTypeShort)) {
+            continue;
+        }
+
+        if(event.key == InputKeyBack) {
+            is_running = false;
+        }
+    }
+
+    furi_thread_flags_set(furi_thread_get_id(context->reader_thread), ReaderThreadFlagExit);
+    furi_thread_join(context->reader_thread);
+}
+
+static void example_thermo_setup(ExampleThermoContext* context) {
+    OneWireHost* onewire = context->onewire;
+    onewire_host_start(onewire);
+}
+
+static void example_thermo_wrapup(ExampleThermoContext* context) {
+    OneWireHost* onewire = context->onewire;
+    onewire_host_stop(onewire);
 }
 
 static ExampleThermoContext* example_thermo_context_alloc() {
@@ -183,6 +208,11 @@ static ExampleThermoContext* example_thermo_context_alloc() {
     view_port_input_callback_set(context->view_port, example_thermo_input_callback, context);
 
     context->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+
+    context->reader_thread = furi_thread_alloc();
+    furi_thread_set_stack_size(context->reader_thread, 1024U);
+    furi_thread_set_context(context->reader_thread, context);
+    furi_thread_set_callback(context->reader_thread, example_thermo_reader_thread_callback);
 
     context->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(context->gui, context->view_port, GuiLayerFullscreen);
@@ -197,6 +227,7 @@ static void example_thermo_context_free(ExampleThermoContext* context) {
     gui_remove_view_port(context->gui, context->view_port);
 
     onewire_host_free(context->onewire);
+    furi_thread_free(context->reader_thread);
     furi_message_queue_free(context->event_queue);
     view_port_free(context->view_port);
 
