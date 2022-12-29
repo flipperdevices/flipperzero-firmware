@@ -190,14 +190,9 @@ void furi_thread_set_context(FuriThread* thread, void* context) {
 
 void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority) {
     furi_assert(thread);
+    furi_assert(thread->state == FuriThreadStateStopped);
     furi_assert(priority >= FuriThreadPriorityIdle && priority <= FuriThreadPriorityIsr);
     thread->priority = priority;
-
-    while(thread->state == FuriThreadStateStarting) furi_delay_tick(1);
-
-    if(thread->state == FuriThreadStateRunning) {
-        vTaskPrioritySet(thread->task_handle, priority);
-    }
 }
 
 void furi_thread_set_state_callback(FuriThread* thread, FuriThreadStateCallback callback) {

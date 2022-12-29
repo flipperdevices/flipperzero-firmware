@@ -71,7 +71,7 @@ static void direct_draw_run(DirectDraw* instance) {
     size_t counter = 0;
     float fps = 0;
 
-    furi_thread_set_priority(furi_thread_get_current(), FuriThreadPriorityIdle);
+    vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
 
     do {
         size_t elapsed = DWT->CYCCNT - start;
