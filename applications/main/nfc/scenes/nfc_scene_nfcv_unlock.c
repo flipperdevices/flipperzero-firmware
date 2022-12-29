@@ -42,10 +42,10 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
             popup_reset(popup);
 
             if(nfc_worker_get_state(nfc->worker) == NfcWorkerStateNfcVUnlockAndSave) {
-                nfc_text_store_set(
-                    nfc,
-                    "%s/SLIX_%02X%02X%02X%02X%02X%02X%02X%02X%s",
-                    NFC_APP_FOLDER,
+                snprintf(
+                    nfc->dev->dev_name,
+                    sizeof(nfc->dev->dev_name),
+                    "SLIX_%02X%02X%02X%02X%02X%02X%02X%02X",
                     nfc_data->uid[0],
                     nfc_data->uid[1],
                     nfc_data->uid[2],
@@ -53,12 +53,11 @@ void nfc_scene_nfcv_unlock_set_state(Nfc* nfc, NfcSceneNfcVUnlockState state) {
                     nfc_data->uid[4],
                     nfc_data->uid[5],
                     nfc_data->uid[6],
-                    nfc_data->uid[7],
-                    NFC_APP_EXTENSION);
+                    nfc_data->uid[7]);
 
                 nfc->dev->format = NfcDeviceSaveFormatNfcV;
 
-                if(nfc_device_save(nfc->dev, nfc->text_store)) {
+                if(nfc_save_file(nfc)) {
                     popup_set_header(popup, "Successfully\nsaved", 94, 3, AlignCenter, AlignTop);
                 } else {
                     popup_set_header(
