@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
 - Added: [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
+- Added: [USB Midi Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 
 <a name="release">
 
@@ -294,7 +295,7 @@ $ ./fbt dolphin_ext
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
-- [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) with thanks to [xMasterX](https://github.com/xMasterX/unleashed-extra-pack)
+- [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` 
