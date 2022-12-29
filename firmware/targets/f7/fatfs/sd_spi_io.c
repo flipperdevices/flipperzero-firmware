@@ -209,7 +209,7 @@ static uint8_t sd_spi_wait_for_data_and_read(void) {
     return responce;
 }
 
-SdSpiStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
+static SdSpiStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     uint8_t byte;
 
@@ -451,7 +451,7 @@ static SdSpiStatus sd_spi_init_spi_mode(void) {
     return SdSpiStatusOK;
 }
 
-SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
+static SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
     uint16_t counter = 0;
     uint8_t csd_data[16];
     SdSpiStatus ret = SdSpiStatusError;
@@ -536,7 +536,7 @@ SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
     return ret;
 }
 
-SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
+static SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
     uint16_t counter = 0;
     uint8_t cid_data[16];
     SdSpiStatus ret = SdSpiStatusError;
@@ -581,6 +581,153 @@ SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
     sd_spi_deselect_card_and_purge();
 
     return ret;
+}
+
+static inline bool sd_cache_get(uint32_t address, uint32_t* data) {
+    uint8_t* cached_data = sector_cache_get(address);
+    if(cached_data) {
+        memcpy(data, cached_data, SD_BLOCK_SIZE);
+        return true;
+    }
+    return false;
+}
+
+static inline void sd_cache_put(uint32_t address, uint32_t* data) {
+    sector_cache_put(address, (uint8_t*)data);
+}
+
+static inline void sd_cache_invalidate_range(uint32_t start_sector, uint32_t end_sector) {
+    sector_cache_invalidate_range(start_sector, end_sector);
+}
+
+static SdSpiStatus
+    sd_spi_cmd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms) {
+    uint32_t block_address = address;
+    uint32_t offset = 0;
+
+    // Send CMD16: R1 response (0x00: no errors)
+    SdSpiCmdAnswer response =
+        sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
+    sd_spi_deselect_card_and_purge();
+
+    if(response.r1 != SdSpi_R1_NO_ERROR) {
+        return SdSpiStatusError;
+    }
+
+    if(!sd_high_capacity) {
+        block_address = address * SD_BLOCK_SIZE;
+    }
+
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
+    while(blocks--) {
+        // CMD17 (SD_CMD_READ_SINGLE_BLOCK): R1 response (0x00: no errors)
+        response =
+            sd_spi_send_cmd(SdSpiCmd_READ_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
+        if(response.r1 != SdSpi_R1_NO_ERROR) {
+            sd_spi_deselect_card_and_purge();
+            return SdSpiStatusError;
+        }
+
+        // Wait for the data start token
+        if(sd_spi_wait_for_data(SdSpiToken_START_DATA_SINGLE_BLOCK_READ, timeout_ms) ==
+           SdSpiStatusOK) {
+            // Read the data block
+            // TODO: DMA transfer can be used here
+            sd_spi_read_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
+            sd_spi_purge_crc();
+
+            // increase offset
+            offset += SD_BLOCK_SIZE;
+
+            // increase block address
+            if(sd_high_capacity) {
+                block_address += 1;
+            } else {
+                block_address += SD_BLOCK_SIZE;
+            }
+        } else {
+            sd_spi_deselect_card_and_purge();
+            return SdSpiStatusError;
+        }
+
+        sd_spi_deselect_card_and_purge();
+
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            return SdSpiStatusTimeout;
+        }
+    }
+
+    return SdSpiStatusOK;
+}
+
+static SdSpiStatus sd_spi_cmd_write_blocks(
+    uint32_t* data,
+    uint32_t address,
+    uint32_t blocks,
+    uint32_t timeout_ms) {
+    uint32_t block_address = address;
+    uint32_t offset = 0;
+
+    // TODO: can be bugged, need to check end_sector address
+    sd_cache_invalidate_range(address, address + blocks);
+
+    // Send CMD16: R1 response (0x00: no errors)
+    SdSpiCmdAnswer response =
+        sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
+    sd_spi_deselect_card_and_purge();
+
+    if(response.r1 != SdSpi_R1_NO_ERROR) {
+        return SdSpiStatusError;
+    }
+
+    if(!sd_high_capacity) {
+        block_address = address * SD_BLOCK_SIZE;
+    }
+
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
+    while(blocks--) {
+        // CMD24 (SdSpiCmd_WRITE_SINGLE_BLOCK): R1 response (0x00: no errors)
+        response = sd_spi_send_cmd(
+            SdSpiCmd_WRITE_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
+        if(response.r1 != SdSpi_R1_NO_ERROR) {
+            sd_spi_deselect_card_and_purge();
+            return SdSpiStatusError;
+        }
+
+        // Send dummy byte for NWR timing : one byte between CMD_WRITE and TOKEN
+        // TODO: check bytes count
+        sd_spi_write_byte(SD_DUMMY_BYTE);
+        sd_spi_write_byte(SD_DUMMY_BYTE);
+
+        // Send the data start token
+        sd_spi_write_byte(SdSpiToken_START_DATA_SINGLE_BLOCK_WRITE);
+        sd_spi_write_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
+        sd_spi_purge_crc();
+
+        // Read data response
+        SdSpiDataResponce data_responce = sd_spi_get_data_response(timeout_ms);
+        sd_spi_deselect_card_and_purge();
+
+        if(data_responce != SdSpiDataResponceOK) {
+            return SdSpiStatusError;
+        }
+
+        // increase offset
+        offset += SD_BLOCK_SIZE;
+
+        // increase block address
+        if(sd_high_capacity) {
+            block_address += 1;
+        } else {
+            block_address += SD_BLOCK_SIZE;
+        }
+
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            return SdSpiStatusTimeout;
+        }
+    }
+
+    return SdSpiStatusOK;
 }
 
 uint8_t sd_max_mount_retry_count() {
@@ -677,83 +824,6 @@ SdSpiStatus sd_get_card_info(SD_CardInfo* card_info) {
     return status;
 }
 
-static SdSpiStatus
-    sd_spi_cmd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms) {
-    uint32_t block_address = address;
-    uint32_t offset = 0;
-
-    // Send CMD16: R1 response (0x00: no errors)
-    SdSpiCmdAnswer response =
-        sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
-    sd_spi_deselect_card_and_purge();
-
-    if(response.r1 != SdSpi_R1_NO_ERROR) {
-        return SdSpiStatusError;
-    }
-
-    if(!sd_high_capacity) {
-        block_address = address * SD_BLOCK_SIZE;
-    }
-
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
-    while(blocks--) {
-        // CMD17 (SD_CMD_READ_SINGLE_BLOCK): R1 response (0x00: no errors)
-        response =
-            sd_spi_send_cmd(SdSpiCmd_READ_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
-        if(response.r1 != SdSpi_R1_NO_ERROR) {
-            sd_spi_deselect_card_and_purge();
-            return SdSpiStatusError;
-        }
-
-        // Wait for the data start token
-        if(sd_spi_wait_for_data(SdSpiToken_START_DATA_SINGLE_BLOCK_READ, timeout_ms) ==
-           SdSpiStatusOK) {
-            // Read the data block
-            // TODO: DMA transfer can be used here
-            sd_spi_read_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
-            sd_spi_purge_crc();
-
-            // increase offset
-            offset += SD_BLOCK_SIZE;
-
-            // increase block address
-            if(sd_high_capacity) {
-                block_address += 1;
-            } else {
-                block_address += SD_BLOCK_SIZE;
-            }
-        } else {
-            sd_spi_deselect_card_and_purge();
-            return SdSpiStatusError;
-        }
-
-        sd_spi_deselect_card_and_purge();
-
-        if(furi_hal_cortex_timer_is_expired(timer)) {
-            return SdSpiStatusTimeout;
-        }
-    }
-
-    return SdSpiStatusOK;
-}
-
-static inline bool sd_cache_get(uint32_t address, uint32_t* data) {
-    uint8_t* cached_data = sector_cache_get(address);
-    if(cached_data) {
-        memcpy(data, cached_data, SD_BLOCK_SIZE);
-        return true;
-    }
-    return false;
-}
-
-static inline void sd_cache_put(uint32_t address, uint32_t* data) {
-    sector_cache_put(address, (uint8_t*)data);
-}
-
-static inline void sd_cache_invalidate_range(uint32_t start_sector, uint32_t end_sector) {
-    sector_cache_invalidate_range(start_sector, end_sector);
-}
-
 SdSpiStatus
     sd_read_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms) {
     SdSpiStatus status = SdSpiStatusError;
@@ -771,76 +841,6 @@ SdSpiStatus
     }
 
     return status;
-}
-
-static SdSpiStatus sd_spi_cmd_write_blocks(
-    uint32_t* data,
-    uint32_t address,
-    uint32_t blocks,
-    uint32_t timeout_ms) {
-    uint32_t block_address = address;
-    uint32_t offset = 0;
-
-    // TODO: can be bugged, need to check end_sector address
-    sd_cache_invalidate_range(address, address + blocks);
-
-    // Send CMD16: R1 response (0x00: no errors)
-    SdSpiCmdAnswer response =
-        sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
-    sd_spi_deselect_card_and_purge();
-
-    if(response.r1 != SdSpi_R1_NO_ERROR) {
-        return SdSpiStatusError;
-    }
-
-    if(!sd_high_capacity) {
-        block_address = address * SD_BLOCK_SIZE;
-    }
-
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
-    while(blocks--) {
-        // CMD24 (SdSpiCmd_WRITE_SINGLE_BLOCK): R1 response (0x00: no errors)
-        response = sd_spi_send_cmd(
-            SdSpiCmd_WRITE_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
-        if(response.r1 != SdSpi_R1_NO_ERROR) {
-            sd_spi_deselect_card_and_purge();
-            return SdSpiStatusError;
-        }
-
-        // Send dummy byte for NWR timing : one byte between CMD_WRITE and TOKEN
-        // TODO: check bytes count
-        sd_spi_write_byte(SD_DUMMY_BYTE);
-        sd_spi_write_byte(SD_DUMMY_BYTE);
-
-        // Send the data start token
-        sd_spi_write_byte(SdSpiToken_START_DATA_SINGLE_BLOCK_WRITE);
-        sd_spi_write_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
-        sd_spi_purge_crc();
-
-        // Read data response
-        SdSpiDataResponce data_responce = sd_spi_get_data_response(timeout_ms);
-        sd_spi_deselect_card_and_purge();
-
-        if(data_responce != SdSpiDataResponceOK) {
-            return SdSpiStatusError;
-        }
-
-        // increase offset
-        offset += SD_BLOCK_SIZE;
-
-        // increase block address
-        if(sd_high_capacity) {
-            block_address += 1;
-        } else {
-            block_address += SD_BLOCK_SIZE;
-        }
-
-        if(furi_hal_cortex_timer_is_expired(timer)) {
-            return SdSpiStatusTimeout;
-        }
-    }
-
-    return SdSpiStatusOK;
 }
 
 SdSpiStatus
