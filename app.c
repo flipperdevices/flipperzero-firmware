@@ -22,8 +22,6 @@ extern const SubGhzProtocolRegistry protoview_protocol_registry;
  * The 'idx' argument is the first sample to render in the circular
  * buffer. */
 void render_signal(Canvas *const canvas, RawSamplesBuffer *buf, uint32_t idx) {
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 0, 0, 127, 63);
     canvas_set_color(canvas, ColorBlack);
 
     int rows = 8;
@@ -151,9 +149,47 @@ void scan_for_signal(ProtoViewApp *app) {
     raw_samples_free(copy);
 }
 
+/* Draw some white text with a black border. */
+void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str)
+{
+    struct {
+        uint8_t x; uint8_t y;
+    } dir[8] = {
+        {-1,-1},
+        {0,-1},
+        {1,-1},
+        {1,0},
+        {1,1},
+        {0,1},
+        {-1,1},
+        {-1,0}
+    };
+
+    /* Rotate in all the directions writing the same string in black
+     * to create a border, then write the actaul string in white in the
+     * middle. */
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+    for (int j = 0; j < 8; j++)
+        canvas_draw_str(canvas,x+dir[j].x,y+dir[j].y,str);
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_str(canvas,x,y,str);
+}
+
 static void render_callback(Canvas *const canvas, void *ctx) {
     UNUSED(ctx);
+
+    /* Clear screen. */
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 0, 0, 127, 63);
+
+    /* Show signal. */
     render_signal(canvas, DetectedSamples, 0);
+
+    /* Show signal information. */
+    char buf[64];
+    snprintf(buf,sizeof(buf),"%luus", (unsigned long)DetectedSamples->short_pulse_dur);
+    canvas_draw_str_with_border(canvas, 100, 63, buf);
 }
 
 /* Here all we do is putting the events into the queue that will be handled

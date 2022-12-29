@@ -56,6 +56,7 @@ void raw_samples_copy(RawSamplesBuffer *dst, RawSamplesBuffer *src) {
     furi_mutex_acquire(src->mutex,FuriWaitForever);
     furi_mutex_acquire(dst->mutex,FuriWaitForever);
     dst->idx = src->idx;
+    dst->short_pulse_dur = src->short_pulse_dur;
     memcpy(dst->level,src->level,sizeof(dst->level));
     memcpy(dst->dur,src->dur,sizeof(dst->dur));
     furi_mutex_release(src->mutex);
