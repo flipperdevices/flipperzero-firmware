@@ -73,7 +73,7 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
     furi_hal_ibutton_pin_low();
 
     // NFC TEST
-    furi_hal_nfc_exit_sleep();
+    //furi_hal_nfc_exit_sleep();
 
     // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting
 
