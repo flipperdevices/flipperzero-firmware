@@ -1,19 +1,40 @@
-#include <furi.h>
-#include <furi_hal.h>
-#include <core/log.h>
-
 #include <gui/gui.h>
 #include <gui/view_port.h>
 
 #include <locale/locale.h>
 
-#define UPDATE_PERIOD_MS 500UL
+#include <one_wire/one_wire_host.h>
+
+#define UPDATE_PERIOD_MS 1000UL
 #define TEXT_STORE_SIZE 64U
+
+#define DS18B20_CMD_CONVERT 0x44U
+#define DS18B20_CMD_READ_SCRATCHPAD 0xbeU
+
+#define DS18B20_CFG_RESOLUTION_POS 5U
+#define DS18B20_CFG_RESOLUTION_MASK 0x03U
+#define DS18B20_DECIMAL_PART_MASK 0x0fU
+
+#define DS18B20_SIGN_MASK 0xf0U
+
+typedef union {
+    struct {
+        uint8_t temp_lsb;
+        uint8_t temp_msb;
+        uint8_t user_alarm_high;
+        uint8_t user_alarm_low;
+        uint8_t config;
+        const uint8_t reserved[3];
+        uint8_t crc;
+    } fields;
+    uint8_t bytes[9];
+} DS18B20Scratchpad;
 
 typedef struct {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
+    OneWireHost* onewire;
     char text_store[TEXT_STORE_SIZE];
     float temp_celsius;
     bool is_connected;
@@ -30,7 +51,8 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 0, 16, 128, 16);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, middle_x, 30, AlignCenter, AlignBottom, "Connnect thermometer");
+    canvas_draw_str_aligned(
+        canvas, middle_x, 30, AlignCenter, AlignBottom, "Connnect thermometer");
     canvas_draw_str_aligned(canvas, middle_x, 42, AlignCenter, AlignBottom, "to GPIO pin 17");
 
     canvas_set_font(canvas, FontKeyboard);
@@ -51,11 +73,11 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
         default:
             furi_crash("Illegal measurement units");
         }
-        snprintf(context->text_store, TEXT_STORE_SIZE, "Temperature: %+.1f%c", (double)temp, temp_units);
+        snprintf(
+            context->text_store, TEXT_STORE_SIZE, "Temperature: %+.1f%c", (double)temp, temp_units);
     } else {
         strncpy(context->text_store, "-- No data --", TEXT_STORE_SIZE);
     }
-
 
     canvas_draw_str_aligned(canvas, middle_x, 58, AlignCenter, AlignBottom, context->text_store);
 }
@@ -67,7 +89,8 @@ static void example_thermo_input_callback(InputEvent* event, void* ctx) {
 
 static void example_thermo_handle_input(ExampleThermoContext* context) {
     InputEvent event;
-    const FuriStatus status = furi_message_queue_get(context->event_queue, &event, UPDATE_PERIOD_MS);
+    const FuriStatus status =
+        furi_message_queue_get(context->event_queue, &event, UPDATE_PERIOD_MS);
 
     if((status != FuriStatusOk) || (event.type != InputTypeShort)) {
         return;
@@ -78,16 +101,75 @@ static void example_thermo_handle_input(ExampleThermoContext* context) {
     }
 }
 
+static void example_thermo_setup(ExampleThermoContext* context) {
+    OneWireHost* onewire = context->onewire;
+    onewire_host_start(onewire);
+}
+
+static void example_thermo_wrapup(ExampleThermoContext* context) {
+    OneWireHost* onewire = context->onewire;
+    onewire_host_stop(onewire);
+}
+
+static void example_thermo_request_temperature(ExampleThermoContext* context) {
+    OneWireHost* onewire = context->onewire;
+
+    FURI_CRITICAL_ENTER();
+
+    bool success = false;
+    do {
+        if(!onewire_host_reset(onewire)) break;
+        onewire_host_skip(onewire);
+        onewire_host_write(onewire, DS18B20_CMD_CONVERT);
+        success = true;
+    } while(false);
+
+    FURI_CRITICAL_EXIT();
+
+    context->is_connected = success;
+}
+
 static void example_thermo_read_temperature(ExampleThermoContext* context) {
-    context->is_connected = true;
-    context->temp_celsius += 0.1f;
+    OneWireHost* onewire = context->onewire;
+
+    FURI_CRITICAL_ENTER();
+
+    bool success = false;
+    do {
+        if(!onewire_host_reset(onewire)) break;
+        onewire_host_skip(onewire);
+
+        DS18B20Scratchpad buf;
+        onewire_host_write(onewire, DS18B20_CMD_READ_SCRATCHPAD);
+        onewire_host_read_bytes(onewire, buf.bytes, sizeof(buf.bytes));
+
+        const uint8_t resolution_mode = (buf.fields.config >> DS18B20_CFG_RESOLUTION_POS) &
+                                        DS18B20_CFG_RESOLUTION_MASK;
+        const uint8_t decimal_mask =
+            (DS18B20_DECIMAL_PART_MASK << (DS18B20_CFG_RESOLUTION_MASK - resolution_mode)) &
+            DS18B20_DECIMAL_PART_MASK;
+
+        const uint8_t integer_part = (buf.fields.temp_msb << 4U) | (buf.fields.temp_lsb >> 4U);
+        const uint8_t decimal_part = buf.fields.temp_lsb & decimal_mask;
+
+        const bool is_negative = (buf.fields.temp_msb & DS18B20_SIGN_MASK) != 0;
+        const float temp_celsius_abs = integer_part + decimal_part / 16.f;
+
+        context->temp_celsius = is_negative ? -temp_celsius_abs : temp_celsius_abs;
+
+        success = true;
+    } while(false);
+
+    FURI_CRITICAL_EXIT();
+
+    context->is_connected = success;
 }
 
 static void example_thermo_run(ExampleThermoContext* context) {
     context->is_running = true;
-    context->temp_celsius = -20.0f;
 
     while(context->is_running) {
+        example_thermo_request_temperature(context);
         example_thermo_read_temperature(context);
         example_thermo_handle_input(context);
     }
@@ -105,6 +187,8 @@ static ExampleThermoContext* example_thermo_context_alloc() {
     context->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(context->gui, context->view_port, GuiLayerFullscreen);
 
+    context->onewire = onewire_host_alloc();
+
     return context;
 }
 
@@ -112,6 +196,7 @@ static void example_thermo_context_free(ExampleThermoContext* context) {
     view_port_enabled_set(context->view_port, false);
     gui_remove_view_port(context->gui, context->view_port);
 
+    onewire_host_free(context->onewire);
     furi_message_queue_free(context->event_queue);
     view_port_free(context->view_port);
 
@@ -122,7 +207,11 @@ int32_t example_thermo_main(void* p) {
     UNUSED(p);
 
     ExampleThermoContext* context = example_thermo_context_alloc();
+    example_thermo_setup(context);
+
     example_thermo_run(context);
+
+    example_thermo_wrapup(context);
     example_thermo_context_free(context);
 
     return 0;
