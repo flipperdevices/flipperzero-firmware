@@ -448,6 +448,7 @@ static SdSpiStatus sd_spi_init_spi_mode(void) {
         return SdSpiStatusError;
     }
 
+    sd_spi_debug("SD card is %s", sd_high_capacity ? "SDHC or SDXC" : "SDSC");
     return SdSpiStatusOK;
 }
 
@@ -668,9 +669,6 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
     uint32_t block_address = address;
     uint32_t offset = 0;
 
-    // TODO: can be bugged, need to check end_sector address
-    sd_cache_invalidate_range(address, address + blocks);
-
     // Send CMD16: R1 response (0x00: no errors)
     SdSpiCmdAnswer response =
         sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
@@ -845,6 +843,7 @@ SdSpiStatus
 
 SdSpiStatus
     sd_write_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms) {
+    sd_cache_invalidate_range(address, address + blocks);
     SdSpiStatus status = sd_spi_cmd_write_blocks(data, address, blocks, timeout_ms);
     return status;
 }
