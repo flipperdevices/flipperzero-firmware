@@ -318,7 +318,6 @@ int32_t protoview_app_entry(void* p) {
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if (qstat == FuriStatusOk) {
-            uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
             if (input.key == InputKeyBack) {
                 app->running = 0;
             } else if (input.key == InputKeyOk) {
@@ -326,8 +325,10 @@ int32_t protoview_app_entry(void* p) {
                 raw_samples_reset(DetectedSamples);
                 raw_samples_reset(RawSamples);
             } else if (input.key == InputKeyDown) {
+                uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;
                 if (app->us_scale < 500) app->us_scale += scale_step;
             } else if (input.key == InputKeyUp) {
+                uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
                 if (app->us_scale > 10) app->us_scale -= scale_step;
             }
 
