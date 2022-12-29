@@ -1,0 +1,4 @@
+version: 2
+updates:
+  # Track official and unleashed firmware as a submodule
+  - package-ecosystem: "gitsubmodule"

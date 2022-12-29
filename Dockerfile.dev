@@ -1,8 +1,0 @@
-# syntax=docker/dockerfile:1
-FROM python:latest
-
-WORKDIR /development_root
-
-COPY ./tools /development_root/tools
-
-CMD bash tools/install.sh

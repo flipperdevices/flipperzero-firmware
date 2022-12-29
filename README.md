@@ -26,20 +26,11 @@ Will do(if I've got time):
 * Blind mode(no timer updates, just background and notification) for more energy saving
 
 ###  Build and Package
-Run application build in docker environment
+Build application
 ```shell
-# This will leave container runnning with a tag flipp-pomodoro-flipper-development-1
-docker compose -f "docker-compose.development.yml" up -d --build
-
-# You can exec bash from inside the contaier https://docs.docker.com/engine/reference/commandline/exec/
-# Once you inside the contaier
-
-# One time run:
-bash tools/install.sh
-
-# Every build run
+# For standard(official) firmware
 bash tools/build.sh
-# Build artifacts will be copied to dist directory.
-```
 
-Alternatively you may use local environment for defelopment. You can find actual instructions [here](https://github.com/flipperdevices/flipperzero-firmware).
+# For unleashed firmware
+bash tools/build.sh -f unleashed 
+```
