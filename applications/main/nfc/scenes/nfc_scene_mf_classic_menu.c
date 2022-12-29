@@ -18,19 +18,19 @@ void nfc_scene_mf_classic_menu_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_classic_menu_submenu_callback, nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_mf_classic_menu_submenu_callback, nfc);
     if(!mf_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data)) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Detect reader",
             SubmenuIndexDetectReader,
             nfc_scene_mf_classic_menu_submenu_callback,
             nfc);
     }
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_mf_classic_menu_submenu_callback, nfc);
 
     submenu_set_selected_item(

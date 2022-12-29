@@ -19,37 +19,37 @@ void storage_settings_scene_start_on_enter(void* context) {
     StorageSettings* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "About Internal Storage",
         StorageSettingsStartSubmenuIndexInternalInfo,
         storage_settings_scene_start_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "About SD Card",
         StorageSettingsStartSubmenuIndexSDInfo,
         storage_settings_scene_start_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Unmount SD Card",
         StorageSettingsStartSubmenuIndexUnmount,
         storage_settings_scene_start_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Format SD Card",
         StorageSettingsStartSubmenuIndexFormat,
         storage_settings_scene_start_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Benchmark SD Card",
         StorageSettingsStartSubmenuIndexBenchy,
         storage_settings_scene_start_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Factory Reset",
         StorageSettingsStartSubmenuIndexFactoryReset,

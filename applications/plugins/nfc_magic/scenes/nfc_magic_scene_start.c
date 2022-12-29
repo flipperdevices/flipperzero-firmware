@@ -14,19 +14,19 @@ void nfc_magic_scene_start_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
 
     Submenu* submenu = nfc_magic->submenu;
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Check Magic Tag",
         SubmenuIndexCheck,
         nfc_magic_scene_start_submenu_callback,
         nfc_magic);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Write Gen1A",
         SubmenuIndexWriteGen1A,
         nfc_magic_scene_start_submenu_callback,
         nfc_magic);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Wipe", SubmenuIndexWipe, nfc_magic_scene_start_submenu_callback, nfc_magic);
 
     submenu_set_selected_item(

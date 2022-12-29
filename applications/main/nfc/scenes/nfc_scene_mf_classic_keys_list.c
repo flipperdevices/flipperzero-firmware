@@ -28,7 +28,7 @@ void nfc_scene_mf_classic_keys_list_prepare(Nfc* nfc, MfClassicDict* dict) {
         strncpy(current_key, furi_string_get_cstr(temp_key), 12);
         MfClassicUserKeys_push_back(nfc->mfc_key_strs, current_key);
         FURI_LOG_D("ListKeys", "Key %lu: %s", index, current_key);
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu, current_key, index++, nfc_scene_mf_classic_keys_list_submenu_callback, nfc);
     }
     furi_string_free(temp_key);

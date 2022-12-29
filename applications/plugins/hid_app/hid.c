@@ -98,23 +98,23 @@ Hid* hid_alloc(HidTransport transport) {
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     // Device Type Submenu view
     app->device_type_submenu = submenu_alloc();
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->device_type_submenu, "Keynote", HidSubmenuIndexKeynote, hid_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->device_type_submenu, "Keyboard", HidSubmenuIndexKeyboard, hid_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->device_type_submenu, "Media", HidSubmenuIndexMedia, hid_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->device_type_submenu, "Mouse", HidSubmenuIndexMouse, hid_submenu_callback, app);
     if(app->transport == HidTransportBle) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             app->device_type_submenu,
             "TikTok Controller",
             HidSubmenuIndexTikTok,
             hid_submenu_callback,
             app);
     }
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->device_type_submenu,
         "Mouse Jiggler",
         HidSubmenuIndexMouseJiggler,

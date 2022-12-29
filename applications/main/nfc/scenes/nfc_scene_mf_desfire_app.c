@@ -44,7 +44,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     } else {
         text_box_set_font(nfc->text_box, TextBoxFontHex);
-        submenu_add_item_cstr(
+        submenu_add_item(
             nfc->submenu,
             "App info",
             SubmenuIndexAppInfo,
@@ -56,7 +56,11 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
         for(MifareDesfireFile* file = app->file_head; file; file = file->next) {
             furi_string_printf(label, "File %d", file->id);
             submenu_add_item(
-                nfc->submenu, label, idx++, nfc_scene_mf_desfire_app_submenu_callback, nfc);
+                nfc->submenu,
+                furi_string_get_cstr(label),
+                idx++,
+                nfc_scene_mf_desfire_app_submenu_callback,
+                nfc);
         }
         furi_string_free(label);
 

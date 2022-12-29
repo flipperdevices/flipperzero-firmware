@@ -194,29 +194,6 @@ View* submenu_get_view(Submenu* submenu) {
 
 void submenu_add_item(
     Submenu* submenu,
-    FuriString* label,
-    uint32_t index,
-    SubmenuItemCallback callback,
-    void* callback_context) {
-    SubmenuItem* item = NULL;
-    furi_assert(label);
-    furi_assert(submenu);
-
-    with_view_model(
-        submenu->view,
-        SubmenuModel * model,
-        {
-            item = SubmenuItemArray_push_new(model->items);
-            furi_string_set(item->label, label);
-            item->index = index;
-            item->callback = callback;
-            item->callback_context = callback_context;
-        },
-        true);
-}
-
-void submenu_add_item_cstr(
-    Submenu* submenu,
     const char* label,
     uint32_t index,
     SubmenuItemCallback callback,

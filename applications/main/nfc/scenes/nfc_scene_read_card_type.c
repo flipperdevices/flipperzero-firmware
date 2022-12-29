@@ -19,31 +19,31 @@ void nfc_scene_read_card_type_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read Mifare Classic",
         SubmenuIndexReadMifareClassic,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read Mifare DESFire",
         SubmenuIndexReadMifareDesfire,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read NTAG/Ultralight",
         SubmenuIndexReadMfUltralight,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read EMV card",
         SubmenuIndexReadEMV,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read NFC-A data",
         SubmenuIndexReadNFCA,

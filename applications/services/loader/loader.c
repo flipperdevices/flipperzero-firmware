@@ -440,7 +440,7 @@ static void loader_build_submenu() {
     FURI_LOG_I(TAG, "Building plugins menu");
     size_t i;
     for(i = 0; i < FLIPPER_PLUGINS_COUNT; i++) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             loader_instance->plugins_menu,
             FLIPPER_PLUGINS[i].name,
             i,
@@ -450,7 +450,7 @@ static void loader_build_submenu() {
 
     FURI_LOG_I(TAG, "Building debug menu");
     for(i = 0; i < FLIPPER_DEBUG_APPS_COUNT; i++) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             loader_instance->debug_menu,
             FLIPPER_DEBUG_APPS[i].name,
             i,
@@ -460,7 +460,7 @@ static void loader_build_submenu() {
 
     FURI_LOG_I(TAG, "Building settings menu");
     for(i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             loader_instance->settings_menu,
             FLIPPER_SETTINGS_APPS[i].name,
             i,

@@ -44,13 +44,13 @@ BtDebugApp* bt_debug_app_alloc() {
 
     // Views
     app->submenu = submenu_alloc();
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->submenu,
         "Carrier test",
         BtDebugSubmenuIndexCarrierTest,
         bt_debug_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         app->submenu, "Packet test", BtDebugSubmenuIndexPacketTest, bt_debug_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), bt_debug_exit);
     view_dispatcher_add_view(

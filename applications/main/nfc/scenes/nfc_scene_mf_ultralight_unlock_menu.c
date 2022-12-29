@@ -20,26 +20,26 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
     uint32_t state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
     if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareUl) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Unlock With Reader",
             SubmenuIndexMfUlUnlockMenuAuto,
             nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
             nfc);
     }
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Auth As Ameebo",
         SubmenuIndexMfUlUnlockMenuAmeebo,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Auth As Xiaomi Air Purifier",
         SubmenuIndexMfUlUnlockMenuXiaomi,
         nfc_scene_mf_ultralight_unlock_menu_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Enter Password Manually",
         SubmenuIndexMfUlUnlockMenuManual,

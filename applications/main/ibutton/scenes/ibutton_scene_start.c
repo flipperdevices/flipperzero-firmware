@@ -17,11 +17,11 @@ void ibutton_scene_start_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Read", SubmenuIndexRead, ibutton_scene_start_submenu_callback, ibutton);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Saved", SubmenuIndexSaved, ibutton_scene_start_submenu_callback, ibutton);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAdd, ibutton_scene_start_submenu_callback, ibutton);
 
     submenu_set_selected_item(

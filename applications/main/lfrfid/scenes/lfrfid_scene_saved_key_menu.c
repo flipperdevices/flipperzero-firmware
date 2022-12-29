@@ -19,15 +19,15 @@ void lfrfid_scene_saved_key_menu_on_enter(void* context) {
     LfRfid* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, lfrfid_scene_saved_key_menu_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Write", SubmenuIndexWrite, lfrfid_scene_saved_key_menu_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Edit", SubmenuIndexEdit, lfrfid_scene_saved_key_menu_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Delete", SubmenuIndexDelete, lfrfid_scene_saved_key_menu_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, lfrfid_scene_saved_key_menu_submenu_callback, app);
 
     submenu_set_selected_item(

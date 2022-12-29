@@ -19,7 +19,7 @@ void infrared_scene_edit_button_select_on_enter(void* context) {
     const size_t button_count = infrared_remote_get_button_count(remote);
     for(size_t i = 0; i < button_count; ++i) {
         InfraredRemoteButton* button = infrared_remote_get_button(remote, i);
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             infrared_remote_button_get_name(button),
             i,

@@ -16,16 +16,16 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Save", SubmenuIndexSave, ibutton_scene_read_key_menu_submenu_callback, ibutton);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Emulate",
         SubmenuIndexEmulate,
         ibutton_scene_read_key_menu_submenu_callback,
         ibutton);
     if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Write",
             SubmenuIndexWrite,

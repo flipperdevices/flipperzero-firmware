@@ -46,7 +46,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
     uint32_t pre_select_item = 0;
 
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             FLIPPER_APPS[i].name,
             i,

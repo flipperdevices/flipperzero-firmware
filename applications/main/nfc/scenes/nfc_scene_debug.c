@@ -15,9 +15,9 @@ void nfc_scene_debug_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Field", SubmenuDebugIndexField, nfc_scene_debug_submenu_callback, nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Apdu", SubmenuDebugIndexApdu, nfc_scene_debug_submenu_callback, nfc);
 
     submenu_set_selected_item(

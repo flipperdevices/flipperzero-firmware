@@ -18,13 +18,12 @@ void lfrfid_scene_start_on_enter(void* context) {
     LfRfid* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item_cstr(
-        submenu, "Read", SubmenuIndexRead, lfrfid_scene_start_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(submenu, "Read", SubmenuIndexRead, lfrfid_scene_start_submenu_callback, app);
+    submenu_add_item(
         submenu, "Saved", SubmenuIndexSaved, lfrfid_scene_start_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManually, lfrfid_scene_start_submenu_callback, app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Extra Actions",
         SubmenuIndexExtraActions,

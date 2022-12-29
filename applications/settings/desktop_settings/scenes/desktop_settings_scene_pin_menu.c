@@ -20,7 +20,7 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
     submenu_reset(submenu);
 
     if(!app->settings.pin_code.length) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Set Pin",
             SCENE_EVENT_SET_PIN,
@@ -28,14 +28,14 @@ void desktop_settings_scene_pin_menu_on_enter(void* context) {
             app);
 
     } else {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Change Pin",
             SCENE_EVENT_CHANGE_PIN,
             desktop_settings_scene_pin_menu_submenu_callback,
             app);
 
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Disable",
             SCENE_EVENT_DISABLE_PIN,

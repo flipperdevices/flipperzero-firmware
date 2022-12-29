@@ -26,7 +26,7 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
 
     text_box_set_font(nfc->text_box, TextBoxFontHex);
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Card info",
         SubmenuIndexCardInfo,
@@ -37,7 +37,12 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
     int idx = SubmenuIndexDynamic;
     for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
         furi_string_printf(label, "App %02x%02x%02x", app->id[0], app->id[1], app->id[2]);
-        submenu_add_item(submenu, label, idx++, nfc_scene_mf_desfire_data_submenu_callback, nfc);
+        submenu_add_item(
+            submenu,
+            furi_string_get_cstr(label),
+            idx++,
+            nfc_scene_mf_desfire_data_submenu_callback,
+            nfc);
     }
     furi_string_free(label);
 

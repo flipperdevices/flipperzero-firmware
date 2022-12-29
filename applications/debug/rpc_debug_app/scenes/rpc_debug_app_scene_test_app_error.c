@@ -14,13 +14,13 @@ void rpc_debug_app_scene_test_app_error_on_enter(void* context) {
     RpcDebugApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Set Error Code",
         SubmenuIndexSetErrorCode,
         rpc_debug_app_scene_test_app_error_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Set Error Text",
         SubmenuIndexSetErrorText,

@@ -18,31 +18,31 @@ void infrared_scene_edit_on_enter(void* context) {
     Submenu* submenu = infrared->submenu;
     SceneManager* scene_manager = infrared->scene_manager;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Add Button",
         SubmenuIndexAddButton,
         infrared_scene_edit_submenu_callback,
         context);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Rename Button",
         SubmenuIndexRenameButton,
         infrared_scene_edit_submenu_callback,
         context);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Delete Button",
         SubmenuIndexDeleteButton,
         infrared_scene_edit_submenu_callback,
         context);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Rename Remote",
         SubmenuIndexRenameRemote,
         infrared_scene_edit_submenu_callback,
         context);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Delete Remote",
         SubmenuIndexDeleteRemote,

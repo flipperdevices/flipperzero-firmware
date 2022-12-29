@@ -17,13 +17,13 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
     LfRfid* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read ASK (Animal, Ordinary Card)",
         SubmenuIndexASK,
         lfrfid_scene_extra_actions_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Read PSK (Indala)",
         SubmenuIndexPSK,
@@ -31,7 +31,7 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         app);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        submenu_add_item_cstr(
+        submenu_add_item(
             submenu,
             "Read RAW RFID data",
             SubmenuIndexRAW,

@@ -17,12 +17,11 @@ void nfc_scene_nfca_menu_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Save UID", SubmenuIndexSaveUid, nfc_scene_nfca_menu_submenu_callback, nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Emulate UID", SubmenuIndexEmulateUid, nfc_scene_nfca_menu_submenu_callback, nfc);
-    submenu_add_item_cstr(
-        submenu, "Info", SubmenuIndexInfo, nfc_scene_nfca_menu_submenu_callback, nfc);
+    submenu_add_item(submenu, "Info", SubmenuIndexInfo, nfc_scene_nfca_menu_submenu_callback, nfc);
 
     submenu_set_selected_item(
         nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneNfcaMenu));

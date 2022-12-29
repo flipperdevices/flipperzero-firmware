@@ -15,19 +15,19 @@ void infrared_scene_universal_on_enter(void* context) {
     Infrared* infrared = context;
     Submenu* submenu = infrared->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "TVs",
         SubmenuIndexUniversalTV,
         infrared_scene_universal_submenu_callback,
         context);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Audio Players",
         SubmenuIndexUniversalAudio,
         infrared_scene_universal_submenu_callback,
         context);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Air Conditioners",
         SubmenuIndexUniversalAC,

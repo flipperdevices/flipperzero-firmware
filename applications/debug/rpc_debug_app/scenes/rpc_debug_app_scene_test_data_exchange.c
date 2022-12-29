@@ -15,13 +15,13 @@ void rpc_debug_app_scene_test_data_exchange_on_enter(void* context) {
     RpcDebugApp* app = context;
     Submenu* submenu = app->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Send Data",
         SubmenuIndexSendData,
         rpc_debug_app_scene_test_data_exchange_submenu_callback,
         app);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Receive Data",
         SubmenuIndexReceiveData,

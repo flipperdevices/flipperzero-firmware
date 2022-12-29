@@ -13,21 +13,21 @@ void subghz_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
 
 void subghz_scene_saved_menu_on_enter(void* context) {
     SubGhz* subghz = context;
-    submenu_add_item_cstr(
+    submenu_add_item(
         subghz->submenu,
         "Emulate",
         SubmenuIndexEmulate,
         subghz_scene_saved_menu_submenu_callback,
         subghz);
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         subghz->submenu,
         "Rename",
         SubmenuIndexEdit,
         subghz_scene_saved_menu_submenu_callback,
         subghz);
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         subghz->submenu,
         "Delete",
         SubmenuIndexDelete,

@@ -17,15 +17,15 @@ void nfc_scene_mf_desfire_menu_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_desfire_menu_submenu_callback, nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu,
         "Emulate UID",
         SubmenuIndexEmulateUid,
         nfc_scene_mf_desfire_menu_submenu_callback,
         nfc);
-    submenu_add_item_cstr(
+    submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_mf_desfire_menu_submenu_callback, nfc);
 
     submenu_set_selected_item(
