@@ -43,6 +43,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
         }
     } else if(
         nfc->dev->format == NfcDeviceSaveFormatMifareUl ||
+        nfc->dev->format == NfcDeviceSaveFormatNfcV ||
         nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
         submenu_add_item(
             submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
