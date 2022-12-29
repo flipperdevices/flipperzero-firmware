@@ -16,6 +16,7 @@
 
 #include <locale/locale.h>
 
+#include <one_wire/maxim_crc.h>
 #include <one_wire/one_wire_host.h>
 
 #define UPDATE_PERIOD_MS 1000UL
@@ -105,25 +106,39 @@ static void example_thermo_read_temperature(ExampleThermoContext* context) {
     FURI_CRITICAL_ENTER();
 
     bool success = false;
+
     do {
-        /* Each communication with a 1-wire device starts by a reset.
-           The functon will return true if a device responded with a presence pulse. */
-        if(!onewire_host_reset(onewire)) break;
-
-        /* After the reset, a ROM operation must follow.
-           If there is only one device connected, the "Skip ROM" command is most appropriate
-           (it can also be used to address all of the connected devices in some cases).*/
-        onewire_host_skip(onewire);
-
-        /* After the ROM operation, a device-specific command is issued.
-           This time, it will be the "Read Scratchpad" command which will
-           prepare the device's internal buffer memory for reading. */
-        onewire_host_write(onewire, DS18B20_CMD_READ_SCRATCHPAD);
-
         DS18B20Scratchpad buf;
 
-        /* The actual reading happens here. A total of 9 bytes is read. */
-        onewire_host_read_bytes(onewire, buf.bytes, sizeof(buf.bytes));
+        /* Attempt reading the temperature 10 times before giving up */
+        size_t attempts_left = 10;
+        do {
+            /* Each communication with a 1-wire device starts by a reset.
+            The functon will return true if a device responded with a presence pulse. */
+            if(!onewire_host_reset(onewire)) continue;
+
+            /* After the reset, a ROM operation must follow.
+            If there is only one device connected, the "Skip ROM" command is most appropriate
+            (it can also be used to address all of the connected devices in some cases).*/
+            onewire_host_skip(onewire);
+
+            /* After the ROM operation, a device-specific command is issued.
+            This time, it will be the "Read Scratchpad" command which will
+            prepare the device's internal buffer memory for reading. */
+            onewire_host_write(onewire, DS18B20_CMD_READ_SCRATCHPAD);
+
+            /* The actual reading happens here. A total of 9 bytes is read. */
+            onewire_host_read_bytes(onewire, buf.bytes, sizeof(buf.bytes));
+
+            /* Calculate the checksum and compare it with one provided by the device. */
+            const uint8_t crc = maxim_crc8(buf.bytes, sizeof(buf.bytes) - 1, MAXIM_CRC8_INIT);
+
+            /* Checksums match, exit the loop */
+            if(crc == buf.fields.crc) break;
+
+        } while(--attempts_left);
+
+        if(attempts_left == 0) break;
 
         /* Get the measurement resolution from the configuration register. (See [1] page 9) */
         const uint8_t resolution_mode = (buf.fields.config >> DS18B20_CFG_RESOLUTION_POS) &
