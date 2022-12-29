@@ -37,7 +37,7 @@ void submenu_free(Submenu* submenu);
  */
 View* submenu_get_view(Submenu* submenu);
 
-/** Add item to submenu using cstring label
+/** Add item to submenu
  *
  * @param      submenu           Submenu instance
  * @param      label             menu item label
@@ -66,7 +66,7 @@ void submenu_reset(Submenu* submenu);
  */
 void submenu_set_selected_item(Submenu* submenu, uint32_t index);
 
-/** Set optional header for submenu from cstring
+/** Set optional header for submenu
  *
  * @param      submenu  Submenu instance
  * @param      header   header to set
