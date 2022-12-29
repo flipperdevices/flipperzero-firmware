@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1229-1109-0.74.3-e6be3d8](https://www.patreon.com/posts/76507719)
+## Latest Updates - [PATREON: Latest Release RM1229-1551-0.74.3-1cc5d29](https://www.patreon.com/posts/76519504)
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-28 20:33 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-29 06:39 EST`
@@ -50,7 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [USB Midi Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - OFW Added: [Direct Draw Debug App (by skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2215)
 - Patreon Poll results call for removal of bad apps. [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) and [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) are removed.
-- Readded Chess & Bad Apple as uncompiled apps with hopes that they will get fixed.
+- Readded Chess & Bad Apple as uncompiled apps with hopes that they will get fixed. [Thanks to ESurge](https://github.com/ESurge/)
 - Found fix to NFC issues [thanks to g3gg0](https://github.com/g3gg0/flipperzero-firmware/tree/g3gg0/)
 - Readded: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - Readded: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
