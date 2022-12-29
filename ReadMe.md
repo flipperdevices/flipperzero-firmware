@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Found fix to NFC issues [thanks to g3gg0](https://github.com/g3gg0/flipperzero-firmware/tree/g3gg0/)
 - Readded: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - Readded: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
+- Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
 
 <a name="release">
 
@@ -136,6 +137,7 @@ $ ./fbt dolphin_ext
 - Assets: Includes SubGHz Remote config for Gas_Sign_Edit [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
 - Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
+- Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
 - [BadUSB: BadUSB as FAP #396 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/396)
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
 - BadUSB: Assets for Kiosk Evasion (By nocomp) and Wifi Stealer (By 7h30th3r0n3)
