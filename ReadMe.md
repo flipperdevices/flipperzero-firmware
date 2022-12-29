@@ -49,7 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - Added: [USB Midi Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - OFW Added: [Direct Draw Debug App (by skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2215)
-- Patreon Poll results call for removal of bad apps.[Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) and [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess). They are removed.
+- Patreon Poll results call for removal of bad apps. [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) and [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) are removed.
 
 <a name="release">
 
