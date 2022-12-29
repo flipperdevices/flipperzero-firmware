@@ -121,6 +121,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
     for (int j = 0; j < SEARCH_CLASSES; j++) {
         for (int level = 0; level < 2; level++) {
             if (classes[j].dur[level] == 0) continue;
+            if (classes[j].count[level] < 3) continue;
             if (s->short_pulse_dur == 0 ||
                 s->short_pulse_dur > classes[j].dur[level])
             {
