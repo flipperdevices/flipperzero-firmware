@@ -152,8 +152,7 @@ void scan_for_signal(ProtoViewApp *app) {
 }
 
 static void render_callback(Canvas *const canvas, void *ctx) {
-    ProtoViewApp *app = ctx;
-    scan_for_signal(app);
+    UNUSED(ctx);
     render_signal(canvas, DetectedSamples, 0);
 }
 
@@ -248,9 +247,21 @@ void protoview_app_free(ProtoViewApp *app) {
     free(app);
 }
 
+/* Called 10 times per second. Do signal processing here. Data we process here
+ * will be later displayed by the render callback. The side effect of this
+ * function is to scan for signals and set DetectedSamples. */
+static void timer_callback(void *ctx) {
+    ProtoViewApp *app = ctx;
+    scan_for_signal(app);
+}
+
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp *app = protoview_app_alloc();
+
+    /* Create a timer. We do data analysis in the callback. */
+    FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10);
 
     radio_begin(app);
     radio_rx(app, FREQ);
@@ -280,6 +291,7 @@ int32_t protoview_app_entry(void* p) {
         radio_sleep(app);
     }
 
+    furi_timer_free(timer);
     protoview_app_free(app);
     return 0;
 }
