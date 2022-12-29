@@ -324,6 +324,7 @@ int32_t protoview_app_entry(void* p) {
             } else if (input.key == InputKeyOk) {
                 app->signal_bestlen = 0;
                 raw_samples_reset(DetectedSamples);
+                raw_samples_reset(RawSamples);
             } else if (input.key == InputKeyDown) {
                 if (app->us_scale < 500) app->us_scale += scale_step;
             } else if (input.key == InputKeyUp) {
