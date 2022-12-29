@@ -19,7 +19,7 @@ recurse_dirs = [
 ]
 
 for recurse_dir in recurse_dirs:
-    sources += libenv.GlobRecursive("*.c*", recurse_dir)
+    sources += libenv.GlobRecursive("*.c*", recurse_dir, exclude=["*~"])
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

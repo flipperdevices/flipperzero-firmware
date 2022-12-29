@@ -77,7 +77,7 @@ def BuildAppElf(env, app):
 
         lib_sources = list(
             itertools.chain.from_iterable(
-                app_env.GlobRecursive(source_type, lib_src_root_path)
+                app_env.GlobRecursive(source_type, lib_src_root_path, exclude="*~")
                 for source_type in lib_def.sources
             )
         )

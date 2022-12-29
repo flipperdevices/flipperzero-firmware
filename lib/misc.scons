@@ -32,7 +32,7 @@ libs_recurse = [
 ]
 
 for lib in libs_recurse:
-    sources += libenv.GlobRecursive("*.c*", lib)
+    sources += libenv.GlobRecursive("*.c*", lib, exclude=["*~"])
 
 libs_plain = [
     "heatshrink",
@@ -40,7 +40,7 @@ libs_plain = [
 ]
 
 for lib in libs_plain:
-    sources += Glob(lib + "/*.c*", source=True)
+    sources += Glob(lib + "/*.c*", source=True, exclude=["*~"])
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
