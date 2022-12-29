@@ -49,9 +49,6 @@ ENV.AppendUnique(
     ],
 )
 
-# ENV.SetDefault(
-#     LINKER_SCRIPT_PATH="firmware/targets/f${TARGET_HW}/${LINKER_SCRIPT}.ld",
-# )
 
 if ENV["FIRMWARE_BUILD_CFG"] == "updater":
     ENV.Append(
