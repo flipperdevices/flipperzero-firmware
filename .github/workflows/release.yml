@@ -49,5 +49,4 @@ jobs:
 
             # Change Detail
             ${{ steps.tag_version.outputs.changelog }}
-          body: 
           artifacts: "dist/**"
