@@ -7,8 +7,8 @@
 #include "scrambler.h"
 #include <furi_hal.h>
 
-char *currentKeyPressed;
-int BUFFER = 10;
+int scrambleStarted = 0;
+
 char scramble[100] = {0};
 int notifications_enabled = 0;
 
@@ -26,9 +26,9 @@ static void draw_callback(Canvas *canvas, void *ctx)
     UNUSED(ctx);
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 13, "Rubik's Cube Scrambler");
+    canvas_draw_str(canvas, 4, 13, "Rubik's Cube Scrambler");
 
-    if (strcmp(currentKeyPressed, "OK") == 0)
+    if (scrambleStarted == 1)
     {
         /*         const char* moves[] = {"U", "D", "L", "R", "F", "B"};
                 const char* directions[] = {"", "'", "2"};
@@ -58,7 +58,7 @@ static void draw_callback(Canvas *canvas, void *ctx)
         {
             success_vibration();
         }
-        currentKeyPressed = "";
+        scrambleStarted = 0;
     }
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 30, scramble);
@@ -78,7 +78,6 @@ static void input_callback(InputEvent *input_event, void *ctx)
 int32_t rubiks_cube_scrambler_main(void *p)
 {
     UNUSED(p);
-    currentKeyPressed = (char *)malloc(sizeof(char) * BUFFER);
     InputEvent event;
 
     FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
@@ -98,7 +97,7 @@ int32_t rubiks_cube_scrambler_main(void *p)
 
         if (event.key == InputKeyOk && event.type == InputTypeShort)
         {
-            currentKeyPressed = "OK";
+            scrambleStarted = 1;
         }
         if (event.key == InputKeyLeft && event.type == InputTypeShort)
         {
