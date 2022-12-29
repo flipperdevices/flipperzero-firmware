@@ -28,10 +28,17 @@ static void play_bit(uint8_t send_bit) {
     gpio_item_set_rfid_pin(PIN_B, !magspoof_bit_dir);
     furi_delay_us(CLOCK_US);
 
+    // NFC tests
+    //(magspoof_bit_dir) ? st25r3916TxRxOn() : st25r3916TxRxOff();
+    //(magspoof_bit_dir) ? furi_hal_nfc_field_on() : furi_hal_nfc_field_off();
+    
     if (send_bit) {
         magspoof_bit_dir ^= 1;
         gpio_item_set_rfid_pin(PIN_A, magspoof_bit_dir);
         gpio_item_set_rfid_pin(PIN_B, !magspoof_bit_dir);
+
+        //(magspoof_bit_dir) ? st25r3916TxRxOn() : st25r3916TxRxOff();
+        //(magspoof_bit_dir) ? furi_hal_nfc_field_on() : furi_hal_nfc_field_off();
     }
     furi_delay_us(CLOCK_US);
 }
@@ -64,6 +71,9 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
 
     furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_low();
+
+    // NFC TEST
+    furi_hal_nfc_exit_sleep();
 
     // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting
 
@@ -129,9 +139,15 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
 
     gpio_item_set_rfid_pin(PIN_A, 0);
     gpio_item_set_rfid_pin(PIN_B, 0);
+    // NFC TEST
+    //st25r3916TxRxOff();
+    //furi_hal_nfc_field_off();
 
     // end critical timing section
     FURI_CRITICAL_EXIT();
+
+    // NFC TEST
+    //furi_hal_nfc_start_sleep();
 
     furi_hal_rfid_pins_reset();
     furi_hal_power_disable_otg();
