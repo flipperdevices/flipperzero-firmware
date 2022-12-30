@@ -64,6 +64,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
+- [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 
 --- 
 
