@@ -20,4 +20,4 @@ If you don't want to build the game, just simply copy **flipper_pong.fap** on yo
 
 ## Gallery ##
 
-<img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper1.png" width=20% height=20%> <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper2.png" width=20% height=20%> <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper3.png" width=20% height=20%>
+<img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper1.png" width=20% height=20%> <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper2.png" width=10% height=10%> <img src="https://github.com/nmrr/flipperzero-pong/blob/main/img/flipper3.png" width=10% height=10%>
