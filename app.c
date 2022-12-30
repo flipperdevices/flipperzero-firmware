@@ -242,8 +242,6 @@ ProtoViewApp* protoview_app_alloc() {
 
     //init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
-    app->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
-    app->txrx->preset->name = furi_string_alloc();
 
     /* Setup rx worker and environment. */
     app->txrx->worker = subghz_worker_alloc();
@@ -286,8 +284,6 @@ void protoview_app_free(ProtoViewApp *app) {
     subghz_receiver_free(app->txrx->receiver);
     subghz_environment_free(app->txrx->environment);
     subghz_worker_free(app->txrx->worker);
-    furi_string_free(app->txrx->preset->name);
-    free(app->txrx->preset);
     free(app->txrx);
 
     furi_hal_power_suppress_charge_exit();
@@ -313,13 +309,21 @@ int32_t protoview_app_entry(void* p) {
     FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10);
 
+    /* Start listening to signals immediately. */
     radio_begin(app);
     radio_rx(app, FREQ);
 
+    /* This is the main event loop: here we get the events that are pushed
+     * in the queue by input_callback(), and process them one after the
+     * other. The timeout is 100 milliseconds, so if not input is received
+     * before such time, we exit the queue_get() function and call
+     * view_port_update() in order to refresh our screen content. */
     InputEvent input;
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if (qstat == FuriStatusOk) {
+            FURI_LOG_E(TAG, "Main Loop - Input: %u", input.key);
+
             if (input.key == InputKeyBack) {
                 app->running = 0;
             } else if (input.key == InputKeyOk) {
@@ -333,8 +337,6 @@ int32_t protoview_app_entry(void* p) {
                 uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
                 if (app->us_scale > 10) app->us_scale -= scale_step;
             }
-
-            FURI_LOG_E(TAG, "Main Loop - Input: %u", input.key);
         } else {
             static int c = 0;
             c++;
@@ -343,6 +345,7 @@ int32_t protoview_app_entry(void* p) {
         view_port_update(app->view_port);
     }
 
+    /* App no longer running. Shut down and free. */
     if (app->txrx->txrx_state == TxRxStateRx) {
         FURI_LOG_E(TAG, "Putting CC1101 to sleep before exiting.");
         radio_rx_end(app);

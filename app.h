@@ -28,10 +28,9 @@ typedef enum {
  * It receives data and we get our protocol "feed" callback called
  * with the level (1 or 0) and duration. */
 struct ProtoViewTxRx {
-    SubGhzWorker* worker;
+    SubGhzWorker* worker;       /* Our background worker. */
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
-    SubGhzRadioPreset* preset;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
 };
 
@@ -39,10 +38,11 @@ typedef struct ProtoViewTxRx ProtoViewTxRx;
 
 struct ProtoViewApp {
     Gui *gui;
-    ViewPort *view_port;
-    FuriMessageQueue *event_queue;
+    ViewPort *view_port;     /* We just use a raw viewport and we render
+                                everything into the low level canvas. */
+    FuriMessageQueue *event_queue;  /* Keypress events go here. */
     ProtoViewTxRx *txrx;     /* Radio state. */
-    SubGhzSetting *setting;
+    SubGhzSetting *setting;  /* A list of valid frequencies. */
     int running;             /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
     uint32_t us_scale;       /* microseconds per pixel. */

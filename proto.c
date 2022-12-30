@@ -40,7 +40,8 @@ void subghz_protocol_decoder_protoview_reset(void* context) {
 }
 
 /* That's the only thig we really use of the protocol decoder
- * implementation. */
+ * implementation. We avoid the subghz provided abstractions and put
+ * the data in our simple abstraction: the RawSamples circular buffer. */
 void subghz_protocol_decoder_protoview_feed(void* context, bool level, uint32_t duration) {
     furi_assert(context);
     UNUSED(context);
@@ -58,6 +59,7 @@ uint8_t subghz_protocol_decoder_protoview_get_hash_data(void* context) {
     return 123;
 }
 
+/* Not used. */
 bool subghz_protocol_decoder_protoview_serialize(
     void* context,
     FlipperFormat* flipper_format,
@@ -69,6 +71,7 @@ bool subghz_protocol_decoder_protoview_serialize(
     return false;
 }
 
+/* Not used. */
 bool subghz_protocol_decoder_protoview_deserialize(void* context, FlipperFormat* flipper_format)
 {
     UNUSED(context);
@@ -93,13 +96,17 @@ const SubGhzProtocolDecoder subghz_protocol_protoview_decoder = {
     .get_string = subhz_protocol_decoder_protoview_get_string,
 };
 
+/* Well, we don't really target a specific protocol. So let's put flags
+ * that make sense. */
 const SubGhzProtocol subghz_protocol_protoview = {
     .name = "Protoview",
     .type = SubGhzProtocolTypeStatic,
-    .flag = SubGhzProtocolFlag_AM | SubGhzProtocolFlag_Decodable,
+    .flag = SubGhzProtocolFlag_AM | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable,
     .decoder = &subghz_protocol_protoview_decoder,
 };
 
+/* Our table has just the single dummy protocol we defined for the
+ * sake of data collection. */
 const SubGhzProtocol* protoview_protocol_registry_items[] = {
     &subghz_protocol_protoview,
 };
