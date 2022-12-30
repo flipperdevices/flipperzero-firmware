@@ -4,7 +4,9 @@ a great deal of RF protocols, however when the exact protocol is not
 implemented (and there are many proprietary ones, such as the ones of
 the car keys), the curious person is left wondering what the device is
 sending at all. With ProtoView in can visualize the high and low pulses
-like in the example image below:
+like in the example image below (showing a Volkswagen key in 2FSK):
+
+![ProtoView screenshot](/images/ProtoViewSignal.jpg)
 
 This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
