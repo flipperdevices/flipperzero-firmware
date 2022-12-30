@@ -64,7 +64,7 @@ void render_signal(ProtoViewApp *app, Canvas *const canvas, RawSamplesBuffer *bu
 /* Return the time difference between a and b, always >= 0 since
  * the absolute value is returned. */
 uint32_t duration_delta(uint32_t a, uint32_t b) {
-    return a > b ? a - b : b -a;
+    return a > b ? a - b : b - a;
 }
 
 /* This function starts scanning samples at offset idx looking for the
