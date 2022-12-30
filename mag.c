@@ -125,24 +125,17 @@ static void mag_free(Mag* mag) {
 
 // entry point for app
 int32_t mag_app(void* p) {
-    FURI_LOG_D(TAG, "Start");
     Mag* mag = mag_alloc();
-    FURI_LOG_D(TAG, "Mag alloc-ed");
     UNUSED(p);
 
     mag_make_app_folder(mag);
-    FURI_LOG_D(TAG, "mag_make_app_folder done");
 
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
-    FURI_LOG_D(TAG, "view_dispatcher_attach... done");
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
-    FURI_LOG_D(TAG, "scene manager next scene done");
 
     view_dispatcher_run(mag->view_dispatcher);
-    FURI_LOG_D(TAG, "view dispatcher run done");
 
     mag_free(mag);
-    FURI_LOG_D(TAG, "mag free done");
 
     return 0;
 }
