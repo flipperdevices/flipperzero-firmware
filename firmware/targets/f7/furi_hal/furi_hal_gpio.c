@@ -215,6 +215,13 @@ void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
     FURI_CRITICAL_EXIT();
 }
 
+void furi_hal_gpio_clear_int_flag(const GpioPin* gpio) {
+    furi_assert(gpio);
+
+    //TODO: Make sure this is correct
+    LL_EXTI_ClearFlag_0_31(gpio->pin);
+}
+
 static void furi_hal_gpio_int_call(uint16_t pin_num) {
     if(gpio_interrupt[pin_num].callback && gpio_interrupt[pin_num].ready) {
         gpio_interrupt[pin_num].callback(gpio_interrupt[pin_num].context);

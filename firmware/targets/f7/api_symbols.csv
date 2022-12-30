@@ -1079,6 +1079,7 @@ Function,-,furi_hal_flash_ob_set_word,_Bool,"size_t, const uint32_t"
 Function,-,furi_hal_flash_program_page,void,"const uint8_t, const uint8_t*, uint16_t"
 Function,-,furi_hal_flash_write_dword,void,"size_t, uint64_t"
 Function,+,furi_hal_gpio_add_int_callback,void,"const GpioPin*, GpioExtiCallback, void*"
+Function,+,furi_hal_gpio_clear_int_flag,void,const GpioPin*
 Function,+,furi_hal_gpio_disable_int_callback,void,const GpioPin*
 Function,+,furi_hal_gpio_enable_int_callback,void,const GpioPin*
 Function,+,furi_hal_gpio_init,void,"const GpioPin*, const GpioMode, const GpioPull, const GpioSpeed"
