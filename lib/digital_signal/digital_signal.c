@@ -342,61 +342,19 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
     sequence->sequence[sequence->sequence_used++] = signal_index;
 }
 
-bool digital_signal_optimization = true;
+static void digital_signal_update_dma(DigitalSignal* signal) {
+    /* keep them prepared in registers so there is less delay when writing */
+    register volatile uint16_t len = signal->internals->reload_reg_entries;
+    register volatile uint32_t addr = (uint32_t)signal->reload_reg_buff;
 
-static void digital_signal_update_dma_c(DigitalSignal* signal) {
     /* if transfer was already active, wait till DMA is done and the last timer ticks are running */
     while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
     }
 
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, signal->internals->reload_reg_entries);
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t)signal->reload_reg_buff);
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, len);
+    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, addr);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-}
-
-static void digital_signal_update_dma_asm(DigitalSignal* signal) {
-    /* this is an "already-prepared" buffer of DMA channel 2 config to write */
-    const volatile uint32_t dma_data[] = {
-        /* base addresses of DMA channel register */
-        /* R0 */ (uint32_t) & (DMA1_Channel2->CCR), /* base address of DMA channel 2 */
-        /* R1 */ DMA1_Channel2->CCR | DMA_CCR_EN, /* CCR to write after finished */
-        /* R2 */ DMA1_Channel2->CCR & ~DMA_CCR_EN, /* CCR value to write first */
-        /* R3 */ (uint32_t)signal->internals->reload_reg_entries, /* CNDTR to write */
-        /* R4 */ (uint32_t) & (TIM2->ARR), /* CPAR to write */
-        /* R5 */ (uint32_t)signal->reload_reg_buff, /* CMAR to write */
-    };
-
-    /* now wait for the DMA finishing and instantly reconfigure it with as few instructions as possible */
-    asm volatile(
-        "\t"
-        "PUSH    {r0-r6}\n\t"
-
-        "LDM     %[data], {r0-r5}\n\t" /* prepare registers with values to write into DMA config */
-
-        "wait_for_dma_finished:\n\t"
-        "LDR     r6, [r0, #4]\n\t" /* read DMA_CNDTRx of DMA1 chan 2 to get remaining transfers */
-        "CMP     r6, #0\n\t"
-        "BNE     wait_for_dma_finished\n\t"
-
-        /* no transfers left, the DMA has finished. now quickly re-enable with new settings.
-           these next 2 instructions are the critical part */
-        "STM     r0, {r2-r5}\n\t" /* disable channel and set up new parameters */
-        "STR     r1, [r0, #0]\n\t" /* enable channel again by writing CCR */
-
-        "POP     {r0-r6}\n\t"
-
-        : /* no outputs*/
-        : /* inputs */
-        [data] "r"(dma_data));
-}
-
-void digital_signal_update_dma(DigitalSignal* signal) {
-    if(digital_signal_optimization) {
-        digital_signal_update_dma_asm(signal);
-    } else {
-        digital_signal_update_dma_c(signal);
-    }
 }
 
 static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSignal* signal) {
