@@ -370,7 +370,7 @@ void protoview_app_free(ProtoViewApp *app) {
     free(app);
 }
 
-/* Called 10 times per second. Do signal processing here. Data we process here
+/* Called periodically. Do signal processing here. Data we process here
  * will be later displayed by the render callback. The side effect of this
  * function is to scan for signals and set DetectedSamples. */
 static void timer_callback(void *ctx) {
