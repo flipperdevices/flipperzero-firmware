@@ -7,8 +7,6 @@
 #include "app.h"
 #include "app_buffer.h"
 
-#define FREQ 433920000
-
 RawSamplesBuffer *RawSamples, *DetectedSamples;
 extern const SubGhzProtocolRegistry protoview_protocol_registry;
 
@@ -182,11 +180,41 @@ void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const cha
      * to create a border, then write the actaul string in white in the
      * middle. */
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
     for (int j = 0; j < 8; j++)
         canvas_draw_str(canvas,x+dir[j].x,y+dir[j].y,str);
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_str(canvas,x,y,str);
+    canvas_set_color(canvas, ColorBlack);
+}
+
+/* Raw pulses rendering. This is our default view. */
+void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app) {
+    /* Show signal. */
+    render_signal(app, canvas, DetectedSamples, 0);
+
+    /* Show signal information. */
+    char buf[64];
+    snprintf(buf,sizeof(buf),"%luus",
+        (unsigned long)DetectedSamples->short_pulse_dur);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_with_border(canvas, 100, 63, buf);
+}
+
+/* Renders a single view with frequency and modulation setting. However
+ * this are logically two different views, and only one of the settings
+ * will be highlighted. */
+void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
+    UNUSED(app);
+    canvas_set_font(canvas, FontPrimary);
+    if (app->current_view == ViewFrequencySettings)
+        canvas_draw_str_with_border(canvas,1,10,"Frequency");
+    else
+        canvas_draw_str(canvas,1,10,"Frequency");
+
+    if (app->current_view == ViewModulationSettings)
+        canvas_draw_str_with_border(canvas,70,10,"Modulation");
+    else
+        canvas_draw_str(canvas,70,10,"Modulation");
 }
 
 static void render_callback(Canvas *const canvas, void *ctx) {
@@ -195,14 +223,14 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 127, 63);
+    canvas_set_color(canvas, ColorBlack);
 
-    /* Show signal. */
-    render_signal(app, canvas, DetectedSamples, 0);
-
-    /* Show signal information. */
-    char buf[64];
-    snprintf(buf,sizeof(buf),"%luus", (unsigned long)DetectedSamples->short_pulse_dur);
-    canvas_draw_str_with_border(canvas, 100, 63, buf);
+    switch(app->current_view) {
+    case ViewRawPulses: render_view_raw_pulses(canvas,app); break;
+    case ViewFrequencySettings: render_view_settings(canvas,app); break;
+    case ViewModulationSettings: render_view_settings(canvas,app); break;
+    case ViewLast: furi_crash(TAG " ViewLast selected"); break;
+    }
 }
 
 /* Here all we do is putting the events into the queue that will be handled
@@ -235,6 +263,7 @@ ProtoViewApp* protoview_app_alloc() {
     view_port_input_callback_set(app->view_port, input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    app->current_view = ViewRawPulses;
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
@@ -256,6 +285,9 @@ ProtoViewApp* protoview_app_alloc() {
     subghz_worker_set_pair_callback(
         app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
+    
+    app->frequency = subghz_setting_get_default_frequency(app->setting);
+    app->modulation = 0; /* Defaults to ProtoViewModulations[0]. */
 
     furi_hal_power_suppress_charge_enter();
     app->running = 1;
@@ -311,7 +343,7 @@ int32_t protoview_app_entry(void* p) {
 
     /* Start listening to signals immediately. */
     radio_begin(app);
-    radio_rx(app, FREQ);
+    radio_rx(app, app->frequency);
 
     /* This is the main event loop: here we get the events that are pushed
      * in the queue by input_callback(), and process them one after the
@@ -336,6 +368,16 @@ int32_t protoview_app_entry(void* p) {
             } else if (input.key == InputKeyUp) {
                 uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
                 if (app->us_scale > 10) app->us_scale -= scale_step;
+            } else if (input.key == InputKeyRight) {
+                /* Go to the next view. */
+                app->current_view++;
+                if (app->current_view == ViewLast) app->current_view = 0;
+            } else if (input.key == InputKeyLeft) {
+                /* Go to the previous view. */
+                if (app->current_view == 0)
+                    app->current_view = ViewLast-1;
+                else
+                    app->current_view--;
             }
         } else {
             static int c = 0;

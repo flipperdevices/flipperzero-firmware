@@ -2,6 +2,16 @@
 
 #include <flipper_format/flipper_format_i.h>
 
+ProtoViewModulation ProtoViewModulations[] = {
+    {"OOK 650Khz", FuriHalSubGhzPresetOok650Async},
+    {"OOK 270Khz", FuriHalSubGhzPresetOok270Async},
+    {"2FSK 2.38Khz", FuriHalSubGhzPreset2FSKDev238Async},
+    {"2FSK 47.6Khz", FuriHalSubGhzPreset2FSKDev476Async},
+    {"MSK", FuriHalSubGhzPresetMSK99_97KbAsync},
+    {"GFSK", FuriHalSubGhzPresetGFSK9_99KbAsync},
+    {NULL, 0} /* End of list sentinel. */
+};
+
 /* Called after the application initialization in order to setup the
  * subghz system and put it into idle state. If the user wants to start
  * receiving we will call radio_rx() to start a receiving worker and
@@ -10,7 +20,7 @@ void radio_begin(ProtoViewApp* app) {
     furi_assert(app);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    furi_hal_subghz_load_preset(ProtoViewModulations[app->modulation].preset);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     app->txrx->txrx_state = TxRxStateIDLE;
 }
