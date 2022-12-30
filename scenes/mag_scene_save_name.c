@@ -24,7 +24,7 @@ void mag_scene_save_name_on_enter(void* context) {
         mag_text_input_callback,
         mag,
         mag->text_store,
-        MAG_KEY_NAME_SIZE,
+        MAG_DEV_NAME_MAX_LEN,
         key_name_is_empty);
 
     FURI_LOG_I("", "%s %s", furi_string_get_cstr(folder_path), mag->text_store);
@@ -56,7 +56,7 @@ bool mag_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 
             if(mag_save_key(mag)) {
                 scene_manager_next_scene(scene_manager, MagSceneSaveSuccess);
-                if(scene_manager_has_previous_scene(scene_manager, MagSceneSavedKeyMenu)) {
+                if(scene_manager_has_previous_scene(scene_manager, MagSceneSavedMenu)) {
                     // Nothing, do not count editing as saving
                     //} else if(scene_manager_has_previous_scene(scene_manager, MagSceneSaveType)) {
                     //DOLPHIN_DEED(DolphinDeedRfidAdd);

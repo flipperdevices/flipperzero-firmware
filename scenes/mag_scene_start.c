@@ -45,10 +45,10 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
             furi_string_set(mag->file_path, MAG_APP_FOLDER);
-            scene_manager_next_scene(mag->scene_manager, MagSceneSelectKey);
+            scene_manager_next_scene(mag->scene_manager, MagSceneFileSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexAddManually) {
-            scene_manager_next_scene(mag->scene_manager, MagSceneSaveData);
+            scene_manager_next_scene(mag->scene_manager, MagSceneUnderConstruction);
             consumed = true;
         }
         scene_manager_set_scene_state(mag->scene_manager, MagSceneStart, event.event);

@@ -13,7 +13,7 @@ App(
     provides=[],
     stack_size=2 * 1024,
     order=20,
-    fap_icon="mag_10px.png",
+    fap_icon="icons/mag_10px.png",
     fap_category="Tools",
     fap_icon_assets="icons",
 )

@@ -1,5 +1,7 @@
 #include "mag_i.h"
 
+#define TAG "Mag"
+
 static bool mag_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Mag* mag = context;
@@ -30,6 +32,8 @@ static Mag* mag_alloc() {
     view_dispatcher_set_navigation_event_callback(
         mag->view_dispatcher, mag_debug_back_event_callback);
 
+    mag->mag_dev = mag_device_alloc();
+
     // Open GUI record
     mag->gui = furi_record_open(RECORD_GUI);
 
@@ -49,6 +53,10 @@ static Mag* mag_alloc() {
     mag->popup = popup_alloc();
     view_dispatcher_add_view(mag->view_dispatcher, MagViewPopup, popup_get_view(mag->popup));
 
+    // Loading
+    mag->loading = loading_alloc();
+    view_dispatcher_add_view(mag->view_dispatcher, MagViewLoading, loading_get_view(mag->loading));
+
     // Widget
     mag->widget = widget_alloc();
     view_dispatcher_add_view(mag->view_dispatcher, MagViewWidget, widget_get_view(mag->widget));
@@ -58,11 +66,6 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
-    // Byte Input
-    mag->byte_input = byte_input_alloc();
-    view_dispatcher_add_view(
-        mag->view_dispatcher, MagViewByteInput, byte_input_get_view(mag->byte_input));
-
     return mag;
 }
 
@@ -71,6 +74,10 @@ static void mag_free(Mag* mag) {
 
     furi_string_free(mag->file_name);
     furi_string_free(mag->file_path);
+
+    // Mag device
+    mag_device_free(mag->mag_dev);
+    mag->mag_dev = NULL;
 
     // Submenu
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewSubmenu);
@@ -84,6 +91,10 @@ static void mag_free(Mag* mag) {
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewPopup);
     popup_free(mag->popup);
 
+    // Loading
+    view_dispatcher_remove_view(mag->view_dispatcher, MagViewLoading);
+    loading_free(mag->loading);
+
     // Widget
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewWidget);
     widget_free(mag->widget);
@@ -91,10 +102,6 @@ static void mag_free(Mag* mag) {
     // TextInput
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewTextInput);
     text_input_free(mag->text_input);
-
-    // ByteInput
-    view_dispatcher_remove_view(mag->view_dispatcher, MagViewByteInput);
-    byte_input_free(mag->byte_input);
 
     // View Dispatcher
     view_dispatcher_free(mag->view_dispatcher);
@@ -118,18 +125,24 @@ static void mag_free(Mag* mag) {
 
 // entry point for app
 int32_t mag_app(void* p) {
+    FURI_LOG_D(TAG, "Start");
     Mag* mag = mag_alloc();
-    char* args = p;
-    UNUSED(args);
+    FURI_LOG_D(TAG, "Mag alloc-ed");
+    UNUSED(p);
 
     mag_make_app_folder(mag);
+    FURI_LOG_D(TAG, "mag_make_app_folder done");
 
     view_dispatcher_attach_to_gui(mag->view_dispatcher, mag->gui, ViewDispatcherTypeFullscreen);
+    FURI_LOG_D(TAG, "view_dispatcher_attach... done");
     scene_manager_next_scene(mag->scene_manager, MagSceneStart);
+    FURI_LOG_D(TAG, "scene manager next scene done");
 
     view_dispatcher_run(mag->view_dispatcher);
+    FURI_LOG_D(TAG, "view dispatcher run done");
 
     mag_free(mag);
+    FURI_LOG_D(TAG, "mag free done");
 
     return 0;
 }
@@ -157,8 +170,7 @@ bool mag_load_key_from_file_select(Mag* mag) {
     furi_assert(mag);
 
     DialogsFileBrowserOptions browser_options;
-    // TODO: Fix icon reference / definition! Temporarily importing asset_icons.h in mag_i.h to let it compile. Remove when fixed!
-    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_125_10px);
+    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_mag_10px);
     browser_options.base_path = MAG_APP_FOLDER;
 
     // Input events and views are managed by file_browser
@@ -240,4 +252,18 @@ void mag_widget_callback(GuiButtonType result, InputType type, void* context) {
 void mag_text_input_callback(void* context) {
     Mag* mag = context;
     view_dispatcher_send_custom_event(mag->view_dispatcher, MagEventNext);
+}
+
+void mag_show_loading_popup(void* context, bool show) {
+    Mag* mag = context;
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewLoading);
+    } else {
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
 }

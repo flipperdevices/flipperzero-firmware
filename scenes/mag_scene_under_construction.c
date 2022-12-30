@@ -1,24 +1,24 @@
 #include "../mag_i.h"
 
-void mag_scene_saved_info_on_enter(void* context) {
+void mag_scene_under_construction_on_enter(void* context) {
     Mag* mag = context;
     Widget* widget = mag->widget;
 
-    widget_add_string_element(
-        widget,
-        64,
-        12,
-        AlignCenter,
-        AlignCenter,
-        FontSecondary,
-        furi_string_get_cstr(mag->mag_dev->dev_data));
+    FuriString* tmp_str;
+    tmp_str = furi_string_alloc();
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
 
+    furi_string_printf(tmp_str, "Under construction!");
+    widget_add_string_element(
+        widget, 64, 4, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
+    furi_string_reset(tmp_str);
+
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
+    furi_string_free(tmp_str);
 }
 
-bool mag_scene_saved_info_on_event(void* context, SceneManagerEvent event) {
+bool mag_scene_under_construction_on_event(void* context, SceneManagerEvent event) {
     Mag* mag = context;
     SceneManager* scene_manager = mag->scene_manager;
     bool consumed = false;
@@ -34,7 +34,7 @@ bool mag_scene_saved_info_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void mag_scene_saved_info_on_exit(void* context) {
+void mag_scene_under_construction_on_exit(void* context) {
     Mag* mag = context;
     widget_reset(mag->widget);
 }

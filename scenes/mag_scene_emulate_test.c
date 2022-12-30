@@ -186,7 +186,7 @@ bool mag_scene_emulate_test_on_event(void *context, SceneManagerEvent event) {
             furi_string_set_str(v, test_str);
 
             // blink led while spoofing
-            notification_message(mag->notifications, &sequence_blink_start_magenta);
+            notification_message(mag->notifications, &sequence_blink_start_blue);
             mag_spoof(v, TEST_TRACK);
             notification_message(mag->notifications, &sequence_blink_stop);
 
