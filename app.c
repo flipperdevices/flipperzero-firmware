@@ -1,3 +1,6 @@
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license. */
+
 #include <furi.h>
 #include <furi_hal.h>
 #include <lib/flipper_format/flipper_format.h>
