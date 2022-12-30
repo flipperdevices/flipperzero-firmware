@@ -69,7 +69,7 @@ Things to investigate:
 * Weather stations are often too in the 433.92Mhz OOK.
 * For car keys, try 443.92 OOK650 and 868.35 Mhz in OOK or 2FSK.
 
-# Installing the app on the flipper
+# Installing the app on the Flipper
 
 * Download the Flipper Zero dev kit and build it:
 ```
