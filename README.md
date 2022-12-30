@@ -69,7 +69,7 @@ Things to investigate:
 * Weather stations are often too in the 433.92Mhz OOK.
 * For car keys, try 443.92 OOK650 and 868.35 Mhz in OOK or 2FSK.
 
-# Installing the app on the Flipper
+# Installing the app from source
 
 * Download the Flipper Zero dev kit and build it:
 ```
@@ -81,6 +81,18 @@ git clone --recursive  https://github.com/flipperdevices/flipperzero-firmware.gi
 * Copy this application folder in `official/application_user`.
 * Connect your Flipper via USB.
 * Build and install with: `./fbt launch_app APPSRC=protoview`.
+
+# Installing the binary file (no build needed)
+
+Drop the `protoview.fap` file you can find in the `binaries` folder into the
+following Flipper Zero location:
+
+    /ext/apps/Tools
+
+The `ext` part means that we are in the SD card. So if you don't want
+to use the Android (or other) application to upload the file,
+you can just take out the SD card, insert it in your computer,
+copy the fine into `apps/Tools`, and that's it.
 
 # License
 
