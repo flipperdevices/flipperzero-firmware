@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
 - Fixed SubGhz Bruteforcer Inclusion
 - [Patreon Only: New Build - One Piece](https://www.patreon.com/posts/76525879)
+- Animations: Updated Mods from OFW to say RogueMaster. Flipper City, Purple Rain and New Years animations updated to say RogueMaster.
 
 <a name="release">
 
