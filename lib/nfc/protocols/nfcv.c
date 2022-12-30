@@ -712,8 +712,10 @@ bool nfcv_emu_loop(
     uint32_t frame_pos = 0;
     uint32_t byte_value = 0;
     uint32_t bits_received = 0;
-    char reset_reason[128];
     bool wait_for_pulse = false;
+
+    uint8_t period_buffer[256];
+    uint32_t period_buffer_pos = 0;
 
     while(true) {
         uint32_t periods =
@@ -729,15 +731,13 @@ bool nfcv_emu_loop(
             break;
         }
 
+        if(period_buffer_pos < sizeof(period_buffer)) {
+            period_buffer[period_buffer_pos++] = periods;
+        }
+
         if(wait_for_pulse) {
             wait_for_pulse = false;
             if(periods != 1) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "SOF: Expected a single low pulse in state %lu, but got %lu",
-                    frame_state,
-                    periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
             }
             continue;
@@ -764,23 +764,12 @@ bool nfcv_emu_loop(
                 periods_previous = 2;
                 wait_for_pulse = true;
             } else {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "SOF: Expected 4/6 periods, got %lu",
-                    periods);
-                frame_state = NFCV_FRAME_STATE_SOF1;
+                frame_state = NFCV_FRAME_STATE_RESET;
             }
             break;
 
         case NFCV_FRAME_STATE_CODING_256:
             if(periods_previous > periods) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo256: Missing %lu periods from previous symbol, got %lu",
-                    periods_previous,
-                    periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
@@ -788,8 +777,6 @@ bool nfcv_emu_loop(
             periods -= periods_previous;
 
             if(periods > 512) {
-                snprintf(
-                    reset_reason, sizeof(reset_reason), "1oo256: %lu periods is too much", periods);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
@@ -809,13 +796,6 @@ bool nfcv_emu_loop(
 
         case NFCV_FRAME_STATE_CODING_4:
             if(periods_previous > periods) {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo4: Missing %lu periods from previous symbol, got %lu at pos %lu",
-                    periods_previous,
-                    periods,
-                    frame_pos);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
@@ -843,12 +823,6 @@ bool nfcv_emu_loop(
                 frame_state = NFCV_FRAME_STATE_EOF;
                 break;
             } else {
-                snprintf(
-                    reset_reason,
-                    sizeof(reset_reason),
-                    "1oo4: Expected 1/3/5/7 low pulses, but got %lu at pos %lu",
-                    periods,
-                    frame_pos);
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
@@ -864,8 +838,6 @@ bool nfcv_emu_loop(
         /* post-state-machine cleanup and reset */
         if(frame_state == NFCV_FRAME_STATE_RESET) {
             frame_state = NFCV_FRAME_STATE_SOF1;
-
-            FURI_LOG_D(TAG, "Resetting state machine, reason: '%s'", reset_reason);
         } else if(frame_state == NFCV_FRAME_STATE_EOF) {
             nfcv_data->frame = frame_payload;
             nfcv_data->frame_length = frame_pos;
@@ -883,6 +855,15 @@ bool nfcv_emu_loop(
         nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
         pulse_reader_start(nfcv_data->emu_air.reader_signal);
         ret = true;
+    } else {
+        if(frame_state != NFCV_FRAME_STATE_SOF1) {
+            FURI_LOG_T(TAG, "leaving while in state: %lu", frame_state);
+        }
+    }
+
+    FURI_LOG_T(TAG, "pulses:");
+    for(uint32_t pos = 0; pos < period_buffer_pos; pos++) {
+        FURI_LOG_T(TAG, " #%lu: %u", pos, period_buffer[pos]);
     }
 
     return ret;

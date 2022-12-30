@@ -164,7 +164,7 @@ void nfc_worker_nfcv_emulate(NfcWorker* nfc_worker) {
 
     nfcv_emu_init(nfc_data, nfcv_data);
     while(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
-        if(nfcv_emu_loop(&tx_rx, nfc_data, nfcv_data, 50)) {
+        if(nfcv_emu_loop(&tx_rx, nfc_data, nfcv_data, 100)) {
             if(nfc_worker->callback) {
                 nfc_worker->callback(NfcWorkerEventNfcVCommandExecuted, nfc_worker->context);
                 if(nfcv_data->modified) {
@@ -173,7 +173,7 @@ void nfc_worker_nfcv_emulate(NfcWorker* nfc_worker) {
                 }
             }
         }
-        furi_delay_ms(0);
+        furi_delay_ms(10);
     }
     nfcv_emu_deinit(nfcv_data);
 
