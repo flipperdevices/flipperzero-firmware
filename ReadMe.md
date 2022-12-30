@@ -58,6 +58,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixed SubGhz Bruteforcer Inclusion
 - [Patreon Only: New Build - One Piece](https://www.patreon.com/posts/76525879)
 - Animations: Updated Mods from OFW to say RogueMaster. Flipper City, Purple Rain and New Years animations updated to say RogueMaster.
+- Weather Station fap fix [Thank you ESurge](https://github.com/ESurge/)
 
 <a name="release">
 
