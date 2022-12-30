@@ -29,13 +29,17 @@ how things work just grepping inside.
 In order to show unknown signals, the application attempts to understand if
 the samples obtained by the Flipper API (a series of pulses that are high
 or low, and with different duration in microseconds) look like belonging to
-a legitimate signal, and aren't just noise. We can't make assumptions about
+a legitimate signal, and aren't just noise.
+
+We can't make assumptions about
 the encoding and the data rate of the communication, so we use a simple
 but relatively effective algorithm. As we check the signal, we try to detect
 long parts of it that are composed of pulses roughly classifiable into
 a maximum of three different classes of lengths, plus or minus 10%. Most
 encodings are somewhat self-clocked, so they tend to have just two or
-three classes of pulse lengths. However often pulses of the same theoretical
+three classes of pulse lengths.
+
+However often pulses of the same theoretical
 length have slightly different lenghts in the case of high and low level
 (RF on or off), so we classify them separately for robustness.
 
@@ -50,6 +54,14 @@ The application shows the longest coherent signal detected so far.
 Under the detected sequence, you will see a small triangle marking a
 specific sample. This mark means that the sequence looked coherent up
 to that point, and starting from there it could be just noise.
+
+In the bottom-right corner the application displays an amount of time
+in microseconds. This is the average length of the shortest pulse length
+detected among the three classes. Usually the *data rate* of the protocol
+is something like `1000000/this-number*2`, but it depends on the encoding
+and could actually be `1000000/this-number*N` with `N > 2` (here 1000000
+is the number of microseconds in one second, and N is the number of clock
+cycles needed to represent a bit).
 
 Things to investigate:
 
