@@ -91,7 +91,7 @@ typedef enum {
     SD_TOKEN_START_DATA_SINGLE_BLOCK_READ = 0xFE,
     SD_TOKEN_START_DATA_MULTIPLE_BLOCK_READ = 0xFE,
     SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE = 0xFE,
-    SD_TOKEN_START_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
+    SD_TOKEN_START_DATA_MULTIPLE_BLOCK_WRITE = 0xFC,
     SD_TOKEN_STOP_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
 } SdSpiToken;
 
@@ -652,7 +652,6 @@ static SdSpiStatus
         if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, timeout_ms) ==
            SdSpiStatusOK) {
             // Read the data block
-            // TODO: DMA transfer can be used here
             sd_spi_read_bytes_dma((uint8_t*)data + offset, SD_BLOCK_SIZE);
             sd_spi_purge_crc();
 
@@ -853,14 +852,18 @@ SdSpiStatus
 
     bool single_sector_read = (blocks == 1);
 
-    if(single_sector_read && sd_cache_get(address, data)) {
-        return SdSpiStatusOK;
-    }
+    if(single_sector_read) {
+        if(sd_cache_get(address, data)) {
+            return SdSpiStatusOK;
+        }
 
-    status = sd_spi_cmd_read_blocks(data, address, blocks, timeout_ms);
+        status = sd_spi_cmd_read_blocks(data, address, blocks, timeout_ms);
 
-    if(single_sector_read && (status == SdSpiStatusOK)) {
-        sd_cache_put(address, data);
+        if(status == SdSpiStatusOK) {
+            sd_cache_put(address, data);
+        }
+    } else {
+        status = sd_spi_cmd_read_blocks(data, address, blocks, timeout_ms);
     }
 
     return status;

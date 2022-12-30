@@ -193,7 +193,7 @@ static void spi_dma_isr() {
 #if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_3
     if(LL_DMA_IsActiveFlag_TC3(SPI_DMA) && LL_DMA_IsEnabledIT_TC(SPI_DMA_RX_DEF)) {
         LL_DMA_ClearFlag_TC3(SPI_DMA);
-        furi_semaphore_release(spi_dma_semaphore);
+        furi_check(furi_semaphore_release(spi_dma_semaphore) == FuriStatusOk);
     }
 #else
 #error Update this code. Would you kindly?
@@ -202,7 +202,7 @@ static void spi_dma_isr() {
 #if SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_4
     if(LL_DMA_IsActiveFlag_TC4(SPI_DMA) && LL_DMA_IsEnabledIT_TC(SPI_DMA_TX_DEF)) {
         LL_DMA_ClearFlag_TC4(SPI_DMA);
-        furi_semaphore_release(spi_dma_semaphore);
+        furi_check(furi_semaphore_release(spi_dma_semaphore) == FuriStatusOk);
     }
 #else
 #error Update this code. Would you kindly?
