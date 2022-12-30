@@ -45,7 +45,7 @@ The application shows the longest coherent signal detected so far.
 
 Under the detected sequence, you will see a small triangle marking a
 specific sample. This mark means that the sequence looked coherent up
-to that point, and starting from that could be just noise.
+to that point, and starting from there it could be just noise.
 
 Things to investigate:
 
