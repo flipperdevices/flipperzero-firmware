@@ -59,6 +59,7 @@ static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context
                 process_general_command(current_command);
             }
         }
+        free(commands.commands);
     }
     return 0;
 }
