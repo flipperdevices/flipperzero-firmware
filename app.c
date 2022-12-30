@@ -197,7 +197,7 @@ void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app) {
     snprintf(buf,sizeof(buf),"%luus",
         (unsigned long)DetectedSamples->short_pulse_dur);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_with_border(canvas, 100, 63, buf);
+    canvas_draw_str_with_border(canvas, 97, 63, buf);
 }
 
 /* Renders a single view with frequency and modulation setting. However
@@ -217,6 +217,9 @@ void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
         canvas_draw_str(canvas,70,10,"Modulation");
 }
 
+/* The callback actually just passes the control to the actual active
+ * view callback, after setting up basic stuff like cleaning the screen
+ * and setting color to black. */
 static void render_callback(Canvas *const canvas, void *ctx) {
     ProtoViewApp *app = ctx;
 
@@ -225,10 +228,12 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     canvas_draw_box(canvas, 0, 0, 127, 63);
     canvas_set_color(canvas, ColorBlack);
 
+    /* Call who is in charge right now. */
     switch(app->current_view) {
     case ViewRawPulses: render_view_raw_pulses(canvas,app); break;
-    case ViewFrequencySettings: render_view_settings(canvas,app); break;
-    case ViewModulationSettings: render_view_settings(canvas,app); break;
+    case ViewFrequencySettings:
+    case ViewModulationSettings:
+        render_view_settings(canvas,app); break;
     case ViewLast: furi_crash(TAG " ViewLast selected"); break;
     }
 }
@@ -245,6 +250,8 @@ static void input_callback(InputEvent* input_event, void* ctx)
     }
 }
 
+/* Allocate the application state and initialize a number of stuff.
+ * This is called in the entry point to create the application state. */
 ProtoViewApp* protoview_app_alloc() {
     ProtoViewApp *app = malloc(sizeof(ProtoViewApp));
 
@@ -295,13 +302,16 @@ ProtoViewApp* protoview_app_alloc() {
     return app;
 }
 
+/* Free what the application allocated. It is not clear to me if the
+ * Flipper OS, once the application exits, will be able to reclaim space
+ * even if we forget to free something here. */
 void protoview_app_free(ProtoViewApp *app) {
     furi_assert(app);
 
-    //CC1101 off
+    // Put CC1101 on sleep.
     radio_sleep(app);
 
-    // View
+    // View related.
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(app->gui, app->view_port);
     view_port_free(app->view_port);
@@ -309,18 +319,19 @@ void protoview_app_free(ProtoViewApp *app) {
     furi_message_queue_free(app->event_queue);
     app->gui = NULL;
 
-    //setting
+    // Frequency setting.
     subghz_setting_free(app->setting);
 
-    //Worker
+    // Worker stuff.
     subghz_receiver_free(app->txrx->receiver);
     subghz_environment_free(app->txrx->environment);
     subghz_worker_free(app->txrx->worker);
     free(app->txrx);
 
-    furi_hal_power_suppress_charge_exit();
+    // Raw samples buffers.
     raw_samples_free(RawSamples);
     raw_samples_free(DetectedSamples);
+    furi_hal_power_suppress_charge_exit();
 
     free(app);
 }
@@ -331,6 +342,29 @@ void protoview_app_free(ProtoViewApp *app) {
 static void timer_callback(void *ctx) {
     ProtoViewApp *app = ctx;
     scan_for_signal(app);
+}
+
+/* Handle input for the raw pulses view. */
+void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
+    if (input.key == InputKeyOk) {
+        /* Reset the current sample to capture the next. */
+        app->signal_bestlen = 0;
+        raw_samples_reset(DetectedSamples);
+        raw_samples_reset(RawSamples);
+    } else if (input.key == InputKeyDown) {
+        /* Rescaling. The set becomes finer under 50us per pixel. */
+        uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;
+        if (app->us_scale < 500) app->us_scale += scale_step;
+    } else if (input.key == InputKeyUp) {
+        uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
+        if (app->us_scale > 10) app->us_scale -= scale_step;
+    }
+}
+
+/* Handle input for the settings view. */
+void process_input_settings(ProtoViewApp *app, InputEvent input) {
+    UNUSED(input);
+    UNUSED(app);
 }
 
 int32_t protoview_app_entry(void* p) {
@@ -356,18 +390,11 @@ int32_t protoview_app_entry(void* p) {
         if (qstat == FuriStatusOk) {
             FURI_LOG_E(TAG, "Main Loop - Input: %u", input.key);
 
+            /* Handle navigation here. Then handle view-specific inputs
+             * in the view specific handling function. */
             if (input.key == InputKeyBack) {
+                /* Exit the app. */
                 app->running = 0;
-            } else if (input.key == InputKeyOk) {
-                app->signal_bestlen = 0;
-                raw_samples_reset(DetectedSamples);
-                raw_samples_reset(RawSamples);
-            } else if (input.key == InputKeyDown) {
-                uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;
-                if (app->us_scale < 500) app->us_scale += scale_step;
-            } else if (input.key == InputKeyUp) {
-                uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
-                if (app->us_scale > 10) app->us_scale -= scale_step;
             } else if (input.key == InputKeyRight) {
                 /* Go to the next view. */
                 app->current_view++;
@@ -378,6 +405,17 @@ int32_t protoview_app_entry(void* p) {
                     app->current_view = ViewLast-1;
                 else
                     app->current_view--;
+            } else {
+                switch(app->current_view) {
+                case ViewRawPulses:
+                    process_input_raw_pulses(app,input);
+                    break;
+                case ViewFrequencySettings:
+                case ViewModulationSettings:
+                    process_input_settings(app,input);
+                    break;
+                case ViewLast: furi_crash(TAG " ViewLast selected"); break;
+                }
             }
         } else {
             static int c = 0;
