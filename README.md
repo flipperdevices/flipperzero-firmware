@@ -42,10 +42,9 @@ Reality:
 
 ![What it looks like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/flipper.jpg)
 
-
 ## Software
 
-The code is based on the original Bosch [driver](https://github.com/BoschSensortec/BMI160_driver/) and an orientation tracking implementation from the [Cardboard](https://github.com/googlevr/cardboard/tree/master/sdk/sensors) project
+The code is based on the original Bosch [driver](https://github.com/BoschSensortec/BMI160_driver/) and an orientation tracking implementation from the Google [Cardboard](https://github.com/googlevr/cardboard/tree/master/sdk/sensors) project
 
 If you're familiar with Flipper applications, start in the [firmware](https://github.com/flipperdevices/flipperzero-firmware) checkout folder and do the following:
 ```
@@ -55,3 +54,7 @@ cd ../..
 ./fbt fap_air_mouse
 ```
 If you're not familiar with those, just grab a `fap` file from Releases.
+
+## License
+
+TL;DR: Use the code however you want, give credit where it's due, no warranty of any kind is provided.
