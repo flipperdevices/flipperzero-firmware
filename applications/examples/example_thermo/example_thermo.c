@@ -19,7 +19,7 @@
 #include <one_wire/maxim_crc.h>
 #include <one_wire/one_wire_host.h>
 
-#define UPDATE_PERIOD_MS 1000UL
+#define UPDATE_PERIOD_MS 1500UL
 #define TEXT_STORE_SIZE 64U
 
 #define DS18B20_CMD_CONVERT 0x44U
