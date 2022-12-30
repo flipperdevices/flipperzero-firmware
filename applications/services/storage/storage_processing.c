@@ -604,7 +604,7 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         break;
     }
 
-    furi_semaphore_release(message->semaphore);
+    api_lock_unlock(message->lock);
 }
 
 void storage_process_message(Storage* app, StorageMessage* message) {
