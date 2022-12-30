@@ -6,14 +6,11 @@ Core improvements
 Features
 ========
 
-- In raw visualization mode, up/down change scaling (100,200,...,500us per pixel)
 - Pressing right/left you browse different modes:
   * Current best signal pulse classes.
   * Raw square wave display. Central button freezes and resumes (toggle). When frozen we display "paused" (inverted) on the low part of the screen.
-- Setup of frequency, AM/FM, ... done with single screens (for each function) found on the right, so that when you are on that screen up/down has the effect of changing frequency / mode.
 
 Screens sequence (user can navigate with <- and ->):
 
-
                             (default)
-[modulation] <> [freq] <> [pulses view] <> [raw square view] <> [signal info]
+[settings] <> [freq] <> [pulses view] <> [raw square view] <> [signal info]
