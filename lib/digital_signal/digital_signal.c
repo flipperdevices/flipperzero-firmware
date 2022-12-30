@@ -342,36 +342,42 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
     sequence->sequence[sequence->sequence_used++] = signal_index;
 }
 
-#if defined(DIGITAL_SIGNAL_PORTABLE_CODE)
+bool digital_signal_optimization = true;
 
-static void digital_signal_update_dma(DigitalSignal* signal) {
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)signal->internals->gpio_buff);
+static void digital_signal_update_dma_c(DigitalSignal* signal) {
+    /* if transfer was already active, wait till DMA is done and the last timer ticks are running */
+    while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
+    }
+
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t)signal->reload_reg_buff);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, 2);
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, signal->internals->reload_reg_entries);
-
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
+    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)signal->internals->gpio_buff);
+    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, 2);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+
+    LL_DMA_ClearFlag_TC1(DMA1);
+    LL_DMA_ClearFlag_TC2(DMA1);
 }
 
-#else
-
-static void digital_signal_update_dma(DigitalSignal* signal) {
+static void digital_signal_update_dma_asm(DigitalSignal* signal) {
     volatile uint32_t dma1_data[] = {
-        /* R6  */ (uint32_t) & (DMA1_Channel1->CCR),
-        /* R7  */ DMA1_Channel1->CCR & ~DMA_CCR_EN,
-        /* R8  */ 2,
-        /* R9  */ (uint32_t) & (signal->internals->gpio->port->BSRR),
-        /* R10 */ (uint32_t)signal->internals->gpio_buff,
-        /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN};
+        /* R6  */ (uint32_t) & (DMA1_Channel1->CCR), /* base address of DMA channel 1 */
+        /* R7  */ DMA1_Channel1->CCR & ~DMA_CCR_EN, /* CCR value to write first */
+        /* R8  */ 2, /* CNDTR to write */
+        /* R9  */ (uint32_t) & (signal->internals->gpio->port->BSRR), /* CPAR to write */
+        /* R10 */ (uint32_t)signal->internals->gpio_buff, /* CMAR to write */
+        /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN}; /* and CCR again to write after finished */
 
     volatile uint32_t dma2_data[] = {
-        /* R0 */ (uint32_t) & (DMA1_Channel2->CCR),
-        /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN,
-        /* R2 */ (uint32_t)signal->internals->reload_reg_entries,
-        /* R3 */ (uint32_t) & (TIM2->ARR),
-        /* R4 */ (uint32_t)signal->reload_reg_buff,
-        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN};
+        /* R0 */ (uint32_t) & (DMA1_Channel2->CCR), /* base address of DMA channel 2 */
+        /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN, /* CCR value to write first */
+        /* R2 */ (uint32_t)signal->internals->reload_reg_entries, /* CNDTR to write */
+        /* R3 */ (uint32_t) & (TIM2->ARR), /* CPAR to write */
+        /* R4 */ (uint32_t)signal->reload_reg_buff, /* CMAR to write */
+        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN}; /* and CCR again to write after finished */
 
     /* hurry when setting up next transfer */
     asm volatile(
@@ -389,10 +395,12 @@ static void digital_signal_update_dma(DigitalSignal* signal) {
         "CMP     r12, #0\n\t"
         "BNE     loop\n\t"
 
+        /* no transfers left, the DMA has finished. now quickly re-enable with new settings 
+           the next 4 instructions are the critical part */
         "STM     r6, {r7-r10}\n\t" /* disable channel and set up new parameters */
-        "STR     r11, [r6, #0]\n\t" /* enable channel again */
+        "STR     r11, [r6, #0]\n\t" /* enable channel again by writing CCR */
         "STM     r0, {r1-r4}\n\t" /* disable channel and set up new parameters */
-        "STR     r5, [r0, #0]\n\t" /* enable channel again */
+        "STR     r5, [r0, #0]\n\t" /* enable channel again by writing CCR */
 
         "POP     {r0-r12}\n\t"
 
@@ -405,7 +413,13 @@ static void digital_signal_update_dma(DigitalSignal* signal) {
     LL_DMA_ClearFlag_TC2(DMA1);
 }
 
-#endif
+void digital_signal_update_dma(DigitalSignal* signal) {
+    if(digital_signal_optimization) {
+        digital_signal_update_dma_asm(signal);
+    } else {
+        digital_signal_update_dma_c(signal);
+    }
+}
 
 static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSignal* signal) {
     furi_assert(sequence);
