@@ -4,18 +4,19 @@ void mag_scene_saved_info_on_enter(void* context) {
     Mag* mag = context;
     Widget* widget = mag->widget;
 
-    widget_add_string_element(
-        widget,
-        64,
-        12,
-        AlignCenter,
-        AlignCenter,
-        FontSecondary,
-        furi_string_get_cstr(mag->mag_dev->dev_data));
+    FuriString* tmp_str;
+    tmp_str = furi_string_alloc();
+
+    furi_string_printf(tmp_str, "%s\r\n", mag->mag_dev->dev_name);
+    furi_string_cat_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data));
+
+    widget_add_string_multiline_element(
+        widget, 0, 1, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
+    furi_string_free(tmp_str);
 }
 
 bool mag_scene_saved_info_on_event(void* context, SceneManagerEvent event) {

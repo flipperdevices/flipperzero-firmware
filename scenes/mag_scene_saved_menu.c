@@ -47,7 +47,7 @@ bool mag_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(mag->scene_manager, MagSceneUnderConstruction);
             consumed = true;
         } else if(event.event == SubmenuIndexDelete) {
-            scene_manager_next_scene(mag->scene_manager, MagSceneUnderConstruction);
+            scene_manager_next_scene(mag->scene_manager, MagSceneDeleteConfirm);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(mag->scene_manager, MagSceneSavedInfo);

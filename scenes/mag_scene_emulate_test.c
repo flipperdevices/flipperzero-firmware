@@ -1,18 +1,18 @@
 #include "../mag_i.h"
 
 #define PIN_A 0
-#define PIN_B 1      // currently unused
+#define PIN_B 1 // currently unused
 #define CLOCK_US 240 // typically set between 200-500us
-#define TEST_STR "%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?"
+#define TEST_STR "%%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?"
 #define TEST_TRACK 0
 // TODO: better way of setting temp test str,
 //       text wrapping on screen? (Will be relevant for any loaded data too)
 
 uint8_t magspoof_bit_dir = 0;
-const char *test_str = TEST_STR;
+const char* test_str = TEST_STR;
 
 void gpio_item_set_rfid_pin(uint8_t index, bool level) {
-    if (index == 0) {
+    if(index == 0) {
         furi_hal_gpio_write(&gpio_rfid_carrier_out, level);
         // A7 GPIO pin for debugging purposes
         // furi_hal_gpio_write(&gpio_ext_pa7, level);
@@ -31,8 +31,8 @@ static void play_bit(uint8_t send_bit) {
     // NFC tests
     //(magspoof_bit_dir) ? st25r3916TxRxOn() : st25r3916TxRxOff();
     //(magspoof_bit_dir) ? furi_hal_nfc_field_on() : furi_hal_nfc_field_off();
-    
-    if (send_bit) {
+
+    if(send_bit) {
         magspoof_bit_dir ^= 1;
         gpio_item_set_rfid_pin(PIN_A, magspoof_bit_dir);
         gpio_item_set_rfid_pin(PIN_B, !magspoof_bit_dir);
@@ -43,29 +43,29 @@ static void play_bit(uint8_t send_bit) {
     furi_delay_us(CLOCK_US);
 }
 
-static void mag_spoof(FuriString *track_str, uint8_t track) {
+static void mag_spoof(FuriString* track_str, uint8_t track) {
     furi_hal_power_enable_otg();
 
     size_t from;
     size_t to;
 
     // TODO ';' in first track case
-    if (track == 0) {
+    if(track == 0) {
         from = furi_string_search_char(track_str, '%');
         to = furi_string_search_char(track_str, '?', from);
-    } else if (track == 1) {
+    } else if(track == 1) {
         from = furi_string_search_char(track_str, ';');
         to = furi_string_search_char(track_str, '?', from);
     } else {
         from = 0;
         to = furi_string_size(track_str);
     }
-    if (from >= to) {
+    if(from >= to) {
         return;
     }
     furi_string_mid(track_str, from, to - from + 1);
 
-    const char *data = furi_string_get_cstr(track_str);
+    const char* data = furi_string_get_cstr(track_str);
 
     printf("%s", data);
 
@@ -105,15 +105,15 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
     magspoof_bit_dir = 0;
 
     // First put out a bunch of leading zeros.
-    for (uint8_t i = 0; i < 25; i++) {
+    for(uint8_t i = 0; i < 25; i++) {
         play_bit(0);
     }
 
-    for (uint8_t i = 0; data[i] != '\0'; i++) {
+    for(uint8_t i = 0; data[i] != '\0'; i++) {
         crc = 1;
         tmp = data[i] - sublen[track];
 
-        for (uint8_t j = 0; j < bitlen[track] - 1; j++) {
+        for(uint8_t j = 0; j < bitlen[track] - 1; j++) {
             crc ^= tmp & 1;
             lrc ^= (tmp & 1) << j;
             play_bit(tmp & 1);
@@ -125,7 +125,7 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
     // finish calculating and send last "byte" (LRC)
     tmp = lrc;
     crc = 1;
-    for (uint8_t j = 0; j < bitlen[track] - 1; j++) {
+    for(uint8_t j = 0; j < bitlen[track] - 1; j++) {
         crc ^= tmp & 1;
         play_bit(tmp & 1);
         tmp >>= 1;
@@ -133,7 +133,7 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
     play_bit(crc);
 
     // finish with 0's
-    for (uint8_t i = 0; i < 5 * 5; i++) {
+    for(uint8_t i = 0; i < 5 * 5; i++) {
         play_bit(0);
     }
 
@@ -153,9 +153,9 @@ static void mag_spoof(FuriString *track_str, uint8_t track) {
     furi_hal_power_disable_otg();
 }
 
-void mag_scene_emulate_test_on_enter(void *context) {
-    Mag *mag = context;
-    Widget *widget = mag->widget;
+void mag_scene_emulate_test_on_enter(void* context) {
+    Mag* mag = context;
+    Widget* widget = mag->widget;
 
     //FuriString *tmp_string;
     //tmp_string = furi_string_alloc();
@@ -172,26 +172,26 @@ void mag_scene_emulate_test_on_enter(void *context) {
     //furi_string_free(tmp_string);
 }
 
-bool mag_scene_emulate_test_on_event(void *context, SceneManagerEvent event) {
-    Mag *mag = context;
-    SceneManager *scene_manager = mag->scene_manager;
+bool mag_scene_emulate_test_on_event(void* context, SceneManagerEvent event) {
+    Mag* mag = context;
+    SceneManager* scene_manager = mag->scene_manager;
     bool consumed = false;
 
-    if (event.type == SceneManagerEventTypeCustom) {
-        if (event.event == GuiButtonTypeRight) {
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == GuiButtonTypeRight) {
             consumed = true;
 
             // Hardcoding a test string for the time being, while we debug/improve LF RFID TX
-            FuriString *v = furi_string_alloc();
+            FuriString* v = furi_string_alloc();
             furi_string_set_str(v, test_str);
 
             // blink led while spoofing
-            notification_message(mag->notifications, &sequence_blink_start_blue);
+            notification_message(mag->notifications, &sequence_blink_start_cyan);
             mag_spoof(v, TEST_TRACK);
             notification_message(mag->notifications, &sequence_blink_stop);
 
             furi_string_free(v);
-        } else if (event.event == GuiButtonTypeLeft) {
+        } else if(event.event == GuiButtonTypeLeft) {
             consumed = true;
 
             scene_manager_previous_scene(scene_manager);
@@ -201,7 +201,7 @@ bool mag_scene_emulate_test_on_event(void *context, SceneManagerEvent event) {
     return consumed;
 }
 
-void mag_scene_emulate_test_on_exit(void *context) {
-    Mag *mag = context;
+void mag_scene_emulate_test_on_exit(void* context) {
+    Mag* mag = context;
     widget_reset(mag->widget);
 }
