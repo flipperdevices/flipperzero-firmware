@@ -161,7 +161,8 @@ void scan_for_signal(ProtoViewApp *app) {
                                        12 samples it's very easy to mistake
                                        noise for signal. */
 
-    for (uint32_t i = 0; i < copy->total-1; i++) {
+    uint32_t i = 0;
+    while (i < copy->total-1) {
         uint32_t thislen = search_coherent_signal(copy,i);
         if (thislen > minlen && thislen > app->signal_bestlen) {
             app->signal_bestlen = thislen;
@@ -171,6 +172,7 @@ void scan_for_signal(ProtoViewApp *app) {
             FURI_LOG_E(TAG, "Displayed sample updated (%d samples)",
                 (int)thislen);
         }
+        i += thislen ? thislen : 1;
     }
     raw_samples_free(copy);
 }
