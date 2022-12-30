@@ -27,6 +27,7 @@ typedef enum {
 } OneWireSlaveError;
 
 struct OneWireSlave {
+    const GpioPin* gpio_pin;
     OneWireSlaveError error;
     OneWireDevice* device;
     OneWireSlaveResultCallback result_cb;
@@ -234,8 +235,9 @@ static void exti_cb(void* context) {
 
 /*********************** PUBLIC ***********************/
 
-OneWireSlave* onewire_slave_alloc() {
+OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin) {
     OneWireSlave* bus = malloc(sizeof(OneWireSlave));
+    bus->gpio_pin = gpio_pin;
     bus->error = NO_ERROR;
     bus->device = NULL;
     bus->result_cb = NULL;

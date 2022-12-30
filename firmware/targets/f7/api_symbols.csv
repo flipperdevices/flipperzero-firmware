@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.5,,
+Version,+,12.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2008,7 +2008,7 @@ Function,+,onewire_device_detach,void,OneWireDevice*
 Function,+,onewire_device_free,void,OneWireDevice*
 Function,+,onewire_device_get_id_p,uint8_t*,OneWireDevice*
 Function,+,onewire_device_send_id,void,OneWireDevice*
-Function,+,onewire_host_alloc,OneWireHost*,
+Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
 Function,+,onewire_host_free,void,OneWireHost*
 Function,+,onewire_host_read,uint8_t,OneWireHost*
 Function,+,onewire_host_read_bit,_Bool,OneWireHost*
@@ -2022,7 +2022,7 @@ Function,+,onewire_host_stop,void,OneWireHost*
 Function,+,onewire_host_target_search,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write_bit,void,"OneWireHost*, _Bool"
-Function,+,onewire_slave_alloc,OneWireSlave*,
+Function,+,onewire_slave_alloc,OneWireSlave*,const GpioPin*
 Function,+,onewire_slave_attach,void,"OneWireSlave*, OneWireDevice*"
 Function,+,onewire_slave_detach,void,OneWireSlave*
 Function,+,onewire_slave_free,void,OneWireSlave*

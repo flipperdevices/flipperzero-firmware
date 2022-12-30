@@ -303,7 +303,7 @@ static ExampleThermoContext* example_thermo_context_alloc() {
     context->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(context->gui, context->view_port, GuiLayerFullscreen);
 
-    context->onewire = onewire_host_alloc();
+    context->onewire = onewire_host_alloc(&ibutton_gpio);
 
     return context;
 }
