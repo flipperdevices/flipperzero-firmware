@@ -103,6 +103,23 @@ bool furi_hal_spi_bus_trx(
     size_t size,
     uint32_t timeout);
 
+/** SPI Transmit and Receive with DMA
+ *
+ * @param      handle     pointer to FuriHalSpiBusHandle instance
+ * @param      tx_buffer  pointer to tx buffer
+ * @param      rx_buffer  pointer to rx buffer
+ * @param      size       transaction size (buffer size)
+ * @param      timeout_ms operation timeout in ms
+ *
+ * @return     true on success
+ */
+bool furi_hal_spi_bus_trx_dma(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* tx_buffer,
+    uint8_t* rx_buffer,
+    size_t size,
+    uint32_t timeout_ms);
+
 #ifdef __cplusplus
 }
 #endif
