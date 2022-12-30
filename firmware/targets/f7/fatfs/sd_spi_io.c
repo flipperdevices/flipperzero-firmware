@@ -47,43 +47,52 @@ typedef enum {
     SdSpiCmdAnswerTypeR7,
 } SdSpiCmdAnswerType;
 
+/*
+    SdSpiCmd and SdSpiToken use non-standard enum value names convention,
+    because it is more convenient to look for documentation on a specific command.
+    For example, to find out what the SD_CMD23_SET_BLOCK_COUNT command does, you need to look for
+    SET_BLOCK_COUNT or CMD23 in the "Part 1 Physical Layer Simplified Specification".
+
+    Do not use that naming convention in other places.
+*/
+
 typedef enum {
-    SdSpiCmd_GO_IDLE_STATE = 0,
-    SdSpiCmd_SEND_OP_COND = 1,
-    SdSpiCmd_SEND_IF_COND = 8,
-    SdSpiCmd_SEND_CSD = 9,
-    SdSpiCmd_SEND_CID = 10,
-    SdSpiCmd_STOP_TRANSMISSION = 12,
-    SdSpiCmd_SEND_STATUS = 13,
-    SdSpiCmd_SET_BLOCKLEN = 16,
-    SdSpiCmd_READ_SINGLE_BLOCK = 17,
-    SdSpiCmd_READ_MULT_BLOCK = 18,
-    SdSpiCmd_SET_BLOCK_COUNT = 23,
-    SdSpiCmd_WRITE_SINGLE_BLOCK = 24,
-    SdSpiCmd_WRITE_MULT_BLOCK = 25,
-    SdSpiCmd_PROG_CSD = 27,
-    SdSpiCmd_SET_WRITE_PROT = 28,
-    SdSpiCmd_CLR_WRITE_PROT = 29,
-    SdSpiCmd_SEND_WRITE_PROT = 30,
-    SdSpiCmd_SD_ERASE_GRP_START = 32,
-    SdSpiCmd_SD_ERASE_GRP_END = 33,
-    SdSpiCmd_UNTAG_SECTOR = 34,
-    SdSpiCmd_ERASE_GRP_START = 35,
-    SdSpiCmd_ERASE_GRP_END = 36,
-    SdSpiCmd_UNTAG_ERASE_GROUP = 37,
-    SdSpiCmd_ERASE = 38,
-    SdSpiCmd_SD_APP_OP_COND = 41,
-    SdSpiCmd_APP_CMD = 55,
-    SdSpiCmd_READ_OCR = 58,
+    SD_CMD0_GO_IDLE_STATE = 0,
+    SD_CMD1_SEND_OP_COND = 1,
+    SD_CMD8_SEND_IF_COND = 8,
+    SD_CMD9_SEND_CSD = 9,
+    SD_CMD10_SEND_CID = 10,
+    SD_CMD12_STOP_TRANSMISSION = 12,
+    SD_CMD13_SEND_STATUS = 13,
+    SD_CMD16_SET_BLOCKLEN = 16,
+    SD_CMD17_READ_SINGLE_BLOCK = 17,
+    SD_CMD18_READ_MULT_BLOCK = 18,
+    SD_CMD23_SET_BLOCK_COUNT = 23,
+    SD_CMD24_WRITE_SINGLE_BLOCK = 24,
+    SD_CMD25_WRITE_MULT_BLOCK = 25,
+    SD_CMD27_PROG_CSD = 27,
+    SD_CMD28_SET_WRITE_PROT = 28,
+    SD_CMD29_CLR_WRITE_PROT = 29,
+    SD_CMD30_SEND_WRITE_PROT = 30,
+    SD_CMD32_SD_ERASE_GRP_START = 32,
+    SD_CMD33_SD_ERASE_GRP_END = 33,
+    SD_CMD34_UNTAG_SECTOR = 34,
+    SD_CMD35_ERASE_GRP_START = 35,
+    SD_CMD36_ERASE_GRP_END = 36,
+    SD_CMD37_UNTAG_ERASE_GROUP = 37,
+    SD_CMD38_ERASE = 38,
+    SD_CMD41_SD_APP_OP_COND = 41,
+    SD_CMD55_APP_CMD = 55,
+    SD_CMD58_READ_OCR = 58,
 } SdSpiCmd;
 
 /** Data tokens */
 typedef enum {
-    SdSpiToken_START_DATA_SINGLE_BLOCK_READ = 0xFE,
-    SdSpiToken_START_DATA_MULTIPLE_BLOCK_READ = 0xFE,
-    SdSpiToken_START_DATA_SINGLE_BLOCK_WRITE = 0xFE,
-    SdSpiToken_START_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
-    SdSpiToken_STOP_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
+    SD_TOKEN_START_DATA_SINGLE_BLOCK_READ = 0xFE,
+    SD_TOKEN_START_DATA_MULTIPLE_BLOCK_READ = 0xFE,
+    SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE = 0xFE,
+    SD_TOKEN_START_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
+    SD_TOKEN_STOP_DATA_MULTIPLE_BLOCK_WRITE = 0xFD,
 } SdSpiToken;
 
 /** R1 answer value */
@@ -329,12 +338,12 @@ static SdSpiStatus sd_spi_init_spi_mode_v1(void) {
     do {
         retry_count++;
 
-        // CMD55 (SD_CMD_APP_CMD) before any ACMD command: R1 response (0x00: no errors)
-        sd_spi_send_cmd(SdSpiCmd_APP_CMD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+        // CMD55 (APP_CMD) before any ACMD command: R1 response (0x00: no errors)
+        sd_spi_send_cmd(SD_CMD55_APP_CMD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
         sd_spi_deselect_card_and_purge();
 
-        // ACMD41 (SD_CMD_SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors)
-        response = sd_spi_send_cmd(SdSpiCmd_SD_APP_OP_COND, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+        // ACMD41 (SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors)
+        response = sd_spi_send_cmd(SD_CMD41_SD_APP_OP_COND, 0, 0xFF, SdSpiCmdAnswerTypeR1);
         sd_spi_deselect_card_and_purge();
 
         if(retry_count >= SD_IDLE_RETRY_COUNT) {
@@ -355,13 +364,13 @@ static SdSpiStatus sd_spi_init_spi_mode_v2(void) {
 
     do {
         retry_count++;
-        // CMD55 (SD_CMD_APP_CMD) before any ACMD command: R1 response (0x00: no errors)
-        sd_spi_send_cmd(SdSpiCmd_APP_CMD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+        // CMD55 (APP_CMD) before any ACMD command: R1 response (0x00: no errors)
+        sd_spi_send_cmd(SD_CMD55_APP_CMD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
         sd_spi_deselect_card_and_purge();
 
-        // ACMD41 (SD_CMD_SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors)
+        // ACMD41 (APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors)
         response =
-            sd_spi_send_cmd(SdSpiCmd_SD_APP_OP_COND, 0x40000000, 0xFF, SdSpiCmdAnswerTypeR1);
+            sd_spi_send_cmd(SD_CMD41_SD_APP_OP_COND, 0x40000000, 0xFF, SdSpiCmdAnswerTypeR1);
         sd_spi_deselect_card_and_purge();
 
         if(retry_count >= SD_IDLE_RETRY_COUNT) {
@@ -375,17 +384,16 @@ static SdSpiStatus sd_spi_init_spi_mode_v2(void) {
         retry_count = 0;
         do {
             retry_count++;
-            /* Send CMD55 (SD_CMD_APP_CMD) before any ACMD command: R1 response (0x00: no errors) */
-            response = sd_spi_send_cmd(SdSpiCmd_APP_CMD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+            // CMD55 (APP_CMD) before any ACMD command: R1 response (0x00: no errors)
+            response = sd_spi_send_cmd(SD_CMD55_APP_CMD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
             sd_spi_deselect_card_and_purge();
 
             if(response.r1 != SdSpi_R1_IN_IDLE_STATE) {
                 sd_spi_debug("CMD55 failed");
                 return SdSpiStatusError;
             }
-            /* Send ACMD41 (SD_CMD_SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors) */
-            response =
-                sd_spi_send_cmd(SdSpiCmd_SD_APP_OP_COND, 0x00000000, 0xFF, SdSpiCmdAnswerTypeR1);
+            // ACMD41 (SD_APP_OP_COND) to initialize SDHC or SDXC cards: R1 response (0x00: no errors)
+            response = sd_spi_send_cmd(SD_CMD41_SD_APP_OP_COND, 0, 0xFF, SdSpiCmdAnswerTypeR1);
             sd_spi_deselect_card_and_purge();
 
             if(retry_count >= SD_IDLE_RETRY_COUNT) {
@@ -404,12 +412,12 @@ static SdSpiStatus sd_spi_init_spi_mode(void) {
     SdSpiCmdAnswer response;
     uint8_t retry_count;
 
-    /* Send CMD0 (SD_CMD_GO_IDLE_STATE) to put SD in SPI mode and 
-     wait for In Idle State Response (R1 Format) equal to 0x01 */
+    // CMD0 (GO_IDLE_STATE) to put SD in SPI mode and
+    // wait for In Idle State Response (R1 Format) equal to 0x01
     retry_count = 0;
     do {
         retry_count++;
-        response = sd_spi_send_cmd(SdSpiCmd_GO_IDLE_STATE, 0, 0x95, SdSpiCmdAnswerTypeR1);
+        response = sd_spi_send_cmd(SD_CMD0_GO_IDLE_STATE, 0, 0x95, SdSpiCmdAnswerTypeR1);
         sd_spi_deselect_card_and_purge();
 
         if(retry_count >= SD_IDLE_RETRY_COUNT) {
@@ -418,9 +426,9 @@ static SdSpiStatus sd_spi_init_spi_mode(void) {
         }
     } while(response.r1 != SdSpi_R1_IN_IDLE_STATE);
 
-    /* Send CMD8 (SD_CMD_SEND_IF_COND) to check the power supply status 
-     and wait until response (R7 Format) equal to 0xAA and */
-    response = sd_spi_send_cmd(SdSpiCmd_SEND_IF_COND, 0x1AA, 0x87, SdSpiCmdAnswerTypeR7);
+    // CMD8 (SEND_IF_COND) to check the power supply status
+    // and wait until response (R7 Format) equal to 0xAA and
+    response = sd_spi_send_cmd(SD_CMD8_SEND_IF_COND, 0x1AA, 0x87, SdSpiCmdAnswerTypeR7);
     sd_spi_deselect_card_and_purge();
 
     if(FLAG_SET(response.r1, SdSpi_R1_ILLEGAL_COMMAND)) {
@@ -435,8 +443,8 @@ static SdSpiStatus sd_spi_init_spi_mode(void) {
             return SdSpiStatusError;
         }
 
-        /* Send CMD58 (SD_CMD_READ_OCR) to initialize SDHC or SDXC cards: R3 response (0x00: no errors) */
-        response = sd_spi_send_cmd(SdSpiCmd_READ_OCR, 0x00000000, 0xFF, SdSpiCmdAnswerTypeR3);
+        // CMD58 (READ_OCR) to initialize SDHC or SDXC cards: R3 response
+        response = sd_spi_send_cmd(SD_CMD58_READ_OCR, 0, 0xFF, SdSpiCmdAnswerTypeR3);
         sd_spi_deselect_card_and_purge();
 
         if(response.r1 != SdSpi_R1_NO_ERROR) {
@@ -458,11 +466,11 @@ static SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
     SdSpiStatus ret = SdSpiStatusError;
     SdSpiCmdAnswer response;
 
-    // CMD9 (CSD register): R1 format (0x00 is no errors)
-    response = sd_spi_send_cmd(SdSpiCmd_SEND_CSD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+    // CMD9 (SEND_CSD): R1 format (0x00 is no errors)
+    response = sd_spi_send_cmd(SD_CMD9_SEND_CSD, 0, 0xFF, SdSpiCmdAnswerTypeR1);
 
     if(response.r1 == SdSpi_R1_NO_ERROR) {
-        if(sd_spi_wait_for_data(SdSpiToken_START_DATA_SINGLE_BLOCK_READ, SD_TIMEOUT_MS) ==
+        if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, SD_TIMEOUT_MS) ==
            SdSpiStatusOK) {
             // read CSD data
             for(counter = 0; counter < 16; counter++) {
@@ -493,7 +501,6 @@ static SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
 
             if(sd_high_capacity == 0) {
                 csd->version.v1.Reserved1 = ((csd_data[6] & 0x0C) >> 2);
-
                 csd->version.v1.DeviceSize = ((csd_data[6] & 0x03) << 10) | (csd_data[7] << 2) |
                                              ((csd_data[8] & 0xC0) >> 6);
                 csd->version.v1.MaxRdCurrentVDDMin = (csd_data[8] & 0x38) >> 3;
@@ -543,11 +550,11 @@ static SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
     SdSpiStatus ret = SdSpiStatusError;
     SdSpiCmdAnswer response;
 
-    // CMD10 (CID register): R1 format (0x00 is no errors)
-    response = sd_spi_send_cmd(SdSpiCmd_SEND_CID, 0, 0xFF, SdSpiCmdAnswerTypeR1);
+    // CMD10 (SEND_CID): R1 format (0x00 is no errors)
+    response = sd_spi_send_cmd(SD_CMD10_SEND_CID, 0, 0xFF, SdSpiCmdAnswerTypeR1);
 
     if(response.r1 == SdSpi_R1_NO_ERROR) {
-        if(sd_spi_wait_for_data(SdSpiToken_START_DATA_SINGLE_BLOCK_READ, SD_TIMEOUT_MS) ==
+        if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, SD_TIMEOUT_MS) ==
            SdSpiStatusOK) {
             // read CID data
             for(counter = 0; counter < 16; counter++) {
@@ -606,9 +613,9 @@ static SdSpiStatus
     uint32_t block_address = address;
     uint32_t offset = 0;
 
-    // Send CMD16: R1 response (0x00: no errors)
+    // CMD16 (SET_BLOCKLEN): R1 response (0x00: no errors)
     SdSpiCmdAnswer response =
-        sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
+        sd_spi_send_cmd(SD_CMD16_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
     sd_spi_deselect_card_and_purge();
 
     if(response.r1 != SdSpi_R1_NO_ERROR) {
@@ -621,16 +628,16 @@ static SdSpiStatus
 
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     while(blocks--) {
-        // CMD17 (SD_CMD_READ_SINGLE_BLOCK): R1 response (0x00: no errors)
+        // CMD17 (READ_SINGLE_BLOCK): R1 response (0x00: no errors)
         response =
-            sd_spi_send_cmd(SdSpiCmd_READ_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
+            sd_spi_send_cmd(SD_CMD17_READ_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_deselect_card_and_purge();
             return SdSpiStatusError;
         }
 
         // Wait for the data start token
-        if(sd_spi_wait_for_data(SdSpiToken_START_DATA_SINGLE_BLOCK_READ, timeout_ms) ==
+        if(sd_spi_wait_for_data(SD_TOKEN_START_DATA_SINGLE_BLOCK_READ, timeout_ms) ==
            SdSpiStatusOK) {
             // Read the data block
             // TODO: DMA transfer can be used here
@@ -669,9 +676,9 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
     uint32_t block_address = address;
     uint32_t offset = 0;
 
-    // Send CMD16: R1 response (0x00: no errors)
+    // CMD16 (SET_BLOCKLEN): R1 response (0x00: no errors)
     SdSpiCmdAnswer response =
-        sd_spi_send_cmd(SdSpiCmd_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
+        sd_spi_send_cmd(SD_CMD16_SET_BLOCKLEN, SD_BLOCK_SIZE, 0xFF, SdSpiCmdAnswerTypeR1);
     sd_spi_deselect_card_and_purge();
 
     if(response.r1 != SdSpi_R1_NO_ERROR) {
@@ -684,9 +691,9 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
 
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     while(blocks--) {
-        // CMD24 (SdSpiCmd_WRITE_SINGLE_BLOCK): R1 response (0x00: no errors)
+        // CMD24 (WRITE_SINGLE_BLOCK): R1 response (0x00: no errors)
         response = sd_spi_send_cmd(
-            SdSpiCmd_WRITE_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
+            SD_CMD24_WRITE_SINGLE_BLOCK, block_address, 0xFF, SdSpiCmdAnswerTypeR1);
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_deselect_card_and_purge();
             return SdSpiStatusError;
@@ -698,7 +705,7 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
         sd_spi_write_byte(SD_DUMMY_BYTE);
 
         // Send the data start token
-        sd_spi_write_byte(SdSpiToken_START_DATA_SINGLE_BLOCK_WRITE);
+        sd_spi_write_byte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
         sd_spi_write_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
         sd_spi_purge_crc();
 
@@ -777,8 +784,8 @@ SdSpiStatus sd_init(bool power_reset) {
 SdSpiStatus sd_get_card_state(void) {
     SdSpiCmdAnswer response;
 
-    // Send CMD13 (SD_SEND_STATUS) to get SD status
-    response = sd_spi_send_cmd(SdSpiCmd_SEND_STATUS, 0x00000000, 0xFF, SdSpiCmdAnswerTypeR2);
+    // Send CMD13 (SEND_STATUS) to get SD status
+    response = sd_spi_send_cmd(SD_CMD13_SEND_STATUS, 0, 0xFF, SdSpiCmdAnswerTypeR2);
     sd_spi_deselect_card_and_purge();
 
     // Return status OK if response is valid
