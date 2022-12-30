@@ -28,22 +28,22 @@ static const uint16_t MAX_LENGTH[3][4][MAX_QRCODE_VERSION] = {
         // Numeric
         {41, 77, 127, 187, 255, 322, 370, 461, 552, 652, 772}, // Low
         {34, 63, 101, 149, 202, 255, 293, 365, 432, 513, 604}, // Medium
-        {27, 48, 77, 111, 144, 178, 207, 259, 312, 364, 427},  // Quartile
-        {17, 34, 58, 82, 106, 139, 154, 202, 235, 288, 331},   // High
+        {27, 48, 77, 111, 144, 178, 207, 259, 312, 364, 427}, // Quartile
+        {17, 34, 58, 82, 106, 139, 154, 202, 235, 288, 331}, // High
     },
     {
         // Alphanumeric
         {25, 47, 77, 114, 154, 195, 224, 279, 335, 395, 468}, // Low
-        {20, 38, 61, 90, 122, 154, 178, 221, 262, 311, 366},  // Medium
-        {16, 29, 47, 67, 87, 108, 125, 157, 189, 221, 259},   // Quartile
-        {10, 20, 35, 50, 64, 84, 93, 122, 143, 174, 200},     // High
+        {20, 38, 61, 90, 122, 154, 178, 221, 262, 311, 366}, // Medium
+        {16, 29, 47, 67, 87, 108, 125, 157, 189, 221, 259}, // Quartile
+        {10, 20, 35, 50, 64, 84, 93, 122, 143, 174, 200}, // High
     },
     {
         // Binary
         {17, 32, 53, 78, 106, 134, 154, 192, 230, 271, 321}, // Low
-        {14, 26, 42, 62, 84, 106, 122, 152, 180, 213, 251},  // Medium
-        {11, 20, 32, 46, 60, 74, 86, 108, 130, 151, 177},    // Quartile
-        {7, 14, 24, 34, 44, 58, 64, 84, 98, 119, 137},       // High
+        {14, 26, 42, 62, 84, 106, 122, 152, 180, 213, 251}, // Medium
+        {11, 20, 32, 46, 60, 74, 86, 108, 130, 151, 177}, // Quartile
+        {7, 14, 24, 34, 44, 58, 64, 84, 98, 119, 137}, // High
     },
 };
 
@@ -72,18 +72,23 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     uint8_t width = canvas_width(canvas);
     uint8_t height = canvas_height(canvas);
-    if (instance->qrcode) {
+    if(instance->qrcode) {
         uint8_t size = instance->qrcode->size;
         uint8_t pixel_size = height / size;
         uint8_t top = (height - pixel_size * size) / 2;
         uint8_t left = (width - pixel_size * size) / 2;
-        for (uint8_t y = 0; y < size; y++) {
-            for (uint8_t x = 0; x < size; x++) {
-                if (qrcode_getModule(instance->qrcode, x, y)) {
-                    if (pixel_size == 1) {
+        for(uint8_t y = 0; y < size; y++) {
+            for(uint8_t x = 0; x < size; x++) {
+                if(qrcode_getModule(instance->qrcode, x, y)) {
+                    if(pixel_size == 1) {
                         canvas_draw_dot(canvas, left + x * pixel_size, top + y * pixel_size);
                     } else {
-                        canvas_draw_box(canvas, left + x * pixel_size, top + y * pixel_size, pixel_size, pixel_size);
+                        canvas_draw_box(
+                            canvas,
+                            left + x * pixel_size,
+                            top + y * pixel_size,
+                            pixel_size,
+                            pixel_size);
                     }
                 }
             }
@@ -93,8 +98,9 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
         uint8_t font_height = canvas_current_font_height(canvas);
         uint8_t margin = (height - font_height * 2) / 3;
-        canvas_draw_str_aligned(canvas, width / 2, margin, AlignCenter, AlignTop, "Could not load qrcode.");
-        if (instance->too_long) {
+        canvas_draw_str_aligned(
+            canvas, width / 2, margin, AlignCenter, AlignTop, "Could not load qrcode.");
+        if(instance->too_long) {
             canvas_set_font(canvas, FontSecondary);
             canvas_draw_str(canvas, width / 2, margin * 2 + font_height, "Message is too long.");
         }
@@ -109,7 +115,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
  * @param ctx Context provided to the callback by view_port_input_callback_set
  */
 static void input_callback(InputEvent* input_event, void* ctx) {
-    if (input_event->type == InputTypeShort) {
+    if(input_event->type == InputTypeShort) {
         QRCodeApp* instance = ctx;
         furi_message_queue_put(instance->input_queue, input_event, 0);
     }
@@ -121,9 +127,9 @@ static void input_callback(InputEvent* input_event, void* ctx) {
  * @returns true if the string is all numeric
  */
 static bool is_numeric(const char* str, uint16_t len) {
-    while (len > 0) {
+    while(len > 0) {
         char c = str[--len];
-        if (c < '0' || c > '9') return false;
+        if(c < '0' || c > '9') return false;
     }
     return true;
 }
@@ -134,19 +140,12 @@ static bool is_numeric(const char* str, uint16_t len) {
  * @returns true if the string is alphanumeric
  */
 static bool is_alphanumeric(const char* str, uint16_t len) {
-    while (len > 0) {
+    while(len > 0) {
         char c = str[--len];
-        if (c >= '0' && c <= '9') continue;
-        if (c >= 'A' && c <= 'Z') continue;
-        if (c == ' '
-                || c == '$'
-                || c == '%'
-                || c == '*'
-                || c == '+'
-                || c == '-'
-                || c == '.'
-                || c == '/'
-                || c == ':')
+        if(c >= '0' && c <= '9') continue;
+        if(c >= 'A' && c <= 'Z') continue;
+        if(c == ' ' || c == '$' || c == '%' || c == '*' || c == '+' || c == '-' || c == '.' ||
+           c == '/' || c == ':')
             continue;
         return false;
     }
@@ -181,7 +180,7 @@ static void qrcode_free(QRCode* qrcode) {
  */
 static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
     furi_check(furi_mutex_acquire(instance->mutex, FuriWaitForever) == FuriStatusOk);
-    if (instance->qrcode) {
+    if(instance->qrcode) {
         qrcode_free(instance->qrcode);
         instance->qrcode = NULL;
     }
@@ -194,8 +193,10 @@ static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
 
         // figure out the qrcode "mode"
         uint8_t mode = MODE_BYTE;
-        if      (is_numeric(cstr, len))      mode = MODE_NUMERIC;
-        else if (is_alphanumeric(cstr, len)) mode = MODE_ALPHANUMERIC;
+        if(is_numeric(cstr, len))
+            mode = MODE_NUMERIC;
+        else if(is_alphanumeric(cstr, len))
+            mode = MODE_ALPHANUMERIC;
 
         // Figure out the smallest qrcode version that'll fit all of the data -
         // we prefer the smallest version to maximize the pixel size of each
@@ -204,11 +205,11 @@ static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
         // number, so we'll add one later.
         uint8_t ecc = ECC_LOW;
         uint8_t version = 0;
-        while (version < MAX_QRCODE_VERSION && MAX_LENGTH[mode][ecc][version] < len) {
+        while(version < MAX_QRCODE_VERSION && MAX_LENGTH[mode][ecc][version] < len) {
             version++;
         }
 
-        if (version == MAX_QRCODE_VERSION) {
+        if(version == MAX_QRCODE_VERSION) {
             instance->too_long = true;
             break;
         }
@@ -218,15 +219,16 @@ static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
         // above that ECC_LOW (0) works... don't forget to add one to that
         // version number...
         ecc = ECC_HIGH;
-        while (MAX_LENGTH[mode][ecc][version] < len) {
+        while(MAX_LENGTH[mode][ecc][version] < len) {
             ecc--;
         }
         version++;
 
         // Build the qrcode
         instance->qrcode = qrcode_alloc(version);
-        int8_t res = qrcode_initBytes(instance->qrcode, instance->qrcode->modules, version, ecc, (uint8_t*)cstr, len);
-        if (res != 0) {
+        int8_t res = qrcode_initBytes(
+            instance->qrcode, instance->qrcode->modules, version, ecc, (uint8_t*)cstr, len);
+        if(res != 0) {
             FURI_LOG_E(TAG, "Could not create qrcode");
 
             qrcode_free(instance->qrcode);
@@ -236,7 +238,7 @@ static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
         }
 
         result = true;
-    } while (false);
+    } while(false);
 
     furi_mutex_release(instance->mutex);
 
@@ -260,27 +262,26 @@ static bool qrcode_load_file(QRCodeApp* instance, const char* file_path) {
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
     do {
-        if (!flipper_format_file_open_existing(file, file_path)) break;
+        if(!flipper_format_file_open_existing(file, file_path)) break;
 
         uint32_t version = 0;
-        if (!flipper_format_read_header(file, temp_str, &version)) break;
-        if (furi_string_cmp_str(temp_str, QRCODE_FILETYPE)
-                || version != QRCODE_FILE_VERSION) {
+        if(!flipper_format_read_header(file, temp_str, &version)) break;
+        if(furi_string_cmp_str(temp_str, QRCODE_FILETYPE) || version != QRCODE_FILE_VERSION) {
             FURI_LOG_E(TAG, "Incorrect file format or version");
             break;
         }
 
-        if (!flipper_format_read_string(file, "Message", temp_str)) {
+        if(!flipper_format_read_string(file, "Message", temp_str)) {
             FURI_LOG_E(TAG, "Message is missing");
             break;
         }
 
-        if (!qrcode_load_string(instance, temp_str)) {
+        if(!qrcode_load_string(instance, temp_str)) {
             break;
         }
 
         result = true;
-    } while (false);
+    } while(false);
 
     furi_record_close(RECORD_STORAGE);
     flipper_format_free(file);
@@ -315,7 +316,7 @@ static QRCodeApp* qrcode_app_alloc() {
  * @param qrcode_app The app to free
  */
 static void qrcode_app_free(QRCodeApp* instance) {
-    if (instance->qrcode) qrcode_free(instance->qrcode);
+    if(instance->qrcode) qrcode_free(instance->qrcode);
 
     gui_remove_view_port(instance->gui, instance->view_port);
     furi_record_close(RECORD_GUI);
@@ -337,14 +338,14 @@ int32_t qrcode_app(void* p) {
     file_path = furi_string_alloc();
 
     do {
-        if (p && strlen(p)) {
+        if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
             furi_string_set(file_path, QRCODE_FOLDER);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
-                    &browser_options, QRCODE_EXTENSION, &I_qrcode_10px);
+                &browser_options, QRCODE_EXTENSION, &I_qrcode_10px);
             browser_options.hide_ext = true;
             browser_options.base_path = QRCODE_FOLDER;
 
@@ -352,22 +353,23 @@ int32_t qrcode_app(void* p) {
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
 
             furi_record_close(RECORD_DIALOGS);
-            if (!res) {
+            if(!res) {
                 FURI_LOG_E(TAG, "No file selected");
                 break;
             }
         }
 
-        if (!qrcode_load_file(instance, furi_string_get_cstr(file_path))) {
+        if(!qrcode_load_file(instance, furi_string_get_cstr(file_path))) {
             FURI_LOG_E(TAG, "Unable to load file");
         }
 
         InputEvent input;
-        while (furi_message_queue_get(instance->input_queue, &input, FuriWaitForever) == FuriStatusOk) {
+        while(furi_message_queue_get(instance->input_queue, &input, FuriWaitForever) ==
+              FuriStatusOk) {
             furi_check(furi_mutex_acquire(instance->mutex, FuriWaitForever) == FuriStatusOk);
 
-            if (input.key == InputKeyBack) {
-                if (instance->qrcode) {
+            if(input.key == InputKeyBack) {
+                if(instance->qrcode) {
                     qrcode_free(instance->qrcode);
                     instance->qrcode = NULL;
                 }
@@ -379,11 +381,11 @@ int32_t qrcode_app(void* p) {
             view_port_update(instance->view_port);
         }
 
-        if (p && strlen(p)) {
+        if(p && strlen(p)) {
             // if started with an arg, exit instead of going to the browser
             break;
         }
-    } while (1);
+    } while(1);
 
     furi_string_free(file_path);
     qrcode_app_free(instance);
