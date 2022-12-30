@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1229-2003-0.74.3-741cc52](https://www.patreon.com/posts/76528290)
+## Latest Updates - [PATREON: Latest Release RM1230-0356-0.74.3-4dbc6bb](https://www.patreon.com/posts/76539797)
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-30 01:34 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-30 01:34 EST`
@@ -59,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Patreon Only: New Build - One Piece](https://www.patreon.com/posts/76525879)
 - Animations: Updated Mods from OFW to say RogueMaster. Flipper City, Purple Rain and New Years animations updated to say RogueMaster.
 - Weather Station fap fix [Thank you ESurge](https://github.com/ESurge/)
+- [Patreon Only: 6 New AMAZING 18 Plus animations thanks to an anonymous donor](https://www.patreon.com/posts/76539797)
 
 <a name="release">
 
