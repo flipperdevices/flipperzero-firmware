@@ -24,6 +24,8 @@ void shapshup_scene_load_file_on_enter(void* context) {
     bool res =
         dialog_file_browser_show(instance->dialogs, file_path, app_folder, &browser_options);
 #endif
+    shapshup_show_loading_popup(instance, true);
+
 #ifdef FURI_DEBUG
     FURI_LOG_D(
         TAG,
@@ -34,6 +36,7 @@ void shapshup_scene_load_file_on_enter(void* context) {
     if(res) {
         ShapShupFileResults result =
             shapshup_main_view_load_file(instance->view_main, furi_string_get_cstr(file_path));
+        shapshup_show_loading_popup(instance, false);
 
         if(result == ShapShupFileResultOk) {
             scene_manager_next_scene(instance->scene_manager, ShapshupSceneStart);
@@ -43,7 +46,17 @@ void shapshup_scene_load_file_on_enter(void* context) {
 
             FuriString* dialog_msg;
             dialog_msg = furi_string_alloc_printf("Cannot parse file\n%s", desc);
-            dialog_message_show_storage_error(instance->dialogs, furi_string_get_cstr(dialog_msg));
+
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
+            dialog_message_set_buttons(message, NULL, NULL, NULL);
+
+            dialog_message_set_text(
+                message, furi_string_get_cstr(dialog_msg), 64, 32, AlignCenter, AlignCenter);
+
+            dialog_message_show(instance->dialogs, message);
+            dialog_message_free(message);
+
 #ifdef SHAPSHUP_FAST_TRACK
             view_dispatcher_stop(instance->view_dispatcher);
 #else
@@ -53,6 +66,8 @@ void shapshup_scene_load_file_on_enter(void* context) {
             furi_string_free(dialog_msg);
         }
     } else {
+        shapshup_show_loading_popup(instance, false);
+
         scene_manager_search_and_switch_to_previous_scene(
             instance->scene_manager, ShapshupSceneStart);
     }
