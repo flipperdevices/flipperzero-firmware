@@ -204,6 +204,18 @@ static inline void sd_spi_read_bytes(uint8_t* data, uint32_t size) {
     furi_check(furi_hal_spi_bus_trx(furi_hal_sd_spi_handle, NULL, data, size, SD_TIMEOUT_MS));
 }
 
+static inline void sd_spi_write_bytes_dma(uint8_t* data, uint32_t size) {
+    uint32_t timeout_mul = (size / 512) + 1;
+    furi_check(furi_hal_spi_bus_trx_dma(
+        furi_hal_sd_spi_handle, data, NULL, size, SD_TIMEOUT_MS * timeout_mul));
+}
+
+static inline void sd_spi_read_bytes_dma(uint8_t* data, uint32_t size) {
+    uint32_t timeout_mul = (size / 512) + 1;
+    furi_check(furi_hal_spi_bus_trx_dma(
+        furi_hal_sd_spi_handle, NULL, data, size, SD_TIMEOUT_MS * timeout_mul));
+}
+
 static uint8_t sd_spi_wait_for_data_and_read(void) {
     uint8_t retry_count = SD_ANSWER_RETRY_COUNT;
     uint8_t responce;
@@ -641,7 +653,7 @@ static SdSpiStatus
            SdSpiStatusOK) {
             // Read the data block
             // TODO: DMA transfer can be used here
-            sd_spi_read_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
+            sd_spi_read_bytes_dma((uint8_t*)data + offset, SD_BLOCK_SIZE);
             sd_spi_purge_crc();
 
             // increase offset
@@ -706,7 +718,7 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
 
         // Send the data start token
         sd_spi_write_byte(SD_TOKEN_START_DATA_SINGLE_BLOCK_WRITE);
-        sd_spi_write_bytes((uint8_t*)data + offset, SD_BLOCK_SIZE);
+        sd_spi_write_bytes_dma((uint8_t*)data + offset, SD_BLOCK_SIZE);
         sd_spi_purge_crc();
 
         // Read data response
@@ -763,11 +775,17 @@ SdSpiStatus sd_init(bool power_reset) {
 
     SdSpiStatus status = SdSpiStatusError;
 
+    // Send 80 dummy clocks with CS high
+    sd_spi_deselect_card();
+    for(uint8_t i = 0; i < 80; i++) {
+        sd_spi_write_byte(SD_DUMMY_BYTE);
+    }
+
     for(uint8_t i = 0; i < 128; i++) {
         status = sd_spi_init_spi_mode();
         if(status == SdSpiStatusOK) {
             // SD initialized and init to SPI mode properly
-            sd_spi_debug("SD init OK");
+            sd_spi_debug("SD init OK after %d retries", i);
             break;
         }
     }
