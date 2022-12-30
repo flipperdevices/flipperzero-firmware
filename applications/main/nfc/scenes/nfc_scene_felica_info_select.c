@@ -13,7 +13,6 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
     FelicaData* data = &nfc->dev->dev_data.felica_data;
     FelicaSelectState* state = &nfc->felica_select;
 
-    FuriStringStack_init(nfc->felica_select.strings);
     FelicaAreaPath_init(nfc->felica_select.selected_areas);
 
     submenu_add_item(submenu, "[Actions]", 0, nfc_scene_felica_info_select_submenu_callback, nfc);
@@ -31,7 +30,7 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
                 i++,
                 nfc_scene_felica_info_select_submenu_callback,
                 nfc);
-            FuriStringStack_push_back(state->strings, system_name);
+            furi_string_free(system_name);
         }
     } else {
         FelicaSystem* system = state->selected_system;
@@ -50,32 +49,33 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
         furi_string_cat(header, "Areas");
 
         submenu_set_header(submenu, furi_string_get_cstr(header));
-        FuriStringStack_push_back(state->strings, header);
+        furi_string_free(header);
 
         FelicaNodeList_it_t it;
         for(FelicaNodeList_it(it, area->nodes); !FelicaNodeList_end_p(it);
             FelicaNodeList_next(it)) {
             FelicaNode* node = *FelicaNodeList_ref(it);
+            FuriString* node_name = furi_string_alloc();
             if(node->type == FelicaNodeTypeArea) {
-                FuriString* area_name = furi_string_alloc_printf("Area %d", node->area->number);
+                furi_string_printf(node_name, "Area %d", node->area->number);
                 submenu_add_item(
                     submenu,
-                    furi_string_get_cstr(area_name),
+                    furi_string_get_cstr(node_name),
                     i++,
                     nfc_scene_felica_info_select_submenu_callback,
                     nfc);
-                FuriStringStack_push_back(state->strings, area_name);
             } else {
                 uint16_t service_code = node->service->number << 6;
-                FuriString* service_name = furi_string_alloc_printf("Service %04X", service_code);
+                furi_string_printf(node_name, "Service %04X", service_code);
                 submenu_add_item(
                     submenu,
-                    furi_string_get_cstr(service_name),
+                    furi_string_get_cstr(node_name),
                     i++,
                     nfc_scene_felica_info_select_submenu_callback,
                     nfc);
-                FuriStringStack_push_back(state->strings, service_name);
             }
+
+            furi_string_free(node_name);
         }
     }
 
@@ -147,6 +147,5 @@ void nfc_scene_felica_info_select_on_exit(void* context) {
 
     // Clear view
     FelicaAreaPath_clear(nfc->felica_select.selected_areas);
-    FuriStringStack_clear(nfc->felica_select.strings);
     submenu_reset(nfc->submenu);
 }

@@ -43,15 +43,12 @@
 #include <m-array.h>
 
 ARRAY_DEF(FelicaAreaPath, FelicaArea*, M_PTR_OPLIST)
-LIST_DEF(FuriStringStack, FuriString*, FURI_STRING_OPLIST)
 ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST)
 
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 
 typedef struct {
-    FuriStringStack_t strings;
-
     FelicaSystem* selected_system;
 
     FelicaAreaPath_t selected_areas;
