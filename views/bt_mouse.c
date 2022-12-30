@@ -44,9 +44,7 @@ struct BtMouse {
 #define BT_MOUSE_FLAG_KILL_THREAD (1UL << 1)
 #define BT_MOUSE_FLAG_ALL (BT_MOUSE_FLAG_INPUT_EVENT | BT_MOUSE_FLAG_KILL_THREAD)
 
-#define MOUSE_MOVE_SHORT 5
-#define MOUSE_MOVE_LONG 20
-#define MOUSE_SCROLL 20
+#define MOUSE_SCROLL 2
 
 static void bt_mouse_notify_event(BtMouse* bt_mouse) {
     FuriThreadId thread_id = furi_thread_get_id(bt_mouse->thread);
@@ -68,7 +66,7 @@ static void bt_mouse_button_state(BtMouse* bt_mouse, int8_t button, bool state) 
     event.button = button;
     event.state = state;
 
-    if (bt_mouse->connected) {
+    if(bt_mouse->connected) {
         furi_mutex_acquire(bt_mouse->mutex, FuriWaitForever);
         bt_mouse->queue[bt_mouse->qtail++] = event;
         bt_mouse->qtail %= BTN_EVT_QUEUE_SIZE;
@@ -102,11 +100,11 @@ static void bt_mouse_process(BtMouse* bt_mouse, InputEvent* event) {
                     bt_mouse_button_state(bt_mouse, HID_MOUSE_BTN_WHEEL, false);
                 }
             } else if(event->key == InputKeyRight) {
-                if(event->type == InputTypePress) {
+                if(event->type == InputTypePress || event->type == InputTypeRepeat) {
                     bt_mouse->wheel = MOUSE_SCROLL;
                 }
             } else if(event->key == InputKeyLeft) {
-                if(event->type == InputTypePress) {
+                if(event->type == InputTypePress || event->type == InputTypeRepeat) {
                     bt_mouse->wheel = -MOUSE_SCROLL;
                 }
             }
@@ -147,11 +145,11 @@ void bt_mouse_connection_status_changed_callback(BtStatus status, void* context)
     //    bt_mouse->view, void * model, { model->connected = connected; }, true);
 }
 
-bool bt_mouse_move(int8_t dx, int8_t dy, void *context) {
+bool bt_mouse_move(int8_t dx, int8_t dy, void* context) {
     furi_assert(context);
     BtMouse* bt_mouse = context;
 
-    if (bt_mouse->connected) {
+    if(bt_mouse->connected) {
         furi_mutex_acquire(bt_mouse->mutex, FuriWaitForever);
         bt_mouse->dx += dx;
         bt_mouse->dy += dy;
@@ -203,10 +201,9 @@ void bt_mouse_exit_callback(void* context) {
 }
 
 static int8_t clamp(int t) {
-    if (t < -128) {
+    if(t < -128) {
         return -128;
-    }
-    else if (t > 127) {
+    } else if(t > 127) {
         return 127;
     }
     return t;
@@ -217,7 +214,8 @@ static int32_t bt_mouse_thread_callback(void* context) {
     BtMouse* bt_mouse = (BtMouse*)context;
 
     while(1) {
-        uint32_t flags = furi_thread_flags_wait(BT_MOUSE_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
+        uint32_t flags =
+            furi_thread_flags_wait(BT_MOUSE_FLAG_ALL, FuriFlagWaitAny, FuriWaitForever);
         if(flags & BT_MOUSE_FLAG_KILL_THREAD) {
             break;
         }
@@ -226,7 +224,7 @@ static int32_t bt_mouse_thread_callback(void* context) {
 
             ButtonEvent event;
             bool send_buttons = false;
-            if (bt_mouse->qhead != bt_mouse->qtail) {
+            if(bt_mouse->qhead != bt_mouse->qtail) {
                 event = bt_mouse->queue[bt_mouse->qhead++];
                 bt_mouse->qhead %= BTN_EVT_QUEUE_SIZE;
                 send_buttons = true;
@@ -241,19 +239,19 @@ static int32_t bt_mouse_thread_callback(void* context) {
 
             furi_mutex_release(bt_mouse->mutex);
 
-            if (bt_mouse->connected && send_buttons) {
-                if (event.state) {
+            if(bt_mouse->connected && send_buttons) {
+                if(event.state) {
                     furi_hal_bt_hid_mouse_press(event.button);
                 } else {
                     furi_hal_bt_hid_mouse_release(event.button);
                 }
             }
 
-            if (bt_mouse->connected && (dx != 0 || dy != 0)) {
+            if(bt_mouse->connected && (dx != 0 || dy != 0)) {
                 furi_hal_bt_hid_mouse_move(dx, dy);
             }
 
-            if (bt_mouse->connected && wheel != 0) {
+            if(bt_mouse->connected && wheel != 0) {
                 furi_hal_bt_hid_mouse_scroll(wheel);
             }
         }
