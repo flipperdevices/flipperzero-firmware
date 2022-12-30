@@ -131,7 +131,7 @@ if extra_int_apps := GetOption("extra_int_apps"):
 if fwenv["FAP_EXAMPLES"]:
     fwenv.Append(APPDIRS=[("applications/examples", False)])
 
-for app_dir, _ in env["APPDIRS"]:
+for app_dir, _ in fwenv["APPDIRS"]:
     app_dir_node = env.Dir("#").Dir(app_dir)
 
     for entry in app_dir_node.glob("*"):
