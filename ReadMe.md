@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1230-0356-0.74.3-4dbc6bb](https://www.patreon.com/posts/76539797)
+## Latest Updates - [PATREON: Latest Release RM1230-1237-0.74.3-40e0bdb](https://www.patreon.com/posts/76555486)
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-30 09:48 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-30 09:48 EST`
@@ -61,7 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Weather Station fap fix [Thank you ESurge](https://github.com/ESurge/)
 - [Patreon Only: 6 New AMAZING 18 Plus animations thanks to an anonymous donor](https://www.patreon.com/posts/76539797)
 - [Patreon Only: New Build - SAO - Sword Art Online](https://www.patreon.com/posts/76540869)
-- Morse Code app fixed by Unleasehd PR.
+- Morse Code app fixed by Unleashed PR.
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Added: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
