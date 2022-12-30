@@ -31,7 +31,9 @@ but relatively effective algorithm. As we check the signal, we try to detect
 long parts of it that are composed of pulses roughly classifiable into
 a maximum of three different classes of lengths, plus or minus 10%. Most
 encodings are somewhat self-clocked, so they tend to have just two or
-three classes of signal lengths.
+three classes of pulse lengths. However often pulses of the same theoretical
+length have slightly different lenghts in the case of high and low level
+(RF on or off), so we classify them separately for robustness.
 
 # Usage
 
