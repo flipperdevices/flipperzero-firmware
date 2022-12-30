@@ -1,0 +1,12 @@
+App(
+    appid="Pomodoro2",
+    name="Pomodoro 2",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipp_pomodoro_main",
+    requires=["gui", "notification"],
+    stack_size=1 * 1024,
+    fap_category="Tools",
+    fap_icon_assets="images",
+    fap_icon="flipp_pomodoro_10.png",
+    fap_icon_assets_symbol="flipp_pomodoro",
+)

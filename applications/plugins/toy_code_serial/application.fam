@@ -1,0 +1,12 @@
+App(
+    appid="ToySerial",
+    name="Toy Serial",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="fbp_app",
+    stack_size=1 * 1024,
+    requires=[
+        "bt",
+        "gui",
+    ],
+    fap_category="Misc",
+)

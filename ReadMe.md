@@ -65,6 +65,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Added: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong)
+- Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
+- Updated: [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
+- Added: [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
+- Added: [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
+- Added: [Gem Utils (By devicious)](https://github.com/devicious/gem-flipperzero)
+- Added: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 
 <a name="release">
 
@@ -258,6 +264,7 @@ $ ./fbt dolphin_ext
 - [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [Bluetooth Remote (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
+- [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Clock (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)
@@ -272,6 +279,7 @@ $ ./fbt dolphin_ext
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
+- [Gem Utils (By devicious)](https://github.com/devicious/gem-flipperzero)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
@@ -298,6 +306,7 @@ $ ./fbt dolphin_ext
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)
 - [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
+- [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) [Changes by Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
@@ -311,6 +320,7 @@ $ ./fbt dolphin_ext
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
 - [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU2XD, SHT2X, SI702X, SI700X, SI701X or AM2320`
+- [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)

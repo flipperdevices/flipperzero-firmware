@@ -1,0 +1,12 @@
+App(
+    appid="BT_Serial",
+    name="BT Serial",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="fbs_app",
+    stack_size=1 * 1024,
+    requires=[
+        "bt",
+        "gui",
+    ],
+    fap_category="Misc",
+)

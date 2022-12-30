@@ -43,7 +43,7 @@ typedef struct {
 #define KEY_WIDTH 9
 #define KEY_HEIGHT 12
 #define KEY_PADDING 1
-#define ROW_COUNT 6
+#define ROW_COUNT 7
 #define COLUMN_COUNT 12
 
 // 0 width items are not drawn, but there value is used
