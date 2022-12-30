@@ -350,64 +350,45 @@ static void digital_signal_update_dma_c(DigitalSignal* signal) {
     }
 
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t)signal->reload_reg_buff);
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, signal->internals->reload_reg_entries);
+    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, (uint32_t)signal->reload_reg_buff);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-    LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_1, (uint32_t)signal->internals->gpio_buff);
-    LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_1, 2);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-
-    LL_DMA_ClearFlag_TC1(DMA1);
-    LL_DMA_ClearFlag_TC2(DMA1);
 }
 
 static void digital_signal_update_dma_asm(DigitalSignal* signal) {
-    /* this is an "already-prepared" buffer of all DMA channel configs to write */
+    /* this is an "already-prepared" buffer of DMA channel 2 config to write */
     const volatile uint32_t dma_data[] = {
-        /* DMA channel 2 data */
+        /* base addresses of DMA channel register */
         /* R0 */ (uint32_t) & (DMA1_Channel2->CCR), /* base address of DMA channel 2 */
-        /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN, /* CCR value to write first */
-        /* R2 */ (uint32_t)signal->internals->reload_reg_entries, /* CNDTR to write */
-        /* R3 */ (uint32_t) & (TIM2->ARR), /* CPAR to write */
-        /* R4 */ (uint32_t)signal->reload_reg_buff, /* CMAR to write */
-        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN, /* and CCR again to write after finished */
-
-        /* DMA channel 1 data */
-        /* R6  */ (uint32_t) & (DMA1_Channel1->CCR), /* base address of DMA channel 1 */
-        /* R7  */ DMA1_Channel1->CCR & ~DMA_CCR_EN, /* CCR value to write first */
-        /* R8  */ 2, /* CNDTR to write */
-        /* R9  */ (uint32_t) & (signal->internals->gpio->port->BSRR), /* CPAR to write */
-        /* R10 */ (uint32_t)signal->internals->gpio_buff, /* CMAR to write */
-        /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN}; /* and CCR again to write after finished */
+        /* R1 */ DMA1_Channel2->CCR | DMA_CCR_EN, /* CCR to write after finished */
+        /* R2 */ DMA1_Channel2->CCR & ~DMA_CCR_EN, /* CCR value to write first */
+        /* R3 */ (uint32_t)signal->internals->reload_reg_entries, /* CNDTR to write */
+        /* R4 */ (uint32_t) & (TIM2->ARR), /* CPAR to write */
+        /* R5 */ (uint32_t)signal->reload_reg_buff, /* CMAR to write */
+    };
 
     /* now wait for the DMA finishing and instantly reconfigure it with as few instructions as possible */
     asm volatile(
         "\t"
-        "PUSH    {r0-r12}\n\t"
+        "PUSH    {r0-r6}\n\t"
 
-        "LDM     %[data], {r0-r11}\n\t" /* prepare registers with values to write into DMA config */
+        "LDM     %[data], {r0-r5}\n\t" /* prepare registers with values to write into DMA config */
 
         "wait_for_dma_finished:\n\t"
-        "LDR     r12, [r0, #4]\n\t" /* read DMA_CNDTRx to get remaining transfers */
-        "CMP     r12, #0\n\t"
+        "LDR     r6, [r0, #4]\n\t" /* read DMA_CNDTRx of DMA1 chan 2 to get remaining transfers */
+        "CMP     r6, #0\n\t"
         "BNE     wait_for_dma_finished\n\t"
 
         /* no transfers left, the DMA has finished. now quickly re-enable with new settings.
-           the next 4 instructions are the critical part */
-        "STM     r6, {r7-r10}\n\t" /* disable channel and set up new parameters */
-        "STR     r11, [r6, #0]\n\t" /* enable channel again by writing CCR */
-        "STM     r0, {r1-r4}\n\t" /* disable channel and set up new parameters */
-        "STR     r5, [r0, #0]\n\t" /* enable channel again by writing CCR */
+           these next 2 instructions are the critical part */
+        "STM     r0, {r2-r5}\n\t" /* disable channel and set up new parameters */
+        "STR     r1, [r0, #0]\n\t" /* enable channel again by writing CCR */
 
-        "POP     {r0-r12}\n\t"
+        "POP     {r0-r6}\n\t"
 
         : /* no outputs*/
         : /* inputs */
         [data] "r"(dma_data));
-
-    LL_DMA_ClearFlag_TC1(DMA1);
-    LL_DMA_ClearFlag_TC2(DMA1);
 }
 
 void digital_signal_update_dma(DigitalSignal* signal) {
