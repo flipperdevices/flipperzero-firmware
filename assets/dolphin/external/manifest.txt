@@ -142,8 +142,8 @@ Max level: 3
 Weight: 3
 
 Name: L1_Sleigh_ride_128x64
-2Min butthurt: 0
-3Max butthurt: 14
-4Min level: 1
-5Max level: 3
-6Weight: 4
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 3
+Weight: 4
