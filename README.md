@@ -19,6 +19,7 @@ Using it is really simple:
  * Up button for Left mouse click;
  * Down button for Right mouse click;
  * Center button for Middle mouse click;
+ * Left and Right buttons for scrolling;
  * Use calibration menu option if you notice significant drift (place your Flipper onto a level surface, make sure it doesn't move, run this option, wait 2 seconds, done).
 
 See early prototype [in action](https://www.youtube.com/watch?v=DdxAmmsYfMA).
