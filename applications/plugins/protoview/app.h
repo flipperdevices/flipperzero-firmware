@@ -36,7 +36,7 @@ typedef enum {
 } ProtoViewCurrentView;
 
 typedef struct {
-    const char *name;
+    const char* name;
     FuriHalSubGhzPreset preset;
 } ProtoViewModulation;
 
@@ -46,7 +46,7 @@ extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
  * It receives data and we get our protocol "feed" callback called
  * with the level (1 or 0) and duration. */
 struct ProtoViewTxRx {
-    SubGhzWorker* worker;       /* Our background worker. */
+    SubGhzWorker* worker; /* Our background worker. */
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
@@ -56,22 +56,22 @@ typedef struct ProtoViewTxRx ProtoViewTxRx;
 
 struct ProtoViewApp {
     /* GUI */
-    Gui *gui;
-    ViewPort *view_port;     /* We just use a raw viewport and we render
+    Gui* gui;
+    ViewPort* view_port; /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
-    ProtoViewCurrentView current_view;  /* Active view ID. */
-    FuriMessageQueue *event_queue;  /* Keypress events go here. */
+    ProtoViewCurrentView current_view; /* Active view ID. */
+    FuriMessageQueue* event_queue; /* Keypress events go here. */
 
     /* Radio related. */
-    ProtoViewTxRx *txrx;     /* Radio state. */
-    SubGhzSetting *setting;  /* A list of valid frequencies. */
+    ProtoViewTxRx* txrx; /* Radio state. */
+    SubGhzSetting* setting; /* A list of valid frequencies. */
 
     /* Application state and config. */
-    int running;             /* Once false exists the app. */
+    int running; /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
-    uint32_t us_scale;       /* microseconds per pixel. */
-    uint32_t frequency;      /* Current frequency. */
-    uint8_t modulation;      /* Current modulation ID, array index in the
+    uint32_t us_scale; /* microseconds per pixel. */
+    uint32_t frequency; /* Current frequency. */
+    uint8_t modulation; /* Current modulation ID, array index in the
                                 ProtoViewModulations table. */
 };
 
