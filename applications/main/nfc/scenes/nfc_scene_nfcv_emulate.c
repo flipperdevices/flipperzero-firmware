@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-#define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (100)
+#define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (200)
 
 enum {
     NfcSceneNfcVEmulateStateWidget,
@@ -11,7 +11,17 @@ bool nfc_scene_nfcv_emulate_worker_callback(NfcWorkerEvent event, void* context)
     UNUSED(event);
     furi_assert(context);
     Nfc* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
+
+    switch(event) {
+    case NfcWorkerEventNfcVCommandExecuted:
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventUpdateLog);
+        break;
+    case NfcWorkerEventNfcVContentChanged:
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventSaveShadow);
+        break;
+    default:
+        break;
+    }
     return true;
 }
 
@@ -29,7 +39,6 @@ void nfc_scene_nfcv_emulate_textbox_callback(void* context) {
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
-// Add widget with device name or inform that data received
 static void nfc_scene_nfcv_emulate_widget_config(Nfc* nfc, bool data_received) {
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     Widget* widget = nfc->widget;
@@ -91,7 +100,7 @@ bool nfc_scene_nfcv_emulate_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventWorkerExit) {
+        if(event.event == NfcCustomEventUpdateLog) {
             // Add data button to widget if data is received for the first time
             if(!furi_string_size(nfc->text_box_store)) {
                 nfc_scene_nfcv_emulate_widget_config(nfc, true);
@@ -109,6 +118,11 @@ bool nfc_scene_nfcv_emulate_on_event(void* context, SceneManagerEvent event) {
 
                 /* clear previously logged command */
                 strcpy(nfcv_data->last_command, "");
+            }
+            consumed = true;
+        } else if(event.event == NfcCustomEventSaveShadow) {
+            if(furi_string_size(nfc->dev->load_path)) {
+                nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
             }
             consumed = true;
         } else if(event.event == GuiButtonTypeCenter && state == NfcSceneNfcVEmulateStateWidget) {

@@ -561,6 +561,7 @@ void nfcv_emu_handle_packet(
                 &nfcv_data->data[nfcv_data->block_size * block],
                 &nfcv_data->frame[ctx->payload_offset + data_pos],
                 data_len);
+            nfcv_data->modified = true;
         }
         nfcv_emu_send(
             tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
@@ -719,7 +720,9 @@ bool nfcv_emu_loop(
             pulse_reader_receive(nfcv_data->emu_air.reader_signal, timeout_ms * 1000);
         uint32_t timestamp = DWT->CYCCNT;
 
+        /* when timed out, reset to SOF state */
         if(periods == PULSE_READER_NO_EDGE) {
+            frame_state = NFCV_FRAME_STATE_SOF1;
             break;
         }
         if(periods == PULSE_READER_LOST_EDGE) {

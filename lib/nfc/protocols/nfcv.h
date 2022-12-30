@@ -161,6 +161,7 @@ typedef struct {
     uint16_t block_num;
     uint8_t block_size;
     uint8_t data[NFCV_MAX_DUMP_SIZE];
+    bool modified;
 
     /* specfic variant infos */
     NfcVSubtype sub_type;

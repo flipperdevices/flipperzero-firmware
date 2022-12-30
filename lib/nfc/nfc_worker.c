@@ -112,7 +112,7 @@ int32_t nfc_worker_task(void* context) {
     } else if(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
         nfc_worker_analyze_reader(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
-        nfc_worker_emulate_nfcv(nfc_worker);
+        nfc_worker_nfcv_emulate(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVUnlock) {
         nfc_worker_nfcv_unlock(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
@@ -124,12 +124,14 @@ int32_t nfc_worker_task(void* context) {
     return 0;
 }
 
-static bool nfc_worker_read_nfcv_content(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+static bool nfc_worker_read_nfcv(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     NfcVReader reader = {};
 
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
+
+    furi_hal_nfc_sleep();
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -148,6 +150,36 @@ static bool nfc_worker_read_nfcv_content(NfcWorker* nfc_worker, FuriHalNfcTxRxCo
     }
 
     return read_success;
+}
+
+void nfc_worker_nfcv_emulate(NfcWorker* nfc_worker) {
+    FuriHalNfcTxRxContext tx_rx = {};
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, &tx_rx, true);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
+    nfcv_emu_init(nfc_data, nfcv_data);
+    while(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
+        if(nfcv_emu_loop(&tx_rx, nfc_data, nfcv_data, 50)) {
+            if(nfc_worker->callback) {
+                nfc_worker->callback(NfcWorkerEventNfcVCommandExecuted, nfc_worker->context);
+                if(nfcv_data->modified) {
+                    nfc_worker->callback(NfcWorkerEventNfcVContentChanged, nfc_worker->context);
+                    nfcv_data->modified = false;
+                }
+            }
+        }
+        furi_delay_ms(0);
+    }
+    nfcv_emu_deinit(nfcv_data);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
 }
 
 void nfc_worker_nfcv_unlock(NfcWorker* nfc_worker) {
@@ -439,20 +471,6 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     return card_read;
 }
 
-static bool nfc_worker_read_nfcv(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
-    furi_assert(nfc_worker);
-    furi_assert(tx_rx);
-
-    bool card_read = false;
-    furi_hal_nfc_sleep();
-
-    /* until here the UID field is reversed from the reader IC. 
-       we will read it here again and it will get placed in the right order. */
-    card_read = nfc_worker_read_nfcv_content(nfc_worker, tx_rx);
-
-    return card_read;
-}
-
 void nfc_worker_read(NfcWorker* nfc_worker) {
     furi_assert(nfc_worker);
     furi_assert(nfc_worker->callback);
@@ -611,32 +629,6 @@ void nfc_worker_emulate_uid(NfcWorker* nfc_worker) {
                 FURI_LOG_E(TAG, "Failed to get reader commands");
             }
         }
-    }
-}
-
-void nfc_worker_emulate_nfcv(NfcWorker* nfc_worker) {
-    FuriHalNfcTxRxContext tx_rx = {};
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
-
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, &tx_rx, true);
-        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
-    }
-
-    nfcv_emu_init(nfc_data, nfcv_data);
-    while(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
-        if(nfcv_emu_loop(&tx_rx, nfc_data, nfcv_data, 50)) {
-            if(nfc_worker->callback) {
-                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
-            }
-        }
-        furi_delay_ms(0);
-    }
-    nfcv_emu_deinit(nfcv_data);
-
-    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
-        reader_analyzer_stop(nfc_worker->reader_analyzer);
     }
 }
 

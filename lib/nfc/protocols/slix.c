@@ -236,6 +236,7 @@ bool slix_generic_protocol_filter(
                 break;
             case SLIX_PASS_PRIVACY:
                 slix->privacy = false;
+                nfcv_data->modified = true;
                 break;
             case SLIX_PASS_DESTROY:
                 FURI_LOG_D(TAG, "Pooof! Got destroyed");
