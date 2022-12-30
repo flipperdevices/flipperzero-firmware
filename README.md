@@ -20,6 +20,10 @@ true for the firmware of the device itself. It's a shame because especially
 in the case of code that talks with hardware peripherals there are tons
 of assumptions and hard-gained lessons that can [only be captured by comments and are in the code only implicitly](http://antirez.com/news/124).
 
+However, the Flipper firmware source code is well written even if it
+lacks comments and documentation, so it is possible to make some ideas of
+how things work just grepping inside.
+
 # Detection algorithm
 
 In order to show unknown signals, the application attempts to understand if
