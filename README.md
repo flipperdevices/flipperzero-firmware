@@ -3,7 +3,7 @@ ProtoView is a digital signal detection and visualization tool for the
 a great deal of RF protocols, however when the exact protocol is not
 implemented (and there are many proprietary ones, such as the ones of
 the car keys), the curious person is left wondering what the device is
-sending at all. With ProtoView in can visualize the high and low pulses
+sending at all. Using ProtoView she or he can visualize the high and low pulses
 like in the example image below (showing a Volkswagen key in 2FSK):
 
 ![ProtoView screenshot](/images/ProtoViewSignal.jpg)
