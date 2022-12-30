@@ -42,6 +42,7 @@ typedef enum {
     SubGhzCustomEventSceneAnalyzerLock,
     SubGhzCustomEventSceneAnalyzerUnlock,
     SubGhzCustomEventSceneSettingLock,
+    SubGhzCustomEventSceneSettingError,
 
     SubGhzCustomEventSceneExit,
     SubGhzCustomEventSceneStay,

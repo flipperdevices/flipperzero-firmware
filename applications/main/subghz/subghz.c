@@ -167,6 +167,12 @@ SubGhz* subghz_alloc() {
     subghz->setting = subghz_setting_alloc();
     subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
 
+    // Load custom advanced AM preset with configurable CFGMDM settings
+    FlipperFormat* advanced_am_preset = subghz_preset_custom_advanced_am_preset_alloc();
+    subghz_setting_load_custom_preset(
+        subghz->setting, ADVANCED_AM_PRESET_NAME, advanced_am_preset);
+    flipper_format_free(advanced_am_preset);
+
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
