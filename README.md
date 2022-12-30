@@ -12,7 +12,7 @@ This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
 
 The secondary goal of ProtoView is to provide a somewhat-documented application
-for the Flipper (even if ProtoView is a pretty atypical application: does not sue the standard widgets and other abstractions provded by the framework).
+for the Flipper (even if ProtoView is a pretty atypical application: doesn't make use of the standard widgets and other abstractions provded by the framework).
 Many apps dealing with the *subghz subsystem* (the Flipper
 abstraction to work with the [CC1101 chip](https://www.ti.com/product/CC1101))
 tend to be complicated and completely undocumented. This is unfortunately
