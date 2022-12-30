@@ -363,7 +363,17 @@ static void digital_signal_update_dma_c(DigitalSignal* signal) {
 }
 
 static void digital_signal_update_dma_asm(DigitalSignal* signal) {
-    volatile uint32_t dma1_data[] = {
+    /* this is an "already-prepared" buffer of all DMA channel configs to write */
+    const volatile uint32_t dma_data[] = {
+        /* DMA channel 2 data */
+        /* R0 */ (uint32_t) & (DMA1_Channel2->CCR), /* base address of DMA channel 2 */
+        /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN, /* CCR value to write first */
+        /* R2 */ (uint32_t)signal->internals->reload_reg_entries, /* CNDTR to write */
+        /* R3 */ (uint32_t) & (TIM2->ARR), /* CPAR to write */
+        /* R4 */ (uint32_t)signal->reload_reg_buff, /* CMAR to write */
+        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN, /* and CCR again to write after finished */
+
+        /* DMA channel 1 data */
         /* R6  */ (uint32_t) & (DMA1_Channel1->CCR), /* base address of DMA channel 1 */
         /* R7  */ DMA1_Channel1->CCR & ~DMA_CCR_EN, /* CCR value to write first */
         /* R8  */ 2, /* CNDTR to write */
@@ -371,31 +381,19 @@ static void digital_signal_update_dma_asm(DigitalSignal* signal) {
         /* R10 */ (uint32_t)signal->internals->gpio_buff, /* CMAR to write */
         /* R11 */ DMA1_Channel1->CCR | DMA_CCR_EN}; /* and CCR again to write after finished */
 
-    volatile uint32_t dma2_data[] = {
-        /* R0 */ (uint32_t) & (DMA1_Channel2->CCR), /* base address of DMA channel 2 */
-        /* R1 */ DMA1_Channel2->CCR & ~DMA_CCR_EN, /* CCR value to write first */
-        /* R2 */ (uint32_t)signal->internals->reload_reg_entries, /* CNDTR to write */
-        /* R3 */ (uint32_t) & (TIM2->ARR), /* CPAR to write */
-        /* R4 */ (uint32_t)signal->reload_reg_buff, /* CMAR to write */
-        /* R5 */ DMA1_Channel2->CCR | DMA_CCR_EN}; /* and CCR again to write after finished */
-
-    /* hurry when setting up next transfer */
+    /* now wait for the DMA finishing and instantly reconfigure it with as few instructions as possible */
     asm volatile(
         "\t"
-        "MOV     r6, %[data1]\n\t"
-        "MOV     r7, %[data2]\n\t"
-
         "PUSH    {r0-r12}\n\t"
 
-        "LDM     r7, {r0-r5}\n\t" /* prepare registers with values to write into DMA config */
-        "LDM     r6, {r6-r11}\n\t"
+        "LDM     %[data], {r0-r11}\n\t" /* prepare registers with values to write into DMA config */
 
-        "loop:\n\t"
+        "wait_for_dma_finished:\n\t"
         "LDR     r12, [r0, #4]\n\t" /* read DMA_CNDTRx to get remaining transfers */
         "CMP     r12, #0\n\t"
-        "BNE     loop\n\t"
+        "BNE     wait_for_dma_finished\n\t"
 
-        /* no transfers left, the DMA has finished. now quickly re-enable with new settings 
+        /* no transfers left, the DMA has finished. now quickly re-enable with new settings.
            the next 4 instructions are the critical part */
         "STM     r6, {r7-r10}\n\t" /* disable channel and set up new parameters */
         "STR     r11, [r6, #0]\n\t" /* enable channel again by writing CCR */
@@ -406,8 +404,7 @@ static void digital_signal_update_dma_asm(DigitalSignal* signal) {
 
         : /* no outputs*/
         : /* inputs */
-        [data1] "r"(dma1_data), [data2] "r"(dma2_data)
-        : "r6", "r7");
+        [data] "r"(dma_data));
 
     LL_DMA_ClearFlag_TC1(DMA1);
     LL_DMA_ClearFlag_TC2(DMA1);
