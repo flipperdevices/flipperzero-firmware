@@ -26,16 +26,16 @@ void radio_begin(ProtoViewApp* app) {
 }
 
 /* Setup subghz to start receiving using a background worker. */
-uint32_t radio_rx(ProtoViewApp* app, uint32_t frequency) {
+uint32_t radio_rx(ProtoViewApp* app) {
     furi_assert(app);
-    if(!furi_hal_subghz_is_frequency_valid(frequency)) {
+    if(!furi_hal_subghz_is_frequency_valid(app->frequency)) {
         furi_crash(TAG" Incorrect RX frequency.");
     }
 
-    if (app->txrx->txrx_state == TxRxStateRx) return frequency;
+    if (app->txrx->txrx_state == TxRxStateRx) return app->frequency;
 
     furi_hal_subghz_idle(); /* Put it into idle state in case it is sleeping. */
-    uint32_t value = furi_hal_subghz_set_frequency_and_path(frequency);
+    uint32_t value = furi_hal_subghz_set_frequency_and_path(app->frequency);
     FURI_LOG_E(TAG, "Switched to frequency: %lu", value);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_flush_rx();

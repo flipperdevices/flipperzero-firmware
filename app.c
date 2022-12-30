@@ -25,16 +25,28 @@ void render_signal(ProtoViewApp *app, Canvas *const canvas, RawSamplesBuffer *bu
     int rows = 8;
     uint32_t time_per_pixel = app->us_scale;
     bool level = 0;
-    uint32_t dur = 0;
+    uint32_t dur = 0, sample_num = 0;
     for (int row = 0; row < rows ; row++) {
         for (int x = 0; x < 128; x++) {
             int y = 3 + row*8;
             if (dur < time_per_pixel/2) {
                 /* Get more data. */
                 raw_samples_get(buf, idx++, &level, &dur);
+                sample_num++;
             }
 
             canvas_draw_line(canvas, x,y,x,y-(level*3));
+
+            /* Write a small triangle under the last sample detected. */
+            if (app->signal_bestlen != 0 &&
+                sample_num == app->signal_bestlen+1)
+            {
+                canvas_draw_dot(canvas,x,y+2);
+                canvas_draw_dot(canvas,x-1,y+3);
+                canvas_draw_dot(canvas,x,y+3);
+                canvas_draw_dot(canvas,x+1,y+3);
+                sample_num++; /* Make sure we don't mark the next, too. */
+            }
 
             /* Remove from the current level duration the time we
              * just plot. */
@@ -73,7 +85,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
                                             allow for high and low. */
     uint32_t len = 0; /* Observed len of coherent samples. */
     s->short_pulse_dur = 0;
-    for (uint32_t j = idx; j < idx+100; j++) {
+    for (uint32_t j = idx; j < idx+500; j++) {
         bool level;
         uint32_t dur;
         raw_samples_get(s, j, &level, &dur);
@@ -160,8 +172,12 @@ void scan_for_signal(ProtoViewApp *app) {
     raw_samples_free(copy);
 }
 
-/* Draw some white text with a black border. */
-void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str)
+/* Draw some text with a border. If the outside color is black and the inside
+ * color is white, it just writes the border of the text, but the function can
+ * also be used to write a bold variation of the font setting both the
+ * colors to black, or alternatively to write a black text with a white
+ * border so that it is visible if there are black stuff on the background. */
+void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color)
 {
     struct {
         uint8_t x; uint8_t y;
@@ -176,13 +192,13 @@ void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const cha
         {-1,0}
     };
 
-    /* Rotate in all the directions writing the same string in black
-     * to create a border, then write the actaul string in white in the
+    /* Rotate in all the directions writing the same string to create a
+     * border, then write the actual string in the other color in the
      * middle. */
-    canvas_set_color(canvas, ColorBlack);
+    canvas_set_color(canvas, border_color);
     for (int j = 0; j < 8; j++)
         canvas_draw_str(canvas,x+dir[j].x,y+dir[j].y,str);
-    canvas_set_color(canvas, ColorWhite);
+    canvas_set_color(canvas, text_color);
     canvas_draw_str(canvas,x,y,str);
     canvas_set_color(canvas, ColorBlack);
 }
@@ -197,7 +213,7 @@ void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app) {
     snprintf(buf,sizeof(buf),"%luus",
         (unsigned long)DetectedSamples->short_pulse_dur);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_with_border(canvas, 97, 63, buf);
+    canvas_draw_str_with_border(canvas, 97, 63, buf, ColorWhite, ColorBlack);
 }
 
 /* Renders a single view with frequency and modulation setting. However
@@ -207,14 +223,28 @@ void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
     UNUSED(app);
     canvas_set_font(canvas, FontPrimary);
     if (app->current_view == ViewFrequencySettings)
-        canvas_draw_str_with_border(canvas,1,10,"Frequency");
+        canvas_draw_str_with_border(canvas,1,10,"Frequency",ColorWhite,ColorBlack);
     else
         canvas_draw_str(canvas,1,10,"Frequency");
 
     if (app->current_view == ViewModulationSettings)
-        canvas_draw_str_with_border(canvas,70,10,"Modulation");
+        canvas_draw_str_with_border(canvas,70,10,"Modulation",ColorWhite,ColorBlack);
     else
         canvas_draw_str(canvas,70,10,"Modulation");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas,10,61,"Use up and down to modify");
+
+    /* Show frequency. We can use big numbers font since it's just a number. */
+    if (app->current_view == ViewFrequencySettings) {
+        char buf[16];
+        snprintf(buf,sizeof(buf),"%.2f",(double)app->frequency/1000000);
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str(canvas, 30, 40, buf);
+    } else if (app->current_view == ViewModulationSettings) {
+        int current = app->modulation;
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 33, 39, ProtoViewModulations[current].name);
+    }
 }
 
 /* The callback actually just passes the control to the actual active
@@ -227,6 +257,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 127, 63);
     canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontPrimary);
 
     /* Call who is in charge right now. */
     switch(app->current_view) {
@@ -363,8 +394,49 @@ void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
 
 /* Handle input for the settings view. */
 void process_input_settings(ProtoViewApp *app, InputEvent input) {
-    UNUSED(input);
-    UNUSED(app);
+    /* Here we handle only up and down. Avoid any work if the user
+     * pressed something else. */
+    if (input.key != InputKeyDown && input.key != InputKeyUp) return;
+
+    if (app->current_view == ViewFrequencySettings) {
+        size_t curidx = 0, i;
+        size_t count = subghz_setting_get_frequency_count(app->setting);
+
+        /* Scan the list of frequencies to check for the index of the
+         * currently set frequency. */
+        for(i = 0; i < count; i++) {
+            uint32_t freq = subghz_setting_get_frequency(app->setting,i);
+            if (freq == app->frequency) {
+                curidx = i;
+                break;
+            }
+        }
+        if (i == count) return; /* Should never happen. */
+
+        if (input.key == InputKeyUp) {
+            curidx = (curidx+1) % count;
+        } else if (input.key == InputKeyDown) {
+            curidx = curidx == 0 ? count-1 : curidx-1;
+        }
+        app->frequency = subghz_setting_get_frequency(app->setting,curidx);
+    } else if (app->current_view == ViewModulationSettings) {
+        uint32_t count = 0;
+        uint32_t modid = app->modulation;
+
+        while(ProtoViewModulations[count].name != NULL) count++;
+        if (input.key == InputKeyUp) {
+            modid = (modid+1) % count;
+        } else if (input.key == InputKeyDown) {
+            modid = modid == 0 ? count-1 : modid-1;
+        }
+        app->modulation = modid;
+    }
+
+    /* Apply changes. */
+    FURI_LOG_E(TAG, "Setting view, setting frequency/modulation to %lu %s", app->frequency, ProtoViewModulations[app->modulation].name);
+    radio_rx_end(app);
+    radio_begin(app);
+    radio_rx(app);
 }
 
 int32_t protoview_app_entry(void* p) {
@@ -373,11 +445,11 @@ int32_t protoview_app_entry(void* p) {
 
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
 
     /* Start listening to signals immediately. */
     radio_begin(app);
-    radio_rx(app, app->frequency);
+    radio_rx(app);
 
     /* This is the main event loop: here we get the events that are pushed
      * in the queue by input_callback(), and process them one after the

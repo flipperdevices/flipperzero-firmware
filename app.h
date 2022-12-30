@@ -73,7 +73,7 @@ struct ProtoViewApp {
 };
 
 void radio_begin(ProtoViewApp* app);
-uint32_t radio_rx(ProtoViewApp* app, uint32_t frequency);
+uint32_t radio_rx(ProtoViewApp* app);
 void radio_idle(ProtoViewApp* app);
 void radio_rx_end(ProtoViewApp* app);
 void radio_sleep(ProtoViewApp* app);

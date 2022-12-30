@@ -1,7 +1,7 @@
 /* Our circular buffer of raw samples, used in order to display
  * the signal. */
 
-#define RAW_SAMPLES_NUM 1024 /* Use a power of two: we take the modulo
+#define RAW_SAMPLES_NUM 2048 /* Use a power of two: we take the modulo
                                 of the index quite often to normalize inside
                                 the range, and division is slow. */
 
