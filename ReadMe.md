@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Animations: Updated Mods from OFW to say RogueMaster. Flipper City, Purple Rain and New Years animations updated to say RogueMaster.
 - Weather Station fap fix [Thank you ESurge](https://github.com/ESurge/)
 - [Patreon Only: 6 New AMAZING 18 Plus animations thanks to an anonymous donor](https://www.patreon.com/posts/76539797)
+- [Patreon Only: New Build - SAO - Sword Art Online](https://www.patreon.com/posts/76540869)
 
 <a name="release">
 
