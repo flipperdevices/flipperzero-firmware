@@ -36,7 +36,7 @@ struct OneWireSlave {
 
 /*********************** PRIVATE ***********************/
 
-uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, const bool pin_value) {
+static uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, const bool pin_value) {
     uint32_t start = DWT->CYCCNT;
     uint32_t time_ticks = time * furi_hal_cortex_instructions_per_microsecond();
     uint32_t time_captured;
@@ -53,7 +53,7 @@ uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, cons
     return 0;
 }
 
-bool onewire_slave_show_presence(OneWireSlave* bus) {
+static bool onewire_slave_show_presence(OneWireSlave* bus) {
     // wait while master delay presence check
     onewire_slave_wait_while_gpio_is(bus, OWS_PRESENCE_TIMEOUT, true);
 
@@ -74,7 +74,7 @@ bool onewire_slave_show_presence(OneWireSlave* bus) {
     return true;
 }
 
-bool onewire_slave_receive_bit(OneWireSlave* bus) {
+static bool onewire_slave_receive_bit(OneWireSlave* bus) {
     // wait while bus is low
     uint32_t time = OWS_SLOT_MAX;
     time = onewire_slave_wait_while_gpio_is(bus, time, false);
@@ -98,7 +98,7 @@ bool onewire_slave_receive_bit(OneWireSlave* bus) {
     return (time > 0);
 }
 
-bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
+static bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     const bool write_zero = !value;
 
     // wait while bus is low
@@ -132,7 +132,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     return true;
 }
 
-void onewire_slave_cmd_search_rom(OneWireSlave* bus) {
+static void onewire_slave_cmd_search_rom(OneWireSlave* bus) {
     const uint8_t key_bytes = 8;
     uint8_t* key = onewire_device_get_id_p(bus->device);
 
@@ -151,7 +151,7 @@ void onewire_slave_cmd_search_rom(OneWireSlave* bus) {
     }
 }
 
-bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
+static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
     uint8_t cmd;
     onewire_slave_receive(bus, &cmd, 1);
 
@@ -178,7 +178,7 @@ bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
     }
 }
 
-bool onewire_slave_bus_start(OneWireSlave* bus) {
+static bool onewire_slave_bus_start(OneWireSlave* bus) {
     bool result = true;
 
     if(bus->device == NULL) {
@@ -186,7 +186,6 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
     } else {
         FURI_CRITICAL_ENTER();
         furi_hal_gpio_init(bus->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_clear_int_flag(bus->gpio_pin);
         bus->error = NO_ERROR;
 
         if(onewire_slave_show_presence(bus)) {
@@ -199,7 +198,6 @@ bool onewire_slave_bus_start(OneWireSlave* bus) {
         }
 
         furi_hal_gpio_init(bus->gpio_pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
-        furi_hal_gpio_clear_int_flag(bus->gpio_pin);
         FURI_CRITICAL_EXIT();
     }
 

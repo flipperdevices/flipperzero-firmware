@@ -226,12 +226,6 @@ void furi_hal_gpio_disable_int_callback(const GpioPin* gpio);
 void furi_hal_gpio_remove_int_callback(const GpioPin* gpio);
 
 /**
- * Clear interrupt flag
- * @param gpio GpioPin
- */
-void furi_hal_gpio_clear_int_flag(const GpioPin* gpio);
-
-/**
  * GPIO write pin
  * @param gpio  GpioPin
  * @param state true / false
