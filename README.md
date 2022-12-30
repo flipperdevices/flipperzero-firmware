@@ -9,8 +9,9 @@ like in the example image below:
 This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
 
-The secondary goal of ProtoView is to provide a well-documented application
-for the Flipper. Many apps dealing with the *subghz subsystem* (the Flipper
+The secondary goal of ProtoView is to provide a somewhat-documented application
+for the Flipper (even if ProtoView is a pretty atypical application: does not sue the standard widgets and other abstractions provded by the framework).
+Many apps dealing with the *subghz subsystem* (the Flipper
 abstraction to work with the [CC1101 chip](https://www.ti.com/product/CC1101))
 tend to be complicated and completely undocumented. This is unfortunately
 true for the firmware of the device itself. It's a shame because especially
@@ -38,6 +39,29 @@ The application shows the longest coherent signal detected so far.
 * The UP and DOWN buttons change the scale. Default is 100us per pixel.
 * The LEFT and RIGHT buttons switch to settings.
 
+Under the detected sequence, you will see a small triangle marking a
+specific sample. This mark means that the sequence looked coherent up
+to that point, and starting from that could be just noise.
+
+Things to investigate:
+
+* Many cheap remotes (gate openers, remotes, ...) are on the 433.92Mhz or nearby and use OOK modulation.
+* Weather stations are often too in the 433.92Mhz OOK.
+* For car keys, try 443.92 OOK650 and 868.35 Mhz in OOK or 2FSK.
+
+# Installing the app on the flipper
+
+* Download the Flipper Zero dev kit and build it:
+```
+mkdir -p ~/flipperZero/official/
+cd ~/flipperZero/official/
+git clone --recursive  https://github.com/flipperdevices/flipperzero-firmware.git  ./
+./fbt
+```
+* Copy this application folder in `official/application_user`.
+* Connect your Flipper via USB.
+* Build and install with: `./fbt launch_app APPSRC=protoview`.
+
 # License
 
 The code is released under the BSD license.
@@ -45,4 +69,3 @@ The code is released under the BSD license.
 # Disclaimer
 
 This application is only provided as an educational tool. The author is not liable in case the application is used to reverse engineer protocols protected by IP or for any other illegal purpose.
-no responsibility in case 
