@@ -80,6 +80,8 @@ int32_t coffee_eeprom_app(void* p) {
                         break;
                     case InputKeyDown:
                         break;
+                    case InputKeyMAX:
+                        break;
                     case InputKeyRight:
                         write_10_eur();
                         plugin_state->credit = read_credit();
@@ -100,8 +102,6 @@ int32_t coffee_eeprom_app(void* p) {
                     }
                 }
             }
-        } else {
-            //FURI_LOG_D(TAG, "osMessageQueue: event timeout");
         }
         view_port_update(view_port);
         release_mutex(&state_mutex, plugin_state);
