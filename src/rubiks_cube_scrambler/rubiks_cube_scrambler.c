@@ -41,7 +41,7 @@ static void draw_callback(Canvas *canvas, void *ctx)
         scrambleStarted = 0;
     }
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 30, scramble);
+    canvas_draw_str_aligned(canvas, 64, 33, AlignCenter, AlignCenter, scramble);
 
     elements_button_center(canvas, "New");
 
