@@ -32,6 +32,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
+- [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -64,6 +65,10 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
+- [Flipp Pomodoro Timer (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
+- [T-Code BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
+- [BT Serial Example (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
+- [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 --- 
 
