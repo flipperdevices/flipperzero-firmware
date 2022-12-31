@@ -1,0 +1,15 @@
+# Walgreens / CVS Playlist / Lowes
+sub: /ext/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Cough.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Skincare.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Vitamin.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Dental.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Stomach.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Shaving.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Shaving.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_14.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Appliance_Desk.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Blind_Cutting.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Electrical.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Flooring_Desk.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Outdoor_Power_Equipment_Desk.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Packaged_Rugs.sub
