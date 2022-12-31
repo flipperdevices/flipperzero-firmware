@@ -11,11 +11,10 @@ Authors: Tanish Bhongade and RaZe
 #include "scrambler.h"
 
 // 6 moves along with direction
-char moves[7] = {"RUFBLD"};
-char dir[4] = {" 2'"};
-// Scramble length
+char moves[6] = {'R', 'U', 'F', 'B', 'L', 'D'};
+char dir[4] = {' ', '\'', '2'};
 const int SLEN = 10;
-
+#define RESULT_SIZE 100
 // Structure which holds main scramble
 struct GetScramble
 {
@@ -54,16 +53,35 @@ void genScramble()
 
 void scrambleReplace()
 {
-	// Stage 2
-	// Actual process begins here
-	// Random ints are generated and respective values are fed inside the array
-	for (int i = 0; i < SLEN; i++)
-	{
-		a.mainScramble[i][0] = moves[getRand(5, 0)];
-		a.mainScramble[i][1] = dir[getRand(2, 0)];
-	}
-	// But scramble is still isn't correct due to repeating moves
+    // Stage 2
+    // Actual process begins here
+
+    // Initialize the mainScramble array with all the possible moves
+    for (int i = 0; i < SLEN; i++)
+    {
+        a.mainScramble[i][0] = moves[getRand(6, 0)];
+        a.mainScramble[i][1] = dir[getRand(3, 0)];
+    }
+
+    // Perform the Fisher-Yates shuffle
+    for (int i = 6 - 1; i > 0; i--)
+    {
+        int j = rand() % (i + 1);
+        char temp[3];
+        strcpy(temp, a.mainScramble[i]);
+        strcpy(a.mainScramble[i], a.mainScramble[j]);
+        strcpy(a.mainScramble[j], temp);
+    }
+
+    // Select the first 10 elements as the scramble, using only the first three elements of the dir array
+    for (int i = 0; i < SLEN; i++)
+    {
+        a.mainScramble[i][1] = dir[rand() % 3];
+    }
 }
+
+
+
 
 void valid()
 {
@@ -101,11 +119,13 @@ int getRand(int upr, int lwr)
 
 char *printData()
 {
-	char *result = malloc(100);
-	int offset = 0;
-	for (int loop = 0; loop < SLEN; loop++)
-	{
-		offset += snprintf(result + offset, 100 - offset, "%s ", a.mainScramble[loop]);
-	}
-	return result;
+    static char result[RESULT_SIZE];
+    int offset = 0;
+    for (int loop = 0; loop < SLEN; loop++)
+    {
+        offset += snprintf(result + offset, RESULT_SIZE - offset, "%s ", a.mainScramble[loop]);
+    }
+    return result;
 }
+
+
