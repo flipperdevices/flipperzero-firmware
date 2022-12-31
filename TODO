@@ -6,6 +6,7 @@ Core improvements
 Features
 ========
 
+- Detect the line code used and try to decode the message as hex dump.
 - Pressing right/left you browse different modes:
   * Current best signal pulse classes.
   * Raw square wave display. Central button freezes and resumes (toggle). When frozen we display "paused" (inverted) on the low part of the screen.
