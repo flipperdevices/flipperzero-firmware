@@ -483,6 +483,8 @@ int32_t protoview_app_entry(void* p) {
                 else
                     app->current_view--;
             } else {
+                /* This is where we pass the control to the currently
+                 * active view input processing. */
                 switch(app->current_view) {
                 case ViewRawPulses:
                     process_input_raw_pulses(app,input);
@@ -495,8 +497,9 @@ int32_t protoview_app_entry(void* p) {
                 }
             }
         } else {
-            static int c = 0;
-            c++;
+            /* Useful to understand if the app is still alive when it
+             * does not respond because of bugs. */
+            static int c = 0; c++;
             if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
         }
         view_port_update(app->view_port);
