@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <furi.h>
 #include <gui/gui.h>
-#include "furi_hal_random.h"
 #include <input/input.h>
 #include <gui/elements.h>
-#include "scrambler.h"
 #include <furi_hal.h>
 
-int scrambleStarted = 0;
+#include "scrambler.h"
+#include "furi_hal_random.h"
 
+int scrambleStarted = 0;
 char scramble[100] = {0};
 int notifications_enabled = 0;
 
@@ -28,32 +28,12 @@ static void draw_callback(Canvas *canvas, void *ctx)
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 4, 13, "Rubik's Cube Scrambler");
 
-    if (scrambleStarted == 1)
+    if (scrambleStarted)
     {
-        /*         const char* moves[] = {"U", "D", "L", "R", "F", "B"};
-                const char* directions[] = {"", "'", "2"};
-                int index = 0;
-                int prevMove = -1; // Initialize previous move to an invalid value
-                for(int i = 0; i < 10; i++) {
-                    int move;
-                    do {
-                        move = rand() % 6;
-                    } while(move == prevMove);
-                    int direction = rand() % 3;
-                    prevMove = move;
-                    index += snprintf(
-                        scramble + index,
-                        sizeof(scramble) - index,
-                        "%s%s ",
-                        moves[move],
-                        directions[direction]);
-                } */
         genScramble();
         scrambleReplace();
         valid();
-        char *data = printData();
-        strcpy(scramble, data);
-        free(data);
+        strcpy(scramble, printData());
         if (notifications_enabled)
         {
             success_vibration();
