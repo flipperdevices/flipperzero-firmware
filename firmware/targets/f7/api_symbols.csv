@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.5,,
+Version,+,12.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2859,11 +2859,11 @@ Function,+,view_port_alloc,ViewPort*,
 Function,+,view_port_draw_callback_set,void,"ViewPort*, ViewPortDrawCallback, void*"
 Function,+,view_port_enabled_set,void,"ViewPort*, _Bool"
 Function,+,view_port_free,void,ViewPort*
-Function,+,view_port_get_height,uint8_t,ViewPort*
+Function,+,view_port_get_height,uint8_t,const ViewPort*
 Function,+,view_port_get_orientation,ViewPortOrientation,const ViewPort*
-Function,+,view_port_get_width,uint8_t,ViewPort*
+Function,+,view_port_get_width,uint8_t,const ViewPort*
 Function,+,view_port_input_callback_set,void,"ViewPort*, ViewPortInputCallback, void*"
-Function,+,view_port_is_enabled,_Bool,ViewPort*
+Function,+,view_port_is_enabled,_Bool,const ViewPort*
 Function,+,view_port_set_height,void,"ViewPort*, uint8_t"
 Function,+,view_port_set_orientation,void,"ViewPort*, ViewPortOrientation"
 Function,+,view_port_set_width,void,"ViewPort*, uint8_t"
