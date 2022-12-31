@@ -30,7 +30,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-31 13:28 EST`
 - Small fix for MRTD doc saving thanks to Bernie
 - Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
-- Assets: Includes SubGHz files:more CVS buttons and Lowes buttons
+- Assets: Includes SubGHz files: more CVS buttons and Lowes buttons
 - Assets: Includes SubGHz Playlist config update and SubGHz Remote config update for CVS, Lowes & Walgreens
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
 - Added: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
