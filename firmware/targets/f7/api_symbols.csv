@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,12.0,,
+Version,v,12.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1560,7 +1560,7 @@ Function,+,gui_add_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, voi
 Function,+,gui_add_view_port,void,"Gui*, ViewPort*, GuiLayer"
 Function,+,gui_direct_draw_acquire,Canvas*,Gui*
 Function,+,gui_direct_draw_release,void,Gui*
-Function,+,gui_get_framebuffer_size,size_t,Gui*
+Function,+,gui_get_framebuffer_size,size_t,const Gui*
 Function,+,gui_remove_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
 Function,+,gui_remove_view_port,void,"Gui*, ViewPort*"
 Function,+,gui_set_lockdown,void,"Gui*, _Bool"
