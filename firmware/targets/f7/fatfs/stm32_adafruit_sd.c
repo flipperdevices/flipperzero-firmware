@@ -779,25 +779,10 @@ uint8_t SD_GetCIDRegister(SD_CID* Cid) {
             Cid->ManufacturerID = CID_Tab[0];
 
             /* Byte 1 */
-            Cid->OEM_AppliID = CID_Tab[1] << 8;
-
-            /* Byte 2 */
-            Cid->OEM_AppliID |= CID_Tab[2];
+            memcpy(Cid->OEM_AppliID, CID_Tab + 1, 2);
 
             /* Byte 3 */
-            Cid->ProdName1 = CID_Tab[3] << 24;
-
-            /* Byte 4 */
-            Cid->ProdName1 |= CID_Tab[4] << 16;
-
-            /* Byte 5 */
-            Cid->ProdName1 |= CID_Tab[5] << 8;
-
-            /* Byte 6 */
-            Cid->ProdName1 |= CID_Tab[6];
-
-            /* Byte 7 */
-            Cid->ProdName2 = CID_Tab[7];
+            memcpy(Cid->ProdName, CID_Tab + 3, 5);
 
             /* Byte 8 */
             Cid->ProdRev = CID_Tab[8];
@@ -815,11 +800,12 @@ uint8_t SD_GetCIDRegister(SD_CID* Cid) {
             Cid->ProdSN |= CID_Tab[12];
 
             /* Byte 13 */
-            Cid->Reserved1 |= (CID_Tab[13] & 0xF0) >> 4;
-            Cid->ManufactDate = (CID_Tab[13] & 0x0F) << 8;
+            Cid->Reserved1 = (CID_Tab[13] & 0xF0) >> 4;
+            Cid->ManufactYear = (CID_Tab[13] & 0x0F) << 4;
 
             /* Byte 14 */
-            Cid->ManufactDate |= CID_Tab[14];
+            Cid->ManufactYear |= (CID_Tab[14] & 0xF0) >> 4;
+            Cid->ManufactMonth = (CID_Tab[14] & 0x0F);
 
             /* Byte 15 */
             Cid->CID_CRC = (CID_Tab[15] & 0xFE) >> 1;

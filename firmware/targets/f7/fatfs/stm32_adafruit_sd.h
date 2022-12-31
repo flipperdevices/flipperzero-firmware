@@ -133,16 +133,16 @@ typedef struct {
   * @brief  Card Identification Data: CID Register   
   */
 typedef struct {
-    __IO uint8_t ManufacturerID; /* ManufacturerID */
-    __IO uint16_t OEM_AppliID; /* OEM/Application ID */
-    __IO uint32_t ProdName1; /* Product Name part1 */
-    __IO uint8_t ProdName2; /* Product Name part2*/
-    __IO uint8_t ProdRev; /* Product Revision */
-    __IO uint32_t ProdSN; /* Product Serial Number */
-    __IO uint8_t Reserved1; /* Reserved1 */
-    __IO uint16_t ManufactDate; /* Manufacturing Date */
-    __IO uint8_t CID_CRC; /* CID CRC */
-    __IO uint8_t Reserved2; /* always 1 */
+    uint8_t ManufacturerID; /* ManufacturerID */
+    char OEM_AppliID[2]; /* OEM/Application ID */
+    char ProdName[5]; /* Product Name */
+    uint8_t ProdRev; /* Product Revision */
+    uint32_t ProdSN; /* Product Serial Number */
+    uint8_t Reserved1; /* Reserved1 */
+    uint8_t ManufactYear; /* Manufacturing Year */
+    uint8_t ManufactMonth; /* Manufacturing Month */
+    uint8_t CID_CRC; /* CID CRC */
+    uint8_t Reserved2; /* always 1 */
 } SD_CID;
 
 /** 
