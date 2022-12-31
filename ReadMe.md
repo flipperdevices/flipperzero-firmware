@@ -28,49 +28,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-30 09:48 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-30 09:48 EST`
-- Assets: Includes SubGHz Playlist config and SubGHz Remote config for CVS & Walgreens.
-- Assets: Includes SubGHz Remote config for Riding_Dirty [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
-- Assets: Includes SubGHz SexToy files [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
-- [Patreon Only: New 18 Plus animation Pool Time 2 (Second New 18 Plus Animation Today)](https://www.patreon.com/posts/76407683)
-- Assets: Includes SubGHz Gas Sign Captures by [0day](https://github.com/0dayCTF)
-- Assets: Includes SubGHz Remote config for Gas_Sign_Edit [from UberGuidoZ](https://github.com/UberGuidoZ/Flipper)
-- New Animation: RM_G0G375_128x64, this animation was made possible by one of our RM Animation Coordinator Patrons with RogueMaster Extreme.
-- Removed Animations for Happy Holidays and Halloween from RM Minimal build included on GitHub releases.
-- [Patreon Update: Future builds for RM Minimal, RM Select, RM Select + 18 Plus, DBZ and the new build ALL will have the new animation RM_G0G375_128x64](https://www.patreon.com/RogueMaster)
-- RM Clock updated to use locale settings (changed with example from ClaraCrazy)
-- [Patreon Update: New DBZ and ALL animation builds](https://www.patreon.com/RogueMaster)
-- Reverted NFCV, NFCA, SLIX and MRTD to fix issue with NFC
-- - Reverted: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
-- - Reverted: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
-- - Reverted: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
-- OFW UPDATE, UNREVERTED: [Mifare dictionary attack performance improvements. #2173 (By nezza)](https://github.com/flipperdevices/flipperzero-firmware/pull/2173)
-- Added: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
-- Added: [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
-- Added: [USB Midi Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
-- OFW Added: [Direct Draw Debug App (by skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2215)
-- Patreon Poll results call for removal of bad apps. [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple) and [Chess (By Okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) are removed.
-- Readded Chess & Bad Apple as uncompiled apps with hopes that they will get fixed. [Thanks to ESurge](https://github.com/ESurge/)
-- Found fix to NFC issues [thanks to g3gg0](https://github.com/g3gg0/flipperzero-firmware/tree/g3gg0/)
-- Readded: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
-- Readded: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
-- Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
-- Fixed SubGhz Bruteforcer Inclusion
-- [Patreon Only: New Build - One Piece](https://www.patreon.com/posts/76525879)
-- Animations: Updated Mods from OFW to say RogueMaster. Flipper City, Purple Rain and New Years animations updated to say RogueMaster.
-- Weather Station fap fix [Thank you ESurge](https://github.com/ESurge/)
-- [Patreon Only: 6 New AMAZING 18 Plus animations thanks to an anonymous donor](https://www.patreon.com/posts/76539797)
-- [Patreon Only: New Build - SAO - Sword Art Online](https://www.patreon.com/posts/76540869)
-- Morse Code app fixed by Unleashed PR.
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Added: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Added: [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong)
-- Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- Updated: [USB Keyboard (By huuck)](https://github.com/huuck/FlipperZeroUSBKeyboard)
-- Added: [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
-- Added: [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
-- Added: [Gem Utils (By devicious)](https://github.com/devicious/gem-flipperzero)
-- Added: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
+- Small fix for MRTD doc saving thanks to Bernie
+- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 
 <a name="release">
 
