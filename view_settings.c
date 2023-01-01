@@ -38,7 +38,8 @@ void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
 void process_input_settings(ProtoViewApp *app, InputEvent input) {
     /* Here we handle only up and down. Avoid any work if the user
      * pressed something else. */
-    if (input.key != InputKeyDown && input.key != InputKeyUp) return;
+    if (input.type != InputTypePress ||
+        (input.key != InputKeyDown && input.key != InputKeyUp)) return;
 
     if (app->current_view == ViewFrequencySettings) {
         size_t curidx = 0, i;
