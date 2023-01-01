@@ -35,7 +35,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
 - Added: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [New Patreon Build: RM All and the new SCIENCE build now have 10 animations with 9 featuring scientists, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76626421)
-- Per PATREON votes, Added SubGHz Playlist to the Main Menu.
+- Per PATREON voters, Added SubGHz Playlist to the Main Menu.
 
 <a name="release">
 
