@@ -3,7 +3,7 @@
 #define PIN_A 0
 #define PIN_B 1 // currently unused
 #define CLOCK_US 240 // typically set between 200-500us
-#define TEST_STR "%%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?;1234567812?"
+#define TEST_STR "%%B123456781234567^LASTNAME/FIRST^YYMMSSSDDDDDDDDDDDDDDDDDDDDDDDDD?"
 #define TEST_TRACK 0
 // TODO: better way of setting temp test str,
 //       text wrapping on screen? (Will be relevant for any loaded data too)
@@ -28,17 +28,15 @@ static void play_bit(uint8_t send_bit) {
     gpio_item_set_rfid_pin(PIN_B, !magspoof_bit_dir);
     furi_delay_us(CLOCK_US);
 
-    // NFC tests
-    //(magspoof_bit_dir) ? st25r3916TxRxOn() : st25r3916TxRxOff();
-    //(magspoof_bit_dir) ? furi_hal_nfc_field_on() : furi_hal_nfc_field_off();
+    // NFC TEST
+    //(magspoof_bit_dir) ? furi_hal_nfc_ll_txrx_on() : furi_hal_nfc_ll_txrx_off();
 
     if(send_bit) {
         magspoof_bit_dir ^= 1;
         gpio_item_set_rfid_pin(PIN_A, magspoof_bit_dir);
         gpio_item_set_rfid_pin(PIN_B, !magspoof_bit_dir);
 
-        //(magspoof_bit_dir) ? st25r3916TxRxOn() : st25r3916TxRxOff();
-        //(magspoof_bit_dir) ? furi_hal_nfc_field_on() : furi_hal_nfc_field_off();
+        //(magspoof_bit_dir) ? furi_hal_nfc_ll_txrx_on() : furi_hal_nfc_ll_txrx_off();
     }
     furi_delay_us(CLOCK_US);
 }
@@ -140,8 +138,7 @@ static void mag_spoof(FuriString* track_str, uint8_t track) {
     gpio_item_set_rfid_pin(PIN_A, 0);
     gpio_item_set_rfid_pin(PIN_B, 0);
     // NFC TEST
-    //st25r3916TxRxOff();
-    //furi_hal_nfc_field_off();
+    //furi_hal_nfc_ll_txrx_off();
 
     // end critical timing section
     FURI_CRITICAL_EXIT();

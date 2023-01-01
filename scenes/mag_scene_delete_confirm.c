@@ -1,6 +1,5 @@
 #include "../mag_i.h"
 #include "../mag_device.h"
-#include <toolbox/path.h>
 
 void mag_scene_delete_confirm_on_enter(void* context) {
     Mag* mag = context;
@@ -11,6 +10,8 @@ void mag_scene_delete_confirm_on_enter(void* context) {
     tmp_str = furi_string_alloc();
 
     furi_string_printf(tmp_str, "\e#Delete %s?\e#", mag_dev->dev_name);
+
+    //TODO: print concise summary of data on card? Would need to vary by card/track type
 
     widget_add_text_box_element(
         widget, 0, 0, 128, 27, AlignCenter, AlignCenter, furi_string_get_cstr(tmp_str), true);

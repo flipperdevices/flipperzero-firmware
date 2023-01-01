@@ -1,4 +1,5 @@
 #include "../mag_i.h"
+#include "mag_icons.h"
 
 void mag_scene_saved_info_on_enter(void* context) {
     Mag* mag = context;
@@ -7,11 +8,17 @@ void mag_scene_saved_info_on_enter(void* context) {
     FuriString* tmp_str;
     tmp_str = furi_string_alloc();
 
+    // Use strlcpy instead perhaps, to truncate to screen width, then add ellipses if needed?
     furi_string_printf(tmp_str, "%s\r\n", mag->mag_dev->dev_name);
-    furi_string_cat_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data));
 
+    widget_add_icon_element(widget, 1, 1, &I_mag_10px);
+    widget_add_string_element(
+        widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
+    furi_string_reset(tmp_str);
+
+    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data));
     widget_add_string_multiline_element(
-        widget, 0, 1, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
+        widget, 0, 15, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
 

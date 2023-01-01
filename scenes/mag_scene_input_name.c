@@ -1,20 +1,23 @@
 #include <lib/toolbox/random_name.h>
 #include "../mag_i.h"
 
-void mag_scene_save_name_on_enter(void* context) {
+void mag_scene_input_name_on_enter(void* context) {
     Mag* mag = context;
     TextInput* text_input = mag->text_input;
     FuriString* folder_path;
     folder_path = furi_string_alloc();
 
-    bool key_name_is_empty = furi_string_empty(mag->file_name);
+    //TODO: compatible types / etc
+    //bool name_is_empty = furi_string_empty(mag->mag_dev->dev_name);
+    bool name_is_empty = false;
 
-    if(key_name_is_empty) {
+    if(name_is_empty) {
         furi_string_set(mag->file_path, MAG_APP_FOLDER);
         set_random_name(mag->text_store, MAG_TEXT_STORE_SIZE);
         furi_string_set(folder_path, MAG_APP_FOLDER);
     } else {
-        mag_text_store_set(mag, "%s", furi_string_get_cstr(mag->file_name));
+        // TODO: compatible types etc
+        //mag_text_store_set(mag, "%s", furi_string_get_cstr(mag->mag_dev->dev_name));
         path_extract_dirname(furi_string_get_cstr(mag->file_path), folder_path);
     }
 
@@ -25,7 +28,7 @@ void mag_scene_save_name_on_enter(void* context) {
         mag,
         mag->text_store,
         MAG_DEV_NAME_MAX_LEN,
-        key_name_is_empty);
+        name_is_empty);
 
     FURI_LOG_I("", "%s %s", furi_string_get_cstr(folder_path), mag->text_store);
 
@@ -40,7 +43,7 @@ void mag_scene_save_name_on_enter(void* context) {
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewTextInput);
 }
 
-bool mag_scene_save_name_on_event(void* context, SceneManagerEvent event) {
+bool mag_scene_input_name_on_event(void* context, SceneManagerEvent event) {
     Mag* mag = context;
     SceneManager* scene_manager = mag->scene_manager;
     bool consumed = false;
@@ -76,7 +79,7 @@ bool mag_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void mag_scene_save_name_on_exit(void* context) {
+void mag_scene_input_name_on_exit(void* context) {
     Mag* mag = context;
     TextInput* text_input = mag->text_input;
 

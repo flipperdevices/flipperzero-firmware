@@ -95,7 +95,6 @@ static bool mag_device_save_file(
     furi_string_free(temp_str);
     flipper_format_free(file);
 
-    // TODO. Extrapolating from the picopass app
     return saved;
 }
 
