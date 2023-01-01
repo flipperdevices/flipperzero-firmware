@@ -73,6 +73,7 @@ void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
          * previous samples. */
         if (input.key == InputKeyRight) app->signal_offset++;
         else if (input.key == InputKeyLeft) app->signal_offset--;
+        else if (input.key == InputKeyOk) app->signal_offset = 0;
     } else if (input.type == InputTypeShort) {
         if (input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
