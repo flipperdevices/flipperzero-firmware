@@ -3,6 +3,10 @@
 
 #include "app.h"
 
+/* =============================================================================
+ * Raw signal detection
+ * ===========================================================================*/
+
 /* Return the time difference between a and b, always >= 0 since
  * the absolute value is returned. */
 uint32_t duration_delta(uint32_t a, uint32_t b) {
@@ -119,4 +123,71 @@ void scan_for_signal(ProtoViewApp *app) {
     raw_samples_free(copy);
 }
 
+/* =============================================================================
+ * Decoding
+ * ===========================================================================*/
 
+/* Set the 'bitpos' bit to value 'val', in the specified bitmap
+ * 'b' of len 'blen'.
+ * Out of range bits will silently be discarded. */
+void set_bit(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val) {
+    uint32_t byte = bitpos/8;
+    uint32_t bit = bitpos&7;
+    if (byte >= blen) return;
+    if (val)
+        b[byte] |= 1<<bit;
+    else
+        b[byte] &= ~(1<<bit);
+}
+
+/* Get the bit 'bitpos' of the bitmap 'b' of 'blen' bytes.
+ * Out of range bits return false (not bit set). */
+bool get_bit(uint8_t *b, uint32_t blen, uint32_t bitpos) {
+    uint32_t byte = bitpos/8;
+    uint32_t bit = bitpos&7;
+    if (byte >= blen) return 0;
+    return (b[byte] & (1<<bit)) != 0;
+}
+
+/* Take the raw signal and turn it into a sequence of bits inside the
+ * buffer 'b'. Note that such 0s and 1s are NOT the actual data in the
+ * signal, but is just a low level representation of the line code. Basically
+ * if the short pulse we find in the signal is 320us, we convert high and
+ * low levels in the raw sample in this way:
+ *
+ * If for instance we see a high level lasting ~600 us, we will add
+ * two 1s bit. If then the signal goes down for 330us, we will add one zero,
+ * and so forth. So for each period of high and low we find the closest
+ * multiple and set the relevant number of bits.
+ * 
+ * In case of a short pulse of 320us detected, 320*2 is the closest to a
+ * high pulse of 600us, so 2 bits will be set.
+ *
+ * In other terms what this function does is sampling the signal at
+ * fixed 'rate' intervals.
+ *
+ * This representation makes it simple to decode the signal at a higher
+ * level later, translating it from Marshal coding or other line codes
+ * to the actual bits/bytes.
+ *
+ * The 'idx' argument marks the detected signal start index into the
+ * raw samples buffer. The 'count' tells the function how many raw
+ * samples to convert into bits. The function returns the number of
+ * bits set into the buffer 'b'. The 'rate' argument, in microseconds, is
+ * the detected short-pulse duration. We expect the line code to be
+ * meaningful when interpreted at multiples of 'rate'. */
+uint32_t convert_signal_to_bits(uint8_t *b, uint32_t blen, RawSamplesBuffer *s, uint32_t idx, uint32_t count, uint32_t rate) {
+    if (rate == 0) return 0; /* We can't perform the conversion. */
+    uint32_t bitpos = 0;
+    for (uint32_t j = 0; j < count; j++) {
+        uint32_t dur;
+        bool level;
+        raw_samples_get(s, j+idx, &level, &dur);
+
+        uint32_t numbits = dur / rate; /* full bits that surely fit. */
+        uint32_t rest = dur % rate;    /* How much we are left with. */
+        if (rest > rate/2) numbits++;  /* There is another one. */
+        while(numbits--) set_bit(b,blen,bitpos++,s[j].level);
+    }
+    return bitpos;
+}
