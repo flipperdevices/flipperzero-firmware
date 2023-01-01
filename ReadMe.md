@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM1231-1330-0.74.3-4d61688](https://www.patreon.com/posts/76601971)
+## Latest Updates - [PATREON: Latest Release RM0101-0323-0.74.3-3984192](https://www.patreon.com/posts/76626421)
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-31 13:28 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-31 13:28 EST`
@@ -34,7 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Assets: Includes SubGHz Playlist config update and SubGHz Remote config update for CVS, Lowes & Walgreens
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
 - Added: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
-- [New Patreon Build: RM All and the new SCIENCE build now have 10 animations with 9 featuring scientists, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
+- [New Patreon Build: RM All and the new SCIENCE build now have 10 animations with 9 featuring scientists, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76626421)
 - Per PATREON votes, Added SubGHz Playlist to the Main Menu.
 
 <a name="release">
