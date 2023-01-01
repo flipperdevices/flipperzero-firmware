@@ -62,6 +62,7 @@ foreach(family_comp ${HAL_FIND_COMPONENTS_FAMILIES})
     string(REGEX MATCH "^STM32([FGHLMUW]P?[0-9BL])([0-9A-Z][0-9M][A-Z][0-9A-Z])?_?(M0PLUS|M4|M7)?.*$" family_comp ${family_comp})
     if(CMAKE_MATCH_1) #Matches the family part of the provided STM32<FAMILY>[..] component
         set(FAMILY ${CMAKE_MATCH_1})
+        string(TOLOWER ${FAMILY} FAMILY_L)
     endif()
     find_path(HAL_${FAMILY}_PATH
         NAMES Inc/stm32${FAMILY_L}xx_hal.h
