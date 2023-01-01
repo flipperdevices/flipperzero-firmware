@@ -2,5 +2,9 @@ version: 2
 updates:
   - package-ecosystem: "gitsubmodule" # Track official and unleashed firmware as a submodule
     directory: "/"
+    commit-message:
+      prefix: 'build'
+      prefix-development: 'build'
+      include: "scope"
     schedule:
       interval: "daily"
