@@ -70,6 +70,7 @@ struct ProtoViewApp {
     int running;             /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
     uint32_t us_scale;       /* microseconds per pixel. */
+    uint32_t signal_offset;  /* Long press left/right panning in raw view. */
     uint32_t frequency;      /* Current frequency. */
     uint8_t modulation;      /* Current modulation ID, array index in the
                                 ProtoViewModulations table. */

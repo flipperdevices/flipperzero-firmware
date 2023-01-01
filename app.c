@@ -27,6 +27,7 @@ void render_signal(ProtoViewApp *app, Canvas *const canvas, RawSamplesBuffer *bu
 
     int rows = 8;
     uint32_t time_per_pixel = app->us_scale;
+    uint32_t start_idx = idx;
     bool level = 0;
     uint32_t dur = 0, sample_num = 0;
     for (int row = 0; row < rows ; row++) {
@@ -42,7 +43,7 @@ void render_signal(ProtoViewApp *app, Canvas *const canvas, RawSamplesBuffer *bu
 
             /* Write a small triangle under the last sample detected. */
             if (app->signal_bestlen != 0 &&
-                sample_num == app->signal_bestlen+1)
+                sample_num+start_idx == app->signal_bestlen+1)
             {
                 canvas_draw_dot(canvas,x,y+2);
                 canvas_draw_dot(canvas,x-1,y+3);
@@ -211,7 +212,7 @@ void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const cha
 /* Raw pulses rendering. This is our default view. */
 void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app) {
     /* Show signal. */
-    render_signal(app, canvas, DetectedSamples, 0);
+    render_signal(app, canvas, DetectedSamples, app->signal_offset);
 
     /* Show signal information. */
     char buf[64];
@@ -280,10 +281,8 @@ static void input_callback(InputEvent* input_event, void* ctx)
 {
     ProtoViewApp *app = ctx;
 
-    if (input_event->type == InputTypePress) {
-        furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
-        FURI_LOG_E(TAG, "INPUT CALLBACK %d", (int)input_event->key);
-    }
+    furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
+    FURI_LOG_E(TAG, "INPUT CALLBACK %d", (int)input_event->key);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -297,7 +296,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     //init setting
     app->setting = subghz_setting_alloc();
-    subghz_setting_load(app->setting, EXT_PATH("protoview/settings.txt"));
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user"));
 
     // GUI
     app->gui = furi_record_open(RECORD_GUI);
@@ -311,6 +310,7 @@ ProtoViewApp* protoview_app_alloc() {
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
     app->us_scale = 100;
+    app->signal_offset = 0;
 
     //init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
@@ -382,18 +382,27 @@ static void timer_callback(void *ctx) {
 
 /* Handle input for the raw pulses view. */
 void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
-    if (input.key == InputKeyOk) {
-        /* Reset the current sample to capture the next. */
-        app->signal_bestlen = 0;
-        raw_samples_reset(DetectedSamples);
-        raw_samples_reset(RawSamples);
-    } else if (input.key == InputKeyDown) {
-        /* Rescaling. The set becomes finer under 50us per pixel. */
-        uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;
-        if (app->us_scale < 500) app->us_scale += scale_step;
-    } else if (input.key == InputKeyUp) {
-        uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
-        if (app->us_scale > 10) app->us_scale -= scale_step;
+    if (input.type == InputTypeRepeat) {
+        /* Handle panning of the signal window. Long pressing
+         * right will show successive samples, long pressing left
+         * previous samples. */
+        if (input.key == InputKeyRight) app->signal_offset++;
+        else if (input.key == InputKeyLeft) app->signal_offset--;
+    } else if (input.type == InputTypeShort) {
+        if (input.key == InputKeyOk) {
+            /* Reset the current sample to capture the next. */
+            app->signal_bestlen = 0;
+            app->signal_offset = 0;
+            raw_samples_reset(DetectedSamples);
+            raw_samples_reset(RawSamples);
+        } else if (input.key == InputKeyDown) {
+            /* Rescaling. The set becomes finer under 50us per pixel. */
+            uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;
+            if (app->us_scale < 500) app->us_scale += scale_step;
+        } else if (input.key == InputKeyUp) {
+            uint32_t scale_step = app->us_scale > 50 ? 50 : 10;
+            if (app->us_scale > 10) app->us_scale -= scale_step;
+        }
     }
 }
 
@@ -465,18 +474,25 @@ int32_t protoview_app_entry(void* p) {
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if (qstat == FuriStatusOk) {
-            FURI_LOG_E(TAG, "Main Loop - Input: %u", input.key);
+            FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u",
+                input.type, input.key);
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
-            if (input.key == InputKeyBack) {
+            if (input.type == InputTypeShort &&
+                input.key == InputKeyBack)
+            {
                 /* Exit the app. */
                 app->running = 0;
-            } else if (input.key == InputKeyRight) {
+            } else if (input.type == InputTypeShort &&
+                       input.key == InputKeyRight)
+            {
                 /* Go to the next view. */
                 app->current_view++;
                 if (app->current_view == ViewLast) app->current_view = 0;
-            } else if (input.key == InputKeyLeft) {
+            } else if (input.type == InputTypeShort &&
+                       input.key == InputKeyLeft)
+            {
                 /* Go to the previous view. */
                 if (app->current_view == 0)
                     app->current_view = ViewLast-1;
