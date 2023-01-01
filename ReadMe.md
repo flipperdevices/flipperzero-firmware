@@ -52,6 +52,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco)
 - [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
+- [GPIO Reader 2 (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 
 ## Tools / Misc
