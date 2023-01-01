@@ -1,0 +1,18 @@
+App(
+    appid="scope",
+    name="Scope",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="scope_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="Tools",
+    fap_icon="scope_10px.png",
+    fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(name="adc",
+            fap_include_paths=["inc"],
+            sources=[
+                "stm32wbxx_hal_adc.c", "stm32wbxx_hal_adc_ex.c", "stm32wbxx_hal_rcc_ex.c", "stm32wbxx_hal_gpio.c", "stm32wbxx_hal_pwr.c", "stm32wbxx_hal.c"
+            ],
+    )]
+)
