@@ -3,8 +3,10 @@
 #include "nfc_magic.h"
 #include "nfc_magic_worker.h"
 
+#include "lib/magic/common.h"
 #include "lib/magic/types.h"
 #include "lib/magic/classic_gen1.h"
+#include "lib/magic/gen4.h"
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -16,6 +18,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
@@ -40,17 +43,22 @@ enum NfcMagicCustomEvent {
     NfcMagicCustomEventTextInputDone,
 };
 
+struct NfcMagicDevice {
+    MagicType type;
+    uint32_t cuid;
+    uint32_t password;
+};
+
 struct NfcMagic {
     NfcMagicWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;
     SceneManager* scene_manager;
-    // NfcMagicDevice* dev;
-    NfcDevice* nfc_dev;
+    struct NfcMagicDevice* dev;
+    NfcDevice* source_dev;
 
-    MagicType card_type;
-    uint32_t magic_pwd;
+    uint32_t new_password;
 
     FuriString* text_box_store;
 
@@ -59,6 +67,7 @@ struct NfcMagic {
     Popup* popup;
     Loading* loading;
     TextInput* text_input;
+    ByteInput* byte_input;
     Widget* widget;
 };
 
@@ -67,6 +76,7 @@ typedef enum {
     NfcMagicViewPopup,
     NfcMagicViewLoading,
     NfcMagicViewTextInput,
+    NfcMagicViewByteInput,
     NfcMagicViewWidget,
 } NfcMagicView;
 

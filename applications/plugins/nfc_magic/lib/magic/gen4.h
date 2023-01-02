@@ -35,13 +35,13 @@ typedef enum {
 
 bool magic_gen4_get_cfg(uint32_t pwd, uint8_t* config);
 
-bool magic_gen4_set_cfg(uint32_t pwd, uint8_t* config, bool fuse);
+bool magic_gen4_set_cfg(uint32_t pwd, const uint8_t* config, uint8_t config_length, bool fuse);
 
 bool magic_gen4_set_pwd(uint32_t old_pwd, uint32_t new_pwd);
 
-bool magic_gen4_read_blk(uint32_t pwd, uint8_t block_num, MfClassicBlock* data);
+bool magic_gen4_read_blk(uint32_t pwd, uint8_t block_num, uint8_t* data);
 
-bool magic_gen4_write_blk(uint32_t pwd, uint8_t block_num, MfClassicBlock* data);
+bool magic_gen4_write_blk(uint32_t pwd, uint8_t block_num, const uint8_t* data);
 
 bool magic_gen4_wipe(uint32_t pwd);
 

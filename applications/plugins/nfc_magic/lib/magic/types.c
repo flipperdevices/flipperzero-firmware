@@ -1,10 +1,8 @@
 #include "types.h"
 
 const char* nfc_magic_type(MagicType type) {
-    if(type == MagicTypeClassicGen1A) {
-        return "Classic Gen 1A";
-    } else if(type == MagicTypeClassicGen1B) {
-        return "Classic Gen 1B";
+    if(type == MagicTypeClassicGen1) {
+        return "Classic Gen 1A/B";
     } else if(type == MagicTypeClassicDirectWrite) {
         return "Classic DirectWrite";
     } else if(type == MagicTypeClassicAPDU) {
