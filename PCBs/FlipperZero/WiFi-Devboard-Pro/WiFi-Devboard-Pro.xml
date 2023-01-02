@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>E:\github\ESP32Marauder\PCBs\FlipperZero\WiFi-Devboard-Pro\WiFi-Devboard-Pro.kicad_sch</source>
-    <date>1/2/2023 2:22:04 PM</date>
+    <date>1/2/2023 2:51:56 PM</date>
     <tool>Eeschema (6.0.8)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -439,7 +439,7 @@
       <tstamps>7756c211-5286-4d10-828b-c4ad5bcfbce7</tstamps>
     </comp>
     <comp ref="IC2">
-      <value>DMP1045U-7</value>
+      <value>SI2333CDS-T1-E3</value>
       <footprint>SOT-23</footprint>
       <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</datasheet>
       <fields>
@@ -448,7 +448,7 @@
         <field name="Comment">IC2,IC4,IC5</field>
         <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
         <field name="Height">1.2</field>
-        <field name="LCSC Part Number">C177033</field>
+        <field name="LCSC Part Number">C144846</field>
         <field name="Manufacturer_Name">Diodes Inc.</field>
         <field name="Manufacturer_Part_Number">DMP1045U-7</field>
         <field name="Mouser Part Number">621-DMP1045U-7</field>
@@ -465,7 +465,7 @@
       <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac"/>
       <property name="Mouser Testing Part Number" value=""/>
       <property name="Mouser Testing Price/Stock" value=""/>
-      <property name="LCSC Part Number" value="C177033"/>
+      <property name="LCSC Part Number" value="C144846"/>
       <property name="Comment" value="IC2,IC4,IC5"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
@@ -507,7 +507,7 @@
       <tstamps>a5cc5237-8cb6-4b5b-ac74-60723428bec5</tstamps>
     </comp>
     <comp ref="IC4">
-      <value>DMP1045U-7</value>
+      <value>SI2333CDS-T1-E3</value>
       <footprint>SOT-23</footprint>
       <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</datasheet>
       <fields>
@@ -516,7 +516,7 @@
         <field name="Comment">IC2,IC4,IC5</field>
         <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
         <field name="Height">1.2</field>
-        <field name="LCSC Part Number">C177033</field>
+        <field name="LCSC Part Number">C144846</field>
         <field name="Manufacturer_Name">Diodes Inc.</field>
         <field name="Manufacturer_Part_Number">DMP1045U-7</field>
         <field name="Mouser Part Number">621-DMP1045U-7</field>
@@ -533,7 +533,7 @@
       <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac"/>
       <property name="Mouser Testing Part Number" value=""/>
       <property name="Mouser Testing Price/Stock" value=""/>
-      <property name="LCSC Part Number" value="C177033"/>
+      <property name="LCSC Part Number" value="C144846"/>
       <property name="Comment" value="IC2,IC4,IC5"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
@@ -541,7 +541,7 @@
       <tstamps>619380bb-1036-4309-ae3c-dfbf1727965f</tstamps>
     </comp>
     <comp ref="IC5">
-      <value>DMP1045U-7</value>
+      <value>SI2333CDS-T1-E3</value>
       <footprint>SOT-23</footprint>
       <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</datasheet>
       <fields>
@@ -550,7 +550,7 @@
         <field name="Comment">IC2,IC4,IC5</field>
         <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
         <field name="Height">1.2</field>
-        <field name="LCSC Part Number">C177033</field>
+        <field name="LCSC Part Number">C144846</field>
         <field name="Manufacturer_Name">Diodes Inc.</field>
         <field name="Manufacturer_Part_Number">DMP1045U-7</field>
         <field name="Mouser Part Number">621-DMP1045U-7</field>
@@ -567,7 +567,7 @@
       <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac"/>
       <property name="Mouser Testing Part Number" value=""/>
       <property name="Mouser Testing Price/Stock" value=""/>
-      <property name="LCSC Part Number" value="C177033"/>
+      <property name="LCSC Part Number" value="C144846"/>
       <property name="Comment" value="IC2,IC4,IC5"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
