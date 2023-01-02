@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Build: Hackz, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76671172)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 
 <a name="release">
 
