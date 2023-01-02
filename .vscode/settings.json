@@ -100,6 +100,8 @@
         "flipp_pomodoro.h": "c",
         "stddef.h": "c",
         "view_port.h": "c",
-        "assets_icons.h": "c"
+        "assets_icons.h": "c",
+        "flipp_pomodoro_app_i.h": "c",
+        "stdlib.h": "c"
     }
 }

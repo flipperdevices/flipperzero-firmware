@@ -1,6 +1,8 @@
 
 #!/bin/bash
 
+application_name="flipp_pomodoro"
+
 mkdir dist
 
 # Fetch all firmwares submodules
@@ -38,8 +40,12 @@ app_suffix="${build_mode}_${api_version}"
 echo "$concatenated_string"  # Outputs "hello world"
 
 export FBT_NO_SYNC=1
-cp -r ../flipp_pomodoro/. applications_user/flipp_pomodoro
 
-./fbt fap_flipp_pomodoro
+rm -rf applications_user/$application_name
+rm -rf build/f7-firmware-D/.extapps
 
-cp build/f7-firmware-D/.extapps/flipp_pomodoro.fap ../dist/flipp_pomodoro_$app_suffix.fap
+cp -r ../$application_name/. applications_user/$application_name
+
+./fbt "fap_${application_name}"
+
+cp "build/f7-firmware-D/.extapps/${application_name}.fap" "../dist/${application_name}_${app_suffix}.fap"

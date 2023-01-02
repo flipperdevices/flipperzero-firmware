@@ -4,7 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/.flipperzero-firmware/**"
+                "${workspaceFolder}/.standard-firmware/**"
             ],
             "defines": [],
             "macFrameworkPath": [
