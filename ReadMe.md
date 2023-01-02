@@ -39,6 +39,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Build: Mario and Friends!](https://www.patreon.com/posts/76649835)
 - Updated passport to Mario themed. [Thank you Kuronons for the animation!](https://github.com/Kuronons/FZ_graphics/)
 - [New Patreon Build: Hackz, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76671172)
+- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
