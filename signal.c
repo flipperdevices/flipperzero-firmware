@@ -16,10 +16,13 @@ uint32_t duration_delta(uint32_t a, uint32_t b) {
 }
 
 /* This function starts scanning samples at offset idx looking for the
- * longest run of pulses, either high or low, that are among 10%
- * of each other, for a maximum of three classes. The classes are
- * counted separtely for high and low signals (RF on / off) because
- * many devices tend to have different pulse lenghts depending on
+ * longest run of pulses, either high or low, that are not much different
+ * from each other, for a maximum of three duration classes.
+ * So for instance 50 successive pulses that are roughly long 340us or 670us
+ * will be sensed as a coherent signal (example: 312, 361, 700, 334, 667, ...)
+ *
+ * The classes are counted separtely for high and low signals (RF on / off)
+ * because many devices tend to have different pulse lenghts depending on
  * the level of the pulse.
  *
  * For instance Oregon2 sensors, in the case of protocol 2.1 will send
@@ -54,7 +57,10 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
                 uint32_t classavg = classes[k].dur[level];
                 uint32_t count = classes[k].count[level];
                 uint32_t delta = duration_delta(dur,classavg);
-                if (delta < classavg/10) {
+                /* Is the difference in duration between this signal and
+                 * the class we are inspecting less than a given percentage?
+                 * If so, accept this signal. */
+                if (delta < classavg/8) { /* 100%/8 = 12%. */
                     /* It is useful to compute the average of the class
                      * we are observing. We know how many samples we got so
                      * far, so we can recompute the average easily.
@@ -79,17 +85,26 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
     /* Update the buffer setting the shortest pulse we found
      * among the three classes. This will be used when scaling
      * for visualization. */
+    uint32_t short_dur[2] = {0,0};
     for (int j = 0; j < SEARCH_CLASSES; j++) {
         for (int level = 0; level < 2; level++) {
             if (classes[j].dur[level] == 0) continue;
             if (classes[j].count[level] < 3) continue;
-            if (s->short_pulse_dur == 0 ||
-                s->short_pulse_dur > classes[j].dur[level])
+            if (short_dur[level] == 0 ||
+                short_dur[level] > classes[j].dur[level])
             {
-                s->short_pulse_dur = classes[j].dur[level];
+                short_dur[level] = classes[j].dur[level];
             }
         }
     }
+
+    /* Use the average between high and low short pulses duration.
+     * Often they are a bit different, and using the average is more robust
+     * when we do decoding sampling at short_pulse_dur intervals. */
+    if (short_dur[0] == 0) short_dur[0] = short_dur[1];
+    if (short_dur[1] == 0) short_dur[1] = short_dur[0];
+    s->short_pulse_dur = (short_dur[0]+short_dur[1])/2;
+
     return len;
 }
 
@@ -117,8 +132,8 @@ void scan_for_signal(ProtoViewApp *app) {
             raw_samples_copy(DetectedSamples,copy);
             DetectedSamples->idx = (DetectedSamples->idx+i)%
                                    DetectedSamples->total;
-            FURI_LOG_E(TAG, "Displayed sample updated (%d samples)",
-                (int)thislen);
+            FURI_LOG_E(TAG, "Displayed sample updated (%d samples %lu us)",
+                (int)thislen, DetectedSamples->short_pulse_dur);
             decode_signal(DetectedSamples,thislen);
         }
         i += thislen ? thislen : 1;
