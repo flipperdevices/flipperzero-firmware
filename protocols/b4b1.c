@@ -14,19 +14,21 @@ static bool decode(uint8_t *bits, uint64_t numbits, ProtoViewMsgInfo *info) {
         "1000000000000000000000000000000001", /* 32 zero bits. */
     };
 
-    uint64_t off;
+    uint32_t off;
     int j;
     for (j = 0; j < 3; j++) {
         off = bitmap_seek_bits(bits,numbits,0,sync_patterns[j]);
         if (off != BITMAP_SEEK_NOT_FOUND) break;
     }
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
-    off += strlen(sync_patterns[j]);
+    if (DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 preamble at: %lu",off);
+    off += strlen(sync_patterns[j])-1;
 
     uint8_t d[3]; /* 24 bits of data. */
     uint32_t decoded =
         convert_from_line_code(d,sizeof(d),bits,numbits,off,"1000","1110");
 
+    if (DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 decoded: %lu",decoded);
     if (decoded != 24) return false;
     snprintf(info->name,PROTOVIEW_MSG_STR_LEN,"PT/SC remote");
     snprintf(info->raw,PROTOVIEW_MSG_STR_LEN,"%02X%02X%02X",d[0],d[1],d[2]);

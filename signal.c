@@ -328,23 +328,22 @@ void decode_signal(RawSamplesBuffer *s, uint64_t len) {
 
     /* Try all the decoders available. */
     int j = 0;
-
     ProtoViewMsgInfo info;
     initialize_msg_info(&info);
+
     while(Decoders[j]) {
         FURI_LOG_E(TAG, "Calling decoder %s", Decoders[j]->name);
-        ProtoViewMsgInfo info;
         if (Decoders[j]->decode(bitmap,bits,&info)) {
             FURI_LOG_E(TAG, "Message detected by %s", Decoders[j]->name);
             break;
         }
         j++;
     }
+
     if (Decoders[j] == NULL) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(TAG, "Decoded %s, raw=%s",
-            info.name, info.raw);
+        FURI_LOG_E(TAG, "Decoded %s, raw=%s", info.name, info.raw);
     }
     free(bitmap);
 }
