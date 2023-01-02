@@ -31,7 +31,7 @@ fi
 print_status notice "new qrcode version: $VER"
 
 # update firmware version in automation
-sed -i -e "/^env.firmware_version:/s/'.*'/'$FIRMWARE_VER'/" .github/workflows/release.yml
+sed -i -e "/firmware_version:/s/'.*'/'$FIRMWARE_VER'/" .github/workflows/release.yml
 
 # commit and tag
 git add .github/workflows/release.yml
