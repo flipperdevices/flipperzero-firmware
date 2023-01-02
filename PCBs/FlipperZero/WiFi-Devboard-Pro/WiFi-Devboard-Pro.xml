@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>E:\github\ESP32Marauder\PCBs\FlipperZero\WiFi-Devboard-Pro\WiFi-Devboard-Pro.kicad_sch</source>
-    <date>1/2/2023 2:51:56 PM</date>
+    <date>1/2/2023 3:12:02 PM</date>
     <tool>Eeschema (6.0.8)</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -605,12 +605,12 @@
       <tstamps>f0aedaf8-4937-4572-9b55-bd8053dfd361</tstamps>
     </comp>
     <comp ref="J2">
-      <value>X6511WVS-08H-C60D48R2</value>
+      <value>X6511WVS-08H-C60D48R1</value>
       <footprint>SMD,P=2.54mm(交错脚)</footprint>
       <fields>
         <field name="Comment">J2</field>
         <field name="Description">Gold 250V 3A Brick nogging Square Pins 2.5mm 260 6mm -40~{ 105 1 8 2.54mm Black Brass 1x8P SMD,P=2.54mm() Pin Headers ROHS}</field>
-        <field name="LCSC Part Number">C2883765</field>
+        <field name="LCSC Part Number">C2883805</field>
         <field name="Manufacturer_Name">XKB Connectivity</field>
         <field name="Manufacturer_Part_Number">X6511WVS-08H-C60D48R2</field>
       </fields>
@@ -625,7 +625,7 @@
       <property name="Arrow Price/Stock" value=""/>
       <property name="Mouser Testing Part Number" value=""/>
       <property name="Mouser Testing Price/Stock" value=""/>
-      <property name="LCSC Part Number" value="C2883765"/>
+      <property name="LCSC Part Number" value="C2883805"/>
       <property name="Comment" value="J2"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
@@ -633,12 +633,12 @@
       <tstamps>deda9295-32a1-4f05-8f75-91c916d877b5</tstamps>
     </comp>
     <comp ref="J3">
-      <value>DZ254S-11-10-48</value>
+      <value>X6511WVS-10H-C60D48R1</value>
       <footprint>HUSRSP10W66P254_2500X250X850P</footprint>
       <fields>
         <field name="Comment">J3</field>
         <field name="Description">Brick nogging Square Pins 1 10 2.54mm 1x10P SMD,P=2.54mm() Pin Headers ROHS</field>
-        <field name="LCSC Part Number">C5160793</field>
+        <field name="LCSC Part Number">C2883807</field>
         <field name="Manufacturer_Name">DEALON</field>
         <field name="Manufacturer_Part_Number">DZ254S-11-10-48</field>
       </fields>
@@ -653,7 +653,7 @@
       <property name="Arrow Price/Stock" value=""/>
       <property name="Mouser Testing Part Number" value=""/>
       <property name="Mouser Testing Price/Stock" value=""/>
-      <property name="LCSC Part Number" value="C5160793"/>
+      <property name="LCSC Part Number" value="C2883807"/>
       <property name="Comment" value="J3"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
