@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Build: RM All and the new SCIENCE build now have 10 animations with 9 featuring scientists, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76626421)
 - Per PATREON voters, Added SubGHz Playlist to the Main Menu.
 - [New Patreon Build: Mario and Friends!](https://www.patreon.com/posts/76649835)
+- Updated passport to Mario themed. [Thank you Kuronons for the animation!](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px))
 
 <a name="release">
 
