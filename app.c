@@ -38,9 +38,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
 static void input_callback(InputEvent* input_event, void* ctx)
 {
     ProtoViewApp *app = ctx;
-
     furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
-    FURI_LOG_E(TAG, "INPUT CALLBACK %d", (int)input_event->key);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -67,7 +65,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
-    app->us_scale = 100;
+    app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
 
     //init Worker & Protocol
@@ -159,8 +157,8 @@ int32_t protoview_app_entry(void* p) {
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if (qstat == FuriStatusOk) {
-            FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u",
-                input.type, input.key);
+            if (DEBUG_MSG) FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u",
+                    input.type, input.key);
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
@@ -200,8 +198,10 @@ int32_t protoview_app_entry(void* p) {
         } else {
             /* Useful to understand if the app is still alive when it
              * does not respond because of bugs. */
-            static int c = 0; c++;
-            if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            if (DEBUG_MSG) {
+                static int c = 0; c++;
+                if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            }
         }
         view_port_update(app->view_port);
     }

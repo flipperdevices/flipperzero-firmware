@@ -23,6 +23,10 @@
 #include "app_buffer.h"
 
 #define TAG "ProtoView"
+#define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100
+#define BITMAP_SEEK_NOT_FOUND UINT32_MAX
+
+#define DEBUG_MSG 1
 
 typedef struct ProtoViewApp ProtoViewApp;
 
@@ -86,6 +90,26 @@ struct ProtoViewApp {
                                 ProtoViewModulations table. */
 };
 
+/* This stucture is filled by the decoder for specific protocols with the
+ * informations about the message. ProtoView will display such information
+ * in the message info view. */
+#define PROTOVIEW_MSG_STR_LEN 16
+typedef struct ProtoViewMsgInfo {
+    char name[PROTOVIEW_MSG_STR_LEN]; /* Protocol name and version. */
+    char raw[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific raw representation.*/
+    /* The following is what the decoder wants to show to user. Each decoder
+     * can use the number of fileds it needs. */
+    char info1[16];     /* Protocol specific decoded string, line 1. */
+    char info2[16];     /* Protocol specific decoded string, line 2. */
+    char info3[16];     /* Protocol specific decoded string, line 3. */
+    uint64_t len;       /* Bits found. */
+} ProtoViewMsgInfo;
+
+typedef struct ProtoViewDecoder {
+    const char *name;   /* Protocol name. */
+    bool (*decode)(uint8_t *bits, uint64_t numbits, ProtoViewMsgInfo *info);
+} ProtoViewDecoder;
+
 extern RawSamplesBuffer *RawSamples, *DetectedSamples;
 
 /* app_radio.c */
@@ -98,6 +122,9 @@ void radio_sleep(ProtoViewApp* app);
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
 void scan_for_signal(ProtoViewApp *app);
+bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
+bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
+uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, const char *bits);
 
 /* view_*.c */
 void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);

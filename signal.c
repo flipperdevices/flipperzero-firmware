@@ -3,6 +3,8 @@
 
 #include "app.h"
 
+void decode_signal(RawSamplesBuffer *s, uint64_t len);
+
 /* =============================================================================
  * Raw signal detection
  * ===========================================================================*/
@@ -117,6 +119,7 @@ void scan_for_signal(ProtoViewApp *app) {
                                    DetectedSamples->total;
             FURI_LOG_E(TAG, "Displayed sample updated (%d samples)",
                 (int)thislen);
+            decode_signal(DetectedSamples,thislen);
         }
         i += thislen ? thislen : 1;
     }
@@ -125,12 +128,21 @@ void scan_for_signal(ProtoViewApp *app) {
 
 /* =============================================================================
  * Decoding
+ *
+ * The following code will translates the raw singals as received by
+ * the CC1101 into logical signals: a bitmap of 0s and 1s sampled at
+ * the detected data clock interval.
+ *
+ * Then the converted signal is passed to the protocols decoders, that look
+ * for protocol-specific information. We stop at the first decoder that is
+ * able to decode the data, so protocols here should be registered in
+ * order of complexity and specificity, with the generic ones at the end.
  * ===========================================================================*/
 
 /* Set the 'bitpos' bit to value 'val', in the specified bitmap
  * 'b' of len 'blen'.
  * Out of range bits will silently be discarded. */
-void set_bit(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val) {
+void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val) {
     uint32_t byte = bitpos/8;
     uint32_t bit = bitpos&7;
     if (byte >= blen) return;
@@ -142,11 +154,37 @@ void set_bit(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val) {
 
 /* Get the bit 'bitpos' of the bitmap 'b' of 'blen' bytes.
  * Out of range bits return false (not bit set). */
-bool get_bit(uint8_t *b, uint32_t blen, uint32_t bitpos) {
+bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos) {
     uint32_t byte = bitpos/8;
     uint32_t bit = bitpos&7;
     if (byte >= blen) return 0;
     return (b[byte] & (1<<bit)) != 0;
+}
+
+/* Return true if the specified sequence of bits, provided as a string in the
+ * form "11010110..." is found in the 'b' bitmap of 'blen' bits at 'bitpos'
+ * position. */
+bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits) {
+    size_t l = strlen(bits);
+    for (size_t j = 0; j < l; j++) {
+        bool expected = (bits[j] == '1') ? true : false;
+        if (bitmap_get(b,blen,bitpos+j) != expected) return false;
+    }
+    return true;
+}
+
+/* Search for the specified bit sequence (see bitmap_match_bits() for details)
+ * in the bitmap 'b' of 'blen' bytes. Returns the offset (in bits) of the
+ * match, or BITMAP_SEEK_NOT_FOUND if not found.
+ *
+ * Note: there are better algorithms, such as Boyer-Moore. Here we hope that
+ * for the kind of patterns we search we'll have a lot of early stops so
+ * we use a vanilla approach. */
+uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, const char *bits) {
+    uint32_t endpos = blen*8;
+    for (uint32_t j = startpos; j < endpos; j++)
+        if (bitmap_match_bits(b,blen,j,bits)) return j;
+    return BITMAP_SEEK_NOT_FOUND;
 }
 
 /* Take the raw signal and turn it into a sequence of bits inside the
@@ -187,7 +225,80 @@ uint32_t convert_signal_to_bits(uint8_t *b, uint32_t blen, RawSamplesBuffer *s, 
         uint32_t numbits = dur / rate; /* full bits that surely fit. */
         uint32_t rest = dur % rate;    /* How much we are left with. */
         if (rest > rate/2) numbits++;  /* There is another one. */
-        while(numbits--) set_bit(b,blen,bitpos++,s[j].level);
+
+        FURI_LOG_E(TAG, "%lu converted into %lu (%d) bits", dur,numbits,(int)level);
+
+        /* If the signal is too short, let's claim it an interference
+         * and ignore it completely. */
+        if (numbits == 0) continue;
+
+        while(numbits--) bitmap_set(b,blen,bitpos++,level);
     }
     return bitpos;
+}
+
+/* This function converts the line code used to the final data representation.
+ * The representation is put inside 'buf', for up to 'buflen' bytes of total
+ * data. For instance in order to convert manchester I can use "10" and "01"
+ * as zero and one patterns. It is possible to use "?" inside patterns in
+ * order to skip certain bits. For instance certain devices encode data twice,
+ * with each bit encoded in manchester encoding and then in its reversed
+ * representation. In such a case I could use "10??" and "01??".
+ *
+ * The function returns the number of bits converted. It will stop as soon
+ * as it finds a pattern that does not match zero or one patterns. */
+#if 0
+uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, const char *zero_pattern, const char *one_pattern)
+{
+}
+#endif
+
+/* Supported protocols go here, with the relevant implementation inside
+ * protocols/<name>.c */
+
+extern ProtoViewDecoder Oregon2Decoder;
+
+ProtoViewDecoder *Decoders[] = {
+    &Oregon2Decoder,
+    NULL
+};
+
+/* This function is called when a new signal is detected. It converts it
+ * to a bitstream, and the calls the protocol specific functions for
+ * decoding. */
+void decode_signal(RawSamplesBuffer *s, uint64_t len) {
+    uint32_t bitmap_bits_size = 4096*8;
+    uint32_t bitmap_size = bitmap_bits_size/8;
+
+    /* We call the decoders with an offset a few bits before the actual
+     * signal detected and for a len of a few bits after its end. */
+    uint32_t before_after_bits = 2;
+
+    uint8_t *bitmap = malloc(bitmap_size);
+    uint32_t bits = convert_signal_to_bits(bitmap,bitmap_size,s,-before_after_bits,len+before_after_bits*2,s->short_pulse_dur);
+
+    if (DEBUG_MSG) { /* Useful for debugging purposes. Don't remove. */
+        char *str = malloc(1024);
+        uint32_t j;
+        for (j = 0; j < bits && j < 1023; j++) {
+            str[j] = bitmap_get(bitmap,bitmap_size,j) ? '1' : '0';
+        }
+        str[j] = 0;
+        FURI_LOG_E(TAG, "%lu bits decoded: %s", bits, str);
+        free(str);
+    }
+
+    /* Try all the decoders available. */
+    int j = 0;
+    while(Decoders[j]) {
+        FURI_LOG_E(TAG, "Calling decoder %s", Decoders[j]->name);
+        ProtoViewMsgInfo info;
+        if (Decoders[j]->decode(bitmap,bits,&info)) {
+            FURI_LOG_E(TAG, "Message detected by %s", Decoders[j]->name);
+            break;
+        }
+        j++;
+    }
+    if (Decoders[j] == NULL) FURI_LOG_E(TAG, "No decoding possible");
+    free(bitmap);
 }
