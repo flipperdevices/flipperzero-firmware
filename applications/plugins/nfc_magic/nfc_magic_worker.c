@@ -96,14 +96,15 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
                 card_found_notified = true;
             }
+            if(nfc_data.cuid != magic_dev->cuid) continue;
             furi_hal_nfc_sleep();
 
             magic_activate();
-            FURI_LOG_I(TAG, "activating");
-            if(nfc_data.cuid != magic_dev->cuid) continue;
             if(magic_dev->type == MagicTypeClassicGen1) {
-                if(dev_protocol == NfcDeviceProtocolMifareClassic) continue;
+                if(dev_protocol != NfcDeviceProtocolMifareClassic) continue;
                 MfClassicData* mfc_data = &dev_data->mf_classic_data;
+
+                if(mfc_data->type != MfClassicType1k) continue;
                 if(!magic_gen1_wupa()) {
                     FURI_LOG_E(TAG, "Not Magic card");
                     nfc_magic_worker->callback(
@@ -268,7 +269,6 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
 
     while(nfc_magic_worker->state == NfcMagicWorkerStateCheck) {
         magic_activate();
-        furi_hal_nfc_activate_nfca(200, &magic_dev->cuid);
         if(magic_gen1_wupa()) {
             magic_dev->type = MagicTypeClassicGen1;
             if(!card_found_notified) {
@@ -277,6 +277,7 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
                 card_found_notified = true;
             }
 
+            furi_hal_nfc_activate_nfca(200, &magic_dev->cuid);
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
         }
@@ -351,9 +352,6 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
         magic_deactivate();
         furi_delay_ms(300);
         if(!magic_activate()) continue;
-        uint32_t cuid;
-        if(!furi_hal_nfc_activate_nfca(200, &cuid)) continue;
-        if(cuid != magic_dev->cuid) continue;
         if(magic_dev->type == MagicTypeClassicGen1) {
             if(!magic_gen1_wupa()) continue;
             if(!magic_gen1_wipe()) continue;
@@ -362,6 +360,9 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
         } else if(magic_dev->type == MagicTypeGen4) {
+            uint32_t cuid;
+            if(!furi_hal_nfc_activate_nfca(200, &cuid)) continue;
+            if(cuid != magic_dev->cuid) continue;
             if(magic_gen4_wipe(magic_dev->password)) continue;
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
