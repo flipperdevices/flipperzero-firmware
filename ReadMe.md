@@ -18,13 +18,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster)
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
-- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, DBZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, DBZ, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `roguemaster.eth` or `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0101-0323-0.74.3-3984192](https://www.patreon.com/posts/76626421)
+## Latest Updates - [PATREON: Latest Release RM0102-0351-0.74.3-50426ba](https://www.patreon.com/posts/76671172)
 
 - Last Synced/Checked [Unleashed], changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2022-12-31 13:28 EST`
 - Last Synced/Checked [OFW], changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2022-12-31 13:28 EST`
@@ -37,7 +37,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Build: RM All and the new SCIENCE build now have 10 animations with 9 featuring scientists, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76626421)
 - Per PATREON voters, Added SubGHz Playlist to the Main Menu.
 - [New Patreon Build: Mario and Friends!](https://www.patreon.com/posts/76649835)
-- Updated passport to Mario themed. [Thank you Kuronons for the animation!](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20background/Passports%20(.png%20files%20-%20128x64px))
+- Updated passport to Mario themed. [Thank you Kuronons for the animation!](https://github.com/Kuronons/FZ_graphics/)
+- [New Patreon Build: Hackz, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76671172)
 
 <a name="release">
 
