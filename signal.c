@@ -261,22 +261,45 @@ uint32_t convert_signal_to_bits(uint8_t *b, uint32_t blen, RawSamplesBuffer *s, 
  * representation. In such a case I could use "10??" and "01??".
  *
  * The function returns the number of bits converted. It will stop as soon
- * as it finds a pattern that does not match zero or one patterns. */
-#if 0
-uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, const char *zero_pattern, const char *one_pattern)
+ * as it finds a pattern that does not match zero or one patterns. The
+ * decoding starts at the specified offset 'off'. */
+uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, const char *zero_pattern, const char *one_pattern)
 {
+    uint32_t decoded = 0; /* Number of bits extracted. */
+    while(off < len) {
+        bool level;
+        if (bitmap_match_bits(bits,len,off,zero_pattern)) {
+            level = true;
+            off += strlen(zero_pattern);
+        } else if (bitmap_match_bits(bits,len,off,one_pattern)) {
+            level = false;
+            off += strlen(zero_pattern);
+        } else {
+            break;
+        }
+        bitmap_set(buf,buflen,decoded++,level);
+        if (decoded/8 == buflen) break; /* No space left on target buffer. */
+    }
+    return decoded;
 }
-#endif
 
 /* Supported protocols go here, with the relevant implementation inside
  * protocols/<name>.c */
 
 extern ProtoViewDecoder Oregon2Decoder;
+extern ProtoViewDecoder B4B1Decoder;
 
 ProtoViewDecoder *Decoders[] = {
-    &Oregon2Decoder,
+    &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
+    &B4B1Decoder,           /* PT, SC, ... 24 bits remotes. */
     NULL
 };
+
+/* Reset the message info structure before passing it to the decoding
+ * functions. */
+void initialize_msg_info(ProtoViewMsgInfo *i) {
+    memset(i,0,sizeof(ProtoViewMsgInfo));
+}
 
 /* This function is called when a new signal is detected. It converts it
  * to a bitstream, and the calls the protocol specific functions for
@@ -305,6 +328,9 @@ void decode_signal(RawSamplesBuffer *s, uint64_t len) {
 
     /* Try all the decoders available. */
     int j = 0;
+
+    ProtoViewMsgInfo info;
+    initialize_msg_info(&info);
     while(Decoders[j]) {
         FURI_LOG_E(TAG, "Calling decoder %s", Decoders[j]->name);
         ProtoViewMsgInfo info;
@@ -314,6 +340,11 @@ void decode_signal(RawSamplesBuffer *s, uint64_t len) {
         }
         j++;
     }
-    if (Decoders[j] == NULL) FURI_LOG_E(TAG, "No decoding possible");
+    if (Decoders[j] == NULL) {
+        FURI_LOG_E(TAG, "No decoding possible");
+    } else {
+        FURI_LOG_E(TAG, "Decoded %s, raw=%s",
+            info.name, info.raw);
+    }
     free(bitmap);
 }

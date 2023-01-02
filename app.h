@@ -102,7 +102,7 @@ typedef struct ProtoViewMsgInfo {
     char info1[16];     /* Protocol specific decoded string, line 1. */
     char info2[16];     /* Protocol specific decoded string, line 2. */
     char info3[16];     /* Protocol specific decoded string, line 3. */
-    uint64_t len;       /* Bits found. */
+    uint64_t len;       /* Bits consumed from the stream. */
 } ProtoViewMsgInfo;
 
 typedef struct ProtoViewDecoder {
@@ -125,6 +125,7 @@ void scan_for_signal(ProtoViewApp *app);
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
 uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, const char *bits);
+uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t offset, const char *zero_pattern, const char *one_pattern);
 
 /* view_*.c */
 void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);
