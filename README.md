@@ -71,8 +71,17 @@ Select one using the arrow keys and the center button. The qrcode will display.
 If you push the right arrow, some stats will display: the qrcode "Version" -
 which corresponds to how big it is; the ECC level - which determines the
 qrcode's resilience to damage, such as a dirty screen (Low, Medium, Quartile,
-and High); and the qrcode Mode (Numeric, Alpha-Numeric, Binary, or Kanji). You
-can hide the stats by pressing the left arrow.
+and High); and the qrcode Mode (Numeric, Alpha-Numeric, Binary, or Kanji).
+
+While viewing the stats, you can select Version or ECC using the up and down
+arrows and the center button. You can then increase or decrease the Version or
+ECC using up and down and save your choice using the center buttton. This
+feature was mostly added for my own amusement and testing, but, theoretically,
+it may help a reader that's having trouble if the default ECC is less than the
+highest value ("H"): you can increase the Version by 1 and then set the ECC to
+"H". Whether or not this helps depends on the reader.
+
+You can hide the stats by pressing the left arrow.
 
 When you're done viewing the qrcode, press the back button to return to the
 file browser. If you push the back button in the file browser, the app will
@@ -80,10 +89,11 @@ exit.
 
 I will ask that you temper your expectations: the Flipper Zero screen is small
 and many readers may have difficulty reading the qrcodes, especially if they
-are encoding a lot of data. I have successfully got my iPhone to read qrcodes
-encoding phone numbers and wifi info, both of which are relatively short.
+are encoding a lot of data. However, I have successfully got my iPhone to read
+qrcodes encoding phone numbers, wifi info, and a url, all the way up to a
+version 11 qrcode (ie, the largest size the screen will fit).
 
-## Wifi QRCodes
+## Example: Wifi QRCodes
 Most phones can automatically connect to wifi networks from a qrcode. If you
 should like to encode your wifi's connection info into a qrcode, here's how
 you'd do it:
