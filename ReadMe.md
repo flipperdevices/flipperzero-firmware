@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
+- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 
 <a name="release">
 
