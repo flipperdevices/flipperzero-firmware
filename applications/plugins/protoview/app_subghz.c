@@ -32,10 +32,10 @@ void radio_begin(ProtoViewApp* app) {
 uint32_t radio_rx(ProtoViewApp* app) {
     furi_assert(app);
     if(!furi_hal_subghz_is_frequency_valid(app->frequency)) {
-        furi_crash(TAG " Incorrect RX frequency.");
+        furi_crash(TAG" Incorrect RX frequency.");
     }
 
-    if(app->txrx->txrx_state == TxRxStateRx) return app->frequency;
+    if (app->txrx->txrx_state == TxRxStateRx) return app->frequency;
 
     furi_hal_subghz_idle(); /* Put it into idle state in case it is sleeping. */
     uint32_t value = furi_hal_subghz_set_frequency_and_path(app->frequency);
@@ -53,7 +53,7 @@ uint32_t radio_rx(ProtoViewApp* app) {
 /* Stop subghz worker (if active), put radio on idle state. */
 void radio_rx_end(ProtoViewApp* app) {
     furi_assert(app);
-    if(app->txrx->txrx_state == TxRxStateRx) {
+    if (app->txrx->txrx_state == TxRxStateRx) {
         if(subghz_worker_is_running(app->txrx->worker)) {
             subghz_worker_stop(app->txrx->worker);
             furi_hal_subghz_stop_async_rx();
@@ -66,7 +66,7 @@ void radio_rx_end(ProtoViewApp* app) {
 /* Put radio on sleep. */
 void radio_sleep(ProtoViewApp* app) {
     furi_assert(app);
-    if(app->txrx->txrx_state == TxRxStateRx) {
+    if (app->txrx->txrx_state == TxRxStateRx) {
         /* We can't go from having an active RX worker to sleeping.
          * Stop the RX subsystems first. */
         radio_rx_end(app);
