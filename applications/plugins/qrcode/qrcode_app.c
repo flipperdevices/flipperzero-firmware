@@ -54,10 +54,17 @@ typedef struct {
     ViewPort* view_port;
 
     FuriMutex** mutex;
+    FuriString* message;
     QRCode* qrcode;
+    uint8_t min_version;
+    uint8_t max_ecc_at_min_version;
     bool loading;
     bool too_long;
     bool show_stats;
+    uint8_t selected_idx;
+    bool edit;
+    uint8_t set_version;
+    uint8_t set_ecc;
 } QRCodeApp;
 
 /**
@@ -117,11 +124,14 @@ static void render_callback(Canvas* canvas, void* ctx) {
     uint8_t font_height = canvas_current_font_height(canvas);
     uint8_t width = canvas_width(canvas);
     uint8_t height = canvas_height(canvas);
-    if(instance->qrcode) {
+    if(instance->loading) {
+        canvas_draw_str_aligned(
+            canvas, width / 2, height / 2, AlignCenter, AlignCenter, "Loading...");
+    } else if(instance->qrcode) {
         uint8_t size = instance->qrcode->size;
         uint8_t pixel_size = height / size;
         uint8_t top = (height - pixel_size * size) / 2;
-        uint8_t left = instance->show_stats ? top : (width - pixel_size * size) / 2;
+        uint8_t left = ((instance->show_stats ? 65 : width) - pixel_size * size) / 2;
         for(uint8_t y = 0; y < size; y++) {
             for(uint8_t x = 0; x < size; x++) {
                 if(qrcode_getModule(instance->qrcode, x, y)) {
@@ -140,25 +150,77 @@ static void render_callback(Canvas* canvas, void* ctx) {
         }
 
         if(instance->show_stats) {
-            if(top < 2) top = 2;
-            left += size * pixel_size + top;
+            top = 10;
+            left = 66;
 
             FuriString* str = furi_string_alloc();
 
-            furi_string_printf(str, "Ver: %i", instance->qrcode->version);
-            canvas_draw_str(canvas, left, top + font_height, furi_string_get_cstr(str));
+            if(!instance->edit || instance->selected_idx == 0) {
+                furi_string_printf(str, "Ver: %i", instance->set_version);
+                canvas_draw_str(canvas, left + 5, top + font_height, furi_string_get_cstr(str));
+                if(instance->selected_idx == 0) {
+                    canvas_draw_triangle(
+                        canvas,
+                        left,
+                        top + font_height / 2,
+                        font_height - 4,
+                        4,
+                        CanvasDirectionLeftToRight);
+                }
+                if(instance->edit) {
+                    uint8_t arrow_left = left + 5 + canvas_string_width(canvas, "Ver: 8") / 2;
+                    canvas_draw_triangle(
+                        canvas, arrow_left, top, font_height - 4, 4, CanvasDirectionBottomToTop);
+                    canvas_draw_triangle(
+                        canvas,
+                        arrow_left,
+                        top + font_height + 1,
+                        font_height - 4,
+                        4,
+                        CanvasDirectionTopToBottom);
+                }
+            }
 
-            furi_string_printf(str, "ECC: %c", get_ecc_char(instance->qrcode->ecc));
-            canvas_draw_str(canvas, left, 2 * (top + font_height), furi_string_get_cstr(str));
+            if(!instance->edit || instance->selected_idx == 1) {
+                furi_string_printf(str, "ECC: %c", get_ecc_char(instance->set_ecc));
+                canvas_draw_str(
+                    canvas, left + 5, 2 * font_height + top + 2, furi_string_get_cstr(str));
+                if(instance->selected_idx == 1) {
+                    canvas_draw_triangle(
+                        canvas,
+                        left,
+                        3 * font_height / 2 + top + 2,
+                        font_height - 4,
+                        4,
+                        CanvasDirectionLeftToRight);
+                }
+                if(instance->edit) {
+                    uint8_t arrow_left = left + 5 + canvas_string_width(canvas, "ECC: H") / 2;
+                    canvas_draw_triangle(
+                        canvas,
+                        arrow_left,
+                        font_height + top + 2,
+                        font_height - 4,
+                        4,
+                        CanvasDirectionBottomToTop);
+                    canvas_draw_triangle(
+                        canvas,
+                        arrow_left,
+                        2 * font_height + top + 3,
+                        font_height - 4,
+                        4,
+                        CanvasDirectionTopToBottom);
+                }
+            }
 
-            furi_string_printf(str, "Mod: %c", get_mode_char(instance->qrcode->mode));
-            canvas_draw_str(canvas, left, 3 * (top + font_height), furi_string_get_cstr(str));
+            if(!instance->edit) {
+                furi_string_printf(str, "Mod: %c", get_mode_char(instance->qrcode->mode));
+                canvas_draw_str(
+                    canvas, left + 5, 3 * font_height + top + 4, furi_string_get_cstr(str));
+            }
 
             furi_string_free(str);
         }
-    } else if(instance->loading) {
-        canvas_draw_str_aligned(
-            canvas, width / 2, height / 2, AlignCenter, AlignCenter, "Loading...");
     } else {
         uint8_t margin = (height - font_height * 2) / 3;
         canvas_draw_str_aligned(
@@ -241,6 +303,37 @@ static void qrcode_free(QRCode* qrcode) {
 }
 
 /**
+ * Rebuild the qrcode. Assumes that instance->message is the message to encode,
+ * that the mutex has been acquired, and the specified version/ecc will be
+ * sufficiently large enough to encode the full message. It is also assumed
+ * that the old qrcode will be free'd by the caller.
+ * @param instance The qrcode app instance
+ * @param version The qrcode version to use
+ * @param ecc The qrcode ECC level to use
+ * @returns true if the qrcode was successfully created
+ */
+static bool rebuild_qrcode(QRCodeApp* instance, uint8_t version, uint8_t ecc) {
+    furi_assert(instance);
+    furi_assert(instance->message);
+
+    const char* cstr = furi_string_get_cstr(instance->message);
+    uint16_t len = strlen(cstr);
+    instance->qrcode = qrcode_alloc(version);
+
+    int8_t res = qrcode_initBytes(
+        instance->qrcode, instance->qrcode->modules, version, ecc, (uint8_t*)cstr, len);
+    if(res != 0) {
+        FURI_LOG_E(TAG, "Could not create qrcode");
+
+        qrcode_free(instance->qrcode);
+        instance->qrcode = NULL;
+
+        return false;
+    }
+    return true;
+}
+
+/**
  * Load a qrcode from a string
  * @param instance The qrcode app instance
  * @param str The message to encode as a qrcode
@@ -251,17 +344,29 @@ static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
     furi_assert(str);
 
     furi_check(furi_mutex_acquire(instance->mutex, FuriWaitForever) == FuriStatusOk);
+    if(instance->message) {
+        furi_string_free(instance->message);
+        instance->message = NULL;
+    }
     if(instance->qrcode) {
         qrcode_free(instance->qrcode);
         instance->qrcode = NULL;
     }
     instance->too_long = false;
     instance->show_stats = false;
+    instance->selected_idx = 0;
+    instance->edit = false;
 
     bool result = false;
     do {
         const char* cstr = furi_string_get_cstr(str);
         uint16_t len = strlen(cstr);
+
+        instance->message = furi_string_alloc_set(str);
+        if(!instance->message) {
+            FURI_LOG_E(TAG, "Could not allocate message");
+            break;
+        }
 
         // figure out the qrcode "mode"
         uint8_t mode = MODE_BYTE;
@@ -297,18 +402,14 @@ static bool qrcode_load_string(QRCodeApp* instance, FuriString* str) {
         version++;
 
         // Build the qrcode
-        instance->qrcode = qrcode_alloc(version);
-        int8_t res = qrcode_initBytes(
-            instance->qrcode, instance->qrcode->modules, version, ecc, (uint8_t*)cstr, len);
-        if(res != 0) {
-            FURI_LOG_E(TAG, "Could not create qrcode");
-
-            qrcode_free(instance->qrcode);
-            instance->qrcode = NULL;
-
+        if(!rebuild_qrcode(instance, version, ecc)) {
+            furi_string_free(instance->message);
+            instance->message = NULL;
             break;
         }
 
+        instance->min_version = instance->set_version = version;
+        instance->max_ecc_at_min_version = instance->set_ecc = ecc;
         result = true;
     } while(false);
 
@@ -382,10 +483,13 @@ static QRCodeApp* qrcode_app_alloc() {
 
     instance->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
+    instance->message = NULL;
     instance->qrcode = NULL;
     instance->loading = true;
     instance->too_long = false;
     instance->show_stats = false;
+    instance->selected_idx = 0;
+    instance->edit = false;
 
     return instance;
 }
@@ -395,6 +499,7 @@ static QRCodeApp* qrcode_app_alloc() {
  * @param qrcode_app The app to free
  */
 static void qrcode_app_free(QRCodeApp* instance) {
+    if(instance->message) furi_string_free(instance->message);
     if(instance->qrcode) qrcode_free(instance->qrcode);
 
     gui_remove_view_port(instance->gui, instance->view_port);
@@ -446,17 +551,73 @@ int32_t qrcode_app(void* p) {
             furi_check(furi_mutex_acquire(instance->mutex, FuriWaitForever) == FuriStatusOk);
 
             if(input.key == InputKeyBack) {
+                if(instance->message) {
+                    furi_string_free(instance->message);
+                    instance->message = NULL;
+                }
                 if(instance->qrcode) {
                     qrcode_free(instance->qrcode);
                     instance->qrcode = NULL;
                 }
                 instance->loading = true;
+                instance->edit = false;
                 furi_mutex_release(instance->mutex);
                 break;
             } else if(input.key == InputKeyRight) {
                 instance->show_stats = true;
             } else if(input.key == InputKeyLeft) {
                 instance->show_stats = false;
+            } else if(instance->show_stats && !instance->loading && instance->qrcode) {
+                if(input.key == InputKeyUp) {
+                    if(!instance->edit) {
+                        instance->selected_idx = MAX(0, instance->selected_idx - 1);
+                    } else {
+                        if(instance->selected_idx == 0 &&
+                           instance->set_version < MAX_QRCODE_VERSION) {
+                            instance->set_version++;
+                        } else if(instance->selected_idx == 1) {
+                            uint8_t max_ecc = instance->set_version == instance->min_version ?
+                                                  instance->max_ecc_at_min_version :
+                                                  ECC_HIGH;
+                            if(instance->set_ecc < max_ecc) {
+                                instance->set_ecc++;
+                            }
+                        }
+                    }
+                } else if(input.key == InputKeyDown) {
+                    if(!instance->edit) {
+                        instance->selected_idx = MIN(1, instance->selected_idx + 1);
+                    } else {
+                        if(instance->selected_idx == 0 &&
+                           instance->set_version > instance->min_version) {
+                            instance->set_version--;
+                            if(instance->set_version == instance->min_version) {
+                                instance->set_ecc =
+                                    MAX(instance->set_ecc, instance->max_ecc_at_min_version);
+                            }
+                        } else if(instance->selected_idx == 1 && instance->set_ecc > 0) {
+                            instance->set_ecc--;
+                        }
+                    }
+                } else if(input.key == InputKeyOk) {
+                    if(instance->edit && (instance->set_version != instance->qrcode->version ||
+                                          instance->set_ecc != instance->qrcode->ecc)) {
+                        QRCode* qrcode = instance->qrcode;
+                        instance->loading = true;
+
+                        if(rebuild_qrcode(instance, instance->set_version, instance->set_ecc)) {
+                            qrcode_free(qrcode);
+                        } else {
+                            FURI_LOG_E(TAG, "Could not rebuild qrcode");
+                            instance->qrcode = qrcode;
+                            instance->set_version = qrcode->version;
+                            instance->set_ecc = qrcode->ecc;
+                        }
+
+                        instance->loading = false;
+                    }
+                    instance->edit = !instance->edit;
+                }
             }
 
             furi_mutex_release(instance->mutex);
