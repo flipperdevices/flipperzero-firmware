@@ -181,6 +181,8 @@ void nfcv_crc(uint8_t* data, uint32_t length) {
 }
 
 void nfcv_emu_free_signals(NfcVEmuAirSignals* signals) {
+    furi_assert(signals);
+
     digital_signal_free(signals->nfcv_resp_one);
     digital_signal_free(signals->nfcv_resp_zero);
     digital_signal_free(signals->nfcv_resp_sof);
@@ -192,6 +194,9 @@ void nfcv_emu_free_signals(NfcVEmuAirSignals* signals) {
 }
 
 bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_t slowdown) {
+    furi_assert(air);
+    furi_assert(signals);
+
     bool ret = true;
 
     if(!signals->nfcv_resp_one) {
@@ -249,6 +254,8 @@ bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
 }
 
 void nfcv_emu_alloc(NfcVData* nfcv_data) {
+    furi_assert(nfcv_data);
+
     if(!nfcv_data->emu_air.nfcv_signal) {
         /* assuming max frame length is 255 bytes */
         nfcv_data->emu_air.nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
@@ -316,6 +323,8 @@ void nfcv_emu_alloc(NfcVData* nfcv_data) {
 }
 
 void nfcv_emu_free(NfcVData* nfcv_data) {
+    furi_assert(nfcv_data);
+
     digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod);
     digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse);
     digital_sequence_free(nfcv_data->emu_air.nfcv_signal);
@@ -337,6 +346,9 @@ void nfcv_emu_send(
     uint8_t length,
     NfcVSendFlags flags,
     uint32_t send_time) {
+    furi_assert(tx_rx);
+    furi_assert(nfcv);
+
     /* picked default value (0) to match the most common format */
     if(!flags) {
         flags = NfcVSendFlagsSof | NfcVSendFlagsCrc | NfcVSendFlagsEof |
@@ -402,6 +414,10 @@ void nfcv_emu_handle_packet(
     FuriHalNfcTxRxContext* tx_rx,
     FuriHalNfcDevData* nfc_data,
     void* nfcv_data_in) {
+    furi_assert(tx_rx);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data_in);
+
     NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
 
@@ -618,7 +634,11 @@ void nfcv_emu_handle_packet(
 }
 
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data);
+
     nfcv_emu_alloc(nfcv_data);
+
     rfal_platform_spi_acquire();
     /* configure for transparent and passive mode */
     st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
@@ -626,7 +646,7 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0xC3);
     /* target mode: ISO14443 passive mode */
     st25r3916WriteRegister(ST25R3916_REG_MODE, 0x88);
-    /* let us modulate the field using MOSI, read modulation using MISO */
+    /* let us modulate the field using MOSI, read ASK modulation using IRQ */
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
 
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
@@ -686,6 +706,8 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
 }
 
 void nfcv_emu_deinit(NfcVData* nfcv_data) {
+    furi_assert(nfcv_data);
+
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     rfal_platform_spi_release();
     nfcv_emu_free(nfcv_data);
@@ -705,36 +727,40 @@ bool nfcv_emu_loop(
     FuriHalNfcDevData* nfc_data,
     NfcVData* nfcv_data,
     uint32_t timeout_ms) {
+    furi_assert(tx_rx);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data);
+
     bool ret = false;
     uint32_t frame_state = NFCV_FRAME_STATE_SOF1;
     uint32_t periods_previous = 0;
-    uint8_t frame_payload[128];
     uint32_t frame_pos = 0;
     uint32_t byte_value = 0;
     uint32_t bits_received = 0;
+    uint32_t timeout = timeout_ms * 1000;
     bool wait_for_pulse = false;
 
-    uint8_t period_buffer[256];
+#ifdef NFCV_DIAGNOSTIC_DUMPS
+    uint8_t period_buffer[NFCV_DIAGNOSTIC_DUMP_SIZE];
     uint32_t period_buffer_pos = 0;
+#endif
 
     while(true) {
-        uint32_t periods =
-            pulse_reader_receive(nfcv_data->emu_air.reader_signal, timeout_ms * 1000);
+        uint32_t periods = pulse_reader_receive(nfcv_data->emu_air.reader_signal, timeout);
         uint32_t timestamp = DWT->CYCCNT;
 
         /* when timed out, reset to SOF state */
-        if(periods == PULSE_READER_NO_EDGE) {
-            frame_state = NFCV_FRAME_STATE_SOF1;
-            break;
-        }
-        if(periods == PULSE_READER_LOST_EDGE) {
+        if(periods == PULSE_READER_NO_EDGE || periods == PULSE_READER_LOST_EDGE) {
             break;
         }
 
+#ifdef NFCV_DIAGNOSTIC_DUMPS
         if(period_buffer_pos < sizeof(period_buffer)) {
             period_buffer[period_buffer_pos++] = periods;
         }
+#endif
 
+        /* short helper for detecting a pulse position */
         if(wait_for_pulse) {
             wait_for_pulse = false;
             if(periods != 1) {
@@ -773,22 +799,23 @@ bool nfcv_emu_loop(
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
             }
+
             /* previous symbol left us with some pulse periods */
             periods -= periods_previous;
 
             if(periods > 512) {
                 frame_state = NFCV_FRAME_STATE_RESET;
                 break;
-            }
-
-            if(periods == 2) {
+            } else if(periods == 2) {
                 frame_state = NFCV_FRAME_STATE_EOF;
                 break;
             }
 
             periods_previous = 512 - (periods + 1);
             byte_value = (periods - 1) / 2;
-            frame_payload[frame_pos++] = (uint8_t)byte_value;
+            if(frame_pos < NFCV_MAX_FRAME_SIZE) {
+                nfcv_data->frame[frame_pos++] = (uint8_t)byte_value;
+            }
 
             wait_for_pulse = true;
 
@@ -828,7 +855,9 @@ bool nfcv_emu_loop(
             }
 
             if(bits_received >= 8) {
-                frame_payload[frame_pos++] = (uint8_t)byte_value;
+                if(frame_pos < NFCV_MAX_FRAME_SIZE) {
+                    nfcv_data->frame[frame_pos++] = (uint8_t)byte_value;
+                }
                 bits_received = 0;
             }
             wait_for_pulse = true;
@@ -839,7 +868,6 @@ bool nfcv_emu_loop(
         if(frame_state == NFCV_FRAME_STATE_RESET) {
             frame_state = NFCV_FRAME_STATE_SOF1;
         } else if(frame_state == NFCV_FRAME_STATE_EOF) {
-            nfcv_data->frame = frame_payload;
             nfcv_data->frame_length = frame_pos;
             nfcv_data->eof_timestamp = timestamp;
             break;
@@ -850,7 +878,7 @@ bool nfcv_emu_loop(
         /* we know that this code uses TIM2, so stop pulse reader */
         pulse_reader_stop(nfcv_data->emu_air.reader_signal);
         if(tx_rx->sniff_rx) {
-            tx_rx->sniff_rx(frame_payload, frame_pos * 8, false, tx_rx->sniff_context);
+            tx_rx->sniff_rx(nfcv_data->frame, frame_pos * 8, false, tx_rx->sniff_context);
         }
         nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
         pulse_reader_start(nfcv_data->emu_air.reader_signal);
@@ -861,10 +889,14 @@ bool nfcv_emu_loop(
         }
     }
 
-    FURI_LOG_T(TAG, "pulses:");
-    for(uint32_t pos = 0; pos < period_buffer_pos; pos++) {
-        FURI_LOG_T(TAG, " #%lu: %u", pos, period_buffer[pos]);
+#ifdef NFCV_DIAGNOSTIC_DUMPS
+    if(period_buffer_pos) {
+        FURI_LOG_T(TAG, "pulses:");
+        for(uint32_t pos = 0; pos < period_buffer_pos; pos++) {
+            FURI_LOG_T(TAG, "     #%lu: %u", pos, period_buffer[pos]);
+        }
     }
+#endif
 
     return ret;
 }
