@@ -284,6 +284,7 @@ int32_t passport_app(void* p) {
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
     //furi_semaphore_free(semaphore);
+    free(passport);
 
     return 0;
 }
