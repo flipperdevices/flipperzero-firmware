@@ -85,7 +85,7 @@ void canvas_commit(Canvas* canvas);
  *
  * @return     width in pixels.
  */
-uint8_t canvas_width(Canvas* canvas);
+uint8_t canvas_width(const Canvas* canvas);
 
 /** Get Canvas height
  *
@@ -93,7 +93,7 @@ uint8_t canvas_width(Canvas* canvas);
  *
  * @return     height in pixels.
  */
-uint8_t canvas_height(Canvas* canvas);
+uint8_t canvas_height(const Canvas* canvas);
 
 /** Get current font height
  *
@@ -101,7 +101,7 @@ uint8_t canvas_height(Canvas* canvas);
  *
  * @return     height in pixels.
  */
-uint8_t canvas_current_font_height(Canvas* canvas);
+uint8_t canvas_current_font_height(const Canvas* canvas);
 
 /** Get font parameters
  *
@@ -110,7 +110,7 @@ uint8_t canvas_current_font_height(Canvas* canvas);
  *
  * @return     pointer to CanvasFontParameters structure
  */
-CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font);
+CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font);
 
 /** Clear canvas
  *
@@ -182,7 +182,7 @@ void canvas_draw_str_aligned(
  *
  * @return     width in pixels.
  */
-uint16_t canvas_string_width(Canvas* canvas, const char* str);
+uint16_t canvas_string_width(const Canvas* canvas, const char* str);
 
 /** Get glyph width
  *
@@ -191,7 +191,7 @@ uint16_t canvas_string_width(Canvas* canvas, const char* str);
  *
  * @return     width in pixels
  */
-uint8_t canvas_glyph_width(Canvas* canvas, char symbol);
+uint8_t canvas_glyph_width(const Canvas* canvas, char symbol);
 
 /** Draw bitmap picture at position defined by x,y.
  *

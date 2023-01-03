@@ -75,17 +75,17 @@ void canvas_frame_set(
     canvas->height = height;
 }
 
-uint8_t canvas_width(Canvas* canvas) {
+uint8_t canvas_width(const Canvas* canvas) {
     furi_assert(canvas);
     return canvas->width;
 }
 
-uint8_t canvas_height(Canvas* canvas) {
+uint8_t canvas_height(const Canvas* canvas) {
     furi_assert(canvas);
     return canvas->height;
 }
 
-uint8_t canvas_current_font_height(Canvas* canvas) {
+uint8_t canvas_current_font_height(const Canvas* canvas) {
     furi_assert(canvas);
     uint8_t font_height = u8g2_GetMaxCharHeight(&canvas->fb);
 
@@ -96,7 +96,7 @@ uint8_t canvas_current_font_height(Canvas* canvas) {
     return font_height;
 }
 
-CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font) {
+CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
     return (CanvasFontParameters*)&canvas_font_params[font];
@@ -188,13 +188,13 @@ void canvas_draw_str_aligned(
     u8g2_DrawStr(&canvas->fb, x, y, str);
 }
 
-uint16_t canvas_string_width(Canvas* canvas, const char* str) {
+uint16_t canvas_string_width(const Canvas* canvas, const char* str) {
     furi_assert(canvas);
     if(!str) return 0;
     return u8g2_GetStrWidth(&canvas->fb, str);
 }
 
-uint8_t canvas_glyph_width(Canvas* canvas, char symbol) {
+uint8_t canvas_glyph_width(const Canvas* canvas, char symbol) {
     furi_assert(canvas);
     return u8g2_GetGlyphWidth(&canvas->fb, symbol);
 }
