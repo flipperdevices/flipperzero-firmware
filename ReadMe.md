@@ -42,6 +42,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
+- [WAV Player (2) (WIP!!!) (By LTVA1)](https://github.com/LTVA1/wav_player) - Works with sample rate in different way
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
