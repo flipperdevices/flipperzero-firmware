@@ -54,8 +54,9 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint32_t decoded =
         convert_from_line_code(buffer,sizeof(buffer),bits,numbytes,off,"1001","0110");
     FURI_LOG_E(TAG, "Oregon2 decoded bits: %lu", decoded);
+    if (decoded < 11*4) return false; /* Minimum len to extract some data. */
 
-    char temp[3] = {0}, deviceid[2] = {0};
+    char temp[3] = {0}, deviceid[2] = {0}, hum[2] = {0};
     for (int j = 0; j < 64; j += 4) {
         uint8_t nib[1];
         nib[0] = 0;
@@ -70,17 +71,22 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         case 3: deviceid[1] |= nib[0]; break;
         case 2: deviceid[1] |= nib[0] << 4; break;
         case 10: temp[0] = nib[0]; break;
+        /* Fixme: take the temperature sign from nibble 11. */
         case 9: temp[1] = nib[0]; break;
         case 8: temp[2] = nib[0]; break;
+        case 13: hum[0] = nib[0]; break;
+        case 12: hum[1] = nib[0]; break;
         }
     }
 
     snprintf(info->name,sizeof(info->name),"%s","Oregon v2.1");
     snprintf(info->raw,sizeof(info->raw),"%08llX", *((uint64_t*)buffer));
-    snprintf(info->info1,sizeof(info->info1),"Temp %d%d.%d",
-        temp[0],temp[1],temp[2]);
-    snprintf(info->info2,sizeof(info->info2),"ID %02X%02X",
+    snprintf(info->info1,sizeof(info->info2),"ID %02X%02X",
         deviceid[0], deviceid[1]);
+    snprintf(info->info2,sizeof(info->info1),"Temp %d%d.%d",
+        temp[0],temp[1],temp[2]);
+    snprintf(info->info3,sizeof(info->info1),"Humidity %d%d",
+        hum[0],hum[1]);
     return true;
 }
 
