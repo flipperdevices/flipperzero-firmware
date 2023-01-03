@@ -13,7 +13,7 @@
 #define CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
 #define NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
 #define TEST_RANDOM_DIR_NAME EXT_PATH("unit_tests/subghz/test_random_raw.sub")
-#define TEST_RANDOM_COUNT_PARSE 244
+#define TEST_RANDOM_COUNT_PARSE 273
 #define TEST_TIMEOUT 10000
 
 static SubGhzEnvironment* environment_handler;
@@ -207,6 +207,152 @@ MU_TEST(subghz_keystore_test) {
     mu_assert(
         subghz_environment_load_keystore(environment_handler, KEYSTORE_DIR_NAME),
         "Test keystore error");
+}
+
+typedef enum {
+    SubGhzHalAsyncTxTestTypeNormal,
+    SubGhzHalAsyncTxTestTypeInvalidStart,
+    SubGhzHalAsyncTxTestTypeInvalidMid,
+    SubGhzHalAsyncTxTestTypeInvalidEnd,
+    SubGhzHalAsyncTxTestTypeResetStart,
+    SubGhzHalAsyncTxTestTypeResetMid,
+    SubGhzHalAsyncTxTestTypeResetEnd,
+} SubGhzHalAsyncTxTestType;
+
+typedef struct {
+    SubGhzHalAsyncTxTestType type;
+    size_t pos;
+} SubGhzHalAsyncTxTest;
+
+#define SUBGHZ_HAL_TEST_DURATION 1
+
+static LevelDuration subghz_hal_async_tx_test_yield(void* context) {
+    SubGhzHalAsyncTxTest* test = context;
+    bool is_odd = test->pos % 2;
+
+    if(test->type == SubGhzHalAsyncTxTestTypeNormal) {
+        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else if(test->type == SubGhzHalAsyncTxTestTypeInvalidStart) {
+        if(test->pos == 0) {
+            test->pos++;
+            return level_duration_make(!is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else if(test->type == SubGhzHalAsyncTxTestTypeInvalidMid) {
+        if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
+            test->pos++;
+            return level_duration_make(!is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else if(test->type == SubGhzHalAsyncTxTestTypeInvalidEnd) {
+        if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+            test->pos++;
+            return level_duration_make(!is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * 8) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else if(test->type == SubGhzHalAsyncTxTestTypeResetStart) {
+        if(test->pos == 0) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else if(test->type == SubGhzHalAsyncTxTestTypeResetMid) {
+        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
+            test->pos++;
+            return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF / 2) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else if(test->type == SubGhzHalAsyncTxTestTypeResetEnd) {
+        if(test->pos < API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+            test->pos++;
+            return level_duration_make(is_odd, SUBGHZ_HAL_TEST_DURATION);
+        } else if(test->pos == API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL - 1) {
+            test->pos++;
+            return level_duration_reset();
+        } else {
+            furi_crash("Yield after reset");
+        }
+    } else {
+        furi_crash("Programming error");
+    }
+}
+
+bool subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestType type) {
+    SubGhzHalAsyncTxTest test = {0};
+    test.type = type;
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    furi_hal_subghz_set_frequency_and_path(433920000);
+
+    if(!furi_hal_subghz_start_async_tx(subghz_hal_async_tx_test_yield, &test)) {
+        return false;
+    }
+
+    while(!furi_hal_subghz_is_async_tx_complete()) {
+        furi_delay_ms(10);
+    }
+    furi_hal_subghz_stop_async_tx();
+    furi_hal_subghz_sleep();
+
+    return true;
+}
+
+MU_TEST(subghz_hal_async_tx_test) {
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeNormal),
+        "Test furi_hal_async_tx normal");
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeInvalidStart),
+        "Test furi_hal_async_tx invalid start");
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeInvalidMid),
+        "Test furi_hal_async_tx invalid mid");
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeInvalidEnd),
+        "Test furi_hal_async_tx invalid end");
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeResetStart),
+        "Test furi_hal_async_tx reset start");
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeResetMid),
+        "Test furi_hal_async_tx reset mid");
+    mu_assert(
+        subghz_hal_async_tx_test_run(SubGhzHalAsyncTxTestTypeResetEnd),
+        "Test furi_hal_async_tx reset end");
 }
 
 //test decoders
@@ -444,6 +590,20 @@ MU_TEST(subghz_decoder_ansonic_test) {
         "Test decoder " SUBGHZ_PROTOCOL_ANSONIC_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_smc5326_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/smc5326_raw.sub"), SUBGHZ_PROTOCOL_SMC5326_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_SMC5326_NAME " error\r\n");
+}
+
+MU_TEST(subghz_decoder_holtek_ht12x_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/holtek_ht12x_raw.sub"), SUBGHZ_PROTOCOL_HOLTEK_HT12X_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_HOLTEK_HT12X_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
@@ -571,6 +731,18 @@ MU_TEST(subghz_encoder_ansonic_test) {
         "Test encoder " SUBGHZ_PROTOCOL_ANSONIC_NAME " error\r\n");
 }
 
+MU_TEST(subghz_encoder_smc5326_test) {
+    mu_assert(
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/smc5326.sub")),
+        "Test encoder " SUBGHZ_PROTOCOL_SMC5326_NAME " error\r\n");
+}
+
+MU_TEST(subghz_encoder_holtek_ht12x_test) {
+    mu_assert(
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/holtek_ht12x.sub")),
+        "Test encoder " SUBGHZ_PROTOCOL_HOLTEK_HT12X_NAME " error\r\n");
+}
+
 MU_TEST(subghz_random_test) {
     mu_assert(subghz_decode_random_test(TEST_RANDOM_DIR_NAME), "Random test error\r\n");
 }
@@ -578,6 +750,8 @@ MU_TEST(subghz_random_test) {
 MU_TEST_SUITE(subghz) {
     subghz_test_init();
     MU_RUN_TEST(subghz_keystore_test);
+
+    MU_RUN_TEST(subghz_hal_async_tx_test);
 
     MU_RUN_TEST(subghz_decoder_came_atomo_test);
     MU_RUN_TEST(subghz_decoder_came_test);
@@ -612,6 +786,8 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
     MU_RUN_TEST(subghz_decoder_ansonic_test);
+    MU_RUN_TEST(subghz_decoder_smc5326_test);
+    MU_RUN_TEST(subghz_decoder_holtek_ht12x_test);
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
@@ -634,6 +810,8 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_encoder_clemsa_test);
     MU_RUN_TEST(subghz_encoder_ansonic_test);
+    MU_RUN_TEST(subghz_encoder_smc5326_test);
+    MU_RUN_TEST(subghz_encoder_holtek_ht12x_test);
 
     MU_RUN_TEST(subghz_random_test);
     subghz_test_deinit();

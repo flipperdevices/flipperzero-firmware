@@ -218,6 +218,7 @@ void ibutton_free(iButton* ibutton) {
 bool ibutton_file_select(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
+    browser_options.base_path = IBUTTON_APP_FOLDER;
 
     bool success = dialog_file_browser_show(
         ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options);
@@ -277,7 +278,7 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
 
     flipper_format_free(file);
 
-    if(!result) {
+    if(!result) { //-V547
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot save\nkey file");
     }
 
@@ -301,7 +302,7 @@ void ibutton_text_store_set(iButton* ibutton, const char* text, ...) {
 }
 
 void ibutton_text_store_clear(iButton* ibutton) {
-    memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE);
+    memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE + 1);
 }
 
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {
@@ -342,7 +343,7 @@ int32_t ibutton_app(void* p) {
     } else {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeFullscreen);
-        if(key_loaded) {
+        if(key_loaded) { //-V547
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
             DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
         } else {

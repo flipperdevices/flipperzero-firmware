@@ -3,6 +3,7 @@
 #include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/raw.h>
 #include <lib/toolbox/path.h>
+#include <float_tools.h>
 
 #define RAW_FILE_NAME "Raw_signal_"
 #define TAG "SubGhzSceneReadRAW"
@@ -259,6 +260,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
         case SubGhzCustomEventViewReadRAWSendStop:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
+                subghz_speaker_unmute(subghz);
                 subghz_tx_stop(subghz);
                 subghz_sleep(subghz);
             }
@@ -357,7 +359,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
 
             float rssi = furi_hal_subghz_get_rssi();
 
-            if(subghz->txrx->raw_threshold_rssi == SUBGHZ_RAW_TRESHOLD_MIN) {
+            if(float_is_equal(subghz->txrx->raw_threshold_rssi, SUBGHZ_RAW_TRESHOLD_MIN)) {
                 subghz_read_raw_add_data_rssi(subghz->subghz_read_raw, rssi, true);
                 subghz_protocol_raw_save_to_file_pause(
                     (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, false);
@@ -376,10 +378,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                     subghz_read_raw_add_data_rssi(subghz->subghz_read_raw, rssi, false);
                     subghz_protocol_raw_save_to_file_pause(
                         (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, true);
+                    subghz_speaker_mute(subghz);
                 } else {
                     subghz_read_raw_add_data_rssi(subghz->subghz_read_raw, rssi, true);
                     subghz_protocol_raw_save_to_file_pause(
                         (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, false);
+                    subghz_speaker_unmute(subghz);
                 }
             }
 

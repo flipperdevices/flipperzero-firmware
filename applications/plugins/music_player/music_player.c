@@ -180,7 +180,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     // note stack view_port
     x_pos = 73;
-    y_pos = 0;
+    y_pos = 0; //-V1048
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_frame(canvas, x_pos, y_pos, 49, 64);
@@ -313,6 +313,7 @@ int32_t music_player_app(void* p) {
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);
             browser_options.hide_ext = false;
+            browser_options.base_path = MUSIC_PLAYER_APP_PATH_FOLDER;
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);

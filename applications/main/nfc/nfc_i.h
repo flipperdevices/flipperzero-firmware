@@ -27,6 +27,7 @@
 #include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/mf_classic_dict.h>
 #include <lib/nfc/parsers/nfc_supported_card.h>
+#include <lib/nfc/helpers/nfc_generators.h>
 
 #include "views/dict_attack.h"
 #include "views/detect_reader.h"
@@ -43,15 +44,13 @@
 ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
 
 #define NFC_TEXT_STORE_SIZE 128
+#define NFC_APP_FOLDER ANY_PATH("nfc")
 
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,
     NfcRpcStateEmulated,
 } NfcRpcState;
-
-// Forward declaration due to circular dependency
-typedef struct NfcGenerator NfcGenerator;
 
 struct Nfc {
     NfcWorker* worker;
