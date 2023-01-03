@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.10.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
       - uses: actions/checkout@v3
 
-      - name: Build application
+      - name: Build Application
         run: |
           bash tools/build.sh -f unleashed
           bash tools/build.sh
 
-      - name: Bump version and push tag
+      - name: Bump Version and Push Tag
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
         with:
@@ -29,7 +29,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - name: Create a GitHub release
+      - name: Create a GitHub Release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
