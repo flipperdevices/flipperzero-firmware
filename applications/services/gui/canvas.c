@@ -96,10 +96,10 @@ uint8_t canvas_current_font_height(const Canvas* canvas) {
     return font_height;
 }
 
-CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
+const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
-    return (CanvasFontParameters*)&canvas_font_params[font];
+    return &canvas_font_params[font];
 }
 
 void canvas_clear(Canvas* canvas) {

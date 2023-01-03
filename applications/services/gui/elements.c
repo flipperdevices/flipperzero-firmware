@@ -638,7 +638,7 @@ void elements_text_box(
     bool inversed_present = false;
     Font current_font = FontSecondary;
     Font prev_font = FontSecondary;
-    CanvasFontParameters* font_params = canvas_get_font_params(canvas, current_font);
+    const CanvasFontParameters* font_params = canvas_get_font_params(canvas, current_font);
 
     // Fill line parameters
     uint8_t line_leading_min = font_params->leading_min;
