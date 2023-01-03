@@ -7,7 +7,8 @@
 
 #include "../app.h"
 
-static bool decode(uint8_t *bits, uint64_t numbits, ProtoViewMsgInfo *info) {
+static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
+    if (numbits < 30) return false;
     const char *sync_patterns[3] = {
         "10000000000000000000000000000001", /* 30 zero bits. */
         "100000000000000000000000000000001", /* 31 zero bits. */
@@ -17,7 +18,7 @@ static bool decode(uint8_t *bits, uint64_t numbits, ProtoViewMsgInfo *info) {
     uint32_t off;
     int j;
     for (j = 0; j < 3; j++) {
-        off = bitmap_seek_bits(bits,numbits,0,sync_patterns[j]);
+        off = bitmap_seek_bits(bits,numbytes,0,sync_patterns[j]);
         if (off != BITMAP_SEEK_NOT_FOUND) break;
     }
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
@@ -26,10 +27,11 @@ static bool decode(uint8_t *bits, uint64_t numbits, ProtoViewMsgInfo *info) {
 
     uint8_t d[3]; /* 24 bits of data. */
     uint32_t decoded =
-        convert_from_line_code(d,sizeof(d),bits,numbits,off,"1000","1110");
+        convert_from_line_code(d,sizeof(d),bits,numbytes,off,"1000","1110");
 
     if (DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 decoded: %lu",decoded);
     if (decoded != 24) return false;
+    bitmap_invert_bytes_bits(d,sizeof(d));
     snprintf(info->name,PROTOVIEW_MSG_STR_LEN,"PT/SC remote");
     snprintf(info->raw,PROTOVIEW_MSG_STR_LEN,"%02X%02X%02X",d[0],d[1],d[2]);
     info->len = off+(4*24);

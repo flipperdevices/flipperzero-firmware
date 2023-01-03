@@ -79,6 +79,7 @@ struct ProtoViewApp {
     /* Generic app state. */
     int running;             /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
+    bool signal_decoded;     /* Was the current signal decoded? */
 
     /* Raw view apps state. */
     uint32_t us_scale;       /* microseconds per pixel. */
@@ -107,7 +108,14 @@ typedef struct ProtoViewMsgInfo {
 
 typedef struct ProtoViewDecoder {
     const char *name;   /* Protocol name. */
-    bool (*decode)(uint8_t *bits, uint64_t numbits, ProtoViewMsgInfo *info);
+    /* The decode function takes a buffer that is actually a bitmap, with
+     * high and low levels represented as 0 and 1. The number of high/low
+     * pulses represented by the bitmap is passed as the 'numbits' argument,
+     * while 'numbytes' represents the total size of the bitmap pointed by
+     * 'bits'. So 'numbytes' is mainly useful to pass as argument to other
+     * functions that perform bit extraction with bound checking, such as
+     * bitmap_get() and so forth. */
+    bool (*decode)(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info);
 } ProtoViewDecoder;
 
 extern RawSamplesBuffer *RawSamples, *DetectedSamples;
@@ -121,8 +129,11 @@ void radio_sleep(ProtoViewApp* app);
 
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
+void reset_current_signal(ProtoViewApp *app);
 void scan_for_signal(ProtoViewApp *app);
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
+void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val);
+void bitmap_invert_bytes_bits(uint8_t *p, uint32_t len);
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
 uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, const char *bits);
 uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t offset, const char *zero_pattern, const char *one_pattern);

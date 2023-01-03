@@ -3,7 +3,8 @@
 
 #include "app.h"
 
-void decode_signal(RawSamplesBuffer *s, uint64_t len);
+bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info);
+void initialize_msg_info(ProtoViewMsgInfo *i);
 
 /* =============================================================================
  * Raw signal detection
@@ -13,6 +14,15 @@ void decode_signal(RawSamplesBuffer *s, uint64_t len);
  * the absolute value is returned. */
 uint32_t duration_delta(uint32_t a, uint32_t b) {
     return a > b ? a - b : b - a;
+}
+
+/* Reset the current signal, so that a new one can be detected. */
+void reset_current_signal(ProtoViewApp *app) {
+    app->signal_bestlen = 0;
+    app->signal_offset = 0;
+    app->signal_decoded = false;
+    raw_samples_reset(DetectedSamples);
+    raw_samples_reset(RawSamples);
 }
 
 /* This function starts scanning samples at offset idx looking for the
@@ -126,15 +136,34 @@ void scan_for_signal(ProtoViewApp *app) {
 
     uint32_t i = 0;
     while (i < copy->total-1) {
+        ProtoViewMsgInfo info;
         uint32_t thislen = search_coherent_signal(copy,i);
-        if (thislen > minlen && thislen > app->signal_bestlen) {
-            app->signal_bestlen = thislen;
-            raw_samples_copy(DetectedSamples,copy);
-            DetectedSamples->idx = (DetectedSamples->idx+i)%
-                                   DetectedSamples->total;
-            FURI_LOG_E(TAG, "Displayed sample updated (%d samples %lu us)",
-                (int)thislen, DetectedSamples->short_pulse_dur);
-            decode_signal(DetectedSamples,thislen);
+
+        /* For messages that are long enough, attempt decoding. */
+        if (thislen > minlen) {
+
+            initialize_msg_info(&info);
+            uint32_t saved_idx = copy->idx; /* Save index, see later. */
+            /* decode_signal() expects the detected signal to start
+             * from index .*/
+            raw_samples_center(copy,i);
+            bool decoded = decode_signal(copy,thislen,&info);
+            copy->idx = saved_idx; /* Restore the index as we are scanning
+                                      the signal in the loop. */
+
+            /* Accept this signal as the new signal if either it's longer
+             * than the previous one, or the previous one was unknown and
+             * this is decoded. */
+            if (thislen > app->signal_bestlen ||
+                (app->signal_decoded == false && decoded))
+            {
+                app->signal_bestlen = thislen;
+                app->signal_decoded = decoded;
+                raw_samples_copy(DetectedSamples,copy);
+                raw_samples_center(DetectedSamples,i);
+                FURI_LOG_E(TAG, "Displayed sample updated (%d samples %lu us)",
+                    (int)thislen, DetectedSamples->short_pulse_dur);
+            }
         }
         i += thislen ? thislen : 1;
     }
@@ -174,6 +203,17 @@ bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos) {
     uint32_t bit = bitpos&7;
     if (byte >= blen) return 0;
     return (b[byte] & (1<<bit)) != 0;
+}
+
+/* We decode bits assuming the first bit we receive is the LSB
+ * (see bitmap_set/get functions). Many devices send data
+ * encoded in the reverse way. */
+void bitmap_invert_bytes_bits(uint8_t *p, uint32_t len) {
+    for (uint32_t j = 0; j < len*8; j += 8) {
+        bool bits[8];
+        for (int i = 0; i < 8; i++) bits[i] = bitmap_get(p,len,j+i);
+        for (int i = 0; i < 8; i++) bitmap_set(p,len,j+i,bits[7-i]);
+    }
 }
 
 /* Return true if the specified sequence of bits, provided as a string in the
@@ -267,23 +307,27 @@ uint32_t convert_signal_to_bits(uint8_t *b, uint32_t blen, RawSamplesBuffer *s, 
  * representation. In such a case I could use "10??" and "01??".
  *
  * The function returns the number of bits converted. It will stop as soon
- * as it finds a pattern that does not match zero or one patterns. The
- * decoding starts at the specified offset 'off'. */
+ * as it finds a pattern that does not match zero or one patterns, or when
+ * the end of the bitmap pointed by 'bits' is reached (the length is
+ * specified in bytes by the caller, via the 'len' parameters).
+ *
+ * The decoding starts at the specified offset (in bits) 'off'. */
 uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, const char *zero_pattern, const char *one_pattern)
 {
     uint32_t decoded = 0; /* Number of bits extracted. */
+    len *= 8; /* Convert bytes to bits. */
     while(off < len) {
-        bool level;
+        bool bitval;
         if (bitmap_match_bits(bits,len,off,zero_pattern)) {
-            level = true;
+            bitval = false;
             off += strlen(zero_pattern);
         } else if (bitmap_match_bits(bits,len,off,one_pattern)) {
-            level = false;
-            off += strlen(zero_pattern);
+            bitval = true;
+            off += strlen(one_pattern);
         } else {
             break;
         }
-        bitmap_set(buf,buflen,decoded++,level);
+        bitmap_set(buf,buflen,decoded++,bitval);
         if (decoded/8 == buflen) break; /* No space left on target buffer. */
     }
     return decoded;
@@ -309,8 +353,9 @@ void initialize_msg_info(ProtoViewMsgInfo *i) {
 
 /* This function is called when a new signal is detected. It converts it
  * to a bitstream, and the calls the protocol specific functions for
- * decoding. */
-void decode_signal(RawSamplesBuffer *s, uint64_t len) {
+ * decoding. If the signal was decoded correctly by some protocol, true
+ * is returned. Otherwise false is returned. */
+bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
     uint32_t bitmap_bits_size = 4096*8;
     uint32_t bitmap_size = bitmap_bits_size/8;
 
@@ -328,28 +373,29 @@ void decode_signal(RawSamplesBuffer *s, uint64_t len) {
             str[j] = bitmap_get(bitmap,bitmap_size,j) ? '1' : '0';
         }
         str[j] = 0;
-        FURI_LOG_E(TAG, "%lu bits decoded: %s", bits, str);
+        FURI_LOG_E(TAG, "%lu bits sampled: %s", bits, str);
         free(str);
     }
 
     /* Try all the decoders available. */
     int j = 0;
-    ProtoViewMsgInfo info;
-    initialize_msg_info(&info);
 
+    bool decoded = false;
     while(Decoders[j]) {
         FURI_LOG_E(TAG, "Calling decoder %s", Decoders[j]->name);
-        if (Decoders[j]->decode(bitmap,bits,&info)) {
+        if (Decoders[j]->decode(bitmap,bitmap_size,bits,info)) {
             FURI_LOG_E(TAG, "Message detected by %s", Decoders[j]->name);
+            decoded = true;
             break;
         }
         j++;
     }
 
-    if (Decoders[j] == NULL) {
+    if (!decoded) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(TAG, "Decoded %s, raw=%s", info.name, info.raw);
+        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s]", info->name, info->raw, info->info1, info->info2, info->info3);
     }
     free(bitmap);
+    return decoded;
 }

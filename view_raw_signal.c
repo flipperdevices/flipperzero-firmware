@@ -80,10 +80,7 @@ void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
     } else if (input.type == InputTypeShort) {
         if (input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
-            app->signal_bestlen = 0;
-            app->signal_offset = 0;
-            raw_samples_reset(DetectedSamples);
-            raw_samples_reset(RawSamples);
+            reset_current_signal(app);
         } else if (input.key == InputKeyDown) {
             /* Rescaling. The set becomes finer under 50us per pixel. */
             uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;

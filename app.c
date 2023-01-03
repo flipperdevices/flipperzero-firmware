@@ -65,6 +65,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
+    app->signal_decoded = false;
     app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
 
