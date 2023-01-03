@@ -23,7 +23,7 @@ jobs:
 
       - name: Bump Version and Push Tag
         id: tag_version
-        uses: mathieudutour/github-tag-action@v6.0
+        uses: mathieudutour/github-tag-action@v6.1
         with:
           release_branches: master
           github_token: ${{ secrets.GITHUB_TOKEN }}
