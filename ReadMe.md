@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0102-1515-0.74.3-afaa0ea](https://www.patreon.com/posts/76695955)
+## Latest Updates - [PATREON: Latest Release RM0103-1115-0.74.3-073fbc1](https://www.patreon.com/posts/76734881)
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-02 04:13 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-02 04:13 EST`
@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - Passport updated to support more stuff. [Thanks to ESurge](https://github.com/ESurge/)
+- [ISO15693: update to latest sources (By g3gg0)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/484)
 
 <a name="release">
 
