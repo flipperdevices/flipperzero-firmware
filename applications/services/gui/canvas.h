@@ -182,7 +182,7 @@ void canvas_draw_str_aligned(
  *
  * @return     width in pixels.
  */
-uint16_t canvas_string_width(const Canvas* canvas, const char* str);
+uint16_t canvas_string_width(Canvas* canvas, const char* str);
 
 /** Get glyph width
  *
@@ -191,7 +191,7 @@ uint16_t canvas_string_width(const Canvas* canvas, const char* str);
  *
  * @return     width in pixels
  */
-uint8_t canvas_glyph_width(const Canvas* canvas, char symbol);
+uint8_t canvas_glyph_width(Canvas* canvas, char symbol);
 
 /** Draw bitmap picture at position defined by x,y.
  *
