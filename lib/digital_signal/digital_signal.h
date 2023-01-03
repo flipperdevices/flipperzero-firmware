@@ -5,8 +5,6 @@
 #include <stdbool.h>
 
 #include <furi_hal_gpio.h>
-#include <stm32wbxx_ll_dma.h>
-#include <stm32wbxx_ll_tim.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,31 +16,20 @@ extern "C" {
 #define DIGITAL_SIGNAL_NS(x) (x * 100UL)
 #define DIGITAL_SIGNAL_PS(x) (x / 10UL)
 
-typedef struct {
+/* using an anonymous type for the internals */
+typedef struct DigitalSignalInternals DigitalSignalInternals;
+
+/* and a public one for accessing user-side fields */
+typedef struct DigitalSignal {
     bool start_level;
     uint32_t edge_cnt;
     uint32_t edges_max_cnt;
     uint32_t* edge_timings;
-    uint32_t* reload_reg_buff;
-    uint32_t reload_reg_entries;
-    uint32_t reload_reg_remainder;
-    uint32_t gpio_buff[2];
-    const GpioPin* gpio;
-    LL_DMA_InitTypeDef dma_config_gpio;
-    LL_DMA_InitTypeDef dma_config_timer;
+    uint32_t* reload_reg_buff; /* internal, but used by unit tests */
+    DigitalSignalInternals* internals;
 } DigitalSignal;
 
-typedef struct {
-    uint8_t signals_size;
-    bool bake;
-    uint32_t sequence_used;
-    uint32_t sequence_size;
-    DigitalSignal** signals;
-    bool* signals_prolonged;
-    uint8_t* sequence;
-    const GpioPin* gpio;
-    uint32_t send_time;
-} DigitalSequence;
+typedef struct DigitalSequence DigitalSequence;
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt);
 
@@ -54,7 +41,7 @@ void digital_signal_add_pulse(DigitalSignal* signal, uint32_t ticks, bool level)
 
 bool digital_signal_append(DigitalSignal* signal_a, DigitalSignal* signal_b);
 
-void digital_signal_prepare(DigitalSignal* signal);
+void digital_signal_prepare_arr(DigitalSignal* signal);
 
 bool digital_signal_get_start_level(DigitalSignal* signal);
 

@@ -1378,6 +1378,8 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
 
         if(dev->format != NfcDeviceSaveFormatNfcV) {
+            // Write ATQA, SAK
+            if(!flipper_format_write_comment_cstr(file, "ISO14443 specific fields")) break;
             // Save ATQA in MSB order for correct companion apps display
             uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
             if(!flipper_format_write_hex(file, "ATQA", atqa, 2)) break;

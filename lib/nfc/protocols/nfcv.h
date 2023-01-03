@@ -16,7 +16,7 @@ extern "C" {
 #define NFCV_RESP_SUBC1_PULSE_32 (1.0f / (NFCV_FC / 32) / 2.0f) /*  1.1799 µs */
 #define NFCV_RESP_SUBC1_UNMOD_256 (256.0f / NFCV_FC) /* 18.8791 µs */
 
-#define PULSE_DURATION_NS (128.0f * 1000000000.0f / NFCV_FC) /* ns */
+#define PULSE_DURATION_NS (128.0f * 1000000000.0f / NFCV_FC)
 
 #define DIGITAL_SIGNAL_UNIT_S (100000000000.0f)
 #define DIGITAL_SIGNAL_UNIT_US (100000.0f)
@@ -24,6 +24,11 @@ extern "C" {
 #define NFCV_TOTAL_BLOCKS_MAX 256
 #define NFCV_BLOCK_SIZE 4
 #define NFCV_MAX_DUMP_SIZE (NFCV_BLOCK_SIZE * NFCV_TOTAL_BLOCKS_MAX)
+#define NFCV_MAX_FRAME_SIZE 64
+#define NFCV_LOG_STR_LEN 128
+
+// #define NFCV_DIAGNOSTIC_DUMPS
+// #define NFCV_DIAGNOSTIC_DUMP_SIZE 128
 
 /* helpers to calculate the send time based on DWT->CYCCNT */
 #define NFCV_FDT_USEC(usec) (usec * 64)
@@ -36,10 +41,15 @@ extern "C" {
 #define NFCV_FRAME_STATE_EOF 4
 #define NFCV_FRAME_STATE_RESET 5
 
+/* sequences for every section of a frame */
 #define NFCV_SIG_SOF 0
 #define NFCV_SIG_BIT0 1
 #define NFCV_SIG_BIT1 2
 #define NFCV_SIG_EOF 3
+#define NFCV_SIG_LOW_SOF 4
+#define NFCV_SIG_LOW_BIT0 5
+#define NFCV_SIG_LOW_BIT1 6
+#define NFCV_SIG_LOW_EOF 7
 
 /* ISO15693 command codes */
 #define ISO15693_INVENTORY 0x01
@@ -109,15 +119,18 @@ typedef union {
 } NfcVSubtypeData;
 
 typedef struct {
-    PulseReader* reader_signal;
-    DigitalSignal* nfcv_resp_pulse_32;
-    DigitalSignal* nfcv_resp_unmod;
+    DigitalSignal* nfcv_resp_sof;
     DigitalSignal* nfcv_resp_one;
     DigitalSignal* nfcv_resp_zero;
-    DigitalSignal* nfcv_resp_sof;
     DigitalSignal* nfcv_resp_eof;
-    DigitalSignal* nfcv_resp_unmod_256;
-    DigitalSignal* nfcv_resp_unmod_768;
+} NfcVEmuAirSignals;
+
+typedef struct {
+    PulseReader* reader_signal;
+    DigitalSignal* nfcv_resp_pulse; /* pulse length, fc/32 */
+    DigitalSignal* nfcv_resp_unmod; /* unmodulated length 256/fc */
+    NfcVEmuAirSignals signals_high;
+    NfcVEmuAirSignals signals_low;
     DigitalSequence* nfcv_signal;
 } NfcVEmuAir;
 
@@ -130,6 +143,7 @@ typedef bool (*NfcVEmuProtocolFilter)(
     FuriHalNfcDevData* nfc_data,
     void* nfcv_data);
 
+/* the default ISO15693 handler context */
 typedef struct {
     uint8_t flags; /* ISO15693-3 flags of the header as specified */
     uint8_t command; /* ISO15693-3 command at offset 1 as specified */
@@ -138,7 +152,7 @@ typedef struct {
     uint8_t address_offset; /* ISO15693-3 offset of the address in frame, if addressed is set */
     uint8_t payload_offset; /* ISO15693-3 offset of the payload in frame */
 
-    uint8_t response_buffer[128]; /* pre-allocated response buffer */
+    uint8_t response_buffer[NFCV_MAX_FRAME_SIZE]; /* pre-allocated response buffer */
     NfcVSendFlags response_flags; /* flags to use when sending response */
     uint32_t send_time; /* timestamp when to send the response */
 
@@ -154,6 +168,8 @@ typedef struct {
     uint8_t block_size;
     uint8_t data[NFCV_MAX_DUMP_SIZE];
 
+    bool modified;
+
     /* specfic variant infos */
     NfcVSubtype sub_type;
     NfcVSubtypeData sub_data;
@@ -162,17 +178,16 @@ typedef struct {
     /* precalced air level data */
     NfcVEmuAir emu_air;
 
-    uint8_t* frame; /* ISO15693-2 incoming raw data from air layer */
+    uint8_t frame[NFCV_MAX_FRAME_SIZE]; /* ISO15693-2 incoming raw data from air layer */
     uint8_t frame_length; /* ISO15693-2 length of incoming data */
     uint32_t eof_timestamp; /* ISO15693-2 EOF timestamp, read from DWT->CYCCNT */
 
     /* handler for the protocol layer as specified in ISO15693-3 */
     NfcVEmuProtocolHandler emu_protocol_handler;
     void* emu_protocol_ctx;
-
     /* runtime data */
-    char last_command[128];
-    char error[32];
+    char last_command[NFCV_LOG_STR_LEN];
+    char error[NFCV_LOG_STR_LEN];
 } NfcVData;
 
 typedef struct {
