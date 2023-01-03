@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - Passport updated to support more stuff. [Thanks to ESurge](https://github.com/ESurge/)
 - [ISO15693: update to latest sources (By g3gg0)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/484)
+- Unleashed: [Add 350Mhz to default SubGHz range](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e99d57785d192948ff8cece37e4978b83cf5dde1#diff-f3daad7a0f634a8f5a5ef177bd1d0338dcb3f6d918c61c76910e4f40916ebe04)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD` [support for BME680 by g3gg0](https://github.com/quen0n/unitemp-flipperzero/pull/1)
 - Added: BadUSB: Assets for RickRoll, RogueMaster GitHub and RogueMaster Patreon
 - Added: NFC: Assets for RogueMaster GitHub and RogueMaster Patreon
