@@ -16,6 +16,7 @@ env.Append(
         Dir("u8g2"),
         Dir("update_util"),
         Dir("print"),
+        Dir("pulse_reader"),
     ],
     SDK_HEADERS=[
         File("one_wire/one_wire_host_timing.h"),
@@ -84,6 +85,7 @@ libs = env.BuildModules(
         "mbedtls",
         "subghz",
         "nfc",
+        "pulse_reader",
         "appframe",
         "misc",
         "lfrfid",

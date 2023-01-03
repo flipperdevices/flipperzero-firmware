@@ -217,6 +217,10 @@ bool slix_generic_protocol_filter(
             break;
         }
 
+        if(!password) {
+            break;
+        }
+
         for(int pos = 0; pos < 4; pos++) {
             password_rcv[pos] = password_xored[3 - pos] ^ rand[pos % 2];
         }
@@ -232,6 +236,7 @@ bool slix_generic_protocol_filter(
                 break;
             case SLIX_PASS_PRIVACY:
                 slix->privacy = false;
+                nfcv_data->modified = true;
                 break;
             case SLIX_PASS_DESTROY:
                 FURI_LOG_D(TAG, "Pooof! Got destroyed");
