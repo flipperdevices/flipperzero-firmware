@@ -18,13 +18,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster)
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
-- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, DBZ, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, 420, DBZ, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `roguemaster.eth` or `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0103-1115-0.74.3-073fbc1](https://www.patreon.com/posts/76734881) 
+## Latest Updates - [PATREON: Latest Release RM0103-1602-0.74.3-413f87f](https://www.patreon.com/posts/76747898) 
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-03 14:22 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-03 14:22 EST`
@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD` [support for BME680 by g3gg0](https://github.com/quen0n/unitemp-flipperzero/pull/1)
 - Added: BadUSB: Assets for RickRoll, RogueMaster GitHub and RogueMaster Patreon
 - Added: NFC: Assets for RogueMaster GitHub and RogueMaster Patreon
+- [New Patreon Build: 420](https://www.patreon.com/posts/76747898)
 
 <a name="release">
 
