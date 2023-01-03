@@ -1,9 +1,32 @@
+#include "pulse_reader.h"
+
 #include <limits.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_gpio.h>
 
-#include "pulse_reader.h"
+#include <stm32wbxx_ll_dma.h>
+#include <stm32wbxx_ll_dmamux.h>
+#include <stm32wbxx_ll_tim.h>
+#include <stm32wbxx_ll_exti.h>
+
+struct PulseReader {
+    uint32_t* timer_buffer;
+    uint32_t* gpio_buffer;
+    uint32_t size;
+    uint32_t pos;
+    uint32_t timer_value;
+    uint32_t gpio_value;
+    uint32_t gpio_mask;
+    uint32_t unit_multiplier;
+    uint32_t unit_divider;
+    uint32_t bit_time;
+    uint32_t dma_channel;
+    const GpioPin* gpio;
+    GpioPull pull;
+    LL_DMA_InitTypeDef dma_config_timer;
+    LL_DMA_InitTypeDef dma_config_gpio;
+};
 
 #define GPIO_PIN_MAP(pin, prefix)               \
     (((pin) == (LL_GPIO_PIN_0))  ? prefix##0 :  \
@@ -31,6 +54,7 @@ PulseReader* pulse_reader_alloc(const GpioPin* gpio, uint32_t size) {
     signal->gpio_buffer = malloc(size * sizeof(uint32_t));
     signal->dma_channel = LL_DMA_CHANNEL_4;
     signal->gpio = gpio;
+    signal->pull = GpioPullNo;
     signal->size = size;
     signal->timer_value = 0;
     signal->pos = 0;
@@ -88,7 +112,17 @@ void pulse_reader_set_bittime(PulseReader* signal, uint32_t bit_time) {
     signal->bit_time = bit_time;
 }
 
+void pulse_reader_set_pull(PulseReader* signal, GpioPull pull) {
+    signal->pull = pull;
+}
+
 void pulse_reader_free(PulseReader* signal) {
+    furi_assert(signal);
+
+    if(!signal) {
+        return;
+    }
+
     free(signal->timer_buffer);
     free(signal->gpio_buffer);
     free(signal);
@@ -105,6 +139,7 @@ void pulse_reader_stop(PulseReader* signal) {
     LL_DMA_DisableChannel(DMA1, signal->dma_channel + 1);
     LL_DMAMUX_DisableRequestGen(NULL, LL_DMAMUX_REQ_GEN_0);
     LL_TIM_DisableCounter(TIM2);
+    furi_hal_gpio_init_simple(signal->gpio, GpioModeAnalog);
 }
 
 void pulse_reader_start(PulseReader* signal) {
@@ -133,13 +168,13 @@ void pulse_reader_start(PulseReader* signal) {
 
     /* we need the EXTI to be configured as interrupt generating line, but no ISR registered */
     furi_hal_gpio_init_ex(
-        signal->gpio, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedVeryHigh, GpioAltFnUnused);
+        signal->gpio, GpioModeInterruptRiseFall, signal->pull, GpioSpeedVeryHigh, GpioAltFnUnused);
 
     /* capture current timer */
     signal->pos = 0;
-    signal->start_level = furi_hal_gpio_read(signal->gpio);
     signal->timer_value = TIM2->CNT;
     signal->gpio_mask = signal->gpio->pin;
+    signal->gpio_value = signal->gpio->port->IDR & signal->gpio_mask;
 
     /* now set up DMA with these settings */
     LL_DMA_Init(DMA1, signal->dma_channel, &signal->dma_config_timer);
