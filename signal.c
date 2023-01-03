@@ -241,7 +241,13 @@ uint32_t convert_signal_to_bits(uint8_t *b, uint32_t blen, RawSamplesBuffer *s, 
         uint32_t rest = dur % rate;    /* How much we are left with. */
         if (rest > rate/2) numbits++;  /* There is another one. */
 
-        FURI_LOG_E(TAG, "%lu converted into %lu (%d) bits", dur,numbits,(int)level);
+        /* Limit how much a single sample can spawn. There are likely no
+         * protocols doing such long pulses when the rate is low. */
+        if (numbits > 1024) numbits = 1024;
+
+        if (0) /* Super verbose, so not under the DEBUG_MSG define. */
+            FURI_LOG_E(TAG, "%lu converted into %lu (%d) bits",
+            dur,numbits,(int)level);
 
         /* If the signal is too short, let's claim it an interference
          * and ignore it completely. */
