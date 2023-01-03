@@ -1,6 +1,7 @@
 #include "digital_signal.h"
 
 #include <furi.h>
+#include <furi_hal.h>
 #include <furi_hal_resources.h>
 #include <math.h>
 
@@ -17,6 +18,7 @@ struct DigitalSequence {
     uint8_t* sequence;
     const GpioPin* gpio;
     uint32_t send_time;
+    bool send_time_active;
 };
 
 struct DigitalSignalInternals {
@@ -31,7 +33,7 @@ struct DigitalSignalInternals {
 #define TAG "DigitalSignal"
 
 #define F_TIM (64000000.0)
-#define T_TIM 1562 /* 15.625 ns *100     */
+#define T_TIM 1562 /* 15.625 ns *100 */
 #define T_TIM_DIV2 781 /* 15.625 ns / 2 *100 */
 
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
@@ -285,9 +287,12 @@ void digital_sequence_alloc_sequence(DigitalSequence* sequence, uint32_t size) {
     sequence->sequence_size = size;
     sequence->sequence = malloc(sequence->sequence_size);
     sequence->send_time = 0;
+    sequence->send_time_active = false;
 }
 
 DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
+    furi_assert(gpio);
+	
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
     sequence->gpio = gpio;
@@ -327,7 +332,10 @@ void digital_sequence_set_signal(
 }
 
 void digital_sequence_set_sendtime(DigitalSequence* sequence, uint32_t send_time) {
+    furi_assert(sequence);
+	
     sequence->send_time = send_time;
+    sequence->send_time_active = true;
 }
 
 void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
@@ -344,23 +352,40 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
 
 static void digital_signal_update_dma(DigitalSignal* signal) {
     /* keep them prepared in registers so there is less delay when writing */
+    register bool restart_needed = false;
     register volatile uint16_t len = signal->internals->reload_reg_entries;
     register volatile uint32_t addr = (uint32_t)signal->reload_reg_buff;
 
-    /* if transfer was already active, wait till DMA is done and the last timer ticks are running */
-    while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
+    /* first make sure it will still count down, else we will risk waiting infinitely */
+    const uint32_t wait_ms = 10;
+    const uint32_t wait_ticks = wait_ms * 1000 * furi_hal_cortex_instructions_per_microsecond();
+    uint16_t prev_remain = LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2);
+    uint32_t prev_timer = DWT->CYCCNT;
+
+    while(prev_remain == LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
+        if(DWT->CYCCNT - prev_timer > wait_ticks) {
+            restart_needed = true;
+			break;
+        }
+    }
+
+    if(!restart_needed) {
+        /* if transfer was already active, wait till DMA is done and the last timer ticks are running */
+        while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
+        }
     }
 
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_2, len);
     LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_2, addr);
     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
+
+    if(restart_needed) {
+        LL_TIM_GenerateEvent_UPDATE(TIM2);
+    }
 }
 
 static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSignal* signal) {
-    furi_assert(sequence);
-    furi_assert(signal);
-
     /* the first iteration has to set up the whole machinery */
     if(!LL_DMA_IsEnabledChannel(DMA1, LL_DMA_CHANNEL_1)) {
         if(!digital_signal_setup_dma(signal)) {
@@ -370,13 +395,9 @@ static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSigna
         digital_signal_setup_timer();
 
         /* if the send time is specified, wait till the core timer passed beyond that time */
-        if(sequence->send_time != 0) {
-            while(true) {
-                uint32_t delta = sequence->send_time - DWT->CYCCNT;
-                /* yeah, it's making use of underflows... */
-                if(delta > 0x80000000) {
-                    break;
-                }
+        if(sequence->send_time_active) {
+            sequence->send_time_active = false;
+            while(sequence->send_time - DWT->CYCCNT < 0x80000000) {
             }
         }
         digital_signal_start_timer();
@@ -389,6 +410,8 @@ static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSigna
 }
 
 DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
+    furi_assert(sequence);
+	
     uint32_t edges = 0;
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
@@ -468,6 +491,7 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     }
     FURI_CRITICAL_EXIT();
 
+    /* wait until last dma transaction was finished */
     while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
     }
 
