@@ -1,22 +1,5 @@
 #include "../app.h"
 
-#if 0
-/* Invert byte ordering. */
-static void invert_nibbles(uint8_t *p, uint32_t len) {
-    len *= 8;
-    for (uint32_t j = 0; j < len; j += 4) {
-        bool b0 = bitmap_get(p,len,j);
-        bool b1 = bitmap_get(p,len,j+1);
-        bool b2 = bitmap_get(p,len,j+2);
-        bool b3 = bitmap_get(p,len,j+3);
-        bitmap_set(p,len,j,b3);
-        bitmap_set(p,len,j+1,b2);
-        bitmap_set(p,len,j+2,b1);
-        bitmap_set(p,len,j+3,b0);
-    }
-}
-#endif
-
 static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
     if (numbits < 32) return false;
     const char *sync_pattern = "01100110" "01100110" "10010110" "10010110";
@@ -25,30 +8,6 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     FURI_LOG_E(TAG, "Oregon2 prelude+sync found");
 
     off += 32; /* Skip preamble. */
-
-    FURI_LOG_E(TAG, "Bits: %d%d%d%d",
-        bitmap_get(bits,numbytes,off),
-        bitmap_get(bits,numbytes,off+1),
-        bitmap_get(bits,numbytes,off+2),
-        bitmap_get(bits,numbytes,off+3));
-
-    FURI_LOG_E(TAG, "Bits: %d%d%d%d",
-        bitmap_get(bits,numbytes,off+4),
-        bitmap_get(bits,numbytes,off+5),
-        bitmap_get(bits,numbytes,off+6),
-        bitmap_get(bits,numbytes,off+7));
-
-    FURI_LOG_E(TAG, "Bits: %d%d%d%d",
-        bitmap_get(bits,numbytes,off+8),
-        bitmap_get(bits,numbytes,off+9),
-        bitmap_get(bits,numbytes,off+10),
-        bitmap_get(bits,numbytes,off+11));
-
-    FURI_LOG_E(TAG, "Bits: %d%d%d%d",
-        bitmap_get(bits,numbytes,off+12),
-        bitmap_get(bits,numbytes,off+13),
-        bitmap_get(bits,numbytes,off+14),
-        bitmap_get(bits,numbytes,off+15));
 
     uint8_t buffer[8];
     uint32_t decoded =
