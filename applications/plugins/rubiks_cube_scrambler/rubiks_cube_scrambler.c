@@ -9,7 +9,8 @@
 #include "furi_hal_random.h"
 
 int scrambleStarted = 0;
-char scramble[100] = {0};
+char scramble_start[100] = {0};
+char scramble_end[100] = {0};
 int notifications_enabled = 0;
 
 static void success_vibration() {
@@ -30,15 +31,19 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         genScramble();
         scrambleReplace();
         valid();
-        strcpy(scramble, printData());
+        strcpy(scramble_start, printData());
         if(notifications_enabled) {
             success_vibration();
         }
+        genScramble();
+        scrambleReplace();
+        valid();
+        strcpy(scramble_end, printData());
         scrambleStarted = 0;
     }
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 33, AlignCenter, AlignCenter, scramble);
-
+    canvas_draw_str_aligned(canvas, 64, 28, AlignCenter, AlignCenter, scramble_start);
+    canvas_draw_str_aligned(canvas, 64, 38, AlignCenter, AlignCenter, scramble_end);
     elements_button_center(canvas, "New");
 
     elements_button_left(canvas, notifications_enabled ? "On" : "Off");

@@ -101,12 +101,24 @@ int getRand(int upr, int lwr) {
     randNum = (rand() % (upr - lwr + 1)) + lwr;
     return randNum;
 }
-
+// Let this function be here for now till I find out what is causing the extra space bug in the scrambles
+void remove_double_spaces(char* str) {
+    int i, j;
+    int len = strlen(str);
+    for(i = 0, j = 0; i < len; i++, j++) {
+        if(str[i] == ' ' && str[i + 1] == ' ') {
+            i++;
+        }
+        str[j] = str[i];
+    }
+    str[j] = '\0';
+}
 char* printData() {
     static char result[RESULT_SIZE];
     int offset = 0;
     for(int loop = 0; loop < SLEN; loop++) {
         offset += snprintf(result + offset, RESULT_SIZE - offset, "%s ", a.mainScramble[loop]);
     }
+    remove_double_spaces(result);
     return result;
 }
