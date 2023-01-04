@@ -40,6 +40,7 @@ typedef enum {
 /* Currently active view. */
 typedef enum {
     ViewRawPulses,
+    ViewInfo,
     ViewFrequencySettings,
     ViewModulationSettings,
     ViewLast, /* Just a sentinel to wrap around. */
@@ -67,15 +68,15 @@ typedef struct ProtoViewTxRx ProtoViewTxRx;
 /* This stucture is filled by the decoder for specific protocols with the
  * informations about the message. ProtoView will display such information
  * in the message info view. */
-#define PROTOVIEW_MSG_STR_LEN 16
+#define PROTOVIEW_MSG_STR_LEN 32
 typedef struct ProtoViewMsgInfo {
     char name[PROTOVIEW_MSG_STR_LEN]; /* Protocol name and version. */
     char raw[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific raw representation.*/
     /* The following is what the decoder wants to show to user. Each decoder
      * can use the number of fileds it needs. */
-    char info1[16];     /* Protocol specific decoded string, line 1. */
-    char info2[16];     /* Protocol specific decoded string, line 2. */
-    char info3[16];     /* Protocol specific decoded string, line 3. */
+    char info1[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 1. */
+    char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
+    char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
     uint64_t len;       /* Bits consumed from the stream. */
 } ProtoViewMsgInfo;
 
@@ -144,6 +145,8 @@ void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);
 void process_input_raw_pulses(ProtoViewApp *app, InputEvent input);
 void render_view_settings(Canvas *const canvas, ProtoViewApp *app);
 void process_input_settings(ProtoViewApp *app, InputEvent input);
+void render_view_info(Canvas *const canvas, ProtoViewApp *app);
+void process_input_info(ProtoViewApp *app, InputEvent input);
 
 /* ui.c */
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);

@@ -54,6 +54,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint32_t decoded =
         convert_from_line_code(buffer,sizeof(buffer),bits,numbytes,off,"1001","0110");
     FURI_LOG_E(TAG, "Oregon2 decoded bits: %lu", decoded);
+
     if (decoded < 11*4) return false; /* Minimum len to extract some data. */
 
     char temp[3] = {0}, deviceid[2] = {0}, hum[2] = {0};
@@ -80,12 +81,14 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     }
 
     snprintf(info->name,sizeof(info->name),"%s","Oregon v2.1");
-    snprintf(info->raw,sizeof(info->raw),"%08llX", *((uint64_t*)buffer));
-    snprintf(info->info1,sizeof(info->info2),"ID %02X%02X",
+    /* The following line crashes the Flipper because of broken
+     * snprintf() implementation. */
+    if (0) snprintf(info->raw,sizeof(info->raw),"%08llX", *((uint64_t*)buffer));
+    snprintf(info->info1,sizeof(info->info1),"Sensor ID %02X%02X",
         deviceid[0], deviceid[1]);
-    snprintf(info->info2,sizeof(info->info1),"Temp %d%d.%d",
+    snprintf(info->info2,sizeof(info->info2),"Temperature %d%d.%d",
         temp[0],temp[1],temp[2]);
-    snprintf(info->info3,sizeof(info->info1),"Humidity %d%d",
+    snprintf(info->info3,sizeof(info->info3),"Humidity %d%d",
         hum[0],hum[1]);
     return true;
 }

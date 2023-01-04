@@ -26,6 +26,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     /* Call who is in charge right now. */
     switch(app->current_view) {
     case ViewRawPulses: render_view_raw_pulses(canvas,app); break;
+    case ViewInfo: render_view_info(canvas,app); break;
     case ViewFrequencySettings:
     case ViewModulationSettings:
         render_view_settings(canvas,app); break;
@@ -188,6 +189,9 @@ int32_t protoview_app_entry(void* p) {
                 switch(app->current_view) {
                 case ViewRawPulses:
                     process_input_raw_pulses(app,input);
+                    break;
+                case ViewInfo:
+                    process_input_info(app,input);
                     break;
                 case ViewFrequencySettings:
                 case ViewModulationSettings:

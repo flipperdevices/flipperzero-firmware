@@ -7,7 +7,6 @@
  * this are logically two different views, and only one of the settings
  * will be highlighted. */
 void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
-    UNUSED(app);
     canvas_set_font(canvas, FontPrimary);
     if (app->current_view == ViewFrequencySettings)
         canvas_draw_str_with_border(canvas,1,10,"Frequency",ColorWhite,ColorBlack);
