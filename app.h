@@ -49,6 +49,7 @@ typedef enum {
 typedef struct {
     const char *name;
     FuriHalSubGhzPreset preset;
+    uint8_t *custom;
 } ProtoViewModulation;
 
 extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
