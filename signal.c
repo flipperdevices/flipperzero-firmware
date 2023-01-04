@@ -399,12 +399,12 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
 
     bool decoded = false;
     while(Decoders[j]) {
-        FURI_LOG_E(TAG, "Calling decoder %s", Decoders[j]->name);
-        if (Decoders[j]->decode(bitmap,bitmap_size,bits,info)) {
-            FURI_LOG_E(TAG, "Message detected by %s", Decoders[j]->name);
-            decoded = true;
-            break;
-        }
+        uint32_t start_time = furi_get_tick();
+        decoded = Decoders[j]->decode(bitmap,bitmap_size,bits,info);
+        uint32_t delta = furi_get_tick() - start_time;
+        FURI_LOG_E(TAG, "Decoder %s took %lu ms",
+            Decoders[j]->name, (unsigned long)delta);
+        if (decoded) break;
         j++;
     }
 
