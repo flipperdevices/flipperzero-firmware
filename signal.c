@@ -134,19 +134,20 @@ void scan_for_signal(ProtoViewApp *app) {
                                        12 samples it's very easy to mistake
                                        noise for signal. */
 
+    ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
     uint32_t i = 0;
+
     while (i < copy->total-1) {
         uint32_t thislen = search_coherent_signal(copy,i);
 
         /* For messages that are long enough, attempt decoding. */
         if (thislen > minlen) {
-            ProtoViewMsgInfo info;
-            initialize_msg_info(&info);
+            initialize_msg_info(info);
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
             /* decode_signal() expects the detected signal to start
              * from index .*/
             raw_samples_center(copy,i);
-            bool decoded = decode_signal(copy,thislen,&info);
+            bool decoded = decode_signal(copy,thislen,info);
             copy->idx = saved_idx; /* Restore the index as we are scanning
                                       the signal in the loop. */
 
@@ -156,7 +157,7 @@ void scan_for_signal(ProtoViewApp *app) {
             if (thislen > app->signal_bestlen ||
                 (app->signal_decoded == false && decoded))
             {
-                app->signal_info = info;
+                app->signal_info = *info;
                 app->signal_bestlen = thislen;
                 app->signal_decoded = decoded;
                 raw_samples_copy(DetectedSamples,copy);
@@ -168,6 +169,7 @@ void scan_for_signal(ProtoViewApp *app) {
         i += thislen ? thislen : 1;
     }
     raw_samples_free(copy);
+    free(info);
 }
 
 /* =============================================================================
@@ -240,6 +242,19 @@ uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, const ch
     for (uint32_t j = startpos; j < endpos; j++)
         if (bitmap_match_bits(b,blen,j,bits)) return j;
     return BITMAP_SEEK_NOT_FOUND;
+}
+
+/* Set the pattern 'pat' into the bitmap 'b' of max length 'blen' bytes.
+ * The pattern is given as a string of 0s and 1s characters, like "01101001".
+ * This function is useful in order to set the test vectors in the protocol
+ * decoders, to see if the decoding works regardless of the fact we are able
+ * to actually receive a given signal. */
+void bitmap_set_pattern(uint8_t *b, uint32_t blen, const char *pat) {
+    uint32_t i = 0;
+    while(pat[i]) {
+        bitmap_set(b,blen,i,pat[i] == '1');
+        i++;
+    }
 }
 
 /* Take the raw signal and turn it into a sequence of bits inside the
@@ -338,10 +353,12 @@ uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, ui
 
 extern ProtoViewDecoder Oregon2Decoder;
 extern ProtoViewDecoder B4B1Decoder;
+extern ProtoViewDecoder RenaultTPMSDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
     &B4B1Decoder,           /* PT, SC, ... 24 bits remotes. */
+    &RenaultTPMSDecoder,    /* Renault TPMS. */
     NULL
 };
 

@@ -1,4 +1,6 @@
-/* This line code is used in many remotes such as Princeton chips
+/* PT/SC remotes. Usually 443.92 Mhz OOK.
+ *
+ * This line code is used in many remotes such as Princeton chips
  * named PT<number>, Silian Microelectronics SC5262 and others.
  * Basically every 4 pulsee represent a bit, where 1000 means 0, and
  * 1110 means 1. Usually we can read 24 bits of data.

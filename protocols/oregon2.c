@@ -1,3 +1,9 @@
+/* Oregon remote termometers. Usually 443.92 Mhz OOK.
+ *
+ * The protocol is described here:
+ * https://wmrx00.sourceforge.net/Arduino/OregonScientific-RF-Protocols.pdf
+ * This implementation is not very complete. */
+
 #include "../app.h"
 
 static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
@@ -5,7 +11,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     const char *sync_pattern = "01100110" "01100110" "10010110" "10010110";
     uint64_t off = bitmap_seek_bits(bits,numbytes,0,sync_pattern);
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
-    FURI_LOG_E(TAG, "Oregon2 prelude+sync found");
+    FURI_LOG_E(TAG, "Oregon2 preamble+sync found");
 
     off += 32; /* Skip preamble. */
 
@@ -23,7 +29,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
                   bitmap_get(buffer,8,j+1) << 1 |
                   bitmap_get(buffer,8,j+2) << 2 |
                   bitmap_get(buffer,8,j+3) << 3);
-        FURI_LOG_E(TAG, "Not inverted nibble[%d]: %x", j/4, (unsigned int)nib[0]);
+        if (DEBUG_MSG) FURI_LOG_E(TAG, "Not inverted nibble[%d]: %x", j/4, (unsigned int)nib[0]);
         raw[j/8] |= nib[0] << (4-(j%4));
         switch(j/4) {
         case 1: deviceid[0] |= nib[0]; break;
