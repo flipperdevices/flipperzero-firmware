@@ -201,6 +201,7 @@ $ ./fbt dolphin_ext
 - Settings: Updated Left to go to Clock [(By RogueMaster)]
 - Settings: Updated HOLD LEFT to go to SubGhz Remote [(By RogueMaster)]
 - SubGHz: Auto Detect Raw in READ action (Needs To Be Enabled In Read Settings) [from perspecdev](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/152)
+- SubGhz: add protocol "Linear Delta-3" #2239 [(By brandonweeks)](https://github.com/flipperdevices/flipperzero-firmware/pull/2239)
 - SubGHz: [Add settings to subghz read functionality to allow setting RSSI threshold (raw only) (By PolymerPrints)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/184)
 - SubGHz: Extended ranges enabled through flag in /ext/subghz/assets/extend_range.txt [from tkerrby](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/116)
 - SubGHz: Moved setting_user file to setting_user.txt! This makes it changable from IOS app. (By RogueMaster)
