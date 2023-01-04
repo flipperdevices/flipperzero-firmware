@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Build: 420](https://www.patreon.com/posts/76747898)
 - Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Added: [SubGhz: add protocol "Linear Delta-3" #2239 (By brandonweeks)](https://github.com/flipperdevices/flipperzero-firmware/pull/2239)
 
 <a name="release">
 
