@@ -9,7 +9,7 @@
 static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
     if (numbits < 32) return false;
     const char *sync_pattern = "01100110" "01100110" "10010110" "10010110";
-    uint64_t off = bitmap_seek_bits(bits,numbytes,0,sync_pattern);
+    uint64_t off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_pattern);
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Oregon2 preamble+sync found");
 

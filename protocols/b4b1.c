@@ -20,7 +20,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint32_t off;
     int j;
     for (j = 0; j < 3; j++) {
-        off = bitmap_seek_bits(bits,numbytes,0,sync_patterns[j]);
+        off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_patterns[j]);
         if (off != BITMAP_SEEK_NOT_FOUND) break;
     }
     if (off == BITMAP_SEEK_NOT_FOUND) return false;

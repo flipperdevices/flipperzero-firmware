@@ -222,8 +222,7 @@ void bitmap_invert_bytes_bits(uint8_t *p, uint32_t len) {
  * form "11010110..." is found in the 'b' bitmap of 'blen' bits at 'bitpos'
  * position. */
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits) {
-    size_t l = strlen(bits);
-    for (size_t j = 0; j < l; j++) {
+    for (size_t j = 0; bits[j]; j++) {
         bool expected = (bits[j] == '1') ? true : false;
         if (bitmap_get(b,blen,bitpos+j) != expected) return false;
     }
@@ -231,14 +230,17 @@ bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *b
 }
 
 /* Search for the specified bit sequence (see bitmap_match_bits() for details)
- * in the bitmap 'b' of 'blen' bytes. Returns the offset (in bits) of the
- * match, or BITMAP_SEEK_NOT_FOUND if not found.
+ * in the bitmap 'b' of 'blen' bytes, looking forward at most 'maxbits' ahead.
+ * Returns the offset (in bits) of the match, or BITMAP_SEEK_NOT_FOUND if not
+ * found.
  *
  * Note: there are better algorithms, such as Boyer-Moore. Here we hope that
  * for the kind of patterns we search we'll have a lot of early stops so
  * we use a vanilla approach. */
-uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, const char *bits) {
-    uint32_t endpos = blen*8;
+uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t maxbits, const char *bits) {
+    uint32_t endpos = startpos+blen*8;
+    uint32_t end2 = startpos+maxbits;
+    if (end2 < endpos) endpos = end2;
     for (uint32_t j = startpos; j < endpos; j++)
         if (bitmap_match_bits(b,blen,j,bits)) return j;
     return BITMAP_SEEK_NOT_FOUND;
