@@ -31,7 +31,6 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     if (DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 decoded: %lu",decoded);
     if (decoded != 24) return false;
-    bitmap_invert_bytes_bits(d,sizeof(d));
     snprintf(info->name,PROTOVIEW_MSG_STR_LEN,"PT/SC remote");
     snprintf(info->raw,PROTOVIEW_MSG_STR_LEN,"%02X%02X%02X",d[0],d[1],d[2]);
     info->len = off+(4*24);

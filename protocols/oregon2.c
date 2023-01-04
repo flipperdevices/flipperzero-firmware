@@ -9,7 +9,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     off += 32; /* Skip preamble. */
 
-    uint8_t buffer[8];
+    uint8_t buffer[8], raw[8] = {0};
     uint32_t decoded =
         convert_from_line_code(buffer,sizeof(buffer),bits,numbytes,off,"1001","0110");
     FURI_LOG_E(TAG, "Oregon2 decoded bits: %lu", decoded);
@@ -19,12 +19,12 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     char temp[3] = {0}, deviceid[2] = {0}, hum[2] = {0};
     for (int j = 0; j < 64; j += 4) {
         uint8_t nib[1];
-        nib[0] = 0;
-        bitmap_set(nib,1,0,bitmap_get(buffer,8,j+0));
-        bitmap_set(nib,1,1,bitmap_get(buffer,8,j+1));
-        bitmap_set(nib,1,2,bitmap_get(buffer,8,j+2));
-        bitmap_set(nib,1,3,bitmap_get(buffer,8,j+3));
+        nib[0] = (bitmap_get(buffer,8,j+0) |
+                  bitmap_get(buffer,8,j+1) << 1 |
+                  bitmap_get(buffer,8,j+2) << 2 |
+                  bitmap_get(buffer,8,j+3) << 3);
         FURI_LOG_E(TAG, "Not inverted nibble[%d]: %x", j/4, (unsigned int)nib[0]);
+        raw[j/8] |= nib[0] << (4-(j%4));
         switch(j/4) {
         case 1: deviceid[0] |= nib[0]; break;
         case 0: deviceid[0] |= nib[0] << 4; break;
@@ -42,7 +42,9 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     snprintf(info->name,sizeof(info->name),"%s","Oregon v2.1");
     /* The following line crashes the Flipper because of broken
      * snprintf() implementation. */
-    if (0) snprintf(info->raw,sizeof(info->raw),"%08llX", *((uint64_t*)buffer));
+    snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X",
+        raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
+        raw[6],raw[7]);
     snprintf(info->info1,sizeof(info->info1),"Sensor ID %02X%02X",
         deviceid[0], deviceid[1]);
     snprintf(info->info2,sizeof(info->info2),"Temperature %d%d.%d",

@@ -188,7 +188,7 @@ void scan_for_signal(ProtoViewApp *app) {
  * Out of range bits will silently be discarded. */
 void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val) {
     uint32_t byte = bitpos/8;
-    uint32_t bit = bitpos&7;
+    uint32_t bit = 7-(bitpos&7);
     if (byte >= blen) return;
     if (val)
         b[byte] |= 1<<bit;
@@ -200,7 +200,7 @@ void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val) {
  * Out of range bits return false (not bit set). */
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos) {
     uint32_t byte = bitpos/8;
-    uint32_t bit = bitpos&7;
+    uint32_t bit = 7-(bitpos&7);
     if (byte >= blen) return 0;
     return (b[byte] & (1<<bit)) != 0;
 }
