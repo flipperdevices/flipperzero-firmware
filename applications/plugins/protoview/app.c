@@ -14,8 +14,8 @@ extern const SubGhzProtocolRegistry protoview_protocol_registry;
 /* The callback actually just passes the control to the actual active
  * view callback, after setting up basic stuff like cleaning the screen
  * and setting color to black. */
-static void render_callback(Canvas *const canvas, void *ctx) {
-    ProtoViewApp *app = ctx;
+static void render_callback(Canvas* const canvas, void* ctx) {
+    ProtoViewApp* app = ctx;
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
@@ -25,28 +25,32 @@ static void render_callback(Canvas *const canvas, void *ctx) {
 
     /* Call who is in charge right now. */
     switch(app->current_view) {
-    case ViewRawPulses: render_view_raw_pulses(canvas,app); break;
+    case ViewRawPulses:
+        render_view_raw_pulses(canvas, app);
+        break;
     case ViewFrequencySettings:
     case ViewModulationSettings:
-        render_view_settings(canvas,app); break;
-    case ViewLast: furi_crash(TAG " ViewLast selected"); break;
+        render_view_settings(canvas, app);
+        break;
+    case ViewLast:
+        furi_crash(TAG " ViewLast selected");
+        break;
     }
 }
 
 /* Here all we do is putting the events into the queue that will be handled
  * in the while() loop of the app entry point function. */
-static void input_callback(InputEvent* input_event, void* ctx)
-{
-    ProtoViewApp *app = ctx;
+static void input_callback(InputEvent* input_event, void* ctx) {
+    ProtoViewApp* app = ctx;
 
-    furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
+    furi_message_queue_put(app->event_queue, input_event, FuriWaitForever);
     FURI_LOG_E(TAG, "INPUT CALLBACK %d", (int)input_event->key);
 }
 
 /* Allocate the application state and initialize a number of stuff.
  * This is called in the entry point to create the application state. */
 ProtoViewApp* protoview_app_alloc() {
-    ProtoViewApp *app = malloc(sizeof(ProtoViewApp));
+    ProtoViewApp* app = malloc(sizeof(ProtoViewApp));
 
     // Init shared data structures
     RawSamples = raw_samples_alloc();
@@ -86,7 +90,7 @@ ProtoViewApp* protoview_app_alloc() {
     subghz_worker_set_pair_callback(
         app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
-    
+
     app->frequency = subghz_setting_get_default_frequency(app->setting);
     app->modulation = 0; /* Defaults to ProtoViewModulations[0]. */
 
@@ -99,7 +103,7 @@ ProtoViewApp* protoview_app_alloc() {
 /* Free what the application allocated. It is not clear to me if the
  * Flipper OS, once the application exits, will be able to reclaim space
  * even if we forget to free something here. */
-void protoview_app_free(ProtoViewApp *app) {
+void protoview_app_free(ProtoViewApp* app) {
     furi_assert(app);
 
     // Put CC1101 on sleep.
@@ -133,17 +137,17 @@ void protoview_app_free(ProtoViewApp *app) {
 /* Called periodically. Do signal processing here. Data we process here
  * will be later displayed by the render callback. The side effect of this
  * function is to scan for signals and set DetectedSamples. */
-static void timer_callback(void *ctx) {
-    ProtoViewApp *app = ctx;
+static void timer_callback(void* ctx) {
+    ProtoViewApp* app = ctx;
     scan_for_signal(app);
 }
 
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
-    ProtoViewApp *app = protoview_app_alloc();
+    ProtoViewApp* app = protoview_app_alloc();
 
     /* Create a timer. We do data analysis in the callback. */
-    FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
+    FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
 
     /* Start listening to signals immediately. */
@@ -158,29 +162,22 @@ int32_t protoview_app_entry(void* p) {
     InputEvent input;
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
-        if (qstat == FuriStatusOk) {
-            FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u",
-                input.type, input.key);
+        if(qstat == FuriStatusOk) {
+            FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
-            if (input.type == InputTypeShort &&
-                input.key == InputKeyBack)
-            {
+            if(input.type == InputTypeShort && input.key == InputKeyBack) {
                 /* Exit the app. */
                 app->running = 0;
-            } else if (input.type == InputTypeShort &&
-                       input.key == InputKeyRight)
-            {
+            } else if(input.type == InputTypeShort && input.key == InputKeyRight) {
                 /* Go to the next view. */
                 app->current_view++;
-                if (app->current_view == ViewLast) app->current_view = 0;
-            } else if (input.type == InputTypeShort &&
-                       input.key == InputKeyLeft)
-            {
+                if(app->current_view == ViewLast) app->current_view = 0;
+            } else if(input.type == InputTypeShort && input.key == InputKeyLeft) {
                 /* Go to the previous view. */
-                if (app->current_view == 0)
-                    app->current_view = ViewLast-1;
+                if(app->current_view == 0)
+                    app->current_view = ViewLast - 1;
                 else
                     app->current_view--;
             } else {
@@ -188,26 +185,29 @@ int32_t protoview_app_entry(void* p) {
                  * active view input processing. */
                 switch(app->current_view) {
                 case ViewRawPulses:
-                    process_input_raw_pulses(app,input);
+                    process_input_raw_pulses(app, input);
                     break;
                 case ViewFrequencySettings:
                 case ViewModulationSettings:
-                    process_input_settings(app,input);
+                    process_input_settings(app, input);
                     break;
-                case ViewLast: furi_crash(TAG " ViewLast selected"); break;
+                case ViewLast:
+                    furi_crash(TAG " ViewLast selected");
+                    break;
                 }
             }
         } else {
             /* Useful to understand if the app is still alive when it
              * does not respond because of bugs. */
-            static int c = 0; c++;
-            if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            static int c = 0;
+            c++;
+            if(!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
         }
         view_port_update(app->view_port);
     }
 
     /* App no longer running. Shut down and free. */
-    if (app->txrx->txrx_state == TxRxStateRx) {
+    if(app->txrx->txrx_state == TxRxStateRx) {
         FURI_LOG_E(TAG, "Putting CC1101 to sleep before exiting.");
         radio_rx_end(app);
         radio_sleep(app);
@@ -217,4 +217,3 @@ int32_t protoview_app_entry(void* p) {
     protoview_app_free(app);
     return 0;
 }
-

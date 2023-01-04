@@ -42,7 +42,7 @@ typedef enum {
 } ProtoViewCurrentView;
 
 typedef struct {
-    const char *name;
+    const char* name;
     FuriHalSubGhzPreset preset;
 } ProtoViewModulation;
 
@@ -52,7 +52,7 @@ extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
  * It receives data and we get our protocol "feed" callback called
  * with the level (1 or 0) and duration. */
 struct ProtoViewTxRx {
-    SubGhzWorker* worker;       /* Our background worker. */
+    SubGhzWorker* worker; /* Our background worker. */
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
@@ -62,27 +62,27 @@ typedef struct ProtoViewTxRx ProtoViewTxRx;
 
 struct ProtoViewApp {
     /* GUI */
-    Gui *gui;
-    ViewPort *view_port;     /* We just use a raw viewport and we render
+    Gui* gui;
+    ViewPort* view_port; /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
-    ProtoViewCurrentView current_view;  /* Active view ID. */
-    FuriMessageQueue *event_queue;  /* Keypress events go here. */
+    ProtoViewCurrentView current_view; /* Active view ID. */
+    FuriMessageQueue* event_queue; /* Keypress events go here. */
 
     /* Radio related. */
-    ProtoViewTxRx *txrx;     /* Radio state. */
-    SubGhzSetting *setting;  /* A list of valid frequencies. */
+    ProtoViewTxRx* txrx; /* Radio state. */
+    SubGhzSetting* setting; /* A list of valid frequencies. */
 
     /* Generic app state. */
-    int running;             /* Once false exists the app. */
+    int running; /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
 
     /* Raw view apps state. */
-    uint32_t us_scale;       /* microseconds per pixel. */
-    uint32_t signal_offset;  /* Long press left/right panning in raw view. */
+    uint32_t us_scale; /* microseconds per pixel. */
+    uint32_t signal_offset; /* Long press left/right panning in raw view. */
 
     /* Configuration view app state. */
-    uint32_t frequency;      /* Current frequency. */
-    uint8_t modulation;      /* Current modulation ID, array index in the
+    uint32_t frequency; /* Current frequency. */
+    uint8_t modulation; /* Current modulation ID, array index in the
                                 ProtoViewModulations table. */
 };
 
@@ -97,13 +97,19 @@ void radio_sleep(ProtoViewApp* app);
 
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
-void scan_for_signal(ProtoViewApp *app);
+void scan_for_signal(ProtoViewApp* app);
 
 /* view_*.c */
-void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);
-void process_input_raw_pulses(ProtoViewApp *app, InputEvent input);
-void render_view_settings(Canvas *const canvas, ProtoViewApp *app);
-void process_input_settings(ProtoViewApp *app, InputEvent input);
+void render_view_raw_pulses(Canvas* const canvas, ProtoViewApp* app);
+void process_input_raw_pulses(ProtoViewApp* app, InputEvent input);
+void render_view_settings(Canvas* const canvas, ProtoViewApp* app);
+void process_input_settings(ProtoViewApp* app, InputEvent input);
 
 /* ui.c */
-void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
+void canvas_draw_str_with_border(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    const char* str,
+    Color text_color,
+    Color border_color);

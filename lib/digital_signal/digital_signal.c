@@ -292,7 +292,7 @@ void digital_sequence_alloc_sequence(DigitalSequence* sequence, uint32_t size) {
 
 DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     furi_assert(gpio);
-	
+
     DigitalSequence* sequence = malloc(sizeof(DigitalSequence));
 
     sequence->gpio = gpio;
@@ -333,7 +333,7 @@ void digital_sequence_set_signal(
 
 void digital_sequence_set_sendtime(DigitalSequence* sequence, uint32_t send_time) {
     furi_assert(sequence);
-	
+
     sequence->send_time = send_time;
     sequence->send_time_active = true;
 }
@@ -365,7 +365,7 @@ static void digital_signal_update_dma(DigitalSignal* signal) {
     while(prev_remain == LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
         if(DWT->CYCCNT - prev_timer > wait_ticks) {
             restart_needed = true;
-			break;
+            break;
         }
     }
 
@@ -411,7 +411,7 @@ static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSigna
 
 DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
     furi_assert(sequence);
-	
+
     uint32_t edges = 0;
 
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
