@@ -3,13 +3,7 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
-
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-
-#define CENTER_X (SCREEN_WIDTH / 2)
-#define CENTER_Y (SCREEN_HEIGHT / 2)
-#define RADIUS (SCREEN_HEIGHT / 2 - 2)
+#include <locale/locale.h>
 
 #define PI 3.14
 
@@ -33,58 +27,75 @@ typedef struct {
     FuriHalRtcDateTime date_time;
 } ClockApp;
 
-static Vector2 angle_to_vector2(float angle_in_degrees, uint8_t distance) {
+static Vector2 angle_to_vector2(float angle_in_degrees, uint8_t distance, Vector2 center) {
     float radians = (angle_in_degrees - 90) * (PI / 180);
 
     Vector2 vec = {
-        .x = CENTER_X + cos(radians) * distance,
-        .y = CENTER_Y + sin(radians) * distance,
+        .x = center.x + cos(radians) * distance,
+        .y = center.y + sin(radians) * distance,
     };
 
     return vec;
 }
 
 static void analog_clock_app_draw_callback(Canvas* canvas, void* context) {
+    furi_assert(context);
     ClockApp* app = context;
     furi_mutex_acquire(app->mutex, FuriWaitForever);
 
-    canvas_draw_circle(canvas, CENTER_X, CENTER_Y, RADIUS);
+    uint8_t width = canvas_width(canvas);
+    uint8_t height = canvas_height(canvas);
+    Vector2 clock_center = {
+        .x = 28 + width / 2,
+        .y = height / 2,
+    };
+    uint8_t radius = MIN(width, height) / 2 - 2;
+
+    canvas_draw_circle(canvas, clock_center.x, clock_center.y, radius);
+
+    FuriString* str = furi_string_alloc();
 
     for(uint8_t i = 3; i <= 12; i += 3) {
-        Vector2 pos = angle_to_vector2(360 / 12 * i, RADIUS - 4);
+        Vector2 pos = angle_to_vector2(360 / 12 * i, radius - 4, clock_center);
 
-        char str[4];
-        snprintf(str, 4, "%i", i);
+        furi_string_printf(str, "%i", i);
 
-        canvas_draw_str_aligned(canvas, pos.x, pos.y, AlignCenter, AlignCenter, str);
+        canvas_draw_str_aligned(
+            canvas, pos.x, pos.y, AlignCenter, AlignCenter, furi_string_get_cstr(str));
     }
 
-    Vector2 hour_vec = angle_to_vector2(((app->date_time.hour % 12) / 12.f * 360.f), RADIUS - 8);
-    canvas_draw_line(canvas, CENTER_X, CENTER_Y, hour_vec.x, hour_vec.y);
+    Vector2 hour_vec =
+        angle_to_vector2(((app->date_time.hour % 12) / 12.f * 360.f), radius - 8, clock_center);
+    canvas_draw_line(canvas, clock_center.x, clock_center.y, hour_vec.x, hour_vec.y);
 
-    Vector2 minute_vec = angle_to_vector2((app->date_time.minute / 60.f * 360.f), RADIUS - 4);
-    canvas_draw_line(canvas, CENTER_X, CENTER_Y, minute_vec.x, minute_vec.y);
+    Vector2 minute_vec =
+        angle_to_vector2((app->date_time.minute / 60.f * 360.f), radius - 4, clock_center);
+    canvas_draw_line(canvas, clock_center.x, clock_center.y, minute_vec.x, minute_vec.y);
 
-    Vector2 second_vec = angle_to_vector2((app->date_time.second / 60.f * 360.f), RADIUS - 2);
-    canvas_draw_line(canvas, CENTER_X, CENTER_Y, second_vec.x, second_vec.y);
+    Vector2 second_vec =
+        angle_to_vector2((app->date_time.second / 60.f * 360.f), radius - 2, clock_center);
+    canvas_draw_line(canvas, clock_center.x, clock_center.y, second_vec.x, second_vec.y);
 
-    canvas_draw_frame(canvas, 0, 51, 25, 13);
     canvas_set_font(canvas, FontSecondary);
 
-    char dateStr[8];
-    snprintf(dateStr, 8, "%02d.%02d", app->date_time.day, app->date_time.month);
-    canvas_draw_str(canvas, 3, 61, dateStr);
+    locale_format_date(str, &app->date_time, locale_get_date_format(), ".");
+    uint16_t date_str_width = canvas_string_width(canvas, furi_string_get_cstr(str));
+    canvas_draw_frame(canvas, 0, 51, date_str_width + 6, 13);
+    canvas_draw_str(canvas, 3, 61, furi_string_get_cstr(str));
 
+    furi_string_free(str);
     furi_mutex_release(app->mutex);
 }
 
 static void analog_clock_app_input_callback(InputEvent* event, void* context) {
+    furi_assert(context);
     FuriMessageQueue* event_queue = context;
     AppEvent app_event = {.type = EventTypeInput, .input = *event};
     furi_message_queue_put(event_queue, &app_event, FuriWaitForever);
 }
 
 static void analog_clock_app_tick(void* context) {
+    furi_assert(context);
     FuriMessageQueue* event_queue = context;
     AppEvent app_event = {.type = EventTypeTick};
     furi_message_queue_put(event_queue, &app_event, 0);
