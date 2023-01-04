@@ -1,6 +1,6 @@
 # RoadMap for RM BUILD
 ### This is more of a project wish list...
-- It is open to whomever wants to build and PR. You get all the credit if you can create it! :D
+- It is open to whoever wants to build and PR. You get all the credit if you can create it! :D
 - I likely won't have time to cover all these items.
 - Some of these would make great sample projects to learn how to make apps for flipper.
 - I tried to organize them in terms of difficulty.
@@ -12,7 +12,7 @@
 - `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper
 - - Also can possibly support larger URLs than the ones in samples (due to length limits on NFC types)
 - - Also can possibly create other types of tags, like WIFI configurations
-- `Doplhin SubGHz Chat` APP to allow listening for and viewing SubGHz messages and sending SubGHz messages
+- `Dolphin SubGHz Chat` APP to allow listening for and viewing SubGHz messages and sending SubGHz messages
 - - Could also be set to transmit a message every X seconds/minutes until another Flipper responds
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for mp3 playback
 - - Also can possible pair to speaker via NFC tap, here are some possible resources:
