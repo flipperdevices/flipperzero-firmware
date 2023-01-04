@@ -284,9 +284,10 @@ static SdSpiCmdAnswer
         cmd_answer.r1 = sd_spi_wait_for_data_and_read();
         break;
     case SdSpiCmdAnswerTypeR1B:
+        // TODO: can be wrong, at least for SD_CMD12_STOP_TRANSMISSION you need to purge one byte before reading R1
         cmd_answer.r1 = sd_spi_wait_for_data_and_read();
-        cmd_answer.r2 = sd_spi_read_byte();
 
+        // In general this shenenigans seems suspicious, please double check SD specs if you are using SdSpiCmdAnswerTypeR1B
         // reassert card
         sd_spi_deselect_card();
         furi_delay_us(1000);
@@ -638,7 +639,6 @@ static SdSpiStatus
         block_address = address * SD_BLOCK_SIZE;
     }
 
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     while(blocks--) {
         // CMD17 (READ_SINGLE_BLOCK): R1 response (0x00: no errors)
         response =
@@ -670,10 +670,6 @@ static SdSpiStatus
         }
 
         sd_spi_deselect_card_and_purge();
-
-        if(furi_hal_cortex_timer_is_expired(timer)) {
-            return SdSpiStatusTimeout;
-        }
     }
 
     return SdSpiStatusOK;
@@ -700,7 +696,6 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
         block_address = address * SD_BLOCK_SIZE;
     }
 
-    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     while(blocks--) {
         // CMD24 (WRITE_SINGLE_BLOCK): R1 response (0x00: no errors)
         response = sd_spi_send_cmd(
@@ -736,10 +731,6 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
             block_address += 1;
         } else {
             block_address += SD_BLOCK_SIZE;
-        }
-
-        if(furi_hal_cortex_timer_is_expired(timer)) {
-            return SdSpiStatusTimeout;
         }
     }
 
