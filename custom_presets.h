@@ -14,7 +14,7 @@ static uint8_t protoview_subghz_tpms_async_regs[][2] = {
     // // Modem Configuration
     {CC1101_MDMCFG0, 0x00},
     {CC1101_MDMCFG1, 0x02},
-    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized)
+    {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized). Other code reading TPMS uses GFSK, but should be the same when in RX mode.
     {CC1101_MDMCFG3, 0x93}, // Data rate is 20kBaud
     {CC1101_MDMCFG4, 0x59}, // Rx bandwidth filter is 325 kHz
     {CC1101_DEVIATN, 0x41}, // Deviation 28.56 kHz
