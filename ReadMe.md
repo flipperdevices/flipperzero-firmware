@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: NFC: Assets for RogueMaster GitHub and RogueMaster Patreon
 - [New Patreon Build: 420](https://www.patreon.com/posts/76747898)
 - Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
+- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 
