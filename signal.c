@@ -45,7 +45,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
     } classes[SEARCH_CLASSES];
 
     memset(classes,0,sizeof(classes));
-    uint32_t minlen = 40, maxlen = 4000; /* Depends on data rate, here we
+    uint32_t minlen = 30, maxlen = 4000; /* Depends on data rate, here we
                                             allow for high and low. */
     uint32_t len = 0; /* Observed len of coherent samples. */
     s->short_pulse_dur = 0;
