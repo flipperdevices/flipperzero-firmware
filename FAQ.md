@@ -34,7 +34,7 @@ When Flipper Authenticator is running `totp` CLI is available for you to list, a
 
 **YES!**
 
-Just pick the token you would like to auto-type then hold "arrow down" button for 1-2sec. and Flipper Authenticator will type it instead of you 😀
+Just pick the token you would like to auto-type then hold <span title="Arrow Down">▼</span> button for 1-2sec. and let Flipper Authenticator type it instead of you 😀
 
 ## How to change\recover PIN?
 
@@ -48,6 +48,15 @@ To do that you may use following CLI commands:
 ## How to backup?
 
 All token secrets are stored in encrypted form and are tied to an original Flipper device and PIN. Given that, there is no sense to try to backup `/ext/apps/Misc/totp.conf` file as it will not help you in situation when you loose your Flipper device. Instead use your favorite password manager to store plain token secrets and\or any other information which will help you recover your accounts.
+
+## How to reset application?
+
+There are two options to reset Flipper Authenticator to its default:
+
+1. Delete `/ext/authenticator/totp.conf` file
+2. Use `totp reset` CLI command
+
+**Regardless of which option you use, please pay attention to the fact that <ins>you will loose everything you configured and added to Flipper Authenticator application, including token secrets.</ins>**
 
 ## Flipper Authenticator generates invalid codes, why so?
 
@@ -67,4 +76,4 @@ Sometimes it is possible that you just made a mistake while typing or copying to
 
 ### Token hashing algorithm is not correct
 
-In majority of situation using default hashing algorithm `SHA1` should work just fine. But for some rare providers it might be necessary to use `SHA256` or `SHA512` as a hashinig alogorithm.
+In majority of situations using default hashing algorithm `SHA1` should work just fine. But for some rare providers it might be necessary to use `SHA256` or `SHA512` as a hashinig alogorithm.
