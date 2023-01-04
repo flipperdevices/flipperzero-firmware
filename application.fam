@@ -1,12 +1,10 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
-    appid="wav_recorder",  # Must be unique
-    name="App wav_recorder",  # Displayed in UI
+    appid="wav_recorder",
+    name="Wav Recorder",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wav_recorder_app",
     stack_size=2 * 1024,
-    fap_category="Misc",
+    fap_category="GPIO",
     # Optional values
     # fap_version=(0, 1),  # (major, minor)
     fap_icon="wav_recorder.png",  # 10x10 1-bit PNG
