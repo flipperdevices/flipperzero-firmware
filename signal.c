@@ -136,12 +136,11 @@ void scan_for_signal(ProtoViewApp *app) {
 
     uint32_t i = 0;
     while (i < copy->total-1) {
-        ProtoViewMsgInfo info;
         uint32_t thislen = search_coherent_signal(copy,i);
 
         /* For messages that are long enough, attempt decoding. */
         if (thislen > minlen) {
-
+            ProtoViewMsgInfo info;
             initialize_msg_info(&info);
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
             /* decode_signal() expects the detected signal to start
@@ -157,6 +156,7 @@ void scan_for_signal(ProtoViewApp *app) {
             if (thislen > app->signal_bestlen ||
                 (app->signal_decoded == false && decoded))
             {
+                app->signal_info = info;
                 app->signal_bestlen = thislen;
                 app->signal_decoded = decoded;
                 raw_samples_copy(DetectedSamples,copy);

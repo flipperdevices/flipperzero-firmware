@@ -64,6 +64,21 @@ struct ProtoViewTxRx {
 
 typedef struct ProtoViewTxRx ProtoViewTxRx;
 
+/* This stucture is filled by the decoder for specific protocols with the
+ * informations about the message. ProtoView will display such information
+ * in the message info view. */
+#define PROTOVIEW_MSG_STR_LEN 16
+typedef struct ProtoViewMsgInfo {
+    char name[PROTOVIEW_MSG_STR_LEN]; /* Protocol name and version. */
+    char raw[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific raw representation.*/
+    /* The following is what the decoder wants to show to user. Each decoder
+     * can use the number of fileds it needs. */
+    char info1[16];     /* Protocol specific decoded string, line 1. */
+    char info2[16];     /* Protocol specific decoded string, line 2. */
+    char info3[16];     /* Protocol specific decoded string, line 3. */
+    uint64_t len;       /* Bits consumed from the stream. */
+} ProtoViewMsgInfo;
+
 struct ProtoViewApp {
     /* GUI */
     Gui *gui;
@@ -80,6 +95,7 @@ struct ProtoViewApp {
     int running;             /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
     bool signal_decoded;     /* Was the current signal decoded? */
+    ProtoViewMsgInfo signal_info; /* Decoded message, if signal_decoded true. */
 
     /* Raw view apps state. */
     uint32_t us_scale;       /* microseconds per pixel. */
@@ -90,21 +106,6 @@ struct ProtoViewApp {
     uint8_t modulation;      /* Current modulation ID, array index in the
                                 ProtoViewModulations table. */
 };
-
-/* This stucture is filled by the decoder for specific protocols with the
- * informations about the message. ProtoView will display such information
- * in the message info view. */
-#define PROTOVIEW_MSG_STR_LEN 16
-typedef struct ProtoViewMsgInfo {
-    char name[PROTOVIEW_MSG_STR_LEN]; /* Protocol name and version. */
-    char raw[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific raw representation.*/
-    /* The following is what the decoder wants to show to user. Each decoder
-     * can use the number of fileds it needs. */
-    char info1[16];     /* Protocol specific decoded string, line 1. */
-    char info2[16];     /* Protocol specific decoded string, line 2. */
-    char info3[16];     /* Protocol specific decoded string, line 3. */
-    uint64_t len;       /* Bits consumed from the stream. */
-} ProtoViewMsgInfo;
 
 typedef struct ProtoViewDecoder {
     const char *name;   /* Protocol name. */

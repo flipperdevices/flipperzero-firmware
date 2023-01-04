@@ -63,6 +63,10 @@ void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app) {
         (unsigned long)DetectedSamples->short_pulse_dur);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_with_border(canvas, 97, 63, buf, ColorWhite, ColorBlack);
+    if (app->signal_decoded) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_with_border(canvas, 1, 61, app->signal_info.name, ColorWhite, ColorBlack);
+    }
 }
 
 /* Handle input for the raw pulses view. */
