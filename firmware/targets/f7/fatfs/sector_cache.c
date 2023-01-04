@@ -21,7 +21,10 @@ void sector_cache_init() {
     if(cache == NULL) {
         cache = memmgr_alloc_from_pool(sizeof(SectorCache));
     }
-    memset(cache, 0, sizeof(SectorCache));
+
+    if(cache != NULL) {
+        memset(cache, 0, sizeof(SectorCache));
+    }
 }
 
 uint8_t* sector_cache_get(uint32_t n_sector) {
