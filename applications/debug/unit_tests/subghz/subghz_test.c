@@ -616,6 +616,13 @@ MU_TEST(subghz_decoder_linear_test) {
         "Test decoder " SUBGHZ_PROTOCOL_LINEAR_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_linear_delta3_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/linear_delta3_raw.sub"), SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME " error\r\n");
+}
+
 MU_TEST(subghz_decoder_megacode_test) {
     mu_assert(
         subghz_decoder_test(
@@ -780,6 +787,12 @@ MU_TEST(subghz_encoder_linear_test) {
         "Test encoder " SUBGHZ_PROTOCOL_LINEAR_NAME " error\r\n");
 }
 
+MU_TEST(subghz_encoder_linear_delta3_test) {
+    mu_assert(
+        subghz_encoder_test(EXT_PATH("unit_tests/subghz/linear_delta3.sub")),
+        "Test encoder " SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME " error\r\n");
+}
+
 MU_TEST(subghz_encoder_megacode_test) {
     mu_assert(
         subghz_encoder_test(EXT_PATH("unit_tests/subghz/megacode.sub")),
@@ -909,6 +922,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_somfy_telis_test);
     MU_RUN_TEST(subghz_decoder_star_line_test);
     MU_RUN_TEST(subghz_decoder_linear_test);
+    MU_RUN_TEST(subghz_decoder_linear_delta3_test);
     MU_RUN_TEST(subghz_decoder_megacode_test);
     MU_RUN_TEST(subghz_decoder_secplus_v1_test);
     MU_RUN_TEST(subghz_decoder_secplus_v2_test);
@@ -934,6 +948,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_encoder_nice_flo_test);
     MU_RUN_TEST(subghz_encoder_keelog_test);
     MU_RUN_TEST(subghz_encoder_linear_test);
+    MU_RUN_TEST(subghz_encoder_linear_delta3_test);
     MU_RUN_TEST(subghz_encoder_megacode_test);
     MU_RUN_TEST(subghz_encoder_holtek_test);
     MU_RUN_TEST(subghz_encoder_secplus_v1_test);
