@@ -42,7 +42,7 @@ typedef struct Asteroid {
 } Asteroid;
 
 #define MAXBUL 10   /* Max bullets on the screen. */
-#define MAXAST 8    /* Max asteroids on the screen. */
+#define MAXAST 32   /* Max asteroids on the screen. */
 typedef struct AsteroidsApp {
     /* GUI */
     Gui *gui;
@@ -275,9 +275,11 @@ void remove_bullet(AsteroidsApp *app, int bid) {
     if (n && bid != n) app->bullets[bid] = app->bullets[n];
 }
 
-/* Create a new asteroid, away from the ship. */
-void add_asteroid(AsteroidsApp *app) {
-    if (app->asteroids_num == MAXAST) return;
+/* Create a new asteroid, away from the ship. Return the
+ * pointer to the asteroid object, so that the caller can change
+ * certain things of the asteroid if needed. */
+Asteroid *add_asteroid(AsteroidsApp *app) {
+    if (app->asteroids_num == MAXAST) return NULL;
     float size = 4+rand()%15;
     float min_distance = 20;
     float x,y;
@@ -288,13 +290,14 @@ void add_asteroid(AsteroidsApp *app) {
     Asteroid *a = &app->asteroids[app->asteroids_num++];
     a->x = x;
     a->y = y;
-    a->vx = ((float)rand()/RAND_MAX);
-    a->vy = ((float)rand()/RAND_MAX);
+    a->vx = 2*(-.5 + ((float)rand()/RAND_MAX));
+    a->vy = 2*(-.5 + ((float)rand()/RAND_MAX));
     a->size = size;
     a->rot = 0;
     a->rot_speed = ((float)rand()/RAND_MAX)/10;
     if (app->ticks & 1) a->rot_speed = -(a->rot_speed);
     a->shape_seed = rand() & 255;
+    return a;
 }
 
 /* Remove the specified asteroid by id (index in the array). */
@@ -304,6 +307,31 @@ void remove_asteroid(AsteroidsApp *app, int id) {
      * array dense, which is an advantage when looping. */
     int n = --app->asteroids_num;
     if (n && id != n) app->asteroids[id] = app->asteroids[n];
+}
+
+/* Called when an asteroid was reached by a bullet. The asteroid
+ * hit is the one with the specified 'id'. */
+void asteroid_was_hit(AsteroidsApp *app, int id) {
+    float sizelimit = 6; // Smaller than that polverize in one shot.
+    Asteroid *a = &app->asteroids[id];
+
+    /* Asteroid is large enough to break into fragments. */
+    float size = a->size;
+    float x = a->x, y = a->y;
+    remove_asteroid(app,id);
+    if (size > sizelimit) {
+        int max_fragments = size / sizelimit;
+        int fragments = 2+rand()%max_fragments;
+        float newsize = size/fragments;
+        if (newsize < 2) newsize = 2;
+        for (int j = 0; j < fragments; j++) {
+            a = add_asteroid(app);
+            if (a == NULL) break; // Too many asteroids on screen.
+            a->x = x + -(size/2) + rand() % (int)newsize;
+            a->y = y + -(size/2) + rand() % (int)newsize;
+            a->size = newsize;
+        }
+    }
 }
 
 /* This is the main game execution function, called 10 times for
@@ -319,8 +347,8 @@ void game_tick(void *ctx) {
     if (app->pressed[InputKeyLeft]) app->ship.rot -= .35;
     if (app->pressed[InputKeyRight]) app->ship.rot += .35;
     if (app->pressed[InputKeyOk]) {
-        app->ship.vx -= 0.35*(float)sin(app->ship.rot);
-        app->ship.vy += 0.35*(float)cos(app->ship.rot);
+        app->ship.vx -= 0.5*(float)sin(app->ship.rot);
+        app->ship.vy += 0.5*(float)cos(app->ship.rot);
     }
 
     /* Fire a bullet if needed. app->fire is set in
@@ -362,7 +390,7 @@ void game_tick(void *ctx) {
             if (detect_collision(a->x, a->y, a->size,
                                  b->x, b->y, 1, 1))
             {
-                remove_asteroid(app,i);
+                asteroid_was_hit(app,i);
                 remove_bullet(app,j);
                 /* The bullet no longer exist. Break the loop.
                  * However we want to start processing from the
