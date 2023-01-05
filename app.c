@@ -15,6 +15,7 @@
 #define DEBUG_MSG 1
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
+#define GAME_START_LIVES 3
 #ifndef PI
 #define PI 3.14159265358979f
 #endif
@@ -43,6 +44,7 @@ typedef struct Asteroid {
 
 #define MAXBUL 10   /* Max bullets on the screen. */
 #define MAXAST 32   /* Max asteroids on the screen. */
+#define SHIP_HIT_ANIMATION_LEN 15
 typedef struct AsteroidsApp {
     /* GUI */
     Gui *gui;
@@ -52,7 +54,14 @@ typedef struct AsteroidsApp {
 
     /* Game state. */
     int running;            /* Once false exists the app. */
+    int gameover;           /* Gameover status. */
     uint32_t ticks;         /* Game ticks. Increments at each refresh. */
+    uint32_t score;         /* Game score. */
+    uint32_t lives;         /* Number of lives in the current game. */
+    uint32_t ship_hit;      /* When non zero, the ship was hit by an asteroid
+                               and we need to show an animation as long as
+                               its value is non-zero (and decrease it's value
+                               at each tick of animation). */
 
     /* Ship state. */
     struct Ship ship;
@@ -171,6 +180,23 @@ void draw_asteroid(Canvas *const canvas, Asteroid *ast) {
     draw_poly(canvas,&ap,ast->x,ast->y,ast->rot);
 }
 
+/* Draw small ships in the top-right part of the screen, one for
+ * each left live. */
+void draw_left_lives(Canvas *const canvas, AsteroidsApp *app) {
+    int lives = app->lives;
+    int x = SCREEN_XRES-5;
+
+    Poly mini_ship = {
+        {-2, 0, 2},
+        {-2, 4, -2},
+        3
+    };
+    while(lives--) {
+        draw_poly(canvas,&mini_ship,x,6,PI);
+        x -= 6;
+    }
+}
+
 /* Given the current position, update it according to the velocity and
  * wrap it back to the other side if the object went over the screen. */
 void update_pos_by_velocity(float *x, float *y, float vx, float vy) {
@@ -190,6 +216,16 @@ void render_callback(Canvas *const canvas, void *ctx) {
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 127, 63);
+
+    /* Draw score. */
+    canvas_set_color(canvas, ColorBlack);
+    canvas_set_font(canvas, FontSecondary);
+    char score[32];
+    snprintf(score,sizeof(score),"%lu",app->score);
+    canvas_draw_str(canvas, 0, 8, score);
+
+    /* Draw left ships. */
+    draw_left_lives(canvas,app);
 
     /* Draw ship, asteroids, bullets. */
     draw_poly(canvas,&ShipPoly,app->ship.x,app->ship.y,app->ship.rot);
@@ -331,7 +367,42 @@ void asteroid_was_hit(AsteroidsApp *app, int id) {
             a->y = y + -(size/2) + rand() % (int)newsize;
             a->size = newsize;
         }
+    } else {
+        app->score++;
     }
+}
+
+/* Function called when a collision between the asteroid and the
+ * ship is detected. */
+void ship_was_hit(AsteroidsApp *app) {
+    app->ship_hit = SHIP_HIT_ANIMATION_LEN;
+    if (app->lives)
+        app->lives--;
+    else
+        app->gameover = true;
+}
+
+/* Restart game after the ship is hit. Will reset the ship position, bullets
+ * and asteroids to restart the game. */
+void restart_game(AsteroidsApp *app) {
+    app->ship.x = SCREEN_XRES / 2;
+    app->ship.y = SCREEN_YRES / 2;
+    app->ship.rot = PI;     /* Start headed towards top. */
+    app->ship.vx = 0;
+    app->ship.vy = 0;
+    app->bullets_num = 0;
+    app->last_bullet_tick = 0;
+    app->asteroids_num = 0;
+}
+
+/* Called after gameover to restart the game. This function
+ * also calls restart_game(). */
+void restart_game_after_gameover(AsteroidsApp *app) {
+    app->gameover = 0;
+    app->ticks = 0;
+    app->score = 0;
+    app->lives = GAME_START_LIVES;
+    restart_game(app);
 }
 
 /* This is the main game execution function, called 10 times for
@@ -342,6 +413,19 @@ void asteroid_was_hit(AsteroidsApp *app, int id) {
  * Each time this function is called, app->tick is incremented. */
 void game_tick(void *ctx) {
     AsteroidsApp *app = ctx;
+
+    /* This is a special condition: ship was hit, we frozen the game
+     * as long as ship_hit isn't zero again, and show an animation of
+     * a rotating ship. */
+    if (app->ship_hit) {
+        app->ship.rot += 0.5;
+        app->ship_hit--;
+        view_port_update(app->view_port);
+        if (app->ship_hit == 0) {
+            restart_game(app);
+        }
+        return;
+    }
 
     /* Handle keypresses. */
     if (app->pressed[InputKeyLeft]) app->ship.rot -= .35;
@@ -402,6 +486,17 @@ void game_tick(void *ctx) {
         }
     }
 
+    /* Detect collision between ship and asteroid. */
+    for (int j = 0; j < app->asteroids_num; j++) {
+        Asteroid *a = &app->asteroids[j];
+        if (detect_collision(a->x, a->y, a->size,
+                             app->ship.x, app->ship.y, 4, 1))
+        {
+            ship_was_hit(app);
+            break;
+        }
+    }
+
     /* From time to time, create a new asteroid. The more asteroids
      * already on the screen, the smaller probability of creating
      * a new one. */
@@ -437,16 +532,8 @@ AsteroidsApp* asteroids_app_alloc() {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-    app->running = 1;
-    app->ticks = 0;
-    app->ship.x = SCREEN_XRES / 2;
-    app->ship.y = SCREEN_YRES / 2;
-    app->ship.rot = PI; /* Start headed towards top. */
-    app->ship.vx = 0;
-    app->ship.vy = 0;
-    app->bullets_num = 0;
-    app->last_bullet_tick = 0;
-    app->asteroids_num = 0;
+    app->running = 1;       /* Turns 0 when back is pressed. */
+    restart_game_after_gameover(app);
     memset(app->pressed,0,sizeof(app->pressed));
     return app;
 }
