@@ -34,6 +34,12 @@ void raw_samples_reset(RawSamplesBuffer* s) {
     furi_mutex_release(s->mutex);
 }
 
+/* Set the raw sample internal index so that what is currently at
+ * offset 'offset', will appear to be at 0 index. */
+void raw_samples_center(RawSamplesBuffer* s, uint32_t offset) {
+    s->idx = (s->idx + offset) % RAW_SAMPLES_NUM;
+}
+
 /* Add the specified sample in the circular buffer. */
 void raw_samples_add(RawSamplesBuffer* s, bool level, uint32_t dur) {
     furi_mutex_acquire(s->mutex, FuriWaitForever);

@@ -7,7 +7,6 @@
  * this are logically two different views, and only one of the settings
  * will be highlighted. */
 void render_view_settings(Canvas* const canvas, ProtoViewApp* app) {
-    UNUSED(app);
     canvas_set_font(canvas, FontPrimary);
     if(app->current_view == ViewFrequencySettings)
         canvas_draw_str_with_border(canvas, 1, 10, "Frequency", ColorWhite, ColorBlack);
@@ -36,43 +35,52 @@ void render_view_settings(Canvas* const canvas, ProtoViewApp* app) {
 
 /* Handle input for the settings view. */
 void process_input_settings(ProtoViewApp* app, InputEvent input) {
-    /* Here we handle only up and down. Avoid any work if the user
-     * pressed something else. */
-    if(input.type != InputTypePress || (input.key != InputKeyDown && input.key != InputKeyUp))
-        return;
+    if(input.type == InputTypeLong && input.key == InputKeyOk) {
+        /* Long pressing to OK sets the default frequency and
+         * modulation. */
+        app->frequency = subghz_setting_get_default_frequency(app->setting);
+        app->modulation = 0;
+    } else if(input.type == InputTypePress && (input.key != InputKeyDown || input.key != InputKeyUp)) {
+        /* Handle up and down to change frequency or modulation. */
+        if(app->current_view == ViewFrequencySettings) {
+            size_t curidx = 0, i;
+            size_t count = subghz_setting_get_frequency_count(app->setting);
 
-    if(app->current_view == ViewFrequencySettings) {
-        size_t curidx = 0, i;
-        size_t count = subghz_setting_get_frequency_count(app->setting);
-
-        /* Scan the list of frequencies to check for the index of the
-         * currently set frequency. */
-        for(i = 0; i < count; i++) {
-            uint32_t freq = subghz_setting_get_frequency(app->setting, i);
-            if(freq == app->frequency) {
-                curidx = i;
-                break;
+            /* Scan the list of frequencies to check for the index of the
+             * currently set frequency. */
+            for(i = 0; i < count; i++) {
+                uint32_t freq = subghz_setting_get_frequency(app->setting, i);
+                if(freq == app->frequency) {
+                    curidx = i;
+                    break;
+                }
             }
-        }
-        if(i == count) return; /* Should never happen. */
+            if(i == count) return; /* Should never happen. */
 
-        if(input.key == InputKeyUp) {
-            curidx = (curidx + 1) % count;
-        } else if(input.key == InputKeyDown) {
-            curidx = curidx == 0 ? count - 1 : curidx - 1;
-        }
-        app->frequency = subghz_setting_get_frequency(app->setting, curidx);
-    } else if(app->current_view == ViewModulationSettings) {
-        uint32_t count = 0;
-        uint32_t modid = app->modulation;
+            if(input.key == InputKeyUp) {
+                curidx = (curidx + 1) % count;
+            } else if(input.key == InputKeyDown) {
+                curidx = curidx == 0 ? count - 1 : curidx - 1;
+            } else {
+                return;
+            }
+            app->frequency = subghz_setting_get_frequency(app->setting, curidx);
+        } else if(app->current_view == ViewModulationSettings) {
+            uint32_t count = 0;
+            uint32_t modid = app->modulation;
 
-        while(ProtoViewModulations[count].name != NULL) count++;
-        if(input.key == InputKeyUp) {
-            modid = (modid + 1) % count;
-        } else if(input.key == InputKeyDown) {
-            modid = modid == 0 ? count - 1 : modid - 1;
+            while(ProtoViewModulations[count].name != NULL) count++;
+            if(input.key == InputKeyUp) {
+                modid = (modid + 1) % count;
+            } else if(input.key == InputKeyDown) {
+                modid = modid == 0 ? count - 1 : modid - 1;
+            } else {
+                return;
+            }
+            app->modulation = modid;
         }
-        app->modulation = modid;
+    } else {
+        return;
     }
 
     /* Apply changes. */

@@ -4,6 +4,7 @@ static TCodeCommandArray decode_device_command(const uint8_t* buffer, uint16_t s
     TCodeCommandArray command_array;
     if(size < 2) {
         command_array.size = 0;
+        FURI_LOG_W("TCode Parser", "Unexpected code length for device command");
         return command_array;
     }
 
@@ -13,15 +14,19 @@ static TCodeCommandArray decode_device_command(const uint8_t* buffer, uint16_t s
 
     switch(buffer[1]) {
     case '0':
+        FURI_LOG_T("TCode Parser", "Device Identification requested");
         command_array.commands[0].data.device_command = DeviceIdentification;
         break;
     case '1':
+        FURI_LOG_T("TCode Parser", "TCode version requested");
         command_array.commands[0].data.device_command = TCodeVersion;
         break;
     case '2':
+        FURI_LOG_T("TCode Parser", "Preferences list requested");
         command_array.commands[0].data.device_command = ListAxesAndUserRangePreferences;
         break;
     case 'S':
+        FURI_LOG_T("TCode Parser", "Stop requested");
         command_array.commands[0].data.device_command = Stop;
         break;
     default:
@@ -41,6 +46,8 @@ static TCodeCommandArray decode_general_command(const uint8_t* buffer, uint16_t 
         }
     }
 
+    FURI_LOG_T("TCode Parser", "Found %u commands in the message", counter);
+
     TCodeCommandArray commands_array;
     commands_array.size = counter;
     commands_array.commands = malloc(commands_array.size * sizeof(TCodeCommand));
@@ -48,6 +55,7 @@ static TCodeCommandArray decode_general_command(const uint8_t* buffer, uint16_t 
     uint16_t position = 0;
     for(uint16_t i = 0; i < counter; i++) {
         TCodeCommand command;
+        command.command_type = Unknown;
 
         TCodeCommandMotionType motion_type;
         switch(buffer[position]) {
@@ -68,11 +76,14 @@ static TCodeCommandArray decode_general_command(const uint8_t* buffer, uint16_t 
             motion_type = Auxiliary;
             break;
         default: // error
+            FURI_LOG_W("TCode Parser", "Unexpected motion type: %u", buffer[position]);
             return commands_array;
         }
+        FURI_LOG_T("TCode Parser", "Parsed motion_type: %u", motion_type);
         position++;
 
         uint16_t channel = buffer[position] - 48; // single ascii character 0-9
+        FURI_LOG_T("TCode Parser", "Parsed channel: %u", channel);
         position++;
 
         // X characters that are digits
@@ -90,8 +101,12 @@ static TCodeCommandArray decode_general_command(const uint8_t* buffer, uint16_t 
         magnitude[position - current_position + 2] = '\0';
         float magnitude_float = strtof((char*)magnitude, NULL);
         free(magnitude);
+        FURI_LOG_T("TCode Parser", "Parsed magnitude: %f", (double)magnitude_float);
 
-        if(position == size || buffer[position] == ' ') {
+        FURI_LOG_T("TCode Parser REMOVE ME", "Current position: %u, size: %u", position, size);
+        FURI_LOG_T("TCode Parser REMOVE ME", "%u", buffer[position]);
+        if(position == size || buffer[position] == ' ' || buffer[position] == '\n') {
+            FURI_LOG_T("TCode Parser", "Command type: Magnitude");
             command.command_type = Magnitude;
             command.data.magnitude_command.motion_type = motion_type;
             command.data.magnitude_command.channel_id = channel;
@@ -116,13 +131,19 @@ static TCodeCommandArray decode_general_command(const uint8_t* buffer, uint16_t 
         command.data.magnitude_time_interval_command.magnitude = magnitude_float;
 
         if(current_step == 'I' || current_step == 'i') {
+            FURI_LOG_T("TCode Parser", "Command type: MagnitudeTimeInterval");
             command.command_type = MagnitudeTimeInterval;
             command.data.magnitude_time_interval_command.time_interval_milliseconds = int_value;
         }
 
         if(current_step == 'S' || current_step == 's') {
+            FURI_LOG_T("TCode Parser", "Command type: MagnitudeSpeed");
             command.command_type = MagnitudeSpeed;
             command.data.magnitude_speed_command.speed_per_hundred_milliseconds = int_value;
+        }
+
+        if(command.command_type == Unknown) {
+            FURI_LOG_W("TCode Parser", "Unknown command type!");
         }
 
         commands_array.commands[i] = command;
@@ -139,6 +160,7 @@ TCodeCommandArray tcode_decode(uint8_t* buffer, uint16_t size) {
     switch(buffer[0]) {
     case 'd':
     case 'D':
+        FURI_LOG_T("TCode Parser", "Parsing device command...");
         return decode_device_command(buffer, size);
     case 'l':
     case 'L':
@@ -148,6 +170,7 @@ TCodeCommandArray tcode_decode(uint8_t* buffer, uint16_t size) {
     case 'V':
     case 'a':
     case 'A':
+        FURI_LOG_T("TCode Parser", "Parsing general command...");
         return decode_general_command(buffer, size);
     default: // error
     {

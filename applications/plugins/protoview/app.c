@@ -28,6 +28,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     case ViewRawPulses:
         render_view_raw_pulses(canvas, app);
         break;
+    case ViewInfo:
+        render_view_info(canvas, app);
+        break;
     case ViewFrequencySettings:
     case ViewModulationSettings:
         render_view_settings(canvas, app);
@@ -42,9 +45,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
  * in the while() loop of the app entry point function. */
 static void input_callback(InputEvent* input_event, void* ctx) {
     ProtoViewApp* app = ctx;
-
     furi_message_queue_put(app->event_queue, input_event, FuriWaitForever);
-    FURI_LOG_E(TAG, "INPUT CALLBACK %d", (int)input_event->key);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -71,7 +72,8 @@ ProtoViewApp* protoview_app_alloc() {
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
-    app->us_scale = 100;
+    app->signal_decoded = false;
+    app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
 
     //init Worker & Protocol
@@ -163,7 +165,8 @@ int32_t protoview_app_entry(void* p) {
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if(qstat == FuriStatusOk) {
-            FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
+            if(DEBUG_MSG)
+                FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
@@ -187,6 +190,9 @@ int32_t protoview_app_entry(void* p) {
                 case ViewRawPulses:
                     process_input_raw_pulses(app, input);
                     break;
+                case ViewInfo:
+                    process_input_info(app, input);
+                    break;
                 case ViewFrequencySettings:
                 case ViewModulationSettings:
                     process_input_settings(app, input);
@@ -199,9 +205,11 @@ int32_t protoview_app_entry(void* p) {
         } else {
             /* Useful to understand if the app is still alive when it
              * does not respond because of bugs. */
-            static int c = 0;
-            c++;
-            if(!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            if(DEBUG_MSG) {
+                static int c = 0;
+                c++;
+                if(!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            }
         }
         view_port_update(app->view_port);
     }

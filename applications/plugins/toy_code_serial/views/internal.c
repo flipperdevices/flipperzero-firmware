@@ -52,7 +52,7 @@ static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context
         TCodeCommandArray commands = tcode_decode(event.data.buffer, event.data.size);
         FURI_LOG_D(TAG, "Decoded commands array size: %u", commands.size);
         for(uint16_t i = 0; i < commands.size; i++) {
-            FURI_LOG_D(TAG, "Command #%u, type: %u", i, commands.commands[i].command_type);
+            FURI_LOG_D(TAG, "Command #%u, type: %u\n", i, commands.commands[i].command_type);
         }
         for(uint16_t i = 0; i < commands.size; i++) {
             // looking for first vibro command to execute
@@ -62,7 +62,6 @@ static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context
                 process_general_command(current_command);
             }
         }
-        free(commands.commands);
     }
     return 0;
 }

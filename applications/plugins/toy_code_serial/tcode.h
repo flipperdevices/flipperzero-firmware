@@ -5,6 +5,7 @@ typedef enum {
     Magnitude,
     MagnitudeTimeInterval,
     MagnitudeSpeed,
+    Unknown,
 } TCodeCommandType;
 
 typedef enum {

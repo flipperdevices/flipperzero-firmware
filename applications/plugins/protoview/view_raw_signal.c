@@ -60,6 +60,10 @@ void render_view_raw_pulses(Canvas* const canvas, ProtoViewApp* app) {
     snprintf(buf, sizeof(buf), "%luus", (unsigned long)DetectedSamples->short_pulse_dur);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_with_border(canvas, 97, 63, buf, ColorWhite, ColorBlack);
+    if(app->signal_decoded) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_with_border(canvas, 1, 61, app->signal_info.name, ColorWhite, ColorBlack);
+    }
 }
 
 /* Handle input for the raw pulses view. */
@@ -72,15 +76,14 @@ void process_input_raw_pulses(ProtoViewApp* app, InputEvent input) {
             app->signal_offset++;
         else if(input.key == InputKeyLeft)
             app->signal_offset--;
-        else if(input.key == InputKeyOk)
+        else if(input.key == InputKeyOk) {
             app->signal_offset = 0;
+            app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
+        }
     } else if(input.type == InputTypeShort) {
         if(input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
-            app->signal_bestlen = 0;
-            app->signal_offset = 0;
-            raw_samples_reset(DetectedSamples);
-            raw_samples_reset(RawSamples);
+            reset_current_signal(app);
         } else if(input.key == InputKeyDown) {
             /* Rescaling. The set becomes finer under 50us per pixel. */
             uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;

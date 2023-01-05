@@ -2,17 +2,19 @@
  * See the LICENSE file for information about the license. */
 
 #include "app.h"
+#include "custom_presets.h"
 
 #include <flipper_format/flipper_format_i.h>
 
 ProtoViewModulation ProtoViewModulations[] = {
-    {"OOK 650Khz", FuriHalSubGhzPresetOok650Async},
-    {"OOK 270Khz", FuriHalSubGhzPresetOok270Async},
-    {"2FSK 2.38Khz", FuriHalSubGhzPreset2FSKDev238Async},
-    {"2FSK 47.6Khz", FuriHalSubGhzPreset2FSKDev476Async},
-    {"MSK", FuriHalSubGhzPresetMSK99_97KbAsync},
-    {"GFSK", FuriHalSubGhzPresetGFSK9_99KbAsync},
-    {NULL, 0} /* End of list sentinel. */
+    {"OOK 650Khz", FuriHalSubGhzPresetOok650Async, NULL},
+    {"OOK 270Khz", FuriHalSubGhzPresetOok270Async, NULL},
+    {"2FSK 2.38Khz", FuriHalSubGhzPreset2FSKDev238Async, NULL},
+    {"2FSK 47.6Khz", FuriHalSubGhzPreset2FSKDev476Async, NULL},
+    {"MSK", FuriHalSubGhzPresetMSK99_97KbAsync, NULL},
+    {"GFSK", FuriHalSubGhzPresetGFSK9_99KbAsync, NULL},
+    {"FSK for TPMS", 0, (uint8_t*)protoview_subghz_tpms_async_regs},
+    {NULL, 0, NULL} /* End of list sentinel. */
 };
 
 /* Called after the application initialization in order to setup the
@@ -23,7 +25,14 @@ void radio_begin(ProtoViewApp* app) {
     furi_assert(app);
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(ProtoViewModulations[app->modulation].preset);
+
+    /* The CC1101 preset can be either one of the standard presets, if
+     * the modulation "custom" field is NULL, or a custom preset we
+     * defined in custom_presets.h. */
+    if(ProtoViewModulations[app->modulation].custom == NULL)
+        furi_hal_subghz_load_preset(ProtoViewModulations[app->modulation].preset);
+    else
+        furi_hal_subghz_load_custom_preset(ProtoViewModulations[app->modulation].custom);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     app->txrx->txrx_state = TxRxStateIDLE;
 }
