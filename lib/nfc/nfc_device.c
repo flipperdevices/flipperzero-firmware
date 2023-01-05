@@ -58,6 +58,8 @@ static void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_
         furi_string_set(format_string, "Mifare Classic");
     } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
         furi_string_set(format_string, "Mifare DESFire");
+    } else if(dev->format == NfcDeviceSaveFormatTopaz) {
+        furi_string_set(format_string, "Topaz");
     } else {
         furi_string_set(format_string, "Unknown");
     }
@@ -91,6 +93,11 @@ static bool nfc_device_parse_format_string(NfcDevice* dev, FuriString* format_st
     if(furi_string_start_with_str(format_string, "Mifare DESFire")) {
         dev->format = NfcDeviceSaveFormatMifareDesfire;
         dev->dev_data.protocol = NfcDeviceProtocolMifareDesfire;
+        return true;
+    }
+    if(furi_string_start_with_str(format_string, "Topaz")) {
+        dev->format = NfcDeviceSaveFormatTopaz;
+        dev->dev_data.protocol = NfcDeviceProtocolTopaz;
         return true;
     }
     return false;
@@ -1012,6 +1019,62 @@ bool nfc_device_load_key_cache(NfcDevice* dev) {
     return load_success;
 }
 
+static bool nfc_device_save_topaz_data(FlipperFormat* file, NfcDevice* dev) {
+    bool saved = false;
+    TopazData* data = &dev->dev_data.topaz_data;
+    FuriString* temp_str = furi_string_alloc();
+    TopazType type = topaz_get_type_from_hr0(data->hr[0]);
+    size_t data_length = topaz_get_size_by_type(type);
+
+    do {
+        if(!flipper_format_write_comment_cstr(file, "Topaz-specific data")) break;
+        if(!flipper_format_write_hex(file, "HR0", &data->hr[0], 1)) break;
+        if(!flipper_format_write_hex(file, "HR1", &data->hr[1], 1)) break;
+
+        for(uint16_t i = 0; i < data_length; i += 8) {
+            furi_string_printf(temp_str, "Block %02X", i / 8);
+            if(!flipper_format_write_hex(file, furi_string_get_cstr(temp_str), &data->data[i], 8))
+                break;
+        }
+
+        saved = true;
+    } while(false);
+
+    furi_string_free(temp_str);
+    return saved;
+}
+
+static bool nfc_device_load_topaz_data(FlipperFormat* file, NfcDevice* dev) {
+    bool parsed = false;
+    TopazData* data = &dev->dev_data.topaz_data;
+    FuriString* temp_str = furi_string_alloc();
+    TopazType type;
+    size_t data_length;
+
+    do {
+        if(!flipper_format_read_hex(file, "HR0", &data->hr[0], 1)) break;
+        if(!flipper_format_read_hex(file, "HR1", &data->hr[1], 1)) break;
+
+        if((data->hr[0] & 0xf0) != 0x10) {
+            FURI_LOG_D(TAG, "Non-Topaz HR0 detected: %02X", data->hr[0]);
+            break;
+        }
+
+        type = topaz_get_type_from_hr0(data->hr[0]);
+        data_length = topaz_get_size_by_type(type);
+
+        for(uint16_t i = 0; i < data_length; i += 8) {
+            furi_string_printf(temp_str, "Block %02X", i / 8);
+            if(!flipper_format_read_hex(file, furi_string_get_cstr(temp_str), &data->data[i], 8))
+                break;
+        }
+
+        parsed = true;
+    } while(false);
+
+    return parsed;
+}
+
 void nfc_device_set_name(NfcDevice* dev, const char* name) {
     furi_assert(dev);
 
@@ -1091,6 +1154,8 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
             if(!nfc_device_save_mifare_classic_data(file, dev)) break;
             // Save keys cache
             if(!nfc_device_save_mifare_classic_keys(dev)) break;
+        } else if(dev->format == NfcDeviceSaveFormatTopaz) {
+            if(!nfc_device_save_topaz_data(file, dev)) break;
         }
         saved = true;
     } while(0);
@@ -1186,6 +1251,8 @@ static bool nfc_device_load_data(NfcDevice* dev, FuriString* path, bool show_dia
             if(!nfc_device_load_mifare_classic_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
             if(!nfc_device_load_mifare_df_data(file, dev)) break;
+        } else if(dev->format == NfcDeviceSaveFormatTopaz) {
+            if(!nfc_device_load_topaz_data(file, dev)) break;
         } else if(dev->format == NfcDeviceSaveFormatBankCard) {
             if(!nfc_device_load_bank_card_data(file, dev)) break;
         }

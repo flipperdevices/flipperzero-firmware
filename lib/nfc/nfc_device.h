@@ -11,6 +11,7 @@
 #include <lib/nfc/protocols/mifare_ultralight.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/mifare_desfire.h>
+#include <lib/nfc/protocols/topaz.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +32,7 @@ typedef enum {
     NfcDeviceProtocolMifareUl,
     NfcDeviceProtocolMifareClassic,
     NfcDeviceProtocolMifareDesfire,
+    NfcDeviceProtocolTopaz,
 } NfcProtocol;
 
 typedef enum {
@@ -39,6 +41,7 @@ typedef enum {
     NfcDeviceSaveFormatMifareUl,
     NfcDeviceSaveFormatMifareClassic,
     NfcDeviceSaveFormatMifareDesfire,
+    NfcDeviceSaveFormatTopaz,
 } NfcDeviceSaveFormat;
 
 typedef struct {
@@ -56,6 +59,7 @@ typedef enum {
     NfcReadModeMfClassic,
     NfcReadModeMfUltralight,
     NfcReadModeMfDesfire,
+    NfcReadModeTopaz,
     NfcReadModeNFCA,
 } NfcReadMode;
 
@@ -73,6 +77,7 @@ typedef struct {
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
         MifareDesfireData mf_df_data;
+        TopazData topaz_data;
     };
     FuriString* parsed_data;
 } NfcDeviceData;

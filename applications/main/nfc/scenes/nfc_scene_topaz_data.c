@@ -1,0 +1,34 @@
+#include "../nfc_i.h"
+
+void nfc_scene_topaz_data_on_enter(void* context) {
+    Nfc* nfc = context;
+    TopazData* data = &nfc->dev->dev_data.topaz_data;
+    TextBox* text_box = nfc->text_box;
+    TopazType type = topaz_get_type_from_hr0(data->hr[0]);
+    size_t data_size = topaz_get_size_by_type(type);
+
+    text_box_set_font(text_box, TextBoxFontHex);
+    for(uint16_t i = 0; i < data_size; i += 2) {
+        if(!(i % 8) && i) {
+            furi_string_push_back(nfc->text_box_store, '\n');
+        }
+        furi_string_cat_printf(nfc->text_box_store, "%02X%02X ", data->data[i], data->data[i + 1]);
+    }
+    text_box_set_text(text_box, furi_string_get_cstr(nfc->text_box_store));
+
+    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+}
+
+bool nfc_scene_topaz_data_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+
+void nfc_scene_topaz_data_on_exit(void* context) {
+    Nfc* nfc = context;
+
+    // Clean view
+    text_box_reset(nfc->text_box);
+    furi_string_reset(nfc->text_box_store);
+}

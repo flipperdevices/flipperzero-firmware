@@ -15,7 +15,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
     if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) ||
-       (protocol == NfcDeviceProtocolMifareClassic)) {
+       (protocol == NfcDeviceProtocolMifareClassic) || (protocol == NfcDeviceProtocolTopaz)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -41,6 +41,11 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             temp_str, "\e#%s\n", nfc_mf_classic_type(dev_data->mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
+    } else if(protocol == NfcDeviceProtocolTopaz) {
+        furi_string_cat_printf(
+            temp_str,
+            "\e#%s\n",
+            nfc_topaz_type(topaz_get_type_from_hr0(dev_data->topaz_data.hr[0])));
     } else {
         furi_string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
     }
@@ -114,6 +119,9 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
         furi_string_cat_printf(temp_str, "\nKeys Found %d/%d", keys_found, keys_total);
         furi_string_cat_printf(temp_str, "\nSectors Read %d/%d", sectors_read, sectors_total);
+    } else if(protocol == NfcDeviceProtocolTopaz) {
+        TopazData* data = &dev_data->topaz_data;
+        furi_string_cat_printf(temp_str, "\nHR0: %02X\nHR1: %02X", data->hr[0], data->hr[1]);
     }
 
     // Add text scroll widget
@@ -139,6 +147,9 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolMifareClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicData);
+                consumed = true;
+            } else if(protocol == NfcDeviceProtocolTopaz) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneTopazData);
                 consumed = true;
             }
         }

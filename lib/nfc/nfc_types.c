@@ -23,6 +23,8 @@ const char* nfc_guess_protocol(NfcProtocol protocol) {
         return "Mifare Classic";
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         return "Mifare DESFire";
+    } else if(protocol == NfcDeviceProtocolTopaz) {
+        return "Topaz";
     } else {
         return "Unrecognized";
     }
@@ -63,5 +65,15 @@ const char* nfc_mf_classic_type(MfClassicType type) {
         return "Mifare Classic 4K";
     } else {
         return "Mifare Classic";
+    }
+}
+
+const char* nfc_topaz_type(TopazType type) {
+    if(type == TopazType96) {
+        return "Topaz 96";
+    } else if(type == TopazType512) {
+        return "Topaz 512";
+    } else {
+        return "Topaz";
     }
 }

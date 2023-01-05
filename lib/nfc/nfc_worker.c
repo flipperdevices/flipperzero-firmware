@@ -229,6 +229,34 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     return read_success;
 }
 
+static bool nfc_worker_read_topaz(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    bool read_success = false;
+    TopazData* data = &nfc_worker->dev_data->topaz_data;
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
+    do {
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300, false)) break;
+        if(!topaz_read_card(tx_rx, data, nfc_worker->dev_data->nfc_data.uid)) break;
+        read_success = true;
+    } while(false);
+
+    if(read_success) {
+        // Update full UID from data
+        memcpy(nfc_worker->dev_data->nfc_data.uid, data->data, TOPAZ_UID_FULL_LENGTH);
+        nfc_worker->dev_data->nfc_data.uid_len = TOPAZ_UID_FULL_LENGTH;
+    }
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
+    return read_success;
+}
+
 static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
 
@@ -252,6 +280,10 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
         }
         card_read = true;
+    } else if(topaz_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1])) {
+        FURI_LOG_I(TAG, "Topaz detected");
+        nfc_worker->dev_data->protocol = NfcDeviceProtocolTopaz;
+        card_read = nfc_worker_read_topaz(nfc_worker, tx_rx);
     } else {
         nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
         card_read = true;
@@ -286,6 +318,9 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolMifareDesfire) {
                         event = NfcWorkerEventReadMfDesfire;
+                        break;
+                    } else if(dev_data->protocol == NfcDeviceProtocolTopaz) {
+                        event = NfcWorkerEventReadTopaz;
                         break;
                     } else if(dev_data->protocol == NfcDeviceProtocolUnknown) {
                         event = NfcWorkerEventReadUidNfcA;
@@ -368,6 +403,12 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
                     nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareDesfire;
                     if(nfc_worker_read_mf_desfire(nfc_worker, &tx_rx)) {
                         event = NfcWorkerEventReadMfDesfire;
+                        break;
+                    }
+                } else if(read_mode == NfcReadModeTopaz) {
+                    nfc_worker->dev_data->protocol = NfcDeviceProtocolTopaz;
+                    if(nfc_worker_read_topaz(nfc_worker, &tx_rx)) {
+                        event = NfcWorkerEventReadTopaz;
                         break;
                     }
                 } else if(read_mode == NfcReadModeNFCA) {
