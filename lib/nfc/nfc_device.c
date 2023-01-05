@@ -1023,15 +1023,13 @@ static bool nfc_device_save_topaz_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
     TopazData* data = &dev->dev_data.topaz_data;
     FuriString* temp_str = furi_string_alloc();
-    TopazType type = topaz_get_type_from_hr0(data->hr[0]);
-    size_t data_length = topaz_get_size_by_type(type);
 
     do {
         if(!flipper_format_write_comment_cstr(file, "Topaz-specific data")) break;
         if(!flipper_format_write_hex(file, "HR0", &data->hr[0], 1)) break;
         if(!flipper_format_write_hex(file, "HR1", &data->hr[1], 1)) break;
 
-        for(uint16_t i = 0; i < data_length; i += 8) {
+        for(uint16_t i = 0; i < data->size; i += 8) {
             furi_string_printf(temp_str, "Block %02X", i / 8);
             if(!flipper_format_write_hex(file, furi_string_get_cstr(temp_str), &data->data[i], 8))
                 break;
@@ -1048,8 +1046,6 @@ static bool nfc_device_load_topaz_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     TopazData* data = &dev->dev_data.topaz_data;
     FuriString* temp_str = furi_string_alloc();
-    TopazType type;
-    size_t data_length;
 
     do {
         if(!flipper_format_read_hex(file, "HR0", &data->hr[0], 1)) break;
@@ -1060,10 +1056,10 @@ static bool nfc_device_load_topaz_data(FlipperFormat* file, NfcDevice* dev) {
             break;
         }
 
-        type = topaz_get_type_from_hr0(data->hr[0]);
-        data_length = topaz_get_size_by_type(type);
+        data->type = topaz_get_type_from_hr0(data->hr[0]);
+        data->size = topaz_get_size_by_type(data->type);
 
-        for(uint16_t i = 0; i < data_length; i += 8) {
+        for(uint16_t i = 0; i < data->size; i += 8) {
             furi_string_printf(temp_str, "Block %02X", i / 8);
             if(!flipper_format_read_hex(file, furi_string_get_cstr(temp_str), &data->data[i], 8))
                 break;

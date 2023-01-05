@@ -42,10 +42,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
     } else if(protocol == NfcDeviceProtocolTopaz) {
-        furi_string_cat_printf(
-            temp_str,
-            "\e#%s\n",
-            nfc_topaz_type(topaz_get_type_from_hr0(dev_data->topaz_data.hr[0])));
+        furi_string_cat_printf(temp_str, "\e#%s\n", nfc_topaz_type(dev_data->topaz_data.type));
     } else {
         furi_string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
     }

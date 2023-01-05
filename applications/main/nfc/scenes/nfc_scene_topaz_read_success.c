@@ -27,8 +27,7 @@ void nfc_scene_topaz_read_success_on_enter(void* context) {
     if(furi_string_size(nfc->dev->dev_data.parsed_data)) {
         temp_str = furi_string_alloc_set(nfc->dev->dev_data.parsed_data);
     } else {
-        temp_str = furi_string_alloc_printf(
-            "\e#%s\n", nfc_topaz_type(topaz_get_type_from_hr0(topaz_data->hr[0])));
+        temp_str = furi_string_alloc_printf("\e#%s\n", nfc_topaz_type(topaz_data->type));
         furi_string_cat_printf(temp_str, "UID:");
         for(size_t i = 0; i < data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", data->uid[i]);

@@ -28,9 +28,7 @@ size_t topaz_get_size_by_type(TopazType type) {
 }
 
 bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid) {
-    size_t data_size;
     size_t data_read = 0;
-    TopazType type;
     bool read_success = false;
 
     do {
@@ -54,17 +52,17 @@ bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid
 
         memcpy(data->hr, tx_rx->rx_data, sizeof(data->hr));
 
-        type = topaz_get_type_from_hr0(data->hr[0]);
-        if(type == TopazTypeUnknown) {
+        data->type = topaz_get_type_from_hr0(data->hr[0]);
+        if(data->type == TopazTypeUnknown) {
             FURI_LOG_D(TAG, "Unknown type, HR0=%#04x", data->hr[0]);
             break;
         }
-        data_size = topaz_get_size_by_type(type);
+        data->size = topaz_get_size_by_type(data->type);
 
         memcpy(data->data, &tx_rx->rx_data[2], 120);
         data_read += 120;
 
-        if(data_size > TOPAZ_96_SIZE) {
+        if(data->size > TOPAZ_96_SIZE) {
             // Perform READ8 on block 0F
             tx_rx->tx_data[0] = TOPAZ_CMD_READ8;
             tx_rx->tx_data[1] = 0x0F;
@@ -83,7 +81,7 @@ bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid
             data_read += 8;
 
             // Perform RSEG for rest of tag
-            for(uint8_t i = 1; data_read < data_size; ++i) {
+            for(uint8_t i = 1; data_read < data->size; ++i) {
                 tx_rx->tx_data[0] = TOPAZ_CMD_RSEG;
                 tx_rx->tx_data[1] = i << 4;
                 memset(&tx_rx->tx_data[2], 0, 8);

@@ -4,11 +4,9 @@ void nfc_scene_topaz_data_on_enter(void* context) {
     Nfc* nfc = context;
     TopazData* data = &nfc->dev->dev_data.topaz_data;
     TextBox* text_box = nfc->text_box;
-    TopazType type = topaz_get_type_from_hr0(data->hr[0]);
-    size_t data_size = topaz_get_size_by_type(type);
 
     text_box_set_font(text_box, TextBoxFontHex);
-    for(uint16_t i = 0; i < data_size; i += 2) {
+    for(uint16_t i = 0; i < data->size; i += 2) {
         if(!(i % 8) && i) {
             furi_string_push_back(nfc->text_box_store, '\n');
         }

@@ -27,6 +27,8 @@ typedef enum {
 } TopazType;
 
 typedef struct {
+    TopazType type;
+    size_t size;
     uint8_t hr[2];
     uint8_t data[TOPAZ_MAX_SIZE];
 } TopazData;
