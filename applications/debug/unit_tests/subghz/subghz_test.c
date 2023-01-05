@@ -619,7 +619,8 @@ MU_TEST(subghz_decoder_linear_test) {
 MU_TEST(subghz_decoder_linear_delta3_test) {
     mu_assert(
         subghz_decoder_test(
-            EXT_PATH("unit_tests/subghz/linear_delta3_raw.sub"), SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME),
+            EXT_PATH("unit_tests/subghz/linear_delta3_raw.sub"),
+            SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME),
         "Test decoder " SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME " error\r\n");
 }
 
