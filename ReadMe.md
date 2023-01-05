@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) WIP
 - Added: [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - Added: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
+- Unleashed: [Updated infrared assets (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/267)
 
 <a name="release">
 
