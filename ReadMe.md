@@ -61,7 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - Added: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Unleashed: [Updated infrared assets (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/267)
-- [New Patreon Builds: Anime+420+18.](https://www.patreon.com/posts/76813216)
+- [New Patreon Builds: Anime+420+18.](https://www.patreon.com/posts/76846321)
 
 <a name="release">
 
