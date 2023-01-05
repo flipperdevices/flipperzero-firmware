@@ -31,20 +31,31 @@ typedef struct AsteroidsApp {
     /* Game state. */
     int running;            /* Once false exists the app. */
     uint32_t ticks;         /* Game ticks. Increments at each refresh. */
-    float shipx;            /* Ship x position. */
-    float shipy;            /* Ship y position. */
-    float shipa;            /* Ship current angle, 2*PI is a full rotation. */
-    float shipvx;           /* x velocity. */
-    float shipvy;           /* y velocity. */
-    float bulletsx[MAXBUL]; /* Bullets x position. */
-    float bulletsy[MAXBUL]; /* Bullets y position. */
-    int bullets_num;        /* Active bullets. */
-    uint32_t last_bullet_tick; /* Tick the last bullet was fired. */
+
+    /* Ship state. */
     struct {
-        float x, y, vx, vy, size;
-        uint8_t shape_seed;
-    } asteroids[MAXAST];        /* Asteroids state. */
-    int asteroids_num;          /* Active asteroids. */
+        float x,            /* Ship x position. */
+        y,                  /* Ship y position. */
+        vx,                 /* x velocity. */
+        vy,                 /* y velocity. */
+        rot;                /* Current rotation. 2*PI full ortation. */
+    } ship;
+
+    /* Bullets state. */
+    struct {
+        float x, y, vx, vy;     /* Fields like in ship. */
+    } bullets[MAXBUL];
+    int bullets_num;            /* Active bullets. */
+    uint32_t last_bullet_tick;  /* Tick the last bullet was fired. */
+
+    /* Asteroids state. */
+    struct {
+        float x, y, vx, vy, rot,    /* Fields like ship. */
+        size;                       /* Asteroid size. */
+        uint8_t shape_seed;         /* Seed to give random shape. */
+    } asteroids[MAXAST];            /* Asteroids state. */
+    int asteroids_num;              /* Active asteroids. */
+
     uint32_t pressed[InputKeyMAX]; /* pressed[id] is true if pressed.
                                       Each array item contains the time
                                       in milliseconds the key was pressed. */
@@ -118,7 +129,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     canvas_draw_box(canvas, 0, 0, 127, 63);
 
     /* Draw ship and asteroids. */
-    draw_poly(canvas,&ShipPoly,app->shipx,app->shipy,app->shipa);
+    draw_poly(canvas,&ShipPoly,app->ship.x,app->ship.y,app->ship.rot);
 }
 
 /* Here all we do is putting the events into the queue that will be handled
@@ -143,11 +154,11 @@ AsteroidsApp* asteroids_app_alloc() {
 
     app->running = 1;
     app->ticks = 0;
-    app->shipx = SCREEN_XRES / 2;
-    app->shipy = SCREEN_YRES / 2;
-    app->shipa = PI; /* Start headed towards top. */
-    app->shipvx = 0;
-    app->shipvy = 0;
+    app->ship.x = SCREEN_XRES / 2;
+    app->ship.y = SCREEN_YRES / 2;
+    app->ship.rot = PI; /* Start headed towards top. */
+    app->ship.vx = 0;
+    app->ship.vy = 0;
     app->bullets_num = 0;
     app->last_bullet_tick = 0;
     app->asteroids_num = 0;
@@ -180,22 +191,22 @@ void asteroids_app_free(AsteroidsApp *app) {
  * Each time this function is called, app->tick is incremented. */
 static void game_tick(void *ctx) {
     AsteroidsApp *app = ctx;
-    if (app->pressed[InputKeyLeft]) app->shipa -= .2;
-    if (app->pressed[InputKeyRight]) app->shipa += .2;
+    if (app->pressed[InputKeyLeft]) app->ship.rot -= .2;
+    if (app->pressed[InputKeyRight]) app->ship.rot += .2;
     if (app->pressed[InputKeyOk]) {
-        app->shipvx -= 0.15*(float)sin(app->shipa);
-        app->shipvy += 0.15*(float)cos(app->shipa);
+        app->ship.vx -= 0.15*(float)sin(app->ship.rot);
+        app->ship.vy += 0.15*(float)cos(app->ship.rot);
     }
     
     /* Update ship position according to its velocity. */
-    app->shipx += app->shipvx;
-    app->shipy += app->shipvy;
+    app->ship.x += app->ship.vx;
+    app->ship.y += app->ship.vy;
 
     /* Return back from one side to the other of the screen. */
-    if (app->shipx >= SCREEN_XRES) app->shipx = 0;
-    else if (app->shipx < 0) app->shipx = SCREEN_XRES-1;
-    if (app->shipy >= SCREEN_YRES) app->shipy = 0;
-    else if (app->shipy < 0) app->shipy = SCREEN_YRES-1;
+    if (app->ship.x >= SCREEN_XRES) app->ship.x = 0;
+    else if (app->ship.x < 0) app->ship.x = SCREEN_XRES-1;
+    if (app->ship.y >= SCREEN_YRES) app->ship.y = 0;
+    else if (app->ship.y < 0) app->ship.y = SCREEN_YRES-1;
 
     app->ticks++;
     view_port_update(app->view_port);
