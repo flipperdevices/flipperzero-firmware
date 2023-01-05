@@ -38,6 +38,8 @@ bool resource_manifest_reader_open(ResourceManifestReader* resource_manifest, co
         resource_manifest->stream, filename, FSAM_READ, FSOM_OPEN_EXISTING);
 }
 
+//-V:resource_manifest_reader_next:547, 560
+
 /* Read entries in format of
  * F:<hash>:<size>:<name>
  * D:<name> 
@@ -107,8 +109,7 @@ ResourceManifestEntry* resource_manifest_reader_next(ResourceManifestReader* res
         } else if(
             resource_manifest->entry.type == ResourceManifestEntryTypeDirectory ||
             resource_manifest->entry.type == ResourceManifestEntryTypeVersion ||
-            resource_manifest->entry.type ==
-                ResourceManifestEntryTypeTimestamp) { //-V:resource_manifest_reader_next:547,560
+            resource_manifest->entry.type == ResourceManifestEntryTypeTimestamp) {
             /* Parse version, timestamp or directory entry
                <Type>:<Value> */
 
