@@ -76,7 +76,7 @@ void furi_hal_nfc_exit_sleep() {
     rfalLowPowerModeStop();
 }
 
-bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
+bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout, bool emv_compliance) {
     furi_assert(nfc_data);
 
     rfalNfcDevice* dev_list = NULL;
@@ -90,7 +90,7 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
         rfalNfcInitialize();
     }
     rfalNfcDiscoverParam params;
-    params.compMode = RFAL_COMPLIANCE_MODE_EMV;
+    params.compMode = emv_compliance ? RFAL_COMPLIANCE_MODE_EMV : RFAL_COMPLIANCE_MODE_NFC;
     params.techs2Find = RFAL_NFC_POLL_TECH_A | RFAL_NFC_POLL_TECH_B | RFAL_NFC_POLL_TECH_F |
                         RFAL_NFC_POLL_TECH_V | RFAL_NFC_POLL_TECH_AP2P | RFAL_NFC_POLL_TECH_ST25TB;
     params.totalDuration = 1000;
@@ -124,7 +124,7 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
             rfalNfcSelect(0);
         }
         if(DWT->CYCCNT - start > timeout * clocks_in_ms) {
-            rfalNfcDeactivate(true);
+            rfalNfcDeactivate(false);
             FURI_LOG_T(TAG, "Timeout");
             break;
         }

@@ -135,16 +135,15 @@ void furi_hal_nfc_stop_cmd();
  */
 void furi_hal_nfc_exit_sleep();
 
-/** NFC poll
+/** NFC detect
  *
- * @param      dev_list    pointer to rfalNfcDevice buffer
- * @param      dev_cnt     pointer device count
- * @param      timeout     timeout in ms
- * @param      deactivate  deactivate flag
+ * @param      nfc_data        pointer to FuriHalNfcDevData
+ * @param      timeout         timeout in ms
+ * @param      emv_compliance  whether to use EMVCo compliance mode
  *
  * @return     true on success
  */
-bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout);
+bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout, bool emv_compliance);
 
 /** Activate NFC-A tag
  *
