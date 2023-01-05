@@ -107,7 +107,7 @@ ResourceManifestEntry* resource_manifest_reader_next(ResourceManifestReader* res
         } else if(
             resource_manifest->entry.type == ResourceManifestEntryTypeDirectory ||
             resource_manifest->entry.type == ResourceManifestEntryTypeVersion ||
-            resource_manifest->entry.type == ResourceManifestEntryTypeTimestamp) { //-V547
+            resource_manifest->entry.type == ResourceManifestEntryTypeTimestamp) { //-V547,-V560
             /* Parse version, timestamp or directory entry
                <Type>:<Value> */
 
