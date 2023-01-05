@@ -18,13 +18,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster)
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
-- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, Anime+420, 420, 420+18, DBZ, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): ALL, Anime+420, Anime+420+18, 420, 420+18, DBZ, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `roguemaster.eth` or `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0105-1721-0.74.3-d63515b](https://www.patreon.com/posts/76845221)
+## Latest Updates - [PATREON: Latest Release RM0105-1750-0.74.3-0a18b6f](https://www.patreon.com/posts/76846321)
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-05 15:24 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-05 15:24 EST`
@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - Added: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Unleashed: [Updated infrared assets (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/267)
+- [New Patreon Builds: Anime+420+18.](https://www.patreon.com/posts/76813216)
 
 <a name="release">
 
