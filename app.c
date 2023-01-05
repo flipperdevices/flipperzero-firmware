@@ -35,7 +35,7 @@ typedef struct Bullet {
 } Bullet;
 
 typedef struct Asteroid {
-    float x, y, vx, vy,         /* Fields like ship. */
+    float x, y, vx, vy, rot,    /* Fields like ship. */
     rot_speed,                  /* Angular velocity (rot speed and sense). */
     size;                       /* Asteroid size. */
     uint8_t shape_seed;         /* Seed to give random shape. */
@@ -113,6 +113,7 @@ void lfsr_next(unsigned char *prev) {
     unsigned char lsb = *prev & 1;
     *prev = *prev >> 1;
     if (lsb == 1) *prev ^= 0b11000111;
+    *prev ^= *prev<<7; /* Mix things a bit more. */
 }
 
 /* Render the polygon 'poly' at x,y, rotated by the specified angle. */
@@ -132,12 +133,42 @@ void draw_poly(Canvas *const canvas, Poly *poly, uint8_t x, uint8_t y, float a)
 
 /* A bullet is just a + pixels pattern. A single pixel is not
  * visible enough. */
-void draw_bullet(Canvas *const canvas, uint8_t x, uint8_t y) {
-    canvas_draw_dot(canvas,x-1,y);
-    canvas_draw_dot(canvas,x+1,y);
-    canvas_draw_dot(canvas,x,y);
-    canvas_draw_dot(canvas,x,y-1);
-    canvas_draw_dot(canvas,x,y+1);
+void draw_bullet(Canvas *const canvas, Bullet *b) {
+    canvas_draw_dot(canvas,b->x-1,b->y);
+    canvas_draw_dot(canvas,b->x+1,b->y);
+    canvas_draw_dot(canvas,b->x,b->y);
+    canvas_draw_dot(canvas,b->x,b->y-1);
+    canvas_draw_dot(canvas,b->x,b->y+1);
+}
+
+/* Draw an asteroid. The asteroid shapes is computed on the fly and
+ * is not stored in a permanent shape structure. In order to generate
+ * the shape, we use an initial fixed shape that we resize according
+ * to the asteroid size, perturbate according to the asteroid shape
+ * seed, and finally draw it rotated of the right amount. */
+void draw_asteroid(Canvas *const canvas, Asteroid *ast) {
+    Poly ap;
+
+    /* Start with what is kinda of a circle. Note that this could be
+     * stored into a template and copied here, to avoid computing
+     * sin() / cos(). But the Flipper can handle it without problems. */
+    uint8_t r = ast->shape_seed;
+    for (int j = 0; j < 8; j++) {
+        float a = (PI*2)/8*j;
+
+        /* Before generating the point, to make the shape unique generate
+         * a random factor between .7 and 1.3 to scale the distance from
+         * the center. However this asteroid should have its unique shape
+         * that remains always the same, so we use a predictable PRNG
+         * implemented by an 8 bit shift register. */
+        lfsr_next(&r);
+        float scaling = .7+((float)r/255*.6);
+
+        ap.x[j] = (float)sin(a) * ast->size * scaling;
+        ap.y[j] = (float)cos(a) * ast->size * scaling;
+    }
+    ap.points = 8;
+    draw_poly(canvas,&ap,ast->x,ast->y,ast->rot);
 }
 
 /* Given the current position, update it according to the velocity and
@@ -164,7 +195,10 @@ void render_callback(Canvas *const canvas, void *ctx) {
     draw_poly(canvas,&ShipPoly,app->ship.x,app->ship.y,app->ship.rot);
 
     for (int j = 0; j < app->bullets_num; j++)
-        draw_bullet(canvas,app->bullets[j].x,app->bullets[j].y);
+        draw_bullet(canvas,&app->bullets[j]);
+
+    for (int j = 0; j < app->asteroids_num; j++)
+        draw_asteroid(canvas,&app->asteroids[j]);
 }
 
 /* ============================ Game logic ================================== */
@@ -173,6 +207,35 @@ float distance(float x1, float y1, float x2, float y2) {
     float dx = x1-x2;
     float dy = y1-y2;
     return sqrt(dx*dx+dy*dy);
+}
+
+/* Detect a collision between the object at x1,y1 of radius r1 and
+ * the object at x2, y2 of radius r2. A factor < 1 will make the
+ * function detect the collision even if the objects are yet not
+ * relly touching, while a factor > 1 will make it detect the collision
+ * only after they are a bit overlapping. It basically is used to
+ * rescale the distance.
+ *
+ * Note that in this simplified 2D world, objects are all considered
+ * spheres (this is why this function only takes the radius). This
+ * is, after all, kinda accurate for asteroids, for bullets, and
+ * even for the ship "core" itself. */
+bool detect_collision(float x1, float y1, float r1,
+                      float x2, float y2, float r2,
+                      float factor)
+{
+    /* The objects are colliding if the distance between object 1 and 2
+     * is smaller than the sum of the two radiuses r1 and r2.
+     * So it would be like: sqrt((x1-x2)^2+(y1-y2)^2) < r1+r2.
+     * However we can avoid computing the sqrt (which is slow) by
+     * squaring the second term and removing the square root, making
+     * the comparison like this:
+     *
+     * (x1-x2)^2+(y1-y2)^2 < (r1+r2)^2. */
+    float dx = (x1-x2)*factor;
+    float dy = (y1-y2)*factor;
+    float rsum = r1+r2;
+    return dx*dx+dy*dy < rsum*rsum;
 }
 
 /* Create a new bullet headed in the same direction of the ship. */
@@ -187,6 +250,11 @@ void ship_fire_bullet(AsteroidsApp *app) {
     /* Ship should fire from its head, not in the middle. */
     b->x += b->vx*5;
     b->y += b->vy*5;
+
+    /* Give the bullet some velocity (for now the vector is just
+     * normalized to 1). */
+    b->vx *= 2;
+    b->vy *= 2;
 
     /* It's more realistic if we add the velocity vector of the
      * ship, too. Otherwise if the ship is going fast the bullets
@@ -220,12 +288,22 @@ void add_asteroid(AsteroidsApp *app) {
     Asteroid *a = &app->asteroids[app->asteroids_num++];
     a->x = x;
     a->y = y;
-    a->vx = (rand()/RAND_MAX)*2;
-    a->vy = (rand()/RAND_MAX)*2;
+    a->vx = ((float)rand()/RAND_MAX);
+    a->vy = ((float)rand()/RAND_MAX);
     a->size = size;
-    a->rot_speed = (rand()/RAND_MAX)/10;
+    a->rot = 0;
+    a->rot_speed = ((float)rand()/RAND_MAX)/10;
     if (app->ticks & 1) a->rot_speed = -(a->rot_speed);
-    a->shape_seed = (app->ticks * 1337) & 255;
+    a->shape_seed = rand() & 255;
+}
+
+/* Remove the specified asteroid by id (index in the array). */
+void remove_asteroid(AsteroidsApp *app, int id) {
+    /* Replace the top asteroid with the empty space left
+     * by the removal of this one. This way we always take the
+     * array dense, which is an advantage when looping. */
+    int n = --app->asteroids_num;
+    if (n && id != n) app->asteroids[id] = app->asteroids[n];
 }
 
 /* This is the main game execution function, called 10 times for
@@ -236,13 +314,23 @@ void add_asteroid(AsteroidsApp *app) {
  * Each time this function is called, app->tick is incremented. */
 void game_tick(void *ctx) {
     AsteroidsApp *app = ctx;
-    if (app->pressed[InputKeyLeft]) app->ship.rot -= .2;
-    if (app->pressed[InputKeyRight]) app->ship.rot += .2;
+
+    /* Handle keypresses. */
+    if (app->pressed[InputKeyLeft]) app->ship.rot -= .35;
+    if (app->pressed[InputKeyRight]) app->ship.rot += .35;
     if (app->pressed[InputKeyOk]) {
-        app->ship.vx -= 0.15*(float)sin(app->ship.rot);
-        app->ship.vy += 0.15*(float)cos(app->ship.rot);
+        app->ship.vx -= 0.35*(float)sin(app->ship.rot);
+        app->ship.vy += 0.35*(float)cos(app->ship.rot);
     }
-    
+
+    /* Fire a bullet if needed. app->fire is set in
+     * asteroids_update_keypress_state() since depends on exact
+     * pressure timing. */
+    if (app->fire) {
+        ship_fire_bullet(app);
+        app->fire = false;
+    }
+
     /* Update ship position according to its velocity. */
     update_pos_by_velocity(&app->ship.x,&app->ship.y,app->ship.vx,app->ship.vy);
 
@@ -257,16 +345,43 @@ void game_tick(void *ctx) {
         }
     }
 
-    /* Fire a bullet if needed. */
-    if (app->fire) {
-        ship_fire_bullet(app);
-        app->fire = false;
+    /* Update asteroids position. */
+    for (int j = 0; j < app->asteroids_num; j++) {
+        update_pos_by_velocity(&app->asteroids[j].x,&app->asteroids[j].y,
+                               app->asteroids[j].vx,app->asteroids[j].vy);
+        app->asteroids[j].rot += app->asteroids[j].rot_speed;
+        if (app->asteroids[j].rot < 0) app->asteroids[j].rot = 2*PI;
+        else if (app->asteroids[j].rot > 2*PI) app->asteroids[j].rot = 0;
+    }
+
+    /* Detect collision between bullet and asteroid. */
+    for (int j = 0; j < app->bullets_num; j++) {
+        Bullet *b = &app->bullets[j];
+        for (int i = 0; i < app->asteroids_num; i++) {
+            Asteroid *a = &app->asteroids[i];
+            if (detect_collision(a->x, a->y, a->size,
+                                 b->x, b->y, 1, 1))
+            {
+                remove_asteroid(app,i);
+                remove_bullet(app,j);
+                /* The bullet no longer exist. Break the loop.
+                 * However we want to start processing from the
+                 * same bullet index, since now it is used by
+                 * another bullet (see remove_bullet()). */
+                j--; /* Scan this j value again. */
+                break;
+            }
+        }
     }
 
     /* From time to time, create a new asteroid. The more asteroids
      * already on the screen, the smaller probability of creating
      * a new one. */
-    if ((random() & 255) < (30/app->asteroids_num)) add_asteroid(app);
+    if (app->asteroids_num == 0 ||
+        (random() % 5000) < (30/(1+app->asteroids_num)))
+    {
+        add_asteroid(app);
+    }
 
     app->ticks++;
     view_port_update(app->view_port);
