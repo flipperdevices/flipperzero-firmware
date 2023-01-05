@@ -19,7 +19,8 @@
 #define PI 3.14159265358979f
 #endif
 
-#define MAXBUL 10
+#define MAXBUL 10   /* Max bullets on the screen. */
+#define MAXAST 8    /* Max asteroids on the screen. */
 typedef struct AsteroidsApp {
     /* GUI */
     Gui *gui;
@@ -37,12 +38,16 @@ typedef struct AsteroidsApp {
     float shipvy;           /* y velocity. */
     float bulletsx[MAXBUL]; /* Bullets x position. */
     float bulletsy[MAXBUL]; /* Bullets y position. */
-    int bullets;            /* Active bullets. */
+    int bullets_num;        /* Active bullets. */
     uint32_t last_bullet_tick; /* Tick the last bullet was fired. */
-    float asteroidsx[MAXBUL];  /* Asteroids x position. */
-    float asteroidsy[MAXBUL];  /* Asteroids y position. */
-    int asteroids;             /* Active asteroids. */
-    uint32_t pressed[InputKeyMAX]; /* pressed[id] is true if pressed. */
+    struct {
+        float x, y, vx, vy, size;
+        uint8_t shape_seed;
+    } asteroids[MAXAST];        /* Asteroids state. */
+    int asteroids_num;          /* Active asteroids. */
+    uint32_t pressed[InputKeyMAX]; /* pressed[id] is true if pressed.
+                                      Each array item contains the time
+                                      in milliseconds the key was pressed. */
     bool fire;                 /* Short press detected: fire a bullet. */
 } AsteroidsApp;
 
@@ -67,6 +72,8 @@ Poly ShipPoly = {
  * polygon in 'rot'. The polygon is rotated by an angle 'a', with
  * center at 0,0. */
 void rotate_poly(Poly *rot, Poly *poly, float a) {
+    /* We want to compute sin(a) and cos(a) only one time
+     * for every point to rotate. It's a slow operation. */
     float sin_a = (float)sin(a);
     float cos_a = (float)cos(a);
     for (uint32_t j = 0; j < poly->points; j++) {
@@ -141,9 +148,9 @@ AsteroidsApp* asteroids_app_alloc() {
     app->shipa = PI; /* Start headed towards top. */
     app->shipvx = 0;
     app->shipvy = 0;
-    app->bullets = 0;
+    app->bullets_num = 0;
     app->last_bullet_tick = 0;
-    app->asteroids = 0;
+    app->asteroids_num = 0;
     memset(app->pressed,0,sizeof(app->pressed));
     return app;
 }
