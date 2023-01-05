@@ -582,7 +582,6 @@ AsteroidsApp* asteroids_app_alloc() {
 
     app->running = 1;       /* Turns 0 when back is pressed. */
     restart_game_after_gameover(app);
-    game_over(app);
     memset(app->pressed,0,sizeof(app->pressed));
     return app;
 }
