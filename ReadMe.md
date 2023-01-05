@@ -54,7 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Added: [SubGhz: add protocol "Linear Delta-3" #2239 (By brandonweeks)](https://github.com/flipperdevices/flipperzero-firmware/pull/2239)
 - [New Patreon Builds: 420+18 and Anime+420; Also updated ALL build to include 420 animations.](https://www.patreon.com/posts/76813216)
-- {Patreon Assets: SC_Card_Assets.zip updated with latest files](https://www.patreon.com/posts/76813216)
+- [Patreon Assets: SC_Card_Assets.zip updated with latest files](https://www.patreon.com/posts/76813216)
 
 <a name="release">
 
