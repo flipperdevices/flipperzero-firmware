@@ -15,6 +15,9 @@
 #define DEBUG_MSG 1
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
+#ifndef PI
+#define PI 3.14159265358979f
+#endif
 
 #define MAXBUL 10
 typedef struct AsteroidsApp {
@@ -39,33 +42,63 @@ typedef struct AsteroidsApp {
     float asteroidsx[MAXBUL];  /* Asteroids x position. */
     float asteroidsy[MAXBUL];  /* Asteroids y position. */
     int asteroids;             /* Active asteroids. */
+    uint32_t pressed[InputKeyMAX]; /* pressed[id] is true if pressed. */
+    bool fire;                 /* Short press detected: fire a bullet. */
 } AsteroidsApp;
 
-/* Rotate the point X,Y by an angle 'a', with center 0,0. */
-void rot2D(float x, float y, float *rx, float *ry, float a) {
-    *rx = x*(float)cos(a)-y*(float)sin(a),
-    *ry = y*(float)cos(a)+x*(float)sin(a);
+/* This structure represents a polygon of at most POLY_MAX points.
+ * The function draw_poly() is able to render it on the screen, rotated
+ * by the amount specified. */
+#define POLY_MAX 8
+typedef struct Poly {
+    float x[POLY_MAX];
+    float y[POLY_MAX];
+    uint32_t points; /* Number of points actually populated. */
+} Poly;
+
+/* Define the polygons we use. */
+Poly ShipPoly = {
+    {-3, 0, 3},
+    {-3, 6, -3},
+    3
+};
+
+/* Rotate the point of the poligon 'poly' and store the new rotated
+ * polygon in 'rot'. The polygon is rotated by an angle 'a', with
+ * center at 0,0. */
+void rotate_poly(Poly *rot, Poly *poly, float a) {
+    float sin_a = (float)sin(a);
+    float cos_a = (float)cos(a);
+    for (uint32_t j = 0; j < poly->points; j++) {
+        rot->x[j] = poly->x[j]*cos_a - poly->y[j]*sin_a;
+        rot->y[j] = poly->y[j]*cos_a + poly->x[j]*sin_a;
+    }
+    rot->points = poly->points;
 }
 
-/* Render the ship at the current position, and rotated by the current
- * angle. */
-void render_ship(Canvas *const canvas, float x, float y, float a) {
-    struct { float x; float y; } shape[3] = {
-        {-3,3}, {0,-6}, {3,3}
-    };
-    for (int j =0; j < 3; j++) {
-        float nx, ny;
-        rot2D(shape[j].x, shape[j].y, &nx, &ny, a);
-        shape[j].x = nx;
-        shape[j].y = ny;
-    }
+#if 0
+/* This is an 8 bit LFSR we use to generate a predictable and fast
+ * pseudorandom sequence of numbers, to give a different shape to
+ * each asteroid. */
+static void lfsr_next(unsigned char *prev) {
+    unsigned char lsb = *prev & 1;
+    *prev = *prev >> 1;
+    if (lsb == 1) *prev ^= 0b11000111;
+}
+#endif
 
+/* Render the polygon 'poly' at x,y, rotated by the specified angle. */
+void draw_poly(Canvas *const canvas, Poly *poly, uint8_t x, uint8_t y, float a)
+{
+    Poly rot;
+    rotate_poly(&rot,poly,a);
     canvas_set_color(canvas, ColorBlack);
-    for (int j =0; j < 4; j++) {
-        int a = j%3;
-        int b = (j+1)%3;
-        canvas_draw_line(canvas,x+shape[a].x,y+shape[a].y,
-                                x+shape[b].x,y+shape[b].y);
+    for (uint32_t j = 0; j < rot.points; j++) {
+        uint32_t a = j;
+        uint32_t b = j+1;
+        if (b == rot.points) b = 0;
+        canvas_draw_line(canvas,x+rot.x[a],y+rot.y[a],
+                                x+rot.x[b],y+rot.y[b]);
     }
 }
 
@@ -76,7 +109,9 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 127, 63);
-    render_ship(canvas,app->shipx,app->shipy,app->shipa);
+
+    /* Draw ship and asteroids. */
+    draw_poly(canvas,&ShipPoly,app->shipx,app->shipy,app->shipa);
 }
 
 /* Here all we do is putting the events into the queue that will be handled
@@ -103,12 +138,13 @@ AsteroidsApp* asteroids_app_alloc() {
     app->ticks = 0;
     app->shipx = SCREEN_XRES / 2;
     app->shipy = SCREEN_YRES / 2;
-    app->shipa = 0;
+    app->shipa = PI; /* Start headed towards top. */
     app->shipvx = 0;
     app->shipvy = 0;
     app->bullets = 0;
     app->last_bullet_tick = 0;
     app->asteroids = 0;
+    memset(app->pressed,0,sizeof(app->pressed));
     return app;
 }
 
@@ -129,19 +165,44 @@ void asteroids_app_free(AsteroidsApp *app) {
     free(app);
 }
 
-/* Called periodically. Do signal processing here. Data we process here
- * will be later displayed by the render callback. The side effect of this
- * function is to scan for signals and set DetectedSamples. */
-static void timer_callback(void *ctx) {
+/* Thi is the main game execution function, called 10 times for
+ * second (with the Flipper screen latency, an higher FPS does not
+ * make sense). In this function we update the position of objects based
+ * on velocity. Detect collisions. Update the score and so forth.
+ *
+ * Each time this function is called, app->tick is incremented. */
+static void game_tick(void *ctx) {
     AsteroidsApp *app = ctx;
+    if (app->pressed[InputKeyLeft]) app->shipa -= .2;
+    if (app->pressed[InputKeyRight]) app->shipa += .2;
+    if (app->pressed[InputKeyOk]) {
+        app->shipvx -= 0.15*(float)sin(app->shipa);
+        app->shipvy += 0.15*(float)cos(app->shipa);
+    }
+    
+    /* Update ship position according to its velocity. */
+    app->shipx += app->shipvx;
+    app->shipy += app->shipvy;
 
-    UNUSED(app);
+    /* Return back from one side to the other of the screen. */
+    if (app->shipx >= SCREEN_XRES) app->shipx = 0;
+    else if (app->shipx < 0) app->shipx = SCREEN_XRES-1;
+    if (app->shipy >= SCREEN_YRES) app->shipy = 0;
+    else if (app->shipy < 0) app->shipy = SCREEN_YRES-1;
+
+    app->ticks++;
+    view_port_update(app->view_port);
 }
 
 /* Handle keys interaction. */
-void asteroids_process_keypress(AsteroidsApp *app, InputEvent input) {
-    UNUSED(app);
-    UNUSED(input);
+void asteroids_update_keypress_state(AsteroidsApp *app, InputEvent input) {
+    if (input.type == InputTypePress) {
+        app->pressed[input.key] = furi_get_tick();
+    } else if (input.type == InputTypeRelease) {
+        uint32_t dur = furi_get_tick() - app->pressed[input.key];
+        app->pressed[input.key] = 0;
+        if (dur < 100 && input.key == InputKeyOk) app->fire = true;
+    }
 }
 
 int32_t asteroids_app_entry(void* p) {
@@ -149,8 +210,8 @@ int32_t asteroids_app_entry(void* p) {
     AsteroidsApp *app = asteroids_app_alloc();
 
     /* Create a timer. We do data analysis in the callback. */
-    FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+    FuriTimer *timer = furi_timer_alloc(game_tick, FuriTimerTypePeriodic, app);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10);
 
     /* This is the main event loop: here we get the events that are pushed
      * in the queue by input_callback(), and process them one after the
@@ -171,7 +232,7 @@ int32_t asteroids_app_entry(void* p) {
             {
                 app->running = 0;
             } else {
-                asteroids_process_keypress(app,input);
+                asteroids_update_keypress_state(app,input);
             }
         } else {
             /* Useful to understand if the app is still alive when it
@@ -181,7 +242,6 @@ int32_t asteroids_app_entry(void* p) {
                 if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
             }
         }
-        view_port_update(app->view_port);
     }
 
     furi_timer_free(timer);
