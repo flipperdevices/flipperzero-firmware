@@ -124,7 +124,8 @@ void rfal_platform_spi_release();
 #define platformI2CSlaveAddrWR(add) /*!< I2C Slave address for Write operation       */
 #define platformI2CSlaveAddrRD(add) /*!< I2C Slave address for Read operation        */
 
-#define platformLog(...) /*!< Log  method                                 */
+#define platformLog(...) \
+    FURI_LOG_D("ST25RFAL002", __VA_ARGS__) /*!< Log  method                                 */
 
 /*
  ******************************************************************************
