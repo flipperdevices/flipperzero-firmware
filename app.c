@@ -19,6 +19,28 @@
 #define PI 3.14159265358979f
 #endif
 
+/* ============================ Data structures ============================= */
+
+typedef struct Ship {
+    float x,            /* Ship x position. */
+    y,                  /* Ship y position. */
+    vx,                 /* x velocity. */
+    vy,                 /* y velocity. */
+    rot;                /* Current rotation. 2*PI full ortation. */
+} Ship;
+
+typedef struct Bullet {
+    float x, y, vx, vy;     /* Fields like in ship. */
+    uint32_t ttl;           /* Time to live, in ticks. */
+} Bullet;
+
+typedef struct Asteroid {
+    float x, y, vx, vy,         /* Fields like ship. */
+    rot_speed,                  /* Angular velocity (rot speed and sense). */
+    size;                       /* Asteroid size. */
+    uint8_t shape_seed;         /* Seed to give random shape. */
+} Asteroid;
+
 #define MAXBUL 10   /* Max bullets on the screen. */
 #define MAXAST 8    /* Max asteroids on the screen. */
 typedef struct AsteroidsApp {
@@ -33,27 +55,15 @@ typedef struct AsteroidsApp {
     uint32_t ticks;         /* Game ticks. Increments at each refresh. */
 
     /* Ship state. */
-    struct {
-        float x,            /* Ship x position. */
-        y,                  /* Ship y position. */
-        vx,                 /* x velocity. */
-        vy,                 /* y velocity. */
-        rot;                /* Current rotation. 2*PI full ortation. */
-    } ship;
+    struct Ship ship;
 
     /* Bullets state. */
-    struct {
-        float x, y, vx, vy;     /* Fields like in ship. */
-    } bullets[MAXBUL];
+    struct Bullet bullets[MAXBUL];  /* Each bullet state. */
     int bullets_num;            /* Active bullets. */
     uint32_t last_bullet_tick;  /* Tick the last bullet was fired. */
 
     /* Asteroids state. */
-    struct {
-        float x, y, vx, vy, rot,    /* Fields like ship. */
-        size;                       /* Asteroid size. */
-        uint8_t shape_seed;         /* Seed to give random shape. */
-    } asteroids[MAXAST];            /* Asteroids state. */
+    Asteroid asteroids[MAXAST];     /* Each asteroid state. */
     int asteroids_num;              /* Active asteroids. */
 
     uint32_t pressed[InputKeyMAX]; /* pressed[id] is true if pressed.
@@ -61,6 +71,8 @@ typedef struct AsteroidsApp {
                                       in milliseconds the key was pressed. */
     bool fire;                 /* Short press detected: fire a bullet. */
 } AsteroidsApp;
+
+/* ============================ 2D drawing ================================== */
 
 /* This structure represents a polygon of at most POLY_MAX points.
  * The function draw_poly() is able to render it on the screen, rotated
@@ -94,16 +106,14 @@ void rotate_poly(Poly *rot, Poly *poly, float a) {
     rot->points = poly->points;
 }
 
-#if 0
 /* This is an 8 bit LFSR we use to generate a predictable and fast
  * pseudorandom sequence of numbers, to give a different shape to
  * each asteroid. */
-static void lfsr_next(unsigned char *prev) {
+void lfsr_next(unsigned char *prev) {
     unsigned char lsb = *prev & 1;
     *prev = *prev >> 1;
     if (lsb == 1) *prev ^= 0b11000111;
 }
-#endif
 
 /* Render the polygon 'poly' at x,y, rotated by the specified angle. */
 void draw_poly(Canvas *const canvas, Poly *poly, uint8_t x, uint8_t y, float a)
@@ -120,21 +130,153 @@ void draw_poly(Canvas *const canvas, Poly *poly, uint8_t x, uint8_t y, float a)
     }
 }
 
+/* A bullet is just a + pixels pattern. A single pixel is not
+ * visible enough. */
+void draw_bullet(Canvas *const canvas, uint8_t x, uint8_t y) {
+    canvas_draw_dot(canvas,x-1,y);
+    canvas_draw_dot(canvas,x+1,y);
+    canvas_draw_dot(canvas,x,y);
+    canvas_draw_dot(canvas,x,y-1);
+    canvas_draw_dot(canvas,x,y+1);
+}
+
+/* Given the current position, update it according to the velocity and
+ * wrap it back to the other side if the object went over the screen. */
+void update_pos_by_velocity(float *x, float *y, float vx, float vy) {
+    /* Return back from one side to the other of the screen. */
+    *x += vx;
+    *y += vy;
+    if (*x >= SCREEN_XRES) *x = 0;
+    else if (*x < 0) *x = SCREEN_XRES-1;
+    if (*y >= SCREEN_YRES) *y = 0;
+    else if (*y < 0) *y = SCREEN_YRES-1;
+}
+
 /* Render the current game screen. */
-static void render_callback(Canvas *const canvas, void *ctx) {
+void render_callback(Canvas *const canvas, void *ctx) {
     AsteroidsApp *app = ctx;
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, 127, 63);
 
-    /* Draw ship and asteroids. */
+    /* Draw ship, asteroids, bullets. */
     draw_poly(canvas,&ShipPoly,app->ship.x,app->ship.y,app->ship.rot);
+
+    for (int j = 0; j < app->bullets_num; j++)
+        draw_bullet(canvas,app->bullets[j].x,app->bullets[j].y);
 }
+
+/* ============================ Game logic ================================== */
+
+float distance(float x1, float y1, float x2, float y2) {
+    float dx = x1-x2;
+    float dy = y1-y2;
+    return sqrt(dx*dx+dy*dy);
+}
+
+/* Create a new bullet headed in the same direction of the ship. */
+void ship_fire_bullet(AsteroidsApp *app) {
+    if (app->bullets_num == MAXBUL) return;
+    Bullet *b = &app->bullets[app->bullets_num];
+    b->x = app->ship.x;
+    b->y = app->ship.y;
+    b->vx = -sin(app->ship.rot);
+    b->vy = cos(app->ship.rot);
+
+    /* Ship should fire from its head, not in the middle. */
+    b->x += b->vx*5;
+    b->y += b->vy*5;
+
+    /* It's more realistic if we add the velocity vector of the
+     * ship, too. Otherwise if the ship is going fast the bullets
+     * will be slower, which is not how the world works. */
+    b->vx += app->ship.vx;
+    b->vy += app->ship.vy;
+
+    b->ttl = 50; /* The bullet will disappear after N ticks. */
+    app->bullets_num++;
+}
+
+/* Remove the specified bullet by id (index in the array). */
+void remove_bullet(AsteroidsApp *app, int bid) {
+    /* Replace the top bullet with the empty space left
+     * by the removal of this bullet. This way we always take the
+     * array dense, which is an advantage when looping. */
+    int n = --app->bullets_num;
+    if (n && bid != n) app->bullets[bid] = app->bullets[n];
+}
+
+/* Create a new asteroid, away from the ship. */
+void add_asteroid(AsteroidsApp *app) {
+    if (app->asteroids_num == MAXAST) return;
+    float size = 4+rand()%15;
+    float min_distance = 20;
+    float x,y;
+    do {
+        x = rand() % SCREEN_XRES;
+        y = rand() % SCREEN_YRES;
+    } while(distance(app->ship.x,app->ship.y,x,y) < min_distance+size);
+    Asteroid *a = &app->asteroids[app->asteroids_num++];
+    a->x = x;
+    a->y = y;
+    a->vx = (rand()/RAND_MAX)*2;
+    a->vy = (rand()/RAND_MAX)*2;
+    a->size = size;
+    a->rot_speed = (rand()/RAND_MAX)/10;
+    if (app->ticks & 1) a->rot_speed = -(a->rot_speed);
+    a->shape_seed = (app->ticks * 1337) & 255;
+}
+
+/* This is the main game execution function, called 10 times for
+ * second (with the Flipper screen latency, an higher FPS does not
+ * make sense). In this function we update the position of objects based
+ * on velocity. Detect collisions. Update the score and so forth.
+ *
+ * Each time this function is called, app->tick is incremented. */
+void game_tick(void *ctx) {
+    AsteroidsApp *app = ctx;
+    if (app->pressed[InputKeyLeft]) app->ship.rot -= .2;
+    if (app->pressed[InputKeyRight]) app->ship.rot += .2;
+    if (app->pressed[InputKeyOk]) {
+        app->ship.vx -= 0.15*(float)sin(app->ship.rot);
+        app->ship.vy += 0.15*(float)cos(app->ship.rot);
+    }
+    
+    /* Update ship position according to its velocity. */
+    update_pos_by_velocity(&app->ship.x,&app->ship.y,app->ship.vx,app->ship.vy);
+
+    /* Update bullets position. */
+    for (int j = 0; j < app->bullets_num; j++) {
+        update_pos_by_velocity(&app->bullets[j].x,&app->bullets[j].y,
+                               app->bullets[j].vx,app->bullets[j].vy);
+        if (--app->bullets[j].ttl == 0) {
+            remove_bullet(app,j);
+            j--; /* Process this bullet index again: the removal will
+                    fill it with the top bullet to take the array dense. */
+        }
+    }
+
+    /* Fire a bullet if needed. */
+    if (app->fire) {
+        ship_fire_bullet(app);
+        app->fire = false;
+    }
+
+    /* From time to time, create a new asteroid. The more asteroids
+     * already on the screen, the smaller probability of creating
+     * a new one. */
+    if ((random() & 255) < (30/app->asteroids_num)) add_asteroid(app);
+
+    app->ticks++;
+    view_port_update(app->view_port);
+}
+
+/* ======================== Flipper specific code =========================== */
 
 /* Here all we do is putting the events into the queue that will be handled
  * in the while() loop of the app entry point function. */
-static void input_callback(InputEvent* input_event, void* ctx)
+void input_callback(InputEvent* input_event, void* ctx)
 {
     AsteroidsApp *app = ctx;
     furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
@@ -183,35 +325,6 @@ void asteroids_app_free(AsteroidsApp *app) {
     free(app);
 }
 
-/* Thi is the main game execution function, called 10 times for
- * second (with the Flipper screen latency, an higher FPS does not
- * make sense). In this function we update the position of objects based
- * on velocity. Detect collisions. Update the score and so forth.
- *
- * Each time this function is called, app->tick is incremented. */
-static void game_tick(void *ctx) {
-    AsteroidsApp *app = ctx;
-    if (app->pressed[InputKeyLeft]) app->ship.rot -= .2;
-    if (app->pressed[InputKeyRight]) app->ship.rot += .2;
-    if (app->pressed[InputKeyOk]) {
-        app->ship.vx -= 0.15*(float)sin(app->ship.rot);
-        app->ship.vy += 0.15*(float)cos(app->ship.rot);
-    }
-    
-    /* Update ship position according to its velocity. */
-    app->ship.x += app->ship.vx;
-    app->ship.y += app->ship.vy;
-
-    /* Return back from one side to the other of the screen. */
-    if (app->ship.x >= SCREEN_XRES) app->ship.x = 0;
-    else if (app->ship.x < 0) app->ship.x = SCREEN_XRES-1;
-    if (app->ship.y >= SCREEN_YRES) app->ship.y = 0;
-    else if (app->ship.y < 0) app->ship.y = SCREEN_YRES-1;
-
-    app->ticks++;
-    view_port_update(app->view_port);
-}
-
 /* Handle keys interaction. */
 void asteroids_update_keypress_state(AsteroidsApp *app, InputEvent input) {
     if (input.type == InputTypePress) {
@@ -219,7 +332,7 @@ void asteroids_update_keypress_state(AsteroidsApp *app, InputEvent input) {
     } else if (input.type == InputTypeRelease) {
         uint32_t dur = furi_get_tick() - app->pressed[input.key];
         app->pressed[input.key] = 0;
-        if (dur < 100 && input.key == InputKeyOk) app->fire = true;
+        if (dur < 200 && input.key == InputKeyOk) app->fire = true;
     }
 }
 
