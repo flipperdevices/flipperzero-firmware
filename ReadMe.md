@@ -70,6 +70,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: New Animation for Sleigh Ride
 - Added: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - OFW: Show region information in sub-GHz app
+- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
 
 <a name="release">
 
