@@ -11,7 +11,10 @@ void subghz_scene_region_info_on_enter(void* context) {
         furi_string_cat_printf(buffer, "Region: %s,  bands:\n", region->country_code);
         for(uint16_t i = 0; i < region->bands_count; ++i) {
             furi_string_cat_printf(
-                buffer, "   %lu-%lu kHz\n", region->bands[i].start/1000, region->bands[i].end/1000);
+                buffer,
+                "   %lu-%lu kHz\n",
+                region->bands[i].start / 1000,
+                region->bands[i].end / 1000);
         }
     } else {
         furi_string_cat_printf(buffer, "Region: N/A\n");
