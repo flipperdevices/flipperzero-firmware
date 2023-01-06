@@ -30,7 +30,6 @@ typedef struct {
     Storage* storage;
 
     char text_store[NAMECHANGER_TEXT_STORE_SIZE + 1];
-    FuriString* error;
 
     Submenu* submenu;
     TextInput* text_input;
@@ -46,6 +45,5 @@ typedef enum {
 } NameChangerView;
 
 bool namechanger_make_app_folder(NameChanger* namechanger);
-bool namechanger_name_read_write(NameChanger* namechanger, char* name, uint8_t mode);
+bool namechanger_name_write(NameChanger* namechanger, char* name);
 void namechanger_text_store_set(NameChanger* namechanger, const char* text, ...);
-void namechanger_text_store_clear(NameChanger* namechanger);
