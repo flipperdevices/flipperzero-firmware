@@ -54,7 +54,7 @@ typedef struct AsteroidsApp {
 
     /* Game state. */
     int running; /* Once false exists the app. */
-    int gameover; /* Gameover status. */
+    bool gameover; /* Gameover status. */
     uint32_t ticks; /* Game ticks. Increments at each refresh. */
     uint32_t score; /* Game score. */
     uint32_t lives; /* Number of lives in the current game. */
@@ -80,6 +80,13 @@ typedef struct AsteroidsApp {
                                       in milliseconds the key was pressed. */
     bool fire; /* Short press detected: fire a bullet. */
 } AsteroidsApp;
+
+/* ============================== Prototyeps ================================ */
+
+// Only functions called before their definition are here.
+
+void restart_game_after_gameover(AsteroidsApp* app);
+uint32_t key_pressed_time(AsteroidsApp* app, InputKey key);
 
 /* ============================ 2D drawing ================================== */
 
@@ -209,7 +216,7 @@ void render_callback(Canvas* const canvas, void* ctx) {
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, 0, 0, 127, 63);
+    canvas_draw_box(canvas, 0, 0, SCREEN_XRES - 1, SCREEN_YRES - 1);
 
     /* Draw score. */
     canvas_set_color(canvas, ColorBlack);
@@ -227,6 +234,15 @@ void render_callback(Canvas* const canvas, void* ctx) {
     for(int j = 0; j < app->bullets_num; j++) draw_bullet(canvas, &app->bullets[j]);
 
     for(int j = 0; j < app->asteroids_num; j++) draw_asteroid(canvas, &app->asteroids[j]);
+
+    /* Game over text. */
+    if(app->gameover) {
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 28, 35, "GAME   OVER");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 25, 50, "Press OK to restart");
+    }
 }
 
 /* ============================ Game logic ================================== */
@@ -248,7 +264,7 @@ float distance(float x1, float y1, float x2, float y2) {
  * spheres (this is why this function only takes the radius). This
  * is, after all, kinda accurate for asteroids, for bullets, and
  * even for the ship "core" itself. */
-bool detect_collision(float x1, float y1, float r1, float x2, float y2, float r2, float factor) {
+bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, float r2, float factor) {
     /* The objects are colliding if the distance between object 1 and 2
      * is smaller than the sum of the two radiuses r1 and r2.
      * So it would be like: sqrt((x1-x2)^2+(y1-y2)^2) < r1+r2.
@@ -361,14 +377,25 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
     }
 }
 
+/* Set gameover state. When in game-over mode, the game displays a gameover
+ * text with a background of many asteroids floating around. */
+void game_over(AsteroidsApp* app) {
+    restart_game_after_gameover(app);
+    app->gameover = true;
+    int asteroids = 8;
+    while(asteroids-- && add_asteroid(app) != NULL)
+        ;
+}
+
 /* Function called when a collision between the asteroid and the
  * ship is detected. */
 void ship_was_hit(AsteroidsApp* app) {
     app->ship_hit = SHIP_HIT_ANIMATION_LEN;
-    if(app->lives)
+    if(app->lives) {
         app->lives--;
-    else
-        app->gameover = true;
+    } else {
+        game_over(app);
+    }
 }
 
 /* Restart game after the ship is hit. Will reset the ship position, bullets
@@ -387,11 +414,68 @@ void restart_game(AsteroidsApp* app) {
 /* Called after gameover to restart the game. This function
  * also calls restart_game(). */
 void restart_game_after_gameover(AsteroidsApp* app) {
-    app->gameover = 0;
+    app->gameover = false;
     app->ticks = 0;
     app->score = 0;
+    app->ship_hit = 0;
     app->lives = GAME_START_LIVES;
     restart_game(app);
+}
+
+/* Move bullets. */
+void update_bullets_position(AsteroidsApp* app) {
+    for(int j = 0; j < app->bullets_num; j++) {
+        update_pos_by_velocity(
+            &app->bullets[j].x, &app->bullets[j].y, app->bullets[j].vx, app->bullets[j].vy);
+        if(--app->bullets[j].ttl == 0) {
+            remove_bullet(app, j);
+            j--; /* Process this bullet index again: the removal will
+                    fill it with the top bullet to take the array dense. */
+        }
+    }
+}
+
+/* Move asteroids. */
+void update_asteroids_position(AsteroidsApp* app) {
+    for(int j = 0; j < app->asteroids_num; j++) {
+        update_pos_by_velocity(
+            &app->asteroids[j].x, &app->asteroids[j].y, app->asteroids[j].vx, app->asteroids[j].vy);
+        app->asteroids[j].rot += app->asteroids[j].rot_speed;
+        if(app->asteroids[j].rot < 0)
+            app->asteroids[j].rot = 2 * PI;
+        else if(app->asteroids[j].rot > 2 * PI)
+            app->asteroids[j].rot = 0;
+    }
+}
+
+/* Collision detection and game state update based on collisions. */
+void detect_collisions(AsteroidsApp* app) {
+    /* Detect collision between bullet and asteroid. */
+    for(int j = 0; j < app->bullets_num; j++) {
+        Bullet* b = &app->bullets[j];
+        for(int i = 0; i < app->asteroids_num; i++) {
+            Asteroid* a = &app->asteroids[i];
+            if(objects_are_colliding(a->x, a->y, a->size, b->x, b->y, 1, 1)) {
+                asteroid_was_hit(app, i);
+                remove_bullet(app, j);
+                /* The bullet no longer exist. Break the loop.
+                 * However we want to start processing from the
+                 * same bullet index, since now it is used by
+                 * another bullet (see remove_bullet()). */
+                j--; /* Scan this j value again. */
+                break;
+            }
+        }
+    }
+
+    /* Detect collision between ship and asteroid. */
+    for(int j = 0; j < app->asteroids_num; j++) {
+        Asteroid* a = &app->asteroids[j];
+        if(objects_are_colliding(a->x, a->y, a->size, app->ship.x, app->ship.y, 4, 1)) {
+            ship_was_hit(app);
+            break;
+        }
+    }
 }
 
 /* This is the main game execution function, called 10 times for
@@ -403,9 +487,10 @@ void restart_game_after_gameover(AsteroidsApp* app) {
 void game_tick(void* ctx) {
     AsteroidsApp* app = ctx;
 
-    /* This is a special condition: ship was hit, we frozen the game
-     * as long as ship_hit isn't zero again, and show an animation of
-     * a rotating ship. */
+    /* There are two special screens:
+     *
+     * 1. Ship was hit, we frozen the game as long as ship_hit isn't zero
+     * again, and show an animation of a rotating ship. */
     if(app->ship_hit) {
         app->ship.rot += 0.5;
         app->ship_hit--;
@@ -413,6 +498,16 @@ void game_tick(void* ctx) {
         if(app->ship_hit == 0) {
             restart_game(app);
         }
+        return;
+    } else if(app->gameover) {
+        /* 2. Game over. We need to update only background asteroids. In this
+     * state the game just displays a GAME OVER text with the floating
+     * asteroids in backgroud. */
+        if(key_pressed_time(app, InputKeyOk) > 100) {
+            restart_game_after_gameover(app);
+        }
+        update_asteroids_position(app);
+        view_port_update(app->view_port);
         return;
     }
 
@@ -432,57 +527,11 @@ void game_tick(void* ctx) {
         app->fire = false;
     }
 
-    /* Update ship position according to its velocity. */
+    /* Update positions and detect collisions. */
     update_pos_by_velocity(&app->ship.x, &app->ship.y, app->ship.vx, app->ship.vy);
-
-    /* Update bullets position. */
-    for(int j = 0; j < app->bullets_num; j++) {
-        update_pos_by_velocity(
-            &app->bullets[j].x, &app->bullets[j].y, app->bullets[j].vx, app->bullets[j].vy);
-        if(--app->bullets[j].ttl == 0) {
-            remove_bullet(app, j);
-            j--; /* Process this bullet index again: the removal will
-                    fill it with the top bullet to take the array dense. */
-        }
-    }
-
-    /* Update asteroids position. */
-    for(int j = 0; j < app->asteroids_num; j++) {
-        update_pos_by_velocity(
-            &app->asteroids[j].x, &app->asteroids[j].y, app->asteroids[j].vx, app->asteroids[j].vy);
-        app->asteroids[j].rot += app->asteroids[j].rot_speed;
-        if(app->asteroids[j].rot < 0)
-            app->asteroids[j].rot = 2 * PI;
-        else if(app->asteroids[j].rot > 2 * PI)
-            app->asteroids[j].rot = 0;
-    }
-
-    /* Detect collision between bullet and asteroid. */
-    for(int j = 0; j < app->bullets_num; j++) {
-        Bullet* b = &app->bullets[j];
-        for(int i = 0; i < app->asteroids_num; i++) {
-            Asteroid* a = &app->asteroids[i];
-            if(detect_collision(a->x, a->y, a->size, b->x, b->y, 1, 1)) {
-                asteroid_was_hit(app, i);
-                remove_bullet(app, j);
-                /* The bullet no longer exist. Break the loop.
-                 * However we want to start processing from the
-                 * same bullet index, since now it is used by
-                 * another bullet (see remove_bullet()). */
-                j--; /* Scan this j value again. */
-                break;
-            }
-        }
-    }
-
-    /* Detect collision between ship and asteroid. */
-    for(int j = 0; j < app->asteroids_num; j++) {
-        Asteroid* a = &app->asteroids[j];
-        if(detect_collision(a->x, a->y, a->size, app->ship.x, app->ship.y, 4, 1)) {
-            ship_was_hit(app);
-            break;
-        }
-    }
+    update_bullets_position(app);
+    update_asteroids_position(app);
+    detect_collisions(app);
 
     /* From time to time, create a new asteroid. The more asteroids
      * already on the screen, the smaller probability of creating
@@ -539,12 +588,18 @@ void asteroids_app_free(AsteroidsApp* app) {
     free(app);
 }
 
+/* Return the time in milliseconds the specified key is continuously
+ * pressed. Or 0 if it is not pressed. */
+uint32_t key_pressed_time(AsteroidsApp* app, InputKey key) {
+    return app->pressed[key] == 0 ? 0 : furi_get_tick() - app->pressed[key];
+}
+
 /* Handle keys interaction. */
 void asteroids_update_keypress_state(AsteroidsApp* app, InputEvent input) {
     if(input.type == InputTypePress) {
         app->pressed[input.key] = furi_get_tick();
     } else if(input.type == InputTypeRelease) {
-        uint32_t dur = furi_get_tick() - app->pressed[input.key];
+        uint32_t dur = key_pressed_time(app, input.key);
         app->pressed[input.key] = 0;
         if(dur < 200 && input.key == InputKeyOk) app->fire = true;
     }
@@ -560,9 +615,7 @@ int32_t asteroids_app_entry(void* p) {
 
     /* This is the main event loop: here we get the events that are pushed
      * in the queue by input_callback(), and process them one after the
-     * other. The timeout is 100 milliseconds, so if not input is received
-     * before such time, we exit the queue_get() function and call
-     * view_port_update() in order to refresh our screen content. */
+     * other. */
     InputEvent input;
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);

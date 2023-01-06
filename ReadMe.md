@@ -62,6 +62,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Unleashed: [Updated infrared assets (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/267)
 - [New Patreon Builds: Anime+420+18.](https://www.patreon.com/posts/76846321)
+- Moved OFW Clock to Misc instead of Tools.
+- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) WIP
 
 <a name="release">
 
