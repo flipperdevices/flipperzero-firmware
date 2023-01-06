@@ -87,18 +87,38 @@ int32_t etch_a_sketch_app(void* p) {
 
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         //break out of the loop if the back key is pressed
-        if(event.type == InputTypeShort && event.key == InputKeyBack) {
+        if(event.key == InputKeyBack && event.type == InputTypeShort) {
             break;
         }
 
+        // Clear
+        if(event.key == InputKeyBack && event.type == InputTypeLong) {
+            etch_state->board[1][1] = true;
+            for(int y = 0; y < 32; y++) {
+                for(int x = 0; x < 64; x++) {
+                    etch_state->board[x][y] = false;
+                }
+            }
+            view_port_update(view_port);
+        }
+
         // Single Dot Select
-        if(event.type == InputTypeShort && event.key == InputKeyOk) {
+        if(event.key == InputKeyOk && event.type == InputTypeShort) {
             etch_state->board[etch_state->selected.x][etch_state->selected.y] =
                 !etch_state->board[etch_state->selected.x][etch_state->selected.y];
         }
 
+        // Erase Board
+        // TODO: Do animation of shaking board
+        if(event.key == InputKeyOk && event.type == InputTypeLong) {
+            etch_state->isDrawing = !etch_state->isDrawing;
+            etch_state->board[etch_state->selected.x][etch_state->selected.y] = true;
+            view_port_update(view_port);
+        }
+
         //check the key pressed and change x and y accordingly
-        if(event.type) {
+        if(event.type == InputTypeShort || event.type == InputTypeRepeat ||
+           event.type == InputTypeLong) {
             switch(event.key) {
             case InputKeyUp:
                 etch_state->selected.y -= 1;
@@ -132,25 +152,6 @@ int32_t etch_a_sketch_app(void* p) {
             if(etch_state->isDrawing == true) {
                 etch_state->board[etch_state->selected.x][etch_state->selected.y] = true;
             }
-            view_port_update(view_port);
-        }
-
-        // Clear Board
-        if(event.key == InputKeyBack && event.type == InputTypeLong) {
-            etch_state->board[1][1] = true;
-            for(int y = 0; y < 32; y++) {
-                for(int x = 0; x < 64; x++) {
-                    etch_state->board[x][y] = false;
-                }
-            }
-            view_port_update(view_port);
-        }
-
-        // Erase Board
-        // TODO: Do animation of shaking board
-        if(event.key == InputKeyOk && event.type == InputTypeLong) {
-            etch_state->isDrawing = !etch_state->isDrawing;
-            etch_state->board[etch_state->selected.x][etch_state->selected.y] = true;
             view_port_update(view_port);
         }
     }
