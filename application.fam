@@ -10,5 +10,6 @@ App(
     stack_size=1024,
     order=90,
 	fap_icon="flizzer_tracker.png",
+	fap_icon_assets="images",
     fap_category="Music",
 )
