@@ -17,7 +17,7 @@ P.S. Don't miss the game over screen.
 Drop the `asteroids.fap` file you can find in the `binaries` folder into the
 following Flipper Zero location:
 
-    /ext/apps/Tools
+    /ext/apps/Games
 
 The `ext` part means that we are in the SD card. So if you don't want
 to use the Android (or other) application to upload the file,
