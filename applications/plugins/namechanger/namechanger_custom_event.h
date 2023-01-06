@@ -3,5 +3,4 @@
 enum NameChangerCustomEvent {
     NameChangerCustomEventBack,
     NameChangerCustomEventTextEditResult,
-    NameChangerCustomEventError,
 };

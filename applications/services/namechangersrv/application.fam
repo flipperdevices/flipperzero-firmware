@@ -3,5 +3,5 @@ App(
     apptype=FlipperAppType.STARTUP,
     entry_point="namechanger_on_system_start",
     requires=["storage"],
-    order=130,
+    order=1000,
 )
