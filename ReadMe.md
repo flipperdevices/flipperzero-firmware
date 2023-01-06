@@ -28,6 +28,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
+- [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
@@ -73,6 +74,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [VB Lab Migration Assistant (By GMMan (cyanic))](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
+- [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
+- [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 
 --- 
 
