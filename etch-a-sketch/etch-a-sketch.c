@@ -64,6 +64,15 @@ const NotificationSequence sequence_draw_disabled = {
     NULL,
 };
 
+const NotificationSequence sequence_cleanup = {
+    &message_red_0,
+    &message_green_0,
+    &message_blue_0,
+    &message_sound_off,
+    &message_vibro_off,
+    NULL,
+};
+
 void etch_draw_callback(Canvas* canvas, void* ctx) {
     const EtchData* etch_state = acquire_mutex((ValueMutex*)ctx, 25);
     UNUSED(ctx);
@@ -210,6 +219,7 @@ int32_t etch_a_sketch_app(void* p) {
         }
     }
 
+    notification_message(notification, &sequence_cleanup);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
