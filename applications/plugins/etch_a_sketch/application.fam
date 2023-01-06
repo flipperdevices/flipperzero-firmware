@@ -8,5 +8,5 @@ App(
     stack_size=2 * 1024,
     order=175,
     fap_icon="etch_a_sketch_icon.png",
-    fap_category="Misc",
+    fap_category="Games",
 )
