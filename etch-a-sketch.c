@@ -6,6 +6,8 @@
 #include <notification/notification_messages.h>
 #include <stdbool.h> // Header-file for boolean data-type.
 
+const int brush_size = 2;
+
 typedef struct selected_position {
     int x;
     int y;
@@ -13,7 +15,7 @@ typedef struct selected_position {
 
 typedef struct {
     selected_position selected;
-    bool board[32][16];
+    bool board[64][32];
     bool isDrawing;
 } EtchData;
 
@@ -23,19 +25,30 @@ void etch_draw_callback(Canvas* canvas, void* ctx) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     //draw the canvas(32x16) on screen(144x64) using 4x4 tiles
-    for(int y = 0; y < 16; y++) {
-        for(int x = 0; x < 32; x++) {
+    for(int y = 0; y < 32; y++) {
+        for(int x = 0; x < 64; x++) {
             if(etch_state->board[x][y]) {
-                canvas_draw_box(canvas, x * 4, y * 4, 4, 4);
+                canvas_draw_box(canvas, x * brush_size, y * brush_size, 2, 2);
             }
         }
     }
 
     //draw cursor as a 4x4 black box with a 2x2 white box inside
     canvas_set_color(canvas, ColorBlack);
-    canvas_draw_box(canvas, etch_state->selected.x * 4, etch_state->selected.y * 4, 4, 4);
-    canvas_set_color(canvas, ColorWhite);
-    canvas_draw_box(canvas, etch_state->selected.x * 4 + 1, etch_state->selected.y * 4 + 1, 2, 2);
+    canvas_draw_box(
+        canvas,
+        etch_state->selected.x * brush_size,
+        etch_state->selected.y * brush_size,
+        brush_size,
+        brush_size);
+
+    // canvas_set_color(canvas, ColorWhite);
+    // canvas_draw_box(
+    //     canvas,
+    //     etch_state->selected.x * brush_size + 1,
+    //     etch_state->selected.y * brush_size + 1,
+    //     brush_size,
+    //     brush_size);
 
     //release the mutex
     release_mutex((ValueMutex*)ctx, etch_state);
@@ -78,8 +91,14 @@ int32_t etch_a_sketch_app(void* p) {
             break;
         }
 
+        // Single Dot Select
+        if(event.type == InputTypeShort && event.key == InputKeyOk) {
+            etch_state->board[etch_state->selected.x][etch_state->selected.y] =
+                !etch_state->board[etch_state->selected.x][etch_state->selected.y];
+        }
+
         //check the key pressed and change x and y accordingly
-        if(event.type == InputTypeShort) {
+        if(event.type) {
             switch(event.key) {
             case InputKeyUp:
                 etch_state->selected.y -= 1;
@@ -93,11 +112,6 @@ int32_t etch_a_sketch_app(void* p) {
             case InputKeyRight:
                 etch_state->selected.x += 1;
                 break;
-            case InputKeyOk:
-                etch_state->board[etch_state->selected.x][etch_state->selected.y] =
-                    !etch_state->board[etch_state->selected.x][etch_state->selected.y];
-                break;
-
             default:
                 break;
             }
@@ -106,29 +120,34 @@ int32_t etch_a_sketch_app(void* p) {
             if(etch_state->selected.x < 0) {
                 etch_state->selected.x = 0;
             }
-            if(etch_state->selected.x > 31) {
-                etch_state->selected.x = 31;
+            if(etch_state->selected.x > 61) {
+                etch_state->selected.x = 61;
             }
             if(etch_state->selected.y < 0) {
                 etch_state->selected.y = 0;
             }
-            if(etch_state->selected.y > 15) {
-                etch_state->selected.y = 15;
+            if(etch_state->selected.y > 31) {
+                etch_state->selected.y = 31;
             }
             if(etch_state->isDrawing == true) {
                 etch_state->board[etch_state->selected.x][etch_state->selected.y] = true;
             }
             view_port_update(view_port);
         }
+
+        // Clear Board
         if(event.key == InputKeyBack && event.type == InputTypeLong) {
             etch_state->board[1][1] = true;
-            for(int y = 0; y < 16; y++) {
-                for(int x = 0; x < 32; x++) {
+            for(int y = 0; y < 32; y++) {
+                for(int x = 0; x < 64; x++) {
                     etch_state->board[x][y] = false;
                 }
             }
             view_port_update(view_port);
         }
+
+        // Erase Board
+        // TODO: Do animation of shaking board
         if(event.key == InputKeyOk && event.type == InputTypeLong) {
             etch_state->isDrawing = !etch_state->isDrawing;
             etch_state->board[etch_state->selected.x][etch_state->selected.y] = true;
