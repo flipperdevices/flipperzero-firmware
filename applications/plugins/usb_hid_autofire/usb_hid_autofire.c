@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include "version.h"
+#include "tools.h"
 
 // Uncomment to be able to make a screenshot
 //#define USB_HID_AUTOFIRE_SCREENSHOT
@@ -25,7 +26,9 @@ uint32_t autofire_delay = 10;
 static void usb_hid_autofire_render_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
     char autofire_delay_str[12];
+    //std::string pi = "pi is " + std::to_string(3.1415926);
     itoa(autofire_delay, autofire_delay_str, 10);
+    //sprintf(autofire_delay_str, "%lu", autofire_delay);
 
     canvas_clear(canvas);
 

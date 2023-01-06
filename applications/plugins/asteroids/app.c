@@ -294,8 +294,8 @@ void ship_fire_bullet(AsteroidsApp* app) {
 
     /* Give the bullet some velocity (for now the vector is just
      * normalized to 1). */
-    b->vx *= 2;
-    b->vy *= 2;
+    b->vx *= 3;
+    b->vy *= 3;
 
     /* It's more realistic if we add the velocity vector of the
      * ship, too. Otherwise if the ship is going fast the bullets
@@ -455,7 +455,7 @@ void detect_collisions(AsteroidsApp* app) {
         Bullet* b = &app->bullets[j];
         for(int i = 0; i < app->asteroids_num; i++) {
             Asteroid* a = &app->asteroids[i];
-            if(objects_are_colliding(a->x, a->y, a->size, b->x, b->y, 1, 1)) {
+            if(objects_are_colliding(a->x, a->y, a->size, b->x, b->y, 1.5, 1)) {
                 asteroid_was_hit(app, i);
                 remove_bullet(app, j);
                 /* The bullet no longer exist. Break the loop.
@@ -514,16 +514,24 @@ void game_tick(void* ctx) {
     /* Handle keypresses. */
     if(app->pressed[InputKeyLeft]) app->ship.rot -= .35;
     if(app->pressed[InputKeyRight]) app->ship.rot += .35;
-    if(app->pressed[InputKeyOk]) {
+    if(key_pressed_time(app, InputKeyOk) > 70) {
         app->ship.vx -= 0.5 * (float)sin(app->ship.rot);
         app->ship.vy += 0.5 * (float)cos(app->ship.rot);
+    } else if(app->pressed[InputKeyDown]) {
+        app->ship.vx *= 0.75;
+        app->ship.vy *= 0.75;
     }
 
     /* Fire a bullet if needed. app->fire is set in
      * asteroids_update_keypress_state() since depends on exact
      * pressure timing. */
     if(app->fire) {
-        ship_fire_bullet(app);
+        uint32_t bullet_min_period = 200; // In milliseconds
+        uint32_t now = furi_get_tick();
+        if(now - app->last_bullet_tick >= bullet_min_period) {
+            ship_fire_bullet(app);
+            app->last_bullet_tick = now;
+        }
         app->fire = false;
     }
 
