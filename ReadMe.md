@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) NOW WORKS :)
 - Updated: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
+- OFW: New Animation for Sleigh Ride
 
 <a name="release">
 
