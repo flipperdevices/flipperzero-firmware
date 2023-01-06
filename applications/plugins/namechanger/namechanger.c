@@ -90,13 +90,14 @@ void namechanger_text_store_set(NameChanger* namechanger, const char* text, ...)
 
 int32_t namechanger_app() {
     NameChanger* namechanger = namechanger_alloc();
-		
-	view_dispatcher_attach_to_gui(namechanger->view_dispatcher, namechanger->gui, ViewDispatcherTypeFullscreen);
-	scene_manager_next_scene(namechanger->scene_manager, NameChangerSceneStart);
-		
-	view_dispatcher_run(namechanger->view_dispatcher);
-	
-	namechanger_free(namechanger);
+
+    view_dispatcher_attach_to_gui(
+        namechanger->view_dispatcher, namechanger->gui, ViewDispatcherTypeFullscreen);
+    scene_manager_next_scene(namechanger->scene_manager, NameChangerSceneStart);
+
+    view_dispatcher_run(namechanger->view_dispatcher);
+
+    namechanger_free(namechanger);
     return 0;
 }
 
@@ -105,53 +106,57 @@ bool namechanger_name_write(NameChanger* namechanger, char* name) {
     furi_string_set(file_path, "/ext/dolphin/name.txt");
 
     bool result = false;
-	
-	//If name is not "eraseerase" (set by Revert) then write name to file
-	//otherwise, remove name.txt
-	
-	if(strcmp(name, "eraseerase") != 0) {
-		//save
-		FlipperFormat* file = flipper_format_file_alloc(namechanger->storage);
-	
-		do {
-			// Open file for write
-			if(!flipper_format_file_open_always(file, furi_string_get_cstr(file_path))) {
-				break;
-			}
 
-			// Write header
-			if(!flipper_format_write_header_cstr(file, NAMECHANGER_HEADER, 1)) {
-				break;
-			}
+    //If name is not "eraseerase" (set by Revert) then write name to file
+    //otherwise, remove name.txt
 
-			// Write comments
-			if(!flipper_format_write_comment_cstr(file, "Changing the value below will change your FlipperZero device name.")) {
-				break;
-			}
+    if(strcmp(name, "eraseerase") != 0) {
+        //save
+        FlipperFormat* file = flipper_format_file_alloc(namechanger->storage);
 
-			if(!flipper_format_write_comment_cstr(file, "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _")) {
-				break;
-			}
+        do {
+            // Open file for write
+            if(!flipper_format_file_open_always(file, furi_string_get_cstr(file_path))) {
+                break;
+            }
 
-			if(!flipper_format_write_comment_cstr(file, "It cannot contain any other characters.")) {
-				break;
-			}
+            // Write header
+            if(!flipper_format_write_header_cstr(file, NAMECHANGER_HEADER, 1)) {
+                break;
+            }
 
-			if(!flipper_format_write_string_cstr(file, "Name", name)) {
-				break;
-			}
+            // Write comments
+            if(!flipper_format_write_comment_cstr(
+                   file, "Changing the value below will change your FlipperZero device name.")) {
+                break;
+            }
 
-			result = true;
-		} while(false);
+            if(!flipper_format_write_comment_cstr(
+                   file,
+                   "Note: This is limited to 8 characters using the following: a-z, A-Z, 0-9, and _")) {
+                break;
+            }
 
-		flipper_format_free(file);
+            if(!flipper_format_write_comment_cstr(
+                   file, "It cannot contain any other characters.")) {
+                break;
+            }
 
-		if(!result) {
-			FURI_LOG_E(TAG, "Cannot save name file.");
-		}
-	} else {
-		result = storage_simply_remove(namechanger->storage, furi_string_get_cstr(file_path));
-	}
+            if(!flipper_format_write_string_cstr(file, "Name", name)) {
+                break;
+            }
+
+            result = true;
+        } while(false);
+
+        flipper_format_free(file);
+
+        if(!result) {
+            FURI_LOG_E(TAG, "Cannot save name file.");
+        }
+    } else {
+        result = storage_simply_remove(namechanger->storage, furi_string_get_cstr(file_path));
+    }
 
     return result;
 }
