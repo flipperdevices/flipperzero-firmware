@@ -64,6 +64,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Builds: Anime+420+18.](https://www.patreon.com/posts/76846321)
 - Moved OFW Clock to Misc instead of Tools.
 - Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) WIP
+- Updated: [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) NOW WORKS :)
 
 <a name="release">
 
@@ -293,6 +294,7 @@ $ ./fbt dolphin_ext
 - [Multi Converter (By theisolinearchip)](https://github.com/theisolinearchip)
 - [Music Beeper (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/1189) [With Changes By qqMajiKpp/Haseo](https://github.com/qqmajikpp/)
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
+- [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488)
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
