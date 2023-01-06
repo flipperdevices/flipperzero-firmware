@@ -19,12 +19,58 @@ typedef struct {
     bool isDrawing;
 } EtchData;
 
+// Sequence to indicate that drawing is enabled.
+const NotificationSequence sequence_begin_draw = {
+    &message_display_backlight_on,
+
+    // Vibrate to indicate that drawing is enabled.
+    &message_vibro_on,
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_c6,
+    &message_delay_50,
+    &message_note_e5,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+// sequence to indicate that drawing is disabled
+const NotificationSequence sequence_end_draw = {
+    &message_red_0,
+    // Indicate that drawing is disabled.
+    &message_vibro_on,
+    &message_note_g5,
+    &message_delay_50,
+    &message_note_e5,
+    &message_delay_50,
+    &message_vibro_off,
+    &message_sound_off,
+    &message_do_not_reset,
+    NULL,
+};
+
+// Indicate that drawing is enabled.
+const NotificationSequence sequence_draw_enabled = {
+    &message_red_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+// Indicate that drawing is disabled.
+const NotificationSequence sequence_draw_disabled = {
+    &message_red_0,
+    &message_do_not_reset,
+    NULL,
+};
+
 void etch_draw_callback(Canvas* canvas, void* ctx) {
     const EtchData* etch_state = acquire_mutex((ValueMutex*)ctx, 25);
     UNUSED(ctx);
+
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    //draw the canvas(32x16) on screen(144x64) using 4x4 tiles
+    //draw the canvas(64x32) on screen(144x64) using brush_size*brush_size tiles
     for(int y = 0; y < 32; y++) {
         for(int x = 0; x < 64; x++) {
             if(etch_state->board[x][y]) {
@@ -33,7 +79,7 @@ void etch_draw_callback(Canvas* canvas, void* ctx) {
         }
     }
 
-    //draw cursor as a 4x4 black box with a 2x2 white box inside
+    //draw cursor as a brush_size by brush_size black box
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_box(
         canvas,
@@ -41,14 +87,6 @@ void etch_draw_callback(Canvas* canvas, void* ctx) {
         etch_state->selected.y * brush_size,
         brush_size,
         brush_size);
-
-    // canvas_set_color(canvas, ColorWhite);
-    // canvas_draw_box(
-    //     canvas,
-    //     etch_state->selected.x * brush_size + 1,
-    //     etch_state->selected.y * brush_size + 1,
-    //     brush_size,
-    //     brush_size);
 
     //release the mutex
     release_mutex((ValueMutex*)ctx, etch_state);
@@ -81,7 +119,7 @@ int32_t etch_a_sketch_app(void* p) {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    //NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
 
@@ -92,6 +130,7 @@ int32_t etch_a_sketch_app(void* p) {
         }
 
         // Clear
+        // TODO: Do animation of shaking board
         if(event.key == InputKeyBack && event.type == InputTypeLong) {
             etch_state->board[1][1] = true;
             for(int y = 0; y < 32; y++) {
@@ -102,17 +141,32 @@ int32_t etch_a_sketch_app(void* p) {
             view_port_update(view_port);
         }
 
+        // Keep LED on while drawing
+        if(etch_state->isDrawing) {
+            notification_message(notification, &sequence_draw_enabled);
+        } else {
+            notification_message(notification, &sequence_draw_disabled);
+        }
+
         // Single Dot Select
         if(event.key == InputKeyOk && event.type == InputTypeShort) {
             etch_state->board[etch_state->selected.x][etch_state->selected.y] =
                 !etch_state->board[etch_state->selected.x][etch_state->selected.y];
         }
 
-        // Erase Board
-        // TODO: Do animation of shaking board
+        // Start Drawing
         if(event.key == InputKeyOk && event.type == InputTypeLong) {
+            // notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_begin_draw);
+            notification_message(notification, &sequence_begin_draw);
+
+            if(etch_state->isDrawing) {
+                // We're ending the drawing
+                notification_message(notification, &sequence_end_draw);
+            }
+
             etch_state->isDrawing = !etch_state->isDrawing;
             etch_state->board[etch_state->selected.x][etch_state->selected.y] = true;
+
             view_port_update(view_port);
         }
 
