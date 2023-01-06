@@ -31,5 +31,6 @@ bool subghz_scene_region_info_on_event(void* context, SceneManagerEvent event) {
 }
 
 void subghz_scene_region_info_on_exit(void* context) {
-    UNUSED(context);
+    SubGhz* subghz = context;
+    widget_reset(subghz->widget);
 }
