@@ -535,7 +535,12 @@ void game_tick(void *ctx) {
      * asteroids_update_keypress_state() since depends on exact
      * pressure timing. */
     if (app->fire) {
-        ship_fire_bullet(app);
+        uint32_t bullet_min_period = 200; // In milliseconds
+        uint32_t now = furi_get_tick();
+        if (now - app->last_bullet_tick >= bullet_min_period) {
+            ship_fire_bullet(app);
+            app->last_bullet_tick = now;
+        }
         app->fire = false;
     }
 
