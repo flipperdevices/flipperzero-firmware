@@ -2567,6 +2567,7 @@ Function,+,stream_read_line,_Bool,"Stream*, FuriString*"
 Function,+,stream_rewind,_Bool,Stream*
 Function,+,stream_save_to_file,size_t,"Stream*, Storage*, const char*, FS_OpenMode"
 Function,+,stream_seek,_Bool,"Stream*, int32_t, StreamOffset"
+Function,+,stream_seek_to_char,_Bool,"Stream*, char, StreamDirection"
 Function,+,stream_size,size_t,Stream*
 Function,+,stream_split,_Bool,"Stream*, Stream*, Stream*"
 Function,+,stream_tell,size_t,Stream*
