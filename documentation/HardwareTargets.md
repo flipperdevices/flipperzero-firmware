@@ -1,6 +1,6 @@
 ## What a Firmware Target is
 
-Flipper's firmware is modular and supports different hardware configurations in a common code base. It encapsulates hardware-specific differences in `furi_hal`, board initialization code, linker files, SDK data and other target-specific information.
+Flipper's firmware is modular and supports different hardware configurations in a common code base. It encapsulates hardware-specific differences in `furi_hal`, board initialization code, linker files, SDK data and other information in a _target definition_.
 
 Target-specifc files are placed in a single subfolder in `firmware/targets`. It must contain a target definition file, `target.json`, and may contain other files if they are referenced by current target's definition. By default, `fbt` gatheres all source files in target folder, unless they are explicitly excluded.
 
@@ -40,5 +40,5 @@ For details on application manifests, check out [their docs page](./AppManifests
 
 Usually you have to specify both TARGET_HW and FIRMWARE_APP_SET for `fbt` to build firmware for non-default target. For example, building and flashing debug firmware for f18 can be done with
 
-    fbt TARGET_HW=18 FIRMWARE_APP_SET=komi flash_usb_full
+    ./fbt TARGET_HW=18 FIRMWARE_APP_SET=komi flash_usb_full
 
