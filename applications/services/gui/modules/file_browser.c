@@ -617,7 +617,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
             browser_update_offset(browser);
             consumed = true;
         }
-    } else if(event->key == InputKeyOk) {
+    } else if(event->key == InputKeyOk || event->key == InputKeyRight) {
         if(event->type == InputTypeShort) {
             BrowserItem_t* selected_item = NULL;
             int32_t select_index = 0;
