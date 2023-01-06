@@ -2,7 +2,7 @@
 
 #include "base.h"
 
-#define SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME "Linear2"
+#define SUBGHZ_PROTOCOL_LINEAR_DELTA3_NAME "LinearDelta3"
 
 typedef struct SubGhzProtocolDecoderLinearDelta3 SubGhzProtocolDecoderLinearDelta3;
 typedef struct SubGhzProtocolEncoderLinearDelta3 SubGhzProtocolEncoderLinearDelta3;
