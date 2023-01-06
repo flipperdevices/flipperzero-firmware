@@ -126,7 +126,8 @@ static void nfc_cli_apdu(Cli* cli, FuriString* args) {
         }
 
         printf("detecting tag\r\n");
-        if(!furi_hal_nfc_detect(&dev_data, 300)) {
+        if(!furi_hal_nfc_detect(&dev_data, 300, true) &&
+           !furi_hal_nfc_detect(&dev_data, 300, false)) {
             printf("Failed to detect tag\r\n");
             break;
         }

@@ -107,6 +107,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_update_mf_classic(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateReadMfUltralightReadAuth) {
         nfc_worker_mf_ultralight_read_auth(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateTopazEmulate) {
+        nfc_worker_emulate_topaz(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
         nfc_worker_mf_classic_dict_attack(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateAnalyzeReader) {
@@ -516,6 +518,7 @@ void nfc_worker_emulate_mf_ultralight(NfcWorker* nfc_worker) {
             nfc_data->uid_len,
             nfc_data->atqa,
             nfc_data->sak,
+            false,
             mf_ul_prepare_emulation_response,
             &emulator,
             5000);
@@ -1016,6 +1019,33 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+}
+
+void nfc_worker_emulate_topaz(NfcWorker* nfc_worker) {
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    TopazEmulator emulator = {};
+    topaz_prepare_emulation(&emulator, &nfc_worker->dev_data->topaz_data);
+
+    while(nfc_worker->state == NfcWorkerStateTopazEmulate) {
+        furi_hal_nfc_emulate_nfca(
+            nfc_data->uid,
+            RFAL_LM_NFCID_LEN_04, // Does not actually matter, we're not using anti-collision
+            nfc_data->atqa,
+            nfc_data->sak,
+            true,
+            topaz_prepare_emulation_response,
+            &emulator,
+            5000);
+        topaz_emulation_reset(&emulator);
+        // Check if data was modified
+        if(emulator.data_changed) {
+            nfc_worker->dev_data->topaz_data = emulator.data;
+            if(nfc_worker->callback) {
+                nfc_worker->callback(NfcWorkerEventSuccess, nfc_worker->context);
+            }
+            emulator.data_changed = false;
+        }
     }
 }
 

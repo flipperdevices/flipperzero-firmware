@@ -39,6 +39,10 @@ extern "C" {
     ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_MANUAL | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_REMV | \
      (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_NONE)
 
+#define FURI_HAL_NFC_TX_NO_CRC_RX_DEFAULT                                              \
+    ((uint32_t)RFAL_TXRX_FLAGS_CRC_TX_MANUAL | (uint32_t)RFAL_TXRX_FLAGS_CRC_RX_REMV | \
+     (uint32_t)RFAL_TXRX_FLAGS_PAR_RX_REMV | (uint32_t)RFAL_TXRX_FLAGS_PAR_TX_AUTO)
+
 typedef enum {
     FuriHalNfcTxRxTypeDefault,
     FuriHalNfcTxRxTypeRxNoCrc,
@@ -200,6 +204,7 @@ void furi_hal_nfc_listen_sleep();
  * @param       uid_len             NFC-A UID length
  * @param       atqa                NFC-A ATQA
  * @param       sak                 NFC-A SAK
+ * @param       is_topaz            whether emulating Topaz
  * @param       callback            FuriHalNfcEmulateCallback instance
  * @param       context             pointer to context for callback
  * @param       timeout             timeout in ms
@@ -211,6 +216,7 @@ bool furi_hal_nfc_emulate_nfca(
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak,
+    bool is_topaz,
     FuriHalNfcEmulateCallback callback,
     void* context,
     uint32_t timeout);

@@ -52,6 +52,8 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker);
 
 void nfc_worker_mf_ul_auth_attack(NfcWorker* nfc_worker);
 
+void nfc_worker_emulate_topaz(NfcWorker* nfc_worker);
+
 void nfc_worker_emulate_apdu(NfcWorker* nfc_worker);
 
 void nfc_worker_analyze_reader(NfcWorker* nfc_worker);

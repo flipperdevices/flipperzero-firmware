@@ -406,6 +406,7 @@ bool furi_hal_nfc_emulate_nfca(
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak,
+    bool is_topaz,
     FuriHalNfcEmulateCallback callback,
     void* context,
     uint32_t timeout) {
@@ -417,6 +418,7 @@ bool furi_hal_nfc_emulate_nfca(
     memcpy(config.nfcid, uid, uid_len);
     memcpy(config.SENS_RES, atqa, RFAL_LM_SENS_RES_LEN);
     config.SEL_RES = sak;
+    config.t1tFlag = is_topaz;
     uint8_t buff_rx[256];
     uint16_t buff_rx_size = 256;
     uint16_t buff_rx_len = 0;
@@ -448,20 +450,45 @@ bool furi_hal_nfc_emulate_nfca(
         buff_rx_len = 0;
         rfalWorker();
         rfalLmState state = rfalListenGetState(&data_received, NULL);
+        rfalTransceiveState txrx_state = rfalGetTransceiveState();
+        ReturnCode txrx_status = rfalGetTransceiveStatus();
+
+        FURI_LOG_D(TAG, "%s: state = %d, data_received = %d", __func__, state, data_received);
+        FURI_LOG_D(TAG, "%s: txrx state = %d, status = %d", __func__, txrx_state, txrx_status);
+
+        if(is_topaz && (state == RFAL_LM_STATE_READY_A || state == RFAL_LM_STATE_ACTIVE_A) &&
+           txrx_state == RFAL_TXRX_STATE_IDLE && txrx_status != ERR_NONE)
+            break;
+
         if(data_received) {
             rfalTransceiveBlockingRx();
-            if(nfca_emulation_handler(buff_rx, buff_rx_len, buff_tx, &buff_tx_len)) {
-                if(rfalListenSleepStart(
-                       RFAL_LM_STATE_SLEEP_A,
-                       buff_rx,
-                       rfalConvBytesToBits(buff_rx_size),
-                       &buff_rx_len)) {
-                    FURI_LOG_E(TAG, "Failed to enter sleep mode");
-                    break;
-                } else {
-                    continue;
+            if(!is_topaz) {
+                if(nfca_emulation_handler(buff_rx, buff_rx_len, buff_tx, &buff_tx_len)) {
+                    if(rfalListenSleepStart(
+                           RFAL_LM_STATE_SLEEP_A,
+                           buff_rx,
+                           rfalConvBytesToBits(buff_rx_size),
+                           &buff_rx_len)) {
+                        FURI_LOG_E(TAG, "Failed to enter sleep mode");
+                        break;
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                if(state == RFAL_LM_STATE_IDLE) {
+                    // Handle REQA and WUPA
+                    if(buff_rx_len == 0 && (*buff_rx == RFAL_14443A_SHORTFRAME_CMD_REQA ||
+                                            *buff_rx == RFAL_14443A_SHORTFRAME_CMD_WUPA)) {
+                        memcpy(buff_tx, atqa, RFAL_LM_SENS_RES_LEN);
+                        buff_tx_len = RFAL_LM_SENS_RES_LEN * 8;
+                        data_type = FURI_HAL_NFC_TX_NO_CRC_RX_DEFAULT;
+                        ReturnCode ret = rfalListenSetState(RFAL_LM_STATE_READY_A);
+                        FURI_LOG_D(TAG, "To RFAL_LM_STATE_READY_A status: %d", ret);
+                    }
                 }
             }
+
             if(buff_tx_len) {
                 ReturnCode ret = rfalTransceiveBitsBlockingTx(
                     buff_tx,
@@ -474,6 +501,10 @@ bool furi_hal_nfc_emulate_nfca(
                 if(ret) {
                     FURI_LOG_E(TAG, "Tranceive failed with status %d", ret);
                     break;
+                }
+                if(is_topaz) {
+                    ret = rfalListenSetState(RFAL_LM_STATE_ACTIVE_A);
+                    FURI_LOG_D(TAG, "To RFAL_LM_STATE_ACTIVE_A status: %d", ret);
                 }
                 continue;
             }

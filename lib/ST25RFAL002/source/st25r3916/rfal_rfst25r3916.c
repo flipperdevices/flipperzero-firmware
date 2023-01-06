@@ -10,8 +10,8 @@
   *
   *        www.st.com/myliberty
   *
-  * Unless required by applicable law or agreed to in writing, software 
-  * distributed under the License is distributed on an "AS IS" BASIS, 
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
   * AND SPECIFICALLY DISCLAIMING THE IMPLIED WARRANTIES OF MERCHANTABILITY,
   * FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
@@ -22,16 +22,16 @@
 
 /*
  *      PROJECT:   ST25R3916 firmware
- *      Revision: 
+ *      Revision:
  *      LANGUAGE:  ISO C99
  */
 
 /*! \file
  *
- *  \author Gustavo Patricio 
+ *  \author Gustavo Patricio
  *
  *  \brief RF Abstraction Layer (RFAL)
- *  
+ *
  *  RFAL implementation for ST25R3916
  */
 
@@ -98,6 +98,7 @@ typedef struct {
     uint16_t* rxLen; /*!< Pointer to write the data length placed into rxBuf  */
     bool dataFlag; /*!< Listen Mode current Data Flag                       */
     bool iniFlag; /*!< Listen Mode initialized Flag  (FeliCa slots)        */
+    bool t1tFlag; /*!< Type 1 tag emulation flag */
 } rfalLm;
 
 /*! Struct that holds all context for the Wake-Up Mode                                             */
@@ -162,12 +163,12 @@ typedef struct {
 /*! Struct that holds NFC-V current context
  *
  * This buffer has to be big enough for coping with maximum response size (hamming coded)
- *    - inventory requests responses: 14*2+2 bytes 
+ *    - inventory requests responses: 14*2+2 bytes
  *    - read single block responses: (32+4)*2+2 bytes
  *    - read multiple block could be very long... -> not supported
  *    - current implementation expects it be written in one bulk into FIFO
  *    - needs to be above FIFO water level of ST25R3916 (200)
- *    - the coding function needs to be able to 
+ *    - the coding function needs to be able to
  *      put more than FIFO water level bytes into it (n*64+1)>200                                                          */
 typedef struct {
     uint8_t codingBuffer[(
@@ -352,44 +353,44 @@ typedef union { /*  PRQA S 0750 # MISRA 19.2 - Both members are of the same type
     5U /*!< Time in ms required for AAT pins and Osc to settle after en bit set */
 #endif /* RFAL_ST25R3916_AAT_SETTLE */
 
-/*! FWT adjustment: 
+/*! FWT adjustment:
  *    64 : NRT jitter between TXE and NRT start      */
 #define RFAL_FWT_ADJUSTMENT 64U
 
-/*! FWT ISO14443A adjustment:  
+/*! FWT ISO14443A adjustment:
  *   512  : 4bit length
  *    64  : Half a bit duration due to ST25R3916 Coherent receiver (1/fc)         */
 #define RFAL_FWT_A_ADJUSTMENT (512U + 64U)
 
-/*! FWT ISO14443B adjustment:  
+/*! FWT ISO14443B adjustment:
  *    SOF (14etu) + 1Byte (10etu) + 1etu (IRQ comes 1etu after first byte) - 3etu (ST25R3916 sends TXE 3etu after) */
 #define RFAL_FWT_B_ADJUSTMENT ((14U + 10U + 1U - 3U) * 128U)
 
-/*! FWT FeliCa 212 adjustment:  
+/*! FWT FeliCa 212 adjustment:
  *    1024 : Length of the two Sync bytes at 212kbps */
 #define RFAL_FWT_F_212_ADJUSTMENT 1024U
 
-/*! FWT FeliCa 424 adjustment:  
+/*! FWT FeliCa 424 adjustment:
  *    512 : Length of the two Sync bytes at 424kbps  */
 #define RFAL_FWT_F_424_ADJUSTMENT 512U
 
 /*! Time between our field Off and other peer field On : Tadt + (n x Trfw)
- * Ecma 340 11.1.2 - Tadt: [56.64 , 188.72] us ;  n: [0 , 3]  ; Trfw = 37.76 us        
+ * Ecma 340 11.1.2 - Tadt: [56.64 , 188.72] us ;  n: [0 , 3]  ; Trfw = 37.76 us
  * Should be: 189 + (3*38) = 303us ; we'll use a more relaxed setting: 605 us    */
 #define RFAL_AP2P_FIELDON_TADTTRFW rfalConvUsTo1fc(605U)
 
 /*! FDT Listen adjustment for ISO14443A   EMVCo 2.6  4.8.1.3  ;  Digital 1.1  6.10
  *
- *  276: Time from the rising pulse of the pause of the logic '1' (i.e. the time point to measure the deaftime from), 
- *       to the actual end of the EOF sequence (the point where the MRT starts). Please note that the ST25R391x uses the 
- *       ISO14443-2 definition where the EOF consists of logic '0' followed by sequence Y. 
+ *  276: Time from the rising pulse of the pause of the logic '1' (i.e. the time point to measure the deaftime from),
+ *       to the actual end of the EOF sequence (the point where the MRT starts). Please note that the ST25R391x uses the
+ *       ISO14443-2 definition where the EOF consists of logic '0' followed by sequence Y.
  *  -64: Further adjustment for receiver to be ready just before first bit
  */
 #define RFAL_FDT_LISTEN_A_ADJUSTMENT (276U - 64U)
 
 /*! FDT Listen adjustment for ISO14443B   EMVCo 2.6  4.8.1.6  ;  Digital 1.1  7.9
  *
- *  340: Time from the rising edge of the EoS to the starting point of the MRT timer (sometime after the final high 
+ *  340: Time from the rising edge of the EoS to the starting point of the MRT timer (sometime after the final high
  *       part of the EoS is completed)
  */
 #define RFAL_FDT_LISTEN_B_ADJUSTMENT 340U
@@ -1362,6 +1363,7 @@ ReturnCode rfalStartTransceive(const rfalTransceiveContext* ctx) {
         /* Check whether the field is already On, otherwise no TXE will be received  */
         if(!st25r3916IsTxEnabled() &&
            (!rfalIsModePassiveListen(gRFAL.mode) && (ctx->txBuf != NULL))) {
+            platformLog("%s: ERR_WRONG_STATE 1", __func__);
             return ERR_WRONG_STATE;
         }
 
@@ -1499,6 +1501,7 @@ ReturnCode rfalStartTransceive(const rfalTransceiveContext* ctx) {
         return ERR_NONE;
     }
 
+    platformLog("%s: ERR_WRONG_STATE 2", __func__);
     return ERR_WRONG_STATE;
 }
 
@@ -1683,9 +1686,9 @@ ReturnCode rfalGetTransceiveRSSI(uint16_t* rssi) {
              false);
     if(isSumMode) {
         /*******************************************************************************/
-        /* Using SQRT from math.h and float. If due to compiler, resources or performance 
+        /* Using SQRT from math.h and float. If due to compiler, resources or performance
          * issue this cannot be used, other approaches can be foreseen with less accuracy:
-         *    Use a simpler sqrt algorithm 
+         *    Use a simpler sqrt algorithm
          *    *rssi = MAX( amRSSI, pmRSSI );
          *    *rssi = ( (amRSSI + pmRSSI) / 2);
          */
@@ -3165,8 +3168,8 @@ ReturnCode rfalFeliCaPoll(
     rfalSetErrorHandling(RFAL_ERRORHANDLING_EMVCO);
 
     /*******************************************************************************/
-    /* Run transceive blocking, 
-     * Calculate Total Response Time in(64/fc): 
+    /* Run transceive blocking,
+     * Calculate Total Response Time in(64/fc):
      *                       512 PICC process time + (n * 256 Time Slot duration)  */
     ret = rfalTransceiveBlockingTx(
         frame,
@@ -3247,7 +3250,7 @@ ReturnCode rfalFeliCaPoll(
 #endif /* RFAL_FEATURE_NFCF */
 
 /*****************************************************************************
- *  Listen Mode                                                              *  
+ *  Listen Mode                                                              *
  *****************************************************************************/
 
 /*******************************************************************************/
@@ -3333,8 +3336,10 @@ ReturnCode rfalListenStart(
         st25r3916WritePTMem(PTMem.PTMem_A, ST25R3916_PTM_A_LEN);
 
         /*******************************************************************************/
-        /* Enable automatic responses for A */
-        autoResp &= ~ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a;
+        if(!confA->t1tFlag) {
+            /* Enable automatic responses for A */
+            autoResp &= ~ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a;
+        }
 
         /* Set Target mode, Bit Rate detection and Listen Mode for NFC-F */
         gRFAL.Lm.mdReg |=
@@ -3448,6 +3453,7 @@ ReturnCode rfalListenStart(
         *gRFAL.Lm.rxLen = 0;
         gRFAL.Lm.dataFlag = false;
         gRFAL.Lm.iniFlag = true;
+        gRFAL.Lm.t1tFlag = (lmMask & RFAL_LM_MASK_NFCA) ? confA->t1tFlag : false;
 
         /* Apply the Automatic Responses configuration */
         st25r3916ChangeRegisterBits(
@@ -3541,10 +3547,12 @@ static ReturnCode rfalRunListenModeWorker(void) {
         if(((irqs & ST25R3916_IRQ_MASK_WU_F) != 0U) && (gRFAL.Lm.brDetected != RFAL_BR_KEEP)) {
             rfalListenSetState(RFAL_LM_STATE_READY_F);
         } else if(((irqs & ST25R3916_IRQ_MASK_RXE) != 0U) && (gRFAL.Lm.brDetected != RFAL_BR_KEEP)) {
+            platformLog("RFAL_LM_STATE_IDLE: irqs: %08lx", irqs);
             irqs = st25r3916GetInterrupt(
                 (ST25R3916_IRQ_MASK_WU_F | ST25R3916_IRQ_MASK_RXE | ST25R3916_IRQ_MASK_EOF |
                  ST25R3916_IRQ_MASK_CRC | ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_ERR2 |
                  ST25R3916_IRQ_MASK_ERR1));
+            platformLog("RFAL_LM_STATE_IDLE: irqs err: %08lx", irqs);
 
             if(((irqs & ST25R3916_IRQ_MASK_CRC) != 0U) ||
                ((irqs & ST25R3916_IRQ_MASK_PAR) != 0U) ||
@@ -3559,6 +3567,8 @@ static ReturnCode rfalRunListenModeWorker(void) {
             *gRFAL.Lm.rxLen = st25r3916GetNumFIFOBytes();
             st25r3916ReadFifo(
                 gRFAL.Lm.rxBuf, MIN(*gRFAL.Lm.rxLen, rfalConvBitsToBytes(gRFAL.Lm.rxBufLen)));
+
+            platformLog("RFAL_LM_STATE_IDLE: rxLen: %d", *gRFAL.Lm.rxLen);
 
             /*******************************************************************************/
             /* REMARK: Silicon workaround ST25R3916 Errata #TBD                            */
@@ -3578,6 +3588,8 @@ static ReturnCode rfalRunListenModeWorker(void) {
             *gRFAL.Lm.rxLen -= ((*gRFAL.Lm.rxLen > RFAL_CRC_LEN) ? RFAL_CRC_LEN : *gRFAL.Lm.rxLen);
             *gRFAL.Lm.rxLen = (uint16_t)rfalConvBytesToBits(*gRFAL.Lm.rxLen);
             gRFAL.Lm.dataFlag = true;
+
+            platformLog("RFAL_LM_STATE_IDLE: %02x", *gRFAL.Lm.rxBuf);
 
             /*Check if Observation Mode was enabled and disable it on ST25R391x */
             rfalCheckDisableObsMode();
@@ -3662,16 +3674,21 @@ static ReturnCode rfalRunListenModeWorker(void) {
             break; /* No interrupt to process */
         }
 
+        platformLog("RFAL_LM_STATE_ACTIVE_A: irqs top: %08lx", irqs);
+
         if((irqs & ST25R3916_IRQ_MASK_RXE) != 0U) {
             /* Retrieve the error flags/irqs */
             irqs |= st25r3916GetInterrupt(
                 (ST25R3916_IRQ_MASK_PAR | ST25R3916_IRQ_MASK_CRC | ST25R3916_IRQ_MASK_ERR2 |
                  ST25R3916_IRQ_MASK_ERR1));
             *gRFAL.Lm.rxLen = st25r3916GetNumFIFOBytes();
+            platformLog("RFAL_LM_STATE_ACTIVE_A: irqs: %08lx", irqs);
+            platformLog("RFAL_LM_STATE_ACTIVE_A: rxLen: %d", *gRFAL.Lm.rxLen);
 
             if(((irqs & ST25R3916_IRQ_MASK_CRC) != 0U) ||
                ((irqs & ST25R3916_IRQ_MASK_ERR1) != 0U) ||
-               ((irqs & ST25R3916_IRQ_MASK_PAR) != 0U) || (*gRFAL.Lm.rxLen <= RFAL_CRC_LEN)) {
+               ((irqs & ST25R3916_IRQ_MASK_PAR) != 0U) ||
+               (*gRFAL.Lm.rxLen <= RFAL_CRC_LEN && !gRFAL.Lm.t1tFlag)) {
                 /* Clear rx context and FIFO */
                 *gRFAL.Lm.rxLen = 0;
                 st25r3916ExecuteCommand(ST25R3916_CMD_CLEAR_FIFO);
@@ -3689,14 +3706,17 @@ static ReturnCode rfalRunListenModeWorker(void) {
                 break;
             }
 
-            /* Remove CRC from length */
-            *gRFAL.Lm.rxLen -= RFAL_CRC_LEN;
+            if(!gRFAL.Lm.t1tFlag) {
+                /* Remove CRC from length */
+                *gRFAL.Lm.rxLen -= RFAL_CRC_LEN;
+            }
 
             /* Retrieve received data */
             st25r3916ReadFifo(
                 gRFAL.Lm.rxBuf, MIN(*gRFAL.Lm.rxLen, rfalConvBitsToBytes(gRFAL.Lm.rxBufLen)));
             *gRFAL.Lm.rxLen = (uint16_t)rfalConvBytesToBits(*gRFAL.Lm.rxLen);
             gRFAL.Lm.dataFlag = true;
+            platformLog("RFAL_LM_STATE_ACTIVE_A: %02x", *gRFAL.Lm.rxBuf);
         } else if((irqs & ST25R3916_IRQ_MASK_EOF) != 0U) {
             rfalListenSetState(RFAL_LM_STATE_POWER_OFF);
         } else {
@@ -3967,9 +3987,11 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
             st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
 
             if((gRFAL.Lm.mdMask & RFAL_LM_MASK_NFCA) != 0U) {
-                /* Enable automatic responses for A */
-                st25r3916ClrRegisterBits(
-                    ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+                if(!gRFAL.Lm.t1tFlag) {
+                    /* Enable automatic responses for A */
+                    st25r3916ClrRegisterBits(
+                        ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+                }
 
                 /* Prepares the NFCIP-1 Passive target logic to wait in the Sense/Idle state */
                 st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
@@ -4066,12 +4088,12 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
 
             /*******************************************************************************/
             /* In Active P2P the Initiator may:  Turn its field On;  LM goes into IDLE state;
-                 *      Initiator sends an unexpected frame raising a Protocol error; Initiator 
-                 *      turns its field Off and ST25R3916 performs the automatic RF Collision 
-                 *      Avoidance keeping our field On; upon a Protocol error upper layer sets 
+                 *      Initiator sends an unexpected frame raising a Protocol error; Initiator
+                 *      turns its field Off and ST25R3916 performs the automatic RF Collision
+                 *      Avoidance keeping our field On; upon a Protocol error upper layer sets
                  *      again the state to IDLE to clear dataFlag and wait for next data.
-                 *      
-                 * Ensure that when upper layer calls SetState(IDLE), it restores initial 
+                 *
+                 * Ensure that when upper layer calls SetState(IDLE), it restores initial
                  * configuration and that check whether an external Field is still present     */
             if((gRFAL.Lm.mdMask & RFAL_LM_MASK_ACTIVE_P2P) != 0U) {
                 /* Ensure nfc_ar is reseted and back to only after Rx */
@@ -4095,8 +4117,10 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
             /* If we are in ACTIVE_A, reEnable Listen for A before going to IDLE, otherwise do nothing */
             if(gRFAL.Lm.state == RFAL_LM_STATE_ACTIVE_A) {
                 /* Enable automatic responses for A and Reset NFCA target state */
-                st25r3916ClrRegisterBits(
-                    ST25R3916_REG_PASSIVE_TARGET, (ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a));
+                if(!gRFAL.Lm.t1tFlag) {
+                    st25r3916ClrRegisterBits(
+                        ST25R3916_REG_PASSIVE_TARGET, (ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a));
+                }
                 st25r3916ExecuteCommand(ST25R3916_CMD_GOTO_SENSE);
             }
 
@@ -4113,9 +4137,9 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
         case RFAL_LM_STATE_READY_F:
 
             /*******************************************************************************/
-            /* If we're coming from BitRate detection mode, the Bit Rate Definition reg 
+            /* If we're coming from BitRate detection mode, the Bit Rate Definition reg
                  * still has the last bit rate used.
-                 * If a frame is received between setting the mode to Listen NFCA and 
+                 * If a frame is received between setting the mode to Listen NFCA and
                  * setting Bit Rate Definition reg, it will raise a framing error.
                  * Set the bitrate immediately, and then the normal SetMode procedure          */
             st25r3916SetBitrate((uint8_t)gRFAL.Lm.brDetected, (uint8_t)gRFAL.Lm.brDetected);
@@ -4154,9 +4178,9 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
         case RFAL_LM_STATE_READY_A:
 
             /*******************************************************************************/
-            /* If we're coming from BitRate detection mode, the Bit Rate Definition reg 
+            /* If we're coming from BitRate detection mode, the Bit Rate Definition reg
                  * still has the last bit rate used.
-                 * If a frame is received between setting the mode to Listen NFCA and 
+                 * If a frame is received between setting the mode to Listen NFCA and
                  * setting Bit Rate Definition reg, it will raise a framing error.
                  * Set the bitrate immediately, and then the normal SetMode procedure          */
             st25r3916SetBitrate((uint8_t)gRFAL.Lm.brDetected, (uint8_t)gRFAL.Lm.brDetected);
@@ -4170,6 +4194,7 @@ ReturnCode rfalListenSetState(rfalLmState newSt) {
             ret = rfalSetMode(RFAL_MODE_LISTEN_NFCA, gRFAL.Lm.brDetected, gRFAL.Lm.brDetected);
 
             gRFAL.state = RFAL_STATE_LM; /* Keep in Listen Mode */
+
             break;
 
         /*******************************************************************************/
@@ -4680,7 +4705,7 @@ ReturnCode rfalLowPowerModeStop(void) {
 #endif /* RFAL_FEATURE_LOWPOWER_MODE */
 
 /*******************************************************************************
- *  RF Chip                                                                    *  
+ *  RF Chip                                                                    *
  *******************************************************************************/
 
 /*******************************************************************************/

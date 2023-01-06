@@ -4,6 +4,9 @@
 
 #define TOPAZ_MAX_SIZE (512)
 #define TOPAZ_UID_FULL_LENGTH (7)
+#define TOPAZ_BYTES_PER_BLOCK (8)
+#define TOPAZ_BYTES_PER_SECTOR (TOPAZ_BYTES_PER_BLOCK * 16)
+#define TOPAZ_BYTES_RALL (120)
 
 #define TOPAZ_CMD_RID (0x78)
 #define TOPAZ_CMD_RALL (0x00)
@@ -16,7 +19,7 @@
 #define TOPAZ_CMD_WRITE_NE8 (0x1B)
 
 #define TOPAZ_96_HR0 (0x11)
-#define TOPAZ_96_SIZE (96)
+#define TOPAZ_96_SIZE (120)
 #define TOPAZ_512_HR0 (0x12)
 #define TOPAZ_512_SIZE (512)
 
@@ -33,7 +36,23 @@ typedef struct {
     uint8_t data[TOPAZ_MAX_SIZE];
 } TopazData;
 
+typedef struct {
+    TopazData data;
+    bool data_changed;
+    uint8_t buff_rx[16];
+    uint8_t buff_level;
+} TopazEmulator;
+
 bool topaz_check_card_type(uint8_t ATQA0, uint8_t ATQA1);
 TopazType topaz_get_type_from_hr0(uint8_t hr0);
 size_t topaz_get_size_by_type(TopazType type);
 bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid);
+void topaz_prepare_emulation(TopazEmulator* emulator, TopazData* data);
+bool topaz_prepare_emulation_response(
+    uint8_t* buff_rx,
+    uint16_t buff_rx_len,
+    uint8_t* buff_tx,
+    uint16_t* buff_tx_len,
+    uint32_t* data_type,
+    void* context);
+void topaz_emulation_reset(TopazEmulator* emulator);
