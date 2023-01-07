@@ -220,9 +220,9 @@ static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     while(param[i] != '\0') {
         uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
-            furi_thread_flags_wait(0, FuriFlagWaitAny, timing);
+            furi_delay_ms(timing);
             furi_hal_hid_kb_press(keycode);
-            furi_thread_flags_wait(0, FuriFlagWaitAny, timing);
+            furi_delay_ms(timing);
             furi_hal_hid_kb_release(keycode);
         }
         i++;
