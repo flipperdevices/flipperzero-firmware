@@ -10,6 +10,8 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <math.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 1
@@ -81,6 +83,18 @@ typedef struct AsteroidsApp {
                                       in milliseconds the key was pressed. */
     bool fire; /* Short press detected: fire a bullet. */
 } AsteroidsApp;
+
+const NotificationSequence sequence_crash = {
+    &message_red_255,
+
+    &message_vibro_on,
+    // &message_note_g5, // Play sound but currently disabled
+    &message_delay_25,
+    // &message_note_e5,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
 
 /* ============================== Prototyeps ================================ */
 
@@ -493,6 +507,7 @@ void game_tick(void* ctx) {
      * 1. Ship was hit, we frozen the game as long as ship_hit isn't zero
      * again, and show an animation of a rotating ship. */
     if(app->ship_hit) {
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_crash);
         app->ship.rot += 0.5;
         app->ship_hit--;
         view_port_update(app->view_port);
