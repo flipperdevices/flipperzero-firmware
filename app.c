@@ -16,6 +16,10 @@
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
 #define GAME_START_LIVES 3
+#define TTLBUL 30 /* Bullet time to live, in ticks. */
+#define MAXBUL 5 /* Max bullets on the screen. */
+#define MAXAST 32 /* Max asteroids on the screen. */
+#define SHIP_HIT_ANIMATION_LEN 15
 #ifndef PI
 #define PI 3.14159265358979f
 #endif
@@ -42,9 +46,6 @@ typedef struct Asteroid {
     uint8_t shape_seed; /* Seed to give random shape. */
 } Asteroid;
 
-#define MAXBUL 5 /* Max bullets on the screen. */
-#define MAXAST 32 /* Max asteroids on the screen. */
-#define SHIP_HIT_ANIMATION_LEN 15
 typedef struct AsteroidsApp {
     /* GUI */
     Gui* gui;
@@ -303,7 +304,7 @@ void ship_fire_bullet(AsteroidsApp* app) {
     b->vx += app->ship.vx;
     b->vy += app->ship.vy;
 
-    b->ttl = 50; /* The bullet will disappear after N ticks. */
+    b->ttl = TTLBUL; /* The bullet will disappear after N ticks. */
     app->bullets_num++;
 }
 
