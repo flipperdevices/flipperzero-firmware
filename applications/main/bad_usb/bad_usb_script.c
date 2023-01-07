@@ -602,7 +602,7 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->file_end = false;
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
-                furi_thread_flags_wait(0, FuriFlagWaitAny, 1500);
+                furi_delay_ms(1500);
                 worker_state = BadUsbStateRunning;
             } else if(flags & WorkerEvtToggle) { // Cancel scheduled execution
                 worker_state = BadUsbStateNotConnected;
