@@ -326,45 +326,53 @@ static bool desktop_check_file_flag(const char* flag_path) {
 
 int32_t desktop_srv(void* p) {
     UNUSED(p);
-    Desktop* desktop = desktop_alloc();
-
-    bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
-    if(!loaded) {
-        memset(&desktop->settings, 0, sizeof(desktop->settings));
-        DESKTOP_SETTINGS_SAVE(&desktop->settings);
+	
+	if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal)
+	{
+		FURI_LOG_W("Desktop", "Desktop load skipped. Device is in special startup mode.");
     }
+	else
+	{
+		Desktop* desktop = desktop_alloc();
 
-    view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
-    desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
-    animation_manager_set_dummy_mode_state(
-        desktop->animation_manager, desktop->settings.dummy_mode);
+		bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
+		if(!loaded) {
+			memset(&desktop->settings, 0, sizeof(desktop->settings));
+			DESKTOP_SETTINGS_SAVE(&desktop->settings);
+		}
 
-    scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
+		view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
+		desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
+		animation_manager_set_dummy_mode_state(
+			desktop->animation_manager, desktop->settings.dummy_mode);
 
-    desktop_pin_lock_init(&desktop->settings);
+		scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    if(!desktop_pin_lock_is_locked()) {
-        if(!loader_is_locked(desktop->loader)) {
-            desktop_auto_lock_arm(desktop);
-        }
-    } else {
-        desktop_lock(desktop);
-    }
+		desktop_pin_lock_init(&desktop->settings);
 
-    if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
-        scene_manager_next_scene(desktop->scene_manager, DesktopSceneSlideshow);
-    }
+		if(!desktop_pin_lock_is_locked()) {
+			if(!loader_is_locked(desktop->loader)) {
+				desktop_auto_lock_arm(desktop);
+			}
+		} else {
+			desktop_lock(desktop);
+		}
 
-    if(!furi_hal_version_do_i_belong_here()) {
-        scene_manager_next_scene(desktop->scene_manager, DesktopSceneHwMismatch);
-    }
+		if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
+			scene_manager_next_scene(desktop->scene_manager, DesktopSceneSlideshow);
+		}
 
-    if(furi_hal_rtc_get_fault_data()) {
-        scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
-    }
+		if(!furi_hal_version_do_i_belong_here()) {
+			scene_manager_next_scene(desktop->scene_manager, DesktopSceneHwMismatch);
+		}
 
-    view_dispatcher_run(desktop->view_dispatcher);
-    desktop_free(desktop);
+		if(furi_hal_rtc_get_fault_data()) {
+			scene_manager_next_scene(desktop->scene_manager, DesktopSceneFault);
+		}
+
+		view_dispatcher_run(desktop->view_dispatcher);
+		desktop_free(desktop);
+	}
 
     return 0;
 }
