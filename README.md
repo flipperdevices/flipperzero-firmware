@@ -2,9 +2,10 @@ This is an implementation of the classic Asteroids game for the [Flipper Zero](h
 
 Controls:
 * Left/Right: rotate ship in the two directions.
-* Ok, short press: fire bullets.
-* Ok, long press: accelerate towards ship head.
-* Down: decelerates.
+* Ok, short press: Short burst bullets
+* Ok, long press: Auto-fire bullets
+* Up: accelerate
+* Down: decelerates
 
 This is a screenshot, but the game looks a lot better in the device itself:
 
