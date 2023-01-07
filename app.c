@@ -450,7 +450,7 @@ void restart_game_after_gameover(AsteroidsApp* app) {
     app->ticks = 0;
     app->score = 0;
     app->ship_hit = 0;
-    app->lives = GAME_START_LIVES;
+    app->lives = GAME_START_LIVES - 1;
     restart_game(app);
 }
 
