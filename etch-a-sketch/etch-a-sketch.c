@@ -157,6 +157,7 @@ int32_t etch_a_sketch_app(void* p) {
         // Clear
         // TODO: Do animation of shaking board
         if(event.key == InputKeyBack && event.type == InputTypeLong) {
+            etch_state->showWelcome = false;
             etch_state->board[1][1] = true;
             for(int y = 0; y < 32; y++) {
                 for(int x = 0; x < 64; x++) {
