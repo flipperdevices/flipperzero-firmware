@@ -42,7 +42,7 @@ typedef struct Asteroid {
     uint8_t shape_seed; /* Seed to give random shape. */
 } Asteroid;
 
-#define MAXBUL 10 /* Max bullets on the screen. */
+#define MAXBUL 5 /* Max bullets on the screen. */
 #define MAXAST 32 /* Max asteroids on the screen. */
 #define SHIP_HIT_ANIMATION_LEN 15
 typedef struct AsteroidsApp {
