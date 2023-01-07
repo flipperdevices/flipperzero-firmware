@@ -28,51 +28,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-06 22:59 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-06 22:59 EST`
-- Small fix for MRTD doc saving thanks to Bernie
-- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
-- Assets: Includes SubGHz files: more CVS buttons and Lowes buttons
-- Assets: Includes SubGHz Playlist config update and SubGHz Remote config update for CVS, Lowes & Walgreens
-- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
-- Added: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
-- [New Patreon Build: RM All and the new SCIENCE build now have 10 animations with 9 featuring scientists, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76626421)
-- Per PATREON voters, Added SubGHz Playlist to the Main Menu.
-- [New Patreon Build: Mario and Friends!](https://www.patreon.com/posts/76649835)
-- Updated passport to Mario themed. [Thank you Kuronons for the animation!](https://github.com/Kuronons/FZ_graphics/)
-- [New Patreon Build: Hackz, inspired by one of our animation coordinators (RM Extreme) on Patreon!](https://www.patreon.com/posts/76671172)
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Updated: [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
-- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- Passport updated to support more stuff. [Thanks to ESurge](https://github.com/ESurge/)
-- [ISO15693: update to latest sources (By g3gg0)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/484)
-- Unleashed: [Add 350Mhz to default SubGHz range](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e99d57785d192948ff8cece37e4978b83cf5dde1#diff-f3daad7a0f634a8f5a5ef177bd1d0338dcb3f6d918c61c76910e4f40916ebe04)
-- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD` [support for BME680 by g3gg0](https://github.com/quen0n/unitemp-flipperzero/pull/1)
-- Added: BadUSB: Assets for RickRoll, RogueMaster GitHub and RogueMaster Patreon
-- Added: NFC: Assets for RogueMaster GitHub and RogueMaster Patreon
-- [New Patreon Build: 420](https://www.patreon.com/posts/76747898)
-- Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Added: [SubGhz: add protocol "Linear Delta-3" #2239 (By brandonweeks)](https://github.com/flipperdevices/flipperzero-firmware/pull/2239)
-- [New Patreon Builds: 420+18 and Anime+420; Also updated ALL build to include 420 animations.](https://www.patreon.com/posts/76813216)
-- [Patreon Assets: SC_Card_Assets.zip updated with latest files](https://www.patreon.com/posts/76813216)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Updated: [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP
-- Added: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) WIP
-- Added: [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
-- Added: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
-- Unleashed: [Updated infrared assets (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/267)
-- [New Patreon Builds: Anime+420+18.](https://www.patreon.com/posts/76846321)
-- Moved OFW Clock to Misc instead of Tools.
-- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) WIP
-- Updated: [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) NOW WORKS :)
-- Updated: [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
-- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
-- OFW: New Animation for Sleigh Ride
-- Added: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
-- OFW: Show region information in sub-GHz app
-- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD`
-- Unleashed: Remove Subghz Region Shown
-- Removed: [Gem Utils (By devicious)](https://github.com/devicious/gem-flipperzero) due to it being too much of a Work In-Progress.
+- [Fixed boot loop during updating (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/489)
 
 <a name="release">
 
