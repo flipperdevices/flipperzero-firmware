@@ -1,5 +1,7 @@
 ADD_SCENE(mag, start, Start)
 ADD_SCENE(mag, emulate_test, EmulateTest)
+ADD_SCENE(mag, emulate, Emulate)
+ADD_SCENE(mag, emulate_config, EmulateConfig)
 ADD_SCENE(mag, file_select, FileSelect)
 ADD_SCENE(mag, saved_menu, SavedMenu)
 ADD_SCENE(mag, saved_info, SavedInfo)

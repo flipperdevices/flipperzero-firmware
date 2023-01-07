@@ -61,6 +61,13 @@ static Mag* mag_alloc() {
     mag->widget = widget_alloc();
     view_dispatcher_add_view(mag->view_dispatcher, MagViewWidget, widget_get_view(mag->widget));
 
+    // Variable Item List
+    mag->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        mag->view_dispatcher,
+        MagViewVariableItemList,
+        variable_item_list_get_view(mag->variable_item_list));
+
     // Text Input
     mag->text_input = text_input_alloc();
     view_dispatcher_add_view(
@@ -103,6 +110,10 @@ static void mag_free(Mag* mag) {
     // Widget
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewWidget);
     widget_free(mag->widget);
+
+    // Variable Item List
+    view_dispatcher_remove_view(mag->view_dispatcher, MagViewVariableItemList);
+    variable_item_list_free(mag->variable_item_list);
 
     // TextInput
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewTextInput);

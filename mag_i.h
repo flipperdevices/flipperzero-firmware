@@ -19,6 +19,7 @@
 #include <gui/modules/loading.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/variable_item_list.h>
 
 #include <notification/notification_messages.h>
 #include <dialogs/dialogs.h>
@@ -59,6 +60,7 @@ struct Mag {
     Loading* loading;
     TextInput* text_input;
     Widget* widget;
+    VariableItemList* variable_item_list;
 
     // Custom views
     Mag_TextInput* mag_text_input;
@@ -70,6 +72,7 @@ typedef enum {
     MagViewPopup,
     MagViewLoading,
     MagViewWidget,
+    MagViewVariableItemList,
     MagViewTextInput,
     MagViewMagTextInput,
 } MagView;

@@ -2,6 +2,7 @@
 
 typedef enum {
     SubmenuIndexEmulateTest,
+    SubmenuIndexConfigWip,
     SubmenuIndexSaved,
     SubmenuIndexAddManually,
 } SubmenuIndex;
@@ -22,6 +23,8 @@ void mag_scene_start_on_enter(void* context) {
         SubmenuIndexEmulateTest,
         mag_scene_start_submenu_callback,
         mag);
+    submenu_add_item(
+        submenu, "Config WIP", SubmenuIndexConfigWip, mag_scene_start_submenu_callback, mag);
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, mag_scene_start_submenu_callback, mag);
     submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
@@ -42,6 +45,9 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexEmulateTest) {
             scene_manager_next_scene(mag->scene_manager, MagSceneEmulateTest);
+            consumed = true;
+        } else if(event.event == SubmenuIndexConfigWip) {
+            scene_manager_next_scene(mag->scene_manager, MagSceneEmulateConfig);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
             furi_string_set(mag->file_path, MAG_APP_FOLDER);
