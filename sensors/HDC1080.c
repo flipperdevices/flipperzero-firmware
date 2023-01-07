@@ -48,8 +48,8 @@ bool unitemp_HDC1080_free(Sensor* sensor) {
 bool unitemp_HDC1080_init(Sensor* sensor) {
     I2CSensor* i2c_sensor = (I2CSensor*)sensor->instance;
 
-    uint8_t data[2]; // = {0b0001000};
-    unitemp_i2c_readRegArray(i2c_sensor, 0xFF, 2, data);
+    uint8_t data[2];
+    if(!unitemp_i2c_readRegArray(i2c_sensor, 0xFF, 2, data)) return UT_SENSORSTATUS_TIMEOUT;
     uint16_t device_id = ((uint16_t)data[0] << 8) | data[1];
     if(device_id != 0x1050) {
         FURI_LOG_E(
@@ -62,7 +62,7 @@ bool unitemp_HDC1080_init(Sensor* sensor) {
     data[0] = 0b0001000;
     data[1] = 0;
     //Установка режима работы и разрядности измерений
-    unitemp_i2c_writeRegArray(i2c_sensor, 0x02, 2, data);
+    if(!unitemp_i2c_writeRegArray(i2c_sensor, 0x02, 2, data)) return UT_SENSORSTATUS_TIMEOUT;
 
     return true;
 }
@@ -78,16 +78,16 @@ UnitempStatus unitemp_HDC1080_update(Sensor* sensor) {
 
     uint8_t data[2] = {0};
     //Запуск измерения
-    unitemp_i2c_writeArray(i2c_sensor, 1, data);
+    if(!unitemp_i2c_writeArray(i2c_sensor, 1, data)) return UT_SENSORSTATUS_TIMEOUT;
     furi_delay_ms(10);
-    unitemp_i2c_readArray(i2c_sensor, 2, data);
+    if(!unitemp_i2c_readArray(i2c_sensor, 2, data)) return UT_SENSORSTATUS_TIMEOUT;
 
     sensor->temp = ((float)(((uint16_t)data[0] << 8) | data[1]) / 65536) * 165 - 40;
 
     data[0] = 1;
-    unitemp_i2c_writeArray(i2c_sensor, 1, data);
+    if(!unitemp_i2c_writeArray(i2c_sensor, 1, data)) return UT_SENSORSTATUS_TIMEOUT;
     furi_delay_ms(10);
-    unitemp_i2c_readArray(i2c_sensor, 2, data);
+    if(!unitemp_i2c_readArray(i2c_sensor, 2, data)) return UT_SENSORSTATUS_TIMEOUT;
     sensor->hum = ((float)(((uint16_t)data[0] << 8) | data[1]) / 65536) * 100;
 
     return UT_SENSORSTATUS_OK;
