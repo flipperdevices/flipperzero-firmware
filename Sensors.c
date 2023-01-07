@@ -79,6 +79,7 @@ static const SensorType* sensorTypes[] = {
     &Dallas,
     &AM2320_SW,
     &AM2320_I2C,
+    &HTU21x,
     &AHT10,
     &SHT30,
     &GXHT30,

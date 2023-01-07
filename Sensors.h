@@ -324,4 +324,5 @@ const GPIO*
 #include "./sensors/DHT20.h"
 #include "./sensors/SHT30.h"
 #include "./sensors/BMP180.h"
+#include "./sensors/HTU21x.h"
 #endif
