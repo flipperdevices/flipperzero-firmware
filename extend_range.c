@@ -9,6 +9,17 @@
 #define KEY_EXTEND_RANGE "use_ext_range_at_own_risk"
 #define KEY_IGNORE_DEFAULT "ignore_default_tx_region"
 
+struct UserSelection {
+    bool extend_range;
+    bool ignore_default;
+    unsigned int current_selection; // 0 - extend_range, 1 - ignore_default
+};
+
+struct UserSelection global_user_selection = {
+    .extend_range = false,
+    .ignore_default = false,
+    .current_selection = 0,
+};
 int global_ret_val = -1;
 
 static void extend_range_close_file(FlipperFormat* file) {
@@ -45,25 +56,45 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 20, "Back -> Exit, OK -> Extend");
 
-    canvas_draw_str(canvas, 2, 30, "Current Status: ");
+    // Extend Range
+
+    if(global_user_selection.extend_range)
+        canvas_draw_str(canvas, 2, 30, "< Extend Range: Yes >");
+    else
+        canvas_draw_str(canvas, 2, 30, "< Extend Range: No >");
+    if(global_user_selection.current_selection == 0) {
+        canvas_draw_line(canvas, 2, 31, 125, 31);
+    }
+
+    // Ignore Default
+    if(global_user_selection.ignore_default)
+        canvas_draw_str(canvas, 2, 40, "< Ignore Default: Yes >");
+    else
+        canvas_draw_str(canvas, 2, 40, "< Ignore Default: No >");
+    if(global_user_selection.current_selection == 1) {
+        canvas_draw_line(canvas, 2, 41, 125, 41);
+    }
+
+    // Current status
+    canvas_draw_str(canvas, 2, 50, "Current Status: ");
     switch(global_ret_val) {
     case -1:
-        canvas_draw_str(canvas, 2, 40, "Waiting");
+        canvas_draw_str(canvas, 2, 60, "Make your selection!");
         break;
     case 0:
-        canvas_draw_str(canvas, 2, 40, "Success. Reboot now.");
+        canvas_draw_str(canvas, 2, 60, "Success. Reboot now.");
         break;
     case 1:
-        canvas_draw_str(canvas, 2, 40, "File not found");
+        canvas_draw_str(canvas, 2, 60, "File not found");
         break;
     case 2:
-        canvas_draw_str(canvas, 2, 40, "Failed to update extend_range");
+        canvas_draw_str(canvas, 2, 60, "Failed to update extend_range");
         break;
     case 3:
-        canvas_draw_str(canvas, 2, 40, "Failed to update ignore_default");
+        canvas_draw_str(canvas, 2, 60, "Failed to update ignore_default");
         break;
     default:
-        canvas_draw_str(canvas, 2, 40, "Unknown error");
+        canvas_draw_str(canvas, 2, 60, "Unknown error");
         break;
     }
 }
@@ -81,17 +112,57 @@ int extend_range() {
         return 1;
     }
 
-    if(!flipper_format_update_string_cstr(file, KEY_EXTEND_RANGE, "true")) {
+    if(!flipper_format_update_string_cstr(
+           file, KEY_EXTEND_RANGE, global_user_selection.extend_range ? "true" : "false")) {
         extend_range_close_file(file);
         return 2;
     }
-    if(!flipper_format_update_string_cstr(file, KEY_IGNORE_DEFAULT, "true")) {
+    if(!flipper_format_update_string_cstr(
+           file, KEY_IGNORE_DEFAULT, global_user_selection.ignore_default ? "true" : "false")) {
         extend_range_close_file(file);
         return 3;
     }
 
     extend_range_close_file(file);
     return 0;
+}
+
+void handle_key(InputEvent* input_event) {
+    if(input_event->type != InputTypePress) {
+        return;
+    }
+
+    switch(input_event->key) {
+    case InputKeyBack:
+        return;
+    case InputKeyOk:
+        global_ret_val = extend_range();
+        return;
+    case InputKeyUp:
+        global_user_selection.current_selection =
+            (global_user_selection.current_selection + 1) % 2;
+        return;
+    case InputKeyDown:
+        global_user_selection.current_selection =
+            (global_user_selection.current_selection + 1) % 2;
+        return;
+    case InputKeyLeft:
+        if(global_user_selection.current_selection == 0) {
+            global_user_selection.extend_range = !global_user_selection.extend_range;
+        } else {
+            global_user_selection.ignore_default = !global_user_selection.ignore_default;
+        }
+        return;
+    case InputKeyRight:
+        if(global_user_selection.current_selection == 0) {
+            global_user_selection.extend_range = !global_user_selection.extend_range;
+        } else {
+            global_user_selection.ignore_default = !global_user_selection.ignore_default;
+        }
+        return;
+    default:
+        return;
+    }
 }
 
 int32_t extend_range_app(void* p) {
@@ -108,14 +179,8 @@ int32_t extend_range_app(void* p) {
 
     InputEvent event;
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
-        if(event.type == InputTypeShort && event.key == InputKeyBack) {
-            break;
-        }
-        if(event.key == InputKeyOk) {
-            if(event.type == InputTypePress) {
-                global_ret_val = extend_range();
-            }
-        }
+        handle_key(&event);
+        if(event.key == InputKeyBack) break;
     }
 
     gui_remove_view_port(gui, view_port);
