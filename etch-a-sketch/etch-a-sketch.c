@@ -5,6 +5,11 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <stdbool.h> // Header-file for boolean data-type.
+#include <stdio.h>
+#include <string.h>
+
+#define WIDTH 64
+#define HEIGHT 32
 
 const int brush_size = 2;
 
@@ -17,6 +22,7 @@ typedef struct {
     selected_position selected;
     bool board[64][32];
     bool isDrawing;
+    bool showWelcome;
 } EtchData;
 
 // Sequence to indicate that drawing is enabled.
@@ -78,6 +84,13 @@ void etch_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     canvas_clear(canvas);
+
+    // Show Welcome Message
+    if(etch_state->showWelcome) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 32, 10, "Etch-A-Sketch");
+    }
+
     canvas_set_color(canvas, ColorBlack);
     //draw the canvas(64x32) on screen(144x64) using brush_size*brush_size tiles
     for(int y = 0; y < 32; y++) {
@@ -131,6 +144,9 @@ int32_t etch_a_sketch_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
+
+    // Show Welcome Banner
+    etch_state->showWelcome = true;
 
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
         //break out of the loop if the back key is pressed
