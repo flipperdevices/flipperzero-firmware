@@ -28,6 +28,7 @@ struct BadUsbScript {
     BadUsbState st;
     FuriString* file_path;
     uint32_t defdelay;
+    uint32_t stringdelay;
     FuriThread* thread;
     uint8_t file_buf[FILE_BUFFER_LEN + 1];
     uint8_t buf_start;
@@ -108,6 +109,8 @@ static const char ducky_cmd_delay[] = {"DELAY "};
 static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
 static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
+static const char ducky_cmd_stringdelay_1[] = {"STRINGDELAY"};
+static const char ducky_cmd_stringdelay_2[] = {"STRING_DELAY"};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
 static const char ducky_cmd_sysrq[] = {"SYSRQ "};
 
@@ -204,16 +207,27 @@ static bool ducky_altstring(const char* param) {
     return state;
 }
 
-static bool ducky_string(const char* param) {
+static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     uint32_t i = 0;
+    uint32_t timing = 0;
+    
+    if(bad_usb->stringdelay == 0) {
+        timing = 0;
+    } else {
+        timing = bad_usb->stringdelay / 2;
+    }
+
     while(param[i] != '\0') {
         uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
+            furi_thread_flags_wait(0, FuriFlagWaitAny, timing);
             furi_hal_hid_kb_press(keycode);
+            furi_thread_flags_wait(0, FuriFlagWaitAny, timing);
             furi_hal_hid_kb_release(keycode);
         }
         i++;
     }
+    bad_usb->stringdelay = 0;
     return true;
 }
 
@@ -272,10 +286,24 @@ static int32_t
             snprintf(error, error_len, "Invalid number %s", line_tmp);
         }
         return (state) ? (0) : SCRIPT_STATE_ERROR;
+    } else if(
+        (strncmp(line_tmp, ducky_cmd_stringdelay_1, strlen(ducky_cmd_stringdelay_1)) == 0) ||
+        (strncmp(line_tmp, ducky_cmd_stringdelay_2, strlen(ducky_cmd_stringdelay_2)) == 0)) {
+        //STRINGDELAY, finally it's here
+        line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
+        state = ducky_get_number(line_tmp, &bad_usb->stringdelay);
+        if((state) && (bad_usb->stringdelay > 0)) {
+            return state;
+        }
+        if(error != NULL) {
+            snprintf(error, error_len, "Invalid number %s", line_tmp);
+        }
+        return SCRIPT_STATE_ERROR;
+
     } else if(strncmp(line_tmp, ducky_cmd_string, strlen(ducky_cmd_string)) == 0) {
         // STRING
         line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
-        state = ducky_string(line_tmp);
+        state = ducky_string(bad_usb, line_tmp);
         if(!state && error != NULL) {
             snprintf(error, error_len, "Invalid string %s", line_tmp);
         }
@@ -545,6 +573,7 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->buf_len = 0;
                 bad_usb->st.line_cur = 0;
                 bad_usb->defdelay = 0;
+                bad_usb->stringdelay = 0;
                 bad_usb->repeat_cnt = 0;
                 bad_usb->file_end = false;
                 storage_file_seek(script_file, 0, true);
@@ -568,6 +597,7 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->buf_len = 0;
                 bad_usb->st.line_cur = 0;
                 bad_usb->defdelay = 0;
+                bad_usb->stringdelay = 0;
                 bad_usb->repeat_cnt = 0;
                 bad_usb->file_end = false;
                 storage_file_seek(script_file, 0, true);
