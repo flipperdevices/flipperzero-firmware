@@ -7,7 +7,7 @@ Assuming the toolchain is already installed, copy **flipper_pong** directory to 
 
 Plug your **Flipper Zero** and build the Pong :
 ```
-./fbt DEBUG=no LIB_DEBUG=no COMPACT=yes launch_app APPSRC=applications_user/flipper_pong
+./fbt launch_app APPSRC=applications_user/flipper_pong
 ```
 
 The game will automatically be launched after compilation
