@@ -96,6 +96,22 @@ const NotificationSequence sequence_crash = {
     NULL,
 };
 
+const NotificationSequence sequence_bullet_fired = {
+    &message_vibro_on,
+    // &message_note_g5, // Play sound but currently disabled. Need On/Off menu setting
+    &message_delay_10,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+
+    // &message_note_e5,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
 /* ============================== Prototyeps ================================ */
 
 // Only functions called before their definition are here.
@@ -297,6 +313,7 @@ bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, flo
 /* Create a new bullet headed in the same direction of the ship. */
 void ship_fire_bullet(AsteroidsApp* app) {
     if(app->bullets_num == MAXBUL) return;
+    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
     Bullet* b = &app->bullets[app->bullets_num];
     b->x = app->ship.x;
     b->y = app->ship.y;
