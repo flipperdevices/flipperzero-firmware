@@ -604,12 +604,10 @@ uint32_t key_pressed_time(AsteroidsApp* app, InputKey key) {
 
 /* Handle keys interaction. */
 void asteroids_update_keypress_state(AsteroidsApp* app, InputEvent input) {
+    if(input.key == InputKeyOk) app->fire = true;
+
     if(input.type == InputTypePress) {
         app->pressed[input.key] = furi_get_tick();
-    } else if(input.type == InputTypeRelease) {
-        uint32_t dur = key_pressed_time(app, input.key);
-        app->pressed[input.key] = 0;
-        if(dur < 200 && input.key == InputKeyOk) app->fire = true;
     }
 }
 
