@@ -48,7 +48,7 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(mag->scene_manager, MagSceneFileSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexAddManually) {
-            scene_manager_next_scene(mag->scene_manager, MagSceneUnderConstruction);
+            scene_manager_next_scene(mag->scene_manager, MagSceneInputValue);
             consumed = true;
         }
         scene_manager_set_scene_state(mag->scene_manager, MagSceneStart, event.event);

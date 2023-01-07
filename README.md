@@ -1,26 +1,44 @@
 # magspoof_flipper
-Very early WIP of MagSpoof for the Flipper Zero. Currently rewriting from the ground up.
+WIP of MagSpoof for the Flipper Zero. Currently rewriting from the ground up. Interpolates work from Samy Kamkar's original MagSpoof project, dunaevai135's Flipper hackathon project, and the Flipper team's LF RFID app.  
 
-Interpolates work from Samy Kamkar's original MagSpoof project, dunaevai135's Flipper hackathon project, and the Flipper team's LF RFID app.  
+Many thanks to everyone who has helped in addition to those above, most notably: antirez for bitmapping suggestions, skotopes for RFID consultation, NVX + dlz for NFC consulation, davethepirate for EE insight and being a sounding board, and cool4uma for their work on custom text_input scenes — as well as everyone else I've had the pleasure of chatting with.
 
-Courses of action to try in the event the LF coil signal is too weak:
-- Attempt downstream modulation techniques, in addition to upstream, like the LF RFID worker does when writing
-- Introduce a subcarrier at ~125kHz, and OOK modulate it at the desired freq of bits (~4kHz)
+Using this README as coarse notes of what remains to be done; anyone is welcome to contribute!
+
+## TODO
+Emulation:
+- Finish refactor from hardcoded test scene to mag_helpers (most notable change: precomputing bit output akin to devBioS's "RedSpoof" implementation of MagSpoof)
+- Multi-track emulation, reverse track emulation
+- Experimentation on timing and other parameters (zero prefix/between/suffix, interpacket delay, reverse vs non-reverse track, etc)
+- Implement/integrate better bitmap than hacky first pass? antirez's better approach (from ProtoView) included at bottom of mag_helpers
+- External TX option(s) — interface with original H-bridge design, also perhaps singular coil. Does GPIO have sufficient output for this? Need a capacitor to discharge from?
+- Pursue skunkworks TX improvement ideas listed below
+
+Scenes:
+- Non-hardcoded emulation scene (using mag_helpers functions) that play loaded card data
+- Emulation config scene. Be able to select between RFID / GPIO H-bridge / GPIO plain coil(?), modify timing (clock and interpacket), select track(s) to be emulated, toggle reverse track (?)
+- Improved saved info display (better text wrapping options? remove and just include that info on the emulate scene? decode data to fields?)
+- Edit saved card scene
+
+File management:
+- What is best way to save track data, and designate which tracks are in a file? Just use end sentinels to determine when loaded, or split it out into different fields?
+- Parsing loaded files into relevent fields (would we need to specify card type as well, to decode correctly?)
+- Modify manual add scene to allow editing and renaming of existing files
+- Validation of card track data?
+- Better cleanup / management of data during add manually
+
+Known bugs:
+- Currently there's a few functions that are unused, while the refactor is in progress. To avoid compilation errors relating to the unused functions, one must comment out `-Werror` in `site_scons/cc.scons` (or comment out the unused functions, the former is just easier/faster).
+- Custom text input scene with expanded characterset (Add Manually) has odd behavior when navigating the keys near the numpad
+- Track 1 data typically starts with a `%` sign. Unless escaped, it won't be displayed when printed, as C considers it a special character. To confirm: how does this impact the emulation when iterating through the chars? Does it get played correctly?
+
+## Skunkworks ideas
+Internal TX improvements:
+- Attempt downstream modulation techniques, in addition to upstream, like the LF RFID worker does when writing, for stronger signal
 - Implement using the timer system, rather than direct-writing to pins
-- Use the NFC (HF RFID) coil instead of or in addition to the LF coil (this is promising in my mind; Samsung Wallet's discontinued magstripe emulation would've been over their NFC coil, most likely)
-- Scrap all this and stick to using an external module for TX (could likely simplify to just a resistor and some coiled wire, rather than the full H-bridge build)
-  
-Other misc things to investigate / build:
-- File format, manual add, saving / loading
-- Ideal timing / speed
-- Precomputing bit output, and then sending ("RedSpoof" by devBioS does this, as they say they had timing issues when computing the bits live)
-- Reverse-track emulate?
-- Tuning of parameters like pre-signal zeros?
-- "Interpacket delay" like the RedSpoof implementation?
-- (Less important) Any way to easily wrap text on screen, without having to manually calculate the number of chars that fit and splicing the string accordingly into lines?  
+- Use the NFC (HF RFID) coil instead of or in addition to the LF coil (likely unfruitful from initial tests; we can enable/disable the oscillating field, but even with transparent mode to the ST25R3916, it seems we don't get low-enough-level control to pull it high/low correctly) 
 
-
-HF coil notes:  
-~~NFC reader field can be turned on / off with `furi_hal_nfc_field_on();` and `furi_hal_nfc_field_off();` respectively, as seen in nfc_scene_field.c (used for debug purposes). Initial tests with `furi_hal_nfc_field_on();` are promising signal-wise, but the delay introduced by the wake/sleep initialization renders it impossible to toggle rapidly. At a lower level, that consists of `furi_hal_nfc_exit_sleep();` and `st25r3916TxRxOn();` to turn on, and `st25r3916TxRxOff();` and `furi_hal_nfc_start_sleep();` to turn off. May be worth trying directly (wake from sleep at setup, toggle on and off corresponding with bit direction, send to sleep on exit). Initial tests have been difficult to get work as some of the st25r3916 symbols are unresolved; need to figure out how to import/call it properly, or how to get another layer lower of control.~~  
-Testing with `furi_hal_nfc_ll_txrx_on();` and `furi_hal_nfc_ll_txrx_off();` does indeed create a nice strong signal on my 'scope (thanks @dlz#7721 for finding the wrapped functions), but no response from a mag reader; makes sense, was a long shot -- next step NFC testing would be lower-level control that lets us pull the coil high/low, rather than just producing the standard 13.56MHz signal and OOK modulating it.
-
+External RX options (What is simplest read module?):
+- Some UART mag reader (bulky, but likely easiest to read over GPIO, and means one can read all tracks)
+- Square audio jack mag reader (compact, but will be harder to decode from GPIO. Also only will read track 2 without modification)
+- USB HID input feasible? Flipper seemingly can't act as an HID host, is there any way to circumvent this or is it due to a hardware incompatibility? This would be the easiest / best option all-around if feasible. 

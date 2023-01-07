@@ -1,6 +1,8 @@
 #pragma once
 
 #include "mag_device.h"
+#include "helpers/mag_helpers.h"
+#include "helpers/mag_text_input.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -27,7 +29,7 @@
 
 #include "scenes/mag_scene.h"
 
-#define MAG_TEXT_STORE_SIZE 128
+#define MAG_TEXT_STORE_SIZE 150
 
 enum MagCustomEvent {
     MagEventNext = 100,
@@ -58,7 +60,8 @@ struct Mag {
     TextInput* text_input;
     Widget* widget;
 
-    // Custom views?
+    // Custom views
+    Mag_TextInput* mag_text_input;
 };
 
 typedef enum {
@@ -68,6 +71,7 @@ typedef enum {
     MagViewLoading,
     MagViewWidget,
     MagViewTextInput,
+    MagViewMagTextInput,
 } MagView;
 
 void mag_text_store_set(Mag* mag, const char* text, ...);
@@ -75,18 +79,6 @@ void mag_text_store_set(Mag* mag, const char* text, ...);
 void mag_text_store_clear(Mag* mag);
 
 void mag_show_loading_popup(void* context, bool show);
-
-// all below this comment are destined for deprecation (now handled by mag_device)
-
-bool mag_save_key(Mag* mag);
-
-bool mag_load_key_from_file_select(Mag* mag);
-
-bool mag_delete_key(Mag* mag);
-
-bool mag_load_key_data(Mag* mag, FuriString* path, bool show_dialog);
-
-bool mag_save_key_data(Mag* mag, FuriString* path);
 
 void mag_make_app_folder(Mag* mag);
 

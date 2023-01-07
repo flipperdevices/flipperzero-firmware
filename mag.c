@@ -66,6 +66,11 @@ static Mag* mag_alloc() {
     view_dispatcher_add_view(
         mag->view_dispatcher, MagViewTextInput, text_input_get_view(mag->text_input));
 
+    // Custom Mag Text Input
+    mag->mag_text_input = mag_text_input_alloc();
+    view_dispatcher_add_view(
+        mag->view_dispatcher, MagViewMagTextInput, mag_text_input_get_view(mag->mag_text_input));
+
     return mag;
 }
 
@@ -103,6 +108,10 @@ static void mag_free(Mag* mag) {
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewTextInput);
     text_input_free(mag->text_input);
 
+    // Custom Mag TextInput
+    view_dispatcher_remove_view(mag->view_dispatcher, MagViewMagTextInput);
+    mag_text_input_free(mag->mag_text_input);
+
     // View Dispatcher
     view_dispatcher_free(mag->view_dispatcher);
 
@@ -138,73 +147,6 @@ int32_t mag_app(void* p) {
     mag_free(mag);
 
     return 0;
-}
-
-bool mag_save_key(Mag* mag) {
-    furi_assert(mag);
-
-    bool result = false;
-
-    mag_make_app_folder(mag);
-
-    if(furi_string_end_with(mag->file_path, MAG_APP_EXTENSION)) {
-        size_t filename_start = furi_string_search_rchar(mag->file_path, '/');
-        furi_string_left(mag->file_path, filename_start);
-    }
-
-    furi_string_cat_printf(
-        mag->file_path, "/%s%s", furi_string_get_cstr(mag->file_name), MAG_APP_EXTENSION);
-
-    result = mag_save_key_data(mag, mag->file_path);
-    return result;
-}
-
-bool mag_load_key_from_file_select(Mag* mag) {
-    furi_assert(mag);
-
-    DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_mag_10px);
-    browser_options.base_path = MAG_APP_FOLDER;
-
-    // Input events and views are managed by file_browser
-    bool result =
-        dialog_file_browser_show(mag->dialogs, mag->file_path, mag->file_path, &browser_options);
-
-    if(result) {
-        result = mag_load_key_data(mag, mag->file_path, true);
-    }
-
-    return result;
-}
-
-bool mag_delete_key(Mag* mag) {
-    furi_assert(mag);
-
-    return storage_simply_remove(mag->storage, furi_string_get_cstr(mag->file_path));
-}
-
-bool mag_load_key_data(Mag* mag, FuriString* path, bool show_dialog) {
-    bool result = false;
-    UNUSED(mag);
-    UNUSED(path);
-    UNUSED(show_dialog);
-
-    // TODO: Needs reworking from LFRFID version, as that goes through some custom protocol by key type.
-    //       Alternatively, co-opt the "protocol" typing as our way of encoding track # (Track 1, 2, 3, or some combination thereof)
-
-    return result;
-}
-
-bool mag_save_key_data(Mag* mag, FuriString* path) {
-    bool result = false;
-    UNUSED(path);
-    //bool result = lfrfid_dict_file_save(app->dict, app->protocol_id, furi_string_get_cstr(path));
-    // TODO: needs reworking from LFRFID version
-    if(!result) {
-        dialog_message_show_storage_error(mag->dialogs, "Cannot save\nkey file");
-    }
-
-    return result;
 }
 
 void mag_make_app_folder(Mag* mag) {

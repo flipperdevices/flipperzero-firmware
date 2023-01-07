@@ -9,7 +9,7 @@ void mag_scene_input_name_on_enter(void* context) {
 
     //TODO: compatible types / etc
     //bool name_is_empty = furi_string_empty(mag->mag_dev->dev_name);
-    bool name_is_empty = false;
+    bool name_is_empty = true;
 
     if(name_is_empty) {
         furi_string_set(mag->file_path, MAG_APP_FOLDER);
@@ -51,23 +51,14 @@ bool mag_scene_input_name_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == MagEventNext) {
             consumed = true;
-            if(!furi_string_empty(mag->file_name)) {
-                mag_delete_key(mag);
-            }
+            //if(!furi_string_empty(mag->file_name)) {
+            //    mag_delete_key(mag);
+            //}
 
             furi_string_set(mag->file_name, mag->text_store);
 
-            if(mag_save_key(mag)) {
+            if(mag_device_save(mag->mag_dev, furi_string_get_cstr(mag->file_name))) {
                 scene_manager_next_scene(scene_manager, MagSceneSaveSuccess);
-                if(scene_manager_has_previous_scene(scene_manager, MagSceneSavedMenu)) {
-                    // Nothing, do not count editing as saving
-                    //} else if(scene_manager_has_previous_scene(scene_manager, MagSceneSaveType)) {
-                    //DOLPHIN_DEED(DolphinDeedRfidAdd);
-                    // TODO: replace dolphin deed!
-                } else {
-                    //DOLPHIN_DEED(DolphinDeedRfidSave);
-                    // TODO: replace dolphin deed!
-                }
             } else {
                 //scene_manager_search_and_switch_to_previous_scene(
                 //    scene_manager, MagSceneReadKeyMenu);
