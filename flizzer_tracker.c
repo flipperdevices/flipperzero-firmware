@@ -164,7 +164,7 @@ static void direct_draw_run(DirectDraw* instance)
 	bool unu = furi_hal_speaker_acquire(1000);
 	UNUSED(unu);
 
-	/*LL_TIM_InitTypeDef TIM_InitStruct3 = {0};
+	LL_TIM_InitTypeDef TIM_InitStruct3 = {0};
 	//TIM_InitStruct.Prescaler = 4;
 	TIM_InitStruct3.Prescaler = 200;
 	TIM_InitStruct3.Autoreload =
@@ -177,7 +177,7 @@ static void direct_draw_run(DirectDraw* instance)
 	TIM_OC_InitStruct2.CompareValue = 127;
 	LL_TIM_OC_Init(TIM16, FURI_HAL_SPEAKER_CHANNEL, &TIM_OC_InitStruct2);
 	LL_TIM_EnableAllOutputs(TIM16);
-	LL_TIM_EnableCounter(TIM16);*/
+	LL_TIM_EnableCounter(TIM16);
 
 	do 
 	{
@@ -218,20 +218,18 @@ int32_t flizzer_tracker_app(void* p)
 
 	direct_draw_run(instance);
 
+	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 15, NULL, NULL);
+	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, NULL, NULL);
+
 	FURI_CRITICAL_ENTER();
 	LL_TIM_DeInit(TIM1);
 	LL_TIM_DeInit(TIM2);
 	LL_TIM_DeInit(TIM16);
 	FURI_CRITICAL_EXIT();
-
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 15, NULL, NULL);
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, NULL, NULL);
-
-	//furi_hal_speaker_release();
+	
+	furi_hal_speaker_release();
 
 	direct_draw_free(instance);
-
-	//NVIC_DisableIRQ(TIM2_IRQn);
 
 	return 0;
 }
