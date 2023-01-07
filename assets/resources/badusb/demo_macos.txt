@@ -79,7 +79,7 @@ STRING Flipper Zero BadUSB feature is compatible with USB Rubber Ducky script fo
 ENTER
 STRING More information about script syntax can be found here:
 ENTER
-STRING https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript
+STRING https://docs.hak5.org/hak5-usb-rubber-ducky/duckyscript-tm-quick-reference
 ENTER
 
 STRING EOF
