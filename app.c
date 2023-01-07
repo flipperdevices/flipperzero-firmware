@@ -536,6 +536,7 @@ void game_tick(void* ctx) {
         /* 2. Game over. We need to update only background asteroids. In this
      * state the game just displays a GAME OVER text with the floating
      * asteroids in backgroud. */
+        app->lives = GAME_START_LIVES; // Show 3 lives in game over screen to match new game start
         if(key_pressed_time(app, InputKeyOk) > 100) {
             restart_game_after_gameover(app);
         }
