@@ -33,6 +33,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - Unleashed Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
 - Unleashed Removed: [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU2XD, SHT2X, SI702X, SI700X, SI701X or AM2320` Unitemp will do them all!
+- Added: [Ectend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 
 <a name="release">
 
