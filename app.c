@@ -514,7 +514,7 @@ void game_tick(void* ctx) {
     /* Handle keypresses. */
     if(app->pressed[InputKeyLeft]) app->ship.rot -= .35;
     if(app->pressed[InputKeyRight]) app->ship.rot += .35;
-    if(key_pressed_time(app, InputKeyOk) > 70) {
+    if(app->pressed[InputKeyUp]) {
         app->ship.vx -= 0.5 * (float)sin(app->ship.rot);
         app->ship.vy += 0.5 * (float)cos(app->ship.rot);
     } else if(app->pressed[InputKeyDown]) {
