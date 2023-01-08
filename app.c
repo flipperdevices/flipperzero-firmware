@@ -60,6 +60,8 @@ typedef struct AsteroidsApp {
     bool gameover; /* Gameover status. */
     uint32_t ticks; /* Game ticks. Increments at each refresh. */
     uint32_t score; /* Game score. */
+    uint32_t highscore; /* Highscore. Shown on Game Over Screen */
+    uint32_t last_score; /* Last score. Shown on Game Over screen */
     uint32_t lives; /* Number of lives in the current game. */
     uint32_t ship_hit; /* When non zero, the ship was hit by an asteroid
                                and we need to show an animation as long as
@@ -270,6 +272,25 @@ void render_callback(Canvas* const canvas, void* ctx) {
     if(app->gameover) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
+
+        // Display High Score
+        canvas_draw_str(canvas, 36, 9, "High Score");
+
+        // Convert highscore to string
+        int length = snprintf(NULL, 0, "%lu", app->highscore);
+        char* str_high_score = malloc(length + 1);
+        snprintf(str_high_score, length + 1, "%lu", app->highscore);
+
+        // Get length to center on screen
+        int nDigits = 0;
+        if(app->highscore > 0) {
+            nDigits = floor(log10(app->highscore)) + 1;
+        }
+
+        // Draw highscore centered
+        canvas_draw_str(canvas, (SCREEN_XRES / 2) - (nDigits * 2), 18, str_high_score);
+        free(str_high_score);
+
         canvas_draw_str(canvas, 28, 35, "GAME   OVER");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 25, 50, "Press OK to restart");
@@ -406,6 +427,10 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
         }
     } else {
         app->score++;
+        app->last_score = app->score; // Save for Game Over Screen
+        if(app->score > app->highscore) {
+            app->highscore = app->score; // Show on Game Over Screen and future main menu
+        }
     }
 }
 
@@ -537,6 +562,7 @@ void game_tick(void* ctx) {
      * state the game just displays a GAME OVER text with the floating
      * asteroids in backgroud. */
         app->lives = GAME_START_LIVES; // Show 3 lives in game over screen to match new game start
+        app->score = app->last_score;
         if(key_pressed_time(app, InputKeyOk) > 100) {
             restart_game_after_gameover(app);
         }
