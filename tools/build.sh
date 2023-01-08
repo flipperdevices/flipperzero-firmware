@@ -1,9 +1,9 @@
-
-#!/bin/bash
+#!/bin/sh
 
 application_name="flipp_pomodoro"
+repo_root=$(dirname $0)/..
 
-mkdir dist
+mkdir -p ${repo_root}/dist
 
 # Fetch all firmwares submodules
 git submodule update --init --recursive
@@ -31,7 +31,7 @@ done
 # Shift the remaining arguments to the left, so that $1, $2, etc. are the non-option arguments
 shift $((OPTIND - 1))
 
-cd .$build_mode-firmware
+cd ${repo_root}/.$build_mode-firmware
 
 api_version=$(awk -F',' 'NR == 2 {print $3}' firmware/targets/f7/api_symbols.csv);
 
