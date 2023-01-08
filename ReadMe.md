@@ -24,7 +24,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0107-2057-0.74.3-14d176b](https://www.patreon.com/posts/76937756)
+## Latest Updates - [PATREON: Latest Release RM0108-0014-0.74.3-9b1f868](https://www.patreon.com/posts/76942152)
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-07 20:15 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-07 20:15 EST`
@@ -38,7 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated notes for Asteroids, Pong and USB Autofire
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
-- Fixed wording in Extend Range app
+- Fixed wording in Extend Range app (found under Misc)
 - Added readme for BT Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - Added readme for Toy Code Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [Patreon Builds Update: ALL: Added Grateful Dead animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/3c40db78dd5488b9544e674004c4168c45ae7305) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
