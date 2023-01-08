@@ -1,5 +1,3 @@
-//** Includes sniffbt and sniffskim for compatible ESP32-WROOM hardware.
-//uart_terminal_app_i.h also changed **//
 #include "../uart_terminal_app_i.h"
 
 // For each command, define whether additional arguments are needed
@@ -26,14 +24,20 @@ typedef struct {
 // NUM_MENU_ITEMS defined in uart_terminal_app_i.h - if you add an entry here, increment it!
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"Console",
-     {"9600", "19200", "57600", "115200"},
-     4,
+     {"115200", "2400", "9600", "19200", "38400", "57600", "230400", "460800", "921600"},
+     9,
      {"", ""},
      NO_ARGS,
      FOCUS_CONSOLE_TOGGLE,
      NO_TIP},
     {"Send command", {""}, 1, {""}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP},
-    {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Fast cmd",
+     {"help", "uptime", "date", "df -h", "ps", "dmesg", "reboot", "poweroff"},
+     8,
+     {"help", "uptime", "date", "df -h", "ps", "dmesg", "reboot", "poweroff"},
+     INPUT_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
 };
 

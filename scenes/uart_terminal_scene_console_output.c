@@ -86,8 +86,8 @@ void uart_terminal_scene_console_output_on_exit(void* context) {
     // Unregister rx callback
     uart_terminal_uart_set_handle_rx_data_cb(app->uart, NULL);
 
-    // Automatically stop the scan when exiting view
-    if(app->is_command) {
-        uart_terminal_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
-    }
+    // Automatically logut when exiting view
+    //if(app->is_command) {
+    //    uart_terminal_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+    //}
 }

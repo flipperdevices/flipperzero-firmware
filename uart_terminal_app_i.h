@@ -1,5 +1,3 @@
-//** Includes sniffbt and sniffskim for compatible ESP32-WROOM hardware.
-// uart_terminal_scene_start.c also changed **//
 #pragma once
 
 #include "uart_terminal_app.h"
@@ -11,7 +9,6 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
-//#include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 #include "uart_text_input.h"
 
