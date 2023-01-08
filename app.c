@@ -3,6 +3,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <storage/storage.h>
 #include <input/input.h>
 #include <gui/gui.h>
 #include <stdlib.h>
@@ -22,6 +23,8 @@
 #define MAXBUL 5 /* Max bullets on the screen. */
 #define MAXAST 32 /* Max asteroids on the screen. */
 #define SHIP_HIT_ANIMATION_LEN 15
+#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
 #ifndef PI
 #define PI 3.14159265358979f
 #endif
@@ -117,7 +120,8 @@ const NotificationSequence sequence_bullet_fired = {
 /* ============================== Prototyeps ================================ */
 
 // Only functions called before their definition are here.
-
+bool load_game(AsteroidsApp* app);
+void save_game(AsteroidsApp* app);
 void restart_game_after_gameover(AsteroidsApp* app);
 uint32_t key_pressed_time(AsteroidsApp* app, InputKey key);
 
@@ -443,6 +447,7 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
 /* Set gameover state. When in game-over mode, the game displays a gameover
  * text with a background of many asteroids floating around. */
 void game_over(AsteroidsApp* app) {
+    save_game(app); // Save highscore
     restart_game_after_gameover(app);
     app->gameover = true;
     int asteroids = 8;
@@ -620,6 +625,41 @@ void game_tick(void* ctx) {
 
 /* ======================== Flipper specific code =========================== */
 
+bool load_game(AsteroidsApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    File* file = storage_file_alloc(storage);
+    uint16_t bytes_readed = 0;
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        bytes_readed = storage_file_read(file, app, sizeof(AsteroidsApp));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close(RECORD_STORAGE);
+
+    return bytes_readed == sizeof(AsteroidsApp);
+}
+
+void save_game(AsteroidsApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
+        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
+            return;
+        }
+    }
+
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(file, app, sizeof(AsteroidsApp));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close(RECORD_STORAGE);
+}
+
 /* Here all we do is putting the events into the queue that will be handled
  * in the while() loop of the app entry point function. */
 void input_callback(InputEvent* input_event, void* ctx) {
@@ -632,6 +672,8 @@ void input_callback(InputEvent* input_event, void* ctx) {
 AsteroidsApp* asteroids_app_alloc() {
     AsteroidsApp* app = malloc(sizeof(AsteroidsApp));
 
+    load_game(app);
+
     app->gui = furi_record_open(RECORD_GUI);
     app->view_port = view_port_alloc();
     view_port_draw_callback_set(app->view_port, render_callback, app);
@@ -640,6 +682,7 @@ AsteroidsApp* asteroids_app_alloc() {
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     app->running = 1; /* Turns 0 when back is pressed. */
+
     restart_game_after_gameover(app);
     memset(app->pressed, 0, sizeof(app->pressed));
     return app;
