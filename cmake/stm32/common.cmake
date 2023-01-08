@@ -61,33 +61,44 @@ function(stm32_print_size_of_target TARGET)
 endfunction()
 
 function(stm32_generate_binary_file TARGET)
+    get_target_property(OUTPUT_NAME ${TARGET} OUTPUT_NAME)
+    get_target_property(BINARY_DIR ${TARGET} BINARY_DIR)
+    set(FILE_NAME "${OUTPUT_NAME}.bin")
+    set(FILE "${BINARY_DIR}/${FILE_NAME}")
     add_custom_command(
         TARGET ${TARGET}
         POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.bin
-        BYPRODUCTS ${TARGET}.bin
-        COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
+        COMMAND ${CMAKE_OBJCOPY} -O binary "$<TARGET_FILE:${TARGET}>" ${FILE}
+        BYPRODUCTS ${FILE}
+        COMMENT "Generating binary file ${FILE_NAME}"
     )
 endfunction()
 
 function(stm32_generate_srec_file TARGET)
+    get_target_property(OUTPUT_NAME ${TARGET} OUTPUT_NAME)
+    get_target_property(BINARY_DIR ${TARGET} BINARY_DIR)
+    set(FILE_NAME "${OUTPUT_NAME}.srec")
+    set(FILE "${BINARY_DIR}/${FILE_NAME}")
     add_custom_command(
         TARGET ${TARGET}
         POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O srec ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.srec
-        BYPRODUCTS ${TARGET}.srec
-
-        COMMENT "Generating srec file ${CMAKE_PROJECT_NAME}.srec"
+        COMMAND ${CMAKE_OBJCOPY} -O srec "$<TARGET_FILE:${TARGET}>" ${FILE}
+        BYPRODUCTS ${FILE}
+        COMMENT "Generating srec file ${FILE_NAME}"
     )
 endfunction()
 
 function(stm32_generate_hex_file TARGET)
+    get_target_property(OUTPUT_NAME ${TARGET} OUTPUT_NAME)
+    get_target_property(BINARY_DIR ${TARGET} BINARY_DIR)
+    set(FILE_NAME "${OUTPUT_NAME}.hex")
+    set(FILE "${BINARY_DIR}/${FILE_NAME}")
     add_custom_command(
         TARGET ${TARGET}
         POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O ihex ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.hex
-        BYPRODUCTS ${TARGET}.hex
-        COMMENT "Generating hex file ${CMAKE_PROJECT_NAME}.hex"
+        COMMAND ${CMAKE_OBJCOPY} -O ihex "$<TARGET_FILE:${TARGET}>" ${FILE}
+        BYPRODUCTS ${FILE}
+        COMMENT "Generating hex file ${FILE_NAME}"
     )
 endfunction()
 
