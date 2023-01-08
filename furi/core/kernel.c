@@ -7,6 +7,30 @@
 
 #include CMSIS_device_header
 
+bool furi_is_irq_context() {
+    bool irq = false;
+    BaseType_t state;
+
+    if(FURI_IS_IRQ_MODE()) {
+        /* Called from interrupt context */
+        irq = true;
+    } else {
+        /* Get FreeRTOS scheduler state */
+        state = xTaskGetSchedulerState();
+
+        if(state != taskSCHEDULER_NOT_STARTED) {
+            /* Scheduler was started */
+            if(FURI_IS_IRQ_MASKED()) {
+                /* Interrupts are masked */
+                irq = true;
+            }
+        }
+    }
+
+    /* Return context, 0: thread context, 1: IRQ context */
+    return (irq);
+}
+
 int32_t furi_kernel_lock() {
     furi_assert(!furi_is_irq_context());
 

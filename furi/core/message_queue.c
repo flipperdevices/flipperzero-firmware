@@ -1,5 +1,5 @@
+#include "kernel.h"
 #include "message_queue.h"
-#include "core/common_defines.h"
 #include <FreeRTOS.h>
 #include <queue.h>
 #include "check.h"

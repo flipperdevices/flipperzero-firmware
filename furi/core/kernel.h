@@ -10,7 +10,15 @@
 extern "C" {
 #endif
 
+/** Check is kernel is currently in interrupt request context.
+ *
+ * @return     true if currently in interrupt request context, false otherwise.
+ */
+bool furi_is_irq_context();
+
 /** Lock kernel, pause process scheduling
+ *
+ * This should never be called in interrupt request context.
  *
  * @return     previous lock state(0 - unlocked, 1 - locked)
  */
@@ -18,11 +26,15 @@ int32_t furi_kernel_lock();
 
 /** Unlock kernel, resume process scheduling
  *
+ * This should never be called in interrupt request context.
+ *
  * @return     previous lock state(0 - unlocked, 1 - locked)
  */
 int32_t furi_kernel_unlock();
 
 /** Restore kernel lock state
+ *
+ * This should never be called in interrupt request context.
  *
  * @param[in]  lock  The lock state
  *
@@ -37,7 +49,9 @@ int32_t furi_kernel_restore_lock(int32_t lock);
 uint32_t furi_kernel_get_tick_frequency();
 
 /** Delay execution
- * 
+ *
+ * This should never be called in interrupt request context.
+ *
  * Also keep in mind delay is aliased to scheduler timer intervals.
  *
  * @param[in]  ticks  The ticks count to pause
@@ -45,6 +59,8 @@ uint32_t furi_kernel_get_tick_frequency();
 void furi_delay_tick(uint32_t ticks);
 
 /** Delay until tick
+ *
+ * This should never be called in interrupt request context.
  *
  * @param[in]  ticks  The tick until which kerel should delay task execution
  *

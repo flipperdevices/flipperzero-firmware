@@ -3,7 +3,6 @@
 #include "memmgr.h"
 #include "kernel.h"
 
-#include "core/common_defines.h"
 #include <FreeRTOS.h>
 #include <timers.h>
 
