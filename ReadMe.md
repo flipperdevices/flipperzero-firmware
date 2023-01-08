@@ -34,6 +34,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Unleashed Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
 - Unleashed Removed: [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU2XD, SHT2X, SI702X, SI700X, SI701X or AM2320` Unitemp will do them all!
 - Added: [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
+- Updated IR Assets from Unleashed
+- Updated notes for Asteroids, Pong and USB Autofire
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
 
 <a name="release">
 

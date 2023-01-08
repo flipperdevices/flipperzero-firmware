@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5
+- Fix compatibility with Flipper Zero firmware 0.74.2
+
 ## 0.4
 - Show active/inactive state in primary font (bold)
 

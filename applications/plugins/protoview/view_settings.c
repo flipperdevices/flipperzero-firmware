@@ -58,9 +58,9 @@ void process_input_settings(ProtoViewApp* app, InputEvent input) {
             if(i == count) return; /* Should never happen. */
 
             if(input.key == InputKeyUp) {
-                curidx = (curidx + 1) % count;
-            } else if(input.key == InputKeyDown) {
                 curidx = curidx == 0 ? count - 1 : curidx - 1;
+            } else if(input.key == InputKeyDown) {
+                curidx = (curidx + 1) % count;
             } else {
                 return;
             }
@@ -71,9 +71,9 @@ void process_input_settings(ProtoViewApp* app, InputEvent input) {
 
             while(ProtoViewModulations[count].name != NULL) count++;
             if(input.key == InputKeyUp) {
-                modid = (modid + 1) % count;
-            } else if(input.key == InputKeyDown) {
                 modid = modid == 0 ? count - 1 : modid - 1;
+            } else if(input.key == InputKeyDown) {
+                modid = (modid + 1) % count;
             } else {
                 return;
             }
