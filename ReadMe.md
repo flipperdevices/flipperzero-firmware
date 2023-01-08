@@ -41,9 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixed wording in Extend Range app
 - Added readme for BT Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - Added readme for Toy Code Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
-- [Patreon Builds Update: ALL: Added Grateful Dead animation](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/3c40db78dd5488b9544e674004c4168c45ae7305)
+- [Patreon Builds Update: ALL: Added Grateful Dead animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/3c40db78dd5488b9544e674004c4168c45ae7305) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
 - [Patreon Builds Update: ALL and Anime Builds: Added two Jojo animations (By Gabry154)](https://github.com/Gabry154/FZ_Customization/tree/main/Animations/JoJo)
-
 
 <a name="release">
 
