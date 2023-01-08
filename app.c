@@ -136,6 +136,8 @@ typedef struct Poly {
 /* Define the polygons we use. */
 Poly ShipPoly = {{-3, 0, 3}, {-3, 6, -3}, 3};
 
+Poly ShipFirePoly = {{-1.5, 0, 1.5}, {-3, -6, -3}, 3};
+
 /* Rotate the point of the poligon 'poly' and store the new rotated
  * polygon in 'rot'. The polygon is rotated by an angle 'a', with
  * center at 0,0. */
@@ -263,6 +265,10 @@ void render_callback(Canvas* const canvas, void* ctx) {
 
     /* Draw ship, asteroids, bullets. */
     draw_poly(canvas, &ShipPoly, app->ship.x, app->ship.y, app->ship.rot);
+
+    if(key_pressed_time(app, InputKeyUp) > 0) {
+        draw_poly(canvas, &ShipFirePoly, app->ship.x, app->ship.y, app->ship.rot);
+    }
 
     for(int j = 0; j < app->bullets_num; j++) draw_bullet(canvas, &app->bullets[j]);
 
