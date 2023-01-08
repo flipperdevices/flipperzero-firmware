@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.2,,
+Version,+,11.6,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -174,6 +174,7 @@ Header,+,lib/subghz/transmitter.h,,
 Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
+Header,+,lib/toolbox/float_tools.h,,
 Header,+,lib/toolbox/hmac_sha256.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
@@ -562,8 +563,8 @@ Function,+,ble_glue_wait_for_c2_start,_Bool,int32_t
 Function,-,bsearch,void*,"const void*, const void*, size_t, size_t, __compar_fn_t"
 Function,+,bt_disconnect,void,Bt*
 Function,+,bt_forget_bonded_devices,void,Bt*
-Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,+,bt_keys_storage_set_default_path,void,Bt*
+Function,+,bt_keys_storage_set_storage_path,void,"Bt*, const char*"
 Function,+,bt_set_profile,_Bool,"Bt*, BtProfile"
 Function,+,bt_set_status_changed_callback,void,"Bt*, BtStatusChangedCallback, void*"
 Function,+,buffered_file_stream_alloc,Stream*,Storage*
@@ -593,6 +594,7 @@ Function,+,byte_input_set_result_callback,void,"ByteInput*, ByteInputCallback, B
 Function,-,bzero,void,"void*, size_t"
 Function,-,calloc,void*,"size_t, size_t"
 Function,+,canvas_clear,void,Canvas*
+Function,+,canvas_commit,void,Canvas*
 Function,+,canvas_current_font_height,uint8_t,Canvas*
 Function,+,canvas_draw_bitmap,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, const uint8_t*"
 Function,+,canvas_draw_box,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
@@ -614,6 +616,7 @@ Function,+,canvas_get_font_params,CanvasFontParameters*,"Canvas*, Font"
 Function,+,canvas_glyph_width,uint8_t,"Canvas*, char"
 Function,+,canvas_height,uint8_t,Canvas*
 Function,+,canvas_invert_color,void,Canvas*
+Function,+,canvas_reset,void,Canvas*
 Function,+,canvas_set_bitmap_mode,void,"Canvas*, _Bool"
 Function,+,canvas_set_color,void,"Canvas*, Color"
 Function,+,canvas_set_font,void,"Canvas*, Font"
@@ -754,6 +757,7 @@ Function,+,elements_multiline_text,void,"Canvas*, uint8_t, uint8_t, const char*"
 Function,+,elements_multiline_text_aligned,void,"Canvas*, uint8_t, uint8_t, Align, Align, const char*"
 Function,+,elements_multiline_text_framed,void,"Canvas*, uint8_t, uint8_t, const char*"
 Function,+,elements_progress_bar,void,"Canvas*, uint8_t, uint8_t, uint8_t, float"
+Function,+,elements_progress_bar_with_text,void,"Canvas*, uint8_t, uint8_t, uint8_t, float, const char*"
 Function,+,elements_scrollable_text_line,void,"Canvas*, uint8_t, uint8_t, uint8_t, FuriString*, size_t, _Bool"
 Function,+,elements_scrollbar,void,"Canvas*, uint16_t, uint16_t"
 Function,+,elements_scrollbar_pos,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint16_t, uint16_t"
@@ -905,6 +909,7 @@ Function,+,flipper_format_write_int32,_Bool,"FlipperFormat*, const char*, const 
 Function,+,flipper_format_write_string,_Bool,"FlipperFormat*, const char*, FuriString*"
 Function,+,flipper_format_write_string_cstr,_Bool,"FlipperFormat*, const char*, const char*"
 Function,+,flipper_format_write_uint32,_Bool,"FlipperFormat*, const char*, const uint32_t*, const uint16_t"
+Function,+,float_is_equal,_Bool,"float, float"
 Function,-,flockfile,void,FILE*
 Function,-,floor,double,double
 Function,-,floorf,float,float
@@ -1553,6 +1558,8 @@ Function,-,gmtime,tm*,const time_t*
 Function,-,gmtime_r,tm*,"const time_t*, tm*"
 Function,+,gui_add_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
 Function,+,gui_add_view_port,void,"Gui*, ViewPort*, GuiLayer"
+Function,+,gui_direct_draw_acquire,Canvas*,Gui*
+Function,+,gui_direct_draw_release,void,Gui*
 Function,+,gui_get_framebuffer_size,size_t,Gui*
 Function,+,gui_remove_framebuffer_callback,void,"Gui*, GuiCanvasCommitCallback, void*"
 Function,+,gui_remove_view_port,void,"Gui*, ViewPort*"
@@ -1853,6 +1860,7 @@ Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
 Function,-,mf_classic_auth_attempt,_Bool,"FuriHalNfcTxRxContext*, MfClassicAuthContext*, uint64_t"
 Function,-,mf_classic_auth_init_context,void,"MfClassicAuthContext*, uint8_t"
 Function,-,mf_classic_authenticate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey"
+Function,-,mf_classic_authenticate_skip_activate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey, _Bool, uint32_t"
 Function,-,mf_classic_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,-,mf_classic_dict_add_key,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_add_key_str,_Bool,"MfClassicDict*, FuriString*"
@@ -2472,6 +2480,7 @@ Function,+,stream_read_line,_Bool,"Stream*, FuriString*"
 Function,+,stream_rewind,_Bool,Stream*
 Function,+,stream_save_to_file,size_t,"Stream*, Storage*, const char*, FS_OpenMode"
 Function,+,stream_seek,_Bool,"Stream*, int32_t, StreamOffset"
+Function,+,stream_seek_to_char,_Bool,"Stream*, char, StreamDirection"
 Function,+,stream_size,size_t,Stream*
 Function,+,stream_split,_Bool,"Stream*, Stream*, Stream*"
 Function,+,stream_tell,size_t,Stream*
