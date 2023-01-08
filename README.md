@@ -1,6 +1,6 @@
 # Flipper BP
 
-Custom implementation of T-Code protocol for Flipper Zero devices.
+Custom implementation of Intiface T-Code protocol via Serial-over-Bluetooth connection for Flipper Zero devices.
 
 ## What is it?
 Flipper Zero devices are capable of communicating with other hardware solutions via different protocols or connections, including using GPIO pins. Therefore you could be able to use it as a periphery controller or proxy for devices that are incapable of connecting to the Intiface software by their own, because they lack wireless or proper wired connection.
