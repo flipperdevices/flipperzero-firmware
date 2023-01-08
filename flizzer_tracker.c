@@ -1,14 +1,10 @@
+#include <stdio.h>
 #include <furi.h>
-#include <furi_hal.h>
-#include <cli/cli.h>
 #include <gui/gui.h>
-#include <gui/canvas_i.h>
 #include <input/input.h>
-#include <gui/view_dispatcher.h>
-
-#include <stm32wbxx_ll_tim.h>
-
+#include <furi_hal.h>
 #include <u8g2_glue.h>
+#include <stm32wbxx_ll_tim.h>
 
 /*
 Fontname: -Raccoon-Fixed4x6-Medium-R-Normal--6-60-75-75-P-40-ISO10646-1
@@ -41,55 +37,22 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] U8G2_FONT_SECTION("u8g2_font_tom_t
 	"y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
 	"\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
 
-#define BUFFER_SIZE (32U)
+typedef enum {
+	EventTypeTick,
+	EventTypeInput,
+} EventType;
+
+typedef struct {
+	EventType type;
+	InputEvent input;
+} HelloWorldEvent;
 
 typedef struct 
 {
-	FuriPubSub* input;
-	FuriPubSubSubscription* input_subscription;
-	Gui* gui;
-	Canvas* canvas;
 	bool stop;
 	uint32_t counter;
 	uint32_t counter_2;
 } DirectDraw;
-
-static void gui_input_events_callback(const void* value, void* ctx) 
-{
-	furi_assert(value);
-	furi_assert(ctx);
-
-	DirectDraw* instance = ctx;
-	const InputEvent* event = value;
-
-	if(event->key == InputKeyBack && event->type == InputTypeShort) 
-	{
-		instance->stop = true;
-	}
-}
-
-static DirectDraw* direct_draw_alloc() 
-{
-	DirectDraw* instance = malloc(sizeof(DirectDraw));
-
-	instance->input = furi_record_open(RECORD_INPUT_EVENTS);
-	instance->gui = furi_record_open(RECORD_GUI);
-	instance->canvas = gui_direct_draw_acquire(instance->gui);
-
-	instance->input_subscription = furi_pubsub_subscribe(instance->input, gui_input_events_callback, instance);
-
-	return instance;
-}
-
-static void direct_draw_free(DirectDraw* instance) 
-{
-	furi_pubsub_unsubscribe(instance->input, instance->input_subscription);
-
-	instance->canvas = NULL;
-	gui_direct_draw_release(instance->gui);
-	furi_record_close(RECORD_GUI);
-	furi_record_close(RECORD_INPUT_EVENTS);
-}
 
 #define FURI_HAL_SPEAKER_TIMER TIM2
 #define FURI_HAL_SPEAKER_CHANNEL LL_TIM_CHANNEL_CH1
@@ -120,11 +83,36 @@ void timer_draw_callback_2(void* ctx)
 	//return;
 }
 
+static void draw_callback(Canvas* canvas, void* ctx) 
+{
+	DirectDraw* instance = (DirectDraw*)ctx;
+
+	char buffer[20] = {0};
+
+	snprintf(buffer, 20, "FRAMES: %ld", instance->counter);
+
+	canvas_clear(canvas);
+
+	canvas_set_custom_font(canvas, u8g2_font_tom_thumb_4x6_tr);
+	
+	canvas_draw_str(canvas, 0, 10, buffer);
+}
+
+static void input_callback(InputEvent* input_event, void* ctx) 
+{
+	// Проверяем, что контекст не нулевой
+	furi_assert(ctx);
+	FuriMessageQueue* event_queue = ctx;
+
+	HelloWorldEvent event = {.type = EventTypeInput, .input = *input_event};
+	furi_message_queue_put(event_queue, &event, FuriWaitForever);
+}
+
 static void direct_draw_run(DirectDraw* instance) 
 {
 	vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
 
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, timer_draw_callback_2, (void*)instance);
+	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 14, timer_draw_callback_2, (void*)instance);
 
 	LL_TIM_InitTypeDef TIM_InitStruct = {0};
 	// Prescaler to get 1kHz clock
@@ -178,47 +166,55 @@ static void direct_draw_run(DirectDraw* instance)
 	LL_TIM_OC_Init(TIM16, FURI_HAL_SPEAKER_CHANNEL, &TIM_OC_InitStruct2);
 	LL_TIM_EnableAllOutputs(TIM16);
 	LL_TIM_EnableCounter(TIM16);
-
-	do 
-	{
-		char buffer[BUFFER_SIZE] = {0};
-
-		snprintf(buffer, BUFFER_SIZE, "FRAMES: %ld", instance->counter);
-
-		canvas_reset(instance->canvas);
-
-		canvas_set_color(instance->canvas, ColorXOR);
-
-		canvas_set_custom_font(instance->canvas, u8g2_font_tom_thumb_4x6_tr);
-
-		if(instance->counter_2 & 1) {
-			//direct_draw_block(instance->canvas, instance->counter % 16, instance->counter, 0);
-		}
-
-		uint32_t free_mem = memmgr_get_free_heap();
-
-		canvas_draw_str(instance->canvas, 10, 10, buffer);
-
-		snprintf(buffer, BUFFER_SIZE, "BYTES FREE: %ld", free_mem);
-
-		canvas_draw_str(instance->canvas, 10, 16, buffer);
-
-		canvas_commit(instance->canvas);
-
-		furi_thread_yield();
-
-	} while(!instance->stop);
 }
 
 int32_t flizzer_tracker_app(void* p) 
 {
 	UNUSED(p);
 
-	DirectDraw* instance = direct_draw_alloc();
+	// Текущее событие типа кастомного типа HelloWorldEvent
+	HelloWorldEvent event;
+	// Очередь событий на 8 элементов размера HelloWorldEvent
+	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(HelloWorldEvent));
+
+	DirectDraw* instance = malloc(sizeof(DirectDraw));
 
 	direct_draw_run(instance);
 
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 15, NULL, NULL);
+	// Создаем новый view port
+	ViewPort* view_port = view_port_alloc();
+	// Создаем callback отрисовки, без контекста
+	view_port_draw_callback_set(view_port, draw_callback, instance);
+	// Создаем callback нажатий на клавиши, в качестве контекста передаем
+	// нашу очередь сообщений, чтоб запихивать в неё эти события
+	view_port_input_callback_set(view_port, input_callback, event_queue);
+
+	// Создаем GUI приложения
+	Gui* gui = furi_record_open(RECORD_GUI);
+	// Подключаем view port к GUI в полноэкранном режиме
+	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+	
+
+	// Бесконечный цикл обработки очереди событий
+	while(1) 
+	{
+		// Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
+		// и проверяем, что у нас получилось это сделать
+		furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
+
+		// Наше событие — это нажатие кнопки
+		if(event.type == EventTypeInput) 
+		{
+			// Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
+			if(event.input.key == InputKeyBack) 
+			{
+				break;
+			}
+		}
+	}
+
+	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 14, NULL, NULL);
 	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, NULL, NULL);
 
 	FURI_CRITICAL_ENTER();
@@ -229,7 +225,15 @@ int32_t flizzer_tracker_app(void* p)
 	
 	furi_hal_speaker_release();
 
-	direct_draw_free(instance);
+	free(instance);
+	
+	// Специальная очистка памяти, занимаемой очередью
+	furi_message_queue_free(event_queue);
+
+	// Чистим созданные объекты, связанные с интерфейсом
+	gui_remove_view_port(gui, view_port);
+	view_port_free(view_port);
+	furi_record_close(RECORD_GUI);
 
 	return 0;
 }
