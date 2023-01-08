@@ -1,6 +1,6 @@
 #include "uart_text_input.h"
 #include <gui/elements.h>
-#include <assets_icons.h>
+#include "uart_terminal_icons.h"
 #include <furi.h>
 
 struct UART_TextInput {

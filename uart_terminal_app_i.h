@@ -44,27 +44,6 @@ struct UART_TerminalApp {
     bool show_stopscan_tip;
 };
 
-// Supported commands:
-// https://github.com/justcallmekoko/ESP32Marauder/wiki/cli
-//   Scan
-//    -> If list is empty, then start a new scanap. (Tap any button to stop.)
-//    -> If there's a list, provide option to rescan and dump list of targets to select.
-//    -> Press BACK to go back to top-level.
-//   Attack
-//    -> Beacon
-//    -> Deauth
-//    -> Probe
-//    -> Rickroll
-//   Sniff
-//    -> Beacon
-//    -> Deauth
-//    -> ESP
-//    -> PMKID
-//    -> Pwnagotchi
-//   Channel
-//   Update
-//   Reboot
-
 typedef enum {
     UART_TerminalAppViewVarItemList,
     UART_TerminalAppViewConsoleOutput,
