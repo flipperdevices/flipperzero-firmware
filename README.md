@@ -22,6 +22,10 @@ The program will automatically be launched after compilation
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper1.png" width=25% height=25%>
 
+**A4** GPIO can be connected on **A7** GPIO to test this application without using a geiger tube. **A4** GPIO is generating a signal whose frequency changes every second.
+
+Press Ok button to clear the graph, press back button to quit
+
 ## Use cases
 
 Ambient radioactivity :
@@ -32,7 +36,7 @@ Measure of uranium ore piece inside a lead container :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=25% height=25%>
 
-Measure of uranium ore in contact with the geiger tube :
+Measure of uranium ore piece in contact with the geiger tube :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper4.png" width=25% height=25%>
 
