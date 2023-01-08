@@ -65,6 +65,7 @@ typedef struct AsteroidsApp {
     uint32_t score; /* Game score. */
     uint32_t highscore; /* Highscore. Shown on Game Over Screen */
     uint32_t last_score; /* Last score. Shown on Game Over screen */
+    bool is_new_highscore; /* Is the last score a new highscore? */
     uint32_t lives; /* Number of lives in the current game. */
     uint32_t ship_hit; /* When non zero, the ship was hit by an asteroid
                                and we need to show an animation as long as
@@ -283,8 +284,13 @@ void render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
 
+        // TODO: if new highscore, display blinking "New High Score"
         // Display High Score
-        canvas_draw_str(canvas, 36, 9, "High Score");
+        if(app->is_new_highscore) {
+            canvas_draw_str(canvas, 22, 9, "New High Score!");
+        } else {
+            canvas_draw_str(canvas, 36, 9, "High Score");
+        }
 
         // Convert highscore to string
         int length = snprintf(NULL, 0, "%lu", app->highscore);
@@ -439,6 +445,7 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
         app->score++;
         app->last_score = app->score; // Save for Game Over Screen
         if(app->score > app->highscore) {
+            app->is_new_highscore = true;
             app->highscore = app->score; // Show on Game Over Screen and future main menu
         }
     }
@@ -450,6 +457,8 @@ void game_over(AsteroidsApp* app) {
     save_game(app); // Save highscore
     restart_game_after_gameover(app);
     app->gameover = true;
+    app->score = app->last_score;
+    app->lives = GAME_START_LIVES; // Show 3 lives in game over screen to match new game start
     int asteroids = 8;
     while(asteroids-- && add_asteroid(app) != NULL)
         ;
@@ -482,6 +491,7 @@ void restart_game(AsteroidsApp* app) {
 /* Called after gameover to restart the game. This function
  * also calls restart_game(). */
 void restart_game_after_gameover(AsteroidsApp* app) {
+    app->is_new_highscore = false;
     app->gameover = false;
     app->ticks = 0;
     app->score = 0;
@@ -572,8 +582,6 @@ void game_tick(void* ctx) {
         /* 2. Game over. We need to update only background asteroids. In this
      * state the game just displays a GAME OVER text with the floating
      * asteroids in backgroud. */
-        app->lives = GAME_START_LIVES; // Show 3 lives in game over screen to match new game start
-        app->score = app->last_score;
         if(key_pressed_time(app, InputKeyOk) > 100) {
             restart_game_after_gameover(app);
         }
