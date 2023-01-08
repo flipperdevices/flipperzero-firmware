@@ -59,18 +59,18 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
     // Extend Range
 
     if(global_user_selection.extend_range)
-        canvas_draw_str(canvas, 2, 30, "< Extend Range: Yes >");
+        canvas_draw_str(canvas, 2, 30, "< Risky Ranges: Yes >");
     else
-        canvas_draw_str(canvas, 2, 30, "< Extend Range: No >");
+        canvas_draw_str(canvas, 2, 30, "< Risky Ranges: No >");
     if(global_user_selection.current_selection == 0) {
         canvas_draw_line(canvas, 2, 31, 125, 31);
     }
 
     // Ignore Default
     if(global_user_selection.ignore_default)
-        canvas_draw_str(canvas, 2, 40, "< Ignore Default: Yes >");
+        canvas_draw_str(canvas, 2, 40, "< Ignore Region: Yes >");
     else
-        canvas_draw_str(canvas, 2, 40, "< Ignore Default: No >");
+        canvas_draw_str(canvas, 2, 40, "< Ignore Region: No >");
     if(global_user_selection.current_selection == 1) {
         canvas_draw_line(canvas, 2, 41, 125, 41);
     }
@@ -88,10 +88,10 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, 2, 60, "File not found");
         break;
     case 2:
-        canvas_draw_str(canvas, 2, 60, "Failed to update extend_range");
+        canvas_draw_str(canvas, 2, 60, "Failed to update risky ranges");
         break;
     case 3:
-        canvas_draw_str(canvas, 2, 60, "Failed to update ignore_default");
+        canvas_draw_str(canvas, 2, 60, "Failed to update ignore region");
         break;
     default:
         canvas_draw_str(canvas, 2, 60, "Unknown error");
