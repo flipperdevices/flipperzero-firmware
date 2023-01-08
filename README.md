@@ -26,6 +26,8 @@ The program will automatically be launched after compilation
 
 Press Ok button to clear the graph, press back button to quit
 
+If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero**
+
 ## Use cases
 
 Ambient radioactivity :
