@@ -20,7 +20,6 @@
 
 void subghz_preset_init(
     void* context,
-    hello_this_var_is_for_compile_error_purpose_please_forgive_me
     const char* preset_name,
     uint32_t frequency,
     uint8_t* preset_data,
