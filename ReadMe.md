@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
 - Fixed wording in Extend Range app
+- Added readme for BT Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 
 <a name="release">
 
