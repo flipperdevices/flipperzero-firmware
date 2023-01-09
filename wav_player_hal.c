@@ -50,7 +50,8 @@ void wav_player_speaker_init(uint32_t sample_rate)
 	//configuring PA6 pin as TIM16 output
 
 	//furi_hal_gpio_init_ex(&gpio_ext_pa6, (GpioMode)GpioPullNo, (GpioPull)GpioModeAltFunctionPushPull, GpioSpeedVeryHigh, GpioAltFn14TIM16);
-	furi_hal_gpio_init_ex(&gpio_ext_pa6, (GpioMode)GpioPullNo, (GpioPull)GpioModeAltFunctionPushPull, GpioSpeedLow, GpioAltFn14TIM16);
+	//furi_hal_gpio_init_ex(&gpio_ext_pa6, (GpioMode)GpioPullNo, (GpioPull)GpioModeAltFunctionPushPull, GpioSpeedLow, GpioAltFn14TIM16);
+	furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn14TIM16);
 	//furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
 	//furi_hal_gpio_write(&gpio_ext_pa6, false);
 }

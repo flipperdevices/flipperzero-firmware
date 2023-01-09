@@ -135,7 +135,8 @@ static bool fill_data(WavPlayerApp* app, size_t index) {
         app->tmp_buffer[i] = 0;
     }
 
-    for(size_t i = 0; i < app->samples_count; i += 2) {
+    for(size_t i = 0; i < app->samples_count; i += 2) 
+    {
         float data = app->tmp_buffer[i];
         data -= UINT8_MAX / 2; // to signed
         data /= UINT8_MAX / 2; // scale -1..1
@@ -153,6 +154,8 @@ static bool fill_data(WavPlayerApp* app, size_t index) {
         if(data > 255) {
             data = 255;
         }
+
+        //uint8_t data = app->tmp_buffer[i];
 
         sample_buffer_start[i / 2] = data;
     }
