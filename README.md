@@ -1,7 +1,7 @@
 # flipperzero-geigercounter
 A geiger counter application for the Flipper Zero
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/logo.jpg" width=30% height=30%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/logo.jpg" width=20% height=20%>
 
 You need a **geiger counter** board to run this application. This board can be used : https://aliexpress.com/item/1005004074447209.html
 
