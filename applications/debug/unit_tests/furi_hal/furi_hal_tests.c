@@ -103,6 +103,39 @@ MU_TEST(furi_hal_i2c_int_1b_fail) {
     mu_assert(data_one != 0, "9 invalid data");
 }
 
+MU_TEST(furi_hal_dma_aq_rel) {
+    const FuriHalDma* dma_1 = furi_hal_dma_acquire_channel();
+    const FuriHalDma* dma_2 = furi_hal_dma_acquire_channel();
+    mu_assert_pointers_not_eq(dma_1, NULL);
+    mu_assert_pointers_not_eq(dma_2, NULL);
+    mu_assert_pointers_not_eq(dma_1, dma_2);
+    furi_hal_dma_release_channel(dma_1);
+    furi_hal_dma_release_channel(dma_2);
+}
+
+MU_TEST(furi_hal_dma_aq_full) {
+    // STM32WB55 has 14 DMA channels, so I assume that there are less than 32 DMA channels
+    const size_t dma_channels_max = 32;
+    const FuriHalDma* dma[dma_channels_max];
+
+    for(size_t i = 0; i < dma_channels_max; i++) {
+        dma[i] = furi_hal_dma_acquire_channel();
+    }
+
+    // check that some channels are acquired
+    mu_assert_pointers_not_eq(dma[0], NULL);
+
+    // check that some channels are not acquired
+    mu_assert_pointers_eq(dma[dma_channels_max - 1], NULL);
+
+    // release all channels
+    for(size_t i = 0; i < dma_channels_max; i++) {
+        if(dma[i] != NULL) {
+            furi_hal_dma_release_channel(dma[i]);
+        }
+    }
+}
+
 MU_TEST_SUITE(furi_hal_i2c_int_suite) {
     MU_SUITE_CONFIGURE(&furi_hal_i2c_int_setup, &furi_hal_i2c_int_teardown);
     MU_RUN_TEST(furi_hal_i2c_int_1b);
@@ -110,7 +143,13 @@ MU_TEST_SUITE(furi_hal_i2c_int_suite) {
     MU_RUN_TEST(furi_hal_i2c_int_1b_fail);
 }
 
+MU_TEST_SUITE(furi_hal_dma_suite) {
+    MU_RUN_TEST(furi_hal_dma_aq_rel);
+    MU_RUN_TEST(furi_hal_dma_aq_full);
+}
+
 int run_minunit_test_furi_hal() {
     MU_RUN_SUITE(furi_hal_i2c_int_suite);
+    MU_RUN_SUITE(furi_hal_dma_suite);
     return MU_EXIT_CODE;
 }
