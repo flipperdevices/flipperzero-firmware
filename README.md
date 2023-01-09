@@ -1,5 +1,3 @@
-# UART_Terminal
-Uart terminal for Flipper Zero
 
 
 INFO:
@@ -16,3 +14,4 @@ INFO:
 
 
 ![4f](https://user-images.githubusercontent.com/122148894/211161461-4507120b-42df-441f-9e01-e4517aa83537.jpg)
+
