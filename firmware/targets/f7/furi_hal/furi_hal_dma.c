@@ -3,13 +3,14 @@
 
 #define DMA_INSTANCE_COUNT 2
 #define DMA_CHANNEL_COUNT 7
-#define DMA_COUNT (DMA_INSTANCE_COUNT * DMA_CHANNEL_COUNT)
+#define DMA_CHANNELS_TAKEN_BY_CORE 4
+#define DMA_COUNT (DMA_INSTANCE_COUNT * DMA_CHANNEL_COUNT - DMA_CHANNELS_TAKEN_BY_CORE)
 
 static const FuriHalDma dma_data[DMA_COUNT] = {
-    {DMA1, LL_DMA_CHANNEL_1},
-    {DMA1, LL_DMA_CHANNEL_2},
-    {DMA1, LL_DMA_CHANNEL_3},
-    {DMA1, LL_DMA_CHANNEL_4},
+    // {DMA1, LL_DMA_CHANNEL_1}, // shared between RFID, Infrared, Subghz and NFC
+    // {DMA1, LL_DMA_CHANNEL_2}, // shared between RFID, Infrared, Subghz and NFC
+    // {DMA1, LL_DMA_CHANNEL_3}, // used by SPI RX
+    // {DMA1, LL_DMA_CHANNEL_4}, // used by SPI TX
     {DMA1, LL_DMA_CHANNEL_5},
     {DMA1, LL_DMA_CHANNEL_6},
     {DMA1, LL_DMA_CHANNEL_7},
@@ -25,10 +26,10 @@ static const FuriHalDma dma_data[DMA_COUNT] = {
 static bool dma_data_used[DMA_COUNT] = {0};
 
 static const FuriHalInterruptId dma_irq_id[DMA_COUNT] = {
-    FuriHalInterruptIdDma1Ch1,
-    FuriHalInterruptIdDma1Ch2,
-    FuriHalInterruptIdDma1Ch3,
-    FuriHalInterruptIdDma1Ch4,
+    // FuriHalInterruptIdDma1Ch1,
+    // FuriHalInterruptIdDma1Ch2,
+    // FuriHalInterruptIdDma1Ch3,
+    // FuriHalInterruptIdDma1Ch4,
     FuriHalInterruptIdDma1Ch5,
     FuriHalInterruptIdDma1Ch6,
     FuriHalInterruptIdDma1Ch7,

@@ -1,12 +1,9 @@
-#include "furi_hal_spi.h"
-#include "furi_hal_resources.h"
+#include <furi.h>
+#include <furi_hal_dma.h>
+#include <furi_hal_spi.h>
+#include <furi_hal_resources.h>
 #include <furi_hal_power.h>
 #include <furi_hal_interrupt.h>
-#include <furi_hal_console.h>
-
-#include <stdbool.h>
-#include <string.h>
-#include <furi.h>
 
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_spi.h>
@@ -23,7 +20,9 @@
 #define SPI_DMA_RX_DEF SPI_DMA, SPI_DMA_RX_CHANNEL
 #define SPI_DMA_TX_DEF SPI_DMA, SPI_DMA_TX_CHANNEL
 
-static FuriSemaphore* spi_dma_semaphore = NULL;
+// For simplicity, I assume that only one SPI DMA transaction can occur at a time.
+static FuriSemaphore* spi_dma_lock = NULL;
+static FuriSemaphore* spi_dma_completed = NULL;
 
 void furi_hal_spi_init_early() {
     furi_hal_spi_bus_init(&furi_hal_spi_bus_d);
@@ -36,7 +35,8 @@ void furi_hal_spi_deinit_early() {
 }
 
 void furi_hal_spi_init() {
-    spi_dma_semaphore = furi_semaphore_alloc(1, 1);
+    spi_dma_lock = furi_semaphore_alloc(1, 1);
+    spi_dma_completed = furi_semaphore_alloc(1, 1);
 
     furi_hal_spi_bus_init(&furi_hal_spi_bus_r);
 
@@ -193,7 +193,7 @@ static void spi_dma_isr() {
 #if SPI_DMA_RX_CHANNEL == LL_DMA_CHANNEL_3
     if(LL_DMA_IsActiveFlag_TC3(SPI_DMA) && LL_DMA_IsEnabledIT_TC(SPI_DMA_RX_DEF)) {
         LL_DMA_ClearFlag_TC3(SPI_DMA);
-        furi_check(furi_semaphore_release(spi_dma_semaphore) == FuriStatusOk);
+        furi_check(furi_semaphore_release(spi_dma_completed) == FuriStatusOk);
     }
 #else
 #error Update this code. Would you kindly?
@@ -202,7 +202,7 @@ static void spi_dma_isr() {
 #if SPI_DMA_TX_CHANNEL == LL_DMA_CHANNEL_4
     if(LL_DMA_IsActiveFlag_TC4(SPI_DMA) && LL_DMA_IsEnabledIT_TC(SPI_DMA_TX_DEF)) {
         LL_DMA_ClearFlag_TC4(SPI_DMA);
-        furi_check(furi_semaphore_release(spi_dma_semaphore) == FuriStatusOk);
+        furi_check(furi_semaphore_release(spi_dma_completed) == FuriStatusOk);
     }
 #else
 #error Update this code. Would you kindly?
@@ -218,6 +218,8 @@ bool furi_hal_spi_bus_trx_dma(
     furi_assert(handle);
     furi_assert(handle->bus->current_handle == handle);
     furi_assert(size > 0);
+    furi_check(furi_semaphore_acquire(spi_dma_lock, FuriWaitForever) == FuriStatusOk);
+
     const uint32_t dma_dummy_u32 = 0xFFFFFFFF;
 
     bool ret = true;
@@ -264,18 +266,18 @@ bool furi_hal_spi_bus_trx_dma(
         }
 
         // acquire semaphore before enabling DMA
-        furi_check(furi_semaphore_acquire(spi_dma_semaphore, timeout_ms) == FuriStatusOk);
+        furi_check(furi_semaphore_acquire(spi_dma_completed, timeout_ms) == FuriStatusOk);
 
         LL_DMA_EnableIT_TC(SPI_DMA_TX_DEF);
         LL_DMA_EnableChannel(SPI_DMA_TX_DEF);
 
         // and wait for it to be released (DMA transfer complete)
-        if(furi_semaphore_acquire(spi_dma_semaphore, timeout_ms) != FuriStatusOk) {
+        if(furi_semaphore_acquire(spi_dma_completed, timeout_ms) != FuriStatusOk) {
             ret = false;
             FURI_LOG_E(TAG, "DMA timeout\r\n");
         }
         // release semaphore, because we are using it as a flag
-        furi_semaphore_release(spi_dma_semaphore);
+        furi_semaphore_release(spi_dma_completed);
 
         LL_DMA_DisableIT_TC(SPI_DMA_TX_DEF);
         LL_DMA_DisableChannel(SPI_DMA_TX_DEF);
@@ -342,19 +344,19 @@ bool furi_hal_spi_bus_trx_dma(
         }
 
         // acquire semaphore before enabling DMA
-        furi_check(furi_semaphore_acquire(spi_dma_semaphore, timeout_ms) == FuriStatusOk);
+        furi_check(furi_semaphore_acquire(spi_dma_completed, timeout_ms) == FuriStatusOk);
 
         LL_DMA_EnableIT_TC(SPI_DMA_RX_DEF);
         LL_DMA_EnableChannel(SPI_DMA_RX_DEF);
         LL_DMA_EnableChannel(SPI_DMA_TX_DEF);
 
         // and wait for it to be released (DMA transfer complete)
-        if(furi_semaphore_acquire(spi_dma_semaphore, timeout_ms) != FuriStatusOk) {
+        if(furi_semaphore_acquire(spi_dma_completed, timeout_ms) != FuriStatusOk) {
             ret = false;
             FURI_LOG_E(TAG, "DMA timeout\r\n");
         }
         // release semaphore, because we are using it as a flag
-        furi_semaphore_release(spi_dma_semaphore);
+        furi_semaphore_release(spi_dma_completed);
 
         LL_DMA_DisableIT_TC(SPI_DMA_RX_DEF);
 
@@ -376,6 +378,8 @@ bool furi_hal_spi_bus_trx_dma(
     }
 
     furi_hal_spi_bus_end_txrx(handle, timeout_ms);
+
+    furi_check(furi_semaphore_release(spi_dma_lock) == FuriStatusOk);
 
     return ret;
 }
