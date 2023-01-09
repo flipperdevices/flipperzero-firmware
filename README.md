@@ -1,7 +1,7 @@
 # flipperzero-geigercounter
 A geiger counter application for the Flipper Zero
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/logo.jpg" width=75% height=75% alt="centered image">
+![banner](https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/logo.jpg)
 
 You need a **geiger counter** board to run this application. This board can be used : https://aliexpress.com/item/1005004074447209.html
 
@@ -9,7 +9,7 @@ The geiger counter board can be powered with +5V power pin of the **Flipper Zero
 
 Output pin for measure on arduino cannot be used on the **Flipper Zero** because output voltage is too low. You can use jack out port instead. This port must be connected on **A7** GPIO :
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schematic.jpg" width=75% height=75%>
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schematic.jpg" width=75% height=75%></p>
 
 ## Build the program
 
