@@ -1,5 +1,5 @@
 App(
-    appid="extend_range",
+    appid="ExtendRange",
     name="Extend Range",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="extend_range_app",
