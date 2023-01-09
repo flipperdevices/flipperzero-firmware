@@ -148,6 +148,7 @@ static bool fap_loader_select_app(FapLoader* loader) {
         .hide_ext = true,
         .item_loader_callback = fap_loader_item_callback,
         .item_loader_context = loader,
+        .base_path = EXT_PATH("apps"),
     };
 
     return dialog_file_browser_show(
@@ -155,7 +156,7 @@ static bool fap_loader_select_app(FapLoader* loader) {
 }
 
 static FapLoader* fap_loader_alloc(const char* path) {
-    FapLoader* loader = malloc(sizeof(FapLoader)); //-V773
+    FapLoader* loader = malloc(sizeof(FapLoader)); //-V799
     loader->fap_path = furi_string_alloc_set(path);
     loader->storage = furi_record_open(RECORD_STORAGE);
     loader->dialogs = furi_record_open(RECORD_DIALOGS);
@@ -166,7 +167,7 @@ static FapLoader* fap_loader_alloc(const char* path) {
         loader->view_dispatcher, loader->gui, ViewDispatcherTypeFullscreen);
     view_dispatcher_add_view(loader->view_dispatcher, 0, loading_get_view(loader->loading));
     return loader;
-}
+} //-V773
 
 static void fap_loader_free(FapLoader* loader) {
     view_dispatcher_remove_view(loader->view_dispatcher, 0);
