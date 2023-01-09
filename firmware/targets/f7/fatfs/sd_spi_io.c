@@ -4,7 +4,7 @@
 #include <furi_hal.h>
 #include <furi/core/core_defines.h>
 
-#define SD_SPI_DEBUG 1
+// #define SD_SPI_DEBUG 1
 #define TAG "SdSpi"
 
 #ifdef SD_SPI_DEBUG
