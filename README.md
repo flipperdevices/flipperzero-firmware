@@ -40,7 +40,7 @@ encodings are somewhat self-clocked, so they tend to have just two or
 three classes of pulse lengths.
 
 However often pulses of the same theoretical
-length have slightly different lenghts in the case of high and low level
+length have slightly different lengths in the case of high and low level
 (RF on or off), so we classify them separately for robustness.
 
 # Usage
