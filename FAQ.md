@@ -47,7 +47,7 @@ To do that you may use following CLI commands:
 
 ## How to backup?
 
-All token secrets are stored in encrypted form and are tied to an original Flipper device and PIN. Given that, there is no sense to try to backup `/ext/apps/Misc/totp.conf` file as it will not help you in situation when you loose your Flipper device. Instead use your favorite password manager to store plain token secrets and\or any other information which will help you recover your accounts.
+All token secrets are stored in encrypted form and are tied to an original Flipper device and PIN. Given that, there is no sense to try to backup `/ext/authenticator/totp.conf` file as it will not help you in situation when you loose your Flipper device. Instead use your favorite password manager to store plain token secrets and\or any other information which will help you recover your accounts.
 
 ## How to reset application?
 
