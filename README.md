@@ -1,4 +1,4 @@
-This is an implementation of the classic Asteroids game for the [Flipper Zero](https://flipperzero.one/). Inside you will find a simple 2D engine that can be reused to implement other games.
+This is an implementation of the classic Asteroids game for the [Flipper Zero](https://flipperzero.one/). Inside you will find a simple 2D engine that can be reused to implement other games. Note: This one is SimplyMinimal's fork of Antirez's version with several modifications.
 
 Controls:
 * Left/Right: rotate ship in the two directions.
@@ -7,15 +7,15 @@ Controls:
 * Up: accelerate
 * Down: decelerates
 
+Your high scores will automatically be saved. Go forth and compete!
+
 This is a screenshot, but the game looks a lot better in the device itself:
 
 ![Asteroids for Flipper Zero screenshot](/images/Asteroids.jpg)
 
-P.S. Don't miss the game over screen.
-
 ## Installing the binary file (no build needed)
 
-Drop the `asteroids.fap` file you can find in the `binaries` folder into the
+Go to the releases and drop the `asteroids.fap` file into the
 following Flipper Zero location:
 
     /ext/apps/Games
