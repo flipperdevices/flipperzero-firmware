@@ -127,42 +127,88 @@ static void app_free(WavPlayerApp* app) {
 }
 
 // TODO: that works only with 8-bit 2ch audio
-static bool fill_data(WavPlayerApp* app, size_t index) {
-    uint16_t* sample_buffer_start = &app->sample_buffer[index];
-    size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
-
-    for(size_t i = count; i < app->samples_count; i++) {
-        app->tmp_buffer[i] = 0;
-    }
-
-    for(size_t i = 0; i < app->samples_count; i += 2) 
+static bool fill_data(WavPlayerApp* app, size_t index)
+{
+    if(app->num_channels == 1)
     {
-        float data = app->tmp_buffer[i];
-        data -= UINT8_MAX / 2; // to signed
-        data /= UINT8_MAX / 2; // scale -1..1
+        uint16_t* sample_buffer_start = &app->sample_buffer[index];
+        size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count_half);
 
-        data *= app->volume; // volume
-        data = tanhf(data); // hyperbolic tangent limiter
-
-        data *= UINT8_MAX / 2; // scale -128..127
-        data += UINT8_MAX / 2; // to unsigned
-
-        if(data < 0) {
-            data = 0;
+        for(size_t i = count; i < app->samples_count_half; i++) {
+            app->tmp_buffer[i] = 0;
         }
 
-        if(data > 255) {
-            data = 255;
+        //for(size_t i = 0; i < app->samples_count; i += 2)
+        for(size_t i = 0; i < app->samples_count_half; i++) //now works with mono!
+        {
+            float data = app->tmp_buffer[i];
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            //uint8_t data = app->tmp_buffer[i];
+
+            sample_buffer_start[i] = data;
         }
 
-        //uint8_t data = app->tmp_buffer[i];
+        wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
 
-        sample_buffer_start[i / 2] = data;
+        return count != app->samples_count_half;
     }
 
-    wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+    if(app->num_channels == 2)
+    {
+        uint16_t* sample_buffer_start = &app->sample_buffer[index];
+        size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
-    return count != app->samples_count;
+        for(size_t i = count; i < app->samples_count; i++) {
+            app->tmp_buffer[i] = 0;
+        }
+
+        for(size_t i = 0; i < app->samples_count; i += 2) 
+        {
+            float data = (app->tmp_buffer[i] + app->tmp_buffer[i + 1]) / 2; // (L + R) / 2
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            //uint8_t data = app->tmp_buffer[i];
+
+            sample_buffer_start[i / 2] = data;
+        }
+
+        wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+
+        return count != app->samples_count;
+    }
+
+    return true;
 }
 
 static void ctrl_callback(WavPlayerCtrl ctrl, void* ctx) {
