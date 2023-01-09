@@ -33,7 +33,7 @@ bool spi_mem_file_create_open(SPIMemApp* app) {
             break;
         success = true;
     } while(0);
-    if(!success) {
+    if(!success) { //-V547
         dialog_message_show_storage_error(app->dialogs, "Cannot save\nfile");
     }
     return success;

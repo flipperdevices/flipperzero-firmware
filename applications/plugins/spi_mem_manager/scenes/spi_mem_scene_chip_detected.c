@@ -22,7 +22,7 @@ static void spi_mem_scene_chip_detected_print_chip_info(Widget* widget, SPIMemCh
         spi_mem_chip_get_vendor_name(chip_info));
     widget_add_string_element(
         widget, 40, 20, AlignLeft, AlignTop, FontSecondary, spi_mem_chip_get_model_name(chip_info));
-    furi_string_printf(tmp_string, "Size: %u KB", spi_mem_chip_get_size(chip_info) / 1024);
+    furi_string_printf(tmp_string, "Size: %zu KB", spi_mem_chip_get_size(chip_info) / 1024);
     widget_add_string_element(
         widget, 40, 28, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_string));
     furi_string_free(tmp_string);

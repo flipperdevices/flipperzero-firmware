@@ -41,7 +41,7 @@ static int32_t spi_mem_worker_thread(void* thread_context) {
     SPIMemWorker* worker = thread_context;
     while(true) {
         uint32_t flags = furi_thread_flags_wait(SPIMemEventAll, FuriFlagWaitAny, FuriWaitForever);
-        if(flags != FuriFlagErrorTimeout) {
+        if(flags != (unsigned)FuriFlagErrorTimeout) {
             if(flags & SPIMemEventStopThread) break;
             if(flags & SPIMemEventChipDetect) worker->mode_index = SPIMemWorkerModeChipDetect;
             if(flags & SPIMemEventRead) worker->mode_index = SPIMemWorkerModeRead;

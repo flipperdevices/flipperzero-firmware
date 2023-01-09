@@ -82,7 +82,8 @@ static void spi_mem_view_progress_draw_callback(Canvas* canvas, void* context) {
     }
 }
 
-static bool spi_mem_view_progress_read_input_callback(InputEvent* event, SPIMemProgressView* app) {
+static bool
+    spi_mem_view_progress_read_write_input_callback(InputEvent* event, SPIMemProgressView* app) {
     bool success = false;
     if(event->type == InputTypeShort && event->key == InputKeyLeft) {
         if(app->callback) {
@@ -105,18 +106,6 @@ static bool
     return success;
 }
 
-static bool
-    spi_mem_view_progress_write_input_callback(InputEvent* event, SPIMemProgressView* app) {
-    bool success = false;
-    if(event->type == InputTypeShort && event->key == InputKeyLeft) {
-        if(app->callback) {
-            app->callback(app->cb_ctx);
-        }
-        success = true;
-    }
-    return success;
-}
-
 static bool spi_mem_view_progress_input_callback(InputEvent* event, void* context) {
     SPIMemProgressView* app = context;
     bool success = false;
@@ -124,11 +113,11 @@ static bool spi_mem_view_progress_input_callback(InputEvent* event, void* contex
     with_view_model(
         app->view, SPIMemProgressViewModel * model, { view_type = model->view_type; }, true);
     if(view_type == SPIMemProgressViewTypeRead) {
-        success = spi_mem_view_progress_read_input_callback(event, app);
+        success = spi_mem_view_progress_read_write_input_callback(event, app);
     } else if(view_type == SPIMemProgressViewTypeVerify) {
         success = spi_mem_view_progress_verify_input_callback(event, app);
     } else if(view_type == SPIMemProgressViewTypeWrite) {
-        success = spi_mem_view_progress_write_input_callback(event, app);
+        success = spi_mem_view_progress_read_write_input_callback(event, app);
     }
     return success;
 }
