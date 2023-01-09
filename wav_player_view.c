@@ -1,22 +1,5 @@
 #include "wav_player_view.h"
 
-#define DATA_COUNT 116
-
-struct WavPlayerView {
-    View* view;
-    WavPlayerCtrlCallback callback;
-    void* context;
-};
-
-typedef struct {
-    bool play;
-    float volume;
-    size_t start;
-    size_t end;
-    size_t current;
-    uint8_t data[DATA_COUNT];
-} WavPlayerViewModel;
-
 float map(float x, float in_min, float in_max, float out_min, float out_max) {
     return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
 }

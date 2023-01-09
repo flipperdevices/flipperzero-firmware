@@ -11,7 +11,8 @@
 #define FURI_HAL_SPEAKER_CHANNEL LL_TIM_CHANNEL_CH1
 #define DMA_INSTANCE DMA1, LL_DMA_CHANNEL_1
 
-void wav_player_speaker_init() {
+void wav_player_speaker_init(uint32_t sample_rate) 
+{
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     //TIM_InitStruct.Prescaler = 4;
     TIM_InitStruct.Prescaler = 1;
@@ -26,7 +27,10 @@ void wav_player_speaker_init() {
     LL_TIM_OC_Init(FURI_HAL_SPEAKER_TIMER, FURI_HAL_SPEAKER_CHANNEL, &TIM_OC_InitStruct);
 
     TIM_InitStruct.Prescaler = 0;
-    TIM_InitStruct.Autoreload = 1451; //64 000 000 / 1451 ~= 44100 Hz
+    //TIM_InitStruct.Autoreload = 1451; //64 000 000 / 1451 ~= 44100 Hz
+
+    TIM_InitStruct.Autoreload = 64000000 / sample_rate; //to support various sample rates
+
     LL_TIM_Init(SAMPLE_RATE_TIMER, &TIM_InitStruct);
 
     //LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};

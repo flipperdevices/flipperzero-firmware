@@ -80,27 +80,6 @@ static void wav_player_dma_isr(void* ctx) {
     }
 }
 
-typedef struct {
-    Storage* storage;
-    Stream* stream;
-    WavParser* parser;
-    uint16_t* sample_buffer;
-    uint8_t* tmp_buffer;
-
-    size_t samples_count_half;
-    size_t samples_count;
-
-    FuriMessageQueue* queue;
-
-    float volume;
-    bool play;
-
-    WavPlayerView* view;
-    ViewDispatcher* view_dispatcher;
-    Gui* gui;
-    NotificationApp* notification;
-} WavPlayerApp;
-
 static WavPlayerApp* app_alloc() {
     WavPlayerApp* app = malloc(sizeof(WavPlayerApp));
     app->samples_count_half = 1024 * 4;
@@ -219,7 +198,7 @@ static void ctrl_callback(WavPlayerCtrl ctrl, void* ctx) {
 
 static void app_run(WavPlayerApp* app) {
     if(!open_wav_stream(app->stream)) return;
-    if(!wav_parser_parse(app->parser, app->stream)) return;
+    if(!wav_parser_parse(app->parser, app->stream, app)) return;
 
     wav_player_view_set_volume(app->view, app->volume);
     wav_player_view_set_start(app->view, wav_parser_get_data_start(app->parser));
@@ -233,7 +212,7 @@ static void app_run(WavPlayerApp* app) {
     bool eof = fill_data(app, 0);
     eof = fill_data(app, app->samples_count_half);
 
-    wav_player_speaker_init();
+    wav_player_speaker_init(app->sample_rate);
     wav_player_dma_init((uint32_t)app->sample_buffer, app->samples_count);
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, wav_player_dma_isr, app->queue);
