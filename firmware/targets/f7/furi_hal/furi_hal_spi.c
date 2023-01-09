@@ -218,6 +218,7 @@ bool furi_hal_spi_bus_trx_dma(
     furi_assert(handle);
     furi_assert(handle->bus->current_handle == handle);
     furi_assert(size > 0);
+    const uint32_t dma_dummy_u32 = 0xFFFFFFFF;
 
     bool ret = true;
     SPI_TypeDef* spi = handle->bus->spi;
@@ -285,11 +286,10 @@ bool furi_hal_spi_bus_trx_dma(
 
         LL_DMA_DeInit(SPI_DMA_TX_DEF);
     } else {
-        const uint32_t dummy = 0xFFFFFFFF;
         uint32_t tx_mem_increase_mode;
 
         if(tx_buffer == NULL) {
-            tx_buffer = (uint8_t*)&dummy;
+            tx_buffer = (uint8_t*)&dma_dummy_u32;
             tx_mem_increase_mode = LL_DMA_PERIPH_NOINCREMENT;
         } else {
             tx_mem_increase_mode = LL_DMA_MEMORY_INCREMENT;

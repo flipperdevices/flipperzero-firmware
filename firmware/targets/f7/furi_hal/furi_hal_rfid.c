@@ -335,8 +335,8 @@ void furi_hal_rfid_tim_emulate_dma_start(
     furi_hal_rfid->rfid_dma = malloc(sizeof(RfidDMA));
     RfidDMA* rfid_dma = furi_hal_rfid->rfid_dma;
 
-    rfid_dma->arr = furi_hal_dma_acquire_channel();
-    rfid_dma->ccr3 = furi_hal_dma_acquire_channel();
+    rfid_dma->arr = furi_hal_dma_acquire_channel(); //-V656
+    rfid_dma->ccr3 = furi_hal_dma_acquire_channel(); //-V656
     furi_check(rfid_dma->arr);
     furi_check(rfid_dma->ccr3);
 
