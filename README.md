@@ -2,11 +2,11 @@
 Uart terminal for Flipper Zero
 
 
-INFO:
+# INFO:
 
 70-80% of the source code is taken from the Wifi Marauder project. Many thanks to the developers of the Wifi Marauder project.
 
-See "dev" branch
+# See "dev" branch
 
 ![1f](https://user-images.githubusercontent.com/122148894/211161305-11c6caf6-2797-42c7-9f80-af74a7bcb713.jpg)
 
