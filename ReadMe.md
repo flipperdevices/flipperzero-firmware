@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Added: [Infrared: allow disabling automatic signal decoding #273 (By Darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/273)
 - Added: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
+- Updated: [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 
 <a name="release">
 
