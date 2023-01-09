@@ -69,6 +69,28 @@ static void input_callback(InputEvent* input_event, void* ctx)
     furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
 }
 
+
+/* Called to switch view (when left/right is pressed). Handles
+ * changing the current view ID and calling the enter/exit view
+ * callbacks if needed. */
+static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
+    ProtoViewCurrentView old = app->current_view;
+    if (dir == AppNextView) {
+        app->current_view++;
+        if (app->current_view == ViewLast) app->current_view = 0;
+    } else if (dir == AppPrevView) {
+        if (app->current_view == 0)
+            app->current_view = ViewLast-1;
+        else
+            app->current_view--;
+    }
+    ProtoViewCurrentView new = app->current_view;
+
+    /* Call the enter/exit view callbacks if needed. */
+    if (old == ViewDirectSampling) view_exit_direct_sampling(app);
+    if (new == ViewDirectSampling) view_enter_direct_sampling(app);
+}
+
 /* Allocate the application state and initialize a number of stuff.
  * This is called in the entry point to create the application state. */
 ProtoViewApp* protoview_app_alloc() {
@@ -205,16 +227,12 @@ int32_t protoview_app_entry(void* p) {
                        input.key == InputKeyRight)
             {
                 /* Go to the next view. */
-                app->current_view++;
-                if (app->current_view == ViewLast) app->current_view = 0;
+                app_switch_view(app,AppNextView);
             } else if (input.type == InputTypeShort &&
                        input.key == InputKeyLeft)
             {
                 /* Go to the previous view. */
-                if (app->current_view == 0)
-                    app->current_view = ViewLast-1;
-                else
-                    app->current_view--;
+                app_switch_view(app,AppPrevView);
             } else {
                 /* This is where we pass the control to the currently
                  * active view input processing. */

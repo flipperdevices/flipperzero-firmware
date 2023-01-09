@@ -47,6 +47,12 @@ typedef enum {
     ViewLast, /* Just a sentinel to wrap around. */
 } ProtoViewCurrentView;
 
+/* Used by app_switch_view() */
+typedef enum {
+    AppNextView,
+    AppPrevView
+} SwitchViewDirection;
+
 typedef struct {
     const char *name;
     FuriHalSubGhzPreset preset;
@@ -152,6 +158,8 @@ void render_view_info(Canvas *const canvas, ProtoViewApp *app);
 void process_input_info(ProtoViewApp *app, InputEvent input);
 void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app);
 void process_input_direct_sampling(ProtoViewApp *app, InputEvent input);
+void view_enter_direct_sampling(ProtoViewApp *app);
+void view_exit_direct_sampling(ProtoViewApp *app);
 
 /* ui.c */
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
