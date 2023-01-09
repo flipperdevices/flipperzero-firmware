@@ -27,12 +27,11 @@ typedef struct {
 typedef struct {
     uint32_t counter;
     uint32_t cps, cpm;
-    uint8_t line[SCREEN_SIZE_X/2];
+    uint8_t line[SCREEN_SIZE_X / 2];
     float coef;
 } mutexStruct;
 
-static void draw_callback(Canvas* canvas, void* ctx) 
-{
+static void draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     mutexStruct* lfsrMutex = (mutexStruct*)acquire_mutex_block((ValueMutex*)ctx);
@@ -40,13 +39,12 @@ static void draw_callback(Canvas* canvas, void* ctx)
 
     snprintf(buffer, sizeof(buffer), "%ld cps - %ld cpm", lfsrMutex->cps, lfsrMutex->cpm);
 
-    for (int i=0;i<SCREEN_SIZE_X;i+=2)
-    {
-        float Y = SCREEN_SIZE_Y-(lfsrMutex->line[i/2]*lfsrMutex->coef);
-        if (Y < 0) Y = 0;
+    for(int i = 0; i < SCREEN_SIZE_X; i += 2) {
+        float Y = SCREEN_SIZE_Y - (lfsrMutex->line[i / 2] * lfsrMutex->coef);
+        if(Y < 0) Y = 0;
 
         canvas_draw_line(canvas, i, Y, i, SCREEN_SIZE_Y);
-        canvas_draw_line(canvas, i+1, Y, i+1, SCREEN_SIZE_Y);
+        canvas_draw_line(canvas, i + 1, Y, i + 1, SCREEN_SIZE_Y);
     }
 
     canvas_set_font(canvas, FontPrimary);
@@ -55,8 +53,7 @@ static void draw_callback(Canvas* canvas, void* ctx)
     release_mutex((ValueMutex*)ctx, lfsrMutex);
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) 
-{
+static void input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     EventApp event = {.type = EventTypeInput, .input = *input_event};
@@ -67,8 +64,8 @@ static void clock_tick(void* ctx) {
     furi_assert(ctx);
 
     uint8_t randomuint8[1];
-    furi_hal_random_fill_buf(randomuint8,1);
-    randomuint8[0] &= 0b00001111;                
+    furi_hal_random_fill_buf(randomuint8, 1);
+    randomuint8[0] &= 0b00001111;
     furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, randomuint8[0], 20);
 
     FuriMessageQueue* queue = ctx;
@@ -83,9 +80,7 @@ static void gpiocallback(void* ctx) {
     furi_message_queue_put(queue, &event, 0);
 }
 
-
-int32_t flipper_geiger_app() 
-{
+int32_t flipper_geiger_app() {
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
@@ -96,7 +91,7 @@ int32_t flipper_geiger_app()
     mutexVal.counter = 0;
     mutexVal.cps = 0;
     mutexVal.cpm = 0;
-    for (int i=0;i<SCREEN_SIZE_X/2;i++) mutexVal.line[i] = 0;
+    for(int i = 0; i < SCREEN_SIZE_X / 2; i++) mutexVal.line[i] = 0;
     mutexVal.coef = 1;
 
     ValueMutex state_mutex;
@@ -114,52 +109,42 @@ int32_t flipper_geiger_app()
     FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, 1000);
 
-    while(1) 
-    {
+    while(1) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
         mutexStruct* lfsrMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
 
-        if (event_status == FuriStatusOk)
-        {   
-            if(event.type == EventTypeInput) 
-            {
-                if(event.input.key == InputKeyBack) 
-                {
+        if(event_status == FuriStatusOk) {
+            if(event.type == EventTypeInput) {
+                if(event.input.key == InputKeyBack) {
                     release_mutex(&state_mutex, lfsrMutex);
                     break;
-                }
-                else if(event.input.key == InputKeyOk && event.input.type == InputTypeShort)
-                {
+                } else if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) {
                     mutexVal.counter = 0;
                     mutexVal.cps = 0;
                     mutexVal.cpm = 0;
-                    for (int i=0;i<SCREEN_SIZE_X/2;i++) mutexVal.line[i] = 0;
+                    for(int i = 0; i < SCREEN_SIZE_X / 2; i++) mutexVal.line[i] = 0;
                 }
-            }
-            else if (event.type == ClockEventTypeTick)
-            {
-                for (int i=0;i<SCREEN_SIZE_X/2-1;i++) lfsrMutex->line[SCREEN_SIZE_X/2-1-i] = lfsrMutex->line[SCREEN_SIZE_X/2-2-i]; 
+            } else if(event.type == ClockEventTypeTick) {
+                for(int i = 0; i < SCREEN_SIZE_X / 2 - 1; i++)
+                    lfsrMutex->line[SCREEN_SIZE_X / 2 - 1 - i] =
+                        lfsrMutex->line[SCREEN_SIZE_X / 2 - 2 - i];
 
                 lfsrMutex->line[0] = lfsrMutex->counter;
                 lfsrMutex->cps = lfsrMutex->counter;
                 lfsrMutex->counter = 0;
 
                 lfsrMutex->cpm = 0;
-                for (int i=0;i<60;i++) lfsrMutex->cpm += lfsrMutex->line[i];
+                for(int i = 0; i < 60; i++) lfsrMutex->cpm += lfsrMutex->line[i];
 
                 uint32_t max = lfsrMutex->line[0];
-                for (int i=1;i<SCREEN_SIZE_X/2;i++)
-                {
-                    if (lfsrMutex->line[i] > max) max = lfsrMutex->line[i];
+                for(int i = 1; i < SCREEN_SIZE_X / 2; i++) {
+                    if(lfsrMutex->line[i] > max) max = lfsrMutex->line[i];
                 }
 
-                if (max > 0)
-                {
-                    lfsrMutex->coef = ((float)(SCREEN_SIZE_Y-15))/((float)max);
+                if(max > 0) {
+                    lfsrMutex->coef = ((float)(SCREEN_SIZE_Y - 15)) / ((float)max);
                 }
-            }
-            else if (event.type == EventGPIO)
-            {
+            } else if(event.type == EventGPIO) {
                 lfsrMutex->counter = lfsrMutex->counter + 1;
             }
         }
