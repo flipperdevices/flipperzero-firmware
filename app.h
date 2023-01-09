@@ -43,6 +43,7 @@ typedef enum {
     ViewInfo,
     ViewFrequencySettings,
     ViewModulationSettings,
+    ViewDirectSampling,
     ViewLast, /* Just a sentinel to wrap around. */
 } ProtoViewCurrentView;
 
@@ -149,6 +150,8 @@ void render_view_settings(Canvas *const canvas, ProtoViewApp *app);
 void process_input_settings(ProtoViewApp *app, InputEvent input);
 void render_view_info(Canvas *const canvas, ProtoViewApp *app);
 void process_input_info(ProtoViewApp *app, InputEvent input);
+void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app);
+void process_input_direct_sampling(ProtoViewApp *app, InputEvent input);
 
 /* ui.c */
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);

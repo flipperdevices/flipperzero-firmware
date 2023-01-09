@@ -56,6 +56,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     case ViewFrequencySettings:
     case ViewModulationSettings:
         render_view_settings(canvas,app); break;
+    case ViewDirectSampling: render_view_direct_sampling(canvas,app); break;
     case ViewLast: furi_crash(TAG " ViewLast selected"); break;
     }
 }
@@ -227,6 +228,9 @@ int32_t protoview_app_entry(void* p) {
                 case ViewFrequencySettings:
                 case ViewModulationSettings:
                     process_input_settings(app,input);
+                    break;
+                case ViewDirectSampling:
+                    process_input_direct_sampling(app,input);
                     break;
                 case ViewLast: furi_crash(TAG " ViewLast selected"); break;
                 }
