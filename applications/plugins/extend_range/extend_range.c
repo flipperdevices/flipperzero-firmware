@@ -1,3 +1,11 @@
+/*
+    This application let's you unlock the extended range of the Sub-GHz module.
+    Use at your own risk!
+
+    @author: maede97
+
+*/
+
 #include <furi.h>
 
 #include <gui/gui.h>
@@ -54,14 +62,14 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 2, 10, "Extend Range Sub-GHz");
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 20, "Back -> Exit, OK -> Extend");
+    canvas_draw_str(canvas, 2, 20, "Back -> Exit, OK -> Apply");
 
     // Extend Range
 
     if(global_user_selection.extend_range)
-        canvas_draw_str(canvas, 2, 30, "< Risky Ranges: Yes >");
+        canvas_draw_str(canvas, 2, 30, "< Risky Range: Yes >");
     else
-        canvas_draw_str(canvas, 2, 30, "< Risky Ranges: No >");
+        canvas_draw_str(canvas, 2, 30, "< Risky Range: No >");
     if(global_user_selection.current_selection == 0) {
         canvas_draw_line(canvas, 2, 31, 125, 31);
     }
@@ -88,10 +96,10 @@ void extend_range_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, 2, 60, "File not found");
         break;
     case 2:
-        canvas_draw_str(canvas, 2, 60, "Failed to update risky ranges");
+        canvas_draw_str(canvas, 2, 60, "Failed to update 'risky ranges'");
         break;
     case 3:
-        canvas_draw_str(canvas, 2, 60, "Failed to update ignore region");
+        canvas_draw_str(canvas, 2, 60, "Failed to update 'ignore region'");
         break;
     default:
         canvas_draw_str(canvas, 2, 60, "Unknown error");
@@ -105,9 +113,43 @@ void extend_range_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-int extend_range() {
+void extend_range_read_defaults() {
     FlipperFormat* file = extend_range_open_file();
+    if(file == NULL) {
+        return;
+    }
 
+    FuriString* extend_range_;
+    FuriString* ignore_default_;
+    extend_range_ = furi_string_alloc();
+    ignore_default_ = furi_string_alloc();
+
+    if(!flipper_format_read_string(file, KEY_EXTEND_RANGE, extend_range_)) {
+        extend_range_close_file(file);
+        return;
+    }
+    if(!flipper_format_read_string(file, KEY_IGNORE_DEFAULT, ignore_default_)) {
+        extend_range_close_file(file);
+        return;
+    }
+
+    if(furi_string_cmp_str(extend_range_, "true") == 0) {
+        global_user_selection.extend_range = true;
+    } else {
+        global_user_selection.extend_range = false;
+    }
+
+    if(furi_string_cmp_str(ignore_default_, "true") == 0) {
+        global_user_selection.ignore_default = true;
+    } else {
+        global_user_selection.ignore_default = false;
+    }
+
+    extend_range_close_file(file);
+}
+
+int apply_user_selection() {
+    FlipperFormat* file = extend_range_open_file();
     if(file == NULL) {
         return 1;
     }
@@ -136,7 +178,7 @@ void handle_key(InputEvent* input_event) {
     case InputKeyBack:
         return;
     case InputKeyOk:
-        global_ret_val = extend_range();
+        global_ret_val = apply_user_selection();
         return;
     case InputKeyUp:
         global_user_selection.current_selection =
@@ -169,6 +211,8 @@ int32_t extend_range_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
+    extend_range_read_defaults();
+
     // Configure view port & callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, extend_range_draw_callback, NULL);
@@ -179,8 +223,8 @@ int32_t extend_range_app(void* p) {
 
     InputEvent event;
     while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+        if(event.type == InputTypeShort && event.key == InputKeyBack) break;
         handle_key(&event);
-        if(event.key == InputKeyBack) break;
     }
 
     gui_remove_view_port(gui, view_port);
