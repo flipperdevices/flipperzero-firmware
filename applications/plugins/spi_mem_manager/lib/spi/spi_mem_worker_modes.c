@@ -170,24 +170,11 @@ static bool spi_mem_worker_write_block_by_page(
     return true;
 }
 
-static bool spi_mem_worker_write_block(
-    SPIMemWorker* worker,
-    size_t offset,
-    uint8_t* data,
-    size_t block_size) {
-    SPIMemChipWriteMode write_mode = spi_mem_chip_get_write_mode(worker->chip_info);
-    size_t page_size = spi_mem_chip_get_page_size(worker->chip_info);
-    if(write_mode == SPIMemChipWriteModePage) {
-        if(!spi_mem_worker_write_block_by_page(worker, offset, data, block_size, page_size))
-            return false;
-    }
-    return true;
-}
-
 static bool
     spi_mem_worker_write(SPIMemWorker* worker, size_t total_size, SPIMemCustomEventWorker* event) {
     bool success = true;
     uint8_t data_buffer[SPI_MEM_FILE_BUFFER_SIZE];
+    size_t page_size = spi_mem_chip_get_page_size(worker->chip_info);
     size_t offset = 0;
     while(true) {
         furi_delay_tick(10); // to give some time to OS
@@ -200,7 +187,8 @@ static bool
             success = false;
             break;
         }
-        if(!spi_mem_worker_write_block(worker, offset, data_buffer, block_size)) {
+        if(!spi_mem_worker_write_block_by_page(
+               worker, offset, data_buffer, block_size, page_size)) {
             success = false;
             break;
         }
