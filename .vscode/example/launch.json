@@ -16,6 +16,19 @@
                 "command": "./fbt get_blackmagic",
                 "description": "Get Blackmagic device",
             }
+        },
+        {
+            "id": "BLACKMAGIC_WIN",
+            "type": "command",
+            "command": "shellCommand.execute",
+            "args": {
+                "useSingleResult": true,
+                "env": {
+                    "PATH": "${workspaceFolder};${env:PATH}"
+                },
+                "command": "fbt.cmd get_blackmagic",
+                "description": "Get Blackmagic device",
+            }
         }
     ],
     "configurations": [
@@ -52,6 +65,27 @@
             "type": "cortex-debug",
             "servertype": "external",
             "gdbTarget": "${input:BLACKMAGIC}",
+            "svdFile": "./debug/STM32WB55_CM4.svd",
+            "rtos": "FreeRTOS",
+            "postAttachCommands": [
+                "monitor swdp_scan",
+                "attach 1",
+                "set confirm off",
+                "set mem inaccessible-by-default off",
+                "source debug/flipperapps.py",
+                "fap-set-debug-elf-root build/latest/.extapps",
+                // "compare-sections",
+            ]
+            // "showDevDebugOutput": "raw",
+        },
+        {
+            "name": "Attach FW (blackmagic) Windows",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/latest/firmware.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "external",
+            "gdbTarget": "${input:BLACKMAGIC_WIN}",
             "svdFile": "./debug/STM32WB55_CM4.svd",
             "rtos": "FreeRTOS",
             "postAttachCommands": [
