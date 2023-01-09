@@ -89,6 +89,22 @@ typedef struct AsteroidsApp {
     bool fire; /* Short press detected: fire a bullet. */
 } AsteroidsApp;
 
+const NotificationSequence sequence_thrusters = {
+    &message_vibro_on,
+    &message_delay_10,
+    &message_vibro_off,
+    NULL,
+};
+
+const NotificationSequence sequence_brake = {
+    &message_vibro_on,
+    &message_delay_10,
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_off,
+    NULL,
+};
+
 const NotificationSequence sequence_crash = {
     &message_red_255,
 
@@ -271,6 +287,7 @@ void render_callback(Canvas* const canvas, void* ctx) {
     draw_poly(canvas, &ShipPoly, app->ship.x, app->ship.y, app->ship.rot);
 
     if(key_pressed_time(app, InputKeyUp) > 0) {
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_thrusters);
         draw_poly(canvas, &ShipFirePoly, app->ship.x, app->ship.y, app->ship.rot);
     }
 
@@ -591,6 +608,7 @@ void game_tick(void* ctx) {
         app->ship.vx -= 0.5 * (float)sin(app->ship.rot);
         app->ship.vy += 0.5 * (float)cos(app->ship.rot);
     } else if(app->pressed[InputKeyDown]) {
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_brake);
         app->ship.vx *= 0.75;
         app->ship.vy *= 0.75;
     }
