@@ -19,6 +19,7 @@ typedef struct {
     uint32_t channel;
 } FuriHalDma;
 
+/** Macro to use FuriHalDma with LL_DMA_xxx functions */
 #define DMA_UNPACK(dma_instance) (dma_instance)->dma, (dma_instance)->channel
 
 /**
