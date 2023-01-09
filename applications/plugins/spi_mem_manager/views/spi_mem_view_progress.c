@@ -217,6 +217,7 @@ void spi_mem_view_progress_inc_progress(SPIMemProgressView* app) {
         SPIMemProgressViewModel * model,
         {
             size_t total_size = spi_mem_view_progress_set_total_size(model);
+            if(total_size == 0) total_size = 1;
             model->blocks_written++;
             model->progress =
                 ((float)model->block_size * (float)model->blocks_written) / ((float)total_size);

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!---
+    This file is downloaded from nofeletru's UsbAsp-flash repository
+    https://github.com/nofeletru/UsbAsp-flash/blob/master/chiplist.xml
+    And distributed under MIT license
+-->
 <!--- 
   size - размер данных микросхемы памяти в байтах(DEC)
   page - размер страницы микросхемы памяти в байтах(DEC). Для SST AAI Word programm - SSTW. Для SST AAI Byte programm - SSTB. 

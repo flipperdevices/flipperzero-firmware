@@ -81,18 +81,17 @@ def generateCArr(arr, filename):
         print('#include "spi_mem_chip_i.h"', file=out)
         print("const SPIMemChip SPIMemChips[] = {", file=out)
         for cur in arr:
-            print("    {" + cur["vendorEnum"] + ",", file=out, end="")
-            print(" " + cur["vendorID"] + ",", file=out, end="")
-            print(' "' + cur["modelName"] + '",', file=out, end="")
-            print(" " + cur["size"] + ",", file=out, end="")
-            print(" " + cur["writeMode"] + ",", file=out, end="")
+            print("    {" + cur["vendorID"] + ",", file=out, end="")
             print(" 0x" + cur["typeID"] + ",", file=out, end="")
             print(" 0x" + cur["capacityID"] + ",", file=out, end="")
+            print(' "' + cur["modelName"] + '",', file=out, end="")
+            print(" " + cur["size"] + ",", file=out, end="")
+            print(" " + cur["pageSize"] + ",", file=out, end="")
+            print(" " + cur["vendorEnum"] + ",", file=out, end="")
             if cur == arr[-1]:
-                print(" " + cur["pageSize"] + "}};", file=out)
+                print(" " + cur["writeMode"] + "}};", file=out)
             else:
-                print(" " + cur["pageSize"] + "},", file=out)
-
+                print(" " + cur["writeMode"] + "},", file=out)
 
 def main():
     filename = "spi_mem_chip_arr.c"

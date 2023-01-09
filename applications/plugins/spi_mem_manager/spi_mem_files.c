@@ -65,19 +65,9 @@ void spi_mem_file_close(SPIMemApp* app) {
 }
 
 size_t spi_mem_file_get_size(SPIMemApp* app) {
-    size_t size = 0;
-    bool success = false;
-    app->file = storage_file_alloc(app->storage);
-    do {
-        if(!storage_file_open(
-               app->file, furi_string_get_cstr(app->file_path), FSAM_READ, FSOM_OPEN_EXISTING))
-            break;
-        size = storage_file_size(app->file);
-        success = true;
-    } while(0);
-    if(!success) {
-        dialog_message_show_storage_error(app->dialogs, "Cannot open\nfile");
-    }
-    spi_mem_file_close(app);
-    return size;
+    FileInfo file_info;
+    if(storage_common_stat(app->storage, furi_string_get_cstr(app->file_path), &file_info) !=
+       FSE_OK)
+        return 0;
+    return file_info.size;
 }

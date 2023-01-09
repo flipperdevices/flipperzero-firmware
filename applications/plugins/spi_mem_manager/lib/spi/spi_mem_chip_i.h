@@ -51,7 +51,8 @@ typedef enum {
     SPIMemChipCMDWriteEnable = 0x06,
     SPIMemChipCMDWriteDisable = 0x04,
     SPIMemChipCMDReadStatus = 0x05,
-    SPIMemChipCMDWriteData = 0x02
+    SPIMemChipCMDWriteData = 0x02,
+    SPIMemChipCMDReleasePowerDown = 0xAB
 } SPIMemChipCMD;
 
 enum SPIMemChipStatusBit {
@@ -71,14 +72,14 @@ typedef struct {
 } SPIMemChipVendorName;
 
 struct SPIMemChip {
-    SPIMemChipVendor vendor_enum;
     uint8_t vendor_id;
-    const char* model_name;
-    size_t size;
-    SPIMemChipWriteMode write_mode;
     uint8_t type_id;
     uint8_t capacity_id;
+    const char* model_name;
+    size_t size;
     size_t page_size;
+    SPIMemChipVendor vendor_enum;
+    SPIMemChipWriteMode write_mode;
 };
 
 extern const SPIMemChip SPIMemChips[];
