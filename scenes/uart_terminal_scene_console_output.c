@@ -44,13 +44,11 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     }
     if(0 == strncmp("19200", app->selected_tx_string, strlen("19200")) && app->BAUDRATE != 19200) {
         uart_terminal_uart_free(app->uart);
-        ;
         app->BAUDRATE = 19200;
         app->uart = uart_terminal_uart_init(app);
     }
     if(0 == strncmp("38400", app->selected_tx_string, strlen("38400")) && app->BAUDRATE != 38400) {
         uart_terminal_uart_free(app->uart);
-        ;
         app->BAUDRATE = 38400;
         app->uart = uart_terminal_uart_init(app);
     }
