@@ -3,6 +3,32 @@
 
 #include "app.h"
 
+/* If this define is enabled, ProtoView is going to mess with the
+ * otherwise opaque SubGhzWorker structure in order to disable
+ * its filter for samples shorter than a given amount (30us at the
+ * time I'm writing this comment).
+ *
+ * This structure must be taken in sync with the one of the firmware. */
+#define PROTOVIEW_DISABLE_SUBGHZ_FILTER 0
+
+#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
+struct SubGhzWorker {
+    FuriThread* thread;
+    FuriStreamBuffer* stream;
+
+    volatile bool running;
+    volatile bool overrun;
+
+    LevelDuration filter_level_duration;
+    bool filter_running;
+    uint16_t filter_duration;
+
+    SubGhzWorkerOverrunCallback overrun_callback;
+    SubGhzWorkerPairCallback pair_callback;
+    void* context;
+};
+#endif
+
 RawSamplesBuffer *RawSamples, *DetectedSamples;
 extern const SubGhzProtocolRegistry protoview_protocol_registry;
 
@@ -75,6 +101,11 @@ ProtoViewApp* protoview_app_alloc() {
 
     /* Setup rx worker and environment. */
     app->txrx->worker = subghz_worker_alloc();
+
+#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
+    app->txrx->worker->filter_running = 0;
+#endif
+
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&protoview_protocol_registry);
