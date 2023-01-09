@@ -1,8 +1,8 @@
 #include "uart_terminal_app_i.h"
 #include "uart_terminal_uart.h"
 
-#define UART_CH (FuriHalUartIdUSART1)
-#define BAUDRATE (115200)
+//#define UART_CH (FuriHalUartIdUSART1)
+//#define BAUDRATE (115200)
 
 struct UART_TerminalUart {
     UART_TerminalApp* app;
@@ -66,7 +66,10 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
     UART_TerminalUart* uart = malloc(sizeof(UART_TerminalUart));
 
     furi_hal_console_disable();
-    furi_hal_uart_set_br(UART_CH, BAUDRATE);
+    if(app->BAUDRATE == 0) {
+        app->BAUDRATE = 115200;
+    }
+    furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
     furi_hal_uart_set_irq_cb(UART_CH, uart_terminal_uart_on_irq_cb, uart);
 
     uart->app = app;

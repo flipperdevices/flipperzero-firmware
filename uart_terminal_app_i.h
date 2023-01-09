@@ -16,6 +16,7 @@
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
+#define UART_CH (FuriHalUartIdUSART1)
 
 struct UART_TerminalApp {
     Gui* gui;
@@ -27,7 +28,6 @@ struct UART_TerminalApp {
     size_t text_box_store_strlen;
     TextBox* text_box;
     UART_TextInput* text_input;
-    //Widget* widget;
 
     VariableItemList* var_item_list;
 
@@ -39,6 +39,7 @@ struct UART_TerminalApp {
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
+    int BAUDRATE;
 };
 
 typedef enum {

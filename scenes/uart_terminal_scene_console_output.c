@@ -30,9 +30,59 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     } else {
         text_box_set_focus(text_box, TextBoxFocusEnd);
     }
+
+    //Change baudrate ///////////////////////////////////////////////////////////////////////////
+    if(0 == strncmp("2400", app->selected_tx_string, strlen("2400")) && app->BAUDRATE != 2400) {
+        uart_terminal_uart_free(app->uart);
+        app->BAUDRATE = 2400;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("9600", app->selected_tx_string, strlen("9600")) && app->BAUDRATE != 9600) {
+        uart_terminal_uart_free(app->uart);
+        app->BAUDRATE = 9600;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("19200", app->selected_tx_string, strlen("19200")) && app->BAUDRATE != 19200) {
+        uart_terminal_uart_free(app->uart);
+        ;
+        app->BAUDRATE = 19200;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("38400", app->selected_tx_string, strlen("38400")) && app->BAUDRATE != 38400) {
+        uart_terminal_uart_free(app->uart);
+        ;
+        app->BAUDRATE = 38400;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("57600", app->selected_tx_string, strlen("57600")) && app->BAUDRATE != 57600) {
+        uart_terminal_uart_free(app->uart);
+        app->BAUDRATE = 57600;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("230400", app->selected_tx_string, strlen("230400")) &&
+       app->BAUDRATE != 230400) {
+        uart_terminal_uart_free(app->uart);
+        app->BAUDRATE = 230400;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("460800", app->selected_tx_string, strlen("460800")) &&
+       app->BAUDRATE != 460800) {
+        uart_terminal_uart_free(app->uart);
+        app->BAUDRATE = 460800;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    if(0 == strncmp("921600", app->selected_tx_string, strlen("921600")) &&
+       app->BAUDRATE != 921600) {
+        uart_terminal_uart_free(app->uart);
+        app->BAUDRATE = 921600;
+        app->uart = uart_terminal_uart_init(app);
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+
     if(app->is_command) {
         furi_string_reset(app->text_box_store);
         app->text_box_store_strlen = 0;
+
         if(0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             const char* help_msg =
                 "UART terminal for Flipper\n\nI'm in github: cool4uma\n\nThis app is a modified\nWiFi Marauder companion,\nThanks 0xchocolate(github)\nfor great code and app.\n\n";
@@ -88,6 +138,6 @@ void uart_terminal_scene_console_output_on_exit(void* context) {
 
     // Automatically logut when exiting view
     //if(app->is_command) {
-    //    uart_terminal_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
+    //    uart_terminal_uart_tx((uint8_t*)("exit\n"), strlen("exit\n"));
     //}
 }
