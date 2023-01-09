@@ -16,7 +16,7 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
             /* Busy loop: this is a terrible approach as it blocks
              * everything else, but for now it's the best we can do
              * to obtain direct data with some spacing. */
-            uint32_t x = 500; while(x--);
+            // uint32_t x = 500; while(x--);
         }
     }
     canvas_set_font(canvas, FontSecondary);
@@ -33,14 +33,22 @@ void process_input_direct_sampling(ProtoViewApp *app, InputEvent input) {
 /* Enter view. Stop the subghz thread to prevent access as we read
  * the CC1101 data directly. */
 void view_enter_direct_sampling(ProtoViewApp *app) {
-    if (app->txrx->txrx_state == TxRxStateRx) {
+    if (app->txrx->txrx_state == TxRxStateRx &&
+        !app->txrx->debug_direct_sampling)
+    {
         subghz_worker_stop(app->txrx->worker);
+    } else {
+        raw_sampling_worker_stop(app);
     }
 }
 
 /* Exit view. Restore the subghz thread. */
 void view_exit_direct_sampling(ProtoViewApp *app) {
-    if (app->txrx->txrx_state == TxRxStateRx) {
+    if (app->txrx->txrx_state == TxRxStateRx &&
+        !app->txrx->debug_direct_sampling)
+    {
         subghz_worker_start(app->txrx->worker);
+    } else {
+        raw_sampling_worker_start(app);
     }
 }

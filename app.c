@@ -123,23 +123,33 @@ ProtoViewApp* protoview_app_alloc() {
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */
-    app->txrx->worker = subghz_worker_alloc();
+    app->txrx->debug_direct_sampling = true;
+    if (app->txrx->debug_direct_sampling) {
+        app->txrx->ds_thread = NULL;
+    } else {
+        app->txrx->worker = subghz_worker_alloc();
+    #ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
+        app->txrx->worker->filter_running = 0;
+    #endif
 
-#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
-    app->txrx->worker->filter_running = 0;
-#endif
+        app->txrx->environment = subghz_environment_alloc();
 
-    app->txrx->environment = subghz_environment_alloc();
-    subghz_environment_set_protocol_registry(
-        app->txrx->environment, (void*)&protoview_protocol_registry);
-    app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
+        subghz_environment_set_protocol_registry(
+            app->txrx->environment, (void*)&protoview_protocol_registry);
 
-    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
-    subghz_worker_set_overrun_callback(
-        app->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
-    subghz_worker_set_pair_callback(
-        app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
-    subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
+        app->txrx->receiver =
+            subghz_receiver_alloc_init(app->txrx->environment);
+
+        subghz_receiver_set_filter(app->txrx->receiver,
+                                   SubGhzProtocolFlag_Decodable);
+        subghz_worker_set_overrun_callback(
+            app->txrx->worker,
+            (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
+
+        subghz_worker_set_pair_callback(
+            app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
+        subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
+    }
     
     app->frequency = subghz_setting_get_default_frequency(app->setting);
     app->modulation = 0; /* Defaults to ProtoViewModulations[0]. */
@@ -171,9 +181,11 @@ void protoview_app_free(ProtoViewApp *app) {
     subghz_setting_free(app->setting);
 
     // Worker stuff.
-    subghz_receiver_free(app->txrx->receiver);
-    subghz_environment_free(app->txrx->environment);
-    subghz_worker_free(app->txrx->worker);
+    if (!app->txrx->debug_direct_sampling) {
+        subghz_receiver_free(app->txrx->receiver);
+        subghz_environment_free(app->txrx->environment);
+        subghz_worker_free(app->txrx->worker);
+    }
     free(app->txrx);
 
     // Raw samples buffers.
@@ -195,6 +207,9 @@ static void timer_callback(void *ctx) {
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp *app = protoview_app_alloc();
+
+    printf("%llu\n", (unsigned long long) DWT->CYCCNT);
+    printf("%llu\n", (unsigned long long) DWT->CYCCNT);
 
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);

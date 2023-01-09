@@ -65,7 +65,11 @@ extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
  * It receives data and we get our protocol "feed" callback called
  * with the level (1 or 0) and duration. */
 struct ProtoViewTxRx {
+    int debug_direct_sampling;  /* Ready from GDO0 in a busy loop. Only
+                                   for testing. */
     SubGhzWorker* worker;       /* Our background worker. */
+    FuriThread *ds_thread;      /* Direct sampling thread. */
+    bool ds_thread_running;     /* Exit condition for the thread. */
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
@@ -136,6 +140,8 @@ uint32_t radio_rx(ProtoViewApp* app);
 void radio_idle(ProtoViewApp* app);
 void radio_rx_end(ProtoViewApp* app);
 void radio_sleep(ProtoViewApp* app);
+void raw_sampling_worker_start(ProtoViewApp *app);
+void raw_sampling_worker_stop(ProtoViewApp *app);
 
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
