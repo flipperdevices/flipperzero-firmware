@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Patreon Builds Update: ALL and Anime Builds: Added two Jojo animations (By Gabry154)](https://github.com/Gabry154/FZ_Customization/tree/main/Animations/JoJo)
 - Thank you to all our supporters! And thank you for all that joined [our Discord](https://discord.gg/gF2bBUzAFe)! We have OVER 9000 users!
 - [Patreon Builds Update: ALL, DBZ, RM Select Builds and Anime Builds: Added Over 9000 DBZ animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/f7c7e543fd45e9861909006e1374e88a9a5661cf)
+- Added: [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer) Inspired By [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 
 <a name="release">
 
@@ -299,6 +300,7 @@ $ ./fbt dolphin_ext
 - [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
+- [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
 - [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
