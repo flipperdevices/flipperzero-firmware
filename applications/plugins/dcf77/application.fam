@@ -1,7 +1,7 @@
 App(
     appid="DCF77",
     name="DCF77 Transmitter",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="dcf77_app_main",
     cdefines=["APP_DCF77"],
     requires=["gui"],
