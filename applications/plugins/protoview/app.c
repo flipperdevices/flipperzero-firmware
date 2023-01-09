@@ -3,6 +3,32 @@
 
 #include "app.h"
 
+/* If this define is enabled, ProtoView is going to mess with the
+ * otherwise opaque SubGhzWorker structure in order to disable
+ * its filter for samples shorter than a given amount (30us at the
+ * time I'm writing this comment).
+ *
+ * This structure must be taken in sync with the one of the firmware. */
+#define PROTOVIEW_DISABLE_SUBGHZ_FILTER 0
+
+#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
+struct SubGhzWorker {
+    FuriThread* thread;
+    FuriStreamBuffer* stream;
+
+    volatile bool running;
+    volatile bool overrun;
+
+    LevelDuration filter_level_duration;
+    bool filter_running;
+    uint16_t filter_duration;
+
+    SubGhzWorkerOverrunCallback overrun_callback;
+    SubGhzWorkerPairCallback pair_callback;
+    void* context;
+};
+#endif
+
 RawSamplesBuffer *RawSamples, *DetectedSamples;
 extern const SubGhzProtocolRegistry protoview_protocol_registry;
 
@@ -35,6 +61,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     case ViewModulationSettings:
         render_view_settings(canvas, app);
         break;
+    case ViewDirectSampling:
+        render_view_direct_sampling(canvas, app);
+        break;
     case ViewLast:
         furi_crash(TAG " ViewLast selected");
         break;
@@ -46,6 +75,27 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 static void input_callback(InputEvent* input_event, void* ctx) {
     ProtoViewApp* app = ctx;
     furi_message_queue_put(app->event_queue, input_event, FuriWaitForever);
+}
+
+/* Called to switch view (when left/right is pressed). Handles
+ * changing the current view ID and calling the enter/exit view
+ * callbacks if needed. */
+static void app_switch_view(ProtoViewApp* app, SwitchViewDirection dir) {
+    ProtoViewCurrentView old = app->current_view;
+    if(dir == AppNextView) {
+        app->current_view++;
+        if(app->current_view == ViewLast) app->current_view = 0;
+    } else if(dir == AppPrevView) {
+        if(app->current_view == 0)
+            app->current_view = ViewLast - 1;
+        else
+            app->current_view--;
+    }
+    ProtoViewCurrentView new = app->current_view;
+
+    /* Call the enter/exit view callbacks if needed. */
+    if(old == ViewDirectSampling) view_exit_direct_sampling(app);
+    if(new == ViewDirectSampling) view_enter_direct_sampling(app);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -81,6 +131,11 @@ ProtoViewApp* protoview_app_alloc() {
 
     /* Setup rx worker and environment. */
     app->txrx->worker = subghz_worker_alloc();
+
+#ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
+    app->txrx->worker->filter_running = 0;
+#endif
+
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&protoview_protocol_registry);
@@ -175,14 +230,10 @@ int32_t protoview_app_entry(void* p) {
                 app->running = 0;
             } else if(input.type == InputTypeShort && input.key == InputKeyRight) {
                 /* Go to the next view. */
-                app->current_view++;
-                if(app->current_view == ViewLast) app->current_view = 0;
+                app_switch_view(app, AppNextView);
             } else if(input.type == InputTypeShort && input.key == InputKeyLeft) {
                 /* Go to the previous view. */
-                if(app->current_view == 0)
-                    app->current_view = ViewLast - 1;
-                else
-                    app->current_view--;
+                app_switch_view(app, AppPrevView);
             } else {
                 /* This is where we pass the control to the currently
                  * active view input processing. */
@@ -196,6 +247,9 @@ int32_t protoview_app_entry(void* p) {
                 case ViewFrequencySettings:
                 case ViewModulationSettings:
                     process_input_settings(app, input);
+                    break;
+                case ViewDirectSampling:
+                    process_input_direct_sampling(app, input);
                     break;
                 case ViewLast:
                     furi_crash(TAG " ViewLast selected");

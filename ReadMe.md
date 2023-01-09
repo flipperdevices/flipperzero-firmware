@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 - Updated: [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - OFW: Fixes for issues on desktop from [PR #2280](https://github.com/flipperdevices/flipperzero-firmware/pull/2280)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 

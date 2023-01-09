@@ -43,8 +43,12 @@ typedef enum {
     ViewInfo,
     ViewFrequencySettings,
     ViewModulationSettings,
+    ViewDirectSampling,
     ViewLast, /* Just a sentinel to wrap around. */
 } ProtoViewCurrentView;
+
+/* Used by app_switch_view() */
+typedef enum { AppNextView, AppPrevView } SwitchViewDirection;
 
 typedef struct {
     const char* name;
@@ -161,6 +165,10 @@ void render_view_settings(Canvas* const canvas, ProtoViewApp* app);
 void process_input_settings(ProtoViewApp* app, InputEvent input);
 void render_view_info(Canvas* const canvas, ProtoViewApp* app);
 void process_input_info(ProtoViewApp* app, InputEvent input);
+void render_view_direct_sampling(Canvas* const canvas, ProtoViewApp* app);
+void process_input_direct_sampling(ProtoViewApp* app, InputEvent input);
+void view_enter_direct_sampling(ProtoViewApp* app);
+void view_exit_direct_sampling(ProtoViewApp* app);
 
 /* ui.c */
 void canvas_draw_str_with_border(
