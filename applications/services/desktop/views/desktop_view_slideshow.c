@@ -10,8 +10,6 @@
 #define DESKTOP_SLIDESHOW_POWEROFF_SHORT 5000
 #define DESKTOP_SLIDESHOW_POWEROFF_LONG (60 * 60 * 1000)
 
-#define TAG "DesktopSlideshowView"
-
 struct DesktopSlideshowView {
     View* view;
     DesktopSlideshowViewCallback callback;
@@ -36,7 +34,6 @@ static void desktop_view_slideshow_draw(Canvas* canvas, void* model) {
 static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
     furi_assert(event);
     DesktopSlideshowView* instance = context;
-    FURI_LOG_D(TAG, "input %u %u", event->type, event->key);
 
     DesktopSlideshowViewModel* model = view_get_model(instance->view);
     bool update_view = false;
@@ -76,13 +73,11 @@ static bool desktop_view_slideshow_input(InputEvent* event, void* context) {
 
 static void desktop_first_start_timer_callback(void* context) {
     DesktopSlideshowView* instance = context;
-    FURI_LOG_D(TAG, "timer");
     instance->callback(DesktopSlideshowPoweroff, instance->context);
 }
 
 static void desktop_view_slideshow_enter(void* context) {
     DesktopSlideshowView* instance = context;
-    FURI_LOG_D(TAG, "enter");
 
     furi_assert(instance->timer == NULL);
     instance->timer =
@@ -100,7 +95,6 @@ static void desktop_view_slideshow_enter(void* context) {
 
 static void desktop_view_slideshow_exit(void* context) {
     DesktopSlideshowView* instance = context;
-    FURI_LOG_D(TAG, "exit");
 
     furi_timer_stop(instance->timer);
     furi_timer_free(instance->timer);
