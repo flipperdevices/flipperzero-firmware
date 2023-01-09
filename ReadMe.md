@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Thank you to all our supporters! And thank you for all that joined [our Discord](https://discord.gg/gF2bBUzAFe)! We have OVER 9000 users!
 - [Patreon Builds Update: ALL, DBZ, RM Select Builds and Anime Builds: Added Over 9000 DBZ animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/f7c7e543fd45e9861909006e1374e88a9a5661cf)
 - Added: [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer) Inspired By [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
+- Added: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 
 <a name="release">
 
