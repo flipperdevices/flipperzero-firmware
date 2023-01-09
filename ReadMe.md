@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer) Inspired By [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - Added: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Added: [Infrared: allow disabling automatic signal decoding #273 (By Darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/273)
+- Added: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 
 <a name="release">
 
@@ -255,6 +256,7 @@ $ ./fbt dolphin_ext
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [DAP Link (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1897)
+- [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 - [Deauther PWNDTOOLS V2.6.0 (By HEX0DAYS)](https://github.com/HEX0DAYS/FlipperZero-PWNDTOOLS) `Req: ESP8266` [Original](https://github.com/SpacehuhnTech/esp8266_deauther)
 - [Distance Sensor (By Sanqui)](https://github.com/Sanqui/flipperzero-firmware/tree/hc_sr04)) `Req: HC-SR04` Ported/Modified by xMasterX
 - [Dolphin Backup (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Modified by RogueMaster
@@ -262,6 +264,7 @@ $ ./fbt dolphin_ext
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
+- [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
