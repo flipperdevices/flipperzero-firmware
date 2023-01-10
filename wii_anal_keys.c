@@ -100,12 +100,14 @@ bool  wait_key (const eventMsg_t* const msg,  state_t* const state)
 	if (msg->input.type == InputTypeShort) {
 		switch (msg->input.key) {
 			case InputKeyLeft:                       //# <L [ SHORT-LEFT ]
-				sceneSet(state, SCENE_SPLASH);
+				timerEn(state, false);               // Stop the timer
+				sceneSetEgg(state, SCENE_SPLASH);
 				used = true;
 				break;
 
 			case InputKeyUp:                         //# <U [ SHORT-UP ]
-				sceneSet(state, SCENE_RIP);
+				timerEn(state, false);               // Stop the timer
+				sceneSetEgg(state, SCENE_RIP);
 				used = true;
 				break;
 
