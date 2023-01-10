@@ -39,7 +39,7 @@ struct InfraredEncoderHandler {
 typedef struct {
     InfraredEncoders encoder;
     InfraredDecoders decoder;
-    InfraredGetProtocolSpec get_protocol_spec;
+    InfraredGetProtocolVariant get_protocol_spec;
 } InfraredEncoderDecoder;
 
 static const InfraredEncoderDecoder infrared_encoder_decoder[] = {
@@ -130,7 +130,7 @@ static const InfraredEncoderDecoder infrared_encoder_decoder[] = {
 };
 
 static int infrared_find_index_by_protocol(InfraredProtocol protocol);
-static const InfraredProtocolSpecification*
+static const InfraredProtocolVariant*
     infrared_get_spec_by_protocol(InfraredProtocol protocol);
 
 const InfraredMessage*
@@ -285,10 +285,10 @@ InfraredProtocol infrared_get_protocol_by_name(const char* protocol_name) {
     return InfraredProtocolUnknown;
 }
 
-static const InfraredProtocolSpecification*
+static const InfraredProtocolVariant*
     infrared_get_spec_by_protocol(InfraredProtocol protocol) {
     int index = infrared_find_index_by_protocol(protocol);
-    const InfraredProtocolSpecification* spec = NULL;
+    const InfraredProtocolVariant* spec = NULL;
     if(index >= 0) {
         spec = infrared_encoder_decoder[index].get_protocol_spec(protocol);
     }

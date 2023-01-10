@@ -21,7 +21,7 @@ const InfraredCommonProtocolSpec protocol_rc5 = {
     .encode_repeat = NULL,
 };
 
-static const InfraredProtocolSpecification infrared_rc5_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_rc5 = {
     .name = "RC5",
     .address_length = 5,
     .command_length = 6,
@@ -29,7 +29,7 @@ static const InfraredProtocolSpecification infrared_rc5_protocol_specification =
     .duty_cycle = INFRARED_RC5_DUTY_CYCLE,
 };
 
-static const InfraredProtocolSpecification infrared_rc5x_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_rc5x = {
     .name = "RC5X",
     .address_length = 5,
     .command_length = 7,
@@ -37,11 +37,11 @@ static const InfraredProtocolSpecification infrared_rc5x_protocol_specification 
     .duty_cycle = INFRARED_RC5_DUTY_CYCLE,
 };
 
-const InfraredProtocolSpecification* infrared_rc5_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_rc5_get_spec(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolRC5)
-        return &infrared_rc5_protocol_specification;
+        return &infrared_protocol_variant_rc5;
     else if(protocol == InfraredProtocolRC5X)
-        return &infrared_rc5x_protocol_specification;
+        return &infrared_protocol_variant_rc5x;
     else
         return NULL;
 }

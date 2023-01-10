@@ -25,7 +25,7 @@ const InfraredCommonProtocolSpec protocol_sirc = {
     .encode_repeat = infrared_encoder_sirc_encode_repeat,
 };
 
-static const InfraredProtocolSpecification infrared_sirc_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_sirc = {
     .name = "SIRC",
     .address_length = 5,
     .command_length = 7,
@@ -33,7 +33,7 @@ static const InfraredProtocolSpecification infrared_sirc_protocol_specification 
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
 };
 
-static const InfraredProtocolSpecification infrared_sirc15_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_sirc15 = {
     .name = "SIRC15",
     .address_length = 8,
     .command_length = 7,
@@ -41,7 +41,7 @@ static const InfraredProtocolSpecification infrared_sirc15_protocol_specificatio
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
 };
 
-static const InfraredProtocolSpecification infrared_sirc20_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_sirc20 = {
     .name = "SIRC20",
     .address_length = 13,
     .command_length = 7,
@@ -49,13 +49,13 @@ static const InfraredProtocolSpecification infrared_sirc20_protocol_specificatio
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
 };
 
-const InfraredProtocolSpecification* infrared_sirc_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_sirc_get_spec(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolSIRC)
-        return &infrared_sirc_protocol_specification;
+        return &infrared_protocol_variant_sirc;
     else if(protocol == InfraredProtocolSIRC15)
-        return &infrared_sirc15_protocol_specification;
+        return &infrared_protocol_variant_sirc15;
     else if(protocol == InfraredProtocolSIRC20)
-        return &infrared_sirc20_protocol_specification;
+        return &infrared_protocol_variant_sirc20;
     else
         return NULL;
 }

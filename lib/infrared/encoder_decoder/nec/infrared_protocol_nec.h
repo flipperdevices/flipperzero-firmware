@@ -25,4 +25,4 @@ void* infrared_encoder_nec_alloc(void);
 InfraredStatus infrared_encoder_nec_encode(void* encoder_ptr, uint32_t* duration, bool* level);
 void infrared_encoder_nec_reset(void* encoder_ptr, const InfraredMessage* message);
 void infrared_encoder_nec_free(void* encoder_ptr);
-const InfraredProtocolSpecification* infrared_nec_get_spec(InfraredProtocol protocol);
+const InfraredProtocolVariant* infrared_nec_get_spec(InfraredProtocol protocol);

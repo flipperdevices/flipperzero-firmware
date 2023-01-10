@@ -33,4 +33,4 @@ void* infrared_encoder_rc5_alloc(void);
 void infrared_encoder_rc5_reset(void* encoder_ptr, const InfraredMessage* message);
 void infrared_encoder_rc5_free(void* decoder);
 InfraredStatus infrared_encoder_rc5_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
-const InfraredProtocolSpecification* infrared_rc5_get_spec(InfraredProtocol protocol);
+const InfraredProtocolVariant* infrared_rc5_get_spec(InfraredProtocol protocol);

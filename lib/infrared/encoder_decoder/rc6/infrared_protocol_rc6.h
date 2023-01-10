@@ -32,4 +32,4 @@ void* infrared_encoder_rc6_alloc(void);
 void infrared_encoder_rc6_reset(void* encoder_ptr, const InfraredMessage* message);
 void infrared_encoder_rc6_free(void* decoder);
 InfraredStatus infrared_encoder_rc6_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
-const InfraredProtocolSpecification* infrared_rc6_get_spec(InfraredProtocol protocol);
+const InfraredProtocolVariant* infrared_rc6_get_spec(InfraredProtocol protocol);

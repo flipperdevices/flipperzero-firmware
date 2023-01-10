@@ -24,7 +24,7 @@ const InfraredCommonProtocolSpec protocol_nec = {
     .encode_repeat = infrared_encoder_nec_encode_repeat,
 };
 
-static const InfraredProtocolSpecification infrared_nec_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_nec = {
     .name = "NEC",
     .address_length = 8,
     .command_length = 8,
@@ -32,7 +32,7 @@ static const InfraredProtocolSpecification infrared_nec_protocol_specification =
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-static const InfraredProtocolSpecification infrared_necext_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_necext = {
     .name = "NECext",
     .address_length = 16,
     .command_length = 16,
@@ -40,7 +40,7 @@ static const InfraredProtocolSpecification infrared_necext_protocol_specificatio
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-static const InfraredProtocolSpecification infrared_nec42_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_nec42 = {
     .name = "NEC42",
     .address_length = 13,
     .command_length = 8,
@@ -48,7 +48,7 @@ static const InfraredProtocolSpecification infrared_nec42_protocol_specification
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-static const InfraredProtocolSpecification infrared_nec42ext_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_nec42ext = {
     .name = "NEC42ext",
     .address_length = 26,
     .command_length = 16,
@@ -56,15 +56,15 @@ static const InfraredProtocolSpecification infrared_nec42ext_protocol_specificat
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-const InfraredProtocolSpecification* infrared_nec_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_nec_get_spec(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolNEC)
-        return &infrared_nec_protocol_specification;
+        return &infrared_protocol_variant_nec;
     else if(protocol == InfraredProtocolNECext)
-        return &infrared_necext_protocol_specification;
+        return &infrared_protocol_variant_necext;
     else if(protocol == InfraredProtocolNEC42)
-        return &infrared_nec42_protocol_specification;
+        return &infrared_protocol_variant_nec42;
     else if(protocol == InfraredProtocolNEC42ext)
-        return &infrared_nec42ext_protocol_specification;
+        return &infrared_protocol_variant_nec42ext;
     else
         return NULL;
 }

@@ -26,5 +26,5 @@ InfraredStatus
 void infrared_encoder_samsung32_reset(void* encoder_ptr, const InfraredMessage* message);
 void* infrared_encoder_samsung32_alloc(void);
 void infrared_encoder_samsung32_free(void* encoder_ptr);
-const InfraredProtocolSpecification* infrared_samsung32_get_spec(InfraredProtocol protocol);
+const InfraredProtocolVariant* infrared_samsung32_get_spec(InfraredProtocol protocol);
 

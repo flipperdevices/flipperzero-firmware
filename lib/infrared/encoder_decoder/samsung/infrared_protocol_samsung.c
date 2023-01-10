@@ -23,7 +23,7 @@ const InfraredCommonProtocolSpec protocol_samsung32 = {
     .encode_repeat = infrared_encoder_samsung32_encode_repeat,
 };
 
-static const InfraredProtocolSpecification infrared_samsung32_protocol_specification = {
+static const InfraredProtocolVariant infrared_protocol_variant_samsung32 = {
     .name = "Samsung32",
     .address_length = 8,
     .command_length = 8,
@@ -31,9 +31,9 @@ static const InfraredProtocolSpecification infrared_samsung32_protocol_specifica
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-const InfraredProtocolSpecification* infrared_samsung32_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_samsung32_get_spec(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolSamsung32)
-        return &infrared_samsung32_protocol_specification;
+        return &infrared_protocol_variant_samsung32;
     else
         return NULL;
 }

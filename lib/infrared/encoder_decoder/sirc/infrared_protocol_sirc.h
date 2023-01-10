@@ -33,4 +33,4 @@ void* infrared_encoder_sirc_alloc(void);
 void infrared_encoder_sirc_reset(void* encoder_ptr, const InfraredMessage* message);
 void infrared_encoder_sirc_free(void* decoder);
 InfraredStatus infrared_encoder_sirc_encode(void* encoder_ptr, uint32_t* duration, bool* polarity);
-const InfraredProtocolSpecification* infrared_sirc_get_spec(InfraredProtocol protocol);
+const InfraredProtocolVariant* infrared_sirc_get_spec(InfraredProtocol protocol);
