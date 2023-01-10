@@ -55,6 +55,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Added: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 - Added: [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
+- [Patreon Builds Update: ALL + Anime + Select Builds: Added 3 Akira animations (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/e40f48ee4c8d75f9fcf634919cf806b1329b32da) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
+- [Patreon Builds Update: 18 Plus Builds: Added 1 Cool Devices and 2 Bible Black animations (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 
 <a name="release">
 
