@@ -5,7 +5,7 @@
 - Read log and command output by uart
 - Send commands by uart
 - Set baud rate
-- Quick commands
+- Fast commands
 
 ## Connecting
 | Flipper Zero pin | UART interface |
