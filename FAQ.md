@@ -68,7 +68,7 @@ Flipper Zero clock has known clock drift problem. So there is a chance that cloc
 
 ### Timezone is not correct
 
-Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.timeanddate.com/time/zone/timezone/utc) or on any other website found in google. Then set it in [conf file](docs/conf-file_description.md) or via setting menu of Flipper Authenticator or using CLI command `totp tz`.
+Because of Flipper Zero API doesn't provide an access to timezone offset it is necessary to set it manually for correct TOTP tokens generation. You may find you timezone offset (or another name is "UTC offset") [here](https://www.utctime.net/time-zone-abbreviations), [here](https://time.is/) or on any other website found in [google](https://letmegooglethat.com/?q=What+is+my+timezone+offset). Then set it in [conf file](docs/conf-file_description.md) or via setting menu of Flipper Authenticator or using CLI command `totp tz`.
 
 ### Token secret is not correct
 
