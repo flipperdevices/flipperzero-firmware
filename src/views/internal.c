@@ -1,7 +1,7 @@
 #include "internal.h"
 #include "../fbp.h"
 
-const uint16_t BT_SERIAL_BUFFER_SIZE = 128;
+static const uint16_t BT_SERIAL_BUFFER_SIZE = 128;
 
 struct FlipperVibrator {
     View* view;
@@ -96,7 +96,7 @@ static bool input_callback(InputEvent* event, void* ctx) {
     return true;
 }
 
-void draw_callback(Canvas* canvas, void* ctx) {
+static void draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
     FlipperVibratorModel* app = ctx;
     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, (char*)app->display_text);

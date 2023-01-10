@@ -16,7 +16,7 @@
       ],
       "btle": {
         "names": [
-            "Flipper Zero"
+            "Flipper *"
         ],
         "services": {
             "8fe5b3d5-2e7f-4a98-2a48-7acc60fe0000": {
