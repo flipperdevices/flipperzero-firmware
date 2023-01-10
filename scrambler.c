@@ -13,7 +13,7 @@ Authors: Tanish Bhongade and RaZe
 // 6 moves along with direction
 char moves[6] = {'R', 'U', 'F', 'B', 'L', 'D'};
 char dir[4] = {' ', '\'', '2'};
-const int SLEN = 10;
+const int SLEN = 20;
 #define RESULT_SIZE 100
 // Structure which holds main scramble
 struct GetScramble
