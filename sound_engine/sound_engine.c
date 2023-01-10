@@ -85,7 +85,7 @@ uint16_t sound_engine_osc(SoundEngineChannel* channel, uint32_t prev_acc)
 			}
 
 			return (channel->lfsr) & (WAVE_AMP - 1);
-			
+
 			break;
 		}
 
@@ -128,10 +128,10 @@ void sound_engine_fill_buffer(SoundEngine* sound_engine, uint16_t* audio_buffer,
 				channel->accumulator += channel->frequency;
 				channel->accumulator &= ACC_LENGTH - 1;
 
-				output += sound_engine_osc(channel, prev_acc);
+				output += (sound_engine_osc(channel, prev_acc) >> (6 + 2));
 			}
 		}
 
-		audio_buffer[i] = (output >> (6 + 2)); //2 more bits so all channels fit
+		audio_buffer[i] = output; //2 more bits so all channels fit
 	}
 }

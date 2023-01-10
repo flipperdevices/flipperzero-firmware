@@ -123,7 +123,7 @@ const char* wave_names[5] =
 	"NONE",
 	"NOISE",
 	"PULSE",
-	"TRIANGE",
+	"TRIANGLE",
 	"SAWTOOTH",
 };
 
@@ -209,7 +209,7 @@ int32_t flizzer_tracker_app(void* p)
 	tracker->frequency = 440;
 	tracker->current_waveform_index = 1;
 
-	sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], 440 * 256);
+	sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], 440 * 1024);
 
 	sound_engine_start();
 
