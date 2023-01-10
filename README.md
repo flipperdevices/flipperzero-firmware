@@ -1,4 +1,5 @@
 # UART Terminal for Flipper Zero
+Flipper Zero app to control various devices via UART interface.
 
 ## INFO:
 
