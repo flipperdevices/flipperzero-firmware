@@ -51,7 +51,9 @@ void submenu_add_item(
     const char* label,
     uint32_t index,
     SubmenuItemCallback callback,
-    void* callback_context);
+    void* callback_context,
+    bool locked,
+    const char* locked_message);
 
 /** Remove all items from submenu
  *
