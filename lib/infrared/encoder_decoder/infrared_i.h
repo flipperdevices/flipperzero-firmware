@@ -22,6 +22,7 @@ typedef struct {
     uint8_t command_length;
     uint32_t frequency;
     float duty_cycle;
+    size_t repeat_count;
 } InfraredProtocolVariant;
 
 typedef const InfraredProtocolVariant* (*InfraredGetProtocolVariant)(InfraredProtocol protocol);

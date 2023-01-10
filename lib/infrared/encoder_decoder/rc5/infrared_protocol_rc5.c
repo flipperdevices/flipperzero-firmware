@@ -27,6 +27,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_rc5 = {
     .command_length = 6,
     .frequency = INFRARED_RC5_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_RC5_DUTY_CYCLE,
+    .repeat_count = INFRARED_RC5_REPEAT_COUNT_MIN,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_rc5x = {
@@ -35,6 +36,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_rc5x = {
     .command_length = 7,
     .frequency = INFRARED_RC5_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_RC5_DUTY_CYCLE,
+    .repeat_count = INFRARED_RC5_REPEAT_COUNT_MIN,
 };
 
 const InfraredProtocolVariant* infrared_protocol_rc5_get_variant(InfraredProtocol protocol) {

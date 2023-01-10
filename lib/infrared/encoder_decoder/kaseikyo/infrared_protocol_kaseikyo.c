@@ -29,6 +29,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_kaseikyo = {
     .command_length = 10,
     .frequency = INFRARED_COMMON_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
+    .repeat_count = INFRARED_KASEIKYO_REPEAT_COUNT_MIN,
 };
 
 const InfraredProtocolVariant* infrared_protocol_kaseikyo_get_variant(InfraredProtocol protocol) {

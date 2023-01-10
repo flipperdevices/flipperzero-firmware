@@ -28,6 +28,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_rc6 = {
     .command_length = 8,
     .frequency = INFRARED_RC6_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_RC6_DUTY_CYCLE,
+    .repeat_count = INFRARED_RC6_REPEAT_COUNT_MIN,
 };
 
 const InfraredProtocolVariant* infrared_protocol_rc6_get_variant(InfraredProtocol protocol) {

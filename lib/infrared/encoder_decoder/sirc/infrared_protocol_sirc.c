@@ -31,6 +31,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_sirc = {
     .command_length = 7,
     .frequency = INFRARED_SIRC_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
+    .repeat_count = INFRARED_SIRC_REPEAT_COUNT_MIN,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_sirc15 = {
@@ -39,6 +40,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_sirc15 = {
     .command_length = 7,
     .frequency = INFRARED_SIRC_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
+    .repeat_count = INFRARED_SIRC_REPEAT_COUNT_MIN,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_sirc20 = {
@@ -47,6 +49,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_sirc20 = {
     .command_length = 7,
     .frequency = INFRARED_SIRC_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
+    .repeat_count = INFRARED_SIRC_REPEAT_COUNT_MIN,
 };
 
 const InfraredProtocolVariant* infrared_protocol_sirc_get_variant(InfraredProtocol protocol) {

@@ -13,6 +13,7 @@
 /* protocol allows 2700 silence, but it is hard to send 1 message without repeat */
 #define INFRARED_RC5_SILENCE (2700 * 10)
 #define INFRARED_RC5_MIN_SPLIT_TIME 2700
+#define INFRARED_RC5_REPEAT_COUNT_MIN 1
 
 extern const InfraredCommonProtocolSpec protocol_rc5;
 

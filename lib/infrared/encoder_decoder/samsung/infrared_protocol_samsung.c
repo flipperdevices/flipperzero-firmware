@@ -29,6 +29,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_samsung32 = {
     .command_length = 8,
     .frequency = INFRARED_COMMON_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
+    .repeat_count = INFRARED_SAMSUNG_REPEAT_COUNT_MIN,
 };
 
 const InfraredProtocolVariant* infrared_protocol_samsung32_get_variant(InfraredProtocol protocol) {

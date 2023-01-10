@@ -30,6 +30,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_nec = {
     .command_length = 8,
     .frequency = INFRARED_COMMON_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
+    .repeat_count = INFRARED_NEC_REPEAT_COUNT_MIN,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_necext = {
@@ -38,6 +39,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_necext = {
     .command_length = 16,
     .frequency = INFRARED_COMMON_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
+    .repeat_count = INFRARED_NEC_REPEAT_COUNT_MIN,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_nec42 = {
@@ -46,6 +48,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_nec42 = {
     .command_length = 8,
     .frequency = INFRARED_COMMON_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
+    .repeat_count = INFRARED_NEC_REPEAT_COUNT_MIN,
 };
 
 static const InfraredProtocolVariant infrared_protocol_variant_nec42ext = {
@@ -54,6 +57,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_nec42ext = {
     .command_length = 16,
     .frequency = INFRARED_COMMON_CARRIER_FREQUENCY,
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
+    .repeat_count = INFRARED_NEC_REPEAT_COUNT_MIN,
 };
 
 const InfraredProtocolVariant* infrared_protocol_nec_get_variant(InfraredProtocol protocol) {
