@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <furi.h>
 #include <gui/gui.h>
+#include <notification/notification_messages.h>
 #include <input/input.h>
 #include <furi_hal.h>
 #include <u8g2_glue.h>
 #include <stm32wbxx_ll_tim.h>
+
+#include "flizzer_tracker_hal.h"
 
 /*
 Fontname: -Raccoon-Fixed4x6-Medium-R-Normal--6-60-75-75-P-40-ISO10646-1
@@ -45,14 +48,21 @@ typedef enum {
 typedef struct {
 	EventType type;
 	InputEvent input;
-} HelloWorldEvent;
+} FlizzerTrackerEvent;
 
 typedef struct 
 {
 	bool stop;
 	uint32_t counter;
 	uint32_t counter_2;
-} DirectDraw;
+	NotificationApp* notification;
+
+	SoundEngine sound_engine;
+
+	uint32_t frequency;
+	uint8_t current_waveform_index;
+	uint16_t pw;
+} FlizzerTrackerApp;
 
 #define FURI_HAL_SPEAKER_TIMER TIM2
 #define FURI_HAL_SPEAKER_CHANNEL LL_TIM_CHANNEL_CH1
@@ -64,9 +74,9 @@ void timer_draw_callback(void* ctx)
 		LL_TIM_ClearFlag_UPDATE(TIM2);
 	}
 
-	DirectDraw* instance = (DirectDraw*)ctx;
+	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
 
-	instance->counter++;
+	tracker->counter++;
 	//return;
 }
 
@@ -77,25 +87,67 @@ void timer_draw_callback_2(void* ctx)
 		LL_TIM_ClearFlag_UPDATE(TIM1);
 	}
 
-	DirectDraw* instance = (DirectDraw*)ctx;
+	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
 
-	instance->counter_2++;
+	tracker->counter_2++;
 	//return;
 }
 
+static void sound_engine_dma_isr(void* ctx)
+{
+    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+
+    // half of transfer
+    if(LL_DMA_IsActiveFlag_HT1(DMA1))
+	{
+        LL_DMA_ClearFlag_HT1(DMA1);
+        // fill first half of buffer
+        sound_engine_fill_buffer(&tracker->sound_engine, tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size / 2);
+
+		tracker->counter++;
+    }
+
+    // transfer complete
+    if(LL_DMA_IsActiveFlag_TC1(DMA1))
+	{
+        LL_DMA_ClearFlag_TC1(DMA1);
+        // fill second half of buffer
+        sound_engine_fill_buffer(&tracker->sound_engine, &tracker->sound_engine.audio_buffer[tracker->sound_engine.audio_buffer_size / 2], tracker->sound_engine.audio_buffer_size / 2); //&app->sample_buffer[index]
+
+		tracker->counter++;
+    }
+}
+
+const char* wave_names[5] = 
+{
+	"NONE",
+	"NOISE",
+	"PULSE",
+	"TRIANGE",
+	"SAWTOOTH",
+};
+
 static void draw_callback(Canvas* canvas, void* ctx) 
 {
-	DirectDraw* instance = (DirectDraw*)ctx;
-
-	char buffer[20] = {0};
-
-	snprintf(buffer, 20, "FRAMES: %ld", instance->counter);
+	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
 
 	canvas_clear(canvas);
 
 	canvas_set_custom_font(canvas, u8g2_font_tom_thumb_4x6_tr);
+
+	char buffer[30] = {0};
+
+	snprintf(buffer, 20, "FREQUENCY: %ld Hz", tracker->frequency);
 	
 	canvas_draw_str(canvas, 0, 10, buffer);
+
+	snprintf(buffer, 20, "WAVEFORM: %s", wave_names[tracker->current_waveform_index]);
+	
+	canvas_draw_str(canvas, 0, 20, buffer);
+
+	snprintf(buffer, 20, "PULSE WIDTH: $%03X", tracker->pw);
+	
+	canvas_draw_str(canvas, 0, 30, buffer);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) 
@@ -104,87 +156,36 @@ static void input_callback(InputEvent* input_event, void* ctx)
 	furi_assert(ctx);
 	FuriMessageQueue* event_queue = ctx;
 
-	HelloWorldEvent event = {.type = EventTypeInput, .input = *input_event};
+	FlizzerTrackerEvent event = {.type = EventTypeInput, .input = *input_event};
 	furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void direct_draw_run(DirectDraw* instance) 
+const uint8_t waveforms[5] = 
 {
-	vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
-
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 14, timer_draw_callback_2, (void*)instance);
-
-	LL_TIM_InitTypeDef TIM_InitStruct = {0};
-	// Prescaler to get 1kHz clock
-	TIM_InitStruct.Prescaler = 32768;
-	TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-	// Auto reload to get freq Hz interrupt
-	TIM_InitStruct.Autoreload = 2500;
-
-	//TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-	LL_TIM_Init(TIM1, &TIM_InitStruct);
-
-	LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
-	TIM_OC_InitStruct.CompareValue = 127;
-	TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
-	LL_TIM_OC_Init(TIM1, FURI_HAL_SPEAKER_CHANNEL, &TIM_OC_InitStruct);
-
-	LL_TIM_EnableIT_UPDATE(TIM1);
-	LL_TIM_EnableAllOutputs(TIM1);
-	LL_TIM_EnableCounter(TIM1);
-
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 15, timer_draw_callback, (void*)instance);
-
-	LL_TIM_InitTypeDef TIM_InitStruct2 = {0};
-	// Prescaler to get 1kHz clock
-	TIM_InitStruct2.Prescaler = 32768;
-	TIM_InitStruct2.CounterMode = LL_TIM_COUNTERMODE_UP;
-	// Auto reload to get freq Hz interrupt
-	TIM_InitStruct2.Autoreload = 200;
-	TIM_InitStruct2.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-	LL_TIM_Init(TIM2, &TIM_InitStruct2);
-	LL_TIM_EnableIT_UPDATE(TIM2);
-	LL_TIM_EnableAllOutputs(TIM2);
-	LL_TIM_EnableCounter(TIM2);
-
-	///
-
-	bool unu = furi_hal_speaker_acquire(1000);
-	UNUSED(unu);
-
-	LL_TIM_InitTypeDef TIM_InitStruct3 = {0};
-	//TIM_InitStruct.Prescaler = 4;
-	TIM_InitStruct3.Prescaler = 200;
-	TIM_InitStruct3.Autoreload =
-		255; //in this fork used purely as PWM timer, the DMA now is triggered by SAMPLE_RATE_TIMER
-	LL_TIM_Init(TIM16, &TIM_InitStruct3);
-
-	LL_TIM_OC_InitTypeDef TIM_OC_InitStruct2 = {0};
-	TIM_OC_InitStruct2.OCMode = LL_TIM_OCMODE_PWM1;
-	TIM_OC_InitStruct2.OCState = LL_TIM_OCSTATE_ENABLE;
-	TIM_OC_InitStruct2.CompareValue = 127;
-	LL_TIM_OC_Init(TIM16, FURI_HAL_SPEAKER_CHANNEL, &TIM_OC_InitStruct2);
-	LL_TIM_EnableAllOutputs(TIM16);
-	LL_TIM_EnableCounter(TIM16);
-}
+	SE_WAVEFORM_NONE,
+	SE_WAVEFORM_NOISE,
+	SE_WAVEFORM_PULSE,
+	SE_WAVEFORM_TRIANGLE,
+	SE_WAVEFORM_SAW,
+};
 
 int32_t flizzer_tracker_app(void* p) 
 {
 	UNUSED(p);
 
-	// Текущее событие типа кастомного типа HelloWorldEvent
-	HelloWorldEvent event;
-	// Очередь событий на 8 элементов размера HelloWorldEvent
-	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(HelloWorldEvent));
+	// Текущее событие типа кастомного типа FlizzerTrackerEvent
+	FlizzerTrackerEvent event;
+	// Очередь событий на 8 элементов размера FlizzerTrackerEvent
+	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
 
-	DirectDraw* instance = malloc(sizeof(DirectDraw));
+	FlizzerTrackerApp* tracker = malloc(sizeof(FlizzerTrackerApp));
 
-	direct_draw_run(instance);
+	//direct_draw_run(tracker);
 
 	// Создаем новый view port
 	ViewPort* view_port = view_port_alloc();
 	// Создаем callback отрисовки, без контекста
-	view_port_draw_callback_set(view_port, draw_callback, instance);
+	view_port_draw_callback_set(view_port, draw_callback, tracker);
 	// Создаем callback нажатий на клавиши, в качестве контекста передаем
 	// нашу очередь сообщений, чтоб запихивать в неё эти события
 	view_port_input_callback_set(view_port, input_callback, event_queue);
@@ -194,7 +195,23 @@ int32_t flizzer_tracker_app(void* p)
 	// Подключаем view port к GUI в полноэкранном режиме
 	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-	
+	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
+
+	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 13, sound_engine_dma_isr, tracker);
+
+	//sound_engine_init(&tracker->sound_engine, 44100, false, 4096);
+	sound_engine_init(&tracker->sound_engine, 44100, true, 4096);
+
+	tracker->sound_engine.channel[0].waveform = SE_WAVEFORM_NOISE;
+	tracker->sound_engine.channel[0].pw = 0x200;
+
+	tracker->frequency = 440;
+	tracker->current_waveform_index = 1;
+
+	sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], 440 * 256);
+
+	sound_engine_start();
 
 	// Бесконечный цикл обработки очереди событий
 	while(1) 
@@ -207,26 +224,84 @@ int32_t flizzer_tracker_app(void* p)
 		if(event.type == EventTypeInput) 
 		{
 			// Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
-			if(event.input.key == InputKeyBack) 
+			if(event.input.key == InputKeyBack && event.input.type == InputTypeShort) 
 			{
 				break;
+			}
+
+			if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) 
+			{
+				tracker->frequency += 50;
+				sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
+				//break;
+			}
+
+			if(event.input.key == InputKeyDown && event.input.type == InputTypeShort) 
+			{
+				if(tracker->frequency > 50)
+				{
+					tracker->frequency -= 50;
+				}
+				sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
+				//break;
+			}
+
+			if(event.input.key == InputKeyRight && event.input.type == InputTypeShort) 
+			{
+				if(tracker->current_waveform_index < 4)
+				{
+					tracker->current_waveform_index++;
+				}
+				
+				tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
+				//break;
+			}
+
+			if(event.input.key == InputKeyLeft && event.input.type == InputTypeShort) 
+			{
+				if(tracker->current_waveform_index > 0)
+				{
+					tracker->current_waveform_index--;
+				}
+				
+				tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
+				//break;
+			}
+
+			if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) 
+			{
+				if(tracker->pw + 0x100 < 0xFFF)
+				{
+					tracker->pw += 0x100;
+				}
+
+				else
+				{
+					tracker->pw = 0x100;
+				}
+				
+				tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
+				tracker->sound_engine.channel[0].pw = tracker->pw;
+				//break;
 			}
 		}
 	}
 
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 14, NULL, NULL);
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, NULL, NULL);
+	//furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 14, NULL, NULL);
+	//furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, NULL, NULL);
+
+	sound_engine_stop();
+	sound_engine_deinit(&tracker->sound_engine);
 
 	FURI_CRITICAL_ENTER();
 	LL_TIM_DeInit(TIM1);
 	LL_TIM_DeInit(TIM2);
 	LL_TIM_DeInit(TIM16);
 	FURI_CRITICAL_EXIT();
-	
-	furi_hal_speaker_release();
 
-	free(instance);
-	
+	notification_message(tracker->notification, &sequence_display_backlight_enforce_auto);
+    furi_record_close(RECORD_NOTIFICATION);
+
 	// Специальная очистка памяти, занимаемой очередью
 	furi_message_queue_free(event_queue);
 
@@ -234,6 +309,8 @@ int32_t flizzer_tracker_app(void* p)
 	gui_remove_view_port(gui, view_port);
 	view_port_free(view_port);
 	furi_record_close(RECORD_GUI);
+
+	free(tracker);
 
 	return 0;
 }
