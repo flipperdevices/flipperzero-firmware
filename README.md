@@ -15,6 +15,11 @@ Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 
 ![wiring](wiring.png)
 
+### Confirmed Compatible Modules
+
+* [Adafruit Ultimate GPS Breakout]
+* Beitian BN-180
+
 ## Building the FAP
 
 1. Clone the [flipperzero-firmware] repository.
