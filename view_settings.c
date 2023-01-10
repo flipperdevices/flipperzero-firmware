@@ -20,6 +20,9 @@ void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas,10,61,"Use up and down to modify");
 
+    if (app->txrx->debug_direct_sampling)
+        canvas_draw_str(canvas,3,54,"(DEBUG direct sampling is ON)");
+
     /* Show frequency. We can use big numbers font since it's just a number. */
     if (app->current_view == ViewFrequencySettings) {
         char buf[16];
@@ -40,6 +43,10 @@ void process_input_settings(ProtoViewApp *app, InputEvent input) {
          * modulation. */
         app->frequency = subghz_setting_get_default_frequency(app->setting);
         app->modulation = 0;
+    } else if (input.type == InputTypeLong && input.key == InputKeyDown) {
+        /* Long pressing to down switches between normal and debug
+         * direct sampling mode. */
+        app->txrx->debug_direct_sampling = !app->txrx->debug_direct_sampling;
     } else if (input.type == InputTypePress &&
               (input.key != InputKeyDown || input.key != InputKeyUp))
     {

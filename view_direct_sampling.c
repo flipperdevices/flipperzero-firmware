@@ -16,7 +16,7 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
             /* Busy loop: this is a terrible approach as it blocks
              * everything else, but for now it's the best we can do
              * to obtain direct data with some spacing. */
-            // uint32_t x = 500; while(x--);
+            uint32_t x = 250; while(x--);
         }
     }
     canvas_set_font(canvas, FontSecondary);

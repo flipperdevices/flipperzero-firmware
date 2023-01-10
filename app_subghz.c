@@ -128,10 +128,15 @@ int32_t direct_sampling_thread(void *ctx) {
             uint32_t dur = now - last_change_time;
             dur /= furi_hal_cortex_instructions_per_microsecond();
 
-            raw_samples_add(RawSamples, last_level, dur);
-            if (j < 50) {
-                l[j] = last_level;
-                d[j] = dur;
+            if (dur > 20) {
+                raw_samples_add(RawSamples, last_level, dur);
+                if (j < 50) {
+                    l[j] = last_level;
+                    d[j] = dur;
+                }
+            } else {
+                last_level = !last_level;
+                continue;
             }
 
             last_level = !last_level; /* What g0 is now. */
