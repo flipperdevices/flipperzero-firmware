@@ -85,9 +85,18 @@ void process_input_settings(ProtoViewApp *app, InputEvent input) {
         return;
     }
 
-    /* Apply changes. */
-    FURI_LOG_E(TAG, "Setting view, setting frequency/modulation to %lu %s", app->frequency, ProtoViewModulations[app->modulation].name);
-    radio_rx_end(app);
-    radio_begin(app);
-    radio_rx(app);
+    /* Apply changes when switching to other views. */
+    app->txrx->freq_mod_changed = true;
+}
+
+/* When the user switches to some other view, if they changed the parameters
+ * we need to restart the radio with the right frequency and modulation. */
+void view_exit_settings(ProtoViewApp *app) {
+    if (app->txrx->freq_mod_changed) {
+        FURI_LOG_E(TAG, "Setting view, setting frequency/modulation to %lu %s", app->frequency, ProtoViewModulations[app->modulation].name);
+        radio_rx_end(app);
+        radio_begin(app);
+        radio_rx(app);
+        app->txrx->freq_mod_changed = false;
+    }
 }

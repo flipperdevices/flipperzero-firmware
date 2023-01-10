@@ -89,6 +89,12 @@ static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
     /* Call the enter/exit view callbacks if needed. */
     if (old == ViewDirectSampling) view_exit_direct_sampling(app);
     if (new == ViewDirectSampling) view_enter_direct_sampling(app);
+    /* The frequency/modulation settings are actually a single view:
+     * as long as the user stays between the two modes of this view we
+     * don't need to call the exit-view callback. */
+    if ((old == ViewFrequencySettings && new != ViewModulationSettings) ||
+        (old == ViewModulationSettings && new != ViewFrequencySettings))
+        view_exit_settings(app);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -123,6 +129,7 @@ ProtoViewApp* protoview_app_alloc() {
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */
+    app->txrx->freq_mod_changed = false;
     app->txrx->debug_direct_sampling = true;
     if (app->txrx->debug_direct_sampling) {
         app->txrx->ds_thread = NULL;

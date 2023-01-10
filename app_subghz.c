@@ -109,10 +109,12 @@ int32_t direct_sampling_thread(void *ctx) {
     bool last_level = false;
     uint32_t last_change_time = DWT->CYCCNT;
 
+    if (0) while(app->txrx->ds_thread_running) furi_delay_ms(1);
+
     while(app->txrx->ds_thread_running) {
-        uint32_t d[10];
+        uint16_t d[50]; uint8_t l[50];
         for (uint32_t j = 0; j < 500; j++) {
-            uint32_t maxloops = 50000;
+            volatile uint32_t maxloops = 50000;
             while(maxloops-- && app->txrx->ds_thread_running) {
                 bool l = furi_hal_gpio_read(&gpio_cc1101_g0);
                 if (l != last_level) break;
@@ -125,18 +127,22 @@ int32_t direct_sampling_thread(void *ctx) {
             uint32_t now = DWT->CYCCNT;
             uint32_t dur = now - last_change_time;
             dur /= furi_hal_cortex_instructions_per_microsecond();
+
             raw_samples_add(RawSamples, last_level, dur);
+            if (j < 50) {
+                l[j] = last_level;
+                d[j] = dur;
+            }
+
             last_level = !last_level; /* What g0 is now. */
             last_change_time = now;
-            if (j < 10) d[j] = dur;
             if (!app->txrx->ds_thread_running) break;
         }
 
-        for (uint32_t j = 0; j < 10; j++) {
-            FURI_LOG_E(TAG, "dur[%u]: %u",
-                (unsigned int)j, (unsigned int)d[j]);
-        }
-        furi_delay_tick(200);
+        for (uint32_t j = 0; j < 50; j++)
+            printf("%d=%u ", (unsigned int)l[j], (unsigned int)d[j]);
+        printf("\n");
+        furi_delay_ms(50);
     }
     FURI_LOG_E(TAG, "Exiting DS thread");
     return 0;

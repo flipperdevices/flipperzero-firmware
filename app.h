@@ -65,7 +65,10 @@ extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
  * It receives data and we get our protocol "feed" callback called
  * with the level (1 or 0) and duration. */
 struct ProtoViewTxRx {
-    int debug_direct_sampling;  /* Ready from GDO0 in a busy loop. Only
+    bool freq_mod_changed;      /* The user changed frequency and/or modulation
+                                   from the interface. There is to restart the
+                                   radio with the right parameters. */
+    bool debug_direct_sampling; /* Read data from GDO0 in a busy loop. Only
                                    for testing. */
     SubGhzWorker* worker;       /* Our background worker. */
     FuriThread *ds_thread;      /* Direct sampling thread. */
@@ -166,6 +169,7 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app);
 void process_input_direct_sampling(ProtoViewApp *app, InputEvent input);
 void view_enter_direct_sampling(ProtoViewApp *app);
 void view_exit_direct_sampling(ProtoViewApp *app);
+void view_exit_settings(ProtoViewApp *app);
 
 /* ui.c */
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
