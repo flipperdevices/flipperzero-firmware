@@ -1,4 +1,5 @@
 #include "flizzer_tracker_hal.h"
+#include "flizzer_tracker.h"
 
 #define SPEAKER_PWM_TIMER TIM16
 #define SAMPLE_RATE_TIMER TIM2
@@ -9,6 +10,31 @@
 #define TIMER_BASE_CLOCK 64000000 /* CPU frequency, 64 MHz */
 
 #define DMA_INSTANCE DMA1, LL_DMA_CHANNEL_1
+
+void sound_engine_dma_isr(void* ctx)
+{
+	SoundEngine* sound_engine = (SoundEngine*)ctx;
+
+	// half of transfer
+	if(LL_DMA_IsActiveFlag_HT1(DMA1))
+	{
+		LL_DMA_ClearFlag_HT1(DMA1);
+		// fill first half of buffer
+		uint16_t* audio_buffer = sound_engine->audio_buffer;
+		uint32_t audio_buffer_length = sound_engine->audio_buffer_size / 2;
+		sound_engine_fill_buffer(sound_engine, audio_buffer, audio_buffer_length);
+	}
+
+	// transfer complete
+	if(LL_DMA_IsActiveFlag_TC1(DMA1))
+	{
+		LL_DMA_ClearFlag_TC1(DMA1);
+		// fill second half of buffer
+		uint32_t audio_buffer_length = sound_engine->audio_buffer_size / 2;
+		uint16_t* audio_buffer = &sound_engine->audio_buffer[audio_buffer_length];
+		sound_engine_fill_buffer(sound_engine, audio_buffer, audio_buffer_length);
+	}
+}
 
 void sound_engine_PWM_timer_init(bool external_audio_output) //external audio on pin PA6
 {

@@ -1,13 +1,5 @@
-#include <stdio.h>
-#include <furi.h>
-#include <gui/gui.h>
-#include <notification/notification_messages.h>
-#include <input/input.h>
-#include <furi_hal.h>
-#include <u8g2_glue.h>
-#include <stm32wbxx_ll_tim.h>
-
-#include "flizzer_tracker_hal.h"
+#include "flizzer_tracker.h"
+#include "init_deinit.h"
 
 /*
 Fontname: -Raccoon-Fixed4x6-Medium-R-Normal--6-60-75-75-P-40-ISO10646-1
@@ -40,92 +32,48 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] U8G2_FONT_SECTION("u8g2_font_tom_t
 	"y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
 	"\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
 
-typedef enum {
-	EventTypeTick,
+typedef enum
+{
 	EventTypeInput,
 } EventType;
 
-typedef struct {
+typedef struct
+{
 	EventType type;
 	InputEvent input;
 } FlizzerTrackerEvent;
 
-typedef struct 
+typedef enum
 {
-	bool stop;
-	uint32_t counter;
-	uint32_t counter_2;
-	NotificationApp* notification;
+	PARAM_FREQUENCY,
+	PARAM_WAVEFORM,
+	PARAM_PW,
+	PARAM_ENABLE_FILTER,
+	PARAM_FILTER_CUTOFF,
+	PARAM_FILTER_RESONANCE,
+	PARAM_FILTER_TYPE,
+} SelectedParam;
 
-	SoundEngine sound_engine;
-
-	uint32_t frequency;
-	uint8_t current_waveform_index;
-	uint16_t pw;
-} FlizzerTrackerApp;
-
-#define FURI_HAL_SPEAKER_TIMER TIM2
-#define FURI_HAL_SPEAKER_CHANNEL LL_TIM_CHANNEL_CH1
-
-void timer_draw_callback(void* ctx)
-{
-	if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) 
-	{
-		LL_TIM_ClearFlag_UPDATE(TIM2);
-	}
-
-	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
-
-	tracker->counter++;
-	//return;
-}
-
-void timer_draw_callback_2(void* ctx) 
-{
-	if(LL_TIM_IsActiveFlag_UPDATE(TIM1)) 
-	{
-		LL_TIM_ClearFlag_UPDATE(TIM1);
-	}
-
-	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
-
-	tracker->counter_2++;
-	//return;
-}
-
-static void sound_engine_dma_isr(void* ctx)
-{
-    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
-
-    // half of transfer
-    if(LL_DMA_IsActiveFlag_HT1(DMA1))
-	{
-        LL_DMA_ClearFlag_HT1(DMA1);
-        // fill first half of buffer
-        sound_engine_fill_buffer(&tracker->sound_engine, tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size / 2);
-
-		tracker->counter++;
-    }
-
-    // transfer complete
-    if(LL_DMA_IsActiveFlag_TC1(DMA1))
-	{
-        LL_DMA_ClearFlag_TC1(DMA1);
-        // fill second half of buffer
-        sound_engine_fill_buffer(&tracker->sound_engine, &tracker->sound_engine.audio_buffer[tracker->sound_engine.audio_buffer_size / 2], tracker->sound_engine.audio_buffer_size / 2); //&app->sample_buffer[index]
-
-		tracker->counter++;
-    }
-}
-
-const char* wave_names[5] = 
+const char* wave_names[] = 
 {
 	"NONE",
 	"NOISE",
 	"PULSE",
 	"TRIANGLE",
 	"SAWTOOTH",
+	"METAL NOISE",
+	"SINE",
 };
+
+const char* filter_names[] = 
+{
+	"NONE",
+	"LOWPASS",
+	"HIGHPASS",
+	"BANDPASS",
+};
+
+#define NUM_PARAMS 10
 
 static void draw_callback(Canvas* canvas, void* ctx) 
 {
@@ -139,15 +87,38 @@ static void draw_callback(Canvas* canvas, void* ctx)
 
 	snprintf(buffer, 20, "FREQUENCY: %ld Hz", tracker->frequency);
 	
-	canvas_draw_str(canvas, 0, 10, buffer);
+	canvas_draw_str(canvas, 0, 6, buffer);
 
 	snprintf(buffer, 20, "WAVEFORM: %s", wave_names[tracker->current_waveform_index]);
 	
-	canvas_draw_str(canvas, 0, 20, buffer);
+	canvas_draw_str(canvas, 0, 12, buffer);
 
 	snprintf(buffer, 20, "PULSE WIDTH: $%03X", tracker->pw);
 	
+	canvas_draw_str(canvas, 0, 18, buffer);
+
+	snprintf(buffer, 20, "FILTER: %s", (tracker->flags & SE_ENABLE_FILTER) ? "ENABLED" : "DISABLED");
+
+	canvas_draw_str(canvas, 0, 24, buffer);
+
+	snprintf(buffer, 20, "CUTOFF: %d", tracker->cutoff);
+	
 	canvas_draw_str(canvas, 0, 30, buffer);
+
+	snprintf(buffer, 20, "RESONANCE: %d", tracker->resonance);
+	
+	canvas_draw_str(canvas, 0, 36, buffer);
+
+	snprintf(buffer, 20, "TYPE: %s", filter_names[tracker->filter_type]);
+	
+	canvas_draw_str(canvas, 0, 42, buffer);
+
+	canvas_draw_str(canvas, 70, tracker->selected_param * 6 + 6, "<");
+
+    uint32_t bytes = memmgr_get_free_heap();
+	snprintf(buffer, 20, "BYTES FREE: %ld", bytes);
+
+	canvas_draw_str(canvas, 0, 64, buffer);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) 
@@ -160,13 +131,15 @@ static void input_callback(InputEvent* input_event, void* ctx)
 	furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-const uint8_t waveforms[5] = 
+const uint8_t waveforms[] = 
 {
 	SE_WAVEFORM_NONE,
 	SE_WAVEFORM_NOISE,
 	SE_WAVEFORM_PULSE,
 	SE_WAVEFORM_TRIANGLE,
 	SE_WAVEFORM_SAW,
+	SE_WAVEFORM_NOISE_METAL,
+	SE_WAVEFORM_SINE,
 };
 
 int32_t flizzer_tracker_app(void* p) 
@@ -179,8 +152,6 @@ int32_t flizzer_tracker_app(void* p)
 	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
 
 	FlizzerTrackerApp* tracker = malloc(sizeof(FlizzerTrackerApp));
-
-	//direct_draw_run(tracker);
 
 	// Создаем новый view port
 	ViewPort* view_port = view_port_alloc();
@@ -196,15 +167,11 @@ int32_t flizzer_tracker_app(void* p)
 	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
 	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
-    notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
+	notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
-	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 13, sound_engine_dma_isr, tracker);
-
-	//sound_engine_init(&tracker->sound_engine, 44100, false, 4096);
-	sound_engine_init(&tracker->sound_engine, 44100, true, 4096);
+	init_tracker(tracker, 44100, true, 1024);
 
 	tracker->sound_engine.channel[0].waveform = SE_WAVEFORM_NOISE;
-	tracker->sound_engine.channel[0].pw = 0x200;
 
 	tracker->frequency = 440;
 	tracker->current_waveform_index = 1;
@@ -231,76 +198,208 @@ int32_t flizzer_tracker_app(void* p)
 
 			if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) 
 			{
-				tracker->frequency += 50;
-				sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
-				//break;
+				if(tracker->selected_param > 0)
+				{
+					tracker->selected_param--;
+				}
 			}
 
 			if(event.input.key == InputKeyDown && event.input.type == InputTypeShort) 
 			{
-				if(tracker->frequency > 50)
+				if(tracker->selected_param < NUM_PARAMS - 1)
 				{
-					tracker->frequency -= 50;
+					tracker->selected_param++;
 				}
-				sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
-				//break;
 			}
 
 			if(event.input.key == InputKeyRight && event.input.type == InputTypeShort) 
 			{
-				if(tracker->current_waveform_index < 4)
+				switch(tracker->selected_param)
 				{
-					tracker->current_waveform_index++;
+					case PARAM_FREQUENCY:
+					{
+						tracker->frequency += 25;
+
+						sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
+
+						break;
+					}
+
+					case PARAM_WAVEFORM:
+					{
+						if(tracker->current_waveform_index < 6)
+						{
+							tracker->current_waveform_index++;
+						}
+						
+						tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
+
+						break;
+					}
+
+					case PARAM_PW:
+					{
+						if(tracker->pw + 0x80 < 0xFFF)
+						{
+							tracker->pw += 0x80;
+						}
+
+						else
+						{
+							tracker->pw = 0x80;
+						}
+
+						tracker->sound_engine.channel[0].pw = tracker->pw;
+
+						break;
+					}
+
+					case PARAM_ENABLE_FILTER:
+					{
+						tracker->flags ^= SE_ENABLE_FILTER;
+
+						tracker->sound_engine.channel[0].filter_mode = FIL_OUTPUT_LOWPASS;
+						
+						tracker->sound_engine.channel[0].flags = tracker->flags;
+
+						break;
+					}
+
+					case PARAM_FILTER_CUTOFF:
+					{
+						tracker->cutoff += 10;
+
+						if(tracker->cutoff > 0xFFF)
+						{
+							tracker->cutoff = 0xFFF;
+						}
+						
+						tracker->sound_engine.channel[0].filter_cutoff = tracker->cutoff;
+
+						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance);
+
+						break;
+					}
+
+					case PARAM_FILTER_RESONANCE:
+					{
+						tracker->resonance++;
+						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
+						break;
+					}
+
+					case PARAM_FILTER_TYPE:
+					{
+						if(tracker->filter_type < 3)
+						{
+							tracker->filter_type++;
+						}
+
+						tracker->sound_engine.channel[0].filter_mode = tracker->filter_type;
+						break;
+					}
 				}
-				
-				tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
-				//break;
 			}
 
 			if(event.input.key == InputKeyLeft && event.input.type == InputTypeShort) 
 			{
-				if(tracker->current_waveform_index > 0)
+				switch(tracker->selected_param)
 				{
-					tracker->current_waveform_index--;
-				}
-				
-				tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
-				//break;
-			}
+					case PARAM_FREQUENCY:
+					{
+						if(tracker->frequency > 25)
+						{
+							tracker->frequency -= 25;
+						}
 
-			if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) 
-			{
-				if(tracker->pw + 0x100 < 0xFFF)
-				{
-					tracker->pw += 0x100;
-				}
+						sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
 
-				else
-				{
-					tracker->pw = 0x100;
+						break;
+					}
+
+					case PARAM_WAVEFORM:
+					{
+						if(tracker->current_waveform_index > 0)
+						{
+							tracker->current_waveform_index--;
+						}
+						
+						tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
+
+						break;
+					}
+
+					case PARAM_PW:
+					{
+						if(tracker->pw - 0x80 > 0)
+						{
+							tracker->pw -= 0x80;
+						}
+
+						else
+						{
+							tracker->pw = 0xF80;
+						}
+
+						tracker->sound_engine.channel[0].pw = tracker->pw;
+
+						break;
+					}
+
+					case PARAM_ENABLE_FILTER:
+					{
+						tracker->flags ^= SE_ENABLE_FILTER;
+
+						tracker->sound_engine.channel[0].filter_mode = FIL_OUTPUT_LOWPASS;
+						
+						tracker->sound_engine.channel[0].flags = tracker->flags;
+
+						break;
+					}
+
+					case PARAM_FILTER_CUTOFF:
+					{
+						if(tracker->cutoff > 10)
+						{
+							tracker->cutoff -= 10;
+						}
+						
+						tracker->sound_engine.channel[0].filter_cutoff = tracker->cutoff;
+						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance);
+
+						break;
+					}
+
+					case PARAM_FILTER_RESONANCE:
+					{
+						if(tracker->resonance > 0)
+						{
+							tracker->resonance--;
+							sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
+						}
+
+						break;
+					}
+
+					case PARAM_FILTER_TYPE:
+					{
+						if(tracker->filter_type > 0)
+						{
+							tracker->filter_type--;
+						}
+
+						tracker->sound_engine.channel[0].filter_mode = tracker->filter_type;
+						break;
+					}
 				}
-				
-				tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
-				tracker->sound_engine.channel[0].pw = tracker->pw;
-				//break;
 			}
 		}
 	}
 
-	//furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 14, NULL, NULL);
-	//furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 15, NULL, NULL);
-
-	sound_engine_stop();
-	sound_engine_deinit(&tracker->sound_engine);
-
-	FURI_CRITICAL_ENTER();
-	LL_TIM_DeInit(TIM1);
-	LL_TIM_DeInit(TIM2);
-	LL_TIM_DeInit(TIM16);
-	FURI_CRITICAL_EXIT();
+	deinit_tracker(tracker);
 
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_auto);
-    furi_record_close(RECORD_NOTIFICATION);
+	furi_record_close(RECORD_NOTIFICATION);
 
 	// Специальная очистка памяти, занимаемой очередью
 	furi_message_queue_free(event_queue);

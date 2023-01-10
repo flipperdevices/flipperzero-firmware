@@ -2,7 +2,7 @@
 
 const uint32_t frequency_table[FREQ_TAB_SIZE] = 
 {
-    (uint32_t)(2093.00 * 1024), //7th octave, the highest in this tracker
+	(uint32_t)(2093.00 * 1024), //7th octave, the highest in this tracker
 	(uint32_t)(2217.46 * 1024), //frequency precision is 1 / 1024th of Hz
 	(uint32_t)(2349.32 * 1024),
 	(uint32_t)(2489.02 * 1024),
@@ -18,21 +18,21 @@ const uint32_t frequency_table[FREQ_TAB_SIZE] =
 
 uint32_t get_freq(uint16_t note)
 {
-    if (note >= ((FREQ_TAB_SIZE * 8) << 8))
+	if (note >= ((FREQ_TAB_SIZE * 8) << 8))
 	{
 		return frequency_table[FREQ_TAB_SIZE - 1];
 	}
 
-    if ((note & 0xff) == 0)
+	if ((note & 0xff) == 0)
 	{
 		return frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES - 1) - ((note >> 8) / 12)); //wrap to one octave
 	}
 
-    else
-    {
-        uint64_t f1 = frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES - 1) - ((note >> 8) / 12));
-        uint64_t f2 = frequency_table[(((note >> 8) + 1) % 12)] / ((NUM_OCTAVES - 1) - (((note >> 8) + 1) / 12));
+	else
+	{
+		uint64_t f1 = frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES - 1) - ((note >> 8) / 12));
+		uint64_t f2 = frequency_table[(((note >> 8) + 1) % 12)] / ((NUM_OCTAVES - 1) - (((note >> 8) + 1) / 12));
 
-        return f1 + (uint64_t)((f2 - f1) * (note & 0xff)) / 256;
-    }
+		return f1 + (uint64_t)((f2 - f1) * (note & 0xff)) / 256;
+	}
 }
