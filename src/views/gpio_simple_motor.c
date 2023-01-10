@@ -40,16 +40,6 @@ static void process_general_command(TCodeCommand command, GPIOSimpleMotor* motor
         motor->current_pwm_duty = new_duty;
         return;
     }
-
-    if (command.command_type == MagnitudeSpeed && command.data.magnitude_speed_command.motion_type == Vibrate && command.data.magnitude_speed_command.channel_id == 0) {
-        // furi_hal_vibro_on(command.data.magnitude_speed_command.magnitude > 0.1f);
-        return;
-    }
-
-    if (command.command_type == MagnitudeTimeInterval && command.data.magnitude_time_interval_command.motion_type == Vibrate && command.data.magnitude_time_interval_command.channel_id == 0) {
-        // furi_hal_vibro_on(command.data.magnitude_time_interval_command.magnitude > 0.1f);
-        return;
-    }
 }
 
 static uint16_t bt_serial_event_callback(SerialServiceEvent event, void* context) {
@@ -142,11 +132,6 @@ GPIOSimpleMotor* gpio_simple_motor_alloc(FBP* fbp) {
             model->display_text_3 = "Press OK to start"; 
         },
         true);
-    
-
-    // init gpio??
-    // furi_hal_clock_mco_enable(app->mco_src, app->mco_div);
-    // furi_hal_gpio_init_ex(&gpio_usart_tx, GpioModeAltFunctionPushPull, GpioPullUp, GpioSpeedVeryHigh, GpioAltFn0MCO);
 
     return motor;
 }
@@ -154,16 +139,6 @@ GPIOSimpleMotor* gpio_simple_motor_alloc(FBP* fbp) {
 void gpio_simple_motor_free(GPIOSimpleMotor* motor) {
     furi_assert(motor);
     furi_hal_pwm_stop(DEFAULT_PWM_OUTPUT_ID);
-    
-    // disable gpio??
-    // furi_hal_gpio_init_ex(
-    //     &gpio_usart_tx,
-    //     GpioModeAltFunctionPushPull,
-    //     GpioPullUp,
-    //     GpioSpeedVeryHigh,
-    //     GpioAltFn7USART1);
-    // furi_hal_clock_mco_disable();
-
     view_free(motor->view);
     free(motor);
 }
