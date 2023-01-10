@@ -113,6 +113,8 @@ int32_t flipper_geiger_app() {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
         mutexStruct* lfsrMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
 
+        uint8_t screenRefresh = 0;
+
         if(event_status == FuriStatusOk) {
             if(event.type == EventTypeInput) {
                 if(event.input.key == InputKeyBack) {
@@ -144,13 +146,15 @@ int32_t flipper_geiger_app() {
                 if(max > 0) {
                     lfsrMutex->coef = ((float)(SCREEN_SIZE_Y - 15)) / ((float)max);
                 }
+
+                screenRefresh = 1;
             } else if(event.type == EventGPIO) {
                 lfsrMutex->counter = lfsrMutex->counter + 1;
             }
         }
 
         release_mutex(&state_mutex, lfsrMutex);
-        view_port_update(view_port);
+        if(screenRefresh == 1) view_port_update(view_port);
     }
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
