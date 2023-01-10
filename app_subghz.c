@@ -101,77 +101,11 @@ void radio_sleep(ProtoViewApp* app) {
 }
 
 /* ============================= Raw sampling mode =============================
- * This is useful only for debugging: in this mode instead of using the
- * subghz thread, we read in a busy loop from the GDO0 pin of the CC1101
- * in order to get exactly what the chip is receiving. Then using the
- * CPU ticks counter we fill the buffer of data with the pulses level
- * and duration. */
-
-int32_t direct_sampling_thread(void *ctx) {
-    ProtoViewApp *app = ctx;
-    bool last_level = false;
-    uint32_t last_change_time = DWT->CYCCNT;
-
-    if (0) while(app->txrx->ds_thread_running) furi_delay_ms(1);
-
-    while(app->txrx->ds_thread_running) {
-        uint16_t d[50]; uint8_t l[50];
-        for (uint32_t j = 0; j < 500; j++) {
-            volatile uint32_t maxloops = 50000;
-            while(maxloops-- && app->txrx->ds_thread_running) {
-                bool l = furi_hal_gpio_read(&gpio_cc1101_g0);
-                if (l != last_level) break;
-            }
-            if (maxloops == 0) {
-                FURI_LOG_E(TAG, "Max loops reached in DS");
-                furi_delay_tick(1);
-            }
-            /* g0 no longer equal to last level. */
-            uint32_t now = DWT->CYCCNT;
-            uint32_t dur = now - last_change_time;
-            dur /= furi_hal_cortex_instructions_per_microsecond();
-
-            if (dur > 20) {
-                raw_samples_add(RawSamples, last_level, dur);
-                if (j < 50) {
-                    l[j] = last_level;
-                    d[j] = dur;
-                }
-            } else {
-                last_level = !last_level;
-                continue;
-            }
-
-            last_level = !last_level; /* What g0 is now. */
-            last_change_time = now;
-            if (!app->txrx->ds_thread_running) break;
-        }
-
-        for (uint32_t j = 0; j < 50; j++)
-            printf("%d=%u ", (unsigned int)l[j], (unsigned int)d[j]);
-        printf("\n");
-        furi_delay_ms(50);
-    }
-    FURI_LOG_E(TAG, "Exiting DS thread");
-    return 0;
-}
-
-#if 0
-void raw_sampling_worker_start(ProtoViewApp *app) {
-    if (app->txrx->ds_thread != NULL) return;
-    app->txrx->ds_thread_running = true;
-    app->txrx->ds_thread = furi_thread_alloc_ex("ProtoView DS", 2048, direct_sampling_thread, app);
-    furi_thread_start(app->txrx->ds_thread);
-}
-
-void raw_sampling_worker_stop(ProtoViewApp *app) {
-    if (app->txrx->ds_thread == NULL) return;
-    app->txrx->ds_thread_running = false;
-    furi_thread_join(app->txrx->ds_thread);
-    furi_thread_free(app->txrx->ds_thread);
-    app->txrx->ds_thread = NULL;
-}
-#endif
+ * This is a special mode that uses a high frequency timer to sample the
+ * CC1101 pin directly. It's useful for debugging purposes when we want
+ * to get the raw data from the chip and completely bypass the subghz
+ * Flipper system.
+ * ===========================================================================*/
 
 void protoview_timer_isr(void *ctx) {
     ProtoViewApp *app = ctx;
@@ -193,9 +127,9 @@ void raw_sampling_worker_start(ProtoViewApp *app) {
     UNUSED(app);
 
     LL_TIM_InitTypeDef tim_init = {
-        .Prescaler = 63,
+        .Prescaler = 63,    /* CPU frequency is ~64Mhz. */
         .CounterMode = LL_TIM_COUNTERMODE_UP,
-        .Autoreload = 5, /* Sample every 5 us */
+        .Autoreload = 5,    /* Sample every 5 us */
     };
 
     LL_TIM_Init(TIM2, &tim_init);
