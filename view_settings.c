@@ -46,7 +46,14 @@ void process_input_settings(ProtoViewApp *app, InputEvent input) {
     } else if (input.type == InputTypeLong && input.key == InputKeyDown) {
         /* Long pressing to down switches between normal and debug
          * direct sampling mode. */
+
+        /* We have to stop the previous sampling system. */
+        radio_rx_end(app);
+
+        /* Then switch mode and start the new one. */
         app->txrx->debug_direct_sampling = !app->txrx->debug_direct_sampling;
+        radio_begin(app);
+        radio_rx(app);
     } else if (input.type == InputTypePress &&
               (input.key != InputKeyDown || input.key != InputKeyUp))
     {
