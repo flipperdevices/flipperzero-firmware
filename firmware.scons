@@ -15,6 +15,7 @@ env = ENV.Clone(
         ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
         "fwbin",
         "fbt_apps",
+        "pvsstudio",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
@@ -272,6 +273,21 @@ AlwaysBuild(fwcdb)
 Precious(fwcdb)
 NoClean(fwcdb)
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_cdb", fwcdb)
+
+pvscheck = fwenv.PVSCheck("pvsreport.log", fwcdb)
+Depends(
+    pvscheck,
+    [
+        fwenv["FW_VERSION_JSON"],
+        fwenv["FW_ASSETS_HEADERS"],
+        fwenv["SDK_APISYMS"],
+        fwenv["_APP_ICONS"],
+    ],
+)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_pvscheck", pvscheck)
+
+pvsreport = fwenv.PVSReport("pvsreport/index.html", pvscheck)
+Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_pvs", pvsreport)
 
 # If current configuration was explicitly requested, generate compilation database
 # and link its directory as build/latest
