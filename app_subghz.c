@@ -5,6 +5,9 @@
 #include "custom_presets.h"
 
 #include <flipper_format/flipper_format_i.h>
+#include <furi_hal_rtc.h>
+#include <furi_hal_spi.h>
+#include <furi_hal_interrupt.h>
 
 void raw_sampling_worker_start(ProtoViewApp *app);
 void raw_sampling_worker_stop(ProtoViewApp *app);
@@ -153,6 +156,7 @@ int32_t direct_sampling_thread(void *ctx) {
     return 0;
 }
 
+#if 0
 void raw_sampling_worker_start(ProtoViewApp *app) {
     if (app->txrx->ds_thread != NULL) return;
     app->txrx->ds_thread_running = true;
@@ -166,4 +170,42 @@ void raw_sampling_worker_stop(ProtoViewApp *app) {
     furi_thread_join(app->txrx->ds_thread);
     furi_thread_free(app->txrx->ds_thread);
     app->txrx->ds_thread = NULL;
+}
+#endif
+
+void protoview_timer_isr(void *ctx) {
+    ProtoViewApp *app = ctx;
+    UNUSED(app);
+    raw_samples_add(RawSamples, true, 500);
+    raw_samples_add(RawSamples, false, 500);
+    LL_TIM_ClearFlag_UPDATE(TIM2);
+}
+
+void raw_sampling_worker_start(ProtoViewApp *app) {
+    UNUSED(app);
+
+    LL_TIM_InitTypeDef tim_init = {
+        .Prescaler = 63999,
+        .CounterMode = LL_TIM_COUNTERMODE_UP,
+        .Autoreload = 30,
+    };
+
+    LL_TIM_Init(TIM2, &tim_init);
+    LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
+    LL_TIM_DisableCounter(TIM2);
+    LL_TIM_SetCounter(TIM2, 0);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, protoview_timer_isr, app);
+    LL_TIM_EnableIT_UPDATE(TIM2);
+    LL_TIM_EnableCounter(TIM2);
+    FURI_LOG_E(TAG, "Timer enabled");
+}
+
+void raw_sampling_worker_stop(ProtoViewApp *app) {
+    UNUSED(app);
+    FURI_CRITICAL_ENTER();
+    LL_TIM_DisableCounter(TIM2);
+    LL_TIM_DisableIT_UPDATE(TIM2);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
+    LL_TIM_DeInit(TIM2);
+    FURI_CRITICAL_EXIT();
 }

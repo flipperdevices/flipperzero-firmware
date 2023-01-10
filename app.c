@@ -130,7 +130,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     /* Setup rx worker and environment. */
     app->txrx->freq_mod_changed = false;
-    app->txrx->debug_direct_sampling = false;
+    app->txrx->debug_direct_sampling = true;
     app->txrx->ds_thread = NULL;
     app->txrx->worker = subghz_worker_alloc();
 #ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
