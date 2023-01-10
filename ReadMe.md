@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - OFW: Fixes for issues on desktop from [PR #2280](https://github.com/flipperdevices/flipperzero-firmware/pull/2280)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 
 <a name="release">
 
