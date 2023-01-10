@@ -53,6 +53,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
         bool level;
         uint32_t dur;
         raw_samples_get(s, j, &level, &dur);
+
         if (dur < minlen || dur > maxlen) break; /* return. */
 
         /* Let's see if it matches a class we already have or if we

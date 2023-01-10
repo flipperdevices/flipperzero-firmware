@@ -180,6 +180,7 @@ void protoview_timer_isr(void *ctx) {
     if (app->txrx->last_g0_value != level) {
         uint32_t now = DWT->CYCCNT;
         uint32_t dur = now - app->txrx->last_g0_change_time;
+        dur /= furi_hal_cortex_instructions_per_microsecond();
         if (dur > 15000) dur = 15000;
         raw_samples_add(RawSamples, app->txrx->last_g0_value, dur);
         app->txrx->last_g0_value = level;
@@ -194,7 +195,7 @@ void raw_sampling_worker_start(ProtoViewApp *app) {
     LL_TIM_InitTypeDef tim_init = {
         .Prescaler = 63,
         .CounterMode = LL_TIM_COUNTERMODE_UP,
-        .Autoreload = 10,
+        .Autoreload = 5, /* Sample every 5 us */
     };
 
     LL_TIM_Init(TIM2, &tim_init);
