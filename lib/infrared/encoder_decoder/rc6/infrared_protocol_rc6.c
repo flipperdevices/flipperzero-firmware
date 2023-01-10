@@ -30,7 +30,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_rc6 = {
     .duty_cycle = INFRARED_RC6_DUTY_CYCLE,
 };
 
-const InfraredProtocolVariant* infrared_rc6_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_protocol_rc6_get_variant(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolRC6)
         return &infrared_protocol_variant_rc6;
     else

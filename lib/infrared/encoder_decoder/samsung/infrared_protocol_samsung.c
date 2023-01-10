@@ -31,7 +31,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_samsung32 = {
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-const InfraredProtocolVariant* infrared_samsung32_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_protocol_samsung32_get_variant(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolSamsung32)
         return &infrared_protocol_variant_samsung32;
     else

@@ -49,7 +49,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_sirc20 = {
     .duty_cycle = INFRARED_SIRC_DUTY_CYCLE,
 };
 
-const InfraredProtocolVariant* infrared_sirc_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_protocol_sirc_get_variant(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolSIRC)
         return &infrared_protocol_variant_sirc;
     else if(protocol == InfraredProtocolSIRC15)

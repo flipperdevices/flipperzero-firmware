@@ -56,7 +56,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_nec42ext = {
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-const InfraredProtocolVariant* infrared_nec_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_protocol_nec_get_variant(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolNEC)
         return &infrared_protocol_variant_nec;
     else if(protocol == InfraredProtocolNECext)

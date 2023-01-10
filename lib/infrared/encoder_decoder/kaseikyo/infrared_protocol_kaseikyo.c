@@ -31,7 +31,7 @@ static const InfraredProtocolVariant infrared_protocol_variant_kaseikyo = {
     .duty_cycle = INFRARED_COMMON_DUTY_CYCLE,
 };
 
-const InfraredProtocolVariant* infrared_kaseikyo_get_spec(InfraredProtocol protocol) {
+const InfraredProtocolVariant* infrared_protocol_kaseikyo_get_variant(InfraredProtocol protocol) {
     if(protocol == InfraredProtocolKaseikyo)
         return &infrared_protocol_variant_kaseikyo;
     else
