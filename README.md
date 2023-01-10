@@ -19,7 +19,7 @@ Info: If possible, do not power your devices from 3V3 (pin 9) Flipper Zero. It d
 ## How to install
 Copy the contents of the repository to the applications_user/uart_terminal folder Flipper Zero firmware and build app with the command ./fbt fap_uart_terminal.
 
-Or use the tool uFBT for building applications for Flipper Zero.
+Or use the tool [uFBT](https://github.com/flipperdevices/flipperzero-ufbt) for building applications for Flipper Zero.
 
 ## How it works
 
