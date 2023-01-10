@@ -1,14 +1,25 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Script import Delete
-import SCons
+from SCons.Script import Delete, Mkdir
 import multiprocessing
+
+
+def emit_pvsreport(target, source, env):
+    target_dir = env["REPORT_DIR"]
+    if env["PLATFORM"] == "win32":
+        # Report generator on Windows emits to a subfolder of given output folder
+        target_dir = target_dir.Dir("fullhtml")
+    return [target_dir.File("index.html")], source
 
 
 def generate(env):
     env.SetDefault(
         PVSNCORES=multiprocessing.cpu_count(),
-        PVSOPTIONS=["@.pvsoptions", "-j${PVSNCORES}"],
+        PVSOPTIONS=[
+            "@.pvsoptions",
+            "-j${PVSNCORES}",
+            # "--incremental", # kinda broken on PVS side
+        ],
         PVSCONVOPTIONS=[
             "-a",
             "GA:1,2,3",
@@ -37,7 +48,6 @@ def generate(env):
 
     env.Append(
         BUILDERS={
-            # pvs-studio-analyzer analyze @.pvsoptions -C gccarm -j8 -f build/latest/compile_commands.json -o PVS-Studio.log
             "PVSCheck": Builder(
                 action=Action(
                     '${PVSCHECKBIN} analyze ${PVSOPTIONS} -f "${SOURCE}" -o "${TARGET}"',
@@ -49,11 +59,14 @@ def generate(env):
             "PVSReport": Builder(
                 action=[
                     Delete("${TARGET.dir}"),
+                    # PlogConverter.exe and plog-converter have different behavior
+                    Mkdir("${TARGET.dir}") if env["PLATFORM"] == "win32" else None,
                     Action(
-                        '${PVSCONVBIN} ${PVSCONVOPTIONS} "${SOURCE}" -o "${TARGET.dir}"',
+                        '${PVSCONVBIN} ${PVSCONVOPTIONS} "${SOURCE}" -o "${REPORT_DIR}"',
                         "${PVSCONVCOMSTR}",
                     ),
                 ],
+                emitter=emit_pvsreport,
                 src_suffix=".log",
             ),
         }

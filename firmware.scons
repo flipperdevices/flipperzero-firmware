@@ -285,9 +285,12 @@ Depends(
     ],
 )
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_pvscheck", pvscheck)
+AlwaysBuild(pvscheck)
+Precious(pvscheck)
 
-pvsreport = fwenv.PVSReport("pvsreport/index.html", pvscheck)
+pvsreport = fwenv.PVSReport(None, pvscheck, REPORT_DIR=Dir("pvsreport"))
 Alias(fwenv["FIRMWARE_BUILD_CFG"] + "_pvs", pvsreport)
+AlwaysBuild(pvsreport)
 
 # If current configuration was explicitly requested, generate compilation database
 # and link its directory as build/latest
