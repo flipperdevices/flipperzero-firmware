@@ -1,6 +1,7 @@
-# iButton key file format
+# iButton Infrared Flipper File Formats
 
 ## Example
+
 ```
 Filetype: Flipper iButton key
 Version: 1
@@ -9,6 +10,7 @@ Key type: Dallas
 # Data size for Cyfral is 2, for Metakom is 4, for Dallas is 8
 Data: 12 34 56 78 9A BC DE F0
 ```
+
 ## Description
 
 Filename extension: `.ibtn`

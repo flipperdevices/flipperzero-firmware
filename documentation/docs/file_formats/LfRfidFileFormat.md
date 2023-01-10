@@ -1,12 +1,14 @@
-# LF RFID key file format
+# 125kHz RFID Infrared Flipper File Formats
 
 ## Example
+
 ```
 Filetype: Flipper RFID key
 Version: 1
 Key type: EM4100
 Data: 01 23 45 67 89
 ```
+
 ## Description
 
 Filename extension: `.rfid`

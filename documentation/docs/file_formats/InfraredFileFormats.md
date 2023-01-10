@@ -1,6 +1,7 @@
 # Infrared Flipper File Formats
 
 ## Infrared Remote File Format
+
 ### Example
 
     Filetype: IR signals file
@@ -25,17 +26,20 @@
     command: 15 00 00 00
 
 ### Description
+
 Filename extension: `.ir`
 
-This file format is used to store an infrared remote that consists of an arbitrary number of buttons. 
+This file format is used to store an infrared remote that consists of an arbitrary number of buttons.
 Each button is separated from others by a comment character (`#`) for better readability.
 
 Known protocols are represented in the `parsed` form, whereas non-recognised signals may be saved and re-transmitted as `raw` data.
 
-#### Version history:
+#### Version history
+
 1. Initial version.
 
 #### Format fields
+
 | Name       | Use     | Type   | Description |
 | ---------- | ------- | ------ |------------ |
 | name       | both    | string | Name of the button. Only printable ASCII characters are allowed. |
@@ -48,25 +52,33 @@ Known protocols are represented in the `parsed` form, whereas non-recognised sig
 | data       | raw     | uint32 | Raw signal timings, in microseconds between logic level changes. Individual elements must be space-separated. Maximum timings amount is 1024. |
 
 ## Infrared Library File Format
+
 ### Examples
+
 - [TV Universal Library](/assets/resources/infrared/assets/tv.ir)
 - [A/C Universal Library](/assets/resources/infrared/assets/ac.ir)
 - [Audio Universal Library](/assets/resources/infrared/assets/audio.ir)
 
 ### Description
+
 Filename extension: `.ir`
 
 This file format is used to store universal remote libraries. It is identical to the previous format, differing only in the `Filetype` field.\
 It also has predefined button names for each universal library type, so that the universal remote application could understand them.
 See [Universal Remotes](/documentation/UniversalRemotes.md) for more information.
 
-### Version history:
+### Version history
+
 1. Initial version.
 
 ## Infrared Test File Format
+
 ### Examples
+
 See [Infrared Unit Tests](/assets/unit_tests/infrared/) for various examples.
+
 ### Description
+
 Filename extension: `.irtest`
 
 This file format is used to store technical test data that is too large to keep directly in the firmware.
@@ -77,10 +89,12 @@ Each infrared protocol must have corresponding unit tests complete with an `.irt
 Known protocols are represented in the `parsed_array` form, whereas raw data has the `raw` type.\
 Note: a single parsed signal must be represented as an array of size 1.
 
-### Version history:
+### Version history
+
 1. Initial version.
 
 #### Format fields
+
 | Name       | Use          | Type   | Description |
 | ---------- | ------------ | ------ |------------ |
 | name       | both         | string | Name of the signal. Only printable ASCII characters are allowed. |
@@ -95,7 +109,9 @@ Note: a single parsed signal must be represented as an array of size 1.
 | data       | raw          | uint32 | Ditto. |
 
 #### Signal names
+
 The signal names in an `.irtest` file follow a convention `<name><test_number>`, where the name is one of:
+
 - decoder_input
 - decoder_expected
 - encoder_decoder_input,

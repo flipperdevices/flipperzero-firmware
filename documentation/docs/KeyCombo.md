@@ -1,11 +1,9 @@
-# Key Combos
+# Key Combinations
 
 There are times when your Flipper feels blue and doesn't respond to your commands.
 In that case, you may find this guide useful.
 
-
 ## Basic Combos
-
 
 ### Hardware Reset
 
@@ -18,7 +16,6 @@ Main components involved: Keys -> DD8(NC7SZ32M5X, OR-gate) -> DD1(STM32WB55, MCU
 There is 1 case where it does not work:
 
 - MCU debug block is active and holding reset line from inside.
-
 
 ### Hardware Power Reset
 
@@ -36,7 +33,6 @@ There is 1 case where it does not work:
 
 - Power supply is connected to USB or 5V_ext
 
-
 ### Software DFU
 
 - Press `LEFT` on boot to enter DFU with Flipper boot-loader
@@ -44,7 +40,6 @@ There is 1 case where it does not work:
 There is 1 case where it does not work:
 
 - Flipper boot-loader is damaged or absent
-
 
 ### Hardware DFU
 
@@ -54,9 +49,7 @@ There is 1 case where it does not work:
 
 - Option Bytes are damaged or set to ignore `OK` key
 
-
 ## DFU Combos
-
 
 ### Hardware Reset + Software DFU
 
@@ -73,7 +66,6 @@ There are 2 cases where it does not work:
 - MCU debug block is active and holding reset line from inside
 - Flipper boot-loader is damaged or absent
 
-
 ### Hardware Reset + Hardware DFU
 
 - Press `LEFT`, `BACK` and `OK` and hold for a couple of seconds
@@ -87,7 +79,6 @@ There are 2 cases where it does not work:
 
 - MCU debug block is active and holding reset line from inside
 - Option Bytes are damaged or set to ignore `OK` key
-
 
 ### Hardware Power Reset + Software DFU
 
@@ -105,7 +96,6 @@ There are 2 cases where it does not work:
 
 - Power supply is connected to USB or 5V_ext
 - Flipper boot-loader is damaged or absent
-
 
 ### Hardware Power Reset + Hardware DFU
 
