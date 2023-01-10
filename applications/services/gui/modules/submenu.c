@@ -263,6 +263,15 @@ void submenu_add_item(
     const char* label,
     uint32_t index,
     SubmenuItemCallback callback,
+    void* callback_context) {
+    submenu_add_lockable_item(submenu, label, index, callback, callback_context, false, NULL);
+}
+
+void submenu_add_lockable_item(
+    Submenu* submenu,
+    const char* label,
+    uint32_t index,
+    SubmenuItemCallback callback,
     void* callback_context,
     bool locked,
     const char* locked_message) {
