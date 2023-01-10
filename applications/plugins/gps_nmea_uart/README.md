@@ -1,11 +1,7 @@
 # GPS for Flipper Zero
 
 A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
-
-[Original link](https://github.com/ezod/flipperzero-gps)
 [Adafruit Ultimate GPS Breakout].
-
-[Original link](https://github.com/ezod/flipperzero-gps)
 
 ![ui](ui.png)
 
@@ -19,6 +15,19 @@ Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 
 ![wiring](wiring.png)
 
+### Confirmed Compatible Modules
+
+* [Adafruit Ultimate GPS Breakout]
+* Beitian BN-180
+
+## Building the FAP
+
+1. Clone the [flipperzero-firmware] repository.
+2. Create a symbolic link in `applications_user` named `gps`, pointing to this
+   repository.
+3. Compile with `./fbt fap_gps`.
+4. Copy `build/f7-firmware-D/.extapps/gps.fap` to `apps/Tools` on the SD card
+   (directly or using [qFlipper]).
 
 ## Contributing
 

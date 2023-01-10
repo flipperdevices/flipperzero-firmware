@@ -9,6 +9,7 @@
 #include "furi_hal_random.h"
 
 int scrambleStarted = 0;
+char scramble_str[100] = {0};
 char scramble_start[100] = {0};
 char scramble_end[100] = {0};
 int notifications_enabled = 0;
@@ -19,6 +20,25 @@ static void success_vibration() {
     furi_delay_ms(50);
     furi_hal_vibro_on(false);
     return;
+}
+void split_array(char original[], int size, char first[], char second[]) {
+    int mid = size / 2;
+    if(size % 2 != 0) {
+        mid++;
+    }
+    int first_index = 0, second_index = 0;
+    for(int i = 0; i < size; i++) {
+        if(i < mid) {
+            first[first_index++] = original[i];
+        } else {
+            if(i == mid && (original[i] == '2' || original[i] == '\'')) {
+                continue;
+            }
+            second[second_index++] = original[i];
+        }
+    }
+    first[first_index] = '\0';
+    second[second_index] = '\0';
 }
 
 static void draw_callback(Canvas* canvas, void* ctx) {
@@ -31,14 +51,11 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         genScramble();
         scrambleReplace();
         valid();
-        strcpy(scramble_start, printData());
+        strcpy(scramble_str, printData());
         if(notifications_enabled) {
             success_vibration();
         }
-        genScramble();
-        scrambleReplace();
-        valid();
-        strcpy(scramble_end, printData());
+        split_array(scramble_str, strlen(scramble_str), scramble_start, scramble_end);
         scrambleStarted = 0;
     }
     canvas_set_font(canvas, FontSecondary);

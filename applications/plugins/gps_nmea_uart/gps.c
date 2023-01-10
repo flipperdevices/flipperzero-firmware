@@ -101,12 +101,6 @@ int32_t gps_app(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
-                    case InputKeyUp:
-                    case InputKeyDown:
-                    case InputKeyRight:
-                    case InputKeyLeft:
-                    case InputKeyOk:
-                        break;
                     case InputKeyBack:
                         processing = false;
                         break;
@@ -115,6 +109,8 @@ int32_t gps_app(void* p) {
                     }
                 }
             }
+        } else {
+            FURI_LOG_D("GPS", "FuriMessageQueue: event timeout");
         }
 
         view_port_update(view_port);

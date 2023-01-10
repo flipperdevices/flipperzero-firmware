@@ -57,6 +57,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Patreon Builds Update: ALL + Anime + Select Builds: Added 3 Akira animations (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/e40f48ee4c8d75f9fcf634919cf806b1329b32da) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
 - [Patreon Builds Update: 18 Plus Builds: Added 1 Cool Devices and 2 Bible Black animations (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
+- Updated ReadMe's for Geiger Counter, GPS, Toy Serial and UART Terminal
+- Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
+- Updated: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 
 <a name="release">
 

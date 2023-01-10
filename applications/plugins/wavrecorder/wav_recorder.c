@@ -20,6 +20,9 @@ typedef struct {
 } RecorderEvent;
 
 typedef struct {
+    FuriMessageQueue* event_queue;
+    ViewPort* view_port;
+    Gui* gui;
     FuriMutex* mutex;
     uint32_t sample_max;
     uint32_t sample_min;
@@ -57,11 +60,7 @@ static void wav_recorder_tick(void* context) {
     furi_message_queue_put(event_queue, &app_event, 0);
 }
 
-int32_t wav_recorder_app(void* p) {
-    UNUSED(p);
-    FURI_LOG_I(TAG, "Hello world");
-    FURI_LOG_I(TAG, "I'm wav_recorder!");
-
+static void wav_recorder_adc_init() {
     // PC3 is ADC1_IN4
     furi_hal_gpio_init(&gpio_ext_pc3, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     FURI_LOG_I(TAG, "Gpio Set OK");
@@ -77,30 +76,65 @@ int32_t wav_recorder_app(void* p) {
 
     furi_hal_adc_enable();
     FURI_LOG_I(TAG, "ADC Enable OK");
+}
 
+static void wav_recorder_adc_deinit() {
+    furi_hal_adc_disable();
+    FURI_LOG_I(TAG, "ADC Disable OK");
+
+    furi_hal_adc_deinit();
+    FURI_LOG_I(TAG, "ADC Deinit OK");
+}
+
+static RecorderApp* wav_recorder_alloc() {
     RecorderApp* app = malloc(sizeof(RecorderApp));
     app->sample_max = 0;
     app->sample_min = 4096;
 
     app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(RecorderEvent));
+    app->event_queue = furi_message_queue_alloc(8, sizeof(RecorderEvent));
 
-    ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, wav_recorder_draw, app);
-    view_port_input_callback_set(view_port, wav_recorder_input, event_queue);
+    app->view_port = view_port_alloc();
+    view_port_draw_callback_set(app->view_port, wav_recorder_draw, app);
+    view_port_input_callback_set(app->view_port, wav_recorder_input, app->event_queue);
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+    app->gui = furi_record_open(RECORD_GUI);
+    gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    FuriTimer* timer = furi_timer_alloc(wav_recorder_tick, FuriTimerTypePeriodic, event_queue);
+    return app;
+}
+
+static void wav_recorder_free(RecorderApp* app) {
+    gui_remove_view_port(app->gui, app->view_port);
+    furi_record_close(RECORD_GUI);
+    view_port_free(app->view_port);
+
+    furi_message_queue_free(app->event_queue);
+
+    furi_mutex_free(app->mutex);
+    free(app);
+}
+
+int32_t wav_recorder_app(void* p) {
+    UNUSED(p);
+    FURI_LOG_I(TAG, "Hello world");
+    FURI_LOG_I(TAG, "I'm wav_recorder!");
+
+    wav_recorder_adc_init();
+
+    RecorderApp* app = wav_recorder_alloc();
+
+    FuriTimer* timer =
+        furi_timer_alloc(wav_recorder_tick, FuriTimerTypePeriodic, app->event_queue);
 
     // TODO: FuriTimer max frequency is 1kHz. Use hardware timer.
     furi_timer_start(timer, 1);
 
     RecorderEvent event;
     for(bool running = true; running;) {
-        furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
+        furi_check(
+            furi_message_queue_get(app->event_queue, &event, FuriWaitForever) == FuriStatusOk);
         if(event.type == EventTypeInput) {
             if(event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
                 running = false;
@@ -114,27 +148,16 @@ int32_t wav_recorder_app(void* p) {
             app->sample_min = MIN(adc_value, app->sample_min);
 
             furi_mutex_release(app->mutex);
-            view_port_update(view_port);
+            view_port_update(app->view_port);
         }
     }
 
     furi_timer_stop(timer);
     furi_timer_free(timer);
 
-    gui_remove_view_port(gui, view_port);
-    furi_record_close(RECORD_GUI);
-    view_port_free(view_port);
+    wav_recorder_free(app);
 
-    furi_message_queue_free(event_queue);
-
-    furi_mutex_free(app->mutex);
-    free(app);
-
-    furi_hal_adc_disable();
-    FURI_LOG_I(TAG, "ADC Disable OK");
-
-    furi_hal_adc_deinit();
-    FURI_LOG_I(TAG, "ADC Deinit OK");
+    wav_recorder_adc_deinit();
 
     return 0;
 }
