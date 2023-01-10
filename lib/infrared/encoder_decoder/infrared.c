@@ -130,8 +130,7 @@ static const InfraredEncoderDecoder infrared_encoder_decoder[] = {
 };
 
 static int infrared_find_index_by_protocol(InfraredProtocol protocol);
-static const InfraredProtocolVariant*
-    infrared_get_variant_by_protocol(InfraredProtocol protocol);
+static const InfraredProtocolVariant* infrared_get_variant_by_protocol(InfraredProtocol protocol);
 
 const InfraredMessage*
     infrared_decode(InfraredDecoderHandler* handler, bool level, uint32_t duration) {
@@ -285,8 +284,7 @@ InfraredProtocol infrared_get_protocol_by_name(const char* protocol_name) {
     return InfraredProtocolUnknown;
 }
 
-static const InfraredProtocolVariant*
-    infrared_get_variant_by_protocol(InfraredProtocol protocol) {
+static const InfraredProtocolVariant* infrared_get_variant_by_protocol(InfraredProtocol protocol) {
     int index = infrared_find_index_by_protocol(protocol);
     const InfraredProtocolVariant* variant = NULL;
     if(index >= 0) {
@@ -315,4 +313,8 @@ uint32_t infrared_get_protocol_frequency(InfraredProtocol protocol) {
 
 float infrared_get_protocol_duty_cycle(InfraredProtocol protocol) {
     return infrared_get_variant_by_protocol(protocol)->duty_cycle;
+}
+
+size_t infrared_get_protocol_min_repeat_count(InfraredProtocol protocol) {
+    return infrared_get_variant_by_protocol(protocol)->repeat_count;
 }

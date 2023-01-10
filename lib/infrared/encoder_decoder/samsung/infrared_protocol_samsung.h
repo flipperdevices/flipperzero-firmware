@@ -29,4 +29,3 @@ void* infrared_encoder_samsung32_alloc(void);
 void infrared_encoder_samsung32_free(void* encoder_ptr);
 
 const InfraredProtocolVariant* infrared_protocol_samsung32_get_variant(InfraredProtocol protocol);
-
