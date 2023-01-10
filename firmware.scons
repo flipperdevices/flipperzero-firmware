@@ -70,6 +70,8 @@ env = ENV.Clone(
             ],
         },
     },
+    SDK_APISYMS=None,
+    _APP_ICONS=None,
 )
 
 
