@@ -1,9 +1,7 @@
-#include <core/memmgr.h>
-#include "infrared.h"
-#include "common/infrared_common_i.h"
-#include "infrared_protocol_defs_i.h"
-#include <stdint.h>
-#include "../infrared_i.h"
+#include "infrared_protocol_rc6_i.h"
+
+#include <stdlib.h>
+#include <core/check.h>
 
 typedef struct InfraredEncoderRC6 {
     InfraredCommonEncoder* common_encoder;

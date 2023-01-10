@@ -1,10 +1,7 @@
-#include "infrared.h"
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <furi.h>
-#include "../infrared_i.h"
-#include "../infrared_protocol_defs_i.h"
+#include "infrared_protocol_rc6_i.h"
+
+#include <stdlib.h>
+#include <core/check.h>
 
 typedef struct {
     InfraredCommonDecoder* common_decoder;

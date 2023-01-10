@@ -1,5 +1,28 @@
-#include "../infrared_i.h"
-#include "infrared_protocol_defs_i.h"
+#include "infrared_protocol_nec_i.h"
+
+const InfraredCommonProtocolSpec protocol_nec = {
+    .timings =
+        {
+            .preamble_mark = INFRARED_NEC_PREAMBLE_MARK,
+            .preamble_space = INFRARED_NEC_PREAMBLE_SPACE,
+            .bit1_mark = INFRARED_NEC_BIT1_MARK,
+            .bit1_space = INFRARED_NEC_BIT1_SPACE,
+            .bit0_mark = INFRARED_NEC_BIT0_MARK,
+            .bit0_space = INFRARED_NEC_BIT0_SPACE,
+            .preamble_tolerance = INFRARED_NEC_PREAMBLE_TOLERANCE,
+            .bit_tolerance = INFRARED_NEC_BIT_TOLERANCE,
+            .silence_time = INFRARED_NEC_SILENCE,
+            .min_split_time = INFRARED_NEC_MIN_SPLIT_TIME,
+        },
+    .databit_len[0] = 42,
+    .databit_len[1] = 32,
+    .no_stop_bit = false,
+    .decode = infrared_common_decode_pdwm,
+    .encode = infrared_common_encode_pdwm,
+    .interpret = infrared_decoder_nec_interpret,
+    .decode_repeat = infrared_decoder_nec_decode_repeat,
+    .encode_repeat = infrared_encoder_nec_encode_repeat,
+};
 
 static const InfraredProtocolSpecification infrared_nec_protocol_specification = {
     .name = "NEC",

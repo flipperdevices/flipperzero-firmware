@@ -1,9 +1,5 @@
-#include "infrared.h"
-#include "infrared_protocol_defs_i.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <furi.h>
-#include "../infrared_i.h"
+#include "infrared_protocol_samsung_i.h"
+#include <core/check.h>
 
 InfraredMessage* infrared_decoder_samsung32_check_ready(void* ctx) {
     return infrared_common_decoder_check_ready(ctx);

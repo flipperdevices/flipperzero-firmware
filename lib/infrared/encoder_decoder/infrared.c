@@ -1,13 +1,16 @@
 #include "infrared.h"
-#include <core/check.h>
-#include "common/infrared_common_i.h"
-#include "infrared_protocol_defs_i.h"
-#include <stdbool.h>
-#include <stdint.h>
+
 #include <stdlib.h>
-#include <furi.h>
-#include "infrared_i.h"
-#include <furi_hal_infrared.h>
+#include <string.h>
+#include <core/check.h>
+#include <core/common_defines.h>
+
+#include "nec/infrared_protocol_nec.h"
+#include "samsung/infrared_protocol_samsung.h"
+#include "rc5/infrared_protocol_rc5.h"
+#include "rc6/infrared_protocol_rc6.h"
+#include "sirc/infrared_protocol_sirc.h"
+#include "kaseikyo/infrared_protocol_kaseikyo.h"
 
 typedef struct {
     InfraredAlloc alloc;

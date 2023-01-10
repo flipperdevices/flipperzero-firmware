@@ -1,9 +1,5 @@
+#include "infrared_protocol_kaseikyo_i.h"
 #include <core/check.h>
-#include "common/infrared_common_i.h"
-#include <stdint.h>
-#include "../infrared_i.h"
-#include "infrared_protocol_defs_i.h"
-#include <furi.h>
 
 void infrared_encoder_kaseikyo_reset(void* encoder_ptr, const InfraredMessage* message) {
     furi_assert(encoder_ptr);
