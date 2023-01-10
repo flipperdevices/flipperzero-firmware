@@ -7,8 +7,6 @@ import multiprocessing
 
 def generate(env):
     env.SetDefault(
-        PVSCHECKBIN="pvs-studio-analyzer",
-        PVSCONVBIN="plog-converter",
         PVSNCORES=multiprocessing.cpu_count(),
         PVSOPTIONS=["@.pvsoptions", "-j${PVSNCORES}"],
         PVSCONVOPTIONS=[
@@ -19,6 +17,17 @@ def generate(env):
             "--indicate-warnings",
         ],
     )
+
+    if env["PLATFORM"] == "win32":
+        env.SetDefault(
+            PVSCHECKBIN="CompilerCommandsAnalyzer.exe",
+            PVSCONVBIN="PlogConverter.exe",
+        )
+    else:
+        env.SetDefault(
+            PVSCHECKBIN="pvs-studio-analyzer",
+            PVSCONVBIN="plog-converter",
+        )
 
     if not env["VERBOSE"]:
         env.SetDefault(
