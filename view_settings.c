@@ -21,7 +21,7 @@ void render_view_settings(Canvas *const canvas, ProtoViewApp *app) {
     canvas_draw_str(canvas,10,61,"Use up and down to modify");
 
     if (app->txrx->debug_direct_sampling)
-        canvas_draw_str(canvas,3,54,"(DEBUG direct sampling is ON)");
+        canvas_draw_str(canvas,3,52,"(DEBUG direct sampling is ON)");
 
     /* Show frequency. We can use big numbers font since it's just a number. */
     if (app->current_view == ViewFrequencySettings) {

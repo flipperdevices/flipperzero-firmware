@@ -71,7 +71,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
                 /* Is the difference in duration between this signal and
                  * the class we are inspecting less than a given percentage?
                  * If so, accept this signal. */
-                if (delta < classavg/8) { /* 100%/8 = 12%. */
+                if (delta < classavg/6) { /* 100%/6 = 16%. */
                     /* It is useful to compute the average of the class
                      * we are observing. We know how many samples we got so
                      * far, so we can recompute the average easily.

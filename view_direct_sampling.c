@@ -20,7 +20,7 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
         }
     }
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_with_border(canvas,40,60,"Direct sampling",
+    canvas_draw_str_with_border(canvas,36,60,"Direct sampling",
         ColorWhite,ColorBlack);
 }
 
