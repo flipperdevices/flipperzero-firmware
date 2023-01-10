@@ -132,6 +132,8 @@ ProtoViewApp* protoview_app_alloc() {
     app->txrx->freq_mod_changed = false;
     app->txrx->debug_direct_sampling = true;
     app->txrx->ds_thread = NULL;
+    app->txrx->last_g0_change_time = DWT->CYCCNT;
+    app->txrx->last_g0_value = false;
     app->txrx->worker = subghz_worker_alloc();
 #ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
     app->txrx->worker->filter_running = 0;

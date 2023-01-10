@@ -68,14 +68,20 @@ struct ProtoViewTxRx {
     bool freq_mod_changed;      /* The user changed frequency and/or modulation
                                    from the interface. There is to restart the
                                    radio with the right parameters. */
-    bool debug_direct_sampling; /* Read data from GDO0 in a busy loop. Only
-                                   for testing. */
     SubGhzWorker* worker;       /* Our background worker. */
-    FuriThread *ds_thread;      /* Direct sampling thread. */
-    bool ds_thread_running;     /* Exit condition for the thread. */
     SubGhzEnvironment* environment;
     SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
+
+    /* Direct sampling mode state. */
+    bool debug_direct_sampling; /* Read data from GDO0 in a busy loop. Only
+                                   for testing. */
+    FuriThread *ds_thread;      /* Direct sampling thread. */
+    bool ds_thread_running;     /* Exit condition for the thread. */
+    uint32_t last_g0_change_time; /* Last high->low (or reverse) switch. */
+    bool last_g0_value;           /* Current value (high or low): we are
+                                     checking the duration in the timer
+                                     handler. */
 };
 
 typedef struct ProtoViewTxRx ProtoViewTxRx;

@@ -175,9 +175,16 @@ void raw_sampling_worker_stop(ProtoViewApp *app) {
 
 void protoview_timer_isr(void *ctx) {
     ProtoViewApp *app = ctx;
-    UNUSED(app);
-    raw_samples_add(RawSamples, true, 500);
-    raw_samples_add(RawSamples, false, 500);
+
+    bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
+    if (app->txrx->last_g0_value != level) {
+        uint32_t now = DWT->CYCCNT;
+        uint32_t dur = now - app->txrx->last_g0_change_time;
+        if (dur > 15000) dur = 15000;
+        raw_samples_add(RawSamples, app->txrx->last_g0_value, dur);
+        app->txrx->last_g0_value = level;
+        app->txrx->last_g0_change_time = now;
+    }
     LL_TIM_ClearFlag_UPDATE(TIM2);
 }
 
@@ -185,9 +192,9 @@ void raw_sampling_worker_start(ProtoViewApp *app) {
     UNUSED(app);
 
     LL_TIM_InitTypeDef tim_init = {
-        .Prescaler = 63999,
+        .Prescaler = 63,
         .CounterMode = LL_TIM_COUNTERMODE_UP,
-        .Autoreload = 30,
+        .Autoreload = 10,
     };
 
     LL_TIM_Init(TIM2, &tim_init);
