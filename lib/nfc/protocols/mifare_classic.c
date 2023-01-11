@@ -591,7 +591,7 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
         key = nfc_util_bytes2num(sec_tr->key_a, sizeof(sec_tr->key_a));
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
-                if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyA, &crypto, false, 0)) continue;
+                if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyA, &crypto, false, 0)) continue;
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                     mf_classic_set_block_read(data, i, &block_tmp);
                     blocks_read++;
@@ -610,7 +610,7 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
         key = nfc_util_bytes2num(sec_tr->key_b, sizeof(sec_tr->key_b));
         for(size_t i = start_block; i < start_block + total_blocks; i++) {
             if(!mf_classic_is_block_read(data, i)) {
-                if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyB, &crypto, false, 0)) continue;
+                if(!mf_classic_auth(tx_rx, i, key, MfClassicKeyB, &crypto, false, 0)) continue;
                 if(mf_classic_read_block(tx_rx, &crypto, i, &block_tmp)) {
                     mf_classic_set_block_read(data, i, &block_tmp);
                     blocks_read++;
