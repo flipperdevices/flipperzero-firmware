@@ -20,10 +20,7 @@ The signal is broadcast at 310MHz with a modulation of AM650.
 
 ## Installation Directions
 This project is intended to be overlayed on top of an existing firmware repo.
-- Clone an existing flipper zero firmware repo
-- Build the firmware
-- Deploy the firmware
-- Confirm the firmware is working properly
+- Clone, Build & Deploy an existing flipper zero firmware repo.  See this [tutorial](/firmware/updating/README.md) for updating firmware.
 - Add the [x10.c](./x10.c) file to the \lib\subghz\protocols folder
 - Add the [x10.h](./x10.h) file to the \lib\subghz\protocols folder
 - Update the  \lib\subghz\protocols\protocol_items.h file
