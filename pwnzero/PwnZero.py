@@ -87,6 +87,21 @@ class PwnZero(object):
         :param: i: Integer to check
         :return: If it is a valid byte
         """
+        return 0 <= i < 256
+
+    def _str_to_bytes(self, s: str) -> list[int]:
+        """
+        Converts a string into a list of bytes
+
+        :param: s: String to convert
+        :return: List of bytes
+        """
+        retVal = []
+        for c in s:
+            retVal.append(ord(c))
+        
+        return retVal
+
 
     def _send_data(self, param: int, args: list[int]) -> bool:
         """
