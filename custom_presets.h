@@ -11,7 +11,7 @@
  *
  * ((256+MDMCFG3)*(2^MDMCFG4:0..3bits)) / 2^28 * 26000000.
  *
- * For instance for the default values of MDMCFG3 (34) and MDMCFG4 (12):
+ * For instance for the default values of MDMCFG3[0..3] (34) and MDMCFG4 (12):
  *
  * ((256+34)*(2^12))/(2^28)*26000000 = 115051.2688000000, that is 115KBaud
  *
@@ -38,6 +38,23 @@
  * d 82 khz
  * e 68 khz
  * f 58 khz
+ *
+ * FSK deviation is controlled by the DEVIATION register. In Ruby:
+ *
+ * dev = (26000000.0/2**17)*(8+(deviation&7))*(2**(deviation>>4&7))
+ *
+ * deviation&7 (last three bits) is the deviation mantissa, while
+ * deviation>>4&7 (bits 6,5,4) are the exponent.
+ *
+ * Deviations values according to certain configuration of DEVIATION:
+ *
+ * 0x04 ->   2.380371 kHz
+ * 0x24 ->   9.521484 kHz
+ * 0x34 ->  19.042969 Khz
+ * 0x40 ->  25.390625 Khz
+ * 0x43 ->  34.912109 Khz
+ * 0x45 ->  41.259765 Khz
+ * 0x47 ->  47.607422 kHz
  */
 
 /* 20 KBaud, 2FSK, 28.56 kHz deviation, 325 Khz bandwidth filter. */
@@ -148,7 +165,7 @@ static uint8_t protoview_subghz_tpms3_async_regs[][2] = {
     {CC1101_MDMCFG2, 0x10}, // GFSK without any other check
     {CC1101_MDMCFG3, 0x93}, // Data rate is 20kBaud
     {CC1101_MDMCFG4, 0x59}, // Rx bandwidth filter is 325 kHz
-    {CC1101_DEVIATN, 0x40}, // Deviation 25.39 Khz
+    {CC1101_DEVIATN, 0x34}, // Deviation 19.04 Khz, works well with TPMS
 
     /* Main Radio Control State Machine */
     {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)

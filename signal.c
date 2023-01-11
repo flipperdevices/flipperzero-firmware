@@ -318,11 +318,9 @@ uint32_t convert_signal_to_bits(uint8_t *b, uint32_t blen, RawSamplesBuffer *s, 
 
 /* This function converts the line code used to the final data representation.
  * The representation is put inside 'buf', for up to 'buflen' bytes of total
- * data. For instance in order to convert manchester I can use "10" and "01"
- * as zero and one patterns. It is possible to use "?" inside patterns in
- * order to skip certain bits. For instance certain devices encode data twice,
- * with each bit encoded in manchester encoding and then in its reversed
- * representation. In such a case I could use "10??" and "01??".
+ * data. For instance in order to convert manchester you can use "10" and "01"
+ * as zero and one patterns. However this function does not handle differential
+ * encodings. See below for convert_from_diff_manchester().
  *
  * The function returns the number of bits converted. It will stop as soon
  * as it finds a pattern that does not match zero or one patterns, or when
@@ -346,6 +344,27 @@ uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, ui
             break;
         }
         bitmap_set(buf,buflen,decoded++,bitval);
+        if (decoded/8 == buflen) break; /* No space left on target buffer. */
+    }
+    return decoded;
+}
+
+/* Convert the differential Manchester code to bits. This is similar to
+ * convert_from_line_code() but specific for Manchester. The user must
+ * supply the value of the previous symbol before this stream, since
+ * in differential codings the next bits depend on the previous one.
+ *
+ * Parameters and return values are like convert_from_line_code(). */
+uint32_t convert_from_diff_manchester(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, bool previous)
+{
+    uint32_t decoded = 0;
+    len *= 8; /* Conver to bits. */
+    for (uint32_t j = off; j < len; j += 2) {
+        bool b0 = bitmap_get(bits,len,j);
+        bool b1 = bitmap_get(bits,len,j+1);
+        if (b0 == previous) break; /* Each new bit must switch value. */
+        bitmap_set(buf,buflen,decoded++,b0 == b1);
+        previous = b1;
         if (decoded/8 == buflen) break; /* No space left on target buffer. */
     }
     return decoded;
