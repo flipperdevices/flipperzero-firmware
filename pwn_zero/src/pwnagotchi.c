@@ -185,7 +185,7 @@ void pwnagotchi_draw_name(Pwnagotchi* pwn, Canvas* canvas) {
 
 void pwnagotchi_draw_channel(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatChannel = malloc(sizeof(char) * (PWNAGOTCHI_MAX_CHANNEL_LEN + 4));
-    strncpy(formatChannel, "CH ", 4);
+    strncpy(formatChannel, "CH", 3);
     strcat(formatChannel, pwn->channel);
     canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_CHANNEL_J, PWNAGOTCHI_CHANNEL_I, formatChannel);
@@ -194,7 +194,7 @@ void pwnagotchi_draw_channel(Pwnagotchi* pwn, Canvas* canvas) {
 
 void pwnagotchi_draw_aps(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatAP = malloc(sizeof(char) * (PWNAGOTCHI_MAX_APS_LEN + 5));
-    strncpy(formatAP, "APS ", 5);
+    strncpy(formatAP, "APS", 4);
     strcat(formatAP, pwn->apStat);
     canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_APS_J, PWNAGOTCHI_APS_I, formatAP);
@@ -203,7 +203,7 @@ void pwnagotchi_draw_aps(Pwnagotchi* pwn, Canvas* canvas) {
 
 void pwnagotchi_draw_uptime(Pwnagotchi* pwn, Canvas* canvas) {
     char* formatUp = malloc(sizeof(char) * (PWNAGOTCHI_MAX_UPTIME_LEN + 4));
-    strncpy(formatUp, "UP ", 4);
+    strncpy(formatUp, "UP", 3);
     strcat(formatUp, pwn->uptime);
     canvas_set_font(canvas, PWNAGOTCHI_FONT);
     canvas_draw_str(canvas, PWNAGOTCHI_UPTIME_J, PWNAGOTCHI_UPTIME_I, formatUp);
