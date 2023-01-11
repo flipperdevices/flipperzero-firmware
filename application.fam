@@ -9,6 +9,7 @@ App(
         "storage",
         "notification",
         "dialogs",
+        'toolbox',
     ],
     provides=[],
     stack_size=2 * 1024,
