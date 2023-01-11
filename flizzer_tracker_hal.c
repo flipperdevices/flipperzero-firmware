@@ -53,7 +53,7 @@ void sound_engine_PWM_timer_init(bool external_audio_output) //external audio on
 
 	if(external_audio_output)
 	{
-		furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedVeryHigh, GpioAltFn14TIM16);
+		furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
 	}
 
 	else

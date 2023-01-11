@@ -9,6 +9,7 @@
 
 #include "flizzer_tracker_hal.h"
 #include "sound_engine/freqs.h"
+#include "sound_engine/sound_engine_filter.h"
 
 typedef struct 
 {
@@ -29,4 +30,6 @@ typedef struct
 	uint16_t cutoff;
 	uint8_t resonance;
 	uint8_t filter_type;
+
+	bool playing;
 } FlizzerTrackerApp;

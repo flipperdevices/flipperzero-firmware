@@ -183,7 +183,7 @@ int32_t flizzer_tracker_app(void* p)
 	// Бесконечный цикл обработки очереди событий
 	while(1) 
 	{
-		// Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
+		// Выбираем событие из очереди в переменную event (ждём бесконечно долго, если очередь пуста)
 		// и проверяем, что у нас получилось это сделать
 		furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
@@ -194,6 +194,21 @@ int32_t flizzer_tracker_app(void* p)
 			if(event.input.key == InputKeyBack && event.input.type == InputTypeShort) 
 			{
 				break;
+			}
+
+			if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) 
+			{
+				tracker->playing = !(tracker->playing);
+
+				if(tracker->playing)
+				{
+					sound_engine_start();
+				}
+
+				else
+				{
+					sound_engine_stop();
+				}
 			}
 
 			if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) 
@@ -276,7 +291,7 @@ int32_t flizzer_tracker_app(void* p)
 						
 						tracker->sound_engine.channel[0].filter_cutoff = tracker->cutoff;
 
-						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance);
+						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
 
 						break;
 					}
@@ -365,7 +380,7 @@ int32_t flizzer_tracker_app(void* p)
 						}
 						
 						tracker->sound_engine.channel[0].filter_cutoff = tracker->cutoff;
-						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance);
+						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
 
 						break;
 					}
