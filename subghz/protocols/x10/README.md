@@ -34,8 +34,7 @@ This project is intended to be overlayed on top of an existing firmware repo.
     &subghz_protocol_x10,
   ```
 - NOTE: Your updated files should look similar to the [protocol_items.c](./protocol_items.c) and [protocol_items.h](./protocol_items.h) in this project.
-- Build the firmware
-- Deploy the firmware
+- Build & deploy the firmware.  See this [tutorial](/firmware/updating/README.md) for updating firmware.
 
 
 ## Running the updated firmware
