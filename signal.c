@@ -153,10 +153,10 @@ void scan_for_signal(ProtoViewApp *app) {
                                       the signal in the loop. */
 
             /* Accept this signal as the new signal if either it's longer
-             * than the previous one, or the previous one was unknown and
-             * this is decoded. */
-            if (thislen > app->signal_bestlen ||
-                (app->signal_decoded == false && decoded))
+             * than the previous undecoded one, or the previous one was
+             * unknown and this is decoded. */
+            if ((thislen > app->signal_bestlen && app->signal_decoded == false)
+                || (app->signal_decoded == false && decoded))
             {
                 app->signal_info = *info;
                 app->signal_bestlen = thislen;
@@ -165,6 +165,11 @@ void scan_for_signal(ProtoViewApp *app) {
                 raw_samples_center(DetectedSamples,i);
                 FURI_LOG_E(TAG, "Displayed sample updated (%d samples %lu us)",
                     (int)thislen, DetectedSamples->short_pulse_dur);
+
+                /* Adjust raw view scale if the signal has an high
+                 * data rate. */
+                if (DetectedSamples->short_pulse_dur < 100)
+                    app->us_scale = 10;
             }
         }
         i += thislen ? thislen : 1;
