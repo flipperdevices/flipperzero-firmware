@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated ReadMe's for Geiger Counter, GPS, Toy Serial and UART Terminal
 - Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - Updated: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
+- Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 
 <a name="release">
 
@@ -226,7 +227,7 @@ $ ./fbt dolphin_ext
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
 - [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
-- [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
+- [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)

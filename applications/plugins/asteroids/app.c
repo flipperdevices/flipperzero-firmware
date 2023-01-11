@@ -3,6 +3,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <storage/storage.h>
 #include <input/input.h>
 #include <gui/gui.h>
 #include <stdlib.h>
@@ -10,24 +11,23 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <math.h>
-
-#ifndef PI
-#define PI 3.14159265358979f
-#endif
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 1
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
 #define GAME_START_LIVES 3
-
-/* The game uses the OK button both to fire and to accelerate the ship.
- * This makes it a lot more playable since the finger does not have to
- * move between two keys. However it is important that the extra time the
- * player needs to press the button to accelerate instead of just firing
- * is precisely selected to provide a smooth experience. After a few
- * attempts, it looks like 70 milliseconds is the right spot. */
-#define SHIP_ACCELERATION_KEYPRESS_TIME 70
+#define TTLBUL 30 /* Bullet time to live, in ticks. */
+#define MAXBUL 5 /* Max bullets on the screen. */
+#define MAXAST 32 /* Max asteroids on the screen. */
+#define SHIP_HIT_ANIMATION_LEN 15
+#define SAVING_DIRECTORY "/ext/app_data/asteroids"
+#define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
+#ifndef PI
+#define PI 3.14159265358979f
+#endif
 
 /* ============================ Data structures ============================= */
 
@@ -36,7 +36,7 @@ typedef struct Ship {
         y, /* Ship y position. */
         vx, /* x velocity. */
         vy, /* y velocity. */
-        rot; /* Current rotation. 2*PI full rotation. */
+        rot; /* Current rotation. 2*PI full ortation. */
 } Ship;
 
 typedef struct Bullet {
@@ -51,21 +51,20 @@ typedef struct Asteroid {
     uint8_t shape_seed; /* Seed to give random shape. */
 } Asteroid;
 
-#define MAXBUL 10 /* Max bullets on the screen. */
-#define MAXAST 32 /* Max asteroids on the screen. */
-#define SHIP_HIT_ANIMATION_LEN 15
 typedef struct AsteroidsApp {
     /* GUI */
     Gui* gui;
     ViewPort* view_port; /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
-    FuriMessageQueue* event_queue; /* Key press events go here. */
+    FuriMessageQueue* event_queue; /* Keypress events go here. */
 
     /* Game state. */
     int running; /* Once false exists the app. */
-    bool gameover; /* Game over status. */
+    bool gameover; /* Gameover status. */
     uint32_t ticks; /* Game ticks. Increments at each refresh. */
     uint32_t score; /* Game score. */
+    uint32_t highscore; /* Highscore. Shown on Game Over Screen */
+    bool is_new_highscore; /* Is the last score a new highscore? */
     uint32_t lives; /* Number of lives in the current game. */
     uint32_t ship_hit; /* When non zero, the ship was hit by an asteroid
                                and we need to show an animation as long as
@@ -90,10 +89,55 @@ typedef struct AsteroidsApp {
     bool fire; /* Short press detected: fire a bullet. */
 } AsteroidsApp;
 
-/* ============================== Prototypes ================================ */
+const NotificationSequence sequence_thrusters = {
+    &message_vibro_on,
+    &message_delay_10,
+    &message_vibro_off,
+    NULL,
+};
+
+const NotificationSequence sequence_brake = {
+    &message_vibro_on,
+    &message_delay_10,
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_off,
+    NULL,
+};
+
+const NotificationSequence sequence_crash = {
+    &message_red_255,
+
+    &message_vibro_on,
+    // &message_note_g5, // Play sound but currently disabled
+    &message_delay_25,
+    // &message_note_e5,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_bullet_fired = {
+    &message_vibro_on,
+    // &message_note_g5, // Play sound but currently disabled. Need On/Off menu setting
+    &message_delay_10,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+
+    // &message_note_e5,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+/* ============================== Prototyeps ================================ */
 
 // Only functions called before their definition are here.
-
+bool load_game(AsteroidsApp* app);
+void save_game(AsteroidsApp* app);
 void restart_game_after_gameover(AsteroidsApp* app);
 uint32_t key_pressed_time(AsteroidsApp* app, InputKey key);
 
@@ -114,7 +158,7 @@ Poly ShipPoly = {{-3, 0, 3}, {-3, 6, -3}, 3};
 
 Poly ShipFirePoly = {{-1.5, 0, 1.5}, {-3, -6, -3}, 3};
 
-/* Rotate the point of the polygon 'poly' and store the new rotated
+/* Rotate the point of the poligon 'poly' and store the new rotated
  * polygon in 'rot'. The polygon is rotated by an angle 'a', with
  * center at 0,0. */
 void rotate_poly(Poly* rot, Poly* poly, float a) {
@@ -165,7 +209,7 @@ void draw_bullet(Canvas* const canvas, Bullet* b) {
 /* Draw an asteroid. The asteroid shapes is computed on the fly and
  * is not stored in a permanent shape structure. In order to generate
  * the shape, we use an initial fixed shape that we resize according
- * to the asteroid size, perturbed according to the asteroid shape
+ * to the asteroid size, perturbate according to the asteroid shape
  * seed, and finally draw it rotated of the right amount. */
 void draw_asteroid(Canvas* const canvas, Asteroid* ast) {
     Poly ap;
@@ -241,8 +285,11 @@ void render_callback(Canvas* const canvas, void* ctx) {
 
     /* Draw ship, asteroids, bullets. */
     draw_poly(canvas, &ShipPoly, app->ship.x, app->ship.y, app->ship.rot);
-    if(key_pressed_time(app, InputKeyOk) > SHIP_ACCELERATION_KEYPRESS_TIME)
+
+    if(key_pressed_time(app, InputKeyUp) > 0) {
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_thrusters);
         draw_poly(canvas, &ShipFirePoly, app->ship.x, app->ship.y, app->ship.rot);
+    }
 
     for(int j = 0; j < app->bullets_num; j++) draw_bullet(canvas, &app->bullets[j]);
 
@@ -252,6 +299,30 @@ void render_callback(Canvas* const canvas, void* ctx) {
     if(app->gameover) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
+
+        // TODO: if new highscore, display blinking "New High Score"
+        // Display High Score
+        if(app->is_new_highscore) {
+            canvas_draw_str(canvas, 22, 9, "New High Score!");
+        } else {
+            canvas_draw_str(canvas, 36, 9, "High Score");
+        }
+
+        // Convert highscore to string
+        int length = snprintf(NULL, 0, "%lu", app->highscore);
+        char* str_high_score = malloc(length + 1);
+        snprintf(str_high_score, length + 1, "%lu", app->highscore);
+
+        // Get length to center on screen
+        int nDigits = 0;
+        if(app->highscore > 0) {
+            nDigits = floor(log10(app->highscore)) + 1;
+        }
+
+        // Draw highscore centered
+        canvas_draw_str(canvas, (SCREEN_XRES / 2) - (nDigits * 2), 20, str_high_score);
+        free(str_high_score);
+
         canvas_draw_str(canvas, 28, 35, "GAME   OVER");
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas, 25, 50, "Press OK to restart");
@@ -295,6 +366,7 @@ bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, flo
 /* Create a new bullet headed in the same direction of the ship. */
 void ship_fire_bullet(AsteroidsApp* app) {
     if(app->bullets_num == MAXBUL) return;
+    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
     Bullet* b = &app->bullets[app->bullets_num];
     b->x = app->ship.x;
     b->y = app->ship.y;
@@ -316,7 +388,7 @@ void ship_fire_bullet(AsteroidsApp* app) {
     b->vx += app->ship.vx;
     b->vy += app->ship.vy;
 
-    b->ttl = 50; /* The bullet will disappear after N ticks. */
+    b->ttl = TTLBUL; /* The bullet will disappear after N ticks. */
     app->bullets_num++;
 }
 
@@ -366,7 +438,7 @@ void remove_asteroid(AsteroidsApp* app, int id) {
 /* Called when an asteroid was reached by a bullet. The asteroid
  * hit is the one with the specified 'id'. */
 void asteroid_was_hit(AsteroidsApp* app, int id) {
-    float sizelimit = 6; // Smaller than that, they disappear in one shot.
+    float sizelimit = 6; // Smaller than that polverize in one shot.
     Asteroid* a = &app->asteroids[id];
 
     /* Asteroid is large enough to break into fragments. */
@@ -387,17 +459,19 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
         }
     } else {
         app->score++;
+        if(app->score > app->highscore) {
+            app->is_new_highscore = true;
+            app->highscore = app->score; // Show on Game Over Screen and future main menu
+        }
     }
 }
 
-/* Set game over state. When in game-over mode, the game displays a
- * game over text with a background of many asteroids floating around. */
+/* Set gameover state. When in game-over mode, the game displays a gameover
+ * text with a background of many asteroids floating around. */
 void game_over(AsteroidsApp* app) {
-    restart_game_after_gameover(app);
+    save_game(app); // Save highscore
     app->gameover = true;
-    int asteroids = 8;
-    while(asteroids-- && add_asteroid(app) != NULL)
-        ;
+    app->lives = GAME_START_LIVES; // Show 3 lives in game over screen to match new game start
 }
 
 /* Function called when a collision between the asteroid and the
@@ -422,16 +496,17 @@ void restart_game(AsteroidsApp* app) {
     app->bullets_num = 0;
     app->last_bullet_tick = 0;
     app->asteroids_num = 0;
+    app->ship_hit = 0;
 }
 
-/* Called after game over to restart the game. This function
+/* Called after gameover to restart the game. This function
  * also calls restart_game(). */
 void restart_game_after_gameover(AsteroidsApp* app) {
     app->gameover = false;
     app->ticks = 0;
     app->score = 0;
-    app->ship_hit = 0;
-    app->lives = GAME_START_LIVES - 1; /* -1 to account for current one. */
+    app->is_new_highscore = false;
+    app->lives = GAME_START_LIVES - 1;
     restart_game(app);
 }
 
@@ -505,6 +580,7 @@ void game_tick(void* ctx) {
      * 1. Ship was hit, we frozen the game as long as ship_hit isn't zero
      * again, and show an animation of a rotating ship. */
     if(app->ship_hit) {
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_crash);
         app->ship.rot += 0.5;
         app->ship_hit--;
         view_port_update(app->view_port);
@@ -515,7 +591,8 @@ void game_tick(void* ctx) {
     } else if(app->gameover) {
         /* 2. Game over. We need to update only background asteroids. In this
      * state the game just displays a GAME OVER text with the floating
-     * asteroids in background. */
+     * asteroids in backgroud. */
+
         if(key_pressed_time(app, InputKeyOk) > 100) {
             restart_game_after_gameover(app);
         }
@@ -524,13 +601,14 @@ void game_tick(void* ctx) {
         return;
     }
 
-    /* Handle key presses. */
+    /* Handle keypresses. */
     if(app->pressed[InputKeyLeft]) app->ship.rot -= .35;
     if(app->pressed[InputKeyRight]) app->ship.rot += .35;
-    if(key_pressed_time(app, InputKeyOk) > SHIP_ACCELERATION_KEYPRESS_TIME) {
+    if(app->pressed[InputKeyUp]) {
         app->ship.vx -= 0.5 * (float)sin(app->ship.rot);
         app->ship.vy += 0.5 * (float)cos(app->ship.rot);
     } else if(app->pressed[InputKeyDown]) {
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_brake);
         app->ship.vx *= 0.75;
         app->ship.vy *= 0.75;
     }
@@ -567,6 +645,41 @@ void game_tick(void* ctx) {
 
 /* ======================== Flipper specific code =========================== */
 
+bool load_game(AsteroidsApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    File* file = storage_file_alloc(storage);
+    uint16_t bytes_readed = 0;
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        bytes_readed = storage_file_read(file, app, sizeof(AsteroidsApp));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close(RECORD_STORAGE);
+
+    return bytes_readed == sizeof(AsteroidsApp);
+}
+
+void save_game(AsteroidsApp* app) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
+        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
+            return;
+        }
+    }
+
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(file, app, sizeof(AsteroidsApp));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+
+    furi_record_close(RECORD_STORAGE);
+}
+
 /* Here all we do is putting the events into the queue that will be handled
  * in the while() loop of the app entry point function. */
 void input_callback(InputEvent* input_event, void* ctx) {
@@ -579,6 +692,8 @@ void input_callback(InputEvent* input_event, void* ctx) {
 AsteroidsApp* asteroids_app_alloc() {
     AsteroidsApp* app = malloc(sizeof(AsteroidsApp));
 
+    load_game(app);
+
     app->gui = furi_record_open(RECORD_GUI);
     app->view_port = view_port_alloc();
     view_port_draw_callback_set(app->view_port, render_callback, app);
@@ -587,6 +702,7 @@ AsteroidsApp* asteroids_app_alloc() {
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     app->running = 1; /* Turns 0 when back is pressed. */
+
     restart_game_after_gameover(app);
     memset(app->pressed, 0, sizeof(app->pressed));
     return app;
@@ -617,12 +733,15 @@ uint32_t key_pressed_time(AsteroidsApp* app, InputKey key) {
 
 /* Handle keys interaction. */
 void asteroids_update_keypress_state(AsteroidsApp* app, InputEvent input) {
+    // Allow Rapid fire
+    if(input.key == InputKeyOk) {
+        app->fire = true;
+    }
+
     if(input.type == InputTypePress) {
         app->pressed[input.key] = furi_get_tick();
     } else if(input.type == InputTypeRelease) {
-        uint32_t dur = key_pressed_time(app, input.key);
         app->pressed[input.key] = 0;
-        if(dur < 200 && input.key == InputKeyOk) app->fire = true;
     }
 }
 
