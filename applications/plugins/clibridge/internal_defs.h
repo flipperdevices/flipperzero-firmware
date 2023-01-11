@@ -88,7 +88,6 @@ typedef struct {
     void* pubsub;
 } Loader_internal;
 
-
 typedef struct {
     CliCallback callback;
     void* context;
