@@ -73,11 +73,9 @@ struct ProtoViewTxRx {
     SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
 
-    /* Direct sampling mode state. */
-    bool debug_direct_sampling; /* Read data from GDO0 in a busy loop. Only
+    /* Timer sampling mode state. */
+    bool debug_timer_sampling;  /* Read data from GDO0 in a busy loop. Only
                                    for testing. */
-    FuriThread *ds_thread;      /* Direct sampling thread. */
-    bool ds_thread_running;     /* Exit condition for the thread. */
     uint32_t last_g0_change_time; /* Last high->low (or reverse) switch. */
     bool last_g0_value;           /* Current value (high or low): we are
                                      checking the duration in the timer

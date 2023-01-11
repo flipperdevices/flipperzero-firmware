@@ -60,7 +60,7 @@ uint32_t radio_rx(ProtoViewApp* app) {
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_flush_rx();
     furi_hal_subghz_rx();
-    if (!app->txrx->debug_direct_sampling) {
+    if (!app->txrx->debug_timer_sampling) {
 
         furi_hal_subghz_start_async_rx(subghz_worker_rx_callback,
                                        app->txrx->worker);
@@ -76,7 +76,7 @@ uint32_t radio_rx(ProtoViewApp* app) {
 void radio_rx_end(ProtoViewApp* app) {
     furi_assert(app);
     if (app->txrx->txrx_state == TxRxStateRx) {
-        if (!app->txrx->debug_direct_sampling) {
+        if (!app->txrx->debug_timer_sampling) {
             if(subghz_worker_is_running(app->txrx->worker)) {
                 subghz_worker_stop(app->txrx->worker);
                 furi_hal_subghz_stop_async_rx();

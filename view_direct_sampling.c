@@ -34,7 +34,7 @@ void process_input_direct_sampling(ProtoViewApp *app, InputEvent input) {
  * the CC1101 data directly. */
 void view_enter_direct_sampling(ProtoViewApp *app) {
     if (app->txrx->txrx_state == TxRxStateRx &&
-        !app->txrx->debug_direct_sampling)
+        !app->txrx->debug_timer_sampling)
     {
         subghz_worker_stop(app->txrx->worker);
     } else {
@@ -45,7 +45,7 @@ void view_enter_direct_sampling(ProtoViewApp *app) {
 /* Exit view. Restore the subghz thread. */
 void view_exit_direct_sampling(ProtoViewApp *app) {
     if (app->txrx->txrx_state == TxRxStateRx &&
-        !app->txrx->debug_direct_sampling)
+        !app->txrx->debug_timer_sampling)
     {
         subghz_worker_start(app->txrx->worker);
     } else {

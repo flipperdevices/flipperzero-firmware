@@ -130,7 +130,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     /* Setup rx worker and environment. */
     app->txrx->freq_mod_changed = false;
-    app->txrx->debug_direct_sampling = false;
+    app->txrx->debug_timer_sampling = false;
     app->txrx->last_g0_change_time = DWT->CYCCNT;
     app->txrx->last_g0_value = false;
     app->txrx->worker = subghz_worker_alloc();
@@ -181,7 +181,7 @@ void protoview_app_free(ProtoViewApp *app) {
     subghz_setting_free(app->setting);
 
     // Worker stuff.
-    if (!app->txrx->debug_direct_sampling) {
+    if (!app->txrx->debug_timer_sampling) {
         subghz_receiver_free(app->txrx->receiver);
         subghz_environment_free(app->txrx->environment);
         subghz_worker_free(app->txrx->worker);
