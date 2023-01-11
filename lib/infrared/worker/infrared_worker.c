@@ -468,8 +468,10 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
     furi_assert(instance->state == InfraredWorkerStateStartTx);
     furi_assert(thread_context);
 
-    size_t repeats_left = instance->signal.decoded ?
-        infrared_get_protocol_min_repeat_count(instance->signal.message.protocol) : 1;
+    size_t repeats_left =
+        instance->signal.decoded ?
+            infrared_get_protocol_min_repeat_count(instance->signal.message.protocol) :
+            1;
     uint32_t events = 0;
 
     bool exit_pending = false;

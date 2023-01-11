@@ -102,7 +102,7 @@ void infrared_send(const InfraredMessage* message, int times) {
     InfraredEncoderHandler* handler = infrared_alloc_encoder();
     infrared_reset_encoder(handler, message);
     infrared_tx_number_of_transmissions =
-        infrared_get_protocol_min_repeat_count(message->protocol) * times;
+        MAX((int)infrared_get_protocol_min_repeat_count(message->protocol), times);
 
     uint32_t frequency = infrared_get_protocol_frequency(message->protocol);
     float duty_cycle = infrared_get_protocol_duty_cycle(message->protocol);
