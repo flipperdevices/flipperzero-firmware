@@ -97,9 +97,7 @@ class Main(App):
                 )
                 result = storage.read.until(storage.CLI_EOL)
                 if len(result):
-                    self.logger.error(
-                        f"Unexpected response: {result.decode('ascii')}"
-                    )
+                    self.logger.error(f"Unexpected response: {result.decode('ascii')}")
                     return -4
 
             return 0
