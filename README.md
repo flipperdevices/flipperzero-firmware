@@ -13,7 +13,7 @@ pwnagotchi-flipper
 
 ## Current state
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
-As of commit 53562da (12/26/22) The non-pixel-by-pixel version of the Flipper app now defaults to drawing the elements in a base state as seen in the picture below. The next task to accomplish will be to refine a protocol v2.0.0 that can command UI changes to the Flipper over UART. After that the Pwnagotchi plugin will be designed.
+As of commit 3c6e491 (1/10/23) The non-pixel-by-pixel version of the Flipper app now can receive and properly process all protocol v2 commands. Next step is to create a Pwnagotchi plugin to command the flipper like a display and then make everything more robust with the UART communication.
 
 <img src='doc/attachments/PwnZeroBaseWFace.png' alt='Flipper screen showing base Pwnagotchi display' height="128" width="256"/>
 
