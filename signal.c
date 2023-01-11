@@ -379,13 +379,13 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
     uint32_t bitmap_bits_size = 4096*8;
     uint32_t bitmap_size = bitmap_bits_size/8;
 
-    /* We call the decoders with an offset a few bits before the actual
+    /* We call the decoders with an offset a few samples before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_bits = 10;
-    uint32_t after_bits = 100;
+    uint32_t before_samples = 10;
+    uint32_t after_samples = 100;
 
     uint8_t *bitmap = malloc(bitmap_size);
-    uint32_t bits = convert_signal_to_bits(bitmap,bitmap_size,s,-before_bits,len+before_bits+after_bits,s->short_pulse_dur);
+    uint32_t bits = convert_signal_to_bits(bitmap,bitmap_size,s,-before_samples,len+before_samples+after_samples,s->short_pulse_dur);
 
     if (DEBUG_MSG) { /* Useful for debugging purposes. Don't remove. */
         char *str = malloc(1024);
