@@ -2,6 +2,8 @@
 ## Introduction
 This is a protocol decoder for the Flipper Zero to decode the X10 series of devices when doing a read from the Sub-GHz menu.  
 
+![Capture of x10 codes](./x10-codes.png)
+![Details of x10 code](./x10-details.png)
 
 ## Validation
 NOTE: As an Amazon Associate I (CodeAllNight) earn from qualifying purchases from the amzn.to links below. 
