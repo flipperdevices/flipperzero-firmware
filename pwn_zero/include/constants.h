@@ -9,7 +9,7 @@
 #define PWNAGOTCHI_UART_BAUD 115200
 
 /// Max length of channel data at top left
-#define PWNAGOTCHI_MAX_CHANNEL_LEN 3
+#define PWNAGOTCHI_MAX_CHANNEL_LEN 4
 
 /// Max length of APS captured at top left
 #define PWNAGOTCHI_MAX_APS_LEN 11
