@@ -376,11 +376,13 @@ uint32_t convert_from_diff_manchester(uint8_t *buf, uint64_t buflen, uint8_t *bi
 extern ProtoViewDecoder Oregon2Decoder;
 extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
+extern ProtoViewDecoder ToyotaTPMSDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
     &B4B1Decoder,           /* PT, SC, ... 24 bits remotes. */
     &RenaultTPMSDecoder,    /* Renault TPMS. */
+    &ToyotaTPMSDecoder,     /* Toyota TPMS. */
     NULL
 };
 
