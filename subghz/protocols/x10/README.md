@@ -24,8 +24,8 @@ This project is intended to be overlayed on top of an existing firmware repo.
 - Build the firmware
 - Deploy the firmware
 - Confirm the firmware is working properly
-- Add the x10.c file to the \lib\subghz\protocols folder
-- Add the x10.h file to the \lib\subghz\protocols folder
+- Add the [x10.c](./x10.c) file to the \lib\subghz\protocols folder
+- Add the [x10.h](./x10.h) file to the \lib\subghz\protocols folder
 - Update the  \lib\subghz\protocols\protocol_items.h file
   - After all of the other #include statements add the following line:
   ```
@@ -36,7 +36,7 @@ This project is intended to be overlayed on top of an existing firmware repo.
   ```
     &subghz_protocol_x10,
   ```
-- NOTE: Your updated files should look similar to the protocol_items.c and protocol_items.h in this project.
+- NOTE: Your updated files should look similar to the [protocol_items.c](./protocol_items.c) and [protocol_items.h](./protocol_items.h) in this project.
 - Build the firmware
 - Deploy the firmware
 
