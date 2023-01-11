@@ -11,6 +11,17 @@ like in the example image below (showing a Volkswagen key in 2FSK):
 This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
 
+Other than that, ProtoView is able to decode a few interesting protocols:
+
+* Renault TPMS data.
+* Toyota TPMS data.
+* Oregon thermometer protocol 2.
+* PTxxxx/SCxxxx based remotes.
+
+The app implements a framework that makes adding and experimenting with new
+protocols very simple. Check the `protocols` directory to see how the
+API works.
+
 The secondary goal of ProtoView is to provide a somewhat-documented application
 for the Flipper (even if ProtoView is a pretty atypical application: doesn't make use of the standard widgets and other abstractions provded by the framework).
 Many apps dealing with the *subghz subsystem* (the Flipper
@@ -55,6 +66,10 @@ Under the detected sequence, you will see a small triangle marking a
 specific sample. This mark means that the sequence looked coherent up
 to that point, and starting from there it could be just noise.
 
+If the protocol is decoded, the bottom-left corner of the screen
+will show the name of the protocol, and going in the next screen
+with the right arrow will show information about the decoded signal.
+
 In the bottom-right corner the application displays an amount of time
 in microseconds. This is the average length of the shortest pulse length
 detected among the three classes. Usually the *data rate* of the protocol
@@ -67,7 +82,8 @@ Things to investigate:
 
 * Many cheap remotes (gate openers, remotes, ...) are on the 433.92Mhz or nearby and use OOK modulation.
 * Weather stations are often too in the 433.92Mhz OOK.
-* For car keys, try 443.92 OOK650 and 868.35 Mhz in OOK or 2FSK.
+* For car keys, try 433.92 OOK650 and 868.35 Mhz in OOK or 2FSK.
+* For TPMS try 433.92 in TPMS modulation (FSK optimized for these signals).
 
 # Installing the app from source
 
