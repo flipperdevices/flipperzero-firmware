@@ -101,6 +101,9 @@ bool message_queue_pop_message(MessageQueue* queue, PwnCommand* dest) {
     // Otherwise let's grab the message! Currently readPtr is pointing at STX
     dest->parameterCode = *(queue->readPtr + 1);
 
+    // Wipe current arguments to hold 0's
+    memset(dest->arguments, 0, PWNAGOTCHI_PROTOCOL_ARGS_MAX);
+
     // Everything folowing is arguments until we hit the end
     // We'll count up the number of bytes in the transmission to know how many to wipe
     int argCount;
