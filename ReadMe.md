@@ -62,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - Updated: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
+- Added: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
 
 <a name="release">
 
