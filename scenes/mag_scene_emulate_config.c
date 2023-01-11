@@ -1,5 +1,4 @@
 #include "../mag_i.h"
-#include <lib/toolbox/value_index.h>
 
 #define TAG "MagSceneEmulateConfig"
 

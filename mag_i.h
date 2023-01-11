@@ -13,6 +13,7 @@
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
 
+
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
@@ -27,6 +28,7 @@
 #include <flipper_format/flipper_format.h>
 
 #include <toolbox/path.h>
+#include <toolbox/value_index.h>
 
 #include "scenes/mag_scene.h"
 
