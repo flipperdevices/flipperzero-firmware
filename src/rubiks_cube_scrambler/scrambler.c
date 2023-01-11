@@ -83,31 +83,13 @@ void scrambleReplace()
 
 
 
-void valid()
-{
-	// Stage 3
-	// Variables for loop
-	int loopOne, loopTwo;
-
-	// This will actually start to make the scramble usable
-	// It will remove stuff like R R F L, etc.
-	for (loopOne = 1; loopOne < SLEN; loopOne++)
-	{
-		while (a.mainScramble[loopOne][0] == a.mainScramble[loopOne - 1][0])
-		{
-			a.mainScramble[loopOne][0] = moves[getRand(5, 0)];
-		}
-	}
-
-	// This will further check it and remove stuff like R L R
-	for (loopTwo = 2; loopTwo < SLEN; loopTwo++)
-	{
-		while ((a.mainScramble[loopTwo][0] == a.mainScramble[loopTwo - 2][0]) || (a.mainScramble[loopTwo][0]) == a.mainScramble[loopTwo - 1][0])
-		{
-			a.mainScramble[loopTwo][0] = moves[getRand(5, 0)];
-		}
-	}
-	// Scramble generation complete
+void valid() {
+    for (int i = 2; i < SLEN; i++) {
+        while ( a.mainScramble[i][0] == a.mainScramble[i - 2][0] || a.mainScramble[i][0] == a.mainScramble[i - 1][0]) {
+            a.mainScramble[i][0] = moves[rand()%5];
+        }
+    }
+    // Scramble generation complete
 }
 
 int getRand(int upr, int lwr)
