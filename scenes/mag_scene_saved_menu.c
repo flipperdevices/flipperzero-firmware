@@ -18,9 +18,9 @@ void mag_scene_saved_menu_on_enter(void* context) {
     Submenu* submenu = mag->submenu;
 
     submenu_add_item(
-        submenu, "Emulate WIP", SubmenuIndexEmulate, mag_scene_saved_menu_submenu_callback, mag);
+        submenu, "Emulate (WIP)", SubmenuIndexEmulate, mag_scene_saved_menu_submenu_callback, mag);
     submenu_add_item(
-        submenu, "Edit", SubmenuIndexEdit, mag_scene_saved_menu_submenu_callback, mag);
+        submenu, "Edit (WIP)", SubmenuIndexEdit, mag_scene_saved_menu_submenu_callback, mag);
     submenu_add_item(
         submenu, "Delete", SubmenuIndexDelete, mag_scene_saved_menu_submenu_callback, mag);
     submenu_add_item(

@@ -20,6 +20,7 @@ void mag_scene_emulate_on_enter(void* context) {
         widget, 0, 15, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Config", mag_widget_callback, mag);
+    widget_add_button_element(widget, GuiButtonTypeRight, "Send", mag_widget_callback, mag);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
     furi_string_free(tmp_str);
@@ -35,6 +36,19 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
 
             scene_manager_next_scene(scene_manager, MagSceneEmulateConfig);
+        } else if(event.event == GuiButtonTypeRight) {
+            consumed = true;
+
+            FuriString* tmp_str;
+            tmp_str = furi_string_alloc_set_str(furi_string_get_cstr(mag->mag_dev->dev_data));
+
+            // Assumes track 2 for temporary testing.
+            // Will overhaul alongside file format and config system
+            notification_message(mag->notifications, &sequence_blink_start_cyan);
+            mag_spoof_single_track_rfid(tmp_str, 1);
+            notification_message(mag->notifications, &sequence_blink_stop);
+
+            furi_string_free(tmp_str);
         }
     }
 
@@ -43,5 +57,6 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
 
 void mag_scene_emulate_on_exit(void* context) {
     Mag* mag = context;
+    notification_message(mag->notifications, &sequence_blink_stop);
     widget_reset(mag->widget);
 }

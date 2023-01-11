@@ -1,5 +1,4 @@
 #include "../mag_i.h"
-#include "mag_icons.h"
 
 void mag_scene_saved_info_on_enter(void* context) {
     Mag* mag = context;
