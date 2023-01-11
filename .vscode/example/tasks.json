@@ -145,6 +145,18 @@
             ]
         },
         {
+            "label": "[Debug] Build and upload all FAPs to Flipper over USB",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt fap_deploy"
+        },
+        {
+            "label": "[Release] Build and upload all FAPs to Flipper over USB",
+            "group": "build",
+            "type": "shell",
+            "command": "./fbt COMPACT=1 DEBUG=0 fap_deploy"
+        },
+        {
             // Press Ctrl+] to quit
             "label": "Serial Console",
             "type": "shell",
