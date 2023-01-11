@@ -131,9 +131,9 @@ void scan_for_signal(ProtoViewApp *app) {
 
     /* Try to seek on data that looks to have a regular high low high low
      * pattern. */
-    uint32_t minlen = 13;           /* Min run of coherent samples. Up to
-                                       12 samples it's very easy to mistake
-                                       noise for signal. */
+    uint32_t minlen = 18;           /* Min run of coherent samples. With less
+                                       than a few samples it's very easy to
+                                       mistake noise for signal. */
 
     ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
     uint32_t i = 0;
