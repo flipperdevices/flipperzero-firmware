@@ -63,6 +63,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - Updated: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - Added: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
+- Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
+- Added: BadUSB: [Install qFlipper For Windows (By DXVVAY)](https://github.com/flipperdevices/flipperzero-firmware/pull/2182)
 
 <a name="release">
 
