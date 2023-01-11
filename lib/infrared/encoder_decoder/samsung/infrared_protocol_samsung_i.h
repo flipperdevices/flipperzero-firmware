@@ -32,4 +32,4 @@ InfraredStatus infrared_encoder_samsung32_encode_repeat(
     uint32_t* duration,
     bool* level);
 
-extern const InfraredCommonProtocolSpec protocol_samsung32;
+extern const InfraredCommonProtocolSpec infrared_protocol_samsung32;

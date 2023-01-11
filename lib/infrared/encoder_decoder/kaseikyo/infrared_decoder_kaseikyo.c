@@ -34,7 +34,7 @@ bool infrared_decoder_kaseikyo_interpret(InfraredCommonDecoder* decoder) {
 }
 
 void* infrared_decoder_kaseikyo_alloc(void) {
-    return infrared_common_decoder_alloc(&protocol_kaseikyo);
+    return infrared_common_decoder_alloc(&infrared_protocol_kaseikyo);
 }
 
 InfraredMessage* infrared_decoder_kaseikyo_decode(void* decoder, bool level, uint32_t duration) {

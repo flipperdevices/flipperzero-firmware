@@ -90,7 +90,7 @@ InfraredStatus infrared_decoder_rc6_decode_manchester(
 void* infrared_decoder_rc6_alloc(void) {
     InfraredRc6Decoder* decoder = malloc(sizeof(InfraredRc6Decoder));
     decoder->toggle = false;
-    decoder->common_decoder = infrared_common_decoder_alloc(&protocol_rc6);
+    decoder->common_decoder = infrared_common_decoder_alloc(&infrared_protocol_rc6);
     decoder->common_decoder->context = decoder;
     return decoder;
 }

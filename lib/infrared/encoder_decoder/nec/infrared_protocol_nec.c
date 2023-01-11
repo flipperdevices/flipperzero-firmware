@@ -1,6 +1,6 @@
 #include "infrared_protocol_nec_i.h"
 
-const InfraredCommonProtocolSpec protocol_nec = {
+const InfraredCommonProtocolSpec infrared_protocol_nec = {
     .timings =
         {
             .preamble_mark = INFRARED_NEC_PREAMBLE_MARK,

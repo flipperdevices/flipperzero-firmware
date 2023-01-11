@@ -28,7 +28,7 @@ void infrared_encoder_kaseikyo_reset(void* encoder_ptr, const InfraredMessage* m
 }
 
 void* infrared_encoder_kaseikyo_alloc(void) {
-    return infrared_common_encoder_alloc(&protocol_kaseikyo);
+    return infrared_common_encoder_alloc(&infrared_protocol_kaseikyo);
 }
 
 void infrared_encoder_kaseikyo_free(void* encoder_ptr) {

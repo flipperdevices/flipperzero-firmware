@@ -15,7 +15,7 @@
 #define INFRARED_RC6_MIN_SPLIT_TIME 2700
 #define INFRARED_RC6_REPEAT_COUNT_MIN 1
 
-extern const InfraredCommonProtocolSpec protocol_rc6;
+extern const InfraredCommonProtocolSpec infrared_protocol_rc6;
 
 bool infrared_decoder_rc6_interpret(InfraredCommonDecoder* decoder);
 InfraredStatus infrared_decoder_rc6_decode_manchester(

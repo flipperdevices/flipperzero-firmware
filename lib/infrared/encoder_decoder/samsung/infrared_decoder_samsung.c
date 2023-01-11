@@ -53,7 +53,7 @@ InfraredStatus infrared_decoder_samsung32_decode_repeat(InfraredCommonDecoder* d
 }
 
 void* infrared_decoder_samsung32_alloc(void) {
-    return infrared_common_decoder_alloc(&protocol_samsung32);
+    return infrared_common_decoder_alloc(&infrared_protocol_samsung32);
 }
 
 InfraredMessage* infrared_decoder_samsung32_decode(void* decoder, bool level, uint32_t duration) {

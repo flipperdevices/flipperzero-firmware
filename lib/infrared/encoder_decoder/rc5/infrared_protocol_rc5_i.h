@@ -15,6 +15,6 @@
 #define INFRARED_RC5_MIN_SPLIT_TIME 2700
 #define INFRARED_RC5_REPEAT_COUNT_MIN 1
 
-extern const InfraredCommonProtocolSpec protocol_rc5;
+extern const InfraredCommonProtocolSpec infrared_protocol_rc5;
 
 bool infrared_decoder_rc5_interpret(InfraredCommonDecoder* decoder);

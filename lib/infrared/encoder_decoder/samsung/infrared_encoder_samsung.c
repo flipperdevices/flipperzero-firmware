@@ -56,7 +56,7 @@ InfraredStatus infrared_encoder_samsung32_encode_repeat(
 }
 
 void* infrared_encoder_samsung32_alloc(void) {
-    return infrared_common_encoder_alloc(&protocol_samsung32);
+    return infrared_common_encoder_alloc(&infrared_protocol_samsung32);
 }
 
 void infrared_encoder_samsung32_free(void* encoder_ptr) {

@@ -17,7 +17,7 @@
 #define INFRARED_SIRC_REPEAT_PERIOD 45000
 #define INFRARED_SIRC_REPEAT_COUNT_MIN 3
 
-extern const InfraredCommonProtocolSpec protocol_sirc;
+extern const InfraredCommonProtocolSpec infrared_protocol_sirc;
 
 bool infrared_decoder_sirc_interpret(InfraredCommonDecoder* decoder);
 InfraredStatus infrared_encoder_sirc_encode_repeat(

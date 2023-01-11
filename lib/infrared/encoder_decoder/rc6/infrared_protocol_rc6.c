@@ -1,6 +1,6 @@
 #include "infrared_protocol_rc6_i.h"
 
-const InfraredCommonProtocolSpec protocol_rc6 = {
+const InfraredCommonProtocolSpec infrared_protocol_rc6 = {
     .timings =
         {
             .preamble_mark = INFRARED_RC6_PREAMBLE_MARK,

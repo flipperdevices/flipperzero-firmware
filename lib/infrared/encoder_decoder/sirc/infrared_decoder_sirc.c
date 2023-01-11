@@ -39,7 +39,7 @@ bool infrared_decoder_sirc_interpret(InfraredCommonDecoder* decoder) {
 }
 
 void* infrared_decoder_sirc_alloc(void) {
-    return infrared_common_decoder_alloc(&protocol_sirc);
+    return infrared_common_decoder_alloc(&infrared_protocol_sirc);
 }
 
 InfraredMessage* infrared_decoder_sirc_decode(void* decoder, bool level, uint32_t duration) {

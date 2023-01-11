@@ -1,6 +1,6 @@
 #include "infrared_protocol_samsung_i.h"
 
-const InfraredCommonProtocolSpec protocol_samsung32 = {
+const InfraredCommonProtocolSpec infrared_protocol_samsung32 = {
     .timings =
         {
             .preamble_mark = INFRARED_SAMSUNG_PREAMBLE_MARK,

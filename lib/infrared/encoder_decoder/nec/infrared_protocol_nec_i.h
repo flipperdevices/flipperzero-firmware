@@ -19,7 +19,7 @@
 #define INFRARED_NEC_PREAMBLE_TOLERANCE 200 // us
 #define INFRARED_NEC_BIT_TOLERANCE 120 // us
 
-extern const InfraredCommonProtocolSpec protocol_nec;
+extern const InfraredCommonProtocolSpec infrared_protocol_nec;
 
 bool infrared_decoder_nec_interpret(InfraredCommonDecoder* decoder);
 InfraredStatus infrared_decoder_nec_decode_repeat(InfraredCommonDecoder* decoder);

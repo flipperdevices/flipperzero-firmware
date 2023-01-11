@@ -1,6 +1,6 @@
 #include "infrared_protocol_kaseikyo_i.h"
 
-const InfraredCommonProtocolSpec protocol_kaseikyo = {
+const InfraredCommonProtocolSpec infrared_protocol_kaseikyo = {
     .timings =
         {
             .preamble_mark = INFRARED_KASEIKYO_PREAMBLE_MARK,

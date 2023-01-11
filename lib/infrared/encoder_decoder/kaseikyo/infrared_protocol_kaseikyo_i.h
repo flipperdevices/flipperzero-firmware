@@ -20,7 +20,7 @@
 #define INFRARED_KASEIKYO_PREAMBLE_TOLERANCE 200 // us
 #define INFRARED_KASEIKYO_BIT_TOLERANCE 120 // us
 
-extern const InfraredCommonProtocolSpec protocol_kaseikyo;
+extern const InfraredCommonProtocolSpec infrared_protocol_kaseikyo;
 
 bool infrared_decoder_kaseikyo_interpret(InfraredCommonDecoder* decoder);
 InfraredStatus infrared_decoder_kaseikyo_decode_repeat(InfraredCommonDecoder* decoder);

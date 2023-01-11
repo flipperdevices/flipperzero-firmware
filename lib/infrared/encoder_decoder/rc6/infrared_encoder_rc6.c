@@ -33,7 +33,7 @@ InfraredStatus infrared_encoder_rc6_encode(void* encoder_ptr, uint32_t* duration
 
 void* infrared_encoder_rc6_alloc(void) {
     InfraredEncoderRC6* encoder = malloc(sizeof(InfraredEncoderRC6));
-    encoder->common_encoder = infrared_common_encoder_alloc(&protocol_rc6);
+    encoder->common_encoder = infrared_common_encoder_alloc(&infrared_protocol_rc6);
     encoder->toggle_bit = false;
     return encoder;
 }

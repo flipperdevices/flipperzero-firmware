@@ -48,7 +48,7 @@ InfraredStatus infrared_encoder_sirc_encode_repeat(
 }
 
 void* infrared_encoder_sirc_alloc(void) {
-    return infrared_common_encoder_alloc(&protocol_sirc);
+    return infrared_common_encoder_alloc(&infrared_protocol_sirc);
 }
 
 void infrared_encoder_sirc_free(void* encoder_ptr) {

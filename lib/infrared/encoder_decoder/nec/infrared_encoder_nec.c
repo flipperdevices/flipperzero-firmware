@@ -78,7 +78,7 @@ InfraredStatus infrared_encoder_nec_encode_repeat(
 }
 
 void* infrared_encoder_nec_alloc(void) {
-    return infrared_common_encoder_alloc(&protocol_nec);
+    return infrared_common_encoder_alloc(&infrared_protocol_nec);
 }
 
 void infrared_encoder_nec_free(void* encoder_ptr) {
