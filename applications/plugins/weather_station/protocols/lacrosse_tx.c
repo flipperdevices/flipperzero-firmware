@@ -1,4 +1,4 @@
-#include "LaCrosse_TX.h"
+#include "lacrosse_tx.h"
 
 #define TAG "WSProtocolLaCrosse_TX"
 
