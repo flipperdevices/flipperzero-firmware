@@ -116,6 +116,8 @@ struct ProtoViewApp {
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
     bool signal_decoded;     /* Was the current signal decoded? */
     ProtoViewMsgInfo signal_info; /* Decoded message, if signal_decoded true. */
+    bool direct_sampling_enabled; /* This special view needs an explicit
+                                     acknowledge to work. */
 
     /* Raw view apps state. */
     uint32_t us_scale;       /* microseconds per pixel. */

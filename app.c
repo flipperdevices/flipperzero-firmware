@@ -118,6 +118,7 @@ ProtoViewApp* protoview_app_alloc() {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->current_view = ViewRawPulses;
+    app->direct_sampling_enabled = false;
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
