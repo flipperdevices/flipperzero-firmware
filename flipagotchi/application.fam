@@ -1,9 +1,9 @@
 App(
-    appid="pwn_zero",
-    name="Pwnagotchi",
+    appid="flipagotchi",
+    name="Flipagotchi",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="pwn_zero_app",
-    cdefines=["APP_PWN_ZERO"],
+    entry_point="flipagotchi_app",
+    cdefines=["APP_FLIPAGOTCHI"],
     requires=["gui"],
     stack_size=2 * 1024,
     order=12,

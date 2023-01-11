@@ -25,7 +25,7 @@ typedef struct {
     View* view;
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
-} PwnZeroApp;
+} FlipagotchiApp;
 
 typedef struct {
     FuriString* text;
@@ -52,7 +52,7 @@ const NotificationSequence sequence_notification = {
     NULL,
 };
 
-static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
+static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
     if (message_queue_has_message(model->queue)) {
         PwnCommand cmd;
         message_queue_pop_message(model->queue, &cmd);
@@ -196,27 +196,27 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
     return false;
 }
 
-static void pwn_zero_view_draw_callback(Canvas* canvas, void* _model) {
+static void flipagotchi_view_draw_callback(Canvas* canvas, void* _model) {
     PwnDumpModel* model = _model;
 
     pwnagotchi_draw_all(model->pwn, canvas);
 
 }
 
-static bool pwn_zero_view_input_callback(InputEvent* event, void* context) {
+static bool flipagotchi_view_input_callback(InputEvent* event, void* context) {
     UNUSED(event);
     UNUSED(context);
     return false;
 }
 
-static uint32_t pwn_zero_exit(void* context) {
+static uint32_t flipagotchi_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
 }
 
-static void pwn_zero_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+static void flipagotchi_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     furi_assert(context);
-    PwnZeroApp* app = context;
+    FlipagotchiApp* app = context;
 
     if(ev == UartIrqEventRXNE) {
         furi_stream_buffer_send(app->rx_stream, &data, 1, 0);
@@ -224,13 +224,13 @@ static void pwn_zero_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     }
 }
 
-static void pwn_zero_push_to_list(PwnDumpModel* model, const char data) {
+static void flipagotchi_push_to_list(PwnDumpModel* model, const char data) {
     message_queue_push_byte(model->queue, data);
 }
 
-static int32_t pwn_zero_worker(void* context) {
+static int32_t flipagotchi_worker(void* context) {
     furi_assert(context);
-    PwnZeroApp* app = context;
+    FlipagotchiApp* app = context;
 
     while(true) {
         bool update = false;
@@ -250,9 +250,9 @@ static int32_t pwn_zero_worker(void* context) {
                         PwnDumpModel* model,
                         {
                             for(size_t i = 0; i < length; i++) {
-                                pwn_zero_push_to_list(model, data[i]);
+                                flipagotchi_push_to_list(model, data[i]);
                             }
-                            update = pwn_zero_exec_cmd(model);
+                            update = flipagotchi_exec_cmd(model);
                         },
                         update);
                 }
@@ -267,8 +267,8 @@ static int32_t pwn_zero_worker(void* context) {
     return 0;
 }
 
-static PwnZeroApp* pwn_zero_app_alloc() {
-    PwnZeroApp* app = malloc(sizeof(PwnZeroApp));
+static FlipagotchiApp* flipagotchi_app_alloc() {
+    FlipagotchiApp* app = malloc(sizeof(FlipagotchiApp));
 
     app->rx_stream = furi_stream_buffer_alloc(2048, 1);
 
@@ -283,8 +283,8 @@ static PwnZeroApp* pwn_zero_app_alloc() {
 
     // Views
     app->view = view_alloc();
-    view_set_draw_callback(app->view, pwn_zero_view_draw_callback);
-    view_set_input_callback(app->view, pwn_zero_view_input_callback);
+    view_set_draw_callback(app->view, flipagotchi_view_draw_callback);
+    view_set_input_callback(app->view, flipagotchi_view_input_callback);
     view_allocate_model(app->view, ViewModelTypeLocking, sizeof(PwnDumpModel));
     with_view_model(
         app->view,
@@ -295,26 +295,26 @@ static PwnZeroApp* pwn_zero_app_alloc() {
         },
         true);
 
-    view_set_previous_callback(app->view, pwn_zero_exit);
+    view_set_previous_callback(app->view, flipagotchi_exit);
     view_dispatcher_add_view(app->view_dispatcher, 0, app->view);
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
 
     // Enable uart listener
     furi_hal_console_disable();
     furi_hal_uart_set_br(PWNAGOTCHI_UART_CHANNEL, PWNAGOTCHI_UART_BAUD);
-    furi_hal_uart_set_irq_cb(PWNAGOTCHI_UART_CHANNEL, pwn_zero_on_irq_cb, app);
+    furi_hal_uart_set_irq_cb(PWNAGOTCHI_UART_CHANNEL, flipagotchi_on_irq_cb, app);
 
     app->worker_thread = furi_thread_alloc();
     furi_thread_set_name(app->worker_thread, "UsbUartWorker");
     furi_thread_set_stack_size(app->worker_thread, 1024);
     furi_thread_set_context(app->worker_thread, app);
-    furi_thread_set_callback(app->worker_thread, pwn_zero_worker);
+    furi_thread_set_callback(app->worker_thread, flipagotchi_worker);
     furi_thread_start(app->worker_thread);
 
     return app;
 }
 
-static void pwn_zero_app_free(PwnZeroApp* app) {
+static void flipagotchi_app_free(FlipagotchiApp* app) {
     furi_assert(app);
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
@@ -348,10 +348,10 @@ static void pwn_zero_app_free(PwnZeroApp* app) {
     free(app);
 }
 
-int32_t pwn_zero_app(void* p) {
+int32_t flipagotchi_app(void* p) {
     UNUSED(p);
-    PwnZeroApp* app = pwn_zero_app_alloc();
+    FlipagotchiApp* app = flipagotchi_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
-    pwn_zero_app_free(app);
+    flipagotchi_app_free(app);
     return 0;
 }
