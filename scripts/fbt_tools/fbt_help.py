@@ -11,7 +11,7 @@ Building:
         Build all FAP apps
     fap_{APPID}, launch_app APPSRC={APPID}:
         Build FAP app with appid={APPID}; upload & start it over USB
-    faps_copy:
+    fap_deploy:
         Build and upload all FAP apps over USB
 
 Flashing & debugging:

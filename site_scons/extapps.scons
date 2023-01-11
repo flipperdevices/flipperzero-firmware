@@ -116,19 +116,6 @@ if appsrc := appenv.subst("$APPSRC"):
     )
     appenv.Alias("launch_app", app_artifacts.validator)
 
-appenv.PhonyTarget(
-    "faps_copy",
-    os.linesep.join(
-        [
-            '${PYTHON3} "${APP_RUN_SCRIPT}" --no-launch'
-            f' "{app_artifact.compact[0].rstr()}"'
-            f' --fap_dst_dir "/ext/apps/{app_artifact.app.fap_category}"'
-            for app_artifact in appenv["EXT_APPS"].values()
-        ]
-    ),
-    source=["faps"],
-)
-
 # SDK management
 
 sdk_origin_path = "${BUILD_DIR}/sdk_origin"
