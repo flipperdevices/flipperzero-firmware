@@ -213,6 +213,8 @@ static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     
     if(bad_usb->stringdelay == 0) {
         timing = 0;
+    } else if(bad_usb->stringdelay > 1000) {
+        timing = bad_usb->stringdelay / 1000 / 2;
     } else {
         timing = bad_usb->stringdelay / 2;
     }
