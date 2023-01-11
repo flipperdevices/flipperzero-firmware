@@ -60,10 +60,135 @@ static bool pwn_zero_exec_cmd(PwnDumpModel* model) {
 
         // See what the cmd wants
         switch (cmd.parameterCode) {
-            case 4:
-                model->pwn->face = cmd.arguments[0];
+            // Process Face
+            case 0x04:
+            {
+                // Adding 4 to account for the offset that is required above 0x03
+                int face = cmd.arguments[0] - 4;
+
+                if (face < 0) {
+                    face = 0;
+                }
+
+                model->pwn->face = cmd.arguments[0] - 4;
 
                 break;
+            }
+            // Process Name
+            case 0x05:
+            {
+                // Write over hostname with nothing
+                strncpy(model->pwn->hostname, "", PWNAGOTCHI_MAX_HOSTNAME_LEN);
+
+                for (size_t i = 0; i < PWNAGOTCHI_MAX_HOSTNAME_LEN; i++) {
+                    // Break if we hit the end of the name
+                    if (cmd.arguments[i] == 0x00) {
+                        break;
+                    }
+
+                    model->pwn->hostname[i] = cmd.arguments[i];
+                }
+                break;
+            }
+            // Process channel
+            case 0x06:
+            {
+                // Write over channel with nothing
+                strncpy(model->pwn->channel, "", PWNAGOTCHI_MAX_CHANNEL_LEN);
+
+                snprintf(model->pwn->channel, PWNAGOTCHI_MAX_CHANNEL_LEN, "%d", cmd.arguments[0]);
+
+                break;
+            }
+            // Process APS (Access Points)
+            case 0x07:
+            {
+                // Write over APS with nothing
+                strncpy(model->pwn->apStat, "", PWNAGOTCHI_MAX_APS_LEN);
+
+                for (size_t i = 0; i < PWNAGOTCHI_MAX_APS_LEN; i++) {
+                    // Break if we hit the end of the name
+                    if (cmd.arguments[i] == 0x00) {
+                        break;
+                    }
+                    model->pwn->apStat[i] = cmd.arguments[i];
+                }
+                break;
+            }
+            // Process uptime
+            case 0x08:
+            {
+                // Write over uptime with nothing
+                strncpy(model->pwn->uptime, "", PWNAGOTCHI_MAX_UPTIME_LEN);
+
+                for (size_t i = 0; i < PWNAGOTCHI_MAX_UPTIME_LEN; i++) {
+                    // Break if we hit the end of the name
+                    if (cmd.arguments[i] == 0x00) {
+                        break;
+                    }
+                    model->pwn->uptime[i] = cmd.arguments[i];
+                }
+                break;
+            }
+            // Process friend
+            case 0x09:
+            {
+                // Friend not implemented yet
+                break;
+            }
+            // Process mode
+            case 0x0a:
+            {
+                enum PwnagotchiMode mode;
+
+                switch (cmd.arguments[0]) {
+                    case 0x04:
+                        mode = PwnMode_Manual;
+                        break;
+                    case 0x05:
+                        mode = PwnMode_Auto;
+                        break;
+                    case 0x06:
+                        mode = PwnMode_Ai;
+                        break;
+                    default:
+                        mode = PwnMode_Manual;
+                        break;
+                }
+                model->pwn->mode = mode;
+
+                break;
+            }
+            // Process Handshakes
+            case 0x11:
+            {
+                // Write over handshakes with nothing
+                strncpy(model->pwn->handshakes, "", PWNAGOTCHI_MAX_HANDSHAKES_LEN);
+
+                for (size_t i = 0; i < PWNAGOTCHI_MAX_HANDSHAKES_LEN; i++) {
+                    // Break if we hit the end of the name
+                    if (cmd.arguments[i] == 0x00) {
+                        break;
+                    }
+                    model->pwn->handshakes[i] = cmd.arguments[i];
+                }
+                break;
+            }
+            // Process message
+            case 0x12:
+            {
+                // Write over the message with nothing
+                strncpy(model->pwn->message, "", PWNAGOTCHI_MAX_MESSAGE_LEN);
+
+                for (size_t i = 0; i < PWNAGOTCHI_MAX_MESSAGE_LEN; i++) {
+                    // Break if we hit the end of the name
+                    if (cmd.arguments[i] == 0x00) {
+                        break;
+                    }
+                    model->pwn->message[i] = cmd.arguments[i];
+                }
+                break;
+            }
         }
 
     }
@@ -120,7 +245,6 @@ static int32_t pwn_zero_worker(void* context) {
                 uint8_t data[1];
                 length = furi_stream_buffer_receive(app->rx_stream, data, 1, 0);
                 if(length > 0) {
-                    furi_hal_uart_tx(PWNAGOTCHI_UART_CHANNEL, data, length);
                     with_view_model(
                         app->view,
                         PwnDumpModel* model,
