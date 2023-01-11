@@ -71,7 +71,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx) {
                 /* Is the difference in duration between this signal and
                  * the class we are inspecting less than a given percentage?
                  * If so, accept this signal. */
-                if (delta < classavg/6) { /* 100%/6 = 16%. */
+                if (delta < classavg/5) { /* 100%/5 = 20%. */
                     /* It is useful to compute the average of the class
                      * we are observing. We know how many samples we got so
                      * far, so we can recompute the average easily.
@@ -381,10 +381,11 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
 
     /* We call the decoders with an offset a few bits before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_after_bits = 2;
+    uint32_t before_bits = 10;
+    uint32_t after_bits = 100;
 
     uint8_t *bitmap = malloc(bitmap_size);
-    uint32_t bits = convert_signal_to_bits(bitmap,bitmap_size,s,-before_after_bits,len+before_after_bits*2,s->short_pulse_dur);
+    uint32_t bits = convert_signal_to_bits(bitmap,bitmap_size,s,-before_bits,len+before_bits+after_bits,s->short_pulse_dur);
 
     if (DEBUG_MSG) { /* Useful for debugging purposes. Don't remove. */
         char *str = malloc(1024);
