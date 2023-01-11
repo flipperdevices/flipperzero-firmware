@@ -154,7 +154,7 @@ static void ws_protocol_lacrosse_tx_remote_controller(WSBlockGeneric* instance) 
                       (float)((instance->data >> 16) & 0x0F) +
                       (float)((instance->data >> 12) & 0x0F) * 0.1f;
 
-    if(msg_type == LACROSSE_TX_MSG_TYPE_TEMP) {
+    if(msg_type == LACROSSE_TX_MSG_TYPE_TEMP) { //-V1051
         instance->temp = msg_value - 50.0f;
         instance->humidity = WS_NO_HUMIDITY;
     } else if(msg_type == LACROSSE_TX_MSG_TYPE_HUM) {
