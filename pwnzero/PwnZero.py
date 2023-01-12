@@ -131,7 +131,7 @@ class PwnZero(object):
         return self._serialConn.write(data) == len(data)
 
     # Public method commands
-    def set_face(self, face: PwnZeroParam.Face) -> bool:
+    def set_face(self, face: PwnZeroParam.FaceEnum) -> bool:
         """
         Set the face of the Pwnagotchi
 
@@ -199,6 +199,15 @@ class PwnZero(object):
         :return: False
         """
         return False
+
+    def set_mode(self, mode: PwnZeroParam.ModeEnum) -> bool:
+        """
+        Set the mode on the Pwnagotchi
+        
+        :param: mode: Mode to set
+        :return: If the command was sent successfully
+        """
+        return self._send_data(PwnZeroParam.MODE.value, [mode.value])
 
     def set_handshakes(self, handshakesCurrent: int, handshakesTotal: int) -> bool:
         """
