@@ -1,6 +1,6 @@
-/* Ford tires TPMS. Usually 443.92 Mhz FSK (In Europe).
+/* Toyota tires TPMS. Usually 443.92 Mhz FSK (In Europe).
  *
- * Preamble + sync + 64 bits of data.
+ * Preamble + sync + 64 bits of data. ~48us short pulse length.
  *
  * The preamble + sync is something like:
  *

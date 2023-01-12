@@ -163,7 +163,7 @@ void scan_for_signal(ProtoViewApp *app) {
                 app->signal_decoded = decoded;
                 raw_samples_copy(DetectedSamples,copy);
                 raw_samples_center(DetectedSamples,i);
-                FURI_LOG_E(TAG, "Displayed sample updated (%d samples %lu us)",
+                FURI_LOG_E(TAG, "===> Displayed sample updated (%d samples %lu us)",
                     (int)thislen, DetectedSamples->short_pulse_dur);
 
                 /* Adjust raw view scale if the signal has an high
@@ -382,12 +382,14 @@ extern ProtoViewDecoder Oregon2Decoder;
 extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
 extern ProtoViewDecoder ToyotaTPMSDecoder;
+extern ProtoViewDecoder SchraderTPMSDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
     &B4B1Decoder,           /* PT, SC, ... 24 bits remotes. */
     &RenaultTPMSDecoder,    /* Renault TPMS. */
     &ToyotaTPMSDecoder,     /* Toyota TPMS. */
+    &SchraderTPMSDecoder,   /* Schrader TPMS. */
     NULL
 };
 
@@ -407,7 +409,7 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
 
     /* We call the decoders with an offset a few samples before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_samples = 10;
+    uint32_t before_samples = 20;
     uint32_t after_samples = 100;
 
     uint8_t *bitmap = malloc(bitmap_size);

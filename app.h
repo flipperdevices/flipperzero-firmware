@@ -180,3 +180,6 @@ void view_exit_settings(ProtoViewApp *app);
 
 /* ui.c */
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
+
+/* crc.c */
+uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);
