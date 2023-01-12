@@ -166,7 +166,7 @@ static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
                 break;
             }
             // Process Handshakes
-            case 0x11:
+            case 0x0b:
             {
                 // Write over handshakes with nothing
                 strncpy(model->pwn->handshakes, "", PWNAGOTCHI_MAX_HANDSHAKES_LEN);
@@ -181,7 +181,7 @@ static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
                 break;
             }
             // Process message
-            case 0x12:
+            case 0x0c:
             {
                 // Write over the message with nothing
                 strncpy(model->pwn->message, "", PWNAGOTCHI_MAX_MESSAGE_LEN);
