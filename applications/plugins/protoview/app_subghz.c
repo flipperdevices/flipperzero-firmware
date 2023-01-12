@@ -5,6 +5,12 @@
 #include "custom_presets.h"
 
 #include <flipper_format/flipper_format_i.h>
+#include <furi_hal_rtc.h>
+#include <furi_hal_spi.h>
+#include <furi_hal_interrupt.h>
+
+void raw_sampling_worker_start(ProtoViewApp* app);
+void raw_sampling_worker_stop(ProtoViewApp* app);
 
 ProtoViewModulation ProtoViewModulations[] = {
     {"OOK 650Khz", FuriHalSubGhzPresetOok650Async, NULL},
@@ -15,6 +21,7 @@ ProtoViewModulation ProtoViewModulations[] = {
     {"GFSK", FuriHalSubGhzPresetGFSK9_99KbAsync, NULL},
     {"TPMS 1 (FSK)", 0, (uint8_t*)protoview_subghz_tpms1_async_regs},
     {"TPMS 2 (FSK)", 0, (uint8_t*)protoview_subghz_tpms2_async_regs},
+    {"TPMS 3 (FSK)", 0, (uint8_t*)protoview_subghz_tpms3_async_regs},
     {NULL, 0, NULL} /* End of list sentinel. */
 };
 
@@ -53,9 +60,12 @@ uint32_t radio_rx(ProtoViewApp* app) {
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     furi_hal_subghz_flush_rx();
     furi_hal_subghz_rx();
-
-    furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, app->txrx->worker);
-    subghz_worker_start(app->txrx->worker);
+    if(!app->txrx->debug_timer_sampling) {
+        furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, app->txrx->worker);
+        subghz_worker_start(app->txrx->worker);
+    } else {
+        raw_sampling_worker_start(app);
+    }
     app->txrx->txrx_state = TxRxStateRx;
     return value;
 }
@@ -64,9 +74,13 @@ uint32_t radio_rx(ProtoViewApp* app) {
 void radio_rx_end(ProtoViewApp* app) {
     furi_assert(app);
     if(app->txrx->txrx_state == TxRxStateRx) {
-        if(subghz_worker_is_running(app->txrx->worker)) {
-            subghz_worker_stop(app->txrx->worker);
-            furi_hal_subghz_stop_async_rx();
+        if(!app->txrx->debug_timer_sampling) {
+            if(subghz_worker_is_running(app->txrx->worker)) {
+                subghz_worker_stop(app->txrx->worker);
+                furi_hal_subghz_stop_async_rx();
+            }
+        } else {
+            raw_sampling_worker_stop(app);
         }
     }
     furi_hal_subghz_idle();
@@ -83,4 +97,56 @@ void radio_sleep(ProtoViewApp* app) {
     }
     furi_hal_subghz_sleep();
     app->txrx->txrx_state = TxRxStateSleep;
+}
+
+/* ============================= Raw sampling mode =============================
+ * This is a special mode that uses a high frequency timer to sample the
+ * CC1101 pin directly. It's useful for debugging purposes when we want
+ * to get the raw data from the chip and completely bypass the subghz
+ * Flipper system.
+ * ===========================================================================*/
+
+void protoview_timer_isr(void* ctx) {
+    ProtoViewApp* app = ctx;
+
+    bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
+    if(app->txrx->last_g0_value != level) {
+        uint32_t now = DWT->CYCCNT;
+        uint32_t dur = now - app->txrx->last_g0_change_time;
+        dur /= furi_hal_cortex_instructions_per_microsecond();
+        if(dur > 15000) dur = 15000;
+        raw_samples_add(RawSamples, app->txrx->last_g0_value, dur);
+        app->txrx->last_g0_value = level;
+        app->txrx->last_g0_change_time = now;
+    }
+    LL_TIM_ClearFlag_UPDATE(TIM2);
+}
+
+void raw_sampling_worker_start(ProtoViewApp* app) {
+    UNUSED(app);
+
+    LL_TIM_InitTypeDef tim_init = {
+        .Prescaler = 63, /* CPU frequency is ~64Mhz. */
+        .CounterMode = LL_TIM_COUNTERMODE_UP,
+        .Autoreload = 5, /* Sample every 5 us */
+    };
+
+    LL_TIM_Init(TIM2, &tim_init);
+    LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
+    LL_TIM_DisableCounter(TIM2);
+    LL_TIM_SetCounter(TIM2, 0);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, protoview_timer_isr, app);
+    LL_TIM_EnableIT_UPDATE(TIM2);
+    LL_TIM_EnableCounter(TIM2);
+    FURI_LOG_E(TAG, "Timer enabled");
+}
+
+void raw_sampling_worker_stop(ProtoViewApp* app) {
+    UNUSED(app);
+    FURI_CRITICAL_ENTER();
+    LL_TIM_DisableCounter(TIM2);
+    LL_TIM_DisableIT_UPDATE(TIM2);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
+    LL_TIM_DeInit(TIM2);
+    FURI_CRITICAL_EXIT();
 }

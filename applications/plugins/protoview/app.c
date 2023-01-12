@@ -96,6 +96,12 @@ static void app_switch_view(ProtoViewApp* app, SwitchViewDirection dir) {
     /* Call the enter/exit view callbacks if needed. */
     if(old == ViewDirectSampling) view_exit_direct_sampling(app);
     if(new == ViewDirectSampling) view_enter_direct_sampling(app);
+    /* The frequency/modulation settings are actually a single view:
+     * as long as the user stays between the two modes of this view we
+     * don't need to call the exit-view callback. */
+    if((old == ViewFrequencySettings && new != ViewModulationSettings) ||
+       (old == ViewModulationSettings && new != ViewFrequencySettings))
+        view_exit_settings(app);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -119,6 +125,7 @@ ProtoViewApp* protoview_app_alloc() {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->current_view = ViewRawPulses;
+    app->direct_sampling_enabled = false;
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
@@ -130,17 +137,18 @@ ProtoViewApp* protoview_app_alloc() {
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */
+    app->txrx->freq_mod_changed = false;
+    app->txrx->debug_timer_sampling = false;
+    app->txrx->last_g0_change_time = DWT->CYCCNT;
+    app->txrx->last_g0_value = false;
     app->txrx->worker = subghz_worker_alloc();
-
 #ifdef PROTOVIEW_DISABLE_SUBGHZ_FILTER
     app->txrx->worker->filter_running = 0;
 #endif
-
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&protoview_protocol_registry);
     app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
-
     subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
     subghz_worker_set_overrun_callback(
         app->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
@@ -178,9 +186,11 @@ void protoview_app_free(ProtoViewApp* app) {
     subghz_setting_free(app->setting);
 
     // Worker stuff.
-    subghz_receiver_free(app->txrx->receiver);
-    subghz_environment_free(app->txrx->environment);
-    subghz_worker_free(app->txrx->worker);
+    if(!app->txrx->debug_timer_sampling) {
+        subghz_receiver_free(app->txrx->receiver);
+        subghz_environment_free(app->txrx->environment);
+        subghz_worker_free(app->txrx->worker);
+    }
     free(app->txrx);
 
     // Raw samples buffers.
@@ -202,6 +212,9 @@ static void timer_callback(void* ctx) {
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp* app = protoview_app_alloc();
+
+    printf("%llu\n", (unsigned long long)DWT->CYCCNT);
+    printf("%llu\n", (unsigned long long)DWT->CYCCNT);
 
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);

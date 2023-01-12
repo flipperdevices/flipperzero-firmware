@@ -53,6 +53,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer* s, uint32_t idx) {
         bool level;
         uint32_t dur;
         raw_samples_get(s, j, &level, &dur);
+
         if(dur < minlen || dur > maxlen) break; /* return. */
 
         /* Let's see if it matches a class we already have or if we
@@ -70,7 +71,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer* s, uint32_t idx) {
                 /* Is the difference in duration between this signal and
                  * the class we are inspecting less than a given percentage?
                  * If so, accept this signal. */
-                if(delta < classavg / 8) { /* 100%/8 = 12%. */
+                if(delta < classavg / 5) { /* 100%/5 = 20%. */
                     /* It is useful to compute the average of the class
                      * we are observing. We know how many samples we got so
                      * far, so we can recompute the average easily.
@@ -128,9 +129,9 @@ void scan_for_signal(ProtoViewApp* app) {
 
     /* Try to seek on data that looks to have a regular high low high low
      * pattern. */
-    uint32_t minlen = 13; /* Min run of coherent samples. Up to
-                                       12 samples it's very easy to mistake
-                                       noise for signal. */
+    uint32_t minlen = 18; /* Min run of coherent samples. With less
+                                       than a few samples it's very easy to
+                                       mistake noise for signal. */
 
     ProtoViewMsgInfo* info = malloc(sizeof(ProtoViewMsgInfo));
     uint32_t i = 0;
@@ -150,9 +151,10 @@ void scan_for_signal(ProtoViewApp* app) {
                                       the signal in the loop. */
 
             /* Accept this signal as the new signal if either it's longer
-             * than the previous one, or the previous one was unknown and
-             * this is decoded. */
-            if(thislen > app->signal_bestlen || (app->signal_decoded == false && decoded)) {
+             * than the previous undecoded one, or the previous one was
+             * unknown and this is decoded. */
+            if((thislen > app->signal_bestlen && app->signal_decoded == false) ||
+               (app->signal_decoded == false && decoded)) {
                 app->signal_info = *info;
                 app->signal_bestlen = thislen;
                 app->signal_decoded = decoded;
@@ -163,6 +165,10 @@ void scan_for_signal(ProtoViewApp* app) {
                     "Displayed sample updated (%d samples %lu us)",
                     (int)thislen,
                     DetectedSamples->short_pulse_dur);
+
+                /* Adjust raw view scale if the signal has an high
+                 * data rate. */
+                if(DetectedSamples->short_pulse_dur < 100) app->us_scale = 10;
             }
         }
         i += thislen ? thislen : 1;
@@ -326,11 +332,9 @@ uint32_t convert_signal_to_bits(
 
 /* This function converts the line code used to the final data representation.
  * The representation is put inside 'buf', for up to 'buflen' bytes of total
- * data. For instance in order to convert manchester I can use "10" and "01"
- * as zero and one patterns. It is possible to use "?" inside patterns in
- * order to skip certain bits. For instance certain devices encode data twice,
- * with each bit encoded in manchester encoding and then in its reversed
- * representation. In such a case I could use "10??" and "01??".
+ * data. For instance in order to convert manchester you can use "10" and "01"
+ * as zero and one patterns. However this function does not handle differential
+ * encodings. See below for convert_from_diff_manchester().
  *
  * The function returns the number of bits converted. It will stop as soon
  * as it finds a pattern that does not match zero or one patterns, or when
@@ -365,17 +369,45 @@ uint32_t convert_from_line_code(
     return decoded;
 }
 
+/* Convert the differential Manchester code to bits. This is similar to
+ * convert_from_line_code() but specific for Manchester. The user must
+ * supply the value of the previous symbol before this stream, since
+ * in differential codings the next bits depend on the previous one.
+ *
+ * Parameters and return values are like convert_from_line_code(). */
+uint32_t convert_from_diff_manchester(
+    uint8_t* buf,
+    uint64_t buflen,
+    uint8_t* bits,
+    uint32_t len,
+    uint32_t off,
+    bool previous) {
+    uint32_t decoded = 0;
+    len *= 8; /* Conver to bits. */
+    for(uint32_t j = off; j < len; j += 2) {
+        bool b0 = bitmap_get(bits, len, j);
+        bool b1 = bitmap_get(bits, len, j + 1);
+        if(b0 == previous) break; /* Each new bit must switch value. */
+        bitmap_set(buf, buflen, decoded++, b0 == b1);
+        previous = b1;
+        if(decoded / 8 == buflen) break; /* No space left on target buffer. */
+    }
+    return decoded;
+}
+
 /* Supported protocols go here, with the relevant implementation inside
  * protocols/<name>.c */
 
 extern ProtoViewDecoder Oregon2Decoder;
 extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
+extern ProtoViewDecoder ToyotaTPMSDecoder;
 
 ProtoViewDecoder* Decoders[] = {
     &Oregon2Decoder, /* Oregon sensors v2.1 protocol. */
     &B4B1Decoder, /* PT, SC, ... 24 bits remotes. */
     &RenaultTPMSDecoder, /* Renault TPMS. */
+    &ToyotaTPMSDecoder, /* Toyota TPMS. */
     NULL};
 
 /* Reset the message info structure before passing it to the decoding
@@ -392,17 +424,18 @@ bool decode_signal(RawSamplesBuffer* s, uint64_t len, ProtoViewMsgInfo* info) {
     uint32_t bitmap_bits_size = 4096 * 8;
     uint32_t bitmap_size = bitmap_bits_size / 8;
 
-    /* We call the decoders with an offset a few bits before the actual
+    /* We call the decoders with an offset a few samples before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_after_bits = 2;
+    uint32_t before_samples = 10;
+    uint32_t after_samples = 100;
 
     uint8_t* bitmap = malloc(bitmap_size);
     uint32_t bits = convert_signal_to_bits(
         bitmap,
         bitmap_size,
         s,
-        -before_after_bits,
-        len + before_after_bits * 2,
+        -before_samples,
+        len + before_samples + after_samples,
         s->short_pulse_dur);
 
     if(DEBUG_MSG) { /* Useful for debugging purposes. Don't remove. */

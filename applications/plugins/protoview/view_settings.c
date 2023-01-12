@@ -20,6 +20,9 @@ void render_view_settings(Canvas* const canvas, ProtoViewApp* app) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 10, 61, "Use up and down to modify");
 
+    if(app->txrx->debug_timer_sampling)
+        canvas_draw_str(canvas, 3, 52, "(DEBUG timer sampling is ON)");
+
     /* Show frequency. We can use big numbers font since it's just a number. */
     if(app->current_view == ViewFrequencySettings) {
         char buf[16];
@@ -40,6 +43,18 @@ void process_input_settings(ProtoViewApp* app, InputEvent input) {
          * modulation. */
         app->frequency = subghz_setting_get_default_frequency(app->setting);
         app->modulation = 0;
+    } else if(0 && input.type == InputTypeLong && input.key == InputKeyDown) {
+        /* Long pressing to down switches between normal and debug
+         * timer sampling mode. NOTE: this feature is disabled for users,
+         * only useful for devs (if useful at all). */
+
+        /* We have to stop the previous sampling system. */
+        radio_rx_end(app);
+
+        /* Then switch mode and start the new one. */
+        app->txrx->debug_timer_sampling = !app->txrx->debug_timer_sampling;
+        radio_begin(app);
+        radio_rx(app);
     } else if(input.type == InputTypePress && (input.key != InputKeyDown || input.key != InputKeyUp)) {
         /* Handle up and down to change frequency or modulation. */
         if(app->current_view == ViewFrequencySettings) {
@@ -83,13 +98,22 @@ void process_input_settings(ProtoViewApp* app, InputEvent input) {
         return;
     }
 
-    /* Apply changes. */
-    FURI_LOG_E(
-        TAG,
-        "Setting view, setting frequency/modulation to %lu %s",
-        app->frequency,
-        ProtoViewModulations[app->modulation].name);
-    radio_rx_end(app);
-    radio_begin(app);
-    radio_rx(app);
+    /* Apply changes when switching to other views. */
+    app->txrx->freq_mod_changed = true;
+}
+
+/* When the user switches to some other view, if they changed the parameters
+ * we need to restart the radio with the right frequency and modulation. */
+void view_exit_settings(ProtoViewApp* app) {
+    if(app->txrx->freq_mod_changed) {
+        FURI_LOG_E(
+            TAG,
+            "Setting view, setting frequency/modulation to %lu %s",
+            app->frequency,
+            ProtoViewModulations[app->modulation].name);
+        radio_rx_end(app);
+        radio_begin(app);
+        radio_rx(app);
+        app->txrx->freq_mod_changed = false;
+    }
 }
