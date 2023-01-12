@@ -20,7 +20,7 @@ class PwnZeroParam(Enum):
     HANDSHAKES  = 11
     MESSAGE     = 12
 
-    class Mode(Enum):
+    class ModeEnum(Enum):
         """
         Embedded class with the mode
         """
@@ -28,7 +28,7 @@ class PwnZeroParam(Enum):
         AUTO    = 5
         AI      = 6
 
-    class Face(Enum):
+    class FaceEnum(Enum):
         """
         Embedded class with all face parameters
         """
@@ -102,7 +102,6 @@ class PwnZero(object):
         
         return retVal
 
-
     def _send_data(self, param: int, args: list[int]) -> bool:
         """
         Sends data using protocol v2 over the serial port to the Flipper Zero
@@ -131,4 +130,93 @@ class PwnZero(object):
         # Send data to flipper
         return self._serialConn.write(data) == len(data)
 
+    # Public method commands
+    def set_face(self, face: PwnZeroParam.Face) -> bool:
+        """
+        Set the face of the Pwnagotchi
 
+        :param: face: Face to set on the device
+        :return: If the command was sent successfully
+        """
+        return self._send_data(PwnZeroParam.FACE.value, [face.value])
+
+    def set_name(self, name: str) -> bool:
+        """
+        Set the name of the Pwnagotchi
+
+        :param: name: Name to set on the pwnagotchi
+        :return: If the command was sent successfully
+        """
+        data = self._str_to_bytes(name)
+        return self._send_data(PwnZeroParam.NAME.value, data)
+
+    def set_channel(self, channel: int) -> bool:
+        """
+        Set the channel of the Pwnagotchi
+        Send a 0 for * (all channels)
+
+        :param: channel: Channel to set on pwnagotchi
+        :return: If the command was sent successfully
+        """
+        return self._send_data(PwnZeroParam.CHANNEL.value, [channel])
+
+    def set_aps(self, apsCurrent: int, apsTotal) -> bool:
+        """
+        Set the APs of the Pwnagotchi
+
+        :param: apsCurrent: Number of APS this session
+        :param: apsTotal: Number of APS in unit lifetime
+        :return: If the command was sent successfully
+        """
+        data = self._str_to_bytes("{} ({})".format(apsCurrent, apsTotal))
+        return self._send_data(PwnZeroParam.APS.value, data)
+
+    def set_uptime(self, hh: int, mm: int, ss: int) -> bool:
+        """
+        Sets the uptime of the Pwnagotchi
+
+        :param: hh: Hours
+        :param: mm: Minutes
+        :param: ss: Seconds
+        :return: If the command was sent successfully
+        """
+        # Make sure all values are less than 100 and greater than 0
+        if not (0 <= hh < 100 and 0 <= mm < 100 and 0 <= ss < 100):
+            return False
+
+        # A stands for adjusted
+        hhA = str(hh).zfill(2)
+        mmA = str(mm).zfill(2)
+        ssA = str(ss).zfill(2)
+
+        data = self._str_to_bytes("{}:{}:{}".format(hhA, mmA, ssA))
+        return self._send_data(PwnZeroParam.APS.value, data)
+
+    def set_friend(self) -> bool:
+        """
+        Friend is currently not supported
+        
+        :return: False
+        """
+        return False
+
+    def set_handshakes(self, handshakesCurrent: int, handshakesTotal: int) -> bool:
+        """
+        Set the number of handshakes on the Pwnagotchi
+
+        :param: handshakesCurrent: Number of handshakes this session
+        :param: handshakesTotal: Number of handshakes in the lifetime of unit
+        :return: If the command was sent successfully
+        """
+        data = self._str_to_bytes("{} ({})".format(handshakesCurrent, handshakesTotal))
+        return self._send_data(PwnZeroParam.HANDSHAKES.value, data)
+
+    def set_message(self, message: str) -> bool:
+        """
+        Sets the displayed message on the Pwnagotchi
+        
+        :param: message: Message to set
+        :return: If the command was sent successfully
+        """
+        data = self._str_to_bytes(message)
+        return self._send_data(PwnZeroParam.MESSAGE.value, data)
