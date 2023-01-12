@@ -45,6 +45,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     FURI_LOG_E(TAG, "Renault TPMS decoded bits: %lu", decoded);
 
     if (decoded < 8*9) return false; /* Require the full 9 bytes. */
+    if (crc8(raw,8,0,7) != raw[8]) return false; /* Require sane CRC. */
 
     float kpa = 0.75 *((uint32_t)((raw[0]&3)<<8) | raw[1]);
     int temp = raw[2]-30;

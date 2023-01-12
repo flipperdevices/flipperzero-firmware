@@ -7,5 +7,3 @@ Core improvements
   sub files with modified signal and so forth.
 - Optimize memory usage storing raw samples in a bitfield: 15 bits
   duration, 1 bit level.
-- Implement checksum for all TPMS protocols. They have very weak
-  preamble/sync discrimination.
