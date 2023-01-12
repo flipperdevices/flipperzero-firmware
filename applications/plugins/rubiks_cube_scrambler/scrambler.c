@@ -54,8 +54,8 @@ void scrambleReplace() {
 
     // Initialize the mainScramble array with all the possible moves
     for(int i = 0; i < SLEN; i++) {
-        a.mainScramble[i][0] = moves[getRand(6, 0)];
-        a.mainScramble[i][1] = dir[getRand(3, 0)];
+        a.mainScramble[i][0] = moves[furi_hal_random_get() % 6];
+        a.mainScramble[i][1] = dir[furi_hal_random_get() % 3];
     }
 
     // Perform the Fisher-Yates shuffle
@@ -69,24 +69,16 @@ void scrambleReplace() {
 
     // Select the first 10 elements as the scramble, using only the first three elements of the dir array
     for(int i = 0; i < SLEN; i++) {
-        a.mainScramble[i][1] = dir[rand() % 3];
+        a.mainScramble[i][1] = dir[furi_hal_random_get() % 3];
     }
-}
-
-void valid() {
-    for (int i = 2; i < SLEN; i++) {
-        while ( a.mainScramble[i][0] == a.mainScramble[i - 2][0] || a.mainScramble[i][0] == a.mainScramble[i - 1][0]) {
-            a.mainScramble[i][0] = moves[rand()%5];
+    for(int i = 1; i < SLEN; i++) {
+        while(a.mainScramble[i][0] == a.mainScramble[i - 2][0] ||
+              a.mainScramble[i][0] == a.mainScramble[i - 1][0]) {
+            a.mainScramble[i][0] = moves[furi_hal_random_get() % 5];
         }
     }
-    // Scramble generation complete
 }
 
-int getRand(int upr, int lwr) {
-    int randNum;
-    randNum = (rand() % (upr - lwr + 1)) + lwr;
-    return randNum;
-}
 // Let this function be here for now till I find out what is causing the extra space bug in the scrambles
 void remove_double_spaces(char* str) {
     int i, j;

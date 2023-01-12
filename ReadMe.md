@@ -58,14 +58,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Patreon Builds Update: ALL + Anime + Select Builds: Added 3 Akira animations (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/e40f48ee4c8d75f9fcf634919cf806b1329b32da) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
 - [Patreon Builds Update: 18 Plus Builds: Added 1 Cool Devices and 2 Bible Black animations (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 - Updated ReadMe's for Geiger Counter, GPS, Toy Serial and UART Terminal
-- Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - Updated: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - Updated: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - Added: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
-- Updated: [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - Added: BadUSB: [Install qFlipper For Windows (By DXVVAY)](https://github.com/flipperdevices/flipperzero-firmware/pull/2182)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Updated: [Rubik's Cube Scrambler (By RaZeSloth)] https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler
 
 <a name="release">
 
