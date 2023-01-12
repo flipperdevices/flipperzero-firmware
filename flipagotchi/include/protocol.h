@@ -3,7 +3,7 @@
 #include <furi.h>
 
 /// Number of bytes that can be stored in the queue at one time
-#define PWNAGOTCHI_PROTOCOL_QUEUE_SIZE 40
+#define PWNAGOTCHI_PROTOCOL_QUEUE_SIZE 1000
 
 /// Max bytes of argument data
 #define PWNAGOTCHI_PROTOCOL_ARGS_MAX 100
