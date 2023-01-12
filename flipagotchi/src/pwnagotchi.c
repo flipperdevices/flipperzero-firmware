@@ -18,7 +18,6 @@ Pwnagotchi* pwnagotchi_alloc() {
     strncpy(pwn->apStat, "0 (0)", 6);
     strncpy(pwn->hostname, "pwn", 4);
     strncpy(pwn->handshakes, "0 (0)", 6);
-    strncpy(pwn->message, "Hello World!", 13);
     strncpy(pwn->uptime, "00:00:00", 9);
     strncpy(pwn->message, "Hack the planet!", 17);
     pwn->mode = PwnMode_Manual;
