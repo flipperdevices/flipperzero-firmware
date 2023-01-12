@@ -99,7 +99,7 @@ void sound_engine_fill_buffer(SoundEngine* sound_engine, uint16_t* audio_buffer,
 				
 				if(channel->flags & SE_ENABLE_FILTER)
 				{
-					sound_engine_filter_cycle(&channel->filter, channel_output[i]);
+					sound_engine_filter_cycle(&channel->filter, channel_output_final[chan]);
 
 					switch(channel->filter_mode)
 					{
