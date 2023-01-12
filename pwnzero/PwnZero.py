@@ -200,7 +200,7 @@ class PwnZero(object):
         ssA = str(ss).zfill(2)
 
         data = self._str_to_bytes("{}:{}:{}".format(hhA, mmA, ssA))
-        return self._send_data(PwnZeroParam.APS.value, data)
+        return self._send_data(PwnZeroParam.UPTIME.value, data)
 
     def set_friend(self) -> bool:
         """
