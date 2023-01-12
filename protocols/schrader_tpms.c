@@ -39,6 +39,13 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     if (decoded < 64) return false; /* Require the full 8 bytes. */
 
+    raw[0] |= 0xf0; // Fix the preamble nibble for checksum computation.
+    uint8_t cksum = crc8(raw,sizeof(raw)-1,0xf0,0x7);
+    if (cksum != raw[7]) {
+        FURI_LOG_E(TAG, "Schrader TPMS checksum mismatch");
+        return false;
+    }
+
     float kpa = (float)raw[5]*2.5;
     int temp = raw[6]-50;
 
