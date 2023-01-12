@@ -13,7 +13,7 @@ pwnagotchi-flipper
 
 ## Current state
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
-As of commit 3c6e491 (1/10/23) The non-pixel-by-pixel version of the Flipper app now can receive and properly process all protocol v2 commands. Next step is to create a Pwnagotchi plugin to command the flipper like a display and then make everything more robust with the UART communication.
+As of commit 82aec42 (1/12/23) The non-pixel-by-pixel version of the Flipper app now can receive and properly process all protocol v2 commands. Next step is to create a Pwnagotchi plugin to command the flipper like a display and then make everything more robust with the UART communication. A python program now exists to control this functionality. I need to integrate that into Pwnagotchi.
 
 <img src='doc/attachments/PwnZeroBaseWFace.png' alt='Flipper screen showing base Pwnagotchi display' height="128" width="256"/>
 
