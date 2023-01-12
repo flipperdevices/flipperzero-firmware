@@ -168,8 +168,10 @@ void scan_for_signal(ProtoViewApp *app) {
 
                 /* Adjust raw view scale if the signal has an high
                  * data rate. */
-                if (DetectedSamples->short_pulse_dur < 100)
+                if (DetectedSamples->short_pulse_dur < 75)
                     app->us_scale = 10;
+                else if (DetectedSamples->short_pulse_dur < 145)
+                    app->us_scale = 30;
             }
         }
         i += thislen ? thislen : 1;
