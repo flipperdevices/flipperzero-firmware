@@ -117,3 +117,11 @@ The code is released under the BSD license.
 # Disclaimer
 
 This application is only provided as an educational tool. The author is not liable in case the application is used to reverse engineer protocols protected by IP or for any other illegal purpose.
+
+# Credits
+
+A big thank you to the RTL433 author, [Benjamin Larsson](https://github.com/merbanan). I used the code and tools he developed in many ways:
+* To capture TPMS data with rtl433 and save to a file, to later play the IQ files and speedup the development.
+* As a sourve of documentation for protocols.
+* As an awesome way to visualize and understand protocols, via [these great web tools](https://triq.org/).
+* To have tons of fun with RTLSDR in general, now and in the past.
