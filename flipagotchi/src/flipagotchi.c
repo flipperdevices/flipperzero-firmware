@@ -96,8 +96,14 @@ static bool flipagotchi_exec_cmd(PwnDumpModel* model) {
                 // Write over channel with nothing
                 strncpy(model->pwn->channel, "", PWNAGOTCHI_MAX_CHANNEL_LEN);
 
-                snprintf(model->pwn->channel, PWNAGOTCHI_MAX_CHANNEL_LEN, "%d", cmd.arguments[0]);
+                for (size_t i = 0; i < PWNAGOTCHI_MAX_CHANNEL_LEN; i++) {
+                    // Break if we hit the end of the name
+                    if (cmd.arguments[i] == 0x00) {
+                        break;
+                    }
 
+                    model->pwn->channel[i] = cmd.arguments[i];
+                }
                 break;
             }
             // Process APS (Access Points)

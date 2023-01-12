@@ -158,7 +158,17 @@ class PwnZero(object):
         :param: channel: Channel to set on pwnagotchi
         :return: If the command was sent successfully
         """
-        return self._send_data(PwnZeroParam.CHANNEL.value, [channel])
+        # Make sure channel is valid
+        if not (0 <= channel <= 255):
+            return False
+        
+        channelStr = "*"
+
+        if channel != 0:
+            channelStr = str(channel)
+
+        data = self._str_to_bytes(channelStr)
+        return self._send_data(PwnZeroParam.CHANNEL.value, data)
 
     def set_aps(self, apsCurrent: int, apsTotal) -> bool:
         """
