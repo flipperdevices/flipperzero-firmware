@@ -6,7 +6,9 @@ the car keys), the curious person is left wondering what the device is
 sending at all. Using ProtoView she or he can visualize the high and low pulses
 like in the example image below (showing a Volkswagen key in 2FSK):
 
-![ProtoView screenshot](/images/ProtoViewSignal.jpg)
+![ProtoView screenshot raw signal](/images/protoview_1.jpg)
+
+![ProtoView screenshot Renault TPMS data](/images/protoview_2.jpg)
 
 This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
