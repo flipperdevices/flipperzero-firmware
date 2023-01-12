@@ -85,38 +85,42 @@ static void draw_callback(Canvas* canvas, void* ctx)
 
 	char buffer[30] = {0};
 
-	snprintf(buffer, 20, "FREQUENCY: %ld Hz", tracker->frequency);
+	snprintf(buffer, 20, "FREQUENCY:%ld Hz", tracker->frequency);
 	
 	canvas_draw_str(canvas, 0, 6, buffer);
 
-	snprintf(buffer, 20, "WAVEFORM: %s", wave_names[tracker->current_waveform_index]);
+	snprintf(buffer, 20, "WAVEFORM:%s", wave_names[tracker->current_waveform_index]);
 	
 	canvas_draw_str(canvas, 0, 12, buffer);
 
-	snprintf(buffer, 20, "PULSE WIDTH: $%03X", tracker->pw);
+	snprintf(buffer, 20, "PULSE WIDTH:$%03X", tracker->pw);
 	
 	canvas_draw_str(canvas, 0, 18, buffer);
 
-	snprintf(buffer, 20, "FILTER: %s", (tracker->flags & SE_ENABLE_FILTER) ? "ENABLED" : "DISABLED");
+	snprintf(buffer, 20, "FILTER:%s", (tracker->flags & SE_ENABLE_FILTER) ? "ENABLED" : "DISABLED");
 
 	canvas_draw_str(canvas, 0, 24, buffer);
 
-	snprintf(buffer, 20, "CUTOFF: %d", tracker->cutoff);
+	snprintf(buffer, 20, "CUTOFF:%d", tracker->cutoff);
 	
 	canvas_draw_str(canvas, 0, 30, buffer);
 
-	snprintf(buffer, 20, "RESONANCE: %d", tracker->resonance);
+	snprintf(buffer, 20, "RESONANCE:%d", tracker->resonance);
 	
 	canvas_draw_str(canvas, 0, 36, buffer);
 
-	snprintf(buffer, 20, "TYPE: %s", filter_names[tracker->filter_type]);
+	snprintf(buffer, 20, "TYPE:%s", filter_names[tracker->filter_type]);
 	
 	canvas_draw_str(canvas, 0, 42, buffer);
+
+	snprintf(buffer, 20, "TR.ENG.CALLS: %d", tracker->tracker_engine.absolute_position);
+	
+	canvas_draw_str(canvas, 0, 48, buffer);
 
 	canvas_draw_str(canvas, 70, tracker->selected_param * 6 + 6, "<");
 
     uint32_t bytes = memmgr_get_free_heap();
-	snprintf(buffer, 20, "BYTES FREE: %ld", bytes);
+	snprintf(buffer, 20, "BYTES FREE:%ld", bytes);
 
 	canvas_draw_str(canvas, 0, 64, buffer);
 }
@@ -151,7 +155,7 @@ int32_t flizzer_tracker_app(void* p)
 	// Очередь событий на 8 элементов размера FlizzerTrackerEvent
 	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
 
-	FlizzerTrackerApp* tracker = malloc(sizeof(FlizzerTrackerApp));
+	FlizzerTrackerApp* tracker = init_tracker(44100, 50, true, 1024);
 
 	// Создаем новый view port
 	ViewPort* view_port = view_port_alloc();
@@ -169,8 +173,6 @@ int32_t flizzer_tracker_app(void* p)
 	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
-	init_tracker(tracker, 44100, true, 1024);
-
 	tracker->sound_engine.channel[0].waveform = SE_WAVEFORM_NOISE;
 
 	tracker->frequency = 440;
@@ -178,7 +180,17 @@ int32_t flizzer_tracker_app(void* p)
 
 	sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], 440 * 1024);
 
-	sound_engine_start();
+	tracker->sound_engine.channel[0].adsr.a = 0x10;
+	tracker->sound_engine.channel[0].adsr.d = 0x10;
+	tracker->sound_engine.channel[0].adsr.s = 0xff;
+	tracker->sound_engine.channel[0].adsr.volume = 0x80;
+	tracker->sound_engine.channel[0].adsr.envelope_state = ATTACK;
+
+	SoundEngine* eng = &(tracker->sound_engine);
+
+	tracker->sound_engine.channel[0].adsr.envelope_speed = envspd(eng, tracker->sound_engine.channel[0].adsr.a);
+
+	play();
 
 	// Бесконечный цикл обработки очереди событий
 	while(1) 
@@ -202,12 +214,12 @@ int32_t flizzer_tracker_app(void* p)
 
 				if(tracker->playing)
 				{
-					sound_engine_start();
+					play();
 				}
 
 				else
 				{
-					sound_engine_stop();
+					stop();
 				}
 			}
 
@@ -272,8 +284,6 @@ int32_t flizzer_tracker_app(void* p)
 					case PARAM_ENABLE_FILTER:
 					{
 						tracker->flags ^= SE_ENABLE_FILTER;
-
-						tracker->sound_engine.channel[0].filter_mode = FIL_OUTPUT_LOWPASS;
 						
 						tracker->sound_engine.channel[0].flags = tracker->flags;
 
@@ -364,8 +374,6 @@ int32_t flizzer_tracker_app(void* p)
 					case PARAM_ENABLE_FILTER:
 					{
 						tracker->flags ^= SE_ENABLE_FILTER;
-
-						tracker->sound_engine.channel[0].filter_mode = FIL_OUTPUT_LOWPASS;
 						
 						tracker->sound_engine.channel[0].flags = tracker->flags;
 
@@ -411,7 +419,7 @@ int32_t flizzer_tracker_app(void* p)
 		}
 	}
 
-	deinit_tracker(tracker);
+	stop();
 
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_auto);
 	furi_record_close(RECORD_NOTIFICATION);
@@ -424,7 +432,7 @@ int32_t flizzer_tracker_app(void* p)
 	view_port_free(view_port);
 	furi_record_close(RECORD_GUI);
 
-	free(tracker);
+	deinit_tracker(tracker);
 
 	return 0;
 }

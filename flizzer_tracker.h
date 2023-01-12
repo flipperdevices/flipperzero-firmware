@@ -10,6 +10,8 @@
 #include "flizzer_tracker_hal.h"
 #include "sound_engine/freqs.h"
 #include "sound_engine/sound_engine_filter.h"
+#include "sound_engine/sound_engine_defs.h"
+#include "tracker_engine/tracker_engine_defs.h"
 
 typedef struct 
 {
@@ -19,6 +21,9 @@ typedef struct
 	NotificationApp* notification;
 
 	SoundEngine sound_engine;
+	TrackerEngine tracker_engine;
+
+	TrackerSong song;
 
 	uint32_t frequency;
 	uint8_t current_waveform_index;

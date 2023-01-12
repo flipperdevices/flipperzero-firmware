@@ -16,6 +16,11 @@
 #define SINE_LUT_SIZE 256
 #define SINE_LUT_BITDEPTH 8
 
+#define MAX_ADSR (0xff << 17)
+#define MAX_ADSR_VOLUME 0x80
+#define BASE_FREQ 22050
+#define envspd(eng, slope) ((slope) != 0 ? (((uint64_t)MAX_ADSR / ((slope) * (slope) * 256)) * BASE_FREQ / eng->sample_rate) : ((uint64_t)MAX_ADSR * BASE_FREQ / eng->sample_rate))
+
 typedef enum
 {
 	SE_WAVEFORM_NONE = 0,
@@ -43,11 +48,19 @@ typedef enum
 	FIL_OUTPUT_BANDPASS = 3,
 } SoundEngineFilterModes;
 
+typedef enum
+{
+	ATTACK = 1,
+	DECAY = 2,
+	SUSTAIN = 3,
+	RELEASE = 4,
+	DONE = 5,
+} SoundEngineEnvelopeStates;
+
 typedef struct
 {
-	uint8_t a, d, s, r, volume;
-	uint32_t envelope;
-	int32_t envelope_speed;
+	uint8_t a, d, s, r, volume, envelope_state;
+	uint32_t envelope, envelope_speed;
 } SoundEngineADSR;
 
 typedef struct
@@ -66,6 +79,9 @@ typedef struct
 	SoundEngineADSR adsr;
 
 	uint16_t flags;
+
+	uint8_t ring_mod, hard_sync; //0xff = self
+	uint8_t sync_bit;
 
 	uint8_t filter_mode;
 	uint16_t filter_cutoff;

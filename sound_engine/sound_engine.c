@@ -1,5 +1,4 @@
 #include "sound_engine.h"
-#include "../flizzer_tracker.h"
 #include "../flizzer_tracker_hal.h"
 
 #include <furi_hal.h>
@@ -9,6 +8,7 @@
 void sound_engine_init(SoundEngine* sound_engine, uint32_t sample_rate, bool external_audio_output, uint32_t audio_buffer_size)
 {
 	sound_engine->audio_buffer = malloc(audio_buffer_size * sizeof(sound_engine->audio_buffer[0]));
+	memset(sound_engine->audio_buffer, 0, sizeof(SoundEngine));
 	sound_engine->audio_buffer_size = audio_buffer_size;
 	sound_engine->sample_rate = sample_rate;
 	sound_engine->external_audio_output = external_audio_output;
@@ -56,6 +56,9 @@ void sound_engine_set_channel_frequency(SoundEngine* sound_engine, SoundEngineCh
 
 void sound_engine_fill_buffer(SoundEngine* sound_engine, uint16_t* audio_buffer, uint32_t audio_buffer_size)
 {
+	int32_t channel_output[NUM_CHANNELS];
+	int32_t channel_output_final[NUM_CHANNELS];
+
 	for(uint32_t i = 0; i < audio_buffer_size; ++i)
 	{
 		int32_t output = WAVE_AMP / 2 / 64;
@@ -64,44 +67,63 @@ void sound_engine_fill_buffer(SoundEngine* sound_engine, uint16_t* audio_buffer,
 		{
 			SoundEngineChannel* channel = &sound_engine->channel[chan];
 
-			int32_t channel_output = 0;
-
 			if(channel->frequency > 0)
 			{
 				uint32_t prev_acc = channel->accumulator;
 
 				channel->accumulator += channel->frequency;
+
+				channel->sync_bit |= (channel->accumulator & ACC_LENGTH);
+
 				channel->accumulator &= ACC_LENGTH - 1;
 
-				channel_output += sound_engine_osc(sound_engine, channel, prev_acc) - WAVE_AMP / 2;
+				if(channel->flags & SE_ENABLE_HARD_SYNC)
+				{
+					uint8_t hard_sync_src = channel->hard_sync == 0xff ? i : channel->hard_sync;
+					
+					if(sound_engine->channel[hard_sync_src].sync_bit)
+					{
+						channel->accumulator = 0;
+					}
+				}
 
+				channel_output[chan] = sound_engine_osc(sound_engine, channel, prev_acc) - WAVE_AMP / 2;
+
+				if(channel->flags & SE_ENABLE_RING_MOD)
+				{
+					uint8_t ring_mod_src = channel->ring_mod == 0xff ? i : channel->ring_mod;
+					channel_output[chan] = channel_output[chan] * channel_output[ring_mod_src] / WAVE_AMP;
+				}
+
+				channel_output_final[chan] = sound_engine_cycle_and_output_adsr(channel_output[chan], sound_engine, &channel->adsr, &channel->flags);
+				
 				if(channel->flags & SE_ENABLE_FILTER)
 				{
-					sound_engine_filter_cycle(&channel->filter, channel_output);
+					sound_engine_filter_cycle(&channel->filter, channel_output[i]);
 
 					switch(channel->filter_mode)
 					{
 						case FIL_OUTPUT_LOWPASS:
 						{
-							channel_output = sound_engine_output_lowpass(&channel->filter);
+							channel_output_final[chan] = sound_engine_output_lowpass(&channel->filter);
 							break;
 						}
 
 						case FIL_OUTPUT_HIGHPASS:
 						{
-							channel_output = sound_engine_output_highpass(&channel->filter);
+							channel_output_final[chan] = sound_engine_output_highpass(&channel->filter);
 							break;
 						}
 
 						case FIL_OUTPUT_BANDPASS:
 						{
-							channel_output = sound_engine_output_bandpass(&channel->filter);
+							channel_output_final[chan] = sound_engine_output_bandpass(&channel->filter);
 							break;
 						}
 					}
 				}
 
-				output += ((channel_output) / (64 * 4)); //2 more bits so all channels fit
+				output += ((channel_output_final[chan]) / (64 * 4)); //2 more bits so all channels fit
 			}
 		}
 
