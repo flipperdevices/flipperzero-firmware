@@ -19,6 +19,7 @@ Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 
 * [Adafruit Ultimate GPS Breakout]
 * Beitian BN-180
+* [u-blox NEO-6M]
 
 ## Building the FAP
 
@@ -45,3 +46,4 @@ baud rate, may be useful for other GPS modules.
 [minmea]: https://github.com/kosma/minmea
 [flipperzero-firmware]: https://github.com/flipperdevices/flipperzero-firmware
 [qFlipper]: https://flipperzero.one/update
+[u-blox NEO-6M]: https://www.u-blox.com/en/product/neo-6-series
