@@ -107,16 +107,18 @@ Setting the hostname to "Pwn":
 ```
 
 ### Channel:
-The channel can be any number between 1 and 255 (6 GHz supports up to 233).
-To set the channel to * (all channels) a 0 should be sent
+The channel can be any number between 1 and 255 (6 GHz supports up to 233) or '*' for all channels.
+Because sending a number as 2 or 3 will confuse the protocol you will send this as ascii as well.
+
 Setting channel:
 ```
-0x02 0x06 [channel_code] 0x03
+0x02 0x06 [ASCII_char_1]...[ASCII_char_3] 0x03
 ```
 
 Setting channel to 11:
 ```
-0x02 0x06 0x0b 0x03
+//         "1"  "1"
+0x02 0x06 0x31 0x32 0x03
 ```
 
 ### APS (Access Points):
