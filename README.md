@@ -8,13 +8,28 @@
 - Fast commands
 
 ## Connecting
-| Flipper Zero pin | UART interface |
-| ---------------- | -------------- |
-| 13 TX            | RX             |
-| 14 RX            | TX             |
-|8, 18 GND         | GND            |
+| Flipper Zero pin | UART interface  |
+| ---------------- | --------------- |
+| 13 TX            | RX              |
+| 14 RX            | TX              |
+|8, 18 GND         | GND             |
 
 Info: If possible, do not power your devices from 3V3 (pin 9) Flipper Zero. It does not support hot plugging.
+
+## Keyboard
+UART_terminal uses its own special keyboard for work, which has all the symbols necessary for working in the console.
+
+To accommodate more characters on a small display, some characters are called up by holding.
+| Keyboard symbols | Returns on hold |
+| ---------------- | --------------- |
+| {                | }               |
+| (                | )               |
+| [                | ]               |
+| ;                | :               |
+| .                | ,               |
+| /                | \               |
+| !                | ?               |
+
 
 ## How to install
 Copy the contents of the repository to the applications_user/uart_terminal folder Flipper Zero firmware and build app with the command ./fbt fap_uart_terminal.
