@@ -20,7 +20,7 @@ class PwnZeroParam(Enum):
     HANDSHAKES  = 11
     MESSAGE     = 12
 
-    class ModeEnum(Enum):
+class PwnMode(Enum):
         """
         Embedded class with the mode
         """
@@ -28,37 +28,37 @@ class PwnZeroParam(Enum):
         AUTO    = 5
         AI      = 6
 
-    class FaceEnum(Enum):
-        """
-        Embedded class with all face parameters
-        """
-        NO_FACE         = 4
-        DEFAULT_FACE    = 5
-        LOOK_R          = 6
-        LOOK_L          = 7
-        LOOK_R_HAPPY    = 8
-        LOOK_L_HAPPY    = 9
-        SLEEP           = 10
-        SLEEP2          = 11
-        AWAKE           = 12
-        BORED           = 13
-        INTENSE         = 14
-        COOL            = 15
-        HAPPY           = 16
-        GRATFUL         = 17
-        EXCITED         = 18
-        MOTIVATED       = 19
-        DEMOTIVATED     = 20
-        SMART           = 21
-        LONELY          = 22
-        SAD             = 23
-        ANGRY           = 24
-        FRIEND          = 25
-        BROKEN          = 26
-        DEBUG           = 27
-        UPLOAD          = 28
-        UPLOAD1         = 29
-        UPLOAD2         = 30
+class PwnFace(Enum):
+    """
+    Embedded class with all face parameters
+    """
+    NO_FACE         = 4
+    DEFAULT_FACE    = 5
+    LOOK_R          = 6
+    LOOK_L          = 7
+    LOOK_R_HAPPY    = 8
+    LOOK_L_HAPPY    = 9
+    SLEEP           = 10
+    SLEEP2          = 11
+    AWAKE           = 12
+    BORED           = 13
+    INTENSE         = 14
+    COOL            = 15
+    HAPPY           = 16
+    GRATFUL         = 17
+    EXCITED         = 18
+    MOTIVATED       = 19
+    DEMOTIVATED     = 20
+    SMART           = 21
+    LONELY          = 22
+    SAD             = 23
+    ANGRY           = 24
+    FRIEND          = 25
+    BROKEN          = 26
+    DEBUG           = 27
+    UPLOAD          = 28
+    UPLOAD1         = 29
+    UPLOAD2         = 30
 
 
 class PwnZero(object):
@@ -131,7 +131,7 @@ class PwnZero(object):
         return self._serialConn.write(data) == len(data)
 
     # Public method commands
-    def set_face(self, face: PwnZeroParam.FaceEnum) -> bool:
+    def set_face(self, face: PwnFace) -> bool:
         """
         Set the face of the Pwnagotchi
 
@@ -200,7 +200,7 @@ class PwnZero(object):
         """
         return False
 
-    def set_mode(self, mode: PwnZeroParam.ModeEnum) -> bool:
+    def set_mode(self, mode: PwnMode) -> bool:
         """
         Set the mode on the Pwnagotchi
         
