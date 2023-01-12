@@ -542,6 +542,10 @@ static bool _input_callback(InputEvent* event, void* context) {
             return true;
         }
     }
+    //Обработка длинного нажатия "Ок"
+    if(event->key == InputKeyOk && event->type == InputTypeLong) {
+        app->settings.temp_unit = !app->settings.temp_unit;
+    }
 
     return true;
 }
