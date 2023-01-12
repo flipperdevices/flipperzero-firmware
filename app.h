@@ -96,6 +96,7 @@ typedef struct ProtoViewMsgInfo {
     char info1[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 1. */
     char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
     char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
+    char info4[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 4. */
     uint64_t len;       /* Bits consumed from the stream. */
 } ProtoViewMsgInfo;
 

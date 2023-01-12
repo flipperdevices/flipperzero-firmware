@@ -25,12 +25,10 @@ void render_view_info(Canvas *const canvas, ProtoViewApp *app) {
         canvas_draw_str(canvas, 0, y, buf);
         y += lineheight;
     }
-    canvas_draw_str(canvas, 0, y, app->signal_info.info1);
-    y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->signal_info.info2);
-    y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->signal_info.info3);
-    y += lineheight;
+    canvas_draw_str(canvas, 0, y, app->signal_info.info1); y += lineheight;
+    canvas_draw_str(canvas, 0, y, app->signal_info.info2); y += lineheight;
+    canvas_draw_str(canvas, 0, y, app->signal_info.info3); y += lineheight;
+    canvas_draw_str(canvas, 0, y, app->signal_info.info4); y += lineheight;
 }
 
 /* Handle input for the settings view. */

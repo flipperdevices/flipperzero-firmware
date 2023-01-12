@@ -385,6 +385,7 @@ extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
 extern ProtoViewDecoder ToyotaTPMSDecoder;
 extern ProtoViewDecoder SchraderTPMSDecoder;
+extern ProtoViewDecoder CitroenTPMSDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
@@ -392,6 +393,7 @@ ProtoViewDecoder *Decoders[] = {
     &RenaultTPMSDecoder,    /* Renault TPMS. */
     &ToyotaTPMSDecoder,     /* Toyota TPMS. */
     &SchraderTPMSDecoder,   /* Schrader TPMS. */
+    &CitroenTPMSDecoder,    /* Citroen TPMS. */
     NULL
 };
 
@@ -445,7 +447,7 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
     if (!decoded) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s]", info->name, info->raw, info->info1, info->info2, info->info3);
+        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s,%s]", info->name, info->raw, info->info1, info->info2, info->info3, info->info4);
     }
     free(bitmap);
     return decoded;

@@ -1,6 +1,6 @@
 App(
     appid="protoview",
-    name="Protocols visualizer",
+    name="ProtoView",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="protoview_app_entry",
     cdefines=["APP_PROTOVIEW"],
