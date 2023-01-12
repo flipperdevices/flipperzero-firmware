@@ -8,8 +8,6 @@ like in the example image below (showing a Volkswagen key in 2FSK):
 
 ![ProtoView screenshot raw signal](/images/protoview_1.jpg)
 
-![ProtoView screenshot Renault TPMS data](/images/protoview_2.jpg)
-
 This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
 
@@ -19,6 +17,8 @@ Other than that, ProtoView is able to decode a few interesting protocols:
 * Toyota TPMS data.
 * Oregon thermometer protocol 2.
 * PTxxxx/SCxxxx based remotes.
+
+![ProtoView screenshot Renault TPMS data](/images/protoview_2.jpg)
 
 The app implements a framework that makes adding and experimenting with new
 protocols very simple. Check the `protocols` directory to see how the
