@@ -1,4 +1,4 @@
-# Stage 1 Communication Protocol (v2.0.0)
+# Stage 1 Communication Protocol (v2.0.1)
 This document will detail the protocol used to communicate between the flipper and the pwnagotchi.
 
 ## Protocol Requirements
