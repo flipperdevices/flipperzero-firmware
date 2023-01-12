@@ -54,7 +54,6 @@ static void draw_callback(Canvas *canvas, void *ctx)
     {
         genScramble();
         scrambleReplace();
-        valid();
         strcpy(scramble_str, printData());
         if (notifications_enabled)
         {
