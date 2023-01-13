@@ -20,15 +20,8 @@ Info: If possible, do not power your devices from 3V3 (pin 9) Flipper Zero. It d
 UART_terminal uses its own special keyboard for work, which has all the symbols necessary for working in the console.
 
 To accommodate more characters on a small display, some characters are called up by holding.
-| Keyboard symbols | Returns on hold |
-| ---------------- | --------------- |
-| {                | }               |
-| (                | )               |
-| [                | ]               |
-| ;                | :               |
-| .                | ,               |
-| /                | \               |
-| !                | ?               |
+
+![kbf](https://user-images.githubusercontent.com/122148894/212286637-7063f1ee-c6ff-46b9-8dc5-79a5f367fab1.png)
 
 
 ## How to install
