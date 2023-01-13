@@ -109,8 +109,8 @@ static const char ducky_cmd_delay[] = {"DELAY "};
 static const char ducky_cmd_string[] = {"STRING "};
 static const char ducky_cmd_defdelay_1[] = {"DEFAULT_DELAY "};
 static const char ducky_cmd_defdelay_2[] = {"DEFAULTDELAY "};
-static const char ducky_cmd_stringdelay_1[] = {"STRINGDELAY"};
-static const char ducky_cmd_stringdelay_2[] = {"STRING_DELAY"};
+static const char ducky_cmd_stringdelay_1[] = {"STRINGDELAY "};
+static const char ducky_cmd_stringdelay_2[] = {"STRING_DELAY "};
 static const char ducky_cmd_repeat[] = {"REPEAT "};
 static const char ducky_cmd_sysrq[] = {"SYSRQ "};
 
@@ -214,7 +214,7 @@ static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     if(bad_usb->stringdelay == 0) {
         timing = 0;
     } else if(bad_usb->stringdelay > 1000) {
-        timing = bad_usb->stringdelay / 1000 / 2;
+        timing = bad_usb->stringdelay / 2 / 10;
     } else {
         timing = bad_usb->stringdelay / 2;
     }
