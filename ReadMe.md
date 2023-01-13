@@ -28,46 +28,12 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-13 12:06 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-13 12:06 EST`
-- [Fixed boot loop during updating (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/489)
-- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
-- Updated: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
-- Unleashed Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
-- Unleashed Removed: [Temperature Sensor (By Mywk)](https://github.com/Mywk/FlipperTemperatureSensor) `Req: HTU2XD, SHT2X, SI702X, SI700X, SI701X or AM2320` Unitemp will do them all!
-- Added: [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
-- Updated IR Assets from Unleashed
-- Updated notes for Asteroids, Pong and USB Autofire
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
-- Fixed wording in Extend Range app (found under Misc)
-- Added readme for BT Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
-- Added readme for Toy Code Serial app [(Thanks to maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
-- [Patreon Builds Update: ALL: Added Grateful Dead animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/3c40db78dd5488b9544e674004c4168c45ae7305) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
-- [Patreon Builds Update: ALL and Anime Builds: Added two Jojo animations (By Gabry154)](https://github.com/Gabry154/FZ_Customization/tree/main/Animations/JoJo)
-- Thank you to all our supporters! And thank you for all that joined [our Discord](https://discord.gg/gF2bBUzAFe)! We have OVER 9000 users!
-- [Patreon Builds Update: ALL, DBZ, RM Select Builds and Anime Builds: Added Over 9000 DBZ animation (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/f7c7e543fd45e9861909006e1374e88a9a5661cf)
-- Added: [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer) Inspired By [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
-- Added: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- Added: [Infrared: allow disabling automatic signal decoding #273 (By Darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/273)
-- Added: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
-- Updated: [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
-- OFW: Fixes for issues on desktop from [PR #2280](https://github.com/flipperdevices/flipperzero-firmware/pull/2280)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- Added: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
-- Added: [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
-- [Patreon Builds Update: ALL + Anime + Select Builds: Added 3 Akira animations (By RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/e40f48ee4c8d75f9fcf634919cf806b1329b32da) [Thanks to one of our RM Animation Coordinators (RM Extreme) on Patreon!](https://www.patreon.com/RogueMaster/membership)
-- [Patreon Builds Update: 18 Plus Builds: Added 1 Cool Devices and 2 Bible Black animations (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
-- Updated ReadMe's for Geiger Counter, GPS, Toy Serial and UART Terminal
-- Updated: [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
-- Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
-- Updated: [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
-- Added: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
-- Added: BadUSB: [Install qFlipper For Windows (By DXVVAY)](https://github.com/flipperdevices/flipperzero-firmware/pull/2182)
 - Updated: [Rubik's Cube Scrambler (By RaZeSloth)] https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler
 - OFW: Add the ability to turn pages in infrared (flipperdevices#2271) 
 - OFW: [FL-3078] Per protocol signal repeat count (flipperdevices#2293) 
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
+- Nicer SubGHz Chat via CLI Bridge with "chat" command (Thanks @E_Surge and @qqMajikpp)
 
 <a name="release">
 
