@@ -13,13 +13,10 @@ and if the selected modulation is correct.
 
 Other than that, ProtoView is able to decode a few interesting protocols:
 
-* Renault TPMS sensors.
-* Toyota TPMS sensors.
-* Schrader TPMS sensors.
-* Citroen TPMS sensors.
+* TPMS sensors: Renault, Toyota, Schrader, Citroen, Ford.
 * Oregon thermometer protocol 2.
 * PTxxxx/SCxxxx based remotes.
-* ... more will be implemented soon, hopefully. Send PRs!
+* ... more will be implemented soon, hopefully. Send PRs :)
 
 ![ProtoView screenshot Renault TPMS data](/images/protoview_2.jpg)
 
