@@ -37,12 +37,19 @@ void sound_engine_deinit(SoundEngine* sound_engine)
 		furi_hal_speaker_release();
 	}
 
+	else
+	{
+		furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
+	}
+
 	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 13, NULL, NULL);
 	sound_engine_stop();
 }
 
-void sound_engine_set_channel_frequency(SoundEngine* sound_engine, SoundEngineChannel* channel, uint32_t frequency)
+void sound_engine_set_channel_frequency(SoundEngine* sound_engine, SoundEngineChannel* channel, uint16_t note)
 {
+	uint32_t frequency = get_freq(note);
+
 	if(frequency != 0)
 	{
 		channel->frequency = (uint64_t)(ACC_LENGTH) / (uint64_t)1024 * (uint64_t)(frequency) / (uint64_t)sound_engine->sample_rate;
@@ -51,6 +58,29 @@ void sound_engine_set_channel_frequency(SoundEngine* sound_engine, SoundEngineCh
 	else
 	{
 		channel->frequency = 0;
+	}
+}
+
+void sound_engine_enable_gate(SoundEngine* sound_engine, SoundEngineChannel* channel, bool enable)
+{
+	if(enable)
+	{
+		channel->adsr.envelope = 0;
+		channel->adsr.envelope_speed = envspd(sound_engine, channel->adsr.a);
+		channel->adsr.envelope_state = ATTACK;
+
+		channel->flags |= SE_ENABLE_GATE;
+
+		if(channel->flags & SE_ENABLE_KEYDOWN_SYNC)
+		{
+			channel->accumulator = 0;
+		}
+	}
+
+	else
+	{
+		channel->adsr.envelope_state = RELEASE;
+		channel->adsr.envelope_speed = envspd(sound_engine, channel->adsr.r);
 	}
 }
 

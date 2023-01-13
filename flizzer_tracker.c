@@ -1,5 +1,11 @@
 #include "flizzer_tracker.h"
 #include "init_deinit.h"
+#include "event.h"
+#include "view/pattern_editor.h"
+
+#define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
+
+#include <flizzer_tracker_icons.h>
 
 /*
 Fontname: -Raccoon-Fixed4x6-Medium-R-Normal--6-60-75-75-P-40-ISO10646-1
@@ -81,9 +87,13 @@ static void draw_callback(Canvas* canvas, void* ctx)
 
 	canvas_clear(canvas);
 
+	canvas_set_color(canvas, ColorXOR);
+
 	canvas_set_custom_font(canvas, u8g2_font_tom_thumb_4x6_tr);
 
-	char buffer[30] = {0};
+	draw_pattern_view(canvas, tracker);
+
+	/*char buffer[30] = {0};
 
 	snprintf(buffer, 20, "FREQUENCY:%ld Hz", tracker->frequency);
 	
@@ -113,7 +123,7 @@ static void draw_callback(Canvas* canvas, void* ctx)
 	
 	canvas_draw_str(canvas, 0, 42, buffer);
 
-	snprintf(buffer, 20, "TR.ENG.CALLS: %d", tracker->tracker_engine.absolute_position);
+	snprintf(buffer, 20, "TR.ENG.CALLS: %d", tracker->sound_engine.channel[0].adsr.volume);
 	
 	canvas_draw_str(canvas, 0, 48, buffer);
 
@@ -122,7 +132,9 @@ static void draw_callback(Canvas* canvas, void* ctx)
     uint32_t bytes = memmgr_get_free_heap();
 	snprintf(buffer, 20, "BYTES FREE:%ld", bytes);
 
-	canvas_draw_str(canvas, 0, 64, buffer);
+	canvas_draw_str(canvas, 0, 64, buffer);*/
+
+	//canvas_draw_icon(canvas, 0, 0, &I_test);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) 
@@ -173,12 +185,12 @@ int32_t flizzer_tracker_app(void* p)
 	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
-	tracker->sound_engine.channel[0].waveform = SE_WAVEFORM_NOISE;
+	//tracker->sound_engine.channel[0].waveform = SE_WAVEFORM_NOISE;
 
 	tracker->frequency = 440;
 	tracker->current_waveform_index = 1;
 
-	sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], 440 * 1024);
+	/*sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], ((12 * 4) << 8));
 
 	tracker->sound_engine.channel[0].adsr.a = 0x10;
 	tracker->sound_engine.channel[0].adsr.d = 0x10;
@@ -188,8 +200,76 @@ int32_t flizzer_tracker_app(void* p)
 
 	SoundEngine* eng = &(tracker->sound_engine);
 
-	tracker->sound_engine.channel[0].adsr.envelope_speed = envspd(eng, tracker->sound_engine.channel[0].adsr.a);
+	tracker->sound_engine.channel[0].adsr.envelope_speed = envspd(eng, tracker->sound_engine.channel[0].adsr.a);*/
 
+	tracker->song.speed = 5;
+	tracker->song.num_instruments = 2;
+	tracker->song.num_patterns = 2;
+	tracker->song.num_sequence_steps = 1;
+	tracker->song.pattern_length = 64;
+
+	tracker->song.sequence.sequence_step[0].pattern_indices[0] = 0;
+	tracker->song.sequence.sequence_step[0].pattern_indices[1] = 1;
+	tracker->song.sequence.sequence_step[0].pattern_indices[2] = 2;
+	tracker->song.sequence.sequence_step[0].pattern_indices[3] = 2;
+
+	tracker->song.pattern[0].step = malloc(64 * sizeof(TrackerSongPatternStep));
+	tracker->song.pattern[1].step = malloc(64 * sizeof(TrackerSongPatternStep));
+	tracker->song.pattern[2].step = malloc(64 * sizeof(TrackerSongPatternStep));
+
+	memset(tracker->song.pattern[0].step, 0, 64 * sizeof(TrackerSongPatternStep));
+	memset(tracker->song.pattern[1].step, 0, 64 * sizeof(TrackerSongPatternStep));
+	memset(tracker->song.pattern[2].step, 0, 64 * sizeof(TrackerSongPatternStep));
+
+	tracker->song.instrument[0] = malloc(sizeof(Instrument));
+	tracker->song.instrument[1] = malloc(sizeof(Instrument));
+
+	for(int i = 0; i < 64; ++i)
+	{
+		set_note(&tracker->song.pattern[0].step[i], MUS_NOTE_NONE);
+		set_note(&tracker->song.pattern[1].step[i], MUS_NOTE_NONE);
+		set_note(&tracker->song.pattern[2].step[i], MUS_NOTE_NONE);
+
+		set_instrument(&tracker->song.pattern[0].step[i], MUS_NOTE_INSTRUMENT_NONE);
+		set_instrument(&tracker->song.pattern[1].step[i], MUS_NOTE_INSTRUMENT_NONE);
+		set_instrument(&tracker->song.pattern[2].step[i], MUS_NOTE_INSTRUMENT_NONE);
+
+		set_volume(&tracker->song.pattern[0].step[i], MUS_NOTE_VOLUME_NONE);
+		set_volume(&tracker->song.pattern[1].step[i], MUS_NOTE_VOLUME_NONE);
+		set_volume(&tracker->song.pattern[2].step[i], MUS_NOTE_VOLUME_NONE);
+	}
+
+	for(int i = 0; i < 64; i += 8)
+	{
+		set_note(&tracker->song.pattern[0].step[0 + i], 12 * 5);
+		set_note(&tracker->song.pattern[0].step[2 + i], 12 * 5 + 2);
+		set_note(&tracker->song.pattern[0].step[4 + i], 12 * 5 - 2);
+		set_note(&tracker->song.pattern[0].step[6 + i], 12 * 5 + 4);
+
+		set_instrument(&tracker->song.pattern[0].step[0 + i], 0);
+		set_instrument(&tracker->song.pattern[0].step[2 + i], 0);
+		set_instrument(&tracker->song.pattern[0].step[4 + i], 0);
+		set_instrument(&tracker->song.pattern[0].step[6 + i], 0);
+	}
+
+	for(int i = 0; i < 64; i++)
+	{
+		set_note(&tracker->song.pattern[1].step[i], 12 * 7 + 11);
+
+		set_instrument(&tracker->song.pattern[1].step[i], 1);
+	}
+
+	tracker->song.instrument[0]->adsr.a = 0x2;
+	tracker->song.instrument[0]->adsr.d = 0x9;
+	tracker->song.instrument[0]->adsr.volume = 0x80;
+	tracker->song.instrument[0]->waveform = SE_WAVEFORM_TRIANGLE;
+
+	tracker->song.instrument[1]->adsr.a = 0x0;
+	tracker->song.instrument[1]->adsr.d = 0x3;
+	tracker->song.instrument[1]->adsr.volume = 0x18;
+	tracker->song.instrument[1]->waveform = SE_WAVEFORM_NOISE;
+
+	tracker->tracker_engine.playing = false;
 	play();
 
 	// Бесконечный цикл обработки очереди событий
@@ -210,17 +290,7 @@ int32_t flizzer_tracker_app(void* p)
 
 			if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) 
 			{
-				tracker->playing = !(tracker->playing);
-
-				if(tracker->playing)
-				{
-					play();
-				}
-
-				else
-				{
-					stop();
-				}
+				tracker->tracker_engine.playing = !(tracker->tracker_engine.playing);
 			}
 
 			if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) 

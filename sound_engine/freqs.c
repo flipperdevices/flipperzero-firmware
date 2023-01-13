@@ -25,13 +25,13 @@ uint32_t get_freq(uint16_t note)
 
 	if ((note & 0xff) == 0)
 	{
-		return frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES - 1) - ((note >> 8) / 12)); //wrap to one octave
+		return frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES) - ((note >> 8) / 12)); //wrap to one octave
 	}
 
 	else
 	{
-		uint64_t f1 = frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES - 1) - ((note >> 8) / 12));
-		uint64_t f2 = frequency_table[(((note >> 8) + 1) % 12)] / ((NUM_OCTAVES - 1) - (((note >> 8) + 1) / 12));
+		uint64_t f1 = frequency_table[((note >> 8) % 12)] / ((NUM_OCTAVES) - ((note >> 8) / 12));
+		uint64_t f2 = frequency_table[(((note >> 8) + 1) % 12)] / ((NUM_OCTAVES) - (((note >> 8) + 1) / 12));
 
 		return f1 + (uint64_t)((f2 - f1) * (note & 0xff)) / 256;
 	}
