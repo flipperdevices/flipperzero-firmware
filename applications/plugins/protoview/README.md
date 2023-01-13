@@ -6,17 +6,19 @@ the car keys), the curious person is left wondering what the device is
 sending at all. Using ProtoView she or he can visualize the high and low pulses
 like in the example image below (showing a Volkswagen key in 2FSK):
 
-![ProtoView screenshot](/images/ProtoViewSignal.jpg)
+![ProtoView screenshot raw signal](/images/protoview_1.jpg)
 
 This is often enough to make an initial idea about the encoding used
 and if the selected modulation is correct.
 
 Other than that, ProtoView is able to decode a few interesting protocols:
 
-* Renault TPMS data.
-* Toyota TPMS data.
+* TPMS sensors: Renault, Toyota, Schrader, Citroen, Ford.
 * Oregon thermometer protocol 2.
 * PTxxxx/SCxxxx based remotes.
+* ... more will be implemented soon, hopefully. Send PRs :)
+
+![ProtoView screenshot Renault TPMS data](/images/protoview_2.jpg)
 
 The app implements a framework that makes adding and experimenting with new
 protocols very simple. Check the `protocols` directory to see how the
@@ -51,7 +53,7 @@ encodings are somewhat self-clocked, so they tend to have just two or
 three classes of pulse lengths.
 
 However often pulses of the same theoretical
-length have slightly different lenghts in the case of high and low level
+length have slightly different lengths in the case of high and low level
 (RF on or off), so we classify them separately for robustness.
 
 # Usage
@@ -117,3 +119,11 @@ The code is released under the BSD license.
 # Disclaimer
 
 This application is only provided as an educational tool. The author is not liable in case the application is used to reverse engineer protocols protected by IP or for any other illegal purpose.
+
+# Credits
+
+A big thank you to the RTL433 author, [Benjamin Larsson](https://github.com/merbanan). I used the code and tools he developed in many ways:
+* To capture TPMS data with rtl433 and save to a file, to later play the IQ files and speedup the development.
+* As a sourve of documentation for protocols.
+* As an awesome way to visualize and understand protocols, via [these great web tools](https://triq.org/).
+* To have tons of fun with RTLSDR in general, now and in the past.

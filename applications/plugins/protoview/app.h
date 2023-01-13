@@ -93,6 +93,7 @@ typedef struct ProtoViewMsgInfo {
     char info1[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 1. */
     char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
     char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
+    char info4[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 4. */
     uint64_t len; /* Bits consumed from the stream. */
 } ProtoViewMsgInfo;
 
@@ -111,6 +112,8 @@ struct ProtoViewApp {
     /* Generic app state. */
     int running; /* Once false exists the app. */
     uint32_t signal_bestlen; /* Longest coherent signal observed so far. */
+    uint32_t signal_last_scan_idx; /* Index of the buffer last time we
+                                      performed the scan. */
     bool signal_decoded; /* Was the current signal decoded? */
     ProtoViewMsgInfo signal_info; /* Decoded message, if signal_decoded true. */
     bool direct_sampling_enabled; /* This special view needs an explicit
@@ -201,3 +204,6 @@ void canvas_draw_str_with_border(
     const char* str,
     Color text_color,
     Color border_color);
+
+/* crc.c */
+uint8_t crc8(const uint8_t* data, size_t len, uint8_t init, uint8_t poly);

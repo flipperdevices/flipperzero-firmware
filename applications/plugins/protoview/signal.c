@@ -162,13 +162,16 @@ void scan_for_signal(ProtoViewApp* app) {
                 raw_samples_center(DetectedSamples, i);
                 FURI_LOG_E(
                     TAG,
-                    "Displayed sample updated (%d samples %lu us)",
+                    "===> Displayed sample updated (%d samples %lu us)",
                     (int)thislen,
                     DetectedSamples->short_pulse_dur);
 
                 /* Adjust raw view scale if the signal has an high
                  * data rate. */
-                if(DetectedSamples->short_pulse_dur < 100) app->us_scale = 10;
+                if(DetectedSamples->short_pulse_dur < 75)
+                    app->us_scale = 10;
+                else if(DetectedSamples->short_pulse_dur < 145)
+                    app->us_scale = 30;
             }
         }
         i += thislen ? thislen : 1;
@@ -402,12 +405,18 @@ extern ProtoViewDecoder Oregon2Decoder;
 extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
 extern ProtoViewDecoder ToyotaTPMSDecoder;
+extern ProtoViewDecoder SchraderTPMSDecoder;
+extern ProtoViewDecoder CitroenTPMSDecoder;
+extern ProtoViewDecoder FordTPMSDecoder;
 
 ProtoViewDecoder* Decoders[] = {
     &Oregon2Decoder, /* Oregon sensors v2.1 protocol. */
     &B4B1Decoder, /* PT, SC, ... 24 bits remotes. */
     &RenaultTPMSDecoder, /* Renault TPMS. */
     &ToyotaTPMSDecoder, /* Toyota TPMS. */
+    &SchraderTPMSDecoder, /* Schrader TPMS. */
+    &CitroenTPMSDecoder, /* Citroen TPMS. */
+    &FordTPMSDecoder, /* Ford TPMS. */
     NULL};
 
 /* Reset the message info structure before passing it to the decoding
@@ -426,7 +435,7 @@ bool decode_signal(RawSamplesBuffer* s, uint64_t len, ProtoViewMsgInfo* info) {
 
     /* We call the decoders with an offset a few samples before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_samples = 10;
+    uint32_t before_samples = 20;
     uint32_t after_samples = 100;
 
     uint8_t* bitmap = malloc(bitmap_size);
@@ -467,12 +476,13 @@ bool decode_signal(RawSamplesBuffer* s, uint64_t len, ProtoViewMsgInfo* info) {
     } else {
         FURI_LOG_E(
             TAG,
-            "Decoded %s, raw=%s info=[%s,%s,%s]",
+            "Decoded %s, raw=%s info=[%s,%s,%s,%s]",
             info->name,
             info->raw,
             info->info1,
             info->info2,
-            info->info3);
+            info->info3,
+            info->info4);
     }
     free(bitmap);
     return decoded;

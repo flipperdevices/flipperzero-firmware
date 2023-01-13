@@ -1,7 +1,7 @@
 /* Renault tires TPMS. Usually 443.92 Mhz FSK.
  *
- * Preamble + marshal-encoded bits. 9 Bytes in total if we don't
- * count the preamble. */
+ * Preamble + sync + Manchester bits. ~48us short pulse.
+ * 9 Bytes in total not counting the preamble. */
 
 #include "../app.h"
 
@@ -43,6 +43,7 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     FURI_LOG_E(TAG, "Renault TPMS decoded bits: %lu", decoded);
 
     if(decoded < 8 * 9) return false; /* Require the full 9 bytes. */
+    if(crc8(raw, 8, 0, 7) != raw[8]) return false; /* Require sane CRC. */
 
     float kpa = 0.75 * ((uint32_t)((raw[0] & 3) << 8) | raw[1]);
     int temp = raw[2] - 30;
@@ -61,9 +62,9 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
         raw[6],
         raw[7],
         raw[8]);
-    snprintf(info->raw, sizeof(info->raw), "Tire ID %02X%02X%02X", raw[3], raw[4], raw[5]);
-    snprintf(info->info1, sizeof(info->info1), "Pressure %.2f kpa", (double)kpa);
-    snprintf(info->info2, sizeof(info->info2), "Temperature %d C", temp);
+    snprintf(info->info1, sizeof(info->info1), "Tire ID %02X%02X%02X", raw[3], raw[4], raw[5]);
+    snprintf(info->info2, sizeof(info->info2), "Pressure %.2f kpa", (double)kpa);
+    snprintf(info->info3, sizeof(info->info3), "Temperature %d C", temp);
     return true;
 }
 

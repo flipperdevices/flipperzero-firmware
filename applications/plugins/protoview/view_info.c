@@ -31,11 +31,16 @@ void render_view_info(Canvas* const canvas, ProtoViewApp* app) {
     y += lineheight;
     canvas_draw_str(canvas, 0, y, app->signal_info.info3);
     y += lineheight;
+    canvas_draw_str(canvas, 0, y, app->signal_info.info4);
+    y += lineheight;
 }
 
-/* Handle input for the settings view. */
+/* Handle input for the info view. */
 void process_input_info(ProtoViewApp* app, InputEvent input) {
-    UNUSED(app);
-    UNUSED(input);
-    return;
+    if(input.type == InputTypeShort) {
+        if(input.key == InputKeyOk) {
+            /* Reset the current sample to capture the next. */
+            reset_current_signal(app);
+        }
+    }
 }

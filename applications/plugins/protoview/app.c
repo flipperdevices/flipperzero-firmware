@@ -129,6 +129,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
+    app->signal_last_scan_idx = 0;
     app->signal_decoded = false;
     app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
@@ -206,6 +207,20 @@ void protoview_app_free(ProtoViewApp* app) {
  * function is to scan for signals and set DetectedSamples. */
 static void timer_callback(void* ctx) {
     ProtoViewApp* app = ctx;
+    uint32_t delta, lastidx = app->signal_last_scan_idx;
+
+    /* scan_for_signal(), called by this function, deals with a
+     * circular buffer. To never miss anything, even if a signal spawns
+     * cross-boundaries, it is enough if we scan each time the buffer fills
+     * for 50% more compared to the last scan. Thanks to this check we
+     * can avoid scanning too many times to just find the same data. */
+    if(lastidx < RawSamples->idx) {
+        delta = RawSamples->idx - lastidx;
+    } else {
+        delta = RawSamples->total - lastidx + RawSamples->idx;
+    }
+    if(delta < RawSamples->total / 2) return;
+    app->signal_last_scan_idx = RawSamples->idx;
     scan_for_signal(app);
 }
 
@@ -213,12 +228,9 @@ int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp* app = protoview_app_alloc();
 
-    printf("%llu\n", (unsigned long long)DWT->CYCCNT);
-    printf("%llu\n", (unsigned long long)DWT->CYCCNT);
-
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 4);
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
 
     /* Start listening to signals immediately. */
     radio_begin(app);
