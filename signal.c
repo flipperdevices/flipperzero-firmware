@@ -386,6 +386,7 @@ extern ProtoViewDecoder RenaultTPMSDecoder;
 extern ProtoViewDecoder ToyotaTPMSDecoder;
 extern ProtoViewDecoder SchraderTPMSDecoder;
 extern ProtoViewDecoder CitroenTPMSDecoder;
+extern ProtoViewDecoder FordTPMSDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
@@ -394,6 +395,7 @@ ProtoViewDecoder *Decoders[] = {
     &ToyotaTPMSDecoder,     /* Toyota TPMS. */
     &SchraderTPMSDecoder,   /* Schrader TPMS. */
     &CitroenTPMSDecoder,    /* Citroen TPMS. */
+    &FordTPMSDecoder,       /* Ford TPMS. */
     NULL
 };
 
