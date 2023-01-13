@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: Add the ability to turn pages in infrared (flipperdevices#2271) 
 - OFW: [FL-3078] Per protocol signal repeat count (flipperdevices#2293) 
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 
 <a name="release">
 

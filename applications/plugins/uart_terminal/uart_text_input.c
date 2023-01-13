@@ -34,64 +34,83 @@ typedef struct {
 
 static const uint8_t keyboard_origin_x = 1;
 static const uint8_t keyboard_origin_y = 29;
-static const uint8_t keyboard_row_count = 3;
+static const uint8_t keyboard_row_count = 4;
 
 #define ENTER_KEY '\r'
 #define BACKSPACE_KEY '\b'
 
 static const UART_TextInputKey keyboard_keys_row_1[] = {
-    {'q', 1, 8},
-    {'w', 9, 8},
-    {'e', 17, 8},
-    {'r', 25, 8},
-    {'t', 33, 8},
-    {'y', 41, 8},
-    {'u', 49, 8},
-    {'i', 57, 8},
-    {'o', 65, 8},
-    {'p', 73, 8},
-    {'0', 81, 8},
-    {'1', 89, 8},
-    {'2', 97, 8},
-    {'3', 105, 8},
-    {'/', 113, 8},
-    {'-', 120, 8},
+    {'{', 1, 0},
+    {'(', 9, 0},
+    {'[', 17, 0},
+    {'|', 25, 0},
+    {'@', 33, 0},
+    {'&', 41, 0},
+    {'#', 49, 0},
+    {';', 57, 0},
+    {'^', 65, 0},
+    {'*', 73, 0},
+    {'`', 81, 0},
+    {'"', 89, 0},
+    {'~', 97, 0},
+    {'\'', 105, 0},
+    {'.', 113, 0},
+    {'/', 120, 0},
 };
 
 static const UART_TextInputKey keyboard_keys_row_2[] = {
-    {'a', 1, 20},
-    {'s', 9, 20},
-    {'d', 18, 20},
-    {'f', 25, 20},
-    {'g', 33, 20},
-    {'h', 41, 20},
-    {'j', 49, 20},
-    {'k', 57, 20},
-    {'l', 65, 20},
-    {BACKSPACE_KEY, 72, 12},
-    {'4', 89, 20},
-    {'5', 97, 20},
-    {'6', 105, 20},
-    {'$', 113, 20},
-    {'&', 120, 20},
-
+    {'q', 1, 10},
+    {'w', 9, 10},
+    {'e', 17, 10},
+    {'r', 25, 10},
+    {'t', 33, 10},
+    {'y', 41, 10},
+    {'u', 49, 10},
+    {'i', 57, 10},
+    {'o', 65, 10},
+    {'p', 73, 10},
+    {'0', 81, 10},
+    {'1', 89, 10},
+    {'2', 97, 10},
+    {'3', 105, 10},
+    {'=', 113, 10},
+    {'-', 120, 10},
 };
 
 static const UART_TextInputKey keyboard_keys_row_3[] = {
-    {'z', 1, 32},
-    {'x', 9, 32},
-    {'c', 18, 32},
-    {'v', 25, 32},
-    {'b', 33, 32},
-    {'n', 41, 32},
-    {'m', 49, 32},
-    {'_', 57, 32},
-    {ENTER_KEY, 64, 23},
-    {'7', 89, 32},
-    {'8', 97, 32},
-    {'9', 105, 32},
-    {'"', 113, 32},
-    {'+', 120, 32},
+    {'a', 1, 21},
+    {'s', 9, 21},
+    {'d', 18, 21},
+    {'f', 25, 21},
+    {'g', 33, 21},
+    {'h', 41, 21},
+    {'j', 49, 21},
+    {'k', 57, 21},
+    {'l', 65, 21},
+    {BACKSPACE_KEY, 72, 13},
+    {'4', 89, 21},
+    {'5', 97, 21},
+    {'6', 105, 21},
+    {'$', 113, 21},
+    {'%', 120, 21},
+
+};
+
+static const UART_TextInputKey keyboard_keys_row_4[] = {
+    {'z', 1, 33},
+    {'x', 9, 33},
+    {'c', 18, 33},
+    {'v', 25, 33},
+    {'b', 33, 33},
+    {'n', 41, 33},
+    {'m', 49, 33},
+    {'_', 57, 33},
+    {ENTER_KEY, 64, 24},
+    {'7', 89, 33},
+    {'8', 97, 33},
+    {'9', 105, 33},
+    {'!', 113, 33},
+    {'+', 120, 33},
 };
 
 static uint8_t get_row_size(uint8_t row_index) {
@@ -106,6 +125,9 @@ static uint8_t get_row_size(uint8_t row_index) {
         break;
     case 3:
         row_size = sizeof(keyboard_keys_row_3) / sizeof(UART_TextInputKey);
+        break;
+    case 4:
+        row_size = sizeof(keyboard_keys_row_4) / sizeof(UART_TextInputKey);
         break;
     }
 
@@ -125,6 +147,9 @@ static const UART_TextInputKey* get_row(uint8_t row_index) {
     case 3:
         row = keyboard_keys_row_3;
         break;
+    case 4:
+        row = keyboard_keys_row_4;
+        break;
     }
 
     return row;
@@ -139,9 +164,36 @@ static bool char_is_lowercase(char letter) {
 }
 
 static char char_to_uppercase(const char letter) {
-    if(letter == '_') {
+    switch(letter) {
+    case '_':
         return 0x20;
-    } else if(isalpha(letter)) {
+        break;
+    case '(':
+        return 0x29;
+        break;
+    case '{':
+        return 0x7d;
+        break;
+    case '[':
+        return 0x5d;
+        break;
+    case '/':
+        return 0x5c;
+        break;
+    case ';':
+        return 0x3a;
+        break;
+    case '.':
+        return 0x2c;
+        break;
+    case '!':
+        return 0x3f;
+        break;
+    case '<':
+        return 0x3e;
+        break;
+    }
+    if(isalpha(letter)) {
         return (letter - 0x20);
     } else {
         return letter;
@@ -166,11 +218,11 @@ static void uart_text_input_view_draw_callback(Canvas* canvas, void* _model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    canvas_draw_str(canvas, 2, 8, model->header);
-    elements_slightly_rounded_frame(canvas, 1, 12, 126, 15);
+    canvas_draw_str(canvas, 2, 7, model->header);
+    elements_slightly_rounded_frame(canvas, 1, 8, 126, 12);
 
     if(canvas_string_width(canvas, text) > needed_string_width) {
-        canvas_draw_str(canvas, start_pos, 22, "...");
+        canvas_draw_str(canvas, start_pos, 17, "...");
         start_pos += 6;
         needed_string_width -= 8;
     }
@@ -184,10 +236,10 @@ static void uart_text_input_view_draw_callback(Canvas* canvas, void* _model) {
             canvas, start_pos - 1, 14, canvas_string_width(canvas, text) + 2, 10);
         canvas_set_color(canvas, ColorWhite);
     } else {
-        canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 1, 22, "|");
-        canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 2, 22, "|");
+        canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 1, 18, "|");
+        canvas_draw_str(canvas, start_pos + canvas_string_width(canvas, text) + 2, 18, "|");
     }
-    canvas_draw_str(canvas, start_pos, 22, text);
+    canvas_draw_str(canvas, start_pos, 17, text);
 
     canvas_set_font(canvas, FontKeyboard);
 
