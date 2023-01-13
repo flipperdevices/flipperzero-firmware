@@ -65,6 +65,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: BadUSB: [Install qFlipper For Windows (By DXVVAY)](https://github.com/flipperdevices/flipperzero-firmware/pull/2182)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Rubik's Cube Scrambler (By RaZeSloth)] https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler
+- OFW: Add the ability to turn pages in infrared (flipperdevices#2271) 
+- OFW: [FL-3078] Per protocol signal repeat count (flipperdevices#2293) 
 
 <a name="release">
 
