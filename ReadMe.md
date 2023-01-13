@@ -34,6 +34,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 - Nicer SubGHz Chat via CLI Bridge with "chat" command (Thanks @E_Surge and @qqMajikpp)
+- Updated Assets: Includes SubGHz assets for CVS/Walgreens (Thanks to [DRA6N](https://github.com/DRA6N/SubGhz_Cust_Serv) and [jimilinuxguy](https://github.com/jimilinuxguy/customer-assistance-buttons-sdr/tree/main/cvs/English))
+- Updated Assets: Includes SubGHz Playlist config and SubGHz Remote config for CVS.
 
 <a name="release">
 

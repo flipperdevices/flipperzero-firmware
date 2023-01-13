@@ -1,12 +1,12 @@
 Filetype: Flipper SubGhz RAW File
 Version: 1
 UP: /any/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Cough.sub
-DOWN: /any/subghz/Customer_Assistance_Buttons/CVS/CVS_Dental.sub
+DOWN: /any/subghz/Customer_Assistance_Buttons/CVS/Cashier_to_the_Front_of_the_Store_ENGLISH.sub
 LEFT: /any/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Skincare.sub
 RIGHT: /subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Vitamin.sub
-OK: /any/subghz/Customer_Assistance_Buttons/CVS/CVS_Stomach.sub
+OK: /any/subghz/Customer_Assistance_Buttons/CVS/the_Photo_Lab_ENGLISH.sub
 ULABEL: Cough_Wal
-DLABEL: Dental_CVS
+DLABEL: Cashier_CVS
 LLABEL: Skincare_Wal
 RLABEL: Vitamin_Wal
-OKLABEL: Stomach_CVS
+OKLABEL: PhotoLab_CVS

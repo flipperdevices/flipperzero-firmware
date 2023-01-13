@@ -2,11 +2,10 @@
 sub: /ext/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Cough.sub
 sub: /ext/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Skincare.sub
 sub: /ext/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Vitamin.sub
-sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Dental.sub
-sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Stomach.sub
-sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Shaving.sub
-sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_Shaving.sub
-sub: /ext/subghz/Customer_Assistance_Buttons/CVS/CVS_14.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/Dental_Care_ENGLISH.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/Stomach_Remedies_ENGLISH.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/Cashier_to_the_Front_of_the_Store_ENGLISH.sub
+sub: /ext/subghz/Customer_Assistance_Buttons/CVS/the_Photo_Lab_ENGLISH.sub
 sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Appliance_Desk.sub
 sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Blind_Cutting.sub
 sub: /ext/subghz/Customer_Assistance_Buttons/Lowes/Electrical.sub
