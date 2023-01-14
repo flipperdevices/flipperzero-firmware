@@ -6,4 +6,4 @@
 
 ## Related things
 
- - IR codes for XBOX https://github.com/Lucaslhm/Flipper-IRDB/tree/main/Consoles/Microsoft
+ - IR codes for XBOX: [Lucaslhm/Flipper-IRDB/Consoles/Microsoft](https://github.com/Lucaslhm/Flipper-IRDB/tree/main/Consoles/Microsoft)
