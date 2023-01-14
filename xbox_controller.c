@@ -3,53 +3,69 @@
 
 #define TAG "XboxControllerApp"
 
-enum XboxControllerSubmenuIndex {
+enum XboxControllerSubmenuIndex
+{
     XboxControllerSubmenuIndexXboxOne,
 };
 
-uint32_t usb_hid_exit_confirm_view(void* context) {
+uint32_t usb_hid_exit_confirm_view(void *context)
+{
     UNUSED(context);
     return UsbHidViewExitConfirm;
 }
 
-uint32_t usb_hid_exit(void* context) {
+uint32_t usb_hid_exit(void *context)
+{
     UNUSED(context);
     return VIEW_NONE;
 }
 
-void usb_hid_submenu_callback(void* context, uint32_t index) {
+void usb_hid_submenu_callback(void *context, uint32_t index)
+{
     furi_assert(context);
-    XboxController* app = context;
-    if(index == XboxControllerSubmenuIndexXboxOne) {
+    XboxController *app = context;
+    if (index == XboxControllerSubmenuIndexXboxOne)
+    {
         app->view_id = UsbHidViewXboxController;
         view_dispatcher_switch_to_view(app->view_dispatcher, UsbHidViewXboxController);
     }
 }
 
-void usb_hid_dialog_callback(DialogExResult result, void* context) {
+void usb_hid_dialog_callback(DialogExResult result, void *context)
+{
     furi_assert(context);
-    XboxController* app = context;
-    if(result == DialogExResultLeft) {
+    XboxController *app = context;
+    if (result == DialogExResultLeft)
+    {
         view_dispatcher_stop(app->view_dispatcher);
-    } else if(result == DialogExResultRight) {
+    }
+    else if (result == DialogExResultRight)
+    {
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id); // Show last view
-    } else if(result == DialogExResultCenter) {
+    }
+    else if (result == DialogExResultCenter)
+    {
         view_dispatcher_switch_to_view(app->view_dispatcher, UsbHidViewSubmenu);
     }
 }
 
-XboxController* xbox_controller_app_alloc() {
-    XboxController* app = malloc(sizeof(XboxController));
+XboxController *xbox_controller_app_alloc()
+{
+    XboxController *app = malloc(sizeof(XboxController));
 
     app->gui = furi_record_open(RECORD_GUI);
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
     app->view_dispatcher = view_dispatcher_alloc();
+
+    // view_set_orientation(app->view_dispatcher->view, ViewOrientationVertical);
 
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
     // Submenu view
     app->submenu = submenu_alloc();
+    view_set_orientation(submenu_get_view(app->submenu), ViewOrientationVertical);
+
     submenu_add_item(
         app->submenu, "Xbox One", XboxControllerSubmenuIndexXboxOne, usb_hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), usb_hid_exit);
@@ -58,6 +74,7 @@ XboxController* xbox_controller_app_alloc() {
 
     // Dialog view
     app->dialog = dialog_ex_alloc();
+    // view_set_orientation(dialog_ex_get_view(app->dialog), ViewOrientationVertical);
     dialog_ex_set_result_callback(app->dialog, usb_hid_dialog_callback);
     dialog_ex_set_context(app->dialog, app);
     dialog_ex_set_left_button_text(app->dialog, "Exit");
@@ -83,7 +100,8 @@ XboxController* xbox_controller_app_alloc() {
     return app;
 }
 
-void xbox_controller_app_free(XboxController* app) {
+void xbox_controller_app_free(XboxController *app)
+{
     furi_assert(app);
 
     // Reset notification
@@ -108,10 +126,11 @@ void xbox_controller_app_free(XboxController* app) {
     free(app);
 }
 
-int32_t xbox_controller_app(void* p) {
+int32_t xbox_controller_app(void *p)
+{
     UNUSED(p);
 
-    XboxController* app = xbox_controller_app_alloc();
+    XboxController *app = xbox_controller_app_alloc();
 
     // FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
     // furi_hal_usb_unlock();
