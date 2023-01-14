@@ -385,17 +385,19 @@ extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
 extern ProtoViewDecoder ToyotaTPMSDecoder;
 extern ProtoViewDecoder SchraderTPMSDecoder;
+extern ProtoViewDecoder SchraderEG53MA4TPMSDecoder;
 extern ProtoViewDecoder CitroenTPMSDecoder;
 extern ProtoViewDecoder FordTPMSDecoder;
 
 ProtoViewDecoder *Decoders[] = {
-    &Oregon2Decoder,        /* Oregon sensors v2.1 protocol. */
-    &B4B1Decoder,           /* PT, SC, ... 24 bits remotes. */
-    &RenaultTPMSDecoder,    /* Renault TPMS. */
-    &ToyotaTPMSDecoder,     /* Toyota TPMS. */
-    &SchraderTPMSDecoder,   /* Schrader TPMS. */
-    &CitroenTPMSDecoder,    /* Citroen TPMS. */
-    &FordTPMSDecoder,       /* Ford TPMS. */
+    &Oregon2Decoder,                /* Oregon sensors v2.1 protocol. */
+    &B4B1Decoder,                   /* PT, SC, ... 24 bits remotes. */
+    &RenaultTPMSDecoder,            /* Renault TPMS. */
+    &ToyotaTPMSDecoder,             /* Toyota TPMS. */
+    &SchraderTPMSDecoder,           /* Schrader TPMS. */
+    &SchraderEG53MA4TPMSDecoder,    /* Schrader EG53MA4 TPMS. */
+    &CitroenTPMSDecoder,            /* Citroen TPMS. */
+    &FordTPMSDecoder,               /* Ford TPMS. */
     NULL
 };
 
