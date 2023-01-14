@@ -83,13 +83,13 @@ static void xbox_controller_view_draw_callback(Canvas* canvas, void* context) {
     canvas_draw_str(canvas, 12, 20, "Hold");
 
     xbox_controller_view_draw_arrow_button(
-        canvas, model->up_pressed, 21, 74, CanvasDirectionBottomToTop);
+        canvas, model->up_pressed, 23, 74, CanvasDirectionBottomToTop);
     xbox_controller_view_draw_arrow_button(
-        canvas, model->down_pressed, 21, 110, CanvasDirectionTopToBottom);
+        canvas, model->down_pressed, 23, 110, CanvasDirectionTopToBottom);
     xbox_controller_view_draw_arrow_button(
         canvas, model->left_pressed, 0, 92, CanvasDirectionRightToLeft);
     xbox_controller_view_draw_arrow_button(
-        canvas, model->right_pressed, 42, 92, CanvasDirectionLeftToRight);
+        canvas, model->right_pressed, 46, 92, CanvasDirectionLeftToRight);
 
     int buttons_post = 30;
     // Ok
