@@ -13,7 +13,7 @@
  * often can't decode correctly the initial alternating pattern 101010101,
  * so what we do is to seek just the sync, that is "001111" or "0011111",
  * however we now that it must be followed by one differenitally encoded
- * bit, so we can use also the first bit of data to force a more robust
+ * bit, so we can use also the first symbol of data to force a more robust
  * detection, and look for one of the following:
  *
  * [001111]00
