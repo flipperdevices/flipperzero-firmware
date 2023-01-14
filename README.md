@@ -3,6 +3,8 @@ Tama P1 Emulator for Flipper Zero
 
 This is a tama P1 Emulator app for Flipper Zero, based on [TamaLIB](https://github.com/jcrona/tamalib/).
 
+![Alt Text](tama.gif)
+
 How to play
 -----------
 Create a `tama_p1` folder in your microSD card, and put the ROM as `rom.bin`.
