@@ -1,12 +1,12 @@
 #include "flizzer_tracker.h"
 #include "init_deinit.h"
-#include "event.h"
+#include "util.h"
+#include "input_event.h"
 #include "view/pattern_editor.h"
 
 #define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
 
 #include <flizzer_tracker_icons.h>
-
 /*
 Fontname: -Raccoon-Fixed4x6-Medium-R-Normal--6-60-75-75-P-40-ISO10646-1
 Copyright: 
@@ -38,136 +38,63 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] U8G2_FONT_SECTION("u8g2_font_tom_t
 	"y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
 	"\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
 
-typedef enum
-{
-	EventTypeInput,
-} EventType;
-
-typedef struct
-{
-	EventType type;
-	InputEvent input;
-} FlizzerTrackerEvent;
-
-typedef enum
-{
-	PARAM_FREQUENCY,
-	PARAM_WAVEFORM,
-	PARAM_PW,
-	PARAM_ENABLE_FILTER,
-	PARAM_FILTER_CUTOFF,
-	PARAM_FILTER_RESONANCE,
-	PARAM_FILTER_TYPE,
-} SelectedParam;
-
-const char* wave_names[] = 
-{
-	"NONE",
-	"NOISE",
-	"PULSE",
-	"TRIANGLE",
-	"SAWTOOTH",
-	"METAL NOISE",
-	"SINE",
-};
-
-const char* filter_names[] = 
-{
-	"NONE",
-	"LOWPASS",
-	"HIGHPASS",
-	"BANDPASS",
-};
-
-#define NUM_PARAMS 10
-
 static void draw_callback(Canvas* canvas, void* ctx) 
 {
 	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
-
-	canvas_clear(canvas);
 
 	canvas_set_color(canvas, ColorXOR);
 
 	canvas_set_custom_font(canvas, u8g2_font_tom_thumb_4x6_tr);
 
-	draw_pattern_view(canvas, tracker);
+	switch(tracker->mode)
+	{
+		case PATTERN_VIEW:
+		{
+			draw_songinfo_view(canvas, tracker);
+			draw_pattern_view(canvas, tracker);
+			break;
+		}
 
-	/*char buffer[30] = {0};
-
-	snprintf(buffer, 20, "FREQUENCY:%ld Hz", tracker->frequency);
-	
-	canvas_draw_str(canvas, 0, 6, buffer);
-
-	snprintf(buffer, 20, "WAVEFORM:%s", wave_names[tracker->current_waveform_index]);
-	
-	canvas_draw_str(canvas, 0, 12, buffer);
-
-	snprintf(buffer, 20, "PULSE WIDTH:$%03X", tracker->pw);
-	
-	canvas_draw_str(canvas, 0, 18, buffer);
-
-	snprintf(buffer, 20, "FILTER:%s", (tracker->flags & SE_ENABLE_FILTER) ? "ENABLED" : "DISABLED");
-
-	canvas_draw_str(canvas, 0, 24, buffer);
-
-	snprintf(buffer, 20, "CUTOFF:%d", tracker->cutoff);
-	
-	canvas_draw_str(canvas, 0, 30, buffer);
-
-	snprintf(buffer, 20, "RESONANCE:%d", tracker->resonance);
-	
-	canvas_draw_str(canvas, 0, 36, buffer);
-
-	snprintf(buffer, 20, "TYPE:%s", filter_names[tracker->filter_type]);
-	
-	canvas_draw_str(canvas, 0, 42, buffer);
-
-	snprintf(buffer, 20, "TR.ENG.CALLS: %d", tracker->sound_engine.channel[0].adsr.volume);
-	
-	canvas_draw_str(canvas, 0, 48, buffer);
-
-	canvas_draw_str(canvas, 70, tracker->selected_param * 6 + 6, "<");
-
-    uint32_t bytes = memmgr_get_free_heap();
-	snprintf(buffer, 20, "BYTES FREE:%ld", bytes);
-
-	canvas_draw_str(canvas, 0, 64, buffer);*/
-
-	//canvas_draw_icon(canvas, 0, 0, &I_test);
+		default: break;
+	}
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) 
 {
 	// Проверяем, что контекст не нулевой
 	furi_assert(ctx);
-	FuriMessageQueue* event_queue = ctx;
+	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
 
-	FlizzerTrackerEvent event = {.type = EventTypeInput, .input = *input_event};
-	furi_message_queue_put(event_queue, &event, FuriWaitForever);
+	if(input_event->key == InputKeyBack && input_event->type == InputTypeShort)
+	{
+		tracker->period = furi_get_tick() - tracker->current_time;
+		tracker->current_time = furi_get_tick();
+
+		tracker->was_it_back_keypress = true;
+	}
+
+	else if(input_event->type == InputTypeShort || input_event->type == InputTypeLong)
+	{
+		tracker->was_it_back_keypress = false;
+		tracker->period = 0;
+	}
+
+	uint32_t final_period = (tracker->was_it_back_keypress ? tracker->period : 0);
+
+	FlizzerTrackerEvent event = {.type = EventTypeInput, .input = *input_event, .period = final_period};
+	furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
 }
-
-const uint8_t waveforms[] = 
-{
-	SE_WAVEFORM_NONE,
-	SE_WAVEFORM_NOISE,
-	SE_WAVEFORM_PULSE,
-	SE_WAVEFORM_TRIANGLE,
-	SE_WAVEFORM_SAW,
-	SE_WAVEFORM_NOISE_METAL,
-	SE_WAVEFORM_SINE,
-};
 
 int32_t flizzer_tracker_app(void* p) 
 {
 	UNUSED(p);
 
+	FlizzerTrackerApp* tracker = init_tracker(44100, 50, true, 1024);
+
 	// Текущее событие типа кастомного типа FlizzerTrackerEvent
 	FlizzerTrackerEvent event;
 	// Очередь событий на 8 элементов размера FlizzerTrackerEvent
-	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
-
-	FlizzerTrackerApp* tracker = init_tracker(44100, 50, true, 1024);
+	tracker->event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
 
 	// Создаем новый view port
 	ViewPort* view_port = view_port_alloc();
@@ -175,7 +102,7 @@ int32_t flizzer_tracker_app(void* p)
 	view_port_draw_callback_set(view_port, draw_callback, tracker);
 	// Создаем callback нажатий на клавиши, в качестве контекста передаем
 	// нашу очередь сообщений, чтоб запихивать в неё эти события
-	view_port_input_callback_set(view_port, input_callback, event_queue);
+	view_port_input_callback_set(view_port, input_callback, tracker);
 
 	// Создаем GUI приложения
 	Gui* gui = furi_record_open(RECORD_GUI);
@@ -184,23 +111,6 @@ int32_t flizzer_tracker_app(void* p)
 
 	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
-
-	//tracker->sound_engine.channel[0].waveform = SE_WAVEFORM_NOISE;
-
-	tracker->frequency = 440;
-	tracker->current_waveform_index = 1;
-
-	/*sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], ((12 * 4) << 8));
-
-	tracker->sound_engine.channel[0].adsr.a = 0x10;
-	tracker->sound_engine.channel[0].adsr.d = 0x10;
-	tracker->sound_engine.channel[0].adsr.s = 0xff;
-	tracker->sound_engine.channel[0].adsr.volume = 0x80;
-	tracker->sound_engine.channel[0].adsr.envelope_state = ATTACK;
-
-	SoundEngine* eng = &(tracker->sound_engine);
-
-	tracker->sound_engine.channel[0].adsr.envelope_speed = envspd(eng, tracker->sound_engine.channel[0].adsr.a);*/
 
 	tracker->song.speed = 5;
 	tracker->song.num_instruments = 2;
@@ -273,219 +183,16 @@ int32_t flizzer_tracker_app(void* p)
 	play();
 
 	// Бесконечный цикл обработки очереди событий
-	while(1) 
+	while(!(tracker->quit)) 
 	{
 		// Выбираем событие из очереди в переменную event (ждём бесконечно долго, если очередь пуста)
 		// и проверяем, что у нас получилось это сделать
-		furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
+		furi_check(furi_message_queue_get(tracker->event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
 		// Наше событие — это нажатие кнопки
 		if(event.type == EventTypeInput) 
 		{
-			// Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
-			if(event.input.key == InputKeyBack && event.input.type == InputTypeShort) 
-			{
-				break;
-			}
-
-			if(event.input.key == InputKeyOk && event.input.type == InputTypeShort) 
-			{
-				tracker->tracker_engine.playing = !(tracker->tracker_engine.playing);
-			}
-
-			if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) 
-			{
-				if(tracker->selected_param > 0)
-				{
-					tracker->selected_param--;
-				}
-			}
-
-			if(event.input.key == InputKeyDown && event.input.type == InputTypeShort) 
-			{
-				if(tracker->selected_param < NUM_PARAMS - 1)
-				{
-					tracker->selected_param++;
-				}
-			}
-
-			if(event.input.key == InputKeyRight && event.input.type == InputTypeShort) 
-			{
-				switch(tracker->selected_param)
-				{
-					case PARAM_FREQUENCY:
-					{
-						tracker->frequency += 25;
-
-						sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
-
-						break;
-					}
-
-					case PARAM_WAVEFORM:
-					{
-						if(tracker->current_waveform_index < 6)
-						{
-							tracker->current_waveform_index++;
-						}
-						
-						tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
-
-						break;
-					}
-
-					case PARAM_PW:
-					{
-						if(tracker->pw + 0x80 < 0xFFF)
-						{
-							tracker->pw += 0x80;
-						}
-
-						else
-						{
-							tracker->pw = 0x80;
-						}
-
-						tracker->sound_engine.channel[0].pw = tracker->pw;
-
-						break;
-					}
-
-					case PARAM_ENABLE_FILTER:
-					{
-						tracker->flags ^= SE_ENABLE_FILTER;
-						
-						tracker->sound_engine.channel[0].flags = tracker->flags;
-
-						break;
-					}
-
-					case PARAM_FILTER_CUTOFF:
-					{
-						tracker->cutoff += 10;
-
-						if(tracker->cutoff > 0xFFF)
-						{
-							tracker->cutoff = 0xFFF;
-						}
-						
-						tracker->sound_engine.channel[0].filter_cutoff = tracker->cutoff;
-
-						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
-
-						break;
-					}
-
-					case PARAM_FILTER_RESONANCE:
-					{
-						tracker->resonance++;
-						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
-						break;
-					}
-
-					case PARAM_FILTER_TYPE:
-					{
-						if(tracker->filter_type < 3)
-						{
-							tracker->filter_type++;
-						}
-
-						tracker->sound_engine.channel[0].filter_mode = tracker->filter_type;
-						break;
-					}
-				}
-			}
-
-			if(event.input.key == InputKeyLeft && event.input.type == InputTypeShort) 
-			{
-				switch(tracker->selected_param)
-				{
-					case PARAM_FREQUENCY:
-					{
-						if(tracker->frequency > 25)
-						{
-							tracker->frequency -= 25;
-						}
-
-						sound_engine_set_channel_frequency(&tracker->sound_engine, &tracker->sound_engine.channel[0], tracker->frequency * 1024);
-
-						break;
-					}
-
-					case PARAM_WAVEFORM:
-					{
-						if(tracker->current_waveform_index > 0)
-						{
-							tracker->current_waveform_index--;
-						}
-						
-						tracker->sound_engine.channel[0].waveform = waveforms[tracker->current_waveform_index];
-
-						break;
-					}
-
-					case PARAM_PW:
-					{
-						if(tracker->pw - 0x80 > 0)
-						{
-							tracker->pw -= 0x80;
-						}
-
-						else
-						{
-							tracker->pw = 0xF80;
-						}
-
-						tracker->sound_engine.channel[0].pw = tracker->pw;
-
-						break;
-					}
-
-					case PARAM_ENABLE_FILTER:
-					{
-						tracker->flags ^= SE_ENABLE_FILTER;
-						
-						tracker->sound_engine.channel[0].flags = tracker->flags;
-
-						break;
-					}
-
-					case PARAM_FILTER_CUTOFF:
-					{
-						if(tracker->cutoff > 10)
-						{
-							tracker->cutoff -= 10;
-						}
-						
-						tracker->sound_engine.channel[0].filter_cutoff = tracker->cutoff;
-						sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
-
-						break;
-					}
-
-					case PARAM_FILTER_RESONANCE:
-					{
-						if(tracker->resonance > 0)
-						{
-							tracker->resonance--;
-							sound_engine_filter_set_coeff(&tracker->sound_engine.channel[0].filter, tracker->cutoff, tracker->resonance * 50);
-						}
-
-						break;
-					}
-
-					case PARAM_FILTER_TYPE:
-					{
-						if(tracker->filter_type > 0)
-						{
-							tracker->filter_type--;
-						}
-
-						tracker->sound_engine.channel[0].filter_mode = tracker->filter_type;
-						break;
-					}
-				}
-			}
+			process_input_event(tracker, &event);
 		}
 	}
 
@@ -495,7 +202,7 @@ int32_t flizzer_tracker_app(void* p)
 	furi_record_close(RECORD_NOTIFICATION);
 
 	// Специальная очистка памяти, занимаемой очередью
-	furi_message_queue_free(event_queue);
+	furi_message_queue_free(tracker->event_queue);
 
 	// Чистим созданные объекты, связанные с интерфейсом
 	gui_remove_view_port(gui, view_port);

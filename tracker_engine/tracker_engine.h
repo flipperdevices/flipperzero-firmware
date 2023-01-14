@@ -9,4 +9,4 @@ void tracker_engine_advance_tick(TrackerEngine* tracker_engine);
 uint8_t tracker_engine_get_note(TrackerSongPatternStep* step);
 uint8_t tracker_engine_get_instrument(TrackerSongPatternStep* step);
 uint8_t tracker_engine_get_volume(TrackerSongPatternStep* step);
-uint8_t tracker_engine_get_command(TrackerSongPatternStep* step);
+uint16_t tracker_engine_get_command(TrackerSongPatternStep* step);

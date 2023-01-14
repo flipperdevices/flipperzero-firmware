@@ -10,6 +10,8 @@ FlizzerTrackerApp* init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
 
 	tracker->tracker_engine.song = &tracker->song;
 
+	tracker->current_note = MIDDLE_C;
+
 	return tracker;
 }
 

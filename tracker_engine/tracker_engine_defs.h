@@ -6,7 +6,7 @@
 #include "../sound_engine/sound_engine_defs.h"
 
 #define INST_PROG_LEN 16
-#define MUS_SONG_NAME_LEN 17
+#define MUS_SONG_NAME_LEN 16
 #define MUS_INST_NAME_LEN (MUS_SONG_NAME_LEN - 3)
 
 #define SONG_MAX_CHANNELS NUM_CHANNELS
@@ -51,7 +51,7 @@ typedef struct
 
 typedef struct
 {
-	char name[MUS_INST_NAME_LEN];
+	char name[MUS_INST_NAME_LEN + 1];
 
 	uint8_t waveform;
 	uint16_t flags;
@@ -137,7 +137,7 @@ typedef struct
 	uint8_t num_patterns, num_sequence_steps, num_instruments;
 	uint8_t pattern_length;
 
-	char song_name[MUS_SONG_NAME_LEN];
+	char song_name[MUS_SONG_NAME_LEN + 1];
 	uint8_t speed, rate;
 
 	uint8_t loop_start, loop_end;

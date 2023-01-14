@@ -104,7 +104,13 @@ void draw_pattern_view(Canvas* canvas, FlizzerTrackerApp* tracker)
 		}
 	}
 
-	canvas_draw_box(canvas, 0, PATTERN_EDITOR_Y + 6 * 2 + 1, 127, 7);
+	if(tracker->editing && tracker->focus == EDIT_PATTERN)
+	{
+		uint8_t x = tracker->current_channel * 32 + tracker->patternx * 4 + (tracker->patternx > 0 ? 4 : 0) - 1;
+		uint8_t y = PATTERN_EDITOR_Y + 6 * 2 + 1;
+
+		canvas_draw_box(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
+	}
 }
 
 void draw_sequence_view(Canvas* canvas, FlizzerTrackerApp* tracker)
@@ -113,8 +119,47 @@ void draw_sequence_view(Canvas* canvas, FlizzerTrackerApp* tracker)
 	UNUSED(tracker);
 }
 
+#define member_size(type, member) sizeof(((type *)0)->member)
+
+#define SONG_HEADER_SIZE (member_size(TrackerSong, song_name) + member_size(TrackerSong, speed) + member_size(TrackerSong, rate) \
+ + member_size(TrackerSong, loop_start) + member_size(TrackerSong, loop_end) + member_size(TrackerSong, num_patterns) \
+ + member_size(TrackerSong, num_sequence_steps) + member_size(TrackerSong, num_instruments) + member_size(TrackerSong, pattern_length))
+
+uint32_t calculate_song_size(TrackerSong* song)
+{
+	uint32_t song_size = SONG_HEADER_SIZE + sizeof(Instrument) * song->num_instruments + sizeof(TrackerSongPatternStep) * song->num_patterns * song->pattern_length + sizeof(TrackerSongSequenceStep) * song->num_sequence_steps;
+	return song_size;
+}
+
 void draw_songinfo_view(Canvas* canvas, FlizzerTrackerApp* tracker)
 {
-	UNUSED(canvas);
-	UNUSED(tracker);
+	uint32_t song_size = calculate_song_size(&tracker->song);
+	uint32_t free_bytes = memmgr_get_free_heap();
+	canvas_draw_line(canvas, 128 - 4 * 10 - 2, 0, 128 - 4 * 10 - 2, 10);
+
+	char song_size_buffer[12];
+	char free_bytes_buffer[12];
+
+	if(song_size > 999)
+	{
+		snprintf(song_size_buffer, sizeof(song_size_buffer), "TUNE:%.1fK", (double)song_size / (double)1024.0);
+	}
+
+	else
+	{
+		snprintf(song_size_buffer, sizeof(song_size_buffer), "TUNE:%ld", song_size);
+	}
+
+	if(free_bytes > 999)
+	{
+		snprintf(free_bytes_buffer, sizeof(song_size_buffer), "FREE:%.1fK", (double)free_bytes / (double)1024.0);
+	}
+
+	else
+	{
+		snprintf(free_bytes_buffer, sizeof(song_size_buffer), "FREE:%ld", free_bytes);
+	}
+
+	canvas_draw_str(canvas, 128 - 4 * 10, 5, song_size_buffer);
+	canvas_draw_str(canvas, 128 - 4 * 10, 11, free_bytes_buffer);
 }

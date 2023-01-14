@@ -13,28 +13,56 @@
 #include "sound_engine/sound_engine_defs.h"
 #include "tracker_engine/tracker_engine_defs.h"
 
+#define MIDDLE_C (12 * 4)
+#define MAX_NOTE (12 * 7 + 11)
+
+typedef enum
+{
+	EventTypeInput,
+} EventType;
+
+typedef struct
+{
+	EventType type;
+	InputEvent input;
+	uint32_t period;
+} FlizzerTrackerEvent;
+
+typedef enum
+{
+	PATTERN_VIEW,
+	INST_EDITOR_VIEW,
+	EXPORT_WAV_VIEW,
+} TrackerMode;
+
+typedef enum
+{
+	EDIT_PATTERN,
+	EDIT_SEQUENCE,
+	EDIT_SONGINFO,
+	EDIT_INSTRUMENT,
+	EDIT_PROGRAM,
+} TrackerFocus;
+
 typedef struct 
 {
-	bool stop;
-	uint32_t counter;
-	uint32_t counter_2;
 	NotificationApp* notification;
+	FuriMessageQueue* event_queue;
+	bool was_it_back_keypress;
+	uint32_t current_time;
+	uint32_t period;
 
 	SoundEngine sound_engine;
 	TrackerEngine tracker_engine;
 
 	TrackerSong song;
 
-	uint32_t frequency;
-	uint8_t current_waveform_index;
-	uint16_t pw;
-
 	uint8_t selected_param;
 
-	uint16_t flags;
-	uint16_t cutoff;
-	uint8_t resonance;
-	uint8_t filter_type;
+	uint8_t mode, focus;
+	uint8_t patternx, current_channel, current_digit, program_step, current_instrument, current_note;
+	bool editing;
+	bool was_editing;
 
-	bool playing;
+	bool quit;
 } FlizzerTrackerApp;

@@ -56,7 +56,7 @@ uint8_t tracker_engine_get_volume(TrackerSongPatternStep* step)
 	return (step->inst_vol & 0xf) | ((step->command & 0x8000) >> 11);
 }
 
-uint8_t tracker_engine_get_command(TrackerSongPatternStep* step)
+uint16_t tracker_engine_get_command(TrackerSongPatternStep* step)
 {
 	return (step->command & 0x7fff);
 }
@@ -141,7 +141,7 @@ void tracker_engine_execute_track_command(TrackerEngine* tracker_engine, uint8_t
 
 	if(vol != MUS_NOTE_VOLUME_NONE)
 	{
-		//tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
+		tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
 	}
 
 	//TODO: add actual big ass function that executes commands; add arpeggio commands there
