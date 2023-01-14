@@ -118,138 +118,137 @@ static void tamagotchi_p1_update_timer_callback(FuriMessageQueue* event_queue) {
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-
-static void tama_p1_load_state() {  
-    state_t *state;
+static void tama_p1_load_state() {
+    state_t* state;
     uint8_t buf[4];
-    bool error = false;  
+    bool error = false;
     state = tamalib_get_state();
 
-    Storage* storage = furi_record_open(RECORD_STORAGE); 
-    File* file = storage_file_alloc(storage); 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
     if(storage_file_open(file, TAMA_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        uint64_t * size = storage_file_size(file); 
+        uint64_t* size = storage_file_size(file);
         FURI_LOG_I(TAG, "Saved file size: %d", size);
 
-        storage_file_read(file, &buf, 4);  
-        if (buf[0] != (uint8_t) STATE_FILE_MAGIC[0] || buf[1] != (uint8_t) STATE_FILE_MAGIC[1] ||
-            buf[2] != (uint8_t) STATE_FILE_MAGIC[2] || buf[3] != (uint8_t) STATE_FILE_MAGIC[3]) {
+        storage_file_read(file, &buf, 4);
+        if(buf[0] != (uint8_t)STATE_FILE_MAGIC[0] || buf[1] != (uint8_t)STATE_FILE_MAGIC[1] ||
+           buf[2] != (uint8_t)STATE_FILE_MAGIC[2] || buf[3] != (uint8_t)STATE_FILE_MAGIC[3]) {
             FURI_LOG_E(TAG, "FATAL: Wrong state file magic in \"%s\" !\n", TAMA_SAVE_PATH);
             error = true;
         }
 
-        storage_file_read(file, &buf, 1);  
-        if (buf[0] != STATE_FILE_VERSION) {
+        storage_file_read(file, &buf, 1);
+        if(buf[0] != STATE_FILE_VERSION) {
             FURI_LOG_E(TAG, "FATAL: Unsupported version");
             error = true;
         }
-        if (!error) {
+        if(!error) {
             FURI_LOG_D(TAG, "Reading save.bin");
 
-            storage_file_read(file, &buf, 2);  
-            *(state->pc) = buf[0] | ((buf[1] & 0x1F) << 8); 
-            
-            storage_file_read(file, &buf, 2);  
-            *(state->x) = buf[0] | ((buf[1] & 0xF) << 8); 
+            storage_file_read(file, &buf, 2);
+            *(state->pc) = buf[0] | ((buf[1] & 0x1F) << 8);
 
-            storage_file_read(file, &buf, 2);  
-            *(state->y) = buf[0] | ((buf[1] & 0xF) << 8); 
+            storage_file_read(file, &buf, 2);
+            *(state->x) = buf[0] | ((buf[1] & 0xF) << 8);
 
-            storage_file_read(file, &buf, 1);  
-            *(state->a) = buf[0] & 0xF; 
+            storage_file_read(file, &buf, 2);
+            *(state->y) = buf[0] | ((buf[1] & 0xF) << 8);
 
-            storage_file_read(file, &buf, 1);  
-            *(state->b) = buf[0] & 0xF; 
+            storage_file_read(file, &buf, 1);
+            *(state->a) = buf[0] & 0xF;
 
-            storage_file_read(file, &buf, 1);  
+            storage_file_read(file, &buf, 1);
+            *(state->b) = buf[0] & 0xF;
+
+            storage_file_read(file, &buf, 1);
             *(state->np) = buf[0] & 0x1F;
 
-            storage_file_read(file, &buf, 1);  
+            storage_file_read(file, &buf, 1);
             *(state->sp) = buf[0];
 
-            storage_file_read(file, &buf, 1);  
+            storage_file_read(file, &buf, 1);
             *(state->flags) = buf[0] & 0xF;
 
-            storage_file_read(file, &buf, 4);  
+            storage_file_read(file, &buf, 4);
             *(state->tick_counter) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
 
-            storage_file_read(file, &buf, 4);  
-            *(state->clk_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+            storage_file_read(file, &buf, 4);
+            *(state->clk_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) |
+                                            (buf[3] << 24);
 
-            storage_file_read(file, &buf, 4);  
-            *(state->prog_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
+            storage_file_read(file, &buf, 4);
+            *(state->prog_timer_timestamp) = buf[0] | (buf[1] << 8) | (buf[2] << 16) |
+                                             (buf[3] << 24);
 
-            storage_file_read(file, &buf, 1);  
+            storage_file_read(file, &buf, 1);
             *(state->prog_timer_enabled) = buf[0] & 0x1;
 
-            storage_file_read(file, &buf, 1);  
+            storage_file_read(file, &buf, 1);
             *(state->prog_timer_data) = buf[0];
 
-            storage_file_read(file, &buf, 1);  
+            storage_file_read(file, &buf, 1);
             *(state->prog_timer_rld) = buf[0];
 
-            storage_file_read(file, &buf, 4);  
+            storage_file_read(file, &buf, 4);
             *(state->call_depth) = buf[0] | (buf[1] << 8) | (buf[2] << 16) | (buf[3] << 24);
 
             FURI_LOG_D(TAG, "Restoring Interupts");
-            for (uint32_t i = 0; i < INT_SLOT_NUM; i++) {
-                storage_file_read(file, &buf, 1);  
+            for(uint32_t i = 0; i < INT_SLOT_NUM; i++) {
+                storage_file_read(file, &buf, 1);
                 state->interrupts[i].factor_flag_reg = buf[0] & 0xF;
 
-                storage_file_read(file, &buf, 1);  
+                storage_file_read(file, &buf, 1);
                 state->interrupts[i].mask_reg = buf[0] & 0xF;
 
-                storage_file_read(file, &buf, 1);  
+                storage_file_read(file, &buf, 1);
                 state->interrupts[i].triggered = buf[0] & 0x1;
             }
 
             /* First 640 half bytes correspond to the RAM */
             FURI_LOG_D(TAG, "Restoring RAM");
-            for (uint32_t i = 0; i < MEM_RAM_SIZE; i++) {
-                storage_file_read(file, &buf, 1);  
+            for(uint32_t i = 0; i < MEM_RAM_SIZE; i++) {
+                storage_file_read(file, &buf, 1);
                 SET_RAM_MEMORY(state->memory, i + MEM_RAM_ADDR, buf[0] & 0xF);
             }
 
             /* I/Os are from 0xF00 to 0xF7F */
             FURI_LOG_D(TAG, "Restoring I/O");
-            for (uint32_t i = 0; i < MEM_IO_SIZE; i++) {
-                storage_file_read(file, &buf, 1);  
+            for(uint32_t i = 0; i < MEM_IO_SIZE; i++) {
+                storage_file_read(file, &buf, 1);
                 SET_IO_MEMORY(state->memory, i + MEM_IO_ADDR, buf[0] & 0xF);
-            } 
-            FURI_LOG_D(TAG, "Refreshing Hardware");  
-            tamalib_refresh_hw();   
-        } 
+            }
+            FURI_LOG_D(TAG, "Refreshing Hardware");
+            tamalib_refresh_hw();
+        }
     }
-     
+
     storage_file_close(file);
     storage_file_free(file);
-    furi_record_close(RECORD_STORAGE); 
+    furi_record_close(RECORD_STORAGE);
 }
 
-
 static void tama_p1_save_state() {
-
     // Saving state
     FURI_LOG_D(TAG, "Saving Gamestate");
 
     uint8_t buf[4];
-    state_t *state;
+    state_t* state;
     uint32_t offset = 0;
     state = tamalib_get_state();
-      
-    Storage* storage = furi_record_open(RECORD_STORAGE); 
-    File* file = storage_file_alloc(storage); 
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
 
     if(storage_file_open(file, TAMA_SAVE_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        buf[0] = (uint8_t) STATE_FILE_MAGIC[0];
-        buf[1] = (uint8_t) STATE_FILE_MAGIC[1];
-        buf[2] = (uint8_t) STATE_FILE_MAGIC[2];
-        buf[3] = (uint8_t) STATE_FILE_MAGIC[3];
+        buf[0] = (uint8_t)STATE_FILE_MAGIC[0];
+        buf[1] = (uint8_t)STATE_FILE_MAGIC[1];
+        buf[2] = (uint8_t)STATE_FILE_MAGIC[2];
+        buf[3] = (uint8_t)STATE_FILE_MAGIC[3];
         offset += storage_file_write(file, &buf, sizeof(buf));
-         
+
         buf[0] = STATE_FILE_VERSION & 0xFF;
         offset += storage_file_write(file, &buf, 1);
-         
+
         buf[0] = *(state->pc) & 0xFF;
         buf[1] = (*(state->pc) >> 8) & 0x1F;
         offset += storage_file_write(file, &buf, 2);
@@ -310,7 +309,7 @@ static void tama_p1_save_state() {
         buf[3] = (*(state->call_depth) >> 24) & 0xFF;
         offset += storage_file_write(file, &buf, sizeof(buf));
 
-        for (uint32_t i = 0; i < INT_SLOT_NUM; i++) {
+        for(uint32_t i = 0; i < INT_SLOT_NUM; i++) {
             buf[0] = state->interrupts[i].factor_flag_reg & 0xF;
             offset += storage_file_write(file, &buf, 1);
 
@@ -322,24 +321,23 @@ static void tama_p1_save_state() {
         }
 
         /* First 640 half bytes correspond to the RAM */
-        for (uint32_t i = 0; i < MEM_RAM_SIZE; i++) {
+        for(uint32_t i = 0; i < MEM_RAM_SIZE; i++) {
             buf[0] = GET_RAM_MEMORY(state->memory, i + MEM_RAM_ADDR) & 0xF;
             offset += storage_file_write(file, &buf, 1);
         }
 
         /* I/Os are from 0xF00 to 0xF7F */
-        for (uint32_t i = 0; i < MEM_IO_SIZE; i++) {
+        for(uint32_t i = 0; i < MEM_IO_SIZE; i++) {
             buf[0] = GET_IO_MEMORY(state->memory, i + MEM_IO_ADDR) & 0xF;
             offset += storage_file_write(file, &buf, 1);
         }
-    }  
+    }
     storage_file_close(file);
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
 
     FURI_LOG_D(TAG, "Finished Writing %lu", offset);
 }
-
 
 static int32_t tamagotchi_p1_worker(void* context) {
     bool running = true;
@@ -496,7 +494,7 @@ int32_t tamagotchi_p1_app(void* p) {
                 if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                     furi_timer_stop(timer);
                     running = false;
-                    tama_p1_save_state(); 
+                    tama_p1_save_state();
                 }
             }
 
