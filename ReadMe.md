@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated D1g1talRain animation weighting for more customization
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
+- Added: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 
 <a name="release">
 
@@ -241,6 +242,7 @@ $ ./fbt dolphin_ext
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
+- [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
 - [Clock (By kowalski7cc)](https://github.com/kowalski7cc/flipperzero-firmware/tree/clock-v1)

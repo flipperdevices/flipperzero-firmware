@@ -1,0 +1,10 @@
+App(
+    appid="Calculator2",
+    name="Calculator 2",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="calculator_main",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="calcIcon.png",
+    fap_category="Misc",
+)
