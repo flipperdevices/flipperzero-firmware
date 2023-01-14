@@ -40,9 +40,12 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     for (int j = 0; j < 9; j++) crc += raw[j];
     if (crc != raw[9]) return false; /* Require sane CRC. */
 
-    float kpa = (float)raw[7]*2.5;
+    /* To convert the raw pressure to kPa, RTL433 uses 2.5, but is likely
+     * wrong. Searching on Google for users experimenting with the value
+     * reported, the value appears to be 2.75. */
+    float kpa = (float)raw[7]*2.75;
     int temp_f = raw[8];
-    int temp_c = (temp_f-32)*5/9;
+    int temp_c = (temp_f-32)*5/9; /* Convert Fahrenheit to Celsius. */
 
     snprintf(info->name,sizeof(info->name),"%s","Schrader EG53MA4 TPMS");
     snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
