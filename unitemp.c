@@ -233,6 +233,8 @@ static bool unitemp_alloc(void) {
  */
 static void unitemp_free(void) {
     popup_free(app->popup);
+    //Удаление вида после обработки
+    view_dispatcher_remove_view(app->view_dispatcher, UnitempViewPopup);
     unitemp_widgets_free();
 
     unitemp_SensorActions_free();

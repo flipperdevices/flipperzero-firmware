@@ -565,5 +565,6 @@ void unitemp_General_switch(void) {
 }
 
 void unitemp_General_free(void) {
+    view_dispatcher_remove_view(app->view_dispatcher, UnitempViewGeneral);
     view_free(view);
 }
