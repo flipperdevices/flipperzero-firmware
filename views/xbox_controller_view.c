@@ -4,6 +4,9 @@
 #include <gui/elements.h>
 #include <xc_icons.h>
 
+// #include <infrared_worker.h>
+#include <infrared_transmit.h>
+
 struct XboxControllerView {
     View* view;
 };
@@ -99,6 +102,16 @@ static void xbox_controller_view_draw_callback(Canvas* canvas, void* context) {
     elements_multiline_text_aligned(canvas, 91, 57, AlignLeft, AlignBottom, "B");
 }
 
+void send_xbox_ir(uint32_t command) {
+    InfraredMessage* message = malloc(sizeof(InfraredMessage));
+    message->protocol = InfraredProtocolNECext;
+    message->address = 0x80D80000;
+    message->command = command;
+    message->repeat = false;
+    infrared_send(message, 1);
+    free(message);
+}
+
 static void
     xbox_controller_view_process(XboxControllerView* xbox_controller_view, InputEvent* event) {
     with_view_model(
@@ -109,20 +122,26 @@ static void
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
                     furi_hal_hid_kb_press(HID_KEYBOARD_UP_ARROW);
+                    send_xbox_ir(0x1EE10000);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
                     furi_hal_hid_kb_press(HID_KEYBOARD_DOWN_ARROW);
+                    send_xbox_ir(0x1FE00000);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
                     furi_hal_hid_kb_press(HID_KEYBOARD_LEFT_ARROW);
+                    send_xbox_ir(0x20DF0000);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
                     furi_hal_hid_kb_press(HID_KEYBOARD_RIGHT_ARROW);
+                    send_xbox_ir(0x21DE0000);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = true;
                     furi_hal_hid_kb_press(HID_KEYBOARD_SPACEBAR);
+                    send_xbox_ir(0x66990000);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = true;
+                    send_xbox_ir(0x659A0000);
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {

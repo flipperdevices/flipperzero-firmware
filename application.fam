@@ -6,6 +6,8 @@ App(
     cdefines=["APP_XBOX_CONTROLLER"],
     requires=[
         "gui",
+        "dialogs",
+        "infrared"
     ],
     stack_size=1 * 1024,
     order=1,
