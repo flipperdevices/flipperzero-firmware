@@ -17,9 +17,11 @@ app.
 
 Building
 --------
+Move this folder into flippers applications/plugins/tama_p1. 
 
 
-
+Launching the app, directly from console to flipper: 
+`./fbt launch_app APPSRC=applications\plugins\tama_p1`
 
 Run the following to compile icons:
 ```
@@ -31,15 +33,11 @@ Note: you may also need to add `-Wno-unused-parameter` to `CCFLAGS` in
 
 Debugging
 ---------
-
-Launching the app, directly from console to flipper: 
-`./fbt launch_app APPSRC=C:\Users\dev\source\repos\flipperzero-tamagotch-p1`
-
 Using the serial script from [FlipperScripts](https://github.com/DroomOne/FlipperScripts/blob/main/serial_logger.py) 
 it is easy to add direct logging after running the appliation: 
 `python .\serial_logger.py`
 
-`./fbt launch_app APPSRC=C:\Users\dev\source\repos\flipperzero-tamagotch-p1;  python .\serial_logger.py`
+`./fbt launch_app APPSRC=applications\plugins\tama_p1;  python .\serial_logger.py`
 
 
 Implemented
