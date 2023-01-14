@@ -19,9 +19,10 @@ ProtoViewModulation ProtoViewModulations[] = {
     {"2FSK 47.6Khz", FuriHalSubGhzPreset2FSKDev476Async, NULL},
     {"MSK", FuriHalSubGhzPresetMSK99_97KbAsync, NULL},
     {"GFSK", FuriHalSubGhzPresetGFSK9_99KbAsync, NULL},
-    {"TPMS 1 (FSK)", 0, (uint8_t*)protoview_subghz_tpms1_async_regs},
-    {"TPMS 2 (FSK)", 0, (uint8_t*)protoview_subghz_tpms2_async_regs},
-    {"TPMS 3 (FSK)", 0, (uint8_t*)protoview_subghz_tpms3_async_regs},
+    {"TPMS 1 (FSK)", 0, (uint8_t*)protoview_subghz_tpms1_fsk_async_regs},
+    {"TPMS 2 (OOK)", 0, (uint8_t*)protoview_subghz_tpms2_ook_async_regs},
+    {"TPMS 3 (FSK)", 0, (uint8_t*)protoview_subghz_tpms3_fsk_async_regs},
+    {"TPMS 4 (FSK)", 0, (uint8_t*)protoview_subghz_tpms4_fsk_async_regs},
     {NULL, 0, NULL} /* End of list sentinel. */
 };
 

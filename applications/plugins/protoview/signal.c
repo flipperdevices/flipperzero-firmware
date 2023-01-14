@@ -406,6 +406,7 @@ extern ProtoViewDecoder B4B1Decoder;
 extern ProtoViewDecoder RenaultTPMSDecoder;
 extern ProtoViewDecoder ToyotaTPMSDecoder;
 extern ProtoViewDecoder SchraderTPMSDecoder;
+extern ProtoViewDecoder SchraderEG53MA4TPMSDecoder;
 extern ProtoViewDecoder CitroenTPMSDecoder;
 extern ProtoViewDecoder FordTPMSDecoder;
 
@@ -415,6 +416,7 @@ ProtoViewDecoder* Decoders[] = {
     &RenaultTPMSDecoder, /* Renault TPMS. */
     &ToyotaTPMSDecoder, /* Toyota TPMS. */
     &SchraderTPMSDecoder, /* Schrader TPMS. */
+    &SchraderEG53MA4TPMSDecoder, /* Schrader EG53MA4 TPMS. */
     &CitroenTPMSDecoder, /* Citroen TPMS. */
     &FordTPMSDecoder, /* Ford TPMS. */
     NULL};
