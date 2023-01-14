@@ -1,10 +1,5 @@
 #include "xbox_controller.h"
 #include "xc_icons.h"
-#include <stdio.h>
-#include <furi.h>
-#include <gui/gui.h>
-#include <input/input.h>
-#include <notification/notification_messages.h>
 
 #define TAG "XboxControllerApp"
 

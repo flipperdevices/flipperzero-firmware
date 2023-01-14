@@ -5,11 +5,14 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
 #include "views/xbox_controller_view.h"
 
+// this should be used as global state
+// we can store different things here
 typedef struct {
     Gui* gui;
     NotificationApp* notifications;

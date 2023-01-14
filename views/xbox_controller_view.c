@@ -1,10 +1,8 @@
 #include "xbox_controller_view.h"
 #include <furi.h>
-#include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
 #include <xc_icons.h>
 
-// #include <infrared_worker.h>
 #include <infrared_transmit.h>
 
 struct XboxControllerView {
@@ -121,23 +119,18 @@ static void
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
-                    furi_hal_hid_kb_press(HID_KEYBOARD_UP_ARROW);
                     send_xbox_ir(0x1EE10000);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
-                    furi_hal_hid_kb_press(HID_KEYBOARD_DOWN_ARROW);
                     send_xbox_ir(0x1FE00000);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
-                    furi_hal_hid_kb_press(HID_KEYBOARD_LEFT_ARROW);
                     send_xbox_ir(0x20DF0000);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
-                    furi_hal_hid_kb_press(HID_KEYBOARD_RIGHT_ARROW);
                     send_xbox_ir(0x21DE0000);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = true;
-                    furi_hal_hid_kb_press(HID_KEYBOARD_SPACEBAR);
                     send_xbox_ir(0x66990000);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = true;
@@ -146,28 +139,23 @@ static void
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = false;
-                    furi_hal_hid_kb_release(HID_KEYBOARD_UP_ARROW);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = false;
-                    furi_hal_hid_kb_release(HID_KEYBOARD_DOWN_ARROW);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = false;
-                    furi_hal_hid_kb_release(HID_KEYBOARD_LEFT_ARROW);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = false;
-                    furi_hal_hid_kb_release(HID_KEYBOARD_RIGHT_ARROW);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = false;
-                    furi_hal_hid_kb_release(HID_KEYBOARD_SPACEBAR);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = false;
                 }
             } else if(event->type == InputTypeShort) {
                 if(event->key == InputKeyBack) {
-                    furi_hal_hid_kb_press(HID_KEYBOARD_DELETE);
-                    furi_hal_hid_kb_release(HID_KEYBOARD_DELETE);
-                    furi_hal_hid_consumer_key_press(HID_CONSUMER_AC_BACK);
-                    furi_hal_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
+                    // furi_hal_hid_kb_press(HID_KEYBOARD_DELETE);
+                    // furi_hal_hid_kb_release(HID_KEYBOARD_DELETE);
+                    // furi_hal_hid_consumer_key_press(HID_CONSUMER_AC_BACK);
+                    // furi_hal_hid_consumer_key_release(HID_CONSUMER_AC_BACK);
                 }
             }
         },
@@ -180,7 +168,7 @@ static bool xbox_controller_view_input_callback(InputEvent* event, void* context
     bool consumed = false;
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
-        furi_hal_hid_kb_release_all();
+        // LONG KEY BACK PRESS HANDLER
     } else {
         xbox_controller_view_process(xbox_controller_view, event);
         consumed = true;
