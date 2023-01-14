@@ -1,6 +1,6 @@
 /*
     Unitemp - Universal temperature reader
-    Copyright (C) 2022  Victor Nikitchuk (https://github.com/quen0n)
+    Copyright (C) 2022-2023  Victor Nikitchuk (https://github.com/quen0n)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -541,6 +541,10 @@ static bool _input_callback(InputEvent* event, void* context) {
             current_view = G_CAROUSEL_VIEW;
             return true;
         }
+    }
+    //Обработка длинного нажатия "Ок"
+    if(event->key == InputKeyOk && event->type == InputTypeLong) {
+        app->settings.temp_unit = !app->settings.temp_unit;
     }
 
     return true;
