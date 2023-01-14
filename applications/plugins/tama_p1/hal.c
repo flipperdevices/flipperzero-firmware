@@ -36,11 +36,11 @@ static bool_t tama_p1_hal_is_log_enabled(log_level_t level) {
 static void tama_p1_hal_log(log_level_t level, char* buff, ...) {
     if(!tama_p1_hal_is_log_enabled(level)) return;
 
-    FuriString* string;
+    FuriString* string = furi_string_alloc();
     va_list args;
     va_start(args, buff);
     furi_string_cat_vprintf(string, buff, args);
-    va_end(args);
+    va_end(args); 
 
     switch(level) {
     case LOG_ERROR:
@@ -50,7 +50,10 @@ static void tama_p1_hal_log(log_level_t level, char* buff, ...) {
         FURI_LOG_I(TAG_HAL, "%s", furi_string_get_cstr(string));
         break;
     case LOG_MEMORY:
+        break;
     case LOG_CPU:
+        FURI_LOG_D(TAG_HAL, "%s", furi_string_get_cstr(string));
+        break;
     default:
         FURI_LOG_D(TAG_HAL, "%s", furi_string_get_cstr(string));
         break;

@@ -9,6 +9,11 @@
 #define TAMA_LCD_ICON_SIZE 14
 #define TAMA_LCD_ICON_MARGIN 1
 
+#define STATE_FILE_MAGIC "TLST"
+#define STATE_FILE_VERSION 2
+#define TAMA_SAVE_PATH EXT_PATH("tama_p1/save.bin")
+
+
 typedef struct {
     FuriThread* thread;
     hal_t hal;
