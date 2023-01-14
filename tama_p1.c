@@ -128,9 +128,7 @@ static void tama_p1_load_state() {
 
     Storage* storage = furi_record_open(RECORD_STORAGE); 
     File* file = storage_file_alloc(storage); 
-    if(storage_file_open(file, TAMA_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        uint64_t * size = storage_file_size(file); 
-        FURI_LOG_I(TAG, "Saved file size: %d", size);
+    if(storage_file_open(file, TAMA_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) { 
 
         storage_file_read(file, &buf, 4);  
         if (buf[0] != (uint8_t) STATE_FILE_MAGIC[0] || buf[1] != (uint8_t) STATE_FILE_MAGIC[1] ||
@@ -227,30 +225,6 @@ static void tama_p1_load_state() {
     furi_record_close(RECORD_STORAGE); 
 }
 
-static int32_t tama_p1_worker(void* context) {
-    bool running = true;
-    FuriMutex* mutex = context;
-    while(furi_mutex_acquire(mutex, FuriWaitForever) != FuriStatusOk) furi_delay_tick(1);
-
-    cpu_sync_ref_timestamp();
-    LL_TIM_EnableCounter(TIM2);
-
-    tama_p1_load_state();
-
-    while(running) {
-        if(furi_thread_flags_get()) {
-            running = false;
-        } else {
-            // FURI_LOG_D(TAG, "Stepping");
-            // for (int i = 0; i < 100; ++i)
-            tamalib_step();
-        }
-    }
-    LL_TIM_DisableCounter(TIM2);
-    furi_mutex_release(mutex);
-    return 0;
-}
- 
 
 static void tama_p1_save_state() {
 
@@ -366,6 +340,32 @@ static void tama_p1_save_state() {
 }
 
 
+static int32_t tama_p1_worker(void* context) {
+    bool running = true;
+    FuriMutex* mutex = context;
+    while(furi_mutex_acquire(mutex, FuriWaitForever) != FuriStatusOk) furi_delay_tick(1);
+
+    cpu_sync_ref_timestamp();
+    LL_TIM_EnableCounter(TIM2);
+
+    tama_p1_load_state();
+
+    while(running) {
+        if(furi_thread_flags_get()) {
+            running = false;
+        } else {
+            // FURI_LOG_D(TAG, "Stepping");
+            // for (int i = 0; i < 100; ++i)
+            tamalib_step();
+        }
+    }
+    LL_TIM_DisableCounter(TIM2);
+    furi_mutex_release(mutex);
+    return 0;
+}
+ 
+ 
+
 static void tama_p1_init(TamaApp* const ctx) {
     g_ctx = ctx;
     memset(ctx, 0, sizeof(TamaApp));
@@ -418,10 +418,6 @@ static void tama_p1_init(TamaApp* const ctx) {
         tamalib_register_hal(&ctx->hal);
         tamalib_init((u12_t*)ctx->rom, NULL, 64000);
         tamalib_set_speed(1);
-
-
-        // TODO: Restore state here? 
-        // tama_p1_load_state();
 
         // TODO: implement fast forwarding
         ctx->fast_forward_done = true;
@@ -502,7 +498,7 @@ int32_t tama_p1_app(void* p) {
                     furi_timer_stop(timer);
                     running = false;
 
-                    // tama_p1_save_state(); 
+                    tama_p1_save_state(); 
                 }
             }
 
