@@ -153,7 +153,7 @@ static const uint8_t protoview_subghz_tpms2_ook_async_regs[][2] = {
     {0, 0},
 };
 
-/* 40 KBaud, 2FSK, 19 kHz deviation, 102 Khz bandwidth filter. */
+/* 40 KBaud, 2FSK, 28 kHz deviation, 270 Khz bandwidth filter. */
 static uint8_t protoview_subghz_tpms3_fsk_async_regs[][2] = {
     /* GPIO GD0 */
     {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
@@ -171,7 +171,7 @@ static uint8_t protoview_subghz_tpms3_fsk_async_regs[][2] = {
     {CC1101_MDMCFG2, 0x04}, // Format 2-FSK/FM, No preamble/sync, Disable (current optimized). Other code reading TPMS uses GFSK, but should be the same when in RX mode.
     {CC1101_MDMCFG3, 0x93}, // Data rate is 40kBaud
     {CC1101_MDMCFG4, 0x6A}, // 6 = BW filter 270kHz, A = Data rate exp
-    {CC1101_DEVIATN, 0x41}, // Deviation 19.042 kHz
+    {CC1101_DEVIATN, 0x41}, // Deviation 28kHz
 
     /* Main Radio Control State Machine */
     {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
