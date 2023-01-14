@@ -1,3 +1,0 @@
-[submodule "lib/tamalib"]
-	path = lib/tamalib
-	url = https://github.com/GMMan/tamalib.git
