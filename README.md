@@ -2,3 +2,8 @@
 
 
 ## !!! WIP !!! I just started working on it
+
+
+## Related things
+
+ - IR codes for XBOX https://github.com/Lucaslhm/Flipper-IRDB/tree/main/Consoles/Microsoft
