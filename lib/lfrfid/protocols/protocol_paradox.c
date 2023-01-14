@@ -182,8 +182,15 @@ void protocol_paradox_render_brief_data(ProtocolParadox* protocol, FuriString* r
 
     uint8_t fc = bit_lib_get_bits(decoded_data, 10, 8);
     uint16_t card_id = bit_lib_get_bits_16(decoded_data, 18, 16);
+    uint8_t card_crc = bit_lib_get_bits_16(decoded_data, 34, 8);
+    uint8_t calc_crc = protocol_paradox_calculate_checksum(fc, card_id);
 
-    furi_string_cat_printf(result, "FC: %03u, Card: %05u", fc, card_id);
+    furi_string_cat_printf(result, "FC: %03u, Card: %05u\r\n", fc, card_id);
+    if(calc_crc == card_crc) {
+        furi_string_cat_printf(result, "CRC : %03u", card_crc);
+    } else {
+        furi_string_cat_printf(result, "Card is Invalid!");
+    }
 };
 
 bool protocol_paradox_write_data(ProtocolParadox* protocol, void* data) {
