@@ -4,9 +4,9 @@
 #include <storage/storage.h>
 #include <stdlib.h>
 #include <stm32wbxx_ll_tim.h>
-#include <tamalib.h>
+#include "tamalib/tamalib.h"
 #include "tama.h"
-#include "tamagotchi_p1_icons.h"
+#include "compiled/assets_icons.h"
 
 TamaApp* g_ctx;
 FuriMutex* g_state_mutex;
@@ -22,7 +22,7 @@ static const Icon* icons_list[] = {
     &I_icon_7,
 };
 
-static void tamagotchi_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
+static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
     furi_assert(cb_ctx);
 
     FuriMutex* const mutex = cb_ctx;
@@ -104,14 +104,14 @@ static void tamagotchi_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
     furi_mutex_release(mutex);
 }
 
-static void tamagotchi_p1_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void tama_p1_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     TamaEvent event = {.type = EventTypeInput, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void tamagotchi_p1_update_timer_callback(FuriMessageQueue* event_queue) {
+static void tama_p1_update_timer_callback(FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     TamaEvent event = {.type = EventTypeTick};
@@ -119,6 +119,7 @@ static void tamagotchi_p1_update_timer_callback(FuriMessageQueue* event_queue) {
 }
 
 
+ 
 static void tama_p1_load_state() {  
     state_t *state;
     uint8_t buf[4];
@@ -226,6 +227,30 @@ static void tama_p1_load_state() {
     furi_record_close(RECORD_STORAGE); 
 }
 
+static int32_t tama_p1_worker(void* context) {
+    bool running = true;
+    FuriMutex* mutex = context;
+    while(furi_mutex_acquire(mutex, FuriWaitForever) != FuriStatusOk) furi_delay_tick(1);
+
+    cpu_sync_ref_timestamp();
+    LL_TIM_EnableCounter(TIM2);
+
+    tama_p1_load_state();
+
+    while(running) {
+        if(furi_thread_flags_get()) {
+            running = false;
+        } else {
+            // FURI_LOG_D(TAG, "Stepping");
+            // for (int i = 0; i < 100; ++i)
+            tamalib_step();
+        }
+    }
+    LL_TIM_DisableCounter(TIM2);
+    furi_mutex_release(mutex);
+    return 0;
+}
+ 
 
 static void tama_p1_save_state() {
 
@@ -341,34 +366,10 @@ static void tama_p1_save_state() {
 }
 
 
-static int32_t tamagotchi_p1_worker(void* context) {
-    bool running = true;
-    FuriMutex* mutex = context;
-    while(furi_mutex_acquire(mutex, FuriWaitForever) != FuriStatusOk) furi_delay_tick(1);
-
-    cpu_sync_ref_timestamp();
-    LL_TIM_EnableCounter(TIM2);
-
-    tama_p1_load_state();
-
-    while(running) {
-        if(furi_thread_flags_get()) {
-            running = false;
-        } else {
-            // FURI_LOG_D(TAG, "Stepping");
-            // for (int i = 0; i < 100; ++i)
-            tamalib_step();
-        }
-    }
-    LL_TIM_DisableCounter(TIM2);
-    furi_mutex_release(mutex);
-    return 0;
-}
-
-static void tamagotchi_p1_init(TamaApp* const ctx) {
+static void tama_p1_init(TamaApp* const ctx) {
     g_ctx = ctx;
     memset(ctx, 0, sizeof(TamaApp));
-    tamagotchi_p1_hal_init(&ctx->hal);
+    tama_p1_hal_init(&ctx->hal);
 
     // Load ROM
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -418,6 +419,10 @@ static void tamagotchi_p1_init(TamaApp* const ctx) {
         tamalib_init((u12_t*)ctx->rom, NULL, 64000);
         tamalib_set_speed(1);
 
+
+        // TODO: Restore state here? 
+        // tama_p1_load_state();
+
         // TODO: implement fast forwarding
         ctx->fast_forward_done = true;
 
@@ -425,13 +430,13 @@ static void tamagotchi_p1_init(TamaApp* const ctx) {
         ctx->thread = furi_thread_alloc();
         furi_thread_set_name(ctx->thread, "TamaLIB");
         furi_thread_set_stack_size(ctx->thread, 1024);
-        furi_thread_set_callback(ctx->thread, tamagotchi_p1_worker);
+        furi_thread_set_callback(ctx->thread, tama_p1_worker);
         furi_thread_set_context(ctx->thread, g_state_mutex);
         furi_thread_start(ctx->thread);
     }
 }
 
-static void tamagotchi_p1_deinit(TamaApp* const ctx) {
+static void tama_p1_deinit(TamaApp* const ctx) {
     if(ctx->rom != NULL) {
         tamalib_release();
         furi_thread_free(ctx->thread);
@@ -439,24 +444,24 @@ static void tamagotchi_p1_deinit(TamaApp* const ctx) {
     }
 }
 
-int32_t tamagotchi_p1_app(void* p) {
+int32_t tama_p1_app(void* p) {
     UNUSED(p);
 
     TamaApp* ctx = malloc(sizeof(TamaApp));
     g_state_mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
-    tamagotchi_p1_init(ctx);
+    tama_p1_init(ctx);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(TamaEvent));
 
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, tamagotchi_p1_draw_callback, g_state_mutex);
-    view_port_input_callback_set(view_port, tamagotchi_p1_input_callback, event_queue);
+    view_port_draw_callback_set(view_port, tama_p1_draw_callback, g_state_mutex);
+    view_port_input_callback_set(view_port, tama_p1_input_callback, event_queue);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     FuriTimer* timer =
-        furi_timer_alloc(tamagotchi_p1_update_timer_callback, FuriTimerTypePeriodic, event_queue);
+        furi_timer_alloc(tama_p1_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 30);
 
     for(bool running = true; running;) {
@@ -472,7 +477,7 @@ int32_t tamagotchi_p1_app(void* p) {
             } else if(event.type == EventTypeInput) {
                 FURI_LOG_D(
                     TAG,
-                    "EventTypeInput: %lu %d %d",
+                    "EventTypeInput: %ld %d %d",
                     event.input.sequence,
                     event.input.key,
                     event.input.type);
@@ -496,7 +501,8 @@ int32_t tamagotchi_p1_app(void* p) {
                 if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                     furi_timer_stop(timer);
                     running = false;
-                    tama_p1_save_state(); 
+
+                    // tama_p1_save_state(); 
                 }
             }
 
@@ -519,7 +525,7 @@ int32_t tamagotchi_p1_app(void* p) {
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     furi_mutex_free(g_state_mutex);
-    tamagotchi_p1_deinit(ctx);
+    tama_p1_deinit(ctx);
     free(ctx);
 
     return 0;
