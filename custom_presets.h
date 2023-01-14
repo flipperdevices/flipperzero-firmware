@@ -1,8 +1,8 @@
 #include <cc1101.h>
 
-/* This is how to configure registers MDMCFG3 and MDMCFG4.
+/* ========================== DATA RATE SETTINGS ===============================
  *
- * Data rate kBaud setting:
+ * This is how to configure registers MDMCFG3 and MDMCFG4.
  *
  * MDMCFG3 is the data rate mantissa, the exponent is in MDMCFG4,
  * last 4 bits of the register.
@@ -14,6 +14,8 @@
  * For instance for the default values of MDMCFG3[0..3] (34) and MDMCFG4 (12):
  *
  * ((256+34)*(2^12))/(2^28)*26000000 = 115051.2688000000, that is 115KBaud
+ *
+ * ============================ BANDWIDTH FILTER ===============================
  *
  * Bandwidth filter setting:
  *
@@ -38,6 +40,8 @@
  * d 82 khz
  * e 68 khz
  * f 58 khz
+ *
+ * ============================== FSK DEVIATION ================================
  *
  * FSK deviation is controlled by the DEVIATION register. In Ruby:
  *
@@ -194,7 +198,7 @@ static uint8_t protoview_subghz_tpms3_fsk_async_regs[][2] = {
     {0, 0},
 };
 
-/* Parameters that should work well for the TPMS PVM C210 sensor. */
+/* FSK 19k dev, 325 Khz filter, 20kBaud. Works well with Toyota. */
 static uint8_t protoview_subghz_tpms4_fsk_async_regs[][2] = {
     /* GPIO GD0 */
     {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
@@ -212,7 +216,7 @@ static uint8_t protoview_subghz_tpms4_fsk_async_regs[][2] = {
     {CC1101_MDMCFG2, 0x10}, // GFSK without any other check
     {CC1101_MDMCFG3, 0x93}, // Data rate is 20kBaud
     {CC1101_MDMCFG4, 0x59}, // Rx bandwidth filter is 325 kHz
-    {CC1101_DEVIATN, 0x34}, // Deviation 19.04 Khz, works well with TPMS
+    {CC1101_DEVIATN, 0x34}, // Deviation 19.04 Khz.
 
     /* Main Radio Control State Machine */
     {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)
