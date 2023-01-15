@@ -23,4 +23,4 @@ if [ -z "$VER" ]; then
   exit 0
 fi
 print_status notice "new firmware version: $VER"
-echo "::set-output name=version::$VER"
+echo "version=$VER" >> $GITHUB_OUTPUT

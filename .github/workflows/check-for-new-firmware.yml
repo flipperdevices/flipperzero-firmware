@@ -42,5 +42,5 @@ jobs:
         run: applications_user/qrcode_app/scripts/update-firmware.sh "${{ steps.check.outputs.version }}"
         env:
           GIT_USER_NAME: ${{ secrets.GitUserName }}
-          GIT_USER_EMAIL: ${{ secrets.GitUseEmail }}
+          GIT_USER_EMAIL: ${{ secrets.GitUserEmail }}
           GITHUB_TOKEN: ${{ secrets.CustomGithubToken }}
