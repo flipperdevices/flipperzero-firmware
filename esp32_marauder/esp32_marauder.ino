@@ -103,7 +103,10 @@ void backlightOff() {
 
 void setup()
 {
-  pinMode(FLASH_BUTTON, INPUT);
+    #ifndef ESP32_CAM
+    pinMode(FLASH_BUTTON, INPUT);
+  #endif
+  
 
   #ifdef HAS_SCREEN
     pinMode(TFT_BL, OUTPUT);

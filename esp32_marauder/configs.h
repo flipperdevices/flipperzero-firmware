@@ -10,6 +10,9 @@
   //#define MARAUDER_KIT
   //#define GENERIC_ESP32
   #define MARAUDER_FLIPPER
+  #define ESP32_CAM
+  #define DISABLE_RGB_LED
+  
   //#define ESP32_LDDB
 
   #define MARAUDER_VERSION "v0.10.0"
@@ -357,6 +360,10 @@
 
   #ifdef ESP32_LDDB
     #define SD_CS 4
+  #endif
+
+  #ifdef ESP32_CAM
+    #define SD_CS 15
   #endif
   //// END SD DEFINITIONS
 
