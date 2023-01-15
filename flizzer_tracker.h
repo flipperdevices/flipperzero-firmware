@@ -7,6 +7,8 @@
 #include <input/input.h>
 #include <u8g2_glue.h>
 
+#include <gui/view_dispatcher.h>
+
 #include "flizzer_tracker_hal.h"
 #include "sound_engine/freqs.h"
 #include "sound_engine/sound_engine_filter.h"
@@ -44,10 +46,25 @@ typedef enum
 	EDIT_PROGRAM,
 } TrackerFocus;
 
+typedef enum
+{
+	SI_PATTERNPOS,
+	SI_SEQUENCEPOS,
+	SI_SONGSPEED,
+	SI_SONGRATE,
+	SI_MASTERVOL,
+
+	SI_SONGNAME,
+	SI_INSTRUMENTNAME,
+	/* ========  */
+	SI_PARAMS,
+} SongInfoParam;
+
 typedef struct 
 {
 	NotificationApp* notification;
 	FuriMessageQueue* event_queue;
+	ViewDispatcher* view_dispatcher;
 	bool was_it_back_keypress;
 	uint32_t current_time;
 	uint32_t period;

@@ -16,3 +16,7 @@ void set_command(TrackerSongPatternStep* step, uint16_t command);
 
 void play_song(FlizzerTrackerApp* tracker, bool from_cursor);
 void stop_song(FlizzerTrackerApp* tracker);
+
+void set_empty_pattern(TrackerSong* song, uint8_t pattern);
+bool is_pattern_empty(TrackerSong* song, uint8_t pattern);
+bool check_and_allocate_pattern(TrackerSong* song, uint8_t pattern);

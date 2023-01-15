@@ -10,32 +10,36 @@ void tracker_engine_init(TrackerEngine* tracker_engine, uint8_t rate, SoundEngin
 	tracker_engine_init_hardware(rate);
 
 	tracker_engine->sound_engine = sound_engine;
+	tracker_engine->rate = rate;
 }
 
-void tracker_engine_deinit_song(TrackerSong* song)
+void tracker_engine_deinit_song(TrackerSong* song, bool free_song)
 {
-	for(int i = 0; i < song->num_patterns; ++i)
+	for(int i = 0; i < MAX_PATTERNS; i++)
 	{
-		if(song->pattern[i].step)
+		if(song->pattern[i].step != NULL)
 		{
 			free(song->pattern[i].step);
 		}
 	}
 
-	for(int i = 0; i < song->num_instruments; ++i)
+	for(int i = 0; i < MAX_INSTRUMENTS; i++)
 	{
-		if(song->instrument[i])
+		if(song->instrument[i] != NULL)
 		{
 			free(song->instrument[i]);
 		}
 	}
 
-	free(song);
+	if(free_song)
+	{
+		free(song);
+	}
 }
 
-void tracker_engine_deinit(TrackerEngine* tracker_engine)
+void tracker_engine_deinit(TrackerEngine* tracker_engine, bool free_song)
 {
-	tracker_engine_deinit_song(tracker_engine->song);
+	tracker_engine_deinit_song(tracker_engine->song, free_song);
 
 	furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 13, NULL, NULL);
 	tracker_engine_stop();
@@ -203,6 +207,8 @@ void tracker_engine_advance_tick(TrackerEngine* tracker_engine)
 				te_channel->slide_speed = 0;
 
 				//TODO: add setting slide speed if slide command is there
+
+				//te_channel->slide_speed = pinst->slide_speed;
 
 				uint8_t prev_adsr_volume = se_channel->adsr.volume;
 

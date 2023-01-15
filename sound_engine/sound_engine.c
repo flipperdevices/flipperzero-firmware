@@ -153,7 +153,7 @@ void sound_engine_fill_buffer(SoundEngine* sound_engine, uint16_t* audio_buffer,
 					}
 				}
 
-				output += ((channel_output_final[chan]) / (64 * 4)); //2 more bits so all channels fit
+				output += ((channel_output_final[chan]) / (int32_t)(64 * 4)); //2 more bits so all channels fit
 			}
 		}
 

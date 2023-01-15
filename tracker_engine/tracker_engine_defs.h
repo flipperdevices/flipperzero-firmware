@@ -156,6 +156,7 @@ typedef struct
 	uint8_t pattern_length;
 
 	uint8_t speed, rate;
+	uint8_t master_volume;
 
 	bool playing; //if we reach the end of the song and song does not loop we just stop there
 } TrackerEngine;

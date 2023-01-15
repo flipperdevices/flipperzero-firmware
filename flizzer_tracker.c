@@ -7,6 +7,7 @@
 #define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
 
 #include <flizzer_tracker_icons.h>
+
 /*
 Fontname: -Raccoon-Fixed4x6-Medium-R-Normal--6-60-75-75-P-40-ISO10646-1
 Copyright: 
@@ -51,6 +52,7 @@ static void draw_callback(Canvas* canvas, void* ctx)
 		case PATTERN_VIEW:
 		{
 			draw_songinfo_view(canvas, tracker);
+			draw_sequence_view(canvas, tracker);
 			draw_pattern_view(canvas, tracker);
 			break;
 		}
@@ -109,13 +111,19 @@ int32_t flizzer_tracker_app(void* p)
 	// Подключаем view port к GUI в полноэкранном режиме
 	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+	tracker->view_dispatcher = view_dispatcher_alloc();
+	view_dispatcher_attach_to_gui(tracker->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+
 	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
+	tracker->tracker_engine.master_volume = 0x80;
+
 	tracker->song.speed = 5;
+	tracker->song.rate = tracker->tracker_engine.rate;
 	tracker->song.num_instruments = 2;
-	tracker->song.num_patterns = 2;
-	tracker->song.num_sequence_steps = 1;
+	tracker->song.num_patterns = 3;
+	tracker->song.num_sequence_steps = 4;
 	tracker->song.pattern_length = 64;
 
 	tracker->song.sequence.sequence_step[0].pattern_indices[0] = 0;
@@ -208,6 +216,8 @@ int32_t flizzer_tracker_app(void* p)
 	gui_remove_view_port(gui, view_port);
 	view_port_free(view_port);
 	furi_record_close(RECORD_GUI);
+
+	view_dispatcher_free(tracker->view_dispatcher);
 
 	deinit_tracker(tracker);
 
