@@ -47,3 +47,7 @@ Measure of uranium ore piece in contact with the geiger tube :
 All previous measures in a row (the scale of the graph is automatically adjusted) :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper5.png" width=25% height=25%>
+
+**A4** GPIO on **A7** GPIO :
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper6.png" width=25% height=25%>
