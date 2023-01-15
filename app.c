@@ -95,6 +95,11 @@ static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
     if ((old == ViewFrequencySettings && new != ViewModulationSettings) ||
         (old == ViewModulationSettings && new != ViewFrequencySettings))
         view_exit_settings(app);
+
+    /* Set the current subview of the view we just left to zero, that is
+     * the main subview of the view. When re re-enter it we want to see
+     * the main thing. */
+    app->current_subview[old] = 0;
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -118,6 +123,7 @@ ProtoViewApp* protoview_app_alloc() {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->current_view = ViewRawPulses;
+    for (int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
 
     // Signal found and visualization defaults

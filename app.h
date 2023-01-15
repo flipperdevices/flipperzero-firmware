@@ -105,7 +105,8 @@ struct ProtoViewApp {
     Gui *gui;
     ViewPort *view_port;     /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
-    ProtoViewCurrentView current_view;  /* Active view ID. */
+    ProtoViewCurrentView current_view;      /* Active left-right view ID. */
+    int current_subview[ViewLast];  /* Active up-down subview ID. */
     FuriMessageQueue *event_queue;  /* Keypress events go here. */
 
     /* Radio related. */
@@ -182,6 +183,8 @@ void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);
 
 /* ui.c */
+void show_available_subviews(Canvas *canvas, ProtoViewApp *app, int last_subview);
+bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview);
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
 
 /* crc.c */
