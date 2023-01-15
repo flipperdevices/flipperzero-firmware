@@ -41,6 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
 - Added: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 - Updated: [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work. Unpack tama.zip, rename tama.b to rom.bin. [Save State (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1)
+- Removed BadUSB Install qFlipper Script to avoid Anti Virus False Positive Flags
+- Fixed SubGHz Chat Spacing for Flipper Screen (Thanks to @qqMajikpp)
 
 <a name="release">
 
