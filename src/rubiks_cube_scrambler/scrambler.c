@@ -12,47 +12,19 @@ Authors: Tanish Bhongade and RaZe
 
 // 6 moves along with direction
 char moves[6] = {'R', 'U', 'F', 'B', 'L', 'D'};
-char dir[4] = {' ', '\'', '2'};
+char dir[4] = {'\'', '2'};
 const int32_t SLEN = 20;
 #define RESULT_SIZE 100
-// Structure which holds main scramble
+
 struct GetScramble
 {
 	char mainScramble[25][3];
 };
-struct GetScramble a; // Its object
+struct GetScramble a;
 
-// Function prototypes to avoid bugs
-void scrambleReplace();
-void genScramble();
-char *printData();
-
-// Main function
-/* int main(){
-	genScramble ();//Calling genScramble
-	scrambleReplace();//Calling scrambleReplace
-	valid();//Calling valid to validate the scramble
-	printData ();//Printing the final scramble
-	//writeToFile();//If you want to write to a file, please uncomment this
-
-	return 0;
-} */
-
-void genScramble()
-{
-	// Stage 1
-	for (int32_t i = 0; i < SLEN; i++)
-	{
-		strcpy(a.mainScramble[i], "00");
-	}
-	// This makes array like this 00 00 00.......
-}
 
 void scrambleReplace()
 {
-    // Stage 2
-    // Actual process begins here
-
     // Initialize the mainScramble array with all the possible moves
     for (int32_t i = 0; i < SLEN; i++)
     {
@@ -60,7 +32,7 @@ void scrambleReplace()
         a.mainScramble[i][1] = dir[furi_hal_random_get() % 3];
     }
 
-    // Perform the Fisher-Yates shuffle
+    /* // Perform the Fisher-Yates shuffle
     for (int32_t i = 6 - 1; i > 0; i--)
     {
         int32_t j = rand() % (i + 1);
@@ -68,9 +40,9 @@ void scrambleReplace()
         strcpy(temp, a.mainScramble[i]);
         strcpy(a.mainScramble[i], a.mainScramble[j]);
         strcpy(a.mainScramble[j], temp);
-    }
+    } */
 
-    // Select the first 10 elements as the scramble, using only the first three elements of the dir array
+    // Select the first 10 elements as the scramble, using only the first two elements of the dir array
     for (int32_t i = 0; i < SLEN; i++)
     {
         a.mainScramble[i][1] = dir[furi_hal_random_get() % 3];
@@ -82,24 +54,6 @@ void scrambleReplace()
     }
 }
 
-
-
-
-
-
-
-// Let this function be here for now till I find out what is causing the extra space bug in the scrambles
-void remove_double_spaces(char *str) {
-  int32_t i, j;
-  int32_t len = strlen(str);
-  for (i = 0, j = 0; i < len; i++, j++) {
-    if (str[i] == ' ' && str[i + 1] == ' ') {
-      i++;
-    }
-    str[j] = str[i];
-  }
-  str[j] = '\0';
-}
 char *printData()
 {
     static char result[RESULT_SIZE];
@@ -108,8 +62,5 @@ char *printData()
     {
         offset += snprintf(result + offset, RESULT_SIZE - offset, "%s ", a.mainScramble[loop]);
     }
-    remove_double_spaces(result);
     return result;
 }
-
-
