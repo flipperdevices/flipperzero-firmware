@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed BadUSB Install qFlipper Script to avoid Anti Virus False Positive Flags
 - Fixed SubGHz Chat Spacing for Flipper Screen (Thanks to @qqMajikpp)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
+- [New battery display (Bar %) (Thanks to Fasjeit)](https://github.com/DarkFlippers/unleashed-firmware/pull/278)
 
 <a name="release">
 
