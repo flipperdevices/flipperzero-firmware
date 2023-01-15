@@ -52,7 +52,7 @@ All previous measures in a row (the scale of the graph is automatically adjusted
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper6.png" width=25% height=25%>
 
-# Change Log
+## Changelog
 
 * 2023-01-05
   * Code fix & a lot of optimizations. Now a lot of events can be handled without any issue
