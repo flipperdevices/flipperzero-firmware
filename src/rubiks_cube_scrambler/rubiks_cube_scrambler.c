@@ -4,15 +4,16 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <furi_hal.h>
+#include <gui/modules/submenu.h>
 
 #include "scrambler.h"
 #include "furi_hal_random.h"
 
-int scrambleStarted = 0;
+bool scrambleStarted = false;
 char scramble_str[100] = {0};
 char scramble_start[100] = {0};
 char scramble_end[100] = {0};
-int notifications_enabled = 0;
+bool notifications_enabled = false;
 
 static void success_vibration()
 {
@@ -23,12 +24,12 @@ static void success_vibration()
     return;
 }
 void split_array(char original[], int size, char first[], char second[]) {
-    int mid = size / 2;
+    int32_t mid = size / 2;
     if (size % 2 != 0) {
         mid++;
     }
-    int first_index = 0, second_index = 0;
-    for (int i = 0; i < size; i++) {
+    int32_t first_index = 0, second_index = 0;
+    for (int32_t i = 0; i < size; i++) {
         if (i < mid) {
             first[first_index++] = original[i];
         } else {
@@ -99,17 +100,17 @@ int32_t rubiks_cube_scrambler_main(void *p)
 
         if (event.key == InputKeyOk && event.type == InputTypeShort)
         {
-            scrambleStarted = 1;
+            scrambleStarted = true;
         }
         if (event.key == InputKeyLeft && event.type == InputTypeShort)
         {
             if (notifications_enabled)
             {
-                notifications_enabled = 0;
+                notifications_enabled = false;
             }
             else
             {
-                notifications_enabled = 1;
+                notifications_enabled = true;
                 success_vibration();
             }
         }
@@ -122,7 +123,7 @@ int32_t rubiks_cube_scrambler_main(void *p)
     furi_message_queue_free(event_queue);
 
     gui_remove_view_port(gui, view_port);
-
+    
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
     return 0;
