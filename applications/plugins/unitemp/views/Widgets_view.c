@@ -27,6 +27,7 @@ void unitemp_widgets_alloc(void) {
 }
 
 void unitemp_widgets_free(void) {
+    view_dispatcher_remove_view(app->view_dispatcher, UnitempViewWidget);
     widget_free(app->widget);
 }
 

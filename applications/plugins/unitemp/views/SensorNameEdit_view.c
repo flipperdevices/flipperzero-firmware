@@ -42,5 +42,6 @@ void unitemp_SensorNameEdit_switch(Sensor* sensor) {
     view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_ID);
 }
 void unitemp_SensorNameEdit_free(void) {
+    view_dispatcher_remove_view(app->view_dispatcher, VIEW_ID);
     text_input_free(text_input);
 }
