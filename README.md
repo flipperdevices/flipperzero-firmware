@@ -51,3 +51,14 @@ All previous measures in a row (the scale of the graph is automatically adjusted
 **A4** GPIO on **A7** GPIO :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper6.png" width=25% height=25%>
+
+# Change Log
+
+* 2023-01-05
+  * Code fix & a lot of optimizations. Now a lot of events can be handled without any issue
+
+* 2023-01-09
+  * Schematic was added & code fix
+
+* 2023-01-08
+  * Initial release
