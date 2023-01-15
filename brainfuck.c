@@ -23,7 +23,6 @@ BFApp* brainfuck_alloc() {
     BFApp* brainfuck = malloc(sizeof(BFApp));
 
     brainfuck->dataSize = 0;
-    brainfuck->bfStack = 0;
     brainfuck->view_dispatcher = view_dispatcher_alloc();
     brainfuck->scene_manager = scene_manager_alloc(&brainfuck_scene_handlers, brainfuck);
     view_dispatcher_enable_queue(brainfuck->view_dispatcher);
@@ -50,19 +49,17 @@ BFApp* brainfuck_alloc() {
     brainfuck->text_input = text_input_alloc();
     view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewTextInput, text_input_get_view(brainfuck->text_input));
 
+    // Textbox
+    brainfuck->text_box = text_box_alloc();
+    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewTextBox, text_box_get_view(brainfuck->text_box)); 
+    brainfuck->text_box_store = furi_string_alloc();
+
     // Dev environment
     brainfuck->BF_dev_env = bf_dev_env_alloc(brainfuck);
     view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewDev, bf_dev_env_get_view(brainfuck->BF_dev_env));
 
-    // Exec environment
-    brainfuck->BF_exec_env = bf_exec_env_alloc(brainfuck);
-    view_dispatcher_add_view(brainfuck->view_dispatcher, brainfuckViewExec, bf_exec_env_get_view(brainfuck->BF_exec_env));
-
     // File path
     brainfuck->BF_file_path = furi_string_alloc();
-    
-    // Worker
-    initWorker();
 
     return brainfuck;
 }
@@ -82,13 +79,14 @@ void brainfuck_free(BFApp* brainfuck) {
     view_dispatcher_remove_view(brainfuck->view_dispatcher, brainfuckViewTextInput);
     text_input_free(brainfuck->text_input);
 
+    // TextBox
+    view_dispatcher_remove_view(brainfuck->view_dispatcher, brainfuckViewTextBox);
+    text_box_free(brainfuck->text_box);
+    furi_string_free(brainfuck->text_box_store);
+
     //dev env
     view_dispatcher_remove_view(brainfuck->view_dispatcher, brainfuckViewDev);
     bf_dev_env_free(brainfuck->BF_dev_env);
-
-    //exec env
-    view_dispatcher_remove_view(brainfuck->view_dispatcher, brainfuckViewExec);
-    bf_exec_env_free(brainfuck->BF_exec_env);
 
     // View Dispatcher
     view_dispatcher_free(brainfuck->view_dispatcher);

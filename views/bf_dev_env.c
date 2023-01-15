@@ -9,8 +9,8 @@ typedef struct BFDevEnv {
 } BFDevEnv;
 
 typedef struct {
-    rByte row;
-    rByte col;
+    uint32_t row;
+    uint32_t col;
 } BFDevEnvModel;
 
 typedef struct{
@@ -158,7 +158,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 0:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)'+'; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'+'; 
                 appDev->dataSize++; }
             break;
         }
@@ -166,7 +166,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 1:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)'-'; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'-'; 
                 appDev->dataSize++; }
             break;
         }
@@ -174,7 +174,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 2:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)'<'; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'<'; 
                 appDev->dataSize++; }
             break;
         }
@@ -182,7 +182,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 3:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)'>'; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'>'; 
                 appDev->dataSize++; }
             break;
         }
@@ -190,7 +190,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 4:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)'['; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'['; 
                 appDev->dataSize++; }
             break;
         }
@@ -198,7 +198,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 5:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)']'; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)']'; 
                 appDev->dataSize++; }
             break;
         }
@@ -206,7 +206,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 6:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)'.'; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'.'; 
                 appDev->dataSize++; }
             break;
         }
@@ -214,7 +214,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 7:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)','; 
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)','; 
                 appDev->dataSize++; }
             break;
         }
@@ -223,12 +223,15 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         {
             if(appDev->dataSize > 0){
                 appDev->dataSize--; 
-                appDev->dataBuffer[appDev->dataSize] = (rByte)0x00;}
+                appDev->dataBuffer[appDev->dataSize] = (uint32_t)0x00;}
             break;
         }
 
         case 9:
         {
+            initWorker(appDev->dataBuffer, appDev->dataSize);
+            beginWorker();
+            text_box_set_text(appDev->text_box, workerGetOutput());
             scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
             break;
         }
@@ -242,7 +245,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
             //save new file
             Stream* stream = buffered_file_stream_alloc(storage);
             buffered_file_stream_open(stream, furi_string_get_cstr(appDev->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
-            stream_write(stream, appDev->dataBuffer, appDev->dataSize);
+            stream_write(stream, (const uint8_t*)appDev->dataBuffer, appDev->dataSize);
             buffered_file_stream_close(stream);
 
             //notify
@@ -271,7 +274,7 @@ static void bf_dev_enter_callback(void* context) {
     appDev = devEnv->appDev;
 
     //clear the bf instruction buffer
-    memset(appDev->dataBuffer, 0x00, BF_INST_BUFFER_SIZE);
+    memset(appDev->dataBuffer, 0x00, BF_INST_BUFFER_SIZE * sizeof(char));
 
     //open the file
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -280,7 +283,7 @@ static void bf_dev_enter_callback(void* context) {
 
     //read into the buffer
     appDev->dataSize = stream_size(stream);
-    stream_read(stream, appDev->dataBuffer, appDev->dataSize);
+    stream_read(stream, (uint8_t*)appDev->dataBuffer, appDev->dataSize);
     buffered_file_stream_close(stream);
 
     //find the end of the file to begin editing

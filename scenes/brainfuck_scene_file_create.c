@@ -6,7 +6,7 @@ void file_name_text_input_callback(void* context) {
 }
 
 char tmpName[64] = {};
-rByte empty[1] = {0x00};
+byte empty[1] = {0x00};
 void brainfuck_scene_file_create_on_enter(void* context) {
     BFApp* app = context;
     TextInput* text_input = app->text_input;
@@ -39,7 +39,7 @@ bool brainfuck_scene_file_create_on_event(void* context, SceneManagerEvent event
             //save new file
             Stream* stream = buffered_file_stream_alloc(storage);
             buffered_file_stream_open(stream, furi_string_get_cstr(app->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
-            stream_write(stream, empty, 1);
+            stream_write(stream, (const uint8_t*)empty, 1);
             buffered_file_stream_close(stream);
 
             //scene_manager_next_scene(app->scene_manager, brainfuckSceneFileSelect);
