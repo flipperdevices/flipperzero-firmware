@@ -215,14 +215,19 @@ bool bitmap_get(uint8_t* b, uint32_t blen, uint32_t bitpos) {
     return (b[byte] & (1 << bit)) != 0;
 }
 
-/* We decode bits assuming the first bit we receive is the LSB
- * (see bitmap_set/get functions). Many devices send data
+/* We decode bits assuming the first bit we receive is the MSB
+ * (see bitmap_set/get functions). Certain devices send data
  * encoded in the reverse way. */
-void bitmap_invert_bytes_bits(uint8_t* p, uint32_t len) {
-    for(uint32_t j = 0; j < len * 8; j += 8) {
-        bool bits[8];
-        for(int i = 0; i < 8; i++) bits[i] = bitmap_get(p, len, j + i);
-        for(int i = 0; i < 8; i++) bitmap_set(p, len, j + i, bits[7 - i]);
+void bitmap_reverse_bytes(uint8_t* p, uint32_t len) {
+    for(uint32_t j = 0; j < len; j++) {
+        uint32_t b = p[j];
+        /* Step 1: swap the two nibbles: 12345678 -> 56781234 */
+        b = (b & 0xf0) >> 4 | (b & 0x0f) << 4;
+        /* Step 2: swap adjacent pairs : 56781234 -> 78563412 */
+        b = (b & 0xcc) >> 2 | (b & 0x33) << 2;
+        /* Step 3: swap adjacent bits  : 78563412 -> 87654321 */
+        b = (b & 0xaa) >> 1 | (b & 0x55) << 1;
+        p[j] = b;
     }
 }
 
@@ -409,6 +414,7 @@ extern ProtoViewDecoder SchraderTPMSDecoder;
 extern ProtoViewDecoder SchraderEG53MA4TPMSDecoder;
 extern ProtoViewDecoder CitroenTPMSDecoder;
 extern ProtoViewDecoder FordTPMSDecoder;
+extern ProtoViewDecoder KeeloqDecoder;
 
 ProtoViewDecoder* Decoders[] = {
     &Oregon2Decoder, /* Oregon sensors v2.1 protocol. */
@@ -419,6 +425,7 @@ ProtoViewDecoder* Decoders[] = {
     &SchraderEG53MA4TPMSDecoder, /* Schrader EG53MA4 TPMS. */
     &CitroenTPMSDecoder, /* Citroen TPMS. */
     &FordTPMSDecoder, /* Ford TPMS. */
+    &KeeloqDecoder, /* Keeloq remote. */
     NULL};
 
 /* Reset the message info structure before passing it to the decoding

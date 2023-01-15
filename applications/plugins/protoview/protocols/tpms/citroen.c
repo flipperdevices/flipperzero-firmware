@@ -5,7 +5,7 @@
  * Then Manchester bits, 10 bytes total.
  * Simple XOR checksum. */
 
-#include "../app.h"
+#include "../../app.h"
 
 static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo* info) {
     /* We consider a preamble of 17 symbols. They are more, but the decoding

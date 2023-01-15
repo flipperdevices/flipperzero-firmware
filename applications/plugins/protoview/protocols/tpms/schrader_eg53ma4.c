@@ -13,7 +13,7 @@
  * Used in certain Open cars and others.
  */
 
-#include "../app.h"
+#include "../../app.h"
 
 static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo* info) {
     const char* sync_pattern = "010101010101"

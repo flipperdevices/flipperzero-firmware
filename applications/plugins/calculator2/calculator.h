@@ -29,4 +29,4 @@ void calculator_reset(Calculator* clc);
 
 void calculator_add_calculator_calculation(Calculator* clc, CalculatorCalculation* calculation);
 
-double calculator_full_solve(Calculator* clc);
+void calculator_full_solve(Calculator* clc);

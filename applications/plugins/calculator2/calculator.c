@@ -51,19 +51,19 @@ void calculator_free(Calculator* clc) {
     free(clc);
 }
 
-double calculator_full_solve(Calculator* clc) {
-    double left_over;
-
+void calculator_full_solve(Calculator* clc) {
+    double sum;
+    // int fake;
     const char* c_str = furi_string_get_cstr(clc->framed_number);
     if(furi_string_search_char(clc->framed_number, '.') == FURI_STRING_FAILURE) {
         int bruh;
         sscanf(c_str, "%d", &bruh);
-        left_over = bruh;
+        sum = (double)bruh;
     } else {
-        sscanf(c_str, "%lf", &left_over);
+        sscanf(c_str, "%lf", &sum);
     }
 
-    double sum = 0;
+    // double sum = 0;
     CalculatorCalculation calculation;
 
     /*while(furi_message_queue_get(clc->operation_queue, &calculation, FuriWaitForever) ==
@@ -76,15 +76,16 @@ double calculator_full_solve(Calculator* clc) {
         sum += calculation.value;
     }
 
-    sum += left_over;
+    // sum += left_over;
 
     // So that u can use the result in later calcs
     // This should be the only thing in the queue
 
     calculator_reset(clc);
 
+    // bruh
     calculator_add_calculator_calculation(
         clc, calculator_calculation_alloc(&CalculatorFunctionAdd, sum));
 
-    return sum;
+    // return sum;
 }

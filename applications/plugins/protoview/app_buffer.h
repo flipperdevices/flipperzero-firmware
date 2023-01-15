@@ -8,11 +8,12 @@
     2048 /* Use a power of two: we take the modulo
                                 of the index quite often to normalize inside
                                 the range, and division is slow. */
-
 typedef struct RawSamplesBuffer {
     FuriMutex* mutex;
-    uint8_t level[RAW_SAMPLES_NUM];
-    uint32_t dur[RAW_SAMPLES_NUM];
+    struct {
+        uint16_t level : 1;
+        uint16_t dur : 15;
+    } samples[RAW_SAMPLES_NUM];
     uint32_t idx; /* Current idx (next to write). */
     uint32_t total; /* Total samples: same as RAW_SAMPLES_NUM, we provide
                        this field for a cleaner interface with the user, but

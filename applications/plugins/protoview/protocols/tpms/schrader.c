@@ -8,7 +8,7 @@
  *
  * Used in FIAT-Chrysler, Mercedes, ... */
 
-#include "../app.h"
+#include "../../app.h"
 
 #define USE_TEST_VECTOR 0
 static const char* test_vector =

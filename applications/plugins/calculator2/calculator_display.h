@@ -50,6 +50,8 @@ void button_add_function_click_callback(struct CalculatorApp* clc_app);
 
 void button_calculate_click_callback(struct CalculatorApp* clc_app);
 
+void button_function_click_callback(struct CalculatorApp* clc_app);
+
 void empty_callback(struct CalculatorApp* clc_app);
 
 extern CalculatorDisplayButton const* const CalculatorDisplayButtonNumberZero;
@@ -87,7 +89,9 @@ extern CalculatorDisplayButton const* const CalculatorDisplayButtonCalculate;
 
 extern CalculatorDisplayButton const* const CalculatorDisplayButtonDecimal;
 
-extern CalculatorDisplayButton const* calculator_display_button_grid[][4];
+extern CalculatorDisplayButton const* const CalculatorDisplayButtonFunctionSquare;
+
+extern CalculatorDisplayButton const* calculator_display_button_grid[][5];
 
 extern const size_t NUMBER_OF_ROWS_BUTTONS;
 extern const size_t NUMBER_OF_COLUMNS_BUTTONS;

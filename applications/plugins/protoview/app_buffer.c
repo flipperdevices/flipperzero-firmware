@@ -29,8 +29,7 @@ void raw_samples_reset(RawSamplesBuffer* s) {
     s->total = RAW_SAMPLES_NUM;
     s->idx = 0;
     s->short_pulse_dur = 0;
-    memset(s->level, 0, sizeof(s->level));
-    memset(s->dur, 0, sizeof(s->dur));
+    memset(s->samples, 0, sizeof(s->samples));
     furi_mutex_release(s->mutex);
 }
 
@@ -43,8 +42,8 @@ void raw_samples_center(RawSamplesBuffer* s, uint32_t offset) {
 /* Add the specified sample in the circular buffer. */
 void raw_samples_add(RawSamplesBuffer* s, bool level, uint32_t dur) {
     furi_mutex_acquire(s->mutex, FuriWaitForever);
-    s->level[s->idx] = level;
-    s->dur[s->idx] = dur;
+    s->samples[s->idx].level = level;
+    s->samples[s->idx].dur = dur;
     s->idx = (s->idx + 1) % RAW_SAMPLES_NUM;
     furi_mutex_release(s->mutex);
 }
@@ -54,8 +53,8 @@ void raw_samples_add(RawSamplesBuffer* s, bool level, uint32_t dur) {
 void raw_samples_get(RawSamplesBuffer* s, uint32_t idx, bool* level, uint32_t* dur) {
     furi_mutex_acquire(s->mutex, FuriWaitForever);
     idx = (s->idx + idx) % RAW_SAMPLES_NUM;
-    *level = s->level[idx];
-    *dur = s->dur[idx];
+    *level = s->samples[idx].level;
+    *dur = s->samples[idx].dur;
     furi_mutex_release(s->mutex);
 }
 
@@ -65,8 +64,7 @@ void raw_samples_copy(RawSamplesBuffer* dst, RawSamplesBuffer* src) {
     furi_mutex_acquire(dst->mutex, FuriWaitForever);
     dst->idx = src->idx;
     dst->short_pulse_dur = src->short_pulse_dur;
-    memcpy(dst->level, src->level, sizeof(dst->level));
-    memcpy(dst->dur, src->dur, sizeof(dst->dur));
+    memcpy(dst->samples, src->samples, sizeof(dst->samples));
     furi_mutex_release(src->mutex);
     furi_mutex_release(dst->mutex);
 }

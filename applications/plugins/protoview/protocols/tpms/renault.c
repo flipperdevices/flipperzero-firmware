@@ -3,7 +3,7 @@
  * Preamble + sync + Manchester bits. ~48us short pulse.
  * 9 Bytes in total not counting the preamble. */
 
-#include "../app.h"
+#include "../../app.h"
 
 #define USE_TEST_VECTOR 0
 static const char* test_vector =
