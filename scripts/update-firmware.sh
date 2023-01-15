@@ -38,6 +38,6 @@ git add .github/workflows/release.yml
 git commit -m "update to firmware $FIRMWARE_VER"
 git tag -a -m "$VER" "$VER"
 git tag "firmware-v$FIRMWARE_VER"
-git push --all
+git push --atomic origin main "$VER" "firmware-v$FIRMWARE_VER"
 
 popd
