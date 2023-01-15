@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: Bluetooth: Works as an AirTag [(Thanks to culturally)](https://github.com/culturally/flipper-zero-airtag)
 - Added: [BadUSB: STRINGDELAY feature, delay fix #2269 (By n30f0x)](https://github.com/flipperdevices/flipperzero-firmware/pull/2269)
 - Added: [WeatherStation: add protocol LaCrosse-TX (TFA Dostmann) #2292 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2292)
+- Added: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 
 <a name="release">
 
@@ -172,6 +173,7 @@ $ ./fbt dolphin_ext
 - [Infrared: allow disabling automatic signal decoding #273 (By Darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/273)
 - [Infrared: Infrared AS FAP #398 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/398) (With Thanks to ESurge) [Restored Infrared and RFID CLI #405 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/405)
 - Infrared: Universal AC, Audio, Fans & Projectors from [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware)
+- [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 - NFC: Assets for RogueMaster GitHub and RogueMaster Patreon
 - NFC: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - NFC: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
