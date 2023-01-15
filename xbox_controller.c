@@ -57,8 +57,6 @@ XboxController *xbox_controller_app_alloc()
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
     app->view_dispatcher = view_dispatcher_alloc();
 
-    // view_set_orientation(app->view_dispatcher->view, ViewOrientationVertical);
-
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
@@ -131,15 +129,8 @@ int32_t xbox_controller_app(void *p)
     UNUSED(p);
 
     XboxController *app = xbox_controller_app_alloc();
-
-    // FuriHalUsbInterface* usb_mode_prev = furi_hal_usb_get_config();
-    // furi_hal_usb_unlock();
-    // furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
-
     view_dispatcher_run(app->view_dispatcher);
 
-    // Change back profile
-    // furi_hal_usb_set_config(usb_mode_prev, NULL);
     xbox_controller_app_free(app);
 
     return 0;

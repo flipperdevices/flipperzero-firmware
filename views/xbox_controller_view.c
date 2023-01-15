@@ -103,10 +103,10 @@ static void xbox_controller_view_draw_callback(Canvas* canvas, void* context) {
 void send_xbox_ir(uint32_t command) {
     InfraredMessage* message = malloc(sizeof(InfraredMessage));
     message->protocol = InfraredProtocolNECext;
-    message->address = 0x80D80000;
+    message->address = 0xD880;
     message->command = command;
     message->repeat = false;
-    infrared_send(message, 1);
+    infrared_send(message, 2);
     free(message);
 }
 
@@ -119,22 +119,22 @@ static void
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
-                    send_xbox_ir(0x1EE10000);
+                    send_xbox_ir(0xE11E);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
-                    send_xbox_ir(0x1FE00000);
+                    send_xbox_ir(0xE01F);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
-                    send_xbox_ir(0x20DF0000);
+                    send_xbox_ir(0xDF20);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
-                    send_xbox_ir(0x21DE0000);
+                    send_xbox_ir(0xDE21);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = true;
-                    send_xbox_ir(0x66990000);
+                    send_xbox_ir(0x9966);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = true;
-                    send_xbox_ir(0x659A0000);
+                    send_xbox_ir(0x9A65);
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {
@@ -166,6 +166,8 @@ static bool xbox_controller_view_input_callback(InputEvent* event, void* context
     furi_assert(context);
     XboxControllerView* xbox_controller_view = context;
     bool consumed = false;
+
+    FURI_LOG_I("XBOX_CONTROLLER", "TYPE: %d, KEY: %d", event->type, event->key);
 
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         // LONG KEY BACK PRESS HANDLER
