@@ -43,7 +43,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixed SubGHz Chat Spacing for Flipper Screen (Thanks to @qqMajikpp)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080`
 - [New battery display (Bar %) (Thanks to Fasjeit)](https://github.com/DarkFlippers/unleashed-firmware/pull/278)
-- Updated: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 - Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: Bluetooth: Works as an AirTag [(Thanks to culturally)](https://github.com/culturally/flipper-zero-airtag)
@@ -51,6 +50,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [WeatherStation: add protocol LaCrosse-TX (TFA Dostmann) #2292 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2292)
 - Added: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 - Added: [NFC Magic: Add support for Gen4 "ultimate card" in Magic app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- Updated: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 
 <a name="release">
 

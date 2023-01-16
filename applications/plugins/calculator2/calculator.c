@@ -54,14 +54,31 @@ void calculator_free(Calculator* clc) {
 void calculator_full_solve(Calculator* clc) {
     double sum;
     // int fake;
-    const char* c_str = furi_string_get_cstr(clc->framed_number);
+    /*const char* c_str = furi_string_get_cstr(clc->framed_number);
     if(furi_string_search_char(clc->framed_number, '.') == FURI_STRING_FAILURE) {
         int bruh;
         sscanf(c_str, "%d", &bruh);
         sum = (double)bruh;
     } else {
         sscanf(c_str, "%lf", &sum);
+    }*/
+    int left;
+    int right;
+    if(furi_string_search_char(clc->framed_number, '.') != FURI_STRING_FAILURE) {
+        if(furi_string_start_with_str(clc->framed_number, ".")) {
+            sscanf(furi_string_get_cstr(clc->framed_number), ".%d", &right);
+            sum = (double)((double)right / pow10(((int)log10(right) + 1)));
+        } else {
+            sscanf(furi_string_get_cstr(clc->framed_number), "%d.%d", &left, &right);
+            sum = (double)left + (double)((double)right / pow10(((int)log10(right) + 1)));
+        }
+    } else {
+        sscanf(furi_string_get_cstr(clc->framed_number), "%d", &left);
+        sum = left;
     }
+
+    // sscanf(furi_string_get_cstr(clc->framed_number), "%d.%d", &left, &right);
+    // sum = (double)left + (double)((double)right / pow10(((int)log10(right) + 1)));
 
     // double sum = 0;
     CalculatorCalculation calculation;
