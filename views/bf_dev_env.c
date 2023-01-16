@@ -28,6 +28,8 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event);
 
 BFApp* appDev;
 
+char bfChars[9] = {'<', '>', '[', ']', '+', '-', '.', ',', 0x00};
+
 int selectedButton = 0;
 int saveNotifyCountdown = 0;
 int execCountdown = 0;
@@ -285,6 +287,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 9:
         {
             //todo: input
+            //scene_manager_next_scene(appDev->scene_manager, brainfuckSceneSetInput);
             break;
         }
 
@@ -344,6 +347,13 @@ static void bf_dev_enter_callback(void* context) {
     appDev->dataSize = stream_size(stream);
     stream_read(stream, (uint8_t*)appDev->dataBuffer, appDev->dataSize);
     buffered_file_stream_close(stream);
+
+    //replaces any invalid characters with an underscore. strips out newlines, comments, etc
+    for(int i = 0; i < appDev->dataSize; i++){
+        if(!strchr(bfChars, appDev->dataBuffer[i])){
+            appDev->dataBuffer[i] = '_';
+        }
+    }
 
     //find the end of the file to begin editing
     int tptr = 0;
