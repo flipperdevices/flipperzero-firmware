@@ -1,7 +1,9 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Script import Delete, Mkdir
+from SCons.Script import Delete, Mkdir, GetBuildFailures
 import multiprocessing
+import webbrowser
+import atexit
 
 
 def emit_pvsreport(target, source, env):
@@ -10,6 +12,13 @@ def emit_pvsreport(target, source, env):
         # Report generator on Windows emits to a subfolder of given output folder
         target_dir = target_dir.Dir("fullhtml")
     return [target_dir.File("index.html")], source
+
+
+def atexist_handler():
+    for bf in GetBuildFailures():
+        if bf.node.exists and bf.node.name.endswith(".html"):
+            webbrowser.open(bf.node.abspath)
+            break
 
 
 def generate(env):
@@ -71,6 +80,7 @@ def generate(env):
             ),
         }
     )
+    atexit.register(atexist_handler)
 
 
 def exists(env):
