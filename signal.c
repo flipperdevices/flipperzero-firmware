@@ -265,7 +265,7 @@ void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff,
      *  src:
      *  +--------+--------+--------+
      *  | 0      | 1      | 2      |
-     *  |hellowod|ld!HELLO|WORLDS!!| <- data to copy
+     *  |hellowor|ld!HELLO|WORLDS!!| <- data to copy
      *  +--------+--------+--------+
      *               ^
      *               |

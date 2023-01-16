@@ -11,12 +11,6 @@ enum {
 
 /* Render the view with the detected message information. */
 static void render_subview_main(Canvas *const canvas, ProtoViewApp *app) {
-    if (app->signal_decoded == false) {
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 30,36,"No signal decoded");
-        return;
-    }
-
     /* Protocol name as title. */
     canvas_set_font(canvas, FontPrimary);
     uint8_t y = 8, lineheight = 10;
@@ -45,6 +39,12 @@ static void render_subview_save(Canvas *const canvas, ProtoViewApp *app) {
 
 /* Render the selected subview of this view. */
 void render_view_info(Canvas *const canvas, ProtoViewApp *app) {
+    if (app->signal_decoded == false) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 30,36,"No signal decoded");
+        return;
+    }
+
     show_available_subviews(canvas,app,SubViewInfoLast);
     switch(app->current_subview[app->current_view]) {
     case SubViewInfoMain: render_subview_main(canvas,app); break;
