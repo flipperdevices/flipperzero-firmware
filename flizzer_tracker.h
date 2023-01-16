@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <furi.h>
 #include <gui/gui.h>
+#include <cli/cli.h>
 #include <input/input.h>
 #include <u8g2_glue.h>
 
@@ -60,10 +61,18 @@ typedef enum
 	SI_PARAMS,
 } SongInfoParam;
 
+typedef struct
+{
+    View* view;
+    void* context;
+} TrackerView;
+
 typedef struct 
 {
 	NotificationApp* notification;
 	FuriMessageQueue* event_queue;
+	Gui* gui;
+	TrackerView* tracker_view;
 	ViewDispatcher* view_dispatcher;
 	bool was_it_back_keypress;
 	uint32_t current_time;
@@ -83,3 +92,8 @@ typedef struct
 
 	bool quit;
 } FlizzerTrackerApp;
+
+typedef struct
+{
+	FlizzerTrackerApp* tracker;
+} TrackerViewModel;

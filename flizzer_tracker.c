@@ -41,7 +41,8 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[725] U8G2_FONT_SECTION("u8g2_font_tom_t
 
 static void draw_callback(Canvas* canvas, void* ctx) 
 {
-	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+	TrackerViewModel* model = (TrackerViewModel*)ctx;
+	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)(model->tracker);
 
 	canvas_set_color(canvas, ColorXOR);
 
@@ -61,11 +62,14 @@ static void draw_callback(Canvas* canvas, void* ctx)
 	}
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) 
+static bool input_callback(InputEvent* input_event, void* ctx) 
 {
 	// Проверяем, что контекст не нулевой
 	furi_assert(ctx);
-	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+	TrackerView* tracker_view = (TrackerView*)ctx;
+	FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)(tracker_view->context);
+
+	bool consumed = false;
 
 	if(input_event->key == InputKeyBack && input_event->type == InputTypeShort)
 	{
@@ -85,34 +89,52 @@ static void input_callback(InputEvent* input_event, void* ctx)
 
 	FlizzerTrackerEvent event = {.type = EventTypeInput, .input = *input_event, .period = final_period};
 	furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+
+	consumed = true;
+	return consumed;
+}
+
+TrackerView* tracker_view_alloc(FlizzerTrackerApp* tracker)
+{
+    TrackerView* tracker_view = malloc(sizeof(TrackerView));
+    tracker_view->view = view_alloc();
+	tracker_view->context = tracker;
+    view_set_context(tracker_view->view, tracker_view);
+    view_allocate_model(tracker_view->view, ViewModelTypeLocking, sizeof(TrackerViewModel));
+    view_set_draw_callback(tracker_view->view, draw_callback);
+    view_set_input_callback(tracker_view->view, input_callback);
+
+    return tracker_view;
+}
+
+void tracker_view_free(TrackerView* tracker_view)
+{
+    furi_assert(tracker_view);
+    view_free(tracker_view->view);
+    free(tracker_view);
 }
 
 int32_t flizzer_tracker_app(void* p) 
 {
 	UNUSED(p);
 
-	FlizzerTrackerApp* tracker = init_tracker(44100, 50, true, 1024);
+	FlizzerTrackerApp* tracker = init_tracker(44100, 50, false, 1024);
 
 	// Текущее событие типа кастомного типа FlizzerTrackerEvent
 	FlizzerTrackerEvent event;
 	// Очередь событий на 8 элементов размера FlizzerTrackerEvent
 	tracker->event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
 
-	// Создаем новый view port
-	ViewPort* view_port = view_port_alloc();
-	// Создаем callback отрисовки, без контекста
-	view_port_draw_callback_set(view_port, draw_callback, tracker);
-	// Создаем callback нажатий на клавиши, в качестве контекста передаем
-	// нашу очередь сообщений, чтоб запихивать в неё эти события
-	view_port_input_callback_set(view_port, input_callback, tracker);
+	tracker->gui = furi_record_open(RECORD_GUI);
+    tracker->view_dispatcher = view_dispatcher_alloc();
+    tracker->tracker_view = tracker_view_alloc(tracker);
 
-	// Создаем GUI приложения
-	Gui* gui = furi_record_open(RECORD_GUI);
-	// Подключаем view port к GUI в полноэкранном режиме
-	gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+    view_dispatcher_add_view(tracker->view_dispatcher, 0, tracker->tracker_view->view);
+    view_dispatcher_attach_to_gui(tracker->view_dispatcher, tracker->gui, ViewDispatcherTypeFullscreen);
 
-	tracker->view_dispatcher = view_dispatcher_alloc();
-	view_dispatcher_attach_to_gui(tracker->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+	with_view_model(tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
+
+    view_dispatcher_switch_to_view(tracker->view_dispatcher, 0);
 
 	tracker->notification = furi_record_open(RECORD_NOTIFICATION);
 	notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
@@ -212,12 +234,10 @@ int32_t flizzer_tracker_app(void* p)
 	// Специальная очистка памяти, занимаемой очередью
 	furi_message_queue_free(tracker->event_queue);
 
-	// Чистим созданные объекты, связанные с интерфейсом
-	gui_remove_view_port(gui, view_port);
-	view_port_free(view_port);
+	view_dispatcher_remove_view(tracker->view_dispatcher, 0);
+    view_dispatcher_free(tracker->view_dispatcher);
+    tracker_view_free(tracker->tracker_view);
 	furi_record_close(RECORD_GUI);
-
-	view_dispatcher_free(tracker->view_dispatcher);
 
 	deinit_tracker(tracker);
 
