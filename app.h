@@ -23,8 +23,9 @@
 #include "app_buffer.h"
 
 #define TAG "ProtoView"
-#define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100
-#define BITMAP_SEEK_NOT_FOUND UINT32_MAX
+#define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100 // 100us is 1 pixel by default
+#define BITMAP_SEEK_NOT_FOUND UINT32_MAX // Returned by function as sentinel
+#define PROTOVIEW_VIEW_PRIVDATA_LEN 32 // View specific private data len
 
 #define DEBUG_MSG 1
 
@@ -100,14 +101,14 @@ typedef struct ProtoViewMsgInfo {
     /* Low level information of the detected signal: the following are filled
      * by the protocol decoding function: */
     uint32_t start_off;         /* Pulses start offset in the bitmap. */
-    uint32_t pulses_len;        /* Number of pulses of the full message. */
+    uint32_t pulses_count;      /* Number of pulses of the full message. */
     /* The following are passed already filled to the decoder. */
     uint32_t short_pulse_dur;   /* Microseconds duration of the short pulse. */
     /* The following are filled by ProtoView core after the decoder returned
      * success. */
     uint8_t *bits;              /* Bitmap with the signal. */
     uint32_t bits_bytes;        /* Number of full bytes in the bitmap, that
-                                   is 'pulses_len/8' rounded to the next
+                                   is 'pulses_count/8' rounded to the next
                                    integer. */
 } ProtoViewMsgInfo;
 
@@ -133,6 +134,13 @@ struct ProtoViewApp {
     ProtoViewMsgInfo *msg_info; /* Decoded message info if not NULL. */
     bool direct_sampling_enabled; /* This special view needs an explicit
                                      acknowledge to work. */
+    void *view_privdata;    /* This is a piece of memory of total size
+                               PROTOVIEW_VIEW_PRIVDATA_LEN that it is
+                               initialized to zero when we switch to
+                               a a new view. While the view we are using
+                               is the same, it can be used by the view to
+                               store any kind of info inside, just casting
+                               the pointer to a few specific-data structure. */
 
     /* Raw view apps state. */
     uint32_t us_scale;       /* microseconds per pixel. */

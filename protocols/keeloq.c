@@ -32,9 +32,11 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     const char *sync_pattern = "101010101010101010101010" "0000";
     uint8_t sync_len = 24+4;
     if (numbits-sync_len+sync_len < 3*66) return false;
-    uint64_t off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_pattern);
+    uint32_t off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_pattern);
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
-    off += sync_len;
+
+    info->start_off = off;
+    off += sync_len; // Seek start of message.
 
     /* Now there is half the gap left, but we allow from 3 to 7, instead of 5
      * symbols of gap, to avoid missing the signal for a matter of wrong
@@ -54,6 +56,10 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     FURI_LOG_E(TAG, "Keeloq decoded bits: %lu", decoded);
 
     if (decoded < 66) return false; /* Require the full 66 bits. */
+
+    off += decoded+66*3; // Seek end to compute total length.
+    info->pulses_count = off - info->start_off;
+
     bitmap_reverse_bytes(raw,sizeof(raw)); /* Keeloq is LSB first. */
 
     int buttons = raw[7]>>4;

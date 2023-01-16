@@ -100,6 +100,7 @@ static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
      * the main subview of the view. When re re-enter it we want to see
      * the main thing. */
     app->current_subview[old] = 0;
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -125,6 +126,8 @@ ProtoViewApp* protoview_app_alloc() {
     app->current_view = ViewRawPulses;
     for (int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
+    app->view_privdata = malloc(PROTOVIEW_VIEW_PRIVDATA_LEN);
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
@@ -134,7 +137,7 @@ ProtoViewApp* protoview_app_alloc() {
     app->signal_offset = 0;
     app->msg_info = NULL;
 
-    //init Worker & Protocol
+    // Init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */

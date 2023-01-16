@@ -9,6 +9,14 @@ enum {
     SubViewInfoLast, /* Just a sentinel. */
 };
 
+/* Our view private data. */
+typedef struct {
+    /* Our save view displays an oscilloscope-alike resampled signal,
+     * so that the user can see what they are saving. With left/right
+     * you can move to next rows. Here we store where we are. */
+    uint32_t signal_display_start_row;
+} InfoViewPrivData;
+
 /* Render the view with the detected message information. */
 static void render_subview_main(Canvas *const canvas, ProtoViewApp *app) {
     /* Protocol name as title. */
@@ -33,22 +41,31 @@ static void render_subview_main(Canvas *const canvas, ProtoViewApp *app) {
 
 /* Render view with save option. */
 static void render_subview_save(Canvas *const canvas, ProtoViewApp *app) {
+    InfoViewPrivData *privdata = app->view_privdata;
+
+    /* Display our signal in digital form: here we don't show the
+     * signal with the exact timing of the received samples, but as it
+     * is in its logic form, in exact multiples of the short pulse length. */
     uint8_t rows = 6;
-    uint8_t rowheight = 8;
+    uint8_t rowheight = 11;
     uint8_t bitwidth = 4;
     uint8_t bitheight = 5;
-    uint32_t idx = 0;
+    uint32_t idx = privdata->signal_display_start_row * (128/4);
     bool prevbit = false;
-    for (uint8_t y = bitheight; y < rows*rowheight; y += rowheight) {
+    for (uint8_t y = bitheight+12; y <= rows*rowheight; y += rowheight) {
         for (uint8_t x = 5; x < 128; x += 4) {
             bool bit = bitmap_get(app->msg_info->bits,
                                   app->msg_info->bits_bytes,idx++);
-            uint8_t prevy = y + prevbit*bitheight - 1;
-            uint8_t thisy = y + bit*bitheight - 1;
+            uint8_t prevy = y + prevbit*(bitheight*-1) - 1;
+            uint8_t thisy = y + bit*(bitheight*-1) - 1;
             canvas_draw_line(canvas,x,prevy,x,thisy);
             canvas_draw_line(canvas,x,thisy,x+bitwidth-1,thisy);
+            prevbit = bit;
         }
     }
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 0, 6, "ok: save, < >: slide rows");
 }
 
 /* Render the selected subview of this view. */
@@ -69,10 +86,21 @@ void render_view_info(Canvas *const canvas, ProtoViewApp *app) {
 /* Handle input for the info view. */
 void process_input_info(ProtoViewApp *app, InputEvent input) {
     if (process_subview_updown(app,input,SubViewInfoLast)) return;
-    if (input.type == InputTypeShort) {
-        if (input.key == InputKeyOk) {
+    InfoViewPrivData *privdata = app->view_privdata;
+    int subview = get_current_subview(app);
+
+    /* Main subview. */
+    if (subview == SubViewInfoMain) {
+        if (input.type == InputTypeShort && input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
             reset_current_signal(app);
+        }
+    } else if (subview == SubViewInfoSave) {
+    /* Save subview. */
+        if (input.type == InputTypePress && input.key == InputKeyRight) {
+            privdata->signal_display_start_row++;
+        } else if (input.type == InputTypePress && input.key == InputKeyLeft) {
+            privdata->signal_display_start_row--;
         }
     }
 }

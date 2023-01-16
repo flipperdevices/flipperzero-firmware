@@ -136,7 +136,6 @@ void scan_for_signal(ProtoViewApp *app) {
                                        than a few samples it's very easy to
                                        mistake noise for signal. */
 
-    ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
     uint32_t i = 0;
 
     while (i < copy->total-1) {
@@ -144,10 +143,15 @@ void scan_for_signal(ProtoViewApp *app) {
 
         /* For messages that are long enough, attempt decoding. */
         if (thislen > minlen) {
+            /* Allocate the message information that some decoder may
+             * fill, in case it is able to decode a message. */
+            ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
             init_msg_info(info,app);
+
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
+
             /* decode_signal() expects the detected signal to start
-             * from index .*/
+             * from index zero .*/
             raw_samples_center(copy,i);
             bool decoded = decode_signal(copy,thislen,info);
             copy->idx = saved_idx; /* Restore the index as we are scanning
@@ -175,6 +179,8 @@ void scan_for_signal(ProtoViewApp *app) {
                 else if (DetectedSamples->short_pulse_dur < 145)
                     app->us_scale = 30;
             } else {
+                /* If the structure was not filled, discard it. Otherwise
+                 * now the owner is app->msg_info. */
                 free_msg_info(info);
             }
         }
@@ -571,13 +577,13 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
         /* The message was correctly decoded: fill the info structure
          * with the decoded signal. The decoder may not implement offset/len
          * filling of the structure. In such case we have no info and
-         * pulses_len will be set to zero. */
-        if (info->pulses_len) {
-            info->bits_bytes = (info->pulses_len+7)/8; // Round to full byte.
+         * pulses_count will be set to zero. */
+        if (info->pulses_count) {
+            info->bits_bytes = (info->pulses_count+7)/8; // Round to full byte.
             info->bits = malloc(info->bits_bytes);
             bitmap_copy(info->bits,info->bits_bytes,0,
                         bitmap,bitmap_size,info->start_off,
-                        info->pulses_len);
+                        info->pulses_count);
         }
     }
     free(bitmap);
