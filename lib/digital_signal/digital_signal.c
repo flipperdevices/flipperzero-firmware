@@ -490,7 +490,6 @@ bool digital_sequence_send(DigitalSequence* sequence) {
             break;
         }
     }
-    FURI_CRITICAL_EXIT();
 
     /* wait until last dma transaction was finished */
     while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
@@ -498,6 +497,7 @@ bool digital_sequence_send(DigitalSequence* sequence) {
 
     digital_signal_stop_timer();
     digital_signal_stop_dma();
+    FURI_CRITICAL_EXIT();
 
     /* undo previously prolonged edges */
     for(uint32_t pos = 0; pos < sequence->signals_size; pos++) {
