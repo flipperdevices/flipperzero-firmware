@@ -37,19 +37,19 @@ char dspLine1[25] = {};
 char dspLine2[25] = {};
 
 static bMapping buttonMappings[12] = {
-    {8,   8, 7, 1},  //0
-    {8,   8, 0, 2},  //1
-    {9,   9, 1, 3},  //2
-    {9,   9, 2, 4},  //3
-    {10, 10, 3, 5},  //4
-    {10, 10, 4, 6},  //5
-    {11, 11, 5, 7},  //6
-    {11, 11, 6, 0}, //7
+    { 8,  8,  7,  1},  //0
+    { 8,  8,  0,  2},  //1
+    { 9,  9,  1,  3},  //2
+    { 9,  9,  2,  4},  //3
+    {10, 10,  3,  5},  //4
+    {10, 10,  4,  6},  //5
+    {11, 11,  5,  7},  //6
+    {11, 11,  6,  0},  //7
 
-    {0, 0, 11, 9}, //8 
-    {3, 3, 8, 10},  //9
-    {5, 5, 9, 11}, //10
-    {6, 6, 10, 8} //11
+    { 0,  0, 11,  9},  //8 
+    { 3,  3,  8, 10},  //9
+    { 5,  5,  9, 11},  //10
+    { 6,  6, 10,  8}   //11
 };
 
 #define BT_X 14
@@ -90,30 +90,26 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
         return;
     }
 
-    //buttons
-    // bf_dev_draw_button(canvas, 2, 24 + 9, (selectedButton == 0), "+"); //T 0
-    // bf_dev_draw_button(canvas, 22 - 3, 24 + 9, (selectedButton == 1),  "-"); //T 1
-    // bf_dev_draw_button(canvas, 42 - 6, 24 + 9, (selectedButton == 2),  "<"); //T 2
-    // bf_dev_draw_button(canvas, 62 - 9, 24 + 9, (selectedButton == 3),  ">"); //T 3
-    // bf_dev_draw_button(canvas, 2, 44 + 5, (selectedButton == 4),  "["); //B 0
-    // bf_dev_draw_button(canvas, 22 - 3, 44 + 5, (selectedButton == 5),  "]"); //B 1
-    // bf_dev_draw_button(canvas, 42 - 6, 44 + 5, (selectedButton == 6),  "."); //B 2
-    // bf_dev_draw_button(canvas, 62 - 9, 44 + 5, (selectedButton == 7),  ","); //B 3
+    if(saveNotifyCountdown > 0){
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "SAVED");
+        saveNotifyCountdown--;
+        return;
+    }
 
-    bf_dev_draw_button(canvas, 1, 35, (selectedButton == 0), "+"); //T 0
-    bf_dev_draw_button(canvas, 17, 35, (selectedButton == 1),  "-"); //T 1
-    bf_dev_draw_button(canvas, 33, 35, (selectedButton == 2),  "<"); //T 2
-    bf_dev_draw_button(canvas, 49, 35, (selectedButton == 3),  ">"); //T 3
-    bf_dev_draw_button(canvas, 65, 35, (selectedButton == 4),  "["); //B 0
-    bf_dev_draw_button(canvas, 81, 35, (selectedButton == 5),  "]"); //B 1
-    bf_dev_draw_button(canvas, 97, 35, (selectedButton == 6),  "."); //B 2
-    bf_dev_draw_button(canvas, 113, 35, (selectedButton == 7),  ","); //B 3
+    bf_dev_draw_button(canvas, 1, 36, (selectedButton == 0), "+");    //T 0
+    bf_dev_draw_button(canvas, 17, 36, (selectedButton == 1),  "-");  //T 1
+    bf_dev_draw_button(canvas, 33, 36, (selectedButton == 2),  "<");  //T 2
+    bf_dev_draw_button(canvas, 49, 36, (selectedButton == 3),  ">");  //T 3
+    bf_dev_draw_button(canvas, 65, 36, (selectedButton == 4),  "[");  //B 0
+    bf_dev_draw_button(canvas, 81, 36, (selectedButton == 5),  "]");  //B 1
+    bf_dev_draw_button(canvas, 97, 36, (selectedButton == 6),  ".");  //B 2
+    bf_dev_draw_button(canvas, 113, 36, (selectedButton == 7),  ","); //B 3
 
-    //save, run, backspace
-    canvas_draw_icon(canvas, 1, 51, (selectedButton == 8) ? &I_KeyBackspaceSelected_24x11 : &I_KeyBackspace_24x11);
-    canvas_draw_icon(canvas, 44, 51, (selectedButton == 9) ? &I_KeyInputSelected_30x11 : &I_KeyInput_30x11);
-    canvas_draw_icon(canvas, 76, 51, (selectedButton == 10) ? &I_KeyRunSelected_24x11 : &I_KeyRun_24x11);
-    canvas_draw_icon(canvas, 102, 51, (selectedButton == 11) ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11);
+    //backspace, input, run, save
+    canvas_draw_icon(canvas, 1, 52, (selectedButton == 8) ? &I_KeyBackspaceSelected_24x11 : &I_KeyBackspace_24x11);
+    canvas_draw_icon(canvas, 45, 52, (selectedButton == 9) ? &I_KeyInputSelected_30x11 : &I_KeyInput_30x11);
+    canvas_draw_icon(canvas, 77, 52, (selectedButton == 10) ? &I_KeyRunSelected_24x11 : &I_KeyRun_24x11);
+    canvas_draw_icon(canvas, 103, 52, (selectedButton == 11) ? &I_KeySaveSelected_24x11 : &I_KeySave_24x11);
 
     if(saveNotifyCountdown > 0){
         canvas_draw_icon(canvas, 98, 54, &I_ButtonRightSmall_3x5);
@@ -121,16 +117,43 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
     }
 
     //textbox
-    canvas_draw_rframe(canvas, 2, 2, 124, 31, 2);
+    //grossly overcomplicated. not fixing it.
+    canvas_draw_rframe(canvas, 1, 1, 125, 33, 2);
     canvas_set_font(canvas, FontBatteryPercent);
 
     int dbOffset = 0;
-    if(appDev->dataSize > 24){
-        dbOffset = (appDev->dataSize - 24);
+    if(appDev->dataSize > 72){
+        dbOffset = (appDev->dataSize - 72);
     }
-    
-    //canvas_draw_str(canvas, 5, 15, (char*)(appDev->dataBuffer + dbOffset));
-    canvas_draw_str_aligned(canvas, 4, 8, AlignLeft, AlignCenter, (char*)(appDev->dataBuffer + dbOffset));
+ 
+    memset(dspLine0, 0x00, 25);
+    memset(dspLine1, 0x00, 25);
+    memset(dspLine2, 0x00, 25);
+
+    int tpM = 0;
+    int tp0 = 0;
+    int tp1 = 0;
+    int tp2 = 0;
+
+    for(int p = dbOffset; p < appDev->dataSize; p++){
+        if(tpM < 24 * 1){
+            dspLine0[tp0] = appDev->dataBuffer[p];
+            tp0++;
+        }
+        else if(tpM < 24 * 2){
+            dspLine1[tp1] = appDev->dataBuffer[p];
+            tp1++;
+        }
+        else if(tpM < 24 * 3){
+            dspLine2[tp2] = appDev->dataBuffer[p];
+            tp2++;
+        }
+        tpM++;
+    }
+
+    canvas_draw_str_aligned(canvas, 3, 8, AlignLeft, AlignCenter, dspLine0);
+    canvas_draw_str_aligned(canvas, 3, 17, AlignLeft, AlignCenter, dspLine1);
+    canvas_draw_str_aligned(canvas, 3, 26, AlignLeft, AlignCenter, dspLine2);
 }
 
 
@@ -284,7 +307,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
             buffered_file_stream_close(stream);
 
             //notify
-            //todo: save screen
+            saveNotifyCountdown = 3;
             break;
         }
     }
