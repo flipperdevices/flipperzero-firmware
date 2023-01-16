@@ -4,7 +4,7 @@
 #include "app.h"
 
 bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info);
-void initialize_msg_info(ProtoViewMsgInfo *i);
+void initialize_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app);
 
 /* =============================================================================
  * Raw signal detection
@@ -143,7 +143,7 @@ void scan_for_signal(ProtoViewApp *app) {
 
         /* For messages that are long enough, attempt decoding. */
         if (thislen > minlen) {
-            initialize_msg_info(info);
+            initialize_msg_info(info,app);
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
             /* decode_signal() expects the detected signal to start
              * from index .*/
@@ -213,6 +213,100 @@ bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos) {
     uint32_t bit = 7-(bitpos&7);
     if (byte >= blen) return 0;
     return (b[byte] & (1<<bit)) != 0;
+}
+
+/* Copy 'count' bits from the bitmap 's' of 'slen' total bytes, to the
+ * bitmap 'd' of 'dlen' total bytes. The bits are copied starting from
+ * offset 'soff' of the source bitmap to the offset 'doff' of the
+ * destination bitmap. */
+void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff,
+                 uint8_t *s, uint32_t slen, uint32_t soff,
+                 uint32_t count)
+{
+    /* If we are byte-aligned in both source and destination, use a fast
+     * path for the number of bytes we can consume this way. */
+    if ((doff & 7) == 0 && (soff & 7) == 0) {
+        uint32_t didx = doff/8;
+        uint32_t sidx = soff/8;
+        while(count > 8 && didx < dlen && sidx < slen) {
+            d[didx++] = s[sidx++];
+            count -= 8;
+        }
+        doff = didx * 8;
+        soff = sidx * 8;
+        /* Note that if we entered this path, the count at the end
+         * of the loop will be < 8. */
+    }
+
+    /* Copy the bits needed to reach an offset where we can copy
+     * two half bytes of src to a full byte of destination. */
+    while(count > 8 && (doff&7) != 0) {
+        bool bit = bitmap_get(s,slen,soff++);
+        bitmap_set(d,dlen,doff++,bit);
+        count--;
+    }
+
+    /* If we are here and count > 8, we have an offset that is byte aligned
+     * to the destination bitmap, but not aligned to the source bitmap.
+     * We can copy fast enough by shifting each two bytes of the original
+     * bitmap.
+     *
+     * This is how it works:
+     *
+     *  dst:
+     *  +--------+--------+--------+
+     *  | 0      | 1      | 2      |
+     *  |        |        |        | <- data to fill
+     *  +--------+--------+--------+
+     *            ^
+     *            |
+     *            doff = 8
+     *
+     *  src:
+     *  +--------+--------+--------+
+     *  | 0      | 1      | 2      |
+     *  |hellowod|ld!HELLO|WORLDS!!| <- data to copy
+     *  +--------+--------+--------+
+     *               ^
+     *               |
+     *               soff = 11
+     *
+     *  skew = 11%8 = 3
+     *  each destination byte in dst will receive:
+     *
+     *  dst[doff/8] = (src[soff/8] << skew) | (src[soff/8+1] >> (8-skew))
+     *
+     *  dstbyte = doff/8 = 8/8 = 1
+     *  srcbyte = soff/8 = 11/8 = 1
+     *
+     *  so dst[1] will get:
+     *  src[1] << 3, that is "ld!HELLO" << 3 = "HELLO..."
+     *      xored with
+     *  src[2] << 5, that is "WORLDS!!" >> 5 = ".....WOR"
+     *  That is "HELLOWOR"
+     */
+    if (count > 8) {
+        uint8_t skew = soff % 8; /* Don't worry, compiler will optimize. */
+        uint32_t didx = doff/8;
+        uint32_t sidx = soff/8;
+        while(count > 8 && didx < dlen && sidx < slen) {
+            d[didx] = ((s[sidx] << skew) |
+                       (s[sidx+1] >> (8-skew)));
+            sidx++;
+            didx++;
+            count -= 8;
+        }
+        soff = sidx*8;
+        doff = didx*8;
+    }
+
+    /* Here count is guaranteed to be < 8.
+     * Copy the final bits bit by bit. */
+    while(count) {
+        bool bit = bitmap_get(s,slen,soff++);
+        bitmap_set(d,dlen,doff++,bit);
+        count--;
+    }
 }
 
 /* We decode bits assuming the first bit we receive is the MSB
@@ -410,8 +504,10 @@ ProtoViewDecoder *Decoders[] = {
 
 /* Reset the message info structure before passing it to the decoding
  * functions. */
-void initialize_msg_info(ProtoViewMsgInfo *i) {
+void initialize_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
+    UNUSED(app);
     memset(i,0,sizeof(ProtoViewMsgInfo));
+    i->short_pulse_dur = DetectedSamples->short_pulse_dur;
 }
 
 /* This function is called when a new signal is detected. It converts it
@@ -458,7 +554,20 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
     if (!decoded) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s,%s]", info->name, info->raw, info->info1, info->info2, info->info3, info->info4);
+        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s,%s]",
+            info->name, info->raw, info->info1, info->info2,
+            info->info3, info->info4);
+        /* The message was correctly decoded: fill the info structure
+         * with the decoded signal. The decoder may not implement offset/len
+         * filling of the structure. In such case we have no info and
+         * pulses_len will be set to zero. */
+        if (info->pulses_len) {
+            info->bits_bytes = (info->pulses_len+7)/8; // Round to full byte.
+            info->bits = malloc(info->bits_bytes);
+            bitmap_copy(info->bits,info->bits_bytes,0,
+                        bitmap,bitmap_size,info->start_off,
+                        info->pulses_len);
+        }
     }
     free(bitmap);
     return decoded;

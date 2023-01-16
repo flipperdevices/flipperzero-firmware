@@ -17,7 +17,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         "1000000000000000000000000000000001", /* 32 zero bits. */
     };
 
-    uint32_t off;
+    uint32_t off, start;
     int j;
     for (j = 0; j < 3; j++) {
         off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_patterns[j]);
@@ -25,6 +25,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     }
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     if (DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 preamble at: %lu",off);
+    start = off;
     off += strlen(sync_patterns[j])-1;
 
     uint8_t d[3]; /* 24 bits of data. */
@@ -35,7 +36,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (decoded != 24) return false;
     snprintf(info->name,PROTOVIEW_MSG_STR_LEN,"PT/SC remote");
     snprintf(info->raw,PROTOVIEW_MSG_STR_LEN,"%02X%02X%02X",d[0],d[1],d[2]);
-    info->len = off+(4*24);
+    info->start_off = start;
+    info->pulses_len = 4*24;
     return true;
 }
 

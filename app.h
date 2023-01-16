@@ -97,7 +97,18 @@ typedef struct ProtoViewMsgInfo {
     char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
     char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
     char info4[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 4. */
-    uint64_t len;       /* Bits consumed from the stream. */
+    /* Low level information of the detected signal: the following are filled
+     * by the protocol decoding function: */
+    uint32_t start_off;         /* Pulses start offset in the bitmap. */
+    uint32_t pulses_len;        /* Number of pulses of the full message. */
+    /* The following are passed already filled to the decoder. */
+    uint32_t short_pulse_dur;   /* Microseconds duration of the short pulse. */
+    /* The following are filled by ProtoView core after the decoder returned
+     * success. */
+    uint8_t *bits;              /* Bitmap with the signal. */
+    uint32_t bits_bytes;        /* Number of full bytes in the bitmap, that
+                                   is 'pulses_len/8' rounded to the next
+                                   integer. */
 } ProtoViewMsgInfo;
 
 struct ProtoViewApp {
@@ -162,6 +173,7 @@ void reset_current_signal(ProtoViewApp *app);
 void scan_for_signal(ProtoViewApp *app);
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val);
+void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff, uint8_t *s, uint32_t slen, uint32_t soff, uint32_t count);
 void bitmap_set_pattern(uint8_t *b, uint32_t blen, const char *pat);
 void bitmap_reverse_bytes(uint8_t *p, uint32_t len);
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
