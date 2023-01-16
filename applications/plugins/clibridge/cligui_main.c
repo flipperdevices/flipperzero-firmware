@@ -50,8 +50,10 @@ static void input_callback_wrapper(InputEvent* event, void* context) {
         view_dispatcher_stop(app->view_dispatcher);
     }
     if(event->type == InputTypeLong && event->key == InputKeyOk) {
-        persistent_exit = true;
-        view_dispatcher_stop(app->view_dispatcher);
+        if(app->data->state == ViewConsoleOutput) {
+            persistent_exit = true;
+            view_dispatcher_stop(app->view_dispatcher);
+        }
     }
     if(app->data->state == ViewTextInput) {
         text_input_input_handler(app, event);

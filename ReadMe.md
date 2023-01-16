@@ -32,6 +32,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Assets: Includes Tama P1 Rom Game file. [this rom](https://tinyurl.com/tamap1)
 - Updated: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 - Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1)
+- Updated: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) (Now allows easier long press for space)
 
 <a name="release">
 
