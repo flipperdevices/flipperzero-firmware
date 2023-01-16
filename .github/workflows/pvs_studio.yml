@@ -63,7 +63,7 @@ jobs:
           chmod 600 ./deploy_key;
           rsync -avrzP --mkpath \
               -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
-              build/f7-firmware-CD/pvsreport/ ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:/home/data/firmware-pvs-studio-report/"${BRANCH_NAME}/";
+              build/f7-firmware-DC/pvsreport/ ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:/home/data/firmware-pvs-studio-report/"${BRANCH_NAME}/";
           rm ./deploy_key;
 
       - name: 'Find Previous Comment'
