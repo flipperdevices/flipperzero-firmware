@@ -28,6 +28,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-13 18:30 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-13 18:30 EST`
+- If you installed the previous release with AirTag code, I recommend a most immediate update from GitHub or Patreon to revert the AirTag code. My apoligies for the mix up, it was not my airtag being emulated, it was from the original project [here](https://github.com/culturally/flipper-zero-airtag). RM and the development team working on airtag features are not trying to track anyone. We are trying to improve the flipper functionality.
 - Assets: Includes Tama P1 Rom Game file. [this rom](https://tinyurl.com/tamap1)
 - Updated: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 - Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1)
