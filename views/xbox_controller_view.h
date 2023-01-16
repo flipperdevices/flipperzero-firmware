@@ -1,6 +1,14 @@
 #pragma once
 
 #include <gui/view.h>
+#include <furi.h>
+#include <gui/canvas_i.h>
+#include <gui/elements.h>
+#include <xc_icons.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
+
+#include <infrared_transmit.h>
 
 typedef struct XboxControllerView XboxControllerView;
 

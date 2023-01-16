@@ -1,13 +1,8 @@
 #include "xbox_controller_view.h"
-#include <furi.h>
-#include <gui/canvas_i.h>
-#include <gui/elements.h>
-#include <xc_icons.h>
-
-#include <infrared_transmit.h>
 
 struct XboxControllerView {
     View* view;
+    NotificationApp* notifications;
 };
 
 typedef struct {
@@ -100,12 +95,20 @@ static void xbox_controller_view_draw_callback(Canvas* canvas, void* context) {
         canvas, model->back_pressed, 0, buttons_post + 19, "B", &I_Pin_back_arrow_10x8);
 }
 
-void send_xbox_ir(uint32_t command) {
+const NotificationSequence sequence_blink_purple_50 = {
+    &message_red_255,
+    &message_blue_255,
+    &message_delay_50,
+    NULL,
+};
+
+void send_xbox_ir(uint32_t command, NotificationApp* notifications) {
     InfraredMessage* message = malloc(sizeof(InfraredMessage));
     message->protocol = InfraredProtocolNECext;
     message->address = 0xD880;
     message->command = command;
     message->repeat = false;
+    notification_message(notifications, &sequence_blink_purple_50);
     infrared_send(message, 2);
     free(message);
 }
@@ -119,22 +122,22 @@ static void
             if(event->type == InputTypePress) {
                 if(event->key == InputKeyUp) {
                     model->up_pressed = true;
-                    send_xbox_ir(0xE11E);
+                    send_xbox_ir(0xE11E, xbox_controller_view->notifications);
                 } else if(event->key == InputKeyDown) {
                     model->down_pressed = true;
-                    send_xbox_ir(0xE01F);
+                    send_xbox_ir(0xE01F, xbox_controller_view->notifications);
                 } else if(event->key == InputKeyLeft) {
                     model->left_pressed = true;
-                    send_xbox_ir(0xDF20);
+                    send_xbox_ir(0xDF20, xbox_controller_view->notifications);
                 } else if(event->key == InputKeyRight) {
                     model->right_pressed = true;
-                    send_xbox_ir(0xDE21);
+                    send_xbox_ir(0xDE21, xbox_controller_view->notifications);
                 } else if(event->key == InputKeyOk) {
                     model->ok_pressed = true;
-                    send_xbox_ir(0x9966);
+                    send_xbox_ir(0x9966, xbox_controller_view->notifications);
                 } else if(event->key == InputKeyBack) {
                     model->back_pressed = true;
-                    send_xbox_ir(0x9A65);
+                    send_xbox_ir(0x9A65, xbox_controller_view->notifications);
                 }
             } else if(event->type == InputTypeRelease) {
                 if(event->key == InputKeyUp) {
@@ -167,8 +170,6 @@ static bool xbox_controller_view_input_callback(InputEvent* event, void* context
     XboxControllerView* xbox_controller_view = context;
     bool consumed = false;
 
-    FURI_LOG_I("XBOX_CONTROLLER", "TYPE: %d, KEY: %d", event->type, event->key);
-
     if(event->type == InputTypeLong && event->key == InputKeyBack) {
         // LONG KEY BACK PRESS HANDLER
     } else {
@@ -179,9 +180,10 @@ static bool xbox_controller_view_input_callback(InputEvent* event, void* context
     return consumed;
 }
 
-XboxControllerView* xbox_controller_view_alloc() {
+XboxControllerView* xbox_controller_view_alloc(NotificationApp* notifications) {
     XboxControllerView* xbox_controller_view = malloc(sizeof(XboxControllerView));
     xbox_controller_view->view = view_alloc();
+    xbox_controller_view->notifications = notifications;
     view_set_orientation(xbox_controller_view->view, ViewOrientationVertical);
     view_set_context(xbox_controller_view->view, xbox_controller_view);
     view_allocate_model(

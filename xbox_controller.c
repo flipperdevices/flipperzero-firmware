@@ -1,38 +1,30 @@
 #include "xbox_controller.h"
-#include "xc_icons.h"
 
 #define TAG "XboxControllerApp"
 
-enum XboxControllerSubmenuIndex
-{
+enum XboxControllerSubmenuIndex {
     XboxControllerSubmenuIndexXboxOne,
     XboxControllerSubmenuIndexPower
 };
 
-uint32_t usb_hid_exit_confirm_view(void *context)
-{
+uint32_t usb_hid_exit_confirm_view(void* context) {
     UNUSED(context);
     return UsbHidViewSubmenu;
 }
 
-uint32_t usb_hid_exit(void *context)
-{
+uint32_t usb_hid_exit(void* context) {
     UNUSED(context);
     return VIEW_NONE;
 }
 
-void usb_hid_submenu_callback(void *context, uint32_t index)
-{
+void usb_hid_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
-    XboxController *app = context;
-    if (index == XboxControllerSubmenuIndexXboxOne)
-    {
+    XboxController* app = context;
+    if(index == XboxControllerSubmenuIndexXboxOne) {
         app->view_id = UsbHidViewXboxController;
         view_dispatcher_switch_to_view(app->view_dispatcher, UsbHidViewXboxController);
-    }
-    else if (index == XboxControllerSubmenuIndexPower)
-    {
-        InfraredMessage *message = malloc(sizeof(InfraredMessage));
+    } else if(index == XboxControllerSubmenuIndexPower) {
+        InfraredMessage* message = malloc(sizeof(InfraredMessage));
         message->protocol = InfraredProtocolNECext;
         message->address = 0xD880;
         message->command = 0xD02F;
@@ -42,27 +34,20 @@ void usb_hid_submenu_callback(void *context, uint32_t index)
     }
 }
 
-void usb_hid_dialog_callback(DialogExResult result, void *context)
-{
+void usb_hid_dialog_callback(DialogExResult result, void* context) {
     furi_assert(context);
-    XboxController *app = context;
-    if (result == DialogExResultLeft)
-    {
+    XboxController* app = context;
+    if(result == DialogExResultLeft) {
         view_dispatcher_stop(app->view_dispatcher);
-    }
-    else if (result == DialogExResultRight)
-    {
+    } else if(result == DialogExResultRight) {
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id); // Show last view
-    }
-    else if (result == DialogExResultCenter)
-    {
+    } else if(result == DialogExResultCenter) {
         view_dispatcher_switch_to_view(app->view_dispatcher, UsbHidViewSubmenu);
     }
 }
 
-XboxController *xbox_controller_app_alloc()
-{
-    XboxController *app = malloc(sizeof(XboxController));
+XboxController* xbox_controller_app_alloc() {
+    XboxController* app = malloc(sizeof(XboxController));
 
     app->gui = furi_record_open(RECORD_GUI);
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -84,7 +69,7 @@ XboxController *xbox_controller_app_alloc()
         app->view_dispatcher, UsbHidViewSubmenu, submenu_get_view(app->submenu));
 
     // Xbox Controller View
-    app->xbox_controller_view = xbox_controller_view_alloc();
+    app->xbox_controller_view = xbox_controller_view_alloc(app->notifications);
     view_set_previous_callback(
         xbox_controller_view_get_view(app->xbox_controller_view), usb_hid_exit_confirm_view);
     view_dispatcher_add_view(
@@ -99,8 +84,7 @@ XboxController *xbox_controller_app_alloc()
     return app;
 }
 
-void xbox_controller_app_free(XboxController *app)
-{
+void xbox_controller_app_free(XboxController* app) {
     furi_assert(app);
 
     // Reset notification
@@ -123,11 +107,10 @@ void xbox_controller_app_free(XboxController *app)
     free(app);
 }
 
-int32_t xbox_controller_app(void *p)
-{
+int32_t xbox_controller_app(void* p) {
     UNUSED(p);
 
-    XboxController *app = xbox_controller_app_alloc();
+    XboxController* app = xbox_controller_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
 
     xbox_controller_app_free(app);

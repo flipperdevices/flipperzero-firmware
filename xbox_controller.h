@@ -11,23 +11,23 @@
 #include <infrared_worker.h>
 #include <infrared_transmit.h>
 #include <gui/modules/dialog_ex.h>
+
 #include "views/xbox_controller_view.h"
+#include "xc_icons.h"
 
 // this should be used as global state
 // we can store different things here
-typedef struct
-{
-    Gui *gui;
-    NotificationApp *notifications;
-    ViewDispatcher *view_dispatcher;
-    Submenu *submenu;
-    DialogEx *dialog;
-    XboxControllerView *xbox_controller_view;
+typedef struct {
+    Gui* gui;
+    NotificationApp* notifications;
+    ViewDispatcher* view_dispatcher;
+    Submenu* submenu;
+    DialogEx* dialog;
+    XboxControllerView* xbox_controller_view;
     uint32_t view_id;
 } XboxController;
 
-typedef enum
-{
+typedef enum {
     UsbHidViewSubmenu,
     UsbHidViewXboxController,
     UsbHidViewExitConfirm,
