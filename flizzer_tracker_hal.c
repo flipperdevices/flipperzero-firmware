@@ -28,9 +28,9 @@ void sound_engine_dma_isr(void *ctx)
 
 void tracker_engine_timer_isr(void *ctx)
 {
-    if (LL_TIM_IsActiveFlag_UPDATE(TIM1))
+    if (LL_TIM_IsActiveFlag_UPDATE(TRACKER_ENGINE_TIMER))
     {
-        LL_TIM_ClearFlag_UPDATE(TIM1);
+        LL_TIM_ClearFlag_UPDATE(TRACKER_ENGINE_TIMER);
     }
 
     TrackerEngine *tracker_engine = (TrackerEngine *)ctx;
@@ -63,6 +63,9 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
         bool unu = furi_hal_speaker_acquire(1000);
         UNUSED(unu);
     }
+
+    LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);
+    LL_TIM_EnableCounter(SPEAKER_PWM_TIMER);
 }
 
 void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
@@ -70,7 +73,7 @@ void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
-    TIM_InitStruct.Prescaler = 0;
+    TIM_InitStruct.Prescaler = 0; 
     TIM_InitStruct.Autoreload = TIMER_BASE_CLOCK / sample_rate; // to support various sample rates
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(SAMPLE_RATE_TIMER, &TIM_InitStruct);
@@ -78,6 +81,8 @@ void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
     LL_TIM_OC_Init(SAMPLE_RATE_TIMER, SPEAKER_PWM_TIMER_CHANNEL, &TIM_OC_InitStruct);
+
+    LL_TIM_EnableAllOutputs(SAMPLE_RATE_TIMER);
 }
 
 void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
@@ -85,8 +90,8 @@ void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
-    TIM_InitStruct.Prescaler = 976 - 1;                          // so with highest autoreload you get 1 Hz
-    TIM_InitStruct.Autoreload = (TIMER_BASE_CLOCK / 976) / rate; // to support various rates
+    TIM_InitStruct.Prescaler = 0; //using 32-bit timer
+    TIM_InitStruct.Autoreload = (uint32_t)TIMER_BASE_CLOCK / (uint32_t)rate; // to support various tracker engine rates
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(TRACKER_ENGINE_TIMER, &TIM_InitStruct);
 
@@ -95,6 +100,16 @@ void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
     LL_TIM_OC_Init(TRACKER_ENGINE_TIMER, SPEAKER_PWM_TIMER_CHANNEL, &TIM_OC_InitStruct);
 
     LL_TIM_EnableIT_UPDATE(TRACKER_ENGINE_TIMER);
+}
+
+void tracker_engine_set_rate(uint8_t rate)
+{
+    LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+    TIM_InitStruct.Prescaler = 0; //using 32-bit timer
+    TIM_InitStruct.Autoreload = (uint32_t)TIMER_BASE_CLOCK / (uint32_t)rate; // to support various tracker engine rates
+    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+    LL_TIM_Init(TRACKER_ENGINE_TIMER, &TIM_InitStruct);
 }
 
 void tracker_engine_init_hardware(uint8_t rate)
@@ -109,7 +124,7 @@ void sound_engine_dma_init(uint32_t address, uint32_t size)
     LL_DMA_ConfigAddresses(DMA_INSTANCE, address, dma_dst, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     LL_DMA_SetDataLength(DMA_INSTANCE, size);
 
-    LL_DMA_SetPeriphRequest(DMA_INSTANCE, LL_DMAMUX_REQ_TIM2_UP);
+    LL_DMA_SetPeriphRequest(DMA_INSTANCE, LL_DMAMUX_REQ_TIM1_UP);
     LL_DMA_SetDataTransferDirection(DMA_INSTANCE, LL_DMA_DIRECTION_MEMORY_TO_PERIPH);
     LL_DMA_SetChannelPriorityLevel(DMA_INSTANCE, LL_DMA_PRIORITY_VERYHIGH);
     LL_DMA_SetMode(DMA_INSTANCE, LL_DMA_MODE_CIRCULAR);
@@ -142,24 +157,24 @@ void sound_engine_dma_stop()
 
 void sound_engine_start()
 {
-    LL_TIM_EnableAllOutputs(SAMPLE_RATE_TIMER);
     LL_TIM_EnableCounter(SAMPLE_RATE_TIMER);
-
-    LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);
-    LL_TIM_EnableCounter(SPEAKER_PWM_TIMER);
 
     sound_engine_dma_start();
 }
 
 void sound_engine_stop()
 {
-    LL_TIM_DisableAllOutputs(SAMPLE_RATE_TIMER);
     LL_TIM_DisableCounter(SAMPLE_RATE_TIMER);
 
-    LL_TIM_DisableAllOutputs(SPEAKER_PWM_TIMER);
-    LL_TIM_DisableCounter(SPEAKER_PWM_TIMER);
-
     sound_engine_dma_stop();
+}
+
+void sound_engine_deinit_timer()
+{
+    LL_TIM_DisableAllOutputs(SAMPLE_RATE_TIMER);
+    LL_TIM_DisableAllOutputs(SPEAKER_PWM_TIMER);
+
+    LL_TIM_DisableCounter(SPEAKER_PWM_TIMER);
 }
 
 void tracker_engine_start()

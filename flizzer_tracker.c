@@ -3,6 +3,7 @@
 #include "input_event.h"
 #include "util.h"
 #include "view/pattern_editor.h"
+#include "view/instrument_editor.h"
 
 #define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
 
@@ -55,6 +56,13 @@ static void draw_callback(Canvas *canvas, void *ctx)
             draw_songinfo_view(canvas, tracker);
             draw_sequence_view(canvas, tracker);
             draw_pattern_view(canvas, tracker);
+            break;
+        }
+
+        case INST_EDITOR_VIEW:
+        {
+            draw_instrument_view(canvas, tracker);
+            draw_instrument_program_view(canvas, tracker);
             break;
         }
 
@@ -133,8 +141,7 @@ int32_t flizzer_tracker_app(void *p)
     view_dispatcher_add_view(tracker->view_dispatcher, 0, tracker->tracker_view->view);
     view_dispatcher_attach_to_gui(tracker->view_dispatcher, tracker->gui, ViewDispatcherTypeFullscreen);
 
-    with_view_model(
-        tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
+    with_view_model(tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
 
     view_dispatcher_switch_to_view(tracker->view_dispatcher, 0);
 
@@ -205,11 +212,13 @@ int32_t flizzer_tracker_app(void *p)
     tracker->song.instrument[0]->adsr.d = 0x9;
     tracker->song.instrument[0]->adsr.volume = 0x80;
     tracker->song.instrument[0]->waveform = SE_WAVEFORM_TRIANGLE;
+    tracker->song.instrument[0]->sound_engine_flags |= SE_ENABLE_KEYDOWN_SYNC;
 
     tracker->song.instrument[1]->adsr.a = 0x0;
     tracker->song.instrument[1]->adsr.d = 0x3;
     tracker->song.instrument[1]->adsr.volume = 0x18;
     tracker->song.instrument[1]->waveform = SE_WAVEFORM_NOISE;
+    tracker->song.instrument[1]->sound_engine_flags |= SE_ENABLE_KEYDOWN_SYNC;
 
     tracker->tracker_engine.playing = false;
     play();

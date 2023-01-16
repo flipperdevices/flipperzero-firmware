@@ -12,8 +12,8 @@
 #include <furi_hal_resources.h>
 
 #define SPEAKER_PWM_TIMER TIM16
-#define SAMPLE_RATE_TIMER TIM2
-#define TRACKER_ENGINE_TIMER TIM1
+#define SAMPLE_RATE_TIMER TIM1
+#define TRACKER_ENGINE_TIMER TIM2
 
 #define SPEAKER_PWM_TIMER_CHANNEL LL_TIM_CHANNEL_CH1
 
@@ -25,9 +25,11 @@ void sound_engine_dma_isr(void *ctx);
 void tracker_engine_timer_isr(void *ctx);
 void sound_engine_init_hardware(uint32_t sample_rate, bool external_audio_output, uint16_t *audio_buffer, uint32_t audio_buffer_size);
 void tracker_engine_init_hardware(uint8_t rate);
+void tracker_engine_set_rate(uint8_t rate);
 void sound_engine_start();
 void sound_engine_stop();
 void stop();
 void play();
 void tracker_engine_stop();
+void sound_engine_deinit_timer();
 void tracker_engine_start();

@@ -136,7 +136,7 @@ void sequence_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
         {
             tracker->tracker_engine.sequence_position++;
 
-            if (tracker->tracker_engine.sequence_position > tracker->tracker_engine.song->num_sequence_steps)
+            if (tracker->tracker_engine.sequence_position >= tracker->tracker_engine.song->num_sequence_steps)
             {
                 tracker->tracker_engine.sequence_position = 0;
             }
@@ -156,7 +156,7 @@ void sequence_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
 
             if (temp_sequence_position < 0)
             {
-                tracker->tracker_engine.sequence_position = tracker->tracker_engine.song->num_sequence_steps;
+                tracker->tracker_engine.sequence_position = tracker->tracker_engine.song->num_sequence_steps - 1;
             }
 
             else

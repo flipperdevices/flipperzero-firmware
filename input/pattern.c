@@ -20,6 +20,26 @@ void edit_note(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t 
 {
     int16_t note = tracker_engine_get_note(step);
 
+    if(note == MUS_NOTE_RELEASE)
+    {
+        if(delta < 0)
+        {
+            set_note(step, MUS_NOTE_CUT);
+        }
+
+        return;
+    }
+
+    if(note == MUS_NOTE_CUT)
+    {
+        if(delta > 0)
+        {
+            set_note(step, MUS_NOTE_RELEASE);
+        }
+
+        return;
+    }
+
     if (note == MUS_NOTE_NONE)
     {
         note = tracker->current_note; // remember which note we entered earlier and use it as reference

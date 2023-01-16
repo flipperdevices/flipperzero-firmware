@@ -6,7 +6,7 @@
 
 void tracker_engine_init(TrackerEngine *tracker_engine, uint8_t rate, SoundEngine *sound_engine)
 {
-    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 14, tracker_engine_timer_isr, (void *)tracker_engine);
+    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 14, tracker_engine_timer_isr, (void *)tracker_engine);
     tracker_engine_init_hardware(rate);
 
     tracker_engine->sound_engine = sound_engine;
@@ -41,7 +41,7 @@ void tracker_engine_deinit(TrackerEngine *tracker_engine, bool free_song)
 {
     tracker_engine_deinit_song(tracker_engine->song, free_song);
 
-    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTim1UpTim16, 13, NULL, NULL);
+    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 13, NULL, NULL);
     tracker_engine_stop();
 }
 

@@ -44,6 +44,7 @@ void sound_engine_deinit(SoundEngine *sound_engine)
 
     furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 13, NULL, NULL);
     sound_engine_stop();
+    sound_engine_deinit_timer();
 }
 
 void sound_engine_set_channel_frequency(SoundEngine *sound_engine, SoundEngineChannel *channel, uint16_t note)

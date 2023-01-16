@@ -12,6 +12,20 @@ void cycle_focus(FlizzerTrackerApp *tracker)
             {
                 tracker->focus = EDIT_PATTERN;
             }
+
+            break;
+        }
+
+        case INST_EDITOR_VIEW:
+        {
+            tracker->focus++;
+
+            if (tracker->focus > EDIT_PROGRAM)
+            {
+                tracker->focus = EDIT_INSTRUMENT;
+            }
+
+            break;
         }
 
         default:
@@ -19,14 +33,34 @@ void cycle_focus(FlizzerTrackerApp *tracker)
     }
 }
 
+void cycle_view(FlizzerTrackerApp *tracker)
+{
+    if (tracker->mode == PATTERN_VIEW)
+    {
+        tracker->mode = INST_EDITOR_VIEW;
+        tracker->focus = EDIT_INSTRUMENT;
+
+        return;
+    }
+
+    if (tracker->mode == INST_EDITOR_VIEW)
+    {
+        tracker->mode = PATTERN_VIEW;
+        tracker->focus = EDIT_PATTERN;
+
+        return;
+    }
+}
+
 void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
 {
-    /*if(event->input.key == InputKeyBack && event->input.type == InputTypeShort && event->period > 0 && event->period < 200)
+    if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && event->period > 0 && event->period < 300 && !(tracker->editing))
     {
-            cycle_focus(tracker);
-    }*/
+        cycle_view(tracker);
+        return;
+    }
 
-    if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && !(tracker->editing))
+    else if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && !(tracker->editing))
     {
         cycle_focus(tracker);
         return;
@@ -56,6 +90,18 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
         case EDIT_SONGINFO:
         {
             songinfo_edit_event(tracker, event);
+            break;
+        }
+
+        case EDIT_INSTRUMENT:
+        {
+            instrument_edit_event(tracker, event);
+            break;
+        }
+
+        case EDIT_PROGRAM:
+        {
+            instrument_program_edit_event(tracker, event);
             break;
         }
 

@@ -27,11 +27,13 @@ char *notename(uint8_t note)
     if (note == MUS_NOTE_CUT)
     {
         snprintf(buffer, sizeof(buffer), "%s", "OFF");
+        return buffer;
     }
 
     if (note == MUS_NOTE_RELEASE)
     {
         snprintf(buffer, sizeof(buffer), "   ");
+        return buffer;
     }
 
     else
