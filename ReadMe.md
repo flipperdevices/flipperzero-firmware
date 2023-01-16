@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 - Added: [NFC Magic: Add support for Gen4 "ultimate card" in Magic app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - Updated: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
+- Reverted: Bluetooth: Works as an AirTag [(Thanks to culturally)](https://github.com/culturally/flipper-zero-airtag)
 
 <a name="release">
 
