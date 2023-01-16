@@ -4,7 +4,6 @@
 #include "app.h"
 
 bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info);
-void initialize_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app);
 
 /* =============================================================================
  * Raw signal detection
@@ -23,6 +22,8 @@ void reset_current_signal(ProtoViewApp *app) {
     app->signal_decoded = false;
     raw_samples_reset(DetectedSamples);
     raw_samples_reset(RawSamples);
+    free_msg_info(app->msg_info);
+    app->msg_info = NULL;
 }
 
 /* This function starts scanning samples at offset idx looking for the
@@ -143,7 +144,7 @@ void scan_for_signal(ProtoViewApp *app) {
 
         /* For messages that are long enough, attempt decoding. */
         if (thislen > minlen) {
-            initialize_msg_info(info,app);
+            init_msg_info(info,app);
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
             /* decode_signal() expects the detected signal to start
              * from index .*/
@@ -158,7 +159,8 @@ void scan_for_signal(ProtoViewApp *app) {
             if ((thislen > app->signal_bestlen && app->signal_decoded == false)
                 || (app->signal_decoded == false && decoded))
             {
-                app->signal_info = *info;
+                free_msg_info(app->msg_info);
+                app->msg_info = info;
                 app->signal_bestlen = thislen;
                 app->signal_decoded = decoded;
                 raw_samples_copy(DetectedSamples,copy);
@@ -172,12 +174,13 @@ void scan_for_signal(ProtoViewApp *app) {
                     app->us_scale = 10;
                 else if (DetectedSamples->short_pulse_dur < 145)
                     app->us_scale = 30;
+            } else {
+                free_msg_info(info);
             }
         }
         i += thislen ? thislen : 1;
     }
     raw_samples_free(copy);
-    free(info);
 }
 
 /* =============================================================================
@@ -502,12 +505,20 @@ ProtoViewDecoder *Decoders[] = {
     NULL
 };
 
+/* Free the message info and allocated data. */
+void free_msg_info(ProtoViewMsgInfo *i) {
+    if (i == NULL) return;
+    free(i->bits);
+    free(i);
+}
+
 /* Reset the message info structure before passing it to the decoding
  * functions. */
-void initialize_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
+void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
     UNUSED(app);
     memset(i,0,sizeof(ProtoViewMsgInfo));
     i->short_pulse_dur = DetectedSamples->short_pulse_dur;
+    i->bits = NULL;
 }
 
 /* This function is called when a new signal is detected. It converts it

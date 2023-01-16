@@ -130,7 +130,7 @@ struct ProtoViewApp {
     uint32_t signal_last_scan_idx; /* Index of the buffer last time we
                                       performed the scan. */
     bool signal_decoded;     /* Was the current signal decoded? */
-    ProtoViewMsgInfo signal_info; /* Decoded message, if signal_decoded true. */
+    ProtoViewMsgInfo *msg_info; /* Decoded message info if not NULL. */
     bool direct_sampling_enabled; /* This special view needs an explicit
                                      acknowledge to work. */
 
@@ -180,6 +180,8 @@ bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *b
 uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t maxbits, const char *bits);
 uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t offset, const char *zero_pattern, const char *one_pattern);
 uint32_t convert_from_diff_manchester(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, bool previous);
+void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app);
+void free_msg_info(ProtoViewMsgInfo *i);
 
 /* view_*.c */
 void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);
@@ -195,6 +197,7 @@ void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);
 
 /* ui.c */
+int get_current_subview(ProtoViewApp *app);
 void show_available_subviews(Canvas *canvas, ProtoViewApp *app, int last_subview);
 bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview);
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);

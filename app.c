@@ -132,6 +132,7 @@ ProtoViewApp* protoview_app_alloc() {
     app->signal_decoded = false;
     app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
+    app->msg_info = NULL;
 
     //init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
@@ -258,12 +259,14 @@ int32_t protoview_app_entry(void* p) {
                 /* Exit the app. */
                 app->running = 0;
             } else if (input.type == InputTypeShort &&
-                       input.key == InputKeyRight)
+                       input.key == InputKeyRight &&
+                       get_current_subview(app) == 0)
             {
                 /* Go to the next view. */
                 app_switch_view(app,AppNextView);
             } else if (input.type == InputTypeShort &&
-                       input.key == InputKeyLeft)
+                       input.key == InputKeyLeft &&
+                       get_current_subview(app) == 0)
             {
                 /* Go to the previous view. */
                 app_switch_view(app,AppPrevView);

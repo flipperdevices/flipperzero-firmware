@@ -3,13 +3,19 @@
 
 #include "app.h"
 
+/* Return the ID of the currently selected subview, of the current
+ * view. */
+int get_current_subview(ProtoViewApp *app) {
+    return app->current_subview[app->current_view];
+}
+
 /* Called by view rendering callback that has subviews, to show small triangles
  * facing down/up if there are other subviews the user can access with up
  * and down. */
 void show_available_subviews(Canvas *canvas, ProtoViewApp *app,
                              int last_subview)
 {
-    int subview = app->current_subview[app->current_view];
+    int subview = get_current_subview(app);
     if (subview != 0)
         canvas_draw_triangle(canvas,120,5,8,5,CanvasDirectionBottomToTop);
     if (subview != last_subview-1)
@@ -20,7 +26,7 @@ void show_available_subviews(Canvas *canvas, ProtoViewApp *app,
  * such keypress, it returns true, so that the actual view input callback
  * knows it can just return ASAP without doing anything. */
 bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview) {
-    int subview = app->current_subview[app->current_view];
+    int subview = get_current_subview(app);
     if (input.type == InputTypePress) {
         if (input.key == InputKeyUp) {
             if (subview != 0)
