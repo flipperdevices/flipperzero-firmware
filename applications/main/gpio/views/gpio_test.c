@@ -835,7 +835,6 @@ GpioTest* gpio_test_alloc() {
     gpio_menu_refresh(model);
 
     view_commit_model(gpio_test->view, false);
-    furi_hal_power_enable_otg();
 
     return gpio_test;
 }
@@ -853,7 +852,6 @@ void gpio_test_free(GpioTest* gpio_test) {
 
     view_free(gpio_test->view);
     free(gpio_test);
-    furi_hal_power_disable_otg();
 }
 
 View* gpio_test_get_view(GpioTest* gpio_test) {
