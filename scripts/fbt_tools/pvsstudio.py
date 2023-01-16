@@ -4,6 +4,8 @@ from SCons.Script import Delete, Mkdir, GetBuildFailures
 import multiprocessing
 import webbrowser
 import atexit
+import sys
+import subprocess
 
 
 def emit_pvsreport(target, source, env):
@@ -17,7 +19,11 @@ def emit_pvsreport(target, source, env):
 def atexist_handler():
     for bf in GetBuildFailures():
         if bf.node.exists and bf.node.name.endswith(".html"):
-            webbrowser.open(bf.node.abspath)
+            # macOS
+            if sys.platform == "darwin":
+                subprocess.run(["open", bf.node.abspath])
+            else:
+                webbrowser.open(bf.node.abspath)
             break
 
 
