@@ -71,7 +71,12 @@ class OpenOCDProgrammer(Programmer):
         self._add_command(openocd_launch_params, "init")
         self._add_command(openocd_launch_params, f"program {bin} reset exit 0x8000000")
 
-        self.logger.debug(f"Launching: {' '.join(openocd_launch_params)}")
+        # join the list of parameters into a string, but add quote if there are spaces
+        openocd_launch_params_string = " ".join(
+            [f'"{p}"' if " " in p else p for p in openocd_launch_params]
+        )
+
+        self.logger.debug(f"Launching: {openocd_launch_params_string}")
 
         process = subprocess.Popen(
             openocd_launch_params,
@@ -309,11 +314,6 @@ class BlackmagicProgrammer(Programmer):
 programmers: list[Programmer] = [
     OpenOCDProgrammer(
         OpenOCDInterface(
-            "jlink", "interface/jlink.cfg", "jlink_serial", ["transport select swd"]
-        ),
-    ),
-    OpenOCDProgrammer(
-        OpenOCDInterface(
             "cmsis-dap",
             "interface/cmsis-dap.cfg",
             "cmsis_dap_serial",
@@ -338,10 +338,9 @@ class Main(App):
         self.subparsers = self.parser.add_subparsers(help="sub-command help")
         self.parser_flash = self.subparsers.add_parser("flash", help="Flash a binary")
         self.parser_flash.add_argument(
-            "--bin",
+            "bin",
             type=str,
             help="Binary to flash",
-            required=True,
         )
         interfaces = [i.get_name() for i in programmers]
         interfaces.extend([i.get_name() for i in network_programmers])
@@ -401,9 +400,10 @@ class Main(App):
 
     def flash(self):
         start_time = time.time()
+        bin_path = os.path.abspath(self.args.bin)
 
-        if not os.path.exists(self.args.bin):
-            self.logger.error(f"Binary file not found: {self.args.bin}")
+        if not os.path.exists(bin_path):
+            self.logger.error(f"Binary file not found: {bin_path}")
             return 1
 
         if self.args.interface:
@@ -436,17 +436,17 @@ class Main(App):
         if self.args.serial:
             interface.set_serial(self.args.serial)
             self.logger.info(
-                f"Flashing {self.args.bin} via {interface.get_name()} with {self.args.serial}"
+                f"Flashing {bin_path} via {interface.get_name()} with {self.args.serial}"
             )
         else:
-            self.logger.info(f"Flashing {self.args.bin} via {interface.get_name()}")
+            self.logger.info(f"Flashing {bin_path} via {interface.get_name()}")
 
-        if not interface.flash(self.args.bin):
+        if not interface.flash(bin_path):
             self.logger.error(f"Failed to flash via {interface.get_name()}")
             return 1
 
         flash_time = time.time() - start_time
-        bin_size = os.path.getsize(self.args.bin)
+        bin_size = os.path.getsize(bin_path)
         self.logger.info(f"Flashed successfully in {flash_time:.2f}s")
         self.logger.info(f"Effective speed: {bin_size / flash_time / 1024:.2f} KiB/s")
         return 0
