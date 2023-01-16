@@ -1,19 +1,19 @@
 #pragma once
 
-#include <notification/notification_messages.h>
-#include <stdio.h>
+#include <cli/cli.h>
 #include <furi.h>
 #include <gui/gui.h>
-#include <cli/cli.h>
 #include <input/input.h>
+#include <notification/notification_messages.h>
+#include <stdio.h>
 #include <u8g2_glue.h>
 
 #include <gui/view_dispatcher.h>
 
 #include "flizzer_tracker_hal.h"
 #include "sound_engine/freqs.h"
-#include "sound_engine/sound_engine_filter.h"
 #include "sound_engine/sound_engine_defs.h"
+#include "sound_engine/sound_engine_filter.h"
 #include "tracker_engine/tracker_engine_defs.h"
 
 #define MIDDLE_C (12 * 4)
@@ -21,79 +21,79 @@
 
 typedef enum
 {
-	EventTypeInput,
+    EventTypeInput,
 } EventType;
 
 typedef struct
 {
-	EventType type;
-	InputEvent input;
-	uint32_t period;
+    EventType type;
+    InputEvent input;
+    uint32_t period;
 } FlizzerTrackerEvent;
 
 typedef enum
 {
-	PATTERN_VIEW,
-	INST_EDITOR_VIEW,
-	EXPORT_WAV_VIEW,
+    PATTERN_VIEW,
+    INST_EDITOR_VIEW,
+    EXPORT_WAV_VIEW,
 } TrackerMode;
 
 typedef enum
 {
-	EDIT_PATTERN,
-	EDIT_SEQUENCE,
-	EDIT_SONGINFO,
-	EDIT_INSTRUMENT,
-	EDIT_PROGRAM,
+    EDIT_PATTERN,
+    EDIT_SEQUENCE,
+    EDIT_SONGINFO,
+    EDIT_INSTRUMENT,
+    EDIT_PROGRAM,
 } TrackerFocus;
 
 typedef enum
 {
-	SI_PATTERNPOS,
-	SI_SEQUENCEPOS,
-	SI_SONGSPEED,
-	SI_SONGRATE,
-	SI_MASTERVOL,
+    SI_PATTERNPOS,
+    SI_SEQUENCEPOS,
+    SI_SONGSPEED,
+    SI_SONGRATE,
+    SI_MASTERVOL,
 
-	SI_SONGNAME,
-	SI_INSTRUMENTNAME,
-	/* ========  */
-	SI_PARAMS,
+    SI_SONGNAME,
+    SI_INSTRUMENTNAME,
+    /* ========  */
+    SI_PARAMS,
 } SongInfoParam;
 
 typedef struct
 {
-    View* view;
-    void* context;
+    View *view;
+    void *context;
 } TrackerView;
 
-typedef struct 
+typedef struct
 {
-	NotificationApp* notification;
-	FuriMessageQueue* event_queue;
-	Gui* gui;
-	TrackerView* tracker_view;
-	ViewDispatcher* view_dispatcher;
-	bool was_it_back_keypress;
-	uint32_t current_time;
-	uint32_t period;
+    NotificationApp *notification;
+    FuriMessageQueue *event_queue;
+    Gui *gui;
+    TrackerView *tracker_view;
+    ViewDispatcher *view_dispatcher;
+    bool was_it_back_keypress;
+    uint32_t current_time;
+    uint32_t period;
 
-	SoundEngine sound_engine;
-	TrackerEngine tracker_engine;
+    SoundEngine sound_engine;
+    TrackerEngine tracker_engine;
 
-	TrackerSong song;
+    TrackerSong song;
 
-	uint8_t selected_param;
+    uint8_t selected_param;
 
-	uint8_t mode, focus;
-	uint8_t patternx, current_channel, current_digit, program_step, current_instrument, current_note;
-	bool editing;
-	bool was_editing;
+    uint8_t mode, focus;
+    uint8_t patternx, current_channel, current_digit, program_step, current_instrument, current_note;
+    bool editing;
+    bool was_editing;
 
-	bool quit;
+    bool quit;
 } FlizzerTrackerApp;
 
 typedef struct
 {
-	FlizzerTrackerApp* tracker;
+    FlizzerTrackerApp *tracker;
 } TrackerViewModel;

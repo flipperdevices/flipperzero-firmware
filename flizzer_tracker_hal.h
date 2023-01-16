@@ -3,9 +3,9 @@
 #include "sound_engine/sound_engine.h"
 #include "tracker_engine/tracker_engine.h"
 
-#include <stm32wbxx_ll_tim.h>
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_gpio.h>
+#include <stm32wbxx_ll_tim.h>
 
 #include <furi_hal.h>
 #include <furi_hal_gpio.h>
@@ -21,9 +21,9 @@
 
 #define DMA_INSTANCE DMA1, LL_DMA_CHANNEL_1
 
-void sound_engine_dma_isr(void* ctx);
-void tracker_engine_timer_isr(void* ctx);
-void sound_engine_init_hardware(uint32_t sample_rate, bool external_audio_output, uint16_t* audio_buffer, uint32_t audio_buffer_size);
+void sound_engine_dma_isr(void *ctx);
+void tracker_engine_timer_isr(void *ctx);
+void sound_engine_init_hardware(uint32_t sample_rate, bool external_audio_output, uint16_t *audio_buffer, uint32_t audio_buffer_size);
 void tracker_engine_init_hardware(uint8_t rate);
 void sound_engine_start();
 void sound_engine_stop();
