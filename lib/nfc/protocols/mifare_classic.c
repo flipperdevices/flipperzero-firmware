@@ -161,7 +161,6 @@ void mf_classic_set_key_found(
 }
 
 void mf_classic_set_key_not_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type) {
-    data = NULL;
     furi_assert(data);
 
     if(key_type == MfClassicKeyA) {
