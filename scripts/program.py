@@ -59,7 +59,9 @@ class OpenOCDProgrammer(Programmer):
 
     def flash(self, bin: str) -> bool:
         i = self.interface
-        bin = bin.replace(os.sep, os.altsep)
+
+        if os.altsep:
+            bin = bin.replace(os.sep, os.altsep)
 
         openocd_launch_params = ["openocd"]
         self._add_file(openocd_launch_params, i.file)
