@@ -363,7 +363,7 @@
   #endif
 
   #ifdef ESP32_CAM
-    #define SD_CS 15
+    #define SD_CS 12 // not 4, not 15, not 13
   #endif
   //// END SD DEFINITIONS
 

@@ -178,6 +178,17 @@ void CommandLine::runCommand(String input) {
       Serial.println("Set channel: " + (String)wifi_scan_obj.set_channel);
     }
   }
+  #ifdef ESP32_CAM
+    else if (cmd_args.get(0) == CAM_PHOTO) {
+      pinMode(4,OUTPUT);
+      digitalWrite(4,HIGH);
+      delay(200);
+      digitalWrite(4,LOW);
+      Serial.println("Saved to SD");
+      
+    }
+  #endif
+  
   // Clear APs
   else if (cmd_args.get(0) == CLEARAP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a"); // APs

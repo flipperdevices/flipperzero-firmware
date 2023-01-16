@@ -4,9 +4,9 @@
 #include "configs.h"
 
 #ifdef HAS_SCREEN
-  #include "MenuFunctions.h"
-  #include "Display.h"
-#endif 
+#include "MenuFunctions.h"
+#include "Display.h"
+#endif
 
 #include "WiFiScan.h"
 #include "Web.h"
@@ -14,8 +14,8 @@
 #include "settings.h"
 
 #ifdef HAS_SCREEN
-  extern MenuFunctions menu_function_obj;
-  extern Display display_obj;
+extern MenuFunctions menu_function_obj;
+extern Display display_obj;
 #endif
 
 extern WiFiScan wifi_scan_obj;
@@ -28,6 +28,12 @@ extern LinkedList<Station>* stations;
 extern const String PROGMEM version_number;
 
 //// Commands
+
+#ifdef ESP32_CAM
+// Camera functions
+const char PROGMEM CAM_PHOTO[] = "photo";
+const char PROGMEM CAM_STREAM[] = "stream";
+#endif
 
 // Admin
 const char PROGMEM CH_CMD[] = "channel";
@@ -116,32 +122,32 @@ class CommandLine {
     int argSearch(LinkedList<String>* cmd_args, String key);
 
     const char* ascii_art =
-    "\r\n"
-    "              @@@@@@                        \r\n"
-    "              @@@@@@@@                      \r\n"
-    "              @@@@@@@@@@@                   \r\n"
-    "             @@@@@@  @@@@@@                 \r\n"
-    "          @@@@@@@      @@@@@@@              \r\n"
-    "        @@@@@@            @@@@@@            \r\n"
-    "     @@@@@@@                @@@@@@@         \r\n"
-    "   @@@@@@                      @@@@@@       \r\n"
-    "@@@@@@@              @@@@@@@@@@@@@@@@       \r\n"
-    "@@@@@                 @@@@@@@@@@@@@@@       \r\n"
-    "@@@@@                   @@@@@@@             \r\n"
-    "@@@@@                      @@@@@@           \r\n"
-    "@@@@@@                       @@@@@@@        \r\n"
-    "  @@@@@@                        @@@@@@@@@@@@\r\n"
-    "    @@@@@@@                          @@@@@@ \r\n"
-    "       @@@@@@                     @@@@@@    \r\n"
-    "         @@@@@@@                @@@@@@      \r\n"
-    "            @@@@@@           @@@@@@         \r\n"
-    "              @@@@@@@      @@@@@@           \r\n"
-    "                 @@@@@@ @@@@@@              \r\n"
-    "                   @@@@@@@@@                \r\n"
-    "                      @@@@@@                \r\n"
-    "                        @@@@                \r\n"
-    "\r\n";
-        
+      "\r\n"
+      "              @@@@@@                        \r\n"
+      "              @@@@@@@@                      \r\n"
+      "              @@@@@@@@@@@                   \r\n"
+      "             @@@@@@  @@@@@@                 \r\n"
+      "          @@@@@@@      @@@@@@@              \r\n"
+      "        @@@@@@            @@@@@@            \r\n"
+      "     @@@@@@@                @@@@@@@         \r\n"
+      "   @@@@@@                      @@@@@@       \r\n"
+      "@@@@@@@              @@@@@@@@@@@@@@@@       \r\n"
+      "@@@@@                 @@@@@@@@@@@@@@@       \r\n"
+      "@@@@@                   @@@@@@@             \r\n"
+      "@@@@@                      @@@@@@           \r\n"
+      "@@@@@@                       @@@@@@@        \r\n"
+      "  @@@@@@                        @@@@@@@@@@@@\r\n"
+      "    @@@@@@@                          @@@@@@ \r\n"
+      "       @@@@@@                     @@@@@@    \r\n"
+      "         @@@@@@@                @@@@@@      \r\n"
+      "            @@@@@@           @@@@@@         \r\n"
+      "              @@@@@@@      @@@@@@           \r\n"
+      "                 @@@@@@ @@@@@@              \r\n"
+      "                   @@@@@@@@@                \r\n"
+      "                      @@@@@@                \r\n"
+      "                        @@@@                \r\n"
+      "\r\n";
+
   public:
     CommandLine();
 
