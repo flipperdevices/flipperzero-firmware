@@ -11,11 +11,20 @@ void gpio_scene_test_ok_callback(InputType type, void* context) {
     }
 }
 
+void gpio_scene_test_tick_callback(void* context) {
+    furi_assert(context);
+    GpioApp* app = context;
+
+    gpio_test_update_callback(app->gpio_test);
+}
+
 void gpio_scene_test_on_enter(void* context) {
     GpioApp* app = context;
-    gpio_item_configure_all_pins(GpioModeOutputPushPull);
+    gpio_item_configure_all_pins(GpioModeInput);
     gpio_test_set_ok_callback(app->gpio_test, gpio_scene_test_ok_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, GpioAppViewGpioTest);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, gpio_scene_test_tick_callback, 100);
 }
 
 bool gpio_scene_test_on_event(void* context, SceneManagerEvent event) {

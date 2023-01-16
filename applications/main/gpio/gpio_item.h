@@ -4,11 +4,15 @@
 
 #define GPIO_ITEM_COUNT 8
 
-void gpio_item_configure_pin(uint8_t index, GpioMode mode);
+void gpio_item_configure_pin(uint8_t index, GpioMode mode, GpioPull pull);
 
 void gpio_item_configure_all_pins(GpioMode mode);
 
+const GpioPin* gpio_item_get_gpiopin(uint8_t index);
+
 void gpio_item_set_pin(uint8_t index, bool level);
+
+bool gpio_item_get_pin(uint8_t index);
 
 void gpio_item_set_all_pins(bool level);
 

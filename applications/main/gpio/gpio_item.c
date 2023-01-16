@@ -18,21 +18,31 @@ static const GpioItem gpio_item[GPIO_ITEM_COUNT] = {
     {"2.8: PC0", &gpio_ext_pc0},
 };
 
-void gpio_item_configure_pin(uint8_t index, GpioMode mode) {
+void gpio_item_configure_pin(uint8_t index, GpioMode mode, GpioPull pull) {
     furi_assert(index < GPIO_ITEM_COUNT);
     furi_hal_gpio_write(gpio_item[index].pin, false);
-    furi_hal_gpio_init(gpio_item[index].pin, mode, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(gpio_item[index].pin, mode, pull, GpioSpeedVeryHigh);
 }
 
 void gpio_item_configure_all_pins(GpioMode mode) {
     for(uint8_t i = 0; i < GPIO_ITEM_COUNT; i++) {
-        gpio_item_configure_pin(i, mode);
+        gpio_item_configure_pin(i, mode, GpioPullNo);
     }
+}
+
+const GpioPin* gpio_item_get_gpiopin(uint8_t index) {
+    furi_assert(index < GPIO_ITEM_COUNT);
+    return gpio_item[index].pin;
 }
 
 void gpio_item_set_pin(uint8_t index, bool level) {
     furi_assert(index < GPIO_ITEM_COUNT);
     furi_hal_gpio_write(gpio_item[index].pin, level);
+}
+
+bool gpio_item_get_pin(uint8_t index) {
+    furi_assert(index < GPIO_ITEM_COUNT);
+    return furi_hal_gpio_read(gpio_item[index].pin);
 }
 
 void gpio_item_set_all_pins(bool level) {
