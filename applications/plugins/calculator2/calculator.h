@@ -29,4 +29,6 @@ void calculator_reset(Calculator* clc);
 
 void calculator_add_calculator_calculation(Calculator* clc, CalculatorCalculation* calculation);
 
+double calculator_get_framed_number_as_double(Calculator* clc);
+
 void calculator_full_solve(Calculator* clc);

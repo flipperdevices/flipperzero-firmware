@@ -51,31 +51,38 @@ void calculator_free(Calculator* clc) {
     free(clc);
 }
 
-void calculator_full_solve(Calculator* clc) {
+double calculator_get_framed_number_as_double(Calculator* clc) {
     double sum;
-    // int fake;
-    /*const char* c_str = furi_string_get_cstr(clc->framed_number);
-    if(furi_string_search_char(clc->framed_number, '.') == FURI_STRING_FAILURE) {
-        int bruh;
-        sscanf(c_str, "%d", &bruh);
-        sum = (double)bruh;
-    } else {
-        sscanf(c_str, "%lf", &sum);
-    }*/
     int left;
     int right;
     if(furi_string_search_char(clc->framed_number, '.') != FURI_STRING_FAILURE) {
         if(furi_string_start_with_str(clc->framed_number, ".")) {
             sscanf(furi_string_get_cstr(clc->framed_number), ".%d", &right);
-            sum = (double)((double)right / pow10(((int)log10(right) + 1)));
+            size_t digits = furi_string_size(clc->framed_number) - 1;
+            // sum = (double)((double)right / pow10(((int)log10(right) + 1)));
+            sum = (double)((double)right / pow10(digits));
+            // 0.001 = 1/1000
+            // digits = 3 | pow10(3) = 1000 |
         } else {
             sscanf(furi_string_get_cstr(clc->framed_number), "%d.%d", &left, &right);
-            sum = (double)left + (double)((double)right / pow10(((int)log10(right) + 1)));
+            char buffer[8];
+            sscanf(furi_string_get_cstr(clc->framed_number), "%*d.%s", buffer);
+
+            size_t digits = strlen(buffer);
+
+            // sum = (double)left + (double)((double)right / pow10(((int)log10(right) + 1)));
+            sum = (double)left + (double)((double)right / pow10(digits));
         }
     } else {
         sscanf(furi_string_get_cstr(clc->framed_number), "%d", &left);
         sum = left;
     }
+
+    return sum;
+}
+
+void calculator_full_solve(Calculator* clc) {
+    double sum = calculator_get_framed_number_as_double(clc);
 
     // sscanf(furi_string_get_cstr(clc->framed_number), "%d.%d", &left, &right);
     // sum = (double)left + (double)((double)right / pow10(((int)log10(right) + 1)));
