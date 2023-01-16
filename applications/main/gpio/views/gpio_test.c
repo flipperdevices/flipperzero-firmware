@@ -551,6 +551,8 @@ static void gpio_menu_signal_cbr(void* _model, uint32_t entry) {
         gpio_menu_enable(model, MenuWs2812Led, false);
         gpio_menu_enable(model, MenuPwmFreq, false);
         gpio_menu_enable(model, MenuPwmDuty, false);
+        gpio_menu_enable(model, MenuServoFreq, false);
+        gpio_menu_enable(model, MenuServoAngle, false);
         return;
     }
 
