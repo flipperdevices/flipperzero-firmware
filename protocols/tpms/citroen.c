@@ -44,9 +44,9 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     snprintf(info->name,sizeof(info->name),"%s","Citroen TPMS");
     snprintf(info->raw,sizeof(info->raw),
-        "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+        "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
         raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
-        raw[6],raw[7],raw[8],raw[9],raw[10]);
+        raw[6],raw[7],raw[8],raw[9]);
     snprintf(info->info1,sizeof(info->info1),"Tire ID %02X%02X%02X%02X",
         raw[1],raw[2],raw[3],raw[4]);
     snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
