@@ -24,14 +24,14 @@ static void cligui_tick_event_cb(void* context) {
             furi_string_push_back(app->text_box_store, c);
         }
     }
-    if (available > 0) {
+    if(available > 0) {
         text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
     }
     // Set input header stuff
     size_t len = furi_string_size(app->text_box_store);
     size_t idx = len - 2;
-    while (idx > 0) {
-        if (furi_string_get_char(app->text_box_store, idx) == '\n') {
+    while(idx > 0) {
+        if(furi_string_get_char(app->text_box_store, idx) == '\n') {
             idx++;
             break;
         }
@@ -50,8 +50,10 @@ static void input_callback_wrapper(InputEvent* event, void* context) {
         view_dispatcher_stop(app->view_dispatcher);
     }
     if(event->type == InputTypeLong && event->key == InputKeyOk) {
-        persistent_exit = true;
-        view_dispatcher_stop(app->view_dispatcher);
+        if(app->data->state == ViewConsoleOutput) {
+            persistent_exit = true;
+            view_dispatcher_stop(app->view_dispatcher);
+        }
     }
     if(app->data->state == ViewTextInput) {
         text_input_input_handler(app, event);
