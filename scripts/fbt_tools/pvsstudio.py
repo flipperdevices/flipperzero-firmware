@@ -84,16 +84,16 @@ def generate(env):
                 src_suffix=".json",
             ),
             "PVSReport": Builder(
-                action=[
-                    Delete("${TARGET.dir}"),
-                    # PlogConverter.exe and plog-converter have different behavior
-                    Mkdir("${TARGET.dir}") if env["PLATFORM"] == "win32" else None,
-                    Action(_set_browser_action, ""),
-                    Action(
+                action=Action(
+                    [
+                        Delete("${TARGET.dir}"),
+                        # PlogConverter.exe and plog-converter have different behavior
+                        Mkdir("${TARGET.dir}") if env["PLATFORM"] == "win32" else None,
+                        Action(_set_browser_action, None),
                         '${PVSCONVBIN} ${PVSCONVOPTIONS} "${SOURCE}" -o "${REPORT_DIR}"',
-                        "${PVSCONVCOMSTR}",
-                    ),
-                ],
+                    ],
+                    "${PVSCONVCOMSTR}",
+                ),
                 emitter=emit_pvsreport,
                 src_suffix=".log",
             ),
