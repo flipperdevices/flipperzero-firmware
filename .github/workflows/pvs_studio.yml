@@ -51,7 +51,7 @@ jobs:
         id: pvs-warn
         run: |
           WARNINGS=0
-          ./fbt COMPACT=1 firmware_pvs || WARNINGS=1
+          ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
 
       - name: 'Upload artifacts to update server'
