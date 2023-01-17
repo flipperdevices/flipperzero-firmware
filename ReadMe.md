@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1)
 - Updated: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) (Now allows easier long press for space)
 - Updated: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
+- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 
 <a name="release">
 

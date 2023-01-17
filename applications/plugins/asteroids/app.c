@@ -469,7 +469,7 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
 /* Set gameover state. When in game-over mode, the game displays a gameover
  * text with a background of many asteroids floating around. */
 void game_over(AsteroidsApp* app) {
-    save_game(app); // Save highscore
+    if(app->is_new_highscore) save_game(app); // Save highscore but only on change
     app->gameover = true;
     app->lives = GAME_START_LIVES; // Show 3 lives in game over screen to match new game start
 }
@@ -765,7 +765,9 @@ int32_t asteroids_app_entry(void* p) {
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
-            if(input.type == InputTypeShort && input.key == InputKeyBack) {
+            if(input.type == InputTypeLong && input.key == InputKeyBack) {
+                // Save High Score even if player didn't finish game
+                if(app->is_new_highscore) save_game(app); // Save highscore but only on change
                 app->running = 0;
             } else {
                 asteroids_update_keypress_state(app, input);
