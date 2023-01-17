@@ -268,7 +268,7 @@ jobs:
           sed -i 's/^  #define MARAUDER_KIT/  \/\/#define MARAUDER_KIT/' esp32_marauder/configs.h
           sed -i 's/^  #define GENERIC_ESP32/  \/\/#define GENERIC_ESP32/' esp32_marauder/configs.h
           sed -i 's/^  #define MARAUDER_FLIPPER/  \/\/#define MARAUDER_FLIPPER/' esp32_marauder/configs.h
-          sed -i 's/^  #define ESP32_LDDB/  #define ESP32_LDDB/' esp32_marauder/configs.h
+          sed -i 's/^  #define ESP32_LDDB/  \/\/#define ESP32_LDDB/' esp32_marauder/configs.h
           sed -i 's/^  \/\/#define MARAUDER_DEV_BOARD_PRO/  #define MARAUDER_DEV_BOARD_PRO/' esp32_marauder/configs.h
           
       - name: Build Marauder for Marauder Dev Board Pro
