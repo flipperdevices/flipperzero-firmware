@@ -23,8 +23,9 @@ This is a screenshot, but the game looks a lot better in the device itself:
 * Left/Right: rotate ship in the two directions.
 * Ok, short press: Short burst bullets
 * Ok, long press: Auto-fire bullets
-* Up: accelerate
-* Down: decelerate
+* Up: Accelerate
+* Down: Decelerate
+* Back (Long Press): Exit game. It will automatically save the high scoore too.
 
 Your high scores will automatically be saved. Go forth and compete!
 
