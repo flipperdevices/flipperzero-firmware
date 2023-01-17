@@ -27,7 +27,8 @@
         "misc",
         "flipper_application",
         "flipperformat",
-        "toolbox"
+        "toolbox",
+        "flipper18"
     ],
     "excluded_sources": [
         "furi_hal_infrared.c",

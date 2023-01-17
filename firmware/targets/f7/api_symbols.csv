@@ -185,6 +185,7 @@ Header,+,lib/subghz/transmitter.h,,
 Header,+,lib/toolbox/args.h,,
 Header,+,lib/toolbox/crc32_calc.h,,
 Header,+,lib/toolbox/dir_walk.h,,
+Header,+,lib/toolbox/float_tools.h,,
 Header,+,lib/toolbox/hmac_sha256.h,,
 Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
@@ -919,6 +920,7 @@ Function,+,flipper_format_write_int32,_Bool,"FlipperFormat*, const char*, const 
 Function,+,flipper_format_write_string,_Bool,"FlipperFormat*, const char*, FuriString*"
 Function,+,flipper_format_write_string_cstr,_Bool,"FlipperFormat*, const char*, const char*"
 Function,+,flipper_format_write_uint32,_Bool,"FlipperFormat*, const char*, const uint32_t*, const uint16_t"
+Function,+,float_is_equal,_Bool,"float, float"
 Function,-,flockfile,void,FILE*
 Function,-,floor,double,double
 Function,-,floorf,float,float
@@ -1642,6 +1644,7 @@ Function,+,infrared_get_protocol_by_name,InfraredProtocol,const char*
 Function,+,infrared_get_protocol_command_length,uint8_t,InfraredProtocol
 Function,+,infrared_get_protocol_duty_cycle,float,InfraredProtocol
 Function,+,infrared_get_protocol_frequency,uint32_t,InfraredProtocol
+Function,+,infrared_get_protocol_min_repeat_count,size_t,InfraredProtocol
 Function,+,infrared_get_protocol_name,const char*,InfraredProtocol
 Function,+,infrared_is_protocol_valid,_Bool,InfraredProtocol
 Function,+,infrared_reset_decoder,void,InfraredDecoderHandler*
@@ -2492,6 +2495,7 @@ Function,+,stream_read_line,_Bool,"Stream*, FuriString*"
 Function,+,stream_rewind,_Bool,Stream*
 Function,+,stream_save_to_file,size_t,"Stream*, Storage*, const char*, FS_OpenMode"
 Function,+,stream_seek,_Bool,"Stream*, int32_t, StreamOffset"
+Function,+,stream_seek_to_char,_Bool,"Stream*, char, StreamDirection"
 Function,+,stream_size,size_t,Stream*
 Function,+,stream_split,_Bool,"Stream*, Stream*, Stream*"
 Function,+,stream_tell,size_t,Stream*
