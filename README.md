@@ -21,6 +21,9 @@ Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 * Beitian BN-180
 * [u-blox NEO-6M]
 
+If you have verified this application working with a module not listed here,
+please submit a PR adding it to the list.
+
 ## Building the FAP
 
 1. Clone the [flipperzero-firmware] repository.
