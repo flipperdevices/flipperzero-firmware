@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  TARGET_CONFIGS: f7,default f18,komi
+  TARGET_CONFIGS: f7,default # f18,komi
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /runner/_work
 
