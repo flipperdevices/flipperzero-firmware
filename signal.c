@@ -303,10 +303,10 @@ void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff,
                        (s[sidx+1] >> (8-skew)));
             sidx++;
             didx++;
+            soff += 8;
+            doff += 8;
             count -= 8;
         }
-        soff = sidx*8;
-        doff = didx*8;
     }
 
     /* Here count is guaranteed to be < 8.

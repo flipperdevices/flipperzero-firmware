@@ -35,9 +35,10 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         convert_from_line_code(d,sizeof(d),bits,numbytes,off,"1000","1110");
 
     if (DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 decoded: %lu",decoded);
-    if (decoded != 24) return false;
+    if (decoded < 24) return false;
 
     off += 24*4; // seek to end symbol offset to calculate the length.
+    off++; // In this protocol there is a final pulse as terminator.
     info->pulses_count = off - info->start_off;
     snprintf(info->name,PROTOVIEW_MSG_STR_LEN,"PT/SC remote");
     snprintf(info->raw,PROTOVIEW_MSG_STR_LEN,"%02X%02X%02X",d[0],d[1],d[2]);

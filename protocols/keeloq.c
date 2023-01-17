@@ -57,7 +57,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     if (decoded < 66) return false; /* Require the full 66 bits. */
 
-    off += decoded+66*3; // Seek end to compute total length.
+    off += 66*3; // Seek end to compute total length.
     info->pulses_count = off - info->start_off;
 
     bitmap_reverse_bytes(raw,sizeof(raw)); /* Keeloq is LSB first. */

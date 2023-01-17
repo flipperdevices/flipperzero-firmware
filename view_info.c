@@ -53,14 +53,21 @@ static void render_subview_save(Canvas *const canvas, ProtoViewApp *app) {
     uint32_t idx = privdata->signal_display_start_row * (128/4);
     bool prevbit = false;
     for (uint8_t y = bitheight+12; y <= rows*rowheight; y += rowheight) {
-        for (uint8_t x = 5; x < 128; x += 4) {
+        for (uint8_t x = 0; x < 128; x += 4) {
             bool bit = bitmap_get(app->msg_info->bits,
-                                  app->msg_info->bits_bytes,idx++);
+                                  app->msg_info->bits_bytes,idx);
             uint8_t prevy = y + prevbit*(bitheight*-1) - 1;
             uint8_t thisy = y + bit*(bitheight*-1) - 1;
             canvas_draw_line(canvas,x,prevy,x,thisy);
             canvas_draw_line(canvas,x,thisy,x+bitwidth-1,thisy);
             prevbit = bit;
+            if (idx >= app->msg_info->pulses_count) {
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_dot(canvas, x+1,thisy);
+                canvas_draw_dot(canvas, x+3,thisy);
+                canvas_set_color(canvas, ColorBlack);
+            }
+            idx++; // Draw next bit
         }
     }
 
@@ -100,7 +107,8 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
         if (input.type == InputTypePress && input.key == InputKeyRight) {
             privdata->signal_display_start_row++;
         } else if (input.type == InputTypePress && input.key == InputKeyLeft) {
-            privdata->signal_display_start_row--;
+            if (privdata->signal_display_start_row != 0)
+                privdata->signal_display_start_row--;
         }
     }
 }
