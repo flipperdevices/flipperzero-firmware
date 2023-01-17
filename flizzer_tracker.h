@@ -9,6 +9,7 @@
 #include <u8g2_glue.h>
 
 #include <gui/view_dispatcher.h>
+#include <gui/modules/text_input.h>
 
 #include "flizzer_tracker_hal.h"
 #include "sound_engine/freqs.h"
@@ -56,6 +57,7 @@ typedef enum
     SI_MASTERVOL,
 
     SI_SONGNAME,
+    SI_CURRENTINSTRUMENT,
     SI_INSTRUMENTNAME,
     /* ========  */
     SI_PARAMS,
@@ -67,6 +69,14 @@ typedef struct
     void *context;
 } TrackerView;
 
+typedef enum
+{
+    VIEW_TRACKER,
+    VIEW_KEYBOARD,
+    VIEW_FILE_MANAGER,
+    VIEW_SUBMENU,
+} FlizzerTrackerViews;
+
 typedef struct
 {
     NotificationApp *notification;
@@ -74,6 +84,7 @@ typedef struct
     Gui *gui;
     TrackerView *tracker_view;
     ViewDispatcher *view_dispatcher;
+    TextInput* text_input;
     bool was_it_back_keypress;
     uint32_t current_time;
     uint32_t period;

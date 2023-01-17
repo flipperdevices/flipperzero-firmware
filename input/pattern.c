@@ -20,9 +20,9 @@ void edit_note(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t 
 {
     int16_t note = tracker_engine_get_note(step);
 
-    if(note == MUS_NOTE_RELEASE)
+    if (note == MUS_NOTE_RELEASE)
     {
-        if(delta < 0)
+        if (delta < 0)
         {
             set_note(step, MUS_NOTE_CUT);
         }
@@ -30,9 +30,9 @@ void edit_note(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t 
         return;
     }
 
-    if(note == MUS_NOTE_CUT)
+    if (note == MUS_NOTE_CUT)
     {
-        if(delta > 0)
+        if (delta > 0)
         {
             set_note(step, MUS_NOTE_RELEASE);
         }
@@ -48,6 +48,7 @@ void edit_note(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t 
     clamp(note, delta, 0, MAX_NOTE);
 
     set_note(step, (uint8_t)note);
+    set_instrument(step, tracker->current_instrument);
 
     tracker->current_note = (uint8_t)note;
 }

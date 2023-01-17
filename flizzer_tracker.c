@@ -2,8 +2,8 @@
 #include "init_deinit.h"
 #include "input_event.h"
 #include "util.h"
-#include "view/pattern_editor.h"
 #include "view/instrument_editor.h"
+#include "view/pattern_editor.h"
 
 #define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
 
@@ -15,30 +15,23 @@ Copyright:
 Glyphs: 95/203
 BBX Build Mode: 0
 */
-const uint8_t u8g2_font_tom_thumb_4x6_tr[725] U8G2_FONT_SECTION("u8g2_font_tom_thumb_4x6_tr") =
-    "_\0\2\2\2\3\3\4\4\3\6\0\377\5\377\5\0\0\352\1\330\2\270 \5\340\315\0!\6\265\310"
-    "\254\0\42\6\213\313$\25#\10\227\310\244\241\206\12$\10\227\310\215\70b\2%\10\227\310d\324F\1"
-    "&\10\227\310(\65R\22'\5\251\313\10(\6\266\310\251\62)\10\226\310\304\224\24\0*\6\217\312\244"
-    "\16+\7\217\311\245\225\0,\6\212\310)\0-\5\207\312\14.\5\245\310\4/\7\227\310Ve\4\60"
-    "\7\227\310-k\1\61\6\226\310\255\6\62\10\227\310h\220\312\1\63\11\227\310h\220\62X\0\64\10\227"
-    "\310$\65b\1\65\10\227\310\214\250\301\2\66\10\227\310\315\221F\0\67\10\227\310\314TF\0\70\10\227"
-    "\310\214\64\324\10\71\10\227\310\214\64\342\2:\6\255\311\244\0;\7\222\310e\240\0<\10\227\310\246\32"
-    "d\20=\6\217\311l\60>\11\227\310d\220A*\1\77\10\227\310\314\224a\2@\10\227\310UC\3"
-    "\1A\10\227\310UC\251\0B\10\227\310\250\264\322\2C\7\227\310\315\32\10D\10\227\310\250d-\0"
-    "E\10\227\310\214\70\342\0F\10\227\310\214\70b\4G\10\227\310\315\221\222\0H\10\227\310$\65\224\12"
-    "I\7\227\310\254X\15J\7\227\310\226\252\2K\10\227\310$\265\222\12L\7\227\310\304\346\0M\10\227"
-    "\310\244\61\224\12N\10\227\310\244q\250\0O\7\227\310UV\5P\10\227\310\250\264b\4Q\10\227\310"
-    "Uj$\1R\10\227\310\250\64V\1S\10\227\310m\220\301\2T\7\227\310\254\330\2U\7\227\310$"
-    "W\22V\10\227\310$\253L\0W\10\227\310$\65\206\12X\10\227\310$\325R\1Y\10\227\310$U"
-    "V\0Z\7\227\310\314T\16[\7\227\310\214X\16\134\10\217\311d\220A\0]\7\227\310\314r\4^"
-    "\5\213\313\65_\5\207\310\14`\6\212\313\304\0a\7\223\310\310\65\2b\10\227\310D\225\324\2c\7"
-    "\223\310\315\14\4d\10\227\310\246\245\222\0e\6\223\310\235\2f\10\227\310\246\264b\2g\10\227\307\35"
-    "\61%\0h\10\227\310D\225\254\0i\6\265\310\244\1j\10\233\307f\30U\5k\10\227\310\304\264T"
-    "\1l\7\227\310\310\326\0m\7\223\310<R\0n\7\223\310\250d\5o\7\223\310U\252\2p\10\227"
-    "\307\250\244V\4q\10\227\307-\225d\0r\6\223\310\315\22s\10\223\310\215\70\22\0t\10\227\310\245"
-    "\25\243\0u\7\223\310$+\11v\10\223\310$\65R\2w\7\223\310\244q\4x\7\223\310\244\62\25"
-    "y\11\227\307$\225dJ\0z\7\223\310\254\221\6{\10\227\310\251\32D\1|\6\265\310(\1}\11"
-    "\227\310\310\14RR\0~\6\213\313\215\4\0\0\0\4\377\377\0";
+// this is a modified version with dot and semicolon moved 1 pixel to the left; lowercase symbols removed
+const uint8_t u8g2_font_tom_thumb_4x6_tr[479] U8G2_FONT_SECTION("u8g2_font_tom_thumb_4x6_tr") =
+    "A\0\2\2\2\3\2\3\4\3\5\0\0\5\0\5\0\0\340\0\0\1\306 \4@\62!\5u\62+"
+    "\42\6\313\63I\5#\10W\62i\250\241\2$\10Wr#\216\230\0%\10W\62\31\265Q\0&\10"
+    "W\62J\215\224\4'\5\351\63\2(\6vr\252\14)\7V\62\61%\5*\6O\63\251\3+\7"
+    "\317ri%\0,\5Jr\12-\5G\63\3.\5E\62\1/\7W\262U\31\1\60\7Wr\313"
+    "Z\0\61\6Vr\253\1\62\7W\62\32\244r\63\11W\62\32\244\14\26\0\64\7W\62I\215X\65"
+    "\10W\62#j\260\0\66\7Wrs\244\21\67\7W\62\63\225\21\70\10W\62#\15\65\2\71\10W"
+    "\62#\215\270\0:\5\315\62);\7Rr\31(\0<\10W\262\251\6\31\4=\6\317\62\33\14>"
+    "\11W\62\31d\220J\0?\10W\62\63e\230\0@\7Wr\325\320@A\7Wr\325P*B\10"
+    "W\62*\255\264\0C\7Wr\263\6\2D\7W\62*Y\13E\7W\62#\216\70F\10W\62#"
+    "\216\30\1G\7Wrs\244$H\10W\62I\15\245\2I\7W\62+V\3J\7W\262\245\252\0"
+    "K\10W\62I\255\244\2L\6W\62\261\71M\10W\62i\14\245\2N\7W\62i\34*O\7W"
+    "r\225U\1P\10W\62*\255\30\1Q\7Wr\225\32IR\7W\62*\215US\10Wr\33d"
+    "\260\0T\7W\62+\266\0U\7W\62\311\225\4V\10W\62\311*\23\0W\10W\62I\215\241\2"
+    "X\10W\62I\265T\0Y\10W\62I\225\25\0Z\7W\62\63\225\3[\7W\62#\226\3\134\7"
+    "\317\62\31d\20]\7W\62\263\34\1^\5\313s\15_\5G\62\3`\5\312\63\61\0\0\0";
 
 static void draw_callback(Canvas *canvas, void *ctx)
 {
@@ -136,14 +129,19 @@ int32_t flizzer_tracker_app(void *p)
 
     tracker->gui = furi_record_open(RECORD_GUI);
     tracker->view_dispatcher = view_dispatcher_alloc();
+
     tracker->tracker_view = tracker_view_alloc(tracker);
 
-    view_dispatcher_add_view(tracker->view_dispatcher, 0, tracker->tracker_view->view);
+    view_dispatcher_add_view(tracker->view_dispatcher, VIEW_TRACKER, tracker->tracker_view->view);
     view_dispatcher_attach_to_gui(tracker->view_dispatcher, tracker->gui, ViewDispatcherTypeFullscreen);
 
-    with_view_model(tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
+    with_view_model(
+        tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
 
-    view_dispatcher_switch_to_view(tracker->view_dispatcher, 0);
+    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+
+    tracker->text_input = text_input_alloc();
+    view_dispatcher_add_view(tracker->view_dispatcher, VIEW_KEYBOARD, text_input_get_view(tracker->text_input));
 
     tracker->notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
@@ -213,6 +211,10 @@ int32_t flizzer_tracker_app(void *p)
     tracker->song.instrument[0]->adsr.volume = 0x80;
     tracker->song.instrument[0]->waveform = SE_WAVEFORM_TRIANGLE;
     tracker->song.instrument[0]->sound_engine_flags |= SE_ENABLE_KEYDOWN_SYNC;
+    /*tracker->song.instrument[0]->sound_engine_flags |= (SE_ENABLE_KEYDOWN_SYNC | SE_ENABLE_FILTER);
+    tracker->song.instrument[0]->flags |= TE_SET_CUTOFF;
+    tracker->song.instrument[0]->filter_type = FIL_OUTPUT_LOWPASS;
+    tracker->song.instrument[0]->filter_cutoff = 10;*/
 
     tracker->song.instrument[1]->adsr.a = 0x0;
     tracker->song.instrument[1]->adsr.d = 0x3;
@@ -245,8 +247,13 @@ int32_t flizzer_tracker_app(void *p)
     // Специальная очистка памяти, занимаемой очередью
     furi_message_queue_free(tracker->event_queue);
 
-    view_dispatcher_remove_view(tracker->view_dispatcher, 0);
+    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_KEYBOARD);
+    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_TRACKER);
+
+    text_input_free(tracker->text_input);
+
     view_dispatcher_free(tracker->view_dispatcher);
+
     tracker_view_free(tracker->tracker_view);
     furi_record_close(RECORD_GUI);
 

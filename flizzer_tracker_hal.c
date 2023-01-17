@@ -73,7 +73,7 @@ void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
-    TIM_InitStruct.Prescaler = 0; 
+    TIM_InitStruct.Prescaler = 0;
     TIM_InitStruct.Autoreload = TIMER_BASE_CLOCK / sample_rate; // to support various sample rates
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(SAMPLE_RATE_TIMER, &TIM_InitStruct);
@@ -90,7 +90,7 @@ void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
-    TIM_InitStruct.Prescaler = 0; //using 32-bit timer
+    TIM_InitStruct.Prescaler = 0;                                            // using 32-bit timer
     TIM_InitStruct.Autoreload = (uint32_t)TIMER_BASE_CLOCK / (uint32_t)rate; // to support various tracker engine rates
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(TRACKER_ENGINE_TIMER, &TIM_InitStruct);
@@ -106,7 +106,7 @@ void tracker_engine_set_rate(uint8_t rate)
 {
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
-    TIM_InitStruct.Prescaler = 0; //using 32-bit timer
+    TIM_InitStruct.Prescaler = 0;                                            // using 32-bit timer
     TIM_InitStruct.Autoreload = (uint32_t)TIMER_BASE_CLOCK / (uint32_t)rate; // to support various tracker engine rates
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(TRACKER_ENGINE_TIMER, &TIM_InitStruct);
@@ -164,6 +164,7 @@ void sound_engine_start()
 
 void sound_engine_stop()
 {
+    LL_TIM_DisableAllOutputs(SAMPLE_RATE_TIMER);
     LL_TIM_DisableCounter(SAMPLE_RATE_TIMER);
 
     sound_engine_dma_stop();

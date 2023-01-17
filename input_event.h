@@ -9,10 +9,10 @@
 #include "tracker_engine/tracker_engine_defs.h"
 #include "util.h"
 
+#include "input/instrument.h"
+#include "input/instrument_program.h"
 #include "input/pattern.h"
 #include "input/sequence.h"
 #include "input/songinfo.h"
-#include "input/instrument.h"
-#include "input/instrument_program.h"
 
 void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event);

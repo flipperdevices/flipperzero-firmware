@@ -96,14 +96,6 @@ void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
     canvas_draw_line(canvas, 0, PATTERN_EDITOR_Y, 127, PATTERN_EDITOR_Y);
 
-    for (int i = 1; i < SONG_MAX_CHANNELS; ++i)
-    {
-        for (int y = PATTERN_EDITOR_Y + 1; y < 64; y += 2)
-        {
-            canvas_draw_dot(canvas, i * 32 - 1, y);
-        }
-    }
-
     for (int i = 0; i < SONG_MAX_CHANNELS; ++i)
     {
         uint8_t sequence_position = tracker->tracker_engine.sequence_position;
@@ -176,6 +168,18 @@ void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
         canvas_draw_box(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
     }
+
+    canvas_set_color(canvas, ColorBlack);
+
+    for (int i = 1; i < SONG_MAX_CHANNELS; ++i)
+    {
+        for (int y = PATTERN_EDITOR_Y + 1; y < 64; y += 2)
+        {
+            canvas_draw_dot(canvas, i * 32 - 1, y);
+        }
+    }
+
+    canvas_set_color(canvas, ColorXOR);
 }
 
 #define SEQ_SLIDER_X (4 * (4 * 2 + 1) + 2)
@@ -253,7 +257,7 @@ void draw_generic_n_digit_field(FlizzerTrackerApp *tracker, Canvas *canvas, uint
 
         else
         {
-            canvas_draw_box(canvas, x - 1, y - 6, strlen(text) * 4 + 2, 7);
+            canvas_draw_box(canvas, x - 1, y - 6, fmax(5, strlen(text) * 4 + 1), 7);
         }
     }
 }
@@ -273,10 +277,15 @@ void draw_songinfo_view(Canvas *canvas, FlizzerTrackerApp *tracker)
     snprintf(buffer, sizeof(buffer), "VOL %02X", tracker->tracker_engine.master_volume);
     draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_MASTERVOL, buffer, 42 + 4 * 7 + 4 * 8, 17, 2);
 
-    snprintf(buffer, sizeof(buffer), "SONG:%s", tracker->song.song_name);
-    draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_SONGNAME, buffer, 42, 23, 1);
-    snprintf(buffer, sizeof(buffer), "INST:%s", tracker->song.instrument[tracker->current_instrument]->name);
-    draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_INSTRUMENTNAME, buffer, 42, 29, 1);
+    snprintf(buffer, sizeof(buffer), "SONG:");
+    canvas_draw_str(canvas, 42, 23, buffer);
+    snprintf(buffer, sizeof(buffer), "%s", tracker->song.song_name);
+    draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_SONGNAME, buffer, 42 + 4 * 5, 23, 1);
+
+    snprintf(buffer, sizeof(buffer), "INST:%c", to_char(tracker->current_instrument));
+    draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_CURRENTINSTRUMENT, buffer, 42, 29, 1);
+    snprintf(buffer, sizeof(buffer), "%s", tracker->song.instrument[tracker->current_instrument]->name);
+    draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_INSTRUMENTNAME, buffer, 42 + 4 * 7, 29, 1);
 
     uint32_t song_size = calculate_song_size(&tracker->song);
     uint32_t free_bytes = memmgr_get_free_heap();

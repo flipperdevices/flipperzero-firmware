@@ -86,11 +86,9 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
 
         te_channel->program_counter = 0;
         te_channel->program_loop = 0;
-        te_channel->program_period = 0;
+        te_channel->program_period = pinst->program_period;
         te_channel->program_tick = 0;
     }
-
-    te_channel->program_period = pinst->program_period;
 
     te_channel->instrument = pinst;
 
@@ -102,21 +100,31 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     te_channel->arpeggio_note = 0;
     te_channel->fixed_note = 0xffff;
 
-    tracker_engine_set_note(tracker_engine, chan, note + (uint16_t)pinst->finetune, true);
+    tracker_engine_set_note(tracker_engine, chan, note + (int16_t)pinst->finetune, true);
 
-    te_channel->last_note = te_channel->target_note = note + (uint16_t)pinst->finetune;
+    te_channel->last_note = te_channel->target_note = note + (int16_t)pinst->finetune;
 
     if (pinst->sound_engine_flags & SE_ENABLE_KEYDOWN_SYNC)
     {
         te_channel->vibrato_position = te_channel->pwm_position = 0;
+        se_channel->accumulator = 0;
+        se_channel->lfsr = RANDOM_SEED;
     }
 
     if (pinst->flags & TE_SET_CUTOFF)
     {
-        te_channel->filter_cutoff = pinst->filter_cutoff;
+        te_channel->filter_cutoff = (pinst->filter_cutoff << 3);
         te_channel->filter_resonance = pinst->filter_resonance;
 
-        sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, (te_channel->filter_resonance << 5));
+        sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
+    }
+
+    if(pinst->sound_engine_flags & SE_ENABLE_FILTER)
+    {
+        te_channel->filter_type = pinst->filter_type;
+        se_channel->filter_mode = te_channel->filter_type;
+        se_channel->filter_cutoff = te_channel->filter_cutoff;
+        se_channel->filter_resonace = te_channel->filter_resonance;
     }
 
     if (pinst->flags & TE_SET_PW)
@@ -152,12 +160,49 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
     // TODO: add actual big ass function that executes commands; add arpeggio commands there
 }
 
+void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
+{
+    SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
+    TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
+
+    if (te_channel->flags & TEC_PLAYING)
+    {
+        if (!(se_channel->flags & SE_ENABLE_GATE))
+        {
+            te_channel->flags &= ~(TEC_PLAYING);
+        }
+
+        if (te_channel->slide_speed != 0)
+        {
+            if (te_channel->target_note > te_channel->note)
+            {
+                te_channel->target_note += fmin(te_channel->slide_speed, te_channel->target_note - te_channel->note);
+            }
+
+            else if (te_channel->target_note < te_channel->note)
+            {
+                te_channel->target_note -= fmin(te_channel->slide_speed, te_channel->note - te_channel->target_note);
+            }
+        }
+
+        // TODO: add instrument program execution
+
+        // TODO: add PWM and vibrato execution
+        uint8_t vib = 0;
+        int32_t chn_note = (te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) + vib + ((int16_t)te_channel->arpeggio_note << 8);
+
+        if (chn_note < 0)
+            chn_note = 0;
+        if (chn_note > ((12 * 7 + 11) << 8))
+            chn_note = ((12 * 7 + 11) << 8); // highest note is B-7
+
+        tracker_engine_set_note(tracker_engine, chan, (uint16_t)chn_note, false);
+    }
+}
+
 void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 {
     if (!(tracker_engine->playing))
-        return;
-
-    if (!(tracker_engine->song))
         return;
 
     if (!(tracker_engine->sound_engine))
@@ -170,121 +215,95 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
         SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
         TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
 
-        uint8_t sequence_position = tracker_engine->sequence_position;
-        uint8_t current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
-        uint8_t pattern_step = tracker_engine->pattern_position;
-
-        TrackerSongPattern *pattern = &song->pattern[current_pattern];
-
-        uint8_t note_delay = 0; // TODO: add note delay command
-
-        if (tracker_engine->current_tick == note_delay)
+        if(tracker_engine->song)
         {
-            uint8_t note = tracker_engine_get_note(&pattern->step[pattern_step]);
-            uint8_t inst = tracker_engine_get_instrument(&pattern->step[pattern_step]);
+            uint8_t sequence_position = tracker_engine->sequence_position;
+            uint8_t current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
+            uint8_t pattern_step = tracker_engine->pattern_position;
 
-            Instrument *pinst = NULL;
+            TrackerSongPattern *pattern = &song->pattern[current_pattern];
 
-            if (inst == MUS_NOTE_INSTRUMENT_NONE)
+            uint8_t note_delay = 0; // TODO: add note delay command
+
+            if (tracker_engine->current_tick == note_delay)
             {
-                pinst = te_channel->instrument;
-            }
+                uint8_t note = tracker_engine_get_note(&pattern->step[pattern_step]);
+                uint8_t inst = tracker_engine_get_instrument(&pattern->step[pattern_step]);
 
-            else
-            {
-                if (inst < song->num_instruments)
-                {
-                    pinst = song->instrument[inst];
-                    te_channel->instrument = pinst;
-                }
-            }
-
-            // TODO: add note cut command
-
-            if (note == MUS_NOTE_RELEASE)
-            {
-                sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
-            }
-
-            else if (pinst && note != MUS_NOTE_RELEASE && note != MUS_NOTE_CUT && note != MUS_NOTE_NONE)
-            {
-                te_channel->slide_speed = 0;
-
-                // TODO: add setting slide speed if slide command is there
-
-                // te_channel->slide_speed = pinst->slide_speed;
-
-                uint8_t prev_adsr_volume = se_channel->adsr.volume;
-
-                tracker_engine_trigger_instrument_internal(tracker_engine, chan, pinst, note << 8);
-                te_channel->note = (note << 8);
-
-                te_channel->target_note = (note << 8) + pinst->finetune;
+                Instrument *pinst = NULL;
 
                 if (inst == MUS_NOTE_INSTRUMENT_NONE)
                 {
-                    se_channel->adsr.volume = prev_adsr_volume;
+                    pinst = te_channel->instrument;
+                }
+
+                else
+                {
+                    if (inst < song->num_instruments)
+                    {
+                        pinst = song->instrument[inst];
+                        te_channel->instrument = pinst;
+                    }
+                }
+
+                // TODO: add note cut command
+
+                if (note == MUS_NOTE_RELEASE)
+                {
+                    sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
+                }
+
+                else if (pinst && note != MUS_NOTE_RELEASE && note != MUS_NOTE_CUT && note != MUS_NOTE_NONE)
+                {
+                    te_channel->slide_speed = 0;
+
+                    // TODO: add setting slide speed if slide command is there
+
+                    // te_channel->slide_speed = pinst->slide_speed;
+
+                    uint8_t prev_adsr_volume = se_channel->adsr.volume;
+
+                    tracker_engine_trigger_instrument_internal(tracker_engine, chan, pinst, note << 8);
+                    te_channel->note = (note << 8);
+
+                    te_channel->target_note = (note << 8) + pinst->finetune;
+
+                    if (inst == MUS_NOTE_INSTRUMENT_NONE)
+                    {
+                        se_channel->adsr.volume = prev_adsr_volume;
+                    }
                 }
             }
+
+            tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
         }
 
-        tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
-
-        if (te_channel->flags & TEC_PLAYING)
-        {
-            if (!(se_channel->flags & SE_ENABLE_GATE))
-            {
-                te_channel->flags &= ~(TEC_PLAYING);
-            }
-
-            if (te_channel->slide_speed != 0)
-            {
-                if (te_channel->target_note > te_channel->note)
-                {
-                    te_channel->target_note += fmin(te_channel->slide_speed, te_channel->target_note - te_channel->note);
-                }
-
-                else if (te_channel->target_note < te_channel->note)
-                {
-                    te_channel->target_note -= fmin(te_channel->slide_speed, te_channel->note - te_channel->target_note);
-                }
-            }
-
-            // TODO: add instrument program execution
-
-            // TODO: add PWM and vibrato execution
-            uint8_t vib = 0;
-            int32_t chn_note = (te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) + vib + ((int16_t)te_channel->arpeggio_note << 8);
-
-            if (chn_note < 0)
-                chn_note = 0;
-            if (chn_note > ((12 * 7 + 11) << 8))
-                chn_note = ((12 * 7 + 11) << 8); // highest note is B-7
-
-            tracker_engine_set_note(tracker_engine, chan, (uint16_t)chn_note, false);
-        }
+        tracker_engine_advance_channel(tracker_engine, chan); //this will be executed even if the song pointer is NULL; handy for live instrument playback from inst editor ("jams")
     }
 
-    tracker_engine->current_tick++;
-
-    if (tracker_engine->current_tick >= song->speed)
+    if(tracker_engine->song)
     {
-        // TODO: add pattern loop and pattern skip commands
+        tracker_engine->current_tick++;
 
-        tracker_engine->pattern_position++;
-
-        tracker_engine->current_tick = 0;
-
-        if (tracker_engine->pattern_position >= song->pattern_length)
+        if (tracker_engine->current_tick >= song->speed)
         {
-            tracker_engine->pattern_position = 0;
-            tracker_engine->sequence_position++;
+            // TODO: add pattern loop and pattern skip commands
 
-            if (tracker_engine->sequence_position >= song->num_sequence_steps)
+            tracker_engine->pattern_position++;
+
+            tracker_engine->current_tick = 0;
+
+            if (tracker_engine->pattern_position >= song->pattern_length)
             {
-                tracker_engine->playing = false; // TODO: add song loop handling
-                tracker_engine->sequence_position--;
-                tracker_engine->pattern_position = song->pattern_length - 1;
+                tracker_engine->pattern_position = 0;
+                tracker_engine->sequence_position++;
+
+                if (tracker_engine->sequence_position >= song->num_sequence_steps)
+                {
+                    tracker_engine->playing = false; // TODO: add song loop handling
+                    tracker_engine->sequence_position--;
+                    tracker_engine->pattern_position = song->pattern_length - 1;
+                }
             }
         }
     }
