@@ -4,7 +4,7 @@
     Due to the lack of documentation on the flipper i copied the picopass app,
     ripped its insides out and used its hollow corpse to build this app inside of.
 
-    i dont know how this stuff works and after 6 hours of trying to learn it, i dont
+    i dont know how this stuff works and after 6 hours of trying to learn it, i dont care
 */
 
 bool brainfuck_custom_event_callback(void* context, uint32_t event) {
