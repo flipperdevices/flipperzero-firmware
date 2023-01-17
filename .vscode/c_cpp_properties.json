@@ -3,7 +3,7 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**",
+                "${workspaceFolder}/flipp_pomodoro/**",
                 "${workspaceFolder}/.standard-firmware/**"
             ],
             "defines": [],

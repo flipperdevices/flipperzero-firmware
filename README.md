@@ -37,4 +37,8 @@ bash tools/build.sh
 
 # For unleashed firmware
 bash tools/build.sh -f unleashed 
+
+# While flipper connected via USB and serial port is not bussy
+# Build, run on flipper and keep app in `Productivity` directory
+bash tools/build.sh -f unleashed -i
 ```

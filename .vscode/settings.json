@@ -102,6 +102,23 @@
         "view_port.h": "c",
         "assets_icons.h": "c",
         "flipp_pomodoro_app_i.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "notifications.h": "c",
+        "infrared_scene_config.h": "c",
+        "dap_scene_config.h": "c",
+        "dap_scene.h": "c",
+        "flipp_pomodoro_scene.h": "c",
+        "dap_gui_custom_event.h": "c",
+        "flipp_pomodoro_app.h": "c",
+        "lfrfid_debug_scene_config.h": "c",
+        "flipp_pomodoro_scene_config.h": "c",
+        "lfrfid_debug_view_tune.h": "c",
+        "view.h": "c",
+        "u2f_view.h": "c",
+        "view_dispatcher.h": "c",
+        "flipp_pomodoro_timer_view.h": "c",
+        "log.h": "c",
+        "mutex.h": "c",
+        "m-array.h": "c"
     }
 }

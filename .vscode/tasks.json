@@ -6,7 +6,7 @@
         {
             "label": "Build Container",
             "type": "shell",
-            "command": "docker compose -f docker-compose.development.yml up -d --build",
+            "command": "bash tools/build.sh -f unleashed -i",
             "group": "build",
             "presentation": {
                 // Reveal the output only if unrecognized errors occur.

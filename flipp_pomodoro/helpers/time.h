@@ -7,7 +7,8 @@ extern const int TIME_SECONDS_IN_MINUTE;
 extern const int TIME_MINUTES_IN_HOUR;
 
 /// @brief Container for a time period
-typedef struct {
+typedef struct
+{
     uint8_t seconds;
     uint8_t minutes;
     uint32_t total_seconds;
@@ -22,4 +23,3 @@ uint32_t time_now();
 /// @param end - end timestamp of the period to measure
 /// @return TimeDifference struct
 TimeDifference time_difference_seconds(uint32_t begin, uint32_t end);
-
