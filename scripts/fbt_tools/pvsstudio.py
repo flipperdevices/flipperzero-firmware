@@ -7,6 +7,14 @@ import atexit
 import sys
 import subprocess
 
+__no_browser = False
+
+
+def _set_browser_action(target, source, env):
+    if env["PVSNOBROWSER"]:
+        global __no_browser
+        __no_browser = True
+
 
 def emit_pvsreport(target, source, env):
     target_dir = env["REPORT_DIR"]
@@ -17,6 +25,10 @@ def emit_pvsreport(target, source, env):
 
 
 def atexist_handler():
+    global __no_browser
+    if __no_browser:
+        return
+
     for bf in GetBuildFailures():
         if bf.node.exists and bf.node.name.endswith(".html"):
             # macOS
@@ -76,6 +88,7 @@ def generate(env):
                     Delete("${TARGET.dir}"),
                     # PlogConverter.exe and plog-converter have different behavior
                     Mkdir("${TARGET.dir}") if env["PLATFORM"] == "win32" else None,
+                    Action(_set_browser_action, ""),
                     Action(
                         '${PVSCONVBIN} ${PVSCONVOPTIONS} "${SOURCE}" -o "${REPORT_DIR}"',
                         "${PVSCONVCOMSTR}",
