@@ -2,6 +2,7 @@
  * See the LICENSE file for information about the license. */
 
 #include "app.h"
+#include <gui/view_i.h>
 
 enum {
     SubViewInfoMain,
@@ -10,11 +11,13 @@ enum {
 };
 
 /* Our view private data. */
+#define SAVE_FILENAME_LEN 64
 typedef struct {
     /* Our save view displays an oscilloscope-alike resampled signal,
      * so that the user can see what they are saving. With left/right
      * you can move to next rows. Here we store where we are. */
     uint32_t signal_display_start_row;
+    char *filename;
 } InfoViewPrivData;
 
 /* Render the view with the detected message information. */
@@ -90,6 +93,13 @@ void render_view_info(Canvas *const canvas, ProtoViewApp *app) {
     }
 }
 
+void text_input_done_callback(void* context) {
+    ProtoViewApp *app = context;
+    InfoViewPrivData *privdata = app->view_privdata;
+    free(privdata->filename);
+    view_dispatcher_stop(app->view_dispatcher);
+}
+
 /* Handle input for the info view. */
 void process_input_info(ProtoViewApp *app, InputEvent input) {
     if (process_subview_updown(app,input,SubViewInfoLast)) return;
@@ -109,6 +119,12 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
         } else if (input.type == InputTypePress && input.key == InputKeyLeft) {
             if (privdata->signal_display_start_row != 0)
                 privdata->signal_display_start_row--;
+        } else if (input.type == InputTypePress && input.key == InputKeyOk) {
+            privdata->filename = malloc(SAVE_FILENAME_LEN);
+            app->show_text_input = true;
+            app->text_input_buffer = privdata->filename;
+            app->text_input_buffer_len = SAVE_FILENAME_LEN;
+            app->text_input_done_callback = text_input_done_callback;
         }
     }
 }

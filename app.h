@@ -14,6 +14,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/subghz_worker.h>
@@ -25,7 +26,7 @@
 #define TAG "ProtoView"
 #define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100 // 100us is 1 pixel by default
 #define BITMAP_SEEK_NOT_FOUND UINT32_MAX // Returned by function as sentinel
-#define PROTOVIEW_VIEW_PRIVDATA_LEN 32 // View specific private data len
+#define PROTOVIEW_VIEW_PRIVDATA_LEN 64 // View specific private data len
 
 #define DEBUG_MSG 1
 
@@ -120,6 +121,14 @@ struct ProtoViewApp {
     ProtoViewCurrentView current_view;      /* Active left-right view ID. */
     int current_subview[ViewLast];  /* Active up-down subview ID. */
     FuriMessageQueue *event_queue;  /* Keypress events go here. */
+    ViewDispatcher *view_dispatcher; /* Used only when we want to show
+                                        the text_input view for a moment.
+                                        Otherwise it is set to null. */
+    TextInput *text_input;
+    bool show_text_input;
+    char *text_input_buffer;
+    uint32_t text_input_buffer_len;
+    void (*text_input_done_callback)(void*);
 
     /* Radio related. */
     ProtoViewTxRx *txrx;     /* Radio state. */
