@@ -58,7 +58,10 @@ bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subvie
  * 'buffer' of 'buflen' total bytes. When the user is done, the done_callback
  * is called passing the application context to it. Such callback needs
  * to do whatever it wants with the input buffer and dismissi the keyboard
- * calling: dismiss_keyboard(app); */
+ * calling: dismiss_keyboard(app);
+ *
+ * Note: if the buffer is not a null-termined zero string, what it contains will
+ * be used as initial input for the user. */
 void show_keyboard(ProtoViewApp *app, char *buffer, uint32_t buflen,
                    void (*done_callback)(void*))
 {

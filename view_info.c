@@ -3,6 +3,7 @@
 
 #include "app.h"
 #include <gui/view_i.h>
+#include <lib/toolbox/random_name.h>
 
 enum {
     SubViewInfoMain,
@@ -100,6 +101,25 @@ void text_input_done_callback(void* context) {
     dismiss_keyboard(app);
 }
 
+/* Replace all the occurrences of character c1 with c2 in the specified
+ * string. */
+void str_replace(char *buf, char c1, char c2) {
+    char *p = buf;
+    while(*p) {
+        if (*p == c1) *p = c2;
+        p++;
+    }
+}
+
+/* Set a random filename the user can edit. */
+void set_signal_random_filename(ProtoViewApp *app, char *buf, size_t buflen) {
+    char suffix[6];
+    set_random_name(suffix,sizeof(suffix));
+    snprintf(buf,buflen,"%.10s-%s-%d",app->msg_info->name,suffix,rand()%1000);
+    str_replace(buf,' ','_');
+    str_replace(buf,'-','_');
+}
+
 /* Handle input for the info view. */
 void process_input_info(ProtoViewApp *app, InputEvent input) {
     if (process_subview_updown(app,input,SubViewInfoLast)) return;
@@ -121,6 +141,7 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
                 privdata->signal_display_start_row--;
         } else if (input.type == InputTypePress && input.key == InputKeyOk) {
             privdata->filename = malloc(SAVE_FILENAME_LEN);
+            set_signal_random_filename(app,privdata->filename,SAVE_FILENAME_LEN);
             show_keyboard(app, privdata->filename, SAVE_FILENAME_LEN,
                           text_input_done_callback);
         }
