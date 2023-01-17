@@ -97,7 +97,7 @@ void text_input_done_callback(void* context) {
     ProtoViewApp *app = context;
     InfoViewPrivData *privdata = app->view_privdata;
     free(privdata->filename);
-    view_dispatcher_stop(app->view_dispatcher);
+    dismiss_keyboard(app);
 }
 
 /* Handle input for the info view. */
@@ -121,10 +121,8 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
                 privdata->signal_display_start_row--;
         } else if (input.type == InputTypePress && input.key == InputKeyOk) {
             privdata->filename = malloc(SAVE_FILENAME_LEN);
-            app->show_text_input = true;
-            app->text_input_buffer = privdata->filename;
-            app->text_input_buffer_len = SAVE_FILENAME_LEN;
-            app->text_input_done_callback = text_input_done_callback;
+            show_keyboard(app, privdata->filename, SAVE_FILENAME_LEN,
+                          text_input_done_callback);
         }
     }
 }

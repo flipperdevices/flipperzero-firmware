@@ -218,6 +218,9 @@ int get_current_subview(ProtoViewApp *app);
 void show_available_subviews(Canvas *canvas, ProtoViewApp *app, int last_subview);
 bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview);
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
+void show_keyboard(ProtoViewApp *app, char *buffer, uint32_t buflen,
+                   void (*done_callback)(void*));
+void dismiss_keyboard(ProtoViewApp *app);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);
