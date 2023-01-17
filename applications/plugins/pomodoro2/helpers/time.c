@@ -17,4 +17,4 @@ TimeDifference time_difference_seconds(uint32_t begin, uint32_t end) {
 
     return (
         TimeDifference){.total_seconds = duration_seconds, .minutes = minutes, .seconds = seconds};
-}
+};

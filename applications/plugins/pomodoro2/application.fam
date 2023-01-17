@@ -2,7 +2,7 @@ App(
     appid="Pomodoro2",
     name="Pomodoro 2",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="flipp_pomodoro_main",
+    entry_point="flipp_pomodoro_app",
     requires=["gui", "notification", "dolphin"],
     stack_size=1 * 1024,
     fap_category="Tools",
