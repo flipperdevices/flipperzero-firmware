@@ -19,9 +19,9 @@
 #define MF_CLASSIC_ACCESS_BYTES_SIZE (4)
 
 typedef enum {
-    MfClassicTypeMini,
     MfClassicType1k,
     MfClassicType4k,
+    MfClassicTypeMini,
 } MfClassicType;
 
 typedef enum {
