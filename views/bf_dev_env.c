@@ -84,7 +84,7 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
         execCountdown--;
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "RUNNING...");
         if(execCountdown == 0){
-            initWorker(appDev->dataBuffer, appDev->dataSize);
+            initWorker(appDev);
             beginWorker();
             text_box_set_text(appDev->text_box, workerGetOutput());
             scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
@@ -287,7 +287,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 9:
         {
             //todo: input
-            //scene_manager_next_scene(appDev->scene_manager, brainfuckSceneSetInput);
+            scene_manager_next_scene(appDev->scene_manager, brainfuckSceneSetInput);
             break;
         }
 

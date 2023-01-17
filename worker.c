@@ -1,4 +1,4 @@
-#include "brainfuck_i.h"
+#include "worker.h"
 
 int status = 0; //0: idle, 1: running, 2: failure
 
@@ -10,10 +10,10 @@ int runOpCount = 0;
 char* wOutput = 0;
 int wOutputPtr = 0;
 
-char wInput = 0x00;
-bool wInputFlag = false;
+char* wInput = 0;
+int wInputPtr = 0;
 
-char* bfStack = 0;
+uint8_t* bfStack = 0;
 int stackPtr = 0;
 int stackSize = BF_STACK_INITIAL_SIZE;
 int stackSizeReal = 0;
@@ -48,12 +48,7 @@ int getStatus(){
     return status;
 }
 
-void workerSetInput(char c){
-    wInput = c;
-    wInputFlag = true;
-}
-
-void initWorker(char* instructions, int instructionsCount){
+void initWorker(BFApp* app){
     //rebuild output
     if(wOutput){ free(wOutput); }
     wOutput = (char*)malloc(BF_OUTPUT_SIZE);
@@ -61,21 +56,21 @@ void initWorker(char* instructions, int instructionsCount){
 
     //rebuild stack
     if(bfStack){ free(bfStack); }
-    bfStack = (char*)malloc(BF_STACK_INITIAL_SIZE);
+    bfStack = (uint8_t*)malloc(BF_STACK_INITIAL_SIZE);
     memset(bfStack, 0x00, BF_STACK_INITIAL_SIZE);
     stackSize = BF_STACK_INITIAL_SIZE;
     stackSizeReal = 0;
     stackPtr = 0;
 
-    //reset input
-    wInput = 0x00;
-    wInputFlag = false;
-
     //set instructions
-    inst = instructions;
-    instCount = instructionsCount;
+    inst = app->dataBuffer;
+    instCount = app->dataSize;
     instPtr = 0;
     runOpCount = 0;
+
+    //set input
+    wInput = app->inputBuffer;
+    wInputPtr = 0;
 
     //set status
     status = 0;
@@ -96,7 +91,7 @@ void rShift(){
         }
 
         memset((tmp + stackSize) - BF_STACK_STEP_SIZE, 0x00, BF_STACK_STEP_SIZE);
-        bfStack = tmp;
+        bfStack = (uint8_t*)tmp;
     };
     if(stackPtr > stackSizeReal){ 
         stackSizeReal = stackPtr; 
@@ -130,9 +125,14 @@ void print(){
 
 void input(){
     runOpCount++;
-    //todo
-    wInput = 0x00;
-    wInputFlag = true;
+    
+    bfStack[stackPtr] = (uint8_t)wInput[wInputPtr];
+    if(wInput[wInputPtr] == 0x00 || wInputPtr >= 64){
+        wInputPtr = 0;
+    }
+    else{
+        wInputPtr++;
+    }
 }
 
 void loop() {

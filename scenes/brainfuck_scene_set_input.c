@@ -5,7 +5,6 @@ void set_input_text_input_callback(void* context) {
     view_dispatcher_send_custom_event(app->view_dispatcher, brainfuckCustomEventTextInputDone);
 }
 
-char tmpBuffer[64] = {};
 void brainfuck_scene_set_input_on_enter(void* context) {
     BFApp* app = context;
     TextInput* text_input = app->text_input;
@@ -15,7 +14,7 @@ void brainfuck_scene_set_input_on_enter(void* context) {
         text_input,
         set_input_text_input_callback,
         app,
-        tmpBuffer,
+        app->inputBuffer,
         64,
         true);
 
@@ -24,18 +23,17 @@ void brainfuck_scene_set_input_on_enter(void* context) {
 
 bool brainfuck_scene_set_input_on_event(void* context, SceneManagerEvent event) {
     BFApp* app = context;
-    UNUSED(app);
     
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == brainfuckCustomEventTextInputDone) {
-            memcpy(app->inputBuffer, tmpBuffer, 64);
-            scene_manager_next_scene(app->scene_manager, brainfuckSceneDevEnv);
+            scene_manager_search_and_switch_to_previous_scene(app->scene_manager, brainfuckSceneDevEnv);
         }
     }
     return consumed;
 }
 
 void brainfuck_scene_set_input_on_exit(void* context) {
-    UNUSED(context);
+    BFApp* app = context;
+    scene_manager_search_and_switch_to_previous_scene(app->scene_manager, brainfuckSceneDevEnv);
 }

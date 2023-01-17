@@ -1,4 +1,6 @@
-void initWorker(char* instructions, int instructionsCount);
+#include "brainfuck_i.h"
+
+void initWorker(BFApp* application);
 char* workerGetOutput();
 int getStackSize();
 int getOpCount();
