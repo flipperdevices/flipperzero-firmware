@@ -5,7 +5,7 @@ App(
     entry_point="barcode_main",
     requires=["gui", "storage"],
     stack_size=2 * 1024,
-    fap_category="Example",
+    fap_category="Misc",
     fap_icon="images/barcode_10.png",
     fap_icon_assets="images",
 )
