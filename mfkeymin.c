@@ -1,7 +1,4 @@
 #include <inttypes.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +15,6 @@ uint32_t prng_successor(uint32_t x, uint32_t n) {
     SWAPENDIAN(x);
     while (n--)
         x = x >> 1 | (x >> 16 ^ x >> 18 ^ x >> 19 ^ x >> 21) << 31;
-
     return SWAPENDIAN(x);
 }
 static inline int filter(uint32_t const x) {
@@ -72,28 +68,23 @@ static inline void update_contribution(uint32_t *item, const uint32_t mask1, con
     p = p << 1 | (evenparity32(*item & mask2));
     *item = p << 24 | (*item & 0xffffff);
 }
-static inline void extend_table(uint32_t *tbl, uint32_t **end, int bit, int m1, int m2, uint32_t in) {
-    in <<= 24;
+static inline void extend_table(uint32_t *tbl, uint32_t **end, int bit, int m1, int m2) {
     for (*tbl <<= 1; tbl <= *end; *++tbl <<= 1)
         if (filter(*tbl) ^ filter(*tbl | 1)) {
             *tbl |= filter(*tbl) ^ bit;
             update_contribution(tbl, m1, m2);
-            *tbl ^= in;
         } else if (filter(*tbl) == bit) {
             *++*end = tbl[1];
             tbl[1] = tbl[0] | 1;
             update_contribution(tbl, m1, m2);
-            *tbl++ ^= in;
+            *tbl++;
             update_contribution(tbl, m1, m2);
-            *tbl ^= in;
         } else
             *tbl-- = *(*end)--;
 }
 static inline void extend_table_simple(uint32_t *tbl, uint32_t **end, int bit) {
     for (*tbl <<= 1; tbl <= *end; *++tbl <<= 1) {
-        if (filter(*tbl) ^ filter(*tbl | 1)) {
-            *tbl |= filter(*tbl) ^ bit;
-        } else if (filter(*tbl) == bit) {
+        if (filter(*tbl) == bit) {
             *++*end = *++tbl;
             *tbl = tbl[-1] | 1;
         } else {
@@ -101,15 +92,14 @@ static inline void extend_table_simple(uint32_t *tbl, uint32_t **end, int bit) {
         }
     }
 }
-static struct Crypto1State *recover(uint32_t *o_head, uint32_t *o_tail, uint32_t oks, uint32_t *e_head, uint32_t *e_tail, uint32_t eks, int rem, struct Crypto1State *sl, uint32_t in, bucket_array_t bucket) {
+static struct Crypto1State *recover(uint32_t *o_head, uint32_t *o_tail, uint32_t oks, uint32_t *e_head, uint32_t *e_tail, uint32_t eks, int rem, struct Crypto1State *sl, bucket_array_t bucket) {
     bucket_info_t bucket_info;
     if (rem == -1) {
         for (uint32_t *e = e_head; e <= e_tail; ++e) {
-            *e = *e << 1 ^ (evenparity32(*e & LF_POLY_EVEN)) ^ (!!(in & 4));
+            *e = *e << 1 ^ (evenparity32(*e & LF_POLY_EVEN));
             for (uint32_t *o = o_head; o <= o_tail; ++o, ++sl) {
                 sl->even = *o;
                 sl->odd = *e ^ (evenparity32(*o & LF_POLY_ODD));
-                sl[1].odd = sl[1].even = 0;
             }
         }
         return sl;
@@ -117,11 +107,10 @@ static struct Crypto1State *recover(uint32_t *o_head, uint32_t *o_tail, uint32_t
     for (uint32_t i = 0; i < 4 && rem--; i++) {
         oks >>= 1;
         eks >>= 1;
-        in >>= 2;
-        extend_table(o_head, &o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1, 0);
+        extend_table(o_head, &o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1);
         if (o_head > o_tail)
             return sl;
-        extend_table(e_head, &e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1, in & 3);
+        extend_table(e_head, &e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1);
         if (e_head > e_tail)
             return sl;
     }
@@ -129,11 +118,11 @@ static struct Crypto1State *recover(uint32_t *o_head, uint32_t *o_tail, uint32_t
     for (int i = bucket_info.numbuckets - 1; i >= 0; i--) {
         sl = recover(bucket_info.bucket_info[1][i].head, bucket_info.bucket_info[1][i].tail, oks,
                      bucket_info.bucket_info[0][i].head, bucket_info.bucket_info[0][i].tail, eks,
-                     rem, sl, in, bucket);
+                     rem, sl, bucket);
     }
     return sl;
 }
-struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in) {
+struct Crypto1State *lfsr_recovery32(uint32_t ks2) {
     struct Crypto1State *statelist;
     uint32_t *odd_head = 0, *odd_tail = 0, oks = 0;
     uint32_t *even_head = 0, *even_tail = 0, eks = 0;
@@ -145,7 +134,6 @@ struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in) {
     odd_head = odd_tail = calloc(1, sizeof(uint32_t) << 20);
     even_head = even_tail = calloc(1, sizeof(uint32_t) << 20);
     statelist =  calloc(1, sizeof(struct Crypto1State) << 18);
-    statelist->odd = statelist->even = 0;
     bucket_array_t bucket;
     for (i = 0; i < 2; i++) {
         for (uint32_t j = 0; j <= 0xff; j++) {
@@ -162,8 +150,7 @@ struct Crypto1State *lfsr_recovery32(uint32_t ks2, uint32_t in) {
         extend_table_simple(odd_head,  &odd_tail, (oks >>= 1) & 1);
         extend_table_simple(even_head, &even_tail, (eks >>= 1) & 1);
     }
-    in = (in >> 16 & 0xff) | (in << 16) | (in & 0xff00); // Byte swapping
-    recover(odd_head, odd_tail, oks, even_head, even_tail, eks, 11, statelist, in << 1, bucket);
+    recover(odd_head, odd_tail, oks, even_head, even_tail, eks, 11, statelist, bucket);
     for (i = 0; i < 2; i++)
         for (uint32_t j = 0; j <= 0xff; j++)
             free(bucket[i][j].head);
@@ -228,9 +215,7 @@ int main(int argc, char *argv[]) {
     uint32_t ar0_enc; // first encrypted reader response
     uint32_t nr1_enc; // second encrypted reader challenge
     uint32_t ar1_enc; // second encrypted reader response
-    uint32_t ks2;     // keystream used to encrypt reader response
     int i;
-    int found;
     char *rest;
     char *token;
     size_t keyarray_size;
@@ -259,8 +244,7 @@ int main(int argc, char *argv[]) {
         }
         uint32_t p64 = prng_successor(nt0, 64);
         uint32_t p64b = prng_successor(nt1, 64);
-        ks2 = ar0_enc ^ p64;
-        s = lfsr_recovery32(ar0_enc ^ p64, 0);
+        s = lfsr_recovery32(ar0_enc ^ p64);
         for (t = s; t->odd | t->even; ++t) {
             crypt_or_rollback_word(t, 0, 0, 0);
             crypt_or_rollback_word(t, nr0_enc, 1, 0);
