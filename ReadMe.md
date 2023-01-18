@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [The clock will now show 12 AM instead of 00 AM (Thanks To Smileycathy1128)](https://github.com/DarkFlippers/unleashed-firmware/pull/288)
 - Added: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
+- Added: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 
 <a name="release">
 
@@ -246,6 +247,7 @@ $ ./fbt dolphin_ext
 - [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
 - [Bluetooth Remote (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
+- [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
