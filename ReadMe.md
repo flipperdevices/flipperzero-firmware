@@ -80,6 +80,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 - [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
+- [Brainfuck interpreter (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 
 --- 
 
