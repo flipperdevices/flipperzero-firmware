@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - Added: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - Updated: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
