@@ -25,7 +25,7 @@ static const char *test_vector =
 static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
 
     if (USE_TEST_VECTOR) { /* Test vector to check that decoding works. */
-        bitmap_set_pattern(bits,numbytes,test_vector);
+        bitmap_set_pattern(bits,numbytes,0,test_vector);
         numbits = strlen(test_vector);
     }
 
@@ -36,6 +36,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Renault TPMS preamble+sync found");
 
+    info->start_off = off;
     off += 20; /* Skip preamble. */
 
     uint8_t raw[9];
@@ -46,6 +47,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     if (decoded < 8*9) return false; /* Require the full 9 bytes. */
     if (crc8(raw,8,0,7) != raw[8]) return false; /* Require sane CRC. */
+
+    info->pulses_count = (off+8*9*2) - info->start_off;
 
     float kpa = 0.75 *((uint32_t)((raw[0]&3)<<8) | raw[1]);
     int temp = raw[2]-30;

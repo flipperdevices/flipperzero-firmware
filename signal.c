@@ -363,15 +363,17 @@ uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t
     return BITMAP_SEEK_NOT_FOUND;
 }
 
-/* Set the pattern 'pat' into the bitmap 'b' of max length 'blen' bytes.
+/* Set the pattern 'pat' into the bitmap 'b' of max length 'blen' bytes,
+ * starting from the specified offset.
+ *
  * The pattern is given as a string of 0s and 1s characters, like "01101001".
  * This function is useful in order to set the test vectors in the protocol
  * decoders, to see if the decoding works regardless of the fact we are able
  * to actually receive a given signal. */
-void bitmap_set_pattern(uint8_t *b, uint32_t blen, const char *pat) {
+void bitmap_set_pattern(uint8_t *b, uint32_t blen, uint32_t off, const char *pat) {
     uint32_t i = 0;
     while(pat[i]) {
-        bitmap_set(b,blen,i,pat[i] == '1');
+        bitmap_set(b,blen,i+off,pat[i] == '1');
         i++;
     }
 }
@@ -537,7 +539,7 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
 
     /* We call the decoders with an offset a few samples before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_samples = 20;
+    uint32_t before_samples = 32;
     uint32_t after_samples = 100;
 
     uint8_t *bitmap = malloc(bitmap_size);

@@ -54,11 +54,9 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         convert_from_line_code(raw,sizeof(raw),bits,numbytes,off,
             "110","100"); /* Pulse width modulation. */
     FURI_LOG_E(TAG, "Keeloq decoded bits: %lu", decoded);
-
     if (decoded < 66) return false; /* Require the full 66 bits. */
 
-    off += 66*3; // Seek end to compute total length.
-    info->pulses_count = off - info->start_off;
+    info->pulses_count = (off+66*3) - info->start_off;
 
     bitmap_reverse_bytes(raw,sizeof(raw)); /* Keeloq is LSB first. */
 

@@ -193,7 +193,7 @@ void scan_for_signal(ProtoViewApp *app);
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val);
 void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff, uint8_t *s, uint32_t slen, uint32_t soff, uint32_t count);
-void bitmap_set_pattern(uint8_t *b, uint32_t blen, const char *pat);
+void bitmap_set_pattern(uint8_t *b, uint32_t blen, uint32_t off, const char *pat);
 void bitmap_reverse_bytes(uint8_t *p, uint32_t len);
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
 uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t maxbits, const char *bits);
