@@ -530,7 +530,7 @@ Sensor* unitemp_sensor_alloc(char* name, const SensorType* type, char* args) {
 
     //Выход если датчик успешно развёрнут
     if(status) {
-        FURI_LOG_I(APP_NAME, "Sensor %s allocated", name);
+        UNITEMP_DEBUG("Sensor %s allocated", name);
         return sensor;
     }
     //Выход с очисткой если память для датчика не была выделена
@@ -563,7 +563,6 @@ void unitemp_sensor_free(Sensor* sensor) {
         FURI_LOG_E(APP_NAME, "Sensor %s memory is not released", sensor->name);
     }
     free(sensor->name);
-    //free(sensor);
 }
 
 void unitemp_sensors_free(void) {
@@ -591,7 +590,7 @@ bool unitemp_sensors_init(void) {
                 app->sensors[i]->name);
             result = false;
         }
-        UNITEMP_DEBUG("Sensor %s successfully initialized", app->sensors[i]->name);
+        FURI_LOG_I(APP_NAME, "Sensor %s successfully initialized", app->sensors[i]->name);
     }
     app->sensors_ready = true;
     return result;
