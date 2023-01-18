@@ -25,6 +25,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Schrader EG53MA4 TPMS preamble+sync found");
 
+    info->start_off = off;
     off += sync_len-8; /* Skip preamble, not sync that is part of the data. */
 
     uint8_t raw[10];
@@ -39,6 +40,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint8_t crc = 0;
     for (int j = 0; j < 9; j++) crc += raw[j];
     if (crc != raw[9]) return false; /* Require sane CRC. */
+
+    info->pulses_count = (off+10*8*2) - info->start_off;
 
     /* To convert the raw pressure to kPa, RTL433 uses 2.5, but is likely
      * wrong. Searching on Google for users experimenting with the value

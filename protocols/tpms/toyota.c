@@ -42,6 +42,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     for (j = 0; sync[j]; j++) {
         off = bitmap_seek_bits(bits,numbytes,0,numbits,sync[j]);
         if (off != BITMAP_SEEK_NOT_FOUND) {
+            info->start_off = off;
             off += strlen(sync[j])-2;
             break;
 	}
@@ -58,6 +59,19 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (decoded < 8*9) return false; /* Require the full 8 bytes. */
     if (crc8(raw,8,0x80,7) != raw[8]) return false; /* Require sane CRC. */
 
+    /* We detected a valid signal. However now info->start_off is actually
+     * pointing to the sync part, not the preamble of alternating 0 and 1.
+     * Protoview decoders get called with some space to the left, in order
+     * for the decoder itself to fix the signal if neeeded, so that its
+     * logical representation will be more accurate and better to save
+     * and retransmit. */
+    if (info->start_off >= 12) {
+        info->start_off -= 12;
+        bitmap_set_pattern(bits,numbytes,info->start_off,"010101010101");
+    }
+
+    info->pulses_count = (off+8*9*2) - info->start_off;
+
     float kpa = (float)((raw[4]&0x7f)<<1 | raw[5]>>7) * 0.25 - 7;
     int temp = ((raw[5]&0x7f)<<1 | raw[6]>>7) - 40;
 
@@ -67,8 +81,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         raw[6],raw[7],raw[8]);
     snprintf(info->info1,sizeof(info->info1),"Tire ID %02X%02X%02X%02X",
         raw[0],raw[1],raw[2],raw[3]);
-    snprintf(info->info1,sizeof(info->info1),"Pressure %.2f psi", (double)kpa);
-    snprintf(info->info2,sizeof(info->info2),"Temperature %d C", temp);
+    snprintf(info->info2,sizeof(info->info2),"Pressure %.2f psi", (double)kpa);
+    snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
     return true;
 }
 

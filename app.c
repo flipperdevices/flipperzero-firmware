@@ -95,6 +95,12 @@ static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
     if ((old == ViewFrequencySettings && new != ViewModulationSettings) ||
         (old == ViewModulationSettings && new != ViewFrequencySettings))
         view_exit_settings(app);
+
+    /* Set the current subview of the view we just left to zero, that is
+     * the main subview of the view. When re re-enter it we want to see
+     * the main thing. */
+    app->current_subview[old] = 0;
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -117,8 +123,14 @@ ProtoViewApp* protoview_app_alloc() {
     view_port_input_callback_set(app->view_port, input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    app->view_dispatcher = NULL;
+    app->text_input = NULL;
+    app->show_text_input = false;
     app->current_view = ViewRawPulses;
+    for (int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
+    app->view_privdata = malloc(PROTOVIEW_VIEW_PRIVDATA_LEN);
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
@@ -126,8 +138,9 @@ ProtoViewApp* protoview_app_alloc() {
     app->signal_decoded = false;
     app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
+    app->msg_info = NULL;
 
-    //init Worker & Protocol
+    // Init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */
@@ -252,12 +265,14 @@ int32_t protoview_app_entry(void* p) {
                 /* Exit the app. */
                 app->running = 0;
             } else if (input.type == InputTypeShort &&
-                       input.key == InputKeyRight)
+                       input.key == InputKeyRight &&
+                       get_current_subview(app) == 0)
             {
                 /* Go to the next view. */
                 app_switch_view(app,AppNextView);
             } else if (input.type == InputTypeShort &&
-                       input.key == InputKeyLeft)
+                       input.key == InputKeyLeft &&
+                       get_current_subview(app) == 0)
             {
                 /* Go to the previous view. */
                 app_switch_view(app,AppPrevView);
@@ -289,7 +304,48 @@ int32_t protoview_app_entry(void* p) {
                 if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
             }
         }
-        view_port_update(app->view_port);
+        if (app->show_text_input) {
+            /* Remove our viewport: we need to use a view dispatcher
+             * in order to show the standard Flipper keyboard. */
+            gui_remove_view_port(app->gui, app->view_port);
+
+            /* Allocate a view dispatcher, add a text input view to it,
+             * and activate it. */
+            app->view_dispatcher = view_dispatcher_alloc();
+            view_dispatcher_enable_queue(app->view_dispatcher);
+            app->text_input = text_input_alloc();
+            view_dispatcher_set_event_callback_context(app->view_dispatcher,app);
+            view_dispatcher_add_view(app->view_dispatcher, 0, text_input_get_view(app->text_input));
+            view_dispatcher_switch_to_view(app->view_dispatcher, 0);
+
+            /* Setup the text input view. The different parameters are set
+             * in the app structure by the view that wanted to show the
+             * input text. The callback, buffer and buffer len must be set.  */
+            text_input_set_header_text(app->text_input, "Save signal filename");
+            text_input_set_result_callback(
+                app->text_input,
+                app->text_input_done_callback,
+                app,
+                app->text_input_buffer,
+                app->text_input_buffer_len,
+                false);
+
+            /* Run the dispatcher with the keyboard. */
+            view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+            view_dispatcher_run(app->view_dispatcher);
+
+            /* Undo all it: remove the view from the dispatcher, free it
+             * so that it removes itself from the current gui, finally
+             * restore our viewport. */
+            view_dispatcher_remove_view(app->view_dispatcher, 0);
+            text_input_free(app->text_input);
+            view_dispatcher_free(app->view_dispatcher);
+            app->view_dispatcher = NULL;
+            gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
+            app->show_text_input = false;
+        } else {
+            view_port_update(app->view_port);
+        }
     }
 
     /* App no longer running. Shut down and free. */

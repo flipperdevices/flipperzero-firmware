@@ -20,6 +20,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Fort TPMS preamble+sync found");
 
+    info->start_off = off;
     off += sync_len; /* Skip preamble and sync. */
 
     uint8_t raw[8];
@@ -34,6 +35,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint8_t crc = 0;
     for (int j = 0; j < 7; j++) crc += raw[j];
     if (crc != raw[7]) return false; /* Require sane CRC. */
+
+    info->pulses_count = (off+8*8*2) - info->start_off;
 
     float psi = 0.25 * (((raw[6]&0x20)<<3)|raw[4]);
 

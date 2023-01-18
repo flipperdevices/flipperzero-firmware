@@ -14,6 +14,7 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/subghz_worker.h>
@@ -23,8 +24,9 @@
 #include "app_buffer.h"
 
 #define TAG "ProtoView"
-#define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100
-#define BITMAP_SEEK_NOT_FOUND UINT32_MAX
+#define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100 // 100us is 1 pixel by default
+#define BITMAP_SEEK_NOT_FOUND UINT32_MAX // Returned by function as sentinel
+#define PROTOVIEW_VIEW_PRIVDATA_LEN 64 // View specific private data len
 
 #define DEBUG_MSG 1
 
@@ -54,9 +56,11 @@ typedef enum {
 } SwitchViewDirection;
 
 typedef struct {
-    const char *name;
-    FuriHalSubGhzPreset preset;
-    uint8_t *custom;
+    const char *name;               // Name to show to the user.
+    const char *id;                 // Identifier in the Flipper API/file.
+    FuriHalSubGhzPreset preset;     // The preset ID.
+    uint8_t *custom;                // If not null, a set of registers for
+                                    // the CC1101, specifying a custom preset.
 } ProtoViewModulation;
 
 extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
@@ -97,7 +101,18 @@ typedef struct ProtoViewMsgInfo {
     char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
     char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
     char info4[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 4. */
-    uint64_t len;       /* Bits consumed from the stream. */
+    /* Low level information of the detected signal: the following are filled
+     * by the protocol decoding function: */
+    uint32_t start_off;         /* Pulses start offset in the bitmap. */
+    uint32_t pulses_count;      /* Number of pulses of the full message. */
+    /* The following are passed already filled to the decoder. */
+    uint32_t short_pulse_dur;   /* Microseconds duration of the short pulse. */
+    /* The following are filled by ProtoView core after the decoder returned
+     * success. */
+    uint8_t *bits;              /* Bitmap with the signal. */
+    uint32_t bits_bytes;        /* Number of full bytes in the bitmap, that
+                                   is 'pulses_count/8' rounded to the next
+                                   integer. */
 } ProtoViewMsgInfo;
 
 struct ProtoViewApp {
@@ -105,8 +120,17 @@ struct ProtoViewApp {
     Gui *gui;
     ViewPort *view_port;     /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
-    ProtoViewCurrentView current_view;  /* Active view ID. */
+    ProtoViewCurrentView current_view;      /* Active left-right view ID. */
+    int current_subview[ViewLast];  /* Active up-down subview ID. */
     FuriMessageQueue *event_queue;  /* Keypress events go here. */
+    ViewDispatcher *view_dispatcher; /* Used only when we want to show
+                                        the text_input view for a moment.
+                                        Otherwise it is set to null. */
+    TextInput *text_input;
+    bool show_text_input;
+    char *text_input_buffer;
+    uint32_t text_input_buffer_len;
+    void (*text_input_done_callback)(void*);
 
     /* Radio related. */
     ProtoViewTxRx *txrx;     /* Radio state. */
@@ -118,9 +142,16 @@ struct ProtoViewApp {
     uint32_t signal_last_scan_idx; /* Index of the buffer last time we
                                       performed the scan. */
     bool signal_decoded;     /* Was the current signal decoded? */
-    ProtoViewMsgInfo signal_info; /* Decoded message, if signal_decoded true. */
+    ProtoViewMsgInfo *msg_info; /* Decoded message info if not NULL. */
     bool direct_sampling_enabled; /* This special view needs an explicit
                                      acknowledge to work. */
+    void *view_privdata;    /* This is a piece of memory of total size
+                               PROTOVIEW_VIEW_PRIVDATA_LEN that it is
+                               initialized to zero when we switch to
+                               a a new view. While the view we are using
+                               is the same, it can be used by the view to
+                               store any kind of info inside, just casting
+                               the pointer to a few specific-data structure. */
 
     /* Raw view apps state. */
     uint32_t us_scale;       /* microseconds per pixel. */
@@ -161,12 +192,18 @@ void reset_current_signal(ProtoViewApp *app);
 void scan_for_signal(ProtoViewApp *app);
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val);
-void bitmap_set_pattern(uint8_t *b, uint32_t blen, const char *pat);
+void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff, uint8_t *s, uint32_t slen, uint32_t soff, uint32_t count);
+void bitmap_set_pattern(uint8_t *b, uint32_t blen, uint32_t off, const char *pat);
 void bitmap_reverse_bytes(uint8_t *p, uint32_t len);
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
 uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t maxbits, const char *bits);
 uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t offset, const char *zero_pattern, const char *one_pattern);
 uint32_t convert_from_diff_manchester(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, bool previous);
+void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app);
+void free_msg_info(ProtoViewMsgInfo *i);
+
+/* signal_file.c */
+bool save_signal(ProtoViewApp *app, const char *filename);
 
 /* view_*.c */
 void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);
@@ -182,7 +219,13 @@ void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);
 
 /* ui.c */
+int get_current_subview(ProtoViewApp *app);
+void show_available_subviews(Canvas *canvas, ProtoViewApp *app, int last_subview);
+bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview);
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
+void show_keyboard(ProtoViewApp *app, char *buffer, uint32_t buflen,
+                   void (*done_callback)(void*));
+void dismiss_keyboard(ProtoViewApp *app);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);

@@ -13,6 +13,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Oregon2 preamble+sync found");
 
+    info->start_off = off;
     off += 32; /* Skip preamble. */
 
     uint8_t buffer[8], raw[8] = {0};
@@ -21,6 +22,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     FURI_LOG_E(TAG, "Oregon2 decoded bits: %lu", decoded);
 
     if (decoded < 11*4) return false; /* Minimum len to extract some data. */
+    info->pulses_count = (off+11*4*4) - info->start_off;
 
     char temp[3] = {0}, deviceid[2] = {0}, hum[2] = {0};
     for (int j = 0; j < 64; j += 4) {

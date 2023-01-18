@@ -4,7 +4,6 @@
 #include "app.h"
 
 bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info);
-void initialize_msg_info(ProtoViewMsgInfo *i);
 
 /* =============================================================================
  * Raw signal detection
@@ -23,6 +22,8 @@ void reset_current_signal(ProtoViewApp *app) {
     app->signal_decoded = false;
     raw_samples_reset(DetectedSamples);
     raw_samples_reset(RawSamples);
+    free_msg_info(app->msg_info);
+    app->msg_info = NULL;
 }
 
 /* This function starts scanning samples at offset idx looking for the
@@ -135,7 +136,6 @@ void scan_for_signal(ProtoViewApp *app) {
                                        than a few samples it's very easy to
                                        mistake noise for signal. */
 
-    ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
     uint32_t i = 0;
 
     while (i < copy->total-1) {
@@ -143,10 +143,16 @@ void scan_for_signal(ProtoViewApp *app) {
 
         /* For messages that are long enough, attempt decoding. */
         if (thislen > minlen) {
-            initialize_msg_info(info);
+            /* Allocate the message information that some decoder may
+             * fill, in case it is able to decode a message. */
+            ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
+            init_msg_info(info,app);
+            info->short_pulse_dur = copy->short_pulse_dur;
+
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
+
             /* decode_signal() expects the detected signal to start
-             * from index .*/
+             * from index zero .*/
             raw_samples_center(copy,i);
             bool decoded = decode_signal(copy,thislen,info);
             copy->idx = saved_idx; /* Restore the index as we are scanning
@@ -158,7 +164,8 @@ void scan_for_signal(ProtoViewApp *app) {
             if ((thislen > app->signal_bestlen && app->signal_decoded == false)
                 || (app->signal_decoded == false && decoded))
             {
-                app->signal_info = *info;
+                free_msg_info(app->msg_info);
+                app->msg_info = info;
                 app->signal_bestlen = thislen;
                 app->signal_decoded = decoded;
                 raw_samples_copy(DetectedSamples,copy);
@@ -172,12 +179,15 @@ void scan_for_signal(ProtoViewApp *app) {
                     app->us_scale = 10;
                 else if (DetectedSamples->short_pulse_dur < 145)
                     app->us_scale = 30;
+            } else {
+                /* If the structure was not filled, discard it. Otherwise
+                 * now the owner is app->msg_info. */
+                free_msg_info(info);
             }
         }
         i += thislen ? thislen : 1;
     }
     raw_samples_free(copy);
-    free(info);
 }
 
 /* =============================================================================
@@ -213,6 +223,100 @@ bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos) {
     uint32_t bit = 7-(bitpos&7);
     if (byte >= blen) return 0;
     return (b[byte] & (1<<bit)) != 0;
+}
+
+/* Copy 'count' bits from the bitmap 's' of 'slen' total bytes, to the
+ * bitmap 'd' of 'dlen' total bytes. The bits are copied starting from
+ * offset 'soff' of the source bitmap to the offset 'doff' of the
+ * destination bitmap. */
+void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff,
+                 uint8_t *s, uint32_t slen, uint32_t soff,
+                 uint32_t count)
+{
+    /* If we are byte-aligned in both source and destination, use a fast
+     * path for the number of bytes we can consume this way. */
+    if ((doff & 7) == 0 && (soff & 7) == 0) {
+        uint32_t didx = doff/8;
+        uint32_t sidx = soff/8;
+        while(count > 8 && didx < dlen && sidx < slen) {
+            d[didx++] = s[sidx++];
+            count -= 8;
+        }
+        doff = didx * 8;
+        soff = sidx * 8;
+        /* Note that if we entered this path, the count at the end
+         * of the loop will be < 8. */
+    }
+
+    /* Copy the bits needed to reach an offset where we can copy
+     * two half bytes of src to a full byte of destination. */
+    while(count > 8 && (doff&7) != 0) {
+        bool bit = bitmap_get(s,slen,soff++);
+        bitmap_set(d,dlen,doff++,bit);
+        count--;
+    }
+
+    /* If we are here and count > 8, we have an offset that is byte aligned
+     * to the destination bitmap, but not aligned to the source bitmap.
+     * We can copy fast enough by shifting each two bytes of the original
+     * bitmap.
+     *
+     * This is how it works:
+     *
+     *  dst:
+     *  +--------+--------+--------+
+     *  | 0      | 1      | 2      |
+     *  |        |        |        | <- data to fill
+     *  +--------+--------+--------+
+     *            ^
+     *            |
+     *            doff = 8
+     *
+     *  src:
+     *  +--------+--------+--------+
+     *  | 0      | 1      | 2      |
+     *  |hellowor|ld!HELLO|WORLDS!!| <- data to copy
+     *  +--------+--------+--------+
+     *               ^
+     *               |
+     *               soff = 11
+     *
+     *  skew = 11%8 = 3
+     *  each destination byte in dst will receive:
+     *
+     *  dst[doff/8] = (src[soff/8] << skew) | (src[soff/8+1] >> (8-skew))
+     *
+     *  dstbyte = doff/8 = 8/8 = 1
+     *  srcbyte = soff/8 = 11/8 = 1
+     *
+     *  so dst[1] will get:
+     *  src[1] << 3, that is "ld!HELLO" << 3 = "HELLO..."
+     *      xored with
+     *  src[2] << 5, that is "WORLDS!!" >> 5 = ".....WOR"
+     *  That is "HELLOWOR"
+     */
+    if (count > 8) {
+        uint8_t skew = soff % 8; /* Don't worry, compiler will optimize. */
+        uint32_t didx = doff/8;
+        uint32_t sidx = soff/8;
+        while(count > 8 && didx < dlen && sidx < slen) {
+            d[didx] = ((s[sidx] << skew) |
+                       (s[sidx+1] >> (8-skew)));
+            sidx++;
+            didx++;
+            soff += 8;
+            doff += 8;
+            count -= 8;
+        }
+    }
+
+    /* Here count is guaranteed to be < 8.
+     * Copy the final bits bit by bit. */
+    while(count) {
+        bool bit = bitmap_get(s,slen,soff++);
+        bitmap_set(d,dlen,doff++,bit);
+        count--;
+    }
 }
 
 /* We decode bits assuming the first bit we receive is the MSB
@@ -259,15 +363,17 @@ uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t
     return BITMAP_SEEK_NOT_FOUND;
 }
 
-/* Set the pattern 'pat' into the bitmap 'b' of max length 'blen' bytes.
+/* Set the pattern 'pat' into the bitmap 'b' of max length 'blen' bytes,
+ * starting from the specified offset.
+ *
  * The pattern is given as a string of 0s and 1s characters, like "01101001".
  * This function is useful in order to set the test vectors in the protocol
  * decoders, to see if the decoding works regardless of the fact we are able
  * to actually receive a given signal. */
-void bitmap_set_pattern(uint8_t *b, uint32_t blen, const char *pat) {
+void bitmap_set_pattern(uint8_t *b, uint32_t blen, uint32_t off, const char *pat) {
     uint32_t i = 0;
     while(pat[i]) {
-        bitmap_set(b,blen,i,pat[i] == '1');
+        bitmap_set(b,blen,i+off,pat[i] == '1');
         i++;
     }
 }
@@ -408,10 +514,19 @@ ProtoViewDecoder *Decoders[] = {
     NULL
 };
 
+/* Free the message info and allocated data. */
+void free_msg_info(ProtoViewMsgInfo *i) {
+    if (i == NULL) return;
+    free(i->bits);
+    free(i);
+}
+
 /* Reset the message info structure before passing it to the decoding
  * functions. */
-void initialize_msg_info(ProtoViewMsgInfo *i) {
+void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
+    UNUSED(app);
     memset(i,0,sizeof(ProtoViewMsgInfo));
+    i->bits = NULL;
 }
 
 /* This function is called when a new signal is detected. It converts it
@@ -424,7 +539,7 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
 
     /* We call the decoders with an offset a few samples before the actual
      * signal detected and for a len of a few bits after its end. */
-    uint32_t before_samples = 20;
+    uint32_t before_samples = 32;
     uint32_t after_samples = 100;
 
     uint8_t *bitmap = malloc(bitmap_size);
@@ -458,7 +573,20 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
     if (!decoded) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s,%s]", info->name, info->raw, info->info1, info->info2, info->info3, info->info4);
+        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s,%s]",
+            info->name, info->raw, info->info1, info->info2,
+            info->info3, info->info4);
+        /* The message was correctly decoded: fill the info structure
+         * with the decoded signal. The decoder may not implement offset/len
+         * filling of the structure. In such case we have no info and
+         * pulses_count will be set to zero. */
+        if (info->pulses_count) {
+            info->bits_bytes = (info->pulses_count+7)/8; // Round to full byte.
+            info->bits = malloc(info->bits_bytes);
+            bitmap_copy(info->bits,info->bits_bytes,0,
+                        bitmap,bitmap_size,info->start_off,
+                        info->pulses_count);
+        }
     }
     free(bitmap);
     return decoded;
