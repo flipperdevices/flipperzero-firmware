@@ -11,4 +11,5 @@ App(
     fap_icon="bfico.png",
     fap_category="Misc",
     fap_icon_assets="icons",
+    fap_icon_assets_symbol="brainfuck",
 )
