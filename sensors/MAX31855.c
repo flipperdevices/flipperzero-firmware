@@ -22,7 +22,7 @@ const SensorType MAX31855 = {
     .altname = "MAX31855 (Thermocouple)",
     .interface = &SPI,
     .datatype = UT_TEMPERATURE,
-    .pollingInterval = 1000,
+    .pollingInterval = 500,
     .allocator = unitemp_MAX31855_alloc,
     .mem_releaser = unitemp_MAX31855_free,
     .initializer = unitemp_MAX31855_init,
@@ -64,6 +64,8 @@ UnitempStatus unitemp_MAX31855_update(Sensor* sensor) {
     furi_hal_spi_release(instance->spi);
 
     uint32_t raw = (buff[0] << 24) | (buff[1] << 16) | (buff[2] << 8) | buff[3];
+
+    if(raw == 0xFFFFFFFF || raw == 0) return UT_SENSORSTATUS_TIMEOUT;
 
     //Определение состояния термопары
     uint8_t state = raw & 0b111;
