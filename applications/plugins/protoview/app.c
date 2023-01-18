@@ -40,8 +40,8 @@ extern const SubGhzProtocolRegistry protoview_protocol_registry;
 /* The callback actually just passes the control to the actual active
  * view callback, after setting up basic stuff like cleaning the screen
  * and setting color to black. */
-static void render_callback(Canvas* const canvas, void* ctx) {
-    ProtoViewApp* app = ctx;
+static void render_callback(Canvas *const canvas, void *ctx) {
+    ProtoViewApp *app = ctx;
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
@@ -51,63 +51,62 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
     /* Call who is in charge right now. */
     switch(app->current_view) {
-    case ViewRawPulses:
-        render_view_raw_pulses(canvas, app);
-        break;
-    case ViewInfo:
-        render_view_info(canvas, app);
-        break;
+    case ViewRawPulses: render_view_raw_pulses(canvas,app); break;
+    case ViewInfo: render_view_info(canvas,app); break;
     case ViewFrequencySettings:
     case ViewModulationSettings:
-        render_view_settings(canvas, app);
-        break;
-    case ViewDirectSampling:
-        render_view_direct_sampling(canvas, app);
-        break;
-    case ViewLast:
-        furi_crash(TAG " ViewLast selected");
-        break;
+        render_view_settings(canvas,app); break;
+    case ViewDirectSampling: render_view_direct_sampling(canvas,app); break;
+    case ViewLast: furi_crash(TAG " ViewLast selected"); break;
     }
 }
 
 /* Here all we do is putting the events into the queue that will be handled
  * in the while() loop of the app entry point function. */
-static void input_callback(InputEvent* input_event, void* ctx) {
-    ProtoViewApp* app = ctx;
-    furi_message_queue_put(app->event_queue, input_event, FuriWaitForever);
+static void input_callback(InputEvent* input_event, void* ctx)
+{
+    ProtoViewApp *app = ctx;
+    furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
 }
+
 
 /* Called to switch view (when left/right is pressed). Handles
  * changing the current view ID and calling the enter/exit view
  * callbacks if needed. */
-static void app_switch_view(ProtoViewApp* app, SwitchViewDirection dir) {
+static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
     ProtoViewCurrentView old = app->current_view;
-    if(dir == AppNextView) {
+    if (dir == AppNextView) {
         app->current_view++;
-        if(app->current_view == ViewLast) app->current_view = 0;
-    } else if(dir == AppPrevView) {
-        if(app->current_view == 0)
-            app->current_view = ViewLast - 1;
+        if (app->current_view == ViewLast) app->current_view = 0;
+    } else if (dir == AppPrevView) {
+        if (app->current_view == 0)
+            app->current_view = ViewLast-1;
         else
             app->current_view--;
     }
     ProtoViewCurrentView new = app->current_view;
 
     /* Call the enter/exit view callbacks if needed. */
-    if(old == ViewDirectSampling) view_exit_direct_sampling(app);
-    if(new == ViewDirectSampling) view_enter_direct_sampling(app);
+    if (old == ViewDirectSampling) view_exit_direct_sampling(app);
+    if (new == ViewDirectSampling) view_enter_direct_sampling(app);
     /* The frequency/modulation settings are actually a single view:
      * as long as the user stays between the two modes of this view we
      * don't need to call the exit-view callback. */
-    if((old == ViewFrequencySettings && new != ViewModulationSettings) ||
-       (old == ViewModulationSettings && new != ViewFrequencySettings))
+    if ((old == ViewFrequencySettings && new != ViewModulationSettings) ||
+        (old == ViewModulationSettings && new != ViewFrequencySettings))
         view_exit_settings(app);
+
+    /* Set the current subview of the view we just left to zero, that is
+     * the main subview of the view. When re re-enter it we want to see
+     * the main thing. */
+    app->current_subview[old] = 0;
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
 }
 
 /* Allocate the application state and initialize a number of stuff.
  * This is called in the entry point to create the application state. */
 ProtoViewApp* protoview_app_alloc() {
-    ProtoViewApp* app = malloc(sizeof(ProtoViewApp));
+    ProtoViewApp *app = malloc(sizeof(ProtoViewApp));
 
     // Init shared data structures
     RawSamples = raw_samples_alloc();
@@ -124,8 +123,14 @@ ProtoViewApp* protoview_app_alloc() {
     view_port_input_callback_set(app->view_port, input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    app->view_dispatcher = NULL;
+    app->text_input = NULL;
+    app->show_text_input = false;
     app->current_view = ViewRawPulses;
+    for (int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
+    app->view_privdata = malloc(PROTOVIEW_VIEW_PRIVDATA_LEN);
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
 
     // Signal found and visualization defaults
     app->signal_bestlen = 0;
@@ -133,8 +138,9 @@ ProtoViewApp* protoview_app_alloc() {
     app->signal_decoded = false;
     app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
     app->signal_offset = 0;
+    app->msg_info = NULL;
 
-    //init Worker & Protocol
+    // Init Worker & Protocol
     app->txrx = malloc(sizeof(ProtoViewTxRx));
 
     /* Setup rx worker and environment. */
@@ -149,14 +155,17 @@ ProtoViewApp* protoview_app_alloc() {
     app->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         app->txrx->environment, (void*)&protoview_protocol_registry);
-    app->txrx->receiver = subghz_receiver_alloc_init(app->txrx->environment);
-    subghz_receiver_set_filter(app->txrx->receiver, SubGhzProtocolFlag_Decodable);
+    app->txrx->receiver =
+        subghz_receiver_alloc_init(app->txrx->environment);
+    subghz_receiver_set_filter(app->txrx->receiver,
+                               SubGhzProtocolFlag_Decodable);
     subghz_worker_set_overrun_callback(
-        app->txrx->worker, (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
+        app->txrx->worker,
+        (SubGhzWorkerOverrunCallback)subghz_receiver_reset);
     subghz_worker_set_pair_callback(
         app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
-
+    
     app->frequency = subghz_setting_get_default_frequency(app->setting);
     app->modulation = 0; /* Defaults to ProtoViewModulations[0]. */
 
@@ -169,7 +178,7 @@ ProtoViewApp* protoview_app_alloc() {
 /* Free what the application allocated. It is not clear to me if the
  * Flipper OS, once the application exits, will be able to reclaim space
  * even if we forget to free something here. */
-void protoview_app_free(ProtoViewApp* app) {
+void protoview_app_free(ProtoViewApp *app) {
     furi_assert(app);
 
     // Put CC1101 on sleep.
@@ -187,7 +196,7 @@ void protoview_app_free(ProtoViewApp* app) {
     subghz_setting_free(app->setting);
 
     // Worker stuff.
-    if(!app->txrx->debug_timer_sampling) {
+    if (!app->txrx->debug_timer_sampling) {
         subghz_receiver_free(app->txrx->receiver);
         subghz_environment_free(app->txrx->environment);
         subghz_worker_free(app->txrx->worker);
@@ -205,8 +214,8 @@ void protoview_app_free(ProtoViewApp* app) {
 /* Called periodically. Do signal processing here. Data we process here
  * will be later displayed by the render callback. The side effect of this
  * function is to scan for signals and set DetectedSamples. */
-static void timer_callback(void* ctx) {
-    ProtoViewApp* app = ctx;
+static void timer_callback(void *ctx) {
+    ProtoViewApp *app = ctx;
     uint32_t delta, lastidx = app->signal_last_scan_idx;
 
     /* scan_for_signal(), called by this function, deals with a
@@ -214,22 +223,22 @@ static void timer_callback(void* ctx) {
      * cross-boundaries, it is enough if we scan each time the buffer fills
      * for 50% more compared to the last scan. Thanks to this check we
      * can avoid scanning too many times to just find the same data. */
-    if(lastidx < RawSamples->idx) {
+    if (lastidx < RawSamples->idx) {
         delta = RawSamples->idx - lastidx;
     } else {
         delta = RawSamples->total - lastidx + RawSamples->idx;
     }
-    if(delta < RawSamples->total / 2) return;
+    if (delta < RawSamples->total/2) return;
     app->signal_last_scan_idx = RawSamples->idx;
     scan_for_signal(app);
 }
 
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
-    ProtoViewApp* app = protoview_app_alloc();
+    ProtoViewApp *app = protoview_app_alloc();
 
     /* Create a timer. We do data analysis in the callback. */
-    FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
+    FuriTimer *timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 8);
 
     /* Start listening to signals immediately. */
@@ -244,57 +253,103 @@ int32_t protoview_app_entry(void* p) {
     InputEvent input;
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
-        if(qstat == FuriStatusOk) {
-            if(DEBUG_MSG)
-                FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
+        if (qstat == FuriStatusOk) {
+            if (DEBUG_MSG) FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u",
+                    input.type, input.key);
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
-            if(input.type == InputTypeShort && input.key == InputKeyBack) {
+            if (input.type == InputTypeShort &&
+                input.key == InputKeyBack)
+            {
                 /* Exit the app. */
                 app->running = 0;
-            } else if(input.type == InputTypeShort && input.key == InputKeyRight) {
+            } else if (input.type == InputTypeShort &&
+                       input.key == InputKeyRight &&
+                       get_current_subview(app) == 0)
+            {
                 /* Go to the next view. */
-                app_switch_view(app, AppNextView);
-            } else if(input.type == InputTypeShort && input.key == InputKeyLeft) {
+                app_switch_view(app,AppNextView);
+            } else if (input.type == InputTypeShort &&
+                       input.key == InputKeyLeft &&
+                       get_current_subview(app) == 0)
+            {
                 /* Go to the previous view. */
-                app_switch_view(app, AppPrevView);
+                app_switch_view(app,AppPrevView);
             } else {
                 /* This is where we pass the control to the currently
                  * active view input processing. */
                 switch(app->current_view) {
                 case ViewRawPulses:
-                    process_input_raw_pulses(app, input);
+                    process_input_raw_pulses(app,input);
                     break;
                 case ViewInfo:
-                    process_input_info(app, input);
+                    process_input_info(app,input);
                     break;
                 case ViewFrequencySettings:
                 case ViewModulationSettings:
-                    process_input_settings(app, input);
+                    process_input_settings(app,input);
                     break;
                 case ViewDirectSampling:
-                    process_input_direct_sampling(app, input);
+                    process_input_direct_sampling(app,input);
                     break;
-                case ViewLast:
-                    furi_crash(TAG " ViewLast selected");
-                    break;
+                case ViewLast: furi_crash(TAG " ViewLast selected"); break;
                 }
             }
         } else {
             /* Useful to understand if the app is still alive when it
              * does not respond because of bugs. */
-            if(DEBUG_MSG) {
-                static int c = 0;
-                c++;
-                if(!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            if (DEBUG_MSG) {
+                static int c = 0; c++;
+                if (!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
             }
         }
-        view_port_update(app->view_port);
+        if (app->show_text_input) {
+            /* Remove our viewport: we need to use a view dispatcher
+             * in order to show the standard Flipper keyboard. */
+            gui_remove_view_port(app->gui, app->view_port);
+
+            /* Allocate a view dispatcher, add a text input view to it,
+             * and activate it. */
+            app->view_dispatcher = view_dispatcher_alloc();
+            view_dispatcher_enable_queue(app->view_dispatcher);
+            app->text_input = text_input_alloc();
+            view_dispatcher_set_event_callback_context(app->view_dispatcher,app);
+            view_dispatcher_add_view(app->view_dispatcher, 0, text_input_get_view(app->text_input));
+            view_dispatcher_switch_to_view(app->view_dispatcher, 0);
+
+            /* Setup the text input view. The different parameters are set
+             * in the app structure by the view that wanted to show the
+             * input text. The callback, buffer and buffer len must be set.  */
+            text_input_set_header_text(app->text_input, "Save signal filename");
+            text_input_set_result_callback(
+                app->text_input,
+                app->text_input_done_callback,
+                app,
+                app->text_input_buffer,
+                app->text_input_buffer_len,
+                false);
+
+            /* Run the dispatcher with the keyboard. */
+            view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+            view_dispatcher_run(app->view_dispatcher);
+
+            /* Undo all it: remove the view from the dispatcher, free it
+             * so that it removes itself from the current gui, finally
+             * restore our viewport. */
+            view_dispatcher_remove_view(app->view_dispatcher, 0);
+            text_input_free(app->text_input);
+            view_dispatcher_free(app->view_dispatcher);
+            app->view_dispatcher = NULL;
+            gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
+            app->show_text_input = false;
+        } else {
+            view_port_update(app->view_port);
+        }
     }
 
     /* App no longer running. Shut down and free. */
-    if(app->txrx->txrx_state == TxRxStateRx) {
+    if (app->txrx->txrx_state == TxRxStateRx) {
         FURI_LOG_E(TAG, "Putting CC1101 to sleep before exiting.");
         radio_rx_end(app);
         radio_sleep(app);
@@ -304,3 +359,4 @@ int32_t protoview_app_entry(void* p) {
     protoview_app_free(app);
     return 0;
 }
+
