@@ -5,6 +5,8 @@
 void tracker_engine_init(TrackerEngine *tracker_engine, uint8_t rate, SoundEngine *sound_engine);
 void tracker_engine_deinit(TrackerEngine *tracker_engine, bool free_song);
 void tracker_engine_advance_tick(TrackerEngine *tracker_engine);
+void tracker_engine_set_song(TrackerEngine *tracker_engine, TrackerSong *song);
+void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, uint8_t chan, Instrument *pinst, uint16_t note);
 
 uint8_t tracker_engine_get_note(TrackerSongPatternStep *step);
 uint8_t tracker_engine_get_instrument(TrackerSongPatternStep *step);

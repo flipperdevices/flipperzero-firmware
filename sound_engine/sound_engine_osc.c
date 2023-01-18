@@ -31,20 +31,35 @@ inline static void shift_lfsr(uint32_t *v, uint32_t tap_0, uint32_t tap_1)
     *v = (*v >> 1) ^ ((zero - (*v & lsb)) & feedback);
 }
 
+static inline uint16_t sound_engine_noise(SoundEngineChannel *channel, uint32_t prev_acc)
+{
+    if ((prev_acc & (ACC_LENGTH / 32)) != (channel->accumulator & (ACC_LENGTH / 32)))
+    {
+        if (channel->waveform & SE_WAVEFORM_NOISE_METAL)
+        {
+            shift_lfsr(&channel->lfsr, 14, 8);
+            channel->lfsr &= (1 << (14 + 1)) - 1;
+        }
+
+        else
+        {
+            shift_lfsr(&channel->lfsr, 22, 17);
+            channel->lfsr &= (1 << (22 + 1)) - 1;
+        }
+    }
+
+    return (channel->lfsr) & (WAVE_AMP - 1);
+}
+
 uint16_t sound_engine_osc(SoundEngine *sound_engine, SoundEngineChannel *channel, uint32_t prev_acc)
 {
     switch (channel->waveform)
     {
         case SE_WAVEFORM_NOISE:
+        case SE_WAVEFORM_NOISE_METAL:
+        case (SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
         {
-            if ((prev_acc & (ACC_LENGTH / 32)) != (channel->accumulator & (ACC_LENGTH / 32)))
-            {
-                shift_lfsr(&channel->lfsr, 22, 17);
-                channel->lfsr &= (1 << (22 + 1)) - 1;
-            }
-
-            return (channel->lfsr) & (WAVE_AMP - 1);
-
+            return sound_engine_noise(channel, prev_acc);
             break;
         }
 
@@ -63,19 +78,6 @@ uint16_t sound_engine_osc(SoundEngine *sound_engine, SoundEngineChannel *channel
         case SE_WAVEFORM_SAW:
         {
             return sound_engine_saw(channel->accumulator);
-            break;
-        }
-
-        case SE_WAVEFORM_NOISE_METAL:
-        {
-            if ((prev_acc & (ACC_LENGTH / 32)) != (channel->accumulator & (ACC_LENGTH / 32)))
-            {
-                shift_lfsr(&channel->lfsr, 14, 8);
-                channel->lfsr &= (1 << (14 + 1)) - 1;
-            }
-
-            return (channel->lfsr) & (WAVE_AMP - 1);
-
             break;
         }
 

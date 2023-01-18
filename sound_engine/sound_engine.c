@@ -39,7 +39,7 @@ void sound_engine_deinit(SoundEngine *sound_engine)
 
     else
     {
-        furi_hal_gpio_init_simple(&gpio_ext_pa6, GpioModeOutputPushPull);
+        furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 
     furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 13, NULL, NULL);

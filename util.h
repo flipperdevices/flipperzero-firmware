@@ -8,6 +8,10 @@
 #include "tracker_engine/tracker_engine_defs.h"
 
 #define clamp(val, add, _min, _max) val = fmin(_max, fmax(_min, (int32_t)val + add))
+#define flipbit(val, bit) \
+    {                     \
+        val ^= bit;       \
+    };
 
 void set_note(TrackerSongPatternStep *step, uint8_t note);
 void set_instrument(TrackerSongPatternStep *step, uint8_t inst);

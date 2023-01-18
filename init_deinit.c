@@ -18,6 +18,12 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
 void deinit_tracker(FlizzerTrackerApp *tracker)
 {
     sound_engine_deinit(&tracker->sound_engine);
+
+    if (tracker->tracker_engine.song == NULL)
+    {
+        tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
+    }
+
     tracker_engine_deinit(&tracker->tracker_engine, false);
 
     FURI_CRITICAL_ENTER();

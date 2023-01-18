@@ -1,5 +1,6 @@
 #pragma once
 
+#include <furi.h>
 #include <stdio.h>
 
 #define FREQ_TAB_SIZE 12 /* one octave */

@@ -53,7 +53,7 @@ void edit_note(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t 
     tracker->current_note = (uint8_t)note;
 }
 
-void edit_instrument(TrackerSongPatternStep *step, int8_t delta)
+void edit_instrument(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t delta)
 {
     int16_t inst = tracker_engine_get_instrument(step);
 
@@ -71,7 +71,7 @@ void edit_instrument(TrackerSongPatternStep *step, int8_t delta)
     }
 
     clamp(inst, delta, 0, MUS_NOTE_INSTRUMENT_NONE - 1);
-
+    tracker->current_instrument = inst; // remember last instrument
     set_instrument(step, (uint8_t)inst);
 }
 
@@ -246,7 +246,7 @@ void edit_pattern_step(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step,
 
         case 1: // instrument
         {
-            edit_instrument(step, delta);
+            edit_instrument(tracker, step, delta);
             break;
         }
 

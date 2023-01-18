@@ -26,6 +26,9 @@
 
 #define TRACKER_ENGINE_VERSION 1
 
+#define MIDDLE_C (12 * 4)
+#define MAX_NOTE (12 * 7 + 11)
+
 typedef enum
 {
     TE_ENABLE_VIBRATO = 1,
@@ -73,6 +76,7 @@ typedef struct
 
     uint8_t filter_cutoff, filter_resonance, filter_type;
 
+    uint8_t base_note;
     int8_t finetune;
 } Instrument;
 
@@ -91,8 +95,8 @@ typedef struct
 
     uint8_t program_counter, program_tick, program_loop, program_period;
 
-    uint16_t filter_cutoff;
-    uint8_t filter_resonance, filter_type;
+    uint16_t filter_cutoff, filter_resonance;
+    uint8_t filter_type;
 
     uint8_t vibrato_speed, vibrato_depth, vibrato_delay;
     uint8_t pwm_speed, pwm_depth, pwm_delay;

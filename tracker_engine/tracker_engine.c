@@ -73,16 +73,21 @@ void tracker_engine_set_note(TrackerEngine *tracker_engine, uint8_t chan, uint16
     sound_engine_set_channel_frequency(tracker_engine->sound_engine, &tracker_engine->sound_engine->channel[chan], note);
 }
 
+void tracker_engine_set_song(TrackerEngine *tracker_engine, TrackerSong *song)
+{
+    tracker_engine->song = song;
+}
+
 void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, uint8_t chan, Instrument *pinst, uint16_t note)
 {
     SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
     TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
 
-    te_channel->channel_flags = TEC_PLAYING | (te_channel->channel_flags & TEC_DISABLED);
+    te_channel->flags = TEC_PLAYING | (te_channel->channel_flags & TEC_DISABLED);
 
     if (!(pinst->flags & TE_PROG_NO_RESTART) && pinst->program_period > 0)
     {
-        te_channel->channel_flags |= TEC_PROGRAM_RUNNING;
+        te_channel->flags |= TEC_PROGRAM_RUNNING;
 
         te_channel->program_counter = 0;
         te_channel->program_loop = 0;
@@ -95,11 +100,12 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     se_channel->waveform = pinst->waveform;
     se_channel->flags = pinst->sound_engine_flags;
 
-    te_channel->flags = pinst->flags;
+    te_channel->channel_flags = pinst->flags;
 
     te_channel->arpeggio_note = 0;
     te_channel->fixed_note = 0xffff;
 
+    note += (uint16_t)(((int16_t)pinst->base_note - MIDDLE_C) << 8);
     tracker_engine_set_note(tracker_engine, chan, note + (int16_t)pinst->finetune, true);
 
     te_channel->last_note = te_channel->target_note = note + (int16_t)pinst->finetune;
@@ -113,13 +119,13 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
 
     if (pinst->flags & TE_SET_CUTOFF)
     {
-        te_channel->filter_cutoff = (pinst->filter_cutoff << 3);
-        te_channel->filter_resonance = pinst->filter_resonance;
+        te_channel->filter_cutoff = ((uint16_t)pinst->filter_cutoff << 3);
+        te_channel->filter_resonance = ((uint16_t)pinst->filter_resonance << 5);
 
         sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
     }
 
-    if(pinst->sound_engine_flags & SE_ENABLE_FILTER)
+    if (pinst->sound_engine_flags & SE_ENABLE_FILTER)
     {
         te_channel->filter_type = pinst->filter_type;
         se_channel->filter_mode = te_channel->filter_type;
@@ -132,6 +138,9 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
         te_channel->pw = (pinst->pw << 4);
         se_channel->pw = (pinst->pw << 4);
     }
+
+    se_channel->ring_mod = pinst->ring_mod;
+    se_channel->hard_sync = pinst->hard_sync;
 
     te_channel->slide_speed = 0;
 
@@ -188,13 +197,18 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
         // TODO: add instrument program execution
 
         // TODO: add PWM and vibrato execution
-        uint8_t vib = 0;
+        uint16_t vib = 0;
         int32_t chn_note = (te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) + vib + ((int16_t)te_channel->arpeggio_note << 8);
 
         if (chn_note < 0)
+        {
             chn_note = 0;
+        }
+
         if (chn_note > ((12 * 7 + 11) << 8))
+        {
             chn_note = ((12 * 7 + 11) << 8); // highest note is B-7
+        }
 
         tracker_engine_set_note(tracker_engine, chan, (uint16_t)chn_note, false);
     }
@@ -215,7 +229,7 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
         SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
         TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
 
-        if(tracker_engine->song)
+        if (tracker_engine->song)
         {
             uint8_t sequence_position = tracker_engine->sequence_position;
             uint8_t current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
@@ -264,7 +278,7 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                     uint8_t prev_adsr_volume = se_channel->adsr.volume;
 
                     tracker_engine_trigger_instrument_internal(tracker_engine, chan, pinst, note << 8);
-                    te_channel->note = (note << 8);
+                    te_channel->note = (note << 8) + pinst->finetune;
 
                     te_channel->target_note = (note << 8) + pinst->finetune;
 
@@ -278,10 +292,10 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
             tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
         }
 
-        tracker_engine_advance_channel(tracker_engine, chan); //this will be executed even if the song pointer is NULL; handy for live instrument playback from inst editor ("jams")
+        tracker_engine_advance_channel(tracker_engine, chan); // this will be executed even if the song pointer is NULL; handy for live instrument playback from inst editor ("jams")
     }
 
-    if(tracker_engine->song)
+    if (tracker_engine->song)
     {
         tracker_engine->current_tick++;
 

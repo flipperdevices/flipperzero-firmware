@@ -40,6 +40,9 @@ void cycle_view(FlizzerTrackerApp *tracker)
         tracker->mode = INST_EDITOR_VIEW;
         tracker->focus = EDIT_INSTRUMENT;
 
+        tracker->selected_param = 0;
+        tracker->current_digit = 0;
+
         return;
     }
 
@@ -47,6 +50,9 @@ void cycle_view(FlizzerTrackerApp *tracker)
     {
         tracker->mode = PATTERN_VIEW;
         tracker->focus = EDIT_PATTERN;
+
+        tracker->selected_param = 0;
+        tracker->current_digit = 0;
 
         return;
     }

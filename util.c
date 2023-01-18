@@ -43,6 +43,8 @@ void play_song(FlizzerTrackerApp *tracker, bool from_cursor)
 
     tracker_engine_set_rate(tracker->song.rate);
 
+    tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
+
     play();
 }
 

@@ -19,7 +19,7 @@
 #define MAX_ADSR (0xff << 17)
 #define MAX_ADSR_VOLUME 0x80
 #define BASE_FREQ 22050
-#define envspd(eng, slope) ((slope) != 0 ? (((uint64_t)MAX_ADSR / ((slope) * (slope) * 256 / 8)) * BASE_FREQ / eng->sample_rate) : ((uint64_t)MAX_ADSR * BASE_FREQ / eng->sample_rate))
+#define envspd(eng, slope) ((slope) != 0 ? (((uint64_t)MAX_ADSR / ((slope) * (slope)*256 / 8)) * BASE_FREQ / eng->sample_rate) : ((uint64_t)MAX_ADSR * BASE_FREQ / eng->sample_rate))
 
 typedef enum
 {
@@ -46,6 +46,8 @@ typedef enum
     FIL_OUTPUT_LOWPASS = 1,
     FIL_OUTPUT_HIGHPASS = 2,
     FIL_OUTPUT_BANDPASS = 3,
+    /* ============ */
+    FIL_MODES = 4,
 } SoundEngineFilterModes;
 
 typedef enum

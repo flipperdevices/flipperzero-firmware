@@ -8,17 +8,14 @@
 #include <stdio.h>
 #include <u8g2_glue.h>
 
-#include <gui/view_dispatcher.h>
 #include <gui/modules/text_input.h>
+#include <gui/view_dispatcher.h>
 
 #include "flizzer_tracker_hal.h"
 #include "sound_engine/freqs.h"
 #include "sound_engine/sound_engine_defs.h"
 #include "sound_engine/sound_engine_filter.h"
 #include "tracker_engine/tracker_engine_defs.h"
-
-#define MIDDLE_C (12 * 4)
-#define MAX_NOTE (12 * 7 + 11)
 
 typedef enum
 {
@@ -63,6 +60,60 @@ typedef enum
     SI_PARAMS,
 } SongInfoParam;
 
+typedef enum
+{
+    INST_CURRENTINSTRUMENT,
+    INST_INSTRUMENTNAME,
+
+    INST_CURRENT_NOTE,
+    INST_FINETUNE,
+
+    INST_SLIDESPEED,
+    INST_SETPW,
+    INST_PW,
+    INST_SETCUTOFF,
+
+    INST_WAVE_NOISE,
+    INST_WAVE_PULSE,
+    INST_WAVE_TRIANGLE,
+    INST_WAVE_SAWTOOTH,
+    INST_WAVE_NOISE_METAL,
+    INST_WAVE_SINE,
+
+    INST_ATTACK,
+    INST_DECAY,
+    INST_SUSTAIN,
+    INST_RELEASE,
+    INST_VOLUME,
+
+    INST_ENABLEFILTER,
+    INST_FILTERCUTOFF,
+    INST_FILTERRESONANCE,
+
+    INST_FILTERTYPE,
+    INST_ENABLERINGMOD,
+    INST_RINGMODSRC,
+    INST_ENABLEHARDSYNC,
+    INST_HARDSYNCSRC,
+
+    INST_RETRIGGERONSLIDE,
+    INST_ENABLEKEYSYNC,
+
+    INST_ENABLEVIBRATO,
+    INST_VIBRATOSPEED,
+    INST_VIBRATODEPTH,
+    INST_VIBRATODELAY,
+
+    INST_ENABLEPWM,
+    INST_PWMSPEED,
+    INST_PWMDEPTH,
+    INST_PWMDELAY,
+
+    INST_PROGRAMEPERIOD,
+    /* ========  */
+    INST_PARAMS,
+} InstrumentParam;
+
 typedef struct
 {
     View *view;
@@ -84,7 +135,7 @@ typedef struct
     Gui *gui;
     TrackerView *tracker_view;
     ViewDispatcher *view_dispatcher;
-    TextInput* text_input;
+    TextInput *text_input;
     bool was_it_back_keypress;
     uint32_t current_time;
     uint32_t period;
@@ -98,6 +149,9 @@ typedef struct
 
     uint8_t mode, focus;
     uint8_t patternx, current_channel, current_digit, program_step, current_instrument, current_note;
+
+    uint8_t inst_editor_shift;
+
     bool editing;
     bool was_editing;
 

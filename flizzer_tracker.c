@@ -46,6 +46,12 @@ static void draw_callback(Canvas *canvas, void *ctx)
     {
         case PATTERN_VIEW:
         {
+            if (tracker->tracker_engine.song == NULL)
+            {
+                stop();
+                tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
+            }
+
             draw_songinfo_view(canvas, tracker);
             draw_sequence_view(canvas, tracker);
             draw_pattern_view(canvas, tracker);
@@ -120,7 +126,7 @@ int32_t flizzer_tracker_app(void *p)
 {
     UNUSED(p);
 
-    FlizzerTrackerApp *tracker = init_tracker(44100, 50, false, 1024);
+    FlizzerTrackerApp *tracker = init_tracker(44100, 50, true, 1024);
 
     // Текущее событие типа кастомного типа FlizzerTrackerEvent
     FlizzerTrackerEvent event;
@@ -137,8 +143,6 @@ int32_t flizzer_tracker_app(void *p)
 
     with_view_model(
         tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
-
-    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
 
     tracker->text_input = text_input_alloc();
     view_dispatcher_add_view(tracker->view_dispatcher, VIEW_KEYBOARD, text_input_get_view(tracker->text_input));
@@ -206,6 +210,7 @@ int32_t flizzer_tracker_app(void *p)
         set_instrument(&tracker->song.pattern[1].step[i], 1);
     }
 
+    tracker->song.instrument[0]->base_note = MIDDLE_C;
     tracker->song.instrument[0]->adsr.a = 0x2;
     tracker->song.instrument[0]->adsr.d = 0x9;
     tracker->song.instrument[0]->adsr.volume = 0x80;
@@ -216,6 +221,7 @@ int32_t flizzer_tracker_app(void *p)
     tracker->song.instrument[0]->filter_type = FIL_OUTPUT_LOWPASS;
     tracker->song.instrument[0]->filter_cutoff = 10;*/
 
+    tracker->song.instrument[1]->base_note = MIDDLE_C;
     tracker->song.instrument[1]->adsr.a = 0x0;
     tracker->song.instrument[1]->adsr.d = 0x3;
     tracker->song.instrument[1]->adsr.volume = 0x18;
@@ -224,6 +230,8 @@ int32_t flizzer_tracker_app(void *p)
 
     tracker->tracker_engine.playing = false;
     play();
+
+    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
 
     // Бесконечный цикл обработки очереди событий
     while (!(tracker->quit))
