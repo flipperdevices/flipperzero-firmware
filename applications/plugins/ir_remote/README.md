@@ -2,12 +2,12 @@
 
 It is a plugin like [UniversalRF Remix](https://github.com/ESurge/flipperzero-firmware-unirfremix) but for infrared files. I do this plugin for convenience, because the main IR app need to navigate for different button abit troublesome (buttons like up,down,left,right,back). I found it useful for TV and TV box.
 
-It supports short press and long press input for different ir remote buttons. Tested on the [unleashed firmware version unlshd-015](https://github.com/DarkFlippers/unleashed-firmware/releases/tag/unlshd-015)
+It supports short press and long press input for different ir remote buttons. Tested on the [unleashed firmware version unlshd-023](https://github.com/DarkFlippers/unleashed-firmware/releases/tag/unlshd-023)
 
 
 ## How to install
 
-1. Update unleashed firmware to the version unlshd-015, then download the `ir_remote.fap` from [releases](https://github.com/Hong5489/ir_remote/tags)
+1. Update unleashed firmware to the version unlshd-023, then download the `ir_remote.fap` from [releases](https://github.com/Hong5489/ir_remote/tags)
 
 2. Put the `ir_remote.fap` file in your flipper's SD card, under `apps` folder
 

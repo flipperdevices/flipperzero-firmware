@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [The clock will now show 12 AM instead of 00 AM (Thanks To Smileycathy1128)](https://github.com/DarkFlippers/unleashed-firmware/pull/288)
 - Added: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - Added: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
+- Updated: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 
 <a name="release">
 
