@@ -76,7 +76,7 @@ static void _draw_temperature(Canvas* canvas, Sensor* sensor, uint8_t x, uint8_t
         app->buff[0] = '-';
         offset = 1;
     }
-    snprintf((char*)(app->buff + offset), BUFF_SIZE, "%d", (int8_t)sensor->temp);
+    snprintf((char*)(app->buff + offset), BUFF_SIZE, "%d", (int16_t)sensor->temp);
     canvas_set_font(canvas, FontBigNumbers);
     canvas_draw_str_aligned(
         canvas,
