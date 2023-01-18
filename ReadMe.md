@@ -22,18 +22,20 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
+### Apps checked & updated at `18 Jan 20:54 GMT +3`
+
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
-- [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids)
+- [Asteroids (By antirez & SimplyMinimal)](https://github.com/antirez/flipper-asteroids) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- [TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work.
+- [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -43,7 +45,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
-- [WAV Player (2) (WIP!!!) (By LTVA1)](https://github.com/LTVA1/wav_player) - Works with sample rate in different way
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
@@ -56,6 +57,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO Reader 2 (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
+- [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) - works with external module!
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -71,11 +73,12 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Flipp Pomodoro Timer (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - [T-Code BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Serial Example (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
-- [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [VB Lab Migration Assistant (By GMMan (cyanic))](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
+- [Calculator 2 (By theCow61)](https://github.com/theCow61/calculator)
+- [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 
 --- 
 
