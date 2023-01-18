@@ -80,27 +80,6 @@ static void wav_player_dma_isr(void* ctx) {
     }
 }
 
-typedef struct {
-    Storage* storage;
-    Stream* stream;
-    WavParser* parser;
-    uint16_t* sample_buffer;
-    uint8_t* tmp_buffer;
-
-    size_t samples_count_half;
-    size_t samples_count;
-
-    FuriMessageQueue* queue;
-
-    float volume;
-    bool play;
-
-    WavPlayerView* view;
-    ViewDispatcher* view_dispatcher;
-    Gui* gui;
-    NotificationApp* notification;
-} WavPlayerApp;
-
 static WavPlayerApp* app_alloc() {
     WavPlayerApp* app = malloc(sizeof(WavPlayerApp));
     app->samples_count_half = 1024 * 4;
@@ -149,38 +128,83 @@ static void app_free(WavPlayerApp* app) {
 
 // TODO: that works only with 8-bit 2ch audio
 static bool fill_data(WavPlayerApp* app, size_t index) {
-    uint16_t* sample_buffer_start = &app->sample_buffer[index];
-    size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
+    if(app->num_channels == 1) {
+        uint16_t* sample_buffer_start = &app->sample_buffer[index];
+        size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count_half);
 
-    for(size_t i = count; i < app->samples_count; i++) {
-        app->tmp_buffer[i] = 0;
-    }
-
-    for(size_t i = 0; i < app->samples_count; i += 2) {
-        float data = app->tmp_buffer[i];
-        data -= UINT8_MAX / 2; // to signed
-        data /= UINT8_MAX / 2; // scale -1..1
-
-        data *= app->volume; // volume
-        data = tanhf(data); // hyperbolic tangent limiter
-
-        data *= UINT8_MAX / 2; // scale -128..127
-        data += UINT8_MAX / 2; // to unsigned
-
-        if(data < 0) {
-            data = 0;
+        for(size_t i = count; i < app->samples_count_half; i++) {
+            app->tmp_buffer[i] = 0;
         }
 
-        if(data > 255) {
-            data = 255;
+        //for(size_t i = 0; i < app->samples_count; i += 2)
+        for(size_t i = 0; i < app->samples_count_half; i++) //now works with mono!
+        {
+            float data = app->tmp_buffer[i];
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            //uint8_t data = app->tmp_buffer[i];
+
+            sample_buffer_start[i] = data;
         }
 
-        sample_buffer_start[i / 2] = data;
+        wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+
+        return count != app->samples_count_half;
     }
 
-    wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+    if(app->num_channels == 2) {
+        uint16_t* sample_buffer_start = &app->sample_buffer[index];
+        size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
-    return count != app->samples_count;
+        for(size_t i = count; i < app->samples_count; i++) {
+            app->tmp_buffer[i] = 0;
+        }
+
+        for(size_t i = 0; i < app->samples_count; i += 2) {
+            float data = (app->tmp_buffer[i] + app->tmp_buffer[i + 1]) / 2; // (L + R) / 2
+            data -= UINT8_MAX / 2; // to signed
+            data /= UINT8_MAX / 2; // scale -1..1
+
+            data *= app->volume; // volume
+            data = tanhf(data); // hyperbolic tangent limiter
+
+            data *= UINT8_MAX / 2; // scale -128..127
+            data += UINT8_MAX / 2; // to unsigned
+
+            if(data < 0) {
+                data = 0;
+            }
+
+            if(data > 255) {
+                data = 255;
+            }
+
+            //uint8_t data = app->tmp_buffer[i];
+
+            sample_buffer_start[i / 2] = data;
+        }
+
+        wav_player_view_set_data(app->view, sample_buffer_start, app->samples_count_half);
+
+        return count != app->samples_count;
+    }
+
+    return true;
 }
 
 static void ctrl_callback(WavPlayerCtrl ctrl, void* ctx) {
@@ -219,7 +243,7 @@ static void ctrl_callback(WavPlayerCtrl ctrl, void* ctx) {
 
 static void app_run(WavPlayerApp* app) {
     if(!open_wav_stream(app->stream)) return;
-    if(!wav_parser_parse(app->parser, app->stream)) return;
+    if(!wav_parser_parse(app->parser, app->stream, app)) return;
 
     wav_player_view_set_volume(app->view, app->volume);
     wav_player_view_set_start(app->view, wav_parser_get_data_start(app->parser));
@@ -233,7 +257,7 @@ static void app_run(WavPlayerApp* app) {
     bool eof = fill_data(app, 0);
     eof = fill_data(app, app->samples_count_half);
 
-    wav_player_speaker_init();
+    wav_player_speaker_init(app->sample_rate);
     wav_player_dma_init((uint32_t)app->sample_buffer, app->samples_count);
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, wav_player_dma_isr, app->queue);
