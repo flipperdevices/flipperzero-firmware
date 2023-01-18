@@ -77,7 +77,6 @@ bool save_signal(ProtoViewApp *app, const char *filename) {
         uint32_t max_line_samples = 100;
         uint32_t idx = 0; // Iindex in the signal bitmap.
         ProtoViewMsgInfo *i = app->msg_info;
-        FURI_LOG_W(TAG, "short dur:%d", (int)i->short_pulse_dur);
         while(idx < i->pulses_count) {
             bool level = bitmap_get(i->bits,i->bits_bytes,idx);
             uint32_t te_times = 1;
@@ -100,7 +99,6 @@ bool save_signal(ProtoViewApp *app, const char *filename) {
             if (this_line_samples == 0)
                 furi_string_cat_printf(file_content,"RAW_Data: ");
             furi_string_cat_printf(file_content,"%d ",(int)dur);
-            FURI_LOG_W(TAG, "dur:%d/%d at idx %d", (int)dur, (int)i->pulses_count, (int)idx);
             this_line_samples++;
 
             /* Store the current set of samples on disk, when we reach a
