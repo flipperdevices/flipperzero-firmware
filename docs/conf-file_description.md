@@ -164,6 +164,19 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 </p>
 </details>
 
+<details>
+<summary><h3 style="display: inline">TokenDuration</h3></summary>
+<p>
+
+**Type:** unsigned int
+
+**Default value:** `30`
+
+**Description:** Token lifetime duration in seconds. Should be between `15` and `255`. Majority websites requires `30`, however some rare websites may require custom lifetime. If you are not sure which one to use - use `30`.
+
+</p>
+</details>
+
 ## Example config file
 
 ```text
@@ -178,12 +191,15 @@ TokenName: Test plain
 TokenSecret: 95 6B CE 3E 2F 01 AF 29 B2 9A DE CA E7 EF F5 B1
 TokenAlgo: sha1
 TokenDigits: 6
+TokenDuration: 30
 TokenName: Verifyr sha256
 TokenSecret: SSECIUHGRYRCRBCNKKXPUQBLBGEQZ3PKNA7TA7TQV6IL5WDFU62TNNT3NHKVWRCQWF4QTSE4IGLG4S7RGY3LDMVDZVMAGB2ARPG7XYQ
 TokenAlgo: sha256
 TokenDigits: 6
+TokenDuration: 60
 TokenName: Verifyr sha512 8
 TokenSecret: 3KKGABEJ4CKS5AHBZBDHFFNKUZHN6D7TKUGI3T7SHEUBAMIAPBUBWQNCMEEGEJX2LF23PYAFUCSRNVQ2ENOQWLHISCOJQCU2SCND4CI
 TokenAlgo: sha512
 TokenDigits: 8
+TokenDuration: 30
 ```
