@@ -23,7 +23,7 @@ void nfc_util_num2bytes(uint64_t src, uint8_t len, uint8_t* dest) {
     }
 }
 
-uint64_t nfc_util_bytes2num(uint8_t* src, uint8_t len) {
+uint64_t nfc_util_bytes2num(const uint8_t* src, uint8_t len) {
     furi_assert(src);
     furi_assert(len <= 8);
 

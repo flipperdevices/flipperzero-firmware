@@ -118,6 +118,10 @@ bool mf_classic_is_allowed_access_data_block(
     MfClassicKey key,
     MfClassicAction action);
 
+bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num);
+
+bool mf_classic_block_to_value(int32_t* value, uint8_t* addr, const uint8_t* block);
+
 bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type);
 
 void mf_classic_set_key_found(
