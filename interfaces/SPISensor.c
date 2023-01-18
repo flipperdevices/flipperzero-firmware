@@ -55,11 +55,13 @@ bool unitemp_spi_sensor_alloc(Sensor* sensor, char* args) {
     unitemp_gpio_lock(unitemp_gpio_getFromInt(2), &SPI);
     unitemp_gpio_lock(unitemp_gpio_getFromInt(3), &SPI);
     unitemp_gpio_lock(unitemp_gpio_getFromInt(5), &SPI);
+    unitemp_gpio_lock(instance->CS_pin, &SPI);
     return status;
 }
 
 bool unitemp_spi_sensor_free(Sensor* sensor) {
     bool status = sensor->type->mem_releaser(sensor);
+    unitemp_gpio_unlock(((SPISensor*)sensor->instance)->CS_pin);
     free(((SPISensor*)(sensor->instance))->spi);
     free(sensor->instance);
 
