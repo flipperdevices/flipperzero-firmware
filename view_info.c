@@ -41,6 +41,13 @@ static void render_subview_main(Canvas *const canvas, ProtoViewApp *app) {
     canvas_draw_str(canvas, 0, y, app->msg_info->info2); y += lineheight;
     canvas_draw_str(canvas, 0, y, app->msg_info->info3); y += lineheight;
     canvas_draw_str(canvas, 0, y, app->msg_info->info4); y += lineheight;
+
+    y = 37;
+    lineheight = 7;
+    canvas_draw_str(canvas, 119, y, "s"); y += lineheight;
+    canvas_draw_str(canvas, 119, y, "a"); y += lineheight;
+    canvas_draw_str(canvas, 119, y, "v"); y += lineheight;
+    canvas_draw_str(canvas, 119, y, "e"); y += lineheight;
 }
 
 /* Render view with save option. */
