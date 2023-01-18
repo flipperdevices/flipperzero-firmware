@@ -57,6 +57,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO Reader 2 (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
+- [RGB LED Controller (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) - works with external module!
 
 ## Tools / Misc
@@ -79,6 +80,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [Calculator 2 (By theCow61)](https://github.com/theCow61/calculator)
 - [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
+- [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 
 --- 
 
