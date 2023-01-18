@@ -78,7 +78,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
-- [Calculator 2 (By theCow61)](https://github.com/theCow61/calculator)
 - [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 - [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 
