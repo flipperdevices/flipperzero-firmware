@@ -181,7 +181,7 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 
 ```text
 Filetype: Flipper TOTP plugin config file
-Version: 2
+Version: 3
 BaseIV: AD F2 DE F3 31 92 C8 77 4B EB BF FE 7D E1 27 51
 Crypto: FE CC 38 99 28 A9 28 6B BC E1 E3 92 B9 02 8A DF
 Timezone: 2.000000
