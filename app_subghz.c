@@ -13,17 +13,19 @@ void raw_sampling_worker_start(ProtoViewApp *app);
 void raw_sampling_worker_stop(ProtoViewApp *app);
 
 ProtoViewModulation ProtoViewModulations[] = {
-    {"OOK 650Khz", FuriHalSubGhzPresetOok650Async, NULL},
-    {"OOK 270Khz", FuriHalSubGhzPresetOok270Async, NULL},
-    {"2FSK 2.38Khz", FuriHalSubGhzPreset2FSKDev238Async, NULL},
-    {"2FSK 47.6Khz", FuriHalSubGhzPreset2FSKDev476Async, NULL},
-    {"MSK", FuriHalSubGhzPresetMSK99_97KbAsync, NULL},
-    {"GFSK", FuriHalSubGhzPresetGFSK9_99KbAsync, NULL},
-    {"TPMS 1 (FSK)", 0, (uint8_t*)protoview_subghz_tpms1_fsk_async_regs},
-    {"TPMS 2 (OOK)", 0, (uint8_t*)protoview_subghz_tpms2_ook_async_regs},
-    {"TPMS 3 (FSK)", 0, (uint8_t*)protoview_subghz_tpms3_fsk_async_regs},
-    {"TPMS 4 (FSK)", 0, (uint8_t*)protoview_subghz_tpms4_fsk_async_regs},
-    {NULL, 0, NULL} /* End of list sentinel. */
+    {"OOK 650Khz", "FuriHalSubGhzPresetOok650Async",
+                    FuriHalSubGhzPresetOok650Async, NULL},
+    {"OOK 270Khz", "FuriHalSubGhzPresetOok270Async",
+                    FuriHalSubGhzPresetOok270Async, NULL},
+    {"2FSK 2.38Khz", "FuriHalSubGhzPreset2FSKDev238Async",
+                    FuriHalSubGhzPreset2FSKDev238Async, NULL},
+    {"2FSK 47.6Khz", "FuriHalSubGhzPreset2FSKDev476Async",
+                    FuriHalSubGhzPreset2FSKDev476Async, NULL},
+    {"TPMS 1 (FSK)", NULL, 0, (uint8_t*)protoview_subghz_tpms1_fsk_async_regs},
+    {"TPMS 2 (OOK)", NULL, 0, (uint8_t*)protoview_subghz_tpms2_ook_async_regs},
+    {"TPMS 3 (FSK)", NULL, 0, (uint8_t*)protoview_subghz_tpms3_fsk_async_regs},
+    {"TPMS 4 (FSK)", NULL, 0, (uint8_t*)protoview_subghz_tpms4_fsk_async_regs},
+    {NULL, NULL, 0, NULL} /* End of list sentinel. */
 };
 
 /* Called after the application initialization in order to setup the

@@ -56,9 +56,11 @@ typedef enum {
 } SwitchViewDirection;
 
 typedef struct {
-    const char *name;
-    FuriHalSubGhzPreset preset;
-    uint8_t *custom;
+    const char *name;               // Name to show to the user.
+    const char *id;                 // Identifier in the Flipper API/file.
+    FuriHalSubGhzPreset preset;     // The preset ID.
+    uint8_t *custom;                // If not null, a set of registers for
+                                    // the CC1101, specifying a custom preset.
 } ProtoViewModulation;
 
 extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
@@ -199,6 +201,9 @@ uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, ui
 uint32_t convert_from_diff_manchester(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, bool previous);
 void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app);
 void free_msg_info(ProtoViewMsgInfo *i);
+
+/* signal_file.c */
+bool save_signal(ProtoViewApp *app, const char *filename);
 
 /* view_*.c */
 void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app);

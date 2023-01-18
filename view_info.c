@@ -94,9 +94,17 @@ void render_view_info(Canvas *const canvas, ProtoViewApp *app) {
     }
 }
 
+/* The user typed the file name. Let's save it and remove the keyboard
+ * view. */
 void text_input_done_callback(void* context) {
     ProtoViewApp *app = context;
     InfoViewPrivData *privdata = app->view_privdata;
+
+    FuriString *save_path = furi_string_alloc_printf(
+        "%s/%s.sub", EXT_PATH("subghz"), privdata->filename);
+    save_signal(app, furi_string_get_cstr(save_path));
+    furi_string_free(save_path);
+
     free(privdata->filename);
     dismiss_keyboard(app);
 }
@@ -118,6 +126,7 @@ void set_signal_random_filename(ProtoViewApp *app, char *buf, size_t buflen) {
     snprintf(buf,buflen,"%.10s-%s-%d",app->msg_info->name,suffix,rand()%1000);
     str_replace(buf,' ','_');
     str_replace(buf,'-','_');
+    str_replace(buf,'/','_');
 }
 
 /* Handle input for the info view. */

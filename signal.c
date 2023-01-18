@@ -147,6 +147,7 @@ void scan_for_signal(ProtoViewApp *app) {
              * fill, in case it is able to decode a message. */
             ProtoViewMsgInfo *info = malloc(sizeof(ProtoViewMsgInfo));
             init_msg_info(info,app);
+            info->short_pulse_dur = copy->short_pulse_dur;
 
             uint32_t saved_idx = copy->idx; /* Save index, see later. */
 
@@ -523,7 +524,6 @@ void free_msg_info(ProtoViewMsgInfo *i) {
 void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
     UNUSED(app);
     memset(i,0,sizeof(ProtoViewMsgInfo));
-    i->short_pulse_dur = DetectedSamples->short_pulse_dur;
     i->bits = NULL;
 }
 
