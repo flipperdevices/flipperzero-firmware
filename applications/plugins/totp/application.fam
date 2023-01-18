@@ -17,6 +17,7 @@ App(
     fap_category="Misc",
     fap_icon_assets="images",
     fap_icon="totp_10px.png",
+    fap_icon_assets_symbol="totp",
     fap_private_libs=[
         Lib(
             name="base32",
