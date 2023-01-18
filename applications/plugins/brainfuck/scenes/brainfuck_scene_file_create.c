@@ -13,12 +13,7 @@ void brainfuck_scene_file_create_on_enter(void* context) {
 
     text_input_set_header_text(text_input, "New script name");
     text_input_set_result_callback(
-        text_input,
-        file_name_text_input_callback,
-        app,
-        tmpName,
-        64,
-        true);
+        text_input, file_name_text_input_callback, app, tmpName, 64, true);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, brainfuckViewTextInput);
 }
@@ -26,7 +21,7 @@ void brainfuck_scene_file_create_on_enter(void* context) {
 bool brainfuck_scene_file_create_on_event(void* context, SceneManagerEvent event) {
     BFApp* app = context;
     UNUSED(app);
-    
+
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == brainfuckCustomEventTextInputDone) {
@@ -38,7 +33,8 @@ bool brainfuck_scene_file_create_on_event(void* context, SceneManagerEvent event
 
             //save new file
             Stream* stream = buffered_file_stream_alloc(storage);
-            buffered_file_stream_open(stream, furi_string_get_cstr(app->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+            buffered_file_stream_open(
+                stream, furi_string_get_cstr(app->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
             stream_write(stream, (const uint8_t*)empty, 1);
             buffered_file_stream_close(stream);
 

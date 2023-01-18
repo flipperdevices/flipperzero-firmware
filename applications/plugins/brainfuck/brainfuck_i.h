@@ -84,4 +84,3 @@ typedef enum {
     brainfuckViewDev,
     brainfuckViewExec,
 } brainfuckView;
-
