@@ -84,7 +84,9 @@ static inline void extend_table(uint32_t *tbl, uint32_t **end, int bit, int m1, 
 }
 static inline void extend_table_simple(uint32_t *tbl, uint32_t **end, int bit) {
     for (*tbl <<= 1; tbl <= *end; *++tbl <<= 1) {
-        if (filter(*tbl) == bit) {
+        if (filter(*tbl) ^ filter(*tbl | 1)) {
+            *tbl |= filter(*tbl) ^ bit;
+        } else if (filter(*tbl) == bit) {
             *++*end = *++tbl;
             *tbl = tbl[-1] | 1;
         } else {
