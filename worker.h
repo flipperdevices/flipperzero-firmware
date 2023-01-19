@@ -6,3 +6,4 @@ int getStackSize();
 int getOpCount();
 int getStatus();
 void beginWorker();
+void killThread();

@@ -27,6 +27,7 @@ static bool bf_dev_process_right(BFDevEnv* devEnv);
 static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event);
 
 BFApp* appDev;
+FuriThread* workerThread; 
 
 char bfChars[9] = {'<', '>', '[', ']', '+', '-', '.', ',', 0x00};
 
@@ -80,17 +81,17 @@ static void bf_dev_draw_button(Canvas* canvas, int x, int y, bool selected, cons
 static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
     UNUSED(_model);
 
-    if(execCountdown > 0){
-        execCountdown--;
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "RUNNING...");
-        if(execCountdown == 0){
-            initWorker(appDev);
-            beginWorker();
-            text_box_set_text(appDev->text_box, workerGetOutput());
-            scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
-        }
-        return;
-    }
+    // if(execCountdown > 0){
+    //     execCountdown--;
+    //     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "RUNNING...");
+    //     if(execCountdown == 0){
+    //         initWorker(appDev);
+    //         beginWorker();
+    //         text_box_set_text(appDev->text_box, workerGetOutput());
+    //         scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
+    //     }
+    //     return;
+    // }
 
     if(saveNotifyCountdown > 0){
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "SAVED");
@@ -98,14 +99,14 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
         return;
     }
 
-    bf_dev_draw_button(canvas, 1, 36, (selectedButton == 0), "+");    //T 0
-    bf_dev_draw_button(canvas, 17, 36, (selectedButton == 1),  "-");  //T 1
-    bf_dev_draw_button(canvas, 33, 36, (selectedButton == 2),  "<");  //T 2
-    bf_dev_draw_button(canvas, 49, 36, (selectedButton == 3),  ">");  //T 3
-    bf_dev_draw_button(canvas, 65, 36, (selectedButton == 4),  "[");  //B 0
-    bf_dev_draw_button(canvas, 81, 36, (selectedButton == 5),  "]");  //B 1
-    bf_dev_draw_button(canvas, 97, 36, (selectedButton == 6),  ".");  //B 2
-    bf_dev_draw_button(canvas, 113, 36, (selectedButton == 7),  ","); //B 3
+    bf_dev_draw_button(canvas, 1,   36, (selectedButton == 0), "+");  //T 0
+    bf_dev_draw_button(canvas, 17,  36, (selectedButton == 1), "-");  //T 1
+    bf_dev_draw_button(canvas, 33,  36, (selectedButton == 2), "<");  //T 2
+    bf_dev_draw_button(canvas, 49,  36, (selectedButton == 3), ">");  //T 3
+    bf_dev_draw_button(canvas, 65,  36, (selectedButton == 4), "[");  //B 0
+    bf_dev_draw_button(canvas, 81,  36, (selectedButton == 5), "]");  //B 1
+    bf_dev_draw_button(canvas, 97,  36, (selectedButton == 6), ".");  //B 2
+    bf_dev_draw_button(canvas, 113, 36, (selectedButton == 7), ",");  //B 3
 
     //backspace, input, run, save
     canvas_draw_icon(canvas, 1, 52, (selectedButton == 8) ? &I_KeyBackspaceSelected_24x11 : &I_KeyBackspace_24x11);
@@ -120,7 +121,7 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
 
     //textbox
     //grossly overcomplicated. not fixing it.
-    canvas_draw_rframe(canvas, 1, 1, 125, 33, 2);
+    canvas_draw_rframe(canvas, 1, 1, 126, 33, 2);
     canvas_set_font(canvas, FontBatteryPercent);
 
     int dbOffset = 0;
@@ -153,7 +154,7 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
         tpM++;
     }
 
-    canvas_draw_str_aligned(canvas, 3, 8, AlignLeft, AlignCenter, dspLine0);
+    canvas_draw_str_aligned(canvas, 3,  8, AlignLeft, AlignCenter, dspLine0);
     canvas_draw_str_aligned(canvas, 3, 17, AlignLeft, AlignCenter, dspLine1);
     canvas_draw_str_aligned(canvas, 3, 26, AlignLeft, AlignCenter, dspLine2);
 }
@@ -215,7 +216,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 0:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'+'; 
+                appDev->dataBuffer[appDev->dataSize] = '+'; 
                 appDev->dataSize++; }
             break;
         }
@@ -223,7 +224,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 1:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'-'; 
+                appDev->dataBuffer[appDev->dataSize] = '-'; 
                 appDev->dataSize++; }
             break;
         }
@@ -231,7 +232,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 2:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'<'; 
+                appDev->dataBuffer[appDev->dataSize] = '<'; 
                 appDev->dataSize++; }
             break;
         }
@@ -239,7 +240,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 3:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'>'; 
+                appDev->dataBuffer[appDev->dataSize] = '>'; 
                 appDev->dataSize++; }
             break;
         }
@@ -247,7 +248,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 4:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'['; 
+                appDev->dataBuffer[appDev->dataSize] = '['; 
                 appDev->dataSize++; }
             break;
         }
@@ -255,7 +256,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 5:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)']'; 
+                appDev->dataBuffer[appDev->dataSize] = ']'; 
                 appDev->dataSize++; }
             break;
         }
@@ -263,7 +264,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 6:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)'.'; 
+                appDev->dataBuffer[appDev->dataSize] = '.'; 
                 appDev->dataSize++; }
             break;
         }
@@ -271,7 +272,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
         case 7:
         {
             if(appDev->dataSize < BF_INST_BUFFER_SIZE){ 
-                appDev->dataBuffer[appDev->dataSize] = (uint32_t)','; 
+                appDev->dataBuffer[appDev->dataSize] = ','; 
                 appDev->dataSize++; }
             break;
         }
@@ -286,14 +287,25 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
         case 9:
         {
-            //todo: input
             scene_manager_next_scene(appDev->scene_manager, brainfuckSceneSetInput);
             break;
         }
 
         case 10:
         {
-            execCountdown = 3;
+            if(getStatus() != 0){
+                killThread();
+                furi_thread_join(workerThread);
+            }
+
+            initWorker(appDev);
+            text_box_set_focus(appDev->text_box, TextBoxFocusEnd);
+            text_box_set_text(appDev->text_box, workerGetOutput());
+
+            workerThread = furi_thread_alloc_ex("Worker", 2048, (void*)beginWorker, NULL);
+            furi_thread_start(workerThread);
+
+            scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
             break;
         }
 
@@ -334,6 +346,12 @@ static void bf_dev_enter_callback(void* context) {
 
     appDev = devEnv->appDev;
     selectedButton = 0;
+
+    //exit the running thread if required
+    if(getStatus() != 0){
+        killThread();
+        furi_thread_join(workerThread);
+    }
 
     //clear the bf instruction buffer
     memset(appDev->dataBuffer, 0x00, BF_INST_BUFFER_SIZE * sizeof(char));
@@ -385,6 +403,11 @@ BFDevEnv* bf_dev_env_alloc(BFApp* appDev) {
 }
 
 void bf_dev_env_free(BFDevEnv* devEnv) {
+    if(getStatus() != 0){
+        killThread();
+        furi_thread_join(workerThread);
+    }
+
     furi_assert(devEnv);
     view_free(devEnv->view);
     free(devEnv);
