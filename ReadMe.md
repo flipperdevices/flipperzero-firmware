@@ -3,6 +3,8 @@
 
 ## What Is Not In The Firmware? [SD CARD EXTRA FILES AND OTHER RESEARCH SOURCES](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
+## [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
+
 # RogueMaster Flipper Zero FW [Support Us!](https://www.patreon.com/RogueMaster/membership)
 ## Thank you to all the supporters!
 
@@ -44,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - UL Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855`
 - UL Updated: [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
+- [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
 
 <a name="release">
 
