@@ -239,11 +239,13 @@ LevelDuration radio_tx_feed_data(void *ctx) {
 /* Vibrate and produce a click sound when a signal is sent. */
 void notify_signal_sent(ProtoViewApp *app) {
     static const NotificationSequence sent_seq = {
+        &message_blue_255,
         &message_vibro_on,
         &message_note_g1,
         &message_delay_10,
         &message_sound_off,
         &message_vibro_off,
+        &message_blue_0,
         NULL
     };
     notification_message(app->notification, &sent_seq);
