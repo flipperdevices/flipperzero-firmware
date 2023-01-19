@@ -11,7 +11,7 @@ App(
     ],
     stack_size=2 * 1024,
     order=64,
-    # fap_icon="bme680.png",
+    fap_icon="scd30.png",
 	fap_author="Heimskr",
 	fap_weburl="https://github.com/heimskr/flipperzero-scd30"
 )
