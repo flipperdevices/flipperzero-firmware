@@ -236,6 +236,19 @@ LevelDuration radio_tx_feed_data(void *ctx) {
     return level_duration_reset();
 }
 
+/* Vibrate and produce a click sound when a signal is sent. */
+void notify_signal_sent(ProtoViewApp *app) {
+    static const NotificationSequence sent_seq = {
+        &message_vibro_on,
+        &message_note_g1,
+        &message_delay_10,
+        &message_sound_off,
+        &message_vibro_off,
+        NULL
+    };
+    notification_message(app->notification, &sent_seq);
+}
+
 /* Handle input for the info view. */
 void process_input_info(ProtoViewApp *app, InputEvent input) {
     if (process_subview_updown(app,input,SubViewInfoLast)) return;
@@ -265,6 +278,7 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
             SendSignalCtx send_state;
             send_signal_init(&send_state,app);
             radio_tx_signal(app,radio_tx_feed_data,&send_state);
+            notify_signal_sent(app);
         }
     }
 }

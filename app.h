@@ -120,6 +120,7 @@ typedef struct ProtoViewMsgInfo {
 struct ProtoViewApp {
     /* GUI */
     Gui *gui;
+    NotificationApp *notification;
     ViewPort *view_port;     /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
     ProtoViewCurrentView current_view;      /* Active left-right view ID. */
