@@ -182,7 +182,7 @@ ProtoViewApp* protoview_app_alloc() {
 void protoview_app_free(ProtoViewApp *app) {
     furi_assert(app);
 
-    // Put CC1101 on sleep.
+    // Put CC1101 on sleep, this also restores charging.
     radio_sleep(app);
 
     // View related.

@@ -37,6 +37,10 @@ void radio_begin(ProtoViewApp* app) {
     furi_hal_subghz_reset();
     furi_hal_subghz_idle();
 
+    /* Power circuits are noisy. Suppressing the charge while we use
+     * ProtoView will improve the RF performances. */
+    furi_hal_power_suppress_charge_enter();
+
     /* The CC1101 preset can be either one of the standard presets, if
      * the modulation "custom" field is NULL, or a custom preset we
      * defined in custom_presets.h. */
@@ -105,7 +109,7 @@ void radio_sleep(ProtoViewApp* app) {
     }
     furi_hal_subghz_sleep();
     app->txrx->txrx_state = TxRxStateSleep;
-
+    furi_hal_power_suppress_charge_exit();
 }
 
 /* =============================== Transmission ============================= */
@@ -117,8 +121,6 @@ void radio_tx_signal(ProtoViewApp *app, FuriHalSubGhzAsyncTxCallback data_feeder
     TxRxState oldstate = app->txrx->txrx_state;
 
     if (oldstate == TxRxStateRx) radio_rx_end(app);
-//    furi_hal_power_suppress_charge_enter();
-
     radio_begin(app);
 
     furi_hal_subghz_idle();
@@ -131,8 +133,6 @@ void radio_tx_signal(ProtoViewApp *app, FuriHalSubGhzAsyncTxCallback data_feeder
     while(!furi_hal_subghz_is_async_tx_complete()) furi_delay_ms(10);
     furi_hal_subghz_stop_async_tx();
     furi_hal_subghz_idle();
-
-//    furi_hal_power_suppress_charge_exit();
 
     radio_begin(app);
     if (oldstate == TxRxStateRx) radio_rx(app);
