@@ -48,13 +48,12 @@ typedef enum {
     ViewModulationSettings,
     ViewDirectSampling,
     ViewLast, /* Just a sentinel to wrap around. */
-} ProtoViewCurrentView;
 
-/* Used by app_switch_view() */
-typedef enum {
-    AppNextView,
-    AppPrevView
-} SwitchViewDirection;
+    /* The following are special views that are not iterated, but
+     * have meaning for the API. */
+    ViewGoNext,
+    ViewGoPrev,
+} ProtoViewCurrentView;
 
 typedef struct {
     const char *name;               // Name to show to the user.

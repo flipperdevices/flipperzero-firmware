@@ -57,7 +57,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     case ViewModulationSettings:
         render_view_settings(canvas,app); break;
     case ViewDirectSampling: render_view_direct_sampling(canvas,app); break;
-    case ViewLast: furi_crash(TAG " ViewLast selected"); break;
+    default: furi_crash(TAG "Invalid view selected"); break;
     }
 }
 
@@ -69,20 +69,25 @@ static void input_callback(InputEvent* input_event, void* ctx)
     furi_message_queue_put(app->event_queue,input_event,FuriWaitForever);
 }
 
-
 /* Called to switch view (when left/right is pressed). Handles
  * changing the current view ID and calling the enter/exit view
- * callbacks if needed. */
-static void app_switch_view(ProtoViewApp *app, SwitchViewDirection dir) {
+ * callbacks if needed.
+ *
+ * The 'switchto' parameter can be the identifier of a view, or the
+ * special views ViewGoNext and ViewGoPrev in order to move to
+ * the logical next/prev view. */
+static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
     ProtoViewCurrentView old = app->current_view;
-    if (dir == AppNextView) {
+    if (switchto == ViewGoNext) {
         app->current_view++;
         if (app->current_view == ViewLast) app->current_view = 0;
-    } else if (dir == AppPrevView) {
+    } else if (switchto == ViewGoPrev) {
         if (app->current_view == 0)
             app->current_view = ViewLast-1;
         else
             app->current_view--;
+    } else {
+        app->current_view = switchto;
     }
     ProtoViewCurrentView new = app->current_view;
 
@@ -271,13 +276,13 @@ int32_t protoview_app_entry(void* p) {
                        get_current_subview(app) == 0)
             {
                 /* Go to the next view. */
-                app_switch_view(app,AppNextView);
+                app_switch_view(app,ViewGoNext);
             } else if (input.type == InputTypeShort &&
                        input.key == InputKeyLeft &&
                        get_current_subview(app) == 0)
             {
                 /* Go to the previous view. */
-                app_switch_view(app,AppPrevView);
+                app_switch_view(app,ViewGoPrev);
             } else {
                 /* This is where we pass the control to the currently
                  * active view input processing. */
@@ -295,7 +300,7 @@ int32_t protoview_app_entry(void* p) {
                 case ViewDirectSampling:
                     process_input_direct_sampling(app,input);
                     break;
-                case ViewLast: furi_crash(TAG " ViewLast selected"); break;
+                default: furi_crash(TAG "Invalid view selected"); break;
                 }
             }
         } else {
