@@ -59,6 +59,9 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     case ViewDirectSampling: render_view_direct_sampling(canvas,app); break;
     default: furi_crash(TAG "Invalid view selected"); break;
     }
+
+    /* Draw the alert box if set. */
+    ui_draw_alert_if_needed(canvas, app);
 }
 
 /* Here all we do is putting the events into the queue that will be handled
@@ -106,6 +109,7 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
      * the main thing. */
     app->current_subview[old] = 0;
     memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
+    ui_dismiss_alert(app);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -132,6 +136,7 @@ ProtoViewApp* protoview_app_alloc() {
     app->view_dispatcher = NULL;
     app->text_input = NULL;
     app->show_text_input = false;
+    app->alert_dismiss_time = 0;
     app->current_view = ViewRawPulses;
     for (int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
@@ -269,17 +274,27 @@ int32_t protoview_app_entry(void* p) {
             if (input.type == InputTypeShort &&
                 input.key == InputKeyBack)
             {
-                /* Exit the app. */
+                if (app->current_view != ViewRawPulses) {
+                    /* If this is not the main app view, go there. */
+                    app_switch_view(app,ViewRawPulses);
+                } else {
+                    /* If we are in the main app view, warn the user
+                     * they needs to long press to really quit. */
+                    ui_show_alert(app,"Long press to exit",1000);
+                }
+            } else if (input.type == InputTypeLong &&
+                       input.key == InputKeyBack)
+            {
                 app->running = 0;
             } else if (input.type == InputTypeShort &&
                        input.key == InputKeyRight &&
-                       get_current_subview(app) == 0)
+                       ui_get_current_subview(app) == 0)
             {
                 /* Go to the next view. */
                 app_switch_view(app,ViewGoNext);
             } else if (input.type == InputTypeShort &&
                        input.key == InputKeyLeft &&
-                       get_current_subview(app) == 0)
+                       ui_get_current_subview(app) == 0)
             {
                 /* Go to the previous view. */
                 app_switch_view(app,ViewGoPrev);

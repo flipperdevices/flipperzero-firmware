@@ -116,6 +116,7 @@ typedef struct ProtoViewMsgInfo {
 } ProtoViewMsgInfo;
 
 /* Our main application context. */
+#define ALERT_MAX_LEN 32
 struct ProtoViewApp {
     /* GUI */
     Gui *gui;
@@ -125,6 +126,8 @@ struct ProtoViewApp {
     ProtoViewCurrentView current_view;      /* Active left-right view ID. */
     int current_subview[ViewLast];  /* Active up-down subview ID. */
     FuriMessageQueue *event_queue;  /* Keypress events go here. */
+
+    /* Input text state. */
     ViewDispatcher *view_dispatcher; /* Used only when we want to show
                                         the text_input view for a moment.
                                         Otherwise it is set to null. */
@@ -133,6 +136,12 @@ struct ProtoViewApp {
     char *text_input_buffer;
     uint32_t text_input_buffer_len;
     void (*text_input_done_callback)(void*);
+
+    /* Alert state. */
+    uint32_t alert_dismiss_time;    /* Millisecond when the alert will be
+                                       no longer shown. Or zero if the alert
+                                       is currently not set at all. */
+    char alert_text[ALERT_MAX_LEN]; /* Alert content. */
 
     /* Radio related. */
     ProtoViewTxRx *txrx;     /* Radio state. */
@@ -222,13 +231,16 @@ void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);
 
 /* ui.c */
-int get_current_subview(ProtoViewApp *app);
-void show_available_subviews(Canvas *canvas, ProtoViewApp *app, int last_subview);
-bool process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview);
-void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
-void show_keyboard(ProtoViewApp *app, char *buffer, uint32_t buflen,
+int ui_get_current_subview(ProtoViewApp *app);
+void ui_show_available_subviews(Canvas *canvas, ProtoViewApp *app, int last_subview);
+bool ui_process_subview_updown(ProtoViewApp *app, InputEvent input, int last_subview);
+void ui_show_keyboard(ProtoViewApp *app, char *buffer, uint32_t buflen,
                    void (*done_callback)(void*));
-void dismiss_keyboard(ProtoViewApp *app);
+void ui_dismiss_keyboard(ProtoViewApp *app);
+void ui_show_alert(ProtoViewApp *app, const char *text, uint32_t ttl);
+void ui_dismiss_alert(ProtoViewApp *app);
+void ui_draw_alert_if_needed(Canvas *canvas, ProtoViewApp *app);
+void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);
