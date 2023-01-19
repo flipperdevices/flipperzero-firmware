@@ -74,8 +74,8 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
         y = lcd_icon_upper_top;
         // y = 64 - TAMA_LCD_ICON_SIZE;
         uint16_t x_ic = lcd_icon_upper_left;
-        // for(uint8_t i = 0; i < 4; ++i) {
-        for(uint8_t i = 0; i < 7; ++i) {
+        for(uint8_t i = 0; i < 4; ++i) {
+        // for(uint8_t i = 0; i < 7; ++i) {
             if(lcd_icons & 1) {
                 canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
             }
@@ -487,9 +487,8 @@ int32_t tama_p1_app(void* p) {
                         tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                     } else if(event.input.key == InputKeyRight) {
                         tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                    } else if(event.input.key == InputKeyUp) { // pause tamagotchi
-                        tamalib_set_button(BTN_LEFT, tama_btn_state);
-                        tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                    } else if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) { 
+                        // TODO: pause or fast-forward tamagotchi
                         tama_p1_save_state(); 
                     } else if(event.input.key == InputKeyDown) { // mute tamagotchi
                         tamalib_set_button(BTN_LEFT, tama_btn_state);
