@@ -36,6 +36,7 @@ typedef struct ProtoViewApp ProtoViewApp;
 typedef enum {
     TxRxStateIDLE,
     TxRxStateRx,
+    TxRxStateTx,
     TxRxStateSleep,
 } TxRxState;
 
@@ -185,6 +186,7 @@ void radio_rx_end(ProtoViewApp* app);
 void radio_sleep(ProtoViewApp* app);
 void raw_sampling_worker_start(ProtoViewApp *app);
 void raw_sampling_worker_stop(ProtoViewApp *app);
+void radio_tx_signal(ProtoViewApp *app, FuriHalSubGhzAsyncTxCallback data_feeder, void *ctx);
 
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);

@@ -11,6 +11,17 @@ enum {
     SubViewInfoLast, /* Just a sentinel. */
 };
 
+/* This is the context we pass to the data yield callback for
+ * asynchronous tx. */
+#define SENDSIGNAL_CURPOS_START_GAP UINT32_MAX-1
+#define SENDSIGNAL_CURPOS_END_GAP UINT32_MAX-2
+typedef struct {
+    uint32_t curpos;        // Current bit position of data to send
+    ProtoViewApp *app;      // App reference.
+    uint32_t start_gap_dur;
+    uint32_t end_gap_dur;
+} SendSignalState;
+
 /* Our view private data. */
 #define SAVE_FILENAME_LEN 64
 typedef struct {
@@ -83,7 +94,7 @@ static void render_subview_save(Canvas *const canvas, ProtoViewApp *app) {
     }
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 6, "ok: save, < >: slide rows");
+    canvas_draw_str(canvas, 0, 6, "ok: send, long ok: save");
 }
 
 /* Render the selected subview of this view. */
@@ -136,6 +147,54 @@ void set_signal_random_filename(ProtoViewApp *app, char *buf, size_t buflen) {
     str_replace(buf,'/','_');
 }
 
+/* Send signal data feeder callback. When the asynchronous transmission is
+ * active, this function is called to return new samples as LevelDuration
+ * types (that is a structure with level, that is pulse or gap, and
+ * duration in microseconds). The position into the transmission is stored
+ * in the context 'ctx':
+ *
+ * In the SendSignalState structure 'ss' we remember at which bit of the
+ * message we are in ss->curoff, however this offset has two special
+ * values to indicate we need to send the initial and final gap.
+ */
+LevelDuration radio_tx_feed_data(void *ctx) {
+    SendSignalState *ss = ctx;
+    uint32_t dur = 0, j;
+    uint32_t level = 0;
+
+    if (ss->start_gap_dur) {
+        LevelDuration ld = level_duration_make(0,ss->start_gap_dur);
+        ss->start_gap_dur = 0;
+        ss->curpos = 0;
+        return ld;
+    }
+
+    if (ss->curpos >= ss->app->msg_info->pulses_count) {
+        if (ss->end_gap_dur) {
+            LevelDuration ld = level_duration_make(0,ss->end_gap_dur);
+            ss->end_gap_dur = 0;
+            return ld;
+        } else {
+            return level_duration_reset();
+        }
+    }
+
+    for (j = 0; ss->curpos+j < ss->app->msg_info->pulses_count; j++) {
+        uint32_t l = bitmap_get(ss->app->msg_info->bits,
+                            ss->app->msg_info->bits_bytes,
+                            ss->curpos+j);
+        if (j == 0) {
+            level = l;
+            dur += ss->app->msg_info->short_pulse_dur;
+            continue;
+        }
+        if (l != level) break;
+        dur += ss->app->msg_info->short_pulse_dur;
+    }
+    ss->curpos += j;
+    return level_duration_make(level, dur);
+}
+
 /* Handle input for the info view. */
 void process_input_info(ProtoViewApp *app, InputEvent input) {
     if (process_subview_updown(app,input,SubViewInfoLast)) return;
@@ -155,11 +214,19 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
         } else if (input.type == InputTypePress && input.key == InputKeyLeft) {
             if (privdata->signal_display_start_row != 0)
                 privdata->signal_display_start_row--;
-        } else if (input.type == InputTypePress && input.key == InputKeyOk) {
+        } else if (input.type == InputTypeLong && input.key == InputKeyOk)
+        {
             privdata->filename = malloc(SAVE_FILENAME_LEN);
             set_signal_random_filename(app,privdata->filename,SAVE_FILENAME_LEN);
             show_keyboard(app, privdata->filename, SAVE_FILENAME_LEN,
                           text_input_done_callback);
+        } else if (input.type == InputTypeShort && input.key == InputKeyOk) {
+            SendSignalState send_state;
+            send_state.curpos = SENDSIGNAL_CURPOS_START_GAP;
+            send_state.app = app;
+            send_state.start_gap_dur = 10000;
+            send_state.end_gap_dur = 10000;
+            radio_tx_signal(app,radio_tx_feed_data,&send_state);
         }
     }
 }
