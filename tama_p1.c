@@ -41,7 +41,8 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
         uint16_t canv_height = canvas_height(canvas);
         uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
         uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
-        uint16_t lcd_matrix_top = 0;
+        // uint16_t lcd_matrix_top = 0;
+        uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
         uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
 
         uint16_t lcd_icon_upper_top = lcd_matrix_top - TAMA_LCD_ICON_SIZE - TAMA_LCD_ICON_MARGIN;
@@ -68,20 +69,34 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
             y += TAMA_SCREEN_SCALE_FACTOR;
         }
 
-        // Draw Icons on bottom
+        // Draw icons
         uint8_t lcd_icons = g_ctx->icons;
-        uint16_t x_ic = 0;
-        y = 64 - TAMA_LCD_ICON_SIZE;
+        y = lcd_icon_upper_top;
+        // y = 64 - TAMA_LCD_ICON_SIZE;
+        uint16_t x_ic = lcd_icon_upper_left;
+        // for(uint8_t i = 0; i < 4; ++i) {
         for(uint8_t i = 0; i < 7; ++i) {
             if(lcd_icons & 1) {
                 canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
             }
-            x_ic += TAMA_LCD_ICON_SIZE + 4;
+            // x_ic += TAMA_LCD_ICON_SIZE + 4;
+            x_ic += lcd_icon_spacing_horiz;
             lcd_icons >>= 1;
         }
 
-        if (lcd_icons & 7) {
-            canvas_draw_icon(canvas, 128 - TAMA_LCD_ICON_SIZE, 0, icons_list[7]);
+        // if (lcd_icons & 7) {
+        //     canvas_draw_icon(canvas, 128 - TAMA_LCD_ICON_SIZE, 0, icons_list[7]);
+        // }
+        // Bottom
+        y = lcd_icon_lower_top;
+        x_ic = lcd_icon_lower_left;
+        for(uint8_t i = 4; i < 8; ++i) {
+            // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
+            if(lcd_icons & 1) {
+                canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
+            }
+            x_ic += lcd_icon_spacing_horiz;
+            lcd_icons >>= 1;
         }
     }
 
@@ -101,8 +116,6 @@ static void tama_p1_update_timer_callback(FuriMessageQueue* event_queue) {
     TamaEvent event = {.type = EventTypeTick};
     furi_message_queue_put(event_queue, &event, 0);
 }
-
-
  
 static void tama_p1_load_state() {  
     state_t *state;
@@ -214,7 +227,6 @@ static void tama_p1_save_state() {
 
     // Saving state
     FURI_LOG_D(TAG, "Saving Gamestate");
-
     uint8_t buf[4];
     state_t *state;
     uint32_t offset = 0;
