@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL Updated: [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
 - Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/Smileycathy1128/flipperzero-tamagotch-p1)
+- Added: [BadUSB: Added support for GUI-CTRL in bad_usb #507 (By NDrog)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/507)
 
 <a name="release">
 
@@ -133,6 +134,7 @@ $ ./fbt dolphin_ext
 - Assets: Includes WAV files for Unlock/Lock Gatekeeper Systems wheels found on some Shopping Carts/Trolleys (Thanks to lukejtaylor) (May not work off lipper)
 - [BadUSB: BadUSB as FAP #396 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/396)
 - BadUSB: Added ignore DUCKY_LANG cmd to retain compatibility with existing scripts [(Thanks to v1nc)](https://github.com/v1nc/flipperzero-firmware)
+- [BadUSB: Added support for GUI-CTRL in bad_usb #507 (By NDrog)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/507)
 - BadUSB: Assets for Kiosk Evasion (By nocomp) and Wifi Stealer (By 7h30th3r0n3)
 - BadUSB: Assets for RickRoll, RogueMaster GitHub and RogueMaster Patreon
 - BadUSB: [Dummy decoy/bad usb keyboard layout #1525 (By dummy-decoy)](https://github.com/flipperdevices/flipperzero-firmware/pull/1525)
