@@ -11,9 +11,12 @@ Create a `tama_p1` folder in your microSD card, and put the ROM as `rom.bin`.
 Use a search engine to find the Tamagotchi ROM. There is a file named `a`. 
 Rename this to `rom.bin`. 
 
-Left button is A, OK is B, and right button is C. Hold the back button to exit.
-There is currently no saving, so your progress will be reset when you exit the
-app.
+- Left button is A.
+- OK is B. 
+- Right button is C. 
+- Holding the Down button functions the same as press both A and C, which mutes the volume. 
+- Hold the Back button to save and exit.
+
 
 Building
 --------
@@ -46,16 +49,11 @@ Implemented
 - Input
 - Sound
 - Saving/Loading emulator state (stored in `/ext/tama_p1/save.bin`)
-  - Save on exit (long press back)
-  - Also saves when pressing: up, back (short press)
-- Button combo shortcuts:
-  - Up: left+middle (pause)
-    - Also saves
-  - Down: left+right (mute)
+- Mute button combo shortcut (down = A+C)
 
 To-do
 -----
-- Save slots
+- more than one save slot
 - In-game reset
 - Test mode?
 - Volume adjustment
