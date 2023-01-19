@@ -46,6 +46,12 @@ Implemented
 - Input
 - Sound
 - Saving/Loading emulator state (stored in `/ext/tama_p1/save.bin`)
+  - Save on exit (long press back)
+  - Also saves when pressing: up, back (short press)
+- Button combo shortcuts:
+  - Up: left+middle (pause)
+    - Also saves
+  - Down: left+right (mute)
 
 To-do
 -----
