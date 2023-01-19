@@ -10,7 +10,7 @@ App(
         "gui",
     ],
     stack_size=2 * 1024,
-    order=64,
+    order=65,
     fap_icon="scd30.png",
 	fap_author="Heimskr",
 	fap_weburl="https://github.com/heimskr/flipperzero-scd30"
