@@ -42,7 +42,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - Added: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - Updated: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - UL Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855`
 - UL Updated: [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
 - [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
@@ -52,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL Updated: SubGHz Optimizations
 - UL Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - UL Updated: IR Assets by @amec0e
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
