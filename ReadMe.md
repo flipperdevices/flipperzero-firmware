@@ -35,7 +35,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` on SD as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1)
+- [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode by [Smileycathy1128](https://github.com/Smileycathy1128/flipperzero-tamagotch-p1)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
