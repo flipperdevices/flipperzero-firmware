@@ -1,13 +1,18 @@
 #pragma once
 
 #include <input/input.h>
-#include <tamalib.h>
+#include "tamalib/tamalib.h"
 
 #define TAG "TamaP1"
 #define TAMA_ROM_PATH EXT_PATH("tama_p1/rom.bin")
 #define TAMA_SCREEN_SCALE_FACTOR 2
 #define TAMA_LCD_ICON_SIZE 14
 #define TAMA_LCD_ICON_MARGIN 1
+
+#define STATE_FILE_MAGIC "TLST"
+#define STATE_FILE_VERSION 2
+#define TAMA_SAVE_PATH EXT_PATH("tama_p1/save.bin")
+
 
 typedef struct {
     FuriThread* thread;
@@ -35,4 +40,4 @@ typedef struct {
 extern TamaApp* g_ctx;
 extern FuriMutex* g_state_mutex;
 
-void tamagotchi_p1_hal_init(hal_t* hal);
+void tama_p1_hal_init(hal_t* hal);
