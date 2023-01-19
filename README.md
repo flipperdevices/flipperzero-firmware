@@ -14,7 +14,7 @@ Rename this to `rom.bin`.
 - Left button is A.
 - OK is B. 
 - Right button is C. 
-- Holding the Down button functions the same as press both A and C, which mutes the volume. 
+- Holding the Up button functions the same as press both A and C, which mutes the volume. 
 - Hold the Back button to save and exit.
 
 
@@ -49,7 +49,7 @@ Implemented
 - Input
 - Sound
 - Saving/Loading emulator state (stored in `/ext/tama_p1/save.bin`)
-- Mute button combo shortcut (down = A+C)
+- Mute button combo shortcut (Up = A+C)
 
 To-do
 -----
