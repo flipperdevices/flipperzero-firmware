@@ -475,6 +475,15 @@ int32_t tama_p1_app(void* p) {
                         tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                     } else if(event.input.key == InputKeyRight) {
                         tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                    } else if(event.input.key == InputKeyUp) { // pause tamagotchi
+                        tamalib_set_button(BTN_LEFT, tama_btn_state);
+                        tamalib_set_button(BTN_Middle, tama_btn_state);
+                        tama_p1_save_state(); 
+                    } else if(event.input.key == InputKeyDown) { // mute tamagotchi
+                        tamalib_set_button(BTN_LEFT, tama_btn_state);
+                        tamalib_set_button(BTN_Right, tama_btn_state);
+                    } else if(event.input.key == InputKeyBack && event.input.type == InputTypeShort) {
+                        tama_p1_save_state();
                     }
                 }
 

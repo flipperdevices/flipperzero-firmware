@@ -34,7 +34,7 @@ Note: you may also need to add `-Wno-unused-parameter` to `CCFLAGS` in
 Debugging
 ---------
 Using the serial script from [FlipperScripts](https://github.com/DroomOne/FlipperScripts/blob/main/serial_logger.py) 
-it is easy to add direct logging after running the appliation: 
+it is easy to add direct logging after running the application: 
 `python .\serial_logger.py`
 
 `./fbt launch_app APPSRC=applications\plugins\tama_p1;  python .\serial_logger.py`
@@ -45,11 +45,11 @@ Implemented
 - Basic emulation
 - Input
 - Sound
-- Saving/Loading emaulator state (stored in `/ext/tama_p1/save.bin`)
+- Saving/Loading emulator state (stored in `/ext/tama_p1/save.bin`)
 
 To-do
 -----
-- Slots
+- Save slots
 - In-game reset
 - Test mode?
 - Volume adjustment
