@@ -3,7 +3,6 @@
 
 ## What Is Not In The Firmware? [SD CARD EXTRA FILES AND OTHER RESEARCH SOURCES](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
-## [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
 
 # RogueMaster Flipper Zero FW [Support Us!](https://www.patreon.com/RogueMaster/membership)
 ## Thank you to all the supporters!
@@ -105,6 +104,7 @@ $ ./fbt dolphin_ext
 
 ## All Changes and Features
 
+- Animations: [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
 - Animations: File `/ext/dolphin/manifest.txt` no longer will get overwritten. Any automatic building of animations is disabled [here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fbe9175e0c828a54e651ee11f64f10f21e36a907).
 - Animations: Hold Center to change Flipper idle animation. [Thanks to Zycenios](https://github.com/flipperdevices/flipperzero-firmware/commit/111786ef40e50a40d2e510595672b569d9b97bba) With changes by RogueMaster.
 - Animations: iButton and RFID P0kem0n images [Thanks to Panzer00Z](https://github.com/Panzer00Z/flipperzero-firmware/)
