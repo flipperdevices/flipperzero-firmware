@@ -52,15 +52,9 @@ static void draw_cb(Canvas *canvas, void *ctx) {
 				canvas_draw_str_aligned(canvas, x, row++ * 10 + 1, AlignLeft, AlignTop, buffer);
 			};
 
-			print("CO2", scd30.temperature);
+			print("CO2", scd30.carbonDioxide);
 			print("Temperature", scd30.temperature);
 			print("Rel Humidity", scd30.relativeHumidity);
-
-			// canvas_set_font(canvas, FontPrimary);
-			// canvas_draw_str_aligned(canvas, 0, row * 10, AlignLeft, AlignTop, "Resistance");
-			// canvas_set_font(canvas, FontSecondary);
-			// snprintf(buffer, sizeof(buffer), "%lu", scd30.gasResistance);
-			// canvas_draw_str_aligned(canvas, x, row++ * 10 + 1, AlignLeft, AlignTop, buffer);
 		} else {
 			canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Reading failed.");
 		}
@@ -237,17 +231,18 @@ bool State::init(FuriMessageQueue *queue) {
 
 bool State::readData() {
 	hasRead = true;
-	lastReadResult = false;
 
 	if (scd30 == nullptr) {
 		ERROR("scd30 is null");
 		return false;
 	}
 
-	lastReadResult = (scd30->beginIfNecessary() && scd30->readData());
+	if (scd30->dataReady()) {
+		lastReadResult = (scd30->beginIfNecessary() && scd30->readData());
 
-	if (!lastReadResult)
-		scd30->begun = false;
+		if (!lastReadResult)
+			scd30->begun = false;
+	}
 
 	return lastReadResult;
 }

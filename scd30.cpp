@@ -14,7 +14,9 @@ bool SCD30::begin(int32_t sensor_id) {
 	resetSensor();
 
 	// First I2C transfer after reset can fail, double tapping seems to get by it.
-	return (startContinuousMeasurement() || startContinuousMeasurement()) && setMeasurementInterval(2);
+	if ((startContinuousMeasurement() || startContinuousMeasurement()) && setMeasurementInterval(2))
+		return begun = true;
+	return false;
 }
 
 bool SCD30::beginIfNecessary() {
@@ -33,18 +35,23 @@ bool SCD30::readData() {
 	buffer[0] = (SCD30_CMD_READ_MEASUREMENT >> 8) & 0xff;
 	buffer[1] = SCD30_CMD_READ_MEASUREMENT & 0xff;
 
-	if (!write(buffer, 2))
+	if (!write(buffer, 2)) {
+		ERROR("%d: Write failure", __LINE__);
 		return false;
+	}
 
 	furi_delay_ms(4); // delay between write and read specified by the datasheet
 
-	if (!read(buffer, 18))
+	if (!read(buffer, 18)) {
+		ERROR("%d: Read failure", __LINE__);
 		return false;
+	}
 
 	// loop through the bytes we read, 3 at a time for i=MSB, i+1=LSB, i+2=CRC
 	for (uint8_t i = 0; i < 18; i += 3) {
 		if (crc8(buffer + i, 2) != buffer[i + 2]) {
 			// we got a bad CRC, fail out
+			ERROR("%d: CRC failure", __LINE__);
 			return false;
 		}
 	}
