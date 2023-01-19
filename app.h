@@ -116,6 +116,7 @@ typedef struct ProtoViewMsgInfo {
                                    integer. */
 } ProtoViewMsgInfo;
 
+/* Our main application context. */
 struct ProtoViewApp {
     /* GUI */
     Gui *gui;

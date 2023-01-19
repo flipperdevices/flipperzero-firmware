@@ -5,22 +5,13 @@
 #include <gui/view_i.h>
 #include <lib/toolbox/random_name.h>
 
+/* This view has subviews accessible navigating up/down. This
+ * enumaration is used to track the currently active subview. */
 enum {
     SubViewInfoMain,
     SubViewInfoSave,
     SubViewInfoLast, /* Just a sentinel. */
 };
-
-/* This is the context we pass to the data yield callback for
- * asynchronous tx. */
-#define SENDSIGNAL_CURPOS_START_GAP UINT32_MAX-1
-#define SENDSIGNAL_CURPOS_END_GAP UINT32_MAX-2
-typedef struct {
-    uint32_t curpos;        // Current bit position of data to send
-    ProtoViewApp *app;      // App reference.
-    uint32_t start_gap_dur;
-    uint32_t end_gap_dur;
-} SendSignalState;
 
 /* Our view private data. */
 #define SAVE_FILENAME_LEN 64
@@ -147,52 +138,102 @@ void set_signal_random_filename(ProtoViewApp *app, char *buf, size_t buflen) {
     str_replace(buf,'/','_');
 }
 
+/* ========================== Signal transmission =========================== */
+
+/* This is the context we pass to the data yield callback for
+ * asynchronous tx. */
+typedef enum {
+    SendSignalSendStartGap,
+    SendSignalSendBits,
+    SendSignalSendEndGap,
+    SendSignalEndTransmission
+} SendSignalState;
+
+#define PROTOVIEW_SENDSIGNAL_START_GAP 10000  /* microseconds. */
+#define PROTOVIEW_SENDSIGNAL_END_GAP 10000    /* microseconds. */
+
+typedef struct {
+    SendSignalState state;  // Current state.
+    uint32_t curpos;        // Current bit position of data to send.
+    ProtoViewApp *app;      // App reference.
+    uint32_t start_gap_dur; // Gap to send at the start.
+    uint32_t end_gap_dur;   // Gap to send at the end.
+} SendSignalCtx;
+
+/* Setup the state context for the callback responsible to feed data
+ * to the subghz async tx system. */
+static void send_signal_init(SendSignalCtx *ss, ProtoViewApp *app) {
+    ss->state = SendSignalSendStartGap;
+    ss->curpos = 0;
+    ss->app = app;
+    ss->start_gap_dur = PROTOVIEW_SENDSIGNAL_START_GAP;
+    ss->end_gap_dur = PROTOVIEW_SENDSIGNAL_END_GAP;
+}
+
 /* Send signal data feeder callback. When the asynchronous transmission is
- * active, this function is called to return new samples as LevelDuration
- * types (that is a structure with level, that is pulse or gap, and
- * duration in microseconds). The position into the transmission is stored
- * in the context 'ctx':
+ * active, this function is called to return new samples from the currently
+ * decoded signal in app->msg_info. The subghz subsystem aspects this function,
+ * that is the data feeder, to return LevelDuration types (that is a structure
+ * with level, that is pulse or gap, and duration in microseconds).
  *
- * In the SendSignalState structure 'ss' we remember at which bit of the
- * message we are in ss->curoff, however this offset has two special
- * values to indicate we need to send the initial and final gap.
+ * The position into the transmission is stored in the context 'ctx', that
+ * references a SendSignalCtx structure.
+ *
+ * In the SendSignalCtx structure 'ss' we remember at which bit of the
+ * message we are, in ss->curoff. We also send a start and end gap in order
+ * to make sure the transmission is clear.
  */
 LevelDuration radio_tx_feed_data(void *ctx) {
-    SendSignalState *ss = ctx;
-    uint32_t dur = 0, j;
-    uint32_t level = 0;
+    SendSignalCtx *ss = ctx;
 
-    if (ss->start_gap_dur) {
-        LevelDuration ld = level_duration_make(0,ss->start_gap_dur);
-        ss->start_gap_dur = 0;
-        ss->curpos = 0;
-        return ld;
+    /* Send start gap. */
+    if (ss->state == SendSignalSendStartGap) {
+        ss->state = SendSignalSendBits;
+        return level_duration_make(0,ss->start_gap_dur);
     }
 
-    if (ss->curpos >= ss->app->msg_info->pulses_count) {
-        if (ss->end_gap_dur) {
-            LevelDuration ld = level_duration_make(0,ss->end_gap_dur);
-            ss->end_gap_dur = 0;
-            return ld;
-        } else {
-            return level_duration_reset();
-        }
-    }
+    /* Send data. */
+    if (ss->state == SendSignalSendBits) {
+        uint32_t dur = 0, j;
+        uint32_t level = 0;
 
-    for (j = 0; ss->curpos+j < ss->app->msg_info->pulses_count; j++) {
-        uint32_t l = bitmap_get(ss->app->msg_info->bits,
-                            ss->app->msg_info->bits_bytes,
-                            ss->curpos+j);
-        if (j == 0) {
-            level = l;
+        /* Let's see how many consecutive bits we have with the same
+         * level. */
+        for (j = 0; ss->curpos+j < ss->app->msg_info->pulses_count; j++) {
+            uint32_t l = bitmap_get(ss->app->msg_info->bits,
+                                ss->app->msg_info->bits_bytes,
+                                ss->curpos+j);
+            if (j == 0) {
+                /* At the first bit of this sequence, we store the
+                 * level of the sequence. */
+                level = l;
+                dur += ss->app->msg_info->short_pulse_dur;
+                continue;
+            }
+
+            /* As long as the level is the same, we update the duration.
+             * Otherwise stop the loop and return this sample. */
+            if (l != level) break;
             dur += ss->app->msg_info->short_pulse_dur;
-            continue;
         }
-        if (l != level) break;
-        dur += ss->app->msg_info->short_pulse_dur;
+        ss->curpos += j;
+
+        /* If this was the last set of bits, change the state to
+         * send the final gap. */
+        if (ss->curpos >= ss->app->msg_info->pulses_count)
+            ss->state = SendSignalSendEndGap;
+        return level_duration_make(level, dur);
     }
-    ss->curpos += j;
-    return level_duration_make(level, dur);
+
+    /* Send end gap. */
+    if (ss->state == SendSignalSendEndGap) {
+        ss->state = SendSignalEndTransmission;
+        return level_duration_make(0,ss->end_gap_dur);
+    }
+
+    /* End transmission. Here state is guaranteed
+     * to be SendSignalEndTransmission */
+    return level_duration_reset();
 }
 
 /* Handle input for the info view. */
@@ -221,11 +262,8 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
             show_keyboard(app, privdata->filename, SAVE_FILENAME_LEN,
                           text_input_done_callback);
         } else if (input.type == InputTypeShort && input.key == InputKeyOk) {
-            SendSignalState send_state;
-            send_state.curpos = SENDSIGNAL_CURPOS_START_GAP;
-            send_state.app = app;
-            send_state.start_gap_dur = 10000;
-            send_state.end_gap_dur = 10000;
+            SendSignalCtx send_state;
+            send_signal_init(&send_state,app);
             radio_tx_signal(app,radio_tx_feed_data,&send_state);
         }
     }
