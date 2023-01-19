@@ -7,9 +7,7 @@
 #define BIT(x, n) ((x) >> (n) & 1)
 #define BEBIT(x, n) BIT(x, (n) ^ 24)
 #define SWAPENDIAN(x) (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16)
-typedef struct bucket { uint32_t *head; uint32_t *bp; } bucket_t;
-typedef bucket_t bucket_array_t[2][0x100];
-typedef struct bucket_info { struct { uint32_t *head, *tail; } bucket_info[2][0x100]; uint32_t numbuckets; } bucket_info_t;
+#define SIZEOF(arr) sizeof(arr) / sizeof(*arr)
 struct Crypto1State {uint32_t odd, even;};
 uint32_t prng_successor(uint32_t x, uint32_t n) {
     SWAPENDIAN(x);
@@ -29,135 +27,183 @@ static inline int filter(uint32_t const x) {
 static inline uint8_t evenparity32(uint32_t x) {
     return (__builtin_parity(x) & 0xFF);
 }
-void bucket_sort_intersect(uint32_t *const estart, uint32_t *const estop, uint32_t *const ostart, uint32_t *const ostop, bucket_info_t *bucket_info, bucket_array_t bucket) {
-    uint32_t *p1, *p2;
-    uint32_t *start[2];
-    uint32_t *stop[2];
-    start[0] = estart;
-    stop[0] = estop;
-    start[1] = ostart;
-    stop[1] = ostop;
-    for (uint32_t i = 0; i < 2; i++) {
-        for (uint32_t j = 0x00; j <= 0xff; j++) {
-            bucket[i][j].bp = bucket[i][j].head;
+int binsearch(int data[], int start, int stop) {
+    int mid, val = data[stop] & 0xff000000;
+    while (start != stop) {
+        mid = (stop - start) >> 1;
+        if ((data[start + mid] ^ 0x80000000) > (val ^ 0x80000000))
+            stop = start + mid;
+        else
+            start += mid + 1;
+    }
+    return start;
+}
+void quicksort(int data[], int start, int stop){
+    int it = start + 1, rit = stop, t;
+    if (it > rit) {
+        return;
+    }
+    while(it < rit) {
+        if( (data[it] ^ 0x80000000) <= (data[start] ^ 0x80000000) ) {
+            ++it;
+        }
+        else if((data[rit] ^ 0x80000000) > (data[start] ^ 0x80000000)) {
+            --rit;
+        }
+        else {
+            t = data[it];
+            data[it] = data[rit];
+            data[rit] = t;
         }
     }
-    for (uint32_t i = 0; i < 2; i++) {
-        for (p1 = start[i]; p1 <= stop[i]; p1++) {
-            uint32_t bucket_index = (*p1 & 0xff000000) >> 24;
-            *(bucket[i][bucket_index].bp++) = *p1;
+    if((data[rit] ^ 0x80000000) >= (data[start] ^ 0x80000000)) {
+        --rit;
+    }
+    if(rit != start) {
+        t = data[rit];
+        data[rit] = data[start];
+        data[start] = t;
+    }
+    quicksort(data, start, rit - 1);
+    quicksort(data, rit + 1, stop);
+}
+void quickSort(int array[], int low, int high) {
+    if (SIZEOF(array) == 0)
+        return;
+    if (low >= high)
+        return;
+    int middle = low + (high - low) / 2;
+    int pivot = array[middle];
+    int i = low, j = high;
+    while (i <= j) {
+        while (array[i] < pivot) {
+            i++;
+        }
+        while (array[j] > pivot) {
+            j--;
+        }
+        if (i <= j) { // swap
+            int temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+            i++;
+            j--;
         }
     }
-    for (uint32_t i = 0; i < 2; i++) {
-        p1 = start[i];
-        uint32_t nonempty_bucket = 0;
-        for (uint32_t j = 0x00; j <= 0xff; j++) {
-            if (bucket[0][j].bp != bucket[0][j].head && bucket[1][j].bp != bucket[1][j].head) { // non-empty intersecting buckets only
-                bucket_info->bucket_info[i][nonempty_bucket].head = p1;
-                for (p2 = bucket[i][j].head; p2 < bucket[i][j].bp; *p1++ = *p2++);
-                bucket_info->bucket_info[i][nonempty_bucket].tail = p1 - 1;
-                nonempty_bucket++;
-            }
-        }
-        bucket_info->numbuckets = nonempty_bucket;
+    if (low < j) {
+        quickSort(array, low, j);
+    }
+    if (high > i) {
+        quickSort(array, i, high);
     }
 }
-static inline void update_contribution(uint32_t *item, const uint32_t mask1, const uint32_t mask2) {
-    uint32_t p = *item >> 25;
-    p = p << 1 | (evenparity32(*item & mask1));
-    p = p << 1 | (evenparity32(*item & mask2));
-    *item = p << 24 | (*item & 0xffffff);
+void update_contribution(int data[], int item, int mask1, int mask2) {
+    int p = data[item] >> 25;
+    p = p << 1 | evenparity32(data[item] & mask1);
+    p = p << 1 | evenparity32(data[item] & mask2);
+    data[item] = p << 24 | (data[item] & 0xffffff);
 }
-static inline void extend_table(uint32_t *tbl, uint32_t **end, int bit, int m1, int m2) {
-    for (*tbl <<= 1; tbl <= *end; *++tbl <<= 1)
-        if (filter(*tbl) ^ filter(*tbl | 1)) {
-            *tbl |= filter(*tbl) ^ bit;
-            update_contribution(tbl, m1, m2);
-        } else if (filter(*tbl) == bit) {
-            *++*end = tbl[1];
-            tbl[1] = tbl[0] | 1;
-            update_contribution(tbl, m1, m2);
-            *tbl++;
-            update_contribution(tbl, m1, m2);
-        } else
-            *tbl-- = *(*end)--;
-}
-static inline void extend_table_simple(uint32_t *tbl, uint32_t **end, int bit) {
-    for (*tbl <<= 1; tbl <= *end; *++tbl <<= 1) {
-        if (filter(*tbl) ^ filter(*tbl | 1)) {
-            *tbl |= filter(*tbl) ^ bit;
-        } else if (filter(*tbl) == bit) {
-            *++*end = *++tbl;
-            *tbl = tbl[-1] | 1;
+int extend_table(int data[], int tbl, int end, int bit, int m1, int m2) {
+    for (data[tbl] <<= 1; tbl <= end; data[++tbl] <<= 1) {
+        if ((filter(data[tbl]) ^ filter(data[tbl] | 1)) != 0) {
+            data[tbl] |= filter(data[tbl]) ^ bit;
+            update_contribution(data, tbl, m1, m2);
+        } else if (filter(data[tbl]) == bit) {
+            data[++end] = data[tbl + 1];
+            data[tbl + 1] = data[tbl] | 1;
+            update_contribution(data, tbl, m1, m2);
+            tbl++;
+            update_contribution(data, tbl, m1, m2);
         } else {
-            *tbl-- = *(*end)--;
+            data[tbl--] = data[end--];
         }
     }
+    return end;
 }
-static struct Crypto1State *recover(uint32_t *o_head, uint32_t *o_tail, uint32_t oks, uint32_t *e_head, uint32_t *e_tail, uint32_t eks, int rem, struct Crypto1State *sl, bucket_array_t bucket) {
-    bucket_info_t bucket_info;
+int extend_table_simple(int data[], int tbl, int end, int bit) {
+    for(data[ tbl ] <<= 1; tbl <= end; data[++tbl] <<= 1) {
+        if ((filter(data[ tbl ]) ^ filter(data[ tbl ] | 1)) !=0 )
+            data[ tbl ] |= filter(data[ tbl ]) ^ bit;
+        else if (filter(data[ tbl ]) == bit) {
+            data[ ++end ] = data[ ++tbl ];
+            data[ tbl ] = data[ tbl - 1 ] | 1;
+        } else {
+            data[ tbl-- ] = data[ end-- ];
+        }
+    }
+    return end;
+}
+int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, int e_tail, int eks, int rem,
+            struct Crypto1State sl[], int s) {
+    int o, e, i;
     if (rem == -1) {
-        for (uint32_t *e = e_head; e <= e_tail; ++e) {
-            *e = *e << 1 ^ (evenparity32(*e & LF_POLY_EVEN));
-            for (uint32_t *o = o_head; o <= o_tail; ++o, ++sl) {
-                sl->even = *o;
-                sl->odd = *e ^ (evenparity32(*o & LF_POLY_ODD));
+        for (e = e_head; e <= e_tail; ++e) {
+            even[e] = (even[e] << 1) ^ evenparity32(even[e] & LF_POLY_EVEN);
+            for (o = o_head; o <= o_tail; ++o, ++s) {
+                sl[s].even = odd[o];
+                sl[s].odd = even[e] ^ evenparity32(odd[o] & LF_POLY_ODD);
+                sl[s + 1].odd = sl[s + 1].even = 0;
             }
         }
-        return sl;
+        return s;
     }
-    for (uint32_t i = 0; i < 4 && rem--; i++) {
+    for (i = 0; (i < 4) && (rem-- != 0); i++) {
         oks >>= 1;
         eks >>= 1;
-        extend_table(o_head, &o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1);
+        o_tail = extend_table(odd, o_head, o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1);
         if (o_head > o_tail)
-            return sl;
-        extend_table(e_head, &e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1);
+            return s;
+        e_tail = extend_table(even, e_head, e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1);
         if (e_head > e_tail)
-            return sl;
+            return s;
     }
-    bucket_sort_intersect(e_head, e_tail, o_head, o_tail, &bucket_info, bucket);
-    for (int i = bucket_info.numbuckets - 1; i >= 0; i--) {
-        sl = recover(bucket_info.bucket_info[1][i].head, bucket_info.bucket_info[1][i].tail, oks,
-                     bucket_info.bucket_info[0][i].head, bucket_info.bucket_info[0][i].tail, eks,
-                     rem, sl, bucket);
+    quicksort(odd, o_head, o_tail);
+    quicksort(even, e_head, e_tail);
+    while (o_tail >= o_head && e_tail >= e_head) {
+        if (((odd[o_tail] ^ even[e_tail]) >> 24) == 0) {
+            o_tail = binsearch(odd, o_head, o = o_tail);
+            e_tail = binsearch(even, e_head, e = e_tail);
+            s = recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, sl, s);
+        } else if ((odd[o_tail] ^ 0x80000000) > (even[e_tail] ^ 0x80000000)) {
+            o_tail = binsearch(odd, o_head, o_tail) - 1;
+        } else {
+            e_tail = binsearch(even, e_head, e_tail) - 1;
+        }
     }
-    return sl;
+
+    return s;
 }
-struct Crypto1State *lfsr_recovery32(uint32_t ks2) {
+struct Crypto1State* lfsr_recovery32(int ks2) {
     struct Crypto1State *statelist;
-    uint32_t *odd_head = 0, *odd_tail = 0, oks = 0;
-    uint32_t *even_head = 0, *even_tail = 0, eks = 0;
+    int stl = 0;
+    int odd_head = 0, odd_tail = -1, oks = 0;
+    int even_head = 0, even_tail = -1, eks = 0;
+    int *odd = calloc(1, sizeof(int) << 20);
+    int *even = calloc(1, sizeof(int) << 20);
+    statelist =  calloc(1, sizeof(struct Crypto1State) << 18);
     int i;
+    for(i = 0; i < (1 << 18); i++) {
+        statelist[i].odd = 0;
+        statelist[i].even = 0;
+    }
     for (i = 31; i >= 0; i -= 2)
         oks = oks << 1 | BEBIT(ks2, i);
     for (i = 30; i >= 0; i -= 2)
         eks = eks << 1 | BEBIT(ks2, i);
-    odd_head = odd_tail = calloc(1, sizeof(uint32_t) << 20);
-    even_head = even_tail = calloc(1, sizeof(uint32_t) << 20);
-    statelist =  calloc(1, sizeof(struct Crypto1State) << 18);
-    bucket_array_t bucket;
-    for (i = 0; i < 2; i++) {
-        for (uint32_t j = 0; j <= 0xff; j++) {
-            bucket[i][j].head = calloc(1, sizeof(uint32_t) << 12);
-        }
-    }
+    statelist[stl].odd = statelist[stl].even = 0;
     for (i = 1 << 20; i >= 0; --i) {
         if (filter(i) == (oks & 1))
-            *++odd_tail = i;
+            odd[++odd_tail] = i;
         if (filter(i) == (eks & 1))
-            *++even_tail = i;
+            even[++even_tail] = i;
     }
     for (i = 0; i < 4; i++) {
-        extend_table_simple(odd_head,  &odd_tail, (oks >>= 1) & 1);
-        extend_table_simple(even_head, &even_tail, (eks >>= 1) & 1);
+        odd_tail = extend_table_simple(odd, odd_head, odd_tail, ((oks >>= 1) & 1));
+        even_tail = extend_table_simple(even, even_head, even_tail, ((eks >>= 1) & 1));
     }
-    recover(odd_head, odd_tail, oks, even_head, even_tail, eks, 11, statelist, bucket);
-    for (i = 0; i < 2; i++)
-        for (uint32_t j = 0; j <= 0xff; j++)
-            free(bucket[i][j].head);
-    free(odd_head);
-    free(even_head);
+    recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 11, statelist, 0);
+    free(odd);
+    free(even);
     return statelist;
 }
 void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
