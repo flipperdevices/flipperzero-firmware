@@ -69,13 +69,14 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
             y += TAMA_SCREEN_SCALE_FACTOR;
         }
 
-        // Draw icons
+        // Start drawing icons
         uint8_t lcd_icons = g_ctx->icons;
+        
+        // Draw top icons
         y = lcd_icon_upper_top;
         // y = 64 - TAMA_LCD_ICON_SIZE;
         uint16_t x_ic = lcd_icon_upper_left;
         for(uint8_t i = 0; i < 4; ++i) {
-        // for(uint8_t i = 0; i < 7; ++i) {
             if(lcd_icons & 1) {
                 canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
             }
@@ -84,10 +85,7 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
             lcd_icons >>= 1;
         }
 
-        // if (lcd_icons & 7) {
-        //     canvas_draw_icon(canvas, 128 - TAMA_LCD_ICON_SIZE, 0, icons_list[7]);
-        // }
-        // Bottom
+        // Draw bottom icons
         y = lcd_icon_lower_top;
         x_ic = lcd_icon_lower_left;
         for(uint8_t i = 4; i < 8; ++i) {
@@ -487,10 +485,10 @@ int32_t tama_p1_app(void* p) {
                         tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                     } else if(event.input.key == InputKeyRight) {
                         tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                    } else if(event.input.key == InputKeyUp && event.input.type == InputTypeShort) { 
+                    } else if(event.input.key == InputKeyDown && event.input.type == InputTypeShort) { 
                         // TODO: pause or fast-forward tamagotchi
                         tama_p1_save_state(); 
-                    } else if(event.input.key == InputKeyDown) { // mute tamagotchi
+                    } else if(event.input.key == InputKeyUp) { // mute tamagotchi
                         tamalib_set_button(BTN_LEFT, tama_btn_state);
                         tamalib_set_button(BTN_RIGHT, tama_btn_state);
                     } else if(event.input.key == InputKeyBack && event.input.type == InputTypeShort) {
