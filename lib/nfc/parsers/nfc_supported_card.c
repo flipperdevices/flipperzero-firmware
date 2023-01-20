@@ -6,6 +6,7 @@
 #include "troika_4k_parser.h"
 #include "two_cities.h"
 #include "all_in_one.h"
+#include "myki.h"
 
 NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
     [NfcSupportedCardTypePlantain] =
@@ -49,6 +50,13 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .verify = all_in_one_parser_verify,
             .read = all_in_one_parser_read,
             .parse = all_in_one_parser_parse,
+        },
+    [NfcSupportedCardTypeMyki] =
+        {
+            .protocol = NfcDeviceProtocolMifareDesfire,
+            .verify = myki_parser_verify,
+            .read = myki_parser_read,
+            .parse = myki_parser_parse,
         },
 };
 

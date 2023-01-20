@@ -44,6 +44,8 @@ bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicMenu);
             } else if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
+            } else if(nfc->dev->dev_data.protocol == NfcDeviceProtocolMifareDesfire) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireMenu);
             }
             consumed = true;
         }

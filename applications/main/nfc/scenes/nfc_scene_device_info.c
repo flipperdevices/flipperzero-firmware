@@ -52,7 +52,8 @@ void nfc_scene_device_info_on_enter(void* context) {
         }
     } else if(
         dev_data->protocol == NfcDeviceProtocolMifareClassic ||
-        dev_data->protocol == NfcDeviceProtocolMifareUl) {
+        dev_data->protocol == NfcDeviceProtocolMifareUl ||
+        dev_data->protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_set(temp_str, nfc->dev->dev_data.parsed_data);
     }
 

@@ -215,6 +215,25 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     }
 
     do {
+        // Try to read supported card
+        FURI_LOG_I(TAG, "Trying to read a supported card ...");
+        for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
+            if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareDesfire) {
+                if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
+                    if(nfc_supported_card[i].read(nfc_worker, tx_rx)) {
+                        read_success = true;
+                        nfc_supported_card[i].parse(nfc_worker->dev_data);
+                        break;
+                    }
+                } else {
+                    furi_hal_nfc_sleep();
+                }
+            }
+        }
+        if(read_success) break;
+        furi_hal_nfc_sleep();
+
+        // Otherwise, try to read as usual
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
         if(!mf_df_read_card(tx_rx, data)) break;
         read_success = true;

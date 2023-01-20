@@ -119,6 +119,8 @@ typedef struct {
 
 void mf_df_clear(MifareDesfireData* data);
 
+MifareDesfireApplication* mf_df_find_application(MifareDesfireData* data, uint32_t application_id);
+
 void mf_df_cat_data(MifareDesfireData* data, FuriString* out);
 void mf_df_cat_card_info(MifareDesfireData* data, FuriString* out);
 void mf_df_cat_version(MifareDesfireVersion* version, FuriString* out);

@@ -49,6 +49,19 @@ void mf_df_cat_data(MifareDesfireData* data, FuriString* out) {
     }
 }
 
+MifareDesfireApplication*
+    mf_df_find_application(MifareDesfireData* data, uint32_t application_id) {
+    uint8_t x = application_id >> 16;
+    uint8_t y = application_id >> 8;
+    uint8_t z = application_id;
+    for(MifareDesfireApplication* app = data->app_head; app; app = app->next) {
+        if(app->id[0] == x && app->id[1] == y && app->id[2] == z) {
+            return app;
+        }
+    }
+    return NULL;
+}
+
 void mf_df_cat_card_info(MifareDesfireData* data, FuriString* out) {
     mf_df_cat_version(&data->version, out);
     if(data->free_memory) {
