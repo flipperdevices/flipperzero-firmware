@@ -320,7 +320,7 @@ static bool
     } else {
         //looking for the last occurrence of gap
         ind = instance->data_raw_ind - 1;
-        while((DURATION_DIFF(abs(instance->data_raw[ind]), gap) > (gap >> 2)) && (ind > 0)) {
+        while((ind > 0) && (DURATION_DIFF(abs(instance->data_raw[ind]), gap) > (gap >> 2))) {
             ind--;
         }
         gap_ind = ind;
@@ -527,7 +527,6 @@ void subghz_protocol_decoder_data_input_rssi(SubGhzProtocolDecoderDataRAW* insta
 uint8_t subghz_protocol_decoder_data_raw_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderDataRAW* instance = context;
-    UNUSED(instance);
     return subghz_protocol_blocks_add_bytes(
         instance->data, subghz_protocol_data_raw_get_full_byte(instance->generic.data_count_bit));
 }
