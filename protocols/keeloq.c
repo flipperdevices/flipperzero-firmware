@@ -87,5 +87,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 }
 
 ProtoViewDecoder KeeloqDecoder = {
-    "Keeloq", decode
+    .name = "Keeloq",
+    .decode = decode,
+    .get_fields = NULL,
+    .build_message = NULL
 };

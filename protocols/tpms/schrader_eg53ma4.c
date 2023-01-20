@@ -62,5 +62,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 }
 
 ProtoViewDecoder SchraderEG53MA4TPMSDecoder = {
-    "Schrader EG53MA4 TPMS", decode
+    .name = "Schrader EG53MA4 TPMS",
+    .decode = decode,
+    .get_fields = NULL,
+    .build_message = NULL
 };

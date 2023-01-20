@@ -63,5 +63,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 }
 
 ProtoViewDecoder Oregon2Decoder = {
-    "Oregon2", decode
+    .name = "Oregon2",
+    .decode = decode,
+    .get_fields = NULL,
+    .build_message = NULL
 };

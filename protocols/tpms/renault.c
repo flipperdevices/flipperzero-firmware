@@ -65,5 +65,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 }
 
 ProtoViewDecoder RenaultTPMSDecoder = {
-    "Renault TPMS", decode
+    .name = "Renault TPMS",
+    .decode = decode,
+    .get_fields = NULL,
+    .build_message = NULL
 };
