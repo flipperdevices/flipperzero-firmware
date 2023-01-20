@@ -21,10 +21,15 @@ extern "C" {
 #define DIGITAL_SIGNAL_UNIT_S (100000000000.0f)
 #define DIGITAL_SIGNAL_UNIT_US (100000.0f)
 
-#define NFCV_TOTAL_BLOCKS_MAX 256
-#define NFCV_BLOCK_SIZE 4
-#define NFCV_MAX_DUMP_SIZE (NFCV_BLOCK_SIZE * NFCV_TOTAL_BLOCKS_MAX)
-#define NFCV_MAX_FRAME_SIZE 64
+/* ISO/IEC 15693-3:2019(E) 10.4.12: maximum number of blocks is defined as 256 */
+#define NFCV_BLOCKS_MAX 256
+/* ISO/IEC 15693-3:2019(E) 10.4.12: maximum size of blocks is defined as 32 */
+#define NFCV_BLOCKSIZE_MAX 32
+/* the resulting memory size a card can have */
+#define NFCV_MEMSIZE_MAX (NFCV_BLOCKS_MAX * NFCV_BLOCKSIZE_MAX)
+/* ISO/IEC 15693-3:2019(E) 7.1b: standard allows up to 8192, the maxium frame length that we are expected to receive/send is less */
+#define NFCV_FRAMESIZE_MAX (1 + NFCV_MEMSIZE_MAX + NFCV_BLOCKS_MAX)
+
 #define NFCV_LOG_STR_LEN 128
 
 // #define NFCV_DIAGNOSTIC_DUMPS
@@ -147,12 +152,13 @@ typedef bool (*NfcVEmuProtocolFilter)(
 typedef struct {
     uint8_t flags; /* ISO15693-3 flags of the header as specified */
     uint8_t command; /* ISO15693-3 command at offset 1 as specified */
+    bool selected; /* ISO15693-3 flags: selected frame */
     bool addressed; /* ISO15693-3 flags: addressed frame */
     bool advanced; /* ISO15693-3 command: advanced command */
     uint8_t address_offset; /* ISO15693-3 offset of the address in frame, if addressed is set */
     uint8_t payload_offset; /* ISO15693-3 offset of the payload in frame */
 
-    uint8_t response_buffer[NFCV_MAX_FRAME_SIZE]; /* pre-allocated response buffer */
+    uint8_t response_buffer[NFCV_FRAMESIZE_MAX]; /* pre-allocated response buffer */
     NfcVSendFlags response_flags; /* flags to use when sending response */
     uint32_t send_time; /* timestamp when to send the response */
 
@@ -166,9 +172,13 @@ typedef struct {
     uint8_t ic_ref;
     uint16_t block_num;
     uint8_t block_size;
-    uint8_t data[NFCV_MAX_DUMP_SIZE];
+    uint8_t data[NFCV_MEMSIZE_MAX];
+    uint8_t security_status[NFCV_BLOCKS_MAX];
+    bool selected;
+    bool quiet;
 
     bool modified;
+    bool ready;
 
     /* specfic variant infos */
     NfcVSubtype sub_type;
@@ -178,7 +188,7 @@ typedef struct {
     /* precalced air level data */
     NfcVEmuAir emu_air;
 
-    uint8_t frame[NFCV_MAX_FRAME_SIZE]; /* ISO15693-2 incoming raw data from air layer */
+    uint8_t* frame; /* [NFCV_FRAMESIZE_MAX] ISO15693-2 incoming raw data from air layer */
     uint8_t frame_length; /* ISO15693-2 length of incoming data */
     uint32_t eof_timestamp; /* ISO15693-2 EOF timestamp, read from DWT->CYCCNT */
 

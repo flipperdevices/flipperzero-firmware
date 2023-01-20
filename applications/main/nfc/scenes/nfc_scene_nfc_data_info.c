@@ -103,11 +103,12 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
 
         for(int block = 0; block < maxBlocks; block++) {
+            const char* status = (nfcv_data->security_status[block] & 0x01) ? "(lck)" : "";
             for(int pos = 0; pos < nfcv_data->block_size; pos++) {
                 furi_string_cat_printf(
                     temp_str, " %02X", nfcv_data->data[block * nfcv_data->block_size + pos]);
             }
-            furi_string_cat_printf(temp_str, "\n");
+            furi_string_cat_printf(temp_str, " %s\n", status);
         }
         furi_string_cat_printf(temp_str, "\n");
 

@@ -183,10 +183,18 @@ void nfcv_crc(uint8_t* data, uint32_t length) {
 void nfcv_emu_free_signals(NfcVEmuAirSignals* signals) {
     furi_assert(signals);
 
-    digital_signal_free(signals->nfcv_resp_one);
-    digital_signal_free(signals->nfcv_resp_zero);
-    digital_signal_free(signals->nfcv_resp_sof);
-    digital_signal_free(signals->nfcv_resp_eof);
+    if(signals->nfcv_resp_one) {
+        digital_signal_free(signals->nfcv_resp_one);
+    }
+    if(signals->nfcv_resp_zero) {
+        digital_signal_free(signals->nfcv_resp_zero);
+    }
+    if(signals->nfcv_resp_sof) {
+        digital_signal_free(signals->nfcv_resp_sof);
+    }
+    if(signals->nfcv_resp_eof) {
+        digital_signal_free(signals->nfcv_resp_eof);
+    }
     signals->nfcv_resp_one = NULL;
     signals->nfcv_resp_zero = NULL;
     signals->nfcv_resp_sof = NULL;
@@ -197,28 +205,40 @@ bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
     furi_assert(air);
     furi_assert(signals);
 
-    bool ret = true;
+    bool success = true;
 
     if(!signals->nfcv_resp_one) {
         /* logical one: unmodulated then 8 pulses */
         signals->nfcv_resp_one = digital_signal_alloc(
             slowdown * (air->nfcv_resp_unmod->edge_cnt + 8 * air->nfcv_resp_pulse->edge_cnt));
+        if(!signals->nfcv_resp_one) {
+            return false;
+        }
         for(size_t i = 0; i < slowdown; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_unmod);
+            success &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_unmod);
         }
         for(size_t i = 0; i < slowdown * 8; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_pulse);
+            success &= digital_signal_append(signals->nfcv_resp_one, air->nfcv_resp_pulse);
+        }
+        if(!success) {
+            return false;
         }
     }
     if(!signals->nfcv_resp_zero) {
         /* logical zero: 8 pulses then unmodulated */
         signals->nfcv_resp_zero = digital_signal_alloc(
             slowdown * (8 * air->nfcv_resp_pulse->edge_cnt + air->nfcv_resp_unmod->edge_cnt));
+        if(!signals->nfcv_resp_zero) {
+            return false;
+        }
         for(size_t i = 0; i < slowdown * 8; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_pulse);
+            success &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_pulse);
         }
         for(size_t i = 0; i < slowdown; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_unmod);
+            success &= digital_signal_append(signals->nfcv_resp_zero, air->nfcv_resp_unmod);
+        }
+        if(!success) {
+            return false;
         }
     }
     if(!signals->nfcv_resp_sof) {
@@ -226,13 +246,19 @@ bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
         signals->nfcv_resp_sof = digital_signal_alloc(
             slowdown * (3 * air->nfcv_resp_unmod->edge_cnt + 24 * air->nfcv_resp_pulse->edge_cnt) +
             signals->nfcv_resp_one->edge_cnt);
+        if(!signals->nfcv_resp_sof) {
+            return false;
+        }
         for(size_t i = 0; i < slowdown * 3; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_unmod);
+            success &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_unmod);
         }
         for(size_t i = 0; i < slowdown * 24; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_pulse);
+            success &= digital_signal_append(signals->nfcv_resp_sof, air->nfcv_resp_pulse);
         }
-        ret &= digital_signal_append(signals->nfcv_resp_sof, signals->nfcv_resp_one);
+        success &= digital_signal_append(signals->nfcv_resp_sof, signals->nfcv_resp_one);
+        if(!success) {
+            return false;
+        }
     }
     if(!signals->nfcv_resp_eof) {
         /* EOF: logic 0, 24 pulses, unmodulated */
@@ -240,29 +266,48 @@ bool nfcv_emu_alloc_signals(NfcVEmuAir* air, NfcVEmuAirSignals* signals, uint32_
             signals->nfcv_resp_zero->edge_cnt +
             slowdown * (24 * air->nfcv_resp_pulse->edge_cnt + 3 * air->nfcv_resp_unmod->edge_cnt) +
             air->nfcv_resp_unmod->edge_cnt);
-        ret &= digital_signal_append(signals->nfcv_resp_eof, signals->nfcv_resp_zero);
+        if(!signals->nfcv_resp_eof) {
+            return false;
+        }
+        success &= digital_signal_append(signals->nfcv_resp_eof, signals->nfcv_resp_zero);
         for(size_t i = 0; i < slowdown * 24; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_pulse);
+            success &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_pulse);
         }
         for(size_t i = 0; i < slowdown * 3; i++) {
-            ret &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
+            success &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
         }
         /* add extra silence */
-        ret &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
+        success &= digital_signal_append(signals->nfcv_resp_eof, air->nfcv_resp_unmod);
+        if(!success) {
+            return false;
+        }
     }
-    return ret;
+    return success;
 }
 
-void nfcv_emu_alloc(NfcVData* nfcv_data) {
+bool nfcv_emu_alloc(NfcVData* nfcv_data) {
     furi_assert(nfcv_data);
+
+    if(!nfcv_data->frame) {
+        nfcv_data->frame = malloc(NFCV_FRAMESIZE_MAX);
+        if(!nfcv_data->frame) {
+            return false;
+        }
+    }
 
     if(!nfcv_data->emu_air.nfcv_signal) {
         /* assuming max frame length is 255 bytes */
         nfcv_data->emu_air.nfcv_signal = digital_sequence_alloc(8 * 255 + 2, &gpio_spi_r_mosi);
+        if(!nfcv_data->emu_air.nfcv_signal) {
+            return false;
+        }
     }
     if(!nfcv_data->emu_air.nfcv_resp_unmod) {
         /* unmodulated 256/fc or 1024/fc signal as building block */
         nfcv_data->emu_air.nfcv_resp_unmod = digital_signal_alloc(4);
+        if(!nfcv_data->emu_air.nfcv_resp_unmod) {
+            return false;
+        }
         nfcv_data->emu_air.nfcv_resp_unmod->start_level = false;
         nfcv_data->emu_air.nfcv_resp_unmod->edge_timings[0] =
             (uint32_t)(NFCV_RESP_SUBC1_UNMOD_256 * DIGITAL_SIGNAL_UNIT_S);
@@ -271,6 +316,9 @@ void nfcv_emu_alloc(NfcVData* nfcv_data) {
     if(!nfcv_data->emu_air.nfcv_resp_pulse) {
         /* modulated fc/32 or fc/8 pulse as building block */
         nfcv_data->emu_air.nfcv_resp_pulse = digital_signal_alloc(4);
+        if(!nfcv_data->emu_air.nfcv_resp_pulse) {
+            return false;
+        }
         nfcv_data->emu_air.nfcv_resp_pulse->start_level = true;
         nfcv_data->emu_air.nfcv_resp_pulse->edge_timings[0] =
             (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
@@ -280,12 +328,12 @@ void nfcv_emu_alloc(NfcVData* nfcv_data) {
     }
 
     bool success = true;
-
     success &= nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_high, 1);
     success &= nfcv_emu_alloc_signals(&nfcv_data->emu_air, &nfcv_data->emu_air.signals_low, 4);
 
     if(!success) {
         FURI_LOG_E(TAG, "Failed to allocate signals");
+        return false;
     }
 
     digital_sequence_set_signal(
@@ -320,16 +368,33 @@ void nfcv_emu_alloc(NfcVData* nfcv_data) {
         nfcv_data->emu_air.nfcv_signal,
         NFCV_SIG_LOW_EOF,
         nfcv_data->emu_air.signals_low.nfcv_resp_eof);
+
+    return true;
 }
 
 void nfcv_emu_free(NfcVData* nfcv_data) {
     furi_assert(nfcv_data);
 
-    digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod);
-    digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse);
-    digital_sequence_free(nfcv_data->emu_air.nfcv_signal);
-    pulse_reader_free(nfcv_data->emu_air.reader_signal);
+    if(nfcv_data->frame) {
+        free(nfcv_data->frame);
+    }
+    if(nfcv_data->emu_protocol_ctx) {
+        free(nfcv_data->emu_protocol_ctx);
+    }
+    if(nfcv_data->emu_air.nfcv_resp_unmod) {
+        digital_signal_free(nfcv_data->emu_air.nfcv_resp_unmod);
+    }
+    if(nfcv_data->emu_air.nfcv_resp_pulse) {
+        digital_signal_free(nfcv_data->emu_air.nfcv_resp_pulse);
+    }
+    if(nfcv_data->emu_air.nfcv_signal) {
+        digital_sequence_free(nfcv_data->emu_air.nfcv_signal);
+    }
+    if(nfcv_data->emu_air.reader_signal) {
+        pulse_reader_free(nfcv_data->emu_air.reader_signal);
+    }
 
+    nfcv_data->frame = NULL;
     nfcv_data->emu_air.nfcv_resp_unmod = NULL;
     nfcv_data->emu_air.nfcv_resp_pulse = NULL;
     nfcv_data->emu_air.nfcv_signal = NULL;
@@ -428,6 +493,7 @@ void nfcv_emu_handle_packet(
     /* parse the frame data for the upcoming part 3 handling */
     ctx->flags = nfcv_data->frame[0];
     ctx->command = nfcv_data->frame[1];
+    ctx->selected = (ctx->flags & RFAL_NFCV_REQ_FLAG_SELECT);
     ctx->addressed = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) &&
                      (ctx->flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
     ctx->advanced = (ctx->command >= 0xA0);
@@ -474,6 +540,14 @@ void nfcv_emu_handle_packet(
         }
     }
 
+    if(ctx->selected && !nfcv_data->selected) {
+        FURI_LOG_D(
+            TAG,
+            "selected card shall execute command 0x%02X, but we were not selected",
+            ctx->command);
+        return;
+    }
+
     /* then give control to the card subtype specific protocol filter */
     if(ctx->emu_protocol_filter != NULL) {
         if(ctx->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
@@ -487,28 +561,39 @@ void nfcv_emu_handle_packet(
 
     switch(ctx->command) {
     case ISO15693_INVENTORY: {
-        ctx->response_buffer[0] = ISO15693_NOERROR;
-        ctx->response_buffer[1] = nfcv_data->dsfid;
-        nfcv_revuidcpy(&ctx->response_buffer[2], nfc_data->uid);
+        if(!nfcv_data->quiet) {
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            ctx->response_buffer[1] = nfcv_data->dsfid;
+            nfcv_revuidcpy(&ctx->response_buffer[2], nfc_data->uid);
 
-        nfcv_emu_send(
-            tx_rx, nfcv_data, ctx->response_buffer, 10, ctx->response_flags, ctx->send_time);
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 10, ctx->response_flags, ctx->send_time);
+            snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+        } else {
+            snprintf(
+                nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY (quiet)");
+        }
         break;
     }
 
     case ISO15693_STAYQUIET: {
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "STAYQUIET");
+        nfcv_data->quiet = true;
         break;
     }
 
     case ISO15693_LOCKBLOCK: {
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCKBLOCK");
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        nfcv_data->security_status[block] |= 0x01;
+        nfcv_data->modified = true;
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK BLOCK %d", block);
         break;
     }
 
     case ISO15693_SELECT: {
         ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_data->selected = true;
+        nfcv_data->quiet = false;
         nfcv_emu_send(
             tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "SELECT");
@@ -517,6 +602,7 @@ void nfcv_emu_handle_packet(
 
     case ISO15693_RESET_TO_READY: {
         ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_data->quiet = false;
         nfcv_emu_send(
             tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "RESET_TO_READY");
@@ -541,15 +627,16 @@ void nfcv_emu_handle_packet(
 
             ctx->response_buffer[buffer_pos++] = ISO15693_NOERROR;
 
-            for(int current_block = 0; current_block < blocks; current_block++) {
+            for(int block_index = 0; block_index < blocks; block_index++) {
+                int block_current = block + block_index;
                 /* prepend security status */
                 if(ctx->flags & RFAL_NFCV_REQ_FLAG_OPTION) {
-                    ctx->response_buffer[buffer_pos++] = 0;
+                    ctx->response_buffer[buffer_pos++] = nfcv_data->security_status[block_current];
                 }
                 /* then the data block */
                 memcpy(
                     &ctx->response_buffer[buffer_pos],
-                    &nfcv_data->data[nfcv_data->block_size * (block + current_block)],
+                    &nfcv_data->data[nfcv_data->block_size * block_current],
                     nfcv_data->block_size);
                 buffer_pos += nfcv_data->block_size;
             }
@@ -649,7 +736,19 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     furi_assert(nfc_data);
     furi_assert(nfcv_data);
 
-    nfcv_emu_alloc(nfcv_data);
+    if(!nfcv_emu_alloc(nfcv_data)) {
+        FURI_LOG_E(TAG, "Failed to allocate structures");
+        nfcv_data->ready = false;
+        return;
+    }
+
+    strcpy(nfcv_data->last_command, "");
+    nfcv_data->quiet = false;
+    nfcv_data->selected = false;
+    nfcv_data->modified = false;
+
+    /* everything is initialized */
+    nfcv_data->ready = true;
 
     rfal_platform_spi_acquire();
     /* configure for transparent and passive mode */
@@ -752,6 +851,10 @@ bool nfcv_emu_loop(
     uint32_t timeout = timeout_ms * 1000;
     bool wait_for_pulse = false;
 
+    if(!nfcv_data->ready) {
+        return false;
+    }
+
 #ifdef NFCV_DIAGNOSTIC_DUMPS
     uint8_t period_buffer[NFCV_DIAGNOSTIC_DUMP_SIZE];
     uint32_t period_buffer_pos = 0;
@@ -825,7 +928,7 @@ bool nfcv_emu_loop(
 
             periods_previous = 512 - (periods + 1);
             byte_value = (periods - 1) / 2;
-            if(frame_pos < NFCV_MAX_FRAME_SIZE) {
+            if(frame_pos < NFCV_FRAMESIZE_MAX) {
                 nfcv_data->frame[frame_pos++] = (uint8_t)byte_value;
             }
 
@@ -867,7 +970,7 @@ bool nfcv_emu_loop(
             }
 
             if(bits_received >= 8) {
-                if(frame_pos < NFCV_MAX_FRAME_SIZE) {
+                if(frame_pos < NFCV_FRAMESIZE_MAX) {
                     nfcv_data->frame[frame_pos++] = (uint8_t)byte_value;
                 }
                 bits_received = 0;

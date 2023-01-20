@@ -674,7 +674,7 @@ static bool nfc_device_save_slix_data(FlipperFormat* file, NfcDevice* dev) {
 bool nfc_device_load_slix_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
-    memset(data, 0, sizeof(NfcVData));
+    memset(data, 0, sizeof(NfcVSlixData));
 
     do {
         if(!flipper_format_read_hex(file, "Password EAS", data->key_eas, sizeof(data->key_eas)))
@@ -715,7 +715,7 @@ static bool nfc_device_save_slix_s_data(FlipperFormat* file, NfcDevice* dev) {
 bool nfc_device_load_slix_s_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
-    memset(data, 0, sizeof(NfcVData));
+    memset(data, 0, sizeof(NfcVSlixData));
 
     do {
         if(!flipper_format_read_hex(file, "Password Read", data->key_read, sizeof(data->key_read)))
@@ -763,7 +763,7 @@ static bool nfc_device_save_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
 bool nfc_device_load_slix_l_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
-    memset(data, 0, sizeof(NfcVData));
+    memset(data, 0, sizeof(NfcVSlixData));
 
     do {
         if(!flipper_format_read_hex(
@@ -811,7 +811,7 @@ static bool nfc_device_save_slix2_data(FlipperFormat* file, NfcDevice* dev) {
 bool nfc_device_load_slix2_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     NfcVSlixData* data = &dev->dev_data.nfcv_data.sub_data.slix;
-    memset(data, 0, sizeof(NfcVData));
+    memset(data, 0, sizeof(NfcVSlixData));
 
     do {
         if(!flipper_format_read_hex(file, "Password Read", data->key_read, sizeof(data->key_read)))
@@ -858,6 +858,9 @@ static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
         if(!flipper_format_write_hex(
                file, "Data Content", data->data, data->block_num * data->block_size))
             break;
+        if(!flipper_format_write_hex(
+               file, "Security Status", data->security_status, data->block_num))
+            break;
         if(!flipper_format_write_comment_cstr(
                file,
                "Subtype of this card (0 = ISO15693, 1 = SLIX, 2 = SLIX-S, 3 = SLIX-L, 4 = SLIX2)"))
@@ -892,7 +895,7 @@ bool nfc_device_load_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
     bool parsed = false;
     NfcVData* data = &dev->dev_data.nfcv_data;
 
-    memset(data, 0, sizeof(NfcVData));
+    memset(data, 0x00, sizeof(NfcVData));
 
     do {
         uint32_t temp_uint32 = 0;
@@ -907,6 +910,13 @@ bool nfc_device_load_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
         if(!flipper_format_read_hex(
                file, "Data Content", data->data, data->block_num * data->block_size))
             break;
+
+        /* optional, as added later */
+        if(flipper_format_key_exist(file, "Security Status")) {
+            if(!flipper_format_read_hex(
+                   file, "Security Status", data->security_status, data->block_num))
+                break;
+        }
         if(!flipper_format_read_hex(file, "Subtype", &temp_value, 1)) break;
         data->sub_type = temp_value;
 

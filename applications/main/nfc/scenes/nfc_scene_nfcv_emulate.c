@@ -75,6 +75,7 @@ void nfc_scene_nfcv_emulate_on_enter(void* context) {
     TextBox* text_box = nfc->text_box;
     text_box_set_font(text_box, TextBoxFontHex);
     text_box_set_focus(text_box, TextBoxFocusEnd);
+    text_box_set_text(text_box, "");
     furi_string_reset(nfc->text_box_store);
 
     // Set Widget state and view
@@ -102,10 +103,10 @@ bool nfc_scene_nfcv_emulate_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventUpdateLog) {
             // Add data button to widget if data is received for the first time
-            if(!furi_string_size(nfc->text_box_store)) {
-                nfc_scene_nfcv_emulate_widget_config(nfc, true);
-            }
             if(strlen(nfcv_data->last_command) > 0) {
+                if(!furi_string_size(nfc->text_box_store)) {
+                    nfc_scene_nfcv_emulate_widget_config(nfc, true);
+                }
                 /* use the last n bytes from the log so there's enough space for the new log entry */
                 size_t maxSize =
                     NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX - (strlen(nfcv_data->last_command) + 1);
