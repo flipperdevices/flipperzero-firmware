@@ -1,0 +1,14 @@
+App(
+    appid="ios_trigger",
+    name="iOS trigger",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ios_trigger_app",
+    cdefines=["APP_IOS_TRIGGER"],
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="ios_trigger_logo.png",
+    fap_category="Misc"
+)
