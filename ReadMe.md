@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - UL Updated: IR Assets by @amec0e
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Added: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 
 <a name="release">
 
@@ -289,6 +290,7 @@ $ ./fbt dolphin_ext
 - [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
+- [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
 - [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`

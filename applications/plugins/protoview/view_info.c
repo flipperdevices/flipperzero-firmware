@@ -2,7 +2,7 @@
  * See the LICENSE file for information about the license. */
 
 #include "app.h"
-#include <gui/view_i.h>
+#include <gui/view.h>
 #include <lib/toolbox/random_name.h>
 
 /* This view has subviews accessible navigating up/down. This
