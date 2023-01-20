@@ -36,8 +36,6 @@ __int32_t ios_trigger_app(void *p){
     //Linking the drawin on the display
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    bool keypressed= false; 
-
     //Main loop
     while(app->running){
         //Geting new event from the envent list in the event variable
@@ -120,20 +118,41 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     AppStruct* app = ctx;
     char chaine_photo[36];
     char chaine_delais[36];
+    char chaine_shooting[36];
+    
+    snprintf(chaine_photo, sizeof(chaine_photo), "%i shots", app->shots);
+    snprintf(chaine_delais, sizeof(chaine_delais), "%i", app->delay);
     if(app->shooting){
-        snprintf(chaine_photo, sizeof(chaine_photo), "Shooting... Photos: %i", app->shots);
-    }else{
-        snprintf(chaine_photo, sizeof(chaine_photo), "Photos: %i", app->shots);
+        snprintf(chaine_shooting, sizeof(chaine_shooting), "Press to stop");
+    }else {
+        snprintf(chaine_shooting, sizeof(chaine_shooting), "Press to start");
     }
-    snprintf(chaine_delais, sizeof(chaine_delais), "Delais %i", app->delay);
+    
+    
     canvas_clear(canvas);
+    canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 2, 10, "iOS Intervalometer");
+    //Represent
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 79, 60, "By Nem0oo");
     if(app->connected){
-        canvas_draw_str(canvas, 0, 10, "Connected");
-        canvas_draw_str(canvas, 0, 20, chaine_delais);
-        canvas_draw_str(canvas, 0, 30, chaine_photo);
+        canvas_draw_icon(canvas, 111, 2, &I_Ble_connected_15x15);
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 3, 26, "Delay (in sec)");
+        canvas_draw_icon(canvas, 67, 28, &I_ButtonDown_7x4);
+        canvas_draw_icon(canvas, 67, 13, &I_ButtonUp_7x4);
+        canvas_draw_str(canvas, 65, 26, chaine_delais);
+        canvas_draw_icon(canvas, 2, 31, &I_Ok_btn_pressed_13x13);
+        canvas_draw_str(canvas, 17, 41, chaine_shooting);
+        canvas_draw_str(canvas, 17, 56, chaine_photo);
+        canvas_draw_icon(canvas, 2, 47, &I_dir_10px);   
     }else{
-        canvas_draw_str(canvas, 0, 10, "Connection en cours...");
+        canvas_draw_icon(canvas, 111, 2, &I_Ble_disconnected_15x15);
+        canvas_draw_icon(canvas, 1, 21, &I_WarningDolphin_45x42);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 48, 37, "Awaiting bluetooth");
     }
 }
 
