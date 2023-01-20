@@ -155,7 +155,7 @@ static void MX_TIM2_Init(void)
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 1;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 4194304;        //39999;
+    htim2.Init.Period = 39999;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
@@ -249,6 +249,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
     UNUSED(ctx);
     char buf[50];
     snprintf(buf, 50, "%d", val1);
+
     canvas_draw_str(canvas, 10, 10, buf);
     //canvas_draw_dot(canvas, image_position.x % 128, image_position.y % 64);
     canvas_draw_line(canvas, 0, 0, 0, 63);
@@ -262,9 +263,20 @@ static void app_input_callback(InputEvent * input_event, void *ctx)
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
+// ramVector found from - https://community.nxp.com/t5/i-MX-Processors/Relocate-vector-table-to-ITCM/m-p/1302304
+// the aligned aspect is key!
+#define TABLE_SIZE	79
+uint32_t ramVector[TABLE_SIZE+1] __attribute__((aligned(512)));
 
 int32_t scope_main(void *p)
 {
+    __disable_irq();
+    memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
+    SCB->VTOR = (uint32_t)ramVector;
+    ramVector[27] = (uint32_t)DMA1_Channel1_IRQHandler;
+    ramVector[34] = (uint32_t)ADC1_IRQHandler;
+    ramVector[44] = (uint32_t)TIM2_IRQHandler;
+    __enable_irq();
     UNUSED(p);
     HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
     FuriMessageQueue *event_queue =
@@ -340,7 +352,7 @@ int32_t scope_main(void *p)
             }
         }
 
-        val1 = aADCxConvertedData[0];
+        val1 = aADCxConvertedData_Voltage_mVolt[0];
         view_port_update(view_port);
     }
 
