@@ -13,6 +13,8 @@
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/popup.h>
 #include <dolphin/dolphin.h>
+#include <assets_icons.h>
+//#include "ios_trigger_icons.h"
 
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Dev/bt_hid.keys")
 #define TAG "HidApp"
