@@ -11,6 +11,6 @@ App(
     order=90,
 	fap_icon="ios_trigger_logo.png",
     fap_category="Misc",
-    fap_icon_assets="assets"
+    fap_icon_assets="assets",
     fap_icon_assets_symbol="ios_trigger",
 )
