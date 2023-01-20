@@ -15,6 +15,10 @@ variables:
   STM32_CUBE_F4_REPO_TAG: v1.26.2
   ARM_TOOLCHAIN_URL: https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2?revision=05382cca-1721-44e1-ae19-1e7c3dc96118&la=en&hash=D7C9D18FCA2DD9F894FD9F3C3DC9228498FA281A
   QEMU_PATH: /opt/qemu/bin/qemu-system-xtensa
+  ZEPHYR_REPO: https://github.com/zephyrproject-rtos/zephyr.git
+  ZEPHYR_REPO_REV: v3.2.0
+  ZEPHYR_TOOLCHAIN: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.15.2/toolchain_linux-x86_64_xtensa-espressif_esp32_zephyr-elf.tar.gz
+  ZEPHYR_SDK: https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.15.2/zephyr-sdk-0.15.2_linux-aarch64_minimal.tar.gz
 
 .build_idf_template:
   stage: build
@@ -74,6 +78,36 @@ build_stm32:
     - cd $CI_PROJECT_DIR/examples/stm32_example/build
     - cmake -DTOOLCHAIN_PREFIX=$CI_PROJECT_DIR/gcc-arm-none-eabi -DSTM32Cube_DIR=$CI_PROJECT_DIR/STM32CubeF4 -G Ninja ..
     - cmake --build .
+
+build_zephyr:
+  stage: build
+  image: espressif/idf:latest
+  tags:
+    - build
+    - internet
+  script:
+    - mkdir $CI_PROJECT_DIR/zephyrproject-rtos
+    - cd $CI_PROJECT_DIR/zephyrproject-rtos
+    - git clone --single-branch --depth=1 -b ${ZEPHYR_REPO_REV} ${ZEPHYR_REPO}
+    - mkdir $CI_PROJECT_DIR/zephyrproject-rtos/zephyr-sdk
+    - cd $CI_PROJECT_DIR/zephyrproject-rtos/zephyr-sdk
+    - wget --no-verbose -O zephyr_sdk.tar.gz ${ZEPHYR_SDK}
+    - tar xvf zephyr_sdk.tar.gz --strip-components=1
+    - wget --no-verbose -O esp32_toolchain.tar.gz ${ZEPHYR_TOOLCHAIN}
+    - tar xvf esp32_toolchain.tar.gz
+    - export ZEPHYR_SDK_INSTALL_DIR=$(pwd)
+    - export ZEPHYR_TOOLCHAIN_VARIANT="zephyr"
+    - cd $CI_PROJECT_DIR/zephyrproject-rtos/zephyr
+    - export ZEPHYR_BASE=$(pwd)
+    - pip install -r scripts/requirements.txt
+    - pip install wheel
+    - if [[ ! -d "$CI_PROJECT_DIR/zephyrproject-rtos/.west" ]]; then
+    - west init -l .
+    - fi
+    - unset IDF_PATH
+    - west zephyr-export
+    - west update hal_espressif
+    - west build -p -b esp32 $CI_PROJECT_DIR/examples/zephyr_example -DZEPHYR_EXTRA_MODULES=$CI_PROJECT_DIR
 
 run_tests:
   stage: test
