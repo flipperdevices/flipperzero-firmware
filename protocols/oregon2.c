@@ -47,18 +47,14 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         }
     }
 
-    snprintf(info->name,sizeof(info->name),"%s","Oregon v2.1");
-    /* The following line crashes the Flipper because of broken
-     * snprintf() implementation. */
-    snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
-        raw[6],raw[7]);
-    snprintf(info->info1,sizeof(info->info1),"Sensor ID %02X%02X",
-        deviceid[0], deviceid[1]);
-    snprintf(info->info2,sizeof(info->info2),"Temperature %d%d.%d",
-        temp[0],temp[1],temp[2]);
-    snprintf(info->info3,sizeof(info->info3),"Humidity %d%d",
-        hum[0],hum[1]);
+    float tempval = ((temp[0]-'0')*10) +
+                     (temp[1]-'0') +
+                    ((float)(temp[2]-'0')*0.1);
+    int humval = (hum[0]-'0')*10 + (hum[1]-'0');
+
+    fieldset_add_bytes(info->fields,"Sensor ID",deviceid,4);
+    fieldset_add_float(info->fields,"Temperature",tempval,1);
+    fieldset_add_uint(info->fields,"Humidity",humval,7);
     return true;
 }
 

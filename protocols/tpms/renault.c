@@ -53,6 +53,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     float kpa = 0.75 *((uint32_t)((raw[0]&3)<<8) | raw[1]);
     int temp = raw[2]-30;
 
+#if 0
     snprintf(info->name,sizeof(info->name),"%s","Renault TPMS");
     snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X%02X",
         raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
@@ -61,6 +62,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
         raw[3],raw[4],raw[5]);
     snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
     snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
+#endif
     return true;
 }
 

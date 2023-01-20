@@ -64,6 +64,24 @@ void fieldset_add_uint(ProtoViewFieldSet *fs, const char *name, uint64_t uval, u
     fieldset_add_field(fs,f);
 }
 
+/* Allocate and append a hex field. This is an unsigned number but
+ * with an hex representation. */
+void fieldset_add_hex(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits) {
+    ProtoViewField *f = field_new(FieldTypeHex,name);
+    f->uvalue = uval;
+    f->len = bits;
+    fieldset_add_field(fs,f);
+}
+
+/* Allocate and append a bin field. This is an unsigned number but
+ * with a binary representation. */
+void fieldset_add_bin(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits) {
+    ProtoViewField *f = field_new(FieldTypeBinary,name);
+    f->uvalue = uval;
+    f->len = bits;
+    fieldset_add_field(fs,f);
+}
+
 /* Allocate and append a string field. */
 void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s) {
     ProtoViewField *f = field_new(FieldTypeStr,name);
@@ -72,12 +90,13 @@ void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s) {
     fieldset_add_field(fs,f);
 }
 
-/* Allocate and append a bytes field. */
-void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count) {
+/* Allocate and append a bytes field. Note that 'count' is specified in
+ * nibbles (bytes*2). */
+void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count_nibbles) {
     ProtoViewField *f = field_new(FieldTypeBytes,name);
-    f->bytes = malloc(count);
-    memcpy(f->bytes,bytes,count);
-    f->len = count;
+    f->bytes = malloc(count_nibbles/2);
+    memcpy(f->bytes,bytes,count_nibbles/2);
+    f->len = count_nibbles;
     fieldset_add_field(fs,f);
 }
 

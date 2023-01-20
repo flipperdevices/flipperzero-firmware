@@ -543,6 +543,7 @@ ProtoViewDecoder *Decoders[] = {
 /* Free the message info and allocated data. */
 void free_msg_info(ProtoViewMsgInfo *i) {
     if (i == NULL) return;
+    fieldset_free(i->fields);
     free(i->bits);
     free(i);
 }
@@ -553,6 +554,7 @@ void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
     UNUSED(app);
     memset(i,0,sizeof(ProtoViewMsgInfo));
     i->bits = NULL;
+    i->fields = fieldset_new();
 }
 
 /* This function is called when a new signal is detected. It converts it
@@ -592,7 +594,10 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
         uint32_t delta = furi_get_tick() - start_time;
         FURI_LOG_E(TAG, "Decoder %s took %lu ms",
             Decoders[j]->name, (unsigned long)delta);
-        if (decoded) break;
+        if (decoded) {
+            info->decoder = Decoders[j];
+            break;
+        }
         j++;
     }
 

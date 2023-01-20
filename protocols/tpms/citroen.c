@@ -45,6 +45,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     int temp = raw[7]-50;
     int battery = raw[8]; /* This may be the battery. It's not clear. */
 
+#if 0
     snprintf(info->name,sizeof(info->name),"%s","Citroen TPMS");
     snprintf(info->raw,sizeof(info->raw),
         "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
@@ -55,6 +56,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
     snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
     snprintf(info->info4,sizeof(info->info4),"Repeat %d, Bat %d", repeat, battery);
+#endif
     return true;
 }
 

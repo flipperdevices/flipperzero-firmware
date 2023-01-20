@@ -34,6 +34,8 @@
 
 typedef struct ProtoViewApp ProtoViewApp;
 typedef struct ProtoViewMsgInfo ProtoViewMsgInfo;
+typedef struct ProtoViewFieldSet ProtoViewFieldSet;
+typedef struct ProtoViewDecoder ProtoViewDecoder;
 
 /* ============================== enumerations ============================== */
 
@@ -162,14 +164,8 @@ struct ProtoViewApp {
  * in the message info view. */
 #define PROTOVIEW_MSG_STR_LEN 32
 typedef struct ProtoViewMsgInfo {
-    char name[PROTOVIEW_MSG_STR_LEN]; /* Protocol name and version. */
-    char raw[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific raw representation.*/
-    /* The following is what the decoder wants to show to user. Each decoder
-     * can use the number of fileds it needs. */
-    char info1[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 1. */
-    char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
-    char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
-    char info4[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 4. */
+    ProtoViewDecoder *decoder;  /* The decoder that decoded the message. */
+    ProtoViewFieldSet *fields;  /* Decoded fields. */
     /* Low level information of the detected signal: the following are filled
      * by the protocol decoding function: */
     uint32_t start_off;         /* Pulses start offset in the bitmap. */
@@ -191,6 +187,8 @@ typedef enum {
     FieldTypeStr,
     FieldTypeSignedInt,
     FieldTypeUnsignedInt,
+    FieldTypeBinary,
+    FiledTypeHex,
     FieldTypeBytes,
     FieldTypeFloat,
 } ProtoViewFieldType;
@@ -198,10 +196,10 @@ typedef enum {
 typedef struct {
     ProtoViewFieldType type;
     uint32_t len;       // Depends on type:
-                        // Bits for integers.
+                        // Bits for integers (signed,unsigned,binary,hex).
                         // Number of characters for strings.
                         // Number of nibbles for bytes (1 for each 4 bits).
-                        // Not used for floats.
+                        // Number of digits after dot for floats.
     char *name;         // Field name.
     union {
         char *str;          // String type.
@@ -212,7 +210,7 @@ typedef struct {
     };
 } ProtoViewField;
 
-typedef struct {
+typedef struct ProtoViewFieldSet {
     ProtoViewField **fields;
     uint32_t numfields;
 } ProtoViewFieldSet;
@@ -292,6 +290,8 @@ void fieldset_free_set(ProtoViewFieldSet *fs);
 ProtoViewFieldSet *fieldset_new(void);
 void fieldset_add_int(ProtoViewFieldSet *fs, const char *name, int64_t val, uint8_t bits);
 void fieldset_add_uint(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits);
+void fieldset_add_hex(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits);
+void fieldset_add_bin(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits);
 void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s);
 void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count);
 void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val);

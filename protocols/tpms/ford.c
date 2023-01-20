@@ -47,6 +47,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     int flags = raw[5] & 0x7f;
     int car_moving = (raw[6] & 0x44) == 0x44;
 
+#if 0
     snprintf(info->name,sizeof(info->name),"%s","Ford TPMS");
     snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X",
         raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
@@ -59,6 +60,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     else
         snprintf(info->info3,sizeof(info->info3),"Flags %d", flags);
     snprintf(info->info4,sizeof(info->info4),"Moving %s", car_moving ? "yes" : "no");
+#endif
     return true;
 }
 
