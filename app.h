@@ -165,7 +165,7 @@ struct ProtoViewApp {
 #define PROTOVIEW_MSG_STR_LEN 32
 typedef struct ProtoViewMsgInfo {
     ProtoViewDecoder *decoder;  /* The decoder that decoded the message. */
-    ProtoViewFieldSet *fields;  /* Decoded fields. */
+    ProtoViewFieldSet *fieldset; /* Decoded fields. */
     /* Low level information of the detected signal: the following are filled
      * by the protocol decoding function: */
     uint32_t start_off;         /* Pulses start offset in the bitmap. */
@@ -188,7 +188,7 @@ typedef enum {
     FieldTypeSignedInt,
     FieldTypeUnsignedInt,
     FieldTypeBinary,
-    FiledTypeHex,
+    FieldTypeHex,
     FieldTypeBytes,
     FieldTypeFloat,
 } ProtoViewFieldType;
@@ -286,7 +286,7 @@ void ui_draw_alert_if_needed(Canvas *canvas, ProtoViewApp *app);
 void canvas_draw_str_with_border(Canvas* canvas, uint8_t x, uint8_t y, const char* str, Color text_color, Color border_color);
 
 /* fields.c */
-void fieldset_free_set(ProtoViewFieldSet *fs);
+void fieldset_free(ProtoViewFieldSet *fs);
 ProtoViewFieldSet *fieldset_new(void);
 void fieldset_add_int(ProtoViewFieldSet *fs, const char *name, int64_t val, uint8_t bits);
 void fieldset_add_uint(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits);
@@ -294,7 +294,7 @@ void fieldset_add_hex(ProtoViewFieldSet *fs, const char *name, uint64_t uval, ui
 void fieldset_add_bin(ProtoViewFieldSet *fs, const char *name, uint64_t uval, uint8_t bits);
 void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s);
 void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count);
-void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val);
+void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val, uint32_t digits_after_dot);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);

@@ -24,7 +24,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if (decoded < 11*4) return false; /* Minimum len to extract some data. */
     info->pulses_count = (off+11*4*4) - info->start_off;
 
-    char temp[3] = {0}, deviceid[2] = {0}, hum[2] = {0};
+    char temp[3] = {0}, hum[2] = {0};
+    uint8_t deviceid[2];
     for (int j = 0; j < 64; j += 4) {
         uint8_t nib[1];
         nib[0] = (bitmap_get(buffer,8,j+0) |
@@ -52,9 +53,9 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
                     ((float)(temp[2]-'0')*0.1);
     int humval = (hum[0]-'0')*10 + (hum[1]-'0');
 
-    fieldset_add_bytes(info->fields,"Sensor ID",deviceid,4);
-    fieldset_add_float(info->fields,"Temperature",tempval,1);
-    fieldset_add_uint(info->fields,"Humidity",humval,7);
+    fieldset_add_bytes(info->fieldset,"Sensor ID",deviceid,4);
+    fieldset_add_float(info->fieldset,"Temperature",tempval,1);
+    fieldset_add_uint(info->fieldset,"Humidity",humval,7);
     return true;
 }
 

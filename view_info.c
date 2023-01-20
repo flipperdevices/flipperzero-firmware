@@ -23,27 +23,77 @@ typedef struct {
     char *filename;
 } InfoViewPrivData;
 
+/* Draw the text label and value of the specified info field at x,y. */
+static void render_info_field(Canvas *const canvas,
+                              ProtoViewField *f, uint8_t x, uint8_t y)
+{
+    char buf[64];
+    canvas_set_font(canvas, FontSecondary);
+    switch(f->type) {
+    case FieldTypeStr:
+        snprintf(buf,sizeof(buf),"%s: %s", f->name, f->str);
+        break;
+    case FieldTypeSignedInt:
+        snprintf(buf,sizeof(buf),"%s: %lld", f->name, (long long) f->value);
+        break;
+    case FieldTypeUnsignedInt:
+        snprintf(buf,sizeof(buf),"%s: %llu", f->name,
+                    (unsigned long long) f->uvalue);
+        break;
+    case FieldTypeBinary:
+        {
+            uint64_t test_bit = (1 << (f->len-1));
+            uint64_t idx = snprintf(buf,sizeof(buf),"%s: ", f->name);
+            while(idx < sizeof(buf)-1 && test_bit) {
+                buf[idx++] = (f->uvalue & test_bit) ? '1' : '0';
+                test_bit >>= 1;
+            }
+            buf[idx] = 0;
+        }
+        break;
+    case FieldTypeHex:
+        snprintf(buf, sizeof(buf), "%s: 0x%*llX", f->name,
+            (int)(f->len+7)/8, f->uvalue);
+        break;
+    case FieldTypeFloat:
+        snprintf(buf, sizeof(buf), "%s: 0x%.*f", f->name,
+            (int)f->len, (double)f->fvalue);
+        break;
+    case FieldTypeBytes:
+        {
+            uint64_t idx = snprintf(buf,sizeof(buf),"%s: ", f->name);
+            uint32_t nibble_num = 0;
+            while(idx < sizeof(buf)-1 && nibble_num < f->len) {
+                const char *charset = "0123456789ABCDEF";
+                uint32_t nibble = nibble_num & 1 ?
+                    (f->bytes[nibble_num/2] >> 4) :
+                    (f->bytes[nibble_num/2] & 0xf);
+                buf[idx++] = charset[nibble];
+                nibble_num++;
+            }
+            buf[idx] = 0;
+        }
+        break;
+    }
+    canvas_draw_str(canvas, x, y, buf);
+}
+
 /* Render the view with the detected message information. */
 static void render_subview_main(Canvas *const canvas, ProtoViewApp *app) {
     /* Protocol name as title. */
     canvas_set_font(canvas, FontPrimary);
     uint8_t y = 8, lineheight = 10;
-    canvas_draw_str(canvas, 0, y, app->msg_info->name);
+    canvas_draw_str(canvas, 0, y, app->msg_info->decoder->name);
     y += lineheight;
 
-    /* Info fields. */
-    char buf[128];
-    canvas_set_font(canvas, FontSecondary);
-    if (app->msg_info->raw[0]) {
-        snprintf(buf,sizeof(buf),"Raw: %s", app->msg_info->raw);
-        canvas_draw_str(canvas, 0, y, buf);
+    /* Draw the info fields. */
+    for (uint32_t j = 0; j < app->msg_info->fieldset->numfields; j++) {
+        render_info_field(canvas,app->msg_info->fieldset->fields[j],0,y);
         y += lineheight;
     }
-    canvas_draw_str(canvas, 0, y, app->msg_info->info1); y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->msg_info->info2); y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->msg_info->info3); y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->msg_info->info4); y += lineheight;
 
+    /* Draw a vertical "save" label. Temporary solution, to switch to
+     * something better ASAP. */
     y = 37;
     lineheight = 7;
     canvas_draw_str(canvas, 119, y, "s"); y += lineheight;
@@ -132,7 +182,7 @@ void str_replace(char *buf, char c1, char c2) {
 void set_signal_random_filename(ProtoViewApp *app, char *buf, size_t buflen) {
     char suffix[6];
     set_random_name(suffix,sizeof(suffix));
-    snprintf(buf,buflen,"%.10s-%s-%d",app->msg_info->name,suffix,rand()%1000);
+    snprintf(buf,buflen,"%.10s-%s-%d",app->msg_info->decoder->name,suffix,rand()%1000);
     str_replace(buf,' ','_');
     str_replace(buf,'-','_');
     str_replace(buf,'/','_');

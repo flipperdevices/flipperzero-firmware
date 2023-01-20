@@ -67,11 +67,11 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
                      (raw[4] << 0);
     int lowbat = (raw[8]&0x80) != 0;
 
-    fieldset_add_bytes(info->fields,"raw",raw,9*2);
-    fieldset_add_bytes(info->fields,"encr",raw,4*2);
-    fieldset_add_hex(info->fields,"id",remote_id,28);
-    fieldset_add_bin(info->fields,"s2|s1|s0|s3",buttons,4);
-    fieldset_add_bin(info->fields,"low battery",lowbat,1);
+    fieldset_add_bytes(info->fieldset,"raw",raw,9*2);
+    fieldset_add_bytes(info->fieldset,"encr",raw,4*2);
+    fieldset_add_hex(info->fieldset,"id",remote_id,28);
+    fieldset_add_bin(info->fieldset,"s2 s1 s0 s3",buttons,4);
+    fieldset_add_bin(info->fieldset,"low battery",lowbat,1);
     return true;
 }
 

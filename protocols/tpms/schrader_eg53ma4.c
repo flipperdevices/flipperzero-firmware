@@ -50,16 +50,9 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     int temp_f = raw[8];
     int temp_c = (temp_f-32)*5/9; /* Convert Fahrenheit to Celsius. */
 
-#if 0
-    snprintf(info->name,sizeof(info->name),"%s","Schrader EG53MA4 TPMS");
-    snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
-        raw[6],raw[7],raw[8],raw[9]);
-    snprintf(info->info1,sizeof(info->info1),"Tire ID %02X%02X%02X",
-        raw[4],raw[5],raw[6]); /* Only 28 bits of ID, not 32. */
-    snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
-    snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp_c);
-#endif
+    fieldset_add_bytes(info->fieldset,"Tire ID",raw+4,3*2);
+    fieldset_add_float(info->fieldset,"Pressure kpa",kpa,2);
+    fieldset_add_int(info->fieldset,"Temperature C",temp_c,8);
     return true;
 }
 

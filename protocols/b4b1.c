@@ -41,8 +41,8 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     off++; // In this protocol there is a final pulse as terminator.
     info->pulses_count = off - info->start_off;
 
-    fieldset_add_bytes(info->fields,"id",d,5);
-    fieldset_add_int(info->fields,"button",d[2]&0xf,4);
+    fieldset_add_bytes(info->fieldset,"id",d,5);
+    fieldset_add_int(info->fieldset,"button",d[2]&0xf,4);
     return true;
 }
 

@@ -26,7 +26,7 @@ static void field_free(ProtoViewField *f) {
 }
 
 /* Free a field set and its contained fields. */
-void fieldset_free_set(ProtoViewFieldSet *fs) {
+void fieldset_free(ProtoViewFieldSet *fs) {
     for (uint32_t j = 0; j < fs->numfields; j++)
         field_free(fs->fields[j]);
     free(fs->fields);
@@ -101,9 +101,9 @@ void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *
 }
 
 /* Allocate and append a float field. */
-void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val) {
+void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val, uint32_t digits_after_dot) {
     ProtoViewField *f = field_new(FieldTypeFloat,name);
     f->fvalue = val;
-    f->len = 0; // Not used for floats
+    f->len = digits_after_dot;
     fieldset_add_field(fs,f);
 }

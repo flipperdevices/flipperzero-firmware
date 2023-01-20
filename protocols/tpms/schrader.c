@@ -33,6 +33,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
                   0011 = 0x3. */
 
     uint8_t raw[8];
+    uint8_t id[4];
     uint32_t decoded =
         convert_from_line_code(raw,sizeof(raw),bits,numbytes,off,
             "01","10"); /* Manchester code. */
@@ -51,17 +52,14 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     float kpa = (float)raw[5]*2.5;
     int temp = raw[6]-50;
+    id[0] = raw[1]&7;
+    id[1] = raw[2];
+    id[2] = raw[3];
+    id[3] = raw[4];
 
-#if 0
-    snprintf(info->name,sizeof(info->name),"%s","Schrader TPMS");
-    snprintf(info->raw,sizeof(info->raw),"%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],raw[1],raw[2],raw[3],raw[4],raw[5],
-        raw[6],raw[7]);
-    snprintf(info->info1,sizeof(info->info1),"Tire ID %01X%02X%02X%02X",
-        raw[1]&7,raw[2],raw[3],raw[4]); /* Only 28 bits of ID, not 32. */
-    snprintf(info->info2,sizeof(info->info2),"Pressure %.2f kpa", (double)kpa);
-    snprintf(info->info3,sizeof(info->info3),"Temperature %d C", temp);
-#endif
+    fieldset_add_bytes(info->fieldset,"Tire ID",id,4*2);
+    fieldset_add_float(info->fieldset,"Pressure kpa",kpa,2);
+    fieldset_add_int(info->fieldset,"Temperature C",temp,8);
     return true;
 }
 

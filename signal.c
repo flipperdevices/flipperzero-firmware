@@ -543,7 +543,7 @@ ProtoViewDecoder *Decoders[] = {
 /* Free the message info and allocated data. */
 void free_msg_info(ProtoViewMsgInfo *i) {
     if (i == NULL) return;
-    fieldset_free(i->fields);
+    fieldset_free(i->fieldset);
     free(i->bits);
     free(i);
 }
@@ -554,7 +554,7 @@ void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app) {
     UNUSED(app);
     memset(i,0,sizeof(ProtoViewMsgInfo));
     i->bits = NULL;
-    i->fields = fieldset_new();
+    i->fieldset = fieldset_new();
 }
 
 /* This function is called when a new signal is detected. It converts it
@@ -604,9 +604,7 @@ bool decode_signal(RawSamplesBuffer *s, uint64_t len, ProtoViewMsgInfo *info) {
     if (!decoded) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(TAG, "Decoded %s, raw=%s info=[%s,%s,%s,%s]",
-            info->name, info->raw, info->info1, info->info2,
-            info->info3, info->info4);
+        FURI_LOG_E(TAG, "+++ Decoded %s", info->decoder->name);
         /* The message was correctly decoded: fill the info structure
          * with the decoded signal. The decoder may not implement offset/len
          * filling of the structure. In such case we have no info and

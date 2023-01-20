@@ -65,7 +65,7 @@ void render_view_raw_pulses(Canvas *const canvas, ProtoViewApp *app) {
     canvas_draw_str_with_border(canvas, 97, 63, buf, ColorWhite, ColorBlack);
     if (app->signal_decoded) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_with_border(canvas, 1, 61, app->msg_info->name, ColorWhite, ColorBlack);
+        canvas_draw_str_with_border(canvas, 1, 61, app->msg_info->decoder->name, ColorWhite, ColorBlack);
     }
 }
 
