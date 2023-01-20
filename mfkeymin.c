@@ -38,36 +38,7 @@ int binsearch(int data[], int start, int stop) {
     }
     return start;
 }
-void quicksort(int data[], int start, int stop){
-    int it = start + 1, rit = stop, t;
-    if (it > rit) {
-        return;
-    }
-    while(it < rit) {
-        if( (data[it] ^ 0x80000000) <= (data[start] ^ 0x80000000) ) {
-            ++it;
-        }
-        else if((data[rit] ^ 0x80000000) > (data[start] ^ 0x80000000)) {
-            --rit;
-        }
-        else {
-            t = data[it];
-            data[it] = data[rit];
-            data[rit] = t;
-        }
-    }
-    if((data[rit] ^ 0x80000000) >= (data[start] ^ 0x80000000)) {
-        --rit;
-    }
-    if(rit != start) {
-        t = data[rit];
-        data[rit] = data[start];
-        data[start] = t;
-    }
-    quicksort(data, start, rit - 1);
-    quicksort(data, rit + 1, stop);
-}
-void quickSort(int array[], int low, int high) {
+void quicksort(int array[], int low, int high) {
     if (SIZEOF(array) == 0)
         return;
     if (low >= high)
@@ -91,10 +62,10 @@ void quickSort(int array[], int low, int high) {
         }
     }
     if (low < j) {
-        quickSort(array, low, j);
+        quicksort(array, low, j);
     }
     if (high > i) {
-        quickSort(array, i, high);
+        quicksort(array, i, high);
     }
 }
 void update_contribution(int data[], int item, int mask1, int mask2) {
@@ -170,27 +141,20 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
             e_tail = binsearch(even, e_head, e_tail) - 1;
         }
     }
-
     return s;
 }
 struct Crypto1State* lfsr_recovery32(int ks2) {
     struct Crypto1State *statelist;
-    int stl = 0;
     int odd_head = 0, odd_tail = -1, oks = 0;
     int even_head = 0, even_tail = -1, eks = 0;
     int *odd = calloc(1, sizeof(int) << 20);
     int *even = calloc(1, sizeof(int) << 20);
     statelist =  calloc(1, sizeof(struct Crypto1State) << 18);
     int i;
-    for(i = 0; i < (1 << 18); i++) {
-        statelist[i].odd = 0;
-        statelist[i].even = 0;
-    }
     for (i = 31; i >= 0; i -= 2)
         oks = oks << 1 | BEBIT(ks2, i);
     for (i = 30; i >= 0; i -= 2)
         eks = eks << 1 | BEBIT(ks2, i);
-    statelist[stl].odd = statelist[stl].even = 0;
     for (i = 1 << 20; i >= 0; --i) {
         if (filter(i) == (oks & 1))
             odd[++odd_tail] = i;
