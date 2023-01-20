@@ -537,20 +537,32 @@ void nfcv_emu_handle_packet(
             nfcv_emu_send(
                 tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
         } else {
-            ctx->response_buffer[0] = ISO15693_NOERROR;
-            memcpy(
-                &ctx->response_buffer[1],
-                &nfcv_data->data[nfcv_data->block_size * block],
-                nfcv_data->block_size * blocks);
+            uint8_t buffer_pos = 0;
+
+            ctx->response_buffer[buffer_pos++] = ISO15693_NOERROR;
+
+            for(int current_block = 0; current_block < blocks; current_block++) {
+                /* prepend security status */
+                if(ctx->flags & RFAL_NFCV_REQ_FLAG_OPTION) {
+                    ctx->response_buffer[buffer_pos++] = 0;
+                }
+                /* then the data block */
+                memcpy(
+                    &ctx->response_buffer[buffer_pos],
+                    &nfcv_data->data[nfcv_data->block_size * (block + current_block)],
+                    nfcv_data->block_size);
+                buffer_pos += nfcv_data->block_size;
+            }
             nfcv_emu_send(
                 tx_rx,
                 nfcv_data,
                 ctx->response_buffer,
-                1 + nfcv_data->block_size * blocks,
+                buffer_pos,
                 ctx->response_flags,
                 ctx->send_time);
         }
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
+
         break;
     }
 
