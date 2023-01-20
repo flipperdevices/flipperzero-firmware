@@ -112,7 +112,7 @@ The Zephyr port is ready to be integrated into your Zephyr app as a Zephyr modul
 ```
     - name: esp-flasher
       url: https://github.com/espressif/esp-serial-flasher
-      revision: <insert current revision here>
+      revision: master
       path: modules/lib/esp_flasher
 ```
 
@@ -121,6 +121,7 @@ And add
 ```
 CONFIG_ESP_SERIAL_FLASHER=y
 CONFIG_CONSOLE_GETCHAR=y
+CONFIG_SERIAL_FLASHER_MD5_ENABLED=y
 ```
 
 to your project configuration `prj.conf`.
