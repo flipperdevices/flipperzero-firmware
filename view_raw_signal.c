@@ -77,14 +77,15 @@ void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
          * previous samples. */
         if (input.key == InputKeyRight) app->signal_offset++;
         else if (input.key == InputKeyLeft) app->signal_offset--;
-        else if (input.key == InputKeyOk) {
-            app->signal_offset = 0;
-            app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
-        }
-    } else if (input.type == InputTypeShort) {
+    } else if (input.type == InputTypeLong) {
         if (input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
             reset_current_signal(app);
+        }
+    } else if (input.type == InputTypeShort) {
+        if (input.key == InputKeyOk) {
+            app->signal_offset = 0;
+            adjust_raw_view_scale(app,DetectedSamples->short_pulse_dur);
         } else if (input.key == InputKeyDown) {
             /* Rescaling. The set becomes finer under 50us per pixel. */
             uint32_t scale_step = app->us_scale >= 50 ? 50 : 10;
@@ -94,4 +95,20 @@ void process_input_raw_pulses(ProtoViewApp *app, InputEvent input) {
             if (app->us_scale > 10) app->us_scale -= scale_step;
         }
     }
+}
+
+/* Adjust raw view scale depending on short pulse duration. */
+void adjust_raw_view_scale(ProtoViewApp *app, uint32_t short_pulse_dur) {
+    if (short_pulse_dur == 0)
+        app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
+    else if (short_pulse_dur < 75)
+        app->us_scale = 10;
+    else if (short_pulse_dur < 145)
+        app->us_scale = 30;
+    else if (short_pulse_dur < 400)
+        app->us_scale = 100;
+    else if (short_pulse_dur < 1000)
+        app->us_scale = 200;
+    else
+        app->us_scale = PROTOVIEW_RAW_VIEW_DEFAULT_SCALE;
 }

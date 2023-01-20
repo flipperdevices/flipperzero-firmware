@@ -198,12 +198,7 @@ void scan_for_signal(ProtoViewApp *app) {
                 FURI_LOG_E(TAG, "===> Displayed sample updated (%d samples %lu us)",
                     (int)thislen, DetectedSamples->short_pulse_dur);
 
-                /* Adjust raw view scale if the signal has an high
-                 * data rate. */
-                if (DetectedSamples->short_pulse_dur < 75)
-                    app->us_scale = 10;
-                else if (DetectedSamples->short_pulse_dur < 145)
-                    app->us_scale = 30;
+                adjust_raw_view_scale(app,DetectedSamples->short_pulse_dur);
                 notify_signal_detected(app,decoded);
             } else {
                 /* If the structure was not filled, discard it. Otherwise

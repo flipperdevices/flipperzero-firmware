@@ -272,6 +272,7 @@ void process_input_direct_sampling(ProtoViewApp *app, InputEvent input);
 void view_enter_direct_sampling(ProtoViewApp *app);
 void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);
+void adjust_raw_view_scale(ProtoViewApp *app, uint32_t short_pulse_dur);
 
 /* ui.c */
 int ui_get_current_subview(ProtoViewApp *app);

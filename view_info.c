@@ -21,6 +21,9 @@ typedef struct {
      * you can move to next rows. Here we store where we are. */
     uint32_t signal_display_start_row;
     char *filename;
+    uint8_t cur_info_page; // Info page to display. Useful when there are
+                           // too many fields populated by the decoder that
+                           // a single page is not enough.
 } InfoViewPrivData;
 
 /* Draw the text label and value of the specified info field at x,y. */
@@ -79,17 +82,35 @@ static void render_info_field(Canvas *const canvas,
 }
 
 /* Render the view with the detected message information. */
+#define INFO_LINES_PER_PAGE 5
 static void render_subview_main(Canvas *const canvas, ProtoViewApp *app) {
+    InfoViewPrivData *privdata = app->view_privdata;
+    uint8_t pages = (app->msg_info->fieldset->numfields
+                     +(INFO_LINES_PER_PAGE-1)) / INFO_LINES_PER_PAGE;
+    privdata->cur_info_page %= pages;
+    uint8_t current_page = privdata->cur_info_page;
+    char buf[32];
+
     /* Protocol name as title. */
     canvas_set_font(canvas, FontPrimary);
     uint8_t y = 8, lineheight = 10;
-    canvas_draw_str(canvas, 0, y, app->msg_info->decoder->name);
+
+    if (pages > 1) {
+        snprintf(buf,sizeof(buf),"%s %u/%u", app->msg_info->decoder->name,
+                                             current_page+1, pages);
+        canvas_draw_str(canvas, 0, y, buf);
+    } else {
+        canvas_draw_str(canvas, 0, y, app->msg_info->decoder->name);
+    }
     y += lineheight;
 
     /* Draw the info fields. */
-    for (uint32_t j = 0; j < app->msg_info->fieldset->numfields; j++) {
-        render_info_field(canvas,app->msg_info->fieldset->fields[j],0,y);
+    uint8_t max_lines = INFO_LINES_PER_PAGE;
+    uint32_t j = current_page*max_lines;
+    while (j < app->msg_info->fieldset->numfields) {
+        render_info_field(canvas,app->msg_info->fieldset->fields[j++],0,y);
         y += lineheight;
+        if (--max_lines == 0) break;
     }
 
     /* Draw a vertical "save" label. Temporary solution, to switch to
@@ -313,9 +334,12 @@ void process_input_info(ProtoViewApp *app, InputEvent input) {
 
     /* Main subview. */
     if (subview == SubViewInfoMain) {
-        if (input.type == InputTypeShort && input.key == InputKeyOk) {
+        if (input.type == InputTypeLong && input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
             reset_current_signal(app);
+        } else if (input.type == InputTypeShort && input.key == InputKeyOk) {
+            /* Show next info page. */
+            privdata->cur_info_page++;
         }
     } else if (subview == SubViewInfoSave) {
     /* Save subview. */
