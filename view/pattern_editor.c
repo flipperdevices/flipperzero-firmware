@@ -181,7 +181,7 @@ void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
     for (int i = 0; i < SONG_MAX_CHANNELS; ++i)
     {
-        if(tracker->tracker_engine.channel[i].channel_flags & TEC_DISABLED)
+        if (tracker->tracker_engine.channel[i].channel_flags & TEC_DISABLED)
         {
             canvas_draw_icon(canvas, 13 + 32 * i, PATTERN_EDITOR_Y - 3, &I_channel_off);
         }

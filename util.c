@@ -75,7 +75,7 @@ bool is_pattern_empty(TrackerSong *song, uint8_t pattern)
     return true;
 }
 
-void set_empty_pattern(TrackerSongPattern* pattern, uint16_t pattern_length)
+void set_empty_pattern(TrackerSongPattern *pattern, uint16_t pattern_length)
 {
     for (uint16_t i = 0; i < pattern_length; i++)
     {
@@ -115,7 +115,7 @@ bool check_and_allocate_pattern(TrackerSong *song, uint8_t pattern)
     }
 }
 
-void resize_pattern(TrackerSongPattern* pattern, uint16_t old_length, uint16_t new_length)
+void resize_pattern(TrackerSongPattern *pattern, uint16_t old_length, uint16_t new_length)
 {
     TrackerSongPattern temp;
     temp.step = malloc((new_length) * sizeof(TrackerSongPatternStep));
@@ -127,11 +127,11 @@ void resize_pattern(TrackerSongPattern* pattern, uint16_t old_length, uint16_t n
     pattern->step = temp.step;
 }
 
-void change_pattern_length(TrackerSong* song, uint16_t new_length)
+void change_pattern_length(TrackerSong *song, uint16_t new_length)
 {
-    for(int i = 0; i < MAX_PATTERNS; i++)
+    for (int i = 0; i < MAX_PATTERNS; i++)
     {
-        if(song->pattern[i].step)
+        if (song->pattern[i].step)
         {
             resize_pattern(&song->pattern[i], song->pattern_length, new_length);
         }

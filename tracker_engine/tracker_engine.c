@@ -319,7 +319,7 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                 if (temp_sequence_position >= song->num_sequence_steps)
                 {
                     tracker_engine->playing = false; // TODO: add song loop handling
-                    //tracker_engine->sequence_position--;
+                    // tracker_engine->sequence_position--;
                     tracker_engine->pattern_position = song->pattern_length - 1;
                 }
 

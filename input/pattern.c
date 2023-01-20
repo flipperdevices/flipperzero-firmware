@@ -71,7 +71,7 @@ void edit_instrument(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, i
     }
 
     clamp(inst, delta, 0, MUS_NOTE_INSTRUMENT_NONE - 1);
-    tracker->current_instrument = inst; //remember last instrument
+    tracker->current_instrument = inst; // remember last instrument
     set_instrument(step, (uint8_t)inst);
 }
 

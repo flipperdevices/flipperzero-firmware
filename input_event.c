@@ -1,27 +1,28 @@
 #include "input_event.h"
 
-void submenu_callback(void* context, uint32_t index)
+void submenu_callback(void *context, uint32_t index)
 {
-    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)context;
+    FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)context;
 
-    switch(tracker->mode)
+    switch (tracker->mode)
     {
         case PATTERN_VIEW:
         {
-            switch(index)
+            switch (index)
             {
                 case SUBMENU_PATTERN_EXIT:
                 {
                     tracker->quit = true;
 
                     static InputEvent inevent = {.sequence = 0, .key = InputKeyLeft, .type = InputTypeMAX};
-                    FlizzerTrackerEvent event = {.type = EventTypeInput, .input = inevent, .period = 0}; //making an event so tracker does not wait for next keypress and exits immediately
+                    FlizzerTrackerEvent event = {.type = EventTypeInput, .input = inevent, .period = 0}; // making an event so tracker does not wait for next keypress and exits immediately
                     furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
                     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
                     break;
                 }
 
-                default: break;
+                default:
+                    break;
             }
 
             break;
@@ -29,26 +30,28 @@ void submenu_callback(void* context, uint32_t index)
 
         case INST_EDITOR_VIEW:
         {
-            switch(index)
+            switch (index)
             {
                 case SUBMENU_INSTRUMENT_EXIT:
                 {
                     tracker->quit = true;
 
                     static InputEvent inevent = {.sequence = 0, .key = InputKeyLeft, .type = InputTypeMAX};
-                    FlizzerTrackerEvent event = {.type = EventTypeInput, .input = inevent, .period = 0}; //making an event so tracker does not wait for next keypress and exits immediately
+                    FlizzerTrackerEvent event = {.type = EventTypeInput, .input = inevent, .period = 0}; // making an event so tracker does not wait for next keypress and exits immediately
                     furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
                     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
                     break;
                 }
 
-                default: break;
+                default:
+                    break;
             }
 
             break;
         }
 
-        default: break;
+        default:
+            break;
     }
 }
 
@@ -103,7 +106,7 @@ void cycle_view(FlizzerTrackerApp *tracker)
         tracker->mode = PATTERN_VIEW;
         tracker->focus = EDIT_PATTERN;
 
-        if(tracker->tracker_engine.song == NULL)
+        if (tracker->tracker_engine.song == NULL)
         {
             stop_song(tracker);
             tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
@@ -133,7 +136,7 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
     // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
     if (event->input.key == InputKeyBack && event->input.type == InputTypeLong)
     {
-        switch(tracker->mode)
+        switch (tracker->mode)
         {
             case PATTERN_VIEW:
             {
@@ -147,7 +150,8 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
                 break;
             }
 
-            default: break;
+            default:
+                break;
         }
 
         return;

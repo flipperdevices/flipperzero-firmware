@@ -1,14 +1,14 @@
 #pragma once
 
 #include <cli/cli.h>
+#include <dialogs/dialogs.h>
 #include <furi.h>
 #include <gui/gui.h>
+#include <gui/modules/submenu.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <dialogs/dialogs.h>
-#include <gui/modules/submenu.h>
-#include <toolbox/stream/file_stream.h>
 #include <stdio.h>
+#include <toolbox/stream/file_stream.h>
 #include <u8g2_glue.h>
 
 #include <gui/modules/text_input.h>
@@ -150,10 +150,10 @@ typedef struct
     TrackerView *tracker_view;
     ViewDispatcher *view_dispatcher;
     TextInput *text_input;
-    Stream* stream;
-    DialogsApp* dialogs;
-    Submenu* pattern_submenu;
-    Submenu* instrument_submenu;
+    Stream *stream;
+    DialogsApp *dialogs;
+    Submenu *pattern_submenu;
+    Submenu *instrument_submenu;
     bool was_it_back_keypress;
     uint32_t current_time;
     uint32_t period;
