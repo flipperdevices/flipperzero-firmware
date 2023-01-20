@@ -139,7 +139,7 @@ typedef struct
     TrackerSongSequence sequence;
 
     uint8_t num_patterns, num_sequence_steps, num_instruments;
-    uint8_t pattern_length;
+    uint16_t pattern_length;
 
     char song_name[MUS_SONG_NAME_LEN + 1];
     uint8_t speed, rate;
@@ -154,10 +154,8 @@ typedef struct
     TrackerSong *song;
     SoundEngine *sound_engine;
 
-    uint8_t pattern_position, sequence_position, current_tick;
+    uint16_t pattern_position, sequence_position, current_tick;
     uint16_t absolute_position; // sequence_position * pattern_length + pattern_position
-
-    uint8_t pattern_length;
 
     uint8_t speed, rate;
     uint8_t master_volume;

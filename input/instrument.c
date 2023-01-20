@@ -289,6 +289,11 @@ void edit_instrument_param(FlizzerTrackerApp *tracker, uint8_t selected_param, i
                 inst->ring_mod = 0xff; // 0xff = self
             }
 
+            if ((int16_t)inst->ring_mod == 0xff && (int16_t)delta > 0)
+            {
+                inst->ring_mod = 0;
+            }
+
             break;
         }
 
@@ -308,6 +313,11 @@ void edit_instrument_param(FlizzerTrackerApp *tracker, uint8_t selected_param, i
             if ((int16_t)inst->hard_sync + (int16_t)delta < 0)
             {
                 inst->hard_sync = 0xff; // 0xff = self
+            }
+
+            if ((int16_t)inst->hard_sync == 0xff && (int16_t)delta > 0)
+            {
+                inst->hard_sync = 0;
             }
 
             break;
@@ -423,7 +433,6 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
     {
         SoundEngineChannel *se_channel = &tracker->sound_engine.channel[0];
         sound_engine_enable_gate(&tracker->sound_engine, se_channel, false);
-        // tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
         return;
     }
 

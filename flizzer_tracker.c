@@ -15,7 +15,7 @@ Copyright:
 Glyphs: 95/203
 BBX Build Mode: 0
 */
-// this is a modified version with dot and semicolon moved 1 pixel to the left; lowercase symbols removed
+// this is a modified version with dot and semicolon moved 1 pixel to the left; lowercase symbols removed to save space
 const uint8_t u8g2_font_tom_thumb_4x6_tr[479] U8G2_FONT_SECTION("u8g2_font_tom_thumb_4x6_tr") =
     "A\0\2\2\2\3\2\3\4\3\5\0\0\5\0\5\0\0\340\0\0\1\306 \4@\62!\5u\62+"
     "\42\6\313\63I\5#\10W\62i\250\241\2$\10Wr#\216\230\0%\10W\62\31\265Q\0&\10"
@@ -33,7 +33,7 @@ const uint8_t u8g2_font_tom_thumb_4x6_tr[479] U8G2_FONT_SECTION("u8g2_font_tom_t
     "X\10W\62I\265T\0Y\10W\62I\225\25\0Z\7W\62\63\225\3[\7W\62#\226\3\134\7"
     "\317\62\31d\20]\7W\62\263\34\1^\5\313s\15_\5G\62\3`\5\312\63\61\0\0\0";
 
-static void draw_callback(Canvas *canvas, void *ctx)
+void draw_callback(Canvas *canvas, void *ctx)
 {
     TrackerViewModel *model = (TrackerViewModel *)ctx;
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)(model->tracker);
@@ -70,7 +70,7 @@ static void draw_callback(Canvas *canvas, void *ctx)
     }
 }
 
-static bool input_callback(InputEvent *input_event, void *ctx)
+bool input_callback(InputEvent *input_event, void *ctx)
 {
     // Проверяем, что контекст не нулевой
     furi_assert(ctx);
@@ -102,53 +102,14 @@ static bool input_callback(InputEvent *input_event, void *ctx)
     return consumed;
 }
 
-TrackerView *tracker_view_alloc(FlizzerTrackerApp *tracker)
-{
-    TrackerView *tracker_view = malloc(sizeof(TrackerView));
-    tracker_view->view = view_alloc();
-    tracker_view->context = tracker;
-    view_set_context(tracker_view->view, tracker_view);
-    view_allocate_model(tracker_view->view, ViewModelTypeLocking, sizeof(TrackerViewModel));
-    view_set_draw_callback(tracker_view->view, draw_callback);
-    view_set_input_callback(tracker_view->view, input_callback);
-
-    return tracker_view;
-}
-
-void tracker_view_free(TrackerView *tracker_view)
-{
-    furi_assert(tracker_view);
-    view_free(tracker_view->view);
-    free(tracker_view);
-}
-
 int32_t flizzer_tracker_app(void *p)
 {
     UNUSED(p);
 
-    FlizzerTrackerApp *tracker = init_tracker(44100, 50, true, 1024);
+    FlizzerTrackerApp *tracker = init_tracker(44100, 50, false, 1024);
 
     // Текущее событие типа кастомного типа FlizzerTrackerEvent
     FlizzerTrackerEvent event;
-    // Очередь событий на 8 элементов размера FlizzerTrackerEvent
-    tracker->event_queue = furi_message_queue_alloc(8, sizeof(FlizzerTrackerEvent));
-
-    tracker->gui = furi_record_open(RECORD_GUI);
-    tracker->view_dispatcher = view_dispatcher_alloc();
-
-    tracker->tracker_view = tracker_view_alloc(tracker);
-
-    view_dispatcher_add_view(tracker->view_dispatcher, VIEW_TRACKER, tracker->tracker_view->view);
-    view_dispatcher_attach_to_gui(tracker->view_dispatcher, tracker->gui, ViewDispatcherTypeFullscreen);
-
-    with_view_model(
-        tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
-
-    tracker->text_input = text_input_alloc();
-    view_dispatcher_add_view(tracker->view_dispatcher, VIEW_KEYBOARD, text_input_get_view(tracker->text_input));
-
-    tracker->notification = furi_record_open(RECORD_NOTIFICATION);
-    notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
     tracker->tracker_engine.master_volume = 0x80;
 
@@ -216,10 +177,6 @@ int32_t flizzer_tracker_app(void *p)
     tracker->song.instrument[0]->adsr.volume = 0x80;
     tracker->song.instrument[0]->waveform = SE_WAVEFORM_TRIANGLE;
     tracker->song.instrument[0]->sound_engine_flags |= SE_ENABLE_KEYDOWN_SYNC;
-    /*tracker->song.instrument[0]->sound_engine_flags |= (SE_ENABLE_KEYDOWN_SYNC | SE_ENABLE_FILTER);
-    tracker->song.instrument[0]->flags |= TE_SET_CUTOFF;
-    tracker->song.instrument[0]->filter_type = FIL_OUTPUT_LOWPASS;
-    tracker->song.instrument[0]->filter_cutoff = 10;*/
 
     tracker->song.instrument[1]->base_note = MIDDLE_C;
     tracker->song.instrument[1]->adsr.a = 0x0;
@@ -248,22 +205,6 @@ int32_t flizzer_tracker_app(void *p)
     }
 
     stop();
-
-    notification_message(tracker->notification, &sequence_display_backlight_enforce_auto);
-    furi_record_close(RECORD_NOTIFICATION);
-
-    // Специальная очистка памяти, занимаемой очередью
-    furi_message_queue_free(tracker->event_queue);
-
-    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_KEYBOARD);
-    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_TRACKER);
-
-    text_input_free(tracker->text_input);
-
-    view_dispatcher_free(tracker->view_dispatcher);
-
-    tracker_view_free(tracker->tracker_view);
-    furi_record_close(RECORD_GUI);
 
     deinit_tracker(tracker);
 

@@ -71,7 +71,7 @@ void edit_instrument(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, i
     }
 
     clamp(inst, delta, 0, MUS_NOTE_INSTRUMENT_NONE - 1);
-    tracker->current_instrument = inst; // remember last instrument
+    tracker->current_instrument = inst; //remember last instrument
     set_instrument(step, (uint8_t)inst);
 }
 
@@ -278,9 +278,9 @@ void pattern_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
 {
     uint8_t sequence_position = tracker->tracker_engine.sequence_position;
     uint8_t current_pattern = tracker->tracker_engine.song->sequence.sequence_step[sequence_position].pattern_indices[tracker->current_channel];
-    uint8_t pattern_step = tracker->tracker_engine.pattern_position;
+    uint16_t pattern_step = tracker->tracker_engine.pattern_position;
 
-    uint8_t pattern_length = tracker->tracker_engine.song->pattern_length;
+    uint16_t pattern_length = tracker->tracker_engine.song->pattern_length;
 
     TrackerSongPattern *pattern = &tracker->tracker_engine.song->pattern[current_pattern];
 

@@ -75,13 +75,11 @@ bool is_pattern_empty(TrackerSong *song, uint8_t pattern)
     return true;
 }
 
-void set_empty_pattern(TrackerSong *song, uint8_t pattern)
+void set_empty_pattern(TrackerSongPattern* pattern, uint16_t pattern_length)
 {
-    TrackerSongPattern song_pattern = song->pattern[pattern];
-
-    for (int i = 0; i < song->pattern_length; i++)
+    for (uint16_t i = 0; i < pattern_length; i++)
     {
-        TrackerSongPatternStep *step = &song_pattern.step[i];
+        TrackerSongPatternStep *step = &pattern->step[i];
 
         set_note(step, MUS_NOTE_NONE);
         set_instrument(step, MUS_NOTE_INSTRUMENT_NONE);
@@ -105,7 +103,7 @@ bool check_and_allocate_pattern(TrackerSong *song, uint8_t pattern)
         if (!(is_pattern_empty(song, pattern - 1))) // don't let the user flood the song with empty patterns
         {
             song->pattern[pattern].step = malloc(sizeof(TrackerSongPatternStep) * song->pattern_length);
-            set_empty_pattern(song, pattern);
+            set_empty_pattern(&song->pattern[pattern], song->pattern_length);
             song->num_patterns++;
             return true;
         }
@@ -115,4 +113,29 @@ bool check_and_allocate_pattern(TrackerSong *song, uint8_t pattern)
             return false;
         }
     }
+}
+
+void resize_pattern(TrackerSongPattern* pattern, uint16_t old_length, uint16_t new_length)
+{
+    TrackerSongPattern temp;
+    temp.step = malloc((new_length) * sizeof(TrackerSongPatternStep));
+
+    set_empty_pattern(&temp, new_length);
+    memcpy(temp.step, pattern->step, fmin(old_length, new_length) * sizeof(TrackerSongPatternStep));
+
+    free(pattern->step);
+    pattern->step = temp.step;
+}
+
+void change_pattern_length(TrackerSong* song, uint16_t new_length)
+{
+    for(int i = 0; i < MAX_PATTERNS; i++)
+    {
+        if(song->pattern[i].step)
+        {
+            resize_pattern(&song->pattern[i], song->pattern_length, new_length);
+        }
+    }
+
+    song->pattern_length = new_length;
 }

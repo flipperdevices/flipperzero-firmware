@@ -100,9 +100,9 @@ void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker)
     {
         uint8_t sequence_position = tracker->tracker_engine.sequence_position;
         uint8_t current_pattern = tracker->tracker_engine.song->sequence.sequence_step[sequence_position].pattern_indices[i];
-        uint8_t pattern_step = tracker->tracker_engine.pattern_position;
+        uint16_t pattern_step = tracker->tracker_engine.pattern_position;
 
-        uint8_t pattern_length = tracker->tracker_engine.song->pattern_length;
+        uint16_t pattern_length = tracker->tracker_engine.song->pattern_length;
 
         TrackerSongPattern *pattern = &tracker->tracker_engine.song->pattern[current_pattern];
 
@@ -163,8 +163,8 @@ void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
     if (tracker->editing && tracker->focus == EDIT_PATTERN)
     {
-        uint8_t x = tracker->current_channel * 32 + tracker->patternx * 4 + (tracker->patternx > 0 ? 4 : 0) - 1;
-        uint8_t y = PATTERN_EDITOR_Y + 6 * 2 + 1;
+        uint16_t x = tracker->current_channel * 32 + tracker->patternx * 4 + (tracker->patternx > 0 ? 4 : 0) - 1;
+        uint16_t y = PATTERN_EDITOR_Y + 6 * 2 + 1;
 
         canvas_draw_box(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
     }
@@ -176,6 +176,19 @@ void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         for (int y = PATTERN_EDITOR_Y + 1; y < 64; y += 2)
         {
             canvas_draw_dot(canvas, i * 32 - 1, y);
+        }
+    }
+
+    for (int i = 0; i < SONG_MAX_CHANNELS; ++i)
+    {
+        if(tracker->tracker_engine.channel[i].channel_flags & TEC_DISABLED)
+        {
+            canvas_draw_icon(canvas, 13 + 32 * i, PATTERN_EDITOR_Y - 3, &I_channel_off);
+        }
+
+        else
+        {
+            canvas_draw_icon(canvas, 13 + 32 * i, PATTERN_EDITOR_Y - 3, &I_channel_on);
         }
     }
 
@@ -317,12 +330,12 @@ void draw_songinfo_view(Canvas *canvas, FlizzerTrackerApp *tracker)
     uint32_t free_bytes = memmgr_get_free_heap();
     canvas_draw_line(canvas, 128 - 4 * 10 - 2, 0, 128 - 4 * 10 - 2, 10);
 
-    char song_size_buffer[12];
-    char free_bytes_buffer[12];
+    char song_size_buffer[19];
+    char free_bytes_buffer[19];
 
-    if (song_size > 999)
+    if (song_size > 9999)
     {
-        snprintf(song_size_buffer, sizeof(song_size_buffer), "TUNE:%.1fK", (double)song_size / (double)1024.0);
+        snprintf(song_size_buffer, sizeof(song_size_buffer), "TUNE:%ld%c%01ldK", song_size / 1024, '.', (song_size % 1024) / 103);
     }
 
     else
@@ -330,9 +343,9 @@ void draw_songinfo_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         snprintf(song_size_buffer, sizeof(song_size_buffer), "TUNE:%ld", song_size);
     }
 
-    if (free_bytes > 999)
+    if (free_bytes > 9999)
     {
-        snprintf(free_bytes_buffer, sizeof(song_size_buffer), "FREE:%.1fK", (double)free_bytes / (double)1024.0);
+        snprintf(free_bytes_buffer, sizeof(song_size_buffer), "FREE:%ld%c%01ldK", free_bytes / 1024, '.', (free_bytes % 1024) / 103);
     }
 
     else

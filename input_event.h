@@ -15,4 +15,5 @@
 #include "input/sequence.h"
 #include "input/songinfo.h"
 
+void submenu_callback(void* context, uint32_t index);
 void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event);

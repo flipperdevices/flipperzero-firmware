@@ -150,6 +150,8 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     se_channel->adsr.r = pinst->adsr.r;
     se_channel->adsr.volume = pinst->adsr.volume;
 
+    te_channel->volume = pinst->adsr.volume;
+
     sound_engine_enable_gate(tracker_engine->sound_engine, &tracker_engine->sound_engine->channel[chan], true);
 }
 
@@ -163,7 +165,7 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
 
     if (vol != MUS_NOTE_VOLUME_NONE)
     {
-        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
+        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
     }
 
     // TODO: add actual big ass function that executes commands; add arpeggio commands there
@@ -310,13 +312,20 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
             if (tracker_engine->pattern_position >= song->pattern_length)
             {
                 tracker_engine->pattern_position = 0;
-                tracker_engine->sequence_position++;
 
-                if (tracker_engine->sequence_position >= song->num_sequence_steps)
+                uint16_t temp_sequence_position = tracker_engine->sequence_position;
+                temp_sequence_position++;
+
+                if (temp_sequence_position >= song->num_sequence_steps)
                 {
                     tracker_engine->playing = false; // TODO: add song loop handling
-                    tracker_engine->sequence_position--;
+                    //tracker_engine->sequence_position--;
                     tracker_engine->pattern_position = song->pattern_length - 1;
+                }
+
+                else
+                {
+                    tracker_engine->sequence_position++;
                 }
             }
         }

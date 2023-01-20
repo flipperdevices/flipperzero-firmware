@@ -62,9 +62,12 @@ void edit_songinfo_param(FlizzerTrackerApp *tracker, uint8_t selected_param, int
     {
         case SI_PATTERNPOS:
         {
-            if ((int16_t)tracker->song.pattern_length + (int16_t)delta > 1 && (int16_t)tracker->song.pattern_length + (int16_t)delta <= 0xff)
+            uint16_t new_length = tracker->song.pattern_length;
+
+            if ((int16_t)new_length + (int16_t)delta > 0 && (int16_t)new_length + (int16_t)delta <= 0x100)
             {
-                tracker->song.pattern_length += delta;
+                new_length += delta;
+                change_pattern_length(&tracker->song, new_length);
             }
 
             break;

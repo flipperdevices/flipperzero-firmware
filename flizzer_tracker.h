@@ -5,6 +5,9 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
+#include <dialogs/dialogs.h>
+#include <gui/modules/submenu.h>
+#include <toolbox/stream/file_stream.h>
 #include <stdio.h>
 #include <u8g2_glue.h>
 
@@ -110,7 +113,7 @@ typedef enum
     INST_PWMDELAY,
 
     INST_PROGRAMEPERIOD,
-    /* ========  */
+    /* ========= */
     INST_PARAMS,
 } InstrumentParam;
 
@@ -125,8 +128,19 @@ typedef enum
     VIEW_TRACKER,
     VIEW_KEYBOARD,
     VIEW_FILE_MANAGER,
-    VIEW_SUBMENU,
+    VIEW_SUBMENU_PATTERN,
+    VIEW_SUBMENU_INSTRUMENT,
 } FlizzerTrackerViews;
+
+typedef enum
+{
+    SUBMENU_PATTERN_EXIT,
+} PatternSubmenuParams;
+
+typedef enum
+{
+    SUBMENU_INSTRUMENT_EXIT,
+} InstrumentSubmenuParams;
 
 typedef struct
 {
@@ -136,6 +150,10 @@ typedef struct
     TrackerView *tracker_view;
     ViewDispatcher *view_dispatcher;
     TextInput *text_input;
+    Stream* stream;
+    DialogsApp* dialogs;
+    Submenu* pattern_submenu;
+    Submenu* instrument_submenu;
     bool was_it_back_keypress;
     uint32_t current_time;
     uint32_t period;
@@ -162,3 +180,6 @@ typedef struct
 {
     FlizzerTrackerApp *tracker;
 } TrackerViewModel;
+
+void draw_callback(Canvas *canvas, void *ctx);
+bool input_callback(InputEvent *input_event, void *ctx);
