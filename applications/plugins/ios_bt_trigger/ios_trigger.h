@@ -20,10 +20,10 @@
 #define TAG "HidApp"
 
 //Enum of allowed event types
-typedef enum{
+typedef enum {
     EventTypeTick,
     EventTypeInput,
-    
+
 } EventType;
 
 //Struct to store an event and its type
@@ -41,10 +41,8 @@ typedef struct {
     bool running;
     bool shooting;
     int shots;
-    int delay;//in ms
+    int delay; //in ms
 } AppStruct;
-
-
 
 static void draw_callback(Canvas* canvas, void* ctx);
 static void input_callback(InputEvent* input_event, void* ctx);
