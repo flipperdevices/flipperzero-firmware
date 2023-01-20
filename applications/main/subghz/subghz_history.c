@@ -207,7 +207,7 @@ bool subghz_history_add_to_history(
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
             data = (data << 8) | key_data[i];
         }
-        if(key_data != 0) {
+        if(data != 0) {
             if(!(uint32_t)(data >> 32)) {
                 furi_string_printf(
                     item->item_str,
@@ -222,6 +222,8 @@ bool subghz_history_add_to_history(
                     (uint32_t)(data >> 32),
                     (uint32_t)(data & 0xFFFFFFFF));
             }
+        } else {
+            furi_string_printf(item->item_str, "%s", furi_string_get_cstr(instance->tmp_string));
         }
 
     } while(false);
