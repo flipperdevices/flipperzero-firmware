@@ -25,7 +25,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0119-1243-0.75.1-299a3b5](https://www.patreon.com/posts/77464234)
+## Latest Updates - [PATREON: Latest Release RM0120-0341-0.75.1-d0571f8](https://www.patreon.com/posts/77493581)
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-20 01:15 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-20 01:15 EST`
