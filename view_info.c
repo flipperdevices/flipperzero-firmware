@@ -187,6 +187,7 @@ void text_input_done_callback(void* context) {
 
     free(privdata->filename);
     ui_dismiss_keyboard(app);
+    ui_show_alert(app, "Signal saved", 1500);
 }
 
 /* Replace all the occurrences of character c1 with c2 in the specified
