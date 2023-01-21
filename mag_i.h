@@ -3,6 +3,7 @@
 #include "mag_device.h"
 #include "helpers/mag_helpers.h"
 #include "helpers/mag_text_input.h"
+#include "helpers/mag_types.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -12,7 +13,6 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
-
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
@@ -40,9 +40,15 @@ enum MagCustomEvent {
     MagEventPopupClosed,
 };
 
-typedef struct Mag Mag;
+typedef struct {
+    MagTxState tx;
+    MagTrackState track;
+    MagReverseState reverse;
+    uint32_t us_clock;
+    uint32_t us_interpacket;
+} MagSetting;
 
-struct Mag {
+typedef struct {
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;
@@ -55,6 +61,8 @@ struct Mag {
     FuriString* file_path;
     FuriString* file_name;
 
+    MagSetting* setting;
+
     // Common views
     Submenu* submenu;
     DialogEx* dialog_ex;
@@ -66,7 +74,7 @@ struct Mag {
 
     // Custom views
     Mag_TextInput* mag_text_input;
-};
+} Mag;
 
 typedef enum {
     MagViewSubmenu,

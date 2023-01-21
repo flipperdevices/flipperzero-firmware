@@ -6,25 +6,29 @@
 #define TAG "MagDevice"
 
 static const char* mag_file_header = "Flipper Mag device";
-static const uint32_t mag_file_version = 0;
+static const uint32_t mag_file_version = 1;
 
 MagDevice* mag_device_alloc() {
     MagDevice* mag_dev = malloc(sizeof(MagDevice));
-    mag_dev->dev_data = furi_string_alloc();
+    mag_dev->dev_data.track[0].str = furi_string_alloc();
+    mag_dev->dev_data.track[1].str = furi_string_alloc();
+    mag_dev->dev_data.track[2].str = furi_string_alloc();
     mag_dev->storage = furi_record_open(RECORD_STORAGE);
     mag_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     mag_dev->load_path = furi_string_alloc();
     return mag_dev;
 }
 
-void mag_device_data_clear(FuriString* dev_data) {
-    furi_string_reset(dev_data);
+void mag_device_data_clear(MagDeviceData* dev_data) {
+    furi_string_reset(dev_data->track[0].str);
+    furi_string_reset(dev_data->track[1].str);
+    furi_string_reset(dev_data->track[2].str);
 }
 
 void mag_device_clear(MagDevice* mag_dev) {
     furi_assert(mag_dev);
 
-    mag_device_data_clear(mag_dev->dev_data);
+    mag_device_data_clear(&mag_dev->dev_data);
     memset(&mag_dev->dev_data, 0, sizeof(mag_dev->dev_data));
     furi_string_reset(mag_dev->load_path);
 }
@@ -36,6 +40,11 @@ void mag_device_free(MagDevice* mag_dev) {
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
     furi_string_free(mag_dev->load_path);
+
+    //furi_string_free(mag_dev->dev_data.track[0].str);
+    //furi_string_free(mag_dev->dev_data.track[1].str);
+    //furi_string_free(mag_dev->dev_data.track[2].str);
+
     free(mag_dev);
 }
 
@@ -82,8 +91,14 @@ static bool mag_device_save_file(
         if(!flipper_format_write_comment_cstr(file, "Mag device track data")) break;
 
         // Write data
-        if(!flipper_format_write_string_cstr(file, "Data", furi_string_get_cstr(mag_dev->dev_data)))
-            break;
+        for(uint8_t i = 0; i < MAG_DEV_TRACKS; i++) {
+            furi_string_printf(temp_str, "Track %d", i + 1);
+            if(!flipper_format_write_string_cstr(
+                   file,
+                   furi_string_get_cstr(temp_str),
+                   furi_string_get_cstr(mag_dev->dev_data.track[i].str)))
+                break;
+        }
 
         saved = true;
     } while(0);
@@ -128,9 +143,13 @@ static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show
         }
 
         // Parse data
-        if(!flipper_format_read_string(file, "Data", mag_dev->dev_data)) {
-            data_read = false;
-            break;
+        for(uint8_t i = 0; i < MAG_DEV_TRACKS; i++) {
+            furi_string_printf(temp_str, "Track %d", i + 1);
+            if(!flipper_format_read_string(
+                   file, furi_string_get_cstr(temp_str), mag_dev->dev_data.track[i].str)) {
+                data_read = false;
+                break;
+            }
         }
 
         parsed = true;

@@ -15,7 +15,7 @@ void mag_scene_emulate_on_enter(void* context) {
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
 
-    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data));
+    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
     widget_add_string_multiline_element(
         widget, 0, 15, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
 
@@ -40,7 +40,8 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
 
             FuriString* tmp_str;
-            tmp_str = furi_string_alloc_set_str(furi_string_get_cstr(mag->mag_dev->dev_data));
+            tmp_str = furi_string_alloc_set_str(
+                furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
 
             // Assumes track 2 for temporary testing.
             // Will overhaul alongside file format and config system

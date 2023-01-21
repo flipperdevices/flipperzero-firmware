@@ -2,6 +2,12 @@
 
 #define TAG "Mag"
 
+#define SETTING_DEFAULT_REVERSE MagReverseStateOff
+#define SETTING_DEFAULT_TRACK MagTrackStateAll
+#define SETTING_DEFAULT_TX_RFID MagTxStateRFID
+#define SETTING_DEFAULT_US_CLOCK 240
+#define SETTING_DEFAULT_US_INTERPACKET 10
+
 static bool mag_debug_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     Mag* mag = context;
@@ -12,6 +18,18 @@ static bool mag_debug_back_event_callback(void* context) {
     furi_assert(context);
     Mag* mag = context;
     return scene_manager_handle_back_event(mag->scene_manager);
+}
+
+static MagSetting* mag_setting_alloc() {
+    // temp hardcoded defaults
+    MagSetting* setting = malloc(sizeof(MagSetting));
+    setting->reverse = SETTING_DEFAULT_REVERSE;
+    setting->track = SETTING_DEFAULT_TRACK;
+    setting->tx = SETTING_DEFAULT_TX_RFID;
+    setting->us_clock = SETTING_DEFAULT_US_CLOCK;
+    setting->us_interpacket = SETTING_DEFAULT_US_INTERPACKET;
+
+    return setting;
 }
 
 static Mag* mag_alloc() {
@@ -33,6 +51,7 @@ static Mag* mag_alloc() {
         mag->view_dispatcher, mag_debug_back_event_callback);
 
     mag->mag_dev = mag_device_alloc();
+    mag->setting = mag_setting_alloc();
 
     // Open GUI record
     mag->gui = furi_record_open(RECORD_GUI);
@@ -81,6 +100,12 @@ static Mag* mag_alloc() {
     return mag;
 }
 
+static void mag_setting_free(MagSetting* setting) {
+    furi_assert(setting);
+
+    free(setting);
+}
+
 static void mag_free(Mag* mag) {
     furi_assert(mag);
 
@@ -90,6 +115,10 @@ static void mag_free(Mag* mag) {
     // Mag device
     mag_device_free(mag->mag_dev);
     mag->mag_dev = NULL;
+
+    // Mag setting
+    mag_setting_free(mag->setting);
+    mag->setting = NULL;
 
     // Submenu
     view_dispatcher_remove_view(mag->view_dispatcher, MagViewSubmenu);

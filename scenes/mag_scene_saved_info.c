@@ -15,7 +15,7 @@ void mag_scene_saved_info_on_enter(void* context) {
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
 
-    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data));
+    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
     widget_add_string_multiline_element(
         widget, 0, 15, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
 
