@@ -356,6 +356,12 @@ int32_t scope_main(void *p)
         view_port_update(view_port);
     }
 
+    HAL_ADC_Stop_DMA (&hadc1);
+    __disable_irq();
+    SCB->VTOR = 0;
+    __enable_irq();
+
+    UNUSED(p);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
