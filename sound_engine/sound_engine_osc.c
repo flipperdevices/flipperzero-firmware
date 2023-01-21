@@ -17,7 +17,7 @@ static inline uint16_t sound_engine_triangle(uint32_t acc)
 
 static inline uint16_t sound_engine_sine(uint32_t acc, SoundEngine *sound_engine)
 {
-    return (sound_engine->sine_lut[(acc >> (ACC_BITS - SINE_LUT_BITDEPTH))] << (OUTPUT_BITS - SINE_LUT_BITDEPTH));
+    return ((uint16_t)sound_engine->sine_lut[(acc >> (ACC_BITS - SINE_LUT_BITDEPTH))] << (OUTPUT_BITS - SINE_LUT_BITDEPTH));
 }
 
 inline static void shift_lfsr(uint32_t *v, uint32_t tap_0, uint32_t tap_1)
@@ -86,6 +86,169 @@ uint16_t sound_engine_osc(SoundEngine *sound_engine, SoundEngineChannel *channel
             return sound_engine_sine(channel->accumulator, sound_engine);
             break;
         }
+
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_triangle(channel->accumulator) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator);
+        }
+
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_noise(channel, prev_acc) & sound_engine_triangle(channel->accumulator);
+        }
+
+        case (SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_saw(channel->accumulator);
+        }
+
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_saw(channel->accumulator) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_triangle(channel->accumulator) & sound_engine_saw(channel->accumulator);
+        }
+
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_triangle(channel->accumulator) & sound_engine_saw(channel->accumulator) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator) & sound_engine_saw(channel->accumulator);
+        }
+
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator) & sound_engine_saw(channel->accumulator) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE):
+        {
+            return sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_PULSE | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_saw(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_saw(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine);
+        }
+
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE_METAL):
+        case (SE_WAVEFORM_SINE | SE_WAVEFORM_PULSE | SE_WAVEFORM_TRIANGLE | SE_WAVEFORM_SAW | SE_WAVEFORM_NOISE | SE_WAVEFORM_NOISE_METAL):
+        {
+            return sound_engine_saw(channel->accumulator) & sound_engine_pulse(channel->accumulator, channel->pw) & sound_engine_triangle(channel->accumulator) & sound_engine_sine(channel->accumulator, sound_engine) & sound_engine_noise(channel, prev_acc);
+        }
+
+        default:
+            break;
     }
 
     return 0;

@@ -10,6 +10,12 @@ void submenu_callback(void *context, uint32_t index)
         {
             switch (index)
             {
+                case SUBMENU_PATTERN_RETURN:
+                {
+                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+                    break;
+                }
+
                 case SUBMENU_PATTERN_EXIT:
                 {
                     tracker->quit = true;
@@ -32,6 +38,12 @@ void submenu_callback(void *context, uint32_t index)
         {
             switch (index)
             {
+                case SUBMENU_INSTRUMENT_RETURN:
+                {
+                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+                    break;
+                }
+
                 case SUBMENU_INSTRUMENT_EXIT:
                 {
                     tracker->quit = true;

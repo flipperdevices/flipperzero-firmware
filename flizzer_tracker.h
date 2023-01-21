@@ -134,11 +134,13 @@ typedef enum
 
 typedef enum
 {
+    SUBMENU_PATTERN_RETURN,
     SUBMENU_PATTERN_EXIT,
 } PatternSubmenuParams;
 
 typedef enum
 {
+    SUBMENU_INSTRUMENT_RETURN,
     SUBMENU_INSTRUMENT_EXIT,
 } InstrumentSubmenuParams;
 

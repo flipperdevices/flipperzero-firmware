@@ -18,6 +18,7 @@ void set_instrument(TrackerSongPatternStep *step, uint8_t inst);
 void set_volume(TrackerSongPatternStep *step, uint8_t vol);
 void set_command(TrackerSongPatternStep *step, uint16_t command);
 
+void reset_buffer(SoundEngine *sound_engine);
 void play_song(FlizzerTrackerApp *tracker, bool from_cursor);
 void stop_song(FlizzerTrackerApp *tracker);
 

@@ -62,6 +62,7 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
     {
         bool unu = furi_hal_speaker_acquire(1000);
         UNUSED(unu);
+        furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 
     LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);

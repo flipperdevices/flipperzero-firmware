@@ -53,7 +53,10 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
     tracker->pattern_submenu = submenu_alloc();
     tracker->instrument_submenu = submenu_alloc();
 
+    submenu_add_item(tracker->pattern_submenu, "Return", SUBMENU_PATTERN_RETURN, submenu_callback, tracker);
     submenu_add_item(tracker->pattern_submenu, "Exit", SUBMENU_PATTERN_EXIT, submenu_callback, tracker);
+
+    submenu_add_item(tracker->instrument_submenu, "Return", SUBMENU_INSTRUMENT_RETURN, submenu_callback, tracker);
     submenu_add_item(tracker->instrument_submenu, "Exit", SUBMENU_INSTRUMENT_EXIT, submenu_callback, tracker);
 
     view_dispatcher_add_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN, submenu_get_view(tracker->pattern_submenu));

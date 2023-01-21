@@ -30,8 +30,18 @@ void set_command(TrackerSongPatternStep *step, uint16_t command)
     step->command |= command & (0x7fff);
 }
 
+void reset_buffer(SoundEngine *sound_engine)
+{
+    for (uint16_t i = 0; i < sound_engine->audio_buffer_size; i++)
+    {
+        sound_engine->audio_buffer[i] = 512;
+    }
+}
+
 void play_song(FlizzerTrackerApp *tracker, bool from_cursor)
 {
+    reset_buffer(&tracker->sound_engine);
+
     tracker->tracker_engine.playing = true;
     tracker->was_editing = tracker->editing;
     tracker->editing = false;

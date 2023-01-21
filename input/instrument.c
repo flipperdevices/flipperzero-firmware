@@ -420,6 +420,7 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
     if (event->input.key == InputKeyOk && event->input.type == InputTypeLong && !tracker->editing)
     {
         // play_song(tracker, true);
+        reset_buffer(&tracker->sound_engine);
         tracker_engine_set_song(&tracker->tracker_engine, NULL);
 
         Instrument *inst = tracker->song.instrument[tracker->current_instrument];
