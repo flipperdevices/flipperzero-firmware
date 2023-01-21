@@ -60,46 +60,30 @@ function(stm32_print_size_of_target TARGET)
     )
 endfunction()
 
-function(stm32_generate_binary_file TARGET)
+function(_stm32_generate_file TARGET OUTPUT_EXTENSION OBJCOPY_BFD_OUTPUT)
     get_target_property(OUTPUT_NAME ${TARGET} OUTPUT_NAME)
     get_target_property(RUNTIME_OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
-    set(FILE_NAME "${OUTPUT_NAME}.bin")
+    set(FILE_NAME "${OUTPUT_NAME}.${OUTPUT_EXTENSION}")
     set(FILE "${RUNTIME_OUTPUT_DIRECTORY}/${FILE_NAME}")
     add_custom_command(
         TARGET ${TARGET}
         POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O binary "$<TARGET_FILE:${TARGET}>" ${FILE}
+        COMMAND ${CMAKE_OBJCOPY} -O ${OBJCOPY_BFD_OUTPUT} "$<TARGET_FILE:${TARGET}>" ${FILE}
         BYPRODUCTS ${FILE}
-        COMMENT "Generating binary file ${FILE_NAME}"
+        COMMENT "Generating ${OBJCOPY_BFD_OUTPUT} file ${FILE_NAME}"
     )
+endfunction()
+
+function(stm32_generate_binary_file TARGET)
+    _stm32_generate_file(${TARGET} "bin" "binary")
 endfunction()
 
 function(stm32_generate_srec_file TARGET)
-    get_target_property(OUTPUT_NAME ${TARGET} OUTPUT_NAME)
-    get_target_property(RUNTIME_OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
-    set(FILE_NAME "${OUTPUT_NAME}.srec")
-    set(FILE "${RUNTIME_OUTPUT_DIRECTORY}/${FILE_NAME}")
-    add_custom_command(
-        TARGET ${TARGET}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O srec "$<TARGET_FILE:${TARGET}>" ${FILE}
-        BYPRODUCTS ${FILE}
-        COMMENT "Generating srec file ${FILE_NAME}"
-    )
+    _stm32_generate_file(${TARGET} "srec" "srec")
 endfunction()
 
 function(stm32_generate_hex_file TARGET)
-    get_target_property(OUTPUT_NAME ${TARGET} OUTPUT_NAME)
-    get_target_property(RUNTIME_OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
-    set(FILE_NAME "${OUTPUT_NAME}.hex")
-    set(FILE "${RUNTIME_OUTPUT_DIRECTORY}/${FILE_NAME}")
-    add_custom_command(
-        TARGET ${TARGET}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O ihex "$<TARGET_FILE:${TARGET}>" ${FILE}
-        BYPRODUCTS ${FILE}
-        COMMENT "Generating hex file ${FILE_NAME}"
-    )
+    _stm32_generate_file(${TARGET} "hex" "ihex")
 endfunction()
 
 # This function takes FAMILY (e.g. L4) and DEVICE (e.g. L496VG) to output TYPE (e.g. L496xx)
