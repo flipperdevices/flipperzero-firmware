@@ -78,20 +78,20 @@ static void bf_dev_draw_button(Canvas* canvas, int x, int y, bool selected, cons
     }
 }
 
+void bf_save_changes(){
+    //remove old file
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_remove(storage, furi_string_get_cstr(appDev->BF_file_path));
+
+    //save new file
+    Stream* stream = buffered_file_stream_alloc(storage);
+    buffered_file_stream_open(stream, furi_string_get_cstr(appDev->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    stream_write(stream, (const uint8_t*)appDev->dataBuffer, appDev->dataSize);
+    buffered_file_stream_close(stream);
+}
+
 static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
     UNUSED(_model);
-
-    // if(execCountdown > 0){
-    //     execCountdown--;
-    //     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "RUNNING...");
-    //     if(execCountdown == 0){
-    //         initWorker(appDev);
-    //         beginWorker();
-    //         text_box_set_text(appDev->text_box, workerGetOutput());
-    //         scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
-    //     }
-    //     return;
-    // }
 
     if(saveNotifyCountdown > 0){
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "SAVED");
@@ -298,6 +298,8 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
                 furi_thread_join(workerThread);
             }
 
+            bf_save_changes();
+
             initWorker(appDev);
             text_box_set_focus(appDev->text_box, TextBoxFocusEnd);
             text_box_set_text(appDev->text_box, workerGetOutput());
@@ -311,17 +313,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
         case 11:
         {
-            //remove old file
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            storage_simply_remove(storage, furi_string_get_cstr(appDev->BF_file_path));
-
-            //save new file
-            Stream* stream = buffered_file_stream_alloc(storage);
-            buffered_file_stream_open(stream, furi_string_get_cstr(appDev->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
-            stream_write(stream, (const uint8_t*)appDev->dataBuffer, appDev->dataSize);
-            buffered_file_stream_close(stream);
-
-            //notify
+            bf_save_changes();
             saveNotifyCountdown = 3;
             break;
         }
