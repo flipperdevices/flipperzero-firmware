@@ -11,7 +11,7 @@
 #include "scope_icons.h"
 
 #define DIGITAL_SCALE_12BITS             ((uint32_t) 0xFFF)
-#define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  64)
+#define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  128)
 #define VAR_CONVERTED_DATA_INIT_VALUE    (DIGITAL_SCALE_12BITS + 1)
 #define VAR_CONVERTED_DATA_INIT_VALUE_16BITS    (0xFFFF + 1U)
 #define __ADC_CALC_DATA_VOLTAGE(__VREFANALOG_VOLTAGE__, __ADC_DATA__)       \
@@ -251,7 +251,8 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
     snprintf(buf, 50, "%d", val1);
 
     canvas_draw_str(canvas, 10, 10, buf);
-    //canvas_draw_dot(canvas, image_position.x % 128, image_position.y % 64);
+    for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++)
+        canvas_draw_dot(canvas, x, 64 - (aADCxConvertedData_Voltage_mVolt[x] / (VDDA_APPLI / 64)));
     canvas_draw_line(canvas, 0, 0, 0, 63);
     canvas_draw_line(canvas, 0, 63, 128, 63);
 }
