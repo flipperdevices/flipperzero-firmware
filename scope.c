@@ -155,7 +155,7 @@ static void MX_TIM2_Init(void)
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 1;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 39999;
+    htim2.Init.Period = 399990 ; //39999;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
@@ -251,8 +251,11 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
     snprintf(buf, 50, "%d", val1);
 
     canvas_draw_str(canvas, 10, 10, buf);
-    for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++)
-        canvas_draw_dot(canvas, x, 64 - (aADCxConvertedData_Voltage_mVolt[x] / (VDDA_APPLI / 64)));
+    for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
+        uint32_t prev = 64 - (aADCxConvertedData_Voltage_mVolt[x-1] / (VDDA_APPLI / 64));
+        uint32_t cur = 64 - (aADCxConvertedData_Voltage_mVolt[x] / (VDDA_APPLI / 64));
+        canvas_draw_line(canvas, x - 1, prev, x, cur);
+    }
     canvas_draw_line(canvas, 0, 0, 0, 63);
     canvas_draw_line(canvas, 0, 63, 128, 63);
 }
