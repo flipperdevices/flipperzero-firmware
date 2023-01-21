@@ -5,12 +5,14 @@ implemented (and there are many proprietary ones, such as the ones in use
 in TPMS systems, car keys and many others), the curious person is left
 wondering what the device is sending at all. Using ProtoView she or he can
 visualize the high and low pulses like in the example image below
-(showing a Volkswagen key in 2FSK):
+(showing a TPMS signal produced by a Renault tire):
 
 ![ProtoView screenshot raw signal](/images/protoview_1.jpg)
 
 This is often enough to make an initial idea about the encoding used
-and if the selected modulation is correct.
+and if the selected modulation is correct. For example, in the signal above
+you can see a set of regular pulses used for synchronization and then
+a sequence of bits encoded in [Manchester](https://en.wikipedia.org/wiki/Manchester_code) line code. If you study these things for five minutes, you'll find yourself able to decode the bits with naked eyes.
 
 ## Decoding capabilities
 
@@ -26,11 +28,14 @@ Other than that, ProtoView is able to decode a few interesting protocols:
 
 The app implements a framework that makes adding and experimenting with new
 protocols very simple. Check the `protocols` directory to see how the
-API works.
+API works. The decoder receives the signal already converted into a bitmap,
+where each bit represents a short pulse duration. Then there are functions
+to seek specific sync/preamble sequences inside the bitmap, to decode
+from different line codes, to compute checksums and so forth.
 
 ## Reply capabilities
 
-Once ProtoView decoded a given message, it is able to *resample* it
+Once ProtoView decodes a given message, it is able to *resample* it
 in pulses and gaps of the theoretical duration, and send the signal again
 via the Flipper RX capabilities. The captured signal can be sent
 to different frequencies and modulations than the ones it was captured
