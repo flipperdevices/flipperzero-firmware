@@ -306,6 +306,7 @@ void fieldset_add_bin(ProtoViewFieldSet *fs, const char *name, uint64_t uval, ui
 void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s);
 void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count);
 void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val, uint32_t digits_after_dot);
+const char *field_get_type_name(ProtoViewField *f);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);

@@ -25,6 +25,20 @@ static void field_free(ProtoViewField *f) {
     free(f);
 }
 
+/* Return the type of the field as string. */
+const char *field_get_type_name(ProtoViewField *f) {
+    switch(f->type) {
+    case FieldTypeStr:          return "str";
+    case FieldTypeSignedInt:    return "int";
+    case FieldTypeUnsignedInt:  return "uint";
+    case FieldTypeBinary:       return "bin";
+    case FieldTypeHex:          return "hex";
+    case FieldTypeBytes:        return "bytes";
+    case FieldTypeFloat:        return "float";
+    }
+    return "unknown";
+}
+
 /* Free a field set and its contained fields. */
 void fieldset_free(ProtoViewFieldSet *fs) {
     for (uint32_t j = 0; j < fs->numfields; j++)
@@ -93,9 +107,10 @@ void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s) {
 /* Allocate and append a bytes field. Note that 'count' is specified in
  * nibbles (bytes*2). */
 void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count_nibbles) {
+    uint32_t numbytes = (count_nibbles+count_nibbles%2)/2;
     ProtoViewField *f = field_new(FieldTypeBytes,name);
-    f->bytes = malloc(count_nibbles/2);
-    memcpy(f->bytes,bytes,count_nibbles/2);
+    f->bytes = malloc(numbytes);
+    memcpy(f->bytes,bytes,numbytes);
     f->len = count_nibbles;
     fieldset_add_field(fs,f);
 }

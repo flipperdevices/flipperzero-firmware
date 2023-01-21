@@ -56,7 +56,7 @@ static void render_view_select_decoder(Canvas *const canvas, ProtoViewApp *app) 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 9, "Signal builder");
 
-    canvas_draw_str_aligned(canvas,64,40,AlignCenter,AlignCenter,
+    canvas_draw_str_aligned(canvas,64,36,AlignCenter,AlignCenter,
         Decoders[privdata->cur_decoder]->name);
 }
 
@@ -66,13 +66,28 @@ static void render_view_set_fields(Canvas *const canvas, ProtoViewApp *app) {
     BuildViewPrivData *privdata = app->view_privdata;
     char buf[32];
     snprintf(buf,sizeof(buf), "%s field %d/%d",
-        privdata->decoder->name, (int)privdata->cur_field,
+        privdata->decoder->name, (int)privdata->cur_field+1,
         (int)privdata->fieldset->numfields);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 0, 9, buf);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 19, "up/down: next field, ok: edit");
-    canvas_draw_str(canvas, 0, 62, "Long press ok: create signal");
+    canvas_draw_str(canvas, 0, 62, "Long ok: create, < > incr/decr");
+
+    /* Write the field name, type, current content. For this part we
+     * write white text on black screen, to visually separate the UI
+     * description part from the UI current field editing part. */
+    canvas_set_color(canvas,ColorBlack);
+    canvas_draw_box(canvas,0,21,128,32);
+
+    canvas_set_color(canvas,ColorWhite);
+    ProtoViewField *field = privdata->fieldset->fields[privdata->cur_field];
+    snprintf(buf,sizeof(buf), "%s %s:%d", field->name,
+        field_get_type_name(field), (int)field->len);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas,64,30,AlignCenter,AlignCenter,buf);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas,63,45,AlignCenter,AlignCenter,"\"foobar\"");
 }
 
 /* Render the build message view. */
@@ -93,6 +108,12 @@ static void process_input_select_decoder(ProtoViewApp *app, InputEvent input) {
             privdata->decoder = Decoders[privdata->cur_decoder];
             privdata->fieldset = fieldset_new();
             privdata->decoder->get_fields(privdata->fieldset);
+            // Now we use the subview system in order to protect the
+            // message editing mode from accidental < or > presses.
+            // Since we are technically into a subview now, we'll have
+            // control of < and >.
+            InputEvent ii = {.type = InputTypePress, .key = InputKeyDown};
+            ui_process_subview_updown(app,ii,2);
         } else if (input.key == InputKeyDown) {
             select_next_decoder(app);
         } else if (input.key == InputKeyUp) {
@@ -103,8 +124,19 @@ static void process_input_select_decoder(ProtoViewApp *app, InputEvent input) {
 
 /* Handle input for fields editing mode. */
 static void process_input_set_fields(ProtoViewApp *app, InputEvent input) {
-    UNUSED(app);
-    UNUSED(input);
+    BuildViewPrivData *privdata = app->view_privdata;
+    ProtoViewFieldSet *fs = privdata->fieldset;
+    if (input.type == InputTypeShort) {
+        if (input.key == InputKeyOk) {
+        } else if (input.key == InputKeyDown) {
+            privdata->cur_field = (privdata->cur_field+1) % fs->numfields;
+        } else if (input.key == InputKeyUp) {
+            if (privdata->cur_field == 0)
+                privdata->cur_field = fs->numfields-1;
+            else
+                privdata->cur_field--;
+        }
+    }
 }
 
 /* Handle input for the build message view. */

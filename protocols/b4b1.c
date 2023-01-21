@@ -46,8 +46,10 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     return true;
 }
 
-static void get_fields(ProtoViewFieldSet *fields) {
-    UNUSED(fields);
+static void get_fields(ProtoViewFieldSet *fieldset) {
+    uint8_t default_id[3]= {0xAB, 0xCD, 0xE0};
+    fieldset_add_bytes(fieldset,"id",default_id,5);
+    fieldset_add_int(fieldset,"button",1,4);
 }
 
 static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fields)
