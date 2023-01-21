@@ -858,8 +858,11 @@ static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
         if(!flipper_format_write_hex(
                file, "Data Content", data->data, data->block_num * data->block_size))
             break;
+        if(!flipper_format_write_comment_cstr(
+               file, "First byte: DSFID (0x01) / AFI (0x02) lock info, others: block lock info"))
+            break;
         if(!flipper_format_write_hex(
-               file, "Security Status", data->security_status, data->block_num))
+               file, "Security Status", data->security_status, 1 + data->block_num))
             break;
         if(!flipper_format_write_comment_cstr(
                file,
@@ -916,7 +919,7 @@ bool nfc_device_load_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
         /* optional, as added later */
         if(flipper_format_key_exist(file, "Security Status")) {
             if(!flipper_format_read_hex(
-                   file, "Security Status", data->security_status, data->block_num))
+                   file, "Security Status", data->security_status, 1 + data->block_num))
                 break;
         }
         if(!flipper_format_read_hex(file, "Subtype", &temp_value, 1)) break;

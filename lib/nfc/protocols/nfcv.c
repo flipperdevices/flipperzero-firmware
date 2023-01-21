@@ -586,7 +586,70 @@ void nfcv_emu_handle_packet(
         uint8_t block = nfcv_data->frame[ctx->payload_offset];
         nfcv_data->security_status[block] |= 0x01;
         nfcv_data->modified = true;
+
+        ctx->response_buffer[0] = ISO15693_NOERROR;
+        nfcv_emu_send(
+            tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK BLOCK %d", block);
+        break;
+    }
+
+    case ISO15693_WRITE_DSFID: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+
+        if(!(nfcv_data->security_status[0] & NfcVLockBitDsfid)) {
+            nfcv_data->dsfid = id;
+            nfcv_data->modified = true;
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE DSFID %02X", id);
+        break;
+    }
+
+    case ISO15693_WRITE_AFI: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+
+        if(!(nfcv_data->security_status[0] & NfcVLockBitAfi)) {
+            nfcv_data->afi = id;
+            nfcv_data->modified = true;
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE AFI %02X", id);
+        break;
+    }
+
+    case ISO15693_LOCK_DSFID: {
+        if(!(nfcv_data->security_status[0] & NfcVLockBitDsfid)) {
+            nfcv_data->security_status[0] |= NfcVLockBitDsfid;
+            nfcv_data->modified = true;
+
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK DSFID");
+        break;
+    }
+
+    case ISO15693_LOCK_AFI: {
+        if(!(nfcv_data->security_status[0] & NfcVLockBitAfi)) {
+            nfcv_data->security_status[0] |= NfcVLockBitAfi;
+            nfcv_data->modified = true;
+
+            ctx->response_buffer[0] = ISO15693_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        }
+
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "LOCK AFI");
         break;
     }
 
@@ -631,7 +694,8 @@ void nfcv_emu_handle_packet(
                 int block_current = block + block_index;
                 /* prepend security status */
                 if(ctx->flags & RFAL_NFCV_REQ_FLAG_OPTION) {
-                    ctx->response_buffer[buffer_pos++] = nfcv_data->security_status[block_current];
+                    ctx->response_buffer[buffer_pos++] =
+                        nfcv_data->security_status[1 + block_current];
                 }
                 /* then the data block */
                 memcpy(
@@ -791,6 +855,43 @@ void nfcv_emu_sniff_packet(
             "%s LOCK %d",
             flags_string,
             block);
+        break;
+    }
+
+    case ISO15693_WRITE_DSFID: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s WR DSFID %d",
+            flags_string,
+            id);
+        break;
+    }
+
+    case ISO15693_WRITE_AFI: {
+        uint8_t id = nfcv_data->frame[ctx->payload_offset];
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s WR AFI %d",
+            flags_string,
+            id);
+        break;
+    }
+
+    case ISO15693_LOCK_DSFID: {
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s LOCK DSFID",
+            flags_string);
+        break;
+    }
+
+    case ISO15693_LOCK_AFI: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s LOCK AFI", flags_string);
         break;
     }
 

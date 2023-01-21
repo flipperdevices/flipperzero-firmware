@@ -87,8 +87,16 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
         furi_string_cat_printf(temp_str, "\n");
 
-        furi_string_cat_printf(temp_str, "DSFID: %02X\n", nfcv_data->dsfid);
-        furi_string_cat_printf(temp_str, "AFI: %02X\n", nfcv_data->afi);
+        furi_string_cat_printf(
+            temp_str,
+            "DSFID: %02X %s\n",
+            nfcv_data->dsfid,
+            (nfcv_data->security_status[0] & NfcVLockBitDsfid) ? "(locked)" : "");
+        furi_string_cat_printf(
+            temp_str,
+            "AFI: %02X %s\n",
+            nfcv_data->afi,
+            (nfcv_data->security_status[0] & NfcVLockBitAfi) ? "(locked)" : "");
         furi_string_cat_printf(temp_str, "IC Ref: %02X\n", nfcv_data->ic_ref);
         furi_string_cat_printf(temp_str, "Blocks: %02X\n", nfcv_data->block_num);
         furi_string_cat_printf(temp_str, "Blocksize: %02X\n", nfcv_data->block_size);

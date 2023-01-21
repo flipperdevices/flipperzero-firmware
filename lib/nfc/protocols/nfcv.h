@@ -86,6 +86,11 @@ extern "C" {
 #define ISO15693_ERROR_BLOCL_WRITELOCK 0x14 // Locking was unsuccessful
 
 typedef enum {
+    NfcVLockBitDsfid = 1,
+    NfcVLockBitAfi = 2,
+} NfcVLockBits;
+
+typedef enum {
     NfcVAuthMethodManual,
     NfcVAuthMethodTonieBox,
 } NfcVAuthMethod;
@@ -174,7 +179,7 @@ typedef struct {
     uint16_t block_num;
     uint8_t block_size;
     uint8_t data[NFCV_MEMSIZE_MAX];
-    uint8_t security_status[NFCV_BLOCKS_MAX];
+    uint8_t security_status[1 + NFCV_BLOCKS_MAX];
     bool selected;
     bool quiet;
 
