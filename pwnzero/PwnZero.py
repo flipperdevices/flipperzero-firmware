@@ -1,6 +1,9 @@
 import serial
 from enum import Enum
 
+import pwnagotchi.plugins as plugins
+import pwnagotchi.ui.faces as faces
+
 class PwnZeroParam(Enum):
     """
     Flipper Zero Parameters
@@ -45,7 +48,7 @@ class PwnFace(Enum):
     INTENSE         = 14
     COOL            = 15
     HAPPY           = 16
-    GRATFUL         = 17
+    GRATEFUL         = 17
     EXCITED         = 18
     MOTIVATED       = 19
     DEMOTIVATED     = 20
@@ -61,11 +64,16 @@ class PwnFace(Enum):
     UPLOAD2         = 30
 
 
-class PwnZero(object):
+class PwnZero(plugins.Plugin):
+    __author__ = "github.com/Matt-London"
+    __version__ = "1.0.0"
+    __license__ = "MIT"
+    __description__ = "Plugin to display the Pwnagotchi on the Flipper Zero"
+
     PROTOCOL_START   = 0x02
     PROTOCOL_END     = 0x03
 
-    def __init__(self, port: str, baud: int = 115200):
+    def __init__(self, port: str = "/dev/serial0", baud: int = 115200):
         """
         Construct a PwnZero object, this will create the connection
 
@@ -80,6 +88,12 @@ class PwnZero(object):
         except:
             raise "Cannot bind to port ({}) with baud ({})".format(port, baud)
 
+    def close(self):
+        """
+        Closes the connection to the Flipper Zero
+        """
+        self._serialConn.close()
+
     def _is_byte(self, i: int) -> bool:
         """
         Checks if a passed in integer is a valid byte (0 <= i < 256)
@@ -89,7 +103,7 @@ class PwnZero(object):
         """
         return 0 <= i < 256
 
-    def _str_to_bytes(self, s: str) -> list[int]:
+    def _str_to_bytes(self, s: str):
         """
         Converts a string into a list of bytes
 
@@ -102,7 +116,7 @@ class PwnZero(object):
         
         return retVal
 
-    def _send_data(self, param: int, args: list[int]) -> bool:
+    def _send_data(self, param: int, args) -> bool:
         """
         Sends data using protocol v2 over the serial port to the Flipper Zero
 
@@ -239,3 +253,128 @@ class PwnZero(object):
         """
         data = self._str_to_bytes(message)
         return self._send_data(PwnZeroParam.MESSAGE.value, data)
+
+    def on_ui_setup(self, ui):
+        pass
+
+    def on_ui_update(self, ui):
+        # Message
+        self.set_message(ui.get('status'))
+
+        # Mode
+        modeEnum = None
+        if ui.get('mode') == 'AI':
+            modeEnum = PwnMode.AI
+        elif ui.get('mode') == 'MANU':
+            modeEnum = PwnMode.MANU
+        elif ui.get('mode') == 'AUTO':
+            modeEnum = PwnMode.AUTO
+        self.set_mode(modeEnum)
+
+        # Channel
+        channelInt = 0
+        channel = ui.get('channel')
+        if channel == '*':
+            channelInt = 0
+        else:
+            channelInt = int(channel)
+        self.set_channel(channelInt)
+
+        # Uptime
+        uptime = ui.get('uptime')
+        uptimeSplit = uptime.split(':')
+        self.set_uptime(int(uptimeSplit[0]), int(uptimeSplit[1]), int(uptimeSplit[2]))
+
+        # APS
+        aps = ui.get('aps')
+        
+        # name
+        self.set_name(ui.get('name').replace(">", ""))
+
+        # Face
+        face = ui.get('face')
+        # Handle:
+        #LOOK_R = '( ⚆_⚆)'
+        # LOOK_L = '(☉_☉ )'
+        # LOOK_R_HAPPY = '( ◕‿◕)'
+        # LOOK_L_HAPPY = '(◕‿◕ )'
+        # SLEEP = '(⇀‿‿↼)'
+        # SLEEP2 = '(≖‿‿≖)'
+        # AWAKE = '(◕‿‿◕)'
+        # BORED = '(-__-)'
+        # INTENSE = '(°▃▃°)'
+        # COOL = '(⌐■_■)'
+        # HAPPY = '(•‿‿•)'
+        # GRATEFUL = '(^‿‿^)'
+        # EXCITED = '(ᵔ◡◡ᵔ)'
+        # MOTIVATED = '(☼‿‿☼)'
+        # DEMOTIVATED = '(≖__≖)'
+        # SMART = '(✜‿‿✜)'
+        # LONELY = '(ب__ب)'
+        # SAD = '(╥☁╥ )'
+        # ANGRY = "(-_-')"
+        # FRIEND = '(♥‿‿♥)'
+        # BROKEN = '(☓‿‿☓)'
+        # DEBUG = '(#__#)'
+        # UPLOAD = '(1__0)'
+        # UPLOAD1 = '(1__1)'
+        # UPLOAD2 = '(0__1)'
+        faceEnum = None
+        if face == faces.LOOK_R:
+            faceEnum = PwnFace.LOOK_R
+        elif face == faces.LOOK_L:
+            faceEnum = PwnFace.LOOK_L
+        elif face == faces.LOOK_R_HAPPY:
+            faceEnum = PwnFace.LOOK_R_HAPPY
+        elif face == faces.LOOK_L_HAPPY:
+            faceEnum = PwnFace.LOOK_L_HAPPY
+        elif face == faces.SLEEP:
+            faceEnum = PwnFace.SLEEP
+        elif face == faces.SLEEP2:
+            faceEnum = PwnFace.SLEEP2
+        elif face == faces.AWAKE:
+            faceEnum = PwnFace.AWAKE
+        elif face == faces.BORED:
+            faceEnum = PwnFace.BORED
+        elif face == faces.INTENSE:
+            faceEnum = PwnFace.INTENSE
+        elif face == faces.COOL:
+            faceEnum = PwnFace.COOL
+        elif face == faces.HAPPY:
+            faceEnum = PwnFace.HAPPY
+        elif face == faces.GRATEFUL:
+            faceEnum = PwnFace.GRATEFUL
+        elif face == faces.EXCITED:
+            faceEnum = PwnFace.EXCITED
+        elif face == faces.MOTIVATED:
+            faceEnum = PwnFace.MOTIVATED
+        elif face == faces.DEMOTIVATED:
+            faceEnum = PwnFace.DEMOTIVATED
+        elif face == faces.SMART:
+            faceEnum = PwnFace.SMART
+        elif face == faces.LONELY:
+            faceEnum = PwnFace.LONELY
+        elif face == faces.SAD:
+            faceEnum = PwnFace.SAD
+        elif face == faces.ANGRY:
+            faceEnum = PwnFace.ANGRY
+        elif face == faces.FRIEND:
+            faceEnum = PwnFace.FRIEND
+        elif face == faces.BROKEN:
+            faceEnum = PwnFace.BROKEN
+        elif face == faces.DEBUG:
+            faceEnum = PwnFace.DEBUG
+        elif face == faces.UPLOAD:
+            faceEnum = PwnFace.UPLOAD
+        elif face == faces.UPLOAD1:
+            faceEnum = PwnFace.UPLOAD1
+        elif face == faces.UPLOAD2:
+            faceEnum = PwnFace.UPLOAD2
+
+        self.set_face(faceEnum)
+
+        # Handshakes
+        handshakes = ui.get('shakes')
+
+        shakesCurr = handshakes.split(' ')[0]
+        shakesTotal = handshakes.split(' ')[1].replace(')', '').replace('(', '')
