@@ -1,6 +1,6 @@
 #include "../nfc_i.h"
 
-#define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (200)
+#define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (800)
 
 enum {
     NfcSceneNfcVSniffStateWidget,

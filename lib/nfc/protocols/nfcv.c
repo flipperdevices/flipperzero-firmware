@@ -836,7 +836,8 @@ void nfcv_emu_sniff_packet(
 
     switch(ctx->command) {
     case ISO15693_INVENTORY: {
-        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s INVENTORY", flags_string);
         break;
     }
 
