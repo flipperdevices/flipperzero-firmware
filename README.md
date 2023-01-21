@@ -37,7 +37,7 @@ from different line codes, to compute checksums and so forth.
 
 Once ProtoView decodes a given message, it is able to *resample* it
 in pulses and gaps of the theoretical duration, and send the signal again
-via the Flipper RX capabilities. The captured signal can be sent
+via the Flipper TX capabilities. The captured signal can be sent
 to different frequencies and modulations than the ones it was captured
 from.
 
