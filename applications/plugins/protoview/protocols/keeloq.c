@@ -59,40 +59,16 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     bitmap_reverse_bytes(raw, sizeof(raw)); /* Keeloq is LSB first. */
 
     int buttons = raw[7] >> 4;
-    int s3 = (buttons & 1) != 0;
-    int s0 = (buttons & 2) != 0;
-    int s1 = (buttons & 4) != 0;
-    int s2 = (buttons & 8) != 0;
-
     int remote_id = ((raw[7] & 0x0f) << 24) | (raw[6] << 16) | (raw[5] << 8) | (raw[4] << 0);
-    int lowbat = raw[8] & 0x80;
+    int lowbat = (raw[8] & 0x80) != 0;
 
-    snprintf(info->name, sizeof(info->name), "%s", "Keeloq remote");
-    snprintf(
-        info->raw,
-        sizeof(info->raw),
-        "%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],
-        raw[1],
-        raw[2],
-        raw[3],
-        raw[4],
-        raw[5],
-        raw[6],
-        raw[7],
-        raw[8]);
-    snprintf(
-        info->info1,
-        sizeof(info->info1),
-        "Encrpyted %02X%02X%02X%02X",
-        raw[3],
-        raw[2],
-        raw[1],
-        raw[0]);
-    snprintf(info->info2, sizeof(info->info2), "ID %08X", remote_id);
-    snprintf(info->info3, sizeof(info->info3), "s0-s3: %d%d%d%d", s0, s1, s2, s3);
-    snprintf(info->info4, sizeof(info->info4), "Low battery? %s", lowbat ? "yes" : "no");
+    fieldset_add_bytes(info->fieldset, "raw", raw, 9 * 2);
+    fieldset_add_bytes(info->fieldset, "encr", raw, 4 * 2);
+    fieldset_add_hex(info->fieldset, "id", remote_id, 28);
+    fieldset_add_bin(info->fieldset, "s2 s1 s0 s3", buttons, 4);
+    fieldset_add_bin(info->fieldset, "low battery", lowbat, 1);
     return true;
 }
 
-ProtoViewDecoder KeeloqDecoder = {"Keeloq", decode};
+ProtoViewDecoder KeeloqDecoder =
+    {.name = "Keeloq", .decode = decode, .get_fields = NULL, .build_message = NULL};

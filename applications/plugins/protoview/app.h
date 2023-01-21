@@ -30,7 +30,14 @@
 
 #define DEBUG_MSG 1
 
+/* Forward declarations. */
+
 typedef struct ProtoViewApp ProtoViewApp;
+typedef struct ProtoViewMsgInfo ProtoViewMsgInfo;
+typedef struct ProtoViewFieldSet ProtoViewFieldSet;
+typedef struct ProtoViewDecoder ProtoViewDecoder;
+
+/* ============================== enumerations ============================== */
 
 /* Subghz system state */
 typedef enum {
@@ -54,6 +61,8 @@ typedef enum {
     ViewGoNext,
     ViewGoPrev,
 } ProtoViewCurrentView;
+
+/* ================================== RX/TX ================================= */
 
 typedef struct {
     const char* name; // Name to show to the user.
@@ -88,34 +97,8 @@ struct ProtoViewTxRx {
 
 typedef struct ProtoViewTxRx ProtoViewTxRx;
 
-/* This stucture is filled by the decoder for specific protocols with the
- * informations about the message. ProtoView will display such information
- * in the message info view. */
-#define PROTOVIEW_MSG_STR_LEN 32
-typedef struct ProtoViewMsgInfo {
-    char name[PROTOVIEW_MSG_STR_LEN]; /* Protocol name and version. */
-    char raw[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific raw representation.*/
-    /* The following is what the decoder wants to show to user. Each decoder
-     * can use the number of fileds it needs. */
-    char info1[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 1. */
-    char info2[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 2. */
-    char info3[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 3. */
-    char info4[PROTOVIEW_MSG_STR_LEN]; /* Protocol specific info line 4. */
-    /* Low level information of the detected signal: the following are filled
-     * by the protocol decoding function: */
-    uint32_t start_off; /* Pulses start offset in the bitmap. */
-    uint32_t pulses_count; /* Number of pulses of the full message. */
-    /* The following are passed already filled to the decoder. */
-    uint32_t short_pulse_dur; /* Microseconds duration of the short pulse. */
-    /* The following are filled by ProtoView core after the decoder returned
-     * success. */
-    uint8_t* bits; /* Bitmap with the signal. */
-    uint32_t bits_bytes; /* Number of full bytes in the bitmap, that
-                                   is 'pulses_count/8' rounded to the next
-                                   integer. */
-} ProtoViewMsgInfo;
+/* ============================== Main app state ============================ */
 
-/* Our main application context. */
 #define ALERT_MAX_LEN 32
 struct ProtoViewApp {
     /* GUI */
@@ -174,6 +157,64 @@ struct ProtoViewApp {
                                 ProtoViewModulations table. */
 };
 
+/* =========================== Protocols decoders =========================== */
+
+/* This stucture is filled by the decoder for specific protocols with the
+ * informations about the message. ProtoView will display such information
+ * in the message info view. */
+#define PROTOVIEW_MSG_STR_LEN 32
+typedef struct ProtoViewMsgInfo {
+    ProtoViewDecoder* decoder; /* The decoder that decoded the message. */
+    ProtoViewFieldSet* fieldset; /* Decoded fields. */
+    /* Low level information of the detected signal: the following are filled
+     * by the protocol decoding function: */
+    uint32_t start_off; /* Pulses start offset in the bitmap. */
+    uint32_t pulses_count; /* Number of pulses of the full message. */
+    /* The following are passed already filled to the decoder. */
+    uint32_t short_pulse_dur; /* Microseconds duration of the short pulse. */
+    /* The following are filled by ProtoView core after the decoder returned
+     * success. */
+    uint8_t* bits; /* Bitmap with the signal. */
+    uint32_t bits_bytes; /* Number of full bytes in the bitmap, that
+                                   is 'pulses_count/8' rounded to the next
+                                   integer. */
+} ProtoViewMsgInfo;
+
+/* This structures describe a set of protocol fields. It is used by decoders
+ * supporting message building to receive and return information about the
+ * protocol. */
+typedef enum {
+    FieldTypeStr,
+    FieldTypeSignedInt,
+    FieldTypeUnsignedInt,
+    FieldTypeBinary,
+    FieldTypeHex,
+    FieldTypeBytes,
+    FieldTypeFloat,
+} ProtoViewFieldType;
+
+typedef struct {
+    ProtoViewFieldType type;
+    uint32_t len; // Depends on type:
+        // Bits for integers (signed,unsigned,binary,hex).
+        // Number of characters for strings.
+        // Number of nibbles for bytes (1 for each 4 bits).
+        // Number of digits after dot for floats.
+    char* name; // Field name.
+    union {
+        char* str; // String type.
+        int64_t value; // Signed integer type.
+        uint64_t uvalue; // Unsigned integer type.
+        uint8_t* bytes; // Raw bytes type.
+        float fvalue; // Float type.
+    };
+} ProtoViewField;
+
+typedef struct ProtoViewFieldSet {
+    ProtoViewField** fields;
+    uint32_t numfields;
+} ProtoViewFieldSet;
+
 typedef struct ProtoViewDecoder {
     const char* name; /* Protocol name. */
     /* The decode function takes a buffer that is actually a bitmap, with
@@ -184,6 +225,8 @@ typedef struct ProtoViewDecoder {
      * functions that perform bit extraction with bound checking, such as
      * bitmap_get() and so forth. */
     bool (*decode)(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo* info);
+    void (*get_fields)(ProtoViewMsgInfo* info, ProtoViewFieldSet* fields);
+    void (*build_message)(RawSamplesBuffer* samples, ProtoViewFieldSet* fields);
 } ProtoViewDecoder;
 
 extern RawSamplesBuffer *RawSamples, *DetectedSamples;
@@ -254,6 +297,7 @@ void process_input_direct_sampling(ProtoViewApp* app, InputEvent input);
 void view_enter_direct_sampling(ProtoViewApp* app);
 void view_exit_direct_sampling(ProtoViewApp* app);
 void view_exit_settings(ProtoViewApp* app);
+void adjust_raw_view_scale(ProtoViewApp* app, uint32_t short_pulse_dur);
 
 /* ui.c */
 int ui_get_current_subview(ProtoViewApp* app);
@@ -275,6 +319,25 @@ void canvas_draw_str_with_border(
     const char* str,
     Color text_color,
     Color border_color);
+
+/* fields.c */
+void fieldset_free(ProtoViewFieldSet* fs);
+ProtoViewFieldSet* fieldset_new(void);
+void fieldset_add_int(ProtoViewFieldSet* fs, const char* name, int64_t val, uint8_t bits);
+void fieldset_add_uint(ProtoViewFieldSet* fs, const char* name, uint64_t uval, uint8_t bits);
+void fieldset_add_hex(ProtoViewFieldSet* fs, const char* name, uint64_t uval, uint8_t bits);
+void fieldset_add_bin(ProtoViewFieldSet* fs, const char* name, uint64_t uval, uint8_t bits);
+void fieldset_add_str(ProtoViewFieldSet* fs, const char* name, const char* s);
+void fieldset_add_bytes(
+    ProtoViewFieldSet* fs,
+    const char* name,
+    const uint8_t* bytes,
+    uint32_t count);
+void fieldset_add_float(
+    ProtoViewFieldSet* fs,
+    const char* name,
+    float val,
+    uint32_t digits_after_dot);
 
 /* crc.c */
 uint8_t crc8(const uint8_t* data, size_t len, uint8_t init, uint8_t poly);

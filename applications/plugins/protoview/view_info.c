@@ -21,33 +21,90 @@ typedef struct {
      * you can move to next rows. Here we store where we are. */
     uint32_t signal_display_start_row;
     char* filename;
+    uint8_t cur_info_page; // Info page to display. Useful when there are
+        // too many fields populated by the decoder that
+        // a single page is not enough.
 } InfoViewPrivData;
 
+/* Draw the text label and value of the specified info field at x,y. */
+static void render_info_field(Canvas* const canvas, ProtoViewField* f, uint8_t x, uint8_t y) {
+    char buf[64];
+    canvas_set_font(canvas, FontSecondary);
+    switch(f->type) {
+    case FieldTypeStr:
+        snprintf(buf, sizeof(buf), "%s: %s", f->name, f->str);
+        break;
+    case FieldTypeSignedInt:
+        snprintf(buf, sizeof(buf), "%s: %lld", f->name, (long long)f->value);
+        break;
+    case FieldTypeUnsignedInt:
+        snprintf(buf, sizeof(buf), "%s: %llu", f->name, (unsigned long long)f->uvalue);
+        break;
+    case FieldTypeBinary: {
+        uint64_t test_bit = (1 << (f->len - 1));
+        uint64_t idx = snprintf(buf, sizeof(buf), "%s: ", f->name);
+        while(idx < sizeof(buf) - 1 && test_bit) {
+            buf[idx++] = (f->uvalue & test_bit) ? '1' : '0';
+            test_bit >>= 1;
+        }
+        buf[idx] = 0;
+    } break;
+    case FieldTypeHex:
+        snprintf(buf, sizeof(buf), "%s: 0x%*llX", f->name, (int)(f->len + 7) / 8, f->uvalue);
+        break;
+    case FieldTypeFloat:
+        snprintf(buf, sizeof(buf), "%s: 0x%.*f", f->name, (int)f->len, (double)f->fvalue);
+        break;
+    case FieldTypeBytes: {
+        uint64_t idx = snprintf(buf, sizeof(buf), "%s: ", f->name);
+        uint32_t nibble_num = 0;
+        while(idx < sizeof(buf) - 1 && nibble_num < f->len) {
+            const char* charset = "0123456789ABCDEF";
+            uint32_t nibble = nibble_num & 1 ? (f->bytes[nibble_num / 2] >> 4) :
+                                               (f->bytes[nibble_num / 2] & 0xf);
+            buf[idx++] = charset[nibble];
+            nibble_num++;
+        }
+        buf[idx] = 0;
+    } break;
+    }
+    canvas_draw_str(canvas, x, y, buf);
+}
+
 /* Render the view with the detected message information. */
+#define INFO_LINES_PER_PAGE 5
 static void render_subview_main(Canvas* const canvas, ProtoViewApp* app) {
+    InfoViewPrivData* privdata = app->view_privdata;
+    uint8_t pages =
+        (app->msg_info->fieldset->numfields + (INFO_LINES_PER_PAGE - 1)) / INFO_LINES_PER_PAGE;
+    privdata->cur_info_page %= pages;
+    uint8_t current_page = privdata->cur_info_page;
+    char buf[32];
+
     /* Protocol name as title. */
     canvas_set_font(canvas, FontPrimary);
     uint8_t y = 8, lineheight = 10;
-    canvas_draw_str(canvas, 0, y, app->msg_info->name);
-    y += lineheight;
 
-    /* Info fields. */
-    char buf[128];
-    canvas_set_font(canvas, FontSecondary);
-    if(app->msg_info->raw[0]) {
-        snprintf(buf, sizeof(buf), "Raw: %s", app->msg_info->raw);
+    if(pages > 1) {
+        snprintf(
+            buf, sizeof(buf), "%s %u/%u", app->msg_info->decoder->name, current_page + 1, pages);
         canvas_draw_str(canvas, 0, y, buf);
-        y += lineheight;
+    } else {
+        canvas_draw_str(canvas, 0, y, app->msg_info->decoder->name);
     }
-    canvas_draw_str(canvas, 0, y, app->msg_info->info1);
-    y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->msg_info->info2);
-    y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->msg_info->info3);
-    y += lineheight;
-    canvas_draw_str(canvas, 0, y, app->msg_info->info4);
     y += lineheight;
 
+    /* Draw the info fields. */
+    uint8_t max_lines = INFO_LINES_PER_PAGE;
+    uint32_t j = current_page * max_lines;
+    while(j < app->msg_info->fieldset->numfields) {
+        render_info_field(canvas, app->msg_info->fieldset->fields[j++], 0, y);
+        y += lineheight;
+        if(--max_lines == 0) break;
+    }
+
+    /* Draw a vertical "save" label. Temporary solution, to switch to
+     * something better ASAP. */
     y = 37;
     lineheight = 7;
     canvas_draw_str(canvas, 119, y, "s");
@@ -127,6 +184,7 @@ void text_input_done_callback(void* context) {
 
     free(privdata->filename);
     ui_dismiss_keyboard(app);
+    ui_show_alert(app, "Signal saved", 1500);
 }
 
 /* Replace all the occurrences of character c1 with c2 in the specified
@@ -143,7 +201,7 @@ void str_replace(char* buf, char c1, char c2) {
 void set_signal_random_filename(ProtoViewApp* app, char* buf, size_t buflen) {
     char suffix[6];
     set_random_name(suffix, sizeof(suffix));
-    snprintf(buf, buflen, "%.10s-%s-%d", app->msg_info->name, suffix, rand() % 1000);
+    snprintf(buf, buflen, "%.10s-%s-%d", app->msg_info->decoder->name, suffix, rand() % 1000);
     str_replace(buf, ' ', '_');
     str_replace(buf, '-', '_');
     str_replace(buf, '/', '_');
@@ -270,9 +328,12 @@ void process_input_info(ProtoViewApp* app, InputEvent input) {
 
     /* Main subview. */
     if(subview == SubViewInfoMain) {
-        if(input.type == InputTypeShort && input.key == InputKeyOk) {
+        if(input.type == InputTypeLong && input.key == InputKeyOk) {
             /* Reset the current sample to capture the next. */
             reset_current_signal(app);
+        } else if(input.type == InputTypeShort && input.key == InputKeyOk) {
+            /* Show next info page. */
+            privdata->cur_info_page++;
         }
     } else if(subview == SubViewInfoSave) {
         /* Save subview. */

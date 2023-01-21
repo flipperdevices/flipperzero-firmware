@@ -193,12 +193,7 @@ void scan_for_signal(ProtoViewApp* app) {
                     (int)thislen,
                     DetectedSamples->short_pulse_dur);
 
-                /* Adjust raw view scale if the signal has an high
-                 * data rate. */
-                if(DetectedSamples->short_pulse_dur < 75)
-                    app->us_scale = 10;
-                else if(DetectedSamples->short_pulse_dur < 145)
-                    app->us_scale = 30;
+                adjust_raw_view_scale(app, DetectedSamples->short_pulse_dur);
                 notify_signal_detected(app, decoded);
             } else {
                 /* If the structure was not filled, discard it. Otherwise
@@ -561,6 +556,7 @@ ProtoViewDecoder* Decoders[] = {
 /* Free the message info and allocated data. */
 void free_msg_info(ProtoViewMsgInfo* i) {
     if(i == NULL) return;
+    fieldset_free(i->fieldset);
     free(i->bits);
     free(i);
 }
@@ -571,6 +567,7 @@ void init_msg_info(ProtoViewMsgInfo* i, ProtoViewApp* app) {
     UNUSED(app);
     memset(i, 0, sizeof(ProtoViewMsgInfo));
     i->bits = NULL;
+    i->fieldset = fieldset_new();
 }
 
 /* This function is called when a new signal is detected. It converts it
@@ -615,22 +612,17 @@ bool decode_signal(RawSamplesBuffer* s, uint64_t len, ProtoViewMsgInfo* info) {
         decoded = Decoders[j]->decode(bitmap, bitmap_size, bits, info);
         uint32_t delta = furi_get_tick() - start_time;
         FURI_LOG_E(TAG, "Decoder %s took %lu ms", Decoders[j]->name, (unsigned long)delta);
-        if(decoded) break;
+        if(decoded) {
+            info->decoder = Decoders[j];
+            break;
+        }
         j++;
     }
 
     if(!decoded) {
         FURI_LOG_E(TAG, "No decoding possible");
     } else {
-        FURI_LOG_E(
-            TAG,
-            "Decoded %s, raw=%s info=[%s,%s,%s,%s]",
-            info->name,
-            info->raw,
-            info->info1,
-            info->info2,
-            info->info3,
-            info->info4);
+        FURI_LOG_E(TAG, "+++ Decoded %s", info->decoder->name);
         /* The message was correctly decoded: fill the info structure
          * with the decoded signal. The decoder may not implement offset/len
          * filling of the structure. In such case we have no info and

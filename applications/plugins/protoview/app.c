@@ -250,6 +250,22 @@ static void timer_callback(void* ctx) {
     scan_for_signal(app);
 }
 
+/* This is the navigation callback we use in the view dispatcher used
+ * to display the "text input" widget, that is the keyboard to get text.
+ * The text input view is implemented to ignore the "back" short press,
+ * so the event is not consumed and is handled by the view dispatcher.
+ * However the view dispatcher implementation has the strange behavior that
+ * if no navigation callback is set, it will not stop when handling back.
+ *
+ * We just need a dummy callback returning false. We believe the
+ * implementation should be changed and if no callback is set, it should be
+ * the same as returning false. */
+static bool keyboard_view_dispatcher_navigation_callback(void* ctx) {
+    UNUSED(ctx);
+    return false;
+}
+
+/* App entry point, as specified in application.fam. */
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp* app = protoview_app_alloc();
@@ -337,6 +353,11 @@ int32_t protoview_app_entry(void* p) {
              * and activate it. */
             app->view_dispatcher = view_dispatcher_alloc();
             view_dispatcher_enable_queue(app->view_dispatcher);
+            /* We need to set a navigation callback for the view dispatcher
+             * otherwise when the user presses back on the keyboard to
+             * abort, the dispatcher will not stop. */
+            view_dispatcher_set_navigation_event_callback(
+                app->view_dispatcher, keyboard_view_dispatcher_navigation_callback);
             app->text_input = text_input_alloc();
             view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
             view_dispatcher_add_view(

@@ -46,10 +46,11 @@ void radio_begin(ProtoViewApp* app) {
     /* The CC1101 preset can be either one of the standard presets, if
      * the modulation "custom" field is NULL, or a custom preset we
      * defined in custom_presets.h. */
-    if(ProtoViewModulations[app->modulation].custom == NULL)
+    if(ProtoViewModulations[app->modulation].custom == NULL) {
         furi_hal_subghz_load_preset(ProtoViewModulations[app->modulation].preset);
-    else
+    } else {
         furi_hal_subghz_load_custom_preset(ProtoViewModulations[app->modulation].custom);
+    }
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     app->txrx->txrx_state = TxRxStateIDLE;
 }

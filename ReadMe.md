@@ -51,9 +51,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL Updated: SubGHz Optimizations
 - UL Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - UL Updated: IR Assets by @amec0e
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - UL Updated: Fix SubGHz GUI receiver bug
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 

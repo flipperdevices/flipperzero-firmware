@@ -51,24 +51,11 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     float kpa = 0.75 * ((uint32_t)((raw[0] & 3) << 8) | raw[1]);
     int temp = raw[2] - 30;
 
-    snprintf(info->name, sizeof(info->name), "%s", "Renault TPMS");
-    snprintf(
-        info->raw,
-        sizeof(info->raw),
-        "%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-        raw[0],
-        raw[1],
-        raw[2],
-        raw[3],
-        raw[4],
-        raw[5],
-        raw[6],
-        raw[7],
-        raw[8]);
-    snprintf(info->info1, sizeof(info->info1), "Tire ID %02X%02X%02X", raw[3], raw[4], raw[5]);
-    snprintf(info->info2, sizeof(info->info2), "Pressure %.2f kpa", (double)kpa);
-    snprintf(info->info3, sizeof(info->info3), "Temperature %d C", temp);
+    fieldset_add_bytes(info->fieldset, "Tire ID", raw + 3, 3 * 2);
+    fieldset_add_float(info->fieldset, "Pressure kpa", kpa, 2);
+    fieldset_add_int(info->fieldset, "Temperature C", temp, 8);
     return true;
 }
 
-ProtoViewDecoder RenaultTPMSDecoder = {"Renault TPMS", decode};
+ProtoViewDecoder RenaultTPMSDecoder =
+    {.name = "Renault TPMS", .decode = decode, .get_fields = NULL, .build_message = NULL};

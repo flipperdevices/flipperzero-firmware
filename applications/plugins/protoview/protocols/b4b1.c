@@ -39,9 +39,11 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     off += 24 * 4; // seek to end symbol offset to calculate the length.
     off++; // In this protocol there is a final pulse as terminator.
     info->pulses_count = off - info->start_off;
-    snprintf(info->name, PROTOVIEW_MSG_STR_LEN, "PT/SC remote");
-    snprintf(info->raw, PROTOVIEW_MSG_STR_LEN, "%02X%02X%02X", d[0], d[1], d[2]);
+
+    fieldset_add_bytes(info->fieldset, "id", d, 5);
+    fieldset_add_int(info->fieldset, "button", d[2] & 0xf, 4);
     return true;
 }
 
-ProtoViewDecoder B4B1Decoder = {"B4B1", decode};
+ProtoViewDecoder B4B1Decoder =
+    {.name = "PT/SC remote", .decode = decode, .get_fields = NULL, .build_message = NULL};
