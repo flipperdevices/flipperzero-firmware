@@ -147,8 +147,8 @@ struct Crypto1State* lfsr_recovery32(int ks2) {
     struct Crypto1State *statelist;
     int odd_head = 0, odd_tail = -1, oks = 0;
     int even_head = 0, even_tail = -1, eks = 0;
-    int *odd = calloc(1, sizeof(int) << 20);
-    int *even = calloc(1, sizeof(int) << 20);
+    int *odd = calloc(1, 5 << 19);
+    int *even = calloc(1, 5 << 19);
     statelist =  calloc(1, sizeof(struct Crypto1State) << 18);
     int i;
     for (i = 31; i >= 0; i -= 2)
