@@ -47,6 +47,9 @@ struct SubGhzProtocolEncoderDataRAW {
 
     SubGhzProtocolBlockEncoder encoder;
     SubGhzBlockGeneric generic;
+
+    uint8_t* data;
+    uint32_t te;
 };
 
 const SubGhzProtocolDecoder subghz_protocol_data_raw_decoder = {
@@ -73,7 +76,7 @@ const SubGhzProtocolEncoder subghz_protocol_data_raw_encoder = {
 
 const SubGhzProtocol subghz_protocol_data_raw = {
     .name = SUBGHZ_PROTOCOL_DATA_RAW_NAME,
-    .type = SubGhzProtocolTypeUnknown,
+    .type = SubGhzProtocolTypeStatic,
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable |
             SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
@@ -81,6 +84,14 @@ const SubGhzProtocol subghz_protocol_data_raw = {
     .decoder = &subghz_protocol_data_raw_decoder,
     .encoder = &subghz_protocol_data_raw_encoder,
 };
+
+static uint16_t subghz_protocol_data_raw_get_full_byte(uint16_t bit_count) {
+    if(bit_count & 0x7) {
+        return (bit_count >> 3) + 1;
+    } else {
+        return (bit_count >> 3);
+    }
+}
 
 void* subghz_protocol_encoder_data_raw_alloc(SubGhzEnvironment* environment) {
     UNUSED(environment);
@@ -90,8 +101,9 @@ void* subghz_protocol_encoder_data_raw_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
+    instance->encoder.size_upload = DATA_RAW_BUF_DATA_SIZE;
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
+    instance->data = malloc(instance->encoder.size_upload * sizeof(uint8_t));
     instance->encoder.is_running = false;
     return instance;
 }
@@ -100,6 +112,7 @@ void subghz_protocol_encoder_data_raw_free(void* context) {
     furi_assert(context);
     SubGhzProtocolEncoderDataRAW* instance = context;
     free(instance->encoder.upload);
+    free(instance->data);
     free(instance);
 }
 
@@ -110,36 +123,13 @@ void subghz_protocol_encoder_data_raw_free(void* context) {
  */
 static bool subghz_protocol_encoder_data_raw_get_upload(SubGhzProtocolEncoderDataRAW* instance) {
     furi_assert(instance);
-    size_t index = 0;
-    size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
-    if(size_upload > instance->encoder.size_upload) {
-        FURI_LOG_E(TAG, "Size upload exceeds allocated encoder buffer.");
-        return false;
-    } else {
-        instance->encoder.size_upload = size_upload;
-    }
-    //Send header
-    instance->encoder.upload[index++] =
-        level_duration_make(false, (uint32_t)subghz_protocol_data_raw_const.te_short * 49);
-    //Send start bit
-    instance->encoder.upload[index++] =
-        level_duration_make(true, (uint32_t)subghz_protocol_data_raw_const.te_long);
-    //Send key data
-    for(uint8_t i = instance->generic.data_count_bit; i > 0; i--) {
-        if(bit_read(instance->generic.data, i - 1)) {
-            //send bit 1
-            instance->encoder.upload[index++] =
-                level_duration_make(false, (uint32_t)subghz_protocol_data_raw_const.te_long);
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_data_raw_const.te_short);
-        } else {
-            //send bit 0
-            instance->encoder.upload[index++] =
-                level_duration_make(false, (uint32_t)subghz_protocol_data_raw_const.te_short);
-            instance->encoder.upload[index++] =
-                level_duration_make(true, (uint32_t)subghz_protocol_data_raw_const.te_long);
-        }
-    }
+    instance->encoder.size_upload = subghz_protocol_blocks_get_upload_from_bit_array(
+        instance->data,
+        instance->generic.data_count_bit,
+        instance->encoder.upload,
+        instance->encoder.size_upload,
+        instance->te,
+        SubGhzProtocolBlockAlignBitRight);
     return true;
 }
 
@@ -152,11 +142,28 @@ bool subghz_protocol_encoder_data_raw_deserialize(void* context, FlipperFormat* 
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-        if(instance->generic.data_count_bit !=
-           subghz_protocol_data_raw_const.min_count_bit_for_found) {
+        if(subghz_protocol_data_raw_get_full_byte(instance->generic.data_count_bit) >=
+           DATA_RAW_BUF_DATA_SIZE) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
         }
+        if(!flipper_format_rewind(flipper_format)) {
+            FURI_LOG_E(TAG, "Rewind error");
+            break;
+        }
+        if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
+            FURI_LOG_E(TAG, "Missing TE");
+            break;
+        }
+        if(!flipper_format_read_hex(
+               flipper_format,
+               "Data_RAW",
+               instance->data,
+               subghz_protocol_data_raw_get_full_byte(instance->generic.data_count_bit))) {
+            FURI_LOG_E(TAG, "Missing Data_RAW");
+            break;
+        }
+
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
@@ -230,14 +237,6 @@ void subghz_protocol_decoder_data_raw_feed(void* context, bool level, uint32_t d
         } else {
             instance->data_raw[instance->data_raw_ind++] = (level ? duration : -duration);
         }
-    }
-}
-
-static uint16_t subghz_protocol_data_raw_get_full_byte(uint16_t bit_count) {
-    if(bit_count & 0x7) {
-        return (bit_count >> 3) + 1;
-    } else {
-        return (bit_count >> 3);
     }
 }
 
@@ -371,7 +370,7 @@ static bool
         do {
             gap_ind--;
             data_temp = (int)(round((float)(instance->data_raw[gap_ind]) / instance->te));
-            //printf("%d  ", data_temp);
+            printf("%d  ", data_temp);
             if(data_temp == 0) bit_count++; //there is noise in the package
             for(size_t i = 0; i < abs(data_temp); i++) {
                 bit_count++;
@@ -403,7 +402,7 @@ static bool
             ind_new_data[ind_new_data_index++].bit_count = bit_count;
         }
 
-        //printf("-------%d-------- \r\n", ind);
+        printf("-------%d-------- \r\n", ind);
 
         //reset the classifier and classify the received data
         memset(classes, 0x00, sizeof(classes));
@@ -496,10 +495,10 @@ void subghz_protocol_decoder_data_input_rssi(SubGhzProtocolDecoderDataRAW* insta
     case DataRAWDecoderStepBufFull:
     case DataRAWDecoderStepWrite:
         if(rssi < DATA_RAW_THRESHOLD_RSSI) {
-            // for(size_t i = 0; i < instance->data_raw_ind; i++) {
-            //     printf("%ld ", instance->data_raw[i]);
-            // }
-            // printf("---%d----------- \r\n", instance->data_raw_ind);
+            for(size_t i = 0; i < instance->data_raw_ind; i++) {
+                printf("%ld ", instance->data_raw[i]);
+            }
+            printf("---%d----------- \r\n", instance->data_raw_ind);
             instance->decoder.parser_step = DataRAWDecoderStepReset;
             if(instance->data_raw_ind >= DATA_RAW_BUF_DATA_COUNT) {
                 if(subghz_protocol_data_raw_check_remote_controller(instance)) {
