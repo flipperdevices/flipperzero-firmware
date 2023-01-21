@@ -17,7 +17,7 @@ pwnagotchi-flipper
 FUNCTIONALITY IS CURRENTLY IN DEVELOPMENT: IT IS INCOMPLETE!
 As of commit 7e9a9dc (1/21/23) The non-pixel-by-pixel version of the Flipper app now can receive and properly process all protocol v2 commands. The plugin was built and it "works" at a basic level. There are many bugs that need to be fixed sometime in the future. Attached is a GIF of the app in action!
 
-<img src="doc/attachments/PwnInAction.gif" width="600" height="408"/>
+<img src="doc/attachments/PwnInAction.gif" width="256" height="160"/>
 
 ## Setup
 TODO: Explain setup process
