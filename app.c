@@ -57,6 +57,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     case ViewModulationSettings:
         render_view_settings(canvas,app); break;
     case ViewDirectSampling: render_view_direct_sampling(canvas,app); break;
+    case ViewBuildMessage: render_view_build_message(canvas,app); break;
     default: furi_crash(TAG "Invalid view selected"); break;
     }
 
@@ -97,6 +98,7 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
     /* Call the enter/exit view callbacks if needed. */
     if (old == ViewDirectSampling) view_exit_direct_sampling(app);
     if (new == ViewDirectSampling) view_enter_direct_sampling(app);
+    if (old == ViewBuildMessage) view_exit_build_message(app);
     /* The frequency/modulation settings are actually a single view:
      * as long as the user stays between the two modes of this view we
      * don't need to call the exit-view callback. */
@@ -330,6 +332,9 @@ int32_t protoview_app_entry(void* p) {
                     break;
                 case ViewDirectSampling:
                     process_input_direct_sampling(app,input);
+                    break;
+                case ViewBuildMessage:
+                    process_input_build_message(app,input);
                     break;
                 default: furi_crash(TAG "Invalid view selected"); break;
                 }

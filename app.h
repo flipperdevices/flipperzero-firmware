@@ -53,6 +53,7 @@ typedef enum {
     ViewInfo,
     ViewFrequencySettings,
     ViewModulationSettings,
+    ViewBuildMessage,
     ViewDirectSampling,
     ViewLast, /* Just a sentinel to wrap around. */
 
@@ -225,7 +226,13 @@ typedef struct ProtoViewDecoder {
      * functions that perform bit extraction with bound checking, such as
      * bitmap_get() and so forth. */
     bool (*decode)(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info);
-    void (*get_fields)(ProtoViewMsgInfo *info, ProtoViewFieldSet *fields);
+    /* This method is used by the decoder to return the fields it needs
+     * in order to build a new message. This way the message builder view
+     * can ask the user to fill the right set of fields of the specified
+     * type. */
+    void (*get_fields)(ProtoViewFieldSet *fields);
+    /* This method takes the fields supported by the decoder, and
+     * renders a message in 'samples'. */
     void (*build_message)(RawSamplesBuffer *samples, ProtoViewFieldSet *fields);
 } ProtoViewDecoder;
 
@@ -269,6 +276,9 @@ void render_view_info(Canvas *const canvas, ProtoViewApp *app);
 void process_input_info(ProtoViewApp *app, InputEvent input);
 void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app);
 void process_input_direct_sampling(ProtoViewApp *app, InputEvent input);
+void render_view_build_message(Canvas *const canvas, ProtoViewApp *app);
+void process_input_build_message(ProtoViewApp *app, InputEvent input);
+void view_exit_build_message(ProtoViewApp *app);
 void view_enter_direct_sampling(ProtoViewApp *app);
 void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);

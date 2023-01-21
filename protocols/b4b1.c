@@ -46,9 +46,19 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     return true;
 }
 
+static void get_fields(ProtoViewFieldSet *fields) {
+    UNUSED(fields);
+}
+
+static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fields)
+{
+    UNUSED(samples);
+    UNUSED(fields);
+}
+
 ProtoViewDecoder B4B1Decoder = {
     .name = "PT/SC remote",
     .decode = decode,
-    .get_fields = NULL,
-    .build_message = NULL 
+    .get_fields = get_fields,
+    .build_message = build_message 
 };
