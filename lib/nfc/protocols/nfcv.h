@@ -96,6 +96,7 @@ typedef enum {
     NfcVTypeSlixS = 2,
     NfcVTypeSlixL = 3,
     NfcVTypeSlix2 = 4,
+    NfcVTypeSniff = 255,
 } NfcVSubtype;
 
 typedef enum {

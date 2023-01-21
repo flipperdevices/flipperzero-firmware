@@ -885,6 +885,8 @@ static bool nfc_device_save_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
         case NfcVTypeSlix2:
             saved = nfc_device_save_slix2_data(file, dev);
             break;
+        default:
+            break;
         }
     } while(false);
 
@@ -935,6 +937,8 @@ bool nfc_device_load_nfcv_data(FlipperFormat* file, NfcDevice* dev) {
             break;
         case NfcVTypeSlix2:
             parsed = nfc_device_load_slix2_data(file, dev);
+            break;
+        default:
             break;
         }
     } while(false);

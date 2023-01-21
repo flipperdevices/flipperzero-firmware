@@ -732,6 +732,160 @@ void nfcv_emu_handle_packet(
     }
 }
 
+void nfcv_emu_sniff_packet(
+    FuriHalNfcTxRxContext* tx_rx,
+    FuriHalNfcDevData* nfc_data,
+    void* nfcv_data_in) {
+    furi_assert(tx_rx);
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data_in);
+
+    NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+
+    if(nfcv_data->frame_length < 2) {
+        return;
+    }
+
+    /* parse the frame data for the upcoming part 3 handling */
+    ctx->flags = nfcv_data->frame[0];
+    ctx->command = nfcv_data->frame[1];
+    ctx->selected = (ctx->flags & RFAL_NFCV_REQ_FLAG_SELECT);
+    ctx->addressed = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) &&
+                     (ctx->flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
+    ctx->advanced = (ctx->command >= 0xA0);
+    ctx->address_offset = 2 + (ctx->advanced ? 1 : 0);
+    ctx->payload_offset = ctx->address_offset + (ctx->addressed ? 8 : 0);
+
+    char flags_string[5];
+
+    snprintf(
+        flags_string,
+        5,
+        "%c%c%c%d",
+        (ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) ?
+            'I' :
+            (ctx->addressed ? 'A' : (ctx->selected ? 'S' : '*')),
+        ctx->advanced ? 'X' : ' ',
+        (ctx->flags & RFAL_NFCV_REQ_FLAG_DATA_RATE) ? 'h' : 'l',
+        (ctx->flags & RFAL_NFCV_REQ_FLAG_SUB_CARRIER) ? 2 : 1);
+
+    switch(ctx->command) {
+    case ISO15693_INVENTORY: {
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "INVENTORY");
+        break;
+    }
+
+    case ISO15693_STAYQUIET: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s STAYQUIET", flags_string);
+        nfcv_data->quiet = true;
+        break;
+    }
+
+    case ISO15693_LOCKBLOCK: {
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s LOCK %d",
+            flags_string,
+            block);
+        break;
+    }
+
+    case ISO15693_SELECT: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s SELECT", flags_string);
+        break;
+    }
+
+    case ISO15693_RESET_TO_READY: {
+        snprintf(
+            nfcv_data->last_command, sizeof(nfcv_data->last_command), "%s RESET", flags_string);
+        break;
+    }
+
+    case ISO15693_READ_MULTI_BLOCK:
+    case ISO15693_READBLOCK: {
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        uint8_t blocks = 1;
+
+        if(ctx->command == ISO15693_READ_MULTI_BLOCK) {
+            blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
+        }
+
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s READ %d cnt: %d",
+            flags_string,
+            block,
+            blocks);
+
+        break;
+    }
+
+    case ISO15693_WRITE_MULTI_BLOCK:
+    case ISO15693_WRITEBLOCK: {
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        uint8_t blocks = 1;
+        uint8_t data_pos = 1;
+
+        if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
+            blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
+            data_pos++;
+        }
+
+        uint8_t* data = &nfcv_data->frame[ctx->payload_offset + data_pos];
+
+        if(ctx->command == ISO15693_WRITE_MULTI_BLOCK) {
+            snprintf(
+                nfcv_data->last_command,
+                sizeof(nfcv_data->last_command),
+                "%s WRITE %d, cnd %d",
+                flags_string,
+                block,
+                blocks);
+        } else {
+            snprintf(
+                nfcv_data->last_command,
+                sizeof(nfcv_data->last_command),
+                "%s WRITE %d %02X %02X %02X %02X",
+                flags_string,
+                block,
+                data[0],
+                data[1],
+                data[2],
+                data[3]);
+        }
+        break;
+    }
+
+    case ISO15693_GET_SYSTEM_INFO: {
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s SYSTEMINFO",
+            flags_string);
+        break;
+    }
+
+    default:
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "%s unsupported: %02X",
+            flags_string,
+            ctx->command);
+        break;
+    }
+
+    if(strlen(nfcv_data->last_command) > 0) {
+        FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);
+    }
+}
+
 void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     furi_assert(nfc_data);
     furi_assert(nfcv_data);
@@ -765,7 +919,11 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     /* if not set already, initialize the default protocol handler */
     if(!nfcv_data->emu_protocol_ctx) {
         nfcv_data->emu_protocol_ctx = malloc(sizeof(NfcVEmuProtocolCtx));
-        nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
+        if(nfcv_data->sub_type == NfcVTypeSniff) {
+            nfcv_data->emu_protocol_handler = &nfcv_emu_sniff_packet;
+        } else {
+            nfcv_data->emu_protocol_handler = &nfcv_emu_handle_packet;
+        }
     }
 
     FURI_LOG_D(TAG, "Starting NfcV emulation");
@@ -800,6 +958,9 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
         break;
     case NfcVTypePlain:
         FURI_LOG_D(TAG, "  Card type:    Plain");
+        break;
+    case NfcVTypeSniff:
+        FURI_LOG_D(TAG, "  Card type:    Sniffing");
         break;
     }
 

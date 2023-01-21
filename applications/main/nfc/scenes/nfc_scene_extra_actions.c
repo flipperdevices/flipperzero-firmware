@@ -5,6 +5,7 @@ enum SubmenuIndex {
     SubmenuIndexMfClassicKeys,
     SubmenuIndexMfUltralightUnlock,
     SubmenuIndexNfcVUnlock,
+    SubmenuIndexNfcVSniff,
 };
 
 void nfc_scene_extra_actions_submenu_callback(void* context, uint32_t index) {
@@ -41,6 +42,12 @@ void nfc_scene_extra_actions_on_enter(void* context) {
         SubmenuIndexNfcVUnlock,
         nfc_scene_extra_actions_submenu_callback,
         nfc);
+    submenu_add_item(
+        submenu,
+        "Listen NfcV Reader",
+        SubmenuIndexNfcVSniff,
+        nfc_scene_extra_actions_submenu_callback,
+        nfc);
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneExtraActions));
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
@@ -67,6 +74,9 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexNfcVUnlock) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVUnlockMenu);
+            consumed = true;
+        } else if(event.event == SubmenuIndexNfcVSniff) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVSniff);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneExtraActions, event.event);

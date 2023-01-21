@@ -113,6 +113,8 @@ int32_t nfc_worker_task(void* context) {
         nfc_worker_analyze_reader(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVEmulate) {
         nfc_worker_nfcv_emulate(nfc_worker);
+    } else if(nfc_worker->state == NfcWorkerStateNfcVSniff) {
+        nfc_worker_nfcv_sniff(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVUnlock) {
         nfc_worker_nfcv_unlock(nfc_worker);
     } else if(nfc_worker->state == NfcWorkerStateNfcVUnlockAndSave) {
@@ -171,6 +173,34 @@ void nfc_worker_nfcv_emulate(NfcWorker* nfc_worker) {
                     nfc_worker->callback(NfcWorkerEventNfcVContentChanged, nfc_worker->context);
                     nfcv_data->modified = false;
                 }
+            }
+        }
+        furi_delay_ms(10);
+    }
+    nfcv_emu_deinit(nfcv_data);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+}
+
+void nfc_worker_nfcv_sniff(NfcWorker* nfc_worker) {
+    FuriHalNfcTxRxContext tx_rx = {};
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    NfcVData* nfcv_data = &nfc_worker->dev_data->nfcv_data;
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, &tx_rx, true);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+
+    nfcv_data->sub_type = NfcVTypeSniff;
+    nfcv_emu_init(nfc_data, nfcv_data);
+
+    while(nfc_worker->state == NfcWorkerStateNfcVSniff) {
+        if(nfcv_emu_loop(&tx_rx, nfc_data, nfcv_data, 100)) {
+            if(nfc_worker->callback) {
+                nfc_worker->callback(NfcWorkerEventNfcVCommandExecuted, nfc_worker->context);
             }
         }
         furi_delay_ms(10);
