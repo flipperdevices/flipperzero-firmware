@@ -8,13 +8,16 @@
 #include <gui/elements.h>
 #include <math.h>
 
-#define MAX_MENU_OPTIONS 8
-#define MAX_MENU_ENTRIES 16
+#define MAX_MENU_OPTIONS 20
+#define MAX_MENU_ENTRIES 20
 #define MAX_WS2812 500
 #define COUNT(x) (sizeof(x) / sizeof(x[0]))
 
 struct GpioTest {
     View* view;
+    bool button_held;
+    int32_t button_ticks;
+    InputKey button;
     GpioTestOkCallback callback;
     void* context;
 };
@@ -140,7 +143,26 @@ static MenuEntry gpio_menu_entries[] = {
          .update_cbr = &gpio_menu_pwm_cbr},
     [MenuServoAngle] =
         {.name = "Angle",
-         .options = {"-90", "-60", "-30", "0", "30", "60", "90"},
+         .options =
+             {"-90",
+              "-80",
+              "-70",
+              "-60",
+              "-50",
+              "-40",
+              "-30",
+              "-20",
+              "-10",
+              "0",
+              "10",
+              "20",
+              "30",
+              "40",
+              "50",
+              "60",
+              "70",
+              "80",
+              "90"},
          .update_cbr = &gpio_menu_servo_cbr},
     [MenuServoMinPulse] =
         {.name = "Min", .options = {"500 us", "1000 us"}, .update_cbr = &gpio_menu_servo_cbr},
@@ -177,10 +199,6 @@ static void gpio_menu_enable(GpioTestModel* model, int32_t entry, bool state) {
 
 static bool gpio_menu_enabled(GpioTestModel* model, int32_t entry) {
     return model->menu_entry_enabled[entry];
-}
-
-static void gpio_menu_value_modify(GpioTestModel* model, int32_t pos, int32_t amount) {
-    gpio_menu_value_set(model, pos, gpio_menu_value_get(model, pos) + amount);
 }
 
 static void gpio_test_draw_callback(Canvas* canvas, void* _model) {
@@ -312,14 +330,28 @@ static bool gpio_test_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeShort) {
-        if(event->key == InputKeyRight) {
-            consumed = gpio_test_process_right(gpio_test);
-        } else if(event->key == InputKeyLeft) {
-            consumed = gpio_test_process_left(gpio_test);
-        } else if(event->key == InputKeyUp) {
+        if(event->key == InputKeyUp) {
             consumed = gpio_test_process_up(gpio_test);
         } else if(event->key == InputKeyDown) {
             consumed = gpio_test_process_down(gpio_test);
+        }
+    } else if(event->type == InputTypePress) {
+        if(event->key == InputKeyRight) {
+            gpio_test->button_held = true;
+            gpio_test->button_ticks = 0;
+            gpio_test->button = event->key;
+            consumed = gpio_test_process_right(gpio_test);
+        } else if(event->key == InputKeyLeft) {
+            gpio_test->button_held = true;
+            gpio_test->button_ticks = 0;
+            gpio_test->button = event->key;
+            consumed = gpio_test_process_left(gpio_test);
+        }
+    } else if(event->type == InputTypeRelease) {
+        if(event->key == InputKeyRight) {
+            gpio_test->button_held = false;
+        } else if(event->key == InputKeyLeft) {
+            gpio_test->button_held = false;
         }
     } else if(event->key == InputKeyOk) {
         consumed = gpio_test_process_ok(gpio_test, event);
@@ -379,39 +411,35 @@ static bool gpio_test_process_down(GpioTest* gpio_test) {
     return true;
 }
 
+static void gpio_test_value_change(GpioTestModel* model, int32_t step) {
+    int32_t pos = model->menu_entry;
+    int32_t val = gpio_menu_value_get(model, pos);
+
+    MenuEntry* menu_entry = &model->menu[pos];
+
+    /* if the menu entry has options */
+    if(menu_entry->options[0]) {
+        if(step > 0 && menu_entry->options[val + 1]) {
+            gpio_menu_value_set(model, pos, val + 1);
+        } else if(step < 0 && val > 0) {
+            gpio_menu_value_set(model, pos, val - 1);
+        }
+    } else {
+        int32_t new_value = MAX(menu_entry->value_min, MIN(menu_entry->value_max, val + step));
+        gpio_menu_value_set(model, pos, new_value);
+    }
+    gpio_menu_refresh(model);
+}
+
 static bool gpio_test_process_left(GpioTest* gpio_test) {
     with_view_model(
-        gpio_test->view,
-        GpioTestModel * model,
-        {
-            int32_t pos = model->menu_entry;
-            int32_t val = gpio_menu_value_get(model, pos);
-
-            if((model->menu[pos].options[0] && val > 0) ||
-               (!model->menu[pos].options[0] && val > model->menu[pos].value_min)) {
-                gpio_menu_value_modify(model, pos, -1);
-                gpio_menu_refresh(model);
-            }
-        },
-        true);
+        gpio_test->view, GpioTestModel * model, { gpio_test_value_change(model, -1); }, true);
     return true;
 }
 
 static bool gpio_test_process_right(GpioTest* gpio_test) {
     with_view_model(
-        gpio_test->view,
-        GpioTestModel * model,
-        {
-            int32_t pos = model->menu_entry;
-            int32_t val = gpio_menu_value_get(model, pos);
-
-            if((model->menu[pos].options[0] && model->menu[pos].options[val + 1]) ||
-               (!model->menu[pos].options[0] && val < model->menu[pos].value_max)) {
-                gpio_menu_value_modify(model, pos, 1);
-                gpio_menu_refresh(model);
-            }
-        },
-        true);
+        gpio_test->view, GpioTestModel * model, { gpio_test_value_change(model, 1); }, true);
     return true;
 }
 
@@ -636,7 +664,7 @@ static void gpio_menu_servo_cbr(void* _model, uint32_t entry) {
     int32_t max = max_pulse[gpio_menu_value_get(model, MenuServoMaxPulse)];
 
     int32_t span = max - min;
-    int32_t pulse_length = min + (span * angle) / 6;
+    int32_t pulse_length = min + (span * angle) / 18;
     int32_t duty = (pulse_length * freq) / 100;
 
     if(model->pwm_freq != freq) {
@@ -877,6 +905,28 @@ void gpio_test_update_callback(GpioTest* gpio_test) {
             }
 
             gpio_test_pwm_update(model);
+
+            /* update when button is held */
+            if(gpio_test->button_held) {
+                gpio_test->button_ticks++;
+
+                /* every 2nd tick, increase value */
+                if((gpio_test->button_ticks % 2) == 0) {
+                    int32_t exp = gpio_test->button_ticks / 20;
+                    int32_t delta = 1;
+
+                    /* a simple integer based pow, increasing step size every 10 counts */
+                    for(int cnt = 0; cnt < exp; cnt++) {
+                        delta *= 10;
+                    }
+
+                    if(gpio_test->button == InputKeyRight) {
+                        gpio_test_value_change(model, delta);
+                    } else if(gpio_test->button == InputKeyLeft) {
+                        gpio_test_value_change(model, -delta);
+                    }
+                }
+            }
         },
         true);
 }
