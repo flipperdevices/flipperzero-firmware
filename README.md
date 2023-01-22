@@ -41,4 +41,10 @@ External RX options (What is simplest read module?):
 ## Credits
 This project interpolates work from [Samy Kamkar's original MagSpoof project](https://github.com/samyk/magspoof), [dunaevai135's Flipper hackathon project](https://github.com/dunaevai135/flipperzero-firmware), and the Flipper team's [LF RFID](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/lfrfid) and [SubGhz](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/subghz) apps.  
 
-Many thanks to everyone who has helped in addition to those above, most notably: [antirez](https://github.com/antirez) for bitmapping suggestions and general C wisdom, [skotopes](https://github.com/skotopes) for RFID consultation, [NVX](https://github.com/nvx) + dlz for NFC consulation, davethepirate + [arha](https://github.com/arha) for EE insight and acting as sounding boards, and [cool4uma](https://github.com/cool4uma) for their work on custom text_input scenes — as well as everyone else I've had the pleasure of chatting with.
+Many thanks to everyone who has helped in addition to those above, most notably: 
+- [antirez](https://github.com/antirez) for bitmapping suggestions and general C wisdom
+- [skotopes](https://github.com/skotopes) for RFID consultation
+- [NVX](https://github.com/nvx) + dlz for NFC consultation
+- davethepirate + [arha](https://github.com/arha) for EE insight and acting as sounding boards
+- [cool4uma](https://github.com/cool4uma) for their work on custom text_input scenes 
+- Everyone else I've had the pleasure of chatting with!
