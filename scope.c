@@ -3,6 +3,8 @@
 #include <furi_hal_resources.h>
 #include <gui/gui.h>
 #include <input/input.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "stm32wbxx_hal.h"
 #include "stm32wbxx_hal_tim.h"
@@ -18,8 +20,10 @@
   ((__ADC_DATA__) * (__VREFANALOG_VOLTAGE__) / DIGITAL_SCALE_12BITS)
 #define VDDA_APPLI                       ((uint32_t)3300)
 
-#include <stdlib.h>
-#include <string.h>
+const uint32_t AHBPrescTable[16UL] = {1UL, 3UL, 5UL, 1UL, 1UL, 6UL, 10UL, 32UL, 2UL, 4UL, 8UL, 16UL, 64UL, 128UL, 256UL, 512UL};
+const uint32_t APBPrescTable[8UL]  = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
+const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
+                                      4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
 
 void Error_Handler()
 {
@@ -27,7 +31,7 @@ void Error_Handler()
     }
 }
 
-uint16_t i = 0;
+uint32_t timebase = 50;
 
 static ADC_HandleTypeDef hadc1;
 static DMA_HandleTypeDef hdma_adc1;
@@ -150,12 +154,13 @@ static void MX_ADC1_Init(void)
 static void MX_TIM2_Init(void)
 {
 
+    uint32_t period = HAL_RCC_GetPCLK1Freq() / timebase;
     TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
     TIM_MasterConfigTypeDef sMasterConfig = { 0 };
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 1;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 399990 ; //39999;
+    htim2.Init.Period = period;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
@@ -175,19 +180,15 @@ static void MX_TIM2_Init(void)
 
 static void MX_DMA_Init(void)
 {
-
     __HAL_RCC_DMAMUX1_CLK_ENABLE();
     __HAL_RCC_DMA1_CLK_ENABLE();
     HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 15, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-
 }
 
 static void MX_GPIO_Init(void)
 {
-
     __HAL_RCC_GPIOC_CLK_ENABLE();
-
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
@@ -201,8 +202,6 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
             __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
                                     aADCxConvertedData[tmp_index]);
     }
-
-
     ubDmaTransferStatus = 1;
 }
 
@@ -217,7 +216,6 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc)
             __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
                                     aADCxConvertedData[tmp_index]);
     }
-
     ubDmaTransferStatus = 0;
 }
 
@@ -248,7 +246,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
     char buf[50];
-    snprintf(buf, 50, "%d", val1);
+    snprintf(buf, 50, "Time: %.3f", (double)1.0/((double)timebase));
 
     canvas_draw_str(canvas, 10, 10, buf);
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
@@ -291,7 +289,6 @@ int32_t scope_main(void *p)
     MX_DMA_Init();
     MX_TIM2_Init();
 
-
     VREFBUF->CSR |= VREFBUF_CSR_ENVR;
     VREFBUF->CSR &= ~VREFBUF_CSR_HIZ;
     VREFBUF->CSR |= VREFBUF_CSR_VRS;
@@ -332,7 +329,7 @@ int32_t scope_main(void *p)
     bool running = true;
     
     while (running) {
-        if (furi_message_queue_get(event_queue, &event, 102) ==
+        if (furi_message_queue_get(event_queue, &event, 1) ==
             FuriStatusOk) {
             if ((event.type == InputTypePress)
                 || (event.type == InputTypeRepeat)) {
