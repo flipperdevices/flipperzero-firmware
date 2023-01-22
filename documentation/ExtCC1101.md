@@ -8,7 +8,7 @@ Connection (module -> flipper GPIO):
 2. VCC -> 9
 3. GDO0 -> 5 (B3)
 4. CSN -> 6
-5. SCK -> 5
+5. SCK -> 4
 6. MOSI -> 2
 7. MISO -> 3
 8. GD2 (not needed)
