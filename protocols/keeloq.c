@@ -95,7 +95,7 @@ static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fieldset
     raw_samples_add(samples,false,te*9);
 
     // Data, 66 bits.
-    uint8_t data[9];
+    uint8_t data[9] = {0};
     memcpy(data,fieldset->fields[0]->bytes,4);     // Encrypted part.
     memcpy(data+4,fieldset->fields[1]->bytes,4);   // ID.
     data[7] = data[7]>>4 | fieldset->fields[2]->uvalue << 4; // s[2,1,0,3]
