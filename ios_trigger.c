@@ -66,14 +66,22 @@ __int32_t ios_trigger_app(void *p){
                             }
                             break;
                         case(InputKeyUp):
-                            app->delay++;
+                            if(!app->shooting){
+                                app->delay++;
+                            }
                             break;
                         case(InputKeyDown):
-                            app->delay--;
+                            if(!app->shooting){
+                                app->delay--;
+                            }
                             break;
                         case(InputKeyLeft):
                             break;
                         case(InputKeyRight):
+                            furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
+                            furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
+                            notification_message(app->notifications, &sequence_blink_blue_100);
+                            app->shots++;
                             break;
                         default:
                             break;
