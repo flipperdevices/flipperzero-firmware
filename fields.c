@@ -66,14 +66,14 @@ int field_to_string(char *buf, size_t len, ProtoViewField *f) {
     case FieldTypeBytes:
         {
             uint64_t idx = 0;
-            uint32_t nibble_num = 0;
-            while(idx < len-1 && nibble_num < f->len) {
+            uint32_t nibble_num = f->len;
+            while(idx < len-1 && nibble_num) {
                 const char *charset = "0123456789ABCDEF";
                 uint32_t nibble = nibble_num & 1 ?
-                    (f->bytes[nibble_num/2] >> 4) :
-                    (f->bytes[nibble_num/2] & 0xf);
+                    (f->bytes[idx/2] >> 4) :
+                    (f->bytes[idx/2] & 0xf);
                 buf[idx++] = charset[nibble];
-                nibble_num++;
+                nibble_num--;
             }
             buf[idx] = 0;
             return idx;
@@ -93,9 +93,11 @@ int field_to_string(char *buf, size_t len, ProtoViewField *f) {
  * new value, otherwise if the specified value is invalid for the
  * field type, false is returned. */
 bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
-    long long val;
-    unsigned long long uval;
-    float fval;
+    // Initialize values to zero since the Flipper sscanf() implementation
+    // is fuzzy... may populate only part of the value.
+    long long val = 0;
+    unsigned long long uval = 0;
+    float fval = 0;
 
     switch(f->type) {
     case FieldTypeStr:
@@ -143,15 +145,15 @@ bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
                 uint8_t nibble = 0;
                 char c = toupper(buf[idx]);
                 if (c >= '0' && c <= '9') nibble = c-'0';
-                else if (c >= 'A' && c <= 'F') nibble = c-'A';
+                else if (c >= 'A' && c <= 'F') nibble = 10+(c-'A');
                 else return false;
 
                 if (nibble_idx & 1) {
                     f->bytes[idx/2] = 
-                        (f->bytes[idx/2] & 0x0F) | (nibble<<4);
+                        (f->bytes[idx/2] & 0xF0) | nibble;
                 } else {
                     f->bytes[idx/2] = 
-                        (f->bytes[idx/2] & 0xF0) | nibble;
+                        (f->bytes[idx/2] & 0x0F) | (nibble<<4);
                 }
                 nibble_idx--;
                 idx++;
