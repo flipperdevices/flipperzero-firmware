@@ -1,5 +1,5 @@
 # EXTRA
-A pack of extra commands for the Flipper Zero (a C library).
+A pack of extra commands for the Flipper Zero (a C library). Check out the demo [here](https://github.com/Milk-Cool/EXTRA-demo)!
 
 ## Downloading and importing
 In your app directory run:
