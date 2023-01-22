@@ -61,15 +61,15 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     bitmap_reverse_bytes(raw,sizeof(raw)); /* Keeloq is LSB first. */
 
     int buttons = raw[7]>>4;
-    uint8_t remote_id[4];
-    bitmap_copy(remote_id,sizeof(remote_id),0,raw+4,sizeof(raw)-4,4,28);
-    int lowbat = (raw[8]&0x80) != 0;
+    int lowbat = (raw[8]&0x1) == 0; // Actual bit meaning: good battery level
+    int alwaysone = (raw[8]&0x2) != 0;
 
-    fieldset_add_bytes(info->fieldset,"raw",raw,9*2);
     fieldset_add_bytes(info->fieldset,"encr",raw,4*2);
-    fieldset_add_bytes(info->fieldset,"id",remote_id,7); // 28 bits, 7 nibbles
+    raw[7] = raw[7]<<4; // Make ID bits contiguous
+    fieldset_add_bytes(info->fieldset,"id",raw+4,7); // 28 bits, 7 nibbles
     fieldset_add_bin(info->fieldset,"s2 s1 s0 s3",buttons,4);
     fieldset_add_bin(info->fieldset,"low battery",lowbat,1);
+    fieldset_add_bin(info->fieldset,"always one",alwaysone,1);
     return true;
 }
 
@@ -80,12 +80,41 @@ static void get_fields(ProtoViewFieldSet *fieldset) {
     fieldset_add_bytes(fieldset,"id",remote_id,7);
     fieldset_add_bin(fieldset,"s[2,1,0,3]",2,4);
     fieldset_add_bin(fieldset,"low battery",0,1);
+    fieldset_add_bin(fieldset,"always one",1,1);
 }
 
-static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fields)
+static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fieldset)
 {
-    UNUSED(samples);
-    UNUSED(fields);
+    uint32_t te = 380; // Short pulse duration in microseconds.
+
+    // Sync: 12 pairs of pulse/gap + 9 times gap
+    for (int j = 0; j < 12; j++) {
+        raw_samples_add(samples,true,te);
+        raw_samples_add(samples,false,te);
+    }
+    raw_samples_add(samples,false,te*9);
+
+    // Data, 66 bits.
+    uint8_t data[9];
+    memcpy(data,fieldset->fields[0]->bytes,4);     // Encrypted part.
+    memcpy(data+4,fieldset->fields[1]->bytes,4);   // ID.
+    data[7] = data[7]>>4 | fieldset->fields[2]->uvalue << 4; // s[2,1,0,3]
+    int low_battery = fieldset->fields[3] != 0;
+    int always_one = fieldset->fields[4] != 0;
+    low_battery = !low_battery; // Bit real meaning is good battery level.
+    data[8] |= low_battery;
+    data[8] |= (always_one << 1);
+    bitmap_reverse_bytes(data,sizeof(data)); /* Keeloq is LSB first. */
+
+    for (int j = 0; j < 66; j++) {
+        if (bitmap_get(data,9,j)) {
+            raw_samples_add(samples,true,te);
+            raw_samples_add(samples,false,te*2);
+        } else {
+            raw_samples_add(samples,true,te*2);
+            raw_samples_add(samples,false,te);
+        }
+    }
 }
 
 ProtoViewDecoder KeeloqDecoder = {
