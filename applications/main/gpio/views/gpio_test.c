@@ -140,7 +140,7 @@ static MenuEntry gpio_menu_entries[] = {
          .update_cbr = &gpio_menu_pwm_cbr},
     [MenuServoAngle] =
         {.name = "Angle",
-         .options = {"-90", "-22.5", "-45", "0", "22.5", "45", "90"},
+         .options = {"-90", "-60", "-30", "0", "30", "60", "90"},
          .update_cbr = &gpio_menu_servo_cbr},
     [MenuServoMinPulse] =
         {.name = "Min", .options = {"500 us", "1000 us"}, .update_cbr = &gpio_menu_servo_cbr},
