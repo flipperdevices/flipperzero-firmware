@@ -1,5 +1,5 @@
 # magspoof_flipper
-WIP of MagSpoof for the Flipper Zero. Currently rewriting from the ground up; basic TX of saved files should now work over both RFID (using the Flipper's internal coil) and GPIO (pins A6 and A7: such that one can connect an H-bridge and external coil). Using this README as coarse notes of what remains to be done; anyone is welcome to contribute!
+WIP of MagSpoof for the Flipper Zero. Currently rewriting from the ground up; basic TX of saved files should now work over both RFID (using the Flipper's internal coil) and GPIO (pins A6 and A7: such that one can connect an H-bridge and external coil). A sample file with test data is included in `assets`, for anyone wishing to experiment. Using this README as coarse notes of what remains to be done; anyone is welcome to contribute!
 
 Disclaimer: use responsibly, and at your own risk. While in my testing, I've seen no reason to believe this could damage the RFID hardware, this is inherently driving the coil in ways it was not designed or intended for; I take no responsibility for fried/bricked Flippers. Similarly, please only use this with magstripe cards and mag readers you own — this is solely meant as a proof of concept for educational purposes, and I neither condone nor am sympathetic to malicious uses of my code.
 
@@ -7,7 +7,7 @@ Disclaimer: use responsibly, and at your own risk. While in my testing, I've see
 Emulation:
 - Clean up old testing scenes, remove deprecated helpers
 - Reverse track precomputation
-- Implement/integrate better bitmap than hacky first pass? antirez's better approach (from ProtoView) included at bottom of mag_helpers
+- Implement/integrate better bitmap than hacky first pass? antirez's better approach (from ProtoView) included at bottom of `helpers/mag_helpers.c`
 - Pursue skunkworks TX improvement ideas listed below
 
 Scenes:
