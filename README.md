@@ -1,9 +1,9 @@
 # FlipperZeroBrainfuck
 
 Brainfuck interpreter and editor for the F0.  
-Creating new files can be buggy, opening / running existing files works fine.  
-Blue LED shows that the program is executing.  
+Supports text inputs and outputs.  
+Blue LED indicates program is running.  
 
-![Screenshot-20230115-223703](https://user-images.githubusercontent.com/16545187/212570889-08a22563-2cff-4783-9a7a-f648a708f95d.png)
+![Screenshot-20230117-202147](https://user-images.githubusercontent.com/16545187/213004616-8846e897-506e-4510-8012-fd2fe2bbe8a1.png)
 
-![Screenshot-20230115-223726](https://user-images.githubusercontent.com/16545187/212570903-cffdb4ed-dfea-4de2-8ef0-6832fe2bbd2b.png)
+![Screenshot-20230117-202208](https://user-images.githubusercontent.com/16545187/213004659-d74751d2-76c4-4a7b-a0f2-f58623478b95.png)
