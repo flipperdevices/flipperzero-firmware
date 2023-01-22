@@ -66,14 +66,12 @@ int field_to_string(char *buf, size_t len, ProtoViewField *f) {
     case FieldTypeBytes:
         {
             uint64_t idx = 0;
-            uint32_t nibble_num = f->len;
-            while(idx < len-1 && nibble_num) {
+            while(idx < len-1 && idx < f->len) {
                 const char *charset = "0123456789ABCDEF";
-                uint32_t nibble = nibble_num & 1 ?
-                    (f->bytes[idx/2] >> 4) :
-                    (f->bytes[idx/2] & 0xf);
+                uint32_t nibble = idx & 1 ?
+                    (f->bytes[idx/2] & 0xf) :
+                    (f->bytes[idx/2] >> 4);
                 buf[idx++] = charset[nibble];
-                nibble_num--;
             }
             buf[idx] = 0;
             return idx;
@@ -140,7 +138,6 @@ bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
         {
             if (len > f->len) return false;
             uint64_t idx = 0;
-            uint64_t nibble_idx = len-1;
             while(buf[idx]) {
                 uint8_t nibble = 0;
                 char c = toupper(buf[idx]);
@@ -148,14 +145,13 @@ bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
                 else if (c >= 'A' && c <= 'F') nibble = 10+(c-'A');
                 else return false;
 
-                if (nibble_idx & 1) {
+                if (idx & 1) {
                     f->bytes[idx/2] = 
                         (f->bytes[idx/2] & 0xF0) | nibble;
                 } else {
                     f->bytes[idx/2] = 
                         (f->bytes[idx/2] & 0x0F) | (nibble<<4);
                 }
-                nibble_idx--;
                 idx++;
             }
             buf[idx] = 0;

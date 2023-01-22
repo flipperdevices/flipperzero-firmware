@@ -61,22 +61,25 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     bitmap_reverse_bytes(raw,sizeof(raw)); /* Keeloq is LSB first. */
 
     int buttons = raw[7]>>4;
-    int remote_id = ((raw[7]&0x0f) << 24) |
-                     (raw[6] << 16) |
-                     (raw[5] << 8) |
-                     (raw[4] << 0);
+    uint8_t remote_id[4];
+    bitmap_copy(remote_id,sizeof(remote_id),0,raw+4,sizeof(raw)-4,4,28);
     int lowbat = (raw[8]&0x80) != 0;
 
     fieldset_add_bytes(info->fieldset,"raw",raw,9*2);
     fieldset_add_bytes(info->fieldset,"encr",raw,4*2);
-    fieldset_add_hex(info->fieldset,"id",remote_id,28);
+    fieldset_add_bytes(info->fieldset,"id",remote_id,7); // 28 bits, 7 nibbles
     fieldset_add_bin(info->fieldset,"s2 s1 s0 s3",buttons,4);
     fieldset_add_bin(info->fieldset,"low battery",lowbat,1);
     return true;
 }
 
-static void get_fields(ProtoViewFieldSet *fields) {
-    UNUSED(fields);
+static void get_fields(ProtoViewFieldSet *fieldset) {
+    uint8_t remote_id[4] = {0xab, 0xcd, 0xef, 0xa0};
+    uint8_t encr[4] = {0xab, 0xab, 0xab, 0xab};
+    fieldset_add_bytes(fieldset,"encr",encr,8);
+    fieldset_add_bytes(fieldset,"id",remote_id,7);
+    fieldset_add_bin(fieldset,"s[2,1,0,3]",2,4);
+    fieldset_add_bin(fieldset,"low battery",0,1);
 }
 
 static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fields)
