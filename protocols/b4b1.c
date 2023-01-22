@@ -58,14 +58,14 @@ static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fs)
 {
     uint32_t te = 334; // Short pulse duration in microseconds.
 
-    // Sync.
+    // Sync: 1 te pulse, 31 te gap.
     raw_samples_add(samples,true,te);
     raw_samples_add(samples,false,te*31);
 
     // ID + button state
     uint8_t data[3];
     memcpy(data,fs->fields[0]->bytes,3);
-    data[3] = (data[3]&0xF0) | fs->fields[1]->uvalue;
+    data[2] = (data[2]&0xF0) | (fs->fields[1]->uvalue & 0xF);
     for (uint32_t j = 0; j < 24; j++) {
         if (bitmap_get(data,sizeof(data),j)) {
             raw_samples_add(samples,true,te*3);
@@ -76,7 +76,7 @@ static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fs)
         }
     }
 
-    // Terminator
+    // Signal terminator. Just a single short pulse.
     raw_samples_add(samples,true,te);
 }
 

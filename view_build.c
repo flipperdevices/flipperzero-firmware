@@ -170,6 +170,19 @@ static void process_input_set_fields(ProtoViewApp *app, InputEvent input) {
                 privdata->cur_field--;
         }
     }
+
+    if (input.type == InputTypeLong && input.key == InputKeyOk) {
+        /* Build the message a fresh raw buffer. */
+        RawSamplesBuffer *rs = raw_samples_alloc();
+        if (privdata->decoder->build_message) {
+            privdata->decoder->build_message(rs,privdata->fieldset);
+            app->signal_decoded = false; // So that the new signal will be
+                                         // accepted as the current signal.
+            scan_for_signal(app,rs);
+            raw_samples_free(rs);
+            ui_show_alert(app,"Done: press back key",3000);
+        }
+    }
 }
 
 /* Handle input for the build message view. */
