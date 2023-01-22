@@ -282,6 +282,7 @@ void view_exit_build_message(ProtoViewApp *app);
 void view_enter_direct_sampling(ProtoViewApp *app);
 void view_exit_direct_sampling(ProtoViewApp *app);
 void view_exit_settings(ProtoViewApp *app);
+void view_exit_info(ProtoViewApp *app);
 void adjust_raw_view_scale(ProtoViewApp *app, uint32_t short_pulse_dur);
 
 /* ui.c */
@@ -307,6 +308,8 @@ void fieldset_add_str(ProtoViewFieldSet *fs, const char *name, const char *s);
 void fieldset_add_bytes(ProtoViewFieldSet *fs, const char *name, const uint8_t *bytes, uint32_t count);
 void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val, uint32_t digits_after_dot);
 const char *field_get_type_name(ProtoViewField *f);
+int field_to_string(char *buf, size_t len, ProtoViewField *f);
+bool field_set_from_string(ProtoViewField *f, char *buf, size_t len);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);

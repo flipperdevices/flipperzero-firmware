@@ -99,6 +99,7 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
     if (old == ViewDirectSampling) view_exit_direct_sampling(app);
     if (new == ViewDirectSampling) view_enter_direct_sampling(app);
     if (old == ViewBuildMessage) view_exit_build_message(app);
+    if (old == ViewInfo) view_exit_info(app);
     /* The frequency/modulation settings are actually a single view:
      * as long as the user stays between the two modes of this view we
      * don't need to call the exit-view callback. */

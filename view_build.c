@@ -6,14 +6,18 @@
 extern ProtoViewDecoder *Decoders[];    // Defined in signal.c.
 
 /* Our view private data. */
+#define USER_VALUE_LEN 64
 typedef struct {
-    ProtoViewDecoder *decoder;      // Decoder we are using to create a message.
-    uint32_t cur_decoder;           // Decoder index when we are yet selecting
-                                    // a decoder. Used when decoder is NULL.
-    ProtoViewFieldSet *fieldset;    // The fields to populate.
-    uint32_t cur_field;             // Field we are editing right now. This
-                                    // is the index inside the 'fieldset'
-                                    // fields.
+    ProtoViewDecoder *decoder;      /* Decoder we are using to create a
+                                       message. */
+    uint32_t cur_decoder;           /* Decoder index when we are yet selecting
+                                       a decoder. Used when decoder is NULL. */
+    ProtoViewFieldSet *fieldset;    /* The fields to populate. */
+    uint32_t cur_field;             /* Field we are editing right now. This
+                                       is the index inside the 'fieldset'
+                                       fields. */
+    char *user_value;               /* Keyboard input to replace the current
+                                       field value goes here. */
 } BuildViewPrivData;
 
 /* Not all the decoders support message bulding, so we can't just
@@ -44,7 +48,7 @@ static void select_prev_decoder(ProtoViewApp *app) {
 static void render_view_select_decoder(Canvas *const canvas, ProtoViewApp *app) {
     BuildViewPrivData *privdata = app->view_privdata;
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 9, "Signal builder");
+    canvas_draw_str(canvas, 0, 9, "Signal creator");
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 19, "up/down: select, ok: choose");
 
@@ -54,9 +58,7 @@ static void render_view_select_decoder(Canvas *const canvas, ProtoViewApp *app) 
         select_next_decoder(app);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 9, "Signal builder");
-
-    canvas_draw_str_aligned(canvas,64,36,AlignCenter,AlignCenter,
+    canvas_draw_str_aligned(canvas,64,38,AlignCenter,AlignCenter,
         Decoders[privdata->cur_decoder]->name);
 }
 
@@ -68,26 +70,32 @@ static void render_view_set_fields(Canvas *const canvas, ProtoViewApp *app) {
     snprintf(buf,sizeof(buf), "%s field %d/%d",
         privdata->decoder->name, (int)privdata->cur_field+1,
         (int)privdata->fieldset->numfields);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 9, buf);
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 0, 19, "up/down: next field, ok: edit");
-    canvas_draw_str(canvas, 0, 62, "Long ok: create, < > incr/decr");
-
-    /* Write the field name, type, current content. For this part we
-     * write white text on black screen, to visually separate the UI
-     * description part from the UI current field editing part. */
     canvas_set_color(canvas,ColorBlack);
-    canvas_draw_box(canvas,0,21,128,32);
-
+    canvas_draw_box(canvas,0,0,128,21);
     canvas_set_color(canvas,ColorWhite);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 1, 9, buf);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 1, 19, "up/down: next field, ok: edit");
+
+    /* Write the field name, type, current content. */
+    canvas_set_color(canvas,ColorBlack);
     ProtoViewField *field = privdata->fieldset->fields[privdata->cur_field];
     snprintf(buf,sizeof(buf), "%s %s:%d", field->name,
         field_get_type_name(field), (int)field->len);
+    buf[0] = toupper(buf[0]);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas,64,30,AlignCenter,AlignCenter,buf);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas,63,45,AlignCenter,AlignCenter,"\"foobar\"");
+
+    /* Render the current value between "" */
+    unsigned int written = (unsigned int) field_to_string(buf+1,sizeof(buf)-1,field);
+    buf[0] = '"';
+    if (written+3 < sizeof(buf)) memcpy(buf+written+1,"\"\x00",2);
+    canvas_draw_str_aligned(canvas,63,45,AlignCenter,AlignCenter,buf);
+
+    /* Footer instructions. */
+    canvas_draw_str(canvas, 0, 62, "Long ok: create, < > incr/decr");
 }
 
 /* Render the build message view. */
@@ -122,12 +130,37 @@ static void process_input_select_decoder(ProtoViewApp *app, InputEvent input) {
     }
 }
 
+/* Called after the user typed the new field value in the keyboard.
+ * Let's save it and remove the keyboard view. */
+static void text_input_done_callback(void* context) {
+    ProtoViewApp *app = context;
+    BuildViewPrivData *privdata = app->view_privdata;
+
+    if (field_set_from_string(privdata->fieldset->fields[privdata->cur_field],
+            privdata->user_value, strlen(privdata->user_value)) == false)
+    {
+        ui_show_alert(app, "Invalid value", 1500);
+    }
+
+    free(privdata->user_value);
+    privdata->user_value = NULL;
+    ui_dismiss_keyboard(app);
+}
+
 /* Handle input for fields editing mode. */
 static void process_input_set_fields(ProtoViewApp *app, InputEvent input) {
     BuildViewPrivData *privdata = app->view_privdata;
     ProtoViewFieldSet *fs = privdata->fieldset;
     if (input.type == InputTypeShort) {
         if (input.key == InputKeyOk) {
+            /* Show the keyboard to let the user type the new
+             * value. */
+            if (privdata->user_value == NULL)
+                privdata->user_value = malloc(USER_VALUE_LEN);
+            field_to_string(privdata->user_value, USER_VALUE_LEN,
+                            fs->fields[privdata->cur_field]);
+            ui_show_keyboard(app, privdata->user_value, USER_VALUE_LEN,
+                             text_input_done_callback);
         } else if (input.key == InputKeyDown) {
             privdata->cur_field = (privdata->cur_field+1) % fs->numfields;
         } else if (input.key == InputKeyUp) {
@@ -152,4 +185,5 @@ void process_input_build_message(ProtoViewApp *app, InputEvent input) {
 void view_exit_build_message(ProtoViewApp *app) {
     BuildViewPrivData *privdata = app->view_privdata;
     if (privdata->fieldset) fieldset_free(privdata->fieldset);
+    if (privdata->user_value) free(privdata->user_value);
 }

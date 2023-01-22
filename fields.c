@@ -39,6 +39,130 @@ const char *field_get_type_name(ProtoViewField *f) {
     return "unknown";
 }
 
+/* Set a string representation of the specified field in buf. */
+int field_to_string(char *buf, size_t len, ProtoViewField *f) {
+    switch(f->type) {
+    case FieldTypeStr:
+        return snprintf(buf,len,"%s", f->str);
+    case FieldTypeSignedInt:
+        return snprintf(buf,len,"%lld", (long long) f->value);
+    case FieldTypeUnsignedInt:
+        return snprintf(buf,len,"%llu", (unsigned long long) f->uvalue);
+    case FieldTypeBinary:
+        {
+            uint64_t test_bit = (1 << (f->len-1));
+            uint64_t idx = 0;
+            while(idx < len-1 && test_bit) {
+                buf[idx++] = (f->uvalue & test_bit) ? '1' : '0';
+                test_bit >>= 1;
+            }
+            buf[idx] = 0;
+            return idx;
+        }
+    case FieldTypeHex:
+        return snprintf(buf, len, "%*llX", (int)(f->len+7)/8, f->uvalue);
+    case FieldTypeFloat:
+        return snprintf(buf, len, "%.*f", (int)f->len, (double)f->fvalue);
+    case FieldTypeBytes:
+        {
+            uint64_t idx = 0;
+            uint32_t nibble_num = 0;
+            while(idx < len-1 && nibble_num < f->len) {
+                const char *charset = "0123456789ABCDEF";
+                uint32_t nibble = nibble_num & 1 ?
+                    (f->bytes[nibble_num/2] >> 4) :
+                    (f->bytes[nibble_num/2] & 0xf);
+                buf[idx++] = charset[nibble];
+                nibble_num++;
+            }
+            buf[idx] = 0;
+            return idx;
+        }
+    }
+    return 0;
+}
+
+/* Set the field value from its string representation in 'buf'.
+ * The field type must already be set and the field should be valid.
+ * The string represenation 'buf' must be null termianted. Note that
+ * even when representing binary values containing zero, this values
+ * are taken as representations, so that would be the string "00" as
+ * the Bytes type representation.
+ *
+ * The function returns true if the filed was successfully set to the
+ * new value, otherwise if the specified value is invalid for the
+ * field type, false is returned. */
+bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
+    long long val;
+    unsigned long long uval;
+    float fval;
+
+    switch(f->type) {
+    case FieldTypeStr:
+        free(f->str);
+        f->len = len;
+        f->str = malloc(len+1);
+        memcpy(f->str,buf,len+1);
+        break;
+    case FieldTypeSignedInt:
+        if (!sscanf(buf,"%lld",&val)) return false;
+        f->value = val;
+        break;
+    case FieldTypeUnsignedInt:
+        if (!sscanf(buf,"%llu",&uval)) return false;
+        f->uvalue = uval;
+        break;
+    case FieldTypeBinary:
+        {
+            uint64_t bit_to_set = (1 << (len-1));
+            uint64_t idx = 0;
+            uval = 0;
+            while(buf[idx]) {
+                if (buf[idx] == '1') uval |= bit_to_set;
+                else if (buf[idx] != '0') return false;
+                bit_to_set >>= 1;
+                idx++;
+            }
+        }
+        break;
+    case FieldTypeHex:
+        if (!sscanf(buf,"%llx",&uval) &&
+            !sscanf(buf,"%llX",&uval)) return false;
+        f->uvalue = uval;
+        break;
+    case FieldTypeFloat:
+        if (!sscanf(buf,"%f",&fval)) return false;
+        f->fvalue = fval;
+        break;
+    case FieldTypeBytes:
+        {
+            if (len > f->len) return false;
+            uint64_t idx = 0;
+            uint64_t nibble_idx = len-1;
+            while(buf[idx]) {
+                uint8_t nibble = 0;
+                char c = toupper(buf[idx]);
+                if (c >= '0' && c <= '9') nibble = c-'0';
+                else if (c >= 'A' && c <= 'F') nibble = c-'A';
+                else return false;
+
+                if (nibble_idx & 1) {
+                    f->bytes[idx/2] = 
+                        (f->bytes[idx/2] & 0x0F) | (nibble<<4);
+                } else {
+                    f->bytes[idx/2] = 
+                        (f->bytes[idx/2] & 0xF0) | nibble;
+                }
+                nibble_idx--;
+                idx++;
+            }
+            buf[idx] = 0;
+        }
+        break;
+    }
+    return true;
+}
+
 /* Free a field set and its contained fields. */
 void fieldset_free(ProtoViewFieldSet *fs) {
     for (uint32_t j = 0; j < fs->numfields; j++)
