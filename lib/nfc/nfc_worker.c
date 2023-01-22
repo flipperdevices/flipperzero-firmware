@@ -816,7 +816,7 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
                 mf_classic_read_sector(&tx_rx, &dest_data, i);
                 bool old_data_read = mf_classic_is_sector_data_read(src_data, i);
                 bool new_data_read = mf_classic_is_sector_data_read(&dest_data, i);
-                if(false && old_data_read != new_data_read) {
+                if(old_data_read != new_data_read) {
                     FURI_LOG_E(TAG, "Failed to update sector %d", i);
                     write_success = false;
                     break;
