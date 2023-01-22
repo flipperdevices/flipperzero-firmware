@@ -1,5 +1,7 @@
 #include "worker.h"
 
+bool killswitch = false;
+
 int status = 0; //0: idle, 1: running, 2: failure
 
 char* inst = 0;
@@ -17,6 +19,12 @@ uint8_t* bfStack = 0;
 int stackPtr = 0;
 int stackSize = BF_STACK_INITIAL_SIZE;
 int stackSizeReal = 0;
+
+BFApp* wrkrApp = 0;
+
+void killThread() {
+    killswitch = true;
+}
 
 bool validateInstPtr() {
     if(instPtr > instCount || instPtr < 0) {
@@ -49,6 +57,8 @@ int getStatus() {
 }
 
 void initWorker(BFApp* app) {
+    wrkrApp = app;
+
     //rebuild output
     if(wOutput) {
         free(wOutput);
@@ -67,13 +77,13 @@ void initWorker(BFApp* app) {
     stackPtr = 0;
 
     //set instructions
-    inst = app->dataBuffer;
-    instCount = app->dataSize;
+    inst = wrkrApp->dataBuffer;
+    instCount = wrkrApp->dataSize;
     instPtr = 0;
     runOpCount = 0;
 
     //set input
-    wInput = app->inputBuffer;
+    wInput = wrkrApp->inputBuffer;
     wInputPtr = 0;
 
     //set status
@@ -190,11 +200,33 @@ void endLoop() {
     }
 }
 
+static const NotificationSequence led_on = {
+    &message_blue_255,
+    &message_do_not_reset,
+    NULL,
+};
+
+static const NotificationSequence led_off = {
+    &message_green_0,
+    NULL,
+};
+
 void beginWorker() {
     status = 1;
     while(inst[instPtr] != 0x00) {
+        if(runOpCount % 500 == 0) {
+            text_box_set_text(wrkrApp->text_box, workerGetOutput());
+            notification_message(wrkrApp->notifications, &led_on);
+        }
+
         if(status == 2) {
-            return;
+            status = 0;
+            break;
+        }
+        if(killswitch) {
+            status = 0;
+            killswitch = false;
+            break;
         }
         switch(inst[instPtr]) {
         case '>':
@@ -233,9 +265,12 @@ void beginWorker() {
         }
         instPtr++;
         if(!validateInstPtr()) {
-            status = 2;
-            return;
+            status = 0;
+            break;
         }
     }
+
+    notification_message(wrkrApp->notifications, &led_off);
+    text_box_set_text(wrkrApp->text_box, workerGetOutput());
     status = 0;
 }

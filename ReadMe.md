@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL Updated: Fix SubGHz GUI receiver bug
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [Patreon Animation Build Update: ALL, RM Select and RM Select 18+ builds now have a new animation "8 Wonders" By @qqMajikpp](https://www.patreon.com/RogueMaster)
+- Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 
 <a name="release">
 

@@ -27,6 +27,7 @@ static bool bf_dev_process_right(BFDevEnv* devEnv);
 static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event);
 
 BFApp* appDev;
+FuriThread* workerThread;
 
 char bfChars[9] = {'<', '>', '[', ']', '+', '-', '.', ',', 0x00};
 
@@ -78,20 +79,21 @@ static void bf_dev_draw_button(Canvas* canvas, int x, int y, bool selected, cons
     }
 }
 
+void bf_save_changes() {
+    //remove old file
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_simply_remove(storage, furi_string_get_cstr(appDev->BF_file_path));
+
+    //save new file
+    Stream* stream = buffered_file_stream_alloc(storage);
+    buffered_file_stream_open(
+        stream, furi_string_get_cstr(appDev->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
+    stream_write(stream, (const uint8_t*)appDev->dataBuffer, appDev->dataSize);
+    buffered_file_stream_close(stream);
+}
+
 static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
     UNUSED(_model);
-
-    if(execCountdown > 0) {
-        execCountdown--;
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "RUNNING...");
-        if(execCountdown == 0) {
-            initWorker(appDev);
-            beginWorker();
-            text_box_set_text(appDev->text_box, workerGetOutput());
-            scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
-        }
-        return;
-    }
 
     if(saveNotifyCountdown > 0) {
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "SAVED");
@@ -128,7 +130,7 @@ static void bf_dev_draw_callback(Canvas* canvas, void* _model) {
 
     //textbox
     //grossly overcomplicated. not fixing it.
-    canvas_draw_rframe(canvas, 1, 1, 125, 33, 2);
+    canvas_draw_rframe(canvas, 1, 1, 126, 33, 2);
     canvas_set_font(canvas, FontBatteryPercent);
 
     int dbOffset = 0;
@@ -221,7 +223,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
     switch(selectedButton) {
     case 0: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)'+';
+            appDev->dataBuffer[appDev->dataSize] = '+';
             appDev->dataSize++;
         }
         break;
@@ -229,7 +231,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 1: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)'-';
+            appDev->dataBuffer[appDev->dataSize] = '-';
             appDev->dataSize++;
         }
         break;
@@ -237,7 +239,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 2: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)'<';
+            appDev->dataBuffer[appDev->dataSize] = '<';
             appDev->dataSize++;
         }
         break;
@@ -245,7 +247,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 3: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)'>';
+            appDev->dataBuffer[appDev->dataSize] = '>';
             appDev->dataSize++;
         }
         break;
@@ -253,7 +255,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 4: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)'[';
+            appDev->dataBuffer[appDev->dataSize] = '[';
             appDev->dataSize++;
         }
         break;
@@ -261,7 +263,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 5: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)']';
+            appDev->dataBuffer[appDev->dataSize] = ']';
             appDev->dataSize++;
         }
         break;
@@ -269,7 +271,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 6: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)'.';
+            appDev->dataBuffer[appDev->dataSize] = '.';
             appDev->dataSize++;
         }
         break;
@@ -277,7 +279,7 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
 
     case 7: {
         if(appDev->dataSize < BF_INST_BUFFER_SIZE) {
-            appDev->dataBuffer[appDev->dataSize] = (uint32_t)',';
+            appDev->dataBuffer[appDev->dataSize] = ',';
             appDev->dataSize++;
         }
         break;
@@ -292,29 +294,31 @@ static bool bf_dev_process_ok(BFDevEnv* devEnv, InputEvent* event) {
     }
 
     case 9: {
-        //todo: input
         scene_manager_next_scene(appDev->scene_manager, brainfuckSceneSetInput);
         break;
     }
 
     case 10: {
-        execCountdown = 3;
+        if(getStatus() != 0) {
+            killThread();
+            furi_thread_join(workerThread);
+        }
+
+        bf_save_changes();
+
+        initWorker(appDev);
+        text_box_set_focus(appDev->text_box, TextBoxFocusEnd);
+        text_box_set_text(appDev->text_box, workerGetOutput());
+
+        workerThread = furi_thread_alloc_ex("Worker", 2048, (void*)beginWorker, NULL);
+        furi_thread_start(workerThread);
+
+        scene_manager_next_scene(appDev->scene_manager, brainfuckSceneExecEnv);
         break;
     }
 
     case 11: {
-        //remove old file
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        storage_simply_remove(storage, furi_string_get_cstr(appDev->BF_file_path));
-
-        //save new file
-        Stream* stream = buffered_file_stream_alloc(storage);
-        buffered_file_stream_open(
-            stream, furi_string_get_cstr(appDev->BF_file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS);
-        stream_write(stream, (const uint8_t*)appDev->dataBuffer, appDev->dataSize);
-        buffered_file_stream_close(stream);
-
-        //notify
+        bf_save_changes();
         saveNotifyCountdown = 3;
         break;
     }
@@ -339,6 +343,12 @@ static void bf_dev_enter_callback(void* context) {
 
     appDev = devEnv->appDev;
     selectedButton = 0;
+
+    //exit the running thread if required
+    if(getStatus() != 0) {
+        killThread();
+        furi_thread_join(workerThread);
+    }
 
     //clear the bf instruction buffer
     memset(appDev->dataBuffer, 0x00, BF_INST_BUFFER_SIZE * sizeof(char));
@@ -393,6 +403,11 @@ BFDevEnv* bf_dev_env_alloc(BFApp* appDev) {
 }
 
 void bf_dev_env_free(BFDevEnv* devEnv) {
+    if(getStatus() != 0) {
+        killThread();
+        furi_thread_join(workerThread);
+    }
+
     furi_assert(devEnv);
     view_free(devEnv->view);
     free(devEnv);

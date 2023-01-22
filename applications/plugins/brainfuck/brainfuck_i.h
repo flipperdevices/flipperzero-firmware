@@ -36,6 +36,9 @@ typedef unsigned char byte;
 #include <stream/buffered_file_stream.h>
 #include <toolbox/stream/file_stream.h>
 
+#include <notification/notification_messages.h>
+#include <notification/notification_app.h>
+
 #define BF_INST_BUFFER_SIZE 2048
 #define BF_OUTPUT_SIZE 512
 #define BF_STACK_INITIAL_SIZE 128

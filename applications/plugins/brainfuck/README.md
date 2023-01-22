@@ -1,8 +1,8 @@
 # FlipperZeroBrainfuck
 
 Brainfuck interpreter and editor for the F0.  
-Supports text inputs and outputs.
-No protection against infinite loops or syntax errors.
+Supports text inputs and outputs.  
+Blue LED indicates program is running.  
 
 ![Screenshot-20230117-202147](https://user-images.githubusercontent.com/16545187/213004616-8846e897-506e-4510-8012-fd2fe2bbe8a1.png)
 
