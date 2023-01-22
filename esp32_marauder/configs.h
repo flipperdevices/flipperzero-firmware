@@ -15,8 +15,9 @@
   #define USE_SD_MMC_ALTERNATIVE
   
   //#define ESP32_LDDB
+  //#define MARAUDER_DEV_BOARD_PRO
 
-  #define MARAUDER_VERSION "v0.10.0"
+  #define MARAUDER_VERSION "v0.10.1"
 
   //// BUTTON DEFINITIONS
   #ifdef MARAUDER_MINI
@@ -362,6 +363,10 @@
   #ifdef ESP32_LDDB
     #define SD_CS 4
   #endif
+
+  #ifdef MARAUDER_DEV_BOARD_PRO
+    #define SD_CS 4
+  #endif
   //// END SD DEFINITIONS
 
   //// SCREEN STUFF
@@ -412,9 +417,11 @@
   #endif
   //// END SCREEN STUFF
 
-  //// NEOPIXEL STUFF
-  #ifdef ESP32_LDDB
+  //// NEOPIXEL STUFF  
+  #if defined(ESP32_LDDB)
     #define PIN 17
+  #elif defined(MARAUDER_DEV_BOARD_PRO)
+    #define PIN 16
   #else
     #define PIN 25
   #endif
