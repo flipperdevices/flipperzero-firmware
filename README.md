@@ -1,5 +1,7 @@
 # Flipper Air Mouse
 
+[![FAP Factory](https://fap.playmean.xyz/api/v1/ginkage/FlippAirMouse/badge)](https://fap.playmean.xyz/ginkage/FlippAirMouse)
+
 ## Brief
 
 > "You can turn anything into an air mouse if you're brave enough"
