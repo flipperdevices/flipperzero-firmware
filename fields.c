@@ -123,6 +123,7 @@ bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
                 bit_to_set >>= 1;
                 idx++;
             }
+            f->uvalue = uval;
         }
         break;
     case FieldTypeHex:
