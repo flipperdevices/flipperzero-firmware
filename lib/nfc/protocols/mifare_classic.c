@@ -412,7 +412,7 @@ bool mf_classic_block_to_value(int32_t* value, uint8_t* addr, const uint8_t* blo
 
     bool val_checks =
         ((v == v1) && (v == ~v_inv) && (block[12] == (~block[13] & 0xFF)) &&
-         (block[14] == (~block[15] & 0xFF)));
+         (block[14] == (~block[15] & 0xFF)) && (block[12] == block[14])));
     if(value) {
         *value = (int32_t)v;
     }
