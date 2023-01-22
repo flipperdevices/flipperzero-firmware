@@ -189,9 +189,9 @@ static void subghz_view_receiver_draw_frame(Canvas* canvas, uint16_t idx, bool s
 static void subghz_view_rssi_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     for(uint8_t i = 1; i < model->u_rssi; i++) {
         if(i % 5) {
+            canvas_draw_dot(canvas, 46 + i, 50);
+            canvas_draw_dot(canvas, 47 + i, 51);
             canvas_draw_dot(canvas, 46 + i, 52);
-            canvas_draw_dot(canvas, 47 + i, 53);
-            canvas_draw_dot(canvas, 46 + i, 54);
         }
     }
 }
@@ -202,7 +202,6 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     canvas_set_font(canvas, FontSecondary);
 
     elements_button_left(canvas, "Config");
-    subghz_view_rssi_draw(canvas, model);
 
     bool scrollbar = model->history_item > 4;
     FuriString* str_buff;
@@ -234,7 +233,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
     if(model->history_item == 0) {
         canvas_draw_icon(canvas, 0, 0, &I_Scanning_123x52);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 63, 46, "Scanning...");
+        canvas_draw_str(canvas, 63, 44, "Scanning...");
         canvas_set_font(canvas, FontSecondary);
     }
 
@@ -244,9 +243,9 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         canvas_draw_str(canvas, 74, 62, "Locked");
         break;
     case SubGhzViewReceiverBarShowToUnlockPress:
-        canvas_draw_str(canvas, 44, 64, furi_string_get_cstr(model->frequency_str));
-        canvas_draw_str(canvas, 79, 64, furi_string_get_cstr(model->preset_str));
-        canvas_draw_str(canvas, 96, 64, furi_string_get_cstr(model->history_stat_str));
+        canvas_draw_str(canvas, 44, 62, furi_string_get_cstr(model->frequency_str));
+        canvas_draw_str(canvas, 79, 62, furi_string_get_cstr(model->preset_str));
+        canvas_draw_str(canvas, 96, 62, furi_string_get_cstr(model->history_stat_str));
         canvas_set_font(canvas, FontSecondary);
         elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
         elements_multiline_text(canvas, 65, 26, "To unlock\npress:");
@@ -258,14 +257,16 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         break;
     case SubGhzViewReceiverBarShowUnlock:
         canvas_draw_icon(canvas, 64, 55, &I_Unlock_7x8);
-        canvas_draw_str(canvas, 74, 64, "Unlocked");
+        canvas_draw_str(canvas, 74, 62, "Unlocked");
         break;
     default:
-        canvas_draw_str(canvas, 44, 64, furi_string_get_cstr(model->frequency_str));
-        canvas_draw_str(canvas, 79, 64, furi_string_get_cstr(model->preset_str));
-        canvas_draw_str(canvas, 96, 64, furi_string_get_cstr(model->history_stat_str));
+        canvas_draw_str(canvas, 44, 62, furi_string_get_cstr(model->frequency_str));
+        canvas_draw_str(canvas, 79, 62, furi_string_get_cstr(model->preset_str));
+        canvas_draw_str(canvas, 96, 62, furi_string_get_cstr(model->history_stat_str));
         break;
     }
+
+    subghz_view_rssi_draw(canvas, model);
 }
 
 static void subghz_view_receiver_timer_callback(void* context) {

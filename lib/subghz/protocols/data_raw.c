@@ -9,8 +9,10 @@
 
 #define TAG "SubGhzProtocolDataRAW"
 
+//change very carefully, RAM ends at the most inopportune moment
 #define DATA_RAW_BUF_RAW_SIZE 2048
-#define DATA_RAW_BUF_DATA_SIZE 1024
+#define DATA_RAW_BUF_DATA_SIZE 512
+
 #define DATA_RAW_THRESHOLD_RSSI -85.0f
 #define DATA_RAW_SEARCH_CLASSES 10
 #define DATA_RAW_TE_MIN_COUNT 40
@@ -28,7 +30,6 @@ typedef enum {
     DataRAWDecoderStepReset = 0,
     DataRAWDecoderStepWrite,
     DataRAWDecoderStepBufFull,
-    // DataRAWDecoderStepCheckDuration,
 } DataRAWDecoderStep;
 
 struct SubGhzProtocolDecoderDataRAW {
@@ -101,9 +102,11 @@ void* subghz_protocol_encoder_data_raw_alloc(SubGhzEnvironment* environment) {
     instance->generic.protocol_name = instance->base.protocol->name;
 
     instance->encoder.repeat = 10;
-    instance->encoder.size_upload = DATA_RAW_BUF_DATA_SIZE;
+    instance->encoder.size_upload = DATA_RAW_BUF_DATA_SIZE * 5;
+    printf("Free heap size alloc: %zu\r\n", memmgr_get_free_heap());
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->data = malloc(instance->encoder.size_upload * sizeof(uint8_t));
+    printf("Free heap size alloc: %zu\r\n", memmgr_get_free_heap());
     instance->encoder.is_running = false;
     return instance;
 }
@@ -111,6 +114,7 @@ void* subghz_protocol_encoder_data_raw_alloc(SubGhzEnvironment* environment) {
 void subghz_protocol_encoder_data_raw_free(void* context) {
     furi_assert(context);
     SubGhzProtocolEncoderDataRAW* instance = context;
+    printf("Free heap size: %zu\r\n", memmgr_get_free_heap());
     free(instance->encoder.upload);
     free(instance->data);
     free(instance);
@@ -123,6 +127,7 @@ void subghz_protocol_encoder_data_raw_free(void* context) {
  */
 static bool subghz_protocol_encoder_data_raw_get_upload(SubGhzProtocolEncoderDataRAW* instance) {
     furi_assert(instance);
+    FURI_LOG_E("instance->encoder.size_upload", "%d", instance->encoder.size_upload);
     instance->encoder.size_upload = subghz_protocol_blocks_get_upload_from_bit_array(
         instance->data,
         instance->generic.data_count_bit,
@@ -130,6 +135,13 @@ static bool subghz_protocol_encoder_data_raw_get_upload(SubGhzProtocolEncoderDat
         instance->encoder.size_upload,
         instance->te,
         SubGhzProtocolBlockAlignBitRight);
+
+    printf(
+        "Free heap size subghz_protocol_encoder_data_raw_get_upload : %zu\r\n",
+        memmgr_get_free_heap());
+    FURI_LOG_E("instance->generic.data_count_bit", "%d", instance->generic.data_count_bit);
+    FURI_LOG_E("instance->encoder.size_upload", "%d", instance->encoder.size_upload);
+    furi_check(instance->encoder.size_upload <= DATA_RAW_BUF_DATA_SIZE * 5);
     return true;
 }
 
@@ -252,15 +264,15 @@ static bool
     } classes[DATA_RAW_SEARCH_CLASSES];
 
     struct {
-        uint32_t bit_ind;
-        uint16_t bit_count;
+        uint32_t data;
+        uint16_t count;
     } ind_new_data[DATA_RAW_MAX_FOUND_GAP_COUNT];
 
     size_t ind = 0;
     uint16_t ind_new_data_index = 0;
 
     memset(classes, 0x00, sizeof(classes));
-    memset(classes, 0x00, sizeof(ind_new_data));
+    memset(ind_new_data, 0x00, sizeof(ind_new_data));
 
     if(instance->data_raw_ind < 512) {
         ind =
@@ -269,6 +281,7 @@ static bool
     } else {
         ind = 512;
     }
+
     //sort the durations to find the shortest correlated interval
     for(size_t i = 0; i < ind; i++) {
         for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
@@ -278,7 +291,7 @@ static bool
                 break;
             } else if(
                 DURATION_DIFF(abs(instance->data_raw[i]), classes[k].data) <
-                (classes[k].data / 5)) { //if the test value does not differ by more than 25%
+                (classes[k].data / 4)) { //if the test value does not differ by more than 20%
                 classes[k].data = (classes[k].data + abs(instance->data_raw[i])) /
                                   2; //adding and averaging values
                 classes[k].count++;
@@ -297,69 +310,105 @@ static bool
 
     bool te_ok = false;
     uint16_t gap_ind = 0;
+    uint16_t gap_delta = 0;
     uint32_t gap = 0;
     int data_temp = 0;
 
-    for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
-        if((classes[k].count > DATA_RAW_TE_MIN_COUNT) && (classes[k].data < instance->te)) {
-            instance->te = classes[k].data;
-            te_ok = true;
-        } else if((classes[k].count > 2) && (classes[k].data > gap)) {
-            gap = classes[k].data;
+    //sort by number of occurrences
+    bool swap = true;
+    while(swap) {
+        swap = false;
+        for(size_t i = 1; i < DATA_RAW_SEARCH_CLASSES; i++) {
+            if(classes[i].count > classes[i - 1].count) {
+                uint32_t data = classes[i - 1].data;
+                uint32_t count = classes[i - 1].count;
+                classes[i - 1].data = classes[i].data;
+                classes[i - 1].count = classes[i].count;
+                classes[i].data = data;
+                classes[i].count = count;
+                swap = true;
+            }
         }
     }
+
+    for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
+        FURI_LOG_W("Class", "%d %d %ld", k, classes[k].count, classes[k].data);
+    }
+
+    if((classes[0].count > DATA_RAW_TE_MIN_COUNT) && (classes[1].count == 0)) {
+        //adopted only the preamble
+        instance->te = classes[0].data;
+        te_ok = true;
+        gap = 0; //gap no
+    } else {
+        //take the 2 most common durations
+        //check that there are enough
+        if((classes[0].count < DATA_RAW_TE_MIN_COUNT) ||
+           (classes[1].count < DATA_RAW_TE_MIN_COUNT))
+            return false;
+        //arrange the first 2 date values ??in ascending order
+        if(classes[0].data > classes[1].data) {
+            uint32_t data = classes[1].data;
+            classes[0].data = classes[1].data;
+            classes[1].data = data;
+        }
+
+        //determine the value to be corrected
+        for(uint8_t k = 1; k < 5; k++) {
+            FURI_LOG_I("-K-", " %f ", (double)((float)classes[1].data / (classes[0].data / k)));
+            float delta = ((float)classes[1].data / (classes[0].data / k)) -
+                          (classes[1].data / (classes[0].data / k));
+            if((delta < 0.25) || (delta > 0.75)) {
+                instance->te = classes[0].data / k;
+                FURI_LOG_I("K", " %d ", k);
+                te_ok = true;
+                break;
+            }
+        }
+
+        //looking for a gap
+        for(size_t k = 2; k < DATA_RAW_SEARCH_CLASSES; k++) {
+            if((classes[k].count > 2) && (classes[k].data > gap)) {
+                gap = classes[k].data;
+                gap_delta = gap / 5;
+            }
+        }
+
+        if((gap / instance->te) < 10) {
+            gap = 0; //check that our signal has a gap greater than 10*TE
+        } else {
+            //looking for the last occurrence of gap
+            ind = instance->data_raw_ind - 1;
+            while((ind > 0) && (DURATION_DIFF(abs(instance->data_raw[ind]), gap) > gap_delta)) {
+                ind--;
+            }
+            gap_ind = ind;
+        }
+    }
+
+    // for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
+    //     //find the 2 most common durations
+    //     if(classes[k].count > ind_new_data[0].count) {
+    //         ind_new_data[1].data = ind_new_data[0].data;
+    //         ind_new_data[1].count = ind_new_data[0].count;
+    //         ind_new_data[0].data = classes[k].data;
+    //         ind_new_data[0].count = classes[k].count;
+    //     }
+    //     //find the longest duration
+    //     if((classes[k].count > 2) && (classes[k].data > gap)) {
+    //         gap = classes[k].data;
+    //         gap_delta = gap / 5;
+    //     }
+    // }
+
+    // for(size_t k = 0; k < DATA_RAW_MAX_FOUND_GAP_COUNT; k++) {
+    //     FURI_LOG_E("ind_new_data", "%d %d %ld", k, ind_new_data[k].count, ind_new_data[k].data);
+    // }
 
     if(!te_ok) {
         //did not find the minimum TE satisfying the condition
         return false;
     }
-
-    if((gap / instance->te) < 10) {
-        gap = 0; //check that our signal has a gap greater than 10*TE
-    } else {
-        //looking for the last occurrence of gap
-        ind = instance->data_raw_ind - 1;
-        while((ind > 0) && (DURATION_DIFF(abs(instance->data_raw[ind]), gap) > (gap >> 2))) {
-            ind--;
-        }
-        gap_ind = ind;
-    }
-
-    // FURI_LOG_I("te", " %ld ", instance->te);
-    // FURI_LOG_I("gap", " %ld ", gap);
-    // FURI_LOG_I("gap_ind", " %d ", gap_ind);
-    // int data = (int)(round((float)(instance->data_raw[gap_ind]) / instance->te));
-    // FURI_LOG_W("gap/ind", " %d ", data);
-
-    // if(te_ok) {
-    //     for(size_t i = gap_ind; i < instance->data_raw_ind - 1; i++) {
-    //         int data_temp = (int)(round((float)(instance->data_raw[i]) / instance->te));
-    //         //printf("%d  ", data_temp);
-
-    //         for(size_t i = 0; i < abs(data_temp); i++) {
-    //             if(data_temp > 0) {
-    //                 subghz_protocol_blocks_set_bit_array(
-    //                     true, instance->data, ind++, DATA_RAW_BUF_DATA_SIZE);
-    //             } else {
-    //                 subghz_protocol_blocks_set_bit_array(
-    //                     false, instance->data, ind++, DATA_RAW_BUF_DATA_SIZE);
-    //             }
-    //         }
-    //         //    // printf("%d  \r\n", ind);
-
-    //         //if we consider that there is a gap, then we divide the signal with respect to this gap
-    //         if(gap !=0) {
-    //             if(DURATION_DIFF(abs(instance->data_raw[i + 1]), gap) < (gap >> 2)) {
-    //                 FURI_LOG_E(
-    //                     "ind", "  %ld %ld %ld ", (instance->data_raw[ind]), gap, (gap >> 2));
-    //                 instance->generic.data_count_bit = ind;
-    //                 FURI_LOG_I("ind", " %d ", ind);
-    //                 if(ind & 0x7) ind = ((ind >> 3) + 1) << 3;
-    //                 FURI_LOG_I("ind", " %d ", ind);
-    //             }
-    //         }
-    //     }
-    //printf("--------------- \r\n");
 
     //if(te_ok) {
 
@@ -388,9 +437,9 @@ static bool
                 }
             }
 
-            if(DURATION_DIFF(abs(instance->data_raw[gap_ind]), gap) < (gap >> 2)) {
-                ind_new_data[ind_new_data_index].bit_ind = ind >> 3;
-                ind_new_data[ind_new_data_index++].bit_count = bit_count;
+            if(DURATION_DIFF(abs(instance->data_raw[gap_ind]), gap) < gap_delta) {
+                ind_new_data[ind_new_data_index].data = ind >> 3;
+                ind_new_data[ind_new_data_index++].count = bit_count;
                 bit_count = 0;
 
                 if(ind_new_data_index == DATA_RAW_MAX_FOUND_GAP_COUNT) break;
@@ -398,21 +447,21 @@ static bool
             }
         } while(gap_ind != 0);
         if(ind_new_data_index != DATA_RAW_MAX_FOUND_GAP_COUNT) {
-            ind_new_data[ind_new_data_index].bit_ind = ind >> 3;
-            ind_new_data[ind_new_data_index++].bit_count = bit_count;
+            ind_new_data[ind_new_data_index].data = ind >> 3;
+            ind_new_data[ind_new_data_index++].count = bit_count;
         }
 
-        printf("-------%d-------- \r\n", ind);
+        printf("-------%d-------- \r\n", (DATA_RAW_BUF_DATA_SIZE * 8) - ind);
 
         //reset the classifier and classify the received data
         memset(classes, 0x00, sizeof(classes));
         for(size_t i = 0; i < ind_new_data_index; i++) {
             for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
                 if(classes[k].count == 0) {
-                    classes[k].data = ind_new_data[i].bit_count;
+                    classes[k].data = ind_new_data[i].count;
                     classes[k].count++;
                     break;
-                } else if(ind_new_data[i].bit_count == classes[k].data) {
+                } else if(ind_new_data[i].count == classes[k].data) {
                     classes[k].count++;
                     break;
                 }
@@ -433,20 +482,18 @@ static bool
         //compare data in chunks with the same number of bits
         if(data_temp == 0) return false;
         for(uint16_t i = 0; i < ind_new_data_index - 1; i++) {
-            if(ind_new_data[i].bit_count == data_temp) {
+            if(ind_new_data[i].count == data_temp) {
                 for(uint16_t y = i + 1; y < ind_new_data_index; y++) {
-                    if(ind_new_data[y].bit_count == data_temp) {
+                    if(ind_new_data[y].count == data_temp) {
                         uint16_t byte_count =
-                            subghz_protocol_data_raw_get_full_byte(ind_new_data[y].bit_count);
+                            subghz_protocol_data_raw_get_full_byte(ind_new_data[y].count);
                         if(memcmp(
-                               instance->data + ind_new_data[i].bit_ind,
-                               instance->data + ind_new_data[y].bit_ind,
+                               instance->data + ind_new_data[i].data,
+                               instance->data + ind_new_data[y].data,
                                byte_count) == 0) {
                             memcpy(
-                                instance->data,
-                                instance->data + ind_new_data[i].bit_ind,
-                                byte_count);
-                            instance->generic.data_count_bit = ind_new_data[i].bit_count;
+                                instance->data, instance->data + ind_new_data[i].data, byte_count);
+                            instance->generic.data_count_bit = ind_new_data[i].count;
                             return true;
                             //i = ind_new_data_index;
                             //break;
@@ -456,20 +503,20 @@ static bool
             }
         }
 
-        // if(ind_new_data_index == 0) return;
-        // ind_new_data_index--;
-        // for(size_t i = (ind / 8) - 1; i < DATA_RAW_BUF_DATA_SIZE; i++) {
-        //     printf("%02x ", instance->data[i]);
-        //     if(ind_new_data[ind_new_data_index].bit_ind == i + 1) {
-        //         printf(
-        //             "\r\n:    %ld , %d   : ",
-        //             ind_new_data[ind_new_data_index].bit_ind,
-        //             ind_new_data[ind_new_data_index].bit_count);
-        //         if(ind_new_data_index != 0) ind_new_data_index--;
-        //     }
-        // }
+        if(ind_new_data_index == 0) return false;
+        ind_new_data_index--;
+        for(size_t i = (ind / 8) - 1; i < DATA_RAW_BUF_DATA_SIZE; i++) {
+            printf("%02x ", instance->data[i]);
+            if(ind_new_data[ind_new_data_index].data == i + 1) {
+                printf(
+                    "\r\n:    %ld , %d   : ",
+                    ind_new_data[ind_new_data_index].data,
+                    ind_new_data[ind_new_data_index].count);
+                if(ind_new_data_index != 0) ind_new_data_index--;
+            }
+        }
 
-        // printf("--------------- \r\n");
+        printf("--------------- \r\n");
 
         // for(size_t i = 0; i < instance->generic.data_count_bit; i++) {
         //     printf("%02x  ", instance->data[i]);
@@ -477,6 +524,62 @@ static bool
 
         // printf("--------------- \r\n");
         // //}
+    } else {
+        FURI_LOG_I("-----", "  ");
+        FURI_LOG_I("-----", "  ");
+        FURI_LOG_I("-----", "  ");
+        FURI_LOG_I("te", " %ld ", instance->te);
+        FURI_LOG_I("gap", " %ld ", gap);
+        FURI_LOG_I("gap_ind", " %d ", gap_ind);
+        int data = (int)(round((float)(instance->data_raw[gap_ind]) / instance->te));
+        FURI_LOG_W("gap/ind", " %d ", data);
+        FURI_LOG_W("instance->data_raw_ind", " %d ", instance->data_raw_ind);
+        ind = 0;
+        for(size_t i = 0; i < instance->data_raw_ind; i++) {
+            int data_temp = (int)(round((float)(instance->data_raw[i]) / instance->te));
+            printf("%d  ", data_temp);
+
+            for(size_t k = 0; k < abs(data_temp); k++) {
+                if(data_temp > 0) {
+                    subghz_protocol_blocks_set_bit_array(
+                        true, instance->data, ind++, DATA_RAW_BUF_DATA_SIZE);
+                } else {
+                    subghz_protocol_blocks_set_bit_array(
+                        false, instance->data, ind++, DATA_RAW_BUF_DATA_SIZE);
+                }
+                //understand. to further reproduce 1024*8 bits, you need 1024*8*8 bytes in the encoder
+                if(ind == DATA_RAW_BUF_DATA_SIZE * 8) {
+                    i = instance->data_raw_ind;
+                    break;
+                }
+            }
+            //printf("%d  \r\n", ind);
+
+            // //if we consider that there is a gap, then we divide the signal with respect to this gap
+            // if(gap != 0) {
+            //     if(DURATION_DIFF(abs(instance->data_raw[i + 1]), gap) < (gap >> 2)) {
+            //         FURI_LOG_E(
+            //             "ind", "  %ld %ld %ld ", (instance->data_raw[ind]), gap, (gap >> 2));
+            //         instance->generic.data_count_bit = ind;
+            //         FURI_LOG_I("ind", " %d ", ind);
+            //         if(ind & 0x7) ind = ((ind >> 3) + 1) << 3;
+            //         FURI_LOG_I("ind", " %d ", ind);
+            //     }
+        }
+
+        printf("--------------- \r\n");
+
+        FURI_LOG_W("ind count_byte", " %d  %d", ind, subghz_protocol_data_raw_get_full_byte(ind));
+        for(size_t i = 0; i < subghz_protocol_data_raw_get_full_byte(ind); i++) {
+            printf("%02x ", instance->data[i]);
+        }
+
+        printf("--------------- \r\n");
+
+        //memcpy(instance->data, instance->data + ind_new_data[i].data, byte_count);
+        instance->generic.data_count_bit = ind;
+
+        return true;
     }
     return false;
 }
