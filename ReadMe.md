@@ -58,6 +58,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [Patreon Animation Build Update](https://www.patreon.com/RogueMaster) Hackz build now has 8 new animations [from TH3WR3NCH](https://github.com/wrenchathome/flip0anims) and 1 new animation [from synthetikspace](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations)
 - [Patreon Animation Build Update: ALL build now has all SCIENCE AND HACKS animations enabled](https://www.patreon.com/RogueMaster)
+- Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
+- Added: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 
