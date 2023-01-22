@@ -7,6 +7,7 @@ Disclaimer: use responsibly, and at your own risk. While in my testing, I've see
 Emulation:
 - Clean up old testing scenes, remove deprecated helpers
 - Reverse track precomputation
+- Does the main timing-sensitive section need to be branchless? (Remove `if`s from the `FURI_CRITICAL...` section of `mag_spoof()`?)
 - Implement/integrate better bitmap than hacky first pass? antirez's better approach (from ProtoView) included at bottom of `helpers/mag_helpers.c`
 - Pursue skunkworks TX improvement ideas listed below
 
