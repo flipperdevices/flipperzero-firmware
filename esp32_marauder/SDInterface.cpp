@@ -97,7 +97,7 @@ void SDInterface::runUpdate() {
         display_obj.tft.setTextColor(TFT_RED);
         display_obj.tft.println(F(text_table2[0]));
       #endif
-      Serial.println(F("Error, update.bin is not a file"));
+      Serial.println(F("Error, could not find \"update.bin\""));
       #ifdef HAS_SCREEN
         display_obj.tft.setTextColor(TFT_WHITE);
       #endif
@@ -111,7 +111,7 @@ void SDInterface::runUpdate() {
       #ifdef HAS_SCREEN
         display_obj.tft.println(F(text_table2[1]));
       #endif
-      Serial.println(F("Try to start update"));
+      Serial.println(F("Starting update over SD. Please wait..."));
       this->performUpdate(updateBin, updateSize);
     }
     else {

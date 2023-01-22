@@ -1,0 +1,2428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>E:\github\ESP32Marauder\PCBs\FlipperZero\WiFi-Devboard-Pro\WiFi-Devboard-Pro.kicad_sch</source>
+    <date>1/2/2023 3:12:02 PM</date>
+    <tool>Eeschema (6.0.8)</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>ESP</title>
+        <company>JustCallMeKoko &amp; trisp3ar</company>
+        <rev>V0.1.0</rev>
+        <date>2022-12-07</date>
+        <source>WiFi-Devboard-Pro.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>1u</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05A105KA5NQNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C1</field>
+        <field name="Description">Cap Ceramic 1uF 25V X5R 10% Pad SMD 0402 85C T/R</field>
+        <field name="Height">0.6</field>
+        <field name="LCSC Part Number">C14445</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05A105KA5NQNC</field>
+        <field name="Mouser Part Number">187-CL05A105KA5NQNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A105KA5NQNC?qs=X6jEic%2FHinDIeFgZnm60Lw%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05A105KA5NQNC" description="Cap Ceramic 1uF 25V X5R 10% Pad SMD 0402 85C T/R"/>
+      <property name="Description" value="Cap Ceramic 1uF 25V X5R 10% Pad SMD 0402 85C T/R"/>
+      <property name="Height" value="0.6"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05A105KA5NQNC"/>
+      <property name="Mouser Part Number" value="187-CL05A105KA5NQNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A105KA5NQNC?qs=X6jEic%2FHinDIeFgZnm60Lw%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05A105KA5NQNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C14445"/>
+      <property name="Comment" value="C1"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>40adbb6d-87aa-405c-ba38-fc70c2bcc5dc</tstamps>
+    </comp>
+    <comp ref="C2">
+      <value>22uF</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.mouser.in/datasheet/2/40/Kyocera_CM__STD__series2_052920-2585758.pdf</datasheet>
+      <fields>
+        <field name="Comment">C2,C5</field>
+        <field name="Description">Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402</field>
+        <field name="Height">0.8</field>
+        <field name="LCSC Part Number">C919306</field>
+        <field name="Manufacturer_Name">Kyocera AVX</field>
+        <field name="Manufacturer_Part_Number">CM05X5R226M06AH080</field>
+        <field name="Mouser Part Number">346-CM05X5R226M6AH80</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Kyocera-AVX/CM05X5R226M06AH080?qs=7MVldsJ5Uaw%2FGnmk7U90nQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CM05X5R226M06AH080" description="Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402"/>
+      <property name="Description" value="Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402"/>
+      <property name="Height" value="0.8"/>
+      <property name="Manufacturer_Name" value="Kyocera AVX"/>
+      <property name="Manufacturer_Part_Number" value="CM05X5R226M06AH080"/>
+      <property name="Mouser Part Number" value="346-CM05X5R226M6AH80"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Kyocera-AVX/CM05X5R226M06AH080?qs=7MVldsJ5Uaw%2FGnmk7U90nQ%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C919306"/>
+      <property name="Comment" value="C2,C5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d0890279-2725-4024-84d8-620ca5b5f28b</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>100n</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C3,C7,C8,C9,C10,C11</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05B104KO5NNNC" description="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Description" value="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05B104KO5NNNC"/>
+      <property name="Mouser Part Number" value="187-CL05B104KO5NNNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05B104KO5NNNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C3,C7,C8,C9,C10,C11"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8cc5bdba-d97c-4d68-9a3d-3bddc120cb57</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>100nF</value>
+      <footprint>0402</footprint>
+      <datasheet>http://www.datasheets360.com/pdf/-5354154806277341459</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CC0402KRX7R7BB104</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cc0402krx7r7bb104/yageo?region=nac</field>
+        <field name="Comment">C4</field>
+        <field name="Description">Cap 100nF 16V 0402 SMD 10% X7R Phycomp 100nF Multilayer Ceramic Capacitor (MLCC) 16 V dc +/-10% X7R dielectric Standard max op. temp. +125C</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">CC0402KRX7R7BB104</field>
+        <field name="Mouser Part Number">603-CC402KRX7R7BB104</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/CC0402KRX7R7BB104?qs=AgBp2OyFlx%252BSOyhfyS7hpw%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CC0402KRX7R7BB104" description="Cap 100nF 16V 0402 SMD 10% X7R Phycomp 100nF Multilayer Ceramic Capacitor (MLCC) 16 V dc +/-10% X7R dielectric Standard max op. temp. +125C"/>
+      <property name="Description" value="Cap 100nF 16V 0402 SMD 10% X7R Phycomp 100nF Multilayer Ceramic Capacitor (MLCC) 16 V dc +/-10% X7R dielectric Standard max op. temp. +125C"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="CC0402KRX7R7BB104"/>
+      <property name="Mouser Part Number" value="603-CC402KRX7R7BB104"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/CC0402KRX7R7BB104?qs=AgBp2OyFlx%252BSOyhfyS7hpw%3D%3D"/>
+      <property name="Arrow Part Number" value="CC0402KRX7R7BB104"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cc0402krx7r7bb104/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C4"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7306dda2-3d96-43f1-8f72-88ad64fc429b</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>22uF</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.mouser.in/datasheet/2/40/Kyocera_CM__STD__series2_052920-2585758.pdf</datasheet>
+      <fields>
+        <field name="Comment">C2,C5</field>
+        <field name="Description">Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402</field>
+        <field name="Height">0.8</field>
+        <field name="LCSC Part Number">C919306</field>
+        <field name="Manufacturer_Name">Kyocera AVX</field>
+        <field name="Manufacturer_Part_Number">CM05X5R226M06AH080</field>
+        <field name="Mouser Part Number">346-CM05X5R226M6AH80</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Kyocera-AVX/CM05X5R226M06AH080?qs=7MVldsJ5Uaw%2FGnmk7U90nQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CM05X5R226M06AH080" description="Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402"/>
+      <property name="Description" value="Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402"/>
+      <property name="Height" value="0.8"/>
+      <property name="Manufacturer_Name" value="Kyocera AVX"/>
+      <property name="Manufacturer_Part_Number" value="CM05X5R226M06AH080"/>
+      <property name="Mouser Part Number" value="346-CM05X5R226M6AH80"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Kyocera-AVX/CM05X5R226M06AH080?qs=7MVldsJ5Uaw%2FGnmk7U90nQ%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C919306"/>
+      <property name="Comment" value="C2,C5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d609f215-7193-4fc9-9a59-352d78285ffb</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>10uF</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2406160.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05A106MQ5NUNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05a106mq5nunc/samsung-electro-mechanics?region=nac</field>
+        <field name="Comment">C6</field>
+        <field name="Description">CAP CER 10UF 6.3V X5R 0402</field>
+        <field name="Height">0.7</field>
+        <field name="LCSC Part Number">C15525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05A106MQ5NUNC</field>
+        <field name="Mouser Part Number">187-CL05A106MQ5NUNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A106MQ5NUNC?qs=X6jEic%2FHinDK8vVLi1zwpw%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05A106MQ5NUNC" description="CAP CER 10UF 6.3V X5R 0402"/>
+      <property name="Description" value="CAP CER 10UF 6.3V X5R 0402"/>
+      <property name="Height" value="0.7"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05A106MQ5NUNC"/>
+      <property name="Mouser Part Number" value="187-CL05A106MQ5NUNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A106MQ5NUNC?qs=X6jEic%2FHinDK8vVLi1zwpw%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05A106MQ5NUNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05a106mq5nunc/samsung-electro-mechanics?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C15525"/>
+      <property name="Comment" value="C6"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>af7dd307-2f93-4a33-8781-443b54c0c8b0</tstamps>
+    </comp>
+    <comp ref="C7">
+      <value>100n</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C3,C7,C8,C9,C10,C11</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05B104KO5NNNC" description="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Description" value="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05B104KO5NNNC"/>
+      <property name="Mouser Part Number" value="187-CL05B104KO5NNNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05B104KO5NNNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C3,C7,C8,C9,C10,C11"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c326f297-9c15-4f6b-9da9-91b9790c451e</tstamps>
+    </comp>
+    <comp ref="C8">
+      <value>100n</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C3,C7,C8,C9,C10,C11</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05B104KO5NNNC" description="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Description" value="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05B104KO5NNNC"/>
+      <property name="Mouser Part Number" value="187-CL05B104KO5NNNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05B104KO5NNNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C3,C7,C8,C9,C10,C11"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>0d82ccd6-e3c2-426c-83d9-a2f7476ba7d5</tstamps>
+    </comp>
+    <comp ref="C9">
+      <value>100n</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C3,C7,C8,C9,C10,C11</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05B104KO5NNNC" description="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Description" value="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05B104KO5NNNC"/>
+      <property name="Mouser Part Number" value="187-CL05B104KO5NNNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05B104KO5NNNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C3,C7,C8,C9,C10,C11"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a96ca40e-b300-41ff-862c-542d3a21e8b5</tstamps>
+    </comp>
+    <comp ref="C10">
+      <value>100n</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C3,C7,C8,C9,C10,C11</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05B104KO5NNNC" description="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Description" value="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05B104KO5NNNC"/>
+      <property name="Mouser Part Number" value="187-CL05B104KO5NNNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05B104KO5NNNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C3,C7,C8,C9,C10,C11"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9ee8c219-8adb-4b43-9abe-06f612204d80</tstamps>
+    </comp>
+    <comp ref="C11">
+      <value>100n</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+        <field name="Comment">C3,C7,C8,C9,C10,C11</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="LCSC Part Number">C1525</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="CL05B104KO5NNNC" description="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Description" value="Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD"/>
+      <property name="Height" value="0.55"/>
+      <property name="Manufacturer_Name" value="Samsung Electro-Mechanics"/>
+      <property name="Manufacturer_Part_Number" value="CL05B104KO5NNNC"/>
+      <property name="Mouser Part Number" value="187-CL05B104KO5NNNC"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D"/>
+      <property name="Arrow Part Number" value="CL05B104KO5NNNC"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C1525"/>
+      <property name="Comment" value="C3,C7,C8,C9,C10,C11"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5497b75c-55bf-439f-8614-477cac66d4dc</tstamps>
+    </comp>
+    <comp ref="H1">
+      <value>MountingHole</value>
+      <fields>
+        <field name="Comment">H1</field>
+      </fields>
+      <libsource lib="Mechanical" part="MountingHole" description="Mounting Hole without connection"/>
+      <property name="Comment" value="H1"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>26d34c7a-663c-44ce-bf5d-9011a0023f0c</tstamps>
+    </comp>
+    <comp ref="IC1">
+      <value>ESP32-WROOM-32E-N4</value>
+      <footprint>SMD-38P,18x25.5x3.1mm</footprint>
+      <datasheet>https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf</datasheet>
+      <fields>
+        <field name="Comment">IC1</field>
+        <field name="Description">RX TXRX MOD WIFI TRACE ANT SMD</field>
+        <field name="Height">3.25</field>
+        <field name="LCSC Part Number">C701341</field>
+        <field name="Manufacturer_Name">Espressif Systems</field>
+        <field name="Manufacturer_Part_Number">ESP32-WROOM-32E-N4</field>
+        <field name="Mouser Part Number">356-ESP32WRM32E132PH</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-WROOM-32E-N4?qs=Li%252BoUPsLEnsPzTWsi%252BRMgQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="ESP32-WROOM-32E-N4" description="RX TXRX MOD WIFI TRACE ANT SMD"/>
+      <property name="Description" value="RX TXRX MOD WIFI TRACE ANT SMD"/>
+      <property name="Height" value="3.25"/>
+      <property name="Manufacturer_Name" value="Espressif Systems"/>
+      <property name="Manufacturer_Part_Number" value="ESP32-WROOM-32E-N4"/>
+      <property name="Mouser Part Number" value="356-ESP32WRM32E132PH"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-WROOM-32E-N4?qs=Li%252BoUPsLEnsPzTWsi%252BRMgQ%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C701341"/>
+      <property name="Comment" value="IC1"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7756c211-5286-4d10-828b-c4ad5bcfbce7</tstamps>
+    </comp>
+    <comp ref="IC2">
+      <value>SI2333CDS-T1-E3</value>
+      <footprint>SOT-23</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">DMP1045U-7</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac</field>
+        <field name="Comment">IC2,IC4,IC5</field>
+        <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
+        <field name="Height">1.2</field>
+        <field name="LCSC Part Number">C144846</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">DMP1045U-7</field>
+        <field name="Mouser Part Number">621-DMP1045U-7</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="DMP1045U-7" description="P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23"/>
+      <property name="Description" value="P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23"/>
+      <property name="Height" value="1.2"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="DMP1045U-7"/>
+      <property name="Mouser Part Number" value="621-DMP1045U-7"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D"/>
+      <property name="Arrow Part Number" value="DMP1045U-7"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C144846"/>
+      <property name="Comment" value="IC2,IC4,IC5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>12e64af1-b300-49f0-ac3b-a02c0ed86eae</tstamps>
+    </comp>
+    <comp ref="IC3">
+      <value>AZ1117H-3.3TRE1</value>
+      <footprint>SOT-223-3</footprint>
+      <datasheet>https://componentsearchengine.com/Datasheets/1/AZ1117H-3.3TRE1.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">AZ1117H-3.3TRE1</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/az1117h-3.3tre1/diodes-incorporated</field>
+        <field name="Comment">IC3</field>
+        <field name="Description">3.3V 1A Pos LDO Regulator SOT-223 DiodesZetex AZ1117H-3.3TRE1, LDO Voltage Regulator, 1A, 3.3 V 1%, maximum of 15 Vin, 3+Tab-Pin SOT-223</field>
+        <field name="Height">1.8</field>
+        <field name="LCSC Part Number">C92517</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">AZ1117H-3.3TRE1</field>
+        <field name="Mouser Part Number">621-AZ1117H-3.3TRE1</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/AZ1117H-3.3TRE1?qs=FKu9oBikfSkGfSKJazTNfQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="AZ1117H-3.3TRE1" description="3.3V 1A Pos LDO Regulator SOT-223 DiodesZetex AZ1117H-3.3TRE1, LDO Voltage Regulator, 1A, 3.3 V 1%, maximum of 15 Vin, 3+Tab-Pin SOT-223"/>
+      <property name="Description" value="3.3V 1A Pos LDO Regulator SOT-223 DiodesZetex AZ1117H-3.3TRE1, LDO Voltage Regulator, 1A, 3.3 V 1%, maximum of 15 Vin, 3+Tab-Pin SOT-223"/>
+      <property name="Height" value="1.8"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="AZ1117H-3.3TRE1"/>
+      <property name="Mouser Part Number" value="621-AZ1117H-3.3TRE1"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/AZ1117H-3.3TRE1?qs=FKu9oBikfSkGfSKJazTNfQ%3D%3D"/>
+      <property name="Arrow Part Number" value="AZ1117H-3.3TRE1"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/az1117h-3.3tre1/diodes-incorporated"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C92517"/>
+      <property name="Comment" value="IC3"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a5cc5237-8cb6-4b5b-ac74-60723428bec5</tstamps>
+    </comp>
+    <comp ref="IC4">
+      <value>SI2333CDS-T1-E3</value>
+      <footprint>SOT-23</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">DMP1045U-7</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac</field>
+        <field name="Comment">IC2,IC4,IC5</field>
+        <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
+        <field name="Height">1.2</field>
+        <field name="LCSC Part Number">C144846</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">DMP1045U-7</field>
+        <field name="Mouser Part Number">621-DMP1045U-7</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="DMP1045U-7" description="P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23"/>
+      <property name="Description" value="P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23"/>
+      <property name="Height" value="1.2"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="DMP1045U-7"/>
+      <property name="Mouser Part Number" value="621-DMP1045U-7"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D"/>
+      <property name="Arrow Part Number" value="DMP1045U-7"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C144846"/>
+      <property name="Comment" value="IC2,IC4,IC5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>619380bb-1036-4309-ae3c-dfbf1727965f</tstamps>
+    </comp>
+    <comp ref="IC5">
+      <value>SI2333CDS-T1-E3</value>
+      <footprint>SOT-23</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">DMP1045U-7</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac</field>
+        <field name="Comment">IC2,IC4,IC5</field>
+        <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
+        <field name="Height">1.2</field>
+        <field name="LCSC Part Number">C144846</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">DMP1045U-7</field>
+        <field name="Mouser Part Number">621-DMP1045U-7</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="DMP1045U-7" description="P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23"/>
+      <property name="Description" value="P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23"/>
+      <property name="Height" value="1.2"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="DMP1045U-7"/>
+      <property name="Mouser Part Number" value="621-DMP1045U-7"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D"/>
+      <property name="Arrow Part Number" value="DMP1045U-7"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C144846"/>
+      <property name="Comment" value="IC2,IC4,IC5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>92132767-5beb-424d-bfe4-5601c811c410</tstamps>
+    </comp>
+    <comp ref="J1">
+      <value>3220-10-0300-00</value>
+      <footprint>322010030000</footprint>
+      <datasheet>http://www.cnctech.us/pdfs/3220-XX-0300-00-TR_.PDF</datasheet>
+      <fields>
+        <field name="Arrow Part Number">3220-10-0300-00</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/3220-10-0300-00/cnc-tech-llc?region=nac</field>
+        <field name="Comment">J1</field>
+        <field name="Description">Conn Shrouded Header (4 Sides) HDR 10 POS 1.27mm Solder ST SMD</field>
+        <field name="Height">5.45</field>
+        <field name="Manufacturer_Name">CNC Tech</field>
+        <field name="Manufacturer_Part_Number">3220-10-0300-00</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="3220-10-0300-00" description="Conn Shrouded Header (4 Sides) HDR 10 POS 1.27mm Solder ST SMD"/>
+      <property name="Description" value="Conn Shrouded Header (4 Sides) HDR 10 POS 1.27mm Solder ST SMD"/>
+      <property name="Height" value="5.45"/>
+      <property name="Manufacturer_Name" value="CNC Tech"/>
+      <property name="Manufacturer_Part_Number" value="3220-10-0300-00"/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Arrow Part Number" value="3220-10-0300-00"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/3220-10-0300-00/cnc-tech-llc?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="Comment" value="J1"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f0aedaf8-4937-4572-9b55-bd8053dfd361</tstamps>
+    </comp>
+    <comp ref="J2">
+      <value>X6511WVS-08H-C60D48R1</value>
+      <footprint>SMD,P=2.54mm(交错脚)</footprint>
+      <fields>
+        <field name="Comment">J2</field>
+        <field name="Description">Gold 250V 3A Brick nogging Square Pins 2.5mm 260 6mm -40~{ 105 1 8 2.54mm Black Brass 1x8P SMD,P=2.54mm() Pin Headers ROHS}</field>
+        <field name="LCSC Part Number">C2883805</field>
+        <field name="Manufacturer_Name">XKB Connectivity</field>
+        <field name="Manufacturer_Part_Number">X6511WVS-08H-C60D48R2</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x08" description="Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Description" value="Gold 250V 3A Brick nogging Square Pins 2.5mm 260 6mm -40~{ 105 1 8 2.54mm Black Brass 1x8P SMD,P=2.54mm() Pin Headers ROHS"/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value="XKB Connectivity"/>
+      <property name="Manufacturer_Part_Number" value="X6511WVS-08H-C60D48R2"/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C2883805"/>
+      <property name="Comment" value="J2"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>deda9295-32a1-4f05-8f75-91c916d877b5</tstamps>
+    </comp>
+    <comp ref="J3">
+      <value>X6511WVS-10H-C60D48R1</value>
+      <footprint>HUSRSP10W66P254_2500X250X850P</footprint>
+      <fields>
+        <field name="Comment">J3</field>
+        <field name="Description">Brick nogging Square Pins 1 10 2.54mm 1x10P SMD,P=2.54mm() Pin Headers ROHS</field>
+        <field name="LCSC Part Number">C2883807</field>
+        <field name="Manufacturer_Name">DEALON</field>
+        <field name="Manufacturer_Part_Number">DZ254S-11-10-48</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x10" description="Generic connector, single row, 01x10, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Description" value="Brick nogging Square Pins 1 10 2.54mm 1x10P SMD,P=2.54mm() Pin Headers ROHS"/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value="DEALON"/>
+      <property name="Manufacturer_Part_Number" value="DZ254S-11-10-48"/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C2883807"/>
+      <property name="Comment" value="J3"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fcf19bfc-528d-4203-b762-ed6134d2203c</tstamps>
+    </comp>
+    <comp ref="J4">
+      <value>Conn_01x11</value>
+      <footprint>SMD,P=2.54mm(交错脚)</footprint>
+      <fields>
+        <field name="Comment">J4,J5</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x11" description="Generic connector, single row, 01x11, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Comment" value="J4,J5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>46b2570d-01f5-4435-97bc-ab401c2278d8</tstamps>
+    </comp>
+    <comp ref="J5">
+      <value>Conn_01x11</value>
+      <footprint>SMD,P=2.54mm(交错脚)</footprint>
+      <fields>
+        <field name="Comment">J4,J5</field>
+      </fields>
+      <libsource lib="Connector_Generic" part="Conn_01x11" description="Generic connector, single row, 01x11, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Comment" value="J4,J5"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f7a03a4d-2cec-4a58-8c55-53b9e06b133e</tstamps>
+    </comp>
+    <comp ref="J6">
+      <value>503398-1892</value>
+      <footprint>SMD</footprint>
+      <datasheet>http://www.molex.com/webdocs/datasheets/pdf/en-us//5033981892_MEMORY_CARD_SOCKET.pdf</datasheet>
+      <fields>
+        <field name="Comment">J6</field>
+        <field name="Description">MicroSD SMT Push-Push 1.28mm height MicroSD SMT Push-Push 1.28mm height</field>
+        <field name="LCSC Part Number">C428492</field>
+        <field name="Manufacturer_Name">Molex</field>
+        <field name="Manufacturer_Part_Number">503398-1892</field>
+        <field name="Mouser Part Number">538-503398-1892</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Molex/503398-1892?qs=b0v8CoHHvSMxV%252BW12iKaSg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="503398-1892" description="MicroSD SMT Push-Push 1.28mm height MicroSD SMT Push-Push 1.28mm height"/>
+      <property name="Description" value="MicroSD SMT Push-Push 1.28mm height MicroSD SMT Push-Push 1.28mm height"/>
+      <property name="Height" value=""/>
+      <property name="Manufacturer_Name" value="Molex"/>
+      <property name="Manufacturer_Part_Number" value="503398-1892"/>
+      <property name="Mouser Part Number" value="538-503398-1892"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Molex/503398-1892?qs=b0v8CoHHvSMxV%252BW12iKaSg%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C428492"/>
+      <property name="Comment" value="J6"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>17f517ac-51e0-4147-b650-9c2b2c8fceaa</tstamps>
+    </comp>
+    <comp ref="LED1">
+      <value>WS2812B-2020</value>
+      <footprint>WS2812B2020</footprint>
+      <datasheet>https://www.alldatasheet.com/datasheet-pdf/pdf/1134522/WORLDSEMI/WS2812B-2020.html</datasheet>
+      <fields>
+        <field name="Comment">LED1</field>
+        <field name="Description">LED; SMD; 2020; RGB; 2x2x0.84mm; 3.75.3V; Lens: transparent; 2kHz</field>
+        <field name="Height">0.84</field>
+        <field name="LCSC Part Number">C965555</field>
+        <field name="Manufacturer_Name">Worldsemi</field>
+        <field name="Manufacturer_Part_Number">WS2812B-2020</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="WS2812B-2020" description="LED; SMD; 2020; RGB; 2x2x0.84mm; 3.75.3V; Lens: transparent; 2kHz"/>
+      <property name="Description" value="LED; SMD; 2020; RGB; 2x2x0.84mm; 3.75.3V; Lens: transparent; 2kHz"/>
+      <property name="Height" value="0.84"/>
+      <property name="Manufacturer_Name" value="Worldsemi"/>
+      <property name="Manufacturer_Part_Number" value="WS2812B-2020"/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C965555"/>
+      <property name="Comment" value="LED1"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>717b536c-10b0-41b2-ac6a-8cd4f58dc279</tstamps>
+    </comp>
+    <comp ref="LED2">
+      <value>TX</value>
+      <footprint>0603</footprint>
+      <datasheet>https://everlighteurope.com/index.php?controller=attachment?id_attachment=5961</datasheet>
+      <fields>
+        <field name="Comment">LED2</field>
+        <field name="Description">Standard LEDs - SMD SMD LED</field>
+        <field name="Height">0.5</field>
+        <field name="LCSC Part Number">C434424</field>
+        <field name="Manufacturer_Name">Everlight</field>
+        <field name="Manufacturer_Part_Number">19-217/Y5C-AP1Q2/3T</field>
+        <field name="Mouser Part Number">638-19217Y5CAP1Q23T</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Everlight/19-217-Y5C-AP1Q2-3T?qs=8cKuZ6Ok2lbUsn%2FBVH2ZdQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="19-217_Y5C-AP1Q2_3T" description="Standard LEDs - SMD SMD LED"/>
+      <property name="Description" value="Standard LEDs - SMD SMD LED"/>
+      <property name="Height" value="0.5"/>
+      <property name="Manufacturer_Name" value="Everlight"/>
+      <property name="Manufacturer_Part_Number" value="19-217/Y5C-AP1Q2/3T"/>
+      <property name="Mouser Part Number" value="638-19217Y5CAP1Q23T"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Everlight/19-217-Y5C-AP1Q2-3T?qs=8cKuZ6Ok2lbUsn%2FBVH2ZdQ%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C434424"/>
+      <property name="Comment" value="LED2"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ec854104-e1e3-4d60-9f8d-d65aaafe1f3c</tstamps>
+    </comp>
+    <comp ref="LED3">
+      <value>RX</value>
+      <footprint>0603</footprint>
+      <datasheet>https://everlighteurope.com/index.php?controller=attachment?id_attachment=5961</datasheet>
+      <fields>
+        <field name="Comment">LED3</field>
+        <field name="Description">Standard LEDs - SMD SMD LED</field>
+        <field name="Height">0.5</field>
+        <field name="LCSC Part Number">C434424</field>
+        <field name="Manufacturer_Name">Everlight</field>
+        <field name="Manufacturer_Part_Number">19-217/Y5C-AP1Q2/3T</field>
+        <field name="Mouser Part Number">638-19217Y5CAP1Q23T</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Everlight/19-217-Y5C-AP1Q2-3T?qs=8cKuZ6Ok2lbUsn%2FBVH2ZdQ%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="19-217_Y5C-AP1Q2_3T" description="Standard LEDs - SMD SMD LED"/>
+      <property name="Description" value="Standard LEDs - SMD SMD LED"/>
+      <property name="Height" value="0.5"/>
+      <property name="Manufacturer_Name" value="Everlight"/>
+      <property name="Manufacturer_Part_Number" value="19-217/Y5C-AP1Q2/3T"/>
+      <property name="Mouser Part Number" value="638-19217Y5CAP1Q23T"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Everlight/19-217-Y5C-AP1Q2-3T?qs=8cKuZ6Ok2lbUsn%2FBVH2ZdQ%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C434424"/>
+      <property name="Comment" value="LED3"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>db81393e-9d7d-4da5-aae6-f8ef7d036f3f</tstamps>
+    </comp>
+    <comp ref="LED4">
+      <value>3V3</value>
+      <footprint>0603</footprint>
+      <datasheet>https://everlighteurope.com/single-color-top-view/3044/east16084ra1.html</datasheet>
+      <fields>
+        <field name="Arrow Part Number">19-217/R6C-AL1M2VY/3T</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/19-217r6c-al1m2vy3t/everlight-electronics?region=nac</field>
+        <field name="Comment">LED4</field>
+        <field name="Description">LED Uni-Color Brilliant Red 632nm T/R</field>
+        <field name="Height">0.5</field>
+        <field name="LCSC Part Number">C84263</field>
+        <field name="Manufacturer_Name">Everlight</field>
+        <field name="Manufacturer_Part_Number">19-217/R6C-AL1M2VY/3T</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="19-217_R6C-AL1M2VY_3T" description="LED Uni-Color Brilliant Red 632nm T/R"/>
+      <property name="Description" value="LED Uni-Color Brilliant Red 632nm T/R"/>
+      <property name="Height" value="0.5"/>
+      <property name="Manufacturer_Name" value="Everlight"/>
+      <property name="Manufacturer_Part_Number" value="19-217/R6C-AL1M2VY/3T"/>
+      <property name="Mouser Part Number" value=""/>
+      <property name="Mouser Price/Stock" value=""/>
+      <property name="Arrow Part Number" value="19-217/R6C-AL1M2VY/3T"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/19-217r6c-al1m2vy3t/everlight-electronics?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C84263"/>
+      <property name="Comment" value="LED4"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c654a4b7-99c8-4cb1-a653-01ae3490e41f</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>10k</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-0710KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-0710kl/yageo?region=europe</field>
+        <field name="Comment">R1,R6</field>
+        <field name="Description">YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60490</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-0710KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-0710KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-0710KL?qs=I1mnnYJTTsxUoNwrUsQExA%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-0710KL" description="YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402"/>
+      <property name="Description" value="YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-0710KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-0710KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-0710KL?qs=I1mnnYJTTsxUoNwrUsQExA%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-0710KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-0710kl/yageo?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60490"/>
+      <property name="Comment" value="R1,R6"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c56ef6a3-fb1c-466e-bd09-0da64fa514b7</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>220</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07220RL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07220rl/yageo?region=nac</field>
+        <field name="Comment">R2</field>
+        <field name="Description">YAGEO (PHYCOMP) - RC0402FR-07220RL - RES, THICK FILM, 220R, 1%, 0.063W, 0402</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C25091</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07220RL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07220RL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07220RL?qs=UOUeRUa%252B8Wkw9iNOZEwgHw%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07220RL" description="YAGEO (PHYCOMP) - RC0402FR-07220RL - RES, THICK FILM, 220R, 1%, 0.063W, 0402"/>
+      <property name="Description" value="YAGEO (PHYCOMP) - RC0402FR-07220RL - RES, THICK FILM, 220R, 1%, 0.063W, 0402"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07220RL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07220RL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07220RL?qs=UOUeRUa%252B8Wkw9iNOZEwgHw%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07220RL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07220rl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C25091"/>
+      <property name="Comment" value="R2"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>61716696-1cfe-44c0-942d-d9126c7bf913</tstamps>
+    </comp>
+    <comp ref="R3">
+      <value>1K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+        <field name="Comment">R3,R4,R5,R13,R14,R15</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C106235</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-071KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-071KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-071KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-071KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C106235"/>
+      <property name="Comment" value="R3,R4,R5,R13,R14,R15"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>0caa6bbe-d103-4a07-900a-14dfcb72cc1b</tstamps>
+    </comp>
+    <comp ref="R4">
+      <value>1K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+        <field name="Comment">R3,R4,R5,R13,R14,R15</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C106235</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-071KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-071KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-071KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-071KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C106235"/>
+      <property name="Comment" value="R3,R4,R5,R13,R14,R15"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>ef58a6fc-042d-4784-bfee-c59b8b796331</tstamps>
+    </comp>
+    <comp ref="R5">
+      <value>1K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+        <field name="Comment">R3,R4,R5,R13,R14,R15</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C106235</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-071KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-071KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-071KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-071KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C106235"/>
+      <property name="Comment" value="R3,R4,R5,R13,R14,R15"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fff9049b-4a63-4738-88ac-bce13f2bd6ba</tstamps>
+    </comp>
+    <comp ref="R6">
+      <value>10k</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-0710KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-0710kl/yageo?region=europe</field>
+        <field name="Comment">R1,R6</field>
+        <field name="Description">YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60490</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-0710KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-0710KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-0710KL?qs=I1mnnYJTTsxUoNwrUsQExA%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-0710KL" description="YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402"/>
+      <property name="Description" value="YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-0710KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-0710KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-0710KL?qs=I1mnnYJTTsxUoNwrUsQExA%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-0710KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-0710kl/yageo?region=europe"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60490"/>
+      <property name="Comment" value="R1,R6"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f59a623c-bec0-4cec-af74-27e3565a9f8a</tstamps>
+    </comp>
+    <comp ref="R7">
+      <value>100K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+        <field name="Comment">R7,R8,R9,R10,R11,R12</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60491</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07100KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07100KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07100KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07100KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07100kl/yageo"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60491"/>
+      <property name="Comment" value="R7,R8,R9,R10,R11,R12"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>7e45edae-6aea-4a3f-b6bd-37e282e1851a</tstamps>
+    </comp>
+    <comp ref="R8">
+      <value>100K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+        <field name="Comment">R7,R8,R9,R10,R11,R12</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60491</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07100KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07100KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07100KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07100KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07100kl/yageo"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60491"/>
+      <property name="Comment" value="R7,R8,R9,R10,R11,R12"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>434b8a81-ef27-4884-a038-c7022455a731</tstamps>
+    </comp>
+    <comp ref="R9">
+      <value>100K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+        <field name="Comment">R7,R8,R9,R10,R11,R12</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60491</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07100KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07100KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07100KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07100KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07100kl/yageo"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60491"/>
+      <property name="Comment" value="R7,R8,R9,R10,R11,R12"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e70859b0-5640-4eb1-b309-a9cceea26974</tstamps>
+    </comp>
+    <comp ref="R10">
+      <value>100K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+        <field name="Comment">R7,R8,R9,R10,R11,R12</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60491</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07100KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07100KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07100KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07100KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07100kl/yageo"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60491"/>
+      <property name="Comment" value="R7,R8,R9,R10,R11,R12"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3d7cf57e-46ad-45b0-8f37-4bcf93c58b86</tstamps>
+    </comp>
+    <comp ref="R11">
+      <value>100K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+        <field name="Comment">R7,R8,R9,R10,R11,R12</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60491</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07100KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07100KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07100KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07100KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07100kl/yageo"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60491"/>
+      <property name="Comment" value="R7,R8,R9,R10,R11,R12"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f825078a-0b67-447d-a4bb-7e5f06e86419</tstamps>
+    </comp>
+    <comp ref="R12">
+      <value>100K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+        <field name="Comment">R7,R8,R9,R10,R11,R12</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C60491</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-07100KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-07100KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-07100KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-07100KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-07100kl/yageo"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C60491"/>
+      <property name="Comment" value="R7,R8,R9,R10,R11,R12"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>51956227-9277-4ca3-a264-ee96fef2edbb</tstamps>
+    </comp>
+    <comp ref="R13">
+      <value>1K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+        <field name="Comment">R3,R4,R5,R13,R14,R15</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C106235</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-071KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-071KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-071KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-071KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C106235"/>
+      <property name="Comment" value="R3,R4,R5,R13,R14,R15"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>32f59975-52fb-45ed-800f-ad6a16bfb7b2</tstamps>
+    </comp>
+    <comp ref="R14">
+      <value>1K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+        <field name="Comment">R3,R4,R5,R13,R14,R15</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C106235</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-071KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-071KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-071KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-071KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C106235"/>
+      <property name="Comment" value="R3,R4,R5,R13,R14,R15"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>02841dce-4e86-4348-a213-f858615339d2</tstamps>
+    </comp>
+    <comp ref="R15">
+      <value>1K</value>
+      <footprint>0402</footprint>
+      <datasheet>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</datasheet>
+      <fields>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+        <field name="Comment">R3,R4,R5,R13,R14,R15</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="LCSC Part Number">C106235</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="RC0402FR-071KL" description="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Description" value="GENERAL PURPOSE CHIP RESISTORS"/>
+      <property name="Height" value="0.4"/>
+      <property name="Manufacturer_Name" value="KEMET"/>
+      <property name="Manufacturer_Part_Number" value="RC0402FR-071KL"/>
+      <property name="Mouser Part Number" value="603-RC0402FR-071KL"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D"/>
+      <property name="Arrow Part Number" value="RC0402FR-071KL"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C106235"/>
+      <property name="Comment" value="R3,R4,R5,R13,R14,R15"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d0c7388b-f7f6-4d18-bc0c-c03547013830</tstamps>
+    </comp>
+    <comp ref="S1">
+      <value>SKRPABE010</value>
+      <footprint>SMD</footprint>
+      <datasheet>https://datasheet.lcsc.com/szlcsc/ALPS-Electric-SKRPABE010_C115360.pdf</datasheet>
+      <fields>
+        <field name="Comment">S1,S2</field>
+        <field name="Description">Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R</field>
+        <field name="Height">2.5</field>
+        <field name="LCSC Part Number">C115360</field>
+        <field name="Manufacturer_Name">ALPS Electric</field>
+        <field name="Manufacturer_Part_Number">SKRPABE010</field>
+        <field name="Mouser Part Number">688-SKRPAB</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Alps-Alpine/SKRPABE010?qs=m0BA540hBPe1GpcSf%2FZ5Yw%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="SKRPABE010" description="Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R"/>
+      <property name="Description" value="Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R"/>
+      <property name="Height" value="2.5"/>
+      <property name="Manufacturer_Name" value="ALPS Electric"/>
+      <property name="Manufacturer_Part_Number" value="SKRPABE010"/>
+      <property name="Mouser Part Number" value="688-SKRPAB"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Alps-Alpine/SKRPABE010?qs=m0BA540hBPe1GpcSf%2FZ5Yw%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C115360"/>
+      <property name="Comment" value="S1,S2"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f9b51342-dbdf-4188-bfea-3a3f82fcc6ca</tstamps>
+    </comp>
+    <comp ref="S2">
+      <value>SKRPABE010</value>
+      <footprint>SMD</footprint>
+      <datasheet>https://datasheet.lcsc.com/szlcsc/ALPS-Electric-SKRPABE010_C115360.pdf</datasheet>
+      <fields>
+        <field name="Comment">S1,S2</field>
+        <field name="Description">Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R</field>
+        <field name="Height">2.5</field>
+        <field name="LCSC Part Number">C115360</field>
+        <field name="Manufacturer_Name">ALPS Electric</field>
+        <field name="Manufacturer_Part_Number">SKRPABE010</field>
+        <field name="Mouser Part Number">688-SKRPAB</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Alps-Alpine/SKRPABE010?qs=m0BA540hBPe1GpcSf%2FZ5Yw%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="SKRPABE010" description="Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R"/>
+      <property name="Description" value="Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R"/>
+      <property name="Height" value="2.5"/>
+      <property name="Manufacturer_Name" value="ALPS Electric"/>
+      <property name="Manufacturer_Part_Number" value="SKRPABE010"/>
+      <property name="Mouser Part Number" value="688-SKRPAB"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Alps-Alpine/SKRPABE010?qs=m0BA540hBPe1GpcSf%2FZ5Yw%3D%3D"/>
+      <property name="Arrow Part Number" value=""/>
+      <property name="Arrow Price/Stock" value=""/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C115360"/>
+      <property name="Comment" value="S1,S2"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a648c944-fb2d-43fa-9b33-c4fa58f57a79</tstamps>
+    </comp>
+    <comp ref="U1">
+      <value>MMDT2907A-7-F</value>
+      <footprint>SOT65P210X110-6N</footprint>
+      <datasheet>https://www.digikey.com/product-detail/en/diodes-incorporated/MMDT2907A-7-F/MMDT2907A-FDICT-ND/755507</datasheet>
+      <fields>
+        <field name="Arrow Part Number">MMDT2907A-7-F</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated</field>
+        <field name="Comment">U1,U2,U3</field>
+        <field name="Description">Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363</field>
+        <field name="Height">1.1</field>
+        <field name="LCSC Part Number">C460232</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">MMDT2907A-7-F</field>
+        <field name="Mouser Part Number">621-MMDT2907A-F</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="MMDT2907A-7-F" description="Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363"/>
+      <property name="Description" value="Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363"/>
+      <property name="Height" value="1.1"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="MMDT2907A-7-F"/>
+      <property name="Mouser Part Number" value="621-MMDT2907A-F"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D"/>
+      <property name="Arrow Part Number" value="MMDT2907A-7-F"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C460232"/>
+      <property name="Comment" value="U1,U2,U3"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>a24644c1-faf2-48cb-a6e5-428bf8b72923</tstamps>
+    </comp>
+    <comp ref="U2">
+      <value>MMDT2907A-7-F</value>
+      <footprint>SOT65P210X110-6N</footprint>
+      <datasheet>https://www.digikey.com/product-detail/en/diodes-incorporated/MMDT2907A-7-F/MMDT2907A-FDICT-ND/755507</datasheet>
+      <fields>
+        <field name="Arrow Part Number">MMDT2907A-7-F</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated</field>
+        <field name="Comment">U1,U2,U3</field>
+        <field name="Description">Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363</field>
+        <field name="Height">1.1</field>
+        <field name="LCSC Part Number">C460232</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">MMDT2907A-7-F</field>
+        <field name="Mouser Part Number">621-MMDT2907A-F</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="MMDT2907A-7-F" description="Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363"/>
+      <property name="Description" value="Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363"/>
+      <property name="Height" value="1.1"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="MMDT2907A-7-F"/>
+      <property name="Mouser Part Number" value="621-MMDT2907A-F"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D"/>
+      <property name="Arrow Part Number" value="MMDT2907A-7-F"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C460232"/>
+      <property name="Comment" value="U1,U2,U3"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>475e7c08-51ef-497c-a412-7276938bb8ea</tstamps>
+    </comp>
+    <comp ref="U3">
+      <value>MMDT2907A-7-F</value>
+      <footprint>SOT65P210X110-6N</footprint>
+      <datasheet>https://www.digikey.com/product-detail/en/diodes-incorporated/MMDT2907A-7-F/MMDT2907A-FDICT-ND/755507</datasheet>
+      <fields>
+        <field name="Arrow Part Number">MMDT2907A-7-F</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated</field>
+        <field name="Comment">U1,U2,U3</field>
+        <field name="Description">Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363</field>
+        <field name="Height">1.1</field>
+        <field name="LCSC Part Number">C460232</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">MMDT2907A-7-F</field>
+        <field name="Mouser Part Number">621-MMDT2907A-F</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D</field>
+      </fields>
+      <libsource lib="SamacSys_Parts" part="MMDT2907A-7-F" description="Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363"/>
+      <property name="Description" value="Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363"/>
+      <property name="Height" value="1.1"/>
+      <property name="Manufacturer_Name" value="Diodes Inc."/>
+      <property name="Manufacturer_Part_Number" value="MMDT2907A-7-F"/>
+      <property name="Mouser Part Number" value="621-MMDT2907A-F"/>
+      <property name="Mouser Price/Stock" value="https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D"/>
+      <property name="Arrow Part Number" value="MMDT2907A-7-F"/>
+      <property name="Arrow Price/Stock" value="https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated"/>
+      <property name="Mouser Testing Part Number" value=""/>
+      <property name="Mouser Testing Price/Stock" value=""/>
+      <property name="LCSC Part Number" value="C460232"/>
+      <property name="Comment" value="U1,U2,U3"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="File: WiFi-Devboard-Pro.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d6d7c070-4b21-43f9-9c3f-ff8fca33c900</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector_Generic" part="Conn_01x08">
+      <description>Generic connector, single row, 01x08, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x08</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x10">
+      <description>Generic connector, single row, 01x10, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x10</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+        <pin num="9" name="Pin_9" type="passive"/>
+        <pin num="10" name="Pin_10" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Connector_Generic" part="Conn_01x11">
+      <description>Generic connector, single row, 01x11, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x11</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+        <pin num="7" name="Pin_7" type="passive"/>
+        <pin num="8" name="Pin_8" type="passive"/>
+        <pin num="9" name="Pin_9" type="passive"/>
+        <pin num="10" name="Pin_10" type="passive"/>
+        <pin num="11" name="Pin_11" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Mechanical" part="MountingHole">
+      <description>Mounting Hole without connection</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>MountingHole*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">H</field>
+        <field name="Value">MountingHole</field>
+        <field name="Datasheet">~</field>
+      </fields>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="19-217_R6C-AL1M2VY_3T">
+      <description>LED Uni-Color Brilliant Red 632nm T/R</description>
+      <docs>https://everlighteurope.com/single-color-top-view/3044/east16084ra1.html</docs>
+      <fields>
+        <field name="Reference">LED</field>
+        <field name="Value">19-217_R6C-AL1M2VY_3T</field>
+        <field name="Footprint">19217R6CAL1M2VY3T</field>
+        <field name="Datasheet">https://everlighteurope.com/single-color-top-view/3044/east16084ra1.html</field>
+        <field name="Description">LED Uni-Color Brilliant Red 632nm T/R</field>
+        <field name="Height">0.5</field>
+        <field name="Manufacturer_Name">Everlight</field>
+        <field name="Manufacturer_Part_Number">19-217/R6C-AL1M2VY/3T</field>
+        <field name="Arrow Part Number">19-217/R6C-AL1M2VY/3T</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/19-217r6c-al1m2vy3t/everlight-electronics?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="19-217_Y5C-AP1Q2_3T">
+      <description>Standard LEDs - SMD SMD LED</description>
+      <docs>https://everlighteurope.com/index.php?controller=attachment?id_attachment=5961</docs>
+      <fields>
+        <field name="Reference">LED</field>
+        <field name="Value">19-217_Y5C-AP1Q2_3T</field>
+        <field name="Footprint">LEDC1608X50N</field>
+        <field name="Datasheet">https://everlighteurope.com/index.php?controller=attachment?id_attachment=5961</field>
+        <field name="Description">Standard LEDs - SMD SMD LED</field>
+        <field name="Height">0.5</field>
+        <field name="Manufacturer_Name">Everlight</field>
+        <field name="Manufacturer_Part_Number">19-217/Y5C-AP1Q2/3T</field>
+        <field name="Mouser Part Number">638-19217Y5CAP1Q23T</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Everlight/19-217-Y5C-AP1Q2-3T?qs=8cKuZ6Ok2lbUsn%2FBVH2ZdQ%3D%3D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="3220-10-0300-00">
+      <description>Conn Shrouded Header (4 Sides) HDR 10 POS 1.27mm Solder ST SMD</description>
+      <docs>http://www.cnctech.us/pdfs/3220-XX-0300-00-TR_.PDF</docs>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">3220-10-0300-00</field>
+        <field name="Footprint">322010030000</field>
+        <field name="Datasheet">http://www.cnctech.us/pdfs/3220-XX-0300-00-TR_.PDF</field>
+        <field name="Description">Conn Shrouded Header (4 Sides) HDR 10 POS 1.27mm Solder ST SMD</field>
+        <field name="Height">5.45</field>
+        <field name="Manufacturer_Name">CNC Tech</field>
+        <field name="Manufacturer_Part_Number">3220-10-0300-00</field>
+        <field name="Arrow Part Number">3220-10-0300-00</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/3220-10-0300-00/cnc-tech-llc?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="4" type="passive"/>
+        <pin num="5" name="5" type="passive"/>
+        <pin num="6" name="6" type="passive"/>
+        <pin num="7" name="7" type="passive"/>
+        <pin num="8" name="8" type="passive"/>
+        <pin num="9" name="9" type="passive"/>
+        <pin num="10" name="10" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="503398-1892">
+      <description>MicroSD SMT Push-Push 1.28mm height MicroSD SMT Push-Push 1.28mm height</description>
+      <docs>http://www.molex.com/webdocs/datasheets/pdf/en-us//5033981892_MEMORY_CARD_SOCKET.pdf</docs>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">503398-1892</field>
+        <field name="Footprint">503398-1892</field>
+        <field name="Datasheet">http://www.molex.com/webdocs/datasheets/pdf/en-us//5033981892_MEMORY_CARD_SOCKET.pdf</field>
+        <field name="Description">MicroSD SMT Push-Push 1.28mm height MicroSD SMT Push-Push 1.28mm height</field>
+        <field name="Manufacturer_Name">Molex</field>
+        <field name="Manufacturer_Part_Number">503398-1892</field>
+        <field name="Mouser Part Number">538-503398-1892</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Molex/503398-1892?qs=b0v8CoHHvSMxV%252BW12iKaSg%3D%3D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="DAT2" type="passive"/>
+        <pin num="2" name="CD/DAT3" type="passive"/>
+        <pin num="3" name="CMD" type="passive"/>
+        <pin num="4" name="VDD" type="passive"/>
+        <pin num="5" name="CLK" type="passive"/>
+        <pin num="6" name="VSS" type="passive"/>
+        <pin num="7" name="DAT0" type="passive"/>
+        <pin num="8" name="DAT1" type="passive"/>
+        <pin num="9" name="DETECT_LEVER" type="passive"/>
+        <pin num="10" name="DETECT_SWITCH" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="AZ1117H-3.3TRE1">
+      <description>3.3V 1A Pos LDO Regulator SOT-223 DiodesZetex AZ1117H-3.3TRE1, LDO Voltage Regulator, 1A, 3.3 V 1%, maximum of 15 Vin, 3+Tab-Pin SOT-223</description>
+      <docs>https://componentsearchengine.com/Datasheets/1/AZ1117H-3.3TRE1.pdf</docs>
+      <fields>
+        <field name="Reference">IC</field>
+        <field name="Value">AZ1117H-3.3TRE1</field>
+        <field name="Footprint">SOT230P700X180-4N</field>
+        <field name="Datasheet">https://componentsearchengine.com/Datasheets/1/AZ1117H-3.3TRE1.pdf</field>
+        <field name="Description">3.3V 1A Pos LDO Regulator SOT-223 DiodesZetex AZ1117H-3.3TRE1, LDO Voltage Regulator, 1A, 3.3 V 1%, maximum of 15 Vin, 3+Tab-Pin SOT-223</field>
+        <field name="Height">1.8</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">AZ1117H-3.3TRE1</field>
+        <field name="Mouser Part Number">621-AZ1117H-3.3TRE1</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/AZ1117H-3.3TRE1?qs=FKu9oBikfSkGfSKJazTNfQ%3D%3D</field>
+        <field name="Arrow Part Number">AZ1117H-3.3TRE1</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/az1117h-3.3tre1/diodes-incorporated</field>
+      </fields>
+      <pins>
+        <pin num="1" name="ADJ/GND" type="passive"/>
+        <pin num="2" name="OUTPUT" type="passive"/>
+        <pin num="3" name="INPUT" type="passive"/>
+        <pin num="4" name="VOUT" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="CC0402KRX7R7BB104">
+      <description>Cap 100nF 16V 0402 SMD 10% X7R Phycomp 100nF Multilayer Ceramic Capacitor (MLCC) 16 V dc +/-10% X7R dielectric Standard max op. temp. +125C</description>
+      <docs>http://www.datasheets360.com/pdf/-5354154806277341459</docs>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CC0402KRX7R7BB104</field>
+        <field name="Footprint">CAPC1005X55N</field>
+        <field name="Datasheet">http://www.datasheets360.com/pdf/-5354154806277341459</field>
+        <field name="Description">Cap 100nF 16V 0402 SMD 10% X7R Phycomp 100nF Multilayer Ceramic Capacitor (MLCC) 16 V dc +/-10% X7R dielectric Standard max op. temp. +125C</field>
+        <field name="Height">0.55</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">CC0402KRX7R7BB104</field>
+        <field name="Mouser Part Number">603-CC402KRX7R7BB104</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/CC0402KRX7R7BB104?qs=AgBp2OyFlx%252BSOyhfyS7hpw%3D%3D</field>
+        <field name="Arrow Part Number">CC0402KRX7R7BB104</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cc0402krx7r7bb104/yageo?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="CL05A105KA5NQNC">
+      <description>Cap Ceramic 1uF 25V X5R 10% Pad SMD 0402 85C T/R</description>
+      <docs>https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics</docs>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CL05A105KA5NQNC</field>
+        <field name="Footprint">CAPC1005X60N</field>
+        <field name="Datasheet">https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics</field>
+        <field name="Description">Cap Ceramic 1uF 25V X5R 10% Pad SMD 0402 85C T/R</field>
+        <field name="Height">0.6</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05A105KA5NQNC</field>
+        <field name="Mouser Part Number">187-CL05A105KA5NQNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A105KA5NQNC?qs=X6jEic%2FHinDIeFgZnm60Lw%3D%3D</field>
+        <field name="Arrow Part Number">CL05A105KA5NQNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05a105ka5nqnc/samsung-electro-mechanics?region=europe</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="CL05A106MQ5NUNC">
+      <description>CAP CER 10UF 6.3V X5R 0402</description>
+      <docs>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2406160.pdf</docs>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CL05A106MQ5NUNC</field>
+        <field name="Footprint">CAPC1005X70N</field>
+        <field name="Datasheet">https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2406160.pdf</field>
+        <field name="Description">CAP CER 10UF 6.3V X5R 0402</field>
+        <field name="Height">0.7</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05A106MQ5NUNC</field>
+        <field name="Mouser Part Number">187-CL05A106MQ5NUNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05A106MQ5NUNC?qs=X6jEic%2FHinDK8vVLi1zwpw%3D%3D</field>
+        <field name="Arrow Part Number">CL05A106MQ5NUNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05a106mq5nunc/samsung-electro-mechanics?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="CL05B104KO5NNNC">
+      <description>Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</description>
+      <docs>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</docs>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CL05B104KO5NNNC</field>
+        <field name="Footprint">CAPC1005X55N</field>
+        <field name="Datasheet">https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA10/2408147.pdf</field>
+        <field name="Description">Samsung Electro-Mechanics CL05B104KO5NNNC 100nF Multilayer Ceramic Capacitor MLCC 16V dc +/-10% Tolerance SMD</field>
+        <field name="Height">0.55</field>
+        <field name="Manufacturer_Name">Samsung Electro-Mechanics</field>
+        <field name="Manufacturer_Part_Number">CL05B104KO5NNNC</field>
+        <field name="Mouser Part Number">187-CL05B104KO5NNNC</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Samsung-Electro-Mechanics/CL05B104KO5NNNC?qs=hqM3L16%252BxlfT2SKOuAUq6Q%3D%3D</field>
+        <field name="Arrow Part Number">CL05B104KO5NNNC</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/cl05b104ko5nnnc/samsung-electro-mechanics?region=europe</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="CM05X5R226M06AH080">
+      <description>Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402</description>
+      <docs>https://www.mouser.in/datasheet/2/40/Kyocera_CM__STD__series2_052920-2585758.pdf</docs>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">CM05X5R226M06AH080</field>
+        <field name="Footprint">CAPC1005X80N</field>
+        <field name="Datasheet">https://www.mouser.in/datasheet/2/40/Kyocera_CM__STD__series2_052920-2585758.pdf</field>
+        <field name="Description">Multilayer Ceramic Capacitors MLCC - SMD/SMT 22UF    6.3V   20%        0402</field>
+        <field name="Height">0.8</field>
+        <field name="Manufacturer_Name">Kyocera AVX</field>
+        <field name="Manufacturer_Part_Number">CM05X5R226M06AH080</field>
+        <field name="Mouser Part Number">346-CM05X5R226M6AH80</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Kyocera-AVX/CM05X5R226M06AH080?qs=7MVldsJ5Uaw%2FGnmk7U90nQ%3D%3D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="DMP1045U-7">
+      <description>P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</description>
+      <docs>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</docs>
+      <fields>
+        <field name="Reference">IC</field>
+        <field name="Value">DMP1045U-7</field>
+        <field name="Footprint">SOT96P240X120-3N</field>
+        <field name="Datasheet">https://datasheet.datasheetarchive.com/originals/distributors/Datasheets-DGA24/1599196.pdf</field>
+        <field name="Description">P-Channel Enhancement MOSFET SOT-23 Diodes Inc DMP1045U-7 P-channel MOSFET Transistor, 5.2 A, -12 V, 3-Pin SOT23</field>
+        <field name="Height">1.2</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">DMP1045U-7</field>
+        <field name="Mouser Part Number">621-DMP1045U-7</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/DMP1045U-7?qs=T%2FOtf55vL7eEKnIWhgMvTQ%3D%3D</field>
+        <field name="Arrow Part Number">DMP1045U-7</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/dmp1045u-7/diodes-incorporated?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="G" type="passive"/>
+        <pin num="2" name="S" type="passive"/>
+        <pin num="3" name="D" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="ESP32-WROOM-32E-N4">
+      <description>RX TXRX MOD WIFI TRACE ANT SMD</description>
+      <docs>https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf</docs>
+      <fields>
+        <field name="Reference">IC</field>
+        <field name="Value">ESP32-WROOM-32E-N4</field>
+        <field name="Footprint">ESP32WROOM32EN4</field>
+        <field name="Datasheet">https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf</field>
+        <field name="Description">RX TXRX MOD WIFI TRACE ANT SMD</field>
+        <field name="Height">3.25</field>
+        <field name="Manufacturer_Name">Espressif Systems</field>
+        <field name="Manufacturer_Part_Number">ESP32-WROOM-32E-N4</field>
+        <field name="Mouser Part Number">356-ESP32WRM32E132PH</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Espressif-Systems/ESP32-WROOM-32E-N4?qs=Li%252BoUPsLEnsPzTWsi%252BRMgQ%3D%3D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND_1" type="passive"/>
+        <pin num="2" name="3V3" type="passive"/>
+        <pin num="3" name="EN" type="passive"/>
+        <pin num="4" name="SENSOR_VP" type="passive"/>
+        <pin num="5" name="SENSOR_VN" type="passive"/>
+        <pin num="6" name="IO34" type="passive"/>
+        <pin num="7" name="IO35" type="passive"/>
+        <pin num="8" name="IO32" type="passive"/>
+        <pin num="9" name="IO33" type="passive"/>
+        <pin num="10" name="IO25" type="passive"/>
+        <pin num="11" name="IO26" type="passive"/>
+        <pin num="12" name="IO27" type="passive"/>
+        <pin num="13" name="IO14" type="passive"/>
+        <pin num="14" name="IO12" type="passive"/>
+        <pin num="15" name="GND_2" type="passive"/>
+        <pin num="16" name="IO13" type="passive"/>
+        <pin num="17" name="NC_1" type="passive"/>
+        <pin num="18" name="NC_2" type="passive"/>
+        <pin num="19" name="NC_3" type="passive"/>
+        <pin num="20" name="NC_4" type="passive"/>
+        <pin num="21" name="NC_5" type="passive"/>
+        <pin num="22" name="NC_6" type="passive"/>
+        <pin num="23" name="IO15" type="passive"/>
+        <pin num="24" name="IO2" type="passive"/>
+        <pin num="25" name="IO0" type="passive"/>
+        <pin num="26" name="IO4" type="passive"/>
+        <pin num="27" name="IO16" type="passive"/>
+        <pin num="28" name="IO17" type="passive"/>
+        <pin num="29" name="IO5" type="passive"/>
+        <pin num="30" name="IO18" type="passive"/>
+        <pin num="31" name="IO19" type="passive"/>
+        <pin num="32" name="NC_7" type="passive"/>
+        <pin num="33" name="IO21" type="passive"/>
+        <pin num="34" name="RXD0" type="passive"/>
+        <pin num="35" name="TXD0" type="passive"/>
+        <pin num="36" name="IO22" type="passive"/>
+        <pin num="37" name="IO23" type="passive"/>
+        <pin num="38" name="GND_3" type="passive"/>
+        <pin num="39" name="GND_4" type="passive"/>
+        <pin num="40" name="GND_5" type="passive"/>
+        <pin num="41" name="GND_6" type="passive"/>
+        <pin num="42" name="GND_7" type="passive"/>
+        <pin num="43" name="GND_8" type="passive"/>
+        <pin num="44" name="GND_9" type="passive"/>
+        <pin num="45" name="GND_10" type="passive"/>
+        <pin num="46" name="GND_11" type="passive"/>
+        <pin num="47" name="GND_12" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="MMDT2907A-7-F">
+      <description>Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363</description>
+      <docs>https://www.digikey.com/product-detail/en/diodes-incorporated/MMDT2907A-7-F/MMDT2907A-FDICT-ND/755507</docs>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">MMDT2907A-7-F</field>
+        <field name="Footprint">SOT65P210X110-6N</field>
+        <field name="Datasheet">https://www.digikey.com/product-detail/en/diodes-incorporated/MMDT2907A-7-F/MMDT2907A-FDICT-ND/755507</field>
+        <field name="Description">Diodes Inc MMDT2907A-7-F Dual PNP Bipolar Transistor, -600 mA, -60 V, 6-Pin SOT-363</field>
+        <field name="Height">1.1</field>
+        <field name="Manufacturer_Name">Diodes Inc.</field>
+        <field name="Manufacturer_Part_Number">MMDT2907A-7-F</field>
+        <field name="Mouser Part Number">621-MMDT2907A-F</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Diodes-Incorporated/MMDT2907A-7-F?qs=r2lzopzdS3aWhNHiAefFpg%3D%3D</field>
+        <field name="Arrow Part Number">MMDT2907A-7-F</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/mmdt2907a-7-f/diodes-incorporated</field>
+      </fields>
+      <pins>
+        <pin num="1" name="E1" type="passive"/>
+        <pin num="2" name="B1" type="passive"/>
+        <pin num="3" name="C2" type="passive"/>
+        <pin num="4" name="E2" type="passive"/>
+        <pin num="5" name="B2" type="passive"/>
+        <pin num="6" name="C1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="RC0402FR-07100KL">
+      <description>GENERAL PURPOSE CHIP RESISTORS</description>
+      <docs>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</docs>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">RC0402FR-07100KL</field>
+        <field name="Footprint">RESC1005X40N</field>
+        <field name="Datasheet">https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07100KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07100KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07100KL?qs=mnq%2FyloZIXzTlUn7JAHSWg%3D%3D</field>
+        <field name="Arrow Part Number">RC0402FR-07100KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07100kl/yageo</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="RC0402FR-0710KL">
+      <description>YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402</description>
+      <docs>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</docs>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">RC0402FR-0710KL</field>
+        <field name="Footprint">RESC1005X40N</field>
+        <field name="Datasheet">https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</field>
+        <field name="Description">YAGEO (PHYCOMP) - RC0402FR-0710KL. - RES, THICK FILM, 10K, 1%, 0.0625W, 0402</field>
+        <field name="Height">0.4</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-0710KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-0710KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-0710KL?qs=I1mnnYJTTsxUoNwrUsQExA%3D%3D</field>
+        <field name="Arrow Part Number">RC0402FR-0710KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-0710kl/yageo?region=europe</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="RC0402FR-071KL">
+      <description>GENERAL PURPOSE CHIP RESISTORS</description>
+      <docs>https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</docs>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">RC0402FR-071KL</field>
+        <field name="Footprint">RESC1005X40N</field>
+        <field name="Datasheet">https://www.yageo.com/upload/media/product/productsearch/datasheet/rchip/PYu-RC_Group_51_RoHS_L_11.pdf</field>
+        <field name="Description">GENERAL PURPOSE CHIP RESISTORS</field>
+        <field name="Height">0.4</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-071KL</field>
+        <field name="Mouser Part Number">603-RC0402FR-071KL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-071KL?qs=V1yeUXFNrknDEmWLmm5v6g%3D%3D</field>
+        <field name="Arrow Part Number">RC0402FR-071KL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-071kl/yageo?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="RC0402FR-07220RL">
+      <description>YAGEO (PHYCOMP) - RC0402FR-07220RL - RES, THICK FILM, 220R, 1%, 0.063W, 0402</description>
+      <docs>https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</docs>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">RC0402FR-07220RL</field>
+        <field name="Footprint">RESC1005X40N</field>
+        <field name="Datasheet">https://datasheet.datasheetarchive.com/originals/distributors/Datasheets_SAMA/902f9e387b938f871d31120f5fc1d65e.pdf</field>
+        <field name="Description">YAGEO (PHYCOMP) - RC0402FR-07220RL - RES, THICK FILM, 220R, 1%, 0.063W, 0402</field>
+        <field name="Height">0.4</field>
+        <field name="Manufacturer_Name">KEMET</field>
+        <field name="Manufacturer_Part_Number">RC0402FR-07220RL</field>
+        <field name="Mouser Part Number">603-RC0402FR-07220RL</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/YAGEO/RC0402FR-07220RL?qs=UOUeRUa%252B8Wkw9iNOZEwgHw%3D%3D</field>
+        <field name="Arrow Part Number">RC0402FR-07220RL</field>
+        <field name="Arrow Price/Stock">https://www.arrow.com/en/products/rc0402fr-07220rl/yageo?region=nac</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="SKRPABE010">
+      <description>Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R</description>
+      <docs>https://datasheet.lcsc.com/szlcsc/ALPS-Electric-SKRPABE010_C115360.pdf</docs>
+      <fields>
+        <field name="Reference">S</field>
+        <field name="Value">SKRPABE010</field>
+        <field name="Footprint">SKRPABE010</field>
+        <field name="Datasheet">https://datasheet.lcsc.com/szlcsc/ALPS-Electric-SKRPABE010_C115360.pdf</field>
+        <field name="Description">Switch Tactile N.O. SPST Button J-Bend 0.05A 16VDC 1.57N SMD Automotive T/R</field>
+        <field name="Height">2.5</field>
+        <field name="Manufacturer_Name">ALPS Electric</field>
+        <field name="Manufacturer_Part_Number">SKRPABE010</field>
+        <field name="Mouser Part Number">688-SKRPAB</field>
+        <field name="Mouser Price/Stock">https://www.mouser.co.uk/ProductDetail/Alps-Alpine/SKRPABE010?qs=m0BA540hBPe1GpcSf%2FZ5Yw%3D%3D</field>
+      </fields>
+      <pins>
+        <pin num="1" name="NO_1" type="passive"/>
+        <pin num="2" name="NO_2" type="passive"/>
+        <pin num="3" name="NO_3" type="passive"/>
+        <pin num="4" name="NO_4" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SamacSys_Parts" part="WS2812B-2020">
+      <description>LED; SMD; 2020; RGB; 2x2x0.84mm; 3.75.3V; Lens: transparent; 2kHz</description>
+      <docs>https://www.alldatasheet.com/datasheet-pdf/pdf/1134522/WORLDSEMI/WS2812B-2020.html</docs>
+      <fields>
+        <field name="Reference">LED</field>
+        <field name="Value">WS2812B-2020</field>
+        <field name="Footprint">WS2812B2020</field>
+        <field name="Datasheet">https://www.alldatasheet.com/datasheet-pdf/pdf/1134522/WORLDSEMI/WS2812B-2020.html</field>
+        <field name="Description">LED; SMD; 2020; RGB; 2x2x0.84mm; 3.75.3V; Lens: transparent; 2kHz</field>
+        <field name="Height">0.84</field>
+        <field name="Manufacturer_Name">Worldsemi</field>
+        <field name="Manufacturer_Part_Number">WS2812B-2020</field>
+      </fields>
+      <pins>
+        <pin num="1" name="DO" type="passive"/>
+        <pin num="2" name="GND" type="passive"/>
+        <pin num="3" name="DI" type="passive"/>
+        <pin num="4" name="VDD" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector_Generic">
+      <uri>D:\Program Files\KiCad\6.0\share\kicad\symbols\/Connector_Generic.kicad_sym</uri>
+    </library>
+    <library logical="Mechanical">
+      <uri>D:\Program Files\KiCad\6.0\share\kicad\symbols\/Mechanical.kicad_sym</uri>
+    </library>
+    <library logical="SamacSys_Parts">
+      <uri>D:/Program Files/KiCad/SamacSys_Parts.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+3V3">
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="IC1" pin="2" pinfunction="3V3" pintype="passive"/>
+      <node ref="IC2" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="IC4" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="J1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="J4" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="J6" pin="4" pinfunction="VDD" pintype="passive"/>
+      <node ref="LED1" pin="4" pinfunction="VDD" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="R13" pin="1" pintype="passive"/>
+      <node ref="R14" pin="1" pintype="passive"/>
+      <node ref="R15" pin="1" pintype="passive"/>
+      <node ref="R6" pin="2" pintype="passive"/>
+      <node ref="U1" pin="1" pinfunction="E1" pintype="passive"/>
+      <node ref="U2" pin="1" pinfunction="E1" pintype="passive"/>
+    </net>
+    <net code="2" name="+5V">
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="C9" pin="2" pintype="passive"/>
+      <node ref="IC3" pin="3" pinfunction="INPUT" pintype="passive"/>
+      <node ref="IC5" pin="2" pinfunction="S" pintype="passive"/>
+      <node ref="J5" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="U3" pin="1" pinfunction="E1" pintype="passive"/>
+    </net>
+    <net code="3" name="+LDO_3V3">
+      <node ref="C10" pin="2" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="IC3" pin="2" pinfunction="OUTPUT" pintype="passive"/>
+      <node ref="IC3" pin="4" pinfunction="VOUT" pintype="passive"/>
+      <node ref="IC4" pin="3" pinfunction="D" pintype="passive"/>
+      <node ref="U2" pin="4" pinfunction="E2" pintype="passive"/>
+    </net>
+    <net code="4" name="+ext_3V3">
+      <node ref="C8" pin="2" pintype="passive"/>
+      <node ref="IC2" pin="3" pinfunction="D" pintype="passive"/>
+      <node ref="J3" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="U1" pin="4" pinfunction="E2" pintype="passive"/>
+    </net>
+    <net code="5" name="+ext_5V">
+      <node ref="C11" pin="2" pintype="passive"/>
+      <node ref="IC5" pin="3" pinfunction="D" pintype="passive"/>
+      <node ref="J2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="U3" pin="4" pinfunction="E2" pintype="passive"/>
+    </net>
+    <net code="6" name="FLP_GPIO_0">
+      <node ref="J2" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="J4" pin="3" pinfunction="Pin_3" pintype="passive"/>
+    </net>
+    <net code="7" name="GND">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C10" pin="1" pintype="passive"/>
+      <node ref="C11" pin="1" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="C8" pin="1" pintype="passive"/>
+      <node ref="C9" pin="1" pintype="passive"/>
+      <node ref="IC1" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="IC1" pin="15" pinfunction="GND_2" pintype="passive"/>
+      <node ref="IC1" pin="38" pinfunction="GND_3" pintype="passive"/>
+      <node ref="IC1" pin="39" pinfunction="GND_4" pintype="passive"/>
+      <node ref="IC1" pin="40" pinfunction="GND_5" pintype="passive"/>
+      <node ref="IC1" pin="41" pinfunction="GND_6" pintype="passive"/>
+      <node ref="IC1" pin="42" pinfunction="GND_7" pintype="passive"/>
+      <node ref="IC1" pin="43" pinfunction="GND_8" pintype="passive"/>
+      <node ref="IC1" pin="44" pinfunction="GND_9" pintype="passive"/>
+      <node ref="IC1" pin="45" pinfunction="GND_10" pintype="passive"/>
+      <node ref="IC1" pin="46" pinfunction="GND_11" pintype="passive"/>
+      <node ref="IC1" pin="47" pinfunction="GND_12" pintype="passive"/>
+      <node ref="IC3" pin="1" pinfunction="ADJ/GND" pintype="passive"/>
+      <node ref="J1" pin="3" pinfunction="3" pintype="passive"/>
+      <node ref="J1" pin="5" pinfunction="5" pintype="passive"/>
+      <node ref="J1" pin="7" pinfunction="7" pintype="passive"/>
+      <node ref="J1" pin="9" pinfunction="9" pintype="passive"/>
+      <node ref="J2" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="J3" pin="10" pinfunction="Pin_10" pintype="passive"/>
+      <node ref="J3" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="J4" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="J5" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="J6" pin="10" pinfunction="DETECT_SWITCH" pintype="passive"/>
+      <node ref="J6" pin="6" pinfunction="VSS" pintype="passive"/>
+      <node ref="J6" pin="9" pinfunction="DETECT_LEVER" pintype="passive"/>
+      <node ref="LED1" pin="2" pinfunction="GND" pintype="passive"/>
+      <node ref="LED4" pin="2" pintype="passive"/>
+      <node ref="R10" pin="1" pintype="passive"/>
+      <node ref="R11" pin="1" pintype="passive"/>
+      <node ref="R12" pin="1" pintype="passive"/>
+      <node ref="R7" pin="1" pintype="passive"/>
+      <node ref="R8" pin="1" pintype="passive"/>
+      <node ref="R9" pin="1" pintype="passive"/>
+      <node ref="S1" pin="4" pinfunction="NO_4" pintype="passive"/>
+      <node ref="S2" pin="4" pinfunction="NO_4" pintype="passive"/>
+    </net>
+    <net code="8" name="GPIO02">
+      <node ref="IC1" pin="24" pinfunction="IO2" pintype="passive"/>
+      <node ref="J4" pin="5" pinfunction="Pin_5" pintype="passive"/>
+    </net>
+    <net code="9" name="GPIO04">
+      <node ref="IC1" pin="26" pinfunction="IO4" pintype="passive"/>
+      <node ref="R3" pin="1" pintype="passive"/>
+    </net>
+    <net code="10" name="GPIO05">
+      <node ref="IC1" pin="29" pinfunction="IO5" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="J4" pin="4" pinfunction="Pin_4" pintype="passive"/>
+    </net>
+    <net code="11" name="GPIO16">
+      <node ref="IC1" pin="27" pinfunction="IO16" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+    </net>
+    <net code="12" name="GPIO017">
+      <node ref="J3" pin="8" pinfunction="Pin_8" pintype="passive"/>
+    </net>
+    <net code="13" name="GPIO17">
+      <node ref="IC1" pin="28" pinfunction="IO17" pintype="passive"/>
+      <node ref="J4" pin="6" pinfunction="Pin_6" pintype="passive"/>
+    </net>
+    <net code="14" name="GPIO18">
+      <node ref="IC1" pin="30" pinfunction="IO18" pintype="passive"/>
+      <node ref="J2" pin="4" pinfunction="Pin_4" pintype="passive"/>
+      <node ref="J3" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="J4" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="R5" pin="1" pintype="passive"/>
+    </net>
+    <net code="15" name="GPIO19">
+      <node ref="IC1" pin="31" pinfunction="IO19" pintype="passive"/>
+      <node ref="J2" pin="3" pinfunction="Pin_3" pintype="passive"/>
+      <node ref="J4" pin="8" pinfunction="Pin_8" pintype="passive"/>
+      <node ref="J6" pin="7" pinfunction="DAT0" pintype="passive"/>
+    </net>
+    <net code="16" name="GPIO21">
+      <node ref="IC1" pin="33" pinfunction="IO21" pintype="passive"/>
+      <node ref="J4" pin="9" pinfunction="Pin_9" pintype="passive"/>
+    </net>
+    <net code="17" name="GPIO22">
+      <node ref="IC1" pin="36" pinfunction="IO22" pintype="passive"/>
+      <node ref="J4" pin="10" pinfunction="Pin_10" pintype="passive"/>
+    </net>
+    <net code="18" name="GPIO23">
+      <node ref="IC1" pin="37" pinfunction="IO23" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="Pin_2" pintype="passive"/>
+      <node ref="J4" pin="11" pinfunction="Pin_11" pintype="passive"/>
+      <node ref="R4" pin="1" pintype="passive"/>
+    </net>
+    <net code="19" name="GPIO25">
+      <node ref="IC1" pin="10" pinfunction="IO25" pintype="passive"/>
+      <node ref="J5" pin="3" pinfunction="Pin_3" pintype="passive"/>
+    </net>
+    <net code="20" name="GPIO26">
+      <node ref="IC1" pin="11" pinfunction="IO26" pintype="passive"/>
+      <node ref="J5" pin="4" pinfunction="Pin_4" pintype="passive"/>
+    </net>
+    <net code="21" name="GPIO27">
+      <node ref="IC1" pin="12" pinfunction="IO27" pintype="passive"/>
+      <node ref="J5" pin="5" pinfunction="Pin_5" pintype="passive"/>
+    </net>
+    <net code="22" name="GPIO32">
+      <node ref="IC1" pin="8" pinfunction="IO32" pintype="passive"/>
+      <node ref="J5" pin="6" pinfunction="Pin_6" pintype="passive"/>
+    </net>
+    <net code="23" name="GPIO33">
+      <node ref="IC1" pin="9" pinfunction="IO33" pintype="passive"/>
+      <node ref="J5" pin="7" pinfunction="Pin_7" pintype="passive"/>
+    </net>
+    <net code="24" name="GPIO34">
+      <node ref="IC1" pin="6" pinfunction="IO34" pintype="passive"/>
+      <node ref="J5" pin="8" pinfunction="Pin_8" pintype="passive"/>
+    </net>
+    <net code="25" name="GPIO35">
+      <node ref="IC1" pin="7" pinfunction="IO35" pintype="passive"/>
+      <node ref="J5" pin="9" pinfunction="Pin_9" pintype="passive"/>
+    </net>
+    <net code="26" name="GPIO36">
+      <node ref="J3" pin="4" pinfunction="Pin_4" pintype="passive"/>
+    </net>
+    <net code="27" name="GPIO39">
+      <node ref="IC1" pin="5" pinfunction="SENSOR_VN" pintype="passive"/>
+      <node ref="J3" pin="2" pinfunction="Pin_2" pintype="passive"/>
+    </net>
+    <net code="28" name="Net-(IC1-Pad25)">
+      <node ref="IC1" pin="25" pinfunction="IO0" pintype="passive"/>
+      <node ref="R6" pin="1" pintype="passive"/>
+      <node ref="S2" pin="1" pinfunction="NO_1" pintype="passive"/>
+    </net>
+    <net code="29" name="Net-(IC2-Pad1)">
+      <node ref="IC2" pin="1" pinfunction="G" pintype="passive"/>
+      <node ref="R8" pin="2" pintype="passive"/>
+      <node ref="U1" pin="6" pinfunction="C1" pintype="passive"/>
+    </net>
+    <net code="30" name="Net-(IC4-Pad1)">
+      <node ref="IC4" pin="1" pinfunction="G" pintype="passive"/>
+      <node ref="R10" pin="2" pintype="passive"/>
+      <node ref="U2" pin="6" pinfunction="C1" pintype="passive"/>
+    </net>
+    <net code="31" name="Net-(IC5-Pad1)">
+      <node ref="IC5" pin="1" pinfunction="G" pintype="passive"/>
+      <node ref="R12" pin="2" pintype="passive"/>
+      <node ref="U3" pin="6" pinfunction="C1" pintype="passive"/>
+    </net>
+    <net code="32" name="Net-(J6-Pad2)">
+      <node ref="J6" pin="2" pinfunction="CD/DAT3" pintype="passive"/>
+      <node ref="R3" pin="2" pintype="passive"/>
+    </net>
+    <net code="33" name="Net-(J6-Pad3)">
+      <node ref="J6" pin="3" pinfunction="CMD" pintype="passive"/>
+      <node ref="R4" pin="2" pintype="passive"/>
+    </net>
+    <net code="34" name="Net-(J6-Pad5)">
+      <node ref="J6" pin="5" pinfunction="CLK" pintype="passive"/>
+      <node ref="R5" pin="2" pintype="passive"/>
+    </net>
+    <net code="35" name="Net-(LED1-Pad3)">
+      <node ref="LED1" pin="3" pinfunction="DI" pintype="passive"/>
+      <node ref="R2" pin="2" pintype="passive"/>
+    </net>
+    <net code="36" name="Net-(LED2-Pad2)">
+      <node ref="LED2" pin="2" pintype="passive"/>
+      <node ref="R13" pin="2" pintype="passive"/>
+    </net>
+    <net code="37" name="Net-(LED3-Pad2)">
+      <node ref="LED3" pin="2" pintype="passive"/>
+      <node ref="R14" pin="2" pintype="passive"/>
+    </net>
+    <net code="38" name="Net-(LED4-Pad1)">
+      <node ref="LED4" pin="1" pintype="passive"/>
+      <node ref="R15" pin="2" pintype="passive"/>
+    </net>
+    <net code="39" name="Net-(R7-Pad2)">
+      <node ref="R7" pin="2" pintype="passive"/>
+      <node ref="U1" pin="2" pinfunction="B1" pintype="passive"/>
+      <node ref="U1" pin="3" pinfunction="C2" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="B2" pintype="passive"/>
+    </net>
+    <net code="40" name="Net-(R9-Pad2)">
+      <node ref="R9" pin="2" pintype="passive"/>
+      <node ref="U2" pin="2" pinfunction="B1" pintype="passive"/>
+      <node ref="U2" pin="3" pinfunction="C2" pintype="passive"/>
+      <node ref="U2" pin="5" pinfunction="B2" pintype="passive"/>
+    </net>
+    <net code="41" name="Net-(R11-Pad2)">
+      <node ref="R11" pin="2" pintype="passive"/>
+      <node ref="U3" pin="2" pinfunction="B1" pintype="passive"/>
+      <node ref="U3" pin="3" pinfunction="C2" pintype="passive"/>
+      <node ref="U3" pin="5" pinfunction="B2" pintype="passive"/>
+    </net>
+    <net code="42" name="RESET">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="IC1" pin="3" pinfunction="EN" pintype="passive"/>
+      <node ref="J1" pin="10" pinfunction="10" pintype="passive"/>
+      <node ref="J2" pin="7" pinfunction="Pin_7" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="S1" pin="1" pinfunction="NO_1" pintype="passive"/>
+    </net>
+    <net code="43" name="RX">
+      <node ref="IC1" pin="35" pinfunction="TXD0" pintype="passive"/>
+      <node ref="J3" pin="6" pinfunction="Pin_6" pintype="passive"/>
+      <node ref="J5" pin="10" pinfunction="Pin_10" pintype="passive"/>
+      <node ref="LED2" pin="1" pintype="passive"/>
+    </net>
+    <net code="44" name="TCK">
+      <node ref="IC1" pin="16" pinfunction="IO13" pintype="passive"/>
+      <node ref="J1" pin="4" pinfunction="4" pintype="passive"/>
+    </net>
+    <net code="45" name="TDI">
+      <node ref="IC1" pin="14" pinfunction="IO12" pintype="passive"/>
+      <node ref="J1" pin="8" pinfunction="8" pintype="passive"/>
+    </net>
+    <net code="46" name="TDO">
+      <node ref="IC1" pin="23" pinfunction="IO15" pintype="passive"/>
+      <node ref="J1" pin="6" pinfunction="6" pintype="passive"/>
+    </net>
+    <net code="47" name="TMS">
+      <node ref="IC1" pin="13" pinfunction="IO14" pintype="passive"/>
+      <node ref="J1" pin="2" pinfunction="2" pintype="passive"/>
+    </net>
+    <net code="48" name="TX">
+      <node ref="IC1" pin="34" pinfunction="RXD0" pintype="passive"/>
+      <node ref="J3" pin="5" pinfunction="Pin_5" pintype="passive"/>
+      <node ref="J5" pin="11" pinfunction="Pin_11" pintype="passive"/>
+      <node ref="LED3" pin="1" pintype="passive"/>
+    </net>
+    <net code="49" name="unconnected-(IC1-Pad4)">
+      <node ref="IC1" pin="4" pinfunction="SENSOR_VP" pintype="passive+no_connect"/>
+    </net>
+    <net code="50" name="unconnected-(IC1-Pad17)">
+      <node ref="IC1" pin="17" pinfunction="NC_1" pintype="passive+no_connect"/>
+    </net>
+    <net code="51" name="unconnected-(IC1-Pad18)">
+      <node ref="IC1" pin="18" pinfunction="NC_2" pintype="passive+no_connect"/>
+    </net>
+    <net code="52" name="unconnected-(IC1-Pad19)">
+      <node ref="IC1" pin="19" pinfunction="NC_3" pintype="passive+no_connect"/>
+    </net>
+    <net code="53" name="unconnected-(IC1-Pad20)">
+      <node ref="IC1" pin="20" pinfunction="NC_4" pintype="passive+no_connect"/>
+    </net>
+    <net code="54" name="unconnected-(IC1-Pad21)">
+      <node ref="IC1" pin="21" pinfunction="NC_5" pintype="passive+no_connect"/>
+    </net>
+    <net code="55" name="unconnected-(IC1-Pad22)">
+      <node ref="IC1" pin="22" pinfunction="NC_6" pintype="passive+no_connect"/>
+    </net>
+    <net code="56" name="unconnected-(IC1-Pad32)">
+      <node ref="IC1" pin="32" pinfunction="NC_7" pintype="passive+no_connect"/>
+    </net>
+    <net code="57" name="unconnected-(J3-Pad9)">
+      <node ref="J3" pin="9" pinfunction="Pin_9" pintype="passive"/>
+    </net>
+    <net code="58" name="unconnected-(J6-Pad1)">
+      <node ref="J6" pin="1" pinfunction="DAT2" pintype="passive+no_connect"/>
+    </net>
+    <net code="59" name="unconnected-(J6-Pad8)">
+      <node ref="J6" pin="8" pinfunction="DAT1" pintype="passive+no_connect"/>
+    </net>
+    <net code="60" name="unconnected-(LED1-Pad1)">
+      <node ref="LED1" pin="1" pinfunction="DO" pintype="passive+no_connect"/>
+    </net>
+    <net code="61" name="unconnected-(S1-Pad2)">
+      <node ref="S1" pin="2" pinfunction="NO_2" pintype="passive+no_connect"/>
+    </net>
+    <net code="62" name="unconnected-(S1-Pad3)">
+      <node ref="S1" pin="3" pinfunction="NO_3" pintype="passive+no_connect"/>
+    </net>
+    <net code="63" name="unconnected-(S2-Pad2)">
+      <node ref="S2" pin="2" pinfunction="NO_2" pintype="passive+no_connect"/>
+    </net>
+    <net code="64" name="unconnected-(S2-Pad3)">
+      <node ref="S2" pin="3" pinfunction="NO_3" pintype="passive+no_connect"/>
+    </net>
+  </nets>
+</export>
