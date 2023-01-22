@@ -259,7 +259,9 @@ void subghz_protocol_decoder_data_raw_feed(void* context, bool level, uint32_t d
 static bool
     subghz_protocol_data_raw_check_remote_controller(SubGhzProtocolDecoderDataRAW* instance) {
     struct {
-        uint32_t data;
+        // uint32_t data[3];
+        // uint32_t data1;
+        float data;
         uint16_t count;
     } classes[DATA_RAW_SEARCH_CLASSES];
 
@@ -286,14 +288,14 @@ static bool
     for(size_t i = 0; i < ind; i++) {
         for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
             if(classes[k].count == 0) {
-                classes[k].data = abs(instance->data_raw[i]);
+                classes[k].data = (float)(abs(instance->data_raw[i]));
                 classes[k].count++;
                 break;
             } else if(
-                DURATION_DIFF(abs(instance->data_raw[i]), classes[k].data) <
-                (classes[k].data / 4)) { //if the test value does not differ by more than 20%
-                classes[k].data = (classes[k].data + abs(instance->data_raw[i])) /
-                                  2; //adding and averaging values
+                DURATION_DIFF((float)(abs(instance->data_raw[i])), (classes[k].data)) <
+                (classes[k].data / 4)) { //if the test value does not differ by more than 25%
+                classes[k].data += ((float)(abs(instance->data_raw[i])) - classes[k].data) *
+                                   0.05f; //running average k=0.05
                 classes[k].count++;
                 break;
             }
@@ -332,12 +334,12 @@ static bool
     }
 
     for(size_t k = 0; k < DATA_RAW_SEARCH_CLASSES; k++) {
-        FURI_LOG_W("Class", "%d %d %ld", k, classes[k].count, classes[k].data);
+        FURI_LOG_W("Class", "%d\t%d\t%ld", k, classes[k].count, (uint32_t)classes[k].data);
     }
 
     if((classes[0].count > DATA_RAW_TE_MIN_COUNT) && (classes[1].count == 0)) {
         //adopted only the preamble
-        instance->te = classes[0].data;
+        instance->te = (uint32_t)classes[0].data;
         te_ok = true;
         gap = 0; //gap no
     } else {
@@ -355,12 +357,12 @@ static bool
 
         //determine the value to be corrected
         for(uint8_t k = 1; k < 5; k++) {
-            FURI_LOG_I("-K-", " %f ", (double)((float)classes[1].data / (classes[0].data / k)));
-            float delta = ((float)classes[1].data / (classes[0].data / k)) -
-                          (classes[1].data / (classes[0].data / k));
+            FURI_LOG_I("K-div", " %f ", (double)(classes[1].data / (classes[0].data / k)));
+            float delta = (classes[1].data / (classes[0].data / k)) -
+                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k));
             if((delta < 0.25) || (delta > 0.75)) {
-                instance->te = classes[0].data / k;
-                FURI_LOG_I("K", " %d ", k);
+                instance->te = (uint32_t)classes[0].data / k;
+                FURI_LOG_I("K=", " %d ", k);
                 te_ok = true;
                 break;
             }
@@ -369,7 +371,7 @@ static bool
         //looking for a gap
         for(size_t k = 2; k < DATA_RAW_SEARCH_CLASSES; k++) {
             if((classes[k].count > 2) && (classes[k].data > gap)) {
-                gap = classes[k].data;
+                gap = (uint32_t)classes[k].data;
                 gap_delta = gap / 5;
             }
         }
@@ -476,7 +478,7 @@ static bool
         data_temp = 0;
         for(size_t i = 0; i < DATA_RAW_SEARCH_CLASSES; i++) {
             if((classes[i].count > 1) && (data_temp < classes[i].count))
-                data_temp = classes[i].data;
+                data_temp = (int)classes[i].data;
         }
 
         //compare data in chunks with the same number of bits
@@ -537,6 +539,7 @@ static bool
         ind = 0;
         for(size_t i = 0; i < instance->data_raw_ind; i++) {
             int data_temp = (int)(round((float)(instance->data_raw[i]) / instance->te));
+            if(data_temp == 0) break; //found an interval 2 times shorter than TE, this is noise
             printf("%d  ", data_temp);
 
             for(size_t k = 0; k < abs(data_temp); k++) {
