@@ -6,4 +6,5 @@ App(
     stack_size=10 * 1024,
     fap_category="Tools",
     icon="A_Plugins_14",
+    sources=["*.c", "*.cc"],
 )
