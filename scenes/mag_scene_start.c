@@ -1,7 +1,7 @@
 #include "../mag_i.h"
 
 typedef enum {
-    SubmenuIndexEmulateTest,
+    //SubmenuIndexEmulateTest,
     SubmenuIndexSaved,
     SubmenuIndexAddManually,
 } SubmenuIndex;
@@ -16,12 +16,12 @@ void mag_scene_start_on_enter(void* context) {
     Mag* mag = context;
     Submenu* submenu = mag->submenu;
 
-    submenu_add_item(
+    /*submenu_add_item(
         submenu,
         "Emulate (Hardcoded)",
         SubmenuIndexEmulateTest,
         mag_scene_start_submenu_callback,
-        mag);
+        mag);*/
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, mag_scene_start_submenu_callback, mag);
     submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
@@ -40,10 +40,11 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexEmulateTest) {
+        /*if(event.event == SubmenuIndexEmulateTest) {
             scene_manager_next_scene(mag->scene_manager, MagSceneEmulateTest);
             consumed = true;
-        } else if(event.event == SubmenuIndexSaved) {
+        } else */
+        if(event.event == SubmenuIndexSaved) {
             furi_string_set(mag->file_path, MAG_APP_FOLDER);
             scene_manager_next_scene(mag->scene_manager, MagSceneFileSelect);
             consumed = true;

@@ -193,7 +193,7 @@ void mag_scene_emulate_config_on_enter(void* context) {
     // Reverse
     item = variable_item_list_add(
         mag->variable_item_list,
-        "Reverse:",
+        "Reverse (WIP):",
         REVERSE_COUNT,
         mag_scene_emulate_config_set_reverse,
         mag);

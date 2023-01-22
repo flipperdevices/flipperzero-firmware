@@ -1,4 +1,5 @@
 #include "mag_helpers.h"
+#include "../mag_i.h"
 
 #define GPIO_PIN_A &gpio_ext_pa6
 #define GPIO_PIN_B &gpio_ext_pa7
@@ -7,8 +8,8 @@
 #define ZERO_PREFIX 25 // n zeros prefix
 #define ZERO_BETWEEN 53 // n zeros between tracks
 #define ZERO_SUFFIX 25 // n zeros suffix
-#define US_CLOCK 240
-#define US_INTERPACKET 10
+//#define US_CLOCK 240
+//#define US_INTERPACKET 10
 
 // bits per char on a given track
 const uint8_t bitlen[] = {7, 5, 5};
@@ -16,39 +17,52 @@ const uint8_t bitlen[] = {7, 5, 5};
 const int sublen[] = {32, 48, 48};
 uint8_t bit_dir = 0;
 
-void play_bit_rfid(uint8_t send_bit) {
+void play_bit_rfid(uint8_t send_bit, MagSetting* setting) {
     // internal TX over RFID coil
     bit_dir ^= 1;
     furi_hal_gpio_write(RFID_PIN, bit_dir);
-    furi_delay_us(US_CLOCK);
+    furi_delay_us(setting->us_clock);
 
     if(send_bit) {
         bit_dir ^= 1;
         furi_hal_gpio_write(RFID_PIN, bit_dir);
     }
-    furi_delay_us(US_CLOCK);
+    furi_delay_us(setting->us_clock);
 
-    furi_delay_us(US_INTERPACKET);
+    furi_delay_us(setting->us_interpacket);
 }
 
-/*static void play_bit_gpio(uint8_t send_bit) {
+void play_bit_gpio(uint8_t send_bit, MagSetting* setting) {
     // external TX over motor driver wired to PIN_A and PIN_B
     bit_dir ^= 1;
     furi_hal_gpio_write(GPIO_PIN_A, bit_dir);
     furi_hal_gpio_write(GPIO_PIN_B, !bit_dir);
-    furi_delay_us(US_CLOCK);
+    furi_delay_us(setting->us_clock);
 
     if(send_bit) {
         bit_dir ^= 1;
         furi_hal_gpio_write(GPIO_PIN_A, bit_dir);
         furi_hal_gpio_write(GPIO_PIN_B, !bit_dir);
     }
-    furi_delay_us(US_CLOCK);
+    furi_delay_us(setting->us_clock);
 
-    furi_delay_us(US_INTERPACKET);
-}*/
+    furi_delay_us(setting->us_interpacket);
+}
 
-void rfid_tx_init() {
+bool play_bit(uint8_t send_bit, MagSetting* setting) {
+    // Initialize configured TX method
+    if(setting->tx == MagTxStateRFID) {
+        play_bit_rfid(send_bit, setting);
+    } else if(setting->tx == MagTxStateGPIOA6A7) {
+        play_bit_gpio(send_bit, setting);
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+void tx_init_rfid() {
     // initialize RFID system for TX
     furi_hal_power_enable_otg();
 
@@ -73,7 +87,7 @@ void rfid_tx_init() {
     furi_delay_ms(300);
 }
 
-void rfid_tx_reset() {
+void tx_reset_rfid() {
     // reset RFID system
     furi_hal_gpio_write(RFID_PIN, 0);
 
@@ -81,21 +95,46 @@ void rfid_tx_reset() {
     furi_hal_power_disable_otg();
 }
 
-/*
-static void gpio_tx_init() {
+void tx_init_gpio() {
     furi_hal_power_enable_otg();
-    gpio_item_configure_all_pins(GpioModeOutputPushPull);
+    // gpio_item_configure_all_pins(GpioModeOutputPushPull);
+    furi_hal_gpio_init(GPIO_PIN_A, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 }
 
-static void gpio_tx_reset() {
-    gpio_item_set_pin(PIN_A, 0);
-    gpio_item_set_pin(PIN_B, 0);
-    gpio_item_set_pin(ENABLE_PIN, 0);
+void tx_reset_gpio() {
+    furi_hal_gpio_write(GPIO_PIN_A, 0);
+    furi_hal_gpio_write(GPIO_PIN_B, 0);
 
-    gpio_item_configure_all_pins(GpioModeAnalog);
+    //gpio_item_configure_all_pins(GpioModeAnalog);
     furi_hal_power_disable_otg();
 }
-*/
+
+bool tx_init(MagSetting* setting) {
+    // Initialize configured TX method
+    if(setting->tx == MagTxStateRFID) {
+        tx_init_rfid();
+    } else if(setting->tx == MagTxStateGPIOA6A7) {
+        tx_init_gpio();
+    } else {
+        return false;
+    }
+
+    return true;
+}
+
+bool tx_reset(MagSetting* setting) {
+    // Reset configured TX method
+    if(setting->tx == MagTxStateRFID) {
+        tx_reset_rfid();
+    } else if(setting->tx == MagTxStateGPIOA6A7) {
+        tx_reset_gpio();
+    } else {
+        return false;
+    }
+
+    return true;
+}
 
 void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_index) {
     // convert individual track to bits
@@ -139,10 +178,11 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
     //furi_assert(is_correct_length);
 }
 
+/*
 void mag_spoof_single_track_rfid(FuriString* track_str, uint8_t track_index) {
     // Quick testing...
 
-    rfid_tx_init();
+    tx_init_rfid();
 
     size_t from;
     size_t to;
@@ -173,13 +213,13 @@ void mag_spoof_single_track_rfid(FuriString* track_str, uint8_t track_index) {
     for(uint8_t i = 0; i < ZERO_SUFFIX; i++) play_bit_rfid(0);
     FURI_CRITICAL_EXIT();
 
-    rfid_tx_reset();
+    tx_reset_rfid();
 }
 
 void mag_spoof_two_track_rfid(FuriString* track1, FuriString* track2) {
     // Quick testing...
 
-    rfid_tx_init();
+    tx_init_rfid();
 
     const char* data1 = furi_string_get_cstr(track1);
     uint8_t bit_array1[(strlen(data1) * bitlen[0]) + 1];
@@ -197,7 +237,70 @@ void mag_spoof_two_track_rfid(FuriString* track1, FuriString* track2) {
     for(uint8_t i = 0; i < ZERO_SUFFIX; i++) play_bit_rfid(0);
     FURI_CRITICAL_EXIT();
 
-    rfid_tx_reset();
+    tx_reset_rfid();
+}*/
+
+void mag_spoof(Mag* mag) {
+    MagSetting* setting = mag->setting;
+
+    // precompute tracks (WIP; ignores reverse and 3rd track)
+    // likely will be reworked to Samy's bitmap method anyway...
+    const char* data1 = furi_string_get_cstr(mag->mag_dev->dev_data.track[0].str);
+    const char* data2 = furi_string_get_cstr(mag->mag_dev->dev_data.track[0].str);
+    uint8_t bit_array1[(strlen(data1) * bitlen[0]) + 1];
+    uint8_t bit_array2[(strlen(data2) * bitlen[1]) + 1];
+    track_to_bits(bit_array1, data1, 0);
+    track_to_bits(bit_array2, data2, 1);
+
+    bool spoofed = false;
+    do {
+        // Initialize configured TX method
+        if(!tx_init(setting)) break;
+
+        // Critical timing section (need to eliminate ifs? does this impact timing?)
+        FURI_CRITICAL_ENTER();
+        // Prefix of zeros
+        for(uint8_t i = 0; i < ZERO_PREFIX; i++) {
+            if(!play_bit(0, setting)) break;
+        }
+
+        // Track 1
+        if((setting->track == MagTrackStateAll) || (setting->track == MagTrackStateOne)) {
+            for(uint8_t i = 0; bit_array1[i] != 2; i++) {
+                if(!play_bit((bit_array1[i] & 1), setting)) break;
+            }
+        }
+
+        // Zeros between tracks
+        if(setting->track == MagTrackStateAll) {
+            for(uint8_t i = 0; i < ZERO_BETWEEN; i++) {
+                if(!play_bit(0, setting)) break;
+            }
+        }
+
+        // Track 2 (TODO: Reverse track)
+        if((setting->track == MagTrackStateAll) || (setting->track == MagTrackStateTwo)) {
+            for(uint8_t i = 0; bit_array2[i] != 2; i++) {
+                if(!play_bit((bit_array2[i] & 1), setting)) break;
+            }
+        }
+
+        // Suffix of zeros
+        for(uint8_t i = 0; i < ZERO_SUFFIX; i++) {
+            if(!play_bit(0, setting)) break;
+        }
+        FURI_CRITICAL_EXIT();
+
+        // Reset configured TX method
+        if(!tx_reset(setting)) break;
+        spoofed = true;
+    } while(0);
+
+    UNUSED(spoofed);
+    /*if(!spoofed) {
+        // error handling?
+        // cleanup?
+    }*/
 }
 
 //// @antirez's code from protoview for bitmapping. May want to refactor to use this...

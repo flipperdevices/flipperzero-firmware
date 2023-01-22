@@ -1,4 +1,5 @@
 #include "../mag_i.h"
+#include "../helpers/mag_helpers.h"
 
 void mag_scene_emulate_on_enter(void* context) {
     Mag* mag = context;
@@ -39,17 +40,18 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == GuiButtonTypeRight) {
             consumed = true;
 
-            FuriString* tmp_str;
-            tmp_str = furi_string_alloc_set_str(
-                furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
+            //FuriString* tmp_str;
+            //tmp_str = furi_string_alloc_set_str(
+            //    furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
 
             // Assumes track 2 for temporary testing.
             // Will overhaul alongside file format and config system
             notification_message(mag->notifications, &sequence_blink_start_cyan);
-            mag_spoof_single_track_rfid(tmp_str, 1);
+            mag_spoof(mag);
+            //mag_spoof_single_track_rfid(tmp_str, 1);
             notification_message(mag->notifications, &sequence_blink_stop);
 
-            furi_string_free(tmp_str);
+            //furi_string_free(tmp_str);
         }
     }
 

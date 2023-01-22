@@ -41,7 +41,7 @@ static void play_bit(uint8_t send_bit) {
     furi_delay_us(CLOCK_US);
 }
 
-static void mag_spoof(FuriString* track_str, uint8_t track) {
+static void mag_spoof_test(FuriString* track_str, uint8_t track) {
     furi_hal_power_enable_otg();
 
     size_t from;
@@ -186,7 +186,7 @@ bool mag_scene_emulate_test_on_event(void* context, SceneManagerEvent event) {
 
             // blink led while spoofing
             notification_message(mag->notifications, &sequence_blink_start_cyan);
-            mag_spoof(v, TEST_TRACK);
+            mag_spoof_test(v, TEST_TRACK);
             // mag_spoof_single_track_rfid(v, TEST_TRACK);
             notification_message(mag->notifications, &sequence_blink_stop);
 

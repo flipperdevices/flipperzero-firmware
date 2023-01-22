@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mag_device.h"
-#include "helpers/mag_helpers.h"
+//#include "helpers/mag_helpers.h"
 #include "helpers/mag_text_input.h"
 #include "helpers/mag_types.h"
 
