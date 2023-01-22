@@ -1906,7 +1906,7 @@ Function,-,mf_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKey,
 Function,-,mf_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKey"
 Function,-,mf_classic_set_sector_data_not_read,void,MfClassicData*
 Function,-,mf_classic_update_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicData*"
-Function,-,mf_classic_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t"
+Function,-,mf_classic_auth_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t"
 Function,-,mf_classic_write_sector,_Bool,"FuriHalNfcTxRxContext*, MfClassicData*, MfClassicData*, uint8_t"
 Function,-,mf_df_cat_application,void,"MifareDesfireApplication*, FuriString*"
 Function,-,mf_df_cat_application_info,void,"MifareDesfireApplication*, FuriString*"

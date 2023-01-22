@@ -850,9 +850,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
                 memcpy(tx_rx->tx_data, nt, sizeof(nt));
                 tx_rx->tx_parity[0] = 0;
-                for(size_t i = 0; i < sizeof(nt); i++) {
-                    tx_rx->tx_parity[0] |= nfc_util_odd_parity8(nt[i]) << (7 - i);
-                }
+                nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, sizeof(nt));
                 tx_rx->tx_bits = sizeof(nt) * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             } else {
@@ -1076,37 +1074,50 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
     return true;
 }
 
+void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
+    furi_assert(tx_rx);
+
+    uint8_t plain_data[2] = {};
+    plain_data[0] = 0x50;
+    plain_data[1] = 0x00;
+
+    nfca_append_crc16(plain_data, 2);
+    if(crypto) {
+        crypto1_encrypt(crypto, NULL, plain_data, 2 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+    } else {
+        memcpy(tx_rx->tx_data, plain_data, 2);
+        nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, 2);
+    }
+    tx_rx->tx_bits = 2 * 8;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
+    furi_hal_nfc_tx_rx(tx_rx, 50);
+}
+
 bool mf_classic_write_block(
     FuriHalNfcTxRxContext* tx_rx,
-    MfClassicBlock* src_block,
+    Crypto1* crypto,
     uint8_t block_num,
-    MfClassicKey key_type,
-    uint64_t key) {
+    MfClassicBlock* src_block) {
     furi_assert(tx_rx);
+    furi_assert(crypto);
     furi_assert(src_block);
 
-    Crypto1 crypto = {};
-    uint8_t plain_data[18] = {};
-    uint8_t resp = 0;
     bool write_success = false;
+    uint8_t plain_data[18] = {};
+    uint8_t resp;
 
     do {
-        furi_hal_nfc_sleep();
-        if(!mf_classic_auth(tx_rx, block_num, key, key_type, &crypto, false, 0)) {
-            FURI_LOG_D(TAG, "Auth fail");
-            break;
-        }
         // Send write command
         plain_data[0] = MF_CLASSIC_WRITE_BLOCK_CMD;
         plain_data[1] = block_num;
         nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(&crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
         tx_rx->tx_bits = 4 * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
+                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on write cmd: %02X", resp);
                     break;
@@ -1124,7 +1135,7 @@ bool mf_classic_write_block(
         memcpy(plain_data, src_block->value, MF_CLASSIC_BLOCK_SIZE);
         nfca_append_crc16(plain_data, MF_CLASSIC_BLOCK_SIZE);
         crypto1_encrypt(
-            &crypto,
+            crypto,
             NULL,
             plain_data,
             (MF_CLASSIC_BLOCK_SIZE + 2) * 8,
@@ -1134,7 +1145,7 @@ bool mf_classic_write_block(
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
+                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on sending data");
                     break;
@@ -1147,46 +1158,24 @@ bool mf_classic_write_block(
             FURI_LOG_D(TAG, "Failed to send data");
             break;
         }
-        write_success = true;
 
-        // Send Halt
-        plain_data[0] = 0x50;
-        plain_data[1] = 0x00;
-        nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(&crypto, NULL, plain_data, 2 * 8, tx_rx->tx_data, tx_rx->tx_parity);
-        tx_rx->tx_bits = 2 * 8;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
-        // No response is expected
-        furi_hal_nfc_tx_rx(tx_rx, 50);
+        write_success = true;
     } while(false);
 
     return write_success;
 }
 
-bool mf_classic_inc_dec_res_block(
+bool mf_classic_auth_write_block(
     FuriHalNfcTxRxContext* tx_rx,
     MfClassicBlock* src_block,
     uint8_t block_num,
     MfClassicKey key_type,
-    uint64_t key,
-    int32_t d_value) {
+    uint64_t key) {
     furi_assert(tx_rx);
     furi_assert(src_block);
 
     Crypto1 crypto = {};
-    uint8_t plain_data[6] = {};
-    uint8_t cmd;
-    uint8_t resp = 0;
     bool write_success = false;
-
-    if(d_value > 0) {
-        cmd = MF_CLASSIC_INCREMENT_CMD;
-    } else if(d_value < 0) {
-        cmd = MF_CLASSIC_DECREMENT_CMD;
-        d_value = -d_value;
-    } else {
-        cmd = MF_CLASSIC_RESTORE_CMD;
-    }
 
     do {
         furi_hal_nfc_sleep();
@@ -1195,16 +1184,78 @@ bool mf_classic_inc_dec_res_block(
             break;
         }
 
+        if(!mf_classic_write_block(tx_rx, &crypto, block_num, src_block)) {
+            FURI_LOG_D(TAG, "Write fail");
+            break;
+        }
+        write_success = true;
+
+        mf_classic_halt(tx_rx, &crypto);
+    } while(false);
+
+    return write_success;
+}
+
+bool mf_classic_transfer(FuriHalNfcTxRxContext* tx_rx, Crypto1 *crypto, uint8_t block_num) {
+    furi_assert(tx_rx);
+    furi_assert(crypto);
+
+    // Send transfer command
+    uint8_t plain_data[4] = {MF_CLASSIC_TRANSFER_CMD, block_num, 0, 0};
+    uint8_t resp = 0;
+    nfca_append_crc16(plain_data, 2);
+    crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+    tx_rx->tx_bits = 4 * 8;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
+
+    if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
+        if(tx_rx->rx_bits == 4) {
+            crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+            if(resp != 0x0A) {
+                FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
+                return false;
+            }
+        } else {
+            FURI_LOG_D(TAG, "Not ACK received");
+            return false;
+        }
+    } else {
+        FURI_LOG_D(TAG, "Failed to send transfer cmd");
+        return false;
+    }
+
+    return true;
+}
+
+bool mf_classic_value_cmd(
+    FuriHalNfcTxRxContext* tx_rx,
+    Crypto1 *crypto,
+    uint8_t block_num,
+    uint8_t cmd,
+    int32_t d_value) {
+    furi_assert(tx_rx);
+    furi_assert(crypto);
+    furi_assert(
+        cmd == MF_CLASSIC_INCREMENT_CMD || cmd == MF_CLASSIC_DECREMENT_CMD ||
+        cmd == MF_CLASSIC_RESTORE_CMD);
+    furi_assert(d_value >= 0);
+
+    uint8_t plain_data[18] = {};
+    uint8_t resp = 0;
+    bool success = false;
+
+    do {
+        // Send cmd
         plain_data[0] = cmd;
         plain_data[1] = block_num;
         nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(&crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
         tx_rx->tx_bits = 4 * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
+                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on write cmd: %02X", resp);
                     break;
@@ -1222,13 +1273,13 @@ bool mf_classic_inc_dec_res_block(
         memcpy(plain_data, &d_value, sizeof(d_value));
         nfca_append_crc16(plain_data, sizeof(d_value));
         crypto1_encrypt(
-            &crypto, NULL, plain_data, (sizeof(d_value) + 2) * 8, tx_rx->tx_data, tx_rx->tx_parity);
+            crypto, NULL, plain_data, (sizeof(d_value) + 2) * 8, tx_rx->tx_data, tx_rx->tx_parity);
         tx_rx->tx_bits = (sizeof(d_value) + 2) * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         // inc, dec, restore do not ACK, but they do NACK
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
+                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
                     break;
@@ -1239,40 +1290,56 @@ bool mf_classic_inc_dec_res_block(
             }
         }
 
-        // Send transfer command
-        plain_data[0] = MF_CLASSIC_TRANSFER_CMD;
-        plain_data[1] = block_num;
-        nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(&crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
-        tx_rx->tx_bits = 4 * 8;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
+        success = true;
 
-        if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
-            if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(&crypto, tx_rx->rx_data, 4, &resp);
-                if(resp != 0x0A) {
-                    FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
-                    break;
-                }
-            } else {
-                FURI_LOG_D(TAG, "Not ACK received");
-                break;
-            }
-        } else {
-            FURI_LOG_D(TAG, "Failed to send transfer cmd");
+    } while(false);
+
+    return success;
+}
+
+bool mf_classic_value_cmd_full(
+    FuriHalNfcTxRxContext* tx_rx,
+    MfClassicBlock* src_block,
+    uint8_t block_num,
+    MfClassicKey key_type,
+    uint64_t key,
+    int32_t d_value) {
+    furi_assert(tx_rx);
+    furi_assert(src_block);
+
+    Crypto1 crypto = {};
+    uint8_t cmd;
+    bool write_success = false;
+
+    if(d_value > 0) {
+        cmd = MF_CLASSIC_INCREMENT_CMD;
+    } else if(d_value < 0) {
+        cmd = MF_CLASSIC_DECREMENT_CMD;
+        d_value = -d_value;
+    } else {
+        cmd = MF_CLASSIC_RESTORE_CMD;
+    }
+
+    do {
+        furi_hal_nfc_sleep();
+        if(!mf_classic_auth(tx_rx, block_num, key, key_type, &crypto, false, 0)) {
+            FURI_LOG_D(TAG, "Value cmd auth fail");
             break;
         }
+        if(!mf_classic_value_cmd(tx_rx, &crypto, block_num, cmd, d_value)) {
+            FURI_LOG_D(TAG, "Value cmd inc/dec/res fail");
+            break;
+        }
+
+        if(!mf_classic_transfer(tx_rx, &crypto, block_num)) {
+            FURI_LOG_D(TAG, "Value cmd transfer fail");
+            break;
+        }
+
         write_success = true;
 
         // Send Halt
-        plain_data[0] = 0x50;
-        plain_data[1] = 0x00;
-        nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(&crypto, NULL, plain_data, 2 * 8, tx_rx->tx_data, tx_rx->tx_parity);
-        tx_rx->tx_bits = 2 * 8;
-        tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
-        // No response is expected
-        furi_hal_nfc_tx_rx(tx_rx, 50);
+        mf_classic_halt(tx_rx, &crypto);
     } while(false);
 
     return write_success;
@@ -1319,7 +1386,7 @@ bool mf_classic_write_sector(
                     if(key_a_found && key_a_inc_allowed) {
                         FURI_LOG_I(TAG, "Incrementing block %d with key A by %ld", i, diff);
                         uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
-                        if(!mf_classic_inc_dec_res_block(
+                        if(!mf_classic_value_cmd_full(
                                tx_rx, &src_data->block[i], i, MfClassicKeyA, key, diff)) {
                             FURI_LOG_E(TAG, "Failed to increment block %d", i);
                             write_success = false;
@@ -1328,7 +1395,7 @@ bool mf_classic_write_sector(
                     } else if(key_b_found && key_b_inc_allowed) {
                         FURI_LOG_I(TAG, "Incrementing block %d with key B by %ld", i, diff);
                         uint64_t key = nfc_util_bytes2num(sec_tr->key_b, 6);
-                        if(!mf_classic_inc_dec_res_block(
+                        if(!mf_classic_value_cmd_full(
                                tx_rx, &src_data->block[i], i, MfClassicKeyB, key, diff)) {
                             FURI_LOG_E(TAG, "Failed to increment block %d", i);
                             write_success = false;
@@ -1341,7 +1408,7 @@ bool mf_classic_write_sector(
                     if(key_a_found && key_a_dec_allowed) {
                         FURI_LOG_I(TAG, "Decrementing block %d with key A by %ld", i, -diff);
                         uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
-                        if(!mf_classic_inc_dec_res_block(
+                        if(!mf_classic_value_cmd_full(
                                tx_rx, &src_data->block[i], i, MfClassicKeyA, key, diff)) {
                             FURI_LOG_E(TAG, "Failed to decrement block %d", i);
                             write_success = false;
@@ -1350,7 +1417,7 @@ bool mf_classic_write_sector(
                     } else if(key_b_found && key_b_dec_allowed) {
                         FURI_LOG_I(TAG, "Decrementing block %d with key B by %ld", i, diff);
                         uint64_t key = nfc_util_bytes2num(sec_tr->key_b, 6);
-                        if(!mf_classic_inc_dec_res_block(
+                        if(!mf_classic_value_cmd_full(
                                tx_rx, &src_data->block[i], i, MfClassicKeyB, key, diff)) {
                             FURI_LOG_E(TAG, "Failed to decrement block %d", i);
                             write_success = false;
@@ -1371,7 +1438,8 @@ bool mf_classic_write_sector(
                 if(key_a_found && key_a_write_allowed) {
                     FURI_LOG_I(TAG, "Writing block %d with key A", i);
                     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
-                    if(!mf_classic_write_block(tx_rx, &src_data->block[i], i, MfClassicKeyA, key)) {
+                    if(!mf_classic_auth_write_block(
+                           tx_rx, &src_data->block[i], i, MfClassicKeyA, key)) {
                         FURI_LOG_E(TAG, "Failed to write block %d", i);
                         write_success = false;
                         break;
@@ -1379,7 +1447,8 @@ bool mf_classic_write_sector(
                 } else if(key_b_found && key_b_write_allowed) {
                     FURI_LOG_I(TAG, "Writing block %d with key A", i);
                     uint64_t key = nfc_util_bytes2num(sec_tr->key_b, 6);
-                    if(!mf_classic_write_block(tx_rx, &src_data->block[i], i, MfClassicKeyB, key)) {
+                    if(!mf_classic_auth_write_block(
+                           tx_rx, &src_data->block[i], i, MfClassicKeyB, key)) {
                         FURI_LOG_E(TAG, "Failed to write block %d", i);
                         write_success = false;
                         break;
