@@ -58,7 +58,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     info->pulses_count = (off+66*3) - info->start_off;
 
-    bitmap_reverse_bytes(raw,sizeof(raw)); /* Keeloq is LSB first. */
+    bitmap_reverse_bytes_bits(raw,sizeof(raw)); /* Keeloq is LSB first. */
 
     int buttons = raw[7]>>4;
     int lowbat = (raw[8]&0x1) == 0; // Actual bit meaning: good battery level
@@ -104,7 +104,7 @@ static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fieldset
     low_battery = !low_battery; // Bit real meaning is good battery level.
     data[8] |= low_battery;
     data[8] |= (always_one << 1);
-    bitmap_reverse_bytes(data,sizeof(data)); /* Keeloq is LSB first. */
+    bitmap_reverse_bytes_bits(data,sizeof(data)); /* Keeloq is LSB first. */
 
     for (int j = 0; j < 66; j++) {
         if (bitmap_get(data,9,j)) {

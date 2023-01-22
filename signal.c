@@ -343,7 +343,7 @@ void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff,
 /* We decode bits assuming the first bit we receive is the MSB
  * (see bitmap_set/get functions). Certain devices send data
  * encoded in the reverse way. */
-void bitmap_reverse_bytes(uint8_t *p, uint32_t len) {
+void bitmap_reverse_bytes_bits(uint8_t *p, uint32_t len) {
     for (uint32_t j = 0; j < len; j++) {
         uint32_t b = p[j];
         /* Step 1: swap the two nibbles: 12345678 -> 56781234 */
