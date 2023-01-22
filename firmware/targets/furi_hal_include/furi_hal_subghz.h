@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <toolbox/level_duration.h>
 #include <furi_hal_gpio.h>
+#include <furi_hal_spi.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,6 +61,9 @@ typedef enum {
     SubGhzRegulationOnlyRx, /**only Rx*/
     SubGhzRegulationTxRx, /**TxRx*/
 } SubGhzRegulation;
+
+/** SPI handle of currently selected subghz device */
+extern FuriHalSpiBusHandle* subghz_spi_handle;
 
 /* Mirror RX/TX async modulation signal to specified pin
  *

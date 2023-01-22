@@ -21,7 +21,7 @@ static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 //  Internal cc1101
 //static FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
 // External cc1101
-static FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
+FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
 
 typedef struct {
     volatile SubGhzState state;
