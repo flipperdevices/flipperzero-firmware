@@ -310,6 +310,7 @@ void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val, uint
 const char *field_get_type_name(ProtoViewField *f);
 int field_to_string(char *buf, size_t len, ProtoViewField *f);
 bool field_set_from_string(ProtoViewField *f, char *buf, size_t len);
+bool field_incr_value(ProtoViewField *f, int incr);
 
 /* crc.c */
 uint8_t crc8(const uint8_t *data, size_t len, uint8_t init, uint8_t poly);

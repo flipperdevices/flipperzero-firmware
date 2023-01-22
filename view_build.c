@@ -147,34 +147,56 @@ static void text_input_done_callback(void* context) {
     ui_dismiss_keyboard(app);
 }
 
+/* Handles the effects of < and > keys in field editing mode.
+ * Instead of force the user to enter the text input mode, delete
+ * the old value, enter the one, we allow to increment and
+ * decrement the current field in a much simpler way.
+ *
+ * The current filed is changed by 'incr' amount. */
+static bool increment_current_field(ProtoViewApp *app, int incr) {
+    BuildViewPrivData *privdata = app->view_privdata;
+    ProtoViewFieldSet *fs = privdata->fieldset;
+    ProtoViewField *f = fs->fields[privdata->cur_field];
+    return field_incr_value(f,incr);
+}
+
 /* Handle input for fields editing mode. */
 static void process_input_set_fields(ProtoViewApp *app, InputEvent input) {
     BuildViewPrivData *privdata = app->view_privdata;
     ProtoViewFieldSet *fs = privdata->fieldset;
-    if (input.type == InputTypeShort) {
-        if (input.key == InputKeyOk) {
-            /* Show the keyboard to let the user type the new
-             * value. */
-            if (privdata->user_value == NULL)
-                privdata->user_value = malloc(USER_VALUE_LEN);
-            field_to_string(privdata->user_value, USER_VALUE_LEN,
-                            fs->fields[privdata->cur_field]);
-            ui_show_keyboard(app, privdata->user_value, USER_VALUE_LEN,
-                             text_input_done_callback);
-        } else if (input.key == InputKeyDown) {
-            privdata->cur_field = (privdata->cur_field+1) % fs->numfields;
-        } else if (input.key == InputKeyUp) {
-            if (privdata->cur_field == 0)
-                privdata->cur_field = fs->numfields-1;
-            else
-                privdata->cur_field--;
-        }
-    }
 
-    if (input.type == InputTypeLong && input.key == InputKeyOk) {
-        /* Build the message a fresh raw buffer. */
-        RawSamplesBuffer *rs = raw_samples_alloc();
+    if (input.type == InputTypeShort && input.key == InputKeyOk) {
+        /* Show the keyboard to let the user type the new
+         * value. */
+        if (privdata->user_value == NULL)
+            privdata->user_value = malloc(USER_VALUE_LEN);
+        field_to_string(privdata->user_value, USER_VALUE_LEN,
+                        fs->fields[privdata->cur_field]);
+        ui_show_keyboard(app, privdata->user_value, USER_VALUE_LEN,
+                         text_input_done_callback);
+    } else if (input.type == InputTypeShort && input.key == InputKeyDown) {
+        privdata->cur_field = (privdata->cur_field+1) % fs->numfields;
+    } else if (input.type == InputTypeShort && input.key == InputKeyUp) {
+        if (privdata->cur_field == 0)
+            privdata->cur_field = fs->numfields-1;
+        else
+            privdata->cur_field--;
+    } else if (input.type == InputTypeShort && input.key == InputKeyRight) {
+        increment_current_field(app,1);
+    } else if (input.type == InputTypeShort && input.key == InputKeyLeft) {
+        increment_current_field(app,-1);
+    } else if (input.type == InputTypeRepeat && input.key == InputKeyRight) {
+        // The reason why we don't use a large increment directly
+        // is that certain field types only support +1 -1 increments.
+        int times = 10;
+        while(times--) increment_current_field(app,1);
+    } else if (input.type == InputTypeRepeat && input.key == InputKeyLeft) {
+        int times = 10;
+        while(times--) increment_current_field(app,-1);
+    } else if (input.type == InputTypeLong && input.key == InputKeyOk) {
+        // Build the message in a fresh raw buffer.
         if (privdata->decoder->build_message) {
+            RawSamplesBuffer *rs = raw_samples_alloc();
             privdata->decoder->build_message(rs,privdata->fieldset);
             app->signal_decoded = false; // So that the new signal will be
                                          // accepted as the current signal.

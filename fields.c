@@ -162,6 +162,65 @@ bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
     return true;
 }
 
+/* Increment the specified field value of 'incr'. If the field type
+ * does not support increments false is returned, otherwise the
+ * action is performed. */
+bool field_incr_value(ProtoViewField *f, int incr) {
+    switch(f->type) {
+        case FieldTypeStr: return false;
+        case FieldTypeSignedInt: {
+            /* Wrap around depending on the number of bits (f->len)
+             * the integer was declared to have. */
+            int64_t max = (1ULL << (f->len-1))-1;
+            int64_t min = -max-1;
+            int64_t v = (int64_t)f->value + incr;
+            if (v > max) v = min+(v-max-1);
+            if (v < min) v = max+(v-min+1);
+            f->value = v;
+            break;
+        }
+        case FieldTypeBinary:
+        case FieldTypeHex:
+        case FieldTypeUnsignedInt: {
+            /* Wrap around like for the unsigned case, but here
+             * is simpler. */
+            uint64_t max = (1ULL << f->len)-1; // Broken for 64 bits.
+            uint64_t uv = (uint64_t)f->value + incr;
+            if (uv > max) uv = uv & max;
+            f->uvalue = uv;
+            break;
+        }
+        case FieldTypeFloat:
+            f->fvalue += incr;
+            break;
+        case FieldTypeBytes: {
+            // For bytes we only support single unit increments.
+            if (incr != -1 && incr != 1) return false;
+            for (int j = f->len-1; j >= 0; j--) {
+                uint8_t nibble = (j&1) ? (f->bytes[j/2] & 0x0F) :
+                                         ((f->bytes[j/2] & 0xF0) >> 4);
+
+                nibble += incr;
+                nibble &= 0x0F;
+
+                f->bytes[j/2] = (j&1) ? ((f->bytes[j/2] & 0xF0) | nibble) :
+                                        ((f->bytes[j/2] & 0x0F) | (nibble<<4));
+
+		/* Propagate the operation on overflow of this nibble. */
+		if ((incr == 1 && nibble == 0) ||
+		    (incr == -1 && nibble == 0xf))
+		{
+		    continue;
+		}
+		break; // Otherwise stop the loop here.
+            }
+            break;
+        }
+    }
+    return true;
+}
+
+
 /* Free a field set and its contained fields. */
 void fieldset_free(ProtoViewFieldSet *fs) {
     for (uint32_t j = 0; j < fs->numfields; j++)
