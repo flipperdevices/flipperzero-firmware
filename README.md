@@ -12,11 +12,11 @@ To include it in a plugin:
 ```c
 #include "extra/extra.h"
 ```
-To register extra commands, call this function:
+To register extra commands:
 ```c
 extra_init_register();
 ```
-To unregister and free the used memory, use:
+To unregister and free the used memory:
 ```c
 extra_deinit_unregister();
 ```
