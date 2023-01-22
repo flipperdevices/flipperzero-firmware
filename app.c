@@ -245,7 +245,7 @@ static void timer_callback(void *ctx) {
     }
     if (delta < RawSamples->total/2) return;
     app->signal_last_scan_idx = RawSamples->idx;
-    scan_for_signal(app);
+    scan_for_signal(app,RawSamples);
 }
 
 /* This is the navigation callback we use in the view dispatcher used

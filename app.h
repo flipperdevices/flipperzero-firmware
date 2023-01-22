@@ -21,7 +21,7 @@
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/registry.h>
-#include "app_buffer.h"
+#include "raw_samples.h"
 
 #define TAG "ProtoView"
 #define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100 // 100us is 1 pixel by default
@@ -251,7 +251,7 @@ void radio_tx_signal(ProtoViewApp *app, FuriHalSubGhzAsyncTxCallback data_feeder
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
 void reset_current_signal(ProtoViewApp *app);
-void scan_for_signal(ProtoViewApp *app);
+void scan_for_signal(ProtoViewApp *app,RawSamplesBuffer *source);
 bool bitmap_get(uint8_t *b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t *b, uint32_t blen, uint32_t bitpos, bool val);
 void bitmap_copy(uint8_t *d, uint32_t dlen, uint32_t doff, uint8_t *s, uint32_t slen, uint32_t soff, uint32_t count);

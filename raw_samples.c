@@ -5,7 +5,7 @@
 #include <furi/core/string.h>
 #include <furi.h>
 #include <furi_hal.h>
-#include "app_buffer.h"
+#include "raw_samples.h"
 
 /* Allocate and initialize a samples buffer. */
 RawSamplesBuffer *raw_samples_alloc(void) {

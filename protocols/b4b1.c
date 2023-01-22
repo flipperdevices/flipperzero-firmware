@@ -42,20 +42,42 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     info->pulses_count = off - info->start_off;
 
     fieldset_add_bytes(info->fieldset,"id",d,5);
-    fieldset_add_int(info->fieldset,"button",d[2]&0xf,4);
+    fieldset_add_uint(info->fieldset,"button",d[2]&0xf,4);
     return true;
 }
 
+/* Give fields and defaults for the signal creator. */
 static void get_fields(ProtoViewFieldSet *fieldset) {
     uint8_t default_id[3]= {0xAB, 0xCD, 0xE0};
     fieldset_add_bytes(fieldset,"id",default_id,5);
-    fieldset_add_int(fieldset,"button",1,4);
+    fieldset_add_uint(fieldset,"button",1,4);
 }
 
-static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fields)
+/* Create a signal. */
+static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fs)
 {
-    UNUSED(samples);
-    UNUSED(fields);
+    uint32_t te = 334; // Short pulse duration in microseconds.
+
+    // Sync.
+    raw_samples_add(samples,true,te);
+    raw_samples_add(samples,false,te*31);
+
+    // ID + button state
+    uint8_t data[3];
+    memcpy(data,fs->fields[0]->bytes,3);
+    data[3] = (data[3]&0xF0) | fs->fields[1]->uvalue;
+    for (uint32_t j = 0; j < 24; j++) {
+        if (bitmap_get(data,sizeof(data),j)) {
+            raw_samples_add(samples,true,te*3);
+            raw_samples_add(samples,false,te);
+        } else {
+            raw_samples_add(samples,true,te);
+            raw_samples_add(samples,false,te*3);
+        }
+    }
+
+    // Terminator
+    raw_samples_add(samples,true,te);
 }
 
 ProtoViewDecoder B4B1Decoder = {
