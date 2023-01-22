@@ -68,7 +68,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     raw[7] = raw[7]<<4; // Make ID bits contiguous
     fieldset_add_bytes(info->fieldset,"id",raw+4,7); // 28 bits, 7 nibbles
     fieldset_add_bin(info->fieldset,"s2 s1 s0 s3",buttons,4);
-    fieldset_add_bin(info->fieldset,"low battery",lowbat,1);
+    fieldset_add_bin(info->fieldset,"low battery",lowbat,0);
     fieldset_add_bin(info->fieldset,"always one",alwaysone,1);
     return true;
 }
