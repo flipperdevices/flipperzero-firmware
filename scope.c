@@ -38,12 +38,11 @@ static DMA_HandleTypeDef hdma_adc1;
 static TIM_HandleTypeDef htim2;
 
 __IO uint16_t aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE];       /* ADC group regular conversion data (array of data) */
-__IO uint16_t aADCxConvertedData_Voltage_mVolt[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
+__IO uint16_t aADCxConvertedData_Voltage_mVoltA[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
+__IO uint16_t aADCxConvertedData_Voltage_mVoltB[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
 __IO uint8_t ubDmaTransferStatus = 2;   /* Variable set into DMA interruption callback */
-
-void HAL_MspInit(void)
-{
-}
+__IO uint16_t *mvoltWrite = &aADCxConvertedData_Voltage_mVoltA[0];
+__IO uint16_t *mvoltDisplay = &aADCxConvertedData_Voltage_mVoltB[0];
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc)
 {
@@ -191,6 +190,14 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
 }
 
+
+void swap(__IO uint16_t **a, __IO uint16_t **b){
+    __IO uint16_t *tmp;
+    tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
 {
     UNUSED(hadc);
@@ -198,11 +205,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
 
     for (tmp_index = (ADC_CONVERTED_DATA_BUFFER_SIZE / 2);
          tmp_index < ADC_CONVERTED_DATA_BUFFER_SIZE; tmp_index++) {
-        aADCxConvertedData_Voltage_mVolt[tmp_index] =
+        mvoltWrite[tmp_index] =
             __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
                                     aADCxConvertedData[tmp_index]);
     }
     ubDmaTransferStatus = 1;
+    swap(&mvoltWrite, &mvoltDisplay);
 }
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc)
@@ -212,7 +220,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc)
 
     for (tmp_index = 0; tmp_index < (ADC_CONVERTED_DATA_BUFFER_SIZE / 2);
          tmp_index++) {
-        aADCxConvertedData_Voltage_mVolt[tmp_index] =
+        mvoltWrite[tmp_index] =
             __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
                                     aADCxConvertedData[tmp_index]);
     }
@@ -228,8 +236,6 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef * hadc)
 typedef struct {
     uint8_t x, y;
 } ImagePosition;
-
-uint16_t val1;
 
 static ImagePosition image_position = {.x = 0,.y = 0 };
 
@@ -250,8 +256,8 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
 
     canvas_draw_str(canvas, 10, 10, buf);
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
-        uint32_t prev = 64 - (aADCxConvertedData_Voltage_mVolt[x-1] / (VDDA_APPLI / 64));
-        uint32_t cur = 64 - (aADCxConvertedData_Voltage_mVolt[x] / (VDDA_APPLI / 64));
+        uint32_t prev = 64 - (mvoltDisplay[x-1] / (VDDA_APPLI / 64));
+        uint32_t cur = 64 - (mvoltDisplay[x] / (VDDA_APPLI / 64));
         canvas_draw_line(canvas, x - 1, prev, x, cur);
     }
     canvas_draw_line(canvas, 0, 0, 0, 63);
@@ -353,7 +359,6 @@ int32_t scope_main(void *p)
             }
         }
 
-        val1 = aADCxConvertedData_Voltage_mVolt[0];
         view_port_update(view_port);
     }
 
