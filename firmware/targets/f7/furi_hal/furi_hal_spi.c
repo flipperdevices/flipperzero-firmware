@@ -30,6 +30,10 @@ void furi_hal_spi_init() {
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_sd_slow);
 
+    furi_hal_spi_bus_init(&furi_hal_spi_sw_bus);
+    // TODO: this has to be initialized only if external subghz is configured
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_sw_bus_handle_subghz_ext);
+
     FURI_LOG_I(TAG, "Init OK");
 }
 
@@ -82,6 +86,26 @@ void furi_hal_spi_release(FuriHalSpiBusHandle* handle) {
     furi_hal_power_insomnia_exit();
 }
 
+// Checks that bus is hardware
+inline static bool furi_hal_spi_bus_is_hw(FuriHalSpiBus* bus) {
+    return bus->spi != NULL;
+}
+
+
+inline static uint8_t furi_hal_spi_sw_bus_txrx(FuriHalSpiBusHandle* handle, uint8_t dat) {
+    uint8_t dat_in = 0;
+
+    for (uint8_t mask = 0x80; mask > 0; mask >>= 1) {
+        furi_hal_gpio_write(handle->mosi, dat & mask);
+        furi_hal_gpio_write(handle->sck, true);
+        if (furi_hal_gpio_read(handle->miso))
+            dat_in |= mask;
+        furi_hal_gpio_write(handle->sck, false);
+    }
+    return dat_in;
+}
+
+
 static void furi_hal_spi_bus_end_txrx(FuriHalSpiBusHandle* handle, uint32_t timeout) {
     UNUSED(timeout); // FIXME
     while(LL_SPI_GetTxFIFOLevel(handle->bus->spi) != LL_SPI_TX_FIFO_EMPTY)
@@ -117,16 +141,23 @@ bool furi_hal_spi_bus_tx(
     furi_assert(size > 0);
     bool ret = true;
 
-    while(size > 0) {
-        if(LL_SPI_IsActiveFlag_TXE(handle->bus->spi)) {
-            LL_SPI_TransmitData8(handle->bus->spi, *buffer);
+    if (furi_hal_spi_bus_is_hw(handle->bus)) {
+        while(size > 0) {
+            if(LL_SPI_IsActiveFlag_TXE(handle->bus->spi)) {
+                LL_SPI_TransmitData8(handle->bus->spi, *buffer);
+                buffer++;
+                size--;
+            }
+        }
+        furi_hal_spi_bus_end_txrx(handle, timeout);
+        LL_SPI_ClearFlag_OVR(handle->bus->spi);
+    } else {
+        while(size > 0) {
+            furi_hal_spi_sw_bus_txrx(handle, *buffer);
             buffer++;
             size--;
         }
     }
-
-    furi_hal_spi_bus_end_txrx(handle, timeout);
-    LL_SPI_ClearFlag_OVR(handle->bus->spi);
 
     return ret;
 }
@@ -143,33 +174,53 @@ bool furi_hal_spi_bus_trx(
 
     bool ret = true;
     size_t tx_size = size;
-    bool tx_allowed = true;
 
-    while(size > 0) {
-        if(tx_size > 0 && LL_SPI_IsActiveFlag_TXE(handle->bus->spi) && tx_allowed) {
-            if(tx_buffer) {
-                LL_SPI_TransmitData8(handle->bus->spi, *tx_buffer);
-                tx_buffer++;
-            } else {
-                LL_SPI_TransmitData8(handle->bus->spi, 0xFF);
+    if (furi_hal_spi_bus_is_hw(handle->bus)) {
+        bool tx_allowed = true;
+
+        while(size > 0) {
+            if(tx_size > 0 && LL_SPI_IsActiveFlag_TXE(handle->bus->spi) && tx_allowed) {
+                if(tx_buffer) {
+                    LL_SPI_TransmitData8(handle->bus->spi, *tx_buffer);
+                    tx_buffer++;
+                } else {
+                    LL_SPI_TransmitData8(handle->bus->spi, 0xFF);
+                }
+                tx_size--;
+                tx_allowed = false;
             }
-            tx_size--;
-            tx_allowed = false;
+
+            if(LL_SPI_IsActiveFlag_RXNE(handle->bus->spi)) {
+                if(rx_buffer) {
+                    *rx_buffer = LL_SPI_ReceiveData8(handle->bus->spi);
+                    rx_buffer++;
+                } else {
+                    LL_SPI_ReceiveData8(handle->bus->spi);
+                }
+                size--;
+                tx_allowed = true;
+            }
         }
 
-        if(LL_SPI_IsActiveFlag_RXNE(handle->bus->spi)) {
-            if(rx_buffer) {
-                *rx_buffer = LL_SPI_ReceiveData8(handle->bus->spi);
-                rx_buffer++;
+        furi_hal_spi_bus_end_txrx(handle, timeout);
+    } else {
+        uint8_t o_dat, i_dat;
+        while(size > 0) {
+            if (tx_size > 0) {
+                o_dat = *tx_buffer;
+                tx_buffer++;
+                tx_size--;
             } else {
-                LL_SPI_ReceiveData8(handle->bus->spi);
+                o_dat = 0xFF;
             }
-            size--;
-            tx_allowed = true;
+            i_dat = furi_hal_spi_sw_bus_txrx(handle, o_dat);
+            if (rx_buffer) {
+                *rx_buffer = i_dat;
+                rx_buffer++;
+                size--;
+            }
         }
     }
-
-    furi_hal_spi_bus_end_txrx(handle, timeout);
 
     return ret;
 }
