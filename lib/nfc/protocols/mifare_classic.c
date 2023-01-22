@@ -663,10 +663,13 @@ static bool mf_classic_read_sector_with_reader(
             break;
         }
         sector->total_blocks = mf_classic_get_blocks_num_in_sector(sector_reader->sector_num);
+        furi_hal_nfc_sleep();
 
         // Read blocks
         for(uint8_t i = 0; i < sector->total_blocks; i++) {
+            if(!mf_classic_auth(tx_rx, first_block + i, key, key_type, crypto, false, 0)) continue;
             mf_classic_read_block(tx_rx, crypto, first_block + i, &sector->block[i]);
+            furi_hal_nfc_sleep();
         }
         // Save sector keys in last block
         if(sector_reader->key_a != MF_CLASSIC_NO_KEY) {
