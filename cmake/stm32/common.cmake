@@ -62,35 +62,47 @@ function(stm32_print_size_of_target TARGET)
     )
 endfunction()
 
+# This function calls the objcopy program defined in CMAKE_OBJCOPY to generate
+# file with object format specified in OBJCOPY_BFD_OUTPUT.
+# The generated file has the name of the target output but with extension
+# corresponding to the OUTPUT_EXTENSION argument value.
+# The generated file will be placed in the same directory as the target output file.
+function(_stm32_generate_file TARGET OUTPUT_EXTENSION OBJCOPY_BFD_OUTPUT)
+    get_target_property(TARGET_OUTPUT_NAME ${TARGET} OUTPUT_NAME)
+    set(OUTPUT_FILE_NAME "${TARGET_OUTPUT_NAME}.${OUTPUT_EXTENSION}")
+
+    get_target_property(RUNTIME_OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
+    if(RUNTIME_OUTPUT_DIRECTORY)
+        set(OUTPUT_FILE_PATH "${RUNTIME_OUTPUT_DIRECTORY}/${OUTPUT_FILE_NAME}")
+    else()
+        set(OUTPUT_FILE_PATH "${OUTPUT_FILE_NAME}")
+    endif()
+
+    add_custom_command(
+        TARGET ${TARGET}
+        POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -O ${OBJCOPY_BFD_OUTPUT} "$<TARGET_FILE:${TARGET}>" ${OUTPUT_FILE_PATH}
+        BYPRODUCTS ${OUTPUT_FILE_PATH}
+        COMMENT "Generating ${OBJCOPY_BFD_OUTPUT} file ${OUTPUT_FILE_NAME}"
+    )
+endfunction()
+
+# This function adds post-build generation of the binary file from the target ELF.
+# The generated file will be placed in the same directory as the ELF file.
 function(stm32_generate_binary_file TARGET)
-    add_custom_command(
-        TARGET ${TARGET}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O binary ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.bin
-        BYPRODUCTS ${TARGET}.bin
-        COMMENT "Generating binary file ${CMAKE_PROJECT_NAME}.bin"
-    )
+    _stm32_generate_file(${TARGET} "bin" "binary")
 endfunction()
 
+# This function adds post-build generation of the Motorola S-record file from the target ELF.
+# The generated file will be placed in the same directory as the ELF file.
 function(stm32_generate_srec_file TARGET)
-    add_custom_command(
-        TARGET ${TARGET}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O srec ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.srec
-        BYPRODUCTS ${TARGET}.srec
-
-        COMMENT "Generating srec file ${CMAKE_PROJECT_NAME}.srec"
-    )
+    _stm32_generate_file(${TARGET} "srec" "srec")
 endfunction()
 
+# This function adds post-build generation of the Intel hex file from the target ELF.
+# The generated file will be placed in the same directory as the ELF file.
 function(stm32_generate_hex_file TARGET)
-    add_custom_command(
-        TARGET ${TARGET}
-        POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O ihex ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C} ${TARGET}.hex
-        BYPRODUCTS ${TARGET}.hex
-        COMMENT "Generating hex file ${CMAKE_PROJECT_NAME}.hex"
-    )
+    _stm32_generate_file(${TARGET} "hex" "ihex")
 endfunction()
 
 # This function takes FAMILY (e.g. L4) and DEVICE (e.g. L496VG) to output TYPE (e.g. L496xx)
