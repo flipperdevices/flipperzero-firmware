@@ -7,6 +7,7 @@
 #include "two_cities.h"
 #include "all_in_one.h"
 #include "myki.h"
+#include "opal.h"
 
 NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
     [NfcSupportedCardTypePlantain] =
@@ -57,6 +58,13 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
             .verify = myki_parser_verify,
             .read = myki_parser_read,
             .parse = myki_parser_parse,
+        },
+    [NfcSupportedCardTypeOpal] =
+        {
+            .protocol = NfcDeviceProtocolMifareDesfire,
+            .verify = opal_parser_verify,
+            .read = opal_parser_read,
+            .parse = opal_parser_parse,
         },
 };
 
