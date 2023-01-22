@@ -10,7 +10,11 @@
 #include "WiFiScan.h"
 #include "Display.h"
 #include "BatteryInterface.h"
+#ifdef USE_SD_MMC_ALTERNATIVE
+#include "SD_MMCInterface.h"
+#else
 #include "SDInterface.h"
+#endif
 #include "Web.h"
 #include "esp_interface.h"
 #include "a32u4_interface.h"

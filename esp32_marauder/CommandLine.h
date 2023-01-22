@@ -10,7 +10,12 @@
 
 #include "WiFiScan.h"
 #include "Web.h"
+
+#ifdef USE_SD_MMC_ALTERNATIVE
+#include "SD_MMCInterface.h"
+#else
 #include "SDInterface.h"
+#endif
 #include "settings.h"
 
 #ifdef HAS_SCREEN

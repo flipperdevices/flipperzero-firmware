@@ -1,4 +1,4 @@
-#include "SDInterface.h"
+/*#include "SDInterface.h"
 #include "lang_var.h"
 
 bool SDInterface::initSD() {
@@ -226,4 +226,4 @@ void SDInterface::main() {
       this->initSD();
     }
   }
-}
+}*/

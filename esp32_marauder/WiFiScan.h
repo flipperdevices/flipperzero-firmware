@@ -24,7 +24,11 @@
 #ifdef HAS_SCREEN
   #include "Display.h"
 #endif
+#ifdef USE_SD_MMC_ALTERNATIVE
+#include "SD_MMCInterface.h"
+#else
 #include "SDInterface.h"
+#endif
 #include "Buffer.h"
 #include "BatteryInterface.h"
 #include "TemperatureInterface.h"

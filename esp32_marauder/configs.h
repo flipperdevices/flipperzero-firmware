@@ -12,6 +12,7 @@
   #define MARAUDER_FLIPPER
   #define ESP32_CAM
   #define DISABLE_RGB_LED
+  #define USE_SD_MMC_ALTERNATIVE
   
   //#define ESP32_LDDB
 
@@ -360,10 +361,6 @@
 
   #ifdef ESP32_LDDB
     #define SD_CS 4
-  #endif
-
-  #ifdef ESP32_CAM
-    #define SD_CS 12 // not 4, not 15, not 13
   #endif
   //// END SD DEFINITIONS
 

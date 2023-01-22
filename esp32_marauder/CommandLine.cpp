@@ -1,4 +1,179 @@
 #include "CommandLine.h"
+#ifdef ESP32_CAM
+
+bool is_configESPCamera = false;
+bool is_initMicroSDCard = false;
+
+#include "FS.h"                // SD Card ESP32
+#include "SD_MMC.h"            // SD Card ESP32
+#include "esp_camera.h"
+#include "soc/soc.h"           // Disable brownout problems
+#include "soc/rtc_cntl_reg.h"  // Disable brownout problems
+#include "driver/rtc_io.h"
+
+// Pin definition for CAMERA_MODEL_AI_THINKER
+#define PWDN_GPIO_NUM     32
+#define RESET_GPIO_NUM    -1
+#define XCLK_GPIO_NUM      0
+#define SIOD_GPIO_NUM     26
+#define SIOC_GPIO_NUM     27
+
+#define Y9_GPIO_NUM       35
+#define Y8_GPIO_NUM       34
+#define Y7_GPIO_NUM       39
+#define Y6_GPIO_NUM       36
+#define Y5_GPIO_NUM       21
+#define Y4_GPIO_NUM       19
+#define Y3_GPIO_NUM       18
+#define Y2_GPIO_NUM        5
+#define VSYNC_GPIO_NUM    25
+#define HREF_GPIO_NUM     23
+#define PCLK_GPIO_NUM     22
+
+void configESPCamera() {
+  if(is_configESPCamera) { Serial.println("cam1"); return; }
+  else is_configESPCamera = true;
+  Serial.println("cam2");
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+  // Configure Camera parameters
+ 
+  // Object to store the camera configuration parameters
+  camera_config_t config;
+ 
+  config.ledc_channel = LEDC_CHANNEL_0;
+  config.ledc_timer = LEDC_TIMER_0;
+  config.pin_d0 = Y2_GPIO_NUM;
+  config.pin_d1 = Y3_GPIO_NUM;
+  config.pin_d2 = Y4_GPIO_NUM;
+  config.pin_d3 = Y5_GPIO_NUM;
+  config.pin_d4 = Y6_GPIO_NUM;
+  config.pin_d5 = Y7_GPIO_NUM;
+  config.pin_d6 = Y8_GPIO_NUM;
+  config.pin_d7 = Y9_GPIO_NUM;
+  config.pin_xclk = XCLK_GPIO_NUM;
+  config.pin_pclk = PCLK_GPIO_NUM;
+  config.pin_vsync = VSYNC_GPIO_NUM;
+  config.pin_href = HREF_GPIO_NUM;
+  config.pin_sscb_sda = SIOD_GPIO_NUM;
+  config.pin_sscb_scl = SIOC_GPIO_NUM;
+  config.pin_pwdn = PWDN_GPIO_NUM;
+  config.pin_reset = RESET_GPIO_NUM;
+  config.xclk_freq_hz = 20000000;
+  config.pixel_format = PIXFORMAT_JPEG; // Choices are YUV422, GRAYSCALE, RGB565, JPEG
+ 
+  // Select lower framesize if the camera doesn't support PSRAM
+  if (psramFound()) {
+    config.frame_size = FRAMESIZE_UXGA; // FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA
+    config.jpeg_quality = 10; //10-63 lower number means higher quality
+    config.fb_count = 2;
+  } else {
+    config.frame_size = FRAMESIZE_SVGA;
+    config.jpeg_quality = 12;
+    config.fb_count = 1;
+  }
+ 
+  // Initialize the Camera
+  esp_err_t err = esp_camera_init(&config);
+  if (err != ESP_OK) {
+    Serial.printf("Camera init failed with error 0x%x", err);
+    return;
+  }
+ 
+  // Camera quality adjustments
+  sensor_t * s = esp_camera_sensor_get();
+ 
+  // BRIGHTNESS (-2 to 2)
+  s->set_brightness(s, 0);
+  // CONTRAST (-2 to 2)
+  s->set_contrast(s, 0);
+  // SATURATION (-2 to 2)
+  s->set_saturation(s, 0);
+  // SPECIAL EFFECTS (0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia)
+  s->set_special_effect(s, 0);
+  // WHITE BALANCE (0 = Disable , 1 = Enable)
+  s->set_whitebal(s, 1);
+  // AWB GAIN (0 = Disable , 1 = Enable)
+  s->set_awb_gain(s, 1);
+  // WB MODES (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home)
+  s->set_wb_mode(s, 0);
+  // EXPOSURE CONTROLS (0 = Disable , 1 = Enable)
+  s->set_exposure_ctrl(s, 1);
+  // AEC2 (0 = Disable , 1 = Enable)
+  s->set_aec2(s, 0);
+  // AE LEVELS (-2 to 2)
+  s->set_ae_level(s, 0);
+  // AEC VALUES (0 to 1200)
+  s->set_aec_value(s, 300);
+  // GAIN CONTROLS (0 = Disable , 1 = Enable)
+  s->set_gain_ctrl(s, 1);
+  // AGC GAIN (0 to 30)
+  s->set_agc_gain(s, 0);
+  // GAIN CEILING (0 to 6)
+  s->set_gainceiling(s, (gainceiling_t)0);
+  // BPC (0 = Disable , 1 = Enable)
+  s->set_bpc(s, 0);
+  // WPC (0 = Disable , 1 = Enable)
+  s->set_wpc(s, 1);
+  // RAW GMA (0 = Disable , 1 = Enable)
+  s->set_raw_gma(s, 1);
+  // LENC (0 = Disable , 1 = Enable)
+  s->set_lenc(s, 1);
+  // HORIZ MIRROR (0 = Disable , 1 = Enable)
+  s->set_hmirror(s, 0);
+  // VERT FLIP (0 = Disable , 1 = Enable)
+  s->set_vflip(s, 0);
+  // DCW (0 = Disable , 1 = Enable)
+  s->set_dcw(s, 1);
+  // COLOR BAR PATTERN (0 = Disable , 1 = Enable)
+  s->set_colorbar(s, 0);
+}
+ 
+void initMicroSDCard() {
+  /*if(is_initMicroSDCard) { Serial.println("sd1"); return; }
+  else is_initMicroSDCard = true;
+  Serial.println("sd2");*/
+  // Start the MicroSD card
+ 
+  Serial.println("Mounting MicroSD Card");
+  if (!SD_MMC.begin("/sdcard", true, false, SDMMC_FREQ_DEFAULT)) {
+    Serial.println("MicroSD Card Mount Failed");
+    return;
+  }
+  uint8_t cardType = SD_MMC.cardType();
+  if (cardType == CARD_NONE) {
+    Serial.println("No MicroSD Card found");
+    return;
+  }
+}
+ 
+void takeNewPhoto(String path) {
+  // Take Picture with Camera
+ 
+  // Setup frame buffer
+  camera_fb_t  * fb = esp_camera_fb_get();
+ 
+  if (!fb) {
+    Serial.println("Camera capture failed");
+    return;
+  }
+ 
+  // Save picture to microSD card
+  fs::FS &fs = SD_MMC;
+  File file = fs.open(path.c_str(), FILE_WRITE);
+  if (!file) {
+    Serial.println("Failed to open file in write mode");
+  }
+  else {
+    file.write(fb->buf, fb->len); // payload (image), payload length
+    Serial.printf("Saved file to path: %s\n", path.c_str());
+  }
+  // Close the file
+  file.close();
+ 
+  // Return the frame buffer back to the driver for reuse
+  esp_camera_fb_return(fb);
+}
+#endif
 
 CommandLine::CommandLine() {
 }
@@ -11,7 +186,7 @@ void CommandLine::RunSetup() {
   Serial.println("            " + version_number + "\n");
   Serial.println(F("       By: justcallmekoko\n"));
   Serial.println(F("--------------------------------\n\n"));
-  
+
   Serial.print("> ");
 }
 
@@ -36,17 +211,17 @@ void CommandLine::main(uint32_t currentTime) {
 
 LinkedList<String> CommandLine::parseCommand(String input, char* delim) {
   LinkedList<String> cmd_args;
-  
+
   if (input != "") {
-    
+
     char fancy[input.length() + 1] = {};
     input.toCharArray(fancy, input.length() + 1);
-        
+
     char* ptr = strtok(fancy, delim);
-  
+
     while (ptr != NULL) {
       cmd_args.add(String(ptr));
-  
+
       ptr = strtok(NULL, delim);
     }
   }
@@ -66,7 +241,7 @@ int CommandLine::argSearch(LinkedList<String>* cmd_args_list, String key) {
 bool CommandLine::checkValueExists(LinkedList<String>* cmd_args_list, int index) {
   if (index < cmd_args_list->size() - 1)
     return true;
-    
+
   return false;
 }
 
@@ -111,7 +286,7 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_CLEARAP_CMD_A);
     Serial.println(HELP_REBOOT_CMD);
     Serial.println(HELP_UPDATE_CMD_A);
-    
+
     // WiFi sniff/scan
     Serial.println(HELP_SCANAP_CMD);
     Serial.println(HELP_SCANSTA_CMD);
@@ -123,10 +298,10 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_SNIFF_DEAUTH_CMD);
     Serial.println(HELP_SNIFF_PMKID_CMD);
     Serial.println(HELP_STOPSCAN_CMD);
-    
+
     // WiFi attack
     Serial.println(HELP_ATTACK_CMD);
-    
+
     // WiFi Aux
     Serial.println(HELP_LIST_AP_CMD_A);
     Serial.println(HELP_LIST_AP_CMD_B);
@@ -134,7 +309,7 @@ void CommandLine::runCommand(String input) {
     Serial.println(HELP_SEL_CMD_A);
     Serial.println(HELP_SSID_CMD_A);
     Serial.println(HELP_SSID_CMD_B);
-    
+
     // Bluetooth sniff/scan
     Serial.println(HELP_BT_SNIFF_CMD);
     Serial.println(HELP_BT_SKIM_CMD);
@@ -153,22 +328,22 @@ void CommandLine::runCommand(String input) {
       web_obj.shutdownServer();
       return;
     }
-    
+
     wifi_scan_obj.StartScan(WIFI_SCAN_OFF);
 
     Serial.println("Stopping WiFi tran/recv");
 
     // If we don't do this, the text and button coordinates will be off
-    #ifdef HAS_SCREEN
-      display_obj.tft.init();
-      menu_function_obj.changeMenu(menu_function_obj.current_menu);
-    #endif
+#ifdef HAS_SCREEN
+    display_obj.tft.init();
+    menu_function_obj.changeMenu(menu_function_obj.current_menu);
+#endif
   }
   // Channel command
   else if (cmd_args.get(0) == CH_CMD) {
     // Search for channel set arg
     int ch_set = this->argSearch(&cmd_args, "-s");
-    
+
     if (cmd_args.size() == 1) {
       Serial.println("Current channel: " + (String)wifi_scan_obj.set_channel);
     }
@@ -178,17 +353,37 @@ void CommandLine::runCommand(String input) {
       Serial.println("Set channel: " + (String)wifi_scan_obj.set_channel);
     }
   }
-  #ifdef ESP32_CAM
-    else if (cmd_args.get(0) == CAM_PHOTO) {
-      pinMode(4,OUTPUT);
-      digitalWrite(4,HIGH);
-      delay(200);
-      digitalWrite(4,LOW);
-      Serial.println("Saved to SD");
-      
+#ifdef ESP32_CAM
+  if (cmd_args.get(0) == CAM_PHOTO) {
+    Serial.println("Camera capture start");
+    pinMode(4, OUTPUT);
+    digitalWrite(4, HIGH);
+    // Initialize the camera
+    configESPCamera(); Serial.println("Camera OK!");
+
+    // Initialize the MicroSD
+    Serial.print("Initializing the MicroSD card module... ");
+    initMicroSDCard();
+
+    int i = 0;
+    while(true)
+    {
+      String path = "/photo_" + String(i++) + ".jpg";
+      if (!SD_MMC.exists(path.c_str()))
+      {
+        takeNewPhoto(path);
+        break;
+      }
     }
-  #endif
-  
+
+    // Turns off the ESP32-CAM white on-board LED (flash) connected to GPIO 4
+    digitalWrite(4, LOW);
+    //rtc_gpio_hold_en(GPIO_NUM_4);
+
+    Serial.println("Camera capture finish");
+  }
+#endif
+
   // Clear APs
   else if (cmd_args.get(0) == CLEARAP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a"); // APs
@@ -196,23 +391,23 @@ void CommandLine::runCommand(String input) {
     int cl_sw = this->argSearch(&cmd_args, "-c"); // Stations
 
     if (ap_sw != -1) {
-      #ifdef HAS_SCREEN
-        menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
-      #endif
+#ifdef HAS_SCREEN
+      menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
+#endif
       wifi_scan_obj.RunClearAPs();
     }
 
     if (ss_sw != -1) {
-      #ifdef HAS_SCREEN
-        menu_function_obj.changeMenu(&menu_function_obj.clearSSIDsMenu);
-      #endif
+#ifdef HAS_SCREEN
+      menu_function_obj.changeMenu(&menu_function_obj.clearSSIDsMenu);
+#endif
       wifi_scan_obj.RunClearSSIDs();
     }
 
     if (cl_sw != -1) {
-      #ifdef HAS_SCREEN
-        menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
-      #endif
+#ifdef HAS_SCREEN
+      menu_function_obj.changeMenu(&menu_function_obj.clearAPsMenu);
+#endif
       wifi_scan_obj.RunClearStations();
     }
   }
@@ -261,10 +456,10 @@ void CommandLine::runCommand(String input) {
     // AP Scan
     if (cmd_args.get(0) == SCANAP_CMD) {
       int full_sw = -1;
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
 
       if (full_sw == -1) {
         Serial.println("Starting AP scan. Stop with " + (String)STOPSCAN_CMD);
@@ -278,76 +473,76 @@ void CommandLine::runCommand(String input) {
     // Raw sniff
     else if (cmd_args.get(0) == SNIFF_RAW_CMD) {
       Serial.println("Starting Raw sniff. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_RAW_CAPTURE, TFT_WHITE);
     }
     // Scan stations
-    else if (cmd_args.get(0) == SCANSTA_CMD) {    
-      Serial.println("Starting Station scan. Stop with " + (String)STOPSCAN_CMD);  
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+    else if (cmd_args.get(0) == SCANSTA_CMD) {
+      Serial.println("Starting Station scan. Stop with " + (String)STOPSCAN_CMD);
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_STATION, TFT_ORANGE);
     }
     // Beacon sniff
     else if (cmd_args.get(0) == SNIFF_BEACON_CMD) {
       Serial.println("Starting Beacon sniff. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_AP, TFT_MAGENTA);
     }
     // Probe sniff
     else if (cmd_args.get(0) == SNIFF_PROBE_CMD) {
       Serial.println("Starting Probe sniff. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_PROBE, TFT_MAGENTA);
     }
     // Deauth sniff
     else if (cmd_args.get(0) == SNIFF_DEAUTH_CMD) {
       Serial.println("Starting Deauth sniff. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_DEAUTH, TFT_RED);
     }
     // Pwn sniff
     else if (cmd_args.get(0) == SNIFF_PWN_CMD) {
       Serial.println("Starting Pwnagotchi sniff. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_PWN, TFT_MAGENTA);
     }
     // Espressif sniff
     else if (cmd_args.get(0) == SNIFF_ESP_CMD) {
       Serial.println("Starting Espressif device sniff. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(WIFI_SCAN_ESPRESSIF, TFT_MAGENTA);
     }
     // PMKID sniff
     else if (cmd_args.get(0) == SNIFF_PMKID_CMD) {
       int ch_sw = this->argSearch(&cmd_args, "-c");
       int d_sw = this->argSearch(&cmd_args, "-d"); // Deauth for pmkid
-      
+
       if (ch_sw != -1) {
         wifi_scan_obj.set_channel = cmd_args.get(ch_sw + 1).toInt();
         wifi_scan_obj.changeChannel();
         Serial.println("Set channel: " + (String)wifi_scan_obj.set_channel);
-        
+
       }
 
       if (d_sw == -1) {
@@ -370,14 +565,14 @@ void CommandLine::runCommand(String input) {
       int src_addr_sw = this->argSearch(&cmd_args, "-s");
       int dst_addr_sw = this->argSearch(&cmd_args, "-d");
       int targ_sw = this->argSearch(&cmd_args, "-c");
-  
+
       if (attack_type_switch == -1) {
         Serial.println("You must specify an attack type");
         return;
       }
       else {
         String attack_type = cmd_args.get(attack_type_switch + 1);
-  
+
         // Branch on attack type
         // Deauth
         if (attack_type == ATTACK_TYPE_DEAUTH) {
@@ -401,10 +596,10 @@ void CommandLine::runCommand(String input) {
               Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
               return;
             }
-            #ifdef HAS_SCREEN
-              display_obj.clearScreen();
-              menu_function_obj.drawStatusBar();
-            #endif
+#ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+#endif
             Serial.println("Starting Deauthentication attack. Stop with " + (String)STOPSCAN_CMD);
             // Station list not specified
             if (targ_sw == -1)
@@ -416,15 +611,15 @@ void CommandLine::runCommand(String input) {
           // Source addr specified
           else {
             String src_mac_str = cmd_args.get(src_addr_sw + 1);
-            sscanf(src_mac_str.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx", 
-              &wifi_scan_obj.src_mac[0], &wifi_scan_obj.src_mac[1], &wifi_scan_obj.src_mac[2], &wifi_scan_obj.src_mac[3], &wifi_scan_obj.src_mac[4], &wifi_scan_obj.src_mac[5]);
+            sscanf(src_mac_str.c_str(), "%2hhx:%2hhx:%2hhx:%2hhx:%2hhx:%2hhx",
+                   &wifi_scan_obj.src_mac[0], &wifi_scan_obj.src_mac[1], &wifi_scan_obj.src_mac[2], &wifi_scan_obj.src_mac[3], &wifi_scan_obj.src_mac[4], &wifi_scan_obj.src_mac[5]);
 
-            #ifdef HAS_SCREEN
-              display_obj.clearScreen();
-              menu_function_obj.drawStatusBar();
-            #endif
+#ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+#endif
             Serial.println("Starting Manual Deauthentication attack. Stop with " + (String)STOPSCAN_CMD);
-            wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_MANUAL, TFT_RED);            
+            wifi_scan_obj.StartScan(WIFI_ATTACK_DEAUTH_MANUAL, TFT_RED);
           }
         }
         // Beacon
@@ -435,19 +630,19 @@ void CommandLine::runCommand(String input) {
               Serial.println("You don't have any SSIDs in your list. Use " + (String)SSID_CMD);
               return;
             }
-            #ifdef HAS_SCREEN
-              display_obj.clearScreen();
-              menu_function_obj.drawStatusBar();
-            #endif
+#ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+#endif
             Serial.println("Starting Beacon list spam. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_LIST, TFT_RED);
           }
           // spam with random
           else if (rand_beacon_sw != -1) {
-            #ifdef HAS_SCREEN
-              display_obj.clearScreen();
-              menu_function_obj.drawStatusBar();
-            #endif
+#ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+#endif
             Serial.println("Starting random Beacon spam. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_BEACON_SPAM, TFT_ORANGE);
           }
@@ -457,10 +652,10 @@ void CommandLine::runCommand(String input) {
               Serial.println("You don't have any targets selected. Use " + (String)SEL_CMD);
               return;
             }
-            #ifdef HAS_SCREEN
-              display_obj.clearScreen();
-              menu_function_obj.drawStatusBar();
-            #endif
+#ifdef HAS_SCREEN
+            display_obj.clearScreen();
+            menu_function_obj.drawStatusBar();
+#endif
             Serial.println("Starting Targeted AP Beacon spam. Stop with " + (String)STOPSCAN_CMD);
             wifi_scan_obj.StartScan(WIFI_ATTACK_AP_SPAM, TFT_MAGENTA);
           }
@@ -474,18 +669,18 @@ void CommandLine::runCommand(String input) {
             return;
           }
           Serial.println("Starting Probe spam. Stop with " + (String)STOPSCAN_CMD);
-          #ifdef HAS_SCREEN
-            display_obj.clearScreen();
-            menu_function_obj.drawStatusBar();
-          #endif
+#ifdef HAS_SCREEN
+          display_obj.clearScreen();
+          menu_function_obj.drawStatusBar();
+#endif
           wifi_scan_obj.StartScan(WIFI_ATTACK_AUTH, TFT_RED);
         }
         else if (attack_type == ATTACK_TYPE_RR) {
           Serial.println("Starting Rick Roll Beacon spam. Stop with " + (String)STOPSCAN_CMD);
-          #ifdef HAS_SCREEN
-            display_obj.clearScreen();
-            menu_function_obj.drawStatusBar();
-          #endif
+#ifdef HAS_SCREEN
+          display_obj.clearScreen();
+          menu_function_obj.drawStatusBar();
+#endif
           wifi_scan_obj.StartScan(WIFI_ATTACK_RICK_ROLL, TFT_YELLOW);
         }
         else {
@@ -499,19 +694,19 @@ void CommandLine::runCommand(String input) {
     // Bluetooth scan
     if (cmd_args.get(0) == BT_SNIFF_CMD) {
       Serial.println("Starting Bluetooth scan. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(BT_SCAN_ALL, TFT_GREEN);
     }
     // Bluetooth CC Skimmer scan
     else if (cmd_args.get(0) == BT_SKIM_CMD) {
       Serial.println("Starting Bluetooth CC Skimmer scan. Stop with " + (String)STOPSCAN_CMD);
-      #ifdef HAS_SCREEN
-        display_obj.clearScreen();
-        menu_function_obj.drawStatusBar();
-      #endif
+#ifdef HAS_SCREEN
+      display_obj.clearScreen();
+      menu_function_obj.drawStatusBar();
+#endif
       wifi_scan_obj.StartScan(BT_SCAN_SKIMMERS, TFT_MAGENTA);
     }
 
@@ -646,7 +841,7 @@ void CommandLine::runCommand(String input) {
     }
     else if (cl_sw != -1) {
       LinkedList<String> sta_index = this->parseCommand(cmd_args.get(cl_sw + 1), ",");
-      
+
       // Select all Stations
       if (cmd_args.get(cl_sw + 1) == "all") {
         for (int i = 0; i < stations->size(); i++) {

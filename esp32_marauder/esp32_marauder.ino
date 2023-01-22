@@ -11,7 +11,6 @@ https://www.online-utility.org/image/convert/to/XBM
   #define MenuFunctions_h
   #define Display_h
 #endif
-
 #include <WiFi.h>
 #include <Wire.h>
 #include "esp_wifi.h"
@@ -24,7 +23,11 @@ https://www.online-utility.org/image/convert/to/XBM
 
 #include "Assets.h"
 #include "WiFiScan.h"
+#ifdef USE_SD_MMC_ALTERNATIVE
+#include "SD_MMCInterface.h"
+#else
 #include "SDInterface.h"
+#endif
 #include "Web.h"
 #include "Buffer.h"
 #include "BatteryInterface.h"
@@ -103,10 +106,9 @@ void backlightOff() {
 
 void setup()
 {
-    #ifndef ESP32_CAM
+  #ifndef ESP32_CAM
     pinMode(FLASH_BUTTON, INPUT);
   #endif
-  
 
   #ifdef HAS_SCREEN
     pinMode(TFT_BL, OUTPUT);
@@ -123,13 +125,13 @@ void setup()
     digitalWrite(TFT_CS, HIGH);
   #endif
 
-  pinMode(SD_CS, OUTPUT);
+  /*pinMode(SD_CS, OUTPUT);
 
   delay(10);
   
   digitalWrite(SD_CS, HIGH);
 
-  delay(10);
+  delay(10);*/
 
   Serial.begin(115200);
   
