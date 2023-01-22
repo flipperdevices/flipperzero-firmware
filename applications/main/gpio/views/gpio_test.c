@@ -1,7 +1,7 @@
 #include "gpio_test.h"
 #include "digital_signal.h"
 #include "furi_hal.h"
-#include "furi_hal_pwm.h"
+#include "advanced_pwm.h"
 
 #include "../gpio_item.h"
 
@@ -42,6 +42,8 @@ typedef struct {
     int32_t pwm_freq;
     int32_t pwm_duty;
     bool pwm_updated;
+    bool pwm_started;
+    AdvancedPwm* pwm_ctx;
 
     float ws2812_time;
     uint32_t ws2812_led;
@@ -79,28 +81,19 @@ typedef enum {
     MenuMode,
     MenuInputConfig,
     MenuOutputConfig,
-    MenuSignalSimple,
-    MenuSignalFull,
+    MenuSignal,
     MenuWs2812,
     MenuWs2812Led,
     MenuPwmFreq,
     MenuPwmDuty,
     MenuServoAngle,
+    MenuServoMinPulse,
+    MenuServoMaxPulse,
     MenuServoFreq
 } MenuIndex;
 
 typedef enum { MenuModeInput, MenuModeOutput, MenuModeOutputToggle, MenuModeSignal } MenuModeIndex;
 typedef enum { MenuSignalWs2812, MenuSignalPwm, MenuSignalServo } MenuSignalModeIndex;
-
-static MenuIndex gpio_menu_signal_caps[GPIO_ITEM_COUNT] = {
-    MenuSignalFull,
-    MenuSignalSimple,
-    MenuSignalFull,
-    MenuSignalSimple,
-    MenuSignalSimple,
-    MenuSignalSimple,
-    MenuSignalSimple,
-    MenuSignalSimple};
 
 static MenuEntry gpio_menu_entries[] = {
     [MenuGpio] =
@@ -121,9 +114,7 @@ static MenuEntry gpio_menu_entries[] = {
         {.name = "Config",
          .options = {"Push Pull", "Open Drain"},
          .update_cbr = &gpio_menu_config_cbr},
-    [MenuSignalSimple] =
-        {.name = "Signal", .options = {"WS2812"}, .update_cbr = &gpio_menu_signal_cbr},
-    [MenuSignalFull] =
+    [MenuSignal] =
         {.name = "Signal",
          .options = {"WS2812", "PWM", "Servo"},
          .update_cbr = &gpio_menu_signal_cbr},
@@ -149,8 +140,12 @@ static MenuEntry gpio_menu_entries[] = {
          .update_cbr = &gpio_menu_pwm_cbr},
     [MenuServoAngle] =
         {.name = "Angle",
-         .options = {"-90", "-45", "0", "45", "90"},
+         .options = {"-90", "-22.5", "-45", "0", "22.5", "45", "90"},
          .update_cbr = &gpio_menu_servo_cbr},
+    [MenuServoMinPulse] =
+        {.name = "Min", .options = {"500 us", "1000 us"}, .update_cbr = &gpio_menu_servo_cbr},
+    [MenuServoMaxPulse] =
+        {.name = "Max", .options = {"2000 us", "2500 us"}, .update_cbr = &gpio_menu_servo_cbr},
     [MenuServoFreq] = {
         .name = "Freq",
         .options = {"50 Hz", "100 Hz", "200 Hz"},
@@ -484,8 +479,7 @@ static void gpio_menu_gpio_cbr(void* _model, uint32_t entry) {
     gpio_menu_value_set(model, MenuMode, model->pin_mode[pin_index]);
     gpio_menu_value_set(model, MenuInputConfig, model->pin_in_config[pin_index]);
     gpio_menu_value_set(model, MenuOutputConfig, model->pin_out_config[pin_index]);
-    gpio_menu_value_set(model, MenuSignalSimple, model->pin_signal[pin_index]);
-    gpio_menu_value_set(model, MenuSignalFull, model->pin_signal[pin_index]);
+    gpio_menu_value_set(model, MenuSignal, model->pin_signal[pin_index]);
 }
 
 static void gpio_menu_config_cbr(void* _model, uint32_t entry) {
@@ -497,34 +491,28 @@ static void gpio_menu_config_cbr(void* _model, uint32_t entry) {
 
 static void gpio_menu_mode_cbr(void* _model, uint32_t entry) {
     GpioTestModel* model = _model;
-    uint8_t pin_index = gpio_menu_value_get(model, MenuGpio);
-    bool has_full = gpio_menu_signal_caps[pin_index] == MenuSignalFull;
 
     switch(gpio_menu_value_get(model, entry)) {
     case MenuModeInput:
         gpio_menu_enable(model, MenuInputConfig, true);
         gpio_menu_enable(model, MenuOutputConfig, false);
-        gpio_menu_enable(model, MenuSignalSimple, false);
-        gpio_menu_enable(model, MenuSignalFull, false);
+        gpio_menu_enable(model, MenuSignal, false);
         break;
     case MenuModeOutput:
     case MenuModeOutputToggle:
         gpio_menu_enable(model, MenuInputConfig, false);
         gpio_menu_enable(model, MenuOutputConfig, true);
-        gpio_menu_enable(model, MenuSignalSimple, false);
-        gpio_menu_enable(model, MenuSignalFull, false);
+        gpio_menu_enable(model, MenuSignal, false);
         break;
     case MenuModeSignal:
         gpio_menu_enable(model, MenuInputConfig, false);
         gpio_menu_enable(model, MenuOutputConfig, true);
-        gpio_menu_enable(model, MenuSignalSimple, !has_full);
-        gpio_menu_enable(model, MenuSignalFull, has_full);
+        gpio_menu_enable(model, MenuSignal, true);
         break;
     default:
         gpio_menu_enable(model, MenuInputConfig, false);
         gpio_menu_enable(model, MenuOutputConfig, false);
-        gpio_menu_enable(model, MenuSignalSimple, false);
-        gpio_menu_enable(model, MenuSignalFull, false);
+        gpio_menu_enable(model, MenuSignal, false);
         break;
     }
 
@@ -552,6 +540,8 @@ static void gpio_menu_signal_cbr(void* _model, uint32_t entry) {
         gpio_menu_enable(model, MenuPwmFreq, false);
         gpio_menu_enable(model, MenuPwmDuty, false);
         gpio_menu_enable(model, MenuServoFreq, false);
+        gpio_menu_enable(model, MenuServoMinPulse, false);
+        gpio_menu_enable(model, MenuServoMaxPulse, false);
         gpio_menu_enable(model, MenuServoAngle, false);
         return;
     }
@@ -569,6 +559,8 @@ static void gpio_menu_signal_cbr(void* _model, uint32_t entry) {
         gpio_menu_enable(model, MenuPwmFreq, false);
         gpio_menu_enable(model, MenuPwmDuty, false);
         gpio_menu_enable(model, MenuServoFreq, false);
+        gpio_menu_enable(model, MenuServoMinPulse, false);
+        gpio_menu_enable(model, MenuServoMaxPulse, false);
         gpio_menu_enable(model, MenuServoAngle, false);
         break;
     case MenuSignalPwm:
@@ -577,6 +569,8 @@ static void gpio_menu_signal_cbr(void* _model, uint32_t entry) {
         gpio_menu_enable(model, MenuPwmFreq, true);
         gpio_menu_enable(model, MenuPwmDuty, true);
         gpio_menu_enable(model, MenuServoFreq, false);
+        gpio_menu_enable(model, MenuServoMinPulse, false);
+        gpio_menu_enable(model, MenuServoMaxPulse, false);
         gpio_menu_enable(model, MenuServoAngle, false);
         model->pwm_updated = true;
         break;
@@ -586,6 +580,8 @@ static void gpio_menu_signal_cbr(void* _model, uint32_t entry) {
         gpio_menu_enable(model, MenuPwmFreq, false);
         gpio_menu_enable(model, MenuPwmDuty, false);
         gpio_menu_enable(model, MenuServoFreq, true);
+        gpio_menu_enable(model, MenuServoMinPulse, true);
+        gpio_menu_enable(model, MenuServoMaxPulse, true);
         gpio_menu_enable(model, MenuServoAngle, true);
         model->pwm_updated = true;
         break;
@@ -595,6 +591,8 @@ static void gpio_menu_signal_cbr(void* _model, uint32_t entry) {
         gpio_menu_enable(model, MenuPwmFreq, false);
         gpio_menu_enable(model, MenuPwmDuty, false);
         gpio_menu_enable(model, MenuServoFreq, false);
+        gpio_menu_enable(model, MenuServoMinPulse, false);
+        gpio_menu_enable(model, MenuServoMaxPulse, false);
         gpio_menu_enable(model, MenuServoAngle, false);
         break;
     }
@@ -614,8 +612,8 @@ static void gpio_menu_pwm_cbr(void* _model, uint32_t entry) {
         model->pwm_freq = gpio_menu_value_get(model, MenuPwmFreq);
         model->pwm_updated = true;
     }
-    if(model->pwm_duty != gpio_menu_value_get(model, MenuPwmDuty)) {
-        model->pwm_duty = gpio_menu_value_get(model, MenuPwmDuty);
+    if(model->pwm_duty != gpio_menu_value_get(model, MenuPwmDuty) * 100) {
+        model->pwm_duty = gpio_menu_value_get(model, MenuPwmDuty) * 100;
         model->pwm_updated = true;
     }
 
@@ -629,13 +627,20 @@ static void gpio_menu_servo_cbr(void* _model, uint32_t entry) {
         return;
     }
     int32_t freqs[] = {50, 100, 200};
+    int32_t min_pulse[] = {500, 1000};
+    int32_t max_pulse[] = {2000, 2500};
 
-    int32_t freq = gpio_menu_value_get(model, MenuServoFreq);
+    int32_t freq = freqs[gpio_menu_value_get(model, MenuServoFreq)];
     int32_t angle = gpio_menu_value_get(model, MenuServoAngle);
-    int32_t duty = 5 + angle;
+    int32_t min = min_pulse[gpio_menu_value_get(model, MenuServoMinPulse)];
+    int32_t max = max_pulse[gpio_menu_value_get(model, MenuServoMaxPulse)];
 
-    if(model->pwm_freq != freqs[freq]) {
-        model->pwm_freq = freqs[freq];
+    int32_t span = max - min;
+    int32_t pulse_length = min + (span * angle) / 6;
+    int32_t duty = (pulse_length * freq) / 100;
+
+    if(model->pwm_freq != freq) {
+        model->pwm_freq = freq;
         model->pwm_updated = true;
     }
     if(model->pwm_duty != duty) {
@@ -650,62 +655,37 @@ static void gpio_test_pwm_update(GpioTestModel* model) {
     if(furi_mutex_acquire(model->mutex, 0) != FuriStatusOk) {
         return;
     }
-    uint32_t pins[2] = {0, 2};
-    FuriHalPwmOutputId channels[2] = {FuriHalPwmOutputIdTim1PA7, FuriHalPwmOutputIdLptim2PA4};
+    bool pwm_used = false;
 
-    for(uint32_t pos = 0; pos < 2; pos++) {
-        FuriHalPwmOutputId chan = channels[pos];
-        uint32_t pin_index = pins[pos];
-
-        if(model->pin_mode[pin_index] != MenuModeSignal ||
-           (model->pin_signal[pin_index] != MenuSignalPwm &&
-            model->pin_signal[pin_index] != MenuSignalServo)) {
-            if(model->pwm_enabled[pin_index]) {
-                FURI_LOG_D("PWM", "IO %lu: stopping", pin_index);
-                model->pwm_enabled[pin_index] = false;
-                furi_hal_pwm_stop(chan);
-            }
-            continue;
+    for(uint32_t pin_index = 0; pin_index < GPIO_ITEM_COUNT; pin_index++) {
+        if(model->pin_signal[pin_index] == MenuSignalPwm ||
+           model->pin_signal[pin_index] == MenuSignalServo) {
+            pwm_used = true;
+            advanced_pwm_add_gpio(model->pwm_ctx, gpio_item_get_gpiopin(pin_index));
         }
+    }
+
+    if(!pwm_used) {
+        if(model->pwm_started) {
+            FURI_LOG_D("PWM", "not used, disabling generator");
+            advanced_pwm_stop(model->pwm_ctx);
+            advanced_pwm_reset_gpio(model->pwm_ctx);
+            model->pwm_started = false;
+        }
+    } else if(!model->pwm_started) {
+        FURI_LOG_D("PWM", "not started yet, starting");
 
         if(model->pwm_freq == 0 || model->pwm_duty == 0) {
             FURI_LOG_D(
-                "PWM",
-                "IO %lu: starting %d with %ld %ld -> zero, aborting",
-                pin_index,
-                chan,
-                model->pwm_freq,
-                model->pwm_duty);
-            continue;
+                "PWM", "starting with %ld %ld -> zero, aborting", model->pwm_freq, model->pwm_duty);
+        } else {
+            advanced_pwm_set_frequency(model->pwm_ctx, model->pwm_freq, model->pwm_duty);
+            advanced_pwm_start(model->pwm_ctx);
+            model->pwm_started = true;
         }
-
-        if(!model->pwm_enabled[pin_index]) {
-            FURI_LOG_D(
-                "PWM",
-                "IO %lu: starting %d with %ld %ld",
-                pin_index,
-                chan,
-                model->pwm_freq,
-                model->pwm_duty);
-            model->pwm_enabled[pin_index] = true;
-            furi_hal_pwm_start(chan, model->pwm_freq, model->pwm_duty);
-            continue;
-        }
-
-        if(!model->pwm_updated) {
-            continue;
-        }
-
-        FURI_LOG_D(
-            "PWM",
-            "IO %lu: update %d with %ld %ld",
-            pin_index,
-            chan,
-            model->pwm_freq,
-            model->pwm_duty);
-        furi_hal_pwm_stop(chan);
-        furi_hal_pwm_start(chan, model->pwm_freq, model->pwm_duty);
-        //furi_hal_pwm_set_params(chan, model->pwm_freq, model->pwm_duty);
+    } else {
+        FURI_LOG_D("PWM", "update with %ld %ld", model->pwm_freq, model->pwm_duty);
+        advanced_pwm_set_frequency(model->pwm_ctx, model->pwm_freq, model->pwm_duty);
     }
 
     model->pwm_updated = false;
@@ -800,6 +780,9 @@ GpioTest* gpio_test_alloc() {
 
     model->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
+    model->pwm_ctx = advanced_pwm_alloc();
+    advanced_pwm_set_polarity(model->pwm_ctx, true);
+
     model->menu_entry = 0;
     model->menu = gpio_menu_entries;
     model->signal_bit_0 = digital_signal_alloc(4);
@@ -844,6 +827,7 @@ void gpio_test_free(GpioTest* gpio_test) {
 
     GpioTestModel* model = view_get_model(gpio_test->view);
     furi_mutex_free(model->mutex);
+    advanced_pwm_free(model->pwm_ctx);
     digital_signal_free(model->signal_bit_0);
     digital_signal_free(model->signal_bit_1);
     digital_signal_free(model->signal_reset);
