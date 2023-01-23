@@ -226,6 +226,37 @@ int32_t flizzer_tracker_app(void *p)
         {
             save_song(tracker, tracker->filepath);
         }
+
+        if(event.type == EventTypeLoadSong)
+        {
+            tracker->dialogs = furi_record_open(RECORD_DIALOGS);
+            tracker->is_loading = true;
+
+            FuriString* path;
+            path = furi_string_alloc();
+            furi_string_set(path, FLIZZER_TRACKER_FOLDER);
+
+            DialogsFileBrowserOptions browser_options;
+            dialog_file_browser_set_basic_options(&browser_options, SONG_FILE_EXT, &I_flizzer_tracker_module);
+            browser_options.base_path = FLIZZER_TRACKER_FOLDER;
+            browser_options.hide_ext = false;
+
+            bool ret = dialog_file_browser_show(tracker->dialogs, path, path, &browser_options);
+
+            furi_record_close(RECORD_DIALOGS);
+
+            if(ret)
+            {
+                bool result = load_song_util(tracker, path);
+                UNUSED(result);
+            }
+
+            else
+            {
+                furi_string_free(path);
+            }
+
+        }
     }
 
     stop();

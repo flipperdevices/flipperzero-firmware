@@ -29,7 +29,7 @@ void save_instrument_inner(Stream* stream, Instrument* inst)
 
     for(uint8_t i = 0; i < INST_PROG_LEN; i++)
     {
-        if(inst->program[i] != TE_PROGRAM_NOP)
+        if((inst->program[i] & 0x7fff) != TE_PROGRAM_NOP)
         {
             progsteps = i + 1;
         }
@@ -39,7 +39,7 @@ void save_instrument_inner(Stream* stream, Instrument* inst)
 
     if(progsteps > 0)
     {
-        rwops = stream_write(stream, (uint8_t*)inst->program, sizeof(progsteps) * sizeof(inst->program[0]));
+        rwops = stream_write(stream, (uint8_t*)inst->program, progsteps * sizeof(inst->program[0]));
     }
 
     rwops = stream_write(stream, (uint8_t*)&inst->program_period, sizeof(inst->program_period));
@@ -89,6 +89,9 @@ bool save_song(FlizzerTrackerApp* tracker, FuriString* filepath)
     rwops = stream_write(tracker->stream, (uint8_t*)&song->loop_end, sizeof(song->loop_end));
     rwops = stream_write(tracker->stream, (uint8_t*)&song->pattern_length, sizeof(song->pattern_length));
 
+    rwops = stream_write(tracker->stream, (uint8_t*)&song->speed, sizeof(song->speed));
+    rwops = stream_write(tracker->stream, (uint8_t*)&song->rate, sizeof(song->rate));
+
     rwops = stream_write(tracker->stream, (uint8_t*)&song->num_sequence_steps, sizeof(song->num_sequence_steps));
 
     for(uint16_t i = 0; i < song->num_sequence_steps; i++)
@@ -118,4 +121,17 @@ bool save_song(FlizzerTrackerApp* tracker, FuriString* filepath)
     UNUSED(open_file);
     UNUSED(rwops);
     return false;
+}
+
+bool load_song_util(FlizzerTrackerApp* tracker, FuriString* filepath)
+{
+    bool open_file = file_stream_open(tracker->stream, furi_string_get_cstr(filepath), FSAM_READ, FSOM_OPEN_ALWAYS);
+
+    bool result = load_song(&tracker->song, tracker->stream);
+
+    tracker->is_loading = false;
+    file_stream_close(tracker->stream);
+    furi_string_free(filepath);
+    UNUSED(open_file);
+    return result;
 }

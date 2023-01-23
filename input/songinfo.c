@@ -57,7 +57,6 @@ void return_from_keyboard_callback(void *ctx)
 
     if(tracker->is_saving)
     {
-        //storage_file_exists(storage, NFC_TEST_DICT_PATH);
         tracker->filepath = furi_string_alloc();
         furi_string_cat_printf(tracker->filepath, "%s/%s%s", FLIZZER_TRACKER_FOLDER, tracker->filename, SONG_FILE_EXT);
 
@@ -71,8 +70,6 @@ void return_from_keyboard_callback(void *ctx)
         {
             FlizzerTrackerEvent event = {.type = EventTypeSaveSong, .input = {0}, .period = 0};
             furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
-            //bool song_saved = save_song(tracker, tracker->filepath);
-            //UNUSED(song_saved);
         }
     }
 }

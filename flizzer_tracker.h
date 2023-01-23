@@ -29,6 +29,7 @@ typedef enum
 {
     EventTypeInput,
     EventTypeSaveSong,
+    EventTypeLoadSong,
 } EventType;
 
 typedef struct

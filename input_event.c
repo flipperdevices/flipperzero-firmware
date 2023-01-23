@@ -68,6 +68,15 @@ void submenu_callback(void *context, uint32_t index)
                     tracker->is_saving = true;
 
                     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_KEYBOARD);
+                    break;
+                }
+
+                case SUBMENU_PATTERN_LOAD_SONG:
+                {
+                    FlizzerTrackerEvent event = {.type = EventTypeLoadSong, .input = {0}, .period = 0};
+                    furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+                    break;
                 }
 
                 default:

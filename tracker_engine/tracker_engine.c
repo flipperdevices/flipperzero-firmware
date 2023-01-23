@@ -47,6 +47,71 @@ void tracker_engine_deinit(TrackerEngine *tracker_engine, bool free_song)
     tracker_engine_stop();
 }
 
+void set_note(TrackerSongPatternStep *step, uint8_t note)
+{
+    step->note &= 0x80;
+    step->note |= (note & 0x7f);
+}
+
+void set_instrument(TrackerSongPatternStep *step, uint8_t inst)
+{
+    step->note &= 0x7f;
+    step->inst_vol &= 0x0f;
+
+    step->note |= ((inst & 0x10) << 3);
+    step->inst_vol |= ((inst & 0xf) << 4);
+}
+
+void set_volume(TrackerSongPatternStep *step, uint8_t vol)
+{
+    step->command &= 0x7fff;
+    step->inst_vol &= 0xf0;
+
+    step->command |= ((vol & 0x10) << 11);
+    step->inst_vol |= (vol & 0xf);
+}
+
+void set_command(TrackerSongPatternStep *step, uint16_t command)
+{
+    step->command &= 0x8000;
+    step->command |= command & (0x7fff);
+}
+
+void set_default_instrument(Instrument* inst)
+{
+    memset(inst, 0, sizeof(Instrument));
+
+    inst->flags = TE_SET_CUTOFF | TE_SET_PW;
+    inst->sound_engine_flags = SE_ENABLE_KEYDOWN_SYNC;
+
+    inst->base_note = MIDDLE_C;
+
+    inst->waveform = SE_WAVEFORM_PULSE;
+    inst->pw = 0x80;
+
+    inst->adsr.a = 0x4;
+    inst->adsr.d = 0x28;
+    inst->adsr.volume = 0x80;
+
+    for(int i = 0; i < INST_PROG_LEN; i++)
+    {
+        inst->program[i] = TE_PROGRAM_NOP;
+    }
+}
+
+void set_empty_pattern(TrackerSongPattern *pattern, uint16_t pattern_length)
+{
+    for (uint16_t i = 0; i < pattern_length; i++)
+    {
+        TrackerSongPatternStep *step = &pattern->step[i];
+
+        set_note(step, MUS_NOTE_NONE);
+        set_instrument(step, MUS_NOTE_INSTRUMENT_NONE);
+        set_volume(step, MUS_NOTE_VOLUME_NONE);
+        set_command(step, 0);
+    }
+}
+
 uint8_t tracker_engine_get_note(TrackerSongPatternStep *step)
 {
     return (step->note & 0x7f);
