@@ -1,0 +1,2 @@
+
+# Slots for Flipper Zero :)
