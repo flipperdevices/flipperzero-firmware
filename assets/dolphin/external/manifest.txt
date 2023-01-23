@@ -1,14 +1,49 @@
 Filetype: Flipper Animation Manifest
 Version: 1
 
-Name: RM_G0G374_128x64
+Name: Kuronons_RMCFW_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 2
 Max level: 30
 Weight: 7
 
-Name: Kuronons_RMCFW_128x64
+Name: L1_Mods_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: L1_Painting_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: L1_Wotori_Purple_rain_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: L2_Unleashed_FlipperCity_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 2
+Max level: 30
+Weight: 7
+
+Name: L2_Wake_up_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 1
+Max level: 30
+Weight: 7
+
+Name: RM_G0G374_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 2
@@ -47,68 +82,5 @@ Name: Sasquach_RMCF_128x64
 Min butthurt: 0
 Max butthurt: 14
 Min level: 2
-Max level: 30
-Weight: 7
-
-Name: L1_Wotori_Purple_rain_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L1_Unleashed_New_year_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 14
-
-Name: L2_Unleashed_FlipperCity_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 2
-Max level: 30
-Weight: 7
-
-Name: L3_Unleashed_FlipperMustache_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 3
-Max level: 30
-Weight: 7
-
-Name: L3_Unleashed_Fireplace_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 3
-Max level: 30
-Weight: 7
-
-Name: L1_Mods_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L1_Painting_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L2_Wake_up_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
-Max level: 30
-Weight: 7
-
-Name: L1_Sleigh_ride_128x64
-Min butthurt: 0
-Max butthurt: 14
-Min level: 1
 Max level: 30
 Weight: 7
