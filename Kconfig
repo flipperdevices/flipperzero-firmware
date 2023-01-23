@@ -4,4 +4,13 @@ menu "ESP serial flasher"
         default y
         help
             Select this option to enable MD5 hashsum check after flashing.
+
+    config SERIAL_FLASHER_RESET_HOLD_TIME_MS
+        int "Time for which the reset pin is asserted when doing a hard reset"
+        default 100
+
+    config SERIAL_FLASHER_BOOT_HOLD_TIME_MS
+        int "Time for which the boot pin is asserted when doing a hard reset"
+        default 50
+
 endmenu

@@ -112,10 +112,8 @@ void loader_port_stm32_init(loader_stm32_config_t *config)
 void loader_port_enter_bootloader(void)
 {
     HAL_GPIO_WritePin(gpio_port_rst, gpio_num_rst, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(gpio_port_io0, gpio_num_io0, GPIO_PIN_RESET);
-    HAL_Delay(1);
-    HAL_GPIO_WritePin(gpio_port_rst, gpio_num_rst, GPIO_PIN_SET);
-    HAL_Delay(100);
+    loader_port_reset_target();
+    HAL_Delay(SERIAL_FLASHER_BOOT_HOLD_TIME_MS);
     HAL_GPIO_WritePin(gpio_port_io0, gpio_num_io0, GPIO_PIN_SET);
 }
 
@@ -123,7 +121,7 @@ void loader_port_enter_bootloader(void)
 void loader_port_reset_target(void)
 {
     HAL_GPIO_WritePin(gpio_port_rst, gpio_num_rst, GPIO_PIN_RESET);
-    HAL_Delay(100);
+    HAL_Delay(SERIAL_FLASHER_RESET_HOLD_TIME_MS);
     HAL_GPIO_WritePin(gpio_port_rst, gpio_num_rst, GPIO_PIN_SET);
 }
 

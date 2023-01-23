@@ -42,15 +42,31 @@ Please refer to ports in `port` directory. Currently, only ports for [ESP32 port
 
 ## Configuration
 
-Apart from writing port (if not available), user can enable flash integrity check functionality by setting MD5_ENABLED option. If enabled, serial flasher is capable of verify flash integrity after writing to memory.
+These are the configuration toggles available to the user:
+* MD5_ENABLED
+
+If enabled, serial flasher is capable of verifying flash integrity after writing to memory.
+
+Default: Enabled
+> Warning: As ROM bootloader of ESP8266 does not support MD5_CHECK, this option has to be disabled!
+
+* SERIAL_FLASHER_RESET_HOLD_TIME_MS
+
+This is the time for which the reset pin is asserted when doing a hard reset in milliseconds.
+
+Default: 100
+
+* SERIAL_FLASHER_BOOT_HOLD_TIME_MS
+
+This is the time for which the boot pin is asserted when doing a hard reset in milliseconds.
+
+Default: 50
 
 Configuration can be passed to `cmake` via command line:
 
 ```
 cmake -DMD5_ENABLED=1 .. && cmake --build .
 ```
-
-Note: in case, no compile definitions are provided, ESP32 is set as target and MD5 check is enabled by default. As ROM bootloader of ESP8266 does not support MD5_CHECK, `-DMD5_ENABLED=0` has to be passed to command line.
 
 ### STM32 support
 
