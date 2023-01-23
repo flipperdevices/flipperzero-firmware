@@ -2,18 +2,18 @@
 
 ## Intro
 
-Unit tests are special pieces of code that apply known inputs to the feature code and check the results to see if they were correct.
+Unit tests are special pieces of code that apply known inputs to the feature code and check the results to see if they are correct.
 They are crucial for writing robust, bug-free code.
 
 Flipper Zero firmware includes a separate application called [unit_tests](/applications/debug/unit_tests).
-It is run directly on the Flipper Zero in order to employ its hardware features and to rule out any platform-related differences.
+It is run directly on Flipper devices in order to employ their hardware features and rule out any platform-related differences.
 
 When contributing code to the Flipper Zero firmware, it is highly desirable to supply unit tests along with the proposed features.
 Running existing unit tests is useful to ensure that the new code doesn't introduce any regressions.
 
 ## Running unit tests
 
-In order to run the unit tests, follow these steps:
+To run the unit tests, follow these steps:
 
 1. Compile the firmware with the tests enabled: `./fbt FIRMWARE_APP_SET=unit_tests`.
 2. Flash the firmware using your preferred method.
@@ -33,14 +33,14 @@ The common entry point for all tests is the [unit_tests](applications/debug/unit
 
 #### Test assets
 
-Some unit tests require external data in order to function. These files (commonly called assets) reside in the [assets/unit_tests](/assets/unit_tests) directory in their respective subdirectories. Asset files can be of any type (plain text, FlipperFormat(FFF), binary, etc).
+Some unit tests require external data in order to function. These files (commonly called assets) reside in the [assets/unit_tests](/assets/unit_tests) directory in their respective subdirectories. Asset files can be of any type (plain text, FlipperFormat (FFF), binary, etc.).
 
 ### Application-specific
 
 #### Infrared
 
 Each infrared protocol has a corresponding set of unit tests, so it makes sense to implement one when adding support for a new protocol.
-In order to add unit tests for your protocol, follow these steps:
+To add unit tests for your protocol, follow these steps:
 
 1. Create a file named `test_<your_protocol_name>.irtest` in the [assets](assets/unit_tests/infrared) directory.
 2. Fill it with the test data (more on it below).
@@ -49,16 +49,16 @@ In order to add unit tests for your protocol, follow these steps:
 
 ##### Test data format
 
-Each unit test has 3 sections:
+Each unit test has three sections:
 
-1. `decoder` - takes in raw signal and outputs decoded messages.
+1. `decoder` - takes in a raw signal and outputs decoded messages.
 2. `encoder` - takes in decoded messages and outputs a raw signal.
 3. `encoder_decoder` - takes in decoded messages, turns them into a raw signal, and then decodes again.
 
 Infrared test asset files have an `.irtest` extension and are regular `.ir` files with a few additions.
-Decoder input data has signal names `decoder_input_N`, where N is a test sequence number. Expected data goes under the name `decoder_expected_N`. When testing the encoder these two are switched.
+Decoder input data has signal names `decoder_input_N`, where N is a test sequence number. Expected data goes under the name `decoder_expected_N`. When testing the encoder, these two are switched.
 
-Decoded data is represented in arrays (since a single raw signal may decode to several messages). If there is only one signal, then it has to be an array of size 1. Use the existing files as syntax examples.
+Decoded data is represented in arrays (since a single raw signal may be decoded into several messages). If there is only one signal, then it has to be an array of size 1. Use the existing files as syntax examples.
 
 ##### Getting raw signals
 

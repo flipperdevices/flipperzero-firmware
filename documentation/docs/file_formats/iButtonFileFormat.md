@@ -1,4 +1,4 @@
-# iButton Infrared Flipper File Formats
+# iButton key file format
 
 ## Example
 
@@ -15,7 +15,7 @@ Data: 12 34 56 78 9A BC DE F0
 
 Filename extension: `.ibtn`
 
-The file stores single iButton key of type defined by `Key type` parameter
+The file stores a single iButton key of the type defined by the `Key type` parameter.
 
 ### Version history
 
@@ -23,7 +23,7 @@ The file stores single iButton key of type defined by `Key type` parameter
 
 ### Format fields
 
-|Name|Description|
-|-|-|
-|Key type|Currently supported: Cyfral, Dallas, Metakom|
-|Data|Key data (HEX values)|
+| Name     | Description                                  |
+| -------- | -------------------------------------------- |
+| Key type | Currently supported: Cyfral, Dallas, Metakom |
+| Data     | Key data (HEX values)                        |
