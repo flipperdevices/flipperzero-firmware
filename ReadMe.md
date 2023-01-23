@@ -27,45 +27,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0123-1148-0.75.1-1bbbe6a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-21 13:15 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-21 13:15 EST`
-- If you installed the previous release with AirTag code, I recommend a most immediate update from GitHub or Patreon to revert the AirTag code. My apoligies for the mix up, it was not my airtag being emulated, it was from the original project [here](https://github.com/culturally/flipper-zero-airtag). RM and the development team working on airtag features are not trying to track anyone. We are trying to improve the flipper functionality.
-- Assets: Includes Tama P1 Rom Game file. [this rom](https://tinyurl.com/tamap1)
-- Updated: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
-- Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1)
-- Updated: [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) (Now allows easier long press for space)
-- Updated: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
-- Updated: [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
-- OFW: Changes to FBT for PVS support (flipperdevices#2286) and removed DEBUG_TOOLS & FAP_EXAMPLES flags (flipperdevices#2291)
-- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- [The clock will now show 12 AM instead of 00 AM (Thanks To Smileycathy1128)](https://github.com/DarkFlippers/unleashed-firmware/pull/288)
-- Added: [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
-- Added: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
-- Updated: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
-- UL Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855`
-- UL Updated: [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work
-- [PREVIEW "RM Minimal" ANIMATIONS THAT COME WITH THIS BUILD](https://www.patreon.com/posts/animation-rm-77441581) or [PREVIEW OTHER ANIMATION SETS](https://www.patreon.com/RogueMaster?filters[tag]=Animations)
-- Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/Smileycathy1128/flipperzero-tamagotch-p1)
-- Added: [BadUSB: Added support for GUI-CTRL in bad_usb #507 (By NDrog)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/507)
-- Updated: [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter) [Improved (By plasticuproject)](https://github.com/plasticuproject/dolphin-better-counter)
-- UL Updated: SubGHz Optimizations
-- UL Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- UL Updated: IR Assets by @amec0e
-- Added: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- UL Updated: Fix SubGHz GUI receiver bug
-- [Patreon Animation Build Update: ALL, RM Select and RM Select 18+ builds now have a new animation "8 Wonders" By @qqMajikpp](https://www.patreon.com/RogueMaster)
-- Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
-- [Patreon Animation Build Update](https://www.patreon.com/RogueMaster): Hackz build now has 8 new animations [from TH3WR3NCH](https://github.com/wrenchathome/flip0anims) and 1 new animation [from synthetikspace](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations)
-- [Patreon Animation Build Update: ALL build now has all SCIENCE AND HACKS animations enabled](https://www.patreon.com/RogueMaster)
-- Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
-- Added: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
-- Updated: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- Animation Build Update: Removed Mustache, New Year, Sleigh Ride and Fireplace animations from RM Minimal and RM Select builds.
-- Animation Build Update: Changed Mods, Painting and Wake Up Animations to be RogueMaster versions on ALL, RM Minimal, RM Select and Stock builds.
-- Passport: Fix EXP Progress Bar.
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Added: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
-- Added: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-23 14:33 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-23 14:33 EST`
 
 <a name="release">
 
