@@ -6,7 +6,7 @@
 #include <furi/core/string.h>
 #include <lib/subghz/registry.h>
 #include <lib/subghz/protocols/base.h>
-#include "app_buffer.h"
+#include "raw_samples.h"
 
 #define TAG "PROTOVIEW-protocol"
 

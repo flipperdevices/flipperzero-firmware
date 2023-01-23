@@ -138,15 +138,15 @@ void notify_signal_detected(ProtoViewApp* app, bool decoded) {
         notification_message(app->notification, &unknown_seq);
 }
 
-/* Search the buffer with the stored signal (last N samples received)
+/* Search the source buffer with the stored signal (last N samples received)
  * in order to find a coherent signal. If a signal that does not appear to
  * be just noise is found, it is set in DetectedSamples global signal
  * buffer, that is what is rendered on the screen. */
-void scan_for_signal(ProtoViewApp* app) {
-    /* We need to work on a copy: the RawSamples buffer is populated
+void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source) {
+    /* We need to work on a copy: the source buffer may be populated
      * by the background thread receiving data. */
     RawSamplesBuffer* copy = raw_samples_alloc();
-    raw_samples_copy(copy, RawSamples);
+    raw_samples_copy(copy, source);
 
     /* Try to seek on data that looks to have a regular high low high low
      * pattern. */
@@ -341,7 +341,7 @@ void bitmap_copy(
 /* We decode bits assuming the first bit we receive is the MSB
  * (see bitmap_set/get functions). Certain devices send data
  * encoded in the reverse way. */
-void bitmap_reverse_bytes(uint8_t* p, uint32_t len) {
+void bitmap_reverse_bytes_bits(uint8_t* p, uint32_t len) {
     for(uint32_t j = 0; j < len; j++) {
         uint32_t b = p[j];
         /* Step 1: swap the two nibbles: 12345678 -> 56781234 */

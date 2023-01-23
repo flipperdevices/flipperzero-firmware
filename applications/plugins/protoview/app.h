@@ -21,7 +21,7 @@
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/registry.h>
-#include "app_buffer.h"
+#include "raw_samples.h"
 
 #define TAG "ProtoView"
 #define PROTOVIEW_RAW_VIEW_DEFAULT_SCALE 100 // 100us is 1 pixel by default
@@ -53,6 +53,7 @@ typedef enum {
     ViewInfo,
     ViewFrequencySettings,
     ViewModulationSettings,
+    ViewBuildMessage,
     ViewDirectSampling,
     ViewLast, /* Just a sentinel to wrap around. */
 
@@ -225,7 +226,13 @@ typedef struct ProtoViewDecoder {
      * functions that perform bit extraction with bound checking, such as
      * bitmap_get() and so forth. */
     bool (*decode)(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo* info);
-    void (*get_fields)(ProtoViewMsgInfo* info, ProtoViewFieldSet* fields);
+    /* This method is used by the decoder to return the fields it needs
+     * in order to build a new message. This way the message builder view
+     * can ask the user to fill the right set of fields of the specified
+     * type. */
+    void (*get_fields)(ProtoViewFieldSet* fields);
+    /* This method takes the fields supported by the decoder, and
+     * renders a message in 'samples'. */
     void (*build_message)(RawSamplesBuffer* samples, ProtoViewFieldSet* fields);
 } ProtoViewDecoder;
 
@@ -244,7 +251,7 @@ void radio_tx_signal(ProtoViewApp* app, FuriHalSubGhzAsyncTxCallback data_feeder
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
 void reset_current_signal(ProtoViewApp* app);
-void scan_for_signal(ProtoViewApp* app);
+void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source);
 bool bitmap_get(uint8_t* b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t* b, uint32_t blen, uint32_t bitpos, bool val);
 void bitmap_copy(
@@ -256,7 +263,7 @@ void bitmap_copy(
     uint32_t soff,
     uint32_t count);
 void bitmap_set_pattern(uint8_t* b, uint32_t blen, uint32_t off, const char* pat);
-void bitmap_reverse_bytes(uint8_t* p, uint32_t len);
+void bitmap_reverse_bytes_bits(uint8_t* p, uint32_t len);
 bool bitmap_match_bits(uint8_t* b, uint32_t blen, uint32_t bitpos, const char* bits);
 uint32_t bitmap_seek_bits(
     uint8_t* b,
@@ -294,9 +301,14 @@ void render_view_info(Canvas* const canvas, ProtoViewApp* app);
 void process_input_info(ProtoViewApp* app, InputEvent input);
 void render_view_direct_sampling(Canvas* const canvas, ProtoViewApp* app);
 void process_input_direct_sampling(ProtoViewApp* app, InputEvent input);
+void render_view_build_message(Canvas* const canvas, ProtoViewApp* app);
+void process_input_build_message(ProtoViewApp* app, InputEvent input);
+void view_enter_build_message(ProtoViewApp* app);
+void view_exit_build_message(ProtoViewApp* app);
 void view_enter_direct_sampling(ProtoViewApp* app);
 void view_exit_direct_sampling(ProtoViewApp* app);
 void view_exit_settings(ProtoViewApp* app);
+void view_exit_info(ProtoViewApp* app);
 void adjust_raw_view_scale(ProtoViewApp* app, uint32_t short_pulse_dur);
 
 /* ui.c */
@@ -338,6 +350,12 @@ void fieldset_add_float(
     const char* name,
     float val,
     uint32_t digits_after_dot);
+const char* field_get_type_name(ProtoViewField* f);
+int field_to_string(char* buf, size_t len, ProtoViewField* f);
+bool field_set_from_string(ProtoViewField* f, char* buf, size_t len);
+bool field_incr_value(ProtoViewField* f, int incr);
+void fieldset_copy_matching_fields(ProtoViewFieldSet* dst, ProtoViewFieldSet* src);
+void field_set_from_field(ProtoViewField* dst, ProtoViewField* src);
 
 /* crc.c */
 uint8_t crc8(const uint8_t* data, size_t len, uint8_t init, uint8_t poly);

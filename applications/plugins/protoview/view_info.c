@@ -29,45 +29,11 @@ typedef struct {
 /* Draw the text label and value of the specified info field at x,y. */
 static void render_info_field(Canvas* const canvas, ProtoViewField* f, uint8_t x, uint8_t y) {
     char buf[64];
+    char strval[32];
+
+    field_to_string(strval, sizeof(strval), f);
+    snprintf(buf, sizeof(buf), "%s: %s", f->name, strval);
     canvas_set_font(canvas, FontSecondary);
-    switch(f->type) {
-    case FieldTypeStr:
-        snprintf(buf, sizeof(buf), "%s: %s", f->name, f->str);
-        break;
-    case FieldTypeSignedInt:
-        snprintf(buf, sizeof(buf), "%s: %lld", f->name, (long long)f->value);
-        break;
-    case FieldTypeUnsignedInt:
-        snprintf(buf, sizeof(buf), "%s: %llu", f->name, (unsigned long long)f->uvalue);
-        break;
-    case FieldTypeBinary: {
-        uint64_t test_bit = (1 << (f->len - 1));
-        uint64_t idx = snprintf(buf, sizeof(buf), "%s: ", f->name);
-        while(idx < sizeof(buf) - 1 && test_bit) {
-            buf[idx++] = (f->uvalue & test_bit) ? '1' : '0';
-            test_bit >>= 1;
-        }
-        buf[idx] = 0;
-    } break;
-    case FieldTypeHex:
-        snprintf(buf, sizeof(buf), "%s: 0x%*llX", f->name, (int)(f->len + 7) / 8, f->uvalue);
-        break;
-    case FieldTypeFloat:
-        snprintf(buf, sizeof(buf), "%s: 0x%.*f", f->name, (int)f->len, (double)f->fvalue);
-        break;
-    case FieldTypeBytes: {
-        uint64_t idx = snprintf(buf, sizeof(buf), "%s: ", f->name);
-        uint32_t nibble_num = 0;
-        while(idx < sizeof(buf) - 1 && nibble_num < f->len) {
-            const char* charset = "0123456789ABCDEF";
-            uint32_t nibble = nibble_num & 1 ? (f->bytes[nibble_num / 2] >> 4) :
-                                               (f->bytes[nibble_num / 2] & 0xf);
-            buf[idx++] = charset[nibble];
-            nibble_num++;
-        }
-        buf[idx] = 0;
-    } break;
-    }
     canvas_draw_str(canvas, x, y, buf);
 }
 
@@ -173,7 +139,7 @@ void render_view_info(Canvas* const canvas, ProtoViewApp* app) {
 
 /* The user typed the file name. Let's save it and remove the keyboard
  * view. */
-void text_input_done_callback(void* context) {
+static void text_input_done_callback(void* context) {
     ProtoViewApp* app = context;
     InfoViewPrivData* privdata = app->view_privdata;
 
@@ -183,6 +149,7 @@ void text_input_done_callback(void* context) {
     furi_string_free(save_path);
 
     free(privdata->filename);
+    privdata->filename = NULL; // Don't free it again on view exit
     ui_dismiss_keyboard(app);
     ui_show_alert(app, "Signal saved", 1500);
 }
@@ -342,7 +309,9 @@ void process_input_info(ProtoViewApp* app, InputEvent input) {
         } else if(input.type == InputTypePress && input.key == InputKeyLeft) {
             if(privdata->signal_display_start_row != 0) privdata->signal_display_start_row--;
         } else if(input.type == InputTypeLong && input.key == InputKeyOk) {
-            privdata->filename = malloc(SAVE_FILENAME_LEN);
+            // We have have the buffer already allocated, in case the
+            // user aborted with BACK a previous saving.
+            if(privdata->filename == NULL) privdata->filename = malloc(SAVE_FILENAME_LEN);
             set_signal_random_filename(app, privdata->filename, SAVE_FILENAME_LEN);
             ui_show_keyboard(app, privdata->filename, SAVE_FILENAME_LEN, text_input_done_callback);
         } else if(input.type == InputTypeShort && input.key == InputKeyOk) {
@@ -352,4 +321,12 @@ void process_input_info(ProtoViewApp* app, InputEvent input) {
             notify_signal_sent(app);
         }
     }
+}
+
+/* Called on view exit. */
+void view_exit_info(ProtoViewApp* app) {
+    InfoViewPrivData* privdata = app->view_privdata;
+    // When the user aborts the keyboard input, we are left with the
+    // filename buffer allocated.
+    if(privdata->filename) free(privdata->filename);
 }
