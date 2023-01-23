@@ -14,14 +14,20 @@ static ProtoViewField *field_new(ProtoViewFieldType type, const char *name) {
     return f;
 }
 
-/* Free a field an associated data. */
-static void field_free(ProtoViewField *f) {
-    free(f->name);
+/* Free only the auxiliary data of a field, used to represent the
+ * current type. Name and type are not touched. */
+static void field_free_aux_data(ProtoViewField *f) {
     switch(f->type) {
     case FieldTypeStr: free(f->str); break;
     case FieldTypeBytes: free(f->bytes); break;
     default: break; // Nothing to free for other types.
     }
+}
+
+/* Free a field an associated data. */
+static void field_free(ProtoViewField *f) {
+    field_free_aux_data(f);
+    free(f->name);
     free(f);
 }
 
@@ -160,6 +166,34 @@ bool field_set_from_string(ProtoViewField *f, char *buf, size_t len) {
         break;
     }
     return true;
+}
+
+/* Set the 'dst' field to contain a copy of the value of the 'src'
+ * field. The field name is not modified. */
+void field_set_from_field(ProtoViewField *dst, ProtoViewField *src) {
+    field_free_aux_data(dst);
+    dst->type = src->type;
+    dst->len = src->len;
+    switch(src->type)  {
+    case FieldTypeStr:
+        dst->str = strdup(src->str);
+        break;
+    case FieldTypeBytes:
+        dst->bytes = malloc(src->len);
+        memcpy(dst->bytes,src->bytes,dst->len);
+        break;
+    case FieldTypeSignedInt:
+        dst->value = src->value;
+        break;
+    case FieldTypeUnsignedInt:
+    case FieldTypeBinary:
+    case FieldTypeHex:
+        dst->uvalue = src->uvalue;
+        break;
+    case FieldTypeFloat:
+        dst->fvalue = src->fvalue;
+        break;
+    }
 }
 
 /* Increment the specified field value of 'incr'. If the field type
@@ -303,4 +337,22 @@ void fieldset_add_float(ProtoViewFieldSet *fs, const char *name, float val, uint
     f->fvalue = val;
     f->len = digits_after_dot;
     fieldset_add_field(fs,f);
+}
+
+/* For each field of the destination filedset 'dst', look for a matching
+ * field name/type in the source fieldset 'src', and if one is found copy
+ * its value into the 'dst' field. */
+void fieldset_copy_matching_fields(ProtoViewFieldSet *dst,
+                                   ProtoViewFieldSet *src)
+{
+    for (uint32_t j = 0; j < dst->numfields; j++) {
+        for (uint32_t i = 0; i < src->numfields; i++) {
+            if (dst->fields[j]->type == src->fields[i]->type &&
+                !strcmp(dst->fields[j]->name,src->fields[i]->name))
+            {
+                field_set_from_field(dst->fields[j],
+                                     src->fields[i]);
+            }
+        }
+    }
 }

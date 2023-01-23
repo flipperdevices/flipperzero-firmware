@@ -81,6 +81,7 @@ static void input_callback(InputEvent* input_event, void* ctx)
  * special views ViewGoNext and ViewGoPrev in order to move to
  * the logical next/prev view. */
 static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
+    /* Switch to the specified view. */
     ProtoViewCurrentView old = app->current_view;
     if (switchto == ViewGoNext) {
         app->current_view++;
@@ -95,11 +96,22 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
     }
     ProtoViewCurrentView new = app->current_view;
 
+    /* Set the current subview of the view we just left to zero. This is
+     * the main subview of the old view. When re re-enter the view we are
+     * lefting, we want to see the main thing again. */
+    app->current_subview[old] = 0;
+
+    /* Reset the view private data each time, before calling the enter/exit
+     * callbacks that may want to setup some state. */
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
+
     /* Call the enter/exit view callbacks if needed. */
     if (old == ViewDirectSampling) view_exit_direct_sampling(app);
     if (new == ViewDirectSampling) view_enter_direct_sampling(app);
     if (old == ViewBuildMessage) view_exit_build_message(app);
+    if (new == ViewBuildMessage) view_enter_build_message(app);
     if (old == ViewInfo) view_exit_info(app);
+
     /* The frequency/modulation settings are actually a single view:
      * as long as the user stays between the two modes of this view we
      * don't need to call the exit-view callback. */
@@ -107,11 +119,6 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
         (old == ViewModulationSettings && new != ViewFrequencySettings))
         view_exit_settings(app);
 
-    /* Set the current subview of the view we just left to zero, that is
-     * the main subview of the view. When re re-enter it we want to see
-     * the main thing. */
-    app->current_subview[old] = 0;
-    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
     ui_dismiss_alert(app);
 }
 

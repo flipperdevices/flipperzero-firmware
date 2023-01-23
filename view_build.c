@@ -52,11 +52,6 @@ static void render_view_select_decoder(Canvas *const canvas, ProtoViewApp *app) 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 19, "up/down: select, ok: choose");
 
-    // When entering the view, the current decoder is just set to zero.
-    // Seek the next valid if needed.
-    if (Decoders[privdata->cur_decoder]->get_fields == NULL)
-        select_next_decoder(app);
-
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas,64,38,AlignCenter,AlignCenter,
         Decoders[privdata->cur_decoder]->name);
@@ -116,10 +111,22 @@ static void process_input_select_decoder(ProtoViewApp *app, InputEvent input) {
             privdata->decoder = Decoders[privdata->cur_decoder];
             privdata->fieldset = fieldset_new();
             privdata->decoder->get_fields(privdata->fieldset);
-            // Now we use the subview system in order to protect the
-            // message editing mode from accidental < or > presses.
-            // Since we are technically into a subview now, we'll have
-            // control of < and >.
+
+            /* If the currently decoded message was produced with the
+             * same decoder the user selected, let's populate the
+             * defaults with the current values. So the user will
+             * actaully edit the current message. */
+            if (app->signal_decoded &&
+                app->msg_info->decoder == privdata->decoder)
+            {
+                fieldset_copy_matching_fields(privdata->fieldset,
+                    app->msg_info->fieldset);
+            }
+
+            /* Now we use the subview system in order to protect the
+               message editing mode from accidental < or > presses.
+               Since we are technically into a subview now, we'll have
+               control of < and >. */
             InputEvent ii = {.type = InputTypePress, .key = InputKeyDown};
             ui_process_subview_updown(app,ii,2);
         } else if (input.key == InputKeyDown) {
@@ -214,6 +221,28 @@ void process_input_build_message(ProtoViewApp *app, InputEvent input) {
         process_input_set_fields(app,input);
     else
         process_input_select_decoder(app,input);
+}
+
+/* Enter view callback. */
+void view_enter_build_message(ProtoViewApp *app) {
+    BuildViewPrivData *privdata = app->view_privdata;
+
+    // When we enter the view, the current decoder is just set to zero.
+    // Seek the next valid if needed.
+    if (Decoders[privdata->cur_decoder]->get_fields == NULL) {
+        select_next_decoder(app);
+    }
+
+    // However if there is currently a decoded message, and the
+    // decoder of such message supports message building, let's
+    // select it.
+    if (app->signal_decoded &&
+        app->msg_info->decoder->get_fields &&
+        app->msg_info->decoder->build_message)
+    {
+        while(Decoders[privdata->cur_decoder] != app->msg_info->decoder)
+            select_next_decoder(app);
+    }
 }
 
 /* Called on exit for cleanup. */
