@@ -1,3 +1,4 @@
+#include <furi_hal.h>
 #include "spi_mem_app_i.h"
 #include "spi_mem_files.h"
 #include "lib/spi/spi_mem_chip_i.h"
@@ -65,6 +66,7 @@ SPIMemApp* spi_mem_alloc(void) {
     view_dispatcher_add_view(
         instance->view_dispatcher, SPIMemViewTextInput, text_input_get_view(instance->text_input));
 
+    furi_hal_power_enable_otg();
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_external);
     scene_manager_next_scene(instance->scene_manager, SPIMemSceneStart);
     return instance;
@@ -96,6 +98,7 @@ void spi_mem_free(SPIMemApp* instance) {
     furi_record_close(RECORD_GUI);
     furi_string_free(instance->file_path);
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_external);
+    furi_hal_power_disable_otg();
     free(instance);
 }
 
