@@ -202,6 +202,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
 	}
 
 	*/
+
     const char* my_name = furi_hal_version_get_name_ptr();
     snprintf(level_str, 12, "Level: %hu", stats->level);
     snprintf(xp_str, 14, "%lu/%lu", xp_above_last_levelup, xp_for_current_level);
@@ -217,6 +218,7 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
+    canvas_draw_line(canvas, 123, 45, 123, 49);
 }
 
 Passport* passport_alloc() {
