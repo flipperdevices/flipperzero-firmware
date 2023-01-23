@@ -4,7 +4,6 @@ typedef enum {
     SPIMemSceneStartSubmenuIndexRead,
     SPIMemSceneStartSubmenuIndexSaved,
     SPIMemSceneStartSubmenuIndexErase,
-    SPIMemSceneStartSubmenuIndexWiring,
     SPIMemSceneStartSubmenuIndexAbout
 } SPIMemSceneStartSubmenuIndex;
 
