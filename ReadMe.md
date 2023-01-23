@@ -53,7 +53,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL Updated: IR Assets by @amec0e
 - Added: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - UL Updated: Fix SubGHz GUI receiver bug
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [Patreon Animation Build Update: ALL, RM Select and RM Select 18+ builds now have a new animation "8 Wonders" By @qqMajikpp](https://www.patreon.com/RogueMaster)
 - Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [Patreon Animation Build Update](https://www.patreon.com/RogueMaster): Hackz build now has 8 new animations [from TH3WR3NCH](https://github.com/wrenchathome/flip0anims) and 1 new animation [from synthetikspace](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations)
@@ -63,6 +62,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - Animation Build Update: Removed Mustache, New Year, Sleigh Ride and Fireplace animations from RM Minimal and RM Select builds.
 - Animation Build Update: Changed Mods, Painting and Wake Up Animations to be RogueMaster versions on ALL, RM Minimal, RM Select and Stock builds.
+- Passport: Fix EXP Progress Bar.
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
