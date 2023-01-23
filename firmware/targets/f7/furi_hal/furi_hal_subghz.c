@@ -21,11 +21,12 @@ static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 // Internal or external subghz module selected
 static bool subghz_use_int_module = true;
 
+// initial cc1101
 const GpioPin* subghz_g0_pin = &gpio_cc1101_g0;
 FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
 
 // external cc1101
-//GpioPin* sughz_g0_pin = &gpio_ext_pb3;
+//const GpioPin* subghz_g0_pin = &gpio_ext_pb3;
 //FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
 
 
@@ -52,8 +53,18 @@ bool furi_hal_subghz_is_internal_cc1101() {
 }
 
 bool furi_hal_subghz_set_internal_cc1101(bool value) {
-    // TODO: check and switch
+    // nothing to do, already set to this value
+    if (subghz_use_int_module == value)
+        return true;
+    if (value) {
+        subghz_g0_pin = &gpio_cc1101_g0;
+        subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
+    } else {
+        subghz_g0_pin = &gpio_ext_pb3;
+        subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
+    }
     subghz_use_int_module = value;
+    // TODO: try to initialize the module
     return true;
 }
 
