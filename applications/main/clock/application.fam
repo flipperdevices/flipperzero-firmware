@@ -1,6 +1,6 @@
 App(
     appid="Clock",
-    name="Clock",
+    name="Dab Timer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="clock_app",
     cdefines=["APP_CLOCK"],
