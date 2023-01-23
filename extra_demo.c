@@ -20,7 +20,7 @@
 #include "extra_demo.h"
 #include "err.h"
 
-#include "extra/extra.h"
+#include "EXTRA/extra.h"
 
 bool run = true;
 
