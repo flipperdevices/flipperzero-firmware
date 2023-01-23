@@ -48,7 +48,7 @@ void view_enter_direct_sampling(ProtoViewApp *app) {
     if (app->txrx->txrx_state == TxRxStateRx &&
         !app->txrx->debug_timer_sampling)
     {
-        subghz_worker_stop(app->txrx->worker);
+        furi_hal_subghz_stop_async_rx();
     } else {
         raw_sampling_worker_stop(app);
     }
@@ -59,7 +59,7 @@ void view_exit_direct_sampling(ProtoViewApp *app) {
     if (app->txrx->txrx_state == TxRxStateRx &&
         !app->txrx->debug_timer_sampling)
     {
-        subghz_worker_start(app->txrx->worker);
+        furi_hal_subghz_start_async_rx(protoview_rx_callback, NULL);
     } else {
         raw_sampling_worker_start(app);
     }
