@@ -18,6 +18,10 @@
 #include <stdint.h>
 #include "serial_io.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     const char *device;
     uint32_t baudrate;
@@ -26,3 +30,7 @@ typedef struct {
 } loader_raspberry_config_t;
 
 esp_loader_error_t loader_port_raspberry_init(const loader_raspberry_config_t *config);
+
+#ifdef __cplusplus
+}
+#endif
