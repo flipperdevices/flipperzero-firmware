@@ -65,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Passport: Fix EXP Progress Bar.
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
+- Added: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 
 <a name="release">
 
@@ -335,6 +336,7 @@ $ ./fbt dolphin_ext
 - [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
+- [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
