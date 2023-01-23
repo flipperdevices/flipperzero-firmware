@@ -1,4 +1,4 @@
-rm -rf RM*-*-*.tgz RM*-*-*.zip .sconsign.dblite dist build assets/resources/apps assets/resources/tama_p1
+rm -rf RM*-*-*.tgz RM*-*-*.zip .sconsign.dblite dist build assets/resources/apps
 git pull
 ./fbt updater_package
 DATE_VAR=`date +%m%d`
