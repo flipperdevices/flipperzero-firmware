@@ -155,6 +155,8 @@ static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app
                     if(buff[i + x + 1] > 0xD0) {
                         memcpy(app->card_number, &buff[i], x + 1);
                         app->card_number_len = x + 1;
+                        app->exp_year = (buff[i + x + 1] << 4) | (buff[i + x + 2] >> 4);
+                        app->exp_month = (buff[i + x + 2] << 4) | (buff[i + x + 3] >> 4);
                         break;
                     }
                 }
