@@ -10,7 +10,7 @@ git clone https://github.com/Milk-Cool/EXTRA.git
 ## Usage
 To include it in a plugin:
 ```c
-#include "extra/extra.h"
+#include "EXTRA/extra.h"
 ```
 To register extra commands:
 ```c
