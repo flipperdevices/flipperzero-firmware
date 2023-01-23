@@ -174,7 +174,7 @@ copy the fine into `apps/Tools`, and that's it.
 Writing a protocol decoder is not hard, and requires to write three
 different methods.
 
-1. decode(). This is mandatory, and is used in order to turn a known signal into a set of fields containing certain informations. For instance for a thermometer sending data via RF, a raw message will be decoded into fields like temperature, humidity, station ID and so forth.
+1. `decode()`. This is mandatory, and is used in order to turn a known signal into a set of fields containing certain informations. For instance for a thermometer sending data via RF, a raw message will be decoded into fields like temperature, humidity, station ID and so forth.
 2. `get_fields()`. Optional, only needed if the protocol supports creating and editing signals. This method just returns the fields names, types and defaults. The app will use this list in order to allow the user to set values. The populated fields will be passed to the `build_message()` method later.
 3. `build_message()`. This method gets a set of fields representing the parameters of the protocol, as set by the user, and will create a low level signal composed of pulses and gaps of specific durations.
 
