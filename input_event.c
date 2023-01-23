@@ -1,5 +1,37 @@
 #include "input_event.h"
 
+#include "diskop.h"
+
+void overwrite_file_widget_yes_input_callback(GuiButtonType result, InputType type, void* ctx)
+{
+    UNUSED(result);
+
+    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+
+    if(type == InputTypeShort)
+    {
+        tracker->is_saving = true;
+        view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+        //save_song(tracker, tracker->filepath);
+        static FlizzerTrackerEvent event = {.type = EventTypeSaveSong, .input = {0}, .period = 0};
+        furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+    }
+}
+
+void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType type, void* ctx)
+{
+    UNUSED(result);
+
+    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+
+    if(type == InputTypeShort)
+    {
+        tracker->is_saving = false;
+        furi_string_free(tracker->filepath);
+        view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+    }
+}
+
 void submenu_callback(void *context, uint32_t index)
 {
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)context;
@@ -25,6 +57,17 @@ void submenu_callback(void *context, uint32_t index)
                     furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
                     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
                     break;
+                }
+
+                case SUBMENU_PATTERN_SAVE_SONG:
+                {
+                    text_input_set_header_text(tracker->text_input, "Song filename:");
+                    memset(&tracker->filename, 0, FILE_NAME_LEN);
+                    text_input_set_result_callback(tracker->text_input, return_from_keyboard_callback, tracker, (char *)&tracker->filename, FILE_NAME_LEN, true);
+
+                    tracker->is_saving = true;
+
+                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_KEYBOARD);
                 }
 
                 default:
@@ -152,12 +195,14 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
         {
             case PATTERN_VIEW:
             {
+                submenu_set_selected_item(tracker->pattern_submenu, SUBMENU_PATTERN_RETURN);
                 view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN);
                 break;
             }
 
             case INST_EDITOR_VIEW:
             {
+                submenu_set_selected_item(tracker->instrument_submenu, SUBMENU_INSTRUMENT_RETURN);
                 view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT);
                 break;
             }

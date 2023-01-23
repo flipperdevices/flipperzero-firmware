@@ -7,6 +7,18 @@
 
 void sound_engine_init(SoundEngine *sound_engine, uint32_t sample_rate, bool external_audio_output, uint32_t audio_buffer_size)
 {
+    if(sound_engine->audio_buffer)
+    {
+        free(sound_engine->audio_buffer);
+    }
+
+    if(sound_engine->sine_lut)
+    {
+        free(sound_engine->sine_lut);
+    }
+
+    memset(sound_engine, 0, sizeof(SoundEngine));
+
     sound_engine->audio_buffer = malloc(audio_buffer_size * sizeof(sound_engine->audio_buffer[0]));
     memset(sound_engine->audio_buffer, 0, sizeof(SoundEngine));
     sound_engine->audio_buffer_size = audio_buffer_size;

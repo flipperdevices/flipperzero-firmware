@@ -149,3 +149,60 @@ void change_pattern_length(TrackerSong *song, uint16_t new_length)
 
     song->pattern_length = new_length;
 }
+
+void set_default_instrument(Instrument* inst)
+{
+    memset(inst, 0, sizeof(Instrument));
+
+    inst->flags = TE_SET_CUTOFF | TE_SET_PW;
+    inst->sound_engine_flags = SE_ENABLE_KEYDOWN_SYNC;
+
+    inst->base_note = MIDDLE_C;
+
+    inst->waveform = SE_WAVEFORM_PULSE;
+    inst->pw = 0x80;
+
+    inst->adsr.a = 0x4;
+    inst->adsr.d = 0x28;
+    inst->adsr.volume = 0x80;
+
+    for(int i = 0; i < INST_PROG_LEN; i++)
+    {
+        inst->program[i] = TE_PROGRAM_NOP;
+    }
+}
+
+bool is_default_instrument(Instrument* inst)
+{
+    Instrument* ref = malloc(sizeof(Instrument));
+    set_default_instrument(ref);
+    bool is_default = memcmp(ref, inst, sizeof(Instrument)) != 0 ? false : true;
+    free(ref);
+    return is_default;
+}
+
+bool check_and_allocate_instrument(TrackerSong *song, uint8_t inst)
+{
+    if (inst < song->num_instruments) // we can go to this instrument since it already exists
+    {
+        return true;
+    }
+
+    else
+    {
+        if(inst >= MAX_INSTRUMENTS) return false;
+
+        if (!(is_default_instrument(song->instrument[inst - 1]))) // don't let the user flood the song with default instrument
+        {
+            song->instrument[inst] = malloc(sizeof(Instrument));
+            set_default_instrument(song->instrument[inst]);
+            song->num_instruments++;
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+    }
+}

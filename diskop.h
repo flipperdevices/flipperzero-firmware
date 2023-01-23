@@ -1,6 +1,7 @@
 #pragma once
 
-#include "sound_engine/sound_engine_defs.h"
-#include "tracker_engine/tracker_engine_defs.h"
+#include "flizzer_tracker.h"
 
 #define INST_FILE_SIG "FZT!INST"
+
+bool save_song(FlizzerTrackerApp* tracker, FuriString* filepath);

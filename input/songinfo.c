@@ -1,54 +1,80 @@
 #include "songinfo.h"
 
+#include "../diskop.h"
+
 void return_from_keyboard_callback(void *ctx)
 {
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)ctx;
 
-    uint8_t string_length = 0;
-    char *string = NULL;
-
-    if (tracker->focus == EDIT_SONGINFO && tracker->mode == PATTERN_VIEW)
+    if(!tracker->is_loading && !tracker->is_saving)
     {
-        switch (tracker->selected_param)
-        {
-            case SI_SONGNAME:
-            {
-                string_length = MUS_SONG_NAME_LEN;
-                string = (char *)&tracker->song.song_name;
-                break;
-            }
+        uint8_t string_length = 0;
+        char *string = NULL;
 
-            case SI_INSTRUMENTNAME:
+        if (tracker->focus == EDIT_SONGINFO && tracker->mode == PATTERN_VIEW)
+        {
+            switch (tracker->selected_param)
             {
-                string_length = MUS_INST_NAME_LEN;
-                string = (char *)&tracker->song.instrument[tracker->current_instrument]->name;
-                break;
+                case SI_SONGNAME:
+                {
+                    string_length = MUS_SONG_NAME_LEN;
+                    string = (char *)&tracker->song.song_name;
+                    break;
+                }
+
+                case SI_INSTRUMENTNAME:
+                {
+                    string_length = MUS_INST_NAME_LEN;
+                    string = (char *)&tracker->song.instrument[tracker->current_instrument]->name;
+                    break;
+                }
             }
         }
-    }
 
-    if (tracker->focus == EDIT_INSTRUMENT && tracker->mode == INST_EDITOR_VIEW)
-    {
-        switch (tracker->selected_param)
+        if (tracker->focus == EDIT_INSTRUMENT && tracker->mode == INST_EDITOR_VIEW)
         {
-            case INST_INSTRUMENTNAME:
+            switch (tracker->selected_param)
             {
-                string_length = MUS_INST_NAME_LEN;
-                string = (char *)&tracker->song.instrument[tracker->current_instrument]->name;
-                break;
+                case INST_INSTRUMENTNAME:
+                {
+                    string_length = MUS_INST_NAME_LEN;
+                    string = (char *)&tracker->song.instrument[tracker->current_instrument]->name;
+                    break;
+                }
             }
         }
-    }
 
-    if (string == NULL || string_length == 0)
-        return;
+        if (string == NULL || string_length == 0)
+            return;
 
-    for (uint8_t i = 0; i < string_length; i++) // I tinyfied the font by deleting lowercase chars, and I don't like the lowercase chars of any 3x5 pixels font
-    {
-        string[i] = toupper(string[i]);
+        for (uint8_t i = 0; i < string_length; i++) // I tinyfied the font by deleting lowercase chars, and I don't like the lowercase chars of any 3x5 pixels font
+        {
+            string[i] = toupper(string[i]);
+        }
     }
 
     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+
+    if(tracker->is_saving)
+    {
+        //storage_file_exists(storage, NFC_TEST_DICT_PATH);
+        tracker->filepath = furi_string_alloc();
+        furi_string_cat_printf(tracker->filepath, "%s/%s%s", FLIZZER_TRACKER_FOLDER, tracker->filename, SONG_FILE_EXT);
+
+        if(storage_file_exists(tracker->storage, furi_string_get_cstr(tracker->filepath)))
+        {
+            view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_FILE_OVERWRITE);
+            return;
+        }
+
+        else
+        {
+            FlizzerTrackerEvent event = {.type = EventTypeSaveSong, .input = {0}, .period = 0};
+            furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+            //bool song_saved = save_song(tracker, tracker->filepath);
+            //UNUSED(song_saved);
+        }
+    }
 }
 
 void edit_songinfo_param(FlizzerTrackerApp *tracker, uint8_t selected_param, int8_t delta)
@@ -75,7 +101,7 @@ void edit_songinfo_param(FlizzerTrackerApp *tracker, uint8_t selected_param, int
 
         case SI_SEQUENCEPOS:
         {
-            if ((int16_t)tracker->song.num_sequence_steps + (int16_t)delta > 1 && (int16_t)tracker->song.num_sequence_steps + (int16_t)delta <= 0xff)
+            if ((int16_t)tracker->song.num_sequence_steps + (int16_t)delta > 0 && (int16_t)tracker->song.num_sequence_steps + (int16_t)delta <= 0x100)
             {
                 tracker->song.num_sequence_steps += delta;
             }
@@ -126,20 +152,11 @@ void edit_songinfo_param(FlizzerTrackerApp *tracker, uint8_t selected_param, int
         {
             int16_t inst = tracker->current_instrument;
 
-            if (inst + delta >= MUS_NOTE_INSTRUMENT_NONE)
-            {
-                if (delta > 0)
-                {
-                    inst = 0;
-                }
+            int8_t inst_delta = delta > 0 ? 1 : -1;
 
-                else
-                {
-                    inst = MUS_NOTE_INSTRUMENT_NONE - 1;
-                }
-            }
+            inst += inst_delta;
 
-            clamp(inst, delta, 0, tracker->song.num_instruments - 1);
+            clamp(inst, 0, 0, tracker->song.num_instruments - 1);
 
             tracker->current_instrument = inst;
 

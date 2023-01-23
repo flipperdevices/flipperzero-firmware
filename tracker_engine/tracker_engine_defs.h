@@ -23,6 +23,7 @@
 #define MUS_NOTE_VOLUME_NONE 31
 
 #define SONG_FILE_SIG "FZT!SONG"
+#define SONG_FILE_EXT ".fzt"
 
 #define TRACKER_ENGINE_VERSION 1
 
@@ -36,8 +37,7 @@ typedef enum
     TE_PROG_NO_RESTART = 4,
     TE_SET_CUTOFF = 8,
     TE_SET_PW = 16,
-    TE_KEY_SYNC = 32,           // sync oscillators on keydown
-    TE_RETRIGGER_ON_SLIDE = 64, // call trigger instrument function even if slide command is there
+    TE_RETRIGGER_ON_SLIDE = 32, // call trigger instrument function even if slide command is there
 } TrackerEngineFlags;
 
 typedef enum
@@ -46,6 +46,28 @@ typedef enum
     TEC_PROGRAM_RUNNING = 2,
     TEC_DISABLED = 4,
 } TrackerEngineChannelFlags;
+
+typedef enum
+{
+    TE_EFFECT_ARPEGGIO = 0x0000,
+    TE_EFFECT_PORTAMENTO_UP = 0x0100,
+    TE_EFFECT_PORTAMENTO_DOWN = 0x0200,
+    TE_EFFECT_SLIDE = 0x0300,
+    TE_EFFECT_VIBRATO = 0x0400,
+    /* TODO: add smth there */
+    TE_EFFECT_VOLUME_FADE = 0x0a00,
+    TE_EFFECT_SET_VOLUME = 0x0c00,
+    TE_EFFECT_SKIP_PATTERN = 0x0d00,
+    TE_EFFECT_EXT = 0x0e00,
+    /* TODO: add 0exy effects here */
+    TE_EFFECT_SET_SPEED_PROG_PERIOD = 0x0f00,
+    /* These effects work only in instrument program */
+    TE_PROGRAM_LOOP_BEGIN = 0x7d00,
+    TE_PROGRAM_LOOP_END = 0x7e00,
+    TE_PROGRAM_JUMP = 0x7f00,
+    TE_PROGRAM_NOP = 0x7ffe,
+    TE_PROGRAM_END = 0x7fff,
+} EffectCommandsOpcodes;
 
 typedef struct
 {
@@ -138,7 +160,8 @@ typedef struct
     TrackerSongPattern pattern[MAX_PATTERNS];
     TrackerSongSequence sequence;
 
-    uint8_t num_patterns, num_sequence_steps, num_instruments;
+    uint8_t num_patterns, num_instruments;
+    uint16_t num_sequence_steps;
     uint16_t pattern_length;
 
     char song_name[MUS_SONG_NAME_LEN + 1];

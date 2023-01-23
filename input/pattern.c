@@ -70,7 +70,7 @@ void edit_instrument(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, i
         }
     }
 
-    clamp(inst, delta, 0, MUS_NOTE_INSTRUMENT_NONE - 1);
+    clamp(inst, delta, 0, tracker->song.num_instruments - 1);
     tracker->current_instrument = inst; // remember last instrument
     set_instrument(step, (uint8_t)inst);
 }
@@ -199,6 +199,7 @@ void delete_field(TrackerSongPatternStep *step, uint8_t field)
         case 0: // note
         {
             set_note(step, MUS_NOTE_NONE);
+            set_instrument(step, MUS_NOTE_INSTRUMENT_NONE); //also delete instrument
             break;
         }
 

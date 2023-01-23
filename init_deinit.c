@@ -47,6 +47,9 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
     with_view_model(
         tracker->tracker_view->view, TrackerViewModel * model, { model->tracker = tracker; }, true);
 
+    tracker->storage = furi_record_open(RECORD_STORAGE);
+    tracker->stream = file_stream_alloc(tracker->storage);
+
     tracker->text_input = text_input_alloc();
     view_dispatcher_add_view(tracker->view_dispatcher, VIEW_KEYBOARD, text_input_get_view(tracker->text_input));
 
@@ -54,6 +57,8 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
     tracker->instrument_submenu = submenu_alloc();
 
     submenu_add_item(tracker->pattern_submenu, "Return", SUBMENU_PATTERN_RETURN, submenu_callback, tracker);
+    submenu_add_item(tracker->pattern_submenu, "Load song", SUBMENU_PATTERN_LOAD_SONG, submenu_callback, tracker);
+    submenu_add_item(tracker->pattern_submenu, "Save song", SUBMENU_PATTERN_SAVE_SONG, submenu_callback, tracker);
     submenu_add_item(tracker->pattern_submenu, "Exit", SUBMENU_PATTERN_EXIT, submenu_callback, tracker);
 
     submenu_add_item(tracker->instrument_submenu, "Return", SUBMENU_INSTRUMENT_RETURN, submenu_callback, tracker);
@@ -61,6 +66,25 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
 
     view_dispatcher_add_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN, submenu_get_view(tracker->pattern_submenu));
     view_dispatcher_add_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT, submenu_get_view(tracker->instrument_submenu));
+
+    tracker->overwrite_file_widget = widget_alloc();
+
+    widget_add_button_element(
+        tracker->overwrite_file_widget,
+        GuiButtonTypeLeft,
+        "No",
+        (ButtonCallback)overwrite_file_widget_no_input_callback,
+        tracker);
+    widget_add_button_element(
+        tracker->overwrite_file_widget,
+        GuiButtonTypeRight,
+        "Yes",
+        (ButtonCallback)overwrite_file_widget_yes_input_callback,
+        tracker);
+
+    widget_add_text_scroll_element(tracker->overwrite_file_widget, 0, 0, 128, 64, "This song file already exists,\n do you want to overwrite it?");
+
+    view_dispatcher_add_view(tracker->view_dispatcher, VIEW_FILE_OVERWRITE, widget_get_view(tracker->overwrite_file_widget));
 
     tracker->notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
@@ -76,6 +100,7 @@ void deinit_tracker(FlizzerTrackerApp *tracker)
     // Специальная очистка памяти, занимаемой очередью
     furi_message_queue_free(tracker->event_queue);
 
+    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_FILE_OVERWRITE);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_KEYBOARD);
@@ -86,10 +111,15 @@ void deinit_tracker(FlizzerTrackerApp *tracker)
     submenu_free(tracker->pattern_submenu);
     submenu_free(tracker->instrument_submenu);
 
+    widget_free(tracker->overwrite_file_widget);
+
     view_dispatcher_free(tracker->view_dispatcher);
 
     tracker_view_free(tracker->tracker_view);
     furi_record_close(RECORD_GUI);
+
+    stream_free(tracker->stream);
+    furi_record_close(RECORD_STORAGE);
 
     sound_engine_deinit(&tracker->sound_engine);
 

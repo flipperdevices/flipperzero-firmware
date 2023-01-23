@@ -6,6 +6,8 @@
 #include <furi.h>
 #include <gui/gui.h>
 
+extern const char to_char_array[];
+
 void draw_pattern_view(Canvas *canvas, FlizzerTrackerApp *tracker);
 void draw_sequence_view(Canvas *canvas, FlizzerTrackerApp *tracker);
 void draw_songinfo_view(Canvas *canvas, FlizzerTrackerApp *tracker);

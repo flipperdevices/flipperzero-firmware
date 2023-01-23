@@ -16,22 +16,16 @@ void edit_instrument_param(FlizzerTrackerApp *tracker, uint8_t selected_param, i
         {
             int16_t inst = tracker->current_instrument;
 
-            if (inst + delta >= MUS_NOTE_INSTRUMENT_NONE)
+            int8_t inst_delta = delta > 0 ? 1 : -1;
+
+            inst += inst_delta;
+
+            clamp(inst, 0, 0, tracker->song.num_instruments);
+
+            if(check_and_allocate_instrument(&tracker->song, (uint8_t)inst))
             {
-                if (delta > 0)
-                {
-                    inst = 0;
-                }
-
-                else
-                {
-                    inst = MUS_NOTE_INSTRUMENT_NONE - 1;
-                }
+                tracker->current_instrument = inst;
             }
-
-            clamp(inst, delta, 0, tracker->song.num_instruments - 1);
-
-            tracker->current_instrument = inst;
 
             break;
         }

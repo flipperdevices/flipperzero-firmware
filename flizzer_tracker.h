@@ -5,10 +5,12 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/widget.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdio.h>
 #include <toolbox/stream/file_stream.h>
+#include <storage/storage.h>
 #include <u8g2_glue.h>
 
 #include <gui/modules/text_input.h>
@@ -20,9 +22,13 @@
 #include "sound_engine/sound_engine_filter.h"
 #include "tracker_engine/tracker_engine_defs.h"
 
+#define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
+#define FILE_NAME_LEN 64
+
 typedef enum
 {
     EventTypeInput,
+    EventTypeSaveSong,
 } EventType;
 
 typedef struct
@@ -127,14 +133,16 @@ typedef enum
 {
     VIEW_TRACKER,
     VIEW_KEYBOARD,
-    VIEW_FILE_MANAGER,
     VIEW_SUBMENU_PATTERN,
     VIEW_SUBMENU_INSTRUMENT,
+    VIEW_FILE_OVERWRITE,
 } FlizzerTrackerViews;
 
 typedef enum
 {
     SUBMENU_PATTERN_RETURN,
+    SUBMENU_PATTERN_LOAD_SONG,
+    SUBMENU_PATTERN_SAVE_SONG,
     SUBMENU_PATTERN_EXIT,
 } PatternSubmenuParams;
 
@@ -152,10 +160,14 @@ typedef struct
     TrackerView *tracker_view;
     ViewDispatcher *view_dispatcher;
     TextInput *text_input;
+    Storage* storage;
     Stream *stream;
+    FuriString* filepath;
     DialogsApp *dialogs;
     Submenu *pattern_submenu;
     Submenu *instrument_submenu;
+    Widget* overwrite_file_widget;
+    char filename[FILE_NAME_LEN + 1];
     bool was_it_back_keypress;
     uint32_t current_time;
     uint32_t period;
@@ -168,12 +180,15 @@ typedef struct
     uint8_t selected_param;
 
     uint8_t mode, focus;
-    uint8_t patternx, current_channel, current_digit, program_step, current_instrument, current_note;
+    uint8_t patternx, current_channel, current_digit, program_position, current_program_step, current_instrument, current_note;
 
     uint8_t inst_editor_shift;
 
     bool editing;
     bool was_editing;
+
+    bool is_loading;
+    bool is_saving;
 
     bool quit;
 } FlizzerTrackerApp;

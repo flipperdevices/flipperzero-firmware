@@ -15,5 +15,8 @@
 #include "input/sequence.h"
 #include "input/songinfo.h"
 
+void overwrite_file_widget_yes_input_callback(GuiButtonType result, InputType type, void* ctx);
+void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType type, void* ctx);
+
 void submenu_callback(void *context, uint32_t index);
 void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event);

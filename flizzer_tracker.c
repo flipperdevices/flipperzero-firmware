@@ -4,8 +4,7 @@
 #include "util.h"
 #include "view/instrument_editor.h"
 #include "view/pattern_editor.h"
-
-#define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
+#include "diskop.h"
 
 #include <flizzer_tracker_icons.h>
 
@@ -39,6 +38,18 @@ void draw_callback(Canvas *canvas, void *ctx)
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)(model->tracker);
 
     canvas_set_color(canvas, ColorXOR);
+
+    if(tracker->is_loading)
+    {
+        canvas_draw_str(canvas, 10, 10, "Loading...");
+        return;
+    }
+
+    if(tracker->is_saving)
+    {
+        canvas_draw_str(canvas, 10, 10, "Saving...");
+        return;
+    }
 
     canvas_set_custom_font(canvas, u8g2_font_tom_thumb_4x6_tr);
 
@@ -96,7 +107,11 @@ bool input_callback(InputEvent *input_event, void *ctx)
     uint32_t final_period = (tracker->was_it_back_keypress ? tracker->period : 0);
 
     FlizzerTrackerEvent event = {.type = EventTypeInput, .input = *input_event, .period = final_period};
-    furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+
+    if(!(tracker->is_loading) && !(tracker->is_saving))
+    {
+        furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+    }
 
     consumed = true;
     return consumed;
@@ -105,6 +120,11 @@ bool input_callback(InputEvent *input_event, void *ctx)
 int32_t flizzer_tracker_app(void *p)
 {
     UNUSED(p);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    bool st = storage_simply_mkdir(storage, FLIZZER_TRACKER_FOLDER);
+    UNUSED(st);
+    furi_record_close(RECORD_STORAGE);
 
     FlizzerTrackerApp *tracker = init_tracker(44100, 50, false, 1024);
 
@@ -171,19 +191,18 @@ int32_t flizzer_tracker_app(void *p)
         set_instrument(&tracker->song.pattern[1].step[i], 1);
     }
 
-    tracker->song.instrument[0]->base_note = MIDDLE_C;
+    set_default_instrument(tracker->song.instrument[0]);
+    set_default_instrument(tracker->song.instrument[1]);
+
     tracker->song.instrument[0]->adsr.a = 0x2;
     tracker->song.instrument[0]->adsr.d = 0x9;
     tracker->song.instrument[0]->adsr.volume = 0x80;
     tracker->song.instrument[0]->waveform = SE_WAVEFORM_TRIANGLE;
-    tracker->song.instrument[0]->sound_engine_flags |= SE_ENABLE_KEYDOWN_SYNC;
 
-    tracker->song.instrument[1]->base_note = MIDDLE_C;
     tracker->song.instrument[1]->adsr.a = 0x0;
     tracker->song.instrument[1]->adsr.d = 0x3;
     tracker->song.instrument[1]->adsr.volume = 0x18;
     tracker->song.instrument[1]->waveform = SE_WAVEFORM_NOISE;
-    tracker->song.instrument[1]->sound_engine_flags |= SE_ENABLE_KEYDOWN_SYNC;
 
     tracker->tracker_engine.playing = false;
     play();
@@ -201,6 +220,11 @@ int32_t flizzer_tracker_app(void *p)
         if (event.type == EventTypeInput)
         {
             process_input_event(tracker, &event);
+        }
+
+        if(event.type == EventTypeSaveSong)
+        {
+            save_song(tracker, tracker->filepath);
         }
     }
 

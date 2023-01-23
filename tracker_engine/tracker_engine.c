@@ -6,6 +6,8 @@
 
 void tracker_engine_init(TrackerEngine *tracker_engine, uint8_t rate, SoundEngine *sound_engine)
 {
+    memset(tracker_engine, 0, sizeof(TrackerEngine));
+
     furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdTIM2, 14, tracker_engine_timer_isr, (void *)tracker_engine);
     tracker_engine_init_hardware(rate);
 
@@ -233,7 +235,7 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
         if (tracker_engine->song)
         {
-            uint8_t sequence_position = tracker_engine->sequence_position;
+            uint16_t sequence_position = tracker_engine->sequence_position;
             uint8_t current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
             uint8_t pattern_step = tracker_engine->pattern_position;
 
@@ -313,19 +315,13 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
             {
                 tracker_engine->pattern_position = 0;
 
-                uint16_t temp_sequence_position = tracker_engine->sequence_position;
-                temp_sequence_position++;
+                tracker_engine->sequence_position++;
 
-                if (temp_sequence_position >= song->num_sequence_steps)
+                if (tracker_engine->sequence_position >= song->num_sequence_steps)
                 {
                     tracker_engine->playing = false; // TODO: add song loop handling
-                    // tracker_engine->sequence_position--;
+                    tracker_engine->sequence_position--;
                     tracker_engine->pattern_position = song->pattern_length - 1;
-                }
-
-                else
-                {
-                    tracker_engine->sequence_position++;
                 }
             }
         }

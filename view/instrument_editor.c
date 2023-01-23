@@ -1,6 +1,8 @@
 #include "instrument_editor.h"
 #include "pattern_editor.h"
 
+#include "opcode_description.h"
+
 #include <flizzer_tracker_icons.h>
 
 void draw_inst_flag(FlizzerTrackerApp *tracker, Canvas *canvas, uint8_t focus, uint8_t param, const char *text, uint8_t x, uint8_t y, uint16_t flags, uint16_t mask)
@@ -86,7 +88,7 @@ static const char *instrument_editor_params_description[] =
         "ENABLE HARD SYNC",
         "HARDSYNC SOURCE CHANNEL (F=SELF)",
         "RETRIGGER INSTRUMENT ON SLIDE",
-        "SYNC OSCLLATORS ON KEYDOWN",
+        "SYNC OSCILLATORS ON KEYDOWN",
         "ENABLE VIBRATO",
         "VIBRATO SPEED",
         "VIBRATO DEPTH",
@@ -156,7 +158,7 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
     draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_SETPW, "PW:", 36, 17 - shift, inst->flags, TE_SET_PW);
     draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PW, "", 54, 17 - shift, inst->pw);
-    draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_SETCUTOFF, "CUT", 62, 17 - shift, inst->flags, TE_SET_CUTOFF);
+    draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_SETCUTOFF, "CUT", 61, 17 - shift, inst->flags, TE_SET_CUTOFF);
 
     draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_WAVE_NOISE, "N", 0, 23 - shift, inst->waveform, SE_WAVEFORM_NOISE);
     draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_WAVE_PULSE, "P", 10, 23 - shift, inst->waveform, SE_WAVEFORM_PULSE);
@@ -204,11 +206,11 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PWMDELAY, "DEL:", 52, 59 - shift, inst->pwm_delay);
     }
 
-    draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PROGRAMEPERIOD, "P.PERIOD:", 84, 56, inst->program_period);
+    draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PROGRAMEPERIOD, "P.PERIOD:", 81, 56, inst->program_period);
 
     canvas_draw_line(canvas, 0, 57, 127, 57);
-    canvas_draw_line(canvas, 82, 0, 82, 56);
-    canvas_draw_line(canvas, 83, 49, 127, 49);
+    canvas_draw_line(canvas, 79, 0, 79, 56);
+    canvas_draw_line(canvas, 80, 49, 127, 49);
 
     if (tracker->focus == EDIT_INSTRUMENT)
     {
@@ -216,8 +218,110 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
     }
 }
 
+char command_get_char(uint16_t command)
+{
+    if((command >> 8) < 36)
+    {
+        return to_char_array[(command >> 8)];
+    }
+
+    if(command == TE_PROGRAM_END)
+    {
+        return ':';
+    }
+
+    if((command & 0xff00) == TE_PROGRAM_JUMP)
+    {
+        return '^';
+    }
+
+    if((command & 0xff00) == TE_PROGRAM_LOOP_END)
+    {
+        return '>';
+    }
+
+    if((command & 0xff00) == TE_PROGRAM_LOOP_BEGIN)
+    {
+        return '<';
+    }
+
+    return '?';
+}
+
+void draw_program_step(Canvas *canvas, uint8_t y, FlizzerTrackerApp *tracker, uint8_t index)
+{
+    char buffer[15];
+
+    Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+    uint16_t opcode = inst->program[index];
+
+    if(opcode != TE_PROGRAM_NOP)
+    {
+        snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), get_opcode_description(opcode, true) ? get_opcode_description(opcode, true) : "");
+
+        if(opcode & 0x8000)
+        {
+            if(index == 0)
+            {
+                canvas_draw_line(canvas, 84 + 4 * 4 + 2, y, 84 + 4 * 4 + 2, y - 3);
+                canvas_draw_dot(canvas, 84 + 4 * 4 + 1, y - 4);
+            }
+
+            if(index > 0 && !(inst->program[index - 1] & 0x8000))
+            {
+                canvas_draw_line(canvas, 84 + 4 * 4 + 2, y, 84 + 4 * 4 + 2, y - 3);
+                canvas_draw_dot(canvas, 84 + 4 * 4 + 1, y - 4);
+            }
+
+            if(index > 0 && (inst->program[index - 1] & 0x8000))
+            {
+                canvas_draw_line(canvas, 84 + 4 * 4 + 2, y, 84 + 4 * 4 + 2, y - 5);
+            }
+        }
+
+        else
+        {
+            if(index > 0 && (inst->program[index - 1] & 0x8000))
+            {
+                canvas_draw_line(canvas, 84 + 4 * 4 + 2, y - 3, 84 + 4 * 4 + 2, y - 5);
+                canvas_draw_dot(canvas, 84 + 4 * 4 + 1, y - 2);
+            }
+        }
+    }
+
+    else
+    {
+        snprintf(buffer, sizeof(buffer), "%01X ---", index);
+    }
+
+    canvas_draw_str(canvas, 81, y, buffer);
+}
+
 void draw_instrument_program_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 {
-    UNUSED(canvas);
-    UNUSED(tracker);
+    Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+
+    for(uint8_t i = tracker->program_position; i < fmin(INST_PROG_LEN, tracker->program_position + 8); i++)
+    {
+        draw_program_step(canvas, 6 + 6 * i - tracker->program_position * 6, tracker, i);
+
+        if(i == tracker->current_program_step && tracker->focus == EDIT_PROGRAM)
+        {
+            if(tracker->editing)
+            {
+                canvas_draw_box(canvas, 80 + 8 + tracker->current_digit * 4, 6 * i - tracker->program_position * 6, 5, 7);
+            }
+
+            else
+            {
+                canvas_draw_box(canvas, 80, 6 * i - tracker->program_position * 6, 5, 7);
+            }
+        }
+    }
+
+    if (tracker->focus == EDIT_PROGRAM)
+    {
+        uint16_t opcode = (inst->program[tracker->current_program_step] & 0x7fff);
+        canvas_draw_str(canvas, 0, 64, get_opcode_description(opcode, false) ? get_opcode_description(opcode, false) : "");
+    }
 }

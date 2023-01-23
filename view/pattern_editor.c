@@ -44,46 +44,6 @@ char *notename(uint8_t note)
     return buffer;
 }
 
-const char to_char_array[] =
-    {
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-        'A',
-        'B',
-        'C',
-        'D',
-        'E',
-        'F',
-        'G',
-        'H',
-        'I',
-        'J',
-        'K',
-        'L',
-        'M',
-        'N',
-        'O',
-        'P',
-        'Q',
-        'R',
-        'S',
-        'T',
-        'U',
-        'V',
-        'W',
-        'X',
-        'Y',
-        'Z',
-};
-
 char to_char(uint8_t number)
 {
     return to_char_array[number];
@@ -307,7 +267,7 @@ void draw_songinfo_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
     snprintf(buffer, sizeof(buffer), "PAT.P.%02X/%02X", tracker->tracker_engine.pattern_position, tracker->song.pattern_length - 1);
     draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_PATTERNPOS, buffer, 42, 5, 2);
-    snprintf(buffer, sizeof(buffer), "SEQ.P.%02X/%02X", tracker->tracker_engine.sequence_position, tracker->song.num_sequence_steps);
+    snprintf(buffer, sizeof(buffer), "SEQ.P.%02X/%02X", tracker->tracker_engine.sequence_position, tracker->song.num_sequence_steps - 1);
     draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_SEQUENCEPOS, buffer, 42, 11, 2);
     snprintf(buffer, sizeof(buffer), "SPD.%02X", tracker->song.speed);
     draw_generic_n_digit_field(tracker, canvas, EDIT_SONGINFO, SI_SONGSPEED, buffer, 42, 17, 2);
