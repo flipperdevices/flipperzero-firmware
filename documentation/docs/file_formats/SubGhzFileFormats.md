@@ -1,6 +1,6 @@
 # File Formats for Flipper's SubGhz Subsystem
 
-## `.sub` File Format
+## .sub File Format
 
 Flipper uses `.sub` files to store SubGhz transmissions. These are text files in Flipper File Format. `.sub` files can contain either a SubGhz Key with a certain protocol or SubGhz RAW data.
 
@@ -151,7 +151,7 @@ Long payload not fitting into internal memory buffer and consisting of short dur
 
 SubGhz application provides support for adding extra radio presets and additional keys for decoding transmissions in certain protocols.
 
-## SubGhz `keeloq_mfcodes_user` file
+## SubGhz keeloq_mfcodes_user file
 
 This file contains additional manufacturer keys for Keeloq protocol. It is used to decode Keeloq transmissions.
 This file is loaded at subghz application start and is located at path `/ext/subghz/assets/keeloq_mfcodes_user`.
@@ -191,7 +191,7 @@ For each key, a name and encryption method must be specified, according to comme
     AABBCCDDEEFFAABB:1:Test1
     AABBCCDDEEFFAABB:1:Test2
 
-## SubGhz `setting_user` file
+## SubGhz setting_user file
 
 This file contains additional radio presets and frequencies for SubGhz application. It is used to add new presets and frequencies for existing presets. This file is being loaded on subghz application start and is located at path `/ext/subghz/assets/setting_user`.
 
