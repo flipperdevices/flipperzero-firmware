@@ -61,7 +61,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - Added: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- RM Minimal Animation Build Update: Removed Mustache, New Year, Sleigh Ride and Fireplace animations.
+- Animation Build Update: Removed Mustache, New Year, Sleigh Ride and Fireplace animations from RM Minimal and RM Select builds.
+- Animation Build Update: Changed Mods, Painting and Wake Up Animations to be RogueMaster versions on ALL, RM Minimal, RM Select and Stock builds.
 
 <a name="release">
 
