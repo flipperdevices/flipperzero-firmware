@@ -63,7 +63,21 @@ typedef enum {
 } SubGhzRegulation;
 
 /** SPI handle of currently selected subghz device */
+extern const GpioPin* subghz_g0_pin;
 extern FuriHalSpiBusHandle* subghz_spi_handle;
+
+/** Gets the internal/external cc1101 state.
+ *
+ * @return true if internal cc1101 is used.
+ */
+bool furi_hal_subghz_is_internal_cc1101();
+
+/** Switches between internal and external cc1101.
+ *
+ * @param[in] true if internal cc1011 should be used, false for external.
+ * @return true if switch was successfull, false if error occured and old value kept.
+ */
+bool furi_hal_subghz_set_internal_cc1101(bool value);
 
 /* Mirror RX/TX async modulation signal to specified pin
  *

@@ -1327,6 +1327,7 @@ Function,+,furi_hal_subghz_idle,void,
 Function,-,furi_hal_subghz_init,void,
 Function,+,furi_hal_subghz_is_async_tx_complete,_Bool,
 Function,+,furi_hal_subghz_is_frequency_valid,_Bool,uint32_t
+Function,+,furi_hal_subghz_is_internal_cc1101,_Bool,
 Function,+,furi_hal_subghz_is_rx_data_crc_valid,_Bool,
 Function,+,furi_hal_subghz_load_custom_preset,void,uint8_t*
 Function,+,furi_hal_subghz_load_patable,void,const uint8_t[8]
@@ -1339,6 +1340,7 @@ Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
+Function,+,furi_hal_subghz_set_internal_cc1101,_Bool,_Bool
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
 Function,-,furi_hal_subghz_shutdown,void,
 Function,+,furi_hal_subghz_sleep,void,
@@ -3228,6 +3230,7 @@ Variable,+,sequence_set_vibro_on,const NotificationSequence,
 Variable,+,sequence_single_vibro,const NotificationSequence,
 Variable,+,sequence_solid_yellow,const NotificationSequence,
 Variable,+,sequence_success,const NotificationSequence,
+Variable,+,subghz_g0_pin,const GpioPin*,
 Variable,+,subghz_protocol_raw,const SubGhzProtocol,
 Variable,+,subghz_protocol_raw_decoder,const SubGhzProtocolDecoder,
 Variable,+,subghz_protocol_raw_encoder,const SubGhzProtocolEncoder,

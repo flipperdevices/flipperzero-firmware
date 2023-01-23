@@ -18,10 +18,16 @@
 
 static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 
-//  Internal cc1101
-//static FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
-// External cc1101
-FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
+// Internal or external subghz module selected
+static bool subghz_use_int_module = true;
+
+const GpioPin* subghz_g0_pin = &gpio_cc1101_g0;
+FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
+
+// external cc1101
+//GpioPin* sughz_g0_pin = &gpio_ext_pb3;
+//FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
+
 
 typedef struct {
     volatile SubGhzState state;
@@ -41,6 +47,17 @@ void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
     furi_hal_subghz.async_mirror_pin = pin;
 }
 
+bool furi_hal_subghz_is_internal_cc1101() {
+    return subghz_use_int_module;
+}
+
+bool furi_hal_subghz_set_internal_cc1101(bool value) {
+    // TODO: check and switch
+    subghz_use_int_module = value;
+    return true;
+}
+
+
 void furi_hal_subghz_init() {
     furi_assert(furi_hal_subghz.state == SubGhzStateInit);
     furi_hal_subghz.state = SubGhzStateIdle;
@@ -53,27 +70,27 @@ void furi_hal_subghz_init() {
 #endif
 
     // Reset
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_reset(subghz_spi_handle);
     cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
 
     // Prepare GD0 for power on self test
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
     // GD0 low
     cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHW);
-    while(furi_hal_gpio_read(&gpio_cc1101_g0) != false)
+    while(furi_hal_gpio_read(subghz_g0_pin) != false)
         ;
 
     // GD0 high
     cc1101_write_reg(
         subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
-    while(furi_hal_gpio_read(&gpio_cc1101_g0) != true)
+    while(furi_hal_gpio_read(subghz_g0_pin) != true)
         ;
 
     // Reset GD0 to floating state
     cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // RF switches
     furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -93,7 +110,7 @@ void furi_hal_subghz_sleep() {
     cc1101_switch_to_idle(subghz_spi_handle);
 
     cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     cc1101_shutdown(subghz_spi_handle);
 
@@ -247,7 +264,7 @@ void furi_hal_subghz_shutdown() {
 
 void furi_hal_subghz_reset() {
     furi_hal_spi_acquire(subghz_spi_handle);
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     cc1101_switch_to_idle(subghz_spi_handle);
     cc1101_reset(subghz_spi_handle);
     cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
@@ -428,7 +445,7 @@ void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void*
     furi_hal_subghz_capture_callback_context = context;
 
     furi_hal_gpio_init_ex(
-        &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+        subghz_g0_pin, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Timer: base
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
@@ -496,7 +513,7 @@ void furi_hal_subghz_stop_async_rx() {
     FURI_CRITICAL_EXIT();
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
 
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
 typedef struct {
@@ -595,7 +612,7 @@ static void furi_hal_subghz_async_tx_timer_isr() {
             } else if(furi_hal_subghz.state == SubGhzStateAsyncTxLast) {
                 furi_hal_subghz.state = SubGhzStateAsyncTxEnd;
                 //forcibly pulls the pin to the ground so that there is no carrier
-                furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+                furi_hal_gpio_init(subghz_g0_pin, GpioModeInput, GpioPullDown, GpioSpeedLow);
                 LL_TIM_DisableCounter(TIM2);
             } else {
                 furi_crash(NULL);
@@ -624,7 +641,7 @@ bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void*
 
     // Connect CC1101_GD0 to TIM2 as output
     furi_hal_gpio_init_ex(
-        &gpio_cc1101_g0, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
+        subghz_g0_pin, GpioModeAltFunctionPushPull, GpioPullDown, GpioSpeedLow, GpioAltFn1TIM2);
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
@@ -736,7 +753,7 @@ void furi_hal_subghz_stop_async_tx() {
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
 
     // Deinitialize GPIO
-    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(subghz_g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     // Stop debug
     if(furi_hal_subghz_stop_debug()) {
