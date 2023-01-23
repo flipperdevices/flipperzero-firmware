@@ -55,14 +55,15 @@ __int32_t ios_trigger_app(void *p){
                             app->running = false;
                             break;
                         case(InputKeyOk):
-                            app->shooting = !app->shooting;
-                            if(app->shooting){
-                                app->shots = 0;
-                                //Timer triggered every delay ms    
-                                furi_timer_start(timer, app->delay * 1000);
-                            }else{
-                                //Timer triggered every delay ms    
-                                furi_timer_stop(timer);
+                            if(app->delay > 0){
+                                app->shooting = !app->shooting;
+                                if(app->shooting){
+                                    //Timer triggered every delay ms    
+                                    furi_timer_start(timer, app->delay * 1000);
+                                }else{
+                                    //Timer triggered every delay ms    
+                                    furi_timer_stop(timer);
+                                }
                             }
                             break;
                         case(InputKeyUp):
@@ -71,7 +72,7 @@ __int32_t ios_trigger_app(void *p){
                             }
                             break;
                         case(InputKeyDown):
-                            if(!app->shooting){
+                            if(!app->shooting && app->delay > 1){
                                 app->delay--;
                             }
                             break;
@@ -218,6 +219,7 @@ AppStruct* appStructAlloc(){
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
     app->connected = false;
     app->running = true;
+    app->delay = 1;
     return app;
 }
 
