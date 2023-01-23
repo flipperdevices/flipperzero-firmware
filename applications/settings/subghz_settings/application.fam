@@ -1,0 +1,9 @@
+App(
+    appid="subghz_settings",
+    name="Subghz",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="subghz_settings_app",
+    requires=["gui", "subghz"],
+    stack_size=1 * 1024,
+    order=80,
+)

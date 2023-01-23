@@ -9,7 +9,7 @@ App(
         "cli",
         "dialogs",
     ],
-    provides=["subghz_start"],
+    provides=["subghz_start", "subghz_settings"],
     icon="A_Sub1ghz_14",
     stack_size=2 * 1024,
     order=10,

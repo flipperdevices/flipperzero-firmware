@@ -59,9 +59,11 @@ bool furi_hal_subghz_set_internal_cc1101(bool value) {
     if (value) {
         subghz_g0_pin = &gpio_cc1101_g0;
         subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
+        FURI_LOG_I(TAG, "Switched to internal cc1101");
     } else {
         subghz_g0_pin = &gpio_ext_pb3;
         subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
+        FURI_LOG_I(TAG, "Switched to external cc1101");
     }
     subghz_use_int_module = value;
     // TODO: try to initialize the module
