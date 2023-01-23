@@ -55,25 +55,39 @@ __int32_t ios_trigger_app(void* p) {
                     app->running = false;
                     break;
                 case(InputKeyOk):
-                    app->shooting = !app->shooting;
-                    if(app->shooting) {
-                        app->shots = 0;
-                        //Timer triggered every delay ms
-                        furi_timer_start(timer, app->delay * 1000);
-                    } else {
-                        //Timer triggered every delay ms
-                        furi_timer_stop(timer);
+                    if(app->delay > 0) {
+                        app->shooting = !app->shooting;
+                        if(app->shooting) {
+                            //Timer triggered every delay ms
+                            furi_timer_start(timer, app->delay * 1000);
+                        } else {
+                            //Timer triggered every delay ms
+                            furi_timer_stop(timer);
+                        }
                     }
                     break;
                 case(InputKeyUp):
-                    app->delay++;
+                    if(!app->shooting) {
+                        app->delay++;
+                    }
                     break;
                 case(InputKeyDown):
-                    app->delay--;
+                    if(!app->shooting && app->delay > 1) {
+                        app->delay--;
+                    }
                     break;
                 case(InputKeyLeft):
+                    if(!app->shooting) {
+                        app->shots = 0;
+                    }
                     break;
                 case(InputKeyRight):
+                    if(!app->shooting) {
+                        furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
+                        furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
+                        notification_message(app->notifications, &sequence_blink_blue_100);
+                        app->shots++;
+                    }
                     break;
                 default:
                     break;
@@ -134,19 +148,28 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 2, 10, "iOS Intervalometer");
     //Represent
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 79, 60, "By Nem0oo");
+    canvas_draw_str(canvas, 92, 62, "Nem0oo");
     if(app->connected) {
         canvas_draw_icon(canvas, 111, 2, &I_Ble_connected_15x15);
 
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 3, 26, "Delay (in sec)");
-        canvas_draw_icon(canvas, 67, 28, &I_ButtonDown_7x4);
-        canvas_draw_icon(canvas, 67, 13, &I_ButtonUp_7x4);
-        canvas_draw_str(canvas, 65, 26, chaine_delais);
-        canvas_draw_icon(canvas, 2, 31, &I_Ok_btn_pressed_13x13);
-        canvas_draw_str(canvas, 17, 41, chaine_shooting);
-        canvas_draw_str(canvas, 17, 56, chaine_photo);
-        canvas_draw_icon(canvas, 2, 47, &I_dir_10px);
+        //Delay line
+        canvas_draw_icon(canvas, 3, 19, &I_ButtonDown_7x4);
+        canvas_draw_icon(canvas, 3, 14, &I_ButtonUp_7x4);
+        canvas_draw_str(canvas, 13, 22, "Delay (in sec)");
+        canvas_draw_str(canvas, 71, 22, chaine_delais);
+        //Start/stop line
+        canvas_draw_icon(canvas, 2, 25, &I_Ok_btn_9x9);
+        canvas_draw_str(canvas, 13, 33, chaine_shooting);
+        //Single shot line
+        canvas_draw_icon(canvas, 6, 36, &I_ButtonRight_4x7);
+        canvas_draw_str(canvas, 13, 43, "Single shot");
+        //Reset shot count line
+        canvas_draw_icon(canvas, 3, 45, &I_ButtonLeft_4x7);
+        canvas_draw_str(canvas, 13, 52, "Reset shot count");
+        //Shots number line
+        canvas_draw_icon(canvas, 2, 53, &I_dir_10px);
+        canvas_draw_str(canvas, 14, 62, chaine_photo);
     } else {
         canvas_draw_icon(canvas, 111, 2, &I_Ble_disconnected_15x15);
         canvas_draw_icon(canvas, 1, 21, &I_WarningDolphin_45x42);
@@ -181,11 +204,6 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     furi_assert(context);
     AppStruct* app = context;
     app->connected = (status == BtStatusConnected);
-    //if(app->connected) {
-    //    notification_message(app->notifications, &sequence_set_blue_255);
-    //} else {
-    //    notification_message(app->notifications, &sequence_reset_blue);
-    //}
 }
 
 AppStruct* appStructAlloc() {
@@ -200,6 +218,7 @@ AppStruct* appStructAlloc() {
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
     app->connected = false;
     app->running = true;
+    app->delay = 1;
     return app;
 }
 
