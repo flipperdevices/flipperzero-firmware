@@ -142,7 +142,15 @@ static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app
                 success = true;
                 FURI_LOG_T(TAG, "found EMV_TAG_AFL %x (len=%d)", tag, tlen);
                 break;
-            case EMV_TAG_CARD_NUM: // Track 2 Equivalent Data. 0xD0 delimits PAN from expiry (YYMM)
+            case EMV_TAG_TRACK_1_EQUIV:
+                memcpy(app->track_1_equiv, &buff[i], tlen);
+                app->track_1_equiv[tlen] = '\0';
+                app->track_1_equiv_len = tlen;
+                success = true;
+                FURI_LOG_T(TAG, "found EMV_TAG_TRACK_1_EQUIV %x : %s", tag, app->track_1_equiv);
+                break;
+            case EMV_TAG_TRACK_2_EQUIV:
+                // 0xD0 delimits PAN from expiry (YYMM)
                 for(int x = 1; x < tlen; x++) {
                     if(buff[i + x + 1] > 0xD0) {
                         memcpy(app->card_number, &buff[i], x + 1);
@@ -150,12 +158,21 @@ static bool emv_decode_response(uint8_t* buff, uint16_t len, EmvApplication* app
                         break;
                     }
                 }
+
+                // Convert 4-bit to ASCII representation
+                for(int x = 0; x < tlen; x++) {
+                    char top = (buff[i + x] >> 4) + '0';
+                    char bottom = (buff[i + x] & 0x0F) + '0';
+                    app->track_2_equiv[x * 2] = top;
+                    app->track_2_equiv_len++;
+                    if(top == '?') break;
+                    app->track_2_equiv[x * 2 + 1] = bottom;
+                    app->track_2_equiv_len++;
+                    if(bottom == '?') break;
+                }
+                app->track_2_equiv[app->track_2_equiv_len] = '\0';
                 success = true;
-                FURI_LOG_T(
-                    TAG,
-                    "found EMV_TAG_CARD_NUM %x (len=%d)",
-                    EMV_TAG_CARD_NUM,
-                    app->card_number_len);
+                FURI_LOG_T(TAG, "found EMV_TAG_TRACK_2_EQUIV %x : %s", tag, app->track_2_equiv);
                 break;
             case EMV_TAG_PAN:
                 memcpy(app->card_number, &buff[i], tlen);

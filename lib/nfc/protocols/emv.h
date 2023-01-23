@@ -11,7 +11,8 @@
 #define EMV_TAG_CARD_NAME 0x50
 #define EMV_TAG_FCI 0xBF0C
 #define EMV_TAG_LOG_CTRL 0x9F4D
-#define EMV_TAG_CARD_NUM 0x57
+#define EMV_TAG_TRACK_1_EQUIV 0x56
+#define EMV_TAG_TRACK_2_EQUIV 0x57
 #define EMV_TAG_PAN 0x5A
 #define EMV_TAG_AFL 0x94
 #define EMV_TAG_EXP_DATE 0x5F24
@@ -29,6 +30,10 @@ typedef struct {
     uint8_t exp_year;
     uint16_t country_code;
     uint16_t currency_code;
+    char track_1_equiv[80];
+    uint8_t track_1_equiv_len;
+    char track_2_equiv[41];
+    uint8_t track_2_equiv_len;
 } EmvData;
 
 typedef struct {
@@ -56,6 +61,10 @@ typedef struct {
     uint16_t currency_code;
     APDU pdol;
     APDU afl;
+    char track_1_equiv[80];
+    uint8_t track_1_equiv_len;
+    char track_2_equiv[41];
+    uint8_t track_2_equiv_len;
 } EmvApplication;
 
 /** Read bank card data
