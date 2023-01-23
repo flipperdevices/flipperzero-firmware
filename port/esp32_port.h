@@ -19,6 +19,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
   uint32_t baud_rate;     /*!< Initial baud rate, can be changed later */
@@ -49,3 +53,7 @@ esp_loader_error_t loader_port_esp32_init(const loader_esp32_config_t *config);
   * @brief Deinitialize serial interface.
   */
 void loader_port_esp32_deinit(void);
+
+#ifdef __cplusplus
+}
+#endif

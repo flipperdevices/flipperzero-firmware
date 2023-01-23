@@ -19,6 +19,10 @@
 #include "serial_io.h"
 #include "stm32f4xx_hal.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     UART_HandleTypeDef *huart;
     GPIO_TypeDef *port_io0;
@@ -28,3 +32,7 @@ typedef struct {
 } loader_stm32_config_t;
 
 void loader_port_stm32_init(loader_stm32_config_t *config);
+
+#ifdef __cplusplus
+}
+#endif
