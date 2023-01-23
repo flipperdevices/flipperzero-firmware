@@ -1,4 +1,4 @@
-// v1
+// v1.1
 
 // System libraries
 #include <stdlib.h>
@@ -11,6 +11,7 @@
 #include <cli/cli_i.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <bad_usb/bad_usb_script.h>
 
 static FuriString* cwd;
 static bool registered = false;
@@ -139,36 +140,36 @@ static void extra_help_handler(Cli* cli, FuriString* args, void* context){
 	if(empty) printf("Extra Commands help\r\n\r\n");
 	if(empty || furi_string_cmp_str(args, "extra_help") == 0) printf("extra_help [command]\r\n");
 	if(empty || furi_string_cmp_str(args, "extra_help") == 0) printf("Lists all commands and usages. Specify a command to only output its usage.\r\n");
+	if(empty || furi_string_cmp_str(args, "cd") == 0)         printf("cd [path]\r\n");
+	if(empty || furi_string_cmp_str(args, "cd") == 0)         printf("Changes the current working directory to the specified direcotry. If no directory is specified, it changes it to /ext.\r\n");
+	if(empty || furi_string_cmp_str(args, "cp") == 0)         printf("cp <path1> <path2>\r\n");
+	if(empty || furi_string_cmp_str(args, "cp") == 0)         printf("Copies the specified file (<path1>) to the specified location (<path2>).\r\n");
 	if(empty || furi_string_cmp_str(args, "echo") == 0)       printf("echo <message>\r\n");
 	if(empty || furi_string_cmp_str(args, "echo") == 0)       printf("Prints the specified message.\r\n");
 	if(empty || furi_string_cmp_str(args, "ls") == 0)         printf("ls [path]\r\n");
 	if(empty || furi_string_cmp_str(args, "ls") == 0)         printf("Lists all files and directories in the specified direcotry. If no directory is specified, it takes the current working directory.\r\n");
-	if(empty || furi_string_cmp_str(args, "cd") == 0)         printf("cd [path]\r\n");
-	if(empty || furi_string_cmp_str(args, "cd") == 0)         printf("Changes the current working directory to the specified direcotry. If no directory is specified, it changes it to /ext.\r\n");
+	if(empty || furi_string_cmp_str(args, "mkdir") == 0)      printf("mkdir <path>\r\n");
+	if(empty || furi_string_cmp_str(args, "mkdir") == 0)      printf("Creates a directory at the specified path.\r\n");
+	if(empty || furi_string_cmp_str(args, "mv") == 0)         printf("mv <path1> <path2>\r\n");
+	if(empty || furi_string_cmp_str(args, "mv") == 0)         printf("Moves the specified file (<path1>) to a new location (<path2>).\r\n");
 	if(empty || furi_string_cmp_str(args, "pwd") == 0)        printf("pwd\r\n");
 	if(empty || furi_string_cmp_str(args, "pwd") == 0)        printf("Prints the current working directory.\r\n");
 	if(empty || furi_string_cmp_str(args, "read") == 0)       printf("read <path>\r\n");
 	if(empty || furi_string_cmp_str(args, "read") == 0)       printf("Read the contents of the specified file.\r\n");
-	if(empty || furi_string_cmp_str(args, "write") == 0)      printf("write <path>\r\n");
-	if(empty || furi_string_cmp_str(args, "write") == 0)      printf("Writes input text to the specified file.\r\n");
-	if(empty || furi_string_cmp_str(args, "touch") == 0)      printf("touch <path>\r\n");
-	if(empty || furi_string_cmp_str(args, "touch") == 0)      printf("Creates a file at the specified path.\r\n");
-	if(empty || furi_string_cmp_str(args, "mkdir") == 0)      printf("mkdir <path>\r\n");
-	if(empty || furi_string_cmp_str(args, "mkdir") == 0)      printf("Creates a directory at the specified path.\r\n");
 	if(empty || furi_string_cmp_str(args, "rm") == 0)         printf("rm <path>\r\n");
 	if(empty || furi_string_cmp_str(args, "rm") == 0)         printf("Deletes the file/directory (recursively) at the specified path.\r\n");
-	if(empty || furi_string_cmp_str(args, "mv") == 0)         printf("mv <path1> <path2>\r\n");
-	if(empty || furi_string_cmp_str(args, "mv") == 0)         printf("Moves the specified file (<path1>) to a new location (<path2>).\r\n");
-	if(empty || furi_string_cmp_str(args, "cp") == 0)         printf("cp <path1> <path2>\r\n");
-	if(empty || furi_string_cmp_str(args, "cp") == 0)         printf("Copies the specified file (<path1>) to the specified location (<path2>).\r\n");
+	if(empty || furi_string_cmp_str(args, "sequence") == 0)   printf("sequence <sequence>\r\n");
+	if(empty || furi_string_cmp_str(args, "sequence") == 0)   printf("Plays a notification sequence.\r\n");
+	if(empty || furi_string_cmp_str(args, "sequence") == 0)   printf("Takes sequence name (sequence defined as sequence_<sequence name> in notification/notification_messages.h) as the only argument.\r\n");
+	if(empty || furi_string_cmp_str(args, "sleep") == 0)      printf("sleep <time>\r\n");
+	if(empty || furi_string_cmp_str(args, "sleep") == 0)      printf("Freezes for <time> milliseconds.\r\n");
 	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("start <path>\r\n");
 	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("Execute the script at the specified path.\r\n");
 	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("Executes commands from a file line by line, igores lines starting with '#' as comments.\r\n");
-	if(empty || furi_string_cmp_str(args, "sleep") == 0)      printf("sleep <time>\r\n");
-	if(empty || furi_string_cmp_str(args, "sleep") == 0)      printf("Freezes for <time> milliseconds.\r\n");
-	if(empty || furi_string_cmp_str(args, "sequence") == 0)   printf("sequence <sequence>\r\n");
-	if(empty || furi_string_cmp_str(args, "sequence") == 0)   printf("Plays a system sequence.\r\n");
-	if(empty || furi_string_cmp_str(args, "sequence") == 0)   printf("Takes sequence name (sequence defined as sequence_<sequence name> in notification/notification_messages.h) as the only argument.\r\n");
+	if(empty || furi_string_cmp_str(args, "touch") == 0)      printf("touch <path>\r\n");
+	if(empty || furi_string_cmp_str(args, "touch") == 0)      printf("Creates a file at the specified path.\r\n");
+	if(empty || furi_string_cmp_str(args, "write") == 0)      printf("write <path>\r\n");
+	if(empty || furi_string_cmp_str(args, "write") == 0)      printf("Writes input text to the specified file.\r\n");
 }
 static void echo_handler(Cli* cli, FuriString* args, void* context){
 	UNUSED(cli);
@@ -293,6 +294,12 @@ static void write_handler(Cli* cli, FuriString* args, void* context){
 	while(true){
 		char input = cli_getc(cli);
 		if(input == CliSymbolAsciiETX) break;
+		if(input == CliSymbolAsciiBackspace){
+			furi_string_u_substr(content, 0, furi_string_size(content) - 1);
+			printf("\b \b");
+			fflush(stdout);
+			continue;
+		}
 		printf("%c", input);
 		fflush(stdout);
 		furi_string_push_back(content, input);
