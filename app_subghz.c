@@ -59,7 +59,7 @@ void radio_begin(ProtoViewApp* app) {
 
 /* We avoid the subghz provided abstractions and put the data in our
  * simple abstraction: the RawSamples circular buffer. */
-void protoview_rx_callback(bool level, uint32_t duration, void* context) {
+void protoview_rx_callback(bool level, uint32_t duration, void *context) {
     UNUSED(context);
     /* Add data to the circular buffer. */
     raw_samples_add(RawSamples, level, duration);
