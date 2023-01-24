@@ -9,3 +9,9 @@ cd ..
 ./fbt DEBUG=1 VERBOSE=1 fap_scope
 ./fbt launch_app APPSRC=applications_user/flipperscope
 ```
+
+## To Do
+
+* Test with signal generator
+* Trigger type mode
+* ...
