@@ -1,6 +1,6 @@
 App(
-    appid="IOS_Trigger",
-    name="iOS Trigger",
+    appid="Camera_Trigger",
+    name="Camera Trigger",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ios_trigger_app",
     cdefines=["APP_IOS_TRIGGER"],
