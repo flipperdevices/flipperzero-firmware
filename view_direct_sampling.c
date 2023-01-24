@@ -6,6 +6,11 @@
 #include <cc1101.h>
 
 #define CAPTURED_BITMAP_SIZE 128*64/8
+#define DEFAULT_USEC_PER_PIXEL 50
+#define USEC_PER_PIXEL_SMALL_CHANGE 5
+#define USEC_PER_PIXEL_LARGE_CHANGE 25
+#define USEC_PER_PIXEL_MIN 5
+#define USEC_PER_PIXEL_MAX 300
 typedef struct {
     uint8_t *captured; // Bitmap with the last captured screen.
     uint32_t usec_per_pixel; // Number of useconds a pixel should represent
@@ -14,7 +19,9 @@ typedef struct {
 /* Read directly from the G0 CC1101 pin, and draw a black or white
  * dot depending on the level. */
 void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
-    if (!app->direct_sampling_enabled) {
+    DirectSamplingViewPrivData *privdata = app->view_privdata;
+
+    if (!app->direct_sampling_enabled && privdata->captured == NULL) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str(canvas,2,9,"Direct sampling is a special");
         canvas_draw_str(canvas,2,18,"mode that displays the signal");
@@ -27,21 +34,20 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
     }
 
     /* Allocate the bitmap only the first time. */
-    DirectSamplingViewPrivData *privdata = app->view_privdata;
     if (privdata->captured == NULL)
         privdata->captured = malloc(CAPTURED_BITMAP_SIZE);
 
     /* Read from data from GPIO */
-    if (privdata->captured == NULL)
-        FURI_LOG_E(TAG, "captured is NULL reading GPIO.");
-    for (int j = 0; j < CAPTURED_BITMAP_SIZE*8; j++) {
-        uint32_t start_time = DWT->CYCCNT;
-        bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
-        bitmap_set(privdata->captured,CAPTURED_BITMAP_SIZE,j,level);
-        uint32_t period =
-            furi_hal_cortex_instructions_per_microsecond() *
-            privdata->usec_per_pixel;
-        while(DWT->CYCCNT - start_time < period);
+    if (app->direct_sampling_enabled) {
+        for (int j = 0; j < CAPTURED_BITMAP_SIZE*8; j++) {
+            uint32_t start_time = DWT->CYCCNT;
+            bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
+            bitmap_set(privdata->captured,CAPTURED_BITMAP_SIZE,j,level);
+            uint32_t period =
+                furi_hal_cortex_instructions_per_microsecond() *
+                privdata->usec_per_pixel;
+            while(DWT->CYCCNT - start_time < period);
+        }
     }
 
     /* Draw on screen. */
@@ -51,18 +57,35 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
             bool level = bitmap_get(privdata->captured,
                 CAPTURED_BITMAP_SIZE,idx++);
             if (level) canvas_draw_dot(canvas,x,y);
-            uint32_t x = 250; while(x--);
         }
     }
+
+    char buf[32];
+    snprintf(buf,sizeof(buf),"%lu usec/px", privdata->usec_per_pixel);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_with_border(canvas,36,60,"Direct sampling",
-        ColorWhite,ColorBlack);
+    canvas_draw_str_with_border(canvas,0,60,buf,ColorWhite,ColorBlack);
 }
 
 /* Handle input */
 void process_input_direct_sampling(ProtoViewApp *app, InputEvent input) {
+    DirectSamplingViewPrivData *privdata = app->view_privdata;
+
     if (input.type == InputTypePress && input.key == InputKeyOk) {
         app->direct_sampling_enabled = !app->direct_sampling_enabled;
+    }
+
+    if ((input.key == InputKeyUp || input.key == InputKeyDown) &&
+        (input.type == InputTypePress || input.type == InputTypeRepeat))
+    {
+        uint32_t change = input.type == InputTypePress ?
+            USEC_PER_PIXEL_SMALL_CHANGE :
+            USEC_PER_PIXEL_LARGE_CHANGE;
+        if (input.key == InputKeyUp) change = -change;
+        privdata->usec_per_pixel += change;
+        if (privdata->usec_per_pixel < USEC_PER_PIXEL_MIN)
+            privdata->usec_per_pixel = USEC_PER_PIXEL_MIN;
+        else if (privdata->usec_per_pixel > USEC_PER_PIXEL_MAX)
+            privdata->usec_per_pixel = USEC_PER_PIXEL_MAX;
     }
 }
 
@@ -71,7 +94,7 @@ void process_input_direct_sampling(ProtoViewApp *app, InputEvent input) {
 void view_enter_direct_sampling(ProtoViewApp *app) {
     /* Set view defaults. */
     DirectSamplingViewPrivData *privdata = app->view_privdata;
-    privdata->usec_per_pixel = 30;
+    privdata->usec_per_pixel = DEFAULT_USEC_PER_PIXEL;
 
     if (app->txrx->txrx_state == TxRxStateRx &&
         !app->txrx->debug_timer_sampling)
