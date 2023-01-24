@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - dev
-  pull_request:
 
 env:
   TARGETS: f7
