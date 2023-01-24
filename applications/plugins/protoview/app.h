@@ -17,9 +17,6 @@
 #include <gui/modules/text_input.h>
 #include <notification/notification_messages.h>
 #include <lib/subghz/subghz_setting.h>
-#include <lib/subghz/subghz_worker.h>
-#include <lib/subghz/receiver.h>
-#include <lib/subghz/transmitter.h>
 #include <lib/subghz/registry.h>
 #include "raw_samples.h"
 
@@ -82,9 +79,6 @@ struct ProtoViewTxRx {
     bool freq_mod_changed; /* The user changed frequency and/or modulation
                                    from the interface. There is to restart the
                                    radio with the right parameters. */
-    SubGhzWorker* worker; /* Our background worker. */
-    SubGhzEnvironment* environment;
-    SubGhzReceiver* receiver;
     TxRxState txrx_state; /* Receiving, idle or sleeping? */
 
     /* Timer sampling mode state. */
@@ -238,7 +232,7 @@ typedef struct ProtoViewDecoder {
 
 extern RawSamplesBuffer *RawSamples, *DetectedSamples;
 
-/* app_radio.c */
+/* app_subghz.c */
 void radio_begin(ProtoViewApp* app);
 uint32_t radio_rx(ProtoViewApp* app);
 void radio_idle(ProtoViewApp* app);
@@ -247,6 +241,7 @@ void radio_sleep(ProtoViewApp* app);
 void raw_sampling_worker_start(ProtoViewApp* app);
 void raw_sampling_worker_stop(ProtoViewApp* app);
 void radio_tx_signal(ProtoViewApp* app, FuriHalSubGhzAsyncTxCallback data_feeder, void* ctx);
+void protoview_rx_callback(bool level, uint32_t duration, void* context);
 
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);

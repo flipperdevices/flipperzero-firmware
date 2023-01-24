@@ -47,7 +47,14 @@ void process_input_direct_sampling(ProtoViewApp* app, InputEvent input) {
  * the CC1101 data directly. */
 void view_enter_direct_sampling(ProtoViewApp* app) {
     if(app->txrx->txrx_state == TxRxStateRx && !app->txrx->debug_timer_sampling) {
-        subghz_worker_stop(app->txrx->worker);
+        furi_hal_subghz_stop_async_rx();
+
+        // To read data asynchronously directly from the view, we need
+        // to put the CC1101 back into reception mode (the previous call
+        // to stop the async RX will put it into idle) and configure the
+        // G0 pin for reading.
+        furi_hal_subghz_rx();
+        furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     } else {
         raw_sampling_worker_stop(app);
     }
@@ -56,7 +63,7 @@ void view_enter_direct_sampling(ProtoViewApp* app) {
 /* Exit view. Restore the subghz thread. */
 void view_exit_direct_sampling(ProtoViewApp* app) {
     if(app->txrx->txrx_state == TxRxStateRx && !app->txrx->debug_timer_sampling) {
-        subghz_worker_start(app->txrx->worker);
+        furi_hal_subghz_start_async_rx(protoview_rx_callback, NULL);
     } else {
         raw_sampling_worker_start(app);
     }

@@ -131,8 +131,8 @@ static const uint8_t protoview_subghz_tpms2_ook_async_regs[][2] = {
     {CC1101_MDMCFG0, 0x00}, // Channel spacing is 25kHz
     {CC1101_MDMCFG1, 0x00}, // Channel spacing is 25kHz
     {CC1101_MDMCFG2, 0x30}, // Format ASK/OOK, No preamble/sync
-    {CC1101_MDMCFG3, /*0x93*/ 0x32}, // Data rate is 10kBaud
-    {CC1101_MDMCFG4, /*0x18*/ 0x17}, // Rx BW filter is 650.000kHz
+    {CC1101_MDMCFG3, 0x93}, // Data rate is 10kBaud
+    {CC1101_MDMCFG4, 0x18}, // Rx BW filter is 650.000kHz
 
     /* Main Radio Control State Machine */
     {CC1101_MCSM0, 0x18}, // Autocalibrate on idle-to-rx/tx, PO_TIMEOUT is 64 cycles(149-155us)

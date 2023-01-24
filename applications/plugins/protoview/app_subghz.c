@@ -57,6 +57,16 @@ void radio_begin(ProtoViewApp* app) {
 
 /* ================================= Reception ============================== */
 
+/* We avoid the subghz provided abstractions and put the data in our
+ * simple abstraction: the RawSamples circular buffer. */
+void protoview_rx_callback(bool level, uint32_t duration, void* context) {
+    UNUSED(context);
+    /* Add data to the circular buffer. */
+    raw_samples_add(RawSamples, level, duration);
+    // FURI_LOG_E(TAG, "FEED: %d %d", (int)level, (int)duration);
+    return;
+}
+
 /* Setup subghz to start receiving using a background worker. */
 uint32_t radio_rx(ProtoViewApp* app) {
     furi_assert(app);
@@ -73,8 +83,7 @@ uint32_t radio_rx(ProtoViewApp* app) {
     furi_hal_subghz_flush_rx();
     furi_hal_subghz_rx();
     if(!app->txrx->debug_timer_sampling) {
-        furi_hal_subghz_start_async_rx(subghz_worker_rx_callback, app->txrx->worker);
-        subghz_worker_start(app->txrx->worker);
+        furi_hal_subghz_start_async_rx(protoview_rx_callback, NULL);
     } else {
         raw_sampling_worker_start(app);
     }
@@ -88,10 +97,7 @@ void radio_rx_end(ProtoViewApp* app) {
 
     if(app->txrx->txrx_state == TxRxStateRx) {
         if(!app->txrx->debug_timer_sampling) {
-            if(subghz_worker_is_running(app->txrx->worker)) {
-                subghz_worker_stop(app->txrx->worker);
-                furi_hal_subghz_stop_async_rx();
-            }
+            furi_hal_subghz_stop_async_rx();
         } else {
             raw_sampling_worker_stop(app);
         }
