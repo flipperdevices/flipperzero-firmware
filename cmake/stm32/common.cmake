@@ -56,7 +56,7 @@ find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt HINTS ${TOOLCHA
 
 function(stm32_print_size_of_target TARGET)
     add_custom_target(${TARGET}_always_display_size
-        ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
+        ALL COMMAND ${CMAKE_SIZE} "$<TARGET_FILE:${TARGET}>"
         COMMENT "Target Sizes: "
         DEPENDS ${TARGET}
     )
