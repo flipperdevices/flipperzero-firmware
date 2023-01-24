@@ -1,6 +1,6 @@
 App(
     appid="clock_loader",
-    name="Clock / Dab Timer",
+    name="Clock",
     apptype=FlipperAppType.APP,
     entry_point="clock_loader_app",
     requires=["gui"],
