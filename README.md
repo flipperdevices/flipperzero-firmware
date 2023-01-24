@@ -12,8 +12,11 @@ cd ..
 
 ## To Do
 
+* Check time period is set correctly
 * Test with signal generator
 * Trigger type mode
+* Way to select and measure voltage from waveform
+* FFT
 * ...
 
 ## Inspiration
