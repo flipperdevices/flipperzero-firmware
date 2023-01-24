@@ -35,4 +35,4 @@ It is like [Google Authenticator](https://play.google.com/store/apps/details?id=
 
 ## Have questions?
 
-Checkout [[FAQ]] or ask in [Discord channel](https://discord.com/channels/937479784148115456/1020428040636993536)
+Checkout [FAQ](https://github.com/akopachov/flipper-zero_authenticator/wiki/FAQ) or ask in [Discord channel](https://discord.com/channels/937479784148115456/1020428040636993536)
