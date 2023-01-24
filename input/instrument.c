@@ -419,9 +419,15 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
 
     if (event->input.key == InputKeyOk && event->input.type == InputTypeLong && !tracker->editing)
     {
-        // play_song(tracker, true);
         reset_buffer(&tracker->sound_engine);
         tracker_engine_set_song(&tracker->tracker_engine, NULL);
+
+        for(int i = 1; i < SONG_MAX_CHANNELS; i++)
+        {
+            tracker->tracker_engine.channel[i].channel_flags &= TEC_PLAYING;
+            tracker->tracker_engine.sound_engine->channel[i].frequency = 0;
+            tracker->tracker_engine.sound_engine->channel[i].waveform = 0;
+        }
 
         Instrument *inst = tracker->song.instrument[tracker->current_instrument];
         tracker_engine_trigger_instrument_internal(&tracker->tracker_engine, 0, inst, (MIDDLE_C << 8));
