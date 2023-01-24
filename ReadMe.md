@@ -93,7 +93,7 @@ Make sure your Flipper is on, and your firmware is functioning. Connect your Fli
 - [Flipper File Formats](/documentation/file_formats) - everything about how Flipper stores your data and how you can work with it
 - [Universal Remotes](/documentation/UniversalRemotes.md) - contributing your infrared remote to the universal remote database
 - [Firmware Roadmap](/documentation/RoadMap.md)
-- And much more in the [documentation](/documentation) folder
+- And much more in the [Developer Documentation](https://flipperdevices.github.io/flipperzero-firmware/)
 
 # Project structure
 
