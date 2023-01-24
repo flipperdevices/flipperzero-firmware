@@ -119,8 +119,7 @@ static int32_t subghz_frequency_analyzer_worker_thread(void* context) {
                 furi_hal_spi_acquire(subghz_spi_handle);
                 cc1101_switch_to_idle(subghz_spi_handle);
                 frequency = cc1101_set_frequency(
-                    subghz_spi_handle,
-                    subghz_setting_get_frequency(instance->setting, i));
+                    subghz_spi_handle, subghz_setting_get_frequency(instance->setting, i));
 
                 cc1101_calibrate(subghz_spi_handle);
                 do {

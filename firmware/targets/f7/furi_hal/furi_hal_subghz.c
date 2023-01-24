@@ -20,15 +20,8 @@ static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 
 // Internal or external subghz module selected
 static bool subghz_use_int_module = true;
-
-// initial cc1101
 const GpioPin* subghz_g0_pin = &gpio_cc1101_g0;
 FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
-
-// external cc1101
-//const GpioPin* subghz_g0_pin = &gpio_ext_pb3;
-//FuriHalSpiBusHandle* subghz_spi_handle = &furi_hal_spi_sw_bus_handle_subghz_ext;
-
 
 typedef struct {
     volatile SubGhzState state;
@@ -54,9 +47,8 @@ bool furi_hal_subghz_is_internal_cc1101() {
 
 bool furi_hal_subghz_set_internal_cc1101(bool value) {
     // nothing to do, already set to this value
-    if (subghz_use_int_module == value)
-        return true;
-    if (value) {
+    if(subghz_use_int_module == value) return true;
+    if(value) {
         subghz_g0_pin = &gpio_cc1101_g0;
         subghz_spi_handle = &furi_hal_spi_bus_handle_subghz;
         FURI_LOG_I(TAG, "Switched to internal cc1101");
@@ -69,7 +61,6 @@ bool furi_hal_subghz_set_internal_cc1101(bool value) {
     // TODO: try to initialize the module
     return true;
 }
-
 
 void furi_hal_subghz_init() {
     furi_assert(furi_hal_subghz.state == SubGhzStateInit);
@@ -96,8 +87,7 @@ void furi_hal_subghz_init() {
         ;
 
     // GD0 high
-    cc1101_write_reg(
-        subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
+    cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
     while(furi_hal_gpio_read(subghz_g0_pin) != true)
         ;
 
@@ -239,8 +229,7 @@ void furi_hal_subghz_flush_tx() {
 bool furi_hal_subghz_rx_pipe_not_empty() {
     CC1101RxBytes status[1];
     furi_hal_spi_acquire(subghz_spi_handle);
-    cc1101_read_reg(
-        subghz_spi_handle, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
+    cc1101_read_reg(subghz_spi_handle, (CC1101_STATUS_RXBYTES) | CC1101_BURST, (uint8_t*)status);
     furi_hal_spi_release(subghz_spi_handle);
     // TODO: you can add a buffer overflow flag if needed
     if(status->NUM_RXBYTES > 0) {
@@ -375,15 +364,13 @@ void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
     furi_hal_spi_acquire(subghz_spi_handle);
     if(path == FuriHalSubGhzPath433) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 0);
-        cc1101_write_reg(
-            subghz_spi_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+        cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
     } else if(path == FuriHalSubGhzPath315) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 1);
         cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG2, CC1101IocfgHW);
     } else if(path == FuriHalSubGhzPath868) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 1);
-        cc1101_write_reg(
-            subghz_spi_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
+        cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG2, CC1101IocfgHW | CC1101_IOCFG_INV);
     } else if(path == FuriHalSubGhzPathIsolate) {
         furi_hal_gpio_write(&gpio_rf_sw_0, 0);
         cc1101_write_reg(subghz_spi_handle, CC1101_IOCFG2, CC1101IocfgHW);

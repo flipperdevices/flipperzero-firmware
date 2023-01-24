@@ -13,14 +13,12 @@ static uint32_t subghz_settings_exit(void* context) {
     return VIEW_NONE;
 }
 
-
 static void cc1101_changed(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, cc1101_text[index]);
     furi_hal_subghz_set_internal_cc1101(index == 0);
     loader_update_menu();
 }
-
 
 SubghzSettings* subghz_settings_alloc() {
     SubghzSettings* app = malloc(sizeof(SubghzSettings));
@@ -39,11 +37,7 @@ SubghzSettings* subghz_settings_alloc() {
     app->var_item_list = variable_item_list_alloc();
 
     item = variable_item_list_add(
-        app->var_item_list,
-        "CC1101",
-        COUNT_OF(cc1101_text),
-        cc1101_changed,
-        app);
+        app->var_item_list, "CC1101", COUNT_OF(cc1101_text), cc1101_changed, app);
     value_index = furi_hal_subghz_is_internal_cc1101() ? 0 : 1;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, cc1101_text[value_index]);
@@ -71,7 +65,6 @@ void subghz_settings_free(SubghzSettings* app) {
     furi_record_close(RECORD_GUI);
     free(app);
 }
-
 
 int32_t subghz_settings_app(void* p) {
     UNUSED(p);

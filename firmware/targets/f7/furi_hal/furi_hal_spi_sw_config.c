@@ -4,7 +4,6 @@
 // TODO: may be not needed
 FuriMutex* furi_hal_spi_sw_bus_mutex = NULL;
 
-
 static void furi_hal_spi_sw_bus_event_callback(FuriHalSpiBus* bus, FuriHalSpiBusEvent event) {
     if(event == FuriHalSpiBusEventInit) {
         furi_hal_spi_sw_bus_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -20,12 +19,10 @@ static void furi_hal_spi_sw_bus_event_callback(FuriHalSpiBus* bus, FuriHalSpiBus
     }
 }
 
-
 FuriHalSpiBus furi_hal_spi_sw_bus = {
     .spi = NULL,
     .callback = furi_hal_spi_sw_bus_event_callback,
 };
-
 
 static void furi_hal_spi_sw_bus_handle_subghz_event_callback(
     FuriHalSpiBusHandle* handle,
@@ -37,21 +34,9 @@ static void furi_hal_spi_sw_bus_handle_subghz_event_callback(
         furi_hal_gpio_write(handle->cs, true);
         furi_hal_gpio_init(handle->cs, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     } else if(event == FuriHalSpiBusHandleEventActivate) {
-        furi_hal_gpio_init(
-            handle->miso,
-            GpioModeInput,
-            GpioPullNo,
-            GpioSpeedVeryHigh);
-        furi_hal_gpio_init(
-            handle->mosi,
-            GpioModeOutputPushPull,
-            GpioPullNo,
-            GpioSpeedVeryHigh);
-        furi_hal_gpio_init(
-            handle->sck,
-            GpioModeOutputPushPull,
-            GpioPullNo,
-            GpioSpeedVeryHigh);
+        furi_hal_gpio_init(handle->miso, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
+        furi_hal_gpio_init(handle->mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+        furi_hal_gpio_init(handle->sck, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
         furi_hal_gpio_write(handle->cs, false);
     } else if(event == FuriHalSpiBusHandleEventDeactivate) {

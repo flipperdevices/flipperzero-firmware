@@ -91,20 +91,19 @@ inline static bool furi_hal_spi_bus_is_hw(FuriHalSpiBus* bus) {
     return bus->spi != NULL;
 }
 
-
 inline static uint8_t furi_hal_spi_sw_bus_txrx(FuriHalSpiBusHandle* handle, uint8_t dat) {
     uint8_t dat_in = 0;
 
-    for (uint8_t mask = 0x80; mask > 0; mask >>= 1) {
+    for(uint8_t mask = 0x80; mask > 0; mask >>= 1) {
         furi_hal_gpio_write(handle->mosi, dat & mask);
         furi_hal_gpio_write(handle->sck, true);
-        if (furi_hal_gpio_read(handle->miso))
+        if(furi_hal_gpio_read(handle->miso)) {
             dat_in |= mask;
+        }
         furi_hal_gpio_write(handle->sck, false);
     }
     return dat_in;
 }
-
 
 static void furi_hal_spi_bus_end_txrx(FuriHalSpiBusHandle* handle, uint32_t timeout) {
     UNUSED(timeout); // FIXME
@@ -141,7 +140,7 @@ bool furi_hal_spi_bus_tx(
     furi_assert(size > 0);
     bool ret = true;
 
-    if (furi_hal_spi_bus_is_hw(handle->bus)) {
+    if(furi_hal_spi_bus_is_hw(handle->bus)) {
         while(size > 0) {
             if(LL_SPI_IsActiveFlag_TXE(handle->bus->spi)) {
                 LL_SPI_TransmitData8(handle->bus->spi, *buffer);
@@ -175,7 +174,7 @@ bool furi_hal_spi_bus_trx(
     bool ret = true;
     size_t tx_size = size;
 
-    if (furi_hal_spi_bus_is_hw(handle->bus)) {
+    if(furi_hal_spi_bus_is_hw(handle->bus)) {
         bool tx_allowed = true;
 
         while(size > 0) {
@@ -206,7 +205,7 @@ bool furi_hal_spi_bus_trx(
     } else {
         uint8_t o_dat, i_dat;
         while(size > 0) {
-            if (tx_size > 0) {
+            if(tx_size > 0) {
                 o_dat = *tx_buffer;
                 tx_buffer++;
                 tx_size--;
@@ -214,7 +213,7 @@ bool furi_hal_spi_bus_trx(
                 o_dat = 0xFF;
             }
             i_dat = furi_hal_spi_sw_bus_txrx(handle, o_dat);
-            if (rx_buffer) {
+            if(rx_buffer) {
                 *rx_buffer = i_dat;
                 rx_buffer++;
                 size--;
