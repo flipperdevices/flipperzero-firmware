@@ -47,7 +47,7 @@ jobs:
         uses: mattnotmitt/doxygen-action@v1.9.5
         with:
           working-directory: 'documentation/'
-          doxyfile-path: 'documentation/Doxygen-awesome.cfg'
+          doxyfile-path: 'Doxygen-awesome.cfg'
 
       - name: 'Debug'
         run: |
