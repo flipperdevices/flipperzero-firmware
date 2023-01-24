@@ -490,6 +490,7 @@ MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
     MU_RUN_TEST(nfca_file_test);
+    MU_RUN_TEST(mf_mini_file_test);
     MU_RUN_TEST(mf_classic_1k_4b_file_test);
     MU_RUN_TEST(mf_classic_4k_4b_file_test);
     MU_RUN_TEST(mf_classic_1k_7b_file_test);
