@@ -33,6 +33,6 @@ It is like [Google Authenticator](https://play.google.com/store/apps/details?id=
 * DOGE: `DAa3nu1RCWwxZdAnGVga77bgxDFP1nhahj`
 * TON: `EQCSBzoTb1B7RhXnka5RegmdjHR3gQwRVgZHNPPqzjjvlW9T`
 
-## Still have questions?
+## Have questions?
 
-Checkout [FAQ](FAQ.md) or ask in [Discord channel](https://discord.com/channels/937479784148115456/1020428040636993536)
+Checkout [[FAQ]] or ask in [Discord channel](https://discord.com/channels/937479784148115456/1020428040636993536)
