@@ -30,7 +30,7 @@ Use `start <path_to_script>` to run a script.
 A script is just CLI commands in a file, each one is on a new line.
 If a line starts with `#` it's a comment. It's ignored by the `start` command.
 
-This example outputs "Hello World", waits a second and plays the success sequence (the one that plays, for example, when the Flipper wrote data to a tag).
+This example outputs "Hello World", waits a second and plays the success sequence (the one that plays, for example, when the Flipper has successfully written data to a tag).
 
 ```bash
 # Example script
