@@ -27,6 +27,7 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
+          submodules: true
 
       - name: 'Get commit details'
         id: names
