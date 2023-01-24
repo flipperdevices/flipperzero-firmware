@@ -123,7 +123,7 @@ typedef struct
     uint8_t vibrato_speed, vibrato_depth, vibrato_delay;
     uint8_t pwm_speed, pwm_depth, pwm_delay;
 
-    uint16_t vibrato_position, pwm_position;
+    uint32_t vibrato_position, pwm_position; //basically accumulators
 
     uint8_t extarp1, extarp2;
 

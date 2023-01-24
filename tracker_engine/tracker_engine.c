@@ -3,6 +3,7 @@
 #include "../flizzer_tracker_hal.h"
 
 #include <furi_hal.h>
+#include "../sound_engine/sound_engine_osc.h"
 
 void tracker_engine_init(TrackerEngine *tracker_engine, uint8_t rate, SoundEngine *sound_engine)
 {
@@ -150,11 +151,11 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
     TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
 
-    te_channel->flags = TEC_PLAYING | (te_channel->channel_flags & TEC_DISABLED);
+    te_channel->channel_flags = TEC_PLAYING | (te_channel->channel_flags & TEC_DISABLED);
 
     if (!(pinst->flags & TE_PROG_NO_RESTART) && pinst->program_period > 0)
     {
-        te_channel->flags |= TEC_PROGRAM_RUNNING;
+        te_channel->channel_flags |= TEC_PROGRAM_RUNNING;
 
         te_channel->program_counter = 0;
         te_channel->program_loop = 0;
@@ -167,7 +168,7 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     se_channel->waveform = pinst->waveform;
     se_channel->flags = pinst->sound_engine_flags;
 
-    te_channel->channel_flags = pinst->flags;
+    te_channel->flags = pinst->flags;
 
     te_channel->arpeggio_note = 0;
     te_channel->fixed_note = 0xffff;
@@ -177,9 +178,25 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
 
     te_channel->last_note = te_channel->target_note = note + (int16_t)pinst->finetune;
 
+    if(pinst->flags & TE_ENABLE_VIBRATO)
+    {
+        te_channel->vibrato_speed = pinst->vibrato_speed;
+        te_channel->vibrato_depth = pinst->vibrato_depth;
+        te_channel->vibrato_delay = pinst->vibrato_delay;
+    }
+
+    if(pinst->flags & TE_ENABLE_PWM)
+    {
+        te_channel->pwm_speed = pinst->pwm_speed;
+        te_channel->pwm_depth = pinst->pwm_depth;
+        te_channel->pwm_delay = pinst->pwm_delay;
+    }
+
     if (pinst->sound_engine_flags & SE_ENABLE_KEYDOWN_SYNC)
     {
-        te_channel->vibrato_position = te_channel->pwm_position = 0;
+        te_channel->vibrato_position = ((ACC_LENGTH / 2 / 2) << 9);
+        te_channel->pwm_position = ((ACC_LENGTH / 2 / 2) << 9);
+
         se_channel->accumulator = 0;
         se_channel->lfsr = RANDOM_SEED;
     }
@@ -230,12 +247,17 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
 
     uint8_t vol = tracker_engine_get_volume(step);
 
-    if (vol != MUS_NOTE_VOLUME_NONE)
+    if (vol != MUS_NOTE_VOLUME_NONE && !(tracker_engine->channel[chan].channel_flags & TEC_DISABLED))
     {
         tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
     }
 
     // TODO: add actual big ass function that executes commands; add arpeggio commands there
+
+    if(tracker_engine->channel[chan].channel_flags & TEC_DISABLED)
+    {
+        tracker_engine->sound_engine->channel[chan].adsr.volume = 0;
+    }
 }
 
 void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
@@ -243,7 +265,7 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
     SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
     TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
 
-    if (te_channel->flags & TEC_PLAYING)
+    if (te_channel->channel_flags & TEC_PLAYING)
     {
         if (!(se_channel->flags & SE_ENABLE_GATE))
         {
@@ -263,11 +285,57 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
             }
         }
 
-        // TODO: add instrument program execution
+        if(te_channel->channel_flags & TEC_PROGRAM_RUNNING)
+        {
+            // TODO: add instrument program execution
+        }
+        
+        int16_t vib = 0;
+        int32_t pwm = 0;
 
-        // TODO: add PWM and vibrato execution
-        uint16_t vib = 0;
-        int32_t chn_note = (te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) + vib + ((int16_t)te_channel->arpeggio_note << 8);
+        if(te_channel->flags & TE_ENABLE_VIBRATO)
+        {
+            if(te_channel->vibrato_delay > 0)
+            {
+                te_channel->vibrato_delay--;
+            }
+
+            else
+            {
+                te_channel->vibrato_position += ((uint32_t)te_channel->vibrato_speed << 21);
+                vib = (int32_t)(sound_engine_triangle(te_channel->vibrato_position >> 9) - WAVE_AMP / 2) * (int32_t)te_channel->vibrato_depth / (256 * 128);
+            }
+        }
+
+        if(te_channel->flags & TE_ENABLE_PWM)
+        {
+            if(te_channel->pwm_delay > 0)
+            {
+                te_channel->pwm_delay--;
+            }
+
+            else
+            {
+                te_channel->pwm_position += ((uint32_t)te_channel->pwm_speed << 20); //so minimum PWM speed is even lower than minimum vibrato speed
+                pwm = ((int32_t)sound_engine_triangle((te_channel->pwm_position) >> 9) - WAVE_AMP / 2) * (int32_t)te_channel->pwm_depth / (256 * 16);
+            }
+
+            int16_t final_pwm = (int16_t)tracker_engine->channel[chan].pw + pwm;
+
+            if(final_pwm < 0)
+            {
+                final_pwm = 0;
+            }
+
+            if(final_pwm > 0xfff)
+            {
+                final_pwm = 0xfff;
+            }
+
+            tracker_engine->sound_engine->channel[chan].pw = final_pwm;
+        }
+
+        int32_t chn_note = (int16_t)(te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) + vib + ((int16_t)te_channel->arpeggio_note << 8);
 
         if (chn_note < 0)
         {
@@ -280,6 +348,11 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
         }
 
         tracker_engine_set_note(tracker_engine, chan, (uint16_t)chn_note, false);
+    }
+
+    if(tracker_engine->channel[chan].channel_flags & TEC_DISABLED) //so we can't set some non-zero volme from inst program too
+    {
+        tracker_engine->sound_engine->channel[chan].adsr.volume = 0;
     }
 }
 

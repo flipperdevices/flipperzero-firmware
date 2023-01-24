@@ -97,6 +97,7 @@ static const char *instrument_editor_params_description[] =
         "PWM SPEED",
         "PWM DEPTH",
         "PWM DELAY (IN TICKS)",
+        "DON'T RESTART PROGRAM ON KEYDOWN",
         "PROG.PERIOD (00 ACTS SAME AS 01)",
 };
 
@@ -114,7 +115,7 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
     Instrument *inst = tracker->song.instrument[tracker->current_instrument];
     uint8_t shift = tracker->inst_editor_shift;
 
-    if (shift == 0)
+    if (shift < 6)
     {
         snprintf(buffer, sizeof(buffer), "INST:%c", to_char(tracker->current_instrument));
         draw_generic_n_digit_field(tracker, canvas, EDIT_INSTRUMENT, INST_CURRENTINSTRUMENT, buffer, 0, 5 - shift, 1);
@@ -122,35 +123,38 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         draw_generic_n_digit_field(tracker, canvas, EDIT_INSTRUMENT, INST_INSTRUMENTNAME, buffer, 4 * 7, 5 - shift, 1);
     }
 
-    snprintf(buffer, sizeof(buffer), "NOTE:%s", notename(inst->base_note));
-    canvas_draw_str(canvas, 0, 11 - shift, buffer);
-
-    if (tracker->editing && tracker->focus == EDIT_INSTRUMENT && tracker->selected_param == INST_CURRENT_NOTE)
+    if (shift < 12)
     {
-        if (tracker->current_digit)
+        snprintf(buffer, sizeof(buffer), "NOTE:%s", notename(inst->base_note));
+        canvas_draw_str(canvas, 0, 11 - shift, buffer);
+
+        if (tracker->editing && tracker->focus == EDIT_INSTRUMENT && tracker->selected_param == INST_CURRENT_NOTE)
         {
-            canvas_draw_box(canvas, 19 + 2 * 4, 5 - shift, 5, 7);
+            if (tracker->current_digit)
+            {
+                canvas_draw_box(canvas, 19 + 2 * 4, 5 - shift, 5, 7);
+            }
+
+            else
+            {
+                canvas_draw_box(canvas, 19, 5 - shift, 5 + 4, 7);
+            }
         }
 
-        else
-        {
-            canvas_draw_box(canvas, 19, 5 - shift, 5 + 4, 7);
-        }
-    }
+        snprintf(buffer, sizeof(buffer), "FINE:%+02d", inst->finetune);
+        canvas_draw_str(canvas, 37, 11 - shift, buffer);
 
-    snprintf(buffer, sizeof(buffer), "FINE:%+02d", inst->finetune);
-    canvas_draw_str(canvas, 37, 11 - shift, buffer);
-
-    if (tracker->editing && tracker->focus == EDIT_INSTRUMENT && tracker->selected_param == INST_FINETUNE)
-    {
-        if (tracker->current_digit)
+        if (tracker->editing && tracker->focus == EDIT_INSTRUMENT && tracker->selected_param == INST_FINETUNE)
         {
-            canvas_draw_box(canvas, 60 + 4, 5 - shift, 5, 7);
-        }
+            if (tracker->current_digit)
+            {
+                canvas_draw_box(canvas, 60 + 4, 5 - shift, 5, 7);
+            }
 
-        else
-        {
-            canvas_draw_box(canvas, 60, 5 - shift, 5, 7);
+            else
+            {
+                canvas_draw_box(canvas, 60, 5 - shift, 5, 7);
+            }
         }
     }
 
@@ -204,6 +208,11 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PWMSPEED, "S:", 20, 59 - shift, inst->pwm_speed);
         draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PWMDEPTH, "D:", 36, 59 - shift, inst->pwm_depth);
         draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PWMDELAY, "DEL:", 52, 59 - shift, inst->pwm_delay);
+    }
+
+    if(shift >= 12)
+    {
+        draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_PROGRESTART, "NO PROG.RESTART", 0, 65 - shift, inst->flags, TE_PROG_NO_RESTART);
     }
 
     draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PROGRAMEPERIOD, "P.PERIOD:", 81, 56, inst->program_period);

@@ -119,6 +119,7 @@ typedef enum
     INST_PWMDEPTH,
     INST_PWMDELAY,
 
+    INST_PROGRESTART,
     INST_PROGRAMEPERIOD,
     /* ========= */
     INST_PARAMS,

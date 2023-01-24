@@ -126,7 +126,7 @@ int32_t flizzer_tracker_app(void *p)
     UNUSED(st);
     furi_record_close(RECORD_STORAGE);
 
-    FlizzerTrackerApp *tracker = init_tracker(44100, 50, false, 1024);
+    FlizzerTrackerApp *tracker = init_tracker(44100, 50, true, 1024);
 
     // Текущее событие типа кастомного типа FlizzerTrackerEvent
     FlizzerTrackerEvent event;
@@ -229,6 +229,8 @@ int32_t flizzer_tracker_app(void *p)
 
         if(event.type == EventTypeLoadSong)
         {
+            stop_song(tracker);
+
             tracker->dialogs = furi_record_open(RECORD_DIALOGS);
             tracker->is_loading = true;
 

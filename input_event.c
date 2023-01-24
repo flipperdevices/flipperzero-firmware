@@ -57,6 +57,8 @@ void return_from_keyboard_callback(void *ctx)
 
     if(tracker->is_saving)
     {
+        stop_song(tracker);
+        
         tracker->filepath = furi_string_alloc();
         furi_string_cat_printf(tracker->filepath, "%s/%s%s", FLIZZER_TRACKER_FOLDER, tracker->filename, SONG_FILE_EXT);
 

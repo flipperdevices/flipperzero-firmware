@@ -10,7 +10,7 @@ static inline uint16_t sound_engine_saw(uint32_t acc)
     return (acc >> (ACC_BITS - OUTPUT_BITS - 1)) & (WAVE_AMP - 1);
 }
 
-static inline uint16_t sound_engine_triangle(uint32_t acc)
+uint16_t sound_engine_triangle(uint32_t acc)
 {
     return ((((acc & (ACC_LENGTH / 2)) ? ~acc : acc) >> (ACC_BITS - OUTPUT_BITS - 2)) & (WAVE_AMP * 2 - 1));
 }
@@ -251,5 +251,5 @@ uint16_t sound_engine_osc(SoundEngine *sound_engine, SoundEngineChannel *channel
             break;
     }
 
-    return 0;
+    return WAVE_AMP / 2;
 }

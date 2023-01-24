@@ -400,6 +400,12 @@ void edit_instrument_param(FlizzerTrackerApp *tracker, uint8_t selected_param, i
 
             break;
         }
+
+        case INST_PROGRESTART:
+        {
+            flipbit(inst->flags, TE_PROG_NO_RESTART);
+            break;
+        }
     }
 }
 
@@ -474,6 +480,7 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
             case INST_ENABLEKEYSYNC:
             case INST_ENABLEVIBRATO:
             case INST_ENABLEPWM:
+            case INST_PROGRESTART:
             {
                 tracker->selected_param++;
 
@@ -532,6 +539,7 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
             case INST_ENABLEKEYSYNC:
             case INST_ENABLEVIBRATO:
             case INST_ENABLEPWM:
+            case INST_PROGRESTART:
             {
                 tracker->selected_param--;
 
@@ -572,6 +580,11 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
     if (tracker->selected_param > INST_VIBRATODELAY)
     {
         tracker->inst_editor_shift = 6;
+    }
+
+    if (tracker->selected_param > INST_PWMDELAY)
+    {
+        tracker->inst_editor_shift = 12;
     }
 
     if (tracker->selected_param < INST_CURRENT_NOTE)
