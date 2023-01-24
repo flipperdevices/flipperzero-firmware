@@ -205,7 +205,7 @@ static void process_input_set_fields(ProtoViewApp* app, InputEvent input) {
             privdata->decoder->build_message(rs, privdata->fieldset);
             app->signal_decoded = false; // So that the new signal will be
                 // accepted as the current signal.
-            scan_for_signal(app, rs);
+            scan_for_signal(app, rs, 5);
             raw_samples_free(rs);
             ui_show_alert(app, "Done: press back key", 3000);
         }

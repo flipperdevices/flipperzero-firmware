@@ -39,15 +39,20 @@ void reset_current_signal(ProtoViewApp* app) {
  * For instance Oregon2 sensors, in the case of protocol 2.1 will send
  * pulses of ~400us (RF on) VS ~580us (RF off). */
 #define SEARCH_CLASSES 3
-uint32_t search_coherent_signal(RawSamplesBuffer* s, uint32_t idx) {
+uint32_t search_coherent_signal(RawSamplesBuffer* s, uint32_t idx, uint32_t min_duration) {
     struct {
         uint32_t dur[2]; /* dur[0] = low, dur[1] = high */
         uint32_t count[2]; /* Associated observed frequency. */
     } classes[SEARCH_CLASSES];
 
     memset(classes, 0, sizeof(classes));
-    uint32_t minlen = 30, maxlen = 4000; /* Depends on data rate, here we
-                                            allow for high and low. */
+
+    // Set a min/max duration limit for samples to be considered part of a
+    // coherent signal. The maximum length is fixed while the minimum
+    // is passed as argument, as depends on the data rate and in general
+    // on the signal to analyze.
+    uint32_t max_duration = 4000;
+
     uint32_t len = 0; /* Observed len of coherent samples. */
     s->short_pulse_dur = 0;
     for(uint32_t j = idx; j < idx + 500; j++) {
@@ -55,7 +60,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer* s, uint32_t idx) {
         uint32_t dur;
         raw_samples_get(s, j, &level, &dur);
 
-        if(dur < minlen || dur > maxlen) break; /* return. */
+        if(dur < min_duration || dur > max_duration) break; /* return. */
 
         /* Let's see if it matches a class we already have or if we
          * can populate a new (yet empty) class. */
@@ -142,7 +147,7 @@ void notify_signal_detected(ProtoViewApp* app, bool decoded) {
  * in order to find a coherent signal. If a signal that does not appear to
  * be just noise is found, it is set in DetectedSamples global signal
  * buffer, that is what is rendered on the screen. */
-void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source) {
+void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source, uint32_t min_duration) {
     /* We need to work on a copy: the source buffer may be populated
      * by the background thread receiving data. */
     RawSamplesBuffer* copy = raw_samples_alloc();
@@ -157,7 +162,7 @@ void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source) {
     uint32_t i = 0;
 
     while(i < copy->total - 1) {
-        uint32_t thislen = search_coherent_signal(copy, i);
+        uint32_t thislen = search_coherent_signal(copy, i, min_duration);
 
         /* For messages that are long enough, attempt decoding. */
         if(thislen > minlen) {

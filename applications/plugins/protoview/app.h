@@ -66,8 +66,11 @@ typedef struct {
     const char* name; // Name to show to the user.
     const char* id; // Identifier in the Flipper API/file.
     FuriHalSubGhzPreset preset; // The preset ID.
-    uint8_t* custom; // If not null, a set of registers for
-        // the CC1101, specifying a custom preset.
+    uint8_t* custom; /* If not null, a set of registers for
+                                       the CC1101, specifying a custom preset.*/
+    uint32_t duration_filter; /* Ignore pulses and gaps that are less
+                                       than the specified microseconds. This
+                                       depends on the data rate. */
 } ProtoViewModulation;
 
 extern ProtoViewModulation ProtoViewModulations[]; /* In app_subghz.c */
@@ -102,6 +105,10 @@ struct ProtoViewApp {
     ViewPort* view_port; /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
     ProtoViewCurrentView current_view; /* Active left-right view ID. */
+    FuriMutex* view_updating_mutex; /* The Flipper GUI calls the screen redraw
+                                       callback in a different thread. We
+                                       use this mutex to protect the redraw
+                                       from changes in app->view_privdata. */
     int current_subview[ViewLast]; /* Active up-down subview ID. */
     FuriMessageQueue* event_queue; /* Keypress events go here. */
 
@@ -246,7 +253,7 @@ void protoview_rx_callback(bool level, uint32_t duration, void* context);
 /* signal.c */
 uint32_t duration_delta(uint32_t a, uint32_t b);
 void reset_current_signal(ProtoViewApp* app);
-void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source);
+void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source, uint32_t min_duration);
 bool bitmap_get(uint8_t* b, uint32_t blen, uint32_t bitpos);
 void bitmap_set(uint8_t* b, uint32_t blen, uint32_t bitpos, bool val);
 void bitmap_copy(
