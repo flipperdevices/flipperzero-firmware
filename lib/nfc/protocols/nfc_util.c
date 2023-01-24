@@ -53,7 +53,7 @@ void nfc_util_odd_parity(const uint8_t* src, uint8_t* dst, uint8_t len) {
     uint8_t parity = 0;
     uint8_t parity_bit = 0;
     while(len--) {
-        parity |= nfc_util_odd_parity8(*src) << parity_bit;
+        parity |= nfc_util_odd_parity8(*src) << (7 - parity_bit);
         parity_bit++;
         if(parity_bit == 8) {
             *dst = parity;
