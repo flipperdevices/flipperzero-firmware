@@ -6,11 +6,8 @@
 
 bool myki_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
+    UNUSED(tx_rx);
     MifareDesfireData* data = &nfc_worker->dev_data->mf_df_data;
-
-    if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) return false;
-    if(!mf_df_read_card(tx_rx, data)) return false;
-
     if(mf_df_find_application(data, 0x0011f2)) {
         FURI_LOG_I("myki", "Card verified");
         return true;
