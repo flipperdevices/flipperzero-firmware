@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - dev
-      - "release*"
-    tags:
-      - '*'
   pull_request:
 
 env:
@@ -49,7 +46,9 @@ jobs:
           working-directory: 'documentation/'
           doxyfile-path: './Doxyfile-awesome.cfg'
 
-      - name: 'Debug'
-        run: |
-          ls documentation/build
+      - name: 'Upload to Github Pages'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./documentation/build/html
 
