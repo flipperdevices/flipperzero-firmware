@@ -70,22 +70,10 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
     }
     ProtoViewCurrentView new = app->current_view;
 
-    /* Set the current subview of the view we just left to zero. This is
-     * the main subview of the old view. When re re-enter the view we are
-     * lefting, we want to see the main thing again. */
-    app->current_subview[old] = 0;
-
-    /* Reset the view private data each time, before calling the enter/exit
-     * callbacks that may want to setup some state. */
-    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
-
-    /* Call the enter/exit view callbacks if needed. */
+    /* Call the exit view callbacks. */
     if (old == ViewDirectSampling) view_exit_direct_sampling(app);
-    if (new == ViewDirectSampling) view_enter_direct_sampling(app);
     if (old == ViewBuildMessage) view_exit_build_message(app);
-    if (new == ViewBuildMessage) view_enter_build_message(app);
     if (old == ViewInfo) view_exit_info(app);
-
     /* The frequency/modulation settings are actually a single view:
      * as long as the user stays between the two modes of this view we
      * don't need to call the exit-view callback. */
@@ -93,6 +81,22 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
         (old == ViewModulationSettings && new != ViewFrequencySettings))
         view_exit_settings(app);
 
+    /* Reset the view private data each time, before calling the enter
+     * callbacks that may want to setup some state. */
+    memset(app->view_privdata,0,PROTOVIEW_VIEW_PRIVDATA_LEN);
+
+    /* Call the enter view callbacks after all the exit callback
+     * of the old view was already executed. */
+    if (new == ViewDirectSampling) view_enter_direct_sampling(app);
+    if (new == ViewBuildMessage) view_enter_build_message(app);
+
+    /* Set the current subview of the view we just left to zero. This is
+     * the main subview of the old view. When we re-enter the view we are
+     * lefting, we want to see the main thing again. */
+    app->current_subview[old] = 0;
+
+    /* If there is an alert on screen, dismiss it: if the user is
+     * switching view she already read it. */
     ui_dismiss_alert(app);
 }
 
