@@ -95,16 +95,23 @@ static void render_callback(Canvas* canvas, void* ctx) {
     // UNUSED(mood);
     // UNUSED(portraits);
 
-    uint32_t xp_progress = 0;
+	//process XP values
+    double xp_progress;
+	int xp_fill;
     uint32_t xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
     uint32_t xp_above_last_levelup = dolphin_state_xp_above_last_levelup(stats->icounter);
     uint32_t xp_for_current_level = xp_to_levelup + xp_above_last_levelup;
 
+	//get percentage from remaining XP
     if(stats->level == 30) {
-        xp_progress = 0;
+        xp_progress = 100;
     } else {
-        xp_progress = xp_to_levelup * 64 / xp_for_current_level;
+        xp_progress = round(((xp_above_last_levelup * 100)/ xp_for_current_level));
     }
+	
+	//calc bar fill ratio
+	//default bar is 65px wide
+	xp_fill = (int)round((xp_progress/100)*65);
 
     // multipass
     canvas_draw_icon(canvas, 0, 0, &I_passport_DB);
@@ -212,13 +219,43 @@ static void render_callback(Canvas* canvas, void* ctx) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_str(canvas, 58, 34, level_str);
     canvas_set_font(canvas, FontBatteryPercent);
-    canvas_draw_str(canvas, 58, 42, xp_str);
+    
+	if(stats->level == 30)
+	{
+		canvas_draw_str(canvas, 58, 42, "Max Level");
+	}
+	else
+	{
+		canvas_draw_str(canvas, 58, 42, xp_str);
+	}
+	
     canvas_set_font(canvas, FontSecondary);
 
+	//old code
+	/*
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 123 - xp_progress, 45, xp_progress + 1, 5);
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_line(canvas, 123, 45, 123, 49);
+	*/
+	
+	//Round Edge
+	
+	//blank out background
+	canvas_set_color(canvas, ColorWhite);
+	canvas_draw_box(canvas, 58, 44, 67, 7);
+	
+	//draw black xp bar which will be used as outline but also for full bar
+	canvas_set_color(canvas, ColorBlack);
+	canvas_draw_rbox(canvas, 58, 45, 67, 6, 1);
+	
+	//hollow out xp bar with white "empty" space
+	canvas_set_color(canvas, ColorWhite);
+	canvas_draw_rbox(canvas, 59, 46, 65, 4, 1);
+	
+	//fill bar according to xp percentage
+	canvas_set_color(canvas, ColorBlack);
+	canvas_draw_rbox(canvas, 59, 46, xp_fill, 4, 1);
 }
 
 Passport* passport_alloc() {
