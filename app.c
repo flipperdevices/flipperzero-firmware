@@ -215,7 +215,8 @@ static void timer_callback(void *ctx) {
     }
     if (delta < RawSamples->total/2) return;
     app->signal_last_scan_idx = RawSamples->idx;
-    scan_for_signal(app,RawSamples);
+    scan_for_signal(app,RawSamples,
+                    ProtoViewModulations[app->modulation].duration_filter);
 }
 
 /* This is the navigation callback we use in the view dispatcher used
