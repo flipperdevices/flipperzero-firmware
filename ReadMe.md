@@ -1,6 +1,7 @@
 
 <a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="40%"></a>
 
+# [Install GitHub Version With WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2FRM0123-1429-0.75.1-9cad37f.tgz&channel=RM420FAP&version=0.75.1)
 ## What Is Not In The Firmware? [SD CARD EXTRA FILES AND OTHER RESEARCH SOURCES](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
 
