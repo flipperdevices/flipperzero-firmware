@@ -16,6 +16,7 @@ extern const SubGhzProtocolRegistry protoview_protocol_registry;
  * and setting color to black. */
 static void render_callback(Canvas *const canvas, void *ctx) {
     ProtoViewApp *app = ctx;
+    furi_mutex_acquire(app->view_updating_mutex,FuriWaitForever);
 
     /* Clear screen. */
     canvas_set_color(canvas, ColorWhite);
@@ -37,6 +38,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
 
     /* Draw the alert box if set. */
     ui_draw_alert_if_needed(canvas, app);
+    furi_mutex_release(app->view_updating_mutex);
 }
 
 /* Here all we do is putting the events into the queue that will be handled
@@ -55,6 +57,8 @@ static void input_callback(InputEvent* input_event, void* ctx)
  * special views ViewGoNext and ViewGoPrev in order to move to
  * the logical next/prev view. */
 static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
+    furi_mutex_acquire(app->view_updating_mutex,FuriWaitForever);
+
     /* Switch to the specified view. */
     ProtoViewCurrentView old = app->current_view;
     if (switchto == ViewGoNext) {
@@ -98,6 +102,7 @@ static void app_switch_view(ProtoViewApp *app, ProtoViewCurrentView switchto) {
     /* If there is an alert on screen, dismiss it: if the user is
      * switching view she already read it. */
     ui_dismiss_alert(app);
+    furi_mutex_release(app->view_updating_mutex);
 }
 
 /* Allocate the application state and initialize a number of stuff.
@@ -126,6 +131,7 @@ ProtoViewApp* protoview_app_alloc() {
     app->show_text_input = false;
     app->alert_dismiss_time = 0;
     app->current_view = ViewRawPulses;
+    app->view_updating_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     for (int j = 0; j < ViewLast; j++) app->current_subview[j] = 0;
     app->direct_sampling_enabled = false;
     app->view_privdata = malloc(PROTOVIEW_VIEW_PRIVDATA_LEN);
@@ -173,6 +179,7 @@ void protoview_app_free(ProtoViewApp *app) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
     furi_message_queue_free(app->event_queue);
+    furi_mutex_free(app->view_updating_mutex);
     app->gui = NULL;
 
     // Frequency setting.

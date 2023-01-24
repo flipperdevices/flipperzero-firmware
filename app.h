@@ -102,6 +102,10 @@ struct ProtoViewApp {
     ViewPort *view_port;     /* We just use a raw viewport and we render
                                 everything into the low level canvas. */
     ProtoViewCurrentView current_view;      /* Active left-right view ID. */
+    FuriMutex *view_updating_mutex; /* The Flipper GUI calls the screen redraw
+                                       callback in a different thread. We
+                                       use this mutex to protect the redraw
+                                       from changes in app->view_privdata. */
     int current_subview[ViewLast];  /* Active up-down subview ID. */
     FuriMessageQueue *event_queue;  /* Keypress events go here. */
 

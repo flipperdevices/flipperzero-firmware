@@ -32,6 +32,8 @@ void render_view_direct_sampling(Canvas *const canvas, ProtoViewApp *app) {
         privdata->captured = malloc(CAPTURED_BITMAP_SIZE);
 
     /* Read from data from GPIO */
+    if (privdata->captured == NULL)
+        FURI_LOG_E(TAG, "captured is NULL reading GPIO.");
     for (int j = 0; j < CAPTURED_BITMAP_SIZE*8; j++) {
         uint32_t start_time = DWT->CYCCNT;
         bool level = furi_hal_gpio_read(&gpio_cc1101_g0);
@@ -91,8 +93,7 @@ void view_enter_direct_sampling(ProtoViewApp *app) {
 /* Exit view. Restore the subghz thread. */
 void view_exit_direct_sampling(ProtoViewApp *app) {
     DirectSamplingViewPrivData *privdata = app->view_privdata;
-    free(privdata->captured);
-    privdata->captured = NULL;
+    if (privdata->captured) free(privdata->captured);
     app->direct_sampling_enabled = false;
 
     /* Restart normal data feeding. */
