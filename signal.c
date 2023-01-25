@@ -526,6 +526,7 @@ extern ProtoViewDecoder SchraderEG53MA4TPMSDecoder;
 extern ProtoViewDecoder CitroenTPMSDecoder;
 extern ProtoViewDecoder FordTPMSDecoder;
 extern ProtoViewDecoder KeeloqDecoder;
+extern ProtoViewDecoder ProtoViewChatDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,                /* Oregon sensors v2.1 protocol. */
@@ -537,6 +538,7 @@ ProtoViewDecoder *Decoders[] = {
     &CitroenTPMSDecoder,            /* Citroen TPMS. */
     &FordTPMSDecoder,               /* Ford TPMS. */
     &KeeloqDecoder,                 /* Keeloq remote. */
+    &ProtoViewChatDecoder,          /* Protoview simple text messages. */
     NULL
 };
 
