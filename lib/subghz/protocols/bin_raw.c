@@ -21,6 +21,18 @@
 #define BIN_RAW_BUF_MIN_DATA_COUNT 128
 #define BIN_RAW_MAX_MARKUP_COUNT 20
 
+//#define BIN_RAW_DEBUG
+
+#ifdef BIN_RAW_DEBUG
+#define bin_raw_debug(...) printf(__VA_ARGS__)
+#define bin_raw_debug_tag(tag, ...)        \
+    printf("\033[0;32m[" tag "]\033[0m "); \
+    printf(__VA_ARGS__)
+#else
+#define bin_raw_debug(...)
+#define bin_raw_debug_tag(...)
+#endif
+
 static const SubGhzBlockConst subghz_protocol_bin_raw_const = {
     .te_short = 30,
     .te_long = 65000,
@@ -33,6 +45,15 @@ typedef enum {
     BinRAWDecoderStepWrite,
     BinRAWDecoderStepBufFull,
 } BinRAWDecoderStep;
+
+typedef enum {
+    BinRAWTypeUnknown = 0,
+    BinRAWTypeNoGap,
+    BinRAWTypeGap,
+    BinRAWTypeGapRecurring,
+    BinRAWTypeGapRolling,
+    BinRAWTypeGapUnknown,
+} BinRAWType;
 
 struct BinRAW_Markup {
     uint16_t byte_bias;
@@ -113,10 +134,8 @@ void* subghz_protocol_encoder_bin_raw_alloc(SubGhzEnvironment* environment) {
 
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = BIN_RAW_BUF_DATA_SIZE * 5;
-    //printf("Free heap size alloc: %zu\r\n", memmgr_get_free_heap());
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
     instance->data = malloc(instance->encoder.size_upload * sizeof(uint8_t));
-    //printf("Free heap size alloc: %zu\r\n", memmgr_get_free_heap());
     memset(instance->data_markup, 0x00, BIN_RAW_MAX_MARKUP_COUNT * sizeof(BinRAW_Markup));
     instance->encoder.is_running = false;
     return instance;
@@ -125,7 +144,6 @@ void* subghz_protocol_encoder_bin_raw_alloc(SubGhzEnvironment* environment) {
 void subghz_protocol_encoder_bin_raw_free(void* context) {
     furi_assert(context);
     SubGhzProtocolEncoderBinRAW* instance = context;
-    printf("Free heap size: %zu\r\n", memmgr_get_free_heap());
     free(instance->encoder.upload);
     free(instance->data);
     free(instance);
@@ -138,7 +156,7 @@ void subghz_protocol_encoder_bin_raw_free(void* context) {
  */
 static bool subghz_protocol_encoder_bin_raw_get_upload(SubGhzProtocolEncoderBinRAW* instance) {
     furi_assert(instance);
-    FURI_LOG_E("instance->encoder.size_upload", "%d", instance->encoder.size_upload);
+    bin_raw_debug_tag("instance->encoder.size_upload", "%d", instance->encoder.size_upload);
     //склеиваем все кусочики посылки в 1 длинную последовательность с выравниванием по левому краю, в заруженых данных у нас выравнивание по правому краю.
 
     uint16_t i = 0;
@@ -407,6 +425,7 @@ static bool
     uint16_t gap_delta = 0;
     uint32_t gap = 0;
     int data_temp = 0;
+    BinRAWType bin_raw_type = BinRAWTypeUnknown;
 
     //sort by number of occurrences
     bool swap = true;
@@ -424,11 +443,14 @@ static bool
             }
         }
     }
-
+#ifdef BIN_RAW_DEBUG
+    bin_raw_debug_tag(TAG, "Sorted durations\r\n");
+    bin_raw_debug("\t\tind\tcount\tus\r\n");
     for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
-        FURI_LOG_W("Class", "%d\t%d\t%ld", k, classes[k].count, (uint32_t)classes[k].data);
+        bin_raw_debug("\t\t%d\t%d\t%ld\r\n", k, classes[k].count, (uint32_t)classes[k].data);
     }
-
+    bin_raw_debug("\r\n");
+#endif
     if((classes[0].count > BIN_RAW_TE_MIN_COUNT) && (classes[1].count == 0)) {
         //adopted only the preamble
         instance->te = (uint32_t)classes[0].data;
@@ -449,28 +471,37 @@ static bool
 
         //determine the value to be corrected
         for(uint8_t k = 1; k < 5; k++) {
-            FURI_LOG_I("K-div", " %f ", (double)(classes[1].data / (classes[0].data / k)));
+            bin_raw_debug_tag(
+                TAG, "K_div= %f\r\n", (double)(classes[1].data / (classes[0].data / k)));
             float delta = (classes[1].data / (classes[0].data / k)) -
                           ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k));
             if((delta < 0.25) || (delta > 0.75)) {
                 instance->te = (uint32_t)classes[0].data / k;
-                FURI_LOG_I("K=", " %d ", k);
-                te_ok = true;
+                bin_raw_debug_tag(TAG, "K= %d\r\n", k);
+                te_ok = true; //found a correlated duration
                 break;
             }
         }
+        if(!te_ok) {
+            //did not find the minimum TE satisfying the condition
+            return false;
+        }
+        bin_raw_debug_tag(TAG, "TE= %ld\r\n\r\n", instance->te);
 
         //looking for a gap
         for(size_t k = 2; k < BIN_RAW_SEARCH_CLASSES; k++) {
             if((classes[k].count > 2) && (classes[k].data > gap)) {
                 gap = (uint32_t)classes[k].data;
-                gap_delta = gap / 5;
+                gap_delta = gap / 5; //calculate 20% deviation from ideal value
             }
         }
 
-        if((gap / instance->te) < 10) {
+        if((gap / instance->te) <
+           10) { //make an assumption, the longest gap should be more than 10 TE
             gap = 0; //check that our signal has a gap greater than 10*TE
+            bin_raw_type = BinRAWTypeNoGap;
         } else {
+            bin_raw_type = BinRAWTypeGap;
             //looking for the last occurrence of gap
             ind = instance->data_raw_ind - 1;
             while((ind > 0) && (DURATION_DIFF(abs(instance->data_raw[ind]), gap) > gap_delta)) {
@@ -480,45 +511,22 @@ static bool
         }
     }
 
-    // for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
-    //     //find the 2 most common durations
-    //     if(classes[k].count > instance->data_markup[0].count) {
-    //         instance->data_markup[1].data = instance->data_markup[0].data;
-    //         instance->data_markup[1].count = instance->data_markup[0].count;
-    //         instance->data_markup[0].data = classes[k].data;
-    //         instance->data_markup[0].count = classes[k].count;
-    //     }
-    //     //find the longest duration
-    //     if((classes[k].count > 2) && (classes[k].data > gap)) {
-    //         gap = classes[k].data;
-    //         gap_delta = gap / 5;
-    //     }
-    // }
-
     // for(size_t k = 0; k < BIN_RAW_MAX_MARKUP_COUNT; k++) {
     //     FURI_LOG_E("instance->data_markup", "%d %d %ld", k, instance->data_markup[k].count, instance->data_markup[k].data);
     // }
 
-    if(!te_ok) {
-        //did not find the minimum TE satisfying the condition
-        return false;
-    }
-
     //if(te_ok) {
 
     //if we consider that there is a gap, then we divide the signal with respect to this gap
-    if(gap != 0) {
+    //processing input data from the end
+    if(bin_raw_type == BinRAWTypeGap) {
+        bin_raw_debug_tag(TAG, "Tinted sequence\r\n");
         ind = (BIN_RAW_BUF_DATA_SIZE * 8);
         uint16_t bit_count = 0;
         do {
             gap_ind--;
             data_temp = (int)(round((float)(instance->data_raw[gap_ind]) / instance->te));
-            //printf("\033[0;32m%d\033[0m(%0.2f)  ", data_temp, (double)((float)(instance->data_raw[gap_ind]) / instance->te));
-            // printf(
-            //     "%d(%0.2f)  ",
-            //     data_temp,
-            //     (double)((float)(instance->data_raw[gap_ind]) / instance->te));
-            printf("%d  ", data_temp);
+            bin_raw_debug("%d ", data_temp);
             if(data_temp == 0) bit_count++; //there is noise in the package
             for(size_t i = 0; i < abs(data_temp); i++) {
                 bit_count++;
@@ -535,7 +543,7 @@ static bool
                         false, instance->data, ind, BIN_RAW_BUF_DATA_SIZE);
                 }
             }
-
+            //split into full bytes if gap is caught
             if(DURATION_DIFF(abs(instance->data_raw[gap_ind]), gap) < gap_delta) {
                 instance->data_markup[data_markup_ind].byte_bias = ind >> 3;
                 instance->data_markup[data_markup_ind++].bit_count = bit_count;
@@ -550,10 +558,12 @@ static bool
             instance->data_markup[data_markup_ind++].bit_count = bit_count;
         }
 
-        printf("-------%d-------- \r\n", (BIN_RAW_BUF_DATA_SIZE * 8) - ind);
+        bin_raw_debug("\r\n\t count bit= %d\r\n\r\n", (BIN_RAW_BUF_DATA_SIZE * 8) - ind);
 
         //reset the classifier and classify the received data
         memset(classes, 0x00, sizeof(classes));
+
+        bin_raw_debug_tag(TAG, "Sort the found pieces by the number of bits in them\r\n");
         for(size_t i = 0; i < data_markup_ind; i++) {
             for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
                 if(classes[k].count == 0) {
@@ -567,9 +577,13 @@ static bool
             }
         }
 
-        for(size_t h = 0; h < BIN_RAW_SEARCH_CLASSES; h++) {
-            FURI_LOG_I("K", "%d, %d %ld ", h, classes[h].count, (uint32_t)classes[h].data);
+#ifdef BIN_RAW_DEBUG
+        bin_raw_debug("\t\tind\tcount\tus\r\n");
+        for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
+            bin_raw_debug("\t\t%d\t%d\t%ld\r\n", k, classes[k].count, (uint32_t)classes[k].data);
         }
+        bin_raw_debug("\r\n");
+#endif
 
         //choose the value with the maximum repetition
         data_temp = 0;
@@ -579,39 +593,42 @@ static bool
         }
 
         //if(data_markup_ind == 0) return false;
-        //вывод в обратном порятке
+
+#ifdef BIN_RAW_DEBUG
+        //output in reverse order
+        bin_raw_debug_tag(TAG, "Found sequences\r\n");
+        bin_raw_debug("\tind  byte_bias\tbit_count\t\tbin_data\r\n");
         uint16_t data_markup_ind_temp = data_markup_ind;
         if(data_markup_ind) {
             data_markup_ind_temp--;
             for(size_t i = (ind / 8) - 1; i < BIN_RAW_BUF_DATA_SIZE; i++) {
-                printf("%02x ", instance->data[i]);
+                bin_raw_debug("%02x ", instance->data[i]);
                 if(instance->data_markup[data_markup_ind_temp].byte_bias == i + 1) {
-                    printf(
-                        "\r\n ind %d :\t%d %d   :\t",
+                    bin_raw_debug(
+                        "\r\n\t%d\t%d\t%d :\t",
                         data_markup_ind_temp,
                         instance->data_markup[data_markup_ind_temp].byte_bias,
                         instance->data_markup[data_markup_ind_temp].bit_count);
                     if(data_markup_ind_temp != 0) data_markup_ind_temp--;
                 }
             }
-
-            printf("--------------- \r\n");
+            bin_raw_debug("\r\n\r\n");
         }
-
         //compare data in chunks with the same number of bits
+        bin_raw_debug_tag(TAG, "Analyze sequences of long %d bit\r\n\r\n", data_temp);
+#endif
+
         //if(data_temp == 0) data_temp = (int)classes[0].data;
-        FURI_LOG_E("data_temp", "%d", data_temp);
-        uint8_t data_type = 0;
 
         if(data_temp != 0) {
-            //проверка, что данные в передаче повторяются каждый пакет
+            //check that data in transmission is repeated every packet
             for(uint16_t i = 0; i < data_markup_ind - 1; i++) {
                 if((instance->data_markup[i].bit_count == data_temp) &&
                    (instance->data_markup[i + 1].bit_count == data_temp)) {
-                    //если количество бит соседних посылках одинаково сравниваем данные
-                    FURI_LOG_E(
-                        "Comparison 1+1",
-                        "i=%d y=%d %02X=%02X .... %02X=%02X",
+                    //if the number of bits in adjacent parcels is the same, compare the data
+                    bin_raw_debug_tag(
+                        TAG,
+                        "Comparison of neighboring sequences ind_1=%d ind_2=%d %02X=%02X .... %02X=%02X\r\n",
                         i,
                         i + 1,
                         instance->data[instance->data_markup[i].byte_bias],
@@ -633,36 +650,33 @@ static bool
                            instance->data + instance->data_markup[i].byte_bias,
                            instance->data + instance->data_markup[i + 1].byte_bias,
                            byte_count - 1) == 0) {
-                        FURI_LOG_I("found 1+1", " ");
-                        // memcpy(
-                        //     instance->data,
-                        //     instance->data + instance->data_markup[i].byte_bias,
-                        //     byte_count);
-                        // instance->generic.data_count_bit = instance->data_markup[i].bit_count;
+                        bin_raw_debug_tag(
+                            TAG, "Match found bin_raw_type=BinRAWTypeGapRecurring\r\n\r\n");
 
-                        //размещаем в 1 элементе смещение до валидных данных
+                        //place in 1 element the offset to valid data
                         instance->data_markup[0].bit_count = instance->data_markup[i].bit_count;
                         instance->data_markup[0].byte_bias = instance->data_markup[i].byte_bias;
-                        //конец
+                        //markup end sign
                         instance->data_markup[1].bit_count = 0;
                         instance->data_markup[1].byte_bias = 0;
 
-                        data_type = 1;
+                        bin_raw_type = BinRAWTypeGapRecurring;
                         i = data_markup_ind;
                         break;
                     }
                 }
             }
         }
-        if(data_type == 0) {
-            //проверяем что повтор  происходит каждые n пакетов
+
+        if(bin_raw_type == BinRAWTypeGap) {
+            // check that retry occurs every n packets
             for(uint16_t i = 0; i < data_markup_ind - 2; i++) {
                 uint16_t byte_count =
                     subghz_protocol_bin_raw_get_full_byte(instance->data_markup[i].bit_count);
                 for(uint16_t y = i + 1; y < data_markup_ind - 1; y++) {
-                    FURI_LOG_E(
-                        "Comparison",
-                        "i=%d y=%d %02X=%02X .... %02X=%02X",
+                    bin_raw_debug_tag(
+                        TAG,
+                        "Comparison every N sequences ind_1=%d ind_2=%d %02X=%02X .... %02X=%02X\r\n",
                         i,
                         y,
                         instance->data[instance->data_markup[i].byte_bias],
@@ -680,7 +694,7 @@ static bool
 
                     if(byte_count ==
                        subghz_protocol_bin_raw_get_full_byte(
-                           instance->data_markup[y].bit_count)) { //если длинна в байтах совпадает
+                           instance->data_markup[y].bit_count)) { //if the length in bytes matches
 
                         if((memcmp(
                                 instance->data + instance->data_markup[i].byte_bias,
@@ -690,31 +704,30 @@ static bool
                                 instance->data + instance->data_markup[i + 1].byte_bias,
                                 instance->data + instance->data_markup[y + 1].byte_bias,
                                 byte_count - 1) == 0)) {
-                            // memcpy(
-                            //     instance->data,
-                            //     instance->data + instance->data_markup[i].data,
-                            //     byte_count);
-                            //instance->generic.data_count_bit = instance->data_markup[i].bit_count;
-                            FURI_LOG_I("found", " ");
-                            //вывод в обратном порятке
-                            uint8_t index = y - 1;
+                            uint8_t index = 0;
+#ifdef BIN_RAW_DEBUG
+                            bin_raw_debug_tag(
+                                TAG, "Match found bin_raw_type=BinRAWTypeGapRolling\r\n\r\n");
+                            //output in reverse order
+                            bin_raw_debug("\tind  byte_bias\tbit_count\t\tbin_data\r\n");
+                            index = y - 1;
                             for(size_t z = instance->data_markup[y].byte_bias + byte_count;
                                 z < instance->data_markup[i].byte_bias + byte_count;
                                 z++) {
                                 if(instance->data_markup[index].byte_bias == z) {
-                                    printf(
-                                        "\r\n ind %d :\t%d %d   :\t",
+                                    bin_raw_debug(
+                                        "\r\n\t%d\t%d\t%d :\t",
                                         index,
                                         instance->data_markup[index].byte_bias,
                                         instance->data_markup[index].bit_count);
                                     if(index != 0) index--;
                                 }
-                                printf("%02x ", instance->data[z]);
+                                bin_raw_debug("%02x ", instance->data[z]);
                             }
 
-                            printf("--------------- \r\n");
-
-                            //todo оптимизировать
+                            bin_raw_debug("\r\n\r\n");
+#endif
+                            //todo can be optimized
                             BinRAW_Markup markup_temp[BIN_RAW_MAX_MARKUP_COUNT];
                             memcpy(
                                 markup_temp,
@@ -732,7 +745,7 @@ static bool
                                     markup_temp[y - index - 1].byte_bias;
                             }
 
-                            data_type = 2;
+                            bin_raw_type = BinRAWTypeGapRolling;
                             i = data_markup_ind;
                             break;
                         }
@@ -740,9 +753,10 @@ static bool
                 }
             }
         }
-        //todo оптимизировать
-        if(data_type == 0) {
-            if(data_temp != 0) {
+        //todo can be optimized
+        if(bin_raw_type == BinRAWTypeGap) {
+            if(data_temp != 0) { //there are sequences with the same number of bits
+
                 BinRAW_Markup markup_temp[BIN_RAW_MAX_MARKUP_COUNT];
                 memcpy(
                     markup_temp,
@@ -758,32 +772,25 @@ static bool
                         instance->data_markup[index].bit_count = markup_temp[i].bit_count;
                         instance->data_markup[index].byte_bias = markup_temp[i].byte_bias;
                         index++;
-                        data_type = 3;
+                        bin_raw_type = BinRAWTypeGapUnknown;
                     }
                 }
             }
         }
-        FURI_LOG_I("data_type", " %d", data_type);
-        if(data_type)
+
+        if(bin_raw_type != BinRAWTypeGap)
             return true;
         else
             return false;
 
     } else {
-        FURI_LOG_I("-----", "  ");
-        FURI_LOG_I("-----", "  ");
-        FURI_LOG_I("-----", "  ");
-        FURI_LOG_I("te", " %ld ", instance->te);
-        FURI_LOG_I("gap", " %ld ", gap);
-        FURI_LOG_I("gap_ind", " %d ", gap_ind);
-        int data = (int)(round((float)(instance->data_raw[gap_ind]) / instance->te));
-        FURI_LOG_W("gap/ind", " %d ", data);
-        FURI_LOG_W("instance->data_raw_ind", " %d ", instance->data_raw_ind);
-        ind = 0; //
+        // if bin_raw_type == BinRAWTypeGap
+        bin_raw_debug_tag(TAG, "Sequence analysis without gap\r\n");
+        ind = 0;
         for(size_t i = 0; i < instance->data_raw_ind; i++) {
             int data_temp = (int)(round((float)(instance->data_raw[i]) / instance->te));
             if(data_temp == 0) break; //found an interval 2 times shorter than TE, this is noise
-            printf("%d  ", data_temp);
+            bin_raw_debug("%d  ", data_temp);
 
             for(size_t k = 0; k < abs(data_temp); k++) {
                 if(data_temp > 0) {
@@ -799,49 +806,60 @@ static bool
                 }
             }
         }
-        printf("--------------- \r\n");
-
-        FURI_LOG_W("ind count_byte", " %d  %d", ind, subghz_protocol_bin_raw_get_full_byte(ind));
-        for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
-            printf("%02x ", instance->data[i]);
-        }
-        printf("--------------- \r\n");
-
-        //right alignment
-        uint8_t bit_bias = (subghz_protocol_bin_raw_get_full_byte(ind) << 3) - ind;
-
-        FURI_LOG_W(
-            "bit_bias",
-            "bit_bias= %d  bit_full_byte= %d bit= %d",
-            bit_bias,
-            subghz_protocol_bin_raw_get_full_byte(ind) << 3,
-            ind);
-
-        for(size_t i = subghz_protocol_bin_raw_get_full_byte(ind) - 1; i > 0; i--) {
-            instance->data[i] = (instance->data[i - 1] << (8 - bit_bias)) |
-                                (instance->data[i] >> bit_bias);
-        }
-        instance->data[0] = (instance->data[0] >> bit_bias);
-
-        //распечаать
-        for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
-            printf("%02x ", instance->data[i]);
-        }
-        printf("--------------- \r\n");
-
-        //memcpy(instance->data, instance->data + instance->data_markup[i].data, byte_count);
 
         if(ind != 0) {
-            //проверить что не приходят одни 0
-            //instance->generic.data_count_bit = ind;
-            instance->data_markup[0].bit_count = ind;
-            instance->data_markup[0].byte_bias = 0;
+            bin_raw_type = BinRAWTypeNoGap;
+            //right alignment
+            uint8_t bit_bias = (subghz_protocol_bin_raw_get_full_byte(ind) << 3) - ind;
+#ifdef BIN_RAW_DEBUG
+            bin_raw_debug(
+                "\r\n\t count bit= %d\tcount full byte= %d\tbias bit= %dr\n\r\n",
+                ind,
+                subghz_protocol_bin_raw_get_full_byte(ind),
+                bit_bias);
 
-            return true;
+            for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
+                bin_raw_debug("%02x ", instance->data[i]);
+            }
+            bin_raw_debug("\r\n\r\n");
+#endif
+            //checking that the received sequence contains useful data
+            bool data_check = false;
+            for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
+                if(instance->data[i] != 0) {
+                    data_check = true;
+                    break;
+                }
+            }
+
+            if(data_check) {
+                for(size_t i = subghz_protocol_bin_raw_get_full_byte(ind) - 1; i > 0; i--) {
+                    instance->data[i] = (instance->data[i - 1] << (8 - bit_bias)) |
+                                        (instance->data[i] >> bit_bias);
+                }
+                instance->data[0] = (instance->data[0] >> bit_bias);
+
+#ifdef BIN_RAW_DEBUG
+                bin_raw_debug_tag(TAG, "Data right alignment\r\n");
+                for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
+                    bin_raw_debug("%02x ", instance->data[i]);
+                }
+                bin_raw_debug("\r\n\r\n");
+#endif
+                instance->data_markup[0].bit_count = ind;
+                instance->data_markup[0].byte_bias = 0;
+
+                return true;
+            } else {
+                bin_raw_type = BinRAWTypeUnknown;
+                return false;
+            }
         } else {
+            bin_raw_type = BinRAWTypeUnknown;
             return false;
         }
     }
+    bin_raw_type = BinRAWTypeUnknown;
     return false;
 }
 
@@ -861,34 +879,38 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
     case BinRAWDecoderStepBufFull:
     case BinRAWDecoderStepWrite:
         if(rssi < BIN_RAW_THRESHOLD_RSSI) {
+#ifdef BIN_RAW_DEBUG
+            bin_raw_debug_tag(TAG, "Data for analysis, positive high, negative low, us\r\n");
             for(size_t i = 0; i < instance->data_raw_ind; i++) {
-                printf("%ld ", instance->data_raw[i]);
+                bin_raw_debug("%ld ", instance->data_raw[i]);
             }
-            printf("---%d----------- \r\n", instance->data_raw_ind);
-
+            bin_raw_debug("\r\n\t count data= %d\r\n\r\n", instance->data_raw_ind);
+#endif
             instance->decoder.parser_step = BinRAWDecoderStepReset;
             instance->generic.data_count_bit = 0;
             if(instance->data_raw_ind >= BIN_RAW_BUF_MIN_DATA_COUNT) {
                 if(subghz_protocol_bin_raw_check_remote_controller(instance)) {
+                    bin_raw_debug_tag(TAG, "Sequence found\r\n");
                     uint16_t i = 0;
                     while((i < BIN_RAW_MAX_MARKUP_COUNT) &&
                           (instance->data_markup[i].bit_count != 0)) {
-
                         instance->generic.data_count_bit += instance->data_markup[i].bit_count;
-                        printf("--->%d %d :\t", instance->data_markup[i].byte_bias, instance->data_markup[i].bit_count);
-                        //вывод
+#ifdef BIN_RAW_DEBUG
+                        bin_raw_debug(
+                            "\t byte_bias= %d bit_count= %d :\t",
+                            instance->data_markup[i].byte_bias,
+                            instance->data_markup[i].bit_count);
                         for(uint16_t y = instance->data_markup[i].byte_bias;
                             y < instance->data_markup[i].byte_bias +
                                     subghz_protocol_bin_raw_get_full_byte(
                                         instance->data_markup[i].bit_count);
                             y++) {
-                            printf("%02x  ", instance->data[y]);
+                            bin_raw_debug("%02X ", instance->data[y]);
                         }
-                        printf("--------------- \r\n");
-
+                        bin_raw_debug(" \r\n");
+#endif
                         i++;
                     }
-                    furi_delay_ms(100);
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
                 }
@@ -906,7 +928,8 @@ uint8_t subghz_protocol_decoder_bin_raw_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderBinRAW* instance = context;
     return subghz_protocol_blocks_add_bytes(
-        instance->data+instance->data_markup[0].byte_bias, subghz_protocol_bin_raw_get_full_byte(instance->data_markup[0].bit_count));
+        instance->data + instance->data_markup[0].byte_bias,
+        subghz_protocol_bin_raw_get_full_byte(instance->data_markup[0].bit_count));
 }
 
 bool subghz_protocol_decoder_bin_raw_serialize(
