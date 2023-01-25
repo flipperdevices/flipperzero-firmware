@@ -905,6 +905,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
 
             is_encrypted = true;
+            continue;
         }
 
         if(!is_encrypted) {
