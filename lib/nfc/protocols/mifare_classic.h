@@ -8,6 +8,7 @@
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_CLASSIC_1K_TOTAL_SECTORS_NUM (16)
 #define MF_CLASSIC_4K_TOTAL_SECTORS_NUM (40)
+#define MF_MINI_TOTAL_SECTORS_NUM (5)
 
 #define MF_CLASSIC_SECTORS_MAX (40)
 #define MF_CLASSIC_BLOCKS_IN_SECTOR_MAX (16)
@@ -20,6 +21,7 @@
 typedef enum {
     MfClassicType1k,
     MfClassicType4k,
+    MfMini,
 } MfClassicType;
 
 typedef enum {
