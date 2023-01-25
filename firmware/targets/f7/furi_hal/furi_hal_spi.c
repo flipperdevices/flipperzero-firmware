@@ -1,5 +1,4 @@
 #include <furi.h>
-#include <furi_hal_dma.h>
 #include <furi_hal_spi.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_power.h>
