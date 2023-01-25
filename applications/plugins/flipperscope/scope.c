@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "scope_icons.h"
+// #include "scope_icons.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>

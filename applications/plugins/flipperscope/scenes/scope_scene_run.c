@@ -14,7 +14,7 @@
 #include "stm32wbxx_hal_tim.h"
 #include "stm32wbxx_nucleo.h"
 #include "stm32wbxx_hal_adc.h"
-#include "scope_icons.h"
+// #include "scope_icons.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
