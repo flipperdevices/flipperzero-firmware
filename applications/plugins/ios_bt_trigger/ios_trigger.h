@@ -16,8 +16,8 @@
 #include <assets_icons.h>
 //#include "ios_trigger_icons.h"
 
-#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps/Dev/bt_hid.keys")
-#define TAG "HidApp"
+#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/ios_trigger/hid.keys")
+#define TAG "iOs_trigger"
 
 //Enum of allowed event types
 typedef enum {

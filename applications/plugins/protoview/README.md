@@ -285,3 +285,5 @@ A big thank you to the RTL433 author, [Benjamin Larsson](https://github.com/merb
 * As a sourve of documentation for protocols.
 * As an awesome way to visualize and understand protocols, via [these great web tools](https://triq.org/).
 * To have tons of fun with RTLSDR in general, now and in the past.
+
+The application icon was designed by Stefano Liuzzo.

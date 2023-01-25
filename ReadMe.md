@@ -37,6 +37,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds now have 8 new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
 - NFC Keys Added [(Thanks to colonelborkmundus)](https://github.com/DarkFlippers/unleashed-firmware/pull/302)
+- Updated: [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
+- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
