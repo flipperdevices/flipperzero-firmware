@@ -59,6 +59,8 @@ const char* nfc_mf_classic_type(MfClassicType type) {
         return "Mifare Classic 1K";
     } else if(type == MfClassicType4k) {
         return "Mifare Classic 4K";
+    } else if(type == MfMini) {
+        return "Mifare Mini";
     } else {
         return "Mifare Classic";
     }
