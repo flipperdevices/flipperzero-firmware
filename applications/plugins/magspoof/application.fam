@@ -9,7 +9,6 @@ App(
         "storage",
         "notification",
         "dialogs",
-        'toolbox',
     ],
     provides=[],
     stack_size=2 * 1024,
@@ -18,4 +17,8 @@ App(
     fap_category="Tools",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="mag",
+    fap_version=(0, 1),  # major, minor
+    fap_description="WIP MagSpoof port using the RFID subsystem",
+    fap_author="Zachary Weiss",
+    fap_weburl="https://github.com/zacharyweiss/magspoof_flipper",
 )

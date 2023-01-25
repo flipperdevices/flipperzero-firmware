@@ -39,10 +39,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Animation Build](https://www.patreon.com/RogueMaster/membership): Dolphin (with only Dolphin related animations)
 - Updated: [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-- Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - OFW: Crash fix: [ELF-loader: wait for notification to complete on app exit #2335](https://github.com/flipperdevices/flipperzero-firmware/pull/2335)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
+- Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 <a name="release">
 

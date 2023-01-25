@@ -190,9 +190,8 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
     bit_array[i] = 2;
     i++;
 
-    // Log the output
+    // Log the output (messy but works)
     char output[100] = {0x0};
-    //FURI_LOG_D(TAG, "%s", bit_array);
     FuriString* tmp_str;
     tmp_str = furi_string_alloc();
     for(uint8_t j = 0; bit_array[j] != 2; j++) {
@@ -201,16 +200,13 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
     }
     FURI_LOG_D(TAG, "Track %d: %s", (track_index + 1), output);
     furi_string_free(tmp_str);
-
-    //bool is_correct_length = (i == (strlen(track_data) * bitlen[track_index]));
-    //furi_assert(is_correct_length);
 }
 
 void mag_spoof(Mag* mag) {
     MagSetting* setting = mag->setting;
 
     // precompute tracks (WIP; ignores reverse and 3rd track)
-    // likely will be reworked to Samy's bitmap method anyway...
+    // likely will be reworked to antirez's bitmap method anyway...
     const char* data1 = furi_string_get_cstr(mag->mag_dev->dev_data.track[0].str);
     const char* data2 = furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str);
     uint8_t bit_array1[(strlen(data1) * bitlen[0]) + 1];
