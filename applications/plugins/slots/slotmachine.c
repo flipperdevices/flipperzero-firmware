@@ -7,9 +7,9 @@
 #include <furi_hal.h>
 #include <slotmachine_icons.h>
 
-const Icon* slot_frames[] = {&I_x2, &I_x3, &I_x4, &I_x2_2};
+const Icon* slot_frames[] = {&I_x2, &I_x3, &I_x4, &I_x2_2, &I_x5};
 
-const uint8_t slot_coef[] = {2, 3, 4, 2};
+const uint8_t slot_coef[] = {2, 3, 4, 2, 5};
 
 typedef struct {
     uint8_t x, y, value, times, speed;
@@ -32,13 +32,13 @@ typedef struct {
 
 #define START_MONEY 1500;
 #define START_BET 300;
-#define RAND_MAX 4;
+#define RAND_MAX 5;
 #define DEFAULT_SPEED 16;
 
 uint8_t DEFAULT_SPINNING_TIMES = 10;
 
 void game_results(SlotMachineApp* app) {
-    int matches[] = {0, 0, 0, 0};
+    int matches[] = {0, 0, 0, 0, 0};
 
     double total = 0;
 
@@ -46,7 +46,7 @@ void game_results(SlotMachineApp* app) {
         matches[app->columns[i]->value]++;
     }
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 5; i++) {
         if(matches[i] >= 2) {
             total += app->bet * (slot_coef[i] / (double)(MAX_COLUMNS_COUNT + 1 - matches[i]));
         }
@@ -71,13 +71,27 @@ void draw_container(Canvas* canvas) {
     canvas_draw_line(canvas, 91, 16, 91, 48);
 }
 
-void drawButton(Canvas* canvas, uint8_t x, uint8_t y, char* str) {
+bool checkIsSpinning(SlotMachineApp* slotmachine) {
+    for(int i = 0; i < COLUMNS_COUNT; i++) {
+        if(slotmachine->columns[i]->spining) return true;
+    }
+
+    return false;
+}
+
+void drawButton(Canvas* canvas, uint8_t x, uint8_t y, char* str, bool invert) {
     const uint8_t string_width = canvas_string_width(canvas, str);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_rframe(canvas, x, y, string_width + 15, 11, 3);
+    if(invert) {
+        canvas_draw_rbox(canvas, x, y, string_width + 15, 11, 3);
+        canvas_invert_color(canvas);
+    } else {
+        canvas_draw_rframe(canvas, x, y, string_width + 15, 11, 3);
+    }
     canvas_draw_circle(canvas, x + 5, y + 5, 3);
     canvas_draw_circle(canvas, x + 5, y + 5, 1);
     canvas_draw_str(canvas, x + 13, y + 9, str);
+    canvas_invert_color(canvas);
 }
 
 // viewport callback
@@ -107,7 +121,7 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 2, 35, winamountStr);
-        drawButton(canvas, 95, 52, "Ok");
+        drawButton(canvas, 95, 52, "Ok", false);
 
         furi_mutex_release(slotmachine->model_mutex);
         return;
@@ -146,7 +160,7 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
             slot_frames[slotmachine->columns[i]->value]);
     }
     draw_container(canvas);
-    drawButton(canvas, 90, 52, "Spin");
+    drawButton(canvas, 90, 52, "Spin", checkIsSpinning(slotmachine));
 
     furi_mutex_release(slotmachine->model_mutex);
 }
@@ -199,14 +213,6 @@ void slotmachine_app_free(SlotMachineApp* app) {
         free(app->columns[i]);
     }
     free(app);
-}
-
-bool checkIsSpinning(SlotMachineApp* slotmachine) {
-    for(int i = 0; i < COLUMNS_COUNT; i++) {
-        if(slotmachine->columns[i]->spining) return true;
-    }
-
-    return false;
 }
 
 // entry point
