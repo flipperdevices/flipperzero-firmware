@@ -34,7 +34,8 @@ Internal TX improvements:
 
 External RX options (What is simplest read module?):
 - Some UART mag reader (bulky, but likely easiest to read over GPIO, and means one can read all tracks)
-- Square audio jack mag reader (compact, but will be harder to decode from GPIO. Also only will read track 2 without modification)
+- Square audio jack mag reader (this may be DOA; seems like newer versions of the Square modules have some form of preprocessing, that also modifies the signal, perhaps in an effort to discourage folks using their hardware independent of their software. Thanks @[arha](https://github.com/arha) for your work investigating this)
+- Some read-head directly connected to GPIO, ADC'd, and parsed all on the Flipper. Likely the most compact and cheapest module option, but also would require the most work.
 - USB HID input feasible? Flipper seemingly can't act as an HID host, is there any way to circumvent this or is it due to a hardware incompatibility? This would be the easiest / best option all-around if feasible. 
 
 ----
