@@ -1,4 +1,7 @@
-/* Schrader TPMS. Usually 443.92 Mhz OOK, 120us pulse len.
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license.
+ *
+ * Schrader TPMS. Usually 443.92 Mhz OOK, 120us pulse len.
  *
  * 500us high pulse + Preamble + Manchester coded bits where:
  * 1 = 10

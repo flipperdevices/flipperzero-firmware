@@ -1,4 +1,7 @@
-/* PT/SC remotes. Usually 443.92 Mhz OOK.
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license.
+ *
+ * PT/SC remotes. Usually 443.92 Mhz OOK.
  *
  * This line code is used in many remotes such as Princeton chips
  * named PT2262, Silian Microelectronics SC5262 and others.
