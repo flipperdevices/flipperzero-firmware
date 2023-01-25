@@ -382,7 +382,7 @@ int32_t snake_game_app(void* p) {
         snake_game_save_score_to_file(snake_state->highscore);
     }
     // Wait for all notifications to be played and return backlight to normal state
-    notification_message_block(notification, &sequence_display_backlight_enforce_auto);
+    notification_message(notification, &sequence_display_backlight_enforce_auto);
 
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
