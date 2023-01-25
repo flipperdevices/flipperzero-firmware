@@ -11,11 +11,11 @@
 
 #define TAG "FuriHalSpi"
 
-#define SPI_DMA DMA1
+#define SPI_DMA DMA2
 #define SPI_DMA_RX_CHANNEL LL_DMA_CHANNEL_3
 #define SPI_DMA_TX_CHANNEL LL_DMA_CHANNEL_4
-#define SPI_DMA_RX_IRQ FuriHalInterruptIdDma1Ch3
-#define SPI_DMA_TX_IRQ FuriHalInterruptIdDma1Ch4
+#define SPI_DMA_RX_IRQ FuriHalInterruptIdDma2Ch3
+#define SPI_DMA_TX_IRQ FuriHalInterruptIdDma2Ch4
 #define SPI_DMA_RX_DEF SPI_DMA, SPI_DMA_RX_CHANNEL
 #define SPI_DMA_TX_DEF SPI_DMA, SPI_DMA_TX_CHANNEL
 
