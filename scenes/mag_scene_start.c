@@ -3,6 +3,7 @@
 typedef enum {
     SubmenuIndexSaved,
     SubmenuIndexAddManually,
+    SubmenuIndexAbout,
 } SubmenuIndex;
 
 static void mag_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -18,7 +19,7 @@ void mag_scene_start_on_enter(void* context) {
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, mag_scene_start_submenu_callback, mag);
     submenu_add_item(
         submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
-    // TODO: "About" scene?
+    submenu_add_item(submenu, "About", SubmenuIndexAbout, mag_scene_start_submenu_callback, mag);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(mag->scene_manager, MagSceneStart));
@@ -34,14 +35,22 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexSaved) {
+        switch(event.event) {
+        case SubmenuIndexSaved:
             furi_string_set(mag->file_path, MAG_APP_FOLDER);
             scene_manager_next_scene(mag->scene_manager, MagSceneFileSelect);
             consumed = true;
-        } else if(event.event == SubmenuIndexAddManually) {
+            break;
+        case SubmenuIndexAddManually:
             scene_manager_next_scene(mag->scene_manager, MagSceneInputValue);
             consumed = true;
+            break;
+        case SubmenuIndexAbout:
+            scene_manager_next_scene(mag->scene_manager, MagSceneAbout);
+            consumed = true;
+            break;
         }
+
         scene_manager_set_scene_state(mag->scene_manager, MagSceneStart, event.event);
     }
 
