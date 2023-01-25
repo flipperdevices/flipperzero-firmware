@@ -210,7 +210,7 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         draw_inst_text_two_digits(tracker, canvas, EDIT_INSTRUMENT, INST_PWMDELAY, "DEL:", 52, 59 - shift, inst->pwm_delay);
     }
 
-    if(shift >= 12)
+    if (shift >= 12)
     {
         draw_inst_flag(tracker, canvas, EDIT_INSTRUMENT, INST_PROGRESTART, "NO PROG.RESTART", 0, 65 - shift, inst->flags, TE_PROG_NO_RESTART);
     }
@@ -229,27 +229,27 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 
 char command_get_char(uint16_t command)
 {
-    if((command >> 8) < 36)
+    if ((command >> 8) < 36)
     {
         return to_char_array[(command >> 8)];
     }
 
-    if(command == TE_PROGRAM_END)
+    if (command == TE_PROGRAM_END)
     {
         return ':';
     }
 
-    if((command & 0xff00) == TE_PROGRAM_JUMP)
+    if ((command & 0xff00) == TE_PROGRAM_JUMP)
     {
         return '^';
     }
 
-    if((command & 0xff00) == TE_PROGRAM_LOOP_END)
+    if ((command & 0xff00) == TE_PROGRAM_LOOP_END)
     {
         return '>';
     }
 
-    if((command & 0xff00) == TE_PROGRAM_LOOP_BEGIN)
+    if ((command & 0xff00) == TE_PROGRAM_LOOP_BEGIN)
     {
         return '<';
     }
@@ -261,28 +261,28 @@ void draw_program_step(Canvas *canvas, uint8_t y, FlizzerTrackerApp *tracker, ui
 {
     char buffer[15];
 
-    Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+    Instrument *inst = tracker->song.instrument[tracker->current_instrument];
     uint16_t opcode = inst->program[index];
 
-    if(opcode != TE_PROGRAM_NOP)
+    if (opcode != TE_PROGRAM_NOP)
     {
         snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), get_opcode_description(opcode, true) ? get_opcode_description(opcode, true) : "");
 
-        if(opcode & 0x8000)
+        if (opcode & 0x8000)
         {
-            if(index == 0)
+            if (index == 0)
             {
                 canvas_draw_line(canvas, 84 + 4 * 4 + 2, y, 84 + 4 * 4 + 2, y - 3);
                 canvas_draw_dot(canvas, 84 + 4 * 4 + 1, y - 4);
             }
 
-            if(index > 0 && !(inst->program[index - 1] & 0x8000))
+            if (index > 0 && !(inst->program[index - 1] & 0x8000))
             {
                 canvas_draw_line(canvas, 84 + 4 * 4 + 2, y, 84 + 4 * 4 + 2, y - 3);
                 canvas_draw_dot(canvas, 84 + 4 * 4 + 1, y - 4);
             }
 
-            if(index > 0 && (inst->program[index - 1] & 0x8000))
+            if (index > 0 && (inst->program[index - 1] & 0x8000))
             {
                 canvas_draw_line(canvas, 84 + 4 * 4 + 2, y, 84 + 4 * 4 + 2, y - 5);
             }
@@ -290,7 +290,7 @@ void draw_program_step(Canvas *canvas, uint8_t y, FlizzerTrackerApp *tracker, ui
 
         else
         {
-            if(index > 0 && (inst->program[index - 1] & 0x8000))
+            if (index > 0 && (inst->program[index - 1] & 0x8000))
             {
                 canvas_draw_line(canvas, 84 + 4 * 4 + 2, y - 3, 84 + 4 * 4 + 2, y - 5);
                 canvas_draw_dot(canvas, 84 + 4 * 4 + 1, y - 2);
@@ -308,15 +308,15 @@ void draw_program_step(Canvas *canvas, uint8_t y, FlizzerTrackerApp *tracker, ui
 
 void draw_instrument_program_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 {
-    Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+    Instrument *inst = tracker->song.instrument[tracker->current_instrument];
 
-    for(uint8_t i = tracker->program_position; i < fmin(INST_PROG_LEN, tracker->program_position + 8); i++)
+    for (uint8_t i = tracker->program_position; i < fmin(INST_PROG_LEN, tracker->program_position + 8); i++)
     {
         draw_program_step(canvas, 6 + 6 * i - tracker->program_position * 6, tracker, i);
 
-        if(i == tracker->current_program_step && tracker->focus == EDIT_PROGRAM)
+        if (i == tracker->current_program_step && tracker->focus == EDIT_PROGRAM)
         {
-            if(tracker->editing)
+            if (tracker->editing)
             {
                 canvas_draw_box(canvas, 80 + 8 + tracker->current_digit * 4, 6 * i - tracker->program_position * 6, 5, 7);
             }

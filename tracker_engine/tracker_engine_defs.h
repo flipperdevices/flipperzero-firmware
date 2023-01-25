@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "../sound_engine/sound_engine_defs.h"
 
@@ -60,6 +61,7 @@ typedef enum
     TE_EFFECT_SKIP_PATTERN = 0x0d00,
     TE_EFFECT_EXT = 0x0e00,
     /* TODO: add 0exy effects here */
+    TE_EFFECT_EXT_NOTE_DELAY = 0x0ed0,
     TE_EFFECT_SET_SPEED_PROG_PERIOD = 0x0f00,
     /* These effects work only in instrument program */
     TE_PROGRAM_LOOP_BEGIN = 0x7d00,
@@ -123,7 +125,7 @@ typedef struct
     uint8_t vibrato_speed, vibrato_depth, vibrato_delay;
     uint8_t pwm_speed, pwm_depth, pwm_delay;
 
-    uint32_t vibrato_position, pwm_position; //basically accumulators
+    uint32_t vibrato_position, pwm_position; // basically accumulators
 
     uint8_t extarp1, extarp2;
 

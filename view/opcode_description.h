@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdio.h>
 #include "../tracker_engine/tracker_engine_defs.h"
+#include <stdio.h>
 
 typedef struct
 {

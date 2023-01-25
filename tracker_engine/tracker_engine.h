@@ -1,5 +1,6 @@
 #pragma once
 
+#include "do_effects.h"
 #include "tracker_engine_defs.h"
 
 void tracker_engine_init(TrackerEngine *tracker_engine, uint8_t rate, SoundEngine *sound_engine);
@@ -19,5 +20,5 @@ void set_instrument(TrackerSongPatternStep *step, uint8_t inst);
 void set_volume(TrackerSongPatternStep *step, uint8_t vol);
 void set_command(TrackerSongPatternStep *step, uint16_t command);
 
-void set_default_instrument(Instrument* inst);
+void set_default_instrument(Instrument *inst);
 void set_empty_pattern(TrackerSongPattern *pattern, uint16_t pattern_length);

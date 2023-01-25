@@ -5,6 +5,6 @@
 
 #define INST_FILE_SIG "FZT!INST"
 
-bool save_song(FlizzerTrackerApp* tracker, FuriString* filepath);
+bool save_song(FlizzerTrackerApp *tracker, FuriString *filepath);
 
-bool load_song_util(FlizzerTrackerApp* tracker, FuriString* filepath);
+bool load_song_util(FlizzerTrackerApp *tracker, FuriString *filepath);

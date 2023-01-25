@@ -199,7 +199,7 @@ void delete_field(TrackerSongPatternStep *step, uint8_t field)
         case 0: // note
         {
             set_note(step, MUS_NOTE_NONE);
-            set_instrument(step, MUS_NOTE_INSTRUMENT_NONE); //also delete instrument
+            set_instrument(step, MUS_NOTE_INSTRUMENT_NONE); // also delete instrument
             break;
         }
 

@@ -2,8 +2,8 @@
 
 #include "../flizzer_tracker_hal.h"
 
-#include <furi_hal.h>
 #include "../sound_engine/sound_engine_osc.h"
+#include <furi_hal.h>
 
 void tracker_engine_init(TrackerEngine *tracker_engine, uint8_t rate, SoundEngine *sound_engine)
 {
@@ -78,7 +78,7 @@ void set_command(TrackerSongPatternStep *step, uint16_t command)
     step->command |= command & (0x7fff);
 }
 
-void set_default_instrument(Instrument* inst)
+void set_default_instrument(Instrument *inst)
 {
     memset(inst, 0, sizeof(Instrument));
 
@@ -94,7 +94,7 @@ void set_default_instrument(Instrument* inst)
     inst->adsr.d = 0x28;
     inst->adsr.volume = 0x80;
 
-    for(int i = 0; i < INST_PROG_LEN; i++)
+    for (int i = 0; i < INST_PROG_LEN; i++)
     {
         inst->program[i] = TE_PROGRAM_NOP;
     }
@@ -178,14 +178,16 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
 
     te_channel->last_note = te_channel->target_note = note + (int16_t)pinst->finetune;
 
-    if(pinst->flags & TE_ENABLE_VIBRATO)
+    te_channel->extarp1 = te_channel->extarp2 = 0;
+
+    if (pinst->flags & TE_ENABLE_VIBRATO)
     {
         te_channel->vibrato_speed = pinst->vibrato_speed;
         te_channel->vibrato_depth = pinst->vibrato_depth;
         te_channel->vibrato_delay = pinst->vibrato_delay;
     }
 
-    if(pinst->flags & TE_ENABLE_PWM)
+    if (pinst->flags & TE_ENABLE_PWM)
     {
         te_channel->pwm_speed = pinst->pwm_speed;
         te_channel->pwm_depth = pinst->pwm_depth;
@@ -226,7 +228,7 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     se_channel->ring_mod = pinst->ring_mod;
     se_channel->hard_sync = pinst->hard_sync;
 
-    te_channel->slide_speed = 0;
+    te_channel->slide_speed = pinst->slide_speed;
 
     se_channel->adsr.a = pinst->adsr.a;
     se_channel->adsr.d = pinst->adsr.d;
@@ -246,15 +248,28 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
     UNUSED(chan);
 
     uint8_t vol = tracker_engine_get_volume(step);
+    uint16_t opcode = tracker_engine_get_command(step);
 
     if (vol != MUS_NOTE_VOLUME_NONE && !(tracker_engine->channel[chan].channel_flags & TEC_DISABLED))
     {
         tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
     }
 
-    // TODO: add actual big ass function that executes commands; add arpeggio commands there
+    if (tracker_engine->channel[chan].instrument != NULL && opcode != 0)
+    {
+        if ((opcode & 0x7f00) == TE_EFFECT_ARPEGGIO)
+        {
+            tracker_engine->channel[chan].extarp1 = ((opcode & 0xf0) >> 4);
+            tracker_engine->channel[chan].extarp2 = (opcode & 0xf);
+        }
 
-    if(tracker_engine->channel[chan].channel_flags & TEC_DISABLED)
+        else
+        {
+            do_command(opcode, tracker_engine, chan);
+        }
+    }
+
+    if (tracker_engine->channel[chan].channel_flags & TEC_DISABLED)
     {
         tracker_engine->sound_engine->channel[chan].adsr.volume = 0;
     }
@@ -276,26 +291,26 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
         {
             if (te_channel->target_note > te_channel->note)
             {
-                te_channel->target_note += fmin(te_channel->slide_speed, te_channel->target_note - te_channel->note);
+                te_channel->note += fmin(te_channel->slide_speed, te_channel->target_note - te_channel->note);
             }
 
             else if (te_channel->target_note < te_channel->note)
             {
-                te_channel->target_note -= fmin(te_channel->slide_speed, te_channel->note - te_channel->target_note);
+                te_channel->note -= fmin(te_channel->slide_speed, te_channel->note - te_channel->target_note);
             }
         }
 
-        if(te_channel->channel_flags & TEC_PROGRAM_RUNNING)
+        if (te_channel->channel_flags & TEC_PROGRAM_RUNNING)
         {
             // TODO: add instrument program execution
         }
-        
+
         int16_t vib = 0;
         int32_t pwm = 0;
 
-        if(te_channel->flags & TE_ENABLE_VIBRATO)
+        if (te_channel->flags & TE_ENABLE_VIBRATO)
         {
-            if(te_channel->vibrato_delay > 0)
+            if (te_channel->vibrato_delay > 0)
             {
                 te_channel->vibrato_delay--;
             }
@@ -307,27 +322,27 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
             }
         }
 
-        if(te_channel->flags & TE_ENABLE_PWM)
+        if (te_channel->flags & TE_ENABLE_PWM)
         {
-            if(te_channel->pwm_delay > 0)
+            if (te_channel->pwm_delay > 0)
             {
                 te_channel->pwm_delay--;
             }
 
             else
             {
-                te_channel->pwm_position += ((uint32_t)te_channel->pwm_speed << 20); //so minimum PWM speed is even lower than minimum vibrato speed
+                te_channel->pwm_position += ((uint32_t)te_channel->pwm_speed << 20); // so minimum PWM speed is even lower than minimum vibrato speed
                 pwm = ((int32_t)sound_engine_triangle((te_channel->pwm_position) >> 9) - WAVE_AMP / 2) * (int32_t)te_channel->pwm_depth / (256 * 16);
             }
 
             int16_t final_pwm = (int16_t)tracker_engine->channel[chan].pw + pwm;
 
-            if(final_pwm < 0)
+            if (final_pwm < 0)
             {
                 final_pwm = 0;
             }
 
-            if(final_pwm > 0xfff)
+            if (final_pwm > 0xfff)
             {
                 final_pwm = 0xfff;
             }
@@ -350,7 +365,7 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
         tracker_engine_set_note(tracker_engine, chan, (uint16_t)chn_note, false);
     }
 
-    if(tracker_engine->channel[chan].channel_flags & TEC_DISABLED) //so we can't set some non-zero volme from inst program too
+    if (tracker_engine->channel[chan].channel_flags & TEC_DISABLED) // so we can't set some non-zero volme from inst program too
     {
         tracker_engine->sound_engine->channel[chan].adsr.volume = 0;
     }
@@ -379,7 +394,14 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
             TrackerSongPattern *pattern = &song->pattern[current_pattern];
 
-            uint8_t note_delay = 0; // TODO: add note delay command
+            uint8_t note_delay = 0;
+
+            uint16_t opcode = tracker_engine_get_command(&pattern->step[pattern_step]);
+
+            if ((opcode & 0x7ff0) == TE_EFFECT_EXT_NOTE_DELAY)
+            {
+                note_delay = (opcode & 0xf);
+            }
 
             if (tracker_engine->current_tick == note_delay)
             {
@@ -401,8 +423,13 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                         te_channel->instrument = pinst;
                     }
                 }
-
-                // TODO: add note cut command
+                
+                if(note == MUS_NOTE_CUT)
+                {
+                    sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
+                    se_channel->adsr.volume = 0;
+                    te_channel->volume = 0;
+                }
 
                 if (note == MUS_NOTE_RELEASE)
                 {
@@ -411,18 +438,23 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
                 else if (pinst && note != MUS_NOTE_RELEASE && note != MUS_NOTE_CUT && note != MUS_NOTE_NONE)
                 {
-                    te_channel->slide_speed = 0;
-
-                    // TODO: add setting slide speed if slide command is there
-
-                    // te_channel->slide_speed = pinst->slide_speed;
+                    //te_channel->slide_speed = 0;
 
                     uint8_t prev_adsr_volume = se_channel->adsr.volume;
 
-                    tracker_engine_trigger_instrument_internal(tracker_engine, chan, pinst, note << 8);
-                    te_channel->note = (note << 8) + pinst->finetune;
+                    if((opcode & 0x7f00) == TE_EFFECT_SLIDE)
+                    {
+                        te_channel->target_note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
+                        te_channel->slide_speed = (opcode & 0xff);
+                    }
 
-                    te_channel->target_note = (note << 8) + pinst->finetune;
+                    else
+                    {
+                        tracker_engine_trigger_instrument_internal(tracker_engine, chan, pinst, note << 8);
+                        te_channel->note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
+
+                        te_channel->target_note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
+                    }
 
                     if (inst == MUS_NOTE_INSTRUMENT_NONE)
                     {

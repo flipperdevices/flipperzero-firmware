@@ -7,12 +7,12 @@
 
 void sound_engine_init(SoundEngine *sound_engine, uint32_t sample_rate, bool external_audio_output, uint32_t audio_buffer_size)
 {
-    if(sound_engine->audio_buffer)
+    if (sound_engine->audio_buffer)
     {
         free(sound_engine->audio_buffer);
     }
 
-    if(sound_engine->sine_lut)
+    if (sound_engine->sine_lut)
     {
         free(sound_engine->sine_lut);
     }

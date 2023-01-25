@@ -1,10 +1,10 @@
 #include "flizzer_tracker.h"
+#include "diskop.h"
 #include "init_deinit.h"
 #include "input_event.h"
 #include "util.h"
 #include "view/instrument_editor.h"
 #include "view/pattern_editor.h"
-#include "diskop.h"
 
 #include <flizzer_tracker_icons.h>
 
@@ -15,7 +15,7 @@ Glyphs: 95/203
 BBX Build Mode: 0
 */
 // this is a modified version with dot and semicolon moved 1 pixel to the left; lowercase symbols removed to save space
-const uint8_t u8g2_font_tom_thumb_4x6_tr[479] U8G2_FONT_SECTION("u8g2_font_tom_thumb_4x6_tr") =
+const uint8_t u8g2_font_tom_thumb_4x6_tr[479] =
     "A\0\2\2\2\3\2\3\4\3\5\0\0\5\0\5\0\0\340\0\0\1\306 \4@\62!\5u\62+"
     "\42\6\313\63I\5#\10W\62i\250\241\2$\10Wr#\216\230\0%\10W\62\31\265Q\0&\10"
     "W\62J\215\224\4'\5\351\63\2(\6vr\252\14)\7V\62\61%\5*\6O\63\251\3+\7"
@@ -39,13 +39,13 @@ void draw_callback(Canvas *canvas, void *ctx)
 
     canvas_set_color(canvas, ColorXOR);
 
-    if(tracker->is_loading)
+    if (tracker->is_loading)
     {
         canvas_draw_str(canvas, 10, 10, "Loading...");
         return;
     }
 
-    if(tracker->is_saving)
+    if (tracker->is_saving)
     {
         canvas_draw_str(canvas, 10, 10, "Saving...");
         return;
@@ -108,7 +108,7 @@ bool input_callback(InputEvent *input_event, void *ctx)
 
     FlizzerTrackerEvent event = {.type = EventTypeInput, .input = *input_event, .period = final_period};
 
-    if(!(tracker->is_loading) && !(tracker->is_saving))
+    if (!(tracker->is_loading) && !(tracker->is_saving))
     {
         furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
     }
@@ -121,7 +121,7 @@ int32_t flizzer_tracker_app(void *p)
 {
     UNUSED(p);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Storage *storage = furi_record_open(RECORD_STORAGE);
     bool st = storage_simply_mkdir(storage, FLIZZER_TRACKER_FOLDER);
     UNUSED(st);
     furi_record_close(RECORD_STORAGE);
@@ -222,12 +222,12 @@ int32_t flizzer_tracker_app(void *p)
             process_input_event(tracker, &event);
         }
 
-        if(event.type == EventTypeSaveSong)
+        if (event.type == EventTypeSaveSong)
         {
             save_song(tracker, tracker->filepath);
         }
 
-        if(event.type == EventTypeLoadSong)
+        if (event.type == EventTypeLoadSong)
         {
             stop_song(tracker);
 
@@ -236,7 +236,7 @@ int32_t flizzer_tracker_app(void *p)
             tracker->dialogs = furi_record_open(RECORD_DIALOGS);
             tracker->is_loading = true;
 
-            FuriString* path;
+            FuriString *path;
             path = furi_string_alloc();
             furi_string_set(path, FLIZZER_TRACKER_FOLDER);
 
@@ -249,7 +249,7 @@ int32_t flizzer_tracker_app(void *p)
 
             furi_record_close(RECORD_DIALOGS);
 
-            if(ret)
+            if (ret)
             {
                 bool result = load_song_util(tracker, path);
                 UNUSED(result);
@@ -259,7 +259,6 @@ int32_t flizzer_tracker_app(void *p)
             {
                 furi_string_free(path);
             }
-
         }
     }
 

@@ -1,4 +1,5 @@
 #include "opcode_description.h"
+#include <stdint.h>
 
 static const OpcodeDescription opcode_desc[] =
     {
@@ -9,6 +10,7 @@ static const OpcodeDescription opcode_desc[] =
         {TE_EFFECT_VIBRATO, 0x7f00, "VIBRATO", "VIB"},
         {TE_EFFECT_VOLUME_FADE, 0x7f00, "VOLUME FADE", "V.FADE"},
         {TE_EFFECT_SKIP_PATTERN, 0x7f00, "SKIP PATTERN", "P.SKIP"},
+        {TE_EFFECT_EXT_NOTE_DELAY, 0x7ff0, "NOTE DELAY", "N.DEL."},
         {TE_EFFECT_SET_SPEED_PROG_PERIOD, 0x7f00, "SET SPEED (PROG.PER.IN PROGRAM)", "P.PER."},
         {TE_PROGRAM_LOOP_BEGIN, 0x7f00, "PROGRAM LOOP BEGIN", "L.BEG."},
         {TE_PROGRAM_LOOP_END, 0x7f00, "PROGRAM LOOP END", "L.END"},

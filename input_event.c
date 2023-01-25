@@ -6,7 +6,7 @@ void return_from_keyboard_callback(void *ctx)
 {
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)ctx;
 
-    if(!tracker->is_loading && !tracker->is_saving)
+    if (!tracker->is_loading && !tracker->is_saving)
     {
         uint8_t string_length = 0;
         char *string = NULL;
@@ -55,14 +55,14 @@ void return_from_keyboard_callback(void *ctx)
 
     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
 
-    if(tracker->is_saving)
+    if (tracker->is_saving)
     {
         stop_song(tracker);
-        
+
         tracker->filepath = furi_string_alloc();
         furi_string_cat_printf(tracker->filepath, "%s/%s%s", FLIZZER_TRACKER_FOLDER, tracker->filename, SONG_FILE_EXT);
 
-        if(storage_file_exists(tracker->storage, furi_string_get_cstr(tracker->filepath)))
+        if (storage_file_exists(tracker->storage, furi_string_get_cstr(tracker->filepath)))
         {
             view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_FILE_OVERWRITE);
             return;
@@ -76,29 +76,29 @@ void return_from_keyboard_callback(void *ctx)
     }
 }
 
-void overwrite_file_widget_yes_input_callback(GuiButtonType result, InputType type, void* ctx)
+void overwrite_file_widget_yes_input_callback(GuiButtonType result, InputType type, void *ctx)
 {
     UNUSED(result);
 
-    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+    FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)ctx;
 
-    if(type == InputTypeShort)
+    if (type == InputTypeShort)
     {
         tracker->is_saving = true;
         view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
-        //save_song(tracker, tracker->filepath);
+        // save_song(tracker, tracker->filepath);
         static FlizzerTrackerEvent event = {.type = EventTypeSaveSong, .input = {0}, .period = 0};
         furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
     }
 }
 
-void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType type, void* ctx)
+void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType type, void *ctx)
 {
     UNUSED(result);
 
-    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+    FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)ctx;
 
-    if(type == InputTypeShort)
+    if (type == InputTypeShort)
     {
         tracker->is_saving = false;
         furi_string_free(tracker->filepath);

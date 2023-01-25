@@ -5,8 +5,8 @@
 
 #include "flizzer_tracker.h"
 #include "sound_engine/sound_engine_defs.h"
-#include "tracker_engine/tracker_engine_defs.h"
 #include "tracker_engine/tracker_engine.h"
+#include "tracker_engine/tracker_engine_defs.h"
 
 #define clamp(val, add, _min, _max) val = fmin(_max, fmax(_min, (int32_t)val + add))
 #define flipbit(val, bit) \

@@ -22,7 +22,7 @@ void edit_instrument_param(FlizzerTrackerApp *tracker, uint8_t selected_param, i
 
             clamp(inst, 0, 0, tracker->song.num_instruments);
 
-            if(check_and_allocate_instrument(&tracker->song, (uint8_t)inst))
+            if (check_and_allocate_instrument(&tracker->song, (uint8_t)inst))
             {
                 tracker->current_instrument = inst;
             }
@@ -422,7 +422,7 @@ void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *even
         reset_buffer(&tracker->sound_engine);
         tracker_engine_set_song(&tracker->tracker_engine, NULL);
 
-        for(int i = 1; i < SONG_MAX_CHANNELS; i++)
+        for (int i = 1; i < SONG_MAX_CHANNELS; i++)
         {
             tracker->tracker_engine.channel[i].channel_flags &= TEC_PLAYING;
             tracker->tracker_engine.sound_engine->channel[i].frequency = 0;

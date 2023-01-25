@@ -108,9 +108,9 @@ void change_pattern_length(TrackerSong *song, uint16_t new_length)
     song->pattern_length = new_length;
 }
 
-bool is_default_instrument(Instrument* inst)
+bool is_default_instrument(Instrument *inst)
 {
-    Instrument* ref = malloc(sizeof(Instrument));
+    Instrument *ref = malloc(sizeof(Instrument));
     set_default_instrument(ref);
     bool is_default = memcmp(ref, inst, sizeof(Instrument)) != 0 ? false : true;
     free(ref);
@@ -126,7 +126,8 @@ bool check_and_allocate_instrument(TrackerSong *song, uint8_t inst)
 
     else
     {
-        if(inst >= MAX_INSTRUMENTS) return false;
+        if (inst >= MAX_INSTRUMENTS)
+            return false;
 
         if (!(is_default_instrument(song->instrument[inst - 1]))) // don't let the user flood the song with default instrument
         {

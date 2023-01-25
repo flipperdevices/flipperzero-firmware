@@ -16,13 +16,13 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
 
     if (event->input.key == InputKeyOk && event->input.type == InputTypeLong && tracker->editing)
     {
-        Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+        Instrument *inst = tracker->song.instrument[tracker->current_instrument];
 
-        if(tracker->current_program_step < INST_PROG_LEN - 1)
+        if (tracker->current_program_step < INST_PROG_LEN - 1)
         {
-            if((inst->program[tracker->current_program_step] & 0x7fff) < TE_PROGRAM_LOOP_BEGIN && ((inst->program[tracker->current_program_step + 1] & 0x7fff) < TE_PROGRAM_LOOP_BEGIN || (inst->program[tracker->current_program_step + 1] & 0x7f00) == TE_PROGRAM_LOOP_END)) //so we can unite with loop end as in klystrack
+            if ((inst->program[tracker->current_program_step] & 0x7fff) < TE_PROGRAM_LOOP_BEGIN && ((inst->program[tracker->current_program_step + 1] & 0x7fff) < TE_PROGRAM_LOOP_BEGIN || (inst->program[tracker->current_program_step + 1] & 0x7f00) == TE_PROGRAM_LOOP_END)) // so we can unite with loop end as in klystrack
             {
-                inst->program[tracker->current_program_step] ^= 0x8000; //flipping unite bit
+                inst->program[tracker->current_program_step] ^= 0x8000; // flipping unite bit
             }
         }
 
@@ -37,19 +37,19 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
 
     if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && tracker->editing)
     {
-        Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+        Instrument *inst = tracker->song.instrument[tracker->current_instrument];
         inst->program[tracker->current_program_step] = TE_PROGRAM_NOP;
     }
 
     if (event->input.key == InputKeyUp && event->input.type == InputTypeShort)
     {
-        if(!(tracker->editing))
+        if (!(tracker->editing))
         {
-            if((int16_t)tracker->current_program_step - 1 >= 0)
+            if ((int16_t)tracker->current_program_step - 1 >= 0)
             {
                 tracker->current_program_step--;
 
-                if(tracker->program_position > tracker->current_program_step)
+                if (tracker->program_position > tracker->current_program_step)
                 {
                     tracker->program_position = tracker->current_program_step;
                 }
@@ -63,23 +63,23 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
             }
         }
 
-        if(tracker->editing)
+        if (tracker->editing)
         {
-            Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+            Instrument *inst = tracker->song.instrument[tracker->current_instrument];
             uint16_t opcode = inst->program[tracker->current_program_step];
 
-            switch(tracker->current_digit)
+            switch (tracker->current_digit)
             {
-                case 0: //MSB
+                case 0: // MSB
                 {
                     uint8_t param = ((opcode & 0x7f00) >> 8);
 
-                    if(param < 0xff)
+                    if (param < 0xff)
                     {
                         param++;
                     }
 
-                    if((inst->program[tracker->current_program_step] & 0x7fff) == TE_PROGRAM_NOP)
+                    if ((inst->program[tracker->current_program_step] & 0x7fff) == TE_PROGRAM_NOP)
                     {
                         param = 0;
                         inst->program[tracker->current_program_step] = 0;
@@ -93,11 +93,11 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                     break;
                 }
 
-                case 1: //upper digit of param, e.g. eXx
+                case 1: // upper digit of param, e.g. eXx
                 {
                     int8_t nibble = ((opcode & 0x00f0) >> 4);
 
-                    if(nibble + 1 < 0xf)
+                    if (nibble + 1 < 0xf)
                     {
                         nibble++;
                     }
@@ -113,11 +113,11 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                     break;
                 }
 
-                case 2: //lower digit of param, e.g. exX
+                case 2: // lower digit of param, e.g. exX
                 {
                     int8_t nibble = (opcode & 0x000f);
 
-                    if(nibble + 1 < 0xf)
+                    if (nibble + 1 < 0xf)
                     {
                         nibble++;
                     }
@@ -133,7 +133,8 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                     break;
                 }
 
-                default: break;
+                default:
+                    break;
             }
         }
 
@@ -142,13 +143,13 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
 
     if (event->input.key == InputKeyDown && event->input.type == InputTypeShort)
     {
-        if(!(tracker->editing))
+        if (!(tracker->editing))
         {
-            if(tracker->current_program_step + 1 < INST_PROG_LEN)
+            if (tracker->current_program_step + 1 < INST_PROG_LEN)
             {
                 tracker->current_program_step++;
 
-                if(tracker->program_position < tracker->current_program_step - 8)
+                if (tracker->program_position < tracker->current_program_step - 8)
                 {
                     tracker->program_position = tracker->current_program_step - 8;
                 }
@@ -162,18 +163,18 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
             }
         }
 
-        if(tracker->editing)
+        if (tracker->editing)
         {
-            Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+            Instrument *inst = tracker->song.instrument[tracker->current_instrument];
             uint16_t opcode = inst->program[tracker->current_program_step];
 
-            switch(tracker->current_digit)
+            switch (tracker->current_digit)
             {
-                case 0: //MSB
+                case 0: // MSB
                 {
                     uint8_t param = ((opcode & 0x7f00) >> 8);
 
-                    if(param < (TE_PROGRAM_JUMP >> 8) && param > 0)
+                    if (param < (TE_PROGRAM_JUMP >> 8) && param > 0)
                     {
                         param--;
 
@@ -181,31 +182,31 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                         inst->program[tracker->current_program_step] |= ((uint16_t)param << 8);
                     }
 
-                    if((inst->program[tracker->current_program_step] & 0x7f00) == TE_PROGRAM_JUMP && (inst->program[tracker->current_program_step] & 0x7fff) != TE_PROGRAM_END && (inst->program[tracker->current_program_step] & 0x7fff) != TE_PROGRAM_NOP)
+                    if ((inst->program[tracker->current_program_step] & 0x7f00) == TE_PROGRAM_JUMP && (inst->program[tracker->current_program_step] & 0x7fff) != TE_PROGRAM_END && (inst->program[tracker->current_program_step] & 0x7fff) != TE_PROGRAM_NOP)
                     {
                         inst->program[tracker->current_program_step] = TE_PROGRAM_LOOP_END | (inst->program[tracker->current_program_step] & 0x8000);
                     }
 
-                    if((inst->program[tracker->current_program_step] & 0x7fff) == TE_PROGRAM_END)
+                    if ((inst->program[tracker->current_program_step] & 0x7fff) == TE_PROGRAM_END)
                     {
-                        //param = (TE_PROGRAM_JUMP >> 8);
+                        // param = (TE_PROGRAM_JUMP >> 8);
                         inst->program[tracker->current_program_step] = TE_PROGRAM_JUMP | (inst->program[tracker->current_program_step] & 0x8000);
                     }
 
-                    if((inst->program[tracker->current_program_step] & 0x7fff) == TE_PROGRAM_NOP)
+                    if ((inst->program[tracker->current_program_step] & 0x7fff) == TE_PROGRAM_NOP)
                     {
-                        //param = (TE_PROGRAM_END >> 8);
+                        // param = (TE_PROGRAM_END >> 8);
                         inst->program[tracker->current_program_step] = TE_PROGRAM_END | (inst->program[tracker->current_program_step] & 0x8000);
                     }
 
                     break;
                 }
 
-                case 1: //upper digit of param, e.g. eXx
+                case 1: // upper digit of param, e.g. eXx
                 {
                     int8_t nibble = ((opcode & 0x00f0) >> 4);
 
-                    if(nibble - 1 >= 0)
+                    if (nibble - 1 >= 0)
                     {
                         nibble--;
                     }
@@ -221,11 +222,11 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                     break;
                 }
 
-                case 2: //lower digit of param, e.g. exX
+                case 2: // lower digit of param, e.g. exX
                 {
                     int8_t nibble = (opcode & 0x000f);
 
-                    if(nibble - 1 >= 0)
+                    if (nibble - 1 >= 0)
                     {
                         nibble--;
                     }
@@ -241,7 +242,8 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                     break;
                 }
 
-                default: break;
+                default:
+                    break;
             }
         }
 

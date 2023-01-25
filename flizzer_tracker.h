@@ -9,9 +9,8 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdio.h>
-#include <toolbox/stream/file_stream.h>
 #include <storage/storage.h>
-#include <u8g2_glue.h>
+#include <toolbox/stream/file_stream.h>
 
 #include <gui/modules/text_input.h>
 #include <gui/view_dispatcher.h>
@@ -162,13 +161,13 @@ typedef struct
     TrackerView *tracker_view;
     ViewDispatcher *view_dispatcher;
     TextInput *text_input;
-    Storage* storage;
+    Storage *storage;
     Stream *stream;
-    FuriString* filepath;
+    FuriString *filepath;
     DialogsApp *dialogs;
     Submenu *pattern_submenu;
     Submenu *instrument_submenu;
-    Widget* overwrite_file_widget;
+    Widget *overwrite_file_widget;
     char filename[FILE_NAME_LEN + 1];
     bool was_it_back_keypress;
     uint32_t current_time;
