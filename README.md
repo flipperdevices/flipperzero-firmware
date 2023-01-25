@@ -10,8 +10,11 @@ cd ..
 ./fbt launch_app APPSRC=applications_user/flipperscope
 ```
 
+Provide signal to pin 16/C0, with a voltage ranging from 0V to 3.3V.
+
 ## To Do
 
+* Customisable input pin
 * Check time period is set correctly
 * Test with signal generator
 * Trigger type mode
