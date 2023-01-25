@@ -2,23 +2,22 @@
 #include <furi_hal.h>
 #include <furi_hal_resources.h>
 #include <gui/gui.h>
-#include <gui/modules/submenu.h>
-#include <input/input.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "scope_icons.h"
-
-#include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
-#include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
 #include <notification/notification_messages.h>
 
+#include "scope_icons.h"
 #include "scope_app_i.h"
-#define TAG "Scope"
+
+void assert_failed(uint8_t * file, uint32_t line)
+{
+    UNUSED(file);
+    UNUSED(line);
+    while (1) {
+    }
+}
 
 static bool scope_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -36,14 +35,6 @@ static void scope_app_tick_event_callback(void* context) {
     furi_assert(context);
     ScopeApp* app = context;
     scene_manager_handle_tick_event(app->scene_manager);
-}
-
-void assert_failed(uint8_t * file, uint32_t line)
-{
-    UNUSED(file);
-    UNUSED(line);
-    while (1) {
-    }
 }
 
 ScopeApp* scope_app_alloc() {
@@ -123,7 +114,6 @@ void scope_app_free(ScopeApp* app) {
 
 int32_t scope_main(void *p)
 {
-
     UNUSED(p);
     ScopeApp* scope_app = scope_app_alloc();
     view_dispatcher_run(scope_app->view_dispatcher);

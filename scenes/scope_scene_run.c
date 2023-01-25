@@ -1,21 +1,6 @@
-#include "../scope_app_i.h"
-#include "../helpers/scope_types.h"
-
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_resources.h>
-#include <gui/gui.h>
-#include <gui/modules/submenu.h>
-#include <input/input.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "stm32wbxx_hal.h"
-#include "stm32wbxx_hal_tim.h"
-#include "stm32wbxx_nucleo.h"
-#include "stm32wbxx_hal_adc.h"
-#include "scope_icons.h"
-
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -23,6 +8,13 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
 #include <notification/notification_messages.h>
+
+#include "stm32wbxx_hal.h"
+#include "stm32wbxx_hal_tim.h"
+#include "stm32wbxx_nucleo.h"
+#include "stm32wbxx_hal_adc.h"
+#include "../scope_app_i.h"
+#include "../helpers/scope_types.h"
 
 #define DIGITAL_SCALE_12BITS             ((uint32_t) 0xFFF)
 #define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  128)
@@ -32,15 +24,15 @@
   ((__ADC_DATA__) * (__VREFANALOG_VOLTAGE__) / DIGITAL_SCALE_12BITS)
 #define VDDA_APPLI                       ((uint32_t)3300)
 
+// ramVector found from - https://community.nxp.com/t5/i-MX-Processors/Relocate-vector-table-to-ITCM/m-p/1302304
+// the aligned aspect is key!
+#define TABLE_SIZE	79
+uint32_t ramVector[TABLE_SIZE+1] __attribute__((aligned(512)));
+
 const uint32_t AHBPrescTable[16UL] = {1UL, 3UL, 5UL, 1UL, 1UL, 6UL, 10UL, 32UL, 2UL, 4UL, 8UL, 16UL, 64UL, 128UL, 256UL, 512UL};
 const uint32_t APBPrescTable[8UL]  = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
 const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
                                       4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
-
-typedef struct {
-    uint8_t x, y;
-} ImagePosition;
-
 double time;
 
 void Error_Handler()
@@ -49,19 +41,15 @@ void Error_Handler()
     }
 }
 
-uint32_t timebase = 1000;
-
 static ADC_HandleTypeDef hadc1;
 static DMA_HandleTypeDef hdma_adc1;
 static TIM_HandleTypeDef htim2;
-
 __IO uint16_t aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE];       /* ADC group regular conversion data (array of data) */
 __IO uint16_t aADCxConvertedData_Voltage_mVoltA[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
 __IO uint16_t aADCxConvertedData_Voltage_mVoltB[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
 __IO uint8_t ubDmaTransferStatus = 2;   /* Variable set into DMA interruption callback */
 __IO uint16_t *mvoltWrite = &aADCxConvertedData_Voltage_mVoltA[0];
 __IO uint16_t *mvoltDisplay = &aADCxConvertedData_Voltage_mVoltB[0];
-
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc)
 {
@@ -73,7 +61,6 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc)
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
         hdma_adc1.Instance = DMA1_Channel1;
         hdma_adc1.Init.Request = DMA_REQUEST_ADC1;
         hdma_adc1.Init.Direction = DMA_PERIPH_TO_MEMORY;
@@ -86,9 +73,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc)
         if (HAL_DMA_Init(&hdma_adc1) != HAL_OK) {
             Error_Handler();
         }
-
         __HAL_LINKDMA(hadc, DMA_Handle, hdma_adc1);
-
         HAL_NVIC_SetPriority(ADC1_IRQn, 15, 0);
         HAL_NVIC_EnableIRQ(ADC1_IRQn);
     }
@@ -157,10 +142,9 @@ static void MX_ADC1_Init(void)
     if (HAL_ADC_Init(&hadc1) != HAL_OK) {
         Error_Handler();
     }
-
     sConfig.Channel = ADC_CHANNEL_1;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLE_5;     ////ADC_SAMPLETIME_640CYCLES_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLE_5;
     sConfig.SingleDiff = ADC_SINGLE_ENDED;
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset = 0;
@@ -171,7 +155,6 @@ static void MX_ADC1_Init(void)
 
 static void MX_TIM2_Init(uint32_t period)
 {
-
     TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
     TIM_MasterConfigTypeDef sMasterConfig = { 0 };
     htim2.Instance = TIM2;
@@ -189,8 +172,7 @@ static void MX_TIM2_Init(uint32_t period)
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) !=
-        HAL_OK) {
+    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK) {
         Error_Handler();
     }
 }
@@ -208,7 +190,6 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
 }
 
-
 void swap(__IO uint16_t **a, __IO uint16_t **b){
     __IO uint16_t *tmp;
     tmp = *a;
@@ -220,12 +201,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
 {
     UNUSED(hadc);
     uint32_t tmp_index = 0;
-
-    for (tmp_index = (ADC_CONVERTED_DATA_BUFFER_SIZE / 2);
-         tmp_index < ADC_CONVERTED_DATA_BUFFER_SIZE; tmp_index++) {
-        mvoltWrite[tmp_index] =
-            __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
-                                    aADCxConvertedData[tmp_index]);
+    for (tmp_index = (ADC_CONVERTED_DATA_BUFFER_SIZE / 2); tmp_index < ADC_CONVERTED_DATA_BUFFER_SIZE; tmp_index++) {
+        mvoltWrite[tmp_index] = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI, aADCxConvertedData[tmp_index]);
     }
     ubDmaTransferStatus = 1;
     swap(&mvoltWrite, &mvoltDisplay);
@@ -235,12 +212,8 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc)
 {
     UNUSED(hadc);
     uint32_t tmp_index = 0;
-
-    for (tmp_index = 0; tmp_index < (ADC_CONVERTED_DATA_BUFFER_SIZE / 2);
-         tmp_index++) {
-        mvoltWrite[tmp_index] =
-            __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI,
-                                    aADCxConvertedData[tmp_index]);
+    for (tmp_index = 0; tmp_index < (ADC_CONVERTED_DATA_BUFFER_SIZE / 2); tmp_index++) {
+        mvoltWrite[tmp_index] = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI, aADCxConvertedData[tmp_index]);
     }
     ubDmaTransferStatus = 0;
 }
@@ -251,12 +224,9 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef * hadc)
     Error_Handler();
 }
 
-
-// Screen is 128x64 px
 static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
-
     char buf[50];
     snprintf(buf, 50, "Time: %.3f", time);
 
@@ -266,6 +236,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
         uint32_t cur = 64 - (mvoltDisplay[x] / (VDDA_APPLI / 64));
         canvas_draw_line(canvas, x - 1, prev, x, cur);
     }
+
     canvas_draw_line(canvas, 0, 0, 0, 63);
     canvas_draw_line(canvas, 0, 63, 128, 63);
 }
@@ -276,11 +247,6 @@ static void app_input_callback(InputEvent * input_event, void *ctx)
     FuriMessageQueue *event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
-
-// ramVector found from - https://community.nxp.com/t5/i-MX-Processors/Relocate-vector-table-to-ITCM/m-p/1302304
-// the aligned aspect is key!
-#define TABLE_SIZE	79
-uint32_t ramVector[TABLE_SIZE+1] __attribute__((aligned(512)));
 
 void scope_scene_run_widget_callback(
     GuiButtonType result,
@@ -307,8 +273,7 @@ void scope_scene_run_on_enter(void* context) {
 
     HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
-    FuriMessageQueue *event_queue =
-        furi_message_queue_alloc(8, sizeof(InputEvent));
+    FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     uint32_t tmp_index_adc_converted_data = 0;
     MX_GPIO_Init();
@@ -324,6 +289,7 @@ void scope_scene_run_on_enter(void* context) {
     };
 
     MX_ADC1_Init();
+
     for (tmp_index_adc_converted_data = 0;
          tmp_index_adc_converted_data < ADC_CONVERTED_DATA_BUFFER_SIZE;
          tmp_index_adc_converted_data++) {
@@ -339,9 +305,7 @@ void scope_scene_run_on_enter(void* context) {
         Error_Handler();
     }
 
-    if (HAL_ADC_Start_DMA(&hadc1,
-                          (uint32_t *) aADCxConvertedData,
-                          ADC_CONVERTED_DATA_BUFFER_SIZE) != HAL_OK) {
+    if (HAL_ADC_Start_DMA(&hadc1, (uint32_t *) aADCxConvertedData, ADC_CONVERTED_DATA_BUFFER_SIZE) != HAL_OK) {
         Error_Handler();
     }
 
@@ -355,23 +319,20 @@ void scope_scene_run_on_enter(void* context) {
     InputEvent event;
     bool running = true;
     while (running) {
-        if (furi_message_queue_get(event_queue, &event, 100) ==
-            FuriStatusOk) {
-
-            if ((event.type == InputTypePress)
-                || (event.type == InputTypeRepeat)) {
+        if (furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
+            if ((event.type == InputTypePress) || (event.type == InputTypeRepeat)) {
                 switch (event.key) {
-                case InputKeyLeft:
-                    break;
-                case InputKeyRight:
-                    break;
-                case InputKeyUp:
-                    break;
-                case InputKeyDown:
-                    break;
-                default:
-                    running = false;
-                    break;
+                    case InputKeyLeft:
+                        break;
+                    case InputKeyRight:
+                        break;
+                    case InputKeyUp:
+                        break;
+                    case InputKeyDown:
+                        break;
+                    default:
+                        running = false;
+                        break;
                 }
             }
         }
@@ -389,8 +350,7 @@ void scope_scene_run_on_enter(void* context) {
 
     furi_record_close(RECORD_GUI);
     scene_manager_previous_scene(app->scene_manager);
-    submenu_set_selected_item(
-        app->submenu, 0);
+    submenu_set_selected_item(app->submenu, 0);
 }
 
 bool scope_scene_run_on_event(void* context, SceneManagerEvent event) {
@@ -403,7 +363,6 @@ bool scope_scene_run_on_event(void* context, SceneManagerEvent event) {
 
 void scope_scene_run_on_exit(void* context) {
     ScopeApp* app = context;
-
     // Clear views
     widget_reset(app->widget);
 }
