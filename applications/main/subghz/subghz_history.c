@@ -205,8 +205,7 @@ bool subghz_history_add_to_history(
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         if(!flipper_format_read_hex(item->flipper_string, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Missing Key");
-            break;
+            FURI_LOG_E(TAG, "No Key");
         }
         uint64_t data = 0;
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
