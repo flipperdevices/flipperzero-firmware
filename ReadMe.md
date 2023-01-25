@@ -28,8 +28,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0124-2217-0.75.1-fd45358](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-25 01:28 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-25 01:28 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-25 12:09 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-25 12:09 EST`
 - Renamed RM Clock to Dab Timer
 - Passport XP Bar Design Updated [(Thanks to ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/510)
 - Renamed: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) to [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
