@@ -12,12 +12,7 @@ struct HidCamera {
 };
 
 typedef struct {
-    bool left_pressed;
-    bool up_pressed;
-    bool right_pressed;
-    bool down_pressed;
     bool ok_pressed;
-    bool back_pressed;
     bool connected;
     HidTransport transport;
 } HidCameraModel;
