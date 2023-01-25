@@ -1,4 +1,7 @@
-/* Microchip HCS200/HCS300/HSC301 KeeLoq, rolling code remotes.
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license.
+ *
+ * Microchip HCS200/HCS300/HSC301 KeeLoq, rolling code remotes.
  *
  * Usually 443.92 Mhz OOK, ~200us or ~400us pulse len, depending
  * on the configuration.

@@ -1,4 +1,7 @@
-/* Citroen TPMS. Usually 443.92 Mhz FSK.
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license.
+ *
+ * Citroen TPMS. Usually 443.92 Mhz FSK.
  *
  * Preamble of ~14 high/low 52 us pulses
  * Sync of high 100us pulse then 50us low

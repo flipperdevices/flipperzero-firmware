@@ -1,4 +1,7 @@
-/* Toyota tires TPMS. Usually 443.92 Mhz FSK (In Europe).
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license.
+ *
+ * Toyota tires TPMS. Usually 443.92 Mhz FSK (In Europe).
  *
  * Preamble + sync + 64 bits of data. ~48us short pulse length.
  *

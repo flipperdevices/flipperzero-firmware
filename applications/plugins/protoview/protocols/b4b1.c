@@ -1,4 +1,7 @@
-/* PT/SC remotes. Usually 443.92 Mhz OOK.
+/* Copyright (C) 2022-2023 Salvatore Sanfilippo -- All Rights Reserved
+ * See the LICENSE file for information about the license.
+ *
+ * PT/SC remotes. Usually 443.92 Mhz OOK.
  *
  * This line code is used in many remotes such as Princeton chips
  * named PT2262, Silian Microelectronics SC5262 and others.
@@ -11,10 +14,15 @@
 
 static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo* info) {
     if(numbits < 30) return false;
-    const char* sync_patterns[3] = {
-        "10000000000000000000000000000001", /* 30 zero bits. */
-        "100000000000000000000000000000001", /* 31 zero bits. */
-        "1000000000000000000000000000000001", /* 32 zero bits. */
+
+    /* Test different pulse + gap + first byte possibilities. */
+    const char* sync_patterns[6] = {
+        "100000000000000000000000000000011101", /* 30 times gap + one. */
+        "100000000000000000000000000000010001", /* 30 times gap + zero. */
+        "1000000000000000000000000000000011101", /* 31 times gap + one. */
+        "1000000000000000000000000000000010001", /* 31 times gap + zero. */
+        "10000000000000000000000000000000011101", /* 32 times gap + one. */
+        "10000000000000000000000000000000010001", /* 32 times gap + zero. */
     };
 
     uint32_t off;
@@ -24,11 +32,11 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
         if(off != BITMAP_SEEK_NOT_FOUND) break;
     }
     if(off == BITMAP_SEEK_NOT_FOUND) return false;
-    if(DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 preamble at: %lu", off);
+    if(DEBUG_MSG) FURI_LOG_E(TAG, "B4B1 preamble id:%d at: %lu", j, off);
     info->start_off = off;
 
-    // Seek data setction. Why -1? Last bit is data.
-    off += strlen(sync_patterns[j]) - 1;
+    // Seek data setction. Why -5? Last 5 half-bit-times are data.
+    off += strlen(sync_patterns[j]) - 5;
 
     uint8_t d[3]; /* 24 bits of data. */
     uint32_t decoded = convert_from_line_code(d, sizeof(d), bits, numbytes, off, "1000", "1110");
