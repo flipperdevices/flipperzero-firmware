@@ -873,8 +873,9 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
                     uint16_t i = 0;
                     while((i < BIN_RAW_MAX_MARKUP_COUNT) &&
                           (instance->data_markup[i].bit_count != 0)) {
-                        instance->generic.data_count_bit += instance->data_markup[i].bit_count;
 
+                        instance->generic.data_count_bit += instance->data_markup[i].bit_count;
+                        printf("--->%d %d :\t", instance->data_markup[i].byte_bias, instance->data_markup[i].bit_count);
                         //вывод
                         for(uint16_t y = instance->data_markup[i].byte_bias;
                             y < instance->data_markup[i].byte_bias +
@@ -887,6 +888,7 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
 
                         i++;
                     }
+                    furi_delay_ms(100);
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
                 }
@@ -904,7 +906,7 @@ uint8_t subghz_protocol_decoder_bin_raw_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderBinRAW* instance = context;
     return subghz_protocol_blocks_add_bytes(
-        instance->data, subghz_protocol_bin_raw_get_full_byte(instance->generic.data_count_bit));
+        instance->data+instance->data_markup[0].byte_bias, subghz_protocol_bin_raw_get_full_byte(instance->data_markup[0].bit_count));
 }
 
 bool subghz_protocol_decoder_bin_raw_serialize(
