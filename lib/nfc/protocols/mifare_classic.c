@@ -7,7 +7,6 @@
 
 #define TAG "MfClassic"
 
-#define MF_CLASSIC_HALT_CMD 0x50U // Technically NFC-A? maybe put in nfca.h?
 #define MF_CLASSIC_ACK_CMD 0xAU
 #define MF_CLASSIC_NACK_BUF_VALID_CMD 0x0U
 #define MF_CLASSIC_NACK_BUF_INVALID_CMD 0x4U
@@ -824,7 +823,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             break;
         }
 
-        if(cmd == MF_CLASSIC_HALT_CMD && plain_data[1] == 0x00) {
+        if(cmd == 0x50 && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
             furi_hal_nfc_listen_sleep();
             command_processed = true;
@@ -1087,7 +1086,7 @@ void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
     furi_assert(tx_rx);
 
     uint8_t plain_data[2] = {};
-    plain_data[0] = MF_CLASSIC_HALT_CMD;
+    plain_data[0] = 0x50;
     plain_data[1] = 0x00;
 
     nfca_append_crc16(plain_data, 2);
