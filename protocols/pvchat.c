@@ -31,14 +31,15 @@
  * 
  * This is the data format:
  * 
- * +-+------+-------+
- * |L|Sender|Message|
- * +-+------+-------+
- *  |    |      \_Message, terminated by 0xFF + 0xAA + 1 byte of checksum
+ * +--+------+-------+--+--+--+
+ * |SL|Sender|Message|FF|AA|CS|
+ * +--+------+-------+--+--+--+
+ *  |    |      |
+ *  |    |      \_ N bytes of message terminated by FF AA + 1 byte of checksum
  *  |    |      
- *  |    \_ L bytes of sender name
+ *  |    \_ SL bytes of sender name
  *  \
- *   \_ Length of sender in bytes
+ *   \_ 1 byte of sender len, 8 bit unsigned integer.
  * 
  * 
  * Checksum = sum of bytes modulo 256, with checksum set
