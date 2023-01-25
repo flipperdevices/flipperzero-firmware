@@ -54,9 +54,12 @@ find_program(CMAKE_SIZE NAMES ${STM32_TARGET_TRIPLET}-size HINTS ${TOOLCHAIN_BIN
 find_program(CMAKE_DEBUGGER NAMES ${STM32_TARGET_TRIPLET}-gdb HINTS ${TOOLCHAIN_BIN_PATH})
 find_program(CMAKE_CPPFILT NAMES ${STM32_TARGET_TRIPLET}-c++filt HINTS ${TOOLCHAIN_BIN_PATH})
 
+# This function adds a target with name '${TARGET}_always_display_size'. The new
+# target builds a TARGET and then calls the program defined in CMAKE_SIZE to
+# display the size of the final ELF.
 function(stm32_print_size_of_target TARGET)
     add_custom_target(${TARGET}_always_display_size
-        ALL COMMAND ${CMAKE_SIZE} ${TARGET}${CMAKE_EXECUTABLE_SUFFIX_C}
+        ALL COMMAND ${CMAKE_SIZE} "$<TARGET_FILE:${TARGET}>"
         COMMENT "Target Sizes: "
         DEPENDS ${TARGET}
     )
