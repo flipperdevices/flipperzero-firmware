@@ -300,9 +300,26 @@ uint32_t crypt_or_rollback_word(struct Crypto1State *s, uint32_t in, int x, int 
     }
     return ret;
 }
+int key_already_found_for_nonce(uint64_t *keyarray, size_t keyarray_size, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
+    int k = 0, found = 0;
+    for(k = 0; k < keyarray_size; k++) {
+        struct Crypto1State temp = {0, 0};
+        int i;
+        for (i = 0; i < 24; i++) {
+            (&temp)->odd |= (BIT(keyarray[k], 2*i+1) << (i ^ 3));
+            (&temp)->even |= (BIT(keyarray[k], 2*i) << (i ^ 3));
+        }
+        crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
+        crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
+        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
+            found = 1;
+            break;
+        }
+    }
+    return found;
+}
 
 int main(int argc, char *argv[]) {
-    struct Crypto1State *s, *t;
     uint64_t key;     // recovered key
     uint32_t uid;     // serial number
     uint32_t nt0;      // tag challenge first
@@ -342,6 +359,9 @@ int main(int argc, char *argv[]) {
         }
         uint32_t p64 = prng_successor(nt0, 64);
         uint32_t p64b = prng_successor(nt1, 64);
+        if (key_already_found_for_nonce(keyarray, keyarray_size, uid ^ nt1, nr1_enc, p64b, ar1_enc)) {
+            continue;
+        }
         FILE *mem_file = fopen(file_path, "wb+");
         void *s_offset = lfsr_recovery32(ar0_enc ^ p64, mem_file);
         int ti = 0;
