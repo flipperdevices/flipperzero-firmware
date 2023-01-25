@@ -92,7 +92,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     fieldset_add_str(info->fieldset,"sender",(char*)raw+1,senderlen);
     fieldset_add_str(info->fieldset,"message",(char*)raw+1+senderlen,
-                     datalen-senderlen-3);
+                     datalen-senderlen-4);
     return true;
 }
 
