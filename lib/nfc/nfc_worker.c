@@ -282,14 +282,6 @@ static bool nfc_worker_read_bank_card(NfcWorker* nfc_worker, FuriHalNfcTxRxConte
     if(emv_app.currency_code) {
         result->currency_code = emv_app.currency_code;
     }
-    if(emv_app.track_1_equiv_len) {
-        result->track_1_equiv_len = emv_app.track_1_equiv_len;
-        memcpy(result->track_1_equiv, emv_app.track_1_equiv, emv_app.track_1_equiv_len);
-    }
-    if(emv_app.track_2_equiv_len) {
-        result->track_2_equiv_len = emv_app.track_2_equiv_len;
-        memcpy(result->track_2_equiv, emv_app.track_2_equiv, emv_app.track_2_equiv_len);
-    }
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_stop(nfc_worker->reader_analyzer);

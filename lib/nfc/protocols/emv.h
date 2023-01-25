@@ -30,10 +30,6 @@ typedef struct {
     uint8_t exp_year;
     uint16_t country_code;
     uint16_t currency_code;
-    char track_1_equiv[80];
-    uint8_t track_1_equiv_len;
-    char track_2_equiv[41];
-    uint8_t track_2_equiv_len;
 } EmvData;
 
 typedef struct {
@@ -61,10 +57,6 @@ typedef struct {
     uint16_t currency_code;
     APDU pdol;
     APDU afl;
-    char track_1_equiv[80];
-    uint8_t track_1_equiv_len;
-    char track_2_equiv[41];
-    uint8_t track_2_equiv_len;
 } EmvApplication;
 
 /** Read bank card data
