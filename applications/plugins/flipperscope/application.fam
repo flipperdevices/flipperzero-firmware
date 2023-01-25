@@ -7,7 +7,7 @@ App(
     stack_size=1 * 1024,
     fap_category="GPIO",
     fap_icon="scope_10px.png",
-    fap_icon_assets="images",
+    # fap_icon_assets="images",
     fap_icon_assets_symbol="scope",
     fap_private_libs=[
         Lib(name="adc",
