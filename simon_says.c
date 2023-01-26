@@ -194,9 +194,40 @@ void draw_current_score(Canvas* canvas, const SimonData* simon_data) {
     canvas_draw_str_aligned(canvas, SCREEN_XRES / 2 + 4, 2, AlignCenter, AlignTop, str_score);
 }
 
+void play_sound_up(SimonData* const app) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(NOTE_UP, app->volume);
+    }
+}
+
+void play_sound_down(SimonData* const app) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(NOTE_DOWN, app->volume);
+    }
+}
+
+void play_sound_left(SimonData* const app) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(NOTE_LEFT, app->volume);
+    }
+}
+
+void play_sound_right(SimonData* const app) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(NOTE_RIGHT, app->volume);
+    }
+}
+
+void stop_sound() {
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
+}
+
 /* Main Render Function */
 void simon_draw_callback(Canvas* canvas, void* ctx) {
-    const SimonData* simon_state = acquire_mutex((ValueMutex*)ctx, 25);
+    SimonData* const simon_state = acquire_mutex((ValueMutex*)ctx, 25);
     if(simon_state == NULL) {
         if(DEBUG_MSG) FURI_LOG_E(TAG, "[simon_draw_callback] Null simon state");
         return;
@@ -255,19 +286,27 @@ void simon_draw_callback(Canvas* canvas, void* ctx) {
         if(simon_state->set_board_neutral) {
             // Draw Neutral Board
             canvas_draw_icon(canvas, BOARD_X, BOARD_Y, &I_board); // Draw Board
+
+            // Stop Sound TODO: Move this to a better place
+            //@todo Sound
+            stop_sound();
         } else {
             switch(simon_state->selectedShape) {
             case up:
-                canvas_draw_icon(canvas, BOARD_X, BOARD_Y, &I_up); // Draw Down
+                canvas_draw_icon(canvas, BOARD_X, BOARD_Y, &I_up); // Draw Up
+                play_sound_up(simon_state);
                 break;
             case down:
                 canvas_draw_icon(canvas, BOARD_X, BOARD_Y, &I_down); // Draw Down
+                play_sound_down(simon_state);
                 break;
             case left:
                 canvas_draw_icon(canvas, BOARD_X, BOARD_Y, &I_left); // Draw Left
+                play_sound_left(simon_state);
                 break;
             case right:
                 canvas_draw_icon(canvas, BOARD_X, BOARD_Y, &I_right); // Draw Right
+                play_sound_right(simon_state);
                 break;
             default:
                 if(DEBUG_MSG)
@@ -280,6 +319,7 @@ void simon_draw_callback(Canvas* canvas, void* ctx) {
 
     // ######################### Game Over #########################
     if(simon_state->gameState == gameOver) {
+        stop_sound(); //TODO: Make a game over sequence
         canvas_set_color(canvas, ColorXOR);
         canvas_set_font(canvas, FontPrimary);
 
@@ -457,10 +497,7 @@ enum shape_names getCurrentSimonMove(SimonData* app) {
 }
 
 void onPlayerSelectedShapeCallback(enum shape_names shape, SimonData* app) {
-    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
-        furi_hal_speaker_start(NOTE_UP, app->volume);
-    }
-
+    //@todo Sound on select
     if(shape == getCurrentSimonMove(app)) {
         onPlayerAnsweredCorrect(app);
     } else {
@@ -551,7 +588,7 @@ int32_t simon_says_app_entry(void* p) {
         FuriStatus q_status = furi_message_queue_get(
             event_queue, &input, simon_state->numberOfMillisecondsBeforeShapeDisappears);
 
-        if(q_status == FuriStatusOk) {
+        if(q_status == FuriStatusOk && simon_state->activePlayer == player) {
             FURI_LOG_D(TAG, "Got input event: %d", input.key);
             //break out of the loop if the back key is pressed
             if(input.key == InputKeyBack && input.type == InputTypeLong) {
@@ -599,6 +636,7 @@ int32_t simon_says_app_entry(void* p) {
                         onPlayerSelectedShapeCallback(right, simon_state);
                         break;
                     default:
+                        simon_state->set_board_neutral = true;
                         break;
                     }
                 } else {
@@ -619,6 +657,7 @@ int32_t simon_says_app_entry(void* p) {
         view_port_update(view_port);
     }
 
+    stop_sound();
     notification_message(notification, &sequence_cleanup);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
