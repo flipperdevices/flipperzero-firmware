@@ -494,7 +494,7 @@ uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, ui
 }
 
 /* Convert the differential Manchester code to bits. This is similar to
- * convert_from_line_code() but specific for Manchester. The user must
+ * convert_from_line_code() but specific for diff-Manchester. The user must
  * supply the value of the previous symbol before this stream, since
  * in differential codings the next bits depend on the previous one.
  *
