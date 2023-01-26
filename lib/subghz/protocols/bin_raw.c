@@ -480,11 +480,11 @@ static bool
 
         //determine the value to be corrected
         for(uint8_t k = 1; k < 5; k++) {
-            bin_raw_debug_tag(
-                TAG, "K_div= %f\r\n", (double)(classes[1].data / (classes[0].data / k)));
-            float delta = (classes[1].data / (classes[0].data / k)) -
-                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k)); //-V656
-            if((delta < 0.25) || (delta > 0.75)) {
+            float delta = (classes[1].data / (classes[0].data / k));
+            bin_raw_debug_tag(TAG, "K_div= %f\r\n", (double)(delta));
+            delta -= (uint32_t)delta;
+
+            if((delta < 0.20f) || (delta > 0.80f)) {
                 instance->te = (uint32_t)classes[0].data / k;
                 bin_raw_debug_tag(TAG, "K= %d\r\n", k);
                 te_ok = true; //found a correlated duration
