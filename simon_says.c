@@ -578,7 +578,6 @@ int32_t simon_says_app_entry(void* p) {
     InputEvent input;
 
     // Show Main Menu Screen
-    //TODO: Disable Loading game for debugging
     load_game(simon_state);
     simon_state->gameState = mainMenu;
 
