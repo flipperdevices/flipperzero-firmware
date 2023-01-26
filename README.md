@@ -1,6 +1,6 @@
 # Leed's Flipper Zero Applications
 
- <div style="text-align:center"><img src="application_user/ledpulser/assets/flipper_logo_orange.png"/></div>
+ <div style="text-align:center"><img src="Misc/ledpulser/assets/flipper_logo_orange.png"/></div>
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>
