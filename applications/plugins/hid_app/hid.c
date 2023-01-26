@@ -137,11 +137,7 @@ Hid* hid_alloc(HidTransport transport) {
         hid_submenu_callback,
         app);
     submenu_add_item(
-        app->device_type_submenu,
-        "Camera",
-        HidSubmenuIndexCamera,
-        hid_submenu_callback,
-        app);
+        app->device_type_submenu, "Camera", HidSubmenuIndexCamera, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->device_type_submenu), hid_exit);
     view_dispatcher_add_view(
         app->view_dispatcher, HidViewSubmenu, submenu_get_view(app->device_type_submenu));

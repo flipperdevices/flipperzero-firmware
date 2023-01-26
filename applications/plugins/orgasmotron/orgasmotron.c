@@ -40,7 +40,7 @@ int32_t orgasmotron_app(void* p) {
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     ValueMutex state_mutex;
-    if (!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
         FURI_LOG_E("Orgasmatron", "cannot create mutex\r\n");
         free(plugin_state);
         return 255;
@@ -61,10 +61,10 @@ int32_t orgasmotron_app(void* p) {
     //int mode = 0;
     bool processing = true;
     //while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
-    while (processing) {
+    while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
-        if (event_status == FuriStatusOk) {
+        if(event_status == FuriStatusOk) {
             if(event.key == InputKeyBack && event.type == InputTypeShort) {
                 //Exit Application
                 notification_message(notification, &sequence_reset_vibro);
@@ -73,53 +73,58 @@ int32_t orgasmotron_app(void* p) {
                 processing = false;
                 //break;
             }
-            if(event.key == InputKeyOk && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyOk &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 0;
             }
-            if(event.key == InputKeyLeft && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyLeft &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 1;
             }
-            if(event.key == InputKeyRight && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyRight &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 3;
             }
-            if(event.key == InputKeyUp && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyUp &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 2;
             }
-            if(event.key == InputKeyDown && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyDown &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 4;
             }
         }
-        
-        if (plugin_state->mode == 0) {
+
+        if(plugin_state->mode == 0) {
             //Stop Vibration
             notification_message(notification, &sequence_reset_vibro);
             notification_message(notification, &sequence_reset_green);
-        } else if (plugin_state->mode == 1) {
+        } else if(plugin_state->mode == 1) {
             //Full power
             notification_message(notification, &sequence_set_vibro_on);
             notification_message(notification, &sequence_set_green_255);
-        } else if (plugin_state->mode == 2) {
+        } else if(plugin_state->mode == 2) {
             //Pulsed Vibration
             notification_message(notification, &sequence_set_vibro_on);
             notification_message(notification, &sequence_set_green_255);
             delay(100);
             notification_message(notification, &sequence_reset_vibro);
-        } else if (plugin_state->mode == 3) {
+        } else if(plugin_state->mode == 3) {
             //Soft power
             notification_message(notification, &sequence_set_vibro_on);
             notification_message(notification, &sequence_set_green_255);
             delay(50);
             notification_message(notification, &sequence_reset_vibro);
-        } else if (plugin_state->mode == 4) {
+        } else if(plugin_state->mode == 4) {
             //Special Sequence
-            for (int i = 0;i < 15;i++) {
+            for(int i = 0; i < 15; i++) {
                 notification_message(notification, &sequence_set_vibro_on);
                 notification_message(notification, &sequence_set_green_255);
                 delay(50);
                 notification_message(notification, &sequence_reset_vibro);
                 delay(50);
             }
-            for (int i = 0;i < 2;i++) {
+            for(int i = 0; i < 2; i++) {
                 notification_message(notification, &sequence_set_vibro_on);
                 notification_message(notification, &sequence_set_green_255);
                 delay(400);
