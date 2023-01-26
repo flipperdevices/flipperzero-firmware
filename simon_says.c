@@ -18,12 +18,20 @@
 #define DEBUG_MSG 1
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
-#define BOARD_X 72
+#define BOARD_X 72 // Used for board placement
 #define BOARD_Y 8
 #define GAME_START_LIVES 3
 #define SAVING_DIRECTORY "/ext/apps/Games"
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_simon_says.save"
-const int brush_size = 2;
+
+// Define Notes
+// Shamelessly stolen from Ocarina application
+// https://github.com/invalidna-me/flipperzero-ocarina
+#define NOTE_UP 587.33f
+#define NOTE_LEFT 493.88f
+#define NOTE_RIGHT 440.00f
+#define NOTE_DOWN 349.23
+#define NOTE_OK 293.66f
 
 /* ============================ Data structures ============================= */
 
@@ -45,6 +53,7 @@ typedef struct {
 
     enum difficulty_mode difficultyMode; // This is the difficulty mode for the current game
     bool sound_enabled; // This is the sound enabled flag for the current game
+    float volume; // This is the volume for the current game
 
     /* Handle Score */
     int currentScore; // This is the score for the current
@@ -398,6 +407,7 @@ void game_over(SimonData* app) {
 /* Called after gameover to restart the game. This function
  * also calls restart_game(). */
 void restart_game_after_gameover(SimonData* app) {
+    app->volume = 1.0f; //TODO: make this a setting
     app->gameState = inGame;
     app->gameover = false;
     app->currentScore = 0;
@@ -447,6 +457,10 @@ enum shape_names getCurrentSimonMove(SimonData* app) {
 }
 
 void onPlayerSelectedShapeCallback(enum shape_names shape, SimonData* app) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(NOTE_UP, app->volume);
+    }
+
     if(shape == getCurrentSimonMove(app)) {
         onPlayerAnsweredCorrect(app);
     } else {
