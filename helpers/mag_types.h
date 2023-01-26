@@ -2,7 +2,7 @@
 
 #define MAG_VERSION_APP "0.01"
 #define MAG_DEVELOPER "Zachary Weiss"
-#define MAG_GITHUB "https://github.com/zacharyweiss/magspoof_flipper"
+#define MAG_GITHUB "github.com/zacharyweiss/magspoof_flipper"
 
 typedef enum {
     MagViewSubmenu,
