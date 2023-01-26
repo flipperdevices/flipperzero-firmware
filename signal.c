@@ -55,7 +55,7 @@ uint32_t search_coherent_signal(RawSamplesBuffer *s, uint32_t idx, uint32_t min_
 
     uint32_t len = 0; /* Observed len of coherent samples. */
     s->short_pulse_dur = 0;
-    for (uint32_t j = idx; j < idx+500; j++) {
+    for (uint32_t j = idx; j < idx+s->total; j++) {
         bool level;
         uint32_t dur;
         raw_samples_get(s, j, &level, &dur);
