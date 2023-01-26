@@ -109,7 +109,7 @@ Also, see `ReadMe.md` files inside those directories for further details.
 
 # Links
 
-- Discord: [flipp.dev/discord](https://flipp.dev/discord)
+- Discord: [discord.gg/flipper](https://discord.gg/flipper)
 - Website: [flipperzero.one](https://flipperzero.one)
 - Forum: [forum.flipperzero.one](https://forum.flipperzero.one/)
 - Kickstarter: [kickstarter.com](https://www.kickstarter.com/projects/flipper-devices/flipper-zero-tamagochi-for-hackers)
