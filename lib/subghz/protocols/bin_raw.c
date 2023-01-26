@@ -21,7 +21,7 @@
 #define BIN_RAW_BUF_MIN_DATA_COUNT 128
 #define BIN_RAW_MAX_MARKUP_COUNT 20
 
-//#define BIN_RAW_DEBUG
+#define BIN_RAW_DEBUG
 
 #ifdef BIN_RAW_DEBUG
 #define bin_raw_debug(...) printf(__VA_ARGS__)
@@ -191,7 +191,7 @@ static bool subghz_protocol_encoder_bin_raw_get_upload(SubGhzProtocolEncoderBinR
 #ifdef BIN_RAW_DEBUG
     bin_raw_debug_tag(TAG, "Restored Sequence left aligned\r\n");
     for(uint16_t y = 0; y < subghz_protocol_bin_raw_get_full_byte(ind); y++) {
-        bin_raw_debug("%02x ", instance->data[y]);
+        bin_raw_debug("%02X ", instance->data[y]);
     }
     bin_raw_debug("\r\n\tbin_count_result= %d\r\n\r\n", ind);
 
@@ -241,12 +241,12 @@ bool subghz_protocol_encoder_bin_raw_deserialize(void* context, FlipperFormat* f
         uint16_t byte_count = 0;
         memset(instance->data_markup, 0x00, BIN_RAW_MAX_MARKUP_COUNT * sizeof(BinRAW_Markup));
         while(flipper_format_read_uint32(flipper_format, "Bit_RAW", (uint32_t*)&temp_data, 1)) {
-            if(ind > BIN_RAW_MAX_MARKUP_COUNT) {
+            if(ind >= BIN_RAW_MAX_MARKUP_COUNT) {
                 FURI_LOG_E(TAG, "Markup overflow");
                 break;
             }
             byte_count += subghz_protocol_bin_raw_get_full_byte(temp_data);
-            if(byte_count > BIN_RAW_BUF_DATA_SIZE) {
+            if(byte_count >= BIN_RAW_BUF_DATA_SIZE) {
                 FURI_LOG_E(TAG, "Receive buffer overflow");
                 break;
             }
@@ -281,7 +281,7 @@ bool subghz_protocol_encoder_bin_raw_deserialize(void* context, FlipperFormat* f
                 y < instance->data_markup[i].byte_bias +
                         subghz_protocol_bin_raw_get_full_byte(instance->data_markup[i].bit_count);
                 y++) {
-                bin_raw_debug("%02x ", instance->data[y]);
+                bin_raw_debug("%02X ", instance->data[y]);
             }
             i++;
         }
@@ -474,7 +474,7 @@ static bool
             bin_raw_debug_tag(
                 TAG, "K_div= %f\r\n", (double)(classes[1].data / (classes[0].data / k)));
             float delta = (classes[1].data / (classes[0].data / k)) -
-                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k));
+                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k)); //V636
             if((delta < 0.25) || (delta > 0.75)) {
                 instance->te = (uint32_t)classes[0].data / k;
                 bin_raw_debug_tag(TAG, "K= %d\r\n", k);
@@ -596,7 +596,7 @@ static bool
         if(data_markup_ind) {
             data_markup_ind_temp--;
             for(size_t i = (ind / 8) - 1; i < BIN_RAW_BUF_DATA_SIZE; i++) {
-                bin_raw_debug("%02x ", instance->data[i]);
+                bin_raw_debug("%02X ", instance->data[i]);
                 if(instance->data_markup[data_markup_ind_temp].byte_bias == i + 1) {
                     bin_raw_debug(
                         "\r\n\t%d\t%d\t%d :\t",
@@ -716,7 +716,7 @@ static bool
                                         instance->data_markup[index].bit_count);
                                     if(index != 0) index--;
                                 }
-                                bin_raw_debug("%02x ", instance->data[z]);
+                                bin_raw_debug("%02X ", instance->data[z]);
                             }
 
                             bin_raw_debug("\r\n\r\n");
@@ -760,15 +760,17 @@ static bool
                     instance->data_markup, 0x00, BIN_RAW_MAX_MARKUP_COUNT * sizeof(BinRAW_Markup));
                 uint16_t byte_count = subghz_protocol_bin_raw_get_full_byte(data_temp);
                 uint16_t index = 0;
-                for(int i = BIN_RAW_MAX_MARKUP_COUNT; i > -1; i--) {
-                    if(subghz_protocol_bin_raw_get_full_byte(markup_temp[i].bit_count) ==
+                uint16_t it = BIN_RAW_MAX_MARKUP_COUNT;
+                do {
+                    it--;
+                    if(subghz_protocol_bin_raw_get_full_byte(markup_temp[it].bit_count) ==
                        byte_count) {
-                        instance->data_markup[index].bit_count = markup_temp[i].bit_count;
-                        instance->data_markup[index].byte_bias = markup_temp[i].byte_bias;
+                        instance->data_markup[index].bit_count = markup_temp[it].bit_count;
+                        instance->data_markup[index].byte_bias = markup_temp[it].byte_bias;
                         index++;
                         bin_raw_type = BinRAWTypeGapUnknown;
                     }
-                }
+                } while(it != 0);
             }
         }
 
@@ -813,7 +815,7 @@ static bool
                 bit_bias);
 
             for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
-                bin_raw_debug("%02x ", instance->data[i]);
+                bin_raw_debug("%02X ", instance->data[i]);
             }
             bin_raw_debug("\r\n\r\n");
 #endif
@@ -836,7 +838,7 @@ static bool
 #ifdef BIN_RAW_DEBUG
                 bin_raw_debug_tag(TAG, "Data right alignment\r\n");
                 for(size_t i = 0; i < subghz_protocol_bin_raw_get_full_byte(ind); i++) {
-                    bin_raw_debug("%02x ", instance->data[i]);
+                    bin_raw_debug("%02X ", instance->data[i]);
                 }
                 bin_raw_debug("\r\n\r\n");
 #endif
@@ -845,15 +847,12 @@ static bool
 
                 return true;
             } else {
-                bin_raw_type = BinRAWTypeUnknown;
                 return false;
             }
         } else {
-            bin_raw_type = BinRAWTypeUnknown;
             return false;
         }
     }
-    bin_raw_type = BinRAWTypeUnknown;
     return false;
 }
 
@@ -1040,12 +1039,12 @@ bool subghz_protocol_decoder_bin_raw_deserialize(void* context, FlipperFormat* f
         uint16_t byte_count = 0;
         memset(instance->data_markup, 0x00, BIN_RAW_MAX_MARKUP_COUNT * sizeof(BinRAW_Markup));
         while(flipper_format_read_uint32(flipper_format, "Bit_RAW", (uint32_t*)&temp_data, 1)) {
-            if(ind > BIN_RAW_MAX_MARKUP_COUNT) {
+            if(ind >= BIN_RAW_MAX_MARKUP_COUNT) {
                 FURI_LOG_E(TAG, "Markup overflow");
                 break;
             }
             byte_count += subghz_protocol_bin_raw_get_full_byte(temp_data);
-            if(byte_count > BIN_RAW_BUF_DATA_SIZE) {
+            if(byte_count >= BIN_RAW_BUF_DATA_SIZE) {
                 FURI_LOG_E(TAG, "Receive buffer overflow");
                 break;
             }

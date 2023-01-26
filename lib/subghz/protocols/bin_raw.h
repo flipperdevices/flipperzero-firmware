@@ -79,7 +79,9 @@ void subghz_protocol_decoder_bin_raw_feed(void* context, bool level, uint32_t du
  */
 uint8_t subghz_protocol_decoder_bin_raw_get_hash_data(void* context);
 
-void subghz_protocol_decoder_bin_raw_data_input_rssi(SubGhzProtocolDecoderBinRAW* instance, float rssi);
+void subghz_protocol_decoder_bin_raw_data_input_rssi(
+    SubGhzProtocolDecoderBinRAW* instance,
+    float rssi);
 
 /**
  * Serialize data SubGhzProtocolDecoderBinRAW.
