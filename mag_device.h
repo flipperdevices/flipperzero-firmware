@@ -15,8 +15,6 @@
 
 typedef void (*MagLoadingCallback)(void* context, bool state);
 
-//typedef struct MagDevice MagDevice;
-
 typedef struct {
     FuriString* str;
 } MagTrack;

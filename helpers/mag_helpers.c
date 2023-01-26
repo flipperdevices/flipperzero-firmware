@@ -105,9 +105,9 @@ void tx_init_gpio() {
     furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
-    furi_delay_ms(300);
-
     furi_hal_gpio_write(GPIO_PIN_ENABLE, 1);
+
+    furi_delay_ms(500);
 }
 
 void tx_reset_gpio() {

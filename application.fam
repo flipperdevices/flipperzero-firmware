@@ -12,7 +12,7 @@ App(
     ],
     provides=[],
     stack_size=2 * 1024,
-    order=20,
+    order=64,  # keep it at the bottom of the list while still WIP
     fap_icon="icons/mag_10px.png",
     fap_category="Tools",
     fap_icon_assets="icons",

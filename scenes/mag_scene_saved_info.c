@@ -20,9 +20,11 @@ void mag_scene_saved_info_on_enter(void* context) {
 
         furi_string_cat_printf(
             tmp_str,
-            "Track %d:\n%s\n\n",
+            "Track %d:%s%s%s",
             (i + 1),
-            furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr));
+            furi_string_empty(trackstr) ? "  " : "\n",
+            furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr),
+            (i + 1 == MAG_DEV_TRACKS) ? "" : "\n\n");
     }
 
     widget_add_text_scroll_element(widget, 0, 15, 128, 49, furi_string_get_cstr(tmp_str));
