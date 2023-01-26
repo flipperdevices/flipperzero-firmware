@@ -15,3 +15,6 @@ The application will be compiled and copied onto your device.
 
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
+
+## Source
+[https://github.com/leedave/Leeds-Flipper-Zero-Applications]

@@ -28,5 +28,8 @@ The application will be compiled and copied onto your device.
 ## Licensing
 The source this was developed from is the Orgasmotron application delivered in RougeMaster Firmware as well as the Flipper-Xtreme Firmware
 All my changes are considered open-source and can be used for whatever purpose. 
-[https://github.com/RogueMaster/flipperzero-firmware-wPlugins]
+[https://github.com/RogueMaster/flipperzero-firmware-wPlugins]<br>
 [https://github.com/ClaraCrazy/Flipper-Xtreme]
+
+## My Source
+[https://github.com/leedave/Leeds-Flipper-Zero-Applications]
