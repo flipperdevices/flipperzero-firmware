@@ -21,7 +21,7 @@
 #define BIN_RAW_BUF_MIN_DATA_COUNT 128
 #define BIN_RAW_MAX_MARKUP_COUNT 20
 
-#define BIN_RAW_DEBUG
+//#define BIN_RAW_DEBUG
 
 #ifdef BIN_RAW_DEBUG
 #define bin_raw_debug(...) FURI_LOG_RAW_D(__VA_ARGS__)
@@ -44,6 +44,7 @@ typedef enum {
     BinRAWDecoderStepReset = 0,
     BinRAWDecoderStepWrite,
     BinRAWDecoderStepBufFull,
+    BinRAWDecoderStepNoParse,
 } BinRAWDecoderStep;
 
 typedef enum {
@@ -109,10 +110,15 @@ const SubGhzProtocolEncoder subghz_protocol_bin_raw_encoder = {
 const SubGhzProtocol subghz_protocol_bin_raw = {
     .name = SUBGHZ_PROTOCOL_BIN_RAW_NAME,
     .type = SubGhzProtocolTypeStatic,
+#ifdef BIN_RAW_DEBUG
     .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
             SubGhzProtocolFlag_AM | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_Decodable |
             SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
-
+#else
+    .flag = SubGhzProtocolFlag_433 | SubGhzProtocolFlag_315 | SubGhzProtocolFlag_868 |
+            SubGhzProtocolFlag_AM | SubGhzProtocolFlag_FM | SubGhzProtocolFlag_BinRAW |
+            SubGhzProtocolFlag_Load | SubGhzProtocolFlag_Save | SubGhzProtocolFlag_Send,
+#endif
     .decoder = &subghz_protocol_bin_raw_decoder,
     .encoder = &subghz_protocol_bin_raw_encoder,
 };
@@ -246,7 +252,7 @@ bool subghz_protocol_encoder_bin_raw_deserialize(void* context, FlipperFormat* f
                 break;
             }
             byte_count += subghz_protocol_bin_raw_get_full_byte(temp_data);
-            if(byte_count >= BIN_RAW_BUF_DATA_SIZE) {
+            if(byte_count > BIN_RAW_BUF_DATA_SIZE) {
                 FURI_LOG_E(TAG, "Receive buffer overflow");
                 break;
             }
@@ -350,9 +356,12 @@ void subghz_protocol_decoder_bin_raw_free(void* context) {
 void subghz_protocol_decoder_bin_raw_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderBinRAW* instance = context;
+#ifdef BIN_RAW_DEBUG
     UNUSED(instance);
-    //instance->decoder.parser_step = BinRAWDecoderStepReset;
-    //instance->data_raw_ind = 0;
+#else
+    instance->decoder.parser_step = BinRAWDecoderStepNoParse;
+    instance->data_raw_ind = 0;
+#endif
 }
 
 void subghz_protocol_decoder_bin_raw_feed(void* context, bool level, uint32_t duration) {
@@ -809,7 +818,7 @@ static bool
             uint8_t bit_bias = (subghz_protocol_bin_raw_get_full_byte(ind) << 3) - ind;
 #ifdef BIN_RAW_DEBUG
             bin_raw_debug(
-                "\r\n\t count bit= %zu\tcount full byte= %d\tbias bit= %dr\n\r\n",
+                "\r\n\t count bit= %zu\tcount full byte= %d\tbias bit= %d\r\n\r\n",
                 ind,
                 subghz_protocol_bin_raw_get_full_byte(ind),
                 bit_bias);
@@ -869,6 +878,7 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
             instance->decoder.parser_step = BinRAWDecoderStepWrite;
         }
         break;
+
     case BinRAWDecoderStepBufFull:
     case BinRAWDecoderStepWrite:
         if(rssi < BIN_RAW_THRESHOLD_RSSI) {
@@ -911,10 +921,13 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
                 }
             }
         }
-
         break;
 
     default:
+        //if instance->decoder.parser_step == BinRAWDecoderStepNoParse or others, restore the initial state
+        if(rssi < BIN_RAW_THRESHOLD_RSSI) {
+            instance->decoder.parser_step = BinRAWDecoderStepReset;
+        }
         break;
     }
 }
@@ -1044,7 +1057,7 @@ bool subghz_protocol_decoder_bin_raw_deserialize(void* context, FlipperFormat* f
                 break;
             }
             byte_count += subghz_protocol_bin_raw_get_full_byte(temp_data);
-            if(byte_count >= BIN_RAW_BUF_DATA_SIZE) {
+            if(byte_count > BIN_RAW_BUF_DATA_SIZE) {
                 FURI_LOG_E(TAG, "Receive buffer overflow");
                 break;
             }

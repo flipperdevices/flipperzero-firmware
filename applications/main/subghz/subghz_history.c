@@ -5,7 +5,7 @@
 #include <furi.h>
 
 #define SUBGHZ_HISTORY_MAX 50
-#define SUBGHZ_HISTORY_FREE_HEAP 18432
+#define SUBGHZ_HISTORY_FREE_HEAP 20480
 #define TAG "SubGhzHistory"
 
 typedef struct {
@@ -147,6 +147,7 @@ bool subghz_history_add_to_history(
     furi_assert(instance);
     furi_assert(context);
 
+    if(memmgr_get_free_heap() < SUBGHZ_HISTORY_FREE_HEAP) return false;
     if(instance->last_index_write >= SUBGHZ_HISTORY_MAX) return false;
 
     SubGhzProtocolDecoderBase* decoder_base = context;
@@ -205,7 +206,7 @@ bool subghz_history_add_to_history(
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         if(!flipper_format_read_hex(item->flipper_string, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "No Key");
+            FURI_LOG_D(TAG, "No Key");
         }
         uint64_t data = 0;
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {
