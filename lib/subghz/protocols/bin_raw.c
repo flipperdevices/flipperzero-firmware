@@ -196,7 +196,7 @@ static bool subghz_protocol_encoder_bin_raw_get_upload(SubGhzProtocolEncoderBinR
     bin_raw_debug("\r\n\tbin_count_result= %d\r\n\r\n", ind);
 
     bin_raw_debug_tag(
-        TAG, "Maximum levels encoded in upload %d\r\n", instance->encoder.size_upload);
+        TAG, "Maximum levels encoded in upload %zu\r\n", instance->encoder.size_upload);
 #endif
     instance->encoder.size_upload = subghz_protocol_blocks_get_upload_from_bit_array(
         instance->data,
@@ -206,7 +206,7 @@ static bool subghz_protocol_encoder_bin_raw_get_upload(SubGhzProtocolEncoderBinR
         instance->te,
         SubGhzProtocolBlockAlignBitLeft);
 
-    bin_raw_debug_tag(TAG, "The result %d is levels\r\n", instance->encoder.size_upload);
+    bin_raw_debug_tag(TAG, "The result %zu is levels\r\n", instance->encoder.size_upload);
     bin_raw_debug_tag(TAG, "Remaining free memory %zu\r\n", memmgr_get_free_heap());
     return true;
 }
@@ -447,7 +447,7 @@ static bool
     bin_raw_debug_tag(TAG, "Sorted durations\r\n");
     bin_raw_debug("\t\tind\tcount\tus\r\n");
     for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
-        bin_raw_debug("\t\t%d\t%d\t%ld\r\n", k, classes[k].count, (uint32_t)classes[k].data);
+        bin_raw_debug("\t\t%zu\t%u\t%lu\r\n", k, classes[k].count, (uint32_t)classes[k].data);
     }
     bin_raw_debug("\r\n");
 #endif
@@ -474,7 +474,7 @@ static bool
             bin_raw_debug_tag(
                 TAG, "K_div= %f\r\n", (double)(classes[1].data / (classes[0].data / k)));
             float delta = (classes[1].data / (classes[0].data / k)) -
-                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k)); //V636
+                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k)); //-V636 
             if((delta < 0.25) || (delta > 0.75)) {
                 instance->te = (uint32_t)classes[0].data / k;
                 bin_raw_debug_tag(TAG, "K= %d\r\n", k);
@@ -486,7 +486,7 @@ static bool
             //did not find the minimum TE satisfying the condition
             return false;
         }
-        bin_raw_debug_tag(TAG, "TE= %ld\r\n\r\n", instance->te);
+        bin_raw_debug_tag(TAG, "TE= %lu\r\n\r\n", instance->te);
 
         //looking for a gap
         for(size_t k = 2; k < BIN_RAW_SEARCH_CLASSES; k++) {
@@ -552,7 +552,7 @@ static bool
             instance->data_markup[data_markup_ind++].bit_count = bit_count;
         }
 
-        bin_raw_debug("\r\n\t count bit= %d\r\n\r\n", (BIN_RAW_BUF_DATA_SIZE * 8) - ind);
+        bin_raw_debug("\r\n\t count bit= %zu\r\n\r\n", (BIN_RAW_BUF_DATA_SIZE * 8) - ind);
 
         //reset the classifier and classify the received data
         memset(classes, 0x00, sizeof(classes));
@@ -564,7 +564,7 @@ static bool
                     classes[k].data = instance->data_markup[i].bit_count;
                     classes[k].count++;
                     break;
-                } else if(instance->data_markup[i].bit_count == classes[k].data) {
+                } else if(instance->data_markup[i].bit_count == (uint16_t)classes[k].data) {
                     classes[k].count++;
                     break;
                 }
@@ -574,7 +574,7 @@ static bool
 #ifdef BIN_RAW_DEBUG
         bin_raw_debug("\t\tind\tcount\tus\r\n");
         for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
-            bin_raw_debug("\t\t%d\t%d\t%ld\r\n", k, classes[k].count, (uint32_t)classes[k].data);
+            bin_raw_debug("\t\t%zu\t%d\t%ld\r\n", k, classes[k].count, (uint32_t)classes[k].data);
         }
         bin_raw_debug("\r\n");
 #endif
@@ -809,7 +809,7 @@ static bool
             uint8_t bit_bias = (subghz_protocol_bin_raw_get_full_byte(ind) << 3) - ind;
 #ifdef BIN_RAW_DEBUG
             bin_raw_debug(
-                "\r\n\t count bit= %d\tcount full byte= %d\tbias bit= %dr\n\r\n",
+                "\r\n\t count bit= %zu\tcount full byte= %d\tbias bit= %dr\n\r\n",
                 ind,
                 subghz_protocol_bin_raw_get_full_byte(ind),
                 bit_bias);
@@ -877,7 +877,7 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
             for(size_t i = 0; i < instance->data_raw_ind; i++) {
                 bin_raw_debug("%ld ", instance->data_raw[i]);
             }
-            bin_raw_debug("\r\n\t count data= %d\r\n\r\n", instance->data_raw_ind);
+            bin_raw_debug("\r\n\t count data= %zu\r\n\r\n", instance->data_raw_ind);
 #endif
             instance->decoder.parser_step = BinRAWDecoderStepReset;
             instance->generic.data_count_bit = 0;
