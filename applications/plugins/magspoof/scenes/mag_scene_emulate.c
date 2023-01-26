@@ -11,14 +11,30 @@ void mag_scene_emulate_on_enter(void* context) {
     // Use strlcpy instead perhaps, to truncate to screen width, then add ellipses if needed?
     furi_string_printf(tmp_str, "%s\r\n", mag->mag_dev->dev_name);
 
+    // TODO: Display other relevant config settings (namely RFID vs GPIO)?
+
     widget_add_icon_element(widget, 1, 1, &I_mag_10px);
     widget_add_string_element(
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
 
-    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
-    widget_add_string_multiline_element(
-        widget, 0, 15, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
+    for(uint8_t i = 0; i < MAG_DEV_TRACKS; i++) {
+        FuriString* trackstr = mag->mag_dev->dev_data.track[i].str;
+        // there's definitely a better way to do this...
+        bool is_active_one = (mag->setting->track == MagTrackStateOne) & (i == 0);
+        bool is_active_two = (mag->setting->track == MagTrackStateTwo) & (i == 1);
+        bool is_active_both = (mag->setting->track == MagTrackStateAll);
+
+        if(is_active_one | is_active_two | is_active_both) {
+            furi_string_cat_printf(
+                tmp_str,
+                "Track %d:\n%s\n\n",
+                (i + 1),
+                furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr));
+        }
+    }
+
+    widget_add_text_scroll_element(widget, 0, 15, 128, 49, furi_string_get_cstr(tmp_str));
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Config", mag_widget_callback, mag);
     widget_add_button_element(widget, GuiButtonTypeRight, "Send", mag_widget_callback, mag);
@@ -33,25 +49,17 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == GuiButtonTypeLeft) {
+        switch(event.event) {
+        case GuiButtonTypeLeft:
             consumed = true;
-
             scene_manager_next_scene(scene_manager, MagSceneEmulateConfig);
-        } else if(event.event == GuiButtonTypeRight) {
+            break;
+        case GuiButtonTypeRight:
             consumed = true;
-
-            //FuriString* tmp_str;
-            //tmp_str = furi_string_alloc_set_str(
-            //    furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
-
-            // Assumes track 2 for temporary testing.
-            // Will overhaul alongside file format and config system
             notification_message(mag->notifications, &sequence_blink_start_cyan);
             mag_spoof(mag);
-            //mag_spoof_single_track_rfid(tmp_str, 1);
             notification_message(mag->notifications, &sequence_blink_stop);
-
-            //furi_string_free(tmp_str);
+            break;
         }
     }
 

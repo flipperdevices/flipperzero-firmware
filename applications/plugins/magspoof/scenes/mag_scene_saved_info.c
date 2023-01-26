@@ -15,11 +15,19 @@ void mag_scene_saved_info_on_enter(void* context) {
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
 
-    furi_string_printf(tmp_str, furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str));
-    widget_add_string_multiline_element(
-        widget, 0, 15, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp_str));
+    for(uint8_t i = 0; i < MAG_DEV_TRACKS; i++) {
+        FuriString* trackstr = mag->mag_dev->dev_data.track[i].str;
 
-    widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
+        furi_string_cat_printf(
+            tmp_str,
+            "Track %d:\n%s\n\n",
+            (i + 1),
+            furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr));
+    }
+
+    widget_add_text_scroll_element(widget, 0, 15, 128, 49, furi_string_get_cstr(tmp_str));
+
+    //widget_add_button_element(widget, GuiButtonTypeLeft, "Back", mag_widget_callback, mag);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
     furi_string_free(tmp_str);
@@ -30,13 +38,8 @@ bool mag_scene_saved_info_on_event(void* context, SceneManagerEvent event) {
     SceneManager* scene_manager = mag->scene_manager;
     bool consumed = false;
 
-    if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == GuiButtonTypeLeft) {
-            consumed = true;
-
-            scene_manager_previous_scene(scene_manager);
-        }
-    }
+    UNUSED(event);
+    UNUSED(scene_manager);
 
     return consumed;
 }

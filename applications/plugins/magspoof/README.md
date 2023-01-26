@@ -13,14 +13,12 @@ Emulation:
 
 Scenes:
 - Finish emulation config scene (reverse track functionality; possibly expand settings list to include prefix/between/suffix options)
-- Improved saved info display (better text wrapping options? remove and just include that info on the emulate scene? decode data to fields?)
-- "About" scene?
 - "Edit" scene (generalize "Add manually")
 
 File management:
 - Validation of card track data?
 - Parsing loaded files into human-readable fields (would we need to specify card type to decode correctly?)
-- Update Add Manually flow to reflect new file format (currently only sets Track 2, and Info/Emulate scene only displays Track 2)
+- Update Add Manually flow to reflect new file format (currently only sets Track 2)
 
 Known bugs:
 - Custom text input scene with expanded characterset (Add Manually) has odd behavior when navigating the keys near the numpad
