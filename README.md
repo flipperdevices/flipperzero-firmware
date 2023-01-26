@@ -13,3 +13,4 @@
  - Proper Main Menu
  - Sound effects (the visually impaired can play too!)
  - Vibration effects (the hearing impaired can play too!)
+ - Better animations and sound effects
