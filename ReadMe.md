@@ -42,7 +42,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds now have 8 more new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) [Updated by jbohack](https://github.com/jbohack)
 - OFW: Crash fix: [nfc: Fix crash when using debug PCAP trace #2338](https://github.com/flipperdevices/flipperzero-firmware/pull/2338)
@@ -50,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: Bluetooth Remote + USB Keyboard: [Added movement interval in mouse_jiggler USB & BLE #303 (By DocKuro)](https://github.com/DarkFlippers/unleashed-firmware/pull/303)
 - Added: Bluetooth Remote: [Add HID mouse auto-clicker. #2319 (By rwl4)](https://github.com/flipperdevices/flipperzero-firmware/pull/2319)
 - Added: [New Micro Sd-Card pinout #2323 (By dexvspr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2323)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 

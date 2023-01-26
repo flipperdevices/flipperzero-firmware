@@ -76,7 +76,10 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     for(j = 0; j < sizeof(raw) - 2; j++)
         if(raw[j] == 0xff && raw[j + 1] == 0xaa) break;
 
-    if(j == sizeof(raw) - 1) return false; // No terminator found.
+    if(j == sizeof(raw) - 1) {
+        FURI_LOG_E(TAG, "Chat: terminator not found");
+        return false; // No terminator found.
+    }
 
     uint32_t datalen = j + 3; // If the terminator was found at j, then
         // we need to sum three more bytes to have
@@ -84,15 +87,21 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     info->pulses_count = 8 * 3 * datalen;
 
     // Check if the control sum matches.
-    if(sum_bytes(raw, datalen - 1, 0) != raw[datalen - 1]) return false;
+    if(sum_bytes(raw, datalen - 1, 0) != raw[datalen - 1]) {
+        FURI_LOG_E(TAG, "Chat: checksum mismatch");
+        return false;
+    }
 
     // Check if the length of the sender looks sane
     uint8_t senderlen = raw[0];
-    if(senderlen >= sizeof(raw)) return false; // Overflow
+    if(senderlen >= sizeof(raw)) {
+        FURI_LOG_E(TAG, "Chat: invalid sender length");
+        return false; // Overflow
+    }
 
     fieldset_add_str(info->fieldset, "sender", (char*)raw + 1, senderlen);
     fieldset_add_str(
-        info->fieldset, "message", (char*)raw + 1 + senderlen, datalen - senderlen - 3);
+        info->fieldset, "message", (char*)raw + 1 + senderlen, datalen - senderlen - 4);
     return true;
 }
 
@@ -132,7 +141,6 @@ static void build_message(RawSamplesBuffer* samples, ProtoViewFieldSet* fs) {
     *p++ = 0xff;
     *p++ = 0xaa;
     *p = sum_bytes(data, datalen - 1, 0);
-    FURI_LOG_E(TAG, "SUM: %lu", (unsigned long)*p);
 
     // Emit bits
     for(uint32_t j = 0; j < datalen * 8; j++) {
