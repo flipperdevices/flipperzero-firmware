@@ -497,7 +497,6 @@ enum shape_names getCurrentSimonMove(SimonData* app) {
 }
 
 void onPlayerSelectedShapeCallback(enum shape_names shape, SimonData* app) {
-    //@todo Sound on select
     if(shape == getCurrentSimonMove(app)) {
         onPlayerAnsweredCorrect(app);
     } else {
@@ -579,6 +578,7 @@ int32_t simon_says_app_entry(void* p) {
 
     // Show Main Menu Screen
     load_game(simon_state);
+    restart_game_after_gameover(simon_state);
     simon_state->gameState = mainMenu;
 
     while(true) {
@@ -587,7 +587,7 @@ int32_t simon_says_app_entry(void* p) {
         FuriStatus q_status = furi_message_queue_get(
             event_queue, &input, simon_state->numberOfMillisecondsBeforeShapeDisappears);
 
-        if(q_status == FuriStatusOk && simon_state->activePlayer == player) {
+        if(q_status == FuriStatusOk) {
             FURI_LOG_D(TAG, "Got input event: %d", input.key);
             //break out of the loop if the back key is pressed
             if(input.key == InputKeyBack && input.type == InputTypeLong) {
@@ -596,10 +596,6 @@ int32_t simon_says_app_entry(void* p) {
                     save_game(simon_state);
                 }
                 break;
-            }
-
-            if(input.type == InputTypeLong) {
-                // Do Nothing. Ignore long press events
             }
 
             //@todo Set Game States
