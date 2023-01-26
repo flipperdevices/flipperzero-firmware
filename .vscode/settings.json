@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "assert.h": "c",
-        "utilities.h": "c",
-        "simonsays_controller.h": "c"
-    },
-    "editor.formatOnSave": true
-}
