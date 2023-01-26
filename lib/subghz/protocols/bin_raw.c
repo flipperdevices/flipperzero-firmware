@@ -156,41 +156,48 @@ void subghz_protocol_encoder_bin_raw_free(void* context) {
  */
 static bool subghz_protocol_encoder_bin_raw_get_upload(SubGhzProtocolEncoderBinRAW* instance) {
     furi_assert(instance);
-    bin_raw_debug_tag("instance->encoder.size_upload", "%d", instance->encoder.size_upload);
-    //склеиваем все кусочики посылки в 1 длинную последовательность с выравниванием по левому краю, в заруженых данных у нас выравнивание по правому краю.
 
+    //we glue all the pieces of the package into 1 long sequence with left alignment,
+    //in the uploaded data we have right alignment.
+
+    bin_raw_debug_tag(TAG, "Recovery of offset bits in sequences\r\n");
     uint16_t i = 0;
     uint16_t ind = 0;
+    bin_raw_debug("\tind  byte_bias\tbit_count\tbit_bias\r\n");
     while((i < BIN_RAW_MAX_MARKUP_COUNT) && (instance->data_markup[i].bit_count != 0)) {
         uint8_t bit_bias =
             subghz_protocol_bin_raw_get_full_byte(instance->data_markup[i].bit_count) * 8 -
             instance->data_markup[i].bit_count;
-        printf(
-            "%d  %d  %d ",
-            bit_bias,
+        bin_raw_debug(
+            "\t%d\t%d\t%d :\t\t%d\r\n",
+            i,
+            instance->data_markup[i].byte_bias,
             instance->data_markup[i].bit_count,
-            instance->data_markup[i].byte_bias);
+            bit_bias);
         for(uint16_t y = instance->data_markup[i].byte_bias * 8;
             y < instance->data_markup[i].byte_bias * 8 +
                     subghz_protocol_bin_raw_get_full_byte(instance->data_markup[i].bit_count) * 8 -
                     bit_bias;
             y++) {
-            //printf("%02x  ", instance->data[y]);
             subghz_protocol_blocks_set_bit_array(
                 subghz_protocol_blocks_get_bit_array(instance->data, y + bit_bias),
                 instance->data,
                 ind++,
                 BIN_RAW_BUF_DATA_SIZE);
         }
-        printf("--------------- \r\n");
         i++;
     }
-
+    bin_raw_debug("\r\n");
+#ifdef BIN_RAW_DEBUG
+    bin_raw_debug_tag(TAG, "Restored Sequence left aligned\r\n");
     for(uint16_t y = 0; y < subghz_protocol_bin_raw_get_full_byte(ind); y++) {
-        printf("%02x  ", instance->data[y]);
+        bin_raw_debug("%02x ", instance->data[y]);
     }
-    printf("--------------- \r\n");
+    bin_raw_debug("\r\n\tbin_count_result= %d\r\n\r\n", ind);
 
+    bin_raw_debug_tag(
+        TAG, "Maximum levels encoded in upload %d\r\n", instance->encoder.size_upload);
+#endif
     instance->encoder.size_upload = subghz_protocol_blocks_get_upload_from_bit_array(
         instance->data,
         ind,
@@ -199,12 +206,8 @@ static bool subghz_protocol_encoder_bin_raw_get_upload(SubGhzProtocolEncoderBinR
         instance->te,
         SubGhzProtocolBlockAlignBitLeft);
 
-    printf(
-        "Free heap size subghz_protocol_encoder_bin_raw_get_upload : %zu\r\n",
-        memmgr_get_free_heap());
-    FURI_LOG_E("instance->generic.data_count_bit", "%d", instance->generic.data_count_bit);
-    FURI_LOG_E("instance->encoder.size_upload", "%d", instance->encoder.size_upload);
-    furi_check(instance->encoder.size_upload <= BIN_RAW_BUF_DATA_SIZE * 5);
+    bin_raw_debug_tag(TAG, "The result %d is levels\r\n", instance->encoder.size_upload);
+    bin_raw_debug_tag(TAG, "Remaining free memory %zu\r\n", memmgr_get_free_heap());
     return true;
 }
 
@@ -224,12 +227,6 @@ bool subghz_protocol_encoder_bin_raw_deserialize(void* context, FlipperFormat* f
             FURI_LOG_E(TAG, "Missing Bit");
             break;
         }
-
-        //  if(subghz_protocol_bin_raw_get_full_byte(instance->generic.data_count_bit) >=
-        //        BIN_RAW_BUF_DATA_SIZE * 8) {
-        //         FURI_LOG_E(TAG, "Wrong number of bits in key");
-        //         break;
-        //     }
 
         instance->generic.data_count_bit = (uint16_t)temp_data;
 
@@ -270,23 +267,26 @@ bool subghz_protocol_encoder_bin_raw_deserialize(void* context, FlipperFormat* f
             ind++;
         }
 
-        //вывод
+#ifdef BIN_RAW_DEBUG
         uint16_t i = 0;
+        bin_raw_debug_tag(TAG, "Download data to encoder\r\n");
+        bin_raw_debug("\tind  byte_bias\tbit_count\t\tbin_data");
         while((i < BIN_RAW_MAX_MARKUP_COUNT) && (instance->data_markup[i].bit_count != 0)) {
-            printf(
-                "bit_count=%d  byte_bias=%d  ",
-                instance->data_markup[i].bit_count,
-                instance->data_markup[i].byte_bias);
+            bin_raw_debug(
+                "\r\n\t%d\t%d\t%d :\t",
+                i,
+                instance->data_markup[i].byte_bias,
+                instance->data_markup[i].bit_count);
             for(uint16_t y = instance->data_markup[i].byte_bias;
                 y < instance->data_markup[i].byte_bias +
                         subghz_protocol_bin_raw_get_full_byte(instance->data_markup[i].bit_count);
                 y++) {
-                printf("%02x  ", instance->data[y]);
+                bin_raw_debug("%02x ", instance->data[y]);
             }
-            printf("--------------- \r\n");
             i++;
         }
-
+        bin_raw_debug("\r\n\r\n");
+#endif
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
@@ -462,7 +462,7 @@ static bool
         if((classes[0].count < BIN_RAW_TE_MIN_COUNT) ||
            (classes[1].count < (BIN_RAW_TE_MIN_COUNT >> 1)))
             return false;
-        //arrange the first 2 date values ??in ascending order
+        //arrange the first 2 date values in ascending order
         if(classes[0].data > classes[1].data) {
             uint32_t data = classes[1].data;
             classes[0].data = classes[1].data;
@@ -510,12 +510,6 @@ static bool
             gap_ind = ind;
         }
     }
-
-    // for(size_t k = 0; k < BIN_RAW_MAX_MARKUP_COUNT; k++) {
-    //     FURI_LOG_E("instance->data_markup", "%d %d %ld", k, instance->data_markup[k].count, instance->data_markup[k].data);
-    // }
-
-    //if(te_ok) {
 
     //if we consider that there is a gap, then we divide the signal with respect to this gap
     //processing input data from the end
@@ -891,13 +885,15 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
             if(instance->data_raw_ind >= BIN_RAW_BUF_MIN_DATA_COUNT) {
                 if(subghz_protocol_bin_raw_check_remote_controller(instance)) {
                     bin_raw_debug_tag(TAG, "Sequence found\r\n");
+                    bin_raw_debug("\tind  byte_bias\tbit_count\t\tbin_data");
                     uint16_t i = 0;
                     while((i < BIN_RAW_MAX_MARKUP_COUNT) &&
                           (instance->data_markup[i].bit_count != 0)) {
                         instance->generic.data_count_bit += instance->data_markup[i].bit_count;
 #ifdef BIN_RAW_DEBUG
                         bin_raw_debug(
-                            "\t byte_bias= %d bit_count= %d :\t",
+                            "\r\n\t%d\t%d\t%d :\t",
+                            i,
                             instance->data_markup[i].byte_bias,
                             instance->data_markup[i].bit_count);
                         for(uint16_t y = instance->data_markup[i].byte_bias;
@@ -907,10 +903,10 @@ void subghz_protocol_decoder_bin_raw_data_input_rssi(
                             y++) {
                             bin_raw_debug("%02X ", instance->data[y]);
                         }
-                        bin_raw_debug(" \r\n");
 #endif
                         i++;
                     }
+                    bin_raw_debug("\r\n");
                     if(instance->base.callback)
                         instance->base.callback(&instance->base, instance->base.context);
                 }
@@ -1031,12 +1027,6 @@ bool subghz_protocol_decoder_bin_raw_deserialize(void* context, FlipperFormat* f
             break;
         }
 
-        //  if(subghz_protocol_bin_raw_get_full_byte(instance->generic.data_count_bit) >=
-        //        BIN_RAW_BUF_DATA_SIZE * 8) {
-        //         FURI_LOG_E(TAG, "Wrong number of bits in key");
-        //         break;
-        //     }
-
         instance->generic.data_count_bit = (uint16_t)temp_data;
 
         if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
@@ -1085,7 +1075,6 @@ bool subghz_protocol_decoder_bin_raw_deserialize(void* context, FlipperFormat* f
 void subghz_protocol_decoder_bin_raw_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderBinRAW* instance = context;
-    //subghz_protocol_bin_raw_check_remote_controller(&instance->generic);
     furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
