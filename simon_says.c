@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <furi_hal.h>
+#include <storage/storage.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <gui/icon.h>
@@ -327,44 +328,38 @@ void simon_input_callback(InputEvent* input_event, void* ctx) {
 /* ======================== Simon Game Engine ======================== */
 
 bool load_game(SimonData* app) {
-    //TODO
-    UNUSED(app);
-    return true;
-    // Storage* storage = furi_record_open(RECORD_STORAGE);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    // File* file = storage_file_alloc(storage);
-    // uint16_t bytes_readed = 0;
-    // if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
-    //     bytes_readed = storage_file_read(file, app, sizeof(SimonData));
-    // }
-    // storage_file_close(file);
-    // storage_file_free(file);
+    File* file = storage_file_alloc(storage);
+    uint16_t bytes_readed = 0;
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        bytes_readed = storage_file_read(file, app, sizeof(SimonData));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
 
-    // furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_STORAGE);
 
-    // return bytes_readed == sizeof(SimonData);
+    return bytes_readed == sizeof(SimonData);
 }
 
 void save_game(SimonData* app) {
-    //TODO
-    UNUSED(app);
+    Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    // Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
+        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
+            return;
+        }
+    }
 
-    // if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
-    //     if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
-    //         return;
-    //     }
-    // }
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(file, app, sizeof(SimonData));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
 
-    // File* file = storage_file_alloc(storage);
-    // if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-    //     storage_file_write(file, app, sizeof(SimonData));
-    // }
-    // storage_file_close(file);
-    // storage_file_free(file);
-
-    // furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_STORAGE);
 }
 
 int getRandomIntInRange(int lower, int upper) {
@@ -489,8 +484,9 @@ void game_tick(SimonData* simon_state) {
                 simon_state->activePlayer = simon;
                 simon_state->currentScore++;
                 // app->numberOfMillisecondsBeforeShapeDisappears -= 50;
-                if(simon_state->currentScore > simon_state->highScore) {
-                    simon_state->highScore = simon_state->currentScore;
+                //TODO: Hacky way of handling highscore by subtracting 1 to account for the first move
+                if(simon_state->currentScore - 1 > simon_state->highScore) {
+                    simon_state->highScore = simon_state->currentScore - 1;
                     simon_state->is_new_highscore = true;
                 }
                 if(simon_state->sound_enabled) {
@@ -531,6 +527,8 @@ int32_t simon_says_app_entry(void* p) {
     InputEvent input;
 
     // Show Main Menu Screen
+    //TODO: Disable Loading game for debugging
+    load_game(simon_state);
     simon_state->gameState = mainMenu;
 
     while(true) {
@@ -538,6 +536,10 @@ int32_t simon_says_app_entry(void* p) {
             FURI_LOG_D(TAG, "Got input event: %d", input.key);
             //break out of the loop if the back key is pressed
             if(input.key == InputKeyBack && input.type == InputTypeLong) {
+                // Save high score before quitting
+                if(simon_state->is_new_highscore) {
+                    save_game(simon_state);
+                }
                 break;
             }
 
