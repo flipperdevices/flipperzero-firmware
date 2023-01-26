@@ -406,6 +406,16 @@ void edit_instrument_param(FlizzerTrackerApp *tracker, uint8_t selected_param, i
             flipbit(inst->flags, TE_PROG_NO_RESTART);
             break;
         }
+
+        case INST_PROGRAMEPERIOD:
+        {
+            if ((int16_t)inst->program_period + (int16_t)delta >= 0 && (int16_t)inst->program_period + (int16_t)delta <= 0xff)
+            {
+                inst->program_period += delta;
+            }
+
+            break;
+        }
     }
 }
 

@@ -328,6 +328,20 @@ void draw_instrument_program_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         }
     }
 
+    // draw arrow pointing at current program step
+
+    for (uint8_t i = 0; i < SONG_MAX_CHANNELS; i++)
+    {
+        if (tracker->tracker_engine.channel[i].instrument == inst && (tracker->tracker_engine.channel[i].channel_flags & TEC_PROGRAM_RUNNING) && (tracker->tracker_engine.sound_engine->channel[i].flags & SE_ENABLE_GATE))
+        {
+            if (tracker->tracker_engine.channel[i].program_tick >= tracker->program_position && tracker->tracker_engine.channel[i].program_tick < tracker->program_position + 8)
+            {
+                canvas_draw_str(canvas, 85, 6 * tracker->tracker_engine.channel[i].program_tick - tracker->program_position * 6 + 6, ">");
+                break;
+            }
+        }
+    }
+
     if (tracker->focus == EDIT_PROGRAM)
     {
         uint16_t opcode = (inst->program[tracker->current_program_step] & 0x7fff);

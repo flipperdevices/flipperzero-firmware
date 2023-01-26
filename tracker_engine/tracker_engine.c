@@ -153,13 +153,14 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
 
     te_channel->channel_flags = TEC_PLAYING | (te_channel->channel_flags & TEC_DISABLED);
 
+    te_channel->program_period = pinst->program_period;
+
     if (!(pinst->flags & TE_PROG_NO_RESTART) && pinst->program_period > 0)
     {
         te_channel->channel_flags |= TEC_PROGRAM_RUNNING;
 
         te_channel->program_counter = 0;
-        te_channel->program_loop = 0;
-        te_channel->program_period = pinst->program_period;
+        te_channel->program_loop = 1;
         te_channel->program_tick = 0;
     }
 
@@ -275,6 +276,105 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
     }
 }
 
+void tracker_engine_execute_program_tick(TrackerEngine *tracker_engine, uint8_t chan, uint8_t advance)
+{
+    TrackerEngineChannel *te_channel = &tracker_engine->channel[chan];
+    uint8_t tick = te_channel->program_tick;
+    uint8_t visited[INST_PROG_LEN] = {0};
+
+do_it_again:;
+
+    const uint16_t inst = te_channel->instrument->program[tick];
+
+    if ((inst & 0x7fff) == TE_PROGRAM_END)
+    {
+        te_channel->channel_flags &= ~(TEC_PROGRAM_RUNNING);
+        return;
+    }
+
+    uint8_t dont_reloop = 0;
+
+    if ((inst & 0x7fff) != TE_PROGRAM_NOP)
+    {
+        switch (inst & 0x7f00)
+        {
+            case TE_PROGRAM_JUMP:
+            {
+                if (!visited[tick])
+                {
+                    visited[tick] = 1;
+                    tick = inst & (INST_PROG_LEN - 1);
+                }
+
+                else
+                    return;
+
+                break;
+            }
+
+            case TE_PROGRAM_LOOP_BEGIN:
+                break;
+
+            case TE_PROGRAM_LOOP_END:
+            {
+                if (te_channel->program_loop == (inst & 0xff))
+                {
+                    if (advance)
+                        te_channel->program_loop = 1;
+                }
+
+                else
+                {
+                    if (advance)
+                        ++te_channel->program_loop;
+
+                    uint8_t l = 0;
+
+                    while ((te_channel->instrument->program[tick] & 0x7f00) != TE_PROGRAM_LOOP_BEGIN && tick > 0)
+                    {
+                        --tick;
+                        if (!(te_channel->instrument->program[tick] & 0x8000))
+                            ++l;
+                    }
+
+                    --tick;
+
+                    dont_reloop = l <= 1;
+                }
+
+                break;
+            }
+
+            default:
+            {
+                do_command(inst, tracker_engine, chan);
+                break;
+            }
+        }
+    }
+
+    if ((inst & 0x7fff) == TE_PROGRAM_NOP || (inst & 0x7f00) != TE_PROGRAM_JUMP)
+    {
+        ++tick;
+        if (tick >= INST_PROG_LEN)
+        {
+            tick = 0;
+        }
+    }
+
+    // skip to next on msb
+
+    if (((inst & 0x8000) || ((inst & 0x7f00) == TE_PROGRAM_LOOP_BEGIN) || ((inst & 0x7f00) == TE_PROGRAM_JUMP)) && (inst & 0x7fff) != TE_PROGRAM_NOP && !dont_reloop)
+    {
+        goto do_it_again;
+    }
+
+    if (advance)
+    {
+        te_channel->program_tick = tick;
+    }
+}
+
 void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
 {
     SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
@@ -302,7 +402,12 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
 
         if (te_channel->channel_flags & TEC_PROGRAM_RUNNING)
         {
-            // TODO: add instrument program execution
+            uint8_t u = (te_channel->program_counter + 1) >= te_channel->program_period;
+            tracker_engine_execute_program_tick(tracker_engine, chan, u);
+            ++te_channel->program_counter;
+
+            if (u)
+                te_channel->program_counter = 0;
         }
 
         int16_t vib = 0;
@@ -423,8 +528,8 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                         te_channel->instrument = pinst;
                     }
                 }
-                
-                if(note == MUS_NOTE_CUT)
+
+                if (note == MUS_NOTE_CUT)
                 {
                     sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
                     se_channel->adsr.volume = 0;
@@ -438,11 +543,11 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
                 else if (pinst && note != MUS_NOTE_RELEASE && note != MUS_NOTE_CUT && note != MUS_NOTE_NONE)
                 {
-                    //te_channel->slide_speed = 0;
+                    // te_channel->slide_speed = 0;
 
                     uint8_t prev_adsr_volume = se_channel->adsr.volume;
 
-                    if((opcode & 0x7f00) == TE_EFFECT_SLIDE)
+                    if ((opcode & 0x7f00) == TE_EFFECT_SLIDE)
                     {
                         te_channel->target_note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
                         te_channel->slide_speed = (opcode & 0xff);

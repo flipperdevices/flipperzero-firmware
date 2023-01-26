@@ -216,6 +216,11 @@ void cycle_focus(FlizzerTrackerApp *tracker)
             if (tracker->focus > EDIT_PROGRAM)
             {
                 tracker->focus = EDIT_INSTRUMENT;
+
+                if (tracker->current_digit > 1)
+                {
+                    tracker->current_digit = 1;
+                }
             }
 
             break;

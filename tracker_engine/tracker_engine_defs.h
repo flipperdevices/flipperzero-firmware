@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "../sound_engine/sound_engine_defs.h"
 
