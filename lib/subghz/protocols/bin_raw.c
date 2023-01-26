@@ -25,7 +25,7 @@
 
 #ifdef BIN_RAW_DEBUG
 #define bin_raw_debug(...) FURI_LOG_RAW_D(__VA_ARGS__)
-#define bin_raw_debug_tag(tag, ...)        \
+#define bin_raw_debug_tag(tag, ...)                \
     FURI_LOG_RAW_D("\033[0;32m[" tag "]\033[0m "); \
     FURI_LOG_RAW_D(__VA_ARGS__)
 #else
@@ -474,7 +474,7 @@ static bool
             bin_raw_debug_tag(
                 TAG, "K_div= %f\r\n", (double)(classes[1].data / (classes[0].data / k)));
             float delta = (classes[1].data / (classes[0].data / k)) -
-                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k)); //-V636 
+                          ((uint32_t)classes[1].data / ((uint32_t)classes[0].data / k)); //-V656
             if((delta < 0.25) || (delta > 0.75)) {
                 instance->te = (uint32_t)classes[0].data / k;
                 bin_raw_debug_tag(TAG, "K= %d\r\n", k);
