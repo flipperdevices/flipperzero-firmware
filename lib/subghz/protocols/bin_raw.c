@@ -24,10 +24,10 @@
 #define BIN_RAW_DEBUG
 
 #ifdef BIN_RAW_DEBUG
-#define bin_raw_debug(...) printf(__VA_ARGS__)
+#define bin_raw_debug(...) FURI_LOG_RAW_D(__VA_ARGS__)
 #define bin_raw_debug_tag(tag, ...)        \
-    printf("\033[0;32m[" tag "]\033[0m "); \
-    printf(__VA_ARGS__)
+    FURI_LOG_RAW_D("\033[0;32m[" tag "]\033[0m "); \
+    FURI_LOG_RAW_D(__VA_ARGS__)
 #else
 #define bin_raw_debug(...)
 #define bin_raw_debug_tag(...)
@@ -574,7 +574,7 @@ static bool
 #ifdef BIN_RAW_DEBUG
         bin_raw_debug("\t\tind\tcount\tus\r\n");
         for(size_t k = 0; k < BIN_RAW_SEARCH_CLASSES; k++) {
-            bin_raw_debug("\t\t%zu\t%d\t%ld\r\n", k, classes[k].count, (uint32_t)classes[k].data);
+            bin_raw_debug("\t\t%zu\t%u\t%lu\r\n", k, classes[k].count, (uint32_t)classes[k].data);
         }
         bin_raw_debug("\r\n");
 #endif
