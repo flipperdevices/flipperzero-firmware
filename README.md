@@ -1,7 +1,7 @@
 # FlipperZero-SimonSays
 ## Think you can beat Simon?
 
-![Main Menu showing text that says "Welcome to Simon Says. Press OK to start"](Screenshot_MainMenu.png) ![Image of Dolphin telling the sequence](Screenshot_InGame.png)
+![Main Menu showing text that says "Welcome to Simon Says. Press OK to start"](Screenshot_MainMenu.png "Main Menu showing text that says Welcome to Simon Says. Press OK to start") ![Image of Dolphin telling the sequence](Screenshot_InGame.png "Image of Dolphin telling the sequence")
 
 
  ## Controls
