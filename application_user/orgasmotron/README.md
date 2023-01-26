@@ -1,7 +1,5 @@
 # Flipper Zero Orgasmotron Update
 
- <div style="text-align:center"><img src="assets/flipper_logo_orange.png"/></div>
-
 ## What this is?
 This app is a proof-of-concept to show abilities of the vibration motor in the Flipper Zero device. I'm also using this <br>
 to learn how to code for Flipper Zero
