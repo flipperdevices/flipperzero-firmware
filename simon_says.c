@@ -379,7 +379,7 @@ void play_sound_wrong_move() {
 // @todo restartGame
 void resetGame(SimonData* app) {
     app->moveIndex = 0;
-    app->numberOfMillisecondsBeforeShapeDisappears = 1000;
+    app->numberOfMillisecondsBeforeShapeDisappears = 500;
     app->activePlayer = simon;
     app->is_wrong_direction = false;
     app->last_button_press_tick = 0;
@@ -532,7 +532,12 @@ int32_t simon_says_app_entry(void* p) {
     simon_state->gameState = mainMenu;
 
     while(true) {
-        if(furi_message_queue_get(event_queue, &input, 500) == FuriStatusOk) {
+        game_tick(simon_state);
+
+        FuriStatus q_status = furi_message_queue_get(
+            event_queue, &input, simon_state->numberOfMillisecondsBeforeShapeDisappears);
+
+        if(q_status == FuriStatusOk) {
             FURI_LOG_D(TAG, "Got input event: %d", input.key);
             //break out of the loop if the back key is pressed
             if(input.key == InputKeyBack && input.type == InputTypeLong) {
@@ -596,8 +601,6 @@ int32_t simon_says_app_entry(void* p) {
         //     simon_state->currentScore++;
         //     simon_state->set_board_neutral = !simon_state->set_board_neutral;
         // }
-
-        game_tick(simon_state);
 
         view_port_update(view_port);
     }
