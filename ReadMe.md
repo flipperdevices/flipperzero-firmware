@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) [Updated by jbohack](https://github.com/jbohack)
 - OFW: Crash fix: [nfc: Fix crash when using debug PCAP trace #2338](https://github.com/flipperdevices/flipperzero-firmware/pull/2338)
 - Added: Bluetooth Remote: [Add camera control mode to bluetooth remote app. #2336 (By LoganMD)](https://github.com/flipperdevices/flipperzero-firmware/pull/2336)
+- Added: Bluetooth Remote + USB Keyboard: [Added movement interval in mouse_jiggler USB & BLE #303 (By DocKuro)](https://github.com/DarkFlippers/unleashed-firmware/pull/303)
 
 <a name="release">
 
@@ -142,6 +143,7 @@ $ ./fbt dolphin_ext
 - BadUSB: sk-SK maping keybord for BadUsb [(By jaroslavmraz)](https://github.com/flipperdevices/flipperzero-firmware/pull/1619)
 - [BadUSB: STRINGDELAY feature, delay fix #2269 (By n30f0x)](https://github.com/flipperdevices/flipperzero-firmware/pull/2269)
 - Bluetooth Remote: [Add camera control mode to bluetooth remote app. #2336 (By LoganMD)](https://github.com/flipperdevices/flipperzero-firmware/pull/2336)
+- Bluetooth Remote + USB Keyboard: [Added movement interval in mouse_jiggler USB & BLE #303 (By DocKuro)](https://github.com/DarkFlippers/unleashed-firmware/pull/303)
 - Clock: Clock.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
 - Desktop: Hidden top bar [Thanks to ESurge](https://github.com/ESurge/)
 - Desktop: Exclude icons on the left and show minimal battery [Thanks to skizzophrenic/Talking-Sasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
