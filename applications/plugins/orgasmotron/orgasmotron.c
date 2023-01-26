@@ -5,15 +5,23 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
+typedef struct {
+    int mode;
+} PluginState;
+
 void vibro_test_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, "Vibro application");
+    canvas_draw_str(canvas, 2, 10, "Vibro Modes");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 22, "Press OK turns on vibro");
+    canvas_draw_str(canvas, 2, 22, "LEFT: strong / RIGHT: Soft");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 34, "Press LEFT turns off vibro");
+    canvas_draw_str(canvas, 2, 34, "UP: Pulsed");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 2, 46, "DOWN Pleasure combo");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 2, 58, "OK: Pause");
 }
 
 void vibro_test_input_callback(InputEvent* input_event, void* ctx) {
@@ -22,9 +30,21 @@ void vibro_test_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
+void delay(int milliseconds) {
+    furi_thread_flags_wait(0, FuriFlagWaitAny, milliseconds);
+}
+
 int32_t orgasmotron_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+
+    PluginState* plugin_state = malloc(sizeof(PluginState));
+    ValueMutex state_mutex;
+    if (!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+        FURI_LOG_E("Orgasmatron", "cannot create mutex\r\n");
+        free(plugin_state);
+        return 255;
+    }
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
@@ -38,31 +58,76 @@ int32_t orgasmotron_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
-
-    while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
-        if(event.type == InputTypeShort && event.key == InputKeyBack) {
+    //int mode = 0;
+    bool processing = true;
+    //while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+    while (processing) {
+        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
+        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        if (event_status == FuriStatusOk) {
+            if(event.key == InputKeyBack && event.type == InputTypeShort) {
+                //Exit Application
+                notification_message(notification, &sequence_reset_vibro);
+                notification_message(notification, &sequence_reset_green);
+                plugin_state->mode = 0;
+                processing = false;
+                //break;
+            }
+            if(event.key == InputKeyOk && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+                plugin_state->mode = 0;
+            }
+            if(event.key == InputKeyLeft && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+                plugin_state->mode = 1;
+            }
+            if(event.key == InputKeyRight && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+                plugin_state->mode = 3;
+            }
+            if(event.key == InputKeyUp && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+                plugin_state->mode = 2;
+            }
+            if(event.key == InputKeyDown && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+                plugin_state->mode = 4;
+            }
+        }
+        
+        if (plugin_state->mode == 0) {
+            //Stop Vibration
             notification_message(notification, &sequence_reset_vibro);
             notification_message(notification, &sequence_reset_green);
-            break;
-        }
-        if(event.key == InputKeyOk) {
-            if(event.type == InputTypePress) {
+        } else if (plugin_state->mode == 1) {
+            //Full power
+            notification_message(notification, &sequence_set_vibro_on);
+            notification_message(notification, &sequence_set_green_255);
+        } else if (plugin_state->mode == 2) {
+            //Pulsed Vibration
+            notification_message(notification, &sequence_set_vibro_on);
+            notification_message(notification, &sequence_set_green_255);
+            delay(100);
+            notification_message(notification, &sequence_reset_vibro);
+        } else if (plugin_state->mode == 3) {
+            //Soft power
+            notification_message(notification, &sequence_set_vibro_on);
+            notification_message(notification, &sequence_set_green_255);
+            delay(50);
+            notification_message(notification, &sequence_reset_vibro);
+        } else if (plugin_state->mode == 4) {
+            //Special Sequence
+            for (int i = 0;i < 15;i++) {
                 notification_message(notification, &sequence_set_vibro_on);
                 notification_message(notification, &sequence_set_green_255);
-            } else if(event.type == InputTypeRelease) {
+                delay(50);
+                notification_message(notification, &sequence_reset_vibro);
+                delay(50);
+            }
+            for (int i = 0;i < 2;i++) {
                 notification_message(notification, &sequence_set_vibro_on);
                 notification_message(notification, &sequence_set_green_255);
+                delay(400);
+                notification_message(notification, &sequence_reset_vibro);
+                delay(50);
             }
         }
-        if(event.key == InputKeyLeft) {
-            if(event.type == InputTypePress) {
-                notification_message(notification, &sequence_reset_vibro);
-                notification_message(notification, &sequence_reset_green);
-            } else if(event.type == InputTypeRelease) {
-                notification_message(notification, &sequence_reset_vibro);
-                notification_message(notification, &sequence_reset_green);
-            }
-        }
+        release_mutex(&state_mutex, plugin_state);
     }
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
@@ -70,6 +135,7 @@ int32_t orgasmotron_app(void* p) {
 
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
+    delete_mutex(&state_mutex);
 
     return 0;
 }
