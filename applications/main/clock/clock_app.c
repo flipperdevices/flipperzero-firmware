@@ -334,7 +334,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
     furi_mutex_release(state->mutex);
     if(state->faceType == 0 || state->faceType == 3) {
-        if (state->faceType == 3) {
+        if(state->faceType == 3) {
             elements_button_left(canvas, "F4");
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
@@ -392,7 +392,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_set_font(canvas, FontSecondary);
         }
     } else if(state->faceType == 1 || state->faceType == 4) {
-        if (state->faceType == 4) {
+        if(state->faceType == 4) {
             elements_button_left(canvas, "F5");
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
@@ -417,7 +417,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
     } else {
-        if (state->faceType == 5) {
+        if(state->faceType == 5) {
             elements_button_left(canvas, "F6");
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
