@@ -48,7 +48,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: Bluetooth Remote + USB Keyboard: [Added movement interval in mouse_jiggler USB & BLE #303 (By DocKuro)](https://github.com/DarkFlippers/unleashed-firmware/pull/303)
 - Added: Bluetooth Remote: [Add HID mouse auto-clicker. #2319 (By rwl4)](https://github.com/flipperdevices/flipperzero-firmware/pull/2319)
 - Added: [New Micro Sd-Card pinout #2323 (By dexvspr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2323)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 - Updated: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 - Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
@@ -56,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 - OFW: [emv: parse track1&2 equivalent data](https://github.com/flipperdevices/flipperzero-firmware/pull/2332)
 - OFW: [nfc: Fix sector reads when one block is unreadable for MIFARE Classic](https://github.com/flipperdevices/flipperzero-firmware/pull/2296)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
