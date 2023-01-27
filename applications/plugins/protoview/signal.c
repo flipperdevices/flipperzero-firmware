@@ -6,6 +6,43 @@
 bool decode_signal(RawSamplesBuffer* s, uint64_t len, ProtoViewMsgInfo* info);
 
 /* =============================================================================
+ * Protocols table.
+ *
+ * Supported protocols go here, with the relevant implementation inside
+ * protocols/<name>.c
+ * ===========================================================================*/
+
+extern ProtoViewDecoder Oregon2Decoder;
+extern ProtoViewDecoder B4B1Decoder;
+extern ProtoViewDecoder RenaultTPMSDecoder;
+extern ProtoViewDecoder ToyotaTPMSDecoder;
+extern ProtoViewDecoder SchraderTPMSDecoder;
+extern ProtoViewDecoder SchraderEG53MA4TPMSDecoder;
+extern ProtoViewDecoder CitroenTPMSDecoder;
+extern ProtoViewDecoder FordTPMSDecoder;
+extern ProtoViewDecoder KeeloqDecoder;
+extern ProtoViewDecoder ProtoViewChatDecoder;
+extern ProtoViewDecoder UnknownDecoder;
+
+ProtoViewDecoder* Decoders[] = {
+    &Oregon2Decoder, /* Oregon sensors v2.1 protocol. */
+    &B4B1Decoder, /* PT, SC, ... 24 bits remotes. */
+    &RenaultTPMSDecoder, /* Renault TPMS. */
+    &ToyotaTPMSDecoder, /* Toyota TPMS. */
+    &SchraderTPMSDecoder, /* Schrader TPMS. */
+    &SchraderEG53MA4TPMSDecoder, /* Schrader EG53MA4 TPMS. */
+    &CitroenTPMSDecoder, /* Citroen TPMS. */
+    &FordTPMSDecoder, /* Ford TPMS. */
+    &KeeloqDecoder, /* Keeloq remote. */
+    &ProtoViewChatDecoder, /* Protoview simple text messages. */
+
+    /* Warning: the following decoder must stay at the end of the
+     * list. Otherwise would detect most signals and prevent the actaul
+     * decoders from handling them. */
+    &UnknownDecoder, /* General protocol detector. */
+    NULL};
+
+/* =============================================================================
  * Raw signal detection
  * ===========================================================================*/
 
@@ -184,8 +221,10 @@ void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source, uint32_t min_d
             /* Accept this signal as the new signal if either it's longer
              * than the previous undecoded one, or the previous one was
              * unknown and this is decoded. */
-            if((thislen > app->signal_bestlen && app->signal_decoded == false) ||
-               (app->signal_decoded == false && decoded)) {
+            bool current_not_decoded = app->signal_decoded == false ||
+                                       app->msg_info->decoder == &UnknownDecoder;
+
+            if(current_not_decoded && (thislen > app->signal_bestlen || decoded)) {
                 free_msg_info(app->msg_info);
                 app->msg_info = info;
                 app->signal_bestlen = thislen;
@@ -199,7 +238,7 @@ void scan_for_signal(ProtoViewApp* app, RawSamplesBuffer* source, uint32_t min_d
                     DetectedSamples->short_pulse_dur);
 
                 adjust_raw_view_scale(app, DetectedSamples->short_pulse_dur);
-                notify_signal_detected(app, decoded);
+                if(app->msg_info->decoder != &UnknownDecoder) notify_signal_detected(app, decoded);
             } else {
                 /* If the structure was not filled, discard it. Otherwise
                  * now the owner is app->msg_info. */
@@ -559,39 +598,6 @@ uint32_t convert_from_diff_manchester(
     }
     return decoded;
 }
-
-/* Supported protocols go here, with the relevant implementation inside
- * protocols/<name>.c */
-
-extern ProtoViewDecoder Oregon2Decoder;
-extern ProtoViewDecoder B4B1Decoder;
-extern ProtoViewDecoder RenaultTPMSDecoder;
-extern ProtoViewDecoder ToyotaTPMSDecoder;
-extern ProtoViewDecoder SchraderTPMSDecoder;
-extern ProtoViewDecoder SchraderEG53MA4TPMSDecoder;
-extern ProtoViewDecoder CitroenTPMSDecoder;
-extern ProtoViewDecoder FordTPMSDecoder;
-extern ProtoViewDecoder KeeloqDecoder;
-extern ProtoViewDecoder ProtoViewChatDecoder;
-extern ProtoViewDecoder UnknownDecoder;
-
-ProtoViewDecoder* Decoders[] = {
-    &Oregon2Decoder, /* Oregon sensors v2.1 protocol. */
-    &B4B1Decoder, /* PT, SC, ... 24 bits remotes. */
-    &RenaultTPMSDecoder, /* Renault TPMS. */
-    &ToyotaTPMSDecoder, /* Toyota TPMS. */
-    &SchraderTPMSDecoder, /* Schrader TPMS. */
-    &SchraderEG53MA4TPMSDecoder, /* Schrader EG53MA4 TPMS. */
-    &CitroenTPMSDecoder, /* Citroen TPMS. */
-    &FordTPMSDecoder, /* Ford TPMS. */
-    &KeeloqDecoder, /* Keeloq remote. */
-    &ProtoViewChatDecoder, /* Protoview simple text messages. */
-
-    /* Warning: the following decoder must stay at the end of the
-     * list. Otherwise would detect most signals and prevent the actaul
-     * decoders from handling them. */
-    &UnknownDecoder, /* General protocol detector. */
-    NULL};
 
 /* Free the message info and allocated data. */
 void free_msg_info(ProtoViewMsgInfo* i) {
