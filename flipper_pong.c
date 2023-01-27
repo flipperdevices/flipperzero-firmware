@@ -15,7 +15,8 @@
 
 #define PAD_SIZE_X 3
 #define PAD_SIZE_Y 8
-#define PLAYER1_PAD_SPEED 8
+#define PLAYER1_PAD_SPEED 4
+
 #define PLAYER2_PAD_SPEED 2
 #define BALL_SIZE 4
 
