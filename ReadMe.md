@@ -56,6 +56,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [emv: parse track1&2 equivalent data](https://github.com/flipperdevices/flipperzero-firmware/pull/2332)
 - OFW: [nfc: Fix sector reads when one block is unreadable for MIFARE Classic](https://github.com/flipperdevices/flipperzero-firmware/pull/2296)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- Added: [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 
 <a name="release">
 
