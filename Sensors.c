@@ -93,7 +93,8 @@ static const SensorType* sensorTypes[] = {
     &BMP180,
     &BMP280,
     &BME280,
-    &MAX31855};
+    &MAX31855,
+    &MAX6675};
 
 const SensorType* unitemp_sensors_getTypeFromInt(uint8_t index) {
     if(index > SENSOR_TYPES_COUNT) return NULL;
