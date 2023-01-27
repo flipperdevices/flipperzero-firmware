@@ -28,8 +28,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0126-2003-0.75.1-76079d0](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-26 11:55 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-26 11:55 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-27 02:36 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-27 02:36 EST`
 - Renamed RM Clock to Dab Timer
 - Passport XP Bar Design Updated [(Thanks to ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/510)
 - Renamed: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) to [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
@@ -53,6 +53,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 - Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - Updated: [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
+- OFW: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
+- OFW: [emv: parse track1&2 equivalent data](https://github.com/flipperdevices/flipperzero-firmware/pull/2332)
+- OFW: [nfc: Fix sector reads when one block is unreadable for MIFARE Classic](https://github.com/flipperdevices/flipperzero-firmware/pull/2296)
 
 <a name="release">
 
@@ -181,7 +184,6 @@ $ ./fbt dolphin_ext
 - [Infrared: allow disabling automatic signal decoding #273 (By Darmiel)](https://github.com/DarkFlippers/unleashed-firmware/pull/273)
 - [Infrared: Infrared AS FAP #398 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/398) (With Thanks to ESurge) [Restored Infrared and RFID CLI #405 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/405)
 - Infrared: Universal AC, Audio, Fans & Projectors from [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware)
-- [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 - NFC: Assets for RogueMaster GitHub and RogueMaster Patreon
 - NFC: [NFC - Machine Readable Travel Documents #1866 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1866)
 - NFC: [(WIP) added ISO15693 reading, saving and revealing from privacy mode (unlock) #1991 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/1991)
