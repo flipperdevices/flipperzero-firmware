@@ -15,7 +15,8 @@
 
 #define PAD_SIZE_X 3
 #define PAD_SIZE_Y 8
-#define PLAYER1_PAD_SPEED 2
+#define PLAYER1_PAD_SPEED 4
+
 #define PLAYER2_PAD_SPEED 2
 #define BALL_SIZE 4
 
@@ -279,6 +280,7 @@ int32_t flipper_pong_app() {
         view_port_update(view_port);
     }
 
+    notification_message(notification, &sequence_reset_rgb);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
     gui_remove_view_port(gui, view_port);
