@@ -1,5 +1,5 @@
 App(
-    appid="gpio_polling_demo",
+    appid="Gpio_Polling_Demo",
     name="Gpio Polling Demo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_polling_demo_app",
