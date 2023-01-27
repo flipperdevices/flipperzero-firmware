@@ -8,5 +8,6 @@ App(
         "bt",
         "gui",
     ],
+    fap_icon="hid_ble_10px.png",
     fap_category="Misc",
 )

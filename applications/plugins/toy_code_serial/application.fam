@@ -8,5 +8,6 @@ App(
         "bt",
         "gui",
     ],
+    fap_icon="ToySerial_10px.png",
     fap_category="Misc",
 )
