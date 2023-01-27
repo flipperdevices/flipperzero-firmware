@@ -229,11 +229,12 @@ void scan_for_signal(ProtoViewApp *app, RawSamplesBuffer *source, uint32_t min_d
             /* Accept this signal as the new signal if either it's longer
              * than the previous undecoded one, or the previous one was
              * unknown and this is decoded. */
-            bool current_not_decoded = app->signal_decoded == false ||
+            bool oldsignal_not_decoded = app->signal_decoded == false ||
                                app->msg_info->decoder == &UnknownDecoder;
 
-            if (current_not_decoded &&
-                (thislen > app->signal_bestlen || decoded))
+            if (oldsignal_not_decoded &&
+                (thislen > app->signal_bestlen ||
+                 (decoded && info->decoder != &UnknownDecoder)))
             {
                 free_msg_info(app->msg_info);
                 app->msg_info = info;
