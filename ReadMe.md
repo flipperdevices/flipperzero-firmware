@@ -62,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Changed images and fixed text position for RFID and NFC
 - OFW: [NFC: change from int8_t to uint8_t](https://github.com/flipperdevices/flipperzero-firmware/pull/2302)
 - OFW: [debug apps: made runnable as .faps; sdk: resolved additional APIs in use by faps](https://github.com/flipperdevices/flipperzero-firmware/pull/2333)
+- Added: [Make ir_remote folder if not exist #2 (Thanks to plarikus)](https://github.com/Hong5489/ir_remote/pull/2)
 
 <a name="release">
 
