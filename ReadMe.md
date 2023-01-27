@@ -63,6 +63,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [debug apps: made runnable as .faps; sdk: resolved additional APIs in use by faps](https://github.com/flipperdevices/flipperzero-firmware/pull/2333)
 - Added: [Make ir_remote folder if not exist #2 (Thanks to plarikus)](https://github.com/Hong5489/ir_remote/pull/2)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- [Patreon Builds Update: Added Controller, Alien Coke and SSJ3 animations to ALL build. Added Controller animation to RM select builds. Added SSJ3 animation to Select, Anime and DBZ Builds as well.](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics)
 
 <a name="release">
 
