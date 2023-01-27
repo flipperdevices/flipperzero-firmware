@@ -236,8 +236,10 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     se_channel->adsr.s = pinst->adsr.s;
     se_channel->adsr.r = pinst->adsr.r;
     se_channel->adsr.volume = pinst->adsr.volume;
+    se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
 
     te_channel->volume = pinst->adsr.volume;
+    te_channel->volume = (int32_t)te_channel->volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
 
     sound_engine_enable_gate(tracker_engine->sound_engine, &tracker_engine->sound_engine->channel[chan], true);
 }
@@ -253,7 +255,8 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
 
     if (vol != MUS_NOTE_VOLUME_NONE && !(tracker_engine->channel[chan].channel_flags & TEC_DISABLED))
     {
-        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
+        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)tracker_engine->channel[chan].instrument->adsr.volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
+        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
     }
 
     if (tracker_engine->channel[chan].instrument != NULL && opcode != 0)
@@ -266,7 +269,7 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
 
         else
         {
-            do_command(opcode, tracker_engine, chan);
+            do_command(opcode, tracker_engine, chan, tracker_engine->current_tick, false);
         }
     }
 
@@ -347,7 +350,7 @@ do_it_again:;
 
             default:
             {
-                do_command(inst, tracker_engine, chan);
+                do_command(inst, tracker_engine, chan, te_channel->program_counter, true);
                 break;
             }
         }
@@ -455,6 +458,11 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
             tracker_engine->sound_engine->channel[chan].pw = final_pwm;
         }
 
+        else
+        {
+            tracker_engine->sound_engine->channel[chan].pw = tracker_engine->channel[chan].pw;
+        }
+
         int32_t chn_note = (int16_t)(te_channel->fixed_note != 0xffff ? te_channel->fixed_note : te_channel->note) + vib + ((int16_t)te_channel->arpeggio_note << 8);
 
         if (chn_note < 0)
@@ -486,6 +494,8 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
     TrackerSong *song = tracker_engine->song;
 
+    uint16_t opcode = 0;
+
     for (int chan = 0; chan < SONG_MAX_CHANNELS; ++chan)
     {
         SoundEngineChannel *se_channel = &tracker_engine->sound_engine->channel[chan];
@@ -501,7 +511,7 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
             uint8_t note_delay = 0;
 
-            uint16_t opcode = tracker_engine_get_command(&pattern->step[pattern_step]);
+            opcode = tracker_engine_get_command(&pattern->step[pattern_step]);
 
             if ((opcode & 0x7ff0) == TE_EFFECT_EXT_NOTE_DELAY)
             {
@@ -568,7 +578,29 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                 }
             }
 
-            tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
+            if ((opcode & 0x7f00) == TE_EFFECT_SKIP_PATTERN && tracker_engine->current_tick == 0)
+            {
+                tracker_engine->sequence_position++;
+                tracker_engine->pattern_position = 0;
+
+                if (tracker_engine->sequence_position >= song->num_sequence_steps)
+                {
+                    tracker_engine->playing = false; // TODO: add song loop handling
+                    tracker_engine->sequence_position--;
+                    tracker_engine->pattern_position = song->pattern_length - 1;
+                }
+
+                sequence_position = tracker_engine->sequence_position;
+                current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
+                pattern_step = tracker_engine->pattern_position;
+
+                pattern = &song->pattern[current_pattern];
+            }
+
+            else
+            {
+                tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
+            }
         }
 
         tracker_engine_advance_channel(tracker_engine, chan); // this will be executed even if the song pointer is NULL; handy for live instrument playback from inst editor ("jams")

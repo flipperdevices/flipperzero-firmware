@@ -98,7 +98,7 @@ static const char *instrument_editor_params_description[] =
         "PWM DEPTH",
         "PWM DELAY (IN TICKS)",
         "DON'T RESTART PROGRAM ON KEYDOWN",
-        "PROG.PERIOD (00 ACTS SAME AS 01)",
+        "PROG.PERIOD (00 = PROGRAM OFF)",
 };
 
 void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)

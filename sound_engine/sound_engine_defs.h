@@ -30,7 +30,7 @@ typedef enum
     SE_WAVEFORM_SAW = 8,
     SE_WAVEFORM_NOISE_METAL = 16,
     SE_WAVEFORM_SINE = 32,
-} SoudEngineWaveformType;
+} SoundEngineWaveformType;
 
 typedef enum
 {

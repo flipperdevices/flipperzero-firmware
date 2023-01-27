@@ -33,6 +33,6 @@ uint32_t get_freq(uint16_t note)
         uint64_t f1 = frequency_table[((note >> 8) % 12)] / (uint64_t)(2 << (((NUM_OCTAVES) - ((note >> 8) / 12)) - 2));
         uint64_t f2 = frequency_table[(((note >> 8) + 1) % 12)] / (uint64_t)(2 << (((NUM_OCTAVES) - (((note >> 8) + 1) / 12)) - 2));
 
-        return (uint64_t)f1 + (uint64_t)((f2 - f1) * (uint64_t)(note & 0xff)) / (uint64_t)256;
+        return f1 + (uint64_t)((f2 - f1) * (uint64_t)(note & 0xff)) / (uint64_t)256;
     }
 }
