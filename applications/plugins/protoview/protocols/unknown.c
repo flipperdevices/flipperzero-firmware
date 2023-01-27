@@ -52,6 +52,7 @@ static uint32_t find_pwm(
      * Anyway at the end of the function we try to fix the sync. */
     for(uint32_t off = 0; off < symlen; off++) {
         uint32_t c = 0; // Number of contiguous symbols found.
+        uint32_t c1 = 0, c2 = 0; // Occurrences of first/second symbol.
         *s1i = off; // Assume we start at one symbol boundaty.
         *s2i = UINT32_MAX; // Second symbol first index still unknown.
         uint32_t next = off;
@@ -73,7 +74,11 @@ static uint32_t find_pwm(
             /* One or the other should match. */
             if(match1 || match2) {
                 c++;
-                if(c > best_count) {
+                if(match1) c1++;
+                if(match2) c2++;
+                if(c > best_count && c1 >= best_count / 5 && // Require enough presence of both
+                   c2 >= best_count / 5) // zero and one.
+                {
                     best_count = c;
                     best_idx1 = *s1i;
                     best_idx2 = *s2i;
@@ -82,6 +87,8 @@ static uint32_t find_pwm(
             } else {
                 /* No match. Continue resetting the signal info. */
                 c = 0; // Start again to count contiguous symbols.
+                c1 = 0;
+                c2 = 0;
                 *s1i = next; // First symbol always at start.
                 *s2i = UINT32_MAX; // Second symbol unknown.
             }
@@ -243,7 +250,8 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     if(manchester_bits > minbits && manchester_bits > pwm3_bits && manchester_bits > pwm4_bits) {
         linecode = LineCodeManchester;
         start1 = tmp1;
-        msgbits = pwm3_bits * 2;
+        msgbits = manchester_bits * 2;
+        FURI_LOG_E(TAG, "MANCHESTER START: %lu", tmp1);
     }
 
     if(linecode == LineCodeNone) return false;
@@ -254,9 +262,13 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint32_t preamble_len = find_preamble(bits, numbytes, numbits, &tmp1);
     uint32_t min_preamble_len = 10;
     uint32_t max_preamble_distance = 32;
-    uint32_t preamble_start;
+    uint32_t preamble_start = 0;
     bool preamble_found = false;
 
+    /* Note that because of the following checks, if the Manchester detector
+     * detected the preamble bits as data, we are ok with that, since it
+     * means that the synchronization is not designed to "break" the bits
+     * flow. In this case we ignore the preamble and return all as data. */
     if(preamble_len >= min_preamble_len && // Not too short.
        tmp1 < start1 && // Should be before the data.
        start1 - tmp1 <= max_preamble_distance) // Not too far.
@@ -271,6 +283,12 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
                                * the message, it is more likely we will
                                * transfer all that is needed, like a message
                                * terminator (that we don't detect). */
+
+    if(preamble_found) FURI_LOG_E(TAG, "PREAMBLE AT: %lu", preamble_start);
+    FURI_LOG_E(TAG, "START: %lu", info->start_off);
+    FURI_LOG_E(TAG, "MSGBITS: %lu", msgbits);
+    FURI_LOG_E(TAG, "DATASTART: %lu", start1);
+    FURI_LOG_E(TAG, "PULSES: %lu", info->pulses_count);
 
     /* We think there is a message and we know where it starts and the
      * line code used. We can turn it into bits and bytes. */
@@ -292,10 +310,10 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
 
     char* linecode_name = get_linecode_name(linecode);
     fieldset_add_str(info->fieldset, "line code", linecode_name, strlen(linecode_name));
-    fieldset_add_uint(info->fieldset, "preamble len", preamble_len, 8);
+    fieldset_add_uint(info->fieldset, "data bits", decoded, 8);
+    if(preamble_found) fieldset_add_uint(info->fieldset, "preamble len", preamble_len, 8);
     fieldset_add_str(info->fieldset, "first symbol", symbol1, strlen(symbol1));
     fieldset_add_str(info->fieldset, "second symbol", symbol2, strlen(symbol2));
-    fieldset_add_uint(info->fieldset, "data bits", decoded, 8);
     for(uint32_t j = 0; j < datalen; j++) {
         char label[16];
         snprintf(label, sizeof(label), "data[%lu]", j);

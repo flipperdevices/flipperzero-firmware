@@ -55,7 +55,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
 - OFW: [emv: parse track1&2 equivalent data](https://github.com/flipperdevices/flipperzero-firmware/pull/2332)
 - OFW: [nfc: Fix sector reads when one block is unreadable for MIFARE Classic](https://github.com/flipperdevices/flipperzero-firmware/pull/2296)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 - Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) [Original (By CompaqDisc)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254) [Refactoring (By GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256) [Using Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock) (Now Has Clock Face Options!)
 - Fixed some missing app icons
@@ -63,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: change from int8_t to uint8_t](https://github.com/flipperdevices/flipperzero-firmware/pull/2302)
 - OFW: [debug apps: made runnable as .faps; sdk: resolved additional APIs in use by faps](https://github.com/flipperdevices/flipperzero-firmware/pull/2333)
 - Added: [Make ir_remote folder if not exist #2 (Thanks to plarikus)](https://github.com/Hong5489/ir_remote/pull/2)
+- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 
 <a name="release">
 
