@@ -21,15 +21,15 @@ void lfrfid_scene_write_on_enter(void* context) {
     LfRfid* app = context;
     Popup* popup = app->popup;
 
-    popup_set_header(popup, "Writing", 89, 30, AlignCenter, AlignTop);
+    popup_set_header(popup, "Writing", 102, 10, AlignCenter, AlignTop);
     if(!furi_string_empty(app->file_name)) {
-        popup_set_text(popup, furi_string_get_cstr(app->file_name), 89, 43, AlignCenter, AlignTop);
+        popup_set_text(popup, furi_string_get_cstr(app->file_name), 92, 23, AlignCenter, AlignTop);
     } else {
         popup_set_text(
             popup,
             protocol_dict_get_name(app->dict, app->protocol_id),
-            89,
-            43,
+            92,
+            23,
             AlignCenter,
             AlignTop);
     }
