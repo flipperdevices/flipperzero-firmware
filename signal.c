@@ -389,6 +389,32 @@ uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t
     return BITMAP_SEEK_NOT_FOUND;
 }
 
+/* Compare bitmaps b1 and b2 (possibly overlapping or the same bitmap),
+ * at the specified offsets, for cmplen bits. Returns true if the
+ * exact same bits are found, otherwise false. */
+bool bitmap_match_bitmap(uint8_t *b1, uint32_t b1len, uint32_t b1off,
+                         uint8_t *b2, uint32_t b2len, uint32_t b2off,
+                         uint32_t cmplen)
+{
+    for (uint32_t j = 0; j < cmplen; j++) {
+        bool bit1 = bitmap_get(b1,b1len,b1off+j);
+        bool bit2 = bitmap_get(b2,b2len,b2off+j);
+        if (bit1 != bit2) return false;
+    }
+    return true;
+}
+
+/* Convert 'len' bitmap bits of the bitmap 'bitmap' into a null terminated
+ * string, stored at 'dst', that must have space at least for len+1 bytes.
+ * The bits are extracted from the specified offset. */
+void bitmap_to_string(char *dst, uint8_t *b, uint32_t blen,
+                      uint32_t off, uint32_t len)
+{
+    for (uint32_t j = 0; j < len; j++)
+        dst[j] = bitmap_get(b,blen,off+j) ? '1' : '0';
+    dst[len] = 0;
+}
+
 /* Set the pattern 'pat' into the bitmap 'b' of max length 'blen' bytes,
  * starting from the specified offset.
  *
@@ -527,6 +553,7 @@ extern ProtoViewDecoder CitroenTPMSDecoder;
 extern ProtoViewDecoder FordTPMSDecoder;
 extern ProtoViewDecoder KeeloqDecoder;
 extern ProtoViewDecoder ProtoViewChatDecoder;
+extern ProtoViewDecoder UnknownDecoder;
 
 ProtoViewDecoder *Decoders[] = {
     &Oregon2Decoder,                /* Oregon sensors v2.1 protocol. */
@@ -539,6 +566,11 @@ ProtoViewDecoder *Decoders[] = {
     &FordTPMSDecoder,               /* Ford TPMS. */
     &KeeloqDecoder,                 /* Keeloq remote. */
     &ProtoViewChatDecoder,          /* Protoview simple text messages. */
+
+    /* Warning: the following decoder must stay at the end of the
+     * list. Otherwise would detect most signals and prevent the actaul
+     * decoders from handling them. */
+    &UnknownDecoder,                /* General protocol detector. */
     NULL
 };
 

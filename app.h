@@ -261,6 +261,11 @@ void bitmap_set_pattern(uint8_t *b, uint32_t blen, uint32_t off, const char *pat
 void bitmap_reverse_bytes_bits(uint8_t *p, uint32_t len);
 bool bitmap_match_bits(uint8_t *b, uint32_t blen, uint32_t bitpos, const char *bits);
 uint32_t bitmap_seek_bits(uint8_t *b, uint32_t blen, uint32_t startpos, uint32_t maxbits, const char *bits);
+bool bitmap_match_bitmap(uint8_t *b1, uint32_t b1len, uint32_t b1off,
+                         uint8_t *b2, uint32_t b2len, uint32_t b2off,
+                         uint32_t cmplen);
+void bitmap_to_string(char *dst, uint8_t *b, uint32_t blen,
+                      uint32_t off, uint32_t len);
 uint32_t convert_from_line_code(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t offset, const char *zero_pattern, const char *one_pattern);
 uint32_t convert_from_diff_manchester(uint8_t *buf, uint64_t buflen, uint8_t *bits, uint32_t len, uint32_t off, bool previous);
 void init_msg_info(ProtoViewMsgInfo *i, ProtoViewApp *app);
