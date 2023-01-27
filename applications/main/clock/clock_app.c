@@ -1,3 +1,4 @@
+#include <math.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -20,6 +21,12 @@
 #define TIME_LEN 12
 #define DATE_LEN 14
 #define MERIDIAN_LEN 3
+#define PI 3.14
+
+typedef struct {
+    uint8_t x;
+    uint8_t y;
+} Vector2;
 
 typedef enum {
     EventTypeTick,
@@ -42,6 +49,7 @@ typedef struct {
     uint32_t codeSequence;
     uint32_t timerSecs;
     uint32_t alert_time;
+    uint32_t faceType;
     bool timer_running;
     bool w_test;
     LocaleDateFormat date_format;
@@ -261,6 +269,17 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+static Vector2 angle_to_vector2(float angle_in_degrees, uint8_t distance, Vector2 center) {
+    float radians = (angle_in_degrees - 90) * (PI / 180);
+
+    Vector2 vec = {
+        .x = center.x + cos(radians) * distance,
+        .y = center.y + sin(radians) * distance,
+    };
+
+    return vec;
+}
+
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
     ClockState* state = ctx;
     if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
@@ -314,39 +333,79 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     char alertTime[4];
     snprintf(alertTime, sizeof(alertTime), "%d", alert_time);
     furi_mutex_release(state->mutex);
-    canvas_set_font(canvas, FontBigNumbers);
-    if(timer_start_timestamp != 0 && !state->w_test) {
-        int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
-                                               timer_stopped_seconds;
-        snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
-        canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
-        canvas_set_font(canvas, FontBatteryPercent);
-        if(state->time_format == LocaleTimeFormat12h)
-            canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
-        canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
-        canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
-        canvas_set_font(canvas, FontSecondary);
-        elements_button_left(canvas, "Reset");
-    } else {
-        if(state->w_test) canvas_set_font(canvas, FontBatteryPercent);
-        if(state->w_test && timer_start_timestamp != 0) {
+    if(state->faceType == 0 || state->faceType == 3) {
+        if (state->faceType == 3) {
+            elements_button_left(canvas, "F4");
+        } else {
+            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
+            elements_button_left(canvas, "F1");
+        }
+        canvas_set_font(canvas, FontBigNumbers);
+        if(timer_start_timestamp != 0 && !state->w_test) {
             int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                    timer_stopped_seconds;
             snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
-            int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
-            int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
-            static const Icon* const count_anim[5] = {
-                &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
-            static const Icon* const count_anim2[4] = {
-                &I_EviWaiting1_18x21, &I_EviWaiting2_18x21, &I_EviSmile1_18x21, &I_EviSmile2_18x21};
-            static const Icon* const count_anim3[4] = {
-                &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
-            canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
-            canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
-            canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
+            canvas_draw_str_aligned(
+                canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
             canvas_draw_str_aligned(
                 canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+            canvas_set_font(canvas, FontBatteryPercent);
+            if(state->time_format == LocaleTimeFormat12h)
+                canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
+            canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
+            canvas_draw_str_aligned(
+                canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
+            canvas_set_font(canvas, FontSecondary);
+            elements_button_left(canvas, "Reset");
+        } else {
+            if(state->w_test) canvas_set_font(canvas, FontBatteryPercent);
+            if(state->w_test && timer_start_timestamp != 0) {
+                int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                       timer_stopped_seconds;
+                snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+                int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
+                int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
+                static const Icon* const count_anim[5] = {
+                    &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
+                static const Icon* const count_anim2[4] = {
+                    &I_EviWaiting1_18x21,
+                    &I_EviWaiting2_18x21,
+                    &I_EviSmile1_18x21,
+                    &I_EviSmile2_18x21};
+                static const Icon* const count_anim3[4] = {
+                    &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
+                canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
+                canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
+                canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
+                canvas_draw_str_aligned(
+                    canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+            }
+            canvas_draw_str_aligned(
+                canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
+            canvas_set_font(canvas, FontBatteryPercent);
+            if(state->time_format == LocaleTimeFormat12h)
+                canvas_draw_str_aligned(canvas, 69, 15, AlignCenter, AlignCenter, meridian_string);
+            if(!state->w_test)
+                canvas_draw_str_aligned(
+                    canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
+            canvas_set_font(canvas, FontSecondary);
+        }
+    } else if(state->faceType == 1 || state->faceType == 4) {
+        if (state->faceType == 4) {
+            elements_button_left(canvas, "F5");
+        } else {
+            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
+            elements_button_left(canvas, "F2");
+        }
+        canvas_set_font(canvas, FontBatteryPercent);
+        if(timer_start_timestamp != 0) {
+            int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                   timer_stopped_seconds;
+            snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+            canvas_draw_str_aligned(
+                canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
         canvas_draw_str_aligned(
             canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
@@ -357,6 +416,52 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 64, 38, AlignCenter, AlignTop, date_string); // DRAW DATE
         canvas_set_font(canvas, FontSecondary);
+    } else {
+        if (state->faceType == 5) {
+            elements_button_left(canvas, "F6");
+        } else {
+            canvas_draw_icon(canvas, 0, 0, &I_black);
+            canvas_set_color(canvas, ColorWhite);
+            elements_button_left(canvas, "F3");
+        }
+        uint8_t width = canvas_width(canvas);
+        uint8_t height = canvas_height(canvas);
+        Vector2 clock_center = {
+            .x = 28 + width / 2,
+            .y = height / 2,
+        };
+        uint8_t radius = MIN(width, height) / 2 - 2;
+        canvas_draw_circle(canvas, clock_center.x, clock_center.y, radius);
+        FuriString* str = furi_string_alloc();
+        for(uint8_t i = 3; i <= 12; i += 3) {
+            Vector2 pos = angle_to_vector2(360 / 12 * i, radius - 4, clock_center);
+
+            furi_string_printf(str, "%i", i);
+
+            canvas_draw_str_aligned(
+                canvas, pos.x, pos.y, AlignCenter, AlignCenter, furi_string_get_cstr(str));
+        }
+        Vector2 hour_vec =
+            angle_to_vector2(((curr_dt.hour % 12) / 12.f * 360.f), radius - 8, clock_center);
+        canvas_draw_line(canvas, clock_center.x, clock_center.y, hour_vec.x, hour_vec.y);
+        Vector2 minute_vec =
+            angle_to_vector2((curr_dt.minute / 60.f * 360.f), radius - 4, clock_center);
+        canvas_draw_line(canvas, clock_center.x, clock_center.y, minute_vec.x, minute_vec.y);
+        Vector2 second_vec =
+            angle_to_vector2((curr_dt.second / 60.f * 360.f), radius - 2, clock_center);
+        canvas_draw_line(canvas, clock_center.x, clock_center.y, second_vec.x, second_vec.y);
+        canvas_set_font(canvas, FontSecondary); // app->date_time
+        locale_format_date(str, &curr_dt, locale_get_date_format(), ".");
+        uint16_t date_str_width = canvas_string_width(canvas, furi_string_get_cstr(str));
+        canvas_draw_frame(canvas, 0, 41, date_str_width + 6, 13);
+        canvas_draw_str(canvas, 3, 51, furi_string_get_cstr(str));
+        if(timer_start_timestamp != 0) {
+            int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                   timer_stopped_seconds;
+            snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
+            canvas_draw_str_aligned(
+                canvas, 15, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+        }
     }
     if(!state->desktop_settings->is_dumbmode && !state->w_test) {
         if(timer_running) {
@@ -389,6 +494,7 @@ static void clock_state_init(ClockState* const state) {
     state->timer_start_timestamp = 0;
     state->timer_stopped_seconds = 0;
     state->timerSecs = 0;
+    state->faceType = 0;
     state->alert_time = 80;
     state->desktop_settings = malloc(sizeof(DesktopSettings));
     state->w_test = false;
@@ -499,14 +605,28 @@ int32_t clock_app(void* p) {
                         } else {
                             plugin_state->codeSequence = 0;
                             if(plugin_state->timer_start_timestamp != 0) {
-                                // START? TIMER
                                 FuriHalRtcDateTime curr_dt;
                                 furi_hal_rtc_get_datetime(&curr_dt);
                                 uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
-                                // Reset seconds
                                 plugin_state->timer_start_timestamp = curr_ts;
                                 plugin_state->timer_stopped_seconds = 0;
                                 plugin_state->timerSecs = 0;
+                            } else {
+                                if(event.input.type == InputTypeShort) {
+                                    if(plugin_state->faceType == 0) {
+                                        plugin_state->faceType = 1;
+                                    } else if(plugin_state->faceType == 1) {
+                                        plugin_state->faceType = 2;
+                                    } else if(plugin_state->faceType == 2) {
+                                        plugin_state->faceType = 3;
+                                    } else if(plugin_state->faceType == 3) {
+                                        plugin_state->faceType = 4;
+                                    } else if(plugin_state->faceType == 4) {
+                                        plugin_state->faceType = 5;
+                                    } else {
+                                        plugin_state->faceType = 0;
+                                    }
+                                }
                             }
                         }
                         break;
