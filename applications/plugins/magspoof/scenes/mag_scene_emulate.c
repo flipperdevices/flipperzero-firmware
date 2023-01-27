@@ -28,8 +28,9 @@ void mag_scene_emulate_on_enter(void* context) {
         if(is_active_one | is_active_two | is_active_both) {
             furi_string_cat_printf(
                 tmp_str,
-                "Track %d:\n%s\n\n",
+                "Track %d:%s%s\n\n",
                 (i + 1),
+                furi_string_empty(trackstr) ? "  " : "\n",
                 furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr));
         }
     }

@@ -105,9 +105,9 @@ void tx_init_gpio() {
     furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
-    furi_delay_ms(300);
-
     furi_hal_gpio_write(GPIO_PIN_ENABLE, 1);
+
+    furi_delay_ms(500);
 }
 
 void tx_reset_gpio() {
@@ -157,9 +157,13 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
 
     int tmp, crc, lrc = 0;
     int i = 0;
+    // Please forgive the mess. This was a bug battlezone. Will clean up over the weekend
+    // So many stupid things done here, many learnings lol
+    //FURI_LOG_D(TAG, "%d", strlen(track_data));
+    //FURI_LOG_D(TAG, "%d", strlen(track_data) * bitlen[track_index]);
 
     // convert track data to bits
-    for(uint8_t j = 0; track_data[i] != '\0'; j++) {
+    for(uint8_t j = 0; track_data[j] != '\0'; j++) {
         crc = 1;
         tmp = track_data[j] - sublen[track_index];
 
@@ -167,39 +171,47 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
             crc ^= tmp & 1;
             lrc ^= (tmp & 1) << k;
             bit_array[i] = tmp & 1;
+            //FURI_LOG_D(
+            //    TAG, "i, j, k: %d %d %d  char %s bit %d", i, j, k, &track_data[j], bit_array[i]);
             i++;
             tmp >>= 1;
         }
         bit_array[i] = crc;
+        //FURI_LOG_D(TAG, "i, j: %d %d  char %s bit %d", i, j, &track_data[j], bit_array[i]);
         i++;
     }
 
+    FURI_LOG_D(TAG, "LRC");
     // finish calculating final "byte" (LRC)
     tmp = lrc;
     crc = 1;
     for(uint8_t j = 0; j < bitlen[track_index] - 1; j++) {
         crc ^= tmp & 1;
         bit_array[i] = tmp & 1;
+        //FURI_LOG_D(TAG, "i, j: %d %d   bit %d", i, j, bit_array[i]);
         i++;
         tmp >>= 1;
     }
     bit_array[i] = crc;
+    //FURI_LOG_D(TAG, "i: %d   bit %d", i, bit_array[i]);
     i++;
 
     // My makeshift end sentinel. All other values 0/1
     bit_array[i] = 2;
+    //FURI_LOG_D(TAG, "i: %d   bit %d", i, bit_array[i]);
     i++;
 
     // Log the output (messy but works)
-    char output[100] = {0x0};
-    FuriString* tmp_str;
+    //char output[500] = {0x0};
+    /*FuriString* tmp_str;
     tmp_str = furi_string_alloc();
     for(uint8_t j = 0; bit_array[j] != 2; j++) {
-        furi_string_printf(tmp_str, "%d", (bit_array[j] & 1));
-        strcat(output, furi_string_get_cstr(tmp_str));
+        furi_string_cat_printf(tmp_str, "%d", (bit_array[j] & 1));
+        //strcat(output, furi_string_get_cstr(tmp_str));
     }
-    FURI_LOG_D(TAG, "Track %d: %s", (track_index + 1), output);
-    furi_string_free(tmp_str);
+    FURI_LOG_D(TAG, "Track %d: %s", (track_index + 1), track_data);
+    FURI_LOG_D(TAG, "Track %d: %s", (track_index + 1), furi_string_get_cstr(tmp_str));*/
+    //furi_string_free(tmp_str);
 }
 
 void mag_spoof(Mag* mag) {
@@ -209,8 +221,8 @@ void mag_spoof(Mag* mag) {
     // likely will be reworked to antirez's bitmap method anyway...
     const char* data1 = furi_string_get_cstr(mag->mag_dev->dev_data.track[0].str);
     const char* data2 = furi_string_get_cstr(mag->mag_dev->dev_data.track[1].str);
-    uint8_t bit_array1[(strlen(data1) * bitlen[0]) + 1];
-    uint8_t bit_array2[(strlen(data2) * bitlen[1]) + 1];
+    uint8_t bit_array1[2 * (strlen(data1) * bitlen[0]) + 1];
+    uint8_t bit_array2[2 * (strlen(data2) * bitlen[1]) + 1];
     track_to_bits(bit_array1, data1, 0);
     track_to_bits(bit_array2, data2, 1);
 
@@ -222,33 +234,33 @@ void mag_spoof(Mag* mag) {
         // Critical timing section (need to eliminate ifs? does this impact timing?)
         FURI_CRITICAL_ENTER();
         // Prefix of zeros
-        for(uint8_t i = 0; i < ZERO_PREFIX; i++) {
+        for(uint16_t i = 0; i < ZERO_PREFIX; i++) {
             if(!play_bit(0, setting)) break;
         }
 
         // Track 1
         if((setting->track == MagTrackStateAll) || (setting->track == MagTrackStateOne)) {
-            for(uint8_t i = 0; bit_array1[i] != 2; i++) {
+            for(uint16_t i = 0; bit_array1[i] != 2; i++) {
                 if(!play_bit((bit_array1[i] & 1), setting)) break;
             }
         }
 
         // Zeros between tracks
         if(setting->track == MagTrackStateAll) {
-            for(uint8_t i = 0; i < ZERO_BETWEEN; i++) {
+            for(uint16_t i = 0; i < ZERO_BETWEEN; i++) {
                 if(!play_bit(0, setting)) break;
             }
         }
 
         // Track 2 (TODO: Reverse track)
         if((setting->track == MagTrackStateAll) || (setting->track == MagTrackStateTwo)) {
-            for(uint8_t i = 0; bit_array2[i] != 2; i++) {
+            for(uint16_t i = 0; bit_array2[i] != 2; i++) {
                 if(!play_bit((bit_array2[i] & 1), setting)) break;
             }
         }
 
         // Suffix of zeros
-        for(uint8_t i = 0; i < ZERO_SUFFIX; i++) {
+        for(uint16_t i = 0; i < ZERO_SUFFIX; i++) {
             if(!play_bit(0, setting)) break;
         }
         FURI_CRITICAL_EXIT();

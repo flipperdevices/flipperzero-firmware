@@ -5,8 +5,11 @@ Disclaimer: use responsibly, and at your own risk. While in my testing, I've see
 
 ## TODO
 Emulation:
+- Fix signal truncation issue! *Edit: Tentative fix in place*
 - General code cleanup
 - Reverse track precompute & replay
+- Prefix/between/suffix addition to config menu
+- Parameter tuning, find best defaults, troubleshoot improperly parsed TX
 - Implement/integrate better bitmap than hacky first pass? Boilerplate from [antirez](https://github.com/antirez)'s better approach (from [ProtoView](https://github.com/antirez/protoview)) included at the bottom of `helpers/mag_helpers.c`
 - Should the main timing-sensitive section be branchless? (Remove `if` and `switch` statements from the `FURI_CRITICAL...` section of `mag_spoof()`?)
 - Pursue skunkworks TX improvement ideas listed below
@@ -14,6 +17,7 @@ Emulation:
 Scenes:
 - Finish emulation config scene (reverse track functionality; possibly expand settings list to include prefix/between/suffix options)
 - "Edit" scene (generalize "Add manually")
+- "Rename" scene (generalize input_name)
 
 File management:
 - Validation of card track data?
@@ -21,9 +25,9 @@ File management:
 - Update Add Manually flow to reflect new file format (currently only sets Track 2)
 
 Known bugs:
+- From debug logging output, seems precomputed signal is getting truncated somehow! This is priority \#1 to fix. *Edit: Tentative fix in place*
 - Custom text input scene with expanded characterset (Add Manually) has odd behavior when navigating the keys near the numpad
-- Track 1 data typically starts with a `%` sign. Unless escaped, it won't be displayed when printed, as C considers it a special character. To confirm: how does this impact the emulation when iterating through the chars? Does it get played correctly?
-- Possible file format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to load happily.
+- File format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to be setting the Track 2 field with anything (doesn't overwrite existing data). However, `flipper_format_read_string()` doesn't seem to return `false`. Is the bug in my code, or with `flipper_format`?
 - Attempting to play a track that doesn't have data results in a crash (as one might expect). Need to lock out users from selecting empty tracks in the config menu or do better error handling
 
 ## Skunkworks ideas
