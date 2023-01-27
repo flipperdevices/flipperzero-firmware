@@ -612,20 +612,18 @@ int32_t clock_app(void* p) {
                                 plugin_state->timer_stopped_seconds = 0;
                                 plugin_state->timerSecs = 0;
                             } else {
-                                if(event.input.type == InputTypeShort) {
-                                    if(plugin_state->faceType == 0) {
-                                        plugin_state->faceType = 1;
-                                    } else if(plugin_state->faceType == 1) {
-                                        plugin_state->faceType = 2;
-                                    } else if(plugin_state->faceType == 2) {
-                                        plugin_state->faceType = 3;
-                                    } else if(plugin_state->faceType == 3) {
-                                        plugin_state->faceType = 4;
-                                    } else if(plugin_state->faceType == 4) {
-                                        plugin_state->faceType = 5;
-                                    } else {
-                                        plugin_state->faceType = 0;
-                                    }
+                                if(plugin_state->faceType == 0) {
+                                    plugin_state->faceType = 1;
+                                } else if(plugin_state->faceType == 1) {
+                                    plugin_state->faceType = 2;
+                                } else if(plugin_state->faceType == 2) {
+                                    plugin_state->faceType = 3;
+                                } else if(plugin_state->faceType == 3) {
+                                    plugin_state->faceType = 4;
+                                } else if(plugin_state->faceType == 4) {
+                                    plugin_state->faceType = 5;
+                                } else {
+                                    plugin_state->faceType = 0;
                                 }
                             }
                         }
