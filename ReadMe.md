@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [New Micro Sd-Card pinout #2323 (By dexvspr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2323)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Added: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
+- Updated: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 
 <a name="release">
 

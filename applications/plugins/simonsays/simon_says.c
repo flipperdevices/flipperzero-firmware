@@ -62,15 +62,10 @@ typedef struct {
 
     /* Handle Shape Display */
     uint32_t numberOfMillisecondsBeforeShapeDisappears; // This defines the speed of the game
-    uint32_t last_shape_displayed_ms; // This is used to time the interval between displaying shapes
     enum shape_names simonMoves[1000]; // Store the sequence of shapes that Simon plays
     enum shape_names selectedShape; // This is used to track the shape that the player has selected
-    bool shapeConsumed; // Tracks whether shape has been checked or not
     bool set_board_neutral; // This is used to track if the board should be neutral or not
     int moveIndex; // This is used to track the current move in the sequence
-
-    enum shape_names selected;
-    enum shape_names board_state; // TODO: This may be redundant by selected
 
     uint32_t last_button_press_tick;
     NotificationApp* notification;
@@ -380,15 +375,21 @@ bool load_game(SimonData* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     File* file = storage_file_alloc(storage);
+
     uint16_t bytes_readed = 0;
     if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        bytes_readed = storage_file_read(file, app, sizeof(SimonData));
+        if(storage_file_size(file) > sizeof(SimonData)) {
+            storage_simply_remove(storage, SAVING_FILENAME);
+            FURI_LOG_E(
+                TAG, "Error: file is larger than the data structure! The file has been deleted.");
+        } else {
+            bytes_readed = storage_file_read(file, app, sizeof(SimonData));
+        }
+        storage_file_close(file);
+        storage_file_free(file);
     }
-    storage_file_close(file);
-    storage_file_free(file);
 
     furi_record_close(RECORD_STORAGE);
-
     return bytes_readed == sizeof(SimonData);
 }
 
@@ -497,7 +498,6 @@ enum shape_names getCurrentSimonMove(SimonData* app) {
 }
 
 void onPlayerSelectedShapeCallback(enum shape_names shape, SimonData* app) {
-    //@todo Sound on select
     if(shape == getCurrentSimonMove(app)) {
         onPlayerAnsweredCorrect(app);
     } else {
@@ -578,8 +578,8 @@ int32_t simon_says_app_entry(void* p) {
     InputEvent input;
 
     // Show Main Menu Screen
-    //TODO: Disable Loading game for debugging
     load_game(simon_state);
+    restart_game_after_gameover(simon_state);
     simon_state->gameState = mainMenu;
 
     while(true) {
@@ -588,7 +588,7 @@ int32_t simon_says_app_entry(void* p) {
         FuriStatus q_status = furi_message_queue_get(
             event_queue, &input, simon_state->numberOfMillisecondsBeforeShapeDisappears);
 
-        if(q_status == FuriStatusOk && simon_state->activePlayer == player) {
+        if(q_status == FuriStatusOk) {
             FURI_LOG_D(TAG, "Got input event: %d", input.key);
             //break out of the loop if the back key is pressed
             if(input.key == InputKeyBack && input.type == InputTypeLong) {
@@ -597,10 +597,6 @@ int32_t simon_says_app_entry(void* p) {
                     save_game(simon_state);
                 }
                 break;
-            }
-
-            if(input.type == InputTypeLong) {
-                // Do Nothing. Ignore long press events
             }
 
             //@todo Set Game States
