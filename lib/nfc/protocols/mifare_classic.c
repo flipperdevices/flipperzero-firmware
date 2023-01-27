@@ -1029,8 +1029,9 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
-        } else if(cmd == MF_CLASSIC_DECREMENT_CMD || cmd == MF_CLASSIC_INCREMENT_CMD ||
-                             cmd == MF_CLASSIC_RESTORE_CMD) {
+        } else if(
+            cmd == MF_CLASSIC_DECREMENT_CMD || cmd == MF_CLASSIC_INCREMENT_CMD ||
+            cmd == MF_CLASSIC_RESTORE_CMD) {
             uint8_t block = plain_data[1];
 
             if(block > mf_classic_get_total_block_num(emulator->data.type)) {
@@ -1099,7 +1100,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
 
     if(!command_processed) {
         // Send NACK
-        uint8_t nack = transfer_buf_valid ? MF_CLASSIC_NACK_BUF_VALID_CMD : MF_CLASSIC_NACK_BUF_INVALID_CMD;
+        uint8_t nack = transfer_buf_valid ? MF_CLASSIC_NACK_BUF_VALID_CMD :
+                                            MF_CLASSIC_NACK_BUF_INVALID_CMD;
         if(is_encrypted) {
             crypto1_encrypt(&emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
         } else {
