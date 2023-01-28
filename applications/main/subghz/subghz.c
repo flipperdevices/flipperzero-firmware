@@ -217,6 +217,8 @@ void subghz_free(SubGhz* subghz) {
         subghz->rpc_ctx = NULL;
     }
 
+    subghz_speaker_off(subghz);
+
     // Packet Test
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestPacket);
     subghz_test_packet_free(subghz->subghz_test_packet);
