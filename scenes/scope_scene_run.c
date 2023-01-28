@@ -34,6 +34,7 @@ const uint32_t APBPrescTable[8UL]  = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
 const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
                                       4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
 double time;
+uint8_t pause=0;
 
 void Error_Handler()
 {
@@ -205,7 +206,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
         mvoltWrite[tmp_index] = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI, aADCxConvertedData[tmp_index]);
     }
     ubDmaTransferStatus = 1;
-    swap(&mvoltWrite, &mvoltDisplay);
+    if(!pause)
+        swap(&mvoltWrite, &mvoltDisplay);
 }
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc)
@@ -262,6 +264,8 @@ void scope_scene_run_on_enter(void* context) {
     ScopeApp* app = context;
     time = app->time;
     UNUSED(app);
+
+    pause = 0;
 
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
@@ -329,6 +333,9 @@ void scope_scene_run_on_enter(void* context) {
                     case InputKeyUp:
                         break;
                     case InputKeyDown:
+                        break;
+                    case InputKeyOk:
+                        pause ^= 1;
                         break;
                     default:
                         running = false;
