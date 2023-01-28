@@ -17,6 +17,21 @@ const uint8_t bitlen[] = {7, 5, 5};
 const int sublen[] = {32, 48, 48};
 uint8_t bit_dir = 0;
 
+void bitbang_raw(bool value, MagSetting* setting)
+{
+    switch(setting->tx) {
+        case MagTxStateRFID:
+            furi_hal_gpio_write(RFID_PIN_OUT, value);
+            break;
+        case MagTxStateGPIOA6A7:
+            furi_hal_gpio_write(GPIO_PIN_A, value);
+            furi_hal_gpio_write(GPIO_PIN_B, !value);
+            break;
+        default:
+            break;
+    }
+}
+
 void play_bit_rfid(uint8_t send_bit, MagSetting* setting) {
     // internal TX over RFID coil
     bit_dir ^= 1;
@@ -214,6 +229,139 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
     //furi_string_free(tmp_str);
 }
 
+void mag_spoof_bitwise(Mag* mag) {
+    MagSetting* setting = mag->setting;
+
+
+    FuriString* ft1 = mag->mag_dev->dev_data.track[0].str;
+    FuriString* ft2 = mag->mag_dev->dev_data.track[1].str;
+
+    char* data1; char* data2;
+    data1 = malloc(furi_string_size(ft1)+1);
+    data2 = malloc(furi_string_size(ft2)+1);
+    strncpy(data1, furi_string_get_cstr(ft1), furi_string_size(ft1));
+    strncpy(data2, furi_string_get_cstr(ft2), furi_string_size(ft2));
+
+    if(furi_log_get_level() >= FuriLogLevelDebug) {
+        debug_msr_string(data1, BITS_TRACK1, OFFSET_TRACK1);
+        debug_msr_string(data2, BITS_TRACK2, OFFSET_TRACK2);
+    }
+
+
+    uint8_t bits_t1_raw[64] = {0x55};              // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
+    uint8_t bits_t1_manchester[128] = {0x55};      // twice the above
+    uint16_t bits_t1_count = msr_encode(data1, (uint8_t*) bits_t1_manchester, (uint8_t*) bits_t1_raw, BITS_TRACK1, OFFSET_TRACK1);
+    uint8_t bits_t2_raw[64] = {0x55};              // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
+    uint8_t bits_t2_manchester[128] = {0x55};      // twice the above
+    uint16_t bits_t2_count = msr_encode(data2, (uint8_t*) bits_t2_manchester, (uint8_t*) bits_t2_raw, BITS_TRACK2, OFFSET_TRACK2);
+
+    if(furi_log_get_level() >= FuriLogLevelDebug) {
+        printf("Manchester bitcount: T1: %d, T2: %d\r\n", bits_t1_count, bits_t2_count);
+
+        printf("T1 raw: ");
+        for (int i = 0; i < bits_t1_count / 16; i++) printf("%02x ", bits_t1_raw[i]);
+        printf("\r\n");
+
+        printf("T1 manchester: ");
+        for (int i = 0; i < bits_t1_count / 8; i++) printf("%02x ", bits_t1_manchester[i]);
+        printf("\r\n");
+
+        printf("T2 raw: ");
+        for (int i = 0; i < bits_t2_count / 16; i++) printf("%02x ", bits_t2_raw[i]);
+        printf("\r\n");
+
+        printf("T2 manchester: ");
+        for (int i = 0; i < bits_t2_count / 8; i++) printf("%02x ", bits_t2_manchester[i]);
+        printf("\r\n");
+
+        printf("Bitwise emulation done\r\n\r\n");
+    }
+
+    if(!tx_init(setting)) return;
+
+    FURI_CRITICAL_ENTER();
+    bool bit = false;
+
+
+    if((setting->track == MagTrackStateAll))
+    for(uint16_t i = 0; i < ZERO_PREFIX; i++)
+    {
+        bit ^= 0xFF;
+        bitbang_raw(bit, setting);
+        furi_delay_us(setting->us_clock*2);
+    }
+
+    if((setting->track == MagTrackStateAll) || (setting->track == MagTrackStateOne))
+    for(uint16_t i = 0; i < bits_t1_count; i++)
+    {
+        uint8_t byte = i / 8;
+        uint8_t bitmask = 1 << (7-(i % 8));
+        /* this comment is mostly for zw's convenience:
+         *
+         * bits are stored in their arrays like on a card (LSB first). This is not how usually bits are stored in a
+         * byte, with the MSB first. the var bitmask creates the pattern to iterate through each bit, LSB first, like so
+         * 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80... masking bits one by one from the current byte
+         *
+         * i've chosen this LSB approach since bits and bytes are hard enough to visualize with the 5/8 and 7/8 encoding
+         * MSR uses. It's a biiit more complicated to process, but visualizing it with printf or a debugger is
+         * infinitely easier
+         *
+         * Encoding the following pairs of 5 bits as 5/8: A1234 B1234 C1234 D1234
+         * using this LSB format looks like: A1234B12 34C1234D 12340000
+         * using the MSB format, looks like: 21B4321A D4321C43 00004321
+         * this means reading each byte backwards when printing/debugging, and the jumping 16 bits ahead, reading 8 more
+         * bits backward, jumping 16 more bits ahead.
+         *
+         * I find this much more convenient for debugging, with the tiny incovenience of reading the bits in reverse
+         * order. THus, the reason for the bitmask above
+         */
+
+        bit = !!(bits_t1_manchester[byte] & bitmask);
+
+        // TODO: reimplement timing delays. Replace fixed furi_hal_cortex_delay_us to wait instead to a specific value
+        // for DWT->CYCCNT. Note timer is aliased to 64us as per
+        // #define FURI_HAL_CORTEX_INSTRUCTIONS_PER_MICROSECOND (SystemCoreClock / 1000000) | furi_hal_cortex.c
+
+        bitbang_raw(bit, setting);
+        furi_delay_us(setting->us_clock);
+        // if (i % 2 == 1) furi_delay_us(setting->us_interpacket);
+    }
+
+    if((setting->track == MagTrackStateAll))
+    for(uint16_t i = 0; i < ZERO_BETWEEN; i++)
+    {
+        bit ^= 0xFF;
+        bitbang_raw(bit, setting);
+        furi_delay_us(setting->us_clock*2);
+    }
+
+    if((setting->track == MagTrackStateAll) || (setting->track == MagTrackStateTwo))
+    for(uint16_t i = 0; i < bits_t2_count; i++)
+    {
+        uint16_t j = bits_t2_count - i - 1;
+        uint8_t byte = j / 8;
+        uint8_t bitmask = 1 << (7-(j % 8));
+        bool bit = !!(bits_t2_manchester[byte] & bitmask);
+        bitbang_raw(bit, setting);
+        furi_delay_us(setting->us_clock);
+        // if (i % 2 == 1) furi_delay_us(setting->us_interpacket);
+    }
+
+    if((setting->track == MagTrackStateAll))
+    for(uint16_t i = 0; i < ZERO_SUFFIX; i++)
+    {
+        bit ^= 0xFF;
+        bitbang_raw(bit, setting);
+        furi_delay_us(setting->us_clock*2);
+    }
+
+    FURI_CRITICAL_EXIT();
+    free(data1);
+    free(data2);
+    tx_reset(setting);
+
+}
+
 void mag_spoof(Mag* mag) {
     MagSetting* setting = mag->setting;
 
@@ -316,3 +464,132 @@ bool get_bit(uint8_t* b, uint32_t blen, uint32_t bitpos) {
     }
     return bitpos;
 }*/
+
+
+
+
+uint16_t add_bit(bool value, uint8_t* out, uint16_t count)
+{
+    uint8_t bit = count % 8;
+    uint8_t byte = count / 8;
+    if (value)
+    {
+        out[byte] |= 0x01;
+    }
+    if (bit < 7) out[byte] <<= 1;
+    return count+1;
+}
+
+uint16_t add_bit_manchester(bool value, uint8_t* out, uint16_t count)
+{
+    static bool toggle = 0;
+    toggle ^= 0x01;
+    count = add_bit(toggle, out, count);
+    if (value) toggle ^= 0x01;
+    count = add_bit(toggle, out, count);
+    return count;
+}
+
+
+uint16_t msr_encode(char* data, uint8_t* out_manchester, uint8_t* out_raw, uint8_t track_bits, uint8_t track_ascii_offset)
+{
+    /*
+     * track_bits - the number of raw (data) bits on the track. on ISO cards, that's 7 for track 5, or 4 for 2/3 - this is samy's bitlen
+     *            - this count includes the parity bit
+     * track_ascii_offset - how much the ascii values are offset. track 1 makes space (ascii 32) become data 0x00,
+     *                    - tracks 2/3 make ascii "0" become data 0x00 - this is samy's sublen
+     *
+     */
+
+    uint16_t raw_bits_count = 0;
+    uint16_t output_count = 0;
+    int tmp, crc, lrc = 0;
+
+    for (int i = 0; i < PREFIX_NUM_ZEROES; i++)
+    {
+        output_count = add_bit_manchester(0, out_manchester, output_count);
+        raw_bits_count = add_bit(0, out_raw, raw_bits_count);
+    }
+
+
+    for (int i = 0; *(data+i) != 0; i++)
+    {
+        crc = 1;
+        tmp = *(data+i) - track_ascii_offset;
+
+        for (int j = 0; j < track_bits-1; j++)
+        {
+            crc ^= tmp & 1;
+            lrc ^= (tmp & 1) << j;
+            raw_bits_count = add_bit(tmp & 0x01, out_raw, raw_bits_count);
+            output_count = add_bit_manchester(tmp & 0x01, out_manchester, output_count);
+            tmp >>= 1;
+        }
+        raw_bits_count = add_bit(crc, out_raw, raw_bits_count);
+        output_count = add_bit_manchester(crc, out_manchester, output_count);
+    }
+
+
+    // LRC byte
+    tmp = lrc;
+    crc = 1;
+    for (int j = 0; j < track_bits-1; j++)
+    {
+        crc ^= tmp & 0x01;
+        raw_bits_count = add_bit(tmp & 0x01, out_raw, raw_bits_count);
+        output_count = add_bit_manchester(tmp & 0x01, out_manchester, output_count);
+        tmp >>= 1;
+    }
+    raw_bits_count = add_bit(crc, out_raw, raw_bits_count);
+    output_count = add_bit_manchester(crc, out_manchester, output_count);
+
+    return output_count;
+}
+
+void debug_msr_string(char* data,  uint8_t track_bits, uint8_t track_ascii_offset)
+{
+    uint8_t bits_raw[64] = {0};           // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
+    uint8_t bits_manchester[128] = {0};    // twice the above
+    int numbits = 0;
+
+    printf("Encoding [%s] with %d bits\r\n", data, track_bits);
+    numbits = msr_encode(data, (uint8_t*)bits_manchester, (uint8_t*)bits_raw, track_bits, track_ascii_offset);
+    printf("Got %d bits\r\n", numbits);
+    printf("Raw byte stream:     ");
+    for(int i = 0; i < numbits / 8 / 2; i++)
+    {
+        printf("%02x", bits_raw[i]);
+        if (i%4==3) printf(" ");
+    }
+
+    printf("\r\n");
+
+    printf("Bits                 ");
+    int space_counter = 0;
+    for(int i = 0; i < numbits / 2; i++)
+    {
+        if (i < PREFIX_NUM_ZEROES)
+        {
+            printf("X");
+            continue;
+        }
+        else if (i == PREFIX_NUM_ZEROES)
+        {
+            printf (" ");
+            space_counter = 0;
+        }
+        printf("%01x", (bits_raw[i/8] & (1 << (7-(i%8)))) != 0);
+        if ((space_counter) % track_bits == track_bits-1) printf(" ");
+        space_counter++;
+    }
+
+    printf("\r\n");
+
+    printf("Manchester encoded, byte stream: ");
+    for(int i = 0; i < numbits / 8; i++)
+    {
+        printf("%02x", bits_manchester[i]);
+        if (i%4==3) printf(" ");
+    }
+    printf("\r\n\r\n");
+}

@@ -7,6 +7,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi/core/log.h>
 
 #include <gui/gui.h>
 #include <gui/view.h>
