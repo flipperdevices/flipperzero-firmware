@@ -16,6 +16,7 @@ const uint8_t bitlen[] = {7, 5, 5};
 // char offset by track
 const int sublen[] = {32, 48, 48};
 uint8_t bit_dir = 0;
+uint8_t last_value = 2;
 
 void bitbang_raw(bool value, MagSetting* setting)
 {
@@ -29,24 +30,32 @@ void bitbang_raw(bool value, MagSetting* setting)
             break;
         case MagTxCC1101_434:
         case MagTxCC1101_868:
-            furi_hal_gpio_write(&gpio_cc1101_g0, true);
-            furi_delay_us(64);
-            furi_hal_gpio_write(&gpio_cc1101_g0, false);
+            if (last_value == 2 || value != (bool)last_value)
+            {
+                furi_hal_gpio_write(&gpio_cc1101_g0, true);
+                furi_delay_us(64);
+                furi_hal_gpio_write(&gpio_cc1101_g0, false);
+            }
             break;
         default:
             break;
     }
+
+    last_value = value;
 }
 
 void play_bit_rf(bool bit, MagSetting* setting) {
 
     bit_dir ^= 1;
-    furi_hal_gpio_write(&gpio_cc1101_g0, bit_dir);
+    furi_hal_gpio_write(&gpio_cc1101_g0, true);
+    furi_delay_us(64);
+    furi_hal_gpio_write(&gpio_cc1101_g0, false);
     furi_delay_us(setting->us_clock);
 
     if(bit) {
-        bit_dir ^= 1;
-        furi_hal_gpio_write(&gpio_cc1101_g0, bit_dir);
+        furi_hal_gpio_write(&gpio_cc1101_g0, true);
+        furi_delay_us(64);
+        furi_hal_gpio_write(&gpio_cc1101_g0, false);
     }
     furi_delay_us(setting->us_clock);
     furi_delay_us(setting->us_interpacket);
@@ -334,7 +343,7 @@ void mag_spoof_bitwise(Mag* mag) {
     }
 
     if(!tx_init(setting)) return;
-
+    last_value = 2;
     FURI_CRITICAL_ENTER();
     bool bit = false;
 
