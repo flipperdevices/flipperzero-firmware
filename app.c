@@ -22,6 +22,8 @@
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
 #define MAXBUL 5 /* Max bullets on the screen. */
 #define MAXAST 32 /* Max asteroids on the screen. */
+#define MAXPOWERUPS 3 /* Max powerups allowed active */
+#define POWERUPSTTL 60 * 1000 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
 #define SAVING_DIRECTORY "/ext/apps/Games"
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
@@ -30,6 +32,27 @@
 #endif
 
 /* ============================ Data structures ============================= */
+typedef enum PowerUpType {
+    PowerUpTypeNone, // No powerup
+    PowerUpTypeShield, // Shield
+    PowerUpTypeLife, // Extra life
+    PowerUpTypeFirePower, // Burst Fire power
+    PowerUpTypeRadialFire, // Radial Fire power
+    PowerUpTypeNuke, // Nuke power
+    PowerUpTypeClone, // Clone ship
+    PowerUpTypeAssist, // Secondary ship
+    Number_of_PowerUps // Used to count the number of powerups
+} PowerUpType;
+
+typedef struct PowerUp {
+    float x, y, vx, vy, /* Fields like in ship. */
+        // rot, /* Fields like ship. */
+        // rot_speed, /* Angular velocity (rot speed and sense). */
+        size; /* Power Up size. */
+    uint32_t ttl; /* Time to live, in ticks. */
+    enum PowerUpType powerUpType; /* Powerup type */
+
+} PowerUp;
 
 typedef struct Ship {
     float x, /* Ship x position. */
@@ -37,6 +60,8 @@ typedef struct Ship {
         vx, /* x velocity. */
         vy, /* y velocity. */
         rot; /* Current rotation. 2*PI full ortation. */
+    enum PowerUpType powerUp; /* Current powerup */
+    bool isPowerUpActive; /* Is the powerup active? */
 } Ship;
 
 typedef struct Bullet {
@@ -51,6 +76,7 @@ typedef struct Asteroid {
     uint8_t shape_seed; /* Seed to give random shape. */
 } Asteroid;
 
+// @todo AsteroidsApp
 typedef struct AsteroidsApp {
     /* GUI */
     Gui* gui;
@@ -73,9 +99,11 @@ typedef struct AsteroidsApp {
 
     /* Ship state. */
     struct Ship ship;
+    struct PowerUp powerUps[MAXPOWERUPS]; /* Each powerup state. */
+    int powerUps_num; /* Active powerups. */
 
     /* Bullets state. */
-    struct Bullet bullets[MAXBUL]; /* Each bullet state. */
+    struct Bullet bullets[MAXBUL * 2]; /* Each bullet state. */
     int bullets_num; /* Active bullets. */
     uint32_t last_bullet_tick; /* Tick the last bullet was fired. */
 
@@ -249,6 +277,52 @@ void draw_left_lives(Canvas* const canvas, AsteroidsApp* app) {
     }
 }
 
+void draw_powerUps(Canvas* const canvas, PowerUp* p) {
+    //@todo draw_powerUp
+    int BOX_SIZE = p->size;
+    switch(p->powerUpType) {
+    case PowerUpTypeNone:
+        break;
+    case PowerUpTypeFirePower:
+        // Draw box with letter F inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 8, p->y + 6, "F");
+        break;
+    case PowerUpTypeShield:
+        // Draw box with letter S inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 8, p->y + 6, "S");
+        break;
+    case PowerUpTypeLife:
+        // Draw box with letter L inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 8, p->y + 6, "L");
+        break;
+    case PowerUpTypeNuke:
+        // Draw box with letter N inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 8, p->y + 6, "N");
+        break;
+    case PowerUpTypeRadialFire:
+        // Draw box with letter R inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 8, p->y + 6, "R");
+        break;
+    case PowerUpTypeAssist:
+        // Draw box with letter A inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 8, p->y + 6, "A");
+        break;
+    default:
+        //@todo Uknown Power Up Type Detected
+        // Draw box with letter U inside
+        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x + 3, p->y + 3, "U");
+        FURI_LOG_E(TAG, "Unexpected Power Up Type Detected: %i", p->powerUpType);
+        break;
+    }
+}
+
 /* Given the current position, update it according to the velocity and
  * wrap it back to the other side if the object went over the screen. */
 void update_pos_by_velocity(float* x, float* y, float vx, float vy) {
@@ -294,6 +368,8 @@ void render_callback(Canvas* const canvas, void* ctx) {
     for(int j = 0; j < app->bullets_num; j++) draw_bullet(canvas, &app->bullets[j]);
 
     for(int j = 0; j < app->asteroids_num; j++) draw_asteroid(canvas, &app->asteroids[j]);
+
+    for(int j = 0; j < app->powerUps_num; j++) draw_powerUps(canvas, &app->powerUps[j]);
 
     /* Game over text. */
     if(app->gameover) {
@@ -365,7 +441,12 @@ bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, flo
 
 /* Create a new bullet headed in the same direction of the ship. */
 void ship_fire_bullet(AsteroidsApp* app) {
-    if(app->bullets_num == MAXBUL) return;
+    // No power ups, only MAXBUL allowed
+    if(app->ship.isPowerUpActive == false && app->bullets_num == MAXBUL) return;
+
+    // Double the Fire Power
+    if((app->ship.powerUp == PowerUpTypeFirePower) && (app->bullets_num == MAXBUL * 2)) return;
+
     notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
     Bullet* b = &app->bullets[app->bullets_num];
     b->x = app->ship.x;
@@ -466,6 +547,54 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
     }
 }
 
+PowerUp* add_powerUp(AsteroidsApp* app) {
+    if(app->powerUps_num == MAXPOWERUPS) return NULL;
+    float size = 4;
+    float min_distance = 20;
+    float x, y;
+    do {
+        x = rand() % SCREEN_XRES;
+        y = rand() % SCREEN_YRES;
+    } while(distance(app->ship.x, app->ship.y, x, y) < min_distance + size);
+    PowerUp* p = &app->powerUps[app->powerUps_num++];
+    p->x = x;
+    p->y = y;
+    p->vx = 2 * (-.5 + ((float)rand() / RAND_MAX));
+    p->vy = 2 * (-.5 + ((float)rand() / RAND_MAX));
+    // p->size = size;
+    // p->rot = 0;
+    // p->rot_speed = ((float)rand() / RAND_MAX) / 10;
+    // if(app->ticks & 1) p->rot_speed = -(p->rot_speed);
+    // p->shape_seed = rand() & 255;
+
+    //@todo add powerup type, for now hardcoding to firepower
+    p->powerUpType = 3; //rand() % Number_of_PowerUps;
+    return p;
+}
+
+void remove_powerUp(AsteroidsApp* app, int id) {
+    /* Replace the top powerUp with the empty space left
+     * by the removal of this one. This way we always take the
+     * array dense, which is an advantage when looping. */
+    int n = --app->powerUps_num;
+    if(n && id != n) app->powerUps[id] = app->powerUps[n];
+}
+
+void powerUp_was_hit(AsteroidsApp* app, int id) {
+    PowerUp* p = &app->powerUps[id];
+    remove_powerUp(app, id);
+    switch(p->powerUpType) {
+    case PowerUpTypeLife:
+        if(app->lives < GAME_START_LIVES) app->lives++;
+        break;
+    case PowerUpTypeFirePower:
+        app->powerUps[id].powerUpType = PowerUpTypeFirePower;
+        break;
+    default:
+        break;
+    }
+}
+
 /* Set gameover state. When in game-over mode, the game displays a gameover
  * text with a background of many asteroids floating around. */
 void game_over(AsteroidsApp* app) {
@@ -494,6 +623,7 @@ void restart_game(AsteroidsApp* app) {
     app->ship.vx = 0;
     app->ship.vy = 0;
     app->bullets_num = 0;
+    app->powerUps_num = 0;
     app->last_bullet_tick = 0;
     app->asteroids_num = 0;
     app->ship_hit = 0;
@@ -536,6 +666,13 @@ void update_asteroids_position(AsteroidsApp* app) {
     }
 }
 
+void update_powerUps_position(AsteroidsApp* app) {
+    for(int j = 0; j < app->powerUps_num; j++) {
+        update_pos_by_velocity(
+            &app->powerUps[j].x, &app->powerUps[j].y, app->powerUps[j].vx, app->powerUps[j].vy);
+    }
+}
+
 /* Collision detection and game state update based on collisions. */
 void detect_collisions(AsteroidsApp* app) {
     /* Detect collision between bullet and asteroid. */
@@ -561,6 +698,15 @@ void detect_collisions(AsteroidsApp* app) {
         Asteroid* a = &app->asteroids[j];
         if(objects_are_colliding(a->x, a->y, a->size, app->ship.x, app->ship.y, 4, 1)) {
             ship_was_hit(app);
+            break;
+        }
+    }
+
+    /* Detect collision between ship and powerUp. */
+    for(int j = 0; j < app->powerUps_num; j++) {
+        PowerUp* p = &app->powerUps[j];
+        if(objects_are_colliding(p->x, p->y, p->size, app->ship.x, app->ship.y, 4, 1)) {
+            powerUp_was_hit(app, j);
             break;
         }
     }
@@ -597,6 +743,7 @@ void game_tick(void* ctx) {
             restart_game_after_gameover(app);
         }
         update_asteroids_position(app);
+        update_powerUps_position(app);
         view_port_update(app->view_port);
         return;
     }
@@ -630,6 +777,7 @@ void game_tick(void* ctx) {
     update_pos_by_velocity(&app->ship.x, &app->ship.y, app->ship.vx, app->ship.vy);
     update_bullets_position(app);
     update_asteroids_position(app);
+    update_powerUps_position(app);
     detect_collisions(app);
 
     /* From time to time, create a new asteroid. The more asteroids
@@ -637,6 +785,11 @@ void game_tick(void* ctx) {
      * a new one. */
     if(app->asteroids_num == 0 || (random() % 5000) < (30 / (1 + app->asteroids_num))) {
         add_asteroid(app);
+    }
+
+    /* From time to time add a random power up */
+    if(app->powerUps_num == 0 || (random() % 5000) < (30 / (1 + app->powerUps_num))) {
+        add_powerUp(app);
     }
 
     app->ticks++;
