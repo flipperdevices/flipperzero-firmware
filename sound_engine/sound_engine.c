@@ -46,7 +46,10 @@ void sound_engine_deinit(SoundEngine *sound_engine)
 
     if (!(sound_engine->external_audio_output))
     {
-        furi_hal_speaker_release();
+        if(furi_hal_speaker_is_mine())
+        {
+            furi_hal_speaker_release();
+        }
     }
 
     else

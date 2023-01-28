@@ -24,6 +24,8 @@
 void sound_engine_dma_isr(void *ctx);
 void tracker_engine_timer_isr(void *ctx);
 void sound_engine_init_hardware(uint32_t sample_rate, bool external_audio_output, uint16_t *audio_buffer, uint32_t audio_buffer_size);
+void sound_engine_PWM_timer_init(bool external_audio_output);
+void sound_engine_set_audio_output(bool external_audio_output);
 void tracker_engine_init_hardware(uint8_t rate);
 void tracker_engine_set_rate(uint8_t rate);
 void sound_engine_start();

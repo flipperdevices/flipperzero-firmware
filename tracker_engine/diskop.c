@@ -92,9 +92,9 @@ bool load_song_inner(TrackerSong *song, Stream *stream)
 
     for (uint16_t i = 0; i < song->num_patterns; i++)
     {
-        song->pattern[i].step = (TrackerSongPatternStep *)malloc(sizeof(TrackerSongPatternStep) * (song->pattern_length - 1));
+        song->pattern[i].step = (TrackerSongPatternStep *)malloc(sizeof(TrackerSongPatternStep) * (song->pattern_length));
         set_empty_pattern(&song->pattern[i], song->pattern_length);
-        rwops = stream_read(stream, (uint8_t *)song->pattern[i].step, sizeof(TrackerSongPatternStep) * (song->pattern_length - 1));
+        rwops = stream_read(stream, (uint8_t *)song->pattern[i].step, sizeof(TrackerSongPatternStep) * (song->pattern_length));
     }
 
     rwops = stream_read(stream, (uint8_t *)&song->num_instruments, sizeof(song->num_instruments));

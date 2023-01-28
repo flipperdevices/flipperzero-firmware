@@ -126,7 +126,7 @@ int32_t flizzer_tracker_app(void *p)
     UNUSED(st);
     furi_record_close(RECORD_STORAGE);
 
-    FlizzerTrackerApp *tracker = init_tracker(44100, 50, false, 1024);
+    FlizzerTrackerApp *tracker = init_tracker(44100, 50, true, 1024);
 
     // Текущее событие типа кастомного типа FlizzerTrackerEvent
     FlizzerTrackerEvent event;
@@ -260,9 +260,19 @@ int32_t flizzer_tracker_app(void *p)
                 furi_string_free(path);
             }
         }
+
+        if(event.type == EventTypeSetAudioMode)
+        {
+            sound_engine_set_audio_output(tracker->external_audio);
+            sound_engine_PWM_timer_init(tracker->external_audio);
+
+            tracker->sound_engine.external_audio_output = tracker->external_audio;
+        }
     }
 
     stop();
+
+    save_config(tracker);
 
     deinit_tracker(tracker);
 

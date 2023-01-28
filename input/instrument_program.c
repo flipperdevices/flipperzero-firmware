@@ -97,7 +97,7 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                 {
                     int8_t nibble = ((opcode & 0x00f0) >> 4);
 
-                    if (nibble + 1 < 0xf)
+                    if (nibble + 1 <= 0xf)
                     {
                         nibble++;
                     }
@@ -117,7 +117,7 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                 {
                     int8_t nibble = (opcode & 0x000f);
 
-                    if (nibble + 1 < 0xf)
+                    if (nibble + 1 <= 0xf)
                     {
                         nibble++;
                     }

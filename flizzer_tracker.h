@@ -13,6 +13,7 @@
 #include <toolbox/stream/file_stream.h>
 
 #include <gui/modules/text_input.h>
+#include <gui/modules/variable_item_list.h>
 #include <gui/view_dispatcher.h>
 
 #include "flizzer_tracker_hal.h"
@@ -29,6 +30,7 @@ typedef enum
     EventTypeInput,
     EventTypeSaveSong,
     EventTypeLoadSong,
+    EventTypeSetAudioMode,
 } EventType;
 
 typedef struct
@@ -137,19 +139,19 @@ typedef enum
     VIEW_SUBMENU_PATTERN,
     VIEW_SUBMENU_INSTRUMENT,
     VIEW_FILE_OVERWRITE,
+    VIEW_SETTINGS,
 } FlizzerTrackerViews;
 
 typedef enum
 {
-    SUBMENU_PATTERN_RETURN,
     SUBMENU_PATTERN_LOAD_SONG,
     SUBMENU_PATTERN_SAVE_SONG,
+    SUBMENU_PATTERN_SETTINGS,
     SUBMENU_PATTERN_EXIT,
 } PatternSubmenuParams;
 
 typedef enum
 {
-    SUBMENU_INSTRUMENT_RETURN,
     SUBMENU_INSTRUMENT_EXIT,
 } InstrumentSubmenuParams;
 
@@ -167,11 +169,14 @@ typedef struct
     DialogsApp *dialogs;
     Submenu *pattern_submenu;
     Submenu *instrument_submenu;
+    VariableItemList* settings_list;
     Widget *overwrite_file_widget;
     char filename[FILE_NAME_LEN + 1];
     bool was_it_back_keypress;
     uint32_t current_time;
     uint32_t period;
+
+    bool external_audio;
 
     SoundEngine sound_engine;
     TrackerEngine tracker_engine;
@@ -192,6 +197,10 @@ typedef struct
     bool is_saving;
 
     bool quit;
+
+    char eq[2];
+    char param[80];
+    char value[10];
 } FlizzerTrackerApp;
 
 typedef struct

@@ -1,5 +1,7 @@
 #include "diskop.h"
 
+#define CFG_FILENAME "settings.cfg"
+
 void save_instrument_inner(Stream *stream, Instrument *inst)
 {
     size_t rwops = stream_write(stream, (uint8_t *)inst->name, sizeof(inst->name));
@@ -103,7 +105,7 @@ bool save_song(FlizzerTrackerApp *tracker, FuriString *filepath)
 
     for (uint16_t i = 0; i < song->num_patterns; i++)
     {
-        rwops = stream_write(tracker->stream, (uint8_t *)song->pattern[i].step, sizeof(TrackerSongPatternStep) * (song->pattern_length - 1));
+        rwops = stream_write(tracker->stream, (uint8_t *)song->pattern[i].step, sizeof(TrackerSongPatternStep) * (song->pattern_length));
     }
 
     rwops = stream_write(tracker->stream, (uint8_t *)&song->num_instruments, sizeof(song->num_instruments));
@@ -134,4 +136,58 @@ bool load_song_util(FlizzerTrackerApp *tracker, FuriString *filepath)
     furi_string_free(filepath);
     UNUSED(open_file);
     return result;
+}
+
+void save_config(FlizzerTrackerApp* tracker)
+{
+    //stream_read_line
+    FuriString* filepath = furi_string_alloc();
+    FuriString* config_line = furi_string_alloc();
+    furi_string_cat_printf(filepath, "%s/%s", FLIZZER_TRACKER_FOLDER, CFG_FILENAME);
+
+    bool open_file = file_stream_open(tracker->stream, furi_string_get_cstr(filepath), FSAM_WRITE, FSOM_OPEN_ALWAYS);
+    UNUSED(open_file);
+
+    furi_string_cat_printf(config_line, "%s = %s\n", "external_audio", tracker->external_audio ? "true" : "false");
+    stream_write_string(tracker->stream, config_line);
+
+    file_stream_close(tracker->stream);
+    furi_string_free(filepath);
+    furi_string_free(config_line);
+}
+
+void load_config(FlizzerTrackerApp* tracker)
+{
+    FuriString* filepath = furi_string_alloc();
+    FuriString* config_line = furi_string_alloc();
+    furi_string_cat_printf(filepath, "%s/%s", FLIZZER_TRACKER_FOLDER, CFG_FILENAME);
+
+    bool open_file = file_stream_open(tracker->stream, furi_string_get_cstr(filepath), FSAM_READ, FSOM_OPEN_ALWAYS);
+    UNUSED(open_file);
+
+    stream_read_line(tracker->stream, config_line);
+
+    sscanf(furi_string_get_cstr(config_line), "%s%s%s", tracker->param, tracker->eq, tracker->value);
+
+    if(strcmp(tracker->param, "external_audio") == 0)
+    {
+        if(strcmp(tracker->value, "false") == 0)
+        {
+            tracker->external_audio = false;
+            //strcpy(tracker->value, "false_");
+        }
+
+        if(strcmp(tracker->value, "true") == 0)
+        {
+            tracker->external_audio = true;
+            //strcpy(tracker->value, "true_");
+        }
+
+        sound_engine_init(&tracker->sound_engine, tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer_size);
+        //sound_engine_set_audio_output(tracker->external_audio);
+    }
+
+    file_stream_close(tracker->stream);
+    furi_string_free(filepath);
+    furi_string_free(config_line);
 }

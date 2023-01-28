@@ -40,6 +40,9 @@ void tracker_engine_timer_isr(void *ctx)
 
 void sound_engine_PWM_timer_init(bool external_audio_output) // external audio on pin PA6
 {
+    LL_TIM_DisableAllOutputs(SPEAKER_PWM_TIMER);
+    LL_TIM_DisableCounter(SPEAKER_PWM_TIMER);
+
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
@@ -56,17 +59,50 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
     if (external_audio_output)
     {
         furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
+
+        if(furi_hal_speaker_is_mine())
+        {
+            furi_hal_speaker_release();
+        }
     }
 
     else
     {
-        bool unu = furi_hal_speaker_acquire(1000);
-        UNUSED(unu);
+        if(!(furi_hal_speaker_is_mine()))
+        {
+            bool unu = furi_hal_speaker_acquire(1000);
+            UNUSED(unu);
+        }
+        
         furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 
     LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);
     LL_TIM_EnableCounter(SPEAKER_PWM_TIMER);
+}
+
+void sound_engine_set_audio_output(bool external_audio_output)
+{
+    if (external_audio_output)
+    {
+        furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
+
+        if(furi_hal_speaker_is_mine())
+        {
+            furi_hal_speaker_release();
+        }
+    }
+
+    else
+    {
+        if(!(furi_hal_speaker_is_mine()))
+        {
+            bool unu = furi_hal_speaker_acquire(1000);
+            UNUSED(unu);
+        }
+
+        furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    }
 }
 
 void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6

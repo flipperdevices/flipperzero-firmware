@@ -2,6 +2,8 @@
 
 #include "diskop.h"
 
+#define AUDIO_MODES_COUNT 2
+
 void return_from_keyboard_callback(void *ctx)
 {
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)ctx;
@@ -106,6 +108,18 @@ void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType typ
     }
 }
 
+uint32_t submenu_settings_exit_callback(void* context)
+{
+    UNUSED(context);
+    return VIEW_SUBMENU_PATTERN;
+}
+
+uint32_t submenu_exit_callback(void* context)
+{
+    UNUSED(context);
+    return VIEW_TRACKER;
+}
+
 void submenu_callback(void *context, uint32_t index)
 {
     FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)context;
@@ -116,12 +130,6 @@ void submenu_callback(void *context, uint32_t index)
         {
             switch (index)
             {
-                case SUBMENU_PATTERN_RETURN:
-                {
-                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
-                    break;
-                }
-
                 case SUBMENU_PATTERN_EXIT:
                 {
                     tracker->quit = true;
@@ -153,6 +161,12 @@ void submenu_callback(void *context, uint32_t index)
                     break;
                 }
 
+                case SUBMENU_PATTERN_SETTINGS:
+                {
+                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_SETTINGS);
+                    break;
+                }
+
                 default:
                     break;
             }
@@ -164,12 +178,6 @@ void submenu_callback(void *context, uint32_t index)
         {
             switch (index)
             {
-                case SUBMENU_INSTRUMENT_RETURN:
-                {
-                    view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
-                    break;
-                }
-
                 case SUBMENU_INSTRUMENT_EXIT:
                 {
                     tracker->quit = true;
@@ -190,6 +198,28 @@ void submenu_callback(void *context, uint32_t index)
 
         default:
             break;
+    }
+}
+
+void audio_output_changed_callback(VariableItem* item)
+{
+    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, audio_modes_text[(index > 1 ? 1 : index)]);
+
+    if(tracker)
+    {
+        tracker->external_audio = (bool)index;
+
+        tracker->external_audio = audio_modes_values[(index > 1 ? 1 : index)];
+
+        //sound_engine_init(&tracker->sound_engine, tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer_size);
+        //sound_engine_init_hardware(tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
+
+        FlizzerTrackerEvent event = {.type = EventTypeSetAudioMode, .input = {0}, .period = 0};
+        furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+
+        UNUSED(event);
     }
 }
 
@@ -283,14 +313,14 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
         {
             case PATTERN_VIEW:
             {
-                submenu_set_selected_item(tracker->pattern_submenu, SUBMENU_PATTERN_RETURN);
+                submenu_set_selected_item(tracker->pattern_submenu, SUBMENU_PATTERN_LOAD_SONG);
                 view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN);
                 break;
             }
 
             case INST_EDITOR_VIEW:
             {
-                submenu_set_selected_item(tracker->instrument_submenu, SUBMENU_INSTRUMENT_RETURN);
+                submenu_set_selected_item(tracker->instrument_submenu, SUBMENU_INSTRUMENT_EXIT);
                 view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT);
                 break;
             }
