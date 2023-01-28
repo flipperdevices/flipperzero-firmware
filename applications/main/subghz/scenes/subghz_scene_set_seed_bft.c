@@ -14,7 +14,6 @@ void subghz_scene_set_seed_bft_on_enter(void* context) {
     SubGhz* subghz = context;
 
     // Setup view
-    // roguemaster don't steal!!!
     ByteInput* byte_input = subghz->byte_input;
     byte_input_set_header_text(byte_input, "Enter SEED in hex");
     byte_input_set_result_callback(
