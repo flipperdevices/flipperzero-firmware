@@ -50,6 +50,7 @@ const uint32_t MSIRangeTable[16UL] = {
     0UL,
     0UL}; /* 0UL values are incorrect cases */
 double time;
+uint8_t pause = 0;
 
 void Error_Handler() {
     while(1) {
@@ -213,7 +214,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
         mvoltWrite[tmp_index] = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI, aADCxConvertedData[tmp_index]);
     }
     ubDmaTransferStatus = 1;
-    swap(&mvoltWrite, &mvoltDisplay);
+    if(!pause) swap(&mvoltWrite, &mvoltDisplay);
 }
 
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc) {
@@ -233,7 +234,7 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* hadc) {
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
     char buf[50];
-    snprintf(buf, 50, "Time: %.3f", time);
+    snprintf(buf, 50, "Time: %.5f", time);
 
     canvas_draw_str(canvas, 10, 10, buf);
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++) {
@@ -263,6 +264,8 @@ void scope_scene_run_on_enter(void* context) {
     ScopeApp* app = context;
     time = app->time;
     UNUSED(app);
+
+    pause = 0;
 
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
@@ -330,6 +333,9 @@ void scope_scene_run_on_enter(void* context) {
                 case InputKeyUp:
                     break;
                 case InputKeyDown:
+                    break;
+                case InputKeyOk:
+                    pause ^= 1;
                     break;
                 default:
                     running = false;

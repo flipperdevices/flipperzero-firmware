@@ -12,19 +12,27 @@
  * Protocol description
  * ====================
  *
- * "1" represents a pulse of one-third bit time (100us)
- * "0" represents a gap of one-third bit time (100us)
+ * The protocol works with different data rates. However here is defined
+ * to use a short pulse/gap duration of 300us and a long pulse/gap
+ * duration of 600us. Even with the Flipper hardware, the protocol works
+ * with 100/200us, but becomes less reliable and standard presets can't
+ * be used because of the higher data rate.
+ *
+ * In the following description we have that:
+ *
+ * "1" represents a pulse of one-third bit time (300us)
+ * "0" represents a gap of one-third bit time (300us)
  * 
  * The message starts with a preamble + a sync pattern:
  * 
- * preamble = 10101010101010101010101010101010
- * sync     = 1100110011001100
+ * preamble = 1010101010101010 x 3
+ * sync     = 1100110011001010
  * 
  * The a variable amount of bytes follow, where each bit
  * is encoded in the following way:
  * 
- * zero 100 (100 us pulse, 200 us gap)
- * one  110 (200 us pulse, 100 us gap)
+ * zero 100 (300 us pulse, 600 us gap)
+ * one  110 (600 us pulse, 300 us gap)
  * 
  * Bytes are sent MSB first, so receiving, in sequence, bits
  * 11100001, means byte E1.
@@ -44,21 +52,50 @@
  * 
  * Checksum = sum of bytes modulo 256, with checksum set
  *            to 0 for the computation.
+ *
+ * Design notes
+ * ============
+ *
+ * The protocol is designed in order to have certain properties:
+ *
+ * 1. Pulses and gaps can only be 100 or 200 microseconds, so the
+ *    message can be described, encoded and decoded with only two
+ *    fixed durations.
+ *
+ * 2. The preamble + sync is designed to have a well recognizable
+ *    pattern that can't be reproduced just for accident inside
+ *    the encoded pattern. There is no combinatio of encoded bits
+ *    leading to the preamble+sync. Also the sync pattern final
+ *    part can't be mistaken for actual bits of data, since it
+ *    contains alternating short pulses/gaps at 100us.
+ *
+ * 3. Data encoding wastes some bandwidth in order to be more
+ *    robust. Even so, with a 300us clock period, a single bit
+ *    bit takes 900us, reaching a data transfer of 138 characters per
+ *    second. More than enough for the simple chat we have here.
  */
 
 static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo* info) {
-    const char* sync_pattern = "1010101010101010"
-                               "1100110011001100";
+    const char* sync_pattern = "1010101010101010" // Preamble
+                               "1100110011001010"; // Sync
     uint8_t sync_len = 32;
 
-    // This is a variable length message, however the minimum length
-    // requires a sender len byte (of value zero) and the terminator
-    // FF 00 plus checksum: a total of 4 bytes.
+    /* This is a variable length message, however the minimum length
+     * requires a sender len byte (of value zero) and the terminator
+     * FF 00 plus checksum: a total of 4 bytes. */
     if(numbits - sync_len < 8 * 4) return false;
 
     uint64_t off = bitmap_seek_bits(bits, numbytes, 0, numbits, sync_pattern);
     if(off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Chat preamble+sync found");
+
+    /* If there is room on the left, let's mark the start of the message
+     * a bit before: we don't try to detect all the preamble, but only
+     * the first part, however it is likely present. */
+    if(off >= 16) {
+        off -= 16;
+        sync_len += 16;
+    }
 
     info->start_off = off;
     off += sync_len; /* Skip preamble and sync. */
@@ -73,7 +110,7 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     // The message needs to have a two bytes terminator before
     // the checksum.
     uint32_t j;
-    for(j = 0; j < sizeof(raw) - 2; j++)
+    for(j = 0; j < sizeof(raw) - 1; j++)
         if(raw[j] == 0xff && raw[j + 1] == 0xaa) break;
 
     if(j == sizeof(raw) - 1) {
@@ -84,7 +121,7 @@ static bool decode(uint8_t* bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint32_t datalen = j + 3; // If the terminator was found at j, then
         // we need to sum three more bytes to have
         // the len: FF itself, AA, checksum.
-    info->pulses_count = 8 * 3 * datalen;
+    info->pulses_count = sync_len + 8 * 3 * datalen;
 
     // Check if the control sum matches.
     if(sum_bytes(raw, datalen - 1, 0) != raw[datalen - 1]) {
@@ -113,20 +150,26 @@ static void get_fields(ProtoViewFieldSet* fieldset) {
 
 /* Create a signal. */
 static void build_message(RawSamplesBuffer* samples, ProtoViewFieldSet* fs) {
-    uint32_t te = 100; /* Short pulse duration in microseconds.
+    uint32_t te = 300; /* Short pulse duration in microseconds.
                           Our protocol needs three symbol times to send
                           a bit, so 300 us per bit = 3.33 kBaud. */
 
-    // Preamble: 16 alternating 100us pulse/gap pairs.
-    for(int j = 0; j < 16; j++) {
+    // Preamble: 24 alternating 300us pulse/gap pairs.
+    for(int j = 0; j < 24; j++) {
         raw_samples_add(samples, true, te);
         raw_samples_add(samples, false, te);
     }
 
-    // Sync: 4 alternating 200 us pulse/gap pairs.
-    for(int j = 0; j < 4; j++) {
+    // Sync: 3 alternating 600 us pulse/gap pairs.
+    for(int j = 0; j < 3; j++) {
         raw_samples_add(samples, true, te * 2);
         raw_samples_add(samples, false, te * 2);
+    }
+
+    // Sync: plus 2 alternating 300 us pluse/gap pairs.
+    for(int j = 0; j < 2; j++) {
+        raw_samples_add(samples, true, te);
+        raw_samples_add(samples, false, te);
     }
 
     // Data: build the array.
