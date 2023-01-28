@@ -8,6 +8,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi/core/log.h>
+#include <furi_hal_gpio.h>
+#include <furi_hal_resources.h>
 
 #include <gui/gui.h>
 #include <gui/view.h>

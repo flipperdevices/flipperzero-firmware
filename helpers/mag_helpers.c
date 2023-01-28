@@ -27,9 +27,29 @@ void bitbang_raw(bool value, MagSetting* setting)
             furi_hal_gpio_write(GPIO_PIN_A, value);
             furi_hal_gpio_write(GPIO_PIN_B, !value);
             break;
+        case MagTxCC1101_434:
+        case MagTxCC1101_868:
+            furi_hal_gpio_write(&gpio_cc1101_g0, true);
+            furi_delay_us(64);
+            furi_hal_gpio_write(&gpio_cc1101_g0, false);
+            break;
         default:
             break;
     }
+}
+
+void play_bit_rf(bool bit, MagSetting* setting) {
+
+    bit_dir ^= 1;
+    furi_hal_gpio_write(&gpio_cc1101_g0, bit_dir);
+    furi_delay_us(setting->us_clock);
+
+    if(bit) {
+        bit_dir ^= 1;
+        furi_hal_gpio_write(&gpio_cc1101_g0, bit_dir);
+    }
+    furi_delay_us(setting->us_clock);
+    furi_delay_us(setting->us_interpacket);
 }
 
 void play_bit_rfid(uint8_t send_bit, MagSetting* setting) {
@@ -72,6 +92,10 @@ bool play_bit(uint8_t send_bit, MagSetting* setting) {
         break;
     case MagTxStateGPIOA6A7:
         play_bit_gpio(send_bit, setting);
+        break;
+    case MagTxCC1101_434:
+    case MagTxCC1101_868:
+        play_bit_rf(send_bit & 0x01, setting);
         break;
     default:
         return false;
@@ -135,6 +159,28 @@ void tx_reset_gpio() {
     furi_hal_power_disable_otg();
 }
 
+void tx_init_rf(int hz)
+{
+    // presets and frequency will need some experimenting
+    furi_hal_subghz_reset();
+    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    // furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
+    // furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
+    // furi_hal_subghz_load_preset(FuriHalSubGhzPreset2FSKDev238Async);
+    // furi_hal_subghz_load_preset(FuriHalSubGhzPreset2FSKDev476Async);
+    furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    furi_hal_subghz_set_frequency_and_path(hz);
+    furi_hal_subghz_tx();
+    furi_hal_gpio_write(&gpio_cc1101_g0, false);
+}
+
+void tx_deinit_rf()
+{
+    furi_hal_gpio_write(&gpio_cc1101_g0, false);
+    furi_hal_subghz_reset();
+    furi_hal_subghz_idle();
+}
+
 bool tx_init(MagSetting* setting) {
     // Initialize configured TX method
     switch(setting->tx) {
@@ -143,6 +189,12 @@ bool tx_init(MagSetting* setting) {
         break;
     case MagTxStateGPIOA6A7:
         tx_init_gpio();
+        break;
+    case MagTxCC1101_434:
+        tx_init_rf(434000000);
+        break;
+    case MagTxCC1101_868:
+        tx_init_rf(868000000);
         break;
     default:
         return false;
@@ -159,6 +211,10 @@ bool tx_reset(MagSetting* setting) {
         break;
     case MagTxStateGPIOA6A7:
         tx_reset_gpio();
+        break;
+    case MagTxCC1101_434:
+    case MagTxCC1101_868:
+        tx_deinit_rf();
         break;
     default:
         return false;

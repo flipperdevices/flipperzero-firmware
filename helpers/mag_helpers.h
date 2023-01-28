@@ -27,3 +27,5 @@ uint16_t add_bit_manchester(bool value, uint8_t* out, uint16_t count);
 uint16_t msr_encode(char* data, uint8_t* out_manchester, uint8_t* out_raw, uint8_t track_bits, uint8_t track_ascii_offset);
 void debug_msr_string(char* data,  uint8_t track_bits, uint8_t track_ascii_offset);
 void mag_spoof_bitwise(Mag* mag);
+void tx_deinit_rf();
+void tx_init_rf(int hz);
