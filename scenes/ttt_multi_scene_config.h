@@ -1,0 +1,1 @@
+ADD_SCENE(ttt_multi, start, Start)
