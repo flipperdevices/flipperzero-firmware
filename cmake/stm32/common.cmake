@@ -72,7 +72,11 @@ endfunction()
 # The generated file will be placed in the same directory as the target output file.
 function(_stm32_generate_file TARGET OUTPUT_EXTENSION OBJCOPY_BFD_OUTPUT)
     get_target_property(TARGET_OUTPUT_NAME ${TARGET} OUTPUT_NAME)
-    set(OUTPUT_FILE_NAME "${TARGET_OUTPUT_NAME}.${OUTPUT_EXTENSION}")
+    if (TARGET_OUTPUT_NAME)
+        set(OUTPUT_FILE_NAME "${TARGET_OUTPUT_NAME}.${OUTPUT_EXTENSION}")
+    else()
+        set(OUTPUT_FILE_NAME "${TARGET}.${OUTPUT_EXTENSION}")
+    endif()
 
     get_target_property(RUNTIME_OUTPUT_DIRECTORY ${TARGET} RUNTIME_OUTPUT_DIRECTORY)
     if(RUNTIME_OUTPUT_DIRECTORY)
