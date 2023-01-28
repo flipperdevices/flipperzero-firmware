@@ -17,7 +17,7 @@
  * 
  * The message starts with a preamble + a sync pattern:
  * 
- * preamble = 10101010101010101010101010101010
+ * preamble = 1010101010101010 x 3
  * sync     = 1100110011001100
  * 
  * The a variable amount of bytes follow, where each bit
@@ -50,14 +50,22 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     const char *sync_pattern = "1010101010101010" "1100110011001100";
     uint8_t sync_len = 32;
 
-    // This is a variable length message, however the minimum length
-    // requires a sender len byte (of value zero) and the terminator
-    // FF 00 plus checksum: a total of 4 bytes.
+    /* This is a variable length message, however the minimum length
+     * requires a sender len byte (of value zero) and the terminator
+     * FF 00 plus checksum: a total of 4 bytes. */
     if (numbits-sync_len < 8*4) return false;
 
     uint64_t off = bitmap_seek_bits(bits,numbytes,0,numbits,sync_pattern);
     if (off == BITMAP_SEEK_NOT_FOUND) return false;
     FURI_LOG_E(TAG, "Chat preamble+sync found");
+
+    /* If there is room on the left, let's mark the start of the message
+     * a bit before: we don't try to detect all the preamble, but only
+     * the first part, however it is likely present. */
+    if (off >= 16) {
+        off -= 16;
+        sync_len += 16;
+    }
 
     info->start_off = off;
     off += sync_len; /* Skip preamble and sync. */
@@ -73,7 +81,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     // The message needs to have a two bytes terminator before
     // the checksum.
     uint32_t j;
-    for (j = 0; j < sizeof(raw)-2; j++)
+    for (j = 0; j < sizeof(raw)-1; j++)
         if (raw[j] == 0xff && raw[j+1] == 0xaa) break;
 
     if (j == sizeof(raw)-1) {
@@ -84,7 +92,7 @@ static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoView
     uint32_t datalen = j+3; // If the terminator was found at j, then
                             // we need to sum three more bytes to have
                             // the len: FF itself, AA, checksum.
-    info->pulses_count = 8*3*datalen;
+    info->pulses_count = sync_len + 8*3*datalen;
 
     // Check if the control sum matches.
     if (sum_bytes(raw,datalen-1,0) != raw[datalen-1]) {
@@ -118,8 +126,8 @@ static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fs)
                           Our protocol needs three symbol times to send
                           a bit, so 300 us per bit = 3.33 kBaud. */
 
-    // Preamble: 16 alternating 100us pulse/gap pairs.
-    for (int j = 0; j < 16; j++) {
+    // Preamble: 24 alternating 100us pulse/gap pairs.
+    for (int j = 0; j < 24; j++) {
         raw_samples_add(samples,true,te);
         raw_samples_add(samples,false,te);
     }
