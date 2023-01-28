@@ -216,9 +216,9 @@ static void draw_battery(Canvas* canvas, PowerInfo* info, int x, int y) {
         snprintf(header, sizeof(header), "Charged!");
     }
 
-    if (!strcmp(value, "")) {
+    if(!strcmp(value, "")) {
         canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, header);
-    } else if (!strcmp(header, "")) {
+    } else if(!strcmp(header, "")) {
         canvas_draw_str_aligned(canvas, x + 92, y + 14, AlignCenter, AlignCenter, value);
     } else {
         canvas_draw_str_aligned(canvas, x + 92, y + 9, AlignCenter, AlignCenter, header);
@@ -317,24 +317,19 @@ int32_t about_settings_app(void* p) {
     DialogMessageButton screen_result;
 
     // draw empty screen to prevent menu flickering
-    view_dispatcher_add_view(
-        view_dispatcher, battery_info_index, battery_view);
+    view_dispatcher_add_view(view_dispatcher, battery_info_index, battery_view);
     view_dispatcher_add_view(
         view_dispatcher, empty_screen_index, empty_screen_get_view(empty_screen));
     view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
     screen_index = -1 + !battery_info;
     while(screen_index > -2) {
-
-        if (screen_index == -1) {
-            if (!battery_info) {
+        if(screen_index == -1) {
+            if(!battery_info) {
                 break;
             }
             with_view_model(
-                battery_view,
-                PowerInfo * model,
-                { power_get_info(power, model); },
-                true);
+                battery_view, PowerInfo * model, { power_get_info(power, model); }, true);
             view_dispatcher_switch_to_view(view_dispatcher, battery_info_index);
             furi_semaphore_acquire(semaphore, 2000);
         } else {
@@ -353,7 +348,6 @@ int32_t about_settings_app(void* p) {
                 screen_index = -2;
             }
         }
-
     }
 
     dialog_message_free(message);

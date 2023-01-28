@@ -72,10 +72,10 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
                     view->interact_callback(view->interact_callback_context);
                 }
             } else if(event->type == InputTypeLong) {
-				Loader* loader = furi_record_open(RECORD_LOADER);
-				loader_start(loader, "About", "batt");
-				furi_record_close(RECORD_LOADER);
-			}
+                Loader* loader = furi_record_open(RECORD_LOADER);
+                loader_start(loader, "About", "batt");
+                furi_record_close(RECORD_LOADER);
+            }
         }
     }
 
