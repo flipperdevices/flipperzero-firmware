@@ -15,6 +15,10 @@ Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 
 ![wiring](wiring.png)
 
+See the [tutorial video](https://www.youtube.com/watch?v=5vSGFzEBp-k) from
+Lab401 by [RocketGod](https://github.com/RocketGod-git) for a visual guide to
+the hardware setup.
+
 ### Confirmed Compatible Modules
 
 * [Adafruit Ultimate GPS Breakout]
