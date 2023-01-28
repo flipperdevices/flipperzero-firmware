@@ -1,4 +1,4 @@
-// v1.1
+// v1.2
 
 // System libraries
 #include <stdlib.h>
@@ -13,9 +13,61 @@
 #include <notification/notification_messages.h>
 #include <bad_usb/bad_usb_script.h>
 
+#define MAX_SCRIPT_LINES 256
+#define READ_CHUNK_SIZE 256
+#define PATH_SPLIT_SIZE 256
+#define LS_NAME_SIZE 256
+
 static FuriString* cwd;
 static bool registered = false;
 static bool initialized = false;
+/*
+  ______                              _       _     _           
+ |  ____|                            (_)     | |   | |          
+ | |__   _ ____   __ __   ____ _ _ __ _  __ _| |__ | | ___  ___ 
+ |  __| | '_ \ \ / / \ \ / / _` | '__| |/ _` | '_ \| |/ _ \/ __|
+ | |____| | | \ V /   \ V / (_| | |  | | (_| | |_) | |  __/\__ \
+ |______|_| |_|\_/     \_/ \__,_|_|  |_|\__,_|_.__/|_|\___||___/
+*/
+/*typedef struct EnvVarialbe {
+	FuriString* name;
+	FuriString* value;
+} EnvVarialbe;
+static EnvVarialbe* env_var_alloc(){
+	EnvVarialbe* var = (EnvVarialbe*)malloc(sizeof(EnvVarialbe));
+	var->name = furi_string_alloc_set_str("");
+	var->value = furi_string_alloc_set_str("");
+	return var;
+}
+static void env_var_free(EnvVarialbe* var){
+	furi_string_free(var->name);
+	furi_string_free(var->value);
+	free(var);
+}
+static EnvVarialbe* vars[64];
+static FuriString* env_var_get(FuriString* name){
+	for(int i = 0; i < 64; i++){
+		if(furi_string_cmp(vars[i]->name, name) != 0) continue;
+		return vars[i]->value;
+	}
+	return furi_string_alloc_set_str("");
+}
+static void env_var_set(FuriString* name, FuriString* value){
+	for(int i = 0; i < 64; i++){
+		if(furi_string_cmp(vars[i]->name, name) == 0){
+			furi_string_free(vars[i]->value);
+			vars[i]->value = value;
+			return;
+		}
+		if(furi_string_cmp_str(vars[i]->name, "") == 0){
+			furi_string_free(vars[i]->name);
+			furi_string_free(vars[i]->value);
+			vars[i]->name = name;
+			vars[i]->value = value;
+			return;
+		}
+	}
+}*/
 
 /*
    _____       _         _        _             
@@ -44,8 +96,8 @@ static void furi_string_u_substr(FuriString* str, size_t start, size_t end){
  |_|   \__,_|\__|_| |_|
 */
 static FuriString* path_parse(FuriString* path){
-	FuriString* parts[256]; // Max safe depth 256
-	for(int i = 0; i < 256; i++){
+	FuriString* parts[PATH_SPLIT_SIZE]; // Max safe depth
+	for(int i = 0; i < PATH_SPLIT_SIZE; i++){
 		parts[i] = furi_string_alloc_set_str("");
 	}
 	bool is_root;
@@ -63,7 +115,7 @@ static FuriString* path_parse(FuriString* path){
 			furi_string_push_back(part, furi_string_get_char(path, i));
 	}
 	furi_string_free(part);
-	for(int i = 0; i < 256; i++){
+	for(int i = 0; i < PATH_SPLIT_SIZE; i++){
 		if(furi_string_cmp_str(parts[i], "") == 0) continue;
 		if(furi_string_cmp_str(parts[i], ".") == 0) furi_string_set_str(parts[i], "");
 		if(furi_string_cmp_str(parts[i], "..") == 0){
@@ -85,13 +137,13 @@ static FuriString* path_parse(FuriString* path){
 	else
 		res = furi_string_alloc_set_str("");
 	bool flag = false;
-	for(int i = 0; i < 256; i++){
+	for(int i = 0; i < PATH_SPLIT_SIZE; i++){
 		if(furi_string_cmp_str(parts[i], "") == 0) continue;
 		flag = true;
 		furi_string_cat(res, parts[i]);
 		furi_string_push_back(res, '/');
 	}
-	for(int i = 0; i < 256; i++)
+	for(int i = 0; i < PATH_SPLIT_SIZE; i++)
 		furi_string_free(parts[i]);
 	if(furi_string_cmp_str(res, "") == 0)
 		furi_string_set_str(res, "/");
@@ -122,6 +174,40 @@ static void path_split(FuriString* src, FuriString* path1, FuriString* path2){
 	
 	furi_string_set(path1, path_parse(path1));
 	furi_string_set(path2, path_parse(path2));
+}
+
+/*
+  ______                     _       
+ |  ____|                   | |      
+ | |__  __  _____  ___ _   _| |_ ___ 
+ |  __| \ \/ / _ \/ __| | | | __/ _ \
+ | |____ >  <  __/ (__| |_| | ||  __/
+ |______/_/\_\___|\___|\__,_|\__\___|
+*/
+static void execute_command(FuriString* scommand, Cli* cli){
+	size_t cmti = furi_string_search_char(scommand, '#');
+	FuriString* cline = furi_string_alloc_set(scommand);
+	furi_string_u_substr(cline, 0, cmti);
+	furi_string_trim(cline);
+	if(furi_string_cmp_str(cline, "") == 0) return;
+	size_t index = furi_string_search_char(cline, ' ');
+	FuriString* command = furi_string_alloc_set(cline);
+	if(index != 4294967295) furi_string_u_substr(command, 0, index);
+	FuriString* arguments = furi_string_alloc_set(cline);
+	if(index == 4294967295) furi_string_set_str(arguments, "");
+	else furi_string_u_substr(arguments, index + 1, furi_string_size(cline));
+	
+	/* Uncomment for debugging
+	printf("L %d\r\n", i);
+	printf("I %d\r\n", cmti);
+	printf("J %d\r\n", index);
+	printf("X %s\r\n", furi_string_get_cstr(cline));
+	printf("C %s\r\n", furi_string_get_cstr(command));
+	printf("A %s\r\n", furi_string_get_cstr(arguments));
+	*/
+	
+	CliCommand* cli_command = CliCommandTree_get(cli->commands, command);
+	cli_command->callback(cli, arguments, cli_command->context);
 }
 
 /*
@@ -170,14 +256,14 @@ static void extra_help_handler(Cli* cli, FuriString* args, void* context){
 	if(empty || furi_string_cmp_str(args, "touch") == 0)      printf("Creates a file at the specified path.\r\n");
 	if(empty || furi_string_cmp_str(args, "write") == 0)      printf("write <path>\r\n");
 	if(empty || furi_string_cmp_str(args, "write") == 0)      printf("Writes input text to the specified file.\r\n");
-}
+	}
 static void echo_handler(Cli* cli, FuriString* args, void* context){
 	UNUSED(cli);
 	UNUSED(context);
 	
 	cli_write(cli, (uint8_t*)furi_string_get_cstr(args), furi_string_size(args));
 	printf("\r\n");
-}
+	}
 static void ls_handler(Cli* cli, FuriString* args, void* context){
 	UNUSED(cli);
 	UNUSED(context);
@@ -198,8 +284,8 @@ static void ls_handler(Cli* cli, FuriString* args, void* context){
 		printf("Not a directory\r\n");
 		goto exit_ls;
 	}
-	char name[256];
-	while(storage_dir_read(dir, NULL, name, 256)){
+	char name[LS_NAME_SIZE];
+	while(storage_dir_read(dir, NULL, name, LS_NAME_SIZE)){
 		printf("%s\r\n", name);
 	}
 exit_ls:
@@ -219,8 +305,9 @@ static void cd_handler(Cli* cli, FuriString* args, void* context){
 		File* dir = storage_file_alloc(storage);
 		if(!storage_dir_open(dir, furi_string_get_cstr(new_path)))
 			printf("Failed to open the directory. Maybe it doesn't exist.");
-		else
+		else {
 			cwd = new_path;
+			}
 		storage_dir_close(dir);
 		storage_file_free(dir);
 		furi_record_close(RECORD_STORAGE);
@@ -248,10 +335,10 @@ static void read_handler(Cli* cli, FuriString* args, void* context){
 		printf("Failed to open the file");
 		goto exit_read;
 	}
-        uint8_t* content = malloc(256);
+	        uint8_t* content = malloc(READ_CHUNK_SIZE);
         uint16_t read_size = 0;
 	do {
-		read_size = storage_file_read(file, content, 256);
+		read_size = storage_file_read(file, content, READ_CHUNK_SIZE);
 		for(int j = 0; j < read_size; j++)
 			printf("%c", content[j]);
 	} while(read_size > 0);
@@ -382,7 +469,9 @@ static void mv_handler(Cli* cli, FuriString* args, void* context){
 	storage_file_free(dir);
 	
 	FS_Error err = storage_common_rename(storage, furi_string_get_cstr(path1), furi_string_get_cstr(path2));
-	if(err == FSE_OK) printf("Moved file successfully!");
+	if(err == FSE_OK){
+		printf("Moved file successfully!");
+	}
 	else if(err == FSE_EXIST) printf("File already exists!");
 	else if(err == FSE_NOT_EXIST) printf("File doesn't exist!");
 	else printf("Can't move the file!");
@@ -412,16 +501,11 @@ static void cp_handler(Cli* cli, FuriString* args, void* context){
 	storage_file_free(dir);
 	
 	FS_Error err = storage_common_copy(storage, furi_string_get_cstr(path1), furi_string_get_cstr(path2));
-	if(err == FSE_OK) printf("Copied file successfully!");
+	if(err == FSE_OK){
+		printf("Copied file successfully!");
+	}
 	else if(err == FSE_EXIST) printf("File already exists!");
 	else if(err == FSE_NOT_EXIST) printf("File doesn't exist!");
-	else if(err == FSE_NOT_READY) printf("FSE_NOT_READY");
-	else if(err == FSE_INVALID_PARAMETER) printf("FSE_INVALID_PARAMETER");
-	else if(err == FSE_DENIED) printf("FSE_DENIED");
-	else if(err == FSE_INVALID_NAME) printf("FSE_INVALID_NAME");
-	else if(err == FSE_INTERNAL) printf("FSE_INTERNAL");
-	else if(err == FSE_NOT_IMPLEMENTED) printf("FSE_NOT_IMPLEMENTED");
-	else if(err == FSE_ALREADY_OPEN) printf("FSE_ALREADY_OPEN");
 	else printf("Can't copy the file!");
 	furi_record_close(RECORD_STORAGE);
 	furi_string_free(path1);
@@ -442,15 +526,15 @@ static void start_handler(Cli* cli, FuriString* args, void* context){
 		printf("Failed to open the file");
 		goto exit_start;
 	}
-	FuriString* lines[256];
-	for(int i = 0; i < 256; i++)
+	FuriString* lines[MAX_SCRIPT_LINES];
+	for(int i = 0; i < MAX_SCRIPT_LINES; i++)
 		lines[i] = furi_string_alloc_set_str("");
 	int cur_line = 0;
-        uint8_t* content = malloc(256);
+        uint8_t* content = malloc(READ_CHUNK_SIZE);
         FuriString* line = furi_string_alloc_set_str("");
         uint16_t read_size = 0;
 	do {
-		read_size = storage_file_read(file, content, 256);
+		read_size = storage_file_read(file, content, READ_CHUNK_SIZE);
 		for(int i = 0; i < read_size; i++){
 			if(content[i] == '\r') continue;
 			else if(content[i] == '\n'){
@@ -463,29 +547,9 @@ static void start_handler(Cli* cli, FuriString* args, void* context){
 	} while(read_size > 0);
 	furi_string_set(lines[cur_line], line);
 	furi_string_free(line);
-	for(int i = 0; i < 256; i++){
-		if(furi_string_start_with_str(lines[i], "#")) continue;
-		furi_string_trim(lines[i]);
-		if(furi_string_cmp_str(lines[i], "") == 0) continue;
-		char search_for = ' ';
-		size_t index = furi_string_search_char(lines[i], search_for);
-		FuriString* command = furi_string_alloc_set(lines[i]);
-		if(index != 4294967295) furi_string_u_substr(command, 0, index);
-		FuriString* arguments = furi_string_alloc_set(lines[i]);
-		if(index == 4294967295) furi_string_set_str(arguments, "");
-		else furi_string_u_substr(arguments, index + 1, furi_string_size(lines[i]));
-		
-		/* Uncomment for debugging
-		printf("L %d\r\n", i);
-		printf("I %d\r\n", index);
-		printf("C %s\r\n", furi_string_get_cstr(command));
-		printf("A %s\r\n", furi_string_get_cstr(arguments));
-		*/
-		
-		CliCommand* cli_command = CliCommandTree_get(cli->commands, command);
-		cli_command->callback(cli, arguments, cli_command->context);
-	}
-	for(int i = 0; i < 256; i++)
+	for(int i = 0; i < MAX_SCRIPT_LINES; i++)
+		execute_command(lines[i], cli);
+	for(int i = 0; i < MAX_SCRIPT_LINES; i++)
 		furi_string_free(lines[i]);
 	
 exit_start:
@@ -601,7 +665,9 @@ static void sequence_handler(Cli* cli, FuriString* args, void* context){
 		notification_message(notification, &sequence_error);
 	else if(furi_string_cmp_str(args, "audiovisual_alert") == 0)
 		notification_message(notification, &sequence_audiovisual_alert);
-	else printf("Usage: sequence <sequence>\r\nSee `extra_help` for more info\r\n");
+	else {
+		printf("Usage: sequence <sequence>\r\nSee `extra_help` for more info\r\n");
+	}
 	furi_record_close(RECORD_NOTIFICATION);
 }
 
@@ -616,6 +682,8 @@ static void sequence_handler(Cli* cli, FuriString* args, void* context){
 void extra_init(){
 	if(initialized) return;
 	cwd = furi_string_alloc_set_str("/ext");
+	/*for(int i = 0; i < 64; i++)
+		vars[i] = env_var_alloc();*/
 	initialized = true;
 }
 void extra_register(){
@@ -635,6 +703,7 @@ void extra_register(){
 	cli_add_command(cli_, "start", CliCommandFlagParallelSafe, start_handler, NULL);
 	cli_add_command(cli_, "sleep", CliCommandFlagParallelSafe, sleep_handler, NULL);
 	cli_add_command(cli_, "sequence", CliCommandFlagParallelSafe, sequence_handler, NULL);
+	cli_add_command(cli_, "if", CliCommandFlagParallelSafe, if_handler, NULL);
 	furi_record_close(RECORD_CLI);
 	registered = true;
 }
@@ -645,6 +714,8 @@ void extra_init_register(){
 void extra_deinit(){
 	if(!initialized) return;
 	furi_string_free(cwd);
+	/*for(int i = 0; i < 64; i++)
+		env_var_free(vars[i]);*/
 	initialized = false;
 }
 void extra_unregister(){
@@ -665,6 +736,7 @@ void extra_unregister(){
 	cli_delete_command(cli_, "start");
 	cli_delete_command(cli_, "sleep");
 	cli_delete_command(cli_, "sequence");
+	cli_delete_command(cli_, "if");
 	furi_record_close(RECORD_CLI);
 }
 void extra_deinit_unregister(){
