@@ -318,8 +318,9 @@ const GPIO*
 //DS18x2x
 #include "./interfaces/OneWireSensor.h"
 #include "./sensors/LM75.h"
-//BMP280, BME280
+//BMP280, BME280, BME680
 #include "./sensors/BMx280.h"
+#include "./sensors/BME680.h"
 #include "./sensors/AM2320.h"
 #include "./sensors/DHT20.h"
 #include "./sensors/SHT30.h"
