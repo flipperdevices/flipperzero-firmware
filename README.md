@@ -24,6 +24,7 @@ You can also use `extra_registered()` to check if extra commands are currently r
 
 ## Commands
 `extra_help`, `cd`, `cp`, `echo`, `ls`, `mkdir`, `mv`, `pwd`, `read`, `rm`, `sequence`, `sleep`, `start`, `touch`, `write`.
+
 For more info refer to `extra_help`.
 
 ## Scripts
