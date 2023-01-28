@@ -5,6 +5,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
+#include "DICE_icons.h"
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
 
 #define TAG "Dice Roller"
@@ -52,6 +53,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
     }
 
     canvas_set_font(canvas, FontSecondary);
+    canvas_draw_icon(canvas, 0, 0, &I_black);
+    canvas_set_color(canvas, ColorWhite);
     if(state->diceSelect < 220) {
         if(state->diceQty == 1) {
             elements_button_left(canvas, "x1");
@@ -281,6 +284,29 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             snprintf(state->strings[2], sizeof(state->strings[2]), "%s", diceTwo[d2_i]);
             snprintf(state->strings[3], sizeof(state->strings[3]), "%s", diceThree[d3_i]);
             snprintf(state->strings[4], sizeof(state->strings[4]), "%s", diceFour[d4_i]);
+        } else if(state->diceSelect == 233) {
+            const char* diceOne[] = {
+                "YOU",
+                "PICK A MATE",
+                "PLAYER TO YOUR LEFT",
+                "ALL PLAYERS",
+                "PLAYER OF YOUR CHOICE",
+                "PLAYER TO YOUR RIGHT"};
+            const char* diceTwo[] = {
+                "LIL Sip", "MAKE A RULE", "DRINK AT WILL", "DON'T DRINK", "BIG SWIG", "BOTTOMS UP"};
+            state->diceRoll =
+                ((rand() % state->diceSelect) + 1); // JUST TO GET IT GOING? AND FIX BUG
+            snprintf(state->diceType[0], sizeof(state->diceType[0]), "%s", "DRINK!");
+            snprintf(
+                state->strings[0],
+                sizeof(state->strings[0]),
+                "%s at %s",
+                state->diceType[0],
+                state->rollTime[0]);
+            uint8_t d1_i = rand() % COUNT_OF(diceOne);
+            uint8_t d2_i = rand() % COUNT_OF(diceTwo);
+            snprintf(state->strings[2], sizeof(state->strings[2]), "%s", diceOne[d1_i]);
+            snprintf(state->strings[3], sizeof(state->strings[3]), "%s", diceTwo[d2_i]);
         } else {
             state->diceRoll = ((rand() % state->diceSelect) + 1);
             snprintf(
@@ -356,6 +382,11 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, state->strings[2]);
             canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->strings[3]);
             canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignCenter, state->strings[4]);
+        } else if(state->diceSelect == 233) {
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, state->strings[0]);
+            canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignCenter, state->strings[2]);
+            canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, state->strings[3]);
         } else if(state->diceSelect == 228 || state->diceSelect == 229) {
             canvas_set_font(canvas, FontBatteryPercent);
             canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, state->strings[1]);
@@ -418,6 +449,8 @@ static void dice_render_callback(Canvas* const canvas, void* ctx) {
         elements_button_right(canvas, "WAR");
     } else if(state->diceSelect == 232) {
         elements_button_right(canvas, "WEED");
+    } else if(state->diceSelect == 233) {
+        elements_button_right(canvas, "DRINK");
     }
 }
 
@@ -530,6 +563,8 @@ int32_t dice_app(void* p) {
                                 plugin_state->diceSelect = 232;
                             }
                         } else if(plugin_state->diceSelect == 232) {
+                            plugin_state->diceSelect = 233;
+                        } else if(plugin_state->diceSelect == 233) {
                             plugin_state->diceSelect = 59;
                         } else if(plugin_state->diceSelect == 59) {
                             plugin_state->diceSelect = 69;

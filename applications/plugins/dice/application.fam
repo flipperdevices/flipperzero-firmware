@@ -1,5 +1,5 @@
 App(
-    appid="Dice",
+    appid="DICE",
     name="Dice [RM]",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dice_app",
@@ -9,4 +9,5 @@ App(
     order=70,
     fap_icon="dice.png",
     fap_category="Games",
+    fap_icon_assets="images",
 )
