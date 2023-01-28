@@ -237,6 +237,7 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         canvas_set_font(canvas, FontSecondary);
     }
 
+    subghz_view_rssi_draw(canvas, model);
     switch(model->bar_show) {
     case SubGhzViewReceiverBarShowLock:
         canvas_draw_icon(canvas, 64, 55, &I_Lock_7x8);
@@ -265,8 +266,6 @@ void subghz_view_receiver_draw(Canvas* canvas, SubGhzViewReceiverModel* model) {
         canvas_draw_str(canvas, 96, 62, furi_string_get_cstr(model->history_stat_str));
         break;
     }
-
-    subghz_view_rssi_draw(canvas, model);
 }
 
 static void subghz_view_receiver_timer_callback(void* context) {
