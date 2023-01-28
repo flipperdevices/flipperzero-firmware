@@ -28,7 +28,7 @@ For more info refer to `extra_help`.
 ## Scripts
 Use `start <path_to_script>` to run a script.
 A script is just CLI commands in a file, each one is on a new line.
-If a line starts with `#` it's a comment. It's ignored by the `start` command.
+If `#` character is present in a line everything after it is ignored as a comment.
 
 This example outputs "Hello World", waits a second and plays the success sequence (the one that plays, for example, when the Flipper has successfully written data to a tag).
 
@@ -36,6 +36,6 @@ This example outputs "Hello World", waits a second and plays the success sequenc
 # Example script
 
 echo Hello World
-sleep 1000
+sleep 1000 # 1000ms = 1s
 sequence success
 ```
