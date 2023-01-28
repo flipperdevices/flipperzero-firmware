@@ -114,8 +114,8 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
 
   - If the worker failed (worker_started == false) then free resources and exit.
 
-  - Configure a callback method for when new data is received.
-    - Second parameter should match the name of your function.  For example if your callback function is "static void rx_event_callback(void* ctx) { /* queue got data message */ }" then you would use "rx_event_callback". 
+  - Register your callback method that will be invoked by the tx_rx_worker when it receives new data.
+    - The second parameter should match the name of your function.  For example if your callback function is "static void rx_event_callback(void* ctx) { /* Queue got data event. */ }" then you would use "rx_event_callback". 
   ```
       subghz_tx_rx_worker_set_callback_have_read(
         demo_context->subghz_txrx,
@@ -148,12 +148,13 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
     
     // The data is now in message buffer!  
     
-    // Typically you want to parse and validate the data.  
-    // If the message needs further processing, then queue
-    // a message with the parsed data set in the event properties.
-    // (Important -- If you allocate any memory and assign pointers
-    // in your event data, make sure that the code that processes
-    // your event will free the memory!)
+    // Typically you want to parse and validate the data.
+  
+    // If the message needs further processing, then queue a message with 
+    // the parsed data set in the event properties.
+  
+    // Important -- If you allocate any memory and assign pointers in your event data,
+    // make sure that the code that processes your event will free the memory!
   }
 ```
 
@@ -169,6 +170,7 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
 
 - If you want to send data, create a UTF8 buffer with the data to send, ensuring that the total buffer length is less than MESSAGE_MAX_LEN.  If your message is 7-bit ASCII (like A-Z a-z 0-9 symbols spaces) then you don't necessarily need to convert to UTF8 (since characters 0-127 are the same in both ASCII and UTF8.)  If you might have special characters (emojis, characters with accents, etc.) they you should convert to UTF8 first.
 ```
+  static void subghz_demo_broadcast(DemoContext* demo_context, FuriString* buffer) {
     uint8_t* message = (uint8_t*)furi_string_get_cstr(buffer);
 
     // Make sure our message will fit into a packet; if not truncate it.
@@ -176,7 +178,7 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
     if (length>MESSAGE_MAX_LEN) {
         message[MESSAGE_MAX_LEN-1] = 0;
         message[MESSAGE_MAX_LEN-2] = '\n';
-        message[MESSAGE_MAX_LEN-2] = '\r';
+        message[MESSAGE_MAX_LEN-3] = '\r';
         length = MESSAGE_MAX_LEN;
     }
 
@@ -184,6 +186,7 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
         // Wait a few milliseconds on failure before trying to send again.
         furi_delay_ms(20);
     }
+  }
 ```
 
 ## Details about the project files

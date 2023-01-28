@@ -116,7 +116,10 @@ static void subghz_demo_receive_data(DemoContext* instance) {
         // respond differently based on the version of the application running on the other Flipper Zero.
         // Important: Don't always trust what is sent, some people with Flipper Zero might send an 
         // invalid version to trick your code into interpreting the payload in a special way.
-        
+
+        // Null terminate the buffer at the end of message so we don't accidently overrun our buffer.        
+        message[MESSAGE_MAX_LEN - 1] = 0;
+
         unsigned int number;
         char senderName[9];
         switch (purpose) {
@@ -291,7 +294,7 @@ static void subghz_demo_broadcast(DemoContext* demo_context, FuriString* buffer)
     if (length>MESSAGE_MAX_LEN) {
         message[MESSAGE_MAX_LEN-1] = 0;
         message[MESSAGE_MAX_LEN-2] = '\n';
-        message[MESSAGE_MAX_LEN-2] = '\r';
+        message[MESSAGE_MAX_LEN-3] = '\r';
         length = MESSAGE_MAX_LEN;
     }
 
