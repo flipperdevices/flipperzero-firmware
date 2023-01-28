@@ -12,8 +12,16 @@
  * Protocol description
  * ====================
  *
- * "1" represents a pulse of one-third bit time (100us)
- * "0" represents a gap of one-third bit time (100us)
+ * The protocol works with different data rates. However here is defined
+ * to use a short pulse/gap duration of 300us and a long pulse/gap
+ * duration of 600us. Even with the Flipper hardware, the protocol works
+ * with 100/200us, but becomes less reliable and standard presets can't
+ * be used because of the higher data rate.
+ *
+ * In the following description we have that:
+ *
+ * "1" represents a pulse of one-third bit time (300us)
+ * "0" represents a gap of one-third bit time (300us)
  * 
  * The message starts with a preamble + a sync pattern:
  * 
@@ -23,8 +31,8 @@
  * The a variable amount of bytes follow, where each bit
  * is encoded in the following way:
  * 
- * zero 100 (100 us pulse, 200 us gap)
- * one  110 (200 us pulse, 100 us gap)
+ * zero 100 (300 us pulse, 600 us gap)
+ * one  110 (600 us pulse, 300 us gap)
  * 
  * Bytes are sent MSB first, so receiving, in sequence, bits
  * 11100001, means byte E1.
@@ -62,10 +70,9 @@
  *    contains alternating short pulses/gaps at 100us.
  *
  * 3. Data encoding wastes some bandwidth in order to be more
- *    robust. The consumed bandwidth is compensated with the ability
- *    to send the signal with a 100us clock period, so an actual
- *    bit takes 300us, reaching a data transfer of 416 bytes per
- *    second. More than enough for the chat.
+ *    robust. Even so, with a 300us clock period, a single bit
+ *    bit takes 900us, reaching a data transfer of 138 characters per
+ *    second. More than enough for the simple chat we have here.
  */
 
 static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
@@ -145,23 +152,23 @@ static void get_fields(ProtoViewFieldSet *fieldset) {
 /* Create a signal. */
 static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fs)
 {
-    uint32_t te = 100; /* Short pulse duration in microseconds.
+    uint32_t te = 300; /* Short pulse duration in microseconds.
                           Our protocol needs three symbol times to send
                           a bit, so 300 us per bit = 3.33 kBaud. */
 
-    // Preamble: 24 alternating 100us pulse/gap pairs.
+    // Preamble: 24 alternating 300us pulse/gap pairs.
     for (int j = 0; j < 24; j++) {
         raw_samples_add(samples,true,te);
         raw_samples_add(samples,false,te);
     }
 
-    // Sync: 3 alternating 200 us pulse/gap pairs.
+    // Sync: 3 alternating 600 us pulse/gap pairs.
     for (int j = 0; j < 3; j++) {
         raw_samples_add(samples,true,te*2);
         raw_samples_add(samples,false,te*2);
     }
 
-    // Sync: plus 2 alternating 100 us pluse/gap pairs.
+    // Sync: plus 2 alternating 300 us pluse/gap pairs.
     for (int j = 0; j < 2; j++) {
         raw_samples_add(samples,true,te);
         raw_samples_add(samples,false,te);
