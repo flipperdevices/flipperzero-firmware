@@ -248,11 +248,11 @@ void mag_spoof_bitwise(Mag* mag) {
     }
 
 
-    uint8_t bits_t1_raw[64] = {0x55};              // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
-    uint8_t bits_t1_manchester[128] = {0x55};      // twice the above
+    uint8_t bits_t1_raw[64] = {0x00};              // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
+    uint8_t bits_t1_manchester[128] = {0x00};      // twice the above
     uint16_t bits_t1_count = msr_encode(data1, (uint8_t*) bits_t1_manchester, (uint8_t*) bits_t1_raw, BITS_TRACK1, OFFSET_TRACK1);
-    uint8_t bits_t2_raw[64] = {0x55};              // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
-    uint8_t bits_t2_manchester[128] = {0x55};      // twice the above
+    uint8_t bits_t2_raw[64] = {0x00};              // 68 chars max track 1 + 1 char crc * 7 approx =~ 483 bits
+    uint8_t bits_t2_manchester[128] = {0x00};      // twice the above
     uint16_t bits_t2_count = msr_encode(data2, (uint8_t*) bits_t2_manchester, (uint8_t*) bits_t2_raw, BITS_TRACK2, OFFSET_TRACK2);
 
     if(furi_log_get_level() >= FuriLogLevelDebug) {
