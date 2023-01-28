@@ -18,7 +18,7 @@
  * The message starts with a preamble + a sync pattern:
  * 
  * preamble = 1010101010101010 x 3
- * sync     = 1100110011001100
+ * sync     = 1100110011001010
  * 
  * The a variable amount of bytes follow, where each bit
  * is encoded in the following way:
@@ -44,10 +44,33 @@
  * 
  * Checksum = sum of bytes modulo 256, with checksum set
  *            to 0 for the computation.
+ *
+ * Design notes
+ * ============
+ *
+ * The protocol is designed in order to have certain properties:
+ *
+ * 1. Pulses and gaps can only be 100 or 200 microseconds, so the
+ *    message can be described, encoded and decoded with only two
+ *    fixed durations.
+ *
+ * 2. The preamble + sync is designed to have a well recognizable
+ *    pattern that can't be reproduced just for accident inside
+ *    the encoded pattern. There is no combinatio of encoded bits
+ *    leading to the preamble+sync. Also the sync pattern final
+ *    part can't be mistaken for actual bits of data, since it
+ *    contains alternating short pulses/gaps at 100us.
+ *
+ * 3. Data encoding wastes some bandwidth in order to be more
+ *    robust. The consumed bandwidth is compensated with the ability
+ *    to send the signal with a 100us clock period, so an actual
+ *    bit takes 300us, reaching a data transfer of 416 bytes per
+ *    second. More than enough for the chat.
  */
 
 static bool decode(uint8_t *bits, uint32_t numbytes, uint32_t numbits, ProtoViewMsgInfo *info) {
-    const char *sync_pattern = "1010101010101010" "1100110011001100";
+    const char *sync_pattern = "1010101010101010"   // Preamble
+                               "1100110011001010";  // Sync
     uint8_t sync_len = 32;
 
     /* This is a variable length message, however the minimum length
@@ -132,10 +155,16 @@ static void build_message(RawSamplesBuffer *samples, ProtoViewFieldSet *fs)
         raw_samples_add(samples,false,te);
     }
 
-    // Sync: 4 alternating 200 us pulse/gap pairs.
-    for (int j = 0; j < 4; j++) {
+    // Sync: 3 alternating 200 us pulse/gap pairs.
+    for (int j = 0; j < 3; j++) {
         raw_samples_add(samples,true,te*2);
         raw_samples_add(samples,false,te*2);
+    }
+
+    // Sync: plus 2 alternating 100 us pluse/gap pairs.
+    for (int j = 0; j < 2; j++) {
+        raw_samples_add(samples,true,te);
+        raw_samples_add(samples,false,te);
     }
 
     // Data: build the array.
