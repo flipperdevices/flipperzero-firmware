@@ -77,7 +77,5 @@ UnitempStatus unitemp_MAX6675_update(Sensor* sensor) {
 
     sensor->temp = (int16_t)(raw) / 32.0f;
 
-    UNITEMP_DEBUG("RAW: %04lX", raw);
-
     return UT_SENSORSTATUS_OK;
 }

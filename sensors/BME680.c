@@ -1,6 +1,7 @@
 /*
     Unitemp - Universal temperature reader
-    Copyright (C) 2022  Victor Nikitchuk (https://github.com/quen0n)
+    Copyright (C) 2022-2023  Victor Nikitchuk (https://github.com/quen0n)
+    Contributed by g0gg0 (https://github.com/g3gg0)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,7 +61,7 @@ const SensorType BME680 = {
 #define BME680_HUM_OVERSAMPLING_2 0b00000010
 #define BME680_HUM_OVERSAMPLING_4 0b00000011
 #define BME680_HUM_OVERSAMPLING_8 0b00000100
-#define BME680_HUM_OVERSAMPLING_16 0b00000101u
+#define BME680_HUM_OVERSAMPLING_16 0b00000101
 //Режимы работы датчика
 #define BME680_MODE_SLEEP 0b00000000 //Наелся и спит
 #define BME680_MODE_FORCED 0b00000001 //Обновляет значения 1 раз, после чего уходит в сон
@@ -393,6 +394,11 @@ UnitempStatus unitemp_BME680_update(Sensor* sensor) {
         FURI_LOG_W(APP_NAME, "Sensor %s is not initialized!", sensor->name);
         return UT_SENSORSTATUS_ERROR;
     }
+
+    unitemp_i2c_writeReg(
+        i2c_sensor,
+        BME680_REG_CTRL_MEAS,
+        unitemp_i2c_readReg(i2c_sensor, BME680_REG_CTRL_MEAS) | 1);
 
     while(BME680_isMeasuring(sensor)) {
         if(furi_get_tick() - t > 100) {
