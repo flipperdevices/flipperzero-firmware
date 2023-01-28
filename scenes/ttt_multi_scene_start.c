@@ -1,8 +1,6 @@
 #include "../ttt_multi.h"
-enum SubmenuIndex {
-    SubmenuIndexCreate,
-    SubmenuIndexJoin,
-};
+
+enum SubmenuIndex { SubmenuIndexCreate, SubmenuIndexJoin, SubmenuIndexLocal };
 
 void ttt_multi_scene_start_submenu_callback(void* context, uint32_t index) {
     TttMultiApp* ttt_multi = context;
@@ -22,6 +20,13 @@ void ttt_multi_scene_start_on_enter(void* context) {
     submenu_add_item(
         submenu, "Join game", SubmenuIndexJoin, ttt_multi_scene_start_submenu_callback, ttt_multi);
 
+    submenu_add_item(
+        submenu,
+        "Local game",
+        SubmenuIndexLocal,
+        ttt_multi_scene_start_submenu_callback,
+        ttt_multi);
+
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(ttt_multi->scene_manager, TttMultiSceneStart));
     view_dispatcher_switch_to_view(ttt_multi->view_dispatcher, TttMultiViewMenu);
@@ -33,10 +38,13 @@ bool ttt_multi_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexCreate) {
-            //scene_manager_next_scene(ttt_multi->scene_manager, TttMultiAppSceneCheck);
+            // TODO: implement
             consumed = true;
         } else if(event.event == SubmenuIndexJoin) {
-            //scene_manager_next_scene(ttt_multi->scene_manager, TttMultiAppSceneFileSelect);
+            // TODO: implement
+            consumed = true;
+        } else if(event.event == SubmenuIndexLocal) {
+            // TODO: implement
             consumed = true;
         }
         scene_manager_set_scene_state(ttt_multi->scene_manager, TttMultiSceneStart, event.event);
