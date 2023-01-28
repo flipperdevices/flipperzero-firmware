@@ -230,7 +230,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
     char buf[50];
-    snprintf(buf, 50, "Time: %.3f", time);
+    snprintf(buf, 50, "Time: %.5f", time);
 
     canvas_draw_str(canvas, 10, 10, buf);
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
