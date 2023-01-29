@@ -10,11 +10,22 @@
 extern "C" {
 #endif
 
-/** Check is kernel is currently in interrupt request context.
- *
- * @return     true if currently in interrupt request context, false otherwise.
+/** Check if CPU is in IRQ or kernel running and IRQ is masked
+ * 
+ * Originally this primitive was born as a workaround for FreeRTOS kernel primitives shenanigans with PRIMASK.
+ * 
+ * Meaningful use cases are:
+ * 
+ * - When kernel is started and you want to ensure that you are not in IRQ or IRQ is not masked(like in critical section)
+ * - When kernel is not started and you want to make sure that you are not in IRQ mode, ignoring PRIMASK.
+ * 
+ * As you can see there will be edge case when kernel is not started and PRIMASK is not 0 that may cause some funky behavior.
+ * Most likely it will happen after kernel primitives being used, but control not yet passed to kernel.
+ * It's up to you to figure out if it is safe for your code or not.
+ * 
+ * @return     true if CPU is in IRQ or kernel running and IRQ is masked
  */
-bool furi_is_irq_context();
+bool furi_kernel_is_irq_or_masked();
 
 /** Lock kernel, pause process scheduling
  *
