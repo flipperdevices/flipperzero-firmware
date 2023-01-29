@@ -1,6 +1,6 @@
-#include "ios_trigger.h"
+#include "bt_trigger.h"
 
-__int32_t ios_trigger_app(void *p){
+__int32_t bt_trigger_app(void *p){
     //Fake using p to compile 
     UNUSED(p);
     AppStruct* app = appStructAlloc();
