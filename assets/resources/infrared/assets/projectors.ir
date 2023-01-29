@@ -1,6 +1,24 @@
 Filetype: IR library file
 Version: 1
 # @amec0e https://github.com/amec0e
+# Model: Epson new
+name: Power
+type: parsed
+protocol: NECext
+address: 83 55 00 00
+command: 90 6F 00 00
+# Model: Hitatchi
+name: Power
+type: parsed
+protocol: NECext
+address: 87 45 00 00
+command: 17 E8 00 00
+# Model: Smart board
+name: Power
+type: parsed
+protocol: NEC
+address: 00 00 00 00
+command: 8A 00 00 00
 name: Power
 type: raw
 frequency: 38000
