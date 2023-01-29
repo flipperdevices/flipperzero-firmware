@@ -3,6 +3,8 @@
 
 Requires: [Esp32-Cam module](https://amzn.to/3WMEO0I).
 
+Download and install instructions: [Latest release](https://github.com/Z4urce/flipperzero-camera/releases)
+
 Usage:
 - Up - Increase contrast
 - Down - Decrease contract
