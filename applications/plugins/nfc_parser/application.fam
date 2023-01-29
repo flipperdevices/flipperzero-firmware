@@ -1,0 +1,12 @@
+App(
+    appid="nfc_parser",
+    name="Nfc Parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="nfc_parser_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=50,
+    # fap_icon="signal_gen_10px.png",
+    # fap_category="Tools",
+    # fap_icon_assets="icons",
+)
