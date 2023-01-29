@@ -27,25 +27,7 @@ If everything checks out, append these signals **to the end** of the [audio play
 
 ## Projectors
 
-Here are examples on how to add anything you wish
-
-1. Adding your Projector to the power button
-```
-name: POWER 
-type: parsed
-protocol: NECext
-address: 83 55 00 00
-command: 90 6F 00 00
-```
-2. Adding your name to anything else, replace the name with the value of the other `POWER`, `MUTE`, `VOL+`, `VOL-` <br />
-3. Creating your own button <br />
-To create your own button you need to be familiar with [FBT](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/fbt.md) <br />
-You must understand simple code `C`, `C++`, and read how to create IRDB files, or **Source** IRDB files [Read](https://github.com/RandomDebugError/irdb/blob/master/README.md) <br />
-Look at pull requests [Section](https://github.com/flipperdevices/flipperzero-firmware/pulls?q=is%3Apr+universal+remote+) if you need any help <br />
-You will be modifying files `infrared_scene_universal.c`, `infrared_scene_config.h`, `infrared_cli.c`, and creating `projectors.ir` according to your name and `infrared_scene_universal_projector_c` according to your name <br />
-Update to the newest flipper zero version [Latest](https://github.com/flipperdevices/flipperzero-firmware/releases) by the github page or by the [qFlipper](https://github.com/flipperdevices/qFlipper/releases) application <br />
-Once installed databases (Comes with the newest update) you can **only now** update to the compiled version of your firmware  <br />
-If you do not want to compile via `fbt updater_package` you can compile via `fbt flash_usb` which will update your flipper via USB cable  <br />
+To add your Projector assign it one of these names `POWER`, `MUTE`, `VOL+`, `VOL-`.
 
 ## Air conditioners
 

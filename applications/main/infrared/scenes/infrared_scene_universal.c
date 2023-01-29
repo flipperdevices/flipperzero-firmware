@@ -36,14 +36,7 @@ void infrared_scene_universal_on_enter(void* context) {
         SubmenuIndexUniversalProjector,
         infrared_scene_universal_submenu_callback,
         context);
-
-    submenu_add_item(
-        submenu,
-        "Fans",
-        SubmenuIndexUniversalFan,
-        infrared_scene_universal_submenu_callback,
-        context);
-
+        
     submenu_add_item(
         submenu,
         "Air Conditioners",
