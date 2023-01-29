@@ -72,6 +72,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): NFC Assets: 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) [It is recommended you randomize UID with this script.](https://github.com/Lanjelin/AmiiboConverter/tree/main)
 - Added: [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
+- Added: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
+- Added: [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 
 <a name="release">
 
@@ -285,12 +287,14 @@ $ ./fbt dolphin_ext
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator)
+- [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
 - [Bluetooth Remote (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
+- [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
 - [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) (Uses Bluetooth)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CLI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
@@ -307,7 +311,9 @@ $ ./fbt dolphin_ext
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
+- [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
+- [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
@@ -329,6 +335,7 @@ $ ./fbt dolphin_ext
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488)
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
+- [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [NRF24 Scanner v2.1 (By vad7)](https://github.com/vad7/nrf24scan)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
