@@ -17,13 +17,18 @@ const PomodoroStage default_stage = Work;
 
 void flipp_pomodoro__toggle_stage(FlippPomodoroState* state) {
     furi_assert(state);
-    state->stage = stage_rotaion_map[state->stage];
+    state->stage = stage_rotaion_map[flipp_pomodoro__get_stage(state)];
     state->started_at_timestamp = time_now();
+};
+
+PomodoroStage flipp_pomodoro__get_stage(FlippPomodoroState* state) {
+    furi_assert(state);
+    return state->stage;
 };
 
 char* flipp_pomodoro__next_stage_label(FlippPomodoroState* state) {
     furi_assert(state);
-    return next_stage_label[state->stage];
+    return next_stage_label[flipp_pomodoro__get_stage(state)];
 };
 
 void flipp_pomodoro__destroy(FlippPomodoroState* state) {
@@ -37,7 +42,7 @@ uint32_t flipp_pomodoro__current_stage_total_duration(FlippPomodoroState* state)
         [Rest] = 5 * TIME_SECONDS_IN_MINUTE,
     };
 
-    return stage_duration_seconds_map[state->stage];
+    return stage_duration_seconds_map[flipp_pomodoro__get_stage(state)];
 };
 
 uint32_t flipp_pomodoro__stage_expires_timestamp(FlippPomodoroState* state) {

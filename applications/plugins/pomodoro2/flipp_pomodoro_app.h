@@ -15,6 +15,7 @@ typedef enum {
     FlippPomodoroAppCustomEventStageSkip = 100,
     FlippPomodoroAppCustomEventStageComplete, // By Expiration
     FlippPomodoroAppCustomEventTimerTick,
+    FlippPomodoroAppCustomEventStateUpdated,
 } FlippPomodoroAppCustomEvent;
 
 typedef struct {

@@ -16,15 +16,19 @@ typedef struct {
 } FlippPomodoroState;
 
 /// @brief Generates initial state
-/// @param state - pointer to the state of pomorodo.
 /// @returns A new pre-populated state for pomodoro timer
 FlippPomodoroState* flipp_pomodoro__new();
+
+/// @brief Extract current stage of pomodoro
+/// @param state - pointer to the state of pomorodo
+/// @returns Current stage value
+PomodoroStage flipp_pomodoro__get_stage(FlippPomodoroState* state);
 
 /// @brief Destroys state of timer and it's dependencies
 void flipp_pomodoro__destroy(FlippPomodoroState* state);
 
 /// @brief Get remaining stage time.
-/// @param state - pointer to the state of pomorodo.
+/// @param state - pointer to the state of pomorodo
 /// @returns Time difference to the end of current stage
 TimeDifference flipp_pomodoro__stage_remaining_duration(FlippPomodoroState* state);
 

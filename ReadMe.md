@@ -68,7 +68,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c) (Now Includes Drinking Dice and a black background with white letters)
 - Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)](https://github.com/Willy-JL)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Assets: Includes a NFC link to TalkingSasquach on YouTube
 - Added: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): NFC Assets: 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) [It is recommended you randomize UID with this script.](https://github.com/Lanjelin/AmiiboConverter/tree/main)
@@ -91,6 +90,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
 - Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
 - Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195), Anime and RM Select builds now have 13 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
+- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 
 <a name="release">
 

@@ -23,3 +23,16 @@ struct ScopeApp {
     Widget* widget;
     double time;
 };
+
+typedef struct {
+    double time;
+    char* str;
+} timeperiod;
+
+static const timeperiod time_list[] = {
+    {1.0, "1s"},
+    {0.1, "0.1s"},
+    {1e-3, "1ms"},
+    {0.1e-3, "0.1ms"},
+    {1e-6, "1us"},
+    {0.5e-6, "0.5us"}};

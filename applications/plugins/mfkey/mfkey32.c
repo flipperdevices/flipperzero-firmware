@@ -452,28 +452,31 @@ uint32_t crypt_or_rollback_word(struct Crypto1State* s, uint32_t in, int x, int 
     return ret;
 }
 
-int key_already_found_for_nonce(
-    uint64_t* keyarray,
-    size_t keyarray_size,
+int napi_key_already_found_for_nonce(
+    MfClassicDict* dict,
     uint32_t uid_xor_nt1,
     uint32_t nr1_enc,
     uint32_t p64b,
     uint32_t ar1_enc) {
+    uint32_t found = 0;
+    // TODO
+    /*
     uint32_t k = 0, found = 0;
     for(k = 0; k < keyarray_size; k++) {
         struct Crypto1State temp = {0, 0};
         int i;
-        for(i = 0; i < 24; i++) {
-            (&temp)->odd |= (BIT(keyarray[k], 2 * i + 1) << (i ^ 3));
-            (&temp)->even |= (BIT(keyarray[k], 2 * i) << (i ^ 3));
+        for (i = 0; i < 24; i++) {
+            (&temp)->odd |= (BIT(keyarray[k], 2*i+1) << (i ^ 3));
+            (&temp)->even |= (BIT(keyarray[k], 2*i) << (i ^ 3));
         }
         crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
         crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
-        if(ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
+        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
             found = 1;
             break;
         }
     }
+    */
     return found;
 }
 
@@ -487,7 +490,8 @@ bool napi_mf_classic_nonces_check_presence() {
     return nonces_present;
 }
 
-MfClassicNonceArray* napi_mf_classic_nonce_array_alloc() {
+MfClassicNonceArray*
+    napi_mf_classic_nonce_array_alloc(MfClassicDict* system_dict, MfClassicDict* user_dict) {
     MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
     Storage* storage = furi_record_open(RECORD_STORAGE);
     nonce_array->stream = buffered_file_stream_alloc(storage);
@@ -497,7 +501,7 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc() {
     do {
         // https://github.com/flipperdevices/flipperzero-firmware/blob/5134f44c09d39344a8747655c0d59864bb574b96/applications/services/storage/filesystem_api_defines.h#L8-L22
         if(!buffered_file_stream_open(
-               nonce_array->stream, MF_CLASSIC_NONCE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+               nonce_array->stream, MF_CLASSIC_NONCE_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
             buffered_file_stream_close(nonce_array->stream);
             break;
         }
@@ -527,9 +531,55 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc() {
                 "Read line: %s, len: %zu",
                 furi_string_get_cstr(next_line),
                 furi_string_size(next_line));
-            //if(furi_string_get_char(next_line, 0) == '#') continue;
-            //if(furi_string_size(next_line) != NFC_MF_CLASSIC_KEY_LEN) continue;
+            if(!furi_string_start_with_str(next_line, "Sec")) continue;
+            const char* next_line_cstr = furi_string_get_cstr(next_line);
+            MfClassicNonce res = {0};
+            char token[20];
+            int i = 0;
+            const char* ptr = next_line_cstr;
+            while(sscanf(ptr, "%s", token) == 1) {
+                switch(i) {
+                case 5:
+                    sscanf(token, "%lx", &res.uid);
+                    break;
+                case 7:
+                    sscanf(token, "%lx", &res.nt0);
+                    break;
+                case 9:
+                    sscanf(token, "%lx", &res.nr0_enc);
+                    break;
+                case 11:
+                    sscanf(token, "%lx", &res.ar0_enc);
+                    break;
+                case 13:
+                    sscanf(token, "%lx", &res.nt1);
+                    break;
+                case 15:
+                    sscanf(token, "%lx", &res.nr1_enc);
+                    break;
+                case 17:
+                    sscanf(token, "%lx", &res.ar1_enc);
+                    break;
+                default:
+                    break; // Do nothing
+                }
+                i++;
+                ptr = strchr(ptr, ' ');
+                if(!ptr) {
+                    break;
+                }
+                ptr++;
+            }
             // TODO: Scan line and check if key for nonce is already known
+            uint32_t p64b = prng_successor(res.nt1, 64);
+            if(napi_key_already_found_for_nonce(
+                   system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc) ||
+               napi_key_already_found_for_nonce(
+                   user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) {
+                continue;
+            }
+            //FURI_LOG_I(TAG, "Nonce uid: %lx, ar1: %lx", res.uid, res.ar1_enc);
+            // Store what nonces need to be cracked in an array
             nonce_array->total_nonces++;
         }
         furi_string_free(next_line);
@@ -761,18 +811,15 @@ void mfkey32(ProgramState* const program_state) {
     size_t keyarray_size;
     uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
     struct Crypto1State* temp;
-    // Read nonces (required)
-    // TODO: Set program_state->err = MissingNonces if MF_CLASSIC_NONCE_PATH does not exist
+    // Check for nonces
     if(!napi_mf_classic_nonces_check_presence()) {
         program_state->err = MissingNonces;
         return;
     }
-    MfClassicNonceArray* nonce_arr;
-    nonce_arr = napi_mf_classic_nonce_array_alloc(MfClassicDictTypeSystem);
     // Read dictionaries (optional)
-    MfClassicDict* system_dict;
+    MfClassicDict* system_dict = {0};
     bool system_dict_exists = napi_mf_classic_dict_check_presence(MfClassicDictTypeSystem);
-    MfClassicDict* user_dict;
+    MfClassicDict* user_dict = {0};
     bool user_dict_exists = napi_mf_classic_dict_check_presence(MfClassicDictTypeUser);
     uint32_t total_dict_keys = 0;
     if(system_dict_exists) {
@@ -784,10 +831,13 @@ void mfkey32(ProgramState* const program_state) {
         total_dict_keys += napi_mf_classic_dict_get_total_keys(user_dict);
     }
     program_state->dict_count = total_dict_keys;
+    // Read nonces
+    MfClassicNonceArray* nonce_arr;
+    nonce_arr = napi_mf_classic_nonce_array_alloc(system_dict, user_dict);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    keyarray_size = 0;
     storage_simply_remove(storage, MF_CLASSIC_MEM_FILE_PATH);
     /*
+    keyarray_size = 0;
     while(fgets(buffer, bufferLength, filePointer)) { // XXX FIXME
         rest = buffer;
         for (i = 0; i <= 17; i++) {
