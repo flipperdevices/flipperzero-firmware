@@ -1,0 +1,15 @@
+App(
+    appid="ESP32_Camera",
+    name="[ESP32] Camera",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="camera_app",
+    cdefines=["APP_CAMERA"],
+    requires=["gui"],
+    stack_size=8*1024,
+    order=1,
+	fap_icon="icon.png",
+    fap_category="GPIO",
+	fap_description="ESP32-CAM live feed and photo capture",
+	fap_author="Z4urce",
+	fap_weburl="https://github.com/Z4urce/flipper-camera"
+)

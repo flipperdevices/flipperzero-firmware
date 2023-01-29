@@ -71,6 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Assets: Includes a NFC link to TalkingSasquach on YouTube
 - Added: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): NFC Assets: 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) [It is recommended you randomize UID with this script.](https://github.com/Lanjelin/AmiiboConverter/tree/main)
+- Added: [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
 
 <a name="release">
 
