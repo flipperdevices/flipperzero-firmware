@@ -68,7 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)](https://github.com/Willy-JL)
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-
+- Assets: Includes a NFC link to TalkingSasquach on YouTube
 
 <a name="release">
 
@@ -141,6 +141,7 @@ $ ./fbt dolphin_ext
 - Archive: FAPs are now launchable from Archive [By RogueMaster], thanks xMasterX for the suggestion
 - Assets: Includes a NFC Level 50 Z3lda Amiibo
 - Assets: Includes a NFC Rick Roll link
+- Assets: Includes a NFC link to TalkingSasquach on YouTube
 - Assets: Includes New Dolphin Animations: [Listed Here](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/assets/resources/dolphin)
 - Assets: Includes sample Music Player tunes
 - Assets: Includes Sonic Screw Driver sound for the Wav Player
