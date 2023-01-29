@@ -4,10 +4,10 @@
 >Boost Your Productivity with the Pomodoro Timer for Flipper Zero! Don't let your flipper get bored, let him help you instead.
 
 ---
-  * [Install](#install)
-  * [Guide](#guide)
-  * [Contributing](#contributing)
-  * [Development](#development)
+* [Install](#install)
+* [Guide](#guide)
+* [Contributing](#contributing)
+* [Development](#development)
     + [Track](#track)
     + [Build and Package](#build-and-package)
 
