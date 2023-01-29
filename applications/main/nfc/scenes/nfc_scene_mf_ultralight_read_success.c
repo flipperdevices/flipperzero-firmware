@@ -40,17 +40,18 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     FlipperApplication* app;
     app = flipper_application_alloc(nfc->dev->storage, &hashtable_api_interface);
     FlipperApplicationPreloadStatus preload_res =
-        flipper_application_preload(app, "/ext/apps/Games/snake_game.fap");
+        flipper_application_preload(app, "/ext/apps/nfc_parser.fap");
     FURI_LOG_I("NFC", "preload res: %d", preload_res);
 
     FlipperApplicationLoadStatus load_status = flipper_application_map_to_memory(app);
     FURI_LOG_I("NFC", "load statud: %d", load_status);
 
-    FuriThread* thread = flipper_application_spawn(app, NULL);
+    FuriThread* thread = flipper_application_spawn(app, (void*)&nfc->dev->dev_data);
     furi_thread_start(thread);
     furi_thread_join(thread);
     int ret = furi_thread_get_return_code(thread);
     FURI_LOG_I("NFC", "Ret code: %d", ret);
+    flipper_application_free(app);
 
     if(furi_string_size(nfc->dev->dev_data.parsed_data)) {
         temp_str = furi_string_alloc_set(nfc->dev->dev_data.parsed_data);
