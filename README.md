@@ -11,5 +11,6 @@ Usage:
 - Ok - Save photos to SD card (DCIM folder)
 - Back - Close application
 
+![How it looks like](images/3.gif)
 ![Standard capture](images/1.png)
 ![With dithering](images/2.png)
