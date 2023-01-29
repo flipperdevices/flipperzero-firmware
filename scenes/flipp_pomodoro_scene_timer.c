@@ -12,6 +12,17 @@ enum
 
 uint8_t ExitSignal = 0;
 
+void flipp_pomodoro_scene_timer_sync_view_state(void *context)
+{
+    furi_assert(context);
+
+    FlippPomodoroApp *app = context;
+
+    flipp_pomodoro_view_timer_set_state(
+        flipp_pomodoro_view_timer_get_view(app->timer_view),
+        app->state);
+};
+
 void flipp_pomodoro_scene_timer_on_next_stage(void *ctx)
 {
     furi_assert(ctx);
@@ -30,9 +41,7 @@ void flipp_pomodoro_scene_timer_on_enter(void *context)
     FlippPomodoroApp *app = context;
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FlippPomodoroAppViewTimer);
-    flipp_pomodoro_view_timer_set_state(
-        flipp_pomodoro_view_timer_get_view(app->timer_view),
-        app->state);
+    flipp_pomodoro_scene_timer_sync_view_state(app);
     flipp_pomodoro_view_timer_set_on_right_cb(
         app->timer_view,
         flipp_pomodoro_scene_timer_on_next_stage,
@@ -46,6 +55,11 @@ void flipp_pomodoro_scene_timer_handle_custom_event(FlippPomodoroApp *app, Flipp
         view_dispatcher_send_custom_event(
             app->view_dispatcher,
             FlippPomodoroAppCustomEventStageComplete);
+    }
+
+    if (custom_event == FlippPomodoroAppCustomEventStateUpdated)
+    {
+        flipp_pomodoro_scene_timer_sync_view_state(app);
     }
 };
 
