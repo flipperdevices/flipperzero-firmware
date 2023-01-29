@@ -285,7 +285,7 @@ void dealer_tick(GameState* game_state) {
                 NULL,
                 to_win_state,
                 game_state->settings.message_duration);
-                DOLPHIN_DEED(DolphinDeedPluginGameWin);
+            DOLPHIN_DEED(DolphinDeedPluginGameWin);
         } else if(dealer_score > player_score) {
             enqueue(
                 &(game_state->queue_state),
