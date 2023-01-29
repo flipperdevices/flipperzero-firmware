@@ -5,7 +5,7 @@
 As a web developer I enjoy guessing colours by HEX Code. This game is targeted at other Devs and graphic designers<br>
 that also enjoy this. 
 <br><br>
-This app is still in development
+This app is still in development, currently all it does is allow you to set the color for the LED using a HEX code
 
 ### Mode 1
 The LED will display a color and you must try and guess it by adjusting the HEX values on the screen. A timer will show<br>
