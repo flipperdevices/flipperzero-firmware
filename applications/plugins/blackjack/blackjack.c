@@ -285,6 +285,7 @@ void dealer_tick(GameState* game_state) {
                 NULL,
                 to_win_state,
                 game_state->settings.message_duration);
+                DOLPHIN_DEED(DolphinDeedPluginGameWin);
         } else if(dealer_score > player_score) {
             enqueue(
                 &(game_state->queue_state),
@@ -571,6 +572,7 @@ int32_t blackjack_app(void* p) {
 
     AppEvent event;
 
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         GameState* localstate = (GameState*)acquire_mutex_block(&state_mutex);

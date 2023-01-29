@@ -87,6 +87,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195), Anime and RM Select builds now have 10 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
 - Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 15 more new animations [(Thanks to Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations)
 - [New PATREON Build: Anime Only](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-Anime)
+- Added: [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
+- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
+- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
 
 <a name="release">
 
@@ -368,6 +371,7 @@ $ ./fbt dolphin_ext
 - [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
+- [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - [Sentry Safe (By H4ckd4ddy)](https://github.com/H4ckd4ddy/flipperzero-sentry-safe-plugin) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/sentry_safe) from [UberGuidoZ](https://github.com/UberGuidoZ/))
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
