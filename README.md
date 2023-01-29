@@ -8,7 +8,7 @@ This is a tama P1 Emulator app for Flipper Zero, based on [TamaLIB](https://gith
 How to play
 -----------
 Create a `tama_p1` folder in your microSD card, and put the ROM as `rom.bin`.
-Use a search engine to find the Tamagotchi ROM. There is a file named `a`. 
+Use a search engine to find the Tamagotchi ROM. There is a file named `a` or `tama.b`. 
 Rename this to `rom.bin`. 
 
 - Left button is A.
