@@ -1,17 +1,5 @@
 #include "color_guess.h"
 #include "digits.h"
-//#include <furi.h>
-//#include <gui/gui.h>
-//#include <input/input.h>
-//#include <lib/toolbox/path.h>
-//#include <lib/subghz/protocols/protocol_items.h>
-//#include "scenes/color_guess_scene.h"
-//#include "scenes/color_guess_scene.c"
-
-//#include <stdlib.h>
-//#include <notification/notification_messages.h>
-//#include "color_guess_icons.h"
-//#include "digits.h"
 
 static void render_callback(Canvas* const canvas, void* ctx) {
     const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
