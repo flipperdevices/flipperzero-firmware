@@ -93,6 +93,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
+- Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/DroomOne/flipperzero-tamagotch-p1/pull/1)
 
 <a name="release">
 

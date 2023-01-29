@@ -12,9 +12,9 @@ Use a search engine to find the Tamagotchi ROM. There is a file named `a`.
 Rename this to `rom.bin`. 
 
 - Left button is A.
-- OK is B. 
+- Down or OK is B. 
 - Right button is C. 
-- Holding the Down button functions the same as press both A and C, which mutes the volume. 
+- Holding the Up button functions the same as press both A and C, which mutes the volume. 
 - Hold the Back button to save and exit.
 
 
@@ -24,7 +24,7 @@ Move this folder into flippers applications/plugins/tama_p1.
 
 
 Launching the app, directly from console to flipper: 
-`./fbt launch_app APPSRC=applications\plugins\tama_p1`
+`./fbt launch_app APPSRC=applications_user/TAMA-P1`
 
 Run the following to compile icons:
 ```
