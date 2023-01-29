@@ -128,22 +128,22 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
 
     do {
         // Try to read supported card
-        // FURI_LOG_I(TAG, "Trying to read a supported card ...");
-        // for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
-        //     if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareUl) {
-        //         if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
-        //             if(nfc_supported_card[i].read(nfc_worker, tx_rx)) {
-        //                 read_success = true;
-        //                 nfc_supported_card[i].parse(nfc_worker->dev_data);
-        //                 break;
-        //             }
-        //         } else {
-        //             furi_hal_nfc_sleep();
-        //         }
-        //     }
-        // }
-        // if(read_success) break;
-        // furi_hal_nfc_sleep();
+        FURI_LOG_I(TAG, "Trying to read a supported card ...");
+        for(size_t i = 0; i < NfcSupportedCardTypeEnd; i++) {
+            if(nfc_supported_card[i].protocol == NfcDeviceProtocolMifareUl) {
+                if(nfc_supported_card[i].verify(nfc_worker, tx_rx)) {
+                    if(nfc_supported_card[i].read(nfc_worker, tx_rx)) {
+                        read_success = true;
+                        nfc_supported_card[i].parse(nfc_worker->dev_data);
+                        break;
+                    }
+                } else {
+                    furi_hal_nfc_sleep();
+                }
+            }
+        }
+        if(read_success) break;
+        furi_hal_nfc_sleep();
 
         // Otherwise, try to read as usual
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
