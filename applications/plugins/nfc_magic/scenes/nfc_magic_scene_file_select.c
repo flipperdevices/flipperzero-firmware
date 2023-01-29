@@ -2,13 +2,13 @@
 
 static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
     NfcDevice* nfc_dev = nfc_magic->source_dev;
-    if((nfc_dev->format == NfcDeviceSaveFormatMifareClassic) &&
-       (nfc_dev->dev_data.nfc_data.uid_len == 4)) {
+    if(nfc_dev->format == NfcDeviceSaveFormatMifareClassic) {
         switch(nfc_magic->dev->type) {
         case MagicTypeClassicGen1:
         case MagicTypeClassicDirectWrite:
         case MagicTypeClassicAPDU:
-            if(nfc_dev->dev_data.mf_classic_data.type != MfClassicType1k) {
+            if((nfc_dev->dev_data.mf_classic_data.type != MfClassicType1k) ||
+               (nfc_dev->dev_data.nfc_data.uid_len != 4)) {
                 return false;
             }
             return true;
