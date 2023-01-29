@@ -11,8 +11,11 @@ Usage:
 - Ok - Save photos to SD card (DCIM folder)
 - Back - Close application
 
+How it looks like:
+
 ![How it looks like](images/3.gif)
 
 Captures from the qFlipper:
+
 ![Standard capture](images/1.png)
 ![With dithering](images/2.png)
