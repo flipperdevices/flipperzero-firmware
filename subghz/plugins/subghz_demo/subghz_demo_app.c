@@ -23,6 +23,7 @@ Long press UP button on Flipper Zero to send 880Hz tone to another Flipper Zero.
 // You should make the SUBGHZ_GAME_NAME short but unique.
 // NOTE: It must end with the ':' character.
 #define SUBGHZ_GAME_NAME "SGDEMO:"
+#define TAG "subghz_demo_app"
 
 // The message max length should be no larger than a value around 60 to 64.
 #define MESSAGE_MAX_LEN 60
@@ -107,6 +108,7 @@ static void subghz_demo_receive_data(DemoContext* instance) {
 
     // The message for a counter (like 42) should be "SGDEMO:" + "C" + "0042" + ":" + "YourFlip" + "\r\n"
     if (strcmp(SUBGHZ_GAME_NAME, (const char*)message)) {
+        FURI_LOG_D(TAG, "Got message %s", message);
         // The purpose immediately follows the game name.
         DemoRfPurpose purpose = message[game_name_len];
         uint8_t version = message[game_name_len+1];
@@ -254,6 +256,7 @@ static void subghz_demo_update_remote_counter(DemoContext* demo_context, DemoEve
     DemoData* data = demo_context->data;
 
     data->remoteCounter = event->number;
+    FURI_LOG_I(TAG, "Remote counter %04u", data->remoteCounter);
 
     // The message contains a sender name furi_string that we need to free, even if we didn't use it.
     if (event->senderName) {
@@ -267,6 +270,7 @@ static void subghz_demo_play_tone(DemoContext* demo_context, DemoEvent* event) {
     DemoData* data = demo_context->data;
 
     unsigned int frequency = event->number;
+    FURI_LOG_I(TAG, "Playing frequency %04u", frequency);
 
     // Make tones if the speaker is available.
 	if (furi_hal_speaker_acquire(1000)) { 
@@ -311,6 +315,7 @@ static void subghz_demo_broadcast_counter(DemoContext* demo_context, unsigned in
     furi_assert(counterToSend < 10000);
     DemoData* data = demo_context->data;
 
+    FURI_LOG_I(TAG, "Sending counter %04u", counterToSend);
     // The message for a counter with value 42 should look like...  "SGDEMO:CA0042:YourFlip\r\n"
     furi_string_printf(data->buffer, "%s%c%c%04u:%s\r\n", SUBGHZ_GAME_NAME, DemoRfPurposeCounter, MAJOR_VERSION, counterToSend, furi_hal_version_get_name_ptr());
 
@@ -321,6 +326,8 @@ static void subghz_demo_broadcast_counter(DemoContext* demo_context, unsigned in
 // We broadcast - "game name + purpose (Tone) + frequency + : + Flipper name + \r\n"
 static void subghz_demo_broadcast_tone(DemoContext* demo_context, unsigned int frequency) {
     DemoData* data = demo_context->data;
+
+    FURI_LOG_I(TAG, "Sending frequency %04u", frequency);
 
     // The message for a frequency of 440 should look like...  "SGDEMO:TA440:YourFlip\r\n"
     furi_string_printf(data->buffer, "%s%c%c%u:%s\r\n", SUBGHZ_GAME_NAME, DemoRfPurposeTone, MAJOR_VERSION, frequency, furi_hal_version_get_name_ptr());
@@ -443,6 +450,7 @@ int32_t subghz_demo_app(void* p) {
                     furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
                     subghz_demo_broadcast_tone(demo_context, event.number);
                     furi_mutex_release(demo_context->mutex);
+                    break;
                 case DemoEventDataDetected:
                     // Another Flipper sent us data!  Process it, potentially queuing an event.
                     subghz_demo_receive_data(demo_context);
@@ -452,11 +460,13 @@ int32_t subghz_demo_app(void* p) {
                     furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
                     subghz_demo_update_remote_counter(demo_context, &event);
                     furi_mutex_release(demo_context->mutex);
+                    break;
                 case DemoEventReceivedTone:
                     // Process the tone sent by the other Flipper Zero.
                     furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
                     subghz_demo_play_tone(demo_context, &event);
                     furi_mutex_release(demo_context->mutex);
+                    break;
                 default:
                     break;
             }
