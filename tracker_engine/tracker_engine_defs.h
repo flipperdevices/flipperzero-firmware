@@ -66,6 +66,12 @@ typedef enum
     TE_EFFECT_SKIP_PATTERN = 0x0d00,
     TE_EFFECT_EXT = 0x0e00,
     /* TODO: add 0exy effects here */
+    TE_EFFECT_EXT_PORTA_UP = 0x0e10,
+    TE_EFFECT_EXT_PORTA_DN = 0x0e20,
+    TE_EFFECT_EXT_RETRIGGER = 0x0e90,
+    TE_EFFECT_EXT_FINE_VOLUME_DOWN = 0x0ea0,
+    TE_EFFECT_EXT_FINE_VOLUME_UP = 0x0eb0,
+    TE_EFFECT_EXT_NOTE_CUT = 0x0ec0,
     TE_EFFECT_EXT_NOTE_DELAY = 0x0ed0,
     TE_EFFECT_SET_SPEED_PROG_PERIOD = 0x0f00,
     /* These effects work only in instrument program */

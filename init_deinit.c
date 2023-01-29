@@ -25,13 +25,13 @@ void tracker_view_free(TrackerView *tracker_view)
     free(tracker_view);
 }
 
-uint8_t my_value_index_bool(const bool value, const bool values[], uint8_t values_count) //why the fuck it gives unresolved symbol if I include it from toolbox???!!!
+uint8_t my_value_index_bool(const bool value, const bool values[], uint8_t values_count) // why the fuck it gives unresolved symbol if I include it from toolbox???!!!
 {
     uint8_t index = 0;
 
-    for(uint8_t i = 0; i < values_count; i++)
+    for (uint8_t i = 0; i < values_count; i++)
     {
-        if(value == values[i])
+        if (value == values[i])
         {
             index = i;
             break;
@@ -94,10 +94,10 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
     load_config(tracker);
 
     tracker->settings_list = variable_item_list_alloc();
-    View* view = variable_item_list_get_view(tracker->settings_list);
+    View *view = variable_item_list_get_view(tracker->settings_list);
     view_set_previous_callback(view, submenu_settings_exit_callback);
 
-    VariableItem* item;
+    VariableItem *item;
     uint8_t value_index;
 
     item = variable_item_list_add(tracker->settings_list, "Audio output", AUDIO_MODES_COUNT, audio_output_changed_callback, tracker);

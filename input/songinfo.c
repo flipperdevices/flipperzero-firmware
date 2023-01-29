@@ -20,7 +20,7 @@ void edit_songinfo_param(FlizzerTrackerApp *tracker, uint8_t selected_param, int
                 new_length += delta;
                 change_pattern_length(&tracker->song, new_length);
 
-                if(tracker->tracker_engine.pattern_position >= new_length)
+                if (tracker->tracker_engine.pattern_position >= new_length)
                 {
                     tracker->tracker_engine.pattern_position = new_length - 1;
                 }
@@ -35,7 +35,7 @@ void edit_songinfo_param(FlizzerTrackerApp *tracker, uint8_t selected_param, int
             {
                 tracker->song.num_sequence_steps += delta;
 
-                if(tracker->tracker_engine.sequence_position >= tracker->song.num_sequence_steps)
+                if (tracker->tracker_engine.sequence_position >= tracker->song.num_sequence_steps)
                 {
                     tracker->tracker_engine.sequence_position = tracker->song.num_sequence_steps - 1;
                 }

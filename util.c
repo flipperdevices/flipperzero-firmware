@@ -12,6 +12,8 @@ void play_song(FlizzerTrackerApp *tracker, bool from_cursor)
 {
     reset_buffer(&tracker->sound_engine);
 
+    sound_engine_dma_init((uint32_t)tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
+
     tracker->tracker_engine.playing = true;
     tracker->was_editing = tracker->editing;
     tracker->editing = false;

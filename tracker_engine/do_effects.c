@@ -2,6 +2,7 @@
 #include <furi.h>
 
 #include "../sound_engine/sound_engine_filter.h"
+#include "tracker_engine.h"
 
 void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel, uint8_t tick, bool from_program)
 {
@@ -185,6 +186,103 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
 
                     se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
                     se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
+                }
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_EXT:
+        {
+            switch (opcode & 0x7ff0)
+            {
+                case TE_EFFECT_EXT_PORTA_DN:
+                {
+                    if (tick == 0)
+                    {
+                        int32_t prev = te_channel->note;
+
+                        te_channel->note -= opcode & 0xf;
+                        if (prev < te_channel->note)
+                            te_channel->note = 0;
+
+                        te_channel->target_note = te_channel->note;
+                    }
+
+                    break;
+                }
+
+                case TE_EFFECT_EXT_PORTA_UP:
+                {
+                    if (tick == 0)
+                    {
+                        uint32_t prev = te_channel->note;
+
+                        te_channel->note += opcode & 0xf;
+                        if (prev > te_channel->note)
+                            te_channel->note = 0xffff;
+
+                        te_channel->target_note = te_channel->note;
+                    }
+
+                    break;
+                }
+
+                case TE_EFFECT_EXT_RETRIGGER:
+                {
+                    if ((opcode & 0xf) > 0 && (tick % (opcode & 0xf)) == 0)
+                    {
+                        uint8_t prev_vol_tr = te_channel->volume;
+                        uint8_t prev_vol_cyd = se_channel->adsr.volume;
+                        tracker_engine_trigger_instrument_internal(tracker_engine, channel, te_channel->instrument, te_channel->last_note);
+                        te_channel->volume = prev_vol_tr;
+                        se_channel->adsr.volume = prev_vol_cyd;
+                    }
+
+                    break;
+                }
+
+                case TE_EFFECT_EXT_FINE_VOLUME_DOWN:
+                {
+                    if (tick == 0)
+                    {
+                        te_channel->volume -= opcode & 0xf;
+
+                        if (te_channel->volume > MAX_ADSR_VOLUME)
+                            te_channel->volume = 0;
+
+                        se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
+                        se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
+                    }
+
+                    break;
+                }
+
+                case TE_EFFECT_EXT_FINE_VOLUME_UP:
+                {
+                    if (tick == 0)
+                    {
+                        te_channel->volume += opcode & 0xf;
+
+                        if (te_channel->volume > MAX_ADSR_VOLUME)
+                            te_channel->volume = MAX_ADSR_VOLUME;
+
+                        se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
+                        se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
+                    }
+
+                    break;
+                }
+
+                case TE_EFFECT_EXT_NOTE_CUT:
+                {
+                    if ((opcode & 0xf) <= tick)
+                    {
+                        se_channel->adsr.volume = 0;
+                        te_channel->volume = 0;
+                    }
+
+                    break;
                 }
             }
 

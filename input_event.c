@@ -108,13 +108,13 @@ void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType typ
     }
 }
 
-uint32_t submenu_settings_exit_callback(void* context)
+uint32_t submenu_settings_exit_callback(void *context)
 {
     UNUSED(context);
     return VIEW_SUBMENU_PATTERN;
 }
 
-uint32_t submenu_exit_callback(void* context)
+uint32_t submenu_exit_callback(void *context)
 {
     UNUSED(context);
     return VIEW_TRACKER;
@@ -201,20 +201,20 @@ void submenu_callback(void *context, uint32_t index)
     }
 }
 
-void audio_output_changed_callback(VariableItem* item)
+void audio_output_changed_callback(VariableItem *item)
 {
-    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)variable_item_get_context(item);
+    FlizzerTrackerApp *tracker = (FlizzerTrackerApp *)variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, audio_modes_text[(index > 1 ? 1 : index)]);
 
-    if(tracker)
+    if (tracker)
     {
         tracker->external_audio = (bool)index;
 
         tracker->external_audio = audio_modes_values[(index > 1 ? 1 : index)];
 
-        //sound_engine_init(&tracker->sound_engine, tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer_size);
-        //sound_engine_init_hardware(tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
+        // sound_engine_init(&tracker->sound_engine, tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer_size);
+        // sound_engine_init_hardware(tracker->sound_engine.sample_rate, tracker->external_audio, tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
 
         FlizzerTrackerEvent event = {.type = EventTypeSetAudioMode, .input = {0}, .period = 0};
         furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);

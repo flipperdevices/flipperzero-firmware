@@ -169,7 +169,7 @@ typedef struct
     DialogsApp *dialogs;
     Submenu *pattern_submenu;
     Submenu *instrument_submenu;
-    VariableItemList* settings_list;
+    VariableItemList *settings_list;
     Widget *overwrite_file_widget;
     char filename[FILE_NAME_LEN + 1];
     bool was_it_back_keypress;

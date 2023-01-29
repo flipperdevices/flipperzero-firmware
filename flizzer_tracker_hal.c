@@ -60,7 +60,7 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
     {
         furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
 
-        if(furi_hal_speaker_is_mine())
+        if (furi_hal_speaker_is_mine())
         {
             furi_hal_speaker_release();
         }
@@ -68,12 +68,12 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
 
     else
     {
-        if(!(furi_hal_speaker_is_mine()))
+        if (!(furi_hal_speaker_is_mine()))
         {
             bool unu = furi_hal_speaker_acquire(1000);
             UNUSED(unu);
         }
-        
+
         furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 
@@ -87,7 +87,7 @@ void sound_engine_set_audio_output(bool external_audio_output)
     {
         furi_hal_gpio_init_ex(&gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
 
-        if(furi_hal_speaker_is_mine())
+        if (furi_hal_speaker_is_mine())
         {
             furi_hal_speaker_release();
         }
@@ -95,7 +95,7 @@ void sound_engine_set_audio_output(bool external_audio_output)
 
     else
     {
-        if(!(furi_hal_speaker_is_mine()))
+        if (!(furi_hal_speaker_is_mine()))
         {
             bool unu = furi_hal_speaker_acquire(1000);
             UNUSED(unu);

@@ -1,7 +1,7 @@
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
-char* audio_modes_text[2] = {
+char *audio_modes_text[2] = {
     "Internal",
     "External",
 };

@@ -231,7 +231,7 @@ int32_t flizzer_tracker_app(void *p)
         {
             stop_song(tracker);
 
-            tracker->tracker_engine.sequence_position = tracker->tracker_engine.pattern_position = 0;
+            tracker->tracker_engine.sequence_position = tracker->tracker_engine.pattern_position = tracker->current_instrument = 0;
 
             tracker->dialogs = furi_record_open(RECORD_DIALOGS);
             tracker->is_loading = true;
@@ -261,9 +261,8 @@ int32_t flizzer_tracker_app(void *p)
             }
         }
 
-        if(event.type == EventTypeSetAudioMode)
+        if (event.type == EventTypeSetAudioMode)
         {
-            sound_engine_set_audio_output(tracker->external_audio);
             sound_engine_PWM_timer_init(tracker->external_audio);
 
             tracker->sound_engine.external_audio_output = tracker->external_audio;
