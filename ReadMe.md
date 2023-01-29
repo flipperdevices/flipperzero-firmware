@@ -168,7 +168,7 @@ $ ./fbt dolphin_ext
 - Bluetooth Remote + USB Keyboard: [Added movement interval in mouse_jiggler USB & BLE #303 (By DocKuro)](https://github.com/DarkFlippers/unleashed-firmware/pull/303)
 - Clock: Clock.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
 - Desktop: Hidden top bar [Thanks to ESurge](https://github.com/ESurge/)
-- Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)](https://github.com/Willy-JL)
+- Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)]
 - Desktop: Exclude icons on the left and show minimal battery [Thanks to skizzophrenic/Talking-Sasquach](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/360)
 - Development free space thanks to removal of unused debug tools and [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/46/files) for removal of first start assets.
 - Dolphin: Assigned profile pic for levels 1-10 (Happy Lvl 1 Dolphin), 11-15 (Happy Lvl 2 Dolphin), 16-18 (Happy Lvl 3 Dolphin), 19-21 (Kid G0ku), 22-24 (Adult G0ku), 25-27 (SSJ G0ku) and 28-30 (SSJ3 G0ku)
