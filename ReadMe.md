@@ -69,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Assets: Includes a NFC link to TalkingSasquach on YouTube
+- Added: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 
 <a name="release">
 

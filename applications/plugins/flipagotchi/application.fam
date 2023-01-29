@@ -1,6 +1,6 @@
 App(
     appid="Flipagotchi",
-    name="Flipagotchi",
+    name="Flipagotchi WIP",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipagotchi_app",
     cdefines=["APP_FLIPAGOTCHI"],
