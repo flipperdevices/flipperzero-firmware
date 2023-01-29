@@ -33,7 +33,7 @@ const uint32_t AHBPrescTable[16UL] = {1UL, 3UL, 5UL, 1UL, 1UL, 6UL, 10UL, 32UL, 
 const uint32_t APBPrescTable[8UL]  = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
 const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
                                       4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
-double time;
+char * time;
 uint8_t pause=0;
 
 void Error_Handler()
@@ -230,7 +230,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
     char buf[50];
-    snprintf(buf, 50, "Time: %.5f", time);
+    snprintf(buf, 50, "Time: %s", time);
 
     canvas_draw_str(canvas, 10, 10, buf);
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
@@ -262,9 +262,12 @@ void scope_scene_run_widget_callback(
 
 void scope_scene_run_on_enter(void* context) {
     ScopeApp* app = context;
-    time = app->time;
-    UNUSED(app);
-
+    for (uint32_t i = 0; i < COUNT_OF(time_list); i++){
+        if(time_list[i].time == app->time){
+            time = time_list[i].str;
+            break;
+        }
+    }
     pause = 0;
 
     __disable_irq();
@@ -299,6 +302,8 @@ void scope_scene_run_on_enter(void* context) {
          tmp_index_adc_converted_data++) {
         aADCxConvertedData[tmp_index_adc_converted_data] =
             VAR_CONVERTED_DATA_INIT_VALUE;
+        aADCxConvertedData_Voltage_mVoltA[tmp_index_adc_converted_data] = 0;
+        aADCxConvertedData_Voltage_mVoltB[tmp_index_adc_converted_data] = 0;
     }
 
     if (HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED) != HAL_OK) {
