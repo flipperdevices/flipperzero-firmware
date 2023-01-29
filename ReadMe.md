@@ -90,6 +90,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
 - Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195), Anime and RM Select builds now have 13 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
 
 <a name="release">
 
