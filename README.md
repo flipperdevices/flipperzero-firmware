@@ -156,3 +156,7 @@ Before you can use it, you have to load the card_graphics.png file in your games
 - Get first non flipped card index in a hand: ``first_non_flipped_card(hand)``
 - Move cards from one hand to another starting at index: ``extract_hand_region(from_hand, to_hand, start_index)``lipped card index in a hand: ``first_non_flipped_card(hand)``
 - Move the whole hand into another hand: ``add_hand_region(from_hand, to_hand)``
+
+## Menu
+
+Do not use it, it barely works and only used in blackjack.
