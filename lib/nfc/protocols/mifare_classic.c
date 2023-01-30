@@ -1122,9 +1122,9 @@ void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
 
     nfca_append_crc16(plain_data, 2);
     if(crypto) {
-        crypto1_encrypt(crypto, NULL, plain_data, 2 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
     } else {
-        memcpy(tx_rx->tx_data, plain_data, 2);
+        memcpy(tx_rx->tx_data, plain_data, 4);
         nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, 2);
     }
 
