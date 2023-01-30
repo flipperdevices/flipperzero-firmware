@@ -39,6 +39,22 @@ void furi_hal_ibutton_emulate_set_next(uint32_t period);
  */
 void furi_hal_ibutton_emulate_stop();
 
+/**
+ * Set the pin to normal mode (open collector), and sets it to float
+ */
+void furi_hal_ibutton_pin_configure();
+
+/**
+ * Sets the pin to analog mode, and sets it to float
+ */
+void furi_hal_ibutton_pin_reset();
+
+/**
+ * iButton write pin
+ * @param state true / false
+ */
+void furi_hal_ibutton_pin_write(const bool state);
+
 #ifdef __cplusplus
 }
 #endif
