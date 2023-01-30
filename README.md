@@ -17,12 +17,12 @@ ui_cleanup();
 
 * To test if a pixel is black or not: ``test_pixel(canvas_buffer, pixel_x, pixel_y, screen_width)``
 * Convert Flippers icon to the same type to u8g2: ``uint8_t * result=image_data(canvas, icon);``
-* Flatten X/Y pixel coordinate to array index ``uint32_t result=pixel_index(x,y)``
+* Flatten X/Y pixel coordinate to array index ``uint32_t result=pixel_index(x, y)``
 * Draw icon region with overlay/invert support: ``draw_icon_clip(canvas, icon, image_x, image_y, screen_x, screen_y, width, height, draw_mode)``
 * Draw flipped region icon with overlay/invert support: ``draw_icon_clip_flipped(canvas, icon, image_x, image_y, screen_x, screen_y, width, height, draw_mode)``
-* Draw rounded box: ``draw_rounded_box(canvas, x,y,width, heigth, draw_mode)``
-* Draw rounded box frame: ``draw_rounded_box_frame(canvas, x,y,width, heigth, draw_mode)``
-* Draw rectangle: ``draw_rectangle(canvas, x,y,width, heigth, draw_mode)``
+* Draw rounded box: ``draw_rounded_box(canvas, x, y, width, heigth, draw_mode)``
+* Draw rounded box frame: ``draw_rounded_box_frame(canvas, x, y, width, heigth, draw_mode)``
+* Draw rectangle: ``draw_rectangle(canvas, x, y, width, heigth, draw_mode)``
 * Invert screen colors in a rectangle: ``invert_rectangle(canvas, x, y, width, height)``
 * Invert screen colors in a shape: ``invert_shape(canvas, image, x, y, width, height)``
 * Read pixel: ``read_pixel(canvas, x, y)``
@@ -42,14 +42,14 @@ Some extra math functionality.
 ### Vector math
 
 * Vector type
-* add 2 vectors together ``Vector result = vector_add(a,b);``
-* divide 2 vectors components from each other ``Vector result = vector_sub(a,b);``
-* Multiplying vector components together ``Vector result = vector_mul_components(a,b);``
-* Dividing vector components ``Vector result = vector_div_components(a,b);``
+* add 2 vectors together ``Vector result = vector_add(a, b);``
+* divide 2 vectors components from each other ``Vector result = vector_sub(a, b);``
+* Multiplying vector components together ``Vector result = vector_mul_components(a, b);``
+* Dividing vector components ``Vector result = vector_div_components(a, b);``
 * Get the magnitude of a vector ``float result = vector_magnitude(a);``
 * Normalize a vector (components add up to one) ``Vector result = vector_normalized(a);``
-* Distance between vectors ``Vector result = vector_distance(a,b);``
-* Get dot product ``float result = vector_distance(a,b);``
+* Distance between vectors ``Vector result = vector_distance(a, b);``
+* Get dot product ``float result = vector_distance(a, b);``
 
 ### Linear Interpolation
 
