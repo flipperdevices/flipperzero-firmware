@@ -358,19 +358,16 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
         if(state->w_test && timer_start_timestamp != 0) {
+            int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
+                                                   timer_stopped_seconds;
+            snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
             int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
             int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
             static const Icon* const count_anim[5] = {
                 &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
-            static const Icon* const count_anim2[4] = {
-                &I_EviWaiting1_18x21, &I_EviWaiting2_18x21, &I_EviSmile1_18x21, &I_EviSmile2_18x21};
-            static const Icon* const count_anim3[4] = {
-                &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
             canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
-            canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
-            canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
             canvas_draw_str_aligned(
-                canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+                canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         } else if(timer_start_timestamp != 0) {
             canvas_draw_str_aligned(
                 canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
@@ -437,16 +434,19 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         } else {
             if(state->w_test) canvas_set_font(canvas, FontBatteryPercent);
             if(state->w_test && timer_start_timestamp != 0) {
-                int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
-                                                       timer_stopped_seconds;
-                snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
                 int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
                 int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
                 static const Icon* const count_anim[5] = {
                     &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
+                static const Icon* const count_anim2[4] = {
+                    &I_EviWaiting1_18x21, &I_EviWaiting2_18x21, &I_EviSmile1_18x21, &I_EviSmile2_18x21};
+                static const Icon* const count_anim3[4] = {
+                    &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
                 canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
+                canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
+                canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
                 canvas_draw_str_aligned(
-                    canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+                    canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
             }
             canvas_draw_str_aligned(
                 canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
