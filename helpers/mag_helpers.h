@@ -15,3 +15,17 @@ void track_to_bits(uint8_t* bit_array, const char* track_data, uint8_t track_ind
 void mag_spoof(Mag* mag);
 void set_bit(uint8_t* b, uint32_t blen, uint32_t bitpos, bool val);
 bool get_bit(uint8_t* b, uint32_t blen, uint32_t bitpos);
+
+
+#define PREFIX_NUM_ZEROES 25
+#define BITS_TRACK1 7
+#define OFFSET_TRACK1 32
+#define BITS_TRACK2 5
+#define OFFSET_TRACK2 48
+uint16_t add_bit(bool value, uint8_t* out, uint16_t count);
+uint16_t add_bit_manchester(bool value, uint8_t* out, uint16_t count);
+uint16_t msr_encode(char* data, uint8_t* out_manchester, uint8_t* out_raw, uint8_t track_bits, uint8_t track_ascii_offset);
+void debug_msr_string(char* data,  uint8_t track_bits, uint8_t track_ascii_offset);
+void mag_spoof_bitwise(Mag* mag);
+void tx_deinit_rf();
+void tx_init_rf(int hz);
