@@ -33,5 +33,4 @@ Or use the tool [uFBT](https://github.com/flipperdevices/flipperzero-ufbt) for b
 
 
 ## INFO:
-
 Source code is taken from the [UART Terminal](https://github.com/cool4uma/UART_Terminal) project. Many thanks to the developers of the Wifi Marauder project.
