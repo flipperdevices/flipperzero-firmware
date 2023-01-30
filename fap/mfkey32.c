@@ -1,19 +1,4 @@
-// TODO: Count total number of nonces
 // TODO: Update progress bar
-// TODO: Eliminate already computed keys from remaining nonces
-// TODO: Run attack using mfkeypaging.c
-// TODO: Eliminate functions:
-/*
-    fclose: storage_file_close
-    fgets: Not directly equivalent, but similar functionality can be achieved using storage_file_read and string manipulation
-    fopen: storage_file_open
-    fputc: Not directly equivalent, but similar functionality can be achieved using storage_file_write and casting a single character to a void*
-    fread: storage_file_read
-    fseek: storage_file_seek
-    ftell: storage_file_tell
-    fwrite: storage_file_write
-    strtok_r: Not directly equivalent, but similar functionality can be achieved using string manipulation and storage_get_next_filename
-*/
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -38,7 +23,6 @@
 #define TAG "Mfkey32"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
-
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define BIT(x, n) ((x) >> (n) & 1)
@@ -60,6 +44,7 @@ typedef struct {
 
 typedef enum {
     MissingNonces,
+    StorageUnwritable,
     ZeroNonces,
     OutOfMemory,
 } MfkeyError;
@@ -94,51 +79,40 @@ struct MfClassicDict {
     uint32_t total_keys;
 };
 
-void *file_calloc(size_t nmemb, size_t size, File *file) {
-    /*
+void *file_calloc(size_t nmemb, size_t size, Stream *file) {
     // Seek to the end of the file
-    fseek(file, 0, SEEK_END); // XXX FIXME
+    stream_seek(file, 0, StreamOffsetFromEnd);
     // Get the current position, which is the end of the file
-    long int offset = ftell(file); // XXX FIXME
+    long int offset = stream_tell(file);
     // Write nmemb * size bytes of 0s to the file
     for (uint32_t i = 0; i < nmemb * size; i++) {
-        fputc(0, file); // XXX FIXME
+        stream_write_char(file, 0);
     }
-    */
-    long int offset = 0; // DEBUG
     // Return the starting offset of the allocated memory
     return (void *) offset;
 }
 
-void file_write_at_offset(void *ptr, int element, void *src, size_t n, File *file) {
-    /*
+void file_write_at_offset(void *ptr, int element, void *src, size_t n, Stream *file) {
     // Seek to the specified offset in the file
-    fseek(file, (long int) (ptr + (element*n)), SEEK_SET); // XXX FIXME
+    stream_seek(file, (long int) (ptr + (element*n)), StreamOffsetFromStart);
     // Write n bytes from src to the file
-    fwrite(src, n, 1, file); // XXX FIXME
-    */
+    stream_write(file, src, n);
 }
 
-void *file_read_at_offset(void *ptr, int element, size_t n, File *file) {
-    /*
+void *file_read_at_offset(void *ptr, int element, size_t n, Stream *file) {
     // Seek to the specified offset in the file
-    fseek(file, (long int) (ptr + (element*n)), SEEK_SET); // XXX FIXME
+    stream_seek(file, (long int) (ptr + (element*n)), StreamOffsetFromStart);
     // Read n bytes from the file
     void *buf = malloc(n);
-    fread(buf, n, 1, file); // XXX FIXME
-    */
-    void *buf = 0; // DEBUG
+    stream_read(file, buf, n);
     return buf;
 }
-int file_read_int_at_offset(void *ptr, int element, size_t n, File *file) {
-    /*
+int file_read_int_at_offset(void *ptr, int element, size_t n, Stream *file) {
     int res;
     // Seek to the specified offset in the file
-    fseek(file, (long int) (ptr + (element*n)), SEEK_SET); // XXX FIXME
+    stream_seek(file, (long int) (ptr + (element*n)), StreamOffsetFromStart);
     // Read n bytes from the file
-    fread(&res, n, 1, file); // XXX FIXME
-    */
-    int res = 0;
+    stream_read(file, (uint8_t*) &res, n);
     return res;
 }
 
@@ -163,7 +137,7 @@ static inline uint8_t evenparity32(uint32_t x) {
     return (__builtin_parity(x) & 0xFF);
 }
 
-int binsearch(void *data_offset, File *mem_file, int start, int stop) {
+int binsearch(void *data_offset, Stream *mem_file, int start, int stop) {
     int mid, val = file_read_int_at_offset(data_offset, stop, sizeof(int), mem_file) & 0xff000000;
     while (start != stop) {
         mid = (stop - start) >> 1;
@@ -176,7 +150,7 @@ int binsearch(void *data_offset, File *mem_file, int start, int stop) {
     return start;
 }
 
-void quicksort(void *data_offset, File *mem_file, int low, int high) {
+void quicksort(void *data_offset, Stream *mem_file, int low, int high) {
     //if (SIZEOF(array) == 0)
     //    return;
     if (low >= high)
@@ -208,7 +182,7 @@ void quicksort(void *data_offset, File *mem_file, int low, int high) {
     }
 }
 
-void update_contribution(void *data_offset, File *mem_file, int item, int mask1, int mask2) {
+void update_contribution(void *data_offset, Stream *mem_file, int item, int mask1, int mask2) {
     int data_item = file_read_int_at_offset(data_offset, item, sizeof(int), mem_file);
     int p = data_item >> 25;
     p = p << 1 | evenparity32(data_item & mask1);
@@ -217,7 +191,7 @@ void update_contribution(void *data_offset, File *mem_file, int item, int mask1,
     file_write_at_offset(data_offset, item, &data_item, sizeof(int), mem_file);
 }
 
-int extend_table(void *data_offset, File *mem_file, int tbl, int end, int bit, int m1, int m2) {
+int extend_table(void *data_offset, Stream *mem_file, int tbl, int end, int bit, int m1, int m2) {
     int data_tbl_init = file_read_int_at_offset(data_offset, tbl, sizeof(int), mem_file);
     data_tbl_init <<= 1;
     file_write_at_offset(data_offset, tbl, &data_tbl_init, sizeof(int), mem_file);
@@ -251,7 +225,7 @@ int extend_table(void *data_offset, File *mem_file, int tbl, int end, int bit, i
     return end;
 }
 
-int extend_table_simple(void *data_offset, File *mem_file, int tbl, int end, int bit) {
+int extend_table_simple(void *data_offset, Stream *mem_file, int tbl, int end, int bit) {
     int data_tbl_init = file_read_int_at_offset(data_offset, tbl, sizeof(int), mem_file);
     data_tbl_init <<= 1;
     file_write_at_offset(data_offset, tbl, &data_tbl_init, sizeof(int), mem_file);
@@ -282,7 +256,7 @@ int extend_table_simple(void *data_offset, File *mem_file, int tbl, int end, int
     return end;
 }
 
-int recover(void *odd_start_offset, File *mem_file, int o_head, int o_tail, int oks, void *even_start_offset, int e_head, int e_tail, int eks, int rem,
+int recover(void *odd_start_offset, Stream *mem_file, int o_head, int o_tail, int oks, void *even_start_offset, int e_head, int e_tail, int eks, int rem,
             void *statelist_start_offset, int s) {
     int o = 0, e = 0, i = 0;
     if (rem == -1) {
@@ -329,7 +303,7 @@ int recover(void *odd_start_offset, File *mem_file, int o_head, int o_tail, int 
     return s;
 }
 
-struct Crypto1State* lfsr_recovery32(int ks2, File *mem_file) {
+struct Crypto1State* lfsr_recovery32(int ks2, Stream *mem_file) {
     int odd_head = 0, odd_tail = -1, oks = 0;
     int even_head = 0, even_tail = -1, eks = 0;
     void *odd_start_offset = file_calloc(1, 5 << 19, mem_file);
@@ -752,10 +726,12 @@ void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
 
 // TODO: Blocks main thread. Do we manually need to render here?
 void mfkey32(ProgramState* const program_state) {
+    uint64_t key;     // recovered key
     size_t keyarray_size = 0;
     uint64_t *keyarray = malloc(sizeof(uint64_t)*1);
     uint32_t i = 0;
     struct Crypto1State *temp;
+    Stream *mem_file = { 0 };
     // Check for nonces
     if (!napi_mf_classic_nonces_check_presence()) {
         program_state->err = MissingNonces;
@@ -803,28 +779,40 @@ void mfkey32(ProgramState* const program_state) {
             continue;
         }
         FURI_LOG_I(TAG, "Cracking %lx %lx", next_nonce.uid, next_nonce.ar1_enc);
-        /*
-        File *mem_file = fopen(MF_CLASSIC_MEM_FILE_PATH, "wb+"); // XXX FIXME
-        void *s_offset = lfsr_recovery32(ar0_enc ^ p64, mem_file);
+        if(!buffered_file_stream_open(mem_file, MF_CLASSIC_MEM_FILE_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+            buffered_file_stream_close(mem_file);
+            program_state->err = StorageUnwritable;
+            napi_mf_classic_nonce_array_free(nonce_arr);
+            if (system_dict_exists) {
+                napi_mf_classic_dict_free(system_dict);
+            }
+            if (user_dict_exists) {
+                napi_mf_classic_dict_free(user_dict);
+            }
+            furi_record_close(RECORD_STORAGE);
+            return;
+        }
+        void *s_offset = lfsr_recovery32(next_nonce.ar0_enc ^ p64, mem_file);
         int ti = 0;
         while (1) {
             temp = (struct Crypto1State *) file_read_at_offset(s_offset, ti, sizeof(struct Crypto1State), mem_file);
             if (!temp->odd && !temp->even) break;
             crypt_or_rollback_word(temp, 0, 0, 0);
-            crypt_or_rollback_word(temp, nr0_enc, 1, 0);
-            crypt_or_rollback_word(temp, uid ^ nt0, 0, 0);
+            crypt_or_rollback_word(temp, next_nonce.nr0_enc, 1, 0);
+            crypt_or_rollback_word(temp, next_nonce.uid ^ next_nonce.nt0, 0, 0);
             crypto1_get_lfsr(temp, &key);
-            crypt_or_rollback_word(temp, uid ^ nt1, 0, 1);
-            crypt_or_rollback_word(temp, nr1_enc, 1, 1);
-            if (ar1_enc == (crypt_or_rollback_word(temp, 0, 0, 1) ^ p64b)) {
-                int found = 0;
+            crypt_or_rollback_word(temp, next_nonce.uid ^ next_nonce.nt1, 0, 1);
+            crypt_or_rollback_word(temp, next_nonce.nr1_enc, 1, 1);
+            if (next_nonce.ar1_enc == (crypt_or_rollback_word(temp, 0, 0, 1) ^ p64b)) {
+                bool already_found = false;
                 for(i = 0; i < keyarray_size; i++) {
                     if (keyarray[i] == key) {
-                        found = 1;
+                        already_found = true;
                         break;
                     }
                 }
-                if (found == 0) {
+                if (already_found == false) {
+                    // New key
                     keyarray = realloc(keyarray, sizeof(uint64_t)*(keyarray_size+1));
                     keyarray_size += 1;
                     keyarray[keyarray_size-1] = key;
@@ -835,18 +823,17 @@ void mfkey32(ProgramState* const program_state) {
             free(temp);
             ti++;
         }
-        */
+        buffered_file_stream_close(mem_file);
     }
     /*
     // TODO: Update display to show all keys were found
-    fclose(filePointer); // XXX FIXME
     printf("Unique keys found:\n");
     for(i = 0; i < keyarray_size; i++) {
         printf("%012" PRIx64 , keyarray[i]);
         printf("\n");
     }
     */
-    // TODO: Prepend key to user dictionary file
+    // TODO: Prepend found key(s) to user dictionary file
     napi_mf_classic_nonce_array_free(nonce_arr);
     if (system_dict_exists) {
         napi_mf_classic_dict_free(system_dict);
