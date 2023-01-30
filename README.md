@@ -115,7 +115,7 @@ Currently it only supports one queue chain.
 * Card
   - Stores data about one card from the deck
   - Properties
-    - pip: the symbol (0:spades, 1:hearths, 2:diamonds, 3:clubs)
+    - pip: the symbol (0: spades, 1: hearths, 2: diamonds, 3: clubs)
     - character: the letter for the card (2 is 0, A is 12)
     - disabled: can be used freely. I used it to hide the card during animation
     - flipped: if this is set to true, instead of the card graphics the backside will be rendered
@@ -146,7 +146,7 @@ Before you can use it, you have to load the card_graphics.png file in your games
 - Draw the backside of the card: ``draw_card_back_at(pos_x, pos_y, canvas)``
 - Generate a deck: ``generate_deck(deck_pointer, how_many_decks)``
 - Blackjack hand calculation: ``hand_count(cards_array, how_many_cards)``
-- Draw card animation state: ``draw_card_animation(card, from_vector, controL_vector, to_vector, current_phase, extra_time_margin, canvas)``
+- Draw card animation state: ``draw_card_animation(card, from_vector, control_vector, to_vector, current_phase, extra_time_margin, canvas)``
 - Create hand pointer: ``init_hand(hand_pointer, card_count)``
 - Free hand pointer: ``free_hand(hand_pointer)``
 - Add card to the hand: ``add_to_hand(hand_pointer, card)``
