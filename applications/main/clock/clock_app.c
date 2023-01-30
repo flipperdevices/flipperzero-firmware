@@ -364,7 +364,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
             canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
             canvas_draw_str_aligned(
-                canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+                canvas, 96, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         } else if(timer_start_timestamp != 0) {
             canvas_draw_str_aligned(
                 canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
@@ -446,7 +446,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
                 canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
                 canvas_draw_str_aligned(
-                    canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+                    canvas, 64, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
             }
             canvas_draw_str_aligned(
                 canvas, 64, 26, AlignCenter, AlignCenter, time_string); // DRAW TIME
