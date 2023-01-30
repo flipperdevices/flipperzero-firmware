@@ -70,7 +70,7 @@ static void storage_cli_info(Cli* cli, FuriString* path) {
         } else {
             printf(
                 "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n"
-                " %02x%2.2s %5.5s %i.%i\r\n SN:%04lx %02i/%i\r\n",
+                "%02x%2.2s %5.5s %i.%i\r\nSN:%04lx %02i/%i\r\n",
                 sd_info.label,
                 sd_api_get_fs_type_text(sd_info.fs_type),
                 sd_info.kb_total,
