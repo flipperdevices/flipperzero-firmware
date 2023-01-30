@@ -10,8 +10,16 @@
 
 TamaApp* g_ctx;
 FuriMutex* g_state_mutex;
-bool portrait_mode;
-// bool in_menu;
+bool portrait_mode = false;
+bool in_menu = false;
+
+int menu_cursor = 0;
+
+const int menu_items = 2;
+// char* menu_strings[2][2] = {
+//     {"Portrait", "Landscape"},
+//     {"Mute", "Mute2"},
+// };
 
 static const Icon* icons_list[] = {
     &I_icon_0,
@@ -23,166 +31,185 @@ static const Icon* icons_list[] = {
     &I_icon_6,
     &I_icon_7,
 };
-static void draw_landscape(Canvas* const canvas, void* cb_ctx) {
-    furi_assert(cb_ctx);
 
-    FuriMutex* const mutex = cb_ctx;
-    if(furi_mutex_acquire(mutex, 25) != FuriStatusOk) return;
+// static void draw_landscape(Canvas* const canvas, void* cb_ctx)
+static void draw_landscape(Canvas* const canvas) {
+    // FURI_LOG_D(TAG, "Drawing frame");
+    // Calculate positioning
+    uint16_t canv_width = canvas_width(canvas);
+    uint16_t canv_height = canvas_height(canvas);
+    uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
+    uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
+    // uint16_t lcd_matrix_top = 0;
+    uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
+    uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
 
-    if(g_ctx->rom == NULL) {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 30, 30, "No ROM");
-    } else if(g_ctx->halted) {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 30, 30, "Halted");
-    } else {
-        // FURI_LOG_D(TAG, "Drawing frame");
-        // Calculate positioning
-        uint16_t canv_width = canvas_width(canvas);
-        uint16_t canv_height = canvas_height(canvas);
-        uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
-        uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
-        // uint16_t lcd_matrix_top = 0;
-        uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
-        uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
+    uint16_t lcd_icon_upper_top = lcd_matrix_top - TAMA_LCD_ICON_SIZE - TAMA_LCD_ICON_MARGIN;
+    uint16_t lcd_icon_upper_left = lcd_matrix_left;
+    uint16_t lcd_icon_lower_top = lcd_matrix_top + lcd_matrix_scaled_height + TAMA_LCD_ICON_MARGIN;
+    uint16_t lcd_icon_lower_left = lcd_matrix_left;
+    uint16_t lcd_icon_spacing_horiz =
+        (lcd_matrix_scaled_width - (4 * TAMA_LCD_ICON_SIZE)) / 3 + TAMA_LCD_ICON_SIZE;
 
-        uint16_t lcd_icon_upper_top = lcd_matrix_top - TAMA_LCD_ICON_SIZE - TAMA_LCD_ICON_MARGIN;
-        uint16_t lcd_icon_upper_left = lcd_matrix_left;
-        uint16_t lcd_icon_lower_top =
-            lcd_matrix_top + lcd_matrix_scaled_height + TAMA_LCD_ICON_MARGIN;
-        uint16_t lcd_icon_lower_left = lcd_matrix_left;
-        uint16_t lcd_icon_spacing_horiz =
-            (lcd_matrix_scaled_width - (4 * TAMA_LCD_ICON_SIZE)) / 3 + TAMA_LCD_ICON_SIZE;
-
-        uint16_t y = lcd_matrix_top;
-        for(uint8_t row = 0; row < 16; ++row) {
-            uint16_t x = lcd_matrix_left;
-            uint32_t row_pixels = g_ctx->framebuffer[row];
-            for(uint8_t col = 0; col < 32; ++col) {
-                if(row_pixels & 1) {
-                    canvas_draw_box(
-                        canvas, x, y, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
-                }
-                x += TAMA_SCREEN_SCALE_FACTOR;
-                row_pixels >>= 1;
+    uint16_t y = lcd_matrix_top;
+    for(uint8_t row = 0; row < 16; ++row) {
+        uint16_t x = lcd_matrix_left;
+        uint32_t row_pixels = g_ctx->framebuffer[row];
+        for(uint8_t col = 0; col < 32; ++col) {
+            if(row_pixels & 1) {
+                canvas_draw_box(canvas, x, y, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
             }
-            y += TAMA_SCREEN_SCALE_FACTOR;
+            x += TAMA_SCREEN_SCALE_FACTOR;
+            row_pixels >>= 1;
         }
-
-        // Start drawing icons
-        uint8_t lcd_icons = g_ctx->icons;
-
-        // Draw top icons
-        y = lcd_icon_upper_top;
-        // y = 64 - TAMA_LCD_ICON_SIZE;
-        uint16_t x_ic = lcd_icon_upper_left;
-        for(uint8_t i = 0; i < 4; ++i) {
-            if(lcd_icons & 1) {
-                canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
-            }
-            // x_ic += TAMA_LCD_ICON_SIZE + 4;
-            x_ic += lcd_icon_spacing_horiz;
-            lcd_icons >>= 1;
-        }
-
-        // Draw bottom icons
-        y = lcd_icon_lower_top;
-        x_ic = lcd_icon_lower_left;
-        for(uint8_t i = 4; i < 8; ++i) {
-            // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
-            if(lcd_icons & 1) {
-                canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
-            }
-            x_ic += lcd_icon_spacing_horiz;
-            lcd_icons >>= 1;
-        }
+        y += TAMA_SCREEN_SCALE_FACTOR;
     }
 
-    furi_mutex_release(mutex);
+    // Start drawing icons
+    uint8_t lcd_icons = g_ctx->icons;
+
+    // Draw top icons
+    y = lcd_icon_upper_top;
+    // y = 64 - TAMA_LCD_ICON_SIZE;
+    uint16_t x_ic = lcd_icon_upper_left;
+    for(uint8_t i = 0; i < 4; ++i) {
+        if(lcd_icons & 1) {
+            canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
+        }
+        // x_ic += TAMA_LCD_ICON_SIZE + 4;
+        x_ic += lcd_icon_spacing_horiz;
+        lcd_icons >>= 1;
+    }
+
+    // Draw bottom icons
+    y = lcd_icon_lower_top;
+    x_ic = lcd_icon_lower_left;
+    for(uint8_t i = 4; i < 8; ++i) {
+        // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
+        if(lcd_icons & 1) {
+            canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
+        }
+        x_ic += lcd_icon_spacing_horiz;
+        lcd_icons >>= 1;
+    }
 }
 
-static void draw_portrait(Canvas* const canvas, void* cb_ctx) {
-    furi_assert(cb_ctx);
+// static void draw_portrait(Canvas* const canvas, void* cb_ctx)
+static void draw_portrait(Canvas* const canvas) {
+    // FURI_LOG_D(TAG, "Drawing frame");
+    // Calculate positioning
+    // uint16_t canv_width = canvas_width(canvas);
+    uint16_t canv_height = canvas_height(canvas);
+    uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
+    uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
+    // uint16_t lcd_matrix_top = 0;
+    uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
+    // uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
+    uint16_t lcd_matrix_left = 64 - TAMA_LCD_ICON_SIZE;
+    uint16_t lcd_icon_upper_left = lcd_matrix_left;
+    uint16_t lcd_icon_lower_left = lcd_matrix_left;
+    uint16_t lcd_icon_spacing_horiz =
+        (lcd_matrix_scaled_width - (4 * TAMA_LCD_ICON_SIZE)) / 3 + TAMA_LCD_ICON_SIZE;
 
-    FuriMutex* const mutex = cb_ctx;
-    if(furi_mutex_acquire(mutex, 25) != FuriStatusOk) return;
-
-    if(g_ctx->rom == NULL) {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 30, 30, "No ROM");
-    } else if(g_ctx->halted) {
-        canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 30, 30, "Halted");
-    } else {
-        // FURI_LOG_D(TAG, "Drawing frame");
-        // Calculate positioning
-        // uint16_t canv_width = canvas_width(canvas);
-        uint16_t canv_height = canvas_height(canvas);
-        uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
-        uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
-        // uint16_t lcd_matrix_top = 0;
-        uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
-        // uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
-        uint16_t lcd_matrix_left = 64 - TAMA_LCD_ICON_SIZE;
-        uint16_t lcd_icon_upper_left = lcd_matrix_left;
-        uint16_t lcd_icon_lower_left = lcd_matrix_left;
-        uint16_t lcd_icon_spacing_horiz =
-            (lcd_matrix_scaled_width - (4 * TAMA_LCD_ICON_SIZE)) / 3 + TAMA_LCD_ICON_SIZE;
-
-        uint16_t y = lcd_matrix_top; // 64
-        for(uint8_t row = 0; row < 16; ++row) {
-            uint16_t x = 128; // lcd_matrix_left
-            uint32_t row_pixels = g_ctx->framebuffer[row];
-            for(uint8_t col = 0; col < 32; ++col) {
-                if(row_pixels & 1) {
-                    canvas_draw_box(
-                        canvas, y + 32, x - 66, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
-                }
-                x -= TAMA_SCREEN_SCALE_FACTOR;
-                row_pixels >>= 1;
+    uint16_t y = lcd_matrix_top; // 64
+    for(uint8_t row = 0; row < 16; ++row) {
+        uint16_t x = 128; // lcd_matrix_left
+        uint32_t row_pixels = g_ctx->framebuffer[row];
+        for(uint8_t col = 0; col < 32; ++col) {
+            if(row_pixels & 1) {
+                canvas_draw_box(
+                    canvas, y + 32, x - 66, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
             }
-            y += TAMA_SCREEN_SCALE_FACTOR;
+            x -= TAMA_SCREEN_SCALE_FACTOR;
+            row_pixels >>= 1;
         }
-
-        // Start drawing icons
-        uint8_t lcd_icons = g_ctx->icons;
-
-        // Draw top icons
-        // y = lcd_icon_upper_top;
-        y = 30;
-        // y = 64 - TAMA_LCD_ICON_SIZE;
-        uint16_t x_ic = lcd_icon_upper_left;
-        // uint16_t x_ic = 64 - TAMA_LCD_ICON_SIZE;
-        for(uint8_t i = 0; i < 4; ++i) {
-            if(lcd_icons & 1) {
-                canvas_draw_icon(canvas, y, x_ic, icons_list[i]);
-            }
-            x_ic -= lcd_icon_spacing_horiz; // TAMA_LCD_ICON_SIZE + 4;
-            lcd_icons >>= 1;
-        }
-
-        // Draw bottom icons
-        y = 84; // lcd_icon_lower_top
-        x_ic = lcd_icon_lower_left; // 64 - TAMA_LCD_ICON_SIZE
-        for(uint8_t i = 4; i < 8; ++i) {
-            // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
-            if(lcd_icons & 1) {
-                canvas_draw_icon(canvas, y, x_ic, icons_list[i]);
-            }
-            x_ic -= lcd_icon_spacing_horiz;
-            lcd_icons >>= 1;
-        }
+        y += TAMA_SCREEN_SCALE_FACTOR;
     }
 
-    furi_mutex_release(mutex);
+    // Start drawing icons
+    uint8_t lcd_icons = g_ctx->icons;
+
+    // Draw top icons
+    // y = lcd_icon_upper_top;
+    y = 30;
+    // y = 64 - TAMA_LCD_ICON_SIZE;
+    uint16_t x_ic = lcd_icon_upper_left;
+    // uint16_t x_ic = 64 - TAMA_LCD_ICON_SIZE;
+    for(uint8_t i = 0; i < 4; ++i) {
+        if(lcd_icons & 1) {
+            canvas_draw_icon(canvas, y, x_ic, icons_list[i]);
+        }
+        x_ic -= lcd_icon_spacing_horiz; // TAMA_LCD_ICON_SIZE + 4;
+        lcd_icons >>= 1;
+    }
+
+    // Draw bottom icons
+    y = 84; // lcd_icon_lower_top
+    x_ic = lcd_icon_lower_left; // 64 - TAMA_LCD_ICON_SIZE
+    for(uint8_t i = 4; i < 8; ++i) {
+        // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
+        if(lcd_icons & 1) {
+            canvas_draw_icon(canvas, y, x_ic, icons_list[i]);
+        }
+        x_ic -= lcd_icon_spacing_horiz;
+        lcd_icons >>= 1;
+    }
+}
+
+// static void draw_menu_portrait(Canvas* const canvas, void* cb_ctx) {}
+
+// static void draw_menu_landscape(Canvas* const canvas, void* cb_ctx)
+static void draw_menu_landscape(Canvas* const canvas) {
+    canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_str_aligned(canvas, 64, 6, AlignCenter, AlignCenter, "Menu");
+    canvas_draw_line(canvas, 0, 10, 128, 10);
+    switch(menu_cursor) {
+    case 0:
+        canvas_draw_circle(canvas, 5, 20, 2);
+        break;
+    case 1:
+        canvas_draw_circle(canvas, 5, 35, 2);
+        break;
+    default:
+        canvas_draw_circle(canvas, 5, 50, 2);
+        break;
+    }
+    if(portrait_mode) {
+        canvas_draw_str(canvas, 10, 25, "Portrait");
+    } else {
+        canvas_draw_str(canvas, 10, 25, "Landscape");
+    }
+    canvas_draw_str(canvas, 10, 40, "Mute");
+    canvas_draw_str(canvas, 10, 55, "Close menu");
 }
 
 static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
-    if(portrait_mode) {
-        draw_portrait(canvas, cb_ctx);
+    furi_assert(cb_ctx);
+
+    FuriMutex* const mutex = cb_ctx;
+    if(furi_mutex_acquire(mutex, 25) != FuriStatusOk) return;
+
+    if(g_ctx->rom == NULL) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 30, 30, "No ROM");
+    } else if(g_ctx->halted) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 30, 30, "Halted");
     } else {
-        draw_landscape(canvas, cb_ctx);
+        if(in_menu) {
+            if(portrait_mode) {
+                // draw_menu_portrait(canvas);
+                draw_menu_landscape(canvas);
+            } else {
+                draw_menu_landscape(canvas);
+            }
+        } else if(portrait_mode) {
+            draw_portrait(canvas);
+        } else {
+            draw_landscape(canvas);
+        }
     }
+    furi_mutex_release(mutex);
 }
 
 static void tama_p1_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -534,8 +561,9 @@ int32_t tama_p1_app(void* p) {
         furi_timer_alloc(tama_p1_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 30);
 
-    portrait_mode = false;
-    in_menu = false;
+    // portrait_mode = false;
+    // in_menu = false;
+    // menu_cursor = 0;
 
     for(bool running = true; running;) {
         TamaEvent event;
@@ -555,63 +583,151 @@ int32_t tama_p1_app(void* p) {
                     event.input.key,
                     event.input.type);
                 InputType input_type = event.input.type;
-                if(input_type == InputTypePress || input_type == InputTypeRelease) {
-                    btn_state_t tama_btn_state = 0;
-                    if(input_type == InputTypePress)
-                        tama_btn_state = BTN_STATE_PRESSED;
-                    else if(input_type == InputTypeRelease)
-                        tama_btn_state = BTN_STATE_RELEASED;
-                    if(portrait_mode) {
-                        if(event.input.key == InputKeyDown) {
-                            tamalib_set_button(BTN_LEFT, tama_btn_state);
-                        } else if(event.input.key == InputKeyOk) {
-                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                        } else if(event.input.key == InputKeyRight) {
-                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                        } else if(event.input.key == InputKeyUp) {
-                            tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                        } else if(event.input.key == InputKeyLeft) {
-                            // TODO: Menu
-                            portrait_mode = false;
-                            // mute tamagotchi
-                            // tamalib_set_button(BTN_LEFT, tama_btn_state);
-                            // tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                        } else if(
-                            event.input.key == InputKeyBack &&
-                            event.input.type == InputTypeShort) {
-                            tama_p1_save_state();
+                btn_state_t tama_btn_state = 0;
+
+                if(input_type == InputTypePress)
+                    tama_btn_state = BTN_STATE_PRESSED;
+                else if(input_type == InputTypeRelease)
+                    tama_btn_state = BTN_STATE_RELEASED;
+
+                if(in_menu) {
+                    if(input_type == InputTypePress) {
+                        // if(portrait_mode)
+                        if(false) { // TODO: Add portrait menu
+                            switch(event.input.key) {
+                            case InputKeyLeft: // Up
+                                if(menu_cursor > 0) {
+                                    menu_cursor -= 1;
+                                } else {
+                                    menu_cursor = menu_items - 1;
+                                }
+                                break;
+                            case InputKeyRight: // Down
+                                if(menu_cursor < menu_items - 1) {
+                                    menu_cursor += 1;
+                                } else {
+                                    menu_cursor = 0;
+                                }
+                                break;
+                            case InputKeyDown: // Left
+                                break;
+                            case InputKeyUp: // Right
+                                break;
+                            case InputKeyOk:
+                                switch(menu_cursor) {
+                                case 0:
+                                    portrait_mode = false;
+                                    break;
+                                case 1:
+                                    // mute tamagotchi
+                                    tamalib_set_button(BTN_LEFT, tama_btn_state);
+                                    tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                                    break;
+                                default:
+                                    in_menu = false;
+                                    break;
+                                }
+                                break;
+                            case InputKeyBack:
+                                // in_menu = false;
+                                break;
+                            default:
+                                break;
+                            }
+                        } else { // landscape
+                            switch(event.input.key) {
+                            case InputKeyUp:
+                                if(menu_cursor > 0) {
+                                    menu_cursor -= 1;
+                                } else {
+                                    menu_cursor = menu_items - 1;
+                                }
+                                break;
+                            case InputKeyDown:
+                                if(menu_cursor < menu_items) {
+                                    menu_cursor += 1;
+                                } else {
+                                    menu_cursor = 0;
+                                }
+                                break;
+                            case InputKeyLeft:
+                                break;
+                            case InputKeyRight:
+                                break;
+                            case InputKeyOk:
+                                switch(menu_cursor) {
+                                case 0:
+                                    // portrait_mode = true;
+                                    portrait_mode = !portrait_mode;
+                                    break;
+                                case 1:
+                                    // mute tamagotchi
+                                    tamalib_set_button(BTN_LEFT, tama_btn_state);
+                                    tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                                    break;
+                                default:
+                                    in_menu = false;
+                                    break;
+                                }
+                                break;
+                            case InputKeyBack:
+                                // in_menu = false;
+                                break;
+                            default:
+                                break;
+                            }
                         }
-                    } else {
-                        if(event.input.key == InputKeyLeft) {
-                            tamalib_set_button(BTN_LEFT, tama_btn_state);
-                        } else if(event.input.key == InputKeyOk) {
-                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                        } else if(event.input.key == InputKeyDown) {
-                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                        } else if(event.input.key == InputKeyRight) {
-                            tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                        } else if(event.input.key == InputKeyUp) {
-                            // TODO: Menu
-                            portrait_mode = true;
-                            // mute tamagotchi
-                            // tamalib_set_button(BTN_LEFT, tama_btn_state);
-                            // tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                        } else if(
-                            event.input.key == InputKeyBack &&
-                            event.input.type == InputTypeShort) {
-                            tama_p1_save_state();
+                    }
+                } else { // out of menu
+                    if(input_type == InputTypePress || input_type == InputTypeRelease) {
+                        if(portrait_mode) {
+                            if(event.input.key == InputKeyDown) {
+                                tamalib_set_button(BTN_LEFT, tama_btn_state);
+                            } else if(event.input.key == InputKeyOk) {
+                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                            } else if(event.input.key == InputKeyRight) {
+                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                            } else if(event.input.key == InputKeyUp) {
+                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                            } else if(event.input.key == InputKeyLeft) {
+                                in_menu = true;
+                                // portrait_mode = false;
+                            } else if(
+                                event.input.key == InputKeyBack &&
+                                event.input.type == InputTypeShort) {
+                                tama_p1_save_state();
+                            }
+                        } else {
+                            if(event.input.key == InputKeyLeft) {
+                                tamalib_set_button(BTN_LEFT, tama_btn_state);
+                            } else if(event.input.key == InputKeyOk) {
+                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                            } else if(event.input.key == InputKeyDown) {
+                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                            } else if(event.input.key == InputKeyRight) {
+                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                            } else if(event.input.key == InputKeyUp) {
+                                in_menu = true;
+                                // portrait_mode = true;
+                                // mute tamagotchi
+                                // tamalib_set_button(BTN_LEFT, tama_btn_state);
+                                // tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                            } else if(
+                                event.input.key == InputKeyBack &&
+                                event.input.type == InputTypeShort) {
+                                tama_p1_save_state();
+                            }
                         }
                     }
                 }
 
-                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
+                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong &&
+                   !in_menu) {
                     furi_timer_stop(timer);
                     running = false;
-
                     tama_p1_save_state();
                 }
             }
-
             furi_mutex_release(g_state_mutex);
         } else {
             // Timeout
