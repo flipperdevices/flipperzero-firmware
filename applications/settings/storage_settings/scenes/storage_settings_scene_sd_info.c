@@ -57,15 +57,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
 
         furi_string_printf(
             app->text_string,
-            // "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free\n%.2f%% free",
-            // sd_info.label,
-            // sd_api_get_fs_type_text(sd_info.fs_type),
-            // sd_total_val,
-            // sd_total_unit,
-            // sd_free_val,
-            // sd_free_unit,
-            // (double)(((int)sd_info.kb_free * 100.0) / (int)sd_info.kb_total));
-            "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free %.2f%% free\n"
+            "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free  %.2f%% free\n"
             "%02X%2.2s %5.5s %i.%i\nSN:%04lX %02i/%i",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),

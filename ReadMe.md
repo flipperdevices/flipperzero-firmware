@@ -37,6 +37,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) (New Primary Face w/Flipagotchi Faces!)
 - OFW: [Furi: getter for current thread stdout write callback #2344 (By Milk-Cool)](https://github.com/flipperdevices/flipperzero-firmware/pull/2344)
 - OFW: [Add support for GUI-CTRL in bad_usb #2315 (By NDrong)](https://github.com/flipperdevices/flipperzero-firmware/pull/2315)
+- OFW: [Print card CID in storage info #2227 (By hramrach)](https://github.com/flipperdevices/flipperzero-firmware/pull/2227)
+- OFW: [Documentation: add BadUSB GUI-CTRL #2347 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2347)
 
 <a name="release">
 
