@@ -815,7 +815,7 @@ void mfkey32(ProgramState* const program_state) {
     uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
     uint32_t i = 0;
     struct Crypto1State* temp;
-    Stream* mem_file = {0};
+    Stream* mem_file;
     // Check for nonces
     if(!napi_mf_classic_nonces_check_presence()) {
         program_state->err = MissingNonces;
@@ -854,6 +854,7 @@ void mfkey32(ProgramState* const program_state) {
     }
     program_state->total = nonce_arr->total_nonces;
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    mem_file = buffered_file_stream_alloc(storage);
     storage_simply_remove(storage, MF_CLASSIC_MEM_FILE_PATH);
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
