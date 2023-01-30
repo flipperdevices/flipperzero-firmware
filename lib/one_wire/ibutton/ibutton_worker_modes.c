@@ -240,9 +240,9 @@ void ibutton_worker_emulate_timer_cb(void* context) {
     furi_hal_ibutton_emulate_set_next(level_duration_get_duration(level));
 
     if(level_duration_get_level(level)) {
-        furi_hal_ibutton_pin_high();
+        furi_hal_gpio_write(&ibutton_gpio, true);
     } else {
-        furi_hal_ibutton_pin_low();
+        furi_hal_gpio_write(&ibutton_gpio, false);
     }
 }
 
@@ -266,7 +266,9 @@ void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
     protocol_dict_set_data(worker->protocols, worker->protocol_to_encode, key_id, key_size);
     protocol_dict_encoder_start(worker->protocols, worker->protocol_to_encode);
 
-    furi_hal_ibutton_start_drive();
+    furi_hal_gpio_write(&ibutton_gpio, true);
+    furi_hal_gpio_init(&ibutton_gpio, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+
     furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
 }
 
