@@ -418,7 +418,7 @@ void mf_classic_reader_add_sector(
     }
 }
 
-bool mf_classic_block_to_value(int32_t* value, uint8_t* addr, const uint8_t* block) {
+bool mf_classic_block_to_value(const uint8_t* block, int32_t* value, uint8_t* addr) {
     uint32_t v = *(uint32_t*)&block[0];
     uint32_t v_inv = *(uint32_t*)&block[4];
     uint32_t v1 = *(uint32_t*)&block[8];
@@ -435,7 +435,7 @@ bool mf_classic_block_to_value(int32_t* value, uint8_t* addr, const uint8_t* blo
     return val_checks;
 }
 
-void mf_classic_value_to_block(uint8_t* block, int32_t value, uint8_t addr) {
+void mf_classic_value_to_block(int32_t value, uint8_t addr, uint8_t* block) {
     uint32_t v_inv = ~((uint32_t)value);
 
     memcpy(block, &value, 4);
@@ -1048,7 +1048,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
 
             int32_t prev_value;
             uint8_t addr;
-            if(!mf_classic_block_to_value(&prev_value, &addr, emulator->data.block[block].value)) {
+            if(!mf_classic_block_to_value(emulator->data.block[block].value, &prev_value, &addr)) {
                 break;
             }
 
@@ -1072,7 +1072,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 value = 0;
             }
 
-            mf_classic_value_to_block(transfer_buf, prev_value + value, addr);
+            mf_classic_value_to_block(prev_value + value, addr, transfer_buf);
             transfer_buf_valid = true;
             // Commands do not ACK
             tx_rx->tx_bits = 0;
@@ -1118,9 +1118,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
 void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
     furi_assert(tx_rx);
 
-    uint8_t plain_data[2] = {};
-    plain_data[0] = 0x50;
-    plain_data[1] = 0x00;
+    uint8_t plain_data[4] = {0x50, 0x00, 0x00, 0x00};
 
     nfca_append_crc16(plain_data, 2);
     if(crypto) {
@@ -1129,7 +1127,8 @@ void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
         memcpy(tx_rx->tx_data, plain_data, 2);
         nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, 2);
     }
-    tx_rx->tx_bits = 2 * 8;
+
+    tx_rx->tx_bits = 4 * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
     furi_hal_nfc_tx_rx(tx_rx, 50);
 }
@@ -1244,28 +1243,34 @@ bool mf_classic_transfer(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto, uint8_t 
     // Send transfer command
     uint8_t plain_data[4] = {MF_CLASSIC_TRANSFER_CMD, block_num, 0, 0};
     uint8_t resp = 0;
+    bool transfer_success = false;
+
     nfca_append_crc16(plain_data, 2);
     crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
     tx_rx->tx_bits = 4 * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
-    if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
-        if(tx_rx->rx_bits == 4) {
-            crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
-            if(resp != 0x0A) {
-                FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
-                return false;
+    do {
+        if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
+            if(tx_rx->rx_bits == 4) {
+                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+                if(resp != 0x0A) {
+                    FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
+                    break;
+                }
+            } else {
+                FURI_LOG_D(TAG, "Not ACK received");
+                break;
             }
         } else {
-            FURI_LOG_D(TAG, "Not ACK received");
-            return false;
+            FURI_LOG_D(TAG, "Failed to send transfer cmd");
+            break;
         }
-    } else {
-        FURI_LOG_D(TAG, "Failed to send transfer cmd");
-        return false;
-    }
 
-    return true;
+        transfer_success = true;
+    } while(false);
+
+    return transfer_success;
 }
 
 bool mf_classic_value_cmd(
@@ -1350,7 +1355,7 @@ bool mf_classic_value_cmd_full(
 
     Crypto1 crypto = {};
     uint8_t cmd;
-    bool write_success = false;
+    bool success = false;
 
     if(d_value > 0) {
         cmd = MF_CLASSIC_INCREMENT_CMD;
@@ -1377,13 +1382,13 @@ bool mf_classic_value_cmd_full(
             break;
         }
 
-        write_success = true;
+        success = true;
 
         // Send Halt
         mf_classic_halt(tx_rx, &crypto);
     } while(false);
 
-    return write_success;
+    return success;
 }
 
 bool mf_classic_write_sector(
@@ -1418,8 +1423,8 @@ bool mf_classic_write_sector(
 
                 int32_t src_value, dst_value;
 
-                mf_classic_block_to_value(&src_value, NULL, src_data->block[i].value);
-                mf_classic_block_to_value(&dst_value, NULL, dest_data->block[i].value);
+                mf_classic_block_to_value(src_data->block[i].value, &src_value, NULL);
+                mf_classic_block_to_value(dest_data->block[i].value, &dst_value, NULL);
 
                 int32_t diff = src_value - dst_value;
 
