@@ -6,7 +6,7 @@
 
 
 # RogueMaster Flipper Zero FW [Support Us!](https://www.patreon.com/RogueMaster/membership)
-## Thank you to all the supporters!
+## Thank you so much to our RM Pro/Extreme Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
 <table><tr><th><div align="left">
 This firmware is a fork of <a href='https://github.com/DarkFlippers/unleashed-firmware/'>Unleashed</a> and the main Flipper Devices FW! We are NOT paywalled. I will try to keep active development and updates from both in this build along with any other projects that can be found to be useful to the community. I try to keep this FW build the most cutting edge with updates from both and updates from nearly all active community projects. See the RM <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#Games'>Games</a> and <a href='https://github.com/RogueMaster/flipperzero-firmware-wPlugins#Plugins'>Plugins</a> for a list of most of those projects.
@@ -21,6 +21,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
 - [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, DBZ, Dolphin, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
+- [NEW VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/animation-all-v4-77935728)
 - [Supporters get SD Card Assets with extra NFC Assets such as 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `roguemaster.eth` or `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
@@ -29,75 +30,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0129-2242-0.75.1-9e641e5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-29 07:10 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-29 07:10 EST`
-- Renamed RM Clock to Dab Timer
-- Passport XP Bar Design Updated [(Thanks to ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/510)
-- Renamed: [iOS Bluetooth Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) to [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds now have 8 new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- NFC Keys Added [(Thanks to colonelborkmundus)](https://github.com/DarkFlippers/unleashed-firmware/pull/302)
-- [New Patreon Animation Build](https://www.patreon.com/RogueMaster/membership): Dolphin (with only Dolphin related animations)
-- Updated: [Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- OFW: Crash fix: [ELF-loader: wait for notification to complete on app exit #2335 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2335)
-- Updated: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
-- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds now have 8 more new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- Updated: [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) [Updated by jbohack](https://github.com/jbohack)
-- OFW: Crash fix: [nfc: Fix crash when using debug PCAP trace #2338 (By krzys-h)](https://github.com/flipperdevices/flipperzero-firmware/pull/2338)
-- Added: Bluetooth Remote: [Add camera control mode to bluetooth remote app. #2336 (By LoganMD)](https://github.com/flipperdevices/flipperzero-firmware/pull/2336)
-- Added: Bluetooth Remote + USB Keyboard: [Added movement interval in mouse_jiggler USB & BLE #303 (By DocKuro)](https://github.com/DarkFlippers/unleashed-firmware/pull/303)
-- Added: Bluetooth Remote: [Add HID mouse auto-clicker. #2319 (By rwl4)](https://github.com/flipperdevices/flipperzero-firmware/pull/2319)
-- Added: [New Micro Sd-Card pinout #2323 (By dexvspr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2323)
-- Added: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
-- Updated: [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
-- Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
-- Updated: [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
-- OFW: [NFC: add MIFARE MINI support #2307 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2307)
-- OFW: [emv: parse track1&2 equivalent data #2332 (By emilytrau)](https://github.com/flipperdevices/flipperzero-firmware/pull/2332)
-- OFW: [nfc: Fix sector reads when one block is unreadable for MIFARE Classic #2296 (By RouNNdeL)](https://github.com/flipperdevices/flipperzero-firmware/pull/2296)
-- Added: [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
-- Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) [Original (By CompaqDisc)](https://gist.github.com/CompaqDisc/4e329c501bd03c1e801849b81f48ea61) [12/24HR (By non-bin)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/254) [Refactoring (By GMMan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/256) [Using Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock) (Now Has Clock Face Options!)
-- Fixed some missing app icons
-- Changed images and fixed text position for RFID and NFC
-- OFW: [NFC: change from int8_t to uint8_t #2302 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2302)
-- OFW: [debug apps: made runnable as .faps; sdk: resolved additional APIs in use by faps #2333 (By emilytrau)](https://github.com/flipperdevices/flipperzero-firmware/pull/2333)
-- Added: [Make ir_remote folder if not exist #2 (Thanks to plarikus)](https://github.com/Hong5489/ir_remote/pull/2)
-- [Patreon Builds Update: Added Controller, Alien Coke and SSJ3 animations to ALL build. Added Controller animation to RM select builds. Added SSJ3 animation to Select, Anime and DBZ Builds as well.](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics)
-- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds now have 6 more new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL builds now have 199 more new animations [(Thanks to mnenkov)](https://github.com/mnenkov/flipper-zero-animations)
-- Updated: [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c) (Now Includes Drinking Dice and a black background with white letters)
-- Desktop: Hold Right goes to About with Battery Info [(Thanks to Willy-JL)](https://github.com/Willy-JL)
-- Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
-- Assets: Includes a NFC link to TalkingSasquach on YouTube
-- Added: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
-- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): NFC Assets: 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) [It is recommended you randomize UID with this script.](https://github.com/Lanjelin/AmiiboConverter/tree/main)
-- Added: [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
-- Added: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
-- Added: [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
-- Added: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
-- OFW: [Furi: make furi_is_irq_context public #2276 (By JarvisCraft)](https://github.com/flipperdevices/flipperzero-firmware/pull/2276)
-- OFW: [LF-RFID: add CRC calculation to paradox protocol #2299 (By jerji)](https://github.com/flipperdevices/flipperzero-firmware/pull/2299)
-- OFW: [WS: add protocol LaCrosse-TX (TFA Dostmann) #2292 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2292)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 9 more new animations, Anime builds have 8 new animations. [(Thanks to Haseo)](https://github.com/Haseosama/FZ_Animations)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 16 new animations [(Thanks to CharlesTheGreat)](https://github.com/CharlesTheGreat77/FlipperZeroAnimation)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 28 new CyberPunk animations [(Thanks to HexxedBitHeadz)](https://github.com/HexxedBitHeadz/FlipperZeroWallpaper)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 8 more new animations [(Thanks to stopoxy)](https://github.com/stopoxy/FZAnimations)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 3 new animations, DOLPHIN build has 1 new animation. [(Thanks to kainsamara)](https://github.com/kainsamara/Flipper-Zero-Animations)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), Anime and RM Select builds now have 10 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 15 more new animations [(Thanks to Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations)
-- [New PATREON Build: Anime Only](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-Anime)
-- Added: [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
-- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
-- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), Anime and RM Select builds now have 13 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
-- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/DroomOne/flipperzero-tamagotch-p1/pull/1)
-- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 34 more new animations [(Thanks to TH3WR3NCH)](https://github.com/wrenchathome/flip0anims)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 22 more new animations [(Thanks to SynthetikSpace)](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations)
-- [NEW VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/animation-all-v4-77935728)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-01-30 01:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-01-30 01:10 EST`
 
 <a name="release">
 
