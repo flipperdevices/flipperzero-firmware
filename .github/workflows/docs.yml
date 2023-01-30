@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - dev
+    tags:
+      - '*'
 
 env:
   TARGETS: f7
@@ -13,7 +15,7 @@ env:
 jobs:
   doxygen:
     if: ${{ !github.event.pull_request.head.repo.fork }}
-    runs-on: [self-hosted, FlipperZeroShell]
+    runs-on: ubuntu-latest
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
@@ -46,10 +48,19 @@ jobs:
           working-directory: 'documentation/'
           doxyfile-path: './Doxyfile-awesome.cfg'
 
-      - name: 'Upload to Github Pages'
+      - name: 'Upload dev documentation to Github Pages'
+        if: ${{ !startsWith(github.ref, 'refs/tags') }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./documentation/build/html
-          publish_branch: documentation
+          publish_branch: 'doc-dev'
+
+      - name: 'Upload tag documentation to Github Pages'
+        if: ${{ startsWith(github.ref, 'refs/tags') }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./documentation/build/html
+          publish_branch: 'doc-${{steps.names.outputs.branch_name}}'
 
