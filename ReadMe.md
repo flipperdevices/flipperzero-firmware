@@ -20,7 +20,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster/membership)
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
-- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v3-77900195), 420, 420+18, Anime Only, Anime+420, Anime+420+18, DBZ, Dolphin, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, DBZ, Dolphin, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
 - [RM Patreon supporters have access to SD Card Assets with extra NFC Assets such as 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `roguemaster.eth` or `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
@@ -78,18 +78,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Furi: make furi_is_irq_context public #2276 (By JarvisCraft)](https://github.com/flipperdevices/flipperzero-firmware/pull/2276)
 - OFW: [LF-RFID: add CRC calculation to paradox protocol #2299 (By jerji)](https://github.com/flipperdevices/flipperzero-firmware/pull/2299)
 - OFW: [WS: add protocol LaCrosse-TX (TFA Dostmann) #2292 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2292)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 9 more new animations, Anime builds have 8 new animations. [(Thanks to Haseo)](https://github.com/Haseosama/FZ_Animations)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 16 new animations [(Thanks to CharlesTheGreat)](https://github.com/CharlesTheGreat77/FlipperZeroAnimation)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 28 new CyberPunk animations [(Thanks to HexxedBitHeadz)](https://github.com/HexxedBitHeadz/FlipperZeroWallpaper)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 8 more new animations [(Thanks to stopoxy)](https://github.com/stopoxy/FZAnimations)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 3 new animations, DOLPHIN build has 1 new animation. [(Thanks to kainsamara)](https://github.com/kainsamara/Flipper-Zero-Animations)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195), Anime and RM Select builds now have 10 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195) builds now have 15 more new animations [(Thanks to Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 9 more new animations, Anime builds have 8 new animations. [(Thanks to Haseo)](https://github.com/Haseosama/FZ_Animations)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 16 new animations [(Thanks to CharlesTheGreat)](https://github.com/CharlesTheGreat77/FlipperZeroAnimation)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 28 new CyberPunk animations [(Thanks to HexxedBitHeadz)](https://github.com/HexxedBitHeadz/FlipperZeroWallpaper)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 8 more new animations [(Thanks to stopoxy)](https://github.com/stopoxy/FZAnimations)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 3 new animations, DOLPHIN build has 1 new animation. [(Thanks to kainsamara)](https://github.com/kainsamara/Flipper-Zero-Animations)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), Anime and RM Select builds now have 10 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 15 more new animations [(Thanks to Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Animations)
 - [New PATREON Build: Anime Only](https://github.com/RogueMaster/awesome-flipperzero-withModules/tree/rogue_main/graphics/dolphin-Anime)
 - Added: [SCD30 Carbon Dioxide Sensor (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
 - Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games) (Playing now affects flippers level)
-- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v3-77900195), Anime and RM Select builds now have 13 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), Anime and RM Select builds now have 13 more new anime animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/DroomOne/flipperzero-tamagotch-p1/pull/1)
