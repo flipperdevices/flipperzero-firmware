@@ -42,7 +42,7 @@
 //Версия приложения
 #define UNITEMP_APP_VER "1.2"
 //Путь хранения файлов плагина
-#define APP_PATH_FOLDER "/ext/unitemp"
+#define APP_PATH_FOLDER "/ext/apps_data/unitemp"
 //Имя файла с настройками
 #define APP_FILENAME_SETTINGS "settings.cfg"
 //Имя файла с датчиками
