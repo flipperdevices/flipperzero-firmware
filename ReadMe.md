@@ -95,6 +95,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/DroomOne/flipperzero-tamagotch-p1/pull/1)
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
+- Patreon Build Update: ALL builds now have 34 more new animations [(Thanks to TH3WR3NCH)](https://github.com/wrenchathome/flip0anims)
+- Patreon Build Update: ALL builds now have 22 more new animations [(Thanks to SynthetikSpace)](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations/)
+- [NEW VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/animation-all-v4-77935728)
 
 <a name="release">
 
