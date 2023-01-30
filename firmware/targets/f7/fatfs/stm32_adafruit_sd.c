@@ -823,7 +823,6 @@ uint8_t SD_GetCIDRegister(SD_CID* Cid) {
     return retr;
 }
 
-
 uint8_t BSP_SD_GetCIDRegister(SD_CID* Cid) {
     uint8_t retr = BSP_SD_ERROR;
 
