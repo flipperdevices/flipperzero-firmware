@@ -600,8 +600,9 @@ bool mf_classic_read_block(
     uint8_t plain_cmd[4] = {MF_CLASSIC_READ_BLOCK_CMD, block_num, 0x00, 0x00};
     nfca_append_crc16(plain_cmd, 2);
 
-    crypto1_encrypt(crypto, NULL, plain_cmd, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
-    tx_rx->tx_bits = 4 * 9;
+    crypto1_encrypt(
+        crypto, NULL, plain_cmd, sizeof(plain_cmd) * 8, tx_rx->tx_data, tx_rx->tx_parity);
+    tx_rx->tx_bits = sizeof(plain_cmd) * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
     if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
@@ -980,7 +981,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 sizeof(block_data) * 8,
                 tx_rx->tx_data,
                 tx_rx->tx_parity);
-            tx_rx->tx_bits = 18 * 8;
+            tx_rx->tx_bits = (MF_CLASSIC_BLOCK_SIZE + 2) * 8;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
         } else if(cmd == MF_CLASSIC_WRITE_BLOCK_CMD) {
             uint8_t block = plain_data[1];
@@ -1059,7 +1060,7 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
             tx_rx->tx_bits = 4;
 
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
-            if(tx_rx->rx_bits != 6 * 8) break; // 4 bytes signed decrement value + 2 bytes crc
+            if(tx_rx->rx_bits != (sizeof(int32_t) + 2) * 8) break;
 
             crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
             int32_t value = *(int32_t*)&plain_data[0];
@@ -1122,13 +1123,14 @@ void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
 
     nfca_append_crc16(plain_data, 2);
     if(crypto) {
-        crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        crypto1_encrypt(
+            crypto, NULL, plain_data, sizeof(plain_data) * 8, tx_rx->tx_data, tx_rx->tx_parity);
     } else {
-        memcpy(tx_rx->tx_data, plain_data, 4);
-        nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, 4);
+        memcpy(tx_rx->tx_data, plain_data, sizeof(plain_data));
+        nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, sizeof(plain_data));
     }
 
-    tx_rx->tx_bits = 4 * 8;
+    tx_rx->tx_bits = sizeof(plain_data) * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
     furi_hal_nfc_tx_rx(tx_rx, 50);
 }
@@ -1246,8 +1248,9 @@ bool mf_classic_transfer(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto, uint8_t 
     bool transfer_success = false;
 
     nfca_append_crc16(plain_data, 2);
-    crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
-    tx_rx->tx_bits = 4 * 8;
+    crypto1_encrypt(
+        crypto, NULL, plain_data, sizeof(plain_data) * 8, tx_rx->tx_data, tx_rx->tx_parity);
+    tx_rx->tx_bits = sizeof(plain_data) * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
     do {
