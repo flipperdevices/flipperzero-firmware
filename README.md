@@ -1,3 +1,5 @@
+work in progress (check to-do list at the bootom of this readme.md)
+
 Tama P1 Emulator for Flipper Zero
 =======================================
 
@@ -11,6 +13,7 @@ Create a `tama_p1` folder in your microSD card, and put the ROM as `rom.bin`.
 Use a search engine to find the Tamagotchi ROM. There is a file named `tama.b`. 
 Rename this to `rom.bin`. 
 
+*Controls in portrait mode are the same as landscape mode, but turned 90 degrees.*
 - Left button is A.
 - Down or OK is B. 
 - Right button is C. 
@@ -45,3 +48,11 @@ it is easy to add direct logging after running the application:
 
 `./fbt launch_app APPSRC=applications\plugins\tama_p1;  python .\serial_logger.py`
 ```
+
+To-Do
+-----
+- Menu options:
+  - Switch between portrait and landscape
+  - A+C shortcut (mute/change in-game time)
+  - Double speed / fast-forward
+  - display runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
