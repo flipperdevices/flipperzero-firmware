@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Documentation: add BadUSB GUI-CTRL #2347 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2347)
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
+- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675`
 
 <a name="release">
 
@@ -328,7 +329,7 @@ $ ./fbt dolphin_ext
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
-- [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855`
+- [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675`
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
 - [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
