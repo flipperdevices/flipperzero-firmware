@@ -13,13 +13,8 @@ FuriMutex* g_state_mutex;
 bool portrait_mode = false;
 bool in_menu = false;
 
-int menu_cursor = 0;
-
-const int menu_items = 2;
-// char* menu_strings[2][2] = {
-//     {"Portrait", "Landscape"},
-//     {"Mute", "Mute2"},
-// };
+int menu_cursor = 2;
+const int menu_items = 3;
 
 static const Icon* icons_list[] = {
     &I_icon_0,
@@ -170,7 +165,7 @@ static void draw_menu_landscape(Canvas* const canvas) {
     case 1:
         canvas_draw_circle(canvas, 5, 35, 2);
         break;
-    default:
+    case 2:
         canvas_draw_circle(canvas, 5, 50, 2);
         break;
     }
@@ -591,93 +586,98 @@ int32_t tama_p1_app(void* p) {
                     tama_btn_state = BTN_STATE_RELEASED;
 
                 if(in_menu) {
-                    if(input_type == InputTypePress) {
-                        // if(portrait_mode)
-                        if(false) { // TODO: Add portrait menu
-                            switch(event.input.key) {
-                            case InputKeyLeft: // Up
-                                if(menu_cursor > 0) {
-                                    menu_cursor -= 1;
-                                } else {
-                                    menu_cursor = menu_items - 1;
-                                }
-                                break;
-                            case InputKeyRight: // Down
-                                if(menu_cursor < menu_items - 1) {
-                                    menu_cursor += 1;
-                                } else {
-                                    menu_cursor = 0;
-                                }
-                                break;
-                            case InputKeyDown: // Left
-                                break;
-                            case InputKeyUp: // Right
-                                break;
-                            case InputKeyOk:
-                                switch(menu_cursor) {
-                                case 0:
-                                    portrait_mode = false;
-                                    break;
-                                case 1:
-                                    // mute tamagotchi
-                                    tamalib_set_button(BTN_LEFT, tama_btn_state);
-                                    tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                                    break;
-                                default:
-                                    in_menu = false;
-                                    break;
-                                }
-                                break;
-                            case InputKeyBack:
-                                // in_menu = false;
-                                break;
-                            default:
-                                break;
+                    // if(input_type == InputTypePress) {
+                    // if(portrait_mode)
+                    if(false) { // TODO: Add portrait menu
+                        // switch(event.input.key) {
+                        if(event.input.key == InputKeyLeft &&
+                           event.input.type == InputTypePress) { // Up
+                            if(menu_cursor > 0) {
+                                menu_cursor -= 1;
+                            } else {
+                                menu_cursor = menu_items - 1;
                             }
-                        } else { // landscape
-                            switch(event.input.key) {
-                            case InputKeyUp:
-                                if(menu_cursor > 0) {
-                                    menu_cursor -= 1;
-                                } else {
-                                    menu_cursor = menu_items - 1;
-                                }
+                        } else if(
+                            event.input.key == InputKeyRight &&
+                            event.input.type == InputTypePress) { // Down
+                            if(menu_cursor < menu_items - 1) {
+                                menu_cursor += 1;
+                            } else {
+                                menu_cursor = 0;
+                            }
+                        }
+                        // else if (event.input.key==InputKeyDown) {// Left
+                        // }
+                        // else if (event.input.key==InputKeyUp) { // Right
+                        // }
+                        else if(event.input.key == InputKeyOk) {
+                            bool temp = false;
+                            switch(menu_cursor) {
+                            case 0:
+                                portrait_mode = false;
                                 break;
-                            case InputKeyDown:
-                                if(menu_cursor < menu_items) {
-                                    menu_cursor += 1;
-                                } else {
-                                    menu_cursor = 0;
-                                }
+                            case 1:
+                                // mute tamagotchi
+                                tamalib_set_button(BTN_LEFT, BTN_STATE_PRESSED);
+                                tamalib_set_button(BTN_RIGHT, BTN_STATE_PRESSED);
+                                temp = true;
                                 break;
-                            case InputKeyLeft:
-                                break;
-                            case InputKeyRight:
-                                break;
-                            case InputKeyOk:
-                                switch(menu_cursor) {
-                                case 0:
-                                    // portrait_mode = true;
-                                    portrait_mode = !portrait_mode;
-                                    break;
-                                case 1:
-                                    // mute tamagotchi
-                                    tamalib_set_button(BTN_LEFT, tama_btn_state);
-                                    tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                                    break;
-                                default:
-                                    in_menu = false;
-                                    break;
-                                }
-                                break;
-                            case InputKeyBack:
-                                // in_menu = false;
-                                break;
+                            case 2:
                             default:
+                                if(temp) {
+                                    tamalib_set_button(BTN_LEFT, BTN_STATE_RELEASED);
+                                    tamalib_set_button(BTN_RIGHT, BTN_STATE_RELEASED);
+                                }
+                                in_menu = false;
                                 break;
                             }
                         }
+                        // else if (event.input.key==InputKeyBack) {
+                        //     in_menu = false;
+                        // }
+                        // }
+                    } else { // landscape
+                        // switch(event.input.key) {
+                        if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
+                            if(menu_cursor > 0) {
+                                menu_cursor -= 1;
+                            } else {
+                                menu_cursor = menu_items - 1;
+                            }
+                        } else if(
+                            event.input.key == InputKeyDown &&
+                            event.input.type == InputTypePress) {
+                            if(menu_cursor < menu_items - 1) {
+                                menu_cursor += 1;
+                            } else {
+                                menu_cursor = 0;
+                            }
+                        }
+                        // else if (event.input.key==InputKeyLeft) {}
+                        // else if (event.input.key==InputKeyRight) {}
+                        else if(event.input.key == InputKeyOk) {
+                            switch(menu_cursor) {
+                            case 0:
+                                // portrait_mode = true;
+                                portrait_mode = !portrait_mode;
+                                break;
+                            case 1:
+                                // mute tamagotchi
+                                tamalib_set_button(BTN_LEFT, tama_btn_state);
+                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                                break;
+                            case 2:
+                            default:
+                                in_menu = false;
+                                break;
+                            }
+                        }
+                        // else if (event.input.key==InputKeyBack) {
+                        //     // in_menu = false;
+                        // }
+                        // }
                     }
+                    // }
                 } else { // out of menu
                     if(input_type == InputTypePress || input_type == InputTypeRelease) {
                         if(portrait_mode) {
