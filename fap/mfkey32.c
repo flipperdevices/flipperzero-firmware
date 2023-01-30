@@ -1,6 +1,6 @@
 // TODO: Count total number of nonces
 // TODO: Update progress bar
-// TODO: Use Flipper dictionary to eliminate already computed keys
+// TODO: Eliminate already computed keys from remaining nonces
 // TODO: Run attack using mfkeypaging.c
 // TODO: Eliminate functions:
 /*
@@ -402,141 +402,6 @@ uint32_t crypt_or_rollback_word(struct Crypto1State *s, uint32_t in, int x, int 
     return ret;
 }
 
-int napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
-    uint32_t found = 0;
-    // TODO
-    /*
-    uint32_t k = 0, found = 0;
-    for(k = 0; k < keyarray_size; k++) {
-        struct Crypto1State temp = {0, 0};
-        int i;
-        for (i = 0; i < 24; i++) {
-            (&temp)->odd |= (BIT(keyarray[k], 2*i+1) << (i ^ 3));
-            (&temp)->even |= (BIT(keyarray[k], 2*i) << (i ^ 3));
-        }
-        crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
-        crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
-        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
-            found = 1;
-            break;
-        }
-    }
-    */
-    return found;
-}
-
-bool napi_mf_classic_nonces_check_presence() {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    bool nonces_present = storage_common_stat(storage, MF_CLASSIC_NONCE_PATH, NULL) == FSE_OK;
-
-    furi_record_close(RECORD_STORAGE);
-
-    return nonces_present;
-}
-
-MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(MfClassicDict* system_dict, MfClassicDict* user_dict) {
-    MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    nonce_array->stream = buffered_file_stream_alloc(storage);
-    furi_record_close(RECORD_STORAGE);
-
-    bool array_loaded = false;
-    do {
-        // https://github.com/flipperdevices/flipperzero-firmware/blob/5134f44c09d39344a8747655c0d59864bb574b96/applications/services/storage/filesystem_api_defines.h#L8-L22
-        if(!buffered_file_stream_open(
-                nonce_array->stream,
-                MF_CLASSIC_NONCE_PATH,
-                FSAM_READ_WRITE,
-                FSOM_OPEN_EXISTING)) {
-            buffered_file_stream_close(nonce_array->stream);
-            break;
-        }
-        
-        // Check for newline ending
-        if(!stream_eof(nonce_array->stream)) {
-            if(!stream_seek(nonce_array->stream, -1, StreamOffsetFromEnd)) break;
-            uint8_t last_char = 0;
-            if(stream_read(nonce_array->stream, &last_char, 1) != 1) break;
-            if(last_char != '\n') {
-                FURI_LOG_D(TAG, "Adding new line ending");
-                if(stream_write_char(nonce_array->stream, '\n') != 1) break;
-            }
-            if(!stream_rewind(nonce_array->stream)) break;
-        }
-
-        // Read total amount of nonces
-        FuriString* next_line;
-        next_line = furi_string_alloc();
-        while(true) {
-            if(!stream_read_line(nonce_array->stream, next_line)) {
-                FURI_LOG_T(TAG, "No nonces left");
-                break;
-            }
-            FURI_LOG_T(
-                TAG,
-                "Read line: %s, len: %zu",
-                furi_string_get_cstr(next_line),
-                furi_string_size(next_line));
-            if(!furi_string_start_with_str(next_line, "Sec")) continue;
-            const char* next_line_cstr = furi_string_get_cstr(next_line);
-            MfClassicNonce res = {0};
-            char token[20];
-            int i = 0;
-            const char* ptr = next_line_cstr;
-            while(sscanf(ptr, "%s", token) == 1) {
-                switch(i){
-                    case 5: sscanf(token, "%lx", &res.uid); break;
-                    case 7: sscanf(token, "%lx", &res.nt0); break;
-                    case 9: sscanf(token, "%lx", &res.nr0_enc); break;
-                    case 11: sscanf(token, "%lx", &res.ar0_enc); break;
-                    case 13: sscanf(token, "%lx", &res.nt1); break;
-                    case 15: sscanf(token, "%lx", &res.nr1_enc); break;
-                    case 17: sscanf(token, "%lx", &res.ar1_enc); break;
-                    default: break; // Do nothing
-                }
-                i++;
-                ptr = strchr(ptr, ' ');
-                if (!ptr) {
-                    break; 
-                }
-                ptr++;
-            }
-            // TODO: Scan line and check if key for nonce is already known
-            uint32_t p64b = prng_successor(res.nt1, 64);
-            if (napi_key_already_found_for_nonce(system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc) ||
-                napi_key_already_found_for_nonce(user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) {
-                continue;
-            }
-            //FURI_LOG_I(TAG, "Nonce uid: %lx, ar1: %lx", res.uid, res.ar1_enc);
-            // Store what nonces need to be cracked in an array
-            nonce_array->total_nonces++;
-        }
-        furi_string_free(next_line);
-        stream_rewind(nonce_array->stream);
-
-        array_loaded = true;
-        FURI_LOG_I(TAG, "Loaded %lu nonces", nonce_array->total_nonces);
-    } while(false);
-
-    if(!array_loaded) {
-        buffered_file_stream_close(nonce_array->stream);
-        free(nonce_array);
-        nonce_array = NULL;
-    }
-
-    return nonce_array;
-}
-
-void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
-    furi_assert(nonce_array);
-    furi_assert(nonce_array->stream);
-
-    buffered_file_stream_close(nonce_array->stream);
-    stream_free(nonce_array->stream);
-    free(nonce_array);
-}
-
 bool napi_mf_classic_dict_check_presence(MfClassicDictType dict_type) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -725,19 +590,141 @@ bool napi_mf_classic_dict_is_key_present(MfClassicDict* dict, uint8_t* key) {
     return key_found;
 }
 
+int napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
+    uint32_t found = 0;
+    uint64_t k = 0;
+    napi_mf_classic_dict_rewind(dict);
+    while (napi_mf_classic_dict_get_next_key(dict, &k)) {
+        struct Crypto1State temp = {0, 0};
+        int i;
+        for (i = 0; i < 24; i++) {
+            (&temp)->odd |= (BIT(k, 2*i+1) << (i ^ 3));
+            (&temp)->even |= (BIT(k, 2*i) << (i ^ 3));
+        }
+        crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
+        crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
+        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
+            found = 1;
+            break;
+        }
+    }
+    return found;
+}
+
+bool napi_mf_classic_nonces_check_presence() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    bool nonces_present = storage_common_stat(storage, MF_CLASSIC_NONCE_PATH, NULL) == FSE_OK;
+
+    furi_record_close(RECORD_STORAGE);
+
+    return nonces_present;
+}
+
+MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(MfClassicDict* system_dict, bool system_dict_exists, MfClassicDict* user_dict, bool user_dict_exists) {
+    MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    nonce_array->stream = buffered_file_stream_alloc(storage);
+    furi_record_close(RECORD_STORAGE);
+
+    bool array_loaded = false;
+    do {
+        // https://github.com/flipperdevices/flipperzero-firmware/blob/5134f44c09d39344a8747655c0d59864bb574b96/applications/services/storage/filesystem_api_defines.h#L8-L22
+        if(!buffered_file_stream_open(
+                nonce_array->stream,
+                MF_CLASSIC_NONCE_PATH,
+                FSAM_READ_WRITE,
+                FSOM_OPEN_EXISTING)) {
+            buffered_file_stream_close(nonce_array->stream);
+            break;
+        }
+        
+        // Check for newline ending
+        if(!stream_eof(nonce_array->stream)) {
+            if(!stream_seek(nonce_array->stream, -1, StreamOffsetFromEnd)) break;
+            uint8_t last_char = 0;
+            if(stream_read(nonce_array->stream, &last_char, 1) != 1) break;
+            if(last_char != '\n') {
+                FURI_LOG_D(TAG, "Adding new line ending");
+                if(stream_write_char(nonce_array->stream, '\n') != 1) break;
+            }
+            if(!stream_rewind(nonce_array->stream)) break;
+        }
+
+        // Read total amount of nonces
+        FuriString* next_line;
+        next_line = furi_string_alloc();
+        while(true) {
+            if(!stream_read_line(nonce_array->stream, next_line)) {
+                FURI_LOG_T(TAG, "No nonces left");
+                break;
+            }
+            FURI_LOG_T(
+                TAG,
+                "Read line: %s, len: %zu",
+                furi_string_get_cstr(next_line),
+                furi_string_size(next_line));
+            if(!furi_string_start_with_str(next_line, "Sec")) continue;
+            const char* next_line_cstr = furi_string_get_cstr(next_line);
+            MfClassicNonce res = {0};
+            char token[20];
+            int i = 0;
+            const char* ptr = next_line_cstr;
+            while(sscanf(ptr, "%s", token) == 1) {
+                switch(i){
+                    case 5: sscanf(token, "%lx", &res.uid); break;
+                    case 7: sscanf(token, "%lx", &res.nt0); break;
+                    case 9: sscanf(token, "%lx", &res.nr0_enc); break;
+                    case 11: sscanf(token, "%lx", &res.ar0_enc); break;
+                    case 13: sscanf(token, "%lx", &res.nt1); break;
+                    case 15: sscanf(token, "%lx", &res.nr1_enc); break;
+                    case 17: sscanf(token, "%lx", &res.ar1_enc); break;
+                    default: break; // Do nothing
+                }
+                i++;
+                ptr = strchr(ptr, ' ');
+                if (!ptr) {
+                    break; 
+                }
+                ptr++;
+            }
+            // TODO: Scan line and check if key for nonce is already known
+            uint32_t p64b = prng_successor(res.nt1, 64);
+            if ((system_dict_exists && napi_key_already_found_for_nonce(system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) ||
+                (user_dict_exists && napi_key_already_found_for_nonce(user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc))) {
+                continue;
+            }
+            FURI_LOG_I(TAG, "No key found for %lx %lx", res.uid, res.ar1_enc);
+            // Store what nonces need to be cracked in an array
+            nonce_array->total_nonces++;
+        }
+        furi_string_free(next_line);
+        stream_rewind(nonce_array->stream);
+
+        array_loaded = true;
+        FURI_LOG_I(TAG, "Loaded %lu nonces", nonce_array->total_nonces);
+    } while(false);
+
+    if(!array_loaded) {
+        buffered_file_stream_close(nonce_array->stream);
+        free(nonce_array);
+        nonce_array = NULL;
+    }
+
+    return nonce_array;
+}
+
+void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
+    furi_assert(nonce_array);
+    furi_assert(nonce_array->stream);
+
+    buffered_file_stream_close(nonce_array->stream);
+    stream_free(nonce_array->stream);
+    free(nonce_array);
+}
+
 // TODO: Do we manually need to render here if the main thread is blocked?
 void mfkey32(ProgramState* const program_state) {
-    uint64_t key;     // recovered key
-    uint32_t uid;     // serial number
-    uint32_t nt0;      // tag challenge first
-    uint32_t nt1;      // tag challenge second
-    uint32_t nr0_enc; // first encrypted reader challenge
-    uint32_t ar0_enc; // first encrypted reader response
-    uint32_t nr1_enc; // second encrypted reader challenge
-    uint32_t ar1_enc; // second encrypted reader response
-    uint32_t i;
-    char *rest;
-    char *token;
     size_t keyarray_size;
     uint64_t *keyarray = malloc(sizeof(uint64_t)*1);
     struct Crypto1State *temp;
@@ -763,7 +750,7 @@ void mfkey32(ProgramState* const program_state) {
     program_state->dict_count = total_dict_keys;
     // Read nonces
     MfClassicNonceArray* nonce_arr;
-    nonce_arr = napi_mf_classic_nonce_array_alloc(system_dict, user_dict);
+    nonce_arr = napi_mf_classic_nonce_array_alloc(system_dict, system_dict_exists, user_dict, user_dict_exists);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_simply_remove(storage, MF_CLASSIC_MEM_FILE_PATH);
     /*
