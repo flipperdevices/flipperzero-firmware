@@ -39,7 +39,6 @@ static void nfc_generate_mf_classic_block_0(
     // Block length is always 16 bytes, and the UID can be either 4 or 7 bytes
     furi_assert(uid_len == 4 || uid_len == 7);
     furi_assert(block);
-    nfc_generate_mf_classic_uid(block, uid_len);
 
     if(uid_len == 4) {
         // Calculate BCC
@@ -98,12 +97,6 @@ static void
     data->nfc_data.atqa[0] = 0x44;
     data->nfc_data.atqa[1] = 0x00;
     data->nfc_data.sak = 0x08;
-    nfc_generate_mf_classic_block_0(
-        data->mf_classic_data.block[0].value,
-        uid_len,
-        data->nfc_data.sak,
-        data->nfc_data.atqa[0],
-        data->nfc_data.atqa[1]);
     data->protocol = NfcDeviceProtocolMifareClassic;
     data->mf_classic_data.type = type;
 }
@@ -342,6 +335,7 @@ static void nfc_generate_ntag_i2c_plus_2k(NfcDeviceData* data) {
 
 void nfc_generate_mf_classic(NfcDeviceData* data, uint8_t uid_len, MfClassicType type) {
     nfc_generate_common_start(data);
+    nfc_generate_mf_classic_uid(data->mf_classic_data.block[0].value, uid_len);
     nfc_generate_mf_classic_common(data, uid_len, type);
 
     // Set the UID
@@ -365,7 +359,6 @@ void nfc_generate_mf_classic(NfcDeviceData* data, uint8_t uid_len, MfClassicType
         }
         // Set SAK to 18
         data->nfc_data.sak = 0x18;
-
     } else if(type == MfClassicType1k) {
         // Set every block to 0xFF
         for(uint16_t i = 1; i < MF_CLASSIC_1K_TOTAL_SECTORS_NUM * 4; i += 1) {
@@ -391,6 +384,13 @@ void nfc_generate_mf_classic(NfcDeviceData* data, uint8_t uid_len, MfClassicType
         // Set SAK to 09
         data->nfc_data.sak = 0x09;
     }
+
+    nfc_generate_mf_classic_block_0(
+        data->mf_classic_data.block[0].value,
+        uid_len,
+        data->nfc_data.sak,
+        data->nfc_data.atqa[0],
+        data->nfc_data.atqa[1]);
 
     mfc->type = type;
 }
