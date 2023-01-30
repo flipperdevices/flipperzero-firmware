@@ -145,7 +145,7 @@ static double e(void) {
     return 2.71828182845904523536;
 }
 static double fac(double a) { /* simplest version of fac */
-    if(a < 0.0) return NAN;
+    if(a < (double)0.0) return NAN;
     if(a > UINT_MAX) return INFINITY;
     unsigned int ua = (unsigned int)(a);
     unsigned long int result = 1, i;
@@ -156,7 +156,7 @@ static double fac(double a) { /* simplest version of fac */
     return (double)result;
 }
 static double ncr(double n, double r) {
-    if(n < 0.0 || r < 0.0 || n < r) return NAN;
+    if(n < (double)0.0 || r < (double)0.0 || n < r) return NAN;
     if(n > UINT_MAX || r > UINT_MAX) return INFINITY;
     unsigned long int un = (unsigned int)(n), ur = (unsigned int)(r), i;
     unsigned long int result = 1;
@@ -278,10 +278,11 @@ void next_token(state* s) {
             s->type = TOK_NUMBER;
         } else {
             /* Look for a variable or builtin function call. */
-            if(isalpha(s->next[0])) {
+            if(isalpha((int)s->next[0])) {
                 const char* start;
                 start = s->next;
-                while(isalpha(s->next[0]) || isdigit(s->next[0]) || (s->next[0] == '_')) s->next++;
+                while(isalpha((int)s->next[0]) || isdigit((int)s->next[0]) || (s->next[0] == '_'))
+                    s->next++;
 
                 const te_variable* var = find_lookup(s, start, s->next - start);
                 if(!var) var = find_builtin(start, s->next - start);
