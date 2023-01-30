@@ -3,6 +3,38 @@
 A collection of methods my games are using. 
 
 ---
+
+## UI
+
+Extra methods for graphics. It can read/write/copy anything from the screen, create a buffer that you can swap with the one inside the canvas object and every flipper draw call should work with it.
+
+Call this at the end of your program
+```
+ui_cleanup();
+```
+
+### How to use it
+
+* To test if a pixel is black or not: ``test_pixel(canvas_buffer, pixel_x, pixel_y, screen_width)``
+* Convert Flippers icon to the same type to u8g2: ``uint8_t * result=image_data(canvas, icon);``
+* Flatten X/Y pixel coordinate to array index ``uint32_t result=pixel_index(x,y)``
+* Draw icon region with overlay/invert support: ``draw_icon_clip(canvas, icon, image_x, image_y, screen_x, screen_y, width, height, draw_mode)``
+* Draw flipped region icon with overlay/invert support: ``draw_icon_clip_flipped(canvas, icon, image_x, image_y, screen_x, screen_y, width, height, draw_mode)``
+* Draw rounded box: ``draw_rounded_box(canvas, x,y,width, heigth, draw_mode)``
+* Draw rounded box frame: ``draw_rounded_box_frame(canvas, x,y,width, heigth, draw_mode)``
+* Draw rectangle: ``draw_rounded_box_frame(canvas, x,y,width, heigth, draw_mode)``
+* Invert screen colors in a rectangle: ``invert_rectangle(canvas, x, y, width, height)``
+* Invert screen colors in a shape: ``invert_shape(canvas, image, x, y, width, height)``
+* Read pixel: ``read_pixel(canvas, x, y)``
+* Set pixel: ``set_pixel(canvas, x, y, draw_mode)``
+* Draw line: ``set_pixel(canvas, x1, y1, x2, y1, draw_mode)``
+* Test coordinate if it is in the screen: ``in_screen(x, y)``
+* Test coordinate if it is in the screen: ``in_screen(x, y)``
+* Get screen buffer: ``get_buffer(canvas)``
+* Create a new buffer: ``make_buffer()``
+* Clone buffer: ``clone_buffer(source_buffer, result_buffer)``
+
+---
 ## Math
 
 Some extra math functionality.
