@@ -66,14 +66,19 @@ typedef enum
     TE_EFFECT_SKIP_PATTERN = 0x0d00,
     TE_EFFECT_EXT = 0x0e00,
     /* TODO: add 0exy effects here */
+    TE_EFFECT_EXT_TOGGLE_FILTER = 0x0e00,
     TE_EFFECT_EXT_PORTA_UP = 0x0e10,
     TE_EFFECT_EXT_PORTA_DN = 0x0e20,
+    TE_EFFECT_EXT_PATTERN_LOOP = 0x0e60, // e60 = start, e61-e6f = end and indication how many loops you want
     TE_EFFECT_EXT_RETRIGGER = 0x0e90,
     TE_EFFECT_EXT_FINE_VOLUME_DOWN = 0x0ea0,
     TE_EFFECT_EXT_FINE_VOLUME_UP = 0x0eb0,
     TE_EFFECT_EXT_NOTE_CUT = 0x0ec0,
     TE_EFFECT_EXT_NOTE_DELAY = 0x0ed0,
+    TE_EFFECT_EXT_PHASE_RESET = 0x0ef0,
     TE_EFFECT_SET_SPEED_PROG_PERIOD = 0x0f00,
+    TE_EFFECT_CUTOFF_UP = 0x1000,   // Gxx
+    TE_EFFECT_CUTOFF_DOWN = 0x1100, // Hxx
     /* These effects work only in instrument program */
     TE_PROGRAM_LOOP_BEGIN = 0x7d00,
     TE_PROGRAM_LOOP_END = 0x7e00,
@@ -197,4 +202,7 @@ typedef struct
     uint8_t master_volume;
 
     bool playing; // if we reach the end of the song and song does not loop we just stop there
+
+    bool in_loop; // for E6X (pattern loop) command
+    uint8_t loops_left;
 } TrackerEngine;

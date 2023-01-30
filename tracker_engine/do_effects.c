@@ -196,6 +196,24 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
         {
             switch (opcode & 0x7ff0)
             {
+                case TE_EFFECT_EXT_TOGGLE_FILTER:
+                {
+                    if (tick == 0)
+                    {
+                        if (opcode & 0xf)
+                        {
+                            se_channel->flags |= SE_ENABLE_FILTER;
+                        }
+
+                        else
+                        {
+                            se_channel->flags &= ~SE_ENABLE_FILTER;
+                        }
+                    }
+
+                    break;
+                }
+
                 case TE_EFFECT_EXT_PORTA_DN:
                 {
                     if (tick == 0)
@@ -284,6 +302,17 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
 
                     break;
                 }
+
+                case TE_EFFECT_EXT_PHASE_RESET:
+                {
+                    if (tick == (opcode & 0xf))
+                    {
+                        se_channel->accumulator = 0;
+                        se_channel->lfsr = RANDOM_SEED;
+                    }
+
+                    break;
+                }
             }
 
             break;
@@ -303,6 +332,34 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                     tracker_engine->song->speed = opcode & 0xff;
                 }
             }
+
+            break;
+        }
+
+        case TE_EFFECT_CUTOFF_UP:
+        {
+            te_channel->filter_cutoff += (opcode & 0xff);
+
+            if (te_channel->filter_cutoff > 0x7ff)
+            {
+                te_channel->filter_cutoff = 0x7ff;
+            }
+
+            sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
+
+            break;
+        }
+
+        case TE_EFFECT_CUTOFF_DOWN:
+        {
+            te_channel->filter_cutoff -= (opcode & 0xff);
+
+            if (te_channel->filter_cutoff > 0x7ff) // unsigned int overflow
+            {
+                te_channel->filter_cutoff = 0;
+            }
+
+            sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
 
             break;
         }

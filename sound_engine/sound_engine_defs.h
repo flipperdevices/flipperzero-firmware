@@ -46,8 +46,12 @@ typedef enum
     FIL_OUTPUT_LOWPASS = 1,
     FIL_OUTPUT_HIGHPASS = 2,
     FIL_OUTPUT_BANDPASS = 3,
+    FIL_OUTPUT_LOW_HIGH = 4,
+    FIL_OUTPUT_HIGH_BAND = 5,
+    FIL_OUTPUT_LOW_BAND = 6,
+    FIL_OUTPUT_LOW_HIGH_BAND = 7,
     /* ============ */
-    FIL_MODES = 4,
+    FIL_MODES = 8,
 } SoundEngineFilterModes;
 
 typedef enum
@@ -86,8 +90,6 @@ typedef struct
     uint8_t sync_bit;
 
     uint8_t filter_mode;
-    uint16_t filter_cutoff;
-    uint16_t filter_resonace;
 
     SoundEngineFilter filter;
 } SoundEngineChannel;

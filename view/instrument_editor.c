@@ -56,6 +56,10 @@ static const char *filter_types[] =
         "LOW",
         "HIGH",
         "BAND",
+        "LOHI",
+        "HIBD",
+        "LOBD",
+        "ALL",
 };
 
 static const char *instrument_editor_params_description[] =

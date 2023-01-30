@@ -82,7 +82,7 @@ void set_default_instrument(Instrument *inst)
 {
     memset(inst, 0, sizeof(Instrument));
 
-    inst->flags = TE_SET_CUTOFF | TE_SET_PW;
+    inst->flags = TE_SET_CUTOFF | TE_SET_PW | TE_ENABLE_VIBRATO;
     inst->sound_engine_flags = SE_ENABLE_KEYDOWN_SYNC;
 
     inst->base_note = MIDDLE_C;
@@ -94,10 +94,19 @@ void set_default_instrument(Instrument *inst)
     inst->adsr.d = 0x28;
     inst->adsr.volume = 0x80;
 
+    inst->filter_type = FIL_OUTPUT_LOWPASS;
+    inst->filter_cutoff = 0xff;
+
+    inst->program_period = 1;
+
     for (int i = 0; i < INST_PROG_LEN; i++)
     {
         inst->program[i] = TE_PROGRAM_NOP;
     }
+
+    inst->vibrato_speed = 0x60;
+    inst->vibrato_depth = 0x20;
+    inst->vibrato_delay = 0x20;
 }
 
 void set_empty_pattern(TrackerSongPattern *pattern, uint16_t pattern_length)
@@ -216,8 +225,6 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     {
         te_channel->filter_type = pinst->filter_type;
         se_channel->filter_mode = te_channel->filter_type;
-        se_channel->filter_cutoff = te_channel->filter_cutoff;
-        se_channel->filter_resonace = te_channel->filter_resonance;
     }
 
     if (pinst->flags & TE_SET_PW)
@@ -578,29 +585,7 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                 }
             }
 
-            if ((opcode & 0x7f00) == TE_EFFECT_SKIP_PATTERN && tracker_engine->current_tick == 0)
-            {
-                tracker_engine->sequence_position++;
-                tracker_engine->pattern_position = 0;
-
-                if (tracker_engine->sequence_position >= song->num_sequence_steps)
-                {
-                    tracker_engine->playing = false; // TODO: add song loop handling
-                    tracker_engine->sequence_position--;
-                    tracker_engine->pattern_position = song->pattern_length - 1;
-                }
-
-                sequence_position = tracker_engine->sequence_position;
-                current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
-                pattern_step = tracker_engine->pattern_position;
-
-                pattern = &song->pattern[current_pattern];
-            }
-
-            else
-            {
-                tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
-            }
+            tracker_engine_execute_track_command(tracker_engine, chan, &pattern->step[pattern_step], tracker_engine->current_tick == note_delay);
         }
 
         tracker_engine_advance_channel(tracker_engine, chan); // this will be executed even if the song pointer is NULL; handy for live instrument playback from inst editor ("jams")
@@ -612,9 +597,80 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
         if (tracker_engine->current_tick >= song->speed)
         {
-            // TODO: add pattern loop and pattern skip commands
+            bool flag = true;
 
-            tracker_engine->pattern_position++;
+            for (int chan = 0; chan < SONG_MAX_CHANNELS; ++chan)
+            {
+                uint16_t sequence_position = tracker_engine->sequence_position;
+                uint8_t current_pattern = song->sequence.sequence_step[sequence_position].pattern_indices[chan];
+                uint8_t pattern_step = tracker_engine->pattern_position;
+
+                TrackerSongPattern *pattern = &song->pattern[current_pattern];
+
+                opcode = tracker_engine_get_command(&pattern->step[pattern_step]);
+
+                if ((opcode & 0x7ff0) == TE_EFFECT_EXT_PATTERN_LOOP)
+                {
+                    if (opcode & 0xf) // loop end
+                    {
+                        if (!(tracker_engine->in_loop))
+                        {
+                            tracker_engine->loops_left = (opcode & 0xf);
+                            tracker_engine->in_loop = true;
+
+                            for (int j = tracker_engine->pattern_position; j >= 0; j--)
+                            {
+                                if (tracker_engine_get_command(&pattern->step[j]) == TE_EFFECT_EXT_PATTERN_LOOP) // search for loop start
+                                {
+                                    tracker_engine->pattern_position = fmax((int16_t)j - 1, 0); // jump to loop start
+
+                                    goto out;
+                                }
+                            }
+                        }
+
+                        else
+                        {
+                            tracker_engine->loops_left--;
+
+                            if (tracker_engine->loops_left == 0)
+                            {
+                                tracker_engine->in_loop = false;
+                                goto out;
+                            }
+
+                            for (int j = tracker_engine->pattern_position; j >= 0; j--)
+                            {
+                                if (tracker_engine_get_command(&pattern->step[j]) == TE_EFFECT_EXT_PATTERN_LOOP) // search for loop start
+                                {
+                                    tracker_engine->pattern_position = fmax((int16_t)j - 1, 0); // jump to loop start
+
+                                    goto out;
+                                }
+                            }
+                        }
+                    }
+
+                    else // loop start
+                    {
+                    }
+
+                out:;
+                }
+
+                if ((opcode & 0x7f00) == TE_EFFECT_SKIP_PATTERN)
+                {
+                    tracker_engine->sequence_position++;
+                    tracker_engine->pattern_position = 0;
+
+                    flag = false;
+                }
+            }
+
+            if (flag)
+            {
+                tracker_engine->pattern_position++;
+            }
 
             tracker_engine->current_tick = 0;
 

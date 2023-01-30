@@ -145,26 +145,53 @@ void sound_engine_fill_buffer(SoundEngine *sound_engine, uint16_t *audio_buffer,
 
                 if (channel->flags & SE_ENABLE_FILTER)
                 {
-                    sound_engine_filter_cycle(&channel->filter, channel_output_final[chan]);
-
-                    switch (channel->filter_mode)
+                    if (channel->filter_mode != 0)
                     {
-                        case FIL_OUTPUT_LOWPASS:
-                        {
-                            channel_output_final[chan] = sound_engine_output_lowpass(&channel->filter);
-                            break;
-                        }
+                        sound_engine_filter_cycle(&channel->filter, channel_output_final[chan]);
 
-                        case FIL_OUTPUT_HIGHPASS:
+                        switch (channel->filter_mode)
                         {
-                            channel_output_final[chan] = sound_engine_output_highpass(&channel->filter);
-                            break;
-                        }
+                            case FIL_OUTPUT_LOWPASS:
+                            {
+                                channel_output_final[chan] = sound_engine_output_lowpass(&channel->filter);
+                                break;
+                            }
 
-                        case FIL_OUTPUT_BANDPASS:
-                        {
-                            channel_output_final[chan] = sound_engine_output_bandpass(&channel->filter);
-                            break;
+                            case FIL_OUTPUT_HIGHPASS:
+                            {
+                                channel_output_final[chan] = sound_engine_output_highpass(&channel->filter);
+                                break;
+                            }
+
+                            case FIL_OUTPUT_BANDPASS:
+                            {
+                                channel_output_final[chan] = sound_engine_output_bandpass(&channel->filter);
+                                break;
+                            }
+
+                            case FIL_OUTPUT_LOW_HIGH:
+                            {
+                                channel_output_final[chan] = sound_engine_output_lowpass(&channel->filter) + sound_engine_output_highpass(&channel->filter);
+                                break;
+                            }
+
+                            case FIL_OUTPUT_HIGH_BAND:
+                            {
+                                channel_output_final[chan] = sound_engine_output_highpass(&channel->filter) + sound_engine_output_bandpass(&channel->filter);
+                                break;
+                            }
+
+                            case FIL_OUTPUT_LOW_BAND:
+                            {
+                                channel_output_final[chan] = sound_engine_output_lowpass(&channel->filter) + sound_engine_output_bandpass(&channel->filter);
+                                break;
+                            }
+
+                            case FIL_OUTPUT_LOW_HIGH_BAND:
+                            {
+                                channel_output_final[chan] = sound_engine_output_lowpass(&channel->filter) + sound_engine_output_highpass(&channel->filter) + sound_engine_output_bandpass(&channel->filter);
+                                break;
+                            }
                         }
                     }
                 }
