@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add support for GUI-CTRL in bad_usb #2315 (By NDrong)](https://github.com/flipperdevices/flipperzero-firmware/pull/2315)
 - OFW: [Print card CID in storage info #2227 (By hramrach)](https://github.com/flipperdevices/flipperzero-firmware/pull/2227)
 - OFW: [Documentation: add BadUSB GUI-CTRL #2347 (By giacomoferretti)](https://github.com/flipperdevices/flipperzero-firmware/pull/2347)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
