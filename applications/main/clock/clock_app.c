@@ -336,18 +336,42 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_release(state->mutex);
     if(state->faceType == 0 || state->faceType == 4) {
         if(state->faceType == 4) {
-            elements_button_left(canvas, "F5");
+            canvas_set_color(canvas, ColorWhite);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F5");
+            }
+            canvas_set_color(canvas, ColorBlack);
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F1");
+            }
             canvas_set_color(canvas, ColorWhite);
-            elements_button_left(canvas, "F1");
         }
         canvas_set_font(canvas, FontBigNumbers);
         int32_t elapsed_secs = timer_running ? (curr_ts - timer_start_timestamp) :
                                                timer_stopped_seconds;
         snprintf(timer_string, 20, "%.2ld:%.2ld", elapsed_secs / 60, elapsed_secs % 60);
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
-        if(timer_start_timestamp != 0) {
+        if(state->w_test && timer_start_timestamp != 0) {
+            int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
+            int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
+            static const Icon* const count_anim[5] = {
+                &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
+            static const Icon* const count_anim2[4] = {
+                &I_EviWaiting1_18x21, &I_EviWaiting2_18x21, &I_EviSmile1_18x21, &I_EviSmile2_18x21};
+            static const Icon* const count_anim3[4] = {
+                &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
+            canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
+            canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
+            canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
+            canvas_draw_str_aligned(
+                canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
+        } else if(timer_start_timestamp != 0) {
             canvas_draw_str_aligned(
                 canvas, 96, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
             static const Icon* const flip_face[25] = {
@@ -365,13 +389,12 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 &I_upload1_flipagotchi,      &I_upload2_flipagotchi,
                 &I_upload_flipagotchi};
             canvas_draw_icon(canvas, 1, 32, flip_face[state->curEmotiveFace]);
-            canvas_set_font(canvas, FontBatteryPercent);
-            canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "Reset");
         } else {
             canvas_draw_icon(canvas, 1, 32, &I_cool_flipagotchi);
         }
+        canvas_set_font(canvas, FontBatteryPercent);
+        canvas_draw_str_aligned(canvas, 117, 11, AlignCenter, AlignCenter, alertTime);
+        canvas_set_font(canvas, FontSecondary);
         canvas_set_font(canvas, FontBatteryPercent);
         if(state->time_format == LocaleTimeFormat12h)
             canvas_draw_str_aligned(canvas, 117, 4, AlignCenter, AlignCenter, meridian_string);
@@ -379,11 +402,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
     } else if(state->faceType == 1 || state->faceType == 5) {
         canvas_set_font(canvas, FontSecondary);
         if(state->faceType == 5) {
-            elements_button_left(canvas, "F6");
+            canvas_set_color(canvas, ColorWhite);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F6");
+            }
+            canvas_set_color(canvas, ColorBlack);
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F2");
+            }
             canvas_set_color(canvas, ColorWhite);
-            elements_button_left(canvas, "F2");
         }
         canvas_set_font(canvas, FontBigNumbers);
         if(timer_start_timestamp != 0 && !state->w_test) {
@@ -401,7 +434,6 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(
                 canvas, 64, 20, AlignCenter, AlignTop, date_string); // DRAW DATE
             canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "Reset");
         } else {
             if(state->w_test) canvas_set_font(canvas, FontBatteryPercent);
             if(state->w_test && timer_start_timestamp != 0) {
@@ -412,16 +444,7 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
                 static const Icon* const count_anim[5] = {
                     &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
-                static const Icon* const count_anim2[4] = {
-                    &I_EviWaiting1_18x21,
-                    &I_EviWaiting2_18x21,
-                    &I_EviSmile1_18x21,
-                    &I_EviSmile2_18x21};
-                static const Icon* const count_anim3[4] = {
-                    &I_frame_01, &I_frame_02, &I_frame_03, &I_frame_02};
                 canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
-                canvas_draw_icon(canvas, 90, 0, count_anim2[elapsed_secs_img2]);
-                canvas_draw_icon(canvas, 110, 5, count_anim3[elapsed_secs_img2]);
                 canvas_draw_str_aligned(
                     canvas, 64, 31, AlignCenter, AlignTop, timer_string); // DRAW TIMER
             }
@@ -437,11 +460,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         }
     } else if(state->faceType == 2 || state->faceType == 6) {
         if(state->faceType == 6) {
-            elements_button_left(canvas, "F7");
+            canvas_set_color(canvas, ColorWhite);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F7");
+            }
+            canvas_set_color(canvas, ColorBlack);
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F3");
+            }
             canvas_set_color(canvas, ColorWhite);
-            elements_button_left(canvas, "F3");
         }
         canvas_set_font(canvas, FontBatteryPercent);
         if(timer_start_timestamp != 0) {
@@ -462,11 +495,21 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
     } else {
         if(state->faceType == 7) {
-            elements_button_left(canvas, "F8");
+            canvas_set_color(canvas, ColorWhite);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F8");
+            }
+            canvas_set_color(canvas, ColorBlack);
         } else {
             canvas_draw_icon(canvas, 0, 0, &I_black);
+            if(timer_start_timestamp != 0) {
+                elements_button_left(canvas, "Reset");
+            } else {
+                elements_button_left(canvas, "F4");
+            }
             canvas_set_color(canvas, ColorWhite);
-            elements_button_left(canvas, "F4");
         }
         uint8_t width = canvas_width(canvas);
         uint8_t height = canvas_height(canvas);
@@ -507,6 +550,12 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
                 canvas, 15, 32, AlignCenter, AlignTop, timer_string); // DRAW TIMER
         }
     }
+    if(state->faceType >= 4) {
+        canvas_set_color(canvas, ColorWhite);
+    }
+    if(state->faceType < 4) {
+        canvas_set_color(canvas, ColorBlack);
+    }
     if(!state->desktop_settings->is_dumbmode && !state->w_test) {
         if(timer_running) {
             elements_button_center(canvas, "Stop");
@@ -525,6 +574,8 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
             elements_button_right(canvas, "S:ByMin");
         }
     }
+    // if(state->faceType >= 4) canvas_set_color(canvas, ColorBlack);
+    // if(state->faceType < 4) canvas_set_color(canvas, ColorWhite);
     if(state->w_test && state->desktop_settings->is_dumbmode) {
         canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
     }
