@@ -8,7 +8,7 @@ This is a tama P1 Emulator app for Flipper Zero, based on [TamaLIB](https://gith
 How to play
 -----------
 Create a `tama_p1` folder in your microSD card, and put the ROM as `rom.bin`.
-Use a search engine to find the Tamagotchi ROM. There is a file named `a` or `tama.b`. 
+Use a search engine to find the Tamagotchi ROM. There is a file named `tama.b`. 
 Rename this to `rom.bin`. 
 
 - Left button is A.
@@ -20,11 +20,13 @@ Rename this to `rom.bin`.
 
 Building
 --------
-Move this folder into flippers applications/plugins/tama_p1. 
+Move this folder into flippers `applications_user/TAMA-P1`. 
 
 
 Launching the app, directly from console to flipper: 
-`./fbt launch_app APPSRC=applications_user/TAMA-P1`
+```
+./fbt launch_app APPSRC=applications_user/TAMA-P1
+```
 
 Run the following to compile icons:
 ```
@@ -38,22 +40,8 @@ Debugging
 ---------
 Using the serial script from [FlipperScripts](https://github.com/DroomOne/FlipperScripts/blob/main/serial_logger.py) 
 it is easy to add direct logging after running the application: 
+```
 `python .\serial_logger.py`
 
 `./fbt launch_app APPSRC=applications\plugins\tama_p1;  python .\serial_logger.py`
-
-
-Implemented
------------
-- Basic emulation
-- Input
-- Sound
-- Saving/Loading emulator state (stored in `/ext/tama_p1/save.bin`)
-- Mute button combo shortcut (Up = A+C)
-
-To-do
------
-- more than one save slot
-- In-game reset
-- Test mode?
-- Volume adjustment
+```
