@@ -1,6 +1,6 @@
 /*
     Unitemp - Universal temperature reader
-    Copyright (C) 2022  Victor Nikitchuk (https://github.com/quen0n)
+    Copyright (C) 2022-2023  Victor Nikitchuk (https://github.com/quen0n)
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ typedef struct Sensor {
 extern const Interface SINGLE_WIRE; //Собственный однопроводной протокол датчиков DHTXX и AM23XX
 extern const Interface ONE_WIRE; //Однопроводной протокол Dallas
 extern const Interface I2C; //I2C_2 (PC0, PC1)
-//extern const Interface SPI;
+extern const Interface SPI; //SPI_1 (MOSI - 2, MISO - 3, CS - 4, SCK - 5)
 
 /* ============================= Датчик(и) ============================= */
 /**
@@ -318,12 +318,15 @@ const GPIO*
 //DS18x2x
 #include "./interfaces/OneWireSensor.h"
 #include "./sensors/LM75.h"
-//BMP280, BME280
+//BMP280, BME280, BME680
 #include "./sensors/BMx280.h"
+#include "./sensors/BME680.h"
 #include "./sensors/AM2320.h"
 #include "./sensors/DHT20.h"
 #include "./sensors/SHT30.h"
 #include "./sensors/BMP180.h"
 #include "./sensors/HTU21x.h"
 #include "./sensors/HDC1080.h"
+#include "./sensors/MAX31855.h"
+#include "./sensors/MAX6675.h"
 #endif
