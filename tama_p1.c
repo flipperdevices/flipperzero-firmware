@@ -13,7 +13,7 @@ FuriMutex* g_state_mutex;
 bool portrait_mode = false;
 bool in_menu = false;
 
-int menu_cursor = 2;
+int menu_cursor = 0;
 const int menu_items = 3;
 
 static const Icon* icons_list[] = {
@@ -169,12 +169,12 @@ static void draw_menu_landscape(Canvas* const canvas) {
         canvas_draw_circle(canvas, 5, 50, 2);
         break;
     }
+    canvas_draw_str(canvas, 10, 25, "A+C (mute/change time)");
     if(portrait_mode) {
-        canvas_draw_str(canvas, 10, 25, "Orientation: Portrait");
+        canvas_draw_str(canvas, 10, 40, "Orientation: Portrait");
     } else {
-        canvas_draw_str(canvas, 10, 25, "Orientation: Landscape");
+        canvas_draw_str(canvas, 10, 40, "Orientation: Landscape");
     }
-    canvas_draw_str(canvas, 10, 40, "A+C (mute/change time)");
     canvas_draw_str(canvas, 10, 55, "Close menu");
 }
 
@@ -600,19 +600,22 @@ int32_t tama_p1_app(void* p) {
                         } else {
                             menu_cursor = 0;
                         }
+                    } else if(
+                        event.input.key == InputKeyLeft && event.input.type == InputTypePress &&
+                        menu_cursor == 1) {
+                        portrait_mode = !portrait_mode;
                     }
-                    // else if (event.input.key==InputKeyLeft) {}
                     // else if (event.input.key==InputKeyRight) {}
-                    else if(event.input.key == InputKeyOk) {
+                    else if(event.input.key == InputKeyOk || event.input.key == InputKeyRight) {
                         switch(menu_cursor) {
                         case 0:
-                            // portrait_mode = true;
-                            if(event.input.type == InputTypePress) portrait_mode = !portrait_mode;
-                            break;
-                        case 1:
                             // mute tamagotchi
                             tamalib_set_button(BTN_LEFT, tama_btn_state);
                             tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                            break;
+                        case 1:
+                            // portrait_mode = true;
+                            if(event.input.type == InputTypePress) portrait_mode = !portrait_mode;
                             break;
                         case 2:
                         default:
