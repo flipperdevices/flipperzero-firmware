@@ -21,7 +21,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
 - [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, DBZ, Dolphin, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
-- [RM Patreon supporters have access to SD Card Assets with extra NFC Assets such as 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
+- [Supporters get SD Card Assets with extra NFC Assets such as 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
 - Donations: ETH: `roguemaster.eth` or `0xC32Ea488DBeCF95992A5C81BD411e56Bd418BC5f`
 
@@ -95,8 +95,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [TAMA P1: Mute (By Smileycathy1128)](https://github.com/DroomOne/flipperzero-tamagotch-p1/pull/1)
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
-- Patreon Build Update: ALL builds now have 34 more new animations [(Thanks to TH3WR3NCH)](https://github.com/wrenchathome/flip0anims)
-- Patreon Build Update: ALL builds now have 22 more new animations [(Thanks to SynthetikSpace)](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 34 more new animations [(Thanks to TH3WR3NCH)](https://github.com/wrenchathome/flip0anims)
+- Patreon Build Update: [ALL](https://www.patreon.com/posts/animation-all-v4-77935728) builds now have 22 more new animations [(Thanks to SynthetikSpace)](https://github.com/synthetikspace/SynthetikSpace-FZ-Animations)
 - [NEW VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/animation-all-v4-77935728)
 
 <a name="release">
@@ -404,4 +404,4 @@ $ ./fbt dolphin_ext
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
-# [Install GitHub Version With WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0123-1429-0.75.1-9cad37f.tgz&channel=RM0123-1429-0.75.1-9cad37f&version=0.75.1
+# [Install GitHub Version With WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0123-1429-0.75.1-9cad37f.tgz&channel=RM0123-1429-0.75.1-9cad37f&version=0.75.1)
