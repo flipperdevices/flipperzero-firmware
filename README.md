@@ -35,7 +35,7 @@ ui_cleanup();
 * Clone buffer: ``clone_buffer(source_buffer, result_buffer)``
 
 ---
-## Math
+## Math (dml)
 
 Some extra math functionality.
 
