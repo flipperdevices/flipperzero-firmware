@@ -22,7 +22,7 @@ ui_cleanup();
 * Draw flipped region icon with overlay/invert support: ``draw_icon_clip_flipped(canvas, icon, image_x, image_y, screen_x, screen_y, width, height, draw_mode)``
 * Draw rounded box: ``draw_rounded_box(canvas, x,y,width, heigth, draw_mode)``
 * Draw rounded box frame: ``draw_rounded_box_frame(canvas, x,y,width, heigth, draw_mode)``
-* Draw rectangle: ``draw_rounded_box_frame(canvas, x,y,width, heigth, draw_mode)``
+* Draw rectangle: ``draw_rectangle(canvas, x,y,width, heigth, draw_mode)``
 * Invert screen colors in a rectangle: ``invert_rectangle(canvas, x, y, width, height)``
 * Invert screen colors in a shape: ``invert_shape(canvas, image, x, y, width, height)``
 * Read pixel: ``read_pixel(canvas, x, y)``
