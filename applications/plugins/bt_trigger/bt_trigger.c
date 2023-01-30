@@ -1,6 +1,6 @@
-#include "ios_trigger.h"
+#include "bt_trigger.h"
 
-__int32_t ios_trigger_app(void* p) {
+__int32_t bt_trigger_app(void* p) {
     //Fake using p to compile
     UNUSED(p);
     AppStruct* app = appStructAlloc();
@@ -54,10 +54,14 @@ __int32_t ios_trigger_app(void* p) {
                     app->shooting = false;
                     app->running = false;
                     break;
-                case(InputKeyOk):
+                case(InputKeyOk): //Take a shot and start intervalometer
                     if(app->delay > 0) {
                         app->shooting = !app->shooting;
                         if(app->shooting) {
+                            furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
+                            furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);
+                            notification_message(app->notifications, &sequence_blink_blue_100);
+                            app->shots++;
                             //Timer triggered every delay ms
                             furi_timer_start(timer, app->delay * 1000);
                         } else {
@@ -66,22 +70,22 @@ __int32_t ios_trigger_app(void* p) {
                         }
                     }
                     break;
-                case(InputKeyUp):
+                case(InputKeyUp): //Increase delay
                     if(!app->shooting) {
                         app->delay++;
                     }
                     break;
-                case(InputKeyDown):
+                case(InputKeyDown): //Decrease delay
                     if(!app->shooting && app->delay > 1) {
                         app->delay--;
                     }
                     break;
-                case(InputKeyLeft):
+                case(InputKeyLeft): //Reset shots counter
                     if(!app->shooting) {
                         app->shots = 0;
                     }
                     break;
-                case(InputKeyRight):
+                case(InputKeyRight): //Take a shot
                     if(!app->shooting) {
                         furi_hal_bt_hid_consumer_key_press(HID_CONSUMER_VOLUME_INCREMENT);
                         furi_hal_bt_hid_consumer_key_release(HID_CONSUMER_VOLUME_INCREMENT);

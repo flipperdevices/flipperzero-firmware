@@ -1,0 +1,16 @@
+App(
+    appid="BT_Trigger",
+    name="BT Trigger",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bt_trigger_app",
+    cdefines=["APP_BT_TRIGGER"],
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="bt_trigger_logo.png",
+    fap_category="Misc",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="bt_trigger",
+)
