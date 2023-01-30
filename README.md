@@ -1,4 +1,4 @@
-work in progress (check to-do list at the bootom of this readme.md)
+***work in progress*** (check to-do list at the bootom of this readme.md)
 
 Tama P1 Emulator for Flipper Zero
 =======================================
@@ -17,7 +17,7 @@ Rename this to `rom.bin`.
 - Left button is A.
 - Down or OK is B. 
 - Right button is C. 
-- Holding the Up button functions the same as press both A and C, which mutes the volume. 
+- Up button takes you to the emulator menu.
 - Hold the Back button to save and exit.
 
 
@@ -55,4 +55,4 @@ To-Do
   - Switch between portrait and landscape
   - A+C shortcut (mute/change in-game time)
   - Double speed / fast-forward
-  - display runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
+  - display/hide runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
