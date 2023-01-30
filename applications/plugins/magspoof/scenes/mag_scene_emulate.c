@@ -39,6 +39,7 @@ void mag_scene_emulate_on_enter(void* context) {
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Config", mag_widget_callback, mag);
     widget_add_button_element(widget, GuiButtonTypeRight, "Send", mag_widget_callback, mag);
+    widget_add_button_element(widget, GuiButtonTypeCenter, "Bitwise", mag_widget_callback, mag);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
     furi_string_free(tmp_str);
@@ -59,6 +60,12 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             notification_message(mag->notifications, &sequence_blink_start_cyan);
             mag_spoof(mag);
+            notification_message(mag->notifications, &sequence_blink_stop);
+            break;
+        case GuiButtonTypeCenter:
+            consumed = true;
+            notification_message(mag->notifications, &sequence_blink_start_cyan);
+            mag_spoof_bitwise(mag);
             notification_message(mag->notifications, &sequence_blink_stop);
             break;
         }
