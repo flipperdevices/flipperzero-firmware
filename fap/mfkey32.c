@@ -60,6 +60,7 @@ typedef struct {
 
 typedef enum {
     MissingNonces,
+    ZeroNonces,
     OutOfMemory,
 } MfkeyError;
 
@@ -84,6 +85,8 @@ typedef struct {
 typedef struct {
     Stream* stream;
     uint32_t total_nonces;
+    MfClassicNonce* remaining_nonce_array;
+    size_t remaining_nonces;
 } MfClassicNonceArray;
 
 struct MfClassicDict {
@@ -402,6 +405,26 @@ uint32_t crypt_or_rollback_word(struct Crypto1State *s, uint32_t in, int x, int 
     return ret;
 }
 
+bool key_already_found_for_nonce(uint64_t *keyarray, size_t keyarray_size, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
+    size_t k = 0;
+    bool found = false;
+    for(k = 0; k < keyarray_size; k++) {
+        struct Crypto1State temp = {0, 0};
+        int i;
+        for (i = 0; i < 24; i++) {
+            (&temp)->odd |= (BIT(keyarray[k], 2*i+1) << (i ^ 3));
+            (&temp)->even |= (BIT(keyarray[k], 2*i) << (i ^ 3));
+        }
+        crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
+        crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
+        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
 bool napi_mf_classic_dict_check_presence(MfClassicDictType dict_type) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -590,8 +613,8 @@ bool napi_mf_classic_dict_is_key_present(MfClassicDict* dict, uint8_t* key) {
     return key_found;
 }
 
-int napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
-    uint32_t found = 0;
+bool napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
+    bool found = false;
     uint64_t k = 0;
     napi_mf_classic_dict_rewind(dict);
     while (napi_mf_classic_dict_get_next_key(dict, &k)) {
@@ -604,7 +627,7 @@ int napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1, 
         crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
         crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
         if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
-            found = 1;
+            found = true;
             break;
         }
     }
@@ -623,6 +646,8 @@ bool napi_mf_classic_nonces_check_presence() {
 
 MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(MfClassicDict* system_dict, bool system_dict_exists, MfClassicDict* user_dict, bool user_dict_exists) {
     MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
+    MfClassicNonce *remaining_nonce_array_init = malloc(sizeof(MfClassicNonce)*1);
+    nonce_array->remaining_nonce_array = remaining_nonce_array_init;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     nonce_array->stream = buffered_file_stream_alloc(storage);
     furi_record_close(RECORD_STORAGE);
@@ -688,14 +713,16 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(MfClassicDict* system_dic
                 }
                 ptr++;
             }
-            // TODO: Scan line and check if key for nonce is already known
             uint32_t p64b = prng_successor(res.nt1, 64);
             if ((system_dict_exists && napi_key_already_found_for_nonce(system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) ||
                 (user_dict_exists && napi_key_already_found_for_nonce(user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc))) {
                 continue;
             }
             FURI_LOG_I(TAG, "No key found for %lx %lx", res.uid, res.ar1_enc);
-            // Store what nonces need to be cracked in an array
+            // TODO: Refactor
+            nonce_array->remaining_nonce_array = realloc(nonce_array->remaining_nonce_array, sizeof(MfClassicNonce)*((nonce_array->remaining_nonces)+1));
+            nonce_array->remaining_nonces++;
+            nonce_array->remaining_nonce_array[(nonce_array->remaining_nonces)-1] = res;
             nonce_array->total_nonces++;
         }
         furi_string_free(next_line);
@@ -723,10 +750,11 @@ void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
     free(nonce_array);
 }
 
-// TODO: Do we manually need to render here if the main thread is blocked?
+// TODO: Blocks main thread. Do we manually need to render here?
 void mfkey32(ProgramState* const program_state) {
-    size_t keyarray_size;
+    size_t keyarray_size = 0;
     uint64_t *keyarray = malloc(sizeof(uint64_t)*1);
+    uint32_t i = 0;
     struct Crypto1State *temp;
     // Check for nonces
     if (!napi_mf_classic_nonces_check_presence()) {
@@ -751,31 +779,32 @@ void mfkey32(ProgramState* const program_state) {
     // Read nonces
     MfClassicNonceArray* nonce_arr;
     nonce_arr = napi_mf_classic_nonce_array_alloc(system_dict, system_dict_exists, user_dict, user_dict_exists);
+    if (nonce_arr->total_nonces == 0) {
+        // Nothing to crack
+        program_state->err = ZeroNonces;
+        napi_mf_classic_nonce_array_free(nonce_arr);
+        if (system_dict_exists) {
+            napi_mf_classic_dict_free(system_dict);
+        }
+        if (user_dict_exists) {
+            napi_mf_classic_dict_free(user_dict);
+        }
+        return;
+    }
+    program_state->total = nonce_arr->total_nonces;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_simply_remove(storage, MF_CLASSIC_MEM_FILE_PATH);
-    /*
-    keyarray_size = 0;
-    while(fgets(buffer, bufferLength, filePointer)) { // XXX FIXME
-        rest = buffer;
-        for (i = 0; i <= 17; i++) {
-            token = strtok_r(rest, " ", &rest); // XXX FIXME
-            switch(i){
-                case 5: sscanf(token, "%lx", &uid); break;
-                case 7: sscanf(token, "%lx", &nt0); break;
-                case 9: sscanf(token, "%lx", &nr0_enc); break;
-                case 11: sscanf(token, "%lx", &ar0_enc); break;
-                case 13: sscanf(token, "%lx", &nt1); break;
-                case 15: sscanf(token, "%lx", &nr1_enc); break;
-                case 17: sscanf(token, "%lx", &ar1_enc); break;
-                default: break; // Do nothing
-            }
-        }
-        uint32_t p64 = prng_successor(nt0, 64);
-        uint32_t p64b = prng_successor(nt1, 64);
-        if (key_already_found_for_nonce(keyarray, keyarray_size, uid ^ nt1, nr1_enc, p64b, ar1_enc)) {
+    for (i = 0; i < nonce_arr->total_nonces; i++) {
+        MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
+        uint32_t p64 = prng_successor(next_nonce.nt0, 64);
+        uint32_t p64b = prng_successor(next_nonce.nt1, 64);
+        if (key_already_found_for_nonce(keyarray, keyarray_size, next_nonce.uid ^ next_nonce.nt1, next_nonce.nr1_enc, p64b, next_nonce.ar1_enc)) {
+            nonce_arr->remaining_nonces--;
             continue;
         }
-        File *mem_file = fopen(file_path, "wb+"); // XXX FIXME
+        FURI_LOG_I(TAG, "Cracking %lx %lx", next_nonce.uid, next_nonce.ar1_enc);
+        /*
+        File *mem_file = fopen(MF_CLASSIC_MEM_FILE_PATH, "wb+"); // XXX FIXME
         void *s_offset = lfsr_recovery32(ar0_enc ^ p64, mem_file);
         int ti = 0;
         while (1) {
@@ -806,8 +835,9 @@ void mfkey32(ProgramState* const program_state) {
             free(temp);
             ti++;
         }
+        */
     }
-
+    /*
     // TODO: Update display to show all keys were found
     fclose(filePointer); // XXX FIXME
     printf("Unique keys found:\n");
@@ -825,7 +855,7 @@ void mfkey32(ProgramState* const program_state) {
         napi_mf_classic_dict_free(user_dict);
     }
     furi_record_close(RECORD_STORAGE);
-    FURI_LOG_I(TAG, "mfkey32 function completed"); // DEBUG
+    FURI_LOG_I(TAG, "mfkey32 function completed normally"); // DEBUG
     return;
 }
 
@@ -870,7 +900,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 static void mfkey32_state_init(ProgramState* const program_state) {
     program_state->running = false;
     program_state->cracked = 0;
-    program_state->total = 10; // Simulated
+    program_state->total = 0;
     program_state->dict_count = 0;
 }
 
