@@ -175,11 +175,11 @@ static void draw_menu_landscape(Canvas* const canvas) {
         break;
     }
     if(portrait_mode) {
-        canvas_draw_str(canvas, 10, 25, "Portrait");
+        canvas_draw_str(canvas, 10, 25, "Orientation: Portrait");
     } else {
-        canvas_draw_str(canvas, 10, 25, "Landscape");
+        canvas_draw_str(canvas, 10, 25, "Orientation: Landscape");
     }
-    canvas_draw_str(canvas, 10, 40, "Mute");
+    canvas_draw_str(canvas, 10, 40, "A+C (mute/change time)");
     canvas_draw_str(canvas, 10, 55, "Close menu");
 }
 

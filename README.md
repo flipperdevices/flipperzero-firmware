@@ -1,5 +1,3 @@
-***work in progress*** (check to-do list at the bootom of this readme.md)
-
 Tama P1 Emulator for Flipper Zero
 =======================================
 
@@ -49,10 +47,15 @@ it is easy to add direct logging after running the application:
 `./fbt launch_app APPSRC=applications\plugins\tama_p1;  python .\serial_logger.py`
 ```
 
-To-Do
------
+Implemented
+-----------
 - Menu options:
   - Switch between portrait and landscape
   - A+C shortcut (mute/change in-game time)
+
+
+To-Do
+-----
+- Menu options:
   - Double speed / fast-forward
   - display/hide runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
