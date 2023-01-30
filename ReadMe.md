@@ -1,7 +1,8 @@
 
 <a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="40%"></a>
 
-# [Install GitHub Version With WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0130-0055-0.75.1-4b05da6.tgz&channel=RM0130-0055-0.75.1-4b05da6&version=0.75.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0130-0055-0.75.1-4b05da6.tgz&channel=RM0130-0055-0.75.1-4b05da6&version=0.75.1)
+
 ## What Is Not In The Firmware? [SD CARD EXTRA FILES AND OTHER RESEARCH SOURCES](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
 
@@ -340,4 +341,4 @@ $ ./fbt dolphin_ext
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
-# [Install GitHub Version With WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0130-0055-0.75.1-4b05da6.tgz&channel=RM0130-0055-0.75.1-4b05da6&version=0.75.1)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0130-0055-0.75.1-4b05da6.tgz&channel=RM0130-0055-0.75.1-4b05da6&version=0.75.1)
