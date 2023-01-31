@@ -153,29 +153,28 @@ static void draw_portrait(Canvas* const canvas) {
 
 // static void draw_menu_portrait(Canvas* const canvas, void* cb_ctx) {}
 
-// static void draw_menu_landscape(Canvas* const canvas, void* cb_ctx)
 static void draw_menu_landscape(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_str_aligned(canvas, 64, 6, AlignCenter, AlignCenter, "Menu");
     canvas_draw_line(canvas, 0, 10, 128, 10);
     switch(menu_cursor) {
     case 0:
-        canvas_draw_circle(canvas, 5, 20, 2);
+        canvas_draw_triangle(canvas, 4, 21, 6, 6, CanvasDirectionLeftToRight);
         break;
     case 1:
-        canvas_draw_circle(canvas, 5, 35, 2);
+        canvas_draw_triangle(canvas, 4, 36, 6, 6, CanvasDirectionLeftToRight);
         break;
     case 2:
-        canvas_draw_circle(canvas, 5, 50, 2);
+        canvas_draw_triangle(canvas, 4, 51, 6, 6, CanvasDirectionLeftToRight);
         break;
     }
-    canvas_draw_str(canvas, 10, 25, "A+C (mute/change time)");
+    canvas_draw_str(canvas, 12, 25, "A+C (mute/change time)");
     if(portrait_mode) {
-        canvas_draw_str(canvas, 10, 40, "Orientation: Portrait");
+        canvas_draw_str(canvas, 12, 40, "Orientation: Portrait");
     } else {
-        canvas_draw_str(canvas, 10, 40, "Orientation: Landscape");
+        canvas_draw_str(canvas, 12, 40, "Orientation: Landscape");
     }
-    canvas_draw_str(canvas, 10, 55, "Close menu");
+    canvas_draw_str(canvas, 12, 55, "Close menu");
 }
 
 static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
@@ -585,8 +584,6 @@ int32_t tama_p1_app(void* p) {
                 else if(input_type == InputTypeRelease)
                     tama_btn_state = BTN_STATE_RELEASED;
 
-                bool back_from_menu = false;
-
                 if(in_menu) {
                     if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
                         if(menu_cursor > 0) {
@@ -600,13 +597,7 @@ int32_t tama_p1_app(void* p) {
                         } else {
                             menu_cursor = 0;
                         }
-                    } else if(
-                        event.input.key == InputKeyLeft && event.input.type == InputTypePress &&
-                        menu_cursor == 1) {
-                        portrait_mode = !portrait_mode;
-                    }
-                    // else if (event.input.key==InputKeyRight) {}
-                    else if(event.input.key == InputKeyOk || event.input.key == InputKeyRight) {
+                    } else if(event.input.key == InputKeyOk) {
                         switch(menu_cursor) {
                         case 0:
                             // mute tamagotchi
@@ -623,7 +614,6 @@ int32_t tama_p1_app(void* p) {
                             break;
                         }
                     } else if(event.input.key == InputKeyBack) {
-                        back_from_menu = true;
                         in_menu = false;
                     }
                 } else { // out of menu
@@ -664,14 +654,11 @@ int32_t tama_p1_app(void* p) {
                     }
                 }
 
-                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
-                    if(back_from_menu) {
-                        back_from_menu = false;
-                    } else {
-                        furi_timer_stop(timer);
-                        running = false;
-                        tama_p1_save_state();
-                    }
+                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong &&
+                   !in_menu) {
+                    furi_timer_stop(timer);
+                    running = false;
+                    tama_p1_save_state();
                 }
             }
             furi_mutex_release(g_state_mutex);
