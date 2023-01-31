@@ -1,6 +1,5 @@
-# Blackjac for Flipper Zero
+# Blackjack for Flipper Zero
 
-## Blackjack
 
 ![Play screen](screenshots/play_scene.png)
 
