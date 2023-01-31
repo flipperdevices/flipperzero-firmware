@@ -21,9 +21,10 @@
 #define GAME_START_LIVES 3
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
 #define MAXBUL 5 /* Max bullets on the screen. */
-#define MAXAST 32 /* Max asteroids on the screen. */
-#define MAXPOWERUPS 3 /* Max powerups allowed active */
-#define POWERUPSTTL 60 * 1000 /* Max powerup time to live, in ticks. */
+//@todo MAX Asteroids
+#define MAXAST 0 //32 /* Max asteroids on the screen. */
+#define MAXPOWERUPS 3 /* Max powerups allowed on screen */
+#define POWERUPSTTL 10 * 1000 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
 #define SAVING_DIRECTORY "/ext/apps/Games"
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
@@ -33,7 +34,7 @@
 
 /* ============================ Data structures ============================= */
 typedef enum PowerUpType {
-    PowerUpTypeNone, // No powerup
+    // PowerUpTypeNone, // No powerup
     PowerUpTypeShield, // Shield
     PowerUpTypeLife, // Extra life
     PowerUpTypeFirePower, // Burst Fire power
@@ -44,14 +45,17 @@ typedef enum PowerUpType {
     Number_of_PowerUps // Used to count the number of powerups
 } PowerUpType;
 
+//    struct PowerUp
 typedef struct PowerUp {
-    float x, y, vx, vy, /* Fields like in ship. */
-        // rot, /* Fields like ship. */
-        // rot_speed, /* Angular velocity (rot speed and sense). */
-        size; /* Power Up size. */
-    uint32_t ttl; /* Time to live, in ticks. */
-    enum PowerUpType powerUpType; /* Powerup type */
+    float x, y, vx, vy; /* Fields like in ship. */
+    // rot, /* Fields like ship. */
+    // rot_speed, /* Angular velocity (rot speed and sense). */
+    int size; /* Power Up size */
 
+    uint32_t ttl; /* Time to live, in ticks. */
+    uint32_t display_ttl; /* How long to display the powerup before it disappears */
+    enum PowerUpType powerUpType; /* PowerUp type */
+    bool isPowerUpActive; /* Is the powerup active? */
 } PowerUp;
 
 typedef struct Ship {
@@ -60,8 +64,6 @@ typedef struct Ship {
         vx, /* x velocity. */
         vy, /* y velocity. */
         rot; /* Current rotation. 2*PI full ortation. */
-    enum PowerUpType powerUp; /* Current powerup */
-    bool isPowerUpActive; /* Is the powerup active? */
 } Ship;
 
 typedef struct Bullet {
@@ -164,6 +166,8 @@ const NotificationSequence sequence_bullet_fired = {
 /* ============================== Prototyeps ================================ */
 
 // Only functions called before their definition are here.
+bool isPowerUpActive(AsteroidsApp* app, enum PowerUpType powerUpType);
+bool isPowerUpAlreadyExists(AsteroidsApp* app, enum PowerUpType powerUpType);
 bool load_game(AsteroidsApp* app);
 void save_game(AsteroidsApp* app);
 void restart_game_after_gameover(AsteroidsApp* app);
@@ -277,47 +281,87 @@ void draw_left_lives(Canvas* const canvas, AsteroidsApp* app) {
     }
 }
 
-void draw_powerUps(Canvas* const canvas, PowerUp* p) {
-    //@todo draw_powerUp
-    int BOX_SIZE = p->size;
+void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
+    /*
+    
+    * * * * * * * * * *
+    *                 *
+    *	              *
+    *                 *
+    *       F         *
+    *                 *
+    *                 *
+    *                 *
+    *                 *
+    * * * * * * * * * *
+
+    BOX_SIZE = 10
+    Box_Width = BOX_SIZE
+    BOX_HEIGHT = BOX_SIZE
+    BOX_X_POS = x - BOX_WIDTH/2
+    BOX_Y_POS = y - BOX_HEIGHT/2
+    POS_F_X = WIDTH/2
+    POS_F_Y = HEIGHT/2
+
+    */
+
+    //@todo render_callback
+
+    // Just return if power up has already been picked up
+    FURI_LOG_I(TAG, "[draw_powerUps] Display TTL: %lu", p->display_ttl);
+    if(p->display_ttl == 0) return;
+
+    canvas_set_color(canvas, ColorXOR);
+
+    int BOX_SIZE = p->size * 2;
     switch(p->powerUpType) {
-    case PowerUpTypeNone:
-        break;
     case PowerUpTypeFirePower:
         // Draw box with letter F inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 8, p->y + 6, "F");
+        FURI_LOG_D(
+            TAG,
+            "[draw_powerUps] p->size: %i x:%i y:%i BOX_SIZE: %i",
+            p->size,
+            abs((int)p->x - (int)(p->size / 2)),
+            abs((int)p->y - (int)(p->size / 2)),
+            BOX_SIZE);
+        canvas_draw_frame(
+            canvas,
+            abs((int)p->x - (int)(p->size / 2)),
+            abs((int)p->y - (int)(p->size / 2)),
+            BOX_SIZE,
+            BOX_SIZE);
+        canvas_draw_str(canvas, p->x, p->y, "F");
         break;
     case PowerUpTypeShield:
         // Draw box with letter S inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 8, p->y + 6, "S");
+        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "S");
         break;
     case PowerUpTypeLife:
         // Draw box with letter L inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 8, p->y + 6, "L");
+        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "L");
         break;
     case PowerUpTypeNuke:
         // Draw box with letter N inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 8, p->y + 6, "N");
+        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "N");
         break;
     case PowerUpTypeRadialFire:
         // Draw box with letter R inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 8, p->y + 6, "R");
+        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "R");
         break;
     case PowerUpTypeAssist:
         // Draw box with letter A inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 8, p->y + 6, "A");
+        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
+        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "A");
         break;
     default:
         //@todo Uknown Power Up Type Detected
         // Draw box with letter U inside
         canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x + 3, p->y + 3, "U");
+        canvas_draw_str(canvas, p->x, p->y, "U");
         FURI_LOG_E(TAG, "Unexpected Power Up Type Detected: %i", p->powerUpType);
         break;
     }
@@ -438,14 +482,14 @@ bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, flo
     float rsum = r1 + r2;
     return dx * dx + dy * dy < rsum * rsum;
 }
-
+//@todo ship_fire_bullet
 /* Create a new bullet headed in the same direction of the ship. */
 void ship_fire_bullet(AsteroidsApp* app) {
     // No power ups, only MAXBUL allowed
-    if(app->ship.isPowerUpActive == false && app->bullets_num == MAXBUL) return;
+    if(isPowerUpActive(app, PowerUpTypeFirePower) == false && app->bullets_num == MAXBUL) return;
 
     // Double the Fire Power
-    if((app->ship.powerUp == PowerUpTypeFirePower) && (app->bullets_num == MAXBUL * 2)) return;
+    if(isPowerUpActive(app, PowerUpTypeFirePower) && (app->bullets_num == (MAXBUL * 2))) return;
 
     notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
     Bullet* b = &app->bullets[app->bullets_num];
@@ -547,52 +591,95 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
     }
 }
 
+//@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
     if(app->powerUps_num == MAXPOWERUPS) return NULL;
-    float size = 4;
+
+    // Randomly select power up for display
+    //@todo Random Power Up Select
+    // PowerUpType powerUpType = rand() % Number_of_PowerUps;
+    PowerUpType selected_powerUpType = PowerUpTypeFirePower;
+
+    FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
+    // Don't add already existing power ups
+    if(isPowerUpAlreadyExists(app, selected_powerUpType)) {
+        FURI_LOG_I(TAG, "[add_powerUp] Power Up %i already active", selected_powerUpType);
+        return NULL;
+    }
+
+    float size = 10;
     float min_distance = 20;
     float x, y;
     do {
         x = rand() % SCREEN_XRES;
         y = rand() % SCREEN_YRES;
     } while(distance(app->ship.x, app->ship.y, x, y) < min_distance + size);
+
     PowerUp* p = &app->powerUps[app->powerUps_num++];
     p->x = x;
     p->y = y;
-    p->vx = 2 * (-.5 + ((float)rand() / RAND_MAX));
-    p->vy = 2 * (-.5 + ((float)rand() / RAND_MAX));
+    //@todo Disable Velocity
+    p->vx = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
+    p->vy = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
+    p->display_ttl = 500;
+    p->ttl = POWERUPSTTL;
+    p->size = (int)size;
     // p->size = size;
     // p->rot = 0;
     // p->rot_speed = ((float)rand() / RAND_MAX) / 10;
     // if(app->ticks & 1) p->rot_speed = -(p->rot_speed);
-    // p->shape_seed = rand() & 255;
 
     //@todo add powerup type, for now hardcoding to firepower
-    p->powerUpType = 3; //rand() % Number_of_PowerUps;
+    p->powerUpType = selected_powerUpType;
+    p->isPowerUpActive = false;
     return p;
 }
 
+//@todo remove_powerUp
 void remove_powerUp(AsteroidsApp* app, int id) {
     /* Replace the top powerUp with the empty space left
      * by the removal of this one. This way we always take the
      * array dense, which is an advantage when looping. */
+
     int n = --app->powerUps_num;
     if(n && id != n) app->powerUps[id] = app->powerUps[n];
 }
 
+//@todo powerUp_was_hit
 void powerUp_was_hit(AsteroidsApp* app, int id) {
     PowerUp* p = &app->powerUps[id];
-    remove_powerUp(app, id);
+    if(p->display_ttl == 0) return; // Don't collect if already collected
+
     switch(p->powerUpType) {
     case PowerUpTypeLife:
         if(app->lives < GAME_START_LIVES) app->lives++;
         break;
-    case PowerUpTypeFirePower:
-        app->powerUps[id].powerUpType = PowerUpTypeFirePower;
-        break;
+    // case PowerUpTypeFirePower:
+    //     app->powerUps[id].powerUpType = PowerUpTypeFirePower;
+    //     break;
     default:
         break;
     }
+    p->display_ttl = 0;
+    p->isPowerUpActive = true;
+}
+
+bool isPowerUpActive(AsteroidsApp* const app, PowerUpType const powerUpType) {
+    for(int i = 0; i < app->powerUps_num; i++) {
+        // PowerUp* p = &app->powerUps[i];
+        // if(p->powerUpType == powerUpType && p->ttl > 0 && p->display_ttl == 0) return true;
+        if(app->powerUps[i].isPowerUpActive && app->powerUps[i].powerUpType == powerUpType) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isPowerUpAlreadyExists(AsteroidsApp* const app, PowerUpType const powerUpType) {
+    for(int i = 0; i < app->powerUps_num; i++) {
+        if(app->powerUps[i].powerUpType == powerUpType) return true;
+    }
+    return false;
 }
 
 /* Set gameover state. When in game-over mode, the game displays a gameover
@@ -668,8 +755,27 @@ void update_asteroids_position(AsteroidsApp* app) {
 
 void update_powerUps_position(AsteroidsApp* app) {
     for(int j = 0; j < app->powerUps_num; j++) {
-        update_pos_by_velocity(
-            &app->powerUps[j].x, &app->powerUps[j].y, app->powerUps[j].vx, app->powerUps[j].vy);
+        // @todo update_powerUps_position
+        if(app->powerUps[j].display_ttl > 0) {
+            update_pos_by_velocity(
+                &app->powerUps[j].x, &app->powerUps[j].y, app->powerUps[j].vx, app->powerUps[j].vy);
+        }
+    }
+}
+
+// @todo update_powerUp_status
+/* This updates the state of each power up collected and removes them if they have expired. */
+void update_powerUp_status(AsteroidsApp* app) {
+    for(int j = app->powerUps_num; j > 0; j--) {
+        if(app->powerUps[j].ttl > 0 && app->powerUps[j].isPowerUpActive) {
+            // Only decrement ttl if we actually picked up power up
+            app->powerUps[j].ttl--;
+        } else if(app->powerUps[j].ttl == 0 && app->powerUps[j].display_ttl == 0) {
+            // we've reached the end of life of the power up
+            // Time to remove it
+            app->powerUps[j].isPowerUpActive = false;
+            remove_powerUp(app, j);
+        }
     }
 }
 
@@ -743,7 +849,6 @@ void game_tick(void* ctx) {
             restart_game_after_gameover(app);
         }
         update_asteroids_position(app);
-        update_powerUps_position(app);
         view_port_update(app->view_port);
         return;
     }
@@ -773,10 +878,23 @@ void game_tick(void* ctx) {
         app->fire = false;
     }
 
+    // DEBUG: Show Power Up Status
+    for(int j = 0; j < app->powerUps_num; j++) {
+        PowerUp* p = &app->powerUps[j];
+        FURI_LOG_I(
+            TAG,
+            "Power Up Type: %d TTL: %lu Display_TTL: %lu PowerUpNum: %i",
+            p->powerUpType,
+            p->ttl,
+            p->display_ttl,
+            app->powerUps_num);
+    }
+
     /* Update positions and detect collisions. */
     update_pos_by_velocity(&app->ship.x, &app->ship.y, app->ship.vx, app->ship.vy);
     update_bullets_position(app);
     update_asteroids_position(app);
+    update_powerUp_status(app); //@todo update_powerUp_status
     update_powerUps_position(app);
     detect_collisions(app);
 
@@ -788,7 +906,8 @@ void game_tick(void* ctx) {
     }
 
     /* From time to time add a random power up */
-    if(app->powerUps_num == 0 || (random() % 5000) < (30 / (1 + app->powerUps_num))) {
+    //@todo game tick
+    if((app->powerUps_num == 0 || random() % 5000) < (30 / (1 + app->powerUps_num))) {
         add_powerUp(app);
     }
 
@@ -913,8 +1032,8 @@ int32_t asteroids_app_entry(void* p) {
     while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
         if(qstat == FuriStatusOk) {
-            if(DEBUG_MSG)
-                FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
+            // if(DEBUG_MSG)
+            // FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
