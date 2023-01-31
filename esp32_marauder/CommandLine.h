@@ -37,7 +37,7 @@ extern const String PROGMEM version_number;
 #ifdef ESP32_CAM
 // Camera functions
 const char PROGMEM CAM_PHOTO[] = "photo";
-const char PROGMEM CAM_STREAM[] = "stream";
+const char PROGMEM CAM_FLASHLIGHT[] = "flashlight";
 #endif
 
 // Admin

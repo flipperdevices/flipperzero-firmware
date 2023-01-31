@@ -31,15 +31,18 @@ bool is_initMicroSDCard = false;
 #define PCLK_GPIO_NUM     22
 
 void configESPCamera() {
-  if(is_configESPCamera) { Serial.println("cam1"); return; }
+  if (is_configESPCamera) {
+    Serial.println("cam1");
+    return;
+  }
   else is_configESPCamera = true;
   Serial.println("cam2");
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
   // Configure Camera parameters
- 
+
   // Object to store the camera configuration parameters
   camera_config_t config;
- 
+
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -60,7 +63,7 @@ void configESPCamera() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG; // Choices are YUV422, GRAYSCALE, RGB565, JPEG
- 
+
   // Select lower framesize if the camera doesn't support PSRAM
   if (psramFound()) {
     config.frame_size = FRAMESIZE_UXGA; // FRAMESIZE_ + QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA
@@ -71,17 +74,17 @@ void configESPCamera() {
     config.jpeg_quality = 12;
     config.fb_count = 1;
   }
- 
+
   // Initialize the Camera
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
- 
+
   // Camera quality adjustments
   sensor_t * s = esp_camera_sensor_get();
- 
+
   // BRIGHTNESS (-2 to 2)
   s->set_brightness(s, 0);
   // CONTRAST (-2 to 2)
@@ -127,13 +130,13 @@ void configESPCamera() {
   // COLOR BAR PATTERN (0 = Disable , 1 = Enable)
   s->set_colorbar(s, 0);
 }
- 
+
 void initMicroSDCard() {
   /*if(is_initMicroSDCard) { Serial.println("sd1"); return; }
-  else is_initMicroSDCard = true;
-  Serial.println("sd2");*/
+    else is_initMicroSDCard = true;
+    Serial.println("sd2");*/
   // Start the MicroSD card
- 
+
   Serial.println("Mounting MicroSD Card");
   if (!SD_MMC.begin("/sdcard", true, false, SDMMC_FREQ_DEFAULT)) {
     Serial.println("MicroSD Card Mount Failed");
@@ -145,18 +148,18 @@ void initMicroSDCard() {
     return;
   }
 }
- 
+
 void takeNewPhoto(String path) {
   // Take Picture with Camera
- 
+
   // Setup frame buffer
   camera_fb_t  * fb = esp_camera_fb_get();
- 
+
   if (!fb) {
     Serial.println("Camera capture failed");
     return;
   }
- 
+
   // Save picture to microSD card
   fs::FS &fs = SD_MMC;
   File file = fs.open(path.c_str(), FILE_WRITE);
@@ -169,7 +172,7 @@ void takeNewPhoto(String path) {
   }
   // Close the file
   file.close();
- 
+
   // Return the frame buffer back to the driver for reuse
   esp_camera_fb_return(fb);
 }
@@ -354,7 +357,12 @@ void CommandLine::runCommand(String input) {
     }
   }
 #ifdef ESP32_CAM
-  if (cmd_args.get(0) == CAM_PHOTO) {
+  else if (cmd_args.get(0) == CAM_FLASHLIGHT) {
+    pinMode(4, OUTPUT);
+    digitalWrite(4, !digitalRead(4));
+  }
+
+  else if (cmd_args.get(0) == CAM_PHOTO) {
     Serial.println("Camera capture start");
     pinMode(4, OUTPUT);
     digitalWrite(4, HIGH);
@@ -366,7 +374,7 @@ void CommandLine::runCommand(String input) {
     initMicroSDCard();
 
     int i = 0;
-    while(true)
+    while (true)
     {
       String path = "/photo_" + String(i++) + ".jpg";
       if (!SD_MMC.exists(path.c_str()))
