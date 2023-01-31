@@ -12,3 +12,14 @@ A new version of Snake Game.
 3. Snake has a head.
 4. The target is an apple
 5. Complete progress bar
+
+
+## Links
+
+Special thanks for *.c file in https://github.com/DarkFlippers/unleashed-firmware.git
+
+## Free Beer
+
+You can support me by using this link:
+(only RU payments accepted) 
+https://yoomoney.ru/to/410018138145748/100
