@@ -5,9 +5,9 @@ https://github.com/jamisonderek/flipper-zero-tutorials
 This is a demonstration of sending radio signals using the subghz_tx_rx worker library.
 
 Features:
-Press OK on Flipper Zero to send the current count to another Flipper Zero.
-Short press UP button on Flipper Zero to send 440Hz tone to another Flipper Zero.
-Long press UP button on Flipper Zero to send 880Hz tone to another Flipper Zero. 
+Press OK on Flipper Zero to log and send the current count to another Flipper Zero.
+Short press UP button on Flipper Zero to log and send 440Hz tone to another Flipper Zero.
+Long press UP button on Flipper Zero to log and send 880Hz tone to another Flipper Zero. 
 
 */
 
@@ -59,7 +59,7 @@ typedef struct {
     // You can add additional data that is helpful for your events.
     InputEvent input;   // This data is specific to DemoEventTypeKey.
     unsigned int number; // This data is specific to DemoEventSendCounter/DemoEventReceivedCounter/DemoEventSendTone/DemoEventReceivedTone.
-    FuriString* senderName; // This data is specific to DemoEventReceivedCounter.
+    FuriString* senderName; // This data is specific to DemoEventReceivedCounter/DemoEventReceivedTone.
 } DemoEvent;
 
 // This is the data for our application.  You might have a game board, 
@@ -102,19 +102,21 @@ static void subghz_demo_receive_data(DemoContext* instance) {
     size_t len = subghz_tx_rx_worker_read(instance->subghz_txrx, message, MESSAGE_MAX_LEN);
     size_t game_name_len = strlen(SUBGHZ_GAME_NAME);
     if (len < (game_name_len + 2)) {
+        FURI_LOG_D(TAG, "Message not long enough. >%s<", message);
+        
         // Message wasn't big enough to have our game name + the reason code + version; so it must not be for us. 
         return;
     }
 
-    // The message for a counter (like 42) should be "SGDEMO:" + "C" + "0042" + ":" + "YourFlip" + "\r\n"
+    // The message for a counter (C) (like 42) using version (A) should be "SGDEMO:" + "C" + "A" + "0042" + ":" + "YourFlip" + "\r\n"
     if (strcmp(SUBGHZ_GAME_NAME, (const char*)message)) {
-        FURI_LOG_D(TAG, "Got message %s", message);
+        FURI_LOG_D(TAG, "Got message >%s<", message);
         // The purpose immediately follows the game name.
         DemoRfPurpose purpose = message[game_name_len];
         uint8_t version = message[game_name_len+1];
+        FURI_LOG_T(TAG, "Purpose is %c and Version is %c", purpose, version);
 
-        UNUSED(version);
-        // Right now we don't care about the veresion of the application, but in the future we might need to
+        // Right now we don't care much about the version of the application, but in the future we might need to
         // respond differently based on the version of the application running on the other Flipper Zero.
         // Important: Don't always trust what is sent, some people with Flipper Zero might send an 
         // invalid version to trick your code into interpreting the payload in a special way.
@@ -132,11 +134,14 @@ static void subghz_demo_receive_data(DemoContext* instance) {
                     FuriString* name = furi_string_alloc();
                     furi_string_set(name, senderName);
                     // The counter is supposed to be a 4 digit number.
-                    if (number > 10000U) {
-                        number %= 10000;
+                    if (number >= 10000U) {
+                        FURI_LOG_W(TAG, "Number was >= 10000U.  >%s<", message);
+                        number %= 10000U;
                     }
                     DemoEvent event = {.type = DemoEventReceivedCounter, .number = number, .senderName = name};
                     furi_message_queue_put(instance->queue, &event, FuriWaitForever);
+                } else {
+                    FURI_LOG_W(TAG, "Failed to parse counter message. >%s<", message);
                 }
             break;
 
@@ -148,14 +153,25 @@ static void subghz_demo_receive_data(DemoContext* instance) {
                     furi_string_set(name, senderName);
                     DemoEvent event = {.type = DemoEventReceivedTone, .number = number, .senderName = name};
                     furi_message_queue_put(instance->queue, &event, FuriWaitForever);
+                } else {
+                    FURI_LOG_W(TAG, "Failed to parse tone message. >%s<", message);
                 }
             break;
 
             // Add parsing for other messages here.
 
             default:
+                if (version <= MAJOR_VERSION) {
+                    // The version is same or less than ours, so we should know about the message purpose.
+                    FURI_LOG_W(TAG, "Message purpose not handled for known version. >%s<", message);
+                } else {
+                    // The version is newer, so it's not surprising we don't know about the purpose.
+                    FURI_LOG_T(TAG, "Message purpose not handled. >%s<", message);
+                }
             break;
         }
+    } else {
+        FURI_LOG_D(TAG, "Message not for our application. >%s<", message);
     }
 }
 
@@ -217,7 +233,7 @@ static void subghz_demo_render_callback(Canvas* canvas, void* ctx) {
     unsigned int remoteCounter = data->remoteCounter;
     // The counter is supposed to be a 4 digit number.
     furi_assert(localCounter < 10000U);
-    furi_assert(remoteCounter < 10000U);
+    furi_assert(remoteCounter <= 10000U); // 10000 means don't display.
 
     // Other fonts are FontPrimary, FontSecondary, FontKeyboard, FontBigNumbers,
     canvas_set_font(canvas, FontPrimary);
@@ -228,7 +244,7 @@ static void subghz_demo_render_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 64, 42, AlignCenter, AlignTop, furi_string_get_cstr(data->buffer));
 
-    if (remoteCounter > 0) {
+    if (remoteCounter < 10000U) {
         furi_string_printf(data->buffer, "Received %04u", remoteCounter);
         canvas_draw_str_aligned(canvas, 64, 52, AlignCenter, AlignTop, furi_string_get_cstr(data->buffer));
     }
@@ -243,25 +259,22 @@ static void subghz_demo_update_local_counter(DemoContext* demo_context) {
     
     // Increment the counter (which is supposed to be a 4 digit number for this app.)
     data->localCounter++;
-    if (data->localCounter > 10000U) {
+    if (data->localCounter >= 10000U) {
         data->localCounter = 0;
     }
+
+    FURI_LOG_T(TAG, "Local counter %04u", data->localCounter);
 }
 
 // Our DemoEventReceivedCounter handler invokes this method.
 // We update our remote counter.
 static void subghz_demo_update_remote_counter(DemoContext* demo_context, DemoEvent* event) {
     // The queueing code should have made sure the value was valid.
-    furi_assert(event->number < 10000);
+    furi_assert(event->number < 10000U);
     DemoData* data = demo_context->data;
 
     data->remoteCounter = event->number;
     FURI_LOG_I(TAG, "Remote counter %04u", data->remoteCounter);
-
-    // The message contains a sender name furi_string that we need to free, even if we didn't use it.
-    if (event->senderName) {
-        furi_string_free(event->senderName);
-    }
 }
 
 // Our DemoEventReceivedTone handler invokes this method.
@@ -273,18 +286,13 @@ static void subghz_demo_play_tone(DemoContext* demo_context, DemoEvent* event) {
     FURI_LOG_I(TAG, "Playing frequency %04u", frequency);
 
     // Make tones if the speaker is available.
-	if (furi_hal_speaker_acquire(1000)) { 
+    if (furi_hal_speaker_acquire(1000)) { // We wait up to a second for now, is that too long?
         float freq = (float)frequency;
-        float volume = 1.0f;
+        float volume = 1.0f; // 100% volume.
         furi_hal_speaker_start(freq, volume);
         furi_delay_ms(100);
         furi_hal_speaker_stop();
         furi_hal_speaker_release();
-    }
-
-    // The message contains a sender name furi_string that we need to free, even if we didn't use it.
-    if (event->senderName) {
-        furi_string_free(event->senderName);
     }
 }
 
@@ -296,6 +304,9 @@ static void subghz_demo_broadcast(DemoContext* demo_context, FuriString* buffer)
     // Make sure our message will fit into a packet; if not truncate it.
     size_t length = strlen((char*)message);
     if (length>MESSAGE_MAX_LEN) {
+        FURI_LOG_E(TAG, "Outgoing message bigger than %d bytes! >%s<", MESSAGE_MAX_LEN, (char*)message);
+
+        // Add \r\n(null) to the end of the 0-indexed string.
         message[MESSAGE_MAX_LEN-1] = 0;
         message[MESSAGE_MAX_LEN-2] = '\n';
         message[MESSAGE_MAX_LEN-3] = '\r';
@@ -309,13 +320,14 @@ static void subghz_demo_broadcast(DemoContext* demo_context, FuriString* buffer)
 }
 
 // Our DemoEventSendCounter handler invokes this method.
-// We broadcast - "game name + purpose (Counter) + 4 digit counter value + : + Flipper name + \r\n"
+// We broadcast - "game name + purpose (Counter) + Version (A) + 4 digit counter value + : + Flipper name + \r\n"
 static void subghz_demo_broadcast_counter(DemoContext* demo_context, unsigned int counterToSend) {
     // The counter is supposed to be a 4 digit number.
-    furi_assert(counterToSend < 10000);
+    furi_assert(counterToSend < 10000U);
     DemoData* data = demo_context->data;
 
     FURI_LOG_I(TAG, "Sending counter %04u", counterToSend);
+
     // The message for a counter with value 42 should look like...  "SGDEMO:CA0042:YourFlip\r\n"
     furi_string_printf(data->buffer, "%s%c%c%04u:%s\r\n", SUBGHZ_GAME_NAME, DemoRfPurposeCounter, MAJOR_VERSION, counterToSend, furi_hal_version_get_name_ptr());
 
@@ -323,7 +335,7 @@ static void subghz_demo_broadcast_counter(DemoContext* demo_context, unsigned in
 }
 
 // Our DemoEventSendTone handler invokes this method.
-// We broadcast - "game name + purpose (Tone) + frequency + : + Flipper name + \r\n"
+// We broadcast - "game name + purpose (Tone) + Version (A) + frequency + : + Flipper name + \r\n"
 static void subghz_demo_broadcast_tone(DemoContext* demo_context, unsigned int frequency) {
     DemoData* data = demo_context->data;
 
@@ -346,6 +358,8 @@ int32_t subghz_demo_app(void* p) {
 
     // Since this demo transmits RF, we see if it is allowed.
     if(!furi_hal_subghz_is_tx_allowed(frequency)) {
+        FURI_LOG_E(TAG, "Transmit on frequency %ld not allowed", frequency);
+
         // For this demo we don't show a friendly error about not being
         // allowed to broadcast on this frequency.  Instead the application
         // just exits.
@@ -358,9 +372,9 @@ int32_t subghz_demo_app(void* p) {
     demo_context->data = malloc(sizeof(DemoData));
     demo_context->data->buffer = furi_string_alloc();
     demo_context->data->localCounter = 0;
-    demo_context->data->remoteCounter = 0;
+    demo_context->data->remoteCounter = 10000U; // Won't display, since larger than 4-digit number.
 
-    // Queue for events (tick or input)
+    // Queue for events
     demo_context->queue = furi_message_queue_alloc(8, sizeof(DemoEvent));
 
     // Subghz worker.
@@ -372,6 +386,8 @@ int32_t subghz_demo_app(void* p) {
         subghz_tx_rx_worker_set_callback_have_read(
             demo_context->subghz_txrx, subghz_demo_worker_update_rx_event_callback, demo_context);
     } else {
+        FURI_LOG_E(TAG, "Failed to start subghz_tx_rx_worker.");
+
         // For this demo we don't show a friendly error about not being
         // allowed to broadcast on this frequency.  Instead the application
         // just exits.
@@ -468,13 +484,20 @@ int32_t subghz_demo_app(void* p) {
                     furi_mutex_release(demo_context->mutex);
                     break;
                 default:
+                    FURI_LOG_E(TAG, "Queue had unknown message type: %u", event.type);
                     break;
+            }
+
+            // If message contains a sender name furi_string, free it.
+            if (event.senderName) {
+                furi_string_free(event.senderName);
             }
 
             // Send signal to update the screen (callback will get invoked at some point later.)
             view_port_update(view_port);
         } else {
             // We had an issue getting message from the queue, so exit application.
+            FURI_LOG_E(TAG, "Issue encountered reading from queue.  Exiting application.");
             processing = false;
         }
     } while (processing);
