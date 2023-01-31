@@ -164,7 +164,7 @@ static void draw_menu_landscape(Canvas* const canvas) {
     case 1:
         canvas_draw_triangle(canvas, 4, 36, 6, 6, CanvasDirectionLeftToRight);
         break;
-    case 2:
+    case menu_items - 1:
         canvas_draw_triangle(canvas, 4, 51, 6, 6, CanvasDirectionLeftToRight);
         break;
     }
@@ -608,7 +608,7 @@ int32_t tama_p1_app(void* p) {
                             // portrait_mode = true;
                             if(event.input.type == InputTypePress) portrait_mode = !portrait_mode;
                             break;
-                        case 2:
+                        case menu_items - 1:
                         default:
                             in_menu = false;
                             break;
