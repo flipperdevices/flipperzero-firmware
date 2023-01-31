@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [Move SCD30 App into GPIO category #518 (Thanks to maede97)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/518)
+- Patreon Build Update: ALL builds now have 6 more new animations [(Thanks to RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/1c0ddfdec013f3b44bb7192466a7e626ff47a460)
 
 <a name="release">
 
