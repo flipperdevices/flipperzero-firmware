@@ -1,4 +1,5 @@
 #include "pattern_editor.h"
+#include "../macros.h"
 
 #include <flizzer_tracker_icons.h>
 
@@ -38,7 +39,8 @@ char *notename(uint8_t note)
 
     else
     {
-        snprintf(buffer, sizeof(buffer), "%s%d", notenames[note % 12], note / 12);
+        uint8_t final_note = my_min(12 * 7 + 11, note);
+        snprintf(buffer, sizeof(buffer), "%s%d", notenames[final_note % 12], final_note / 12);
     }
 
     return buffer;
@@ -163,6 +165,7 @@ void draw_sequence_view(Canvas *canvas, FlizzerTrackerApp *tracker)
     char buffer[4];
 
     uint8_t sequence_position = tracker->tracker_engine.sequence_position;
+    TrackerSong *song = &tracker->song;
 
     for (int pos = sequence_position - 2; pos < sequence_position + 3; pos++)
     {
@@ -181,7 +184,43 @@ void draw_sequence_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         }
     }
 
-    // TODO: add song loop indication
+    if (song->loop_start != 0 || song->loop_end != 0)
+    {
+        canvas_set_color(canvas, ColorBlack);
+
+        for (int pos = sequence_position - 2; pos < sequence_position + 3; pos++)
+        {
+            if (pos >= 0 && pos < tracker->song.num_sequence_steps)
+            {
+                if (pos == song->loop_start)
+                {
+                    int16_t y = (pos - (sequence_position - 2)) * 6;
+
+                    canvas_draw_line(canvas, 0, fmax(y, 0), 1, fmax(y, 0));
+                    canvas_draw_line(canvas, 0, fmax(y, 0), 0, fmax(y + 4, 0));
+                }
+
+                if (pos > song->loop_start && pos < song->loop_end)
+                {
+                    int16_t y = (pos - (sequence_position - 2)) * 6;
+
+                    canvas_draw_line(canvas, 0, fmax(y - 1, 0), 0, fmax(y + 4, 0));
+                }
+
+                if (pos == song->loop_end)
+                {
+                    int16_t y = (pos - (sequence_position - 2)) * 6;
+
+                    canvas_draw_line(canvas, 0, fmax(y + 4, 0), 1, fmax(y + 4, 0));
+                    canvas_draw_line(canvas, 0, fmax(y - 1, 0), 0, fmax(y + 4, 0));
+
+                    break;
+                }
+            }
+        }
+
+        canvas_set_color(canvas, ColorXOR);
+    }
 
     canvas_set_color(canvas, ColorBlack);
 

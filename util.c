@@ -1,4 +1,5 @@
 #include "util.h"
+#include "macros.h"
 
 void reset_buffer(SoundEngine *sound_engine)
 {
@@ -91,7 +92,7 @@ void resize_pattern(TrackerSongPattern *pattern, uint16_t old_length, uint16_t n
     temp.step = malloc((new_length) * sizeof(TrackerSongPatternStep));
 
     set_empty_pattern(&temp, new_length);
-    memcpy(temp.step, pattern->step, fmin(old_length, new_length) * sizeof(TrackerSongPatternStep));
+    memcpy(temp.step, pattern->step, my_min(old_length, new_length) * sizeof(TrackerSongPatternStep));
 
     free(pattern->step);
     pattern->step = temp.step;

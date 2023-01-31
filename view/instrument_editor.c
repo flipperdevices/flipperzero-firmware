@@ -1,6 +1,7 @@
 #include "instrument_editor.h"
 #include "pattern_editor.h"
 
+#include "../macros.h"
 #include "opcode_description.h"
 
 #include <flizzer_tracker_icons.h>
@@ -270,7 +271,20 @@ void draw_program_step(Canvas *canvas, uint8_t y, FlizzerTrackerApp *tracker, ui
 
     if (opcode != TE_PROGRAM_NOP)
     {
-        snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), get_opcode_description(opcode, true) ? get_opcode_description(opcode, true) : "");
+        if ((opcode & 0x7f00) == TE_EFFECT_ARPEGGIO)
+        {
+            snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), notename((opcode & 0xff) + tracker->song.instrument[tracker->current_instrument]->base_note));
+        }
+
+        else if ((opcode & 0x7f00) == TE_EFFECT_ARPEGGIO_ABS)
+        {
+            snprintf(buffer, sizeof(buffer), "%01X %c%02X F.%s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), notename(opcode & 0xff));
+        }
+
+        else
+        {
+            snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), get_opcode_description(opcode, true) ? get_opcode_description(opcode, true) : "");
+        }
 
         if (opcode & 0x8000)
         {
@@ -314,7 +328,7 @@ void draw_instrument_program_view(Canvas *canvas, FlizzerTrackerApp *tracker)
 {
     Instrument *inst = tracker->song.instrument[tracker->current_instrument];
 
-    for (uint8_t i = tracker->program_position; i < fmin(INST_PROG_LEN, tracker->program_position + 8); i++)
+    for (uint8_t i = tracker->program_position; i < my_min(INST_PROG_LEN, tracker->program_position + 8); i++)
     {
         draw_program_step(canvas, 6 + 6 * i - tracker->program_position * 6, tracker, i);
 

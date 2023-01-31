@@ -158,6 +158,36 @@ void sequence_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
         }
     }
 
+    if (event->input.key == InputKeyUp && event->input.type == InputTypeLong && !(tracker->editing)) // set loop begin or loop end for the song
+    {
+        TrackerSong *song = &tracker->song;
+
+        if (song->loop_start == song->loop_end && song->loop_end == 0) // if both are 0
+        {
+            song->loop_end = tracker->tracker_engine.sequence_position;
+        }
+
+        else
+        {
+            if (tracker->tracker_engine.sequence_position < song->loop_end)
+            {
+                song->loop_start = tracker->tracker_engine.sequence_position;
+            }
+
+            if (tracker->tracker_engine.sequence_position > song->loop_start)
+            {
+                song->loop_end = tracker->tracker_engine.sequence_position;
+            }
+        }
+    }
+
+    if (event->input.key == InputKeyDown && event->input.type == InputTypeLong && !(tracker->editing)) // erase loop begin and loop end points
+    {
+        TrackerSong *song = &tracker->song;
+
+        song->loop_start = song->loop_end = 0;
+    }
+
     if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && tracker->editing)
     {
         delete_sequence_step(tracker);

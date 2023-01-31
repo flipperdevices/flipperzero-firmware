@@ -1,6 +1,7 @@
 #include "tracker_engine.h"
 
 #include "../flizzer_tracker_hal.h"
+#include "../macros.h"
 
 #include "../sound_engine/sound_engine_osc.h"
 #include <furi_hal.h>
@@ -401,12 +402,12 @@ void tracker_engine_advance_channel(TrackerEngine *tracker_engine, uint8_t chan)
         {
             if (te_channel->target_note > te_channel->note)
             {
-                te_channel->note += fmin(te_channel->slide_speed, te_channel->target_note - te_channel->note);
+                te_channel->note += my_min(te_channel->slide_speed, te_channel->target_note - te_channel->note);
             }
 
             else if (te_channel->target_note < te_channel->note)
             {
-                te_channel->note -= fmin(te_channel->slide_speed, te_channel->note - te_channel->target_note);
+                te_channel->note -= my_min(te_channel->slide_speed, te_channel->note - te_channel->target_note);
             }
         }
 
@@ -678,7 +679,23 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
             {
                 tracker_engine->pattern_position = 0;
 
-                tracker_engine->sequence_position++;
+                if (song->loop_start != 0 || song->loop_end != 0)
+                {
+                    if (tracker_engine->sequence_position == song->loop_end)
+                    {
+                        tracker_engine->sequence_position = song->loop_start; // infinite loop between loop start and loop end
+                    }
+
+                    else
+                    {
+                        tracker_engine->sequence_position++;
+                    }
+                }
+
+                else
+                {
+                    tracker_engine->sequence_position++;
+                }
 
                 if (tracker_engine->sequence_position >= song->num_sequence_steps)
                 {

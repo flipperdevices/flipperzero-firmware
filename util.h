@@ -8,7 +8,9 @@
 #include "tracker_engine/tracker_engine.h"
 #include "tracker_engine/tracker_engine_defs.h"
 
-#define clamp(val, add, _min, _max) val = fmin(_max, fmax(_min, (int32_t)val + add))
+#include "macros.h"
+
+#define clamp(val, add, _min, _max) val = my_min(_max, my_max(_min, (int32_t)val + add))
 #define flipbit(val, bit) \
     {                     \
         val ^= bit;       \

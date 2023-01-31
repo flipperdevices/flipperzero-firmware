@@ -64,11 +64,12 @@ typedef enum
     TE_EFFECT_SET_WAVEFORM = 0x0b00,
     TE_EFFECT_SET_VOLUME = 0x0c00,
     TE_EFFECT_SKIP_PATTERN = 0x0d00,
+
     TE_EFFECT_EXT = 0x0e00,
-    /* TODO: add 0exy effects here */
     TE_EFFECT_EXT_TOGGLE_FILTER = 0x0e00,
     TE_EFFECT_EXT_PORTA_UP = 0x0e10,
     TE_EFFECT_EXT_PORTA_DN = 0x0e20,
+    TE_EFFECT_EXT_FILTER_MODE = 0x0e30,
     TE_EFFECT_EXT_PATTERN_LOOP = 0x0e60, // e60 = start, e61-e6f = end and indication how many loops you want
     TE_EFFECT_EXT_RETRIGGER = 0x0e90,
     TE_EFFECT_EXT_FINE_VOLUME_DOWN = 0x0ea0,
@@ -76,9 +77,37 @@ typedef enum
     TE_EFFECT_EXT_NOTE_CUT = 0x0ec0,
     TE_EFFECT_EXT_NOTE_DELAY = 0x0ed0,
     TE_EFFECT_EXT_PHASE_RESET = 0x0ef0,
+
     TE_EFFECT_SET_SPEED_PROG_PERIOD = 0x0f00,
-    TE_EFFECT_CUTOFF_UP = 0x1000,   // Gxx
-    TE_EFFECT_CUTOFF_DOWN = 0x1100, // Hxx
+    TE_EFFECT_CUTOFF_UP = 0x1000,      // Gxx
+    TE_EFFECT_CUTOFF_DOWN = 0x1100,    // Hxx
+    TE_EFFECT_SET_RESONANCE = 0x1200,  // Ixx
+    TE_EFFECT_RESONANCE_UP = 0x1300,   // Jxx
+    TE_EFFECT_RESONANCE_DOWN = 0x1400, // Kxx
+
+    TE_EFFECT_SET_ATTACK = 0x1500,      // Lxx
+    TE_EFFECT_SET_DECAY = 0x1600,       // Mxx
+    TE_EFFECT_SET_SUSTAIN = 0x1700,     // Nxx
+    TE_EFFECT_SET_RELEASE = 0x1800,     // Oxx
+    TE_EFFECT_PROGRAM_RESTART = 0x1900, // Pxx
+    /*
+    TE_EFFECT_ = 0x1a00, //Qxx
+    */
+
+    TE_EFFECT_SET_RING_MOD_SRC = 0x1b00,  // Rxx
+    TE_EFFECT_SET_HARD_SYNC_SRC = 0x1c00, // Sxx
+
+    /*
+    TE_EFFECT_ = 0x1d00, //Txx
+    TE_EFFECT_ = 0x1e00, //Uxx
+    TE_EFFECT_ = 0x1f00, //Vxx
+    TE_EFFECT_ = 0x2000, //Wxx
+    TE_EFFECT_ = 0x2100, //Xxx
+    */
+
+    TE_EFFECT_ARPEGGIO_ABS = 0x2200,    // Yxx
+    TE_EFFECT_TRIGGER_RELEASE = 0x2300, // Zxx
+
     /* These effects work only in instrument program */
     TE_PROGRAM_LOOP_BEGIN = 0x7d00,
     TE_PROGRAM_LOOP_END = 0x7e00,

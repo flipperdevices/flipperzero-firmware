@@ -1,6 +1,7 @@
 #include "do_effects.h"
 #include <furi.h>
 
+#include "../sound_engine/sound_engine.h"
 #include "../sound_engine/sound_engine_filter.h"
 #include "tracker_engine.h"
 
@@ -246,6 +247,16 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                     break;
                 }
 
+                case TE_EFFECT_EXT_FILTER_MODE:
+                {
+                    if (tick == 0)
+                    {
+                        se_channel->filter_mode = (opcode & 0xf);
+                    }
+
+                    break;
+                }
+
                 case TE_EFFECT_EXT_RETRIGGER:
                 {
                     if ((opcode & 0xf) > 0 && (tick % (opcode & 0xf)) == 0)
@@ -360,6 +371,131 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
             }
 
             sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
+
+            break;
+        }
+
+        case TE_EFFECT_SET_RESONANCE:
+        {
+            if (tick == 0)
+            {
+                te_channel->filter_resonance = ((opcode & 0xff) << 5);
+                sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_RESONANCE_UP:
+        {
+            te_channel->filter_resonance += ((opcode & 0xff) << 2);
+
+            if (te_channel->filter_resonance > (0xff << 5))
+            {
+                te_channel->filter_resonance = (0xff << 5);
+            }
+
+            sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
+            break;
+        }
+
+        case TE_EFFECT_RESONANCE_DOWN:
+        {
+            te_channel->filter_resonance -= ((opcode & 0xff) << 2);
+
+            if (te_channel->filter_resonance > (0xff << 5))
+            {
+                te_channel->filter_resonance = 0;
+            }
+
+            sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
+            break;
+        }
+
+        case TE_EFFECT_SET_RING_MOD_SRC:
+        {
+            if (tick == 0)
+            {
+                se_channel->ring_mod = (opcode & 0xff);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_SET_HARD_SYNC_SRC:
+        {
+            if (tick == 0)
+            {
+                se_channel->hard_sync = (opcode & 0xff);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_SET_ATTACK:
+        {
+            if (tick == 0)
+            {
+                se_channel->adsr.a = (opcode & 0xff);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_SET_DECAY:
+        {
+            if (tick == 0)
+            {
+                se_channel->adsr.d = (opcode & 0xff);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_SET_SUSTAIN:
+        {
+            if (tick == 0)
+            {
+                se_channel->adsr.s = (opcode & 0xff);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_SET_RELEASE:
+        {
+            if (tick == 0)
+            {
+                se_channel->adsr.r = (opcode & 0xff);
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_PROGRAM_RESTART:
+        {
+            if (tick == 0)
+            {
+                te_channel->program_counter = 0;
+                te_channel->program_loop = 0;
+                te_channel->program_period = 0;
+                te_channel->program_tick = 0;
+            }
+
+            break;
+        }
+
+        case TE_EFFECT_ARPEGGIO_ABS:
+        {
+            te_channel->arpeggio_note = 0;
+            te_channel->fixed_note = ((opcode & 0xff) << 8);
+
+            break;
+        }
+
+        case TE_EFFECT_TRIGGER_RELEASE:
+        {
+            sound_engine_enable_gate(tracker_engine->sound_engine, se_channel, 0);
 
             break;
         }

@@ -1,4 +1,5 @@
 #include "instrument_program.h"
+#include "../macros.h"
 
 void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
 {
@@ -10,7 +11,7 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
 
     if (event->input.key == InputKeyRight && event->input.type == InputTypeShort && tracker->editing)
     {
-        tracker->current_digit = fmin(2, tracker->current_digit + 1);
+        tracker->current_digit = my_min(2, tracker->current_digit + 1);
         return;
     }
 
@@ -197,6 +198,12 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
                     {
                         // param = (TE_PROGRAM_END >> 8);
                         inst->program[tracker->current_program_step] = TE_PROGRAM_END | (inst->program[tracker->current_program_step] & 0x8000);
+                    }
+
+                    if ((inst->program[tracker->current_program_step] & 0x7f00) == (TE_PROGRAM_LOOP_BEGIN - 0x100))
+                    {
+                        // param = (TE_PROGRAM_END >> 8);
+                        inst->program[tracker->current_program_step] = TE_EFFECT_TRIGGER_RELEASE | (inst->program[tracker->current_program_step] & 0x8000);
                     }
 
                     break;
