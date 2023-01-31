@@ -13,17 +13,6 @@
 
 typedef struct ScopeApp ScopeApp;
 
-struct ScopeApp {
-    Gui* gui;
-    ViewDispatcher* view_dispatcher;
-    SceneManager* scene_manager;
-    NotificationApp* notifications;
-    VariableItemList* variable_item_list;
-    Submenu* submenu;
-    Widget* widget;
-    double time ;
-};
-
 typedef struct {
     double time;
     char * str;
@@ -37,3 +26,28 @@ static const timeperiod time_list[] = {
     {1e-6, "1us"},
     {0.5e-6, "0.5us"}
 };
+
+enum measureenum {m_time, m_voltage};
+
+typedef struct {
+    enum measureenum type;
+    char * str;
+} measurement;
+
+static const measurement measurement_list[] = {
+    {m_time,  "Time"},
+    {m_voltage, "Voltage"}
+};
+
+struct ScopeApp {
+    Gui* gui;
+    ViewDispatcher* view_dispatcher;
+    SceneManager* scene_manager;
+    NotificationApp* notifications;
+    VariableItemList* variable_item_list;
+    Submenu* submenu;
+    Widget* widget;
+    double time ;
+    enum measureenum measurement;
+};
+

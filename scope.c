@@ -79,6 +79,8 @@ ScopeApp* scope_app_alloc() {
         app->view_dispatcher, ScopeViewWidget, widget_get_view(app->widget));
 
     app->time = 0.001;
+    app->measurement = m_time;
+
     scene_manager_next_scene(app->scene_manager, ScopeSceneStart);
     return app;
 }
