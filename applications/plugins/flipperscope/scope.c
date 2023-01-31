@@ -8,7 +8,6 @@
 #include <gui/modules/widget.h>
 #include <notification/notification_messages.h>
 
-// #include "scope_icons.h"
 #include "scope_app_i.h"
 
 void assert_failed(uint8_t* file, uint32_t line) {
@@ -77,6 +76,8 @@ ScopeApp* scope_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, ScopeViewWidget, widget_get_view(app->widget));
 
     app->time = 0.001;
+    app->measurement = m_time;
+
     scene_manager_next_scene(app->scene_manager, ScopeSceneStart);
     return app;
 }

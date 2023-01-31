@@ -14,7 +14,6 @@
 #include "stm32wbxx_nucleo.h"
 #include "stm32wbxx_hal_adc.h"
 #include "../scope_app_i.h"
-#include "../helpers/scope_types.h"
 
 #define DIGITAL_SCALE_12BITS ((uint32_t)0xFFF)
 #define ADC_CONVERTED_DATA_BUFFER_SIZE ((uint32_t)128)
@@ -51,6 +50,7 @@ const uint32_t MSIRangeTable[16UL] = {
     0UL}; /* 0UL values are incorrect cases */
 char* time;
 uint8_t pause = 0;
+enum measureenum type;
 
 void Error_Handler() {
     while(1) {
@@ -233,10 +233,33 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef* hadc) {
 
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
-    char buf[50];
-    snprintf(buf, 50, "Time: %s", time);
+    switch(type) {
+    case m_time: {
+        char buf[50];
+        snprintf(buf, 50, "Time: %s", time);
+        canvas_draw_str(canvas, 10, 10, buf);
+    } break;
+    case m_voltage: {
+        char buf1[50];
+        char buf2[50];
+        char buf3[50];
+        double max = 0.0;
+        double min = 100.0;
+        for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++) {
+            if(mvoltDisplay[x] < min) min = mvoltDisplay[x];
+            if(mvoltDisplay[x] > max) max = mvoltDisplay[x];
+        }
+        snprintf(buf1, 50, "Max: %.2fV", max / 1000);
+        canvas_draw_str(canvas, 10, 10, buf1);
+        snprintf(buf2, 50, "Min: %.2fV", min / 1000);
+        canvas_draw_str(canvas, 10, 20, buf2);
+        snprintf(buf3, 50, "Vpp: %.2fV", (max - min) / 1000);
+        canvas_draw_str(canvas, 10, 30, buf3);
+    } break;
+    default:
+        break;
+    }
 
-    canvas_draw_str(canvas, 10, 10, buf);
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++) {
         uint32_t prev = 64 - (mvoltDisplay[x - 1] / (VDDA_APPLI / 64));
         uint32_t cur = 64 - (mvoltDisplay[x] / (VDDA_APPLI / 64));
@@ -269,6 +292,7 @@ void scope_scene_run_on_enter(void* context) {
         }
     }
     pause = 0;
+    type = app->measurement;
 
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);

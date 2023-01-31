@@ -9,14 +9,14 @@ void (*const flipp_pomodoro_scene_on_enter_handlers[])(void*) = {
 
 // Generate scene on_event handlers array
 #define ADD_SCENE(prefix, name, id) prefix##_scene_##name##_on_event,
-bool (*const flipp_pomodoro_scene_on_event_handlers[])(void* context, SceneManagerEvent event) = {
+bool (*const flipp_pomodoro_scene_on_event_handlers[])(void* ctx, SceneManagerEvent event) = {
 #include "config/flipp_pomodoro_scene_config.h"
 };
 #undef ADD_SCENE
 
 // Generate scene on_exit handlers array
 #define ADD_SCENE(prefix, name, id) prefix##_scene_##name##_on_exit,
-void (*const flipp_pomodoro_scene_on_exit_handlers[])(void* context) = {
+void (*const flipp_pomodoro_scene_on_exit_handlers[])(void* ctx) = {
 #include "config/flipp_pomodoro_scene_config.h"
 };
 #undef ADD_SCENE

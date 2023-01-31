@@ -5,7 +5,7 @@
 
 typedef struct FlippPomodoroTimerView FlippPomodoroTimerView;
 
-typedef void (*FlippPomodoroTimerViewInputCb)(void* context);
+typedef void (*FlippPomodoroTimerViewInputCb)(void* ctx);
 
 FlippPomodoroTimerView* flipp_pomodoro_view_timer_alloc();
 

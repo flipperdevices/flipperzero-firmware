@@ -27,8 +27,9 @@ typedef struct {
 } FlippPomodoroTimerViewModel;
 
 static const Icon* stage_background_image[] = {
-    [Work] = &A_flipp_pomodoro_focus_64,
-    [Rest] = &A_flipp_pomodoro_rest_64,
+    [FlippPomodoroStageFocus] = &A_flipp_pomodoro_focus_64,
+    [FlippPomodoroStageRest] = &A_flipp_pomodoro_rest_64,
+    [FlippPomodoroStageLongBreak] = &A_flipp_pomodoro_rest_64,
 };
 
 static void
@@ -40,7 +41,7 @@ static void
     const uint8_t countdown_box_width = canvas_width(canvas) * 0.5;
     const uint8_t countdown_box_x =
         canvas_width(canvas) - countdown_box_width - right_border_margin;
-    const uint8_t countdown_box_y = 0;
+    const uint8_t countdown_box_y = 15;
 
     elements_bold_rounded_frame(
         canvas, countdown_box_x, countdown_box_y, countdown_box_width, countdown_box_height);
@@ -59,6 +60,35 @@ static void
     furi_string_free(timer_string);
 };
 
+static void draw_str_with_drop_shadow(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    Align horizontal,
+    Align vertical,
+    const char* str) {
+    canvas_set_color(canvas, ColorWhite);
+    for(int x_off = -2; x_off <= 2; x_off++) {
+        for(int y_off = -2; y_off <= 2; y_off++) {
+            canvas_draw_str_aligned(canvas, x + x_off, y + y_off, horizontal, vertical, str);
+        }
+    }
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_str_aligned(canvas, x, y, horizontal, vertical, str);
+}
+
+static void
+    flipp_pomodoro_view_timer_draw_current_stage_label(Canvas* canvas, FlippPomodoroState* state) {
+    canvas_set_font(canvas, FontPrimary);
+    draw_str_with_drop_shadow(
+        canvas,
+        canvas_width(canvas),
+        0,
+        AlignRight,
+        AlignTop,
+        flipp_pomodoro__current_stage_label(state));
+}
+
 static void flipp_pomodoro_view_timer_draw_callback(Canvas* canvas, void* _model) {
     if(!_model) {
         return;
@@ -73,6 +103,9 @@ static void flipp_pomodoro_view_timer_draw_callback(Canvas* canvas, void* _model
 
     flipp_pomodoro_view_timer_draw_countdown(
         canvas, flipp_pomodoro__stage_remaining_duration(model->state));
+
+    flipp_pomodoro_view_timer_draw_current_stage_label(canvas, model->state);
+    canvas_set_color(canvas, ColorBlack);
 
     canvas_set_font(canvas, FontSecondary);
     elements_button_right(canvas, flipp_pomodoro__next_stage_label(model->state));

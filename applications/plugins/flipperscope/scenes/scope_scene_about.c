@@ -1,5 +1,4 @@
 #include "../scope_app_i.h"
-#include "../helpers/scope_types.h"
 
 void scope_scene_about_widget_callback(GuiButtonType result, InputType type, void* context) {
     ScopeApp* app = context;
@@ -37,7 +36,7 @@ void scope_scene_about_on_enter(void* context) {
         14,
         AlignCenter,
         AlignBottom,
-        "\e#\e!         Flipperscope            \e!\n",
+        "\e#\e!          flipperscope             \e!\n",
         false);
     widget_add_text_scroll_element(app->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);

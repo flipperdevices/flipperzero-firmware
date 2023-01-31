@@ -5,13 +5,15 @@
 
 /// @brief Options of pomodoro stages
 typedef enum {
-    Work,
-    Rest,
+    FlippPomodoroStageFocus,
+    FlippPomodoroStageRest,
+    FlippPomodoroStageLongBreak,
 } PomodoroStage;
 
 /// @brief State of the pomodoro timer
 typedef struct {
     PomodoroStage stage;
+    uint8_t current_stage_index;
     uint32_t started_at_timestamp;
 } FlippPomodoroState;
 
@@ -31,6 +33,11 @@ void flipp_pomodoro__destroy(FlippPomodoroState* state);
 /// @param state - pointer to the state of pomorodo
 /// @returns Time difference to the end of current stage
 TimeDifference flipp_pomodoro__stage_remaining_duration(FlippPomodoroState* state);
+
+/// @brief Label of currently active stage
+/// @param state - pointer to the state of pomorodo
+/// @returns A string that explains current stage
+char* flipp_pomodoro__current_stage_label(FlippPomodoroState* state);
 
 /// @brief Label of transition to the next stage
 /// @param state - pointer to the state of pomorodo.

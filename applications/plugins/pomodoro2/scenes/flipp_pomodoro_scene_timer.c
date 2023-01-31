@@ -8,10 +8,10 @@ enum { SceneEventConusmed = true, SceneEventNotConusmed = false };
 
 uint8_t ExitSignal = 0;
 
-void flipp_pomodoro_scene_timer_sync_view_state(void* context) {
-    furi_assert(context);
+void flipp_pomodoro_scene_timer_sync_view_state(void* ctx) {
+    furi_assert(ctx);
 
-    FlippPomodoroApp* app = context;
+    FlippPomodoroApp* app = ctx;
 
     flipp_pomodoro_view_timer_set_state(
         flipp_pomodoro_view_timer_get_view(app->timer_view), app->state);
@@ -25,10 +25,10 @@ void flipp_pomodoro_scene_timer_on_next_stage(void* ctx) {
     view_dispatcher_send_custom_event(app->view_dispatcher, FlippPomodoroAppCustomEventStageSkip);
 };
 
-void flipp_pomodoro_scene_timer_on_enter(void* context) {
-    furi_assert(context);
+void flipp_pomodoro_scene_timer_on_enter(void* ctx) {
+    furi_assert(ctx);
 
-    FlippPomodoroApp* app = context;
+    FlippPomodoroApp* app = ctx;
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FlippPomodoroAppViewTimer);
     flipp_pomodoro_scene_timer_sync_view_state(app);
@@ -66,6 +66,6 @@ bool flipp_pomodoro_scene_timer_on_event(void* ctx, SceneManagerEvent event) {
     return SceneEventNotConusmed;
 };
 
-void flipp_pomodoro_scene_timer_on_exit(void* context) {
-    UNUSED(context);
+void flipp_pomodoro_scene_timer_on_exit(void* ctx) {
+    UNUSED(ctx);
 };

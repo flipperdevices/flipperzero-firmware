@@ -1,5 +1,4 @@
 #include "../scope_app_i.h"
-#include "../helpers/scope_types.h"
 
 void scope_scene_setup_widget_callback(GuiButtonType result, InputType type, void* context) {
     ScopeApp* app = context;
@@ -9,12 +8,19 @@ void scope_scene_setup_widget_callback(GuiButtonType result, InputType type, voi
 }
 
 static void timeperiod_cb(VariableItem* item) {
-    UNUSED(item);
     ScopeApp* app = variable_item_get_context(item);
     furi_assert(app);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, time_list[index].str);
     app->time = time_list[index].time;
+}
+
+static void measurement_cb(VariableItem* item) {
+    ScopeApp* app = variable_item_get_context(item);
+    furi_assert(app);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, measurement_list[index].str);
+    app->measurement = measurement_list[index].type;
 }
 
 void scope_scene_setup_on_enter(void* context) {
@@ -28,6 +34,17 @@ void scope_scene_setup_on_enter(void* context) {
         if(time_list[i].time == app->time) {
             variable_item_set_current_value_index(item, i);
             variable_item_set_current_value_text(item, time_list[i].str);
+            break;
+        }
+    }
+
+    item = variable_item_list_add(
+        var_item_list, "Measurement", COUNT_OF(measurement_list), measurement_cb, app);
+
+    for(uint32_t i = 0; i < COUNT_OF(measurement_list); i++) {
+        if(measurement_list[i].type == app->measurement) {
+            variable_item_set_current_value_index(item, i);
+            variable_item_set_current_value_text(item, measurement_list[i].str);
             break;
         }
     }

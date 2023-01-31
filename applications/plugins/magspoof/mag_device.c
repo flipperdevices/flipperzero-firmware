@@ -179,7 +179,7 @@ bool mag_file_select(MagDevice* mag_dev) {
     mag_app_folder = furi_string_alloc_set(MAG_APP_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_mag_file_10px);
+    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_mag_10px);
     browser_options.base_path = MAG_APP_FOLDER;
 
     bool res = dialog_file_browser_show(
