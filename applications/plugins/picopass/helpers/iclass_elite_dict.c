@@ -3,8 +3,10 @@
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 
-#define ICLASS_ELITE_DICT_FLIPPER_PATH EXT_PATH("/ext/apps_data/picopass/assets/iclass_elite_dict.txt")
-#define ICLASS_ELITE_DICT_USER_PATH EXT_PATH("/ext/apps_data/picopass/assets/iclass_elite_dict_user.txt")
+#define ICLASS_ELITE_DICT_FLIPPER_PATH \
+    EXT_PATH("/ext/apps_data/picopass/assets/iclass_elite_dict.txt")
+#define ICLASS_ELITE_DICT_USER_PATH \
+    EXT_PATH("/ext/apps_data/picopass/assets/iclass_elite_dict_user.txt")
 
 #define TAG "IclassEliteDict"
 
