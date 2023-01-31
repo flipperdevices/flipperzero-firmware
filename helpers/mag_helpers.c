@@ -346,24 +346,24 @@ void mag_spoof_bitwise(Mag* mag) {
             uint8_t byte = i / 8;
             uint8_t bitmask = 1 << (7 - (i % 8));
             /* this comment is mostly for zw's convenience:
-         *
-         * bits are stored in their arrays like on a card (LSB first). This is not how usually bits are stored in a
-         * byte, with the MSB first. the var bitmask creates the pattern to iterate through each bit, LSB first, like so
-         * 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80... masking bits one by one from the current byte
-         *
-         * i've chosen this LSB approach since bits and bytes are hard enough to visualize with the 5/8 and 7/8 encoding
-         * MSR uses. It's a biiit more complicated to process, but visualizing it with printf or a debugger is
-         * infinitely easier
-         *
-         * Encoding the following pairs of 5 bits as 5/8: A1234 B1234 C1234 D1234
-         * using this LSB format looks like: A1234B12 34C1234D 12340000
-         * using the MSB format, looks like: 21B4321A D4321C43 00004321
-         * this means reading each byte backwards when printing/debugging, and the jumping 16 bits ahead, reading 8 more
-         * bits backward, jumping 16 more bits ahead.
-         *
-         * I find this much more convenient for debugging, with the tiny incovenience of reading the bits in reverse
-         * order. THus, the reason for the bitmask above
-         */
+             *
+             * bits are stored in their arrays like on a card (LSB first). This is not how usually bits are stored in a
+             * byte, with the MSB first. the var bitmask creates the pattern to iterate through each bit, LSB first, like so
+             * 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80... masking bits one by one from the current byte
+             *
+             * i've chosen this LSB approach since bits and bytes are hard enough to visualize with the 5/8 and 7/8 encoding
+             * MSR uses. It's a biiit more complicated to process, but visualizing it with printf or a debugger is
+             * infinitely easier
+             *
+             * Encoding the following pairs of 5 bits as 5/8: A1234 B1234 C1234 D1234
+             * using this LSB format looks like: A1234B12 34C1234D 12340000
+             * using the MSB format, looks like: 21B4321A D4321C43 00004321
+             * this means reading each byte backwards when printing/debugging, and the jumping 16 bits ahead, reading 8 more
+             * bits backward, jumping 16 more bits ahead.
+             *
+             * I find this much more convenient for debugging, with the tiny incovenience of reading the bits in reverse
+             * order. THus, the reason for the bitmask above
+             */
 
             bit = !!(bits_t1_manchester[byte] & bitmask);
 
@@ -404,7 +404,7 @@ void mag_spoof_bitwise(Mag* mag) {
     FURI_CRITICAL_EXIT();
     free(data1);
     free(data2);
-    tx_reset(setting);
+    tx_deinit(setting);
 }
 
 // due for deprecation
@@ -460,7 +460,7 @@ void mag_spoof(Mag* mag) {
         FURI_CRITICAL_EXIT();
 
         // Reset configured TX method
-        if(!tx_reset(setting)) break;
+        if(!tx_deinit(setting)) break;
         spoofed = true;
     } while(0);
 

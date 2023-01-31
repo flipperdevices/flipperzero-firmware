@@ -10,7 +10,7 @@ void mag_scene_saved_info_on_enter(void* context) {
     // Use strlcpy instead perhaps, to truncate to screen width, then add ellipses if needed?
     furi_string_printf(tmp_str, "%s\r\n", mag->mag_dev->dev_name);
 
-    widget_add_icon_element(widget, 1, 1, &I_mag_10px);
+    widget_add_icon_element(widget, 2, 1, &I_mag_file_10px);
     widget_add_string_element(
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
