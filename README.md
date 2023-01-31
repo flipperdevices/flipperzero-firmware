@@ -52,10 +52,9 @@ Implemented
 - Menu options:
   - Switch between portrait and landscape
   - A+C shortcut (mute/change in-game time)
+  - Double speed / fast-forward
 
 
 To-Do
 -----
-- Menu options:
-  - Double speed / fast-forward
-  - display/hide runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
+- display/hide runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
