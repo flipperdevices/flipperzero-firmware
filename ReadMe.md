@@ -2,7 +2,7 @@
 
 A new version of Snake Game.
 
-![Snake 2.0](Snake 2.0.png)
+![Snake_2.0](https://github.com/Willzvul/Snake_2.0/blob/main/Snake%202.0.png)
 
 
 ## Features
