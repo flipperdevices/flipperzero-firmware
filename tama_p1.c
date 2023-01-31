@@ -686,6 +686,10 @@ int32_t tama_p1_app(void* p) {
                             } else if(
                                 event.input.key == InputKeyBack &&
                                 event.input.type == InputTypePress) {
+                                if(speed != 1) {
+                                    speed = 1;
+                                    tamalib_set_speed(speed);
+                                }
                                 tama_p1_save_state();
                             }
                         }
@@ -694,6 +698,10 @@ int32_t tama_p1_app(void* p) {
 
                 if(event.input.key == InputKeyBack && event.input.type == InputTypeLong &&
                    !in_menu) {
+                    if(speed != 1) {
+                        speed = 1;
+                        tamalib_set_speed(speed);
+                    }
                     furi_timer_stop(timer);
                     running = false;
                     tama_p1_save_state();
