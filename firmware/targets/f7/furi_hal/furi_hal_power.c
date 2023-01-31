@@ -486,7 +486,7 @@ void furi_hal_power_info_get(PropertyValueCallback out, char sep, void* context)
         property_value_out(&property_context, NULL, 2, "format", "major", "2");
         property_value_out(&property_context, NULL, 2, "format", "minor", "1");
     } else {
-        property_value_out(&property_context, NULL, 3, "power", "info", "major", "1");
+        property_value_out(&property_context, NULL, 3, "power", "info", "major", "2");
         property_value_out(&property_context, NULL, 3, "power", "info", "minor", "1");
     }
 
