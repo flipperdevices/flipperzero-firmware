@@ -196,7 +196,7 @@ static int32_t example_thermo_reader_thread_callback(void* ctx) {
             furi_thread_flags_wait(ReaderThreadFlagExit, FuriFlagWaitAny, UPDATE_PERIOD_MS);
 
         /* If an exit signal was received, return from this thread. */
-        if(flags != FuriFlagErrorTimeout) break;
+        if(flags != (unsigned)FuriFlagErrorTimeout) break;
 
         /* The measurement is now ready, read it from the termometer. */
         example_thermo_read_temperature(context);
