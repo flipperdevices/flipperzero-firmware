@@ -1,7 +1,13 @@
 # magspoof_flipper
-WIP of MagSpoof for the Flipper Zero. Basic TX of saved files confirmed working against an MSR90 with an external H-bridge module mirroring Samy Kamkar's design (wired to 5V, GND, A7, A6, and A4; will include a wiring diagram soon). RFID coil output weaker; able to be picked up/detected by more compact mag readers such as Square, but yet to have success with it being decoded/parsed properly. Additional WIP investigation into alternate internal TX options (CC1101, ST25R3916, piezo) underway, courtesy of arha. Sample files with test data are included in `assets` for anyone wishing to experiment.
+WIP of MagSpoof for the Flipper Zero. Basic TX of saved files confirmed working against an MSR90 with an external H-bridge module mirroring Samy Kamkar's design. RFID coil output weaker; able to be picked up/detected by more compact mag readers such as Square, but yet to have success with it being decoded/parsed properly. Additional WIP investigation into alternate internal TX options (CC1101, ST25R3916, piezo) underway, courtesy of arha. Sample files with test data are included in `assets` for anyone wishing to experiment.
 
 Disclaimer: use responsibly, and at your own risk. While in my testing, I've seen no reason to believe this could damage the RFID hardware, this is inherently driving the coil in ways it was not designed or intended for; I take no responsibility for fried/bricked Flippers. Similarly, please only use this with magstripe cards and mag readers you own — this is solely meant as a proof of concept for educational purposes. I neither condone nor am sympathetic to malicious uses of my code.
+
+## Optional GPIO TX Module
+For those desiring better TX than the internal RFID coil can offer, one can build the module below, consisting of an H-bridge, a capacitor, and a coil.
+
+<img src="https://user-images.githubusercontent.com/20050953/215654078-1f4b370e-21b3-4324-b63c-3bbbc643120e.png" alt="Wiring diagram" title="Wiring diagram" style="height:320px">
+
 
 ## TODO
 Known bugs:
