@@ -12,9 +12,11 @@ TamaApp* g_ctx;
 FuriMutex* g_state_mutex;
 bool portrait_mode = false;
 bool in_menu = false;
+int speed = 1;
+const int max_speed = 4;
 
 int menu_cursor = 0;
-const int menu_items = 3;
+const int menu_items = 4;
 
 static const Icon* icons_list[] = {
     &I_icon_0,
@@ -159,22 +161,46 @@ static void draw_menu_landscape(Canvas* const canvas) {
     canvas_draw_line(canvas, 0, 10, 128, 10);
     switch(menu_cursor) {
     case 0:
-        canvas_draw_triangle(canvas, 4, 21, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 15, 6, 6, CanvasDirectionLeftToRight);
         break;
     case 1:
-        canvas_draw_triangle(canvas, 4, 36, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 25, 6, 6, CanvasDirectionLeftToRight);
         break;
     case 2:
-        canvas_draw_triangle(canvas, 4, 51, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 35, 6, 6, CanvasDirectionLeftToRight);
+        break;
+    case menu_items - 1:
+        canvas_draw_triangle(canvas, 4, 45, 6, 6, CanvasDirectionLeftToRight);
         break;
     }
-    canvas_draw_str(canvas, 12, 25, "A+C (mute/change time)");
+    canvas_draw_str(canvas, 12, 20, "A+C (mute/change time)");
     if(portrait_mode) {
-        canvas_draw_str(canvas, 12, 40, "Orientation: Portrait");
+        canvas_draw_str(canvas, 12, 30, "Orientation: Portrait");
     } else {
-        canvas_draw_str(canvas, 12, 40, "Orientation: Landscape");
+        canvas_draw_str(canvas, 12, 30, "Orientation: Landscape");
     }
-    canvas_draw_str(canvas, 12, 55, "Close menu");
+    switch(speed) {
+    case 0: // freeze menu too
+        canvas_draw_str(canvas, 12, 40, "Speed: 0x");
+        break;
+    case 1:
+        canvas_draw_str(canvas, 12, 40, "Speed: 1x");
+        break;
+    case 2:
+        canvas_draw_str(canvas, 12, 40, "Speed: 2x");
+        break;
+    case 3:
+        canvas_draw_str(canvas, 12, 40, "Speed: 3x");
+        break;
+    case max_speed:
+        canvas_draw_str(canvas, 12, 40, "Speed: 4x (max)");
+        break;
+    default:
+        canvas_draw_str(canvas, 12, 40, "Speed ?x");
+        break;
+    }
+
+    canvas_draw_str(canvas, 12, 50, "Close menu");
 }
 
 static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
@@ -512,7 +538,7 @@ static void tama_p1_init(TamaApp* const ctx) {
         // Init TamaLIB
         tamalib_register_hal(&ctx->hal);
         tamalib_init((u12_t*)ctx->rom, NULL, 64000);
-        tamalib_set_speed(1);
+        tamalib_set_speed(speed);
 
         // TODO: implement fast forwarding
         ctx->fast_forward_done = true;
@@ -609,6 +635,18 @@ int32_t tama_p1_app(void* p) {
                             if(event.input.type == InputTypePress) portrait_mode = !portrait_mode;
                             break;
                         case 2:
+                            if(event.input.type == InputTypePress) {
+                                if(speed == 2) { // skip 3x
+                                    speed = 4;
+                                } else if(speed < max_speed) {
+                                    speed++;
+                                } else {
+                                    speed = 1;
+                                }
+                                tamalib_set_speed(speed);
+                            }
+                            break;
+                        case menu_items - 1:
                         default:
                             in_menu = false;
                             break;
