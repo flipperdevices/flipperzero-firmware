@@ -293,32 +293,7 @@ class PwnZero(plugins.Plugin):
 
         # Face
         face = ui.get('face')
-        # Handle:
-        #LOOK_R = '( ⚆_⚆)'
-        # LOOK_L = '(☉_☉ )'
-        # LOOK_R_HAPPY = '( ◕‿◕)'
-        # LOOK_L_HAPPY = '(◕‿◕ )'
-        # SLEEP = '(⇀‿‿↼)'
-        # SLEEP2 = '(≖‿‿≖)'
-        # AWAKE = '(◕‿‿◕)'
-        # BORED = '(-__-)'
-        # INTENSE = '(°▃▃°)'
-        # COOL = '(⌐■_■)'
-        # HAPPY = '(•‿‿•)'
-        # GRATEFUL = '(^‿‿^)'
-        # EXCITED = '(ᵔ◡◡ᵔ)'
-        # MOTIVATED = '(☼‿‿☼)'
-        # DEMOTIVATED = '(≖__≖)'
-        # SMART = '(✜‿‿✜)'
-        # LONELY = '(ب__ب)'
-        # SAD = '(╥☁╥ )'
-        # ANGRY = "(-_-')"
-        # FRIEND = '(♥‿‿♥)'
-        # BROKEN = '(☓‿‿☓)'
-        # DEBUG = '(#__#)'
-        # UPLOAD = '(1__0)'
-        # UPLOAD1 = '(1__1)'
-        # UPLOAD2 = '(0__1)'
+        
         faceEnum = None
         if face == faces.LOOK_R:
             faceEnum = PwnFace.LOOK_R

@@ -19,7 +19,8 @@
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_NONCE_PATH EXT_PATH("nfc/.mfkey32.log")
-#define MF_CLASSIC_MEM_FILE_PATH EXT_PATH("nfc/cache/mem_file.bin")
+// TODO: Create nfc/.cache/ if missing?
+#define MF_CLASSIC_MEM_FILE_PATH EXT_PATH("nfc/.cache/mem_file.bin")
 #define TAG "Mfkey32"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
@@ -855,7 +856,8 @@ void mfkey32(ProgramState* const program_state) {
     program_state->total = nonce_arr->total_nonces;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     mem_file = buffered_file_stream_alloc(storage);
-    storage_simply_remove(storage, MF_CLASSIC_MEM_FILE_PATH);
+    // Removing the file is not needed if FSOM_CREATE_ALWAYS truncates it to 0 bytes
+    //storage_simply_remove(storage, MF_CLASSIC_MEM_FILE_PATH);
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
         uint32_t p64 = prng_successor(next_nonce.nt0, 64);
@@ -873,6 +875,7 @@ void mfkey32(ProgramState* const program_state) {
         FURI_LOG_I(TAG, "Cracking %lx %lx", next_nonce.uid, next_nonce.ar1_enc);
         if(!buffered_file_stream_open(
                mem_file, MF_CLASSIC_MEM_FILE_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+            FURI_LOG_E(TAG, "Failed to open %s", MF_CLASSIC_MEM_FILE_PATH);
             buffered_file_stream_close(mem_file);
             program_state->err = StorageUnwritable;
             napi_mf_classic_nonce_array_free(nonce_arr);
@@ -919,14 +922,13 @@ void mfkey32(ProgramState* const program_state) {
         }
         buffered_file_stream_close(mem_file);
     }
-    /*
     // TODO: Update display to show all keys were found
-    printf("Unique keys found:\n");
+    FURI_LOG_I(TAG, "Unique keys found:");
     for(i = 0; i < keyarray_size; i++) {
-        printf("%012" PRIx64 , keyarray[i]);
-        printf("\n");
+        //printf("%012" PRIx64 , keyarray[i]);
+        //printf("\n");
+        FURI_LOG_I(TAG, "%lu", keyarray[i]);
     }
-    */
     // TODO: Prepend found key(s) to user dictionary file
     napi_mf_classic_nonce_array_free(nonce_arr);
     if(system_dict_exists) {

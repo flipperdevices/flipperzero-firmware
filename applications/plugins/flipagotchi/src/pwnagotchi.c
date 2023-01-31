@@ -1,6 +1,10 @@
 #include "../include/pwnagotchi.h"
 
-#include "../include/faces_xbm.h"
+/*
+Icons from RogueMaster at:
+https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/8c45f8e9a921f61cda78ecdb2e58a244041d3e05
+*/
+#include "flipagotchi_icons.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -26,150 +30,99 @@ Pwnagotchi* pwnagotchi_alloc() {
 }
 
 void pwnagotchi_draw_face(Pwnagotchi* pwn, Canvas* canvas) {
-    int width = 0;
-    int height = 0;
-    uint8_t* xbm;
+    const Icon* currentFace;
+    bool draw = true;
+
     switch(pwn->face) {
     case NoFace:
-        width = noface_width;
-        height = noface_height;
-        xbm = noface_xbm;
+        // Draw nothing
+        draw = false;
         break;
     case DefaultFace:
-        width = awake_width;
-        height = awake_height;
-        xbm = awake_xbm;
+        currentFace = &I_awake_flipagotchi;
         break;
     case Look_r:
-        width = look_r_width;
-        height = look_r_height;
-        xbm = look_r_xbm;
+        currentFace = &I_look_r_flipagotchi;
         break;
     case Look_l:
-        width = look_l_width;
-        height = look_l_height;
-        xbm = look_l_xbm;
+        currentFace = &I_look_l_flipagotchi;
         break;
     case Look_r_happy:
-        width = look_r_happy_width;
-        height = look_r_happy_height;
-        xbm = look_r_happy_xbm;
+        currentFace = &I_look_r_happy_flipagotchi;
         break;
     case Look_l_happy:
-        width = look_l_happy_width;
-        height = look_l_happy_height;
-        xbm = look_l_happy_xbm;
+        currentFace = &I_look_l_happy_flipagotchi;
         break;
     case Sleep:
-        width = sleep_width;
-        height = sleep_height;
-        xbm = sleep_xbm;
+        currentFace = &I_sleep_flipagotchi;
         break;
     case Sleep2:
-        width = sleep2_width;
-        height = sleep2_height;
-        xbm = sleep2_xbm;
+        currentFace = &I_sleep2_flipagotchi;
         break;
     case Awake:
-        width = awake_width;
-        height = awake_height;
-        xbm = awake_xbm;
+        currentFace = &I_awake_flipagotchi;
         break;
     case Bored:
-        width = bored_width;
-        height = bored_height;
-        xbm = bored_xbm;
+        currentFace = &I_bored_flipagotchi;
         break;
     case Intense:
-        width = intense_width;
-        height = intense_height;
-        xbm = intense_xbm;
+        currentFace = &I_intense_flipagotchi;
         break;
     case Cool:
-        width = cool_width;
-        height = cool_height;
-        xbm = cool_xbm;
+        currentFace = &I_cool_flipagotchi;
         break;
     case Happy:
-        width = happy_width;
-        height = happy_height;
-        xbm = happy_xbm;
+        currentFace = &I_happy_flipagotchi;
         break;
     case Grateful:
-        width = grateful_width;
-        height = grateful_height;
-        xbm = grateful_xbm;
+        currentFace = &I_grateful_flipagotchi;
         break;
     case Excited:
-        width = excited_width;
-        height = excited_height;
-        xbm = excited_xbm;
+        currentFace = &I_excited_flipagotchi;
         break;
     case Motivated:
-        width = motivated_width;
-        height = motivated_height;
-        xbm = motivated_xbm;
+        currentFace = &I_motivated_flipagotchi;
         break;
     case Demotivated:
-        width = demotivated_width;
-        height = demotivated_height;
-        xbm = demotivated_xbm;
+        currentFace = &I_demotivated_flipagotchi;
         break;
     case Smart:
-        width = smart_width;
-        height = smart_height;
-        xbm = smart_xbm;
+        currentFace = &I_smart_flipagotchi;
         break;
     case Lonely:
-        width = lonely_width;
-        height = lonely_height;
-        xbm = lonely_xbm;
+        currentFace = &I_lonely_flipagotchi;
         break;
     case Sad:
-        width = sad_width;
-        height = sad_height;
-        xbm = sad_xbm;
+        currentFace = &I_sad_flipagotchi;
         break;
     case Angry:
-        width = angry_width;
-        height = angry_height;
-        xbm = angry_xbm;
+        currentFace = &I_angry_flipagotchi;
         break;
     case Friend:
-        width = friend_width;
-        height = friend_height;
-        xbm = friend_xbm;
+        currentFace = &I_friend_flipagotchi;
         break;
     case Broken:
-        width = broken_width;
-        height = broken_height;
-        xbm = broken_xbm;
+        currentFace = &I_broken_flipagotchi;
         break;
     case Debug:
-        width = debug_width;
-        height = debug_height;
-        xbm = debug_xbm;
+        currentFace = &I_debug_flipagotchi;
         break;
     case Upload:
-        width = upload_width;
-        height = upload_height;
-        xbm = upload_xbm;
+        currentFace = &I_upload_flipagotchi;
         break;
     case Upload1:
-        width = upload1_width;
-        height = upload1_height;
-        xbm = upload1_xbm;
+        currentFace = &I_upload1_flipagotchi;
         break;
     case Upload2:
-        width = upload2_width;
-        height = upload2_height;
-        xbm = upload2_xbm;
+        currentFace = &I_upload2_flipagotchi;
         break;
     default:
-        xbm = NULL;
+        draw = false;
     }
 
-    canvas_draw_xbm(canvas, PWNAGOTCHI_FACE_J, PWNAGOTCHI_FACE_I, width, height, xbm);
+    if(draw) {
+        canvas_draw_icon(canvas, PWNAGOTCHI_FACE_J, PWNAGOTCHI_FACE_I, currentFace);
+    }
 }
 
 void pwnagotchi_draw_name(Pwnagotchi* pwn, Canvas* canvas) {

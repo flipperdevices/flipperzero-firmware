@@ -12,7 +12,6 @@
 #include "../include/protocol.h"
 #include "../include/constants.h"
 #include "../include/message_queue.h"
-#include "Flipagotchi_icons.h"
 
 #define LINES_ON_SCREEN 6
 #define COLUMNS_ON_SCREEN 21
