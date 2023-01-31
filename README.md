@@ -1,7 +1,7 @@
 # Blackjack for Flipper Zero
 
 
-![Play screen](screenshots/play_scene.png)
+![Play screen](screenshots/blackjack.gif)
 
 ## Building
 > The app should be compatible with the official and custom flipper firmwares. If not, follow these steps to build it
