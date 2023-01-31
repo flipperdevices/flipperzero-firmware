@@ -36,7 +36,8 @@ struct OneWireSlave {
 
 /*********************** PRIVATE ***********************/
 
-static uint32_t onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, const bool pin_value) {
+static uint32_t
+    onewire_slave_wait_while_gpio_is(OneWireSlave* bus, uint32_t time, const bool pin_value) {
     uint32_t start = DWT->CYCCNT;
     uint32_t time_ticks = time * furi_hal_cortex_instructions_per_microsecond();
     uint32_t time_captured;

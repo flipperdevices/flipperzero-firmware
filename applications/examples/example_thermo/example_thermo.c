@@ -55,7 +55,7 @@ typedef union {
         uint8_t temp_lsb; /* Least significant byte of the temperature */
         uint8_t temp_msb; /* Most significant byte of the temperature */
         uint8_t user_alarm_high; /* User register 1 (Temp high alarm) */
-        uint8_t user_alarm_low;  /* User register 2 (Temp low alarm) */
+        uint8_t user_alarm_low; /* User register 2 (Temp low alarm) */
         uint8_t config; /* Configuration register */
         uint8_t reserved[3]; /* Not used */
         uint8_t crc; /* CRC checksum for error detection */
@@ -192,7 +192,8 @@ static int32_t example_thermo_reader_thread_callback(void* ctx) {
         example_thermo_request_temperature(context);
 
         /* Wait for the measurement to finish. At the same time wait for an exit signal. */
-        const uint32_t flags = furi_thread_flags_wait(ReaderThreadFlagExit, FuriFlagWaitAny, UPDATE_PERIOD_MS);
+        const uint32_t flags =
+            furi_thread_flags_wait(ReaderThreadFlagExit, FuriFlagWaitAny, UPDATE_PERIOD_MS);
 
         /* If an exit signal was received, return from this thread. */
         if(flags != FuriFlagErrorTimeout) break;
@@ -209,16 +210,26 @@ static int32_t example_thermo_reader_thread_callback(void* ctx) {
 /* Convert a GpioPin definition to a pin number */
 // TODO: This should be a part of furi_hal API
 static int32_t example_thermo_gpio_pin_to_num(const GpioPin* gpio_pin) {
-    if(gpio_pin == &gpio_ext_pa7) return 2;
-    else if(gpio_pin == &gpio_ext_pa6) return 3;
-    else if(gpio_pin == &gpio_ext_pa4) return 4;
-    else if(gpio_pin == &gpio_ext_pb3) return 5;
-    else if(gpio_pin == &gpio_ext_pb2) return 6;
-    else if(gpio_pin == &gpio_ext_pc3) return 7;
-    else if(gpio_pin == &gpio_ext_pc1) return 15;
-    else if(gpio_pin == &gpio_ext_pc0) return 16;
-    else if(gpio_pin == &ibutton_gpio) return 17;
-    else return -1;
+    if(gpio_pin == &gpio_ext_pa7)
+        return 2;
+    else if(gpio_pin == &gpio_ext_pa6)
+        return 3;
+    else if(gpio_pin == &gpio_ext_pa4)
+        return 4;
+    else if(gpio_pin == &gpio_ext_pb3)
+        return 5;
+    else if(gpio_pin == &gpio_ext_pb2)
+        return 6;
+    else if(gpio_pin == &gpio_ext_pc3)
+        return 7;
+    else if(gpio_pin == &gpio_ext_pc1)
+        return 15;
+    else if(gpio_pin == &gpio_ext_pc0)
+        return 16;
+    else if(gpio_pin == &ibutton_gpio)
+        return 17;
+    else
+        return -1;
 }
 
 /* Draw the GUI of the application. The screen is completely redrawn during each call. */
@@ -235,7 +246,11 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str_aligned(
         canvas, middle_x, 30, AlignCenter, AlignBottom, "Connnect thermometer");
 
-    snprintf(text_store, TEXT_STORE_SIZE, "to GPIO pin %ld", example_thermo_gpio_pin_to_num(&THERMO_GPIO_PIN));
+    snprintf(
+        text_store,
+        TEXT_STORE_SIZE,
+        "to GPIO pin %ld",
+        example_thermo_gpio_pin_to_num(&THERMO_GPIO_PIN));
     canvas_draw_str_aligned(canvas, middle_x, 42, AlignCenter, AlignBottom, text_store);
 
     canvas_set_font(canvas, FontKeyboard);
