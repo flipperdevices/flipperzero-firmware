@@ -62,6 +62,7 @@ This project interpolates work from [Samy Kamkar's original MagSpoof project](ht
 
 Many thanks to everyone who has helped in addition to those above, most notably: 
 - [arha](https://github.com/arha) for bitmapping work and skunkworks testing (now a collaborator!)
+- [Z4urce](https://github.com/Z4urce) for the provisional app icon
 - [antirez](https://github.com/antirez) for bitmapping suggestions and general C wisdom
 - [skotopes](https://github.com/skotopes) for RFID consultation
 - [NVX](https://github.com/nvx) + dlz for NFC consultation
