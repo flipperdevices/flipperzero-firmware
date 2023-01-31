@@ -1,6 +1,6 @@
 #include "uart_text_input.h"
 #include <gui/elements.h>
-#include "lora_term_icons.h"
+#include "lora_terminal_icons.h"
 #include <furi.h>
 
 struct UART_TextInput {
@@ -36,7 +36,7 @@ static const uint8_t keyboard_origin_x = 1;
 static const uint8_t keyboard_origin_y = 29;
 static const uint8_t keyboard_row_count = 4;
 
-#define ENTER_KEY '\r\n'
+#define ENTER_KEY '\r'
 #define BACKSPACE_KEY '\b'
 
 static const UART_TextInputKey keyboard_keys_row_1[] = {
