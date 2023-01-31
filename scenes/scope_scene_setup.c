@@ -1,5 +1,4 @@
 #include "../scope_app_i.h"
-#include "../helpers/scope_types.h"
 
 void scope_scene_setup_widget_callback(
     GuiButtonType result,

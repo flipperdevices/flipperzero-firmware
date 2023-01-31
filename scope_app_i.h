@@ -1,6 +1,6 @@
 #pragma once
 
-#include "helpers/scope_types.h"
+#include "scenes/scope_types.h"
 #include "scenes/scope_scene.h"
 
 #include <gui/gui.h>

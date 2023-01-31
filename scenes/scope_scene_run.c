@@ -14,7 +14,6 @@
 #include "stm32wbxx_nucleo.h"
 #include "stm32wbxx_hal_adc.h"
 #include "../scope_app_i.h"
-#include "../helpers/scope_types.h"
 
 #define DIGITAL_SCALE_12BITS             ((uint32_t) 0xFFF)
 #define ADC_CONVERTED_DATA_BUFFER_SIZE   ((uint32_t)  128)
