@@ -207,31 +207,6 @@ static int32_t example_thermo_reader_thread_callback(void* ctx) {
 
 /*************** GUI, Input and Main Loop *****************/
 
-/* Convert a GpioPin definition to a pin number */
-// TODO: This should be a part of furi_hal API
-static int32_t example_thermo_gpio_pin_to_num(const GpioPin* gpio_pin) {
-    if(gpio_pin == &gpio_ext_pa7)
-        return 2;
-    else if(gpio_pin == &gpio_ext_pa6)
-        return 3;
-    else if(gpio_pin == &gpio_ext_pa4)
-        return 4;
-    else if(gpio_pin == &gpio_ext_pb3)
-        return 5;
-    else if(gpio_pin == &gpio_ext_pb2)
-        return 6;
-    else if(gpio_pin == &gpio_ext_pc3)
-        return 7;
-    else if(gpio_pin == &gpio_ext_pc1)
-        return 15;
-    else if(gpio_pin == &gpio_ext_pc0)
-        return 16;
-    else if(gpio_pin == &ibutton_gpio)
-        return 17;
-    else
-        return -1;
-}
-
 /* Draw the GUI of the application. The screen is completely redrawn during each call. */
 static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
     ExampleThermoContext* context = ctx;
@@ -250,7 +225,7 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
         text_store,
         TEXT_STORE_SIZE,
         "to GPIO pin %ld",
-        example_thermo_gpio_pin_to_num(&THERMO_GPIO_PIN));
+        furi_hal_gpio_get_ext_pin_number(&THERMO_GPIO_PIN));
     canvas_draw_str_aligned(canvas, middle_x, 42, AlignCenter, AlignBottom, text_store);
 
     canvas_set_font(canvas, FontKeyboard);

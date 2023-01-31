@@ -226,6 +226,13 @@ void furi_hal_gpio_disable_int_callback(const GpioPin* gpio);
 void furi_hal_gpio_remove_int_callback(const GpioPin* gpio);
 
 /**
+ * Get a corresponding external connector pin number for a gpio
+ * @param gpio GpioPin
+ * @return pin number or -1 if gpio is not on the external connector
+ */
+int32_t furi_hal_gpio_get_ext_pin_number(const GpioPin* gpio);
+
+/**
  * GPIO write pin
  * @param gpio  GpioPin
  * @param state true / false

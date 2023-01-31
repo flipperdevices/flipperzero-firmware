@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <furi_hal_gpio.h>
 #include <furi_hal_version.h>
+#include <furi_hal_resources.h>
 #include <stm32wbxx_ll_comp.h>
 
 #define GET_SYSCFG_EXTI_PORT(gpio)                \
@@ -213,6 +214,29 @@ void furi_hal_gpio_remove_int_callback(const GpioPin* gpio) {
     gpio_interrupt[pin_num].context = NULL;
     gpio_interrupt[pin_num].ready = false;
     FURI_CRITICAL_EXIT();
+}
+
+int32_t furi_hal_gpio_get_ext_pin_number(const GpioPin* gpio) {
+    if(gpio == &gpio_ext_pa7)
+        return 2;
+    else if(gpio == &gpio_ext_pa6)
+        return 3;
+    else if(gpio == &gpio_ext_pa4)
+        return 4;
+    else if(gpio == &gpio_ext_pb3)
+        return 5;
+    else if(gpio == &gpio_ext_pb2)
+        return 6;
+    else if(gpio == &gpio_ext_pc3)
+        return 7;
+    else if(gpio == &gpio_ext_pc1)
+        return 15;
+    else if(gpio == &gpio_ext_pc0)
+        return 16;
+    else if(gpio == &ibutton_gpio)
+        return 17;
+    else
+        return -1;
 }
 
 static void furi_hal_gpio_int_call(uint16_t pin_num) {
