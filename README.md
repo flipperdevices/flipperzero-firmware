@@ -1,5 +1,5 @@
 # PetADolphin
-Flipper app to make your dolphin be little bit happier (Reset mood)
+Flipper app to make your dolphin a little bit happier (Reset mood)
 
 1. Put directory into applications_user directory of flipperzero firmware sdk
 2. Build firmware with ./fbt COMPACT=1 DEBUG=0
