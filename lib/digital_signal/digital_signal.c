@@ -8,17 +8,26 @@
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
 
+
+struct ReloadBuffers {
+    uint32_t** buffers; /* pointers to the shadow buffers, either one or two. NULL if none */
+    uint32_t count; /* number of allocated buffers, 0, 1 or 2 */
+    uint32_t size; /* maximum entry count of a single buffer */
+    uint32_t current; /* current buffer index, the other one is most likely being used */
+    uint32_t entries; /* entries in the current buffer */
+};
+
 struct DigitalSequence {
     uint8_t signals_size;
     bool bake;
     uint32_t sequence_used;
     uint32_t sequence_size;
     DigitalSignal** signals;
-    bool* signals_prolonged;
     uint8_t* sequence;
     const GpioPin* gpio;
     uint32_t send_time;
     bool send_time_active;
+    struct ReloadBuffers* reload;
 };
 
 struct DigitalSignalInternals {
@@ -28,6 +37,7 @@ struct DigitalSignalInternals {
     const GpioPin* gpio;
     LL_DMA_InitTypeDef dma_config_gpio;
     LL_DMA_InitTypeDef dma_config_timer;
+    struct ReloadBuffers* reload;
 };
 
 #define TAG "DigitalSignal"
@@ -45,27 +55,30 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     signal->reload_reg_buff = malloc(signal->edges_max_cnt * sizeof(uint32_t));
 
     signal->internals = malloc(sizeof(DigitalSignalInternals));
-    signal->internals->reload_reg_entries = 0;
-    signal->internals->reload_reg_remainder = 0;
-    signal->internals->dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    signal->internals->dma_config_gpio.Mode = LL_DMA_MODE_CIRCULAR;
-    signal->internals->dma_config_gpio.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    signal->internals->dma_config_gpio.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    signal->internals->dma_config_gpio.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    signal->internals->dma_config_gpio.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    signal->internals->dma_config_gpio.NbData = 2;
-    signal->internals->dma_config_gpio.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    signal->internals->dma_config_gpio.Priority = LL_DMA_PRIORITY_VERYHIGH;
+    DigitalSignalInternals* internals = signal->internals;
+    internals->reload = NULL;
+    internals->reload_reg_entries = 0;
+    internals->reload_reg_remainder = 0;
 
-    signal->internals->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->ARR);
-    signal->internals->dma_config_timer.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    signal->internals->dma_config_timer.Mode = LL_DMA_MODE_NORMAL;
-    signal->internals->dma_config_timer.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    signal->internals->dma_config_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    signal->internals->dma_config_timer.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    signal->internals->dma_config_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    signal->internals->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-    signal->internals->dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
+    internals->dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    internals->dma_config_gpio.Mode = LL_DMA_MODE_CIRCULAR;
+    internals->dma_config_gpio.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    internals->dma_config_gpio.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    internals->dma_config_gpio.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    internals->dma_config_gpio.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    internals->dma_config_gpio.NbData = 2;
+    internals->dma_config_gpio.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    internals->dma_config_gpio.Priority = LL_DMA_PRIORITY_VERYHIGH;
+
+    internals->dma_config_timer.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->ARR);
+    internals->dma_config_timer.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    internals->dma_config_timer.Mode = LL_DMA_MODE_NORMAL;
+    internals->dma_config_timer.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    internals->dma_config_timer.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    internals->dma_config_timer.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    internals->dma_config_timer.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    internals->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    internals->dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
 
     return signal;
 }
@@ -79,6 +92,12 @@ void digital_signal_free(DigitalSignal* signal) {
 
     free(signal->edge_timings);
     free(signal->reload_reg_buff);
+    if(signal->internals->reload) {
+        if(signal->internals->reload->buffers) {
+            free(signal->internals->reload->buffers);
+        }
+        free(signal->internals->reload);
+    }
     free(signal->internals);
     free(signal);
 }
@@ -164,32 +183,54 @@ uint32_t digital_signal_get_edge(DigitalSignal* signal, uint32_t edge_num) {
 void digital_signal_prepare_arr(DigitalSignal* signal) {
     furi_assert(signal);
 
+    DigitalSignalInternals* internals = signal->internals;
+
     /* set up signal polarities */
-    if(signal->internals->gpio) {
-        uint32_t bit_set = signal->internals->gpio->pin;
-        uint32_t bit_reset = signal->internals->gpio->pin << 16;
+    if(internals->gpio) {
+        uint32_t bit_set = internals->gpio->pin;
+        uint32_t bit_reset = internals->gpio->pin << 16;
+
+#ifdef DEBUG_OUTPUT
+        bit_set |= gpio_ext_pb3.pin;
+        bit_reset |= gpio_ext_pb3.pin << 16;
+#endif
 
         if(signal->start_level) {
-            signal->internals->gpio_buff[0] = bit_set;
-            signal->internals->gpio_buff[1] = bit_reset;
+            internals->gpio_buff[0] = bit_set;
+            internals->gpio_buff[1] = bit_reset;
         } else {
-            signal->internals->gpio_buff[0] = bit_reset;
-            signal->internals->gpio_buff[1] = bit_set;
+            internals->gpio_buff[0] = bit_reset;
+            internals->gpio_buff[1] = bit_set;
         }
     }
 
     /* set up edge timings */
-    signal->internals->reload_reg_entries = 0;
+    internals->reload_reg_entries = 0;
 
     for(size_t pos = 0; pos < signal->edge_cnt; pos++) {
-        uint32_t pulse_duration =
-            signal->edge_timings[pos] + signal->internals->reload_reg_remainder;
+        uint32_t pulse_duration = signal->edge_timings[pos] + internals->reload_reg_remainder;
         uint32_t pulse_ticks = (pulse_duration + T_TIM_DIV2) / T_TIM;
-        signal->internals->reload_reg_remainder = pulse_duration - (pulse_ticks * T_TIM);
+        internals->reload_reg_remainder = pulse_duration - (pulse_ticks * T_TIM);
 
         if(pulse_ticks > 1) {
-            signal->reload_reg_buff[signal->internals->reload_reg_entries++] = pulse_ticks - 1;
+            signal->reload_reg_buff[internals->reload_reg_entries++] = pulse_ticks - 1;
         }
+    }
+
+    /* in case there are no shadow buffers defined, allocate and use the precalced data */
+    if(!internals->reload || !internals->reload->count) {
+        if(internals->reload) {
+            free(internals->reload);
+        }
+        internals->reload = malloc(sizeof(struct ReloadBuffers));
+        internals->reload->count = 1;
+        internals->reload->size = signal->edges_max_cnt;
+        internals->reload->buffers = malloc(sizeof(uint32_t*));
+        internals->reload->buffers[0] = malloc(internals->reload->size * sizeof(uint32_t));
+        memcpy(
+            internals->reload->buffers[0],
+            signal->reload_reg_buff,
+            internals->reload_reg_entries * sizeof(uint32_t));
     }
 }
 
@@ -202,32 +243,8 @@ static void digital_signal_stop_dma() {
 
 static void digital_signal_stop_timer() {
     LL_TIM_DisableCounter(TIM2);
-    LL_TIM_SetCounter(TIM2, 0);
-}
-
-static bool digital_signal_setup_dma(DigitalSignal* signal) {
-    furi_assert(signal);
-
-    if(!signal->internals->reload_reg_entries) {
-        return false;
-    }
-
-    signal->internals->dma_config_gpio.MemoryOrM2MDstAddress =
-        (uint32_t)signal->internals->gpio_buff;
-    signal->internals->dma_config_gpio.PeriphOrM2MSrcAddress =
-        (uint32_t) & (signal->internals->gpio->port->BSRR);
-    signal->internals->dma_config_timer.MemoryOrM2MDstAddress = (uint32_t)signal->reload_reg_buff;
-    signal->internals->dma_config_timer.NbData = signal->internals->reload_reg_entries;
-
-    /* set up DMA channel 1 and 2 for GPIO and timer copy operations */
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &signal->internals->dma_config_gpio);
-    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &signal->internals->dma_config_timer);
-
-    /* enable both DMA channels */
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
-
-    return true;
+    LL_TIM_DisableUpdateEvent(TIM2);
+    LL_TIM_DisableDMAReq_UPDATE(TIM2);
 }
 
 static void digital_signal_setup_timer() {
@@ -236,15 +253,45 @@ static void digital_signal_setup_timer() {
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
     LL_TIM_SetPrescaler(TIM2, 0);
-    LL_TIM_SetAutoReload(TIM2, 10);
+    LL_TIM_SetAutoReload(TIM2, 0xFFFFFFFF);
     LL_TIM_SetCounter(TIM2, 0);
-    LL_TIM_EnableUpdateEvent(TIM2);
-    LL_TIM_EnableDMAReq_UPDATE(TIM2);
 }
 
 static void digital_signal_start_timer() {
-    LL_TIM_GenerateEvent_UPDATE(TIM2);
     LL_TIM_EnableCounter(TIM2);
+    LL_TIM_EnableUpdateEvent(TIM2);
+    LL_TIM_EnableDMAReq_UPDATE(TIM2);
+    LL_TIM_GenerateEvent_UPDATE(TIM2);
+}
+
+static bool digital_signal_setup_dma(DigitalSignal* signal) {
+    furi_assert(signal);
+    DigitalSignalInternals* internals = signal->internals;
+
+    uint32_t buffer_entries = internals->reload->entries;
+    if(!buffer_entries || !internals->reload || !internals->reload->buffers) {
+        return false;
+    }
+    digital_signal_stop_dma();
+
+    internals->dma_config_gpio.MemoryOrM2MDstAddress = (uint32_t)internals->gpio_buff;
+    internals->dma_config_gpio.PeriphOrM2MSrcAddress = (uint32_t) & (internals->gpio->port->BSRR);
+    internals->dma_config_timer.MemoryOrM2MDstAddress =
+        (uint32_t)internals->reload->buffers[internals->reload->current];
+    internals->dma_config_timer.NbData = buffer_entries;
+
+    /* set up DMA channel 1 and 2 for GPIO and timer copy operations */
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &internals->dma_config_gpio);
+    LL_DMA_Init(DMA1, LL_DMA_CHANNEL_2, &internals->dma_config_timer);
+
+    /* enable both DMA channels */
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
+    LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_2);
+
+    /* buffer is used now by DMA, skip to next */
+    internals->reload->current = (internals->reload->current + 1) % internals->reload->count;
+
+    return true;
 }
 
 void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
@@ -279,7 +326,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
 void digital_sequence_alloc_signals(DigitalSequence* sequence, uint32_t size) {
     sequence->signals_size = size;
     sequence->signals = malloc(sequence->signals_size * sizeof(DigitalSignal*));
-    sequence->signals_prolonged = malloc(sequence->signals_size * sizeof(bool));
 }
 
 void digital_sequence_alloc_sequence(DigitalSequence* sequence, uint32_t size) {
@@ -298,6 +344,13 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     sequence->gpio = gpio;
     sequence->bake = false;
 
+    sequence->reload = malloc(sizeof(struct ReloadBuffers));
+    sequence->reload->count = 2;
+    sequence->reload->size = 512;
+    sequence->reload->buffers = malloc(sizeof(uint32_t*));
+    sequence->reload->buffers[0] = malloc(sequence->reload->size * sizeof(uint32_t));
+    sequence->reload->buffers[1] = malloc(sequence->reload->size * sizeof(uint32_t));
+
     digital_sequence_alloc_signals(sequence, 32);
     digital_sequence_alloc_sequence(sequence, size);
 
@@ -311,9 +364,17 @@ void digital_sequence_free(DigitalSequence* sequence) {
         return;
     }
 
+    /* de-assign the shared reload buffer */
+    for(int pos = 0; pos < sequence->signals_size; pos++) {
+        if(sequence->signals[pos]) {
+            sequence->signals[pos]->internals->reload = NULL;
+        }
+    }
+
     free(sequence->signals);
     free(sequence->sequence);
-    free(sequence->signals_prolonged);
+    free(sequence->reload->buffers);
+    free(sequence->reload);
     free(sequence);
 }
 
@@ -325,9 +386,37 @@ void digital_sequence_set_signal(
     furi_assert(signal);
     furi_assert(signal_index < sequence->signals_size);
 
+    /* if there is already a signal, unassign the shared reload buffer */
+    if(sequence->signals[signal_index]) {
+        sequence->signals[signal_index]->internals->reload = NULL;
+    }
+
     sequence->signals[signal_index] = signal;
     signal->internals->gpio = sequence->gpio;
     signal->internals->reload_reg_remainder = 0;
+
+    /* free the original reload buffer */
+    if(signal->internals->reload) {
+        if(signal->internals->reload->buffers) {
+            for(uint32_t pos = 0; pos < signal->internals->reload->count; pos++) {
+                free(signal->internals->reload->buffers[pos]);
+            }
+            free(signal->internals->reload->buffers);
+        }
+        free(signal->internals->reload);
+    }
+
+    /* assign the sequence's shared reload buffer */
+    signal->internals->reload = sequence->reload;
+
+    /* ensure it is big enough and reallocate if not */
+    if(sequence->reload->size < signal->edges_max_cnt) {
+        free(sequence->reload->buffers);
+
+        sequence->reload->size = signal->edges_max_cnt;
+        sequence->reload->buffers[0] = malloc(sequence->reload->size * sizeof(uint32_t));
+        sequence->reload->buffers[1] = malloc(sequence->reload->size * sizeof(uint32_t));
+    }
 
     digital_signal_prepare_arr(signal);
 }
@@ -352,10 +441,11 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
 }
 
 static void digital_signal_update_dma(DigitalSignal* signal) {
+    struct ReloadBuffers* reload = signal->internals->reload;
     /* keep them prepared in registers so there is less delay when writing */
     register bool restart_needed = false;
-    register volatile uint16_t len = signal->internals->reload_reg_entries;
-    register volatile uint32_t addr = (uint32_t)signal->reload_reg_buff;
+    register volatile uint16_t len = reload->entries;
+    register volatile uint32_t addr = (uint32_t)reload->buffers[reload->current];
 
     /* first make sure it will still count down, else we will risk waiting infinitely */
     const uint32_t wait_ms = 10;
@@ -374,6 +464,8 @@ static void digital_signal_update_dma(DigitalSignal* signal) {
         /* if transfer was already active, wait till DMA is done and the last timer ticks are running */
         while(LL_DMA_GetDataLength(DMA1, LL_DMA_CHANNEL_2)) {
         }
+    } else {
+        FURI_LOG_D(TAG, "digital_sequence_send_signal: DMA hung, restart needed");
     }
 
     LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_2);
@@ -384,6 +476,8 @@ static void digital_signal_update_dma(DigitalSignal* signal) {
     if(restart_needed) {
         LL_TIM_GenerateEvent_UPDATE(TIM2);
     }
+
+    reload->current = (reload->current + 1) % reload->count;
 }
 
 static bool digital_sequence_send_signal(DigitalSequence* sequence, DigitalSignal* signal) {
@@ -437,7 +531,12 @@ DigitalSignal* digital_sequence_bake(DigitalSequence* sequence) {
 bool digital_sequence_send(DigitalSequence* sequence) {
     furi_assert(sequence);
 
+    struct ReloadBuffers* reload = sequence->reload;
+
     furi_hal_gpio_init(sequence->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+#ifdef DEBUG_OUTPUT
+    furi_hal_gpio_init(&gpio_ext_pb3, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+#endif
 
     if(sequence->bake) {
         DigitalSignal* sig = digital_sequence_bake(sequence);
@@ -450,9 +549,16 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     int32_t remainder = 0;
     FURI_CRITICAL_ENTER();
 
+    bool traded_first = false;
+
     for(uint32_t pos = 0; pos < sequence->sequence_used; pos++) {
         uint8_t signal_index = sequence->sequence[pos];
         DigitalSignal* sig = sequence->signals[signal_index];
+        DigitalSignal* sig_next = NULL;
+
+        if(pos + 1 < sequence->sequence_used) {
+            sig_next = sequence->signals[sequence->sequence[pos + 1]];
+        }
 
         if(!sig) {
             FURI_LOG_D(
@@ -463,27 +569,39 @@ bool digital_sequence_send(DigitalSequence* sequence) {
             break;
         }
 
-        /* when we are too late more than half a tick, make the first edge temporarily longer */
-        bool needs_prolongation = false;
+        /* if the first edge is handled by prolonging the last pulse of the previous signal, skip it here */
+        reload->entries = sig->edge_cnt - (traded_first ? 1 : 0);
 
+        memcpy(
+            reload->buffers[reload->current],
+            &sig->reload_reg_buff[traded_first ? 1 : 0],
+            reload->entries * sizeof(uint32_t));
+        traded_first = false;
+
+        /* when we are too late more than half a tick, make the first edge temporarily longer */
         if(remainder >= T_TIM_DIV2) {
             remainder -= T_TIM;
-            needs_prolongation = true;
+            reload->buffers[reload->current][0] += 1;
         }
 
         /* update the total remainder */
         remainder += sig->internals->reload_reg_remainder;
 
-        /* do we need to update the prolongation? */
-        if(needs_prolongation != sequence->signals_prolonged[signal_index]) {
-            if(needs_prolongation) {
-                sig->edge_timings[0]++;
-            } else {
-                sig->edge_timings[0]--;
+        /* when a signal ends with the same level as the next signal begins, let the fist signal generate the whole pulse */
+        if(sig_next) {
+            /* beware, we do not want the level after the last edge, but the last level before that edge */
+            bool end_level = sig->start_level ^ ((sig->edge_cnt % 2) == 0);
+
+            /* take from the next, add it to the first */
+            if(end_level == sig_next->start_level) {
+                /* add the traded prolongation to the last pulse */
+                reload->buffers[reload->current][reload->entries - 1] +=
+                    sig_next->reload_reg_buff[0];
+                traded_first = true;
             }
-            sequence->signals_prolonged[signal_index] = needs_prolongation;
         }
 
+        /* transmit */
         bool success = digital_sequence_send_signal(sequence, sig);
 
         if(!success) {
@@ -498,16 +616,6 @@ bool digital_sequence_send(DigitalSequence* sequence) {
     digital_signal_stop_timer();
     digital_signal_stop_dma();
     FURI_CRITICAL_EXIT();
-
-    /* undo previously prolonged edges */
-    for(uint32_t pos = 0; pos < sequence->signals_size; pos++) {
-        DigitalSignal* sig = sequence->signals[pos];
-
-        if(sig && sequence->signals_prolonged[pos]) {
-            sig->edge_timings[0]--;
-            sequence->signals_prolonged[pos] = false;
-        }
-    }
 
     return true;
 }
