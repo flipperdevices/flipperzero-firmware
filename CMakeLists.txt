@@ -57,3 +57,24 @@ endif()
 if(DEFINED MD5_ENABLED OR CONFIG_SERIAL_FLASHER_MD5_ENABLED)
     target_compile_definitions(${target} PUBLIC -DMD5_ENABLED=1)
 endif()
+
+if(DEFINED CONFIG_SERIAL_FLASHER_RESET_HOLD_TIME_MS AND DEFINED CONFIG_SERIAL_FLASHER_BOOT_HOLD_TIME_MS)
+    target_compile_definitions(${target}
+    PUBLIC
+        SERIAL_FLASHER_RESET_HOLD_TIME_MS=${CONFIG_SERIAL_FLASHER_RESET_HOLD_TIME_MS}
+        SERIAL_FLASHER_BOOT_HOLD_TIME_MS=${CONFIG_SERIAL_FLASHER_BOOT_HOLD_TIME_MS}
+    )
+else()
+    if(NOT DEFINED SERIAL_FLASHER_RESET_HOLD_TIME_MS)
+        target_compile_definitions(${target}
+        PUBLIC
+            SERIAL_FLASHER_RESET_HOLD_TIME_MS=100
+        )
+    endif()
+    if(NOT DEFINED SERIAL_FLASHER_BOOT_HOLD_TIME_MS)
+        target_compile_definitions(${target}
+        PUBLIC
+            SERIAL_FLASHER_BOOT_HOLD_TIME_MS=50
+        )
+    endif()
+endif()

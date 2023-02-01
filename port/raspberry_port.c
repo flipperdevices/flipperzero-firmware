@@ -261,10 +261,8 @@ esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_
 void loader_port_enter_bootloader(void)
 {
     gpioWrite(s_gpio0_trigger_pin, 0);
-    gpioWrite(s_reset_trigger_pin, 0);
-    loader_port_delay_ms(50);
-    gpioWrite(s_reset_trigger_pin, 1);
-    loader_port_delay_ms(50);
+    loader_port_reset_target();
+    loader_port_delay_ms(SERIAL_FLASHER_BOOT_HOLD_TIME_MS);
     gpioWrite(s_gpio0_trigger_pin, 1);
 }
 
@@ -272,7 +270,7 @@ void loader_port_enter_bootloader(void)
 void loader_port_reset_target(void)
 {
     gpioWrite(s_reset_trigger_pin, 0);
-    loader_port_delay_ms(50);
+    loader_port_delay_ms(SERIAL_FLASHER_RESET_HOLD_TIME_MS);
     gpioWrite(s_reset_trigger_pin, 1);
 }
 
