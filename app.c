@@ -24,7 +24,7 @@
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
 #define MAXBUL 50 /* Max bullets on the screen. */
 //@todo MAX Asteroids
-#define MAXAST 0 //32 /* Max asteroids on the screen. */
+#define MAXAST 32 /* Max asteroids on the screen. */
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
 #define POWERUPSTTL 400 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
@@ -160,6 +160,74 @@ const NotificationSequence sequence_bullet_fired = {
     &message_delay_1,
 
     // &message_note_e5,
+    &message_vibro_off,
+    &message_sound_off,
+    NULL,
+};
+
+const NotificationSequence sequence_nuke = {
+    &message_red_255,
+    &message_vibro_on,
+    // &message_note_g5, // Play sound but currently disabled
+    &message_delay_250,
+    &message_red_0,
+    &message_vibro_off,
+
+    &message_red_255,
+    &message_vibro_on,
+    // &message_note_g5, // Play sound but currently disabled
+    &message_delay_250,
+    &message_red_0,
+    &message_vibro_off,
+
+    &message_vibro_on,
+    &message_red_255,
+    &message_delay_100,
+    &message_red_0,
+    &message_vibro_off,
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_on,
+    &message_red_255,
+    &message_delay_100,
+    &message_red_0,
+    &message_vibro_off,
+
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_on,
+    &message_red_255,
+    &message_delay_100,
+    &message_red_0,
+    &message_vibro_off,
+
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_on,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_red_0,
+    &message_vibro_off,
+
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_on,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_red_0,
+    &message_vibro_off,
+
+    &message_delay_1,
+    &message_vibro_on,
+    &message_delay_1,
+    &message_delay_1,
+    &message_red_0,
     &message_vibro_off,
     &message_sound_off,
     NULL,
@@ -318,7 +386,7 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
     // Display power up to be picked up
     switch(p->powerUpType) {
     case PowerUpTypeFirePower:
-        canvas_draw_icon(canvas, p->x, p->y, &I_ammo_11x11);
+        canvas_draw_icon(canvas, p->x, p->y, &I_firepower_shifted_9x10);
         break;
     case PowerUpTypeShield:
         canvas_draw_icon(canvas, p->x, p->y, &I_split_shield_10x10);
@@ -486,7 +554,7 @@ void ship_fire_bullet(AsteroidsApp* app) {
     if(isPowerUpActive(app, PowerUpTypeFirePower) == false && app->bullets_num >= 5) return;
 
     // Double the Fire Power
-    if(isPowerUpActive(app, PowerUpTypeFirePower) && (app->bullets_num == (MAXBUL))) return;
+    if(isPowerUpActive(app, PowerUpTypeFirePower) && (app->bullets_num >= (MAXBUL))) return;
 
     notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
     Bullet* b = &app->bullets[app->bullets_num];
@@ -594,9 +662,10 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
     // Randomly select power up for display
     //@todo Random Power Up Select
-    PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
-    // PowerUpType selected_powerUpType = PowerUpTypeFirePower;
+    // PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
+    PowerUpType selected_powerUpType = PowerUpTypeFirePower;
     // PowerUpType selected_powerUpType = PowerUpTypeLife;
+    // PowerUpType selected_powerUpType = PowerUpTypeNuke;
 
     FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
@@ -637,6 +706,9 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
 //@todo remove_powerUp
 void remove_powerUp(AsteroidsApp* app, int id) {
+    // Invalid ID, ignore
+    if(id <= 0) return;
+
     // TODO: Break this out into object types that set the game state
     if(app->powerUps[id].powerUpType == PowerUpTypeFirePower) {
         app->bullet_min_period = 200;
@@ -647,6 +719,12 @@ void remove_powerUp(AsteroidsApp* app, int id) {
      * array dense, which is an advantage when looping. */
     int n = --app->powerUps_num;
     if(n && id != n) app->powerUps[id] = app->powerUps[n];
+}
+
+void remove_all_astroids_and_bullets(AsteroidsApp* app) {
+    app->score += app->asteroids_num;
+    app->asteroids_num = 0;
+    app->bullets_num = 0;
 }
 
 //@todo powerUp_was_hit
@@ -662,6 +740,11 @@ void powerUp_was_hit(AsteroidsApp* app, int id) {
     case PowerUpTypeFirePower:
         p->ttl = POWERUPSTTL / 2;
         app->bullet_min_period = 100;
+        break;
+    case PowerUpTypeNuke:
+        //TODO: Animate explosion
+        notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_nuke);
+        remove_all_astroids_and_bullets(app);
         break;
     default:
         break;
@@ -812,6 +895,8 @@ void detect_collisions(AsteroidsApp* app) {
         if(objects_are_colliding(a->x, a->y, a->size, app->ship.x, app->ship.y, 4, 1)) {
             if(isPowerUpActive(app, PowerUpTypeShield)) {
                 // Asteroid was hit with shield
+                notification_message(
+                    furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
                 asteroid_was_hit(app, j);
             } else {
                 // No sheild active, take damage
