@@ -4,32 +4,6 @@
 bool is_configESPCamera = false;
 bool is_initMicroSDCard = false;
 
-#include "FS.h"                // SD Card ESP32
-#include "SD_MMC.h"            // SD Card ESP32
-#include "esp_camera.h"
-#include "soc/soc.h"           // Disable brownout problems
-#include "soc/rtc_cntl_reg.h"  // Disable brownout problems
-#include "driver/rtc_io.h"
-
-// Pin definition for CAMERA_MODEL_AI_THINKER
-#define PWDN_GPIO_NUM     32
-#define RESET_GPIO_NUM    -1
-#define XCLK_GPIO_NUM      0
-#define SIOD_GPIO_NUM     26
-#define SIOC_GPIO_NUM     27
-
-#define Y9_GPIO_NUM       35
-#define Y8_GPIO_NUM       34
-#define Y7_GPIO_NUM       39
-#define Y6_GPIO_NUM       36
-#define Y5_GPIO_NUM       21
-#define Y4_GPIO_NUM       19
-#define Y3_GPIO_NUM       18
-#define Y2_GPIO_NUM        5
-#define VSYNC_GPIO_NUM    25
-#define HREF_GPIO_NUM     23
-#define PCLK_GPIO_NUM     22
-
 void configESPCamera() {
   if (is_configESPCamera) {
     Serial.println("cam1");
@@ -357,6 +331,16 @@ void CommandLine::runCommand(String input) {
     }
   }
 #ifdef ESP32_CAM
+
+  else if (cmd_args.get(0) == CAM_STREAM) {
+    Serial.print("Switching to Streaming mode. Continue in camera app. Reset ESP32CAM to go back to Marauder mode.");
+    delay(5000);
+    cam_stream_setup();
+    for (;;)
+      cam_stream_loop();
+
+  }
+
   else if (cmd_args.get(0) == CAM_FLASHLIGHT) {
     pinMode(4, OUTPUT);
     digitalWrite(4, !digitalRead(4));

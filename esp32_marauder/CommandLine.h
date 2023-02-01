@@ -38,6 +38,7 @@ extern const String PROGMEM version_number;
 // Camera functions
 const char PROGMEM CAM_PHOTO[] = "photo";
 const char PROGMEM CAM_FLASHLIGHT[] = "flashlight";
+const char PROGMEM CAM_STREAM[] = "stream";
 #endif
 
 // Admin
