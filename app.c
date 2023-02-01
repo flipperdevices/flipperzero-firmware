@@ -20,12 +20,13 @@
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
 #define GAME_START_LIVES 3
+#define MAXLIVES 8 /* Max lives allowed. */
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
-#define MAXBUL 5 /* Max bullets on the screen. */
+#define MAXBUL 50 /* Max bullets on the screen. */
 //@todo MAX Asteroids
 #define MAXAST 0 //32 /* Max asteroids on the screen. */
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
-#define POWERUPSTTL 10 * 1000 /* Max powerup time to live, in ticks. */
+#define POWERUPSTTL 100 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
 #define SAVING_DIRECTORY "/ext/apps/Games"
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
@@ -106,9 +107,10 @@ typedef struct AsteroidsApp {
     int powerUps_num; /* Active powerups. */
 
     /* Bullets state. */
-    struct Bullet bullets[MAXBUL * 2]; /* Each bullet state. */
+    struct Bullet bullets[MAXBUL]; /* Each bullet state. */
     int bullets_num; /* Active bullets. */
     uint32_t last_bullet_tick; /* Tick the last bullet was fired. */
+    uint32_t bullet_min_period; /* Minimum time between bullets in ms. */
 
     /* Asteroids state. */
     Asteroid asteroids[MAXAST]; /* Each asteroid state. */
@@ -466,11 +468,11 @@ bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, flo
 //@todo ship_fire_bullet
 /* Create a new bullet headed in the same direction of the ship. */
 void ship_fire_bullet(AsteroidsApp* app) {
-    // No power ups, only MAXBUL allowed
-    if(isPowerUpActive(app, PowerUpTypeFirePower) == false && app->bullets_num == MAXBUL) return;
+    // No power ups, only 5 bullets allowed
+    if(isPowerUpActive(app, PowerUpTypeFirePower) == false && app->bullets_num >= 5) return;
 
     // Double the Fire Power
-    if(isPowerUpActive(app, PowerUpTypeFirePower) && (app->bullets_num == (MAXBUL * 2))) return;
+    if(isPowerUpActive(app, PowerUpTypeFirePower) && (app->bullets_num == (MAXBUL))) return;
 
     notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
     Bullet* b = &app->bullets[app->bullets_num];
@@ -597,7 +599,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
         //It also keeps it away from the lives and score at the top of screen
         x = rand() % (SCREEN_XRES - (int)size * 2);
         y = rand() % (SCREEN_YRES - (int)size * 2);
-    } while(distance(app->ship.x, app->ship.y, x, y) < min_distance + size);
+    } while(distance(app->ship.x, app->ship.y, (float)x, (float)y) < min_distance + size);
 
     PowerUp* p = &app->powerUps[app->powerUps_num++];
     p->x = x;
@@ -606,7 +608,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     p->vx = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
     p->vy = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
     p->display_ttl = 500;
-    p->ttl = POWERUPSTTL;
+    p->ttl = POWERUPSTTL / 2;
     p->size = (int)size;
     // p->size = size;
     // p->rot = 0;
@@ -621,10 +623,14 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
 //@todo remove_powerUp
 void remove_powerUp(AsteroidsApp* app, int id) {
+    // TODO: Break this out into object types that set the game state
+    if(app->powerUps[id].powerUpType == PowerUpTypeFirePower) {
+        app->bullet_min_period = 200;
+    }
+
     /* Replace the top powerUp with the empty space left
      * by the removal of this one. This way we always take the
      * array dense, which is an advantage when looping. */
-
     int n = --app->powerUps_num;
     if(n && id != n) app->powerUps[id] = app->powerUps[n];
 }
@@ -636,12 +642,12 @@ void powerUp_was_hit(AsteroidsApp* app, int id) {
 
     switch(p->powerUpType) {
     case PowerUpTypeLife:
-        if(app->lives <= GAME_START_LIVES) app->lives++;
+        if(app->lives < MAXLIVES) app->lives++;
         remove_powerUp(app, id);
         break;
-    // case PowerUpTypeFirePower:
-    //     app->powerUps[id].powerUpType = PowerUpTypeFirePower;
-    //     break;
+    case PowerUpTypeFirePower:
+        app->bullet_min_period = 100;
+        break;
     default:
         break;
     }
@@ -697,6 +703,7 @@ void restart_game(AsteroidsApp* app) {
     app->bullets_num = 0;
     app->powerUps_num = 0;
     app->last_bullet_tick = 0;
+    app->bullet_min_period = 200;
     app->asteroids_num = 0;
     app->ship_hit = 0;
 }
@@ -854,9 +861,8 @@ void game_tick(void* ctx) {
      * asteroids_update_keypress_state() since depends on exact
      * pressure timing. */
     if(app->fire) {
-        uint32_t bullet_min_period = 200; // In milliseconds
         uint32_t now = furi_get_tick();
-        if(now - app->last_bullet_tick >= bullet_min_period) {
+        if(now - app->last_bullet_tick >= app->bullet_min_period) {
             ship_fire_bullet(app);
             app->last_bullet_tick = now;
         }
