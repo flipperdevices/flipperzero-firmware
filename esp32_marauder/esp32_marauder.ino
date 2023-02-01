@@ -160,7 +160,7 @@ void setup()
 
   delay(10);*/
 
-  Serial.begin(115200);
+  Serial.begin(230400);
   
   //Serial.begin(115200);
 

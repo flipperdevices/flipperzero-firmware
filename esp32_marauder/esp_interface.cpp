@@ -92,7 +92,7 @@ void EspInterface::bootProgramMode() {
 
 void EspInterface::bootRunMode() {
   Serial.end();
-  Serial.begin(115200);
+  Serial.begin(230400);
   Serial.println("[!] Setting ESP12 in run mode...");
   digitalWrite(ESP_ZERO, HIGH);
   delay(100);
