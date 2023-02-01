@@ -389,7 +389,7 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
         canvas_draw_icon(canvas, p->x, p->y, &I_firepower_shifted_9x10);
         break;
     case PowerUpTypeShield:
-        canvas_draw_icon(canvas, p->x, p->y, &I_split_shield_10x10);
+        canvas_draw_icon(canvas, p->x, p->y, &I_shield_frame);
         break;
     case PowerUpTypeLife:
         // Draw a heart
@@ -666,6 +666,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     // PowerUpType selected_powerUpType = PowerUpTypeFirePower;
     // PowerUpType selected_powerUpType = PowerUpTypeLife;
     // PowerUpType selected_powerUpType = PowerUpTypeNuke;
+    // PowerUpType selected_powerUpType = PowerUpTypeShield;
 
     FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
