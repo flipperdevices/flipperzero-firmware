@@ -32,7 +32,7 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
      NO_TIP},
     {"Send command", {""}, 1, {""}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Fast cmd",
-     {"AT", "Param", "Band", "ADDRESS", "NETWORKID", "CRFOP?", "SEND", "RCV"},
+     {"AT", "Param", "Band", "ADDRESS", "NETWORKID", "CRFOP", "SEND", "RCV"},
      8,
      {"AT", "AT+PARAMETER?", "AT+BAND?", "AT+ADDRESS?", "AT+NETWORKID?", "AT+CRFOP?", "AT+SEND=<Address>,<Length>,<Data>", "+RCV=<Address>,<Length>,<Data>,<RSSI>,<SNR>"},
      INPUT_ARGS,
