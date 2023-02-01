@@ -662,8 +662,8 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
     // Randomly select power up for display
     //@todo Random Power Up Select
-    // PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
-    PowerUpType selected_powerUpType = PowerUpTypeFirePower;
+    PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
+    // PowerUpType selected_powerUpType = PowerUpTypeFirePower;
     // PowerUpType selected_powerUpType = PowerUpTypeLife;
     // PowerUpType selected_powerUpType = PowerUpTypeNuke;
 
