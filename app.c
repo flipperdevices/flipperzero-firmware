@@ -721,7 +721,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 //@todo remove_powerUp
 void remove_powerUp(AsteroidsApp* app, int id) {
     // Invalid ID, ignore
-    if(id <= 0) return;
+    if(id < 0) return;
 
     // TODO: Break this out into object types that set the game state
     if(app->powerUps[id].powerUpType == PowerUpTypeFirePower) {
@@ -879,6 +879,8 @@ void update_powerUp_status(AsteroidsApp* app) {
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
             remove_powerUp(app, j);
+            j--; /* Process this power up index again: the removal will
+                    fill it with the top power up to take the array dense. */
         } else if(app->powerUps[j].display_ttl > 0) {
             app->powerUps[j].display_ttl--;
         }
