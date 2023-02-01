@@ -1,5 +1,5 @@
 # LoRA Terminal for Flipper Zero
-[Flipper Zero](https://flipperzero.one/) app to control various devices via UART interface.
+[Flipper Zero](https://flipperzero.one/) app to control Lora Breakout board.
 
 ## Capabilities
 - Read log and command output by uart
@@ -17,7 +17,7 @@
 Info: If possible, do not power your devices from 3V3 (pin 9) Flipper Zero. It does not support hot plugging.
 
 ## Keyboard
-UART_terminal uses its own special keyboard for work, which has all the symbols necessary for working in the console.
+LoRA_terminal uses its own special keyboard for work, which has all the symbols necessary for working in the console.
 
 To accommodate more characters on a small display, some characters are called up by holding.
 
@@ -25,7 +25,7 @@ To accommodate more characters on a small display, some characters are called up
 
 
 ## How to install
-Copy the contents of the repository to the applications_user/uart_terminal folder Flipper Zero firmware and build app with the command ./fbt fap_LORA-Term.
+Copy the contents of the repository to the applications_user/LoRA_terminal folder Flipper Zero firmware and build app with the command ./fbt fap_LoRA-Term.
 
 Or use the tool [uFBT](https://github.com/flipperdevices/flipperzero-ufbt) for building applications for Flipper Zero.
 

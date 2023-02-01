@@ -89,7 +89,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
 
         if(0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             const char* help_msg =
-                "UART terminal for Flipper\n\nI'm in github: cool4uma\n\nThis app is a modified\nWiFi Marauder companion,\nThanks 0xchocolate(github)\nfor great code and app.\n\n";
+                "LoRA terminal for Flipper\n\nI'm in github: aafksab\n\nThis app is a modified\nUART Terminal,\nThanks cool4uma(github)\nfor great code and app.\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
         }
@@ -113,9 +113,12 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
 
     // Send command with newline '\n'
     if(app->is_command && app->selected_tx_string) {
-        uart_terminal_uart_tx(
-            (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
-        uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+        char buffer[50];
+        char ending[] = "\r\n";
+        snprintf(buffer,50,"%s %s",(app->selected_tx_string),ending);
+        uint8_t* buffer_ptr = (uint8_t*)&buffer[0];
+        FURI_LOG_D("app", "%s", buffer_ptr);
+        uart_terminal_uart_tx(buffer_ptr, strlen((char*)buffer_ptr));
     }
 }
 
