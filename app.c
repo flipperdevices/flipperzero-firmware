@@ -13,6 +13,7 @@
 #include <math.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <asteroids_icons.h>
 
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 1
@@ -308,60 +309,40 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
     //@todo render_callback
 
     // Just return if power up has already been picked up
-    FURI_LOG_I(TAG, "[draw_powerUps] Display TTL: %lu", p->display_ttl);
+    // FURI_LOG_I(TAG, "[draw_powerUps] Display TTL: %lu", p->display_ttl);
     if(p->display_ttl == 0) return;
 
     canvas_set_color(canvas, ColorXOR);
 
-    int BOX_SIZE = p->size * 2;
     switch(p->powerUpType) {
     case PowerUpTypeFirePower:
-        // Draw box with letter F inside
-        FURI_LOG_D(
-            TAG,
-            "[draw_powerUps] p->size: %i x:%i y:%i BOX_SIZE: %i",
-            p->size,
-            abs((int)p->x - (int)(p->size / 2)),
-            abs((int)p->y - (int)(p->size / 2)),
-            BOX_SIZE);
-        canvas_draw_frame(
-            canvas,
-            abs((int)p->x - (int)(p->size / 2)),
-            abs((int)p->y - (int)(p->size / 2)),
-            BOX_SIZE,
-            BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y, "F");
+        canvas_draw_icon(canvas, p->x, p->y, &I_ammo_11x11);
         break;
     case PowerUpTypeShield:
         // Draw box with letter S inside
-        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "S");
+        canvas_draw_str(canvas, p->x, p->y, "S");
         break;
     case PowerUpTypeLife:
-        // Draw box with letter L inside
-        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "L");
+        // Draw a heart
+        canvas_draw_icon(canvas, p->x, p->y, &I_heart_10x10);
         break;
     case PowerUpTypeNuke:
         // Draw box with letter N inside
-        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "N");
+        // canvas_draw_disc(canvas, p->x, p->y, p->size);
+        canvas_draw_str(canvas, p->x, p->y, "N");
         break;
     case PowerUpTypeRadialFire:
         // Draw box with letter R inside
-        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "R");
+        canvas_draw_str(canvas, p->x, p->y, "R");
         break;
     case PowerUpTypeAssist:
         // Draw box with letter A inside
-        canvas_draw_frame(canvas, p->x - p->size / 2, p->y - p->size / 2, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y - BOX_SIZE / 2, "A");
+        canvas_draw_str(canvas, p->x, p->y, "A");
         break;
     default:
         //@todo Uknown Power Up Type Detected
         // Draw box with letter U inside
-        canvas_draw_frame(canvas, p->x, p->y, BOX_SIZE, BOX_SIZE);
-        canvas_draw_str(canvas, p->x, p->y, "U");
+        canvas_draw_str(canvas, p->x, p->y, "?");
         FURI_LOG_E(TAG, "Unexpected Power Up Type Detected: %i", p->powerUpType);
         break;
     }
@@ -597,8 +578,9 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
     // Randomly select power up for display
     //@todo Random Power Up Select
-    // PowerUpType powerUpType = rand() % Number_of_PowerUps;
-    PowerUpType selected_powerUpType = PowerUpTypeFirePower;
+    PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
+    // PowerUpType selected_powerUpType = PowerUpTypeFirePower;
+    // PowerUpType selected_powerUpType = PowerUpTypeLife;
 
     FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
@@ -611,8 +593,10 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     float min_distance = 20;
     float x, y;
     do {
-        x = rand() % SCREEN_XRES;
-        y = rand() % SCREEN_YRES;
+        //size*2 to make sure power up is not spawned on the edge of the screen
+        //It also keeps it away from the lives and score at the top of screen
+        x = rand() % (SCREEN_XRES - (int)size * 2);
+        y = rand() % (SCREEN_YRES - (int)size * 2);
     } while(distance(app->ship.x, app->ship.y, x, y) < min_distance + size);
 
     PowerUp* p = &app->powerUps[app->powerUps_num++];
@@ -652,7 +636,8 @@ void powerUp_was_hit(AsteroidsApp* app, int id) {
 
     switch(p->powerUpType) {
     case PowerUpTypeLife:
-        if(app->lives < GAME_START_LIVES) app->lives++;
+        if(app->lives <= GAME_START_LIVES) app->lives++;
+        remove_powerUp(app, id);
         break;
     // case PowerUpTypeFirePower:
     //     app->powerUps[id].powerUpType = PowerUpTypeFirePower;
