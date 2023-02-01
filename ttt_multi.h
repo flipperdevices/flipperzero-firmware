@@ -15,7 +15,7 @@
 #include <input/input.h>
 
 #include "scenes/ttt_multi_scene.h"
-#include "helpers/ttt_multi_game.h"
+#include "views/ttt_multi_game_view.h"
 
 #include "ttt_multi_icons.h"
 
@@ -25,12 +25,12 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    TttMultiGame* game;
-
     // Common views
     Submenu* submenu;
+    TttMultiGameView* game_view;
 } TttMultiApp;
 
 typedef enum {
     TttMultiViewMenu,
+    TttMultiViewGame,
 } TttMultiView;
