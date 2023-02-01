@@ -13,6 +13,9 @@ Then run the command:
  ```
 The application will be compiled and copied onto your device. 
 
+## Documentation / Tutorials
+<a href="Tutorials">Documentation</a>
+
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
 
