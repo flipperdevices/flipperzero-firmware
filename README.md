@@ -18,11 +18,9 @@ Press the 'ok' button (button in the centre of joypad) to pause/unpause the wave
 
 ## To Do
 
+* Voltage measurements for max/min of waveform seem a bit off currently, need to investigate further
 * Customisable input pin
-* Check time period is set correctly
-* Test with signal generator
 * Trigger type mode
-* Way to select and measure voltage from waveform
 * FFT
 * ...
 
