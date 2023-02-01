@@ -351,6 +351,18 @@ void draw_left_lives(Canvas* const canvas, AsteroidsApp* app) {
     }
 }
 
+bool should_draw_powerUp(PowerUp* const p) {
+    // Just return if power up has already been picked up
+    if(p->display_ttl == 0) return false;
+
+    // Begin flashing power up when it is about to expire
+    if(p->display_ttl < 100) {
+        return p->display_ttl % 8 > 0;
+    }
+
+    return true;
+}
+
 void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
     /*
     
@@ -380,6 +392,7 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
     // Just return if power up has already been picked up
     // FURI_LOG_I(TAG, "[draw_powerUps] Display TTL: %lu", p->display_ttl);
     if(p->display_ttl == 0) return;
+    if(!should_draw_powerUp(p)) return;
 
     canvas_set_color(canvas, ColorXOR);
 
@@ -691,7 +704,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     //@todo Disable Velocity
     p->vx = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
     p->vy = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
-    p->display_ttl = 500;
+    p->display_ttl = 200;
     p->ttl = POWERUPSTTL;
     p->size = (int)size;
     // p->size = size;
@@ -866,6 +879,8 @@ void update_powerUp_status(AsteroidsApp* app) {
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
             remove_powerUp(app, j);
+        } else if(app->powerUps[j].display_ttl > 0) {
+            app->powerUps[j].display_ttl--;
         }
     }
 }
