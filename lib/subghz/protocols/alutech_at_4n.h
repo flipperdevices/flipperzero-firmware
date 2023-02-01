@@ -62,7 +62,9 @@ bool subghz_protocol_decoder_alutech_at_4n_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_decoder_alutech_at_4n_deserialize(void* context, FlipperFormat* flipper_format);
+bool subghz_protocol_decoder_alutech_at_4n_deserialize(
+    void* context,
+    FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
