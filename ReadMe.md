@@ -13,6 +13,9 @@ A new version of Snake Game.
 4. The target is an apple
 5. Complete progress bar
 
+## Building FAP
+
+https://fap.playmean.xyz/Willzvul/Snake_2.0
 
 ## Links
 
