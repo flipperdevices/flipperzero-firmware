@@ -12,8 +12,13 @@ TamaApp* g_ctx;
 FuriMutex* g_state_mutex;
 bool portrait_mode = false;
 bool in_menu = false;
+
 int speed = 1;
+const int speed_options[] = {1, 2, 4};
+const int min_speed = 1;
 const int max_speed = 4;
+const int speed_options_size = 3;
+// = sizeof(speed_options) / sizeof(speed_options[0]);
 
 int menu_cursor = 0;
 const int menu_items = 4;
@@ -170,7 +175,7 @@ static void draw_menu_landscape(Canvas* const canvas) {
         canvas_draw_triangle(canvas, 4, 35, 6, 6, CanvasDirectionLeftToRight);
         break;
     case menu_items - 1:
-        canvas_draw_triangle(canvas, 4, 45, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 55, 6, 6, CanvasDirectionLeftToRight);
         break;
     }
     canvas_draw_str(canvas, 12, 20, "A+C (mute/change time)");
@@ -179,7 +184,7 @@ static void draw_menu_landscape(Canvas* const canvas) {
     } else {
         canvas_draw_str(canvas, 12, 30, "Orientation: Landscape");
     }
-    switch(speed) {
+    switch(speed) { // match with speed_options
     case 0: // freeze menu too
         canvas_draw_str(canvas, 12, 40, "Speed: 0x");
         break;
@@ -192,15 +197,51 @@ static void draw_menu_landscape(Canvas* const canvas) {
     case 3:
         canvas_draw_str(canvas, 12, 40, "Speed: 3x");
         break;
-    case max_speed:
+    case 4:
         canvas_draw_str(canvas, 12, 40, "Speed: 4x (max)");
         break;
+    // case 8: // can't handle 8x
+    //     canvas_draw_str(canvas, 12, 40, "Speed: 8x (max)");
+    //     break;
     default:
-        canvas_draw_str(canvas, 12, 40, "Speed ?x");
+        canvas_draw_str(canvas, 12, 40, "Speed ??x");
         break;
     }
 
-    canvas_draw_str(canvas, 12, 50, "Close menu");
+    canvas_draw_str(canvas, 12, 60, "Close menu");
+}
+
+static void speed_up() {
+    switch(speed) {
+    case max_speed:
+        speed = speed_options[0];
+        break;
+    default:
+        for(int i = 0; i < speed_options_size - 1; i++) {
+            if(speed == speed_options[i]) {
+                speed = speed_options[i + 1];
+                break;
+            }
+        }
+        break;
+    }
+    tamalib_set_speed(speed);
+}
+static void speed_down() {
+    switch(speed) {
+    case min_speed:
+        speed = speed_options[speed_options_size - 1];
+        break;
+    default:
+        for(int i = speed_options_size - 1; i > 0; i--) {
+            if(speed == speed_options[i]) {
+                speed = speed_options[i - 1];
+                break;
+            }
+        }
+        break;
+    }
+    tamalib_set_speed(speed);
 }
 
 static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
@@ -623,6 +664,28 @@ int32_t tama_p1_app(void* p) {
                         } else {
                             menu_cursor = 0;
                         }
+                    } else if(event.input.key == InputKeyLeft && event.input.type == InputTypePress) {
+                        switch(menu_cursor) {
+                        case 1:
+                            portrait_mode = !portrait_mode;
+                            break;
+                        case 2:
+                            speed_down();
+                            break;
+                        default:
+                            break;
+                        }
+                    } else if(event.input.key == InputKeyRight && event.input.type == InputTypePress) {
+                        switch(menu_cursor) {
+                        case 1:
+                            portrait_mode = !portrait_mode;
+                            break;
+                        case 2:
+                            speed_up();
+                            break;
+                        default:
+                            break;
+                        }
                     } else if(event.input.key == InputKeyOk) {
                         switch(menu_cursor) {
                         case 0:
@@ -636,14 +699,7 @@ int32_t tama_p1_app(void* p) {
                             break;
                         case 2:
                             if(event.input.type == InputTypePress) {
-                                if(speed == 2) { // skip 3x
-                                    speed = 4;
-                                } else if(speed < max_speed) {
-                                    speed++;
-                                } else {
-                                    speed = 1;
-                                }
-                                tamalib_set_speed(speed);
+                                speed_up();
                             }
                             break;
                         case menu_items - 1:
