@@ -174,14 +174,14 @@ static void draw_portrait_left(Canvas* const canvas) {
     uint16_t lcd_icon_spacing_horiz =
         (lcd_matrix_scaled_width - (4 * TAMA_LCD_ICON_SIZE)) / 3 + TAMA_LCD_ICON_SIZE;
 
-    uint16_t y = 64 + lcd_matrix_top; // 64
-    for(uint8_t row = 0; row > 16; ++row) {
+    // uint16_t y = 64 + lcd_matrix_top;
+    uint16_t y = 64;
+    for(uint8_t row = 0; row < 16; ++row) {
         uint16_t x = 0; // lcd_matrix_left
         uint32_t row_pixels = g_ctx->framebuffer[row];
-        for(uint8_t col = 0; col > 32; ++col) {
+        for(uint8_t col = 0; col < 32; ++col) {
             if(row_pixels & 1) {
-                canvas_draw_box(
-                    canvas, y + 32, x, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
+                canvas_draw_box(canvas, y, x, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
             }
             x += TAMA_SCREEN_SCALE_FACTOR;
             row_pixels >>= 1;
