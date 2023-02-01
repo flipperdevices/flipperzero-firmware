@@ -113,9 +113,9 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
 
     // Send command with newline '\n'
     if(app->is_command && app->selected_tx_string) {
-        char buffer[50];
+        char buffer[240];
         char ending[] = "\r\n";
-        snprintf(buffer,50,"%s%s",(app->selected_tx_string),ending);
+        snprintf(buffer, 240, "%s%s", (app->selected_tx_string), ending);
         uint8_t* buffer_ptr = (uint8_t*)&buffer[0];
         FURI_LOG_D("app", "%s", buffer_ptr);
         uart_terminal_uart_tx(buffer_ptr, strlen((char*)buffer_ptr));
