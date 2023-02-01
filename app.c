@@ -26,7 +26,7 @@
 //@todo MAX Asteroids
 #define MAXAST 0 //32 /* Max asteroids on the screen. */
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
-#define POWERUPSTTL 100 /* Max powerup time to live, in ticks. */
+#define POWERUPSTTL 400 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
 #define SAVING_DIRECTORY "/ext/apps/Games"
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
@@ -36,7 +36,6 @@
 
 /* ============================ Data structures ============================= */
 typedef enum PowerUpType {
-    // PowerUpTypeNone, // No powerup
     PowerUpTypeShield, // Shield
     PowerUpTypeLife, // Extra life
     PowerUpTypeFirePower, // Burst Fire power
@@ -316,22 +315,22 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
 
     canvas_set_color(canvas, ColorXOR);
 
+    // Display power up to be picked up
     switch(p->powerUpType) {
     case PowerUpTypeFirePower:
         canvas_draw_icon(canvas, p->x, p->y, &I_ammo_11x11);
         break;
     case PowerUpTypeShield:
-        // Draw box with letter S inside
-        canvas_draw_str(canvas, p->x, p->y, "S");
+        canvas_draw_icon(canvas, p->x, p->y, &I_split_shield_10x10);
         break;
     case PowerUpTypeLife:
         // Draw a heart
         canvas_draw_icon(canvas, p->x, p->y, &I_heart_10x10);
         break;
     case PowerUpTypeNuke:
-        // Draw box with letter N inside
         // canvas_draw_disc(canvas, p->x, p->y, p->size);
-        canvas_draw_str(canvas, p->x, p->y, "N");
+        // canvas_draw_str(canvas, p->x, p->y, "N");
+        canvas_draw_icon(canvas, p->x, p->y, &I_nuke_10x10);
         break;
     case PowerUpTypeRadialFire:
         // Draw box with letter R inside
@@ -341,6 +340,10 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
         // Draw box with letter A inside
         canvas_draw_str(canvas, p->x, p->y, "A");
         break;
+    case PowerUpTypeClone:
+        // Draw box with letter C inside
+        canvas_draw_str(canvas, p->x, p->y, "C");
+        break;
     default:
         //@todo Uknown Power Up Type Detected
         // Draw box with letter U inside
@@ -348,6 +351,14 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
         FURI_LOG_E(TAG, "Unexpected Power Up Type Detected: %i", p->powerUpType);
         break;
     }
+}
+
+void draw_shield(Canvas* const canvas, AsteroidsApp* app) {
+    if(isPowerUpActive(app, PowerUpTypeShield) == false) return;
+
+    canvas_set_color(canvas, ColorXOR);
+    // canvas_draw_disc(canvas, app->ship.x, app->ship.y, 4);
+    canvas_draw_circle(canvas, app->ship.x, app->ship.y, 10);
 }
 
 /* Given the current position, update it according to the velocity and
@@ -386,6 +397,9 @@ void render_callback(Canvas* const canvas, void* ctx) {
 
     /* Draw ship, asteroids, bullets. */
     draw_poly(canvas, &ShipPoly, app->ship.x, app->ship.y, app->ship.rot);
+
+    /* Draw shield if active. */
+    draw_shield(canvas, app);
 
     if(key_pressed_time(app, InputKeyUp) > 0) {
         notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_thrusters);
@@ -597,8 +611,8 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     do {
         //size*2 to make sure power up is not spawned on the edge of the screen
         //It also keeps it away from the lives and score at the top of screen
-        x = rand() % (SCREEN_XRES - (int)size * 2);
-        y = rand() % (SCREEN_YRES - (int)size * 2);
+        x = rand() % (SCREEN_XRES - (int)size);
+        y = rand() % (SCREEN_YRES - (int)size);
     } while(distance(app->ship.x, app->ship.y, (float)x, (float)y) < min_distance + size);
 
     PowerUp* p = &app->powerUps[app->powerUps_num++];
@@ -608,7 +622,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     p->vx = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
     p->vy = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
     p->display_ttl = 500;
-    p->ttl = POWERUPSTTL / 2;
+    p->ttl = POWERUPSTTL;
     p->size = (int)size;
     // p->size = size;
     // p->rot = 0;
@@ -646,6 +660,7 @@ void powerUp_was_hit(AsteroidsApp* app, int id) {
         remove_powerUp(app, id);
         break;
     case PowerUpTypeFirePower:
+        p->ttl = POWERUPSTTL / 2;
         app->bullet_min_period = 100;
         break;
     default:
@@ -795,7 +810,13 @@ void detect_collisions(AsteroidsApp* app) {
     for(int j = 0; j < app->asteroids_num; j++) {
         Asteroid* a = &app->asteroids[j];
         if(objects_are_colliding(a->x, a->y, a->size, app->ship.x, app->ship.y, 4, 1)) {
-            ship_was_hit(app);
+            if(isPowerUpActive(app, PowerUpTypeShield)) {
+                // Asteroid was hit with shield
+                asteroid_was_hit(app, j);
+            } else {
+                // No sheild active, take damage
+                ship_was_hit(app);
+            }
             break;
         }
     }
