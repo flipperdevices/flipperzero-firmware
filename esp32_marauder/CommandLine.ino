@@ -333,7 +333,7 @@ void CommandLine::runCommand(String input) {
 #ifdef ESP32_CAM
 
   else if (cmd_args.get(0) == CAM_STREAM) {
-    Serial.print("Switching to Streaming mode. Continue in camera app. Reset ESP32CAM to go back to Marauder mode.");
+    Serial.println("Switching to Streaming mode.\nContinue in camera.fap app.\nReset ESP32CAM to go back to Marauder mode.");
     delay(5000);
     cam_stream_setup();
     for (;;)
