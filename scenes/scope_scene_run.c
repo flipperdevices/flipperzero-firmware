@@ -33,8 +33,10 @@ const uint32_t APBPrescTable[8UL]  = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
 const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
                                       4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
 char * time;
+double freq;
 uint8_t pause=0;
 enum measureenum type;
+int toggle = 0;
 
 void Error_Handler()
 {
@@ -154,6 +156,14 @@ static void MX_ADC1_Init(void)
     }
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2){
+        toggle ^= 1;
+        furi_hal_gpio_write(&gpio_ext_pa7, toggle);
+    }
+}
+
 static void MX_TIM2_Init(uint32_t period)
 {
     TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
@@ -229,33 +239,69 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef * hadc)
 static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
+
+    int16_t index[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    float data[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    float crossings[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    float max = 0.0;
+    float min = 33000.0;
+    int count = 0;
+    char buf1[50];
+
+    for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
+        if(mvoltDisplay[x] < min)
+            min = mvoltDisplay[x];
+        if(mvoltDisplay[x] > max)
+            max = mvoltDisplay[x];
+    }
+    max /= 1000;
+    min /= 1000;
+
     switch(type){
         case m_time:
             {
-                char buf[50];
-                snprintf(buf, 50, "Time: %s", time);
-                canvas_draw_str(canvas, 10, 10, buf);
+                snprintf(buf1, 50, "Time: %s", time);
+                canvas_draw_str(canvas, 10, 10, buf1);
+                for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
+                    index[x] = -1;
+                    crossings[x] = -1.0;
+                    data[x] = ((float)mvoltDisplay[x] / 1000) - min;
+                    data[x] = ((2 / (max - min)) * data[x]) - 1;
+                }
+                for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
+                    if(data[x] >= 0 && data[x-1] < 0){
+                        index[count++] = x - 1;
+                    }
+                }
+                count=0;
+                for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
+                    if(index[x] == -1)
+                        break;
+                    crossings[count++] = (float)index[x] - data[index[x]] / (data[index[x]+1] - data[index[x]]);
+                }
+                float avg = 0.0;
+                float countv = 0.0;
+                for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
+                    if(crossings[x] == -1 || crossings[x+1] == -1)
+                        break;
+                    if(x + 1 >= ADC_CONVERTED_DATA_BUFFER_SIZE)
+                       break;
+                    avg += crossings[x+1] - crossings[x];
+                    countv += 1;
+                }
+                avg /= countv;
+                snprintf(buf1, 50, "Freq: %.1f Hz", (double)((float)freq / avg));
+                canvas_draw_str(canvas, 10, 20, buf1);
             }
             break;
         case m_voltage:
             {
-                char buf1[50];
-                char buf2[50];
-                char buf3[50];
-                double max = 0.0;
-                double min = 100.0;
-                for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
-                    if(mvoltDisplay[x] < min)
-                        min = mvoltDisplay[x];
-                    if(mvoltDisplay[x] > max)
-                        max = mvoltDisplay[x];
-                }
-                snprintf(buf1, 50, "Max: %.2fV", max/1000);
+                snprintf(buf1, 50, "Max: %.2fV", (double)max);
                 canvas_draw_str(canvas, 10, 10, buf1);
-                snprintf(buf2, 50, "Min: %.2fV", min/1000);
-                canvas_draw_str(canvas, 10, 20, buf2);
-                snprintf(buf3, 50, "Vpp: %.2fV", (max - min)/1000);
-                canvas_draw_str(canvas, 10, 30, buf3);
+                snprintf(buf1, 50, "Min: %.2fV", (double)min);
+                canvas_draw_str(canvas, 10, 20, buf1);
+                snprintf(buf1, 50, "Vpp: %.2fV", (double)(max - min));
+                canvas_draw_str(canvas, 10, 30, buf1);
             }
             break;
         default:
@@ -300,6 +346,12 @@ void scope_scene_run_on_enter(void* context) {
     pause = 0;
     type = app->measurement;
 
+    // Test purposes
+    /*
+    furi_hal_gpio_write(&gpio_ext_pa7, false);
+    furi_hal_gpio_init( &gpio_ext_pa7, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    */
+
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
     SCB->VTOR = (uint32_t)ramVector;
@@ -316,7 +368,10 @@ void scope_scene_run_on_enter(void* context) {
     MX_GPIO_Init();
     MX_DMA_Init();
 
-    uint32_t period = (uint32_t)((double)HAL_RCC_GetPCLK1Freq() * app->time);
+    // Hack -- PCLK1 - seems to be twice what is reported? Not sure how?
+    uint32_t period = (uint32_t)((double)(HAL_RCC_GetPCLK1Freq() * 2) * app->time);
+    freq = 1 / app->time;
+
     MX_TIM2_Init(period);
 
     VREFBUF->CSR |= VREFBUF_CSR_ENVR;
@@ -340,6 +395,10 @@ void scope_scene_run_on_enter(void* context) {
         Error_Handler();
     }
 
+    /*
+    // Use to generate interrupt to toggle GPIO for testing
+    if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
+    */
     if (HAL_TIM_Base_Start(&htim2) != HAL_OK) {
         Error_Handler();
     }
