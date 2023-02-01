@@ -379,7 +379,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
         {
             if (tick == 0)
             {
-                te_channel->filter_resonance = ((opcode & 0xff) << 5);
+                te_channel->filter_resonance = (opcode & 0xff);
                 sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
             }
 
@@ -388,11 +388,11 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
 
         case TE_EFFECT_RESONANCE_UP:
         {
-            te_channel->filter_resonance += ((opcode & 0xff) << 2);
+            te_channel->filter_resonance += (opcode & 0xff);
 
-            if (te_channel->filter_resonance > (0xff << 5))
+            if (te_channel->filter_resonance > 0xff)
             {
-                te_channel->filter_resonance = (0xff << 5);
+                te_channel->filter_resonance = 0xff;
             }
 
             sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
@@ -401,9 +401,9 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
 
         case TE_EFFECT_RESONANCE_DOWN:
         {
-            te_channel->filter_resonance -= ((opcode & 0xff) << 2);
+            te_channel->filter_resonance -= (opcode & 0xff);
 
-            if (te_channel->filter_resonance > (0xff << 5))
+            if (te_channel->filter_resonance > 0xff)
             {
                 te_channel->filter_resonance = 0;
             }

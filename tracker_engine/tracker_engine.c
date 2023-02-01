@@ -217,7 +217,7 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
     if (pinst->flags & TE_SET_CUTOFF)
     {
         te_channel->filter_cutoff = ((uint16_t)pinst->filter_cutoff << 3);
-        te_channel->filter_resonance = ((uint16_t)pinst->filter_resonance << 5);
+        te_channel->filter_resonance = (uint16_t)pinst->filter_resonance;
 
         sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
     }
@@ -569,6 +569,11 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                     {
                         te_channel->target_note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
                         te_channel->slide_speed = (opcode & 0xff);
+                    }
+
+                    else if ((opcode & 0x7f00) == TE_EFFECT_LEGATO)
+                    {
+                        te_channel->note = te_channel->target_note = te_channel->last_note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
                     }
 
                     else

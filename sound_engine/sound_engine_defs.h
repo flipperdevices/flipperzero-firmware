@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #define NUM_CHANNELS 4
@@ -71,8 +72,9 @@ typedef struct
 
 typedef struct
 {
-    int32_t f, q, p;
-    int32_t b0, b1, b2, b3, b4; // filter coefficients
+    // int32_t f, q, p;
+    // int32_t b0, b1, b2, b3, b4; // filter coefficients
+    int32_t cutoff, resonance, low, high, band;
 } SoundEngineFilter;
 
 typedef struct

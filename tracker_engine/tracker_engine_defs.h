@@ -102,9 +102,9 @@ typedef enum
     TE_EFFECT_ = 0x1e00, //Uxx
     TE_EFFECT_ = 0x1f00, //Vxx
     TE_EFFECT_ = 0x2000, //Wxx
-    TE_EFFECT_ = 0x2100, //Xxx
     */
 
+    TE_EFFECT_LEGATO = 0x2100,          // Xxx
     TE_EFFECT_ARPEGGIO_ABS = 0x2200,    // Yxx
     TE_EFFECT_TRIGGER_RELEASE = 0x2300, // Zxx
 
