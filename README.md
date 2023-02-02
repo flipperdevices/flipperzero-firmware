@@ -5,9 +5,9 @@ A geiger counter application for the Flipper Zero
 
 You need a **geiger counter** board to run this application. This board can be used : https://aliexpress.com/item/1005004074447209.html
 
-**Note :** this board uses a **J305** geiger tube. According this [website](https://www.rhelectronics.store/j305-glassy-geiger-muller-tube-nuclear-radiation-sensor) gamma conversion factor is **0.0081** for this tube. This value has been declared in the header of the source file so you can change it easily if needed.
+**Note :** this board uses a **J305** geiger tube. According this [website](https://www.rhelectronics.store/j305-glassy-geiger-muller-tube-nuclear-radiation-sensor) gamma conversion factor is **0.0081** for this tube. This value has been declared in the header of the source file so you can change it easily if needed. Incorrect conversion factor will give false measurements when **μSv/m** / **mSv/y** has been selected.
 
-The geiger counter board can be powered with +5V power pin of the **Flipper Zero** 
+The geiger counter board can be powered with +5V power pin of the **Flipper Zero**. This pin will automatically be enabled when the program is launched. 
 
 Output pin for measure on arduino cannot be used on the **Flipper Zero** because output voltage is too low. You can use jack out port instead. This port must be connected on **A7** GPIO :
 
