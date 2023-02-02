@@ -242,7 +242,7 @@ static void draw_menu(Canvas* const canvas) {
         if(menu_cursor3) {
             canvas_draw_triangle(canvas, 4, 56, 6, 6, CanvasDirectionLeftToRight);
         } else {
-            canvas_draw_triangle(canvas, 65, 56, 6, 6, CanvasDirectionLeftToRight);
+            canvas_draw_triangle(canvas, 67, 56, 6, 6, CanvasDirectionLeftToRight);
         }
         break;
     }
@@ -736,12 +736,14 @@ int32_t tama_p1_app(void* p) {
 
                 if(in_menu) {
                     if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
+                        menu_cursor3 = true;
                         if(menu_cursor > 0) {
                             menu_cursor -= 1;
                         } else {
                             menu_cursor = menu_items - 1;
                         }
                     } else if(event.input.key == InputKeyDown && event.input.type == InputTypePress) {
+                        menu_cursor3 = true;
                         if(menu_cursor < menu_items - 1) {
                             menu_cursor += 1;
                         } else {
