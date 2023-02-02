@@ -20,8 +20,9 @@ const int max_speed = 4;
 const int speed_options_size = 3;
 // = sizeof(speed_options) / sizeof(speed_options[0]);
 
-int menu_cursor = 0; // 1: A+C; 2: layout mode; 3: speed
-const int menu_items = 4;
+int menu_cursor = 0; // 0: A+C; 1: layout mode; 2: speed
+const int menu_items = 4; // 3: Close menu, Save & Exit
+bool menu_cursor3 = true;
 
 static const Icon* icons_list[] = {
     &I_icon_0,
@@ -162,11 +163,11 @@ static void draw_portrait_left(Canvas* const canvas) {
     // FURI_LOG_D(TAG, "Drawing frame");
     // Calculate positioning
     // uint16_t canv_width = canvas_width(canvas);
-    uint16_t canv_height = canvas_height(canvas);
+    // uint16_t canv_height = canvas_height(canvas);
     uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
-    uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
+    // uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
     // uint16_t lcd_matrix_top = 0;
-    uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
+    // uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
     // uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
     uint16_t lcd_matrix_left = 0;
     uint16_t lcd_icon_upper_left = lcd_matrix_left;
@@ -221,22 +222,28 @@ static void draw_portrait_left(Canvas* const canvas) {
 
 // static void draw_menu_portrait(Canvas* const canvas, void* cb_ctx) {}
 
-static void draw_menu_landscape(Canvas* const canvas) {
+// static void draw_menu_landscape(Canvas* const canvas)
+
+static void draw_menu(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_str_aligned(canvas, 64, 6, AlignCenter, AlignCenter, "Menu");
     canvas_draw_line(canvas, 0, 10, 128, 10);
     switch(menu_cursor) {
     case 0:
-        canvas_draw_triangle(canvas, 4, 15, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 16, 6, 6, CanvasDirectionLeftToRight);
         break;
     case 1:
-        canvas_draw_triangle(canvas, 4, 25, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 26, 6, 6, CanvasDirectionLeftToRight);
         break;
     case 2:
-        canvas_draw_triangle(canvas, 4, 35, 6, 6, CanvasDirectionLeftToRight);
+        canvas_draw_triangle(canvas, 4, 36, 6, 6, CanvasDirectionLeftToRight);
         break;
     case menu_items - 1:
-        canvas_draw_triangle(canvas, 4, 55, 6, 6, CanvasDirectionLeftToRight);
+        if(menu_cursor3) {
+            canvas_draw_triangle(canvas, 4, 56, 6, 6, CanvasDirectionLeftToRight);
+        } else {
+            canvas_draw_triangle(canvas, 65, 56, 6, 6, CanvasDirectionLeftToRight);
+        }
         break;
     }
     canvas_draw_str(canvas, 12, 20, "A+C (mute/change time)");
@@ -277,8 +284,8 @@ static void draw_menu_landscape(Canvas* const canvas) {
         canvas_draw_str(canvas, 12, 40, "Speed ??x");
         break;
     }
-
     canvas_draw_str(canvas, 12, 60, "Close menu");
+    canvas_draw_str(canvas, 75, 60, "Save & Exit");
 }
 
 static void speed_up() {
@@ -329,7 +336,8 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
     } else {
         if(in_menu) {
             // switch(layout_mode)
-            draw_menu_landscape(canvas);
+            // draw_menu_landscape(canvas);
+            draw_menu(canvas);
         } else {
             switch(layout_mode) {
             case 0:
@@ -757,6 +765,9 @@ int32_t tama_p1_app(void* p) {
                         case 2:
                             speed_down();
                             break;
+                        case menu_items - 1:
+                            menu_cursor3 = !menu_cursor3;
+                            break;
                         default:
                             break;
                         }
@@ -777,6 +788,9 @@ int32_t tama_p1_app(void* p) {
                             break;
                         case 2:
                             speed_up();
+                            break;
+                        case menu_items - 1:
+                            menu_cursor3 = !menu_cursor3;
                             break;
                         default:
                             break;
@@ -810,11 +824,24 @@ int32_t tama_p1_app(void* p) {
                             break;
                         case menu_items - 1:
                         default:
-                            in_menu = false;
+                            if(menu_cursor3) {
+                                in_menu = false;
+                                menu_cursor3 = true;
+                            } else {
+                                if(speed != 1) {
+                                    speed = 1;
+                                    tamalib_set_speed(speed);
+                                }
+                                furi_timer_stop(timer);
+                                running = false;
+                                tama_p1_save_state();
+                            }
+
                             break;
                         }
                     } else if(event.input.key == InputKeyBack) {
                         in_menu = false;
+                        menu_cursor3 = true;
                     }
                 } else { // out of menu
                     if(input_type == InputTypePress || input_type == InputTypeRelease) {
