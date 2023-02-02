@@ -24,7 +24,7 @@
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
 #define MAXBUL 50 /* Max bullets on the screen. */
 //@todo MAX Asteroids
-#define MAXAST 0 //32 /* Max asteroids on the screen. */
+#define MAXAST 32 /* Max asteroids on the screen. */
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
 #define POWERUPSTTL 400 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
