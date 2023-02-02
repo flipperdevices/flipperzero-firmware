@@ -2,7 +2,7 @@
 
 #include "base.h"
 
-#define SUBGHZ_PROTOCOL_DOOYA_NAME "DOOYA"
+#define SUBGHZ_PROTOCOL_DOOYA_NAME "Dooya"
 
 typedef struct SubGhzProtocolDecoderDooya SubGhzProtocolDecoderDooya;
 typedef struct SubGhzProtocolEncoderDooya SubGhzProtocolEncoderDooya;

@@ -5,13 +5,15 @@
 #include "../blocks/generic.h"
 #include "../blocks/math.h"
 
-#define TAG "SubGhzProtocolDOOYA"
+#define TAG "SubGhzProtocolDooya"
+
+#define DOYA_SINGLE_CHANNEL 0xFF
 
 static const SubGhzBlockConst subghz_protocol_dooya_const = {
-    .te_short = 300,
-    .te_long = 750,
-    .te_delta = 100,
-    .min_count_bit_for_found = 39,
+    .te_short = 366,
+    .te_long = 733,
+    .te_delta = 120,
+    .min_count_bit_for_found = 40,
 };
 
 struct SubGhzProtocolDecoderDooya {
@@ -110,18 +112,18 @@ static bool subghz_protocol_encoder_dooya_get_upload(SubGhzProtocolEncoderDooya*
     if(bit_read(instance->generic.data, 0)) {
         instance->encoder.upload[index++] = level_duration_make(
             false,
-            (uint32_t)subghz_protocol_dooya_const.te_long * 10 +
+            (uint32_t)subghz_protocol_dooya_const.te_long * 12 +
                 subghz_protocol_dooya_const.te_long);
     } else {
         instance->encoder.upload[index++] = level_duration_make(
             false,
-            (uint32_t)subghz_protocol_dooya_const.te_long * 10 +
+            (uint32_t)subghz_protocol_dooya_const.te_long * 12 +
                 subghz_protocol_dooya_const.te_short);
     }
 
     //Send start bit
     instance->encoder.upload[index++] =
-        level_duration_make(true, (uint32_t)subghz_protocol_dooya_const.te_short * 16);
+        level_duration_make(true, (uint32_t)subghz_protocol_dooya_const.te_short * 13);
     instance->encoder.upload[index++] =
         level_duration_make(false, (uint32_t)subghz_protocol_dooya_const.te_long * 2);
 
@@ -153,7 +155,7 @@ bool subghz_protocol_encoder_dooya_deserialize(void* context, FlipperFormat* fli
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
-        if(instance->generic.data_count_bit - 1 !=
+        if(instance->generic.data_count_bit !=
            subghz_protocol_dooya_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
@@ -208,17 +210,6 @@ void subghz_protocol_decoder_dooya_free(void* context) {
     free(instance);
 }
 
-static bool subghz_protocol_decoder_dooya_check_parity(SubGhzProtocolDecoderDooya* instance) {
-    uint8_t msg[] = {
-        instance->decoder.decode_data >> 33,
-        instance->decoder.decode_data >> 25,
-        instance->decoder.decode_data >> 17,
-        instance->decoder.decode_data >> 9,
-        instance->decoder.decode_data >> 1};
-    return subghz_protocol_blocks_parity_bytes(msg, 5) !=
-           (uint8_t)(instance->decoder.decode_data & 1);
-}
-
 void subghz_protocol_decoder_dooya_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderDooya* instance = context;
@@ -231,8 +222,8 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
 
     switch(instance->decoder.parser_step) {
     case DooyaDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_dooya_const.te_long * 10) <
-                        subghz_protocol_dooya_const.te_delta * 10)) {
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_dooya_const.te_long * 12) <
+                        subghz_protocol_dooya_const.te_delta * 20)) {
             instance->decoder.parser_step = DooyaDecoderStepFoundStartBit;
         }
         break;
@@ -248,8 +239,8 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
                 instance->decoder.parser_step = DooyaDecoderStepReset;
             }
         } else if(
-            DURATION_DIFF(duration, subghz_protocol_dooya_const.te_long * 6) <
-            subghz_protocol_dooya_const.te_delta * 10) {
+            DURATION_DIFF(duration, subghz_protocol_dooya_const.te_short * 13) <
+            subghz_protocol_dooya_const.te_delta * 5) {
             break;
         } else {
             instance->decoder.parser_step = DooyaDecoderStepReset;
@@ -268,32 +259,25 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
     case DooyaDecoderStepCheckDuration:
         if(!level) {
             if(duration >= (subghz_protocol_dooya_const.te_long * 4)) {
+                //add last bit
+                if(DURATION_DIFF(instance->decoder.te_last, subghz_protocol_dooya_const.te_short) <
+                   subghz_protocol_dooya_const.te_delta) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                } else if(
+                    DURATION_DIFF(instance->decoder.te_last, subghz_protocol_dooya_const.te_long) <
+                    subghz_protocol_dooya_const.te_delta * 2) {
+                    subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                } else {
+                    instance->decoder.parser_step = DooyaDecoderStepReset;
+                    break;
+                }
                 instance->decoder.parser_step = DooyaDecoderStepFoundStartBit;
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_dooya_const.min_count_bit_for_found) {
-                    //add last bit
-                    if(DURATION_DIFF(
-                           instance->decoder.te_last, subghz_protocol_dooya_const.te_short) <
-                       subghz_protocol_dooya_const.te_delta) {
-                        subghz_protocol_blocks_add_bit(&instance->decoder, 0);
-                        instance->decoder.parser_step = DooyaDecoderStepSaveDuration;
-                    } else if(
-                        DURATION_DIFF(
-                            instance->decoder.te_last, subghz_protocol_dooya_const.te_long) <
-                        subghz_protocol_dooya_const.te_delta * 2) {
-                        subghz_protocol_blocks_add_bit(&instance->decoder, 1);
-                        instance->decoder.parser_step = DooyaDecoderStepSaveDuration;
-                    } else {
-                        instance->decoder.parser_step = DooyaDecoderStepReset;
-                        break;
-                    }
-
-                    if(subghz_protocol_decoder_dooya_check_parity(instance)) {
-                        instance->generic.data = instance->decoder.decode_data;
-                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
-                        if(instance->base.callback)
-                            instance->base.callback(&instance->base, instance->base.context);
-                    }
+                    instance->generic.data = instance->decoder.decode_data;
+                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+                    if(instance->base.callback)
+                        instance->base.callback(&instance->base, instance->base.context);
                 }
                 break;
             } else if(
@@ -326,30 +310,41 @@ void subghz_protocol_decoder_dooya_feed(void* context, bool level, uint32_t dura
  */
 static void subghz_protocol_somfy_telis_check_remote_controller(SubGhzBlockGeneric* instance) {
     /*
- * 																serial + channel      k  r	x  !p	
- * long press down   X * E1DC030533, 40b 			111000011101110000000011000001010 01 10 01 1
+ * 																serial       s/m  ch      key   	
+ * long press down   X * E1DC030533, 40b 			111000011101110000000011 0000 0101 0011 0011
  * 
- * short press down  3 * E1DC030533, 40b			111000011101110000000011000001010 01 10 01 1
- *                   3 * E1DC03053C, 40b 	        111000011101110000000011000001010 01 11 10 0
+ * short press down  3 * E1DC030533, 40b			111000011101110000000011 0000 0101 0011 0011
+ *                   3 * E1DC03053C, 40b 	        111000011101110000000011 0000 0101 0011 1100
  * 	
- * press stop        X * E1DC030555, 40b			111000011101110000000011000001010 10 10 10 1
+ * press stop        X * E1DC030555, 40b			111000011101110000000011 0000 0101 0101 0101
  * 
- * long press up     X * E1DC030511, 40b			111000011101110000000011000001010 00 10 00 1
+ * long press up     X * E1DC030511, 40b			111000011101110000000011 0000 0101 0001 0001
  * 
- * short press up    3 * E1DC030511, 40b			111000011101110000000011000001010 00 10 00 1
- *                   3 * E1DC03051E, 40b		    111000011101110000000011000001010 00 11 11 0
+ * short press up    3 * E1DC030511, 40b			111000011101110000000011 0000 0101 0001 0001
+ *                   3 * E1DC03051E, 40b		    111000011101110000000011 0000 0101 0001 1110
  *
- * serial + channel: serial + channel (need more information)
- * k: key  00b - up, 01b - down, 10b - stop, 11 - unknown 
- * r: 10b - long press 11b - short press
- * x: unknown
- * !p: invert parity
- * 
+ * serial: 3 byte serial number
+ * s/m: single (b0000) / multi (b0001) channel console  
+ * ch: channel if single (always b0101) or multi 
+ * key: 0b00010001 - long press up
+ *      0b00011110 - short press up
+ *      0b00110011 - long press down
+ *      0b00111100 - short press down
+ *      0b01010101 - press stop 
+ *      0b01111001 - press up + down
+ *      0b10000000 - press up + stop
+ *      0b10000001 - press down + stop
+ *      0b11001100 - press P2
+ *      
 */
 
-    instance->serial = (instance->data >> 7);
-    instance->btn = (instance->data >> 5) & 0x3;
-    instance->cnt = (instance->data >> 3) & 0x3;
+    instance->serial = (instance->data >> 16);
+    if((instance->data >> 12) & 0x0F) {
+        instance->cnt = (instance->data >> 8) & 0x0F;
+    } else {
+        instance->cnt = DOYA_SINGLE_CHANNEL;
+    }
+    instance->btn = instance->data & 0xFF;
 }
 
 uint8_t subghz_protocol_decoder_dooya_get_hash_data(void* context) {
@@ -376,7 +371,7 @@ bool subghz_protocol_decoder_dooya_deserialize(void* context, FlipperFormat* fli
         if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
             break;
         }
-        if(instance->generic.data_count_bit - 1 !=
+        if(instance->generic.data_count_bit !=
            subghz_protocol_dooya_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
@@ -386,22 +381,45 @@ bool subghz_protocol_decoder_dooya_deserialize(void* context, FlipperFormat* fli
     return ret;
 }
 
-/** 
+/**
  * Get button name.
- * @param btn Button number, 2 bit
+ * @param btn Button number, 8 bit
  */
 static const char* subghz_protocol_dooya_get_name_button(uint8_t btn) {
-    const char* name_btn[0x04] = {"UP", "Down", "Stop", "Unknown"};
-    return btn < 0x04 ? name_btn[btn] : name_btn[4];
-}
-
-/** 
- * Get time press button.
- * @param cnt Cnt number, 2 bit
- */
-static const char* subghz_protocol_dooya_get_time_press_button(uint8_t cnt) {
-    const char* name_cnt[0x04] = {"Unknown", "Unknown", "Long", "Short"};
-    return cnt < 0x04 ? name_cnt[cnt] : name_cnt[0];
+    const char* btn_name;
+    switch(btn) {
+    case 0b00010001:
+        btn_name = "Up_Long";
+        break;
+    case 0b00011110:
+        btn_name = "Up_Short";
+        break;
+    case 0b00110011:
+        btn_name = "Down_Long";
+        break;
+    case 0b00111100:
+        btn_name = "Down_Short";
+        break;
+    case 0b01010101:
+        btn_name = "Stop";
+        break;
+    case 0b01111001:
+        btn_name = "Up+Down";
+        break;
+    case 0b10000000:
+        btn_name = "Up+Stop";
+        break;
+    case 0b10000001:
+        btn_name = "Down+Stop";
+        break;
+    case 0b11001100:
+        btn_name = "P2";
+        break;
+    default:
+        btn_name = "Unknown";
+        break;
+    }
+    return btn_name;
 }
 
 void subghz_protocol_decoder_dooya_get_string(void* context, FuriString* output) {
@@ -415,11 +433,15 @@ void subghz_protocol_decoder_dooya_get_string(void* context, FuriString* output)
         "%s %dbit\r\n"
         "Key:0x%010llX\r\n"
         "Sn:0x%08lX\r\n"
-        "Btn:%s Press:%s\r\n",
+        "Btn:%s\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         instance->generic.data,
         instance->generic.serial,
-        subghz_protocol_dooya_get_name_button(instance->generic.btn),
-        subghz_protocol_dooya_get_time_press_button(instance->generic.cnt));
+        subghz_protocol_dooya_get_name_button(instance->generic.btn));
+    if(instance->generic.cnt == DOYA_SINGLE_CHANNEL) {
+        furi_string_cat_printf(output, "Ch:Single\r\n");
+    } else {
+        furi_string_cat_printf(output, "Ch:%ld\r\n", instance->generic.cnt);
+    }
 }
