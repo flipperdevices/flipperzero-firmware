@@ -19,7 +19,6 @@ Emulation:
 - [ ] Validate arha's bitmap changes, transition over to it fully
 - [ ] General code cleanup
 - [ ] Reverse track precompute & replay (should be simple with new bitmap approach; just iterate through bytes backwards, bits forwards?)
-- [ ] Prefix/between/suffix addition to config menu
 - [ ] Parameter tuning, find best defaults, troubleshoot improperly parsed TX
 - [ ] Pursue skunkworks TX improvement ideas listed below
 
@@ -35,15 +34,17 @@ File management:
 
 ## Skunkworks ideas
 Internal TX improvements:
-- [ ] Attempt downstream modulation techniques, in addition to upstream, like the LF RFID worker does when writing, for stronger signal
+- [ ] Attempt downstream modulation techniques in addition to upstream, like the LF RFID worker does when writing.
 - [ ] Implement using the timer system, rather than direct-writing to pins
 - [ ] Use the NFC (HF RFID) coil instead of or in addition to the LF coil (likely unfruitful from initial tests; we can enable/disable the oscillating field, but even with transparent mode to the ST25R3916, it seems we don't get low-enough-level control to pull it high/low correctly) 
 
 External RX options:
-1. UART-connected mag reader (bulky, but likely easiest to read over GPIO, and means one can read all tracks)
-2. Square audio jack mag reader (this may be DOA; seems like newer versions of the Square modules have some form of preprocessing that also modifies the signal, perhaps in an effort to discourage folks using their hardware independent of their software. Thanks [@arha](https://github.com/arha) for your work investigating this)
-3. Some read-head directly connected to GPIO, ADC'd, and parsed all on the Flipper. Likely the most compact and cheapest module option, but also would require the most work.
-4. USB HID input likely infeasible; seems the FZ cannot act as an HID host.
+1. [TTL / PS/2 mag reader connected to UART](https://www.alibaba.com/product-detail/Mini-portable-12-3-tracks-usb_60679900708.html) (bulky, harder to source, but likely easiest to read over GPIO, and means one can read all tracks)
+2. Square audio jack mag reader (this may be DOA; seems like newer versions of the Square modules have some form of preprocessing that also modifies the signal, perhaps in an effort to discourage folks using their hardware independent of their software. Thanks [arha](https://github.com/arha) for your work investigating this)
+3. Some [read-head](https://www.alibaba.com/product-detail/POS-1-2-3-triple-track_60677205741.html) directly connected to GPIO, ADC'd, and parsed all on the Flipper. Likely the most compact and cheapest module option, but also would require the most work.
+4. USB HID input over pre-existing USB C port infeasible; seems the FZ cannot act as an HID host (MCU is the STM32WB55RGV6TR).
+5. Custom USB HID host hat based on MAX3421E (USB Host Controller w/ SPI), like the [Arduino USB Host Shield](https://docs.arduino.cc/retired/shields/arduino-usb-host-shield). Would be a large but worthwhile project in its own right, and would let one connect any USB HID reader they desire (or other HID devices for other projects). Suggestion credit to [arha](https://github.com/arha).
+6. Implement a software USB host solution over GPIO like [esp32_usb_soft_host](https://github.com/sdima1357/esp32_usb_soft_host). Suggestion credit to [arha](https://github.com/arha). Also a large undertaking, but valuable in and of itself.
 
 ## arha todo & notes
 Attempting to exploit flipper hardware to some extent
@@ -61,8 +62,8 @@ Attempting to exploit flipper hardware to some extent
 This project interpolates work from [Samy Kamkar's original MagSpoof project](https://github.com/samyk/magspoof), [dunaevai135 & AlexYaro's Flipper hackathon project](https://github.com/dunaevai135/flipperzero-firmware), and the Flipper team's [LF RFID](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/lfrfid) and [SubGhz](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/subghz) apps.  
 
 Many thanks to everyone who has helped in addition to those above, most notably: 
-- [arha](https://github.com/arha) for bitmapping work and skunkworks testing (now a collaborator!)
-- [Z4urce](https://github.com/Z4urce) for the provisional app icon
+- [arha](https://github.com/arha) for bitmapping work, skunkworks testing, and inumerable suggestions/ideas/feedback (now a collaborator!)
+- [Z4urce](https://github.com/Z4urce) for an earlier app icon
 - [antirez](https://github.com/antirez) for bitmapping suggestions and general C wisdom
 - [skotopes](https://github.com/skotopes) for RFID consultation
 - [NVX](https://github.com/nvx) + dlz for NFC consultation
