@@ -51,7 +51,7 @@ typedef struct PowerUp {
     float x, y, vx, vy; /* Fields like in ship. */
     // rot, /* Fields like ship. */
     // rot_speed, /* Angular velocity (rot speed and sense). */
-    int size; /* Power Up size */
+    float size; /* Power Up size */
 
     uint32_t ttl; /* Time to live, in ticks. */
     uint32_t display_ttl; /* How long to display the powerup before it disappears */
@@ -166,68 +166,41 @@ const NotificationSequence sequence_bullet_fired = {
 };
 
 const NotificationSequence sequence_nuke = {
-    &message_red_255,
-    &message_vibro_on,
-    // &message_note_g5, // Play sound but currently disabled
-    &message_delay_250,
-    &message_red_0,
-    &message_vibro_off,
+    &message_blink_set_color_red,
+    &message_blink_start_100,
 
-    &message_red_255,
     &message_vibro_on,
-    // &message_note_g5, // Play sound but currently disabled
-    &message_delay_250,
-    &message_red_0,
+    &message_delay_10,
     &message_vibro_off,
 
     &message_vibro_on,
-    &message_red_255,
-    &message_delay_100,
-    &message_red_0,
-    &message_vibro_off,
-    &message_delay_1,
-    &message_delay_1,
-    &message_vibro_on,
-    &message_red_255,
-    &message_delay_100,
-    &message_red_0,
+    &message_delay_10,
     &message_vibro_off,
 
-    &message_delay_1,
-    &message_delay_1,
-    &message_delay_1,
     &message_vibro_on,
-    &message_red_255,
-    &message_delay_100,
+    &message_delay_10,
+    &message_vibro_off,
     &message_red_0,
+
+    &message_vibro_on,
+    &message_delay_10,
+    &message_delay_1,
+    &message_delay_1,
     &message_vibro_off,
 
-    &message_delay_1,
-    &message_delay_1,
-    &message_delay_1,
     &message_vibro_on,
+    &message_delay_10,
     &message_delay_1,
     &message_delay_1,
-    &message_delay_1,
-    &message_delay_1,
-    &message_delay_1,
-    &message_red_0,
     &message_vibro_off,
 
-    &message_delay_1,
-    &message_delay_1,
     &message_vibro_on,
+    &message_delay_10,
     &message_delay_1,
     &message_delay_1,
-    &message_delay_1,
-    &message_red_0,
     &message_vibro_off,
 
-    &message_delay_1,
-    &message_vibro_on,
-    &message_delay_1,
-    &message_delay_1,
-    &message_red_0,
+    &message_blink_stop,
     &message_vibro_off,
     &message_sound_off,
     NULL,
@@ -284,6 +257,8 @@ void lfsr_next(unsigned char* prev) {
     if(lsb == 1) *prev ^= 0b11000111;
     *prev ^= *prev << 7; /* Mix things a bit more. */
 }
+
+/* ================================ Render ================================ */
 
 /* Render the polygon 'poly' at x,y, rotated by the specified angle. */
 void draw_poly(Canvas* const canvas, Poly* poly, uint8_t x, uint8_t y, float a) {
@@ -474,22 +449,6 @@ void draw_shield(Canvas* const canvas, AsteroidsApp* app) {
     canvas_draw_circle(canvas, app->ship.x, app->ship.y, 8);
 }
 
-/* Given the current position, update it according to the velocity and
- * wrap it back to the other side if the object went over the screen. */
-void update_pos_by_velocity(float* x, float* y, float vx, float vy) {
-    /* Return back from one side to the other of the screen. */
-    *x += vx;
-    *y += vy;
-    if(*x >= SCREEN_XRES)
-        *x = 0;
-    else if(*x < 0)
-        *x = SCREEN_XRES - 1;
-    if(*y >= SCREEN_YRES)
-        *y = 0;
-    else if(*y < 0)
-        *y = SCREEN_YRES - 1;
-}
-
 /* Render the current game screen. */
 void render_callback(Canvas* const canvas, void* ctx) {
     AsteroidsApp* app = ctx;
@@ -564,6 +523,22 @@ void render_callback(Canvas* const canvas, void* ctx) {
 
 /* ============================ Game logic ================================== */
 
+/* Given the current position, update it according to the velocity and
+ * wrap it back to the other side if the object went over the screen. */
+void update_pos_by_velocity(float* x, float* y, float vx, float vy) {
+    /* Return back from one side to the other of the screen. */
+    *x += vx;
+    *y += vy;
+    if(*x >= SCREEN_XRES)
+        *x = 0;
+    else if(*x < 0)
+        *x = SCREEN_XRES - 1;
+    if(*y >= SCREEN_YRES)
+        *y = 0;
+    else if(*y < 0)
+        *y = SCREEN_YRES - 1;
+}
+
 float distance(float x1, float y1, float x2, float y2) {
     float dx = x1 - x2;
     float dy = y1 - y2;
@@ -595,6 +570,8 @@ bool objects_are_colliding(float x1, float y1, float r1, float x2, float y2, flo
     float rsum = r1 + r2;
     return dx * dx + dy * dy < rsum * rsum;
 }
+
+/* ================================ Bullets ================================ */
 //@todo ship_fire_bullet
 /* Create a new bullet headed in the same direction of the ship. */
 void ship_fire_bullet(AsteroidsApp* app) {
@@ -639,6 +616,7 @@ void remove_bullet(AsteroidsApp* app, int bid) {
     if(n && bid != n) app->bullets[bid] = app->bullets[n];
 }
 
+/* ================================ Asteroids ================================ */
 /* Create a new asteroid, away from the ship. Return the
  * pointer to the asteroid object, so that the caller can change
  * certain things of the asteroid if needed. */
@@ -704,10 +682,11 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
     }
 }
 
-bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y) {
+/* ================================ Power Up ================================ */
+bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y, float size) {
     for(int i = 0; i < app->powerUps_num; i++) {
         PowerUp* p2 = &app->powerUps[i];
-        if(distance(x, y, p2->x, p2->y) < p2->size) return true;
+        if(objects_are_colliding(x, y, size, p2->x, p2->y, p2->size, 1.0)) return true;
     }
     return false;
 }
@@ -718,12 +697,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     if(app->powerUps_num == MAXPOWERUPS) return NULL;
 
     // Randomly select power up for display
-    //@todo Random Power Up Select
     PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
-    // PowerUpType selected_powerUpType = PowerUpTypeFirePower;
-    // PowerUpType selected_powerUpType = PowerUpTypeLife;
-    // PowerUpType selected_powerUpType = PowerUpTypeNuke;
-    // PowerUpType selected_powerUpType = PowerUpTypeShield;
 
     // FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
@@ -740,8 +714,8 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
         //It also keeps it away from the lives and score at the top of screen
         x = rand() % (SCREEN_XRES - (int)size);
         y = rand() % (SCREEN_YRES - (int)size);
-    } while((distance(app->ship.x, app->ship.y, (float)x, (float)y) < min_distance + size) &&
-            (!isPowerUpCollidingWithEachOther(app, x, y)));
+    } while((distance(app->ship.x, app->ship.y, x, y) < min_distance + size) &&
+            (!isPowerUpCollidingWithEachOther(app, x, y, size)));
 
     PowerUp* p = &app->powerUps[app->powerUps_num++];
     p->x = x;
@@ -751,7 +725,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     p->vy = 0; //2 * (-.5 + ((float)rand() / RAND_MAX));
     p->display_ttl = 200;
     p->ttl = POWERUPSTTL;
-    p->size = (int)size;
+    p->size = size;
     // p->size = size;
     // p->rot = 0;
     // p->rot_speed = ((float)rand() / RAND_MAX) / 10;
@@ -803,6 +777,7 @@ void powerUp_was_hit(AsteroidsApp* app, int id) {
     case PowerUpTypeNuke:
         //TODO: Animate explosion
         notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_nuke);
+        // Simulate nuke explosion
         remove_all_astroids_and_bullets(app);
         break;
     default:
@@ -830,6 +805,7 @@ bool isPowerUpAlreadyExists(AsteroidsApp* const app, PowerUpType const powerUpTy
     return false;
 }
 
+/* ================================ Game States ================================ */
 /* Set gameover state. When in game-over mode, the game displays a gameover
  * text with a background of many asteroids floating around. */
 void game_over(AsteroidsApp* app) {
@@ -876,6 +852,7 @@ void restart_game_after_gameover(AsteroidsApp* app) {
     restart_game(app);
 }
 
+/* ================================ Position & Status ================================ */
 /* Move bullets. */
 void update_bullets_position(AsteroidsApp* app) {
     for(int j = 0; j < app->bullets_num; j++) {
