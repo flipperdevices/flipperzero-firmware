@@ -1,6 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <atomic.h>
+
 #include "ibutton_worker_i.h"
 
 typedef enum {
@@ -39,7 +40,7 @@ iButtonWorker* ibutton_worker_alloc() {
 
     worker->thread = furi_thread_alloc_ex("iButtonWorker", 2048, ibutton_worker_thread, worker);
 
-    worker->protocols = protocol_dict_alloc(ibutton_protocols, iButtonProtocolMax);
+    // worker->protocols = protocol_dict_alloc(ibutton_protocols, iButtonProtocolMax);
 
     return worker;
 }
@@ -103,7 +104,7 @@ void ibutton_worker_free(iButtonWorker* worker) {
     onewire_host_free(worker->host);
     onewire_device_free(worker->device);
 
-    protocol_dict_free(worker->protocols);
+    // protocol_dict_free(worker->protocols);
 
     furi_message_queue_free(worker->messages);
 

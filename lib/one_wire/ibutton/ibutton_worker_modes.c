@@ -79,71 +79,71 @@ void ibutton_worker_comparator_callback(bool level, void* context) {
     read_context->last_dwt_value = current_dwt_value;
 }
 
-bool ibutton_worker_read_comparator(iButtonWorker* worker) {
-    bool result = false;
-
-    protocol_dict_decoders_start(worker->protocols);
-
-    furi_hal_rfid_pins_reset();
-    // pulldown pull pin, we sense the signal through the analog part of the RFID schematic
-    furi_hal_rfid_pin_pull_pulldown();
-
-    iButtonReadContext read_context = {
-        .last_dwt_value = DWT->CYCCNT,
-        .stream = furi_stream_buffer_alloc(sizeof(LevelDuration) * 512, 1),
-    };
-
-    furi_hal_rfid_comp_set_callback(ibutton_worker_comparator_callback, &read_context);
-    furi_hal_rfid_comp_start();
-
-    uint32_t tick_start = furi_get_tick();
-    while(true) {
-        LevelDuration level;
-        size_t ret =
-            furi_stream_buffer_receive(read_context.stream, &level, sizeof(LevelDuration), 100);
-
-        if((furi_get_tick() - tick_start) > 100) {
-            break;
-        }
-
-        if(ret > 0) {
-            ProtocolId decoded_index = protocol_dict_decoders_feed(
-                worker->protocols,
-                level_duration_get_level(level),
-                level_duration_get_duration(level));
-
-            if(decoded_index == PROTOCOL_NO) continue;
-
-            protocol_dict_get_data(
-                worker->protocols, decoded_index, worker->key_data, ibutton_key_get_max_size());
-
-            switch(decoded_index) {
-            case iButtonProtocolCyfral:
-                furi_check(worker->key_p != NULL);
-                ibutton_key_set_type(worker->key_p, iButtonKeyCyfral);
-                ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
-                result = true;
-                break;
-            case iButtonProtocolMetakom:
-                furi_check(worker->key_p != NULL);
-                ibutton_key_set_type(worker->key_p, iButtonKeyMetakom);
-                ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
-                result = true;
-                break;
-            default:
-                break;
-            }
-        }
-    }
-
-    furi_hal_rfid_comp_stop();
-    furi_hal_rfid_comp_set_callback(NULL, NULL);
-    furi_hal_rfid_pins_reset();
-
-    furi_stream_buffer_free(read_context.stream);
-
-    return result;
-}
+// bool ibutton_worker_read_comparator(iButtonWorker* worker) {
+//     bool result = false;
+//
+//     protocol_dict_decoders_start(worker->protocols);
+//
+//     furi_hal_rfid_pins_reset();
+//     // pulldown pull pin, we sense the signal through the analog part of the RFID schematic
+//     furi_hal_rfid_pin_pull_pulldown();
+//
+//     iButtonReadContext read_context = {
+//         .last_dwt_value = DWT->CYCCNT,
+//         .stream = furi_stream_buffer_alloc(sizeof(LevelDuration) * 512, 1),
+//     };
+//
+//     furi_hal_rfid_comp_set_callback(ibutton_worker_comparator_callback, &read_context);
+//     furi_hal_rfid_comp_start();
+//
+//     uint32_t tick_start = furi_get_tick();
+//     while(true) {
+//         LevelDuration level;
+//         size_t ret =
+//             furi_stream_buffer_receive(read_context.stream, &level, sizeof(LevelDuration), 100);
+//
+//         if((furi_get_tick() - tick_start) > 100) {
+//             break;
+//         }
+//
+//         if(ret > 0) {
+//             ProtocolId decoded_index = protocol_dict_decoders_feed(
+//                 worker->protocols,
+//                 level_duration_get_level(level),
+//                 level_duration_get_duration(level));
+//
+//             if(decoded_index == PROTOCOL_NO) continue;
+//
+//             protocol_dict_get_data(
+//                 worker->protocols, decoded_index, worker->key_data, ibutton_key_get_max_size());
+//
+//             switch(decoded_index) {
+//             case iButtonProtocolCyfral:
+//                 furi_check(worker->key_p != NULL);
+//                 ibutton_key_set_type(worker->key_p, iButtonKeyCyfral);
+//                 ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
+//                 result = true;
+//                 break;
+//             case iButtonProtocolMetakom:
+//                 furi_check(worker->key_p != NULL);
+//                 ibutton_key_set_type(worker->key_p, iButtonKeyMetakom);
+//                 ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
+//                 result = true;
+//                 break;
+//             default:
+//                 break;
+//             }
+//         }
+//     }
+//
+//     furi_hal_rfid_comp_stop();
+//     furi_hal_rfid_comp_set_callback(NULL, NULL);
+//     furi_hal_rfid_pins_reset();
+//
+//     furi_stream_buffer_free(read_context.stream);
+//
+//     return result;
+// }
 
 bool ibutton_worker_read_dallas(iButtonWorker* worker) {
     bool result = false;
@@ -189,8 +189,8 @@ void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
     bool valid = false;
     if(ibutton_worker_read_dallas(worker)) {
         valid = true;
-    } else if(ibutton_worker_read_comparator(worker)) {
-        valid = true;
+    // } else if(ibutton_worker_read_comparator(worker)) {
+    //     valid = true;
     }
 
     if(valid) {
@@ -230,42 +230,42 @@ void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
     onewire_slave_detach(worker->slave);
 }
 
-void ibutton_worker_emulate_timer_cb(void* context) {
-    furi_assert(context);
-    iButtonWorker* worker = context;
+// void ibutton_worker_emulate_timer_cb(void* context) {
+//     furi_assert(context);
+//     iButtonWorker* worker = context;
+//
+//     const LevelDuration level_duration =
+//         protocol_dict_encoder_yield(worker->protocols, worker->protocol_to_encode);
+//
+//     const bool level = level_duration_get_level(level_duration);
+//
+//     furi_hal_ibutton_emulate_set_next(level);
+//     furi_hal_ibutton_pin_write(level);
+// }
 
-    const LevelDuration level_duration =
-        protocol_dict_encoder_yield(worker->protocols, worker->protocol_to_encode);
-
-    const bool level = level_duration_get_level(level_duration);
-
-    furi_hal_ibutton_emulate_set_next(level);
-    furi_hal_ibutton_pin_write(level);
-}
-
-void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
-    furi_assert(worker->key_p);
-    const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
-    const uint8_t key_size = ibutton_key_get_max_size();
-
-    switch(ibutton_key_get_type(worker->key_p)) {
-    case iButtonKeyDS1990:
-        return;
-        break;
-    case iButtonKeyCyfral:
-        worker->protocol_to_encode = iButtonProtocolCyfral;
-        break;
-    case iButtonKeyMetakom:
-        worker->protocol_to_encode = iButtonProtocolMetakom;
-        break;
-    }
-
-    protocol_dict_set_data(worker->protocols, worker->protocol_to_encode, key_id, key_size);
-    protocol_dict_encoder_start(worker->protocols, worker->protocol_to_encode);
-
-    furi_hal_ibutton_pin_configure();
-    furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
-}
+// void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
+//     furi_assert(worker->key_p);
+//     const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
+//     const uint8_t key_size = ibutton_key_get_max_size();
+//
+//     switch(ibutton_key_get_type(worker->key_p)) {
+//     case iButtonKeyDS1990:
+//         return;
+//         break;
+//     case iButtonKeyCyfral:
+//         worker->protocol_to_encode = iButtonProtocolCyfral;
+//         break;
+//     case iButtonKeyMetakom:
+//         worker->protocol_to_encode = iButtonProtocolMetakom;
+//         break;
+//     }
+//
+//     protocol_dict_set_data(worker->protocols, worker->protocol_to_encode, key_id, key_size);
+//     protocol_dict_encoder_start(worker->protocols, worker->protocol_to_encode);
+//
+//     furi_hal_ibutton_pin_configure();
+//     furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
+// }
 
 void ibutton_worker_emulate_timer_stop(iButtonWorker* worker) {
     UNUSED(worker);
@@ -278,15 +278,15 @@ void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_hal_rfid_pins_reset();
     furi_hal_rfid_pin_pull_pulldown();
 
-    switch(ibutton_key_get_type(worker->key_p)) {
-    case iButtonKeyDS1990:
+    // switch(ibutton_key_get_type(worker->key_p)) {
+    // case iButtonKeyDS1990:
         ibutton_worker_emulate_dallas_start(worker);
-        break;
-    case iButtonKeyCyfral:
-    case iButtonKeyMetakom:
-        ibutton_worker_emulate_timer_start(worker);
-        break;
-    }
+        // break;
+    // case iButtonKeyCyfral:
+    // case iButtonKeyMetakom:
+    //     ibutton_worker_emulate_timer_start(worker);
+    //     break;
+    // }
 }
 
 void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {

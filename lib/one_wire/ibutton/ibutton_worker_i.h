@@ -5,13 +5,17 @@
  */
 
 #pragma once
+
+#include <one_wire/one_wire_host.h>
+#include <one_wire/one_wire_slave.h>
+#include <one_wire/one_wire_device.h>
+
+#include <toolbox/protocols/protocol_dict.h>
+
 #include "ibutton_worker.h"
 #include "ibutton_writer.h"
-#include "../one_wire_host.h"
-#include "../one_wire_slave.h"
-#include "../one_wire_device.h"
-#include <toolbox/protocols/protocol_dict.h>
-#include "protocols/ibutton_protocols.h"
+
+// #include "protocols/ibutton_protocols.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +52,7 @@ struct iButtonWorker {
     void* cb_ctx;
 
     ProtocolDict* protocols;
-    iButtonProtocol protocol_to_encode;
+    // iButtonProtocol protocol_to_encode;
 };
 
 extern const iButtonWorkerModeType ibutton_worker_modes[];
