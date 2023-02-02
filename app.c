@@ -471,7 +471,7 @@ void draw_shield(Canvas* const canvas, AsteroidsApp* app) {
 
     canvas_set_color(canvas, ColorXOR);
     // canvas_draw_disc(canvas, app->ship.x, app->ship.y, 4);
-    canvas_draw_circle(canvas, app->ship.x, app->ship.y, 10);
+    canvas_draw_circle(canvas, app->ship.x, app->ship.y, 8);
 }
 
 /* Given the current position, update it according to the velocity and
