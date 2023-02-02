@@ -38,7 +38,7 @@ Ambient radioactivity :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper8.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper9.png" width=25% height=25%>
 
-**Note :** mesures in **μSv/h** / **mSv/y** are not precise
+**Note :** measures in **μSv/h** / **mSv/y** are not precise
 
 Measure of uranium ore piece inside a lead container :
 
