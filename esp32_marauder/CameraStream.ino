@@ -68,9 +68,11 @@ void cam_stream_loop() {
         break;
       case 'C':
         s->set_contrast(s, s->status.contrast + 1);
+        s->set_contrast(s, s->status.brightness + 1);
         break;
       case 'c':
         s->set_contrast(s, s->status.contrast - 1);
+        s->set_contrast(s, s->status.brightness - 1);
         break;
       /*case 'B':
         s->set_contrast(s, s->status.brightness + 1);
@@ -92,10 +94,10 @@ void cam_stream_loop() {
       */
 
       // Toggle cases
-      case 'B':  // Toggle Mirror
+      case '>':  // Toggle Mirror
         s->set_hmirror(s, !s->status.hmirror);
         break;
-      case 'b':
+      case '<':
         invert = !invert;
         break;
       default:
