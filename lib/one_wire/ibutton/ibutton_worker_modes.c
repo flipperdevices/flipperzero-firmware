@@ -150,7 +150,7 @@ bool ibutton_worker_read_dallas(iButtonWorker* worker) {
     onewire_host_start(worker->host);
     furi_delay_ms(100);
     FURI_CRITICAL_ENTER();
-    if(onewire_host_search(worker->host, worker->key_data, NORMAL_SEARCH)) {
+    if(onewire_host_search(worker->host, worker->key_data, OneWireHostSearchModeNormal)) {
         onewire_host_reset_search(worker->host);
 
         // key found, verify

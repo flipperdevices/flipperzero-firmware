@@ -175,10 +175,10 @@ uint8_t onewire_host_search(OneWireHost* host, uint8_t* new_addr, OneWireHostSea
 
         // issue the search command
         switch(mode) {
-        case CONDITIONAL_SEARCH:
+        case OneWireHostSearchModeConditional:
             onewire_host_write(host, 0xEC);
             break;
-        case NORMAL_SEARCH:
+        case OneWireHostSearchModeNormal:
             onewire_host_write(host, 0xF0);
             break;
         }

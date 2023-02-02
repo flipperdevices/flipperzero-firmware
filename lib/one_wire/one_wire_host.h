@@ -14,8 +14,8 @@ extern "C" {
 #endif
 
 typedef enum {
-    CONDITIONAL_SEARCH = 0, /**< Search for alarmed device */
-    NORMAL_SEARCH = 1, /**< Search all devices */
+    OneWireHostSearchModeConditional = 0, /**< Search for alarmed device */
+    OneWireHostSearchModeNormal = 1, /**< Search all devices */
 } OneWireHostSearchMode;
 
 typedef struct OneWireHost OneWireHost;
