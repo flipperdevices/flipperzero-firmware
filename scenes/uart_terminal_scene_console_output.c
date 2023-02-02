@@ -1,5 +1,19 @@
 #include "../uart_terminal_app_i.h"
 
+// The FlipperZero Settings->System menu allows you to set the logging level at RUN-time
+// LOG_LEVEL lets you limit it at COMPILE-time
+//    1.  None
+//    2.  Errors      : ERROR -> FURI_LOG_E
+//    3.  Warnings    : WARN  -> FURI_LOG_W
+//    4.  Information : INFO  -> FURI_LOG_I
+//    5.  Debug       : DEBUG -> FURI_LOG_D
+//    6.  Trace       : TRACE -> FURI_LOG_T
+// Also provides ENTER and LEAVE -> TRACE
+
+#include  "../logging.h"
+#include  "../err.h"   // Error numbers & messages
+#define   LOG_LEVEL  6
+
 void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     UART_TerminalApp* app = context;
@@ -117,7 +131,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         char ending[] = "\r\n";
         snprintf(buffer, 240, "%s%s", (app->selected_tx_string), ending);
         uint8_t* buffer_ptr = (uint8_t*)&buffer[0];
-        INFO("app", "%s", buffer_ptr);
+        FURI_LOG_I("app", "%s", buffer_ptr);
+        INFO("%s", buffer_ptr);
         uart_terminal_uart_tx(buffer_ptr, strlen((char*)buffer_ptr));
     }
 }
