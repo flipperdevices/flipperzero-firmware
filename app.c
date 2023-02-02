@@ -363,7 +363,7 @@ bool should_draw_powerUp(PowerUp* const p) {
     return true;
 }
 
-void draw_powerUp_RemainingLife(Canvas* canvas, PowerUp* p, int y_offset) {
+void draw_powerUp_RemainingLife(Canvas* canvas, PowerUp* const p, int y_offset) {
     if(!p->isPowerUpActive) return;
 
     /*
@@ -379,33 +379,19 @@ void draw_powerUp_RemainingLife(Canvas* canvas, PowerUp* p, int y_offset) {
     Round(0) = 0
     */
     int progress_bar_width = SCREEN_XRES / 4;
-    if(p->ttl > 0) {
-        //Erase the previous progress bar
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_line(
-            canvas,
-            SCREEN_XRES / 2 - progress_bar_width,
-            3 + y_offset,
-            SCREEN_XRES / 2 + progress_bar_width,
-            3 + y_offset);
 
-        canvas_set_color(canvas, ColorXOR);
-        int percentage = p->ttl / POWERUPSTTL;
-        int remaining = round(percentage * progress_bar_width);
-        // int filled = progress_bar_width - remaining;
-        canvas_draw_line(
-            canvas,
-            round(SCREEN_XRES / 2) - remaining, // x1
-            3 + y_offset, //y1
-            round(SCREEN_XRES / 2) + remaining, //x2
-            3 + y_offset); //y2
-        FURI_LOG_I(
-            TAG,
-            "[draw_powerUp_RemainingLife] Percentage: %d, Remaining: %d Id: %d powerUpType: %d",
-            percentage,
-            remaining,
-            y_offset,
-            p->powerUpType);
+    if(p->ttl > 0) {
+        canvas_set_color(canvas, ColorBlack);
+        int remaining = ceil(((float)p->ttl / (float)POWERUPSTTL) * (float)progress_bar_width);
+
+        if(remaining > 0) {
+            canvas_draw_line(
+                canvas,
+                (SCREEN_XRES / 2) - remaining, // x1
+                3 + y_offset, //y1
+                (SCREEN_XRES / 2) + remaining, //x2
+                3 + y_offset); //
+        }
     }
 }
 
@@ -720,7 +706,7 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
 
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
-    FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
+    // FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
     if(app->powerUps_num == MAXPOWERUPS) return NULL;
 
     // Randomly select power up for display
@@ -731,10 +717,10 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     // PowerUpType selected_powerUpType = PowerUpTypeNuke;
     // PowerUpType selected_powerUpType = PowerUpTypeShield;
 
-    FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
+    // FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
     if(isPowerUpAlreadyExists(app, selected_powerUpType)) {
-        FURI_LOG_I(TAG, "[add_powerUp] Power Up %i already active", selected_powerUpType);
+        FURI_LOG_D(TAG, "[add_powerUp] Power Up %i already active", selected_powerUpType);
         return NULL;
     }
 
@@ -1044,16 +1030,16 @@ void game_tick(void* ctx) {
     }
 
     // DEBUG: Show Power Up Status
-    for(int j = 0; j < app->powerUps_num; j++) {
-        PowerUp* p = &app->powerUps[j];
-        FURI_LOG_I(
-            TAG,
-            "Power Up Type: %d TTL: %lu Display_TTL: %lu PowerUpNum: %i",
-            p->powerUpType,
-            p->ttl,
-            p->display_ttl,
-            app->powerUps_num);
-    }
+    // for(int j = 0; j < app->powerUps_num; j++) {
+    // PowerUp* p = &app->powerUps[j];
+    // FURI_LOG_I(
+    //     TAG,
+    //     "Power Up Type: %d TTL: %lu Display_TTL: %lu PowerUpNum: %i",
+    //     p->powerUpType,
+    //     p->ttl,
+    //     p->display_ttl,
+    //     app->powerUps_num);
+    // }
 
     /* Update positions and detect collisions. */
     update_pos_by_velocity(&app->ship.x, &app->ship.y, app->ship.vx, app->ship.vy);
