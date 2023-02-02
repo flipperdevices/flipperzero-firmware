@@ -704,6 +704,14 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
     }
 }
 
+bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y) {
+    for(int i = 0; i < app->powerUps_num; i++) {
+        PowerUp* p2 = &app->powerUps[i];
+        if(distance(x, y, p2->x, p2->y) < p2->size) return true;
+    }
+    return false;
+}
+
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
     // FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
@@ -732,7 +740,8 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
         //It also keeps it away from the lives and score at the top of screen
         x = rand() % (SCREEN_XRES - (int)size);
         y = rand() % (SCREEN_YRES - (int)size);
-    } while(distance(app->ship.x, app->ship.y, (float)x, (float)y) < min_distance + size);
+    } while((distance(app->ship.x, app->ship.y, (float)x, (float)y) < min_distance + size) &&
+            (!isPowerUpCollidingWithEachOther(app, x, y)));
 
     PowerUp* p = &app->powerUps[app->powerUps_num++];
     p->x = x;
