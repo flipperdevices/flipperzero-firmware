@@ -286,8 +286,13 @@ static void camera_app_free(UartEchoApp* app) {
 
 int32_t camera_app(void* p) {
     UNUSED(p);
+    furi_hal_power_enable_otg();
+    furi_delay_ms(300);
     UartEchoApp* app = camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     camera_app_free(app);
+    
+    furi_hal_power_disable_otg();
+
     return 0;
 }
