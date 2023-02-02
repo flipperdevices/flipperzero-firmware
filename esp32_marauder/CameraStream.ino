@@ -94,11 +94,15 @@ void cam_stream_loop() {
       */
 
       // Toggle cases
-      case '>':  // Toggle Mirror
+      case '>':  // Toggle Mirror 
         s->set_hmirror(s, !s->status.hmirror);
+        if (s->status.hmirror)
+          s->set_vflip(s, !s->status.vflip);
         break;
       case '<':
         invert = !invert;
+        if(invert)
+          disable_dithering = !disable_dithering;
         break;
       default:
         break;
@@ -146,14 +150,8 @@ void cam_stream_loop() {
   delay(50);
 }
 
-bool IsDarkBit(uint8_t bit) {
-  bool result = bit < 128;
-
-  if (invert) {
-    result = !result;
-  }
-
-  return result;
+inline bool IsDarkBit(const uint8_t bit) {
+  return (invert ^ (bit < 128));
 }
 
 void DitherImage(camera_fb_t* fb) {
