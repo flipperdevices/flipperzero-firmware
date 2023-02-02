@@ -20,7 +20,7 @@
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
 #define GAME_START_LIVES 3
-#define MAXLIVES 8 /* Max lives allowed. */
+#define MAXLIVES 5 /* Max bonus lives allowed. */
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
 #define MAXBUL 50 /* Max bullets on the screen. */
 //@todo MAX Asteroids
