@@ -686,7 +686,7 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
 bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y, float size) {
     for(int i = 0; i < app->powerUps_num; i++) {
         PowerUp* p2 = &app->powerUps[i];
-        if(objects_are_colliding(x, y, size, p2->x, p2->y, p2->size, 1.0)) return true;
+        if(objects_are_colliding(x, y, size, p2->x, p2->y, p2->size, 1)) return true;
     }
     return false;
 }
@@ -714,8 +714,9 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
         //It also keeps it away from the lives and score at the top of screen
         x = rand() % (SCREEN_XRES - (int)size);
         y = rand() % (SCREEN_YRES - (int)size);
-    } while((distance(app->ship.x, app->ship.y, x, y) < min_distance + size) &&
-            (!isPowerUpCollidingWithEachOther(app, x, y, size)));
+    } while(
+        ((distance(app->ship.x, app->ship.y, x, y) < min_distance + size) ||
+         isPowerUpCollidingWithEachOther(app, x, y, size)));
 
     PowerUp* p = &app->powerUps[app->powerUps_num++];
     p->x = x;
@@ -735,6 +736,24 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     p->powerUpType = selected_powerUpType;
     p->isPowerUpActive = false;
     return p;
+}
+
+bool isPowerUpActive(AsteroidsApp* const app, PowerUpType const powerUpType) {
+    for(int i = 0; i < app->powerUps_num; i++) {
+        // PowerUp* p = &app->powerUps[i];
+        // if(p->powerUpType == powerUpType && p->ttl > 0 && p->display_ttl == 0) return true;
+        if(app->powerUps[i].isPowerUpActive && app->powerUps[i].powerUpType == powerUpType) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isPowerUpAlreadyExists(AsteroidsApp* const app, PowerUpType const powerUpType) {
+    for(int i = 0; i < app->powerUps_num; i++) {
+        if(app->powerUps[i].powerUpType == powerUpType) return true;
+    }
+    return false;
 }
 
 //@todo remove_powerUp
@@ -785,24 +804,6 @@ void powerUp_was_hit(AsteroidsApp* app, int id) {
     }
     p->display_ttl = 0;
     p->isPowerUpActive = true;
-}
-
-bool isPowerUpActive(AsteroidsApp* const app, PowerUpType const powerUpType) {
-    for(int i = 0; i < app->powerUps_num; i++) {
-        // PowerUp* p = &app->powerUps[i];
-        // if(p->powerUpType == powerUpType && p->ttl > 0 && p->display_ttl == 0) return true;
-        if(app->powerUps[i].isPowerUpActive && app->powerUps[i].powerUpType == powerUpType) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool isPowerUpAlreadyExists(AsteroidsApp* const app, PowerUpType const powerUpType) {
-    for(int i = 0; i < app->powerUps_num; i++) {
-        if(app->powerUps[i].powerUpType == powerUpType) return true;
-    }
-    return false;
 }
 
 /* ================================ Game States ================================ */
@@ -1184,11 +1185,11 @@ int32_t asteroids_app_entry(void* p) {
         } else {
             /* Useful to understand if the app is still alive when it
              * does not respond because of bugs. */
-            if(DEBUG_MSG) {
-                static int c = 0;
-                c++;
-                if(!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
-            }
+            // if(DEBUG_MSG) {
+            //     static int c = 0;
+            //     c++;
+            //     if(!(c % 20)) FURI_LOG_E(TAG, "Loop timeout");
+            // }
         }
     }
 
