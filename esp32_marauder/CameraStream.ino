@@ -1,7 +1,8 @@
 #ifdef ESP32_CAM
+
 // from: https://github.com/Z4urce/flipperzero-camera/blob/main/esp32_firmware/esp32_cam_uart_stream/esp32_cam_uart_stream.ino
 void cam_stream_setup() {
-  Serial.begin(230400);
+  // camera init
 
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -29,35 +30,35 @@ void cam_stream_setup() {
   config.frame_size = FRAMESIZE_QQVGA;
   config.fb_count = 1;
 
-  // camera init
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
-
   // Setting high contrast to make easier to dither
-  sensor_t * s = esp_camera_sensor_get();
+  sensor_t* s = esp_camera_sensor_get();
   s->set_contrast(s, 2);
 }
 
-bool stop_stream = false;
 bool disable_dithering = false;
 bool invert = false;
 
 void cam_stream_loop() {
-
+  bool stop_stream = false;
   // Reading serial
   if (Serial.available() > 0) {
     char r = Serial.read();
-    sensor_t * s = esp_camera_sensor_get();
-    
-    switch(r) {
+    sensor_t* s = esp_camera_sensor_get();
+
+    switch (r) {
       case 'S':
-        stop_stream = false;
+        //stop_stream = false;
         break;
       case 's':
-        stop_stream = true;
+        /*stop_stream = true;
+        preferences.putBool("streaming", false);
+        preferences.end();
+        ESP.restart();*/
         break;
       case 'D':
         disable_dithering = false;
@@ -71,29 +72,35 @@ void cam_stream_loop() {
       case 'c':
         s->set_contrast(s, s->status.contrast - 1);
         break;
-      case 'B':
+      /*case 'B':
         s->set_contrast(s, s->status.brightness + 1);
         break;
-      case 'b':
+        case 'b':
         s->set_contrast(s, s->status.brightness - 1);
         break;
 
-      // Toggle cases
-      case 'M': // Toggle Mirror
+        // Toggle cases
+        case 'M': // Toggle Mirror
         s->set_hmirror(s, !s->status.hmirror);
         break;
-      case '>':
+        case '>':
         disable_dithering = !disable_dithering;
         break;
-      case '<':
+        case '<':
         invert = !invert;
+        break;
+      */
+
+      // Toggle cases
+      case 'B':  // Toggle Mirror
+        s->set_hmirror(s, !s->status.hmirror);
+        break;
+      case 'b':
+        invert = !invert;
+        break;
       default:
         break;
     }
-  }
-
-  if (stop_stream){
-    return;
   }
 
   camera_fb_t* fb = esp_camera_fb_get();
@@ -101,7 +108,7 @@ void cam_stream_loop() {
   if (!fb) {
     return;
   }
-  
+
   //Length: 19200
   //Width: 160
   //Height: 120
@@ -113,15 +120,15 @@ void cam_stream_loop() {
   }
 
   uint8_t flipper_y = 0;
-  for(uint8_t y = 28; y < 92; ++y) {
+  for (uint8_t y = 28; y < 92; ++y) {
     Serial.print("Y:");
     Serial.print((char)flipper_y);
 
     size_t true_y = y * fb->width;
-    for (uint8_t x = 16; x < 144; x+=8){
+    for (uint8_t x = 16; x < 144; x += 8) {
       char c = 0;
-      for(uint8_t j = 0; j < 8; ++j){
-        if (IsDarkBit(fb->buf[true_y + x + (7-j)])){
+      for (uint8_t j = 0; j < 8; ++j) {
+        if (IsDarkBit(fb->buf[true_y + x + (7 - j)])) {
           c |= 1 << j;
         }
       }
@@ -137,10 +144,10 @@ void cam_stream_loop() {
   delay(50);
 }
 
-bool IsDarkBit(uint8_t bit){
+bool IsDarkBit(uint8_t bit) {
   bool result = bit < 128;
 
-  if (invert){
+  if (invert) {
     result = !result;
   }
 
@@ -148,19 +155,19 @@ bool IsDarkBit(uint8_t bit){
 }
 
 void DitherImage(camera_fb_t* fb) {
-  for(uint8_t y = 0; y < fb->height; ++y){
-      for (uint8_t x = 0; x < fb->width; ++x){
-        size_t current = (y*fb->width) + x;
-        uint8_t oldpixel = fb->buf[current];
-        uint8_t newpixel = oldpixel >= 128 ? 255 : 0;
-        fb->buf[current] = newpixel;
-        uint8_t quant_error = oldpixel - newpixel;
-        fb->buf[(y*fb->width) + x + 1] = fb->buf[(y*fb->width) + x + 1] + quant_error * 7 / 16;
-        fb->buf[(y+1*fb->width) + x-1] = fb->buf[(y+1*fb->width) + x-1] + quant_error * 3 / 16;
-        fb->buf[(y + 1*fb->width) + x] = fb->buf[(y + 1*fb->width) + x] + quant_error * 5 / 16;
-        fb->buf[(y+1*fb->width) + x+1] = fb->buf[(y+1*fb->width) + x+1] + quant_error * 1 / 16;
-      }
-    }  
+  for (uint8_t y = 0; y < fb->height; ++y) {
+    for (uint8_t x = 0; x < fb->width; ++x) {
+      size_t current = (y * fb->width) + x;
+      uint8_t oldpixel = fb->buf[current];
+      uint8_t newpixel = oldpixel >= 128 ? 255 : 0;
+      fb->buf[current] = newpixel;
+      uint8_t quant_error = oldpixel - newpixel;
+      fb->buf[(y * fb->width) + x + 1] = fb->buf[(y * fb->width) + x + 1] + quant_error * 7 / 16;
+      fb->buf[(y + 1 * fb->width) + x - 1] = fb->buf[(y + 1 * fb->width) + x - 1] + quant_error * 3 / 16;
+      fb->buf[(y + 1 * fb->width) + x] = fb->buf[(y + 1 * fb->width) + x] + quant_error * 5 / 16;
+      fb->buf[(y + 1 * fb->width) + x + 1] = fb->buf[(y + 1 * fb->width) + x + 1] + quant_error * 1 / 16;
+    }
+  }
 }
 
 #endif

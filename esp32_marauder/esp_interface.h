@@ -11,7 +11,7 @@
 
 #define ESP_RST  14
 #define ESP_ZERO 13
-#define BAUD     115200
+#define BAUD     230400
 
 #ifdef HAS_SCREEN
   extern Display display_obj;

@@ -1,19 +1,8 @@
 #include "CommandLine.h"
 #ifdef ESP32_CAM
 
-bool is_configESPCamera = false;
-bool is_initMicroSDCard = false;
-
 void configESPCamera() {
-  if (is_configESPCamera) {
-    Serial.println("cam1");
-    return;
-  }
-  else is_configESPCamera = true;
-  Serial.println("cam2");
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
-  // Configure Camera parameters
-
   // Object to store the camera configuration parameters
   camera_config_t config;
 
@@ -106,11 +95,6 @@ void configESPCamera() {
 }
 
 void initMicroSDCard() {
-  /*if(is_initMicroSDCard) { Serial.println("sd1"); return; }
-    else is_initMicroSDCard = true;
-    Serial.println("sd2");*/
-  // Start the MicroSD card
-
   Serial.println("Mounting MicroSD Card");
   if (!SD_MMC.begin("/sdcard", true, false, SDMMC_FREQ_DEFAULT)) {
     Serial.println("MicroSD Card Mount Failed");
@@ -123,12 +107,20 @@ void initMicroSDCard() {
   }
 }
 
-void takeNewPhoto(String path) {
+void takeNewPhoto(String path, bool flash) {
   // Take Picture with Camera
 
   // Setup frame buffer
+  if (flash)
+  {
+    pinMode(4, OUTPUT);
+    digitalWrite(4, HIGH);
+  }
   camera_fb_t  * fb = esp_camera_fb_get();
-
+  if (flash)
+  {
+    digitalWrite(4, LOW);
+  }
   if (!fb) {
     Serial.println("Camera capture failed");
     return;
@@ -149,6 +141,7 @@ void takeNewPhoto(String path) {
 
   // Return the frame buffer back to the driver for reuse
   esp_camera_fb_return(fb);
+  fb = NULL;
 }
 #endif
 
@@ -333,12 +326,12 @@ void CommandLine::runCommand(String input) {
 #ifdef ESP32_CAM
 
   else if (cmd_args.get(0) == CAM_STREAM) {
-    Serial.println("Switching to Streaming mode.\nContinue in camera.fap app.\nReset ESP32CAM to go back to Marauder mode.");
-    delay(5000);
-    cam_stream_setup();
-    for (;;)
-      cam_stream_loop();
-
+    preferences.begin("esp32cam", false);
+    preferences.putBool("streaming", true);
+    preferences.putBool("return", false);
+    preferences.end();
+    Serial.print("Press reset to switch to\nstreaming mode. To get\nback, press reset twice\nwaiting a second between\npresses.");
+    for (;;) {}
   }
 
   else if (cmd_args.get(0) == CAM_FLASHLIGHT) {
@@ -348,8 +341,6 @@ void CommandLine::runCommand(String input) {
 
   else if (cmd_args.get(0) == CAM_PHOTO) {
     Serial.println("Camera capture start");
-    pinMode(4, OUTPUT);
-    digitalWrite(4, HIGH);
     // Initialize the camera
     configESPCamera(); Serial.println("Camera OK!");
 
@@ -363,15 +354,10 @@ void CommandLine::runCommand(String input) {
       String path = "/photo_" + String(i++) + ".jpg";
       if (!SD_MMC.exists(path.c_str()))
       {
-        takeNewPhoto(path);
+        takeNewPhoto(path, true);
         break;
       }
     }
-
-    // Turns off the ESP32-CAM white on-board LED (flash) connected to GPIO 4
-    digitalWrite(4, LOW);
-    //rtc_gpio_hold_en(GPIO_NUM_4);
-
     Serial.println("Camera capture finish");
   }
 #endif
