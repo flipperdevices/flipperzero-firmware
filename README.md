@@ -43,7 +43,7 @@ External RX options:
 2. Square audio jack mag reader (this may be DOA; seems like newer versions of the Square modules have some form of preprocessing that also modifies the signal, perhaps in an effort to discourage folks using their hardware independent of their software. Thanks [arha](https://github.com/arha) for your work investigating this)
 3. Some [read-head](https://www.alibaba.com/product-detail/POS-1-2-3-triple-track_60677205741.html) directly connected to GPIO, ADC'd, and parsed all on the Flipper. Likely the most compact and cheapest module option, but also would require the most work.
 4. USB HID input over pre-existing USB C port infeasible; seems the FZ cannot act as an HID host (MCU is the STM32WB55RGV6TR).
-5. Custom USB HID host hat based on MAX3421E (USB Host Controller w/ SPI), like the [Arduino USB Host Shield](https://docs.arduino.cc/retired/shields/arduino-usb-host-shield). Would be a large but worthwhile project in its own right, and would let one connect any USB HID reader they desire (or other HID devices for other projects). Suggestion credit to [arha](https://github.com/arha).
+5. Custom USB HID host hat based on the [MAX3421E](https://www.analog.com/en/products/max3421e.html) (USB Host Controller w/ SPI), like the [Arduino USB Host Shield](https://docs.arduino.cc/retired/shields/arduino-usb-host-shield). Would be a large but worthwhile project in its own right, and would let one connect any USB HID reader they desire (or other HID devices for other projects). Suggestion credit to [arha](https://github.com/arha).
 6. Implement a software USB host solution over GPIO like [esp32_usb_soft_host](https://github.com/sdima1357/esp32_usb_soft_host). Suggestion credit to [arha](https://github.com/arha). Also a large undertaking, but valuable in and of itself.
 
 ## arha todo & notes
@@ -62,7 +62,7 @@ Attempting to exploit flipper hardware to some extent
 This project interpolates work from [Samy Kamkar's original MagSpoof project](https://github.com/samyk/magspoof), [dunaevai135 & AlexYaro's Flipper hackathon project](https://github.com/dunaevai135/flipperzero-firmware), and the Flipper team's [LF RFID](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/lfrfid) and [SubGhz](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/subghz) apps.  
 
 Many thanks to everyone who has helped in addition to those above, most notably: 
-- [arha](https://github.com/arha) for bitmapping work, skunkworks testing, and inumerable suggestions/ideas/feedback (now a collaborator!)
+- [arha](https://github.com/arha) for bitmapping work, skunkworks testing, and innumerable suggestions/ideas/feedback (now a collaborator!)
 - [Z4urce](https://github.com/Z4urce) for an earlier app icon
 - [antirez](https://github.com/antirez) for bitmapping suggestions and general C wisdom
 - [skotopes](https://github.com/skotopes) for RFID consultation
