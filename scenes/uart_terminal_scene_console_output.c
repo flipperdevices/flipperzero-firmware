@@ -125,7 +125,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     uart_terminal_uart_set_handle_rx_data_cb(
         app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
 
-    // Send command with newline '\n'
+    // Send command with newline '\r\n'
     if(app->is_command && app->selected_tx_string) {
         char buffer[240];
         char ending[] = "\r\n";
