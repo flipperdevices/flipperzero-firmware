@@ -24,7 +24,7 @@
 #define TTLBUL 30 /* Bullet time to live, in ticks. */
 #define MAXBUL 50 /* Max bullets on the screen. */
 //@todo MAX Asteroids
-#define MAXAST 32 /* Max asteroids on the screen. */
+#define MAXAST 0 //32 /* Max asteroids on the screen. */
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
 #define POWERUPSTTL 400 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
@@ -39,10 +39,10 @@ typedef enum PowerUpType {
     PowerUpTypeShield, // Shield
     PowerUpTypeLife, // Extra life
     PowerUpTypeFirePower, // Burst Fire power
-    PowerUpTypeRadialFire, // Radial Fire power
+    // PowerUpTypeRadialFire, // Radial Fire power
     PowerUpTypeNuke, // Nuke power
-    PowerUpTypeClone, // Clone ship
-    PowerUpTypeAssist, // Secondary ship
+    // PowerUpTypeClone, // Clone ship
+    // PowerUpTypeAssist, // Secondary ship
     Number_of_PowerUps // Used to count the number of powerups
 } PowerUpType;
 
@@ -363,6 +363,52 @@ bool should_draw_powerUp(PowerUp* const p) {
     return true;
 }
 
+void draw_powerUp_RemainingLife(Canvas* canvas, PowerUp* p, int y_offset) {
+    if(!p->isPowerUpActive) return;
+
+    /*
+    Here we generate a reverse progress bar. The bar is 24 pixels wide and 1 pixel tall.
+    Calculate the percentage of hitpoints left: hitpoints / total hitpoints
+    Multiply the percentage by the width of the bar (in pixels): percentage * bar width
+    Subtract the result from the width of the bar to get the filled portion of the bar: bar width - (percentage * bar width)
+    Round the result to the nearest integer to get the final result.
+
+    400 / 400 = 1.0
+    1.0 * 24 = 24
+    24 - 24 = 0
+    Round(0) = 0
+    */
+    int progress_bar_width = SCREEN_XRES / 4;
+    if(p->ttl > 0) {
+        //Erase the previous progress bar
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_line(
+            canvas,
+            SCREEN_XRES / 2 - progress_bar_width,
+            3 + y_offset,
+            SCREEN_XRES / 2 + progress_bar_width,
+            3 + y_offset);
+
+        canvas_set_color(canvas, ColorXOR);
+        int percentage = p->ttl / POWERUPSTTL;
+        int remaining = round(percentage * progress_bar_width);
+        // int filled = progress_bar_width - remaining;
+        canvas_draw_line(
+            canvas,
+            round(SCREEN_XRES / 2) - remaining, // x1
+            3 + y_offset, //y1
+            round(SCREEN_XRES / 2) + remaining, //x2
+            3 + y_offset); //y2
+        FURI_LOG_I(
+            TAG,
+            "[draw_powerUp_RemainingLife] Percentage: %d, Remaining: %d Id: %d powerUpType: %d",
+            percentage,
+            remaining,
+            y_offset,
+            p->powerUpType);
+    }
+}
+
 void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
     /*
     
@@ -413,18 +459,18 @@ void draw_powerUps(Canvas* const canvas, PowerUp* const p) {
         // canvas_draw_str(canvas, p->x, p->y, "N");
         canvas_draw_icon(canvas, p->x, p->y, &I_nuke_10x10);
         break;
-    case PowerUpTypeRadialFire:
-        // Draw box with letter R inside
-        canvas_draw_str(canvas, p->x, p->y, "R");
-        break;
-    case PowerUpTypeAssist:
-        // Draw box with letter A inside
-        canvas_draw_str(canvas, p->x, p->y, "A");
-        break;
-    case PowerUpTypeClone:
-        // Draw box with letter C inside
-        canvas_draw_str(canvas, p->x, p->y, "C");
-        break;
+    // case PowerUpTypeRadialFire:
+    //     // Draw box with letter R inside
+    //     canvas_draw_str(canvas, p->x, p->y, "R");
+    //     break;
+    // case PowerUpTypeAssist:
+    //     // Draw box with letter A inside
+    //     canvas_draw_str(canvas, p->x, p->y, "A");
+    //     break;
+    // case PowerUpTypeClone:
+    //     // Draw box with letter C inside
+    //     canvas_draw_str(canvas, p->x, p->y, "C");
+    //     break;
     default:
         //@todo Uknown Power Up Type Detected
         // Draw box with letter U inside
@@ -491,7 +537,10 @@ void render_callback(Canvas* const canvas, void* ctx) {
 
     for(int j = 0; j < app->asteroids_num; j++) draw_asteroid(canvas, &app->asteroids[j]);
 
-    for(int j = 0; j < app->powerUps_num; j++) draw_powerUps(canvas, &app->powerUps[j]);
+    for(int j = 0; j < app->powerUps_num; j++) {
+        draw_powerUps(canvas, &app->powerUps[j]);
+        draw_powerUp_RemainingLife(canvas, &app->powerUps[j], j);
+    }
 
     /* Game over text. */
     if(app->gameover) {
@@ -671,6 +720,7 @@ void asteroid_was_hit(AsteroidsApp* app, int id) {
 
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
+    FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
     if(app->powerUps_num == MAXPOWERUPS) return NULL;
 
     // Randomly select power up for display
@@ -870,19 +920,19 @@ void update_powerUps_position(AsteroidsApp* app) {
 // @todo update_powerUp_status
 /* This updates the state of each power up collected and removes them if they have expired. */
 void update_powerUp_status(AsteroidsApp* app) {
-    for(int j = app->powerUps_num; j > 0; j--) {
+    for(int j = app->powerUps_num; j >= 0; j--) {
         if(app->powerUps[j].ttl > 0 && app->powerUps[j].isPowerUpActive) {
             // Only decrement ttl if we actually picked up power up
             app->powerUps[j].ttl--;
-        } else if(app->powerUps[j].ttl == 0 && app->powerUps[j].display_ttl == 0) {
+        } else if(app->powerUps[j].display_ttl > 0) {
+            app->powerUps[j].display_ttl--;
+        } else {
             // we've reached the end of life of the power up
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
             remove_powerUp(app, j);
-            j--; /* Process this power up index again: the removal will
-                    fill it with the top power up to take the array dense. */
-        } else if(app->powerUps[j].display_ttl > 0) {
-            app->powerUps[j].display_ttl--;
+            // j--; /* Process this power up index again: the removal will
+            //         fill it with the top power up to take the array dense. */
         }
     }
 }
