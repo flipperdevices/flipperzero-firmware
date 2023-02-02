@@ -12,6 +12,7 @@ For those desiring better TX than the internal RFID coil can offer, one can buil
 ## TODO
 Known bugs:
 - [ ] File format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to be setting the Track 2 field with anything (doesn't overwrite existing data). However, `flipper_format_read_string()` doesn't seem to return `false`. Is the bug in my code, or with `flipper_format`?
+  - [ ] Review how it's done in [unirfremix (Sub-GHz Remote)](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/applications/main/unirfremix/unirfremix_app.c), as IIRC that can handle empty keys, despite using the `flipper_format` lib for parsing.
 - [ ] Attempting to play a track that doesn't have data results in a crash (as one might expect). Need to lock out users from selecting empty tracks in the config menu or do better error handling
 - [ ] Custom text input scene with expanded characterset (Add Manually) has odd behavior when navigating the keys near the numpad
 
@@ -40,11 +41,11 @@ Internal TX improvements:
 
 External RX options:
 1. [TTL / PS/2 mag reader connected to UART](https://www.alibaba.com/product-detail/Mini-portable-12-3-tracks-usb_60679900708.html) (bulky, harder to source, but likely easiest to read over GPIO, and means one can read all tracks)
-2. Square audio jack mag reader (this may be DOA; seems like newer versions of the Square modules have some form of preprocessing that also modifies the signal, perhaps in an effort to discourage folks using their hardware independent of their software. Thanks [arha](https://github.com/arha) for your work investigating this)
-3. Some [read-head](https://www.alibaba.com/product-detail/POS-1-2-3-triple-track_60677205741.html) directly connected to GPIO, ADC'd, and parsed all on the Flipper. Likely the most compact and cheapest module option, but also would require the most work.
+2. Square audio jack mag reader (this may be DOA; seems like newer versions of the Square modules have some form of preprocessing that also modifies the signal, perhaps in an effort to discourage folks using their hardware independent of their software. Thanks arha for your work investigating this)
+3. Some [read-head](https://www.alibaba.com/product-detail/POS-1-2-3-triple-track_60677205741.html) directly connected to GPIO, ADC'd, and parsed all on the Flipper. Likely the most compact and cheapest module option, but also would require some signal-processing cleverness.
 4. USB HID input over pre-existing USB C port infeasible; seems the FZ cannot act as an HID host (MCU is the STM32WB55RGV6TR).
-5. Custom USB HID host hat based on the [MAX3421E](https://www.analog.com/en/products/max3421e.html) (USB Host Controller w/ SPI), like the [Arduino USB Host Shield](https://docs.arduino.cc/retired/shields/arduino-usb-host-shield). Would be a large but worthwhile project in its own right, and would let one connect any USB HID reader they desire (or other HID devices for other projects). Suggestion credit to [arha](https://github.com/arha).
-6. Implement a software USB host solution over GPIO like [esp32_usb_soft_host](https://github.com/sdima1357/esp32_usb_soft_host). Suggestion credit to [arha](https://github.com/arha). Also a large undertaking, but valuable in and of itself.
+5. Custom USB HID host hat based on the [MAX3421E](https://www.analog.com/en/products/max3421e.html) (USB Host Controller w/ SPI), like the [Arduino USB Host Shield](https://docs.arduino.cc/retired/shields/arduino-usb-host-shield). Would be a large but worthwhile project in its own right, and would let one connect any USB HID reader they desire (or other HID devices for other projects). Suggestion credit to arha.
+6. Implement a software/firmware USB host solution over GPIO like [esp32_usb_soft_host (for ESP32)](https://github.com/sdima1357/esp32_usb_soft_host) or [V-USB (for AVR)](https://www.obdev.at/products/vusb/index.html). Suggestion credit to arha. Also a massive undertaking, but valuable in and of itself.
 
 ## arha todo & notes
 Attempting to exploit flipper hardware to some extent
@@ -59,14 +60,14 @@ Attempting to exploit flipper hardware to some extent
 
 ----
 ## Credits
-This project interpolates work from [Samy Kamkar's original MagSpoof project](https://github.com/samyk/magspoof), [dunaevai135 & AlexYaro's Flipper hackathon project](https://github.com/dunaevai135/flipperzero-firmware), and the Flipper team's [LF RFID](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/lfrfid) and [SubGhz](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/subghz) apps.  
+This project interpolates work from [Samy Kamkar](https://github.com/samyk/)'s [original MagSpoof project](https://github.com/samyk/magspoof), [Alexey D. (dunaevai135)](https://github.com/dunaevai135/) & [Alexandr Yaroshevich](https://github.com/AYaro)'s [Flipper hackathon project](https://github.com/dunaevai135/flipperzero-firmware/tree/dev/applications/magspoof), and the [Flipper team](https://github.com/flipperdevices)'s [LF RFID](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/lfrfid) and [SubGhz](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/applications/main/subghz) apps.  
 
 Many thanks to everyone who has helped in addition to those above, most notably: 
 - [arha](https://github.com/arha) for bitmapping work, skunkworks testing, and innumerable suggestions/ideas/feedback (now a collaborator!)
-- [Z4urce](https://github.com/Z4urce) for an earlier app icon
-- [antirez](https://github.com/antirez) for bitmapping suggestions and general C wisdom
+- [Zalán Kórósi (Z4urce)](https://github.com/Z4urce) for an earlier app icon
+- [Salvatore Sanfilippo (antirez)](https://github.com/antirez) for bitmapping suggestions and general C wisdom
 - [skotopes](https://github.com/skotopes) for RFID consultation
-- [NVX](https://github.com/nvx) + dlz for NFC consultation
+- [Tiernan (NVX)](https://github.com/nvx) + dlz for NFC consultation
 - davethepirate for EE insight and acting as a sounding board
 - [cool4uma](https://github.com/cool4uma) for their work on custom text_input scenes 
 - Everyone else I've had the pleasure of chatting with!
