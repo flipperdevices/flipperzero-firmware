@@ -277,9 +277,15 @@ void edit_pattern_step(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step,
 
 void pattern_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
 {
-    if (event->input.key == InputKeyUp && event->input.type == InputTypeLong && !(tracker->editing))
+    if (event->input.key == InputKeyDown && event->input.type == InputTypeLong && !(tracker->editing))
     {
         flipbit(tracker->tracker_engine.channel[tracker->current_channel].channel_flags, TEC_DISABLED);
+        return;
+    }
+
+    if (event->input.key == InputKeyUp && event->input.type == InputTypeLong && !(tracker->editing))
+    {
+        tracker->tracker_engine.pattern_position = 0; // return to pattern 1st row
         return;
     }
 

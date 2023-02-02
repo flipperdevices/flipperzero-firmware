@@ -219,6 +219,10 @@ void tracker_engine_trigger_instrument_internal(TrackerEngine *tracker_engine, u
         te_channel->filter_cutoff = ((uint16_t)pinst->filter_cutoff << 3);
         te_channel->filter_resonance = (uint16_t)pinst->filter_resonance;
 
+        se_channel->filter.low = 0;
+        se_channel->filter.high = 0;
+        se_channel->filter.band = 0;
+
         sound_engine_filter_set_coeff(&se_channel->filter, te_channel->filter_cutoff, te_channel->filter_resonance);
     }
 

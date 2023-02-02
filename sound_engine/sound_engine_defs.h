@@ -72,8 +72,6 @@ typedef struct
 
 typedef struct
 {
-    // int32_t f, q, p;
-    // int32_t b0, b1, b2, b3, b4; // filter coefficients
     int32_t cutoff, resonance, low, high, band;
 } SoundEngineFilter;
 
