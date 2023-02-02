@@ -1,5 +1,4 @@
-/*
- * Copyright (c) 2022 KT-Elektronik, Klaucke und Partner GmbH
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +15,14 @@
 
 #pragma once
 
-#include "esp_loader_io.h"
-#include <zephyr/kernel.h>
-#include <zephyr/drivers/gpio.h>
+#include "esp_loader.h"
 #include <stdint.h>
+#include <stdlib.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+esp_loader_error_t SLIP_receive_data(uint8_t *buff, size_t size);
 
-typedef struct {
-    const struct device *uart_dev;
-    const struct gpio_dt_spec enable_spec;
-    const struct gpio_dt_spec boot_spec;
-} loader_zephyr_config_t;
+esp_loader_error_t SLIP_receive_packet(uint8_t *buff, size_t size);
 
-esp_loader_error_t loader_port_zephyr_init(const loader_zephyr_config_t *config);
+esp_loader_error_t SLIP_send(const uint8_t *data, size_t size);
 
-#ifdef __cplusplus
-}
-#endif
-
+esp_loader_error_t SLIP_send_delimiter(void);

@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "serial_comm_prv.h"
-#include "serial_comm.h"
-#include "serial_io.h"
+#include "protocol.h"
+#include "esp_loader_io.h"
 #include "esp_loader.h"
 #include "esp_targets.h"
 #include "md5_hash.h"
@@ -329,7 +328,7 @@ esp_loader_error_t esp_loader_write_register(uint32_t address, uint32_t reg_valu
     return loader_write_reg_cmd(address, reg_value, 0xFFFFFFFF, 0);
 }
 
-esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate)
+esp_loader_error_t esp_loader_change_transmission_rate(uint32_t transmission_rate)
 {
     if (s_target == ESP8266_CHIP) {
         return ESP_LOADER_ERROR_UNSUPPORTED_FUNC;
@@ -337,7 +336,7 @@ esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate)
 
     loader_port_start_timer(DEFAULT_TIMEOUT);
 
-    return loader_change_baudrate_cmd(baudrate);
+    return loader_change_baudrate_cmd(transmission_rate);
 }
 
 #if MD5_ENABLED

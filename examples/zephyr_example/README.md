@@ -16,7 +16,7 @@ Following steps are performed in order to re-program target's memory:
 5. Then `esp_loader_flash_start()` is called to enter flashing mode and erase amount of memory to be flashed.
 6. `esp_loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
 
-Note: In addition, to steps mentioned above, `esp_loader_change_baudrate`  is called after connection
+Note: In addition, to steps mentioned above, `esp_loader_change_transmission_rate`  is called after connection
 is established in order to increase flashing speed. This does not apply for ESP8266, as its bootloader
 does not support this command. However, ESP8266 is capable of detecting baud rate during connection
 phase, and can be changed before calling `esp_loader_connect`, if necessary.

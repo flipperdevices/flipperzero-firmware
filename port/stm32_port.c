@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ static void serial_debug_print(const uint8_t *data, uint16_t size, bool write) {
 
 static uint32_t s_time_end;
 
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
     serial_debug_print(data, size, true);
 
@@ -80,7 +80,7 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
 }
 
 
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
     memset(data, 0x22, size);
 
@@ -101,7 +101,7 @@ void loader_port_stm32_init(loader_stm32_config_t *config)
 
 {
     uart = config->huart;
-    gpio_port_io0 = config->port_io0; 
+    gpio_port_io0 = config->port_io0;
     gpio_port_rst = config->port_rst;
     gpio_num_io0 = config->pin_num_io0;
     gpio_num_rst = config->pin_num_rst;
@@ -150,7 +150,7 @@ void loader_port_debug_print(const char *str)
     printf("DEBUG: %s", str);
 }
 
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+esp_loader_error_t loader_port_change_transmission_rate(uint32_t baudrate)
 {
     uart->Init.BaudRate = baudrate;
 

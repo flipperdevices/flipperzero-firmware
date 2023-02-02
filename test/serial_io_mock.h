@@ -1,4 +1,4 @@
-/* Copyright 2018 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2018-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,5 +34,5 @@ typedef struct {
     uint32_t dummy;
 } loader_serial_config_t;
 
-esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config);
-void loader_port_serial_deinit();
+esp_loader_error_t loader_port_mock_init(const loader_serial_config_t *config);
+void loader_port_mock_deinit();

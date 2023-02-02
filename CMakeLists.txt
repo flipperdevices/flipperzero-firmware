@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 
-set(srcs src/esp_loader.c
-         src/esp_targets.c
-         src/serial_comm.c
-         src/md5_hash.c
+set(srcs
+    src/esp_loader.c
+    src/esp_targets.c
+    src/md5_hash.c
+    src/protocol.c
+    src/slip.c
 )
 
 

@@ -37,7 +37,7 @@ esp_loader_error_t configure_tty()
     return ESP_LOADER_SUCCESS;
 }
 
-esp_loader_error_t loader_port_serial_read(uint8_t *data, const uint16_t size, const uint32_t timeout)
+esp_loader_error_t loader_port_read(uint8_t *data, const uint16_t size, const uint32_t timeout)
 {
     if (!device_is_ready(uart_dev) || data == NULL || size == 0) {
         return ESP_LOADER_ERROR_FAIL;
@@ -61,7 +61,7 @@ esp_loader_error_t loader_port_serial_read(uint8_t *data, const uint16_t size, c
     return ESP_LOADER_SUCCESS;
 }
 
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, const uint16_t size, const uint32_t timeout)
+esp_loader_error_t loader_port_write(const uint8_t *data, const uint16_t size, const uint32_t timeout)
 {
     if (!device_is_ready(uart_dev) || data == NULL || size == 0) {
         return ESP_LOADER_ERROR_FAIL;
@@ -126,7 +126,7 @@ uint32_t loader_port_remaining_time(void)
     return (remaining > 0) ? (uint32_t)remaining : 0;
 }
 
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+esp_loader_error_t loader_port_change_transmission_rate(uint32_t baudrate)
 {
     struct uart_config uart_config;
 

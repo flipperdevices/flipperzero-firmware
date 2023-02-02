@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <sys/param.h>
-#include "serial_io.h"
+#include "esp_loader_io.h"
 #include "esp_loader.h"
 #include "example_common.h"
 
@@ -123,7 +123,7 @@ void get_example_ram_app_binary(target_chip_t target, example_ram_app_binary_t *
 
 #endif
 
-esp_loader_error_t connect_to_target(uint32_t higher_baudrate)
+esp_loader_error_t connect_to_target(uint32_t higher_transmission_rate)
 {
     esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
 
@@ -134,21 +134,21 @@ esp_loader_error_t connect_to_target(uint32_t higher_baudrate)
     }
     printf("Connected to target\n");
 
-    if (higher_baudrate && esp_loader_get_target() != ESP8266_CHIP) {
-        err = esp_loader_change_baudrate(higher_baudrate);
+    if (higher_transmission_rate && esp_loader_get_target() != ESP8266_CHIP) {
+        err = esp_loader_change_transmission_rate(higher_transmission_rate);
         if (err == ESP_LOADER_ERROR_UNSUPPORTED_FUNC) {
-            printf("ESP8266 does not support change baudrate command.");
+            printf("ESP8266 does not support change transmission rate command.");
             return err;
         } else if (err != ESP_LOADER_SUCCESS) {
-            printf("Unable to change baud rate on target.");
+            printf("Unable to change transmission rate on target.");
             return err;
         } else {
-            err = loader_port_change_baudrate(higher_baudrate);
+            err = loader_port_change_transmission_rate(higher_transmission_rate);
             if (err != ESP_LOADER_SUCCESS) {
-                printf("Unable to change baud rate.");
+                printf("Unable to change transmission rate.");
                 return err;
             }
-            printf("Baudrate changed\n");
+            printf("Transmission rate changed changed\n");
         }
     }
 

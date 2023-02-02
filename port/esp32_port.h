@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
  #pragma once
 
-#include "serial_io.h"
+#include "esp_loader_io.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 
@@ -34,7 +34,7 @@ typedef struct
   uint32_t rx_buffer_size;    /*!< Set to zero for default RX buffer size */
   uint32_t tx_buffer_size;    /*!< Set to zero for default TX buffer size */
   uint32_t queue_size;        /*!< Set to zero for default UART queue size */
-  QueueHandle_t *uart_queue;  /*!< Set to NULL, if UART queue handle is not  
+  QueueHandle_t *uart_queue;  /*!< Set to NULL, if UART queue handle is not
                                    necessary. Otherwise, it will be assigned here */
 } loader_esp32_config_t;
 

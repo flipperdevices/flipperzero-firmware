@@ -25,21 +25,21 @@ Supported **target** microcontrollers:
 
 In order to support new target, following function has to be implemented by user:
 
-- loader_port_serial_read()
-- loader_port_serial_write()
+- loader_port_read()
+- loader_port_write()
 - loader_port_enter_bootloader()
 - loader_port_delay_ms()
 - loader_port_start_timer()
 - loader_port_remaining_time()
 
-Following functions are part of serial_io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not called directly from library.
+Following functions are part of io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not called directly from library.
 
-- loader_port_change_baudrate()
+- loader_port_change_transmission_rate()
 - loader_port_reset_target()
 - loader_port_debug_print()
 
-Prototypes of all function mentioned above can be found in [serial_io.h](include/serial_io.h).
-Please refer to ports in `port` directory. Currently, only ports for [ESP32 port](port/esp32_port.c), [STM32 port](port/stm32_port.c), and [Zephyr port](port/zephyr_port.c) are available.
+Prototypes of all function mentioned above can be found in [io.h](include/io.h).
+Please refer to ports in `port` directory. Currently, ports for [ESP32](port/esp32_port.c), [STM32](port/stm32_port.c), and [Zephyr](port/zephyr_port.c) are available.
 
 ## Configuration
 
