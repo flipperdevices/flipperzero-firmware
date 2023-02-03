@@ -30,6 +30,10 @@ void bitbang_raw(bool value, MagSetting* setting) {
     case MagTxStatePiezo:
         furi_hal_gpio_write(&gpio_speaker, value);
         break;
+    case MagTxStateLF_P:
+        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_speaker, value);
+        break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
         if(last_value == 2 || value != (bool)last_value) {
