@@ -11,14 +11,14 @@ For those desiring better TX than the internal RFID coil can offer, one can buil
 
 ## TODO
 Known bugs:
-- [ ] File format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to be setting the Track 2 field with anything (doesn't overwrite existing data). However, `flipper_format_read_string()` doesn't seem to return `false`. Is the bug in my code, or with `flipper_format`?
-  - [ ] Review how it's done in [unirfremix (Sub-GHz Remote)](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/applications/main/unirfremix/unirfremix_app.c), as IIRC that can handle empty keys, despite using the `flipper_format` lib for parsing.
+- [X] File format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to be setting the Track 2 field with anything (doesn't overwrite existing data). However, `flipper_format_read_string()` doesn't seem to return `false`. Is the bug in my code, or with `flipper_format`?
+  - [X] Review how it's done in [unirfremix (Sub-GHz Remote)](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/applications/main/unirfremix/unirfremix_app.c), as IIRC that can handle empty keys, despite using the `flipper_format` lib for parsing.
 - [ ] Attempting to play a track that doesn't have data results in a crash (as one might expect). Need to lock out users from selecting empty tracks in the config menu or do better error handling
 - [ ] Custom text input scene with expanded characterset (Add Manually) has odd behavior when navigating the keys near the numpad
 
 Emulation:
 - [ ] Validate arha's bitmap changes, transition over to it fully
-- [ ] Test piezo TX (prelim tests promising)
+- [X] Test piezo TX (prelim tests promising)
 - [ ] General code cleanup
 - [ ] Reverse track precompute & replay (should be simple with new bitmap approach; just iterate through bytes backwards, bits forwards?)
 - [ ] Parameter tuning, find best defaults, troubleshoot improperly parsed TX
