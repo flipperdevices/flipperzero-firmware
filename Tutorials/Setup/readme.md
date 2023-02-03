@@ -11,6 +11,7 @@ It is important, that you get this using a Git client. If you just download it a
 <br><br>
 Download the firmware of you choice using Git<br>
 <a href="https://github.com/flipperdevices/flipperzero-firmware" target="_blank">Original Firmware (recommended)</a><br>
+<a href="https://github.com/IamUSER/Flipper-Fusion">FZ Fusion Firmware</a><br>
 <a href="https://github.com/ClaraCrazy/Flipper-Xtreme" target="_blank">Xtreme Firmware</a><br>
 <a href="https://github.com/DarkFlippers/unleashed-firmware" target="_blank">Unleashed Firmware</a><br>
 <a href="https://github.com/RogueMaster/flipperzero-firmware-wPlugins" target="_blank">Roguemaster Firmware</a><br>
