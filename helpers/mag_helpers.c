@@ -22,6 +22,10 @@ void play_halfbit(bool value, MagSetting* setting) {
     switch(setting->tx) {
     case MagTxStateRFID:
         furi_hal_gpio_write(RFID_PIN_OUT, value);
+        /*furi_hal_gpio_write(RFID_PIN_OUT, !value);
+        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(RFID_PIN_OUT, !value);
+        furi_hal_gpio_write(RFID_PIN_OUT, value);*/
         break;
     case MagTxStateGPIO:
         furi_hal_gpio_write(GPIO_PIN_A, value);
@@ -29,10 +33,33 @@ void play_halfbit(bool value, MagSetting* setting) {
         break;
     case MagTxStatePiezo:
         furi_hal_gpio_write(&gpio_speaker, value);
+        /*furi_hal_gpio_write(&gpio_speaker, !value);
+        furi_hal_gpio_write(&gpio_speaker, value);
+        furi_hal_gpio_write(&gpio_speaker, !value);
+        furi_hal_gpio_write(&gpio_speaker, value);*/
+
         break;
     case MagTxStateLF_P:
         furi_hal_gpio_write(RFID_PIN_OUT, value);
         furi_hal_gpio_write(&gpio_speaker, value);
+
+        /* // Weaker but cleaner signal
+        if(value) {
+            furi_hal_gpio_write(RFID_PIN_OUT, value);
+            furi_hal_gpio_write(&gpio_speaker, value);
+            furi_delay_us(10);
+            furi_hal_gpio_write(RFID_PIN_OUT, !value);
+            furi_hal_gpio_write(&gpio_speaker, !value);
+        } else {
+            furi_delay_us(10);
+        }*/
+
+        /*furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_speaker, value);
+        furi_hal_gpio_write(RFID_PIN_OUT, !value);
+        furi_hal_gpio_write(&gpio_speaker, !value);
+        furi_hal_gpio_write(RFID_PIN_OUT, value);
+        furi_hal_gpio_write(&gpio_speaker, value);*/
         break;
     case MagTxStateNFC:
         // turn on for duration of half-bit? or "blip" the field on / off?
@@ -269,7 +296,11 @@ void mag_spoof(Mag* mag) {
         data3, (uint8_t*)bits_t3_manchester, (uint8_t*)bits_t3_raw, bitlen[2], sublen[2]);
 
     if(furi_log_get_level() >= FuriLogLevelDebug) {
-        printf("Manchester bitcount: T1: %d, T2: %d\r\n", bits_t1_count, bits_t2_count);
+        printf(
+            "Manchester bitcount: T1: %d, T2: %d, T3: %d\r\n",
+            bits_t1_count,
+            bits_t2_count,
+            bits_t3_count);
         printf("T1 raw: ");
         for(int i = 0; i < bits_t1_count / 16; i++) printf("%02x ", bits_t1_raw[i]);
         printf("\r\nT1 manchester: ");
@@ -293,7 +324,7 @@ void mag_spoof(Mag* mag) {
     FURI_CRITICAL_ENTER();
     for(uint16_t i = 0; i < (ZERO_PREFIX * 2); i++) {
         // is this right?
-        bit ^= 0xFF;
+        if(!!(i % 2)) bit ^= 1;
         play_halfbit(bit, setting);
         furi_delay_us(setting->us_clock);
     }
@@ -303,7 +334,7 @@ void mag_spoof(Mag* mag) {
 
     if((setting->track == MagTrackStateOneAndTwo))
         for(uint16_t i = 0; i < (ZERO_BETWEEN * 2); i++) {
-            bit ^= 0xFF;
+            if(!!(i % 2)) bit ^= 1;
             play_halfbit(bit, setting);
             furi_delay_us(setting->us_clock);
         }
@@ -319,7 +350,7 @@ void mag_spoof(Mag* mag) {
         play_track((uint8_t*)bits_t3_manchester, bits_t3_count, setting, false);
 
     for(uint16_t i = 0; i < (ZERO_SUFFIX * 2); i++) {
-        bit ^= 0xFF;
+        if(!!(i % 2)) bit ^= 1;
         play_halfbit(bit, setting);
         furi_delay_us(setting->us_clock);
     }
