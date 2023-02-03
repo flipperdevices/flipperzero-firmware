@@ -25,7 +25,7 @@ static int32_t ibutton_worker_thread(void* thread_context);
 iButtonWorker* ibutton_worker_alloc() {
     iButtonWorker* worker = malloc(sizeof(iButtonWorker));
     worker->key_p = NULL;
-    worker->key_data = malloc(ibutton_key_get_max_size());
+    worker->rom_data = malloc(ibutton_key_get_max_size());
     worker->host = onewire_host_alloc(&ibutton_gpio);
     worker->slave = onewire_slave_alloc(&ibutton_gpio);
     worker->writer = ibutton_writer_alloc(worker->host);
@@ -109,7 +109,7 @@ void ibutton_worker_free(iButtonWorker* worker) {
     furi_message_queue_free(worker->messages);
 
     furi_thread_free(worker->thread);
-    free(worker->key_data);
+    free(worker->rom_data);
     free(worker);
 }
 

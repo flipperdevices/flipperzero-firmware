@@ -6,21 +6,13 @@
 
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define IBUTTON_KEY_DATA_SIZE 8
-#define IBUTTON_KEY_NAME_SIZE 22
-
-typedef enum {
-    iButtonKeyDS1990,
-    iButtonKeyCyfral,
-    iButtonKeyMetakom,
-} iButtonKeyType;
 
 typedef struct iButtonKey iButtonKey;
 
@@ -32,102 +24,37 @@ iButtonKey* ibutton_key_alloc();
 
 /**
  * Free key
- * @param key 
+ * @param [in] key
  */
 void ibutton_key_free(iButtonKey* key);
 
 /**
- * Copy key
- * @param to 
- * @param from 
+ * Get protocol id
+ * @param [in] key
+ * @return protocol id
  */
-void ibutton_key_set(iButtonKey* to, const iButtonKey* from);
+size_t ibutton_key_get_protocol_id(const iButtonKey* key);
 
 /**
- * Set key data
- * @param key 
- * @param data 
- * @param data_count 
+ * Set protocol id
+ * @param [in] key
+ * @param [in] protocol_id
  */
-void ibutton_key_set_data(iButtonKey* key, uint8_t* data, uint8_t data_count);
+void ibutton_key_set_protocol_id(iButtonKey* key, size_t protocol_id);
 
 /**
- * Clear key data
- * @param key 
+ * Set ROM data. The data size is defined by the current protocol.
+ * @param [in] key
+ * @param [in] data
  */
-void ibutton_key_clear_data(iButtonKey* key);
+void ibutton_key_set_rom_data(iButtonKey* key, const uint8_t* rom_data, size_t data_size);
 
 /**
- * Get pointer to key data
- * @param key 
- * @return const uint8_t* 
+ * Set user data. The data size is defined by the current protocol.
+ * @param [in] key
+ * @param [in] data
  */
-const uint8_t* ibutton_key_get_data_p(iButtonKey* key);
-
-/**
- * Get key data size
- * @param key 
- * @return uint8_t 
- */
-uint8_t ibutton_key_get_data_size(iButtonKey* key);
-
-/**
- * Set key type
- * @param key 
- * @param key_type 
- */
-void ibutton_key_set_type(iButtonKey* key, iButtonKeyType key_type);
-
-/**
- * Get key type
- * @param key 
- * @return iButtonKeyType 
- */
-iButtonKeyType ibutton_key_get_type(iButtonKey* key);
-
-/**
- * Get type string from key type
- * @param key_type 
- * @return const char* 
- */
-const char* ibutton_key_get_string_by_type(iButtonKeyType key_type);
-
-/**
- * Get key type from string
- * @param type_string 
- * @param key_type 
- * @return bool 
- */
-bool ibutton_key_get_type_by_string(const char* type_string, iButtonKeyType* key_type);
-
-/**
- * Get key data size from type
- * @param key_type 
- * @return uint8_t 
- */
-uint8_t ibutton_key_get_size_by_type(iButtonKeyType key_type);
-
-/**
- * Get max key size
- * @return uint8_t 
- */
-uint8_t ibutton_key_get_max_size();
-
-/**
- * Check if CRC for onewire key is valid
- * @param key 
- * @return true 
- * @return false 
- */
-bool ibutton_key_dallas_crc_is_valid(iButtonKey* key);
-
-/**
- * Check if onewire key is a DS1990 key
- * @param key 
- * @return true 
- * @return false 
- */
-bool ibutton_key_dallas_is_1990_key(iButtonKey* key);
+void ibutton_key_set_user_data(iButtonKey* key, const void* user_data, size_t data_size);
 
 #ifdef __cplusplus
 }

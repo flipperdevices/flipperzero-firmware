@@ -6,16 +6,15 @@
 
 #pragma once
 
+#include <core/thread.h>
+#include <core/message_queue.h>
+
 #include <one_wire/one_wire_host.h>
 #include <one_wire/one_wire_slave.h>
 #include <one_wire/one_wire_device.h>
 
-#include <toolbox/protocols/protocol_dict.h>
-
 #include "ibutton_worker.h"
 #include "ibutton_writer.h"
-
-// #include "protocols/ibutton_protocols.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +36,8 @@ typedef enum {
 
 struct iButtonWorker {
     iButtonKey* key_p;
-    uint8_t* key_data;
+    uint8_t* rom_data;
+    void* protocol_data;
     OneWireHost* host;
     OneWireSlave* slave;
     OneWireDevice* device;
@@ -51,7 +51,7 @@ struct iButtonWorker {
     iButtonWorkerEmulateCallback emulate_cb;
     void* cb_ctx;
 
-    ProtocolDict* protocols;
+    // ProtocolDict* protocols;
     // iButtonProtocol protocol_to_encode;
 };
 

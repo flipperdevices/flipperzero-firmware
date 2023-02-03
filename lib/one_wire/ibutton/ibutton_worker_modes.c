@@ -1,7 +1,9 @@
 #include <furi.h>
 #include <furi_hal.h>
+
 #include "ibutton_worker_i.h"
-#include "ibutton_key_command.h"
+
+#include "protocols/ibutton_protocols.h"
 
 void ibutton_worker_mode_idle_start(iButtonWorker* worker);
 void ibutton_worker_mode_idle_tick(iButtonWorker* worker);
@@ -147,36 +149,65 @@ void ibutton_worker_comparator_callback(bool level, void* context) {
 
 bool ibutton_worker_read_dallas(iButtonWorker* worker) {
     bool result = false;
+
+    uint8_t *rom_data = NULL;
+    void *user_data = NULL;
+
     onewire_host_start(worker->host);
     furi_delay_ms(100);
+
     FURI_CRITICAL_ENTER();
-    if(onewire_host_search(worker->host, worker->key_data, OneWireHostSearchModeNormal)) {
-        onewire_host_reset_search(worker->host);
 
-        // key found, verify
-        if(onewire_host_reset(worker->host)) {
-            onewire_host_write(worker->host, DS1990_CMD_READ_ROM);
-            bool key_valid = true;
-            for(uint8_t i = 0; i < ibutton_key_get_max_size(); i++) {
-                if(onewire_host_read(worker->host) != worker->key_data[i]) {
-                    key_valid = false;
-                    break;
-                }
-            }
+    do {
+        if(!onewire_host_search(worker->host, worker->rom_data, OneWireHostSearchModeNormal)) {
+            break;
+        }
 
-            if(key_valid) {
-                result = true;
+        if(!onewire_host_reset(worker->host)) {
+            break;
+        }
 
-                furi_check(worker->key_p != NULL);
-                ibutton_key_set_type(worker->key_p, iButtonKeyDS1990);
-                ibutton_key_set_data(worker->key_p, worker->key_data, ibutton_key_get_max_size());
+        const uint8_t family_code = worker->rom_data[0];
+        const size_t protocol_index = ibutton_protocols_get_index_by_family_code(family_code);
+
+        if(protocol_index == (size_t)iButtonProtocolMax) {
+            break;
+        }
+
+        rom_data = malloc(ibutton_protocols_get_rom_size(protocol_index));
+
+        if(!ibutton_protocols_read_rom(worker->host, rom_data, protocol_index)) {
+            break;
+        }
+
+        //TODO: check if the ROM data matches
+
+        const size_t user_data_size = ibutton_protocols_get_user_data_size(protocol_index);
+        if(user_data_size > 0) {
+            user_data = malloc(user_data_size);
+            if(!ibutton_protocols_read_user_data(worker->host, user_data, protocol_index)) {
+                break;
             }
         }
-    } else {
-        onewire_host_reset_search(worker->host);
+
+        //TODO: set key data
+
+        result = true;
+    } while(false);
+
+    if(rom_data) {
+        free(rom_data);
     }
+
+    if(user_data) {
+        free(user_data);
+    }
+
+    onewire_host_reset_search(worker->host);
     onewire_host_stop(worker->host);
+
     FURI_CRITICAL_EXIT();
+
     return result;
 }
 
@@ -215,10 +246,10 @@ static void onewire_slave_callback(void* context) {
 }
 
 void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
-    uint8_t* device_id = onewire_device_get_id_p(worker->device);
-    const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
-    const uint8_t key_size = ibutton_key_get_max_size();
-    memcpy(device_id, key_id, key_size);
+    // uint8_t* device_id = onewire_device_get_id_p(worker->device);
+    // const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
+    // const uint8_t key_size = ibutton_key_get_max_size();
+    // memcpy(device_id, key_id, key_size);
 
     onewire_slave_attach(worker->slave, worker->device);
     onewire_slave_set_result_callback(worker->slave, onewire_slave_callback, worker);
@@ -298,15 +329,15 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
 
     furi_hal_rfid_pins_reset();
 
-    switch(ibutton_key_get_type(worker->key_p)) {
-    case iButtonKeyDS1990:
-        ibutton_worker_emulate_dallas_stop(worker);
-        break;
-    case iButtonKeyCyfral:
-    case iButtonKeyMetakom:
-        ibutton_worker_emulate_timer_stop(worker);
-        break;
-    }
+    // switch(ibutton_key_get_type(worker->key_p)) {
+    // case iButtonKeyDS1990:
+    //     ibutton_worker_emulate_dallas_stop(worker);
+    //     break;
+    // case iButtonKeyCyfral:
+    // case iButtonKeyMetakom:
+    //     ibutton_worker_emulate_timer_stop(worker);
+    //     break;
+    // }
 }
 
 /*********************** WRITE ***********************/
