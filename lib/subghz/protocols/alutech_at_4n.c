@@ -352,6 +352,7 @@ static void subghz_protocol_alutech_at_4n_remote_controller(
  *      cc SSSSSSSS XXxx BB 
  * 
  *  crc1 is calculated from the lower part of cnt
+ *  key 1=0xff, 2=0x11, 3=0x22, 4=0x33, 5=0x44
  * 
  */
 
