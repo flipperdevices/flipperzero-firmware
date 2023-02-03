@@ -21,6 +21,10 @@ Press the 'ok' button (button in the centre of joypad) to pause/unpause the wave
 * Measures frequency of waveform in hertz
 * Measures voltage: min, max, Vpp
 
+![Signal Generator](photos/sig.jpg)
+
+![Flipper Zero running flipperscope](photos/freq.jpg)
+
 ## To Do
 
 * Voltage measurements for max/min of waveform seem a bit off currently, need to investigate further
