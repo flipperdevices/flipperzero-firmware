@@ -40,11 +40,11 @@ File management:
 Internal TX improvements:
 - [ ] Attempt downstream modulation techniques in addition to upstream, like the LF RFID worker does when writing.
 - [ ] Implement using the timer system, rather than direct-writing to pins
-- [ ] Use the NFC (HF RFID) coil instead of or in addition to the LF coil (likely unfruitful from initial tests; we can enable/disable the oscillating field, but even with transparent mode to the ST25R3916, it seems we don't get low-enough-level control to pull it high/low correctly) 
+- [X] Use the NFC (HF RFID) coil instead of or in addition to the LF coil (likely unfruitful from initial tests; we can enable/disable the oscillating field, but even with transparent mode to the ST25R3916, it seems we don't get low-enough-level control to pull it high/low correctly) 
 - [ ] Add "subcarriers" to each half-bit transmitted (wiggle the pin high and low rapidly)
   - [ ] Piezo subcarrier tests
   - [ ] LF subcarrier tests
-  - [ ] Retry NFC oscillating field? 
+  - [X] Retry NFC oscillating field? 
 
 External RX options:
 1. [TTL / PS/2 mag reader connected to UART](https://www.alibaba.com/product-detail/Mini-portable-12-3-tracks-usb_60679900708.html) (bulky, harder to source, but likely easiest to read over GPIO, and means one can read all tracks)

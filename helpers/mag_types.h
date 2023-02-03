@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAG_VERSION_APP "0.04"
+#define MAG_VERSION_APP "0.05"
 #define MAG_DEVELOPER "Zachary Weiss"
 #define MAG_GITHUB "github.com/zacharyweiss/magspoof_flipper"
 
@@ -32,6 +32,7 @@ typedef enum {
     MagTxStateGPIO,
     MagTxStatePiezo,
     MagTxStateLF_P, // combo of RFID and Piezo
+    MagTxStateNFC,
     MagTxCC1101_434,
     MagTxCC1101_868,
 } MagTxState;
