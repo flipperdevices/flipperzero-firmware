@@ -59,6 +59,8 @@ Plays a notification sequence.
 Takes sequence name (sequence defined as sequence_<sequence name> in notification/notification_messages.h) as the only argument.
 set <name> <value>
 Sets the variable <name> to <value>
+sh
+Starts the EXTRA shell.
 sleep <time>
 Freezes for <time> milliseconds.
 start <path>
@@ -97,7 +99,7 @@ You can also use `input <varname>` to set a variable value to a string input by 
 
 > TODO: command and function to clear variables
 
-Also in scripts you can use `%<varname>%` to insert a variable value.
+Also in scripts and EXTRA shell you can use `%<varname>%` to insert a variable value.
 
 Example:
 ```bash
