@@ -147,8 +147,10 @@ static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show
             furi_string_printf(temp_str, "Track %d", i + 1);
             if(!flipper_format_read_string(
                    file, furi_string_get_cstr(temp_str), mag_dev->dev_data.track[i].str)) {
+                FURI_LOG_D(TAG, "Could not read track %d data", i + 1);
+
+                // TODO: smarter load handling now that it is acceptible for some tracks to be empty
                 data_read = false;
-                break;
             }
         }
 

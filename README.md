@@ -1,7 +1,7 @@
 # magspoof_flipper
-WIP of MagSpoof for the Flipper Zero. Basic TX of saved files confirmed working against an MSR90 with an external H-bridge module mirroring Samy Kamkar's design. RFID coil output weaker; able to be picked up/detected by more compact mag readers such as Square, but yet to have success with it being decoded/parsed properly. Additional WIP investigation into alternate internal TX options (CC1101, ST25R3916, piezo) underway, courtesy of arha. Sample files with test data are included in `assets` for anyone wishing to experiment.
+WIP of MagSpoof for the Flipper Zero. Basic TX of saved files confirmed working against an MSR90 with an external H-bridge module mirroring Samy Kamkar's design. RFID coil output weaker; able to be picked up/detected by more compact mag readers such as Square, but yet to have success with it being decoded/parsed properly. Additional investigation into alternate internal TX options (CC1101, ST25R3916, piezo) underway; tentatively, RFID coil + speaker (`LF + P` config setting) results in the strongest internal TX tested to date but still weaker than a dedicated external module or an actual card swipe (and sounds like a dial-up modem from hell). Sample files with test data are included in `assets` for anyone wishing to experiment.
 
-Disclaimer: use responsibly, and at your own risk. While in my testing, I've seen no reason to believe this could damage the RFID hardware, this is inherently driving the coil in ways it was not designed or intended for; I take no responsibility for fried/bricked Flippers. Similarly, please only use this with magstripe cards and mag readers you own — this is solely meant as a proof of concept for educational purposes. I neither condone nor am sympathetic to malicious uses of my code.
+Disclaimer: use responsibly, and at your own risk. While in my testing, I've seen no reason to believe this could damage the RFID (or other) hardware, this is inherently driving the coil in ways it was not designed or intended for; I take no responsibility for fried/bricked Flippers. Similarly, please only use this with magstripe cards and mag readers you own — this is solely meant as a proof of concept for educational purposes. I neither condone nor am sympathetic to malicious uses of my code.
 
 ## Optional GPIO TX Module
 For those desiring better TX than the internal RFID coil can offer, one can build the module below, consisting of an H-bridge, a capacitor, and a coil.
@@ -11,22 +11,25 @@ For those desiring better TX than the internal RFID coil can offer, one can buil
 
 ## TODO
 Known bugs:
-- [ ] File format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to be setting the Track 2 field with anything (doesn't overwrite existing data). However, `flipper_format_read_string()` doesn't seem to return `false`. Is the bug in my code, or with `flipper_format`?
-  - [ ] Review how it's done in [unirfremix (Sub-GHz Remote)](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/applications/main/unirfremix/unirfremix_app.c), as IIRC that can handle empty keys, despite using the `flipper_format` lib for parsing.
-- [ ] Attempting to play a track that doesn't have data results in a crash (as one might expect). Need to lock out users from selecting empty tracks in the config menu or do better error handling
+- [X] File format issues when Track 2 data exists but Track 1 is left empty; doesn't seem to be setting the Track 2 field with anything (doesn't overwrite existing data). However, `flipper_format_read_string()` doesn't seem to return `false`. Is the bug in my code, or with `flipper_format`?
+  - [X] Review how it's done in [unirfremix (Sub-GHz Remote)](https://github.com/DarkFlippers/unleashed-firmware/blob/dev/applications/main/unirfremix/unirfremix_app.c), as IIRC that can handle empty keys, despite using the `flipper_format` lib for parsing.
+- [X] Attempting to play a track that doesn't have data results in a crash (as one might expect). Need to lock out users from selecting empty tracks in the config menu or do better error handling (*Doesn't crash now, but still should probably prevent users from being able to select*)
 - [ ] Custom text input scene with expanded characterset (Add Manually) has odd behavior when navigating the keys near the numpad
 
 Emulation:
-- [ ] Validate arha's bitmap changes, transition over to it fully
+- [X] Validate arha's bitmap changes, transition over to it fully
+- [X] Test piezo TX (prelim tests promising)
 - [ ] General code cleanup
-- [ ] Reverse track precompute & replay (should be simple with new bitmap approach; just iterate through bytes backwards, bits forwards?)
+- [X] Reverse track precompute & replay
 - [ ] Parameter tuning, find best defaults, troubleshoot improperly parsed TX
 - [ ] Pursue skunkworks TX improvement ideas listed below
+- [ ] Remove or reimplement interpacket 
+  - [ ] Verify `furi_delay_us` aliasing to `64us`
 
 Scenes:
-- [ ] Finish emulation config scene (reverse track functionality; possibly expand settings list to include prefix/between/suffix options)
-- [ ] "Edit" scene (generalize "Add manually")
-- [ ] "Rename" scene (generalize input_name)
+- [X] Finish emulation config scene (reverse track functionality; possibly expand settings list to include prefix/between/suffix options)
+- [ ] "Edit" scene (generalize `input_value`)
+- [ ] "Rename" scene (generalize `input_name`)
 
 File management:
 - [ ] Update Add Manually flow to reflect new file format (currently only sets Track 2)
@@ -38,6 +41,10 @@ Internal TX improvements:
 - [ ] Attempt downstream modulation techniques in addition to upstream, like the LF RFID worker does when writing.
 - [ ] Implement using the timer system, rather than direct-writing to pins
 - [ ] Use the NFC (HF RFID) coil instead of or in addition to the LF coil (likely unfruitful from initial tests; we can enable/disable the oscillating field, but even with transparent mode to the ST25R3916, it seems we don't get low-enough-level control to pull it high/low correctly) 
+- [ ] Add "subcarriers" to each half-bit transmitted (wiggle the pin high and low rapidly)
+  - [ ] Piezo subcarrier tests
+  - [ ] LF subcarrier tests
+  - [ ] Retry NFC oscillating field? 
 
 External RX options:
 1. [TTL / PS/2 mag reader connected to UART](https://www.alibaba.com/product-detail/Mini-portable-12-3-tracks-usb_60679900708.html) (bulky, harder to source, but likely easiest to read over GPIO, and means one can read all tracks)
