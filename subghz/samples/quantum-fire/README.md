@@ -6,8 +6,9 @@ These Flipper Zero subghz captures are from the remote control for the Quantum F
 - Model: DBR04 (Quantum Fireworks USA) 
 - FCC ID: [Z2F-DBR04](https://fccid.io/Z2F-DBR04)
 
+
 ## Demo
-[YouTube video](https://youtu.be/8EuNqTr02eU) of igniting fireworks using the Flipper Zero.  The signals broadcast from the subghz were pre-recorded ("Read RAW", config: 433.92MHz, AM650, RSSI -70) using a remote that was paired to the ignitor.  F_a1.sub and F_a2.sub were the files used in the video recording.
+[YouTube video](https://youtu.be/8EuNqTr02eU) of igniting fireworks using the Flipper Zero.  The signals broadcast from the subghz were pre-recorded ("Read RAW", config: 433.92MHz, AM650, RSSI -70) using a remote that was paired to the ignitor.  RAW_a1.sub and RAW_a2.sub were the files used in the video recording.  Princeton_a1 was captured using "Read" instead of "Read RAW".
 
 ## Notes
 According to fccid.io user manual:
@@ -18,3 +19,5 @@ According to fccid.io user manual:
 
 Reading more about EV1527 (non-rolling code, but large key space):
 - https://ripplesecurity.com.au/blogs/news/ev1527-and-ask-explained-simple says "Note that in the common basic protocol the full transmission (remote control keypress) consists of a preamble of one appr.. 320 microseconds pulse (“1”) followed by 31 zeros of the same time size (320 X 31 ~ 9900 micros, immediately followed by the 20 bits address and 4 command (button) bits all of the same time size."
+
+The protocol is the Princeton protocol.
