@@ -293,7 +293,7 @@ static bool animation_storage_load_frames(
     FileInfo file_info;
     FuriString* filename;
     filename = furi_string_alloc();
-    size_t max_filesize = ROUND_UP_TO(width, 8) * height + 1;
+    size_t max_filesize = ROUND_UP_TO(width, 8) * height + 2;
 
     for(int i = 0; i < icon->frame_count; ++i) {
         frames_ok = false;
