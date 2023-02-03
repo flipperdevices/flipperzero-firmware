@@ -97,6 +97,8 @@ ColorGuess* color_guess_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, ColorGuessViewIdMenu, submenu_get_view(app->submenu));
     app->color_guess_color_set = color_guess_color_set_alloc();
     view_dispatcher_add_view(app->view_dispatcher, ColorGuessViewIdColorSet, color_guess_color_set_get_view(app->color_guess_color_set));
+    app->color_guess_play = color_guess_play_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, ColorGuessViewIdPlay, color_guess_play_get_view(app->color_guess_play));
 
     //End Scene Additions
 

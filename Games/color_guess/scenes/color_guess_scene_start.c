@@ -22,11 +22,24 @@ void color_guess_scene_start_on_enter(void* context) {
 
 bool color_guess_scene_start_on_event(void* context, SceneManagerEvent event) {
     ColorGuess* app = context;
-    if(event.event == SubmenuIndexColorSet) {
-        scene_manager_set_scene_state(
-            app->scene_manager, ColorGuessSceneStart, SubmenuIndexPlay);
-        scene_manager_next_scene(app->scene_manager, ColorGuessSceneColorSet);
+    UNUSED(app);
+    if(event.type == SceneManagerEventTypeBack) {
+        //exit app
+        scene_manager_stop(app->scene_manager);
+        view_dispatcher_stop(app->view_dispatcher);
         return true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == SubmenuIndexColorSet) {
+            scene_manager_set_scene_state(
+                app->scene_manager, ColorGuessSceneStart, SubmenuIndexColorSet);
+            scene_manager_next_scene(app->scene_manager, ColorGuessSceneColorSet);
+            return true;
+        } else if (event.event == SubmenuIndexPlay) {
+            scene_manager_set_scene_state(
+                app->scene_manager, ColorGuessSceneStart, SubmenuIndexPlay);
+            scene_manager_next_scene(app->scene_manager, ColorGuessScenePlay);
+            return true;
+        }
     }
     return false;
 }

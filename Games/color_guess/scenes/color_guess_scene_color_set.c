@@ -1,5 +1,6 @@
 #include "../color_guess.h"
-#include "../digits.h"
+//#include "../digits.h"
+#include "../helpers/color_guess_custom_event.h"
 #include "../views/color_guess_color_set.h"
 
 /*static void color_set_render_callback(Canvas* const canvas, void* context) {
@@ -44,12 +45,21 @@
     plugin_state->blue = 0;
 }*/
 
+void color_guess_color_set_callback(ColorGuessCustomEvent event, void* context) {
+    furi_assert(context);
+    ColorGuess* app = context;
+    //UNUSED(app);
+    //UNUSED(event);
+    view_dispatcher_send_custom_event(app->view_dispatcher, event);
+}
+
 void color_guess_scene_color_set_on_enter(void* context) {
     furi_assert(context);
     ColorGuess* app = context;
     UNUSED(app);
     //color_guess_state_init(app->plugin_state);
 
+    color_guess_color_set_set_callback(app->color_guess_color_set, color_guess_color_set_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, ColorGuessViewIdColorSet);
 }
@@ -57,15 +67,29 @@ void color_guess_scene_color_set_on_enter(void* context) {
 bool color_guess_scene_color_set_on_event(void* context, SceneManagerEvent event) {
     ColorGuess* app = context;
     UNUSED(app);
-    UNUSED(event);
-    //color_set_render_callback();
-    // if(event.event == SubmenuIndexColorSet) {
-    //     scene_manager_set_scene_state(
-    //         app->scene_manager, ColorGuessSceneStart, SubmenuIndexPlay);
-    //     scene_manager_next_scene(app->scene_manager, ColorGuessSceneColorSet);
-    //     return true;
-    // }
-    return false;
+    //UNUSED(event);
+
+    bool consumed = false;
+    if(event.type == SceneManagerEventTypeCustom) {
+        switch(event.event) {
+            case ColorGuessCustomEventColorSetLeft:
+
+                break;
+            case ColorGuessCustomEventColorSetBack:
+                notification_message(app->notification, &sequence_reset_red);
+                notification_message(app->notification, &sequence_reset_green);
+                notification_message(app->notification, &sequence_reset_blue);
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                    app->scene_manager, ColorGuessSceneStart)) {
+                        scene_manager_stop(app->scene_manager);
+                        view_dispatcher_stop(app->view_dispatcher);
+                    }
+                consumed = true;
+                break;
+        }
+    }
+
+    return consumed;
 }
 
 void color_guess_scene_color_set_on_exit(void* context) {
