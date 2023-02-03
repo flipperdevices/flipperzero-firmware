@@ -32,6 +32,7 @@ typedef enum {
     MagTxStateGPIO,
     MagTxStatePiezo,
     MagTxStateLF_P, // combo of RFID and Piezo
+    MagTxStateNFC,
     MagTxCC1101_434,
     MagTxCC1101_868,
 } MagTxState;

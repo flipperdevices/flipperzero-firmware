@@ -34,6 +34,17 @@ void play_halfbit(bool value, MagSetting* setting) {
         furi_hal_gpio_write(RFID_PIN_OUT, value);
         furi_hal_gpio_write(&gpio_speaker, value);
         break;
+    case MagTxStateNFC:
+        // turn on for duration of half-bit? or "blip" the field on / off?
+        // getting nothing from the mag reader either way
+        //(value) ? furi_hal_nfc_ll_txrx_on() : furi_hal_nfc_ll_txrx_off();
+
+        if(last_value == 2 || value != (bool)last_value) {
+            furi_hal_nfc_ll_txrx_on();
+            //furi_delay_us(64);
+            furi_hal_nfc_ll_txrx_off();
+        }
+        break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
         if(last_value == 2 || value != (bool)last_value) {
@@ -167,6 +178,9 @@ bool tx_init(MagSetting* setting) {
         tx_init_piezo();
         tx_init_rfid();
         break;
+    case MagTxStateNFC:
+        furi_hal_nfc_exit_sleep();
+        break;
     case MagTxCC1101_434:
         tx_init_rf(434000000);
         break;
@@ -201,6 +215,10 @@ bool tx_deinit(MagSetting* setting) {
     case MagTxStateLF_P:
         tx_deinit_piezo();
         tx_deinit_rfid();
+        break;
+    case MagTxStateNFC:
+        furi_hal_nfc_ll_txrx_off();
+        furi_hal_nfc_start_sleep();
         break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
