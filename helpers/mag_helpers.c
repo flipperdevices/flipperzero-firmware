@@ -23,9 +23,12 @@ void bitbang_raw(bool value, MagSetting* setting) {
     case MagTxStateRFID:
         furi_hal_gpio_write(RFID_PIN_OUT, value);
         break;
-    case MagTxStateGPIOA6A7:
+    case MagTxStateGPIO:
         furi_hal_gpio_write(GPIO_PIN_A, value);
         furi_hal_gpio_write(GPIO_PIN_B, !value);
+        break;
+    case MagTxStatePiezo:
+        furi_hal_gpio_write(&gpio_speaker, value);
         break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
@@ -90,14 +93,52 @@ void play_bit_gpio(uint8_t send_bit, MagSetting* setting) {
     furi_delay_us(setting->us_interpacket);
 }
 
+void play_bit_piezo(uint8_t send_bit, MagSetting* setting) {
+    // TX testing with parasitic EMF from buzzer
+    bit_dir ^= 1;
+    furi_hal_gpio_write(&gpio_speaker, bit_dir);
+    furi_delay_us(setting->us_clock);
+
+    if(send_bit) {
+        bit_dir ^= 1;
+        furi_hal_gpio_write(&gpio_speaker, bit_dir);
+    }
+    furi_delay_us(setting->us_clock);
+
+    furi_delay_us(setting->us_interpacket);
+}
+
+void play_bit_lf_p(uint8_t send_bit, MagSetting* setting) {
+    // TX testing with parasitic EMF from buzzer
+    bit_dir ^= 1;
+    furi_hal_gpio_write(&gpio_speaker, bit_dir);
+    furi_hal_gpio_write(RFID_PIN_OUT, bit_dir);
+    furi_delay_us(setting->us_clock);
+
+    if(send_bit) {
+        bit_dir ^= 1;
+        furi_hal_gpio_write(&gpio_speaker, bit_dir);
+        furi_hal_gpio_write(RFID_PIN_OUT, bit_dir);
+    }
+    furi_delay_us(setting->us_clock);
+
+    furi_delay_us(setting->us_interpacket);
+}
+
 bool play_bit(uint8_t send_bit, MagSetting* setting) {
     // Initialize configured TX method
     switch(setting->tx) {
     case MagTxStateRFID:
         play_bit_rfid(send_bit, setting);
         break;
-    case MagTxStateGPIOA6A7:
+    case MagTxStateGPIO:
         play_bit_gpio(send_bit, setting);
+        break;
+    case MagTxStatePiezo:
+        play_bit_piezo(send_bit, setting);
+        break;
+    case MagTxStateLF_P:
+        play_bit_lf_p(send_bit, setting);
         break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
@@ -185,14 +226,34 @@ void tx_deinit_rf() {
     furi_hal_subghz_idle();
 }
 
+void tx_init_piezo() {
+    // TODO: some special mutex acquire procedure? c.f. furi_hal_speaker.c
+    furi_hal_gpio_init(&gpio_speaker, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+
+    // tossing in this delay arbitrarily to make it easier to see light blinking during TX
+    //furi_delay_ms(100);
+}
+
+void tx_deinit_piezo() {
+    // TODO: some special mutex release procedure?
+    furi_hal_gpio_init(&gpio_speaker, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+}
+
 bool tx_init(MagSetting* setting) {
     // Initialize configured TX method
     switch(setting->tx) {
     case MagTxStateRFID:
         tx_init_rfid();
         break;
-    case MagTxStateGPIOA6A7:
+    case MagTxStateGPIO:
         tx_init_gpio();
+        break;
+    case MagTxStatePiezo:
+        tx_init_piezo();
+        break;
+    case MagTxStateLF_P:
+        tx_init_piezo();
+        tx_init_rfid();
         break;
     case MagTxCC1101_434:
         tx_init_rf(434000000);
@@ -213,8 +274,15 @@ bool tx_deinit(MagSetting* setting) {
     case MagTxStateRFID:
         tx_deinit_rfid();
         break;
-    case MagTxStateGPIOA6A7:
+    case MagTxStateGPIO:
         tx_deinit_gpio();
+        break;
+    case MagTxStatePiezo:
+        tx_deinit_piezo();
+        break;
+    case MagTxStateLF_P:
+        tx_deinit_piezo();
+        tx_deinit_rfid();
         break;
     case MagTxCC1101_434:
     case MagTxCC1101_868:
@@ -345,13 +413,11 @@ void mag_spoof_bitwise(Mag* mag) {
         for(uint16_t i = 0; i < bits_t1_count; i++) {
             uint8_t byte = i / 8;
             uint8_t bitmask = 1 << (7 - (i % 8));
-            /* this comment is mostly for zw's convenience:
-             *
-             * bits are stored in their arrays like on a card (LSB first). This is not how usually bits are stored in a
+            /* Bits are stored in their arrays like on a card (LSB first). This is not how usually bits are stored in a
              * byte, with the MSB first. the var bitmask creates the pattern to iterate through each bit, LSB first, like so
              * 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80... masking bits one by one from the current byte
              *
-             * i've chosen this LSB approach since bits and bytes are hard enough to visualize with the 5/8 and 7/8 encoding
+             * I've chosen this LSB approach since bits and bytes are hard enough to visualize with the 5/8 and 7/8 encoding
              * MSR uses. It's a biiit more complicated to process, but visualizing it with printf or a debugger is
              * infinitely easier
              *
@@ -362,7 +428,7 @@ void mag_spoof_bitwise(Mag* mag) {
              * bits backward, jumping 16 more bits ahead.
              *
              * I find this much more convenient for debugging, with the tiny incovenience of reading the bits in reverse
-             * order. THus, the reason for the bitmask above
+             * order. Thus, the reason for the bitmask above
              */
 
             bit = !!(bits_t1_manchester[byte] & bitmask);

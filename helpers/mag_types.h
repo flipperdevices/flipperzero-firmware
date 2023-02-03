@@ -28,7 +28,9 @@ typedef enum {
 
 typedef enum {
     MagTxStateRFID,
-    MagTxStateGPIOA6A7,
+    MagTxStateGPIO,
+    MagTxStatePiezo,
+    MagTxStateLF_P, // combo of RFID and Piezo
     MagTxCC1101_434,
     MagTxCC1101_868,
 } MagTxState;

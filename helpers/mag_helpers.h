@@ -4,6 +4,8 @@
 
 void play_bit_rfid(uint8_t send_bit, MagSetting* setting);
 void play_bit_gpio(uint8_t send_bit, MagSetting* setting);
+void play_bit_piezo(uint8_t send_bit, MagSetting* setting);
+void play_bit_lf_p(uint8_t send_bit, MagSetting* setting);
 bool play_bit(uint8_t send_bit, MagSetting* setting);
 void tx_init_rfid();
 void tx_init_gpio();

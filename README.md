@@ -18,6 +18,7 @@ Known bugs:
 
 Emulation:
 - [ ] Validate arha's bitmap changes, transition over to it fully
+- [ ] Test piezo TX (prelim tests promising)
 - [ ] General code cleanup
 - [ ] Reverse track precompute & replay (should be simple with new bitmap approach; just iterate through bytes backwards, bits forwards?)
 - [ ] Parameter tuning, find best defaults, troubleshoot improperly parsed TX
