@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "color_guess_icons.h"
 
 const Icon* digits[17] = {
     &I_digit_0_10x14,

@@ -8,8 +8,11 @@
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
-#include "color_guess_icons.h"
-#include "digits.h"
+#include <gui/scene_manager.h>
+#include "scenes/color_guess_scene.h"
+#include "views/color_guess_color_set.h"
+#include "views/color_guess_play.h"
+
 
 typedef enum {
     EventTypeTick,
@@ -37,6 +40,11 @@ typedef struct {
     PluginState* plugin_state;
     ViewPort* view_port;
     ValueMutex state_mutex;
+    ViewDispatcher* view_dispatcher;
+    Submenu* submenu;
+    SceneManager* scene_manager;
+    ColorGuessColorSet* color_guess_color_set;
+    ColorGuessPlay* color_guess_play;
     bool error;
 } ColorGuess;
 
