@@ -92,8 +92,11 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 
 int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
+    furi_hal_power_disable_external_3_3v();
+    furi_hal_power_disable_otg();
+    furi_delay_ms(100);
+    furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    furi_delay_ms(300);
 
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
 

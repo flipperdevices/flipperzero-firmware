@@ -325,15 +325,6 @@ void CommandLine::runCommand(String input) {
   }
 #ifdef ESP32_CAM
 
-  else if (cmd_args.get(0) == CAM_STREAM) {
-    preferences.begin("esp32cam", false);
-    preferences.putBool("streaming", true);
-    preferences.putBool("return", false);
-    preferences.end();
-    Serial.print("Press reset to switch to\nstreaming mode. To get\nback, press reset twice\nwaiting a second between\npresses.");
-    for (;;) {}
-  }
-
   else if (cmd_args.get(0) == CAM_FLASHLIGHT) {
     pinMode(4, OUTPUT);
     digitalWrite(4, !digitalRead(4));

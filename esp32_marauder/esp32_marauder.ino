@@ -22,9 +22,6 @@
 #include <Arduino.h>
 #ifdef ESP32_CAM
 
-#include <Preferences.h>
-Preferences preferences;
-
 #include "FS.h"                // SD Card ESP32
 #include "SD_MMC.h"            // SD Card ESP32
 #include "esp_camera.h"
@@ -167,25 +164,19 @@ void setup()
     delay(10);*/
 
   Serial.begin(230400);
-  preferences.begin("esp32cam", false);
-  if (preferences.getBool("streaming", false))
+
+  unsigned long waitForStreamMode = millis() + 1000;
+
+  while (waitForStreamMode > millis())
   {
-    if (preferences.getBool("return", false))
+    if (Serial.available()) // if we receive anything, just switch to stream mode
     {
-      preferences.putBool("streaming", false);
-      preferences.end();
-      ESP.restart();
+      cam_stream_setup();
+      for (;;)
+        cam_stream_loop();
     }
-    preferences.putBool("return", true);
-    preferences.end();
-    delay(2000);
-    preferences.begin("esp32cam", false);
-    preferences.putBool("return", false);
-    preferences.end();
-    cam_stream_setup();
-    for (;;)
-      cam_stream_loop();
   }
+
   //Serial.begin(115200);
 
   //Serial.println("\n\nHello, World!\n");

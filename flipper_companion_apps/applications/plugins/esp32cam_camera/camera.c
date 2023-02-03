@@ -255,6 +255,14 @@ static UartEchoApp* camera_app_alloc() {
     furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, camera_on_irq_cb, app);
 
+    furi_hal_power_disable_external_3_3v();
+    furi_hal_power_disable_otg();
+    furi_delay_ms(100);
+    furi_hal_power_enable_external_3_3v();
+    furi_hal_power_enable_otg();
+    furi_delay_ms(600); 
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){13}, 1); // Just to trigger the stream
+
     return app;
 }
 
@@ -286,8 +294,7 @@ static void camera_app_free(UartEchoApp* app) {
 
 int32_t camera_app(void* p) {
     UNUSED(p);
-    furi_hal_power_enable_otg();
-    furi_delay_ms(300);
+
     UartEchoApp* app = camera_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     camera_app_free(app);
