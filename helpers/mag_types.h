@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAG_VERSION_APP "0.03"
+#define MAG_VERSION_APP "0.04"
 #define MAG_DEVELOPER "Zachary Weiss"
 #define MAG_GITHUB "github.com/zacharyweiss/magspoof_flipper"
 
@@ -16,14 +16,15 @@ typedef enum {
 } MagView;
 
 typedef enum {
-    MagReverseStateOn,
     MagReverseStateOff,
+    MagReverseStateOn,
 } MagReverseState;
 
 typedef enum {
-    MagTrackStateAll,
+    MagTrackStateOneAndTwo,
     MagTrackStateOne,
     MagTrackStateTwo,
+    MagTrackStateThree,
 } MagTrackState;
 
 typedef enum {

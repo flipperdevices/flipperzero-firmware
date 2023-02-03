@@ -2,7 +2,7 @@
 
 typedef enum {
     SubmenuIndexSaved,
-    SubmenuIndexAddManually,
+    //SubmenuIndexAddManually,
     SubmenuIndexAbout,
 } SubmenuIndex;
 
@@ -17,8 +17,8 @@ void mag_scene_start_on_enter(void* context) {
     Submenu* submenu = mag->submenu;
 
     submenu_add_item(submenu, "Saved", SubmenuIndexSaved, mag_scene_start_submenu_callback, mag);
-    submenu_add_item(
-        submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
+    //submenu_add_item(
+    //    submenu, "Add Manually", SubmenuIndexAddManually, mag_scene_start_submenu_callback, mag);
     submenu_add_item(submenu, "About", SubmenuIndexAbout, mag_scene_start_submenu_callback, mag);
 
     submenu_set_selected_item(
@@ -41,10 +41,10 @@ bool mag_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(mag->scene_manager, MagSceneFileSelect);
             consumed = true;
             break;
-        case SubmenuIndexAddManually:
-            scene_manager_next_scene(mag->scene_manager, MagSceneInputValue);
-            consumed = true;
-            break;
+        //case SubmenuIndexAddManually:
+        //    scene_manager_next_scene(mag->scene_manager, MagSceneInputValue);
+        //    consumed = true;
+        //    break;
         case SubmenuIndexAbout:
             scene_manager_next_scene(mag->scene_manager, MagSceneAbout);
             consumed = true;
