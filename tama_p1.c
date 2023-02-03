@@ -10,19 +10,20 @@
 
 TamaApp* g_ctx;
 FuriMutex* g_state_mutex;
-int layout_mode = 0; // 0: landscape; 1: portrait => 2: portrait <= 3: big landscape
+uint8_t layout_mode =
+    1; // 0: landscape (small); 1: landscape (big); 2: landscape (full); 3: portrait => 4: portrait <=
 bool in_menu = false;
 
-int speed = 1;
-const int speed_options[] = {1, 2, 4};
-const int min_speed = 1;
-const int max_speed = 4;
-const int speed_options_size = 3;
+uint8_t speed = 1;
+const uint8_t speed_options[] = {1, 2, 4};
+const uint8_t min_speed = 1;
+const uint8_t max_speed = 4;
+const uint8_t speed_options_size = 3;
 // = sizeof(speed_options) / sizeof(speed_options[0]);
 
-int menu_cursor = 0; // 0: A+C; 1: layout mode; 2: speed
-const int menu_items = 4; // 3: Close menu, Save & Exit
-bool sub_menu_default = true;
+uint8_t menu_cursor = 3; // 0: A+C; 1: layout mode; 2: speed
+const uint8_t menu_items = 4; // 3: Close menu, Save & Exit
+uint8_t sub_menu_default = 0;
 
 static const Icon* icons_list[] = {
     &I_icon_0,
@@ -36,20 +37,19 @@ static const Icon* icons_list[] = {
 };
 
 // static void draw_landscape(Canvas* const canvas, void* cb_ctx)
-static void draw_landscape(Canvas* const canvas, int scale) {
+static void draw_landscape(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
     // Calculate positioning
     uint16_t canv_width = canvas_width(canvas);
     uint16_t canv_height = canvas_height(canvas);
-    uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR * scale;
-    uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR * scale;
-    // uint16_t lcd_matrix_top = 0;
-    uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
+    uint16_t lcd_matrix_scaled_width = 32 * scale;
+    uint16_t lcd_matrix_scaled_height = 16 * scale;
+    uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2; // 0
     uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
 
-    uint16_t lcd_icon_upper_top = lcd_matrix_top - TAMA_LCD_ICON_SIZE - TAMA_LCD_ICON_MARGIN;
+    // uint16_t lcd_icon_upper_top = lcd_matrix_top - TAMA_LCD_ICON_SIZE - TAMA_LCD_ICON_MARGIN;
+    // uint16_t lcd_icon_lower_top = lcd_matrix_top + lcd_matrix_scaled_height + TAMA_LCD_ICON_MARGIN;
     uint16_t lcd_icon_upper_left = lcd_matrix_left;
-    uint16_t lcd_icon_lower_top = lcd_matrix_top + lcd_matrix_scaled_height + TAMA_LCD_ICON_MARGIN;
     uint16_t lcd_icon_lower_left = lcd_matrix_left;
     uint16_t lcd_icon_spacing_horiz =
         (lcd_matrix_scaled_width - (4 * TAMA_LCD_ICON_SIZE)) / 3 + TAMA_LCD_ICON_SIZE;
@@ -60,50 +60,53 @@ static void draw_landscape(Canvas* const canvas, int scale) {
         uint32_t row_pixels = g_ctx->framebuffer[row];
         for(uint8_t col = 0; col < 32; ++col) {
             if(row_pixels & 1) {
-                canvas_draw_box(
-                    canvas,
-                    x,
-                    y,
-                    TAMA_SCREEN_SCALE_FACTOR * scale,
-                    TAMA_SCREEN_SCALE_FACTOR * scale);
+                canvas_draw_box(canvas, x, y, scale, scale);
             }
-            x += TAMA_SCREEN_SCALE_FACTOR * scale;
+            x += scale;
             row_pixels >>= 1;
         }
-        y += TAMA_SCREEN_SCALE_FACTOR * scale;
+        y += scale;
     }
 
     // Start drawing icons
     uint8_t lcd_icons = g_ctx->icons;
 
     // Draw top icons
-    if(scale == 1)
-        y = lcd_icon_upper_top;
-    else
-        y = 0;
-    // y = 64 - TAMA_LCD_ICON_SIZE;
+    y = 0;
     uint16_t x_ic = lcd_icon_upper_left;
     for(uint8_t i = 0; i < 4; ++i) {
         if(lcd_icons & 1) {
             canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
         }
         // x_ic += TAMA_LCD_ICON_SIZE + 4;
+        // if(scale == 3) {
+        //     y += 16;
+        // } else {
         x_ic += lcd_icon_spacing_horiz;
+        // }
         lcd_icons >>= 1;
     }
 
     // Draw bottom icons
-    if(scale == 1)
-        y = lcd_icon_lower_top;
-    else
-        y = 64 - TAMA_LCD_ICON_SIZE;
+    y = 64 - TAMA_LCD_ICON_SIZE;
+    // if(scale == 3) {
+    // y = 0;
+    // x_ic = 128 - TAMA_LCD_ICON_SIZE;
+    //     x_ic = 0;
+    // } else {
+    // y = 64 - TAMA_LCD_ICON_SIZE;
     x_ic = lcd_icon_lower_left;
+    // }
     for(uint8_t i = 4; i < 8; ++i) {
         // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
         if(lcd_icons & 1) {
             canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
         }
+        // if(scale == 3) {
+        //     y += 16;
+        // } else {
         x_ic += lcd_icon_spacing_horiz;
+        // }
         lcd_icons >>= 1;
     }
 }
@@ -250,9 +253,11 @@ static void draw_menu(Canvas* const canvas) {
         canvas_draw_triangle(canvas, 4, 36, 6, 6, CanvasDirectionLeftToRight);
         break;
     case menu_items - 1:
-        if(sub_menu_default) {
+        if(sub_menu_default == 0) {
             canvas_draw_triangle(canvas, 4, 56, 6, 6, CanvasDirectionLeftToRight);
-        } else {
+        } else if(sub_menu_default == 1) {
+            canvas_draw_triangle(canvas, 36, 56, 6, 6, CanvasDirectionLeftToRight);
+        } else if(sub_menu_default == 2) {
             canvas_draw_triangle(canvas, 67, 56, 6, 6, CanvasDirectionLeftToRight);
         }
         break;
@@ -260,19 +265,22 @@ static void draw_menu(Canvas* const canvas) {
     canvas_draw_str(canvas, 12, 20, "A+C (mute/change time)");
     switch(layout_mode) {
     case 0:
-        canvas_draw_str(canvas, 12, 30, "Orientation: Landscape");
+        canvas_draw_str(canvas, 12, 30, "Layout: Landscape (small)");
         break;
     case 1:
-        canvas_draw_str(canvas, 12, 30, "Orientation: Portrait =>");
+        canvas_draw_str(canvas, 12, 30, "Layout: Landscape (big)");
         break;
     case 2:
-        canvas_draw_str(canvas, 12, 30, "Orientation: Portrait <=");
+        canvas_draw_str(canvas, 12, 30, "Layout: Landscape (full)");
         break;
     case 3:
-        canvas_draw_str(canvas, 12, 30, "Orientation: Big Landscape");
+        canvas_draw_str(canvas, 12, 30, "Layout: Portrait =>");
+        break;
+    case 4:
+        canvas_draw_str(canvas, 12, 30, "Layout: Portrait <=");
         break;
     default:
-        canvas_draw_str(canvas, 12, 30, "Orientation: ???");
+        canvas_draw_str(canvas, 12, 30, "Layout: ???");
         break;
     }
     switch(speed) { // match with speed_options
@@ -298,7 +306,8 @@ static void draw_menu(Canvas* const canvas) {
         canvas_draw_str(canvas, 12, 40, "Speed ??x");
         break;
     }
-    canvas_draw_str(canvas, 12, 60, "Close menu");
+    canvas_draw_str(canvas, 12, 60, "Close");
+    canvas_draw_str(canvas, 44, 60, "Save");
     canvas_draw_str(canvas, 75, 60, "Save & Exit");
 }
 
@@ -355,16 +364,19 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
         } else {
             switch(layout_mode) {
             case 0:
-                draw_landscape(canvas, 1);
+                draw_landscape(canvas, TAMA_SCREEN_SCALE_FACTOR); // 2
                 break;
             case 1:
-                draw_portrait_right(canvas);
+                draw_landscape(canvas, 3);
                 break;
             case 2:
-                draw_portrait_left(canvas);
+                draw_landscape(canvas, 4);
                 break;
             case 3:
-                draw_landscape(canvas, 2);
+                draw_portrait_right(canvas);
+                break;
+            case 4:
+                draw_portrait_left(canvas);
                 break;
             default:
                 break;
@@ -756,12 +768,12 @@ int32_t tama_p1_app(void* p) {
                         if(menu_cursor > 0) {
                             menu_cursor -= 1;
                         } else {
-                            sub_menu_default = true;
+                            sub_menu_default = 0;
                             menu_cursor = menu_items - 1;
                         }
                     } else if(event.input.key == InputKeyDown && event.input.type == InputTypePress) {
                         if(menu_cursor < menu_items - 1) {
-                            sub_menu_default = true;
+                            sub_menu_default = 0;
                             menu_cursor += 1;
                         } else {
                             menu_cursor = 0;
@@ -771,11 +783,12 @@ int32_t tama_p1_app(void* p) {
                         case 1:
                             switch(layout_mode) {
                             case 0:
-                                layout_mode = 3;
+                                layout_mode = 4;
                                 break;
                             case 1:
                             case 2:
                             case 3:
+                            case 4:
                                 layout_mode -= 1;
                                 break;
                             }
@@ -784,7 +797,17 @@ int32_t tama_p1_app(void* p) {
                             speed_down();
                             break;
                         case menu_items - 1:
-                            sub_menu_default = !sub_menu_default;
+                            switch(sub_menu_default) {
+                            case 0:
+                                sub_menu_default = 2;
+                                break;
+                            case 1:
+                            case 2:
+                                sub_menu_default -= 1;
+                                break;
+                            default:
+                                break;
+                            }
                             break;
                         default:
                             break;
@@ -796,9 +819,10 @@ int32_t tama_p1_app(void* p) {
                             case 0:
                             case 1:
                             case 2:
+                            case 3:
                                 layout_mode += 1;
                                 break;
-                            case 3:
+                            case 4:
                                 layout_mode = 0;
                                 break;
                             }
@@ -807,7 +831,17 @@ int32_t tama_p1_app(void* p) {
                             speed_up();
                             break;
                         case menu_items - 1:
-                            sub_menu_default = !sub_menu_default;
+                            switch(sub_menu_default) {
+                            case 0:
+                            case 1:
+                                sub_menu_default += 1;
+                                break;
+                            case 2:
+                                sub_menu_default = 0;
+                                break;
+                            default:
+                                break;
+                            }
                             break;
                         default:
                             break;
@@ -840,9 +874,14 @@ int32_t tama_p1_app(void* p) {
                             break;
                         case menu_items - 1:
                         default:
-                            if(sub_menu_default) {
+                            switch(sub_menu_default) {
+                            case 0:
                                 in_menu = false;
-                            } else {
+                                break;
+                            case 1:
+                                tama_p1_save_state();
+                                break;
+                            case 2:
                                 if(speed != 1) {
                                     speed = 1;
                                     tamalib_set_speed(speed);
@@ -850,8 +889,10 @@ int32_t tama_p1_app(void* p) {
                                 furi_timer_stop(timer);
                                 running = false;
                                 tama_p1_save_state();
+                                break;
+                            default:
+                                break;
                             }
-
                             break;
                         }
                     } else if(event.input.key == InputKeyBack) {
@@ -860,26 +901,27 @@ int32_t tama_p1_app(void* p) {
                 } else { // out of menu
                     if(input_type == InputTypePress || input_type == InputTypeRelease) {
                         switch(layout_mode) {
-                        case 3:
                         case 0:
-                            switch(event.input.key) {
-                            case InputKeyLeft:
-                                tamalib_set_button(BTN_LEFT, tama_btn_state);
-                                break;
-                            case InputKeyDown:
-                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                                break;
-                            case InputKeyRight:
-                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                                break;
-                            case InputKeyUp:
-                                in_menu = true;
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
                         case 1:
+                        case 2:
+                            switch(event.input.key) {
+                            case InputKeyLeft:
+                                tamalib_set_button(BTN_LEFT, tama_btn_state);
+                                break;
+                            case InputKeyDown:
+                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                                break;
+                            case InputKeyRight:
+                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                                break;
+                            case InputKeyUp:
+                                in_menu = true;
+                                break;
+                            default:
+                                break;
+                            }
+                            break;
+                        case 3:
                             switch(event.input.key) {
                             case InputKeyDown:
                                 tamalib_set_button(BTN_LEFT, tama_btn_state);
@@ -897,7 +939,7 @@ int32_t tama_p1_app(void* p) {
                                 break;
                             }
                             break;
-                        case 2:
+                        case 4:
                             switch(event.input.key) {
                             case InputKeyUp:
                                 tamalib_set_button(BTN_LEFT, tama_btn_state);
@@ -930,15 +972,16 @@ int32_t tama_p1_app(void* p) {
                         }
                         if(event.input.key == InputKeyOk) {
                             tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                        } else if(
-                            event.input.key == InputKeyBack &&
-                            event.input.type == InputTypeShort) {
-                            if(speed != 1) {
-                                speed = 1;
-                                tamalib_set_speed(speed);
-                            }
-                            tama_p1_save_state();
                         }
+                        // else if(
+                        //     event.input.key == InputKeyBack &&
+                        //     event.input.type == InputTypeShort) {
+                        //     if(speed != 1) {
+                        //         speed = 1;
+                        //         tamalib_set_speed(speed);
+                        //     }
+                        //     tama_p1_save_state();
+                        // }
                     }
                     if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                         if(speed != 1) {
@@ -949,6 +992,13 @@ int32_t tama_p1_app(void* p) {
                         running = false;
                         tama_p1_save_state();
                     }
+                    // else if(event.input.key == InputKeyBack && event.input.type == InputTypeRepeat) {
+                    //     if(speed != 1) {
+                    //         speed = 1;
+                    //         tamalib_set_speed(speed);
+                    //     }
+                    //     tama_p1_save_state();
+                    // }
                 }
             }
             furi_mutex_release(g_state_mutex);
