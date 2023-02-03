@@ -59,10 +59,31 @@ typedef enum {
     ESP32C3_CHIP = 3,
     ESP32S3_CHIP = 4,
     ESP32C2_CHIP = 5,
-    ESP32H2_CHIP = 6,
+    ESP32H4_CHIP = 6,
     ESP_MAX_CHIP = 7,
     ESP_UNKNOWN_CHIP = 7
 } target_chip_t;
+
+/**
+ * @brief esptool portable bin header format
+ */
+typedef struct esp_loader_bin_header {
+  uint8_t magic;
+  uint8_t segments;
+  uint8_t flash_mode;
+  uint8_t flash_size_freq;
+  uint32_t entrypoint;
+} esp_loader_bin_header_t;
+
+/**
+ * @brief esptool portable bin segment format
+ */
+typedef struct esp_loader_bin_segment {
+  uint32_t addr;
+  uint32_t size;
+  uint8_t *data;
+} esp_loader_bin_segment_t;
+
 
 /**
  * @brief SPI pin configuration arguments
@@ -161,6 +182,56 @@ esp_loader_error_t esp_loader_flash_write(void *payload, uint32_t size);
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   */
 esp_loader_error_t esp_loader_flash_finish(bool reboot);
+
+
+/**
+  * @brief Initiates mem operation
+  *
+  * @param offset[in]       Address from which mem operation will be performed.
+  * @param size[in]         Size of the whole binary to be loaded into mem.
+  * @param block_size[in]   Size of buffer used in subsequent calls to esp_loader_mem_write.
+  *
+  * @note  image_size is size of the whole image, whereas, block_size is chunk of data sent
+  *        to the target, each time esp_mem_flash_write function is called.
+  *
+  * @return
+  *     - ESP_LOADER_SUCCESS Success
+  *     - ESP_LOADER_ERROR_TIMEOUT Timeout
+  *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  */
+esp_loader_error_t esp_loader_mem_start(uint32_t offset, uint32_t size, uint32_t block_size);
+
+
+/**
+  * @brief Writes supplied data to target's mem memory.
+  *
+  * @param payload[in]      Data to be loaded into target's memory.
+  * @param size[in]         Size of data in bytes.
+  *
+  * @note  size must not be greater that block_size supplied to previously called
+  *        esp_loader_mem_start function. 
+  *        Therefore, size of data buffer has to be equal or greater than block_size.
+  *
+  * @return
+  *     - ESP_LOADER_SUCCESS Success
+  *     - ESP_LOADER_ERROR_TIMEOUT Timeout
+  *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  */
+esp_loader_error_t esp_loader_mem_write(void *payload, uint32_t size);
+
+
+/**
+  * @brief Ends mem operation.
+  *
+  * @param entrypoint[in]       entrypoint of ram program.
+  *
+  * @return
+  *     - ESP_LOADER_SUCCESS Success
+  *     - ESP_LOADER_ERROR_TIMEOUT Timeout
+  *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
+  */
+esp_loader_error_t esp_loader_mem_finish(uint32_t entrypoint);
+
 
 /**
   * @brief Writes register.

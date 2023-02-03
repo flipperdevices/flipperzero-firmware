@@ -1,4 +1,5 @@
 build
-sdkconfig
+sdkconfig*
 empty_file.bin
 binaries.c
+*.lock

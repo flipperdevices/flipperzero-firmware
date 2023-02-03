@@ -41,8 +41,12 @@ void app_main(void)
 
         get_example_binaries(esp_loader_get_target(), &bin);
 
+        printf("\e[1;32mLoading bootloader...\n\e[0m");
         flash_binary(bin.boot.data, bin.boot.size, bin.boot.addr);
+        printf("\e[1;32mLoading partition table...\n\e[0m");
         flash_binary(bin.part.data, bin.part.size, bin.part.addr);
+        printf("\e[1;32mLoading app...\n\e[0m");
         flash_binary(bin.app.data,  bin.app.size,  bin.app.addr);
+        printf("\e[1;32mDone!\n\e[0m");
     }
 }

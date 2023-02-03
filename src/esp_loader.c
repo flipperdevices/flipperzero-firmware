@@ -30,9 +30,14 @@
 #define MIN(a, b) ((a) < (b)) ? (a) : (b)
 #endif
 
+#ifndef ROUNDUP
+#define ROUNDUP(a, b) (((int)a + (int)b - 1) / (int)b)
+#endif
+
 static const uint32_t DEFAULT_TIMEOUT = 1000;
 static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most flash operations
 static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 10000; // timeout (per megabyte) for erasing a region
+static const uint32_t LOAD_RAM_TIMEOUT_PER_MB = 2000000; // timeout (per megabyte) for erasing a region
 static const uint8_t  PADDING_PATTERN = 0xFF;
 
 typedef enum {
@@ -279,6 +284,29 @@ esp_loader_error_t esp_loader_flash_finish(bool reboot)
     loader_port_start_timer(DEFAULT_TIMEOUT);
 
     return loader_flash_end_cmd(!reboot);
+}
+
+
+esp_loader_error_t esp_loader_mem_start(uint32_t offset, uint32_t size, uint32_t block_size)
+{
+    uint32_t blocks_to_write = ROUNDUP(size, block_size);
+    loader_port_start_timer(timeout_per_mb(size, LOAD_RAM_TIMEOUT_PER_MB));
+    return loader_mem_begin_cmd(offset, size, blocks_to_write, block_size);
+}
+
+
+esp_loader_error_t esp_loader_mem_write(void *payload, uint32_t size)
+{
+    uint8_t *data = (uint8_t *)payload;
+    loader_port_start_timer(timeout_per_mb(size, LOAD_RAM_TIMEOUT_PER_MB));
+    return loader_mem_data_cmd(data, size);
+}
+
+
+esp_loader_error_t esp_loader_mem_finish(uint32_t entrypoint)
+{
+    loader_port_start_timer(DEFAULT_TIMEOUT);
+    return loader_mem_end_cmd(entrypoint);
 }
 
 

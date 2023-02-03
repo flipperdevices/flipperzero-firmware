@@ -14,7 +14,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <sys/param.h>
 #include "serial_io.h"
 #include "esp_loader.h"
@@ -22,10 +24,13 @@
 
 #ifndef SINGLE_TARGET_SUPPORT
 
-#define BOOTLOADER_ADDRESS_8266  0x1000
-#define BOOTLOADER_ADDRESS  0x1000
-#define PARTITION_ADDRESS   0x8000
-#define APPLICATION_ADDRESS 0x10000
+
+// For esp8266, esp32, esp32s2
+#define BOOTLOADER_ADDRESS_V0       0x1000
+// For esp32s3 and later chips
+#define BOOTLOADER_ADDRESS_V1       0x0
+#define PARTITION_ADDRESS           0x8000
+#define APPLICATION_ADDRESS         0x10000
 
 extern const uint8_t  ESP32_bootloader_bin[];
 extern const uint32_t ESP32_bootloader_bin_size;
@@ -48,12 +53,19 @@ extern const uint32_t ESP8266_hello_world_bin_size;
 extern const uint8_t  ESP8266_partition_table_bin[];
 extern const uint32_t ESP8266_partition_table_bin_size;
 
+extern const uint8_t  ESP32_H4_bootloader_bin[];
+extern const uint32_t ESP32_H4_bootloader_bin_size;
+extern const uint8_t  ESP32_H4_hello_world_bin[];
+extern const uint32_t ESP32_H4_hello_world_bin_size;
+extern const uint8_t  ESP32_H4_partition_table_bin[];
+extern const uint32_t ESP32_H4_partition_table_bin_size;
+
 void get_example_binaries(target_chip_t target, example_binaries_t *bins)
 {
     if (target == ESP8266_CHIP) {
         bins->boot.data = ESP8266_bootloader_bin;
         bins->boot.size = ESP8266_bootloader_bin_size;
-        bins->boot.addr = BOOTLOADER_ADDRESS_8266;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V0;
         bins->part.data = ESP8266_partition_table_bin;
         bins->part.size = ESP8266_partition_table_bin_size;
         bins->part.addr = PARTITION_ADDRESS;
@@ -63,23 +75,49 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
     } else if (target == ESP32_CHIP) {
         bins->boot.data = ESP32_bootloader_bin;
         bins->boot.size = ESP32_bootloader_bin_size;
-        bins->boot.addr = BOOTLOADER_ADDRESS;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V0;
         bins->part.data = ESP32_partition_table_bin;
         bins->part.size = ESP32_partition_table_bin_size;
         bins->part.addr = PARTITION_ADDRESS;
         bins->app.data  = ESP32_hello_world_bin;
         bins->app.size  = ESP32_hello_world_bin_size;
         bins->app.addr  = APPLICATION_ADDRESS;
-    } else {
+    } else if (target == ESP32S2_CHIP) {
         bins->boot.data = ESP32_S2_bootloader_bin;
         bins->boot.size = ESP32_S2_bootloader_bin_size;
-        bins->boot.addr = BOOTLOADER_ADDRESS;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V0;
         bins->part.data = ESP32_S2_partition_table_bin;
         bins->part.size = ESP32_S2_partition_table_bin_size;
         bins->part.addr = PARTITION_ADDRESS;
         bins->app.data  = ESP32_S2_hello_world_bin;
         bins->app.size  = ESP32_S2_hello_world_bin_size;
         bins->app.addr  = APPLICATION_ADDRESS;
+    } else if (target == ESP32H4_CHIP){
+        bins->boot.data = ESP32_H4_bootloader_bin;
+        bins->boot.size = ESP32_H4_bootloader_bin_size;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V1;
+        bins->part.data = ESP32_H4_partition_table_bin;
+        bins->part.size = ESP32_H4_partition_table_bin_size;
+        bins->part.addr = PARTITION_ADDRESS;
+        bins->app.data  = ESP32_H4_hello_world_bin;
+        bins->app.size  = ESP32_H4_hello_world_bin_size;
+        bins->app.addr  = APPLICATION_ADDRESS;
+    } else {
+        abort();
+    }
+}
+
+
+extern const uint8_t  ESP32_H4_app_bin[];
+extern const uint32_t ESP32_H4_app_bin_size;
+
+void get_example_ram_app_binary(target_chip_t target, example_ram_app_binary_t *bin)
+{
+    if (target == ESP32H4_CHIP){
+        bin->ram_app.data = ESP32_H4_app_bin;
+        bin->ram_app.size = ESP32_H4_app_bin_size;
+    } else {
+        abort();
     }
 }
 
@@ -170,3 +208,58 @@ esp_loader_error_t flash_binary(const uint8_t *bin, size_t size, size_t address)
 
     return ESP_LOADER_SUCCESS;
 }
+
+
+esp_loader_error_t load_ram_binary(const uint8_t *bin)
+{
+    printf("Start loading\n");
+    esp_loader_error_t err;
+    esp_loader_bin_header_t *header = (esp_loader_bin_header_t *)bin;
+    esp_loader_bin_segment_t segments[header->segments];
+
+    // Parse segments
+    uint32_t seg;
+    uint32_t *cur_seg_pos;
+    for (seg=0, cur_seg_pos = (uint32_t *)(&bin[BIN_FIRST_SEGMENT_OFFSET]);
+         seg < header->segments;
+         seg++) {
+        segments[seg].addr = *cur_seg_pos++;
+        segments[seg].size = *cur_seg_pos++;
+        segments[seg].data = (uint8_t *)cur_seg_pos;
+        cur_seg_pos += (segments[seg].size) / 4;
+    }
+
+    // Download segments
+    for (seg=0; seg < header->segments; seg++) {
+        printf("Downloading %"PRIu32" bytes at 0x%08"PRIx32"...\n", segments[seg].size, segments[seg].addr);
+
+        err = esp_loader_mem_start(segments[seg].addr, segments[seg].size, ESP_RAM_BLOCK);
+        if (err != ESP_LOADER_SUCCESS) {
+            printf("Loading ram start with error %d.\n", err);
+            return err;
+        }
+
+        size_t remain_size = segments[seg].size;
+        uint8_t *data_pos = segments[seg].data;
+        while(remain_size > 0) {
+            size_t data_size = MIN(ESP_RAM_BLOCK, remain_size);
+            err = esp_loader_mem_write(data_pos, data_size);
+            if (err != ESP_LOADER_SUCCESS) {
+                printf("\nPacket could not be written! Error %d.\n", err);
+                return err;
+            }
+            data_pos += data_size;
+            remain_size -= data_size;
+        }
+    }
+
+    err = esp_loader_mem_finish(header->entrypoint);
+    if (err != ESP_LOADER_SUCCESS) {
+        printf("\nLoad ram finish with Error %d.\n", err);
+        return err;
+    }
+    printf("\nFinished loading\n");
+
+    return ESP_LOADER_SUCCESS;
+}
+
