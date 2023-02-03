@@ -1,5 +1,4 @@
 #include "../color_guess.h"
-//#include "color_guess_color_set.h"
 #include "color_guess_icons.h"
 #include "../digits.h"
 #include <furi.h>
@@ -16,7 +15,6 @@ struct ColorGuessColorSet {
 
 typedef struct {
     ColorGuessColorSetStatus status;
-
     int cursorpos;
     int digit[6];
     int red;
@@ -42,7 +40,7 @@ void color_guess_color_set_draw(Canvas* canvas, ColorGuessColorSetModel* model) 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 5, 7, "random Text");
+    canvas_draw_str(canvas, 5, 7, "Set a custom color on LED");
     
     canvas_draw_icon(canvas, newCursorPos, 18, &I_ButtonUp_10x5);
     canvas_draw_icon(canvas, newCursorPos, 41, &I_ButtonDown_10x5);
@@ -53,10 +51,11 @@ void color_guess_color_set_draw(Canvas* canvas, ColorGuessColorSetModel* model) 
     canvas_draw_icon(canvas, 66, 25, digits[model->digit[3]]);
     canvas_draw_icon(canvas, 78, 25, digits[model->digit[4]]);
     canvas_draw_icon(canvas, 90, 25, digits[model->digit[5]]);
+    elements_button_right(canvas, "See your color here");
+    
 }
 
 static void color_guess_color_set_model_init(ColorGuessColorSetModel* const model) {
-    //model->scene = 0;
     model->cursorpos = 0;
     model->red = 0;
     for (int i = 0;i < 6; i++) {
@@ -66,16 +65,35 @@ static void color_guess_color_set_model_init(ColorGuessColorSetModel* const mode
     model->blue = 0;
 }
 
+void color_guess_color_set_set_led(void* context, ColorGuessColorSetModel* model) {
+    furi_assert(context);
+    ColorGuess* app = context;
+    NotificationMessage notification_led_message_1;
+    NotificationMessage notification_led_message_2;
+    NotificationMessage notification_led_message_3;
+    notification_led_message_1.type = NotificationMessageTypeLedRed;
+    notification_led_message_1.data.led.value = (model->digit[0] * 16) + model->digit[1];
+    notification_led_message_2.type = NotificationMessageTypeLedGreen;
+    notification_led_message_2.data.led.value = (model->digit[2] * 16) + model->digit[3];
+    notification_led_message_3.type = NotificationMessageTypeLedBlue;
+    notification_led_message_3.data.led.value = (model->digit[4] * 16) + model->digit[5];
+    const NotificationSequence notification_sequence = {
+        &notification_led_message_1,
+        &notification_led_message_2,
+        &notification_led_message_3,
+        &message_do_not_reset,
+        NULL,
+    };
+    notification_message(app->notification, &notification_sequence);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+}
+
 bool color_guess_color_set_input(InputEvent* event, void* context) {
     furi_assert(context);
-    //UNUSED(context);
     ColorGuessColorSet* instance = context;
-    UNUSED(instance);
-    //UNUSED(event);
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
-            //if(event->key == InputKeyBack && event->type == InputTypeRelease) {
                 with_view_model(
                     instance->view,
                     ColorGuessColorSetModel * model,
@@ -86,7 +104,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                     true);
                 break;
             case InputKeyLeft:
-            //} else if (event->key == InputKeyLeft && event->type == InputTypeRelease) {
                 with_view_model(
                     instance->view,
                     ColorGuessColorSetModel* model,
@@ -110,7 +127,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         {
                             model->cursorpos = 0;
                         }
-                        
                     },
                     true);
                 break;
@@ -123,6 +139,8 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         if (model->digit[model->cursorpos] > 15) {
                             model->digit[model->cursorpos] = 0;
                         }
+                        color_guess_color_set_set_led(instance->context, model);
+                        //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
                     },
                     true);
                 break;
@@ -135,6 +153,8 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         if (model->digit[model->cursorpos] < 0) {
                             model->digit[model->cursorpos] = 15;
                         }
+                        color_guess_color_set_set_led(instance->context, model);
+                        //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
                     },
                     true);
                 break;
@@ -151,13 +171,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
 
 void color_guess_color_set_exit(void* context) {
     furi_assert(context);
-    /*ColorGuessColorSet* instance = context;
-
-    with_view_model(instance->view, ColorGuessColorSetModel * model, {
-        if (model->status != 1) {
-            model->status = 1;
-        }
-    }, true);*/
 }
 
 void color_guess_color_set_enter(void* context) {
@@ -180,7 +193,6 @@ ColorGuessColorSet* color_guess_color_set_alloc() {
         instance->view,
         ColorGuessColorSetModel * model,
         {
-            //model->status = 1;
             color_guess_color_set_model_init(model);
         },
         true);
