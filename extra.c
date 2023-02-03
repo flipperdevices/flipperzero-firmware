@@ -1,4 +1,4 @@
-// v2
+// v2.1
 
 // System libraries
 #include <stdlib.h>
@@ -257,6 +257,36 @@ static FuriString* execute_command_listen(FuriString* command, Cli* cli){
 }
 
 /*
+  _____                _   _ _            
+ |  __ \              | | | (_)           
+ | |__) |___  __ _  __| | | |_ _ __   ___ 
+ |  _  // _ \/ _` |/ _` | | | | '_ \ / _ \
+ | | \ \  __/ (_| | (_| | | | | | | |  __/
+ |_|  \_\___|\__,_|\__,_| |_|_|_| |_|\___|
+*/
+static FuriString* read_line(Cli* cli){
+	FuriString* input = furi_string_alloc_set_str("");
+	while(true){
+		char c;
+		cli_read(cli, (uint8_t*)&c, 1);
+		if(c == CliSymbolAsciiBackspace){
+			furi_string_u_substr(input, 0, furi_string_size(input) - 1);
+			printf("\b \b");
+			fflush(stdout);
+			continue;
+		}
+		if(c == CliSymbolAsciiLF) continue;
+		if(c == CliSymbolAsciiCR){
+			return input;
+		}else{
+			furi_string_push_back(input, c);
+			printf("%c", c);
+			fflush(stdout);
+		}
+	}
+}
+
+/*
    _____                                          _     
   / ____|                                        | |    
  | |     ___  _ __ ___  _ __ ___   __ _ _ __   __| |___ 
@@ -307,6 +337,8 @@ static void extra_help_handler(Cli* cli, FuriString* args, void* context){
 	if(empty || furi_string_cmp_str(args, "set") == 0)        printf("Sets the variable <name> to <value>\r\n");
 	if(empty || furi_string_cmp_str(args, "sleep") == 0)      printf("sleep <time>\r\n");
 	if(empty || furi_string_cmp_str(args, "sleep") == 0)      printf("Freezes for <time> milliseconds.\r\n");
+	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("sh\r\n");
+	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("Starts the EXTRA shell.\r\n");
 	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("start <path>\r\n");
 	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("Execute the script at the specified path.\r\n");
 	if(empty || furi_string_cmp_str(args, "start") == 0)      printf("Executes commands from a file line by line, igores lines starting with '#' as comments.\r\n");
@@ -761,21 +793,9 @@ static void input_handler(Cli* cli, FuriString* args, void* context){
 	
 	furi_string_trim(args);
 	
-	FuriString* input = furi_string_alloc_set_str("");
-	while(true){
-		char c;
-		cli_read(cli, (uint8_t*)&c, 1);
-		if(c == CliSymbolAsciiLF) continue;
-		if(c == CliSymbolAsciiCR){
-			env_var_set(args, input);
-			printf("\r\n");
-			break;
-		}else{
-			furi_string_push_back(input, c);
-			printf("%c", c);
-			fflush(stdout);
-		}
-	}
+	FuriString* input = read_line(cli);
+	env_var_set(args, input);
+	printf("\r\n");
 	furi_string_free(input);
 }
 static void true_handler(Cli* cli, FuriString* args, void* context){
@@ -829,6 +849,19 @@ static void while_handler(Cli* cli, FuriString* args, void* context){
 		execute_command(cmd2, cli, false);
 	}
 }
+static void sh_handler(Cli* cli, FuriString* args, void* context){
+	UNUSED(args);
+	UNUSED(context);
+	while(true){
+		printf("%s > ", furi_string_get_cstr(cwd));
+		fflush(stdout);
+		FuriString* input = read_line(cli);
+		if(furi_string_cmp_str(input, "exit") == 0) break;
+		execute_command(input, cli, true);
+		printf("\r\n");
+		furi_string_free(input);
+	}
+}
 
 /*
    _____            _             _ 
@@ -870,6 +903,7 @@ void extra_register(){
 	cli_add_command(cli_, "true", CliCommandFlagParallelSafe, true_handler, NULL);
 	cli_add_command(cli_, "if", CliCommandFlagParallelSafe, if_handler, NULL);
 	cli_add_command(cli_, "while", CliCommandFlagParallelSafe, while_handler, NULL);
+	cli_add_command(cli_, "sh", CliCommandFlagParallelSafe, sh_handler, NULL);
 	furi_record_close(RECORD_CLI);
 	registered = true;
 }
@@ -910,6 +944,7 @@ void extra_unregister(){
 	cli_delete_command(cli_, "true");
 	cli_delete_command(cli_, "if");
 	cli_delete_command(cli_, "while");
+	cli_delete_command(cli_, "sh");
 	furi_record_close(RECORD_CLI);
 }
 void extra_deinit_unregister(){
