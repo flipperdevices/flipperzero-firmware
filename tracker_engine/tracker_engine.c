@@ -571,6 +571,13 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
 
                     if ((opcode & 0x7f00) == TE_EFFECT_SLIDE)
                     {
+                        if (pinst->flags & TE_RETRIGGER_ON_SLIDE)
+                        {
+                            uint16_t temp_note = te_channel->note;
+                            tracker_engine_trigger_instrument_internal(tracker_engine, chan, pinst, note << 8);
+                            te_channel->note = temp_note;
+                        }
+
                         te_channel->target_note = ((note + pinst->base_note - MIDDLE_C) << 8) + pinst->finetune;
                         te_channel->slide_speed = (opcode & 0xff);
                     }

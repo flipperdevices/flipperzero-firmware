@@ -485,6 +485,30 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
             break;
         }
 
+        case TE_EFFECT_PORTA_UP_SEMITONE:
+        {
+            uint32_t prev = te_channel->note;
+
+            te_channel->note += ((opcode & 0xff) << 8);
+            if (prev > te_channel->note)
+                te_channel->note = 0xffff;
+
+            te_channel->target_note = te_channel->note;
+            break;
+        }
+
+        case TE_EFFECT_PORTA_DOWN_SEMITONE:
+        {
+            int32_t prev = te_channel->note;
+
+            te_channel->note -= ((opcode & 0xff) << 8);
+            if (prev < te_channel->note)
+                te_channel->note = 0;
+
+            te_channel->target_note = te_channel->note;
+            break;
+        }
+
         case TE_EFFECT_ARPEGGIO_ABS:
         {
             te_channel->arpeggio_note = 0;

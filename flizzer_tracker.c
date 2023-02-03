@@ -226,7 +226,9 @@ int32_t flizzer_tracker_app(void *p)
 
             furi_record_close(RECORD_DIALOGS);
 
-            if (ret)
+            const char *cpath = furi_string_get_cstr(path);
+
+            if (ret && strcmp(&cpath[strlen(cpath) - 4], SONG_FILE_EXT) == 0)
             {
                 bool result = load_song_util(tracker, path);
                 UNUSED(result);
@@ -235,6 +237,7 @@ int32_t flizzer_tracker_app(void *p)
             else
             {
                 furi_string_free(path);
+                tracker->is_loading = false;
             }
         }
 
