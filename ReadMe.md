@@ -22,10 +22,10 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `18 Jan 20:54 GMT +3`
+### Apps checked & updated at `4 Feb 16:22 GMT +3`
 
 ## Games
-- [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong)
+- [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Yatzee (By emfleak)](https://github.com/emfleak/flipperzero-yatzee)
@@ -36,6 +36,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode by [Smileycathy1128](https://github.com/Smileycathy1128/flipperzero-tamagotch-p1)
+- [Slots for Flipper Zero (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
+- [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
+- [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -59,6 +62,11 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [RGB LED Controller (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) - works with external module!
+- [Pwnagotchi->Flipper interface (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- [ESP32->Flipper Camera (By Z4urce)](https://github.com/Z4urce/flipperzero-camera)
+- [SCD30 Reader (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
+- [Bar code scanner emulator via COM port (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator)
+- [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -82,6 +90,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [Brainfuck interpreter (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [Flipper CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge)
+- [NightStand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
+- [BT Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
+- [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 
 --- 
 
