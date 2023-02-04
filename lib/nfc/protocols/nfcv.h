@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#define NFCV_FC (13560000.0f) /* MHz */
+#define NFCV_FC (13560000.0f / 0.9998f) /* MHz */
 #define NFCV_RESP_SUBC1_PULSE_32 (1.0f / (NFCV_FC / 32) / 2.0f) /*  1.1799 µs */
 #define NFCV_RESP_SUBC1_UNMOD_256 (256.0f / NFCV_FC) /* 18.8791 µs */
 
@@ -37,7 +37,7 @@ extern "C" {
 
 /* helpers to calculate the send time based on DWT->CYCCNT */
 #define NFCV_FDT_USEC(usec) (usec * 64)
-#define NFCV_FDT_FC(ticks) (ticks * 6400 / 1356)
+#define NFCV_FDT_FC(ticks) ((ticks)*6400 / 1356)
 
 #define NFCV_FRAME_STATE_SOF1 0
 #define NFCV_FRAME_STATE_SOF2 1
@@ -72,6 +72,9 @@ extern "C" {
 #define ISO15693_LOCK_DSFID 0x2A
 #define ISO15693_GET_SYSTEM_INFO 0x2B
 #define ISO15693_READ_MULTI_SECSTATUS 0x2C
+
+#define ISO15693_CUST_ECHO_MODE 0xDE
+#define ISO15693_CUST_ECHO_DATA 0xDF
 
 /* ISO15693 RESPONSE ERROR CODES */
 #define ISO15693_NOERROR 0x00
@@ -139,6 +142,7 @@ typedef struct {
 typedef struct {
     PulseReader* reader_signal;
     DigitalSignal* nfcv_resp_pulse; /* pulse length, fc/32 */
+    DigitalSignal* nfcv_resp_half_pulse; /* half pulse length, fc/32 */
     DigitalSignal* nfcv_resp_unmod; /* unmodulated length 256/fc */
     NfcVEmuAirSignals signals_high;
     NfcVEmuAirSignals signals_low;
@@ -185,6 +189,7 @@ typedef struct {
 
     bool modified;
     bool ready;
+    bool echo_mode;
 
     /* specfic variant infos */
     NfcVSubtype sub_type;
