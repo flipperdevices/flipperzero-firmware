@@ -153,10 +153,10 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
         {
             if (!(te_channel->channel_flags & TEC_DISABLED))
             {
-                te_channel->volume -= opcode & 0xf;
+                te_channel->volume -= (opcode & 0xf);
                 if (te_channel->volume > MAX_ADSR_VOLUME)
                     te_channel->volume = 0;
-                te_channel->volume += (opcode >> 4) & 0xf;
+                te_channel->volume += ((opcode >> 4) & 0xf);
                 if (te_channel->volume > MAX_ADSR_VOLUME)
                     te_channel->volume = MAX_ADSR_VOLUME;
 
@@ -221,7 +221,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                     {
                         int32_t prev = te_channel->note;
 
-                        te_channel->note -= opcode & 0xf;
+                        te_channel->note -= (opcode & 0xf);
                         if (prev < te_channel->note)
                             te_channel->note = 0;
 
@@ -237,7 +237,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                     {
                         uint32_t prev = te_channel->note;
 
-                        te_channel->note += opcode & 0xf;
+                        te_channel->note += (opcode & 0xf);
                         if (prev > te_channel->note)
                             te_channel->note = 0xffff;
 
@@ -275,7 +275,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                 {
                     if (tick == 0)
                     {
-                        te_channel->volume -= opcode & 0xf;
+                        te_channel->volume -= (opcode & 0xf);
 
                         if (te_channel->volume > MAX_ADSR_VOLUME)
                             te_channel->volume = 0;
@@ -291,7 +291,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                 {
                     if (tick == 0)
                     {
-                        te_channel->volume += opcode & 0xf;
+                        te_channel->volume += (opcode & 0xf);
 
                         if (te_channel->volume > MAX_ADSR_VOLUME)
                             te_channel->volume = MAX_ADSR_VOLUME;
