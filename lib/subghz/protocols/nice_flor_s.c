@@ -110,7 +110,7 @@ const SubGhzProtocol subghz_protocol_nice_flor_s = {
 
 // /**
 //  * Read bytes from rainbow table
-//  * @param p array[10]  P0-P1|P2-P3-P4-P5-P6-P7-P8-P9-P10
+//  * @param p array[10]  P0-P1|P2-P3-P4-P5-P6-P7-XX-XX-XX
 //  * @param num_parcel  parcel number 0..15
 //  * @param hold_bit  0 - the button was only pressed, 1 - the button was held down
 //  */
