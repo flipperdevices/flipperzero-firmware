@@ -28,6 +28,7 @@ To accommodate more characters on a small display, some characters are called up
 Copy the contents of the repository to the applications_user/uart_terminal folder Flipper Zero firmware and build app with the command ./fbt fap_uart_terminal.
 
 Or use the tool [uFBT](https://github.com/flipperdevices/flipperzero-ufbt) for building applications for Flipper Zero.
+Download ready [fap](https://github.com/playmean/fap-list)
 
 ## How it works
 
