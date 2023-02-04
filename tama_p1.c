@@ -10,12 +10,8 @@
 
 TamaApp* g_ctx;
 FuriMutex* g_state_mutex;
-uint8_t layout_mode = 1;
-// 0: landscape (small);
-// 1: landscape (big);
-// 2: landscape (full);
-// 3: portrait =>
-// 4: portrait <=
+uint8_t layout_mode = 0; // 3: portrait => 4: portrait <=
+// 0: landscape (small) 1: landscape (big) 2: landscape (full)
 bool in_menu = false;
 
 uint8_t speed = 1;
@@ -238,6 +234,23 @@ static void draw_portrait_left(Canvas* const canvas) {
     }
 }
 
+static void draw_mini(Canvas* const canvas) {
+    // Calculate positioning
+    uint16_t y = 34;
+    for(uint8_t row = 0; row < 16; ++row) {
+        uint16_t x = 84;
+        uint32_t row_pixels = g_ctx->framebuffer[row];
+        for(uint8_t col = 0; col < 32; ++col) {
+            if(row_pixels & 1) {
+                canvas_draw_dot(canvas, x, y);
+            }
+            x += 1;
+            row_pixels >>= 1;
+        }
+        y += 1;
+    }
+}
+
 // static void draw_menu_portrait(Canvas* const canvas, void* cb_ctx) {}
 
 // static void draw_menu_landscape(Canvas* const canvas)
@@ -246,6 +259,8 @@ static void draw_menu(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_str_aligned(canvas, 64, 6, AlignCenter, AlignCenter, "Menu");
     canvas_draw_line(canvas, 0, 10, 128, 10);
+    draw_mini(canvas);
+
     switch(menu_cursor) {
     case 0:
         canvas_draw_triangle(canvas, 4, 16, 6, 6, CanvasDirectionLeftToRight);
@@ -763,10 +778,93 @@ int32_t tama_p1_app(void* p) {
                 btn_state_t tama_btn_state = 0;
 
                 if(in_menu) {
-                    if(event.input.key == InputKeyBack && event.input.type == InputTypePress) {
+                    if(event.input.key == InputKeyBack) {
                         in_menu = false;
-                    }
-                    if(event.input.key == InputKeyOk) {
+                    } else if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
+                        if(menu_cursor > 0) {
+                            menu_cursor -= 1;
+                        } else {
+                            sub_menu_default = 0;
+                            menu_cursor = menu_items - 1;
+                        }
+                    } else if(event.input.key == InputKeyDown && event.input.type == InputTypePress) {
+                        if(menu_cursor < menu_items - 1) {
+                            sub_menu_default = 0;
+                            menu_cursor += 1;
+                        } else {
+                            menu_cursor = 0;
+                        }
+                    } else if(event.input.key == InputKeyLeft && event.input.type == InputTypePress) {
+                        switch(menu_cursor) {
+                        case 1:
+                            switch(layout_mode) {
+                            case 0:
+                                layout_mode = 4;
+                                break;
+                            case 1:
+                            case 2:
+                            case 3:
+                            case 4:
+                                layout_mode -= 1;
+                                break;
+                            }
+                            break;
+                        case 2:
+                            speed_down();
+                            break;
+                        case menu_items - 1:
+                            switch(sub_menu_default) {
+                            case 0:
+                                sub_menu_default = 2;
+                                break;
+                            case 1:
+                            case 2:
+                                // sub_menu_default = 0;
+                                sub_menu_default -= 1;
+                                break;
+                            default:
+                                break;
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    } else if(event.input.key == InputKeyRight && event.input.type == InputTypePress) {
+                        switch(menu_cursor) {
+                        case 1:
+                            switch(layout_mode) {
+                            case 0:
+                            case 1:
+                            case 2:
+                            case 3:
+                                layout_mode += 1;
+                                break;
+                            case 4:
+                                layout_mode = 0;
+                                break;
+                            }
+                            break;
+                        case 2:
+                            speed_up();
+                            break;
+                        case menu_items - 1:
+                            switch(sub_menu_default) {
+                            case 0:
+                            case 1:
+                                // sub_menu_default = 2;
+                                sub_menu_default += 1;
+                                break;
+                            case 2:
+                                sub_menu_default = 0;
+                                break;
+                            default:
+                                break;
+                            }
+                            break;
+                        default:
+                            break;
+                        }
+                    } else if(event.input.key == InputKeyOk) {
                         switch(menu_cursor) {
                         case 0:
                             // mute tamagotchi
@@ -819,98 +917,12 @@ int32_t tama_p1_app(void* p) {
                                     tamalib_set_speed(speed);
                                 }
                                 furi_timer_stop(timer);
-                                running = false;
                                 tama_p1_save_state();
+                                running = false;
                                 break;
                             default:
                                 break;
                             }
-                            break;
-                        }
-                    }
-                    if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
-                        if(menu_cursor > 0) {
-                            menu_cursor -= 1;
-                        } else {
-                            sub_menu_default = 0;
-                            menu_cursor = menu_items - 1;
-                        }
-                    }
-                    if(event.input.key == InputKeyDown && event.input.type == InputTypePress) {
-                        if(menu_cursor < menu_items - 1) {
-                            sub_menu_default = 0;
-                            menu_cursor += 1;
-                        } else {
-                            menu_cursor = 0;
-                        }
-                    }
-                    if(event.input.key == InputKeyLeft && event.input.type == InputTypePress) {
-                        switch(menu_cursor) {
-                        case 1:
-                            switch(layout_mode) {
-                            case 0:
-                                layout_mode = 4;
-                                break;
-                            case 1:
-                            case 2:
-                            case 3:
-                            case 4:
-                                layout_mode -= 1;
-                                break;
-                            }
-                            break;
-                        case 2:
-                            speed_down();
-                            break;
-                        case menu_items - 1:
-                            switch(sub_menu_default) {
-                            case 0:
-                                sub_menu_default = 2;
-                                break;
-                            case 1:
-                            case 2:
-                                sub_menu_default -= 1;
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-                    if(event.input.key == InputKeyRight && event.input.type == InputTypePress) {
-                        switch(menu_cursor) {
-                        case 1:
-                            switch(layout_mode) {
-                            case 0:
-                            case 1:
-                            case 2:
-                            case 3:
-                                layout_mode += 1;
-                                break;
-                            case 4:
-                                layout_mode = 0;
-                                break;
-                            }
-                            break;
-                        case 2:
-                            speed_up();
-                            break;
-                        case menu_items - 1:
-                            switch(sub_menu_default) {
-                            case 0:
-                            case 1:
-                                sub_menu_default += 1;
-                                break;
-                            case 2:
-                                sub_menu_default = 0;
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
-                        default:
                             break;
                         }
                     }
@@ -920,28 +932,11 @@ int32_t tama_p1_app(void* p) {
                         tama_btn_state = BTN_STATE_PRESSED;
                     else if(input_type == InputTypeRelease)
                         tama_btn_state = BTN_STATE_RELEASED;
-                    if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
-                        if(speed != 1) {
-                            speed = 1;
-                            tamalib_set_speed(speed);
-                        }
-                        furi_timer_stop(timer);
-                        running = false;
-                        tama_p1_save_state();
-                    }
+
                     if(input_type == InputTypePress || input_type == InputTypeRelease) {
                         if(event.input.key == InputKeyOk) {
                             tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                         }
-                        // else if(
-                        //     event.input.key == InputKeyBack &&
-                        //     event.input.type == InputTypeShort) {
-                        //     if(speed != 1) {
-                        //         speed = 1;
-                        //         tamalib_set_speed(speed);
-                        //     }
-                        //     tama_p1_save_state();
-                        // }
                         switch(layout_mode) {
                         case 0:
                         case 1:
@@ -1002,20 +997,18 @@ int32_t tama_p1_app(void* p) {
                                 break;
                             }
                             break;
-                        default: // error handling
-                            switch(event.input.key) {
-                            case InputKeyUp:
-                            case InputKeyDown:
-                            case InputKeyLeft:
-                            case InputKeyRight:
-                                sub_menu_default = 0;
-                                in_menu = true;
-                                break;
-                            default:
-                                break;
-                            }
+                        default:
                             break;
                         }
+                    }
+                    if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
+                        if(speed != 1) {
+                            speed = 1;
+                            tamalib_set_speed(speed);
+                        }
+                        furi_timer_stop(timer);
+                        tama_p1_save_state();
+                        running = false;
                     }
                 }
             }

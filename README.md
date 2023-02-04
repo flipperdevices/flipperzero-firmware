@@ -18,6 +18,8 @@ Rename this to `rom.bin`.
 - Up button takes you to the emulator menu.
 - Hold the Back button to save and exit.
 
+![Alt Text](Screenshot1.png)
+![Alt Text](Screenshot2.png)
 
 Building
 --------
@@ -57,4 +59,7 @@ Implemented
 
 To-Do
 -----
-- display/hide runtime (reason: changing the in-game clock and aging up the Tamagotchi does not affect when it evolves.)
+- fix bug where the Flipper's button stop responding for a few seconds, usually after mashing buttons in quick succession.
+
+![Alt Text](Screenshot3.png)
+![Alt Text](Screenshot4.png)
