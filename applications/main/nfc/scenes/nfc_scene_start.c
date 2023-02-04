@@ -63,6 +63,11 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
+	    // Explicitly save the selected menu entry on button
+	    // press, since this menu item invokes a dialog. In the
+	    // SubGhz app, scene_manager_set_scene_state(...) is
+	    // explicitly called in every event branch, but not here.
+	    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, event.event);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFileSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexExtraAction) {
