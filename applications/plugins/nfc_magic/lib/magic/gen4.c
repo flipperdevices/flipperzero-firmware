@@ -174,14 +174,17 @@ bool magic_gen4_write_blk(uint32_t pwd, uint8_t block_num, const uint8_t* data) 
 
 bool magic_gen4_wipe(uint32_t pwd) {
     if(!magic_gen4_set_cfg(pwd, MAGIC_DEFAULT_CONFIG, sizeof(MAGIC_DEFAULT_CONFIG), false)) {
+        FURI_LOG_E(TAG, "Set config failed");
         return false;
     }
     if(!magic_gen4_write_blk(pwd, 0, MAGIC_DEFAULT_BLOCK0)) {
+        FURI_LOG_E(TAG, "Block 0 write failed");
         return false;
     }
     for(size_t i = 1; i < 0xFF; i++) {
         const uint8_t* block = magic_gen4_is_block_num_trailer(i) ? MAGIC_DEFAULT_SECTOR_TRAILER : MAGIC_EMPTY_BLOCK;
         if(!magic_gen4_write_blk(pwd, 0, block)) {
+            FURI_LOG_E(TAG, "Block %d write failed", i);
             return false;
         }
     }

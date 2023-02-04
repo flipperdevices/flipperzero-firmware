@@ -145,7 +145,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     // UL-C?
                     // UL?
                     default:
-                        gen4_config[27] = 0x00;
+                        gen4_config[27] = MagicGen4UltralightModeUL_EV1;
                         break;
                     case MfUltralightTypeNTAG203:
                     case MfUltralightTypeNTAG213:
@@ -155,16 +155,16 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     case MfUltralightTypeNTAGI2C2K:
                     case MfUltralightTypeNTAGI2CPlus1K:
                     case MfUltralightTypeNTAGI2CPlus2K:
-                        gen4_config[27] = 0x01;
+                        gen4_config[27] = MagicGen4UltralightModeNTAG;
                         break;
                     }
                 }
 
                 if(dev_data->nfc_data.uid_len == 4) {
-                    gen4_config[1] = 0x00;
+                    gen4_config[1] = MagicGen4UIDLengthSingle;
                 } else if(dev_data->nfc_data.uid_len == 7) {
-                    gen4_config[1] = 0x01;
-                } else if(dev_data->nfc_data.uid_len == 10) {
+                    gen4_config[1] = MagicGen4UIDLengthDouble;
+                } else {
                     break;
                 }
 
@@ -172,7 +172,12 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                 gen4_config[3] = (uint8_t)(password >> 16);
                 gen4_config[4] = (uint8_t)(password >> 8);
                 gen4_config[5] = (uint8_t)password;
-                gen4_config[6] = 0x02;
+
+                if(dev_protocol == NfcDeviceProtocolMifareUl) {
+                    gen4_config[6] = MagicGen4ShadowModeHighSpeedIgnore;
+                } else {
+                    gen4_config[6] = MagicGen4ShadowModeIgnore;
+                }
                 gen4_config[7] = 0x00;
                 memset(gen4_config + 8, 0, 16);
                 gen4_config[24] = dev_data->nfc_data.atqa[0];
