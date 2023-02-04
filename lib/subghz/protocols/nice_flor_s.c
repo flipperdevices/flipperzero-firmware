@@ -385,8 +385,8 @@ static void subghz_protocol_nice_flor_s_remote_controller(
     * The additional 20 bytes contain the code of the pressed button,
     *    the button hold bit and the CRC of the entire message.
     *       START-P0-P1-P2-P3-P4-P5-P6-P7-P8-P9-P10-STOP
-    * P7 (byte)     - if (n<4) k=0x8f : k=0x80; P7=k^n;
-    * P8 (byte)     - if (hold bit) b=0x00 : b=0x10; P8=(b^(k<<4) <<8) | 4 hi bit crc
+    * P7 (byte)     - if (n<4) k=0x8f : k=0x80; P7= k^n;
+    * P8 (byte)     - if (hold bit) b=0x00 : b=0x10; P8= b^(k<<4) | 4 hi bit crc
     * P10 (4-bit)   - 4 lo bit crc 
     *                            key+b crc  
     * data    => 0x1724A7D9A522F  899  D6 hold bit = 0 - just pressed the button
