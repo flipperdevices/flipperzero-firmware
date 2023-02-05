@@ -681,6 +681,20 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
                     tracker_engine->pattern_position = 0;
 
                     flag = false;
+
+                    if (tracker_engine->sequence_position >= song->num_sequence_steps)
+                    {
+                        tracker_engine->playing = false;
+                        tracker_engine->sequence_position--;
+                        tracker_engine->pattern_position = song->pattern_length - 1;
+
+                        for (int i = 0; i < SONG_MAX_CHANNELS; i++)
+                        {
+                            sound_engine_enable_gate(tracker_engine->sound_engine, &tracker_engine->sound_engine->channel[i], false);
+                        }
+
+                        goto end_process;
+                    }
                 }
             }
 
@@ -727,4 +741,6 @@ void tracker_engine_advance_tick(TrackerEngine *tracker_engine)
             }
         }
     }
+
+end_process:;
 }

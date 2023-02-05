@@ -102,4 +102,6 @@ typedef struct
     uint32_t audio_buffer_size;
     bool external_audio_output;
     uint8_t sine_lut[SINE_LUT_SIZE];
+
+    // uint32_t counter; //for debug
 } SoundEngine;

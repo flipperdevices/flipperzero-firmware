@@ -234,4 +234,6 @@ typedef struct
 
     bool in_loop; // for E6X (pattern loop) command
     uint8_t loops_left;
+
+    // uint32_t counter; //for debug
 } TrackerEngine;

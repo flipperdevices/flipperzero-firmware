@@ -310,6 +310,11 @@ void pattern_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
     if (event->input.key == InputKeyOk && event->input.type == InputTypeShort && !tracker->tracker_engine.playing)
     {
         tracker->editing = !tracker->editing;
+
+        if (tracker->editing)
+        {
+            // stop_song(tracker);
+        }
     }
 
     if (event->input.key == InputKeyOk && event->input.type == InputTypeLong)
@@ -323,7 +328,15 @@ void pattern_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
 
             else
             {
-                play_song(tracker, true);
+                if (tracker->tracker_engine.pattern_position == tracker->song.pattern_length - 1 && tracker->tracker_engine.sequence_position == tracker->song.num_sequence_steps - 1) // if we are at the very end of the song
+                {
+                    stop_song(tracker);
+                }
+
+                else
+                {
+                    play_song(tracker, true);
+                }
             }
         }
 

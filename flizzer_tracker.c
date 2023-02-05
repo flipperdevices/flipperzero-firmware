@@ -30,6 +30,13 @@ void draw_callback(Canvas *canvas, void *ctx)
 
     canvas_set_custom_u8g2_font(canvas, u8g2_font_tom_thumb_4x6_tr);
 
+    /*char buffer[33];
+    snprintf(buffer, sizeof(buffer), "%ld", (tracker->sound_engine.counter & 8191));
+    canvas_draw_str(canvas, 0, 29, buffer);
+
+    snprintf(buffer, sizeof(buffer), "%ld", (tracker->tracker_engine.counter & 8191));
+    canvas_draw_str(canvas, 18, 29, buffer);*/
+
     switch (tracker->mode)
     {
         case PATTERN_VIEW:
@@ -108,8 +115,6 @@ int32_t flizzer_tracker_app(void *p)
 
     // Текущее событие типа кастомного типа FlizzerTrackerEvent
     FlizzerTrackerEvent event;
-
-    play();
 
     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
 

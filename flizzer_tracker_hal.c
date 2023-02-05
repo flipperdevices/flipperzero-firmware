@@ -5,6 +5,8 @@ void sound_engine_dma_isr(void *ctx)
 {
     SoundEngine *sound_engine = (SoundEngine *)ctx;
 
+    // sound_engine->counter++;
+
     // half of transfer
     if (LL_DMA_IsActiveFlag_HT1(DMA1))
     {
@@ -26,16 +28,16 @@ void sound_engine_dma_isr(void *ctx)
     }
 }
 
-void tracker_engine_timer_isr(void *ctx)
+void tracker_engine_timer_isr(void *ctx) // the tracker engine interrupt is of higher priority than sound engine one so it can run at the middle of filling the buffer, thus allowing sample-accurate tight effect timing
 {
+    TrackerEngine *tracker_engine = (TrackerEngine *)ctx;
+    // tracker_engine->counter++;
+
     if (LL_TIM_IsActiveFlag_UPDATE(TRACKER_ENGINE_TIMER))
     {
         LL_TIM_ClearFlag_UPDATE(TRACKER_ENGINE_TIMER);
+        tracker_engine_advance_tick(tracker_engine);
     }
-
-    TrackerEngine *tracker_engine = (TrackerEngine *)ctx;
-
-    tracker_engine_advance_tick(tracker_engine);
 }
 
 void sound_engine_PWM_timer_init(bool external_audio_output) // external audio on pin PA6
