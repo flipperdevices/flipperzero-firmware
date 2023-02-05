@@ -5,5 +5,6 @@ Tips and tricks for developing Application for Flipper using C Programming langu
 ## Table of Contents
 <ul>
 <li><a href="FunctionsParameters/readme.md">Functions and Parameters Basics</a></li>
+<li><a href="NullPointerReference/readme.md">Problems with Null Pointer References</a></li>
 </ul>
 
