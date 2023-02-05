@@ -47,21 +47,27 @@ bool lfrfid_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
+	    scene_manager_set_scene_state(app->scene_manager, LfRfidSceneStart, SubmenuIndexRead);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRead);
             DOLPHIN_DEED(DolphinDeedRfidRead);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
+	    // Like the NFC app (see comments in `nfc_scene_start.c`),
+	    // it is best to save the scene in every branch in case
+	    // the user cancels selecting a file.
+	    scene_manager_set_scene_state(app->scene_manager, LfRfidSceneStart, SubmenuIndexSaved);
             furi_string_set(app->file_path, LFRFID_APP_FOLDER);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneSelectKey);
             consumed = true;
         } else if(event.event == SubmenuIndexAddManually) {
+	    scene_manager_set_scene_state(app->scene_manager, LfRfidSceneStart, SubmenuIndexAddManually);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneSaveType);
             consumed = true;
         } else if(event.event == SubmenuIndexExtraActions) {
+	    scene_manager_set_scene_state(app->scene_manager, LfRfidSceneStart, SubmenuIndexExtraActions);
             scene_manager_next_scene(app->scene_manager, LfRfidSceneExtraActions);
             consumed = true;
         }
-        scene_manager_set_scene_state(app->scene_manager, LfRfidSceneStart, event.event);
     }
 
     return consumed;
