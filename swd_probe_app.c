@@ -237,7 +237,14 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
     int y = 10;
 
     if(ctx->detected_device) {
-        snprintf(buffer, sizeof(buffer), "FOUND!");
+        /* if seen less than a quarter second ago */
+        if((ctx->detected_timeout + TIMER_HZ / 4) >= TIMER_HZ * TIMEOUT) {
+            snprintf(buffer, sizeof(buffer), "FOUND!");
+        } else {
+            /* if it was seen more than a quarter second ago, show countdown */
+            snprintf(
+                buffer, sizeof(buffer), "FOUND! (%lus)", (ctx->detected_timeout / TIMER_HZ) + 1);
+        }
     } else {
         snprintf(
             buffer, sizeof(buffer), "Searching... %c", gpio_direction_ind[ctx->current_mask_id]);
@@ -338,7 +345,7 @@ static void on_timer_tick(AppFSM* ctx) {
     /* now when detected a device, set the timeout */
     if(ctx->detected) {
         ctx->detected_device = true;
-        ctx->detected_timeout = TIMER_HZ * 3;
+        ctx->detected_timeout = TIMER_HZ * TIMEOUT;
     }
 
     ctx->current_mask_id = (ctx->current_mask_id + 1) % COUNT(gpio_direction_mask);
@@ -412,15 +419,21 @@ int32_t swd_probe_app_main(void* p) {
 
         view_port_update(view_port);
 
+        bool beep = false;
+
         if(ctx->detected_device && !ctx->detected_notified) {
-            notification_message_block(ctx->notification, &seq_c_minor);
             ctx->detected_notified = true;
+            beep = true;
         }
         if(!ctx->detected_device && ctx->detected_notified) {
             ctx->detected_notified = false;
         }
 
         release_mutex(&state_mutex, ctx);
+
+        if(beep) {
+            notification_message_block(ctx->notification, &seq_c_minor);
+        }
     }
 
     // Wait for all notifications to be played and return backlight to normal state

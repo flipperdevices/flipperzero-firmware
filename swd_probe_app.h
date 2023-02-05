@@ -20,6 +20,7 @@
 #define TAG "SWD"
 
 #define TIMER_HZ 50
+#define TIMEOUT 3
 
 typedef enum { KeyNone, KeyUp, KeyRight, KeyDown, KeyLeft, KeyOK } KeyCode;
 
