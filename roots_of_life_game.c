@@ -152,13 +152,6 @@ static void game_state_init(GameState* state) {
         state->cells[i] = R_NONE;
         state->pickups[i] = false;
     }
-
-    state->collectedPickups = 0;
-    for(int i = 0, n = rand_range(PICKUPS_MIN, PICKUPS_MAX); i < n; i++) {
-        int x = rand_range(0, CELLS_X);
-        int y = rand_range(0, CELLS_Y);
-        state->pickups[CELL(y, x)] = true;
-    }
 }
 
 static void free_root(GameState* state) {
@@ -362,6 +355,13 @@ static void reset_level(GameState* state) {
 
     state->rerolls = REROLLS_MAX;
     state->score = 0;
+
+    state->collectedPickups = 0;
+    for(int i = 0, n = rand_range(PICKUPS_MIN, PICKUPS_MAX); i < n; i++) {
+        int x = rand_range(0, CELLS_X);
+        int y = rand_range(0, CELLS_Y);
+        state->pickups[CELL(y, x)] = true;
+    }
 }
 
 static void recalculate_score(GameState* state) {
