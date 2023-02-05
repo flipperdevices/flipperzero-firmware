@@ -2,6 +2,7 @@
 
 ![Game screen](images/game.png)
 ![Menu screen](images/menu.png)
+![You win](images/win.png)
 
 ## Compile
 1. Clone [firmware](https://github.com/flipperdevices/flipperzero-firmware)
@@ -20,6 +21,10 @@ ln -s ../../flipperzero-reversi flipperzero-reversi
 2. Open qFlipper
 3. Open File Manager, SD Card/apps/games
 4. Drag `game_reversi.fapp` to qFlipper
+
+## Controls
+The game controls should be intuitive.
+Longs press on OK opens the menu to start a new game.
 
 ## Thanks to:
 - [2048 game](https://github.com/eugene-kirzhanov/flipper-zero-2048-game)
