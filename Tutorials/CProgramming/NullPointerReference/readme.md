@@ -33,9 +33,11 @@ void color_guess_color_set_set_led(void* context, ColorGuessColorSetModel* model
 4. If now the process from the Firmware tries to process the next message from the queue, it will find nothing, not know what to do and therefore crash the device<br>
 <br>
 This is why I added a delay at the end of the function
+
 ```
 furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
 ```
+
 I cannot say how long it will take the Firmware OS to process my message, but 10ms is not noticable for humans, but far more than enough for the async process to catch up and process the message from the queue, before my function ends and the values set are removed from RAM. 
 
 <img src="assets/c_garbage_collection.png" />
