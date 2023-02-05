@@ -18,3 +18,10 @@ jobs:
       uses: oleksiikutuzov/flipperzero-ufbt-action@v1
       with:
         channel: release
+
+    - name: Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: game_reversi.fap
+        path: /home/runner/work/flipperzero-reversi/flipperzero-reversi/dist/game_reversi.fap
+        if-no-files-found: warn
