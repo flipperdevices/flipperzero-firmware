@@ -25,18 +25,17 @@ C will not accept something like this. First reason is that functions in C do no
 Thinking in C, what actually happens when PHP excecutes the above code is (mixed up pseudo code that wont work, but tries to explain the problem)
 ```
 public function main() {
-    $myArray = ['a', 'b', 'c'];
+    $myArray = ['a', 'b', 'c']; // create original array
 
-    $myArrayPointer = doSomethingWithArray(&$myArrayPointer);
-    $myArray = $myArrayPointer;
+    $myNewArrayPointer = doSomethingWithArray(&$myArrayPointer); // send pointer to original array into function
+    $myArray = $myNewArrayPointer; //take data from new array and save in original array
 }
 
 public function doSomethingWithArray(array $myArrayPointer): arrayPointer
 {
-    //create copy of array
-    $myArray = $myArrayPointer;
-    $myArray[] = 'd';
-    return &$myArray;
+    $myNewArray = $myArrayPointer; // create an array using data from the original array referenced by pointer
+    $myNewArray[] = 'd'; // manipulate the new array
+    return &$myNewArrayPointer; // return pointer to new array
 }
 ```
 So doSomethingWithArray creates a copy of the first array, manipulates it and returns a pointer to the copied array. Back in main() we replace the original array with the content of the manipulated array. Wasted resources here. <br>
