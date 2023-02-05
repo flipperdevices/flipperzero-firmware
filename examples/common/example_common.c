@@ -214,8 +214,8 @@ esp_loader_error_t load_ram_binary(const uint8_t *bin)
 {
     printf("Start loading\n");
     esp_loader_error_t err;
-    esp_loader_bin_header_t *header = (esp_loader_bin_header_t *)bin;
-    esp_loader_bin_segment_t segments[header->segments];
+    example_bin_header_t *header = (example_bin_header_t *)bin;
+    example_bin_segment_t segments[header->segments];
 
     // Parse segments
     uint32_t seg;

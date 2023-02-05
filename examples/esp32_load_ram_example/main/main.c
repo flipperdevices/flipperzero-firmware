@@ -1,4 +1,4 @@
-/* Flash multiple partitions example
+/* Example of loading the program into RAM
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -19,8 +19,10 @@
 #include "example_common.h"
 #include "freertos/FreeRTOS.h"
 
+static const char *TAG = "serial_ram_loader";
+
 // This can be set to a higher baud rate, but because it takes some time to
-// switch the uart baud rate in SlaveMonitor task, the log at slave starup
+// switch the uart baud rate in slave_monitor task, the log at slave starup
 // time will be lost or garbled.
 #define HIGHER_BAUDRATE 115200
 
@@ -28,7 +30,8 @@
 #define BUF_LEN 128
 static char buf[BUF_LEN] = {0};
 
-void SlaveMonitor(){
+void slave_monitor(void *arg)
+{
 #if (HIGHER_BAUDRATE != 115200)
     uart_flush_input(UART_NUM_1);
     uart_flush(UART_NUM_1);
@@ -55,22 +58,22 @@ void app_main(void)
     };
 
     if (loader_port_esp32_init(&config) != ESP_LOADER_SUCCESS) {
-        ESP_LOGE("example", "serial initialization failed.");
+        ESP_LOGE(TAG, "serial initialization failed.");
         abort();
     }
 
     if (connect_to_target(HIGHER_BAUDRATE) == ESP_LOADER_SUCCESS) {
         get_example_ram_app_binary(esp_loader_get_target(), &bin);
-        printf("\e[1;32mLoading app to RAM ...\n\e[0m");
+        ESP_LOGI(TAG, "Loading app to RAM ...");
         esp_loader_error_t err = load_ram_binary(bin.ram_app.data);
         if (err == ESP_LOADER_SUCCESS) {
             // Forward slave's serial output
-            printf("\e[1;33m********************************************\n\e[0m");
-            printf("\e[1;33m*** Logs below are print from slave .... ***\n\e[0m");
-            printf("\e[1;33m********************************************\n\e[0m");
-            xTaskCreate(SlaveMonitor, "SlaveMonitor", 2048, NULL, configMAX_PRIORITIES, NULL);
+            ESP_LOGI(TAG, "********************************************");
+            ESP_LOGI(TAG, "*** Logs below are print from slave .... ***");
+            ESP_LOGI(TAG, "********************************************");
+            xTaskCreate(slave_monitor, "slave_monitor", 2048, NULL, configMAX_PRIORITIES, NULL);
         } else {
-            printf("\e[1;31mLoading to ram failed ...\e[0m\n");
+            ESP_LOGE(TAG, "Loading to ram failed ...");
         }
     }
     vTaskDelete(NULL);

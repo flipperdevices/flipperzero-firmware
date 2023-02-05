@@ -2,7 +2,7 @@
 
 ## Overview
 
-Serial flasher component provides portable library for flashing Espressif SoCs from other host microcontroller. Espressif SoCs are normally programmed via serial interface (UART). Port layer for given host microcontroller has to be implemented, if not available. Details can be found in section below.
+Serial flasher component provides portable library for flashing or loading ram loadble app to Espressif SoCs from other host microcontroller. Espressif SoCs are normally programmed via serial interface (UART). Port layer for given host microcontroller has to be implemented, if not available. Details can be found in section below.
 
 Supported **host** microcontrollers:
 
