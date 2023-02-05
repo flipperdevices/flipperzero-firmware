@@ -129,6 +129,8 @@ FlizzerTrackerApp *init_tracker(uint32_t sample_rate, uint8_t rate, bool externa
     tracker->notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
+    set_default_song(tracker);
+
     return tracker;
 }
 

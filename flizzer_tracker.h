@@ -22,7 +22,8 @@
 #include "sound_engine/sound_engine_filter.h"
 #include "tracker_engine/tracker_engine_defs.h"
 
-#define FLIZZER_TRACKER_FOLDER "/ext/flizzer_tracker"
+#define APPSDATA_FOLDER "/ext/apps_data"
+#define FLIZZER_TRACKER_FOLDER "/ext/apps_data/flizzer_tracker"
 #define FILE_NAME_LEN 64
 
 typedef enum

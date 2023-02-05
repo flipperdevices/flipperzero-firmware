@@ -25,3 +25,4 @@ bool check_and_allocate_pattern(TrackerSong *song, uint8_t pattern);
 void change_pattern_length(TrackerSong *song, uint16_t new_length);
 
 bool check_and_allocate_instrument(TrackerSong *song, uint8_t inst);
+void set_default_song(FlizzerTrackerApp *tracker);

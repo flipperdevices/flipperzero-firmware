@@ -99,7 +99,8 @@ int32_t flizzer_tracker_app(void *p)
     UNUSED(p);
 
     Storage *storage = furi_record_open(RECORD_STORAGE);
-    bool st = storage_simply_mkdir(storage, FLIZZER_TRACKER_FOLDER);
+    bool st = storage_simply_mkdir(storage, APPSDATA_FOLDER);
+    st = storage_simply_mkdir(storage, FLIZZER_TRACKER_FOLDER);
     UNUSED(st);
     furi_record_close(RECORD_STORAGE);
 
@@ -108,80 +109,6 @@ int32_t flizzer_tracker_app(void *p)
     // Текущее событие типа кастомного типа FlizzerTrackerEvent
     FlizzerTrackerEvent event;
 
-    tracker->tracker_engine.master_volume = 0x80;
-
-    tracker->song.speed = 5;
-    tracker->song.rate = tracker->tracker_engine.rate;
-    tracker->song.num_instruments = 2;
-    tracker->song.num_patterns = 3;
-    tracker->song.num_sequence_steps = 4;
-    tracker->song.pattern_length = 64;
-
-    tracker->song.sequence.sequence_step[0].pattern_indices[0] = 0;
-    tracker->song.sequence.sequence_step[0].pattern_indices[1] = 1;
-    tracker->song.sequence.sequence_step[0].pattern_indices[2] = 2;
-    tracker->song.sequence.sequence_step[0].pattern_indices[3] = 2;
-
-    tracker->song.pattern[0].step = malloc(64 * sizeof(TrackerSongPatternStep));
-    tracker->song.pattern[1].step = malloc(64 * sizeof(TrackerSongPatternStep));
-    tracker->song.pattern[2].step = malloc(64 * sizeof(TrackerSongPatternStep));
-
-    memset(tracker->song.pattern[0].step, 0, 64 * sizeof(TrackerSongPatternStep));
-    memset(tracker->song.pattern[1].step, 0, 64 * sizeof(TrackerSongPatternStep));
-    memset(tracker->song.pattern[2].step, 0, 64 * sizeof(TrackerSongPatternStep));
-
-    tracker->song.instrument[0] = malloc(sizeof(Instrument));
-    tracker->song.instrument[1] = malloc(sizeof(Instrument));
-
-    for (int i = 0; i < 64; ++i)
-    {
-        set_note(&tracker->song.pattern[0].step[i], MUS_NOTE_NONE);
-        set_note(&tracker->song.pattern[1].step[i], MUS_NOTE_NONE);
-        set_note(&tracker->song.pattern[2].step[i], MUS_NOTE_NONE);
-
-        set_instrument(&tracker->song.pattern[0].step[i], MUS_NOTE_INSTRUMENT_NONE);
-        set_instrument(&tracker->song.pattern[1].step[i], MUS_NOTE_INSTRUMENT_NONE);
-        set_instrument(&tracker->song.pattern[2].step[i], MUS_NOTE_INSTRUMENT_NONE);
-
-        set_volume(&tracker->song.pattern[0].step[i], MUS_NOTE_VOLUME_NONE);
-        set_volume(&tracker->song.pattern[1].step[i], MUS_NOTE_VOLUME_NONE);
-        set_volume(&tracker->song.pattern[2].step[i], MUS_NOTE_VOLUME_NONE);
-    }
-
-    for (int i = 0; i < 64; i += 8)
-    {
-        set_note(&tracker->song.pattern[0].step[0 + i], 12 * 5);
-        set_note(&tracker->song.pattern[0].step[2 + i], 12 * 5 + 2);
-        set_note(&tracker->song.pattern[0].step[4 + i], 12 * 5 - 2);
-        set_note(&tracker->song.pattern[0].step[6 + i], 12 * 5 + 4);
-
-        set_instrument(&tracker->song.pattern[0].step[0 + i], 0);
-        set_instrument(&tracker->song.pattern[0].step[2 + i], 0);
-        set_instrument(&tracker->song.pattern[0].step[4 + i], 0);
-        set_instrument(&tracker->song.pattern[0].step[6 + i], 0);
-    }
-
-    for (int i = 0; i < 64; i++)
-    {
-        set_note(&tracker->song.pattern[1].step[i], 12 * 7 + 11);
-
-        set_instrument(&tracker->song.pattern[1].step[i], 1);
-    }
-
-    set_default_instrument(tracker->song.instrument[0]);
-    set_default_instrument(tracker->song.instrument[1]);
-
-    tracker->song.instrument[0]->adsr.a = 0x2;
-    tracker->song.instrument[0]->adsr.d = 0x9;
-    tracker->song.instrument[0]->adsr.volume = 0x80;
-    tracker->song.instrument[0]->waveform = SE_WAVEFORM_TRIANGLE;
-
-    tracker->song.instrument[1]->adsr.a = 0x0;
-    tracker->song.instrument[1]->adsr.d = 0x3;
-    tracker->song.instrument[1]->adsr.volume = 0x18;
-    tracker->song.instrument[1]->waveform = SE_WAVEFORM_NOISE;
-
-    tracker->tracker_engine.playing = false;
     play();
 
     view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);

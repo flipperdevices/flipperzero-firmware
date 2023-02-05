@@ -36,6 +36,12 @@ void stop_song(FlizzerTrackerApp *tracker)
 {
     tracker->tracker_engine.playing = false;
     tracker->editing = tracker->was_editing;
+
+    for (int i = 0; i < SONG_MAX_CHANNELS; i++)
+    {
+        tracker->sound_engine.channel[i].adsr.volume = 0;
+    }
+
     stop();
 }
 
@@ -145,4 +151,45 @@ bool check_and_allocate_instrument(TrackerSong *song, uint8_t inst)
             return false;
         }
     }
+}
+
+void set_default_song(FlizzerTrackerApp *tracker)
+{
+    tracker->tracker_engine.master_volume = 0x80;
+
+    tracker->song.speed = 6;
+    tracker->song.rate = tracker->tracker_engine.rate;
+    tracker->song.num_instruments = 1;
+    tracker->song.num_patterns = 5;
+    tracker->song.num_sequence_steps = 1;
+    tracker->song.pattern_length = 64;
+
+    tracker->song.sequence.sequence_step[0].pattern_indices[0] = 1;
+    tracker->song.sequence.sequence_step[0].pattern_indices[1] = 2;
+    tracker->song.sequence.sequence_step[0].pattern_indices[2] = 3;
+    tracker->song.sequence.sequence_step[0].pattern_indices[3] = 4;
+
+    for (int i = 0; i < 5; i++)
+    {
+        tracker->song.pattern[i].step = malloc(64 * sizeof(TrackerSongPatternStep));
+        memset(tracker->song.pattern[i].step, 0, 64 * sizeof(TrackerSongPatternStep));
+    }
+
+    for (int i = 0; i < 64; ++i)
+    {
+        for (int j = 0; j < 5; j++)
+        {
+            set_note(&tracker->song.pattern[j].step[i], MUS_NOTE_NONE);
+
+            set_instrument(&tracker->song.pattern[j].step[i], MUS_NOTE_INSTRUMENT_NONE);
+
+            set_volume(&tracker->song.pattern[j].step[i], MUS_NOTE_VOLUME_NONE);
+        }
+    }
+
+    tracker->song.instrument[0] = malloc(sizeof(Instrument));
+
+    set_default_instrument(tracker->song.instrument[0]);
+
+    tracker->tracker_engine.playing = false;
 }

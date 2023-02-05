@@ -306,7 +306,6 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
         return;
     }
 
-    // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
     if (event->input.key == InputKeyBack && event->input.type == InputTypeLong)
     {
         switch (tracker->mode)

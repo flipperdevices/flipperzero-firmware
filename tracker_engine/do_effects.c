@@ -437,6 +437,11 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
             if (tick == 0)
             {
                 se_channel->adsr.a = (opcode & 0xff);
+
+                if (se_channel->adsr.envelope_state == ATTACK)
+                {
+                    se_channel->adsr.envelope_speed = envspd(tracker_engine->sound_engine, se_channel->adsr.a);
+                }
             }
 
             break;
@@ -447,6 +452,11 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
             if (tick == 0)
             {
                 se_channel->adsr.d = (opcode & 0xff);
+
+                if (se_channel->adsr.envelope_state == DECAY)
+                {
+                    se_channel->adsr.envelope_speed = envspd(tracker_engine->sound_engine, se_channel->adsr.d);
+                }
             }
 
             break;
@@ -467,6 +477,11 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
             if (tick == 0)
             {
                 se_channel->adsr.r = (opcode & 0xff);
+
+                if (se_channel->adsr.envelope_state == RELEASE)
+                {
+                    se_channel->adsr.envelope_speed = envspd(tracker_engine->sound_engine, se_channel->adsr.r);
+                }
             }
 
             break;
