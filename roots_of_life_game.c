@@ -25,12 +25,13 @@
 #define CELL(Y, X) (Y * CELLS_X + X)
 
 // Root Spawn
-#define ROOT_SIZE_X 4
-#define ROOT_SIZE_Y 3
+#define ROOT_SIZE_X 7
+#define ROOT_SIZE_Y 7
 #define ROOT(Y, X) ((Y)*ROOT_SIZE_X + (X))
 
 #define SPAWN_DIRECTIONS 2
-#define GROW_STEPS 3
+#define GROW_STEPS 4
+#define GROW_SAME_DIRECTION_CHANCE 70
 #define RANDOM_GROW_ATTEMPTS 4
 #define RANDOM_GROW_CHANCE 50
 
@@ -38,10 +39,15 @@
 #define BLINK_PERIOD 12
 #define BLINK_HIDE_FRAMES 5
 #define TREE_HEIGHT 10
+#define PICKUP_FREQUENCY 10
 
 // Game
 #define REROLLS_MAX 5
 #define SCORE_FACTOR 10
+
+#define PICKUPS_MIN 1
+#define PICKUPS_MAX 5
+#define PICKUPS_POINTS_FACTOR 10
 
 typedef enum { EventTypeTick, EventTypeKey } EventType;
 
@@ -63,9 +69,12 @@ typedef struct {
 
     bool* filledCells;
     char* cells;
+    bool* pickups;
+    int collectedPickups;
 
     bool* filledRootBase;
     char* rootBase;
+
     int rootSizeX;
     int rootSizeY;
     bool* filledRoot;
@@ -103,6 +112,9 @@ static Direction reverse_dir(Direction dir) {
     }
 }
 
+static int rand_range(int min, int max) {
+    return min + rand() % (max - min);
+}
 static bool rand_chance(int chance) {
     return (rand() % 100) < chance;
 }
@@ -128,6 +140,7 @@ static void game_state_init(GameState* state) {
     // Init field arrays
     state->filledCells = (bool*)malloc(CELLS_TOTAL * sizeof(bool));
     state->cells = (char*)malloc(CELLS_TOTAL * sizeof(char));
+    state->pickups = (bool*)malloc(CELLS_TOTAL * sizeof(char));
 
     state->rootBase = (char*)malloc(ROOT_SIZE_X * ROOT_SIZE_Y * sizeof(char));
     state->filledRootBase = (bool*)malloc(ROOT_SIZE_X * ROOT_SIZE_Y * sizeof(bool));
@@ -137,6 +150,14 @@ static void game_state_init(GameState* state) {
     for(int i = 0; i < CELLS_TOTAL; i++) {
         state->filledCells[i] = false;
         state->cells[i] = R_NONE;
+        state->pickups[i] = false;
+    }
+
+    state->collectedPickups = 0;
+    for(int i = 0, n = rand_range(PICKUPS_MIN, PICKUPS_MAX); i < n; i++) {
+        int x = rand_range(0, CELLS_X);
+        int y = rand_range(0, CELLS_Y);
+        state->pickups[CELL(y, x)] = true;
     }
 }
 
@@ -148,6 +169,7 @@ static void free_root(GameState* state) {
 static void game_state_free(GameState* state) {
     free(state->filledCells);
     free(state->cells);
+    free(state->pickups);
 
     free(state->rootBase);
     free(state->filledRootBase);
@@ -173,8 +195,11 @@ static void generate_new_root(GameState* state) {
 
     for(int i = 0; i < SPAWN_DIRECTIONS; i++) {
         int pX = cX, pY = cY;
+        Direction oldDir = rand_dir();
         for(int g = 0; g < GROW_STEPS; g++) {
-            Direction dir = rand_dir();
+            Direction dir = rand_chance(GROW_SAME_DIRECTION_CHANCE) ? oldDir : rand_dir();
+            oldDir = dir;
+
             int nX = pX - (dir & R_LEFT ? 1 : 0) + (dir & R_RIGHT ? 1 : 0);
             int nY = pY - (dir & R_UP ? 1 : 0) + (dir & R_DOWN ? 1 : 0);
             if(nX < 0 || nY < 0 || nX >= ROOT_SIZE_X || nY >= ROOT_SIZE_Y) continue;
@@ -243,16 +268,16 @@ static void generate_new_root(GameState* state) {
     }
 }
 
-static bool in_borders(GameState* state, int x, int y) {
-    return x >= 0 && y >= 0 && x < CELLS_X && y < CELLS_Y
+static bool in_borders(int x, int y) {
+    return x >= 0 && y >= 0 && x < CELLS_X && y < CELLS_Y;
 }
 static char get_cell(GameState* state, int x, int y) {
-    if(!in_borders(state, x, y)) return R_NONE;
+    if(!in_borders(x, y)) return R_NONE;
     return state->cells[CELL(y, x)];
 }
 
 static bool get_filled_cell(GameState* state, int x, int y) {
-    if(!in_borders(state, x, y)) return false;
+    if(!in_borders(x, y)) return false;
     return state->filledCells[CELL(y, x)];
 }
 
@@ -301,7 +326,7 @@ static bool try_place_root(GameState* state) {
             int rX = x + state->pX;
 
             // Root may be out of borders in rare cases (after new cpawn changed its size), just ignore that part
-            if(in_borders(state, rX, rY)) {
+            if(in_borders(rX, rY)) {
                 int c = CELL(rY, rX);
 
                 state->filledCells[c] = true;
@@ -345,7 +370,15 @@ static void recalculate_score(GameState* state) {
         if(state->filledCells[i]) score++;
     }
 
-    state->score = score * SCORE_FACTOR;
+    for(int i = 0; i < CELLS_TOTAL; i++) {
+        if(!state->pickups[i] || !state->filledCells[i]) continue;
+
+        state->pickups[i] = false;
+        state->collectedPickups++;
+        state->rerolls++;
+    }
+
+    state->score = (score + state->collectedPickups * PICKUPS_POINTS_FACTOR) * SCORE_FACTOR;
 }
 
 static void draw_root_cell(Canvas* canvas, char root, int y, int x, bool isHidden) {
@@ -376,6 +409,27 @@ static void draw_placed_roots(Canvas* canvas, GameState* state) {
     }
 }
 
+static void draw_pickup(Canvas* canvas, GameState* state, int y, int x) {
+    int posX = FIELD_START_X + x * CELL_SIZE + 1, posY = FIELD_START_Y + y * CELL_SIZE + 1;
+
+    int stage = state->tick / PICKUP_FREQUENCY;
+
+    if(stage++ % 4 < 3) canvas_draw_dot(canvas, posX + 1, posY);
+    if(stage++ % 4 < 3) canvas_draw_dot(canvas, posX, posY + 1);
+    if(stage++ % 4 < 3) canvas_draw_dot(canvas, posX - 1, posY);
+    if(stage++ % 4 < 3) canvas_draw_dot(canvas, posX, posY - 1);
+}
+
+static void draw_pickups(Canvas* canvas, GameState* state) {
+    for(int y = 0; y < CELLS_Y; y++) {
+        for(int x = 0; x < CELLS_X; x++) {
+            int c = CELL(y, x);
+            if(!state->pickups[c]) continue;
+            draw_pickup(canvas, state, y, x);
+        }
+    }
+}
+
 static void draw_active_root(Canvas* canvas, GameState* state) {
     bool isHidden = (state->tick % BLINK_PERIOD) < BLINK_HIDE_FRAMES;
 
@@ -391,6 +445,7 @@ static void draw_active_root(Canvas* canvas, GameState* state) {
     }
 }
 
+#if DRAW_DEBUG
 static void draw_generated_root(Canvas* canvas, GameState* state) {
     bool isHidden = (state->tick % BLINK_PERIOD) < BLINK_HIDE_FRAMES;
 
@@ -405,6 +460,7 @@ static void draw_generated_root(Canvas* canvas, GameState* state) {
         }
     }
 }
+#endif
 
 static void draw_ground(Canvas* canvas, GameState* state) {
     canvas_draw_line(canvas, 0, GROUND_HEIGHT, FLIPPER_LCD_WIDTH, GROUND_HEIGHT);
@@ -490,7 +546,7 @@ static void draw_end_ui(Canvas* canvas, GameState* state) {
     int x = FLIPPER_LCD_WIDTH / 2 - w2;
     int y = FLIPPER_LCD_HEIGHT / 2 - h2;
 
-    canvas_draw_str(canvas, x + 1, y + 9, "      Game Over      ");
+    canvas_draw_str(canvas, x + 1, y + 9, "        Game Over        ");
 
     FuriString* tmp_string = furi_string_alloc();
     furi_string_printf(tmp_string, "You've got %d points", MAX(0, state->score));
@@ -519,6 +575,7 @@ static void roots_draw_callback(Canvas* const canvas, void* ctx) {
 
     draw_gui(canvas, state);
     draw_placed_roots(canvas, state);
+    draw_pickups(canvas, state);
 
     switch(state->stage) {
     case StageStart:
@@ -527,7 +584,9 @@ static void roots_draw_callback(Canvas* const canvas, void* ctx) {
 
     case StageRun:
         draw_active_root(canvas, state);
+#if DRAW_DEBUG
         draw_generated_root(canvas, state);
+#endif
         break;
 
     case StageOver:
