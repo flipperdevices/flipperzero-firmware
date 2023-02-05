@@ -31,7 +31,9 @@ bool subghz_scene_delete_success_on_event(void* context, SceneManagerEvent event
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
             } else if(scene_manager_search_and_switch_to_previous_scene(
                           subghz->scene_manager, SubGhzSceneSaved)) {
-                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
+		// here, the most natural step is to set the selected menu entry to Saved,
+		// since the user will be coming back from the saved files menu
+		scene_manager_set_scene_state(subghz->scene_manager, SubGhzSceneStart, SubmenuIndexSaved);
             } else {
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
