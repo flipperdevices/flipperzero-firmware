@@ -555,6 +555,12 @@ static void draw_end_ui(Canvas* canvas, GameState* state) {
 
     canvas_draw_str(canvas, x + 2, y + 29, "Press [OK] to restart");
 
+    int h = 13, w = 54;
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, 0, FLIPPER_LCD_HEIGHT - h, w + 1, h + 1);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_frame(canvas, 0, FLIPPER_LCD_HEIGHT - h, w, h);
+    canvas_draw_str(canvas, 2, FLIPPER_LCD_HEIGHT - 3, "by @Xorboo");
     UNUSED(state);
 }
 
