@@ -38,7 +38,7 @@ public function doSomethingWithArray(array $myArrayPointer): arrayPointer
     return &$myNewArrayPointer; // return pointer to new array
 }
 ```
-So doSomethingWithArray creates a copy of the first array, manipulates it and returns a pointer to the copied array. Back in main() we replace the original array with the content of the manipulated array. Wasted resources here. <br>
+So doSomethingWithArray creates a copy of the first array, manipulates it and returns a pointer to the copied array. Back in main() we replace the original array with the content of the manipulated array. Wasted resources here. <br><br>
 Even in pure correct PHP, this code can be more effective
 ```
 public function main() {
