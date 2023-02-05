@@ -159,13 +159,14 @@ void computer_move(GameState *game_state) {
   int best_row = -1, best_col = -1, best_score = -1000000;
   for (int i = 0; i < BOARD_SIZE; i++) {
     for (int j = 0; j < BOARD_SIZE; j++) {
-      if (is_legal_move(game_state->board, i, j, game_state->current_player)) {
-        int score = heuristic(game_state->board);
-        if (score > best_score) {
-          best_score = score;
-          best_row = i;
-          best_col = j;
-        }
+      if (!is_legal_move(game_state->board, i, j, game_state->current_player)) {
+        continue;
+      }
+      int score = heuristic(game_state->board);
+      if (score > best_score) {
+        best_score = score;
+        best_row = i;
+        best_col = j;
       }
     }
   }
