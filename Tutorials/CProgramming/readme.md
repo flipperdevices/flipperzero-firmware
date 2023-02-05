@@ -4,7 +4,15 @@ Tips and tricks for developing Application for Flipper using C Programming langu
 <br>
 ## Table of Contents
 <ul>
+<li><!--a href=""-->Creating an Application Manifest (tbd)<!--/a--></li>
 <li><a href="FunctionsParameters/readme.md">Functions and Parameters Basics</a></li>
 <li><a href="NullPointerReference/readme.md">Problems with Null Pointer References</a></li>
+<li><!--a href=""-->The need for Mutex (tbd)<!--/a--></li>
+<li><!--a href=""-->Drawing on screen (tbd)<!--/a--></li>
+<li><!--a href=""-->Button Inputs (tbd)<!--/a--></li>
+<li><!--a href=""-->Using the submenu feature (tbd)<!--/a--></li>
+<li><!--a href=""-->Using the scene manager and view dispatcher (tbd)<!--/a--></li>
+<li><!--a href=""-->How I made the large font for the Color Guess app (tbd)<!--/a--></li>
+<li><!--a href=""-->Accessing Hardware (tbd)<!--/a--></li>
 </ul>
 
