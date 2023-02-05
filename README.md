@@ -10,7 +10,7 @@ cd ..
 ./fbt launch_app APPSRC=applications_user/flipperscope
 ```
 
-Provide signal to pin 16/C0, with a voltage ranging from 0V to 3.3V.
+Provide signal to pin 16/C0, with a voltage ranging from 0V to 2.5V.
 
 Press the 'ok' button (button in the centre of joypad) to pause/unpause the waveform display.
 
@@ -25,9 +25,12 @@ Press the 'ok' button (button in the centre of joypad) to pause/unpause the wave
 
 ![Flipper Zero running flipperscope](photos/freq.jpg)
 
+![Rigol](photos/rigol.jpg)
+
+![Flipper Zero running flipperscope](photos/volt.jpg)
+
 ## To Do
 
-* Voltage measurements for max/min of waveform seem a bit off currently, need to investigate further
 * Customisable input pin
 * Trigger type mode
 * FFT
