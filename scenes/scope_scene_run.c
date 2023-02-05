@@ -32,11 +32,12 @@ const uint32_t AHBPrescTable[16UL] = {1UL, 3UL, 5UL, 1UL, 1UL, 6UL, 10UL, 32UL, 
 const uint32_t APBPrescTable[8UL]  = {0UL, 0UL, 0UL, 0UL, 1UL, 2UL, 3UL, 4UL};
 const uint32_t MSIRangeTable[16UL] = {100000UL, 200000UL, 400000UL, 800000UL, 1000000UL, 2000000UL, \
                                       4000000UL, 8000000UL, 16000000UL, 24000000UL, 32000000UL, 48000000UL, 0UL, 0UL, 0UL, 0UL}; /* 0UL values are incorrect cases */
-char * time;
-double freq;
-uint8_t pause=0;
-enum measureenum type;
-int toggle = 0;
+
+char * time;            // Current time period text
+double freq;            // Current samplerate
+uint8_t pause=0;        // Whether we want to pause output or not
+enum measureenum type;  // Type of measurement we are performing
+int toggle = 0;         // Used for toggling output GPIO, only used in testing
 
 void Error_Handler()
 {
@@ -47,12 +48,14 @@ void Error_Handler()
 static ADC_HandleTypeDef hadc1;
 static DMA_HandleTypeDef hdma_adc1;
 static TIM_HandleTypeDef htim2;
-__IO uint16_t aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE];       /* ADC group regular conversion data (array of data) */
-__IO uint16_t aADCxConvertedData_Voltage_mVoltA[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
-__IO uint16_t aADCxConvertedData_Voltage_mVoltB[ADC_CONVERTED_DATA_BUFFER_SIZE]; /* Value of voltage calculated from ADC conversion data (unit: mV) (array of data) */
-__IO uint8_t ubDmaTransferStatus = 2;   /* Variable set into DMA interruption callback */
-__IO uint16_t *mvoltWrite = &aADCxConvertedData_Voltage_mVoltA[0];
-__IO uint16_t *mvoltDisplay = &aADCxConvertedData_Voltage_mVoltB[0];
+
+__IO uint16_t aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE];                   // Array that ADC data is copied to, via DMA
+__IO uint16_t aADCxConvertedData_Voltage_mVoltA[ADC_CONVERTED_DATA_BUFFER_SIZE];    // Data is converted to range from 0 to 3300
+__IO uint16_t aADCxConvertedData_Voltage_mVoltB[ADC_CONVERTED_DATA_BUFFER_SIZE];    // Data is converted to range from 0 to 3300
+__IO uint8_t ubDmaTransferStatus = 2;                                               // DMA transfer status
+
+__IO uint16_t *mvoltWrite = &aADCxConvertedData_Voltage_mVoltA[0];                  // Pointer to area we write converted voltage data to
+__IO uint16_t *mvoltDisplay = &aADCxConvertedData_Voltage_mVoltB[0];                // Pointer to area of memory we display
 
 void HAL_ADC_MspInit(ADC_HandleTypeDef * hadc)
 {
@@ -124,6 +127,7 @@ void TIM2_IRQHandler(void)
     HAL_TIM_IRQHandler(&htim2);
 }
 
+// Setup ADC1 to be triggered by timer2
 static void MX_ADC1_Init(void)
 {
     ADC_ChannelConfTypeDef sConfig = { 0 };
@@ -156,6 +160,7 @@ static void MX_ADC1_Init(void)
     }
 }
 
+// Only used in testing, for toggling GPIO pin, to measure timer frequency
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM2){
@@ -164,6 +169,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
 }
 
+// Init timer2
 static void MX_TIM2_Init(uint32_t period)
 {
     TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
@@ -201,6 +207,7 @@ static void MX_GPIO_Init(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
 }
 
+// Swap pointer addresses, used for double buffer
 void swap(__IO uint16_t **a, __IO uint16_t **b){
     __IO uint16_t *tmp;
     tmp = *a;
@@ -208,6 +215,7 @@ void swap(__IO uint16_t **a, __IO uint16_t **b){
     *b = tmp;
 }
 
+// Write end half of DMA buffer to converted output
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
 {
     UNUSED(hadc);
@@ -216,10 +224,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef * hadc)
         mvoltWrite[tmp_index] = __ADC_CALC_DATA_VOLTAGE(VDDA_APPLI, aADCxConvertedData[tmp_index]);
     }
     ubDmaTransferStatus = 1;
+    // Swap double buffer, so new data can be displayed, provided we're not paused
     if(!pause)
         swap(&mvoltWrite, &mvoltDisplay);
 }
 
+// Write first half of DMA buffer to converted output
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef * hadc)
 {
     UNUSED(hadc);
@@ -236,6 +246,7 @@ void HAL_ADC_ErrorCallback(ADC_HandleTypeDef * hadc)
     Error_Handler();
 }
 
+// Used to draw to display
 static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
@@ -248,6 +259,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
     int count = 0;
     char buf1[50];
 
+    // Calculate voltage measurements
     for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
         if(mvoltDisplay[x] < min)
             min = mvoltDisplay[x];
@@ -260,20 +272,25 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
     switch(type){
         case m_time:
             {
+                // Display current time period
                 snprintf(buf1, 50, "Time: %s", time);
                 canvas_draw_str(canvas, 10, 10, buf1);
+                // Shift waveform across a virtual 0 line, so it crosses 0
                 for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
                     index[x] = -1;
                     crossings[x] = -1.0;
                     data[x] = ((float)mvoltDisplay[x] / 1000) - min;
                     data[x] = ((2 / (max - min)) * data[x]) - 1;
                 }
+                // Find points at which waveform crosses virtual 0 line
                 for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
                     if(data[x] >= 0 && data[x-1] < 0){
                         index[count++] = x - 1;
                     }
                 }
                 count=0;
+                // Linear interpolation to find zero crossings
+                // see https://gist.github.com/endolith/255291 for Python version
                 for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
                     if(index[x] == -1)
                         break;
@@ -282,20 +299,22 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
                 float avg = 0.0;
                 float countv = 0.0;
                 for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
-                    if(crossings[x] == -1 || crossings[x+1] == -1)
-                        break;
                     if(x + 1 >= ADC_CONVERTED_DATA_BUFFER_SIZE)
                        break;
+                    if(crossings[x] == -1 || crossings[x+1] == -1)
+                        break;
                     avg += crossings[x+1] - crossings[x];
                     countv += 1;
                 }
                 avg /= countv;
+                // Display frequency of waveform
                 snprintf(buf1, 50, "Freq: %.1f Hz", (double)((float)freq / avg));
                 canvas_draw_str(canvas, 10, 20, buf1);
             }
             break;
         case m_voltage:
             {
+                // Display max, min, peak-to-peak voltages
                 snprintf(buf1, 50, "Max: %.2fV", (double)max);
                 canvas_draw_str(canvas, 10, 10, buf1);
                 snprintf(buf1, 50, "Min: %.2fV", (double)min);
@@ -308,12 +327,14 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
             break;
     }
 
+    // Draw lines between each data point
     for(uint32_t x = 1; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
         uint32_t prev = 64 - (mvoltDisplay[x-1] / (VDDA_APPLI / 64));
         uint32_t cur = 64 - (mvoltDisplay[x] / (VDDA_APPLI / 64));
         canvas_draw_line(canvas, x - 1, prev, x, cur);
     }
 
+    // Draw graph lines
     canvas_draw_line(canvas, 0, 0, 0, 63);
     canvas_draw_line(canvas, 0, 63, 128, 63);
 }
@@ -337,21 +358,26 @@ void scope_scene_run_widget_callback(
 
 void scope_scene_run_on_enter(void* context) {
     ScopeApp* app = context;
+
+    // Find string representation of time period we're using
     for (uint32_t i = 0; i < COUNT_OF(time_list); i++){
         if(time_list[i].time == app->time){
             time = time_list[i].str;
             break;
         }
     }
+
+    // Currently un-paused
     pause = 0;
+
+    // What type of measurement are we performing
     type = app->measurement;
 
     // Test purposes
-    /*
-    furi_hal_gpio_write(&gpio_ext_pa7, false);
-    furi_hal_gpio_init( &gpio_ext_pa7, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    */
+    //furi_hal_gpio_write(&gpio_ext_pa7, false);
+    //furi_hal_gpio_init( &gpio_ext_pa7, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
+    // Copy vector table, modify to use our own IRQ handlers
     __disable_irq();
     memcpy(ramVector, (uint32_t*)(FLASH_BASE | SCB->VTOR), sizeof(uint32_t) * TABLE_SIZE);
     SCB->VTOR = (uint32_t)ramVector;
@@ -360,6 +386,8 @@ void scope_scene_run_on_enter(void* context) {
     ramVector[44] = (uint32_t)TIM2_IRQHandler;
     __enable_irq();
 
+    // Found this recommended by https://www.freertos.org/RTOS-Cortex-M3-M4.html
+    // although we're using after RTOS started
     HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
     FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
@@ -374,6 +402,7 @@ void scope_scene_run_on_enter(void* context) {
 
     MX_TIM2_Init(period);
 
+    // Set VREFBUF, as vref isn't connected to 3.3V itself in the flipper zero
     VREFBUF->CSR |= VREFBUF_CSR_ENVR;
     VREFBUF->CSR &= ~VREFBUF_CSR_HIZ;
     VREFBUF->CSR |= VREFBUF_CSR_VRS;
@@ -382,11 +411,11 @@ void scope_scene_run_on_enter(void* context) {
 
     MX_ADC1_Init();
 
+    // Setup initial values from ADC
     for (tmp_index_adc_converted_data = 0;
          tmp_index_adc_converted_data < ADC_CONVERTED_DATA_BUFFER_SIZE;
          tmp_index_adc_converted_data++) {
-        aADCxConvertedData[tmp_index_adc_converted_data] =
-            VAR_CONVERTED_DATA_INIT_VALUE;
+        aADCxConvertedData[tmp_index_adc_converted_data] = VAR_CONVERTED_DATA_INIT_VALUE;
         aADCxConvertedData_Voltage_mVoltA[tmp_index_adc_converted_data] = 0;
         aADCxConvertedData_Voltage_mVoltB[tmp_index_adc_converted_data] = 0;
     }
@@ -395,14 +424,13 @@ void scope_scene_run_on_enter(void* context) {
         Error_Handler();
     }
 
-    /*
     // Use to generate interrupt to toggle GPIO for testing
-    if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
-    */
+    //if (HAL_TIM_Base_Start_IT(&htim2) != HAL_OK) {
     if (HAL_TIM_Base_Start(&htim2) != HAL_OK) {
         Error_Handler();
     }
 
+    // Start DMA transfer
     if (HAL_ADC_Start_DMA(&hadc1, (uint32_t *) aADCxConvertedData, ADC_CONVERTED_DATA_BUFFER_SIZE) != HAL_OK) {
         Error_Handler();
     }
@@ -440,6 +468,7 @@ void scope_scene_run_on_enter(void* context) {
         view_port_update(view_port);
     }
 
+    // Stop DMA and switch back to original vector table
     HAL_ADC_Stop_DMA (&hadc1);
     __disable_irq();
     SCB->VTOR = 0;
@@ -449,6 +478,7 @@ void scope_scene_run_on_enter(void* context) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
 
+    // Switch back to original scene
     furi_record_close(RECORD_GUI);
     scene_manager_previous_scene(app->scene_manager);
     submenu_set_selected_item(app->submenu, 0);
