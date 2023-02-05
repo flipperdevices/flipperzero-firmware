@@ -93,7 +93,7 @@ static void draw_callback(Canvas *const canvas, void *ctx) {
 
   canvas_set_font(canvas, FontPrimary);
   // draw score
-  char score_str[10];
+  char score_str[25];
   memset(score_str, 0, sizeof(score_str));
   snprintf(score_str, sizeof(score_str), "%d - %d", whites, blacks);
 
