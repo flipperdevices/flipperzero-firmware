@@ -1,3 +1,4 @@
+#include <float.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_resources.h>
@@ -21,7 +22,7 @@
 #define VAR_CONVERTED_DATA_INIT_VALUE_16BITS    (0xFFFF + 1U)
 #define __ADC_CALC_DATA_VOLTAGE(__VREFANALOG_VOLTAGE__, __ADC_DATA__)       \
   ((__ADC_DATA__) * (__VREFANALOG_VOLTAGE__) / DIGITAL_SCALE_12BITS)
-#define VDDA_APPLI                       ((uint32_t)3300)
+#define VDDA_APPLI                       ((uint32_t)2500)
 
 // ramVector found from - https://community.nxp.com/t5/i-MX-Processors/Relocate-vector-table-to-ITCM/m-p/1302304
 // the aligned aspect is key!
@@ -50,8 +51,8 @@ static DMA_HandleTypeDef hdma_adc1;
 static TIM_HandleTypeDef htim2;
 
 __IO uint16_t aADCxConvertedData[ADC_CONVERTED_DATA_BUFFER_SIZE];                   // Array that ADC data is copied to, via DMA
-__IO uint16_t aADCxConvertedData_Voltage_mVoltA[ADC_CONVERTED_DATA_BUFFER_SIZE];    // Data is converted to range from 0 to 3300
-__IO uint16_t aADCxConvertedData_Voltage_mVoltB[ADC_CONVERTED_DATA_BUFFER_SIZE];    // Data is converted to range from 0 to 3300
+__IO uint16_t aADCxConvertedData_Voltage_mVoltA[ADC_CONVERTED_DATA_BUFFER_SIZE];    // Data is converted to range from 0 to 2500
+__IO uint16_t aADCxConvertedData_Voltage_mVoltB[ADC_CONVERTED_DATA_BUFFER_SIZE];    // Data is converted to range from 0 to 2500
 __IO uint8_t ubDmaTransferStatus = 2;                                               // DMA transfer status
 
 __IO uint16_t *mvoltWrite = &aADCxConvertedData_Voltage_mVoltA[0];                  // Pointer to area we write converted voltage data to
@@ -151,7 +152,7 @@ static void MX_ADC1_Init(void)
     }
     sConfig.Channel = ADC_CHANNEL_1;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLE_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_2CYCLES_5;
     sConfig.SingleDiff = ADC_SINGLE_ENDED;
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset = 0;
@@ -255,7 +256,7 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
     float data[ADC_CONVERTED_DATA_BUFFER_SIZE];
     float crossings[ADC_CONVERTED_DATA_BUFFER_SIZE];
     float max = 0.0;
-    float min = 33000.0;
+    float min = FLT_MAX;
     int count = 0;
     char buf1[50];
 
@@ -402,7 +403,7 @@ void scope_scene_run_on_enter(void* context) {
 
     MX_TIM2_Init(period);
 
-    // Set VREFBUF, as vref isn't connected to 3.3V itself in the flipper zero
+    // Set VREFBUF to 2.5V, as vref isn't connected to 3.3V itself in the flipper zero
     VREFBUF->CSR |= VREFBUF_CSR_ENVR;
     VREFBUF->CSR &= ~VREFBUF_CSR_HIZ;
     VREFBUF->CSR |= VREFBUF_CSR_VRS;
