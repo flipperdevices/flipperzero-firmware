@@ -252,13 +252,14 @@ static void app_draw_callback(Canvas * canvas, void *ctx)
 {
     UNUSED(ctx);
 
-    int16_t index[ADC_CONVERTED_DATA_BUFFER_SIZE];
-    float data[ADC_CONVERTED_DATA_BUFFER_SIZE];
-    float crossings[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    static int16_t index[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    static float data[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    static float crossings[ADC_CONVERTED_DATA_BUFFER_SIZE];
+    static char buf1[50];
+
     float max = 0.0;
     float min = FLT_MAX;
     int count = 0;
-    char buf1[50];
 
     // Calculate voltage measurements
     for(uint32_t x = 0; x < ADC_CONVERTED_DATA_BUFFER_SIZE; x++){
