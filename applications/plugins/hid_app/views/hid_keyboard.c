@@ -384,7 +384,10 @@ HidKeyboard* hid_keyboard_alloc(Hid* bt_hid) {
     with_view_model(
         hid_keyboard->view,
         HidKeyboardModel * model,
-        { model->transport = bt_hid->transport; },
+        {
+            model->transport = bt_hid->transport;
+            model->y = 1;
+        },
         true);
 
     return hid_keyboard;
