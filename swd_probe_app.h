@@ -113,6 +113,7 @@ typedef struct {
     bool detected_notified;
     uint8_t mode_page;
     uint8_t ap_pos;
+    uint8_t ap_scanned;
 
     uint32_t hex_addr;
     uint8_t hex_select;

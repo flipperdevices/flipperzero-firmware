@@ -1,5 +1,6 @@
 #include <furi.h>
 #include <gui/gui.h>
+#include <gui/elements.h>
 #include <input/input.h>
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
@@ -482,6 +483,9 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
             y += 10;
 
+            canvas_set_font(canvas, FontSecondary);
+            elements_button_right(canvas, "DP Regs");
+
             break;
         }
         case 1: {
@@ -511,6 +515,9 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
                 canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
             }
             y += 10;
+            canvas_set_font(canvas, FontSecondary);
+            elements_button_left(canvas, "Scan");
+            elements_button_right(canvas, "DPID");
             break;
         }
         case 2: {
@@ -539,6 +546,9 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
                     y += 10;
                 }
             }
+            canvas_set_font(canvas, FontSecondary);
+            elements_button_left(canvas, "DP Regs");
+            elements_button_right(canvas, "APs");
             break;
         }
         case 3: {
@@ -546,8 +556,16 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             y += 10;
             canvas_set_font(canvas, FontKeyboard);
 
-            if(!ctx->apidr_info[ctx->ap_pos].ok) {
-                snprintf(buffer, sizeof(buffer), "[%d] unused", ctx->ap_pos);
+            char state = ' ';
+            if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos < ctx->ap_scanned + 10) {
+                state = '*';
+            }
+            if(!ctx->apidr_info[ctx->ap_pos].tested) {
+                snprintf(buffer, sizeof(buffer), "[%d]%c<searching>", ctx->ap_pos, state);
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+            } else if(!ctx->apidr_info[ctx->ap_pos].ok) {
+                snprintf(buffer, sizeof(buffer), "[%d]%c<none>", ctx->ap_pos, state);
                 canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
                 y += 10;
 
@@ -593,7 +611,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
                     type = types[ctx->apidr_info[ctx->ap_pos].type];
                 }
 
-                snprintf(buffer, sizeof(buffer), "[%d] %s - %s", ctx->ap_pos, class, type);
+                snprintf(buffer, sizeof(buffer), "[%d]%c%s - %s", ctx->ap_pos, state, class, type);
                 canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
                 y += 10;
 
@@ -613,7 +631,13 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
                     jep106_manufacturer(ctx->apidr_info[ctx->ap_pos].designer));
                 canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
                 y += 10;
+
+                elements_button_center(canvas, "Show");
             }
+            canvas_set_font(canvas, FontSecondary);
+            elements_button_left(canvas, "DPID");
+            elements_scrollbar_pos(
+                canvas, 4, 10, 40, ctx->ap_pos / 32, COUNT(ctx->apidr_info) / 32);
         } break;
 
             /* hex dump view */
@@ -707,6 +731,7 @@ static void on_timer_tick(AppFSM* ctx) {
             ctx->io_swc = 0xFF;
             ctx->io_num_swd = 0xFF;
             ctx->io_num_swc = 0xFF;
+            ctx->ap_scanned = 0;
             memset(&ctx->dp_regs, 0x00, sizeof(ctx->dp_regs));
             memset(&ctx->targetid_info, 0x00, sizeof(ctx->targetid_info));
             memset(&ctx->apidr_info, 0x00, sizeof(ctx->apidr_info));
@@ -777,11 +802,10 @@ static void on_timer_tick(AppFSM* ctx) {
         break;
     }
     case 3: {
-        /* fetch current CTRL/STAT */
-        swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
-
         /* set debug enable request */
         if(!(ctx->dp_regs.ctrlstat & (CSYSPWRUPREQ | CDBGPWRUPREQ))) {
+            /* fetch current CTRL/STAT */
+            swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
             ctx->dp_regs.ctrlstat |= CDBGPWRUPREQ;
             ctx->dp_regs.ctrlstat |= CSYSPWRUPREQ;
             furi_log_print_format(FuriLogLevelDefault, TAG, "no (CSYSPWRUPREQ | CDBGPWRUPREQ)");
@@ -789,11 +813,23 @@ static void on_timer_tick(AppFSM* ctx) {
             break;
         }
         if(!(ctx->dp_regs.ctrlstat & CDBGPWRUPACK)) {
+            /* fetch current CTRL/STAT */
+            swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
             furi_log_print_format(FuriLogLevelDefault, TAG, "no CDBGPWRUPACK");
             break;
         }
 
-        for(int ap = 0; ap < COUNT(ctx->apidr_info); ap++) {
+        /* only scan 10 APs at once to stay responsive */
+        for(int pos = 0; pos < 10; pos++) {
+            if(ctx->ap_scanned >= COUNT(ctx->apidr_info)) {
+                ctx->ap_scanned = 0;
+                for(int reset_ap = 0; reset_ap < COUNT(ctx->apidr_info); reset_ap++) {
+                    ctx->apidr_info[reset_ap].tested = false;
+                }
+            }
+
+            int ap = ctx->ap_scanned++;
+
             if(ctx->apidr_info[ap].ok) {
                 continue;
             }
@@ -805,6 +841,8 @@ static void on_timer_tick(AppFSM* ctx) {
             static uint32_t prev_data = 0;
             uint32_t data = 0;
             if(swd_read_ap(ctx, ap, AP_IDR, &data) != 1) {
+                swd_abort(ctx);
+                swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
                 continue;
             }
             if(data == 0) {
@@ -953,7 +991,7 @@ int32_t swd_probe_app_main(void* p) {
                     case InputKeyOk:
                         ctx->last_key = KeyOK;
 
-                        if(ctx->mode_page == 3) {
+                        if(ctx->mode_page == 3 && ctx->apidr_info[ctx->ap_pos].ok) {
                             ctx->mode_page = 4;
                         }
                         break;
