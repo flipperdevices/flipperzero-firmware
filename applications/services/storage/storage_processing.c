@@ -2,11 +2,9 @@
 #include <m-list.h>
 #include <m-dict.h>
 
-#define FS_CALL(_storage, _fn)   \
-    ret = _storage->fs_api->_fn; \
+#define FS_CALL(_storage, _fn) ret = _storage->fs_api->_fn;
 
-#define ST_CALL(_storage, _fn)   \
-    ret = _storage->api._fn;     \
+#define ST_CALL(_storage, _fn) ret = _storage->api._fn;
 
 static StorageData* storage_get_storage_by_type(Storage* app, StorageType type) {
     furi_check(type == ST_EXT || type == ST_INT);
