@@ -10,7 +10,7 @@ App(
     stack_size=2 * 1024,
     order=30,
     fap_icon="ledpulser_10px.png",
-    fap_category="Leed\Misc",
+    fap_category="Misc",
     fap_author="Leed",
     fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",
 )
