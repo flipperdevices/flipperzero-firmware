@@ -1,6 +1,4 @@
-// TODO: Need to eliminate the last two memory allocations to run without paging to disk:
-//    int *odd = calloc(1, 5 << 19);
-//    int *even = calloc(1, 5 << 19);
+// TODO: Only runs with NUM_CHUNKS=1 and CHUNK_DIV=1
 // TODO: Unused "s" in recover?
 #include <inttypes.h>
 #include <stdio.h>
