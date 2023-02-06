@@ -50,6 +50,19 @@ static const char* gpio_name(uint8_t mask) {
 }
 
 static void swd_configure_pins(AppFSM* const ctx, bool output) {
+    if(ctx->mode_page != 0 && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
+        furi_hal_gpio_init(
+            gpios[ctx->io_num_swc], GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+        if(!output) {
+            furi_hal_gpio_init(
+                gpios[ctx->io_num_swd], GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
+        } else {
+            furi_hal_gpio_init(
+                gpios[ctx->io_num_swd], GpioModeOutputOpenDrain, GpioPullUp, GpioSpeedVeryHigh);
+        }
+        return;
+    }
+
     for(int io = 0; io < 8; io++) {
         uint8_t bitmask = 1 << io;
 
@@ -75,6 +88,11 @@ static void swd_configure_pins(AppFSM* const ctx, bool output) {
 }
 
 static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
+    if(ctx->mode_page != 0 && ctx->io_num_swc < 8) {
+        furi_hal_gpio_write(gpios[ctx->io_num_swc], level);
+        return;
+    }
+
     for(int io = 0; io < 8; io++) {
         uint8_t bitmask = 1 << io;
 
@@ -90,6 +108,11 @@ static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
 }
 
 static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
+    if(ctx->mode_page != 0 && ctx->io_num_swd < 8) {
+        furi_hal_gpio_write(gpios[ctx->io_num_swd], level);
+        return;
+    }
+
     for(int io = 0; io < 8; io++) {
         uint8_t bitmask = 1 << io;
 
@@ -105,6 +128,10 @@ static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
 }
 
 static uint8_t swd_get_data(AppFSM* const ctx) {
+    if(ctx->mode_page != 0 && ctx->io_num_swd < 8) {
+        return furi_hal_gpio_read(gpios[ctx->io_num_swd]);
+    }
+
     uint8_t bits = 0;
     for(int io = 0; io < 8; io++) {
         uint8_t bitmask = 1 << io;
@@ -215,7 +242,7 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
         bool parity = swd_read_bit(ctx);
 
         if(parity != __builtin_parity(*data)) {
-            return 7;
+            return 8;
         }
     }
     swd_set_data(ctx, false);
@@ -248,7 +275,7 @@ static uint8_t swd_select(AppFSM* const ctx, uint8_t ap_sel, uint8_t ap_bank, ui
 
     uint8_t ret = swd_transfer(ctx, false, true, 2, &bank_reg);
     if(ret != 1) {
-        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_read_dpbank: failed: %d", ret);
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_select: failed: %d", ret);
     }
     return ret;
 }
@@ -557,14 +584,11 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             canvas_set_font(canvas, FontKeyboard);
 
             char state = ' ';
-            if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos < ctx->ap_scanned + 10) {
+            if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos <= ctx->ap_scanned + 10) {
                 state = '*';
             }
-            if(!ctx->apidr_info[ctx->ap_pos].tested) {
-                snprintf(buffer, sizeof(buffer), "[%d]%c<searching>", ctx->ap_pos, state);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-            } else if(!ctx->apidr_info[ctx->ap_pos].ok) {
+
+            if(!ctx->apidr_info[ctx->ap_pos].ok) {
                 snprintf(buffer, sizeof(buffer), "[%d]%c<none>", ctx->ap_pos, state);
                 canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
                 y += 10;
@@ -794,13 +818,10 @@ static void on_timer_tick(AppFSM* ctx) {
         }
 
         ctx->current_mask_id = (ctx->current_mask_id + 1) % COUNT(gpio_direction_mask);
-
         break;
     }
     case 1:
-    case 2: {
-        break;
-    }
+    case 2:
     case 3: {
         /* set debug enable request */
         if(!(ctx->dp_regs.ctrlstat & (CSYSPWRUPREQ | CDBGPWRUPREQ))) {
@@ -819,10 +840,9 @@ static void on_timer_tick(AppFSM* ctx) {
             break;
         }
 
-        /* only scan 10 APs at once to stay responsive */
-        for(int pos = 0; pos < 10; pos++) {
-            if(ctx->ap_scanned >= COUNT(ctx->apidr_info)) {
-                ctx->ap_scanned = 0;
+        /* only scan a few APs at once to stay responsive */
+        for(int pos = 0; pos < 5; pos++) {
+            if(ctx->ap_scanned == 0) {
                 for(int reset_ap = 0; reset_ap < COUNT(ctx->apidr_info); reset_ap++) {
                     ctx->apidr_info[reset_ap].tested = false;
                 }
@@ -830,29 +850,20 @@ static void on_timer_tick(AppFSM* ctx) {
 
             int ap = ctx->ap_scanned++;
 
-            if(ctx->apidr_info[ap].ok) {
-                continue;
-            }
             if(ctx->apidr_info[ap].tested) {
                 continue;
             }
             ctx->apidr_info[ap].tested = true;
 
-            static uint32_t prev_data = 0;
             uint32_t data = 0;
             if(swd_read_ap(ctx, ap, AP_IDR, &data) != 1) {
                 swd_abort(ctx);
-                swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
                 continue;
             }
             if(data == 0) {
                 continue;
             }
-            if(data == prev_data) {
-                continue;
-            }
-            furi_log_print_format(FuriLogLevelDefault, TAG, "detected AP%d", ap);
-            prev_data = data;
+            furi_log_print_format(FuriLogLevelDefault, TAG, "AP%d detected", ap);
             ctx->apidr_info[ap].ok = true;
             ctx->apidr_info[ap].revision = (data >> 24) & 0x0F;
             ctx->apidr_info[ap].designer = (data >> 17) & 0x3FF;
