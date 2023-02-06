@@ -49,22 +49,13 @@ jobs:
           working-directory: 'documentation/'
           doxyfile-path: './Doxyfile-awesome.cfg'
 
-      - name: 'Upload dev documentation'
-        if: ${{ !startsWith(github.ref, 'refs/tags') }}
+      - name: 'Upload documentation'
         uses: prewk/s3-cp-action@v2
         with:
           aws_s3_endpoint: "${{ secrets.FW_DOCS_AWS_ENDPOINT }}"
           aws_access_key_id: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
           aws_secret_access_key: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
           source: "./documentation/build/html"
-          dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/dev"
-          flags: "--recursive --acl public-read"
-
-      - name: 'Upload tag documentation to Github Pages'
-        if: ${{ startsWith(github.ref, 'refs/tags') }}
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./documentation/build/html
-          publish_branch: 'doc-${{steps.names.outputs.branch_name}}'
+          dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}"
+          flags: "--recursive --acl public-read --delete"
 
