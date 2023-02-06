@@ -28,6 +28,7 @@ const GpioPin gpio_infrared_tx_debug = {.port = GPIOA, .pin = GPIO_PIN_7};
 #define INFRARED_TX_CCMR_LOW \
     (TIM_CCMR2_OC3PE | LL_TIM_OCMODE_FORCED_INACTIVE) /* Space time - force low */
 
+/* DMA Channels definition */
 #define IR_DMA DMA2
 #define IR_DMA_CH1_CHANNEL LL_DMA_CHANNEL_1
 #define IR_DMA_CH2_CHANNEL LL_DMA_CHANNEL_2
