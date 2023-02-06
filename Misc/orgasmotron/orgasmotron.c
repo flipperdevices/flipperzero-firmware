@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
+#include <dolphin/dolphin.h>
 
 typedef struct {
     int mode;
@@ -56,6 +57,8 @@ int32_t orgasmotron_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, &sequence_display_backlight_on);
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     InputEvent event;
     //int mode = 0;

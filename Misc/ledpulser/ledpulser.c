@@ -4,30 +4,14 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
+#include "ledpulser_icons.h"
+#include <dolphin/dolphin.h>
 
 const int color_green = 1;
 const int color_blue = 2;
 const int color_red = 3;
-const int color_white = 4;
-
-const NotificationSequence sequence_solid_white = {
-    &message_red_255,
-    &message_green_255,
-    &message_blue_255,
-    &message_do_not_reset,
-    NULL,
-};
-
-const NotificationMessage message_red_128 = {
-    .type = NotificationMessageTypeLedRed,
-    .data.led.value = 128,
-};
-
-const NotificationSequence sequence_half_red = {
-    &message_red_128,
-    &message_do_not_reset,
-    NULL,
-};
+const int color_yellow = 4;
+const int color_white = 5;
 
 typedef struct {
     int mode;
@@ -38,44 +22,49 @@ typedef struct {
 
 int intensity = 0;
 
-/*
-const NotificationMessage message_red_dyn = {
-    .type = NotificationMessageTypeLedRed,
-    .data.led.value = intensity,
-};
-
-const NotificationSequence sequence_red_dyn = {
-    &message_red_dyn,
-    &message_do_not_reset,
-    NULL,
-};*/
-
-/*
-NotificationSequence* generate_led_notification(int color, int intensity) {
-    //enum setColor = NotificationMessageTypeLedRed;
-    NotificationSequence response = {
-        {
-            .type = &NotificationMessageTypeLedRed,
-            .data.led.value = intensity,
-        },
-        NULL
-    };
-    return response;
-}*/
-
-
-
 void led_test_draw_callback(Canvas* canvas, void* ctx) {
-    UNUSED(ctx);
+    //UNUSED(ctx);
+    furi_assert(ctx);
+    PluginState* plugin_state = ctx;
+
     canvas_clear(canvas);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_icon(canvas, 0, 0, &I_flipper_cross);
+    canvas_draw_str(canvas, 79, 35, "Red");
+    canvas_draw_str(canvas, 101, 35, "Green");
+    canvas_draw_str(canvas, 78, 12, "Blue");
+    canvas_draw_str(canvas, 49, 35, "White");
+    canvas_draw_str(canvas, 73, 57, "Yellow");
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "LED Pulser");
+    
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 22, "LEFT: Green / RIGHT: Red");
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 34, "UP: Blue / Down: White");
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 58, "OK: Off");
+    if (plugin_state->mode == color_yellow) {
+        canvas_draw_box(canvas, 71, 48, 31, 11);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 73, 57, "Yellow");
+        canvas_invert_color(canvas);
+    } else if (plugin_state->mode == color_red) {
+        canvas_draw_box(canvas, 77, 26, 20, 11);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 79, 35, "Red");
+        canvas_invert_color(canvas);
+    } else if (plugin_state->mode == color_blue) {
+        canvas_draw_box(canvas, 76, 3, 22, 11);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 78, 12, "Blue");
+        canvas_invert_color(canvas);
+    } else if (plugin_state->mode == color_green) {
+        canvas_draw_box(canvas, 100, 26, 27, 11);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 101, 35, "Green");
+        canvas_invert_color(canvas);
+    } else if (plugin_state->mode == color_white) {
+        canvas_draw_box(canvas, 47, 26, 27, 11);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 49, 35, "White");
+        canvas_invert_color(canvas);
+    }
 }
 
 void led_test_input_callback(InputEvent* input_event, void* ctx) {
@@ -104,21 +93,20 @@ int32_t ledpulser_app(void* p) {
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     NotificationMessage* dyn_notification_message = malloc(sizeof(NotificationMessage));
-    //NotificationSequence* dyn_notification_sequence = malloc(sizeof(sequence_half_red));
     ValueMutex state_mutex;
     if (!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
         FURI_LOG_E("LED Pulser", "cannot create mutex\r\n");
         free(plugin_state);
         free(dyn_notification_message);
-        //free(dyn_notification_sequence);
         return 255;
     }
     plugin_state->direction = 0;
     plugin_state->intensity = 0;
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, led_test_draw_callback, NULL);
+    view_port_draw_callback_set(view_port, led_test_draw_callback, plugin_state);
     view_port_input_callback_set(view_port, led_test_input_callback, event_queue);
 
     // Register view port in GUI
@@ -128,9 +116,8 @@ int32_t ledpulser_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
-    //int mode = 0;
     bool processing = true;
-    //while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+    notification_message(notification, &sequence_display_backlight_on);
     while (processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
@@ -146,23 +133,43 @@ int32_t ledpulser_app(void* p) {
                 processing = false;
                 //break;
             }
-            if(event.key == InputKeyOk && (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                plugin_state->mode = 0;
+            if(event.key == InputKeyOk && event.type == InputTypePress) {
+                if (plugin_state->mode == color_red) {
+                    plugin_state->mode = 0;
+                } else {
+                    plugin_state->mode = color_red;
+                    notification_led_message.type = NotificationMessageTypeLedRed;
+                }
             }
-            if(event.key == InputKeyLeft && (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                plugin_state->mode = color_red;
-                notification_led_message.type = NotificationMessageTypeLedRed;
+            if(event.key == InputKeyLeft && event.type == InputTypePress) {
+                if (plugin_state->mode == color_white) {
+                    plugin_state->mode = 0;
+                } else {
+                    plugin_state->mode = color_white;
+                }
             }
-            if(event.key == InputKeyRight && (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                plugin_state->mode = color_green;
-                notification_led_message.type = NotificationMessageTypeLedGreen;
+            if(event.key == InputKeyRight && event.type == InputTypePress) {
+                if (plugin_state->mode == color_green) {
+                    plugin_state->mode = 0;
+                } else {
+                    plugin_state->mode = color_green;
+                    notification_led_message.type = NotificationMessageTypeLedGreen;
+                }
             }
-            if(event.key == InputKeyUp && (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                plugin_state->mode = color_blue;
-                notification_led_message.type = NotificationMessageTypeLedBlue;
+            if(event.key == InputKeyUp && event.type == InputTypePress) {
+                if (plugin_state->mode == color_blue) {
+                    plugin_state->mode = 0;
+                } else {
+                    plugin_state->mode = color_blue;
+                    notification_led_message.type = NotificationMessageTypeLedBlue;
+                }
             }
-            if(event.key == InputKeyDown && (event.type == InputTypePress || event.type == InputTypeRelease)) {
-                plugin_state->mode = color_white;
+            if(event.key == InputKeyDown && event.type == InputTypePress) {
+                if (plugin_state->mode == color_yellow) {
+                    plugin_state->mode = 0;
+                } else {
+                    plugin_state->mode = color_yellow;
+                }
             }
         }
         
@@ -195,16 +202,19 @@ int32_t ledpulser_app(void* p) {
                     }
                 }
             }
-        } else if (plugin_state->mode == color_white) {
+        } else if (plugin_state->mode == color_white || plugin_state->mode == color_yellow) {
             notification_led_message_1.type = NotificationMessageTypeLedRed;
             notification_led_message_2.type = NotificationMessageTypeLedGreen;
             notification_led_message_3.type = NotificationMessageTypeLedBlue;
             
-            //White
             while (true) {
                 notification_led_message_1.data.led.value = plugin_state->intensity;
                 notification_led_message_2.data.led.value = plugin_state->intensity;
-                notification_led_message_3.data.led.value = plugin_state->intensity;
+                if (plugin_state->mode == color_white) {
+                    notification_led_message_3.data.led.value = plugin_state->intensity;
+                } else {
+                    notification_led_message_3.data.led.value = 0;
+                }
                 const NotificationSequence notification_sequence = {
                     &notification_led_message_1,
                     &notification_led_message_2,
