@@ -557,7 +557,7 @@ static SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
     return ret;
 }
 
-static SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
+SdSpiStatus sd_get_cid(SD_CID* Cid) {
     uint16_t counter = 0;
     uint8_t cid_data[16];
     SdSpiStatus ret = SdSpiStatusError;
@@ -577,21 +577,15 @@ static SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
             sd_spi_purge_crc();
 
             Cid->ManufacturerID = cid_data[0];
-            Cid->OEM_AppliID = cid_data[1] << 8;
-            Cid->OEM_AppliID |= cid_data[2];
-            Cid->ProdName1 = cid_data[3] << 24;
-            Cid->ProdName1 |= cid_data[4] << 16;
-            Cid->ProdName1 |= cid_data[5] << 8;
-            Cid->ProdName1 |= cid_data[6];
-            Cid->ProdName2 = cid_data[7];
+            memcpy(Cid->OEM_AppliID, cid_data + 1, 2);
+            memcpy(Cid->ProdName, cid_data + 3, 5);
             Cid->ProdRev = cid_data[8];
             Cid->ProdSN = cid_data[9] << 24;
             Cid->ProdSN |= cid_data[10] << 16;
             Cid->ProdSN |= cid_data[11] << 8;
             Cid->ProdSN |= cid_data[12];
-            Cid->Reserved1 |= (cid_data[13] & 0xF0) >> 4;
-            Cid->ManufactDate = (cid_data[13] & 0x0F) << 8;
-            Cid->ManufactDate |= cid_data[14];
+            Cid->Reserved1 = (cid_data[13] & 0xF0) >> 4;
+            Cid->ManufactYear = (cid_data[13] & 0x0F) << 4;
             Cid->CID_CRC = (cid_data[15] & 0xFE) >> 1;
             Cid->Reserved2 = 1;
 
@@ -813,7 +807,7 @@ SdSpiStatus sd_get_card_info(SD_CardInfo* card_info) {
         return status;
     }
 
-    status = sd_spi_get_cid(&(card_info->Cid));
+    status = sd_get_cid(&(card_info->Cid));
 
     if(status != SdSpiStatusOK) {
         return status;

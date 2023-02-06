@@ -1,5 +1,5 @@
 #include "../storage_settings.h"
-#include <stm32_adafruit_sd.h>
+#include <sd_spi_io.h>
 
 static void storage_settings_scene_sd_info_dialog_callback(DialogExResult result, void* context) {
     StorageSettings* app = context;
@@ -14,14 +14,14 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
     SDInfo sd_info;
     SD_CID sd_cid;
     FS_Error sd_status = storage_sd_info(app->fs_api, &sd_info);
-    BSP_SD_GetCIDRegister(&sd_cid);
+    SdSpiStatus cid_status = sd_get_cid(&sd_cid);
 
     scene_manager_set_scene_state(app->scene_manager, StorageSettingsSDInfo, sd_status);
 
     dialog_ex_set_context(dialog_ex, app);
     dialog_ex_set_result_callback(dialog_ex, storage_settings_scene_sd_info_dialog_callback);
 
-    if(sd_status != FSE_OK) {
+    if(sd_status != FSE_OK || cid_status != SdSpiStatusOK) {
         dialog_ex_set_icon(dialog_ex, 72, 17, &I_DolphinCommon_56x48);
         dialog_ex_set_header(dialog_ex, "SD Card Not Mounted", 64, 3, AlignCenter, AlignTop);
         dialog_ex_set_text(
