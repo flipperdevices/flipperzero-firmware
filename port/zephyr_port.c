@@ -61,7 +61,6 @@ esp_loader_error_t loader_port_serial_read(uint8_t *data, const uint16_t size, c
     return ESP_LOADER_SUCCESS;
 }
 
-
 esp_loader_error_t loader_port_serial_write(const uint8_t *data, const uint16_t size, const uint32_t timeout)
 {
     if (!device_is_ready(uart_dev) || data == NULL || size == 0) {
@@ -147,4 +146,3 @@ esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
     /* bitrate-change can require tty re-configuration */
     return configure_tty();
 }
-
