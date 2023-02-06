@@ -245,16 +245,20 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
   int *odd = malloc((5 << 19)/NUM_CHUNKS);
   int *even = malloc((5 << 19)/NUM_CHUNKS);
   int chunk_size = (1 << 20)/128;
-  int i = 0, j = 0, k = 0;
-  for (i = 31; i >= 0; i -= 2)
-    oks = oks << 1 | BEBIT(ks2, i);
-  for (i = 30; i >= 0; i -= 2)
-    eks = eks << 1 | BEBIT(ks2, i);
+  int i = 0, j = 0, k = 0, n = 0;
   for(i = 1 << 20; i >= 0; i -= chunk_size) {
     memset(odd,  0, (5 << 19)/NUM_CHUNKS);
     memset(even, 0, (5 << 19)/NUM_CHUNKS);
     odd_tail  = -1;
     even_tail = -1;
+    odd_head = 0;
+    even_head = 0;
+    oks = 0;
+    eks = 0;
+    for (n = 31; n >= 0; n -= 2)
+      oks = oks << 1 | BEBIT(ks2, n);
+    for (n = 30; n >= 0; n -= 2)
+      eks = eks << 1 | BEBIT(ks2, n);
     for(j = 0; j < chunk_size; j++) {
       // Do not write to negative indexes
       if (i-j < 0) {
@@ -262,11 +266,11 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
       }
       //printf("i-j is %i\n", i-j);
       if (filter(i-j) == (oks & 1)) {
-        //printf("off: %i, odd: %i. real: %i/%i\n", i-j, odd_tail, (odd_tail)*4, (5 << 19)/NUM_CHUNKS);
+        //printf("ooff: %i\n", i-j);
         odd[++odd_tail] = i-j;
       }
       if (filter(i-j) == (eks & 1)) {
-        //printf("off: %i, even: %i. real: %i/%i\n", i-j, even_tail, (even_tail)*4, (5 << 19)/NUM_CHUNKS);
+        //printf("eoff: %i\n", i-j);
         even[++even_tail] = i-j;
       }
     }
@@ -274,14 +278,8 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
       odd_tail = extend_table_simple(odd, odd_head, odd_tail, ((oks >>= 1) & 1));
       even_tail = extend_table_simple(even, even_head, even_tail, ((eks >>= 1) & 1));
     }
-    //recover for the chunk
     recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 11, 0, p);
-    //set odd_head and even_head to new value? the old tail?
-    //odd_head  = odd_tail;
-    //even_head = even_tail;
-    //printf("\nlooped\n\n");
   }
-
   free(odd);
   free(even);
   return p->key;
