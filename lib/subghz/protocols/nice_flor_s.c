@@ -443,7 +443,7 @@ bool subghz_protocol_decoder_nice_flor_s_deserialize(void* context, FlipperForma
             break;
         }
         if((instance->generic.data_count_bit !=
-            subghz_protocol_nice_flor_s_const.min_count_bit_for_found) ||
+            subghz_protocol_nice_flor_s_const.min_count_bit_for_found) &&
            (instance->generic.data_count_bit != NICE_ONE_COUNT_BIT)) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;

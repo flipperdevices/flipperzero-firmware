@@ -13,7 +13,7 @@
 #define CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
 #define NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
 #define TEST_RANDOM_DIR_NAME EXT_PATH("unit_tests/subghz/test_random_raw.sub")
-#define TEST_RANDOM_COUNT_PARSE 273
+#define TEST_RANDOM_COUNT_PARSE 290
 #define TEST_TIMEOUT 10000
 
 static SubGhzEnvironment* environment_handler;
@@ -604,6 +604,13 @@ MU_TEST(subghz_decoder_holtek_ht12x_test) {
         "Test decoder " SUBGHZ_PROTOCOL_HOLTEK_HT12X_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_nice_one_test) {
+    mu_assert(
+        subghz_decoder_test(
+            EXT_PATH("unit_tests/subghz/nice_one_raw.sub"), SUBGHZ_PROTOCOL_NICE_FLOR_S_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_NICE_FLOR_S_NAME " error\r\n");
+}
+
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
@@ -788,6 +795,8 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_ansonic_test);
     MU_RUN_TEST(subghz_decoder_smc5326_test);
     MU_RUN_TEST(subghz_decoder_holtek_ht12x_test);
+    MU_RUN_TEST(subghz_decoder_nice_one_test);
+
 
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
