@@ -37,6 +37,11 @@ static const Icon* icons_list[] = {
     &I_icon_7,
 };
 
+static InputKey m = InputKeyUp;
+static InputKey a = InputKeyLeft;
+static InputKey b = InputKeyDown;
+static InputKey c = InputKeyRight;
+
 // static void draw_landscape(Canvas* const canvas, void* cb_ctx)
 static void draw_landscape(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
@@ -831,11 +836,16 @@ int32_t tama_p1_app(void* p) {
                     event.input.sequence,
                     event.input.key,
                     event.input.type);
-                InputType input_type = event.input.type;
-                btn_state_t tama_btn_state = 0;
+                InputType input_type = event.input.type; // idk why this is a variable
+                btn_state_t tama_btn_state = 0; // BTN_STATE_RELEASED is 0
 
                 if(in_menu) {
+                    if(menu_cursor == 2 &&
+                       (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
+                        tama_btn_state = BTN_STATE_RELEASED;
+                    }
                     if(event.input.key == InputKeyBack) {
+                        tama_btn_state = BTN_STATE_RELEASED;
                         in_menu = false;
                     } else if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
                         if(menu_cursor > 0) {
@@ -863,12 +873,38 @@ int32_t tama_p1_app(void* p) {
                             switch(layout_mode) {
                             case 0:
                                 layout_mode = 4;
+                                m = InputKeyRight;
+                                a = InputKeyUp;
+                                b = InputKeyLeft;
+                                c = InputKeyDown;
                                 break;
                             case 1:
+                                layout_mode -= 1; // 0
+                                m = InputKeyUp;
+                                a = InputKeyLeft;
+                                b = InputKeyDown;
+                                c = InputKeyRight;
+                                break;
                             case 2:
+                                layout_mode -= 1; // 1
+                                m = InputKeyUp;
+                                a = InputKeyLeft;
+                                b = InputKeyDown;
+                                c = InputKeyRight;
+                                break;
                             case 3:
+                                layout_mode -= 1; // 2
+                                m = InputKeyUp;
+                                a = InputKeyLeft;
+                                b = InputKeyDown;
+                                c = InputKeyRight;
+                                break;
                             case 4:
-                                layout_mode -= 1;
+                                layout_mode -= 1; // 3
+                                m = InputKeyLeft;
+                                a = InputKeyDown;
+                                b = InputKeyRight;
+                                c = InputKeyUp;
                                 break;
                             }
                             break;
@@ -876,6 +912,7 @@ int32_t tama_p1_app(void* p) {
                             speed_down();
                             break;
                         case 2:
+                            tama_btn_state = BTN_STATE_RELEASED;
                             switch(sub_menu_buttons) {
                             case 0:
                                 sub_menu_buttons = 3;
@@ -910,13 +947,39 @@ int32_t tama_p1_app(void* p) {
                         case 0:
                             switch(layout_mode) {
                             case 0:
+                                layout_mode += 1; // 1
+                                m = InputKeyUp;
+                                a = InputKeyLeft;
+                                b = InputKeyDown;
+                                c = InputKeyRight;
+                                break;
                             case 1:
+                                layout_mode += 1; // 2
+                                m = InputKeyUp;
+                                a = InputKeyLeft;
+                                b = InputKeyDown;
+                                c = InputKeyRight;
+                                break;
                             case 2:
+                                layout_mode += 1; // 3
+                                m = InputKeyLeft;
+                                a = InputKeyDown;
+                                b = InputKeyRight;
+                                c = InputKeyUp;
+                                break;
                             case 3:
-                                layout_mode += 1;
+                                layout_mode += 1; // 4
+                                m = InputKeyRight;
+                                a = InputKeyUp;
+                                b = InputKeyLeft;
+                                c = InputKeyDown;
                                 break;
                             case 4:
                                 layout_mode = 0;
+                                m = InputKeyUp;
+                                a = InputKeyLeft;
+                                b = InputKeyDown;
+                                c = InputKeyRight;
                                 break;
                             }
                             break;
@@ -924,6 +987,7 @@ int32_t tama_p1_app(void* p) {
                             speed_up();
                             break;
                         case 2:
+                            tama_btn_state = BTN_STATE_RELEASED;
                             switch(sub_menu_buttons) {
                             case 0:
                             case 1:
@@ -959,13 +1023,39 @@ int32_t tama_p1_app(void* p) {
                             if(event.input.type == InputTypePress) {
                                 switch(layout_mode) {
                                 case 0:
+                                    layout_mode += 1; // 1
+                                    m = InputKeyUp;
+                                    a = InputKeyLeft;
+                                    b = InputKeyDown;
+                                    c = InputKeyRight;
+                                    break;
                                 case 1:
+                                    layout_mode += 1; // 2
+                                    m = InputKeyUp;
+                                    a = InputKeyLeft;
+                                    b = InputKeyDown;
+                                    c = InputKeyRight;
+                                    break;
                                 case 2:
+                                    layout_mode += 1; // 3
+                                    m = InputKeyLeft;
+                                    a = InputKeyDown;
+                                    b = InputKeyRight;
+                                    c = InputKeyUp;
+                                    break;
                                 case 3:
-                                    layout_mode += 1;
+                                    layout_mode += 1; // 4
+                                    m = InputKeyRight;
+                                    a = InputKeyUp;
+                                    b = InputKeyLeft;
+                                    c = InputKeyDown;
                                     break;
                                 case 4:
                                     layout_mode = 0;
+                                    m = InputKeyUp;
+                                    a = InputKeyLeft;
+                                    b = InputKeyDown;
+                                    c = InputKeyRight;
                                     break;
                                 }
                             }
@@ -1033,7 +1123,7 @@ int32_t tama_p1_app(void* p) {
                         }
                     }
 
-                } else { // out of menu
+                } else { // out of menu // TODO: clean up code -.-
                     if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                         if(speed != 1) {
                             // speed = 1;
@@ -1044,106 +1134,52 @@ int32_t tama_p1_app(void* p) {
                         tama_p1_save_state();
                         running = false;
                     }
+                    // else if(event.input.key != InputKeyBack) {
+                    //     switch(layout_mode) {
+                    //     case 0:
+                    //     case 1:
+                    //     case 2:
+                    //         m = InputKeyUp;
+                    //         a = InputKeyLeft;
+                    //         b = InputKeyDown;
+                    //         c = InputKeyRight;
+                    //         break;
+                    //     case 3:
+                    //         m = InputKeyLeft;
+                    //         a = InputKeyDown;
+                    //         b = InputKeyRight;
+                    //         c = InputKeyUp;
+                    //         break;
+                    //     case 4:
+                    //         m = InputKeyRight;
+                    //         a = InputKeyUp;
+                    //         b = InputKeyLeft;
+                    //         c = InputKeyDown;
+                    //         break;
+                    //     default:
+                    //         break;
+                    //     }
+                    // }
                     if(input_type == InputTypePress || input_type == InputTypeRelease) {
-                        if(event.input.key != InputKeyBack) { // TODO: clean up code -.-
-                            switch(layout_mode) {
-                            case 0:
-                            case 1:
-                            case 2:
-                                if(event.input.key != InputKeyUp) {
-                                    if(input_type == InputTypePress)
-                                        tama_btn_state = BTN_STATE_PRESSED;
-                                    else if(input_type == InputTypeRelease)
-                                        tama_btn_state = BTN_STATE_RELEASED;
-                                }
-                                break;
-                            case 3:
-                                if(event.input.key != InputKeyLeft) {
-                                    if(input_type == InputTypePress)
-                                        tama_btn_state = BTN_STATE_PRESSED;
-                                    else if(input_type == InputTypeRelease)
-                                        tama_btn_state = BTN_STATE_RELEASED;
-                                }
-                                break;
-                            case 4:
-                                if(event.input.key != InputKeyRight) {
-                                    if(input_type == InputTypePress)
-                                        tama_btn_state = BTN_STATE_PRESSED;
-                                    else if(input_type == InputTypeRelease)
-                                        tama_btn_state = BTN_STATE_RELEASED;
-                                }
-                                break;
-                            default:
-                                break;
-                            }
-                        }
-                        if(input_type == InputTypePress)
-                            tama_btn_state = BTN_STATE_PRESSED;
-                        else if(input_type == InputTypeRelease)
+                        if(event.input.key != InputKeyBack && event.input.key != m) {
+                            if(input_type == InputTypePress)
+                                tama_btn_state = BTN_STATE_PRESSED;
+                            else if(input_type == InputTypeRelease)
+                                tama_btn_state = BTN_STATE_RELEASED;
+                        } else {
                             tama_btn_state = BTN_STATE_RELEASED;
-
-                        if(event.input.key == InputKeyOk) {
-                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                         }
-                        switch(layout_mode) {
-                        case 0:
-                        case 1:
-                        case 2:
-                            switch(event.input.key) {
-                            case InputKeyUp:
-                                in_menu = true;
-                                break;
-                            case InputKeyLeft:
-                                tamalib_set_button(BTN_LEFT, tama_btn_state);
-                                break;
-                            case InputKeyDown:
-                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                                break;
-                            case InputKeyRight:
-                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
-                        case 3:
-                            switch(event.input.key) {
-                            case InputKeyLeft:
-                                in_menu = true;
-                                break;
-                            case InputKeyDown:
-                                tamalib_set_button(BTN_LEFT, tama_btn_state);
-                                break;
-                            case InputKeyRight:
-                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                                break;
-                            case InputKeyUp:
-                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
-                        case 4:
-                            switch(event.input.key) {
-                            case InputKeyRight:
-                                in_menu = true;
-                                break;
-                            case InputKeyUp:
-                                tamalib_set_button(BTN_LEFT, tama_btn_state);
-                                break;
-                            case InputKeyLeft:
-                                tamalib_set_button(BTN_MIDDLE, tama_btn_state);
-                                break;
-                            case InputKeyDown:
-                                tamalib_set_button(BTN_RIGHT, tama_btn_state);
-                                break;
-                            default:
-                                break;
-                            }
-                            break;
-                        default:
-                            break;
+                        if(event.input.key == m) {
+                            tama_btn_state = BTN_STATE_RELEASED;
+                            in_menu = true;
+                        } else if(event.input.key == a) {
+                            tamalib_set_button(BTN_LEFT, tama_btn_state);
+                        } else if(event.input.key == b) {
+                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
+                        } else if(event.input.key == c) {
+                            tamalib_set_button(BTN_RIGHT, tama_btn_state);
+                        } else if(event.input.key == InputKeyOk) {
+                            tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                         }
                     }
                 }
