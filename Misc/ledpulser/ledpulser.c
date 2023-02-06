@@ -37,29 +37,29 @@ void led_test_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 73, 57, "Yellow");
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "LED Pulser");
-    
+
     canvas_set_font(canvas, FontSecondary);
-    if (plugin_state->mode == color_yellow) {
+    if(plugin_state->mode == color_yellow) {
         canvas_draw_box(canvas, 71, 48, 31, 11);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 73, 57, "Yellow");
         canvas_invert_color(canvas);
-    } else if (plugin_state->mode == color_red) {
+    } else if(plugin_state->mode == color_red) {
         canvas_draw_box(canvas, 77, 26, 20, 11);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 79, 35, "Red");
         canvas_invert_color(canvas);
-    } else if (plugin_state->mode == color_blue) {
+    } else if(plugin_state->mode == color_blue) {
         canvas_draw_box(canvas, 76, 3, 22, 11);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 78, 12, "Blue");
         canvas_invert_color(canvas);
-    } else if (plugin_state->mode == color_green) {
+    } else if(plugin_state->mode == color_green) {
         canvas_draw_box(canvas, 100, 26, 27, 11);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 101, 35, "Green");
         canvas_invert_color(canvas);
-    } else if (plugin_state->mode == color_white) {
+    } else if(plugin_state->mode == color_white) {
         canvas_draw_box(canvas, 47, 26, 27, 11);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 49, 35, "White");
@@ -73,7 +73,10 @@ void led_test_input_callback(InputEvent* input_event, void* ctx) {
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-void led_set_light(NotificationApp* notification, NotificationMessage notification_led_message, int intensity) {
+void led_set_light(
+    NotificationApp* notification,
+    NotificationMessage notification_led_message,
+    int intensity) {
     notification_led_message.data.led.value = intensity;
     const NotificationSequence notification_sequence = {
         &notification_led_message,
@@ -94,7 +97,7 @@ int32_t ledpulser_app(void* p) {
     PluginState* plugin_state = malloc(sizeof(PluginState));
     NotificationMessage* dyn_notification_message = malloc(sizeof(NotificationMessage));
     ValueMutex state_mutex;
-    if (!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
+    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
         FURI_LOG_E("LED Pulser", "cannot create mutex\r\n");
         free(plugin_state);
         free(dyn_notification_message);
@@ -118,14 +121,14 @@ int32_t ledpulser_app(void* p) {
     InputEvent event;
     bool processing = true;
     notification_message(notification, &sequence_display_backlight_on);
-    while (processing) {
+    while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
         NotificationMessage notification_led_message;
         NotificationMessage notification_led_message_1;
         NotificationMessage notification_led_message_2;
         NotificationMessage notification_led_message_3;
-        if (event_status == FuriStatusOk) {
+        if(event_status == FuriStatusOk) {
             if(event.key == InputKeyBack && event.type == InputTypeShort) {
                 //Exit Application
                 notification_message(notification, &sequence_reset_green);
@@ -134,7 +137,7 @@ int32_t ledpulser_app(void* p) {
                 //break;
             }
             if(event.key == InputKeyOk && event.type == InputTypePress) {
-                if (plugin_state->mode == color_red) {
+                if(plugin_state->mode == color_red) {
                     plugin_state->mode = 0;
                 } else {
                     plugin_state->mode = color_red;
@@ -142,14 +145,14 @@ int32_t ledpulser_app(void* p) {
                 }
             }
             if(event.key == InputKeyLeft && event.type == InputTypePress) {
-                if (plugin_state->mode == color_white) {
+                if(plugin_state->mode == color_white) {
                     plugin_state->mode = 0;
                 } else {
                     plugin_state->mode = color_white;
                 }
             }
             if(event.key == InputKeyRight && event.type == InputTypePress) {
-                if (plugin_state->mode == color_green) {
+                if(plugin_state->mode == color_green) {
                     plugin_state->mode = 0;
                 } else {
                     plugin_state->mode = color_green;
@@ -157,7 +160,7 @@ int32_t ledpulser_app(void* p) {
                 }
             }
             if(event.key == InputKeyUp && event.type == InputTypePress) {
-                if (plugin_state->mode == color_blue) {
+                if(plugin_state->mode == color_blue) {
                     plugin_state->mode = 0;
                 } else {
                     plugin_state->mode = color_blue;
@@ -165,21 +168,23 @@ int32_t ledpulser_app(void* p) {
                 }
             }
             if(event.key == InputKeyDown && event.type == InputTypePress) {
-                if (plugin_state->mode == color_yellow) {
+                if(plugin_state->mode == color_yellow) {
                     plugin_state->mode = 0;
                 } else {
                     plugin_state->mode = color_yellow;
                 }
             }
         }
-        
-        if (plugin_state->mode == 0) {
+
+        if(plugin_state->mode == 0) {
             //Off
             notification_message(notification, &sequence_reset_red);
             notification_message(notification, &sequence_reset_green);
             notification_message(notification, &sequence_reset_blue);
-        } else if (plugin_state->mode == color_green || plugin_state->mode == color_blue || plugin_state->mode == color_red) {
-            while (true) {
+        } else if(
+            plugin_state->mode == color_green || plugin_state->mode == color_blue ||
+            plugin_state->mode == color_red) {
+            while(true) {
                 notification_led_message.data.led.value = plugin_state->intensity;
                 const NotificationSequence notification_sequence = {
                     &notification_led_message,
@@ -188,29 +193,29 @@ int32_t ledpulser_app(void* p) {
                 };
                 notification_message(notification, &notification_sequence);
                 delay(2);
-                if (plugin_state->direction == 0) {
+                if(plugin_state->direction == 0) {
                     plugin_state->intensity++;
-                    if (plugin_state->intensity >= 255) {
+                    if(plugin_state->intensity >= 255) {
                         plugin_state->direction = 1;
                         break;
                     }
                 } else {
                     plugin_state->intensity--;
-                    if (plugin_state->intensity <= 0) {
+                    if(plugin_state->intensity <= 0) {
                         plugin_state->direction = 0;
                         break;
                     }
                 }
             }
-        } else if (plugin_state->mode == color_white || plugin_state->mode == color_yellow) {
+        } else if(plugin_state->mode == color_white || plugin_state->mode == color_yellow) {
             notification_led_message_1.type = NotificationMessageTypeLedRed;
             notification_led_message_2.type = NotificationMessageTypeLedGreen;
             notification_led_message_3.type = NotificationMessageTypeLedBlue;
-            
-            while (true) {
+
+            while(true) {
                 notification_led_message_1.data.led.value = plugin_state->intensity;
                 notification_led_message_2.data.led.value = plugin_state->intensity;
-                if (plugin_state->mode == color_white) {
+                if(plugin_state->mode == color_white) {
                     notification_led_message_3.data.led.value = plugin_state->intensity;
                 } else {
                     notification_led_message_3.data.led.value = 0;
@@ -224,15 +229,15 @@ int32_t ledpulser_app(void* p) {
                 };
                 notification_message(notification, &notification_sequence);
                 delay(2);
-                if (plugin_state->direction == 0) {
+                if(plugin_state->direction == 0) {
                     plugin_state->intensity++;
-                    if (plugin_state->intensity >= 255) {
+                    if(plugin_state->intensity >= 255) {
                         plugin_state->direction = 1;
                         break;
                     }
                 } else {
                     plugin_state->intensity--;
-                    if (plugin_state->intensity <= 0) {
+                    if(plugin_state->intensity <= 0) {
                         plugin_state->direction = 0;
                         break;
                     }
