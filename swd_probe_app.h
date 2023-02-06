@@ -36,6 +36,7 @@
 #define MEMAP_TAR 0x04
 #define MEMAP_DRW 0x0C
 #define AP_IDR 0xFC
+#define AP_BASE 0xF8
 
 typedef enum { KeyNone, KeyUp, KeyRight, KeyDown, KeyLeft, KeyOK } KeyCode;
 
@@ -74,6 +75,7 @@ typedef struct {
     uint8_t class;
     uint8_t variant;
     uint8_t type;
+    uint32_t base;
 } swd_apidr_info_t;
 
 typedef struct {

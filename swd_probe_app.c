@@ -262,12 +262,21 @@ static void swd_line_reset(AppFSM* const ctx) {
 static void swd_abort(AppFSM* const ctx) {
     uint32_t dpidr;
 
-    furi_log_print_format(FuriLogLevelDefault, TAG, "send ABORT");
     /* first reset the line */
     swd_line_reset(ctx);
     swd_transfer(ctx, false, false, 0, &dpidr);
     uint32_t abort = 0x0E;
     swd_transfer(ctx, false, true, 0, &abort);
+}
+
+static void swd_abort_simple(AppFSM* const ctx) {
+    uint32_t abort = 0x0E;
+    swd_transfer(ctx, false, true, 0, &abort);
+
+    uint32_t dpidr;
+    if(swd_transfer(ctx, false, false, 0, &dpidr) != 1) {
+        swd_abort(ctx);
+    }
 }
 
 static uint8_t swd_select(AppFSM* const ctx, uint8_t ap_sel, uint8_t ap_bank, uint8_t dp_bank) {
@@ -317,6 +326,21 @@ static uint8_t swd_read_ap(AppFSM* const ctx, uint8_t ap, uint8_t ap_off, uint32
     return ret;
 }
 
+static uint8_t swd_read_ap_single(AppFSM* const ctx, uint8_t ap, uint8_t ap_off, uint32_t* data) {
+    uint8_t ret = swd_select(ctx, ap, (ap_off >> 4) & 0x0F, 0);
+    if(ret != 1) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_read_ap_single: swd_select failed");
+        return ret;
+    }
+    *data = 0;
+    ret = swd_transfer(ctx, true, false, (ap_off >> 2) & 3, data);
+    if(ret != 1) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_read_ap_single: failed: %d", ret);
+        return ret;
+    }
+    return ret;
+}
+
 static uint8_t swd_write_ap(AppFSM* const ctx, uint8_t ap, uint8_t ap_off, uint32_t data) {
     uint8_t ret = swd_select(ctx, ap, (ap_off >> 4) & 0x0F, 0);
     if(ret != 1) {
@@ -347,7 +371,7 @@ static uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, 
 static uint8_t swd_read_memory_cont(AppFSM* const ctx, uint8_t ap, uint32_t* data) {
     uint8_t ret = 0;
 
-    ret |= swd_read_ap(ctx, ap, MEMAP_DRW, data);
+    ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, data);
 
     if(ret != 1) {
         swd_abort(ctx);
@@ -579,7 +603,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             break;
         }
         case 3: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP ID Register");
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP Menu");
             y += 10;
             canvas_set_font(canvas, FontKeyboard);
 
@@ -635,7 +659,12 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
                     type = types[ctx->apidr_info[ctx->ap_pos].type];
                 }
 
-                snprintf(buffer, sizeof(buffer), "[%d]%c%s - %s", ctx->ap_pos, state, class, type);
+                snprintf(buffer, sizeof(buffer), "[%d]%c%s, %s", ctx->ap_pos, state, class, type);
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+
+                snprintf(
+                    buffer, sizeof(buffer), "Base 0x%08lX", ctx->apidr_info[ctx->ap_pos].base);
                 canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
                 y += 10;
 
@@ -856,6 +885,7 @@ static void on_timer_tick(AppFSM* ctx) {
             ctx->apidr_info[ap].tested = true;
 
             uint32_t data = 0;
+            uint32_t base = 0;
             if(swd_read_ap(ctx, ap, AP_IDR, &data) != 1) {
                 swd_abort(ctx);
                 continue;
@@ -871,6 +901,10 @@ static void on_timer_tick(AppFSM* ctx) {
             ctx->apidr_info[ap].variant = (data >> 4) & 0x0F;
             ctx->apidr_info[ap].type = (data >> 0) & 0x0F;
 
+            if(swd_read_ap(ctx, ap, AP_BASE, &ctx->apidr_info[ap].base) != 1) {
+                swd_abort(ctx);
+            }
+
             break;
         }
         break;
@@ -881,22 +915,18 @@ static void on_timer_tick(AppFSM* ctx) {
         }
         ctx->hex_read_delay = 0;
 
-        uint32_t data = 0;
-
         memset(ctx->hex_buffer, 0xEE, sizeof(ctx->hex_buffer));
 
-        /* initiate first transfer */
-        ctx->hex_buffer_valid[0] = swd_read_memory(ctx, ctx->ap_pos, ctx->hex_addr, &data) == 1;
-        if(ctx->hex_buffer_valid[0]) {
-            memcpy(&ctx->hex_buffer[0], &data, 4);
-        }
-
-        /* now successive transfers */
-        for(int pos = 1; pos < sizeof(ctx->hex_buffer) / 4; pos++) {
-            ctx->hex_buffer_valid[pos] = swd_read_memory_cont(ctx, ctx->ap_pos, &data) == 1;
+        uint32_t addr = ctx->hex_addr;
+        uint32_t data = 0;
+        for(int pos = 0; pos < sizeof(ctx->hex_buffer) / 4; pos++) {
+            ctx->hex_buffer_valid[pos] = swd_read_memory(ctx, ctx->ap_pos, addr, &data) == 1;
             if(ctx->hex_buffer_valid[pos]) {
                 memcpy(&ctx->hex_buffer[pos * 4], &data, 4);
+            } else {
+                swd_abort_simple(ctx);
             }
+            addr += 4;
         }
     }
     }
@@ -948,7 +978,8 @@ int32_t swd_probe_app_main(void* p) {
                             }
                             break;
                         case 4: {
-                            ctx->hex_addr += (1 << (4 * ctx->hex_select));
+                            ctx->hex_addr +=
+                                ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
                             break;
                         }
                         }
@@ -965,7 +996,8 @@ int32_t swd_probe_app_main(void* p) {
                             }
                             break;
                         case 4: {
-                            ctx->hex_addr -= (1 << (4 * ctx->hex_select));
+                            ctx->hex_addr -=
+                                ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
                             break;
                         }
                         }
