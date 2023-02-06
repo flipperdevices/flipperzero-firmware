@@ -30,8 +30,6 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
     uint8_t bsp_result;
     SDData* sd_data = storage->data;
 
-    storage_data_lock(storage);
-
     while(result == false && counter > 0 && hal_sd_detect()) {
         if(notify) {
             NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
@@ -91,7 +89,6 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
     }
 
     storage_data_timestamp(storage);
-    storage_data_unlock(storage);
 
     return result;
 }
@@ -100,14 +97,12 @@ FS_Error sd_unmount_card(StorageData* storage) {
     SDData* sd_data = storage->data;
     SDError error;
 
-    storage_data_lock(storage);
     storage->status = StorageStatusNotReady;
     error = FR_DISK_ERR;
 
     // TODO do i need to close the files?
-
     f_mount(0, sd_data->path, 0);
-    storage_data_unlock(storage);
+
     return storage_ext_parse_error(error);
 }
 
@@ -119,8 +114,6 @@ FS_Error sd_format_card(StorageData* storage) {
     uint8_t* work_area;
     SDData* sd_data = storage->data;
     SDError error;
-
-    storage_data_lock(storage);
 
     work_area = malloc(_MAX_SS);
     error = f_mkfs(sd_data->path, FM_ANY, 0, work_area, _MAX_SS);
@@ -138,8 +131,6 @@ FS_Error sd_format_card(StorageData* storage) {
         storage->status = StorageStatusOK;
     } while(false);
 
-    storage_data_unlock(storage);
-
     return storage_ext_parse_error(error);
 #endif
 }
@@ -156,14 +147,12 @@ FS_Error sd_card_info(StorageData* storage, SDInfo* sd_info) {
     memset(sd_info, 0, sizeof(SDInfo));
 
     // get fs info
-    storage_data_lock(storage);
     error = f_getlabel(sd_data->path, sd_info->label, NULL);
     if(error == FR_OK) {
 #ifndef FURI_RAM_EXEC
         error = f_getfree(sd_data->path, &free_clusters, &fs);
 #endif
     }
-    storage_data_unlock(storage);
 
     if(error == FR_OK) {
         // calculate size
