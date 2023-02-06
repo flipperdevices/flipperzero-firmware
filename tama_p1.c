@@ -113,13 +113,13 @@ static void draw_landscape(Canvas* const canvas, uint8_t scale) {
 }
 
 // static void draw_portrait_right(Canvas* const canvas, void* cb_ctx)
-static void draw_portrait_right(Canvas* const canvas) {
+static void draw_portrait_right(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
     // Calculate positioning
     // uint16_t canv_width = canvas_width(canvas);
     uint16_t canv_height = canvas_height(canvas);
-    uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
-    uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
+    uint16_t lcd_matrix_scaled_width = 32 * scale;
+    uint16_t lcd_matrix_scaled_height = 16 * scale;
     // uint16_t lcd_matrix_top = 0;
     uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
     // uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
@@ -135,13 +135,12 @@ static void draw_portrait_right(Canvas* const canvas) {
         uint32_t row_pixels = g_ctx->framebuffer[row];
         for(uint8_t col = 0; col < 32; ++col) {
             if(row_pixels & 1) {
-                canvas_draw_box(
-                    canvas, y + 32, x - 66, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
+                canvas_draw_box(canvas, y + 32, x - 66, scale, scale);
             }
-            x -= TAMA_SCREEN_SCALE_FACTOR;
+            x -= scale;
             row_pixels >>= 1;
         }
-        y += TAMA_SCREEN_SCALE_FACTOR;
+        y += scale;
     }
 
     // Start drawing icons
@@ -174,13 +173,13 @@ static void draw_portrait_right(Canvas* const canvas) {
     }
 }
 
-static void draw_portrait_left(Canvas* const canvas) {
+static void draw_portrait_left(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
     // Calculate positioning
     // uint16_t canv_width = canvas_width(canvas);
     // uint16_t canv_height = canvas_height(canvas);
-    uint16_t lcd_matrix_scaled_width = 32 * TAMA_SCREEN_SCALE_FACTOR;
-    // uint16_t lcd_matrix_scaled_height = 16 * TAMA_SCREEN_SCALE_FACTOR;
+    uint16_t lcd_matrix_scaled_width = 32 * scale;
+    // uint16_t lcd_matrix_scaled_height = 16 * scale;
     // uint16_t lcd_matrix_top = 0;
     // uint16_t lcd_matrix_top = (canv_height - lcd_matrix_scaled_height) / 2;
     // uint16_t lcd_matrix_left = (canv_width - lcd_matrix_scaled_width) / 2;
@@ -197,12 +196,12 @@ static void draw_portrait_left(Canvas* const canvas) {
         uint32_t row_pixels = g_ctx->framebuffer[row];
         for(uint8_t col = 0; col < 32; ++col) {
             if(row_pixels & 1) {
-                canvas_draw_box(canvas, y, x, TAMA_SCREEN_SCALE_FACTOR, TAMA_SCREEN_SCALE_FACTOR);
+                canvas_draw_box(canvas, y, x, scale, scale);
             }
-            x += TAMA_SCREEN_SCALE_FACTOR;
+            x += scale;
             row_pixels >>= 1;
         }
-        y -= TAMA_SCREEN_SCALE_FACTOR;
+        y -= scale;
     }
 
     // Start drawing icons
@@ -369,7 +368,7 @@ static void draw_menu(Canvas* const canvas) {
     //     canvas_draw_str(canvas, 12, 30, "Speed: 3x");
     //     break;
     case 4:
-        canvas_draw_str(canvas, 12, 30, "Speed:   4x (Max)");
+        canvas_draw_str(canvas, 12, 30, "Speed:   4x (max)");
         break;
     // case 8: // can't handle 8x
     //     canvas_draw_str(canvas, 12, 40, "Speed: 8x (max)");
@@ -450,10 +449,10 @@ static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
                 draw_landscape(canvas, 4);
                 break;
             case 3:
-                draw_portrait_right(canvas);
+                draw_portrait_right(canvas, TAMA_SCREEN_SCALE_FACTOR);
                 break;
             case 4:
-                draw_portrait_left(canvas);
+                draw_portrait_left(canvas, TAMA_SCREEN_SCALE_FACTOR);
                 break;
             default:
                 break;
@@ -708,9 +707,9 @@ static int32_t tama_p1_worker(void* context) {
         if(furi_thread_flags_get()) {
             running = false;
         } else {
-            // FURI_LOG_D(TAG, "Stepping");
+            // FURI_LOG_D(TAG, "Stepping"); // enabling this cause blank screen somehow
             // for (int i = 0; i < 100; ++i)
-            tamalib_step();
+            tamalib_step(); // tamalib_mainloop();
         }
     }
     LL_TIM_DisableCounter(TIM2);
@@ -772,7 +771,7 @@ static void tama_p1_init(TamaApp* const ctx) {
         tamalib_set_speed(speed);
 
         // TODO: implement fast forwarding
-        ctx->fast_forward_done = true;
+        // ctx->fast_forward_done = true;
 
         // Start stepping thread
         ctx->thread = furi_thread_alloc();
@@ -1006,11 +1005,11 @@ int32_t tama_p1_app(void* p) {
                                 break;
                             case 1: // Save
                                 if(speed != 1) {
-                                    uint8_t temp = speed;
-                                    speed = 1;
-                                    tamalib_set_speed(speed);
+                                    // uint8_t temp = speed;
+                                    // speed = 1;
+                                    tamalib_set_speed(1);
                                     tama_p1_save_state();
-                                    speed = temp;
+                                    // speed = temp;
                                     tamalib_set_speed(speed);
                                 } else {
                                     tama_p1_save_state();
@@ -1035,12 +1034,54 @@ int32_t tama_p1_app(void* p) {
                     }
 
                 } else { // out of menu
-                    if(input_type == InputTypePress)
-                        tama_btn_state = BTN_STATE_PRESSED;
-                    else if(input_type == InputTypeRelease)
-                        tama_btn_state = BTN_STATE_RELEASED;
-
+                    if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
+                        if(speed != 1) {
+                            // speed = 1;
+                            // tamalib_set_speed(speed);
+                            tamalib_set_speed(1);
+                        }
+                        furi_timer_stop(timer);
+                        tama_p1_save_state();
+                        running = false;
+                    }
                     if(input_type == InputTypePress || input_type == InputTypeRelease) {
+                        if(event.input.key != InputKeyBack) { // TODO: clean up code -.-
+                            switch(layout_mode) {
+                            case 0:
+                            case 1:
+                            case 2:
+                                if(event.input.key != InputKeyUp) {
+                                    if(input_type == InputTypePress)
+                                        tama_btn_state = BTN_STATE_PRESSED;
+                                    else if(input_type == InputTypeRelease)
+                                        tama_btn_state = BTN_STATE_RELEASED;
+                                }
+                                break;
+                            case 3:
+                                if(event.input.key != InputKeyLeft) {
+                                    if(input_type == InputTypePress)
+                                        tama_btn_state = BTN_STATE_PRESSED;
+                                    else if(input_type == InputTypeRelease)
+                                        tama_btn_state = BTN_STATE_RELEASED;
+                                }
+                                break;
+                            case 4:
+                                if(event.input.key != InputKeyRight) {
+                                    if(input_type == InputTypePress)
+                                        tama_btn_state = BTN_STATE_PRESSED;
+                                    else if(input_type == InputTypeRelease)
+                                        tama_btn_state = BTN_STATE_RELEASED;
+                                }
+                                break;
+                            default:
+                                break;
+                            }
+                        }
+                        if(input_type == InputTypePress)
+                            tama_btn_state = BTN_STATE_PRESSED;
+                        else if(input_type == InputTypeRelease)
+                            tama_btn_state = BTN_STATE_RELEASED;
+
                         if(event.input.key == InputKeyOk) {
                             tamalib_set_button(BTN_MIDDLE, tama_btn_state);
                         }
@@ -1105,35 +1146,13 @@ int32_t tama_p1_app(void* p) {
                             break;
                         }
                     }
-                    // if(event.input.key == InputKeyBack) {
-                    //     uint8_t temp = speed;
-                    //     if(event.input.type == InputTypeRelease) {
-                    //         speed = temp;
-                    //         tamalib_set_speed(speed);
-                    //     } else if(speed != 1 && event.input.type == InputTypePress) {
-                    //         speed = 1;
-                    //         tamalib_set_speed(speed);
-                    //     }
-                    //     if(event.input.type == InputTypeLong) {
-                    //         furi_timer_stop(timer);
-                    //         tama_p1_save_state();
-                    //         running = false;
-                    //     }
-                    // }
-                    if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
-                        speed = 1;
-                        tamalib_set_speed(speed);
-                        tama_p1_save_state();
-                        furi_timer_stop(timer);
-                        running = false;
-                    }
                 }
             }
             furi_mutex_release(g_state_mutex);
         }
         // else {
         //     // Timeout
-        //     // FURI_LOG_D(TAG, "Timed out");
+        //     FURI_LOG_D(TAG, "Timed out");
         // }
     }
 
