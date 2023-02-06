@@ -214,6 +214,10 @@ bool furi_hal_spi_bus_trx_dma(
     uint8_t* rx_buffer,
     size_t size,
     uint32_t timeout_ms) {
+    if(xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) {
+        return furi_hal_spi_bus_trx(handle, tx_buffer, rx_buffer, size, timeout_ms);
+    }
+
     furi_assert(handle);
     furi_assert(handle->bus->current_handle == handle);
     furi_assert(size > 0);
