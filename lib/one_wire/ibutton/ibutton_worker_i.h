@@ -37,7 +37,6 @@ typedef enum {
 struct iButtonWorker {
     iButtonKey* key_p;
     uint8_t* rom_data;
-    void* protocol_data;
     OneWireHost* host;
     OneWireSlave* slave;
     OneWireDevice* device;
@@ -49,10 +48,8 @@ struct iButtonWorker {
     iButtonWorkerReadCallback read_cb;
     iButtonWorkerWriteCallback write_cb;
     iButtonWorkerEmulateCallback emulate_cb;
-    void* cb_ctx;
 
-    // ProtocolDict* protocols;
-    // iButtonProtocol protocol_to_encode;
+    void* cb_ctx;
 };
 
 extern const iButtonWorkerModeType ibutton_worker_modes[];

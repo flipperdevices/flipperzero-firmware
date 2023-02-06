@@ -2,8 +2,7 @@
 #include <furi_hal.h>
 
 #include "ibutton_worker_i.h"
-
-#include "protocols/ibutton_protocols.h"
+#include "ibutton_protocols.h"
 
 void ibutton_worker_mode_idle_start(iButtonWorker* worker);
 void ibutton_worker_mode_idle_tick(iButtonWorker* worker);
@@ -150,9 +149,6 @@ void ibutton_worker_comparator_callback(bool level, void* context) {
 bool ibutton_worker_read_dallas(iButtonWorker* worker) {
     bool result = false;
 
-    uint8_t *rom_data = NULL;
-    void *user_data = NULL;
-
     onewire_host_start(worker->host);
     furi_delay_ms(100);
 
@@ -163,45 +159,25 @@ bool ibutton_worker_read_dallas(iButtonWorker* worker) {
             break;
         }
 
+        const uint8_t family_code = worker->rom_data[0];
+        const iButtonProtocol protocol_id = ibutton_protocols_get_id_by_family_code(family_code);
+
+        if(protocol_id == iButtonProtocolMax) {
+            break;
+        }
+
         if(!onewire_host_reset(worker->host)) {
             break;
         }
 
-        const uint8_t family_code = worker->rom_data[0];
-        const size_t protocol_index = ibutton_protocols_get_index_by_family_code(family_code);
-
-        if(protocol_index == (size_t)iButtonProtocolMax) {
+        if(!ibutton_protocols_read(worker->host, ibutton_key_get_protocol_data(worker->key_p), protocol_id)) {
             break;
         }
 
-        rom_data = malloc(ibutton_protocols_get_rom_size(protocol_index));
-
-        if(!ibutton_protocols_read_rom(worker->host, rom_data, protocol_index)) {
-            break;
-        }
-
-        //TODO: check if the ROM data matches
-
-        const size_t user_data_size = ibutton_protocols_get_user_data_size(protocol_index);
-        if(user_data_size > 0) {
-            user_data = malloc(user_data_size);
-            if(!ibutton_protocols_read_user_data(worker->host, user_data, protocol_index)) {
-                break;
-            }
-        }
-
-        //TODO: set key data
+        ibutton_key_set_protocol_id(worker->key_p, protocol_id);
 
         result = true;
     } while(false);
-
-    if(rom_data) {
-        free(rom_data);
-    }
-
-    if(user_data) {
-        free(user_data);
-    }
 
     onewire_host_reset_search(worker->host);
     onewire_host_stop(worker->host);

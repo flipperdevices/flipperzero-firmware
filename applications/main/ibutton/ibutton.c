@@ -54,18 +54,18 @@ bool ibutton_load_key_data(iButton* ibutton, FuriString* key_path, bool show_dia
         if(furi_string_cmp_str(data, IBUTTON_APP_FILE_TYPE) != 0) break;
         if(version != 1) break;
 
-        // key type
-        iButtonKeyType type;
-        if(!flipper_format_read_string(file, "Key type", data)) break;
-        if(!ibutton_key_get_type_by_string(furi_string_get_cstr(data), &type)) break;
-
-        // key data
-        uint8_t key_data[IBUTTON_KEY_DATA_SIZE] = {0};
-        if(!flipper_format_read_hex(file, "Data", key_data, ibutton_key_get_size_by_type(type)))
-            break;
-
-        ibutton_key_set_type(ibutton->key, type);
-        ibutton_key_set_data(ibutton->key, key_data, IBUTTON_KEY_DATA_SIZE);
+        // // key type
+        // iButtonKeyType type;
+        // if(!flipper_format_read_string(file, "Key type", data)) break;
+        // if(!ibutton_key_get_type_by_string(furi_string_get_cstr(data), &type)) break;
+        //
+        // // key data
+        // uint8_t key_data[IBUTTON_KEY_DATA_SIZE] = {0};
+        // if(!flipper_format_read_hex(file, "Data", key_data, ibutton_key_get_size_by_type(type)))
+        //     break;
+        //
+        // ibutton_key_set_type(ibutton->key, type);
+        // ibutton_key_set_data(ibutton->key, key_data, IBUTTON_KEY_DATA_SIZE);
 
         result = true;
     } while(false);
@@ -235,7 +235,7 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
     ibutton_make_app_folder(ibutton);
 
     FlipperFormat* file = flipper_format_file_alloc(ibutton->storage);
-    iButtonKey* key = ibutton->key;
+    // iButtonKey* key = ibutton->key;
 
     bool result = false;
 
@@ -261,17 +261,17 @@ bool ibutton_save_key(iButton* ibutton, const char* key_name) {
         // Write key type
         if(!flipper_format_write_comment_cstr(file, "Key type can be Cyfral, Dallas or Metakom"))
             break;
-        const char* key_type = ibutton_key_get_string_by_type(ibutton_key_get_type(key));
-        if(!flipper_format_write_string_cstr(file, "Key type", key_type)) break;
+        // const char* key_type = ibutton_key_get_string_by_type(ibutton_key_get_type(key));
+        // if(!flipper_format_write_string_cstr(file, "Key type", key_type)) break;
 
         // Write data
         if(!flipper_format_write_comment_cstr(
                file, "Data size for Cyfral is 2, for Metakom is 4, for Dallas is 8"))
             break;
 
-        if(!flipper_format_write_hex(
-               file, "Data", ibutton_key_get_data_p(key), ibutton_key_get_data_size(key)))
-            break;
+        // if(!flipper_format_write_hex(
+        //        file, "Data", ibutton_key_get_data_p(key), ibutton_key_get_data_size(key)))
+        //     break;
         result = true;
 
     } while(false);
@@ -308,6 +308,13 @@ void ibutton_text_store_clear(iButton* ibutton) {
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {
     furi_assert(message < sizeof(ibutton_notification_sequences) / sizeof(NotificationSequence*));
     notification_message(ibutton->notifications, ibutton_notification_sequences[message]);
+}
+
+void ibutton_widget_callback(GuiButtonType result, InputType type, void* context) {
+    iButton* ibutton = context;
+    if(type == InputTypeShort) {
+        view_dispatcher_send_custom_event(ibutton->view_dispatcher, result);
+    }
 }
 
 int32_t ibutton_app(void* p) {

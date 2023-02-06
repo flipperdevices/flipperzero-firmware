@@ -7,19 +7,19 @@
 #define DS1992_FAMILY_CODE 0x08U
 #define DS1992_USER_DATA_SIZE 128U
 
-static bool dallas_ds1992_read_sram(OneWireHost*, uint8_t*);
+static bool dallas_ds1992_read(OneWireHost* host, void* protocol_data);
 
 const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
-    .rom_size = DALLAS_COMMON_ROM_SIZE,
-    .user_data_size = DS1992_USER_DATA_SIZE,
+    .data_size = sizeof(DallasCommonRomData) + DS1992_USER_DATA_SIZE,
 
-    .read_rom = dallas_common_read_rom,
-    .read_user_data = dallas_ds1992_read_sram,
+    .read = dallas_ds1992_read,
+    .render_data = NULL,
+    .render_brief_data = NULL,
 };
 
-bool dallas_ds1992_read_sram(OneWireHost* host, uint8_t* data) {
+bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     UNUSED(host);
-    UNUSED(data);
+    UNUSED(protocol_data);
     return true;
 }

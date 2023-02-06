@@ -31,7 +31,7 @@ void ibutton_scene_save_name_on_enter(void* context) {
         ibutton_scene_save_name_text_input_callback,
         ibutton,
         ibutton->text_store,
-        IBUTTON_KEY_NAME_SIZE,
+        22, //TODO: use a constant
         key_name_is_empty);
 
     FuriString* folder_path;

@@ -10,6 +10,8 @@
 #include <notification/notification_messages.h>
 
 #include <one_wire/ibutton/ibutton_worker.h>
+#include <one_wire/ibutton/ibutton_protocols.h>
+
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
@@ -85,3 +87,5 @@ bool ibutton_delete_key(iButton* ibutton);
 void ibutton_text_store_set(iButton* ibutton, const char* text, ...);
 void ibutton_text_store_clear(iButton* ibutton);
 void ibutton_notification_message(iButton* ibutton, uint32_t message);
+
+void ibutton_widget_callback(GuiButtonType result, InputType type, void* context);

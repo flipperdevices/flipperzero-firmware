@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,12.0,,
+Version,+,13.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1573,20 +1573,11 @@ Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
 Function,+,ibutton_key_alloc,iButtonKey*,
-Function,+,ibutton_key_clear_data,void,iButtonKey*
-Function,+,ibutton_key_dallas_crc_is_valid,_Bool,iButtonKey*
-Function,+,ibutton_key_dallas_is_1990_key,_Bool,iButtonKey*
 Function,+,ibutton_key_free,void,iButtonKey*
-Function,+,ibutton_key_get_data_p,const uint8_t*,iButtonKey*
-Function,+,ibutton_key_get_data_size,uint8_t,iButtonKey*
-Function,+,ibutton_key_get_max_size,uint8_t,
-Function,+,ibutton_key_get_size_by_type,uint8_t,iButtonKeyType
-Function,+,ibutton_key_get_string_by_type,const char*,iButtonKeyType
-Function,+,ibutton_key_get_type,iButtonKeyType,iButtonKey*
-Function,+,ibutton_key_get_type_by_string,_Bool,"const char*, iButtonKeyType*"
-Function,+,ibutton_key_set,void,"iButtonKey*, const iButtonKey*"
-Function,+,ibutton_key_set_data,void,"iButtonKey*, uint8_t*, uint8_t"
-Function,+,ibutton_key_set_type,void,"iButtonKey*, iButtonKeyType"
+Function,+,ibutton_key_get_protocol_data,iButtonProtocolData*,const iButtonKey*
+Function,+,ibutton_key_get_protocol_id,iButtonProtocol,const iButtonKey*
+Function,+,ibutton_key_set_protocol_data,void,"iButtonKey*, iButtonProtocolData*"
+Function,+,ibutton_key_set_protocol_id,void,"iButtonKey*, iButtonProtocol"
 Function,+,ibutton_worker_alloc,iButtonWorker*,
 Function,+,ibutton_worker_emulate_set_callback,void,"iButtonWorker*, iButtonWorkerEmulateCallback, void*"
 Function,+,ibutton_worker_emulate_start,void,"iButtonWorker*, iButtonKey*"
@@ -3030,6 +3021,7 @@ Variable,+,gpio_usart_tx,const GpioPin,
 Variable,+,gpio_usb_dm,const GpioPin,
 Variable,+,gpio_usb_dp,const GpioPin,
 Variable,+,ibutton_gpio,const GpioPin,
+Variable,+,ibutton_protocols,const iButtonProtocolBase*[],
 Variable,+,input_pins,const InputPin[],
 Variable,+,input_pins_count,const size_t,
 Variable,+,lfrfid_protocols,const ProtocolBase*[],

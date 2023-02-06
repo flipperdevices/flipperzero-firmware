@@ -24,14 +24,14 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
         SubmenuIndexEmulate,
         ibutton_scene_read_key_menu_submenu_callback,
         ibutton);
-    if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
-        submenu_add_item(
-            submenu,
-            "Write",
-            SubmenuIndexWrite,
-            ibutton_scene_read_key_menu_submenu_callback,
-            ibutton);
-    }
+    // if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
+    //     submenu_add_item(
+    //         submenu,
+    //         "Write",
+    //         SubmenuIndexWrite,
+    //         ibutton_scene_read_key_menu_submenu_callback,
+    //         ibutton);
+    // }
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneReadKeyMenu));
 

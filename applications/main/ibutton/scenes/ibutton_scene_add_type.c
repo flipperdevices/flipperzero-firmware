@@ -29,26 +29,27 @@ void ibutton_scene_add_type_on_enter(void* context) {
 }
 
 bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
-    iButton* ibutton = context;
-    iButtonKey* key = ibutton->key;
+    UNUSED(context);
+    // iButton* ibutton = context;
+    // iButtonKey* key = ibutton->key;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, event.event);
-        consumed = true;
-        if(event.event == SubmenuIndexCyfral) {
-            ibutton_key_set_type(key, iButtonKeyCyfral);
-        } else if(event.event == SubmenuIndexDallas) {
-            ibutton_key_set_type(key, iButtonKeyDS1990);
-        } else if(event.event == SubmenuIndexMetakom) {
-            ibutton_key_set_type(key, iButtonKeyMetakom);
-        } else {
-            furi_crash("Unknown key type");
-        }
-
-        furi_string_set(ibutton->file_path, IBUTTON_APP_FOLDER);
-        ibutton_key_clear_data(key);
-        scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
+        // scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, event.event);
+        // consumed = true;
+        // if(event.event == SubmenuIndexCyfral) {
+        //     ibutton_key_set_type(key, iButtonKeyCyfral);
+        // } else if(event.event == SubmenuIndexDallas) {
+        //     ibutton_key_set_type(key, iButtonKeyDS1990);
+        // } else if(event.event == SubmenuIndexMetakom) {
+        //     ibutton_key_set_type(key, iButtonKeyMetakom);
+        // } else {
+        //     furi_crash("Unknown key type");
+        // }
+        //
+        // furi_string_set(ibutton->file_path, IBUTTON_APP_FOLDER);
+        // ibutton_key_clear_data(key);
+        // scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
     }
 
     return consumed;

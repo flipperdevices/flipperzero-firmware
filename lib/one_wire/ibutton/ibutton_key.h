@@ -6,9 +6,7 @@
 
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include "protocols/ibutton_protocol_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,28 +31,28 @@ void ibutton_key_free(iButtonKey* key);
  * @param [in] key
  * @return protocol id
  */
-size_t ibutton_key_get_protocol_id(const iButtonKey* key);
+iButtonProtocol ibutton_key_get_protocol_id(const iButtonKey* key);
 
 /**
  * Set protocol id
  * @param [in] key
  * @param [in] protocol_id
  */
-void ibutton_key_set_protocol_id(iButtonKey* key, size_t protocol_id);
+void ibutton_key_set_protocol_id(iButtonKey* key, iButtonProtocol protocol_id);
 
 /**
- * Set ROM data. The data size is defined by the current protocol.
+ * Get protocol data
  * @param [in] key
- * @param [in] data
+ * @return protocol data
  */
-void ibutton_key_set_rom_data(iButtonKey* key, const uint8_t* rom_data, size_t data_size);
+iButtonProtocolData* ibutton_key_get_protocol_data(const iButtonKey* key);
 
 /**
- * Set user data. The data size is defined by the current protocol.
+ * Set protocol data
  * @param [in] key
- * @param [in] data
+ * @param [in] protocol_data
  */
-void ibutton_key_set_user_data(iButtonKey* key, const void* user_data, size_t data_size);
+void ibutton_key_set_protocol_data(iButtonKey* key, iButtonProtocolData* protocol_data);
 
 #ifdef __cplusplus
 }
