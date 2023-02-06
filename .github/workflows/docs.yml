@@ -58,7 +58,7 @@ jobs:
           aws_secret_access_key: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
           source: "./documentation/build/html"
           dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/dev"
-          flags: --recursive
+          flags: "--recursive --acl public-read"
 
       - name: 'Upload tag documentation to Github Pages'
         if: ${{ startsWith(github.ref, 'refs/tags') }}
