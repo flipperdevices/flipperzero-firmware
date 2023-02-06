@@ -16,7 +16,7 @@ colors in appearance. <br>
 <br>
 
 ## What this does
-The application allows you to play a pulse animation in the three basic colors red, green and blue, as well as a combined color which is in this case white. 
+The application allows you to play a pulse animation in the three basic colors red, green and blue, as well as a combined colors yellow and white. 
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>
