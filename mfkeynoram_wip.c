@@ -9,6 +9,7 @@
 // 64 loops, ~82 KB of total RAM per loop
 // (5 << 19)/64 = 40960
 #define NUM_CHUNKS 64
+#define CHUNK_DIV 128
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define BIT(x, n) ((x) >> (n) & 1)
@@ -244,7 +245,7 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
   int even_head = 0, even_tail = -1, eks = 0;
   int *odd = malloc((5 << 19)/NUM_CHUNKS);
   int *even = malloc((5 << 19)/NUM_CHUNKS);
-  int chunk_size = (1 << 20)/128;
+  int chunk_size = (1 << 20)/CHUNK_DIV;
   int i = 0, j = 0, k = 0, n = 0;
   for(i = 1 << 20; i >= 0; i -= chunk_size) {
     memset(odd,  0, (5 << 19)/NUM_CHUNKS);
