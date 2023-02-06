@@ -210,6 +210,20 @@ FS_Error sd_card_info(StorageData* storage, SDInfo* sd_info) {
 #endif
     }
 
+    SD_CID cid;
+    SdSpiStatus status = sd_get_cid(&cid);
+
+    if(status == SdSpiStatusOK) {
+        sd_info->manufacturer_id = cid.ManufacturerID;
+        memcpy(sd_info->oem_id, cid.OEM_AppliID, sizeof(cid.OEM_AppliID));
+        memcpy(sd_info->product_name, cid.ProdName, sizeof(cid.ProdName));
+        sd_info->product_revision_major = cid.ProdRev >> 4;
+        sd_info->product_revision_minor = cid.ProdRev & 0x0F;
+        sd_info->product_serial_number = cid.ProdSN;
+        sd_info->manufacturing_year = 2000 + cid.ManufactYear;
+        sd_info->manufacturing_month = cid.ManufactMonth;
+    }
+
     return storage_ext_parse_error(error);
 }
 

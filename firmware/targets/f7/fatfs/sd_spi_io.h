@@ -154,4 +154,4 @@ SdSpiStatus
  * @param Cid 
  * @return SdSpiStatus 
  */
-SdSpiStatus sd_get_cid(SD_CID* Cid);
+SdSpiStatus sd_get_cid(SD_CID* cid);

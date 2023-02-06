@@ -557,7 +557,7 @@ static SdSpiStatus sd_spi_get_csd(SD_CSD* csd) {
     return ret;
 }
 
-SdSpiStatus sd_get_cid(SD_CID* Cid) {
+static SdSpiStatus sd_spi_get_cid(SD_CID* Cid) {
     uint16_t counter = 0;
     uint8_t cid_data[16];
     SdSpiStatus ret = SdSpiStatusError;
@@ -807,7 +807,7 @@ SdSpiStatus sd_get_card_info(SD_CardInfo* card_info) {
         return status;
     }
 
-    status = sd_get_cid(&(card_info->Cid));
+    status = sd_spi_get_cid(&(card_info->Cid));
 
     if(status != SdSpiStatusOK) {
         return status;
@@ -858,5 +858,20 @@ SdSpiStatus
     sd_write_blocks(uint32_t* data, uint32_t address, uint32_t blocks, uint32_t timeout_ms) {
     sd_cache_invalidate_range(address, address + blocks);
     SdSpiStatus status = sd_spi_cmd_write_blocks(data, address, blocks, timeout_ms);
+    return status;
+}
+
+SdSpiStatus sd_get_cid(SD_CID* cid) {
+    SdSpiStatus status;
+
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
+
+    memset(cid, 0, sizeof(SD_CID));
+    status = sd_spi_get_cid(cid);
+
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
+
     return status;
 }
