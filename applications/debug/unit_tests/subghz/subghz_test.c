@@ -797,7 +797,6 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_holtek_ht12x_test);
     MU_RUN_TEST(subghz_decoder_nice_one_test);
 
-
     MU_RUN_TEST(subghz_encoder_princeton_test);
     MU_RUN_TEST(subghz_encoder_came_test);
     MU_RUN_TEST(subghz_encoder_came_twee_test);
