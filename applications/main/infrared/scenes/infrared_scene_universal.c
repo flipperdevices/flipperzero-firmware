@@ -46,18 +46,16 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexUniversalTV) {
-	    scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, SubmenuIndexUniversalTV);
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalTV);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalAC) {
-	    scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, SubmenuIndexUniversalAC);
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalAC);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalAudio) {
-	    scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, SubmenuIndexUniversalAudio);
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalAudio);
             consumed = true;
         }
+	scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, event.event);
     }
 
     return consumed;
