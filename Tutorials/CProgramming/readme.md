@@ -4,7 +4,7 @@ Tips and tricks for developing Application for Flipper using C Programming langu
 <br>
 ## Table of Contents
 <ul>
-<li><!--a href=""-->Creating an Application Manifest (tbd)<!--/a--></li>
+<li><a href="Manifest/readme.md">Creating an Application Manifest</a></li>
 <li><a href="FunctionsParameters/readme.md">Functions and Parameters Basics</a></li>
 <li><a href="NullPointerReference/readme.md">Problems with Null Pointer References</a></li>
 <li><!--a href=""-->The need for Mutex (tbd)<!--/a--></li>
