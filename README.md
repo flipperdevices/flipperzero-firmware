@@ -48,6 +48,7 @@ it is easy to add direct logging after running the application:
 
 `./fbt launch_app APPSRC=applications\plugins\tama_p1;  python .\serial_logger.py`
 ```
+Alternatively, follow the directions here: https://flipper.atmanos.com/docs/debugging/viewing/
 
 Implemented
 -----------
@@ -56,10 +57,20 @@ Implemented
   - A+C shortcut (mute/change in-game time)
   - Double speed / fast-forward
 
+![Alt Text](Screenshot3.png)
 
 To-Do
 -----
-- fix bug where the Flipper's button stop responding for a few seconds, usually after mashing buttons in quick succession.
+- Fix bugs: 
+  - When not on 1x speed, after mashing buttons in quick succession, buttons stop responding for a few seconds. But the rom still runs.
+- Stuff to do when bored:
+  - optimization and bug fixing (see above)
+  - add to this list
+  - portrait menu
+  - Add "loading bar" when saving
+  - "Advanced" settings
+  - saving and loading, multiple save states, with the date and time of of each save.
+  - Autosave and changing autosave frequency
+  - Save settings to /tama_p1/settings.txt
 
-![Alt Text](Screenshot3.png)
 ![Alt Text](Screenshot4.png)
