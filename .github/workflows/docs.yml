@@ -6,6 +6,7 @@ on:
       - dev
     tags:
       - '*'
+  pull_request:
 
 env:
   TARGETS: f7
@@ -48,13 +49,16 @@ jobs:
           working-directory: 'documentation/'
           doxyfile-path: './Doxyfile-awesome.cfg'
 
-      - name: 'Upload dev documentation to Github Pages'
+      - name: 'Upload dev documentation'
         if: ${{ !startsWith(github.ref, 'refs/tags') }}
-        uses: peaceiris/actions-gh-pages@v3
+        uses: prewk/s3-cp-action@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./documentation/build/html
-          publish_branch: 'doc-dev'
+          aws_s3_endpoint: "${{ secrets.FW_DOCS_AWS_ENDPOINT }}"
+          aws_access_key_id: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
+          aws_secret_access_key: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
+          source: "map_analyser_files/"
+          dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/dev"
+          flags: --recursive
 
       - name: 'Upload tag documentation to Github Pages'
         if: ${{ startsWith(github.ref, 'refs/tags') }}
