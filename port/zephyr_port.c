@@ -55,7 +55,7 @@ esp_loader_error_t loader_port_serial_read(uint8_t *data, const uint16_t size, c
             return ESP_LOADER_ERROR_TIMEOUT;
         }
         total_read += read;
-        remaining = size - total_read;
+        remaining -= read;
     }
 
     return ESP_LOADER_SUCCESS;
@@ -80,7 +80,7 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, const uint16_t 
             return ESP_LOADER_ERROR_TIMEOUT;
         }
         total_written += written;
-        remaining = size - total_written;
+        remaining -= written;
     }
 
     return ESP_LOADER_SUCCESS;
