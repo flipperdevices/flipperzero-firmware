@@ -286,55 +286,6 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
   return p->key;
 }
 
-/*
-uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
-    int odd_head = 0, odd_tail = -1, oks = 0;
-    int even_head = 0, even_tail = -1, eks = 0;
-    int *odd = calloc(1, (5 << 19)/NUM_CHUNKS);
-    int *even = calloc(1, (5 << 19)/NUM_CHUNKS);
-    int offset_max = 1 << 20;
-    int chunk_max = offset_max/NUM_CHUNKS;
-    int i = 0, j = 0;
-    for (i = 31; i >= 0; i -= 2)
-        oks = oks << 1 | BEBIT(ks2, i);
-    for (i = 30; i >= 0; i -= 2)
-        eks = eks << 1 | BEBIT(ks2, i);
-    // TODO: How do oks, eks, odd_head, and even_head change? Save state before later operations?
-    for (i = offset_max-1; i > 0; i -= chunk_max) {
-        odd_tail = -1;
-        even_tail = -1;
-        for (j = 0; j < chunk_max; j++) {
-            //printf("j: %i, i-j: %i\n", j, i-j);
-            if (filter(i-j) == (oks & 1)) {
-                //++odd_tail;
-                //printf("off: %i, odd: %i. real: %i/%i\n", j, odd_tail % chunk_max, (odd_tail % chunk_max)*4, (5 << 19)/NUM_CHUNKS);
-                // FIXME with array index:
-                odd[++odd_tail] = i-j;
-            }
-            if (filter(i-j) == (eks & 1)) {
-                //++even_tail;
-                //printf("off: %i, even: %i. real: %i/%i\n", j, even_tail % chunk_max, (even_tail % chunk_max)*4, (5 << 19)/NUM_CHUNKS);
-                // FIXME with array index:
-                even[++even_tail] = i-j;
-            }
-        }
-        printf("Mid even and odd tail: %i, %i\n", even_tail, odd_tail);*/
-        /*
-        for (i = 0; i < 4; i++) {
-            odd_tail = extend_table_simple(odd, odd_head, odd_tail, ((oks >>= 1) & 1));
-            even_tail = extend_table_simple(even, even_head, even_tail, ((eks >>= 1) & 1));
-        }
-        recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 11, 0, p);
-        */
-    /*
-    }
-    printf("Final even and odd tail: %i, %i\n", even_tail, odd_tail);
-    free(odd);
-    free(even);
-    return p->key;
-}
-*/
-
 int main(int argc, char *argv[]) {
     struct Crypto1State *s, *t;
     uint64_t key;     // recovered key
