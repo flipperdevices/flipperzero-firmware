@@ -56,7 +56,7 @@ jobs:
           aws_s3_endpoint: "${{ secrets.FW_DOCS_AWS_ENDPOINT }}"
           aws_access_key_id: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
           aws_secret_access_key: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
-          source: "map_analyser_files/"
+          source: "./documentation/build/html"
           dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/dev"
           flags: --recursive
 
