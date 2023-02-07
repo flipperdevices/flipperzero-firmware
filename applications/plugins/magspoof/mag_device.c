@@ -147,8 +147,10 @@ static bool mag_device_load_data(MagDevice* mag_dev, FuriString* path, bool show
             furi_string_printf(temp_str, "Track %d", i + 1);
             if(!flipper_format_read_string(
                    file, furi_string_get_cstr(temp_str), mag_dev->dev_data.track[i].str)) {
+                FURI_LOG_D(TAG, "Could not read track %d data", i + 1);
+
+                // TODO: smarter load handling now that it is acceptible for some tracks to be empty
                 data_read = false;
-                break;
             }
         }
 
@@ -179,7 +181,7 @@ bool mag_file_select(MagDevice* mag_dev) {
     mag_app_folder = furi_string_alloc_set(MAG_APP_FOLDER);
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_mag_10px);
+    dialog_file_browser_set_basic_options(&browser_options, MAG_APP_EXTENSION, &I_mag_file_10px);
     browser_options.base_path = MAG_APP_FOLDER;
 
     bool res = dialog_file_browser_show(

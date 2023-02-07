@@ -1,6 +1,18 @@
 #include "../mag_i.h"
 #include "../helpers/mag_helpers.h"
 
+#define TAG "MagSceneEmulate"
+
+void cat_trackstr(FuriString* str, uint8_t calls, uint8_t i, FuriString* trackstr) {
+    furi_string_cat_printf(
+        str,
+        "%sTrack %d:%s%s\n",
+        (calls == 0) ? "" : "\n", // if first line, don't prepend a "\n"
+        (i + 1),
+        furi_string_empty(trackstr) ? "  " : "\n",
+        furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr));
+}
+
 void mag_scene_emulate_on_enter(void* context) {
     Mag* mag = context;
     Widget* widget = mag->widget;
@@ -13,26 +25,33 @@ void mag_scene_emulate_on_enter(void* context) {
 
     // TODO: Display other relevant config settings (namely RFID vs GPIO)?
 
-    widget_add_icon_element(widget, 2, 1, &I_mag_10px);
+    widget_add_icon_element(widget, 1, 1, &I_mag_file_10px);
     widget_add_string_element(
         widget, 13, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp_str));
     furi_string_reset(tmp_str);
 
+    FURI_LOG_D(TAG, "%d", mag->setting->reverse);
+
+    // print relevant data
+    uint8_t cat_count = 0;
     for(uint8_t i = 0; i < MAG_DEV_TRACKS; i++) {
         FuriString* trackstr = mag->mag_dev->dev_data.track[i].str;
-        // there's definitely a better way to do this...
-        bool is_active_one = (mag->setting->track == MagTrackStateOne) & (i == 0);
-        bool is_active_two = (mag->setting->track == MagTrackStateTwo) & (i == 1);
-        bool is_active_both = (mag->setting->track == MagTrackStateAll);
 
-        if(is_active_one | is_active_two | is_active_both) {
-            furi_string_cat_printf(
-                tmp_str,
-                "Track %d:%s%s%s",
-                (i + 1),
-                furi_string_empty(trackstr) ? "  " : "\n",
-                furi_string_empty(trackstr) ? "< empty >" : furi_string_get_cstr(trackstr),
-                (i + 1 == MAG_DEV_TRACKS) ? "\n" : "\n\n");
+        // still messy / dumb way to do this, but slightly cleaner than before.
+        // will clean up more later
+        switch(mag->setting->track) {
+        case MagTrackStateOne:
+            if(i == 0) cat_trackstr(tmp_str, cat_count++, i, trackstr);
+            break;
+        case MagTrackStateTwo:
+            if(i == 1) cat_trackstr(tmp_str, cat_count++, i, trackstr);
+            break;
+        case MagTrackStateThree:
+            if(i == 2) cat_trackstr(tmp_str, cat_count++, i, trackstr);
+            break;
+        case MagTrackStateOneAndTwo:
+            if((i == 0) | (i == 1)) cat_trackstr(tmp_str, cat_count++, i, trackstr);
+            break;
         }
     }
 
@@ -40,8 +59,6 @@ void mag_scene_emulate_on_enter(void* context) {
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Config", mag_widget_callback, mag);
     widget_add_button_element(widget, GuiButtonTypeRight, "Send", mag_widget_callback, mag);
-    widget_add_button_element(widget, GuiButtonTypeCenter, "Bitwise", mag_widget_callback, mag);
-
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
     furi_string_free(tmp_str);
 }
@@ -61,12 +78,6 @@ bool mag_scene_emulate_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             notification_message(mag->notifications, &sequence_blink_start_cyan);
             mag_spoof(mag);
-            notification_message(mag->notifications, &sequence_blink_stop);
-            break;
-        case GuiButtonTypeCenter:
-            consumed = true;
-            notification_message(mag->notifications, &sequence_blink_start_cyan);
-            mag_spoof_bitwise(mag);
             notification_message(mag->notifications, &sequence_blink_stop);
             break;
         }

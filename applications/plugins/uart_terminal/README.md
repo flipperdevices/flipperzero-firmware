@@ -42,4 +42,4 @@ Or use the tool [uFBT](https://github.com/flipperdevices/flipperzero-ufbt) for b
 
 ## INFO:
 
-~70% of the source code is taken from the [Wifi Marauder](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) project. Many thanks to the developers of the Wifi Marauder project.
+~60% of the source code is taken from the [Wifi Marauder](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) project. Many thanks to the developers of the Wifi Marauder project.

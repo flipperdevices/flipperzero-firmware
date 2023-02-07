@@ -13,7 +13,9 @@ App(
         Lib(name="adc",
             fap_include_paths=["inc"],
             sources=[
-                "stm32wbxx_hal_adc.c", "stm32wbxx_hal_adc_ex.c", "stm32wbxx_hal_rcc_ex.c", "stm32wbxx_hal_gpio.c", "stm32wbxx_hal_pwr.c", "stm32wbxx_hal.c", "stm32wbxx_hal_tim.c", "stm32wbxx_hal_tim_ex.c", "stm32wbxx_hal_cortex.c", "stm32wbxx_hal_dma.c", "stm32wbxx_hal_rcc.c"
+                "stm32wbxx_hal_adc.c", "stm32wbxx_hal_adc_ex.c", "stm32wbxx_hal_rcc_ex.c", "stm32wbxx_hal_gpio.c",
+                "stm32wbxx_hal_pwr.c", "stm32wbxx_hal.c", "stm32wbxx_hal_tim.c", "stm32wbxx_hal_tim_ex.c",
+                "stm32wbxx_hal_cortex.c", "stm32wbxx_hal_dma.c", "stm32wbxx_hal_rcc.c"
             ],
     )]
 )

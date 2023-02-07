@@ -10,31 +10,38 @@ enum MagSettingIndex {
     MagSettingIndexInterpacket,
 };
 
-#define TX_COUNT 4
+#define TX_COUNT 7
 const char* const tx_text[TX_COUNT] = {
     "RFID",
-    "A6/A7",
+    "GPIO",
+    "Piezo",
+    "LF + P",
+    "NFC",
     "434MHz",
     "868MHz",
 };
 const uint32_t tx_value[TX_COUNT] = {
     MagTxStateRFID,
-    MagTxStateGPIOA6A7,
+    MagTxStateGPIO,
+    MagTxStatePiezo,
+    MagTxStateLF_P,
+    MagTxStateNFC,
     MagTxCC1101_434,
     MagTxCC1101_868,
-
 };
 
-#define TRACK_COUNT 3
+#define TRACK_COUNT 4
 const char* const track_text[TRACK_COUNT] = {
-    "ALL",
+    "1 + 2",
     "1",
     "2",
+    "3",
 };
 const uint32_t track_value[TRACK_COUNT] = {
-    MagTrackStateAll,
+    MagTrackStateOneAndTwo,
     MagTrackStateOne,
     MagTrackStateTwo,
+    MagTrackStateThree,
 };
 
 #define REVERSE_COUNT 2
@@ -133,7 +140,7 @@ static void mag_scene_emulate_config_set_track(VariableItem* item) {
         mag->setting->track = track_value[index];
     } else if(mag->setting->reverse == MagReverseStateOn) {
         variable_item_set_current_value_index(
-            item, value_index_uint32(MagTrackStateAll, track_value, TRACK_COUNT));
+            item, value_index_uint32(MagTrackStateOneAndTwo, track_value, TRACK_COUNT));
     }
 
     // TODO: Check there is data in selected track?
@@ -144,10 +151,12 @@ static void mag_scene_emulate_config_set_reverse(VariableItem* item) {
     Mag* mag = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    if(mag->setting->track == MagTrackStateAll) {
-        // only allow reverse track to be set when playing all
+    if(mag->setting->track == MagTrackStateOneAndTwo) {
+        // only allow reverse track to be set when playing both 1 and 2
         variable_item_set_current_value_text(item, reverse_text[index]);
         mag->setting->reverse = reverse_value[index];
+        //FURI_LOG_D(TAG, "%s", reverse_text[index]);
+        //FURI_LOG_D(TAG, "%d", mag->setting->reverse);
     } else {
         variable_item_set_current_value_index(
             item, value_index_uint32(MagReverseStateOff, reverse_value, REVERSE_COUNT));
@@ -196,9 +205,10 @@ void mag_scene_emulate_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, track_text[value_index]);
 
     // Reverse
+    //FURI_LOG_D(TAG, "%d", mag->setting->reverse);
     item = variable_item_list_add(
         mag->variable_item_list,
-        "Reverse (WIP):",
+        "Reverse:",
         REVERSE_COUNT,
         mag_scene_emulate_config_set_reverse,
         mag);
@@ -216,6 +226,7 @@ void mag_scene_emulate_config_on_enter(void* context) {
     variable_item_set_current_value_text(item, clock_text[value_index]);
 
     // Interpacket
+    /*
     item = variable_item_list_add(
         mag->variable_item_list,
         "Interpacket:",
@@ -226,7 +237,8 @@ void mag_scene_emulate_config_on_enter(void* context) {
         value_index_uint32(mag->setting->us_interpacket, interpacket_value, INTERPACKET_COUNT);
     scene_manager_set_scene_state(mag->scene_manager, MagSceneEmulateConfig, (uint32_t)item);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, interpacket_text[value_index]);
+    variable_item_set_current_value_text(item, interpacket_text[value_index]);*/
+    UNUSED(mag_scene_emulate_config_set_interpacket);
 
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewVariableItemList);
 }
