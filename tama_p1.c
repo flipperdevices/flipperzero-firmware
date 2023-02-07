@@ -42,6 +42,39 @@ static InputKey a = InputKeyLeft;
 static InputKey b = InputKeyDown;
 static InputKey c = InputKeyRight;
 
+static void speed_up() {
+    switch(speed) {
+    case max_speed:
+        speed = speed_options[0];
+        break;
+    default:
+        for(uint8_t i = 0; i < speed_options_size - 1; i++) {
+            if(speed == speed_options[i]) {
+                speed = speed_options[i + 1];
+                break;
+            }
+        }
+        break;
+    }
+    tamalib_set_speed(speed);
+}
+static void speed_down() {
+    switch(speed) {
+    case min_speed:
+        speed = speed_options[speed_options_size - 1];
+        break;
+    default:
+        for(uint8_t i = speed_options_size - 1; i > 0; i--) {
+            if(speed == speed_options[i]) {
+                speed = speed_options[i - 1];
+                break;
+            }
+        }
+        break;
+    }
+    tamalib_set_speed(speed);
+}
+
 // static void draw_landscape(Canvas* const canvas, void* cb_ctx)
 static void draw_landscape(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
@@ -116,7 +149,6 @@ static void draw_landscape(Canvas* const canvas, uint8_t scale) {
         lcd_icons >>= 1;
     }
 }
-
 // static void draw_portrait_right(Canvas* const canvas, void* cb_ctx)
 static void draw_portrait_right(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
@@ -177,7 +209,6 @@ static void draw_portrait_right(Canvas* const canvas, uint8_t scale) {
         lcd_icons >>= 1;
     }
 }
-
 static void draw_portrait_left(Canvas* const canvas, uint8_t scale) {
     // FURI_LOG_D(TAG, "Drawing frame");
     // Calculate positioning
@@ -238,58 +269,56 @@ static void draw_portrait_left(Canvas* const canvas, uint8_t scale) {
         lcd_icons >>= 1;
     }
 }
-
 // static void draw_mini(Canvas* const canvas, uint16_t inX, uint16_t inY)
 static void draw_mini(Canvas* const canvas) {
     // Calculate positioning
     // uint16_t y = inY;
-    uint16_t y = 34;
+    const uint16_t y = 34;
+    const uint16_t x = 84;
+
+    uint16_t y1 = y;
     for(uint8_t row = 0; row < 16; ++row) {
         // uint16_t x = inX;
-        uint16_t x = 84;
+        uint16_t x1 = x;
         uint32_t row_pixels = g_ctx->framebuffer[row];
         for(uint8_t col = 0; col < 32; ++col) {
             if(row_pixels & 1) {
-                canvas_draw_dot(canvas, x, y);
+                canvas_draw_dot(canvas, x1, y1);
             }
-            x += 1;
+            x1 += 1;
             row_pixels >>= 1;
         }
-        y += 1;
+        y1 += 1;
     }
 
     // Start drawing icons
     uint8_t lcd_icons = g_ctx->icons;
 
     // Draw top icons
-    y = 32;
-    uint16_t x_ic = 84;
+    uint16_t y2 = y - 2;
+    uint16_t x_ic = x;
     for(uint8_t i = 0; i < 4; ++i) {
         if(lcd_icons & 1) {
             // canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
-            canvas_draw_line(canvas, x_ic, y, x_ic + 6, y);
+            canvas_draw_line(canvas, x_ic, y2, x_ic + 6, y2);
         }
         x_ic += 8;
         lcd_icons >>= 1;
     }
 
     // Draw bottom icons
-    y = 51;
-    x_ic = 84;
+    y2 = y + 17;
+    x_ic = x;
     for(uint8_t i = 4; i < 8; ++i) {
         // canvas_draw_frame(canvas, x_ic, y, TAMA_LCD_ICON_SIZE, TAMA_LCD_ICON_SIZE);
         if(lcd_icons & 1) {
             // canvas_draw_icon(canvas, x_ic, y, icons_list[i]);
-            canvas_draw_line(canvas, x_ic, y, x_ic + 6, y);
+            canvas_draw_line(canvas, x_ic, y2, x_ic + 6, y2);
         }
         x_ic += 8;
         lcd_icons >>= 1;
     }
 }
-
-// static void draw_menu_portrait(Canvas* const canvas, void* cb_ctx) {}
-
-// static void draw_menu_landscape(Canvas* const canvas)
 
 static void draw_menu(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -369,15 +398,9 @@ static void draw_menu(Canvas* const canvas) {
     case 2:
         canvas_draw_str(canvas, 12, 30, "Speed:  2x");
         break;
-    // case 3:
-    //     canvas_draw_str(canvas, 12, 30, "Speed: 3x");
-    //     break;
     case 4:
         canvas_draw_str(canvas, 12, 30, "Speed:   4x (max)");
         break;
-    // case 8: // can't handle 8x
-    //     canvas_draw_str(canvas, 12, 40, "Speed: 8x (max)");
-    //     break;
     default:
         canvas_draw_str(canvas, 12, 30, "Speed ??x");
         break;
@@ -390,39 +413,6 @@ static void draw_menu(Canvas* const canvas) {
     canvas_draw_str(canvas, 12, 60, "Close");
     canvas_draw_str(canvas, 44, 60, "Save");
     canvas_draw_str(canvas, 75, 60, "Save & Exit");
-}
-
-static void speed_up() {
-    switch(speed) {
-    case max_speed:
-        speed = speed_options[0];
-        break;
-    default:
-        for(uint8_t i = 0; i < speed_options_size - 1; i++) {
-            if(speed == speed_options[i]) {
-                speed = speed_options[i + 1];
-                break;
-            }
-        }
-        break;
-    }
-    tamalib_set_speed(speed);
-}
-static void speed_down() {
-    switch(speed) {
-    case min_speed:
-        speed = speed_options[speed_options_size - 1];
-        break;
-    default:
-        for(uint8_t i = speed_options_size - 1; i > 0; i--) {
-            if(speed == speed_options[i]) {
-                speed = speed_options[i - 1];
-                break;
-            }
-        }
-        break;
-    }
-    tamalib_set_speed(speed);
 }
 
 static void tama_p1_draw_callback(Canvas* const canvas, void* cb_ctx) {
@@ -836,7 +826,7 @@ int32_t tama_p1_app(void* p) {
                     event.input.sequence,
                     event.input.key,
                     event.input.type);
-                InputType input_type = event.input.type; // idk why this is a variable
+                // InputType input_type = event.input.type; // idk why this is a variable
                 btn_state_t tama_btn_state = 0; // BTN_STATE_RELEASED is 0
 
                 if(in_menu) {
@@ -853,20 +843,27 @@ int32_t tama_p1_app(void* p) {
                         } else {
                             menu_cursor = menu_items - 1;
                         }
-                        if(menu_cursor >= menu_items - 2 && sub_menu_last > 0)
+                        if(menu_cursor >= menu_items - 2 && sub_menu_last > 0) {
                             sub_menu_buttons = 1;
-                        else
+                            sub_menu_last = 1;
+                        } else {
                             sub_menu_buttons = 0;
+                            sub_menu_last = 0;
+                        }
                     } else if(event.input.key == InputKeyDown && event.input.type == InputTypePress) {
                         if(menu_cursor < menu_items - 1) {
                             menu_cursor += 1;
                         } else {
                             menu_cursor = 0;
                         }
-                        if(menu_cursor >= menu_items - 2 && sub_menu_buttons > 0)
+                        if(menu_cursor >= menu_items - 2 && sub_menu_buttons > 0) {
+                            sub_menu_buttons = 1;
                             sub_menu_last = 1;
-                        else
+                            // sub_menu_last = 2;
+                        } else {
+                            sub_menu_buttons = 0;
                             sub_menu_last = 0;
+                        }
                     } else if(event.input.key == InputKeyLeft && event.input.type == InputTypePress) {
                         switch(menu_cursor) {
                         case 0:
@@ -1066,9 +1063,9 @@ int32_t tama_p1_app(void* p) {
                             }
                             break;
                         case 2:
-                            if(input_type == InputTypePress)
+                            if(event.input.type == InputTypePress)
                                 tama_btn_state = BTN_STATE_PRESSED;
-                            else if(input_type == InputTypeRelease)
+                            else if(event.input.type == InputTypeRelease)
                                 tama_btn_state = BTN_STATE_RELEASED;
 
                             switch(sub_menu_buttons) {
@@ -1134,37 +1131,12 @@ int32_t tama_p1_app(void* p) {
                         tama_p1_save_state();
                         running = false;
                     }
-                    // else if(event.input.key != InputKeyBack) {
-                    //     switch(layout_mode) {
-                    //     case 0:
-                    //     case 1:
-                    //     case 2:
-                    //         m = InputKeyUp;
-                    //         a = InputKeyLeft;
-                    //         b = InputKeyDown;
-                    //         c = InputKeyRight;
-                    //         break;
-                    //     case 3:
-                    //         m = InputKeyLeft;
-                    //         a = InputKeyDown;
-                    //         b = InputKeyRight;
-                    //         c = InputKeyUp;
-                    //         break;
-                    //     case 4:
-                    //         m = InputKeyRight;
-                    //         a = InputKeyUp;
-                    //         b = InputKeyLeft;
-                    //         c = InputKeyDown;
-                    //         break;
-                    //     default:
-                    //         break;
-                    //     }
-                    // }
-                    if(input_type == InputTypePress || input_type == InputTypeRelease) {
+                    if(event.input.type == InputTypePress ||
+                       event.input.type == InputTypeRelease) {
                         if(event.input.key != InputKeyBack && event.input.key != m) {
-                            if(input_type == InputTypePress)
+                            if(event.input.type == InputTypePress)
                                 tama_btn_state = BTN_STATE_PRESSED;
-                            else if(input_type == InputTypeRelease)
+                            else if(event.input.type == InputTypeRelease)
                                 tama_btn_state = BTN_STATE_RELEASED;
                         } else {
                             tama_btn_state = BTN_STATE_RELEASED;
@@ -1191,12 +1163,10 @@ int32_t tama_p1_app(void* p) {
         //     FURI_LOG_D(TAG, "Timed out");
         // }
     }
-
     if(ctx->rom != NULL) {
         furi_thread_flags_set(furi_thread_get_id(ctx->thread), 1);
         furi_thread_join(ctx->thread);
     }
-
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
@@ -1206,6 +1176,5 @@ int32_t tama_p1_app(void* p) {
     furi_mutex_free(g_state_mutex);
     tama_p1_deinit(ctx);
     free(ctx);
-
     return 0;
 }
