@@ -15,6 +15,8 @@ typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocol
 typedef struct {
     const uint8_t family_code;
     const size_t data_size;
+    const char* manufacturer;
+    const char* name;
 
     iButtonProtocolReadFunc read;
     iButtonProtocolRenderDataFunc render_data;

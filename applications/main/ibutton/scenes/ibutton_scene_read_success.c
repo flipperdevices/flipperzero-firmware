@@ -1,15 +1,35 @@
 #include "../ibutton_i.h"
+
 #include <dolphin/dolphin.h>
 
 void ibutton_scene_read_success_on_enter(void* context) {
     iButton* ibutton = context;
+    iButtonKey* key = ibutton->key;
     Widget* widget = ibutton->widget;
+
+    FuriString *tmp = furi_string_alloc();
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Retry", ibutton_widget_callback, context);
     widget_add_button_element(widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
 
+    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
+    const iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
+
+    furi_string_printf(tmp, "%s[%s]", ibutton_protocols_get_name(protocol_id), ibutton_protocols_get_manufacturer(protocol_id));
+
+    widget_add_string_element(
+        widget, 0, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
+
+    furi_string_reset(tmp);
+    ibutton_protocols_render_brief_data(tmp, protocol_data, protocol_id);
+
+    widget_add_string_multiline_element(
+        widget, 0, 16, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp));
+
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
     ibutton_notification_message(ibutton, iButtonNotificationMessageGreenOn);
+
+    furi_string_free(tmp);
 }
 
 bool ibutton_scene_read_success_on_event(void* context, SceneManagerEvent event) {
