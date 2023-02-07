@@ -795,7 +795,7 @@ void remove_all_astroids_and_bullets(AsteroidsApp* app) {
 //@todo powerUp_was_hit
 void powerUp_was_hit(AsteroidsApp* app, int id) {
     PowerUp* p = &app->powerUps[id];
-    if(p->display_ttl == 0) return; // Don't collect if already collected
+    if(p->display_ttl == 0) return; // Don't collect if already collected or expired
 
     switch(p->powerUpType) {
     case PowerUpTypeLife:
