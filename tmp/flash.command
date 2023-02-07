@@ -1,1 +1,0 @@
-esptool.py -p (PORT) -b 460800 --before default_reset --after hard_reset --chip esp32s2  write_flash --flash_mode dio --flash_freq 80m --flash_size 4MB 0x1000 bootloader.bin 0x10000 blackmagic.bin 0x8000 partition-table.bin 
