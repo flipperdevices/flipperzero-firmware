@@ -199,6 +199,7 @@ Header,+,lib/toolbox/stream/file_stream.h,,
 Header,+,lib/toolbox/stream/stream.h,,
 Header,+,lib/toolbox/stream/string_stream.h,,
 Header,+,lib/toolbox/tar/tar_archive.h,,
+Header,+,lib/toolbox/value_index.h,,
 Header,+,lib/toolbox/version.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
@@ -1404,6 +1405,7 @@ Function,-,furi_hal_vibro_init,void,
 Function,+,furi_hal_vibro_on,void,_Bool
 Function,-,furi_init,void,
 Function,+,furi_kernel_get_tick_frequency,uint32_t,
+Function,+,furi_kernel_is_irq_or_masked,_Bool,
 Function,+,furi_kernel_lock,int32_t,
 Function,+,furi_kernel_restore_lock,int32_t,int32_t
 Function,+,furi_kernel_unlock,int32_t,
@@ -1528,6 +1530,7 @@ Function,+,furi_thread_get_name,const char*,FuriThreadId
 Function,+,furi_thread_get_return_code,int32_t,FuriThread*
 Function,+,furi_thread_get_stack_space,uint32_t,FuriThreadId
 Function,+,furi_thread_get_state,FuriThreadState,FuriThread*
+Function,+,furi_thread_get_stdout_callback,FuriThreadStdoutWriteCallback,
 Function,+,furi_thread_is_suspended,_Bool,FuriThreadId
 Function,+,furi_thread_join,_Bool,FuriThread*
 Function,+,furi_thread_mark_as_service,void,FuriThread*
@@ -1875,8 +1878,10 @@ Function,+,menu_reset,void,Menu*
 Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
 Function,-,mf_classic_auth_attempt,_Bool,"FuriHalNfcTxRxContext*, MfClassicAuthContext*, uint64_t"
 Function,-,mf_classic_auth_init_context,void,"MfClassicAuthContext*, uint8_t"
+Function,-,mf_classic_auth_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t"
 Function,-,mf_classic_authenticate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey"
 Function,-,mf_classic_authenticate_skip_activate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey, _Bool, uint32_t"
+Function,-,mf_classic_block_to_value,_Bool,"const uint8_t*, int32_t*, uint8_t*"
 Function,-,mf_classic_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,-,mf_classic_dict_add_key,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_add_key_str,_Bool,"MfClassicDict*, FuriString*"
@@ -1895,7 +1900,7 @@ Function,-,mf_classic_dict_is_key_present,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_is_key_present_str,_Bool,"MfClassicDict*, FuriString*"
 Function,-,mf_classic_dict_rewind,_Bool,MfClassicDict*
 Function,-,mf_classic_emulator,_Bool,"MfClassicEmulator*, FuriHalNfcTxRxContext*"
-Function,-,mf_classic_get_classic_type,MfClassicType,"int8_t, uint8_t, uint8_t"
+Function,-,mf_classic_get_classic_type,MfClassicType,"uint8_t, uint8_t, uint8_t"
 Function,-,mf_classic_get_read_sectors_and_keys,void,"MfClassicData*, uint8_t*, uint8_t*"
 Function,-,mf_classic_get_sector_by_block,uint8_t,uint8_t
 Function,-,mf_classic_get_sector_trailer_block_num_by_sector,uint8_t,uint8_t
@@ -1903,6 +1908,7 @@ Function,-,mf_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"MfCl
 Function,-,mf_classic_get_total_block_num,uint16_t,MfClassicType
 Function,-,mf_classic_get_total_sectors_num,uint8_t,MfClassicType
 Function,-,mf_classic_get_type_str,const char*,MfClassicType
+Function,-,mf_classic_halt,void,"FuriHalNfcTxRxContext*, Crypto1*"
 Function,-,mf_classic_is_allowed_access_data_block,_Bool,"MfClassicData*, uint8_t, MfClassicKey, MfClassicAction"
 Function,-,mf_classic_is_allowed_access_sector_trailer,_Bool,"MfClassicData*, uint8_t, MfClassicKey, MfClassicAction"
 Function,-,mf_classic_is_block_read,_Bool,"MfClassicData*, uint8_t"
@@ -1911,6 +1917,8 @@ Function,-,mf_classic_is_key_found,_Bool,"MfClassicData*, uint8_t, MfClassicKey"
 Function,-,mf_classic_is_sector_data_read,_Bool,"MfClassicData*, uint8_t"
 Function,-,mf_classic_is_sector_read,_Bool,"MfClassicData*, uint8_t"
 Function,-,mf_classic_is_sector_trailer,_Bool,uint8_t
+Function,-,mf_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
+Function,-,mf_classic_read_block,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, MfClassicBlock*"
 Function,-,mf_classic_read_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicReader*, MfClassicData*"
 Function,-,mf_classic_read_sector,void,"FuriHalNfcTxRxContext*, MfClassicData*, uint8_t"
 Function,-,mf_classic_reader_add_sector,void,"MfClassicReader*, uint8_t, uint64_t, uint64_t"
@@ -1918,8 +1926,12 @@ Function,-,mf_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlo
 Function,-,mf_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKey, uint64_t"
 Function,-,mf_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKey"
 Function,-,mf_classic_set_sector_data_not_read,void,MfClassicData*
+Function,-,mf_classic_transfer,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t"
 Function,-,mf_classic_update_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicData*"
-Function,-,mf_classic_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t"
+Function,-,mf_classic_value_cmd,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, uint8_t, int32_t"
+Function,-,mf_classic_value_cmd_full,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t, int32_t"
+Function,-,mf_classic_value_to_block,void,"int32_t, uint8_t, uint8_t*"
+Function,-,mf_classic_write_block,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, MfClassicBlock*"
 Function,-,mf_classic_write_sector,_Bool,"FuriHalNfcTxRxContext*, MfClassicData*, MfClassicData*, uint8_t"
 Function,-,mf_df_cat_application,void,"MifareDesfireApplication*, FuriString*"
 Function,-,mf_df_cat_application_info,void,"MifareDesfireApplication*, FuriString*"
@@ -2081,7 +2093,7 @@ Function,-,posix_memalign,int,"void**, size_t, size_t"
 Function,-,pow,double,"double, double"
 Function,-,pow10,double,double
 Function,-,pow10f,float,float
-Function,-,power_enable_low_battery_level_notification,void,"Power*, _Bool"
+Function,+,power_enable_low_battery_level_notification,void,"Power*, _Bool"
 Function,+,power_get_info,void,"Power*, PowerInfo*"
 Function,+,power_get_pubsub,FuriPubSub*,Power*
 Function,+,power_is_battery_healthy,_Bool,Power*
@@ -2120,6 +2132,7 @@ Function,-,putchar_unlocked,int,int
 Function,-,putenv,int,char*
 Function,-,puts,int,const char*
 Function,-,putw,int,"int, FILE*"
+Function,-,pvPortCalloc,void*,"size_t, size_t"
 Function,-,pvPortMalloc,void*,size_t
 Function,-,pvTaskGetThreadLocalStoragePointer,void*,"TaskHandle_t, BaseType_t"
 Function,-,pvTaskIncrementMutexHeldCount,TaskHandle_t,
@@ -2809,16 +2822,19 @@ Function,-,vTaskSetTaskNumber,void,"TaskHandle_t, const UBaseType_t"
 Function,-,vTaskSetThreadLocalStoragePointer,void,"TaskHandle_t, BaseType_t, void*"
 Function,-,vTaskSetTimeOutState,void,TimeOut_t*
 Function,-,vTaskStartScheduler,void,
-Function,-,vTaskStepTick,void,const TickType_t
+Function,-,vTaskStepTick,void,TickType_t
 Function,-,vTaskSuspend,void,TaskHandle_t
 Function,-,vTaskSuspendAll,void,
 Function,-,vTaskSwitchContext,void,
-Function,-,vTimerSetReloadMode,void,"TimerHandle_t, const UBaseType_t"
+Function,-,vTimerSetReloadMode,void,"TimerHandle_t, const BaseType_t"
 Function,-,vTimerSetTimerID,void,"TimerHandle_t, void*"
 Function,-,vTimerSetTimerNumber,void,"TimerHandle_t, UBaseType_t"
 Function,+,validator_is_file_alloc_init,ValidatorIsFile*,"const char*, const char*, const char*"
 Function,+,validator_is_file_callback,_Bool,"const char*, FuriString*, void*"
 Function,+,validator_is_file_free,void,ValidatorIsFile*
+Function,+,value_index_bool,uint8_t,"const _Bool, const _Bool[], uint8_t"
+Function,+,value_index_float,uint8_t,"const float, const float[], uint8_t"
+Function,+,value_index_uint32,uint8_t,"const uint32_t, const uint32_t[], uint8_t"
 Function,+,variable_item_get_context,void*,VariableItem*
 Function,+,variable_item_get_current_value_index,uint8_t,VariableItem*
 Function,+,variable_item_list_add,VariableItem*,"VariableItemList*, const char*, uint8_t, VariableItemChangeCallback, void*"
@@ -2951,12 +2967,13 @@ Function,-,xTaskPriorityInherit,BaseType_t,const TaskHandle_t
 Function,-,xTaskRemoveFromEventList,BaseType_t,const List_t*
 Function,-,xTaskResumeAll,BaseType_t,
 Function,-,xTaskResumeFromISR,BaseType_t,TaskHandle_t
-Function,-,xTimerCreate,TimerHandle_t,"const char*, const TickType_t, const UBaseType_t, void*, TimerCallbackFunction_t"
-Function,-,xTimerCreateStatic,TimerHandle_t,"const char*, const TickType_t, const UBaseType_t, void*, TimerCallbackFunction_t, StaticTimer_t*"
+Function,-,xTimerCreate,TimerHandle_t,"const char*, const TickType_t, const BaseType_t, void*, TimerCallbackFunction_t"
+Function,-,xTimerCreateStatic,TimerHandle_t,"const char*, const TickType_t, const BaseType_t, void*, TimerCallbackFunction_t, StaticTimer_t*"
 Function,-,xTimerCreateTimerTask,BaseType_t,
 Function,-,xTimerGenericCommand,BaseType_t,"TimerHandle_t, const BaseType_t, const TickType_t, BaseType_t*, const TickType_t"
 Function,-,xTimerGetExpiryTime,TickType_t,TimerHandle_t
 Function,-,xTimerGetPeriod,TickType_t,TimerHandle_t
+Function,-,xTimerGetReloadMode,BaseType_t,TimerHandle_t
 Function,-,xTimerGetTimerDaemonTaskHandle,TaskHandle_t,
 Function,-,xTimerIsTimerActive,BaseType_t,TimerHandle_t
 Function,-,xTimerPendFunctionCall,BaseType_t,"PendedFunction_t, void*, uint32_t, TickType_t"

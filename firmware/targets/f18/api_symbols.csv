@@ -164,6 +164,7 @@ Header,+,lib/toolbox/stream/file_stream.h,,
 Header,+,lib/toolbox/stream/stream.h,,
 Header,+,lib/toolbox/stream/string_stream.h,,
 Header,+,lib/toolbox/tar/tar_archive.h,,
+Header,+,lib/toolbox/value_index.h,,
 Header,+,lib/toolbox/version.h,,
 Function,-,LL_ADC_CommonDeInit,ErrorStatus,ADC_Common_TypeDef*
 Function,-,LL_ADC_CommonInit,ErrorStatus,"ADC_Common_TypeDef*, LL_ADC_CommonInitTypeDef*"
@@ -1111,6 +1112,7 @@ Function,-,furi_hal_vibro_init,void,
 Function,+,furi_hal_vibro_on,void,_Bool
 Function,-,furi_init,void,
 Function,+,furi_kernel_get_tick_frequency,uint32_t,
+Function,+,furi_kernel_is_irq_or_masked,_Bool,
 Function,+,furi_kernel_lock,int32_t,
 Function,+,furi_kernel_restore_lock,int32_t,int32_t
 Function,+,furi_kernel_unlock,int32_t,
@@ -1235,6 +1237,7 @@ Function,+,furi_thread_get_name,const char*,FuriThreadId
 Function,+,furi_thread_get_return_code,int32_t,FuriThread*
 Function,+,furi_thread_get_stack_space,uint32_t,FuriThreadId
 Function,+,furi_thread_get_state,FuriThreadState,FuriThread*
+Function,+,furi_thread_get_stdout_callback,FuriThreadStdoutWriteCallback,
 Function,+,furi_thread_is_suspended,_Bool,FuriThreadId
 Function,+,furi_thread_join,_Bool,FuriThread*
 Function,+,furi_thread_mark_as_service,void,FuriThread*
@@ -1511,6 +1514,7 @@ Function,-,putchar_unlocked,int,int
 Function,-,putenv,int,char*
 Function,-,puts,int,const char*
 Function,-,putw,int,"int, FILE*"
+Function,-,pvPortCalloc,void*,"size_t, size_t"
 Function,-,pvPortMalloc,void*,size_t
 Function,-,pvTaskGetThreadLocalStoragePointer,void*,"TaskHandle_t, BaseType_t"
 Function,-,pvTaskIncrementMutexHeldCount,TaskHandle_t,
@@ -1866,16 +1870,19 @@ Function,-,vTaskSetTaskNumber,void,"TaskHandle_t, const UBaseType_t"
 Function,-,vTaskSetThreadLocalStoragePointer,void,"TaskHandle_t, BaseType_t, void*"
 Function,-,vTaskSetTimeOutState,void,TimeOut_t*
 Function,-,vTaskStartScheduler,void,
-Function,-,vTaskStepTick,void,const TickType_t
+Function,-,vTaskStepTick,void,TickType_t
 Function,-,vTaskSuspend,void,TaskHandle_t
 Function,-,vTaskSuspendAll,void,
 Function,-,vTaskSwitchContext,void,
-Function,-,vTimerSetReloadMode,void,"TimerHandle_t, const UBaseType_t"
+Function,-,vTimerSetReloadMode,void,"TimerHandle_t, const BaseType_t"
 Function,-,vTimerSetTimerID,void,"TimerHandle_t, void*"
 Function,-,vTimerSetTimerNumber,void,"TimerHandle_t, UBaseType_t"
 Function,+,validator_is_file_alloc_init,ValidatorIsFile*,"const char*, const char*, const char*"
 Function,+,validator_is_file_callback,_Bool,"const char*, FuriString*, void*"
 Function,+,validator_is_file_free,void,ValidatorIsFile*
+Function,+,value_index_bool,uint8_t,"const _Bool, const _Bool[], uint8_t"
+Function,+,value_index_float,uint8_t,"const float, const float[], uint8_t"
+Function,+,value_index_uint32,uint8_t,"const uint32_t, const uint32_t[], uint8_t"
 Function,+,variable_item_get_context,void*,VariableItem*
 Function,+,variable_item_get_current_value_index,uint8_t,VariableItem*
 Function,+,variable_item_list_add,VariableItem*,"VariableItemList*, const char*, uint8_t, VariableItemChangeCallback, void*"
@@ -2008,12 +2015,13 @@ Function,-,xTaskPriorityInherit,BaseType_t,const TaskHandle_t
 Function,-,xTaskRemoveFromEventList,BaseType_t,const List_t*
 Function,-,xTaskResumeAll,BaseType_t,
 Function,-,xTaskResumeFromISR,BaseType_t,TaskHandle_t
-Function,-,xTimerCreate,TimerHandle_t,"const char*, const TickType_t, const UBaseType_t, void*, TimerCallbackFunction_t"
-Function,-,xTimerCreateStatic,TimerHandle_t,"const char*, const TickType_t, const UBaseType_t, void*, TimerCallbackFunction_t, StaticTimer_t*"
+Function,-,xTimerCreate,TimerHandle_t,"const char*, const TickType_t, const BaseType_t, void*, TimerCallbackFunction_t"
+Function,-,xTimerCreateStatic,TimerHandle_t,"const char*, const TickType_t, const BaseType_t, void*, TimerCallbackFunction_t, StaticTimer_t*"
 Function,-,xTimerCreateTimerTask,BaseType_t,
 Function,-,xTimerGenericCommand,BaseType_t,"TimerHandle_t, const BaseType_t, const TickType_t, BaseType_t*, const TickType_t"
 Function,-,xTimerGetExpiryTime,TickType_t,TimerHandle_t
 Function,-,xTimerGetPeriod,TickType_t,TimerHandle_t
+Function,-,xTimerGetReloadMode,BaseType_t,TimerHandle_t
 Function,-,xTimerGetTimerDaemonTaskHandle,TaskHandle_t,
 Function,-,xTimerIsTimerActive,BaseType_t,TimerHandle_t
 Function,-,xTimerPendFunctionCall,BaseType_t,"PendedFunction_t, void*, uint32_t, TickType_t"
