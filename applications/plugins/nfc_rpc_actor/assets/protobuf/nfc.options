@@ -1,0 +1,3 @@
+PB.NfcAAnticollisionResponse.uid    max_size: 10
+PB.NfcAAnticollisionResponse.sak    max_size: 1
+PB.NfcAAnticollisionResponse.atqa    max_size: 2

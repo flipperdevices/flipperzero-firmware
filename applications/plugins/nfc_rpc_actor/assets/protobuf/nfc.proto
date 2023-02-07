@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package PB;
+option java_package = "com.flipperdevices.nfc.protobuf";
+
+enum anticollisionType {
+  NONE = 0;
+  NFCA = 1;
+  NFCB = 2;
+  NFCBPrime = 3;
+  NFCF = 4;
+  NFCV = 5;
+}
+
+message NfcAnticollisionRequest {
+  anticollisionType type = 1;
+}
+
+message NfcAAnticollisionResponse {
+  bool ok = 1;
+  bytes uid = 2;
+  bytes sak = 3;
+  bytes atqa = 4;
+  uint32 uid_len = 5;
+}

@@ -1,0 +1,22 @@
+App(
+    appid="nfc_rpc_actor",
+    name="NfcRpcActor",
+    apptype=FlipperAppType.DEBUG,
+    entry_point="nfc_rpc_actor_app",
+    requires=[
+        "storage",
+        "gui",
+        "rpc",
+        "nfc",
+        "input",
+    ],
+    stack_size=4 * 1024,
+    order=30,
+    fap_icon="../../../assets/icons/Archive/125_10px.png",
+    fap_category="Tools",
+    fap_private_libs=[
+        Lib(
+            name="nanopb",
+        ),
+    ],
+)
