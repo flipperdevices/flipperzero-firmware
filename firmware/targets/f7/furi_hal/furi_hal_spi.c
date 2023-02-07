@@ -244,6 +244,8 @@ bool furi_hal_spi_bus_trx_dma(
     }
 
     if(rx_buffer == NULL) {
+        // Only TX mode, do not use RX channel
+
         LL_DMA_InitTypeDef dma_config = {0};
         dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (spi->DR);
         dma_config.MemoryOrM2MDstAddress = (uint32_t)tx_buffer;
@@ -294,9 +296,11 @@ bool furi_hal_spi_bus_trx_dma(
 
         LL_DMA_DeInit(SPI_DMA_TX_DEF);
     } else {
+        // TRX or RX mode, use both channels
         uint32_t tx_mem_increase_mode;
 
         if(tx_buffer == NULL) {
+            // RX mode, use dummy data instead of TX buffer
             tx_buffer = (uint8_t*)&dma_dummy_u32;
             tx_mem_increase_mode = LL_DMA_PERIPH_NOINCREMENT;
         } else {

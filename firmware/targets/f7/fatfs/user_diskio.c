@@ -130,10 +130,16 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
 
     if(sd_read_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) ==
        SdSpiStatusOK) {
+        FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
+
         /* wait until the read operation is finished */
-        while(sd_get_card_state() != SdSpiStatusOK) {
-        }
         res = RES_OK;
+        while(sd_get_card_state() != SdSpiStatusOK) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
+                res = RES_ERROR;
+                break;
+            }
+        }
     }
 
     furi_hal_sd_spi_handle = NULL;
@@ -163,10 +169,16 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
 
     if(sd_write_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) ==
        SdSpiStatusOK) {
+        FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
+
         /* wait until the Write operation is finished */
-        while(sd_get_card_state() != SdSpiStatusOK) {
-        }
         res = RES_OK;
+        while(sd_get_card_state() != SdSpiStatusOK) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
+                res = RES_ERROR;
+                break;
+            }
+        }
     }
 
     furi_hal_sd_spi_handle = NULL;
