@@ -1,11 +1,10 @@
-#include "furi_hal_spi.h"
-#include "furi_hal_resources.h"
+#include <furi_hal_spi.h>
+#include <furi_hal_resources.h>
 #include <furi_hal_power.h>
 #include <furi_hal_subghz.h>
 
 #include <stdbool.h>
 #include <string.h>
-#include <furi.h>
 
 #include <stm32wbxx_ll_spi.h>
 #include <stm32wbxx_ll_utils.h>

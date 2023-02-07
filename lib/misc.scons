@@ -28,7 +28,6 @@ libs_recurse = [
     "digital_signal",
     "pulse_reader",
     "micro-ecc",
-    "one_wire",
     "u8g2",
     "update_util",
 ]
