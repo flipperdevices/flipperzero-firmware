@@ -16,6 +16,9 @@ void furi_hal_spi_config_deinit_early();
 /** Initialize SPI HAL */
 void furi_hal_spi_config_init();
 
+/** Initialize SPI DMA HAL */
+void furi_hal_spi_dma_init();
+
 /** Initialize SPI Bus
  *
  * @param      handle  pointer to FuriHalSpiBus instance
