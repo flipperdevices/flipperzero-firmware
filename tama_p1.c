@@ -1086,40 +1086,41 @@ int32_t tama_p1_app(void* p) {
                             break;
                         case menu_items - 1:
                         default:
-                            switch(sub_menu_last) {
-                            case 0: // close menu
-                                in_menu = false;
-                                break;
-                            case 1: // Save
-                                if(speed != 1) {
-                                    // uint8_t temp = speed;
-                                    // speed = 1;
-                                    tamalib_set_speed(1);
+                            if(event.input.type == InputTypePress) {
+                                switch(sub_menu_last) {
+                                case 0: // close menu
+                                    in_menu = false;
+                                    break;
+                                case 1: // Save
+                                    if(speed != 1) {
+                                        // uint8_t temp = speed;
+                                        // speed = 1;
+                                        tamalib_set_speed(1);
+                                        tama_p1_save_state();
+                                        // speed = temp;
+                                        tamalib_set_speed(speed);
+                                    } else {
+                                        tama_p1_save_state();
+                                    }
+                                    // in_menu = false;
+                                    break;
+                                case 2: // Save & Exit
+                                    if(speed != 1) {
+                                        // speed = 1;
+                                        // tamalib_set_speed(speed);
+                                        tamalib_set_speed(1);
+                                    }
+                                    furi_timer_stop(timer);
                                     tama_p1_save_state();
-                                    // speed = temp;
-                                    tamalib_set_speed(speed);
-                                } else {
-                                    tama_p1_save_state();
+                                    running = false;
+                                    break;
+                                default:
+                                    break;
                                 }
-                                // in_menu = false;
-                                break;
-                            case 2: // Save & Exit
-                                if(speed != 1) {
-                                    // speed = 1;
-                                    // tamalib_set_speed(speed);
-                                    tamalib_set_speed(1);
-                                }
-                                furi_timer_stop(timer);
-                                tama_p1_save_state();
-                                running = false;
-                                break;
-                            default:
-                                break;
                             }
                             break;
                         }
                     }
-
                 } else { // out of menu // TODO: clean up code -.-
                     if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                         if(speed != 1) {
@@ -1141,9 +1142,11 @@ int32_t tama_p1_app(void* p) {
                         } else {
                             tama_btn_state = BTN_STATE_RELEASED;
                         }
-                        if(event.input.key == m) {
-                            tama_btn_state = BTN_STATE_RELEASED;
+                        if(event.input.key == m && event.input.type == InputTypePress) {
                             in_menu = true;
+                            // if(speed == 1) speed = 4;
+                            // else speed = 1;
+                            // tamalib_set_speed(speed);
                         } else if(event.input.key == a) {
                             tamalib_set_button(BTN_LEFT, tama_btn_state);
                         } else if(event.input.key == b) {
