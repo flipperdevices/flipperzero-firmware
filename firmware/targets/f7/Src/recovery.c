@@ -15,7 +15,7 @@ static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress) {
     u8g2_DrawStr(fb, 2, 8, "PIN and Factory Reset");
     u8g2_SetFont(fb, u8g2_font_haxrcorp4089_tr);
     u8g2_DrawStr(fb, 2, 21, "Hold Right to confirm");
-    u8g2_DrawStr(fb, 2, 31, "Press Back to cancel");
+    u8g2_DrawStr(fb, 2, 31, "Press Down to cancel");
 
     if(progress < COUNTER_VALUE) {
         size_t width = progress / (COUNTER_VALUE / 100);
@@ -33,7 +33,7 @@ void flipper_boot_recovery_exec() {
 
     size_t counter = COUNTER_VALUE;
     while(counter) {
-        if(!furi_hal_gpio_read(&gpio_button_back)) {
+        if(!furi_hal_gpio_read(&gpio_button_down)) {
             break;
         }
 
