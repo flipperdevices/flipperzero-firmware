@@ -8,12 +8,11 @@ static void ttt_multi_scene_local_callback(void* context, TttMultiCustomEvent ev
     view_dispatcher_send_custom_event(ttt_multi->view_dispatcher, event);
 }
 
-
 void ttt_multi_scene_local_on_enter(void* context) {
     furi_assert(context);
 
     TttMultiApp* ttt_multi = context;
-    TttMultiGameView *view = ttt_multi->game_view;
+    TttMultiGameView* view = ttt_multi->game_view;
 
     ttt_multi_game_view_set_callback(view, ttt_multi_scene_local_callback, ttt_multi);
     ttt_multi_game_view_set_local_play(view);
@@ -22,7 +21,7 @@ void ttt_multi_scene_local_on_enter(void* context) {
 
 void ttt_multi_scene_local_on_exit(void* context) {
     furi_assert(context);
-    TttMultiApp *ttt_multi = context;
+    TttMultiApp* ttt_multi = context;
 
     ttt_multi_game_view_reset(ttt_multi->game_view);
 }
@@ -34,23 +33,23 @@ bool ttt_multi_scene_local_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         TttMultiCustomEvent custom_event = event.event;
         switch(custom_event) {
-            case TttMultiCustomEventGameMove: {
-                TttMultiGameMove last_move = {};
-                ttt_multi_game_view_get_last_move(ttt_multi->game_view, &last_move);
-                ttt_multi_game_view_move(ttt_multi->game_view, &last_move);
-                return true;
+        case TttMultiCustomEventGameMove: {
+            TttMultiGameMove last_move = {};
+            ttt_multi_game_view_get_last_move(ttt_multi->game_view, &last_move);
+            ttt_multi_game_view_move(ttt_multi->game_view, &last_move);
+            return true;
+        }
+        case TttMultiCustomEventGameFinish: {
+            TttMultiGameResult result = ttt_multi_game_view_get_result(ttt_multi->game_view);
+            if(result == TttMultiGameResultDraw) {
+                notification_message(ttt_multi->notifications, &sequence_error);
+            } else {
+                notification_message(ttt_multi->notifications, &sequence_success);
             }
-            case TttMultiCustomEventGameFinish:{
-                TttMultiGameResult result = ttt_multi_game_view_get_result(ttt_multi->game_view);
-                if(result == TttMultiGameResultDraw) {
-                    notification_message(ttt_multi->notifications, &sequence_error);
-                } else {
-                    notification_message(ttt_multi->notifications,&sequence_success);
-                }
-                return true;
-            }
-            default:
-                break;
+            return true;
+        }
+        default:
+            break;
         }
     }
 
