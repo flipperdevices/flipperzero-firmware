@@ -12,7 +12,7 @@ static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress) {
     u8g2_SetDrawColor(fb, 0x01);
 
     u8g2_SetFont(fb, u8g2_font_helvB08_tr);
-    u8g2_DrawStr(fb, 2, 8, "Factory Reset Mode");
+    u8g2_DrawStr(fb, 2, 8, "PIN and Factory Reset");
     u8g2_SetFont(fb, u8g2_font_haxrcorp4089_tr);
     u8g2_DrawStr(fb, 2, 21, "Hold Right to confirm");
     u8g2_DrawStr(fb, 2, 31, "Press Back to cancel");
