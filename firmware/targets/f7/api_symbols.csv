@@ -636,8 +636,8 @@ Function,+,canvas_invert_color,void,Canvas*
 Function,+,canvas_reset,void,Canvas*
 Function,+,canvas_set_bitmap_mode,void,"Canvas*, _Bool"
 Function,+,canvas_set_color,void,"Canvas*, Color"
-Function,+,canvas_set_font,void,"Canvas*, Font"
 Function,+,canvas_set_custom_u8g2_font,void,"Canvas*, const uint8_t*"
+Function,+,canvas_set_font,void,"Canvas*, Font"
 Function,+,canvas_set_font_direction,void,"Canvas*, CanvasDirection"
 Function,-,canvas_set_orientation,void,"Canvas*, CanvasOrientation"
 Function,+,canvas_string_width,uint16_t,"Canvas*, const char*"
@@ -2072,9 +2072,10 @@ Function,+,nfc_device_save_shadow,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
 Function,+,nfc_device_set_name,void,"NfcDevice*, const char*"
 Function,+,nfc_file_select,_Bool,NfcDevice*
-Function,-,nfc_util_bytes2num,uint64_t,"uint8_t*, uint8_t"
+Function,-,nfc_util_bytes2num,uint64_t,"const uint8_t*, uint8_t"
 Function,-,nfc_util_even_parity32,uint8_t,uint32_t
 Function,-,nfc_util_num2bytes,void,"uint64_t, uint8_t, uint8_t*"
+Function,-,nfc_util_odd_parity,void,"const uint8_t*, uint8_t*, uint8_t"
 Function,-,nfc_util_odd_parity8,uint8_t,uint8_t
 Function,-,nfca_append_crc16,void,"uint8_t*, uint16_t"
 Function,-,nfca_emulation_handler,_Bool,"uint8_t*, uint16_t, uint8_t*, uint16_t*"
