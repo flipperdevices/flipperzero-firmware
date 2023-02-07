@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  TARGET_CONFIGS: f7,default # f18,komi
+  TARGETS: f7,f18
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /runner/_work
 
@@ -59,19 +59,16 @@ jobs:
       - name: 'Build the firmware'
         run: |
           set -e
-          for TARGET_CONFIG in ${TARGET_CONFIGS}; do
-            TARGET=`echo ${TARGET_CONFIG} | sed 's/f//' | cut -d, -f1`
-            APP_SET=`echo ${TARGET_CONFIG} | sed 's/f//' | cut -d, -f2`          
-            ./fbt TARGET_HW=$TARGET FIRMWARE_APP_SET=$APP_SET \
-              copro_dist updater_package ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+          for TARGET in ${TARGETS}; do
+            ./fbt TARGET_HW=$TARGET copro_dist updater_package \
+            ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
           done
 
       - name: 'Move upload files'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
           set -e
-          for TARGET_CONFIG in ${TARGET_CONFIGS}; do
-            TARGET=`echo ${TARGET_CONFIG} | cut -d, -f1`
+          for TARGET in ${TARGETS}; do
             mv dist/${TARGET}-*/* artifacts/
           done
 
@@ -188,9 +185,6 @@ jobs:
       - name: 'Build the firmware'
         run: |
           set -e
-          for TARGET_CONFIG in ${TARGET_CONFIGS}; do
-            TARGET=`echo ${TARGET_CONFIG} | sed 's/f//' | cut -d, -f1`
-            APP_SET=`echo ${TARGET_CONFIG} | sed 's/f//' | cut -d, -f2`          
-            ./fbt TARGET_HW=$TARGET FIRMWARE_APP_SET=$APP_SET \
-              updater_package DEBUG=0 COMPACT=1
+          for TARGET in ${TARGETS}; do
+            ./fbt TARGET_HW=$TARGET DEBUG=0 COMPACT=1 updater_package 
           done

@@ -81,7 +81,7 @@ if extra_app_list := GetOption("extra_ext_apps"):
 
 incompatible_apps = []
 for app in known_extapps:
-    if not any(map(lambda t: t in app.targets, ["all", appenv.subst("f${TARGET_HW}")])):
+    if not app.supports_hardware_target(appenv.subst("f${TARGET_HW}")):
         incompatible_apps.append(app)
         continue
 

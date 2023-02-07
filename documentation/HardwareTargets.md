@@ -38,7 +38,7 @@ For details on application manifests, check out [their docs page](./AppManifests
 
 ## Building Firmware for a Specific Target
 
-Usually you have to specify both TARGET_HW and FIRMWARE_APP_SET for `fbt` to build firmware for non-default target. For example, building and flashing debug firmware for f18 can be done with
+You have to specify TARGET_HW (and, optionally, FIRMWARE_APP_SET) for `fbt` to build firmware for non-default target. For example, building and flashing debug firmware for f18 can be done with
 
-    ./fbt TARGET_HW=18 FIRMWARE_APP_SET=komi flash_usb_full
+    ./fbt TARGET_HW=18 flash_usb_full
 

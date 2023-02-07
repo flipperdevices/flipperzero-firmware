@@ -15,16 +15,3 @@ App(
         "archive",
     ],
 )
-
-App(
-    appid="komi_apps",
-    name="Komi's applications for main menu",
-    apptype=FlipperAppType.METAPACKAGE,
-    provides=[
-        "gpio",
-        "bad_usb",
-        "u2f",
-        "fap_loader",
-        "archive",
-    ],
-)

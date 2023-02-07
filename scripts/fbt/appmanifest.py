@@ -180,6 +180,7 @@ class AppBuildset:
         self._process_deps()
         self._check_conflicts()
         self._check_unsatisfied()  # unneeded?
+        self._check_target_match()
         self.apps = sorted(
             list(map(self.appmgr.get, self.appnames)),
             key=lambda app: app.appid,
@@ -188,17 +189,12 @@ class AppBuildset:
     def _is_missing_dep(self, dep_name: str):
         return dep_name not in self.appnames
 
-    def _filter_by_target(self, app_name: str):
-        return any(
-            map(
-                lambda t: t in self.appmgr.get(app_name).targets,
-                ["all", self.hw_target],
-            )
-        )
+    def _check_if_app_target_supported(self, app_name: str):
+        return self.appmgr.get(app_name).supports_hardware_target(self.hw_target)
 
     def _get_app_depends(self, app_name: str) -> List[str]:
         # Skip app if its target is not supported by the target we are building for
-        if not self._filter_by_target(app_name):
+        if not self._check_if_app_target_supported(app_name):
             self._writer(
                 f"Skipping {app_name} due to target mismatch (building for {self.hw_target}, app supports {app_def.targets}"
             )
@@ -207,7 +203,7 @@ class AppBuildset:
         app_def = self.appmgr.get(app_name)
         return list(
             filter(
-                self._filter_by_target,
+                self._check_if_app_target_supported,
                 filter(self._is_missing_dep, app_def.provides + app_def.requires),
             )
         )
@@ -250,6 +246,17 @@ class AppBuildset:
         if len(unsatisfied):
             raise AppBuilderException(
                 f"Unsatisfied dependencies for {', '.join(f'{missing_dep[0]}: {missing_dep[1]}' for missing_dep in unsatisfied)}"
+            )
+
+    def _check_target_match(self):
+        incompatible = []
+        for app in self.appnames:
+            if not self.appmgr.get(app).supports_hardware_target(self.hw_target):
+                incompatible.append(app)
+
+        if len(incompatible):
+            raise AppBuilderException(
+                f"Apps incompatible with target {self.hw_target}: {', '.join(incompatible)}"
             )
 
     def get_apps_cdefs(self):
