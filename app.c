@@ -92,6 +92,7 @@ typedef struct AsteroidsApp {
     /* Game state. */
     int running; /* Once false exists the app. */
     bool gameover; /* Gameover status. */
+    bool paused; /* Game paused status. */
     uint32_t ticks; /* Game ticks. Increments at each refresh. */
     uint32_t score; /* Game score. */
     uint32_t highscore; /* Highscore. Shown on Game Over Screen */
@@ -1011,6 +1012,12 @@ void game_tick(void* ctx) {
         update_asteroids_position(app);
         view_port_update(app->view_port);
         return;
+    } else if(app->paused) {
+        if(key_pressed_time(app, InputKeyBack) > 100 || key_pressed_time(app, InputKeyOk) > 100) {
+            app->paused = false;
+        }
+        view_port_update(app->view_port);
+        return;
     }
 
     /* Handle keypresses. */
@@ -1194,6 +1201,15 @@ int32_t asteroids_app_entry(void* p) {
         if(qstat == FuriStatusOk) {
             // if(DEBUG_MSG)
             // FURI_LOG_E(TAG, "Main Loop - Input: type %d key %u", input.type, input.key);
+            /* Handle Pause */
+            if(input.type == InputTypeShort && input.key == InputKeyBack) {
+                app->paused = !app->paused;
+                if(app->paused) {
+                    furi_timer_stop(timer);
+                } else {
+                    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 10);
+                }
+            }
 
             /* Handle navigation here. Then handle view-specific inputs
              * in the view specific handling function. */
