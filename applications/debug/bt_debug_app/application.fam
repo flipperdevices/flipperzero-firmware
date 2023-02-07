@@ -2,7 +2,6 @@ App(
     appid="bt_debug",
     name="Bluetooth Debug",
     apptype=FlipperAppType.DEBUG,
-    targets=["f7"],
     entry_point="bt_debug_app",
     cdefines=["SRV_BT"],
     requires=[
