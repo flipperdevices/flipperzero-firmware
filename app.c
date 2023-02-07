@@ -490,6 +490,15 @@ void render_callback(Canvas* const canvas, void* ctx) {
         draw_powerUp_RemainingLife(canvas, &app->powerUps[j], j);
     }
 
+    if(app->paused) {
+        canvas_set_color(canvas, ColorXOR);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_rbox(canvas, 0, 0, SCREEN_XRES, SCREEN_YRES, 4);
+        canvas_draw_str_aligned(
+            canvas, SCREEN_XRES / 2, SCREEN_YRES / 2, AlignCenter, AlignCenter, "Paused");
+        return;
+    }
+
     /* Game over text. */
     if(app->gameover) {
         canvas_set_color(canvas, ColorBlack);
