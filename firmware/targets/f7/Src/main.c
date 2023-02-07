@@ -50,6 +50,22 @@ int main() {
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModeNormal);
         furi_hal_power_reset();
     } else {
+        // Factory reset
+        if(!furi_hal_gpio_read(&gpio_button_up)) {
+            furi_hal_light_sequence("rgb R");
+            size_t counter = 3000;
+            while(counter && !furi_hal_gpio_read(&gpio_button_up)) {
+                furi_delay_ms(1);
+                counter--;
+            }
+
+            if(!counter) {
+                furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
+                furi_hal_rtc_set_pin_fails(0);
+                furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+            }
+        }
+
         furi_hal_light_sequence("rgb G");
         furi_thread_start(main_thread);
     }

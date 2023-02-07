@@ -75,6 +75,7 @@ const size_t input_pins_count = sizeof(input_pins) / sizeof(InputPin);
 
 void furi_hal_resources_init_early() {
     furi_hal_gpio_init(&gpio_button_left, GpioModeInput, GpioPullUp, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_button_up, GpioModeInput, GpioPullUp, GpioSpeedLow);
 
     // SD Card stepdown control
     furi_hal_gpio_write(&periph_power, 1);
