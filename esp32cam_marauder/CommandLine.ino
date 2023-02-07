@@ -119,7 +119,10 @@ void takeNewPhoto(String path, bool flash) {
   {
     pinMode(4, OUTPUT);
     digitalWrite(4, HIGH);
+    delay(200);
   }
+  esp_camera_fb_get();
+  delay(100);
   camera_fb_t  * fb = esp_camera_fb_get();
   if (flash)
   {
