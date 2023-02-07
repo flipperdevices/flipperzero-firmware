@@ -130,6 +130,7 @@ void backlightOff() {
 
 void setup()
 {
+  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
   //pinMode(FLASH_BUTTON, INPUT);
 
   #ifdef HAS_SCREEN

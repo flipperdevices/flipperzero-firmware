@@ -1,6 +1,12 @@
 #include "CommandLine.h"
+
+bool configESPCamera_initialized = false;
+
 void configESPCamera() {
-  WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+  if(configESPCamera_initialized)
+    return;
+  configESPCamera_initialized = true;
+
   // Object to store the camera configuration parameters
   camera_config_t config;
 
@@ -146,7 +152,7 @@ CommandLine::CommandLine() {
 }
 
 void CommandLine::RunSetup() {
-  Serial.println(this->ascii_art);
+  //Serial.println(this->ascii_art);
 
   Serial.println(F("\n\n--------------------------------\n"));
   Serial.println(F("         ESP32 Marauder      \n"));
