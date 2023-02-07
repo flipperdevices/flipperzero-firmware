@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [TAMA P1: Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1)
 - Added: [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - Added: [Tic-Tac-Toe Multi (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
+- [Separate Playlists for CVS, Walgreens and Lowes #523 (By coenmpostma)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/523)
 
 <a name="release">
 
