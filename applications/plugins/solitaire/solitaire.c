@@ -485,6 +485,10 @@ int32_t solitaire_app(void* p) {
 
     DOLPHIN_DEED(DolphinDeedPluginGameStart);
     AppEvent event;
+
+    // Call Dolphin deed on game start
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 150);
         GameState* localstate = (GameState*)acquire_mutex_block(&state_mutex);

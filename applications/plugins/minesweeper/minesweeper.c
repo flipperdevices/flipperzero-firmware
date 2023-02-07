@@ -8,6 +8,8 @@
 #include <dialogs/dialogs.h>
 #include <m-string.h>
 
+#include <dolphin/dolphin.h>
+
 #include "assets.h"
 
 #define PLAYFIELD_WIDTH 16
@@ -251,6 +253,9 @@ static bool game_won(Minesweeper* minesweeper_state) {
     dialog_message_set_buttons(message, NULL, "Play again", NULL);
     dialog_message_set_icon(message, NULL, 72, 17);
 
+    // Call dolphin deed when we win the game
+    DOLPHIN_DEED(DolphinDeedPluginGameWin);
+
     DialogMessageButton choice = dialog_message_show(dialogs, message);
     dialog_message_free(message);
     furi_string_free(tempStr);
@@ -404,6 +409,9 @@ int32_t minesweeper_app(void* p) {
     // Open GUI and register view_port
     Gui* gui = furi_record_open("gui");
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    // Call dolphin deed on game start
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
 
     PluginEvent event;
     for(bool processing = true; processing;) {

@@ -29,6 +29,8 @@
 
 /* Forward declarations. */
 
+/* Forward declarations. */
+
 typedef struct ProtoViewApp ProtoViewApp;
 typedef struct ProtoViewMsgInfo ProtoViewMsgInfo;
 typedef struct ProtoViewFieldSet ProtoViewFieldSet;
