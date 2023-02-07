@@ -68,6 +68,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - Added: [Tic-Tac-Toe Multi (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Separate Playlists for CVS, Walgreens and Lowes #523 (By coenmpostma)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/523)
+- OFW: [Pin Reset #2367 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2367)
+- OFW: [multitarget support for fbt #2209 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2209)
 
 <a name="release">
 
