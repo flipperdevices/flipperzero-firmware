@@ -15,6 +15,8 @@
 #include <notification/notification_messages.h>
 #include <asteroids_icons.h>
 
+#include <time.h>
+
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 1
 #define SCREEN_XRES 128
@@ -694,7 +696,8 @@ bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y, float 
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
     // FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
-    if(app->powerUps_num == MAXPOWERUPS) return NULL;
+    if(app->powerUps_num == MAXPOWERUPS) return NULL; // Max Power Ups reached
+    if(app->lives == MAXLIVES) return NULL; // Max Lives reached
 
     // Randomly select power up for display
     PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
@@ -713,7 +716,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
         //size*2 to make sure power up is not spawned on the edge of the screen
         //It also keeps it away from the lives and score at the top of screen
         x = rand() % (SCREEN_XRES - (int)size);
-        y = rand() % (SCREEN_YRES - (int)size);
+        y = rand() % (SCREEN_YRES - (int)size + 20);
     } while(
         ((distance(app->ship.x, app->ship.y, x, y) < min_distance + size) ||
          isPowerUpCollidingWithEachOther(app, x, y, size)));
@@ -880,6 +883,24 @@ void update_asteroids_position(AsteroidsApp* app) {
     }
 }
 
+bool should_add_powerUp(AsteroidsApp* app) {
+    srand(furi_get_tick());
+    int random_number = rand() % 100 + 1;
+
+    // The chance of spawning a power-up decreases as the game goes on
+    int threshold = 100 - (app->score * 5);
+
+    // Make sure the threshold doesn't go below 10
+    threshold = (threshold < 10) ? 10 : threshold;
+    FURI_LOG_I(
+        TAG,
+        "Random number: %d, threshold: %d Bool: %d",
+        random_number,
+        threshold,
+        random_number <= threshold);
+    return random_number <= threshold;
+}
+
 void update_powerUps_position(AsteroidsApp* app) {
     for(int j = 0; j < app->powerUps_num; j++) {
         // @todo update_powerUps_position
@@ -899,7 +920,7 @@ void update_powerUp_status(AsteroidsApp* app) {
             app->powerUps[j].ttl--;
         } else if(app->powerUps[j].display_ttl > 0) {
             app->powerUps[j].display_ttl--;
-        } else {
+        } else if(app->powerUps[j].ttl == 0) {
             // we've reached the end of life of the power up
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
@@ -1045,7 +1066,8 @@ void game_tick(void* ctx) {
 
     /* From time to time add a random power up */
     //@todo game tick
-    if((app->powerUps_num == 0 || random() % 5000) < (30 / (1 + app->powerUps_num))) {
+    // if(app->powerUps_num == 0 || random() % (500 + (100 * (int)app->score)) <= app->powerUps_num) {
+    if(should_add_powerUp(app)) {
         add_powerUp(app);
     }
 
