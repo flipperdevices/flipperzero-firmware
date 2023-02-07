@@ -1,6 +1,6 @@
 #include <gui/elements.h>
 #include "gpio_i2c_scanner.h"
-#include "../gpio_item.h"
+#include "../gpio_items.h"
 
 #include <string.h>
 
