@@ -1,6 +1,7 @@
 #include "ds1992.h"
 
 #include <core/core_defines.h>
+#include <lib/toolbox/pretty_format.h>
 
 #include "dallas_common.h"
 
@@ -9,6 +10,8 @@
 
 #define DS1992_BRIEF_HEAD_COUNT 4U
 #define DS1992_BRIEF_TAIL_COUNT 3U
+
+#define DS1992_DATA_ROW_LENGTH 7U
 
 typedef struct {
     DallasCommonRomData rom_data;
@@ -21,6 +24,7 @@ static void dallas_ds1992_render_brief_data(FuriString*, const iButtonProtocolDa
 
 const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
+    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteBlank | iButtonProtocolFeatureWriteCopy,
     .data_size = sizeof(DS1992ProtocolData),
     .manufacturer = "Dallas",
     .name = "DS1992",
@@ -51,11 +55,7 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
 
 void dallas_ds1992_render_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData *data = protocol_data;
-
-    for(size_t i = 0; i < DS1992_SRAM_DATA_SIZE; ++i) {
-        const char* fmt = (i < DS1992_SRAM_DATA_SIZE - 1) ? "%02X " : "%02X";
-        furi_string_cat_printf(result, fmt, data->sram_data[i]);
-    }
+    pretty_format_bytes_hex(result, DS1992_DATA_ROW_LENGTH, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
 void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {

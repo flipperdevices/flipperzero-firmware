@@ -180,6 +180,7 @@ Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
 Header,+,lib/toolbox/md5.h,,
 Header,+,lib/toolbox/path.h,,
+Header,+,lib/toolbox/pretty_format.h,,
 Header,+,lib/toolbox/protocols/protocol_dict.h,,
 Header,+,lib/toolbox/random_name.h,,
 Header,+,lib/toolbox/saved_struct.h,,
@@ -2071,6 +2072,8 @@ Function,+,power_off,void,Power*
 Function,+,power_reboot,void,PowerBootMode
 Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
+Function,+,pretty_format_bytes_ascii,void,"FuriString*, size_t, const uint8_t*, size_t"
+Function,+,pretty_format_bytes_hex,void,"FuriString*, size_t, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
 Function,-,prng_successor,uint32_t,"uint32_t, uint32_t"
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."

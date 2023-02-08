@@ -4,7 +4,9 @@
 typedef enum {
     SubmenuIndexSave,
     SubmenuIndexEmulate,
-    SubmenuIndexWrite,
+    SubmenuIndexViewData,
+    SubmenuIndexWriteBlank,
+    SubmenuIndexWriteCopy,
 } SubmenuIndex;
 
 void ibutton_scene_read_key_menu_submenu_callback(void* context, uint32_t index) {
@@ -16,6 +18,8 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
+    const uint32_t features = ibutton_protocols_get_features(ibutton_key_get_protocol_id(ibutton->key));
+
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, ibutton_scene_read_key_menu_submenu_callback, ibutton);
     submenu_add_item(
@@ -24,16 +28,18 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
         SubmenuIndexEmulate,
         ibutton_scene_read_key_menu_submenu_callback,
         ibutton);
-    // if(ibutton_key_get_type(ibutton->key) == iButtonKeyDS1990) {
-    //     submenu_add_item(
-    //         submenu,
-    //         "Write",
-    //         SubmenuIndexWrite,
-    //         ibutton_scene_read_key_menu_submenu_callback,
-    //         ibutton);
-    // }
-    submenu_set_selected_item(
-        submenu, scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneReadKeyMenu));
+
+    if(features & iButtonProtocolFeatureExtData) {
+        submenu_add_item(submenu, "View Data", SubmenuIndexViewData, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+    }
+
+    if(features & iButtonProtocolFeatureWriteBlank) {
+        submenu_add_item(submenu, "Write Blank", SubmenuIndexWriteBlank, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+    }
+
+    if(features & iButtonProtocolFeatureWriteCopy) {
+        submenu_add_item(submenu, "Write Copy", SubmenuIndexWriteCopy, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+    }
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
 }
@@ -43,16 +49,18 @@ bool ibutton_scene_read_key_menu_on_event(void* context, SceneManagerEvent event
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_set_scene_state(
-            ibutton->scene_manager, iButtonSceneReadKeyMenu, event.event);
         consumed = true;
         if(event.event == SubmenuIndexSave) {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveName);
         } else if(event.event == SubmenuIndexEmulate) {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
             DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
-        } else if(event.event == SubmenuIndexWrite) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
+        } else if(event.event == SubmenuIndexViewData) {
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneViewData);
+        } else if(event.event == SubmenuIndexWriteBlank) {
+            // TODO: Write blank
+        } else if(event.event == SubmenuIndexWriteCopy) {
+            // TODO: Write copy
         }
     }
 

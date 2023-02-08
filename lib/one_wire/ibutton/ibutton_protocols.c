@@ -10,6 +10,10 @@ iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
     return protocol_id;
 }
 
+uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id) {
+    return ibutton_protocols[protocol_id]->features;
+}
+
 size_t ibutton_protocols_get_data_size(iButtonProtocol protocol_id) {
     return ibutton_protocols[protocol_id]->data_size;
 }

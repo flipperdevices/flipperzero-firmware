@@ -14,6 +14,12 @@
 iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code);
 
 /**
+ * Get protocol features bitmask by protocol id
+ * @param [in] protocol_id id of the protocol in question
+ */
+uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id);
+
+/**
  * Get data size based on the protocol id
  * @param [in] protocol_id id of the protocol in question
  * @return data size in bytes

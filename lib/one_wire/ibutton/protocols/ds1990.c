@@ -12,6 +12,7 @@ static void dallas_ds1990_render_brief_data(FuriString*, const iButtonProtocolDa
 
 const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .family_code = DS1990_FAMILY_CODE,
+    .features = iButtonProtocolFeatureWriteBlank,
     .data_size = sizeof(DallasCommonRomData),
     .manufacturer = "Dallas",
     .name = "DS1990",
