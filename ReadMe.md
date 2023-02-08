@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0208-1602-0.76.1-98961af](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-08 15:25 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-08 15:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-08 16:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-08 16:45 EST`
 - [Separate Playlists for CVS, Walgreens and Lowes #523 (By pstmcm2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/523)
 - OFW: [Pin Reset #2367 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2367)
 - OFW: [multitarget support for fbt #2209 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2209)
@@ -65,6 +65,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
 - UL: Updated [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Removed: [NFC Magic: Add support for Gen4 "ultimate card" in Magic app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) (Seemingly Not Working)
+- UL: [SubGHz HAL Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 
 <a name="release">
 
