@@ -164,7 +164,7 @@ Depends(
     ),
 )
 Alias("fap_dist", fap_dist)
-distenv.Default(fap_dist)
+# distenv.Default(fap_dist)
 
 distenv.Depends(firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"].resources_dist)
 
