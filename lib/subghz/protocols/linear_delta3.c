@@ -26,6 +26,8 @@ struct SubGhzProtocolDecoderLinearDelta3 {
 
     SubGhzBlockDecoder decoder;
     SubGhzBlockGeneric generic;
+
+    uint32_t last_data;
 };
 
 struct SubGhzProtocolEncoderLinearDelta3 {
@@ -135,14 +137,14 @@ static bool
             level_duration_make(true, (uint32_t)subghz_protocol_linear_delta3_const.te_short);
         //Send PT_GUARD
         instance->encoder.upload[index] = level_duration_make(
-            false, (uint32_t)subghz_protocol_linear_delta3_const.te_short * 47);
+            false, (uint32_t)subghz_protocol_linear_delta3_const.te_short * 73);
     } else {
         //send bit 0
         instance->encoder.upload[index++] =
             level_duration_make(true, (uint32_t)subghz_protocol_linear_delta3_const.te_long);
         //Send PT_GUARD
         instance->encoder.upload[index] = level_duration_make(
-            false, (uint32_t)subghz_protocol_linear_delta3_const.te_short * 44);
+            false, (uint32_t)subghz_protocol_linear_delta3_const.te_short * 70);
     }
 
     return true;
@@ -219,6 +221,7 @@ void subghz_protocol_decoder_linear_delta3_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderLinearDelta3* instance = context;
     instance->decoder.parser_step = LinearDecoderStepReset;
+    instance->last_data = 0;
 }
 
 void subghz_protocol_decoder_linear_delta3_feed(void* context, bool level, uint32_t duration) {
@@ -259,14 +262,19 @@ void subghz_protocol_decoder_linear_delta3_feed(void* context, bool level, uint3
                 }
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_linear_delta3_const.min_count_bit_for_found) {
-                    instance->generic.serial = 0x0;
-                    instance->generic.btn = 0x0;
+                    if((instance->last_data == instance->decoder.decode_data) &&
+                       instance->last_data) {
+                        instance->generic.serial = 0x0;
+                        instance->generic.btn = 0x0;
 
-                    instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+                        instance->generic.data = instance->decoder.decode_data;
+                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
 
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
+                        if(instance->base.callback)
+                            instance->base.callback(&instance->base, instance->base.context);
+                    }
+                    instance->decoder.parser_step = LinearDecoderStepSaveDuration;
+                    instance->last_data = instance->decoder.decode_data;
                 }
                 break;
             }
@@ -337,15 +345,15 @@ void subghz_protocol_decoder_linear_delta3_get_string(void* context, FuriString*
     furi_assert(context);
     SubGhzProtocolDecoderLinearDelta3* instance = context;
 
-    uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
+    uint32_t data = instance->generic.data & 0xFF;
 
     furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
-        "Key:0x%08lX\r\n"
+        "Key:0x%lX\r\n"
         "DIP:" DIP_PATTERN "\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
-        code_found_lo,
-        DATA_TO_DIP(code_found_lo));
+        data,
+        DATA_TO_DIP(data));
 }
