@@ -98,7 +98,6 @@ iButton* ibutton_alloc() {
 
     ibutton->gui = furi_record_open(RECORD_GUI);
 
-    // ibutton->storage = furi_record_open(RECORD_STORAGE);
     ibutton->dialogs = furi_record_open(RECORD_DIALOGS);
     ibutton->notifications = furi_record_open(RECORD_NOTIFICATION);
 
@@ -156,9 +155,6 @@ void ibutton_free(iButton* ibutton) {
 
     view_dispatcher_free(ibutton->view_dispatcher);
     scene_manager_free(ibutton->scene_manager);
-
-    // furi_record_close(RECORD_STORAGE);
-    // ibutton->storage = NULL;
 
     furi_record_close(RECORD_NOTIFICATION);
     ibutton->notifications = NULL;
