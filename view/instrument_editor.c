@@ -273,7 +273,15 @@ void draw_program_step(Canvas *canvas, uint8_t y, FlizzerTrackerApp *tracker, ui
     {
         if ((opcode & 0x7f00) == TE_EFFECT_ARPEGGIO)
         {
-            snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), notename((opcode & 0xff) + tracker->song.instrument[tracker->current_instrument]->base_note));
+            if ((opcode & 0xff) != 0xf0 && (opcode & 0xff) != 0xf1)
+            {
+                snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), notename(my_min(12 * 7 + 11, (opcode & 0xff) + tracker->song.instrument[tracker->current_instrument]->base_note)));
+            }
+
+            else
+            {
+                snprintf(buffer, sizeof(buffer), "%01X %c%02X %s", index, command_get_char(opcode & 0x7fff), (opcode & 0xff), notename((opcode & 0xff)));
+            }
         }
 
         else if ((opcode & 0x7f00) == TE_EFFECT_ARPEGGIO_ABS)

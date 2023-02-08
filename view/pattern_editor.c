@@ -23,7 +23,7 @@ static const char *notenames[] =
 
 char *notename(uint8_t note)
 {
-    static char buffer[4];
+    static char buffer[6];
 
     if (note == MUS_NOTE_CUT)
     {
@@ -33,7 +33,19 @@ char *notename(uint8_t note)
 
     if (note == MUS_NOTE_RELEASE)
     {
-        snprintf(buffer, sizeof(buffer), "   ");
+        snprintf(buffer, sizeof(buffer), "%s", "   ");
+        return buffer;
+    }
+
+    if(note == 0xf0) //external arpeggio notes
+    {
+        snprintf(buffer, sizeof(buffer), "%s", "EXT.0");
+        return buffer;
+    }
+
+    if(note == 0xf1)
+    {
+        snprintf(buffer, sizeof(buffer), "%s", "EXT.1");
         return buffer;
     }
 
