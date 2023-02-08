@@ -9,6 +9,7 @@ import socket
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from flipper.app import App
+from serial.tools.list_ports_common import ListPortInfo
 
 
 class Programmer(ABC):
@@ -143,7 +144,9 @@ def blackmagic_find_serial(serial: str):
         if not serial.startswith("\\\\.\\"):
             serial = f"\\\\.\\{serial}"
 
-    ports = list(list_ports.grep("blackmagic"))
+    # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
+    ports: list[ListPortInfo] = list(list_ports.grep("blackmagic"))  # type: ignore
+
     if len(ports) == 0:
         return None
     elif len(ports) > 2:

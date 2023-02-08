@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from flipper.app import App
+from serial.tools.list_ports_common import ListPortInfo
 
 import logging
 import os
@@ -17,8 +18,9 @@ class Main(App):
         # logging
         self.logger = logging.getLogger()
 
-    def lookup(self):
-        ports = list(list_ports.grep("ESP32-S2"))
+    def find_wifi_board(self):
+        # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
+        ports: list[ListPortInfo] = list(list_ports.grep("ESP32-S2"))  # type: ignore
 
         if len(ports) == 0:
             # Blackmagic probe serial port not found, will be handled later
@@ -55,7 +57,11 @@ class Main(App):
                 f.write(response.content)
 
     def update(self):
-        port = self.lookup()
+        try:
+            port = self.find_wifi_board()
+        except Exception as e:
+            self.logger.error(f"{e}")
+            return 1
 
         if self.args.port != "auto":
             port = self.args.port
