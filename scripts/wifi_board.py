@@ -6,6 +6,7 @@ import logging
 import os
 import tempfile
 import subprocess
+import serial.tools.list_ports as list_ports
 
 
 class Main(App):
@@ -17,8 +18,6 @@ class Main(App):
         self.logger = logging.getLogger()
 
     def lookup(self):
-        import serial.tools.list_ports as list_ports
-
         ports = list(list_ports.grep("ESP32-S2"))
 
         if len(ports) == 0:
@@ -57,6 +56,14 @@ class Main(App):
 
     def update(self):
         port = self.lookup()
+
+        if self.args.port != "auto":
+            port = self.args.port
+
+            available_ports = [p[0] for p in list(list_ports.comports())]
+            if port not in available_ports:
+                self.logger.error(f"Port {port} not found")
+                return 1
 
         if port is None:
             self.logger.error("WiFi board not found")
