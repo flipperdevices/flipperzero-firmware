@@ -66,6 +66,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Removed: [NFC Magic: Add support for Gen4 "ultimate card" in Magic app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) (Seemingly Not Working)
 - UL: [SubGHz HAL Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
+- UL PR: [Fix CTRL-SHIFT in mousejacker #316 (By notmarek)](https://github.com/DarkFlippers/unleashed-firmware/pull/316)
+- UL PR: [Updated infrared assets #318 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/318)
 
 <a name="release">
 
