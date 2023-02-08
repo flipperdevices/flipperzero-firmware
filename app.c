@@ -168,6 +168,17 @@ const NotificationSequence sequence_bullet_fired = {
     NULL,
 };
 
+const NotificationSequence sequence_powerup_collected = {
+    &message_vibro_on,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_delay_1,
+    &message_vibro_off,
+    NULL,
+};
+
 const NotificationSequence sequence_nuke = {
     &message_blink_set_color_red,
     &message_blink_start_100,
@@ -800,6 +811,9 @@ void remove_all_astroids_and_bullets(AsteroidsApp* app) {
 void powerUp_was_hit(AsteroidsApp* app, int id) {
     PowerUp* p = &app->powerUps[id];
     if(p->display_ttl == 0) return; // Don't collect if already collected or expired
+
+    // Vibrate to indicate power up was collected
+    notification_message(furi_record_open(RECORD_NOTIFICATION), &sequence_powerup_collected);
 
     switch(p->powerUpType) {
     case PowerUpTypeLife:
