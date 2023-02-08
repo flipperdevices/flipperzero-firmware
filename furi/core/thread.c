@@ -195,6 +195,15 @@ void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority) {
     thread->priority = priority;
 }
 
+void furi_thread_set_current_priority(FuriThreadPriority priority) {
+    UBaseType_t new_priority = priority ? priority : FuriThreadPriorityNormal;
+    vTaskPrioritySet(NULL, new_priority);
+}
+
+FuriThreadPriority furi_thread_get_current_priority() {
+    return (FuriThreadPriority)uxTaskPriorityGet(NULL);
+}
+
 void furi_thread_set_state_callback(FuriThread* thread, FuriThreadStateCallback callback) {
     furi_assert(thread);
     furi_assert(thread->state == FuriThreadStateStopped);
@@ -528,6 +537,12 @@ bool furi_thread_set_stdout_callback(FuriThreadStdoutWriteCallback callback) {
     thread->output.write_callback = callback;
 
     return true;
+}
+
+FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback() {
+    FuriThread* thread = furi_thread_get_current();
+
+    return thread->output.write_callback;
 }
 
 size_t furi_thread_stdout_write(const char* data, size_t size) {
