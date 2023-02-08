@@ -705,7 +705,7 @@ bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y, float 
 
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
-    // FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
+    FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
     if(app->powerUps_num == MAXPOWERUPS) return NULL; // Max Power Ups reached
     if(app->lives == MAXLIVES) return NULL; // Max Lives reached
 
@@ -771,10 +771,14 @@ bool isPowerUpAlreadyExists(AsteroidsApp* const app, PowerUpType const powerUpTy
 
 //@todo remove_powerUp
 void remove_powerUp(AsteroidsApp* app, int id) {
+    FURI_LOG_I(TAG, "remove_powerUp: %i", id);
     // Invalid ID, ignore
-    if(id < 0) return;
-
+    if(id < 0) {
+        FURI_LOG_E(TAG, "remove_powerUp: Invalid ID: %i", id);
+        return;
+    }
     // TODO: Break this out into object types that set the game state
+    // Return the bullet period to normal
     if(app->powerUps[id].powerUpType == PowerUpTypeFirePower) {
         app->bullet_min_period = 200;
     }
@@ -902,12 +906,12 @@ bool should_add_powerUp(AsteroidsApp* app) {
 
     // Make sure the threshold doesn't go below 10
     threshold = (threshold < 10) ? 10 : threshold;
-    FURI_LOG_I(
-        TAG,
-        "Random number: %d, threshold: %d Bool: %d",
-        random_number,
-        threshold,
-        random_number <= threshold);
+    // FURI_LOG_I(
+    //     TAG,
+    //     "Random number: %d, threshold: %d Bool: %d",
+    //     random_number,
+    //     threshold,
+    //     random_number <= threshold);
     return random_number <= threshold;
 }
 
@@ -930,7 +934,7 @@ void update_powerUp_status(AsteroidsApp* app) {
             app->powerUps[j].ttl--;
         } else if(app->powerUps[j].display_ttl > 0) {
             app->powerUps[j].display_ttl--;
-        } else if(app->powerUps[j].ttl == 0) {
+        } else if(app->powerUps[j].ttl == 0 || app->powerUps[j].display_ttl == 0) {
             // we've reached the end of life of the power up
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
