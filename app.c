@@ -928,7 +928,7 @@ void update_powerUps_position(AsteroidsApp* app) {
 // @todo update_powerUp_status
 /* This updates the state of each power up collected and removes them if they have expired. */
 void update_powerUp_status(AsteroidsApp* app) {
-    for(int j = app->powerUps_num; j >= 0; j--) {
+    for(int j = 0; j < app->powerUps_num; j++) {
         if(app->powerUps[j].ttl > 0 && app->powerUps[j].isPowerUpActive) {
             // Only decrement ttl if we actually picked up power up
             app->powerUps[j].ttl--;
@@ -945,8 +945,8 @@ void update_powerUp_status(AsteroidsApp* app) {
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
             remove_powerUp(app, j);
-            // j--; /* Process this power up index again: the removal will
-            //         fill it with the top power up to take the array dense. */
+            j--; /* Process this power up index again: the removal will
+                    fill it with the top power up to take the array dense. */
         } else {
             FURI_LOG_E(
                 TAG,
