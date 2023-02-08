@@ -988,11 +988,12 @@ void detect_collisions(AsteroidsApp* app) {
                 notification_message(
                     furi_record_open(RECORD_NOTIFICATION), &sequence_bullet_fired);
                 asteroid_was_hit(app, j);
+                j--; /* Scan this j value again. */
             } else {
                 // No sheild active, take damage
                 ship_was_hit(app);
+                break;
             }
-            break;
         }
     }
 
@@ -1001,7 +1002,7 @@ void detect_collisions(AsteroidsApp* app) {
         PowerUp* p = &app->powerUps[j];
         if(objects_are_colliding(p->x, p->y, p->size, app->ship.x, app->ship.y, 4, 1)) {
             powerUp_was_hit(app, j);
-            break;
+            // break;
         }
     }
 }
