@@ -225,7 +225,7 @@ static void example_thermo_draw_callback(Canvas* canvas, void* ctx) {
         text_store,
         TEXT_STORE_SIZE,
         "to GPIO pin %ld",
-        furi_hal_gpio_get_ext_pin_number(&THERMO_GPIO_PIN));
+        furi_hal_resources_get_ext_pin_number(&THERMO_GPIO_PIN));
     canvas_draw_str_aligned(canvas, middle_x, 42, AlignCenter, AlignBottom, text_store);
 
     canvas_set_font(canvas, FontKeyboard);
