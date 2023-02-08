@@ -380,8 +380,6 @@ void subghz_cli_command_rx_raw(Cli* cli, FuriString* args, void* context) {
 
     furi_hal_power_suppress_charge_exit();
 
-    printf("\r\nPackets received %zu\r\n", instance->packet_count);
-
     // Cleanup
     furi_stream_buffer_free(instance->stream);
     free(instance);
