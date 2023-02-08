@@ -43,7 +43,7 @@ void infrared_scene_universal_projector_on_enter(void* context) {
         0,
         1,
         3,
-        64,
+        66,
         &I_Vol_up_25x27,
         &I_Vol_up_hvr_25x27,
         infrared_scene_universal_common_item_callback,
@@ -55,15 +55,15 @@ void infrared_scene_universal_projector_on_enter(void* context) {
         1,
         1,
         36,
-        64,
+        66,
         &I_Vol_down_25x27,
         &I_Vol_down_hvr_25x27,
         infrared_scene_universal_common_item_callback,
         context);
     infrared_brute_force_add_record(brute_force, i++, "Vol_dn");
 
-    button_panel_add_label(button_panel, 10, 11, FontPrimary, "Projector remote");
-    button_panel_add_label(button_panel, 17, 60, FontSecondary, "Volume");
+    button_panel_add_label(button_panel, 2, 11, FontPrimary, "Proj. remote");
+    button_panel_add_label(button_panel, 17, 62, FontSecondary, "Volume");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
     view_dispatcher_switch_to_view(infrared->view_dispatcher, InfraredViewStack);
