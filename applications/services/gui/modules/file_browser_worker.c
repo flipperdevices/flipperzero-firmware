@@ -1,13 +1,16 @@
 #include "file_browser_worker.h"
+
+#include <storage/filesystem_api_defines.h>
+#include <storage/storage.h>
+
+#include <toolbox/path.h>
 #include <core/check.h>
 #include <core/common_defines.h>
-#include "storage/filesystem_api_defines.h"
+#include <furi.h>
+
 #include <m-array.h>
 #include <stdbool.h>
-#include <storage/storage.h>
-#include <furi.h>
 #include <stddef.h>
-#include "toolbox/path.h"
 
 #define TAG "BrowserWorker"
 
@@ -375,7 +378,7 @@ BrowserWorker* file_browser_worker_alloc(
     const char* filter_ext,
     bool skip_assets,
     bool hide_dot_files) {
-    BrowserWorker* browser = malloc(sizeof(BrowserWorker)); //-V773
+    BrowserWorker* browser = malloc(sizeof(BrowserWorker));
 
     idx_last_array_init(browser->idx_last);
 
@@ -395,7 +398,7 @@ BrowserWorker* file_browser_worker_alloc(
     furi_thread_start(browser->thread);
 
     return browser;
-}
+} //-V773
 
 void file_browser_worker_free(BrowserWorker* browser) {
     furi_assert(browser);

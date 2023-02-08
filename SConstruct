@@ -148,9 +148,12 @@ fap_dist = [
             for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
         ),
     ),
-    distenv.Install(
-        f"#/dist/{dist_dir}/apps",
-        "#/assets/resources/apps",
+    *(
+        distenv.Install(
+            f"#/dist/{dist_dir}/apps/{app_artifact.app.fap_category}",
+            app_artifact.compact[0],
+        )
+        for app_artifact in firmware_env["FW_EXTAPPS"].applications.values()
     ),
 ]
 Depends(
@@ -164,6 +167,14 @@ Alias("fap_dist", fap_dist)
 # distenv.Default(fap_dist)
 
 distenv.Depends(firmware_env["FW_RESOURCES"], firmware_env["FW_EXTAPPS"].resources_dist)
+
+# Copy all faps to device
+
+fap_deploy = distenv.PhonyTarget(
+    "fap_deploy",
+    "${PYTHON3} ${ROOT_DIR}/scripts/storage.py send ${SOURCE} /ext/apps",
+    source=Dir("#/assets/resources/apps"),
+)
 
 
 # Target for bundling core2 package for qFlipper
@@ -189,6 +200,20 @@ firmware_bm_flash = distenv.PhonyTarget(
     GDBFLASH=[
         "-ex",
         "load",
+        "-ex",
+        "quit",
+    ],
+)
+
+gdb_backtrace_all_threads = distenv.PhonyTarget(
+    "gdb_trace_all",
+    "$GDB $GDBOPTS $SOURCES $GDBFLASH",
+    source=firmware_env["FW_ELF"],
+    GDBOPTS="${GDBOPTS_BASE}",
+    GDBREMOTE="${OPENOCD_GDB_PIPE}",
+    GDBFLASH=[
+        "-ex",
+        "thread apply all bt",
         "-ex",
         "quit",
     ],

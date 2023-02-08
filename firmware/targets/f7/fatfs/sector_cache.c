@@ -19,14 +19,11 @@ static SectorCache* cache = NULL;
 
 void sector_cache_init() {
     if(cache == NULL) {
-        cache = furi_hal_memory_alloc(sizeof(SectorCache));
+        cache = memmgr_alloc_from_pool(sizeof(SectorCache));
     }
 
     if(cache != NULL) {
-        FURI_LOG_I("SectorCache", "Initializing sector cache");
         memset(cache, 0, sizeof(SectorCache));
-    } else {
-        FURI_LOG_E("SectorCache", "Cannot enable sector cache");
     }
 }
 

@@ -9,7 +9,11 @@
 
 FuriEventFlag* furi_event_flag_alloc() {
     furi_assert(!FURI_IS_IRQ_MODE());
-    return ((FuriEventFlag*)xEventGroupCreate());
+
+    EventGroupHandle_t handle = xEventGroupCreate();
+    furi_check(handle);
+
+    return ((FuriEventFlag*)handle);
 }
 
 void furi_event_flag_free(FuriEventFlag* instance) {
@@ -28,7 +32,7 @@ uint32_t furi_event_flag_set(FuriEventFlag* instance, uint32_t flags) {
     if(FURI_IS_IRQ_MODE()) {
         yield = pdFALSE;
         if(xEventGroupSetBitsFromISR(hEventGroup, (EventBits_t)flags, &yield) == pdFAIL) {
-            rflags = (uint32_t)FuriStatusErrorResource;
+            rflags = (uint32_t)FuriFlagErrorResource;
         } else {
             rflags = flags;
             portYIELD_FROM_ISR(yield);

@@ -34,6 +34,8 @@ void nfc_scene_extra_actions_on_enter(void* context) {
         SubmenuIndexMfUltralightUnlock,
         nfc_scene_extra_actions_submenu_callback,
         nfc);
+    submenu_set_selected_item(
+        submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneExtraActions));
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
@@ -43,7 +45,7 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexMfClassicKeys) {
-            if(mf_classic_dict_check_presence(MfClassicDictTypeFlipper)) {
+            if(mf_classic_dict_check_presence(MfClassicDictTypeSystem)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicKeys);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);

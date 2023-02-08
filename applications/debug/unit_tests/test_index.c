@@ -13,6 +13,7 @@ int run_minunit_test_furi_hal();
 int run_minunit_test_furi_string();
 int run_minunit_test_infrared();
 int run_minunit_test_rpc();
+int run_minunit_test_manifest();
 int run_minunit_test_flipper_format();
 int run_minunit_test_flipper_format_string();
 int run_minunit_test_stream();
@@ -24,6 +25,7 @@ int run_minunit_test_protocol_dict();
 int run_minunit_test_lfrfid_protocols();
 int run_minunit_test_nfc();
 int run_minunit_test_bit_lib();
+int run_minunit_test_float_tools();
 int run_minunit_test_bt();
 
 typedef int (*UnitTestEntry)();
@@ -40,6 +42,7 @@ const UnitTest unit_tests[] = {
     {.name = "storage", .entry = run_minunit_test_storage},
     {.name = "stream", .entry = run_minunit_test_stream},
     {.name = "dirwalk", .entry = run_minunit_test_dirwalk},
+    {.name = "manifest", .entry = run_minunit_test_manifest},
     {.name = "flipper_format", .entry = run_minunit_test_flipper_format},
     {.name = "flipper_format_string", .entry = run_minunit_test_flipper_format_string},
     {.name = "rpc", .entry = run_minunit_test_rpc},
@@ -50,6 +53,7 @@ const UnitTest unit_tests[] = {
     {.name = "protocol_dict", .entry = run_minunit_test_protocol_dict},
     {.name = "lfrfid", .entry = run_minunit_test_lfrfid_protocols},
     {.name = "bit_lib", .entry = run_minunit_test_bit_lib},
+    {.name = "float_tools", .entry = run_minunit_test_float_tools},
     {.name = "bt", .entry = run_minunit_test_bt},
 };
 
@@ -73,7 +77,6 @@ void unit_tests_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(args);
     UNUSED(context);
-    uint32_t failed_tests = 0;
     minunit_run = 0;
     minunit_assert = 0;
     minunit_fail = 0;
@@ -99,32 +102,35 @@ void unit_tests_cli(Cli* cli, FuriString* args, void* context) {
 
             if(furi_string_size(args)) {
                 if(furi_string_cmp_str(args, unit_tests[i].name) == 0) {
-                    failed_tests += unit_tests[i].entry();
+                    unit_tests[i].entry();
                 } else {
                     printf("Skipping %s\r\n", unit_tests[i].name);
                 }
             } else {
-                failed_tests += unit_tests[i].entry();
+                unit_tests[i].entry();
             }
         }
-        printf("\r\nFailed tests: %lu\r\n", failed_tests);
 
-        // Time report
-        cycle_counter = (furi_get_tick() - cycle_counter);
-        printf("Consumed: %lu ms\r\n", cycle_counter);
+        if(minunit_run != 0) {
+            printf("\r\nFailed tests: %u\r\n", minunit_fail);
 
-        // Wait for tested services and apps to deallocate memory
-        furi_delay_ms(200);
-        uint32_t heap_after = memmgr_get_free_heap();
-        printf("Leaked: %ld\r\n", heap_before - heap_after);
+            // Time report
+            cycle_counter = (furi_get_tick() - cycle_counter);
+            printf("Consumed: %lu ms\r\n", cycle_counter);
 
-        // Final Report
-        if(failed_tests == 0) {
-            notification_message(notification, &sequence_success);
-            printf("Status: PASSED\r\n");
-        } else {
-            notification_message(notification, &sequence_error);
-            printf("Status: FAILED\r\n");
+            // Wait for tested services and apps to deallocate memory
+            furi_delay_ms(200);
+            uint32_t heap_after = memmgr_get_free_heap();
+            printf("Leaked: %ld\r\n", heap_before - heap_after);
+
+            // Final Report
+            if(minunit_fail == 0) {
+                notification_message(notification, &sequence_success);
+                printf("Status: PASSED\r\n");
+            } else {
+                notification_message(notification, &sequence_error);
+                printf("Status: FAILED\r\n");
+            }
         }
     }
 
