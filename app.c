@@ -935,12 +935,26 @@ void update_powerUp_status(AsteroidsApp* app) {
         } else if(app->powerUps[j].display_ttl > 0) {
             app->powerUps[j].display_ttl--;
         } else if(app->powerUps[j].ttl == 0 || app->powerUps[j].display_ttl == 0) {
+            FURI_LOG_I(
+                TAG,
+                "[update_powerUp_status] Power up expired!, ttl: %lu, display_ttl: %lu id: %d",
+                app->powerUps[j].ttl,
+                app->powerUps[j].display_ttl,
+                j);
             // we've reached the end of life of the power up
             // Time to remove it
             app->powerUps[j].isPowerUpActive = false;
             remove_powerUp(app, j);
             // j--; /* Process this power up index again: the removal will
             //         fill it with the top power up to take the array dense. */
+        } else {
+            FURI_LOG_E(
+                TAG,
+                "[update_powerUp_status] Power up error! Invalid Index: %d ttl: %lu display_ttl: %lu PowerUp_Num: %d",
+                j,
+                app->powerUps[j].ttl,
+                app->powerUps[j].display_ttl,
+                app->powerUps_num);
         }
     }
 }
