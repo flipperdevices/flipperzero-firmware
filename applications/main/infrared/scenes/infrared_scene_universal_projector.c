@@ -9,7 +9,7 @@ void infrared_scene_universal_projector_on_enter(void* context) {
     ButtonPanel* button_panel = infrared->button_panel;
     InfraredBruteForce* brute_force = infrared->brute_force;
 
-    infrared_brute_force_set_db_filename(brute_force, EXT_PATH("infrared/assets/projectors.ir"));
+    infrared_brute_force_set_db_filename(brute_force, EXT_PATH("infrared/assets/projector.ir"));
     
     button_panel_reserve(button_panel, 2, 2);
     uint32_t i = 0;
@@ -62,7 +62,7 @@ void infrared_scene_universal_projector_on_enter(void* context) {
         context);
     infrared_brute_force_add_record(brute_force, i++, "Vol_dn");
 
-    button_panel_add_label(button_panel, 10, 11, FontPrimary, "Projector");
+    button_panel_add_label(button_panel, 10, 11, FontPrimary, "Projector remote");
     button_panel_add_label(button_panel, 17, 60, FontSecondary, "Volume");
 
     view_set_orientation(view_stack_get_view(infrared->view_stack), ViewOrientationVertical);
