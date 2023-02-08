@@ -10,7 +10,7 @@ on:
   pull_request:
 
 env:
-  TARGETS: f7 f18
+  TARGETS: f7
   DEFAULT_TARGET: f7
   FBT_TOOLCHAIN_PATH: /runner/_work
 
@@ -188,5 +188,5 @@ jobs:
           set -e
           for TARGET in ${TARGETS}; do
             TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET DEBUG=0 COMPACT=1 updater_package 
+            ./fbt TARGET_HW=$TARGET DEBUG=0 COMPACT=1 fap_dist updater_package
           done
