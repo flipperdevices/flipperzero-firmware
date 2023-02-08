@@ -771,7 +771,7 @@ static void tama_p1_init(TamaApp* const ctx) {
         // Start stepping thread
         ctx->thread = furi_thread_alloc();
         furi_thread_set_name(ctx->thread, "TamaLIB");
-        furi_thread_set_stack_size(ctx->thread, 1024);
+        furi_thread_set_stack_size(ctx->thread, 2 * 1024);
         furi_thread_set_callback(ctx->thread, tama_p1_worker);
         furi_thread_set_context(ctx->thread, g_state_mutex);
         furi_thread_start(ctx->thread);
@@ -830,14 +830,15 @@ int32_t tama_p1_app(void* p) {
                 btn_state_t tama_btn_state = 0; // BTN_STATE_RELEASED is 0
 
                 if(in_menu) {
-                    if(menu_cursor == 2 &&
-                       (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
-                        tama_btn_state = BTN_STATE_RELEASED;
-                    }
+                    // if(menu_cursor == 2 &&
+                       // (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
+                        // tama_btn_state = BTN_STATE_RELEASED;
+                    // }
                     if(event.input.key == InputKeyBack) {
                         tama_btn_state = BTN_STATE_RELEASED;
                         in_menu = false;
                     } else if(event.input.key == InputKeyUp && event.input.type == InputTypePress) {
+                        tama_btn_state = BTN_STATE_RELEASED;
                         if(menu_cursor > 0) {
                             menu_cursor -= 1;
                         } else {
@@ -851,6 +852,7 @@ int32_t tama_p1_app(void* p) {
                             sub_menu_last = 0;
                         }
                     } else if(event.input.key == InputKeyDown && event.input.type == InputTypePress) {
+                        tama_btn_state = BTN_STATE_RELEASED;
                         if(menu_cursor < menu_items - 1) {
                             menu_cursor += 1;
                         } else {
@@ -859,7 +861,6 @@ int32_t tama_p1_app(void* p) {
                         if(menu_cursor >= menu_items - 2 && sub_menu_buttons > 0) {
                             sub_menu_buttons = 1;
                             sub_menu_last = 1;
-                            // sub_menu_last = 2;
                         } else {
                             sub_menu_buttons = 0;
                             sub_menu_last = 0;
@@ -1082,6 +1083,8 @@ int32_t tama_p1_app(void* p) {
                             case 3: // C
                                 tamalib_set_button(BTN_RIGHT, tama_btn_state);
                                 break;
+                            default:
+                                break;
                             }
                             break;
                         case menu_items - 1:
@@ -1093,22 +1096,26 @@ int32_t tama_p1_app(void* p) {
                                     break;
                                 case 1: // Save
                                     if(speed != 1) {
-                                        // uint8_t temp = speed;
-                                        // speed = 1;
-                                        tamalib_set_speed(1);
+                                        uint8_t temp = speed;
+                                        speed = 1;
+                                        tamalib_set_speed(speed);
+                                        furi_timer_stop(timer);
                                         tama_p1_save_state();
-                                        // speed = temp;
+                                        furi_timer_start(
+                                            timer, furi_kernel_get_tick_frequency() / 30);
+                                        speed = temp;
                                         tamalib_set_speed(speed);
                                     } else {
+                                        furi_timer_stop(timer);
                                         tama_p1_save_state();
+                                        furi_timer_start(
+                                            timer, furi_kernel_get_tick_frequency() / 30);
                                     }
-                                    // in_menu = false;
                                     break;
                                 case 2: // Save & Exit
                                     if(speed != 1) {
-                                        // speed = 1;
-                                        // tamalib_set_speed(speed);
-                                        tamalib_set_speed(1);
+                                        speed = 1;
+                                        tamalib_set_speed(speed);
                                     }
                                     furi_timer_stop(timer);
                                     tama_p1_save_state();
@@ -1124,16 +1131,15 @@ int32_t tama_p1_app(void* p) {
                 } else { // out of menu // TODO: clean up code -.-
                     if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) {
                         if(speed != 1) {
-                            // speed = 1;
-                            // tamalib_set_speed(speed);
-                            tamalib_set_speed(1);
+                            speed = 1;
+                            tamalib_set_speed(speed);
                         }
                         furi_timer_stop(timer);
                         tama_p1_save_state();
                         running = false;
-                    }
-                    if(event.input.type == InputTypePress ||
-                       event.input.type == InputTypeRelease) {
+                    } else if(
+                        event.input.type == InputTypePress ||
+                        event.input.type == InputTypeRelease) {
                         if(event.input.key != InputKeyBack && event.input.key != m) {
                             if(event.input.type == InputTypePress)
                                 tama_btn_state = BTN_STATE_PRESSED;
@@ -1144,9 +1150,6 @@ int32_t tama_p1_app(void* p) {
                         }
                         if(event.input.key == m && event.input.type == InputTypePress) {
                             in_menu = true;
-                            // if(speed == 1) speed = 4;
-                            // else speed = 1;
-                            // tamalib_set_speed(speed);
                         } else if(event.input.key == a) {
                             tamalib_set_button(BTN_LEFT, tama_btn_state);
                         } else if(event.input.key == b) {
