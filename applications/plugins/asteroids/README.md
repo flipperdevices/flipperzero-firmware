@@ -4,14 +4,16 @@ This is an implementation of the classic Asteroids game for the [Flipper Zero](h
 * Auto rapid fire (less wear on the buttons this way too)
 * Up button applies thrusters
 * Haptic feedback and LED effects
+* Power up system
 * High Score system
 * Automatic save and load of high score
+* Ability to Pause
 * Some modifications to certain game play elements
 
 ## What's coming next
 * Settings screen
 * Enabling sound effects (configurable on/off option)
-* Power Ups
+* ~~Power Ups~~ Improved power up management
 
 ---
 
@@ -25,6 +27,7 @@ This is a screenshot, but the game looks a lot better in the device itself:
 * Ok, long press: Auto-fire bullets
 * Up: Accelerate
 * Down: Decelerate
+* Back (Short Press): Pause game
 * Back (Long Press): Exit game. It will automatically save the high scoore too.
 
 Your high scores will automatically be saved. Go forth and compete!
