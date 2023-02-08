@@ -2,6 +2,13 @@
 
 #include <gui/view.h>
 
+extern const Icon* digits[17];
+
+#define TIMER_FORMAT "%02ld:%02ld" //"%.2d:%.2d"
+#define TIMER_LENGHT 12
+#define CLOSENESS_LENGTH 7
+#define CLOSENESS_FORMAT "%d%%"
+
 typedef struct ColorGuessPlay ColorGuessPlay;
 
 typedef enum {
