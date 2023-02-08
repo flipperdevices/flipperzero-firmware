@@ -65,27 +65,6 @@ typedef enum {
 } target_chip_t;
 
 /**
- * @brief esptool portable bin header format
- */
-typedef struct esp_loader_bin_header {
-  uint8_t magic;
-  uint8_t segments;
-  uint8_t flash_mode;
-  uint8_t flash_size_freq;
-  uint32_t entrypoint;
-} esp_loader_bin_header_t;
-
-/**
- * @brief esptool portable bin segment format
- */
-typedef struct esp_loader_bin_segment {
-  uint32_t addr;
-  uint32_t size;
-  uint8_t *data;
-} esp_loader_bin_segment_t;
-
-
-/**
  * @brief SPI pin configuration arguments
  */
 typedef union {
@@ -169,7 +148,7 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   */
-esp_loader_error_t esp_loader_flash_write(void *payload, uint32_t size);
+esp_loader_error_t esp_loader_flash_write(const void *payload, uint32_t size);
 
 /**
   * @brief Ends flash operation.
@@ -185,7 +164,7 @@ esp_loader_error_t esp_loader_flash_finish(bool reboot);
 
 
 /**
-  * @brief Initiates mem operation
+  * @brief Initiates mem operation, initiates loading for program into target RAM
   *
   * @param offset[in]       Address from which mem operation will be performed.
   * @param size[in]         Size of the whole binary to be loaded into mem.
@@ -217,11 +196,12 @@ esp_loader_error_t esp_loader_mem_start(uint32_t offset, uint32_t size, uint32_t
   *     - ESP_LOADER_ERROR_TIMEOUT Timeout
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   */
-esp_loader_error_t esp_loader_mem_write(void *payload, uint32_t size);
+esp_loader_error_t esp_loader_mem_write(const void *payload, uint32_t size);
 
 
 /**
-  * @brief Ends mem operation.
+  * @brief Ends mem operation, finish loading for program into target RAM
+  *        and send the entrypoint of ram_loadable app
   *
   * @param entrypoint[in]       entrypoint of ram program.
   *

@@ -17,6 +17,8 @@
 #include "esp_loader.h"
 #include "example_common.h"
 
+static const char *TAG = "serial_flasher";
+
 #define HIGHER_BAUDRATE 230400
 
 void app_main(void)
@@ -33,7 +35,7 @@ void app_main(void)
     };
 
     if (loader_port_esp32_init(&config) != ESP_LOADER_SUCCESS) {
-        ESP_LOGE("example", "serial initialization failed.");
+        ESP_LOGE(TAG, "serial initialization failed.");
         return;
     }
 
@@ -41,12 +43,12 @@ void app_main(void)
 
         get_example_binaries(esp_loader_get_target(), &bin);
 
-        printf("\e[1;32mLoading bootloader...\n\e[0m");
+        ESP_LOGI(TAG, "Loading bootloader...");
         flash_binary(bin.boot.data, bin.boot.size, bin.boot.addr);
-        printf("\e[1;32mLoading partition table...\n\e[0m");
+        ESP_LOGI(TAG, "Loading partition table...");
         flash_binary(bin.part.data, bin.part.size, bin.part.addr);
-        printf("\e[1;32mLoading app...\n\e[0m");
+        ESP_LOGI(TAG, "Loading app...");
         flash_binary(bin.app.data,  bin.app.size,  bin.app.addr);
-        printf("\e[1;32mDone!\n\e[0m");
+        ESP_LOGI(TAG, "Done!");
     }
 }
