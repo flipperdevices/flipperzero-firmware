@@ -194,7 +194,7 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
   - specifies the name of our application.
   - specifies the entry point for our application.
   - specifies we use the GUI.
-  - specifies our icon is the gpio_polling_demo.png file.
+  - specifies our icon is the subghz_demo.png file.
   - specifies our application can be found in the "Misc" category.
 
 - subghz_demo.png
