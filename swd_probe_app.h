@@ -22,7 +22,15 @@
 #define SWD_DELAY_US 1
 #define TIMER_HZ 50
 #define TIMEOUT 3
-#define MODE_PAGES 4
+
+typedef enum {
+    ModePageScan = 0,
+    ModePageDPRegs = 1,
+    ModePageDPID = 2,
+    ModePageAPID = 3,
+    ModePageCount = 4,
+    ModePageHexDump = 0x100,
+} ModePages;
 
 #define CDBGPWRUPREQ (1 << 28)
 #define CDBGPWRUPACK (1 << 29)
@@ -113,7 +121,7 @@ typedef struct {
     bool detected;
     bool detected_device;
     bool detected_notified;
-    uint8_t mode_page;
+    uint32_t mode_page;
     uint8_t ap_pos;
     uint8_t ap_scanned;
 

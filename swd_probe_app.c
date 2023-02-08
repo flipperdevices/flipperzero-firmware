@@ -50,7 +50,7 @@ static const char* gpio_name(uint8_t mask) {
 }
 
 static void swd_configure_pins(AppFSM* const ctx, bool output) {
-    if(ctx->mode_page != 0 && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
+    if(ctx->mode_page != ModePageScan && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
         furi_hal_gpio_init(
             gpios[ctx->io_num_swc], GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
         if(!output) {
@@ -88,7 +88,7 @@ static void swd_configure_pins(AppFSM* const ctx, bool output) {
 }
 
 static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
-    if(ctx->mode_page != 0 && ctx->io_num_swc < 8) {
+    if(ctx->mode_page != ModePageScan && ctx->io_num_swc < 8) {
         furi_hal_gpio_write(gpios[ctx->io_num_swc], level);
         return;
     }
@@ -108,7 +108,7 @@ static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
 }
 
 static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
-    if(ctx->mode_page != 0 && ctx->io_num_swd < 8) {
+    if(ctx->mode_page != ModePageScan && ctx->io_num_swd < 8) {
         furi_hal_gpio_write(gpios[ctx->io_num_swd], level);
         return;
     }
@@ -128,7 +128,7 @@ static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
 }
 
 static uint8_t swd_get_data(AppFSM* const ctx) {
-    if(ctx->mode_page != 0 && ctx->io_num_swd < 8) {
+    if(ctx->mode_page != ModePageScan && ctx->io_num_swd < 8) {
         return furi_hal_gpio_read(gpios[ctx->io_num_swd]);
     }
 
@@ -477,6 +477,60 @@ static void swd_scan(AppFSM* const ctx) {
     swd_detect(ctx);
 }
 
+static bool swd_ensure_powerup(AppFSM* const ctx) {
+    if(!(ctx->dp_regs.ctrlstat & (CSYSPWRUPREQ | CDBGPWRUPREQ))) {
+        /* fetch current CTRL/STAT */
+        swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
+        /* enable requests */
+        ctx->dp_regs.ctrlstat |= CDBGPWRUPREQ;
+        ctx->dp_regs.ctrlstat |= CSYSPWRUPREQ;
+        furi_log_print_format(FuriLogLevelDefault, TAG, "no (CSYSPWRUPREQ | CDBGPWRUPREQ)");
+        swd_transfer(ctx, false, true, 1, &ctx->dp_regs.ctrlstat);
+        return false;
+    }
+    if(!(ctx->dp_regs.ctrlstat & CDBGPWRUPACK)) {
+        /* fetch current CTRL/STAT */
+        swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
+        furi_log_print_format(FuriLogLevelDefault, TAG, "no CDBGPWRUPACK");
+        return false;
+    }
+
+    return true;
+}
+
+static void swd_apscan_reset(AppFSM* const ctx) {
+    for(int reset_ap = 0; reset_ap < COUNT(ctx->apidr_info); reset_ap++) {
+        ctx->apidr_info[reset_ap].tested = false;
+    }
+}
+
+static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
+    ctx->apidr_info[ap].tested = true;
+
+    uint32_t data = 0;
+    uint32_t base = 0;
+    if(swd_read_ap(ctx, ap, AP_IDR, &data) != 1) {
+        swd_abort(ctx);
+        return false;
+    }
+    if(data == 0) {
+        return false;
+    }
+    furi_log_print_format(FuriLogLevelDefault, TAG, "AP%lu detected", ap);
+    ctx->apidr_info[ap].ok = true;
+    ctx->apidr_info[ap].revision = (data >> 24) & 0x0F;
+    ctx->apidr_info[ap].designer = (data >> 17) & 0x3FF;
+    ctx->apidr_info[ap].class = (data >> 13) & 0x0F;
+    ctx->apidr_info[ap].variant = (data >> 4) & 0x0F;
+    ctx->apidr_info[ap].type = (data >> 0) & 0x0F;
+
+    if(swd_read_ap(ctx, ap, AP_BASE, &ctx->apidr_info[ap].base) != 1) {
+        swd_abort(ctx);
+        return false;
+    }
+    return true;
+}
+
 static void render_callback(Canvas* const canvas, void* cb_ctx) {
     AppFSM* ctx = acquire_mutex((ValueMutex*)cb_ctx, 25);
     if(ctx == NULL) {
@@ -492,7 +546,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
     if(ctx->detected_device) {
         /* if seen less than a quarter second ago */
         switch(ctx->mode_page) {
-        case 0: {
+        case ModePageScan: {
             if((ctx->detected_timeout + TIMER_HZ / 4) >= TIMER_HZ * TIMEOUT) {
                 snprintf(buffer, sizeof(buffer), "FOUND!");
             } else {
@@ -539,7 +593,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
 
             break;
         }
-        case 1: {
+        case ModePageDPRegs: {
             canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP Registers");
             y += 10;
             canvas_set_font(canvas, FontKeyboard);
@@ -571,7 +625,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             elements_button_right(canvas, "DPID");
             break;
         }
-        case 2: {
+        case ModePageDPID: {
             canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP ID Register");
             y += 10;
             canvas_set_font(canvas, FontKeyboard);
@@ -602,7 +656,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             elements_button_right(canvas, "APs");
             break;
         }
-        case 3: {
+        case ModePageAPID: {
             canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP Menu");
             y += 10;
             canvas_set_font(canvas, FontKeyboard);
@@ -694,7 +748,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         } break;
 
             /* hex dump view */
-        case 4: {
+        case ModePageHexDump: {
             canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Hex dump");
             y += 10;
             canvas_set_font(canvas, FontKeyboard);
@@ -776,7 +830,7 @@ static void app_deinit(AppFSM* const ctx) {
 
 static void on_timer_tick(AppFSM* ctx) {
     switch(ctx->mode_page) {
-    case 0: {
+    case ModePageScan: {
         /* reset after timeout */
         if(ctx->detected_timeout == 0) {
             ctx->detected_device = false;
@@ -849,67 +903,34 @@ static void on_timer_tick(AppFSM* ctx) {
         ctx->current_mask_id = (ctx->current_mask_id + 1) % COUNT(gpio_direction_mask);
         break;
     }
-    case 1:
-    case 2:
-    case 3: {
+
+    case ModePageDPRegs:
+    case ModePageDPID:
+    case ModePageAPID: {
         /* set debug enable request */
-        if(!(ctx->dp_regs.ctrlstat & (CSYSPWRUPREQ | CDBGPWRUPREQ))) {
-            /* fetch current CTRL/STAT */
-            swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
-            ctx->dp_regs.ctrlstat |= CDBGPWRUPREQ;
-            ctx->dp_regs.ctrlstat |= CSYSPWRUPREQ;
-            furi_log_print_format(FuriLogLevelDefault, TAG, "no (CSYSPWRUPREQ | CDBGPWRUPREQ)");
-            swd_transfer(ctx, false, true, 1, &ctx->dp_regs.ctrlstat);
-            break;
-        }
-        if(!(ctx->dp_regs.ctrlstat & CDBGPWRUPACK)) {
-            /* fetch current CTRL/STAT */
-            swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
-            furi_log_print_format(FuriLogLevelDefault, TAG, "no CDBGPWRUPACK");
+        if(!swd_ensure_powerup(ctx)) {
             break;
         }
 
         /* only scan a few APs at once to stay responsive */
         for(int pos = 0; pos < 5; pos++) {
             if(ctx->ap_scanned == 0) {
-                for(int reset_ap = 0; reset_ap < COUNT(ctx->apidr_info); reset_ap++) {
-                    ctx->apidr_info[reset_ap].tested = false;
-                }
+                swd_apscan_reset(ctx);
             }
 
-            int ap = ctx->ap_scanned++;
+            uint8_t ap = ctx->ap_scanned++;
 
             if(ctx->apidr_info[ap].tested) {
                 continue;
             }
-            ctx->apidr_info[ap].tested = true;
-
-            uint32_t data = 0;
-            uint32_t base = 0;
-            if(swd_read_ap(ctx, ap, AP_IDR, &data) != 1) {
-                swd_abort(ctx);
-                continue;
+            if(swd_apscan_test(ctx, ap)) {
+                break;
             }
-            if(data == 0) {
-                continue;
-            }
-            furi_log_print_format(FuriLogLevelDefault, TAG, "AP%d detected", ap);
-            ctx->apidr_info[ap].ok = true;
-            ctx->apidr_info[ap].revision = (data >> 24) & 0x0F;
-            ctx->apidr_info[ap].designer = (data >> 17) & 0x3FF;
-            ctx->apidr_info[ap].class = (data >> 13) & 0x0F;
-            ctx->apidr_info[ap].variant = (data >> 4) & 0x0F;
-            ctx->apidr_info[ap].type = (data >> 0) & 0x0F;
-
-            if(swd_read_ap(ctx, ap, AP_BASE, &ctx->apidr_info[ap].base) != 1) {
-                swd_abort(ctx);
-            }
-
-            break;
         }
         break;
     }
-    case 4: {
+
+    case ModePageHexDump: {
         if(ctx->hex_read_delay++ < 10) {
             break;
         }
@@ -1006,12 +1027,12 @@ int32_t swd_probe_app_main(void* p) {
 
                     case InputKeyRight:
                         ctx->last_key = KeyRight;
-                        if(ctx->mode_page == 4) {
+                        if(ctx->mode_page == ModePageHexDump) {
                             if(ctx->hex_select > 0) {
                                 ctx->hex_select--;
                             }
                         } else {
-                            if(ctx->mode_page + 1 < MODE_PAGES) {
+                            if(ctx->mode_page + 1 < ModePageCount) {
                                 ctx->mode_page++;
                             }
                         }
@@ -1020,7 +1041,7 @@ int32_t swd_probe_app_main(void* p) {
                     case InputKeyLeft:
                         ctx->last_key = KeyLeft;
 
-                        if(ctx->mode_page == 4) {
+                        if(ctx->mode_page == ModePageHexDump) {
                             if(ctx->hex_select < 7) {
                                 ctx->hex_select++;
                             }
@@ -1034,16 +1055,16 @@ int32_t swd_probe_app_main(void* p) {
                     case InputKeyOk:
                         ctx->last_key = KeyOK;
 
-                        if(ctx->mode_page == 3 && ctx->apidr_info[ctx->ap_pos].ok) {
-                            ctx->mode_page = 4;
+                        if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
+                            ctx->mode_page = ModePageHexDump;
                         }
                         break;
 
                     case InputKeyBack:
-                        if(ctx->mode_page == 4) {
-                            ctx->mode_page = 3;
-                        } else if(ctx->mode_page != 0) {
-                            ctx->mode_page = 0;
+                        if(ctx->mode_page == ModePageHexDump) {
+                            ctx->mode_page = ModePageAPID;
+                        } else if(ctx->mode_page != ModePageScan) {
+                            ctx->mode_page = ModePageScan;
                         } else {
                             processing = false;
                         }
