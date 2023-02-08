@@ -42,6 +42,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Patreon Animation Build](https://www.patreon.com/RogueMaster/membership): P0KEMON (with only P0KEMON related animations)
 - Updated: [Authenticator/TOTP: Affecting dolphin level at start #71 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator/pull/71)
 - Updated: [TAMA P1: Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1)
+- Added: [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi)
+- Added: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
 
 <a name="release">
 
@@ -233,6 +235,8 @@ $ ./fbt dolphin_ext
 - [Minesweeper (By panki27)](https://github.com/panki27/minesweeper)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) [(Patched By SimplyMinimal)](https://github.com/nmrr/flipperzero-pong/pull/2)
+- [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi)
+- [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
 - [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 - [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
