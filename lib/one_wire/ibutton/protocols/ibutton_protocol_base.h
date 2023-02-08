@@ -7,6 +7,8 @@
 #include <core/string.h>
 #include <one_wire/one_wire_host.h>
 
+#include <flipper_format.h>
+
 typedef void iButtonProtocolData;
 
 typedef enum {
@@ -16,6 +18,8 @@ typedef enum {
 } iButtonProtocolFeature;
 
 typedef bool (*iButtonProtocolReadFunc)(OneWireHost*, iButtonProtocolData*);
+typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolData*);
+typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);
 
 typedef struct {
@@ -26,6 +30,8 @@ typedef struct {
     const char* name;
 
     iButtonProtocolReadFunc read;
+    iButtonProtocolSaveFunc save;
+    iButtonProtocolLoadFunc load;
     iButtonProtocolRenderDataFunc render_data;
     iButtonProtocolRenderDataFunc render_brief_data;
 } iButtonProtocolBase;

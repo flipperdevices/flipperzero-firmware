@@ -19,6 +19,8 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
 
     .read = dallas_ds1990_read,
     .render_data = NULL, /* No data to render */
+    .save = NULL,
+    .load = NULL,
     .render_brief_data = dallas_ds1990_render_brief_data,
 };
 

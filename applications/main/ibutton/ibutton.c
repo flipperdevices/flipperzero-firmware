@@ -40,19 +40,18 @@ static void ibutton_make_app_folder(iButton* ibutton) {
 }
 
 bool ibutton_load_key_data(iButton* ibutton, FuriString* key_path, bool show_dialog) {
-    FlipperFormat* file = flipper_format_file_alloc(ibutton->storage);
     bool result = false;
-    FuriString* data;
-    data = furi_string_alloc();
+
+    FlipperFormat* file = flipper_format_file_alloc(ibutton->storage);
+    FuriString* data = furi_string_alloc();
 
     do {
         if(!flipper_format_file_open_existing(file, furi_string_get_cstr(key_path))) break;
 
-        // header
         uint32_t version;
         if(!flipper_format_read_header(file, data, &version)) break;
         if(furi_string_cmp_str(data, IBUTTON_APP_FILE_TYPE) != 0) break;
-        if(version != 1) break;
+        if(version > 2) break;
 
         // // key type
         // iButtonKeyType type;

@@ -54,6 +54,25 @@ const char* ibutton_protocols_get_name(iButtonProtocol protocol_id);
 bool ibutton_protocols_read(OneWireHost* host, iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
 
 /**
+ * Save the key data to a FFF file. The header must be written beforehand.
+ * @param [out] ff pointer to a FlipperFormat instance
+ * @param [in] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ * @return true on success, false on failure
+ */
+bool ibutton_protocols_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+
+/**
+ * Save the key data to a FFF file. The header must be read beforehand.
+ * @param [in] ff pointer to a FlipperFormat instance
+ * @param [in] version file format version to use when loading
+ * @param [out] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ * @return true on success, false on failure
+ */
+bool ibutton_protocols_load(FlipperFormat* ff, uint32_t version, iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+
+/**
  * Format a string containing device full data
  * @param [out] result pointer to the FuriString instance (must be initialized)
  * @param [in] protocol_data pointer to protocol-specific data

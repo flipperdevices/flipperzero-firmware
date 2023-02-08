@@ -30,6 +30,8 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .name = "DS1992",
 
     .read = dallas_ds1992_read,
+    .save = NULL,
+    .load = NULL,
     .render_data = dallas_ds1992_render_data,
     .render_brief_data = dallas_ds1992_render_brief_data,
 };
