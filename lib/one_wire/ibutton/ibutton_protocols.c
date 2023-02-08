@@ -10,6 +10,16 @@ iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
     return protocol_id;
 }
 
+iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name) {
+    iButtonProtocol protocol_id;
+
+    for(protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
+        if(!strcmp(ibutton_protocols[protocol_id]->name, protocol_name)) break;
+    }
+
+    return protocol_id;
+}
+
 uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id) {
     return ibutton_protocols[protocol_id]->features;
 }

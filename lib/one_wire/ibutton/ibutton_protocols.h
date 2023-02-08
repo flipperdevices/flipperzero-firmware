@@ -10,6 +10,13 @@
 iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code);
 
 /**
+ * Get protocol id from iButton protocol name
+ * @param [in] protocol_name
+ * @return protocol id or iButtonProtocolMax if protocol not found
+ */
+iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name);
+
+/**
  * Get protocol features bitmask by protocol id
  * @param [in] protocol_id id of the protocol in question
  */

@@ -34,9 +34,13 @@ static const NotificationSequence* ibutton_notification_sequences[] = {
 };
 
 static void ibutton_make_app_folder(iButton* ibutton) {
-    if(!storage_simply_mkdir(ibutton->storage, IBUTTON_APP_FOLDER)) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if(!storage_simply_mkdir(storage, IBUTTON_APP_FOLDER)) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot create\napp folder");
     }
+
+    furi_record_close(RECORD_STORAGE);
 }
 
 bool ibutton_load_key_data(iButton* ibutton, FuriString* key_path, bool show_dialog) {
