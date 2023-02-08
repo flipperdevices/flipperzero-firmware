@@ -18,7 +18,7 @@
 #include <time.h>
 
 #define TAG "Asteroids" // Used for logging
-#define DEBUG_MSG 1
+#define DEBUG_MSG 0
 #define SCREEN_XRES 128
 #define SCREEN_YRES 64
 #define GAME_START_LIVES 3
