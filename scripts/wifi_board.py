@@ -24,7 +24,7 @@ class Main(App):
         if len(ports) == 0:
             # Blackmagic probe serial port not found, will be handled later
             pass
-        elif len(ports) > 2:
+        elif len(ports) > 1:
             raise Exception("More than one WiFi board found")
         else:
             port = ports[0]
