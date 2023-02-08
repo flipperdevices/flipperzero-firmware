@@ -78,7 +78,7 @@ void picopass_scene_read_card_success_on_enter(void* context) {
             uint8_t key[PICOPASS_BLOCK_LEN];
             memcpy(key, &pacs->key, PICOPASS_BLOCK_LEN);
             for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
-                furi_string_cat_printf(sio_str, " %02X", key[i]);
+                furi_string_cat_printf(sio_str, "%02X", key[i]);
             }
         }
 
