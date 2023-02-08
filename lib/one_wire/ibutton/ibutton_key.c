@@ -8,6 +8,7 @@
 #include "ibutton_protocols.h"
 
 #define IBUTTON_KEY_FILE_TYPE "Flipper iButton key"
+#define IBUTTON_KEY_ONEWIRE_ROM_SIZE 8U
 
 struct iButtonKey {
     iButtonProtocol protocol_id;
@@ -42,7 +43,7 @@ uint32_t ibutton_key_get_features(iButtonKey* key) {
 
 static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
     bool result = false;
-    uint8_t rom_data[8]; //TODO: replace with a better constant
+    uint8_t rom_data[IBUTTON_KEY_ONEWIRE_ROM_SIZE];
 
     onewire_host_start(host);
     furi_delay_ms(100);
@@ -96,14 +97,20 @@ bool ibutton_key_load(iButtonKey* key, const char* file_name) {
 
         if(version == 1) {
             if(!flipper_format_read_string(ff, "Key type", tmp)) break;
-            //TODO: determine protocol_id
         } else if(version == 2) {
             if(!flipper_format_read_string(ff, "Protocol", tmp)) break;
-            //TODO: determine protocol_id
         } else {
             break;
         }
 
+        if((version == 1) && furi_string_equal(tmp, "Dallas")) {
+            // Handle older keys which refer to DS1990 as just "Dallas"
+            key->protocol_id = iButtonProtocolDS1990;
+        } else {
+            key->protocol_id = ibutton_protocols_get_id_by_name(furi_string_get_cstr(tmp));
+        }
+
+        if(key->protocol_id == iButtonProtocolMax) break;
         if(!ibutton_protocols_load(ff, version, key->protocol_data, key->protocol_id)) break;
 
         result = true;
