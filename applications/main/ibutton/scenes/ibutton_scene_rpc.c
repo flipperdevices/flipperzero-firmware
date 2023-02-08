@@ -31,7 +31,7 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             bool result = false;
             if(arg && (furi_string_empty(ibutton->file_path))) {
                 furi_string_set(ibutton->file_path, arg);
-                if(ibutton_load_key_data(ibutton, ibutton->file_path, false)) {
+                if(ibutton_key_load(ibutton->key, furi_string_get_cstr(ibutton->file_path))) {
                     ibutton_worker_emulate_start(ibutton->key_worker, ibutton->key);
                     FuriString* key_name;
                     key_name = furi_string_alloc();

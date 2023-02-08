@@ -43,46 +43,6 @@ static void ibutton_make_app_folder(iButton* ibutton) {
     furi_record_close(RECORD_STORAGE);
 }
 
-bool ibutton_load_key_data(iButton* ibutton, FuriString* key_path, bool show_dialog) {
-    bool result = false;
-
-    FlipperFormat* file = flipper_format_file_alloc(ibutton->storage);
-    FuriString* data = furi_string_alloc();
-
-    do {
-        if(!flipper_format_file_open_existing(file, furi_string_get_cstr(key_path))) break;
-
-        uint32_t version;
-        if(!flipper_format_read_header(file, data, &version)) break;
-        if(furi_string_cmp_str(data, IBUTTON_APP_FILE_TYPE) != 0) break;
-        if(version > 2) break;
-
-        // // key type
-        // iButtonKeyType type;
-        // if(!flipper_format_read_string(file, "Key type", data)) break;
-        // if(!ibutton_key_get_type_by_string(furi_string_get_cstr(data), &type)) break;
-        //
-        // // key data
-        // uint8_t key_data[IBUTTON_KEY_DATA_SIZE] = {0};
-        // if(!flipper_format_read_hex(file, "Data", key_data, ibutton_key_get_size_by_type(type)))
-        //     break;
-        //
-        // ibutton_key_set_type(ibutton->key, type);
-        // ibutton_key_set_data(ibutton->key, key_data, IBUTTON_KEY_DATA_SIZE);
-
-        result = true;
-    } while(false);
-
-    flipper_format_free(file);
-    furi_string_free(data);
-
-    if((!result) && (show_dialog)) {
-        dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
-    }
-
-    return result;
-}
-
 static void ibutton_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
     iButton* ibutton = context;
@@ -218,17 +178,28 @@ void ibutton_free(iButton* ibutton) {
     free(ibutton);
 }
 
+static bool ibutton_load_key(iButton* ibutton, FuriString* file_path) {
+    const bool success = ibutton_key_load(ibutton->key, furi_string_get_cstr(file_path));
+
+    if(!success) {
+        dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
+    }
+
+    return success;
+}
+
 bool ibutton_file_select(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
+    bool success = false;
+
     dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
     browser_options.base_path = IBUTTON_APP_FOLDER;
 
-    bool success = dialog_file_browser_show(
-        ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options);
-
-    if(success) {
-        success = ibutton_load_key_data(ibutton, ibutton->file_path, true);
-    }
+    do {
+        if(!dialog_file_browser_show(ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options)) break;
+        if(!ibutton_load_key(ibutton, ibutton->file_path)) break;
+        success = true;
+    } while(0);
 
     return success;
 }
@@ -338,10 +309,7 @@ int32_t ibutton_app(void* p) {
             rpc_system_app_send_started(ibutton->rpc_ctx);
         } else {
             furi_string_set(ibutton->file_path, (const char*)p);
-            if(ibutton_load_key_data(ibutton, ibutton->file_path, true)) {
-                key_loaded = true;
-                // TODO: Display an error if the key from p could not be loaded
-            }
+            key_loaded = ibutton_load_key(ibutton, ibutton->file_path);
         }
     }
 
