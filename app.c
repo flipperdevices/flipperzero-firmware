@@ -15,8 +15,6 @@
 #include <notification/notification_messages.h>
 #include <asteroids_icons.h>
 
-#include <time.h>
-
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 0
 #define SCREEN_XRES 128
