@@ -21,7 +21,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Keep Your Flipper Up To Date With [PATREON membership](https://www.patreon.com/RogueMaster/membership)
 - [PATREON for compiled releases](https://www.patreon.com/RogueMaster) for nearly ALL updates. Patreon Releases sometimes multiple times a day. GitHub releases will occur weekly or with OFW version updates.
 - [Contact me on Patreon to RENAME your Flipper](https://www.patreon.com/RogueMaster/membership) I can do custom names and custom animation sets with your custom build provided for every Patreon release.
-- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, DBZ, Dolphin, HACKZ, MARIO, ONE PIECE, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
+- [:fire: PATREON ANIMATION BUILDS AVAILABLE](https://www.patreon.com/RogueMaster/membership): [ALL](https://www.patreon.com/posts/animation-all-v4-77935728), 420, 420+18, Anime Only, Anime+420, Anime+420+18, DBZ, Dolphin, HACKZ, MARIO, ONE PIECE, P0KEMON, RM 18PLUS, RM SELECT, RM SELECT + 18PLUS, RM MINIMAL (default on GitHub), SAO, SCIENCE AND STOCK with all assets updated to look like stock.
 - [NEW VIDEO PREVIEW FOR ALL ANIMATIONS](https://www.patreon.com/posts/animation-all-v4-77935728)
 - [Supporters get SD Card Assets with extra NFC Assets such as 48 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster)](https://www.patreon.com/RogueMaster/membership)
 - Donations: BTC: `3MPQbKmGRCstg4FjnadfHa3woCT94JkR2a`
@@ -73,6 +73,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Cart key wav fix (By ZabuzaDemon)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/522)
 - OFW: [Allow use of any suitable pin for 1-Wire devices #2350 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2350)
 - OFW: [SD over SPI improvements #2204 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2204)
+- [New Patreon Animation Build](https://www.patreon.com/RogueMaster/membership): P0KEMON (with only P0KEMON related animations)
 
 <a name="release">
 
