@@ -442,6 +442,6 @@ void subghz_protocol_decoder_dooya_get_string(void* context, FuriString* output)
     if(instance->generic.cnt == DOYA_SINGLE_CHANNEL) {
         furi_string_cat_printf(output, "Ch:Single\r\n");
     } else {
-        furi_string_cat_printf(output, "Ch:%ld\r\n", instance->generic.cnt);
+        furi_string_cat_printf(output, "Ch:%lu\r\n", instance->generic.cnt);
     }
 }
