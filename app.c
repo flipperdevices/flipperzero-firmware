@@ -379,7 +379,7 @@ void draw_powerUp_RemainingLife(Canvas* canvas, PowerUp* const p, int y_offset) 
                 (SCREEN_XRES / 2) - remaining, // x1
                 3 + y_offset, //y1
                 (SCREEN_XRES / 2) + remaining, //x2
-                3 + y_offset); //
+                3 + y_offset); // y2
         }
     }
 }
