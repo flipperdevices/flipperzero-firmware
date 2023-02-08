@@ -36,7 +36,6 @@ typedef enum {
 
 struct iButtonWorker {
     iButtonKey* key_p;
-    uint8_t* rom_data;
     OneWireHost* host;
     OneWireSlave* slave;
     OneWireDevice* device;

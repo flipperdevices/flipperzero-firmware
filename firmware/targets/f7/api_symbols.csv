@@ -1595,10 +1595,14 @@ Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
 Function,+,ibutton_key_alloc,iButtonKey*,
 Function,+,ibutton_key_free,void,iButtonKey*
-Function,+,ibutton_key_get_protocol_data,iButtonProtocolData*,const iButtonKey*
-Function,+,ibutton_key_get_protocol_id,iButtonProtocol,const iButtonKey*
-Function,+,ibutton_key_set_protocol_data,void,"iButtonKey*, iButtonProtocolData*"
-Function,+,ibutton_key_set_protocol_id,void,"iButtonKey*, iButtonProtocol"
+Function,+,ibutton_key_get_features,uint32_t,iButtonKey*
+Function,+,ibutton_key_get_manufacturer_name,const char*,iButtonKey*
+Function,+,ibutton_key_get_protocol_name,const char*,iButtonKey*
+Function,+,ibutton_key_get_rendered_brief_data,void,"iButtonKey*, FuriString*"
+Function,+,ibutton_key_get_rendered_data,void,"iButtonKey*, FuriString*"
+Function,+,ibutton_key_load,_Bool,"iButtonKey*, const char*"
+Function,+,ibutton_key_read,_Bool,"iButtonKey*, OneWireHost*"
+Function,+,ibutton_key_save,_Bool,"iButtonKey*, const char*"
 Function,+,ibutton_worker_alloc,iButtonWorker*,
 Function,+,ibutton_worker_emulate_set_callback,void,"iButtonWorker*, iButtonWorkerEmulateCallback, void*"
 Function,+,ibutton_worker_emulate_start,void,"iButtonWorker*, iButtonKey*"
@@ -3056,7 +3060,6 @@ Variable,+,gpio_usart_tx,const GpioPin,
 Variable,+,gpio_usb_dm,const GpioPin,
 Variable,+,gpio_usb_dp,const GpioPin,
 Variable,+,ibutton_gpio,const GpioPin,
-Variable,+,ibutton_protocols,const iButtonProtocolBase*[],
 Variable,+,input_pins,const InputPin[],
 Variable,+,input_pins_count,const size_t,
 Variable,+,lfrfid_protocols,const ProtocolBase*[],

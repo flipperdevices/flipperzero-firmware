@@ -7,10 +7,7 @@ void ibutton_scene_view_data_on_enter(void* context) {
 
     FuriString* tmp = furi_string_alloc();
 
-    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
-    const iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
-
-    ibutton_protocols_render_data(tmp, protocol_data, protocol_id);
+    ibutton_key_get_rendered_data(key, tmp);
 
     text_box_set_font(text_box, TextBoxFontHex);
     //TODO: make TextBox own the text

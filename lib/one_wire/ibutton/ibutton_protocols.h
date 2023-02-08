@@ -1,9 +1,5 @@
 #pragma once
 
-#include <core/string.h>
-
-#include <one_wire/one_wire_host.h>
-
 #include "protocols/ibutton_protocol_defs.h"
 
 /**

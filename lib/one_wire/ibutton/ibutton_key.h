@@ -6,7 +6,8 @@
 
 #pragma once
 
-#include "protocols/ibutton_protocol_defs.h"
+#include <core/string.h>
+#include <one_wire/one_wire_host.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,33 +27,21 @@ iButtonKey* ibutton_key_alloc();
  */
 void ibutton_key_free(iButtonKey* key);
 
-/**
- * Get protocol id
- * @param [in] key
- * @return protocol id
- */
-iButtonProtocol ibutton_key_get_protocol_id(const iButtonKey* key);
+const char* ibutton_key_get_manufacturer_name(iButtonKey* key);
 
-/**
- * Set protocol id
- * @param [in] key
- * @param [in] protocol_id
- */
-void ibutton_key_set_protocol_id(iButtonKey* key, iButtonProtocol protocol_id);
+const char* ibutton_key_get_protocol_name(iButtonKey* key);
 
-/**
- * Get protocol data
- * @param [in] key
- * @return protocol data
- */
-iButtonProtocolData* ibutton_key_get_protocol_data(const iButtonKey* key);
+void ibutton_key_get_rendered_data(iButtonKey* key, FuriString* result);
 
-/**
- * Set protocol data
- * @param [in] key
- * @param [in] protocol_data
- */
-void ibutton_key_set_protocol_data(iButtonKey* key, iButtonProtocolData* protocol_data);
+void ibutton_key_get_rendered_brief_data(iButtonKey* key, FuriString* result);
+
+uint32_t ibutton_key_get_features(iButtonKey* key);
+
+bool ibutton_key_read(iButtonKey* key, OneWireHost* host);
+
+bool ibutton_key_save(iButtonKey* key, const char* file_name);
+
+bool ibutton_key_load(iButtonKey* key, const char* file_name);
 
 #ifdef __cplusplus
 }

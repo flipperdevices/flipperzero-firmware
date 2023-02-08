@@ -146,61 +146,13 @@ void ibutton_worker_comparator_callback(bool level, void* context) {
 //     return result;
 // }
 
-bool ibutton_worker_read_dallas(iButtonWorker* worker) {
-    bool result = false;
-
-    onewire_host_start(worker->host);
-    furi_delay_ms(100);
-
-    FURI_CRITICAL_ENTER();
-
-    do {
-        if(!onewire_host_search(worker->host, worker->rom_data, OneWireHostSearchModeNormal)) {
-            break;
-        }
-
-        const uint8_t family_code = worker->rom_data[0];
-        const iButtonProtocol protocol_id = ibutton_protocols_get_id_by_family_code(family_code);
-
-        if(protocol_id == iButtonProtocolMax) {
-            break;
-        }
-
-        if(!onewire_host_reset(worker->host)) {
-            break;
-        }
-
-        if(!ibutton_protocols_read(worker->host, ibutton_key_get_protocol_data(worker->key_p), protocol_id)) {
-            break;
-        }
-
-        ibutton_key_set_protocol_id(worker->key_p, protocol_id);
-
-        result = true;
-    } while(false);
-
-    onewire_host_reset_search(worker->host);
-    onewire_host_stop(worker->host);
-
-    FURI_CRITICAL_EXIT();
-
-    return result;
-}
-
 void ibutton_worker_mode_read_start(iButtonWorker* worker) {
     UNUSED(worker);
     furi_hal_power_enable_otg();
 }
 
 void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
-    bool valid = false;
-    if(ibutton_worker_read_dallas(worker)) {
-        valid = true;
-    // } else if(ibutton_worker_read_comparator(worker)) {
-    //     valid = true;
-    }
-
-    if(valid) {
+    if(ibutton_key_read(worker->key_p, worker->host)) {
         if(worker->read_cb != NULL) {
             worker->read_cb(worker->cb_ctx);
         }
