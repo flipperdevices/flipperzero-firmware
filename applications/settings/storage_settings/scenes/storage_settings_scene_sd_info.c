@@ -64,14 +64,14 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             sd_free_val,
             sd_free_unit,
             (double)(((int)sd_info.kb_free * 100.0) / (int)sd_info.kb_total),
-            sd_cid.manufacturer_id,
-            sd_cid.oem_id,
-            sd_cid.product_name,
-            sd_cid.product_revision_major,
-            sd_cid.product_revision_minor,
-            sd_cid.product_serial_number,
-            sd_cid.manufacturing_month,
-            sd_cid.manufacturing_year);
+            sd_info.manufacturer_id,
+            sd_info.oem_id,
+            sd_info.product_name,
+            sd_info.product_revision_major,
+            sd_info.product_revision_minor,
+            sd_info.product_serial_number,
+            sd_info.manufacturing_month,
+            sd_info.manufacturing_year);
         dialog_ex_set_text(
             dialog_ex, furi_string_get_cstr(app->text_string), 4, 1, AlignLeft, AlignTop);
     }
