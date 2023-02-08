@@ -18,7 +18,14 @@ class Main(App):
         # logging
         self.logger = logging.getLogger()
 
-    def find_wifi_board(self):
+    def find_wifi_board(self) -> bool:
+        # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
+        blackmagics: list[ListPortInfo] = list(list_ports.grep("blackmagic"))  # type: ignore
+        daps: list[ListPortInfo] = list(list_ports.grep("CMSIS-DAP"))  # type: ignore
+
+        return len(blackmagics) > 0 or len(daps) > 0
+
+    def find_wifi_board_bootloader(self):
         # idk why, but python thinks that list_ports.grep returns tuple[str, str, str]
         ports: list[ListPortInfo] = list(list_ports.grep("ESP32-S2"))  # type: ignore
 
@@ -58,7 +65,7 @@ class Main(App):
 
     def update(self):
         try:
-            port = self.find_wifi_board()
+            port = self.find_wifi_board_bootloader()
         except Exception as e:
             self.logger.error(f"{e}")
             return 1
@@ -72,10 +79,14 @@ class Main(App):
                 return 1
 
         if port is None:
-            self.logger.error("WiFi board not found")
-            self.logger.info(
-                "Please connect WiFi board to your computer, hold down BOOT button and press RESET button"
-            )
+            if self.find_wifi_board():
+                self.logger.error("WiFi board found, but not in bootloader mode.")
+                self.logger.info("Please hold down BOOT button and press RESET button")
+            else:
+                self.logger.error("WiFi board not found")
+                self.logger.info(
+                    "Please connect WiFi board to your computer, hold down BOOT button and press RESET button"
+                )
             return 1
 
         # TODO: get real temporary dir
