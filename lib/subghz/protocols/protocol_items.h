@@ -40,5 +40,4 @@
 #include "holtek_ht12x.h"
 #include "kinggates_stylo_4k.h"
 
-
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
