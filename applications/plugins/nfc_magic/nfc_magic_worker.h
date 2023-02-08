@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lib/nfc/nfc_device.h>
-#include "nfc_magic.h"
 
 typedef struct NfcMagicWorker NfcMagicWorker;
 
@@ -10,7 +9,6 @@ typedef enum {
 
     NfcMagicWorkerStateCheck,
     NfcMagicWorkerStateWrite,
-    NfcMagicWorkerStateRekey,
     NfcMagicWorkerStateWipe,
 
     NfcMagicWorkerStateStop,
@@ -35,8 +33,6 @@ void nfc_magic_worker_stop(NfcMagicWorker* nfc_magic_worker);
 void nfc_magic_worker_start(
     NfcMagicWorker* nfc_magic_worker,
     NfcMagicWorkerState state,
-    NfcMagicDevice* magic_dev,
     NfcDeviceData* dev_data,
-    uint32_t new_password,
     NfcMagicWorkerCallback callback,
     void* context);

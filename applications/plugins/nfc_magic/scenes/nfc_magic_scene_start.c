@@ -1,7 +1,8 @@
 #include "../nfc_magic_i.h"
 enum SubmenuIndex {
     SubmenuIndexCheck,
-    SubmenuIndexAuthenticateGen4,
+    SubmenuIndexWriteGen1A,
+    SubmenuIndexWipe,
 };
 
 void nfc_magic_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -21,10 +22,12 @@ void nfc_magic_scene_start_on_enter(void* context) {
         nfc_magic);
     submenu_add_item(
         submenu,
-        "Authenticate Gen4",
-        SubmenuIndexAuthenticateGen4,
+        "Write Gen1A",
+        SubmenuIndexWriteGen1A,
         nfc_magic_scene_start_submenu_callback,
         nfc_magic);
+    submenu_add_item(
+        submenu, "Wipe", SubmenuIndexWipe, nfc_magic_scene_start_submenu_callback, nfc_magic);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneStart));
@@ -37,27 +40,16 @@ bool nfc_magic_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexCheck) {
-            scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexCheck);
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheck);
             consumed = true;
-        } else if(event.event == SubmenuIndexAuthenticateGen4) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneKeyInput);
-            consumed = true;
         } else if(event.event == SubmenuIndexWriteGen1A) {
-            // Explicitly save state in each branch so that the
-            // correct option is reselected if the user cancels
-            // loading a file.
-            scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexWriteGen1A);
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneFileSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexWipe) {
-            scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexWipe);
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWipe);
             consumed = true;
         }
+        scene_manager_set_scene_state(nfc_magic->scene_manager, NfcMagicSceneStart, event.event);
     }
 
     return consumed;
