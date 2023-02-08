@@ -8,5 +8,5 @@ App(
     stack_size= 2 * 1024,
     order = 215,
     fap_icon="tamaIcon2.png",
-    fap_category="my_games",
+    fap_category="Games",
 )
