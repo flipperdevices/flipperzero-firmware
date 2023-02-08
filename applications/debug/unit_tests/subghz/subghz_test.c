@@ -619,8 +619,6 @@ MU_TEST(subghz_decoder_dooya_test) {
         "Test decoder " SUBGHZ_PROTOCOL_DOOYA_NAME " error\r\n");
 }
 
-
-
 //test encoders
 MU_TEST(subghz_encoder_princeton_test) {
     mu_assert(
