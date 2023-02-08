@@ -50,11 +50,6 @@ bool ibutton_scene_read_not_key_error_on_event(void* context, SceneManagerEvent 
         scene_manager_next_scene(scene_manager, iButtonSceneExitConfirm);
     } else if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        if(event.event == DialogExResultRight) {
-            scene_manager_next_scene(scene_manager, iButtonSceneReadKeyMenu);
-        } else if(event.event == DialogExResultLeft) {
-            scene_manager_previous_scene(scene_manager);
-        }
     }
 
     return consumed;
@@ -62,11 +57,6 @@ bool ibutton_scene_read_not_key_error_on_event(void* context, SceneManagerEvent 
 
 void ibutton_scene_read_not_key_error_on_exit(void* context) {
     iButton* ibutton = context;
-    DialogEx* dialog_ex = ibutton->dialog_ex;
-
     ibutton_text_store_clear(ibutton);
-
-    dialog_ex_reset(dialog_ex);
-
     ibutton_notification_message(ibutton, iButtonNotificationMessageRedOff);
 }

@@ -17,7 +17,6 @@
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
-#include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
@@ -54,7 +53,6 @@ struct iButton {
     TextBox* text_box;
     Popup* popup;
     Widget* widget;
-    DialogEx* dialog_ex;
 
     void* rpc_ctx;
 };
@@ -66,7 +64,6 @@ typedef enum {
     iButtonViewTextBox,
     iButtonViewPopup,
     iButtonViewWidget,
-    iButtonViewDialogEx,
 } iButtonView;
 
 typedef enum {
