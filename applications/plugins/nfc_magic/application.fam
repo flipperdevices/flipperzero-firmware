@@ -18,4 +18,5 @@ App(
         ),
     ],
     fap_icon_assets="assets",
+    fap_icon_assets_symbol="nfc_magic",
 )
