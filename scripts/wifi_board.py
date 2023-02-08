@@ -4,7 +4,7 @@ from flipper.app import App
 
 import logging
 import os
-import time
+import tempfile
 import subprocess
 
 
@@ -25,14 +25,14 @@ class Main(App):
             # Blackmagic probe serial port not found, will be handled later
             pass
         elif len(ports) > 2:
-            raise Exception("More than one Blackmagic board found")
+            raise Exception("More than one WiFi board found")
         else:
             port = ports[0]
             if os.name == "nt":
                 port.device = f"\\\\.\\{port.device}"
             return port.device
 
-    def download_latest(self, dir):
+    def download_latest(self, dir: str):
         import requests
 
         # TODO: get latest version
@@ -56,18 +56,22 @@ class Main(App):
                 f.write(response.content)
 
     def update(self):
-        # TODO: get real temporary dir
-        dir = "./tmp"
-
         port = self.lookup()
 
         if port is None:
-            self.logger.error("Blackmagic probe not found")
+            self.logger.error("WiFi board not found")
+            self.logger.info(
+                "Please connect WiFi board to your computer, hold down BOOT button and press RESET button"
+            )
             return 1
 
-        self.download_latest(dir)
+        # TODO: get real temporary dir
+        dir = tempfile.TemporaryDirectory()
+        dir_name = dir.name
 
-        with open(os.path.join(dir, "flash.command"), "r") as f:
+        self.download_latest(dir_name)
+
+        with open(os.path.join(dir_name, "flash.command"), "r") as f:
             flash_command = f.read()
 
         flash_command = flash_command.replace("\n", "").replace("\r", "")
@@ -79,24 +83,48 @@ class Main(App):
         esptool_params = []
         esptool_params.extend(args)
 
-        self.logger.info(f'Running command: "{" ".join(args)}"')
+        self.logger.info(f'Running command: "{" ".join(args)}" in "{dir_name}"')
 
         process = subprocess.Popen(
             esptool_params,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            cwd=dir,
+            cwd=dir_name,
+            bufsize=1,
+            universal_newlines=True,
         )
 
+        # esptool.py will set returncode to 1, even if flashing was successful
+        # because it will not be able to reset the board after flashing via usb
+        success_counter = 0
+        success_marker = "Hash of data verified."
+
+        success_but_reset_failed = False
+
         while process.poll() is None:
-            time.sleep(0.25)
-            print(".", end="", flush=True)
-        print()
+            if process.stdout is not None:
+                for line in process.stdout:
+                    text = line.strip()
+                    if text == success_marker:
+                        success_counter += 1
 
-        if process.stdout:
-            self.logger.info(process.stdout.read().decode("utf-8").strip())
+                    if "can not exit the download mode over USB" in text:
+                        success_but_reset_failed = True
 
-        return process.returncode
+                    self.logger.debug(f"{text}")
+
+        dir.cleanup()
+
+        if success_counter < 3:
+            self.logger.error(f"Failed to flash WiFi board")
+            return 1
+
+        self.logger.info("WiFi board flashed successfully")
+
+        if success_but_reset_failed:
+            self.logger.info("Press RESET button on WiFi board to start it")
+
+        return 0
 
 
 if __name__ == "__main__":
