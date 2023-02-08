@@ -1,4 +1,4 @@
-#include "furi_hal_light.h"
+#include <furi_hal_light.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <storage/storage.h>
@@ -150,11 +150,16 @@ void notification_vibro_off() {
 }
 
 void notification_sound_on(float freq, float volume) {
-    furi_hal_speaker_start(freq, volume);
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+        furi_hal_speaker_start(freq, volume);
+    }
 }
 
 void notification_sound_off() {
-    furi_hal_speaker_stop();
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_stop();
+        furi_hal_speaker_release();
+    }
 }
 
 // display timer

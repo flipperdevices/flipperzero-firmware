@@ -177,6 +177,7 @@ SubGhz* subghz_alloc() {
 
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
+    subghz->txrx->speaker_state = SubGhzSpeakerStateDisable;
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
     subghz->txrx->raw_threshold_rssi = SUBGHZ_RAW_TRESHOLD_MIN;
     subghz->txrx->history = subghz_history_alloc();
@@ -186,6 +187,8 @@ SubGhz* subghz_alloc() {
     subghz->txrx->environment = subghz_environment_alloc();
     subghz_environment_set_came_atomo_rainbow_table_file_name(
         subghz->txrx->environment, EXT_PATH("subghz/assets/came_atomo"));
+    subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
+        subghz->txrx->environment, EXT_PATH("subghz/assets/alutech_at_4n"));
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         subghz->txrx->environment, EXT_PATH("subghz/assets/nice_flor_s"));
     subghz_environment_set_protocol_registry(

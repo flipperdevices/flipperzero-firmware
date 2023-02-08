@@ -29,7 +29,7 @@ typedef struct {
     TextInputValidatorCallback validator_callback;
     void* validator_callback_context;
     FuriString* validator_text;
-    bool valadator_message_visible;
+    bool validator_message_visible;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -92,14 +92,16 @@ static uint8_t get_row_size(uint8_t row_index) {
 
     switch(row_index + 1) {
     case 1:
-        row_size = sizeof(keyboard_keys_row_1) / sizeof(TextInputKey);
+        row_size = COUNT_OF(keyboard_keys_row_1);
         break;
     case 2:
-        row_size = sizeof(keyboard_keys_row_2) / sizeof(TextInputKey);
+        row_size = COUNT_OF(keyboard_keys_row_2);
         break;
     case 3:
-        row_size = sizeof(keyboard_keys_row_3) / sizeof(TextInputKey);
+        row_size = COUNT_OF(keyboard_keys_row_3);
         break;
+    default:
+        furi_crash(NULL);
     }
 
     return row_size;
@@ -118,6 +120,8 @@ static const TextInputKey* get_row(uint8_t row_index) {
     case 3:
         row = keyboard_keys_row_3;
         break;
+    default:
+        furi_crash(NULL);
     }
 
     return row;
@@ -134,7 +138,7 @@ static bool char_is_lowercase(char letter) {
 static char char_to_uppercase(const char letter) {
     if(letter == '_') {
         return 0x20;
-    } else if(isalpha(letter)) {
+    } else if(islower(letter)) {
         return (letter - 0x20);
     } else {
         return letter;
@@ -184,7 +188,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontKeyboard);
 
-    for(uint8_t row = 0; row <= keyboard_row_count; row++) {
+    for(uint8_t row = 0; row < keyboard_row_count; row++) {
         const uint8_t column_count = get_row_size(row);
         const TextInputKey* keys = get_row(row);
 
@@ -250,7 +254,7 @@ static void text_input_view_draw_callback(Canvas* canvas, void* _model) {
             }
         }
     }
-    if(model->valadator_message_visible) {
+    if(model->validator_message_visible) {
         canvas_set_font(canvas, FontSecondary);
         canvas_set_color(canvas, ColorWhite);
         canvas_draw_box(canvas, 8, 10, 110, 48);
@@ -303,9 +307,11 @@ static void text_input_handle_right(TextInput* text_input, TextInputModel* model
 
 static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, bool shift) {
     char selected = get_selected_char(model);
-    uint8_t text_length = strlen(model->text_buffer);
+    size_t text_length = strlen(model->text_buffer);
 
-    if(shift) {
+    bool toogle_case = text_length == 0;
+    if(shift) toogle_case = !toogle_case;
+    if(toogle_case) {
         selected = char_to_uppercase(selected);
     }
 
@@ -313,7 +319,7 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
         if(model->validator_callback &&
            (!model->validator_callback(
                model->text_buffer, model->validator_text, model->validator_callback_context))) {
-            model->valadator_message_visible = true;
+            model->validator_message_visible = true;
             furi_timer_start(text_input->timer, furi_kernel_get_tick_frequency() * 4);
         } else if(model->callback != 0 && text_length > 0) {
             model->callback(model->callback_context);
@@ -325,9 +331,6 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
             text_length = 0;
         }
         if(text_length < (model->text_buffer_size - 1)) {
-            if(text_length == 0 && char_is_lowercase(selected)) {
-                selected = char_to_uppercase(selected);
-            }
             model->text_buffer[text_length] = selected;
             model->text_buffer[text_length + 1] = 0;
         }
@@ -345,8 +348,8 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
     TextInputModel* model = view_get_model(text_input->view);
 
     if((!(event->type == InputTypePress) && !(event->type == InputTypeRelease)) &&
-       model->valadator_message_visible) {
-        model->valadator_message_visible = false;
+       model->validator_message_visible) {
+        model->validator_message_visible = false;
         consumed = true;
     } else if(event->type == InputTypeShort) {
         consumed = true;
@@ -432,7 +435,7 @@ void text_input_timer_callback(void* context) {
     with_view_model(
         text_input->view,
         TextInputModel * model,
-        { model->valadator_message_visible = false; },
+        { model->validator_message_visible = false; },
         true);
 }
 
@@ -481,7 +484,6 @@ void text_input_reset(TextInput* text_input) {
         text_input->view,
         TextInputModel * model,
         {
-            model->text_buffer_size = 0;
             model->header = "";
             model->selected_row = 0;
             model->selected_column = 0;
@@ -493,7 +495,7 @@ void text_input_reset(TextInput* text_input) {
             model->validator_callback = NULL;
             model->validator_callback_context = NULL;
             furi_string_reset(model->validator_text);
-            model->valadator_message_visible = false;
+            model->validator_message_visible = false;
         },
         true);
 }

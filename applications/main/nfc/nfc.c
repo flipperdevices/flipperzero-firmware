@@ -1,5 +1,5 @@
 #include "nfc_i.h"
-#include "furi_hal_nfc.h"
+#include <furi_hal_nfc.h>
 #include <dolphin/dolphin.h>
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
@@ -46,6 +46,7 @@ Nfc* nfc_alloc() {
 
     // Nfc device
     nfc->dev = nfc_device_alloc();
+    furi_string_set(nfc->dev->folder, NFC_APP_FOLDER);
 
     // Open GUI record
     nfc->gui = furi_record_open(RECORD_GUI);
