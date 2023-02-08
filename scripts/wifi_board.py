@@ -90,6 +90,11 @@ class Main(App):
         flash_command = flash_command.replace("\n", "").replace("\r", "")
         flash_command = flash_command.replace("(PORT)", port)
 
+        # We can't reset the board after flashing via usb
+        flash_command = flash_command.replace(
+            "--after hard_reset", "--after no_reset_stub"
+        )
+
         args = flash_command.split(" ")[0:]
         args = list(filter(None, args))
 
@@ -107,37 +112,20 @@ class Main(App):
             universal_newlines=True,
         )
 
-        # esptool.py will set returncode to 1, even if flashing was successful
-        # because it will not be able to reset the board after flashing via usb
-        success_counter = 0
-        success_marker = "Hash of data verified."
-
-        success_but_reset_failed = False
-
         while process.poll() is None:
             if process.stdout is not None:
                 for line in process.stdout:
-                    text = line.strip()
-                    if text == success_marker:
-                        success_counter += 1
-
-                    if "can not exit the download mode over USB" in text:
-                        success_but_reset_failed = True
-
-                    self.logger.debug(f"{text}")
+                    self.logger.debug(f"{line.strip()}")
 
         dir.cleanup()
 
-        if success_counter < 3:
+        if process.returncode != 0:
             self.logger.error(f"Failed to flash WiFi board")
-            return 1
-
-        self.logger.info("WiFi board flashed successfully")
-
-        if success_but_reset_failed:
+        else:
+            self.logger.info("WiFi board flashed successfully")
             self.logger.info("Press RESET button on WiFi board to start it")
 
-        return 0
+        return process.returncode
 
 
 if __name__ == "__main__":
