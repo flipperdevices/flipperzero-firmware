@@ -49,6 +49,7 @@ We do not condone illegal activity and strongly encourage keeping transmissions 
 
 - Linear 10bit 300MHz
 - Linear 10bit 310MHz
+- Linear Delta 3 8bit 310MHz
 
 #### UNILARM
 
