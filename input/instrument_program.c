@@ -150,9 +150,9 @@ void instrument_program_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEve
             {
                 tracker->current_program_step++;
 
-                if (tracker->program_position < tracker->current_program_step - 8)
+                if (tracker->program_position < tracker->current_program_step - 7)
                 {
-                    tracker->program_position = tracker->current_program_step - 8;
+                    tracker->program_position = tracker->current_program_step - 7;
                 }
             }
 

@@ -37,13 +37,13 @@ char *notename(uint8_t note)
         return buffer;
     }
 
-    if(note == 0xf0) //external arpeggio notes
+    if (note == 0xf0) // external arpeggio notes
     {
         snprintf(buffer, sizeof(buffer), "%s", "EXT.0");
         return buffer;
     }
 
-    if(note == 0xf1)
+    if (note == 0xf1)
     {
         snprintf(buffer, sizeof(buffer), "%s", "EXT.1");
         return buffer;

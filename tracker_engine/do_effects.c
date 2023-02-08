@@ -160,7 +160,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                 if (te_channel->volume > MAX_ADSR_VOLUME)
                     te_channel->volume = MAX_ADSR_VOLUME;
 
-                se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
+                se_channel->adsr.volume = (int32_t)te_channel->volume;
                 se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
             }
 
@@ -185,7 +185,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                 {
                     te_channel->volume = opcode & 0xff;
 
-                    se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
+                    se_channel->adsr.volume = (int32_t)te_channel->volume;
                     se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
                 }
             }
@@ -280,7 +280,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                         if (te_channel->volume > MAX_ADSR_VOLUME)
                             te_channel->volume = 0;
 
-                        se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
+                        se_channel->adsr.volume = (int32_t)te_channel->volume;
                         se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
                     }
 
@@ -296,7 +296,7 @@ void do_command(uint16_t opcode, TrackerEngine *tracker_engine, uint8_t channel,
                         if (te_channel->volume > MAX_ADSR_VOLUME)
                             te_channel->volume = MAX_ADSR_VOLUME;
 
-                        se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)te_channel->volume / MAX_ADSR_VOLUME * (int32_t)te_channel->instrument->adsr.volume / MAX_ADSR_VOLUME;
+                        se_channel->adsr.volume = (int32_t)te_channel->volume;
                         se_channel->adsr.volume = (int32_t)se_channel->adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
                     }
 

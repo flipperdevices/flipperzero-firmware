@@ -267,7 +267,7 @@ void tracker_engine_execute_track_command(TrackerEngine *tracker_engine, uint8_t
 
     if (vol != MUS_NOTE_VOLUME_NONE && !(tracker_engine->channel[chan].channel_flags & TEC_DISABLED))
     {
-        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)tracker_engine->channel[chan].instrument->adsr.volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE - 1);
+        tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->channel[chan].volume / MAX_ADSR_VOLUME * (int32_t)vol / (MUS_NOTE_VOLUME_NONE);
         tracker_engine->sound_engine->channel[chan].adsr.volume = (int32_t)tracker_engine->sound_engine->channel[chan].adsr.volume * (int32_t)tracker_engine->master_volume / MAX_ADSR_VOLUME;
     }
 
