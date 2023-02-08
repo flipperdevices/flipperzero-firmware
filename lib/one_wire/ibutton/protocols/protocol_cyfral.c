@@ -181,7 +181,7 @@ static bool protocol_cyfral_decoder_feed(ProtocolCyfral* proto, bool level, uint
                     cyfral->index++;
                 }
 
-                // succefully read 8 nibbles
+                // successfully read 8 nibbles
                 if(cyfral->index == 8) {
                     cyfral->state = CYFRAL_READ_STOP_NIBBLE;
                 }
@@ -270,10 +270,10 @@ static LevelDuration protocol_cyfral_encoder_yield(ProtocolCyfral* proto) {
         // start word (0b0001)
         switch(proto->encoder.index) {
         case 0:
-            result = level_duration_make(false, CYFRAL_0_LOW);
+            result = level_duration_make(false, CYFRAL_0_LOW); //-V1037
             break;
         case 1:
-            result = level_duration_make(true, CYFRAL_0_HI);
+            result = level_duration_make(true, CYFRAL_0_HI); //-V1037
             break;
         case 2:
             result = level_duration_make(false, CYFRAL_0_LOW);

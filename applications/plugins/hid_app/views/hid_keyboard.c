@@ -25,6 +25,7 @@ typedef struct {
     bool back_pressed;
     bool connected;
     char key_string[5];
+    HidTransport transport;
 } HidKeyboardModel;
 
 typedef struct {
@@ -45,11 +46,25 @@ typedef struct {
 #define KEY_WIDTH 9
 #define KEY_HEIGHT 12
 #define KEY_PADDING 1
-#define ROW_COUNT 6
+#define ROW_COUNT 7
 #define COLUMN_COUNT 12
 
 // 0 width items are not drawn, but there value is used
 const HidKeyboardKey hid_keyboard_keyset[ROW_COUNT][COLUMN_COUNT] = {
+    {
+        {.width = 1, .icon = &I_ButtonF1_5x8, .value = HID_KEYBOARD_F1},
+        {.width = 1, .icon = &I_ButtonF2_5x8, .value = HID_KEYBOARD_F2},
+        {.width = 1, .icon = &I_ButtonF3_5x8, .value = HID_KEYBOARD_F3},
+        {.width = 1, .icon = &I_ButtonF4_5x8, .value = HID_KEYBOARD_F4},
+        {.width = 1, .icon = &I_ButtonF5_5x8, .value = HID_KEYBOARD_F5},
+        {.width = 1, .icon = &I_ButtonF6_5x8, .value = HID_KEYBOARD_F6},
+        {.width = 1, .icon = &I_ButtonF7_5x8, .value = HID_KEYBOARD_F7},
+        {.width = 1, .icon = &I_ButtonF8_5x8, .value = HID_KEYBOARD_F8},
+        {.width = 1, .icon = &I_ButtonF9_5x8, .value = HID_KEYBOARD_F9},
+        {.width = 1, .icon = &I_ButtonF10_5x8, .value = HID_KEYBOARD_F10},
+        {.width = 1, .icon = &I_ButtonF11_5x8, .value = HID_KEYBOARD_F11},
+        {.width = 1, .icon = &I_ButtonF12_5x8, .value = HID_KEYBOARD_F12},
+    },
     {
         {.width = 1, .icon = NULL, .key = "1", .shift_key = "!", .value = HID_KEYBOARD_1},
         {.width = 1, .icon = NULL, .key = "2", .shift_key = "@", .value = HID_KEYBOARD_2},
@@ -207,7 +222,7 @@ static void hid_keyboard_draw_callback(Canvas* canvas, void* context) {
     HidKeyboardModel* model = context;
 
     // Header
-    if(!model->connected) {
+    if((!model->connected) && (model->transport == HidTransportBle)) {
         canvas_draw_icon(canvas, 0, 0, &I_Ble_disconnected_15x15);
         canvas_set_font(canvas, FontPrimary);
         elements_multiline_text_aligned(canvas, 17, 3, AlignLeft, AlignTop, "Keyboard");
@@ -223,7 +238,12 @@ static void hid_keyboard_draw_callback(Canvas* canvas, void* context) {
 
     canvas_set_font(canvas, FontKeyboard);
     // Start shifting the all keys up if on the next row (Scrolling)
-    uint8_t initY = model->y - 4 > 0 ? model->y - 4 : 0;
+    uint8_t initY = model->y == 0 ? 0 : 1;
+
+    if(model->y > 5) {
+        initY = model->y - 4;
+    }
+
     for(uint8_t y = initY; y < ROW_COUNT; y++) {
         const HidKeyboardKey* keyboardKeyRow = hid_keyboard_keyset[y];
         uint8_t x = 0;
@@ -249,30 +269,19 @@ static void hid_keyboard_draw_callback(Canvas* canvas, void* context) {
 
 static uint8_t hid_keyboard_get_selected_key(HidKeyboardModel* model) {
     HidKeyboardKey key = hid_keyboard_keyset[model->y][model->x];
-    // Use upper case if shift is toggled
-    bool useUppercase = model->shift;
-    // Check if the key has an upper case version
-    bool hasUppercase = key.shift_key != 0;
-    if(useUppercase && hasUppercase)
-        return key.value;
-    else
-        return key.value;
+    return key.value;
 }
 
 static void hid_keyboard_get_select_key(HidKeyboardModel* model, HidKeyboardPoint delta) {
     // Keep going until a valid spot is found, this allows for nulls and zero width keys in the map
     do {
-        if(((int8_t)model->y) + delta.y < 0)
-            model->y = ROW_COUNT - 1;
-        else
-            model->y = (model->y + delta.y) % ROW_COUNT;
+        const int delta_sum = model->y + delta.y;
+        model->y = delta_sum < 0 ? ROW_COUNT - 1 : delta_sum % ROW_COUNT;
     } while(delta.y != 0 && hid_keyboard_keyset[model->y][model->x].value == 0);
 
     do {
-        if(((int8_t)model->x) + delta.x < 0)
-            model->x = COLUMN_COUNT - 1;
-        else
-            model->x = (model->x + delta.x) % COLUMN_COUNT;
+        const int delta_sum = model->x + delta.x;
+        model->x = delta_sum < 0 ? COLUMN_COUNT - 1 : delta_sum % COLUMN_COUNT;
     } while(delta.x != 0 && hid_keyboard_keyset[model->y][model->x].width ==
                                 0); // Skip zero width keys, pretend they are one key
 }
@@ -371,6 +380,15 @@ HidKeyboard* hid_keyboard_alloc(Hid* bt_hid) {
     view_allocate_model(hid_keyboard->view, ViewModelTypeLocking, sizeof(HidKeyboardModel));
     view_set_draw_callback(hid_keyboard->view, hid_keyboard_draw_callback);
     view_set_input_callback(hid_keyboard->view, hid_keyboard_input_callback);
+
+    with_view_model(
+        hid_keyboard->view,
+        HidKeyboardModel * model,
+        {
+            model->transport = bt_hid->transport;
+            model->y = 1;
+        },
+        true);
 
     return hid_keyboard;
 }

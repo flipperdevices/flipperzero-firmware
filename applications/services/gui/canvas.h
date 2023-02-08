@@ -17,6 +17,7 @@ extern "C" {
 typedef enum {
     ColorWhite = 0x00,
     ColorBlack = 0x01,
+    ColorXOR = 0x02,
 } Color;
 
 /** Fonts enumeration */
@@ -65,6 +66,18 @@ typedef struct {
 
 /** Canvas anonymous structure */
 typedef struct Canvas Canvas;
+
+/** Reset canvas drawing tools configuration
+ *
+ * @param      canvas  Canvas instance
+ */
+void canvas_reset(Canvas* canvas);
+
+/** Commit canvas. Send buffer to display
+ *
+ * @param      canvas  Canvas instance
+ */
+void canvas_commit(Canvas* canvas);
 
 /** Get Canvas width
  *
@@ -132,6 +145,13 @@ void canvas_invert_color(Canvas* canvas);
  * @param      font    Font
  */
 void canvas_set_font(Canvas* canvas, Font font);
+
+/** Set custom drawing font
+ *
+ * @param      canvas  Canvas instance
+ * @param      font    Pointer to u8g2 const uint8_t* font array
+ */
+void canvas_set_custom_u8g2_font(Canvas* canvas, const uint8_t* font);
 
 /** Draw string at position of baseline defined by x, y.
  *

@@ -132,6 +132,18 @@ void furi_thread_set_context(FuriThread* thread, void* context);
  */
 void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority);
 
+/** Set current thread priority
+ *
+ * @param      priority FuriThreadPriority value
+ */
+void furi_thread_set_current_priority(FuriThreadPriority priority);
+
+/** Get current thread priority
+ *
+ * @return     FuriThreadPriority value
+ */
+FuriThreadPriority furi_thread_get_current_priority();
+
 /** Set FuriThread state change callback
  *
  * @param      thread    FuriThread instance
@@ -263,6 +275,12 @@ const char* furi_thread_get_appid(FuriThreadId thread_id);
  * @return uint32_t 
  */
 uint32_t furi_thread_get_stack_space(FuriThreadId thread_id);
+
+/** Get STDOUT callback for thead
+ *
+ * @return STDOUT callback
+ */
+FuriThreadStdoutWriteCallback furi_thread_get_stdout_callback();
 
 /** Set STDOUT callback for thread
  * 
