@@ -66,11 +66,20 @@ static void storage_cli_info(Cli* cli, FuriString* path) {
             storage_cli_print_error(error);
         } else {
             printf(
-                "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n",
+                "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n"
+                "%02x%s %s v%i.%i\r\nSN:%04lx %02i/%i\r\n",
                 sd_info.label,
                 sd_api_get_fs_type_text(sd_info.fs_type),
                 sd_info.kb_total,
-                sd_info.kb_free);
+                sd_info.kb_free,
+                sd_info.manufacturer_id,
+                sd_info.oem_id,
+                sd_info.product_name,
+                sd_info.product_revision_major,
+                sd_info.product_revision_minor,
+                sd_info.product_serial_number,
+                sd_info.manufacturing_month,
+                sd_info.manufacturing_year);
         }
     } else {
         storage_cli_print_usage();
