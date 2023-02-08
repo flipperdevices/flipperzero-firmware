@@ -247,6 +247,17 @@ const SubBruteProtocol subbrute_protocol_linear_10bit_310 = {
     .file = LinearFileProtocol};
 
 /**
+ * Linear Delta 3 8bit 310MHz
+ */
+const SubBruteProtocol subbrute_protocol_linear_delta_8bit_310 = {
+    .frequency = 310000000,
+    .bits = 8,
+    .te = 0,
+    .repeat = 4,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = LinearDeltaFileProtocol};
+
+/**
  * UNILARM 24bit 330MHz
  */
 const SubBruteProtocol subbrute_protocol_unilarm_24bit_330 = {
@@ -375,6 +386,7 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackChamberlain7bit390] = "Chamberlain 7bit 390MHz",
     [SubBruteAttackLinear10bit300] = "Linear 10bit 300MHz",
     [SubBruteAttackLinear10bit310] = "Linear 10bit 310MHz",
+    [SubBruteAttackLinearDelta8bit310] = "LinearDelta3 8bit 310MHz",
     [SubBruteAttackUNILARM24bit330] = "UNILARM 25bit 330MHz",
     [SubBruteAttackUNILARM24bit433] = "UNILARM 25bit 433MHz",
     [SubBruteAttackSMC532624bit330] = "SMC5326 25bit 330MHz",
@@ -421,6 +433,7 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackChamberlain7bit390] = &subbrute_protocol_chamberlain_7bit_390,
     [SubBruteAttackLinear10bit300] = &subbrute_protocol_linear_10bit_300,
     [SubBruteAttackLinear10bit310] = &subbrute_protocol_linear_10bit_310,
+    [SubBruteAttackLinearDelta8bit310] = &subbrute_protocol_linear_delta_8bit_310,
     [SubBruteAttackUNILARM24bit330] = &subbrute_protocol_unilarm_24bit_330,
     [SubBruteAttackUNILARM24bit433] = &subbrute_protocol_unilarm_24bit_433,
     [SubBruteAttackSMC532624bit330] = &subbrute_protocol_smc5326_24bit_330,
@@ -436,6 +449,7 @@ static const char* subbrute_protocol_file_types[] = {
     [NICEFileProtocol] = "Nice FLO",
     [ChamberlainFileProtocol] = "Cham_Code",
     [LinearFileProtocol] = "Linear",
+    [LinearDeltaFileProtocol] = "LinearDelta3",
     [PrincetonFileProtocol] = "Princeton",
     [RAWFileProtocol] = "RAW",
     [BETTFileProtocol] = "BETT",

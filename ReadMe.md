@@ -63,6 +63,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Move CSN space to prevent overflow #2232 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/2232)
 - OFW: [fbt: building fap_dist for compact gh build; accessor: fixed for latest ibutton changes #2377 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2377)
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
+- UL: Updated [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 
 <a name="release">
 
