@@ -14,7 +14,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
-    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) || (protocol == NfcDeviceProtocolMifareClassic)) {
+    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) ||
+       (protocol == NfcDeviceProtocolMifareClassic)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -105,9 +106,6 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             }
         }
     } else if(protocol == NfcDeviceProtocolMifareClassic) {
-	FURI_LOG_I("nfc",
-		   "Mifare Classic device: data in mifare block 0: 0x%x",
-		   dev_data->mf_classic_data.block[0].value[0]);
         MfClassicData* data = &dev_data->mf_classic_data;
         uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
         uint8_t keys_total = sectors_total * 2;
@@ -139,10 +137,10 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
             } else if(protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
                 consumed = true;
-            } else if (protocol == NfcDeviceProtocolMifareClassic) {
-		scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicData);
+            } else if(protocol == NfcDeviceProtocolMifareClassic) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicData);
                 consumed = true;
-	    }
+            }
         }
     }
 
