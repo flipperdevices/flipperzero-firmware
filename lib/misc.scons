@@ -1,5 +1,6 @@
 Import("env")
 
+
 env.Append(
     CPPPATH=[
         "#/lib/digital_signal",
@@ -31,7 +32,7 @@ libs_recurse = [
 ]
 
 for lib in libs_recurse:
-    sources += libenv.GlobRecursive("*.c*", lib, exclude=["*~"])
+    sources += libenv.GlobRecursive("*.c*", lib)
 
 libs_plain = [
     "heatshrink",
@@ -39,7 +40,7 @@ libs_plain = [
 ]
 
 for lib in libs_plain:
-    sources += Glob(lib + "/*.c*", source=True, exclude=["*~"])
+    sources += Glob(lib + "/*.c*", source=True)
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)
