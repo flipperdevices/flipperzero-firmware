@@ -1,5 +1,4 @@
 #include "../storage_settings.h"
-#include <stm32_adafruit_sd.h>
 
 static void storage_settings_scene_sd_info_dialog_callback(DialogExResult result, void* context) {
     StorageSettings* app = context;
@@ -12,9 +11,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
     DialogEx* dialog_ex = app->dialog_ex;
 
     SDInfo sd_info;
-    SD_CID sd_cid;
     FS_Error sd_status = storage_sd_info(app->fs_api, &sd_info);
-    BSP_SD_GetCIDRegister(&sd_cid);
 
     scene_manager_set_scene_state(app->scene_manager, StorageSettingsSDInfo, sd_status);
 
@@ -58,7 +55,8 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
         furi_string_printf(
             app->text_string,
             "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free  %.2f%% free\n"
-            "%02X%2.2s %5.5s %i.%i\nSN:%04lX %02i/%i",
+            // "%02X%2.2s %5.5s %i.%i\nSN:%04lX %02i/%i",
+            "%02X%s %s v%i.%i\nSN:%04lX %02i/%i",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
             sd_total_val,
@@ -66,14 +64,14 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             sd_free_val,
             sd_free_unit,
             (double)(((int)sd_info.kb_free * 100.0) / (int)sd_info.kb_total),
-            sd_cid.ManufacturerID,
-            sd_cid.OEM_AppliID,
-            sd_cid.ProdName,
-            sd_cid.ProdRev >> 4,
-            sd_cid.ProdRev & 0xf,
-            sd_cid.ProdSN,
-            sd_cid.ManufactMonth,
-            sd_cid.ManufactYear + 2000);
+            sd_cid.manufacturer_id,
+            sd_cid.oem_id,
+            sd_cid.product_name,
+            sd_cid.product_revision_major,
+            sd_cid.product_revision_minor,
+            sd_cid.product_serial_number,
+            sd_cid.manufacturing_month,
+            sd_cid.manufacturing_year);
         dialog_ex_set_text(
             dialog_ex, furi_string_get_cstr(app->text_string), 4, 1, AlignLeft, AlignTop);
     }
