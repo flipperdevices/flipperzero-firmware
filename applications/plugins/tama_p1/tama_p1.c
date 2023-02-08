@@ -831,8 +831,8 @@ int32_t tama_p1_app(void* p) {
 
                 if(in_menu) {
                     // if(menu_cursor == 2 &&
-                       // (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
-                        // tama_btn_state = BTN_STATE_RELEASED;
+                    // (event.input.key == InputKeyUp || event.input.key == InputKeyDown)) {
+                    // tama_btn_state = BTN_STATE_RELEASED;
                     // }
                     if(event.input.key == InputKeyBack) {
                         tama_btn_state = BTN_STATE_RELEASED;
