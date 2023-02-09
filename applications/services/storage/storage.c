@@ -6,7 +6,6 @@
 #include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
-#include <toolbox/stream/file_stream.h>
 
 #define STORAGE_TICK 1000
 
