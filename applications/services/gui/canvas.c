@@ -57,7 +57,7 @@ uint8_t* canvas_get_buffer(Canvas* canvas) {
     return u8g2_GetBufferPtr(&canvas->fb);
 }
 
-size_t canvas_get_buffer_size(Canvas* canvas) {
+size_t canvas_get_buffer_size(const Canvas* canvas) {
     furi_assert(canvas);
     return u8g2_GetBufferTileWidth(&canvas->fb) * u8g2_GetBufferTileHeight(&canvas->fb) * 8;
 }
@@ -75,17 +75,17 @@ void canvas_frame_set(
     canvas->height = height;
 }
 
-uint8_t canvas_width(Canvas* canvas) {
+uint8_t canvas_width(const Canvas* canvas) {
     furi_assert(canvas);
     return canvas->width;
 }
 
-uint8_t canvas_height(Canvas* canvas) {
+uint8_t canvas_height(const Canvas* canvas) {
     furi_assert(canvas);
     return canvas->height;
 }
 
-uint8_t canvas_current_font_height(Canvas* canvas) {
+uint8_t canvas_current_font_height(const Canvas* canvas) {
     furi_assert(canvas);
     uint8_t font_height = u8g2_GetMaxCharHeight(&canvas->fb);
 
@@ -96,10 +96,10 @@ uint8_t canvas_current_font_height(Canvas* canvas) {
     return font_height;
 }
 
-CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font) {
+const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font) {
     furi_assert(canvas);
     furi_assert(font < FontTotalNumber);
-    return (CanvasFontParameters*)&canvas_font_params[font];
+    return &canvas_font_params[font];
 }
 
 void canvas_clear(Canvas* canvas) {
@@ -135,6 +135,12 @@ void canvas_set_font(Canvas* canvas, Font font) {
     } else {
         furi_crash(NULL);
     }
+}
+
+void canvas_set_custom_u8g2_font(Canvas* canvas, const uint8_t* font) {
+    furi_assert(canvas);
+    u8g2_SetFontMode(&canvas->fb, 1);
+    u8g2_SetFont(&canvas->fb, font);
 }
 
 void canvas_draw_str(Canvas* canvas, uint8_t x, uint8_t y, const char* str) {
