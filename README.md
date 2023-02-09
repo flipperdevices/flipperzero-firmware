@@ -59,6 +59,17 @@ OK - вход в режим просмотра адресов и включен�
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/Screenshot-5.png">
 <br>
 <br>
+Схема подключения модуля nRF24l01:<br>
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/scheme.png">
+![Gerber for full board:]("https://raw.githubusercontent.com/vad7/nrf24scan/master/Gerber_PCB_Flipper Zero nRF24 board_v1_0.zip")
+<br>
+[Easyeda source](https://oshwlab.com/vad7/flipper-zero-nrf24-board)
+<br>
+![Gerber for mini board with 5V - 3.3V converter LM1117-3.3:]("https://raw.githubusercontent.com/vad7/nrf24scan/master/Gerber_PCB_Flipper Zero nRF24 board mini_v1_0.zip")
+<br>
+[Easyeda source](https://oshwlab.com/vad7/flipper-zero-nrf24-board_copy)
+<br>
+<br>
 _________________________________________________________________________________
 <br>
 <br>
