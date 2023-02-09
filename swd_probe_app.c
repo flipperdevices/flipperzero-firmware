@@ -17,6 +17,7 @@
 
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 static bool swd_message_process(AppFSM* ctx);
+static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data);
 
 static const GpioPin* gpios[] = {
     &gpio_ext_pc0,
@@ -198,7 +199,9 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
 
-    swd_write_byte(ctx, 0, 8);
+    uint32_t idle = 0;
+    swd_write(ctx, (uint8_t*)&idle, ctx->swd_idle_bits);
+
     uint8_t request[] = {0};
 
     request[0] |= 0x01; /* start bit*/
@@ -269,6 +272,7 @@ static void swd_line_reset(AppFSM* const ctx) {
         swd_write_byte(ctx, 0xFF, 8);
     }
     swd_write_byte(ctx, 0, 8);
+    ctx->dp_regs.select_ok = false;
 }
 
 static void swd_abort(AppFSM* const ctx) {
@@ -280,6 +284,19 @@ static void swd_abort(AppFSM* const ctx) {
     uint32_t abort = 0x0E;
     swd_transfer(ctx, false, true, 0, &abort);
 }
+/*
+static uint8_t swd_transferxx(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data) {
+    uint8_t ret = 0;
+    for(int tries = 0; tries < 3; tries++) {
+        ret = swd_transfer(ctx, ap, write, a23, data);
+        if(ret == 1) {
+            return ret;
+        }
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_transfer: failed: %d/3", tries);
+        swd_abort(ctx);
+    }
+    return 9;
+}*/
 
 static void swd_abort_simple(AppFSM* const ctx) {
     uint32_t abort = 0x0E;
@@ -294,10 +311,18 @@ static void swd_abort_simple(AppFSM* const ctx) {
 static uint8_t swd_select(AppFSM* const ctx, uint8_t ap_sel, uint8_t ap_bank, uint8_t dp_bank) {
     uint32_t bank_reg = (ap_sel << 24) | ((ap_bank & 0x0F) << 4) | (dp_bank & 0x0F);
 
+    if(ctx->dp_regs.select_ok && bank_reg == ctx->dp_regs.select) {
+        return 1;
+    }
+
     uint8_t ret = swd_transfer(ctx, false, true, 2, &bank_reg);
     if(ret != 1) {
+        ctx->dp_regs.select_ok = false;
         furi_log_print_format(FuriLogLevelDefault, TAG, "swd_select: failed: %d", ret);
     }
+
+    ctx->dp_regs.select = bank_reg;
+    ctx->dp_regs.select_ok = true;
     return ret;
 }
 
@@ -317,8 +342,6 @@ static uint8_t
         furi_log_print_format(FuriLogLevelDefault, TAG, "swd_read_dpbank: failed: %d", ret);
         return ret;
     }
-    /* reset bank to zero again */
-    ret = swd_select(ctx, 0, 0, 0);
     return ret;
 }
 
@@ -408,7 +431,9 @@ static uint8_t swd_read_memory_block(
     ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, &data);
 
     for(size_t pos = 0; pos < len; pos += 4) {
+        data = 0xDEADBEEF;
         ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, &data);
+        furi_log_print_format(FuriLogLevelDefault, TAG, "##read %lX", data);
 
         memcpy(&buf[pos], &data, 4);
 
@@ -735,6 +760,9 @@ static bool swd_scriptfunc_beep(ScriptContext* ctx) {
 static bool swd_scriptfunc_message(ScriptContext* ctx) {
     uint32_t wait_time = 0;
     char message[256];
+    char type[256];
+    bool success = true;
+    bool show_dialog = false;
 
     if(!swd_script_skip_whitespace(ctx)) {
         furi_log_print_format(FuriLogLevelDefault, TAG, "message: missing whitespace");
@@ -751,10 +779,50 @@ static bool swd_scriptfunc_message(ScriptContext* ctx) {
         return false;
     }
 
+    if(swd_script_get_string(ctx, type, sizeof(type))) {
+        if(!strcmp(type, "dialog")) {
+            show_dialog = true;
+        }
+    }
+
     if(wait_time <= 60 * 1000) {
         strcpy(ctx->app->state_string, message);
         swd_script_gui_refresh(ctx);
         furi_delay_ms(wait_time);
+        if(show_dialog) {
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_header(message, "SWD Probe", 16, 2, AlignLeft, AlignTop);
+            dialog_message_set_icon(message, &I_app, 3, 2);
+            dialog_message_set_text(message, ctx->app->state_string, 3, 16, AlignLeft, AlignTop);
+            dialog_message_set_buttons(message, "Abort", "Ok", NULL);
+            success = dialog_message_show(ctx->app->dialogs, message) == DialogMessageButtonCenter;
+            dialog_message_free(message);
+        }
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static bool swd_scriptfunc_swd_idle_bits(ScriptContext* ctx) {
+    uint32_t swd_idle_bits = 0;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_idle_bits: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_number(ctx, &swd_idle_bits)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_idle_bits: failed to parse");
+        return false;
+    }
+
+    if(swd_idle_bits <= 32) {
+        ctx->app->swd_idle_bits = swd_idle_bits;
+    } else {
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "swd_idle_bits: value must be between 1 and 32");
     }
 
     swd_script_seek_newline(ctx);
@@ -965,8 +1033,15 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
                 furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: aborting read");
                 break;
             }
-            uint32_t ret = swd_read_memory_block(
-                ctx->app, ctx->selected_ap, address + pos, buffer, ctx->block_size);
+            uint32_t ret = 0;
+
+            if(ctx->block_size > 4) {
+                ret = swd_read_memory_block(
+                    ctx->app, ctx->selected_ap, address + pos, buffer, ctx->block_size);
+            } else {
+                ret = swd_read_memory(
+                    ctx->app, ctx->selected_ap, address + pos, (uint8_t*)(void*)buffer);
+            }
             read_ok = (ret == 1);
 
             if(!read_ok) {
@@ -1144,6 +1219,7 @@ static const ScriptFunctionInfo script_funcs[] = {
     {"apselect", &swd_scriptfunc_apselect},
     {"max_tries", &swd_scriptfunc_maxtries},
     {"swd_clock_delay", &swd_scriptfunc_swd_clock_delay},
+    {"swd_idle_bits", &swd_scriptfunc_swd_idle_bits},
     {"block_size", &swd_scriptfunc_blocksize},
     {"abort", &swd_scriptfunc_abort},
     {"mem_dump", &swd_scriptfunc_mem_dump},
@@ -1196,7 +1272,20 @@ static bool swd_execute_script_line(ScriptContext* const ctx, File* file) {
         swd_script_gui_refresh(ctx);
 
         /* func function, execute */
-        return script_funcs[entry].func(ctx);
+        bool success = script_funcs[entry].func(ctx);
+
+        if(!success) {
+            furi_log_print_format(
+                FuriLogLevelDefault, TAG, "Command failed: %s", script_funcs[entry].prefix);
+            snprintf(
+                ctx->app->state_string,
+                sizeof(ctx->app->state_string),
+                "Command failed: %s",
+                script_funcs[entry].prefix);
+            return false;
+        }
+
+        return true;
     }
     furi_log_print_format(FuriLogLevelDefault, TAG, "unknown command");
 
@@ -1205,57 +1294,76 @@ static bool swd_execute_script_line(ScriptContext* const ctx, File* file) {
 
 static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
     bool success = true;
+    bool restart = false;
 
-    ctx->script = malloc(sizeof(ScriptContext));
+    do {
+        success = true;
+        restart = false;
+        ctx->script = malloc(sizeof(ScriptContext));
 
-    ctx->script->app = ctx;
-    ctx->script->max_tries = 1;
+        ctx->script->app = ctx;
+        ctx->script->max_tries = 1;
 
-    if(!storage_file_exists(ctx->storage, filename)) {
-        furi_log_print_format(FuriLogLevelDefault, TAG, "Does not exist '%s'", filename);
-        free(ctx->script);
-        ctx->script = NULL;
-        return false;
-    }
+        if(!storage_file_exists(ctx->storage, filename)) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "Does not exist '%s'", filename);
+            free(ctx->script);
+            ctx->script = NULL;
+            return false;
+        }
 
-    /* first allocate a file object */
-    ctx->script->script_file = storage_file_alloc(ctx->storage);
+        /* first allocate a file object */
+        ctx->script->script_file = storage_file_alloc(ctx->storage);
 
-    /* then get our script opened */
-    if(!storage_file_open(ctx->script->script_file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(ctx->script->script_file));
-        furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to open '%s'", filename);
+        /* then get our script opened */
+        if(!storage_file_open(ctx->script->script_file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(ctx->script->script_file));
+            furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to open '%s'", filename);
+            storage_file_free(ctx->script->script_file);
+            free(ctx->script);
+            ctx->script = NULL;
+            return false;
+        }
+
+        uint32_t line = 1;
+        while(line < SCRIPT_MAX_LINES) {
+            if(ctx->script->abort) {
+                furi_log_print_format(FuriLogLevelDefault, TAG, "Abort requested");
+                break;
+            }
+            if(storage_file_eof(ctx->script->script_file)) {
+                break;
+            }
+            furi_log_print_format(FuriLogLevelDefault, TAG, "line %lu", line);
+            if(!swd_execute_script_line(ctx->script, ctx->script->script_file)) {
+                success = false;
+                break;
+            }
+            line++;
+        }
+
+        furi_log_print_format(FuriLogLevelDefault, TAG, "Finished");
+
+        storage_file_close(ctx->script->script_file);
         storage_file_free(ctx->script->script_file);
         free(ctx->script);
+
         ctx->script = NULL;
-        return false;
-    }
 
-    uint32_t line = 1;
-    while(line < SCRIPT_MAX_LINES) {
-        if(ctx->script->abort) {
-            furi_log_print_format(FuriLogLevelDefault, TAG, "Abort requested");
-            break;
+        if(!success) {
+            char text_buf[128];
+
+            snprintf(text_buf, sizeof(text_buf), "Line %lu failed:\n%s", line, ctx->state_string);
+            DialogMessage* message = dialog_message_alloc();
+            dialog_message_set_header(message, "SWD Probe", 16, 2, AlignLeft, AlignTop);
+            dialog_message_set_icon(message, &I_app, 3, 2);
+            dialog_message_set_text(message, text_buf, 3, 16, AlignLeft, AlignTop);
+            dialog_message_set_buttons(message, "Back", "Retry", NULL);
+            if(dialog_message_show(ctx->dialogs, message) == DialogMessageButtonCenter) {
+                restart = true;
+            }
+            dialog_message_free(message);
         }
-        if(storage_file_eof(ctx->script->script_file)) {
-            break;
-        }
-        furi_log_print_format(FuriLogLevelDefault, TAG, "line %lu", line);
-        if(!swd_execute_script_line(ctx->script, ctx->script->script_file)) {
-            furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to execute line %lu", line);
-            success = false;
-            break;
-        }
-        line++;
-    }
-
-    furi_log_print_format(FuriLogLevelDefault, TAG, "Finished");
-
-    storage_file_close(ctx->script->script_file);
-    storage_file_free(ctx->script->script_file);
-    free(ctx->script);
-
-    ctx->script = NULL;
+    } while(restart);
 
     return success;
 }
@@ -1320,6 +1428,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             y += 10;
 
             canvas_set_font(canvas, FontSecondary);
+            elements_button_left(canvas, "Script");
             elements_button_right(canvas, "DP Regs");
 
             break;
@@ -1552,6 +1661,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Down to select");
             y += 10;
         }
+        elements_button_left(canvas, "Script");
     }
 
     release_mutex((ValueMutex*)cb_ctx, ctx);
@@ -1583,6 +1693,8 @@ static void app_init(AppFSM* const app) {
     app->io_swd = 0xFF;
     app->io_swc = 0xFF;
     app->hex_addr = 0x40002800;
+    app->swd_clock_delay = CLOCK_DELAY;
+    app->swd_idle_bits = IDLE_BITS;
 
     strcpy(app->state_string, "none");
     strcpy(app->script_detected, "");
@@ -1634,26 +1746,33 @@ static void on_timer_tick(AppFSM* ctx) {
             ctx->dpidr_info.designer = (ctx->dp_regs.dpidr >> 1) & 0x3FF;
 
             if(!has_multiple_bits(ctx->io_swc)) {
+                furi_log_print_format(FuriLogLevelDebug, TAG, " - Detected pins");
+                furi_log_print_format(FuriLogLevelDebug, TAG, " - Resetting error");
                 /* reset error */
                 uint8_t ack = swd_transfer(ctx, false, false, 1, &ctx->dp_regs.ctrlstat);
                 furi_log_print_format(
-                    FuriLogLevelDefault, TAG, "stat %02lX %d", ctx->dp_regs.ctrlstat, ack);
+                    FuriLogLevelDebug, TAG, "stat %02lX %d", ctx->dp_regs.ctrlstat, ack);
 
                 if(ack != 1 || (ctx->dp_regs.ctrlstat & STAT_ERROR_FLAGS)) {
-                    furi_log_print_format(FuriLogLevelDefault, TAG, "send ABORT");
+                    furi_log_print_format(FuriLogLevelDebug, TAG, "send ABORT");
                     swd_abort(ctx);
                 }
+                furi_log_print_format(FuriLogLevelDebug, TAG, " - Fetch CTRL/STAT");
                 ctx->dp_regs.ctrlstat_ok = swd_read_dpbank(ctx, 1, 0, &ctx->dp_regs.ctrlstat) == 1;
 
                 if(ctx->dpidr_info.version >= 1) {
+                    furi_log_print_format(FuriLogLevelDebug, TAG, " - DAPv1, read DLCR");
                     ctx->dp_regs.dlcr_ok = swd_read_dpbank(ctx, 1, 1, &ctx->dp_regs.dlcr) == 1;
                 }
 
                 if(ctx->dpidr_info.version >= 2) {
+                    furi_log_print_format(FuriLogLevelDebug, TAG, " - DAPv2, read TARGETID");
                     ctx->dp_regs.targetid_ok =
                         swd_read_dpbank(ctx, 1, 2, &ctx->dp_regs.targetid) == 1;
+                    furi_log_print_format(FuriLogLevelDebug, TAG, " - DAPv2, read EVENTSTAT");
                     ctx->dp_regs.eventstat_ok =
                         swd_read_dpbank(ctx, 1, 4, &ctx->dp_regs.eventstat) == 1;
+                    furi_log_print_format(FuriLogLevelDebug, TAG, " - DAPv2, read DLPIDR");
                     ctx->dp_regs.dlpidr_ok = swd_read_dpbank(ctx, 1, 3, &ctx->dp_regs.dlpidr) == 1;
                 }
 
@@ -1665,7 +1784,7 @@ static void on_timer_tick(AppFSM* ctx) {
 
                 if(!ctx->script_detected_executed && strlen(ctx->script_detected) > 0) {
                     furi_log_print_format(
-                        FuriLogLevelDefault, TAG, "Run detected script '%s'", ctx->script_detected);
+                        FuriLogLevelDefault, TAG, " - Run script '%s'", ctx->script_detected);
 
                     ctx->script_detected_executed = true;
 
@@ -1673,6 +1792,10 @@ static void on_timer_tick(AppFSM* ctx) {
                     swd_execute_script(ctx, ctx->script_detected);
                     ctx->mode_page = ModePageScan;
                 }
+            }
+        } else {
+            if(!has_multiple_bits(ctx->io_swc)) {
+                furi_log_print_format(FuriLogLevelDebug, TAG, " - Lost device");
             }
         }
 
@@ -1819,6 +1942,26 @@ static bool swd_message_process(AppFSM* ctx) {
                         if(ctx->hex_select < 7) {
                             ctx->hex_select++;
                         }
+                    } else if(ctx->mode_page == ModePageScan) {
+                        FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                        FuriString* preselected = furi_string_alloc_printf(
+                            (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
+                                                                 ANY_PATH("swd"));
+                        DialogsFileBrowserOptions options;
+
+                        dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
+
+                        if(dialog_file_browser_show(
+                               ctx->dialogs, result_path, preselected, &options)) {
+                            const char* path = furi_string_get_cstr(result_path);
+                            ctx->mode_page = ModePageScript;
+                            swd_execute_script(ctx, path);
+                            ctx->mode_page = ModePageScan;
+                        }
+
+                        furi_string_free(result_path);
+                        furi_string_free(preselected);
+                        break;
                     } else {
                         if(ctx->mode_page > 0) {
                             ctx->mode_page--;
@@ -1885,6 +2028,8 @@ int32_t swd_probe_app_main(void* p) {
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
     notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
+
+    swd_execute_script(app, ANY_PATH("swd/startup.swd"));
 
     DOLPHIN_DEED(DolphinDeedPluginGameStart);
 

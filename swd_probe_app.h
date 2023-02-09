@@ -23,6 +23,8 @@
 #define TIMER_HZ 50
 #define TIMEOUT 3
 #define QUEUE_SIZE 32
+#define IDLE_BITS 8
+#define CLOCK_DELAY 0
 
 #define MAX_FILE_LENGTH 128
 #define SCRIPT_MAX_LINES 1000
@@ -132,6 +134,7 @@ typedef struct {
     uint8_t io_num_swd;
     uint32_t detected_timeout;
     uint32_t swd_clock_delay;
+    uint32_t swd_idle_bits;
     bool detected;
     bool detected_device;
     bool detected_notified;
