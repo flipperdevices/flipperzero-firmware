@@ -1,16 +1,22 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
+#include <dialogs/dialogs.h>
 #include <input/input.h>
+#include <storage/storage.h>
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
 #include "swd_probe_app.h"
+#include "swd_probe_icons.h"
 #include "jep106.h"
 
 #define COUNT(x) (sizeof(x) / sizeof((x)[0]))
+
+static void render_callback(Canvas* const canvas, void* cb_ctx);
+static bool swd_message_process(AppFSM* ctx);
 
 static const GpioPin* gpios[] = {
     &gpio_ext_pc0,
@@ -145,21 +151,27 @@ static uint8_t swd_get_data(AppFSM* const ctx) {
     return bits;
 }
 
+static void swd_clock_delay(AppFSM* const ctx) {
+    if(ctx->swd_clock_delay) {
+        furi_delay_us(ctx->swd_clock_delay);
+    }
+}
+
 static void swd_write_bit(AppFSM* const ctx, bool level) {
     swd_set_clock(ctx, 0);
     swd_set_data(ctx, level);
-    furi_delay_us(SWD_DELAY_US);
+    swd_clock_delay(ctx);
     swd_set_clock(ctx, 1);
-    furi_delay_us(SWD_DELAY_US);
+    swd_clock_delay(ctx);
     swd_set_clock(ctx, 0);
 }
 
 static uint8_t swd_read_bit(AppFSM* const ctx) {
     swd_set_clock(ctx, 1);
-    furi_delay_us(SWD_DELAY_US);
+    swd_clock_delay(ctx);
     swd_set_clock(ctx, 0);
     uint8_t bits = swd_get_data(ctx);
-    furi_delay_us(SWD_DELAY_US);
+    swd_clock_delay(ctx);
     swd_set_clock(ctx, 1);
 
     return bits;
@@ -355,6 +367,19 @@ static uint8_t swd_write_ap(AppFSM* const ctx, uint8_t ap, uint8_t ap_off, uint3
     return ret;
 }
 
+static uint8_t swd_write_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t data) {
+    uint8_t ret = 0;
+
+    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, 0x03000012);
+    ret |= swd_write_ap(ctx, ap, MEMAP_TAR, address);
+    ret |= swd_write_ap(ctx, ap, MEMAP_DRW, data);
+
+    if(ret != 1) {
+        swd_abort(ctx);
+    }
+    return ret;
+}
+
 static uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t* data) {
     uint8_t ret = 0;
 
@@ -368,13 +393,29 @@ static uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, 
     return ret;
 }
 
-static uint8_t swd_read_memory_cont(AppFSM* const ctx, uint8_t ap, uint32_t* data) {
+static uint8_t swd_read_memory_block(
+    AppFSM* const ctx,
+    uint8_t ap,
+    uint32_t address,
+    uint8_t* buf,
+    uint32_t len) {
     uint8_t ret = 0;
+    uint32_t data = 0;
+    bool first = true;
 
-    ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, data);
+    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, 0x03000012);
+    ret |= swd_write_ap(ctx, ap, MEMAP_TAR, address);
+    ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, &data);
 
-    if(ret != 1) {
-        swd_abort(ctx);
+    for(size_t pos = 0; pos < len; pos += 4) {
+        ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, &data);
+
+        memcpy(&buf[pos], &data, 4);
+
+        if(ret != 1) {
+            swd_abort(ctx);
+            return ret;
+        }
     }
     return ret;
 }
@@ -505,6 +546,9 @@ static void swd_apscan_reset(AppFSM* const ctx) {
 }
 
 static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
+    furi_assert(ctx);
+    furi_assert(ap < sizeof(ctx->apidr_info));
+
     ctx->apidr_info[ap].tested = true;
 
     uint32_t data = 0;
@@ -530,6 +574,693 @@ static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
     }
     return true;
 }
+
+/**************************  script helpers  **************************/
+
+static bool swd_script_seek_newline(ScriptContext* ctx) {
+    while(true) {
+        uint8_t ch = 0;
+        uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
+        if(ret != 1) {
+            return false;
+        }
+        if(ch == '\n') {
+            return true;
+        }
+    }
+}
+
+static bool swd_script_skip_whitespace(ScriptContext* ctx) {
+    while(true) {
+        uint8_t ch = 0;
+        uint64_t start_pos = storage_file_tell(ctx->script_file);
+        uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
+        if(ret != 1) {
+            return false;
+        }
+        if(ch == '\n') {
+            return false;
+        }
+        if(ch != ' ') {
+            storage_file_seek(ctx->script_file, start_pos, true);
+            return true;
+        }
+    }
+}
+
+static bool swd_script_get_string(ScriptContext* ctx, char* str, size_t max_length) {
+    bool quot = false;
+    size_t pos = 0;
+
+    str[pos] = '\000';
+
+    while(true) {
+        char ch = 0;
+        uint64_t start_pos = storage_file_tell(ctx->script_file);
+        uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
+        if(ret != 1) {
+            return false;
+        }
+        if(ch == '"') {
+            quot = !quot;
+            continue;
+        }
+        if(!quot) {
+            if(ch == ' ') {
+                return true;
+            }
+            if(ch == '\r' || ch == '\n') {
+                storage_file_seek(ctx->script_file, start_pos, true);
+                return true;
+            }
+        }
+        if(pos + 2 > max_length) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "swd_script_get_string: too long");
+            return false;
+        }
+        str[pos++] = ch;
+        str[pos] = '\000';
+    }
+    furi_log_print_format(FuriLogLevelDefault, TAG, "swd_script_get_string: got '%s'", str);
+
+    return true;
+}
+
+static bool swd_script_get_number(ScriptContext* ctx, uint32_t* number) {
+    char str[16];
+
+    if(!swd_script_get_string(ctx, str, sizeof(str))) {
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "swd_script_get_number: could not get string");
+        return false;
+    }
+    furi_log_print_format(FuriLogLevelDefault, TAG, "swd_script_get_number: got '%s'", str);
+
+    size_t pos = 0;
+    *number = 0;
+
+    /* hex number? */
+    if(!strncmp(str, "0x", 2)) {
+        pos += 2;
+        while(str[pos]) {
+            uint8_t ch = str[pos++];
+            uint8_t ch_num = ch - '0';
+            uint8_t ch_hex = (ch & ~0x20) - 'A';
+
+            *number <<= 4;
+
+            if(ch_num <= 10) {
+                *number += ch_num;
+            } else if(ch_hex <= 5) {
+                *number += 10 + ch_hex;
+            } else {
+                return false;
+            }
+        }
+    } else {
+        while(str[pos]) {
+            uint8_t ch = str[pos++];
+            uint8_t ch_num = ch - '0';
+
+            *number *= 10;
+
+            if(ch_num < 10) {
+                *number += ch_num;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+static void swd_script_gui_refresh(ScriptContext* ctx) {
+    //Canvas* canvas = gui_direct_draw_acquire(ctx->app->gui);
+
+    furi_log_print_format(FuriLogLevelDefault, TAG, "Status: %s", ctx->app->state_string);
+    //render_callback(canvas, &ctx->app->state_mutex);
+
+    if(furi_message_queue_get_count(ctx->app->event_queue) > 0) {
+        swd_message_process(ctx->app);
+    }
+    view_port_update(ctx->app->view_port);
+
+    //gui_direct_draw_release(ctx->app->gui);
+}
+
+/************************** script functions **************************/
+
+static bool swd_scriptfunc_comment(ScriptContext* ctx) {
+    furi_log_print_format(FuriLogLevelDefault, TAG, "comment");
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_beep(ScriptContext* ctx) {
+    uint32_t sound = 0;
+    furi_log_print_format(FuriLogLevelDefault, TAG, "beep");
+
+    swd_script_skip_whitespace(ctx);
+    swd_script_get_number(ctx, &sound);
+
+    notification_message_block(ctx->app->notification, seq_sounds[sound]);
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_message(ScriptContext* ctx) {
+    uint32_t wait_time = 0;
+    char message[256];
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "message: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_number(ctx, &wait_time)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "message: failed to parse wait_time");
+        return false;
+    }
+
+    if(!swd_script_get_string(ctx, message, sizeof(message))) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "message: failed to parse message");
+        return false;
+    }
+
+    if(wait_time <= 60 * 1000) {
+        strcpy(ctx->app->state_string, message);
+        swd_script_gui_refresh(ctx);
+        furi_delay_ms(wait_time);
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_swd_clock_delay(ScriptContext* ctx) {
+    uint32_t swd_clock_delay = 0;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_clock_delay: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_number(ctx, &swd_clock_delay)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "swd_clock_delay: failed to parse");
+        return false;
+    }
+
+    if(swd_clock_delay <= 1000000) {
+        ctx->app->swd_clock_delay = swd_clock_delay;
+    } else {
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "swd_clock_delay: value must be between 1 and 1000000");
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_maxtries(ScriptContext* ctx) {
+    uint32_t max_tries = 0;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "max_tries: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_number(ctx, &max_tries)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "max_tries: failed to parse");
+        return false;
+    }
+
+    if(max_tries >= 1 && max_tries <= 1024) {
+        ctx->max_tries = max_tries;
+    } else {
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "max_tries: value must be between 1 and 1024");
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_blocksize(ScriptContext* ctx) {
+    uint32_t block_size = 0;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "block_size: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_number(ctx, &block_size)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "block_size: failed to parse");
+        return false;
+    }
+
+    if(block_size >= 4 && block_size <= 0x1000) {
+        ctx->block_size = block_size;
+    } else {
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "block_size: value must be between 4 and 4096");
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_apselect(ScriptContext* ctx) {
+    uint32_t ap = 0;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "apselect: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_number(ctx, &ap)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "apselect: failed to parse");
+        return false;
+    }
+
+    if(!swd_apscan_test(ctx->app, ap)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "apselect: no selected AP");
+        return false;
+    }
+
+    ctx->selected_ap = ap;
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_apscan(ScriptContext* ctx) {
+    furi_log_print_format(FuriLogLevelDefault, TAG, "apscan: Scanning APs");
+    for(uint32_t ap = 0; ap < 255; ap++) {
+        snprintf(ctx->app->state_string, sizeof(ctx->app->state_string), "Scan AP %lu", ap);
+        swd_script_gui_refresh(ctx);
+        if(swd_apscan_test(ctx->app, ap)) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "apscan:  AP%lu detected", ap);
+        }
+    }
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_abort(ScriptContext* ctx) {
+    furi_log_print_format(FuriLogLevelDefault, TAG, "abort: Aborting");
+    swd_abort(ctx->app);
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
+    char filename[MAX_FILE_LENGTH];
+    uint32_t address = 0;
+    uint32_t length = 0;
+    uint32_t flags = 0;
+    bool success = true;
+
+    /* get file */
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: missing whitespace");
+        return false;
+    }
+
+    if(!swd_script_get_string(ctx, filename, sizeof(filename))) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: failed to parse filename");
+        return false;
+    }
+    /* get address */
+    if(!swd_script_get_number(ctx, &address)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: failed to parse address");
+        return false;
+    }
+
+    /* get length */
+    if(!swd_script_get_number(ctx, &length)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: failed to parse length");
+        return false;
+    }
+
+    /* get flags */
+    if(swd_script_get_number(ctx, &flags)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: found extra flags");
+    }
+
+    furi_log_print_format(
+        FuriLogLevelDefault,
+        TAG,
+        "mem_dump: would dump %08lX, len %08lX into %s",
+        address,
+        length,
+        filename);
+
+    File* dump = storage_file_alloc(ctx->app->storage);
+
+    if(!storage_file_open(dump, filename, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_free(dump);
+        snprintf(ctx->app->state_string, sizeof(ctx->app->state_string), "Failed to create file");
+        swd_script_gui_refresh(ctx);
+        notification_message_block(ctx->app->notification, &seq_error);
+        return false;
+    }
+
+    if(ctx->block_size == 0) {
+        ctx->block_size = 0x100;
+    }
+    if(ctx->block_size > 0x1000) {
+        ctx->block_size = 0x1000;
+    }
+
+    uint8_t* buffer = malloc(ctx->block_size);
+
+    for(uint32_t pos = 0; pos < length; pos += ctx->block_size) {
+        if((pos & 0xFF) == 0) {
+            int pct = pos * 100 / length;
+            snprintf(
+                ctx->app->state_string,
+                sizeof(ctx->app->state_string),
+                "Dump %08lX (%d%%)",
+                pos,
+                pct);
+            swd_script_gui_refresh(ctx);
+        }
+
+        bool read_ok = false;
+        uint32_t data = 0;
+
+        for(uint32_t tries = 0; tries < ctx->max_tries; tries++) {
+            if(ctx->abort) {
+                furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: aborting read");
+                break;
+            }
+            uint32_t ret = swd_read_memory_block(
+                ctx->app, ctx->selected_ap, address + pos, buffer, ctx->block_size);
+            read_ok = (ret == 1);
+
+            if(!read_ok) {
+                snprintf(
+                    ctx->app->state_string,
+                    sizeof(ctx->app->state_string),
+                    "Failed at 0x%08lX",
+                    address + pos);
+                swd_script_gui_refresh(ctx);
+                furi_delay_ms(100);
+            } else {
+                break;
+            }
+        }
+        if(ctx->abort) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "mem_dump: aborting");
+            break;
+        }
+
+        if(!read_ok) {
+            /* flags == 1: "continue reading even if it fails" */
+            /* flags == 2: "its okay if cannot dump fully" */
+            if(flags & 1) {
+                /* set all content to a known value as indication */
+                for(size_t fill_pos = 0; fill_pos < ctx->block_size; fill_pos += 4) {
+                    *((uint32_t*)&buffer[fill_pos]) = 0xDEADFACE;
+                }
+            } else if(flags & 2) {
+                success = (pos > 0);
+                break;
+            } else {
+                notification_message_block(ctx->app->notification, &seq_error);
+                success = false;
+                break;
+            }
+        }
+        storage_file_write(dump, buffer, ctx->block_size);
+    }
+
+    storage_file_close(dump);
+    swd_script_seek_newline(ctx);
+    free(buffer);
+
+    return success;
+}
+
+static bool swd_scriptfunc_mem_write(ScriptContext* ctx) {
+    uint32_t address = 0;
+    uint32_t data = 0;
+    bool success = true;
+
+    /* get file */
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_write: missing whitespace");
+        return false;
+    }
+
+    /* get address */
+    if(!swd_script_get_number(ctx, &address)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_write: failed to parse 1");
+        return false;
+    }
+
+    /* get data */
+    if(!swd_script_get_number(ctx, &data)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_write: failed to parse 2");
+        return false;
+    }
+
+    furi_log_print_format(
+        FuriLogLevelDefault, TAG, "mem_write: write %08lX to %08lX", data, address);
+
+    bool access_ok = false;
+    for(uint32_t tries = 0; tries < ctx->max_tries; tries++) {
+        if(ctx->abort) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "mem_write: aborting");
+            break;
+        }
+        access_ok = swd_write_memory(ctx->app, ctx->selected_ap, address, data) == 1;
+
+        if(!access_ok) {
+            snprintf(
+                ctx->app->state_string,
+                sizeof(ctx->app->state_string),
+                "Failed write 0x%08lX",
+                address);
+            swd_script_gui_refresh(ctx);
+        }
+    }
+
+    if(!access_ok) {
+        notification_message_block(ctx->app->notification, &seq_error);
+        success = false;
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
+    uint32_t address = 0;
+    uint32_t data = 0;
+    uint32_t mask = 0;
+    bool success = true;
+
+    /* get file */
+    if(!swd_script_skip_whitespace(ctx)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_ldmst: missing whitespace");
+        return false;
+    }
+
+    /* get address */
+    if(!swd_script_get_number(ctx, &address)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_ldmst: failed to parse 1");
+        return false;
+    }
+
+    /* get data */
+    if(!swd_script_get_number(ctx, &data)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_ldmst: failed to parse 2");
+        return false;
+    }
+
+    /* get mask */
+    if(!swd_script_get_number(ctx, &mask)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "mem_ldmst: failed to parse 2");
+        return false;
+    }
+
+    furi_log_print_format(
+        FuriLogLevelDefault,
+        TAG,
+        "mem_ldmst: write %08lX to %08lX, mask %08lX",
+        data,
+        address,
+        mask);
+
+    bool access_ok = false;
+    uint32_t modified = 0;
+    for(uint32_t tries = 0; tries < ctx->max_tries; tries++) {
+        if(ctx->abort) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "mem_ldmst: aborting");
+            break;
+        }
+        access_ok = swd_read_memory(ctx->app, ctx->selected_ap, address, &modified) == 1;
+        modified = (modified & mask) | data;
+        access_ok &= swd_write_memory(ctx->app, ctx->selected_ap, address, modified) == 1;
+
+        if(!access_ok) {
+            snprintf(
+                ctx->app->state_string,
+                sizeof(ctx->app->state_string),
+                "Failed access 0x%08lX",
+                address);
+            swd_script_gui_refresh(ctx);
+        }
+    }
+
+    if(!access_ok) {
+        notification_message_block(ctx->app->notification, &seq_error);
+        success = false;
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static const ScriptFunctionInfo script_funcs[] = {
+    {"#", &swd_scriptfunc_comment},
+    {"message", &swd_scriptfunc_message},
+    {"beep", &swd_scriptfunc_beep},
+    {"apscan", &swd_scriptfunc_apscan},
+    {"apselect", &swd_scriptfunc_apselect},
+    {"max_tries", &swd_scriptfunc_maxtries},
+    {"swd_clock_delay", &swd_scriptfunc_swd_clock_delay},
+    {"block_size", &swd_scriptfunc_blocksize},
+    {"abort", &swd_scriptfunc_abort},
+    {"mem_dump", &swd_scriptfunc_mem_dump},
+    {"mem_ldmst", &swd_scriptfunc_mem_ldmst},
+    {"mem_write", &swd_scriptfunc_mem_write}};
+
+/************************** script main code **************************/
+
+static bool swd_execute_script_line(ScriptContext* const ctx, File* file) {
+    char buffer[64];
+    uint64_t start_pos = storage_file_tell(ctx->script_file);
+    uint16_t ret = storage_file_read(ctx->script_file, buffer, 2);
+    storage_file_seek(ctx->script_file, start_pos, true);
+
+    if(ret < 2) {
+        return true;
+    }
+
+    if(buffer[0] == '\n' || (buffer[0] == '\r' && buffer[1] == '\n')) {
+        return true;
+    }
+
+    for(size_t entry = 0; entry < COUNT(script_funcs); entry++) {
+        if(ctx->abort) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "swd_execute_script_line: aborting");
+            break;
+        }
+        char buffer[64];
+
+        storage_file_seek(ctx->script_file, start_pos, true);
+
+        size_t expected = strlen(script_funcs[entry].prefix);
+        uint16_t ret = storage_file_read(ctx->script_file, buffer, expected);
+
+        if(ret != expected) {
+            continue;
+        }
+        buffer[expected] = '\000';
+        if(strncmp(buffer, script_funcs[entry].prefix, expected)) {
+            continue;
+        }
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "command: '%s'", script_funcs[entry].prefix);
+
+        snprintf(
+            ctx->app->state_string,
+            sizeof(ctx->app->state_string),
+            "CMD: %s",
+            script_funcs[entry].prefix);
+        swd_script_gui_refresh(ctx);
+
+        /* func function, execute */
+        return script_funcs[entry].func(ctx);
+    }
+    furi_log_print_format(FuriLogLevelDefault, TAG, "unknown command");
+
+    return false;
+}
+
+static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
+    bool success = true;
+
+    ctx->script = malloc(sizeof(ScriptContext));
+
+    ctx->script->app = ctx;
+    ctx->script->max_tries = 1;
+
+    if(!storage_file_exists(ctx->storage, filename)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "Does not exist '%s'", filename);
+        free(ctx->script);
+        ctx->script = NULL;
+        return false;
+    }
+
+    /* first allocate a file object */
+    ctx->script->script_file = storage_file_alloc(ctx->storage);
+
+    /* then get our script opened */
+    if(!storage_file_open(ctx->script->script_file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(ctx->script->script_file));
+        furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to open '%s'", filename);
+        storage_file_free(ctx->script->script_file);
+        free(ctx->script);
+        ctx->script = NULL;
+        return false;
+    }
+
+    uint32_t line = 1;
+    while(line < SCRIPT_MAX_LINES) {
+        if(ctx->script->abort) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "Abort requested");
+            break;
+        }
+        if(storage_file_eof(ctx->script->script_file)) {
+            break;
+        }
+        furi_log_print_format(FuriLogLevelDefault, TAG, "line %lu", line);
+        if(!swd_execute_script_line(ctx->script, ctx->script->script_file)) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to execute line %lu", line);
+            success = false;
+            break;
+        }
+        line++;
+    }
+
+    furi_log_print_format(FuriLogLevelDefault, TAG, "Finished");
+
+    storage_file_close(ctx->script->script_file);
+    storage_file_free(ctx->script->script_file);
+    free(ctx->script);
+
+    ctx->script = NULL;
+
+    return success;
+}
+
+/************************** UI functions **************************/
 
 static void render_callback(Canvas* const canvas, void* cb_ctx) {
     AppFSM* ctx = acquire_mutex((ValueMutex*)cb_ctx, 25);
@@ -783,12 +1514,44 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
 
             break;
         }
+
+            /* hex dump view */
+        case ModePageScript: {
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Script");
+            y += 10;
+            y += 10;
+            canvas_draw_str_aligned(canvas, 10, y, AlignLeft, AlignBottom, "Status:");
+            y += 10;
+            canvas_set_font(canvas, FontKeyboard);
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, ctx->state_string);
+            y += 10;
+
+        } break;
         }
     } else {
         snprintf(
             buffer, sizeof(buffer), "Searching... %c", gpio_direction_ind[ctx->current_mask_id]);
         canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, buffer);
         y += 10;
+        y += 10;
+        canvas_draw_str_aligned(canvas, 10, y, AlignLeft, AlignBottom, "Script:");
+        y += 10;
+        if(strlen(ctx->script_detected) > 0) {
+            canvas_set_font(canvas, FontKeyboard);
+            const char* filename = strrchr(ctx->script_detected, '/');
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, &filename[1]);
+            y += 10;
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Up to clear");
+            y += 10;
+        } else {
+            canvas_set_font(canvas, FontKeyboard);
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "<none>");
+            y += 10;
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Down to select");
+            y += 10;
+        }
     }
 
     release_mutex((ValueMutex*)cb_ctx, ctx);
@@ -797,35 +1560,36 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
-    AppEvent event = {.type = EventKeyPress, .input = *input_event};
-    furi_message_queue_put(event_queue, &event, FuriWaitForever);
+    /* better skip than sorry */
+    if(furi_message_queue_get_count(event_queue) < QUEUE_SIZE) {
+        AppEvent event = {.type = EventKeyPress, .input = *input_event};
+        furi_message_queue_put(event_queue, &event, 100);
+    }
 }
 
 static void timer_tick_callback(FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
-    AppEvent event = {.type = EventTimerTick};
-    furi_message_queue_put(event_queue, &event, 0);
+    /* filling buffer makes no sense, as we lost timing anyway */
+    if(furi_message_queue_get_count(event_queue) < 1) {
+        AppEvent event = {.type = EventTimerTick};
+        furi_message_queue_put(event_queue, &event, 100);
+    }
 }
 
-static void app_init(AppFSM* const ctx, FuriMessageQueue* event_queue) {
-    ctx->_event_queue = event_queue;
-    FuriTimer* timer =
-        furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, ctx->_event_queue);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
-    ctx->_timer = timer;
+static void app_init(AppFSM* const app) {
+    app->current_mask_id = 0;
+    app->current_mask = gpio_direction_mask[app->current_mask_id];
+    app->io_swd = 0xFF;
+    app->io_swc = 0xFF;
+    app->hex_addr = 0x40002800;
 
-    ctx->current_mask_id = 0;
-    ctx->current_mask = gpio_direction_mask[ctx->current_mask_id];
-    ctx->io_swd = 0xFF;
-    ctx->io_swc = 0xFF;
-    ctx->hex_addr = 0x40002800;
-
-    strcpy(ctx->state_string, "none");
+    strcpy(app->state_string, "none");
+    strcpy(app->script_detected, "");
 }
 
 static void app_deinit(AppFSM* const ctx) {
-    furi_timer_free(ctx->_timer);
+    furi_timer_free(ctx->timer);
 }
 
 static void on_timer_tick(AppFSM* ctx) {
@@ -842,6 +1606,7 @@ static void on_timer_tick(AppFSM* ctx) {
             memset(&ctx->dp_regs, 0x00, sizeof(ctx->dp_regs));
             memset(&ctx->targetid_info, 0x00, sizeof(ctx->targetid_info));
             memset(&ctx->apidr_info, 0x00, sizeof(ctx->apidr_info));
+            ctx->script_detected_executed = false;
         } else {
             ctx->detected_timeout--;
         }
@@ -896,6 +1661,17 @@ static void on_timer_tick(AppFSM* ctx) {
                     ctx->targetid_info.revision = (ctx->dp_regs.targetid >> 28) & 0x0F;
                     ctx->targetid_info.partno = (ctx->dp_regs.targetid >> 12) & 0xFFFF;
                     ctx->targetid_info.designer = (ctx->dp_regs.targetid >> 1) & 0x3FF;
+                }
+
+                if(!ctx->script_detected_executed && strlen(ctx->script_detected) > 0) {
+                    furi_log_print_format(
+                        FuriLogLevelDefault, TAG, "Run detected script '%s'", ctx->script_detected);
+
+                    ctx->script_detected_executed = true;
+
+                    ctx->mode_page = ModePageScript;
+                    swd_execute_script(ctx, ctx->script_detected);
+                    ctx->mode_page = ModePageScan;
                 }
             }
         }
@@ -953,168 +1729,203 @@ static void on_timer_tick(AppFSM* ctx) {
     }
 }
 
+static bool swd_message_process(AppFSM* ctx) {
+    bool processing = true;
+    AppEvent event;
+    FuriStatus event_status = furi_message_queue_get(ctx->event_queue, &event, 100);
+
+    if(event_status == FuriStatusOk) {
+        if(event.type == EventKeyPress) {
+            if(event.input.type == InputTypePress) {
+                switch(event.input.key) {
+                case InputKeyUp:
+                    switch(ctx->mode_page) {
+                    default:
+                        break;
+
+                    case ModePageScan: {
+                        strcpy(ctx->script_detected, "");
+                        break;
+                    }
+
+                    case ModePageAPID:
+                        if(ctx->ap_pos > 0) {
+                            ctx->ap_pos--;
+                        }
+                        break;
+
+                    case ModePageHexDump: {
+                        ctx->hex_addr +=
+                            ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
+                        break;
+                    }
+                    }
+                    break;
+
+                case InputKeyDown:
+                    switch(ctx->mode_page) {
+                    default:
+                        break;
+
+                    case ModePageScan: {
+                        FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                        FuriString* preselected = furi_string_alloc_printf(
+                            (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
+                                                                 ANY_PATH("swd"));
+                        DialogsFileBrowserOptions options;
+
+                        dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
+
+                        if(dialog_file_browser_show(
+                               ctx->dialogs, result_path, preselected, &options)) {
+                            const char* path = furi_string_get_cstr(result_path);
+                            strcpy(ctx->script_detected, path);
+                        }
+
+                        furi_string_free(result_path);
+                        furi_string_free(preselected);
+                        break;
+                    }
+
+                    case ModePageAPID:
+                        if(ctx->ap_pos + 1 < COUNT(ctx->apidr_info)) {
+                            ctx->ap_pos++;
+                        }
+                        break;
+
+                    case ModePageHexDump: {
+                        ctx->hex_addr -=
+                            ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
+                        break;
+                    }
+                    }
+
+                    break;
+
+                case InputKeyRight:
+                    if(ctx->mode_page == ModePageHexDump) {
+                        if(ctx->hex_select > 0) {
+                            ctx->hex_select--;
+                        }
+                    } else {
+                        if(ctx->mode_page + 1 < ModePageCount) {
+                            ctx->mode_page++;
+                        }
+                    }
+                    break;
+
+                case InputKeyLeft:
+                    if(ctx->mode_page == ModePageHexDump) {
+                        if(ctx->hex_select < 7) {
+                            ctx->hex_select++;
+                        }
+                    } else {
+                        if(ctx->mode_page > 0) {
+                            ctx->mode_page--;
+                        }
+                    }
+                    break;
+
+                case InputKeyOk:
+                    if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
+                        ctx->mode_page = ModePageHexDump;
+                    }
+                    break;
+
+                case InputKeyBack:
+                    if(ctx->mode_page == ModePageHexDump) {
+                        ctx->mode_page = ModePageAPID;
+                    } else if(ctx->mode_page == ModePageScript) {
+                        ctx->script->abort = true;
+                    } else if(ctx->mode_page != ModePageScan) {
+                        ctx->mode_page = ModePageScan;
+                    } else {
+                        processing = false;
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }
+        } else if(event.type == EventTimerTick) {
+            on_timer_tick(ctx);
+        }
+    } else {
+        /* timeout */
+    }
+
+    return processing;
+}
+
 int32_t swd_probe_app_main(void* p) {
     UNUSED(p);
 
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(AppEvent));
-    AppFSM* ctx = malloc(sizeof(AppFSM));
-    app_init(ctx, event_queue);
+    AppFSM* app = malloc(sizeof(AppFSM));
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, ctx, sizeof(AppFSM))) {
+    app_init(app);
+
+    if(!init_mutex(&app->state_mutex, app, sizeof(AppFSM))) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
-        free(ctx);
+        free(app);
         return 255;
     }
 
-    ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &state_mutex);
-    view_port_input_callback_set(view_port, input_callback, event_queue);
+    app->notification = furi_record_open(RECORD_NOTIFICATION);
+    app->gui = furi_record_open(RECORD_GUI);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
+    app->storage = furi_record_open(RECORD_STORAGE);
 
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-    ctx->notification = furi_record_open(RECORD_NOTIFICATION);
-    notification_message_block(ctx->notification, &sequence_display_backlight_enforce_on);
+    app->view_port = view_port_alloc();
+    app->event_queue = furi_message_queue_alloc(QUEUE_SIZE, sizeof(AppEvent));
+    app->timer = furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, app->event_queue);
+
+    view_port_draw_callback_set(app->view_port, render_callback, &app->state_mutex);
+    view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
+    gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
+
+    notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
 
     DOLPHIN_DEED(DolphinDeedPluginGameStart);
 
-    AppEvent event;
+    furi_timer_start(app->timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
+
     for(bool processing = true; processing;) {
-        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
+        //AppFSM* ctx = (AppFSM*)acquire_mutex_block(&app->state_mutex);
 
-        AppFSM* ctx = (AppFSM*)acquire_mutex_block(&state_mutex);
+        processing = swd_message_process(app);
 
-        if(event_status == FuriStatusOk) {
-            if(event.type == EventKeyPress) {
-                if(event.input.type == InputTypePress) {
-                    switch(event.input.key) {
-                    case InputKeyUp:
-                        ctx->last_key = KeyUp;
-                        switch(ctx->mode_page) {
-                        default:
-                            break;
-                        case 3:
-                            if(ctx->ap_pos > 0) {
-                                ctx->ap_pos--;
-                            }
-                            break;
-                        case 4: {
-                            ctx->hex_addr +=
-                                ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
-                            break;
-                        }
-                        }
-                        break;
+        view_port_update(app->view_port);
 
-                    case InputKeyDown:
-                        ctx->last_key = KeyDown;
-                        switch(ctx->mode_page) {
-                        default:
-                            break;
-                        case 3:
-                            if(ctx->ap_pos + 1 < COUNT(ctx->apidr_info)) {
-                                ctx->ap_pos++;
-                            }
-                            break;
-                        case 4: {
-                            ctx->hex_addr -=
-                                ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
-                            break;
-                        }
-                        }
-
-                        break;
-
-                    case InputKeyRight:
-                        ctx->last_key = KeyRight;
-                        if(ctx->mode_page == ModePageHexDump) {
-                            if(ctx->hex_select > 0) {
-                                ctx->hex_select--;
-                            }
-                        } else {
-                            if(ctx->mode_page + 1 < ModePageCount) {
-                                ctx->mode_page++;
-                            }
-                        }
-                        break;
-
-                    case InputKeyLeft:
-                        ctx->last_key = KeyLeft;
-
-                        if(ctx->mode_page == ModePageHexDump) {
-                            if(ctx->hex_select < 7) {
-                                ctx->hex_select++;
-                            }
-                        } else {
-                            if(ctx->mode_page > 0) {
-                                ctx->mode_page--;
-                            }
-                        }
-                        break;
-
-                    case InputKeyOk:
-                        ctx->last_key = KeyOK;
-
-                        if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
-                            ctx->mode_page = ModePageHexDump;
-                        }
-                        break;
-
-                    case InputKeyBack:
-                        if(ctx->mode_page == ModePageHexDump) {
-                            ctx->mode_page = ModePageAPID;
-                        } else if(ctx->mode_page != ModePageScan) {
-                            ctx->mode_page = ModePageScan;
-                        } else {
-                            processing = false;
-                        }
-                        break;
-
-                    default:
-                        break;
-                    }
-                }
-            } else if(event.type == EventTimerTick) {
-                FURI_CRITICAL_ENTER();
-                on_timer_tick(ctx);
-                FURI_CRITICAL_EXIT();
-            }
-        } else {
-            /* timeout */
-        }
-
-        view_port_update(view_port);
+        //release_mutex(&ctx->state_mutex, ctx);
 
         bool beep = false;
 
-        if(ctx->detected_device && !ctx->detected_notified) {
-            ctx->detected_notified = true;
+        if(app->detected_device && !app->detected_notified) {
+            app->detected_notified = true;
             beep = true;
         }
-        if(!ctx->detected_device && ctx->detected_notified) {
-            ctx->detected_notified = false;
+        if(!app->detected_device && app->detected_notified) {
+            app->detected_notified = false;
         }
-
-        release_mutex(&state_mutex, ctx);
-
         if(beep) {
-            notification_message_block(ctx->notification, &seq_c_minor);
+            notification_message_block(app->notification, &seq_c_minor);
         }
     }
 
+    app_deinit(app);
     // Wait for all notifications to be played and return backlight to normal state
-    app_deinit(ctx);
 
-    notification_message_block(ctx->notification, &sequence_display_backlight_enforce_auto);
+    notification_message_block(app->notification, &sequence_display_backlight_enforce_auto);
 
-    view_port_enabled_set(view_port, false);
-    gui_remove_view_port(gui, view_port);
+    view_port_enabled_set(app->view_port, false);
+    gui_remove_view_port(app->gui, app->view_port);
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
-    view_port_free(view_port);
-    furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
-    free(ctx);
+    view_port_free(app->view_port);
+    furi_message_queue_free(app->event_queue);
+    delete_mutex(&app->state_mutex);
+    free(app);
 
     return 0;
 }

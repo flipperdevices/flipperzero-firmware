@@ -4,9 +4,10 @@ App(
     apptype=FlipperAppType.PLUGIN,
     entry_point="swd_probe_app_main",
     cdefines=["APP_SWD_PROBE"],
-    requires=["gui"],
-    stack_size=1 * 1024,
+    requires=["gui", "storage", "dialogs"],
+    stack_size=2 * 1024,
     order=10,
     fap_icon="icons/app.png",
     fap_category="Tools",
+    fap_icon_assets="icons"
 )

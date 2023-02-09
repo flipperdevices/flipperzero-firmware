@@ -19,9 +19,13 @@
 
 #define TAG "SWD"
 
-#define SWD_DELAY_US 1
+#define SWD_DELAY_US 0
 #define TIMER_HZ 50
 #define TIMEOUT 3
+#define QUEUE_SIZE 32
+
+#define MAX_FILE_LENGTH 128
+#define SCRIPT_MAX_LINES 1000
 
 typedef enum {
     ModePageScan = 0,
@@ -30,6 +34,7 @@ typedef enum {
     ModePageAPID = 3,
     ModePageCount = 4,
     ModePageHexDump = 0x100,
+    ModePageScript = 0x101,
 } ModePages;
 
 #define CDBGPWRUPREQ (1 << 28)
@@ -99,17 +104,25 @@ typedef struct {
     uint16_t designer;
 } swd_targetid_info_t;
 
-typedef struct {
-    KeyCode last_key;
+typedef struct sScriptContext ScriptContext;
 
-    FuriTimer* _timer;
-    FuriMessageQueue* _event_queue;
+typedef struct {
+    FuriMessageQueue* event_queue;
+    FuriTimer* timer;
     NotificationApp* notification;
+    Storage* storage;
+    ViewPort* view_port;
+    Gui* gui;
+    DialogsApp* dialogs;
+
+    ValueMutex state_mutex;
 
     swd_targetid_info_t targetid_info;
     swd_dpidr_info_t dpidr_info;
     swd_dpreg_t dp_regs;
     swd_apidr_info_t apidr_info[256];
+
+    ScriptContext* script;
 
     uint8_t current_mask_id;
     uint32_t current_mask;
@@ -118,6 +131,7 @@ typedef struct {
     uint8_t io_num_swc;
     uint8_t io_num_swd;
     uint32_t detected_timeout;
+    uint32_t swd_clock_delay;
     bool detected;
     bool detected_device;
     bool detected_notified;
@@ -132,7 +146,24 @@ typedef struct {
     uint8_t hex_read_delay;
 
     char state_string[32];
+    char script_detected[MAX_FILE_LENGTH];
+    bool script_detected_executed;
 } AppFSM;
+
+struct sScriptContext {
+    AppFSM* app;
+    File* script_file;
+    uint64_t position;
+    uint32_t selected_ap;
+    uint32_t max_tries;
+    uint32_t block_size;
+    bool abort;
+};
+
+typedef struct {
+    const char* prefix;
+    bool (*func)(ScriptContext* ctx);
+} ScriptFunctionInfo;
 
 const NotificationSequence seq_c_minor = {
     &message_note_c4,
@@ -155,5 +186,25 @@ const NotificationSequence seq_c_minor = {
     &message_vibro_off,
     NULL,
 };
+
+const NotificationSequence seq_error = {
+
+    &message_vibro_on,
+    &message_delay_50,
+    &message_vibro_off,
+
+    &message_note_g4,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_10,
+
+    &message_note_c4,
+    &message_delay_500,
+    &message_sound_off,
+    &message_delay_10,
+    NULL,
+};
+
+const NotificationSequence* seq_sounds[] = {&seq_c_minor, &seq_error};
 
 #endif
