@@ -728,6 +728,14 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
         return NULL;
     }
 
+    // Make extra life power up more rare
+    if(selected_powerUpType == PowerUpTypeLife) {
+        if(rand() % 10 != 0) {
+            FURI_LOG_D(TAG, "[add_powerUp] Power Up %i not selected", selected_powerUpType);
+            return NULL;
+        }
+    }
+
     float size = 10;
     float min_distance = 20;
     float x, y;
