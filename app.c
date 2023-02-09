@@ -732,10 +732,12 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     float min_distance = 20;
     float x, y;
     do {
-        //size*2 to make sure power up is not spawned on the edge of the screen
-        //It also keeps it away from the lives and score at the top of screen
+        //Make sure power up is not spawned on the edge of the screen
         x = rand() % (SCREEN_XRES - (int)size);
-        y = rand() % (SCREEN_YRES - (int)size + 20);
+        y = rand() % (SCREEN_YRES - (int)size);
+
+        //Also keep it away from the lives and score at the top of screen
+        if(y < size) y = size;
     } while(
         ((distance(app->ship.x, app->ship.y, x, y) < min_distance + size) ||
          isPowerUpCollidingWithEachOther(app, x, y, size)));
