@@ -712,6 +712,17 @@ bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y, float 
     return false;
 }
 
+bool should_trigger_rare_powerUp(PowerUpType selected_powerUpType) {
+    switch(selected_powerUpType) {
+    case PowerUpTypeLife: // Make extra life power up more rare
+        return rand() % 10 != 0;
+    case PowerUpTypeShield: // Make shield power up more rare
+        return rand() % 4 != 0;
+    default:
+        return true;
+    }
+}
+
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
     FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
@@ -722,28 +733,16 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
     FURI_LOG_I(TAG, "[add_powerUp] Power Up Selected: %i", selected_powerUpType);
 
-    // FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
     if(isPowerUpAlreadyExists(app, selected_powerUpType)) {
         FURI_LOG_D(TAG, "[add_powerUp] Power Up %i already active", selected_powerUpType);
         return NULL;
     }
 
-    // Make extra life power up more rare
-    if(selected_powerUpType == PowerUpTypeLife) {
-        if(rand() % 10 != 0) {
-            FURI_LOG_D(
-                TAG, "[add_powerUp] Exra Life Power Up %i not selected", selected_powerUpType);
-            return NULL;
-        }
-    }
-
-    // Make shield power up more rare
-    if(selected_powerUpType == PowerUpTypeShield) {
-        if(rand() % 4 != 0) {
-            FURI_LOG_D(TAG, "[add_powerUp] Shield Power Up %i not selected", selected_powerUpType);
-            return NULL;
-        }
+    // Make some power ups more rare
+    if(!should_trigger_rare_powerUp(selected_powerUpType)) {
+        FURI_LOG_D(TAG, "[add_powerUp] Power Up %i not triggered", selected_powerUpType);
+        return NULL;
     }
 
     float size = 10;
