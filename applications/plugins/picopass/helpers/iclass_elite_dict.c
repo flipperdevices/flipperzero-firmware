@@ -3,8 +3,8 @@
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 
-#define ICLASS_ELITE_DICT_FLIPPER_PATH EXT_PATH("picopass/assets/iclass_elite_dict.txt")
-#define ICLASS_ELITE_DICT_USER_PATH EXT_PATH("picopass/assets/iclass_elite_dict_user.txt")
+#define ICLASS_ELITE_DICT_FLIPPER_NAME "/assets/iclass_elite_dict.txt"
+#define ICLASS_ELITE_DICT_USER_NAME "/assets/iclass_elite_dict_user.txt"
 
 #define TAG "IclassEliteDict"
 
@@ -19,14 +19,21 @@ struct IclassEliteDict {
 bool iclass_elite_dict_check_presence(IclassEliteDictType dict_type) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
+    FuriString* app_path = furi_string_alloc();
+    storage_common_get_my_data_path(storage, app_path);
+
     bool dict_present = false;
     if(dict_type == IclassEliteDictTypeFlipper) {
-        dict_present = storage_common_stat(storage, ICLASS_ELITE_DICT_FLIPPER_PATH, NULL) ==
-                       FSE_OK;
+        furi_string_cat(app_path, ICLASS_ELITE_DICT_FLIPPER_NAME);
+        dict_present =
+            (storage_common_stat(storage, furi_string_get_cstr(app_path), NULL) == FSE_OK);
     } else if(dict_type == IclassEliteDictTypeUser) {
-        dict_present = storage_common_stat(storage, ICLASS_ELITE_DICT_USER_PATH, NULL) == FSE_OK;
+        furi_string_cat(app_path, ICLASS_ELITE_DICT_USER_NAME);
+        dict_present =
+            (storage_common_stat(storage, furi_string_get_cstr(app_path), NULL) == FSE_OK);
     }
 
+    furi_string_free(app_path);
     furi_record_close(RECORD_STORAGE);
 
     return dict_present;
@@ -36,20 +43,27 @@ IclassEliteDict* iclass_elite_dict_alloc(IclassEliteDictType dict_type) {
     IclassEliteDict* dict = malloc(sizeof(IclassEliteDict));
     Storage* storage = furi_record_open(RECORD_STORAGE);
     dict->stream = buffered_file_stream_alloc(storage);
-    furi_record_close(RECORD_STORAGE);
     FuriString* next_line = furi_string_alloc();
+
+    FuriString* app_path = furi_string_alloc();
+    storage_common_get_my_data_path(storage, app_path);
 
     bool dict_loaded = false;
     do {
         if(dict_type == IclassEliteDictTypeFlipper) {
+            furi_string_cat(app_path, ICLASS_ELITE_DICT_FLIPPER_NAME);
             if(!buffered_file_stream_open(
-                   dict->stream, ICLASS_ELITE_DICT_FLIPPER_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+                   dict->stream, furi_string_get_cstr(app_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
                 buffered_file_stream_close(dict->stream);
                 break;
             }
         } else if(dict_type == IclassEliteDictTypeUser) {
+            furi_string_cat(app_path, ICLASS_ELITE_DICT_USER_NAME);
             if(!buffered_file_stream_open(
-                   dict->stream, ICLASS_ELITE_DICT_USER_PATH, FSAM_READ_WRITE, FSOM_OPEN_ALWAYS)) {
+                   dict->stream,
+                   furi_string_get_cstr(app_path),
+                   FSAM_READ_WRITE,
+                   FSOM_OPEN_ALWAYS)) {
                 buffered_file_stream_close(dict->stream);
                 break;
             }
@@ -75,7 +89,9 @@ IclassEliteDict* iclass_elite_dict_alloc(IclassEliteDictType dict_type) {
         dict = NULL;
     }
 
+    furi_record_close(RECORD_STORAGE);
     furi_string_free(next_line);
+    furi_string_free(app_path);
 
     return dict;
 }

@@ -36,7 +36,9 @@ void picopass_scene_save_name_on_enter(void* context) {
     if(furi_string_end_with(picopass->dev->load_path, PICOPASS_APP_EXTENSION)) {
         path_extract_dirname(furi_string_get_cstr(picopass->dev->load_path), folder_path);
     } else {
-        furi_string_set(folder_path, PICOPASS_APP_FOLDER);
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        storage_common_get_my_data_path(storage, folder_path);
+        furi_record_close(RECORD_STORAGE);
     }
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(

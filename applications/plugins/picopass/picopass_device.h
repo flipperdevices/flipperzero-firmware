@@ -23,7 +23,6 @@
 #define PICOPASS_KC_BLOCK_INDEX 4
 #define PICOPASS_AIA_BLOCK_INDEX 5
 
-#define PICOPASS_APP_FOLDER ANY_PATH("picopass")
 #define PICOPASS_APP_EXTENSION ".picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
@@ -73,6 +72,7 @@ typedef struct {
 
 typedef struct {
     Storage* storage;
+    FuriString* app_path;
     DialogsApp* dialogs;
     PicopassDeviceData dev_data;
     char dev_name[PICOPASS_DEV_NAME_MAX_LEN + 1];
