@@ -306,12 +306,12 @@ MU_TEST_SUITE(storage_rename) {
 #define APPSDATA_APP_PATH(path) APPSDATA_PATH "/" path
 
 static const char* storage_test_apps[] = {
-    "twilight",
-    "rainbow",
-    "pinkie",
-    "apple",
-    "flutter",
-    "rare",
+    "-_twilight_-",
+    "-_rainbow_-",
+    "-_pinkie_-",
+    "-_apple_-",
+    "-_flutter_-",
+    "-_rare_-",
 };
 
 static size_t storage_test_apps_count = COUNT_OF(storage_test_apps);
@@ -356,6 +356,7 @@ MU_TEST(test_storage_common_get_my_data_path_apps) {
         mu_check(
             storage_common_stat(storage, furi_string_get_cstr(expected), &fileinfo) == FSE_OK);
         mu_check(fileinfo.flags & FSF_DIRECTORY);
+        storage_simply_remove(storage, furi_string_get_cstr(expected));
         furi_record_close(RECORD_STORAGE);
 
         furi_string_free(expected);
@@ -380,6 +381,8 @@ MU_TEST(test_storage_common_get_my_data_path) {
     // check that cli folder exists
     mu_check(storage_common_stat(storage, APPSDATA_APP_PATH("cli"), &fileinfo) == FSE_OK);
     mu_check(fileinfo.flags & FSF_DIRECTORY);
+
+    storage_simply_remove(storage, APPSDATA_APP_PATH("cli"));
 
     furi_string_free(path);
     furi_record_close(RECORD_STORAGE);

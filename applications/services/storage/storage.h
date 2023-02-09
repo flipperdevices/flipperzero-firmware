@@ -15,7 +15,8 @@ extern "C" {
 #define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
 #define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
 
-#define APPSDATA_PATH EXT_PATH("appsdata")
+#define APPSDATA_FOLDER "apps_data"
+#define APPSDATA_PATH EXT_PATH(APPSDATA_FOLDER)
 
 #define RECORD_STORAGE "storage"
 
@@ -249,7 +250,8 @@ FS_Error storage_common_fs_info(
     uint64_t* free_space);
 
 /**
- * @brief Get path to the current app data directory
+ * @brief Get path to the current app data directory. Will be created if not exists.
+ * For example: "/ext/appsdata/snake_game"
  * 
  * @param storage 
  * @param path 
