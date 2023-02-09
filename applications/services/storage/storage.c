@@ -6,6 +6,7 @@
 #include "storages/storage_int.h"
 #include "storages/storage_ext.h"
 #include <assets_icons.h>
+#include <toolbox/stream/file_stream.h>
 
 #define STORAGE_TICK 1000
 
@@ -58,6 +59,9 @@ Storage* storage_app_alloc() {
     gui_add_view_port(gui, app->sd_gui.view_port, GuiLayerStatusBarLeft);
     furi_record_close(RECORD_GUI);
 
+    //Show Icon on Desktop
+    app->sd_gui.iconshow = false;
+
     return app;
 }
 
@@ -87,7 +91,7 @@ void storage_tick(Storage* app) {
         app->storage[ST_EXT].status == StorageStatusErrorInternal) &&
        app->sd_gui.enabled == false) {
         app->sd_gui.enabled = true;
-        view_port_enabled_set(app->sd_gui.view_port, true);
+        view_port_enabled_set(app->sd_gui.view_port, app->sd_gui.iconshow);
 
         if(app->storage[ST_EXT].status == StorageStatusOK) {
             FURI_LOG_I(TAG, "SD card mount");

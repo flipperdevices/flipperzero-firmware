@@ -296,12 +296,17 @@ static void bt_on_key_storage_change_callback(uint8_t* addr, uint16_t size, void
 }
 
 static void bt_statusbar_update(Bt* bt) {
-    if(bt->status == BtStatusAdvertising) {
-        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Idle_5x8));
-        view_port_enabled_set(bt->statusbar_view_port, true);
-    } else if(bt->status == BtStatusConnected) {
-        view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Connected_16x8));
-        view_port_enabled_set(bt->statusbar_view_port, true);
+    if(bt->bt_settings.iconshow == true) {
+        if(bt->status == BtStatusAdvertising) {
+            view_port_set_width(bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Idle_5x8));
+            view_port_enabled_set(bt->statusbar_view_port, true);
+        } else if(bt->status == BtStatusConnected) {
+            view_port_set_width(
+                bt->statusbar_view_port, icon_get_width(&I_Bluetooth_Connected_16x8));
+            view_port_enabled_set(bt->statusbar_view_port, true);
+        } else {
+            view_port_enabled_set(bt->statusbar_view_port, false);
+        }
     } else {
         view_port_enabled_set(bt->statusbar_view_port, false);
     }

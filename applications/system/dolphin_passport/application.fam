@@ -1,0 +1,13 @@
+App(
+    appid="dolphin_passport",
+    name="Passport",
+	apptype=FlipperAppType.SYSTEM,
+    entry_point="dolphin_passport_app",
+    cdefines=["APP_DOLPHIN_PASSPORT"],
+    requires=[
+        "gui",
+        "dolphin",
+    ],
+    stack_size=1 * 1024,
+    order=60,
+)

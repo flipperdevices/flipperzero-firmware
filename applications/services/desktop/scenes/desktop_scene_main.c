@@ -2,6 +2,7 @@
 #include <furi_hal.h>
 #include "applications/services/applications.h"
 #include <assets_icons.h>
+#include <storage/storage.h>
 #include <loader/loader.h>
 
 #include "../desktop_i.h"
@@ -13,7 +14,17 @@
 
 #define TAG "DesktopSrv"
 
-#define CLOCK_APP EXT_PATH("/apps/Main/Clock.fap")
+#define CLOCK_APP EXT_PATH("apps/Main/Clock.fap")
+#define PASSPORT_APP EXT_PATH("apps/Main/Passport.fap")
+#define SNAKE_APP EXT_PATH("apps/Games/Snake.fap")
+#define IMPROVED_2048_APP EXT_PATH("apps/Games/2048_improved.fap")
+#define ZOMBIEZ_APP EXT_PATH("apps/Games/Zombiez.fap")
+#define TETRIS_APP EXT_PATH("apps/Games/Tetris.fap")
+#define DOOM_APP EXT_PATH("apps/Games/DOOM.fap")
+#define DICE_APP EXT_PATH("apps/Games/Dice.fap")
+#define ARKANOID_APP EXT_PATH("apps/Games/Arkanoid.fap")
+#define HEAP_DEFENCE_APP EXT_PATH("apps/Games/Heap_Defence.fap")
+#define SUBGHZ_REMOTE_APP EXT_PATH("apps/Main/SubGHz_Remote.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -69,9 +80,21 @@ static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char*
         if(status == LoaderStatusOk) break;
         FURI_LOG_E(TAG, "loader_start failed: %d", status);
 
-        status = loader_start(desktop->loader, "Passport", NULL);
-        if(status != LoaderStatusOk) {
-            FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        if(storage_file_exists(storage, PASSPORT_APP)) {
+            furi_record_close(RECORD_STORAGE);
+            LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, PASSPORT_APP);
+
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
+        } else {
+            furi_record_close(RECORD_STORAGE);
+            LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+
+            if(status != LoaderStatusOk) {
+                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            }
         }
     } while(false);
 }
@@ -193,57 +216,80 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                Storage* storage = furi_record_open(RECORD_STORAGE);
+                if(storage_file_exists(storage, PASSPORT_APP)) {
+                    furi_record_close(RECORD_STORAGE);
+                    LoaderStatus status =
+                        loader_start(desktop->loader, FAP_LOADER_APP_NAME, PASSPORT_APP);
+
+                    if(status != LoaderStatusOk) {
+                        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                    }
+                } else {
+                    furi_record_close(RECORD_STORAGE);
+                    LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+
+                    if(status != LoaderStatusOk) {
+                        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                    }
                 }
             }
             consumed = true;
             break;
         case DesktopMainEventOpenPassport: {
-            LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            if(storage_file_exists(storage, PASSPORT_APP)) {
+                furi_record_close(RECORD_STORAGE);
+                LoaderStatus status =
+                    loader_start(desktop->loader, FAP_LOADER_APP_NAME, PASSPORT_APP);
+
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
+            } else {
+                furi_record_close(RECORD_STORAGE);
+                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+
+                if(status != LoaderStatusOk) {
+                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
+                }
             }
             break;
         }
         case DesktopMainEventOpenSnake: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Snake.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, SNAKE_APP);
             break;
         }
         case DesktopMainEventOpen2048: {
-            desktop_scene_main_open_app_or_profile(
-                desktop, EXT_PATH("/apps/Games/2048_improved.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, IMPROVED_2048_APP);
             break;
         }
         case DesktopMainEventOpenZombiez: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Zombiez.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, ZOMBIEZ_APP);
             break;
         }
         case DesktopMainEventOpenTetris: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Tetris.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, TETRIS_APP);
             break;
         }
         case DesktopMainEventOpenDOOM: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/DOOM.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, DOOM_APP);
             break;
         }
         case DesktopMainEventOpenDice: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Dice.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, DICE_APP);
             break;
         }
         case DesktopMainEventOpenArkanoid: {
-            desktop_scene_main_open_app_or_profile(desktop, EXT_PATH("/apps/Games/Arkanoid.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, ARKANOID_APP);
             break;
         }
         case DesktopMainEventOpenHeap: {
-            desktop_scene_main_open_app_or_profile(
-                desktop, EXT_PATH("/apps/Games/Heap_Defence.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, HEAP_DEFENCE_APP);
             break;
         }
         case DesktopMainEventOpenSubRemote: {
-            desktop_scene_main_open_app_or_profile(
-                desktop, EXT_PATH("/apps/Main/SubGHz_Remote.fap"));
+            desktop_scene_main_open_app_or_profile(desktop, SUBGHZ_REMOTE_APP);
             break;
         }
         case DesktopMainEventOpenClock: {

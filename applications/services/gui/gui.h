@@ -18,6 +18,7 @@ typedef enum {
 
     GuiLayerWindow, /**< Window layer, status bar is shown */
 
+    GuiLayerStatusBarTop, /**< Status bar top side layer */
     GuiLayerStatusBarLeft, /**< Status bar left-side layer, auto-layout */
     GuiLayerStatusBarRight, /**< Status bar right-side layer, auto-layout */
 

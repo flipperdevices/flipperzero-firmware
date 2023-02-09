@@ -32,6 +32,22 @@ static void desktop_loader_callback(const void* message, void* context) {
         view_dispatcher_send_custom_event(desktop->view_dispatcher, DesktopGlobalAfterAppFinished);
     }
 }
+
+static void storage_Desktop_status_callback(const void* message, void* context) {
+    furi_assert(context);
+    Desktop* desktop = context;
+    const StorageEvent* storage_event = message;
+
+    if((storage_event->type == StorageEventTypeCardUnmount) ||
+       (storage_event->type == StorageEventTypeCardMountError)) {
+        view_port_enabled_set(desktop->sdcard_icon_viewport, false);
+    }
+
+    if(storage_event->type == StorageEventTypeCardMount) {
+        view_port_enabled_set(desktop->sdcard_icon_viewport, desktop->settings.sdcard);
+    }
+}
+
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     furi_assert(canvas);
@@ -42,6 +58,22 @@ static void desktop_dummy_mode_icon_draw_callback(Canvas* canvas, void* context)
     UNUSED(context);
     furi_assert(canvas);
     canvas_draw_icon(canvas, 0, 0, &I_GameMode_11x8);
+}
+
+static void desktop_topbar_icon_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
+    furi_assert(canvas);
+
+    canvas_set_bitmap_mode(canvas, 1);
+    canvas_draw_icon(canvas, 0, 0, &I_Background_128x11);
+    canvas_set_bitmap_mode(canvas, 0);
+}
+
+static void desktop_sdcard_icon_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
+    furi_assert(canvas);
+
+    canvas_draw_icon(canvas, 0, 0, &I_SDcardMounted_11x8);
 }
 
 static bool desktop_custom_event_callback(void* context, uint32_t event) {
@@ -245,6 +277,22 @@ Desktop* desktop_alloc() {
     view_port_enabled_set(desktop->dummy_mode_icon_viewport, false);
     gui_add_view_port(desktop->gui, desktop->dummy_mode_icon_viewport, GuiLayerStatusBarLeft);
 
+    // Top bar icon
+    desktop->topbar_icon_viewport = view_port_alloc();
+    view_port_set_width(desktop->topbar_icon_viewport, icon_get_width(&I_Background_128x11));
+    view_port_draw_callback_set(
+        desktop->topbar_icon_viewport, desktop_topbar_icon_draw_callback, desktop);
+    view_port_enabled_set(desktop->topbar_icon_viewport, false);
+    gui_add_view_port(desktop->gui, desktop->topbar_icon_viewport, GuiLayerStatusBarTop);
+
+    // SD card icon hack
+    desktop->sdcard_icon_viewport = view_port_alloc();
+    view_port_set_width(desktop->sdcard_icon_viewport, icon_get_width(&I_SDcardMounted_11x8));
+    view_port_draw_callback_set(
+        desktop->sdcard_icon_viewport, desktop_sdcard_icon_draw_callback, desktop);
+    view_port_enabled_set(desktop->sdcard_icon_viewport, false);
+    gui_add_view_port(desktop->gui, desktop->sdcard_icon_viewport, GuiLayerStatusBarLeft);
+
     // Special case: autostart application is already running
     desktop->loader = furi_record_open(RECORD_LOADER);
     if(loader_is_locked(desktop->loader) &&
@@ -262,6 +310,11 @@ Desktop* desktop_alloc() {
     desktop->auto_lock_timer =
         furi_timer_alloc(desktop_auto_lock_timer_callback, FuriTimerTypeOnce, desktop);
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    desktop->sub = furi_pubsub_subscribe(
+        storage_get_pubsub(storage), storage_Desktop_status_callback, desktop);
+    furi_record_close(RECORD_STORAGE);
+
     return desktop;
 }
 
@@ -275,6 +328,10 @@ void desktop_free(Desktop* desktop) {
         furi_pubsub_unsubscribe(desktop->input_events_pubsub, desktop->input_events_subscription);
         desktop->input_events_subscription = NULL;
     }
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    furi_pubsub_unsubscribe(storage_get_pubsub(storage), desktop->sub);
+    furi_record_close(RECORD_STORAGE);
 
     desktop->loader = NULL;
     desktop->input_events_pubsub = NULL;
@@ -337,6 +394,10 @@ int32_t desktop_srv(void* p) {
             memset(&desktop->settings, 0, sizeof(desktop->settings));
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
+
+        view_port_enabled_set(desktop->topbar_icon_viewport, desktop->settings.top_bar);
+
+        view_port_enabled_set(desktop->sdcard_icon_viewport, desktop->settings.sdcard);
 
         view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
         desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
