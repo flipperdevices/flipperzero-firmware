@@ -68,7 +68,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz HAL Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - UL PR: [Fix CTRL-SHIFT in mousejacker #316 (By notmarek)](https://github.com/DarkFlippers/unleashed-firmware/pull/316)
 - UL PR: [Updated infrared assets #318 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/318)
-
+ - [Passport as a FAP with Multiple Pages, and Dynamic Icons/Images support (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Old Passport moved but kept as a redundancy in case Passport FAP not found (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Passport Settings app to configure dynamic icons in Passport FAP (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [This does not change old Passport (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Updates to Desktop Settings app (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Desktop icons are now dynamic, and can be changed in Desktop Settings (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Updates to BT, Desktop, GUI, Power, and Storage services to support Dynamic Icons in Desktop (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Fixes for NameChanger app + service (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Cleaned up XP levels in Dolphin service for a more cleaner progression (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Fixed SubGHz CLI "Chat" command throwing errors at build time (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ - [Fixed Dummy Mode build error in Desktop Views files (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+ 
 <a name="release">
 
 ## Install Latest Release
