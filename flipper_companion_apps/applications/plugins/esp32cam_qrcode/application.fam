@@ -1,0 +1,15 @@
+App(
+    appid="ESP32CAM_QRcode",
+    name="[ESP32CAM] QR Code",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="uart_echo_app",
+    cdefines=["APP_QRCODE"],
+    requires=["gui"],
+    stack_size=8*1024,
+    order=1,
+	fap_icon="icon.png",
+  fap_category="GPIO",
+	fap_description="ESP32-CAM QR code",
+	fap_author="eried",
+	fap_weburl="https://flipper.ried.cl"
+)
