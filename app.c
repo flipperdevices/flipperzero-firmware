@@ -720,6 +720,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
     // Randomly select power up for display
     PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
+    FURI_LOG_I(TAG, "[add_powerUp] Power Up Selected: %i", selected_powerUpType);
 
     // FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
@@ -731,7 +732,16 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     // Make extra life power up more rare
     if(selected_powerUpType == PowerUpTypeLife) {
         if(rand() % 10 != 0) {
-            FURI_LOG_D(TAG, "[add_powerUp] Power Up %i not selected", selected_powerUpType);
+            FURI_LOG_D(
+                TAG, "[add_powerUp] Exra Life Power Up %i not selected", selected_powerUpType);
+            return NULL;
+        }
+    }
+
+    // Make shield power up more rare
+    if(selected_powerUpType == PowerUpTypeShield) {
+        if(rand() % 4 != 0) {
+            FURI_LOG_D(TAG, "[add_powerUp] Shield Power Up %i not selected", selected_powerUpType);
             return NULL;
         }
     }
@@ -767,6 +777,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     //@todo add powerup type, for now hardcoding to firepower
     p->powerUpType = selected_powerUpType;
     p->isPowerUpActive = false;
+    FURI_LOG_I(TAG, "[add_powerUp] Power Up Added: %i", p->powerUpType);
     return p;
 }
 
