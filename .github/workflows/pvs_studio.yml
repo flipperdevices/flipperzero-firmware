@@ -54,19 +54,7 @@ jobs:
           ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
 
-      - name: 'Upload artifacts to update server'
-        if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.RSYNC_DEPLOY_PORT }} -H ${{ secrets.RSYNC_DEPLOY_HOST }} > ~/.ssh/known_hosts
-          echo "${{ secrets.RSYNC_DEPLOY_KEY }}" > deploy_key;
-          chmod 600 ./deploy_key;
-          rsync -avrzP --mkpath \
-              -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
-              build/f7-firmware-DC/pvsreport/ ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:/home/data/firmware-pvs-studio-report/"${BRANCH_NAME}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/";
-          rm ./deploy_key;
-
-      - name: 'Upload documentation'
+      - name: 'Upload report'
         if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
         uses: prewk/s3-cp-action@v2
         with:
