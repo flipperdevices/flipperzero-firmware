@@ -210,34 +210,17 @@ static bool ducky_altstring(const char* param) {
 
 static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     uint32_t i = 0;
-    uint32_t timing = 0;
 
-    if(bad_usb->stringdelay == 0) {
-        timing = 0;
         while(param[i] != '\0') {
             uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
             if(keycode != HID_KEYBOARD_NONE) {
                 furi_hal_hid_kb_press(keycode);
                 furi_hal_hid_kb_release(keycode);
-            }
+                if(bad_usb->stringdelay > 0) {
+                    furi_delay_ms(bad_usb->stringdelay);
+                    }
+                }
             i++;
-        }
-    } else if(bad_usb->stringdelay > 0) {
-        if(bad_usb->stringdelay > 1000) {
-            timing = bad_usb->stringdelay / 2 / 10;
-        } else {
-            timing = bad_usb->stringdelay / 2;
-        }
-        while(param[i] != '\0') {
-            uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
-            if(keycode != HID_KEYBOARD_NONE) {
-                furi_delay_ms(timing);
-                furi_hal_hid_kb_press(keycode);
-                furi_delay_ms(timing);
-                furi_hal_hid_kb_release(keycode);
-            }
-            i++;
-        }
     }
     bad_usb->stringdelay = 0;
     return true;
