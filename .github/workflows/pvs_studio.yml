@@ -50,7 +50,7 @@ jobs:
       - name: 'Convert PVS-Studio output to html and detect warnings'
         id: pvs-warn
         run: |
-          WARNINGS=0
+          WARNINGS=1
           ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
 
@@ -65,6 +65,17 @@ jobs:
               -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
               build/f7-firmware-DC/pvsreport/ ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:/home/data/firmware-pvs-studio-report/"${BRANCH_NAME}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/";
           rm ./deploy_key;
+
+      - name: 'Upload documentation'
+        if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_s3_endpoint: "${{ secrets.PVS_AWS_ENDPOINT }}"
+          aws_access_key_id: "${{ secrets.PVS_AWS_ACCESS_KEY }}"
+          aws_secret_access_key: "${{ secrets.PVS_AWS_SECRET_KEY }}"
+          source: "./build/f7-firmware-DC/pvsreport"
+          dest: "s3://${{ secrets.PVS_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/"
+          flags: "--recursive --acl public-read"
 
       - name: 'Find Previous Comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request && (steps.pvs-warn.outputs.warnings != 0) }}
@@ -83,7 +94,7 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **PVS-Studio report for commit `${{steps.names.outputs.commit_sha}}`:**
-            - [Report](https://update.flipperzero.one/builds/firmware-pvs-studio-report/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
+            - [Report](https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
           edit-mode: replace
 
       - name: 'Raise exception'
