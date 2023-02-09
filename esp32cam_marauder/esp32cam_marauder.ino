@@ -169,6 +169,11 @@ void setup()
           for (;;)
             qr_reader_loop();
 
+        case 'm':  // Motion detection
+          motion_detection_setup();
+          for (;;)
+            motion_detection_loop();
+
         default:  // Camera stream
           cam_stream_setup();
           for (;;)
