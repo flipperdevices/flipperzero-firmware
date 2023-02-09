@@ -59,6 +59,8 @@ struct Desktop {
 
     ViewPort* lock_icon_viewport;
     ViewPort* dummy_mode_icon_viewport;
+    ViewPort* topbar_icon_viewport;
+    ViewPort* sdcard_icon_viewport;
 
     AnimationManager* animation_manager;
 
@@ -68,6 +70,7 @@ struct Desktop {
     FuriPubSubSubscription* app_start_stop_subscription;
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
+    FuriPubSubSubscription* sub;
     FuriTimer* auto_lock_timer;
 };
 

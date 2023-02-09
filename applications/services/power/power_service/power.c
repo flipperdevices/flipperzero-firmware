@@ -512,7 +512,15 @@ int32_t power_srv(void* p) {
 
     DesktopSettings* settings = malloc(sizeof(DesktopSettings));
     DESKTOP_SETTINGS_LOAD(settings);
-    power->displayBatteryPercentage = settings->displayBatteryPercentage;
+
+    if(settings->displayBatteryPercentage != DISPLAY_BATTERY_NONE) {
+        power->displayBatteryPercentage = settings->displayBatteryPercentage;
+        view_port_enabled_set(power->battery_view_port, true);
+    } else {
+        power->displayBatteryPercentage = settings->displayBatteryPercentage;
+        view_port_enabled_set(power->battery_view_port, false);
+    }
+
     free(settings);
 
     while(1) {
@@ -532,9 +540,24 @@ int32_t power_srv(void* p) {
         if(need_refresh) {
             DesktopSettings* settings = malloc(sizeof(DesktopSettings));
             DESKTOP_SETTINGS_LOAD(settings);
-            power->displayBatteryPercentage = settings->displayBatteryPercentage;
+
+            if(power->displayBatteryPercentage == DISPLAY_BATTERY_NONE) {
+                if(settings->displayBatteryPercentage != DISPLAY_BATTERY_NONE) {
+                    power->displayBatteryPercentage = settings->displayBatteryPercentage;
+                    view_port_enabled_set(power->battery_view_port, true);
+                    view_port_update(power->battery_view_port);
+                }
+            } else {
+                if(settings->displayBatteryPercentage == DISPLAY_BATTERY_NONE) {
+                    power->displayBatteryPercentage = settings->displayBatteryPercentage;
+                    view_port_enabled_set(power->battery_view_port, false);
+                } else {
+                    power->displayBatteryPercentage = settings->displayBatteryPercentage;
+                    view_port_update(power->battery_view_port);
+                }
+            }
+
             free(settings);
-            view_port_update(power->battery_view_port);
         }
 
         // Check OTG status and disable it in case of fault

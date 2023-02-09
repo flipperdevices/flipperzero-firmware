@@ -11,6 +11,7 @@ extern "C" {
 
 typedef struct {
     bool enabled;
+    bool iconshow;
 } BtSettings;
 
 bool bt_settings_load(BtSettings* bt_settings);

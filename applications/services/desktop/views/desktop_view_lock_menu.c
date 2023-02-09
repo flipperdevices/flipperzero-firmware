@@ -9,12 +9,12 @@
 
 #define LOCK_MENU_ITEMS_NB 5
 
-static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
+/*static void desktop_view_lock_menu_dumbmode_changed(bool isThisGameMode) {
     DesktopSettingsApp* app = malloc(sizeof(DesktopSettingsApp));
     DESKTOP_SETTINGS_LOAD(&app->settings);
     app->settings.is_dumbmode = isThisGameMode;
     DESKTOP_SETTINGS_SAVE(&app->settings);
-}
+}*/
 
 typedef enum {
     DesktopLockMenuIndexLock,
