@@ -50,7 +50,7 @@ jobs:
       - name: 'Convert PVS-Studio output to html and detect warnings'
         id: pvs-warn
         run: |
-          WARNINGS=1
+          WARNINGS=0
           ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
           echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
 
