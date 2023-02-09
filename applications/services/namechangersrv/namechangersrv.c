@@ -3,7 +3,8 @@
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
 
-void namechanger_on_system_start() {
+int32_t namechanger_on_system_start(void* p) {
+    UNUSED(p);
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
         FURI_LOG_W(TAG, "NameChangerSRV load skipped. Device is in special startup mode.");
     } else {
@@ -164,4 +165,6 @@ void namechanger_on_system_start() {
         furi_string_free(filepath);
         furi_record_close(RECORD_STORAGE);
     }
+
+    return 0;
 }

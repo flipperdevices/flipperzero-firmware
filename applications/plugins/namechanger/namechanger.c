@@ -88,7 +88,8 @@ void namechanger_text_store_set(NameChanger* namechanger, const char* text, ...)
     va_end(args);
 }
 
-int32_t namechanger_app() {
+int32_t namechanger_app(void* p) {
+    UNUSED(p);
     NameChanger* namechanger = namechanger_alloc();
 
     view_dispatcher_attach_to_gui(
