@@ -174,8 +174,8 @@ void ibutton_free(iButton* ibutton) {
     free(ibutton);
 }
 
-static bool ibutton_load_key(iButton* ibutton, FuriString* file_path) {
-    const bool success = ibutton_key_load(ibutton->key, furi_string_get_cstr(file_path));
+static bool ibutton_load_key(iButton* ibutton) {
+    const bool success = ibutton_key_load(ibutton->key, furi_string_get_cstr(ibutton->file_path));
 
     if(!success) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
@@ -184,7 +184,7 @@ static bool ibutton_load_key(iButton* ibutton, FuriString* file_path) {
     return success;
 }
 
-bool ibutton_file_select(iButton* ibutton) {
+bool ibutton_select_key(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
     bool success = false;
 
@@ -193,66 +193,24 @@ bool ibutton_file_select(iButton* ibutton) {
 
     do {
         if(!dialog_file_browser_show(ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options)) break;
-        if(!ibutton_load_key(ibutton, ibutton->file_path)) break;
+        if(!ibutton_load_key(ibutton)) break;
         success = true;
     } while(0);
 
     return success;
 }
 
-bool ibutton_save_key(iButton* ibutton, const char* key_name) {
-    // Create ibutton directory if necessary
+bool ibutton_save_key(iButton* ibutton) {
     ibutton_make_app_folder(ibutton);
 
-    FlipperFormat* file = flipper_format_file_alloc(ibutton->storage);
-    // iButtonKey* key = ibutton->key;
+    iButtonKey* key = ibutton->key;
+    const bool success = ibutton_key_save(key, furi_string_get_cstr(ibutton->file_path));
 
-    bool result = false;
-
-    do {
-        // Check if we has old key
-        if(furi_string_end_with(ibutton->file_path, IBUTTON_APP_EXTENSION)) {
-            // First remove old key
-            ibutton_delete_key(ibutton);
-
-            // Remove old key name from path
-            size_t filename_start = furi_string_search_rchar(ibutton->file_path, '/');
-            furi_string_left(ibutton->file_path, filename_start);
-        }
-
-        furi_string_cat_printf(ibutton->file_path, "/%s%s", key_name, IBUTTON_APP_EXTENSION);
-
-        // Open file for write
-        if(!flipper_format_file_open_always(file, furi_string_get_cstr(ibutton->file_path))) break;
-
-        // Write header
-        if(!flipper_format_write_header_cstr(file, IBUTTON_APP_FILE_TYPE, 1)) break;
-
-        // Write key type
-        if(!flipper_format_write_comment_cstr(file, "Key type can be Cyfral, Dallas or Metakom"))
-            break;
-        // const char* key_type = ibutton_key_get_string_by_type(ibutton_key_get_type(key));
-        // if(!flipper_format_write_string_cstr(file, "Key type", key_type)) break;
-
-        // Write data
-        if(!flipper_format_write_comment_cstr(
-               file, "Data size for Cyfral is 2, for Metakom is 4, for Dallas is 8"))
-            break;
-
-        // if(!flipper_format_write_hex(
-        //        file, "Data", ibutton_key_get_data_p(key), ibutton_key_get_data_size(key)))
-        //     break;
-        result = true;
-
-    } while(false);
-
-    flipper_format_free(file);
-
-    if(!result) { //-V547
+    if(!success) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot save\nkey file");
     }
 
-    return result;
+    return success;
 }
 
 bool ibutton_delete_key(iButton* ibutton) {
@@ -260,19 +218,6 @@ bool ibutton_delete_key(iButton* ibutton) {
     result = storage_simply_remove(ibutton->storage, furi_string_get_cstr(ibutton->file_path));
 
     return result;
-}
-
-void ibutton_text_store_set(iButton* ibutton, const char* text, ...) {
-    va_list args;
-    va_start(args, text);
-
-    vsnprintf(ibutton->text_store, IBUTTON_TEXT_STORE_SIZE, text, args);
-
-    va_end(args);
-}
-
-void ibutton_text_store_clear(iButton* ibutton) {
-    memset(ibutton->text_store, 0, IBUTTON_TEXT_STORE_SIZE + 1);
 }
 
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {
@@ -305,7 +250,7 @@ int32_t ibutton_app(void* p) {
             rpc_system_app_send_started(ibutton->rpc_ctx);
         } else {
             furi_string_set(ibutton->file_path, (const char*)p);
-            key_loaded = ibutton_load_key(ibutton, ibutton->file_path);
+            key_loaded = ibutton_load_key(ibutton);
         }
     }
 

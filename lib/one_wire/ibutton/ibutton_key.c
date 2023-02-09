@@ -8,6 +8,7 @@
 #include "ibutton_protocols.h"
 
 #define IBUTTON_KEY_FILE_TYPE "Flipper iButton key"
+#define IBUTTON_KEY_CURRENT_FORMAT_VERSION 2U
 #define IBUTTON_KEY_ONEWIRE_ROM_SIZE 8U
 
 struct iButtonKey {
@@ -42,7 +43,7 @@ uint32_t ibutton_key_get_features(iButtonKey* key) {
 }
 
 static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
-    bool result = false;
+    bool success = false;
     uint8_t rom_data[IBUTTON_KEY_ONEWIRE_ROM_SIZE];
 
     onewire_host_start(host);
@@ -59,7 +60,7 @@ static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
         if(!onewire_host_reset(host)) break;
         if(!ibutton_protocols_read(host, key->protocol_data, key->protocol_id)) break;
 
-        result = true;
+        success = true;
     } while(false);
 
     onewire_host_reset_search(host);
@@ -67,7 +68,7 @@ static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
 
     FURI_CRITICAL_EXIT();
 
-    return result;
+    return success;
 }
 
 bool ibutton_key_read(iButtonKey* key, OneWireHost* host) {
@@ -75,13 +76,32 @@ bool ibutton_key_read(iButtonKey* key, OneWireHost* host) {
 }
 
 bool ibutton_key_save(iButtonKey* key, const char* file_name) {
-    UNUSED(key);
-    UNUSED(file_name);
-    return false;
+    bool success = false;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    do {
+        const char* protocol_name = ibutton_protocols_get_name(key->protocol_id);
+        // TODO: handle the invalid protocol case
+
+        if(!flipper_format_file_open_always(ff, file_name)) break;
+
+        if(!flipper_format_write_header_cstr(ff, IBUTTON_KEY_FILE_TYPE, IBUTTON_KEY_CURRENT_FORMAT_VERSION)) break;
+        if(!flipper_format_write_string_cstr(ff, "Protocol", protocol_name)) break;
+        if(!ibutton_protocols_save(ff, key->protocol_data, key->protocol_id)) break;
+
+        success = true;
+    } while(false);
+
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+
+    return success;
 }
 
 bool ibutton_key_load(iButtonKey* key, const char* file_name) {
-    bool result = false;
+    bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     FlipperFormat* ff = flipper_format_file_alloc(storage);
@@ -113,14 +133,14 @@ bool ibutton_key_load(iButtonKey* key, const char* file_name) {
         if(key->protocol_id == iButtonProtocolMax) break;
         if(!ibutton_protocols_load(ff, version, key->protocol_data, key->protocol_id)) break;
 
-        result = true;
+        success = true;
     } while(false);
 
     flipper_format_free(ff);
     furi_string_free(tmp);
     furi_record_close(RECORD_STORAGE);
 
-    return result;
+    return success;
 }
 
 void ibutton_key_get_rendered_data(iButtonKey* key, FuriString* result) {

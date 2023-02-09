@@ -64,7 +64,7 @@ void ibutton_scene_delete_confirm_on_enter(void* context) {
     //     break;
     // }
     widget_add_string_element(
-        widget, 64, 46, AlignCenter, AlignBottom, FontSecondary, ibutton->text_store);
+        widget, 64, 46, AlignCenter, AlignBottom, FontSecondary, ibutton->key_name);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
 
@@ -93,6 +93,5 @@ bool ibutton_scene_delete_confirm_on_event(void* context, SceneManagerEvent even
 
 void ibutton_scene_delete_confirm_on_exit(void* context) {
     iButton* ibutton = context;
-    ibutton_text_store_clear(ibutton);
     widget_reset(ibutton->widget);
 }

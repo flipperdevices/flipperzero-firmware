@@ -3,7 +3,7 @@
 
 void ibutton_scene_info_on_enter(void* context) {
     iButton* ibutton = context;
-    Widget* widget = ibutton->widget;
+    // Widget* widget = ibutton->widget;
     // iButtonKey* key = ibutton->key;
 
     // const uint8_t* key_data = ibutton_key_get_data_p(key);
@@ -45,8 +45,8 @@ void ibutton_scene_info_on_enter(void* context) {
     //     break;
     // }
 
-    widget_add_string_element(
-        widget, 64, 50, AlignCenter, AlignBottom, FontSecondary, ibutton->text_store);
+    // widget_add_string_element(
+    //     widget, 64, 50, AlignCenter, AlignBottom, FontSecondary, ibutton->text_store);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
 
@@ -61,6 +61,5 @@ bool ibutton_scene_info_on_event(void* context, SceneManagerEvent event) {
 
 void ibutton_scene_info_on_exit(void* context) {
     iButton* ibutton = context;
-    ibutton_text_store_clear(ibutton);
     widget_reset(ibutton->widget);
 }

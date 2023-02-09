@@ -25,12 +25,10 @@
 #include "ibutton_custom_event.h"
 #include "scenes/ibutton_scene.h"
 
-#define IBUTTON_FILE_NAME_SIZE 100
-#define IBUTTON_TEXT_STORE_SIZE 128
-
 #define IBUTTON_APP_FOLDER ANY_PATH("ibutton")
 #define IBUTTON_APP_EXTENSION ".ibtn"
-#define IBUTTON_APP_FILE_TYPE "Flipper iButton key"
+
+#define IBUTTON_KEY_NAME_SIZE 22
 
 struct iButton {
     SceneManager* scene_manager;
@@ -45,7 +43,7 @@ struct iButton {
     iButtonKey* key;
 
     FuriString* file_path;
-    char text_store[IBUTTON_TEXT_STORE_SIZE + 1];
+    char key_name[IBUTTON_KEY_NAME_SIZE+1];
 
     Submenu* submenu;
     ByteInput* byte_input;
@@ -80,11 +78,9 @@ typedef enum {
     iButtonNotificationMessageBlinkStop,
 } iButtonNotificationMessage;
 
-bool ibutton_file_select(iButton* ibutton);
-bool ibutton_save_key(iButton* ibutton, const char* key_name);
+bool ibutton_select_key(iButton* ibutton);
+bool ibutton_save_key(iButton* ibutton);
 bool ibutton_delete_key(iButton* ibutton);
-void ibutton_text_store_set(iButton* ibutton, const char* text, ...);
-void ibutton_text_store_clear(iButton* ibutton);
 void ibutton_notification_message(iButton* ibutton, uint32_t message);
 
 void ibutton_widget_callback(GuiButtonType result, InputType type, void* context);

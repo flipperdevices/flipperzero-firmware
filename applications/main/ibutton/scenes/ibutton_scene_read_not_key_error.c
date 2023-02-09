@@ -57,6 +57,5 @@ bool ibutton_scene_read_not_key_error_on_event(void* context, SceneManagerEvent 
 
 void ibutton_scene_read_not_key_error_on_exit(void* context) {
     iButton* ibutton = context;
-    ibutton_text_store_clear(ibutton);
     ibutton_notification_message(ibutton, iButtonNotificationMessageRedOff);
 }

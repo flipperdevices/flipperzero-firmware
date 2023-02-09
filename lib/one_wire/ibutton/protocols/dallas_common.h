@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <flipper_format.h>
 #include <one_wire/one_wire_host.h>
 
 typedef union {
@@ -14,3 +15,5 @@ typedef union {
 
 bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data);
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size);
+bool dallas_common_save_rom_data(FlipperFormat* ff, const DallasCommonRomData* rom_data);
+bool dallas_common_load_rom_data(FlipperFormat* ff, uint32_t format_version, DallasCommonRomData* rom_data);

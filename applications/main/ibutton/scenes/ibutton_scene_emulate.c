@@ -57,8 +57,8 @@ void ibutton_scene_emulate_on_enter(void* context) {
     widget_add_string_multiline_element(
         widget, 90, 10, AlignCenter, AlignTop, FontPrimary, "iButton\nemulating");
     widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
-    widget_add_text_box_element(
-        widget, 54, 39, 75, 22, AlignCenter, AlignCenter, ibutton->text_store, true);
+    // widget_add_text_box_element(
+    //     widget, 54, 39, 75, 22, AlignCenter, AlignCenter, ibutton->text_store, true);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
 
