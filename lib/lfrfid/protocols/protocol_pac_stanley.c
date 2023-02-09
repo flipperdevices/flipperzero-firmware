@@ -207,8 +207,8 @@ void protocol_pac_stanley_render_data(ProtocolPACStanley* protocol, FuriString* 
 }
 
 const ProtocolBase protocol_pac_stanley = {
-    .name = "PAC/Stanley",
-    .manufacturer = "N/A",
+    .name = "PAC",
+    .manufacturer = "Stanley",
     .data_size = PAC_STANLEY_DECODED_DATA_SIZE,
     .features = LFRFIDFeatureASK,
     .validate_count = 3,

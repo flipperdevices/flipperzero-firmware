@@ -44,6 +44,6 @@ The file stores a single RFID key of the type defined by the `Key type` paramete
 | Viking      | Viking            |
 | Jablotron   | Jablotron         |
 | Paradox     | Paradox           |
-| PAC/Stanley | PAC/Stanley       |
+| PAC         | PAC/Stanley       |
 | Keri        | Keri              |
 | Gallagher   | Gallagher         |
