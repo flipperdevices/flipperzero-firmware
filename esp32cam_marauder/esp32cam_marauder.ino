@@ -160,13 +160,20 @@ void setup()
 
   unsigned long waitForStreamMode = millis() + 1000;
 
-  while (waitForStreamMode > millis())
-  {
-    if (Serial.available()) // if we receive anything, just switch to stream mode
+  while (waitForStreamMode > millis()) {
+    if (Serial.available())  // if we receive anything, just switch to another mode
     {
-      cam_stream_setup();
-      for (;;)
-        cam_stream_loop();
+      switch (Serial.read()) {
+        case 'q':  // QR code reader mode
+          qr_reader_setup();
+          for (;;)
+            qr_reader_loop();
+
+        default:  // Camera stream
+          cam_stream_setup();
+          for (;;)
+            cam_stream_loop();
+      }
     }
   }
   //Serial.begin(115200);
