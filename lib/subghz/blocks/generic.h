@@ -5,8 +5,8 @@
 #include <stddef.h>
 
 #include <lib/flipper_format/flipper_format.h>
-#include "furi.h"
-#include "furi_hal.h"
+#include <furi.h>
+#include <furi_hal.h>
 #include "../types.h"
 
 #ifdef __cplusplus
@@ -19,7 +19,7 @@ struct SubGhzBlockGeneric {
     const char* protocol_name;
     uint64_t data;
     uint32_t serial;
-    uint8_t data_count_bit;
+    uint16_t data_count_bit;
     uint8_t btn;
     uint32_t cnt;
 };
