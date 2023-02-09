@@ -107,7 +107,7 @@ static int32_t uart_echo_worker(void* context) {
             do {
                 uint8_t data[64];
                 length = furi_stream_buffer_receive(app->rx_stream, data, 64, 0);
-                if(length > 0) {
+                if(length > 0 && app->initialized) {
                     furi_hal_uart_tx(FuriHalUartIdUSART1, data, length);
                     with_view_model(
                         app->view,
@@ -179,9 +179,10 @@ static UartEchoApp* uart_echo_app_alloc() {
     furi_delay_ms(100);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    furi_delay_ms(600); 
+    furi_delay_ms(1000); 
     furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'q'}, 1); // Just to trigger the qr code mode
-
+    furi_delay_ms(10);
+    app->initialized = true;
     return app;
 }
 

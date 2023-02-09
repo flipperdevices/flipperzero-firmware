@@ -21,6 +21,7 @@ typedef struct {
     View* view;
     FuriThread* worker_thread;
     FuriStreamBuffer* rx_stream;
+    bool initialized;
 } UartEchoApp;
 
 typedef struct {
