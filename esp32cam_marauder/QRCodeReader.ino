@@ -63,8 +63,8 @@ void qr_reader_setup() {
   sensor_t * s = esp_camera_sensor_get();
   s->set_framesize(s, FRAMESIZE_QVGA);
   
-  Serial.println("Configure and initialize the camera successfully.");
-  Serial.println();
+  //Serial.println("Configure and initialize the camera successfully.");
+  //Serial.println();
   /* ---------------------------------------- */
 
   /* ---------------------------------------- create "QRCodeReader_Task" using the xTaskCreatePinnedToCore() function */
@@ -85,10 +85,10 @@ void qr_reader_loop() {
 
 void QRCodeReader( void * pvParameters ){
   /* ---------------------------------------- */
-  Serial.println("QRCodeReader is ready.");
-  Serial.print("QRCodeReader running on core ");
-  Serial.println(xPortGetCoreID());
-  Serial.println();
+  Serial.println("Waiting for QR code");
+  //Serial.print("QRCodeReader running on core ");
+  //Serial.println(xPortGetCoreID());
+  //Serial.println();
   /* ---------------------------------------- */
 
   /* ---------------------------------------- Loop to read QR Code in real time. */
