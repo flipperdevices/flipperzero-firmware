@@ -148,7 +148,7 @@ typedef struct {
     uint8_t hex_buffer_valid[8];
     uint8_t hex_read_delay;
 
-    char state_string[32];
+    char state_string[64];
     char script_detected[MAX_FILE_LENGTH];
     bool script_detected_executed;
 } AppFSM;
@@ -160,7 +160,13 @@ struct sScriptContext {
     uint32_t selected_ap;
     uint32_t max_tries;
     uint32_t block_size;
+
     bool abort;
+    bool restart;
+    bool errors_ignore;
+    bool status_ignore;
+    bool goto_active;
+    char goto_label[64];
 };
 
 typedef struct {

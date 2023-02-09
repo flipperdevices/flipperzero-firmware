@@ -317,7 +317,7 @@ static uint8_t swd_select(AppFSM* const ctx, uint8_t ap_sel, uint8_t ap_bank, ui
 
     uint8_t ret = swd_transfer(ctx, false, true, 2, &bank_reg);
     if(ret != 1) {
-        ctx->dp_regs.select_ok = false;
+        //ctx->dp_regs.select_ok = false;
         furi_log_print_format(FuriLogLevelDefault, TAG, "swd_select: failed: %d", ret);
     }
 
@@ -392,10 +392,13 @@ static uint8_t swd_write_ap(AppFSM* const ctx, uint8_t ap, uint8_t ap_off, uint3
 
 static uint8_t swd_write_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t data) {
     uint8_t ret = 0;
+    uint32_t csw = 0x23000002;
 
-    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, 0x03000012);
+    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, csw);
     ret |= swd_write_ap(ctx, ap, MEMAP_TAR, address);
     ret |= swd_write_ap(ctx, ap, MEMAP_DRW, data);
+    furi_log_print_format(
+        FuriLogLevelDefault, TAG, "swd_write_memory: write 0x%08lX to 0x%08lX", data, address);
 
     if(ret != 1) {
         swd_abort(ctx);
@@ -405,8 +408,9 @@ static uint8_t swd_write_memory(AppFSM* const ctx, uint8_t ap, uint32_t address,
 
 static uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t* data) {
     uint8_t ret = 0;
+    uint32_t csw = 0x23000002;
 
-    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, 0x03000012);
+    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, csw);
     ret |= swd_write_ap(ctx, ap, MEMAP_TAR, address);
     ret |= swd_read_ap(ctx, ap, MEMAP_DRW, data);
 
@@ -425,8 +429,9 @@ static uint8_t swd_read_memory_block(
     uint8_t ret = 0;
     uint32_t data = 0;
     bool first = true;
+    uint32_t csw = 0x23000002;
 
-    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, 0x03000012);
+    ret |= swd_write_ap(ctx, ap, MEMAP_CSW, csw);
     ret |= swd_write_ap(ctx, ap, MEMAP_TAR, address);
     ret |= swd_read_ap_single(ctx, ap, MEMAP_DRW, &data);
 
@@ -644,6 +649,7 @@ static bool swd_script_get_string(ScriptContext* ctx, char* str, size_t max_leng
         uint64_t start_pos = storage_file_tell(ctx->script_file);
         uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
         if(ret != 1) {
+            furi_log_print_format(FuriLogLevelDefault, TAG, "swd_script_get_string: end reached?");
             return false;
         }
         if(ch == '"') {
@@ -652,11 +658,11 @@ static bool swd_script_get_string(ScriptContext* ctx, char* str, size_t max_leng
         }
         if(!quot) {
             if(ch == ' ') {
-                return true;
+                break;
             }
             if(ch == '\r' || ch == '\n') {
                 storage_file_seek(ctx->script_file, start_pos, true);
-                return true;
+                break;
             }
         }
         if(pos + 2 > max_length) {
@@ -666,7 +672,7 @@ static bool swd_script_get_string(ScriptContext* ctx, char* str, size_t max_leng
         str[pos++] = ch;
         str[pos] = '\000';
     }
-    furi_log_print_format(FuriLogLevelDefault, TAG, "swd_script_get_string: got '%s'", str);
+    furi_log_print_format(FuriLogLevelDebug, TAG, "swd_script_get_string: got '%s'", str);
 
     return true;
 }
@@ -679,7 +685,7 @@ static bool swd_script_get_number(ScriptContext* ctx, uint32_t* number) {
             FuriLogLevelDefault, TAG, "swd_script_get_number: could not get string");
         return false;
     }
-    furi_log_print_format(FuriLogLevelDefault, TAG, "swd_script_get_number: got '%s'", str);
+    furi_log_print_format(FuriLogLevelDebug, TAG, "swd_script_get_number: got '%s'", str);
 
     size_t pos = 0;
     *number = 0;
@@ -721,23 +727,96 @@ static bool swd_script_get_number(ScriptContext* ctx, uint32_t* number) {
 }
 
 static void swd_script_gui_refresh(ScriptContext* ctx) {
-    //Canvas* canvas = gui_direct_draw_acquire(ctx->app->gui);
-
-    furi_log_print_format(FuriLogLevelDefault, TAG, "Status: %s", ctx->app->state_string);
-    //render_callback(canvas, &ctx->app->state_mutex);
-
     if(furi_message_queue_get_count(ctx->app->event_queue) > 0) {
         swd_message_process(ctx->app);
     }
-    view_port_update(ctx->app->view_port);
-
-    //gui_direct_draw_release(ctx->app->gui);
+    if(!ctx->status_ignore) {
+        furi_log_print_format(FuriLogLevelDebug, TAG, "Status: %s", ctx->app->state_string);
+        view_port_update(ctx->app->view_port);
+    }
 }
 
 /************************** script functions **************************/
 
 static bool swd_scriptfunc_comment(ScriptContext* ctx) {
-    furi_log_print_format(FuriLogLevelDefault, TAG, "comment");
+    furi_log_print_format(FuriLogLevelDebug, TAG, "comment");
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_label(ScriptContext* ctx) {
+    uint32_t sound = 0;
+    char label[256];
+    furi_log_print_format(FuriLogLevelDebug, TAG, "label");
+
+    swd_script_skip_whitespace(ctx);
+    if(!swd_script_get_string(ctx, label, sizeof(label))) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "label: failed to parse");
+        return false;
+    }
+
+    if(!strcmp(label, ctx->goto_label)) {
+        ctx->goto_active = false;
+        furi_log_print_format(FuriLogLevelDebug, TAG, "label: matches '%s'", ctx->goto_label);
+    }
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_goto(ScriptContext* ctx) {
+    uint32_t sound = 0;
+    furi_log_print_format(FuriLogLevelDebug, TAG, "goto");
+
+    swd_script_skip_whitespace(ctx);
+
+    if(!swd_script_get_string(ctx, ctx->goto_label, sizeof(ctx->goto_label))) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "goto: failed to parse");
+        return false;
+    }
+
+    /* start from beginning and rerun starting from label */
+    ctx->goto_active = true;
+    ctx->restart = true;
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_status(ScriptContext* ctx) {
+    uint32_t status = 1;
+    furi_log_print_format(FuriLogLevelDebug, TAG, "status");
+
+    swd_script_skip_whitespace(ctx);
+    swd_script_get_number(ctx, &status);
+
+    ctx->status_ignore = status == 0;
+
+    swd_script_seek_newline(ctx);
+
+    return true;
+}
+
+static bool swd_scriptfunc_errors(ScriptContext* ctx) {
+    char type[32];
+    furi_log_print_format(FuriLogLevelDebug, TAG, "errors");
+
+    swd_script_skip_whitespace(ctx);
+
+    if(!swd_script_get_string(ctx, type, sizeof(type))) {
+        furi_log_print_format(FuriLogLevelDebug, TAG, "goto: failed to parse");
+        return false;
+    }
+
+    if(!strcmp(type, "ignore")) {
+        ctx->errors_ignore = true;
+    }
+    if(!strcmp(type, "fail")) {
+        ctx->errors_ignore = false;
+    }
     swd_script_seek_newline(ctx);
 
     return true;
@@ -745,7 +824,7 @@ static bool swd_scriptfunc_comment(ScriptContext* ctx) {
 
 static bool swd_scriptfunc_beep(ScriptContext* ctx) {
     uint32_t sound = 0;
-    furi_log_print_format(FuriLogLevelDefault, TAG, "beep");
+    furi_log_print_format(FuriLogLevelDebug, TAG, "beep");
 
     swd_script_skip_whitespace(ctx);
     swd_script_get_number(ctx, &sound);
@@ -1120,7 +1199,12 @@ static bool swd_scriptfunc_mem_write(ScriptContext* ctx) {
             furi_log_print_format(FuriLogLevelDefault, TAG, "mem_write: aborting");
             break;
         }
+
         access_ok = swd_write_memory(ctx->app, ctx->selected_ap, address, data) == 1;
+        access_ok |= ctx->errors_ignore;
+        swd_read_memory(ctx->app, ctx->selected_ap, address, &data);
+        furi_log_print_format(
+            FuriLogLevelDefault, TAG, "mem_write: read %08lX from %08lX", data, address);
 
         if(!access_ok) {
             snprintf(
@@ -1191,6 +1275,8 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
         modified = (modified & mask) | data;
         access_ok &= swd_write_memory(ctx->app, ctx->selected_ap, address, modified) == 1;
 
+        access_ok |= ctx->errors_ignore;
+
         if(!access_ok) {
             snprintf(
                 ctx->app->state_string,
@@ -1213,6 +1299,10 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
 
 static const ScriptFunctionInfo script_funcs[] = {
     {"#", &swd_scriptfunc_comment},
+    {".label", &swd_scriptfunc_label},
+    {"goto", &swd_scriptfunc_goto},
+    {"status", &swd_scriptfunc_status},
+    {"errors", &swd_scriptfunc_errors},
     {"message", &swd_scriptfunc_message},
     {"beep", &swd_scriptfunc_beep},
     {"apscan", &swd_scriptfunc_apscan},
@@ -1261,68 +1351,85 @@ static bool swd_execute_script_line(ScriptContext* const ctx, File* file) {
         if(strncmp(buffer, script_funcs[entry].prefix, expected)) {
             continue;
         }
-        furi_log_print_format(
-            FuriLogLevelDefault, TAG, "command: '%s'", script_funcs[entry].prefix);
+        bool success = true;
 
-        snprintf(
-            ctx->app->state_string,
-            sizeof(ctx->app->state_string),
-            "CMD: %s",
-            script_funcs[entry].prefix);
-        swd_script_gui_refresh(ctx);
-
-        /* func function, execute */
-        bool success = script_funcs[entry].func(ctx);
-
-        if(!success) {
+        if(ctx->goto_active) {
             furi_log_print_format(
-                FuriLogLevelDefault, TAG, "Command failed: %s", script_funcs[entry].prefix);
-            snprintf(
-                ctx->app->state_string,
-                sizeof(ctx->app->state_string),
-                "Command failed: %s",
-                script_funcs[entry].prefix);
-            return false;
+                FuriLogLevelDebug, TAG, "ignore: '%s'", script_funcs[entry].prefix);
+
+            /* only execute label handlers */
+            if(buffer[0] == '.') {
+                success = script_funcs[entry].func(ctx);
+            } else {
+                swd_script_seek_newline(ctx);
+            }
+        } else {
+            furi_log_print_format(
+                FuriLogLevelDebug, TAG, "command: '%s'", script_funcs[entry].prefix);
+
+            if(!ctx->status_ignore) {
+                snprintf(
+                    ctx->app->state_string,
+                    sizeof(ctx->app->state_string),
+                    "CMD: %s",
+                    script_funcs[entry].prefix);
+            }
+            swd_script_gui_refresh(ctx);
+
+            /* function, execute */
+            success = script_funcs[entry].func(ctx);
+
+            if(!success && !ctx->errors_ignore) {
+                furi_log_print_format(
+                    FuriLogLevelDefault, TAG, "Command failed: %s", script_funcs[entry].prefix);
+                snprintf(
+                    ctx->app->state_string,
+                    sizeof(ctx->app->state_string),
+                    "Command failed: %s",
+                    script_funcs[entry].prefix);
+                return false;
+            }
         }
 
         return true;
     }
-    furi_log_print_format(FuriLogLevelDefault, TAG, "unknown command");
+    furi_log_print_format(FuriLogLevelDefault, TAG, "unknown command '%s'", buffer);
 
     return false;
 }
 
 static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
     bool success = true;
-    bool restart = false;
+
+    ctx->script = malloc(sizeof(ScriptContext));
+    ctx->script->app = ctx;
+    ctx->script->max_tries = 1;
+
+    if(!storage_file_exists(ctx->storage, filename)) {
+        furi_log_print_format(FuriLogLevelDefault, TAG, "Does not exist '%s'", filename);
+        free(ctx->script);
+        ctx->script = NULL;
+        return false;
+    }
+
+    /* first allocate a file object */
+    ctx->script->script_file = storage_file_alloc(ctx->storage);
+
+    /* then get our script opened */
+    if(!storage_file_open(ctx->script->script_file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(ctx->script->script_file));
+        furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to open '%s'", filename);
+        storage_file_free(ctx->script->script_file);
+        free(ctx->script);
+        ctx->script = NULL;
+        return false;
+    }
 
     do {
         success = true;
-        restart = false;
-        ctx->script = malloc(sizeof(ScriptContext));
+        ctx->script->restart = false;
 
-        ctx->script->app = ctx;
-        ctx->script->max_tries = 1;
-
-        if(!storage_file_exists(ctx->storage, filename)) {
-            furi_log_print_format(FuriLogLevelDefault, TAG, "Does not exist '%s'", filename);
-            free(ctx->script);
-            ctx->script = NULL;
-            return false;
-        }
-
-        /* first allocate a file object */
-        ctx->script->script_file = storage_file_alloc(ctx->storage);
-
-        /* then get our script opened */
-        if(!storage_file_open(ctx->script->script_file, filename, FSAM_READ, FSOM_OPEN_EXISTING)) {
-            FURI_LOG_E(TAG, "open, %s", storage_file_get_error_desc(ctx->script->script_file));
-            furi_log_print_format(FuriLogLevelDefault, TAG, "Failed to open '%s'", filename);
-            storage_file_free(ctx->script->script_file);
-            free(ctx->script);
-            ctx->script = NULL;
-            return false;
-        }
+        storage_file_seek(ctx->script->script_file, 0, true);
 
         uint32_t line = 1;
         while(line < SCRIPT_MAX_LINES) {
@@ -1333,21 +1440,22 @@ static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
             if(storage_file_eof(ctx->script->script_file)) {
                 break;
             }
-            furi_log_print_format(FuriLogLevelDefault, TAG, "line %lu", line);
+            furi_log_print_format(FuriLogLevelDebug, TAG, "line %lu", line);
             if(!swd_execute_script_line(ctx->script, ctx->script->script_file)) {
                 success = false;
+                break;
+            }
+            if(ctx->script->restart) {
                 break;
             }
             line++;
         }
 
-        furi_log_print_format(FuriLogLevelDefault, TAG, "Finished");
-
-        storage_file_close(ctx->script->script_file);
-        storage_file_free(ctx->script->script_file);
-        free(ctx->script);
-
-        ctx->script = NULL;
+        if(ctx->script->restart) {
+            furi_log_print_format(FuriLogLevelDebug, TAG, "Restarting");
+        } else {
+            furi_log_print_format(FuriLogLevelDebug, TAG, "Finished");
+        }
 
         if(!success) {
             char text_buf[128];
@@ -1359,11 +1467,17 @@ static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
             dialog_message_set_text(message, text_buf, 3, 16, AlignLeft, AlignTop);
             dialog_message_set_buttons(message, "Back", "Retry", NULL);
             if(dialog_message_show(ctx->dialogs, message) == DialogMessageButtonCenter) {
-                restart = true;
+                ctx->script->restart = true;
             }
             dialog_message_free(message);
         }
-    } while(restart);
+    } while(ctx->script->restart);
+
+    storage_file_close(ctx->script->script_file);
+    storage_file_free(ctx->script->script_file);
+    free(ctx->script);
+
+    ctx->script = NULL;
 
     return success;
 }
@@ -1693,6 +1807,7 @@ static void app_init(AppFSM* const app) {
     app->io_swd = 0xFF;
     app->io_swc = 0xFF;
     app->hex_addr = 0x40002800;
+    app->hex_addr = 0xE000EDF0;
     app->swd_clock_delay = CLOCK_DELAY;
     app->swd_idle_bits = IDLE_BITS;
 
