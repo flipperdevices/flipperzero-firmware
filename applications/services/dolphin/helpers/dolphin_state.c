@@ -14,15 +14,48 @@
 #define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-int level_array[30] = {450,   700,   1100,  1800,  2300,  2900,   3900,   5000,   5900,  7200,
-                       8400,  10000, 11500, 13000, 15000, 18000,  20000,  22000,  25000, 33000,
-                       41000, 50000, 62000, 75000, 90000, 105000, 120000, 135000, 155000};
+
+/*
+The way the math works:
+
+Current xp (icounter) is subtracted from the threshold (xp requirement for next level up)
+
+The array values in level_array result in the following XP requirements per level below:
+
+500,  750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750,
+3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 6000,
+7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000
+
+To change the level requirement, add the last level's value with the desired next level's value.
+Ex: Level 1 is 0 - 500. Level 2 needs to be Level 1 + next desired XP value.
+
+Level 2 is calculated:
+Previous Level's Required XP: 500
++
+Desired Level XP: 750
+=
+Value in level_array: 1250
+*/
+
+uint32_t level_array[29] = {500,    1250,   2250,   3500,   5000,  6750,  8750,  11000,
+                            13500,  16250,  19250,  22500,  26000, 29750, 33750, 38000,
+                            42500,  47250,  52250,  58250,  65250, 73250, 82250, 92250,
+                            103250, 115250, 128250, 142250, 157250};
+
+/*
+This calculates the size of an array. This is good as it's used for dynamic for loops below. Therefore, you can just add more values to level_array for more levels.
+*/
+#define NUM(a) (sizeof(a) / sizeof(*a))
 
 #define BUTTHURT_MAX 14
 #define BUTTHURT_MIN 0
 
 DolphinState* dolphin_state_alloc() {
     return malloc(sizeof(DolphinState));
+}
+
+int dolphin_state_max_level() {
+    return NUM(level_array) + 1;
 }
 
 void dolphin_state_free(DolphinState* dolphin_state) {
@@ -82,41 +115,50 @@ uint64_t dolphin_state_timestamp() {
 }
 
 bool dolphin_state_is_levelup(uint32_t icounter) {
-    for(int i = 0; i < 30; ++i) {
+    for(int i = 0; i < NUM(level_array); i++) {
         if((icounter == level_array[i])) {
-            return true;
+            return (icounter == level_array[i]);
         }
-    };
-    return false;
+    }
+    return NUM(level_array) + 1;
 }
 
 uint8_t dolphin_get_level(uint32_t icounter) {
-    for(int i = 0; i < 29; ++i) {
+    for(int i = 0; i < NUM(level_array); i++) {
         if(icounter <= level_array[i]) {
             return i + 1;
         }
     }
-    return 30;
+    return NUM(level_array) + 1;
 }
 
 uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
-    if(level_array[0] > icounter) {
-        for(int i = 1; i < 29; ++i) {
-            if(icounter <= level_array[i]) {
-                return level_array[i] - icounter + 1;
-            }
+    uint32_t threshold = 0;
+    for(int i = 0; i < NUM(level_array); i++) {
+        if(icounter <= level_array[0]) {
+            threshold = 0;
+            break;
+        } else if(icounter <= level_array[i]) {
+            threshold = level_array[i - 1];
+            break;
+        } else {
+            threshold = level_array[NUM(level_array) - 1];
         }
     }
-    return icounter;
+    return icounter - threshold;
 }
 
 uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
-    for(int i = 0; i < 29; ++i) {
+    uint32_t threshold = 0;
+    for(int i = 0; i < NUM(level_array); i++) {
         if(icounter <= level_array[i]) {
-            return level_array[i] - icounter;
+            threshold = level_array[i];
+            break;
+        } else {
+            threshold = (uint32_t)-1;
         }
     }
-    return (uint32_t)-1 - icounter;
+    return threshold - icounter;
 }
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {

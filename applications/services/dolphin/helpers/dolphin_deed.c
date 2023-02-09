@@ -2,46 +2,46 @@
 #include <furi.h>
 
 static const DolphinDeedWeight dolphin_deed_weights[] = {
-    {1, DolphinAppSubGhz}, // DolphinDeedSubGhzReceiverInfo
-    {3, DolphinAppSubGhz}, // DolphinDeedSubGhzSave
-    {1, DolphinAppSubGhz}, // DolphinDeedSubGhzRawRec
-    {2, DolphinAppSubGhz}, // DolphinDeedSubGhzAddManually
-    {2, DolphinAppSubGhz}, // DolphinDeedSubGhzSend
-    {1, DolphinAppSubGhz}, // DolphinDeedSubGhzFrequencyAnalyzer
+    {5, DolphinAppSubGhz}, // DolphinDeedSubGhzReceiverInfo
+    {15, DolphinAppSubGhz}, // DolphinDeedSubGhzSave
+    {5, DolphinAppSubGhz}, // DolphinDeedSubGhzRawRec
+    {10, DolphinAppSubGhz}, // DolphinDeedSubGhzAddManually
+    {10, DolphinAppSubGhz}, // DolphinDeedSubGhzSend
+    {5, DolphinAppSubGhz}, // DolphinDeedSubGhzFrequencyAnalyzer
 
-    {1, DolphinAppRfid}, // DolphinDeedRfidRead
-    {3, DolphinAppRfid}, // DolphinDeedRfidReadSuccess
-    {3, DolphinAppRfid}, // DolphinDeedRfidSave
-    {2, DolphinAppRfid}, // DolphinDeedRfidEmulate
-    {2, DolphinAppRfid}, // DolphinDeedRfidAdd
+    {5, DolphinAppRfid}, // DolphinDeedRfidRead
+    {15, DolphinAppRfid}, // DolphinDeedRfidReadSuccess
+    {15, DolphinAppRfid}, // DolphinDeedRfidSave
+    {10, DolphinAppRfid}, // DolphinDeedRfidEmulate
+    {10, DolphinAppRfid}, // DolphinDeedRfidAdd
 
-    {1, DolphinAppNfc}, // DolphinDeedNfcRead
-    {3, DolphinAppNfc}, // DolphinDeedNfcReadSuccess
-    {3, DolphinAppNfc}, // DolphinDeedNfcSave
-    {1, DolphinAppNfc}, // DolphinDeedNfcDetectReader
-    {2, DolphinAppNfc}, // DolphinDeedNfcEmulate
-    {2, DolphinAppNfc}, // DolphinDeedNfcMfcAdd
-    {1, DolphinAppNfc}, // DolphinDeedNfcAddSave
-    {1, DolphinAppNfc}, // DolphinDeedNfcAddEmulate
+    {5, DolphinAppNfc}, // DolphinDeedNfcRead
+    {15, DolphinAppNfc}, // DolphinDeedNfcReadSuccess
+    {5, DolphinAppNfc}, // DolphinDeedNfcSave
+    {5, DolphinAppNfc}, // DolphinDeedNfcDetectReader
+    {10, DolphinAppNfc}, // DolphinDeedNfcEmulate
+    {10, DolphinAppNfc}, // DolphinDeedNfcMfcAdd
+    {5, DolphinAppNfc}, // DolphinDeedNfcAddSave
+    {5, DolphinAppNfc}, // DolphinDeedNfcAddEmulate
 
-    {1, DolphinAppIr}, // DolphinDeedIrSend
-    {3, DolphinAppIr}, // DolphinDeedIrLearnSuccess
-    {3, DolphinAppIr}, // DolphinDeedIrSave
+    {5, DolphinAppIr}, // DolphinDeedIrSend
+    {15, DolphinAppIr}, // DolphinDeedIrLearnSuccess
+    {15, DolphinAppIr}, // DolphinDeedIrSave
 
-    {1, DolphinAppIbutton}, // DolphinDeedIbuttonRead
-    {3, DolphinAppIbutton}, // DolphinDeedIbuttonReadSuccess
-    {3, DolphinAppIbutton}, // DolphinDeedIbuttonSave
-    {2, DolphinAppIbutton}, // DolphinDeedIbuttonEmulate
-    {2, DolphinAppIbutton}, // DolphinDeedIbuttonAdd
+    {5, DolphinAppIbutton}, // DolphinDeedIbuttonRead
+    {15, DolphinAppIbutton}, // DolphinDeedIbuttonReadSuccess
+    {15, DolphinAppIbutton}, // DolphinDeedIbuttonSave
+    {10, DolphinAppIbutton}, // DolphinDeedIbuttonEmulate
+    {10, DolphinAppIbutton}, // DolphinDeedIbuttonAdd
 
-    {3, DolphinAppBadusb}, // DolphinDeedBadUsbPlayScript
-    {3, DolphinAppPlugin}, // DolphinDeedU2fAuthorized
+    {15, DolphinAppBadusb}, // DolphinDeedBadUsbPlayScript
+    {15, DolphinAppPlugin}, // DolphinDeedU2fAuthorized
 
-    {1, DolphinAppPlugin}, // DolphinDeedGpioUartBridge
+    {5, DolphinAppPlugin}, // DolphinDeedGpioUartBridge
 
-    {1, DolphinAppPlugin}, // DolphinDeedPluginStart
-    {1, DolphinAppPlugin}, // DolphinDeedPluginGameStart
-    {10, DolphinAppPlugin}, // DolphinDeedPluginGameWin
+    {5, DolphinAppPlugin}, // DolphinDeedPluginStart
+    {5, DolphinAppPlugin}, // DolphinDeedPluginGameStart
+    {20, DolphinAppPlugin}, // DolphinDeedPluginGameWin
 };
 
 static uint8_t dolphin_deed_limits[] = {
@@ -53,7 +53,7 @@ static uint8_t dolphin_deed_limits[] = {
     100, // DolphinAppBadusb
     // 100, // DolphinAppU2f
     // 100, // DolphinAppGpio
-    100, // DolphinAppPlugin
+    200, // DolphinAppPlugin
 };
 
 _Static_assert(COUNT_OF(dolphin_deed_weights) == DolphinDeedMAX, "dolphin_deed_weights size error");

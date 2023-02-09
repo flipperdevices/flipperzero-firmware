@@ -33,6 +33,8 @@ void dolphin_state_clear_limits(DolphinState* dolphin_state);
 
 uint64_t dolphin_state_timestamp();
 
+int dolphin_state_max_level();
+
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed);
 
 void dolphin_state_butthurted(DolphinState* dolphin_state);
