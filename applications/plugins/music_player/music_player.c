@@ -10,7 +10,6 @@
 
 #define TAG "MusicPlayer"
 
-#define MUSIC_PLAYER_APP_PATH_FOLDER ANY_PATH("music_player")
 #define MUSIC_PLAYER_APP_EXTENSION "*"
 
 #define MUSIC_PLAYER_SEMITONE_HISTORY_SIZE 4
@@ -307,18 +306,26 @@ int32_t music_player_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, MUSIC_PLAYER_APP_PATH_FOLDER);
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            FuriString* app_path = furi_string_alloc();
+
+            storage_common_get_my_data_path(storage, app_path);
+
+            furi_string_set(file_path, app_path);
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);
             browser_options.hide_ext = false;
-            browser_options.base_path = MUSIC_PLAYER_APP_PATH_FOLDER;
+            browser_options.base_path = furi_string_get_cstr(app_path);
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
 
             furi_record_close(RECORD_DIALOGS);
+            furi_record_close(RECORD_STORAGE);
+            furi_string_free(app_path);
+
             if(!res) {
                 FURI_LOG_E(TAG, "No file selected");
                 break;
