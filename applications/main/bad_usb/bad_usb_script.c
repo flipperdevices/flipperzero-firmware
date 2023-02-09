@@ -211,16 +211,16 @@ static bool ducky_altstring(const char* param) {
 static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     uint32_t i = 0;
 
-        while(param[i] != '\0') {
-            uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
-            if(keycode != HID_KEYBOARD_NONE) {
-                furi_hal_hid_kb_press(keycode);
-                furi_hal_hid_kb_release(keycode);
-                if(bad_usb->stringdelay > 0) {
-                    furi_delay_ms(bad_usb->stringdelay);
-                    }
-                }
-            i++;
+    while(param[i] != '\0') {
+        uint16_t keycode = HID_ASCII_TO_KEY(param[i]);
+        if(keycode != HID_KEYBOARD_NONE) {
+            furi_hal_hid_kb_press(keycode);
+            furi_hal_hid_kb_release(keycode);
+            if(bad_usb->stringdelay > 0) {
+                furi_delay_ms(bad_usb->stringdelay);
+            }
+        }
+        i++;
     }
     bad_usb->stringdelay = 0;
     return true;
