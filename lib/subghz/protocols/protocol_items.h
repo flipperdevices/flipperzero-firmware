@@ -39,5 +39,9 @@
 #include "ansonic.h"
 #include "smc5326.h"
 #include "holtek_ht12x.h"
+#include "dooya.h"
+#include "alutech_at_4n.h"
+#include "kinggates_stylo_4k.h"
+#include "bin_raw.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
