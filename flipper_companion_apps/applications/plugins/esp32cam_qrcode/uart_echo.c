@@ -179,9 +179,9 @@ static UartEchoApp* uart_echo_app_alloc() {
     furi_delay_ms(100);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    furi_delay_ms(1000); 
+    furi_delay_ms(1500); 
     furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'q'}, 1); // Just to trigger the qr code mode
-    furi_delay_ms(10);
+    furi_delay_ms(1);
     app->initialized = true;
     return app;
 }

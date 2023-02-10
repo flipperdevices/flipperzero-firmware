@@ -31,7 +31,7 @@ static void camera_view_draw_callback(Canvas* canvas, void* _model) {
     
         canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 8, 12, "Connect the ESP32-CAM");
+        canvas_draw_str(canvas, 8, 12, "Waiting ESP32-CAM...");
         canvas_draw_str(canvas, 20, 24, "VCC - 3V3/5V");
         canvas_draw_str(canvas, 20, 34, "GND - GND");
         canvas_draw_str(canvas, 20, 44, "U0R - TX");
@@ -260,9 +260,9 @@ static UartEchoApp* camera_app_alloc() {
     furi_delay_ms(100);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    furi_delay_ms(600); 
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){13}, 1); // Just to trigger the stream
-
+    furi_delay_ms(1500); 
+    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'c'}, 1); // Just to trigger the stream
+    furi_delay_ms(1);
     return app;
 }
 
