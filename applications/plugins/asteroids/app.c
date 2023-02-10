@@ -15,8 +15,6 @@
 #include <notification/notification_messages.h>
 #include <asteroids_icons.h>
 
-#include <time.h>
-
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 0
 #define SCREEN_XRES 128
@@ -714,6 +712,17 @@ bool isPowerUpCollidingWithEachOther(AsteroidsApp* app, float x, float y, float 
     return false;
 }
 
+bool should_trigger_rare_powerUp(PowerUpType selected_powerUpType) {
+    switch(selected_powerUpType) {
+    case PowerUpTypeLife: // Make extra life power up more rare
+        return rand() % 10 != 0;
+    case PowerUpTypeShield: // Make shield power up more rare
+        return rand() % 4 != 0;
+    default:
+        return true;
+    }
+}
+
 //@todo Add PowerUp
 PowerUp* add_powerUp(AsteroidsApp* app) {
     FURI_LOG_I(TAG, "add_powerUp: %i", app->powerUps_num);
@@ -722,11 +731,17 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
 
     // Randomly select power up for display
     PowerUpType selected_powerUpType = rand() % Number_of_PowerUps;
+    FURI_LOG_I(TAG, "[add_powerUp] Power Up Selected: %i", selected_powerUpType);
 
-    // FURI_LOG_I(TAG, "[add_powerUp] Power Ups Active: %i", app->powerUps_num);
     // Don't add already existing power ups
     if(isPowerUpAlreadyExists(app, selected_powerUpType)) {
         FURI_LOG_D(TAG, "[add_powerUp] Power Up %i already active", selected_powerUpType);
+        return NULL;
+    }
+
+    // Make some power ups more rare
+    if(!should_trigger_rare_powerUp(selected_powerUpType)) {
+        FURI_LOG_D(TAG, "[add_powerUp] Power Up %i not triggered", selected_powerUpType);
         return NULL;
     }
 
@@ -734,10 +749,12 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     float min_distance = 20;
     float x, y;
     do {
-        //size*2 to make sure power up is not spawned on the edge of the screen
-        //It also keeps it away from the lives and score at the top of screen
+        //Make sure power up is not spawned on the edge of the screen
         x = rand() % (SCREEN_XRES - (int)size);
-        y = rand() % (SCREEN_YRES - (int)size + 20);
+        y = rand() % (SCREEN_YRES - (int)size);
+
+        //Also keep it away from the lives and score at the top of screen
+        if(y < size) y = size;
     } while(
         ((distance(app->ship.x, app->ship.y, x, y) < min_distance + size) ||
          isPowerUpCollidingWithEachOther(app, x, y, size)));
@@ -759,6 +776,7 @@ PowerUp* add_powerUp(AsteroidsApp* app) {
     //@todo add powerup type, for now hardcoding to firepower
     p->powerUpType = selected_powerUpType;
     p->isPowerUpActive = false;
+    FURI_LOG_I(TAG, "[add_powerUp] Power Up Added: %i", p->powerUpType);
     return p;
 }
 

@@ -62,7 +62,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [SubGhz: add protocol KingGates Stylo4k #2368 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2368)
 - OFW: [Move CSN space to prevent overflow #2232 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/2232)
 - OFW: [fbt: building fap_dist for compact gh build; accessor: fixed for latest ibutton changes #2377 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2377)
-- Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
 - UL: Updated [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Removed: [NFC Magic: Add support for Gen4 "ultimate card" in Magic app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) (Seemingly Not Working)
 - UL: [SubGHz HAL Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
@@ -88,6 +87,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: **SubGhz: add protocol BinRAW (binarization of data quantized by the minimum correlated duration)**
 - OFW: Picopass: show elite key used from dictionary 
 - OFW: Firmware fixes and improvements for flashing via blackmagic
+- Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
 
 <a name="release">
 
