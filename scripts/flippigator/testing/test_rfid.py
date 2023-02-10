@@ -97,6 +97,7 @@ class TestRfid(BaseCase):
         menu_ref = [
             "EM-Micro EM4100",
             "HID H10301",
+            "IDTECK Idteck",
             "Motorola Indala26",
             "Kantech IoProxXSF",
             "AWID",

@@ -20,6 +20,7 @@ class TestSubGhz(BaseCase):
             "Saved",
             "Add Manually",
             "Frequency Analyzer",
+            "Region Information",
             "Test",
         ]
         assert menu == menu_ref, "Sub-GHz menu list is wrong"

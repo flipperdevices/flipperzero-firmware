@@ -134,7 +134,7 @@ def nav(port, request):
 
     return nav
 
-
+'''
 @pytest.fixture(scope="session", autouse=True)
 def gator() -> Gator:
     print("Gator initialization")
@@ -150,3 +150,4 @@ def gator() -> Gator:
     gator.home()
 
     return gator
+'''

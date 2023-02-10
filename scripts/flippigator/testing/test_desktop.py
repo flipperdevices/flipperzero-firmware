@@ -13,22 +13,6 @@ class TestMain(BaseCase):
     Here lies the test cases for the menu
     """
 
-    def test_skipped(self, nav):
-        """
-        This test is skipped
-        """
-        nav.go_to_main_screen()
-        assert False, "This test is skipped"
-
-    def test_skipped2(self, nav):
-        """
-        This test is skipped
-        """
-        nav.go_to_main_screen()
-        nav.press_ok()
-        nav.update_screen()
-        assert False, "This test is skipped"
-
     def test_main_screen_negative(self, nav):  # can have multiple fixtures and args
         """ "
         Negative test case for main screen

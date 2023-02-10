@@ -7,7 +7,7 @@ import time
 import serial
 from termcolor import colored
 
-from flippigator.flippigator import Gator
+from flippigator.flippigator import Gator, Navigator
 
 
 def main():

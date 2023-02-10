@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from time import sleep
 
 if TYPE_CHECKING:
     from flippigator.flippigator import Navigator
@@ -13,6 +14,7 @@ class App:
 
     def go_into(self):
         self._navi.go_to_main_screen()
+        sleep(1)
         self._navi.press_ok()
         self._navi.go_to(self._name)
         self._navi.press_ok()

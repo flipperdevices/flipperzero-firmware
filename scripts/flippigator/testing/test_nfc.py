@@ -122,8 +122,13 @@ class TestNfc(BaseCase):
 
         nav.go_to("Unlock NTAG")
         nav.press_ok()
-        state = nav.get_current_state()
-        assert "Enter Password Manual" in state, "Can't find Unlock NTAG"
+        menu = nav.get_menu_list()
+        menu_ref = [
+            "Auth As Ameebo",
+            "Auth As Xiaomi",
+            "Enter Password Manual",
+        ]
+        assert menu == menu_ref, "NFC Extra Actions list is wrong"
         nav.press_back()
         nav.go_to_main_screen()
 
@@ -148,6 +153,7 @@ class TestNfc(BaseCase):
             "NTAG I2C 2k",
             "NTAG I2C Plus 1k",
             "NTAG I2C Plus 2k",
+            "Mifare Mini",
             "Mifare Classic 1k 4byte",
             "Mifare Classic 1k 7byte",
             "Mifare Classic 4k 4byte",
