@@ -179,6 +179,14 @@ static bool ibutton_load_key(iButton* ibutton) {
 
     if(!success) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
+
+    } else {
+        FuriString* tmp = furi_string_alloc();
+
+        path_extract_filename(ibutton->file_path, tmp, true);
+        strncpy(ibutton->key_name, furi_string_get_cstr(tmp), IBUTTON_KEY_NAME_SIZE);
+
+        furi_string_free(tmp);
     }
 
     return success;
