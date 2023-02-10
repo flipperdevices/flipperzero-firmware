@@ -1,5 +1,5 @@
 #define MAX_RESOLUTION_VGA
-
+// Using EloquentEsp32cam library
 #include "esp32cam.h"
 #include "esp32cam/JpegDecoder.h"
 #include "esp32cam/motion/Detector.h"
