@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0208-1702-0.76.1-2a84e03](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-08 16:45 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-08 16:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-09 19:22 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-09 19:22 EST`
 - [Separate Playlists for CVS, Walgreens and Lowes #523 (By pstmcm2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/523)
 - OFW: [Pin Reset #2367 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2367)
 - OFW: [multitarget support for fbt #2209 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2209)
@@ -68,17 +68,18 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz HAL Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - UL PR: [Fix CTRL-SHIFT in mousejacker #316 (By notmarek)](https://github.com/DarkFlippers/unleashed-firmware/pull/316)
 - UL PR: [Updated infrared assets #318 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/318)
- - [Passport as a FAP with Multiple Pages, and Dynamic Icons/Images support (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Old Passport moved but kept as a redundancy in case Passport FAP not found (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Passport Settings app to configure dynamic icons in Passport FAP (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [This does not change old Passport (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Updates to Desktop Settings app (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Desktop icons are now dynamic, and can be changed in Desktop Settings (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Updates to BT, Desktop, GUI, Power, and Storage services to support Dynamic Icons in Desktop (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Fixes for NameChanger app + service (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Cleaned up XP levels in Dolphin service for a more cleaner progression (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Fixed SubGHz CLI "Chat" command throwing errors at build time (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- - [Fixed Dummy Mode build error in Desktop Views files (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- Fixed naming for CVS/Lowes/Walgreens SubGHz Playlists.
+- [Passport as a FAP with Multiple Pages, and Dynamic Icons/Images support (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Old Passport moved but kept as a redundancy in case Passport FAP not found (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Passport Settings app to configure dynamic icons in Passport FAP (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [This does not change old Passport (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Updates to Desktop Settings app (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Desktop icons are now dynamic, and can be changed in Desktop Settings (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Updates to BT, Desktop, GUI, Power, and Storage services to support Dynamic Icons in Desktop (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Fixes for NameChanger app + service (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Cleaned up XP levels in Dolphin service for a more cleaner progression (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Fixed SubGHz CLI "Chat" command throwing errors at build time (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- [Fixed Dummy Mode build error in Desktop Views files (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
 - UL: Updates and BugFixes listed in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev)
 - UL: SubGHz: **Fixed bug in SubGHz HAL, now CC1101 shutdowns properly, (also this fixed unstable TX)**
 - UL: SubGHz: GUI Fixes
