@@ -61,13 +61,14 @@ class TestNfc(BaseCase):
         menu_ref = [
             "Save",
             "Emulate",
+            "Detect r(down)eader",
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
         nav.go_to("Emulate")
         nav.press_ok()
         state = nav.get_current_state()
-        assert "Emulating" in state, "NFC Emulation fail"
+        assert "Emulating MIFARE Classic" in state, "NFC Emulation fail"
         nav.press_back()
 
         nav.go_to("Info")
