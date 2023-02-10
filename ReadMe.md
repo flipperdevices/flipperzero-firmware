@@ -90,6 +90,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
 - UL: [Kinggates stylo 4k #321 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/321)
 - OFW: [Fixed typo in nfc_magic_scene_wrong_card.c #2382 (By Pierce01)](https://github.com/flipperdevices/flipperzero-firmware/pull/2382)
+- UL: [SubGHz: **Alutech AT-4N** encoder (support for sending signals) (By assasinfil - PR #322)](https://github.com/DarkFlippers/unleashed-firmware/pull/322)
 
 <a name="release">
 
