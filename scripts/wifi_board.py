@@ -45,10 +45,10 @@ class Main(App):
 
         # TODO: get latest version
         urls = [
-            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/dap-link/flash.command",
-            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/dap-link/blackmagic.bin",
-            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/dap-link/bootloader.bin",
-            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/dap-link/partition-table.bin",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/flash.command",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/blackmagic.bin",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/bootloader.bin",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/partition-table.bin",
         ]
 
         if not os.path.exists(dir):
