@@ -257,11 +257,14 @@ static UartEchoApp* camera_app_alloc() {
 
     furi_hal_power_disable_external_3_3v();
     furi_hal_power_disable_otg();
-    furi_delay_ms(100);
+    furi_delay_ms(200);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    furi_delay_ms(1500); 
-    furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'c'}, 1); // Just to trigger the stream
+    for(int i=0;i<2;i++)
+    {
+        furi_delay_ms(500); 
+        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'c'}, 1); 
+    }
     furi_delay_ms(1);
     return app;
 }
