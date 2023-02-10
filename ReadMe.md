@@ -79,7 +79,15 @@ This software is for experimental purposes only and is not meant for any illegal
  - [Cleaned up XP levels in Dolphin service for a more cleaner progression (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
  - [Fixed SubGHz CLI "Chat" command throwing errors at build time (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
  - [Fixed Dummy Mode build error in Desktop Views files (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
- 
+- UL: Updates and BugFixes listed in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev)
+- UL: SubGHz: **Fixed bug in SubGHz HAL, now CC1101 shutdowns properly, (also this fixed unstable TX)**
+- UL: SubGHz: GUI Fixes
+- OFW: SubGhz: fix cc1101_read_fifo func
+- OFW: feat: add missing `const` qualifiers
+- OFW: **SubGhz: add protocol BinRAW (binarization of data quantized by the minimum correlated duration)**
+- OFW: Picopass: show elite key used from dictionary 
+- OFW: Firmware fixes and improvements for flashing via blackmagic
+
 <a name="release">
 
 ## Install Latest Release
