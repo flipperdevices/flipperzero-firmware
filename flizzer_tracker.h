@@ -187,7 +187,7 @@ typedef struct
     uint8_t selected_param;
 
     uint8_t mode, focus;
-    uint8_t patternx, current_channel, current_digit, program_position, current_program_step, current_instrument, current_note;
+    uint8_t patternx, current_channel, current_digit, program_position, current_program_step, current_instrument, current_note, current_volume;
 
     uint8_t inst_editor_shift;
 

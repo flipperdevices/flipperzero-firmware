@@ -125,7 +125,7 @@ void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker)
         snprintf(buffer, sizeof(buffer), "INST:%c", to_char(tracker->current_instrument));
         draw_generic_n_digit_field(tracker, canvas, EDIT_INSTRUMENT, INST_CURRENTINSTRUMENT, buffer, 0, 5 - shift, 1);
         snprintf(buffer, sizeof(buffer), "%s", tracker->song.instrument[tracker->current_instrument]->name);
-        draw_generic_n_digit_field(tracker, canvas, EDIT_INSTRUMENT, INST_INSTRUMENTNAME, buffer, 4 * 7, 5 - shift, 1);
+        draw_generic_n_digit_field(tracker, canvas, EDIT_INSTRUMENT, INST_INSTRUMENTNAME, buffer, 4 * 7 - 1, 5 - shift, 1);
     }
 
     if (shift < 12)

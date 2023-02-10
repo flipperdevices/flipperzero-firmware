@@ -297,12 +297,14 @@ void process_input_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event)
     if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && event->period > 0 && event->period < 300 && !(tracker->editing))
     {
         cycle_view(tracker);
+        stop_song(tracker);
         return;
     }
 
     else if (event->input.key == InputKeyBack && event->input.type == InputTypeShort && !(tracker->editing))
     {
         cycle_focus(tracker);
+        stop_song(tracker);
         return;
     }
 

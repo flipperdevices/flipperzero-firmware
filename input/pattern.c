@@ -61,7 +61,7 @@ void edit_instrument(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, i
     {
         if (delta > 0)
         {
-            inst = 0;
+            inst = tracker->current_instrument;
         }
 
         else
@@ -75,26 +75,27 @@ void edit_instrument(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, i
     set_instrument(step, (uint8_t)inst);
 }
 
-void edit_volume(TrackerSongPatternStep *step, int8_t delta)
+void edit_volume(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step, int8_t delta)
 {
     int16_t vol = tracker_engine_get_volume(step);
 
-    if (vol == MUS_NOTE_VOLUME_NONE)
-    {
-        if (delta > 0)
-        {
-            vol = 0;
-        }
+    vol = tracker->current_volume;
 
-        else
-        {
-            vol = MUS_NOTE_VOLUME_NONE - 1;
-        }
+    if (vol + delta < 0)
+    {
+        vol = MUS_NOTE_VOLUME_NONE - 1 - delta;
+    }
+
+    if (vol + delta >= MUS_NOTE_VOLUME_NONE)
+    {
+        vol = 0 - delta;
     }
 
     clamp(vol, delta, 0, MUS_NOTE_VOLUME_NONE - 1);
 
     set_volume(step, (uint8_t)vol);
+
+    tracker->current_volume = vol;
 }
 
 void edit_command(TrackerSongPatternStep *step, uint8_t digit, int8_t delta)
@@ -253,7 +254,7 @@ void edit_pattern_step(FlizzerTrackerApp *tracker, TrackerSongPatternStep *step,
 
         case 2: // volume
         {
-            edit_volume(step, delta);
+            edit_volume(tracker, step, delta);
             break;
         }
 
