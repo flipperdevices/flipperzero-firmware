@@ -131,6 +131,37 @@ void backlightOff() {
 void setup()
 {
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
+
+  Serial.begin(230400);
+
+  unsigned long waitForStreamMode = millis() + 3000;
+
+  while (waitForStreamMode > millis()) {
+    if (Serial.available())  // if we receive anything, just switch to another mode
+    {
+      switch (Serial.read()) {
+        case 'q':  // QR code reader mode
+          qr_reader_setup();
+          for (;;)
+            qr_reader_loop();
+
+        case 'm':  // Motion detection
+          motion_detection_setup();
+          for (;;)
+            motion_detection_loop();
+
+        case 'c':  // Camera stream
+          cam_stream_setup();
+          for (;;)
+            cam_stream_loop();
+        
+        case 'w':  // Marauder
+          goto continue_to_marauder;
+      }
+    }
+  }
+  continue_to_marauder:;
+
   //pinMode(FLASH_BUTTON, INPUT);
 
   #ifdef HAS_SCREEN
@@ -155,32 +186,7 @@ void setup()
   digitalWrite(SD_CS, HIGH);
 
   delay(10);*/
-
-  Serial.begin(230400);
-
-  unsigned long waitForStreamMode = millis() + 1000;
-
-  while (waitForStreamMode > millis()) {
-    if (Serial.available())  // if we receive anything, just switch to another mode
-    {
-      switch (Serial.read()) {
-        case 'q':  // QR code reader mode
-          qr_reader_setup();
-          for (;;)
-            qr_reader_loop();
-
-        case 'm':  // Motion detection
-          motion_detection_setup();
-          for (;;)
-            motion_detection_loop();
-
-        default:  // Camera stream
-          cam_stream_setup();
-          for (;;)
-            cam_stream_loop();
-      }
-    }
-  }
+  
   //Serial.begin(115200);
 
   //Serial.println("\n\nHello, World!\n");
