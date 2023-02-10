@@ -13,12 +13,16 @@
 
 #define DS1992_DATA_ROW_LENGTH 7U
 
+#define DS1992_SRAM_DATA_KEY "Sram Data"
+
 typedef struct {
     DallasCommonRomData rom_data;
     uint8_t sram_data[DS1992_SRAM_DATA_SIZE];
 } DS1992ProtocolData;
 
-static bool dallas_ds1992_read(OneWireHost* host, void* protocol_data);
+static bool dallas_ds1992_read(OneWireHost*, void*);
+static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
+static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_brief_data(FuriString*, const iButtonProtocolData*);
 
@@ -30,8 +34,8 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .name = "DS1992",
 
     .read = dallas_ds1992_read,
-    .save = NULL,
-    .load = NULL,
+    .save = dallas_ds1992_save,
+    .load = dallas_ds1992_load,
     .render_data = dallas_ds1992_render_data,
     .render_brief_data = dallas_ds1992_render_brief_data,
 };
@@ -41,14 +45,35 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1992ProtocolData *data = protocol_data;
 
     do {
-        if(!dallas_common_read_rom(host, &data->rom_data)) {
-            break;
-        }
+        if(!dallas_common_read_rom(host, &data->rom_data)) break;
+        if(!dallas_common_read_mem(host, 0, data->sram_data, DS1992_SRAM_DATA_SIZE)) break;
+        success = true;
+    } while(false);
 
-        if(!dallas_common_read_mem(host, 0, data->sram_data, DS1992_SRAM_DATA_SIZE)) {
-            break;
-        }
+    return success;
+}
 
+bool dallas_ds1992_load(FlipperFormat* ff, uint32_t format_version, iButtonProtocolData* protocol_data) {
+    DS1992ProtocolData *data = protocol_data;
+    bool success = false;
+
+    do {
+        if(format_version < 2) break;
+        if(!dallas_common_load_rom_data(ff, format_version, &data->rom_data)) break;
+        if(!flipper_format_read_hex(ff, DS1992_SRAM_DATA_KEY, data->sram_data, DS1992_SRAM_DATA_SIZE)) break;
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+bool dallas_ds1992_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {
+    const DS1992ProtocolData *data = protocol_data;
+    bool success = false;
+
+    do {
+        if(!dallas_common_save_rom_data(ff, &data->rom_data)) break;
+        if(!flipper_format_write_hex(ff, DS1992_SRAM_DATA_KEY, data->sram_data, DS1992_SRAM_DATA_SIZE)) break;
         success = true;
     } while(false);
 
