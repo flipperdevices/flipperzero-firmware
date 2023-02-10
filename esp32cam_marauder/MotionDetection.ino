@@ -79,6 +79,8 @@ void motion_detection_setup() {
     Serial.println(cam.getErrorMessage());
 }
 
+unsigned long nextMotionAlert = 0;
+
 void motion_detection_loop() {
   if (!cam.capture()) {
     Serial.println(cam.getErrorMessage());
@@ -107,8 +109,9 @@ void motion_detection_loop() {
   /**
      * Test if motion was detected
      */
-  if (detector.triggered()) {
+  if (detector.triggered() && millis()>nextMotionAlert) {
     Serial.println("Motion!");
+    nextMotionAlert = millis()+1000;
   }
 
   /**
