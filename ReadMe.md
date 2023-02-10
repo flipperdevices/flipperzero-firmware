@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0209-2252-0.76.1-dcbe3cd](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-09 21:02 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-09 21:02 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-10 12:42 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-10 12:42 EST`
 - [Separate Playlists for CVS, Walgreens and Lowes #523 (By pstmcm2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/523)
 - OFW: [Pin Reset #2367 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2367)
 - OFW: [multitarget support for fbt #2209 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2209)
@@ -88,6 +88,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: Picopass: show elite key used from dictionary 
 - OFW: Firmware fixes and improvements for flashing via blackmagic
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
+- UL: [Kinggates stylo 4k #321 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/321)
 
 <a name="release">
 
