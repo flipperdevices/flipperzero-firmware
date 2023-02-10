@@ -89,6 +89,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: Firmware fixes and improvements for flashing via blackmagic
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
 - UL: [Kinggates stylo 4k #321 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/321)
+- OFW: [Fixed typo in nfc_magic_scene_wrong_card.c #2382 (By Pierce01)](https://github.com/flipperdevices/flipperzero-firmware/pull/2382)
 
 <a name="release">
 
