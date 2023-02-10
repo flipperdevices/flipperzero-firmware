@@ -43,6 +43,7 @@
 #include "dooya.h"
 #include "alutech_at_4n.h"
 #include "kinggates_stylo_4k.h"
+#include "bin_raw.h"
 
 #ifdef __cplusplus
 extern "C" {
