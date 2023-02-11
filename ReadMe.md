@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0209-2252-0.76.1-dcbe3cd](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
+## Latest Updates - [PATREON: Latest Release RM0211-1137-0.76.1-6d2290a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-10 12:42 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-10 12:42 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-11 11:40 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-11 11:40 EST`
 - [Separate Playlists for CVS, Walgreens and Lowes #523 (By pstmcm2)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/523)
 - OFW: [Pin Reset #2367 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2367)
 - OFW: [multitarget support for fbt #2209 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2209)
@@ -90,8 +90,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Asteroids (Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids) - Now with PowerUps!
 - UL: [Kinggates stylo 4k #321 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/321)
 - OFW: [Fixed typo in nfc_magic_scene_wrong_card.c #2382 (By Pierce01)](https://github.com/flipperdevices/flipperzero-firmware/pull/2382)
-- UL: [SubGHz: **Alutech AT-4N** encoder (support for sending signals) (By assasinfil - PR #322)](https://github.com/DarkFlippers/unleashed-firmware/pull/322)
-- UL: [NFC: Add Mifare Classic keys (by Bon-Jorik (scaff.walker) | PR #324)](https://github.com/DarkFlippers/unleashed-firmware/pull/324)
+- UL: [SubGHz: **Alutech AT-4N** encoder (support for sending signals) (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/322)
+- UL: [NFC: Add Mifare Classic keys (by Bon-Jorik (scaff.walker))](https://github.com/DarkFlippers/unleashed-firmware/pull/324)
 
 <a name="release">
 
