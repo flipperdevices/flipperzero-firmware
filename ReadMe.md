@@ -92,6 +92,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fixed typo in nfc_magic_scene_wrong_card.c #2382 (By Pierce01)](https://github.com/flipperdevices/flipperzero-firmware/pull/2382)
 - UL: [SubGHz: **Alutech AT-4N** encoder (support for sending signals) (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/322)
 - UL: [NFC: Add Mifare Classic keys (by Bon-Jorik (scaff.walker))](https://github.com/DarkFlippers/unleashed-firmware/pull/324)
+- SubGHz: Region Fixed! -  To transmit to outside ranges, use the Extend Range app under Applications=>Misc.
 
 <a name="release">
 
