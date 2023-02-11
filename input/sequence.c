@@ -38,7 +38,7 @@ void edit_sequence_step(FlizzerTrackerApp *tracker, int8_t delta)
                 nibble += delta;
             }
 
-            temp_pattern &= 0xf0;
+            temp_pattern &= 0x0f;
             temp_pattern |= (nibble << 4);
 
             break;
