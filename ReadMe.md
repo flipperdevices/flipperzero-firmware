@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware) with API v11.x
-## Apps from this pack should be compatible with OFW with API v11.x (dev branch)
+# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware) with API v14.x
+## Apps from this pack should be compatible with OFW with API v14.x (dev branch)
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `4 Feb 16:22 GMT +3`
+### Apps checked & updated at `11 Feb 02:56 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -35,10 +35,13 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
-- [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode by [Smileycathy1128](https://github.com/Smileycathy1128/flipperzero-tamagotch-p1)
+- [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode & settings by [Round-Pi](https://github.com/Round-Pi/flipperzero-tamagotch-p1)
 - [Slots for Flipper Zero (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots)
 - [Simon Says (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-SimonSays)
 - [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0)
+- [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi)
+- [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
+- [Tic-Tac-Toe Multi (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -67,6 +70,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [SCD30 Reader (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [Bar code scanner emulator via COM port (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator)
 - [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
+- [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
