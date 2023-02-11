@@ -1,6 +1,6 @@
 App(
-    appid="type2sam",
-    name="Type to SAM",
+    appid="text2sam",
+    name="Text to SAM",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sam_app",
     cdefines=["APP_SAM"],
