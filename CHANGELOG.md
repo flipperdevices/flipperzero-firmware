@@ -9,6 +9,8 @@
 * Plugins: SubGHz Bruteforcer - Added support for Linear Delta-3 310MHz
 * Plugins: Fix CTRL-SHIFT in mousejacker (by @notmarek | PR #316)
 * Infrared: Update universal remote assets (by @amec0e) (PR #318)
+* NFC: Add Mifare Classic keys (by @Bon-Jorik (scaff.walker) | PR #324)
+* Misc: Playing games now affect Flipper's level
 * OFW: Fixed typo in nfc_magic_scene_wrong_card.c 
 * OFW: SubGhz: fix cc1101_read_fifo func
 * OFW: feat: add missing `const` qualifiers
@@ -41,7 +43,7 @@
 
 [-> Download qFlipper (official link)](https://flipperzero.one/update)
 
-## Please support development of my project on Patreon, but also the Unleashed project with one of the listed methods below. Most the changes listed above have been added into RM.
+## Please support development of the project
 * Boosty: https://boosty.to/mmxdev
 * Ko-Fi: https://ko-fi.com/masterx
 * cloudtips (only RU payments accepted): https://pay.cloudtips.ru/p/7b3e9d65
@@ -55,7 +57,7 @@
 * XMR (Monero): `41xUz92suUu1u5Mu4qkrcs52gtfpu9rnZRdBpCJ244KRHf6xXSvVFevdf2cnjS7RAeYr5hn9MsEfxKoFDRSctFjG5fv1Mhn`
 * TON: `EQCOqcnYkvzOZUV_9bPE_8oTbOrOF03MnF-VcJyjisTZmpGf`
 
-### Thanks to Unleashed sponsors:
+### Thanks to our sponsors:
 callmezimbra, Quen0n, MERRON, grvpvl (lvpvrg), art_col, ThurstonWaffles, Moneron, UterGrooll, LUCFER, Northpirate, zloepuzo, T.Rat, Alexey B., ionelife, ...
 and all other great people who supported our project and me (xMasterX), thanks to you all!
 
