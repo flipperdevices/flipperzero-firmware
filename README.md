@@ -10,6 +10,8 @@ cd ..
 ./fbt launch_app APPSRC=applications_user/flipperscope
 ```
 
+Alternatively upload the **scope.fap** file in the binary folder of this repository to your flipper zero.
+
 Provide signal to pin 16/C0, with a voltage ranging from 0V to 2.5V.
 
 Press the 'ok' button (button in the centre of joypad) to pause/unpause the waveform display.
