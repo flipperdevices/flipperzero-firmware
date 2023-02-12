@@ -3,7 +3,6 @@
 #include <m-array.h>
 #include <furi.h>
 #include <m-algo.h>
-#include <m-string.h>
 #include <storage/storage.h>
 #include "toolbox/path.h"
 
@@ -87,8 +86,11 @@ static int ArchiveFile_t_cmp(const ArchiveFile_t* a, const ArchiveFile_t* b) {
     if(a->type == ArchiveFileTypeFolder && b->type != ArchiveFileTypeFolder) {
         return -1;
     }
+    if(a->type != ArchiveFileTypeFolder && b->type == ArchiveFileTypeFolder) {
+        return 1;
+    }
 
-    return furi_string_cmp(a->path, b->path);
+    return furi_string_cmpi(a->path, b->path);
 }
 
 #define M_OPL_ArchiveFile_t()                 \
