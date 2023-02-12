@@ -36,6 +36,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [iButton Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/)
 - UL: [Update filebrowser #327 (By CrazyClara)](https://github.com/DarkFlippers/unleashed-firmware/pull/327) - File sorting SAME algorithm used, back action fixed...
 - UL: [added support for subghz pagers #328 (By jbohack)](https://github.com/DarkFlippers/unleashed-firmware/pull/328)
+- Added: [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 
 <a name="release">
 
@@ -329,6 +330,7 @@ $ ./fbt dolphin_ext
 - [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675`
+- [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
 - [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
