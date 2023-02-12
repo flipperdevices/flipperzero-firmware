@@ -208,32 +208,6 @@ static bool
             break;
         }
 
-        // items_cnt = 0;
-        // while(items_cnt < offset) {
-        //     if(!storage_dir_read(directory, &file_info, name_temp, FILE_NAME_LEN_MAX)) {
-        //         break;
-        //     }
-        //     if(storage_file_get_error(directory) == FSE_OK) {
-        //         furi_string_set(name_str, name_temp);
-        //         if(browser_filter_by_name(browser, name_str, (file_info.flags & FSF_DIRECTORY))) {
-        //             items_cnt++;
-        //         }
-        //     } else {
-        //         break;
-        //     }
-        // }
-        // if(items_cnt != offset) {
-        //     break;
-        // }
-
-        // ROGUE MASTER MOMENT
-        // this used to load the file list in chunks, which makes sense
-        // but then RM made it sort the files, still in chunks...
-        // so while scrolling, it loads more files and sorts them...
-        // chances are, the new files are higher in the sorted list...
-        // so the files keep shifting around while scrolling...
-        // now this does something intelligent: loads and sorts all in one go.
-        // might take a few milliseconds longer, but atleast it works
         UNUSED(offset);
         UNUSED(count);
         if(browser->list_load_cb) {
