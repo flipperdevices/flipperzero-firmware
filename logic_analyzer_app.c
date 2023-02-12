@@ -52,20 +52,10 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         snprintf(
             buffer,
             sizeof(buffer),
-            "%c%02X %lX %ld %ld",
-            app->sump->armed ? '*' : ' ',
+            "%02X %lX %ld %lX %lX %X",
             app->sump->flags,
             app->sump->divider,
-            app->sump->read_count,
-            app->sump->delay_count);
-
-        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-        y += 10;
-
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%lX %lX %X",
+            app->sump->delay_count,
             app->sump->trig_mask,
             app->sump->trig_values,
             app->sump->trig_config);
@@ -73,15 +63,20 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
         y += 10;
 
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "Captured: %u / %ld (%02X)",
-            app->capture_pos,
-            app->sump->read_count,
-            app->current_levels);
-        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-        y += 20;
+        if(app->sump->armed) {
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "Captured: %u / %ld",
+                app->capture_pos,
+                app->sump->read_count);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 20;
+        }
+
+        if(app->sump->armed) {
+            elements_button_center(canvas, "Trigger");
+        }
     }
 
     release_mutex((ValueMutex*)cb_ctx, app);
@@ -126,6 +121,7 @@ static bool message_process(AppFSM* app) {
             break;
 
         case InputKeyOk:
+            /* when armed, trigger by pressing the button */
             if(app->sump->armed) {
                 for(size_t pos = app->capture_pos; pos < app->sump->read_count; pos++) {
                     app->capture_buffer[app->sump->read_count - 1 - pos] = 0;
