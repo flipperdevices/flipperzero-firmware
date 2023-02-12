@@ -14,61 +14,14 @@ static void ibutton_scene_emulate_callback(void* context, bool emulated) {
 
 void ibutton_scene_emulate_on_enter(void* context) {
     iButton* ibutton = context;
-    Widget* widget = ibutton->widget;
     iButtonKey* key = ibutton->key;
-
-    // const uint8_t* key_data = ibutton_key_get_data_p(key);
-    //
-    // FuriString* key_name;
-    // key_name = furi_string_alloc();
-    // if(furi_string_end_with(ibutton->file_path, IBUTTON_APP_EXTENSION)) {
-    //     path_extract_filename(ibutton->file_path, key_name, true);
-    // }
-    //
-    // // check that stored key has name
-    // if(!furi_string_empty(key_name)) {
-    //     ibutton_text_store_set(ibutton, "%s", furi_string_get_cstr(key_name));
-    // } else {
-    //     // if not, show key data
-    //     switch(ibutton_key_get_type(key)) {
-    //     case iButtonKeyDS1990:
-    //         ibutton_text_store_set(
-    //             ibutton,
-    //             "%02X %02X %02X %02X\n%02X %02X %02X %02X",
-    //             key_data[0],
-    //             key_data[1],
-    //             key_data[2],
-    //             key_data[3],
-    //             key_data[4],
-    //             key_data[5],
-    //             key_data[6],
-    //             key_data[7]);
-    //         break;
-    //     case iButtonKeyCyfral:
-    //         ibutton_text_store_set(ibutton, "%02X %02X", key_data[0], key_data[1]);
-    //         break;
-    //     case iButtonKeyMetakom:
-    //         ibutton_text_store_set(
-    //             ibutton, "%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
-    //         break;
-    //     }
-    // }
-
-    widget_add_string_multiline_element(
-        widget, 90, 10, AlignCenter, AlignTop, FontPrimary, "iButton\nemulating");
-    widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
-    // widget_add_text_box_element(
-    //     widget, 54, 39, 75, 22, AlignCenter, AlignCenter, ibutton->text_store, true);
-
-    view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
 
     ibutton_worker_emulate_set_callback(
         ibutton->key_worker, ibutton_scene_emulate_callback, ibutton);
     ibutton_worker_emulate_start(ibutton->key_worker, key);
 
-    // furi_string_free(key_name);
-
     ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
+    view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
 }
 
 bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {

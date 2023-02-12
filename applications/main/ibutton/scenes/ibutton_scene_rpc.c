@@ -39,12 +39,6 @@ bool ibutton_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         path_extract_filename(ibutton->file_path, key_name, true);
                     }
 
-                    // if(!furi_string_empty(key_name)) {
-                    //     ibutton_text_store_set(
-                    //         ibutton, "emulating\n%s", furi_string_get_cstr(key_name));
-                    // } else {
-                    //     ibutton_text_store_set(ibutton, "emulating");
-                    // }
                     popup_set_text(popup, ibutton->key_name, 82, 32, AlignCenter, AlignTop);
 
                     ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
