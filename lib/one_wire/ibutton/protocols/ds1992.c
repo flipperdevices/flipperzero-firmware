@@ -107,7 +107,15 @@ void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolDa
     }
 }
 
+void dallas_ds1992_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {
+    const DS1992ProtocolData* data = protocol_data;
+
+    if(!dallas_common_is_valid_crc(&data->rom_data)) {
+        furi_string_printf(result, "CRC Error");
+    }
+}
+
 bool dallas_ds1992_is_valid(const iButtonProtocolData* protocol_data) {
-    const DallasCommonRomData* rom_data = protocol_data;
-    return dallas_common_is_valid_crc(rom_data);
+    const DS1992ProtocolData* data = protocol_data;
+    return dallas_common_is_valid_crc(&data->rom_data);
 }

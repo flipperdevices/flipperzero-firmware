@@ -1601,6 +1601,7 @@ Function,+,ibutton_key_get_manufacturer_name,const char*,iButtonKey*
 Function,+,ibutton_key_get_protocol_name,const char*,iButtonKey*
 Function,+,ibutton_key_get_rendered_brief_data,void,"iButtonKey*, FuriString*"
 Function,+,ibutton_key_get_rendered_data,void,"iButtonKey*, FuriString*"
+Function,+,ibutton_key_get_rendered_error,void,"iButtonKey*, FuriString*"
 Function,+,ibutton_key_is_valid,_Bool,iButtonKey*
 Function,+,ibutton_key_load,_Bool,"iButtonKey*, const char*"
 Function,+,ibutton_key_read,_Bool,"iButtonKey*, OneWireHost*"

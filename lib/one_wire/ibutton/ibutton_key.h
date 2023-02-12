@@ -29,8 +29,6 @@ void ibutton_key_free(iButtonKey* key);
 
 bool ibutton_key_is_valid(iButtonKey* key);
 
-// const char* ibutton_key_get_error_message(iButtonKey* key);
-
 const char* ibutton_key_get_manufacturer_name(iButtonKey* key);
 
 const char* ibutton_key_get_protocol_name(iButtonKey* key);
@@ -38,6 +36,8 @@ const char* ibutton_key_get_protocol_name(iButtonKey* key);
 void ibutton_key_get_rendered_data(iButtonKey* key, FuriString* result);
 
 void ibutton_key_get_rendered_brief_data(iButtonKey* key, FuriString* result);
+
+void ibutton_key_get_rendered_error(iButtonKey* key, FuriString* result);
 
 uint32_t ibutton_key_get_features(iButtonKey* key);
 

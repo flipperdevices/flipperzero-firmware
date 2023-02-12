@@ -11,6 +11,7 @@ static bool dallas_ds1990_read(OneWireHost*, void*);
 static bool dallas_ds1990_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1990_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1990_render_brief_data(FuriString*, const iButtonProtocolData*);
+static void dallas_ds1990_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds1990_is_valid(const iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1990 = {
@@ -25,6 +26,7 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .load = dallas_ds1990_load,
     .render_data = NULL, /* No data to render */
     .render_brief_data = dallas_ds1990_render_brief_data,
+    .render_error = dallas_ds1990_render_error,
     .is_valid = dallas_ds1990_is_valid,
 };
 
@@ -48,6 +50,14 @@ void dallas_ds1990_render_brief_data(FuriString* result, const iButtonProtocolDa
 
     for(size_t i = 0; i < sizeof(rom_data->bytes); ++i) {
         furi_string_cat_printf(result, "%02X ", rom_data->bytes[i]);
+    }
+}
+
+void dallas_ds1990_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {
+    const DallasCommonRomData* rom_data = protocol_data;
+
+    if(!dallas_common_is_valid_crc(rom_data)) {
+        furi_string_printf(result, "CRC Error");
     }
 }
 

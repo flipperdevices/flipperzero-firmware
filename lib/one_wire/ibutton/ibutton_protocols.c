@@ -78,6 +78,11 @@ void ibutton_protocols_render_brief_data(FuriString* result, const iButtonProtoc
     ibutton_protocols[protocol_id]->render_brief_data(result, protocol_data);
 }
 
+void ibutton_protocols_render_error(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+    furi_assert(protocol_id < iButtonProtocolMax);
+    ibutton_protocols[protocol_id]->render_error(result, protocol_data);
+}
+
 bool ibutton_protocols_is_valid(const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->is_valid(protocol_data);

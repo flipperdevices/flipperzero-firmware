@@ -35,5 +35,6 @@ typedef struct {
     iButtonProtocolLoadFunc load;
     iButtonProtocolRenderDataFunc render_data;
     iButtonProtocolRenderDataFunc render_brief_data;
+    iButtonProtocolRenderDataFunc render_error;
     iButtonProtocolIsValidFunc is_valid;
 } iButtonProtocolBase;
