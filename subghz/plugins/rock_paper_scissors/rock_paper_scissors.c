@@ -59,9 +59,15 @@ typedef enum {
     StatePaper = MovePaper, // P
     StateRock = MoveRock, // R
     StateScissors = MoveScissors, // S
-    StateLost = 'L',
-    StateTie = 'T',
-    StateWon = 'W',
+    StateLostRock = 'L',
+    StateLostPaper = 'l',
+    StateLostScissors = '-',
+    StateTieRock = 'T',
+    StateTiePaper = 't',
+    StateTieScissors = 'x',
+    StateWonRock = 'W',
+    StateWonPaper = 'w',
+    StateWonScissors = '+',
     StateErrorRemoteTimeout = '7', // Joined but didn't make any moves.
     StateErrorRemoteFast = '8', // Remote user sent moves after than local user.  
     StateErrorLocalFast = '9', // Local user sent moves after than remote user.
@@ -262,9 +268,6 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
     GameState remotePlayer = data->remotePlayer;
     
     canvas_set_font(canvas, FontSecondary);
-    // Temporary - Show game state.
-    furi_string_printf(data->buffer, "State: %c - %c", localPlayer, remotePlayer);
-    canvas_draw_str_aligned(canvas, 5, 8, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
 
     // Temporary - Just show game text.
     switch (localPlayer) {
@@ -282,7 +285,10 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         break;
 
         case StateCount2:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Pick U:Rock R:Paper D:Scissors");
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignTop, "^ Rock");
+            canvas_draw_str_aligned(canvas, 50, 30, AlignLeft, AlignTop, "> Paper");
+            canvas_draw_str_aligned(canvas, 5, 50, AlignLeft, AlignTop, "v Scissors");
         break;
 
         case StateRock:
@@ -297,16 +303,43 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Scissors");
         break;
 
-        case StateWon:
+        case StateWonRock:
             canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You won!!!");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Rock v. Scissors");
+        break;
+        case StateWonPaper:
+            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You won!!!");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Paper v. Rock");
+        break;
+        case StateWonScissors:
+            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You won!!!");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Scissors v. Paper");
         break;
 
-        case StateTie:
+        case StateTieRock:
             canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You tied!");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Rock v. Rock");
+        break;
+        case StateTiePaper:
+            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You tied!");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Paper v. Paper");
+        break;
+        case StateTieScissors:
+            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You tied!");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Scissors v. Scissors");
         break;
 
-        case StateLost:
+        case StateLostRock:
             canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You lost.");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Rock v. Paper");
+        break;
+        case StateLostPaper:
+            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You lost.");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Paper v. Scissors");
+        break;
+        case StateLostScissors:
+            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You lost.");
+            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Scissors v. Rock");
         break;
 
         case StateError:
@@ -411,9 +444,59 @@ static uint32_t duration(uint32_t tick) {
     return current - tick;
 }
 
+// Checks if game state is winner.
+// @param state GameState to check.
+// @returns true if game state is a winner.
+static bool isWin(GameState state) {
+    return (StateWonPaper == state) ||
+        (StateWonRock == state) || 
+        (StateWonScissors == state); 
+}
+
+// Checks if game state is lost.
+// @param state GameState to check.
+// @returns true if game state is a loss.
+static bool isLoss(GameState state) {
+    return (StateLostPaper == state) ||
+        (StateLostRock == state) || 
+        (StateLostScissors == state); 
+}
+
+// Checks if game state is tie.
+// @param state GameState to check.
+// @returns true if game state is a tie.
+static bool isTie(GameState state) {
+    return (StateTiePaper == state) ||
+        (StateTieRock == state) ||
+        (StateTieScissors == state);
+}
+
+// Checks if game state is result (win/loss/tie).
+// @param state GameState to check.
+// @returns true if game state is a win, loss or tie.
+static bool isResult(GameState state) {
+    return isWin(state) || isLoss(state) || isTie(state);
+}
+
+// Checks if game state is final move (rock/paper/scissors).
+// @param state GameState to check.
+// @returns true if game state is a rock, paper, scissors.
+static bool isFinalMove(GameState state) {
+    return (StateRock == state) ||
+        (StatePaper == state) ||
+        (StateScissors == state);
+}
+
+static bool isError(GameState state) {
+    return (StateError == state) ||
+        (StateErrorLocalFast == state) ||
+        (StateErrorRemoteFast == state) ||
+        (StateErrorRemoteTimeout == state);
+}
+
 // Temporary timings, since I don't have second Flipper & send commands via laptop. 
 #define DURATION_NO_MOVE_DETECTED_ERROR 60000
-#define DURATION_SHOW_ERROR 15000
+#define DURATION_SHOW_ERROR 3000
 #define DURATION_SHOW_MOVES 5000
 #define DURATION_WIN_LOSS_TIE 10000
 
@@ -436,7 +519,7 @@ static void rps_state_machine_update(GameContext* game_context) {
     }
 
     // TEMP - After Error, we reset back to Looking for player.
-    if ((StateErrorRemoteTimeout == d->localPlayer) &&
+    if (isError(d->localPlayer) &&
         (duration(d->localMoveTick) > DURATION_SHOW_ERROR)) {
         d->remotePlayer = StateLookingForPlayer;
         d->remoteMoveTick = furi_get_tick();
@@ -447,7 +530,7 @@ static void rps_state_machine_update(GameContext* game_context) {
     }
 
     // TEMP - After Win, Loss, Tie -  we reset back to Ready.
-    if (((StateWon == d->localPlayer) || (StateLost == d->localPlayer) || (StateTie == d->localPlayer)) &&
+    if (isResult(d->localPlayer) &&
         (duration(d->localMoveTick) > DURATION_WIN_LOSS_TIE)) {
         d->remotePlayer = StateReady;
         d->remoteMoveTick = furi_get_tick();
@@ -459,37 +542,47 @@ static void rps_state_machine_update(GameContext* game_context) {
     }
 
     // Check for winner.
-    if ((duration(d->localMoveTick) > DURATION_SHOW_MOVES) &&
-        (duration(d->remoteMoveTick) > DURATION_SHOW_MOVES)) {
-        if ((d->localPlayer == d->remotePlayer) &&
-            ((d->localPlayer == StateRock) ||
-            (d->localPlayer == StatePaper) ||
-            (d->localPlayer == StateScissors))) {
-            d->localPlayer = StateTie;
-            d->localMoveTick = furi_get_tick();
-            d->remotePlayer = StateTie;
-            d->remoteMoveTick = furi_get_tick();
+    if (isFinalMove(d->localPlayer) && isFinalMove(d->remotePlayer) && 
+        (duration(d->localMoveTick) > DURATION_SHOW_MOVES)) {
+        d->localMoveTick = furi_get_tick();
+        d->remoteMoveTick = furi_get_tick();
+        if ((d->localPlayer == StateRock) && (d->remotePlayer == StateScissors)) {
+            d->localPlayer = StateWonRock;
+            d->remotePlayer = StateLostScissors;        
+            FURI_LOG_I(TAG, "Local won w/Rock.");
+        } else if ((d->localPlayer == StateScissors) && (d->remotePlayer == StatePaper)) {
+            d->localPlayer = StateWonScissors;
+            d->remotePlayer = StateLostPaper;        
+            FURI_LOG_I(TAG, "Local won w/Scissors.");
+        } else if ((d->localPlayer == StatePaper) && (d->remotePlayer == StateRock)) {
+            d->localPlayer = StateWonPaper;
+            d->remotePlayer = StateLostRock;        
+            FURI_LOG_I(TAG, "Local won w/Paper.");
+        } else if ((d->localPlayer == StateRock) && (d->remotePlayer == StatePaper)) {
+            d->localPlayer = StateLostRock;
+            d->remotePlayer = StateWonPaper;        
+            FURI_LOG_I(TAG, "Remote won w/Paper.");
+        } else if ((d->localPlayer == StateScissors) && (d->remotePlayer == StateRock)) {
+            d->localPlayer = StateLostScissors;
+            d->remotePlayer = StateWonRock;        
+            FURI_LOG_I(TAG, "Remote won w/Rock.");
+        } else if ((d->localPlayer == StatePaper) && (d->remotePlayer == StateScissors)) {
+            d->localPlayer = StateLostPaper;
+            d->remotePlayer = StateWonScissors;        
+            FURI_LOG_I(TAG, "Remote won w/Scissors.");
+        } else {
             FURI_LOG_I(TAG, "Tie game.");
-            return;
-        } else if (((d->localPlayer == StateRock) && (d->remotePlayer == StateScissors)) ||
-                ((d->localPlayer == StateScissors) && (d->remotePlayer == StatePaper)) ||
-                ((d->localPlayer == StatePaper) && (d->remotePlayer == StateRock))) {
-            d->localPlayer = StateWon;
-            d->localMoveTick = furi_get_tick();
-            d->remotePlayer = StateLost;        
-            d->remoteMoveTick = furi_get_tick();
-            FURI_LOG_I(TAG, "Local won.");
-            return;
-        } else if (((d->remotePlayer == StateRock) && (d->localPlayer == StateScissors)) ||
-                ((d->remotePlayer == StateScissors) && (d->localPlayer == StatePaper)) ||
-                ((d->remotePlayer == StatePaper) && (d->localPlayer == StateRock))) {
-            d->remotePlayer = StateWon;        
-            d->remoteMoveTick = furi_get_tick();
-            d->localPlayer = StateLost;
-            d->localMoveTick = furi_get_tick();
-            FURI_LOG_I(TAG, "Remote won.");
-            return;
-        } 
+            if (d->localPlayer == StateRock) {
+                d->localPlayer = StateTieRock;
+                d->remotePlayer = StateTieRock;
+            } else if (d->localPlayer == StatePaper) {
+                d->localPlayer = StateTiePaper;
+                d->remotePlayer = StateTiePaper;
+            } else {
+                d->localPlayer = StateTieScissors;
+                d->remotePlayer = StateTieScissors;
+            } 
+        }
     }
 }
 
@@ -522,48 +615,45 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
     } else if (MoveCount == move && StateCount1 == game_context->data->localPlayer) {
         if ((StateCount1 == game_context->data->remotePlayer) ||
             (StateCount2 == game_context->data->remotePlayer)) {
-                localMove = MoveCount2;
-                localState = StateCount2;
-            } else {
-                localState = StateErrorLocalFast;
-                FURI_LOG_I(TAG, "Local count sync error. remote is %c.", game_context->data->remotePlayer);
-            }
-    } else if (MoveRock == move && StateCount2 == game_context->data->localPlayer) {
-        if ((StateCount2 == game_context->data->remotePlayer) ||
-            (StateRock == game_context->data->remotePlayer) ||
-            (StatePaper == game_context->data->remotePlayer) ||
-            (StateScissors == game_context->data->remotePlayer)) {
+            localMove = MoveCount2;
+            localState = StateCount2;
+        } else {
+            localState = StateErrorLocalFast;
+            FURI_LOG_I(TAG, "Local count sync error. remote is %c.", game_context->data->remotePlayer);
+        }
+    } else if (StateCount2 == game_context->data->localPlayer) {
+        if (MoveRock == move) {
+            if ((StateCount2 == game_context->data->remotePlayer) ||
+                isFinalMove(game_context->data->remotePlayer)) {
                 localMove = MoveRock;
                 localState = StateRock;
             } else {
                 localState = StateErrorLocalFast;
                 FURI_LOG_I(TAG, "Local rock sync error. remote is %c.", game_context->data->remotePlayer);
             }
-    } else if (MovePaper == move && StateCount2 == game_context->data->localPlayer) {
-        if ((StateCount2 == game_context->data->remotePlayer) ||
-            (StateRock == game_context->data->remotePlayer) ||
-            (StatePaper == game_context->data->remotePlayer) ||
-            (StateScissors == game_context->data->remotePlayer)) {
+        } else if (MovePaper == move) {
+            if ((StateCount2 == game_context->data->remotePlayer) ||
+                isFinalMove(game_context->data->remotePlayer)) {
                 localMove = MovePaper;
                 localState = StatePaper;
             } else {
                 localState = StateErrorLocalFast;
                 FURI_LOG_I(TAG, "Local paper sync error. remote is %c.", game_context->data->remotePlayer);
             }
-    } else if (MoveScissors == move && StateCount2 == game_context->data->localPlayer) {
-        if ((StateCount2 == game_context->data->remotePlayer) ||
-            (StateRock == game_context->data->remotePlayer) ||
-            (StatePaper == game_context->data->remotePlayer) ||
-            (StateScissors == game_context->data->remotePlayer)) {
+        } else if (MoveScissors == move) {
+            if ((StateCount2 == game_context->data->remotePlayer) ||
+                isFinalMove(game_context->data->remotePlayer)) {
                 localMove = MoveScissors;
                 localState = StateScissors;
             } else {
                 localState = StateErrorLocalFast;
                 FURI_LOG_I(TAG, "Local scissors sync error. remote is %c.", game_context->data->remotePlayer);
             }
+        } else {
+            FURI_LOG_E(TAG, "Invalid Local move '%c' error. lState=%c. rState=%c.", move, game_context->data->localPlayer, game_context->data->remotePlayer);
+        }
     } else {
-        FURI_LOG_E(TAG, "Local move '%c' error. lState=%c. rState=%c.", move, game_context->data->localPlayer, game_context->data->remotePlayer);
-        localState = StateError;
+        FURI_LOG_E(TAG, "Invalid Local move '%c' error. lState=%c. rState=%c.", move, game_context->data->localPlayer, game_context->data->remotePlayer);
     }
 
     if (MoveUnknown != localMove) {
@@ -590,41 +680,35 @@ static bool rps_state_machine_remote_moved(GameContext* game_context, Move move)
     } else if (MoveCount2 == move && StateCount1 == game_context->data->remotePlayer) {
         if ((StateCount1 == game_context->data->localPlayer) ||
             (StateCount2 == game_context->data->localPlayer)) {
-                remoteState = StateCount2;
-            } else {
-                remoteState = StateErrorRemoteFast;
-                FURI_LOG_I(TAG, "Remote count sync error. local is %c.", game_context->data->localPlayer);
-            }
+            remoteState = StateCount2;
+        } else {
+            remoteState = StateErrorRemoteFast;
+            FURI_LOG_I(TAG, "Remote count sync error. local is %c.", game_context->data->localPlayer);
+        }
     } else if (MoveRock == move && StateCount2 == game_context->data->remotePlayer) {
         if ((StateCount2 == game_context->data->localPlayer) ||
-            (StateRock == game_context->data->localPlayer) ||
-            (StatePaper == game_context->data->localPlayer) ||
-            (StateScissors == game_context->data->localPlayer)) {
-                remoteState = StateRock;
-            } else {
-                remoteState = StateErrorRemoteFast;
-                FURI_LOG_I(TAG, "Remote rock sync error. local is %c.", game_context->data->localPlayer);
-            }
+            isFinalMove(game_context->data->localPlayer)) {
+            remoteState = StateRock;
+        } else {
+            remoteState = StateErrorRemoteFast;
+            FURI_LOG_I(TAG, "Remote rock sync error. local is %c.", game_context->data->localPlayer);
+        }
     } else if (MovePaper == move && StateCount2 == game_context->data->remotePlayer) {
         if ((StateCount2 == game_context->data->localPlayer) ||
-            (StateRock == game_context->data->localPlayer) ||
-            (StatePaper == game_context->data->localPlayer) ||
-            (StateScissors == game_context->data->localPlayer)) {
-                remoteState = StatePaper;
-            } else {
-                remoteState = StateErrorRemoteFast;
-                FURI_LOG_I(TAG, "Remote paper sync error. local is %c.", game_context->data->localPlayer);
-            }
+            isFinalMove(game_context->data->localPlayer)) {
+            remoteState = StatePaper;
+        } else {
+            remoteState = StateErrorRemoteFast;
+            FURI_LOG_I(TAG, "Remote paper sync error. local is %c.", game_context->data->localPlayer);
+        }
     } else if (MoveScissors == move && StateCount2 == game_context->data->remotePlayer) {
         if ((StateCount2 == game_context->data->localPlayer) ||
-            (StateRock == game_context->data->localPlayer) ||
-            (StatePaper == game_context->data->localPlayer) ||
-            (StateScissors == game_context->data->localPlayer)) {
-                remoteState = StateScissors;
-            } else {
-                remoteState = StateErrorRemoteFast;
-                FURI_LOG_I(TAG, "Remote scissors sync error. local is %c.", game_context->data->localPlayer);
-            }
+            isFinalMove(game_context->data->localPlayer)) {
+            remoteState = StateScissors;
+        } else {
+            remoteState = StateErrorRemoteFast;
+            FURI_LOG_I(TAG, "Remote scissors sync error. local is %c.", game_context->data->localPlayer);
+        }
     } else {
         FURI_LOG_E(TAG, "Remote move '%c' error. lState=%c. rState=%c.", move, game_context->data->localPlayer, game_context->data->remotePlayer);
         remoteState = StateError;
