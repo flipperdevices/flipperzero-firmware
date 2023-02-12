@@ -91,3 +91,10 @@ void ibutton_protocols_render_data(FuriString* result, const iButtonProtocolData
  */
 void ibutton_protocols_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
 
+/**
+ * Check whether the data is valid according to the selected protocol
+ * @param [in] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ * @return true if data is valid, false otherwise
+ */
+bool ibutton_protocols_is_valid(const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);

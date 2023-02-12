@@ -27,6 +27,10 @@ iButtonKey* ibutton_key_alloc();
  */
 void ibutton_key_free(iButtonKey* key);
 
+bool ibutton_key_is_valid(iButtonKey* key);
+
+// const char* ibutton_key_get_error_message(iButtonKey* key);
+
 const char* ibutton_key_get_manufacturer_name(iButtonKey* key);
 
 const char* ibutton_key_get_protocol_name(iButtonKey* key);

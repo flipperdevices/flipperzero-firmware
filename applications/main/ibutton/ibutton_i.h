@@ -4,9 +4,8 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
-#include <assets_icons.h>
-#include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <gui/view_dispatcher.h>
 #include <notification/notification_messages.h>
 
 #include <one_wire/ibutton/ibutton_worker.h>
@@ -21,6 +20,8 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
+
+#include <assets_icons.h>
 
 #include "ibutton_custom_event.h"
 #include "scenes/ibutton_scene.h"

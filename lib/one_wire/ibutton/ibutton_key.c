@@ -30,6 +30,19 @@ void ibutton_key_free(iButtonKey* key) {
     free(key);
 }
 
+bool ibutton_key_is_valid(iButtonKey* key) {
+    return key->protocol_id < iButtonProtocolMax ? ibutton_protocols_is_valid(key->protocol_data, key->protocol_id) : false;
+}
+
+// const char* ibutton_key_get_error_message(iButtonKey* key) {
+//     if(key->protocol_id >= iButtonProtocolMax) {
+//         return "Unsupported Protocol";
+//     } else {
+//         // TODO: add protocol-specific error messages
+//         return NULL;
+//     }
+// }
+
 const char* ibutton_key_get_manufacturer_name(iButtonKey* key) {
     return ibutton_protocols_get_manufacturer(key->protocol_id);
 }
@@ -54,13 +67,15 @@ static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
     do {
         if(!onewire_host_search(host, rom_data, OneWireHostSearchModeNormal)) break;
 
+        /* Considering any found 1-Wire device a success.
+         * It can be checked later with ibutton_key_is_valid(). */
+        success = true;
+
         key->protocol_id = ibutton_protocols_get_id_by_family_code(rom_data[0]);
         if(key->protocol_id == iButtonProtocolMax) break;
 
         if(!onewire_host_reset(host)) break;
         if(!ibutton_protocols_read(host, key->protocol_data, key->protocol_id)) break;
-
-        success = true;
     } while(false);
 
     onewire_host_reset_search(host);
@@ -82,8 +97,8 @@ bool ibutton_key_save(iButtonKey* key, const char* file_name) {
     FlipperFormat* ff = flipper_format_file_alloc(storage);
 
     do {
+        if(key->protocol_id >= iButtonProtocolMax) break;
         const char* protocol_name = ibutton_protocols_get_name(key->protocol_id);
-        // TODO: handle the invalid protocol case
 
         if(!flipper_format_file_open_always(ff, file_name)) break;
 
@@ -124,7 +139,7 @@ bool ibutton_key_load(iButtonKey* key, const char* file_name) {
         }
 
         if((version == 1) && furi_string_equal(tmp, "Dallas")) {
-            // Handle older keys which refer to DS1990 as just "Dallas"
+            // Handle older key files which refer to DS1990 as just "Dallas"
             key->protocol_id = iButtonProtocolDS1990;
         } else {
             key->protocol_id = ibutton_protocols_get_id_by_name(furi_string_get_cstr(tmp));

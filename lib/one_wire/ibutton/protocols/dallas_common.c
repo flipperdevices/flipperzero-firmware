@@ -8,14 +8,18 @@
 #define DALLAS_COMMON_ROM_DATA_KEY_V1 "Data"
 #define DALLAS_COMMON_ROM_DATA_KEY_V2 "Rom Data"
 
-bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data) {
-    onewire_host_write(host, DALLAS_COMMON_CMD_READ_ROM);
-    onewire_host_read_bytes(host, rom_data->bytes, sizeof(DallasCommonRomData));
-
+bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data) {
     const uint8_t crc_calculated = maxim_crc8(rom_data->bytes, sizeof(DallasCommonRomData) - 1, MAXIM_CRC8_INIT);
     const uint8_t crc_received = rom_data->fields.checksum;
 
     return crc_calculated == crc_received;
+}
+
+bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data) {
+    onewire_host_write(host, DALLAS_COMMON_CMD_READ_ROM);
+    onewire_host_read_bytes(host, rom_data->bytes, sizeof(DallasCommonRomData));
+
+    return dallas_common_is_valid_crc(rom_data);
 }
 
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size) {

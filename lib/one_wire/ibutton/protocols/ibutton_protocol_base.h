@@ -21,6 +21,7 @@ typedef bool (*iButtonProtocolReadFunc)(OneWireHost*, iButtonProtocolData*);
 typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);
+typedef bool (*iButtonProtocolIsValidFunc)(const iButtonProtocolData*);
 
 typedef struct {
     const uint8_t family_code;
@@ -34,4 +35,5 @@ typedef struct {
     iButtonProtocolLoadFunc load;
     iButtonProtocolRenderDataFunc render_data;
     iButtonProtocolRenderDataFunc render_brief_data;
+    iButtonProtocolIsValidFunc is_valid;
 } iButtonProtocolBase;

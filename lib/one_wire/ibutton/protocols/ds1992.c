@@ -25,6 +25,7 @@ static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_brief_data(FuriString*, const iButtonProtocolData*);
+static bool dallas_ds1992_is_valid(const iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
@@ -38,6 +39,7 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .load = dallas_ds1992_load,
     .render_data = dallas_ds1992_render_data,
     .render_brief_data = dallas_ds1992_render_brief_data,
+    .is_valid = dallas_ds1992_is_valid,
 };
 
 bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -103,4 +105,9 @@ void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolDa
     for(size_t i = DS1992_SRAM_DATA_SIZE - DS1992_BRIEF_TAIL_COUNT; i < DS1992_SRAM_DATA_SIZE; ++i) {
         furi_string_cat_printf(result, " %02X", data->sram_data[i]);
     }
+}
+
+bool dallas_ds1992_is_valid(const iButtonProtocolData* protocol_data) {
+    const DallasCommonRomData* rom_data = protocol_data;
+    return dallas_common_is_valid_crc(rom_data);
 }
