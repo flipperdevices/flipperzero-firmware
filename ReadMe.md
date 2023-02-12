@@ -51,6 +51,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
+- [Text 2 SAM (By Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam)
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
