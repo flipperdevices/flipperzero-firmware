@@ -19,52 +19,15 @@ static const GpioPin* gpios[] = {
 
 static const char* gpio_names[] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA6", "PA7"};
 
-const NotificationSequence seq_c_minor = {
-    &message_note_c4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_note_ds4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_note_g4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_vibro_on,
-    &message_delay_50,
-    &message_vibro_off,
-    NULL,
-};
-
-const NotificationSequence seq_error = {
-
-    &message_vibro_on,
-    &message_delay_50,
-    &message_vibro_off,
-
-    &message_note_g4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_note_c4,
-    &message_delay_500,
-    &message_sound_off,
-    &message_delay_10,
-    NULL,
-};
-
-const NotificationSequence* seq_sounds[] = {&seq_c_minor, &seq_error};
-
 static void render_callback(Canvas* const canvas, void* cb_ctx) {
-    AppFSM* ctx = acquire_mutex((ValueMutex*)cb_ctx, 25);
+    AppFSM* app = acquire_mutex((ValueMutex*)cb_ctx, 25);
 
-    if(ctx == NULL || !ctx->processing) {
+    if(app == NULL) {
+        return;
+    }
+
+    if(!app->processing) {
+        release_mutex((ValueMutex*)cb_ctx, app);
         return;
     }
 
@@ -75,9 +38,9 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
     canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, "State");
     y += 10;
 
-    if(ctx->uart) {
+    if(app->uart) {
         UsbUartState st;
-        usb_uart_get_state(ctx->uart, &st);
+        usb_uart_get_state(app->uart, &st);
 
         snprintf(buffer, sizeof(buffer), "Rx %ld / Tx %ld", st.rx_cnt, st.tx_cnt);
         canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
@@ -85,16 +48,16 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
     }
     canvas_set_font(canvas, FontSecondary);
 
-    if(ctx->sump) {
+    if(app->sump) {
         snprintf(
             buffer,
             sizeof(buffer),
             "%c%02X %lX %ld %ld",
-            ctx->sump->armed ? '*' : ' ',
-            ctx->sump->flags,
-            ctx->sump->divider,
-            ctx->sump->read_count,
-            ctx->sump->delay_count);
+            app->sump->armed ? '*' : ' ',
+            app->sump->flags,
+            app->sump->divider,
+            app->sump->read_count,
+            app->sump->delay_count);
 
         canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
         y += 10;
@@ -103,9 +66,9 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             buffer,
             sizeof(buffer),
             "%lX %lX %X",
-            ctx->sump->trig_mask,
-            ctx->sump->trig_values,
-            ctx->sump->trig_config);
+            app->sump->trig_mask,
+            app->sump->trig_values,
+            app->sump->trig_config);
 
         canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
         y += 10;
@@ -114,14 +77,14 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
             buffer,
             sizeof(buffer),
             "Captured: %u / %ld (%02X)",
-            ctx->capture_pos,
-            ctx->sump->read_count,
-            ctx->current_levels);
+            app->capture_pos,
+            app->sump->read_count,
+            app->current_levels);
         canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
         y += 20;
     }
 
-    release_mutex((ValueMutex*)cb_ctx, ctx);
+    release_mutex((ValueMutex*)cb_ctx, app);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -134,71 +97,64 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     }
 }
 
-static void timer_tick_callback(FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
-
-    /* filling buffer makes no sense, as we lost timing anyway */
-    if(furi_message_queue_get_count(event_queue) < 1) {
-        AppEvent event = {.type = EventTimerTick};
-        furi_message_queue_put(event_queue, &event, 100);
-    }
-}
-
-static void app_init(AppFSM* const app) {
-    strcpy(app->state_string, "none");
-}
-
-static void app_deinit(AppFSM* const ctx) {
-    furi_timer_free(ctx->timer);
-}
-
-static void on_timer_tick(AppFSM* ctx) {
-}
-
-static bool message_process(AppFSM* ctx) {
+static bool message_process(AppFSM* app) {
     bool processing = true;
     AppEvent event;
-    FuriStatus event_status = furi_message_queue_get(ctx->event_queue, &event, 100);
+    FuriStatus event_status = furi_message_queue_get(app->event_queue, &event, 100);
 
-    if(event_status == FuriStatusOk) {
-        if(event.type == EventKeyPress) {
-            if(event.input.type == InputTypePress) {
-                switch(event.input.key) {
-                case InputKeyUp:
-                    break;
+    if(event_status != FuriStatusOk) {
+        return true;
+    }
 
-                case InputKeyDown:
-                    break;
-
-                case InputKeyRight:
-                    break;
-
-                case InputKeyLeft:
-                    break;
-
-                case InputKeyOk:
-                    if(ctx->sump->armed) {
-                        for(size_t pos = ctx->capture_pos; pos < ctx->sump->read_count; pos++) {
-                            ctx->capture_buffer[ctx->sump->read_count - 1 - pos] = 0;
-                        }
-                        ctx->buffer_full = true;
-                        ctx->sump->armed = false;
-                    }
-                    break;
-
-                case InputKeyBack:
-                    processing = false;
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        } else if(event.type == EventTimerTick) {
-            on_timer_tick(ctx);
+    switch(event.type) {
+    case EventKeyPress: {
+        if(event.input.type != InputTypePress) {
+            break;
         }
-    } else {
-        /* timeout */
+
+        switch(event.input.key) {
+        case InputKeyUp:
+            break;
+
+        case InputKeyDown:
+            break;
+
+        case InputKeyRight:
+            break;
+
+        case InputKeyLeft:
+            break;
+
+        case InputKeyOk:
+            if(app->sump->armed) {
+                for(size_t pos = app->capture_pos; pos < app->sump->read_count; pos++) {
+                    app->capture_buffer[app->sump->read_count - 1 - pos] = 0;
+                }
+                app->sump->armed = false;
+                AppEvent event = {.type = EventBufferFilled};
+                furi_message_queue_put(app->event_queue, &event, 100);
+            }
+            break;
+
+        case InputKeyBack:
+            processing = false;
+            break;
+
+        default:
+            break;
+        }
+
+        break;
+    }
+
+    case EventBufferFilled: {
+        usb_uart_tx_data(app->uart, app->capture_buffer, app->sump->read_count);
+        break;
+    }
+
+    default: {
+        break;
+    }
     }
 
     return processing;
@@ -224,7 +180,7 @@ void tx_sump_tx(void* ctx, uint8_t* data, size_t length) {
     usb_uart_tx_data(app->uart, data, length);
 }
 
-uint8_t levels_get(AppFSM* app) {
+static uint8_t levels_get(AppFSM* app) {
     uint32_t port_a = GPIOA->IDR;
     uint32_t port_b = GPIOB->IDR;
     uint32_t port_c = GPIOC->IDR;
@@ -256,7 +212,8 @@ static int32_t capture_thread_worker(void* context) {
 
                 if(app->capture_pos >= app->sump->read_count) {
                     app->sump->armed = false;
-                    app->buffer_full = true;
+                    AppEvent event = {.type = EventBufferFilled};
+                    furi_message_queue_put(app->event_queue, &event, 100);
                 }
             }
             furi_delay_us(1);
@@ -272,38 +229,28 @@ static int32_t capture_thread_worker(void* context) {
     return 0;
 }
 
-int32_t logic_analyzer_app_main(void* p) {
-    UNUSED(p);
-
-    AppFSM* app = malloc(sizeof(AppFSM));
-
-    app_init(app);
+static bool app_init(AppFSM* const app) {
+    strcpy(app->state_string, "none");
 
     if(!init_mutex(&app->state_mutex, app, sizeof(AppFSM))) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(app);
-        return 255;
+        return false;
     }
+
+    app->processing = true;
 
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
 
-    app->processing = true;
     app->view_port = view_port_alloc();
     app->event_queue = furi_message_queue_alloc(QUEUE_SIZE, sizeof(AppEvent));
-    app->timer = furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, app->event_queue);
 
     view_port_draw_callback_set(app->view_port, render_callback, &app->state_mutex);
     view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
-
-    notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
-
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
-
-    furi_timer_start(app->timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
 
     UsbUartConfig uart_config;
 
@@ -325,33 +272,49 @@ int32_t logic_analyzer_app_main(void* p) {
     app->capture_thread = furi_thread_alloc_ex("capture_thread", 1024, capture_thread_worker, app);
     furi_thread_start(app->capture_thread);
 
-    while(app->processing) {
-        app->processing = message_process(app);
+    return true;
+}
 
-        view_port_update(app->view_port);
-        if(app->buffer_full) {
-            usb_uart_tx_data(app->uart, app->capture_buffer, app->sump->read_count);
-            app->buffer_full = false;
-        }
-    }
-
-    furi_thread_join(app->capture_thread);
-    furi_thread_free(app->capture_thread);
-
-    usb_uart_disable(app->uart);
-    app_deinit(app);
-
-    notification_message_block(app->notification, &sequence_display_backlight_enforce_auto);
-
+static void app_deinit(AppFSM* const app) {
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(app->gui, app->view_port);
-    furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
     view_port_free(app->view_port);
     furi_message_queue_free(app->event_queue);
     delete_mutex(&app->state_mutex);
 
+    furi_thread_join(app->capture_thread);
+    furi_thread_free(app->capture_thread);
+
     free(app->capture_buffer);
+
+    sump_free(app->sump);
+
+    usb_uart_disable(app->uart);
+
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_NOTIFICATION);
+}
+
+int32_t logic_analyzer_app_main(void* p) {
+    UNUSED(p);
+
+    AppFSM* app = malloc(sizeof(AppFSM));
+    app_init(app);
+
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
+
+    while(app->processing) {
+        app->processing = message_process(app);
+
+        view_port_update(app->view_port);
+    }
+
+    notification_message_block(app->notification, &sequence_display_backlight_enforce_auto);
+
+    app_deinit(app);
     free(app);
 
     return 0;

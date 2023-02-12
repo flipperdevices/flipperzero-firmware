@@ -27,10 +27,7 @@
 
 typedef enum { KeyNone, KeyUp, KeyRight, KeyDown, KeyLeft, KeyOK } KeyCode;
 
-typedef enum {
-    EventTimerTick,
-    EventKeyPress,
-} EventType;
+typedef enum { EventKeyPress, EventBufferFilled } EventType;
 
 typedef struct {
     EventType type;
@@ -39,7 +36,6 @@ typedef struct {
 
 typedef struct {
     FuriMessageQueue* event_queue;
-    FuriTimer* timer;
     NotificationApp* notification;
     Storage* storage;
     ViewPort* view_port;
@@ -55,7 +51,6 @@ typedef struct {
     FuriThread* capture_thread;
     uint8_t* capture_buffer;
     size_t capture_pos;
-    bool buffer_full;
     uint8_t current_levels;
 
     char state_string[64];

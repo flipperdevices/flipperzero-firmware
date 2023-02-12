@@ -116,7 +116,9 @@ static int32_t usb_uart_worker(void* context) {
             furi_thread_flags_wait(WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         furi_check(!(events & FuriFlagError));
 
-        if(events & WorkerEvtStop) break;
+        if(events & WorkerEvtStop) {
+            break;
+        }
 
         if(events & WorkerEvtCdcRx) {
             furi_check(furi_mutex_acquire(usb_uart->usb_mutex, FuriWaitForever) == FuriStatusOk);
