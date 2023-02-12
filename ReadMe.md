@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Update filebrowser #327 (By CrazyClara)](https://github.com/DarkFlippers/unleashed-firmware/pull/327) - File sorting SAME algorithm used, back action fixed...
 - UL: [added support for subghz pagers #328 (By jbohack)](https://github.com/DarkFlippers/unleashed-firmware/pull/328)
 - Added: [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
+- UL: [Fix file browser update issues #333 (By WillyJL)](https://github.com/DarkFlippers/unleashed-firmware/pull/333) - Also removed dumb assumptions from code comments
 
 <a name="release">
 
