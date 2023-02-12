@@ -97,7 +97,9 @@ bool ibutton_key_save(iButtonKey* key, const char* file_name) {
 
         if(!flipper_format_file_open_always(ff, file_name)) break;
 
-        if(!flipper_format_write_header_cstr(ff, IBUTTON_KEY_FILE_TYPE, IBUTTON_KEY_CURRENT_FORMAT_VERSION)) break;
+        if(!flipper_format_write_header_cstr(
+               ff, IBUTTON_KEY_FILE_TYPE, IBUTTON_KEY_CURRENT_FORMAT_VERSION))
+            break;
         if(!flipper_format_write_string_cstr(ff, "Protocol", protocol_name)) break;
         if(!ibutton_protocols_save(ff, key->protocol_data, key->protocol_id)) break;
 

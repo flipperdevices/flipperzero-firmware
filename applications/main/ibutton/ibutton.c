@@ -203,7 +203,9 @@ bool ibutton_select_key(iButton* ibutton) {
     furi_string_set(ibutton->file_path, IBUTTON_APP_FOLDER);
 
     do {
-        if(!dialog_file_browser_show(ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options)) break;
+        if(!dialog_file_browser_show(
+               ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options))
+            break;
         if(!ibutton_load_key(ibutton)) break;
         success = true;
     } while(0);

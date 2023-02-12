@@ -13,7 +13,11 @@ extern "C" {
  * @param [in] data pointer to the input data buffer
  * @param [in] data_size input data size
  */
-void pretty_format_bytes_hex(FuriString* result, size_t row_length, const uint8_t* data, size_t data_size);
+void pretty_format_bytes_hex(
+    FuriString* result,
+    size_t row_length,
+    const uint8_t* data,
+    size_t data_size);
 
 /**
  * Format a data buffer as an ASCII string with line breaks
@@ -22,7 +26,11 @@ void pretty_format_bytes_hex(FuriString* result, size_t row_length, const uint8_
  * @param [in] data pointer to the input data buffer
  * @param [in] data_size input data size
  */
-void pretty_format_bytes_ascii(FuriString* result, size_t row_length, const uint8_t* data, size_t data_size);
+void pretty_format_bytes_ascii(
+    FuriString* result,
+    size_t row_length,
+    const uint8_t* data,
+    size_t data_size);
 
 #ifdef __cplusplus
 }

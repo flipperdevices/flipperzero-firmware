@@ -8,9 +8,7 @@ void ibutton_scene_info_on_enter(void* context) {
 
     FuriString* tmp = furi_string_alloc();
 
-    furi_string_printf(tmp, "%s [%s]",
-        ibutton->key_name,
-        ibutton_key_get_protocol_name(key));
+    furi_string_printf(tmp, "%s [%s]", ibutton->key_name, ibutton_key_get_protocol_name(key));
 
     widget_add_string_element(
         widget, 0, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
@@ -22,7 +20,8 @@ void ibutton_scene_info_on_enter(void* context) {
         widget, 0, 16, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp));
 
     if(ibutton_key_get_features(key) & iButtonProtocolFeatureExtData) {
-        widget_add_button_element(widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
+        widget_add_button_element(
+            widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
     }
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);

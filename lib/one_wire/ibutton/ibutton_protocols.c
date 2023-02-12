@@ -53,38 +53,58 @@ const char* ibutton_protocols_get_name(iButtonProtocol protocol_id) {
     return ibutton_protocols[protocol_id]->name;
 }
 
-bool ibutton_protocols_read(OneWireHost* host, iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+bool ibutton_protocols_read(
+    OneWireHost* host,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->read(host, protocol_data);
 }
 
-bool ibutton_protocols_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+bool ibutton_protocols_save(
+    FlipperFormat* ff,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->save(ff, protocol_data);
 }
 
-bool ibutton_protocols_load(FlipperFormat* ff, uint32_t version, iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+bool ibutton_protocols_load(
+    FlipperFormat* ff,
+    uint32_t version,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->load(ff, version, protocol_data);
 }
 
-void ibutton_protocols_render_data(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+void ibutton_protocols_render_data(
+    FuriString* result,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     ibutton_protocols[protocol_id]->render_data(result, protocol_data);
 }
 
-void ibutton_protocols_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+void ibutton_protocols_render_brief_data(
+    FuriString* result,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     ibutton_protocols[protocol_id]->render_brief_data(result, protocol_data);
 }
 
-void ibutton_protocols_render_error(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+void ibutton_protocols_render_error(
+    FuriString* result,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     ibutton_protocols[protocol_id]->render_error(result, protocol_data);
 }
 
-bool ibutton_protocols_is_valid(const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+bool ibutton_protocols_is_valid(
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->is_valid(protocol_data);
 }
-

@@ -27,6 +27,7 @@ void ibutton_scene_view_data_on_exit(void* context) {
     iButton* ibutton = context;
     text_box_reset(ibutton->text_box);
 
-    FuriString* tmp = (FuriString*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneViewData);
+    FuriString* tmp =
+        (FuriString*)scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneViewData);
     furi_string_free(tmp);
 }

@@ -30,15 +30,30 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
         ibutton);
 
     if(features & iButtonProtocolFeatureExtData) {
-        submenu_add_item(submenu, "View Data", SubmenuIndexViewData, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+        submenu_add_item(
+            submenu,
+            "View Data",
+            SubmenuIndexViewData,
+            ibutton_scene_read_key_menu_submenu_callback,
+            ibutton);
     }
 
     if(features & iButtonProtocolFeatureWriteBlank) {
-        submenu_add_item(submenu, "Write Blank", SubmenuIndexWriteBlank, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+        submenu_add_item(
+            submenu,
+            "Write Blank",
+            SubmenuIndexWriteBlank,
+            ibutton_scene_read_key_menu_submenu_callback,
+            ibutton);
     }
 
     if(features & iButtonProtocolFeatureWriteCopy) {
-        submenu_add_item(submenu, "Write Copy", SubmenuIndexWriteCopy, ibutton_scene_read_key_menu_submenu_callback, ibutton);
+        submenu_add_item(
+            submenu,
+            "Write Copy",
+            SubmenuIndexWriteCopy,
+            ibutton_scene_read_key_menu_submenu_callback,
+            ibutton);
     }
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);

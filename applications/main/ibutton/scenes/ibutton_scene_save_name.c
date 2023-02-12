@@ -29,8 +29,8 @@ void ibutton_scene_save_name_on_enter(void* context) {
         IBUTTON_KEY_NAME_SIZE,
         is_new_file);
 
-    ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        IBUTTON_APP_FOLDER, IBUTTON_APP_EXTENSION, ibutton->key_name);
+    ValidatorIsFile* validator_is_file =
+        validator_is_file_alloc_init(IBUTTON_APP_FOLDER, IBUTTON_APP_EXTENSION, ibutton->key_name);
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewTextInput);
@@ -43,7 +43,12 @@ bool ibutton_scene_save_name_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == iButtonCustomEventTextEditResult) {
-            furi_string_printf(ibutton->file_path, "%s/%s%s", IBUTTON_APP_FOLDER, ibutton->key_name, IBUTTON_APP_EXTENSION);
+            furi_string_printf(
+                ibutton->file_path,
+                "%s/%s%s",
+                IBUTTON_APP_FOLDER,
+                ibutton->key_name,
+                IBUTTON_APP_EXTENSION);
 
             if(ibutton_save_key(ibutton)) {
                 scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveSuccess);

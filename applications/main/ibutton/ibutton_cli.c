@@ -34,34 +34,34 @@ void ibutton_cli_print_usage() {
     printf("\t<key_data> are hex-formatted\r\n");
 };
 
-// bool ibutton_cli_get_key_type(FuriString* data, iButtonKeyType* type) {
-//     bool result = false;
-//
-//     if(furi_string_cmp_str(data, "Dallas") == 0 || furi_string_cmp_str(data, "dallas") == 0) {
-//         result = true;
-//         *type = iButtonKeyDS1990;
-//     } else if(furi_string_cmp_str(data, "Cyfral") == 0 || furi_string_cmp_str(data, "cyfral") == 0) {
-//         result = true;
-//         *type = iButtonKeyCyfral;
-//     } else if(furi_string_cmp_str(data, "Metakom") == 0 || furi_string_cmp_str(data, "metakom") == 0) {
-//         result = true;
-//         *type = iButtonKeyMetakom;
-//     }
-//
-//     return result;
-// }
+    // bool ibutton_cli_get_key_type(FuriString* data, iButtonKeyType* type) {
+    //     bool result = false;
+    //
+    //     if(furi_string_cmp_str(data, "Dallas") == 0 || furi_string_cmp_str(data, "dallas") == 0) {
+    //         result = true;
+    //         *type = iButtonKeyDS1990;
+    //     } else if(furi_string_cmp_str(data, "Cyfral") == 0 || furi_string_cmp_str(data, "cyfral") == 0) {
+    //         result = true;
+    //         *type = iButtonKeyCyfral;
+    //     } else if(furi_string_cmp_str(data, "Metakom") == 0 || furi_string_cmp_str(data, "metakom") == 0) {
+    //         result = true;
+    //         *type = iButtonKeyMetakom;
+    //     }
+    //
+    //     return result;
+    // }
 
-// void ibutton_cli_print_key_data(iButtonKey* key) {
-//     const uint8_t* key_data = ibutton_key_get_data_p(key);
-//     iButtonKeyType type = ibutton_key_get_type(key);
-//
-//     printf("%s ", ibutton_key_get_string_by_type(type));
-//     for(size_t i = 0; i < ibutton_key_get_size_by_type(type); i++) {
-//         printf("%02X", key_data[i]);
-//     }
-//
-//     printf("\r\n");
-// }
+    // void ibutton_cli_print_key_data(iButtonKey* key) {
+    //     const uint8_t* key_data = ibutton_key_get_data_p(key);
+    //     iButtonKeyType type = ibutton_key_get_type(key);
+    //
+    //     printf("%s ", ibutton_key_get_string_by_type(type));
+    //     for(size_t i = 0; i < ibutton_key_get_size_by_type(type); i++) {
+    //         printf("%02X", key_data[i]);
+    //     }
+    //
+    //     printf("\r\n");
+    // }
 
 #define EVENT_FLAG_IBUTTON_COMPLETE (1 << 0)
 

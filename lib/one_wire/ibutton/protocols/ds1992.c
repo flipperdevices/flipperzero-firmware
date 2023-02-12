@@ -29,7 +29,8 @@ static bool dallas_ds1992_is_valid(const iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
-    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteBlank | iButtonProtocolFeatureWriteCopy,
+    .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteBlank |
+                iButtonProtocolFeatureWriteCopy,
     .data_size = sizeof(DS1992ProtocolData),
     .manufacturer = "Dallas",
     .name = "DS1992",
@@ -44,7 +45,7 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
 
 bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     bool success = false;
-    DS1992ProtocolData *data = protocol_data;
+    DS1992ProtocolData* data = protocol_data;
 
     do {
         if(!dallas_common_read_rom(host, &data->rom_data)) break;
@@ -55,14 +56,19 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     return success;
 }
 
-bool dallas_ds1992_load(FlipperFormat* ff, uint32_t format_version, iButtonProtocolData* protocol_data) {
-    DS1992ProtocolData *data = protocol_data;
+bool dallas_ds1992_load(
+    FlipperFormat* ff,
+    uint32_t format_version,
+    iButtonProtocolData* protocol_data) {
+    DS1992ProtocolData* data = protocol_data;
     bool success = false;
 
     do {
         if(format_version < 2) break;
         if(!dallas_common_load_rom_data(ff, format_version, &data->rom_data)) break;
-        if(!flipper_format_read_hex(ff, DS1992_SRAM_DATA_KEY, data->sram_data, DS1992_SRAM_DATA_SIZE)) break;
+        if(!flipper_format_read_hex(
+               ff, DS1992_SRAM_DATA_KEY, data->sram_data, DS1992_SRAM_DATA_SIZE))
+            break;
         success = true;
     } while(false);
 
@@ -70,12 +76,14 @@ bool dallas_ds1992_load(FlipperFormat* ff, uint32_t format_version, iButtonProto
 }
 
 bool dallas_ds1992_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {
-    const DS1992ProtocolData *data = protocol_data;
+    const DS1992ProtocolData* data = protocol_data;
     bool success = false;
 
     do {
         if(!dallas_common_save_rom_data(ff, &data->rom_data)) break;
-        if(!flipper_format_write_hex(ff, DS1992_SRAM_DATA_KEY, data->sram_data, DS1992_SRAM_DATA_SIZE)) break;
+        if(!flipper_format_write_hex(
+               ff, DS1992_SRAM_DATA_KEY, data->sram_data, DS1992_SRAM_DATA_SIZE))
+            break;
         success = true;
     } while(false);
 
@@ -83,18 +91,20 @@ bool dallas_ds1992_save(FlipperFormat* ff, const iButtonProtocolData* protocol_d
 }
 
 void dallas_ds1992_render_data(FuriString* result, const iButtonProtocolData* protocol_data) {
-    const DS1992ProtocolData *data = protocol_data;
-    pretty_format_bytes_hex(result, DS1992_DATA_ROW_LENGTH, data->sram_data, DS1992_SRAM_DATA_SIZE);
+    const DS1992ProtocolData* data = protocol_data;
+    pretty_format_bytes_hex(
+        result, DS1992_DATA_ROW_LENGTH, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
 void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
-    const DS1992ProtocolData *data = protocol_data;
+    const DS1992ProtocolData* data = protocol_data;
 
     for(size_t i = 0; i < sizeof(data->rom_data.bytes); ++i) {
         furi_string_cat_printf(result, "%02X ", data->rom_data.bytes[i]);
     }
 
-    furi_string_cat_printf(result, "\nInternal SRAM: %zu Kbit\n", DS1992_SRAM_DATA_SIZE * 8U / 1024U);
+    furi_string_cat_printf(
+        result, "\nInternal SRAM: %zu Kbit\n", (size_t)(DS1992_SRAM_DATA_SIZE * 8U / 1024U));
 
     for(size_t i = 0; i < DS1992_BRIEF_HEAD_COUNT; ++i) {
         furi_string_cat_printf(result, "%02X ", data->sram_data[i]);
@@ -102,7 +112,8 @@ void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolDa
 
     furi_string_cat_printf(result, "[  . . .  ]");
 
-    for(size_t i = DS1992_SRAM_DATA_SIZE - DS1992_BRIEF_TAIL_COUNT; i < DS1992_SRAM_DATA_SIZE; ++i) {
+    for(size_t i = DS1992_SRAM_DATA_SIZE - DS1992_BRIEF_TAIL_COUNT; i < DS1992_SRAM_DATA_SIZE;
+        ++i) {
         furi_string_cat_printf(result, " %02X", data->sram_data[i]);
     }
 }

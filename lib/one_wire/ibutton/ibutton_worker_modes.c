@@ -239,8 +239,8 @@ void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
 
     // switch(ibutton_key_get_type(worker->key_p)) {
     // case iButtonKeyDS1990:
-        ibutton_worker_emulate_dallas_start(worker);
-        // break;
+    ibutton_worker_emulate_dallas_start(worker);
+    // break;
     // case iButtonKeyCyfral:
     // case iButtonKeyMetakom:
     //     ibutton_worker_emulate_timer_start(worker);

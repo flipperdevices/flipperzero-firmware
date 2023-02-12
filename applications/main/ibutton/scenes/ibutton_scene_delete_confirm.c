@@ -9,17 +9,18 @@ void ibutton_scene_delete_confirm_on_enter(void* context) {
     FuriString* tmp = furi_string_alloc();
 
     widget_add_button_element(widget, GuiButtonTypeLeft, "Back", ibutton_widget_callback, context);
-    widget_add_button_element(widget, GuiButtonTypeRight, "Delete", ibutton_widget_callback, context);
+    widget_add_button_element(
+        widget, GuiButtonTypeRight, "Delete", ibutton_widget_callback, context);
 
     furi_string_printf(tmp, "Delete %s?", ibutton->key_name);
     widget_add_string_element(
-        widget, 128/2, 0, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
+        widget, 128 / 2, 0, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
 
     furi_string_reset(tmp);
     ibutton_key_get_rendered_brief_data(key, tmp);
 
     widget_add_string_multiline_element(
-        widget, 128/2, 16, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(tmp));
+        widget, 128 / 2, 16, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(tmp));
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
     furi_string_free(tmp);

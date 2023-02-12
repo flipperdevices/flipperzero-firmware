@@ -29,11 +29,21 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
         ibutton);
 
     if(features & iButtonProtocolFeatureWriteBlank) {
-        submenu_add_item(submenu, "Write Blank", SubmenuIndexWriteBlank, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
+        submenu_add_item(
+            submenu,
+            "Write Blank",
+            SubmenuIndexWriteBlank,
+            ibutton_scene_saved_key_menu_submenu_callback,
+            ibutton);
     }
 
     if(features & iButtonProtocolFeatureWriteCopy) {
-        submenu_add_item(submenu, "Write Copy", SubmenuIndexWriteCopy, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
+        submenu_add_item(
+            submenu,
+            "Write Copy",
+            SubmenuIndexWriteCopy,
+            ibutton_scene_saved_key_menu_submenu_callback,
+            ibutton);
     }
 
     submenu_add_item(

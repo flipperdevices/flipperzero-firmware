@@ -54,7 +54,10 @@ const char* ibutton_protocols_get_name(iButtonProtocol protocol_id);
  * @param [in] host pointer to a OneWire host instance
  * @return true on success, false on failure
  */
-bool ibutton_protocols_read(OneWireHost* host, iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+bool ibutton_protocols_read(
+    OneWireHost* host,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
 
 /**
  * Save the key data to a FFF file. The header must be written beforehand.
@@ -63,7 +66,10 @@ bool ibutton_protocols_read(OneWireHost* host, iButtonProtocolData* protocol_dat
  * @param [in] protocol_id id of the protocol in question
  * @return true on success, false on failure
  */
-bool ibutton_protocols_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+bool ibutton_protocols_save(
+    FlipperFormat* ff,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
 
 /**
  * Save the key data to a FFF file. The header must be read beforehand.
@@ -73,7 +79,11 @@ bool ibutton_protocols_save(FlipperFormat* ff, const iButtonProtocolData* protoc
  * @param [in] protocol_id id of the protocol in question
  * @return true on success, false on failure
  */
-bool ibutton_protocols_load(FlipperFormat* ff, uint32_t version, iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+bool ibutton_protocols_load(
+    FlipperFormat* ff,
+    uint32_t version,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
 
 /**
  * Format a string containing device full data
@@ -81,7 +91,10 @@ bool ibutton_protocols_load(FlipperFormat* ff, uint32_t version, iButtonProtocol
  * @param [in] protocol_data pointer to protocol-specific data
  * @param [in] protocol_id id of the protocol in question
  */
-void ibutton_protocols_render_data(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+void ibutton_protocols_render_data(
+    FuriString* result,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
 
 /**
  * Format a string containing device brief data
@@ -89,7 +102,10 @@ void ibutton_protocols_render_data(FuriString* result, const iButtonProtocolData
  * @param [in] protocol_data pointer to protocol-specific data
  * @param [in] protocol_id id of the protocol in question
  */
-void ibutton_protocols_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+void ibutton_protocols_render_brief_data(
+    FuriString* result,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
 
 /**
  * Format a string containing error message (for invalid keys)
@@ -97,7 +113,10 @@ void ibutton_protocols_render_brief_data(FuriString* result, const iButtonProtoc
  * @param [in] protocol_data pointer to protocol-specific data
  * @param [in] protocol_id id of the protocol in question
  */
-void ibutton_protocols_render_error(FuriString* result, const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+void ibutton_protocols_render_error(
+    FuriString* result,
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
 
 /**
  * Check whether the data is valid according to the selected protocol
@@ -105,4 +124,6 @@ void ibutton_protocols_render_error(FuriString* result, const iButtonProtocolDat
  * @param [in] protocol_id id of the protocol in question
  * @return true if data is valid, false otherwise
  */
-bool ibutton_protocols_is_valid(const iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);
+bool ibutton_protocols_is_valid(
+    const iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);

@@ -44,7 +44,7 @@ struct iButton {
     iButtonKey* key;
 
     FuriString* file_path;
-    char key_name[IBUTTON_KEY_NAME_SIZE+1];
+    char key_name[IBUTTON_KEY_NAME_SIZE + 1];
 
     Submenu* submenu;
     ByteInput* byte_input;

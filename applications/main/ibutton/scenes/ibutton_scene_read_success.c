@@ -7,12 +7,15 @@ void ibutton_scene_read_success_on_enter(void* context) {
     iButtonKey* key = ibutton->key;
     Widget* widget = ibutton->widget;
 
-    FuriString *tmp = furi_string_alloc();
+    FuriString* tmp = furi_string_alloc();
 
-    widget_add_button_element(widget, GuiButtonTypeLeft, "Retry", ibutton_widget_callback, context);
-    widget_add_button_element(widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
+    widget_add_button_element(
+        widget, GuiButtonTypeLeft, "Retry", ibutton_widget_callback, context);
+    widget_add_button_element(
+        widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
 
-    furi_string_printf(tmp, "%s[%s]", ibutton_key_get_protocol_name(key), ibutton_key_get_manufacturer_name(key));
+    furi_string_printf(
+        tmp, "%s[%s]", ibutton_key_get_protocol_name(key), ibutton_key_get_manufacturer_name(key));
 
     widget_add_string_element(
         widget, 0, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
