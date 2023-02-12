@@ -199,6 +199,9 @@ bool ibutton_select_key(iButton* ibutton) {
     dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
     browser_options.base_path = IBUTTON_APP_FOLDER;
 
+    // TODO: remember the last opened location?
+    furi_string_set(ibutton->file_path, IBUTTON_APP_FOLDER);
+
     do {
         if(!dialog_file_browser_show(ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options)) break;
         if(!ibutton_load_key(ibutton)) break;
@@ -223,7 +226,12 @@ bool ibutton_save_key(iButton* ibutton) {
 
 bool ibutton_delete_key(iButton* ibutton) {
     bool result = false;
-    result = storage_simply_remove(ibutton->storage, furi_string_get_cstr(ibutton->file_path));
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    result = storage_simply_remove(storage, furi_string_get_cstr(ibutton->file_path));
+    furi_record_close(RECORD_STORAGE);
+
+    // TODO: reset key data
 
     return result;
 }

@@ -1,74 +1,28 @@
 #include "../ibutton_i.h"
 #include <toolbox/path.h>
 
-// static void ibutton_scene_delete_confirm_widget_callback(
-//     GuiButtonType result,
-//     InputType type,
-//     void* context) {
-//     iButton* ibutton = context;
-//     if(type == InputTypeShort) {
-//         view_dispatcher_send_custom_event(ibutton->view_dispatcher, result);
-//     }
-// }
-
 void ibutton_scene_delete_confirm_on_enter(void* context) {
     iButton* ibutton = context;
+    iButtonKey* key = ibutton->key;
     Widget* widget = ibutton->widget;
-    // iButtonKey* key = ibutton->key;
-    // const uint8_t* key_data = ibutton_key_get_data_p(key);
-    //
-    // FuriString* key_name;
-    // key_name = furi_string_alloc();
-    // path_extract_filename(ibutton->file_path, key_name, true);
-    //
-    // ibutton_text_store_set(ibutton, "\e#Delete %s?\e#", furi_string_get_cstr(key_name));
-    // widget_add_text_box_element(
-    //     widget, 0, 0, 128, 27, AlignCenter, AlignCenter, ibutton->text_store, true);
-    // widget_add_button_element(
-    //     widget, GuiButtonTypeLeft, "Cancel", ibutton_scene_delete_confirm_widget_callback, ibutton);
-    // widget_add_button_element(
-    //     widget,
-    //     GuiButtonTypeRight,
-    //     "Delete",
-    //     ibutton_scene_delete_confirm_widget_callback,
-    //     ibutton);
-    //
-    // switch(ibutton_key_get_type(key)) {
-    // case iButtonKeyDS1990:
-    //     ibutton_text_store_set(
-    //         ibutton,
-    //         "%02X %02X %02X %02X %02X %02X %02X %02X",
-    //         key_data[0],
-    //         key_data[1],
-    //         key_data[2],
-    //         key_data[3],
-    //         key_data[4],
-    //         key_data[5],
-    //         key_data[6],
-    //         key_data[7]);
-    //     widget_add_string_element(
-    //         widget, 64, 34, AlignCenter, AlignBottom, FontSecondary, "Dallas");
-    //     break;
-    //
-    // case iButtonKeyCyfral:
-    //     ibutton_text_store_set(ibutton, "%02X %02X", key_data[0], key_data[1]);
-    //     widget_add_string_element(
-    //         widget, 64, 34, AlignCenter, AlignBottom, FontSecondary, "Cyfral");
-    //     break;
-    //
-    // case iButtonKeyMetakom:
-    //     ibutton_text_store_set(
-    //         ibutton, "%02X %02X %02X %02X", key_data[0], key_data[1], key_data[2], key_data[3]);
-    //     widget_add_string_element(
-    //         widget, 64, 34, AlignCenter, AlignBottom, FontSecondary, "Metakom");
-    //     break;
-    // }
+
+    FuriString* tmp = furi_string_alloc();
+
+    widget_add_button_element(widget, GuiButtonTypeLeft, "Back", ibutton_widget_callback, context);
+    widget_add_button_element(widget, GuiButtonTypeRight, "Delete", ibutton_widget_callback, context);
+
+    furi_string_printf(tmp, "Delete %s?", ibutton->key_name);
     widget_add_string_element(
-        widget, 64, 46, AlignCenter, AlignBottom, FontSecondary, ibutton->key_name);
+        widget, 128/2, 0, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
+
+    furi_string_reset(tmp);
+    ibutton_key_get_rendered_brief_data(key, tmp);
+
+    widget_add_string_multiline_element(
+        widget, 128/2, 16, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(tmp));
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
-
-    // furi_string_free(key_name);
+    furi_string_free(tmp);
 }
 
 bool ibutton_scene_delete_confirm_on_event(void* context, SceneManagerEvent event) {
@@ -81,8 +35,10 @@ bool ibutton_scene_delete_confirm_on_event(void* context, SceneManagerEvent even
         if(event.event == GuiButtonTypeRight) {
             if(ibutton_delete_key(ibutton)) {
                 scene_manager_next_scene(scene_manager, iButtonSceneDeleteSuccess);
+            } else {
+                dialog_message_show_storage_error(ibutton->dialogs, "Cannot delete\nkey file");
+                scene_manager_previous_scene(scene_manager);
             }
-            //TODO: What if the key could not be deleted?
         } else if(event.event == GuiButtonTypeLeft) {
             scene_manager_previous_scene(scene_manager);
         }
