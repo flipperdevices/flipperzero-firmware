@@ -1,12 +1,13 @@
 /**
  * @file one_wire_slave.h
  * 
- * 1-Wire slave library. Currently it can only emulate ID.
+ * 1-Wire slave library.
  */
 
 #pragma once
 #include <stdint.h>
 #include <stdbool.h>
+
 #include <furi_hal_gpio.h>
 
 #ifdef __cplusplus
@@ -16,6 +17,7 @@ extern "C" {
 typedef struct OneWireDevice OneWireDevice;
 typedef struct OneWireSlave OneWireSlave;
 typedef void (*OneWireSlaveResultCallback)(void* context);
+typedef bool (*OneWireSlaveCommandCallback)(uint8_t command, void* context);
 
 /**
  * Allocate onewire slave
@@ -43,17 +45,15 @@ void onewire_slave_start(OneWireSlave* bus);
 void onewire_slave_stop(OneWireSlave* bus);
 
 /**
- * Attach device for emulation
- * @param bus 
- * @param device 
+ * Set a callback to report emulation success
+ * @param bus
+ * @param callback
+ * @param context
  */
-void onewire_slave_attach(OneWireSlave* bus, OneWireDevice* device);
-
-/**
- * Detach device from bus
- * @param bus 
- */
-void onewire_slave_detach(OneWireSlave* bus);
+void onewire_slave_set_command_callback(
+    OneWireSlave* bus,
+    OneWireSlaveCommandCallback callback,
+    void* context);
 
 /**
  * Set a callback to report emulation success

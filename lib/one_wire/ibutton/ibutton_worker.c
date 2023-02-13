@@ -28,7 +28,6 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->host = onewire_host_alloc(&ibutton_gpio);
     worker->slave = onewire_slave_alloc(&ibutton_gpio);
     worker->writer = ibutton_writer_alloc(worker->host);
-    worker->device = onewire_device_alloc(0, 0, 0, 0, 0, 0, 0, 0);
     worker->messages = furi_message_queue_alloc(1, sizeof(iButtonMessage));
 
     worker->mode_index = iButtonWorkerIdle;
@@ -99,7 +98,6 @@ void ibutton_worker_free(iButtonWorker* worker) {
     onewire_slave_free(worker->slave);
 
     onewire_host_free(worker->host);
-    onewire_device_free(worker->device);
 
     furi_message_queue_free(worker->messages);
 

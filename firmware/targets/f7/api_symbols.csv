@@ -164,7 +164,6 @@ Header,+,lib/mlib/m-variant.h,,
 Header,+,lib/nfc/nfc_device.h,,
 Header,+,lib/one_wire/ibutton/ibutton_worker.h,,
 Header,+,lib/one_wire/maxim_crc.h,,
-Header,+,lib/one_wire/one_wire_device.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_host_timing.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
@@ -2028,12 +2027,6 @@ Function,+,notification_message,void,"NotificationApp*, const NotificationSequen
 Function,+,notification_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,-,nrand48,long,unsigned short[3]
 Function,-,on_exit,int,"void (*)(int, void*), void*"
-Function,+,onewire_device_alloc,OneWireDevice*,"uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t"
-Function,+,onewire_device_attach,void,"OneWireDevice*, OneWireSlave*"
-Function,+,onewire_device_detach,void,OneWireDevice*
-Function,+,onewire_device_free,void,OneWireDevice*
-Function,+,onewire_device_get_id_p,uint8_t*,OneWireDevice*
-Function,+,onewire_device_send_id,void,OneWireDevice*
 Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
 Function,+,onewire_host_free,void,OneWireHost*
 Function,+,onewire_host_read,uint8_t,OneWireHost*
@@ -2049,9 +2042,8 @@ Function,+,onewire_host_target_search,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write_bit,void,"OneWireHost*, _Bool"
 Function,+,onewire_slave_alloc,OneWireSlave*,const GpioPin*
-Function,+,onewire_slave_attach,void,"OneWireSlave*, OneWireDevice*"
-Function,+,onewire_slave_detach,void,OneWireSlave*
 Function,+,onewire_slave_free,void,OneWireSlave*
+Function,+,onewire_slave_set_command_callback,void,"OneWireSlave*, OneWireSlaveCommandCallback, void*"
 Function,+,onewire_slave_set_result_callback,void,"OneWireSlave*, OneWireSlaveResultCallback, void*"
 Function,+,onewire_slave_start,void,OneWireSlave*
 Function,+,onewire_slave_stop,void,OneWireSlave*

@@ -11,7 +11,6 @@
 
 #include <one_wire/one_wire_host.h>
 #include <one_wire/one_wire_slave.h>
-#include <one_wire/one_wire_device.h>
 
 #include "ibutton_worker.h"
 #include "ibutton_writer.h"
@@ -38,7 +37,6 @@ struct iButtonWorker {
     iButtonKey* key_p;
     OneWireHost* host;
     OneWireSlave* slave;
-    OneWireDevice* device;
     iButtonWriter* writer;
     iButtonWorkerMode mode_index;
     FuriMessageQueue* messages;

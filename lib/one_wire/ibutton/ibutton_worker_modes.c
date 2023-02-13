@@ -2,7 +2,6 @@
 #include <furi_hal.h>
 
 #include "ibutton_worker_i.h"
-#include "ibutton_protocols.h"
 
 void ibutton_worker_mode_idle_start(iButtonWorker* worker);
 void ibutton_worker_mode_idle_tick(iButtonWorker* worker);
@@ -174,19 +173,12 @@ static void onewire_slave_callback(void* context) {
 }
 
 void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
-    // uint8_t* device_id = onewire_device_get_id_p(worker->device);
-    // const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
-    // const uint8_t key_size = ibutton_key_get_max_size();
-    // memcpy(device_id, key_id, key_size);
-
-    onewire_slave_attach(worker->slave, worker->device);
     onewire_slave_set_result_callback(worker->slave, onewire_slave_callback, worker);
     onewire_slave_start(worker->slave);
 }
 
 void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
     onewire_slave_stop(worker->slave);
-    onewire_slave_detach(worker->slave);
 }
 
 // void ibutton_worker_emulate_timer_cb(void* context) {
