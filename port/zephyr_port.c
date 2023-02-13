@@ -39,56 +39,48 @@ esp_loader_error_t configure_tty()
 
 esp_loader_error_t loader_port_serial_read(uint8_t *data, const uint16_t size, const uint32_t timeout)
 {
-    ssize_t bytes_read = 0;
-
     if (!device_is_ready(uart_dev) || data == NULL || size == 0) {
         return ESP_LOADER_ERROR_FAIL;
     }
 
-    tty_set_rx_timeout(&tty, timeout);
-    while (bytes_read < size) {
-        uint16_t chunk = CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE;
-        if (size < CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE) {
-            chunk = size;
-        }
+    ssize_t total_read = 0;
+    ssize_t remaining = size;
 
-        ssize_t read = tty_read(&tty, &data[bytes_read], chunk);
+    tty_set_rx_timeout(&tty, timeout);
+    while (remaining > 0) {
+        const uint16_t chunk_size = remaining < CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE ?
+            remaining : CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE;
+        ssize_t read = tty_read(&tty, &data[total_read], chunk_size);
         if (read < 0) {
             return ESP_LOADER_ERROR_TIMEOUT;
-        } else {
-            bytes_read += read;
         }
+        total_read += read;
+        remaining -= read;
     }
-
-    if (bytes_read != size) return ESP_LOADER_ERROR_FAIL;
 
     return ESP_LOADER_SUCCESS;
 }
 
 esp_loader_error_t loader_port_serial_write(const uint8_t *data, const uint16_t size, const uint32_t timeout)
 {
-    ssize_t bytes_wrote = 0;
-
     if (!device_is_ready(uart_dev) || data == NULL || size == 0) {
         return ESP_LOADER_ERROR_FAIL;
     }
 
+    ssize_t total_written = 0;
+    ssize_t remaining = size;
+
     tty_set_tx_timeout(&tty, timeout);
-    while (bytes_wrote < size) {
-        uint16_t chunk = CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE;
-        if (size < CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE) {
-            chunk = size;
-        }
-
-        ssize_t read = tty_write(&tty, &data[bytes_wrote], chunk);
-        if (read < 0) {
+    while (remaining > 0) {
+        const uint16_t chunk_size = remaining < CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE ?
+            remaining : CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE;
+        ssize_t written = tty_write(&tty, &data[total_written], chunk_size);
+        if (written < 0) {
             return ESP_LOADER_ERROR_TIMEOUT;
-        } else {
-            bytes_wrote += read;
         }
+        total_written += written;
+        remaining -= written;
     }
-
-    if (bytes_wrote != size) return ESP_LOADER_ERROR_FAIL;
 
     return ESP_LOADER_SUCCESS;
 }
@@ -154,4 +146,3 @@ esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
     /* bitrate-change can require tty re-configuration */
     return configure_tty();
 }
-
