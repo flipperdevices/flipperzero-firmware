@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fix Cyfral & Metakom emulation #2392 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2392)
 - UL: [Fixes for File Browser (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/334)
 - UL: [Revert some iButton fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f4af57d15a4b334c79c6933856bcdd54f8769049)
+- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 
 <a name="release">
 
