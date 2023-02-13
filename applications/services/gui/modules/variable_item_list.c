@@ -1,8 +1,8 @@
 #include "variable_item_list.h"
-#include "gui/canvas.h"
-#include <m-array.h>
-#include <furi.h>
 #include <gui/elements.h>
+#include <gui/canvas.h>
+#include <furi.h>
+#include <m-array.h>
 #include <stdint.h>
 
 struct VariableItem {
@@ -188,8 +188,8 @@ void variable_item_list_process_up(VariableItemList* variable_item_list) {
             uint8_t items_on_screen = 4;
             if(model->position > 0) {
                 model->position--;
-                if(((model->position - model->window_position) < 1) &&
-                   model->window_position > 0) {
+
+                if((model->position == model->window_position) && (model->window_position > 0)) {
                     model->window_position--;
                 }
             } else {

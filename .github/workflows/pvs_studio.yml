@@ -43,43 +43,31 @@ jobs:
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
 
-      - name: 'Make reports directory'
+      - name: 'Supply PVS credentials'
         run: |
-          rm -rf reports/
-          mkdir reports
-
-      - name: 'Generate compile_comands.json'
-        run: |
-          ./fbt COMPACT=1 version_json proto_ver icons firmware_cdb dolphin_internal dolphin_blocking _fap_icons
-
-      - name: 'Static code analysis'
-        run: |
-          source scripts/toolchain/fbtenv.sh
           pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
-          pvs-studio-analyzer analyze \
-              @.pvsoptions \
-              -j$(grep -c processor /proc/cpuinfo) \
-              -f build/f7-firmware-DC/compile_commands.json \
-              -o PVS-Studio.log
 
-      - name: 'Convert PVS-Studio output to html page'
-        run: plog-converter -a GA:1,2,3 -t fullhtml PVS-Studio.log -o reports/${DEFAULT_TARGET}-${SUFFIX}
-
-      - name: 'Upload artifacts to update server'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+      - name: 'Convert PVS-Studio output to html and detect warnings'
+        id: pvs-warn
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -p ${{ secrets.RSYNC_DEPLOY_PORT }} -H ${{ secrets.RSYNC_DEPLOY_HOST }} > ~/.ssh/known_hosts
-          echo "${{ secrets.RSYNC_DEPLOY_KEY }}" > deploy_key;
-          chmod 600 ./deploy_key;
-          rsync -avrzP --mkpath \
-              -e 'ssh -p ${{ secrets.RSYNC_DEPLOY_PORT }} -i ./deploy_key' \
-              reports/ ${{ secrets.RSYNC_DEPLOY_USER }}@${{ secrets.RSYNC_DEPLOY_HOST }}:/home/data/firmware-pvs-studio-report/"${BRANCH_NAME}/";
-          rm ./deploy_key;
+          WARNINGS=0
+          ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
+          echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
+
+      - name: 'Upload report'
+        if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_s3_endpoint: "${{ secrets.PVS_AWS_ENDPOINT }}"
+          aws_access_key_id: "${{ secrets.PVS_AWS_ACCESS_KEY }}"
+          aws_secret_access_key: "${{ secrets.PVS_AWS_SECRET_KEY }}"
+          source: "./build/f7-firmware-DC/pvsreport"
+          dest: "s3://${{ secrets.PVS_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/"
+          flags: "--recursive --acl public-read"
 
       - name: 'Find Previous Comment'
-        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
-        uses: peter-evans/find-comment@v1
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request && (steps.pvs-warn.outputs.warnings != 0) }}
+        uses: peter-evans/find-comment@v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -87,12 +75,19 @@ jobs:
           body-includes: 'PVS-Studio report for commit'
 
       - name: 'Create or update comment'
-        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request && (steps.pvs-warn.outputs.warnings != 0) }}
         uses: peter-evans/create-or-update-comment@v1
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
             **PVS-Studio report for commit `${{steps.names.outputs.commit_sha}}`:**
-            - [Report](https://update.flipperzero.one/builds/firmware-pvs-studio-report/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
+            - [Report](https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
           edit-mode: replace
+
+      - name: 'Raise exception'
+        if: ${{ steps.pvs-warn.outputs.warnings != 0 }}
+        run: |
+          echo "Please fix all PVS warnings before merge"
+          exit 1
+

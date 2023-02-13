@@ -16,7 +16,7 @@ appenv = ENV["APPENV"] = ENV.Clone(
 )
 
 appenv.Replace(
-    LINKER_SCRIPT=appenv.subst("$APP_LINKER_SCRIPT"),
+    LINKER_SCRIPT_PATH=appenv["APP_LINKER_SCRIPT_PATH"],
 )
 
 appenv.AppendUnique(
@@ -65,9 +65,8 @@ class FlipperExtAppBuildArtifacts:
 apps_to_build_as_faps = [
     FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
+    FlipperAppType.DEBUG,
 ]
-if appenv["DEBUG_TOOLS"]:
-    apps_to_build_as_faps.append(FlipperAppType.DEBUG)
 
 known_extapps = [
     app
@@ -79,17 +78,20 @@ known_extapps = [
 if extra_app_list := GetOption("extra_ext_apps"):
     known_extapps.extend(map(appenv["APPMGR"].get, extra_app_list.split(",")))
 
+incompatible_apps = []
 for app in known_extapps:
-    if not any(map(lambda t: t in app.targets, ["all", appenv.subst("f${TARGET_HW}")])):
-        warn(
-            WarningOnByDefault,
-            f"Can't build '{app.name}' (id '{app.appid}'): target mismatch"
-            f" (building for {appenv.subst('f${TARGET_HW}')}, app supports {app.targets}",
-        )
+    if not app.supports_hardware_target(appenv.subst("f${TARGET_HW}")):
+        incompatible_apps.append(app)
         continue
 
     appenv.BuildAppElf(app)
 
+if incompatible_apps:
+    warn(
+        WarningOnByDefault,
+        f"Skipping build of {len(incompatible_apps)} incompatible app(s): "
+        + ", ".join(f"'{app.name}' (id '{app.appid}')" for app in incompatible_apps),
+    )
 
 if appenv["FORCE"]:
     appenv.AlwaysBuild(
@@ -143,6 +145,11 @@ sdk_apisyms = appenv.SDKSymGenerator(
     "${BUILD_DIR}/assets/compiled/symbols.h", appenv["SDK_DEFINITION"]
 )
 Alias("api_syms", sdk_apisyms)
+ENV.Replace(
+    SDK_APISYMS=sdk_apisyms,
+    _APP_ICONS=appenv["_APP_ICONS"],
+)
+
 
 if appenv["FORCE"]:
     appenv.AlwaysBuild(sdk_source, sdk_tree, sdk_apicheck, sdk_apisyms)

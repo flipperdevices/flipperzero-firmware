@@ -119,8 +119,8 @@ void subghz_protocol_encoder_keeloq_free(void* context) {
  */
 static bool subghz_protocol_keeloq_gen_data(SubGhzProtocolEncoderKeeloq* instance, uint8_t btn) {
     instance->generic.cnt++;
-    uint32_t fix = btn << 28 | instance->generic.serial;
-    uint32_t decrypt = btn << 28 |
+    uint32_t fix = (uint32_t)btn << 28 | instance->generic.serial;
+    uint32_t decrypt = (uint32_t)btn << 28 |
                        (instance->generic.serial & 0x3FF)
                            << 16 | //ToDo in some protocols the discriminator is 0
                        instance->generic.cnt;
@@ -271,7 +271,8 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         subghz_protocol_keeloq_check_remote_controller(
             &instance->generic, instance->keystore, &instance->manufacture_name);
 
-        if(strcmp(instance->manufacture_name, "DoorHan")) {
+        if(strcmp(instance->manufacture_name, "DoorHan") != 0) {
+            FURI_LOG_E(TAG, "Wrong manufacturer name");
             break;
         }
 
@@ -287,7 +288,7 @@ bool subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* fl
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> i * 8) & 0xFF;
+            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> (i * 8)) & 0xFF;
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Unable to add Key");
@@ -389,11 +390,14 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
                             subghz_protocol_keeloq_const.te_delta)) {
                 // Found end TX
                 instance->decoder.parser_step = KeeloqDecoderStepReset;
-                if(instance->decoder.decode_count_bit >=
-                   subghz_protocol_keeloq_const.min_count_bit_for_found) {
+                if((instance->decoder.decode_count_bit >=
+                    subghz_protocol_keeloq_const.min_count_bit_for_found) &&
+                   (instance->decoder.decode_count_bit <=
+                    subghz_protocol_keeloq_const.min_count_bit_for_found + 2)) {
                     if(instance->generic.data != instance->decoder.decode_data) {
                         instance->generic.data = instance->decoder.decode_data;
-                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+                        instance->generic.data_count_bit =
+                            subghz_protocol_keeloq_const.min_count_bit_for_found;
                         if(instance->base.callback)
                             instance->base.callback(&instance->base, instance->base.context);
                     }
@@ -410,6 +414,8 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
                 if(instance->decoder.decode_count_bit <
                    subghz_protocol_keeloq_const.min_count_bit_for_found) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 1);
+                } else {
+                    instance->decoder.decode_count_bit++;
                 }
                 instance->decoder.parser_step = KeeloqDecoderStepSaveDuration;
             } else if(
@@ -420,6 +426,8 @@ void subghz_protocol_decoder_keeloq_feed(void* context, bool level, uint32_t dur
                 if(instance->decoder.decode_count_bit <
                    subghz_protocol_keeloq_const.min_count_bit_for_found) {
                     subghz_protocol_blocks_add_bit(&instance->decoder, 0);
+                } else {
+                    instance->decoder.decode_count_bit++;
                 }
                 instance->decoder.parser_step = KeeloqDecoderStepSaveDuration;
             } else {

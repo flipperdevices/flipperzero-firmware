@@ -7,7 +7,7 @@ enum SubmenuIndex {
     SubmenuIndexDetectReader,
     SubmenuIndexSaved,
     SubmenuIndexExtraAction,
-    SubmenuIndexAddManualy,
+    SubmenuIndexAddManually,
     SubmenuIndexDebug,
 };
 
@@ -28,7 +28,7 @@ void nfc_scene_start_on_enter(void* context) {
     submenu_add_item(
         submenu, "Extra Actions", SubmenuIndexExtraAction, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
-        submenu, "Add Manually", SubmenuIndexAddManualy, nfc_scene_start_submenu_callback, nfc);
+        submenu, "Add Manually", SubmenuIndexAddManually, nfc_scene_start_submenu_callback, nfc);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         submenu_add_item(
@@ -48,11 +48,14 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexRead);
             nfc->dev->dev_data.read_mode = NfcReadModeAuto;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneStart, SubmenuIndexDetectReader);
             bool sd_exist = storage_sd_status(nfc->dev->storage) == FSE_OK;
             if(sd_exist) {
                 nfc_device_data_clear(&nfc->dev->dev_data);
@@ -63,19 +66,27 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
+            // Save the scene state explicitly in each branch, so that
+            // if the user cancels loading a file, the Saved menu item
+            // is properly reselected.
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFileSelect);
             consumed = true;
         } else if(event.event == SubmenuIndexExtraAction) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneStart, SubmenuIndexExtraAction);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneExtraActions);
             consumed = true;
-        } else if(event.event == SubmenuIndexAddManualy) {
+        } else if(event.event == SubmenuIndexAddManually) {
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneStart, SubmenuIndexAddManually);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetType);
             consumed = true;
         } else if(event.event == SubmenuIndexDebug) {
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexDebug);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDebug);
             consumed = true;
         }
-        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, event.event);
     }
     return consumed;
 }
