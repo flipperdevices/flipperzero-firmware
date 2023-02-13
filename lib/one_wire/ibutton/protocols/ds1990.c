@@ -8,6 +8,8 @@
 #define DS1990_FAMILY_CODE 0x01U
 #define DS1990_FAMILY_NAME "DS1990"
 
+#define DS1990_CMD_READ_ROM 0x0FU
+
 typedef struct {
     OneWireSlave* slave;
 } DS1990ProtocolState;
@@ -56,6 +58,7 @@ static bool dallas_ds1990_emulate_callback(uint8_t command, void* context) {
     case DALLAS_COMMON_CMD_SEARCH_ROM:
         return dallas_common_emulate_search_rom(slave, &data->rom_data);
     case DALLAS_COMMON_CMD_READ_ROM:
+    case DS1990_CMD_READ_ROM:
         return dallas_common_emulate_read_rom(slave, &data->rom_data);
     default:
         return false;
