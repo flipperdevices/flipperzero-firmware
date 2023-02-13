@@ -253,7 +253,7 @@ const SubBruteProtocol subbrute_protocol_linear_delta_8bit_310 = {
     .frequency = 310000000,
     .bits = 8,
     .te = 0,
-    .repeat = 4,
+    .repeat = 5,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = LinearDeltaFileProtocol};
 

@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - UL: [Nice one encoder #335 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/335) NFC 14a SN emulation bug [#335](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/335) fixed.
 - UL: [SubGHz: Remove 467.75 From freq analyzer since it has too much noise (Frequency is still can be used, just excluded from FA to avoid false detections) (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f93462667c2571d5994ba1341c5d93df2577e2bc)
+- UL: Plugins -> SubGHz Bruteforcer: Fix Linear Delta 3 repeats (now its more stable and we will be sure signal is received correctly) (By xMasterX)
 
 <a name="release">
 
