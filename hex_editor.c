@@ -12,6 +12,7 @@
 #include <toolbox/stream/file_stream.h>
 
 #include <hex_editor_icons.h>
+// #include <assets_icons.h>
 
 #define TAG "HexEditor"
 
@@ -45,7 +46,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 0, 10, "Hello World!");
+    canvas_draw_str(canvas, 0, 10, "Line and mode:");
     // elements_button_right(canvas, "Info");
 
     // // elements_string_fit_width(canvas, buffer, 100);
@@ -61,11 +62,21 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     // elements_scrollable_text_line(
     //     canvas, 0, 20, 128, hex_editor->buffer, hex_editor->model->string_offset, false);
 
-    canvas_draw_line(canvas, 3, 20, 5, 30);
+    // canvas_draw_line(canvas, 3, 20, 5, 30);
+
+    canvas_draw_icon(canvas, 0, 20, &I_Pin_arrow_up_7x9);
+
+    if(hex_editor->model->mode) {
+        elements_button_left(canvas, "ASCII -");
+        elements_button_right(canvas, "ASCII +");
+    } else {
+        elements_button_left(canvas, "");
+        elements_button_right(canvas, "");
+    }
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_glyph(canvas, 0, 50, '0' + hex_editor->model->mode);
-    canvas_draw_glyph(canvas, 20, 50, hex_editor->model->editable_char);
+    canvas_draw_glyph(canvas, 0, 45, '0' + hex_editor->model->mode);
+    canvas_draw_glyph(canvas, 30, 45, hex_editor->model->editable_char);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
