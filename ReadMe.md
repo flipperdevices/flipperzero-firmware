@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0213-0044-0.76.1-dfbc77a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-13 00:40 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-13 00:40 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-13 12:48 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-13 12:48 EST`
 - UL: [iButton Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/)
 - UL: [Update filebrowser #327 (By CrazyClara)](https://github.com/DarkFlippers/unleashed-firmware/pull/327) - File sorting SAME algorithm used, back action fixed...
 - UL: [added support for subghz pagers #328 (By jbohack)](https://github.com/DarkFlippers/unleashed-firmware/pull/328)
@@ -42,6 +42,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubGHz -> HAL: **Fixed external CC1101 module issues** (transmission now works correctly) (fixed issue #331)](https://github.com/DarkFlippers/unleashed-firmware/pull/331)
 - UL: SubGHz: Use 17 (1W) pin for subghz debug mode
 - OFW: [Mark debug app as debug not external #2387 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/2387)
+- OFW: [BadUSB: disable CDC mode, USB mode switch fix #2394 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2394)
+- OFW: [Updater visual fixes #2391 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2391)
+- OFW: [Fix Cyfral & Metakom emulation #2392 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2392)
+- UL: [Fixes for File Browser (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/334)
+- UL: [Revert some iButton fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f4af57d15a4b334c79c6933856bcdd54f8769049)
 
 <a name="release">
 
