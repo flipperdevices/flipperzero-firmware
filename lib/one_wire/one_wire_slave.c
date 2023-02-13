@@ -105,7 +105,8 @@ static bool onewire_slave_bus_start(OneWireSlave* bus) {
     if(onewire_slave_show_presence(bus)) {
         // TODO think about multiple command cycles
         onewire_slave_receive_and_process_cmd(bus);
-        result = (bus->error == OneWireSlaveErrorNone || bus->error == OneWireSlaveErrorInvalidCommand);
+        result =
+            (bus->error == OneWireSlaveErrorNone || bus->error == OneWireSlaveErrorInvalidCommand);
 
     } else {
         result = false;

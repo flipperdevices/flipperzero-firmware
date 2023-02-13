@@ -1,12 +1,13 @@
 #include "ds1992.h"
 
 #include <core/core_defines.h>
-#include <lib/toolbox/pretty_format.h>
+#include <toolbox/pretty_format.h>
 
 #include "dallas_common.h"
 
 #define DS1992_FAMILY_CODE 0x08U
 #define DS1992_FAMILY_NAME "DS1992"
+
 #define DS1992_SRAM_DATA_SIZE 128U
 
 #define DS1992_BRIEF_HEAD_COUNT 4U
@@ -16,12 +17,21 @@
 
 #define DS1992_SRAM_DATA_KEY "Sram Data"
 
+#define BITS_IN_BYTE 8U
+#define BITS_IN_KBIT 1024U
+
+typedef struct {
+    OneWireSlave* slave;
+} DS1992ProtocolState;
+
 typedef struct {
     DallasCommonRomData rom_data;
     uint8_t sram_data[DS1992_SRAM_DATA_SIZE];
+    DS1992ProtocolState state;
 } DS1992ProtocolData;
 
 static bool dallas_ds1992_read(OneWireHost*, void*);
+static void dallas_ds1992_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
@@ -37,7 +47,7 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .name = DS1992_FAMILY_NAME,
 
     .read = dallas_ds1992_read,
-    .emulate = NULL,
+    .emulate = dallas_ds1992_emulate,
     .save = dallas_ds1992_save,
     .load = dallas_ds1992_load,
     .render_data = dallas_ds1992_render_data,
@@ -56,6 +66,32 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     } while(false);
 
     return success;
+}
+
+static bool dallas_ds1992_emulate_callback(uint8_t command, void* context) {
+    furi_assert(context);
+    DS1992ProtocolData* data = context;
+    OneWireSlave* slave = data->state.slave;
+
+    switch(command) {
+    case DALLAS_COMMON_CMD_SEARCH_ROM:
+        // TODO: respond with internal SRAM if a ROM command was performed
+        return dallas_common_emulate_search_rom(slave, &data->rom_data);
+    case DALLAS_COMMON_CMD_READ_ROM:
+        // TODO: set the state to indicate that a ROM command has occured
+        return dallas_common_emulate_read_rom(slave, &data->rom_data);
+    default:
+        return false;
+    }
+}
+
+void dallas_ds1992_emulate(OneWireSlave* slave, iButtonProtocolData* protocol_data) {
+    DS1992ProtocolData* data = protocol_data;
+    data->state.slave = slave;
+    // TODO: reset the command state
+
+    onewire_slave_set_command_callback(slave, dallas_ds1992_emulate_callback, protocol_data);
+    onewire_slave_start(slave);
 }
 
 bool dallas_ds1992_load(
@@ -106,7 +142,9 @@ void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolDa
     }
 
     furi_string_cat_printf(
-        result, "\nInternal SRAM: %zu Kbit\n", (size_t)(DS1992_SRAM_DATA_SIZE * 8U / 1024U));
+        result,
+        "\nInternal SRAM: %zu Kbit\n",
+        (size_t)(DS1992_SRAM_DATA_SIZE * BITS_IN_BYTE / BITS_IN_KBIT));
 
     for(size_t i = 0; i < DS1992_BRIEF_HEAD_COUNT; ++i) {
         furi_string_cat_printf(result, "%02X ", data->sram_data[i]);
