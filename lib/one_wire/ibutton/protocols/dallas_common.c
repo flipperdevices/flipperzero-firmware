@@ -4,9 +4,6 @@
 
 #define BITS_IN_BYTE 8U
 
-#define DALLAS_COMMON_CMD_READ_ROM (0x33U)
-#define DALLAS_COMMON_CMD_READ_MEM (0xF0U)
-
 #define DALLAS_COMMON_ROM_DATA_KEY_V1 "Data"
 #define DALLAS_COMMON_ROM_DATA_KEY_V2 "Rom Data"
 
@@ -35,22 +32,24 @@ bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, 
     return true;
 }
 
-void dallas_common_emulate_search_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data) {
+bool dallas_common_emulate_search_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data) {
     for(size_t i = 0; i < sizeof(DallasCommonRomData); i++) {
         for(size_t j = 0; j < BITS_IN_BYTE; j++) {
             bool bit = (rom_data->bytes[i] >> j) & 0x01;
 
-            if(!onewire_slave_send_bit(slave, bit)) return;
-            if(!onewire_slave_send_bit(slave, !bit)) return;
+            if(!onewire_slave_send_bit(slave, bit)) return false;
+            if(!onewire_slave_send_bit(slave, !bit)) return false;
 
             onewire_slave_receive_bit(slave);
             // TODO: check for errors and return if any
         }
     }
+
+    return true;
 }
 
-void dallas_common_emulate_read_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data) {
-    onewire_slave_send(slave, rom_data->bytes, sizeof(DallasCommonRomData));
+bool dallas_common_emulate_read_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data) {
+    return onewire_slave_send(slave, rom_data->bytes, sizeof(DallasCommonRomData));
 }
 
 bool dallas_common_save_rom_data(FlipperFormat* ff, const DallasCommonRomData* rom_data) {

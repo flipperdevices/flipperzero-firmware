@@ -6,11 +6,16 @@
 #include "dallas_common.h"
 
 #define DS1990_FAMILY_CODE 0x01U
+#define DS1990_FAMILY_NAME "DS1990"
 
 typedef struct {
     OneWireSlave* slave;
-    DallasCommonRomData* rom_data;
-} DS1990EmulateContext;
+} DS1990ProtocolState;
+
+typedef struct {
+    DallasCommonRomData rom_data;
+    DS1990ProtocolState state;
+} DS1990ProtocolData;
 
 static bool dallas_ds1990_read(OneWireHost*, iButtonProtocolData*);
 static void dallas_ds1990_emulate(OneWireSlave*, iButtonProtocolData*);
@@ -18,14 +23,14 @@ static bool dallas_ds1990_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1990_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1990_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1990_render_error(FuriString*, const iButtonProtocolData*);
-static bool dallas_ds1990_is_valid(const iButtonProtocolData*);
+static bool dallas_ds1990_is_data_valid(const iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .family_code = DS1990_FAMILY_CODE,
     .features = iButtonProtocolFeatureWriteBlank,
-    .data_size = sizeof(DallasCommonRomData),
-    .manufacturer = "Dallas",
-    .name = "DS1990",
+    .data_size = sizeof(DS1990ProtocolData),
+    .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
+    .name = DS1990_FAMILY_NAME,
 
     .read = dallas_ds1990_read,
     .emulate = dallas_ds1990_emulate,
@@ -34,72 +39,67 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .render_data = NULL, /* No data to render */
     .render_brief_data = dallas_ds1990_render_brief_data,
     .render_error = dallas_ds1990_render_error,
-    .is_valid = dallas_ds1990_is_valid,
+    .is_valid = dallas_ds1990_is_data_valid,
 };
 
 bool dallas_ds1990_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
-    DallasCommonRomData* rom_data = protocol_data;
-    return dallas_common_read_rom(host, rom_data);
+    DS1990ProtocolData* data = protocol_data;
+    return dallas_common_read_rom(host, &data->rom_data);
 }
 
-static bool dallas_ds1990_emulate_callback(uint8_t command, void* ctx) {
-    furi_assert(ctx);
+static bool dallas_ds1990_emulate_callback(uint8_t command, void* context) {
+    furi_assert(context);
+    DS1990ProtocolData* data = context;
+    OneWireSlave* slave = data->state.slave;
 
-    DS1990EmulateContext* context = ctx;
-    bool success = true;
-
-    if(command == 0xF0) {
-        dallas_common_emulate_search_rom(context->slave, context->rom_data);
-    } else if(command == 0x33) {
-        dallas_common_emulate_read_rom(context->slave, context->rom_data);
-    } else {
-        success = false;
+    switch(command) {
+    case DALLAS_COMMON_CMD_SEARCH_ROM:
+        return dallas_common_emulate_search_rom(slave, &data->rom_data);
+    case DALLAS_COMMON_CMD_READ_ROM:
+        return dallas_common_emulate_read_rom(slave, &data->rom_data);
+    default:
+        return false;
     }
-
-    return success;
 }
 
 void dallas_ds1990_emulate(OneWireSlave* slave, iButtonProtocolData* protocol_data) {
-    DS1990EmulateContext* context = malloc(sizeof(DS1990EmulateContext));
-    context->slave = slave;
-    context->rom_data = protocol_data;
+    DS1990ProtocolData* data = protocol_data;
+    data->state.slave = slave;
 
-    // TODO: this code leaks memory! find out how to pass context properly
-
-    onewire_slave_set_command_callback(slave, dallas_ds1990_emulate_callback, context);
+    onewire_slave_set_command_callback(slave, dallas_ds1990_emulate_callback, protocol_data);
     onewire_slave_start(slave);
 }
 
 bool dallas_ds1990_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {
-    const DallasCommonRomData* rom_data = protocol_data;
-    return dallas_common_save_rom_data(ff, rom_data);
+    const DS1990ProtocolData* data = protocol_data;
+    return dallas_common_save_rom_data(ff, &data->rom_data);
 }
 
 bool dallas_ds1990_load(
     FlipperFormat* ff,
     uint32_t format_version,
     iButtonProtocolData* protocol_data) {
-    DallasCommonRomData* rom_data = protocol_data;
-    return dallas_common_load_rom_data(ff, format_version, rom_data);
+    DS1990ProtocolData* data = protocol_data;
+    return dallas_common_load_rom_data(ff, format_version, &data->rom_data);
 }
 
 void dallas_ds1990_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
-    const DallasCommonRomData* rom_data = protocol_data;
+    const DS1990ProtocolData* data = protocol_data;
 
-    for(size_t i = 0; i < sizeof(rom_data->bytes); ++i) {
-        furi_string_cat_printf(result, "%02X ", rom_data->bytes[i]);
+    for(size_t i = 0; i < sizeof(DallasCommonRomData); ++i) {
+        furi_string_cat_printf(result, "%02X ", data->rom_data.bytes[i]);
     }
 }
 
 void dallas_ds1990_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {
-    const DallasCommonRomData* rom_data = protocol_data;
+    const DS1990ProtocolData* data = protocol_data;
 
-    if(!dallas_common_is_valid_crc(rom_data)) {
+    if(!dallas_common_is_valid_crc(&data->rom_data)) {
         furi_string_printf(result, "CRC Error");
     }
 }
 
-bool dallas_ds1990_is_valid(const iButtonProtocolData* protocol_data) {
-    const DallasCommonRomData* rom_data = protocol_data;
-    return dallas_common_is_valid_crc(rom_data);
+bool dallas_ds1990_is_data_valid(const iButtonProtocolData* protocol_data) {
+    const DS1990ProtocolData* data = protocol_data;
+    return dallas_common_is_valid_crc(&data->rom_data);
 }

@@ -6,6 +6,7 @@
 #include "dallas_common.h"
 
 #define DS1992_FAMILY_CODE 0x08U
+#define DS1992_FAMILY_NAME "DS1992"
 #define DS1992_SRAM_DATA_SIZE 128U
 
 #define DS1992_BRIEF_HEAD_COUNT 4U
@@ -25,15 +26,15 @@ static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_brief_data(FuriString*, const iButtonProtocolData*);
-static bool dallas_ds1992_is_valid(const iButtonProtocolData*);
+static bool dallas_ds1992_is_data_valid(const iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
     .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteBlank |
                 iButtonProtocolFeatureWriteCopy,
     .data_size = sizeof(DS1992ProtocolData),
-    .manufacturer = "Dallas",
-    .name = "DS1992",
+    .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
+    .name = DS1992_FAMILY_NAME,
 
     .read = dallas_ds1992_read,
     .emulate = NULL,
@@ -41,7 +42,7 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .load = dallas_ds1992_load,
     .render_data = dallas_ds1992_render_data,
     .render_brief_data = dallas_ds1992_render_brief_data,
-    .is_valid = dallas_ds1992_is_valid,
+    .is_valid = dallas_ds1992_is_data_valid,
 };
 
 bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -127,7 +128,7 @@ void dallas_ds1992_render_error(FuriString* result, const iButtonProtocolData* p
     }
 }
 
-bool dallas_ds1992_is_valid(const iButtonProtocolData* protocol_data) {
+bool dallas_ds1992_is_data_valid(const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData* data = protocol_data;
     return dallas_common_is_valid_crc(&data->rom_data);
 }
