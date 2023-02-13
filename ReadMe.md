@@ -33,15 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-13 12:48 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-13 12:48 EST`
-- UL: [iButton Fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/)
-- UL: [Update filebrowser #327 (By CrazyClara)](https://github.com/DarkFlippers/unleashed-firmware/pull/327) - File sorting SAME algorithm used, back action fixed...
-- UL: [added support for subghz pagers #328 (By jbohack)](https://github.com/DarkFlippers/unleashed-firmware/pull/328)
-- Added: [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
-- UL: [Fix file browser update issues #333 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/333) - Also removed dumb assumptions from code comments
-- UL: [Archive and FileBrowser: Fixed #332 (large folders parse issue)](https://github.com/DarkFlippers/unleashed-firmware/pull/332)
-- UL: [SubGHz -> HAL: **Fixed external CC1101 module issues** (transmission now works correctly) (fixed issue #331)](https://github.com/DarkFlippers/unleashed-firmware/pull/331)
-- UL: SubGHz: Use 17 (1W) pin for subghz debug mode
-- OFW: [Mark debug app as debug not external #2387 (By Willy-JL)](https://github.com/flipperdevices/flipperzero-firmware/pull/2387)
 - OFW: [BadUSB: disable CDC mode, USB mode switch fix #2394 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2394)
 - OFW: [Updater visual fixes #2391 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2391)
 - OFW: [Fix Cyfral & Metakom emulation #2392 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2392)
