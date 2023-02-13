@@ -18,14 +18,36 @@ void cli_command_device_info_callback(const char* key, const char* value, bool l
     printf("%-30s: %s\r\n", key, value);
 }
 
+void cli_command_power_info_callback(const char* key, const char* value, bool last, void* context) {
+    UNUSED(last);
+    UNUSED(context);
+    printf("%-24s: %s\r\n", key, value);
+}
+
 /* 
  * Device Info Command
  * This command is intended to be used by humans
+ * 
+ * Arguments:
+ * - device - print device info
+ * - power - print power info
+ * - power_debug - print power debug info
  */
-void cli_command_device_info(Cli* cli, FuriString* args, void* context) {
+void cli_command_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
-    UNUSED(args);
-    furi_hal_info_get(cli_command_device_info_callback, '_', context);
+    if(furi_string_size(args) > 0) {
+        if(!furi_string_cmp(args, "device")) {
+            furi_hal_info_get(cli_command_device_info_callback, '_', context);
+        } else if(!furi_string_cmp(args, "power")) {
+            furi_hal_power_info_get(cli_command_power_info_callback, '_', context);
+        } else if(!furi_string_cmp(args, "power_debug")) {
+            furi_hal_power_debug_get(cli_command_power_info_callback, NULL);
+        } else {
+            cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
+        }
+        return;
+    }
+    cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
 }
 
 void cli_command_help(Cli* cli, FuriString* args, void* context) {
@@ -410,8 +432,8 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
 }
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
-    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
+    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
 
     cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
     cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);
