@@ -35,7 +35,6 @@ typedef enum {
 
 typedef struct UpdaterManifestProcessingState {
     UpdateManifest* manifest;
-    FuriString* message;
     bool ready_to_be_applied;
 } UpdaterManifestProcessingState;
 

@@ -99,7 +99,6 @@ void updater_scene_loadcfg_on_exit(void* context) {
 
     if(updater->pending_update) {
         update_manifest_free(updater->pending_update->manifest);
-        furi_string_free(updater->pending_update->message);
     }
 
     widget_reset(updater->widget);
