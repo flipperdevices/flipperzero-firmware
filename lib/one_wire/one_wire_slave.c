@@ -1,5 +1,4 @@
 #include "one_wire_slave.h"
-#include "one_wire_slave_i.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -76,83 +75,6 @@ static bool onewire_slave_show_presence(OneWireSlave* bus) {
     return true;
 }
 
-static bool onewire_slave_receive_bit(OneWireSlave* bus) {
-    // wait while bus is low
-    uint32_t time = OWS_SLOT_MAX;
-    time = onewire_slave_wait_while_gpio_is(bus, time, false);
-    if(time == 0) {
-        bus->error = OneWireSlaveErrorResetInProgress;
-        return false;
-    }
-
-    // wait while bus is high
-    time = OWS_MSG_HIGH_TIMEOUT;
-    time = onewire_slave_wait_while_gpio_is(bus, time, true);
-    if(time == 0) {
-        bus->error = OneWireSlaveErrorAwaitTimeslot;
-        return false;
-    }
-
-    // wait a time of zero
-    time = OWS_READ_MIN;
-    time = onewire_slave_wait_while_gpio_is(bus, time, false);
-
-    return (time > 0);
-}
-
-static bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
-    const bool write_zero = !value;
-
-    // wait while bus is low
-    uint32_t time = OWS_SLOT_MAX;
-    time = onewire_slave_wait_while_gpio_is(bus, time, false);
-    if(time == 0) {
-        bus->error = OneWireSlaveErrorResetInProgress;
-        return false;
-    }
-
-    // wait while bus is high
-    time = OWS_MSG_HIGH_TIMEOUT;
-    time = onewire_slave_wait_while_gpio_is(bus, time, true);
-    if(time == 0) {
-        bus->error = OneWireSlaveErrorAwaitTimeslot;
-        return false;
-    }
-
-    // choose write time
-    if(write_zero) {
-        furi_hal_gpio_write(bus->gpio_pin, false);
-        time = OWS_WRITE_ZERO;
-    } else {
-        time = OWS_READ_MAX;
-    }
-
-    // hold line for ZERO or ONE time
-    furi_delay_us(time);
-    furi_hal_gpio_write(bus->gpio_pin, true);
-
-    return true;
-}
-
-// static void onewire_slave_cmd_search_rom(OneWireSlave* bus) {
-//     const uint8_t key_bytes = 8;
-//     uint8_t* key = onewire_device_get_id_p(bus->device);
-//
-//     for(uint8_t i = 0; i < key_bytes; i++) {
-//         uint8_t key_byte = key[i];
-//
-//         for(uint8_t j = 0; j < 8; j++) {
-//             bool bit = (key_byte >> j) & 0x01;
-//
-//             if(!onewire_slave_send_bit(bus, bit)) return;
-//             if(!onewire_slave_send_bit(bus, !bit)) return;
-//
-//             onewire_slave_receive_bit(bus);
-//             if(bus->error != NO_ERROR) return;
-//         }
-//     }
-// }
-
 static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
     uint8_t cmd;
     onewire_slave_receive(bus, &cmd, 1);
@@ -228,10 +150,10 @@ static void onewire_slave_exti_cb(void* context) {
 
 OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin) {
     OneWireSlave* bus = malloc(sizeof(OneWireSlave));
+
     bus->gpio_pin = gpio_pin;
     bus->error = OneWireSlaveErrorNone;
-    bus->result_cb = NULL;
-    bus->result_cb_ctx = NULL;
+
     return bus;
 }
 
@@ -266,6 +188,64 @@ void onewire_slave_set_result_callback(
     void* context) {
     bus->result_cb = result_cb;
     bus->result_cb_ctx = context;
+}
+
+bool onewire_slave_receive_bit(OneWireSlave* bus) {
+    // wait while bus is low
+    uint32_t time = OWS_SLOT_MAX;
+    time = onewire_slave_wait_while_gpio_is(bus, time, false);
+    if(time == 0) {
+        bus->error = OneWireSlaveErrorResetInProgress;
+        return false;
+    }
+
+    // wait while bus is high
+    time = OWS_MSG_HIGH_TIMEOUT;
+    time = onewire_slave_wait_while_gpio_is(bus, time, true);
+    if(time == 0) {
+        bus->error = OneWireSlaveErrorAwaitTimeslot;
+        return false;
+    }
+
+    // wait a time of zero
+    time = OWS_READ_MIN;
+    time = onewire_slave_wait_while_gpio_is(bus, time, false);
+
+    return (time > 0);
+}
+
+bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
+    const bool write_zero = !value;
+
+    // wait while bus is low
+    uint32_t time = OWS_SLOT_MAX;
+    time = onewire_slave_wait_while_gpio_is(bus, time, false);
+    if(time == 0) {
+        bus->error = OneWireSlaveErrorResetInProgress;
+        return false;
+    }
+
+    // wait while bus is high
+    time = OWS_MSG_HIGH_TIMEOUT;
+    time = onewire_slave_wait_while_gpio_is(bus, time, true);
+    if(time == 0) {
+        bus->error = OneWireSlaveErrorAwaitTimeslot;
+        return false;
+    }
+
+    // choose write time
+    if(write_zero) {
+        furi_hal_gpio_write(bus->gpio_pin, false);
+        time = OWS_WRITE_ZERO;
+    } else {
+        time = OWS_READ_MAX;
+    }
+
+    // hold line for ZERO or ONE time
+    furi_delay_us(time);
+    furi_hal_gpio_write(bus->gpio_pin, true);
+
+    return true;
 }
 
 bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t data_length) {

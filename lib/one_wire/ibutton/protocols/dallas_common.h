@@ -1,7 +1,9 @@
 #pragma once
 
 #include <flipper_format.h>
+
 #include <one_wire/one_wire_host.h>
+#include <one_wire/one_wire_slave.h>
 
 typedef union {
     struct {
@@ -17,6 +19,10 @@ bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data);
 bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data);
 
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size);
+
+void dallas_common_emulate_search_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data);
+
+void dallas_common_emulate_read_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data);
 
 bool dallas_common_save_rom_data(FlipperFormat* ff, const DallasCommonRomData* rom_data);
 

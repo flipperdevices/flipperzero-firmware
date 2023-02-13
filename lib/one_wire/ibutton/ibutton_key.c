@@ -85,6 +85,17 @@ bool ibutton_key_read(iButtonKey* key, OneWireHost* host) {
     return ibutton_key_read_onewire(key, host);
 }
 
+bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* slave) {
+    bool success = false;
+
+    if(key->protocol_id < iButtonProtocolMax) {
+        ibutton_protocols_emulate(slave, key->protocol_data, key->protocol_id);
+        success = true;
+    }
+
+    return success;
+}
+
 bool ibutton_key_save(iButtonKey* key, const char* file_name) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);

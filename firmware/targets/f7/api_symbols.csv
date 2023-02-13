@@ -1594,6 +1594,7 @@ Function,-,hypot,double,"double, double"
 Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
 Function,+,ibutton_key_alloc,iButtonKey*,
+Function,+,ibutton_key_emulate,_Bool,"iButtonKey*, OneWireSlave*"
 Function,+,ibutton_key_free,void,iButtonKey*
 Function,+,ibutton_key_get_features,uint32_t,iButtonKey*
 Function,+,ibutton_key_get_manufacturer_name,const char*,iButtonKey*
@@ -2043,6 +2044,10 @@ Function,+,onewire_host_write,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write_bit,void,"OneWireHost*, _Bool"
 Function,+,onewire_slave_alloc,OneWireSlave*,const GpioPin*
 Function,+,onewire_slave_free,void,OneWireSlave*
+Function,+,onewire_slave_receive,_Bool,"OneWireSlave*, uint8_t*, const uint8_t"
+Function,+,onewire_slave_receive_bit,_Bool,OneWireSlave*
+Function,+,onewire_slave_send,_Bool,"OneWireSlave*, const uint8_t*, const uint8_t"
+Function,+,onewire_slave_send_bit,_Bool,"OneWireSlave*, _Bool"
 Function,+,onewire_slave_set_command_callback,void,"OneWireSlave*, OneWireSlaveCommandCallback, void*"
 Function,+,onewire_slave_set_result_callback,void,"OneWireSlave*, OneWireSlaveResultCallback, void*"
 Function,+,onewire_slave_start,void,OneWireSlave*

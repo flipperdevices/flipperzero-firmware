@@ -61,6 +61,14 @@ bool ibutton_protocols_read(
     return ibutton_protocols[protocol_id]->read(host, protocol_data);
 }
 
+void ibutton_protocols_emulate(
+    OneWireSlave* slave,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
+    furi_assert(protocol_id < iButtonProtocolMax);
+    ibutton_protocols[protocol_id]->emulate(slave, protocol_data);
+}
+
 bool ibutton_protocols_save(
     FlipperFormat* ff,
     const iButtonProtocolData* protocol_data,

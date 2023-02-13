@@ -1,11 +1,9 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
-
 #include <core/string.h>
+
 #include <one_wire/one_wire_host.h>
+#include <one_wire/one_wire_slave.h>
 
 #include <flipper_format.h>
 
@@ -18,6 +16,7 @@ typedef enum {
 } iButtonProtocolFeature;
 
 typedef bool (*iButtonProtocolReadFunc)(OneWireHost*, iButtonProtocolData*);
+typedef void (*iButtonProtocolEmulateFunc)(OneWireSlave*, iButtonProtocolData*);
 typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);
@@ -31,6 +30,7 @@ typedef struct {
     const char* name;
 
     iButtonProtocolReadFunc read;
+    iButtonProtocolEmulateFunc emulate;
     iButtonProtocolSaveFunc save;
     iButtonProtocolLoadFunc load;
     iButtonProtocolRenderDataFunc render_data;

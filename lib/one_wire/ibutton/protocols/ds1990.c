@@ -7,7 +7,13 @@
 
 #define DS1990_FAMILY_CODE 0x01U
 
-static bool dallas_ds1990_read(OneWireHost*, void*);
+typedef struct {
+    OneWireSlave* slave;
+    DallasCommonRomData* rom_data;
+} DS1990EmulateContext;
+
+static bool dallas_ds1990_read(OneWireHost*, iButtonProtocolData*);
+static void dallas_ds1990_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool dallas_ds1990_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1990_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1990_render_brief_data(FuriString*, const iButtonProtocolData*);
@@ -22,6 +28,7 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .name = "DS1990",
 
     .read = dallas_ds1990_read,
+    .emulate = dallas_ds1990_emulate,
     .save = dallas_ds1990_save,
     .load = dallas_ds1990_load,
     .render_data = NULL, /* No data to render */
@@ -33,6 +40,34 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
 bool dallas_ds1990_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DallasCommonRomData* rom_data = protocol_data;
     return dallas_common_read_rom(host, rom_data);
+}
+
+static bool dallas_ds1990_emulate_callback(uint8_t command, void* ctx) {
+    furi_assert(ctx);
+
+    DS1990EmulateContext* context = ctx;
+    bool success = true;
+
+    if(command == 0xF0) {
+        dallas_common_emulate_search_rom(context->slave, context->rom_data);
+    } else if(command == 0x33) {
+        dallas_common_emulate_read_rom(context->slave, context->rom_data);
+    } else {
+        success = false;
+    }
+
+    return success;
+}
+
+void dallas_ds1990_emulate(OneWireSlave* slave, iButtonProtocolData* protocol_data) {
+    DS1990EmulateContext* context = malloc(sizeof(DS1990EmulateContext));
+    context->slave = slave;
+    context->rom_data = protocol_data;
+
+    // TODO: this code leaks memory! find out how to pass context properly
+
+    onewire_slave_set_command_callback(slave, dallas_ds1990_emulate_callback, context);
+    onewire_slave_start(slave);
 }
 
 bool dallas_ds1990_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {

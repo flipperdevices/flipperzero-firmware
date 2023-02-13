@@ -3,21 +3,21 @@
 
 #include "ibutton_worker_i.h"
 
-void ibutton_worker_mode_idle_start(iButtonWorker* worker);
-void ibutton_worker_mode_idle_tick(iButtonWorker* worker);
-void ibutton_worker_mode_idle_stop(iButtonWorker* worker);
+static void ibutton_worker_mode_idle_start(iButtonWorker* worker);
+static void ibutton_worker_mode_idle_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_idle_stop(iButtonWorker* worker);
 
-void ibutton_worker_mode_emulate_start(iButtonWorker* worker);
-void ibutton_worker_mode_emulate_tick(iButtonWorker* worker);
-void ibutton_worker_mode_emulate_stop(iButtonWorker* worker);
+static void ibutton_worker_mode_emulate_start(iButtonWorker* worker);
+static void ibutton_worker_mode_emulate_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_emulate_stop(iButtonWorker* worker);
 
-void ibutton_worker_mode_read_start(iButtonWorker* worker);
-void ibutton_worker_mode_read_tick(iButtonWorker* worker);
-void ibutton_worker_mode_read_stop(iButtonWorker* worker);
+static void ibutton_worker_mode_read_start(iButtonWorker* worker);
+static void ibutton_worker_mode_read_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_read_stop(iButtonWorker* worker);
 
-void ibutton_worker_mode_write_start(iButtonWorker* worker);
-void ibutton_worker_mode_write_tick(iButtonWorker* worker);
-void ibutton_worker_mode_write_stop(iButtonWorker* worker);
+static void ibutton_worker_mode_write_start(iButtonWorker* worker);
+static void ibutton_worker_mode_write_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_write_stop(iButtonWorker* worker);
 
 const iButtonWorkerModeType ibutton_worker_modes[] = {
     {
@@ -62,24 +62,24 @@ void ibutton_worker_mode_idle_stop(iButtonWorker* worker) {
 
 /*********************** READ ***********************/
 
-typedef struct {
-    uint32_t last_dwt_value;
-    FuriStreamBuffer* stream;
-} iButtonReadContext;
+// typedef struct {
+//     uint32_t last_dwt_value;
+//     FuriStreamBuffer* stream;
+// } iButtonReadContext;
 
-void ibutton_worker_comparator_callback(bool level, void* context) {
-    iButtonReadContext* read_context = context;
+// static void ibutton_worker_comparator_callback(bool level, void* context) {
+//     iButtonReadContext* read_context = context;
+//
+//     uint32_t current_dwt_value = DWT->CYCCNT;
+//
+//     LevelDuration data =
+//         level_duration_make(level, current_dwt_value - read_context->last_dwt_value);
+//     furi_stream_buffer_send(read_context->stream, &data, sizeof(LevelDuration), 0);
+//
+//     read_context->last_dwt_value = current_dwt_value;
+// }
 
-    uint32_t current_dwt_value = DWT->CYCCNT;
-
-    LevelDuration data =
-        level_duration_make(level, current_dwt_value - read_context->last_dwt_value);
-    furi_stream_buffer_send(read_context->stream, &data, sizeof(LevelDuration), 0);
-
-    read_context->last_dwt_value = current_dwt_value;
-}
-
-// bool ibutton_worker_read_comparator(iButtonWorker* worker) {
+// static bool ibutton_worker_read_comparator(iButtonWorker* worker) {
 //     bool result = false;
 //
 //     protocol_dict_decoders_start(worker->protocols);
@@ -172,16 +172,16 @@ static void onewire_slave_callback(void* context) {
     ibutton_worker_notify_emulate(worker);
 }
 
-void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
+static void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
     onewire_slave_set_result_callback(worker->slave, onewire_slave_callback, worker);
-    onewire_slave_start(worker->slave);
+    ibutton_key_emulate(worker->key_p, worker->slave);
 }
 
-void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
+static void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
     onewire_slave_stop(worker->slave);
 }
 
-// void ibutton_worker_emulate_timer_cb(void* context) {
+// static void ibutton_worker_emulate_timer_cb(void* context) {
 //     furi_assert(context);
 //     iButtonWorker* worker = context;
 //
@@ -194,7 +194,7 @@ void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
 //     furi_hal_ibutton_pin_write(level);
 // }
 
-// void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
+// static void ibutton_worker_emulate_timer_start(iButtonWorker* worker) {
 //     furi_assert(worker->key_p);
 //     const uint8_t* key_id = ibutton_key_get_data_p(worker->key_p);
 //     const uint8_t key_size = ibutton_key_get_max_size();
@@ -218,10 +218,10 @@ void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
 //     furi_hal_ibutton_emulate_start(0, ibutton_worker_emulate_timer_cb, worker);
 // }
 
-void ibutton_worker_emulate_timer_stop(iButtonWorker* worker) {
-    UNUSED(worker);
-    furi_hal_ibutton_emulate_stop();
-}
+// static void ibutton_worker_emulate_timer_stop(iButtonWorker* worker) {
+//     UNUSED(worker);
+//     furi_hal_ibutton_emulate_stop();
+// }
 
 void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_assert(worker->key_p);
@@ -229,15 +229,7 @@ void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_hal_rfid_pins_reset();
     furi_hal_rfid_pin_pull_pulldown();
 
-    // switch(ibutton_key_get_type(worker->key_p)) {
-    // case iButtonKeyDS1990:
     ibutton_worker_emulate_dallas_start(worker);
-    // break;
-    // case iButtonKeyCyfral:
-    // case iButtonKeyMetakom:
-    //     ibutton_worker_emulate_timer_start(worker);
-    //     break;
-    // }
 }
 
 void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
@@ -246,18 +238,8 @@ void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
 
 void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
     furi_assert(worker->key_p);
-
+    ibutton_worker_emulate_dallas_stop(worker);
     furi_hal_rfid_pins_reset();
-
-    // switch(ibutton_key_get_type(worker->key_p)) {
-    // case iButtonKeyDS1990:
-    //     ibutton_worker_emulate_dallas_stop(worker);
-    //     break;
-    // case iButtonKeyCyfral:
-    // case iButtonKeyMetakom:
-    //     ibutton_worker_emulate_timer_stop(worker);
-    //     break;
-    // }
 }
 
 /*********************** WRITE ***********************/

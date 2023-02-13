@@ -7,7 +7,9 @@
 #pragma once
 
 #include <core/string.h>
+
 #include <one_wire/one_wire_host.h>
+#include <one_wire/one_wire_slave.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,6 +44,8 @@ void ibutton_key_get_rendered_error(iButtonKey* key, FuriString* result);
 uint32_t ibutton_key_get_features(iButtonKey* key);
 
 bool ibutton_key_read(iButtonKey* key, OneWireHost* host);
+
+bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* slave);
 
 bool ibutton_key_save(iButtonKey* key, const char* file_name);
 
