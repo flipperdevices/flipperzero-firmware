@@ -243,6 +243,11 @@ void ibutton_notification_message(iButton* ibutton, uint32_t message) {
     notification_message(ibutton->notifications, ibutton_notification_sequences[message]);
 }
 
+void ibutton_submenu_callback(void* context, uint32_t index) {
+    iButton* ibutton = context;
+    view_dispatcher_send_custom_event(ibutton->view_dispatcher, index);
+}
+
 void ibutton_widget_callback(GuiButtonType result, InputType type, void* context) {
     iButton* ibutton = context;
     if(type == InputTypeShort) {

@@ -8,21 +8,13 @@ enum SubmenuIndex {
     SubmenuIndexAdd,
 };
 
-void ibutton_scene_start_submenu_callback(void* context, uint32_t index) {
-    iButton* ibutton = context;
-    view_dispatcher_send_custom_event(ibutton->view_dispatcher, index);
-}
-
 void ibutton_scene_start_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    submenu_add_item(
-        submenu, "Read", SubmenuIndexRead, ibutton_scene_start_submenu_callback, ibutton);
-    submenu_add_item(
-        submenu, "Saved", SubmenuIndexSaved, ibutton_scene_start_submenu_callback, ibutton);
-    submenu_add_item(
-        submenu, "Add Manually", SubmenuIndexAdd, ibutton_scene_start_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Read", SubmenuIndexRead, ibutton_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Saved", SubmenuIndexSaved, ibutton_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Add Manually", SubmenuIndexAdd, ibutton_submenu_callback, ibutton);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneStart));

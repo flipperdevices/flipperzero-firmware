@@ -10,53 +10,27 @@ enum SubmenuIndex {
     SubmenuIndexInfo,
 };
 
-void ibutton_scene_saved_key_menu_submenu_callback(void* context, uint32_t index) {
-    iButton* ibutton = context;
-    view_dispatcher_send_custom_event(ibutton->view_dispatcher, index);
-}
-
 void ibutton_scene_saved_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
     const uint32_t features = ibutton_key_get_features(ibutton->key);
 
-    submenu_add_item(
-        submenu,
-        "Emulate",
-        SubmenuIndexEmulate,
-        ibutton_scene_saved_key_menu_submenu_callback,
-        ibutton);
+    submenu_add_item(submenu, "Emulate", SubmenuIndexEmulate, ibutton_submenu_callback, ibutton);
 
     if(features & iButtonProtocolFeatureWriteBlank) {
         submenu_add_item(
-            submenu,
-            "Write Blank",
-            SubmenuIndexWriteBlank,
-            ibutton_scene_saved_key_menu_submenu_callback,
-            ibutton);
+            submenu, "Write Blank", SubmenuIndexWriteBlank, ibutton_submenu_callback, ibutton);
     }
 
     if(features & iButtonProtocolFeatureWriteCopy) {
         submenu_add_item(
-            submenu,
-            "Write Copy",
-            SubmenuIndexWriteCopy,
-            ibutton_scene_saved_key_menu_submenu_callback,
-            ibutton);
+            submenu, "Write Copy", SubmenuIndexWriteCopy, ibutton_submenu_callback, ibutton);
     }
 
-    submenu_add_item(
-        submenu, "Edit", SubmenuIndexEdit, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
-
-    submenu_add_item(
-        submenu,
-        "Delete",
-        SubmenuIndexDelete,
-        ibutton_scene_saved_key_menu_submenu_callback,
-        ibutton);
-    submenu_add_item(
-        submenu, "Info", SubmenuIndexInfo, ibutton_scene_saved_key_menu_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Edit", SubmenuIndexEdit, ibutton_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Delete", SubmenuIndexDelete, ibutton_submenu_callback, ibutton);
+    submenu_add_item(submenu, "Info", SubmenuIndexInfo, ibutton_submenu_callback, ibutton);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
 }
