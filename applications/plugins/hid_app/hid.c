@@ -2,6 +2,7 @@
 #include "views.h"
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
+#include <toolbox/path_helper.h>
 
 #define TAG "HidApp"
 
@@ -376,16 +377,12 @@ int32_t hid_ble_app(void* p) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    FuriString* bt_key_path = furi_string_alloc();
+    PathHelper* path_helper = path_helper_alloc_apps_data();
+    path_helper_append(path_helper, HID_BT_KEYS_STORAGE_NAME);
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_get_my_data_path(storage, bt_key_path);
-    furi_string_cat(bt_key_path, "/" HID_BT_KEYS_STORAGE_NAME);
+    bt_keys_storage_set_storage_path(app->bt, path_helper_get(path_helper));
 
-    bt_keys_storage_set_storage_path(app->bt, furi_string_get_cstr(bt_key_path));
-
-    furi_string_free(bt_key_path);
-    furi_record_close(RECORD_STORAGE);
+    path_helper_free(path_helper);
 
     if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
         FURI_LOG_E(TAG, "Failed to switch to HID profile");

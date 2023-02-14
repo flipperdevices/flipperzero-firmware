@@ -7,6 +7,7 @@
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
+#include <toolbox/path_helper.h>
 
 #define TAG "MusicPlayer"
 
@@ -306,25 +307,20 @@ int32_t music_player_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            FuriString* app_path = furi_string_alloc();
-
-            storage_common_get_my_data_path(storage, app_path);
-
-            furi_string_set(file_path, app_path);
+            PathHelper* path_helper = path_helper_alloc_apps_data();
+            furi_string_set(file_path, path_helper_get(path_helper));
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);
             browser_options.hide_ext = false;
-            browser_options.base_path = furi_string_get_cstr(app_path);
+            browser_options.base_path = path_helper_get(path_helper);
 
             DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
             bool res = dialog_file_browser_show(dialogs, file_path, file_path, &browser_options);
 
             furi_record_close(RECORD_DIALOGS);
-            furi_record_close(RECORD_STORAGE);
-            furi_string_free(app_path);
+            path_helper_free(path_helper);
 
             if(!res) {
                 FURI_LOG_E(TAG, "No file selected");
