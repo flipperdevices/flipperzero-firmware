@@ -97,7 +97,7 @@ void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* mo
     int distanceRed = abs(ledRed - userRed);
     int distanceGreen = abs(ledGreen - userGreen);
     int distanceBlue = abs(ledBlue - userBlue);
-    float percentageRed = 100 - ((distanceRed / 255.0) * 100);
+    float percentageRed = 100 - ((distanceRed / 255.0) * 100); //make sure one number is float, otherwise C will calc wrong
     float percentageGreen = 100 - ((distanceGreen / 255.0) * 100);
     float percentageBlue = 100 - ((distanceBlue / 255.0) * 100);
     float fullPercentage = (percentageRed + percentageGreen + percentageBlue) / 3;
