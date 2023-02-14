@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,14.1,,
+Version,+,14.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -191,6 +191,7 @@ Header,+,lib/toolbox/manchester_decoder.h,,
 Header,+,lib/toolbox/manchester_encoder.h,,
 Header,+,lib/toolbox/md5.h,,
 Header,+,lib/toolbox/path.h,,
+Header,+,lib/toolbox/path_helper.h,,
 Header,+,lib/toolbox/protocols/protocol_dict.h,,
 Header,+,lib/toolbox/random_name.h,,
 Header,+,lib/toolbox/saved_struct.h,,
@@ -2068,6 +2069,11 @@ Function,+,path_extract_dirname,void,"const char*, FuriString*"
 Function,+,path_extract_extension,void,"FuriString*, char*, size_t"
 Function,+,path_extract_filename,void,"FuriString*, FuriString*, _Bool"
 Function,+,path_extract_filename_no_ext,void,"const char*, FuriString*"
+Function,+,path_helper_alloc,PathHelper*,
+Function,+,path_helper_alloc_apps_data,PathHelper*,
+Function,+,path_helper_append,void,"PathHelper*, const char*"
+Function,+,path_helper_free,void,PathHelper*
+Function,+,path_helper_get,const char*,PathHelper*
 Function,-,pcTaskGetName,char*,TaskHandle_t
 Function,-,pcTimerGetName,const char*,TimerHandle_t
 Function,-,pclose,int,FILE*
