@@ -8,18 +8,37 @@
 
 extern const Icon* digits[17];
 
+int colorsEasy[] = {
+    0xff0000,
+    0x00ff00,
+    0x0000ff,
+    0xffff00,
+    0xff00ff,
+    0x00ffff,
+    0xffffff,
+    0x500000,
+    0x005000,
+    0x505000,
+    0x505050,
+    0x500050,
+    0x005050,
+};
+
 struct ColorGuessPlay {
     View* view;
     ColorGuessPlayCallback callback;
     void* context;
 };
 
+
 typedef struct {
     ColorGuessPlayStatus status;
     int cursorpos;
     int digit[6];
+    int color;
     int time_spent;
     int timestamp_start;
+    int closeness;
 } ColorGuessPlayModel;
 
 void color_guess_play_set_callback(
@@ -30,6 +49,41 @@ void color_guess_play_set_callback(
     furi_assert(callback);
     instance->callback = callback;
     instance->context = context;
+}
+
+void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
+    furi_assert(context);
+    ColorGuess* app = context;
+    //Reset timer
+    FuriHalRtcDateTime date_time;
+    furi_hal_rtc_get_datetime(&date_time);
+    model->timestamp_start = furi_hal_rtc_datetime_to_timestamp(&date_time);
+
+    //Set random color
+    NotificationMessage notification_led_message_1;
+    notification_led_message_1.type = NotificationMessageTypeLedRed;
+    NotificationMessage notification_led_message_2;
+    notification_led_message_2.type = NotificationMessageTypeLedGreen;
+    NotificationMessage notification_led_message_3;
+    notification_led_message_3.type = NotificationMessageTypeLedBlue;
+    
+    model->color = colorsEasy[rand() % ARR_SIZE(colorsEasy)];
+    notification_led_message_1.data.led.value = ((model->color >> 16) & 0xFF);
+    notification_led_message_2.data.led.value = ((model->color >> 8) & 0xFF);
+    notification_led_message_3.data.led.value = ((model->color) & 0xFF);
+
+    model->closeness = ((model->color >> 8) & 0xFF);
+
+    const NotificationSequence notification_sequence = {
+        &notification_led_message_1,
+        &notification_led_message_2,
+        &notification_led_message_3,
+        &message_do_not_reset,
+        NULL,
+    };
+    notification_message(app->notification, &notification_sequence);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+    
 }
 
 void parse_time_str(char* buffer, int32_t sec) {
@@ -46,7 +100,6 @@ void parse_time_str(char* buffer, int32_t sec) {
 void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
-    const int closeness = 0;
     FuriHalRtcDateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
     uint32_t timestamp = furi_hal_rtc_datetime_to_timestamp(&date_time);
@@ -58,7 +111,7 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
 
     //snprintf(timer_string, TIMER_LENGHT, TIMER_FORMAT, date_time.minute, date_time.second);
     parse_time_str(timer_string, time_elapsed);
-    snprintf(closeness_string, CLOSENESS_LENGTH, CLOSENESS_FORMAT, closeness);
+    snprintf(closeness_string, CLOSENESS_LENGTH, CLOSENESS_FORMAT, model->closeness);
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -85,9 +138,7 @@ static void color_guess_play_model_init(ColorGuessPlayModel* const model) {
     for (int i = 0;i < 6; i++) {
         model->digit[i] = 0;
     }
-    FuriHalRtcDateTime date_time;
-    furi_hal_rtc_get_datetime(&date_time);
-    model->timestamp_start = furi_hal_rtc_datetime_to_timestamp(&date_time);
+    model->closeness = 0;
 }
 
 bool color_guess_play_input(InputEvent* event, void* context) {
@@ -176,6 +227,7 @@ void color_guess_play_enter(void* context) {
         ColorGuessPlayModel * model,
         {
             color_guess_play_model_init(model);
+            color_guess_play_new_round(instance->context, model);
         },
         true
     );
