@@ -11,4 +11,4 @@
 
 #define MAX_PATTERNX (2 + 1 + 1 + 3)
 
-void pattern_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event);
+void pattern_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event);

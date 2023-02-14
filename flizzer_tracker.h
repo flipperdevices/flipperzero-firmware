@@ -26,30 +26,26 @@
 #define FLIZZER_TRACKER_FOLDER "/ext/apps_data/flizzer_tracker"
 #define FILE_NAME_LEN 64
 
-typedef enum
-{
+typedef enum {
     EventTypeInput,
     EventTypeSaveSong,
     EventTypeLoadSong,
     EventTypeSetAudioMode,
 } EventType;
 
-typedef struct
-{
+typedef struct {
     EventType type;
     InputEvent input;
     uint32_t period;
 } FlizzerTrackerEvent;
 
-typedef enum
-{
+typedef enum {
     PATTERN_VIEW,
     INST_EDITOR_VIEW,
     EXPORT_WAV_VIEW,
 } TrackerMode;
 
-typedef enum
-{
+typedef enum {
     EDIT_PATTERN,
     EDIT_SEQUENCE,
     EDIT_SONGINFO,
@@ -57,8 +53,7 @@ typedef enum
     EDIT_PROGRAM,
 } TrackerFocus;
 
-typedef enum
-{
+typedef enum {
     SI_PATTERNPOS,
     SI_SEQUENCEPOS,
     SI_SONGSPEED,
@@ -72,8 +67,7 @@ typedef enum
     SI_PARAMS,
 } SongInfoParam;
 
-typedef enum
-{
+typedef enum {
     INST_CURRENTINSTRUMENT,
     INST_INSTRUMENTNAME,
 
@@ -127,14 +121,12 @@ typedef enum
     INST_PARAMS,
 } InstrumentParam;
 
-typedef struct
-{
-    View *view;
-    void *context;
+typedef struct {
+    View* view;
+    void* context;
 } TrackerView;
 
-typedef enum
-{
+typedef enum {
     VIEW_TRACKER,
     VIEW_KEYBOARD,
     VIEW_SUBMENU_PATTERN,
@@ -143,35 +135,32 @@ typedef enum
     VIEW_SETTINGS,
 } FlizzerTrackerViews;
 
-typedef enum
-{
+typedef enum {
     SUBMENU_PATTERN_LOAD_SONG,
     SUBMENU_PATTERN_SAVE_SONG,
     SUBMENU_PATTERN_SETTINGS,
     SUBMENU_PATTERN_EXIT,
 } PatternSubmenuParams;
 
-typedef enum
-{
+typedef enum {
     SUBMENU_INSTRUMENT_EXIT,
 } InstrumentSubmenuParams;
 
-typedef struct
-{
-    NotificationApp *notification;
-    FuriMessageQueue *event_queue;
-    Gui *gui;
-    TrackerView *tracker_view;
-    ViewDispatcher *view_dispatcher;
-    TextInput *text_input;
-    Storage *storage;
-    Stream *stream;
-    FuriString *filepath;
-    DialogsApp *dialogs;
-    Submenu *pattern_submenu;
-    Submenu *instrument_submenu;
-    VariableItemList *settings_list;
-    Widget *overwrite_file_widget;
+typedef struct {
+    NotificationApp* notification;
+    FuriMessageQueue* event_queue;
+    Gui* gui;
+    TrackerView* tracker_view;
+    ViewDispatcher* view_dispatcher;
+    TextInput* text_input;
+    Storage* storage;
+    Stream* stream;
+    FuriString* filepath;
+    DialogsApp* dialogs;
+    Submenu* pattern_submenu;
+    Submenu* instrument_submenu;
+    VariableItemList* settings_list;
+    Widget* overwrite_file_widget;
     char filename[FILE_NAME_LEN + 1];
     bool was_it_back_keypress;
     uint32_t current_time;
@@ -187,7 +176,8 @@ typedef struct
     uint8_t selected_param;
 
     uint8_t mode, focus;
-    uint8_t patternx, current_channel, current_digit, program_position, current_program_step, current_instrument, current_note, current_volume;
+    uint8_t patternx, current_channel, current_digit, program_position, current_program_step,
+        current_instrument, current_note, current_volume;
 
     uint8_t inst_editor_shift;
 
@@ -204,10 +194,9 @@ typedef struct
     char value[10];
 } FlizzerTrackerApp;
 
-typedef struct
-{
-    FlizzerTrackerApp *tracker;
+typedef struct {
+    FlizzerTrackerApp* tracker;
 } TrackerViewModel;
 
-void draw_callback(Canvas *canvas, void *ctx);
-bool input_callback(InputEvent *input_event, void *ctx);
+void draw_callback(Canvas* canvas, void* ctx);
+bool input_callback(InputEvent* input_event, void* ctx);

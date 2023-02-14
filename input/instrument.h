@@ -9,4 +9,4 @@
 #include "../tracker_engine/tracker_engine_defs.h"
 #include "../util.h"
 
-void instrument_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event);
+void instrument_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event);

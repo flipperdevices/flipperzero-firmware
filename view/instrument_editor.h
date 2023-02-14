@@ -7,5 +7,5 @@
 #include <furi.h>
 #include <gui/gui.h>
 
-void draw_instrument_view(Canvas *canvas, FlizzerTrackerApp *tracker);
-void draw_instrument_program_view(Canvas *canvas, FlizzerTrackerApp *tracker);
+void draw_instrument_view(Canvas* canvas, FlizzerTrackerApp* tracker);
+void draw_instrument_program_view(Canvas* canvas, FlizzerTrackerApp* tracker);

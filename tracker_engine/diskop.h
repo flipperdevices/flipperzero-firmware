@@ -7,4 +7,4 @@
 #include <storage/storage.h>
 #include <toolbox/stream/file_stream.h>
 
-bool load_song(TrackerSong *song, Stream *stream);
+bool load_song(TrackerSong* song, Stream* stream);

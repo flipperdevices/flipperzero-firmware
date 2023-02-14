@@ -10,5 +10,5 @@
 #include "../tracker_engine/tracker_engine_defs.h"
 #include "../util.h"
 
-void songinfo_edit_event(FlizzerTrackerApp *tracker, FlizzerTrackerEvent *event);
-void return_from_keyboard_callback(void *ctx);
+void songinfo_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event);
+void return_from_keyboard_callback(void* ctx);
