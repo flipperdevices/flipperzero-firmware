@@ -14,10 +14,12 @@ Down - Scissors
 
 */
 
+#include "rock_paper_scissors_icons.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_resources.h>
 #include <gui/gui.h>
+#include <gui/icon.h>
 #include <locale/locale.h>
 
 #include <lib/subghz/subghz_tx_rx_worker.h>
@@ -37,6 +39,25 @@ Down - Scissors
 
 // The major version must be a single character (it can be anything - like '1' or 'A' or 'a').
 #define MAJOR_VERSION 'A'
+
+typedef enum {
+    DolphinLocalLooking = 0,
+    DolphinLocalReady,
+    DolphinLocalCount,
+    DolphinLocalRock,
+    DolphinLocalPaper,
+    DolphinLocalScissors,
+    DolphinRemoteReady,
+    DolphinRemoteCount,
+    DolphinRemoteRock,
+    DolphinRemotePaper,
+    DolphinRemoteScissors,
+} DolphinImageIndex;
+
+const Icon* images[] = {
+    &I_Local_Looking, &I_Local_Ready,
+    &I_Local_Count, &I_Local_Rock, &I_Local_Paper, &I_Local_Scissors,  
+    &I_Remote_Ready, &I_Remote_Count, &I_Remote_Rock, &I_Remote_Paper, &I_Remote_Scissors }; 
 
 // The various moves a player can make. 
 // Some moves may be invalid depending on the current game state.
@@ -269,97 +290,167 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
     
     canvas_set_font(canvas, FontSecondary);
 
-    // Temporary - Just show game text.
-    switch (localPlayer) {
-        case StateLookingForPlayer:
-            furi_string_printf(data->buffer, "Waiting for join: %d", data->gameNumber);
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
-        break;
-
+    switch (remotePlayer) {
         case StateReady:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Press OK for 1.");
+            canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteReady]);
         break;
 
         case StateCount1:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Press OK for 2.");
+            canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteCount]);
+            canvas_draw_str_aligned(canvas, 70, 15, AlignLeft, AlignTop, "1");
         break;
 
         case StateCount2:
-            canvas_set_font(canvas, FontPrimary);
-            canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignTop, "^ Rock");
-            canvas_draw_str_aligned(canvas, 50, 30, AlignLeft, AlignTop, "> Paper");
-            canvas_draw_str_aligned(canvas, 5, 50, AlignLeft, AlignTop, "v Scissors");
+            canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteCount]);
+            canvas_draw_str_aligned(canvas, 70, 15, AlignLeft, AlignTop, "2");
         break;
 
         case StateRock:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Rock");
+        case StateTieRock:
+        case StateWonRock:
+        case StateLostRock:
+            if (StateCount2 != localPlayer) {
+                canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteRock]);
+                canvas_draw_str_aligned(canvas, 70, 55, AlignLeft, AlignTop, "Rock"); 
+            } else {
+                canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteCount]);
+            }
         break;
 
         case StatePaper:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Paper");
+        case StateTiePaper:
+        case StateWonPaper:
+        case StateLostPaper:
+            if (StateCount2 != localPlayer) {
+                canvas_draw_icon(canvas, 64, 0, images[DolphinRemotePaper]);
+                canvas_draw_str_aligned(canvas, 70, 55, AlignLeft, AlignTop, "Paper"); 
+            } else {
+                canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteCount]);
+            }
         break;
 
         case StateScissors:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Scissors");
-        break;
-
-        case StateWonRock:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You won!!!");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Rock v. Scissors");
-        break;
-        case StateWonPaper:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You won!!!");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Paper v. Rock");
-        break;
-        case StateWonScissors:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You won!!!");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Scissors v. Paper");
-        break;
-
-        case StateTieRock:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You tied!");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Rock v. Rock");
-        break;
-        case StateTiePaper:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You tied!");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Paper v. Paper");
-        break;
         case StateTieScissors:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You tied!");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Scissors v. Scissors");
-        break;
-
-        case StateLostRock:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You lost.");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Rock v. Paper");
-        break;
-        case StateLostPaper:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You lost.");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Paper v. Scissors");
-        break;
+        case StateWonScissors:
         case StateLostScissors:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "You lost.");
-            canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "Scissors v. Rock");
-        break;
-
-        case StateError:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Unknown error");
-        break;
-
-        case StateErrorLocalFast:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Too fast!");
-        break;
-
-        case StateErrorRemoteFast:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Remote too fast!");
-        break;
-
-        case StateErrorRemoteTimeout:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Remote timeout.");
+            if (StateCount2 != localPlayer) {
+                canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteScissors]);
+                canvas_draw_str_aligned(canvas, 70, 55, AlignLeft, AlignTop, "Scissors"); 
+            } else {
+                canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteCount]);
+            }
         break;
 
         default:
-            canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "Unexpected.");
+        break;
+    }
+
+    switch (localPlayer) {
+        case StateLookingForPlayer:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalLooking]);
+            furi_string_printf(data->buffer, "Waiting for player, game %03d.", data->gameNumber);
+            canvas_draw_str_aligned(canvas, 0, 55, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+        break;
+
+        case StateReady:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalReady]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Press OK    for 1.");
+        break;
+
+        case StateCount1:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalCount]);
+            canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignTop, "1");
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Press OK for 2.");
+        break;
+
+        case StateCount2:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalCount]);
+            canvas_draw_str_aligned(canvas, 50, 15, AlignLeft, AlignTop, "2");
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "^Rock >Paper vScissor");
+        break;
+
+        case StateRock:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalRock]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Rock");
+        break;
+
+        case StatePaper:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalPaper]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Paper");
+        break;
+
+        case StateScissors:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalScissors]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Scissors");
+        break;
+
+        case StateWonRock:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalRock]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Rock");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You won!!!");
+        break;
+        case StateWonPaper:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalPaper]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Paper");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You won!!!");
+        break;
+        case StateWonScissors:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalScissors]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Scissors");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You won!!!");
+        break;
+
+        case StateTieRock:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalRock]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Rock");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You tied!");
+        break;
+        case StateTiePaper:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalPaper]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Paper");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You tied!");
+        break;
+        case StateTieScissors:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalScissors]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Scissors");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You tied!");
+        break;
+
+        case StateLostRock:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalRock]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Rock");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You lost.");
+        break;
+        case StateLostPaper:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalPaper]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Paper");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You lost.");
+        break;
+        case StateLostScissors:
+            canvas_draw_icon(canvas, 0, 0, images[DolphinLocalScissors]);
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Scissors");
+            canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You lost.");
+        break;
+
+        case StateError:
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unknown error");
+        break;
+
+        case StateErrorLocalFast:
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Too fast!");
+        break;
+
+        case StateErrorRemoteFast:
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Remote too fast!");
+        break;
+
+        case StateErrorRemoteTimeout:
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Remote timeout.");
+        break;
+
+        default:
+            canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unexpected.");
         break;
     }
 
@@ -497,7 +588,7 @@ static bool isError(GameState state) {
 // Temporary timings, since I don't have second Flipper & send commands via laptop. 
 #define DURATION_NO_MOVE_DETECTED_ERROR 60000
 #define DURATION_SHOW_ERROR 3000
-#define DURATION_SHOW_MOVES 5000
+#define DURATION_SHOW_MOVES 500
 #define DURATION_WIN_LOSS_TIE 10000
 
 // Updates the state machine, if needed.
@@ -834,6 +925,7 @@ int32_t rock_paper_scissors_app(void* p) {
                                 joinGameNumber = game_context->data->gameNumber;
                                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
                                     rps_broadcast_join(game_context, joinGameNumber);
+                                    rps_state_machine_remote_joined(game_context);
                                     furi_mutex_release(game_context->mutex);
                                 } else {
                                     FURI_LOG_E(TAG, "Failed to aquire mutex.");

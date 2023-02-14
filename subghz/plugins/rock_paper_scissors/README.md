@@ -2,9 +2,9 @@
 ## Status
 This is current a work in progress.  
 - Most of the game logic is complete (two flippers should be able to play each other.)
+- UI to show images instead of text.
 
 Remaining work:
-- UI to show images instead of text.
 - Tone when button pressed.
 - Show games found & let user pick the game to join.
 - Log joined game into SD card.
@@ -34,6 +34,8 @@ These directions assume you are starting at the flipper desktop.  If not, please
 - Choose "Rock Paper Scissors"
 
 - Do the same steps on your second Flipper.
+
+- On one of the flippers press Left arrow to join the game.
 
 - Once two players are joined:
   - Press "OK" to send "1".  The other player should also press "OK" to send "1" back (at the same time!)
