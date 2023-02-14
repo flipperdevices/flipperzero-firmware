@@ -1,0 +1,13 @@
+App(
+    appid="Flizzer_Tracker",
+    name="Flizzer Tracker",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flizzer_tracker_app",
+    cdefines=["APP_FLIZZER_TRACKER"],
+    stack_size=2 * 1024,
+    order=90,
+	fap_icon="flizzer_tracker.png",
+	fap_icon_assets="images",
+    fap_category="Music",
+    fap_icon_assets_symbol="flizzer_tracker",
+)

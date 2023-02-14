@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Plugins -> SubGHz Bruteforcer: Fix Linear Delta 3 repeats (now its more stable and we will be sure signal is received correctly) (By xMasterX)
 - UL: Show RSSI in weather station app and in pocsag pager app (By xMasterX)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds will now have 103 more new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
+- Added: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker) - Feel free to provide feedback in the project.
 
 <a name="release">
 
@@ -287,6 +288,7 @@ $ ./fbt dolphin_ext
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
