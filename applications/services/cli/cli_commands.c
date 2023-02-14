@@ -25,7 +25,7 @@ void cli_command_power_info_callback(const char* key, const char* value, bool la
 }
 
 /* 
- * Device Info Command
+ * Info Command
  * This command is intended to be used by humans
  * 
  * Arguments:

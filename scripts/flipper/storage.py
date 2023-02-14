@@ -66,7 +66,7 @@ class FlipperStorage:
         self.port.open()
         self.port.reset_input_buffer()
         # Send a command with a known syntax to make sure the buffer is flushed
-        self.send("device_info\r")
+        self.send("info device\r")
         self.read.until("hardware_model")
         # And read buffer until we get prompt
         self.read.until(self.CLI_PROMPT)
