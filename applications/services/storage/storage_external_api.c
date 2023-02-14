@@ -635,7 +635,6 @@ FS_Error storage_common_fs_info(
 
 bool storage_common_get_my_data_path(Storage* storage, FuriString* path) {
     furi_assert(storage);
-    furi_assert(path);
 
     FuriThreadId thread_id = furi_thread_get_current_id();
     FuriString* app_name = furi_string_alloc_set(furi_thread_get_appid(thread_id));
@@ -648,7 +647,9 @@ bool storage_common_get_my_data_path(Storage* storage, FuriString* path) {
     do {
         if(!storage_simply_mkdir(storage, APPSDATA_PATH)) break;
         if(!storage_simply_mkdir(storage, furi_string_get_cstr(app_path))) break;
-        furi_string_set(path, app_path);
+        if(path) {
+            furi_string_set(path, app_path);
+        }
         result = true;
     } while(false);
 
