@@ -17,7 +17,6 @@ void color_guess_scene_color_set_on_enter(void* context) {
 
 bool color_guess_scene_color_set_on_event(void* context, SceneManagerEvent event) {
     ColorGuess* app = context;
-    UNUSED(app);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {

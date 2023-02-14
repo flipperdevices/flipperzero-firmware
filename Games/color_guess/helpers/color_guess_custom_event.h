@@ -7,4 +7,10 @@ typedef enum {
     ColorGuessCustomEventColorSetRight,
     ColorGuessCustomEventColorSetOk,
     ColorGuessCustomEventColorSetBack,
+    ColorGuessCustomEventPlayUp,
+    ColorGuessCustomEventPlayDown,
+    ColorGuessCustomEventPlayLeft,
+    ColorGuessCustomEventPlayRight,
+    ColorGuessCustomEventPlayOk,
+    ColorGuessCustomEventPlayBack,
 } ColorGuessCustomEvent;

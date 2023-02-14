@@ -1,13 +1,16 @@
-#include "color_guess_play.h"
 #include "../color_guess.h"
 #include "color_guess_icons.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
+#include <dolphin/dolphin.h>
+
+extern const Icon* digits[17];
 
 struct ColorGuessPlay {
     View* view;
+    ColorGuessPlayCallback callback;
     void* context;
 };
 
@@ -18,6 +21,16 @@ typedef struct {
     int time_spent;
     int timestamp_start;
 } ColorGuessPlayModel;
+
+void color_guess_play_set_callback(
+    ColorGuessPlay* instance,
+    ColorGuessPlayCallback callback,
+    void* context) {
+    furi_assert(instance);
+    furi_assert(callback);
+    instance->callback = callback;
+    instance->context = context;
+}
 
 void parse_time_str(char* buffer, int32_t sec) {
     //int seconds = sec % 60;
@@ -78,8 +91,75 @@ static void color_guess_play_model_init(ColorGuessPlayModel* const model) {
 }
 
 bool color_guess_play_input(InputEvent* event, void* context) {
-    furi_assert(context);
-    UNUSED(event);
+    furi_assert(context); 
+    ColorGuessPlay* instance = context;
+    if (event->type == InputTypeRelease) {
+        switch(event->key) {
+            case InputKeyBack:
+                with_view_model(
+                    instance->view,
+                    ColorGuessPlayModel * model,
+                    {
+                        UNUSED(model);
+                        instance->callback(ColorGuessCustomEventPlayBack, instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyLeft:
+                with_view_model(
+                    instance->view,
+                    ColorGuessPlayModel* model,
+                    {
+                        model->cursorpos--;
+                        if (model->cursorpos < 0)
+                        {
+                            model->cursorpos = 5;
+                        }
+                    },
+                    true);
+                break;
+            case InputKeyRight:
+                with_view_model(
+                    instance->view,
+                    ColorGuessPlayModel* model,
+                    {
+                        model->cursorpos++;
+                        if (model->cursorpos > 5)
+                        {
+                            model->cursorpos = 0;
+                        }
+                    },
+                    true);
+                break;
+            case InputKeyUp:
+                with_view_model(
+                    instance->view,
+                    ColorGuessPlayModel* model,
+                    {
+                        model->digit[model->cursorpos]++;
+                        if (model->digit[model->cursorpos] > 15) {
+                            model->digit[model->cursorpos] = 0;
+                        }
+                    },
+                    true);
+                break;
+            case InputKeyDown:
+                with_view_model(
+                    instance->view,
+                    ColorGuessPlayModel* model,
+                    {
+                        model->digit[model->cursorpos]--;
+                        if (model->digit[model->cursorpos] < 0) {
+                            model->digit[model->cursorpos] = 15;
+                        }
+                    },
+                    true);
+                break;
+            case InputKeyOk:
+            case InputKeyMAX:
+                break;
+        }
+    }
     return true;
 }
 
@@ -90,25 +170,25 @@ void color_guess_play_exit(void* context) {
 
 void color_guess_play_enter(void* context) {
     furi_assert(context);
-    //ColorGuessPlay* instance = (ColorGuessPlay*)context;
-    /*with_view_model(
-      //  instance->view,
-        context,
+    ColorGuessPlay* instance = (ColorGuessPlay*)context;
+    with_view_model(
+        instance->view,
         ColorGuessPlayModel * model,
         {
             color_guess_play_model_init(model);
         },
         true
-    );*/
+    );
 }
 
 ColorGuessPlay* color_guess_play_alloc() {
     ColorGuessPlay* instance = malloc(sizeof(ColorGuessPlay));
     instance->view = view_alloc();
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(ColorGuessPlayModel));
+    view_set_context(instance->view, instance); // furi_assert crashes in events without this
     view_set_draw_callback(instance->view, (ViewDrawCallback)color_guess_play_draw);
-    //view_set_input_callback(instance->view, color_guess_play_input);
-    //view_set_enter_callback(instance->view, color_guess_play_enter);
+    view_set_input_callback(instance->view, color_guess_play_input);
+    view_set_enter_callback(instance->view, color_guess_play_enter);
     //view_set_exit_callback(instance->view, color_guess_play_exit);
 
     with_view_model(
@@ -126,7 +206,13 @@ ColorGuessPlay* color_guess_play_alloc() {
 void color_guess_play_free(ColorGuessPlay* instance) {
     furi_assert(instance);
 
-
+    with_view_model(
+        instance->view,
+        ColorGuessPlayModel * model,
+        {
+            free(model->digit);
+        },
+        true);
     view_free(instance->view);
     free(instance);
 }

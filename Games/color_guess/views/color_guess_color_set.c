@@ -107,7 +107,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         {
                             model->cursorpos = 5;
                         }
-                        
                     },
                     true);
                 break;
@@ -157,9 +156,7 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                 break;
         }
     }
-    //ColorGuessColorSet* instance = context;
-
-
+    
     return true;
 }
 
