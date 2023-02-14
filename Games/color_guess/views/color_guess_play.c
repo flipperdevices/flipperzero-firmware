@@ -72,7 +72,7 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     notification_led_message_2.data.led.value = ((model->color >> 8) & 0xFF);
     notification_led_message_3.data.led.value = ((model->color) & 0xFF);
 
-    model->closeness = ((model->color >> 8) & 0xFF);
+    //model->closeness = ((model->color >> 8) & 0xFF);
 
     const NotificationSequence notification_sequence = {
         &notification_led_message_1,
@@ -82,8 +82,26 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
         NULL,
     };
     notification_message(app->notification, &notification_sequence);
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set    
+}
+
+void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* model) {
+    UNUSED(context);
+    int userRed = (model->digit[0] * 16) + model->digit[1];
+    int userGreen = (model->digit[2] * 16) + model->digit[3];
+    int userBlue = (model->digit[4] * 16) + model->digit[5];
+    int ledRed = ((model->color >> 16) & 0xFF);
+    int ledGreen = ((model->color >> 8) & 0xFF);
+    int ledBlue = ((model->color) & 0xFF);
     
+    int distanceRed = abs(ledRed - userRed);
+    int distanceGreen = abs(ledGreen - userGreen);
+    int distanceBlue = abs(ledBlue - userBlue);
+    float percentageRed = 100 - ((distanceRed / 255.0) * 100);
+    float percentageGreen = 100 - ((distanceGreen / 255.0) * 100);
+    float percentageBlue = 100 - ((distanceBlue / 255.0) * 100);
+    float fullPercentage = (percentageRed + percentageGreen + percentageBlue) / 3;
+    model->closeness = round(fullPercentage);
 }
 
 void parse_time_str(char* buffer, int32_t sec) {
@@ -119,7 +137,7 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Time spent:"); 
     canvas_draw_str_aligned(canvas, 55, 0, AlignLeft, AlignTop, timer_string); // DRAW TIMER
     canvas_draw_str_aligned(canvas, 0, 9, AlignLeft, AlignTop, "You are this close:"); 
-    canvas_draw_str_aligned(canvas, 110, 9, AlignLeft, AlignTop, closeness_string); 
+    canvas_draw_str_aligned(canvas, 105, 9, AlignLeft, AlignTop, closeness_string); 
     
     canvas_draw_icon(canvas, newCursorPos, 20, &I_ButtonUp_10x5);
     canvas_draw_icon(canvas, newCursorPos, 43, &I_ButtonDown_10x5);
@@ -191,6 +209,7 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                         if (model->digit[model->cursorpos] > 15) {
                             model->digit[model->cursorpos] = 0;
                         }
+                        color_guess_play_calculate_closeness(instance, model);
                     },
                     true);
                 break;
@@ -203,6 +222,7 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                         if (model->digit[model->cursorpos] < 0) {
                             model->digit[model->cursorpos] = 15;
                         }
+                        color_guess_play_calculate_closeness(instance, model);
                     },
                     true);
                 break;
