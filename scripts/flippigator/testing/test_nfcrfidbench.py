@@ -10,7 +10,7 @@ from flippigator.case import BaseCase
 os.system("color")
 
 
-@pytest.mark.nfc_rfid_bench
+@pytest.mark.bench
 class TestNfcRfidBench(BaseCase):
     def test_read_nfc_ref_card(self, nav, gator):
         with allure.step("Go to NFC"):

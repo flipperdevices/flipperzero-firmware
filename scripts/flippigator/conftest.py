@@ -30,6 +30,7 @@ def pytest_addoption(parser):
     parser.addoption("--gui", action="store", default=True, help="gui flag")
     parser.addoption("--scale", action="store", default=12, help="scale factor")
     parser.addoption("--threshold", action="store", default=0.99, help="threshold")
+    parser.addoption("--bench", action="store_true", default=False, help="use this flag for E2E bench tests")
 
 
 def pytest_configure(config):
@@ -40,6 +41,14 @@ def pytest_configure(config):
 def pytest_unconfigure(config):
     # here you can add teardown after session!
     pass
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--bench"):
+        return
+    skip_bench = pytest.mark.skip(reason="need --bench option to run")
+    for item in items:
+        if "bench" in item.keywords:
+            item.add_marker(skip_bench)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -146,7 +155,7 @@ def gator() -> Gator:
     gator_serial.flushOutput()
     gator_serial.flushInput()
 
-    gator = Gator(gator_serial)
+    gator = Gator(gator_serial, 900, 900)
     gator.home()
 
     return gator

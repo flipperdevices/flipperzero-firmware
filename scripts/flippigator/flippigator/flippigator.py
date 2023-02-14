@@ -130,11 +130,13 @@ class Navigator:
         cv.imshow(window_name, display_image)
         key = cv.waitKey(1)
 
-    def recog_ref(self):
+    def recog_ref(self, ref = []):
         # self.updateScreen()
         temp_pic_list = list()
         screen_image = self.get_raw_screen()
-        for im in list(self.imRef.keys()):
+        if len(ref) == 0:
+            ref = list(self.imRef.keys())
+        for im in ref:
             template = cv.cvtColor(self.imRef.get(im), 0)
             res = cv.matchTemplate(screen_image, template, cv.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
@@ -184,9 +186,9 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout=3):
+    def get_current_state(self, timeout=3, ref = []):
         self.update_screen()
-        state = self.recog_ref()
+        state = self.recog_ref(ref)
         start_time = time.time()
         while len(state) == 0:
             self.update_screen()
@@ -273,9 +275,13 @@ class Gator:
     def __init__(
         self,
         serial,
+        x_size,
+        y_size,
         debug: bool = True,
     ):
         self._serial = serial
+        self._x_size = x_size
+        self._y_size = y_size
         self._debugFlag = debug
 
     def __del__(self):
@@ -294,6 +300,10 @@ class Gator:
             status = self._serial.readline()
             print(status)
             time.sleep(0.2)
+
+    def transform(self, x, y, speed = 3000):
+        return (-x-self._x_size, -y-self._y_size, speed)
+
 
     def swim_to(self, x, y, speed=3000):
         self._serial.reset_output_buffer()
