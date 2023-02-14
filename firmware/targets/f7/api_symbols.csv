@@ -1606,6 +1606,8 @@ Function,+,ibutton_key_is_valid,_Bool,iButtonKey*
 Function,+,ibutton_key_load,_Bool,"iButtonKey*, const char*"
 Function,+,ibutton_key_read,_Bool,"iButtonKey*, OneWireHost*"
 Function,+,ibutton_key_save,_Bool,"iButtonKey*, const char*"
+Function,+,ibutton_key_write_blank,_Bool,"iButtonKey*, OneWireHost*"
+Function,+,ibutton_key_write_copy,_Bool,"iButtonKey*, OneWireHost*"
 Function,+,ibutton_worker_alloc,iButtonWorker*,
 Function,+,ibutton_worker_emulate_set_callback,void,"iButtonWorker*, iButtonWorkerEmulateCallback, void*"
 Function,+,ibutton_worker_emulate_start,void,"iButtonWorker*, iButtonKey*"

@@ -31,6 +31,8 @@ typedef struct {
 } DS1992ProtocolData;
 
 static bool dallas_ds1992_read(OneWireHost*, void*);
+static bool dallas_ds1992_write_blank(OneWireHost*, iButtonProtocolData*);
+static bool dallas_ds1992_write_copy(OneWireHost*, iButtonProtocolData*);
 static void dallas_ds1992_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
@@ -47,6 +49,8 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .name = DS1992_FAMILY_NAME,
 
     .read = dallas_ds1992_read,
+    .write_blank = dallas_ds1992_write_blank,
+    .write_copy = dallas_ds1992_write_copy,
     .emulate = dallas_ds1992_emulate,
     .save = dallas_ds1992_save,
     .load = dallas_ds1992_load,
@@ -66,6 +70,18 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     } while(false);
 
     return success;
+}
+
+bool dallas_ds1992_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
+    (void)host;
+    (void)protocol_data;
+    return false;
+}
+
+bool dallas_ds1992_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
+    (void)host;
+    (void)protocol_data;
+    return false;
 }
 
 static bool dallas_ds1992_emulate_callback(uint8_t command, void* context) {

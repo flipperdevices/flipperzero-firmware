@@ -85,6 +85,34 @@ bool ibutton_key_read(iButtonKey* key, OneWireHost* host) {
     return ibutton_key_read_onewire(key, host);
 }
 
+bool ibutton_key_write_blank(iButtonKey* key, OneWireHost* host) {
+    bool success = false;
+
+    do {
+        if(key->protocol_id >= iButtonProtocolMax) break;
+        if(!(ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureWriteBlank)) break;
+        if(!ibutton_protocols_write_blank(host, key->protocol_data, key->protocol_id)) break;
+
+        success = true;
+    } while(false);
+
+    return success;
+}
+
+bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host) {
+    bool success = false;
+
+    do {
+        if(key->protocol_id >= iButtonProtocolMax) break;
+        if(!(ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureWriteCopy)) break;
+        if(!ibutton_protocols_write_copy(host, key->protocol_data, key->protocol_id)) break;
+
+        success = true;
+    } while(false);
+
+    return success;
+}
+
 bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* slave) {
     bool success = false;
 

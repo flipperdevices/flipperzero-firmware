@@ -15,7 +15,7 @@ typedef enum {
     iButtonProtocolFeatureWriteCopy = (1U << 2),
 } iButtonProtocolFeature;
 
-typedef bool (*iButtonProtocolReadFunc)(OneWireHost*, iButtonProtocolData*);
+typedef bool (*iButtonProtocolReadWriteFunc)(OneWireHost*, iButtonProtocolData*);
 typedef void (*iButtonProtocolEmulateFunc)(OneWireSlave*, iButtonProtocolData*);
 typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
@@ -29,7 +29,9 @@ typedef struct {
     const char* manufacturer;
     const char* name;
 
-    iButtonProtocolReadFunc read;
+    iButtonProtocolReadWriteFunc read;
+    iButtonProtocolReadWriteFunc write_blank;
+    iButtonProtocolReadWriteFunc write_copy;
     iButtonProtocolEmulateFunc emulate;
     iButtonProtocolSaveFunc save;
     iButtonProtocolLoadFunc load;

@@ -13,7 +13,6 @@
 #include <one_wire/one_wire_slave.h>
 
 #include "ibutton_worker.h"
-#include "ibutton_writer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +36,6 @@ struct iButtonWorker {
     iButtonKey* key_p;
     OneWireHost* host;
     OneWireSlave* slave;
-    iButtonWriter* writer;
     iButtonWorkerMode mode_index;
     FuriMessageQueue* messages;
     FuriThread* thread;

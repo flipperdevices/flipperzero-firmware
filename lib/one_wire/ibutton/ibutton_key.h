@@ -45,6 +45,10 @@ uint32_t ibutton_key_get_features(iButtonKey* key);
 
 bool ibutton_key_read(iButtonKey* key, OneWireHost* host);
 
+bool ibutton_key_write_blank(iButtonKey* key, OneWireHost* host);
+
+bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host);
+
 bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* slave);
 
 bool ibutton_key_save(iButtonKey* key, const char* file_name);

@@ -62,6 +62,30 @@ bool ibutton_protocols_read(
     iButtonProtocol protocol_id);
 
 /**
+ * Write the key to a blank using the selected protocol
+ * @param [in] host pointer to a OneWire host instance
+ * @param [out] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ * @return true on success, false on failure
+ */
+bool ibutton_protocols_write_blank(
+    OneWireHost* host,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
+
+/**
+ * Write the key to another one of the same type using the selected protocol
+ * @param [in] host pointer to a OneWire host instance
+ * @param [out] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ * @return true on success, false on failure
+ */
+bool ibutton_protocols_write_copy(
+    OneWireHost* host,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
+
+/**
  * Emulate the device using the selected protocol
  * @param [in] host pointer to a OneWire host instance
  * @param [in] protocol_data pointer to protocol-specific data

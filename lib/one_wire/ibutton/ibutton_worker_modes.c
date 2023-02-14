@@ -250,26 +250,13 @@ void ibutton_worker_mode_write_start(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_write_tick(iButtonWorker* worker) {
-    furi_check(worker->key_p != NULL);
-    iButtonWriterResult writer_result = ibutton_writer_write(worker->writer, worker->key_p);
-    iButtonWorkerWriteResult result;
-    switch(writer_result) {
-    case iButtonWriterOK:
-        result = iButtonWorkerWriteOK;
-        break;
-    case iButtonWriterSameKey:
-        result = iButtonWorkerWriteSameKey;
-        break;
-    case iButtonWriterNoDetect:
-        result = iButtonWorkerWriteNoDetect;
-        break;
-    case iButtonWriterCannotWrite:
-        result = iButtonWorkerWriteCannotWrite;
-        break;
-    default:
-        result = iButtonWorkerWriteNoDetect;
-        break;
-    }
+    furi_assert(worker->key_p);
+
+    const bool success = ibutton_key_write_blank(worker->key_p, worker->host) ||
+                         ibutton_key_write_copy(worker->key_p, worker->host);
+
+    // TODO: pass a proper result to the callback
+    const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK : iButtonWorkerWriteNoDetect;
 
     if(worker->write_cb != NULL) {
         worker->write_cb(worker->cb_ctx, result);

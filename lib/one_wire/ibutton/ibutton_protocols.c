@@ -61,6 +61,22 @@ bool ibutton_protocols_read(
     return ibutton_protocols[protocol_id]->read(host, protocol_data);
 }
 
+bool ibutton_protocols_write_blank(
+    OneWireHost* host,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
+    furi_assert(protocol_id < iButtonProtocolMax);
+    return ibutton_protocols[protocol_id]->write_blank(host, protocol_data);
+}
+
+bool ibutton_protocols_write_copy(
+    OneWireHost* host,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
+    furi_assert(protocol_id < iButtonProtocolMax);
+    return ibutton_protocols[protocol_id]->write_copy(host, protocol_data);
+}
+
 void ibutton_protocols_emulate(
     OneWireSlave* slave,
     iButtonProtocolData* protocol_data,
