@@ -2096,8 +2096,7 @@ Function,+,power_off,void,Power*
 Function,+,power_reboot,void,PowerBootMode
 Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
-Function,+,pretty_format_bytes_ascii,void,"FuriString*, size_t, const uint8_t*, size_t"
-Function,+,pretty_format_bytes_hex,void,"FuriString*, size_t, const uint8_t*, size_t"
+Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
 Function,-,prng_successor,uint32_t,"uint32_t, uint32_t"
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."

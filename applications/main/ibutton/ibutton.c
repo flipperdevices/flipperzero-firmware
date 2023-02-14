@@ -117,10 +117,6 @@ iButton* ibutton_alloc() {
     view_dispatcher_add_view(
         ibutton->view_dispatcher, iButtonViewTextInput, text_input_get_view(ibutton->text_input));
 
-    ibutton->text_box = text_box_alloc();
-    view_dispatcher_add_view(
-        ibutton->view_dispatcher, iButtonViewTextBox, text_box_get_view(ibutton->text_box));
-
     ibutton->popup = popup_alloc();
     view_dispatcher_add_view(
         ibutton->view_dispatcher, iButtonViewPopup, popup_get_view(ibutton->popup));
@@ -140,9 +136,6 @@ void ibutton_free(iButton* ibutton) {
 
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewPopup);
     popup_free(ibutton->popup);
-
-    view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewTextBox);
-    text_box_free(ibutton->text_box);
 
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewTextInput);
     text_input_free(ibutton->text_input);

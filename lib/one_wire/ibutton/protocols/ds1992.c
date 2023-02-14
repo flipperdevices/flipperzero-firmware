@@ -13,7 +13,7 @@
 #define DS1992_BRIEF_HEAD_COUNT 4U
 #define DS1992_BRIEF_TAIL_COUNT 3U
 
-#define DS1992_DATA_ROW_LENGTH 7U
+#define DS1992_DATA_BYTE_COUNT 4U
 
 #define DS1992_SRAM_DATA_KEY "Sram Data"
 
@@ -130,8 +130,12 @@ bool dallas_ds1992_save(FlipperFormat* ff, const iButtonProtocolData* protocol_d
 
 void dallas_ds1992_render_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData* data = protocol_data;
-    pretty_format_bytes_hex(
-        result, DS1992_DATA_ROW_LENGTH, data->sram_data, DS1992_SRAM_DATA_SIZE);
+    pretty_format_bytes_hex_canonical(
+        result,
+        DS1992_DATA_BYTE_COUNT,
+        PRETTY_FORMAT_FONT_MONOSPACE,
+        data->sram_data,
+        DS1992_SRAM_DATA_SIZE);
 }
 
 void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
