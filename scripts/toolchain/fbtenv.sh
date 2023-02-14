@@ -5,7 +5,7 @@
 # public variables
 DEFAULT_SCRIPT_PATH="$(pwd -P)";
 SCRIPT_PATH="${SCRIPT_PATH:-$DEFAULT_SCRIPT_PATH}";
-FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"19"}";
+FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"20"}";
 FBT_TOOLCHAIN_PATH="${FBT_TOOLCHAIN_PATH:-$SCRIPT_PATH}";
 
 fbtenv_show_usage()
@@ -35,6 +35,7 @@ fbtenv_restore_env()
     PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/bin://g")";
     PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/protobuf\/bin://g")";
     PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/openocd\/bin://g")";
+    PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/openssl\/bin://g")";
     if [ -n "${PS1:-""}" ]; then
         PS1="$(echo "$PS1" | sed 's/\[fbt\]//g')";
     elif [ -n "${PROMPT:-""}" ]; then
@@ -285,6 +286,7 @@ fbtenv_main()
     PATH="$TOOLCHAIN_ARCH_DIR/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openocd/bin:$PATH";
+    PATH="$TOOLCHAIN_ARCH_DIR/openssl/bin:$PATH";
 
     SAVED_PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-""}";
     SAVED_PYTHONPATH="${PYTHONPATH:-""}";
