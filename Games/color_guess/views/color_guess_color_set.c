@@ -1,11 +1,12 @@
 #include "../color_guess.h"
 #include "color_guess_icons.h"
-#include "../digits.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+
+extern const Icon* digits[17];
 
 struct ColorGuessColorSet {
     View* view;
@@ -17,9 +18,6 @@ typedef struct {
     ColorGuessColorSetStatus status;
     int cursorpos;
     int digit[6];
-    int red;
-    int green;
-    int blue;
 } ColorGuessColorSetModel;
 
 void color_guess_color_set_set_callback(
@@ -33,7 +31,6 @@ void color_guess_color_set_set_callback(
 }
 
 void color_guess_color_set_draw(Canvas* canvas, ColorGuessColorSetModel* model) {
-    //UNUSED(model);
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
     
@@ -57,12 +54,9 @@ void color_guess_color_set_draw(Canvas* canvas, ColorGuessColorSetModel* model) 
 
 static void color_guess_color_set_model_init(ColorGuessColorSetModel* const model) {
     model->cursorpos = 0;
-    model->red = 0;
     for (int i = 0;i < 6; i++) {
         model->digit[i] = 0;
     }
-    model->green = 0;
-    model->blue = 0;
 }
 
 void color_guess_color_set_set_led(void* context, ColorGuessColorSetModel* model) {
@@ -113,7 +107,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         {
                             model->cursorpos = 5;
                         }
-                        
                     },
                     true);
                 break;
@@ -163,9 +156,7 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                 break;
         }
     }
-    //ColorGuessColorSet* instance = context;
-
-
+    
     return true;
 }
 

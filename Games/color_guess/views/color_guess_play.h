@@ -1,15 +1,28 @@
 #pragma once
 
 #include <gui/view.h>
+#include "../helpers/color_guess_custom_event.h"
+
+extern const Icon* digits[17];
+
+#define TIMER_FORMAT "%02ld:%02ld" //"%.2d:%.2d"
+#define TIMER_LENGHT 12
+#define CLOSENESS_LENGTH 7
+#define CLOSENESS_FORMAT "%d%%"
 
 typedef struct ColorGuessPlay ColorGuessPlay;
+
+typedef void (*ColorGuessPlayCallback)(ColorGuessCustomEvent event, void* context);
 
 typedef enum {
     ColorGuessPlayStatusStart,
     ColorGuessPlayStatusIDLE,
 } ColorGuessPlayStatus;
 
-//typedef void (*ColorGuessColorSetCallback)(ColorGuessCustomEvent event, void* context);
+void color_guess_play_set_callback(
+    ColorGuessPlay* color_guess_play,
+    ColorGuessPlayCallback callback,
+    void* context);
 
 View* color_guess_play_get_view(ColorGuessPlay* color_guess_static);
 

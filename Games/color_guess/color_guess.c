@@ -1,4 +1,5 @@
 #include "color_guess.h"
+#include "digits.h"
 
 bool color_guess_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -21,9 +22,15 @@ bool color_guess_navigation_event_callback(void* context) {
 
 ColorGuess* color_guess_app_alloc() {
     ColorGuess* app = malloc(sizeof(ColorGuess));
+    //app->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
+    //app->plugin_state = malloc(sizeof(PluginState));
+    //app->view_port = view_port_alloc();
     app->error = false;
+    
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+    notification_message(notification, &sequence_display_backlight_on);
 
     //Scene additions
     app->view_dispatcher = view_dispatcher_alloc();
@@ -43,7 +50,7 @@ ColorGuess* color_guess_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, ColorGuessViewIdPlay, color_guess_play_get_view(app->color_guess_play));
 
     //End Scene Additions
-    
+
     return app;
 }
 
@@ -68,6 +75,7 @@ void color_guess_app_free(ColorGuess* app) {
     app->view_port = NULL;
     
     app->gui = NULL;
+    //furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;
 
     //Remove whatever is left
@@ -85,9 +93,9 @@ int32_t color_guess_app(void* p) {
         color_guess_app_free(app);
         return 1;
     }
-
+    
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-
+    
     scene_manager_next_scene(app->scene_manager, ColorGuessSceneStart);
 
     furi_hal_power_suppress_charge_enter();

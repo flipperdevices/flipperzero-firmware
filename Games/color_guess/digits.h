@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 
 #include <stdint.h>
 #include "color_guess_icons.h"
