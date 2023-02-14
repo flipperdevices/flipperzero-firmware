@@ -17,8 +17,8 @@ void ibutton_scene_add_type_on_enter(void* context) {
             submenu, furi_string_get_cstr(tmp), protocol_id, ibutton_submenu_callback, context);
     }
 
-    submenu_set_selected_item(
-        submenu, scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddType));
+    const uint32_t prev_protocol_id = scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddType);
+    submenu_set_selected_item(submenu, prev_protocol_id);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
     furi_string_free(tmp);
@@ -29,12 +29,14 @@ bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        consumed = true;
-        scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, event.event);
+        const uint32_t protocol_id = event.event;
 
         // TODO: set the key protocol
 
+        scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, protocol_id);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
+
+        consumed = true;
     }
 
     return consumed;
