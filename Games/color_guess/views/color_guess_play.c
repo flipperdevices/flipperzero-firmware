@@ -1,5 +1,6 @@
 #include "../color_guess.h"
 #include "color_guess_icons.h"
+#include "../helpers/color_guess_colors.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -7,22 +8,6 @@
 #include <dolphin/dolphin.h>
 
 extern const Icon* digits[17];
-
-int colorsEasy[] = {
-    0xff0000,
-    0x00ff00,
-    0x0000ff,
-    0xffff00,
-    0xff00ff,
-    0x00ffff,
-    0xffffff,
-    0x500000,
-    0x005000,
-    0x505000,
-    0x505050,
-    0x500050,
-    0x005050,
-};
 
 struct ColorGuessPlay {
     View* view;
