@@ -61,8 +61,9 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
 
     if(furi_string_size(args) > 0) {
         cli_nl();
+        printf("`");
         printf("%s", furi_string_get_cstr(args));
-        printf(": command not found");
+        printf("` command not found");
     }
 }
 
