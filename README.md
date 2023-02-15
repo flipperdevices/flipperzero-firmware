@@ -25,5 +25,11 @@ This is a two player game that uses the subghz_tx_rx worker library for communic
 ### subghz-protocol-x10-decoder
 [project](./subghz/protocols/x10/README.md) - This is a protocol decoder for the Flipper Zero to decode the x10 series of devices when doing a read from the Sub-GHz menu.
 
+### subghz-samples-chevy-hhr-2006
+[data](./subghz/samples/chevy-hhr-2006/README.md) - These Flipper Zero subghz captures are from the remote control for the Chevy HHR 2006 keyfob.
+
 ### subghz-samples-quantum-fire
 [data](./subghz/samples/quantum-fire/README.md) - These Flipper Zero subghz captures are from the remote control for the Quantum Fire (QF-6LR).
+
+### subghz-samples-x10
+[data](./subghz/samples/x10/README.md) - These Flipper Zero subghz captures are from the remote control for the X10.

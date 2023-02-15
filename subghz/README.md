@@ -3,5 +3,5 @@ The Flipper Zero "Sub-GHz" radio is used for receiving and transmitting frequenc
 
 This enlistment contains the following:
 - [Plugins](./plugins/README.md) are applications & games that can be added to the Flipper Zero.  These applications utilize the subghz radio.
-- [Protcols](./protocols/README.md) extend the Sub-GHz "Read" feature of your Flipper with the ability to support new protocols.
+- [Protocols](./protocols/README.md) extend the Sub-GHz "Read" feature of your Flipper with the ability to support new protocols.
 - [Samples](./samples/README.md) are samples captured by various remotes I own.
