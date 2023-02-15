@@ -47,6 +47,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker) - Feel free to provide feedback in the project.
 - [Passport+Desktop Improvements (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/532) Now has changable passport backgrounds!
 - OFW: [Up toolchain to version 20 #2397 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2397)
+- Passport now has many 8 selectable backgrounds options and 22 profile image options. (Changes [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1ede732163770d1b41e12748f8bbac279e0be062) with [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/532))
+- Many thanks to [Kuronons](https://github.com/Kuronons/FZ_graphics/tree/main) for the many passport backgrounds and profile images available and included.
 
 <a name="release">
 
