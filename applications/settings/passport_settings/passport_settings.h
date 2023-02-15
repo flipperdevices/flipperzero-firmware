@@ -63,7 +63,7 @@ extern "C" {
 
 typedef struct {
     uint8_t background;
-    bool image;
+    uint8_t image;
     bool name;
     uint8_t mood_set;
     bool level;
