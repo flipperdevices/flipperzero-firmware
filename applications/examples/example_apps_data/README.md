@@ -4,7 +4,9 @@ This example demonstrates how to utilize the Apps Data folder to store data that
 
 ## What is the Apps Data Folder?
 
-The **Apps Data** folder is a folder used to store data for external apps that are not part of the main firmware. The path to the current application folder is related to the `appsid` of the app. The `appsid` is used to identify the app in the app store and is stored in the `application.fam` file. 
+The **Apps Data** folder is a folder used to store data for external apps that are not part of the main firmware. 
+
+The path to the current application folder is related to the `appsid` of the app. The `appsid` is used to identify the app in the app store and is stored in the `application.fam` file. 
 The Apps Data folder is located only on the external storage, the SD card.
 
 For example, if the `appsid` of the app is `snake_game`, the path to the Apps Data folder will be `/ext/apps_data/snake_game`.
