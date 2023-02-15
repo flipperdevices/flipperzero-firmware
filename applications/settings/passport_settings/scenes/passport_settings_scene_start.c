@@ -7,13 +7,11 @@
 #define SCENE_EVENT_SELECT_BACKGROUND 0
 #define SCENE_EVENT_SELECT_IMAGE 1
 #define SCENE_EVENT_SELECT_NAME 2
-#define SCENE_EVENT_SELECT_MOOD 3
+#define SCENE_EVENT_SELECT_MOOD_SET 3
 #define SCENE_EVENT_SELECT_LEVEL 4
 #define SCENE_EVENT_SELECT_XP_TEXT 5
 #define SCENE_EVENT_SELECT_XP_MODE 6
 #define SCENE_EVENT_SELECT_MULTIPAGE 7
-
-#define XP_MODE_COUNT 7
 
 const char* const xp_mode_count_text[XP_MODE_COUNT] =
     {"Bar", "%", "Inv. %", "Retro 3", "Retro 5", "Bar %", "None"};
@@ -27,20 +25,22 @@ const uint32_t xp_mode_value[XP_MODE_COUNT] = {
     XP_MODE_BAR_PERCENT,
     XP_MODE_NONE};
 
-#define PASSPORT_ON_OFF_COUNT 2
-
 const char* const passport_on_off_text[PASSPORT_ON_OFF_COUNT] = {
     "OFF",
     "ON",
 };
 
-const uint32_t background_value[PASSPORT_ON_OFF_COUNT] = {false, true};
+const char* const background_text[PASSPORT_BG_COUNT] = {"None", "Mario", "DB"};
+
+const uint32_t background_value[PASSPORT_BG_COUNT] = {BG_NONE, BG_MARIO, BG_DB};
 
 const uint32_t image_value[PASSPORT_ON_OFF_COUNT] = {false, true};
 
 const uint32_t name_value[PASSPORT_ON_OFF_COUNT] = {false, true};
 
-const uint32_t mood_value[PASSPORT_ON_OFF_COUNT] = {false, true};
+const char* const mood_set_text[MOOD_SET_COUNT] = {"None", "Regular", "420"};
+
+const uint32_t mood_set_value[MOOD_SET_COUNT] = {MOOD_SET_NONE, MOOD_SET_REGULAR, MOOD_SET_420};
 
 const uint32_t level_value[PASSPORT_ON_OFF_COUNT] = {false, true};
 
@@ -57,8 +57,8 @@ static void passport_settings_scene_start_background_changed(VariableItem* item)
     PassportSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, passport_on_off_text[index]);
-    app->settings.background = background_value[index];
+    variable_item_set_current_value_text(item, background_text[index]);
+    app->settings.background = index;
 }
 
 static void passport_settings_scene_start_image_changed(VariableItem* item) {
@@ -77,12 +77,12 @@ static void passport_settings_scene_start_name_changed(VariableItem* item) {
     app->settings.name = name_value[index];
 }
 
-static void passport_settings_scene_start_mood_changed(VariableItem* item) {
+static void passport_settings_scene_start_mood_set_changed(VariableItem* item) {
     PassportSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, passport_on_off_text[index]);
-    app->settings.mood = mood_value[index];
+    variable_item_set_current_value_text(item, mood_set_text[index]);
+    app->settings.mood_set = index;
 }
 
 static void passport_settings_scene_start_level_changed(VariableItem* item) {
@@ -127,14 +127,14 @@ void passport_settings_scene_start_on_enter(void* context) {
     item = variable_item_list_add(
         variable_item_list,
         "Background",
-        PASSPORT_ON_OFF_COUNT,
+        PASSPORT_BG_COUNT,
         passport_settings_scene_start_background_changed,
         app);
 
     value_index =
-        value_index_uint32(app->settings.background, background_value, PASSPORT_ON_OFF_COUNT);
+        value_index_uint32(app->settings.background, background_value, PASSPORT_BG_COUNT);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, passport_on_off_text[value_index]);
+    variable_item_set_current_value_text(item, background_text[value_index]);
 
     item = variable_item_list_add(
         variable_item_list,
@@ -160,14 +160,14 @@ void passport_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
-        "Mood",
-        PASSPORT_ON_OFF_COUNT,
-        passport_settings_scene_start_mood_changed,
+        "Mood Text Set",
+        MOOD_SET_COUNT,
+        passport_settings_scene_start_mood_set_changed,
         app);
 
-    value_index = value_index_uint32(app->settings.mood, mood_value, PASSPORT_ON_OFF_COUNT);
+    value_index = value_index_uint32(app->settings.mood_set, mood_set_value, MOOD_SET_COUNT);
     variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, passport_on_off_text[value_index]);
+    variable_item_set_current_value_text(item, mood_set_text[value_index]);
 
     item = variable_item_list_add(
         variable_item_list,
@@ -234,7 +234,7 @@ bool passport_settings_scene_start_on_event(void* context, SceneManagerEvent sme
         case SCENE_EVENT_SELECT_NAME:
             consumed = true;
             break;
-        case SCENE_EVENT_SELECT_MOOD:
+        case SCENE_EVENT_SELECT_MOOD_SET:
             consumed = true;
             break;
         case SCENE_EVENT_SELECT_LEVEL:

@@ -20,7 +20,9 @@ typedef enum {
 
     GuiLayerStatusBarTop, /**< Status bar top side layer */
     GuiLayerStatusBarLeft, /**< Status bar left-side layer, auto-layout */
+    GuiLayerStatusBarLeftSlim, /**< Status bar left-side layer, auto-layout */
     GuiLayerStatusBarRight, /**< Status bar right-side layer, auto-layout */
+    GuiLayerStatusBarRightSlim, /**< Status bar right-side layer, auto-layout */
 
     GuiLayerFullscreen, /**< Fullscreen layer, no status bar */
 

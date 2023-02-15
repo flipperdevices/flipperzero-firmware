@@ -29,6 +29,8 @@ struct Power {
     PowerUnplugUsb* power_unplug_usb;
 
     ViewPort* battery_view_port;
+    ViewPort* battery_slim_view_port;
+
     Gui* gui;
     NotificationApp* notification;
     FuriPubSub* event_pubsub;

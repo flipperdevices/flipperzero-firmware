@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Passport_icons.h"
 #include <core/check.h>
 #include <core/record.h>
 #include <furi.h>
@@ -8,11 +7,13 @@
 #include <input/input.h>
 #include <gui/canvas_i.h>
 #include <furi_hal_version.h>
+
+#include "math.h"
 #include "dolphin/dolphin.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "desktop/desktop_settings.h"
 #include "passport_settings/passport_settings.h"
-#include "math.h"
+#include "Passport_icons.h"
 
 #define MOODS_TOTAL 1
 #define BUTTHURT_MAX 14
@@ -57,23 +58,40 @@ static const Icon* const portrait[7] = {
 // static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy, portrait_ok, portrait_bad};
 //static const Icon* const* portraits[MOODS_TOTAL] = {portrait_happy};
 
-static const char* const moods[16] = {
-    "Stoned",
-    "Baked",
-    "Ripped",
-    "Joyful",
-    "Happy",
-    "Satisfied",
-    "Relaxed",
-    "Nostalgic",
-    "Okay",
-    "Tired",
-    "Bored",
-    "Sad",
-    "Annoyed",
-    "Upset",
-    "Angry",
-    "Furious"};
+static const char* const moods[MOOD_SET_COUNT][16] = {
+    {},
+    {"Joyful",
+     "Good",
+     "Satisfied",
+     "Happy",
+     "Dreaming",
+     "Relaxed",
+     "Okay",
+     "Tired",
+     "Bored",
+     "Sad",
+     "Disappointed",
+     "Annoyed",
+     "Grumpy",
+     "Upset",
+     "Angry",
+     "Furious"},
+    {"Stoned",
+     "Baked",
+     "Ripped",
+     "Joyful",
+     "Happy",
+     "Satisfied",
+     "Relaxed",
+     "Nostalgic",
+     "Okay",
+     "Tired",
+     "Bored",
+     "Sad",
+     "Annoyed",
+     "Upset",
+     "Angry",
+     "Furious"}};
 
 typedef struct {
     Dolphin* dolphin;
@@ -98,7 +116,7 @@ typedef struct {
     char level_str[12];
     char level_str1[12];
 
-    char my_name[8];
+    char my_name[9];
 
     char mood_str[20];
     uint8_t mood;

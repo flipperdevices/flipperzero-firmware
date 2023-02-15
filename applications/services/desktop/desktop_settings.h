@@ -44,6 +44,9 @@
 #define DISPLAY_BATTERY_BAR_PERCENT 5
 #define DISPLAY_BATTERY_NONE 6
 
+#define ICON_STYLE_STOCK 0
+#define ICON_STYLE_SLIM 1
+
 #define FAP_LOADER_APP_NAME "Applications"
 
 typedef struct {
@@ -67,4 +70,6 @@ typedef struct {
     uint8_t dummy_mode;
     bool top_bar;
     bool sdcard;
+    uint8_t icon_style;
+    bool bt_icon;
 } DesktopSettings;
