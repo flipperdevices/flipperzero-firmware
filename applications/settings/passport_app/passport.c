@@ -70,7 +70,7 @@ void passport_alloc(Passport* passport) {
         if(stats->level > 21) passport->tmpLvl = 5;
         if(stats->level > 24) passport->tmpLvl = 6;
         if(stats->level > 27) passport->tmpLvl = 6;
-    } else if (passport->settings.image == PIMG_DOLPHIN) {
+    } else if(passport->settings.image == PIMG_DOLPHIN) {
         passport->tmpLvl = 0;
         if(stats->level > 10) passport->tmpLvl = 1;
         if(stats->level > 20) passport->tmpLvl = 2;
