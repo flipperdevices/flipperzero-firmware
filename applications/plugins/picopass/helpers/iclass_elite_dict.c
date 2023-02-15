@@ -70,7 +70,7 @@ IclassEliteDict* iclass_elite_dict_alloc(IclassEliteDictType dict_type) {
         }
 
         // Read total amount of keys
-        while(true) {
+        while(true) { //-V547
             if(!stream_read_line(dict->stream, next_line)) break;
             if(furi_string_get_char(next_line, 0) == '#') continue;
             if(furi_string_size(next_line) != ICLASS_ELITE_KEY_LINE_LEN) continue;
