@@ -254,10 +254,13 @@ void desktop_unlock(Desktop* desktop) {
 }
 
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
-    if(desktop->settings.icon_style == false) {
-        view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
-    } else {
+    switch(desktop->settings.icon_style) {
+    case ICON_STYLE_SLIM:
         view_port_enabled_set(desktop->dummy_mode_icon_slim_viewport, enabled);
+        break;
+    case ICON_STYLE_STOCK:
+        view_port_enabled_set(desktop->dummy_mode_icon_viewport, enabled);
+        break;
     }
     desktop_main_set_dummy_mode_state(desktop->main_view, enabled);
     animation_manager_set_dummy_mode_state(desktop->animation_manager, enabled);

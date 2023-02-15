@@ -135,13 +135,13 @@ static void render_callback(Canvas* const canvas, void* mutex) {
 
         // draw background
         switch(passport->settings.background) {
-        case 0:
+        case BG_NONE:
 
             break;
-        case 1:
+        case BG_MARIO:
             canvas_draw_icon(canvas, 0, 0, &I_passport_mario);
             break;
-        case 2:
+        case BG_DB:
             canvas_draw_icon(canvas, 0, 0, &I_passport_dragonball);
             break;
         }
