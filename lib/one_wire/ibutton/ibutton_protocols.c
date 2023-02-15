@@ -78,11 +78,11 @@ bool ibutton_protocols_write_copy(
 }
 
 void ibutton_protocols_emulate(
-    OneWireSlave* slave,
+    OneWireSlave* bus,
     iButtonProtocolData* protocol_data,
     iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
-    ibutton_protocols[protocol_id]->emulate(slave, protocol_data);
+    ibutton_protocols[protocol_id]->emulate(bus, protocol_data);
 }
 
 bool ibutton_protocols_save(

@@ -11,7 +11,7 @@
 #define DS1990_CMD_READ_ROM 0x0FU
 
 typedef struct {
-    OneWireSlave* slave;
+    OneWireSlave* bus;
 } DS1990ProtocolState;
 
 typedef struct {
@@ -61,25 +61,25 @@ bool dallas_ds1990_write_blank(OneWireHost* host, iButtonProtocolData* protocol_
 static bool dallas_ds1990_emulate_callback(uint8_t command, void* context) {
     furi_assert(context);
     DS1990ProtocolData* data = context;
-    OneWireSlave* slave = data->state.slave;
+    OneWireSlave* bus = data->state.bus;
 
     switch(command) {
     case DALLAS_COMMON_CMD_SEARCH_ROM:
-        return dallas_common_emulate_search_rom(slave, &data->rom_data);
+        return dallas_common_emulate_search_rom(bus, &data->rom_data);
     case DALLAS_COMMON_CMD_READ_ROM:
     case DS1990_CMD_READ_ROM:
-        return dallas_common_emulate_read_rom(slave, &data->rom_data);
+        return dallas_common_emulate_read_rom(bus, &data->rom_data);
     default:
         return false;
     }
 }
 
-void dallas_ds1990_emulate(OneWireSlave* slave, iButtonProtocolData* protocol_data) {
+void dallas_ds1990_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
-    data->state.slave = slave;
+    data->state.bus = bus;
 
-    onewire_slave_set_command_callback(slave, dallas_ds1990_emulate_callback, protocol_data);
-    onewire_slave_start(slave);
+    onewire_slave_set_command_callback(bus, dallas_ds1990_emulate_callback, protocol_data);
+    onewire_slave_start(bus);
 }
 
 bool dallas_ds1990_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {

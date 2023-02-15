@@ -17,7 +17,8 @@ void ibutton_scene_add_type_on_enter(void* context) {
             submenu, furi_string_get_cstr(tmp), protocol_id, ibutton_submenu_callback, context);
     }
 
-    const uint32_t prev_protocol_id = scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddType);
+    const uint32_t prev_protocol_id =
+        scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneAddType);
     submenu_set_selected_item(submenu, prev_protocol_id);
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);

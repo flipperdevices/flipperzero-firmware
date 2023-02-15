@@ -33,9 +33,9 @@ typedef enum {
 } iButtonWorkerMode;
 
 struct iButtonWorker {
-    iButtonKey* key_p;
+    iButtonKey* key;
     OneWireHost* host;
-    OneWireSlave* slave;
+    OneWireSlave* bus;
     iButtonWorkerMode mode_index;
     FuriMessageQueue* messages;
     FuriThread* thread;

@@ -87,12 +87,12 @@ bool ibutton_protocols_write_copy(
 
 /**
  * Emulate the device using the selected protocol
- * @param [in] host pointer to a OneWire host instance
+ * @param [in] bus pointer to a OneWireSlave bus instance
  * @param [in] protocol_data pointer to protocol-specific data
  * @param [in] protocol_id id of the protocol in question
  */
 void ibutton_protocols_emulate(
-    OneWireSlave* slave,
+    OneWireSlave* bus,
     iButtonProtocolData* protocol_data,
     iButtonProtocol protocol_id);
 

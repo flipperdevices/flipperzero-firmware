@@ -30,9 +30,9 @@ bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data);
 
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size);
 
-bool dallas_common_emulate_search_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data);
+bool dallas_common_emulate_search_rom(OneWireSlave* bus, const DallasCommonRomData* rom_data);
 
-bool dallas_common_emulate_read_rom(OneWireSlave* slave, const DallasCommonRomData* rom_data);
+bool dallas_common_emulate_read_rom(OneWireSlave* bus, const DallasCommonRomData* rom_data);
 
 bool dallas_common_save_rom_data(FlipperFormat* ff, const DallasCommonRomData* rom_data);
 

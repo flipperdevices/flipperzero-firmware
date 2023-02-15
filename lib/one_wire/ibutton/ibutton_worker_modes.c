@@ -151,7 +151,7 @@ void ibutton_worker_mode_read_start(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
-    if(ibutton_key_read(worker->key_p, worker->host)) {
+    if(ibutton_key_read(worker->key, worker->host)) {
         if(worker->read_cb != NULL) {
             worker->read_cb(worker->cb_ctx);
         }
@@ -173,12 +173,12 @@ static void onewire_slave_callback(void* context) {
 }
 
 static void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
-    onewire_slave_set_result_callback(worker->slave, onewire_slave_callback, worker);
-    ibutton_key_emulate(worker->key_p, worker->slave);
+    onewire_slave_set_result_callback(worker->bus, onewire_slave_callback, worker);
+    ibutton_key_emulate(worker->key, worker->bus);
 }
 
 static void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
-    onewire_slave_stop(worker->slave);
+    onewire_slave_stop(worker->bus);
 }
 
 // static void ibutton_worker_emulate_timer_cb(void* context) {
@@ -224,7 +224,7 @@ static void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
 // }
 
 void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
-    furi_assert(worker->key_p);
+    furi_assert(worker->key);
 
     furi_hal_rfid_pins_reset();
     furi_hal_rfid_pin_pull_pulldown();
@@ -237,7 +237,7 @@ void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
-    furi_assert(worker->key_p);
+    furi_assert(worker->key);
     ibutton_worker_emulate_dallas_stop(worker);
     furi_hal_rfid_pins_reset();
 }
@@ -250,13 +250,14 @@ void ibutton_worker_mode_write_start(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_write_tick(iButtonWorker* worker) {
-    furi_assert(worker->key_p);
+    furi_assert(worker->key);
 
-    const bool success = ibutton_key_write_blank(worker->key_p, worker->host) ||
-                         ibutton_key_write_copy(worker->key_p, worker->host);
+    const bool success = ibutton_key_write_blank(worker->key, worker->host) ||
+                         ibutton_key_write_copy(worker->key, worker->host);
 
     // TODO: pass a proper result to the callback
-    const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK : iButtonWorkerWriteNoDetect;
+    const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
+                                                      iButtonWorkerWriteNoDetect;
 
     if(worker->write_cb != NULL) {
         worker->write_cb(worker->cb_ctx, result);

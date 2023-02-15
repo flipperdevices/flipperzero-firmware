@@ -90,7 +90,8 @@ bool ibutton_key_write_blank(iButtonKey* key, OneWireHost* host) {
 
     do {
         if(key->protocol_id >= iButtonProtocolMax) break;
-        if(!(ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureWriteBlank)) break;
+        if(!(ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureWriteBlank))
+            break;
         if(!ibutton_protocols_write_blank(host, key->protocol_data, key->protocol_id)) break;
 
         success = true;
@@ -104,7 +105,8 @@ bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host) {
 
     do {
         if(key->protocol_id >= iButtonProtocolMax) break;
-        if(!(ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureWriteCopy)) break;
+        if(!(ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureWriteCopy))
+            break;
         if(!ibutton_protocols_write_copy(host, key->protocol_data, key->protocol_id)) break;
 
         success = true;
@@ -113,11 +115,11 @@ bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host) {
     return success;
 }
 
-bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* slave) {
+bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* bus) {
     bool success = false;
 
     if(key->protocol_id < iButtonProtocolMax) {
-        ibutton_protocols_emulate(slave, key->protocol_data, key->protocol_id);
+        ibutton_protocols_emulate(bus, key->protocol_data, key->protocol_id);
         success = true;
     }
 
