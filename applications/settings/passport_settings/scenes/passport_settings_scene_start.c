@@ -79,7 +79,7 @@ static void passport_settings_scene_start_image_changed(VariableItem* item) {
     PassportSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, passport_on_off_text[index]);
+    variable_item_set_current_value_text(item, image_text[index]);
     app->settings.image = image_value[index];
 }
 
