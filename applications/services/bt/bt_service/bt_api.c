@@ -15,6 +15,12 @@ bool bt_set_profile(Bt* bt, BtProfile profile) {
     return result;
 }
 
+BtStatus bt_get_status(Bt* bt) {
+    furi_assert(bt);
+
+    return bt->status;
+}
+
 void bt_disconnect(Bt* bt) {
     furi_assert(bt);
 

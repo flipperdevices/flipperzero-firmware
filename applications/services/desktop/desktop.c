@@ -73,7 +73,6 @@ static void desktop_bt_icon_draw_idle_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Idle_5x8);
 }
 
-/*
 static void desktop_bt_icon_draw_connected_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     furi_assert(canvas);
@@ -81,7 +80,7 @@ static void desktop_bt_icon_draw_connected_callback(Canvas* canvas, void* contex
     canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Connected_16x8);
 }
 
-static void desktop_bt_connection_status_changed_callback(BtStatus status, void* context) {
+static void desktop_bt_connection_status_update_icon(BtStatus status, void* context) {
     furi_assert(context);
     Desktop* desktop = context;
 
@@ -129,7 +128,6 @@ static void desktop_bt_connection_status_changed_callback(BtStatus status, void*
         view_port_update(desktop->bt_icon_slim_viewport);
     }
 }
-*/
 
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
@@ -191,8 +189,14 @@ static bool desktop_back_event_callback(void* context) {
 
 static void desktop_tick_event_callback(void* context) {
     furi_assert(context);
-    Desktop* app = context;
-    scene_manager_handle_tick_event(app->scene_manager);
+    Desktop* desktop = context;
+
+    if(desktop->settings.bt_icon) {
+        BtStatus status = bt_get_status(desktop->bt);
+        desktop_bt_connection_status_update_icon(status, desktop);
+    }
+
+    scene_manager_handle_tick_event(desktop->scene_manager);
 }
 
 static void desktop_input_event_callback(const void* value, void* context) {
@@ -440,6 +444,8 @@ Desktop* desktop_alloc() {
         storage_get_pubsub(storage), storage_Desktop_status_callback, desktop);
     furi_record_close(RECORD_STORAGE);
 
+    desktop->bt = furi_record_open(RECORD_BT);
+
     return desktop;
 }
 
@@ -458,6 +464,9 @@ void desktop_free(Desktop* desktop) {
     furi_pubsub_unsubscribe(storage_get_pubsub(storage), desktop->storage_sub);
     furi_record_close(RECORD_STORAGE);
     desktop->storage_sub = NULL;
+
+    furi_record_close(RECORD_BT);
+    desktop->bt = NULL;
 
     desktop->loader = NULL;
     desktop->input_events_pubsub = NULL;
@@ -519,40 +528,22 @@ int32_t desktop_srv(void* p) {
         if(!loaded) {
             memset(&desktop->settings, 0, sizeof(desktop->settings));
             desktop->settings.displayBatteryPercentage = DISPLAY_BATTERY_BAR_PERCENT;
-            desktop->settings.top_bar = 1;
-            desktop->settings.sdcard = 1;
+            desktop->settings.top_bar = false;
+            desktop->settings.sdcard = true;
             desktop->settings.icon_style = ICON_STYLE_SLIM;
-            desktop->settings.bt_icon = 1;
+            desktop->settings.bt_icon = true;
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
-
-        bt_settings_load(&desktop->bt_settings);
 
         view_port_enabled_set(desktop->topbar_icon_viewport, desktop->settings.top_bar);
 
         switch(desktop->settings.icon_style) {
         case ICON_STYLE_SLIM:
-            if(desktop->bt_settings.enabled) {
-                view_port_set_width(
-                    desktop->bt_icon_slim_viewport, icon_get_width(&I_Bluetooth_Idle_5x8));
-                view_port_draw_callback_set(
-                    desktop->bt_icon_slim_viewport, desktop_bt_icon_draw_idle_callback, desktop);
-                view_port_enabled_set(desktop->bt_icon_slim_viewport, desktop->settings.bt_icon);
-                view_port_update(desktop->bt_icon_slim_viewport);
-            }
             view_port_enabled_set(desktop->sdcard_icon_slim_viewport, desktop->settings.sdcard);
             view_port_enabled_set(
                 desktop->dummy_mode_icon_slim_viewport, desktop->settings.dummy_mode);
             break;
         case ICON_STYLE_STOCK:
-            if(desktop->bt_settings.enabled) {
-                view_port_set_width(
-                    desktop->bt_icon_viewport, icon_get_width(&I_Bluetooth_Idle_5x8));
-                view_port_draw_callback_set(
-                    desktop->bt_icon_viewport, desktop_bt_icon_draw_idle_callback, desktop);
-                view_port_enabled_set(desktop->bt_icon_viewport, desktop->settings.bt_icon);
-                view_port_update(desktop->bt_icon_viewport);
-            }
             view_port_enabled_set(desktop->sdcard_icon_viewport, desktop->settings.sdcard);
             view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
             break;
