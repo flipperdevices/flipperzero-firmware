@@ -25,11 +25,41 @@ extern "C" {
 #define MOOD_SET_REGULAR 1
 #define MOOD_SET_420 2
 
-#define PASSPORT_BG_COUNT 3
+#define PASSPORT_BG_COUNT 8
 
 #define BG_NONE 0
-#define BG_MARIO 1
-#define BG_DB 2
+#define BG_DB 1
+#define BG_STOCK 2
+#define BG_FURI 3
+#define BG_MARIO 4
+#define BG_MOUNTAINS 5
+#define BG_MULTI 6
+#define BG_SCROLL 7
+
+#define PROFILE_IMG_COUNT 22
+
+#define PIMG_NONE 0
+#define PIMG_BRIAREOS 1
+#define PIMG_COBRA 2
+#define PIMG_DALI 3
+#define PIMG_DOLPHIN 4
+#define PIMG_ED209 5
+#define PIMG_FSOCIETY 6
+#define PIMG_GOKUSET 7
+#define PIMG_GOKUKID 8
+#define PIMG_GOKUADULT 9
+#define PIMG_GOKUSSJ 10
+#define PIMG_GOKUSSJ3 11
+#define PIMG_GUYFAWKES 12
+#define PIMG_LAIN 13
+#define PIMG_MARVIN 14
+#define PIMG_MORELEELLOO 15
+#define PIMG_NEUROMANCER 16
+#define PIMG_MARIO 17
+#define PIMG_SHINKAI 18
+#define PIMG_SPIDER 19
+#define PIMG_TANKGIRL 20
+#define PIMG_TOTORO 21
 
 typedef struct {
     uint8_t background;

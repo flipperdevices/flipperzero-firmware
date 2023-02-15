@@ -5,13 +5,13 @@ void passport_alloc(Passport* passport) {
 
     // Load Passport Settings
     if(!(passport_settings_load(&passport->settings))) {
-        passport->settings.background = 1;
-        passport->settings.image = true;
+        passport->settings.background = BG_MARIO;
+        passport->settings.image = PIMG_GOKUSET;
         passport->settings.name = true;
-        passport->settings.mood_set = 2;
+        passport->settings.mood_set = MOOD_SET_420;
         passport->settings.level = true;
         passport->settings.xp_text = true;
-        passport->settings.xp_mode = 0;
+        passport->settings.xp_mode = XP_MODE_BAR_PERCENT;
         passport->settings.multipage = true;
         passport_settings_save(&passport->settings);
     }
@@ -38,7 +38,6 @@ void passport_alloc(Passport* passport) {
     DolphinStats* stats = &passport->stats;
 
     passport->max_level = dolphin_state_max_level();
-    passport->tmpLvl = 0;
 
     //get XP
     passport->xp_to_levelup = dolphin_state_xp_to_levelup(stats->icounter);
@@ -61,14 +60,21 @@ void passport_alloc(Passport* passport) {
     if(passport->desktop_settings.is_dumbmode) passport->moodStrIndex = passport->moodStrIndex + 4;
 
     // portrait
+    passport->tmpLvl = 0;
     furi_assert((stats->level > 0) && (stats->level <= passport->max_level));
-    if(stats->level > 10) passport->tmpLvl = 1;
-    if(stats->level > 15) passport->tmpLvl = 2;
-    if(stats->level > 18) passport->tmpLvl = 3;
-    if(stats->level > 21) passport->tmpLvl = 4;
-    if(stats->level > 24) passport->tmpLvl = 5;
-    if(stats->level > 27) passport->tmpLvl = 6;
-
+    if(passport->settings.image == PIMG_GOKUSET) {
+        passport->tmpLvl = 3;
+        if(stats->level > 10) passport->tmpLvl = 4;
+        if(stats->level > 15) passport->tmpLvl = 4;
+        if(stats->level > 18) passport->tmpLvl = 5;
+        if(stats->level > 21) passport->tmpLvl = 5;
+        if(stats->level > 24) passport->tmpLvl = 6;
+        if(stats->level > 27) passport->tmpLvl = 6;
+    } else if (passport->settings.image == PIMG_DOLPHIN) {
+        passport->tmpLvl = 0;
+        if(stats->level > 10) passport->tmpLvl = 1;
+        if(stats->level > 20) passport->tmpLvl = 2;
+    }
     //string variables set
     //name
     if(furi_hal_version_get_name_ptr()) {
@@ -136,19 +142,97 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         // draw background
         switch(passport->settings.background) {
         case BG_NONE:
-
-            break;
-        case BG_MARIO:
-            canvas_draw_icon(canvas, 0, 0, &I_passport_mario);
             break;
         case BG_DB:
             canvas_draw_icon(canvas, 0, 0, &I_passport_dragonball);
             break;
+        case BG_STOCK:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_FlipperClassic);
+            break;
+        case BG_FURI:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_Furipass);
+            break;
+        case BG_MARIO:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_mario);
+            break;
+        case BG_MOUNTAINS:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_Mountains);
+            break;
+        case BG_MULTI:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_Multipass);
+            break;
+        case BG_SCROLL:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_Scroll);
+            break;
         }
 
         // draw portrait
-        if(passport->settings.image) {
+        switch(passport->settings.image) {
+        case PIMG_NONE:
+            break;
+        case PIMG_BRIAREOS:
+            canvas_draw_icon(canvas, 0, 0, &I_Briareos_Hecatonchires);
+            break;
+        case PIMG_COBRA:
+            canvas_draw_icon(canvas, 0, 0, &I_Cobra);
+            break;
+        case PIMG_DALI:
+            canvas_draw_icon(canvas, 0, 0, &I_Dali_Mask);
+            break;
+        case PIMG_DOLPHIN:
             canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
+            break;
+        case PIMG_ED209:
+            canvas_draw_icon(canvas, 0, 0, &I_ED209);
+            break;
+        case PIMG_FSOCIETY:
+            canvas_draw_icon(canvas, 0, 0, &I_FSociety_Mask);
+            break;
+        case PIMG_GOKUSET:
+            canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
+            break;
+        case PIMG_GOKUKID:
+            canvas_draw_icon(canvas, 0, 0, &I_G0ku);
+            break;
+        case PIMG_GOKUADULT:
+            canvas_draw_icon(canvas, 0, 0, &I_g0ku_1);
+            break;
+        case PIMG_GOKUSSJ:
+            canvas_draw_icon(canvas, 0, 0, &I_g0ku_2);
+            break;
+        case PIMG_GOKUSSJ3:
+            canvas_draw_icon(canvas, 0, 0, &I_g0ku_3);
+            break;
+        case PIMG_GUYFAWKES:
+            canvas_draw_icon(canvas, 0, 0, &I_Guy_Fawkes_Mask);
+            break;
+        case PIMG_LAIN:
+            canvas_draw_icon(canvas, 0, 0, &I_Lain);
+            break;
+        case PIMG_MARVIN:
+            canvas_draw_icon(canvas, 0, 0, &I_Marvin);
+            break;
+        case PIMG_MORELEELLOO:
+            canvas_draw_icon(canvas, 0, 0, &I_Moreleeloo);
+            break;
+        case PIMG_NEUROMANCER:
+            canvas_draw_icon(canvas, 0, 0, &I_Neuromancer);
+            break;
+        case PIMG_MARIO:
+            canvas_draw_icon(canvas, 0, 0, &I_Pixel_Mario);
+            break;
+        case PIMG_SHINKAI:
+            canvas_draw_icon(canvas, 0, 0, &I_Shinkai);
+            break;
+        case PIMG_SPIDER:
+            canvas_draw_icon(canvas, 0, 0, &I_Spider_Jerusalem);
+            break;
+        case PIMG_TANKGIRL:
+            canvas_draw_icon(canvas, 0, 0, &I_Tank_Girl);
+            break;
+        case PIMG_TOTORO:
+            canvas_draw_icon(canvas, 0, 0, &I_Totoro);
+            break;
         }
 
         //draw flipper info

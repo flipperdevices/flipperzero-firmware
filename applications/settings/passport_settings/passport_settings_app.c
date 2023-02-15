@@ -65,13 +65,13 @@ extern int32_t passport_settings_app(void* p) {
 
     // Load Passport Settings
     if(!(passport_settings_load(&app->settings))) {
-        app->settings.background = 1;
-        app->settings.image = true;
+        app->settings.background = BG_MARIO;
+        app->settings.image = PIMG_GOKUSET;
         app->settings.name = true;
-        app->settings.mood_set = 2;
+        app->settings.mood_set = MOOD_SET_420;
         app->settings.level = true;
         app->settings.xp_text = true;
-        app->settings.xp_mode = 0;
+        app->settings.xp_mode = XP_MODE_BAR_PERCENT;
         app->settings.multipage = true;
         passport_settings_save(&app->settings);
     }

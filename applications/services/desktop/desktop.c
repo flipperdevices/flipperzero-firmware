@@ -518,10 +518,10 @@ int32_t desktop_srv(void* p) {
         bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
         if(!loaded) {
             memset(&desktop->settings, 0, sizeof(desktop->settings));
-            desktop->settings.displayBatteryPercentage = 0;
+            desktop->settings.displayBatteryPercentage = DISPLAY_BATTERY_BAR_PERCENT;
             desktop->settings.top_bar = 1;
             desktop->settings.sdcard = 1;
-            desktop->settings.icon_style = 0;
+            desktop->settings.icon_style = ICON_STYLE_SLIM;
             desktop->settings.bt_icon = 1;
             DESKTOP_SETTINGS_SAVE(&desktop->settings);
         }
