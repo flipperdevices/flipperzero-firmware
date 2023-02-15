@@ -73,6 +73,7 @@ static void desktop_bt_icon_draw_idle_callback(Canvas* canvas, void* context) {
     canvas_draw_icon(canvas, 0, 0, &I_Bluetooth_Idle_5x8);
 }
 
+/*
 static void desktop_bt_icon_draw_connected_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     furi_assert(canvas);
@@ -128,6 +129,7 @@ static void desktop_bt_connection_status_changed_callback(BtStatus status, void*
         view_port_update(desktop->bt_icon_slim_viewport);
     }
 }
+*/
 
 static void desktop_lock_icon_draw_callback(Canvas* canvas, void* context) {
     UNUSED(context);
@@ -438,8 +440,6 @@ Desktop* desktop_alloc() {
         storage_get_pubsub(storage), storage_Desktop_status_callback, desktop);
     furi_record_close(RECORD_STORAGE);
 
-    desktop->bt = furi_record_open(RECORD_BT);
-
     return desktop;
 }
 
@@ -458,9 +458,6 @@ void desktop_free(Desktop* desktop) {
     furi_pubsub_unsubscribe(storage_get_pubsub(storage), desktop->storage_sub);
     furi_record_close(RECORD_STORAGE);
     desktop->storage_sub = NULL;
-
-    furi_record_close(RECORD_BT);
-    desktop->bt = NULL;
 
     desktop->loader = NULL;
     desktop->input_events_pubsub = NULL;
@@ -560,9 +557,6 @@ int32_t desktop_srv(void* p) {
             view_port_enabled_set(desktop->dummy_mode_icon_viewport, desktop->settings.dummy_mode);
             break;
         }
-
-        bt_set_status_changed_callback(
-            desktop->bt, desktop_bt_connection_status_changed_callback, desktop);
 
         desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
         animation_manager_set_dummy_mode_state(
