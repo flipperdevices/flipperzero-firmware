@@ -18,6 +18,10 @@ Feel free to reach out to me at CodeAllNight@outlook.com with any questions or l
 ### subghz-plugins-subghz_demo
 [tutorial](./subghz/plugins/subghz_demo/README.md) - This is a demonstration of sending &amp; receiving radio signals using the subghz_tx_rx worker library.
 
+### subghz-plugins-rock_paper_scissors
+[game](./subghz/plugins/rock_paper_scissors/README.md) -
+This is a two player game that uses the subghz_tx_rx worker library for communication.  Two Flipper Zeros running this game can play Rock, Paper, Scissors against each other!
+
 ### subghz-protocol-x10-decoder
 [project](./subghz/protocols/x10/README.md) - This is a protocol decoder for the Flipper Zero to decode the x10 series of devices when doing a read from the Sub-GHz menu.
 

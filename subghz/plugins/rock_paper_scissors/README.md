@@ -1,10 +1,13 @@
 # Rock Papper Scissors
-## Status
-This is current a work in progress.  
-- Most of the game logic is complete (two flippers should be able to play each other.)
-- UI to show images instead of text.
+## Introduction
+This is game of Rock, Paper, Scissors.  In version 1, we use the subghz radio to find other players, communicate moves, and exchange contact information.
 
-Remaining work:
+## Status
+This is currently a work in progress...  
+- Most of the game logic is complete (two flippers should be able to play against each other.)
+- UI to show Flipper images instead of just debug text.
+
+Remaining work (for subghz version):
 - Tone when button pressed.
 - Show games found & let user pick the game to join.
 - Log joined game into SD card.
@@ -13,9 +16,15 @@ Remaining work:
 - Config - Allow changing game number.
 - Config - Allow changing frequency.
 - Config - Allow changing message on join.
+- Refactor the code, so it has less duplication.
+- Write tutorial.
+- Add game ending animations.
 
-## Introduction
-This is game of Rock, Paper, Scissors.  In version 1, we use the subghz radio to find other players, communicate moves, and exchange contact information.
+Future ideas:
+- Uses Princeton signals for second player.
+- Create stand-alone hardware badges that can play the game too.
+- Instead of subghz, use IR.
+- Instead of subghz, use GPIO.
 
 ## Installation Directions
 This project is intended to be overlayed on top of an existing firmware repo.
