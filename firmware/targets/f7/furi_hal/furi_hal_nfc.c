@@ -34,6 +34,19 @@ void furi_hal_nfc_init() {
     }
 }
 
+void furi_hal_nfc_deinit() {
+    if(event) {
+        furi_event_flag_free(event);
+        event = NULL;
+    }
+    ReturnCode ret = rfalDeinitialize();
+    if(ret == ERR_NONE) {
+        FURI_LOG_I(TAG, "Deinit OK");
+    } else {
+        FURI_LOG_W(TAG, "Deinitialization failed, RFAL returned: %d", ret);
+    }
+}
+
 bool furi_hal_nfc_is_busy() {
     return rfalNfcGetState() != RFAL_NFC_STATE_IDLE;
 }
