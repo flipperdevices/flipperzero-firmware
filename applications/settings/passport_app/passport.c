@@ -171,67 +171,67 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         case PIMG_NONE:
             break;
         case PIMG_BRIAREOS:
-            canvas_draw_icon(canvas, 0, 0, &I_Briareos_Hecatonchires);
+            canvas_draw_icon(canvas, 11, 2, &I_Briareos_Hecatonchires);
             break;
         case PIMG_COBRA:
-            canvas_draw_icon(canvas, 0, 0, &I_Cobra);
+            canvas_draw_icon(canvas, 11, 2, &I_Cobra);
             break;
         case PIMG_DALI:
-            canvas_draw_icon(canvas, 0, 0, &I_Dali_Mask);
+            canvas_draw_icon(canvas, 11, 2, &I_Dali_Mask);
             break;
         case PIMG_DOLPHIN:
             canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
             break;
         case PIMG_ED209:
-            canvas_draw_icon(canvas, 0, 0, &I_ED209);
+            canvas_draw_icon(canvas, 11, 2, &I_ED209);
             break;
         case PIMG_FSOCIETY:
-            canvas_draw_icon(canvas, 0, 0, &I_FSociety_Mask);
+            canvas_draw_icon(canvas, 11, 2, &I_FSociety_Mask);
             break;
         case PIMG_GOKUSET:
             canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
             break;
         case PIMG_GOKUKID:
-            canvas_draw_icon(canvas, 0, 0, &I_G0ku);
+            canvas_draw_icon(canvas, 11, 2, &I_G0ku);
             break;
         case PIMG_GOKUADULT:
-            canvas_draw_icon(canvas, 0, 0, &I_g0ku_1);
+            canvas_draw_icon(canvas, 11, 2, &I_g0ku_1);
             break;
         case PIMG_GOKUSSJ:
-            canvas_draw_icon(canvas, 0, 0, &I_g0ku_2);
+            canvas_draw_icon(canvas, 11, 2, &I_g0ku_2);
             break;
         case PIMG_GOKUSSJ3:
-            canvas_draw_icon(canvas, 0, 0, &I_g0ku_3);
+            canvas_draw_icon(canvas, 11, 2, &I_g0ku_3);
             break;
         case PIMG_GUYFAWKES:
-            canvas_draw_icon(canvas, 0, 0, &I_Guy_Fawkes_Mask);
+            canvas_draw_icon(canvas, 11, 2, &I_Guy_Fawkes_Mask);
             break;
         case PIMG_LAIN:
-            canvas_draw_icon(canvas, 0, 0, &I_Lain);
+            canvas_draw_icon(canvas, 11, 2, &I_Lain);
             break;
         case PIMG_MARVIN:
-            canvas_draw_icon(canvas, 0, 0, &I_Marvin);
+            canvas_draw_icon(canvas, 11, 2, &I_Marvin);
             break;
         case PIMG_MORELEELLOO:
-            canvas_draw_icon(canvas, 0, 0, &I_Moreleeloo);
+            canvas_draw_icon(canvas, 11, 2, &I_Moreleeloo);
             break;
         case PIMG_NEUROMANCER:
-            canvas_draw_icon(canvas, 0, 0, &I_Neuromancer);
+            canvas_draw_icon(canvas, 11, 2, &I_Neuromancer);
             break;
         case PIMG_MARIO:
-            canvas_draw_icon(canvas, 0, 0, &I_Pixel_Mario);
+            canvas_draw_icon(canvas, 11, 2, &I_Pixel_Mario);
             break;
         case PIMG_SHINKAI:
-            canvas_draw_icon(canvas, 0, 0, &I_Shinkai);
+            canvas_draw_icon(canvas, 11, 2, &I_Shinkai);
             break;
         case PIMG_SPIDER:
-            canvas_draw_icon(canvas, 0, 0, &I_Spider_Jerusalem);
+            canvas_draw_icon(canvas, 11, 2, &I_Spider_Jerusalem);
             break;
         case PIMG_TANKGIRL:
-            canvas_draw_icon(canvas, 0, 0, &I_Tank_Girl);
+            canvas_draw_icon(canvas, 11, 2, &I_Tank_Girl);
             break;
         case PIMG_TOTORO:
-            canvas_draw_icon(canvas, 0, 0, &I_Totoro);
+            canvas_draw_icon(canvas, 11, 2, &I_Totoro);
             break;
         }
 
