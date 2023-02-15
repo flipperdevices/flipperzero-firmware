@@ -231,6 +231,14 @@ static ViewPort* power_battery_view_port_alloc(Power* power) {
     return battery_view_port;
 }
 
+static ViewPort* power_battery_slim_view_port_alloc(Power* power) {
+    ViewPort* battery_slim_view_port = view_port_alloc();
+    view_port_set_width(battery_slim_view_port, icon_get_width(&I_Battery_26x8));
+    view_port_draw_callback_set(battery_slim_view_port, power_draw_battery_callback, power);
+    gui_add_view_port(power->gui, battery_slim_view_port, GuiLayerStatusBarRightSlim);
+    return battery_slim_view_port;
+}
+
 static void power_start_auto_shutdown_timer(Power* power) {
     furi_timer_start(power->auto_shutdown_timer, furi_ms_to_ticks(power->shutdown_idle_delay_ms));
 }
@@ -343,6 +351,7 @@ Power* power_alloc() {
 
     // Battery view port
     power->battery_view_port = power_battery_view_port_alloc(power);
+    power->battery_slim_view_port = power_battery_slim_view_port_alloc(power);
     power->show_low_bat_level_message = true;
 
     //Auto shutdown timer
@@ -362,6 +371,7 @@ void power_free(Power* power) {
     power_unplug_usb_free(power->power_unplug_usb);
 
     view_port_free(power->battery_view_port);
+    view_port_free(power->battery_slim_view_port);
 
     // State
     furi_mutex_free(power->api_mtx);
@@ -515,10 +525,20 @@ int32_t power_srv(void* p) {
 
     if(settings->displayBatteryPercentage != DISPLAY_BATTERY_NONE) {
         power->displayBatteryPercentage = settings->displayBatteryPercentage;
-        view_port_enabled_set(power->battery_view_port, true);
+        switch(settings->icon_style) {
+        case ICON_STYLE_SLIM:
+            view_port_enabled_set(power->battery_slim_view_port, true);
+            view_port_enabled_set(power->battery_view_port, false);
+            break;
+        case ICON_STYLE_STOCK:
+            view_port_enabled_set(power->battery_slim_view_port, false);
+            view_port_enabled_set(power->battery_view_port, true);
+            break;
+        }
     } else {
         power->displayBatteryPercentage = settings->displayBatteryPercentage;
         view_port_enabled_set(power->battery_view_port, false);
+        view_port_enabled_set(power->battery_slim_view_port, false);
     }
 
     free(settings);
@@ -544,16 +564,34 @@ int32_t power_srv(void* p) {
             if(power->displayBatteryPercentage == DISPLAY_BATTERY_NONE) {
                 if(settings->displayBatteryPercentage != DISPLAY_BATTERY_NONE) {
                     power->displayBatteryPercentage = settings->displayBatteryPercentage;
-                    view_port_enabled_set(power->battery_view_port, true);
-                    view_port_update(power->battery_view_port);
+                    switch(settings->icon_style) {
+                    case ICON_STYLE_SLIM:
+                        view_port_enabled_set(power->battery_slim_view_port, true);
+                        view_port_enabled_set(power->battery_view_port, false);
+                        view_port_update(power->battery_slim_view_port);
+                        break;
+                    case ICON_STYLE_STOCK:
+                        view_port_enabled_set(power->battery_view_port, true);
+                        view_port_enabled_set(power->battery_slim_view_port, false);
+                        view_port_update(power->battery_view_port);
+                        break;
+                    }
                 }
             } else {
                 if(settings->displayBatteryPercentage == DISPLAY_BATTERY_NONE) {
                     power->displayBatteryPercentage = settings->displayBatteryPercentage;
                     view_port_enabled_set(power->battery_view_port, false);
+                    view_port_enabled_set(power->battery_slim_view_port, false);
                 } else {
                     power->displayBatteryPercentage = settings->displayBatteryPercentage;
-                    view_port_update(power->battery_view_port);
+                    switch(settings->icon_style) {
+                    case ICON_STYLE_SLIM:
+                        view_port_update(power->battery_slim_view_port);
+                        break;
+                    case ICON_STYLE_STOCK:
+                        view_port_update(power->battery_view_port);
+                        break;
+                    }
                 }
             }
 

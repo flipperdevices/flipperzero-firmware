@@ -3,7 +3,6 @@ App(
     name="Applications not shown in menus",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-		"dolphin_passport",
         "updater_app",
         "storage_move_to_sd",
         # "archive",

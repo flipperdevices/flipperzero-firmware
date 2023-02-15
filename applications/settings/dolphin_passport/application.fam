@@ -1,7 +1,7 @@
 App(
     appid="dolphin_passport",
-    name="Passport",
-	apptype=FlipperAppType.SYSTEM,
+    name="Passport (Old)",
+	apptype=FlipperAppType.SETTINGS,
     entry_point="dolphin_passport_app",
     cdefines=["APP_DOLPHIN_PASSPORT"],
     requires=[

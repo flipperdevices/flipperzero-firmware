@@ -8,11 +8,12 @@
 #define SCENE_EVENT_SELECT_FAVORITE_SECONDARY 1
 #define SCENE_EVENT_SELECT_PIN_SETUP 2
 #define SCENE_EVENT_SELECT_AUTO_LOCK_DELAY 3
-#define SCENE_EVENT_SELECT_BATTERY_DISPLAY 4
-#define SCENE_EVENT_SELECT_BT_ICON 5
-#define SCENE_EVENT_SELECT_SDCARD_ICON 6
-#define SCENE_EVENT_SELECT_TOP_BAR 7
-#define SCENE_EVENT_SELECT_DUMBMODE 8
+#define SCENE_EVENT_SELECT_ICON_STYLE 4
+#define SCENE_EVENT_SELECT_BATTERY_DISPLAY 5
+#define SCENE_EVENT_SELECT_BT_ICON 6
+#define SCENE_EVENT_SELECT_SDCARD_ICON 7
+#define SCENE_EVENT_SELECT_TOP_BAR 8
+#define SCENE_EVENT_SELECT_DUMBMODE 9
 
 #define AUTO_LOCK_DELAY_COUNT 9
 const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
@@ -44,6 +45,13 @@ const uint32_t displayBatteryPercentage_value[BATTERY_VIEW_COUNT] = {
     DISPLAY_BATTERY_NONE};
 
 uint8_t origBattDisp_value = 0;
+
+#define ICON_STYLE_COUNT 2
+
+const char* const icon_style_count_text[ICON_STYLE_COUNT] = {"Stock", "Slim"};
+
+const uint32_t icon_style_value[ICON_STYLE_COUNT] = {ICON_STYLE_STOCK, ICON_STYLE_SLIM};
+uint8_t origIconStyle_value = 0;
 
 #define DESKTOP_ON_OFF_COUNT 2
 
@@ -84,12 +92,20 @@ static void desktop_settings_scene_start_battery_view_changed(VariableItem* item
     app->settings.displayBatteryPercentage = index;
 }
 
+static void desktop_settings_scene_start_icon_style_changed(VariableItem* item) {
+    DesktopSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, icon_style_count_text[index]);
+    app->settings.icon_style = icon_style_value[index];
+}
+
 static void desktop_settings_scene_start_bticon_changed(VariableItem* item) {
     DesktopSettingsApp* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, desktop_on_off_text[index]);
-    app->bt_settings.iconshow = bticon_value[index];
+    app->settings.bt_icon = bticon_value[index];
 }
 
 static void desktop_settings_scene_start_sdcard_changed(VariableItem* item) {
@@ -119,8 +135,9 @@ static void desktop_settings_scene_start_dumbmode_changed(VariableItem* item) {
 void desktop_settings_scene_start_on_enter(void* context) {
     DesktopSettingsApp* app = context;
     VariableItemList* variable_item_list = app->variable_item_list;
+    origIconStyle_value = app->settings.icon_style;
     origBattDisp_value = app->settings.displayBatteryPercentage;
-    origBTIcon_value = app->bt_settings.iconshow;
+    origBTIcon_value = app->settings.bt_icon;
     origTopBar_value = app->settings.top_bar;
     origSDCard_value = app->settings.sdcard;
 
@@ -149,6 +166,17 @@ void desktop_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
+        "Icon Style",
+        ICON_STYLE_COUNT,
+        desktop_settings_scene_start_icon_style_changed,
+        app);
+
+    value_index = value_index_uint32(app->settings.icon_style, icon_style_value, ICON_STYLE_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, icon_style_count_text[value_index]);
+
+    item = variable_item_list_add(
+        variable_item_list,
         "Battery View",
         BATTERY_VIEW_COUNT,
         desktop_settings_scene_start_battery_view_changed,
@@ -168,8 +196,7 @@ void desktop_settings_scene_start_on_enter(void* context) {
         desktop_settings_scene_start_bticon_changed,
         app);
 
-    value_index =
-        value_index_uint32(app->bt_settings.iconshow, bticon_value, DESKTOP_ON_OFF_COUNT);
+    value_index = value_index_uint32(app->settings.bt_icon, bticon_value, DESKTOP_ON_OFF_COUNT);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, desktop_on_off_text[value_index]);
 
@@ -240,6 +267,9 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
         case SCENE_EVENT_SELECT_AUTO_LOCK_DELAY:
             consumed = true;
             break;
+        case SCENE_EVENT_SELECT_ICON_STYLE:
+            consumed = true;
+            break;
         case SCENE_EVENT_SELECT_BATTERY_DISPLAY:
             consumed = true;
             break;
@@ -264,11 +294,11 @@ void desktop_settings_scene_start_on_exit(void* context) {
     DesktopSettingsApp* app = context;
     variable_item_list_reset(app->variable_item_list);
     DESKTOP_SETTINGS_SAVE(&app->settings);
-    bt_settings_save(&app->bt_settings);
 
-    if((app->settings.displayBatteryPercentage != origBattDisp_value) ||
-       (app->bt_settings.iconshow != origBTIcon_value) ||
-       (app->settings.sdcard != origSDCard_value) || (app->settings.top_bar != origTopBar_value)) {
+    if((app->settings.icon_style != origIconStyle_value) ||
+       (app->settings.displayBatteryPercentage != origBattDisp_value) ||
+       (app->settings.bt_icon != origBTIcon_value) || (app->settings.sdcard != origSDCard_value) ||
+       (app->settings.top_bar != origTopBar_value)) {
         furi_hal_power_reset();
     }
 }

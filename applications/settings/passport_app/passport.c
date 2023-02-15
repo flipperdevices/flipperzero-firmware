@@ -5,10 +5,10 @@ void passport_alloc(Passport* passport) {
 
     // Load Passport Settings
     if(!(passport_settings_load(&passport->settings))) {
-        passport->settings.background = true;
+        passport->settings.background = 1;
         passport->settings.image = true;
         passport->settings.name = true;
-        passport->settings.mood = true;
+        passport->settings.mood_set = 2;
         passport->settings.level = true;
         passport->settings.xp_text = true;
         passport->settings.xp_mode = 0;
@@ -71,9 +71,19 @@ void passport_alloc(Passport* passport) {
 
     //string variables set
     //name
-    snprintf(passport->my_name, 8, "%s", furi_hal_version_get_name_ptr());
+    if(furi_hal_version_get_name_ptr()) {
+        snprintf(passport->my_name, 9, "%s", furi_hal_version_get_name_ptr());
+    } else {
+        snprintf(passport->my_name, 9, "%s", "Unknown");
+    }
     //mood
-    snprintf(passport->mood_str, 20, "Mood: %s", moods[passport->moodStrIndex]);
+    if(passport->settings.mood_set != 0) {
+        snprintf(
+            passport->mood_str,
+            20,
+            "Mood: %s",
+            moods[passport->settings.mood_set][passport->moodStrIndex]);
+    }
     //level
     snprintf(passport->level_str, 12, "Level: %hu", stats->level);
 
@@ -124,8 +134,16 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         passport->xp_fill = (int)round((passport->xp_progress / 100) * 65);
 
         // draw background
-        if(passport->settings.background) {
-            canvas_draw_icon(canvas, 0, 0, &I_passport_background);
+        switch(passport->settings.background) {
+        case 0:
+
+            break;
+        case 1:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_mario);
+            break;
+        case 2:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_dragonball);
+            break;
         }
 
         // draw portrait
@@ -137,10 +155,10 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         canvas_set_font(canvas, FontSecondary);
         //name
         if(passport->settings.name) {
-            canvas_draw_str(canvas, 58, 10, passport->my_name ? passport->my_name : "Unknown");
+            canvas_draw_str(canvas, 58, 10, passport->my_name);
         }
         //mood
-        if(passport->settings.mood) {
+        if(passport->settings.mood_set != 0) {
             canvas_draw_str(canvas, 58, 22, passport->mood_str);
         }
         //level
@@ -237,25 +255,33 @@ static void render_callback(Canvas* const canvas, void* mutex) {
             //first section
             //no start - drawing end curve
             canvas_draw_dot(canvas, 77, 46);
+            canvas_draw_dot(canvas, 78, 46);
             canvas_draw_dot(canvas, 78, 47);
             canvas_draw_dot(canvas, 78, 48);
+            canvas_draw_dot(canvas, 78, 49);
             canvas_draw_dot(canvas, 77, 49);
             //second section
             //start curve
             canvas_draw_dot(canvas, 81, 46);
+            canvas_draw_dot(canvas, 80, 46);
             canvas_draw_dot(canvas, 80, 47);
             canvas_draw_dot(canvas, 80, 48);
+            canvas_draw_dot(canvas, 80, 49);
             canvas_draw_dot(canvas, 81, 49);
             //end curve
             canvas_draw_dot(canvas, 99, 46);
+            canvas_draw_dot(canvas, 100, 46);
             canvas_draw_dot(canvas, 100, 47);
             canvas_draw_dot(canvas, 100, 48);
+            canvas_draw_dot(canvas, 100, 49);
             canvas_draw_dot(canvas, 99, 49);
             //third section
             //start curve (no end curve)
             canvas_draw_dot(canvas, 103, 46);
+            canvas_draw_dot(canvas, 102, 46);
             canvas_draw_dot(canvas, 102, 47);
             canvas_draw_dot(canvas, 102, 48);
+            canvas_draw_dot(canvas, 102, 49);
             canvas_draw_dot(canvas, 103, 49);
 
             //fill bar according to xp percentage
@@ -266,53 +292,31 @@ static void render_callback(Canvas* const canvas, void* mutex) {
             //create retro x3 look - white parts after fill
             canvas_set_color(canvas, ColorWhite);
             //between first and second sections
-            canvas_draw_dot(canvas, 77, 45);
             canvas_draw_dot(canvas, 78, 45);
             canvas_draw_dot(canvas, 79, 45);
             canvas_draw_dot(canvas, 80, 45);
-            canvas_draw_dot(canvas, 81, 45);
 
-            canvas_draw_dot(canvas, 78, 46);
             canvas_draw_dot(canvas, 79, 46);
-            canvas_draw_dot(canvas, 80, 46);
-
             canvas_draw_dot(canvas, 79, 47);
-
             canvas_draw_dot(canvas, 79, 48);
-
-            canvas_draw_dot(canvas, 78, 49);
             canvas_draw_dot(canvas, 79, 49);
-            canvas_draw_dot(canvas, 80, 49);
 
-            canvas_draw_dot(canvas, 77, 50);
             canvas_draw_dot(canvas, 78, 50);
             canvas_draw_dot(canvas, 79, 50);
             canvas_draw_dot(canvas, 80, 50);
-            canvas_draw_dot(canvas, 81, 50);
             //between second and third sections
-            canvas_draw_dot(canvas, 99, 45);
             canvas_draw_dot(canvas, 100, 45);
             canvas_draw_dot(canvas, 101, 45);
             canvas_draw_dot(canvas, 102, 45);
-            canvas_draw_dot(canvas, 103, 45);
 
-            canvas_draw_dot(canvas, 100, 46);
             canvas_draw_dot(canvas, 101, 46);
-            canvas_draw_dot(canvas, 102, 46);
-
             canvas_draw_dot(canvas, 101, 47);
-
             canvas_draw_dot(canvas, 101, 48);
-
-            canvas_draw_dot(canvas, 100, 49);
             canvas_draw_dot(canvas, 101, 49);
-            canvas_draw_dot(canvas, 102, 49);
 
-            canvas_draw_dot(canvas, 99, 50);
             canvas_draw_dot(canvas, 100, 50);
             canvas_draw_dot(canvas, 101, 50);
             canvas_draw_dot(canvas, 102, 50);
-            canvas_draw_dot(canvas, 103, 50);
             break;
         case 4:
             //Retro 5
@@ -328,47 +332,63 @@ static void render_callback(Canvas* const canvas, void* mutex) {
             //first section
             //no start - drawing end curve
             canvas_draw_dot(canvas, 71, 46);
+            canvas_draw_dot(canvas, 72, 46);
             canvas_draw_dot(canvas, 72, 47);
             canvas_draw_dot(canvas, 72, 48);
+            canvas_draw_dot(canvas, 72, 49);
             canvas_draw_dot(canvas, 71, 49);
             //second section
             //start curve
             canvas_draw_dot(canvas, 75, 46);
+            canvas_draw_dot(canvas, 74, 46);
             canvas_draw_dot(canvas, 74, 47);
             canvas_draw_dot(canvas, 74, 48);
+            canvas_draw_dot(canvas, 74, 49);
             canvas_draw_dot(canvas, 75, 49);
             //end curve
             canvas_draw_dot(canvas, 83, 46);
+            canvas_draw_dot(canvas, 84, 46);
             canvas_draw_dot(canvas, 84, 47);
             canvas_draw_dot(canvas, 84, 48);
+            canvas_draw_dot(canvas, 84, 49);
             canvas_draw_dot(canvas, 83, 49);
             //third section
             //start curve
             canvas_draw_dot(canvas, 87, 46);
+            canvas_draw_dot(canvas, 86, 46);
             canvas_draw_dot(canvas, 86, 47);
             canvas_draw_dot(canvas, 86, 48);
+            canvas_draw_dot(canvas, 86, 49);
             canvas_draw_dot(canvas, 87, 49);
             //end curve
             canvas_draw_dot(canvas, 95, 46);
+            canvas_draw_dot(canvas, 96, 46);
             canvas_draw_dot(canvas, 96, 47);
             canvas_draw_dot(canvas, 96, 48);
+            canvas_draw_dot(canvas, 96, 49);
             canvas_draw_dot(canvas, 95, 49);
             //fourth section
             //start curve
             canvas_draw_dot(canvas, 99, 46);
+            canvas_draw_dot(canvas, 98, 46);
             canvas_draw_dot(canvas, 98, 47);
             canvas_draw_dot(canvas, 98, 48);
+            canvas_draw_dot(canvas, 98, 49);
             canvas_draw_dot(canvas, 99, 49);
             //end curve
             canvas_draw_dot(canvas, 107, 46);
+            canvas_draw_dot(canvas, 108, 46);
             canvas_draw_dot(canvas, 108, 47);
             canvas_draw_dot(canvas, 108, 48);
+            canvas_draw_dot(canvas, 108, 49);
             canvas_draw_dot(canvas, 107, 49);
             //fifth section
             //start curve (no end curve)
             canvas_draw_dot(canvas, 111, 46);
+            canvas_draw_dot(canvas, 110, 46);
             canvas_draw_dot(canvas, 110, 47);
             canvas_draw_dot(canvas, 110, 48);
+            canvas_draw_dot(canvas, 110, 49);
             canvas_draw_dot(canvas, 111, 49);
 
             //fill bar according to xp percentage
@@ -379,101 +399,57 @@ static void render_callback(Canvas* const canvas, void* mutex) {
             //create retro x3 look - white parts after fill
             canvas_set_color(canvas, ColorWhite);
             //between first and second sections
-            canvas_draw_dot(canvas, 71, 45);
             canvas_draw_dot(canvas, 72, 45);
             canvas_draw_dot(canvas, 73, 45);
             canvas_draw_dot(canvas, 74, 45);
-            canvas_draw_dot(canvas, 75, 45);
 
-            canvas_draw_dot(canvas, 72, 46);
             canvas_draw_dot(canvas, 73, 46);
-            canvas_draw_dot(canvas, 74, 46);
-
             canvas_draw_dot(canvas, 73, 47);
-
             canvas_draw_dot(canvas, 73, 48);
-
-            canvas_draw_dot(canvas, 72, 49);
             canvas_draw_dot(canvas, 73, 49);
-            canvas_draw_dot(canvas, 74, 49);
 
-            canvas_draw_dot(canvas, 71, 50);
             canvas_draw_dot(canvas, 72, 50);
             canvas_draw_dot(canvas, 73, 50);
             canvas_draw_dot(canvas, 74, 50);
-            canvas_draw_dot(canvas, 75, 50);
             //between second and third sections
-            canvas_draw_dot(canvas, 83, 45);
             canvas_draw_dot(canvas, 84, 45);
             canvas_draw_dot(canvas, 85, 45);
             canvas_draw_dot(canvas, 86, 45);
-            canvas_draw_dot(canvas, 87, 45);
 
-            canvas_draw_dot(canvas, 84, 46);
             canvas_draw_dot(canvas, 85, 46);
-            canvas_draw_dot(canvas, 86, 46);
-
             canvas_draw_dot(canvas, 85, 47);
-
             canvas_draw_dot(canvas, 85, 48);
-
-            canvas_draw_dot(canvas, 84, 49);
             canvas_draw_dot(canvas, 85, 49);
-            canvas_draw_dot(canvas, 86, 49);
 
-            canvas_draw_dot(canvas, 83, 50);
             canvas_draw_dot(canvas, 84, 50);
             canvas_draw_dot(canvas, 85, 50);
             canvas_draw_dot(canvas, 86, 50);
-            canvas_draw_dot(canvas, 87, 50);
             //between third and fourth sections
-            canvas_draw_dot(canvas, 95, 45);
             canvas_draw_dot(canvas, 96, 45);
             canvas_draw_dot(canvas, 97, 45);
             canvas_draw_dot(canvas, 98, 45);
-            canvas_draw_dot(canvas, 99, 45);
 
-            canvas_draw_dot(canvas, 96, 46);
             canvas_draw_dot(canvas, 97, 46);
-            canvas_draw_dot(canvas, 98, 46);
-
             canvas_draw_dot(canvas, 97, 47);
-
             canvas_draw_dot(canvas, 97, 48);
-
-            canvas_draw_dot(canvas, 96, 49);
             canvas_draw_dot(canvas, 97, 49);
-            canvas_draw_dot(canvas, 98, 49);
 
-            canvas_draw_dot(canvas, 95, 50);
             canvas_draw_dot(canvas, 96, 50);
             canvas_draw_dot(canvas, 97, 50);
             canvas_draw_dot(canvas, 98, 50);
-            canvas_draw_dot(canvas, 99, 50);
             //between fourth and fifth sections
-            canvas_draw_dot(canvas, 107, 45);
             canvas_draw_dot(canvas, 108, 45);
             canvas_draw_dot(canvas, 109, 45);
             canvas_draw_dot(canvas, 110, 45);
-            canvas_draw_dot(canvas, 111, 45);
 
-            canvas_draw_dot(canvas, 108, 46);
             canvas_draw_dot(canvas, 109, 46);
-            canvas_draw_dot(canvas, 110, 46);
-
             canvas_draw_dot(canvas, 109, 47);
-
             canvas_draw_dot(canvas, 109, 48);
-
-            canvas_draw_dot(canvas, 108, 49);
             canvas_draw_dot(canvas, 109, 49);
-            canvas_draw_dot(canvas, 110, 49);
 
-            canvas_draw_dot(canvas, 107, 50);
             canvas_draw_dot(canvas, 108, 50);
             canvas_draw_dot(canvas, 109, 50);
             canvas_draw_dot(canvas, 110, 50);
-            canvas_draw_dot(canvas, 111, 50);
             break;
         case 5:
             //Percent with Bar

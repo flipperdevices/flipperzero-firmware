@@ -65,10 +65,10 @@ extern int32_t passport_settings_app(void* p) {
 
     // Load Passport Settings
     if(!(passport_settings_load(&app->settings))) {
-        app->settings.background = true;
+        app->settings.background = 1;
         app->settings.image = true;
         app->settings.name = true;
-        app->settings.mood = true;
+        app->settings.mood_set = 2;
         app->settings.level = true;
         app->settings.xp_text = true;
         app->settings.xp_mode = 0;

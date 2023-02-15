@@ -130,7 +130,7 @@ void passport_set_variables(Passport* passport) {
 
     //string variables set
     //name
-    snprintf(passport->my_name, 8, "%s", furi_hal_version_get_name_ptr());
+    snprintf(passport->my_name, 9, "%s", furi_hal_version_get_name_ptr());
     //mood
     snprintf(passport->mood_str, 20, "Mood: %s", moods[passport->moodStrIndex]);
     //level

@@ -9,7 +9,6 @@
 #include <dialogs/dialogs.h>
 #include <assets_icons.h>
 
-#include <bt/bt_settings.h>
 #include <desktop/desktop_settings.h>
 #include <desktop/views/desktop_view_pin_input.h>
 #include "views/desktop_settings_view_pin_setup_howto.h"
@@ -26,7 +25,6 @@ typedef enum {
 
 typedef struct {
     DesktopSettings settings;
-    BtSettings bt_settings;
 
     Gui* gui;
     DialogsApp* dialogs;
