@@ -84,7 +84,6 @@ struct Desktop {
     FuriTimer* auto_lock_timer;
 
     Bt* bt;
-    BtSettings bt_settings;
 };
 
 Desktop* desktop_alloc();
