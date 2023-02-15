@@ -38,7 +38,7 @@ typedef struct {
     uint16_t tmpLvl;
     char level_str[12];
 
-    char my_name[8];
+    char my_name[9];
 
     char mood_str[20];
     uint8_t mood;
