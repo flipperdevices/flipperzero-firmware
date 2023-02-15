@@ -14,7 +14,7 @@ Feel free to reach out to me at CodeAllNight@outlook.com with any questions or l
 [tutorial](./gpio/gpio_polling_demo/README.md) - This is a "hello world" demonstration of reading a GPIO pin using polling.
 
 
-## Subghz
+## Subghz [folder](./subghz/README.md)
 ### subghz-plugins-subghz_demo
 [tutorial](./subghz/plugins/subghz_demo/README.md) - This is a demonstration of sending &amp; receiving radio signals using the subghz_tx_rx worker library.
 
