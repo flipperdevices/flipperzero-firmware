@@ -245,15 +245,15 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
 /*********************** WRITE ***********************/
 
 void ibutton_worker_mode_write_start(iButtonWorker* worker) {
+    UNUSED(worker);
     furi_hal_power_enable_otg();
-    onewire_host_start(worker->host);
 }
 
 void ibutton_worker_mode_write_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    const bool success = ibutton_key_write_blank(worker->key, worker->host) ||
-                         ibutton_key_write_copy(worker->key, worker->host);
+    // TODO: separate modes for writing copies and blanks?
+    const bool success = ibutton_key_write_copy(worker->key, worker->host);
 
     // TODO: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
@@ -265,6 +265,6 @@ void ibutton_worker_mode_write_tick(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_write_stop(iButtonWorker* worker) {
+    UNUSED(worker);
     furi_hal_power_disable_otg();
-    onewire_host_stop(worker->host);
 }

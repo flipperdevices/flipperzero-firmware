@@ -47,7 +47,8 @@ bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent even
         } else if(event.event == SubmenuIndexWriteBlank) {
             // TODO: Write blank
         } else if(event.event == SubmenuIndexWriteCopy) {
-            // TODO: Write copy
+            // TODO: Properly differentiate between write blank and copy
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexEdit) {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
         } else if(event.event == SubmenuIndexDelete) {

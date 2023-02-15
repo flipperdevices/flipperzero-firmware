@@ -2044,6 +2044,7 @@ Function,+,onewire_host_stop,void,OneWireHost*
 Function,+,onewire_host_target_search,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write,void,"OneWireHost*, uint8_t"
 Function,+,onewire_host_write_bit,void,"OneWireHost*, _Bool"
+Function,+,onewire_host_write_bytes,void,"OneWireHost*, const uint8_t*, uint16_t"
 Function,+,onewire_slave_alloc,OneWireSlave*,const GpioPin*
 Function,+,onewire_slave_free,void,OneWireSlave*
 Function,+,onewire_slave_receive,_Bool,"OneWireSlave*, uint8_t*, const uint8_t"

@@ -77,6 +77,14 @@ void onewire_host_write_bit(OneWireHost* host, bool value);
 void onewire_host_write(OneWireHost* host, uint8_t value);
 
 /**
+ * Write many bytes
+ * @param host
+ * @param buffer
+ * @param count
+ */
+void onewire_host_write_bytes(OneWireHost* host, const uint8_t* buffer, uint16_t count);
+
+/**
  * Skip ROM command
  * @param host 
  */

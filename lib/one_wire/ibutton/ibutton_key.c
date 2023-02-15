@@ -59,19 +59,17 @@ static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
 
     FURI_CRITICAL_ENTER();
 
-    do {
-        if(!onewire_host_search(host, rom_data, OneWireHostSearchModeNormal)) break;
-
+    if(onewire_host_search(host, rom_data, OneWireHostSearchModeNormal)) {
         /* Considering any found 1-Wire device a success.
          * It can be checked later with ibutton_key_is_valid(). */
         success = true;
 
         key->protocol_id = ibutton_protocols_get_id_by_family_code(rom_data[0]);
-        if(key->protocol_id == iButtonProtocolMax) break;
 
-        if(!onewire_host_reset(host)) break;
-        if(!ibutton_protocols_read(host, key->protocol_data, key->protocol_id)) break;
-    } while(false);
+        if(key->protocol_id < iButtonProtocolMax) {
+            ibutton_protocols_read(host, key->protocol_data, key->protocol_id);
+        }
+    }
 
     onewire_host_reset_search(host);
     onewire_host_stop(host);
@@ -82,11 +80,17 @@ static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
 }
 
 bool ibutton_key_read(iButtonKey* key, OneWireHost* host) {
+    // TODO: Read Cyfral & Metakom keys
     return ibutton_key_read_onewire(key, host);
 }
 
 bool ibutton_key_write_blank(iButtonKey* key, OneWireHost* host) {
     bool success = false;
+
+    onewire_host_start(host);
+    furi_delay_ms(100);
+
+    FURI_CRITICAL_ENTER();
 
     do {
         if(key->protocol_id >= iButtonProtocolMax) break;
@@ -97,11 +101,20 @@ bool ibutton_key_write_blank(iButtonKey* key, OneWireHost* host) {
         success = true;
     } while(false);
 
+    onewire_host_stop(host);
+
+    FURI_CRITICAL_EXIT();
+
     return success;
 }
 
 bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host) {
     bool success = false;
+
+    onewire_host_start(host);
+    furi_delay_ms(100);
+
+    FURI_CRITICAL_ENTER();
 
     do {
         if(key->protocol_id >= iButtonProtocolMax) break;
@@ -111,6 +124,10 @@ bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host) {
 
         success = true;
     } while(false);
+
+    onewire_host_stop(host);
+
+    FURI_CRITICAL_EXIT();
 
     return success;
 }

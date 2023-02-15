@@ -1,5 +1,6 @@
 #include "dallas_common.h"
 
+#include <core/common_defines.h>
 #include <one_wire/maxim_crc.h>
 
 #define BITS_IN_BYTE 8U
@@ -7,12 +8,12 @@
 #define DALLAS_COMMON_ROM_DATA_KEY_V1 "Data"
 #define DALLAS_COMMON_ROM_DATA_KEY_V2 "Rom Data"
 
-bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data) {
-    const uint8_t crc_calculated =
-        maxim_crc8(rom_data->bytes, sizeof(DallasCommonRomData) - 1, MAXIM_CRC8_INIT);
-    const uint8_t crc_received = rom_data->fields.checksum;
+#define DALLAS_COMMON_COPY_SCRATCH_TIMEOUT_US 100U
+#define DALLAS_COMMON_COPY_SCRATCH_POLL_US 5U
 
-    return crc_calculated == crc_received;
+bool dallas_common_skip_rom(OneWireHost* host) {
+    onewire_host_write(host, DALLAS_COMMON_CMD_SKIP_ROM);
+    return true;
 }
 
 bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data) {
@@ -22,13 +23,54 @@ bool dallas_common_read_rom(OneWireHost* host, DallasCommonRomData* rom_data) {
     return dallas_common_is_valid_crc(rom_data);
 }
 
+bool dallas_common_write_scratchpad(
+    OneWireHost* host,
+    uint16_t address,
+    const uint8_t* data,
+    size_t data_size) {
+    onewire_host_write(host, DALLAS_COMMON_CMD_WRITE_SCRATCH);
+    onewire_host_write(host, (uint8_t)address);
+    onewire_host_write(host, (uint8_t)(address >> BITS_IN_BYTE));
+
+    onewire_host_write_bytes(host, data, data_size);
+
+    return true;
+}
+
+bool dallas_common_read_scratchpad(
+    OneWireHost* host,
+    DallasCommonAddressRegs* regs,
+    uint8_t* data,
+    size_t data_size) {
+    onewire_host_write(host, DALLAS_COMMON_CMD_READ_SCRATCH);
+    onewire_host_read_bytes(host, regs->bytes, sizeof(DallasCommonAddressRegs));
+    onewire_host_read_bytes(host, data, data_size);
+
+    return true;
+}
+
+bool dallas_common_copy_scratchpad(OneWireHost* host, const DallasCommonAddressRegs* regs) {
+    onewire_host_write(host, DALLAS_COMMON_CMD_COPY_SCRATCH);
+    onewire_host_write_bytes(host, regs->bytes, sizeof(DallasCommonAddressRegs));
+
+    size_t time_elapsed;
+    for(time_elapsed = 0; time_elapsed < DALLAS_COMMON_COPY_SCRATCH_TIMEOUT_US;
+        time_elapsed += DALLAS_COMMON_COPY_SCRATCH_POLL_US) {
+        if(!onewire_host_read_bit(host)) break;
+        furi_delay_us(DALLAS_COMMON_COPY_SCRATCH_POLL_US);
+    }
+
+    return time_elapsed < DALLAS_COMMON_COPY_SCRATCH_TIMEOUT_US;
+}
+
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size) {
     onewire_host_write(host, DALLAS_COMMON_CMD_READ_MEM);
 
     onewire_host_write(host, (uint8_t)address);
-    onewire_host_write(host, (uint8_t)(address > 8));
+    onewire_host_write(host, (uint8_t)(address > BITS_IN_BYTE));
 
     onewire_host_read_bytes(host, data, (uint16_t)data_size);
+
     return true;
 }
 
@@ -71,4 +113,12 @@ bool dallas_common_load_rom_data(
     default:
         return false;
     }
+}
+
+bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data) {
+    const uint8_t crc_calculated =
+        maxim_crc8(rom_data->bytes, sizeof(DallasCommonRomData) - 1, MAXIM_CRC8_INIT);
+    const uint8_t crc_received = rom_data->fields.checksum;
+
+    return crc_calculated == crc_received;
 }
