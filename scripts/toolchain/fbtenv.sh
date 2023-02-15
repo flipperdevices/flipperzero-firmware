@@ -249,6 +249,7 @@ fbtenv_check_download_toolchain()
     elif [ ! -f "$TOOLCHAIN_ARCH_DIR/VERSION" ]; then
         fbtenv_download_toolchain || return 1;
     elif [ "$(cat "$TOOLCHAIN_ARCH_DIR/VERSION")" -ne "$FBT_TOOLCHAIN_VERSION" ]; then
+        echo "FBT: starting toolchain upgrade process.."
         fbtenv_download_toolchain || return 1;
     fi
     return 0;
@@ -270,6 +271,11 @@ fbtenv_download_toolchain()
     return 0;
 }
 
+fbtenv_print_version()
+{
+    echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
+}
+
 fbtenv_main()
 {
     fbtenv_check_sourced || return 1;
@@ -282,6 +288,7 @@ fbtenv_main()
     fbtenv_check_script_path || return 1;
     fbtenv_check_download_toolchain || return 1;
     fbtenv_set_shell_prompt;
+    fbtenv_print_version;
     PATH="$TOOLCHAIN_ARCH_DIR/python/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
