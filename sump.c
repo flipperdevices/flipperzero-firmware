@@ -14,7 +14,7 @@ void sump_handle_get_metadata(Sump* sump) {
     const char* name = "Flipper LogicAnalyzer v1.0 (g3gg0.de)";
     const char* fpga = "(none)";
     const char* firmware = "v1.0";
-    const uint32_t probes = 4;
+    const uint8_t probes = 8;
     uint32_t max_sample_rate = 10000000;
     uint32_t max_sample_mem = MAX_SAMPLE_MEM;
 
@@ -35,7 +35,7 @@ void sump_handle_get_metadata(Sump* sump) {
 
     /* 0x40	Number of usable probes (short) */
     buf[pos++] = 0x40;
-    buf[pos++] = 0x08;
+    buf[pos++] = probes;
 
     /* 0x41 	Protocol version (short) */
     buf[pos++] = 0x41;

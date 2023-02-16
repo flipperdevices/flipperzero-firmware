@@ -3,7 +3,7 @@
 #include "logic_analyzer_app.h"
 #include "logic_analyzer_icons.h"
 
-#define COUNT(x) (sizeof(x) / sizeof((x)[0]))
+#define COUNT(x) ((size_t)(sizeof(x) / sizeof((x)[0])))
 
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 
@@ -17,7 +17,7 @@ static const GpioPin* gpios[] = {
     &gpio_ext_pa6,
     &gpio_ext_pa7};
 
-static const char* gpio_names[] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA6", "PA7"};
+// static const char* gpio_names[] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA6", "PA7"};
 
 static void render_callback(Canvas* const canvas, void* cb_ctx) {
     AppFSM* app = acquire_mutex((ValueMutex*)cb_ctx, 25);
@@ -177,6 +177,7 @@ void tx_sump_tx(void* ctx, uint8_t* data, size_t length) {
 }
 
 static uint8_t levels_get(AppFSM* app) {
+    UNUSED(app);
     uint32_t port_a = GPIOA->IDR;
     uint32_t port_b = GPIOB->IDR;
     uint32_t port_c = GPIOC->IDR;
@@ -261,7 +262,7 @@ static bool app_init(AppFSM* const app) {
 
     app->capture_buffer = malloc(MAX_SAMPLE_MEM);
 
-    for(int io = 0; io < COUNT(gpios); io++) {
+    for(size_t io = 0; io < COUNT(gpios); io++) {
         furi_hal_gpio_init(gpios[io], GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
     }
 
