@@ -2,6 +2,15 @@
 #include <stdint.h>
 
 static const OpcodeDescription opcode_desc[] = {
+    {TE_PROGRAM_LOOP_BEGIN, 0x7f00, "PROGRAM LOOP BEGIN", "L.BEG."},
+    {TE_PROGRAM_LOOP_END, 0x7f00, "PROGRAM LOOP END", "L.END"},
+
+    {TE_PROGRAM_NOP, 0x7fff, "NO OPERATION", ""},
+    {TE_PROGRAM_END, 0x7fff, "PROGRAM END", "PR.END"},
+    {TE_PROGRAM_JUMP, 0x7f00, "JUMP TO POSITION", "GOTO"},
+
+    //====================================================
+
     {TE_EFFECT_ARPEGGIO, 0x7f00, "RELATIVE ARPEGGIO NOTE", ""},
     {TE_EFFECT_PORTAMENTO_UP, 0x7f00, "PORTAMENTO UP", "PORTUP"},
     {TE_EFFECT_PORTAMENTO_DOWN, 0x7f00, "PORTAMENTO DOWN", "PORTDN"},
@@ -49,13 +58,6 @@ static const OpcodeDescription opcode_desc[] = {
     {TE_EFFECT_LEGATO, 0x7f00, "LEGATO", "LEGATO"},
     {TE_EFFECT_ARPEGGIO_ABS, 0x7f00, "ABSOLUTE ARPEGGIO NOTE", ""},
     {TE_EFFECT_TRIGGER_RELEASE, 0x7f00, "TRIGGER RELEASE", "TR.REL"},
-
-    {TE_PROGRAM_LOOP_BEGIN, 0x7f00, "PROGRAM LOOP BEGIN", "L.BEG."},
-    {TE_PROGRAM_LOOP_END, 0x7f00, "PROGRAM LOOP END", "L.END"},
-
-    {TE_PROGRAM_NOP, 0x7fff, "NO OPERATION", ""},
-    {TE_PROGRAM_END, 0x7fff, "PROGRAM END", "PR.END"},
-    {TE_PROGRAM_JUMP, 0x7f00, "JUMP TO POSITION", "GOTO"},
     {0, 0, NULL, NULL},
 };
 

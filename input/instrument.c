@@ -397,8 +397,7 @@ void instrument_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* even
         return;
     }
 
-    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort) {
         switch(tracker->selected_param) {
         default: {
             tracker->current_digit++;
@@ -450,8 +449,7 @@ void instrument_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* even
         }
     }
 
-    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort) {
         switch(tracker->selected_param) {
         default: {
             tracker->current_digit--;

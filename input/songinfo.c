@@ -117,8 +117,7 @@ void songinfo_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         tracker->editing = !tracker->editing;
     }
 
-    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort) {
         switch(tracker->selected_param) {
         default: {
             tracker->current_digit++;
@@ -152,8 +151,7 @@ void songinfo_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         }
     }
 
-    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort) {
         switch(tracker->selected_param) {
         default: {
             tracker->current_digit--;

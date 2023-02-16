@@ -28,6 +28,16 @@ void draw_inst_flag(
             canvas_draw_box(canvas, x + 5, y - 6, strlen(text) * 4 + 1, 7);
         }
     }
+
+    if(tracker->focus == focus && tracker->selected_param == param && !(tracker->editing)) {
+        if(text[strlen(text) - 1] == ':') {
+            canvas_draw_frame(canvas, x + 5, y - 6, strlen(text) * 4 - 1, 7);
+        }
+
+        else {
+            canvas_draw_frame(canvas, x + 5, y - 6, strlen(text) * 4 + 1, 7);
+        }
+    }
 }
 
 void draw_inst_text_one_digit(
@@ -48,6 +58,10 @@ void draw_inst_text_one_digit(
     if(tracker->focus == focus && tracker->selected_param == param && tracker->editing) {
         canvas_draw_box(canvas, x + strlen(text) * 4 - 3, y - 6, 5, 7);
     }
+
+    if(tracker->focus == focus && tracker->selected_param == param && !(tracker->editing)) {
+        canvas_draw_frame(canvas, x + strlen(text) * 4 - 3, y - 6, 5, 7);
+    }
 }
 
 void draw_inst_text_two_digits(
@@ -67,6 +81,11 @@ void draw_inst_text_two_digits(
 
     if(tracker->focus == focus && tracker->selected_param == param && tracker->editing) {
         canvas_draw_box(
+            canvas, x + strlen(text) * 4 + 4 * tracker->current_digit - 3, y - 6, 5, 7);
+    }
+
+    if(tracker->focus == focus && tracker->selected_param == param && !(tracker->editing)) {
+        canvas_draw_frame(
             canvas, x + strlen(text) * 4 + 4 * tracker->current_digit - 3, y - 6, 5, 7);
     }
 }
@@ -164,6 +183,17 @@ void draw_instrument_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
             }
         }
 
+        if(!(tracker->editing) && tracker->focus == EDIT_INSTRUMENT &&
+           tracker->selected_param == INST_CURRENT_NOTE) {
+            if(tracker->current_digit) {
+                canvas_draw_frame(canvas, 19 + 2 * 4, 5 - shift, 5, 7);
+            }
+
+            else {
+                canvas_draw_frame(canvas, 19, 5 - shift, 5 + 4, 7);
+            }
+        }
+
         snprintf(buffer, sizeof(buffer), "FINE:%+02d", inst->finetune);
         canvas_draw_str(canvas, 37, 11 - shift, buffer);
 
@@ -175,6 +205,17 @@ void draw_instrument_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
 
             else {
                 canvas_draw_box(canvas, 60, 5 - shift, 5, 7);
+            }
+        }
+
+        if(!(tracker->editing) && tracker->focus == EDIT_INSTRUMENT &&
+           tracker->selected_param == INST_FINETUNE) {
+            if(tracker->current_digit) {
+                canvas_draw_frame(canvas, 60 + 4, 5 - shift, 5, 7);
+            }
+
+            else {
+                canvas_draw_frame(canvas, 60, 5 - shift, 5, 7);
             }
         }
     }
@@ -311,6 +352,12 @@ void draw_instrument_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
     if(tracker->editing && tracker->focus == EDIT_INSTRUMENT &&
        tracker->selected_param == INST_FILTERTYPE) {
         canvas_draw_box(
+            canvas, 19, 35 - shift, strlen(filter_types[inst->filter_type]) * 4 + 1, 7);
+    }
+
+    if(!(tracker->editing) && tracker->focus == EDIT_INSTRUMENT &&
+       tracker->selected_param == INST_FILTERTYPE) {
+        canvas_draw_frame(
             canvas, 19, 35 - shift, strlen(filter_types[inst->filter_type]) * 4 + 1, 7);
     }
 

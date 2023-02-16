@@ -32,6 +32,7 @@ void sound_engine_dma_init(uint32_t address, uint32_t size);
 void sound_engine_PWM_timer_init(bool external_audio_output);
 void sound_engine_set_audio_output(bool external_audio_output);
 void tracker_engine_init_hardware(uint8_t rate);
+void tracker_engine_timer_init(uint8_t rate);
 void tracker_engine_set_rate(uint8_t rate);
 void sound_engine_start();
 void sound_engine_stop();
