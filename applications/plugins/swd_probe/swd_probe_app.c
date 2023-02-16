@@ -1113,8 +1113,8 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
                 ret = swd_read_memory_block(
                     ctx->app, ctx->selected_ap, address + pos, buffer, ctx->block_size);
             } else {
-                ret = swd_read_memory(
-                    ctx->app, ctx->selected_ap, address + pos, (uint32_t*)buffer);
+                ret =
+                    swd_read_memory(ctx->app, ctx->selected_ap, address + pos, (uint32_t*)buffer);
             }
             read_ok = (ret == 1);
 
