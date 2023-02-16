@@ -273,7 +273,7 @@ fbtenv_download_toolchain()
 
 fbtenv_print_version()
 {
-    if [ -n "$FBT_QUIET" ]; then
+    if [ -n "${FBT_QUIET:-""}" ]; then
         return 0;
     fi
     echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
