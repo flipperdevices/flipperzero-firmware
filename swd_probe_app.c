@@ -13,7 +13,7 @@
 #include "swd_probe_icons.h"
 #include "jep106.h"
 
-#define COUNT(x) (sizeof(x) / sizeof((x)[0]))
+#define COUNT(x) ((size_t)(sizeof(x) / sizeof((x)[0])))
 
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 static bool swd_message_process(AppFSM* ctx);
@@ -40,15 +40,15 @@ static bool has_multiple_bits(uint8_t x) {
     return (x & (x - 1)) != 0;
 }
 
-static int get_bit_num(uint8_t x) {
-    return __builtin_ctz(x);
+static uint8_t get_bit_num(uint8_t x) {
+    return (uint8_t)__builtin_ctz(x);
 }
 
 static const char* gpio_name(uint8_t mask) {
     if(has_multiple_bits(mask)) {
         return "Pxx";
     }
-    int io = get_bit_num(mask);
+    uint8_t io = get_bit_num(mask);
     if(io >= COUNT(gpio_names)) {
         return "Pxx";
     }
@@ -428,7 +428,6 @@ static uint8_t swd_read_memory_block(
     uint32_t len) {
     uint8_t ret = 0;
     uint32_t data = 0;
-    bool first = true;
     uint32_t csw = 0x23000002;
 
     ret |= swd_write_ap(ctx, ap, MEMAP_CSW, csw);
@@ -570,7 +569,7 @@ static bool swd_ensure_powerup(AppFSM* const ctx) {
 }
 
 static void swd_apscan_reset(AppFSM* const ctx) {
-    for(int reset_ap = 0; reset_ap < COUNT(ctx->apidr_info); reset_ap++) {
+    for(size_t reset_ap = 0; reset_ap < COUNT(ctx->apidr_info); reset_ap++) {
         ctx->apidr_info[reset_ap].tested = false;
     }
 }
@@ -582,7 +581,6 @@ static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
     ctx->apidr_info[ap].tested = true;
 
     uint32_t data = 0;
-    uint32_t base = 0;
     if(swd_read_ap(ctx, ap, AP_IDR, &data) != 1) {
         swd_abort(ctx);
         return false;
@@ -746,7 +744,6 @@ static bool swd_scriptfunc_comment(ScriptContext* ctx) {
 }
 
 static bool swd_scriptfunc_label(ScriptContext* ctx) {
-    uint32_t sound = 0;
     char label[256];
     furi_log_print_format(FuriLogLevelDebug, TAG, "label");
 
@@ -767,7 +764,6 @@ static bool swd_scriptfunc_label(ScriptContext* ctx) {
 }
 
 static bool swd_scriptfunc_goto(ScriptContext* ctx) {
-    uint32_t sound = 0;
     furi_log_print_format(FuriLogLevelDebug, TAG, "goto");
 
     swd_script_skip_whitespace(ctx);
@@ -1105,7 +1101,6 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
         }
 
         bool read_ok = false;
-        uint32_t data = 0;
 
         for(uint32_t tries = 0; tries < ctx->max_tries; tries++) {
             if(ctx->abort) {
@@ -1119,7 +1114,7 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
                     ctx->app, ctx->selected_ap, address + pos, buffer, ctx->block_size);
             } else {
                 ret = swd_read_memory(
-                    ctx->app, ctx->selected_ap, address + pos, (uint8_t*)(void*)buffer);
+                    ctx->app, ctx->selected_ap, address + pos, (uint32_t*)buffer);
             }
             read_ok = (ret == 1);
 
@@ -1318,7 +1313,7 @@ static const ScriptFunctionInfo script_funcs[] = {
 
 /************************** script main code **************************/
 
-static bool swd_execute_script_line(ScriptContext* const ctx, File* file) {
+static bool swd_execute_script_line(ScriptContext* const ctx) {
     char buffer[64];
     uint64_t start_pos = storage_file_tell(ctx->script_file);
     uint16_t ret = storage_file_read(ctx->script_file, buffer, 2);
@@ -1441,7 +1436,7 @@ static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
                 break;
             }
             furi_log_print_format(FuriLogLevelDebug, TAG, "line %lu", line);
-            if(!swd_execute_script_line(ctx->script, ctx->script->script_file)) {
+            if(!swd_execute_script_line(ctx->script)) {
                 success = false;
                 break;
             }
@@ -1626,7 +1621,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
                 y += 10;
 
                 if(ctx->ap_pos == 0) {
-                    for(int pos = 0; pos < COUNT(ctx->apidr_info); pos++) {
+                    for(size_t pos = 0; pos < COUNT(ctx->apidr_info); pos++) {
                         if(ctx->apidr_info[pos].ok) {
                             ctx->ap_pos = pos;
                         }
@@ -1954,7 +1949,7 @@ static void on_timer_tick(AppFSM* ctx) {
 
         uint32_t addr = ctx->hex_addr;
         uint32_t data = 0;
-        for(int pos = 0; pos < sizeof(ctx->hex_buffer) / 4; pos++) {
+        for(size_t pos = 0; pos < sizeof(ctx->hex_buffer) / 4; pos++) {
             ctx->hex_buffer_valid[pos] = swd_read_memory(ctx, ctx->ap_pos, addr, &data) == 1;
             if(ctx->hex_buffer_valid[pos]) {
                 memcpy(&ctx->hex_buffer[pos * 4], &data, 4);
@@ -2026,7 +2021,7 @@ static bool swd_message_process(AppFSM* ctx) {
                     }
 
                     case ModePageAPID:
-                        if(ctx->ap_pos + 1 < COUNT(ctx->apidr_info)) {
+                        if(ctx->ap_pos + 1U < COUNT(ctx->apidr_info)) {
                             ctx->ap_pos++;
                         }
                         break;
