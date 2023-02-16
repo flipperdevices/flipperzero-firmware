@@ -12,9 +12,9 @@ To use `fbt`, you only need `git` installed in your system.
  >    - On Windows, simply run `scripts/toochain/fbtenv.cmd`.
  >    - On Linux & MacOS, run `source scripts/toochain/fbtenv.sh` in a new shell.
  
- If your system is not supported by pre-built toolchain variants or you want to use custom versions of dependencies, you can `set FBT_NOENV=1`. `fbt` will skip toolchain & environment configuration and will expect all tools to be available in your system's `PATH`. *(this option is not available on Windows)*
+ If your system is not supported by pre-built toolchain variants or you want to use custom versions of dependencies, you can `set FBT_NOENV=1`. `fbt` will skip toolchain & environment configuration and will expect all tools to be available on your system's `PATH`. *(this option is not available on Windows)*
  
- If `FBT_TOOLCHAIN_PATH` variable is set, `fbt` will use that directory to install toolchain into. By default, it downloads toolchain into `toolchain` subdirectory repo's root.
+ If `FBT_TOOLCHAIN_PATH` variable is set, `fbt` will use that directory to unpack toolchain into. By default, it downloads toolchain into `toolchain` subdirectory repo's root.
 
 If you want to suppress printing toolchain version and certain other information to console, you can `set FBT_QUIET=1`. it can be useful for running `fbt` for processing its output, like `fbt get_blackmagic`.
 
@@ -22,7 +22,7 @@ If you want to suppress printing toolchain version and certain other information
   - On Windows, it's `set "FBT_NO_SYNC=1"` in the shell you're running `fbt` from
   - On \*nix, it's `$ FBT_NO_SYNC=1 ./fbt ...`
 
- > There are more variables controlling basic `fbt` behavior. See `fbt` & `fbtenv` scripts sources for details.
+ > There are more variables controlling basic `fbt` behavior. See `fbt` & `fbtenv` scripts' sources for details.
 
 
 ## Invoking FBT
