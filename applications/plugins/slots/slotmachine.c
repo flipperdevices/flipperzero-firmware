@@ -17,7 +17,7 @@ typedef struct {
 } SlotColumn;
 
 int COLUMNS_COUNT = 4;
-const MAX_COLUMNS_COUNT = 4;
+int MAX_COLUMNS_COUNT = 4;
 
 typedef struct {
     Gui* gui; // container gui
@@ -32,7 +32,7 @@ typedef struct {
 
 #define START_MONEY 1500;
 #define START_BET 300;
-#define RAND_MAX 5;
+#define SSRAND_MAX 5;
 #define DEFAULT_SPEED 16;
 
 uint8_t DEFAULT_SPINNING_TIMES = 10;
@@ -101,8 +101,7 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "Slots");
-    Icon* litl_icon = &I_little_coin;
-    canvas_draw_icon(canvas, 30, 3, litl_icon);
+    canvas_draw_icon(canvas, 30, 3, &I_little_coin);
 
     char moneyStr[15];
     snprintf(moneyStr, sizeof(moneyStr), "$%.0f", slotmachine->money);
@@ -135,7 +134,7 @@ void slotmachine_draw_callback(Canvas* canvas, void* ctx) {
                 slotmachine->columns[i]->y = 13;
                 slotmachine->columns[i]->times--;
                 slotmachine->columns[i]->speed--;
-                slotmachine->columns[i]->value = rand() % RAND_MAX;
+                slotmachine->columns[i]->value = rand() % SSRAND_MAX;
 
                 if(slotmachine->columns[i]->times == 0) {
                     slotmachine->columns[i]->y = 23;
