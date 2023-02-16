@@ -5,21 +5,20 @@
 #include <u8g2_glue.h>
 #include <assets_icons.h>
 
-#define COUNTER_VALUE (100U)
+#define COUNTER_VALUE (20U)
 
-static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress) {
+static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress, uint8_t* splash_data) {
     u8g2_ClearBuffer(fb);
     u8g2_SetDrawColor(fb, 0x01);
 
-    u8g2_SetFont(fb, u8g2_font_helvB08_tr);
-    u8g2_DrawStr(fb, 2, 8, "PIN and Factory Reset");
-    u8g2_SetFont(fb, u8g2_font_haxrcorp4089_tr);
-    u8g2_DrawStr(fb, 2, 21, "Hold Right to confirm");
-    u8g2_DrawStr(fb, 2, 31, "Press Down to cancel");
+    // Draw the recovery picture
+    u8g2_DrawXBM(fb, 0, 0, 128, 64, splash_data);
+    u8g2_DrawRFrame(fb, 59, 41, 69, 8, 2);
 
     if(progress < COUNTER_VALUE) {
-        size_t width = progress / (COUNTER_VALUE / 100);
-        u8g2_DrawBox(fb, 14 + (50 - width / 2), 54, width, 3);
+        // Fill the progress bar while the progress is going down
+        size_t width = (COUNTER_VALUE - progress) * 68 / COUNTER_VALUE;
+        u8g2_DrawBox(fb, 60, 42, width, 6);
     }
 
     u8g2_SetPowerSave(fb, 0);
@@ -31,9 +30,13 @@ void flipper_boot_recovery_exec() {
     u8g2_Setup_st756x_flipper(fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
     u8g2_InitDisplay(fb);
 
+    furi_hal_compress_icon_init();
+    uint8_t* splash_data = NULL;
+    furi_hal_compress_icon_decode(icon_get_data(&I_Erase_pin_128x64), &splash_data);
+
     size_t counter = COUNTER_VALUE;
     while(counter) {
-        if(!furi_hal_gpio_read(&gpio_button_down)) {
+        if(!furi_hal_gpio_read(&gpio_button_back)) {
             break;
         }
 
@@ -43,7 +46,7 @@ void flipper_boot_recovery_exec() {
             counter = COUNTER_VALUE;
         }
 
-        flipper_boot_recovery_draw_splash(fb, counter);
+        flipper_boot_recovery_draw_splash(fb, counter, splash_data);
     }
 
     if(!counter) {
