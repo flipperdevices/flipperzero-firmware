@@ -50,9 +50,17 @@ void play_song(FlizzerTrackerApp* tracker, bool from_cursor) {
     tracker->tracker_engine.current_tick = 0;
     tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
 
-    for(uint8_t i = 0; i < SONG_MAX_CHANNELS; i++) {
+    for(uint8_t i = 0; i < SONG_MAX_CHANNELS; i++)
+    {
+        bool was_disabled = tracker->tracker_engine.channel[i].channel_flags & TEC_DISABLED;
+        
         memset(&tracker->sound_engine.channel[i], 0, sizeof(SoundEngineChannel));
         memset(&tracker->tracker_engine.channel[i], 0, sizeof(TrackerEngineChannel));
+
+        if(was_disabled)
+        {
+            tracker->tracker_engine.channel[i].channel_flags |= TEC_DISABLED;
+        }
     }
 
     tracker->tracker_engine.pattern_position = temppos;
