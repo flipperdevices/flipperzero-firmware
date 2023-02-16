@@ -143,20 +143,22 @@ def nav(port, request):
 
     return nav
 
-'''
+
 @pytest.fixture(scope="session", autouse=True)
-def gator() -> Gator:
-    print("Gator initialization")
-    gator_serial = serial.Serial("/dev/ttyUSB0", timeout=1)  # Надо будет переделать!!!
-    gator_serial.baudrate = 115200
+def gator(request) -> Gator:
+    bench = request.config.getoption("--bench")
+    if bench:
+        print("Gator initialization")
+        gator_serial = serial.Serial("/dev/ttyUSB0", timeout=1)  # Надо будет переделать!!!
+        gator_serial.baudrate = 115200
 
-    time.sleep(3)
+        time.sleep(3)
 
-    gator_serial.flushOutput()
-    gator_serial.flushInput()
+        gator_serial.flushOutput()
+        gator_serial.flushInput()
 
-    gator = Gator(gator_serial, 900, 900)
-    gator.home()
+        gator = Gator(gator_serial, 900, 900)
+        gator.home()
 
-    return gator
-'''
+        return gator
+

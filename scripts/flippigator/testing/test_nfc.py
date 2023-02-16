@@ -17,6 +17,9 @@ class TestNfc(BaseCase):
         assert nav.nfc.check_menu() == 0, "NFC menu list differs from reference"
         nav.go_to_main_screen()
 
+    '''
+    I think that it's time to del all handy test from this repo
+    Let's make only smoke test without bench?
     def test_read_ref_card(self, nav):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
@@ -85,6 +88,7 @@ class TestNfc(BaseCase):
         state = nav.get_current_state()
         assert "FileBrowserLevelUp" in state, "Can't save read NFC card"
         nav.go_to_main_screen()
+    '''
 
     def test_detect_reader(self, nav):
         nav.nfc.go_into()

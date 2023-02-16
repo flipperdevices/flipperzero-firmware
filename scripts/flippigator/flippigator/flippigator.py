@@ -241,6 +241,7 @@ class Navigator:
             print(colored("Press " + button, "cyan"))
 
     def get_menu_list(self):
+        time.sleep(0.2)
         menus = list()
         cur = self.get_current_state()
 

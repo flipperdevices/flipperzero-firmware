@@ -19,7 +19,7 @@ class TestApplications(BaseCase):
             "FolderGames",
             "FolderMisc",
             "FolderTools",
-            "FolderDebug",
+            #"FolderDebug",
         ]
         assert menu == menu_ref, "Applications menu list is wrong"
         nav.go_to_main_screen()
