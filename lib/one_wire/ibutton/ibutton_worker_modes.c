@@ -15,9 +15,10 @@ static void ibutton_worker_mode_read_start(iButtonWorker* worker);
 static void ibutton_worker_mode_read_tick(iButtonWorker* worker);
 static void ibutton_worker_mode_read_stop(iButtonWorker* worker);
 
-static void ibutton_worker_mode_write_start(iButtonWorker* worker);
-static void ibutton_worker_mode_write_tick(iButtonWorker* worker);
-static void ibutton_worker_mode_write_stop(iButtonWorker* worker);
+static void ibutton_worker_mode_write_common_start(iButtonWorker* worker);
+static void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker);
+static void ibutton_worker_mode_write_common_stop(iButtonWorker* worker);
 
 const iButtonWorkerModeType ibutton_worker_modes[] = {
     {
@@ -34,9 +35,15 @@ const iButtonWorkerModeType ibutton_worker_modes[] = {
     },
     {
         .quant = 1000,
-        .start = ibutton_worker_mode_write_start,
-        .tick = ibutton_worker_mode_write_tick,
-        .stop = ibutton_worker_mode_write_stop,
+        .start = ibutton_worker_mode_write_common_start,
+        .tick = ibutton_worker_mode_write_blank_tick,
+        .stop = ibutton_worker_mode_write_common_stop,
+    },
+    {
+        .quant = 1000,
+        .start = ibutton_worker_mode_write_common_start,
+        .tick = ibutton_worker_mode_write_copy_tick,
+        .stop = ibutton_worker_mode_write_common_stop,
     },
     {
         .quant = 1000,
@@ -156,7 +163,7 @@ void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
             worker->read_cb(worker->cb_ctx);
         }
 
-        ibutton_worker_switch_mode(worker, iButtonWorkerIdle);
+        ibutton_worker_switch_mode(worker, iButtonWorkerModeIdle);
     }
 }
 
@@ -244,27 +251,36 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
 
 /*********************** WRITE ***********************/
 
-void ibutton_worker_mode_write_start(iButtonWorker* worker) {
+void ibutton_worker_mode_write_common_start(iButtonWorker* worker) {
     UNUSED(worker);
     furi_hal_power_enable_otg();
 }
 
-void ibutton_worker_mode_write_tick(iButtonWorker* worker) {
+void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    // TODO: separate modes for writing copies and blanks?
-    const bool success = ibutton_key_write_copy(worker->key, worker->host);
-
+    const bool success = ibutton_key_write_blank(worker->key, worker->host);
     // TODO: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
                                                       iButtonWorkerWriteNoDetect;
-
     if(worker->write_cb != NULL) {
         worker->write_cb(worker->cb_ctx, result);
     }
 }
 
-void ibutton_worker_mode_write_stop(iButtonWorker* worker) {
+void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker) {
+    furi_assert(worker->key);
+
+    const bool success = ibutton_key_write_copy(worker->key, worker->host);
+    // TODO: pass a proper result to the callback
+    const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
+                                                      iButtonWorkerWriteNoDetect;
+    if(worker->write_cb != NULL) {
+        worker->write_cb(worker->cb_ctx, result);
+    }
+}
+
+void ibutton_worker_mode_write_common_stop(iButtonWorker* worker) {
     UNUSED(worker);
     furi_hal_power_disable_otg();
 }

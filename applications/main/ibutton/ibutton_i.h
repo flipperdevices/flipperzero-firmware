@@ -30,6 +30,12 @@
 
 #define IBUTTON_KEY_NAME_SIZE 22
 
+typedef enum {
+    iButtonWriteModeInvalid,
+    iButtonWriteModeBlank,
+    iButtonWriteModeCopy,
+} iButtonWriteMode;
+
 struct iButton {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
@@ -41,6 +47,7 @@ struct iButton {
 
     iButtonWorker* key_worker;
     iButtonKey* key;
+    iButtonWriteMode write_mode;
 
     FuriString* file_path;
     char key_name[IBUTTON_KEY_NAME_SIZE + 1];

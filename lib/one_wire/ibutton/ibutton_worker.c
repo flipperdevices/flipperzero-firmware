@@ -8,7 +8,8 @@ typedef enum {
     iButtonMessageEnd,
     iButtonMessageStop,
     iButtonMessageRead,
-    iButtonMessageWrite,
+    iButtonMessageWriteBlank,
+    iButtonMessageWriteCopy,
     iButtonMessageEmulate,
     iButtonMessageNotifyEmulate,
 } iButtonMessageType;
@@ -29,7 +30,7 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->bus = onewire_slave_alloc(&ibutton_gpio);
     worker->messages = furi_message_queue_alloc(1, sizeof(iButtonMessage));
 
-    worker->mode_index = iButtonWorkerIdle;
+    worker->mode_index = iButtonWorkerModeIdle;
     worker->read_cb = NULL;
     worker->write_cb = NULL;
     worker->emulate_cb = NULL;
@@ -44,7 +45,7 @@ void ibutton_worker_read_set_callback(
     iButtonWorker* worker,
     iButtonWorkerReadCallback callback,
     void* context) {
-    furi_check(worker->mode_index == iButtonWorkerIdle);
+    furi_check(worker->mode_index == iButtonWorkerModeIdle);
     worker->read_cb = callback;
     worker->cb_ctx = context;
 }
@@ -53,7 +54,7 @@ void ibutton_worker_write_set_callback(
     iButtonWorker* worker,
     iButtonWorkerWriteCallback callback,
     void* context) {
-    furi_check(worker->mode_index == iButtonWorkerIdle);
+    furi_check(worker->mode_index == iButtonWorkerModeIdle);
     worker->write_cb = callback;
     worker->cb_ctx = context;
 }
@@ -62,7 +63,7 @@ void ibutton_worker_emulate_set_callback(
     iButtonWorker* worker,
     iButtonWorkerEmulateCallback callback,
     void* context) {
-    furi_check(worker->mode_index == iButtonWorkerIdle);
+    furi_check(worker->mode_index == iButtonWorkerModeIdle);
     worker->emulate_cb = callback;
     worker->cb_ctx = context;
 }
@@ -73,8 +74,14 @@ void ibutton_worker_read_start(iButtonWorker* worker, iButtonKey* key) {
         furi_message_queue_put(worker->messages, &message, FuriWaitForever) == FuriStatusOk);
 }
 
-void ibutton_worker_write_start(iButtonWorker* worker, iButtonKey* key) {
-    iButtonMessage message = {.type = iButtonMessageWrite, .data.key = key};
+void ibutton_worker_write_blank_start(iButtonWorker* worker, iButtonKey* key) {
+    iButtonMessage message = {.type = iButtonMessageWriteBlank, .data.key = key};
+    furi_check(
+        furi_message_queue_put(worker->messages, &message, FuriWaitForever) == FuriStatusOk);
+}
+
+void ibutton_worker_write_copy_start(iButtonWorker* worker, iButtonKey* key) {
+    iButtonMessage message = {.type = iButtonMessageWriteCopy, .data.key = key};
     furi_check(
         furi_message_queue_put(worker->messages, &message, FuriWaitForever) == FuriStatusOk);
 }
@@ -145,25 +152,29 @@ static int32_t ibutton_worker_thread(void* thread_context) {
         if(status == FuriStatusOk) {
             switch(message.type) {
             case iButtonMessageEnd:
-                ibutton_worker_switch_mode(worker, iButtonWorkerIdle);
+                ibutton_worker_switch_mode(worker, iButtonWorkerModeIdle);
                 ibutton_worker_set_key_p(worker, NULL);
                 running = false;
                 break;
             case iButtonMessageStop:
-                ibutton_worker_switch_mode(worker, iButtonWorkerIdle);
+                ibutton_worker_switch_mode(worker, iButtonWorkerModeIdle);
                 ibutton_worker_set_key_p(worker, NULL);
                 break;
             case iButtonMessageRead:
                 ibutton_worker_set_key_p(worker, message.data.key);
-                ibutton_worker_switch_mode(worker, iButtonWorkerRead);
+                ibutton_worker_switch_mode(worker, iButtonWorkerModeRead);
                 break;
-            case iButtonMessageWrite:
+            case iButtonMessageWriteBlank:
                 ibutton_worker_set_key_p(worker, message.data.key);
-                ibutton_worker_switch_mode(worker, iButtonWorkerWrite);
+                ibutton_worker_switch_mode(worker, iButtonWorkerModeWriteBlank);
+                break;
+            case iButtonMessageWriteCopy:
+                ibutton_worker_set_key_p(worker, message.data.key);
+                ibutton_worker_switch_mode(worker, iButtonWorkerModeWriteCopy);
                 break;
             case iButtonMessageEmulate:
                 ibutton_worker_set_key_p(worker, message.data.key);
-                ibutton_worker_switch_mode(worker, iButtonWorkerEmulate);
+                ibutton_worker_switch_mode(worker, iButtonWorkerModeEmulate);
                 break;
             case iButtonMessageNotifyEmulate:
                 if(worker->emulate_cb) {

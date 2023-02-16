@@ -45,9 +45,10 @@ bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent even
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
             DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
         } else if(event.event == SubmenuIndexWriteBlank) {
-            // TODO: Write blank
+            ibutton->write_mode = iButtonWriteModeBlank;
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexWriteCopy) {
-            // TODO: Properly differentiate between write blank and copy
+            ibutton->write_mode = iButtonWriteModeCopy;
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexEdit) {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);

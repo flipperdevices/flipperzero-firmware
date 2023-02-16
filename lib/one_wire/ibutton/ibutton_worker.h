@@ -78,11 +78,18 @@ void ibutton_worker_write_set_callback(
     void* context);
 
 /**
- * Start write mode
+ * Start write blank mode
  * @param worker 
  * @param key 
  */
-void ibutton_worker_write_start(iButtonWorker* worker, iButtonKey* key);
+void ibutton_worker_write_blank_start(iButtonWorker* worker, iButtonKey* key);
+
+/**
+ * Start write copy mode
+ * @param worker
+ * @param key
+ */
+void ibutton_worker_write_copy_start(iButtonWorker* worker, iButtonKey* key);
 
 /**
  * Set "emulate success" callback

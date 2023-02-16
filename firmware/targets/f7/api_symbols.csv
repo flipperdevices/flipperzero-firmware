@@ -1617,8 +1617,9 @@ Function,+,ibutton_worker_read_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,ibutton_worker_start_thread,void,iButtonWorker*
 Function,+,ibutton_worker_stop,void,iButtonWorker*
 Function,+,ibutton_worker_stop_thread,void,iButtonWorker*
+Function,+,ibutton_worker_write_blank_start,void,"iButtonWorker*, iButtonKey*"
+Function,+,ibutton_worker_write_copy_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,ibutton_worker_write_set_callback,void,"iButtonWorker*, iButtonWorkerWriteCallback, void*"
-Function,+,ibutton_worker_write_start,void,"iButtonWorker*, iButtonKey*"
 Function,+,icon_animation_alloc,IconAnimation*,const Icon*
 Function,+,icon_animation_free,void,IconAnimation*
 Function,+,icon_animation_get_height,uint8_t,const IconAnimation*

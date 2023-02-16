@@ -73,9 +73,11 @@ bool ibutton_scene_read_key_menu_on_event(void* context, SceneManagerEvent event
         } else if(event.event == SubmenuIndexViewData) {
             scene_manager_next_scene(ibutton->scene_manager, iButtonSceneViewData);
         } else if(event.event == SubmenuIndexWriteBlank) {
-            // TODO: Write blank
+            ibutton->write_mode = iButtonWriteModeBlank;
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexWriteCopy) {
-            // TODO: Write copy
+            ibutton->write_mode = iButtonWriteModeCopy;
+            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
         }
     }
 
