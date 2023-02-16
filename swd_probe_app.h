@@ -47,6 +47,20 @@ typedef enum {
 #define STICKYERR (1 << 5)
 #define STAT_ERROR_FLAGS (WDATAERR | STICKYERR)
 
+#define REG_IDCODE 0x00
+#define REG_CTRLSTAT 0x01
+#define REG_CTRLSTAT_BANK 0x00
+#define REG_DLCR 0x01
+#define REG_DLCR_BANK 0x01
+#define REG_TARGETID 0x01
+#define REG_TARGETID_BANK 0x02
+#define REG_DLPIDR 0x01
+#define REG_DLPIDR_BANK 0x03
+#define REG_EVENTSTAT 0x01
+#define REG_EVENTSTAT_BANK 0x04
+
+#define REG_SELECT 0x02
+
 #define MEMAP_CSW 0x00
 #define MEMAP_TAR 0x04
 #define MEMAP_DRW 0x0C
@@ -126,6 +140,7 @@ typedef struct {
 
     ScriptContext* script;
 
+    uint32_t loop_count;
     uint8_t current_mask_id;
     uint32_t current_mask;
     uint8_t io_swc;
@@ -155,7 +170,9 @@ typedef struct {
 
 struct sScriptContext {
     AppFSM* app;
+    ScriptContext* parent;
     File* script_file;
+    char filename[MAX_FILE_LENGTH];
     uint64_t position;
     uint32_t selected_ap;
     uint32_t max_tries;
