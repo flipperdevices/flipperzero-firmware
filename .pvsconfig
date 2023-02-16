@@ -46,4 +46,4 @@
 //-V:picopass_device_decrypt:1048
 
 # Examples
-//-V:example_apps_data_main:779
+//V_EXCLUDE_PATH applications/examples/
