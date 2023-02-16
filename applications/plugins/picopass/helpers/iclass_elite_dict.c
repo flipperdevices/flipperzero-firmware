@@ -83,7 +83,7 @@ IclassEliteDict* iclass_elite_dict_alloc(IclassEliteDictType dict_type) {
         FURI_LOG_I(TAG, "Loaded dictionary with %lu keys", dict->total_keys);
     } while(false);
 
-    if(!dict_loaded) {
+    if(!dict_loaded) { //-V547
         buffered_file_stream_close(dict->stream);
         free(dict);
         dict = NULL;
