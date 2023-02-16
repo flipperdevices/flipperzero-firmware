@@ -128,8 +128,8 @@ void tx_init_rfid() {
     // OTG needed for RFID? Or just legacy from GPIO?
     furi_hal_power_enable_otg();
 
-    furi_hal_ibutton_start_drive();
-    furi_hal_ibutton_pin_low();
+    furi_hal_ibutton_pin_configure();
+    furi_hal_ibutton_pin_write(false);
 
     // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting
 
