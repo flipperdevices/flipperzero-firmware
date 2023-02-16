@@ -13,7 +13,6 @@
 #include "views/color_guess_color_set.h"
 #include "views/color_guess_play.h"
 
-
 typedef enum {
     EventTypeTick,
     EventTypeKey,

@@ -33,12 +33,12 @@ void color_guess_color_set_set_callback(
 void color_guess_color_set_draw(Canvas* canvas, ColorGuessColorSetModel* model) {
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
-    
+
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 5, 7, "Set a custom color on LED");
-    
+
     canvas_draw_icon(canvas, newCursorPos, 18, &I_ButtonUp_10x5);
     canvas_draw_icon(canvas, newCursorPos, 41, &I_ButtonDown_10x5);
     canvas_draw_icon(canvas, 18, 25, digits[16]);
@@ -49,12 +49,11 @@ void color_guess_color_set_draw(Canvas* canvas, ColorGuessColorSetModel* model) 
     canvas_draw_icon(canvas, 78, 25, digits[model->digit[4]]);
     canvas_draw_icon(canvas, 90, 25, digits[model->digit[5]]);
     elements_button_right(canvas, "See your color here");
-    
 }
 
 static void color_guess_color_set_model_init(ColorGuessColorSetModel* const model) {
     model->cursorpos = 0;
-    for (int i = 0;i < 6; i++) {
+    for(int i = 0; i < 6; i++) {
         model->digit[i] = 0;
     }
 }
@@ -79,84 +78,83 @@ void color_guess_color_set_set_led(void* context, ColorGuessColorSetModel* model
         NULL,
     };
     notification_message(app->notification, &notification_sequence);
-    furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+    furi_thread_flags_wait(
+        0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
 }
 
 bool color_guess_color_set_input(InputEvent* event, void* context) {
     furi_assert(context);
     ColorGuessColorSet* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    ColorGuessColorSetModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(ColorGuessCustomEventColorSetBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-                with_view_model(
-                    instance->view,
-                    ColorGuessColorSetModel* model,
-                    {
-                        model->cursorpos--;
-                        if (model->cursorpos < 0)
-                        {
-                            model->cursorpos = 5;
-                        }
-                    },
-                    true);
-                break;
-            case InputKeyRight:
-                with_view_model(
-                    instance->view,
-                    ColorGuessColorSetModel* model,
-                    {
-                        model->cursorpos++;
-                        if (model->cursorpos > 5)
-                        {
-                            model->cursorpos = 0;
-                        }
-                    },
-                    true);
-                break;
-            case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    ColorGuessColorSetModel* model,
-                    {
-                        model->digit[model->cursorpos]++;
-                        if (model->digit[model->cursorpos] > 15) {
-                            model->digit[model->cursorpos] = 0;
-                        }
-                        color_guess_color_set_set_led(instance->context, model);
-                        //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyDown:
-                with_view_model(
-                    instance->view,
-                    ColorGuessColorSetModel* model,
-                    {
-                        model->digit[model->cursorpos]--;
-                        if (model->digit[model->cursorpos] < 0) {
-                            model->digit[model->cursorpos] = 15;
-                        }
-                        color_guess_color_set_set_led(instance->context, model);
-                        //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyOk:
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                ColorGuessColorSetModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(ColorGuessCustomEventColorSetBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+            with_view_model(
+                instance->view,
+                ColorGuessColorSetModel * model,
+                {
+                    model->cursorpos--;
+                    if(model->cursorpos < 0) {
+                        model->cursorpos = 5;
+                    }
+                },
+                true);
+            break;
+        case InputKeyRight:
+            with_view_model(
+                instance->view,
+                ColorGuessColorSetModel * model,
+                {
+                    model->cursorpos++;
+                    if(model->cursorpos > 5) {
+                        model->cursorpos = 0;
+                    }
+                },
+                true);
+            break;
+        case InputKeyUp:
+            with_view_model(
+                instance->view,
+                ColorGuessColorSetModel * model,
+                {
+                    model->digit[model->cursorpos]++;
+                    if(model->digit[model->cursorpos] > 15) {
+                        model->digit[model->cursorpos] = 0;
+                    }
+                    color_guess_color_set_set_led(instance->context, model);
+                    //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
+                },
+                true);
+            break;
+        case InputKeyDown:
+            with_view_model(
+                instance->view,
+                ColorGuessColorSetModel * model,
+                {
+                    model->digit[model->cursorpos]--;
+                    if(model->digit[model->cursorpos] < 0) {
+                        model->digit[model->cursorpos] = 15;
+                    }
+                    color_guess_color_set_set_led(instance->context, model);
+                    //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
+                },
+                true);
+            break;
+        case InputKeyOk:
+        case InputKeyMAX:
+            break;
         }
     }
-    
+
     return true;
 }
 
@@ -183,17 +181,14 @@ ColorGuessColorSet* color_guess_color_set_alloc() {
     with_view_model(
         instance->view,
         ColorGuessColorSetModel * model,
-        {
-            color_guess_color_set_model_init(model);
-        },
+        { color_guess_color_set_model_init(model); },
         true);
-    
+
     return instance;
 }
 
 void color_guess_color_set_free(ColorGuessColorSet* instance) {
     furi_assert(instance);
-
 
     view_free(instance->view);
     free(instance);
@@ -202,7 +197,5 @@ void color_guess_color_set_free(ColorGuessColorSet* instance) {
 View* color_guess_color_set_get_view(ColorGuessColorSet* instance) {
     furi_assert(instance);
 
-
     return instance->view;
 }
-

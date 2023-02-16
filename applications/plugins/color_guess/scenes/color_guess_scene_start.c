@@ -13,10 +13,17 @@ void color_guess_scene_start_submenu_callback(void* context, uint32_t index) {
 void color_guess_scene_start_on_enter(void* context) {
     ColorGuess* app = context;
 
-    submenu_add_item(app->submenu, "Play Game", SubmenuIndexPlay, color_guess_scene_start_submenu_callback, app);
-    submenu_add_item(app->submenu, "Set Color", SubmenuIndexColorSet, color_guess_scene_start_submenu_callback, app);
+    submenu_add_item(
+        app->submenu, "Play Game", SubmenuIndexPlay, color_guess_scene_start_submenu_callback, app);
+    submenu_add_item(
+        app->submenu,
+        "Set Color",
+        SubmenuIndexColorSet,
+        color_guess_scene_start_submenu_callback,
+        app);
 
-    submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, ColorGuessSceneStart));
+    submenu_set_selected_item(
+        app->submenu, scene_manager_get_scene_state(app->scene_manager, ColorGuessSceneStart));
     view_dispatcher_switch_to_view(app->view_dispatcher, ColorGuessViewIdMenu);
 }
 
@@ -34,7 +41,7 @@ bool color_guess_scene_start_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, ColorGuessSceneStart, SubmenuIndexColorSet);
             scene_manager_next_scene(app->scene_manager, ColorGuessSceneColorSet);
             return true;
-        } else if (event.event == SubmenuIndexPlay) {
+        } else if(event.event == SubmenuIndexPlay) {
             scene_manager_set_scene_state(
                 app->scene_manager, ColorGuessSceneStart, SubmenuIndexPlay);
             scene_manager_next_scene(app->scene_manager, ColorGuessScenePlay);
