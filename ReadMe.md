@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix for BT icon not updating on Desktop #533 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/533)
 - Added: [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Added: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- Added: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 <a name="release">
 
@@ -348,6 +349,7 @@ $ ./fbt dolphin_ext
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
+- [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675`
 - [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
