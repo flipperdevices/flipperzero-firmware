@@ -251,7 +251,7 @@ void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
 
 /*********************** WRITE ***********************/
 
-void ibutton_worker_mode_write_common_start(iButtonWorker* worker) {
+void ibutton_worker_mode_write_common_start(iButtonWorker* worker) { //-V524
     UNUSED(worker);
     furi_hal_power_enable_otg();
 }
@@ -280,7 +280,7 @@ void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker) {
     }
 }
 
-void ibutton_worker_mode_write_common_stop(iButtonWorker* worker) {
+void ibutton_worker_mode_write_common_stop(iButtonWorker* worker) { //-V524
     UNUSED(worker);
     furi_hal_power_disable_otg();
 }
