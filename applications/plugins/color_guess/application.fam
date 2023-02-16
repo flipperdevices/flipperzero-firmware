@@ -1,7 +1,7 @@
 App(
     appid="Color_Guess",
     name="Color Guess",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="color_guess_app",
     cdefines=["APP_COLOR_GUESS"],
     requires=[

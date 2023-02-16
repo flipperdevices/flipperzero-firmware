@@ -1,7 +1,7 @@
 App(
     appid="LED_Pulsator",
     name="LED Pulsator",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="ledpulser_app",
     cdefines=["APP_LEDPULSER"],
     requires=[
