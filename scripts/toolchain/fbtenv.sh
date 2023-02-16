@@ -13,7 +13,7 @@ fbtenv_show_usage()
     echo "Running this script manually is wrong, please source it";
     echo "Example:";
     printf "\tsource scripts/toolchain/fbtenv.sh\n";
-    echo "To restore your environment source fbtenv.sh with '--restore'."
+    echo "To restore your environment, source fbtenv.sh with '--restore'."
     echo "Example:";
     printf "\tsource scripts/toolchain/fbtenv.sh --restore\n";
 }
@@ -122,7 +122,7 @@ fbtenv_get_kernel_type()
         TOOLCHAIN_ARCH_DIR="$FBT_TOOLCHAIN_PATH/toolchain/x86_64-linux";
         TOOLCHAIN_URL="https://update.flipperzero.one/builds/toolchain/gcc-arm-none-eabi-10.3-x86_64-linux-flipper-$FBT_TOOLCHAIN_VERSION.tar.gz";
     elif echo "$SYS_TYPE" | grep -q "MINGW"; then
-        echo "In MinGW shell use \"[u]fbt.cmd\" instead of \"[u]fbt\"";
+        echo "In MinGW shell, use \"[u]fbt.cmd\" instead of \"[u]fbt\"";
         return 1;
     else
         echo "Your system configuration is not supported. Sorry.. Please report us your configuration.";
@@ -273,6 +273,9 @@ fbtenv_download_toolchain()
 
 fbtenv_print_version()
 {
+    if [ -n "$FBT_QUIET" ]; then
+        return 0;
+    fi
     echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
 }
 
