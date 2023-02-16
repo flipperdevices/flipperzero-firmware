@@ -15,6 +15,8 @@ There are a few different playlists:
 - [demo video](https://youtu.be/8EuNqTr02eU) Flipper Zero ignites fireworks, replaying a "Read RAW" signal. (In the end of my overview video, I mentioned that I would make another video of the Flipper igniting fireworks.)
 
 
+## BADUSB (Keyboard/Mouse emulator)
+- [video](https://youtu.be/Ta7eVNS5opU) Demonstrates a firmware fix for DELETE and BACKSPACE keys.  If you have the fix applied, then you can send "CTRL-ALT DELETE" to unlock a PC.
 
 ## GPIO (General-Purpose Input/Output)
 ### GPIO ~ Adding Polling input to your code
