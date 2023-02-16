@@ -73,6 +73,8 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
         furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 
+    SPEAKER_PWM_TIMER->CNT = 0;
+
     LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);
     LL_TIM_EnableCounter(SPEAKER_PWM_TIMER);
 }
@@ -113,6 +115,8 @@ void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
     LL_TIM_OC_Init(SAMPLE_RATE_TIMER, SPEAKER_PWM_TIMER_CHANNEL, &TIM_OC_InitStruct);
 
     LL_TIM_EnableAllOutputs(SAMPLE_RATE_TIMER);
+
+    SAMPLE_RATE_TIMER->CNT = 0;
 }
 
 void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
@@ -131,6 +135,8 @@ void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
     LL_TIM_OC_Init(TRACKER_ENGINE_TIMER, SPEAKER_PWM_TIMER_CHANNEL, &TIM_OC_InitStruct);
 
     LL_TIM_EnableIT_UPDATE(TRACKER_ENGINE_TIMER);
+
+    TRACKER_ENGINE_TIMER->CNT = 0;
 }
 
 void tracker_engine_set_rate(uint8_t rate) {
@@ -141,6 +147,8 @@ void tracker_engine_set_rate(uint8_t rate) {
         (uint32_t)TIMER_BASE_CLOCK / (uint32_t)rate - 1; // to support various tracker engine rates
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(TRACKER_ENGINE_TIMER, &TIM_InitStruct);
+
+    TRACKER_ENGINE_TIMER->CNT = 0;
 }
 
 void tracker_engine_init_hardware(uint8_t rate) {
@@ -186,6 +194,7 @@ void sound_engine_dma_stop() {
 }
 
 void sound_engine_start() {
+    SAMPLE_RATE_TIMER->CNT = 0;
     LL_TIM_EnableCounter(SAMPLE_RATE_TIMER);
 
     sound_engine_dma_start();
@@ -206,6 +215,8 @@ void sound_engine_deinit_timer() {
 }
 
 void tracker_engine_start() {
+    TRACKER_ENGINE_TIMER->CNT = 0;
+
     LL_TIM_EnableAllOutputs(TRACKER_ENGINE_TIMER);
     LL_TIM_EnableCounter(TRACKER_ENGINE_TIMER);
 }

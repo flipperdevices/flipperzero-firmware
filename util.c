@@ -17,12 +17,14 @@ void stop_song(FlizzerTrackerApp* tracker) {
     }
 
     stop();
+
+    reset_buffer(&tracker->sound_engine);
 }
 
 void play_song(FlizzerTrackerApp* tracker, bool from_cursor) {
-    stop_song(tracker);
+    uint16_t temppos = tracker->tracker_engine.pattern_position;
 
-    reset_buffer(&tracker->sound_engine);
+    stop_song(tracker);
 
     sound_engine_dma_init(
         (uint32_t)tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
@@ -34,12 +36,26 @@ void play_song(FlizzerTrackerApp* tracker, bool from_cursor) {
 
     if(!(from_cursor)) {
         tracker->tracker_engine.pattern_position = 0;
+        temppos = 0;
     }
 
     tracker_engine_timer_init(tracker->song.rate);
 
+    /*sound_engine_init_hardware(tracker->sound_engine.sample_rate,
+    tracker->sound_engine.external_audio_output,
+    tracker->sound_engine.audio_buffer,
+    tracker->sound_engine.audio_buffer_size);
+    tracker_engine_init_hardware(tracker->song.rate);*/
+
     tracker->tracker_engine.current_tick = 0;
     tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
+
+    for(uint8_t i = 0; i < SONG_MAX_CHANNELS; i++) {
+        memset(&tracker->sound_engine.channel[i], 0, sizeof(SoundEngineChannel));
+        memset(&tracker->tracker_engine.channel[i], 0, sizeof(TrackerEngineChannel));
+    }
+
+    tracker->tracker_engine.pattern_position = temppos;
 
     play();
 }
