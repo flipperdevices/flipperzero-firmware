@@ -52,7 +52,7 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
 
 bool dallas_ds1990_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
-    return dallas_common_read_rom(host, &data->rom_data);
+    return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data);
 }
 
 bool dallas_ds1990_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
