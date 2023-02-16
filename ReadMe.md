@@ -33,27 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-16 17:00 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-16 17:00 EST`
-- OFW: [BadUSB: disable CDC mode, USB mode switch fix #2394 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2394)
-- OFW: [Updater visual fixes #2391 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2391)
-- OFW: [Fix Cyfral & Metakom emulation #2392 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2392)
-- UL: [Fixes for File Browser (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/334)
-- UL: [Revert some iButton fixes (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f4af57d15a4b334c79c6933856bcdd54f8769049)
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- UL: [Nice one encoder #335 (By assasinfil)](https://github.com/DarkFlippers/unleashed-firmware/pull/335) NFC 14a SN emulation bug [#335](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/335) fixed.
-- UL: [SubGHz: Remove 467.75 From freq analyzer since it has too much noise (Frequency is still can be used, just excluded from FA to avoid false detections) (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f93462667c2571d5994ba1341c5d93df2577e2bc)
-- UL: Plugins -> SubGHz Bruteforcer: Fix Linear Delta 3 repeats (now its more stable and we will be sure signal is received correctly) (By xMasterX)
-- UL: Show RSSI in weather station app and in pocsag pager app (By xMasterX)
-- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): ALL, Anime and RM Select builds will now have 103 more new animations [(Thanks to IoriKesso)](https://github.com/IoriKesso/Flipper-Zero-Anime-Wallpapers)
-- Added: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker) - Feel free to provide feedback in the project.
-- [Passport+Desktop Improvements (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/532) Now has changable passport backgrounds!
-- OFW: [Up toolchain to version 20 #2397 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2397)
-- Passport now has 8 selectable backgrounds options and 22 profile image options. (Changes [By RogueMaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1ede732163770d1b41e12748f8bbac279e0be062) with [thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/532))
-- Many thanks to [Kuronons](https://github.com/Kuronons/FZ_graphics/tree/main) for the many passport backgrounds and profile images available and included.
-- UL: [Updated IR Assets (thanks to amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/340)
-- [Fix for BT icon not updating on Desktop #533 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/533)
-- Added: [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
-- Added: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
-- Added: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 <a name="release">
 
