@@ -24,6 +24,7 @@ typedef struct {
     int time_spent;
     int timestamp_start;
     int closeness;
+    int difficulty;
 } ColorGuessPlayModel;
 
 void color_guess_play_set_callback(
@@ -52,7 +53,14 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     NotificationMessage notification_led_message_3;
     notification_led_message_3.type = NotificationMessageTypeLedBlue;
     
-    model->color = colorsEasy[rand() % ARR_SIZE(colorsEasy)];
+    if (model->difficulty == 0) {
+        model->color = colorsEasy[rand() % ARR_SIZE(colorsEasy)];
+    } else if (model->difficulty == 1) {
+        model->color = colorsNormal[rand() % ARR_SIZE(colorsNormal)];
+    } else if (model->difficulty == 2) {
+        model->color = colorsHard[rand() % ARR_SIZE(colorsHard)];
+    }
+    
     notification_led_message_1.data.led.value = ((model->color >> 16) & 0xFF);
     notification_led_message_2.data.led.value = ((model->color >> 8) & 0xFF);
     notification_led_message_3.data.led.value = ((model->color) & 0xFF);
@@ -100,6 +108,25 @@ void parse_time_str(char* buffer, int32_t sec) {
         sec % 60); // second
 }
 
+void drawDifficulty(Canvas* canvas, ColorGuessPlayModel* model) {
+    UNUSED(model);
+    char *strDifficulty = malloc(7);
+    if (model->difficulty == 0) {
+        strcpy(strDifficulty, "Easy");
+    } else if (model->difficulty == 1) {
+        strcpy(strDifficulty, "Medium");
+    } else if (model->difficulty == 2) {
+        strcpy(strDifficulty, "Hard");
+    }
+    canvas_draw_box(canvas, 0, 52, 47, 12);
+    canvas_invert_color(canvas);
+    canvas_draw_icon(canvas, 2, 54, &I_ButtonCenter_7x7);
+    canvas_draw_str_aligned(canvas, 11, 54, AlignLeft, AlignTop, strDifficulty); 
+    canvas_invert_color(canvas);
+    free(strDifficulty);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 10);
+}
+
 void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
@@ -134,6 +161,7 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     canvas_draw_icon(canvas, 78, 27, digits[model->digit[4]]);
     canvas_draw_icon(canvas, 90, 27, digits[model->digit[5]]);
     elements_button_right(canvas, "Guess this color");
+    drawDifficulty(canvas, model);
 }
 
 static void color_guess_play_model_init(ColorGuessPlayModel* const model) {
@@ -142,6 +170,7 @@ static void color_guess_play_model_init(ColorGuessPlayModel* const model) {
         model->digit[i] = 0;
     }
     model->closeness = 0;
+    model->difficulty = 1;
 }
 
 bool color_guess_play_input(InputEvent* event, void* context) {
@@ -212,6 +241,18 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                     true);
                 break;
             case InputKeyOk:
+                with_view_model(
+                    instance->view,
+                    ColorGuessPlayModel* model,
+                    {
+                        model->difficulty++;
+                        if (model->difficulty > 2) {
+                            model->difficulty = 0;
+                        }
+                        color_guess_play_new_round(instance->context, model);
+                    },
+                    true);
+                break;
             case InputKeyMAX:
                 break;
         }
