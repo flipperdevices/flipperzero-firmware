@@ -5,6 +5,9 @@
 
 #include "dallas_common.h"
 
+#include "blanks/rw1990.h"
+#include "blanks/tm2004.h"
+
 #define DS1992_FAMILY_CODE 0x08U
 #define DS1992_FAMILY_NAME "DS1992"
 
@@ -62,23 +65,16 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
 };
 
 bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
-    bool success = false;
     DS1992ProtocolData* data = protocol_data;
-
-    do {
-        if(!onewire_host_reset(host)) break;
-        if(!dallas_common_read_rom(host, &data->rom_data)) break;
-        if(!dallas_common_read_mem(host, 0, data->sram_data, DS1992_SRAM_DATA_SIZE)) break;
-        success = true;
-    } while(false);
-
-    return success;
+    return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data) &&
+           dallas_common_read_mem(host, 0, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
 bool dallas_ds1992_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
-    (void)host;
-    (void)protocol_data;
-    return false;
+    DS1992ProtocolData* data = protocol_data;
+    return rw1990_write_v1(host, data->rom_data.bytes, sizeof(DallasCommonRomData)) ||
+           rw1990_write_v2(host, data->rom_data.bytes, sizeof(DallasCommonRomData)) ||
+           tm2004_write(host, (uint8_t*)data, sizeof(DallasCommonRomData) + DS1992_SRAM_DATA_SIZE);
 }
 
 bool dallas_ds1992_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
