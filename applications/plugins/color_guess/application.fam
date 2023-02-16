@@ -1,0 +1,16 @@
+App(
+    appid="Color_Guess",
+    name="Color Guess",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="color_guess_app",
+    cdefines=["APP_COLOR_GUESS"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=10,
+    fap_icon="color_guess_10px.png",
+    fap_icon_assets="icons",
+    fap_category="Games",
+    fap_icon_assets_symbol="color_guess",
+)

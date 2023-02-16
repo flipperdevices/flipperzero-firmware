@@ -51,6 +51,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Many thanks to [Kuronons](https://github.com/Kuronons/FZ_graphics/tree/main) for the many passport backgrounds and profile images available and included.
 - UL: [Updated IR Assets (thanks to amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/340)
 - [Fix for BT icon not updating on Desktop #533 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/533)
+- Added: [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- Added: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 
 <a name="release">
 
@@ -232,6 +234,7 @@ $ ./fbt dolphin_ext
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
+- [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
 - [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
@@ -305,6 +308,7 @@ $ ./fbt dolphin_ext
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
+- [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
