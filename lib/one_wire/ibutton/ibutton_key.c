@@ -50,7 +50,7 @@ uint32_t ibutton_key_get_features(iButtonKey* key) {
     return ibutton_protocols_get_features(key->protocol_id);
 }
 
-static bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
+static inline bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
     bool success = false;
     uint8_t rom_data[IBUTTON_KEY_ONEWIRE_ROM_SIZE];
 
@@ -132,15 +132,22 @@ bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host) {
     return success;
 }
 
-bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* bus) {
+static inline bool ibutton_key_emulate_onewire(iButtonKey* key, OneWireSlave* bus) {
     bool success = false;
 
     if(key->protocol_id < iButtonProtocolMax) {
         ibutton_protocols_emulate(bus, key->protocol_data, key->protocol_id);
+        // Important: starting the bus AFTER calling ibutton_protocols_emulate()
+        onewire_slave_start(bus);
         success = true;
     }
 
     return success;
+}
+
+bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* bus) {
+    // TODO: Emulate Cyfral & Metakom keys
+    return ibutton_key_emulate_onewire(key, bus);
 }
 
 bool ibutton_key_save(iButtonKey* key, const char* file_name) {

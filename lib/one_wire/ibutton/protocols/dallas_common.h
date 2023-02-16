@@ -60,9 +60,20 @@ bool dallas_common_read_scratchpad(
     uint8_t* data,
     size_t data_size);
 
-bool dallas_common_copy_scratchpad(OneWireHost* host, const DallasCommonAddressRegs* regs);
+bool dallas_common_copy_scratchpad(
+    OneWireHost* host,
+    const DallasCommonAddressRegs* regs,
+    uint32_t timeout_us);
 
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size);
+
+/* Combined operations */
+bool dallas_common_write_mem(
+    OneWireHost* host,
+    uint32_t timeout_us,
+    size_t page_size,
+    const uint8_t* data,
+    size_t data_size);
 
 /* Emulation */
 bool dallas_common_emulate_search_rom(OneWireSlave* bus, const DallasCommonRomData* rom_data);

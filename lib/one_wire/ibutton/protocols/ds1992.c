@@ -10,6 +10,7 @@
 
 #define DS1992_SRAM_DATA_SIZE 128U
 #define DS1992_SRAM_PAGE_SIZE 4U
+#define DS1992_COPY_SCRATCH_TIMEOUT_US 100U
 
 #define DS1992_BRIEF_HEAD_COUNT 4U
 #define DS1992_BRIEF_TAIL_COUNT 3U
@@ -81,36 +82,13 @@ bool dallas_ds1992_write_blank(OneWireHost* host, iButtonProtocolData* protocol_
 }
 
 bool dallas_ds1992_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
-    bool success = false;
     DS1992ProtocolData* data = protocol_data;
-
-    DallasCommonAddressRegs regs;
-    uint8_t scratch[DS1992_SRAM_PAGE_SIZE];
-
-    do {
-        size_t i;
-        for(i = 0; i < DS1992_SRAM_DATA_SIZE; i += DS1992_SRAM_PAGE_SIZE) {
-            if(!onewire_host_reset(host)) break;
-            if(!dallas_common_skip_rom(host)) break;
-            if(!dallas_common_write_scratchpad(host, i, data->sram_data + i, DS1992_SRAM_PAGE_SIZE))
-                break;
-
-            if(!onewire_host_reset(host)) break;
-            if(!dallas_common_skip_rom(host)) break;
-            if(!dallas_common_read_scratchpad(host, &regs, scratch, DS1992_SRAM_PAGE_SIZE)) break;
-
-            if(!onewire_host_reset(host)) break;
-            if(!dallas_common_skip_rom(host)) break;
-            if(!dallas_common_copy_scratchpad(host, &regs)) break;
-        }
-
-        if(i != DS1992_SRAM_DATA_SIZE) break;
-        if(!onewire_host_reset(host)) break;
-
-        success = true;
-    } while(false);
-
-    return success;
+    return dallas_common_write_mem(
+        host,
+        DS1992_COPY_SCRATCH_TIMEOUT_US,
+        DS1992_SRAM_PAGE_SIZE,
+        data->sram_data,
+        DS1992_SRAM_DATA_SIZE);
 }
 
 static bool dallas_ds1992_emulate_callback(uint8_t command, void* context) {
@@ -136,7 +114,6 @@ void dallas_ds1992_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data
     // TODO: reset the command state
 
     onewire_slave_set_command_callback(bus, dallas_ds1992_emulate_callback, protocol_data);
-    onewire_slave_start(bus);
 }
 
 bool dallas_ds1992_load(

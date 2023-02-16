@@ -8,8 +8,8 @@
 #define DALLAS_COMMON_ROM_DATA_KEY_V1 "Data"
 #define DALLAS_COMMON_ROM_DATA_KEY_V2 "Rom Data"
 
-#define DALLAS_COMMON_COPY_SCRATCH_TIMEOUT_US 100U
-#define DALLAS_COMMON_COPY_SCRATCH_POLL_US 5U
+#define DALLAS_COMMON_COPY_SCRATCH_MIN_TIMEOUT_US 5U
+#define DALLAS_COMMON_COPY_SCRATCH_POLL_COUNT 20U
 
 bool dallas_common_skip_rom(OneWireHost* host) {
     onewire_host_write(host, DALLAS_COMMON_CMD_SKIP_ROM);
@@ -49,18 +49,24 @@ bool dallas_common_read_scratchpad(
     return true;
 }
 
-bool dallas_common_copy_scratchpad(OneWireHost* host, const DallasCommonAddressRegs* regs) {
+bool dallas_common_copy_scratchpad(
+    OneWireHost* host,
+    const DallasCommonAddressRegs* regs,
+    uint32_t timeout_us) {
     onewire_host_write(host, DALLAS_COMMON_CMD_COPY_SCRATCH);
     onewire_host_write_bytes(host, regs->bytes, sizeof(DallasCommonAddressRegs));
 
-    size_t time_elapsed;
-    for(time_elapsed = 0; time_elapsed < DALLAS_COMMON_COPY_SCRATCH_TIMEOUT_US;
-        time_elapsed += DALLAS_COMMON_COPY_SCRATCH_POLL_US) {
+    const uint32_t poll_delay =
+        MAX(timeout_us / DALLAS_COMMON_COPY_SCRATCH_POLL_COUNT,
+            DALLAS_COMMON_COPY_SCRATCH_MIN_TIMEOUT_US);
+
+    uint32_t time_elapsed;
+    for(time_elapsed = 0; time_elapsed < timeout_us; time_elapsed += poll_delay) {
         if(!onewire_host_read_bit(host)) break;
-        furi_delay_us(DALLAS_COMMON_COPY_SCRATCH_POLL_US);
+        furi_delay_us(poll_delay);
     }
 
-    return time_elapsed < DALLAS_COMMON_COPY_SCRATCH_TIMEOUT_US;
+    return time_elapsed < timeout_us;
 }
 
 bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size) {
@@ -72,6 +78,50 @@ bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, 
     onewire_host_read_bytes(host, data, (uint16_t)data_size);
 
     return true;
+}
+
+bool dallas_common_write_mem(
+    OneWireHost* host,
+    uint32_t timeout_us,
+    size_t page_size,
+    const uint8_t* data,
+    size_t data_size) {
+    // data size must be a multiple of page size
+    furi_check(data_size % page_size == 0);
+
+    bool success = false;
+    DallasCommonAddressRegs regs;
+    uint8_t* scratch = malloc(page_size);
+
+    do {
+        size_t i;
+        for(i = 0; i < data_size; i += page_size) {
+            const uint8_t* data_ptr = data + i;
+
+            if(!onewire_host_reset(host)) break;
+            if(!dallas_common_skip_rom(host)) break;
+            if(!dallas_common_write_scratchpad(host, i, data_ptr, page_size)) break;
+
+            if(!onewire_host_reset(host)) break;
+            if(!dallas_common_skip_rom(host)) break;
+            if(!dallas_common_read_scratchpad(host, &regs, scratch, page_size)) break;
+
+            // TODO: check the scratchpad contents
+
+            if(!onewire_host_reset(host)) break;
+            if(!dallas_common_skip_rom(host)) break;
+            if(!dallas_common_copy_scratchpad(host, &regs, timeout_us)) break;
+        }
+
+        if(i != data_size) break;
+        if(!onewire_host_reset(host)) break;
+
+        success = true;
+    } while(false);
+
+    free(scratch);
+
+    return success;
 }
 
 bool dallas_common_emulate_search_rom(OneWireSlave* bus, const DallasCommonRomData* rom_data) {

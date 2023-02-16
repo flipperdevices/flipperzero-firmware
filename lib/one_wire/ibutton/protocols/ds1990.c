@@ -79,7 +79,6 @@ void dallas_ds1990_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data
     data->state.bus = bus;
 
     onewire_slave_set_command_callback(bus, dallas_ds1990_emulate_callback, protocol_data);
-    onewire_slave_start(bus);
 }
 
 bool dallas_ds1990_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {
