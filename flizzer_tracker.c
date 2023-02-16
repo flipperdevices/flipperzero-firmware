@@ -25,8 +25,7 @@ void draw_callback(Canvas* canvas, void* ctx) {
         return;
     }
 
-    if(tracker->showing_help)
-    {
+    if(tracker->showing_help) {
         canvas_draw_icon(canvas, 0, 0, &I_help);
         return;
     }

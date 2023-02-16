@@ -372,13 +372,13 @@ void tracker_engine_advance_channel(TrackerEngine* tracker_engine, uint8_t chan)
 
         if(te_channel->slide_speed != 0) {
             if(te_channel->target_note > te_channel->note) {
-                te_channel->note +=
-                    my_min(te_channel->slide_speed * 4, te_channel->target_note - te_channel->note);
+                te_channel->note += my_min(
+                    te_channel->slide_speed * 4, te_channel->target_note - te_channel->note);
             }
 
             else if(te_channel->target_note < te_channel->note) {
-                te_channel->note -=
-                    my_min(te_channel->slide_speed * 4, te_channel->note - te_channel->target_note);
+                te_channel->note -= my_min(
+                    te_channel->slide_speed * 4, te_channel->note - te_channel->target_note);
             }
         }
 
@@ -518,7 +518,6 @@ void tracker_engine_advance_tick(TrackerEngine* tracker_engine) {
                 else if(
                     pinst && note != MUS_NOTE_RELEASE && note != MUS_NOTE_CUT &&
                     note != MUS_NOTE_NONE) {
-
                     uint8_t prev_adsr_volume = se_channel->adsr.volume;
 
                     if((opcode & 0x7f00) == TE_EFFECT_SLIDE) {

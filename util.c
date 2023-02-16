@@ -21,7 +21,7 @@ void stop_song(FlizzerTrackerApp* tracker) {
 
 void play_song(FlizzerTrackerApp* tracker, bool from_cursor) {
     stop_song(tracker);
-    
+
     reset_buffer(&tracker->sound_engine);
 
     sound_engine_dma_init(

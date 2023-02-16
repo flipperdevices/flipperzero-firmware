@@ -272,12 +272,14 @@ void cycle_view(FlizzerTrackerApp* tracker) {
 }
 
 void process_input_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event) {
-    if(event->input.key == InputKeyBack && event->input.type == InputTypeShort && tracker->showing_help) {
+    if(event->input.key == InputKeyBack && event->input.type == InputTypeShort &&
+       tracker->showing_help) {
         tracker->showing_help = false;
         return;
     }
 
-    if(tracker->showing_help || tracker->is_loading || tracker->is_saving) return; //do not react until these are finished
+    if(tracker->showing_help || tracker->is_loading || tracker->is_saving)
+        return; //do not react until these are finished
 
     if(event->input.key == InputKeyBack && event->input.type == InputTypeShort &&
        event->period > 0 && event->period < 300 && !(tracker->editing)) {
