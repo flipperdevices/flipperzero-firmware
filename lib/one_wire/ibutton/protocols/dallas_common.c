@@ -11,6 +11,11 @@
 #define DALLAS_COMMON_COPY_SCRATCH_MIN_TIMEOUT_US 5U
 #define DALLAS_COMMON_COPY_SCRATCH_POLL_COUNT 20U
 
+#define DALLAS_COMMON_END_ADDRESS_MASK 0x01F
+#define DALLAS_COMMON_STATUS_FLAG_PF (1U << 5)
+#define DALLAS_COMMON_STATUS_FLAG_OF (1U << 6)
+#define DALLAS_COMMON_STATUS_FLAG_AA (1U << 7)
+
 bool dallas_common_skip_rom(OneWireHost* host) {
     onewire_host_write(host, DALLAS_COMMON_CMD_SKIP_ROM);
     return true;
@@ -86,42 +91,46 @@ bool dallas_common_write_mem(
     size_t page_size,
     const uint8_t* data,
     size_t data_size) {
-    // data size must be a multiple of page size
+    // Data size must be a multiple of page size
     furi_check(data_size % page_size == 0);
 
-    bool success = false;
     DallasCommonAddressRegs regs;
     uint8_t* scratch = malloc(page_size);
 
-    do {
-        size_t i;
-        for(i = 0; i < data_size; i += page_size) {
-            const uint8_t* data_ptr = data + i;
+    size_t i;
+    for(i = 0; i < data_size; i += page_size) {
+        const uint8_t* data_ptr = data + i;
 
-            if(!onewire_host_reset(host)) break;
-            if(!dallas_common_skip_rom(host)) break;
-            if(!dallas_common_write_scratchpad(host, i, data_ptr, page_size)) break;
-
-            if(!onewire_host_reset(host)) break;
-            if(!dallas_common_skip_rom(host)) break;
-            if(!dallas_common_read_scratchpad(host, &regs, scratch, page_size)) break;
-
-            // TODO: check the scratchpad contents
-
-            if(!onewire_host_reset(host)) break;
-            if(!dallas_common_skip_rom(host)) break;
-            if(!dallas_common_copy_scratchpad(host, &regs, timeout_us)) break;
-        }
-
-        if(i != data_size) break;
+        // Write scratchpad with the next page value
         if(!onewire_host_reset(host)) break;
+        if(!dallas_common_skip_rom(host)) break;
+        if(!dallas_common_write_scratchpad(host, i, data_ptr, page_size)) break;
 
-        success = true;
-    } while(false);
+        // Read back the scratchpad contents and address registers
+        if(!onewire_host_reset(host)) break;
+        if(!dallas_common_skip_rom(host)) break;
+        if(!dallas_common_read_scratchpad(host, &regs, scratch, page_size)) break;
+
+        // Verify scratchpad contents
+        if(memcmp(data_ptr, scratch, page_size) != 0) break;
+
+        // Write scratchpad to internal memory
+        if(!onewire_host_reset(host)) break;
+        if(!dallas_common_skip_rom(host)) break;
+        if(!dallas_common_copy_scratchpad(host, &regs, timeout_us)) break;
+
+        // Read back the address registers again
+        if(!onewire_host_reset(host)) break;
+        if(!dallas_common_skip_rom(host)) break;
+        if(!dallas_common_read_scratchpad(host, &regs, scratch, 0)) break;
+
+        // Check if AA flag is set
+        if(!(regs.fields.status & DALLAS_COMMON_STATUS_FLAG_AA)) break;
+    }
 
     free(scratch);
 
-    return success;
+    return i == data_size;
 }
 
 bool dallas_common_emulate_search_rom(OneWireSlave* bus, const DallasCommonRomData* rom_data) {

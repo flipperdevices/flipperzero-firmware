@@ -32,13 +32,7 @@ typedef union {
     struct {
         uint8_t address_lo;
         uint8_t address_hi;
-        union {
-            struct {
-                uint8_t offset : 5;
-                uint8_t flags : 3;
-            };
-            uint8_t byte;
-        } status;
+        uint8_t status;
     } fields;
     uint8_t bytes[3];
 } DallasCommonAddressRegs;
