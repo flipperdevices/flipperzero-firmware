@@ -149,7 +149,7 @@ static esp_loader_error_t SLIP_send_delimiter(void)
 static esp_loader_error_t send_cmd(const void *cmd_data, uint32_t size, uint32_t *reg_value)
 {
     response_t response;
-    command_t command = ((command_common_t *)cmd_data)->command;
+    command_t command = ((const command_common_t *)cmd_data)->command;
 
     RETURN_ON_ERROR( SLIP_send_delimiter() );
     RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, size) );
@@ -163,7 +163,7 @@ static esp_loader_error_t send_cmd_with_data(const void *cmd_data, size_t cmd_si
                                              const void *data, size_t data_size)
 {
     response_t response;
-    command_t command = ((command_common_t *)cmd_data)->command;
+    command_t command = ((const command_common_t *)cmd_data)->command;
 
     RETURN_ON_ERROR( SLIP_send_delimiter() );
     RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, cmd_size) );
@@ -177,7 +177,7 @@ static esp_loader_error_t send_cmd_with_data(const void *cmd_data, size_t cmd_si
 static esp_loader_error_t send_cmd_md5(const void *cmd_data, size_t cmd_size, uint8_t md5_out[MD5_SIZE])
 {
     rom_md5_response_t response;
-    command_t command = ((command_common_t *)cmd_data)->command;
+    command_t command = ((const command_common_t *)cmd_data)->command;
 
     RETURN_ON_ERROR( SLIP_send_delimiter() );
     RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, cmd_size) );
