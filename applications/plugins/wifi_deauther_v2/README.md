@@ -4,10 +4,6 @@ Flipper Zero esp8266 deauther app.
 
 Based off the WiFi Marauder App from 0xchocolate.
 
-Thanks to Roguemaster for fixing some issues I had with the code and didnt get a chance to get to. I have now uploaded these changes into the source. 
-
-I have also successfully built this with unleashed souce as well and included the FAP file here. unleashed version unlshd-020.
-
 https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion
 
 https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/unleashed/applications/wifi_marauder_companion
@@ -36,13 +32,10 @@ TX--------U_RX
 
 
 
-Video in action (old version).
+Video in action.
 https://youtu.be/_RFzZyPkeR0
 
-New video and install instructions.
-https://youtu.be/CKK7t0TaRVQ
-
-If you want to disable the built in WiFi access and web interface (only use flipper to send serial commands) then select "set webinterface false", "save settings" and "reboot". When it starts back up you wont see the pwned AP any more.
+If you want to disable the built in WiFi access and web interface (only use flipper to serial send commands) then select "set webinterface false", "save settings" and "reboot". When it starts back up you wont see the pwned AP any more.
 
 I installed this into Roguemaster to test.
 
