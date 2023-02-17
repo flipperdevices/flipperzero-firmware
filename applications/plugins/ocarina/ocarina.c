@@ -88,27 +88,27 @@ int32_t ocarina_app(void* p) {
             if(event.type == InputTypePress) {
                 switch(event.key) {
                 case InputKeyUp:
-                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
                         furi_hal_speaker_start(NOTE_UP, volume);
                     }
                     break;
                 case InputKeyDown:
-                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
                         furi_hal_speaker_start(NOTE_DOWN, volume);
                     }
                     break;
                 case InputKeyLeft:
-                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
                         furi_hal_speaker_start(NOTE_LEFT, volume);
                     }
                     break;
                 case InputKeyRight:
-                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
                         furi_hal_speaker_start(NOTE_RIGHT, volume);
                     }
                     break;
                 case InputKeyOk:
-                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+                    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
                         furi_hal_speaker_start(NOTE_OK, volume);
                     }
                     break;
