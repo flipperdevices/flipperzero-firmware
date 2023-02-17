@@ -3,7 +3,7 @@ App(
     name="Asteroids",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="asteroids_app_entry",
-    cdefines=["APP_PROTOVIEW"],
+    cdefines=["APP_ASTEROIDS"],
     requires=["gui"],
     stack_size=8 * 1024,
     order=50,
