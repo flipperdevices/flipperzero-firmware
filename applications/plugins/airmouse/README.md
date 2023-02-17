@@ -19,6 +19,7 @@ Using it is really simple:
  * Up button for Left mouse click;
  * Down button for Right mouse click;
  * Center button for Middle mouse click;
+ * Left and Right buttons for scrolling;
  * Use calibration menu option if you notice significant drift (place your Flipper onto a level surface, make sure it doesn't move, run this option, wait 2 seconds, done).
 
 See early prototype [in action](https://www.youtube.com/watch?v=DdxAmmsYfMA).
@@ -41,10 +42,9 @@ Reality:
 
 ![What it looks like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/flipper.jpg)
 
-
 ## Software
 
-The code is based on the original Bosch [driver](https://github.com/BoschSensortec/BMI160_driver/) and an orientation tracking implementation from the [Cardboard](https://github.com/googlevr/cardboard/tree/master/sdk/sensors) project
+The code is based on the original Bosch [driver](https://github.com/BoschSensortec/BMI160_driver/) and an orientation tracking implementation from the Google [Cardboard](https://github.com/googlevr/cardboard/tree/master/sdk/sensors) project
 
 If you're familiar with Flipper applications, start in the [firmware](https://github.com/flipperdevices/flipperzero-firmware) checkout folder and do the following:
 ```
@@ -54,3 +54,7 @@ cd ../..
 ./fbt fap_air_mouse
 ```
 If you're not familiar with those, just grab a `fap` file from Releases.
+
+## License
+
+TL;DR: Use the code however you want, give credit where it's due, no warranty of any kind is provided.
