@@ -12,7 +12,7 @@
 #define FRAME_TOP 3
 #define FRAME_CELL_SIZE 7
 
-#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_DIRECTORY "/ext/apps_data/reversi"
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_reversi.save"
 
 typedef enum { AppScreenGame, AppScreenMenu } AppScreen;
@@ -259,7 +259,7 @@ bool handle_key_menu(AppState* app_state, InputKey key) {
         }
         break;
     case InputKeyDown:
-        if(app_state->selected_menu_item <= MENU_ITEMS_COUNT) {
+        if (app_state->selected_menu_item < MENU_ITEMS_COUNT - 1) {
             app_state->selected_menu_item++;
         }
         break;

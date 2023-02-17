@@ -52,6 +52,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Added: [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/) [Taken From Extra Apps From xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
+- Updated: [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi) [bugfix: correctly handle menu states #3 (By SimplyMinimal)](https://github.com/dimat/flipperzero-reversi/pull/3) [Save location update (By RogueMaster)]
 
 <a name="release">
 
