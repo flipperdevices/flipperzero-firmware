@@ -37,18 +37,17 @@ const uint32_t background_value[PASSPORT_BG_COUNT] =
     {BG_NONE, BG_DB, BG_STOCK, BG_FURI, BG_MARIO, BG_MOUNTAINS, BG_MULTI, BG_SCROLL};
 
 const char* const image_text[PROFILE_IMG_COUNT] = {
-    "None",       "Briareos",    "Cobra",       "Dali Mask",  "Dolphin Pet",
-    "ED-209",     "FSociety",    "Goku (Set)",  "Goku (Kid)", "Goku (Adult)",
-    "Goku (SSJ)", "Goku (SSJ3)", "Guy Fawkes",  "Lain",       "Mario",
-    "Marvin",     "Moreleeloo",  "Neuromancer", "Shinkai",    "Spider Jerusalem",
-    "Tank Girl",  "Totoro"};
+    "None",       "Briareos",   "Cobra",      "Dali Mask",        "Dolphin Pet", "ED-209",
+    "FSociety",   "Goku (Set)", "Goku (Kid)", "Goku (Adult)",     "Goku (SSJ)",  "Goku (SSJ3)",
+    "Guy Fawkes", "Lain",       "Mario",      "Marvin",           "Moreleeloo",  "Neuromancer",
+    "Rabbit",     "Shinkai",    "Sonic",      "Spider Jerusalem", "Tank Girl",   "Totoro"};
 
 const uint32_t image_value[PROFILE_IMG_COUNT] = {
-    PIMG_NONE,     PIMG_BRIAREOS,    PIMG_COBRA,       PIMG_DALI,    PIMG_DOLPHIN,
-    PIMG_ED209,    PIMG_FSOCIETY,    PIMG_GOKUSET,     PIMG_GOKUKID, PIMG_GOKUADULT,
-    PIMG_GOKUSSJ,  PIMG_GOKUSSJ3,    PIMG_GUYFAWKES,   PIMG_LAIN,    PIMG_MARIO,
-    PIMG_MARVIN,   PIMG_MORELEELLOO, PIMG_NEUROMANCER, PIMG_SHINKAI, PIMG_SPIDER,
-    PIMG_TANKGIRL, PIMG_TOTORO};
+    PIMG_NONE,    PIMG_BRIAREOS,    PIMG_COBRA,       PIMG_DALI,    PIMG_DOLPHIN,
+    PIMG_ED209,   PIMG_FSOCIETY,    PIMG_GOKUSET,     PIMG_GOKUKID, PIMG_GOKUADULT,
+    PIMG_GOKUSSJ, PIMG_GOKUSSJ3,    PIMG_GUYFAWKES,   PIMG_LAIN,    PIMG_MARIO,
+    PIMG_MARVIN,  PIMG_MORELEELLOO, PIMG_NEUROMANCER, PIMG_RABBIT,  PIMG_SHINKAI,
+    PIMG_SONIC,   PIMG_SPIDER,      PIMG_TANKGIRL,    PIMG_TOTORO};
 
 const uint32_t name_value[PASSPORT_ON_OFF_COUNT] = {false, true};
 
