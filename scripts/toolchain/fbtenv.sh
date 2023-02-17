@@ -297,7 +297,7 @@ fbtenv_main()
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openocd/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openssl/bin:$PATH";
-    export "$PATH";
+    export PATH;
 
     export SAVED_PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-""}";
     export SAVED_PYTHONPATH="${PYTHONPATH:-""}";
