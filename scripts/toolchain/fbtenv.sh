@@ -7,6 +7,7 @@ DEFAULT_SCRIPT_PATH="$(pwd -P)";
 SCRIPT_PATH="${SCRIPT_PATH:-$DEFAULT_SCRIPT_PATH}";
 FBT_TOOLCHAIN_VERSION="${FBT_TOOLCHAIN_VERSION:-"20"}";
 FBT_TOOLCHAIN_PATH="${FBT_TOOLCHAIN_PATH:-$SCRIPT_PATH}";
+FBT_VERBOSE="${FBT_VERBOSE:-""}";
 
 fbtenv_show_usage()
 {
@@ -273,10 +274,9 @@ fbtenv_download_toolchain()
 
 fbtenv_print_version()
 {
-    if [ -n "${FBT_QUIET:-""}" ]; then
-        return 0;
+    if [ -n "$FBT_VERBOSE" ]; then
+        echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
     fi
-    echo "FBT: using toolchain version $(cat "$TOOLCHAIN_ARCH_DIR/VERSION")";
 }
 
 fbtenv_main()

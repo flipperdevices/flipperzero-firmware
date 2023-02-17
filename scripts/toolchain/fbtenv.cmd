@@ -36,7 +36,7 @@ if not "%REAL_TOOLCHAIN_VERSION%" == "%FLIPPER_TOOLCHAIN_VERSION%" (
     set /p REAL_TOOLCHAIN_VERSION=<"%FBT_TOOLCHAIN_VERSION_FILE%"
 )
 
-if not defined FBT_QUIET (
+if defined FBT_VERBOSE (
     echo FBT: using toolchain version %REAL_TOOLCHAIN_VERSION%
 )
 
