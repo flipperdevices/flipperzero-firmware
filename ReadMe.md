@@ -37,6 +37,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Slot Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Dolphin: Passport: [Animated Rabbit and Sonic for Passport (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/534)
+- UL: Removed USB Keyboard Now In Bluetooth Remote
+- UL: [Autolock with pin code #338 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/338)
 
 <a name="release">
 
@@ -148,7 +150,7 @@ $ ./fbt dolphin_ext
 - Dolphin: Passport: As a FAP with Multiple Pages, and Dynamic Icons/Images support [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
 - Dolphin: Passport: Default Mario Themed [(Thanks to Kuronons)](https://github.com/Kuronons/FZ_graphics/tree/main/Passport%20background)
 - Dolphin: Passport: Many thanks to Kuronons for the many passport backgrounds and profile images available and included.
-- Dolphin: Passport: Now has 8 selectable backgrounds options and 22 profile image options. (Changes By RogueMaster with thanks to ESurge)
+- Dolphin: Passport: Now has 10 selectable backgrounds options and 22 profile image options. (Changes By RogueMaster with thanks to ESurge)
 - Dolphin: Passport: Passport Settings app to configure dynamic icons in Passport FAP [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
