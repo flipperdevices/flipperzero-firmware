@@ -34,7 +34,7 @@ const char* const background_text[PASSPORT_BG_COUNT] =
     {"None", "DB", "Flipper", "Furipass", "Mario", "Mountains", "Multipass", "Scroll", "Slutpass"};
 
 const uint32_t background_value[PASSPORT_BG_COUNT] =
-    {BG_NONE, BG_DB, BG_STOCK, BG_FURI, BG_MARIO, BG_MOUNTAINS, BG_MULTI, BG_SCROL, BG_SLUT};
+    {BG_NONE, BG_DB, BG_STOCK, BG_FURI, BG_MARIO, BG_MOUNTAINS, BG_MULTI, BG_SCROLL, BG_SLUT};
 
 const char* const image_text[PROFILE_IMG_COUNT] = {
     "None",       "Briareos",   "Cobra",      "Dali Mask",        "Dolphin Pet", "ED-209",
