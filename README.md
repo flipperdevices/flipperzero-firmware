@@ -24,8 +24,8 @@ A barcode generator for the Flipper Zero that supports **UPC-A**, **EAN-8**, **E
 3) Open qFlipper and go to the file manager
 4) Navigate to the `apps` folder
 5) Drag & Drop the `.fap` file into the `apps` folder
-6) Navigate back to the root folder and create the folder `app_data`, if not already there
-7) Navigate into `app_data` and create another folder called `barcode_data`
+6) Navigate back to the root folder and create the folder `apps_data`, if not already there
+7) Navigate into `apps_data` and create another folder called `barcode_data`
 8) Navigate into `barcode_data`
 9) Drag & Drop the encoding txts (`code39_encodings.txt` & `code128_encodings.txt`) into the `barcode_data` folder
 
