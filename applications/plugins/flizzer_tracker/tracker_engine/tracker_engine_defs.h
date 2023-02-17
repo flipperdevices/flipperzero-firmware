@@ -214,7 +214,8 @@ typedef struct {
     TrackerSong* song;
     SoundEngine* sound_engine;
 
-    uint16_t pattern_position, sequence_position, current_tick;
+    uint16_t pattern_position, sequence_position;
+    int16_t current_tick;
     uint16_t absolute_position; // sequence_position * pattern_length + pattern_position
 
     uint8_t speed, rate;

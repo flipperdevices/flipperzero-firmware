@@ -7,37 +7,65 @@ void reset_buffer(SoundEngine* sound_engine) {
     }
 }
 
-void play_song(FlizzerTrackerApp* tracker, bool from_cursor) {
-    reset_buffer(&tracker->sound_engine);
-
-    sound_engine_dma_init(
-        (uint32_t)tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
-
-    tracker->tracker_engine.playing = true;
-    tracker->was_editing = tracker->editing;
-    tracker->editing = false;
-
-    if(!(from_cursor)) {
-        tracker->tracker_engine.pattern_position = 0;
-    }
-
-    tracker_engine_set_rate(tracker->song.rate);
-
-    tracker->tracker_engine.current_tick = 0;
-    tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
-
-    play();
-}
-
 void stop_song(FlizzerTrackerApp* tracker) {
     tracker->tracker_engine.playing = false;
     tracker->editing = tracker->was_editing;
 
     for(int i = 0; i < SONG_MAX_CHANNELS; i++) {
         tracker->sound_engine.channel[i].adsr.volume = 0;
+        tracker->tracker_engine.channel[i].channel_flags &= ~(TEC_PROGRAM_RUNNING);
     }
 
     stop();
+
+    reset_buffer(&tracker->sound_engine);
+}
+
+void play_song(FlizzerTrackerApp* tracker, bool from_cursor) {
+    uint16_t temppos = tracker->tracker_engine.pattern_position;
+
+    stop_song(tracker);
+
+    sound_engine_dma_init(
+        (uint32_t)tracker->sound_engine.audio_buffer, tracker->sound_engine.audio_buffer_size);
+
+    tracker->tracker_engine.playing = true;
+
+    tracker->was_editing = tracker->editing;
+    tracker->editing = false;
+
+    if(!(from_cursor)) {
+        tracker->tracker_engine.pattern_position = 0;
+        temppos = 0;
+    }
+
+    tracker_engine_timer_init(tracker->song.rate);
+
+    /*sound_engine_init_hardware(tracker->sound_engine.sample_rate,
+    tracker->sound_engine.external_audio_output,
+    tracker->sound_engine.audio_buffer,
+    tracker->sound_engine.audio_buffer_size);
+    tracker_engine_init_hardware(tracker->song.rate);*/
+
+    tracker->tracker_engine.current_tick = 0;
+    tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
+
+    for(uint8_t i = 0; i < SONG_MAX_CHANNELS; i++)
+    {
+        bool was_disabled = tracker->tracker_engine.channel[i].channel_flags & TEC_DISABLED;
+        
+        memset(&tracker->sound_engine.channel[i], 0, sizeof(SoundEngineChannel));
+        memset(&tracker->tracker_engine.channel[i], 0, sizeof(TrackerEngineChannel));
+
+        if(was_disabled)
+        {
+            tracker->tracker_engine.channel[i].channel_flags |= TEC_DISABLED;
+        }
+    }
+
+    tracker->tracker_engine.pattern_position = temppos;
+
+    play();
 }
 
 bool is_pattern_empty(TrackerSong* song, uint8_t pattern) {

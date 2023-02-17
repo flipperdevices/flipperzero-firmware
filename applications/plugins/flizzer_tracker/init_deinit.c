@@ -103,6 +103,8 @@ FlizzerTrackerApp* init_tracker(
     submenu_add_item(
         tracker->pattern_submenu, "Settings", SUBMENU_PATTERN_SETTINGS, submenu_callback, tracker);
     submenu_add_item(
+        tracker->pattern_submenu, "Help", SUBMENU_PATTERN_HELP, submenu_callback, tracker);
+    submenu_add_item(
         tracker->pattern_submenu, "Exit", SUBMENU_PATTERN_EXIT, submenu_callback, tracker);
 
     submenu_add_item(

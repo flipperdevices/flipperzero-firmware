@@ -45,7 +45,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
-- Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
@@ -54,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
 - Updated: [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi) [bugfix: correctly handle menu states #3 (By SimplyMinimal)](https://github.com/dimat/flipperzero-reversi/pull/3) [Save location update (By RogueMaster)]
 - Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
+- Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 
 <a name="release">
 

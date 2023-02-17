@@ -75,8 +75,7 @@ void sequence_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         tracker->editing = !tracker->editing;
     }
 
-    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort) {
         tracker->current_digit++;
 
         if(tracker->current_digit > 1) {
@@ -90,8 +89,7 @@ void sequence_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         }
     }
 
-    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort) {
         tracker->current_digit--;
 
         if(tracker->current_digit > 1) // unsigned int overflow
@@ -141,7 +139,7 @@ void sequence_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         }
     }
 
-    if(event->input.key == InputKeyUp && event->input.type == InputTypeLong &&
+    if(event->input.key == InputKeyRight && event->input.type == InputTypeLong &&
        !(tracker->editing)) // set loop begin or loop end for the song
     {
         TrackerSong* song = &tracker->song;
@@ -162,12 +160,24 @@ void sequence_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         }
     }
 
-    if(event->input.key == InputKeyDown && event->input.type == InputTypeLong &&
+    if(event->input.key == InputKeyLeft && event->input.type == InputTypeLong &&
        !(tracker->editing)) // erase loop begin and loop end points
     {
         TrackerSong* song = &tracker->song;
 
         song->loop_start = song->loop_end = 0;
+    }
+
+    if(event->input.key == InputKeyUp && event->input.type == InputTypeLong &&
+       !(tracker->editing)) // jump to the beginning
+    {
+        tracker->tracker_engine.sequence_position = 0;
+    }
+
+    if(event->input.key == InputKeyDown && event->input.type == InputTypeLong &&
+       !(tracker->editing)) // jump to the end
+    {
+        tracker->tracker_engine.sequence_position = tracker->song.num_sequence_steps - 1;
     }
 
     if(event->input.key == InputKeyBack && event->input.type == InputTypeShort &&

@@ -140,6 +140,14 @@ void draw_pattern_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
         canvas_draw_box(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
     }
 
+    if(!(tracker->editing) && tracker->focus == EDIT_PATTERN) {
+        uint16_t x = tracker->current_channel * 32 + tracker->patternx * 4 +
+                     (tracker->patternx > 0 ? 4 : 0) - 1;
+        uint16_t y = PATTERN_EDITOR_Y + 6 * 2 + 1;
+
+        canvas_draw_frame(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
+    }
+
     canvas_set_color(canvas, ColorBlack);
 
     for(int i = 1; i < SONG_MAX_CHANNELS; ++i) {
@@ -240,6 +248,13 @@ void draw_sequence_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
 
         canvas_draw_box(canvas, x, y, 5, 7);
     }
+
+    if(!(tracker->editing) && tracker->focus == EDIT_SEQUENCE) {
+        uint8_t x = tracker->current_channel * (4 + 4 + 1) + (tracker->current_digit ? 4 : 0) + 2;
+        uint8_t y = 11;
+
+        canvas_draw_frame(canvas, x, y, 5, 7);
+    }
 }
 
 #define member_size(type, member) sizeof(((type*)0)->member)
@@ -303,6 +318,41 @@ void draw_generic_n_digit_field(
 
         else {
             canvas_draw_box(canvas, x - 1, y - 6, fmax(5, strlen(text) * 4 + 1), 7);
+        }
+    }
+
+    if(tracker->focus == focus && tracker->selected_param == param && !(tracker->editing)) {
+        bool select_string = true;
+
+        if(tracker->focus == EDIT_SONGINFO) {
+            if(param != SI_SONGNAME && param != SI_INSTRUMENTNAME) {
+                select_string = false;
+            }
+        }
+
+        if(tracker->focus == EDIT_INSTRUMENT) {
+            if(param != INST_INSTRUMENTNAME) {
+                select_string = false;
+            }
+        }
+
+        if(!(select_string)) {
+            if(tracker->focus == EDIT_INSTRUMENT && param == INST_CURRENTINSTRUMENT) {
+                canvas_draw_frame(canvas, x + strlen(text) * 4 - digits * 4 - 1, y - 6, 5, 7);
+            }
+
+            else {
+                canvas_draw_frame(
+                    canvas,
+                    x + strlen(text) * 4 - digits * 4 + tracker->current_digit * 4 - 1,
+                    y - 6,
+                    5,
+                    7);
+            }
+        }
+
+        else {
+            canvas_draw_frame(canvas, x - 1, y - 6, fmax(5, strlen(text) * 4 + 1), 7);
         }
     }
 }

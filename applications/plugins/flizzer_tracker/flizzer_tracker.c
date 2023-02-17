@@ -25,14 +25,12 @@ void draw_callback(Canvas* canvas, void* ctx) {
         return;
     }
 
+    if(tracker->showing_help) {
+        canvas_draw_icon(canvas, 0, 0, &I_help);
+        return;
+    }
+
     canvas_set_custom_u8g2_font(canvas, u8g2_font_tom_thumb_4x6_tr);
-
-    /*char buffer[33];
-    snprintf(buffer, sizeof(buffer), "%ld", (tracker->sound_engine.counter & 8191));
-    canvas_draw_str(canvas, 0, 29, buffer);
-
-    snprintf(buffer, sizeof(buffer), "%ld", (tracker->tracker_engine.counter & 8191));
-    canvas_draw_str(canvas, 18, 29, buffer);*/
 
     switch(tracker->mode) {
     case PATTERN_VIEW: {

@@ -139,6 +139,7 @@ typedef enum {
     SUBMENU_PATTERN_LOAD_SONG,
     SUBMENU_PATTERN_SAVE_SONG,
     SUBMENU_PATTERN_SETTINGS,
+    SUBMENU_PATTERN_HELP,
     SUBMENU_PATTERN_EXIT,
 } PatternSubmenuParams;
 
@@ -186,6 +187,7 @@ typedef struct {
 
     bool is_loading;
     bool is_saving;
+    bool showing_help;
 
     bool quit;
 

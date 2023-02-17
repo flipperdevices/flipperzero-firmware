@@ -468,7 +468,7 @@ void tracker_engine_advance_tick(TrackerEngine* tracker_engine) {
 
     uint16_t opcode = 0;
 
-    for(int chan = 0; chan < SONG_MAX_CHANNELS; ++chan) {
+    for(uint8_t chan = 0; chan < SONG_MAX_CHANNELS; chan++) {
         SoundEngineChannel* se_channel = &tracker_engine->sound_engine->channel[chan];
         TrackerEngineChannel* te_channel = &tracker_engine->channel[chan];
 
@@ -518,8 +518,6 @@ void tracker_engine_advance_tick(TrackerEngine* tracker_engine) {
                 else if(
                     pinst && note != MUS_NOTE_RELEASE && note != MUS_NOTE_CUT &&
                     note != MUS_NOTE_NONE) {
-                    // te_channel->slide_speed = 0;
-
                     uint8_t prev_adsr_volume = se_channel->adsr.volume;
 
                     if((opcode & 0x7f00) == TE_EFFECT_SLIDE) {

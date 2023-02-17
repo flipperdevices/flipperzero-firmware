@@ -123,6 +123,12 @@ void submenu_callback(void* context, uint32_t index) {
             break;
         }
 
+        case SUBMENU_PATTERN_HELP: {
+            tracker->showing_help = true;
+            view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+            break;
+        }
+
         case SUBMENU_PATTERN_SAVE_SONG: {
             text_input_set_header_text(tracker->text_input, "Song filename:");
             memset(&tracker->filename, 0, FILE_NAME_LEN);
@@ -266,6 +272,15 @@ void cycle_view(FlizzerTrackerApp* tracker) {
 }
 
 void process_input_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event) {
+    if(event->input.key == InputKeyBack && event->input.type == InputTypeShort &&
+       tracker->showing_help) {
+        tracker->showing_help = false;
+        return;
+    }
+
+    if(tracker->showing_help || tracker->is_loading || tracker->is_saving)
+        return; //do not react until these are finished
+
     if(event->input.key == InputKeyBack && event->input.type == InputTypeShort &&
        event->period > 0 && event->period < 300 && !(tracker->editing)) {
         cycle_view(tracker);

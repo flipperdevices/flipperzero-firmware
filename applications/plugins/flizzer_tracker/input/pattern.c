@@ -249,10 +249,17 @@ void edit_pattern_step(FlizzerTrackerApp* tracker, TrackerSongPatternStep* step,
 }
 
 void pattern_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event) {
-    if(event->input.key == InputKeyDown && event->input.type == InputTypeLong &&
+    if(event->input.key == InputKeyLeft && event->input.type == InputTypeLong &&
        !(tracker->editing)) {
         flipbit(
             tracker->tracker_engine.channel[tracker->current_channel].channel_flags, TEC_DISABLED);
+        return;
+    }
+
+    if(event->input.key == InputKeyDown && event->input.type == InputTypeLong &&
+       !(tracker->editing)) {
+        tracker->tracker_engine.pattern_position =
+            tracker->tracker_engine.song->pattern_length - 1; // return to pattern 1st row
         return;
     }
 
@@ -317,8 +324,7 @@ void pattern_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event) 
         }
     }
 
-    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyRight && event->input.type == InputTypeShort) {
         tracker->patternx++;
 
         if(tracker->patternx > MAX_PATTERNX - 1) {
@@ -332,8 +338,7 @@ void pattern_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event) 
         }
     }
 
-    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort &&
-       tracker->editing) {
+    if(event->input.key == InputKeyLeft && event->input.type == InputTypeShort) {
         tracker->patternx--;
 
         if(tracker->patternx > MAX_PATTERNX - 1) // unsigned int overflow
