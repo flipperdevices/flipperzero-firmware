@@ -10,6 +10,16 @@ void pretty_format_bytes_hex_canonical(
     const uint8_t* data,
     size_t data_size) {
     furi_assert(data);
+    /* Only num_places byte(s) can be on a single line, therefore: */
+    const size_t line_count = data_size / num_places + (data_size % num_places != 0 ? 1 : 0);
+    /* Line length = Prefix length + 3 * num_places (2 hex digits + space) + 1 * num_places +
+       + 1 pipe character + 1 newline character */
+    const size_t line_length = (line_prefix ? strlen(line_prefix) : 0) + 4 * num_places + 2;
+
+    /* Reserve memory in adance in order to avoid unnecessary reallocs */
+    furi_string_reset(result);
+    furi_string_reserve(result, line_count * line_length);
+
     for(size_t i = 0; i < data_size; i += num_places) {
         if(line_prefix) {
             furi_string_cat(result, line_prefix);
