@@ -11,7 +11,7 @@ App(
     stack_size=2 * 1024,
     fap_icon="logo_bc.png",
     fap_libs=["assets"],
-    fap_description="Bar Code Emulator app for Evotor",
+    fap_description="Emulates a barcode scanner for testing cash registers. Why buy a scanner when you have a flipper?",
     fap_author="Igor Danilov",
     fap_version=(0, 5),
     order=70,
