@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi) [bugfix: correctly handle menu states #3 (By SimplyMinimal)](https://github.com/dimat/flipperzero-reversi/pull/3) [Save location update (By RogueMaster)]
 - Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- Updated: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 
 <a name="release">
 
