@@ -253,7 +253,7 @@ bool handle_key_menu(AppState *app_state, InputKey key) {
     }
     break;
   case InputKeyDown:
-    if (app_state->selected_menu_item <= MENU_ITEMS_COUNT) {
+    if (app_state->selected_menu_item < MENU_ITEMS_COUNT - 1) {
       app_state->selected_menu_item++;
     }
     break;
