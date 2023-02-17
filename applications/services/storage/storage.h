@@ -178,6 +178,15 @@ bool storage_dir_read(File* file, FileInfo* fileinfo, char* name, uint16_t name_
  */
 bool storage_dir_rewind(File* file);
 
+/**
+ * @brief Check that dir exists
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+bool storage_dir_exists(Storage* storage, const char* path);
+
 /******************* Common Functions *******************/
 
 /** Retrieves unix timestamp of last access
@@ -258,6 +267,17 @@ FS_Error storage_common_fs_info(
  * @return bool success flag
  */
 bool storage_common_get_my_data_path(Storage* storage, FuriString* path);
+
+/**
+ * @brief Move content of one folder to another, with rename of all conflicting files. 
+ * Source folder will be deleted if the migration is successful.
+ * 
+ * @param storage 
+ * @param source 
+ * @param dest 
+ * @return FS_Error 
+ */
+FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest);
 
 /******************* Error Functions *******************/
 

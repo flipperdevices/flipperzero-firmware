@@ -349,6 +349,17 @@ bool storage_dir_rewind(File* file) {
     return S_RETURN_BOOL;
 }
 
+bool storage_dir_exists(Storage* storage, const char* path) {
+    bool exist = false;
+    FileInfo fileinfo;
+    FS_Error error = storage_common_stat(storage, path, &fileinfo);
+
+    if(error == FSE_OK && (fileinfo.flags & FSF_DIRECTORY)) {
+        exist = true;
+    }
+
+    return exist;
+}
 /****************** COMMON ******************/
 
 FS_Error storage_common_timestamp(Storage* storage, const char* path, uint32_t* timestamp) {
@@ -556,7 +567,7 @@ FS_Error storage_common_merge(Storage* storage, const char* old_path, const char
                 furi_string_set(new_path_next, new_path);
                 FuriString* dir_path;
                 FuriString* filename;
-                char extension[MAX_EXT_LEN];
+                char extension[MAX_EXT_LEN] = {0};
 
                 dir_path = furi_string_alloc();
                 filename = furi_string_alloc();
@@ -655,6 +666,20 @@ bool storage_common_get_my_data_path(Storage* storage, FuriString* path) {
 
     furi_string_free(app_path);
     return result;
+}
+
+FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest) {
+    if(!storage_dir_exists(storage, source)) {
+        return FSE_OK;
+    }
+
+    FS_Error error = storage_common_merge(storage, source, dest);
+
+    if(error == FSE_OK) {
+        storage_simply_remove_recursive(storage, source);
+    }
+
+    return error;
 }
 
 /****************** ERROR ******************/

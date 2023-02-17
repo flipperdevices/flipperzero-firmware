@@ -2,8 +2,35 @@
 #include <furi.h>
 #include <storage/storage.h>
 
+#define UNIT_TESTS_PATH(path) EXT_PATH("unit_tests/" path)
+
 #define STORAGE_LOCKED_FILE EXT_PATH("locked_file.test")
 #define STORAGE_LOCKED_DIR STORAGE_INT_PATH_PREFIX
+
+#define STORAGE_TEST_DIR UNIT_TESTS_PATH("test_dir")
+
+static bool storage_file_create(Storage* storage, const char* path, const char* data) {
+    File* file = storage_file_alloc(storage);
+    bool result = false;
+    do {
+        if(!storage_file_open(file, path, FSAM_WRITE, FSOM_CREATE_NEW)) {
+            break;
+        }
+
+        if(storage_file_write(file, data, strlen(data)) != strlen(data)) {
+            break;
+        }
+
+        if(!storage_file_close(file)) {
+            break;
+        }
+
+        result = true;
+    } while(0);
+
+    storage_file_free(file);
+    return result;
+}
 
 static void storage_file_open_lock_setup() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
@@ -115,7 +142,7 @@ static int32_t storage_dir_locker(void* ctx) {
     File* file = storage_file_alloc(storage);
     furi_check(storage_dir_open(file, STORAGE_LOCKED_DIR));
     furi_semaphore_release(semaphore);
-    furi_delay_ms(1000);
+    furi_delay_ms(100);
 
     furi_check(storage_dir_close(file));
     furi_record_close(RECORD_STORAGE);
@@ -152,9 +179,21 @@ MU_TEST(storage_dir_open_lock) {
     mu_assert(result, "cannot open locked dir");
 }
 
+MU_TEST(storage_dir_exists_test) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    mu_check(!storage_dir_exists(storage, STORAGE_TEST_DIR));
+    mu_assert_int_eq(FSE_OK, storage_common_mkdir(storage, STORAGE_TEST_DIR));
+    mu_check(storage_dir_exists(storage, STORAGE_TEST_DIR));
+    mu_assert_int_eq(FSE_OK, storage_common_remove(storage, STORAGE_TEST_DIR));
+
+    furi_record_close(RECORD_STORAGE);
+}
+
 MU_TEST_SUITE(storage_dir) {
     MU_RUN_TEST(storage_dir_open_close);
     MU_RUN_TEST(storage_dir_open_lock);
+    MU_RUN_TEST(storage_dir_exists_test);
 }
 
 static const char* const storage_copy_test_paths[] = {
@@ -388,9 +427,65 @@ MU_TEST(test_storage_common_get_my_data_path) {
     furi_record_close(RECORD_STORAGE);
 }
 
+MU_TEST(test_storage_common_migrate) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    // Setup test folders
+    storage_simply_remove_recursive(storage, UNIT_TESTS_PATH("migrate_old"));
+    storage_simply_remove_recursive(storage, UNIT_TESTS_PATH("migrate_new"));
+
+    // Test migration from non existing folder
+    mu_assert_int_eq(
+        FSE_OK,
+        storage_common_migrate(
+            storage, UNIT_TESTS_PATH("migrate_old"), UNIT_TESTS_PATH("migrate_new")));
+
+    // Test migration from existing folder to non existing
+    mu_assert_int_eq(FSE_OK, storage_common_mkdir(storage, UNIT_TESTS_PATH("migrate_old")));
+    mu_check(storage_file_create(storage, UNIT_TESTS_PATH("migrate_old/file1"), "test1"));
+    mu_check(storage_file_create(storage, UNIT_TESTS_PATH("migrate_old/file2.ext"), "test2"));
+    mu_check(storage_file_create(storage, UNIT_TESTS_PATH("migrate_old/file3.ext.ext"), "test3"));
+    mu_assert_int_eq(
+        FSE_OK,
+        storage_common_migrate(
+            storage, UNIT_TESTS_PATH("migrate_old"), UNIT_TESTS_PATH("migrate_new")));
+
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file1")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file2.ext")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file3.ext.ext")));
+    mu_check(storage_dir_exists(storage, UNIT_TESTS_PATH("migrate_new")));
+    mu_check(!storage_dir_exists(storage, UNIT_TESTS_PATH("migrate_old")));
+
+    // Test migration from existing folder to existing
+    mu_assert_int_eq(FSE_OK, storage_common_mkdir(storage, UNIT_TESTS_PATH("migrate_old")));
+    mu_check(storage_file_create(storage, UNIT_TESTS_PATH("migrate_old/file1"), "test1"));
+    mu_check(storage_file_create(storage, UNIT_TESTS_PATH("migrate_old/file2.ext"), "test2"));
+    mu_check(storage_file_create(storage, UNIT_TESTS_PATH("migrate_old/file3.ext.ext"), "test3"));
+
+    mu_assert_int_eq(
+        FSE_OK,
+        storage_common_migrate(
+            storage, UNIT_TESTS_PATH("migrate_old"), UNIT_TESTS_PATH("migrate_new")));
+
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file1")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file2.ext")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file3.ext.ext")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file11")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file21.ext")));
+    mu_check(storage_file_exists(storage, UNIT_TESTS_PATH("migrate_new/file3.ext1.ext")));
+    mu_check(storage_dir_exists(storage, UNIT_TESTS_PATH("migrate_new")));
+    mu_check(!storage_dir_exists(storage, UNIT_TESTS_PATH("migrate_old")));
+
+    storage_simply_remove_recursive(storage, UNIT_TESTS_PATH("migrate_old"));
+    storage_simply_remove_recursive(storage, UNIT_TESTS_PATH("migrate_new"));
+
+    furi_record_close(RECORD_STORAGE);
+}
+
 MU_TEST_SUITE(test_storage_common) {
     MU_RUN_TEST(test_storage_common_get_my_data_path);
     MU_RUN_TEST(test_storage_common_get_my_data_path_apps);
+    MU_RUN_TEST(test_storage_common_migrate);
 }
 
 int run_minunit_test_storage() {
