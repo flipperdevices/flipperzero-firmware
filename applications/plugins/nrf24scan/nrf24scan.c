@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG "nrf24scan"
-#define VERSION "2.1"
+#define VERSION "2.2"
 #define MAX_CHANNEL 125
 #define MAX_ADDR 6
 
@@ -485,7 +485,13 @@ void check_add_addr(uint8_t* pkt) {
 
 static void prepare_nrf24(bool fsend_packet) {
     nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
-    nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, NRF_rate);
+    nrf24_write_reg(
+        nrf24_HANDLE,
+        REG_RF_SETUP,
+        (NRF_rate == 0 ? 0b00100000 :
+         NRF_rate == 1 ? 0 :
+                         0b00001000) |
+            0b111); // +TX high power
     uint8_t erx_addr = (1 << 0); // Enable RX_P0
     struct ADDRS* adr = what_to_do == 1 ? &addrs_sniff : &addrs;
     if(!fsend_packet) {
@@ -517,14 +523,13 @@ static void prepare_nrf24(bool fsend_packet) {
         }
         if(what_to_do == 1) { // SNIFF
             payload = 32;
-            nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts, NO CRC
+            nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts
             nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
             nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
             nrf24_write_reg(
                 nrf24_HANDLE,
                 REG_FEATURE,
                 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-            nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
         } else if(setup_from_log) { // Scan
             nrf24_write_reg(
                 nrf24_HANDLE,
