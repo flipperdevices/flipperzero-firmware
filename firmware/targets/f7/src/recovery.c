@@ -5,7 +5,7 @@
 #include <u8g2_glue.h>
 #include <assets_icons.h>
 
-#define COUNTER_VALUE (68U)
+#define COUNTER_VALUE (136U)
 
 static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress) {
     if(progress < COUNTER_VALUE) {
