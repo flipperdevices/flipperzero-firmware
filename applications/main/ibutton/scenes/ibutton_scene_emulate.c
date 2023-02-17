@@ -16,12 +16,27 @@ void ibutton_scene_emulate_on_enter(void* context) {
     iButton* ibutton = context;
     iButtonKey* key = ibutton->key;
 
+    Widget* widget = ibutton->widget;
+    FuriString* tmp = furi_string_alloc();
+
+    widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
+
+    furi_string_printf(tmp, "%s\n[%s]", ibutton->key_name, ibutton_key_get_protocol_name(key));
+
+    widget_add_text_box_element(
+        widget, 52, 38, 75, 26, AlignCenter, AlignCenter, furi_string_get_cstr(tmp), true);
+
+    widget_add_string_multiline_element(
+        widget, 88, 10, AlignCenter, AlignTop, FontPrimary, "iButton\nemulating");
+
     ibutton_worker_emulate_set_callback(
         ibutton->key_worker, ibutton_scene_emulate_callback, ibutton);
     ibutton_worker_emulate_start(ibutton->key_worker, key);
 
     ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
+
+    furi_string_free(tmp);
 }
 
 bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {
