@@ -37,7 +37,6 @@ jobs:
 
       - name: 'Check ticket and report'
         run: |
-          export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
           source scripts/toolchain/fbtenv.sh
           python3 -m pip install slack_sdk
           python3 scripts/merge_report_qa.py \
