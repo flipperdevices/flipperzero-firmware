@@ -8,7 +8,7 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define DESKTOP_SETTINGS_VER (6)
+#define DESKTOP_SETTINGS_VER (7)
 
 #define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)
 #define DESKTOP_SETTINGS_MAGIC (0x17)
@@ -72,4 +72,5 @@ typedef struct {
     bool sdcard;
     uint8_t icon_style;
     bool bt_icon;
+    bool auto_lock_with_pin;
 } DesktopSettings;
