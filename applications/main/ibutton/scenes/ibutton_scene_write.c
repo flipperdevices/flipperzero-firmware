@@ -17,16 +17,36 @@ void ibutton_scene_write_on_enter(void* context) {
     iButtonKey* key = ibutton->key;
     iButtonWorker* worker = ibutton->key_worker;
 
+    Widget* widget = ibutton->widget;
+    FuriString* tmp = furi_string_alloc();
+
+    widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
+
+    furi_string_printf(tmp, "%s\n[%s]", ibutton->key_name, ibutton_key_get_protocol_name(key));
+
+    widget_add_text_box_element(
+        widget, 52, 38, 75, 26, AlignCenter, AlignCenter, furi_string_get_cstr(tmp), true);
+
     ibutton_worker_write_set_callback(worker, ibutton_scene_write_callback, ibutton);
 
+    furi_string_set(tmp, "iButton\nwriting ");
+
     if(ibutton->write_mode == iButtonWriteModeBlank) {
+        furi_string_cat(tmp, "Blank");
         ibutton_worker_write_blank_start(worker, key);
+
     } else if(ibutton->write_mode == iButtonWriteModeCopy) {
+        furi_string_cat(tmp, "Copy");
         ibutton_worker_write_copy_start(worker, key);
     }
 
+    widget_add_string_multiline_element(
+        widget, 88, 10, AlignCenter, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
+
     ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
+
+    furi_string_free(tmp);
 }
 
 bool ibutton_scene_write_on_event(void* context, SceneManagerEvent event) {
