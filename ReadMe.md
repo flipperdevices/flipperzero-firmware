@@ -29,7 +29,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0216-1700-0.77.2-33df872](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0217-0200-0.77.2-6fe242f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-17 02:00 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-17 02:00 EST`
@@ -49,7 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
-- Added: [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/) [Taken From Extra Apps From xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
+- Added: [Snake 2.0 (By Willzvul)](https://github.com/Willzvul/Snake_2.0/) [Taken From Extra Apps From xMasterX](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
 - Updated: [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi) [bugfix: correctly handle menu states #3 (By SimplyMinimal)](https://github.com/dimat/flipperzero-reversi/pull/3) [Save location update (By RogueMaster)]
 - Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
