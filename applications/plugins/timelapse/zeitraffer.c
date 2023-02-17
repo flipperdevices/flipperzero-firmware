@@ -390,7 +390,7 @@ int32_t zeitraffer_app(void* p) {
         }
         if(!flipper_format_write_comment_cstr(
                save,
-               "Zeitraffer app settings: № of frames, interval time, backlight type, Delay")) {
+               "Zeitraffer app settings: n of frames, interval time, backlight type, Delay")) {
             notification_message(notifications, &sequence_error);
             break;
         }
