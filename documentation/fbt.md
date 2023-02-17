@@ -16,7 +16,7 @@ To use `fbt`, you only need `git` installed in your system.
  
  If `FBT_TOOLCHAIN_PATH` variable is set, `fbt` will use that directory to unpack toolchain into. By default, it downloads toolchain into `toolchain` subdirectory repo's root.
 
-If you want to suppress printing toolchain version and certain other information to console, you can `set FBT_QUIET=1`. it can be useful for running `fbt` for processing its output, like `fbt get_blackmagic`.
+If you want to enable extra debug output for `fbt` and toolchain management scripts, you can `set FBT_VERBOSE=1`.
 
 `fbt` always performs `git submodule update --init` on start, unless you set `FBT_NO_SYNC=1` in the environment:
   - On Windows, it's `set "FBT_NO_SYNC=1"` in the shell you're running `fbt` from
