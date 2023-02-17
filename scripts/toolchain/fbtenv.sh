@@ -43,9 +43,9 @@ fbtenv_restore_env()
         PROMPT="$(echo "$PROMPT" | sed 's/\[fbt\]//g')";
     fi
 
-    PYTHONNOUSERSITE="$SAVED_PYTHONNOUSERSITE";
-    PYTHONPATH="$SAVED_PYTHONPATH";
-    PYTHONHOME="$SAVED_PYTHONHOME";
+    export PYTHONNOUSERSITE="$SAVED_PYTHONNOUSERSITE";
+    export PYTHONPATH="$SAVED_PYTHONPATH";
+    export PYTHONHOME="$SAVED_PYTHONHOME";
 
     unset SAVED_PYTHONNOUSERSITE;
     unset SAVED_PYTHONPATH;
@@ -297,14 +297,15 @@ fbtenv_main()
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openocd/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openssl/bin:$PATH";
+    export "$PATH";
 
-    SAVED_PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-""}";
-    SAVED_PYTHONPATH="${PYTHONPATH:-""}";
-    SAVED_PYTHONHOME="${PYTHONHOME:-""}";
+    export SAVED_PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-""}";
+    export SAVED_PYTHONPATH="${PYTHONPATH:-""}";
+    export SAVED_PYTHONHOME="${PYTHONHOME:-""}";
 
-    PYTHONNOUSERSITE=1;
-    PYTHONPATH=;
-    PYTHONHOME=;
+    export PYTHONNOUSERSITE=1;
+    export PYTHONPATH=;
+    export PYTHONHOME=;
 }
 
 fbtenv_main "${1:-""}";
