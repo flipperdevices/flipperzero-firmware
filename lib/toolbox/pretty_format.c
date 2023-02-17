@@ -21,7 +21,8 @@ void pretty_format_bytes_hex_canonical(
     }
 
     /* Only num_places byte(s) can be on a single line, therefore: */
-    const size_t line_count = data_size / num_places + (data_size % num_places != 0 ? 1 : 0) + (is_truncated ? 2 : 0);
+    const size_t line_count =
+        data_size / num_places + (data_size % num_places != 0 ? 1 : 0) + (is_truncated ? 2 : 0);
     /* Line length = Prefix length + 3 * num_places (2 hex digits + space) + 1 * num_places +
        + 1 pipe character + 1 newline character */
     const size_t line_length = (line_prefix ? strlen(line_prefix) : 0) + 4 * num_places + 2;
@@ -53,6 +54,7 @@ void pretty_format_bytes_hex_canonical(
     }
 
     if(is_truncated) {
-        furi_string_cat_printf(result, "\n(Data is too big. Showing only the first %zu bytes.)", data_size);
+        furi_string_cat_printf(
+            result, "\n(Data is too big. Showing only the first %zu bytes.)", data_size);
     }
 }
