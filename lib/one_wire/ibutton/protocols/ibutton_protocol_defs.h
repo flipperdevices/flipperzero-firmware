@@ -2,6 +2,11 @@
 
 #include "ibutton_protocol_base.h"
 
-typedef enum { iButtonProtocolDS1990, iButtonProtocolDS1992, iButtonProtocolMax } iButtonProtocol;
+typedef enum {
+    iButtonProtocolDS1990,
+    iButtonProtocolDS1992,
+    iButtonProtocolDS1996,
+    iButtonProtocolMax
+} iButtonProtocol;
 
 extern const iButtonProtocolBase* ibutton_protocols[];

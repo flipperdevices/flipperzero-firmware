@@ -5,6 +5,7 @@
  */
 
 #pragma once
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -58,20 +59,20 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value);
 /**
  * Send data
  * @param bus
- * @param address
- * @param data_length
+ * @param data
+ * @param data_size
  * @return bool
  */
-bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t data_length);
+bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size);
 
 /**
  * Receive data
  * @param bus
  * @param data
- * @param data_length
+ * @param data_size
  * @return bool
  */
-bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, const uint8_t data_length);
+bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size);
 
 /**
  * Set a callback to report emulation success

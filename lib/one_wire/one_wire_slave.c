@@ -95,9 +95,6 @@ static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
 static bool onewire_slave_bus_start(OneWireSlave* bus) {
     bool result = true;
 
-    // if(bus->device == NULL) {
-    //     result = false;
-    // } else {
     FURI_CRITICAL_ENTER();
     furi_hal_gpio_init(bus->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
     bus->error = OneWireSlaveErrorNone;
@@ -114,7 +111,6 @@ static bool onewire_slave_bus_start(OneWireSlave* bus) {
 
     furi_hal_gpio_init(bus->gpio_pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
     FURI_CRITICAL_EXIT();
-    // }
 
     return result;
 }
@@ -249,14 +245,14 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     return true;
 }
 
-bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t data_length) {
-    uint8_t bytes_sent = 0;
+bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
+    size_t bytes_sent = 0;
 
     furi_hal_gpio_write(bus->gpio_pin, true);
 
     // bytes loop
-    for(; bytes_sent < data_length; ++bytes_sent) {
-        const uint8_t data_byte = address[bytes_sent];
+    for(; bytes_sent < data_size; ++bytes_sent) {
+        const uint8_t data_byte = data[bytes_sent];
 
         // bit loop
         for(uint8_t bit_mask = 0x01; bit_mask != 0; bit_mask <<= 1) {
@@ -271,12 +267,12 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* address, const uint8_t
     return true;
 }
 
-bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, const uint8_t data_length) {
-    uint8_t bytes_received = 0;
+bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
+    size_t bytes_received = 0;
 
     furi_hal_gpio_write(bus->gpio_pin, true);
 
-    for(; bytes_received < data_length; ++bytes_received) {
+    for(; bytes_received < data_size; ++bytes_received) {
         uint8_t value = 0;
 
         for(uint8_t bit_mask = 0x01; bit_mask != 0; bit_mask <<= 1) {
@@ -285,5 +281,5 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, const uint8_t data_
 
         data[bytes_received] = value;
     }
-    return (bytes_received != data_length);
+    return (bytes_received != data_size);
 }

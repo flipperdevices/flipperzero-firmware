@@ -153,6 +153,25 @@ bool dallas_common_emulate_read_rom(OneWireSlave* bus, const DallasCommonRomData
     return onewire_slave_send(bus, rom_data->bytes, sizeof(DallasCommonRomData));
 }
 
+bool dallas_common_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
+    bool success = false;
+
+    union {
+        uint8_t bytes[sizeof(uint16_t)];
+        uint16_t word;
+    } address;
+
+    do {
+        if(!onewire_slave_receive(bus, address.bytes, sizeof(address))) break;
+        if(address.word >= data_size) break;
+        if(!onewire_slave_send(bus, data + address.word, data_size - address.word)) break;
+
+        success = true;
+    } while(false);
+
+    return success;
+}
+
 bool dallas_common_save_rom_data(FlipperFormat* ff, const DallasCommonRomData* rom_data) {
     return flipper_format_write_hex(
         ff, DALLAS_COMMON_ROM_DATA_KEY_V2, rom_data->bytes, sizeof(DallasCommonRomData));

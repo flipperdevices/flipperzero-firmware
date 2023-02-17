@@ -2048,9 +2048,9 @@ Function,+,onewire_host_write_bit,void,"OneWireHost*, _Bool"
 Function,+,onewire_host_write_bytes,void,"OneWireHost*, const uint8_t*, uint16_t"
 Function,+,onewire_slave_alloc,OneWireSlave*,const GpioPin*
 Function,+,onewire_slave_free,void,OneWireSlave*
-Function,+,onewire_slave_receive,_Bool,"OneWireSlave*, uint8_t*, const uint8_t"
+Function,+,onewire_slave_receive,_Bool,"OneWireSlave*, uint8_t*, size_t"
 Function,+,onewire_slave_receive_bit,_Bool,OneWireSlave*
-Function,+,onewire_slave_send,_Bool,"OneWireSlave*, const uint8_t*, const uint8_t"
+Function,+,onewire_slave_send,_Bool,"OneWireSlave*, const uint8_t*, size_t"
 Function,+,onewire_slave_send_bit,_Bool,"OneWireSlave*, _Bool"
 Function,+,onewire_slave_set_command_callback,void,"OneWireSlave*, OneWireSlaveCommandCallback, void*"
 Function,+,onewire_slave_set_result_callback,void,"OneWireSlave*, OneWireSlaveResultCallback, void*"
