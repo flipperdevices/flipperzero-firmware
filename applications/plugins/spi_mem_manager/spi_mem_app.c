@@ -42,6 +42,10 @@ SPIMemApp* spi_mem_alloc(void) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot find\napp folder");
     }
 
+    // Migrate data from old sd-card folder
+    storage_common_migrate(
+        instance->storage, "/ext/spimem", furi_string_get_cstr(instance->file_path_default));
+
     furi_string_set(instance->file_path, instance->file_path_default);
 
     view_dispatcher_enable_queue(instance->view_dispatcher);

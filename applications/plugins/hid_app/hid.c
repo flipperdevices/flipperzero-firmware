@@ -380,6 +380,12 @@ int32_t hid_ble_app(void* p) {
     PathHelper* path_helper = path_helper_alloc_apps_data();
     path_helper_append(path_helper, HID_BT_KEYS_STORAGE_NAME);
 
+    // Migrate data from old sd-card folder
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(
+        storage, EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME), path_helper_get(path_helper));
+    furi_record_close(RECORD_STORAGE);
+
     bt_keys_storage_set_storage_path(app->bt, path_helper_get(path_helper));
 
     path_helper_free(path_helper);

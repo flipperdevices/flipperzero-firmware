@@ -308,6 +308,11 @@ int32_t music_player_app(void* p) {
             furi_string_set(file_path, (const char*)p);
         } else {
             PathHelper* path_helper = path_helper_alloc_apps_data();
+
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            storage_common_migrate(storage, "/ext/music_player", path_helper_get(path_helper));
+            furi_record_close(RECORD_STORAGE);
+
             furi_string_set(file_path, path_helper_get(path_helper));
 
             DialogsFileBrowserOptions browser_options;
