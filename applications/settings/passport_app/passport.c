@@ -178,6 +178,9 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         case BG_SCROLL:
             canvas_draw_icon(canvas, 0, 0, &I_passport_Scroll);
             break;
+        case BG_SLUT:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_SlutPass);
+            break;
         }
 
         // draw portrait

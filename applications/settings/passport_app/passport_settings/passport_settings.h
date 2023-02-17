@@ -25,7 +25,7 @@ extern "C" {
 #define MOOD_SET_REGULAR 1
 #define MOOD_SET_420 2
 
-#define PASSPORT_BG_COUNT 8
+#define PASSPORT_BG_COUNT 9
 
 #define BG_NONE 0
 #define BG_DB 1
@@ -35,6 +35,7 @@ extern "C" {
 #define BG_MOUNTAINS 5
 #define BG_MULTI 6
 #define BG_SCROLL 7
+#define BG_SLUT 8
 
 #define PROFILE_IMG_COUNT 24
 
