@@ -1,6 +1,9 @@
+#include "EtchASketch_icons.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
+#include <gui/elements.h>
+#include <gui/icon.h>
 #include <input/input.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -87,8 +90,28 @@ void etch_draw_callback(Canvas* canvas, void* ctx) {
 
     // Show Welcome Message
     if(etch_state->showWelcome) {
+        // Draw Etch A Sketch frame
+        canvas_draw_frame(canvas, 5, 3, 119, 55); // Border
+        canvas_draw_icon(canvas, 8, 50, &I_Ok_btn_pressed_13x13); // Left Knob
+        canvas_draw_icon(canvas, 107, 50, &I_Ok_btn_pressed_13x13); // Right Knob
+
+        // Draw Etch A Sketch text banner
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str(canvas, 32, 10, "Etch-A-Sketch");
+        canvas_draw_str(canvas, 36, 15, "Etch A Sketch");
+
+        // Draw Etch A Sketch instructions "Hold Back to clear"
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 31, 26, "* Hold ");
+        canvas_draw_icon(canvas, 59, 18, &I_Pin_back_arrow_10x8);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 72, 26, "to clear");
+
+        // Draw Etch A Sketch instructions "Hold OK button to draw"
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 31, 37, "* Hold");
+        canvas_draw_icon(canvas, 61, 30, &I_ButtonCenter_7x7);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 72, 37, "to draw");
     }
 
     canvas_set_color(canvas, ColorBlack);
@@ -157,6 +180,7 @@ int32_t etch_a_sketch_app(void* p) {
         // Clear
         // TODO: Do animation of shaking board
         if(event.key == InputKeyBack && event.type == InputTypeLong) {
+            etch_state->showWelcome = false;
             etch_state->board[1][1] = true;
             for(int y = 0; y < 32; y++) {
                 for(int x = 0; x < 64; x++) {
