@@ -57,6 +57,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Desktop: Passport: Added SlutPass BG from Xtreme FW
+- OFW: VERY Minor changes spread across 6 PRs
 
 <a name="release">
 
