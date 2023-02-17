@@ -75,6 +75,20 @@ void passport_alloc(Passport* passport) {
         if(stats->level > 10) passport->tmpLvl = 1;
         if(stats->level > 20) passport->tmpLvl = 2;
     }
+
+    //start animation for sonic passport image if selected
+    if(passport->settings.image == PIMG_RABBIT) {
+        animations[AniRabbit] = icon_animation_alloc(&A_Rabbit_46x49);
+
+        icon_animation_start(animations[AniRabbit]);
+    }
+
+    if(passport->settings.image == PIMG_SONIC) {
+        animations[AniSonic] = icon_animation_alloc(&A_Sonic_46x49);
+
+        icon_animation_start(animations[AniSonic]);
+    }
+
     //string variables set
     //name
     if(furi_hal_version_get_name_ptr()) {
@@ -209,6 +223,9 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         case PIMG_LAIN:
             canvas_draw_icon(canvas, 11, 2, &I_Lain);
             break;
+        case PIMG_MARIO:
+            canvas_draw_icon(canvas, 11, 2, &I_Pixel_Mario);
+            break;
         case PIMG_MARVIN:
             canvas_draw_icon(canvas, 11, 2, &I_Marvin);
             break;
@@ -218,11 +235,14 @@ static void render_callback(Canvas* const canvas, void* mutex) {
         case PIMG_NEUROMANCER:
             canvas_draw_icon(canvas, 11, 2, &I_Neuromancer);
             break;
-        case PIMG_MARIO:
-            canvas_draw_icon(canvas, 11, 2, &I_Pixel_Mario);
+        case PIMG_RABBIT:
+            canvas_draw_icon_animation(canvas, 11, 2, animations[AniRabbit]);
             break;
         case PIMG_SHINKAI:
             canvas_draw_icon(canvas, 11, 2, &I_Shinkai);
+            break;
+        case PIMG_SONIC:
+            canvas_draw_icon_animation(canvas, 11, 2, animations[AniSonic]);
             break;
         case PIMG_SPIDER:
             canvas_draw_icon(canvas, 11, 2, &I_Spider_Jerusalem);
@@ -659,6 +679,14 @@ void passport_free(Passport* passport) {
         icon_animation_free(animations[AniYelVirus]);
         icon_animation_stop(animations[AniBluVirus]);
         icon_animation_free(animations[AniBluVirus]);
+    }
+
+    if(passport->settings.image == PIMG_RABBIT) {
+        icon_animation_free(animations[AniRabbit]);
+    }
+
+    if(passport->settings.image == PIMG_SONIC) {
+        icon_animation_free(animations[AniSonic]);
     }
 
     free(passport);
