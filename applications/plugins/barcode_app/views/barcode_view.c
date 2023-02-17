@@ -243,7 +243,7 @@ static void draw_upc_a(Canvas* canvas, BarcodeData* barcode_data) {
 static void draw_code_39(Canvas* canvas, BarcodeData* barcode_data) {
     FuriString* raw_data = barcode_data->raw_data;
     FuriString* barcode_digits = barcode_data->correct_data;
-    BarcodeTypeObj* type_obj = barcode_data->type_obj;
+    //BarcodeTypeObj* type_obj = barcode_data->type_obj;
 
     int barcode_length = furi_string_size(barcode_digits);
     int total_pixels = 0;
@@ -381,9 +381,10 @@ static void barcode_draw_callback(Canvas* canvas, void* ctx) {
 }
 
 bool barcode_input_callback(InputEvent* input_event, void* ctx) {
-    furi_assert(ctx);
+    UNUSED(ctx);
+    //furi_assert(ctx);
 
-    Barcode* test_view_object = ctx;
+    //Barcode* test_view_object = ctx;
 
     if(input_event->key == InputKeyBack) {
         return false;
