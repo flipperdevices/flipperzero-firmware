@@ -5,23 +5,20 @@
 #include <u8g2_glue.h>
 #include <assets_icons.h>
 
-#define COUNTER_VALUE (20U)
+#define COUNTER_VALUE (68U)
 
-static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress, uint8_t* splash_data) {
-    u8g2_ClearBuffer(fb);
-    u8g2_SetDrawColor(fb, 0x01);
-
-    // Draw the recovery picture
-    u8g2_DrawXBM(fb, 0, 0, 128, 64, splash_data);
-    u8g2_DrawRFrame(fb, 59, 41, 69, 8, 2);
-
+static void flipper_boot_recovery_draw_splash(u8g2_t* fb, size_t progress) {
     if(progress < COUNTER_VALUE) {
         // Fill the progress bar while the progress is going down
+        u8g2_SetDrawColor(fb, 0x01);
+        u8g2_DrawRFrame(fb, 59, 41, 69, 8, 2);
         size_t width = (COUNTER_VALUE - progress) * 68 / COUNTER_VALUE;
         u8g2_DrawBox(fb, 60, 42, width, 6);
+    } else {
+        u8g2_SetDrawColor(fb, 0x00);
+        u8g2_DrawRBox(fb, 59, 41, 69, 8, 2);
     }
 
-    u8g2_SetPowerSave(fb, 0);
     u8g2_SendBuffer(fb);
 }
 
@@ -33,6 +30,14 @@ void flipper_boot_recovery_exec() {
     furi_hal_compress_icon_init();
     uint8_t* splash_data = NULL;
     furi_hal_compress_icon_decode(icon_get_data(&I_Erase_pin_128x64), &splash_data);
+
+    u8g2_ClearBuffer(fb);
+    u8g2_SetDrawColor(fb, 0x01);
+
+    // Draw the recovery picture
+    u8g2_DrawXBM(fb, 0, 0, 128, 64, splash_data);
+    u8g2_SendBuffer(fb);
+    u8g2_SetPowerSave(fb, 0);
 
     size_t counter = COUNTER_VALUE;
     while(counter) {
@@ -46,7 +51,7 @@ void flipper_boot_recovery_exec() {
             counter = COUNTER_VALUE;
         }
 
-        flipper_boot_recovery_draw_splash(fb, counter, splash_data);
+        flipper_boot_recovery_draw_splash(fb, counter);
     }
 
     if(!counter) {
