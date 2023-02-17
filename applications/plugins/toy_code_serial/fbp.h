@@ -10,6 +10,7 @@
 
 #include "tcode.h"
 #include "views/internal.h"
+#include "views/gpio_simple_motor.h"
 
 #define TAG "Flipper BP"
 
@@ -27,9 +28,11 @@ struct FBP {
     FuriMessageQueue* event_queue;
 
     FlipperVibrator* flipper_vibrator;
+    GPIOSimpleMotor* gpio_simple_motor;
 };
 
 typedef enum {
     FBPAppViewSubmenu,
     FBPAppViewInternal,
+    FBPAppViewGPIOSimpleMotor,
 } FBPAppView;
