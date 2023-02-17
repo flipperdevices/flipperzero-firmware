@@ -114,7 +114,7 @@ static void decrease_volume(TuningForkState* tuning_fork_state) {
 }
 
 static void play(TuningForkState* tuning_fork_state) {
-    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
+    if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(1000)) {
         furi_hal_speaker_start(
             current_tuning_note_freq(tuning_fork_state), tuning_fork_state->volume);
     }
