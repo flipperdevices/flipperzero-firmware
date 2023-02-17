@@ -9,6 +9,6 @@ Hit any button other than back repeatedly. Calculates based on the average of th
 ## Compiling
 
 ```
-./fbt fap_bpm_tapper
+./fbt firmware_bpm_tapper
 ```
 

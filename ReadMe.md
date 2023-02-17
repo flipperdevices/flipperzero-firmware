@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Removed USB Keyboard Now In Bluetooth Remote
 - UL: [Autolock with pin code #338 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/338)
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
+- Updated: [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 
 <a name="release">
 
