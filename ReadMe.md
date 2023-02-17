@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [WiFi (Deauther) V2 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2) `Req: ESP8266` [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
+- Updated: [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 
 <a name="release">
 
