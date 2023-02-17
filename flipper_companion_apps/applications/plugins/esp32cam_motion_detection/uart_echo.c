@@ -236,5 +236,6 @@ int32_t uart_echo_app(void* p) {
     UartEchoApp* app = uart_echo_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     uart_echo_app_free(app);
+    furi_hal_power_disable_otg();
     return 0;
 }
