@@ -45,10 +45,10 @@ class Main(App):
 
         # TODO: get latest version
         urls = [
-            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/flash.command",
-            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/blackmagic.bin",
-            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/bootloader.bin",
-            "https://update.flipperzero.one/builds/blackmagic-firmware/dev/partition-table.bin",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/update-blackmagic/flash.command",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/update-blackmagic/blackmagic.bin",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/update-blackmagic/bootloader.bin",
+            "https://update.flipperzero.one/builds/blackmagic-firmware/zlo/update-blackmagic/partition-table.bin",
         ]
 
         if not os.path.exists(dir):
@@ -89,13 +89,12 @@ class Main(App):
                 )
             return 1
 
-        # TODO: get real temporary dir
+        # get temporary dir
         dir = tempfile.TemporaryDirectory()
-        dir_name = dir.name
 
-        self.download_latest(dir_name)
+        self.download_latest(dir.name)
 
-        with open(os.path.join(dir_name, "flash.command"), "r") as f:
+        with open(os.path.join(dir.name, "flash.command"), "r") as f:
             flash_command = f.read()
 
         flash_command = flash_command.replace("\n", "").replace("\r", "")
@@ -112,13 +111,13 @@ class Main(App):
         esptool_params = []
         esptool_params.extend(args)
 
-        self.logger.info(f'Running command: "{" ".join(args)}" in "{dir_name}"')
+        self.logger.info(f'Running command: "{" ".join(args)}" in "{dir.name}"')
 
         process = subprocess.Popen(
             esptool_params,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            cwd=dir_name,
+            cwd=dir.name,
             bufsize=1,
             universal_newlines=True,
         )
