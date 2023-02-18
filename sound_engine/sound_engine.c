@@ -102,7 +102,7 @@ void sound_engine_fill_buffer(
     int32_t channel_output_final[NUM_CHANNELS];
 
     for(uint32_t i = 0; i < audio_buffer_size; ++i) {
-        int32_t output = WAVE_AMP / 2 / 64;
+        int32_t output = WAVE_AMP * 2;
 
         for(uint32_t chan = 0; chan < NUM_CHANNELS; ++chan) {
             SoundEngineChannel* channel = &sound_engine->channel[chan];
@@ -191,12 +191,10 @@ void sound_engine_fill_buffer(
                     }
                 }
 
-                output +=
-                    ((channel_output_final[chan]) /
-                     (int32_t)(64 * 4)); // 2 more bits so all channels fit
+                output += channel_output_final[chan];
             }
         }
 
-        audio_buffer[i] = output;
+        audio_buffer[i] = output / (int32_t)(64 * 4);
     }
 }
