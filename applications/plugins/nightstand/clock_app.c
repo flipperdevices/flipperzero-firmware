@@ -11,12 +11,16 @@
 
 /*
     This is a modified version of the default clock app intended for use overnight
-    Up / Down control the displays brightness. Down at brightness 0 turns the notification LED on and off.
+    Up / Down controls the displays brightness. Down at brightness 0 turns the notification LED on and off.
+    Default clock button actions replaced with long presses.
 */
 
 int brightness = 5;
 bool led = false;
 NotificationApp* notif = 0;
+
+int dspBrightnessBarFrames = 0;
+const int dspBrightnessBarDisplayFrames = 8;
 
 const NotificationMessage message_red_dim = {
     .type = NotificationMessageTypeLedRed,
@@ -45,13 +49,14 @@ static const NotificationSequence led_reset = {
     NULL,
 };
 
-void set_backlight_brightness(float brightness) {
+void set_backlight_brightness(float brightness){
     notif->settings.display_brightness = brightness;
     notification_message(notif, &sequence_display_backlight_on);
 }
 
-void handle_up() {
-    if(brightness < 100) {
+void handle_up(){
+    dspBrightnessBarFrames = dspBrightnessBarDisplayFrames;
+    if(brightness < 100){
         led = false;
         notification_message(notif, &led_off);
         brightness += 5;
@@ -59,20 +64,19 @@ void handle_up() {
     set_backlight_brightness((float)(brightness / 100.f));
 }
 
-void handle_down() {
-    if(brightness > 0) {
+void handle_down(){
+    dspBrightnessBarFrames = dspBrightnessBarDisplayFrames;
+    if(brightness > 0){
         brightness -= 5;
-        if(brightness == 0) { //trigger only on the first brightness 5 -> 0 transition
+        if(brightness == 0){ //trigger only on the first brightness 5 -> 0 transition
             led = true;
             notification_message(notif, &led_on);
         }
-    } else if(brightness == 0) { //trigger on every down press afterwards
+    }
+    else if(brightness == 0){ //trigger on every down press afterwards
         led = !led;
-        if(led) {
-            notification_message(notif, &led_on);
-        } else {
-            notification_message(notif, &led_off);
-        }
+        if(led){ notification_message(notif, &led_on); }
+        else{ notification_message(notif, &led_off); }
     }
     set_backlight_brightness((float)(brightness / 100.f));
 }
@@ -83,12 +87,36 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+//do you are have stupid?
+void elements_progress_bar_vertical(Canvas* canvas, uint8_t x, uint8_t y, uint8_t height, float progress) {
+    furi_assert(canvas);
+    furi_assert((progress >= 0) && (progress <= 1.0));
+    uint8_t width = 9;
+
+    uint8_t progress_length = roundf((1.f - progress) * (height - 2));
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_box(canvas, x + 1, y + 1, width - 2, height - 2);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x + 1, y + 1, width - 2, progress_length);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, width, height, 3);
+}
+
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
     //canvas_clear(canvas);
     //canvas_set_color(canvas, ColorBlack);
 
     //avoids a bug with the brightness being reverted after the backlight-off period
     set_backlight_brightness((float)(brightness / 100.f));
+
+
+    if(dspBrightnessBarFrames > 0){
+        elements_progress_bar_vertical(canvas, 119, 1, 62, (float)(brightness / 100.f));
+        dspBrightnessBarFrames--;
+    }
 
     ClockState* state = ctx;
     if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
@@ -190,14 +218,14 @@ static void clock_tick(void* ctx) {
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-void timer_start_stop(ClockState* plugin_state) {
+void timer_start_stop(ClockState* plugin_state){
     // START/STOP TIMER
     FuriHalRtcDateTime curr_dt;
     furi_hal_rtc_get_datetime(&curr_dt);
     uint32_t curr_ts = furi_hal_rtc_datetime_to_timestamp(&curr_dt);
 
     if(plugin_state->timer_running) {
-        // Update stopped seconds
+            // Update stopped seconds
         plugin_state->timer_stopped_seconds = curr_ts - plugin_state->timer_start_timestamp;
     } else {
         if(plugin_state->timer_start_timestamp == 0) {
@@ -212,7 +240,7 @@ void timer_start_stop(ClockState* plugin_state) {
     plugin_state->timer_running = !plugin_state->timer_running;
 }
 
-void timer_reset_seconds(ClockState* plugin_state) {
+void timer_reset_seconds(ClockState* plugin_state){
     if(plugin_state->timer_start_timestamp != 0) {
         // Reset seconds
         plugin_state->timer_running = false;
@@ -249,8 +277,7 @@ int32_t clock_app(void* p) {
     view_port_draw_callback_set(view_port, clock_render_callback, plugin_state);
     view_port_input_callback_set(view_port, clock_input_callback, plugin_state->event_queue);
 
-    FuriTimer* timer =
-        furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
+    FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, plugin_state->event_queue);
 
     if(timer == NULL) {
         FURI_LOG_E(TAG, "Cannot create timer");
@@ -286,31 +313,32 @@ int32_t clock_app(void* p) {
         if(event.type == EventTypeKey) {
             if(event.input.type == InputTypeLong) {
                 switch(event.input.key) {
-                case InputKeyLeft:
-                    // Reset seconds
-                    timer_reset_seconds(plugin_state);
-                    break;
-                case InputKeyOk:
-                    // Toggle timer
-                    timer_start_stop(plugin_state);
-                    break;
-                case InputKeyBack:
-                    // Exit the plugin
-                    processing = false;
-                    break;
-                default:
-                    break;
+                    case InputKeyLeft:
+                        // Reset seconds
+                        timer_reset_seconds(plugin_state);
+                        break;
+                    case InputKeyOk:
+                        // Toggle timer
+                        timer_start_stop(plugin_state);
+                        break;
+                    case InputKeyBack:
+                        // Exit the plugin
+                        processing = false;
+                        break;
+                    default:
+                        break;
                 }
-            } else if(event.input.type == InputTypeShort) {
+            }
+            else if(event.input.type == InputTypeShort) {
                 switch(event.input.key) {
-                case InputKeyUp:
-                    handle_up();
-                    break;
-                case InputKeyDown:
-                    handle_down();
-                    break;
-                default:
-                    break;
+                    case InputKeyUp:
+                        handle_up();
+                        break;
+                    case InputKeyDown:   
+                        handle_down();
+                        break;
+                    default:
+                        break;
                 }
             }
         } /*else if(event.type == EventTypeTick) {
