@@ -9,6 +9,6 @@ App(
     ],
     stack_size=8 * 1024,
     fap_icon="bfico.png",
-    fap_category="Misc",
+    fap_category="Tools",
     fap_icon_assets="icons",
 )
