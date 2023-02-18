@@ -9,6 +9,8 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include <math.h>
+
 #include "swd_probe_app.h"
 #include "swd_probe_icons.h"
 #include "jep106.h"
@@ -43,7 +45,6 @@ static const char* gpio_names[] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA
 /* bit set: clock, else data */
 static const uint8_t gpio_direction_mask[6] =
     {0b10101010, 0b01010101, 0b11001100, 0b00110011, 0b11110000, 0b00001111};
-static const uint8_t gpio_direction_ind[6] = "-\\||/-";
 
 static bool has_multiple_bits(uint8_t x) {
     return (x & (x - 1)) != 0;
@@ -442,7 +443,7 @@ static uint8_t swd_read_memory_block(
     uint32_t len) {
     uint8_t ret = 0;
     uint32_t data = 0;
-    uint32_t csw = 0x23000002;
+    uint32_t csw = 0x23000012;
 
     ret |= swd_write_ap(ctx, ap, MEMAP_CSW, csw);
     ret |= swd_write_ap(ctx, ap, MEMAP_TAR, address);
@@ -582,10 +583,13 @@ static bool swd_ensure_powerup(AppFSM* const ctx) {
         swd_read_dpbank(ctx, REG_CTRLSTAT, REG_CTRLSTAT_BANK, &ctx->dp_regs.ctrlstat);
         ret = false;
     }
-    DBGS(" - Fetch CTRL/STAT");
-    ctx->dp_regs.ctrlstat_ok =
-        swd_read_dpbank(ctx, REG_CTRLSTAT, REG_CTRLSTAT_BANK, &ctx->dp_regs.ctrlstat) == 1;
-    DBG("     %08lX %s", ctx->dp_regs.ctrlstat, ctx->dp_regs.ctrlstat_ok ? "OK" : "FAIL");
+
+    if(!ret) {
+        DBGS(" - Fetch CTRL/STAT");
+        ctx->dp_regs.ctrlstat_ok =
+            swd_read_dpbank(ctx, REG_CTRLSTAT, REG_CTRLSTAT_BANK, &ctx->dp_regs.ctrlstat) == 1;
+        DBG("     %08lX %s", ctx->dp_regs.ctrlstat, ctx->dp_regs.ctrlstat_ok ? "OK" : "FAIL");
+    }
 
     return ret;
 }
@@ -1541,6 +1545,105 @@ static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
 
 /************************** UI functions **************************/
 
+/*
+#define NUM_EDGES 12
+#define NUM_VERTICES 8
+
+const int vertexCoords[NUM_VERTICES][3] = {
+    {-1, -1, -1},
+    {1, -1, -1},
+    {1, 1, -1},
+    {-1, 1, -1},
+    {-1, -1, 1},
+    {1, -1, 1},
+    {1, 1, 1},
+    {-1, 1, 1}};
+
+const int edgeIndices[NUM_EDGES][2] =
+    {{0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
+
+*/
+
+#define CANVAS_WIDTH 128
+#define CANVAS_HEIGHT 64
+
+#define COERCE(d, min, max) \
+    do {                    \
+        if(d < (min)) {     \
+            d = (min);      \
+        }                   \
+        if(d > (max)) {     \
+            d = (max);      \
+        }                   \
+    } while(0)
+
+#define COERCE_COORDS(x1, y1, x2, y2) \
+    do {                              \
+        COERCE(x1, 0, CANVAS_WIDTH);  \
+        COERCE(x2, 0, CANVAS_WIDTH);  \
+        COERCE(y1, 0, CANVAS_HEIGHT); \
+        COERCE(y1, 0, CANVAS_HEIGHT); \
+    } while(0)
+
+#include "model/model_chip.h"
+
+static int rotatedVertexCoords[NUM_VERTICES][3];
+
+static void draw_model(Canvas* const canvas) {
+    static float xAngle = 0;
+    static float yAngle = 0;
+    static float zAngle = 0;
+    static float zoom = 0;
+    static float speed = 0.6f;
+
+    float cosXAngle = cosf(xAngle);
+    float sinXAngle = sinf(xAngle);
+    float cosYAngle = cosf(yAngle);
+    float sinYAngle = sinf(yAngle);
+    float cosZAngle = cosf(zAngle);
+    float sinZAngle = sinf(zAngle);
+    float sinZoom = 1.2f + sinf(zoom) * 0.25f;
+
+    int centerX = CANVAS_WIDTH / 2;
+    int centerY = CANVAS_HEIGHT / 2 + 5;
+
+    for(int i = 0; i < NUM_VERTICES; i++) {
+        int x = vertexCoords[i][0] * sinZoom * 16;
+        int y = vertexCoords[i][1] * sinZoom * 16;
+        int z = vertexCoords[i][2] * sinZoom * 16;
+
+        int y1 = y * cosXAngle - z * sinXAngle;
+        int z1 = y * sinXAngle + z * cosXAngle;
+
+        int x2 = x * cosYAngle + z1 * sinYAngle;
+        int z2 = -x * sinYAngle + z1 * cosYAngle;
+
+        int x3 = x2 * cosZAngle - y1 * sinZAngle;
+        int y3 = x2 * sinZAngle + y1 * cosZAngle;
+
+        rotatedVertexCoords[i][0] = x3 + centerX;
+        rotatedVertexCoords[i][1] = y3 + centerY;
+        rotatedVertexCoords[i][2] = z2;
+    }
+
+    for(size_t i = 0; i < COUNT(edgeIndices); i++) {
+        int v1Index = edgeIndices[i][0];
+        int v2Index = edgeIndices[i][1];
+        int x1 = rotatedVertexCoords[v1Index][0];
+        int y1 = rotatedVertexCoords[v1Index][1];
+        int x2 = rotatedVertexCoords[v2Index][0];
+        int y2 = rotatedVertexCoords[v2Index][1];
+
+        COERCE_COORDS(x1, y1, x2, y2);
+        canvas_draw_line(canvas, x1, y1, x2, y2);
+    }
+
+    xAngle += speed * 0.02 / sinZoom;
+    yAngle += speed * 0.023 / sinZoom;
+    zAngle += speed * 0.029 * sinZoom;
+    zoom += speed * 0.005;
+}
+
 static void render_callback(Canvas* const canvas, void* cb_ctx) {
     AppFSM* ctx = acquire_mutex((ValueMutex*)cb_ctx, 25);
     if(ctx == NULL) {
@@ -1809,9 +1912,9 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         } break;
         }
     } else {
-        snprintf(
-            buffer, sizeof(buffer), "Searching... %c", gpio_direction_ind[ctx->current_mask_id]);
-        canvas_draw_str(canvas, 25, 10, buffer);
+        draw_model(canvas);
+
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Searching");
         y += 14;
 
         canvas_set_font(canvas, FontSecondary);

@@ -22,8 +22,10 @@ typedef struct {
     int color;
     int time_spent;
     int timestamp_start;
+    int prev_closeness;
     int closeness;
     int difficulty;
+    int success;
 } ColorGuessPlayModel;
 
 void color_guess_play_set_callback(
@@ -36,6 +38,26 @@ void color_guess_play_set_callback(
     instance->context = context;
 }
 
+void play_happy_bop(void* context, ColorGuessPlayModel* model) {
+    ColorGuess* app = context;
+    if(model->success == 1) {
+        for(int i = 0; i < 4; i++) {
+            notification_message(app->notification, &sequence_set_vibro_on);
+            furi_thread_flags_wait(0, FuriFlagWaitAny, 50);
+            notification_message(app->notification, &sequence_reset_vibro);
+            furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
+        }
+    } else if(model->closeness > model->prev_closeness) {
+        notification_message(app->notification, &sequence_set_vibro_on);
+        furi_thread_flags_wait(0, FuriFlagWaitAny, 20);
+        notification_message(app->notification, &sequence_reset_vibro);
+    } else if(model->closeness < model->prev_closeness) {
+        notification_message(app->notification, &sequence_set_vibro_on);
+        furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
+        notification_message(app->notification, &sequence_reset_vibro);
+    }
+}
+
 void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     furi_assert(context);
     ColorGuess* app = context;
@@ -43,6 +65,9 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     FuriHalRtcDateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
     model->timestamp_start = furi_hal_rtc_datetime_to_timestamp(&date_time);
+    model->success = 0;
+    model->closeness = 0;
+    model->prev_closeness = 0;
 
     //Set random color
     NotificationMessage notification_led_message_1;
@@ -64,8 +89,6 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     notification_led_message_2.data.led.value = ((model->color >> 8) & 0xFF);
     notification_led_message_3.data.led.value = ((model->color) & 0xFF);
 
-    //model->closeness = ((model->color >> 8) & 0xFF);
-
     const NotificationSequence notification_sequence = {
         &notification_led_message_1,
         &notification_led_message_2,
@@ -79,7 +102,9 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
 }
 
 void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* model) {
-    UNUSED(context);
+    furi_assert(context);
+    ColorGuess* app = context;
+    UNUSED(app);
     int userRed = (model->digit[0] * 16) + model->digit[1];
     int userGreen = (model->digit[2] * 16) + model->digit[3];
     int userBlue = (model->digit[4] * 16) + model->digit[5];
@@ -94,13 +119,15 @@ void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* mo
                                  100); //make sure one number is float, otherwise C will calc wrong
     float percentageGreen = 100 - ((distanceGreen / 255.0) * 100);
     float percentageBlue = 100 - ((distanceBlue / 255.0) * 100);
+    if(percentageRed == 100 && percentageGreen == 100 && percentageBlue == 100) {
+        model->success = 1;
+    }
     float fullPercentage = (percentageRed + percentageGreen + percentageBlue) / 3;
+    model->prev_closeness = model->closeness;
     model->closeness = round(fullPercentage);
 }
 
 void parse_time_str(char* buffer, int32_t sec) {
-    //int seconds = sec % 60;
-    //int minutes = (sec % (60 * 60)) / 60;
     snprintf(
         buffer,
         TIMER_LENGHT,
@@ -129,16 +156,37 @@ void drawDifficulty(Canvas* canvas, ColorGuessPlayModel* model) {
 }
 
 void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
+    char timer_string[TIMER_LENGHT];
+    if(model->success == 1) {
+        parse_time_str(timer_string, model->time_spent);
+        canvas_clear(canvas);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "You won!!");
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_center(canvas, "New Round");
+        canvas_set_font(canvas, FontBigNumbers);
+        canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignTop, timer_string);
+
+        canvas_draw_icon(canvas, 18, 32, digits[16]);
+        canvas_draw_icon(canvas, 30, 32, digits[model->digit[0]]);
+        canvas_draw_icon(canvas, 42, 32, digits[model->digit[1]]);
+        canvas_draw_icon(canvas, 54, 32, digits[model->digit[2]]);
+        canvas_draw_icon(canvas, 66, 32, digits[model->digit[3]]);
+        canvas_draw_icon(canvas, 78, 32, digits[model->digit[4]]);
+        canvas_draw_icon(canvas, 90, 32, digits[model->digit[5]]);
+
+        return;
+    }
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
     FuriHalRtcDateTime date_time;
     furi_hal_rtc_get_datetime(&date_time);
     uint32_t timestamp = furi_hal_rtc_datetime_to_timestamp(&date_time);
     uint32_t time_elapsed = timestamp - model->timestamp_start;
+    model->time_spent = time_elapsed;
 
-    char timer_string[TIMER_LENGHT];
     char closeness_string[4];
-    UNUSED(time_elapsed);
 
     //snprintf(timer_string, TIMER_LENGHT, TIMER_FORMAT, date_time.minute, date_time.second);
     parse_time_str(timer_string, time_elapsed);
@@ -223,6 +271,7 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                         model->digit[model->cursorpos] = 0;
                     }
                     color_guess_play_calculate_closeness(instance, model);
+                    play_happy_bop(instance->context, model);
                 },
                 true);
             break;
@@ -236,6 +285,7 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                         model->digit[model->cursorpos] = 15;
                     }
                     color_guess_play_calculate_closeness(instance, model);
+                    play_happy_bop(instance->context, model);
                 },
                 true);
             break;
@@ -244,9 +294,13 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                 instance->view,
                 ColorGuessPlayModel * model,
                 {
-                    model->difficulty++;
-                    if(model->difficulty > 2) {
-                        model->difficulty = 0;
+                    if(model->success == 1) {
+                        model->success = 0;
+                    } else {
+                        model->difficulty++;
+                        if(model->difficulty > 2) {
+                            model->difficulty = 0;
+                        }
                     }
                     color_guess_play_new_round(instance->context, model);
                 },
