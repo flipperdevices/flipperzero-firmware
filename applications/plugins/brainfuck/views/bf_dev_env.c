@@ -35,9 +35,9 @@ int selectedButton = 0;
 int saveNotifyCountdown = 0;
 int execCountdown = 0;
 
-char dspLine0[25] = {};
-char dspLine1[25] = {};
-char dspLine2[25] = {};
+char dspLine0[25] = {0x00};
+char dspLine1[25] = {0x00};
+char dspLine2[25] = {0x00};
 
 static bMapping buttonMappings[12] = {
     {8, 8, 7, 1}, //0
@@ -361,6 +361,10 @@ static void bf_dev_enter_callback(void* context) {
 
     //read into the buffer
     appDev->dataSize = stream_size(stream);
+    if(appDev->dataSize > 2000) {
+        return; //BF file is too large
+    }
+
     stream_read(stream, (uint8_t*)appDev->dataBuffer, appDev->dataSize);
     buffered_file_stream_close(stream);
 

@@ -1,4 +1,6 @@
 #include "worker.h"
+#include <furi_hal_resources.h>
+#include <furi.h>
 
 bool killswitch = false;
 
@@ -207,27 +209,40 @@ static const NotificationSequence led_on = {
 };
 
 static const NotificationSequence led_off = {
-    &message_green_0,
+    &message_blue_0,
     NULL,
 };
 
+void input_kill(void* _ctx) {
+    UNUSED(_ctx);
+    killswitch = true;
+}
+
 void beginWorker() {
     status = 1;
+
+    //redefined from furi_hal_resources.c
+    const GpioPin gpio_button_back = {.port = GPIOC, .pin = LL_GPIO_PIN_13};
+
     while(inst[instPtr] != 0x00) {
         if(runOpCount % 500 == 0) {
             text_box_set_text(wrkrApp->text_box, workerGetOutput());
             notification_message(wrkrApp->notifications, &led_on);
         }
 
+        //status 2 indicates failure
         if(status == 2) {
             status = 0;
             break;
         }
-        if(killswitch) {
+
+        //read back button directly to avoid weirdness in furi
+        if(killswitch || !furi_hal_gpio_read(&gpio_button_back)) {
             status = 0;
             killswitch = false;
             break;
         }
+
         switch(inst[instPtr]) {
         case '>':
             rShift();
