@@ -11,12 +11,16 @@
 
 /*
     This is a modified version of the default clock app intended for use overnight
-    Up / Down control the displays brightness. Down at brightness 0 turns the notification LED on and off.
+    Up / Down controls the displays brightness. Down at brightness 0 turns the notification LED on and off.
+    Default clock button actions replaced with long presses.
 */
 
 int brightness = 5;
 bool led = false;
 NotificationApp* notif = 0;
+
+int dspBrightnessBarFrames = 0;
+const int dspBrightnessBarDisplayFrames = 8;
 
 const NotificationMessage message_red_dim = {
     .type = NotificationMessageTypeLedRed,
@@ -51,6 +55,7 @@ void set_backlight_brightness(float brightness){
 }
 
 void handle_up(){
+    dspBrightnessBarFrames = dspBrightnessBarDisplayFrames;
     if(brightness < 100){
         led = false;
         notification_message(notif, &led_off);
@@ -60,6 +65,7 @@ void handle_up(){
 }
 
 void handle_down(){
+    dspBrightnessBarFrames = dspBrightnessBarDisplayFrames;
     if(brightness > 0){
         brightness -= 5;
         if(brightness == 0){ //trigger only on the first brightness 5 -> 0 transition
@@ -81,12 +87,36 @@ static void clock_input_callback(InputEvent* input_event, FuriMessageQueue* even
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+//do you are have stupid?
+void elements_progress_bar_vertical(Canvas* canvas, uint8_t x, uint8_t y, uint8_t height, float progress) {
+    furi_assert(canvas);
+    furi_assert((progress >= 0) && (progress <= 1.0));
+    uint8_t width = 9;
+
+    uint8_t progress_length = roundf((1.f - progress) * (height - 2));
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_box(canvas, x + 1, y + 1, width - 2, height - 2);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x + 1, y + 1, width - 2, progress_length);
+
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, width, height, 3);
+}
+
 static void clock_render_callback(Canvas* const canvas, void* ctx) {
     //canvas_clear(canvas);
     //canvas_set_color(canvas, ColorBlack);
 
     //avoids a bug with the brightness being reverted after the backlight-off period
     set_backlight_brightness((float)(brightness / 100.f));
+
+
+    if(dspBrightnessBarFrames > 0){
+        elements_progress_bar_vertical(canvas, 119, 1, 62, (float)(brightness / 100.f));
+        dspBrightnessBarFrames--;
+    }
 
     ClockState* state = ctx;
     if(furi_mutex_acquire(state->mutex, 200) != FuriStatusOk) {
