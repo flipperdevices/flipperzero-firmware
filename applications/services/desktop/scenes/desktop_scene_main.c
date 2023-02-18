@@ -227,7 +227,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                     }
                 } else {
                     furi_record_close(RECORD_STORAGE);
-                    LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+                    LoaderStatus status = loader_start(desktop->loader, "Passport (Old)", NULL);
 
                     if(status != LoaderStatusOk) {
                         FURI_LOG_E(TAG, "loader_start failed: %d", status);
@@ -248,7 +248,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
                 }
             } else {
                 furi_record_close(RECORD_STORAGE);
-                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
+                LoaderStatus status = loader_start(desktop->loader, "Passport (Old)", NULL);
 
                 if(status != LoaderStatusOk) {
                     FURI_LOG_E(TAG, "loader_start failed: %d", status);
