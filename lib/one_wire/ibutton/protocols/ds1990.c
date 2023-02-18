@@ -111,7 +111,7 @@ void dallas_ds1990_render_error(FuriString* result, const iButtonProtocolData* p
     const DS1990ProtocolData* data = protocol_data;
 
     if(!dallas_common_is_valid_crc(&data->rom_data)) {
-        furi_string_printf(result, "CRC Error");
+        dallas_common_render_crc_error(result, &data->rom_data);
     }
 }
 

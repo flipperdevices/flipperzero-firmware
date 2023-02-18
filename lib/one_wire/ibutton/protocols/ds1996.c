@@ -49,6 +49,7 @@ static bool dallas_ds1996_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1996_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1996_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1996_render_brief_data(FuriString*, const iButtonProtocolData*);
+static void dallas_ds1996_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds1996_is_data_valid(const iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1996 = {
@@ -66,6 +67,7 @@ const iButtonProtocolBase ibutton_protocol_ds1996 = {
     .load = dallas_ds1996_load,
     .render_data = dallas_ds1996_render_data,
     .render_brief_data = dallas_ds1996_render_brief_data,
+    .render_error = dallas_ds1996_render_error,
     .is_valid = dallas_ds1996_is_data_valid,
 };
 
@@ -197,7 +199,7 @@ void dallas_ds1996_render_error(FuriString* result, const iButtonProtocolData* p
     const DS1996ProtocolData* data = protocol_data;
 
     if(!dallas_common_is_valid_crc(&data->rom_data)) {
-        furi_string_printf(result, "CRC Error");
+        dallas_common_render_crc_error(result, &data->rom_data);
     }
 }
 

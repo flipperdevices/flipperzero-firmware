@@ -200,3 +200,13 @@ bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data) {
 
     return crc_calculated == crc_received;
 }
+
+void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomData* rom_data) {
+    furi_string_set(result, "CRC Error\n");
+
+    const size_t data_size = sizeof(DallasCommonRomData);
+
+    for(size_t i = 0; i < data_size; ++i) {
+        furi_string_cat_printf(result, (i < data_size - 1) ? "%02X " : "%02X", rom_data->bytes[i]);
+    }
+}
