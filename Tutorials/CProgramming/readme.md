@@ -11,7 +11,7 @@ Tips and tricks for developing Application for Flipper using C Programming langu
 <li><!--a href=""-->Drawing on screen (tbd)<!--/a--></li>
 <li><!--a href=""-->Button Inputs (tbd)<!--/a--></li>
 <li><!--a href=""-->Using the submenu feature (tbd)<!--/a--></li>
-<li><!--a href=""-->Using the scene manager and view dispatcher (tbd)<!--/a--></li>
+<li><a href="SceneManager">Using the scene manager and view dispatcher</a></li>
 <li><!--a href=""-->How I made the large font for the Color Guess app (tbd)<!--/a--></li>
 <li><!--a href=""-->Accessing Hardware (tbd)<!--/a--></li>
 </ul>
