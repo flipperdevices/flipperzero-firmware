@@ -18,9 +18,10 @@ Roots are generated and moved within 3x3 cells, so not all positions would be av
 
 ### Controls
 
-- OK to start the game
-- Arrows to move the root
-- OK to either place the root if possible or reroll it otherwise
+- `OK` to start the game
+- `Arrows` to move the root
+- `OK` to either place the root if possible or reroll it otherwise
+- `Back` to quit
 
 ## Installation
 
