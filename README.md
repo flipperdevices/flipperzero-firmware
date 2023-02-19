@@ -1,6 +1,6 @@
 # Root of Life
 
-A zen-puzzle game for FlipperZero (@flipperdevices) puzzle made on [GlobalGameJam'23](https://globalgamejam.org/2023/games/roots-life-9) (theme: "Roots")
+A zen-puzzle game for [FlipperZero](https://flipperzero.one/) puzzle made on [GlobalGameJam'23](https://globalgamejam.org/2023/games/roots-life-9) (theme: "Roots")
 
 ![FlipperZero with the game on it](docs/device.jpeg)
 
@@ -44,5 +44,5 @@ _(no, nothing of that will ever be done)_
 
 ## Funzies
 
-- [Timelapse](https://youtu.be/yM8CcmQ7kqQ) of programming and presenting the game
+- [Timelapse](https://youtu.be/yM8CcmQ7kqQ) of coding and presenting the game
 - Game icons were made in Paint (one of the possible jam diversifiers, and not like i needed anything else there really)
