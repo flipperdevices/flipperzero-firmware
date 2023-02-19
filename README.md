@@ -4,6 +4,16 @@ I will use this repository for my Flipper Zero projects.  The various README.md 
 Feel free to reach out to me at CodeAllNight@outlook.com with any questions or leave them in the [issues section](https://github.com/jamisonderek/flipper-zero-tutorials/issues) for this project.
 
 
+## YouTube
+### videos
+[video index](./youtube/README.md) - This is a list of my various YouTube video tutorials.
+
+
+## Electronics
+### electronics projects
+[parts list](./electronics/README.md) - This is a list of electronics parts that I will be using in my videos or tutorials.
+
+
 ## Firmware
 ### firmware-updating
 [tutorial](./firmware/updating/README.md) - The Flipper Zero makes updating the firmware simple and fairly safe.  It is easy to build your own firmware as well using the fbt command.
