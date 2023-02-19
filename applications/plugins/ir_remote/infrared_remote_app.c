@@ -230,6 +230,8 @@ int32_t infrared_remote_app(void* p) {
         //set missing filenames to N/A
         //assign button signals
         size_t index = 0;
+
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "UP", app->up_button)) {
             FURI_LOG_W(TAG, "Could not read UP string");
             furi_string_set(app->up_button, "N/A");
@@ -244,6 +246,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "DOWN", app->down_button)) {
             FURI_LOG_W(TAG, "Could not read DOWN string");
             furi_string_set(app->down_button, "N/A");
@@ -258,6 +261,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "LEFT", app->left_button)) {
             FURI_LOG_W(TAG, "Could not read LEFT string");
             furi_string_set(app->left_button, "N/A");
@@ -272,6 +276,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "RIGHT", app->right_button)) {
             FURI_LOG_W(TAG, "Could not read RIGHT string");
             furi_string_set(app->right_button, "N/A");
@@ -286,6 +291,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "OK", app->ok_button)) {
             FURI_LOG_W(TAG, "Could not read OK string");
             furi_string_set(app->ok_button, "N/A");
@@ -300,6 +306,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "BACK", app->back_button)) {
             FURI_LOG_W(TAG, "Could not read BACK string");
             furi_string_set(app->back_button, "N/A");
@@ -314,6 +321,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "UPHOLD", app->up_hold_button)) {
             FURI_LOG_W(TAG, "Could not read UPHOLD string");
             furi_string_set(app->up_hold_button, "N/A");
@@ -328,6 +336,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "DOWNHOLD", app->down_hold_button)) {
             FURI_LOG_W(TAG, "Could not read DOWNHOLD string");
             furi_string_set(app->down_hold_button, "N/A");
@@ -342,6 +351,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "LEFTHOLD", app->left_hold_button)) {
             FURI_LOG_W(TAG, "Could not read LEFTHOLD string");
             furi_string_set(app->left_hold_button, "N/A");
@@ -356,6 +366,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "RIGHTHOLD", app->right_hold_button)) {
             FURI_LOG_W(TAG, "Could not read RIGHTHOLD string");
             furi_string_set(app->right_hold_button, "N/A");
@@ -370,6 +381,7 @@ int32_t infrared_remote_app(void* p) {
             }
         }
 
+        flipper_format_rewind(ff);
         if(!flipper_format_read_string(ff, "OKHOLD", app->ok_hold_button)) {
             FURI_LOG_W(TAG, "Could not read OKHOLD string");
             furi_string_set(app->ok_hold_button, "N/A");
