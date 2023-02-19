@@ -17,6 +17,8 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include "usb_uart.h"
+
 #define TAG "SWD"
 
 #define SWD_DELAY_US 0
@@ -130,7 +132,9 @@ typedef struct {
     ViewPort* view_port;
     Gui* gui;
     DialogsApp* dialogs;
+    UsbUart* uart;
 
+    FuriMutex* swd_mutex;
     ValueMutex state_mutex;
 
     swd_targetid_info_t targetid_info;
@@ -139,6 +143,7 @@ typedef struct {
     swd_apidr_info_t apidr_info[256];
 
     ScriptContext* script;
+    ScriptContext* commandline;
 
     uint32_t loop_count;
     uint8_t current_mask_id;
@@ -171,8 +176,15 @@ typedef struct {
 struct sScriptContext {
     AppFSM* app;
     ScriptContext* parent;
-    File* script_file;
     char filename[MAX_FILE_LENGTH];
+
+    /* when used with string input */
+    char line_data[128];
+    uint64_t line_pos;
+
+    /* when used with file input */
+    File* script_file;
+
     uint64_t position;
     uint32_t selected_ap;
     uint32_t max_tries;
