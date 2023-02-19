@@ -33,10 +33,11 @@
 
 typedef enum {
     ModePageScan = 0,
-    ModePageDPRegs = 1,
-    ModePageDPID = 2,
-    ModePageAPID = 3,
-    ModePageCount = 4,
+    ModePageFound = 1,
+    ModePageDPRegs = 2,
+    ModePageDPID = 3,
+    ModePageAPID = 4,
+    ModePageCount = 5,
     ModePageHexDump = 0x100,
     ModePageScript = 0x101,
 } ModePages;
@@ -125,17 +126,18 @@ typedef struct {
 typedef struct sScriptContext ScriptContext;
 
 typedef struct {
-    FuriMessageQueue* event_queue;
-    FuriTimer* timer;
-    NotificationApp* notification;
     Storage* storage;
-    ViewPort* view_port;
     Gui* gui;
     DialogsApp* dialogs;
-    UsbUart* uart;
+    NotificationApp* notification;
 
+    FuriTimer* timer;
+    UsbUart* uart;
+    ViewPort* view_port;
+
+    FuriMessageQueue* event_queue;
     FuriMutex* swd_mutex;
-    ValueMutex state_mutex;
+    FuriMutex* gui_mutex;
 
     swd_targetid_info_t targetid_info;
     swd_dpidr_info_t dpidr_info;
@@ -152,7 +154,7 @@ typedef struct {
     uint8_t io_swd;
     uint8_t io_num_swc;
     uint8_t io_num_swd;
-    uint32_t detected_timeout;
+    int32_t detected_timeout;
     uint32_t swd_clock_delay;
     uint32_t swd_idle_bits;
     bool detected;

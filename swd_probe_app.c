@@ -67,7 +67,7 @@ static const char* gpio_name(uint8_t mask) {
 }
 
 static void swd_configure_pins(AppFSM* const ctx, bool output) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
         furi_hal_gpio_init(
             gpios[ctx->io_num_swc], GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
         if(!output) {
@@ -105,7 +105,7 @@ static void swd_configure_pins(AppFSM* const ctx, bool output) {
 }
 
 static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swc < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swc < 8) {
         furi_hal_gpio_write(gpios[ctx->io_num_swc], level);
         return;
     }
@@ -125,7 +125,7 @@ static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
 }
 
 static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swd < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swd < 8) {
         furi_hal_gpio_write(gpios[ctx->io_num_swd], level);
         return;
     }
@@ -145,7 +145,7 @@ static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
 }
 
 static uint8_t swd_get_data(AppFSM* const ctx) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swd < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swd < 8) {
         return furi_hal_gpio_read(gpios[ctx->io_num_swd]);
     }
 
@@ -206,6 +206,8 @@ static void swd_write(AppFSM* const ctx, const uint8_t* data, size_t bits) {
 }
 
 static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data) {
+    notification_message(ctx->notification, &sequence_set_red_255);
+
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
 
@@ -241,6 +243,7 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
     }
 
     if(ack != 0x01) {
+        notification_message(ctx->notification, &sequence_reset_red);
         return ack;
     }
 
@@ -267,22 +270,26 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
         bool parity = swd_read_bit(ctx);
 
         if(parity != __builtin_parity(*data)) {
+            notification_message(ctx->notification, &sequence_reset_red);
             return 8;
         }
     }
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
+    notification_message(ctx->notification, &sequence_reset_red);
 
     return ack;
 }
 
 /* A line reset is achieved by holding the data signal HIGH for at least 50 clock cycles, followed by at least two idle cycles. */
 static void swd_line_reset(AppFSM* const ctx) {
+    notification_message(ctx->notification, &sequence_set_red_255);
     for(int bitcount = 0; bitcount < 50; bitcount += 8) {
         swd_write_byte(ctx, 0xFF, 8);
     }
     swd_write_byte(ctx, 0, 8);
     ctx->dp_regs.select_ok = false;
+    notification_message(ctx->notification, &sequence_reset_red);
 }
 
 static void swd_abort(AppFSM* const ctx) {
@@ -946,7 +953,7 @@ static bool swd_scriptfunc_status(ScriptContext* ctx) {
     swd_script_skip_whitespace(ctx);
     swd_script_get_number(ctx, &status);
 
-    ctx->status_ignore = status == 0;
+    ctx->status_ignore = (status == 0);
 
     swd_script_seek_newline(ctx);
 
@@ -1018,7 +1025,7 @@ static bool swd_scriptfunc_message(ScriptContext* ctx) {
     }
 
     if(wait_time <= 60 * 1000) {
-        strcpy(ctx->app->state_string, message);
+        strncpy(ctx->app->state_string, message, sizeof(ctx->app->state_string));
         swd_script_gui_refresh(ctx);
         furi_delay_ms(wait_time);
         if(show_dialog) {
@@ -1278,9 +1285,6 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
             } else {
                 break;
             }
-            if(access_ok) {
-                break;
-            }
         }
         if(ctx->abort) {
             DBGS("aborting");
@@ -1362,8 +1366,7 @@ static bool swd_scriptfunc_mem_write(ScriptContext* ctx) {
                 "Failed write 0x%08lX",
                 address);
             swd_script_gui_refresh(ctx);
-        }
-        if(access_ok) {
+        } else {
             break;
         }
     }
@@ -1432,8 +1435,7 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
                 "Failed access 0x%08lX",
                 address);
             swd_script_gui_refresh(ctx);
-        }
-        if(access_ok) {
+        } else {
             break;
         }
     }
@@ -1919,11 +1921,13 @@ static void draw_model(Canvas* const canvas) {
     zoom += speed * 0.005;
 }
 
-static void render_callback(Canvas* const canvas, void* cb_ctx) {
-    AppFSM* ctx = acquire_mutex((ValueMutex*)cb_ctx, 25);
-    if(ctx == NULL) {
-        return;
-    }
+static void render_callback(Canvas* const canvas, void* ctx_in) {
+    furi_assert(canvas);
+    furi_assert(ctx_in);
+
+    AppFSM* ctx = ctx_in;
+    DBGS("furi_mutex_acquire");
+    furi_mutex_acquire(ctx->gui_mutex, FuriWaitForever);
 
     char buffer[64];
     int y = 10;
@@ -1931,262 +1935,18 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-    if(ctx->detected_device) {
-        /* if seen less than a quarter second ago */
-        switch(ctx->mode_page) {
-        case ModePageScan: {
-            if((ctx->detected_timeout + TIMER_HZ / 4) >= TIMER_HZ * TIMEOUT) {
-                snprintf(buffer, sizeof(buffer), "FOUND!");
-            } else {
-                /* if it was seen more than a quarter second ago, show countdown */
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "FOUND! (%lus)",
-                    (ctx->detected_timeout / TIMER_HZ) + 1);
-            }
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, buffer);
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
+    DBG("render page %lu (%s)", ctx->mode_page, ctx->detected_device ? "Detected" : "Searching");
 
-            snprintf(
-                buffer,
-                sizeof(buffer),
-                "SWC/SWD: %s/%s",
-                gpio_name(ctx->io_swc),
-                gpio_name(ctx->io_swd));
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-            snprintf(buffer, sizeof(buffer), "DPIDR 0x%08lX", ctx->dp_regs.dpidr);
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
+    if(!ctx->detected_device) {
+        ctx->mode_page = ModePageScan;
+    } else if(ctx->mode_page == ModePageScan) {
+        ctx->mode_page = ModePageFound;
+    }
 
-            snprintf(
-                buffer,
-                sizeof(buffer),
-                "Part %02X Rev %X DAPv%d",
-                ctx->dpidr_info.partno,
-                ctx->dpidr_info.revision,
-                ctx->dpidr_info.version);
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-
-            canvas_set_font(canvas, FontSecondary);
-            snprintf(buffer, sizeof(buffer), "%s", jep106_manufacturer(ctx->dpidr_info.designer));
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "Script");
-            elements_button_right(canvas, "DP Regs");
-
-            break;
-        }
-        case ModePageDPRegs: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP Registers");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-            if(ctx->dp_regs.dpidr_ok) {
-                snprintf(buffer, sizeof(buffer), "DPIDR %08lX", ctx->dp_regs.dpidr);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-
-            if(ctx->dp_regs.ctrlstat_ok) {
-                snprintf(buffer, sizeof(buffer), "CTRL  %08lX", ctx->dp_regs.ctrlstat);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-
-            if(ctx->dp_regs.targetid_ok) {
-                snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-
-            if(ctx->dp_regs.eventstat_ok) {
-                snprintf(buffer, sizeof(buffer), "EVTST %08lX", ctx->dp_regs.eventstat);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "Scan");
-            elements_button_right(canvas, "DPID");
-            break;
-        }
-        case ModePageDPID: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP ID Register");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-            if(ctx->dpidr_info.version != 2) {
-                snprintf(buffer, sizeof(buffer), "TARGETID not supported");
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-            } else {
-                if(ctx->dp_regs.targetid_ok) {
-                    snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
-                    canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                    y += 10;
-
-                    snprintf(buffer, sizeof(buffer), "Part No. %04X", ctx->targetid_info.partno);
-                    canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                    y += 10;
-                    snprintf(
-                        buffer,
-                        sizeof(buffer),
-                        "%s",
-                        jep106_manufacturer(ctx->targetid_info.designer));
-                    canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                    y += 10;
-                }
-            }
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "DP Regs");
-            elements_button_right(canvas, "APs");
-            break;
-        }
-        case ModePageAPID: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP Menu");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-
-            char state = ' ';
-            if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos <= ctx->ap_scanned + 10) {
-                state = '*';
-            }
-
-            if(!ctx->apidr_info[ctx->ap_pos].ok) {
-                snprintf(buffer, sizeof(buffer), "[%d]%c<none>", ctx->ap_pos, state);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                if(ctx->ap_pos == 0) {
-                    for(size_t pos = 0; pos < COUNT(ctx->apidr_info); pos++) {
-                        if(ctx->apidr_info[pos].ok) {
-                            ctx->ap_pos = pos;
-                        }
-                    }
-                }
-            } else {
-                const char* class = "";
-
-                switch(ctx->apidr_info[ctx->ap_pos].class) {
-                case 0:
-                    class = "und";
-                    break;
-                case 1:
-                    class = "COM";
-                    break;
-                case 8:
-                    class = "MEM";
-                    break;
-                default:
-                    class = "unk";
-                    break;
-                }
-
-                const char* types[] = {
-                    "COM-AP",
-                    "AHB3",
-                    "APB2 or APB3",
-                    "Type unknown",
-                    "AXI3 or AXI4",
-                    "AHB5",
-                    "APB4 and APB5",
-                    "AXI5",
-                    "AHB5 enh.",
-                };
-                const char* type = "Type unk";
-
-                if(ctx->apidr_info[ctx->ap_pos].type < COUNT(types)) {
-                    type = types[ctx->apidr_info[ctx->ap_pos].type];
-                }
-
-                snprintf(buffer, sizeof(buffer), "[%d]%c%s, %s", ctx->ap_pos, state, class, type);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                snprintf(
-                    buffer, sizeof(buffer), "Base 0x%08lX", ctx->apidr_info[ctx->ap_pos].base);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "Rev %d Var %d",
-                    ctx->apidr_info[ctx->ap_pos].revision,
-                    ctx->apidr_info[ctx->ap_pos].variant);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "%s",
-                    jep106_manufacturer(ctx->apidr_info[ctx->ap_pos].designer));
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                elements_button_center(canvas, "Show");
-            }
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "DPID");
-            elements_scrollbar_pos(
-                canvas, 4, 10, 40, ctx->ap_pos / 32, COUNT(ctx->apidr_info) / 32);
-        } break;
-
-            /* hex dump view */
-        case ModePageHexDump: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Hex dump");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, "Addr:");
-
-            snprintf(buffer, sizeof(buffer), "%08lX", ctx->hex_addr);
-            canvas_draw_str_aligned(canvas, 38, y, AlignLeft, AlignBottom, buffer);
-            uint32_t font_width = canvas_glyph_width(canvas, '0');
-            uint32_t x = 37 + (7 - ctx->hex_select) * font_width;
-
-            /* draw selection */
-            canvas_draw_line(canvas, x, y + 1, x + font_width, y + 1);
-            y += 10;
-
-            uint32_t byte_num = 0;
-            for(int line = 0; line < 4; line++) {
-                uint32_t x_pos = 5;
-
-                for(int byte_pos = 0; byte_pos < 8; byte_pos++) {
-                    if(ctx->hex_buffer_valid[byte_num / 4]) {
-                        snprintf(buffer, sizeof(buffer), "%02X", ctx->hex_buffer[byte_num]);
-                    } else {
-                        snprintf(buffer, sizeof(buffer), "--");
-                    }
-                    byte_num++;
-                    canvas_draw_str_aligned(canvas, x_pos, y, AlignLeft, AlignBottom, buffer);
-                    x_pos += font_width * 2 + font_width / 2;
-                }
-                y += 10;
-            }
-
-            break;
-        }
-
-        /* hex dump view */
-        case ModePageScript: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Script");
-            y += 10;
-            y += 10;
-            canvas_draw_str_aligned(canvas, 10, y, AlignLeft, AlignBottom, "Status:");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, ctx->state_string);
-            y += 10;
-
-        } break;
-        }
-    } else {
+    /* if seen less than a quarter second ago */
+    switch(ctx->mode_page) {
+    case ModePageScan: {
+        ctx->mode_page = 0;
         draw_model(canvas);
 
         canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Searching");
@@ -2233,28 +1993,285 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         }
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "Script");
+        break;
+    }
+    case ModePageFound: {
+        if((ctx->detected_timeout + TIMER_HZ / 4) >= TIMER_HZ * TIMEOUT) {
+            snprintf(buffer, sizeof(buffer), "FOUND!");
+        } else {
+            /* if it was seen more than a quarter second ago, show countdown */
+            snprintf(
+                buffer, sizeof(buffer), "FOUND! (%lus)", (ctx->detected_timeout / TIMER_HZ) + 1);
+        }
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, buffer);
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "SWC/SWD: %s/%s",
+            gpio_name(ctx->io_swc),
+            gpio_name(ctx->io_swd));
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+        snprintf(buffer, sizeof(buffer), "DPIDR 0x%08lX", ctx->dp_regs.dpidr);
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Part %02X Rev %X DAPv%d",
+            ctx->dpidr_info.partno,
+            ctx->dpidr_info.revision,
+            ctx->dpidr_info.version);
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(buffer, sizeof(buffer), "%s", jep106_manufacturer(ctx->dpidr_info.designer));
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "Script");
+        elements_button_right(canvas, "DP Regs");
+
+        break;
+    }
+    case ModePageDPRegs: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP Registers");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+        if(ctx->dp_regs.dpidr_ok) {
+            snprintf(buffer, sizeof(buffer), "DPIDR %08lX", ctx->dp_regs.dpidr);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+
+        if(ctx->dp_regs.ctrlstat_ok) {
+            snprintf(buffer, sizeof(buffer), "CTRL  %08lX", ctx->dp_regs.ctrlstat);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+
+        if(ctx->dp_regs.targetid_ok) {
+            snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+
+        if(ctx->dp_regs.eventstat_ok) {
+            snprintf(buffer, sizeof(buffer), "EVTST %08lX", ctx->dp_regs.eventstat);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "Scan");
+        elements_button_right(canvas, "DPID");
+
+        break;
     }
 
-    release_mutex((ValueMutex*)cb_ctx, ctx);
+    case ModePageDPID: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP ID Register");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+        if(ctx->dpidr_info.version != 2) {
+            snprintf(buffer, sizeof(buffer), "TARGETID not supported");
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+        } else {
+            if(ctx->dp_regs.targetid_ok) {
+                snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+
+                snprintf(buffer, sizeof(buffer), "Part No. %04X", ctx->targetid_info.partno);
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+                snprintf(
+                    buffer, sizeof(buffer), "%s", jep106_manufacturer(ctx->targetid_info.designer));
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+            }
+        }
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "DP Regs");
+        elements_button_right(canvas, "APs");
+        break;
+    }
+
+    case ModePageAPID: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP Menu");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+
+        char state = ' ';
+        if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos <= ctx->ap_scanned + 10) {
+            state = '*';
+        }
+
+        if(!ctx->apidr_info[ctx->ap_pos].ok) {
+            snprintf(buffer, sizeof(buffer), "[%d]%c<none>", ctx->ap_pos, state);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            if(ctx->ap_pos == 0) {
+                for(size_t pos = 0; pos < COUNT(ctx->apidr_info); pos++) {
+                    if(ctx->apidr_info[pos].ok) {
+                        ctx->ap_pos = pos;
+                    }
+                }
+            }
+        } else {
+            const char* class = "";
+
+            switch(ctx->apidr_info[ctx->ap_pos].class) {
+            case 0:
+                class = "und";
+                break;
+            case 1:
+                class = "COM";
+                break;
+            case 8:
+                class = "MEM";
+                break;
+            default:
+                class = "unk";
+                break;
+            }
+
+            const char* types[] = {
+                "COM-AP",
+                "AHB3",
+                "APB2 or APB3",
+                "Type unknown",
+                "AXI3 or AXI4",
+                "AHB5",
+                "APB4 and APB5",
+                "AXI5",
+                "AHB5 enh.",
+            };
+            const char* type = "Type unk";
+
+            if(ctx->apidr_info[ctx->ap_pos].type < COUNT(types)) {
+                type = types[ctx->apidr_info[ctx->ap_pos].type];
+            }
+
+            snprintf(buffer, sizeof(buffer), "[%d]%c%s, %s", ctx->ap_pos, state, class, type);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            snprintf(buffer, sizeof(buffer), "Base 0x%08lX", ctx->apidr_info[ctx->ap_pos].base);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "Rev %d Var %d",
+                ctx->apidr_info[ctx->ap_pos].revision,
+                ctx->apidr_info[ctx->ap_pos].variant);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "%s",
+                jep106_manufacturer(ctx->apidr_info[ctx->ap_pos].designer));
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            elements_button_center(canvas, "Show");
+        }
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "DPID");
+        elements_scrollbar_pos(canvas, 4, 10, 40, ctx->ap_pos / 32, COUNT(ctx->apidr_info) / 32);
+        break;
+    }
+
+    /* hex dump view */
+    case ModePageHexDump: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Hex dump");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, "Addr:");
+
+        snprintf(buffer, sizeof(buffer), "%08lX", ctx->hex_addr);
+        canvas_draw_str_aligned(canvas, 38, y, AlignLeft, AlignBottom, buffer);
+        uint32_t font_width = canvas_glyph_width(canvas, '0');
+        uint32_t x = 37 + (7 - ctx->hex_select) * font_width;
+
+        /* draw selection */
+        canvas_draw_line(canvas, x, y + 1, x + font_width, y + 1);
+        y += 10;
+
+        uint32_t byte_num = 0;
+        for(int line = 0; line < 4; line++) {
+            uint32_t x_pos = 5;
+
+            for(int byte_pos = 0; byte_pos < 8; byte_pos++) {
+                if(ctx->hex_buffer_valid[byte_num / 4]) {
+                    snprintf(buffer, sizeof(buffer), "%02X", ctx->hex_buffer[byte_num]);
+                } else {
+                    snprintf(buffer, sizeof(buffer), "--");
+                }
+                byte_num++;
+                canvas_draw_str_aligned(canvas, x_pos, y, AlignLeft, AlignBottom, buffer);
+                x_pos += font_width * 2 + font_width / 2;
+            }
+            y += 10;
+        }
+
+        break;
+    }
+
+    /* hex dump view */
+    case ModePageScript: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Script");
+        y += 10;
+        y += 10;
+        canvas_draw_str_aligned(canvas, 10, y, AlignLeft, AlignBottom, "Status:");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, ctx->state_string);
+        y += 10;
+        break;
+    }
+    }
+
+    DBGS("furi_mutex_release");
+    furi_mutex_release(ctx->gui_mutex);
 }
 
-static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
+static void input_callback(InputEvent* input_event, void* ctx_in) {
+    furi_assert(input_event);
+    furi_assert(ctx_in);
+    AppFSM* ctx = ctx_in;
 
+    DBGS("furi_message_queue_get_count");
     /* better skip than sorry */
-    if(furi_message_queue_get_count(event_queue) < QUEUE_SIZE) {
+    if(furi_message_queue_get_count(ctx->event_queue) < QUEUE_SIZE) {
+        DBGS("furi_message_queue_put");
         AppEvent event = {.type = EventKeyPress, .input = *input_event};
-        furi_message_queue_put(event_queue, &event, 100);
+        furi_message_queue_put(ctx->event_queue, &event, 100);
     }
 }
 
-static void timer_tick_callback(FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
+static void timer_tick_callback(void* ctx_in) {
+    furi_assert(ctx_in);
+    AppFSM* ctx = ctx_in;
 
+    //DBGS("furi_message_queue_get_count");
     /* filling buffer makes no sense, as we lost timing anyway */
-    if(furi_message_queue_get_count(event_queue) < 1) {
+    if(furi_message_queue_get_count(ctx->event_queue) < 1) {
+        //DBGS("furi_message_queue_put");
         AppEvent event = {.type = EventTimerTick};
-        furi_message_queue_put(event_queue, &event, 100);
+        furi_message_queue_put(ctx->event_queue, &event, 100);
     }
 }
 
@@ -2281,9 +2298,13 @@ static void on_timer_tick(AppFSM* ctx) {
     ctx->loop_count++;
 
     switch(ctx->mode_page) {
-    case ModePageScan: {
+    case ModePageScan:
+    case ModePageFound: {
         /* reset after timeout */
-        if(ctx->detected_timeout == 0) {
+        if(ctx->detected_timeout > 0) {
+            ctx->detected_timeout--;
+        } else {
+            DBGS("Reset detected flag");
             ctx->detected_device = false;
             ctx->io_swd = 0xFF;
             ctx->io_swc = 0xFF;
@@ -2294,8 +2315,6 @@ static void on_timer_tick(AppFSM* ctx) {
             memset(&ctx->targetid_info, 0x00, sizeof(ctx->targetid_info));
             memset(&ctx->apidr_info, 0x00, sizeof(ctx->apidr_info));
             ctx->script_detected_executed = false;
-        } else {
-            ctx->detected_timeout--;
         }
 
         ctx->detected = false;
@@ -2313,6 +2332,7 @@ static void on_timer_tick(AppFSM* ctx) {
 
         /* now when detected a device, set the timeout */
         if(ctx->detected) {
+            DBGS("Set detected flag");
             ctx->detected_device = true;
             ctx->detected_timeout = TIMER_HZ * TIMEOUT;
 
@@ -2389,7 +2409,7 @@ static void on_timer_tick(AppFSM* ctx) {
 
                     ctx->mode_page = ModePageScript;
                     swd_execute_script(ctx, ctx->script_detected);
-                    ctx->mode_page = ModePageScan;
+                    ctx->mode_page = ModePageFound;
                 }
                 furi_mutex_release(ctx->swd_mutex);
             }
@@ -2471,7 +2491,8 @@ static bool swd_message_process(AppFSM* ctx) {
                     default:
                         break;
 
-                    case ModePageScan: {
+                    case ModePageScan:
+                    case ModePageFound: {
                         strcpy(ctx->script_detected, "");
                         break;
                     }
@@ -2547,7 +2568,8 @@ static bool swd_message_process(AppFSM* ctx) {
                         if(ctx->hex_select < 7) {
                             ctx->hex_select++;
                         }
-                    } else if(ctx->mode_page == ModePageScan) {
+                    } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
+                        uint32_t mode_page = ctx->mode_page;
                         FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
                         FuriString* preselected = furi_string_alloc_printf(
                             (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
@@ -2561,7 +2583,7 @@ static bool swd_message_process(AppFSM* ctx) {
                             const char* path = furi_string_get_cstr(result_path);
                             ctx->mode_page = ModePageScript;
                             swd_execute_script(ctx, path);
-                            ctx->mode_page = ModePageScan;
+                            ctx->mode_page = mode_page;
                         }
 
                         furi_string_free(result_path);
@@ -2585,9 +2607,11 @@ static bool swd_message_process(AppFSM* ctx) {
                         ctx->mode_page = ModePageAPID;
                     } else if(ctx->mode_page == ModePageScript) {
                         ctx->script->abort = true;
-                    } else if(ctx->mode_page != ModePageScan) {
+                    } else if(ctx->mode_page > ModePageFound) {
                         ctx->mode_page = ModePageScan;
-                    } else {
+                    } else if(ctx->mode_page == ModePageScan) {
+                        processing = false;
+                    } else if(ctx->mode_page == ModePageFound) {
                         processing = false;
                     }
                     break;
@@ -2632,26 +2656,22 @@ int32_t swd_probe_app_main(void* p) {
 
     AppFSM* app = malloc(sizeof(AppFSM));
 
+    DBGS("App init");
     app_init(app);
 
-    if(!init_mutex(&app->state_mutex, app, sizeof(AppFSM))) {
-        FURI_LOG_E(TAG, "cannot create mutex\r\n");
-        free(app);
-        return 255;
-    }
-
+    DBGS("furi_record_open");
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
 
-    app->view_port = view_port_alloc();
-    app->event_queue = furi_message_queue_alloc(QUEUE_SIZE, sizeof(AppEvent));
-    app->timer = furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, app->event_queue);
+    DBGS("furi_mutex_alloc");
     app->swd_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    app->gui_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    app->event_queue = furi_message_queue_alloc(QUEUE_SIZE, sizeof(AppEvent));
 
+    DBGS("usb_uart_enable");
     UsbUartConfig uart_config;
-
     uart_config.vcp_ch = 1;
     uart_config.rx_data = &data_received;
     uart_config.rx_data_ctx = app;
@@ -2661,26 +2681,29 @@ int32_t swd_probe_app_main(void* p) {
     app->commandline->max_tries = 1;
     app->commandline->app = app;
 
-    view_port_draw_callback_set(app->view_port, render_callback, &app->state_mutex);
-    view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
+    DBGS("view_port_alloc");
+    app->view_port = view_port_alloc();
+    view_port_draw_callback_set(app->view_port, render_callback, app);
+    view_port_input_callback_set(app->view_port, input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
+    DBGS("furi_timer_alloc");
+    app->timer = furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, app);
+    furi_timer_start(app->timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
 
+    DBGS("notification_message_block");
+    notification_message(app->notification, &sequence_display_backlight_enforce_on);
+
+    DBGS("swd_execute_script");
     swd_execute_script(app, ANY_PATH("swd/startup.swd"));
 
     DOLPHIN_DEED(DolphinDeedPluginGameStart);
 
-    furi_timer_start(app->timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
-
+    DBGS("processing");
     for(bool processing = true; processing;) {
-        //AppFSM* ctx = (AppFSM*)acquire_mutex_block(&app->state_mutex);
-
         processing = swd_message_process(app);
 
         view_port_update(app->view_port);
-
-        //release_mutex(&ctx->state_mutex, ctx);
 
         bool beep = false;
 
@@ -2700,14 +2723,16 @@ int32_t swd_probe_app_main(void* p) {
 
     furi_timer_free(app->timer);
 
-    notification_message_block(app->notification, &sequence_display_backlight_enforce_auto);
+    notification_message(app->notification, &sequence_display_backlight_enforce_auto);
 
     usb_uart_disable(app->uart);
+
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(app->gui, app->view_port);
     view_port_free(app->view_port);
+
     furi_message_queue_free(app->event_queue);
-    delete_mutex(&app->state_mutex);
+    furi_mutex_free(app->gui_mutex);
     furi_mutex_free(app->swd_mutex);
     free(app);
 
