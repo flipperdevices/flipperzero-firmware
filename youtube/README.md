@@ -19,6 +19,10 @@ There are a few different playlists:
 - [video](https://youtu.be/Ta7eVNS5opU) Demonstrates a firmware fix for DELETE and BACKSPACE keys.  If you have the fix applied, then you can send "CTRL-ALT DELETE" to unlock a PC.
 
 ## GPIO (General-Purpose Input/Output)
+### Electronics
+- [intro video](https://youtu.be/wfNIyLphR3Y) Introduction to LEDs (lights)
+- [intro video](https://youtu.be/j5Jy3Wedw58) Introduction to breadboard/protoboard (for making circuit prototypes)
+
 ### GPIO ~ Adding Polling input to your code
 - [code video](https://youtu.be/v0PkcOtZdHg) Add Polling GPIO input to your [code](../gpio/gpio_polling_demo/README.md).
 
