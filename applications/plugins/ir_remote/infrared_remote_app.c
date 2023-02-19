@@ -13,6 +13,7 @@
 #include "infrared_remote.h"
 #include "infrared_remote_button.h"
 #define TAG "IR_Remote"
+#define MENU_BTN_TXT_X 36
 
 #include <flipper_format/flipper_format.h>
 
@@ -59,17 +60,17 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
 
         canvas_draw_str_aligned(
-            canvas, 32, 8, AlignCenter, AlignCenter, furi_string_get_cstr(app->up_button));
+            canvas, MENU_BTN_TXT_X, 8, AlignCenter, AlignCenter, furi_string_get_cstr(app->up_button));
         canvas_draw_str_aligned(
-            canvas, 32, 18, AlignCenter, AlignCenter, furi_string_get_cstr(app->down_button));
+            canvas, MENU_BTN_TXT_X, 18, AlignCenter, AlignCenter, furi_string_get_cstr(app->down_button));
         canvas_draw_str_aligned(
-            canvas, 32, 28, AlignCenter, AlignCenter, furi_string_get_cstr(app->left_button));
+            canvas, MENU_BTN_TXT_X, 28, AlignCenter, AlignCenter, furi_string_get_cstr(app->left_button));
         canvas_draw_str_aligned(
-            canvas, 32, 38, AlignCenter, AlignCenter, furi_string_get_cstr(app->right_button));
+            canvas, MENU_BTN_TXT_X, 38, AlignCenter, AlignCenter, furi_string_get_cstr(app->right_button));
         canvas_draw_str_aligned(
-            canvas, 32, 48, AlignCenter, AlignCenter, furi_string_get_cstr(app->ok_button));
+            canvas, MENU_BTN_TXT_X, 48, AlignCenter, AlignCenter, furi_string_get_cstr(app->ok_button));
         canvas_draw_str_aligned(
-            canvas, 32, 58, AlignCenter, AlignCenter, furi_string_get_cstr(app->back_button));
+            canvas, MENU_BTN_TXT_X, 58, AlignCenter, AlignCenter, furi_string_get_cstr(app->back_button));
 
         canvas_draw_line(canvas, 0, 65, 64, 65);
 
@@ -81,21 +82,21 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_icon(canvas, 0, 118, &I_back_10px);
 
         canvas_draw_str_aligned(
-            canvas, 32, 73, AlignCenter, AlignCenter, furi_string_get_cstr(app->up_hold_button));
+            canvas, MENU_BTN_TXT_X, 73, AlignCenter, AlignCenter, furi_string_get_cstr(app->up_hold_button));
         canvas_draw_str_aligned(
-            canvas, 32, 83, AlignCenter, AlignCenter, furi_string_get_cstr(app->down_hold_button));
+            canvas, MENU_BTN_TXT_X, 83, AlignCenter, AlignCenter, furi_string_get_cstr(app->down_hold_button));
         canvas_draw_str_aligned(
-            canvas, 32, 93, AlignCenter, AlignCenter, furi_string_get_cstr(app->left_hold_button));
+            canvas, MENU_BTN_TXT_X, 93, AlignCenter, AlignCenter, furi_string_get_cstr(app->left_hold_button));
         canvas_draw_str_aligned(
             canvas,
-            32,
+            MENU_BTN_TXT_X,
             103,
             AlignCenter,
             AlignCenter,
             furi_string_get_cstr(app->right_hold_button));
         canvas_draw_str_aligned(
-            canvas, 32, 113, AlignCenter, AlignCenter, furi_string_get_cstr(app->ok_hold_button));
-        canvas_draw_str_aligned(canvas, 32, 123, AlignCenter, AlignCenter, "Exit App");
+            canvas, MENU_BTN_TXT_X, 113, AlignCenter, AlignCenter, furi_string_get_cstr(app->ok_hold_button));
+        canvas_draw_str_aligned(canvas, MENU_BTN_TXT_X, 123, AlignCenter, AlignCenter, "Exit App");
     }
 }
 
