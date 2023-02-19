@@ -157,6 +157,7 @@ void storage_settings_scene_benchmark_on_exit(void* context) {
     StorageSettings* app = context;
     DialogEx* dialog_ex = app->dialog_ex;
 
+    storage_common_remove(app->fs_api, BENCH_FILE);
     dialog_ex_reset(dialog_ex);
 
     furi_string_reset(app->text_string);
