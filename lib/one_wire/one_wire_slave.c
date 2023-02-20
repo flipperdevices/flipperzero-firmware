@@ -271,9 +271,9 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
 }
 
 bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
-    size_t bytes_sent = 0;
-
     furi_hal_gpio_write(bus->gpio_pin, true);
+
+    size_t bytes_sent = 0;
 
     // bytes loop
     for(; bytes_sent < data_size; ++bytes_sent) {
@@ -301,11 +301,16 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
         uint8_t value = 0;
 
         for(uint8_t bit_mask = 0x01; bit_mask != 0; bit_mask <<= 1) {
-            if(onewire_slave_receive_bit(bus)) value |= bit_mask;
+            if(onewire_slave_receive_bit(bus)) {
+                value |= bit_mask;
+            }
+
+            if(bus->error != OneWireSlaveErrorNone) {
+                return false;
+            }
         }
 
         data[bytes_received] = value;
     }
-
-    return (bytes_received == data_size);
+    return true;
 }
