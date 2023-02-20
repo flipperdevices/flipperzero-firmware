@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  container-test-job:
+  build-fap:
     runs-on: ubuntu-latest
     container:
       image: an4tur0r/flipperzero-unleashed:latest
@@ -15,7 +15,7 @@ jobs:
         - ${{ github.workspace }}:/flipperzero-unleashed/applications_user/xbox_controller
       options: --cpus 1
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build
         run: |
           cd /flipperzero-unleashed
