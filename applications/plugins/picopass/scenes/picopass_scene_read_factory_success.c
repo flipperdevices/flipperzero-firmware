@@ -28,21 +28,21 @@ void picopass_scene_read_factory_success_on_enter(void* context) {
     //PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
 
-    uint8_t *configBlock = &AA1->data[PICOPASS_CONFIG_BLOCK_INDEX];
+    uint8_t* configBlock = &AA1->data[PICOPASS_CONFIG_BLOCK_INDEX];
     uint8_t fuses = configBlock[7];
 
-    if ((fuses & 0x80) == 0x80) {
+    if((fuses & 0x80) == 0x80) {
         furi_string_cat_printf(subtitle, "Personalization mode");
     } else {
         furi_string_cat_printf(subtitle, "Application mode");
     }
 
     widget_add_button_element(
-    widget,
-    GuiButtonTypeCenter,
-    "Write Standard iClass Key",
-    picopass_scene_read_factory_success_widget_callback,
-    picopass);
+        widget,
+        GuiButtonTypeCenter,
+        "Write Standard iClass Key",
+        picopass_scene_read_factory_success_widget_callback,
+        picopass);
 
     widget_add_string_element(
         widget, 64, 5, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(title));

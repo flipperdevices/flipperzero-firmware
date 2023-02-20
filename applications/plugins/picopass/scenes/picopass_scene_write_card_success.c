@@ -37,7 +37,8 @@ void picopass_scene_write_card_success_on_enter(void* context) {
         picopass_scene_write_card_success_widget_callback,
         picopass);
 
-    widget_add_string_element(widget, 64, 5, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(str));
+    widget_add_string_element(
+        widget, 64, 5, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(str));
 
     furi_string_free(str);
 
