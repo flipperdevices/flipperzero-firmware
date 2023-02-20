@@ -9,6 +9,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/variable_item_list.h>
 #include "scenes/boilerplate_scene.h"
 #include "views/boilerplate_scene_1.h"
 #include "views/boilerplate_scene_2.h"
@@ -19,8 +20,12 @@ typedef struct {
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
     SceneManager* scene_manager;
+    VariableItemList* variable_item_list;
     BoilerplateScene1* boilerplate_scene_1;
     BoilerplateScene2* boilerplate_scene_2;
+    Submenu* boilerplate_settings;
+    int haptic; 
+    int speaker;
     //BoilerplateSettings* boilerplate_settings;
 } Boilerplate;
 
@@ -30,3 +35,13 @@ typedef enum {
     BoilerplateViewIdScene2,
     BoilerplateViewIdSettings,
 } BoilerplateViewId;
+
+typedef enum {
+    BoilerplateHapticOff,
+    BoilerplateHapticOn,
+} BoilerplateHapticState;
+
+typedef enum {
+    BoilerplateSpeakerOff,
+    BoilerplateSpeakerOn,
+} BoilerplateSpeakerState;

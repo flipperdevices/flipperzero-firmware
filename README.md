@@ -8,12 +8,12 @@ Use this code as a foundation for developing Flipper Zero Applications, change t
 - Start Screen (tbd)
 - Menu
 - Different Scenes / Views
-- Settings Page (tbd)
+- Settings Page 
 - Handling of Button Inputs
 - Handling of Tick events
 - Handling of Enter/Exit events
 - Rendering to GUI
-- Haptic Feedback (tbd)
+- Haptic Feedback 
 - Dolphin Deeds (make dolphin happy)
 
 ## How to install on Flipper Zero

@@ -32,6 +32,9 @@ void boilerplate_scene_1_draw(Canvas* canvas, BoilerplateScene1Model* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "An empty scene to be"); 
+    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as boilerplate"); 
 }
 
 static void boilerplate_scene_1_model_init(BoilerplateScene1Model* const model) {
@@ -54,41 +57,9 @@ bool boilerplate_scene_1_input(InputEvent* event, void* context) {
                     true);
                 break;
             case InputKeyLeft:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene1Model* model,
-                    {
-                        UNUSED(model);
-                    },
-                    true);
-                break;
             case InputKeyRight:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene1Model* model,
-                    {
-                        UNUSED(model);
-                    },
-                    true);
-                break;
             case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene1Model* model,
-                    {
-                        UNUSED(model);
-                    },
-                    true);
-                break;
             case InputKeyDown:
-                with_view_model(
-                    instance->view,
-                    BoilerplateScene1Model* model,
-                    {
-                        UNUSED(model);
-                    },
-                    true);
-                break;
             case InputKeyOk:
                 with_view_model(
                     instance->view,

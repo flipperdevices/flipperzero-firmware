@@ -4,6 +4,8 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include "../helpers/boilerplate_haptic.h"
+#include "../helpers/boilerplate_speaker.h"
 
 struct BoilerplateScene2 {
     View* view;
@@ -12,8 +14,22 @@ struct BoilerplateScene2 {
 };
 
 typedef struct {
-    int custom_value;
+    int screen_text;
 } BoilerplateScene2Model;
+
+char buttonText[11][14] = {
+    "",
+    "Press Up",
+    "Press Down",
+    "Press Left",
+    "Press Right",
+    "Press Ok",
+    "Release Up",
+    "Release Down",
+    "Release Left",
+    "Release Right",
+    "Release Ok",
+};
 
 void boilerplate_scene_2_set_callback(
     BoilerplateScene2* instance,
@@ -26,15 +42,19 @@ void boilerplate_scene_2_set_callback(
 }
 
 void boilerplate_scene_2_draw(Canvas* canvas, BoilerplateScene2Model* model) {
-    UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 2"); 
+    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "Scene 2: Input Examples"); 
+    canvas_set_font(canvas, FontSecondary);
+    char *strInput = malloc(15);
+    strcpy(strInput, buttonText[model->screen_text]);
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, strInput); 
+    free(strInput);
 }
 
 static void boilerplate_scene_2_model_init(BoilerplateScene2Model* const model) {
-    model->custom_value = 1;
+    model->screen_text = 0;
 }
 
 bool boilerplate_scene_2_input(InputEvent* event, void* context) {
@@ -48,15 +68,128 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                     BoilerplateScene2Model * model,
                     {
                         UNUSED(model);
+                        stop_all_sound(instance->context);
                         instance->callback(BoilerplateCustomEventScene2Back, instance->context);
+                        play_long_bump(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyUp:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 6;
+                        play_bad_bump(instance->context);
+                        stop_all_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyDown:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 7;
+                        play_bad_bump(instance->context);
+                        stop_all_sound(instance->context);
                     },
                     true);
                 break;
             case InputKeyLeft:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 8;
+                        play_bad_bump(instance->context);
+                        stop_all_sound(instance->context);
+                    },
+                    true);
+                break;
             case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 9;
+                        play_bad_bump(instance->context);
+                        stop_all_sound(instance->context);
+                    },
+                    true);
+                break;
             case InputKeyOk:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 10;
+                        play_bad_bump(instance->context);
+                        stop_all_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyMAX:
+                break;
+        }
+    } else if (event->type == InputTypePress) {
+         switch(event->key) {
+            case InputKeyUp:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 1;
+                        play_happy_bump(instance->context);
+                        play_input_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyDown:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 2;
+                        play_happy_bump(instance->context);
+                        play_input_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyLeft:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 3;
+                        play_happy_bump(instance->context);
+                        play_input_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyRight:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 4;
+                        play_happy_bump(instance->context);
+                        play_input_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyOk:
+                with_view_model(
+                    instance->view,
+                    BoilerplateScene2Model * model,
+                    {
+                        model->screen_text = 5;
+                        play_happy_bump(instance->context);
+                        play_input_sound(instance->context);
+                    },
+                    true);
+                break;
+            case InputKeyBack:
             case InputKeyMAX:
                 break;
         }
@@ -67,6 +200,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
 
 void boilerplate_scene_2_exit(void* context) {
     furi_assert(context);
+    Boilerplate* app = context;
+    stop_all_sound(app);
 }
 
 void boilerplate_scene_2_enter(void* context) {
@@ -82,7 +217,7 @@ BoilerplateScene2* boilerplate_scene_2_alloc() {
     view_set_draw_callback(instance->view, (ViewDrawCallback)boilerplate_scene_2_draw);
     view_set_input_callback(instance->view, boilerplate_scene_2_input);
     //view_set_enter_callback(instance->view, boilerplate_scene_2_enter);
-    //view_set_exit_callback(instance->view, boilerplate_scene_2_exit);
+    view_set_exit_callback(instance->view, boilerplate_scene_2_exit);
 
     with_view_model(
         instance->view,

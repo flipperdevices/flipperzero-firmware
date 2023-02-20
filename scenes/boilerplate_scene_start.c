@@ -41,11 +41,11 @@ bool boilerplate_scene_start_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, BoilerplateSceneStart, SubmenuIndexScene2);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_2);
             return true;
-        //} else if (event.event == SubmenuIndexSettings) {
-        //    scene_manager_set_scene_state(
-        //        app->scene_manager, BoilerplateSceneStart, SubmenuIndexSettings);
-        //    scene_manager_next_scene(app->scene_manager, BoilerplateSceneSettings);
-        //    return true;
+        } else if (event.event == SubmenuIndexSettings) {
+            scene_manager_set_scene_state(
+                app->scene_manager, BoilerplateSceneStart, SubmenuIndexSettings);
+            scene_manager_next_scene(app->scene_manager, BoilerplateSceneSettings);
+            return true;
         }
     }
     return false;
