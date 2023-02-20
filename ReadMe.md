@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [IR Remote plugin improvements #535 (By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535)
 - Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
+- Added: 2 SubGHz Assets for Walgreens/Lowes. Updated playlists for Walgreens/Lowes.
 
 <a name="release">
 
