@@ -63,7 +63,7 @@ typedef struct {
     uint8_t u_rssi;
 } WSReceiverModel;
 
-void ws_receiver_rssi(WSReceiver* instance, float rssi) {
+void ws_view_receiver_set_rssi(WSReceiver* instance, float rssi) {
     furi_assert(instance);
     with_view_model(
         instance->view,
