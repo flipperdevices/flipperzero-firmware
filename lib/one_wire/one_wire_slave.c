@@ -16,8 +16,6 @@
 
 typedef enum {
     OneWireSlaveErrorNone = 0,
-    OneWireSlaveErrorResetTooLong,
-    OneWireSlaveErrorResetTooShort,
     OneWireSlaveErrorPresenceConflict,
     OneWireSlaveErrorAwaitTimeslot,
     OneWireSlaveErrorInvalidCommand,
@@ -28,10 +26,14 @@ typedef enum {
 struct OneWireSlave {
     const GpioPin* gpio_pin;
     OneWireSlaveError error;
-    OneWireSlaveCommandCallback command_cb;
-    OneWireSlaveResultCallback result_cb;
-    void* result_cb_ctx;
-    void* command_cb_ctx;
+
+    OneWireSlaveResetCallback reset_callback;
+    OneWireSlaveCommandCallback command_callback;
+    OneWireSlaveResultCallback result_callback;
+
+    void* reset_callback_context;
+    void* result_callback_context;
+    void* command_callback_context;
 };
 
 /*********************** PRIVATE ***********************/
@@ -80,15 +82,30 @@ static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
     onewire_slave_receive(bus, &cmd, 1);
 
     if(bus->error == OneWireSlaveErrorResetInProgress) {
-        return true;
+        if(onewire_slave_show_presence(bus)) {
+            if(bus->reset_callback != NULL) {
+                bus->reset_callback(bus->reset_callback_context);
+            }
+            bus->error = OneWireSlaveErrorNone;
+            return true;
+
+        } else {
+            return false;
+        }
+
     } else if(bus->error != OneWireSlaveErrorNone) {
         return false;
-    } else if(bus->command_cb) {
-        // TODO: error state for failed callback
-        return bus->command_cb(cmd, bus->command_cb_ctx);
+
     } else {
-        bus->error = OneWireSlaveErrorInvalidCommand;
-        return false;
+        bool result = false;
+
+        if(bus->command_callback) {
+            result = bus->command_callback(cmd, bus->command_callback_context);
+        } else {
+            bus->error = OneWireSlaveErrorInvalidCommand;
+        }
+
+        return result;
     }
 }
 
@@ -100,8 +117,13 @@ static bool onewire_slave_bus_start(OneWireSlave* bus) {
     bus->error = OneWireSlaveErrorNone;
 
     if(onewire_slave_show_presence(bus)) {
-        // TODO think about multiple command cycles
-        onewire_slave_receive_and_process_cmd(bus);
+        if(bus->reset_callback != NULL) {
+            bus->reset_callback(bus->reset_callback_context);
+        }
+
+        while(onewire_slave_receive_and_process_cmd(bus))
+            ;
+
         result =
             (bus->error == OneWireSlaveErrorNone || bus->error == OneWireSlaveErrorInvalidCommand);
 
@@ -115,30 +137,25 @@ static bool onewire_slave_bus_start(OneWireSlave* bus) {
     return result;
 }
 
-static void onewire_slave_exti_cb(void* context) {
+static void onewire_slave_exti_callback(void* context) {
     OneWireSlave* bus = context;
 
-    volatile bool input_state = furi_hal_gpio_read(bus->gpio_pin);
+    const volatile bool input_state = furi_hal_gpio_read(bus->gpio_pin);
     static uint32_t pulse_start = 0;
 
     if(input_state) {
-        uint32_t pulse_length =
+        const uint32_t pulse_length =
             (DWT->CYCCNT - pulse_start) / furi_hal_cortex_instructions_per_microsecond();
-        if(pulse_length >= OWS_RESET_MIN) {
-            if(pulse_length <= OWS_RESET_MAX) {
-                // reset cycle ok
-                bool result = onewire_slave_bus_start(bus);
-                if(result && bus->result_cb != NULL) {
-                    bus->result_cb(bus->result_cb_ctx);
-                }
-            } else {
-                bus->error = OneWireSlaveErrorResetTooLong;
+
+        if((pulse_length >= OWS_RESET_MIN) && pulse_length <= (OWS_RESET_MAX)) {
+            const bool result = onewire_slave_bus_start(bus);
+
+            if(result && bus->result_callback != NULL) {
+                bus->result_callback(bus->result_callback_context);
             }
-        } else {
-            bus->error = OneWireSlaveErrorResetTooShort;
         }
+
     } else {
-        //FALL event
         pulse_start = DWT->CYCCNT;
     }
 };
@@ -160,7 +177,7 @@ void onewire_slave_free(OneWireSlave* bus) {
 }
 
 void onewire_slave_start(OneWireSlave* bus) {
-    furi_hal_gpio_add_int_callback(bus->gpio_pin, onewire_slave_exti_cb, bus);
+    furi_hal_gpio_add_int_callback(bus->gpio_pin, onewire_slave_exti_callback, bus);
     furi_hal_gpio_write(bus->gpio_pin, true);
     furi_hal_gpio_init(bus->gpio_pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
 }
@@ -171,20 +188,28 @@ void onewire_slave_stop(OneWireSlave* bus) {
     furi_hal_gpio_remove_int_callback(bus->gpio_pin);
 }
 
+void onewire_slave_set_reset_callback(
+    OneWireSlave* bus,
+    OneWireSlaveResetCallback callback,
+    void* context) {
+    bus->reset_callback = callback;
+    bus->reset_callback_context = context;
+}
+
 void onewire_slave_set_command_callback(
     OneWireSlave* bus,
     OneWireSlaveCommandCallback callback,
     void* context) {
-    bus->command_cb = callback;
-    bus->command_cb_ctx = context;
+    bus->command_callback = callback;
+    bus->command_callback_context = context;
 }
 
 void onewire_slave_set_result_callback(
     OneWireSlave* bus,
     OneWireSlaveResultCallback result_cb,
     void* context) {
-    bus->result_cb = result_cb;
-    bus->result_cb_ctx = context;
+    bus->result_callback = result_cb;
+    bus->result_callback_context = context;
 }
 
 bool onewire_slave_receive_bit(OneWireSlave* bus) {

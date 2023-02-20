@@ -87,7 +87,13 @@ bool dallas_ds1996_write_copy(OneWireHost* host, iButtonProtocolData* protocol_d
         DS1996_SRAM_DATA_SIZE);
 }
 
-static bool dallas_ds1996_emulate_callback(uint8_t command, void* context) {
+static void dallas_ds1996_reset_callback(void* context) {
+    furi_assert(context);
+    DS1996ProtocolData* data = context;
+    data->state.command_state = DS1996CommandStateIdle;
+}
+
+static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
     furi_assert(context);
     DS1996ProtocolData* data = context;
     OneWireSlave* bus = data->state.bus;
@@ -100,7 +106,8 @@ static bool dallas_ds1996_emulate_callback(uint8_t command, void* context) {
 
         } else if(data->state.command_state == DS1996CommandStateRomCmd) {
             data->state.command_state = DS1996CommandStateMemCmd;
-            return dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE);
+            dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE);
+            return false;
 
         } else {
             return false;
@@ -108,6 +115,7 @@ static bool dallas_ds1996_emulate_callback(uint8_t command, void* context) {
 
     case DALLAS_COMMON_CMD_READ_ROM:
         if(data->state.command_state == DS1996CommandStateIdle) {
+            data->state.command_state = DS1996CommandStateRomCmd;
             return dallas_common_emulate_read_rom(bus, &data->rom_data);
         } else {
             return false;
@@ -121,9 +129,9 @@ static bool dallas_ds1996_emulate_callback(uint8_t command, void* context) {
 void dallas_ds1996_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data) {
     DS1996ProtocolData* data = protocol_data;
     data->state.bus = bus;
-    data->state.command_state = DS1996CommandStateIdle;
 
-    onewire_slave_set_command_callback(bus, dallas_ds1996_emulate_callback, protocol_data);
+    onewire_slave_set_reset_callback(bus, dallas_ds1996_reset_callback, protocol_data);
+    onewire_slave_set_command_callback(bus, dallas_ds1996_command_callback, protocol_data);
 }
 
 bool dallas_ds1996_load(

@@ -18,6 +18,7 @@ extern "C" {
 typedef struct OneWireDevice OneWireDevice;
 typedef struct OneWireSlave OneWireSlave;
 
+typedef void (*OneWireSlaveResetCallback)(void* context);
 typedef void (*OneWireSlaveResultCallback)(void* context);
 typedef bool (*OneWireSlaveCommandCallback)(uint8_t command, void* context);
 
@@ -75,7 +76,18 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size
 bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size);
 
 /**
- * Set a callback to report emulation success
+ * Set a callback to be called on each reset
+ * @param bus
+ * @param callback
+ * @param context
+ */
+void onewire_slave_set_reset_callback(
+    OneWireSlave* bus,
+    OneWireSlaveResetCallback callback,
+    void* context);
+
+/**
+ * Set a callback to be called on each command
  * @param bus
  * @param callback
  * @param context

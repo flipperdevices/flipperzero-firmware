@@ -63,27 +63,33 @@ bool dallas_ds1990_write_blank(OneWireHost* host, iButtonProtocolData* protocol_
            tm2004_write(host, data->rom_data.bytes, sizeof(DallasCommonRomData));
 }
 
-static bool dallas_ds1990_emulate_callback(uint8_t command, void* context) {
+static bool dallas_ds1990_command_callback(uint8_t command, void* context) {
     furi_assert(context);
     DS1990ProtocolData* data = context;
     OneWireSlave* bus = data->state.bus;
 
     switch(command) {
     case DALLAS_COMMON_CMD_SEARCH_ROM:
-        return dallas_common_emulate_search_rom(bus, &data->rom_data);
+        dallas_common_emulate_search_rom(bus, &data->rom_data);
+        break;
     case DALLAS_COMMON_CMD_READ_ROM:
     case DS1990_CMD_READ_ROM:
-        return dallas_common_emulate_read_rom(bus, &data->rom_data);
+        dallas_common_emulate_read_rom(bus, &data->rom_data);
+        break;
     default:
-        return false;
+        break;
     }
+
+    // No support for multiple consecutive commands
+    return false;
 }
 
 void dallas_ds1990_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
     data->state.bus = bus;
 
-    onewire_slave_set_command_callback(bus, dallas_ds1990_emulate_callback, protocol_data);
+    onewire_slave_set_reset_callback(bus, NULL, NULL);
+    onewire_slave_set_command_callback(bus, dallas_ds1990_command_callback, protocol_data);
 }
 
 bool dallas_ds1990_save(FlipperFormat* ff, const iButtonProtocolData* protocol_data) {
