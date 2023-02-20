@@ -252,18 +252,21 @@ int* extend_table_precompute(int head, int *tail, int xks, int iterations) {
                     temp_states_buffer[s] <<= 1;
                     int t = temp_states_buffer[s];
 
-                    if ((filter(t) ^ filter(t | 1)) != 0 ) {
+                    int a = (filter(t) == xks_bit);
+                    int b = (filter(t | 1) == xks_bit);
+
+                    if(!a && !b) {
+                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+                    } else if (!a && b) {
                         temp_states_buffer[s] |= filter(t) ^ xks_bit;
-                    } else if (filter(t) == xks_bit) {
+                    } else if (a && b) {
                         temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
                         temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
-                    } else {
-                        //temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
                     }
                 }
             }
 
-            for (int s = 0; s < temp_states_tail; s++) {
+            for (int s = 0; s <= temp_states_tail; s++) {
                 (*tail)++;
                 data[*tail] = temp_states_buffer[s];
             }
@@ -356,8 +359,8 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(filePointer);
-    
-    printf("Keys found: %i\n", keyarray_size);
+
+    printf("Keys found: %li\n", keyarray_size);
     printf("Unique keys found:\n");
     for(i = 0; i < keyarray_size; i++) {
         printf("%012" PRIx64 , keyarray[i]);
