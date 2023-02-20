@@ -19,6 +19,12 @@
 
 #define DALLAS_COMMON_CMD_READ_MEM 0xF0U
 
+typedef enum {
+    DallasCommonCommandStateIdle,
+    DallasCommonCommandStateRomCmd,
+    DallasCommonCommandStateMemCmd,
+} DallasCommonCommandState;
+
 typedef union {
     struct {
         uint8_t family_code;

@@ -25,15 +25,9 @@
 #define BITS_IN_BYTE 8U
 #define BITS_IN_KBIT 1024U
 
-typedef enum {
-    DS1996CommandStateIdle,
-    DS1996CommandStateRomCmd,
-    DS1996CommandStateMemCmd,
-} DS1996CommandState;
-
 typedef struct {
     OneWireSlave* bus;
-    DS1996CommandState command_state;
+    DallasCommonCommandState command_state;
 } DS1996ProtocolState;
 
 typedef struct {
@@ -90,7 +84,7 @@ bool dallas_ds1996_write_copy(OneWireHost* host, iButtonProtocolData* protocol_d
 static void dallas_ds1996_reset_callback(void* context) {
     furi_assert(context);
     DS1996ProtocolData* data = context;
-    data->state.command_state = DS1996CommandStateIdle;
+    data->state.command_state = DallasCommonCommandStateIdle;
 }
 
 static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
@@ -100,12 +94,12 @@ static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
 
     switch(command) {
     case DALLAS_COMMON_CMD_SEARCH_ROM:
-        if(data->state.command_state == DS1996CommandStateIdle) {
-            data->state.command_state = DS1996CommandStateRomCmd;
+        if(data->state.command_state == DallasCommonCommandStateIdle) {
+            data->state.command_state = DallasCommonCommandStateRomCmd;
             return dallas_common_emulate_search_rom(bus, &data->rom_data);
 
-        } else if(data->state.command_state == DS1996CommandStateRomCmd) {
-            data->state.command_state = DS1996CommandStateMemCmd;
+        } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
+            data->state.command_state = DallasCommonCommandStateMemCmd;
             dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE);
             return false;
 
@@ -114,8 +108,8 @@ static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
         }
 
     case DALLAS_COMMON_CMD_READ_ROM:
-        if(data->state.command_state == DS1996CommandStateIdle) {
-            data->state.command_state = DS1996CommandStateRomCmd;
+        if(data->state.command_state == DallasCommonCommandStateIdle) {
+            data->state.command_state = DallasCommonCommandStateRomCmd;
             return dallas_common_emulate_read_rom(bus, &data->rom_data);
         } else {
             return false;

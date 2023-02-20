@@ -27,6 +27,7 @@
 
 typedef struct {
     OneWireSlave* bus;
+    DallasCommonCommandState command_state;
 } DS1992ProtocolState;
 
 typedef struct {
@@ -89,18 +90,40 @@ bool dallas_ds1992_write_copy(OneWireHost* host, iButtonProtocolData* protocol_d
         DS1992_SRAM_DATA_SIZE);
 }
 
-static bool dallas_ds1992_emulate_callback(uint8_t command, void* context) {
+static void dallas_ds1992_reset_callback(void* context) {
+    furi_assert(context);
+    DS1992ProtocolData* data = context;
+    data->state.command_state = DallasCommonCommandStateIdle;
+}
+
+static bool dallas_ds1992_command_callback(uint8_t command, void* context) {
     furi_assert(context);
     DS1992ProtocolData* data = context;
     OneWireSlave* bus = data->state.bus;
 
     switch(command) {
     case DALLAS_COMMON_CMD_SEARCH_ROM:
-        // TODO: respond with internal SRAM if a ROM command was performed
-        return dallas_common_emulate_search_rom(bus, &data->rom_data);
+        if(data->state.command_state == DallasCommonCommandStateIdle) {
+            data->state.command_state = DallasCommonCommandStateRomCmd;
+            return dallas_common_emulate_search_rom(bus, &data->rom_data);
+
+        } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
+            data->state.command_state = DallasCommonCommandStateMemCmd;
+            dallas_common_emulate_read_mem(bus, data->sram_data, DS1992_SRAM_DATA_SIZE);
+            return false;
+
+        } else {
+            return false;
+        }
+
     case DALLAS_COMMON_CMD_READ_ROM:
-        // TODO: set the state to indicate that a ROM command has occured
-        return dallas_common_emulate_read_rom(bus, &data->rom_data);
+        if(data->state.command_state == DallasCommonCommandStateIdle) {
+            data->state.command_state = DallasCommonCommandStateRomCmd;
+            return dallas_common_emulate_read_rom(bus, &data->rom_data);
+        } else {
+            return false;
+        }
+
     default:
         return false;
     }
@@ -109,9 +132,9 @@ static bool dallas_ds1992_emulate_callback(uint8_t command, void* context) {
 void dallas_ds1992_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data) {
     DS1992ProtocolData* data = protocol_data;
     data->state.bus = bus;
-    // TODO: reset the command state
 
-    onewire_slave_set_command_callback(bus, dallas_ds1992_emulate_callback, protocol_data);
+    onewire_slave_set_reset_callback(bus, dallas_ds1992_reset_callback, protocol_data);
+    onewire_slave_set_command_callback(bus, dallas_ds1992_command_callback, protocol_data);
 }
 
 bool dallas_ds1992_load(
