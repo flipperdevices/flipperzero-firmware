@@ -438,6 +438,77 @@ ReturnCode picopass_write_card(PicopassBlock* AA1) {
     return ERR_NONE;
 }
 
+ReturnCode picopass_write_block(PicopassBlock* AA1, PicopassPacs *pacs, uint8_t blockNo) {
+    rfalPicoPassIdentifyRes idRes;
+    rfalPicoPassSelectRes selRes;
+    rfalPicoPassReadCheckRes rcRes;
+    rfalPicoPassCheckRes chkRes;
+
+    ReturnCode err;
+
+    uint8_t div_key[8] = {0};
+    uint8_t mac[4] = {0};
+    uint8_t ccnr[12] = {0};
+
+    err = rfalPicoPassPollerIdentify(&idRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerIdentify error %d", err);
+        return err;
+    }
+
+    err = rfalPicoPassPollerSelect(idRes.CSN, &selRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerSelect error %d", err);
+        return err;
+    }
+
+    err = rfalPicoPassPollerReadCheck(&rcRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerReadCheck error %d", err);
+        return err;
+    }
+    memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
+
+    loclass_diversifyKey(selRes.CSN, pacs->key, div_key);
+    loclass_opt_doReaderMAC(ccnr, div_key, mac);
+
+    err = rfalPicoPassPollerCheck(mac, &chkRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerCheck error %d", err);
+        return err;
+    }
+
+    FURI_LOG_D(TAG, "rfalPicoPassPollerWriteBlock %d", blockNo);
+    uint8_t data[9] = {0};
+    data[0] = blockNo;
+    memcpy(data + 1, AA1[blockNo].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
+    loclass_doMAC_N(data, sizeof(data), div_key, mac);
+    FURI_LOG_D(
+        TAG,
+        "loclass_doMAC_N %d %02x%02x%02x%02x%02x%02x%02x%02x %02x%02x%02x%02x",
+        blockNo,
+        data[1],
+        data[2],
+        data[3],
+        data[4],
+        data[5],
+        data[6],
+        data[7],
+        data[8],
+        mac[0],
+        mac[1],
+        mac[2],
+        mac[3]);
+
+    err = rfalPicoPassPollerWriteBlock(blockNo, AA1[blockNo].data, mac);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerWriteBlock error %d", err);
+        return err;
+    }
+
+    return ERR_NONE;
+}
+
 int32_t picopass_worker_task(void* context) {
     PicopassWorker* picopass_worker = context;
 
@@ -446,6 +517,8 @@ int32_t picopass_worker_task(void* context) {
         picopass_worker_detect(picopass_worker);
     } else if(picopass_worker->state == PicopassWorkerStateWrite) {
         picopass_worker_write(picopass_worker);
+    } else if(picopass_worker->state == PicopassWorkerStateWriteStandardKey) {
+        picopass_worker_write_standard_key(picopass_worker);
     }
     picopass_worker_disable_field(ERR_NONE);
 
@@ -540,6 +613,49 @@ void picopass_worker_write(PicopassWorker* picopass_worker) {
             err = picopass_write_card(AA1);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_write_card error %d", err);
+                nextState = PicopassWorkerEventFail;
+            }
+
+            // Notify caller and exit
+            if(picopass_worker->callback) {
+                picopass_worker->callback(nextState, picopass_worker->context);
+            }
+            break;
+        }
+        furi_delay_ms(100);
+    }
+}
+
+void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
+    PicopassDeviceData* dev_data = picopass_worker->dev_data;
+    PicopassBlock* AA1 = dev_data->AA1;
+    PicopassPacs* pacs = &dev_data->pacs;
+    ReturnCode err;
+    PicopassWorkerEvent nextState = PicopassWorkerEventSuccess;
+    uint8_t blockNo = PICOPASS_KD_BLOCK_INDEX;
+
+    uint8_t *csn = &AA1->data[PICOPASS_CSN_BLOCK_INDEX];
+    uint8_t *configBlock = &AA1->data[PICOPASS_CONFIG_BLOCK_INDEX];
+    uint8_t fuses = configBlock[7];
+    uint8_t *oldKey = &AA1->data[PICOPASS_KD_BLOCK_INDEX];
+
+    uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
+    loclass_diversifyKey(csn, picopass_iclass_key, newKey);
+
+    if ((fuses & 0x80) == 0x80) {
+        memcpy(oldKey, newKey, PICOPASS_BLOCK_LEN);
+    } else {
+        // XOR when in application mode
+        for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+            oldKey[i] ^= newKey[i];
+        }
+    }
+
+    while(picopass_worker->state == PicopassWorkerStateWriteStandardKey) {
+        if(picopass_detect_card(1000) == ERR_NONE) {
+            err = picopass_write_block(AA1, pacs, blockNo);
+            if(err != ERR_NONE) {
+                FURI_LOG_E(TAG, "picopass_write_block error %d", err);
                 nextState = PicopassWorkerEventFail;
             }
 
