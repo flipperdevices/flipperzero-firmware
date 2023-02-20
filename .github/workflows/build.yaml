@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  container-test-job:
+    runs-on: ubuntu-latest
+    container:
+      image: an4tur0r/flipperzero-unleashed:latest
+      env:
+        APP_NAME: xbox_controller
+      volumes:
+        - ${{ github.workspace }}:/flipperzero-unleashed/applications_user/xbox_controller
+      options: --cpus 1
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check for dockerenv file
+        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
+      - name: Build
+        run: |
+          cd /flipperzero-unleashed
+          ./fbt launch_app APPSRC=xbox_controller
+          # cp build/f7-firmware-D/.extapps/xbox_controller.fap applications_user/xbox_controller/
