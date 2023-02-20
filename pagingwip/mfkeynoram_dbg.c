@@ -235,57 +235,64 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
     }
     return s;
 }
-int* extend_table_precompute(int head, int *tail, int *xks, int iterations) {
-    int *data = malloc(sizeof(int)*(5 << 20)); // Obviously this won't be here in the final version, and it won't need this much space
-    int saved_xks = *xks;
-    for (int i = 1 << 20; i >= 0; --i) {
-        if (filter(i) == (*xks & 1)) {
+int* extend_table_precompute(int head, int *tail, int xks, int iterations) {
+    int *data = malloc(sizeof(int) * (5 << 20)); // Obviously this won't be here in the final version, and it won't need this much space
+
+    for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
+        if (filter(main_iter) == (xks & 1)) {
             int *temp_states_buffer = malloc(sizeof(int)*(5<<8)); // TODO: Find max, adjust as needed
             int temp_states_tail = 0;
-            temp_states_buffer[0] = i;
-            for (int j = 0; j < iterations; j++) {
-                int xks_bit = ((*xks >>= 1) & 1);
+
+            temp_states_buffer[0] = main_iter;
+
+            for (int extend_iter = 1; extend_iter <= iterations; extend_iter++) {
+                int xks_bit = BIT(xks, extend_iter);
+
                 for (int s = 0; s <= temp_states_tail; s++) {
                     temp_states_buffer[s] <<= 1;
                     int t = temp_states_buffer[s];
+
                     if ((filter(t) ^ filter(t | 1)) != 0 ) {
                         temp_states_buffer[s] |= filter(t) ^ xks_bit;
                     } else if (filter(t) == xks_bit) {
-                        //temp_states_buffer[temp_states_tail++] = temp_states_buffer[s] | 1;
                         temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
                         temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
-                        // FIXME PLZ
-                        //temp_states_buffer[++temp_states_tail] = temp_states_buffer[s++];
-                        //temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
-                    }/* else {
-                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
-                    }*/
+                    } else {
+                        //temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+                    }
                 }
             }
-            *xks = saved_xks;
+
             for (int s = 0; s < temp_states_tail; s++) {
                 (*tail)++;
                 data[*tail] = temp_states_buffer[s];
             }
+
             free(temp_states_buffer);
         }
     }
-    for (int iter = 0; iter < iterations; iter++) {
-        (*xks) >>= 1;
-    }
+
     return data;
 }
 uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
     int odd_head = 0, odd_tail = -1, oks = 0;
     int even_head = 0, even_tail = -1, eks = 0;
     int i;
+
     for (i = 31; i >= 0; i -= 2)
         oks = oks << 1 | BEBIT(ks2, i);
     for (i = 30; i >= 0; i -= 2)
         eks = eks << 1 | BEBIT(ks2, i);
+
     // TODO: Precompute first extend table in recover() too
-    int *odd = extend_table_precompute(odd_head, &odd_tail, &oks, 4);
-    int *even = extend_table_precompute(even_head, &even_tail, &eks, 4);
+    int *odd = extend_table_precompute(odd_head, &odd_tail, oks, 4);
+    int *even = extend_table_precompute(even_head, &even_tail, eks, 4);
+
+    for (int iter = 0; iter < 4; iter++) {
+        oks >>= 1;
+        eks >>= 1;
+    }
+
     printf("odd_tail: %i, even_tail: %i\n", odd_tail, even_tail);
     recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 11, 0, p);
     free(odd);
@@ -349,6 +356,8 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(filePointer);
+    
+    printf("Keys found: %i\n", keyarray_size);
     printf("Unique keys found:\n");
     for(i = 0; i < keyarray_size; i++) {
         printf("%012" PRIx64 , keyarray[i]);
