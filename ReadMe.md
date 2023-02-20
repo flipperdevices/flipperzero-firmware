@@ -55,11 +55,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Desktop: Passport: Added SlutPass BG from Xtreme FW
 - OFW: VERY Minor changes spread across 6 PRs
-- Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - Updated: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
+- [IR Remote plugin improvements #535 (By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535)
+- Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 <a name="release">
 

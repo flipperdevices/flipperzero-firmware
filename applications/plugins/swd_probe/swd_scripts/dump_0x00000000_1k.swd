@@ -1,4 +1,4 @@
-apselect 0
+ap_select 0
 max_tries 50
 block_size 4
 mem_dump /ext/swd/flash.bin 0x00000000 0x100000 2

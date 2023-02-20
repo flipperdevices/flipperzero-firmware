@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="swd_probe_app_main",
     cdefines=["APP_SWD_PROBE"],
-    requires=["gui", "storage", "dialogs"],
+    requires=["notification", "gui", "storage", "dialogs", "cli"],
     stack_size=2 * 1024,
     order=10,
     fap_icon="icons/app.png",

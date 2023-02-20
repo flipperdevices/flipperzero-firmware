@@ -17,12 +17,14 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include "usb_uart.h"
+
 #define TAG "SWD"
 
 #define SWD_DELAY_US 0
-#define TIMER_HZ 50
+#define TIMER_HZ 20
 #define TIMEOUT 3
-#define QUEUE_SIZE 32
+#define QUEUE_SIZE 8
 #define IDLE_BITS 8
 #define CLOCK_DELAY 0
 
@@ -31,10 +33,11 @@
 
 typedef enum {
     ModePageScan = 0,
-    ModePageDPRegs = 1,
-    ModePageDPID = 2,
-    ModePageAPID = 3,
-    ModePageCount = 4,
+    ModePageFound = 1,
+    ModePageDPRegs = 2,
+    ModePageDPID = 3,
+    ModePageAPID = 4,
+    ModePageCount = 5,
     ModePageHexDump = 0x100,
     ModePageScript = 0x101,
 } ModePages;
@@ -123,15 +126,18 @@ typedef struct {
 typedef struct sScriptContext ScriptContext;
 
 typedef struct {
-    FuriMessageQueue* event_queue;
-    FuriTimer* timer;
-    NotificationApp* notification;
     Storage* storage;
-    ViewPort* view_port;
     Gui* gui;
     DialogsApp* dialogs;
+    NotificationApp* notification;
 
-    ValueMutex state_mutex;
+    FuriTimer* timer;
+    UsbUart* uart;
+    ViewPort* view_port;
+
+    FuriMessageQueue* event_queue;
+    FuriMutex* swd_mutex;
+    FuriMutex* gui_mutex;
 
     swd_targetid_info_t targetid_info;
     swd_dpidr_info_t dpidr_info;
@@ -139,7 +145,9 @@ typedef struct {
     swd_apidr_info_t apidr_info[256];
 
     ScriptContext* script;
+    ScriptContext* commandline;
 
+    uint8_t timeout_overdue;
     uint32_t loop_count;
     uint8_t current_mask_id;
     uint32_t current_mask;
@@ -147,7 +155,7 @@ typedef struct {
     uint8_t io_swd;
     uint8_t io_num_swc;
     uint8_t io_num_swd;
-    uint32_t detected_timeout;
+    int32_t detected_timeout;
     uint32_t swd_clock_delay;
     uint32_t swd_idle_bits;
     bool detected;
@@ -161,7 +169,6 @@ typedef struct {
     uint8_t hex_select;
     uint8_t hex_buffer[32];
     uint8_t hex_buffer_valid[8];
-    uint8_t hex_read_delay;
 
     char state_string[64];
     char script_detected[MAX_FILE_LENGTH];
@@ -171,8 +178,15 @@ typedef struct {
 struct sScriptContext {
     AppFSM* app;
     ScriptContext* parent;
-    File* script_file;
     char filename[MAX_FILE_LENGTH];
+
+    /* when used with string input */
+    char line_data[128];
+    uint64_t line_pos;
+
+    /* when used with file input */
+    File* script_file;
+
     uint64_t position;
     uint32_t selected_ap;
     uint32_t max_tries;

@@ -67,7 +67,7 @@ static const char* gpio_name(uint8_t mask) {
 }
 
 static void swd_configure_pins(AppFSM* const ctx, bool output) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swc < 8 && ctx->io_num_swd < 8) {
         furi_hal_gpio_init(
             gpios[ctx->io_num_swc], GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
         if(!output) {
@@ -105,7 +105,7 @@ static void swd_configure_pins(AppFSM* const ctx, bool output) {
 }
 
 static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swc < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swc < 8) {
         furi_hal_gpio_write(gpios[ctx->io_num_swc], level);
         return;
     }
@@ -125,7 +125,7 @@ static void swd_set_clock(AppFSM* const ctx, const uint8_t level) {
 }
 
 static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swd < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swd < 8) {
         furi_hal_gpio_write(gpios[ctx->io_num_swd], level);
         return;
     }
@@ -145,7 +145,7 @@ static void swd_set_data(AppFSM* const ctx, const uint8_t level) {
 }
 
 static uint8_t swd_get_data(AppFSM* const ctx) {
-    if(ctx->mode_page != ModePageScan && ctx->io_num_swd < 8) {
+    if(ctx->mode_page > ModePageFound && ctx->io_num_swd < 8) {
         return furi_hal_gpio_read(gpios[ctx->io_num_swd]);
     }
 
@@ -206,6 +206,9 @@ static void swd_write(AppFSM* const ctx, const uint8_t* data, size_t bits) {
 }
 
 static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data) {
+    //notification_message(ctx->notification, &sequence_set_blue_255);
+    //notification_message(ctx->notification, &sequence_reset_red);
+
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
 
@@ -241,6 +244,8 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
     }
 
     if(ack != 0x01) {
+        //notification_message(ctx->notification, &sequence_reset_blue);
+        //notification_message(ctx->notification, &sequence_set_red_255);
         return ack;
     }
 
@@ -267,22 +272,27 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
         bool parity = swd_read_bit(ctx);
 
         if(parity != __builtin_parity(*data)) {
+            //notification_message(ctx->notification, &sequence_reset_blue);
+            //notification_message(ctx->notification, &sequence_set_red_255);
             return 8;
         }
     }
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
+    //notification_message(ctx->notification, &sequence_reset_blue);
 
     return ack;
 }
 
 /* A line reset is achieved by holding the data signal HIGH for at least 50 clock cycles, followed by at least two idle cycles. */
 static void swd_line_reset(AppFSM* const ctx) {
+    //notification_message(ctx->notification, &sequence_set_red_255);
     for(int bitcount = 0; bitcount < 50; bitcount += 8) {
         swd_write_byte(ctx, 0xFF, 8);
     }
     swd_write_byte(ctx, 0, 8);
     ctx->dp_regs.select_ok = false;
+    //notification_message(ctx->notification, &sequence_reset_red);
 }
 
 static void swd_abort(AppFSM* const ctx) {
@@ -326,11 +336,15 @@ static uint8_t swd_select(AppFSM* const ctx, uint8_t ap_sel, uint8_t ap_bank, ui
 
 static uint8_t
     swd_read_dpbank(AppFSM* const ctx, uint8_t dp_off, uint8_t dp_bank, uint32_t* data) {
+    uint8_t ret = 0;
+
     /* select target bank */
-    uint8_t ret = swd_select(ctx, 0, 0, dp_bank);
-    if(ret != 1) {
-        DBGS("swd_select failed");
-        return ret;
+    if(dp_bank < 0x10) {
+        uint8_t ret = swd_select(ctx, 0, 0, dp_bank);
+        if(ret != 1) {
+            DBGS("swd_select failed");
+            return ret;
+        }
     }
 
     /* read data from it */
@@ -345,11 +359,15 @@ static uint8_t
 
 static uint8_t
     swd_write_dpbank(AppFSM* const ctx, uint8_t dp_off, uint8_t dp_bank, uint32_t* data) {
+    uint8_t ret = 0;
+
     /* select target bank */
-    uint8_t ret = swd_select(ctx, 0, 0, dp_bank);
-    if(ret != 1) {
-        DBGS("swd_select failed");
-        return ret;
+    if(dp_bank < 0x10) {
+        ret = swd_select(ctx, 0, 0, dp_bank);
+        if(ret != 1) {
+            DBGS("swd_select failed");
+            return ret;
+        }
     }
 
     /* write it */
@@ -362,6 +380,7 @@ static uint8_t
 }
 
 static uint8_t swd_read_ap(AppFSM* const ctx, uint8_t ap, uint8_t ap_off, uint32_t* data) {
+    /* select target bank */
     uint8_t ret = swd_select(ctx, ap, (ap_off >> 4) & 0x0F, 0);
     if(ret != 1) {
         DBGS("swd_select failed");
@@ -603,6 +622,7 @@ static void swd_apscan_reset(AppFSM* const ctx) {
 static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
     furi_assert(ctx);
     furi_assert(ap < sizeof(ctx->apidr_info));
+    bool ret = true;
 
     ctx->apidr_info[ap].tested = true;
 
@@ -624,19 +644,67 @@ static bool swd_apscan_test(AppFSM* const ctx, uint32_t ap) {
 
     if(swd_read_ap(ctx, ap, AP_BASE, &ctx->apidr_info[ap].base) != 1) {
         swd_abort(ctx);
-        return false;
+        ret = false;
     }
-    return true;
+    return ret;
 }
 
 /**************************  script helpers  **************************/
 
+static void swd_script_log(ScriptContext* ctx, FuriLogLevel level, const char* format, ...) {
+    bool commandline = false;
+    ScriptContext* cur = ctx;
+    char buffer[256];
+    va_list argp;
+    va_start(argp, format);
+
+    do {
+        if(cur == ctx->app->commandline) {
+            commandline = true;
+        }
+        cur = cur->parent;
+    } while(cur);
+
+    if(commandline) {
+        const char* prefix = "";
+
+        switch(level) {
+        case FuriLogLevelWarn:
+            prefix = "Warning: ";
+            break;
+        case FuriLogLevelError:
+            prefix = "ERROR: ";
+            break;
+        default:
+            break;
+        }
+
+        strcpy(buffer, prefix);
+        size_t pos = strlen(buffer);
+        vsnprintf(&buffer[pos], sizeof(buffer) - pos - 2, format, argp);
+        strcat(buffer, "\n");
+        usb_uart_tx_data(ctx->app->uart, (uint8_t*)buffer, strlen(buffer));
+    } else {
+        LOG(buffer);
+    }
+    va_end(argp);
+}
+
+/* read characters until newline was read */
 static bool swd_script_seek_newline(ScriptContext* ctx) {
     while(true) {
         uint8_t ch = 0;
-        uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
-        if(ret != 1) {
-            return false;
+
+        if(ctx->script_file) {
+            if(storage_file_read(ctx->script_file, &ch, 1) != 1) {
+                return false;
+            }
+        } else {
+            ch = ctx->line_data[ctx->line_pos];
+            if(ch == 0) {
+                return false;
+            }
+            ctx->line_pos++;
         }
         if(ch == '\n') {
             return true;
@@ -644,19 +712,37 @@ static bool swd_script_seek_newline(ScriptContext* ctx) {
     }
 }
 
+/* read whitespaces until the next character is read. 
+   returns false if EOF or newline was read */
 static bool swd_script_skip_whitespace(ScriptContext* ctx) {
     while(true) {
         uint8_t ch = 0;
-        uint64_t start_pos = storage_file_tell(ctx->script_file);
-        uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
-        if(ret != 1) {
-            return false;
+        uint64_t start_pos = 0;
+
+        if(ctx->script_file) {
+            start_pos = storage_file_tell(ctx->script_file);
+
+            if(storage_file_read(ctx->script_file, &ch, 1) != 1) {
+                return false;
+            }
+        } else {
+            start_pos = ctx->line_pos;
+            ch = ctx->line_data[ctx->line_pos];
+
+            if(ch == 0) {
+                return false;
+            }
+            ctx->line_pos++;
         }
         if(ch == '\n') {
             return false;
         }
         if(ch != ' ') {
-            storage_file_seek(ctx->script_file, start_pos, true);
+            if(ctx->script_file) {
+                storage_file_seek(ctx->script_file, start_pos, true);
+            } else {
+                ctx->line_pos = start_pos;
+            }
             return true;
         }
     }
@@ -670,12 +756,26 @@ static bool swd_script_get_string(ScriptContext* ctx, char* str, size_t max_leng
 
     while(true) {
         char ch = 0;
-        uint64_t start_pos = storage_file_tell(ctx->script_file);
-        uint16_t ret = storage_file_read(ctx->script_file, &ch, 1);
-        if(ret != 1) {
-            DBGS("end reached?");
-            return false;
+        uint64_t start_pos = 0;
+
+        if(ctx->script_file) {
+            start_pos = storage_file_tell(ctx->script_file);
+
+            if(storage_file_read(ctx->script_file, &ch, 1) != 1) {
+                DBGS("end reached");
+                return false;
+            }
+        } else {
+            start_pos = ctx->line_pos;
+            ch = ctx->line_data[ctx->line_pos];
+
+            if(ch == 0) {
+                DBGS("end reached");
+                return false;
+            }
+            ctx->line_pos++;
         }
+
         if(ch == '"') {
             quot = !quot;
             continue;
@@ -685,7 +785,11 @@ static bool swd_script_get_string(ScriptContext* ctx, char* str, size_t max_leng
                 break;
             }
             if(ch == '\r' || ch == '\n') {
-                storage_file_seek(ctx->script_file, start_pos, true);
+                if(ctx->script_file) {
+                    storage_file_seek(ctx->script_file, start_pos, true);
+                } else {
+                    ctx->line_pos = start_pos;
+                }
                 break;
             }
         }
@@ -763,6 +867,7 @@ static void swd_script_gui_refresh(ScriptContext* ctx) {
 
 static bool swd_scriptfunc_comment(ScriptContext* ctx) {
     DBGS("comment");
+
     swd_script_seek_newline(ctx);
 
     return true;
@@ -774,7 +879,7 @@ static bool swd_scriptfunc_label(ScriptContext* ctx) {
 
     swd_script_skip_whitespace(ctx);
     if(!swd_script_get_string(ctx, label, sizeof(label))) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse label");
         return false;
     }
 
@@ -794,7 +899,7 @@ static bool swd_scriptfunc_goto(ScriptContext* ctx) {
     swd_script_skip_whitespace(ctx);
 
     if(!swd_script_get_string(ctx, ctx->goto_label, sizeof(ctx->goto_label))) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse target label");
         return false;
     }
 
@@ -820,7 +925,7 @@ static bool swd_scriptfunc_call(ScriptContext* ctx) {
 
     /* append filename */
     if(!swd_script_get_string(ctx, &path[1], sizeof(filename) - strlen(path))) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse filename");
         return false;
     }
 
@@ -828,7 +933,7 @@ static bool swd_scriptfunc_call(ScriptContext* ctx) {
 
     /* append extension */
     if(strlen(filename) + 5 >= sizeof(filename)) {
-        DBGS("name too long");
+        swd_script_log(ctx, FuriLogLevelError, "name too long");
         return false;
     }
 
@@ -837,7 +942,7 @@ static bool swd_scriptfunc_call(ScriptContext* ctx) {
     bool ret = swd_execute_script(ctx->app, filename);
 
     if(!ret) {
-        DBG("failed to exec '%s'", filename);
+        swd_script_log(ctx, FuriLogLevelError, "failed to exec '%s'", filename);
         return false;
     }
 
@@ -851,7 +956,7 @@ static bool swd_scriptfunc_status(ScriptContext* ctx) {
     swd_script_skip_whitespace(ctx);
     swd_script_get_number(ctx, &status);
 
-    ctx->status_ignore = status == 0;
+    ctx->status_ignore = (status == 0);
 
     swd_script_seek_newline(ctx);
 
@@ -865,7 +970,7 @@ static bool swd_scriptfunc_errors(ScriptContext* ctx) {
     swd_script_skip_whitespace(ctx);
 
     if(!swd_script_get_string(ctx, type, sizeof(type))) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse");
         return false;
     }
 
@@ -902,17 +1007,17 @@ static bool swd_scriptfunc_message(ScriptContext* ctx) {
     bool show_dialog = false;
 
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_number(ctx, &wait_time)) {
-        DBGS("failed to parse wait_time");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse wait_time");
         return false;
     }
 
     if(!swd_script_get_string(ctx, message, sizeof(message))) {
-        DBGS("failed to parse message");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse message");
         return false;
     }
 
@@ -923,7 +1028,7 @@ static bool swd_scriptfunc_message(ScriptContext* ctx) {
     }
 
     if(wait_time <= 60 * 1000) {
-        strcpy(ctx->app->state_string, message);
+        strncpy(ctx->app->state_string, message, sizeof(ctx->app->state_string));
         swd_script_gui_refresh(ctx);
         furi_delay_ms(wait_time);
         if(show_dialog) {
@@ -946,19 +1051,19 @@ static bool swd_scriptfunc_swd_idle_bits(ScriptContext* ctx) {
     uint32_t swd_idle_bits = 0;
 
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_number(ctx, &swd_idle_bits)) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse");
         return false;
     }
 
     if(swd_idle_bits <= 32) {
         ctx->app->swd_idle_bits = swd_idle_bits;
     } else {
-        DBGS("value must be between 1 and 32");
+        swd_script_log(ctx, FuriLogLevelError, "value must be between 1 and 32");
     }
 
     swd_script_seek_newline(ctx);
@@ -970,19 +1075,19 @@ static bool swd_scriptfunc_swd_clock_delay(ScriptContext* ctx) {
     uint32_t swd_clock_delay = 0;
 
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_number(ctx, &swd_clock_delay)) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse");
         return false;
     }
 
     if(swd_clock_delay <= 1000000) {
         ctx->app->swd_clock_delay = swd_clock_delay;
     } else {
-        DBGS("value must be between 1 and 1000000");
+        swd_script_log(ctx, FuriLogLevelError, "value must be between 1 and 1000000");
     }
 
     swd_script_seek_newline(ctx);
@@ -994,12 +1099,12 @@ static bool swd_scriptfunc_maxtries(ScriptContext* ctx) {
     uint32_t max_tries = 0;
 
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_number(ctx, &max_tries)) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse");
         return false;
     }
 
@@ -1018,19 +1123,19 @@ static bool swd_scriptfunc_blocksize(ScriptContext* ctx) {
     uint32_t block_size = 0;
 
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_number(ctx, &block_size)) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse");
         return false;
     }
 
     if(block_size >= 4 && block_size <= 0x1000) {
         ctx->block_size = block_size;
     } else {
-        DBGS("value must be between 4 and 4096");
+        swd_script_log(ctx, FuriLogLevelError, "value must be between 4 and 4096");
     }
 
     swd_script_seek_newline(ctx);
@@ -1042,17 +1147,17 @@ static bool swd_scriptfunc_apselect(ScriptContext* ctx) {
     uint32_t ap = 0;
 
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_number(ctx, &ap)) {
-        DBGS("failed to parse");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse AP");
         return false;
     }
 
     if(!swd_apscan_test(ctx->app, ap)) {
-        DBGS("no selected AP");
+        swd_script_log(ctx, FuriLogLevelError, "no selected AP");
         return false;
     }
 
@@ -1094,23 +1199,23 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
 
     /* get file */
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     if(!swd_script_get_string(ctx, filename, sizeof(filename))) {
-        DBGS("failed to parse filename");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse filename");
         return false;
     }
     /* get address */
     if(!swd_script_get_number(ctx, &address)) {
-        DBGS("failed to parse address");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse address");
         return false;
     }
 
     /* get length */
     if(!swd_script_get_number(ctx, &length)) {
-        DBGS("failed to parse length");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse length");
         return false;
     }
 
@@ -1139,6 +1244,8 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
     }
 
     uint8_t* buffer = malloc(ctx->block_size);
+
+    furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
 
     for(uint32_t pos = 0; pos < length; pos += ctx->block_size) {
         if((pos & 0xFF) == 0) {
@@ -1207,6 +1314,8 @@ static bool swd_scriptfunc_mem_dump(ScriptContext* ctx) {
         storage_file_write(dump, buffer, ctx->block_size);
     }
 
+    furi_mutex_release(ctx->app->swd_mutex);
+
     storage_file_close(dump);
     swd_script_seek_newline(ctx);
     free(buffer);
@@ -1221,19 +1330,19 @@ static bool swd_scriptfunc_mem_write(ScriptContext* ctx) {
 
     /* get file */
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     /* get address */
     if(!swd_script_get_number(ctx, &address)) {
-        DBGS("failed to parse 1");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse address");
         return false;
     }
 
     /* get data */
     if(!swd_script_get_number(ctx, &data)) {
-        DBGS("failed to parse 2");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse data");
         return false;
     }
 
@@ -1246,7 +1355,9 @@ static bool swd_scriptfunc_mem_write(ScriptContext* ctx) {
             break;
         }
 
+        furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
         access_ok = swd_write_memory(ctx->app, ctx->selected_ap, address, data) == 1;
+        furi_mutex_release(ctx->app->swd_mutex);
         access_ok |= ctx->errors_ignore;
         swd_read_memory(ctx->app, ctx->selected_ap, address, &data);
         DBG("read %08lX from %08lX", data, address);
@@ -1258,6 +1369,8 @@ static bool swd_scriptfunc_mem_write(ScriptContext* ctx) {
                 "Failed write 0x%08lX",
                 address);
             swd_script_gui_refresh(ctx);
+        } else {
+            break;
         }
     }
 
@@ -1277,27 +1390,26 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
     uint32_t mask = 0;
     bool success = true;
 
-    /* get file */
     if(!swd_script_skip_whitespace(ctx)) {
-        DBGS("missing whitespace");
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
         return false;
     }
 
     /* get address */
     if(!swd_script_get_number(ctx, &address)) {
-        DBGS("failed to parse 1");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse address");
         return false;
     }
 
     /* get data */
     if(!swd_script_get_number(ctx, &data)) {
-        DBGS("failed to parse 2");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse data");
         return false;
     }
 
     /* get mask */
     if(!swd_script_get_number(ctx, &mask)) {
-        DBGS("failed to parse 2");
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse mask");
         return false;
     }
 
@@ -1310,10 +1422,13 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
             DBGS("aborting");
             break;
         }
+        furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
+
         access_ok = swd_read_memory(ctx->app, ctx->selected_ap, address, &modified) == 1;
         modified = (modified & mask) | data;
         access_ok &= swd_write_memory(ctx->app, ctx->selected_ap, address, modified) == 1;
 
+        furi_mutex_release(ctx->app->swd_mutex);
         access_ok |= ctx->errors_ignore;
 
         if(!access_ok) {
@@ -1323,6 +1438,8 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
                 "Failed access 0x%08lX",
                 address);
             swd_script_gui_refresh(ctx);
+        } else {
+            break;
         }
     }
 
@@ -1330,6 +1447,164 @@ static bool swd_scriptfunc_mem_ldmst(ScriptContext* ctx) {
         notification_message_block(ctx->app->notification, &seq_error);
         success = false;
     }
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static bool swd_scriptfunc_dp_write(ScriptContext* ctx) {
+    uint32_t dp_bank = 0;
+    uint32_t dp_off = 0;
+    uint32_t data = 0;
+    bool success = true;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
+        return false;
+    }
+
+    /* get data */
+    if(!swd_script_get_number(ctx, &data)) {
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse data");
+        return false;
+    }
+
+    /* get dp_off */
+    if(!swd_script_get_number(ctx, &dp_off)) {
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse DP offset");
+        return false;
+    }
+
+    /* get dp_bank */
+    if(!swd_script_get_number(ctx, &dp_bank)) {
+        dp_bank = 0xFF;
+    }
+
+    swd_script_log(
+        ctx, FuriLogLevelDefault, "write %08lX to reg %08lX / bank %08lX", data, dp_off, dp_bank);
+
+    furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
+
+    uint8_t ret = swd_write_dpbank(ctx->app, dp_off, dp_bank, &data);
+    if(ret != 1) {
+        swd_script_log(ctx, FuriLogLevelError, "swd_write_dpbank failed");
+        success = false;
+    }
+
+    furi_mutex_release(ctx->app->swd_mutex);
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static bool swd_scriptfunc_dp_read(ScriptContext* ctx) {
+    uint32_t dp_bank = 0;
+    uint32_t dp_off = 0;
+    uint32_t data = 0;
+    bool success = true;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
+        return false;
+    }
+
+    /* get dp_off */
+    if(!swd_script_get_number(ctx, &dp_off)) {
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse DP offset");
+        return false;
+    }
+
+    /* get dp_bank */
+    if(!swd_script_get_number(ctx, &dp_bank)) {
+        dp_bank = 0xFF;
+    }
+
+    swd_script_log(ctx, FuriLogLevelDefault, "read reg %02lX / bank %02lX", dp_off, dp_bank);
+
+    furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
+
+    uint8_t ret = swd_read_dpbank(ctx->app, dp_off, dp_bank, &data);
+    if(ret != 1) {
+        swd_script_log(ctx, FuriLogLevelError, "swd_read_dpbank failed");
+        success = false;
+    } else {
+        swd_script_log(ctx, FuriLogLevelDefault, "result: 0x%08lX", data);
+    }
+    furi_mutex_release(ctx->app->swd_mutex);
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static bool swd_scriptfunc_ap_write(ScriptContext* ctx) {
+    uint32_t ap_reg = 0;
+    uint32_t data = 0;
+    bool success = true;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
+        return false;
+    }
+
+    /* get data */
+    if(!swd_script_get_number(ctx, &data)) {
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse data");
+        return false;
+    }
+
+    /* get ap_reg */
+    if(!swd_script_get_number(ctx, &ap_reg)) {
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse AP register");
+        return false;
+    }
+
+    swd_script_log(
+        ctx, FuriLogLevelDefault, "AP%d %08lX -> %02lX", ctx->selected_ap, data, ap_reg);
+
+    furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
+
+    uint8_t ret = swd_write_ap(ctx->app, ctx->selected_ap, ap_reg, data);
+    if(ret != 1) {
+        swd_script_log(ctx, FuriLogLevelError, "swd_write_ap failed");
+        success = false;
+    }
+    furi_mutex_release(ctx->app->swd_mutex);
+
+    swd_script_seek_newline(ctx);
+
+    return success;
+}
+
+static bool swd_scriptfunc_ap_read(ScriptContext* ctx) {
+    uint32_t ap_reg = 0;
+    uint32_t data = 0;
+    bool success = true;
+
+    if(!swd_script_skip_whitespace(ctx)) {
+        swd_script_log(ctx, FuriLogLevelError, "missing whitespace");
+        return false;
+    }
+
+    /* get ap_reg */
+    if(!swd_script_get_number(ctx, &ap_reg)) {
+        swd_script_log(ctx, FuriLogLevelError, "failed to parse AP register");
+        return false;
+    }
+
+    furi_mutex_acquire(ctx->app->swd_mutex, FuriWaitForever);
+
+    uint8_t ret = swd_read_ap(ctx->app, ctx->selected_ap, ap_reg, &data);
+    if(ret != 1) {
+        swd_script_log(ctx, FuriLogLevelError, "swd_read_ap failed");
+        success = false;
+    } else {
+        swd_script_log(
+            ctx, FuriLogLevelDefault, "AP%d %02lX: %08lX", ctx->selected_ap, ap_reg, data);
+    }
+    furi_mutex_release(ctx->app->swd_mutex);
 
     swd_script_seek_newline(ctx);
 
@@ -1345,8 +1620,6 @@ static const ScriptFunctionInfo script_funcs[] = {
     {"errors", &swd_scriptfunc_errors},
     {"message", &swd_scriptfunc_message},
     {"beep", &swd_scriptfunc_beep},
-    {"apscan", &swd_scriptfunc_apscan},
-    {"apselect", &swd_scriptfunc_apselect},
     {"max_tries", &swd_scriptfunc_maxtries},
     {"swd_clock_delay", &swd_scriptfunc_swd_clock_delay},
     {"swd_idle_bits", &swd_scriptfunc_swd_idle_bits},
@@ -1354,18 +1627,35 @@ static const ScriptFunctionInfo script_funcs[] = {
     {"abort", &swd_scriptfunc_abort},
     {"mem_dump", &swd_scriptfunc_mem_dump},
     {"mem_ldmst", &swd_scriptfunc_mem_ldmst},
-    {"mem_write", &swd_scriptfunc_mem_write}};
+    {"mem_write", &swd_scriptfunc_mem_write},
+    {"dp_write", &swd_scriptfunc_dp_write},
+    {"dp_read", &swd_scriptfunc_dp_read},
+    {"ap_scan", &swd_scriptfunc_apscan},
+    {"ap_select", &swd_scriptfunc_apselect},
+    {"ap_read", &swd_scriptfunc_ap_read},
+    {"ap_write", &swd_scriptfunc_ap_write}};
 
 /************************** script main code **************************/
 
 static bool swd_execute_script_line(ScriptContext* const ctx) {
     char buffer[64];
-    uint64_t start_pos = storage_file_tell(ctx->script_file);
-    uint16_t ret = storage_file_read(ctx->script_file, buffer, 2);
-    storage_file_seek(ctx->script_file, start_pos, true);
+    uint64_t start_pos = 0;
 
-    if(ret < 2) {
-        return true;
+    if(ctx->script_file) {
+        start_pos = storage_file_tell(ctx->script_file);
+        uint16_t ret = storage_file_read(ctx->script_file, buffer, 2);
+        storage_file_seek(ctx->script_file, start_pos, true);
+
+        if(ret < 2) {
+            return true;
+        }
+    } else {
+        start_pos = ctx->line_pos;
+        strncpy(buffer, ctx->line_data, 2);
+
+        if(buffer[0] == 0 || buffer[1] == 0) {
+            return true;
+        }
     }
 
     if(buffer[0] == '\n' || (buffer[0] == '\r' && buffer[1] == '\n')) {
@@ -1378,16 +1668,24 @@ static bool swd_execute_script_line(ScriptContext* const ctx) {
             DBGS("aborting");
             break;
         }
-        char buffer[64];
-
-        storage_file_seek(ctx->script_file, start_pos, true);
-
         size_t expected = strlen(script_funcs[entry].prefix);
-        uint16_t ret = storage_file_read(ctx->script_file, buffer, expected);
 
-        if(ret != expected) {
-            continue;
+        if(ctx->script_file) {
+            storage_file_seek(ctx->script_file, start_pos, true);
+
+            if(storage_file_read(ctx->script_file, buffer, expected) != expected) {
+                continue;
+            }
+        } else {
+            ctx->line_pos = start_pos;
+
+            if(strlen(ctx->line_data) < expected) {
+                continue;
+            }
+            strncpy(buffer, ctx->line_data, expected);
+            ctx->line_pos += expected;
         }
+
         buffer[expected] = '\000';
         if(strncmp(buffer, script_funcs[entry].prefix, expected)) {
             continue;
@@ -1419,7 +1717,8 @@ static bool swd_execute_script_line(ScriptContext* const ctx) {
             success = script_funcs[entry].func(ctx);
 
             if(!success && !ctx->errors_ignore) {
-                DBG("Command failed: %s", script_funcs[entry].prefix);
+                swd_script_log(
+                    ctx, FuriLogLevelError, "Command failed: %s", script_funcs[entry].prefix);
                 snprintf(
                     ctx->app->state_string,
                     sizeof(ctx->app->state_string),
@@ -1431,7 +1730,7 @@ static bool swd_execute_script_line(ScriptContext* const ctx) {
 
         return true;
     }
-    DBG("unknown command '%s'", buffer);
+    swd_script_log(ctx, FuriLogLevelError, "unknown command '%s'", buffer);
 
     return false;
 }
@@ -1545,25 +1844,6 @@ static bool swd_execute_script(AppFSM* const ctx, const char* filename) {
 
 /************************** UI functions **************************/
 
-/*
-#define NUM_EDGES 12
-#define NUM_VERTICES 8
-
-const int vertexCoords[NUM_VERTICES][3] = {
-    {-1, -1, -1},
-    {1, -1, -1},
-    {1, 1, -1},
-    {-1, 1, -1},
-    {-1, -1, 1},
-    {1, -1, 1},
-    {1, 1, 1},
-    {-1, 1, 1}};
-
-const int edgeIndices[NUM_EDGES][2] =
-    {{0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
-
-*/
-
 #define CANVAS_WIDTH 128
 #define CANVAS_HEIGHT 64
 
@@ -1644,11 +1924,12 @@ static void draw_model(Canvas* const canvas) {
     zoom += speed * 0.005;
 }
 
-static void render_callback(Canvas* const canvas, void* cb_ctx) {
-    AppFSM* ctx = acquire_mutex((ValueMutex*)cb_ctx, 25);
-    if(ctx == NULL) {
-        return;
-    }
+static void render_callback(Canvas* const canvas, void* ctx_in) {
+    furi_assert(canvas);
+    furi_assert(ctx_in);
+
+    AppFSM* ctx = ctx_in;
+    furi_mutex_acquire(ctx->gui_mutex, FuriWaitForever);
 
     char buffer[64];
     int y = 10;
@@ -1656,262 +1937,15 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-    if(ctx->detected_device) {
-        /* if seen less than a quarter second ago */
-        switch(ctx->mode_page) {
-        case ModePageScan: {
-            if((ctx->detected_timeout + TIMER_HZ / 4) >= TIMER_HZ * TIMEOUT) {
-                snprintf(buffer, sizeof(buffer), "FOUND!");
-            } else {
-                /* if it was seen more than a quarter second ago, show countdown */
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "FOUND! (%lus)",
-                    (ctx->detected_timeout / TIMER_HZ) + 1);
-            }
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, buffer);
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
+    if(!ctx->detected_device) {
+        ctx->mode_page = ModePageScan;
+    } else if(ctx->mode_page == ModePageScan) {
+        ctx->mode_page = ModePageFound;
+    }
 
-            snprintf(
-                buffer,
-                sizeof(buffer),
-                "SWC/SWD: %s/%s",
-                gpio_name(ctx->io_swc),
-                gpio_name(ctx->io_swd));
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-            snprintf(buffer, sizeof(buffer), "DPIDR 0x%08lX", ctx->dp_regs.dpidr);
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-
-            snprintf(
-                buffer,
-                sizeof(buffer),
-                "Part %02X Rev %X DAPv%d",
-                ctx->dpidr_info.partno,
-                ctx->dpidr_info.revision,
-                ctx->dpidr_info.version);
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-
-            canvas_set_font(canvas, FontSecondary);
-            snprintf(buffer, sizeof(buffer), "%s", jep106_manufacturer(ctx->dpidr_info.designer));
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            y += 10;
-
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "Script");
-            elements_button_right(canvas, "DP Regs");
-
-            break;
-        }
-        case ModePageDPRegs: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP Registers");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-            if(ctx->dp_regs.dpidr_ok) {
-                snprintf(buffer, sizeof(buffer), "DPIDR %08lX", ctx->dp_regs.dpidr);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-
-            if(ctx->dp_regs.ctrlstat_ok) {
-                snprintf(buffer, sizeof(buffer), "CTRL  %08lX", ctx->dp_regs.ctrlstat);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-
-            if(ctx->dp_regs.targetid_ok) {
-                snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-
-            if(ctx->dp_regs.eventstat_ok) {
-                snprintf(buffer, sizeof(buffer), "EVTST %08lX", ctx->dp_regs.eventstat);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-            }
-            y += 10;
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "Scan");
-            elements_button_right(canvas, "DPID");
-            break;
-        }
-        case ModePageDPID: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP ID Register");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-            if(ctx->dpidr_info.version != 2) {
-                snprintf(buffer, sizeof(buffer), "TARGETID not supported");
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-            } else {
-                if(ctx->dp_regs.targetid_ok) {
-                    snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
-                    canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                    y += 10;
-
-                    snprintf(buffer, sizeof(buffer), "Part No. %04X", ctx->targetid_info.partno);
-                    canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                    y += 10;
-                    snprintf(
-                        buffer,
-                        sizeof(buffer),
-                        "%s",
-                        jep106_manufacturer(ctx->targetid_info.designer));
-                    canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                    y += 10;
-                }
-            }
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "DP Regs");
-            elements_button_right(canvas, "APs");
-            break;
-        }
-        case ModePageAPID: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP Menu");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-
-            char state = ' ';
-            if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos <= ctx->ap_scanned + 10) {
-                state = '*';
-            }
-
-            if(!ctx->apidr_info[ctx->ap_pos].ok) {
-                snprintf(buffer, sizeof(buffer), "[%d]%c<none>", ctx->ap_pos, state);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                if(ctx->ap_pos == 0) {
-                    for(size_t pos = 0; pos < COUNT(ctx->apidr_info); pos++) {
-                        if(ctx->apidr_info[pos].ok) {
-                            ctx->ap_pos = pos;
-                        }
-                    }
-                }
-            } else {
-                const char* class = "";
-
-                switch(ctx->apidr_info[ctx->ap_pos].class) {
-                case 0:
-                    class = "und";
-                    break;
-                case 1:
-                    class = "COM";
-                    break;
-                case 8:
-                    class = "MEM";
-                    break;
-                default:
-                    class = "unk";
-                    break;
-                }
-
-                const char* types[] = {
-                    "COM-AP",
-                    "AHB3",
-                    "APB2 or APB3",
-                    "Type unknown",
-                    "AXI3 or AXI4",
-                    "AHB5",
-                    "APB4 and APB5",
-                    "AXI5",
-                    "AHB5 enh.",
-                };
-                const char* type = "Type unk";
-
-                if(ctx->apidr_info[ctx->ap_pos].type < COUNT(types)) {
-                    type = types[ctx->apidr_info[ctx->ap_pos].type];
-                }
-
-                snprintf(buffer, sizeof(buffer), "[%d]%c%s, %s", ctx->ap_pos, state, class, type);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                snprintf(
-                    buffer, sizeof(buffer), "Base 0x%08lX", ctx->apidr_info[ctx->ap_pos].base);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "Rev %d Var %d",
-                    ctx->apidr_info[ctx->ap_pos].revision,
-                    ctx->apidr_info[ctx->ap_pos].variant);
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                snprintf(
-                    buffer,
-                    sizeof(buffer),
-                    "%s",
-                    jep106_manufacturer(ctx->apidr_info[ctx->ap_pos].designer));
-                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
-                y += 10;
-
-                elements_button_center(canvas, "Show");
-            }
-            canvas_set_font(canvas, FontSecondary);
-            elements_button_left(canvas, "DPID");
-            elements_scrollbar_pos(
-                canvas, 4, 10, 40, ctx->ap_pos / 32, COUNT(ctx->apidr_info) / 32);
-        } break;
-
-            /* hex dump view */
-        case ModePageHexDump: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Hex dump");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-
-            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, "Addr:");
-
-            snprintf(buffer, sizeof(buffer), "%08lX", ctx->hex_addr);
-            canvas_draw_str_aligned(canvas, 38, y, AlignLeft, AlignBottom, buffer);
-            uint32_t font_width = canvas_glyph_width(canvas, '0');
-            uint32_t x = 37 + (7 - ctx->hex_select) * font_width;
-
-            /* draw selection */
-            canvas_draw_line(canvas, x, y + 1, x + font_width, y + 1);
-            y += 10;
-
-            uint32_t byte_num = 0;
-            for(int line = 0; line < 4; line++) {
-                uint32_t x_pos = 5;
-
-                for(int byte_pos = 0; byte_pos < 8; byte_pos++) {
-                    if(ctx->hex_buffer_valid[byte_num / 4]) {
-                        snprintf(buffer, sizeof(buffer), "%02X", ctx->hex_buffer[byte_num]);
-                    } else {
-                        snprintf(buffer, sizeof(buffer), "--");
-                    }
-                    byte_num++;
-                    canvas_draw_str_aligned(canvas, x_pos, y, AlignLeft, AlignBottom, buffer);
-                    x_pos += font_width * 2 + font_width / 2;
-                }
-                y += 10;
-            }
-
-            break;
-        }
-
-            /* hex dump view */
-        case ModePageScript: {
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Script");
-            y += 10;
-            y += 10;
-            canvas_draw_str_aligned(canvas, 10, y, AlignLeft, AlignBottom, "Status:");
-            y += 10;
-            canvas_set_font(canvas, FontKeyboard);
-            canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, ctx->state_string);
-            y += 10;
-
-        } break;
-        }
-    } else {
+    /* if seen less than a quarter second ago */
+    switch(ctx->mode_page) {
+    case ModePageScan: {
         draw_model(canvas);
 
         canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Searching");
@@ -1958,32 +1992,278 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         }
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "Script");
+        break;
+    }
+    case ModePageFound: {
+        if((ctx->detected_timeout + TIMER_HZ / 4) >= TIMER_HZ * TIMEOUT) {
+            snprintf(buffer, sizeof(buffer), "FOUND!");
+        } else {
+            /* if it was seen more than a quarter second ago, show countdown */
+            snprintf(
+                buffer, sizeof(buffer), "FOUND! (%lus)", (ctx->detected_timeout / TIMER_HZ) + 1);
+        }
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, buffer);
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "SWC/SWD: %s/%s",
+            gpio_name(ctx->io_swc),
+            gpio_name(ctx->io_swd));
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+        snprintf(buffer, sizeof(buffer), "DPIDR 0x%08lX", ctx->dp_regs.dpidr);
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Part %02X Rev %X DAPv%d",
+            ctx->dpidr_info.partno,
+            ctx->dpidr_info.revision,
+            ctx->dpidr_info.version);
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(buffer, sizeof(buffer), "%s", jep106_manufacturer(ctx->dpidr_info.designer));
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "Script");
+        elements_button_right(canvas, "DP Regs");
+
+        break;
+    }
+    case ModePageDPRegs: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP Registers");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+        if(ctx->dp_regs.dpidr_ok) {
+            snprintf(buffer, sizeof(buffer), "DPIDR %08lX", ctx->dp_regs.dpidr);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+
+        if(ctx->dp_regs.ctrlstat_ok) {
+            snprintf(buffer, sizeof(buffer), "CTRL  %08lX", ctx->dp_regs.ctrlstat);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+
+        if(ctx->dp_regs.targetid_ok) {
+            snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+
+        if(ctx->dp_regs.eventstat_ok) {
+            snprintf(buffer, sizeof(buffer), "EVTST %08lX", ctx->dp_regs.eventstat);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        }
+        y += 10;
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "Scan");
+        elements_button_right(canvas, "DPID");
+
+        break;
     }
 
-    release_mutex((ValueMutex*)cb_ctx, ctx);
+    case ModePageDPID: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "DP ID Register");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+        if(ctx->dpidr_info.version != 2) {
+            snprintf(buffer, sizeof(buffer), "TARGETID not supported");
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+        } else {
+            if(ctx->dp_regs.targetid_ok) {
+                snprintf(buffer, sizeof(buffer), "TGTID %08lX", ctx->dp_regs.targetid);
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+
+                snprintf(buffer, sizeof(buffer), "Part No. %04X", ctx->targetid_info.partno);
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+                snprintf(
+                    buffer, sizeof(buffer), "%s", jep106_manufacturer(ctx->targetid_info.designer));
+                canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+                y += 10;
+            }
+        }
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "DP Regs");
+        elements_button_right(canvas, "APs");
+        break;
+    }
+
+    case ModePageAPID: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "AP Menu");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+
+        char state = ' ';
+        if(ctx->ap_pos >= ctx->ap_scanned && ctx->ap_pos <= ctx->ap_scanned + 10) {
+            state = '*';
+        }
+
+        if(!ctx->apidr_info[ctx->ap_pos].ok) {
+            snprintf(buffer, sizeof(buffer), "[%d]%c<none>", ctx->ap_pos, state);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            if(ctx->ap_pos == 0) {
+                for(size_t pos = 0; pos < COUNT(ctx->apidr_info); pos++) {
+                    if(ctx->apidr_info[pos].ok) {
+                        ctx->ap_pos = pos;
+                    }
+                }
+            }
+        } else {
+            const char* class = "";
+
+            switch(ctx->apidr_info[ctx->ap_pos].class) {
+            case 0:
+                class = "und";
+                break;
+            case 1:
+                class = "COM";
+                break;
+            case 8:
+                class = "MEM";
+                break;
+            default:
+                class = "unk";
+                break;
+            }
+
+            const char* types[] = {
+                "COM-AP",
+                "AHB3",
+                "APB2 or APB3",
+                "Type unknown",
+                "AXI3 or AXI4",
+                "AHB5",
+                "APB4 and APB5",
+                "AXI5",
+                "AHB5 enh.",
+            };
+            const char* type = "Type unk";
+
+            if(ctx->apidr_info[ctx->ap_pos].type < COUNT(types)) {
+                type = types[ctx->apidr_info[ctx->ap_pos].type];
+            }
+
+            snprintf(buffer, sizeof(buffer), "[%d]%c%s, %s", ctx->ap_pos, state, class, type);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            snprintf(buffer, sizeof(buffer), "Base 0x%08lX", ctx->apidr_info[ctx->ap_pos].base);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "Rev %d Var %d",
+                ctx->apidr_info[ctx->ap_pos].revision,
+                ctx->apidr_info[ctx->ap_pos].variant);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "%s",
+                jep106_manufacturer(ctx->apidr_info[ctx->ap_pos].designer));
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            y += 10;
+
+            elements_button_center(canvas, "Show");
+        }
+        canvas_set_font(canvas, FontSecondary);
+        elements_button_left(canvas, "DPID");
+        elements_scrollbar_pos(canvas, 4, 10, 40, ctx->ap_pos / 32, COUNT(ctx->apidr_info) / 32);
+        break;
+    }
+
+    /* hex dump view */
+    case ModePageHexDump: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Hex dump");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, "Addr:");
+
+        snprintf(buffer, sizeof(buffer), "%08lX", ctx->hex_addr);
+        canvas_draw_str_aligned(canvas, 38, y, AlignLeft, AlignBottom, buffer);
+        uint32_t font_width = canvas_glyph_width(canvas, '0');
+        uint32_t x = 37 + (7 - ctx->hex_select) * font_width;
+
+        /* draw selection */
+        canvas_draw_line(canvas, x, y + 1, x + font_width, y + 1);
+        y += 10;
+
+        uint32_t byte_num = 0;
+        for(int line = 0; line < 4; line++) {
+            uint32_t x_pos = 5;
+
+            for(int byte_pos = 0; byte_pos < 8; byte_pos++) {
+                if(ctx->hex_buffer_valid[byte_num / 4]) {
+                    snprintf(buffer, sizeof(buffer), "%02X", ctx->hex_buffer[byte_num]);
+                } else {
+                    snprintf(buffer, sizeof(buffer), "--");
+                }
+                byte_num++;
+                canvas_draw_str_aligned(canvas, x_pos, y, AlignLeft, AlignBottom, buffer);
+                x_pos += font_width * 2 + font_width / 2;
+            }
+            y += 10;
+        }
+        break;
+    }
+
+    /* hex dump view */
+    case ModePageScript: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Script");
+        y += 10;
+        y += 10;
+        canvas_draw_str_aligned(canvas, 10, y, AlignLeft, AlignBottom, "Status:");
+        y += 10;
+        canvas_set_font(canvas, FontKeyboard);
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, ctx->state_string);
+        y += 10;
+        break;
+    }
+    }
+
+    furi_mutex_release(ctx->gui_mutex);
 }
 
-static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
+static void input_callback(InputEvent* input_event, void* ctx_in) {
+    furi_assert(input_event);
+    furi_assert(ctx_in);
+    AppFSM* ctx = ctx_in;
 
+    int entries = furi_message_queue_get_count(ctx->event_queue);
+
+    DBG("furi_message_queue_get_count: %d", entries);
     /* better skip than sorry */
-    if(furi_message_queue_get_count(event_queue) < QUEUE_SIZE) {
+    if(entries < QUEUE_SIZE) {
+        DBGS("furi_message_queue_put");
         AppEvent event = {.type = EventKeyPress, .input = *input_event};
-        furi_message_queue_put(event_queue, &event, 100);
-    }
-}
-
-static void timer_tick_callback(FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
-
-    /* filling buffer makes no sense, as we lost timing anyway */
-    if(furi_message_queue_get_count(event_queue) < 1) {
-        AppEvent event = {.type = EventTimerTick};
-        furi_message_queue_put(event_queue, &event, 100);
+        furi_message_queue_put(ctx->event_queue, &event, 0);
     }
 }
 
 static void app_init(AppFSM* const app) {
+    furi_assert(app);
+
     app->loop_count = 0;
     app->current_mask_id = 0;
     app->current_mask = gpio_direction_mask[app->current_mask_id];
@@ -1998,17 +2278,25 @@ static void app_init(AppFSM* const app) {
     strcpy(app->script_detected, "");
 }
 
-static void app_deinit(AppFSM* const ctx) {
-    furi_timer_free(ctx->timer);
+static void app_deinit(AppFSM* const app) {
+    furi_assert(app);
+
+    strcpy(app->state_string, "exiting");
 }
 
-static void on_timer_tick(AppFSM* ctx) {
+static void swd_main_loop(AppFSM* ctx) {
+    furi_assert(ctx);
+
     ctx->loop_count++;
 
     switch(ctx->mode_page) {
-    case ModePageScan: {
+    case ModePageScan:
+    case ModePageFound: {
         /* reset after timeout */
-        if(ctx->detected_timeout == 0) {
+        if(ctx->detected_timeout > 0) {
+            ctx->detected_timeout--;
+        } else {
+            DBGS("Reset detected flag");
             ctx->detected_device = false;
             ctx->io_swd = 0xFF;
             ctx->io_swc = 0xFF;
@@ -2019,8 +2307,6 @@ static void on_timer_tick(AppFSM* ctx) {
             memset(&ctx->targetid_info, 0x00, sizeof(ctx->targetid_info));
             memset(&ctx->apidr_info, 0x00, sizeof(ctx->apidr_info));
             ctx->script_detected_executed = false;
-        } else {
-            ctx->detected_timeout--;
         }
 
         ctx->detected = false;
@@ -2032,10 +2318,13 @@ static void on_timer_tick(AppFSM* ctx) {
         }
 
         /* do the scan */
+        furi_mutex_acquire(ctx->swd_mutex, FuriWaitForever);
         swd_scan(ctx);
+        furi_mutex_release(ctx->swd_mutex);
 
         /* now when detected a device, set the timeout */
         if(ctx->detected) {
+            DBGS("Set detected flag");
             ctx->detected_device = true;
             ctx->detected_timeout = TIMER_HZ * TIMEOUT;
 
@@ -2049,6 +2338,7 @@ static void on_timer_tick(AppFSM* ctx) {
                 DBGS(" - Detected pins");
                 DBGS(" - Resetting error");
 
+                furi_mutex_acquire(ctx->swd_mutex, FuriWaitForever);
                 /* reset error */
                 /* first make sure we have the correct bank by invalidating the current select cache */
                 ctx->dp_regs.select_ok = false;
@@ -2111,8 +2401,9 @@ static void on_timer_tick(AppFSM* ctx) {
 
                     ctx->mode_page = ModePageScript;
                     swd_execute_script(ctx, ctx->script_detected);
-                    ctx->mode_page = ModePageScan;
+                    ctx->mode_page = ModePageFound;
                 }
+                furi_mutex_release(ctx->swd_mutex);
             }
         } else {
             if(!has_multiple_bits(ctx->io_swc)) {
@@ -2127,8 +2418,10 @@ static void on_timer_tick(AppFSM* ctx) {
     case ModePageDPRegs:
     case ModePageDPID:
     case ModePageAPID: {
+        furi_mutex_acquire(ctx->swd_mutex, FuriWaitForever);
         /* set debug enable request */
         if(!swd_ensure_powerup(ctx)) {
+            furi_mutex_release(ctx->swd_mutex);
             break;
         }
 
@@ -2147,28 +2440,25 @@ static void on_timer_tick(AppFSM* ctx) {
                 break;
             }
         }
+        furi_mutex_release(ctx->swd_mutex);
         break;
     }
 
     case ModePageHexDump: {
-        if(ctx->hex_read_delay++ < 10) {
-            break;
-        }
-        ctx->hex_read_delay = 0;
+        furi_mutex_acquire(ctx->swd_mutex, FuriWaitForever);
 
-        memset(ctx->hex_buffer, 0xEE, sizeof(ctx->hex_buffer));
+        for(size_t byte_pos = 0; byte_pos < sizeof(ctx->hex_buffer); byte_pos += 4) {
+            uint32_t* data = (uint32_t*)&ctx->hex_buffer[byte_pos];
+            bool ret = swd_read_memory(ctx, ctx->ap_pos, ctx->hex_addr + byte_pos, data) == 1;
 
-        uint32_t addr = ctx->hex_addr;
-        uint32_t data = 0;
-        for(size_t pos = 0; pos < sizeof(ctx->hex_buffer) / 4; pos++) {
-            ctx->hex_buffer_valid[pos] = swd_read_memory(ctx, ctx->ap_pos, addr, &data) == 1;
-            if(ctx->hex_buffer_valid[pos]) {
-                memcpy(&ctx->hex_buffer[pos * 4], &data, 4);
-            } else {
+            ctx->hex_buffer_valid[byte_pos / 4] = ret;
+
+            if(!ret) {
                 swd_abort_simple(ctx);
             }
-            addr += 4;
         }
+        furi_mutex_release(ctx->swd_mutex);
+        break;
     }
     }
 }
@@ -2176,150 +2466,170 @@ static void on_timer_tick(AppFSM* ctx) {
 static bool swd_message_process(AppFSM* ctx) {
     bool processing = true;
     AppEvent event;
-    FuriStatus event_status = furi_message_queue_get(ctx->event_queue, &event, 100);
 
-    if(event_status == FuriStatusOk) {
-        if(event.type == EventKeyPress) {
-            if(event.input.type == InputTypePress) {
-                switch(event.input.key) {
-                case InputKeyUp:
-                    switch(ctx->mode_page) {
-                    default:
-                        break;
+    /* wait to make sure the OS can do its stuff */
+    FuriStatus event_status = furi_message_queue_get(ctx->event_queue, &event, 1000 / TIMER_HZ);
 
-                    case ModePageScan: {
-                        strcpy(ctx->script_detected, "");
-                        break;
-                    }
-
-                    case ModePageAPID:
-                        if(ctx->ap_pos > 0) {
-                            ctx->ap_pos--;
-                        }
-                        break;
-
-                    case ModePageHexDump: {
-                        ctx->hex_addr +=
-                            ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
-                        break;
-                    }
-                    }
-                    break;
-
-                case InputKeyDown:
-                    switch(ctx->mode_page) {
-                    default:
-                        break;
-
-                    case ModePageScan: {
-                        FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
-                        FuriString* preselected = furi_string_alloc_printf(
-                            (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                                 ANY_PATH("swd"));
-                        DialogsFileBrowserOptions options;
-
-                        dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
-
-                        if(dialog_file_browser_show(
-                               ctx->dialogs, result_path, preselected, &options)) {
-                            const char* path = furi_string_get_cstr(result_path);
-                            strcpy(ctx->script_detected, path);
-                        }
-
-                        furi_string_free(result_path);
-                        furi_string_free(preselected);
-                        break;
-                    }
-
-                    case ModePageAPID:
-                        if(ctx->ap_pos + 1U < COUNT(ctx->apidr_info)) {
-                            ctx->ap_pos++;
-                        }
-                        break;
-
-                    case ModePageHexDump: {
-                        ctx->hex_addr -=
-                            ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
-                        break;
-                    }
-                    }
-
-                    break;
-
-                case InputKeyRight:
-                    if(ctx->mode_page == ModePageHexDump) {
-                        if(ctx->hex_select > 0) {
-                            ctx->hex_select--;
-                        }
-                    } else if(ctx->detected) {
-                        if(ctx->mode_page + 1 < ModePageCount) {
-                            ctx->mode_page++;
-                        }
-                    }
-                    break;
-
-                case InputKeyLeft:
-                    if(ctx->mode_page == ModePageHexDump) {
-                        if(ctx->hex_select < 7) {
-                            ctx->hex_select++;
-                        }
-                    } else if(ctx->mode_page == ModePageScan) {
-                        FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
-                        FuriString* preselected = furi_string_alloc_printf(
-                            (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                                 ANY_PATH("swd"));
-                        DialogsFileBrowserOptions options;
-
-                        dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
-
-                        if(dialog_file_browser_show(
-                               ctx->dialogs, result_path, preselected, &options)) {
-                            const char* path = furi_string_get_cstr(result_path);
-                            ctx->mode_page = ModePageScript;
-                            swd_execute_script(ctx, path);
-                            ctx->mode_page = ModePageScan;
-                        }
-
-                        furi_string_free(result_path);
-                        furi_string_free(preselected);
-                        break;
-                    } else {
-                        if(ctx->mode_page > 0) {
-                            ctx->mode_page--;
-                        }
-                    }
-                    break;
-
-                case InputKeyOk:
-                    if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
-                        ctx->mode_page = ModePageHexDump;
-                    }
-                    break;
-
-                case InputKeyBack:
-                    if(ctx->mode_page == ModePageHexDump) {
-                        ctx->mode_page = ModePageAPID;
-                    } else if(ctx->mode_page == ModePageScript) {
-                        ctx->script->abort = true;
-                    } else if(ctx->mode_page != ModePageScan) {
-                        ctx->mode_page = ModePageScan;
-                    } else {
-                        processing = false;
-                    }
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        } else if(event.type == EventTimerTick) {
-            on_timer_tick(ctx);
-        }
-    } else {
-        /* timeout */
+    if(event_status != FuriStatusOk) {
+        return processing;
     }
 
+    if(event.type == EventKeyPress) {
+        if(event.input.type == InputTypePress) {
+            switch(event.input.key) {
+            case InputKeyUp:
+                switch(ctx->mode_page) {
+                default:
+                    break;
+
+                case ModePageScan:
+                case ModePageFound: {
+                    strcpy(ctx->script_detected, "");
+                    break;
+                }
+
+                case ModePageAPID:
+                    if(ctx->ap_pos > 0) {
+                        ctx->ap_pos--;
+                    }
+                    break;
+
+                case ModePageHexDump: {
+                    ctx->hex_addr += ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
+                    break;
+                }
+                }
+                break;
+
+            case InputKeyDown:
+                switch(ctx->mode_page) {
+                default:
+                    break;
+
+                case ModePageScan: {
+                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* preselected = furi_string_alloc_printf(
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
+                                                             ANY_PATH("swd"));
+                    DialogsFileBrowserOptions options;
+
+                    dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
+
+                    if(dialog_file_browser_show(ctx->dialogs, result_path, preselected, &options)) {
+                        const char* path = furi_string_get_cstr(result_path);
+                        strcpy(ctx->script_detected, path);
+                    }
+
+                    furi_string_free(result_path);
+                    furi_string_free(preselected);
+                    break;
+                }
+
+                case ModePageAPID:
+                    if(ctx->ap_pos + 1U < COUNT(ctx->apidr_info)) {
+                        ctx->ap_pos++;
+                    }
+                    break;
+
+                case ModePageHexDump: {
+                    ctx->hex_addr -= ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
+                    break;
+                }
+                }
+
+                break;
+
+            case InputKeyRight:
+                if(ctx->mode_page == ModePageHexDump) {
+                    if(ctx->hex_select > 0) {
+                        ctx->hex_select--;
+                    }
+                } else if(ctx->detected) {
+                    if(ctx->mode_page + 1 < ModePageCount) {
+                        ctx->mode_page++;
+                    }
+                }
+                break;
+
+            case InputKeyLeft:
+                if(ctx->mode_page == ModePageHexDump) {
+                    if(ctx->hex_select < 7) {
+                        ctx->hex_select++;
+                    }
+                } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
+                    uint32_t mode_page = ctx->mode_page;
+                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* preselected = furi_string_alloc_printf(
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
+                                                             ANY_PATH("swd"));
+                    DialogsFileBrowserOptions options;
+
+                    dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
+
+                    if(dialog_file_browser_show(ctx->dialogs, result_path, preselected, &options)) {
+                        const char* path = furi_string_get_cstr(result_path);
+                        ctx->mode_page = ModePageScript;
+                        swd_execute_script(ctx, path);
+                        ctx->mode_page = mode_page;
+                    }
+
+                    furi_string_free(result_path);
+                    furi_string_free(preselected);
+                    break;
+                } else {
+                    if(ctx->mode_page > 0) {
+                        ctx->mode_page--;
+                    }
+                }
+                break;
+
+            case InputKeyOk:
+                if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
+                    ctx->mode_page = ModePageHexDump;
+                }
+                break;
+
+            case InputKeyBack:
+                if(ctx->mode_page == ModePageHexDump) {
+                    ctx->mode_page = ModePageAPID;
+                } else if(ctx->mode_page == ModePageScript) {
+                    ctx->script->abort = true;
+                } else if(ctx->mode_page > ModePageFound) {
+                    ctx->mode_page = ModePageScan;
+                } else if(ctx->mode_page == ModePageScan) {
+                    processing = false;
+                } else if(ctx->mode_page == ModePageFound) {
+                    processing = false;
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
     return processing;
+}
+
+size_t data_received(void* ctx, uint8_t* data, size_t length) {
+    AppFSM* app = (AppFSM*)ctx;
+
+    strncpy(app->commandline->line_data, (const char*)data, length);
+    app->commandline->line_pos = 0;
+
+    for(size_t pos = 0; pos < length; pos++) {
+        uint8_t ch = app->commandline->line_data[pos];
+
+        if((ch == '\r') || (ch == '\n')) {
+            app->commandline->line_data[pos++] = '\n';
+            app->commandline->line_data[pos] = 0;
+            LOG("direct command '%s'", app->commandline->line_data);
+            swd_execute_script_line(app->commandline);
+            return pos;
+        }
+    }
+
+    return 0;
 }
 
 int32_t swd_probe_app_main(void* p) {
@@ -2327,43 +2637,51 @@ int32_t swd_probe_app_main(void* p) {
 
     AppFSM* app = malloc(sizeof(AppFSM));
 
+    DBGS("App init");
     app_init(app);
 
-    if(!init_mutex(&app->state_mutex, app, sizeof(AppFSM))) {
-        FURI_LOG_E(TAG, "cannot create mutex\r\n");
-        free(app);
-        return 255;
-    }
-
+    DBGS("furi_record_open");
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
 
-    app->view_port = view_port_alloc();
+    DBGS("furi_mutex_alloc");
+    app->swd_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    app->gui_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     app->event_queue = furi_message_queue_alloc(QUEUE_SIZE, sizeof(AppEvent));
-    app->timer = furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, app->event_queue);
 
-    view_port_draw_callback_set(app->view_port, render_callback, &app->state_mutex);
-    view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
+    DBGS("usb_uart_enable");
+    UsbUartConfig uart_config;
+    uart_config.vcp_ch = 1;
+    uart_config.rx_data = &data_received;
+    uart_config.rx_data_ctx = app;
+    app->uart = usb_uart_enable(&uart_config);
+
+    app->commandline = malloc(sizeof(ScriptContext));
+    app->commandline->max_tries = 1;
+    app->commandline->app = app;
+
+    DBGS("view_port_alloc");
+    app->view_port = view_port_alloc();
+    view_port_draw_callback_set(app->view_port, render_callback, app);
+    view_port_input_callback_set(app->view_port, input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
+    DBGS("notification_message_block");
+    notification_message(app->notification, &sequence_display_backlight_enforce_on);
 
+    DBGS("swd_execute_script");
     swd_execute_script(app, ANY_PATH("swd/startup.swd"));
 
     DOLPHIN_DEED(DolphinDeedPluginGameStart);
 
-    furi_timer_start(app->timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
-
+    DBGS("processing");
     for(bool processing = true; processing;) {
-        //AppFSM* ctx = (AppFSM*)acquire_mutex_block(&app->state_mutex);
-
-        processing = swd_message_process(app);
-
+        swd_main_loop(app);
         view_port_update(app->view_port);
 
-        //release_mutex(&ctx->state_mutex, ctx);
+        processing = swd_message_process(app);
 
         bool beep = false;
 
@@ -2379,19 +2697,25 @@ int32_t swd_probe_app_main(void* p) {
         }
     }
 
-    app_deinit(app);
-    // Wait for all notifications to be played and return backlight to normal state
-
-    notification_message_block(app->notification, &sequence_display_backlight_enforce_auto);
-
     view_port_enabled_set(app->view_port, false);
     gui_remove_view_port(app->gui, app->view_port);
+    view_port_free(app->view_port);
+
+    app_deinit(app);
+
+    notification_message(app->notification, &sequence_display_backlight_enforce_auto);
+
+    usb_uart_disable(app->uart);
+
+    furi_message_queue_free(app->event_queue);
+    furi_mutex_free(app->gui_mutex);
+    furi_mutex_free(app->swd_mutex);
+    free(app);
+
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
-    view_port_free(app->view_port);
-    furi_message_queue_free(app->event_queue);
-    delete_mutex(&app->state_mutex);
-    free(app);
+    furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_STORAGE);
 
     return 0;
 }
