@@ -21,5 +21,5 @@ jobs:
       - name: Build
         run: |
           cd /flipperzero-unleashed
-          ./fbt launch_app APPSRC=xbox_controller
+          ./fbt fap_xbox_controller
           # cp build/f7-firmware-D/.extapps/xbox_controller.fap applications_user/xbox_controller/
