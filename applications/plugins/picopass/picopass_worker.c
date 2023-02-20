@@ -438,7 +438,7 @@ ReturnCode picopass_write_card(PicopassBlock* AA1) {
     return ERR_NONE;
 }
 
-ReturnCode picopass_write_block(PicopassBlock* AA1, PicopassPacs *pacs, uint8_t blockNo) {
+ReturnCode picopass_write_block(PicopassPacs *pacs, uint8_t blockNo, uint8_t* newBlock) {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
     rfalPicoPassReadCheckRes rcRes;
@@ -479,9 +479,8 @@ ReturnCode picopass_write_block(PicopassBlock* AA1, PicopassPacs *pacs, uint8_t 
     }
 
     FURI_LOG_D(TAG, "rfalPicoPassPollerWriteBlock %d", blockNo);
-    uint8_t data[9] = {0};
-    data[0] = blockNo;
-    memcpy(data + 1, AA1[blockNo].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
+    uint8_t data[9] = {blockNo, newBlock[0], newBlock[1], newBlock[2], newBlock[3], newBlock[4], newBlock[5], newBlock[6], newBlock[7]
+    };
     loclass_doMAC_N(data, sizeof(data), div_key, mac);
     FURI_LOG_D(
         TAG,
@@ -500,7 +499,7 @@ ReturnCode picopass_write_block(PicopassBlock* AA1, PicopassPacs *pacs, uint8_t 
         mac[2],
         mac[3]);
 
-    err = rfalPicoPassPollerWriteBlock(blockNo, AA1[blockNo].data, mac);
+    err = rfalPicoPassPollerWriteBlock(data[0], data+1, mac);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerWriteBlock error %d", err);
         return err;
@@ -632,7 +631,6 @@ void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
     PicopassPacs* pacs = &dev_data->pacs;
     ReturnCode err;
     PicopassWorkerEvent nextState = PicopassWorkerEventSuccess;
-    uint8_t blockNo = PICOPASS_KD_BLOCK_INDEX;
 
     uint8_t *csn = &AA1->data[PICOPASS_CSN_BLOCK_INDEX];
     uint8_t *configBlock = &AA1->data[PICOPASS_CONFIG_BLOCK_INDEX];
@@ -642,18 +640,40 @@ void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
     uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
     loclass_diversifyKey(csn, picopass_iclass_key, newKey);
 
+    FURI_LOG_D(
+        TAG,
+        "keychange %02x%02x%02x%02x%02x%02x%02x%02x -> %02x%02x%02x%02x%02x%02x%02x%02x",
+        oldKey[0],
+        oldKey[1],
+        oldKey[2],
+        oldKey[3],
+        oldKey[4],
+        oldKey[5],
+        oldKey[6],
+        oldKey[7],
+        newKey[0],
+        newKey[1],
+        newKey[2],
+        newKey[3],
+        newKey[4],
+        newKey[5],
+        newKey[6],
+        newKey[7]
+        );
+
     if ((fuses & 0x80) == 0x80) {
-        memcpy(oldKey, newKey, PICOPASS_BLOCK_LEN);
+        FURI_LOG_D(TAG, "Plain write for personalized key change");
     } else {
+        FURI_LOG_D(TAG, "Write XOR for application key change");
         // XOR when in application mode
         for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
-            oldKey[i] ^= newKey[i];
+            newKey[i] ^= oldKey[i];
         }
     }
 
     while(picopass_worker->state == PicopassWorkerStateWriteStandardKey) {
         if(picopass_detect_card(1000) == ERR_NONE) {
-            err = picopass_write_block(AA1, pacs, blockNo);
+            err = picopass_write_block(pacs, PICOPASS_KD_BLOCK_INDEX, newKey);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_write_block error %d", err);
                 nextState = PicopassWorkerEventFail;
