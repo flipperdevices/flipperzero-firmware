@@ -24,6 +24,7 @@ FuriEventFlag* event = NULL;
 #define FURI_HAL_NFC_UID_INCOMPLETE (0x04)
 
 void furi_hal_nfc_init() {
+    furi_assert(!event);
     event = furi_event_flag_alloc();
 
     ReturnCode ret = rfalNfcInitialize();
