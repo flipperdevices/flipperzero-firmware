@@ -206,7 +206,8 @@ static void swd_write(AppFSM* const ctx, const uint8_t* data, size_t bits) {
 }
 
 static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data) {
-    notification_message(ctx->notification, &sequence_set_red_255);
+    //notification_message(ctx->notification, &sequence_set_blue_255);
+    //notification_message(ctx->notification, &sequence_reset_red);
 
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
@@ -243,7 +244,8 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
     }
 
     if(ack != 0x01) {
-        notification_message(ctx->notification, &sequence_reset_red);
+        //notification_message(ctx->notification, &sequence_reset_blue);
+        //notification_message(ctx->notification, &sequence_set_red_255);
         return ack;
     }
 
@@ -270,26 +272,27 @@ static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23,
         bool parity = swd_read_bit(ctx);
 
         if(parity != __builtin_parity(*data)) {
-            notification_message(ctx->notification, &sequence_reset_red);
+            //notification_message(ctx->notification, &sequence_reset_blue);
+            //notification_message(ctx->notification, &sequence_set_red_255);
             return 8;
         }
     }
     swd_set_data(ctx, false);
     swd_configure_pins(ctx, true);
-    notification_message(ctx->notification, &sequence_reset_red);
+    //notification_message(ctx->notification, &sequence_reset_blue);
 
     return ack;
 }
 
 /* A line reset is achieved by holding the data signal HIGH for at least 50 clock cycles, followed by at least two idle cycles. */
 static void swd_line_reset(AppFSM* const ctx) {
-    notification_message(ctx->notification, &sequence_set_red_255);
+    //notification_message(ctx->notification, &sequence_set_red_255);
     for(int bitcount = 0; bitcount < 50; bitcount += 8) {
         swd_write_byte(ctx, 0xFF, 8);
     }
     swd_write_byte(ctx, 0, 8);
     ctx->dp_regs.select_ok = false;
-    notification_message(ctx->notification, &sequence_reset_red);
+    //notification_message(ctx->notification, &sequence_reset_red);
 }
 
 static void swd_abort(AppFSM* const ctx) {
@@ -1926,7 +1929,6 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
     furi_assert(ctx_in);
 
     AppFSM* ctx = ctx_in;
-    DBGS("furi_mutex_acquire");
     furi_mutex_acquire(ctx->gui_mutex, FuriWaitForever);
 
     char buffer[64];
@@ -1934,8 +1936,6 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
-
-    DBG("render page %lu (%s)", ctx->mode_page, ctx->detected_device ? "Detected" : "Searching");
 
     if(!ctx->detected_device) {
         ctx->mode_page = ModePageScan;
@@ -1946,7 +1946,6 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
     /* if seen less than a quarter second ago */
     switch(ctx->mode_page) {
     case ModePageScan: {
-        ctx->mode_page = 0;
         draw_model(canvas);
 
         canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Searching");
@@ -2226,7 +2225,6 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
             }
             y += 10;
         }
-
         break;
     }
 
@@ -2244,7 +2242,6 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
     }
     }
 
-    DBGS("furi_mutex_release");
     furi_mutex_release(ctx->gui_mutex);
 }
 
@@ -2253,29 +2250,20 @@ static void input_callback(InputEvent* input_event, void* ctx_in) {
     furi_assert(ctx_in);
     AppFSM* ctx = ctx_in;
 
-    DBGS("furi_message_queue_get_count");
+    int entries = furi_message_queue_get_count(ctx->event_queue);
+
+    DBG("furi_message_queue_get_count: %d", entries);
     /* better skip than sorry */
-    if(furi_message_queue_get_count(ctx->event_queue) < QUEUE_SIZE) {
+    if(entries < QUEUE_SIZE) {
         DBGS("furi_message_queue_put");
         AppEvent event = {.type = EventKeyPress, .input = *input_event};
-        furi_message_queue_put(ctx->event_queue, &event, 100);
-    }
-}
-
-static void timer_tick_callback(void* ctx_in) {
-    furi_assert(ctx_in);
-    AppFSM* ctx = ctx_in;
-
-    //DBGS("furi_message_queue_get_count");
-    /* filling buffer makes no sense, as we lost timing anyway */
-    if(furi_message_queue_get_count(ctx->event_queue) < 1) {
-        //DBGS("furi_message_queue_put");
-        AppEvent event = {.type = EventTimerTick};
-        furi_message_queue_put(ctx->event_queue, &event, 100);
+        furi_message_queue_put(ctx->event_queue, &event, 0);
     }
 }
 
 static void app_init(AppFSM* const app) {
+    furi_assert(app);
+
     app->loop_count = 0;
     app->current_mask_id = 0;
     app->current_mask = gpio_direction_mask[app->current_mask_id];
@@ -2291,10 +2279,14 @@ static void app_init(AppFSM* const app) {
 }
 
 static void app_deinit(AppFSM* const app) {
+    furi_assert(app);
+
     strcpy(app->state_string, "exiting");
 }
 
-static void on_timer_tick(AppFSM* ctx) {
+static void swd_main_loop(AppFSM* ctx) {
+    furi_assert(ctx);
+
     ctx->loop_count++;
 
     switch(ctx->mode_page) {
@@ -2453,26 +2445,20 @@ static void on_timer_tick(AppFSM* ctx) {
     }
 
     case ModePageHexDump: {
-        if(ctx->hex_read_delay++ < 10) {
-            break;
-        }
-        ctx->hex_read_delay = 0;
-
         furi_mutex_acquire(ctx->swd_mutex, FuriWaitForever);
-        memset(ctx->hex_buffer, 0xEE, sizeof(ctx->hex_buffer));
 
-        uint32_t addr = ctx->hex_addr;
-        uint32_t data = 0;
-        for(size_t pos = 0; pos < sizeof(ctx->hex_buffer) / 4; pos++) {
-            ctx->hex_buffer_valid[pos] = swd_read_memory(ctx, ctx->ap_pos, addr, &data) == 1;
-            if(ctx->hex_buffer_valid[pos]) {
-                memcpy(&ctx->hex_buffer[pos * 4], &data, 4);
-            } else {
+        for(size_t byte_pos = 0; byte_pos < sizeof(ctx->hex_buffer); byte_pos += 4) {
+            uint32_t* data = (uint32_t*)&ctx->hex_buffer[byte_pos];
+            bool ret = swd_read_memory(ctx, ctx->ap_pos, ctx->hex_addr + byte_pos, data) == 1;
+
+            ctx->hex_buffer_valid[byte_pos / 4] = ret;
+
+            if(!ret) {
                 swd_abort_simple(ctx);
             }
-            addr += 4;
         }
         furi_mutex_release(ctx->swd_mutex);
+        break;
     }
     }
 }
@@ -2480,153 +2466,148 @@ static void on_timer_tick(AppFSM* ctx) {
 static bool swd_message_process(AppFSM* ctx) {
     bool processing = true;
     AppEvent event;
-    FuriStatus event_status = furi_message_queue_get(ctx->event_queue, &event, 100);
 
-    if(event_status == FuriStatusOk) {
-        if(event.type == EventKeyPress) {
-            if(event.input.type == InputTypePress) {
-                switch(event.input.key) {
-                case InputKeyUp:
-                    switch(ctx->mode_page) {
-                    default:
-                        break;
+    /* wait to make sure the OS can do its stuff */
+    FuriStatus event_status = furi_message_queue_get(ctx->event_queue, &event, 1000 / TIMER_HZ);
 
-                    case ModePageScan:
-                    case ModePageFound: {
-                        strcpy(ctx->script_detected, "");
-                        break;
-                    }
-
-                    case ModePageAPID:
-                        if(ctx->ap_pos > 0) {
-                            ctx->ap_pos--;
-                        }
-                        break;
-
-                    case ModePageHexDump: {
-                        ctx->hex_addr +=
-                            ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
-                        break;
-                    }
-                    }
-                    break;
-
-                case InputKeyDown:
-                    switch(ctx->mode_page) {
-                    default:
-                        break;
-
-                    case ModePageScan: {
-                        FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
-                        FuriString* preselected = furi_string_alloc_printf(
-                            (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                                 ANY_PATH("swd"));
-                        DialogsFileBrowserOptions options;
-
-                        dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
-
-                        if(dialog_file_browser_show(
-                               ctx->dialogs, result_path, preselected, &options)) {
-                            const char* path = furi_string_get_cstr(result_path);
-                            strcpy(ctx->script_detected, path);
-                        }
-
-                        furi_string_free(result_path);
-                        furi_string_free(preselected);
-                        break;
-                    }
-
-                    case ModePageAPID:
-                        if(ctx->ap_pos + 1U < COUNT(ctx->apidr_info)) {
-                            ctx->ap_pos++;
-                        }
-                        break;
-
-                    case ModePageHexDump: {
-                        ctx->hex_addr -=
-                            ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
-                        break;
-                    }
-                    }
-
-                    break;
-
-                case InputKeyRight:
-                    if(ctx->mode_page == ModePageHexDump) {
-                        if(ctx->hex_select > 0) {
-                            ctx->hex_select--;
-                        }
-                    } else if(ctx->detected) {
-                        if(ctx->mode_page + 1 < ModePageCount) {
-                            ctx->mode_page++;
-                        }
-                    }
-                    break;
-
-                case InputKeyLeft:
-                    if(ctx->mode_page == ModePageHexDump) {
-                        if(ctx->hex_select < 7) {
-                            ctx->hex_select++;
-                        }
-                    } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
-                        uint32_t mode_page = ctx->mode_page;
-                        FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
-                        FuriString* preselected = furi_string_alloc_printf(
-                            (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                                 ANY_PATH("swd"));
-                        DialogsFileBrowserOptions options;
-
-                        dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
-
-                        if(dialog_file_browser_show(
-                               ctx->dialogs, result_path, preselected, &options)) {
-                            const char* path = furi_string_get_cstr(result_path);
-                            ctx->mode_page = ModePageScript;
-                            swd_execute_script(ctx, path);
-                            ctx->mode_page = mode_page;
-                        }
-
-                        furi_string_free(result_path);
-                        furi_string_free(preselected);
-                        break;
-                    } else {
-                        if(ctx->mode_page > 0) {
-                            ctx->mode_page--;
-                        }
-                    }
-                    break;
-
-                case InputKeyOk:
-                    if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
-                        ctx->mode_page = ModePageHexDump;
-                    }
-                    break;
-
-                case InputKeyBack:
-                    if(ctx->mode_page == ModePageHexDump) {
-                        ctx->mode_page = ModePageAPID;
-                    } else if(ctx->mode_page == ModePageScript) {
-                        ctx->script->abort = true;
-                    } else if(ctx->mode_page > ModePageFound) {
-                        ctx->mode_page = ModePageScan;
-                    } else if(ctx->mode_page == ModePageScan) {
-                        processing = false;
-                    } else if(ctx->mode_page == ModePageFound) {
-                        processing = false;
-                    }
-                    break;
-
-                default:
-                    break;
-                }
-            }
-        } else if(event.type == EventTimerTick) {
-            on_timer_tick(ctx);
-        }
-    } else {
-        /* timeout */
+    if(event_status != FuriStatusOk) {
+        return processing;
     }
 
+    if(event.type == EventKeyPress) {
+        if(event.input.type == InputTypePress) {
+            switch(event.input.key) {
+            case InputKeyUp:
+                switch(ctx->mode_page) {
+                default:
+                    break;
+
+                case ModePageScan:
+                case ModePageFound: {
+                    strcpy(ctx->script_detected, "");
+                    break;
+                }
+
+                case ModePageAPID:
+                    if(ctx->ap_pos > 0) {
+                        ctx->ap_pos--;
+                    }
+                    break;
+
+                case ModePageHexDump: {
+                    ctx->hex_addr += ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
+                    break;
+                }
+                }
+                break;
+
+            case InputKeyDown:
+                switch(ctx->mode_page) {
+                default:
+                    break;
+
+                case ModePageScan: {
+                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* preselected = furi_string_alloc_printf(
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
+                                                             ANY_PATH("swd"));
+                    DialogsFileBrowserOptions options;
+
+                    dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
+
+                    if(dialog_file_browser_show(ctx->dialogs, result_path, preselected, &options)) {
+                        const char* path = furi_string_get_cstr(result_path);
+                        strcpy(ctx->script_detected, path);
+                    }
+
+                    furi_string_free(result_path);
+                    furi_string_free(preselected);
+                    break;
+                }
+
+                case ModePageAPID:
+                    if(ctx->ap_pos + 1U < COUNT(ctx->apidr_info)) {
+                        ctx->ap_pos++;
+                    }
+                    break;
+
+                case ModePageHexDump: {
+                    ctx->hex_addr -= ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
+                    break;
+                }
+                }
+
+                break;
+
+            case InputKeyRight:
+                if(ctx->mode_page == ModePageHexDump) {
+                    if(ctx->hex_select > 0) {
+                        ctx->hex_select--;
+                    }
+                } else if(ctx->detected) {
+                    if(ctx->mode_page + 1 < ModePageCount) {
+                        ctx->mode_page++;
+                    }
+                }
+                break;
+
+            case InputKeyLeft:
+                if(ctx->mode_page == ModePageHexDump) {
+                    if(ctx->hex_select < 7) {
+                        ctx->hex_select++;
+                    }
+                } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
+                    uint32_t mode_page = ctx->mode_page;
+                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* preselected = furi_string_alloc_printf(
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
+                                                             ANY_PATH("swd"));
+                    DialogsFileBrowserOptions options;
+
+                    dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
+
+                    if(dialog_file_browser_show(ctx->dialogs, result_path, preselected, &options)) {
+                        const char* path = furi_string_get_cstr(result_path);
+                        ctx->mode_page = ModePageScript;
+                        swd_execute_script(ctx, path);
+                        ctx->mode_page = mode_page;
+                    }
+
+                    furi_string_free(result_path);
+                    furi_string_free(preselected);
+                    break;
+                } else {
+                    if(ctx->mode_page > 0) {
+                        ctx->mode_page--;
+                    }
+                }
+                break;
+
+            case InputKeyOk:
+                if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
+                    ctx->mode_page = ModePageHexDump;
+                }
+                break;
+
+            case InputKeyBack:
+                if(ctx->mode_page == ModePageHexDump) {
+                    ctx->mode_page = ModePageAPID;
+                } else if(ctx->mode_page == ModePageScript) {
+                    ctx->script->abort = true;
+                } else if(ctx->mode_page > ModePageFound) {
+                    ctx->mode_page = ModePageScan;
+                } else if(ctx->mode_page == ModePageScan) {
+                    processing = false;
+                } else if(ctx->mode_page == ModePageFound) {
+                    processing = false;
+                }
+                break;
+
+            default:
+                break;
+            }
+        }
+    }
     return processing;
 }
 
@@ -2687,10 +2668,6 @@ int32_t swd_probe_app_main(void* p) {
     view_port_input_callback_set(app->view_port, input_callback, app);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
-    DBGS("furi_timer_alloc");
-    app->timer = furi_timer_alloc(timer_tick_callback, FuriTimerTypePeriodic, app);
-    furi_timer_start(app->timer, furi_kernel_get_tick_frequency() / TIMER_HZ);
-
     DBGS("notification_message_block");
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
 
@@ -2701,9 +2678,10 @@ int32_t swd_probe_app_main(void* p) {
 
     DBGS("processing");
     for(bool processing = true; processing;) {
-        processing = swd_message_process(app);
-
+        swd_main_loop(app);
         view_port_update(app->view_port);
+
+        processing = swd_message_process(app);
 
         bool beep = false;
 
@@ -2719,17 +2697,15 @@ int32_t swd_probe_app_main(void* p) {
         }
     }
 
-    app_deinit(app);
+    view_port_enabled_set(app->view_port, false);
+    gui_remove_view_port(app->gui, app->view_port);
+    view_port_free(app->view_port);
 
-    furi_timer_free(app->timer);
+    app_deinit(app);
 
     notification_message(app->notification, &sequence_display_backlight_enforce_auto);
 
     usb_uart_disable(app->uart);
-
-    view_port_enabled_set(app->view_port, false);
-    gui_remove_view_port(app->gui, app->view_port);
-    view_port_free(app->view_port);
 
     furi_message_queue_free(app->event_queue);
     furi_mutex_free(app->gui_mutex);

@@ -22,9 +22,9 @@
 #define TAG "SWD"
 
 #define SWD_DELAY_US 0
-#define TIMER_HZ 50
+#define TIMER_HZ 20
 #define TIMEOUT 3
-#define QUEUE_SIZE 32
+#define QUEUE_SIZE 8
 #define IDLE_BITS 8
 #define CLOCK_DELAY 0
 
@@ -147,6 +147,7 @@ typedef struct {
     ScriptContext* script;
     ScriptContext* commandline;
 
+    uint8_t timeout_overdue;
     uint32_t loop_count;
     uint8_t current_mask_id;
     uint32_t current_mask;
@@ -168,7 +169,6 @@ typedef struct {
     uint8_t hex_select;
     uint8_t hex_buffer[32];
     uint8_t hex_buffer_valid[8];
-    uint8_t hex_read_delay;
 
     char state_string[64];
     char script_detected[MAX_FILE_LENGTH];
