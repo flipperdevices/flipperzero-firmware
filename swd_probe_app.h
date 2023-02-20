@@ -22,7 +22,7 @@
 #define TAG "SWD"
 
 #define SWD_DELAY_US 0
-#define TIMER_HZ 20
+#define TIMER_HZ 50
 #define TIMEOUT 3
 #define QUEUE_SIZE 8
 #define IDLE_BITS 8
