@@ -23,10 +23,9 @@ There are a few different playlists:
 - [intro video](https://youtu.be/wfNIyLphR3Y) Introduction to LEDs (lights)
 - [intro video](https://youtu.be/j5Jy3Wedw58) Introduction to breadboard/protoboard (for making circuit prototypes)
 
-### GPIO ~ Adding Polling input to your code
+### GPIO
 - [code video](https://youtu.be/v0PkcOtZdHg) Add Polling GPIO input to your [code](../gpio/gpio_polling_demo/README.md).
-
-
+- [1337 video](https://youtu.be/cd9culIw79U) Connecting to a 7-Segment display and using the built-in Flipper Zero "GPIO Manual Control" app to display different numbers.
 
 ## Sub-GHz
 ### Sub-GHz ~ Overview
