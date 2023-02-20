@@ -197,6 +197,29 @@ static ReturnCode picopass_auth_standard(uint8_t* csn, uint8_t* div_key) {
     return rfalPicoPassPollerCheck(mac, &chkRes);
 }
 
+static ReturnCode picopass_auth_factory(uint8_t* csn, uint8_t* div_key) {
+    UNUSED(csn);
+    rfalPicoPassReadCheckRes rcRes;
+    rfalPicoPassCheckRes chkRes;
+
+    ReturnCode err;
+
+    uint8_t mac[4] = {0};
+    uint8_t ccnr[12] = {0};
+
+    err = rfalPicoPassPollerReadCheck(&rcRes);
+    if(err != ERR_NONE) {
+        FURI_LOG_E(TAG, "rfalPicoPassPollerReadCheck error %d", err);
+        return err;
+    }
+    memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
+
+    memcpy(div_key, picopass_factory_key, PICOPASS_BLOCK_LEN);
+    loclass_opt_doReaderMAC(ccnr, div_key, mac);
+
+    return rfalPicoPassPollerCheck(mac, &chkRes);
+}
+
 static ReturnCode picopass_auth_dict(
     uint8_t* csn,
     PicopassPacs* pacs,
@@ -266,6 +289,13 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
 
     FURI_LOG_E(TAG, "Trying standard legacy key");
     err = picopass_auth_standard(
+        AA1[PICOPASS_CSN_BLOCK_INDEX].data, AA1[PICOPASS_KD_BLOCK_INDEX].data);
+    if(err == ERR_NONE) {
+        return ERR_NONE;
+    }
+
+    FURI_LOG_E(TAG, "Trying factory default key");
+    err = picopass_auth_factory(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data, AA1[PICOPASS_KD_BLOCK_INDEX].data);
     if(err == ERR_NONE) {
         return ERR_NONE;
