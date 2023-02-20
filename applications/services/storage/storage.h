@@ -279,6 +279,15 @@ bool storage_common_get_my_data_path(Storage* storage, FuriString* path);
  */
 FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest);
 
+/**
+ * @brief Check that file or dir exists
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+bool storage_common_exists(Storage* storage, const char* path);
+
 /******************* Error Functions *******************/
 
 /** Retrieves the error text from the error id

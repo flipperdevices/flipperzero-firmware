@@ -490,7 +490,7 @@ FS_Error storage_common_copy(Storage* storage, const char* old_path, const char*
 
 static FS_Error
     storage_merge_recursive(Storage* storage, const char* old_path, const char* new_path) {
-    FS_Error error = storage_common_mkdir(storage, new_path);
+    FS_Error error = FSE_OK;
     DirWalk* dir_walk = dir_walk_alloc(storage);
     FuriString *path, *file_basename, *tmp_new_path;
     FileInfo fileinfo;
@@ -499,7 +499,7 @@ static FS_Error
     tmp_new_path = furi_string_alloc();
 
     do {
-        if((error != FSE_OK) && (error != FSE_EXIST)) break;
+        if(!storage_simply_mkdir(storage, new_path)) break;
 
         dir_walk_set_recursive(dir_walk, false);
         if(!dir_walk_open(dir_walk, old_path)) {
@@ -669,7 +669,7 @@ bool storage_common_get_my_data_path(Storage* storage, FuriString* path) {
 }
 
 FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest) {
-    if(!storage_dir_exists(storage, source)) {
+    if(!storage_common_exists(storage, source)) {
         return FSE_OK;
     }
 
@@ -680,6 +680,11 @@ FS_Error storage_common_migrate(Storage* storage, const char* source, const char
     }
 
     return error;
+}
+
+bool storage_common_exists(Storage* storage, const char* path) {
+    FileInfo file_info;
+    return storage_common_stat(storage, path, &file_info) == FSE_OK;
 }
 
 /****************** ERROR ******************/
