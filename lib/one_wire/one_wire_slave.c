@@ -57,8 +57,10 @@ static uint32_t
 }
 
 static bool onewire_slave_show_presence(OneWireSlave* bus) {
+    // wait until the bus is high (might return immediately)
+    onewire_slave_wait_while_gpio_is(bus, OWS_RESET_MAX, false);
     // wait while master delay presence check
-    onewire_slave_wait_while_gpio_is(bus, OWS_PRESENCE_TIMEOUT, true);
+    furi_delay_us(OWS_PRESENCE_TIMEOUT);
 
     // show presence
     furi_hal_gpio_write(bus->gpio_pin, false);
@@ -83,29 +85,28 @@ static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
 
     if(bus->error == OneWireSlaveErrorResetInProgress) {
         if(onewire_slave_show_presence(bus)) {
+            bus->error = OneWireSlaveErrorNone;
+
             if(bus->reset_callback != NULL) {
                 bus->reset_callback(bus->reset_callback_context);
             }
-            bus->error = OneWireSlaveErrorNone;
+
             return true;
 
         } else {
             return false;
         }
 
-    } else if(bus->error != OneWireSlaveErrorNone) {
-        return false;
-
-    } else {
-        bool result = false;
-
+    } else if(bus->error == OneWireSlaveErrorNone) {
         if(bus->command_callback) {
-            result = bus->command_callback(cmd, bus->command_callback_context);
+            return bus->command_callback(cmd, bus->command_callback_context);
         } else {
             bus->error = OneWireSlaveErrorInvalidCommand;
+            return false;
         }
 
-        return result;
+    } else {
+        return false;
     }
 }
 
