@@ -1,7 +1,6 @@
 // TODO: Need to eliminate the last two memory allocations
 //    int *odd = calloc(1, 5 << 19);
 //    int *even = calloc(1, 5 << 19);
-// TODO: Unused "s" in recover?
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -204,7 +203,7 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
                 temp.even = odd[o];
                 temp.odd = even[e] ^ evenparity32(odd[o] & LF_POLY_ODD);
                 if (check_state(&temp, p)) {
-                    return s;
+                    return -1;
                 }
             }
         }
@@ -227,6 +226,9 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
             o_tail = binsearch(odd, o_head, o = o_tail);
             e_tail = binsearch(even, e_head, e = e_tail);
             s = recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, p);
+            if (s == -1) {
+                break;
+            }
         } else if ((odd[o_tail] ^ 0x80000000) > (even[e_tail] ^ 0x80000000)) {
             o_tail = binsearch(odd, o_head, o_tail) - 1;
         } else {
@@ -236,11 +238,11 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
     return s;
 }
 int* extend_table_precompute(int head, int *tail, int xks, int iterations) {
-    int *data = malloc(sizeof(int) * (5 << 20)); // Obviously this won't be here in the final version, and it won't need this much space
+    int *data = malloc(sizeof(int) * (5 << 19)); // Obviously this won't be here in the final version, and it won't need this much space
 
     for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
         if (filter(main_iter) == (xks & 1)) {
-            int *temp_states_buffer = malloc(sizeof(int)*(5<<8)); // TODO: Find max, adjust as needed
+            int *temp_states_buffer = malloc(sizeof(int)*(2<<3));
             int temp_states_tail = 0;
 
             temp_states_buffer[0] = main_iter;
