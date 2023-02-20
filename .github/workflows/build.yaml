@@ -16,8 +16,6 @@ jobs:
       options: --cpus 1
     steps:
       - uses: actions/checkout@v2
-      - name: Check for dockerenv file
-        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
       - name: Build
         run: |
           cd /flipperzero-unleashed
