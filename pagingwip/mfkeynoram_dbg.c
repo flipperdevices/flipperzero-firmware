@@ -235,34 +235,45 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
     }
     return s;
 }
-int extend_table_precompute(int data[], int tbl, int end, int bit) {
-    // This function isn't close to working yet, it doesn't even have a correct function prototype. Just assembling the code that will be necessary.
-    int *new_partial_states_buffer = calloc(1, 5 << 19); // TODO: Find max, adjust "5 << 19"
-    int *data = calloc(1, 5 << 19);
-    int num_partial_states_in_buffer = 0;
-    for (i = 1 << 20; i >= 0; --i) {
-        if (filter(i) == (oks & 1))
-            odd[++odd_tail] = i;
-        if (filter(i) == (eks & 1))
-            even[++even_tail] = i;
-    }
-    /*
-    for (i = 0; i < 4; i++) {
-        odd_tail = extend_table_simple(odd, odd_head, odd_tail, ((oks >>= 1) & 1));
-        even_tail = extend_table_simple(even, even_head, even_tail, ((eks >>= 1) & 1));
-    }
-    */
-    for(data[ tbl ] <<= 1; tbl <= end; data[++tbl] <<= 1) {
-        if ((filter(data[ tbl ]) ^ filter(data[ tbl ] | 1)) !=0 )
-            data[ tbl ] |= filter(data[ tbl ]) ^ bit;
-        else if (filter(data[ tbl ]) == bit) {
-            data[ ++end ] = data[ ++tbl ];
-            data[ tbl ] = data[ tbl - 1 ] | 1;
-        } else {
-            data[ tbl-- ] = data[ end-- ];
+int* extend_table_precompute(int head, int *tail, int *xks, int iterations) {
+    int *data = malloc(sizeof(int)*(5 << 20)); // Obviously this won't be here in the final version, and it won't need this much space
+    int saved_xks = *xks;
+    for (int i = 1 << 20; i >= 0; --i) {
+        if (filter(i) == (*xks & 1)) {
+            int *temp_states_buffer = malloc(sizeof(int)*(5<<8)); // TODO: Find max, adjust as needed
+            int temp_states_tail = 0;
+            temp_states_buffer[0] = i;
+            for (int j = 0; j < iterations; j++) {
+                int xks_bit = ((*xks >>= 1) & 1);
+                for (int s = 0; s <= temp_states_tail; s++) {
+                    temp_states_buffer[s] <<= 1;
+                    int t = temp_states_buffer[s];
+                    if ((filter(t) ^ filter(t | 1)) != 0 ) {
+                        temp_states_buffer[s] |= filter(t) ^ xks_bit;
+                    } else if (filter(t) == xks_bit) {
+                        //temp_states_buffer[temp_states_tail++] = temp_states_buffer[s] | 1;
+                        temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
+                        temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
+                        // FIXME PLZ
+                        //temp_states_buffer[++temp_states_tail] = temp_states_buffer[s++];
+                        //temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
+                    }/* else {
+                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+                    }*/
+                }
+            }
+            *xks = saved_xks;
+            for (int s = 0; s < temp_states_tail; s++) {
+                (*tail)++;
+                data[*tail] = temp_states_buffer[s];
+            }
+            free(temp_states_buffer);
         }
     }
-    return end;
+    for (int iter = 0; iter < iterations; iter++) {
+        (*xks) >>= 1;
+    }
+    return data;
 }
 uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
     int odd_head = 0, odd_tail = -1, oks = 0;
@@ -273,8 +284,9 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
     for (i = 30; i >= 0; i -= 2)
         eks = eks << 1 | BEBIT(ks2, i);
     // TODO: Precompute first extend table in recover() too
-    int *odd = extend_table_precompute(odd_head, &odd_tail, oks, 4);
-    int *even = extend_table_precompute(even_head, &even_tail, eks, 4);
+    int *odd = extend_table_precompute(odd_head, &odd_tail, &oks, 4);
+    int *even = extend_table_precompute(even_head, &even_tail, &eks, 4);
+    printf("odd_tail: %i, even_tail: %i\n", odd_tail, even_tail);
     recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 11, 0, p);
     free(odd);
     free(even);
