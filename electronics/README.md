@@ -17,6 +17,11 @@ If you are just starting out, I'd recommend ordering this starter kit...
 - [Amazon link](https://amzn.to/3lRGRUM) Large breadboard, very similar to the one in my videos.  Great for prototyping LARGE circuits.
 - [Amazon link](https://amzn.to/3IAEUoi) Variety of breadboards (2 with rails, 6 without) + jumper wires; very similar to other boards I own.
 
+### Wires
+- [Amazon link](https://amzn.to/3lTbfOd) These are the jumper wires (Dupont Wire) I ordered.  They have male/male, male/female, female/female.  You can never have too many of these cables --  I also bought [link](https://amzn.to/3YXlob8) and [link](https://amzn.to/41cpJZL); all of which are very similar.  
+- [Amazon link](https://amzn.to/3xBuUVw) I also ordered these jumper wires, which came with some rotary encoders.  (In a future video, I'll use the encoders.)
+- [Amazon link](https://amzn.to/3KjRF8c) These are the aligator clips I bought to clip on to various connections.
+
 ### Resistors
 - [Amazon link](https://amzn.to/3Igs0uB) A good assortment of resistors.
 - [Amazon link](https://amzn.to/3Kk6nvJ) I love how easy it is to read the values on this decade box (and I own two of these) but they are expensive.
