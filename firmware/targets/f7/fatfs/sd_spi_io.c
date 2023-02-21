@@ -230,6 +230,12 @@ static uint8_t sd_spi_wait_for_data_and_read(void) {
     return responce;
 }
 
+SdSpiStatus sd_spi_error(SdSpiStatus status) {
+    // Reset the sector cache and return the error
+    sector_cache_init();
+    return status;
+}
+
 static SdSpiStatus sd_spi_wait_for_data(uint8_t data, uint32_t timeout_ms) {
     FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     uint8_t byte;
@@ -626,9 +632,7 @@ static SdSpiStatus
     sd_spi_deselect_card_and_purge();
 
     if(response.r1 != SdSpi_R1_NO_ERROR) {
-        // Reset sector cache if card is in error state
-        sector_cache_init();
-        return SdSpiStatusError;
+        return sd_spi_error(SdSpiStatusError);
     }
 
     if(!sd_high_capacity) {
@@ -642,9 +646,7 @@ static SdSpiStatus
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_deselect_card_and_purge();
 
-            // Reset sector cache if card is in error state
-            sector_cache_init();
-            return SdSpiStatusError;
+            return sd_spi_error(SdSpiStatusError);
         }
 
         // Wait for the data start token
@@ -666,9 +668,7 @@ static SdSpiStatus
         } else {
             sd_spi_deselect_card_and_purge();
 
-            // Reset sector cache if card is in error state
-            sector_cache_init();
-            return SdSpiStatusError;
+            return sd_spi_error(SdSpiStatusError);
         }
 
         sd_spi_deselect_card_and_purge();
@@ -691,9 +691,7 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
     sd_spi_deselect_card_and_purge();
 
     if(response.r1 != SdSpi_R1_NO_ERROR) {
-        // Reset sector cache if card is in error state
-        sector_cache_init();
-        return SdSpiStatusError;
+        return sd_spi_error(SdSpiStatusError);
     }
 
     if(!sd_high_capacity) {
@@ -707,9 +705,7 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
         if(response.r1 != SdSpi_R1_NO_ERROR) {
             sd_spi_deselect_card_and_purge();
 
-            // Reset sector cache if card is in error state
-            sector_cache_init();
-            return SdSpiStatusError;
+            return sd_spi_error(SdSpiStatusError);
         }
 
         // Send dummy byte for NWR timing : one byte between CMD_WRITE and TOKEN
@@ -727,9 +723,7 @@ static SdSpiStatus sd_spi_cmd_write_blocks(
         sd_spi_deselect_card_and_purge();
 
         if(data_responce != SdSpiDataResponceOK) {
-            // Reset sector cache if card is in error state
-            sector_cache_init();
-            return SdSpiStatusError;
+            return sd_spi_error(SdSpiStatusError);
         }
 
         // increase offset
@@ -810,9 +804,7 @@ SdSpiStatus sd_get_card_state(void) {
         return SdSpiStatusOK;
     }
 
-    // Reset sector cache if card is in error state
-    sector_cache_init();
-    return SdSpiStatusError;
+    return sd_spi_error(SdSpiStatusError);
 }
 
 SdSpiStatus sd_get_card_info(SD_CardInfo* card_info) {
@@ -821,17 +813,13 @@ SdSpiStatus sd_get_card_info(SD_CardInfo* card_info) {
     status = sd_spi_get_csd(&(card_info->Csd));
 
     if(status != SdSpiStatusOK) {
-        // Reset sector cache if card is in error state
-        sector_cache_init();
-        return status;
+        return sd_spi_error(status);
     }
 
     status = sd_spi_get_cid(&(card_info->Cid));
 
     if(status != SdSpiStatusOK) {
-        // Reset sector cache if card is in error state
-        sector_cache_init();
-        return status;
+        return sd_spi_error(status);
     }
 
     if(sd_high_capacity == 1) {
@@ -873,8 +861,7 @@ SdSpiStatus
     }
 
     if(status == SdSpiStatusError) {
-        // Reset sector cache if card is in error state
-        sector_cache_init();
+        return sd_spi_error(status);
     }
 
     return status;
