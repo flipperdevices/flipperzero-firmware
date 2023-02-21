@@ -68,6 +68,16 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Up toolchain version to 21 #2416 (By dunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2416)
 - OFW: [IR Universal Audio Remote: Add Grundig CMS 5000 #2414 (By ComputerCarsten)](https://github.com/flipperdevices/flipperzero-firmware/pull/2414)
 - OFW: [Display Mifare Classic data in NFC app #2389 (By liamhays)](https://github.com/flipperdevices/flipperzero-firmware/pull/2389)
+- [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): Total of 31 animations added thanks to our Discord contest submissions! Thank you to the community for providing such great GIFs! ALL build will now have 31 new animations from the animation contest on Discord.
+- - Includes 11 new animations exclusively for the ALL build
+- - Includes 13 new animations for the Anime build
+- - Includes 5 new animations for the Hackz build
+- - Includes 2 new animations for DBZ build
+- - Includes 1 new animation for the Dolphin build
+- - Includes 1 new animation for the 0ne Piece build
+- - Includes 1 new animation for the P0kemon build
+- - Includes 1 new animation for the RM Select build
+- - Includes 1 new animation for the RM Select build with Bart from the Simpsons [(Thanks to skizzophrenic/TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/)
 
 <a name="release">
 
