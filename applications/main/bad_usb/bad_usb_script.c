@@ -609,7 +609,7 @@ static int32_t bad_usb_worker(void* context) {
                 flags = furi_thread_flags_wait(
                     WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtToggle,
                     FuriFlagWaitAny | FuriFlagNoClear,
-                    5000);
+                    1500);
                 if(flags == FuriFlagErrorTimeout) {
                     // If nothing happened - start script execution
                     worker_state = BadUsbStateRunning;
