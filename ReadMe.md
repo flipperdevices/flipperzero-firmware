@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0220-1623-0.77.2-14a3912](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-21 15:00 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-21 15:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-21 16:40 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-21 16:40 EST`
 - Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [iButton Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
@@ -69,7 +69,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [IR Universal Audio Remote: Add Grundig CMS 5000 #2414 (By ComputerCarsten)](https://github.com/flipperdevices/flipperzero-firmware/pull/2414)
 - OFW: [Display Mifare Classic data in NFC app #2389 (By liamhays)](https://github.com/flipperdevices/flipperzero-firmware/pull/2389)
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): Total of 31 animations added thanks to our Discord contest submissions! Thank you to the community for providing such great GIFs! ALL build will now have 31 new animations from the animation contest on Discord. Includes 11 new animations exclusively for the ALL build, 13 new animations for the Anime build, 5 new animations for the Hackz build, 2 new animations for DBZ build, 1 new animation for the Dolphin build, 1 new animation for the 0ne Piece build, 1 new animation for the P0kemon build, 1 new animation for the RM Select build [(Converted by RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/f5ed4c8be0c9e7068c710154d6fd780d6d599f1e) and 1 new animation for the RM Select build with Bart from the Simpsons [(Thanks to skizzophrenic/TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/)
-- UL PR: [Updated AC, Audio and Projector Universal Remotes (Thanks to amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/357)
+- UL: [Updated AC, Audio and Projector Universal Remotes (Thanks to amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/357)
+- UL: [typo combing #352 (Thanks to Round-Pi)](https://github.com/DarkFlippers/unleashed-firmware/pull/352)
 
 <a name="release">
 
