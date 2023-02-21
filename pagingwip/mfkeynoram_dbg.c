@@ -7,6 +7,10 @@
 #include <string.h>
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
+#define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
+#define CONST_M2_1 (LF_POLY_ODD << 1)
+#define CONST_M1_2 (LF_POLY_ODD)
+#define CONST_M2_2 (LF_POLY_EVEN << 1 | 1)
 #define BIT(x, n) ((x) >> (n) & 1)
 #define BEBIT(x, n) BIT(x, (n) ^ 24)
 #define SWAPENDIAN(x) (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16)
@@ -95,18 +99,56 @@ int extend_table(int data[], int tbl, int end, int bit, int m1, int m2) {
     }
     return end;
 }
-int extend_table_simple(int data[], int tbl, int end, int bit) {
-    for(data[ tbl ] <<= 1; tbl <= end; data[++tbl] <<= 1) {
-        if ((filter(data[ tbl ]) ^ filter(data[ tbl ] | 1)) !=0 )
-            data[ tbl ] |= filter(data[ tbl ]) ^ bit;
-        else if (filter(data[ tbl ]) == bit) {
-            data[ ++end ] = data[ ++tbl ];
-            data[ tbl ] = data[ tbl - 1 ] | 1;
-        } else {
-            data[ tbl-- ] = data[ end-- ];
+int* extend_table_precompute(int head, int *tail, int xks, int iterations, int m1, int m2) {
+    int *data = malloc(sizeof(int) * (5 << 19)); // Obviously this won't be here in the final version, and it won't need this much space
+
+    for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
+        if (filter(main_iter) == (xks & 1)) {
+            int *temp_states_buffer = malloc(sizeof(int)*(2<<7)); // TODO: Observed 144, set to 256
+            int temp_states_tail = 0;
+
+            temp_states_buffer[0] = main_iter;
+
+            for (int extend_iter = 1; extend_iter <= iterations; extend_iter++) {
+                int xks_bit = BIT(xks, extend_iter);
+
+                for (int s = 0; s <= temp_states_tail; s++) {
+                    temp_states_buffer[s] <<= 1;
+                    int t = temp_states_buffer[s];
+
+                    if ((filter(t) ^ filter(t | 1)) != 0 ) {
+                        temp_states_buffer[s] |= filter(t) ^ xks_bit;
+                        if (extend_iter > 4) {
+                            update_contribution(temp_states_buffer, s, m1, m2);
+                        }
+                    } else if (filter(t) == xks_bit) {
+                        // TODO: Refactor
+                        if (extend_iter > 4) {
+                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
+                            temp_states_buffer[s + 1] = temp_states_buffer[s] | 1;
+                            update_contribution(temp_states_buffer, s, m1, m2);
+                            s++;
+                            update_contribution(temp_states_buffer, s, m1, m2);
+                        } else {
+                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
+                            temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
+                        }
+                    } else {
+                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+                    }
+                }
+            }
+
+            for (int s = 0; s <= temp_states_tail; s++) {
+                data[*tail] = temp_states_buffer[s];
+                (*tail)++;
+            }
+
+            free(temp_states_buffer);
         }
     }
-    return end;
+
+    return data;
 }
 void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
     int i;
@@ -193,7 +235,7 @@ int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
     return found;
 }
 int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, int e_tail, int eks, int rem,
-            int s, struct Crypto1Params *p) {
+            int s, struct Crypto1Params *p, int first_run) {
     int o, e, i;
     if (rem == -1) {
         for (e = e_head; e <= e_tail; ++e) {
@@ -209,15 +251,18 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
         }
         return s;
     }
-    for (i = 0; (i < 4) && (rem-- != 0); i++) {
-        oks >>= 1;
-        eks >>= 1;
-        o_tail = extend_table(odd, o_head, o_tail, oks & 1, LF_POLY_EVEN << 1 | 1, LF_POLY_ODD << 1);
-        if (o_head > o_tail)
-            return s;
-        e_tail = extend_table(even, e_head, e_tail, eks & 1, LF_POLY_ODD, LF_POLY_EVEN << 1 | 1);
-        if (e_head > e_tail)
-            return s;
+    if (!first_run) {
+        // TODO: Do we need to worry about the return s in precompute?
+        for (i = 0; (i < 4) && (rem-- != 0); i++) {
+            oks >>= 1;
+            eks >>= 1;
+            o_tail = extend_table(odd, o_head, o_tail, oks & 1, CONST_M1_1, CONST_M2_1);
+            if (o_head > o_tail)
+                return s;
+            e_tail = extend_table(even, e_head, e_tail, eks & 1, CONST_M1_2, CONST_M2_2);
+            if (e_head > e_tail)
+                return s;
+        }
     }
     quicksort(odd, o_head, o_tail);
     quicksort(even, e_head, e_tail);
@@ -225,7 +270,7 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
         if (((odd[o_tail] ^ even[e_tail]) >> 24) == 0) {
             o_tail = binsearch(odd, o_head, o = o_tail);
             e_tail = binsearch(even, e_head, e = e_tail);
-            s = recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, p);
+            s = recover(odd, o_tail--, o, oks, even, e_tail--, e, eks, rem, s, p, 0);
             if (s == -1) {
                 break;
             }
@@ -237,51 +282,9 @@ int recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_head, 
     }
     return s;
 }
-int* extend_table_precompute(int head, int *tail, int xks, int iterations) {
-    int *data = malloc(sizeof(int) * (5 << 19)); // Obviously this won't be here in the final version, and it won't need this much space
-
-    for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
-        if (filter(main_iter) == (xks & 1)) {
-            int *temp_states_buffer = malloc(sizeof(int)*(2<<3));
-            int temp_states_tail = 0;
-
-            temp_states_buffer[0] = main_iter;
-
-            for (int extend_iter = 1; extend_iter <= iterations; extend_iter++) {
-                int xks_bit = BIT(xks, extend_iter);
-
-                for (int s = 0; s <= temp_states_tail; s++) {
-                    temp_states_buffer[s] <<= 1;
-                    int t = temp_states_buffer[s];
-
-                    int a = (filter(t) == xks_bit);
-                    int b = (filter(t | 1) == xks_bit);
-
-                    if(!a && !b) {
-                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
-                    } else if (!a && b) {
-                        temp_states_buffer[s] |= filter(t) ^ xks_bit;
-                    } else if (a && b) {
-                        temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
-                        temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
-                    }
-                }
-            }
-
-            for (int s = 0; s <= temp_states_tail; s++) {
-                (*tail)++;
-                data[*tail] = temp_states_buffer[s];
-            }
-
-            free(temp_states_buffer);
-        }
-    }
-
-    return data;
-}
 uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
-    int odd_head = 0, odd_tail = -1, oks = 0;
-    int even_head = 0, even_tail = -1, eks = 0;
+    int odd_head = 0, odd_tail = 0, oks = 0;
+    int even_head = 0, even_tail = 0, eks = 0;
     int i;
 
     for (i = 31; i >= 0; i -= 2)
@@ -289,17 +292,16 @@ uint64_t lfsr_recovery32(int ks2, struct Crypto1Params *p) {
     for (i = 30; i >= 0; i -= 2)
         eks = eks << 1 | BEBIT(ks2, i);
 
-    // TODO: Precompute first extend table in recover() too
-    int *odd = extend_table_precompute(odd_head, &odd_tail, oks, 4);
-    int *even = extend_table_precompute(even_head, &even_tail, eks, 4);
+    int *odd = extend_table_precompute(odd_head, &odd_tail, oks, 8, CONST_M1_1, CONST_M2_1);
+    int *even = extend_table_precompute(even_head, &even_tail, eks, 8, CONST_M1_2, CONST_M2_2);
 
-    for (int iter = 0; iter < 4; iter++) {
+    for (int iter = 0; iter < 8; iter++) {
         oks >>= 1;
         eks >>= 1;
     }
 
-    printf("odd_tail: %i, even_tail: %i\n", odd_tail, even_tail);
-    recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 11, 0, p);
+    //printf("odd_tail: %i, even_tail: %i\n", odd_tail, even_tail);
+    recover(odd, odd_head, odd_tail, oks, even, even_head, even_tail, eks, 7, 0, p, 1);
     free(odd);
     free(even);
     return p->key;
