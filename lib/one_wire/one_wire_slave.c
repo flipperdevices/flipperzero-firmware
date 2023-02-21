@@ -20,11 +20,10 @@
 
 typedef enum {
     OneWireSlaveErrorNone = 0,
+    OneWireSlaveErrorResetInProgress,
     OneWireSlaveErrorPresenceConflict,
-    OneWireSlaveErrorAwaitTimeslot,
     OneWireSlaveErrorInvalidCommand,
-    OneWireSlaveErrorFirstBitTimeout,
-    OneWireSlaveErrorResetInProgress
+    OneWireSlaveErrorTimeout,
 } OneWireSlaveError;
 
 struct OneWireSlave {
@@ -83,10 +82,8 @@ static bool onewire_slave_show_presence(OneWireSlave* bus) {
     return true;
 }
 
-static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
-    uint8_t cmd;
-    onewire_slave_receive(bus, &cmd, 1);
-
+static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) {
+    /* Reset condition detected, send a presence pulse and reset protocol state */
     if(bus->error == OneWireSlaveErrorResetInProgress) {
         if(onewire_slave_show_presence(bus)) {
             bus->error = OneWireSlaveErrorNone;
@@ -96,45 +93,36 @@ static bool onewire_slave_receive_and_process_cmd(OneWireSlave* bus) {
             }
 
             return true;
-
-        } else {
-            return false;
         }
 
     } else if(bus->error == OneWireSlaveErrorNone) {
-        if(bus->command_callback) {
-            return bus->command_callback(cmd, bus->command_callback_context);
+        uint8_t command;
+
+        if(!onewire_slave_receive(bus, &command, 1)) {
+            /* Upon failure, request an additional iteration to
+               choose the appropriate action by checking bus->error */
+            return true;
+        } else if(bus->command_callback) {
+            return bus->command_callback(command, bus->command_callback_context);
         } else {
             bus->error = OneWireSlaveErrorInvalidCommand;
-            return false;
         }
-
-    } else {
-        return false;
     }
+
+    return false;
 }
 
-static bool onewire_slave_bus_start(OneWireSlave* bus) {
-    bool result = true;
-
+static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
     FURI_CRITICAL_ENTER();
     furi_hal_gpio_init(bus->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-    bus->error = OneWireSlaveErrorNone;
 
-    if(onewire_slave_show_presence(bus)) {
-        if(bus->reset_callback != NULL) {
-            bus->reset_callback(bus->reset_callback_context);
-        }
+    /* Start in Reset state in order to send a presence pulse immediately */
+    bus->error = OneWireSlaveErrorResetInProgress;
 
-        while(onewire_slave_receive_and_process_cmd(bus))
-            ;
+    while(onewire_slave_receive_and_process_command(bus))
+        ;
 
-        result =
-            (bus->error == OneWireSlaveErrorNone || bus->error == OneWireSlaveErrorInvalidCommand);
-
-    } else {
-        result = false;
-    }
+    const bool result = (bus->error == OneWireSlaveErrorNone);
 
     furi_hal_gpio_init(bus->gpio_pin, GpioModeInterruptRiseFall, GpioPullNo, GpioSpeedLow);
     FURI_CRITICAL_EXIT();
@@ -230,7 +218,7 @@ bool onewire_slave_receive_bit(OneWireSlave* bus) {
     time = ONEWIRE_TH_TIMEOUT;
     time = onewire_slave_wait_while_gpio_is(bus, time, true);
     if(time == 0) {
-        bus->error = OneWireSlaveErrorAwaitTimeslot;
+        bus->error = OneWireSlaveErrorTimeout;
         return false;
     }
 
@@ -254,7 +242,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     time = ONEWIRE_TH_TIMEOUT;
     time = onewire_slave_wait_while_gpio_is(bus, time, true);
     if(time == 0) {
-        bus->error = OneWireSlaveErrorAwaitTimeslot;
+        bus->error = OneWireSlaveErrorTimeout;
         return false;
     }
 
@@ -285,9 +273,6 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size
         // bit loop
         for(uint8_t bit_mask = 0x01; bit_mask != 0; bit_mask <<= 1) {
             if(!onewire_slave_send_bit(bus, bit_mask & data_byte)) {
-                // if we cannot send first bit
-                if((bit_mask == 0x01) && (bus->error == OneWireSlaveErrorAwaitTimeslot))
-                    bus->error = OneWireSlaveErrorFirstBitTimeout;
                 return false;
             }
         }
