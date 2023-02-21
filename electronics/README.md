@@ -23,7 +23,8 @@ If you are just starting out, I'd recommend ordering this starter kit...
 - [Amazon link](https://amzn.to/3KjRF8c) These are the aligator clips I bought to clip on to various connections.
 
 ### Resistors
-- [Amazon link](https://amzn.to/3Igs0uB) A good assortment of resistors.
+- [Amazon link](https://amzn.to/3Igs0uB) A good assortment of resistors that I bought in the past.  They are 1% tolerance (which is really good).  
+  - NOTE: If you never owned resistors before, you may **also** want to purchase something like [link](https://amzn.to/3xEphpS) because they have three color bands + tolerance band; which is fairly common in older electronics {so it's good to get familiar with the color codes} -- I own something similar, back from my RadioShack days, but it is not this exact same kit.
 - [Amazon link](https://amzn.to/3Kk6nvJ) I love how easy it is to read the values on this decade box (and I own two of these) but they are expensive.
 - [Amazon link](https://amzn.to/3IeSHzw) This circuit board has variable resistors, moving the jumpers around is a little bit of a pain, but it's nice to be able to get a precise value vs. using a trimmer or potentiometer.
 
