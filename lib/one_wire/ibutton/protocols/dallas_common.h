@@ -96,6 +96,10 @@ bool dallas_common_load_rom_data(
 /* Miscellaneous */
 bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data);
 
-void dallas_common_render_brief_data(FuriString* result, const DallasCommonRomData* rom_data, const uint8_t* sram_data, size_t sram_data_size);
+void dallas_common_render_brief_data(
+    FuriString* result,
+    const DallasCommonRomData* rom_data,
+    const uint8_t* sram_data,
+    size_t sram_data_size);
 
 void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomData* rom_data);

@@ -207,7 +207,11 @@ bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data) {
     return crc_calculated == crc_received;
 }
 
-void dallas_common_render_brief_data(FuriString* result, const DallasCommonRomData* rom_data, const uint8_t* sram_data, size_t sram_data_size) {
+void dallas_common_render_brief_data(
+    FuriString* result,
+    const DallasCommonRomData* rom_data,
+    const uint8_t* sram_data,
+    size_t sram_data_size) {
     for(size_t i = 0; i < sizeof(rom_data->bytes); ++i) {
         furi_string_cat_printf(result, "%02X ", rom_data->bytes[i]);
     }
@@ -223,8 +227,7 @@ void dallas_common_render_brief_data(FuriString* result, const DallasCommonRomDa
 
     furi_string_cat_printf(result, "[  . . .  ]");
 
-    for(size_t i = sram_data_size - DALLAS_COMMON_BRIEF_TAIL_COUNT; i < sram_data_size;
-        ++i) {
+    for(size_t i = sram_data_size - DALLAS_COMMON_BRIEF_TAIL_COUNT; i < sram_data_size; ++i) {
         furi_string_cat_printf(result, " %02X", sram_data[i]);
     }
 }

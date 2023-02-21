@@ -183,7 +183,8 @@ void dallas_ds1992_render_data(FuriString* result, const iButtonProtocolData* pr
 
 void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData* data = protocol_data;
-    dallas_common_render_brief_data(result, &data->rom_data, data->sram_data, DS1992_SRAM_DATA_SIZE);
+    dallas_common_render_brief_data(
+        result, &data->rom_data, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
 void dallas_ds1992_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {

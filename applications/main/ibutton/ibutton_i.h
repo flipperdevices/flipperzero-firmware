@@ -19,6 +19,7 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
+#include <gui/modules/loading.h>
 
 #include <assets_icons.h>
 
@@ -57,6 +58,7 @@ struct iButton {
     TextInput* text_input;
     Popup* popup;
     Widget* widget;
+    Loading* loading;
 
     void* rpc_ctx;
 };
@@ -67,6 +69,7 @@ typedef enum {
     iButtonViewTextInput,
     iButtonViewPopup,
     iButtonViewWidget,
+    iButtonViewLoading,
 } iButtonView;
 
 typedef enum {
@@ -83,7 +86,8 @@ typedef enum {
     iButtonNotificationMessageBlinkStop,
 } iButtonNotificationMessage;
 
-bool ibutton_select_key(iButton* ibutton);
+bool ibutton_select_and_load_key(iButton* ibutton);
+bool ibutton_load_key(iButton* ibutton);
 bool ibutton_save_key(iButton* ibutton);
 bool ibutton_delete_key(iButton* ibutton);
 void ibutton_notification_message(iButton* ibutton, uint32_t message);

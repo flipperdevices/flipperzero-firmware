@@ -125,11 +125,18 @@ iButton* ibutton_alloc() {
     view_dispatcher_add_view(
         ibutton->view_dispatcher, iButtonViewWidget, widget_get_view(ibutton->widget));
 
+    ibutton->loading = loading_alloc();
+    view_dispatcher_add_view(
+        ibutton->view_dispatcher, iButtonViewLoading, loading_get_view(ibutton->loading));
+
     return ibutton;
 }
 
 void ibutton_free(iButton* ibutton) {
     furi_assert(ibutton);
+
+    view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewLoading);
+    loading_free(ibutton->loading);
 
     view_dispatcher_remove_view(ibutton->view_dispatcher, iButtonViewWidget);
     widget_free(ibutton->widget);
@@ -167,7 +174,9 @@ void ibutton_free(iButton* ibutton) {
     free(ibutton);
 }
 
-static bool ibutton_load_key(iButton* ibutton) {
+bool ibutton_load_key(iButton* ibutton) {
+    view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewLoading);
+
     const bool success = ibutton_key_load(ibutton->key, furi_string_get_cstr(ibutton->file_path));
 
     if(!success) {
@@ -185,25 +194,16 @@ static bool ibutton_load_key(iButton* ibutton) {
     return success;
 }
 
-bool ibutton_select_key(iButton* ibutton) {
+bool ibutton_select_and_load_key(iButton* ibutton) {
     DialogsFileBrowserOptions browser_options;
-    bool success = false;
-
     dialog_file_browser_set_basic_options(&browser_options, IBUTTON_APP_EXTENSION, &I_ibutt_10px);
     browser_options.base_path = IBUTTON_APP_FOLDER;
 
     // TODO: remember the last opened location?
     furi_string_set(ibutton->file_path, IBUTTON_APP_FOLDER);
-
-    do {
-        if(!dialog_file_browser_show(
-               ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options))
-            break;
-        if(!ibutton_load_key(ibutton)) break;
-        success = true;
-    } while(0);
-
-    return success;
+    return dialog_file_browser_show(
+               ibutton->dialogs, ibutton->file_path, ibutton->file_path, &browser_options) &&
+           ibutton_load_key(ibutton);
 }
 
 bool ibutton_save_key(iButton* ibutton) {
