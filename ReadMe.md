@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0220-1623-0.77.2-14a3912](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-20 16:20 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-20 16:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-21 02:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-21 02:45 EST`
 - Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [iButton Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [Slot Machine (By Daniel-dev-s)](https://github.com/Daniel-dev-s/flipperzero-slots) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
 - Updated: [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM) [Fixes (By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack/blob/main/apps_api_14.x_src.zip)
