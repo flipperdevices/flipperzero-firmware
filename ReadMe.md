@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Delete rwfiletest.bin on exit SDcard benchmark #2415 (By polarikus)](https://github.com/flipperdevices/flipperzero-firmware/pull/2415)
 - OFW: [Up toolchain version to 21 #2416 (By dunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2416)
 - OFW: [IR Universal Audio Remote: Add Grundig CMS 5000 #2414 (By ComputerCarsten)](https://github.com/flipperdevices/flipperzero-firmware/pull/2414)
+- OFW: [Display Mifare Classic data in NFC app #2389 (By liamhays)](https://github.com/flipperdevices/flipperzero-firmware/pull/2389)
 
 <a name="release">
 
