@@ -97,7 +97,6 @@ static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) 
 
     } else if(bus->error == OneWireSlaveErrorNone) {
         uint8_t command;
-
         if(!onewire_slave_receive(bus, &command, 1)) {
             /* Upon failure, request an additional iteration to
                choose the appropriate action by checking bus->error */
