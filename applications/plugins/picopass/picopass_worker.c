@@ -199,7 +199,6 @@ static ReturnCode picopass_auth_standard(uint8_t* csn, uint8_t* div_key) {
 }
 
 static ReturnCode picopass_auth_factory(uint8_t* csn, uint8_t* div_key) {
-    UNUSED(csn);
     rfalPicoPassReadCheckRes rcRes;
     rfalPicoPassCheckRes chkRes;
 
@@ -648,30 +647,10 @@ void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
     uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
     loclass_diversifyKey(csn, picopass_iclass_key, newKey);
 
-    FURI_LOG_D(
-        TAG,
-        "keychange %02x%02x%02x%02x%02x%02x%02x%02x -> %02x%02x%02x%02x%02x%02x%02x%02x",
-        oldKey[0],
-        oldKey[1],
-        oldKey[2],
-        oldKey[3],
-        oldKey[4],
-        oldKey[5],
-        oldKey[6],
-        oldKey[7],
-        newKey[0],
-        newKey[1],
-        newKey[2],
-        newKey[3],
-        newKey[4],
-        newKey[5],
-        newKey[6],
-        newKey[7]);
-
     if((fuses & 0x80) == 0x80) {
-        FURI_LOG_D(TAG, "Plain write for personalized key change");
+        FURI_LOG_D(TAG, "Plain write for personalized mode key change");
     } else {
-        FURI_LOG_D(TAG, "Write XOR for application key change");
+        FURI_LOG_D(TAG, "XOR write for application mode key change");
         // XOR when in application mode
         for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
             newKey[i] ^= oldKey[i];
