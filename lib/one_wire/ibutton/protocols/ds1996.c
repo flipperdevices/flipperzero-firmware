@@ -106,6 +106,17 @@ static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
             return false;
         }
 
+    case DALLAS_COMMON_CMD_SKIP_ROM:
+        if(data->state.command_state == DallasCommonCommandStateIdle) {
+            data->state.command_state = DallasCommonCommandStateRomCmd;
+            return true;
+        } else {
+            return false;
+        }
+
+    case DALLAS_COMMON_CMD_OVERDRIVE_SKIP_ROM:
+    case DALLAS_COMMON_CMD_OVERDRIVE_MATCH_ROM:
+        /* TODO: Overdrive mode support */
     default:
         return false;
     }

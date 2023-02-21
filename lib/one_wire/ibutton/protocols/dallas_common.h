@@ -19,6 +19,9 @@
 
 #define DALLAS_COMMON_CMD_READ_MEM 0xF0U
 
+#define DALLAS_COMMON_CMD_OVERDRIVE_SKIP_ROM 0x3CU
+#define DALLAS_COMMON_CMD_OVERDRIVE_MATCH_ROM 0x69U
+
 typedef enum {
     DallasCommonCommandStateIdle,
     DallasCommonCommandStateRomCmd,
