@@ -5,9 +5,6 @@
 
 #include "dallas_common.h"
 
-#include "blanks/rw1990.h"
-#include "blanks/tm2004.h"
-
 #define DS1996_FAMILY_CODE 0x0CU
 #define DS1996_FAMILY_NAME "DS1996"
 
@@ -15,15 +12,9 @@
 #define DS1996_SRAM_PAGE_SIZE 32U
 #define DS1996_COPY_SCRATCH_TIMEOUT_US 100U
 
-#define DS1996_BRIEF_HEAD_COUNT 4U
-#define DS1996_BRIEF_TAIL_COUNT 3U
-
 #define DS1996_DATA_BYTE_COUNT 4U
 
 #define DS1996_SRAM_DATA_KEY "Sram Data"
-
-#define BITS_IN_BYTE 8U
-#define BITS_IN_KBIT 1024U
 
 typedef struct {
     OneWireSlave* bus;
@@ -175,26 +166,7 @@ void dallas_ds1996_render_data(FuriString* result, const iButtonProtocolData* pr
 
 void dallas_ds1996_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1996ProtocolData* data = protocol_data;
-
-    for(size_t i = 0; i < sizeof(data->rom_data.bytes); ++i) {
-        furi_string_cat_printf(result, "%02X ", data->rom_data.bytes[i]);
-    }
-
-    furi_string_cat_printf(
-        result,
-        "\nInternal SRAM: %zu Kbit\n",
-        (size_t)(DS1996_SRAM_DATA_SIZE * BITS_IN_BYTE / BITS_IN_KBIT));
-
-    for(size_t i = 0; i < DS1996_BRIEF_HEAD_COUNT; ++i) {
-        furi_string_cat_printf(result, "%02X ", data->sram_data[i]);
-    }
-
-    furi_string_cat_printf(result, "[  . . .  ]");
-
-    for(size_t i = DS1996_SRAM_DATA_SIZE - DS1996_BRIEF_TAIL_COUNT; i < DS1996_SRAM_DATA_SIZE;
-        ++i) {
-        furi_string_cat_printf(result, " %02X", data->sram_data[i]);
-    }
+    dallas_common_render_brief_data(result, &data->rom_data, data->sram_data, DS1996_SRAM_DATA_SIZE);
 }
 
 void dallas_ds1996_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {

@@ -16,6 +16,12 @@
 #define DALLAS_COMMON_STATUS_FLAG_OF (1U << 6)
 #define DALLAS_COMMON_STATUS_FLAG_AA (1U << 7)
 
+#define DALLAS_COMMON_BRIEF_HEAD_COUNT 4U
+#define DALLAS_COMMON_BRIEF_TAIL_COUNT 3U
+
+#define BITS_IN_BYTE 8U
+#define BITS_IN_KBIT 1024U
+
 bool dallas_common_skip_rom(OneWireHost* host) {
     onewire_host_write(host, DALLAS_COMMON_CMD_SKIP_ROM);
     return true;
@@ -199,6 +205,28 @@ bool dallas_common_is_valid_crc(const DallasCommonRomData* rom_data) {
     const uint8_t crc_received = rom_data->fields.checksum;
 
     return crc_calculated == crc_received;
+}
+
+void dallas_common_render_brief_data(FuriString* result, const DallasCommonRomData* rom_data, const uint8_t* sram_data, size_t sram_data_size) {
+    for(size_t i = 0; i < sizeof(rom_data->bytes); ++i) {
+        furi_string_cat_printf(result, "%02X ", rom_data->bytes[i]);
+    }
+
+    furi_string_cat_printf(
+        result,
+        "\nInternal SRAM: %zu Kbit\n",
+        (size_t)(sram_data_size * BITS_IN_BYTE / BITS_IN_KBIT));
+
+    for(size_t i = 0; i < DALLAS_COMMON_BRIEF_HEAD_COUNT; ++i) {
+        furi_string_cat_printf(result, "%02X ", sram_data[i]);
+    }
+
+    furi_string_cat_printf(result, "[  . . .  ]");
+
+    for(size_t i = sram_data_size - DALLAS_COMMON_BRIEF_TAIL_COUNT; i < sram_data_size;
+        ++i) {
+        furi_string_cat_printf(result, " %02X", sram_data[i]);
+    }
 }
 
 void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomData* rom_data) {

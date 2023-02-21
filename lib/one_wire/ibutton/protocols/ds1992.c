@@ -5,7 +5,6 @@
 
 #include "dallas_common.h"
 
-#include "blanks/rw1990.h"
 #include "blanks/tm2004.h"
 
 #define DS1992_FAMILY_CODE 0x08U
@@ -15,15 +14,9 @@
 #define DS1992_SRAM_PAGE_SIZE 4U
 #define DS1992_COPY_SCRATCH_TIMEOUT_US 100U
 
-#define DS1992_BRIEF_HEAD_COUNT 4U
-#define DS1992_BRIEF_TAIL_COUNT 3U
-
 #define DS1992_DATA_BYTE_COUNT 4U
 
 #define DS1992_SRAM_DATA_KEY "Sram Data"
-
-#define BITS_IN_BYTE 8U
-#define BITS_IN_KBIT 1024U
 
 typedef struct {
     OneWireSlave* bus;
@@ -75,9 +68,8 @@ bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
 
 bool dallas_ds1992_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1992ProtocolData* data = protocol_data;
-    return rw1990_write_v1(host, data->rom_data.bytes, sizeof(DallasCommonRomData)) ||
-           rw1990_write_v2(host, data->rom_data.bytes, sizeof(DallasCommonRomData)) ||
-           tm2004_write(host, (uint8_t*)data, sizeof(DallasCommonRomData) + DS1992_SRAM_DATA_SIZE);
+    // TODO: Make this work, currently broken
+    return tm2004_write(host, (uint8_t*)data, sizeof(DallasCommonRomData) + DS1992_SRAM_DATA_SIZE);
 }
 
 bool dallas_ds1992_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -183,26 +175,7 @@ void dallas_ds1992_render_data(FuriString* result, const iButtonProtocolData* pr
 
 void dallas_ds1992_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData* data = protocol_data;
-
-    for(size_t i = 0; i < sizeof(data->rom_data.bytes); ++i) {
-        furi_string_cat_printf(result, "%02X ", data->rom_data.bytes[i]);
-    }
-
-    furi_string_cat_printf(
-        result,
-        "\nInternal SRAM: %zu Kbit\n",
-        (size_t)(DS1992_SRAM_DATA_SIZE * BITS_IN_BYTE / BITS_IN_KBIT));
-
-    for(size_t i = 0; i < DS1992_BRIEF_HEAD_COUNT; ++i) {
-        furi_string_cat_printf(result, "%02X ", data->sram_data[i]);
-    }
-
-    furi_string_cat_printf(result, "[  . . .  ]");
-
-    for(size_t i = DS1992_SRAM_DATA_SIZE - DS1992_BRIEF_TAIL_COUNT; i < DS1992_SRAM_DATA_SIZE;
-        ++i) {
-        furi_string_cat_printf(result, " %02X", data->sram_data[i]);
-    }
+    dallas_common_render_brief_data(result, &data->rom_data, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
 void dallas_ds1992_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {
