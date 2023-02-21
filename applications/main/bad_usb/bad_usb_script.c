@@ -624,8 +624,8 @@ static int32_t bad_usb_worker(void* context) {
 
         } else if(worker_state == BadUsbStateRunning) { // State: running
             uint16_t delay_cur = (delay_val > 1000) ? (1000) : (delay_val);
-            uint32_t flags =
-                bad_usb_flags_get(WorkerEvtEnd | WorkerEvtToggle | WorkerEvtDisconnect, delay_cur);
+            uint32_t flags = furi_thread_flags_wait(
+                WorkerEvtEnd | WorkerEvtToggle | WorkerEvtDisconnect, FuriFlagWaitAny, delay_cur);
 
             delay_val -= delay_cur;
             if(!(flags & FuriFlagError)) {
