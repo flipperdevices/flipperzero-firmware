@@ -23,13 +23,14 @@ If you are just starting out, I'd recommend ordering this starter kit...
 - [Amazon link](https://amzn.to/3KjRF8c) These are the aligator clips I bought to clip on to various connections.
 
 ### Resistors
-- [Amazon link](https://amzn.to/3Igs0uB) A good assortment of resistors.
+- [Amazon link](https://amzn.to/3Igs0uB) A good assortment of resistors that I bought in the past.  They are 1% tolerance (which is really good).  
+  - NOTE: If you never owned resistors before, you may **also** want to purchase something like [link](https://amzn.to/3xEphpS) because they have three color bands + tolerance band; which is fairly common in older electronics {so it's good to get familiar with the color codes} -- I own something similar, back from my RadioShack days, but it is not this exact same kit.
 - [Amazon link](https://amzn.to/3Kk6nvJ) I love how easy it is to read the values on this decade box (and I own two of these) but they are expensive.
 - [Amazon link](https://amzn.to/3IeSHzw) This circuit board has variable resistors, moving the jumpers around is a little bit of a pain, but it's nice to be able to get a precise value vs. using a trimmer or potentiometer.
 
 ### LEDs
 - [Amazon link](https://amzn.to/3XNYLER) This is one of my main assortment of LEDs.
-
+- [Amazon search result](https://amzn.to/3Ij0rkg) 7-Segment displays are available with "common cathode" and "common anode".  I bought mine from Vetco Electronics in Bellevue, WA, USA -- so I don't have an Amazon link to recommend.  For "common cathode" one pin goes to GND and the Flipper Zero GPIO output pins need to drive output to 3.3volts.  For "common anode" one pin goes to 3.3volts or 5.0volts and the Flipper Zero GPIO output pins need to drive output to GND.  Both configurations are possible; so either will work fine.  Most people like "common cathode" because then you write a GPIO 'true' to turn the LED on (instead of 'true' to turn it off.)
 
 ## Disclaimer
 When you purchase through links on this page, I may earn an
