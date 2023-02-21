@@ -30,7 +30,7 @@ If you are just starting out, I'd recommend ordering this starter kit...
 
 ### LEDs
 - [Amazon link](https://amzn.to/3XNYLER) This is one of my main assortment of LEDs.
-
+- [Amazon search result](https://amzn.to/3Ij0rkg) 7-Segment displays are available with "common cathode" and "common anode".  I bought mine from Vetco Electronics in Bellevue, WA, USA -- so I don't have an Amazon link to recommend.  For "common cathode" one pin goes to GND and the Flipper Zero GPIO output pins need to drive output to 3.3volts.  For "common anode" one pin goes to 3.3volts or 5.0volts and the Flipper Zero GPIO output pins need to drive output to GND.  Both configurations are possible; so either will work fine.  Most people like "common cathode" because then you write a GPIO 'true' to turn the LED on (instead of 'true' to turn it off.)
 
 ## Disclaimer
 When you purchase through links on this page, I may earn an
