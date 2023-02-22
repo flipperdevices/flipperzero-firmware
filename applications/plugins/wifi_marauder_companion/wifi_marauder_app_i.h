@@ -14,10 +14,15 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
+#include <storage/storage.h>
+#include <dialogs/dialogs.h>
+
 #define NUM_MENU_ITEMS (16)
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
+
+#define MARAUDER_APP_FOLDER ANY_PATH("marauder")
 
 struct WifiMarauderApp {
     Gui* gui;
@@ -29,7 +34,8 @@ struct WifiMarauderApp {
     size_t text_box_store_strlen;
     TextBox* text_box;
     TextInput* text_input;
-    //Widget* widget;
+    Storage* storage;
+    DialogsApp* dialogs;
 
     VariableItemList* var_item_list;
 

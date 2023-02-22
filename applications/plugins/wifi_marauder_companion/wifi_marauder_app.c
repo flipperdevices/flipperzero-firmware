@@ -25,6 +25,8 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     WifiMarauderApp* app = malloc(sizeof(WifiMarauderApp));
 
     app->gui = furi_record_open(RECORD_GUI);
+    app->storage = furi_record_open(RECORD_STORAGE);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&wifi_marauder_scene_handlers, app);
@@ -67,6 +69,14 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     return app;
 }
 
+void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
+    furi_assert(app);
+
+    if (!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
+    }
+}
+
 void wifi_marauder_app_free(WifiMarauderApp* app) {
     furi_assert(app);
 
@@ -86,6 +96,8 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }
@@ -93,6 +105,8 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
+
+    wifi_marauder_make_app_folder(wifi_marauder_app);
 
     wifi_marauder_app->uart = wifi_marauder_uart_init(wifi_marauder_app);
 
