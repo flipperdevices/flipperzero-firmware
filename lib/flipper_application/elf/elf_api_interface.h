@@ -5,8 +5,11 @@
 
 #define ELF_INVALID_ADDRESS 0xFFFFFFFF
 
-typedef struct {
+typedef struct ElfApiInterface {
     uint16_t api_version_major;
     uint16_t api_version_minor;
-    bool (*resolver_callback)(const char* name, Elf32_Addr* address);
+    bool (*resolver_callback)(
+        const struct ElfApiInterface* interface,
+        const char* name,
+        Elf32_Addr* address);
 } ElfApiInterface;

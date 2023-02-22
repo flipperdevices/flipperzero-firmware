@@ -115,6 +115,18 @@ FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplicatio
  */
 FuriThread* flipper_application_spawn(FlipperApplication* app, void* args);
 
+bool flipper_application_is_lib(FlipperApplication* app);
+
+typedef int32_t (*FlipperApplicationEntryPoint)(void*);
+
+typedef struct {
+    const char* appid;
+    const uint32_t ep_api_version;
+    const void* entry_point;
+} FlipperApplicationLibraryDescriptor;
+
+const FlipperApplicationLibraryDescriptor* flipper_application_lib_get(FlipperApplication* app);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,7 +1,6 @@
 #include "compilesort.hpp"
-#include "elf_hashtable.h"
-#include "elf_hashtable_entry.h"
-#include "elf_hashtable_checks.hpp"
+#include "firmware_api.h"
+#include "api_hashtable_checks.hpp"
 
 #include <array>
 #include <algorithm>
@@ -9,7 +8,7 @@
 /* Generated table */
 #include <symbols.h>
 
-#define TAG "elf_hashtable"
+#define TAG "fw_api"
 
 static_assert(!has_hash_collisions(elf_api_table), "Detected API method hash collision!");
 
@@ -20,7 +19,11 @@ static_assert(!has_hash_collisions(elf_api_table), "Detected API method hash col
  * @return true if the table contains a function
  */
 
-bool elf_resolve_from_hashtable(const char* name, Elf32_Addr* address) {
+bool elf_resolve_from_hashtable(
+    const ElfApiInterface* interface,
+    const char* name,
+    Elf32_Addr* address) {
+    UNUSED(interface);
     bool result = false;
     uint32_t gnu_sym_hash = elf_gnu_hash(name);
 
@@ -41,7 +44,7 @@ bool elf_resolve_from_hashtable(const char* name, Elf32_Addr* address) {
     return result;
 }
 
-const ElfApiInterface hashtable_api_interface = {
+const ElfApiInterface firmware_api_interface = {
     .api_version_major = (elf_api_version >> 16),
     .api_version_minor = (elf_api_version & 0xFFFF),
     .resolver_callback = &elf_resolve_from_hashtable,

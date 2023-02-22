@@ -19,6 +19,7 @@ class FlipperAppType(Enum):
     STARTUP = "StartupHook"
     EXTERNAL = "External"
     METAPACKAGE = "Package"
+    EXTENSION = "Extension"
 
 
 @dataclass

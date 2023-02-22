@@ -83,24 +83,32 @@ bool elf_file_load_section_table(ELFFile* elf_file, FlipperApplicationManifest* 
 ELFFileLoadStatus elf_file_load_sections(ELFFile* elf_file);
 
 /**
- * @brief Execute ELF file pre-run stage, call static constructors for example (load stage #3)
+ * @brief Execute ELF file pre-run stage, 
+ * call static constructors for example (load stage #3)
+ * Must be done before invoking any code from the ELF file
  * @param elf 
  */
-void elf_file_pre_run(ELFFile* elf);
+void elf_file_call_init(ELFFile* elf);
+
+bool elf_file_is_init_complete(ELFFile* elf);
 
 /**
- * @brief Run ELF file (load stage #4)
+ * @brief Run ELF file - invoke entry point (load stage #4)
  * @param elf_file 
  * @param args 
  * @return int32_t 
  */
-int32_t elf_file_run(ELFFile* elf_file, void* args);
+// int32_t elf_file_call_ep(ELFFile* elf_file, void* args);
+
+void* elf_file_get_entry_point(ELFFile* elf_file);
 
 /**
- * @brief Execute ELF file post-run stage, call static destructors for example (load stage #5)
+ * @brief Execute ELF file post-run stage, 
+ * call static destructors for example (load stage #5)
+ * Must be done if any code from the ELF file was executed
  * @param elf 
  */
-void elf_file_post_run(ELFFile* elf);
+void elf_file_call_fini(ELFFile* elf);
 
 /**
  * @brief Get ELF file API interface

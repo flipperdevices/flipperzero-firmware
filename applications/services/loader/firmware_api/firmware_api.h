@@ -1,5 +1,4 @@
 #pragma once
-#include <stdint.h>
 
 #include <flipper_application/elf/elf_api_interface.h>
 
@@ -7,7 +6,7 @@
 extern "C" {
 #endif
 
-extern const ElfApiInterface hashtable_api_interface;
+extern const ElfApiInterface firmware_api_interface;
 
 #ifdef __cplusplus
 }

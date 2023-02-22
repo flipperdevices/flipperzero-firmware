@@ -6,6 +6,8 @@ env.Append(
     ],
     SDK_HEADERS=[
         File("flipper_application.h"),
+        File("app_lib/app_lib_manager.h"),
+        File("app_lib/compound_api.h"),
     ],
 )
 

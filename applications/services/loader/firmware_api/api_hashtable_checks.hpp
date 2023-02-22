@@ -3,8 +3,11 @@
  */
 
 #pragma once
+
+#ifdef __cplusplus
+
 #include <array>
-#include "elf_hashtable_entry.h"
+#include "api_hashtable_entry.hpp"
 
 template <std::size_t N>
 constexpr bool has_hash_collisions(const std::array<sym_entry, N> api_methods) {
@@ -16,3 +19,5 @@ constexpr bool has_hash_collisions(const std::array<sym_entry, N> api_methods) {
 
     return false;
 }
+
+#endif
