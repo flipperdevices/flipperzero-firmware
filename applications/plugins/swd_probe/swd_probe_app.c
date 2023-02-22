@@ -1,29 +1,9 @@
-#include <furi.h>
-#include <gui/gui.h>
-#include <gui/elements.h>
-#include <dialogs/dialogs.h>
-#include <input/input.h>
-#include <storage/storage.h>
-#include <stdlib.h>
-#include <dolphin/dolphin.h>
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
 
-#include <math.h>
 
 #include "swd_probe_app.h"
 #include "swd_probe_icons.h"
 #include "jep106.h"
-
-/* short debug message */
-#define DBGS(format) furi_log_print_format(FuriLogLevelDebug, TAG, "%s: " format, __FUNCTION__)
-/* formatted debug message */
-#define DBG(format, ...) \
-    furi_log_print_format(FuriLogLevelDebug, TAG, "%s: " format, __FUNCTION__, __VA_ARGS__)
-/* log message*/
-#define LOG(...) furi_log_print_format(FuriLogLevelDefault, TAG, __VA_ARGS__)
-
-#define COUNT(x) ((size_t)(sizeof(x) / sizeof((x)[0])))
+#include "adi.h"
 
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 static bool swd_message_process(AppFSM* ctx);
@@ -45,6 +25,48 @@ static const char* gpio_names[] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA
 /* bit set: clock, else data */
 static const uint8_t gpio_direction_mask[6] =
     {0b10101010, 0b01010101, 0b11001100, 0b00110011, 0b11110000, 0b00001111};
+
+const NotificationSequence seq_c_minor = {
+    &message_note_c4,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_10,
+
+    &message_note_ds4,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_10,
+
+    &message_note_g4,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_10,
+
+    &message_vibro_on,
+    &message_delay_50,
+    &message_vibro_off,
+    NULL,
+};
+
+const NotificationSequence seq_error = {
+
+    &message_vibro_on,
+    &message_delay_50,
+    &message_vibro_off,
+
+    &message_note_g4,
+    &message_delay_100,
+    &message_sound_off,
+    &message_delay_10,
+
+    &message_note_c4,
+    &message_delay_500,
+    &message_sound_off,
+    &message_delay_10,
+    NULL,
+};
+
+const NotificationSequence* seq_sounds[] = {&seq_c_minor, &seq_error};
 
 static bool has_multiple_bits(uint8_t x) {
     return (x & (x - 1)) != 0;
@@ -440,7 +462,7 @@ static uint8_t swd_write_memory(AppFSM* const ctx, uint8_t ap, uint32_t address,
     return ret;
 }
 
-static uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t* data) {
+uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t* data) {
     uint8_t ret = 0;
     uint32_t csw = 0x23000002;
 
@@ -2188,6 +2210,7 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
         }
         canvas_set_font(canvas, FontSecondary);
         elements_button_left(canvas, "DPID");
+        elements_button_right(canvas, "CoreS.");
         elements_scrollbar_pos(canvas, 4, 10, 40, ctx->ap_pos / 32, COUNT(ctx->apidr_info) / 32);
         break;
     }
@@ -2228,6 +2251,56 @@ static void render_callback(Canvas* const canvas, void* ctx_in) {
         break;
     }
 
+    case ModePageCoresight: {
+        canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Coresight");
+        y += 10;
+        canvas_set_font(canvas, FontSecondary);
+
+        uint32_t base = ctx->coresight_bases[ctx->coresight_level];
+        uint32_t base_next = adi_romtable_get(ctx, base, ctx->coresight_pos[ctx->coresight_level]);
+
+        snprintf(buffer, sizeof(buffer), "Base: %08lX", base);
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+        snprintf(buffer, sizeof(buffer), "Type: %s", adi_romtable_type(ctx, base));
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+        snprintf(buffer, sizeof(buffer), "Full: %s", adi_romtable_full(ctx, base));
+        canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+        y += 10;
+
+        if(adi_is_romtable(ctx, base)) {
+            snprintf(
+                buffer,
+                sizeof(buffer),
+                "[%lu/%lu] -> %08lX",
+                ctx->coresight_pos[ctx->coresight_level] + 1,
+                ctx->coresight_count[ctx->coresight_level],
+                base_next);
+            canvas_draw_str_aligned(canvas, 5, y, AlignLeft, AlignBottom, buffer);
+            canvas_set_font(canvas, FontSecondary);
+            elements_button_center(canvas, "Enter");
+        }
+        y += 10;
+
+        canvas_set_font(canvas, FontSecondary);
+
+        if(ctx->coresight_level) {
+            elements_button_left(canvas, "Prev");
+        } else {
+            elements_button_left(canvas, "APs");
+        }
+        elements_scrollbar_pos(
+            canvas,
+            4,
+            10,
+            40,
+            ctx->coresight_pos[ctx->coresight_level],
+            ctx->coresight_count[ctx->coresight_level]);
+
+        break;
+    }
+
     /* hex dump view */
     case ModePageScript: {
         canvas_draw_str_aligned(canvas, 64, y, AlignCenter, AlignBottom, "Script");
@@ -2252,10 +2325,8 @@ static void input_callback(InputEvent* input_event, void* ctx_in) {
 
     int entries = furi_message_queue_get_count(ctx->event_queue);
 
-    DBG("furi_message_queue_get_count: %d", entries);
     /* better skip than sorry */
     if(entries < QUEUE_SIZE) {
-        DBGS("furi_message_queue_put");
         AppEvent event = {.type = EventKeyPress, .input = *input_event};
         furi_message_queue_put(ctx->event_queue, &event, 0);
     }
@@ -2460,6 +2531,10 @@ static void swd_main_loop(AppFSM* ctx) {
         furi_mutex_release(ctx->swd_mutex);
         break;
     }
+
+    case ModePageCoresight:
+        furi_delay_ms(50);
+        break;
     }
 }
 
@@ -2498,10 +2573,17 @@ static bool swd_message_process(AppFSM* ctx) {
                     ctx->hex_addr += ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
                     break;
                 }
+
+                case ModePageCoresight: {
+                    if(ctx->coresight_pos[ctx->coresight_level] > 0) {
+                        ctx->coresight_pos[ctx->coresight_level]--;
+                    }
+                    break;
+                }
                 }
                 break;
 
-            case InputKeyDown:
+            case InputKeyDown: {
                 switch(ctx->mode_page) {
                 default:
                     break;
@@ -2535,15 +2617,31 @@ static bool swd_message_process(AppFSM* ctx) {
                     ctx->hex_addr -= ((ctx->hex_select) ? 1 : 8) * (1 << (4 * ctx->hex_select));
                     break;
                 }
-                }
 
+                case ModePageCoresight: {
+                    if(ctx->coresight_pos[ctx->coresight_level] + 1 <
+                       ctx->coresight_count[ctx->coresight_level]) {
+                        ctx->coresight_pos[ctx->coresight_level]++;
+                    }
+                    break;
+                }
+                }
                 break;
+            }
 
             case InputKeyRight:
                 if(ctx->mode_page == ModePageHexDump) {
                     if(ctx->hex_select > 0) {
                         ctx->hex_select--;
                     }
+                } else if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
+                    ctx->mode_page = ModePageCoresight;
+                    uint32_t base = ctx->apidr_info[ctx->ap_pos].base & 0xFFFFF000;
+                    ctx->coresight_level = 0;
+                    ctx->coresight_bases[ctx->coresight_level] = base;
+                    ctx->coresight_pos[ctx->coresight_level] = 0;
+                    ctx->coresight_count[ctx->coresight_level] =
+                        adi_romtable_entry_count(ctx, base);
                 } else if(ctx->detected) {
                     if(ctx->mode_page + 1 < ModePageCount) {
                         ctx->mode_page++;
@@ -2555,6 +2653,12 @@ static bool swd_message_process(AppFSM* ctx) {
                 if(ctx->mode_page == ModePageHexDump) {
                     if(ctx->hex_select < 7) {
                         ctx->hex_select++;
+                    }
+                } else if(ctx->mode_page == ModePageCoresight) {
+                    if(ctx->coresight_level > 0) {
+                        ctx->coresight_level--;
+                    } else {
+                        ctx->mode_page = ModePageAPID;
                     }
                 } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
                     uint32_t mode_page = ctx->mode_page;
@@ -2586,6 +2690,21 @@ static bool swd_message_process(AppFSM* ctx) {
             case InputKeyOk:
                 if(ctx->mode_page == ModePageAPID && ctx->apidr_info[ctx->ap_pos].ok) {
                     ctx->mode_page = ModePageHexDump;
+                } else if(ctx->mode_page == ModePageCoresight) {
+                    uint32_t base = ctx->coresight_bases[ctx->coresight_level];
+
+                    if(!adi_is_romtable(ctx, base)) {
+                        break;
+                    }
+
+                    uint32_t cur_pos = ctx->coresight_pos[ctx->coresight_level];
+                    uint32_t base_next = adi_romtable_get(ctx, base, cur_pos);
+                    uint32_t new_count = adi_romtable_entry_count(ctx, base_next);
+
+                    ctx->coresight_level++;
+                    ctx->coresight_pos[ctx->coresight_level] = 0;
+                    ctx->coresight_count[ctx->coresight_level] = new_count;
+                    ctx->coresight_bases[ctx->coresight_level] = base_next;
                 }
                 break;
 

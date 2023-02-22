@@ -60,7 +60,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [IR Remote plugin improvements #535 (By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535)
-- Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - Added: 2 SubGHz Assets for Walgreens/Lowes. Updated playlists for Walgreens/Lowes.
 - OFW: [Show RSSI in Weather Station app #2395 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2395) (Updates by skotopes)
 - OFW: [Re-init NFC when starting the worker #2399 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2399)
@@ -72,6 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Updated AC, Audio and Projector Universal Remotes (Thanks to amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/357)
 - UL: [typo combing #352 (Thanks to Round-Pi)](https://github.com/DarkFlippers/unleashed-firmware/pull/352)
 - Added: [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
+- Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 <a name="release">
 

@@ -4,25 +4,42 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_speaker.h>
 #include <gui/gui.h>
+#include <gui/elements.h>
+#include <dialogs/dialogs.h>
 #include <input/input.h>
-
+#include <storage/storage.h>
+#include <dolphin/dolphin.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/subghz_file_encoder_worker.h>
 #include <notification/notification.h>
-#include <notification/notification_messages.h>
 
 #include "usb_uart.h"
 
 #define TAG "SWD"
 
+/* short debug message */
+#define DBGS(format) furi_log_print_format(FuriLogLevelDebug, TAG, "%s: " format, __FUNCTION__)
+/* formatted debug message */
+#define DBG(format, ...) \
+    furi_log_print_format(FuriLogLevelDebug, TAG, "%s: " format, __FUNCTION__, __VA_ARGS__)
+/* log message*/
+#define LOG(...) furi_log_print_format(FuriLogLevelDefault, TAG, __VA_ARGS__)
+
+#define COUNT(x) ((size_t)(sizeof(x) / sizeof((x)[0])))
+#define ARRAY_SIZE(x) COUNT(x)
+
 #define SWD_DELAY_US 0
-#define TIMER_HZ 20
+#define TIMER_HZ 25
 #define TIMEOUT 3
 #define QUEUE_SIZE 8
 #define IDLE_BITS 8
@@ -40,6 +57,7 @@ typedef enum {
     ModePageCount = 5,
     ModePageHexDump = 0x100,
     ModePageScript = 0x101,
+    ModePageCoresight = 0x102,
 } ModePages;
 
 #define CDBGPWRUPREQ (1 << 28)
@@ -165,6 +183,11 @@ typedef struct {
     uint8_t ap_pos;
     uint8_t ap_scanned;
 
+    uint32_t coresight_pos[16];
+    uint32_t coresight_count[16];
+    uint8_t coresight_level;
+    uint32_t coresight_bases[16];
+
     uint32_t hex_addr;
     uint8_t hex_select;
     uint8_t hex_buffer[32];
@@ -205,46 +228,6 @@ typedef struct {
     bool (*func)(ScriptContext* ctx);
 } ScriptFunctionInfo;
 
-const NotificationSequence seq_c_minor = {
-    &message_note_c4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_note_ds4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_note_g4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_vibro_on,
-    &message_delay_50,
-    &message_vibro_off,
-    NULL,
-};
-
-const NotificationSequence seq_error = {
-
-    &message_vibro_on,
-    &message_delay_50,
-    &message_vibro_off,
-
-    &message_note_g4,
-    &message_delay_100,
-    &message_sound_off,
-    &message_delay_10,
-
-    &message_note_c4,
-    &message_delay_500,
-    &message_sound_off,
-    &message_delay_10,
-    NULL,
-};
-
-const NotificationSequence* seq_sounds[] = {&seq_c_minor, &seq_error};
+uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_t* data);
 
 #endif
