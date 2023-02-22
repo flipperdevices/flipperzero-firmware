@@ -230,7 +230,7 @@ static uint8_t sd_spi_wait_for_data_and_read(void) {
     return responce;
 }
 
-SdSpiStatus sd_spi_error(SdSpiStatus status) {
+static SdSpiStatus sd_spi_error(SdSpiStatus status) {
     // Reset the sector cache and return the error
     sector_cache_init();
     return status;
