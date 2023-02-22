@@ -6,13 +6,15 @@
 #include <gui/view.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
-#include <notification/notification_messages.h>
 
 #include <one_wire/ibutton/ibutton_worker.h>
 #include <one_wire/ibutton/ibutton_protocols.h>
 
+#include <rpc/rpc_app.h>
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
+#include <notification/notification.h>
+#include <notification/notification_messages.h>
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
@@ -45,8 +47,9 @@ struct iButton {
     Storage* storage;
     DialogsApp* dialogs;
     NotificationApp* notifications;
+    RpcAppSystem* rpc;
 
-    iButtonWorker* key_worker;
+    iButtonWorker* worker;
     iButtonKey* key;
     iButtonWriteMode write_mode;
 
@@ -59,8 +62,6 @@ struct iButton {
     Popup* popup;
     Widget* widget;
     Loading* loading;
-
-    void* rpc_ctx;
 };
 
 typedef enum {

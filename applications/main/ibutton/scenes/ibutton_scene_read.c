@@ -10,7 +10,7 @@ void ibutton_scene_read_on_enter(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
     iButtonKey* key = ibutton->key;
-    iButtonWorker* worker = ibutton->key_worker;
+    iButtonWorker* worker = ibutton->worker;
 
     popup_set_header(popup, "iButton", 95, 26, AlignCenter, AlignBottom);
     popup_set_text(popup, "Waiting\nfor key ...", 95, 30, AlignCenter, AlignTop);
@@ -54,7 +54,7 @@ bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {
 void ibutton_scene_read_on_exit(void* context) {
     iButton* ibutton = context;
     Popup* popup = ibutton->popup;
-    ibutton_worker_stop(ibutton->key_worker);
+    ibutton_worker_stop(ibutton->worker);
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 0, NULL);

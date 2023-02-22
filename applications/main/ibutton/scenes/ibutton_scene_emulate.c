@@ -29,9 +29,8 @@ void ibutton_scene_emulate_on_enter(void* context) {
     widget_add_string_multiline_element(
         widget, 88, 10, AlignCenter, AlignTop, FontPrimary, "iButton\nemulating");
 
-    ibutton_worker_emulate_set_callback(
-        ibutton->key_worker, ibutton_scene_emulate_callback, ibutton);
-    ibutton_worker_emulate_start(ibutton->key_worker, key);
+    ibutton_worker_emulate_set_callback(ibutton->worker, ibutton_scene_emulate_callback, ibutton);
+    ibutton_worker_emulate_start(ibutton->worker, key);
 
     ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateStart);
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
@@ -46,8 +45,7 @@ bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeTick) {
         uint32_t cnt = scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneEmulate);
         if(cnt > 0) {
-            cnt--;
-            if(cnt == 0) {
+            if(--cnt == 0) {
                 ibutton_notification_message(ibutton, iButtonNotificationMessageEmulateBlink);
             }
             scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneEmulate, cnt);
@@ -69,7 +67,7 @@ bool ibutton_scene_emulate_on_event(void* context, SceneManagerEvent event) {
 
 void ibutton_scene_emulate_on_exit(void* context) {
     iButton* ibutton = context;
-    ibutton_worker_stop(ibutton->key_worker);
+    ibutton_worker_stop(ibutton->worker);
     widget_reset(ibutton->widget);
     ibutton_notification_message(ibutton, iButtonNotificationMessageBlinkStop);
 }

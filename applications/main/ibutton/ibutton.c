@@ -1,10 +1,6 @@
-#include "ibutton.h"
-#include "assets_icons.h"
 #include "ibutton_i.h"
-#include "ibutton/scenes/ibutton_scene.h"
+
 #include <toolbox/path.h>
-#include <flipper_format/flipper_format.h>
-#include <rpc/rpc_app.h>
 #include <dolphin/dolphin.h>
 
 #define TAG "iButtonApp"
@@ -50,14 +46,14 @@ static void ibutton_rpc_command_callback(RpcAppSystemEvent event, void* context)
     if(event == RpcAppEventSessionClose) {
         view_dispatcher_send_custom_event(
             ibutton->view_dispatcher, iButtonCustomEventRpcSessionClose);
-        rpc_system_app_set_callback(ibutton->rpc_ctx, NULL, NULL);
-        ibutton->rpc_ctx = NULL;
+        rpc_system_app_set_callback(ibutton->rpc, NULL, NULL);
+        ibutton->rpc = NULL;
     } else if(event == RpcAppEventAppExit) {
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcExit);
     } else if(event == RpcAppEventLoadFile) {
         view_dispatcher_send_custom_event(ibutton->view_dispatcher, iButtonCustomEventRpcLoad);
     } else {
-        rpc_system_app_confirm(ibutton->rpc_ctx, event, false);
+        rpc_system_app_confirm(ibutton->rpc, event, false);
     }
 }
 
@@ -102,8 +98,8 @@ iButton* ibutton_alloc() {
     ibutton->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     ibutton->key = ibutton_key_alloc();
-    ibutton->key_worker = ibutton_worker_alloc();
-    ibutton_worker_start_thread(ibutton->key_worker);
+    ibutton->worker = ibutton_worker_alloc();
+    ibutton_worker_start_thread(ibutton->worker);
 
     ibutton->submenu = submenu_alloc();
     view_dispatcher_add_view(
@@ -165,8 +161,8 @@ void ibutton_free(iButton* ibutton) {
     furi_record_close(RECORD_GUI);
     ibutton->gui = NULL;
 
-    ibutton_worker_stop_thread(ibutton->key_worker);
-    ibutton_worker_free(ibutton->key_worker);
+    ibutton_worker_stop_thread(ibutton->worker);
+    ibutton_worker_free(ibutton->worker);
     ibutton_key_free(ibutton->key);
 
     furi_string_free(ibutton->file_path);
@@ -252,33 +248,32 @@ void ibutton_widget_callback(GuiButtonType result, InputType type, void* context
     }
 }
 
-int32_t ibutton_app(void* p) {
+int32_t ibutton_app(void* arg) {
     iButton* ibutton = ibutton_alloc();
 
     ibutton_make_app_folder(ibutton);
 
     bool key_loaded = false;
-    bool rpc_mode = false;
 
-    if(p && strlen(p)) {
-        uint32_t rpc_ctx = 0;
-        if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
+    if((arg != NULL) && (strlen(arg) != 0)) {
+        if(sscanf(arg, "RPC %lX", (uint32_t*)&ibutton->rpc) == 1) {
             FURI_LOG_D(TAG, "Running in RPC mode");
-            ibutton->rpc_ctx = (void*)rpc_ctx;
-            rpc_mode = true;
-            rpc_system_app_set_callback(ibutton->rpc_ctx, ibutton_rpc_command_callback, ibutton);
-            rpc_system_app_send_started(ibutton->rpc_ctx);
+
+            rpc_system_app_set_callback(ibutton->rpc, ibutton_rpc_command_callback, ibutton);
+            rpc_system_app_send_started(ibutton->rpc);
+
         } else {
-            furi_string_set(ibutton->file_path, (const char*)p);
+            furi_string_set(ibutton->file_path, (const char*)arg);
             key_loaded = ibutton_load_key(ibutton);
         }
     }
 
-    if(rpc_mode) {
+    if(ibutton->rpc != NULL) {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeDesktop);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneRpc);
         DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
+
     } else {
         view_dispatcher_attach_to_gui(
             ibutton->view_dispatcher, ibutton->gui, ViewDispatcherTypeFullscreen);
@@ -292,9 +287,9 @@ int32_t ibutton_app(void* p) {
 
     view_dispatcher_run(ibutton->view_dispatcher);
 
-    if(ibutton->rpc_ctx) {
-        rpc_system_app_set_callback(ibutton->rpc_ctx, NULL, NULL);
-        rpc_system_app_send_exited(ibutton->rpc_ctx);
+    if(ibutton->rpc) {
+        rpc_system_app_set_callback(ibutton->rpc, NULL, NULL);
+        rpc_system_app_send_exited(ibutton->rpc);
     }
     ibutton_free(ibutton);
     return 0;

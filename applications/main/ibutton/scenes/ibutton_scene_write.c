@@ -15,7 +15,7 @@ void ibutton_scene_write_on_enter(void* context) {
     furi_assert(ibutton->write_mode != iButtonWriteModeInvalid);
 
     iButtonKey* key = ibutton->key;
-    iButtonWorker* worker = ibutton->key_worker;
+    iButtonWorker* worker = ibutton->worker;
 
     Widget* widget = ibutton->widget;
     FuriString* tmp = furi_string_alloc();
@@ -75,7 +75,7 @@ void ibutton_scene_write_on_exit(void* context) {
     iButton* ibutton = context;
     ibutton->write_mode = iButtonWriteModeInvalid;
 
-    ibutton_worker_stop(ibutton->key_worker);
+    ibutton_worker_stop(ibutton->worker);
     widget_reset(ibutton->widget);
 
     ibutton_notification_message(ibutton, iButtonNotificationMessageBlinkStop);
