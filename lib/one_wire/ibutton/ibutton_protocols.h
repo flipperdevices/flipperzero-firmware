@@ -5,7 +5,7 @@
 /**
  * Get protocol id from iButton family code
  * @param [in] family_code
- * @return protocol id or iButtonProtocolMax if protocol not found
+ * @return protocol id or iButtonProtocolGeneric if protocol not found
  */
 iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code);
 

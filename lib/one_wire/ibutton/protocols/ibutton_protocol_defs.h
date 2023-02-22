@@ -6,6 +6,7 @@ typedef enum {
     iButtonProtocolDS1990,
     iButtonProtocolDS1992,
     iButtonProtocolDS1996,
+    iButtonProtocolDSGeneric,
     iButtonProtocolMax
 } iButtonProtocol;
 

@@ -3,7 +3,7 @@
 iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
     iButtonProtocol protocol_id;
 
-    for(protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
+    for(protocol_id = 0; protocol_id < iButtonProtocolDSGeneric; ++protocol_id) {
         if(ibutton_protocols[protocol_id]->family_code == family_code) break;
     }
 

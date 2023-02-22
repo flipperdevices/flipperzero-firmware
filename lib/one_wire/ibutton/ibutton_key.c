@@ -102,11 +102,10 @@ static inline bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) 
          * It can be checked later with ibutton_key_is_valid(). */
         success = true;
 
+        /* If a 1-Wire device was found, protocol_id is guaranteed to be
+         * one of the known keys or DSGeneric. */
         key->protocol_id = ibutton_protocols_get_id_by_family_code(rom_data[0]);
-
-        if(key->protocol_id < iButtonProtocolMax) {
-            ibutton_protocols_read(host, key->protocol_data, key->protocol_id);
-        }
+        ibutton_protocols_read(host, key->protocol_data, key->protocol_id);
     }
 
     onewire_host_reset_search(host);
