@@ -14,7 +14,7 @@ jobs:
           submodules: true
 
       - name: Lint
-        uses: oleksiikutuzov/flipperzero-ufbt-action@v1
+        uses: oleksiikutuzov/flipperzero-ufbt-action@v2
         with:
           lint: true
           path: application
