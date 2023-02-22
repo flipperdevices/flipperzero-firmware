@@ -103,3 +103,5 @@ void dallas_common_render_brief_data(
     size_t sram_data_size);
 
 void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomData* rom_data);
+
+void dallas_common_apply_edits(DallasCommonRomData* rom_data, uint8_t family_code);

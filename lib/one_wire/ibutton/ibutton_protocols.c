@@ -132,3 +132,19 @@ bool ibutton_protocols_is_valid(
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->is_valid(protocol_data);
 }
+
+void ibutton_protocols_get_editable_data(
+    uint8_t** data,
+    size_t* data_size,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id) {
+    furi_assert(data);
+    furi_assert(data_size);
+    furi_assert(protocol_id < iButtonProtocolMax);
+    return ibutton_protocols[protocol_id]->get_editable_data(data, data_size, protocol_data);
+}
+
+void ibutton_protocols_apply_edits(iButtonProtocolData* protocol_data, iButtonProtocol protocol_id) {
+    furi_assert(protocol_id < iButtonProtocolMax);
+    ibutton_protocols[protocol_id]->apply_edits(protocol_data);
+}

@@ -164,3 +164,23 @@ void ibutton_protocols_render_error(
 bool ibutton_protocols_is_valid(
     const iButtonProtocolData* protocol_data,
     iButtonProtocol protocol_id);
+
+/**
+ * Get a pointer to the protocol's editable data and its size
+ * @param [out] data pointer to a pointer to contain the start of data
+ * @param [out] data_size pointer to a variable to contain the data size
+ * @param [in] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ */
+void ibutton_protocols_get_editable_data(
+    uint8_t** data,
+    size_t* data_size,
+    iButtonProtocolData* protocol_data,
+    iButtonProtocol protocol_id);
+
+/**
+ * Make all necessary internal adjustments after editing the data
+ * @param [in] protocol_data pointer to protocol-specific data
+ * @param [in] protocol_id id of the protocol in question
+ */
+void ibutton_protocols_apply_edits(iButtonProtocolData* protocol_data, iButtonProtocol protocol_id);

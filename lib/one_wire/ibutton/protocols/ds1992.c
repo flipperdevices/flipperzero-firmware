@@ -39,11 +39,13 @@ static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1992_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds1992_is_data_valid(const iButtonProtocolData*);
+static void dallas_ds1992_get_editable_data(uint8_t**, size_t*, iButtonProtocolData*);
+static void dallas_ds1992_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .family_code = DS1992_FAMILY_CODE,
     .features = iButtonProtocolFeatureExtData | iButtonProtocolFeatureWriteBlank |
-                iButtonProtocolFeatureWriteCopy,
+                iButtonProtocolFeatureWriteCopy | iButtonProtocolFeatureApplyEdits,
     .data_size = sizeof(DS1992ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DS1992_FAMILY_NAME,
@@ -58,6 +60,8 @@ const iButtonProtocolBase ibutton_protocol_ds1992 = {
     .render_brief_data = dallas_ds1992_render_brief_data,
     .render_error = dallas_ds1992_render_error,
     .is_valid = dallas_ds1992_is_data_valid,
+    .get_editable_data = dallas_ds1992_get_editable_data,
+    .apply_edits = dallas_ds1992_apply_edits,
 };
 
 bool dallas_ds1992_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -198,4 +202,18 @@ void dallas_ds1992_render_error(FuriString* result, const iButtonProtocolData* p
 bool dallas_ds1992_is_data_valid(const iButtonProtocolData* protocol_data) {
     const DS1992ProtocolData* data = protocol_data;
     return dallas_common_is_valid_crc(&data->rom_data);
+}
+
+void dallas_ds1992_get_editable_data(
+    uint8_t** data_ptr,
+    size_t* data_size,
+    iButtonProtocolData* protocol_data) {
+    DS1992ProtocolData* data = protocol_data;
+    *data_ptr = data->rom_data.bytes;
+    *data_size = sizeof(DallasCommonRomData);
+}
+
+void dallas_ds1992_apply_edits(iButtonProtocolData* protocol_data) {
+    DS1992ProtocolData* data = protocol_data;
+    dallas_common_apply_edits(&data->rom_data, DS1992_FAMILY_CODE);
 }

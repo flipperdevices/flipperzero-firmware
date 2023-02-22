@@ -32,7 +32,7 @@ bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         const uint32_t protocol_id = event.event;
 
-        // TODO: set the key protocol
+        ibutton_key_set_protocol_id(ibutton->key, protocol_id);
 
         scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, protocol_id);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);

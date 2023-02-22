@@ -30,12 +30,21 @@ void ibutton_key_free(iButtonKey* key) {
     free(key);
 }
 
+void ibutton_key_reset(iButtonKey* key) {
+    key->protocol_id = iButtonProtocolMax;
+    memset(key->protocol_data, 0, ibutton_protocols_get_max_data_size());
+}
+
 bool ibutton_key_is_valid(iButtonKey* key) {
     if(key->protocol_id < iButtonProtocolMax) {
         return ibutton_protocols_is_valid(key->protocol_data, key->protocol_id);
     } else {
         return false;
     }
+}
+
+uint32_t ibutton_key_get_features(iButtonKey* key) {
+    return ibutton_protocols_get_features(key->protocol_id);
 }
 
 const char* ibutton_key_get_manufacturer_name(iButtonKey* key) {
@@ -46,8 +55,37 @@ const char* ibutton_key_get_protocol_name(iButtonKey* key) {
     return ibutton_protocols_get_name(key->protocol_id);
 }
 
-uint32_t ibutton_key_get_features(iButtonKey* key) {
-    return ibutton_protocols_get_features(key->protocol_id);
+void ibutton_key_get_editable_data(iButtonKey* key, iButtonKeyEditableData* data) {
+    furi_assert(data);
+    if(key->protocol_id < iButtonProtocolMax) {
+        ibutton_protocols_get_editable_data(
+            &data->ptr, &data->size, key->protocol_data, key->protocol_id);
+    } else {
+        data->ptr = NULL;
+        data->size = 0;
+    }
+}
+
+void ibutton_key_get_rendered_data(iButtonKey* key, FuriString* result) {
+    ibutton_protocols_render_data(result, key->protocol_data, key->protocol_id);
+}
+
+void ibutton_key_get_rendered_brief_data(iButtonKey* key, FuriString* result) {
+    ibutton_protocols_render_brief_data(result, key->protocol_data, key->protocol_id);
+}
+
+void ibutton_key_get_rendered_error(iButtonKey* key, FuriString* result) {
+    if(key->protocol_id < iButtonProtocolMax) {
+        ibutton_protocols_render_error(result, key->protocol_data, key->protocol_id);
+    } else {
+        furi_string_printf(result, "Unsupported Protocol");
+    }
+}
+
+void ibutton_key_set_protocol_id(iButtonKey* key, uint32_t protocol_id) {
+    ibutton_key_reset(key);
+    key->protocol_id = protocol_id;
+    ibutton_key_apply_edits(key);
 }
 
 static inline bool ibutton_key_read_onewire(iButtonKey* key, OneWireHost* host) {
@@ -220,18 +258,9 @@ bool ibutton_key_load(iButtonKey* key, const char* file_name) {
     return success;
 }
 
-void ibutton_key_get_rendered_data(iButtonKey* key, FuriString* result) {
-    ibutton_protocols_render_data(result, key->protocol_data, key->protocol_id);
-}
-
-void ibutton_key_get_rendered_brief_data(iButtonKey* key, FuriString* result) {
-    ibutton_protocols_render_brief_data(result, key->protocol_data, key->protocol_id);
-}
-
-void ibutton_key_get_rendered_error(iButtonKey* key, FuriString* result) {
-    if(key->protocol_id < iButtonProtocolMax) {
-        ibutton_protocols_render_error(result, key->protocol_data, key->protocol_id);
-    } else {
-        furi_string_printf(result, "Unsupported Protocol");
+void ibutton_key_apply_edits(iButtonKey* key) {
+    if((key->protocol_id < iButtonProtocolMax) &&
+       (ibutton_protocols_get_features(key->protocol_id) & iButtonProtocolFeatureApplyEdits)) {
+        ibutton_protocols_apply_edits(key->protocol_data, key->protocol_id);
     }
 }

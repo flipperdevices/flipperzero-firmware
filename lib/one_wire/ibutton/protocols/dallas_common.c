@@ -241,3 +241,10 @@ void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomDat
         furi_string_cat_printf(result, (i < data_size - 1) ? "%02X " : "%02X", rom_data->bytes[i]);
     }
 }
+
+void dallas_common_apply_edits(DallasCommonRomData* rom_data, uint8_t family_code) {
+    rom_data->fields.family_code = family_code;
+    const uint8_t crc =
+        maxim_crc8(rom_data->bytes, sizeof(DallasCommonRomData) - 1, MAXIM_CRC8_INIT);
+    rom_data->fields.checksum = crc;
+}

@@ -13,6 +13,7 @@ typedef enum {
     iButtonProtocolFeatureExtData = (1U << 0),
     iButtonProtocolFeatureWriteBlank = (1U << 1),
     iButtonProtocolFeatureWriteCopy = (1U << 2),
+    iButtonProtocolFeatureApplyEdits = (1U << 3),
 } iButtonProtocolFeature;
 
 typedef bool (*iButtonProtocolReadWriteFunc)(OneWireHost*, iButtonProtocolData*);
@@ -21,6 +22,8 @@ typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolDat
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolIsValidFunc)(const iButtonProtocolData*);
+typedef void (*iButtonProtocolGetEditableDataFunc)(uint8_t**, size_t*, iButtonProtocolData*);
+typedef void (*iButtonProtocolApplyEditsFunc)(iButtonProtocolData*);
 
 typedef struct {
     const uint8_t family_code;
@@ -39,4 +42,6 @@ typedef struct {
     iButtonProtocolRenderDataFunc render_brief_data;
     iButtonProtocolRenderDataFunc render_error;
     iButtonProtocolIsValidFunc is_valid;
+    iButtonProtocolGetEditableDataFunc get_editable_data;
+    iButtonProtocolApplyEditsFunc apply_edits;
 } iButtonProtocolBase;

@@ -30,10 +30,12 @@ static bool dallas_ds1990_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1990_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1990_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds1990_is_data_valid(const iButtonProtocolData*);
+static void dallas_ds1990_get_editable_data(uint8_t**, size_t*, iButtonProtocolData*);
+static void dallas_ds1990_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .family_code = DS1990_FAMILY_CODE,
-    .features = iButtonProtocolFeatureWriteBlank,
+    .features = iButtonProtocolFeatureWriteBlank | iButtonProtocolFeatureApplyEdits,
     .data_size = sizeof(DS1990ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DS1990_FAMILY_NAME,
@@ -48,6 +50,8 @@ const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .render_brief_data = dallas_ds1990_render_brief_data,
     .render_error = dallas_ds1990_render_error,
     .is_valid = dallas_ds1990_is_data_valid,
+    .get_editable_data = dallas_ds1990_get_editable_data,
+    .apply_edits = dallas_ds1990_apply_edits,
 };
 
 bool dallas_ds1990_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -124,4 +128,18 @@ void dallas_ds1990_render_error(FuriString* result, const iButtonProtocolData* p
 bool dallas_ds1990_is_data_valid(const iButtonProtocolData* protocol_data) {
     const DS1990ProtocolData* data = protocol_data;
     return dallas_common_is_valid_crc(&data->rom_data);
+}
+
+void dallas_ds1990_get_editable_data(
+    uint8_t** data_ptr,
+    size_t* data_size,
+    iButtonProtocolData* protocol_data) {
+    DS1990ProtocolData* data = protocol_data;
+    *data_ptr = data->rom_data.bytes;
+    *data_size = sizeof(DallasCommonRomData);
+}
+
+void dallas_ds1990_apply_edits(iButtonProtocolData* protocol_data) {
+    DS1990ProtocolData* data = protocol_data;
+    dallas_common_apply_edits(&data->rom_data, DS1990_FAMILY_CODE);
 }
