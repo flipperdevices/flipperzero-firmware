@@ -24,7 +24,7 @@ int32_t module_demo_app2(void* p) {
     }
 
     uint32_t module_count = application_lib_manager_get_count(manager);
-    FURI_LOG_I(TAG, "Loaded libs: %ld", module_count);
+    FURI_LOG_I(TAG, "Loaded libs: %lu", module_count);
 
     for(uint32_t i = 0; i < module_count; i++) {
         const DemoAppModule* module = application_lib_manager_get_ep(manager, i);

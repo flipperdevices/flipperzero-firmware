@@ -193,7 +193,7 @@ const FlipperApplicationLibraryDescriptor* flipper_application_lib_get(FlipperAp
 
     FURI_LOG_D(
         TAG,
-        "Library for %s, API v. %ld loaded",
+        "Library for %s, API v. %lu loaded",
         lib_descriptor->appid,
         lib_descriptor->ep_api_version);
 
