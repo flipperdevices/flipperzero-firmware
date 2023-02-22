@@ -71,6 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Patreon Build Update](https://www.patreon.com/RogueMaster/membership): Total of 31 animations added thanks to our Discord contest submissions! Thank you to the community for providing such great GIFs! ALL build will now have 31 new animations from the animation contest on Discord. Includes 11 new animations exclusively for the ALL build, 13 new animations for the Anime build, 5 new animations for the Hackz build, 2 new animations for DBZ build, 1 new animation for the Dolphin build, 1 new animation for the 0ne Piece build, 1 new animation for the P0kemon build, 1 new animation for the RM Select build [(Converted by RogueMaster)](https://github.com/RogueMaster/awesome-flipperzero-withModules/commit/f5ed4c8be0c9e7068c710154d6fd780d6d599f1e) and 1 new animation for the RM Select build with Bart from the Simpsons [(Thanks to skizzophrenic/TalkingSasquach)](https://github.com/skizzophrenic/Talking-Sasquach/)
 - UL: [Updated AC, Audio and Projector Universal Remotes (Thanks to amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/357)
 - UL: [typo combing #352 (Thanks to Round-Pi)](https://github.com/DarkFlippers/unleashed-firmware/pull/352)
+- Added: [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 
 <a name="release">
 
