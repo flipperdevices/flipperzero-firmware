@@ -873,6 +873,7 @@ Function,-,flipper_application_preload_status_to_string,const char*,FlipperAppli
 Function,+,flipper_application_spawn,FuriThread*,"FlipperApplication*, void*"
 Function,+,flipper_format_buffered_file_alloc,FlipperFormat*,Storage*
 Function,+,flipper_format_buffered_file_close,_Bool,FlipperFormat*
+Function,+,flipper_format_buffered_file_open_always,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_buffered_file_open_existing,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_delete_key,_Bool,"FlipperFormat*, const char*"
 Function,+,flipper_format_file_alloc,FlipperFormat*,Storage*

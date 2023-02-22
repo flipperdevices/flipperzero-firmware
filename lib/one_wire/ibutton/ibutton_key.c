@@ -192,13 +192,13 @@ bool ibutton_key_save(iButtonKey* key, const char* file_name) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    FlipperFormat* ff = flipper_format_file_alloc(storage);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
 
     do {
         if(key->protocol_id >= iButtonProtocolMax) break;
         const char* protocol_name = ibutton_protocols_get_name(key->protocol_id);
 
-        if(!flipper_format_file_open_always(ff, file_name)) break;
+        if(!flipper_format_buffered_file_open_always(ff, file_name)) break;
 
         if(!flipper_format_write_header_cstr(
                ff, IBUTTON_KEY_FILE_TYPE, IBUTTON_KEY_CURRENT_FORMAT_VERSION))
@@ -219,11 +219,11 @@ bool ibutton_key_load(iButtonKey* key, const char* file_name) {
     bool success = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    FlipperFormat* ff = flipper_format_file_alloc(storage);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
     FuriString* tmp = furi_string_alloc();
 
     do {
-        if(!flipper_format_file_open_existing(ff, file_name)) break;
+        if(!flipper_format_buffered_file_open_existing(ff, file_name)) break;
 
         uint32_t version;
 
