@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,14.2,,
+Version,+,14.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -111,6 +111,8 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_tim.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
+Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
+Header,+,lib/flipper_application/api_hashtable/compilesort.hpp,,
 Header,+,lib/flipper_application/app_lib/app_lib_manager.h,,
 Header,+,lib/flipper_application/app_lib/compound_api.h,,
 Header,+,lib/flipper_application/flipper_application.h,,
@@ -792,6 +794,7 @@ Function,+,elements_slightly_rounded_box,void,"Canvas*, uint8_t, uint8_t, uint8_
 Function,+,elements_slightly_rounded_frame,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,elements_string_fit_width,void,"Canvas*, FuriString*, uint8_t"
 Function,+,elements_text_box,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t, Align, Align, const char*, _Bool"
+Function,+,elf_resolve_from_hashtable,_Bool,"const ElfApiInterface*, const char*, Elf32_Addr*"
 Function,+,empty_screen_alloc,EmptyScreen*,
 Function,+,empty_screen_free,void,EmptyScreen*
 Function,+,empty_screen_get_view,View*,EmptyScreen*
@@ -3019,7 +3022,7 @@ Variable,-,_sys_nerr,int,
 Variable,-,_timezone,long,
 Variable,-,_tzname,char*[2],
 Variable,+,cli_vcp,CliSession,
-Variable,+,firmware_api_interface,const ElfApiInterface,
+Variable,+,firmware_api_interface,const ElfApiInterface*,
 Variable,+,furi_hal_i2c_bus_external,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_bus_power,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_handle_external,FuriHalI2cBusHandle,

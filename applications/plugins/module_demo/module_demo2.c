@@ -15,7 +15,7 @@ int32_t module_demo_app2(void* p) {
     FURI_LOG_I(TAG, "I'm module_demo2!");
 
     ApplicationLibManager* manager = application_lib_manager_alloc(
-        DEMO_APP_ID, DEMO_APP_MODULE_API_VERSION, &firmware_api_interface);
+        DEMO_APP_ID, DEMO_APP_MODULE_API_VERSION, firmware_api_interface);
 
     if(application_lib_manager_load_all(manager, "/ext/apps_data/module_demo/extensions") !=
        ApplicationLibManagerErrorNone) {

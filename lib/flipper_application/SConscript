@@ -8,6 +8,8 @@ env.Append(
         File("flipper_application.h"),
         File("app_lib/app_lib_manager.h"),
         File("app_lib/compound_api.h"),
+        File("api_hashtable/api_hashtable.h"),
+        File("api_hashtable/compilesort.hpp"),
     ],
 )
 
@@ -16,6 +18,7 @@ libenv = env.Clone(FW_LIB_NAME="flipper_application")
 libenv.ApplyLibFlags()
 
 sources = libenv.GlobRecursive("*.c")
+sources.append(File("api_hashtable/api_hashtable.cpp"))
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

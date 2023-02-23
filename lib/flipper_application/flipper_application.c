@@ -135,11 +135,10 @@ static int32_t flipper_application_thread(void* context) {
 
 FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     furi_check(app->thread == NULL);
+    furi_check(!flipper_application_is_lib(app));
     app->ep_thread_args = args;
 
     const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-    furi_check(!flipper_application_is_lib(app));
-
     app->thread = furi_thread_alloc_ex(
         manifest->name, manifest->stack_size, flipper_application_thread, app);
 
@@ -186,7 +185,7 @@ const FlipperApplicationLibraryDescriptor* flipper_application_lib_get(FlipperAp
     }
 
     typedef const FlipperApplicationLibraryDescriptor* (*get_lib_descriptor_t)(void);
-    get_lib_descriptor_t lib_ep = (void*)elf_file_get_entry_point(app->elf);
+    get_lib_descriptor_t lib_ep = elf_file_get_entry_point(app->elf);
     furi_check(lib_ep);
 
     const FlipperApplicationLibraryDescriptor* lib_descriptor = lib_ep();
@@ -197,5 +196,5 @@ const FlipperApplicationLibraryDescriptor* flipper_application_lib_get(FlipperAp
         lib_descriptor->appid,
         lib_descriptor->ep_api_version);
 
-    return lib_ep();
+    return lib_descriptor;
 }

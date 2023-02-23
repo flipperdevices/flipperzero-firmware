@@ -32,7 +32,7 @@ ApplicationLibManager* application_lib_manager_alloc(
     manager->application_id = application_id;
     manager->api_version = api_version;
     if(!api_interface) {
-        manager->api_interface = &firmware_api_interface;
+        manager->api_interface = firmware_api_interface;
     } else {
         manager->api_interface = api_interface;
     }
@@ -55,7 +55,7 @@ void application_lib_manager_free(ApplicationLibManager* manager) {
 
 ApplicationLibManagerError
     application_lib_manager_load_single(ApplicationLibManager* manager, const char* path) {
-    FlipperApplication* lib = flipper_application_alloc(manager->storage, &firmware_api_interface);
+    FlipperApplication* lib = flipper_application_alloc(manager->storage, firmware_api_interface);
 
     ApplicationLibManagerError error = ApplicationLibManagerErrorNone;
     do {

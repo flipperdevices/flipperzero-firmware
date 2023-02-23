@@ -26,7 +26,7 @@ bool fap_loader_load_name_and_icon(
     Storage* storage,
     uint8_t** icon_ptr,
     FuriString* item_name) {
-    FlipperApplication* app = flipper_application_alloc(storage, &firmware_api_interface);
+    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
 
     FlipperApplicationPreloadStatus preload_res =
         flipper_application_preload_manifest(app, furi_string_get_cstr(path));
@@ -70,7 +70,7 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
     bool show_error = true;
     do {
         file_selected = true;
-        loader->app = flipper_application_alloc(loader->storage, &firmware_api_interface);
+        loader->app = flipper_application_alloc(loader->storage, firmware_api_interface);
         size_t start = furi_get_tick();
 
         FURI_LOG_I(TAG, "FAP Loader is loading %s", furi_string_get_cstr(loader->fap_path));

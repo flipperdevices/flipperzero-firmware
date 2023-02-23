@@ -4,6 +4,8 @@
 
 #pragma once
 
+#ifdef __cplusplus
+
 #include <iterator>
 #include <array>
 
@@ -109,3 +111,5 @@ constexpr auto create_array_t(const Ts&&... values) {
     static_assert(traits::are_same_type<Ts...>(), "all elements must have same type");
     return std::array<array_type, sizeof...(Ts)>{static_cast<T>(values)...};
 }
+
+#endif

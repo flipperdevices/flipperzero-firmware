@@ -15,7 +15,7 @@ int32_t module_demo_app(void* p) {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
-    FlipperApplication* app = flipper_application_alloc(storage, &firmware_api_interface);
+    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
 
     do {
         FlipperApplicationPreloadStatus preload_res = flipper_application_preload(

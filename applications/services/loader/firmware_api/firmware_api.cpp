@@ -1,51 +1,21 @@
-#include "compilesort.hpp"
 #include "firmware_api.h"
-#include "api_hashtable_checks.hpp"
 
-#include <array>
-#include <algorithm>
+#include <flipper_application/api_hashtable/api_hashtable.h>
+#include <flipper_application/api_hashtable/compilesort.hpp>
 
 /* Generated table */
 #include <symbols.h>
 
-#define TAG "fw_api"
-
 static_assert(!has_hash_collisions(elf_api_table), "Detected API method hash collision!");
 
-/**
- * Get function address by function name
- * @param name function name
- * @param address output for function address
- * @return true if the table contains a function
- */
-
-bool elf_resolve_from_hashtable(
-    const ElfApiInterface* interface,
-    const char* name,
-    Elf32_Addr* address) {
-    UNUSED(interface);
-    bool result = false;
-    uint32_t gnu_sym_hash = elf_gnu_hash(name);
-
-    sym_entry key = {
-        .hash = gnu_sym_hash,
-        .address = 0,
-    };
-
-    auto find_res = std::lower_bound(elf_api_table.cbegin(), elf_api_table.cend(), key);
-    if((find_res == elf_api_table.cend() || (find_res->hash != gnu_sym_hash))) {
-        FURI_LOG_W(TAG, "Can't find symbol '%s' (hash %lx)!", name, gnu_sym_hash);
-        result = false;
-    } else {
-        result = true;
-        *address = find_res->address;
-    }
-
-    return result;
-}
-
-const ElfApiInterface firmware_api_interface = {
-    .api_version_major = (elf_api_version >> 16),
-    .api_version_minor = (elf_api_version & 0xFFFF),
-    .resolver_callback = &elf_resolve_from_hashtable,
+constexpr auto elf_api_interface = HashtableApiInterface{
+    {
+        .api_version_major = (elf_api_version >> 16),
+        .api_version_minor = (elf_api_version & 0xFFFF),
+        .resolver_callback = &elf_resolve_from_hashtable,
+    },
+    .table_cbegin = elf_api_table.cbegin(),
+    .table_cend = elf_api_table.cend(),
 };
+
+const ElfApiInterface* firmware_api_interface = &elf_api_interface;
