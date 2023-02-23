@@ -5,6 +5,7 @@
 #include <furi.h>
 #include <furi_hal_power.h>
 #include <furi_hal_console.h>
+#include <furi_hal_cortex.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
@@ -26,8 +27,8 @@ typedef struct {
     NotificationApp* notification;
     bool have_5v;
     bool measurement_made;
-    uint32_t echo; // ms
-    float distance; // meters
+    uint32_t echo; // us
+    float distance; // cm
 } PluginState;
 
 const NotificationSequence sequence_done = {
@@ -68,15 +69,16 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             elements_multiline_text_aligned(
                 canvas, 64, 40, AlignCenter, AlignTop, "13/TX -> Trig\n14/RX -> Echo");
         } else {
-            elements_multiline_text_aligned(canvas, 4, 28, AlignLeft, AlignTop, "Readout:");
-
             FuriString* str_buf;
             str_buf = furi_string_alloc();
-            furi_string_printf(str_buf, "Echo: %ld ms", plugin_state->echo);
+            furi_string_printf(str_buf, "Echo: %0.2f ms", (double)(plugin_state->echo/1000.0f));
 
             canvas_draw_str_aligned(
+                canvas, 8, 28, AlignLeft, AlignTop, furi_string_get_cstr(str_buf));
+            furi_string_printf(str_buf, "Distance: %0.2f cm", (double)plugin_state->distance);
+            canvas_draw_str_aligned(
                 canvas, 8, 38, AlignLeft, AlignTop, furi_string_get_cstr(str_buf));
-            furi_string_printf(str_buf, "Distance: %02f m", (double)plugin_state->distance);
+            furi_string_printf(str_buf, "Distance: %0.2f in", (double)(plugin_state->distance/2.54f));
             canvas_draw_str_aligned(
                 canvas, 8, 48, AlignLeft, AlignTop, furi_string_get_cstr(str_buf));
 
@@ -110,11 +112,17 @@ static void hc_sr04_state_init(PluginState* const plugin_state) {
     }
 }
 
-float hc_sr04_ms_to_m(uint32_t ms) {
+uint32_t hc_sr04_duration_to_usActual(uint32_t duration) {
+    return duration * 1.5888f / 1e2f; 
+}
+
+float hc_sr04_duration_to_cm(uint32_t duration) {
     const float speed_sound_m_per_s = 343.0f;
-    const float time_s = ms / 1e3f;
-    const float total_dist = time_s * speed_sound_m_per_s;
-    return total_dist / 2.0f;
+    duration *= 1.588f; // calculated by measurement.
+    const float time_one_way_sec = duration / 2e6f;
+    float total_dist = time_one_way_sec * speed_sound_m_per_s;
+    total_dist += 0.497f; // offset for fixed delays.
+    return total_dist; 
 }
 
 static void hc_sr04_measure(PluginState* const plugin_state) {
@@ -147,10 +155,6 @@ static void hc_sr04_measure(PluginState* const plugin_state) {
     furi_delay_ms(10);
     furi_hal_gpio_write(&gpio_usart_tx, false);
 
-    // TODO change from furi_get_tick(), which returns ms,
-    // to DWT->CYCCNT, which is a more precise counter with
-    // us precision (see furi_hal_cortex_delay_us)
-
     const uint32_t start = furi_get_tick();
 
     while(furi_get_tick() - start < timeout_ms && furi_hal_gpio_read(&gpio_usart_rx))
@@ -158,16 +162,19 @@ static void hc_sr04_measure(PluginState* const plugin_state) {
     while(furi_get_tick() - start < timeout_ms && !furi_hal_gpio_read(&gpio_usart_rx))
         ;
 
-    const uint32_t pulse_start = furi_get_tick();
+    FuriHalCortexTimer beginTimer = furi_hal_cortex_timer_get(0);
 
     while(furi_get_tick() - start < timeout_ms && furi_hal_gpio_read(&gpio_usart_rx))
         ;
 
-    const uint32_t pulse_end = furi_get_tick();
+    FuriHalCortexTimer endTimer = furi_hal_cortex_timer_get(0);
+
     //FURI_CRITICAL_EXIT();
 
-    plugin_state->echo = pulse_end - pulse_start;
-    plugin_state->distance = hc_sr04_ms_to_m(pulse_end - pulse_start);
+    uint32_t duration = endTimer.start - beginTimer.start;
+
+    plugin_state->echo = hc_sr04_duration_to_usActual(duration);
+    plugin_state->distance = hc_sr04_duration_to_cm(duration);
     plugin_state->measurement_made = true;
 
     //furi_hal_light_set(LightRed, 0x00);
