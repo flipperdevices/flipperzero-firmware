@@ -12,9 +12,9 @@
 #include <protocols/protocol_dict.h>
 
 #include "ibutton_key_i.h"
-#include "protocols/ibutton_protocol_defs_i.h"
 
-#include "protocols/misc/ibutton_protocols_misc.h"
+#include "protocols/ibutton_protocol_defs_i.h"
+#include "protocols/misc/ibutton_protocol_misc_defs.h"
 
 #define IBUTTON_FILE_TYPE "Flipper iButton key"
 

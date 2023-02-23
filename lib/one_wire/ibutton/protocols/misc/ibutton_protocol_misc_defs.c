@@ -1,4 +1,4 @@
-#include "ibutton_protocols_misc.h"
+#include "ibutton_protocol_misc_defs.h"
 
 #include "cyfral.h"
 #include "metakom.h"
