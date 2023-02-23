@@ -23,7 +23,6 @@
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
 #define MARAUDER_APP_FOLDER ANY_PATH("apps_data/marauder")
-#define MARAUDER_CAPTURE_FILE_PREFIX MARAUDER_APP_FOLDER "/capture.pcap"
 
 struct WifiMarauderApp {
     Gui* gui;

@@ -1,5 +1,43 @@
 #include "../wifi_marauder_app_i.h"
 
+void wifi_marauder_print_message(uint8_t* buf, size_t len, WifiMarauderApp* app) {
+    // If text box store gets too big, then truncate it
+    app->text_box_store_strlen += len;
+    if(app->text_box_store_strlen >= WIFI_MARAUDER_TEXT_BOX_STORE_SIZE - 1) {
+        furi_string_right(app->text_box_store, app->text_box_store_strlen / 2);
+        app->text_box_store_strlen = furi_string_size(app->text_box_store) + len;
+    }
+    // Null-terminate buf and append to text box store
+    buf[len] = '\0';
+    furi_string_cat_printf(app->text_box_store, "%s", buf);
+}
+
+void wifi_marauder_get_prefix_from_cmd(char* dest, const char* command) {
+    int start, end, delta;
+    start = strlen("sniff");
+    end = strcspn(command, " ");
+    delta = end - start;
+    strncpy(dest, command + start, end - start);
+    dest[delta] = '\0';    
+}
+
+void wifi_marauder_create_pcap_file(WifiMarauderApp* app) {
+    char prefix[10];
+    char capture_file_path[100];
+    wifi_marauder_get_prefix_from_cmd(prefix, app->selected_tx_string);
+
+    app->capture_file = storage_file_alloc(app->storage);
+    int i=0;
+    do{
+        snprintf(capture_file_path, sizeof(capture_file_path), "%s/%s_%d.pcap", MARAUDER_APP_FOLDER, prefix, i);
+        i++;
+    } while(storage_file_exists(app->storage, capture_file_path));
+
+    if (!storage_file_open(app->capture_file, capture_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot open pcap file");
+    }
+}
+
 void wifi_marauder_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
     WifiMarauderApp* app = context;
@@ -8,25 +46,14 @@ void wifi_marauder_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     if (strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0 && !app->is_writing) {
         app->is_writing = true;
         if (!app->capture_file || !storage_file_is_open(app->capture_file)) {
-            app->capture_file = storage_file_alloc(app->storage);
-            if (!storage_file_open(app->capture_file, MARAUDER_CAPTURE_FILE_PREFIX, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-                dialog_message_show_storage_error(app->dialogs, "Cannot open pcap file");
-            }
+            wifi_marauder_create_pcap_file(app);
         }
     }
 
     if (app->is_writing) {
         storage_file_write(app->capture_file, buf, len);
     } else {
-        // If text box store gets too big, then truncate it
-        app->text_box_store_strlen += len;
-        if(app->text_box_store_strlen >= WIFI_MARAUDER_TEXT_BOX_STORE_SIZE - 1) {
-            furi_string_right(app->text_box_store, app->text_box_store_strlen / 2);
-            app->text_box_store_strlen = furi_string_size(app->text_box_store) + len;
-        }
-        // Null-terminate buf and append to text box store
-        buf[len] = '\0';
-        furi_string_cat_printf(app->text_box_store, "%s", buf);
+        wifi_marauder_print_message(buf, len, app);
     }
 
     view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshConsoleOutput);
