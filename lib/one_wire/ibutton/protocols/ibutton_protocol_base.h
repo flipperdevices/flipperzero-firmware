@@ -1,6 +1,10 @@
 #pragma once
 
+#include <stdint.h>
+#include <stddef.h>
+
 typedef void iButtonProtocolData;
+typedef void iButtonProtocolContext;
 
 typedef enum {
     iButtonProtocolFeatureExtData = (1U << 0),
@@ -8,3 +12,8 @@ typedef enum {
     iButtonProtocolFeatureWriteCopy = (1U << 2),
     iButtonProtocolFeatureApplyEdits = (1U << 3),
 } iButtonProtocolFeature;
+
+typedef struct {
+    uint8_t* ptr;
+    size_t size;
+} iButtonProtocolEditableData;

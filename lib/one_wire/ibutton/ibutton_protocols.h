@@ -11,11 +11,6 @@
 extern "C" {
 #endif
 
-typedef struct {
-    uint8_t* ptr;
-    size_t size;
-} iButtonEditableData;
-
 /**
  * Initialise the iButton protocols system and allocate necessary objects
  */
@@ -146,7 +141,7 @@ bool ibutton_protocols_is_valid(const iButtonKey* key);
  * @param [in] protocol_data pointer to protocol-specific data
  * @param [in] protocol_id id of the protocol in question
  */
-void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonEditableData* data);
+void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonProtocolEditableData* data);
 
 /**
  * Make all necessary internal adjustments after editing the data

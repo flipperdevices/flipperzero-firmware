@@ -355,11 +355,12 @@ bool ibutton_protocols_is_valid(const iButtonKey* key) {
     return ibutton_protocols[protocol_id]->is_valid(protocol_data);
 }
 
-void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonEditableData* data) {
+void ibutton_protocols_get_editable_data(
+    const iButtonKey* key,
+    iButtonProtocolEditableData* editable_data) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
-    return ibutton_protocols[protocol_id]->get_editable_data(
-        &data->ptr, &data->size, protocol_data);
+    return ibutton_protocols[protocol_id]->get_editable_data(editable_data, protocol_data);
 }
 
 void ibutton_protocols_apply_edits(const iButtonKey* key) {

@@ -2,20 +2,16 @@
 
 #include "ibutton_protocol_base.h"
 
-#include <core/string.h>
-
-#include <one_wire/one_wire_host.h>
-#include <one_wire/one_wire_slave.h>
-
 #include <flipper_format.h>
 
-typedef bool (*iButtonProtocolReadWriteFunc)(OneWireHost*, iButtonProtocolData*);
-typedef void (*iButtonProtocolEmulateFunc)(OneWireSlave*, iButtonProtocolData*);
+typedef bool (*iButtonProtocolReadWriteFunc)(iButtonProtocolContext*, iButtonProtocolData*);
+typedef void (*iButtonProtocolEmulateFunc)(iButtonProtocolContext*, iButtonProtocolData*);
 typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolIsValidFunc)(const iButtonProtocolData*);
-typedef void (*iButtonProtocolGetEditableDataFunc)(uint8_t**, size_t*, iButtonProtocolData*);
+typedef void (
+    *iButtonProtocolGetEditableDataFunc)(iButtonProtocolEditableData*, iButtonProtocolData*);
 typedef void (*iButtonProtocolApplyEditsFunc)(iButtonProtocolData*);
 
 typedef struct {
