@@ -6,6 +6,7 @@
 #include <dolphin/dolphin.h>
 #include "../helpers/boilerplate_haptic.h"
 #include "../helpers/boilerplate_speaker.h"
+#include "../helpers/boilerplate_led.h"
 
 struct BoilerplateScene2 {
     View* view;
@@ -82,6 +83,7 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                         model->screen_text = 6;
                         play_bad_bump(instance->context);
                         stop_all_sound(instance->context);
+                        led_set_rgb(instance->context, 255, 0, 255);
                     },
                     true);
                 break;
@@ -93,6 +95,7 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                         model->screen_text = 7;
                         play_bad_bump(instance->context);
                         stop_all_sound(instance->context);
+                        led_set_rgb(instance->context, 255, 255, 0);
                     },
                     true);
                 break;
@@ -104,6 +107,7 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                         model->screen_text = 8;
                         play_bad_bump(instance->context);
                         stop_all_sound(instance->context);
+                        led_set_rgb(instance->context, 0, 255, 255);
                     },
                     true);
                 break;
@@ -115,6 +119,7 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                         model->screen_text = 9;
                         play_bad_bump(instance->context);
                         stop_all_sound(instance->context);
+                        led_set_rgb(instance->context, 255, 0, 0);
                     },
                     true);
                 break;
@@ -126,6 +131,7 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                         model->screen_text = 10;
                         play_bad_bump(instance->context);
                         stop_all_sound(instance->context);
+                        led_set_rgb(instance->context, 255, 255, 255);
                     },
                     true);
                 break;
@@ -202,6 +208,7 @@ void boilerplate_scene_2_exit(void* context) {
     furi_assert(context);
     Boilerplate* app = context;
     stop_all_sound(app);
+    //led_reset(app);
 }
 
 void boilerplate_scene_2_enter(void* context) {
