@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `13 Feb 22:18 GMT +3`
+### Apps checked & updated at `24 Feb 02:30 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -42,6 +42,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi)
 - [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
 - [Tic-Tac-Toe Multi (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
+- [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 
 ## Music
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -52,6 +53,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
 - [Text 2 SAM (By Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam)
+- [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
@@ -72,7 +74,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Bar code scanner emulator via COM port (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator)
 - [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
-- [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -81,7 +82,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
-- [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
+- [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) - improvements [(By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
