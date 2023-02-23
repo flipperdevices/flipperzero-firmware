@@ -501,7 +501,8 @@ void ibutton_protocols_get_editable_data(
     }
 }
 
-static void ibutton_protocols_misc_apply_edits(ProtocolId protocol_id, iButtonProtocolData* protocol_data) {
+static void
+    ibutton_protocols_misc_apply_edits(ProtocolId protocol_id, iButtonProtocolData* protocol_data) {
     protocol_dict_set_data(
         ibutton_ctx->dict,
         protocol_id,
@@ -517,6 +518,7 @@ void ibutton_protocols_apply_edits(const iButtonKey* key) {
     if(protocol_id < iButtonProtocolMiscMin) {
         ibutton_protocols[protocol_id]->apply_edits(protocol_data);
     } else {
-        ibutton_protocols_misc_apply_edits(ibutton_protocols_get_misc_id(protocol_id), protocol_data);
+        ibutton_protocols_misc_apply_edits(
+            ibutton_protocols_get_misc_id(protocol_id), protocol_data);
     }
 }

@@ -71,7 +71,6 @@ void ibutton_worker_mode_idle_stop(iButtonWorker* worker) {
 
 /*********************** READ ***********************/
 
-
 void ibutton_worker_mode_read_start(iButtonWorker* worker) {
     UNUSED(worker);
     furi_hal_power_enable_otg();
