@@ -27,13 +27,19 @@ void ibutton_scene_add_type_on_enter(void* context) {
 
 bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    iButtonKey* key = ibutton->key;
+
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         const uint32_t protocol_id = event.event;
 
         memset(ibutton->key_name, 0, IBUTTON_KEY_NAME_SIZE + 1);
-        ibutton_key_set_protocol_id(ibutton->key, protocol_id);
+
+        ibutton_key_reset(key);
+        ibutton_key_set_protocol_id(key, protocol_id);
+
+        ibutton_protocols_apply_edits(key);
 
         scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, protocol_id);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);

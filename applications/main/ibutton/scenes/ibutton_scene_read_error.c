@@ -17,7 +17,7 @@ void ibutton_scene_read_error_on_enter(void* context) {
     widget_add_string_element(
         widget, 128 / 2, 2, AlignCenter, AlignTop, FontPrimary, "Read Error");
 
-    ibutton_key_get_rendered_error(key, tmp);
+    ibutton_protocols_render_error(key, tmp);
 
     widget_add_string_multiline_element(
         widget, 128 / 2, 16, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(tmp));

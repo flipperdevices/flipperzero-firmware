@@ -1,25 +1,26 @@
 #include "../ibutton_i.h"
-#include <toolbox/path.h>
 
 void ibutton_scene_info_on_enter(void* context) {
     iButton* ibutton = context;
     iButtonKey* key = ibutton->key;
     Widget* widget = ibutton->widget;
 
+    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
+
     FuriString* tmp = furi_string_alloc();
 
-    furi_string_printf(tmp, "%s [%s]", ibutton->key_name, ibutton_key_get_protocol_name(key));
+    furi_string_printf(tmp, "%s [%s]", ibutton->key_name, ibutton_protocols_get_name(protocol_id));
 
     widget_add_string_element(
         widget, 0, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
 
     furi_string_reset(tmp);
-    ibutton_key_get_rendered_brief_data(key, tmp);
+    ibutton_protocols_render_brief_data(key, tmp);
 
     widget_add_string_multiline_element(
         widget, 0, 16, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp));
 
-    if(ibutton_key_get_features(key) & iButtonProtocolFeatureExtData) {
+    if(ibutton_protocols_get_features(protocol_id) & iButtonProtocolFeatureExtData) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
     }

@@ -14,7 +14,8 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    const uint32_t features = ibutton_key_get_features(ibutton->key);
+    const uint32_t features =
+        ibutton_protocols_get_features(ibutton_key_get_protocol_id(ibutton->key));
 
     submenu_add_item(submenu, "Emulate", SubmenuIndexEmulate, ibutton_submenu_callback, ibutton);
 

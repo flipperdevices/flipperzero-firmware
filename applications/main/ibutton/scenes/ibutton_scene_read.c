@@ -36,7 +36,7 @@ bool ibutton_scene_read_on_event(void* context, SceneManagerEvent event) {
         if(event.event == iButtonCustomEventWorkerRead) {
             strncpy(ibutton->key_name, "Unsaved Key", IBUTTON_KEY_NAME_SIZE);
 
-            if(ibutton_key_is_valid(ibutton->key)) {
+            if(ibutton_protocols_is_valid(ibutton->key)) {
                 ibutton_notification_message(ibutton, iButtonNotificationMessageSuccess);
                 scene_manager_next_scene(scene_manager, iButtonSceneReadSuccess);
 

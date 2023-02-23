@@ -9,19 +9,24 @@ void ibutton_scene_read_success_on_enter(void* context) {
 
     FuriString* tmp = furi_string_alloc();
 
+    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
+
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", ibutton_widget_callback, context);
     widget_add_button_element(
         widget, GuiButtonTypeRight, "More", ibutton_widget_callback, context);
 
     furi_string_printf(
-        tmp, "%s[%s]", ibutton_key_get_protocol_name(key), ibutton_key_get_manufacturer_name(key));
+        tmp,
+        "%s[%s]",
+        ibutton_protocols_get_name(protocol_id),
+        ibutton_protocols_get_manufacturer(protocol_id));
 
     widget_add_string_element(
         widget, 0, 2, AlignLeft, AlignTop, FontPrimary, furi_string_get_cstr(tmp));
 
     furi_string_reset(tmp);
-    ibutton_key_get_rendered_brief_data(key, tmp);
+    ibutton_protocols_render_brief_data(key, tmp);
 
     widget_add_string_multiline_element(
         widget, 0, 16, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(tmp));

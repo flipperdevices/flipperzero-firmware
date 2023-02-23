@@ -21,7 +21,11 @@ void ibutton_scene_emulate_on_enter(void* context) {
 
     widget_add_icon_element(widget, 3, 10, &I_iButtonKey_49x44);
 
-    furi_string_printf(tmp, "%s\n[%s]", ibutton->key_name, ibutton_key_get_protocol_name(key));
+    furi_string_printf(
+        tmp,
+        "%s\n[%s]",
+        ibutton->key_name,
+        ibutton_protocols_get_name(ibutton_key_get_protocol_id(key)));
 
     widget_add_text_box_element(
         widget, 52, 38, 75, 26, AlignCenter, AlignCenter, furi_string_get_cstr(tmp), true);

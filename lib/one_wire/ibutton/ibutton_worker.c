@@ -35,8 +35,6 @@ iButtonWorker* ibutton_worker_alloc() {
 
     worker->thread = furi_thread_alloc_ex("iButtonWorker", 2048, ibutton_worker_thread, worker);
 
-    ibutton_protocols_init();
-
     return worker;
 }
 
@@ -98,8 +96,6 @@ void ibutton_worker_stop(iButtonWorker* worker) {
 }
 
 void ibutton_worker_free(iButtonWorker* worker) {
-    ibutton_protocols_shutdown();
-
     furi_message_queue_free(worker->messages);
     furi_thread_free(worker->thread);
     free(worker);
