@@ -35,7 +35,7 @@ static void dallas_ds1990_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds1990 = {
     .family_code = DS1990_FAMILY_CODE,
-    .features = iButtonProtocolFeatureWriteBlank | iButtonProtocolFeatureApplyEdits,
+    .features = iButtonProtocolFeatureWriteBlank,
     .data_size = sizeof(DS1990ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
     .name = DS1990_FAMILY_NAME,

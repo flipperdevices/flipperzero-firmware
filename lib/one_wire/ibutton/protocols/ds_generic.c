@@ -28,6 +28,7 @@ static void ds_generic_render_brief_data(FuriString*, const iButtonProtocolData*
 static void ds_generic_render_error(FuriString*, const iButtonProtocolData*);
 static bool ds_generic_is_data_valid(const iButtonProtocolData*);
 static void ds_generic_get_editable_data(iButtonProtocolEditableData*, iButtonProtocolData*);
+static void ds_generic_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolBase ibutton_protocol_ds_generic = {
     .family_code = DALLAS_GENERIC_FAMILY_CODE,
@@ -47,7 +48,7 @@ const iButtonProtocolBase ibutton_protocol_ds_generic = {
     .render_error = ds_generic_render_error,
     .is_valid = ds_generic_is_data_valid,
     .get_editable_data = ds_generic_get_editable_data,
-    .apply_edits = NULL, /* No rules to apply edits */
+    .apply_edits = ds_generic_apply_edits,
 };
 
 bool ds_generic_read(iButtonProtocolContext* protocol_context, iButtonProtocolData* protocol_data) {
@@ -132,4 +133,8 @@ void ds_generic_get_editable_data(
     DallasGenericProtocolData* data = protocol_data;
     editable_data->ptr = data->rom_data.bytes;
     editable_data->size = sizeof(DallasCommonRomData);
+}
+
+void ds_generic_apply_edits(iButtonProtocolData* protocol_data) {
+    UNUSED(protocol_data);
 }

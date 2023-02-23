@@ -47,21 +47,32 @@ void ibutton_protocols_shutdown() {
     free(ibutton_ctx);
 }
 
+// 1-Wire only
 static iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
     iButtonProtocol protocol_id;
 
-    for(protocol_id = 0; protocol_id < iButtonProtocolDSGeneric; ++protocol_id) {
+    for(protocol_id = iButtonProtocolOneWireMin; protocol_id < iButtonProtocolOneWireMax;
+        ++protocol_id) {
         if(ibutton_protocols[protocol_id]->family_code == family_code) break;
     }
 
     return protocol_id;
 }
 
+static ProtocolId ibutton_protocols_get_misc_id(iButtonProtocol protocol_id) {
+    furi_assert(protocol_id >= iButtonProtocolMiscMin);
+    return protocol_id - iButtonProtocolMiscMin;
+}
+
 static iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name) {
     iButtonProtocol protocol_id;
 
-    for(protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
+    for(protocol_id = iButtonProtocolMin; protocol_id < iButtonProtocolMiscMin; ++protocol_id) {
         if(!strcmp(ibutton_protocols[protocol_id]->name, protocol_name)) break;
+    }
+
+    if(protocol_id == iButtonProtocolMiscMin) {
+        protocol_id += protocol_dict_get_protocol_by_name(ibutton_ctx->dict, protocol_name);
     }
 
     return protocol_id;
@@ -75,24 +86,34 @@ uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id) {
 size_t ibutton_protocols_get_max_data_size() {
     size_t max_data_size = 0;
 
-    for(size_t i = 0; i < (size_t)iButtonProtocolMax; ++i) {
+    for(iButtonProtocol i = iButtonProtocolMin; i < iButtonProtocolMiscMin; ++i) {
         const size_t current_rom_size = ibutton_protocols[i]->data_size;
         if(current_rom_size > max_data_size) {
             max_data_size = current_rom_size;
         }
     }
 
-    return max_data_size;
+    return MAX(max_data_size, protocol_dict_get_max_data_size(ibutton_ctx->dict));
 }
 
 const char* ibutton_protocols_get_manufacturer(iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
-    return ibutton_protocols[protocol_id]->manufacturer;
+    if(protocol_id < iButtonProtocolMiscMin) {
+        return ibutton_protocols[protocol_id]->manufacturer;
+    } else {
+        return protocol_dict_get_manufacturer(
+            ibutton_ctx->dict, ibutton_protocols_get_misc_id(protocol_id));
+    }
 }
 
 const char* ibutton_protocols_get_name(iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
-    return ibutton_protocols[protocol_id]->name;
+    if(protocol_id < iButtonProtocolMiscMin) {
+        return ibutton_protocols[protocol_id]->name;
+    } else {
+        return protocol_dict_get_name(
+            ibutton_ctx->dict, ibutton_protocols_get_misc_id(protocol_id));
+    }
 }
 
 static inline bool
@@ -223,10 +244,10 @@ void ibutton_protocols_emulate_start(iButtonKey* key) {
 
     furi_assert(protocol_id < iButtonProtocolMax);
 
-    if(protocol_id > iButtonProtocolDSGeneric) {
-        ibutton_protocols_emulate_misc_start(protocol_data, protocol_id);
-    } else {
+    if(protocol_id < iButtonProtocolMiscMin) {
         ibutton_protocols_emulate_onewire_start(protocol_data, protocol_id);
+    } else {
+        ibutton_protocols_emulate_misc_start(protocol_data, protocol_id);
     }
 }
 
@@ -242,10 +263,10 @@ void ibutton_protocols_emulate_stop(iButtonKey* key) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     furi_assert(protocol_id < iButtonProtocolMax);
 
-    if(protocol_id > iButtonProtocolDSGeneric) {
-        ibutton_protocols_emulate_misc_stop();
-    } else {
+    if(protocol_id < iButtonProtocolMiscMin) {
         ibutton_protocols_emulate_onewire_stop();
+    } else {
+        ibutton_protocols_emulate_misc_stop();
     }
 }
 
