@@ -4,16 +4,30 @@ void wifi_marauder_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     furi_assert(context);
     WifiMarauderApp* app = context;
 
-    // If text box store gets too big, then truncate it
-    app->text_box_store_strlen += len;
-    if(app->text_box_store_strlen >= WIFI_MARAUDER_TEXT_BOX_STORE_SIZE - 1) {
-        furi_string_right(app->text_box_store, app->text_box_store_strlen / 2);
-        app->text_box_store_strlen = furi_string_size(app->text_box_store) + len;
+    // If it is a sniff function, open the pcap file for recording
+    if (strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0 && !app->is_writing) {
+        app->is_writing = true;
+        if (!app->capture_file || !storage_file_is_open(app->capture_file)) {
+            app->capture_file = storage_file_alloc(app->storage);
+            if (!storage_file_open(app->capture_file, MARAUDER_CAPTURE_FILE_PREFIX, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                dialog_message_show_storage_error(app->dialogs, "Cannot open pcap file");
+            }
+        }
     }
 
-    // Null-terminate buf and append to text box store
-    buf[len] = '\0';
-    furi_string_cat_printf(app->text_box_store, "%s", buf);
+    if (app->is_writing) {
+        storage_file_write(app->capture_file, buf, len);
+    } else {
+        // If text box store gets too big, then truncate it
+        app->text_box_store_strlen += len;
+        if(app->text_box_store_strlen >= WIFI_MARAUDER_TEXT_BOX_STORE_SIZE - 1) {
+            furi_string_right(app->text_box_store, app->text_box_store_strlen / 2);
+            app->text_box_store_strlen = furi_string_size(app->text_box_store) + len;
+        }
+        // Null-terminate buf and append to text box store
+        buf[len] = '\0';
+        furi_string_cat_printf(app->text_box_store, "%s", buf);
+    }
 
     view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshConsoleOutput);
 }
@@ -89,4 +103,11 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     if(app->is_command) {
         wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
     }
+
+    app->is_writing = false;
+    if (app->capture_file && storage_file_is_open(app->capture_file)) {
+        storage_file_close(app->capture_file);
+        storage_file_free(app->capture_file);
+    }
+
 }

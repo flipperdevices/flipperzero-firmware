@@ -22,7 +22,8 @@
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
-#define MARAUDER_APP_FOLDER ANY_PATH("marauder")
+#define MARAUDER_APP_FOLDER ANY_PATH("apps_data/marauder")
+#define MARAUDER_CAPTURE_FILE_PREFIX MARAUDER_APP_FOLDER "/capture.pcap"
 
 struct WifiMarauderApp {
     Gui* gui;
@@ -35,6 +36,7 @@ struct WifiMarauderApp {
     TextBox* text_box;
     TextInput* text_input;
     Storage* storage;
+    File* capture_file;
     DialogsApp* dialogs;
 
     VariableItemList* var_item_list;
@@ -47,6 +49,7 @@ struct WifiMarauderApp {
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
+    bool is_writing;
 
     // For input source and destination MAC in targeted deauth attack
     int special_case_input_step;
