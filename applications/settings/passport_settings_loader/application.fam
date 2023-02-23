@@ -1,0 +1,10 @@
+App(
+    appid="passport_settings_loader",
+    name="Passport Settings",
+    apptype=FlipperAppType.SETTINGS,
+    entry_point="passport_settings_loader_app",
+    requires=["gui"],
+    stack_size=int(1.5 * 1024),
+    order=50,
+	link="/ext/apps/Main/Passport_Settings.fap",
+)
