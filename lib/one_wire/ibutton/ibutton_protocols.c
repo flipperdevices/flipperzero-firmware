@@ -352,28 +352,42 @@ void ibutton_protocols_render_data(const iButtonKey* key, FuriString* result) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     const iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
     furi_assert(protocol_id < iButtonProtocolMax);
-    ibutton_protocols[protocol_id]->render_data(result, protocol_data);
+    if(protocol_id < iButtonProtocolMiscMin) {
+        ibutton_protocols[protocol_id]->render_data(result, protocol_data);
+    } else {
+        protocol_dict_render_data(ibutton_ctx->dict, result, ibutton_protocols_get_misc_id(protocol_id));
+    }
 }
 
 void ibutton_protocols_render_brief_data(const iButtonKey* key, FuriString* result) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     const iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
     furi_assert(protocol_id < iButtonProtocolMax);
-    ibutton_protocols[protocol_id]->render_brief_data(result, protocol_data);
+    if(protocol_id < iButtonProtocolMiscMin) {
+        ibutton_protocols[protocol_id]->render_brief_data(result, protocol_data);
+    } else {
+        protocol_dict_render_brief_data(ibutton_ctx->dict, result, ibutton_protocols_get_misc_id(protocol_id));
+    }
 }
 
 void ibutton_protocols_render_error(const iButtonKey* key, FuriString* result) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     const iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
     furi_assert(protocol_id < iButtonProtocolMax);
-    ibutton_protocols[protocol_id]->render_error(result, protocol_data);
+    if(protocol_id < iButtonProtocolMiscMin) {
+        ibutton_protocols[protocol_id]->render_error(result, protocol_data);
+    }
 }
 
 bool ibutton_protocols_is_valid(const iButtonKey* key) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     const iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
     furi_assert(protocol_id < iButtonProtocolMax);
-    return ibutton_protocols[protocol_id]->is_valid(protocol_data);
+    if(protocol_id < iButtonProtocolMiscMin) {
+        return ibutton_protocols[protocol_id]->is_valid(protocol_data);
+    } else {
+        return true;
+    }
 }
 
 void ibutton_protocols_get_editable_data(
@@ -381,12 +395,21 @@ void ibutton_protocols_get_editable_data(
     iButtonProtocolEditableData* editable_data) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
-    return ibutton_protocols[protocol_id]->get_editable_data(editable_data, protocol_data);
+    if(protocol_id < iButtonProtocolMiscMin) {
+        ibutton_protocols[protocol_id]->get_editable_data(editable_data, protocol_data);
+    } else {
+        editable_data->ptr = ibutton_key_get_protocol_data(key);
+        editable_data->size = protocol_dict_get_data_size(ibutton_ctx->dict, ibutton_protocols_get_misc_id(protocol_id));
+    }
 }
 
 void ibutton_protocols_apply_edits(const iButtonKey* key) {
     const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
     iButtonProtocolData* protocol_data = ibutton_key_get_protocol_data(key);
     furi_assert(protocol_id < iButtonProtocolMax);
-    ibutton_protocols[protocol_id]->apply_edits(protocol_data);
+    if(protocol_id < iButtonProtocolMiscMin) {
+        ibutton_protocols[protocol_id]->apply_edits(protocol_data);
+    } else {
+        // TODO: implement applying edits for misc protocols
+    }
 }
