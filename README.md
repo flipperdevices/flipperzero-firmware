@@ -1,6 +1,6 @@
 # Flipper Air Mouse
 
-[![FAP Factory](https://fap.playmean.xyz/api/v1/ginkage/FlippAirMouse/badge)](https://fap.playmean.xyz/ginkage/FlippAirMouse)
+[![FlipC.org](https://flipc.org/ginkage/FlippAirMouse/badge)](https://flipc.org/ginkage/FlippAirMouse)
 
 ## Brief
 
