@@ -46,32 +46,11 @@ const char* ibutton_protocols_get_manufacturer(iButtonProtocol protocol_id);
  */
 const char* ibutton_protocols_get_name(iButtonProtocol protocol_id);
 
-// /**
-//  * Get protocol id from iButton family code
-//  * @param [in] family_code
-//  * @return protocol id or iButtonProtocolGeneric if protocol not found
-//  */
-// iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code);
-//
-// /**
-//  * Get protocol id from iButton protocol name
-//  * @param [in] protocol_name
-//  * @return protocol id or iButtonProtocolMax if protocol not found
-//  */
-// iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name);
-
 /**
  * Get protocol features bitmask by protocol id
  * @param [in] protocol_id id of the protocol in question
  */
 uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id);
-
-// /**
-//  * Get data size based on the protocol id
-//  * @param [in] protocol_id id of the protocol in question
-//  * @return data size in bytes
-//  */
-// size_t ibutton_protocols_get_data_size(iButtonProtocol protocol_id);
 
 /**
  * Read the device using the selected protocol

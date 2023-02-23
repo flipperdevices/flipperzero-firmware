@@ -47,7 +47,7 @@ void ibutton_protocols_shutdown() {
     free(ibutton_ctx);
 }
 
-iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
+static iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
     iButtonProtocol protocol_id;
 
     for(protocol_id = 0; protocol_id < iButtonProtocolDSGeneric; ++protocol_id) {
@@ -57,7 +57,7 @@ iButtonProtocol ibutton_protocols_get_id_by_family_code(uint8_t family_code) {
     return protocol_id;
 }
 
-iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name) {
+static iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name) {
     iButtonProtocol protocol_id;
 
     for(protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
@@ -70,11 +70,6 @@ iButtonProtocol ibutton_protocols_get_id_by_name(const char* protocol_name) {
 uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id) {
     furi_assert(protocol_id < iButtonProtocolMax);
     return ibutton_protocols[protocol_id]->features;
-}
-
-size_t ibutton_protocols_get_data_size(iButtonProtocol protocol_id) {
-    furi_assert(protocol_id < iButtonProtocolMax);
-    return ibutton_protocols[protocol_id]->data_size;
 }
 
 size_t ibutton_protocols_get_max_data_size() {
@@ -218,7 +213,7 @@ static inline void ibutton_protocols_emulate_onewire_start(
     iButtonProtocol protocol_id) {
     OneWireSlave* bus = ibutton_ctx->bus;
     ibutton_protocols[protocol_id]->emulate(bus, protocol_data);
-    // Important: starting the bus AFTER calling ibutton_protocols_emulate()
+    // Important: starting the bus AFTER calling emulate()
     onewire_slave_start(bus);
 }
 
