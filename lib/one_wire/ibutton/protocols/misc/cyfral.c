@@ -325,6 +325,12 @@ static LevelDuration protocol_cyfral_encoder_yield(ProtocolCyfral* proto) {
     return result;
 }
 
+static void protocol_cyfral_render_brief_data(ProtocolCyfral* proto, FuriString* result) {
+    for(size_t i = 0; i < CYFRAL_DATA_SIZE; ++i) {
+        furi_string_cat_printf(result, "%02X ", ((uint8_t*)&proto->data)[i]);
+    }
+}
+
 const ProtocolBase ibutton_protocol_misc_cyfral = {
     .name = "Cyfral",
     .manufacturer = "Cyfral",
@@ -342,4 +348,5 @@ const ProtocolBase ibutton_protocol_misc_cyfral = {
             .start = (ProtocolEncoderStart)protocol_cyfral_encoder_start,
             .yield = (ProtocolEncoderYield)protocol_cyfral_encoder_yield,
         },
+    .render_brief_data = (ProtocolRenderData)protocol_cyfral_render_brief_data,
 };

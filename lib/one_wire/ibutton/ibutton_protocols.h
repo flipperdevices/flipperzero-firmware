@@ -48,105 +48,92 @@ const char* ibutton_protocols_get_name(iButtonProtocol protocol_id);
 uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id);
 
 /**
- * Read the device using the selected protocol
- * @param [out] protocol_data pointer to protocol-specific data
- * @param [out] protocol_id id of the detected protocol or iButtonProtocolMax on failure
+ * Read a physical device (a key or an emulator)
+ * @param [out] key pointer to the key to read into (must be allocated before)
  * @return true on success, false on failure
  */
 bool ibutton_protocols_read(iButtonKey* key);
 
 /**
- * Write the key to a blank using the selected protocol
- * @param [out] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
+ * Write the key to a blank
+ * @param [in] key pointer to the key to be written
  * @return true on success, false on failure
  */
 bool ibutton_protocols_write_blank(iButtonKey* key);
 
 /**
- * Write the key to another one of the same type using the selected protocol
- * @param [out] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
+ * Write the key to another one of the same type
+ * @param [in] key pointer to the key to be written
  * @return true on success, false on failure
  */
 bool ibutton_protocols_write_copy(iButtonKey* key);
 
 /**
- * Start emulating the key using the selected protocol
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
+ * Start emulating the key
+ * @param [in] key pointer to the key to be emulated
  */
 void ibutton_protocols_emulate_start(iButtonKey* key);
 
 /**
- * Stop emulating the key using the selected protocol
- * @param [in] protocol_id id of the protocol in question
+ * Stop emulating the key
+ * @param [in] key pointer to the key to be emulated
  */
 void ibutton_protocols_emulate_stop(iButtonKey* key);
 
 /**
  * Save the key data to a FFF file.
+ * @param [in] key pointer to the key to be saved
  * @param [in] file_name full absolute path to the file name
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
  * @return true on success, false on failure
  */
 bool ibutton_protocols_save(const iButtonKey* key, const char* file_name);
 
 /**
- * Save the key data to a FFF file.
+ * Load the key from a FFF file.
+ * @param [out] key pointer to the key to load into (must be allocated before)
  * @param [in] file_name full absolute path to the file name
- * @param [out] protocol_data pointer to protocol-specific data
- * @param [out] protocol_id id of the protocol in question
  * @return true on success, false on failure
  */
 bool ibutton_protocols_load(iButtonKey* key, const char* file_name);
 
 /**
  * Format a string containing device full data
+ * @param [in] key pointer to the key to be rendered
  * @param [out] result pointer to the FuriString instance (must be initialized)
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the detected protocol or iButtonProtocolMax on failure
  */
 void ibutton_protocols_render_data(const iButtonKey* key, FuriString* result);
 
 /**
  * Format a string containing device brief data
+ * @param [in] key pointer to the key to be rendered
  * @param [out] result pointer to the FuriString instance (must be initialized)
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
  */
 void ibutton_protocols_render_brief_data(const iButtonKey* key, FuriString* result);
 
 /**
  * Format a string containing error message (for invalid keys)
+ * @param [in] key pointer to the key to be rendered
  * @param [out] result pointer to the FuriString instance (must be initialized)
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
  */
 void ibutton_protocols_render_error(const iButtonKey* key, FuriString* result);
 
 /**
- * Check whether the data is valid according to the selected protocol
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
+ * Check whether the key data is valid
+ * @param [in] key pointer to the key to be checked
  * @return true if data is valid, false otherwise
  */
 bool ibutton_protocols_is_valid(const iButtonKey* key);
 
 /**
- * Get a pointer to the protocol's editable data and its size
- * @param [out] data pointer to a pointer to contain the start of data
- * @param [out] data_size pointer to a variable to contain the data size
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
+ * Get a pointer to the key's editable data (for in-place editing)
+ * @param [in] key pointer to the key to be checked
+ * @param [out] data pointer to a structure to contain the editable data
  */
 void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonProtocolEditableData* data);
 
 /**
- * Make all necessary internal adjustments after editing the data
- * @param [in] protocol_data pointer to protocol-specific data
- * @param [in] protocol_id id of the protocol in question
+ * Make all necessary internal adjustments after editing the key
+ * @param [in,out] key pointer to the key to be adjusted
  */
 void ibutton_protocols_apply_edits(const iButtonKey* key);
 
