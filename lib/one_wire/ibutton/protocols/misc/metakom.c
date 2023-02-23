@@ -301,7 +301,7 @@ static LevelDuration protocol_metakom_encoder_yield(ProtocolMetakom* proto) {
     return result;
 }
 
-const ProtocolBase protocol_metakom = {
+const ProtocolBase ibutton_protocol_misc_metakom = {
     .name = "Metakom",
     .manufacturer = "Metakom",
     .data_size = METAKOM_DATA_SIZE,

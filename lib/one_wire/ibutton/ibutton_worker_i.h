@@ -9,9 +9,6 @@
 #include <core/thread.h>
 #include <core/message_queue.h>
 
-#include <one_wire/one_wire_host.h>
-#include <one_wire/one_wire_slave.h>
-
 #include "ibutton_worker.h"
 
 #ifdef __cplusplus
@@ -35,8 +32,6 @@ typedef enum {
 
 struct iButtonWorker {
     iButtonKey* key;
-    OneWireHost* host;
-    OneWireSlave* bus;
     iButtonWorkerMode mode_index;
     FuriMessageQueue* messages;
     FuriThread* thread;

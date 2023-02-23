@@ -1,4 +1,4 @@
-#include "ibutton_protocol_defs.h"
+#include "ibutton_protocol_defs_i.h"
 
 #include "ds1990.h"
 #include "ds1992.h"

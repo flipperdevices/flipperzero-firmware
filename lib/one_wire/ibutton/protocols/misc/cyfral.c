@@ -325,7 +325,7 @@ static LevelDuration protocol_cyfral_encoder_yield(ProtocolCyfral* proto) {
     return result;
 }
 
-const ProtocolBase protocol_cyfral = {
+const ProtocolBase ibutton_protocol_misc_cyfral = {
     .name = "Cyfral",
     .manufacturer = "Cyfral",
     .data_size = CYFRAL_DATA_SIZE,

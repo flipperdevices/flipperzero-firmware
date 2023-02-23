@@ -1597,7 +1597,8 @@ Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
 Function,+,ibutton_key_alloc,iButtonKey*,
 Function,+,ibutton_key_apply_edits,void,iButtonKey*
-Function,+,ibutton_key_emulate,_Bool,"iButtonKey*, OneWireSlave*"
+Function,+,ibutton_key_emulate_start,void,iButtonKey*
+Function,+,ibutton_key_emulate_stop,void,iButtonKey*
 Function,+,ibutton_key_free,void,iButtonKey*
 Function,+,ibutton_key_get_editable_data,void,"iButtonKey*, iButtonKeyEditableData*"
 Function,+,ibutton_key_get_features,uint32_t,iButtonKey*
@@ -1608,12 +1609,12 @@ Function,+,ibutton_key_get_rendered_data,void,"iButtonKey*, FuriString*"
 Function,+,ibutton_key_get_rendered_error,void,"iButtonKey*, FuriString*"
 Function,+,ibutton_key_is_valid,_Bool,iButtonKey*
 Function,+,ibutton_key_load,_Bool,"iButtonKey*, const char*"
-Function,+,ibutton_key_read,_Bool,"iButtonKey*, OneWireHost*"
+Function,+,ibutton_key_read,_Bool,iButtonKey*
 Function,+,ibutton_key_reset,void,iButtonKey*
 Function,+,ibutton_key_save,_Bool,"iButtonKey*, const char*"
 Function,+,ibutton_key_set_protocol_id,void,"iButtonKey*, uint32_t"
-Function,+,ibutton_key_write_blank,_Bool,"iButtonKey*, OneWireHost*"
-Function,+,ibutton_key_write_copy,_Bool,"iButtonKey*, OneWireHost*"
+Function,+,ibutton_key_write_blank,_Bool,iButtonKey*
+Function,+,ibutton_key_write_copy,_Bool,iButtonKey*
 Function,+,ibutton_worker_alloc,iButtonWorker*,
 Function,+,ibutton_worker_emulate_set_callback,void,"iButtonWorker*, iButtonWorkerEmulateCallback, void*"
 Function,+,ibutton_worker_emulate_start,void,"iButtonWorker*, iButtonKey*"

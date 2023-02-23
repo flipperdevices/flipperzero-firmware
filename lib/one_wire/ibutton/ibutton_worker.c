@@ -1,8 +1,7 @@
-#include <furi.h>
-#include <furi_hal.h>
-#include <atomic.h>
-
 #include "ibutton_worker_i.h"
+#include "ibutton_protocols.h"
+
+#include <core/check.h>
 
 typedef enum {
     iButtonMessageEnd,
@@ -26,8 +25,6 @@ static int32_t ibutton_worker_thread(void* thread_context);
 iButtonWorker* ibutton_worker_alloc() {
     iButtonWorker* worker = malloc(sizeof(iButtonWorker));
     worker->key = NULL;
-    worker->host = onewire_host_alloc(&ibutton_gpio);
-    worker->bus = onewire_slave_alloc(&ibutton_gpio);
     worker->messages = furi_message_queue_alloc(1, sizeof(iButtonMessage));
 
     worker->mode_index = iButtonWorkerModeIdle;
@@ -37,6 +34,8 @@ iButtonWorker* ibutton_worker_alloc() {
     worker->cb_ctx = NULL;
 
     worker->thread = furi_thread_alloc_ex("iButtonWorker", 2048, ibutton_worker_thread, worker);
+
+    ibutton_protocols_init();
 
     return worker;
 }
@@ -99,14 +98,10 @@ void ibutton_worker_stop(iButtonWorker* worker) {
 }
 
 void ibutton_worker_free(iButtonWorker* worker) {
-    onewire_slave_free(worker->bus);
-
-    onewire_host_free(worker->host);
+    ibutton_protocols_shutdown();
 
     furi_message_queue_free(worker->messages);
-
     furi_thread_free(worker->thread);
-
     free(worker);
 }
 

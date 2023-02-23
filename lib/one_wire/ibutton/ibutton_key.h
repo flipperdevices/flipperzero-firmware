@@ -8,9 +8,6 @@
 
 #include <core/string.h>
 
-#include <one_wire/one_wire_host.h>
-#include <one_wire/one_wire_slave.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -54,13 +51,15 @@ void ibutton_key_get_rendered_error(iButtonKey* key, FuriString* result);
 
 void ibutton_key_set_protocol_id(iButtonKey* key, uint32_t protocol_id);
 
-bool ibutton_key_read(iButtonKey* key, OneWireHost* host);
+bool ibutton_key_read(iButtonKey* key);
 
-bool ibutton_key_write_blank(iButtonKey* key, OneWireHost* host);
+bool ibutton_key_write_blank(iButtonKey* key);
 
-bool ibutton_key_write_copy(iButtonKey* key, OneWireHost* host);
+bool ibutton_key_write_copy(iButtonKey* key);
 
-bool ibutton_key_emulate(iButtonKey* key, OneWireSlave* bus);
+void ibutton_key_emulate_start(iButtonKey* key);
+
+void ibutton_key_emulate_stop(iButtonKey* key);
 
 bool ibutton_key_save(iButtonKey* key, const char* file_name);
 

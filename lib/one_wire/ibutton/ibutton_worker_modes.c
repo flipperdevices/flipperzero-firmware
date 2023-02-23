@@ -158,7 +158,7 @@ void ibutton_worker_mode_read_start(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
-    if(ibutton_key_read(worker->key, worker->host)) {
+    if(ibutton_key_read(worker->key)) {
         if(worker->read_cb != NULL) {
             worker->read_cb(worker->cb_ctx);
         }
@@ -173,20 +173,20 @@ void ibutton_worker_mode_read_stop(iButtonWorker* worker) {
 }
 
 /*********************** EMULATE ***********************/
-static void onewire_slave_callback(void* context) {
-    furi_assert(context);
-    iButtonWorker* worker = context;
-    ibutton_worker_notify_emulate(worker);
-}
+// static void onewire_slave_callback(void* context) {
+//     furi_assert(context);
+//     iButtonWorker* worker = context;
+//     ibutton_worker_notify_emulate(worker);
+// }
 
-static void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
-    onewire_slave_set_result_callback(worker->bus, onewire_slave_callback, worker);
-    ibutton_key_emulate(worker->key, worker->bus);
-}
+// static void ibutton_worker_emulate_dallas_start(iButtonWorker* worker) {
+//     onewire_slave_set_result_callback(worker->bus, onewire_slave_callback, worker);
+//     ibutton_key_emulate_start(worker->key, worker->bus);
+// }
 
-static void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
-    onewire_slave_stop(worker->bus);
-}
+// static void ibutton_worker_emulate_dallas_stop(iButtonWorker* worker) {
+//     onewire_slave_stop(worker->bus);
+// }
 
 // static void ibutton_worker_emulate_timer_cb(void* context) {
 //     furi_assert(context);
@@ -236,7 +236,7 @@ void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_hal_rfid_pins_reset();
     furi_hal_rfid_pin_pull_pulldown();
 
-    ibutton_worker_emulate_dallas_start(worker);
+    ibutton_key_emulate_start(worker->key);
 }
 
 void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
@@ -245,7 +245,8 @@ void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
 
 void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
     furi_assert(worker->key);
-    ibutton_worker_emulate_dallas_stop(worker);
+    ibutton_key_emulate_stop(worker->key);
+
     furi_hal_rfid_pins_reset();
 }
 
@@ -259,7 +260,7 @@ void ibutton_worker_mode_write_common_start(iButtonWorker* worker) { //-V524
 void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    const bool success = ibutton_key_write_blank(worker->key, worker->host);
+    const bool success = ibutton_key_write_blank(worker->key);
     // TODO: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
                                                       iButtonWorkerWriteNoDetect;
@@ -271,7 +272,7 @@ void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker) {
 void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    const bool success = ibutton_key_write_copy(worker->key, worker->host);
+    const bool success = ibutton_key_write_copy(worker->key);
     // TODO: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
                                                       iButtonWorkerWriteNoDetect;
