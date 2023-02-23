@@ -5,8 +5,8 @@
 
 #include "dallas_common.h"
 
-#include "blanks/rw1990.h"
-#include "blanks/tm2004.h"
+#include "../blanks/rw1990.h"
+#include "../blanks/tm2004.h"
 
 #define DS1990_FAMILY_CODE 0x01U
 #define DS1990_FAMILY_NAME "DS1990"

@@ -5,7 +5,7 @@
 
 #include "dallas_common.h"
 
-#include "blanks/tm2004.h"
+#include "../blanks/tm2004.h"
 
 #define DALLAS_GENERIC_FAMILY_CODE 0x00U
 #define DALLAS_GENERIC_FAMILY_NAME "DSGeneric"

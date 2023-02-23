@@ -5,7 +5,7 @@
 
 #include "dallas_common.h"
 
-#include "blanks/tm2004.h"
+#include "../blanks/tm2004.h"
 
 #define DS1992_FAMILY_CODE 0x08U
 #define DS1992_FAMILY_NAME "DS1992"

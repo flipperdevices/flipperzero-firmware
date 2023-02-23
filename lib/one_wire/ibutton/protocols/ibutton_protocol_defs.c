@@ -1,9 +1,9 @@
-#include "ibutton_protocol_defs_i.h"
+#include "ibutton_protocol_defs.h"
 
-#include "ds1990.h"
-#include "ds1992.h"
-#include "ds1996.h"
-#include "ds_generic.h"
+#include "dallas/ds1990.h"
+#include "dallas/ds1992.h"
+#include "dallas/ds1996.h"
+#include "dallas/ds_generic.h"
 
 const iButtonProtocolBase* ibutton_protocols[] = {
     /* 1-Wire protocols */
