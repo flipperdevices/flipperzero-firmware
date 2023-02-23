@@ -26,6 +26,7 @@ typedef struct {
     Submenu* boilerplate_settings;
     int haptic; 
     int speaker;
+    int led;
     //BoilerplateSettings* boilerplate_settings;
 } Boilerplate;
 
@@ -45,3 +46,8 @@ typedef enum {
     BoilerplateSpeakerOff,
     BoilerplateSpeakerOn,
 } BoilerplateSpeakerState;
+
+typedef enum {
+    BoilerplateLedOff,
+    BoilerplateLedOn,
+} BoilerplateLedState;

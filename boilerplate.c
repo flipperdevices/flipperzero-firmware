@@ -41,6 +41,7 @@ Boilerplate* boilerplate_app_alloc() {
 
     app->haptic = 1;
     app->speaker = 1;
+    app->led = 1;
     
     view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdMenu, submenu_get_view(app->submenu));
     app->boilerplate_scene_1 = boilerplate_scene_1_alloc();
