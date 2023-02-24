@@ -24,7 +24,7 @@ typedef struct {
     BoilerplateScene1* boilerplate_scene_1;
     BoilerplateScene2* boilerplate_scene_2;
     Submenu* boilerplate_settings;
-    int haptic; 
+    int haptic;
     int speaker;
     int led;
     //BoilerplateSettings* boilerplate_settings;
