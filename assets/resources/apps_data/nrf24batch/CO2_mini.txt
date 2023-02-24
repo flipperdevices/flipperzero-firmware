@@ -1,0 +1,56 @@
+Info: CO2 sensor mini
+Rate: 1
+Ch: 121
+CRC: 2
+Address: C8C8CF
+Delay_ms: 10
+
+Payload struct: 2,1,1
+EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4
+
+R default: ,EEPROM,0xC1
+W default: n,,0x81
+Write start: ,,0x8F
+
+R: ID*=,ID
+R: OSCCAL=0x51,RAM
+R: OSCCAL_EMEM=0
+R: CO2=0x67,RAM,0xC2
+
+R: RxAddr=1
+W: RxAddr=,1
+
+R: Ch=2
+W: Ch=,2
+
+R: nRF RETR=3
+W: nRF RETR 1/750uS=0x21,3
+
+R: AnswerDelay=9
+W: AnswerDelay=,9
+
+R: Send period=4
+W: Send period=,4
+
+R: CO2 threshold*2=5,,0xC2
+W: CO2 threshold=,5,0x82
+
+R: CO2 correct*2=7,,0xC2
+W: CO2 correct=,7,0x82
+
+R: FanLSB[10]=i:10
+W: FanLSB=,i:19
+
+W: Reset=,RESET,0xC1
+
+RBatch: Settings: ID;OSCCAL;RxAddr;Ch;nRF RETR;CO2 threshold;CO2 correct;FanLSB
+RBatch: Settings2: OSCCAL;OSCCAL_EMEM;RxAddr;Ch;nRF RETR;CO2 threshold;CO2 correct;FanLSB
+
+WBatch: Default Ch-121: RxAddr=0xCF;Ch=121;CO2 threshold=1000;CO2 correct=0;Send period=30;FanLSB={0xC1,0xC2,0xC3,0};Reset
+WBatch: Default Ch-10: RxAddr=0xCF;Ch=10;CO2 threshold=1000;CO2 correct=0;Send period=31;FanLSB={0xC1,0};Reset
+WBatch: CO2: CO2 threshold=1000;CO2 correct=1
+WBatch: Fan: FanLSB={0xC2,0xC3,0};Reset
+WBatch: DELAY=0: AnswerDelay=0
+WBatch: DELAY=100: AnswerDelay=100
+WBatch: DELAY=200: AnswerDelay=200
+WBatch: DELAY=255: AnswerDelay=255

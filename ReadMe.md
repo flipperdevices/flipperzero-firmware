@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - Added: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- Added: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
@@ -317,6 +318,7 @@ $ ./fbt dolphin_ext
 - [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/nrfsniff) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
+- [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
 - [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) [Updated by jbohack](https://github.com/jbohack)
