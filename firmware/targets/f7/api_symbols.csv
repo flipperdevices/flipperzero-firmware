@@ -113,8 +113,8 @@ Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_wwdg.h,,
 Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
 Header,+,lib/flipper_application/api_hashtable/compilesort.hpp,,
-Header,+,lib/flipper_application/app_lib/app_lib_manager.h,,
-Header,+,lib/flipper_application/app_lib/compound_api.h,,
+Header,+,lib/flipper_application/application_library/application_lib_manager.h,,
+Header,+,lib/flipper_application/application_library/composite_resolver.h,,
 Header,+,lib/flipper_application/flipper_application.h,,
 Header,+,lib/flipper_format/flipper_format.h,,
 Header,+,lib/flipper_format/flipper_format_i.h,,
@@ -690,10 +690,10 @@ Function,+,cli_session_close,void,Cli*
 Function,+,cli_session_open,void,"Cli*, void*"
 Function,+,cli_write,void,"Cli*, const uint8_t*, size_t"
 Function,-,clock,clock_t,
-Function,+,compound_api_resolver_add,void,"CompundApiResolver*, const ElfApiInterface*"
-Function,+,compound_api_resolver_alloc,CompundApiResolver*,
-Function,+,compound_api_resolver_free,void,CompundApiResolver*
-Function,+,compound_api_resolver_get,const ElfApiInterface*,CompundApiResolver*
+Function,+,composite_api_resolver_add,void,"CompositeApiResolver*, const ElfApiInterface*"
+Function,+,composite_api_resolver_alloc,CompositeApiResolver*,
+Function,+,composite_api_resolver_free,void,CompositeApiResolver*
+Function,+,composite_api_resolver_get,const ElfApiInterface*,CompositeApiResolver*
 Function,-,copysign,double,"double, double"
 Function,-,copysignf,float,"float, float"
 Function,-,copysignl,long double,"long double, long double"

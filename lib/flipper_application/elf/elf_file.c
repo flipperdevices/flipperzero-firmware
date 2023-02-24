@@ -17,6 +17,8 @@
 #define FURI_LOG_D(...)
 #endif
 
+#define ELF_INVALID_ADDRESS 0xFFFFFFFF
+
 #define TRAMPOLINE_CODE_SIZE 6
 
 /**

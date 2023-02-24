@@ -1,4 +1,4 @@
-#include "app_lib_manager.h"
+#include "application_lib_manager.h"
 
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage.h>
@@ -10,8 +10,6 @@
 #include <furi.h>
 
 #define TAG "libmgr"
-
-// ARRAY_DEF(FlipperApplicationLibList, const FlipperApplicationLibraryDescriptor*, M_POD_OPLIST)
 
 ARRAY_DEF(FlipperApplicationList, FlipperApplication*, M_PTR_OPLIST)
 #define M_OPL_FlipperApplicationList_t() ARRAY_OPLIST(FlipperApplicationList, M_PTR_OPLIST)
@@ -31,21 +29,15 @@ ApplicationLibManager* application_lib_manager_alloc(
     ApplicationLibManager* manager = malloc(sizeof(ApplicationLibManager));
     manager->application_id = application_id;
     manager->api_version = api_version;
-    if(!api_interface) {
-        manager->api_interface = firmware_api_interface;
-    } else {
-        manager->api_interface = api_interface;
-    }
+    manager->api_interface = api_interface ? api_interface : firmware_api_interface;
     manager->storage = furi_record_open(RECORD_STORAGE);
     FlipperApplicationList_init(manager->libs);
     return manager;
 }
 
 void application_lib_manager_free(ApplicationLibManager* manager) {
-    // Iterate over all libs and free them
     for
         M_EACH(loaded_lib, manager->libs, FlipperApplicationList_t) {
-            // UNUSED(loaded_lib);
             flipper_application_free(*loaded_lib);
         }
     FlipperApplicationList_clear(manager->libs);
@@ -112,10 +104,6 @@ ApplicationLibManagerError
 
 ApplicationLibManagerError
     application_lib_manager_load_all(ApplicationLibManager* manager, const char* path) {
-    // Iterate over all files in the directory
-    // UNUSED(manager);
-    // UNUSED(path);
-    // Iterate over all files in the directory
     File* directory = storage_file_alloc(manager->storage);
     char file_name_buffer[256];
     FuriString* file_name = furi_string_alloc();
@@ -135,7 +123,7 @@ ApplicationLibManagerError
             }
 
             path_concat(path, file_name_buffer, file_name);
-            FURI_LOG_I(TAG, "Loading %s", furi_string_get_cstr(file_name));
+            FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
             ApplicationLibManagerError error =
                 application_lib_manager_load_single(manager, furi_string_get_cstr(file_name));
 

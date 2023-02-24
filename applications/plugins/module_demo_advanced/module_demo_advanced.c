@@ -4,8 +4,8 @@
 #include "app_api_table.h"
 
 #include <flipper_application/flipper_application.h>
-#include <flipper_application/app_lib/app_lib_manager.h>
-#include <flipper_application/app_lib/compound_api.h>
+#include <flipper_application/application_library/application_lib_manager.h>
+#include <flipper_application/application_library/composite_resolver.h>
 
 #include <loader/firmware_api/firmware_api.h>
 
@@ -16,12 +16,12 @@ int32_t module_demo_advanced_app(void* p) {
 
     FURI_LOG_I(TAG, "I'm module_demo_advanced!");
 
-    CompundApiResolver* resolver = compound_api_resolver_alloc();
-    compound_api_resolver_add(resolver, firmware_api_interface);
-    compound_api_resolver_add(resolver, module_demo_api_interface);
+    CompositeApiResolver* resolver = composite_api_resolver_alloc();
+    composite_api_resolver_add(resolver, firmware_api_interface);
+    composite_api_resolver_add(resolver, module_demo_api_interface);
 
     ApplicationLibManager* manager = application_lib_manager_alloc(
-        APP_ID, APP_MODULE_API_VERSION, compound_api_resolver_get(resolver));
+        APP_ID, APP_MODULE_API_VERSION, composite_api_resolver_get(resolver));
 
     if(application_lib_manager_load_all(
            manager, "/ext/apps_data/module_demo_advanced/extensions") !=
@@ -42,7 +42,7 @@ int32_t module_demo_advanced_app(void* p) {
     }
 
     application_lib_manager_free(manager);
-    compound_api_resolver_free(resolver);
+    composite_api_resolver_free(resolver);
     FURI_LOG_I(TAG, "Goodbye!");
 
     return 0;

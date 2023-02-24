@@ -6,8 +6,8 @@ env.Append(
     ],
     SDK_HEADERS=[
         File("flipper_application.h"),
-        File("app_lib/app_lib_manager.h"),
-        File("app_lib/compound_api.h"),
+        File("application_library/application_lib_manager.h"),
+        File("application_library/composite_resolver.h"),
         File("api_hashtable/api_hashtable.h"),
         File("api_hashtable/compilesort.hpp"),
     ],

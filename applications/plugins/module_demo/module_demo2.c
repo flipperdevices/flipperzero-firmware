@@ -1,7 +1,7 @@
 #include <furi.h>
 
 #include <flipper_application/flipper_application.h>
-#include <flipper_application/app_lib/app_lib_manager.h>
+#include <flipper_application/application_library/application_lib_manager.h>
 #include <loader/firmware_api/firmware_api.h>
 
 #include "demo_module_api.h"
