@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SWD Resouces Moved for SD install
 - UL: [Fix keyboard capitalization bug #362 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/362)
 - Added: [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
+- Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 
 <a name="release">
 

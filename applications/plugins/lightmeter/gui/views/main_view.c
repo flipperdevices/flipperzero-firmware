@@ -62,11 +62,11 @@ const float aperture_numbers[] = {
 const float speed_numbers[] = {
     [SPEED_8000] = 1.0 / 8000, [SPEED_4000] = 1.0 / 4000, [SPEED_2000] = 1.0 / 2000,
     [SPEED_1000] = 1.0 / 1000, [SPEED_500] = 1.0 / 500,   [SPEED_250] = 1.0 / 250,
-    [SPEED_125] = 1.0 / 125,   [SPEED_60] = 1.0 / 60,     [SPEED_30] = 1.0 / 30,
-    [SPEED_15] = 1.0 / 15,     [SPEED_8] = 1.0 / 8,       [SPEED_4] = 1.0 / 4,
-    [SPEED_2] = 1.0 / 2,       [SPEED_1S] = 1.0,          [SPEED_2S] = 2.0,
-    [SPEED_4S] = 4.0,          [SPEED_8S] = 8.0,          [SPEED_15S] = 15.0,
-    [SPEED_30S] = 30.0,
+    [SPEED_125] = 1.0 / 125,   [SPEED_60] = 1.0 / 60,     [SPEED_48] = 1.0 / 48,
+    [SPEED_30] = 1.0 / 30,     [SPEED_15] = 1.0 / 15,     [SPEED_8] = 1.0 / 8,
+    [SPEED_4] = 1.0 / 4,       [SPEED_2] = 1.0 / 2,       [SPEED_1S] = 1.0,
+    [SPEED_2S] = 2.0,          [SPEED_4S] = 4.0,          [SPEED_8S] = 8.0,
+    [SPEED_15S] = 15.0,        [SPEED_30S] = 30.0,
 };
 
 struct MainView {

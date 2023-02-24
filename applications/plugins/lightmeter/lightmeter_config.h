@@ -79,6 +79,7 @@ typedef enum {
     SPEED_250,
     SPEED_125,
     SPEED_60,
+    SPEED_48,
     SPEED_30,
     SPEED_15,
     SPEED_8,
