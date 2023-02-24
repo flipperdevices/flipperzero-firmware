@@ -9,18 +9,18 @@
 #include <notification/notification_messages.h>
 
 typedef enum {
-	EventTypeTick,
-	EventTypeKey,
+    EventTypeTick,
+    EventTypeKey,
 } EventType;
 
 typedef struct {
-	EventType type;
-	InputEvent input;
+    EventType type;
+    InputEvent input;
 } PluginEvent;
 
 typedef struct {
-	int x;
-	int y;
+    int x;
+    int y;
 } PluginState;
 
 typedef struct {
@@ -28,7 +28,6 @@ typedef struct {
     FuriMessageQueue* event_queue;
     PluginState* plugin_state;
     ViewPort* view_port;
-	Storage* storage;
-	NotificationApp* notification;
+    Storage* storage;
+    NotificationApp* notification;
 } nRF24Batch;
-
