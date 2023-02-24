@@ -1,0 +1,18 @@
+App(
+    appid="Xbox_Controller",
+    name="Xbox Controller",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="xbox_controller_app",
+    cdefines=["APP_XBOX_CONTROLLER"],
+    requires=[
+        "gui",
+        "dialogs",
+        "infrared"
+    ],
+    stack_size=1 * 1024,
+    order=1,
+	fap_icon="xbox_controller.png",
+    fap_category="Misc",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="xc",
+)

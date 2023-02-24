@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Faster Power Off
 - UL: SWD Resouces Moved for SD install
 - UL: [Fix keyboard capitalization bug #362 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/362)
+- Added: [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 
 <a name="release">
 
@@ -295,6 +296,7 @@ $ ./fbt dolphin_ext
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
+- [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [LED Pulsator (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
