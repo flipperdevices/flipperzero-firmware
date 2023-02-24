@@ -9,7 +9,7 @@ void ibutton_scene_read_success_on_enter(void* context) {
 
     FuriString* tmp = furi_string_alloc();
 
-    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
+    const iButtonProtocolId protocol_id = ibutton_key_get_protocol_id(key);
 
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", ibutton_widget_callback, context);

@@ -1,9 +1,7 @@
 #include "ibutton_key.h"
 
-#include "protocols/ibutton_protocol_base.h"
-
 struct iButtonKey {
-    iButtonProtocol protocol_id;
+    iButtonProtocolId protocol_id;
     iButtonProtocolData* protocol_data;
     size_t protocol_data_size;
 };
@@ -28,11 +26,11 @@ void ibutton_key_reset(iButtonKey* key) {
     memset(key->protocol_data, 0, key->protocol_data_size);
 }
 
-iButtonProtocol ibutton_key_get_protocol_id(const iButtonKey* key) {
+iButtonProtocolId ibutton_key_get_protocol_id(const iButtonKey* key) {
     return key->protocol_id;
 }
 
-void ibutton_key_set_protocol_id(iButtonKey* key, iButtonProtocol protocol_id) {
+void ibutton_key_set_protocol_id(iButtonKey* key, iButtonProtocolId protocol_id) {
     key->protocol_id = protocol_id;
 }
 

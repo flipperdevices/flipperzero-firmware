@@ -32,20 +32,20 @@ size_t ibutton_protocols_get_max_data_size();
  * @param [in] protocol_id id of the protocol in question
  * @return pointer to a statically allocated string with manufacturer name
  */
-const char* ibutton_protocols_get_manufacturer(iButtonProtocol protocol_id);
+const char* ibutton_protocols_get_manufacturer(iButtonProtocolId protocol_id);
 
 /**
  * Get the protocol name based on the protocol id
  * @param [in] protocol_id id of the protocol in question
  * @return pointer to a statically allocated string with protocol name
  */
-const char* ibutton_protocols_get_name(iButtonProtocol protocol_id);
+const char* ibutton_protocols_get_name(iButtonProtocolId protocol_id);
 
 /**
  * Get protocol features bitmask by protocol id
  * @param [in] protocol_id id of the protocol in question
  */
-uint32_t ibutton_protocols_get_features(iButtonProtocol protocol_id);
+uint32_t ibutton_protocols_get_features(iButtonProtocolId protocol_id);
 
 /**
  * Read a physical device (a key or an emulator)

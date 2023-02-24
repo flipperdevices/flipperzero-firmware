@@ -6,7 +6,7 @@ void ibutton_scene_add_type_on_enter(void* context) {
 
     FuriString* tmp = furi_string_alloc();
 
-    for(iButtonProtocol protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
+    for(iButtonProtocolId protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
         furi_string_printf(
             tmp,
             "%s %s",
@@ -32,7 +32,7 @@ bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        const uint32_t protocol_id = event.event;
+        const iButtonProtocolId protocol_id = event.event;
 
         memset(ibutton->key_name, 0, IBUTTON_KEY_NAME_SIZE + 1);
 

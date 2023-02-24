@@ -9,6 +9,7 @@
 #include <core/string.h>
 
 #include "protocols/ibutton_protocol_defs.h"
+#include "protocols/ibutton_protocol_base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,12 +32,12 @@ void ibutton_key_free(iButtonKey* key);
 /**
  * TODO: description comment
  */
-iButtonProtocol ibutton_key_get_protocol_id(const iButtonKey* key);
+iButtonProtocolId ibutton_key_get_protocol_id(const iButtonKey* key);
 
 /**
  * TODO: description comment
  */
-void ibutton_key_set_protocol_id(iButtonKey* key, iButtonProtocol protocol_id);
+void ibutton_key_set_protocol_id(iButtonKey* key, iButtonProtocolId protocol_id);
 
 /**
  * TODO: description comment

@@ -1597,9 +1597,9 @@ Function,-,hypotf,float,"float, float"
 Function,-,hypotl,long double,"long double, long double"
 Function,+,ibutton_key_alloc,iButtonKey*,size_t
 Function,+,ibutton_key_free,void,iButtonKey*
-Function,+,ibutton_key_get_protocol_id,iButtonProtocol,const iButtonKey*
+Function,+,ibutton_key_get_protocol_id,iButtonProtocolId,const iButtonKey*
 Function,+,ibutton_key_reset,void,iButtonKey*
-Function,+,ibutton_key_set_protocol_id,void,"iButtonKey*, iButtonProtocol"
+Function,+,ibutton_key_set_protocol_id,void,"iButtonKey*, iButtonProtocolId"
 Function,+,ibutton_worker_alloc,iButtonWorker*,
 Function,+,ibutton_worker_emulate_set_callback,void,"iButtonWorker*, iButtonWorkerEmulateCallback, void*"
 Function,+,ibutton_worker_emulate_start,void,"iButtonWorker*, iButtonKey*"

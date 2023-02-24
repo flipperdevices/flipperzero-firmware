@@ -5,7 +5,7 @@ void ibutton_scene_info_on_enter(void* context) {
     iButtonKey* key = ibutton->key;
     Widget* widget = ibutton->widget;
 
-    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
+    const iButtonProtocolId protocol_id = ibutton_key_get_protocol_id(key);
 
     FuriString* tmp = furi_string_alloc();
 

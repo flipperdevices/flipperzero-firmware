@@ -16,7 +16,7 @@ void ibutton_scene_write_on_enter(void* context) {
 
     iButtonKey* key = ibutton->key;
     iButtonWorker* worker = ibutton->worker;
-    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(key);
+    const iButtonProtocolId protocol_id = ibutton_key_get_protocol_id(key);
 
     Widget* widget = ibutton->widget;
     FuriString* tmp = furi_string_alloc();

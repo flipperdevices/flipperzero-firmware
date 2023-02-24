@@ -18,7 +18,7 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
     iButton* ibutton = context;
     Submenu* submenu = ibutton->submenu;
 
-    const iButtonProtocol protocol_id = ibutton_key_get_protocol_id(ibutton->key);
+    const iButtonProtocolId protocol_id = ibutton_key_get_protocol_id(ibutton->key);
     const uint32_t features = ibutton_protocols_get_features(protocol_id);
 
     submenu_add_item(
