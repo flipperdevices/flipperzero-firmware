@@ -8,7 +8,7 @@
 
 static_assert(!has_hash_collisions(elf_api_table), "Detected API method hash collision!");
 
-constexpr auto elf_api_interface = HashtableApiInterface{
+constexpr HashtableApiInterface elf_api_interface{
     {
         .api_version_major = (elf_api_version >> 16),
         .api_version_minor = (elf_api_version & 0xFFFF),

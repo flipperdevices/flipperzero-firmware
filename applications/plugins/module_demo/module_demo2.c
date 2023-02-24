@@ -3,7 +3,6 @@
 #include <flipper_application/flipper_application.h>
 #include <flipper_application/app_lib/app_lib_manager.h>
 #include <loader/firmware_api/firmware_api.h>
-#include <storage/storage.h>
 
 #include "demo_module_api.h"
 

@@ -1,0 +1,29 @@
+App(
+    appid="module_demo_advanced",
+    name="App module_demo_advanced",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="module_demo_advanced_app",
+    stack_size=2 * 1024,
+    fap_category="Misc",
+    fap_icon="module_demo_advanced.png",  # 10x10 1-bit PNG
+)
+
+App(
+    appid="module_demo_advanced_plugin1",
+    name="App module_demo_advanced_plugin1",
+    apptype=FlipperAppType.EXTENSION,
+    entry_point="module_demo_advanced_plugin1_ep",
+    stack_size=0,
+    fap_category="module_demo_advanced",
+    sources=["module1.c"],
+)
+
+App(
+    appid="module_demo_advanced_plugin2",
+    name="App module_demo_advanced_plugin2",
+    apptype=FlipperAppType.EXTENSION,
+    entry_point="module_demo_advanced_plugin2_ep",
+    stack_size=0,
+    fap_category="module_demo_advanced",
+    sources=["module2.c"],
+)

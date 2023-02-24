@@ -644,7 +644,7 @@ ELFFile* elf_file_alloc(Storage* storage, const ElfApiInterface* api_interface) 
 void elf_file_free(ELFFile* elf) {
     // furi_check(!elf->init_array_called);
     if(elf->init_array_called) {
-        FURI_LOG_W(TAG, "Init array was called, but not fini array");
+        FURI_LOG_W(TAG, "Init array was called, but fini array wasn't");
         elf_file_call_section_list(elf->fini_array, true);
     }
 

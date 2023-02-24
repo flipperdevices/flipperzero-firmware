@@ -55,7 +55,7 @@ void application_lib_manager_free(ApplicationLibManager* manager) {
 
 ApplicationLibManagerError
     application_lib_manager_load_single(ApplicationLibManager* manager, const char* path) {
-    FlipperApplication* lib = flipper_application_alloc(manager->storage, firmware_api_interface);
+    FlipperApplication* lib = flipper_application_alloc(manager->storage, manager->api_interface);
 
     ApplicationLibManagerError error = ApplicationLibManagerErrorNone;
     do {
