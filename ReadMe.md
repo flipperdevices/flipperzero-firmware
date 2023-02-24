@@ -100,6 +100,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [NightStand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)
 - [BT Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
 - [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
+- [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 
 --- 
 
