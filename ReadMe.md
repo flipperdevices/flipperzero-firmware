@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Fix keyboard capitalization bug #362 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/362)
 - Added: [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
+- Added: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 
 <a name="release">
 
@@ -284,6 +285,7 @@ $ ./fbt dolphin_ext
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
+- [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
