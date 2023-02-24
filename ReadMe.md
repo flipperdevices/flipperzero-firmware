@@ -31,9 +31,12 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0222-1747-0.77.2-8621389](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-22 18:00 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-22 18:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-24 01:13 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-24 01:13 EST`
 - [Passport Settings: App and Config now stored on SD card (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d76d5b79fe838c657b8f75f4861d5e7f01950642)
+- UL: Faster Power Off
+- UL: SWD Resouces Moved for SD install
+- UL: [Fix keyboard capitalization bug #362 (By Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/pull/362)
 
 <a name="release">
 
