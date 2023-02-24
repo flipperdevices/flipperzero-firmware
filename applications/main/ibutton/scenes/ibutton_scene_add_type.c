@@ -6,7 +6,8 @@ void ibutton_scene_add_type_on_enter(void* context) {
 
     FuriString* tmp = furi_string_alloc();
 
-    for(iButtonProtocolId protocol_id = 0; protocol_id < iButtonProtocolMax; ++protocol_id) {
+    for(uint32_t protocol_id = 0; protocol_id < ibutton_protocols_get_protocol_count();
+        ++protocol_id) {
         furi_string_printf(
             tmp,
             "%s %s",

@@ -33,7 +33,7 @@ static bool dallas_ds1990_is_data_valid(const iButtonProtocolData*);
 static void dallas_ds1990_get_editable_data(iButtonProtocolEditableData*, iButtonProtocolData*);
 static void dallas_ds1990_apply_edits(iButtonProtocolData*);
 
-const iButtonProtocolBase ibutton_protocol_ds1990 = {
+const iButtonProtocolDallasBase ibutton_protocol_ds1990 = {
     .family_code = DS1990_FAMILY_CODE,
     .features = iButtonProtocolFeatureWriteBlank,
     .data_size = sizeof(DS1990ProtocolData),

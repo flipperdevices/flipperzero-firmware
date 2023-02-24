@@ -22,6 +22,11 @@ void ibutton_protocols_init();
 void ibutton_protocols_shutdown();
 
 /**
+ *
+ */
+uint32_t ibutton_protocols_get_protocol_count();
+
+/**
  * Get maximum data size out of all protocols available
  * @return maximum data size in bytes
  */

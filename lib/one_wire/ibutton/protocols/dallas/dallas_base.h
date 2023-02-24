@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ibutton_protocol_base.h"
+#include "../ibutton_protocol_base.h"
 
 #include <flipper_format.h>
 
@@ -33,4 +33,4 @@ typedef struct {
     iButtonProtocolIsValidFunc is_valid;
     iButtonProtocolGetEditableDataFunc get_editable_data;
     iButtonProtocolApplyEditsFunc apply_edits;
-} iButtonProtocolBase;
+} iButtonProtocolDallasBase;

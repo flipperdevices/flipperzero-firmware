@@ -38,7 +38,6 @@ void ibutton_protocols_misc_emulate_start(
 
 void ibutton_protocols_misc_emulate_stop(
     iButtonProtocolsMisc* protocols,
-    iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id);
 
 bool ibutton_protocols_misc_save(
@@ -50,7 +49,8 @@ bool ibutton_protocols_misc_save(
 bool ibutton_protocols_misc_load(
     iButtonProtocolsMisc* protocols,
     iButtonProtocolData* protocol_data,
-    iButtonProtocolId* protocol_id,
+    iButtonProtocolId protocol_id,
+    uint32_t format_version,
     FlipperFormat* ff);
 
 void ibutton_protocols_misc_render_data(

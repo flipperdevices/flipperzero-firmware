@@ -30,7 +30,7 @@ static bool ds_generic_is_data_valid(const iButtonProtocolData*);
 static void ds_generic_get_editable_data(iButtonProtocolEditableData*, iButtonProtocolData*);
 static void ds_generic_apply_edits(iButtonProtocolData*);
 
-const iButtonProtocolBase ibutton_protocol_ds_generic = {
+const iButtonProtocolDallasBase ibutton_protocol_ds_generic = {
     .family_code = DALLAS_GENERIC_FAMILY_CODE,
     .features = iButtonProtocolFeatureWriteBlank,
     .data_size = sizeof(DallasGenericProtocolData),

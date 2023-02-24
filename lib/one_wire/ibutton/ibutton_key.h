@@ -8,7 +8,6 @@
 
 #include <core/string.h>
 
-#include "protocols/ibutton_protocol_defs.h"
 #include "protocols/ibutton_protocol_base.h"
 
 #ifdef __cplusplus
