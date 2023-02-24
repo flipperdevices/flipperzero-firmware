@@ -39,6 +39,7 @@ extern "C" {
 #define REG_RF_CH 0x05
 #define REG_TX_ADDR 0x10
 #define REG_FIFO_STATUS 0x17
+#define REG_OBSERVE_TX 0x08
 
 #define RX_PW_P0 0x11
 #define RX_PW_P1 0x12
@@ -49,6 +50,7 @@ extern "C" {
 #define RX_DR    0x40
 #define TX_DS    0x20
 #define MAX_RT   0x10
+#define NRF24_EN_DYN_ACK 0x01
 
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2
@@ -86,6 +88,9 @@ uint8_t nrf24_write_buf_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* d
  * @return     device status
  */
 uint8_t nrf24_read_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size);
+
+// Read single register (1 byte)
+uint8_t nrf24_read_register(FuriHalSpiBusHandle* handle, uint8_t reg);
 
 /** Power up the radio for operation
  * 

@@ -1,4 +1,4 @@
-// Modified by vad7, 25.11.2022
+// Modified by vad7, 24.02.2023
 //
 #include "nrf24.h"
 #include <furi.h>
@@ -32,33 +32,34 @@ void nrf24_spi_trx(
 }
 
 uint8_t nrf24_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data) {
-    uint8_t tx[2] = {W_REGISTER | (REGISTER_MASK & reg), data};
-    uint8_t rx[2] = {0};
-    nrf24_spi_trx(handle, tx, rx, 2);
+    uint8_t buf[] = {W_REGISTER | (REGISTER_MASK & reg), data};
+    nrf24_spi_trx(handle, buf, buf, 2);
     //FURI_LOG_D("NRF_WR", " #%02X=%02X", reg, data);
-    return rx[0];
+    return buf[0];
 }
 
 uint8_t nrf24_write_buf_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size) {
-    uint8_t tx[size + 1];
-    uint8_t rx[size + 1];
-    memset(rx, 0, size + 1);
-    tx[0] = W_REGISTER | (REGISTER_MASK & reg);
-    memcpy(&tx[1], data, size);
-    nrf24_spi_trx(handle, tx, rx, size + 1);
+    uint8_t buf[size + 1];
+    buf[0] = W_REGISTER | (REGISTER_MASK & reg);
+    memcpy(&buf[1], data, size);
+    nrf24_spi_trx(handle, buf, buf, size + 1);
     //FURI_LOG_D("NRF_WR", " #%02X(%02X)=0x%02X%02X%02X%02X%02X", reg, size, data[0], data[1], data[2], data[3], data[4] );
-    return rx[0];
+    return buf[0];
 }
 
 uint8_t nrf24_read_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size) {
-    uint8_t tx[size + 1];
-    uint8_t rx[size + 1];
-    memset(rx, 0, size + 1);
-    tx[0] = R_REGISTER | (REGISTER_MASK & reg);
-    memset(&tx[1], 0, size);
-    nrf24_spi_trx(handle, tx, rx, size + 1);
-    memcpy(data, &rx[1], size);
-    return rx[0];
+    uint8_t buf[size + 1];
+    memset(buf, 0, size + 1);
+    buf[0] = R_REGISTER | (REGISTER_MASK & reg);
+    nrf24_spi_trx(handle, buf, buf, size + 1);
+    memcpy(data, &buf[1], size);
+    return buf[0];
+}
+
+uint8_t nrf24_read_register(FuriHalSpiBusHandle* handle, uint8_t reg) {
+    uint8_t buf[] = { R_REGISTER | (REGISTER_MASK & reg), 0xFF };
+    nrf24_spi_trx(handle, buf, buf, 2);
+    return buf[1];
 }
 
 uint8_t nrf24_flush_rx(FuriHalSpiBusHandle* handle) {
@@ -90,10 +91,9 @@ uint8_t nrf24_set_maclen(FuriHalSpiBusHandle* handle, uint8_t maclen) {
 }
 
 uint8_t nrf24_status(FuriHalSpiBusHandle* handle) {
-    uint8_t status;
-    uint8_t tx[] = {R_REGISTER | (REGISTER_MASK & REG_STATUS)};
-    nrf24_spi_trx(handle, tx, &status, 1);
-    return status;
+    uint8_t tx = RF24_NOP;
+    nrf24_spi_trx(handle, &tx, &tx, 1);
+    return tx;
 }
 
 uint32_t nrf24_get_rate(FuriHalSpiBusHandle* handle) {
@@ -191,32 +191,33 @@ uint8_t nrf24_set_packetlen(FuriHalSpiBusHandle* handle, uint8_t len) {
 // packet_size: 0 - dyn payload (read from PL_WID), 1 - read from pipe size, >1 - override
 uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* ret_packetsize, uint8_t packet_size) {
     uint8_t status = 0;
-    uint8_t tx_cmd[33] = {0}; // 32 max payload size + 1 for command
-    uint8_t tmp_packet[33] = {0};
+    uint8_t buf[33]; // 32 max payload size + 1 for command
 
     status = nrf24_status(handle);
     if(!(status & RX_DR)) {
-        tx_cmd[0] = R_REGISTER | (REGISTER_MASK & REG_FIFO_STATUS);
-        nrf24_spi_trx(handle, tx_cmd, tmp_packet, 2);
-        if((tmp_packet[1] & 1) == 0) status |= RX_DR; // packet in FIFO buffer
+        if((nrf24_read_register(handle, REG_FIFO_STATUS) & 1) == 0) {
+            FURI_LOG_D("NRF", "FIFO PKT");
+            status |= RX_DR; // packet in FIFO buffer
+        }
     }
     if(status & RX_DR) {
         if(packet_size == 1)
             packet_size = nrf24_get_packetlen(handle, (status >> 1) & 7);
         else if(packet_size == 0){
-            tx_cmd[0] = R_RX_PL_WID; tx_cmd[1] = 0;
-            nrf24_spi_trx(handle, tx_cmd, tmp_packet, 2);
-            packet_size = tmp_packet[1];
+            buf[0] = R_RX_PL_WID; buf[1] = 0xFF;
+            nrf24_spi_trx(handle, buf, buf, 2);
+            packet_size = buf[1];
         }
         if(packet_size > 32 || packet_size == 0) packet_size = 32;
-        tx_cmd[0] = R_RX_PAYLOAD; tx_cmd[1] = 0;
-        nrf24_spi_trx(handle, tx_cmd, tmp_packet, packet_size + 1);
-        memcpy(packet, &tmp_packet[1], packet_size);
+        memset(buf, 0, packet_size + 1);
+        buf[0] = R_RX_PAYLOAD;
+        nrf24_spi_trx(handle, buf, buf, packet_size + 1);
+        memcpy(packet, &buf[1], packet_size);
         nrf24_write_reg(handle, REG_STATUS, RX_DR); // clear RX_DR
     }
-    if(status & (TX_DS | MAX_RT)) { // MAX_RT, TX_DS
-        nrf24_write_reg(handle, REG_STATUS, (TX_DS | MAX_RT)); // clear RX_DR, MAX_RT.
-    }
+    // if(status & (TX_DS | MAX_RT)) { // MAX_RT, TX_DS
+    //     nrf24_write_reg(handle, REG_STATUS, (TX_DS | MAX_RT)); // clear RX_DR, MAX_RT.
+    // }
 
     *ret_packetsize = packet_size;
     return status;
@@ -225,28 +226,21 @@ uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* re
 // Return 0 when error
 uint8_t nrf24_txpacket(FuriHalSpiBusHandle* handle, uint8_t* payload, uint8_t size, bool ack) {
     uint8_t status = 0;
-    uint8_t tx[size + 1];
-    uint8_t rx[size + 1];
-    memset(tx, 0, size + 1);
-    memset(rx, 0, size + 1);
-
-    if(!ack)
-        tx[0] = W_TX_PAYLOAD_NOACK;
-    else
-        tx[0] = W_TX_PAYLOAD;
-
-    memcpy(&tx[1], payload, size);
-    nrf24_spi_trx(handle, tx, rx, size + 1);
+    uint8_t buf[size + 1];
+    buf[0] = ack ? W_TX_PAYLOAD : W_TX_PAYLOAD_NOACK;
+    memcpy(&buf[1], payload, size);
     nrf24_set_tx_mode(handle);
-
+    nrf24_spi_trx(handle, buf, buf, size + 1);
     uint32_t start_time = furi_get_tick();
     do {
-        furi_delay_ms(1);
+        furi_delay_us(100);
         status = nrf24_status(handle);
-    } while(!(status & (TX_DS | MAX_RT)) && furi_get_tick() - start_time < 500UL);
-
-    if(status & MAX_RT) nrf24_flush_tx(handle);
-
+    } while(!(status & (TX_DS | MAX_RT)) && furi_get_tick() - start_time < 100UL);
+    if(status & MAX_RT) {
+        if(furi_log_get_level() == FuriLogLevelDebug) FURI_LOG_D("NRF", "MAX RT: %X (%X)", nrf24_read_register(handle, REG_OBSERVE_TX), status);
+        nrf24_flush_tx(handle);
+    }
+    furi_hal_gpio_write(nrf24_CE_PIN, false);
     //nrf24_set_idle(handle);
     if(status & (TX_DS | MAX_RT)) nrf24_write_reg(handle, REG_STATUS, TX_DS | MAX_RT);
     return status & TX_DS;
@@ -268,109 +262,29 @@ uint8_t nrf24_set_idle(FuriHalSpiBusHandle* handle) {
     nrf24_read_reg(handle, REG_CONFIG, &cfg, 1);
     cfg &= 0xfc; // clear bottom two bits to power down the radio
     status = nrf24_write_reg(handle, REG_CONFIG, cfg);
-    //nr204_write_reg(handle, REG_EN_RXADDR, 0x0);
     furi_hal_gpio_write(nrf24_CE_PIN, false);
     return status;
 }
 
 uint8_t nrf24_set_rx_mode(FuriHalSpiBusHandle* handle) {
-    uint8_t status = 0;
     uint8_t cfg = 0;
-    //status = nrf24_write_reg(handle, REG_CONFIG, 0x0F); // enable 2-byte CRC, PWR_UP, and PRIM_RX
-    nrf24_read_reg(handle, REG_CONFIG, &cfg, 1);
+    cfg = nrf24_read_register(handle, REG_CONFIG);
     cfg |= 0x03; // PWR_UP, and PRIM_RX
-    status = nrf24_write_reg(handle, REG_CONFIG, cfg);
-    //nr204_write_reg(REG_EN_RXADDR, 0x03) // Set RX Pipe 0 and 1
+    cfg = nrf24_write_reg(handle, REG_CONFIG, cfg);
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    //furi_delay_ms(2);
-    return status;
+    return cfg;
 }
 
 uint8_t nrf24_set_tx_mode(FuriHalSpiBusHandle* handle) {
-    uint8_t status = 0;
-    uint8_t cfg = 0;
+    uint8_t reg;
     furi_hal_gpio_write(nrf24_CE_PIN, false);
-    nrf24_write_reg(handle, REG_STATUS, TX_DS | MAX_RT);
-    //status = nrf24_write_reg(handle, REG_CONFIG, 0x0E); // enable 2-byte CRC, PWR_UP
-    nrf24_read_reg(handle, REG_CONFIG, &cfg, 1);
-    cfg &= 0xFE; // disable PRIM_RX
-    cfg |= 0x02; // PWR_UP
-    status = nrf24_write_reg(handle, REG_CONFIG, cfg);
+    //nrf24_write_reg(handle, REG_STATUS, TX_DS | MAX_RT);
+    reg = nrf24_read_register(handle, REG_CONFIG);
+    reg &= ~0x01; // disable PRIM_RX
+    reg |= 0x02; // PWR_UP
+    reg = nrf24_write_reg(handle, REG_CONFIG, reg);
     furi_hal_gpio_write(nrf24_CE_PIN, true);
-    //furi_delay_ms(2);
-    return status;
-}
-
-void nrf24_configure(
-    FuriHalSpiBusHandle* handle,
-    uint8_t rate,
-    uint8_t* srcmac,
-    uint8_t* dstmac,
-    uint8_t maclen,
-    uint8_t channel,
-    bool noack,
-    bool disable_aa) {
-    assert(channel <= 125);
-    assert(rate == 1 || rate == 2);
-    if(rate == 2)
-        rate = 8; // 2Mbps
-    else
-        rate = 0; // 1Mbps
-
-    nrf24_write_reg(handle, REG_CONFIG, 0x00); // Stop nRF
-    nrf24_set_idle(handle);
-    nrf24_write_reg(handle, REG_STATUS, 0x70); // clear interrupts
-    if(disable_aa)
-        nrf24_write_reg(handle, REG_EN_AA, 0x00); // Disable Shockburst
-    else
-        nrf24_write_reg(handle, REG_EN_AA, 0x1F); // Enable Shockburst
-
-    nrf24_write_reg(handle, REG_DYNPD, 0x3F); // enable dynamic payload length on all pipes
-    if(noack)
-        nrf24_write_reg(handle, REG_FEATURE, 0x05); // disable payload-with-ack, enable noack
-    else {
-        nrf24_write_reg(handle, REG_CONFIG, 0x0C); // 2 byte CRC
-        nrf24_write_reg(handle, REG_FEATURE, 0x07); // enable dyn payload and ack
-        nrf24_write_reg(
-            handle, REG_SETUP_RETR, 0x1f); // 15 retries for AA, 500us auto retransmit delay
-    }
-
-    nrf24_set_idle(handle);
-    nrf24_flush_rx(handle);
-    nrf24_flush_tx(handle);
-
-    if(maclen) nrf24_set_maclen(handle, maclen);
-    if(srcmac) nrf24_set_src_mac(handle, srcmac, maclen);
-    if(dstmac) nrf24_set_dst_mac(handle, dstmac, maclen);
-
-    nrf24_write_reg(handle, REG_RF_CH, channel);
-    nrf24_write_reg(handle, REG_RF_SETUP, rate);
-    furi_delay_ms(200);
-}
-
-void nrf24_init_promisc_mode(FuriHalSpiBusHandle* handle, uint8_t channel, uint8_t rate) {
-    //uint8_t preamble[] = {0x55, 0x00}; // little endian
-    uint8_t preamble[] = {0xAA, 0x00}; // little endian
-    //uint8_t preamble[] = {0x00, 0x55}; // little endian
-    //uint8_t preamble[] = {0x00, 0xAA}; // little endian
-    nrf24_write_reg(handle, REG_CONFIG, 0x00); // Stop nRF
-    nrf24_write_reg(handle, REG_STATUS, 0x70); // clear interrupts
-    nrf24_write_reg(handle, REG_DYNPD, 0x0); // disable shockburst
-    nrf24_write_reg(handle, REG_EN_AA, 0x00); // Disable Shockburst
-    nrf24_write_reg(handle, REG_FEATURE, 0x05); // disable payload-with-ack, enable noack
-    nrf24_set_maclen(handle, 2); // shortest address
-    nrf24_set_src_mac(handle, preamble, 2); // set src mac to preamble bits to catch everything
-    nrf24_set_packetlen(handle, 32); // set max packet length
-    nrf24_set_idle(handle);
-    nrf24_flush_rx(handle);
-    nrf24_flush_tx(handle);
-    nrf24_write_reg(handle, REG_RF_CH, channel);
-    nrf24_write_reg(handle, REG_RF_SETUP, rate);
-
-    // prime for RX, no checksum
-    nrf24_write_reg(handle, REG_CONFIG, 0x03); // PWR_UP and PRIM_RX, disable AA and CRC
-    furi_hal_gpio_write(nrf24_CE_PIN, true);
-    furi_delay_ms(100);
+    return reg;
 }
 
 void hexlify(uint8_t* in, uint8_t size, char* out) {
@@ -437,95 +351,6 @@ void int16_to_bytes(uint16_t val, uint8_t* out, bool bigendian) {
         else
             out[i] = (val >> (i * 8)) & 0xff;
     }
-}
-
-// handle iffyness with preamble processing sometimes being a bit (literally) off
-void alt_address_old(uint8_t* packet, uint8_t* altaddr) {
-    uint8_t macmess_hi_b[4];
-    uint8_t macmess_lo_b[2];
-    uint32_t macmess_hi;
-    uint16_t macmess_lo;
-    uint8_t preserved;
-
-    // get first 6 bytes into 32-bit and 16-bit variables
-    memcpy(macmess_hi_b, packet, 4);
-    memcpy(macmess_lo_b, packet + 4, 2);
-
-    macmess_hi = bytes_to_int32(macmess_hi_b, true);
-
-    //preserve least 7 bits from hi that will be shifted down to lo
-    preserved = macmess_hi & 0x7f;
-    macmess_hi >>= 7;
-
-    macmess_lo = bytes_to_int16(macmess_lo_b, true);
-    macmess_lo >>= 7;
-    macmess_lo = (preserved << 9) | macmess_lo;
-    int32_to_bytes(macmess_hi, macmess_hi_b, true);
-    int16_to_bytes(macmess_lo, macmess_lo_b, true);
-    memcpy(altaddr, &macmess_hi_b[1], 3);
-    memcpy(altaddr + 3, macmess_lo_b, 2);
-}
-
-bool validate_address(uint8_t* addr) {
-    uint8_t bad[][3] = {{0x55, 0x55}, {0xAA, 0xAA}, {0x00, 0x00}, {0xFF, 0xFF}};
-    for(int i = 0; i < 4; i++)
-        for(int j = 0; j < 2; j++)
-            if(!memcmp(addr + j * 2, bad[i], 2)) return false;
-
-    return true;
-}
-
-bool nrf24_sniff_address(FuriHalSpiBusHandle* handle, uint8_t maclen, uint8_t* address) {
-    bool found = false;
-    uint8_t packet[32] = {0};
-    uint8_t packetsize;
-    //char printit[65];
-    uint8_t status = 0;
-    status = nrf24_rxpacket(handle, packet, &packetsize, true);
-    if(status & 0x40) {
-        if(validate_address(packet)) {
-            for(int i = 0; i < maclen; i++) address[i] = packet[maclen - 1 - i];
-
-            /*
-            alt_address(packet, packet);
-
-            for(i = 0; i < maclen; i++)
-                address[i + 5] = packet[maclen - 1 - i];
-            */
-
-            //memcpy(address, packet, maclen);
-            //hexlify(packet, packetsize, printit);
-            found = true;
-        }
-    }
-
-    return found;
-}
-
-uint8_t nrf24_find_channel(
-    FuriHalSpiBusHandle* handle,
-    uint8_t* srcmac,
-    uint8_t* dstmac,
-    uint8_t maclen,
-    uint8_t rate,
-    uint8_t min_channel,
-    uint8_t max_channel,
-    bool autoinit) {
-    uint8_t ping_packet[] = {0x0f, 0x0f, 0x0f, 0x0f}; // this can be anything, we just need an ack
-    uint8_t ch = max_channel + 1; // means fail
-    nrf24_configure(handle, rate, srcmac, dstmac, maclen, 2, false, false);
-    for(ch = min_channel; ch <= max_channel + 1; ch++) {
-        nrf24_write_reg(handle, REG_RF_CH, ch);
-        if(nrf24_txpacket(handle, ping_packet, 4, true)) break;
-    }
-
-    if(autoinit) {
-        FURI_LOG_D("nrf24", "initializing radio for channel %d", ch);
-        nrf24_configure(handle, rate, srcmac, dstmac, maclen, ch, false, false);
-        return ch;
-    }
-
-    return ch;
 }
 
 uint8_t nrf24_set_mac(uint8_t mac_addr, uint8_t *mac, uint8_t mlen)
