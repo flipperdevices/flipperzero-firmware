@@ -20,14 +20,8 @@
 #define SCAN_APP_PATH_FOLDER "/ext/apps_data/nrf24batch"
 #define LOG_FILENAME "log"
 #define LOG_FILEEXT ".txt"
-#define MAX_LOG_RECORDS 200
-#define MAX_FOUND_RECORDS 70
-#define LOG_REC_SIZE 34 // max packet size
-#define VIEW_LOG_MAX_X 22
-#define VIEW_LOG_WIDTH_B 10 // bytes
-#define NRF_REPEAT_ATTEMPTS 3
-#define NRF_READ_TIMEOUT 700UL // ms
-#define WORK_PERIOD 10 // ms, frequency of individual cmds
+#define NRF_READ_TIMEOUT 300UL // ms
+#define WORK_PERIOD 2 // ms, frequency of individual cmds
 
 const char SettingsFld_Info[] = "Info:";
 const char SettingsFld_Ch[] = "Ch:";
@@ -35,6 +29,7 @@ const char SettingsFld_Rate[] = "Rate:";
 const char SettingsFld_DPL[] = "DPL:";
 const char SettingsFld_CRC[] = "CRC:";
 const char SettingsFld_Address[] = "Address:";
+const char SettingsFld_Resend[] = "Resend:";
 const char SettingsFld_Delay[] = "Delay_ms:";
 const char SettingsFld_WriteStart[] = "Write start:";
 const char SettingsFld_Payload[] = "Payload struct:";
@@ -75,7 +70,8 @@ uint8_t NRF_AA_OFF; // Disable Auto Acknowledgement
 bool NRF_ERROR = 0;
 bool NRF_INITED = false;
 uint8_t NRF_last_packet_send_st = 0;
-uint8_t NRF_repeat = 0;
+uint8_t NRF_resend = 1; // number of transaction attempts
+uint8_t NRF_repeat = 0; // count number of repeated requests (until < NRF_resend)
 uint32_t NRF_time;
 
 uint8_t addr[5]; // nRF24 address, MSB first
@@ -87,6 +83,7 @@ uint8_t payload_fields = 0;
 uint8_t payload_size = 0; // bytes
 FuriString* ReadDefault = NULL;
 FuriString* WriteDefault = NULL;
+FuriString* WriteStart = NULL;
 uint32_t delay_between_pkt = 5; // ms
 FuriString* Constants = NULL; // text of STR=x
 FuriString** Read_cmd = NULL; // Names of read cmd
@@ -177,6 +174,10 @@ void free_store(void) {
         furi_string_free(WriteDefault);
         WriteDefault = NULL;
     }
+    if(WriteStart) {
+        furi_string_free(WriteStart);
+        WriteDefault = NULL;
+    }
     if(Read_cmd_Total) {
         for(uint16_t i = 0; i < Read_cmd_Total; i++) furi_string_free(Read_cmd[i]);
         Read_cmd_Total = 0;
@@ -237,79 +238,94 @@ static bool select_settings_file() {
 }
 
 static void prepare_nrf24(void) {
-    if(NRF_INITED) return;
-    nrf24_write_reg(nrf24_HANDLE, REG_STATUS, 0x70); // clear interrupts
-    nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
-    nrf24_write_reg(
-        nrf24_HANDLE,
-        REG_RF_SETUP,
-        (NRF_rate == 0 ? 0b00100000 :
-         NRF_rate == 1 ? 0 :
-                         0b00001000) |
-            0b111); // +TX high power
-    nrf24_write_reg(
-        nrf24_HANDLE,
-        REG_CONFIG,
-        0x70 | ((NRF_CRC == 1 ? 0b1000 :
-                 NRF_CRC == 2 ? 0b1100 :
-                                0))); // Mask all interrupts
-    nrf24_write_reg(
-        nrf24_HANDLE, REG_SETUP_RETR, 0b00010111); // Automatic Retransmission, 0.5ms, 7 times
-    nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x01); // Auto acknowledgement
-    nrf24_write_reg(
-        nrf24_HANDLE,
-        REG_FEATURE,
-        NRF_DPL ?
-            4 + 1 :
-            1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-    nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
-    nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload_size);
-    nrf24_set_maclen(nrf24_HANDLE, addr_len);
-    nrf24_set_mac(REG_RX_ADDR_P0, addr, addr_len);
-    uint8_t tmp[5] = {0};
-    nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, addr_len);
-    for(uint8_t i = 0; i < addr_len / 2; i++) {
-        uint8_t tb = tmp[i];
-        tmp[i] = tmp[addr_len - i - 1];
-        tmp[addr_len - i - 1] = tb;
+    if(!NRF_INITED) {
+        nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
+        nrf24_write_reg(
+            nrf24_HANDLE,
+            REG_RF_SETUP,
+            (NRF_rate == 0 ? 0b00100000 :
+             NRF_rate == 1 ? 0 :
+                             0b00001000) |
+                0b111); // +TX high power
+        nrf24_write_reg(
+            nrf24_HANDLE,
+            REG_CONFIG,
+            0x70 | ((NRF_CRC == 1 ? 0b1000 :
+                     NRF_CRC == 2 ? 0b1100 :
+                                    0))); // Mask all interrupts
+        nrf24_write_reg(
+            nrf24_HANDLE,
+            REG_SETUP_RETR,
+            ((NRF_rate == 0 ? 0b0010 : 0b0001) << 4) |
+                0b0111); // Automatic Retransmission, ARD, ARC
+        nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x01); // Auto acknowledgement
+        nrf24_write_reg(
+            nrf24_HANDLE,
+            REG_FEATURE,
+            NRF24_EN_DYN_ACK |
+                (NRF_DPL ?
+                     4 :
+                     0)); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+        nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
+        nrf24_write_reg(nrf24_HANDLE, RX_PW_P0, payload_size);
+        nrf24_set_maclen(nrf24_HANDLE, addr_len);
+        nrf24_set_mac(REG_RX_ADDR_P0, addr, addr_len);
+        uint8_t tmp[5] = {0};
+        nrf24_read_reg(nrf24_HANDLE, REG_RX_ADDR_P0, tmp, addr_len);
+        for(uint8_t i = 0; i < addr_len / 2; i++) {
+            uint8_t tb = tmp[i];
+            tmp[i] = tmp[addr_len - i - 1];
+            tmp[addr_len - i - 1] = tb;
+        }
+        NRF_ERROR = memcmp(addr, tmp, addr_len) != 0;
+        nrf24_set_mac(REG_TX_ADDR, addr, addr_len);
+        nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, 1);
+        //nrf24_set_idle(nrf24_HANDLE);
+        NRF_INITED = true;
     }
-    NRF_ERROR = memcmp(addr, tmp, addr_len) != 0;
-    nrf24_set_mac(REG_TX_ADDR, addr, addr_len);
-    nrf24_write_reg(nrf24_HANDLE, REG_EN_RXADDR, 1);
-    nrf24_flush_rx(nrf24_HANDLE);
     nrf24_flush_tx(nrf24_HANDLE);
-    //nrf24_set_idle(nrf24_HANDLE);
-    NRF_INITED = true;
+    nrf24_flush_rx(nrf24_HANDLE);
+    nrf24_write_reg(nrf24_HANDLE, REG_STATUS, MAX_RT | RX_DR | TX_DS);
+    furi_hal_gpio_write(nrf24_CE_PIN, false);
 }
 
 // true - ok
 uint8_t nrf24_send_packet() {
     if(furi_log_get_level() == FuriLogLevelDebug) {
-        char buf[64];
+        char buf[65];
         buf[0] = 0;
         add_to_str_hex_bytes(buf, payload, payload_size);
         FURI_LOG_D(TAG, "SEND: %s", buf);
     }
-    // nrf24_write_reg(nrf24_HANDLE, REG_STATUS, RX_DR | TX_DS | MAX_RT);
-    // nrf24_flush_rx(nrf24_HANDLE);
-    if(nrf24_status(nrf24_HANDLE) & MAX_RT) {
-        nrf24_flush_tx(nrf24_HANDLE);
-        nrf24_write_reg(nrf24_HANDLE, REG_STATUS, MAX_RT);
-    }
-    NRF_last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, payload, payload_size, true);
-    NRF_time = furi_get_tick();
-    FURI_LOG_D(TAG, "Send packet = %d", NRF_last_packet_send_st);
+    //nrf24_flush_tx(nrf24_HANDLE);
+    //nrf24_write_reg(nrf24_HANDLE, REG_STATUS, RX_DR | TX_DS | MAX_RT);
+    NRF_last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, payload, payload_size, true); // ACK
     if(NRF_last_packet_send_st) {
         if((rw_type == rwt_read_cmd || rw_type == rwt_read_batch) &&
            send_status == sst_sending) { // Read
             nrf24_set_rx_mode(nrf24_HANDLE);
             send_status = sst_receiving; // receiving
-            FURI_LOG_D(TAG, "Receiving...");
         }
-
     } else
         notification_message(APP->notification, &sequence_blink_red_100);
+    NRF_time = furi_get_tick();
+    FURI_LOG_D(
+        TAG,
+        "Send packet: %d%s",
+        rw_type,
+        send_status,
+        NRF_last_packet_send_st,
+        send_status == sst_receiving ? ", Receiving" : "");
     return NRF_last_packet_send_st;
+}
+
+uint8_t nrf24_resend_packet() {
+    if(Log_Total) {
+        FuriString* str = Log[Log_Total - 1];
+        char* p = strstr(furi_string_get_cstr(str), ": ");
+        if(p) furi_string_left(str, p - furi_string_get_cstr(str) + 2);
+    }
+    return nrf24_send_packet();
 }
 
 // true - new packet
@@ -321,10 +337,10 @@ bool nrf24_read_newpacket() {
     if(st & RX_DR) {
         NRF_time = furi_get_tick();
         if(furi_log_get_level() == FuriLogLevelDebug) {
-            char buf[64];
+            char buf[65];
             buf[0] = 0;
             add_to_str_hex_bytes(buf, payload_receive, packetsize);
-            FURI_LOG_D(TAG, "READ: %s", buf);
+            FURI_LOG_D(TAG, "READ(%X): %s", st, buf);
         }
         if(Log_Total) {
             FuriString* str = Log[Log_Total - 1];
@@ -365,9 +381,9 @@ bool nrf24_read_newpacket() {
                 if(--cmd_array_cnt) {
                     furi_string_cat_str(str, ",");
                     payload[cmd_array_idx]++;
-                    furi_delay_ms(delay_between_pkt);
+                    NRF_repeat = 0;
                     send_status = sst_sending;
-                    if(!nrf24_send_packet()) send_status = sst_error;
+                    nrf24_send_packet();
                 } else
                     send_status = sst_ok;
             } else {
@@ -486,10 +502,10 @@ bool Run_Read_cmd(FuriString* cmd) {
             if(cmd_array_cnt > 1) cmd_array = true; // array
         }
     }
-    NRF_repeat = 0;
     prepare_nrf24();
     if(NRF_ERROR) return false;
     what_doing = 2;
+    NRF_repeat = 0;
     send_status = sst_sending; // Read - sending
     nrf24_send_packet();
     return true;
@@ -540,12 +556,28 @@ bool Run_ReadBatch_cmd(FuriString* cmd) {
 bool Run_WriteBatch_cmd(FuriString* cmd) {
     char* p;
     send_status = sst_none;
+    prepare_nrf24();
+    if(NRF_ERROR) return false;
     if(cmd) {
         p = strchr((char*)furi_string_get_cstr(cmd), ':');
         if(p == NULL) return false;
         p += 2;
         WriteBatch_cmd_curr = NULL;
         free_Log();
+        if(WriteStart) {
+            if(!fill_payload((char*)furi_string_get_cstr(WriteStart), NULL, VAR_EMPTY))
+                return false;
+            send_status = sst_sending;
+            uint8_t i = 0;
+            do {
+                if(nrf24_send_packet()) break;
+                furi_delay_ms(delay_between_pkt);
+            } while(i++ < NRF_resend);
+            if(i >= NRF_resend && i) { // not ok
+                send_status = sst_error;
+                return false;
+            }
+        }
     } else {
         if(WriteBatch_cmd_curr)
             p = WriteBatch_cmd_curr;
@@ -602,9 +634,6 @@ bool Run_WriteBatch_cmd(FuriString* cmd) {
         if(strncmp(p, w, len) != 0) continue;
         delim_col++;
         str_rtrim(delim_col);
-        NRF_repeat = 0;
-        prepare_nrf24();
-        if(NRF_ERROR) return false;
         cmd_array_cnt = 255;
         do {
             memset(payload, 0, sizeof(payload));
@@ -615,13 +644,14 @@ bool Run_WriteBatch_cmd(FuriString* cmd) {
                 if(cmd_array_cnt != 255) payload[cmd_array_idx] = cmd_array_cnt;
             } else
                 cmd_array = false;
-            send_status = sst_sending; // Read - sending
+            send_status = sst_sending;
+            NRF_repeat = 0;
             uint8_t i = 0;
-            for(; i < NRF_repeat; i++) {
+            do {
                 if(nrf24_send_packet()) break;
                 furi_delay_ms(delay_between_pkt);
-            }
-            if(i < NRF_repeat) {
+            } while(i++ < NRF_resend);
+            if(i < NRF_resend || i == 0) { // ok
                 if(cmd_array) { // array
                     for(; arr != NULL;) {
                         if(*arr == ',') break;
@@ -687,6 +717,8 @@ static uint8_t load_settings_file() {
                 NRF_CRC = atoi(p + sizeof(SettingsFld_CRC));
             } else if(strncmp(p, SettingsFld_DPL, sizeof(SettingsFld_DPL) - 1) == 0) {
                 NRF_DPL = atoi(p + sizeof(SettingsFld_DPL));
+            } else if(strncmp(p, SettingsFld_Resend, sizeof(SettingsFld_Resend) - 1) == 0) {
+                NRF_resend = atoi(p + sizeof(SettingsFld_Resend));
             } else if(strncmp(p, SettingsFld_Delay, sizeof(SettingsFld_Delay) - 1) == 0) {
                 delay_between_pkt = atoi(p + sizeof(SettingsFld_Delay));
             } else if(strncmp(p, SettingsFld_Payload, sizeof(SettingsFld_Payload) - 1) == 0) {
@@ -715,6 +747,8 @@ static uint8_t load_settings_file() {
                     payload_struct[2]);
             } else if(strncmp(p, SettingsFld_ReadDefault, sizeof(SettingsFld_ReadDefault) - 1) == 0) {
                 ReadDefault = furi_string_alloc_set_str(p + sizeof(SettingsFld_ReadDefault));
+            } else if(strncmp(p, SettingsFld_WriteStart, sizeof(SettingsFld_WriteStart) - 1) == 0) {
+                WriteStart = furi_string_alloc_set_str(p + sizeof(SettingsFld_WriteStart));
             } else if(strncmp(p, SettingsFld_WriteDefault, sizeof(SettingsFld_WriteDefault) - 1) == 0) {
                 WriteDefault = furi_string_alloc_set_str(p + sizeof(SettingsFld_WriteDefault));
             } else if(strncmp(p, SettingsFld_Read, sizeof(SettingsFld_Read) - 1) == 0) {
@@ -937,29 +971,27 @@ void work_timer_callback(void* ctx) {
             }
         } else if(send_status == sst_sending) { // sending
             if(!NRF_last_packet_send_st) { // No ACK on last attempt
-                if(furi_get_tick() - NRF_time >= delay_between_pkt) {
-                    if(++NRF_repeat < NRF_REPEAT_ATTEMPTS)
-                        nrf24_send_packet();
+                if(furi_get_tick() - NRF_time > delay_between_pkt) {
+                    if(NRF_repeat++ < NRF_resend)
+                        nrf24_resend_packet();
                     else
-                        send_status = sst_error; // error
+                        send_status = sst_error; // error NO_ACK
                 }
             }
         } else if(send_status == sst_receiving) { // receiving
-            for(uint8_t i = 0; i < 10; i++) {
+            for(uint8_t i = 0; i < 3; i++) {
                 bool new = nrf24_read_newpacket();
                 if(new) {
-                    if(send_status != sst_receiving) {
-                        NRF_repeat = 0;
-                        break;
-                    }
-                } else if(furi_get_tick() - NRF_time >= NRF_READ_TIMEOUT) {
-                    if(++NRF_repeat < NRF_REPEAT_ATTEMPTS)
-                        nrf24_send_packet();
-                    else {
+                    if(send_status != sst_receiving) break;
+                } else if(furi_get_tick() - NRF_time > NRF_READ_TIMEOUT) {
+                    if(NRF_repeat++ < NRF_resend) {
+                        send_status = sst_sending;
+                        nrf24_resend_packet();
+                    } else {
                         FURI_LOG_D(TAG, "TIMEOUT: %lu", furi_get_tick() - NRF_time);
                         send_status = sst_timeout;
-                        break;
                     }
+                    break;
                 }
             }
         } else if(send_status == sst_ok) {
@@ -1006,6 +1038,13 @@ int32_t nrf24batch_app(void* p) {
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(APP->event_queue, &event, 200);
         PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+
+        static FuriLogLevel FuriLogLevel = FuriLogLevelDefault;
+        if(furi_log_get_level() != FuriLogLevel) {
+            FuriLogLevel = furi_log_get_level();
+            if(FuriLogLevel == FuriLogLevelDebug)
+                furi_hal_uart_set_br(FuriHalUartIdUSART1, 460800);
+        }
 
         if(event_status == FuriStatusOk) {
             // press events
