@@ -1,11 +1,14 @@
 #pragma once
 
-#include "../ibutton_protocol_base.h"
+#include "../ibutton_protocol_common.h"
 
 #include <flipper_format.h>
 
-typedef bool (*iButtonProtocolReadWriteFunc)(iButtonProtocolContext*, iButtonProtocolData*);
-typedef void (*iButtonProtocolEmulateFunc)(iButtonProtocolContext*, iButtonProtocolData*);
+#include <one_wire/one_wire_host.h>
+#include <one_wire/one_wire_slave.h>
+
+typedef bool (*iButtonProtocolReadWriteFunc)(OneWireHost*, iButtonProtocolData*);
+typedef void (*iButtonProtocolEmulateFunc)(OneWireSlave*, iButtonProtocolData*);
 typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);

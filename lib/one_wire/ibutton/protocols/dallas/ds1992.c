@@ -29,10 +29,10 @@ typedef struct {
     DS1992ProtocolState state;
 } DS1992ProtocolData;
 
-static bool dallas_ds1992_read(iButtonProtocolContext*, void*);
-static bool dallas_ds1992_write_blank(iButtonProtocolContext*, iButtonProtocolData*);
-static bool dallas_ds1992_write_copy(iButtonProtocolContext*, iButtonProtocolData*);
-static void dallas_ds1992_emulate(iButtonProtocolContext*, iButtonProtocolData*);
+static bool dallas_ds1992_read(OneWireHost*, void*);
+static bool dallas_ds1992_write_blank(OneWireHost*, iButtonProtocolData*);
+static bool dallas_ds1992_write_copy(OneWireHost*, iButtonProtocolData*);
+static void dallas_ds1992_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool dallas_ds1992_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool dallas_ds1992_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1992_render_data(FuriString*, const iButtonProtocolData*);
@@ -65,27 +65,24 @@ const iButtonProtocolDallasBase ibutton_protocol_ds1992 = {
 };
 
 bool dallas_ds1992_read(
-    iButtonProtocolContext* protocol_context,
+    OneWireHost* host,
     iButtonProtocolData* protocol_data) {
-    OneWireHost* host = protocol_context;
     DS1992ProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data) &&
            dallas_common_read_mem(host, 0, data->sram_data, DS1992_SRAM_DATA_SIZE);
 }
 
 bool dallas_ds1992_write_blank(
-    iButtonProtocolContext* protocol_context,
+    OneWireHost* host,
     iButtonProtocolData* protocol_data) {
-    OneWireHost* host = protocol_context;
     DS1992ProtocolData* data = protocol_data;
     // TODO: Make this work, currently broken
     return tm2004_write(host, (uint8_t*)data, sizeof(DallasCommonRomData) + DS1992_SRAM_DATA_SIZE);
 }
 
 bool dallas_ds1992_write_copy(
-    iButtonProtocolContext* protocol_context,
+    OneWireHost* host,
     iButtonProtocolData* protocol_data) {
-    OneWireHost* host = protocol_context;
     DS1992ProtocolData* data = protocol_data;
     return dallas_common_write_mem(
         host,
@@ -143,9 +140,8 @@ static bool dallas_ds1992_command_callback(uint8_t command, void* context) {
 }
 
 void dallas_ds1992_emulate(
-    iButtonProtocolContext* protocol_context,
+    OneWireSlave* bus,
     iButtonProtocolData* protocol_data) {
-    OneWireSlave* bus = protocol_context;
     DS1992ProtocolData* data = protocol_data;
     data->state.bus = bus;
 

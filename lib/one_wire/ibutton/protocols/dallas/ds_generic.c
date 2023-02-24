@@ -19,9 +19,9 @@ typedef struct {
     DallasGenericProtocolState state;
 } DallasGenericProtocolData;
 
-static bool ds_generic_read(iButtonProtocolContext*, iButtonProtocolData*);
-static bool ds_generic_write_blank(iButtonProtocolContext*, iButtonProtocolData*);
-static void ds_generic_emulate(iButtonProtocolContext*, iButtonProtocolData*);
+static bool ds_generic_read(OneWireHost*, iButtonProtocolData*);
+static bool ds_generic_write_blank(OneWireHost*, iButtonProtocolData*);
+static void ds_generic_emulate(OneWireSlave*, iButtonProtocolData*);
 static bool ds_generic_load(FlipperFormat*, uint32_t, iButtonProtocolData*);
 static bool ds_generic_save(FlipperFormat*, const iButtonProtocolData*);
 static void ds_generic_render_brief_data(FuriString*, const iButtonProtocolData*);
@@ -51,16 +51,14 @@ const iButtonProtocolDallasBase ibutton_protocol_ds_generic = {
     .apply_edits = ds_generic_apply_edits,
 };
 
-bool ds_generic_read(iButtonProtocolContext* protocol_context, iButtonProtocolData* protocol_data) {
-    OneWireHost* host = protocol_context;
+bool ds_generic_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DallasGenericProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data);
 }
 
 bool ds_generic_write_blank(
-    iButtonProtocolContext* protocol_context,
+    OneWireHost* host,
     iButtonProtocolData* protocol_data) {
-    OneWireHost* host = protocol_context;
     DallasGenericProtocolData* data = protocol_data;
     return tm2004_write(host, data->rom_data.bytes, sizeof(DallasCommonRomData));
 }
@@ -86,9 +84,8 @@ static bool ds_generic_command_callback(uint8_t command, void* context) {
 }
 
 void ds_generic_emulate(
-    iButtonProtocolContext* protocol_context,
+    OneWireSlave* bus,
     iButtonProtocolData* protocol_data) {
-    OneWireSlave* bus = protocol_context;
     DallasGenericProtocolData* data = protocol_data;
     data->state.bus = bus;
 

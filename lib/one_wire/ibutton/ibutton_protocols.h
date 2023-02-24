@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "protocols/ibutton_protocol_base.h"
+#include "protocols/ibutton_protocol_common.h"
 
 #include "ibutton_key.h"
 

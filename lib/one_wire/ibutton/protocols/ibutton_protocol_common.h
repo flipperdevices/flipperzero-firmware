@@ -4,8 +4,6 @@
 #include <stddef.h>
 
 typedef void iButtonProtocolData;
-typedef void iButtonProtocolContext;
-
 typedef int32_t iButtonProtocolId;
 
 typedef enum {

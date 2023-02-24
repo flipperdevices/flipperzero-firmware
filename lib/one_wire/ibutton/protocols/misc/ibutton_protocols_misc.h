@@ -4,7 +4,7 @@
 
 #include <flipper_format.h>
 
-#include "../ibutton_protocol_base.h"
+#include "../ibutton_protocol_common.h"
 
 typedef struct iButtonProtocolsMisc iButtonProtocolsMisc;
 
