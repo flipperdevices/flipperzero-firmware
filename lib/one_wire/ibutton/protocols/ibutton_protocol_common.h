@@ -15,4 +15,4 @@ typedef enum {
 typedef struct {
     uint8_t* ptr;
     size_t size;
-} iButtonProtocolEditableData;
+} iButtonEditableData;

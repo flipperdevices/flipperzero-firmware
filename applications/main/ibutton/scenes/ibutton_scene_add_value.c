@@ -14,7 +14,7 @@ void ibutton_scene_add_value_on_enter(void* context) {
     iButton* ibutton = context;
     byte_input_set_header_text(ibutton->byte_input, "Enter the key");
 
-    iButtonProtocolEditableData editable_data;
+    iButtonEditableData editable_data;
     ibutton_protocols_get_editable_data(ibutton->key, &editable_data);
 
     byte_input_set_result_callback(

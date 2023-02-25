@@ -256,7 +256,7 @@ static void ibutton_protocols_dallas_get_editable_data(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
-    iButtonProtocolEditableData* editable_data) {
+    iButtonEditableData* editable_data) {
     UNUSED(protocols);
     furi_assert(protocol_id < iButtonProtocolDSMax);
     ibutton_protocols_dallas[protocol_id]->get_editable_data(editable_data, protocol_data);

@@ -134,9 +134,7 @@ bool ibutton_protocols_is_valid(const iButtonKey* key);
  * @param [in] key pointer to the key to be checked
  * @param [out] editable pointer to a structure to contain the editable data
  */
-void ibutton_protocols_get_editable_data(
-    const iButtonKey* key,
-    iButtonProtocolEditableData* editable);
+void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonEditableData* editable);
 
 /**
  * Make all necessary internal adjustments after editing the key

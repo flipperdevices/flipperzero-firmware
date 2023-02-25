@@ -36,7 +36,7 @@ static void dallas_ds1996_render_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1996_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1996_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds1996_is_data_valid(const iButtonProtocolData*);
-static void dallas_ds1996_get_editable_data(iButtonProtocolEditableData*, iButtonProtocolData*);
+static void dallas_ds1996_get_editable_data(iButtonEditableData*, iButtonProtocolData*);
 static void dallas_ds1996_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds1996 = {
@@ -199,7 +199,7 @@ bool dallas_ds1996_is_data_valid(const iButtonProtocolData* protocol_data) {
 }
 
 void dallas_ds1996_get_editable_data(
-    iButtonProtocolEditableData* editable_data,
+    iButtonEditableData* editable_data,
     iButtonProtocolData* protocol_data) {
     DS1996ProtocolData* data = protocol_data;
     editable_data->ptr = data->rom_data.bytes;

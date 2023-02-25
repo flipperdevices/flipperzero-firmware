@@ -30,7 +30,7 @@ static bool dallas_ds1990_save(FlipperFormat*, const iButtonProtocolData*);
 static void dallas_ds1990_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void dallas_ds1990_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds1990_is_data_valid(const iButtonProtocolData*);
-static void dallas_ds1990_get_editable_data(iButtonProtocolEditableData*, iButtonProtocolData*);
+static void dallas_ds1990_get_editable_data(iButtonEditableData*, iButtonProtocolData*);
 static void dallas_ds1990_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds1990 = {
@@ -131,7 +131,7 @@ bool dallas_ds1990_is_data_valid(const iButtonProtocolData* protocol_data) {
 }
 
 void dallas_ds1990_get_editable_data(
-    iButtonProtocolEditableData* editable_data,
+    iButtonEditableData* editable_data,
     iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
     editable_data->ptr = data->rom_data.bytes;

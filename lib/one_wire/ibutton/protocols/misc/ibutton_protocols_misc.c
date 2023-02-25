@@ -231,7 +231,7 @@ static void ibutton_protocols_misc_get_editable_data(
     iButtonProtocolsMisc* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
-    iButtonProtocolEditableData* data) {
+    iButtonEditableData* data) {
     data->ptr = protocol_data;
     data->size = protocol_dict_get_data_size(protocols->dict, protocol_id);
 }

@@ -27,7 +27,7 @@ static bool ds_generic_save(FlipperFormat*, const iButtonProtocolData*);
 static void ds_generic_render_brief_data(FuriString*, const iButtonProtocolData*);
 static void ds_generic_render_error(FuriString*, const iButtonProtocolData*);
 static bool ds_generic_is_data_valid(const iButtonProtocolData*);
-static void ds_generic_get_editable_data(iButtonProtocolEditableData*, iButtonProtocolData*);
+static void ds_generic_get_editable_data(iButtonEditableData*, iButtonProtocolData*);
 static void ds_generic_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds_generic = {
@@ -121,7 +121,7 @@ bool ds_generic_is_data_valid(const iButtonProtocolData* protocol_data) {
 }
 
 void ds_generic_get_editable_data(
-    iButtonProtocolEditableData* editable_data,
+    iButtonEditableData* editable_data,
     iButtonProtocolData* protocol_data) {
     DallasGenericProtocolData* data = protocol_data;
     editable_data->ptr = data->rom_data.bytes;

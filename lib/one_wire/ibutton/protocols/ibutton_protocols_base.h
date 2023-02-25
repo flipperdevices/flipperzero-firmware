@@ -27,7 +27,7 @@ typedef void (*iButtonProtocolsGetDataFunc)(
     iButtonProtocols*,
     iButtonProtocolData*,
     iButtonProtocolId,
-    iButtonProtocolEditableData*);
+    iButtonEditableData*);
 
 typedef void (
     *iButtonProtocolsApplyFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolId);

@@ -13,8 +13,7 @@ typedef bool (*iButtonProtocolSaveFunc)(FlipperFormat*, const iButtonProtocolDat
 typedef bool (*iButtonProtocolLoadFunc)(FlipperFormat*, uint32_t, iButtonProtocolData*);
 typedef void (*iButtonProtocolRenderDataFunc)(FuriString*, const iButtonProtocolData*);
 typedef bool (*iButtonProtocolIsValidFunc)(const iButtonProtocolData*);
-typedef void (
-    *iButtonProtocolGetEditableDataFunc)(iButtonProtocolEditableData*, iButtonProtocolData*);
+typedef void (*iButtonProtocolGetEditableDataFunc)(iButtonEditableData*, iButtonProtocolData*);
 typedef void (*iButtonProtocolApplyEditsFunc)(iButtonProtocolData*);
 
 typedef struct {

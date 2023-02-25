@@ -2,11 +2,7 @@
 
 #include <storage/storage.h>
 
-#include <one_wire/one_wire_host.h>
-#include <one_wire/one_wire_slave.h>
-
 #include "ibutton_key_i.h"
-
 #include "protocols/ibutton_protocols_defs.h"
 
 #define IBUTTON_FILE_TYPE "Flipper iButton key"
@@ -272,9 +268,7 @@ bool ibutton_protocols_is_valid(const iButtonKey* key) {
     return PROTOCOL_BASE->is_valid(PROTOCOL_GROUP, data, PROTOCOL_ID);
 }
 
-void ibutton_protocols_get_editable_data(
-    const iButtonKey* key,
-    iButtonProtocolEditableData* editable) {
+void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonEditableData* editable) {
     const iButtonProtocolId id = ibutton_key_get_protocol_id(key);
     iButtonProtocolData* data = ibutton_key_get_protocol_data(key);
 
