@@ -218,9 +218,7 @@ static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     while(param[i] != '\0') {
         uint16_t keycode = BADUSB_ASCII_TO_KEY(bad_usb, param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
-            furi_delay_ms(timing);
             furi_hal_hid_kb_press(keycode);
-            furi_delay_ms(timing);
             furi_hal_hid_kb_release(keycode);
             if(bad_usb->stringdelay > 0) {
                 furi_delay_ms(bad_usb->stringdelay);
@@ -482,14 +480,7 @@ static int32_t ducky_script_execute_next(BadUsbScript* bad_usb, File* script_fil
                     return 0;
                 } else if(delay_val < 0) {
                     bad_usb->st.error_line = bad_usb->st.line_cur;
-                    if(delay_val == SCRIPT_STATE_NEXT_LINE) {
-                        snprintf(
-                            bad_usb->st.error, sizeof(bad_usb->st.error), "Forbidden empty line");
-                        FURI_LOG_E(
-                            WORKER_TAG, "Forbidden empty line at line %u", bad_usb->st.line_cur);
-                    } else {
-                        FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
-                    }
+                    FURI_LOG_E(WORKER_TAG, "Unknown command at line %u", bad_usb->st.line_cur);
                     return SCRIPT_STATE_ERROR;
                 } else {
                     return (delay_val + bad_usb->defdelay);
