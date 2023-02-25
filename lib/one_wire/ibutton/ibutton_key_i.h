@@ -2,7 +2,7 @@
 
 #include "ibutton_key.h"
 
-#include "protocols/ibutton_protocol_common.h"
+#include "protocols/ibutton_protocol_common_i.h"
 
 iButtonProtocolData* ibutton_key_get_protocol_data(const iButtonKey* key);
 

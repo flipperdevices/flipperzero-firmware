@@ -3,11 +3,10 @@
 #include <stdbool.h>
 #include <flipper_format.h>
 
-#include "ibutton_protocol_common.h"
+#include "ibutton_protocol_common_i.h"
 
 typedef void iButtonProtocols;
 typedef uint32_t iButtonGroupId;
-typedef int32_t iButtonLocalProtocolId;
 
 typedef iButtonProtocols* (*iButtonProtocolsAllocFunc)(void);
 typedef void (*iButtonProtocolsFreeFunc)(iButtonProtocols*);
@@ -15,45 +14,45 @@ typedef void (*iButtonProtocolsFreeFunc)(iButtonProtocols*);
 typedef void (*iButtonProtocolsRenderFunc)(
     iButtonProtocols*,
     const iButtonProtocolData*,
-    iButtonProtocolId,
+    iButtonProtocolLocalId,
     FuriString*);
 
 typedef bool (*iButtonProtocolsIsValidFunc)(
     iButtonProtocols*,
     const iButtonProtocolData*,
-    iButtonProtocolId);
+    iButtonProtocolLocalId);
 
 typedef void (*iButtonProtocolsGetDataFunc)(
     iButtonProtocols*,
     iButtonProtocolData*,
-    iButtonProtocolId,
+    iButtonProtocolLocalId,
     iButtonEditableData*);
 
 typedef void (
-    *iButtonProtocolsApplyFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolId);
+    *iButtonProtocolsApplyFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolLocalId);
 
 typedef size_t (*iButtonProtocolsGetSizeFunc)(iButtonProtocols*);
-typedef uint32_t (*iButtonProtocolsGetFeaturesFunc)(iButtonProtocols*, iButtonProtocolId);
-typedef const char* (*iButtonProtocolsGetStringFunc)(iButtonProtocols*, iButtonProtocolId);
+typedef uint32_t (*iButtonProtocolsGetFeaturesFunc)(iButtonProtocols*, iButtonProtocolLocalId);
+typedef const char* (*iButtonProtocolsGetStringFunc)(iButtonProtocols*, iButtonProtocolLocalId);
 
-typedef bool (*iButtonProtocolsGetIdFunc)(iButtonProtocols*, iButtonProtocolId*, const char*);
-
-typedef bool (
-    *iButtonProtocolsReadFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolId*);
+typedef bool (*iButtonProtocolsGetIdFunc)(iButtonProtocols*, iButtonProtocolLocalId*, const char*);
 
 typedef bool (
-    *iButtonProtocolsWriteFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolId);
+    *iButtonProtocolsReadFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolLocalId*);
+
+typedef bool (
+    *iButtonProtocolsWriteFunc)(iButtonProtocols*, iButtonProtocolData*, iButtonProtocolLocalId);
 
 typedef bool (*iButtonProtocolsSaveFunc)(
     iButtonProtocols*,
     const iButtonProtocolData*,
-    iButtonProtocolId,
+    iButtonProtocolLocalId,
     FlipperFormat*);
 
 typedef bool (*iButtonProtocolsLoadFunc)(
     iButtonProtocols*,
     iButtonProtocolData*,
-    iButtonProtocolId,
+    iButtonProtocolLocalId,
     uint32_t,
     FlipperFormat*);
 

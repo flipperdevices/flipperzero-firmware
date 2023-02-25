@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-typedef void iButtonProtocolData;
 typedef int32_t iButtonProtocolId;
 
 typedef enum {

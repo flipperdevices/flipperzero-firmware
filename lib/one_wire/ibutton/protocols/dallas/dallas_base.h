@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ibutton_protocol_common.h"
+#include "../ibutton_protocol_common_i.h"
 
 #include <flipper_format.h>
 

@@ -25,11 +25,11 @@ static iButtonProtocols** protocols;
 typedef struct {
     const iButtonProtocolsBase* base;
     iButtonProtocols* protocols;
-    iButtonLocalProtocolId id;
+    iButtonProtocolLocalId id;
 } iButtonProtocolSelect;
 
 static bool ibutton_protocols_get_group_by_id(iButtonProtocolId id, iButtonProtocolSelect* data) {
-    iButtonLocalProtocolId local_id = id;
+    iButtonProtocolLocalId local_id = id;
 
     for(iButtonGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {
         if(local_id < (signed)ibutton_protocols[i]->protocol_count) {
@@ -76,10 +76,10 @@ uint32_t ibutton_protocols_get_protocol_count() {
 }
 
 static iButtonProtocolId ibutton_protocols_get_id_by_name(const char* name) {
-    iButtonLocalProtocolId offset = 0;
+    iButtonProtocolLocalId offset = 0;
 
     for(iButtonGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {
-        iButtonLocalProtocolId local_id;
+        iButtonProtocolLocalId local_id;
         if(ibutton_protocols[i]->get_id_by_name(protocols[i], &local_id, name)) {
             return local_id + offset;
         }
@@ -117,10 +117,10 @@ const char* ibutton_protocols_get_name(iButtonProtocolId id) {
 }
 
 bool ibutton_protocols_read(iButtonKey* key) {
-    iButtonLocalProtocolId id = -1;
+    iButtonProtocolLocalId id = -1;
     iButtonProtocolData* data = ibutton_key_get_protocol_data(key);
 
-    iButtonLocalProtocolId offset = 0;
+    iButtonProtocolLocalId offset = 0;
     for(iButtonGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {
         if(ibutton_protocols[i]->read(protocols[i], data, &id)) {
             id += offset;

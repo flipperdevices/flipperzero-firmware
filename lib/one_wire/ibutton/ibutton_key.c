@@ -1,4 +1,4 @@
-#include "ibutton_key.h"
+#include "ibutton_key_i.h"
 
 struct iButtonKey {
     iButtonProtocolId protocol_id;
