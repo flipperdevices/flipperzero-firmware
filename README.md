@@ -19,7 +19,8 @@ Flipper Zero application for nRF24L01 external board. Send batch commands. (IN D
 Перед пакетом команд для записи отправляется пакет 'Write start', если присутствует в файле.<br>
 <br>
 Пример файл [CO2_mini](https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Distr/nrf24batch/CO2_mini.txt)<br>
-<br>
+Для устройства на Attiny44A, которое отправляет данные с датчика CO2 на контроллеры, управляющие вентиляцией или проветриватели: https://github.com/vad7/CO2-mini
+<br><br>
 Структура файла настроек:
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/descript.png">
 <br>
