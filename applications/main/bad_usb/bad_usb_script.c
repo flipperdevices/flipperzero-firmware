@@ -214,15 +214,7 @@ static bool ducky_altstring(const char* param) {
 
 static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     uint32_t i = 0;
-    uint32_t timing = 0;
 
-    if(bad_usb->stringdelay == 0) {
-        timing = 0;
-    } else if(bad_usb->stringdelay > 1000) {
-        timing = bad_usb->stringdelay / 2 / 10;
-    } else {
-        timing = bad_usb->stringdelay / 2;
-    }
 
     while(param[i] != '\0') {
         uint16_t keycode = BADUSB_ASCII_TO_KEY(bad_usb, param[i]);
@@ -624,8 +616,6 @@ static int32_t bad_usb_worker(void* context) {
                 bad_usb->file_end = false;
                 storage_file_seek(script_file, 0, true);
                 // extra time for PC to recognize Flipper as keyboard
-                furi_delay_ms(1500);
-                worker_state = BadUsbStateRunning;
                 flags = furi_thread_flags_wait(
                     WorkerEvtEnd | WorkerEvtDisconnect | WorkerEvtToggle,
                     FuriFlagWaitAny | FuriFlagNoClear,
