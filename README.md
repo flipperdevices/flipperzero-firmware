@@ -31,3 +31,11 @@ Flipper Zero application for nRF24L01 external board. Sends batch commands. (IN 
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-2.png">
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-3.png">
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-4.png">
+<br>
+<br>
+Mini board for Flipper Zero to connect nRF24l01:  
+  
+<img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/scheme2.png">
+<br>
+<a href="https://raw.githubusercontent.com/vad7/nrf24scan/master/Gerber_PCB_Flipper%20Zero%20nRF24%20board%20mini_v1_0.zip">Gerber</a> for mini board with 5V - 3.3V converter LM1117-3.3<br>
+<a href="https://oshwlab.com/vad7/flipper-zero-nrf24-board_copy">Easyeda source</a>
