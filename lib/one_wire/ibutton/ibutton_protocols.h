@@ -34,23 +34,23 @@ size_t ibutton_protocols_get_max_data_size();
 
 /**
  * Get the manufacturer name based on the protocol id
- * @param [in] protocol_id id of the protocol in question
+ * @param [in] id id of the protocol in question
  * @return pointer to a statically allocated string with manufacturer name
  */
-const char* ibutton_protocols_get_manufacturer(iButtonProtocolId protocol_id);
+const char* ibutton_protocols_get_manufacturer(iButtonProtocolId id);
 
 /**
  * Get the protocol name based on the protocol id
- * @param [in] protocol_id id of the protocol in question
+ * @param [in] id id of the protocol in question
  * @return pointer to a statically allocated string with protocol name
  */
-const char* ibutton_protocols_get_name(iButtonProtocolId protocol_id);
+const char* ibutton_protocols_get_name(iButtonProtocolId id);
 
 /**
  * Get protocol features bitmask by protocol id
- * @param [in] protocol_id id of the protocol in question
+ * @param [in] id id of the protocol in question
  */
-uint32_t ibutton_protocols_get_features(iButtonProtocolId protocol_id);
+uint32_t ibutton_protocols_get_features(iButtonProtocolId id);
 
 /**
  * Read a physical device (a key or an emulator)
@@ -132,9 +132,11 @@ bool ibutton_protocols_is_valid(const iButtonKey* key);
 /**
  * Get a pointer to the key's editable data (for in-place editing)
  * @param [in] key pointer to the key to be checked
- * @param [out] data pointer to a structure to contain the editable data
+ * @param [out] editable pointer to a structure to contain the editable data
  */
-void ibutton_protocols_get_editable_data(const iButtonKey* key, iButtonProtocolEditableData* data);
+void ibutton_protocols_get_editable_data(
+    const iButtonKey* key,
+    iButtonProtocolEditableData* editable);
 
 /**
  * Make all necessary internal adjustments after editing the key

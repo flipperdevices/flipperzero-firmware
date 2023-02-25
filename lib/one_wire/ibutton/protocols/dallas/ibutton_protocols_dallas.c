@@ -2,19 +2,16 @@
 
 #include <furi_hal_resources.h>
 
-#include <one_wire/one_wire_host.h>
-#include <one_wire/one_wire_slave.h>
-
 #include "ibutton_protocol_dallas_defs.h"
 
 #define IBUTTON_ONEWIRE_ROM_SIZE 8U
 
-struct iButtonProtocolsDallas {
+typedef struct {
     OneWireHost* host;
     OneWireSlave* bus;
-};
+} iButtonProtocolsDallas;
 
-iButtonProtocolsDallas* ibutton_protocols_dallas_alloc() {
+static iButtonProtocolsDallas* ibutton_protocols_dallas_alloc() {
     iButtonProtocolsDallas* protocols = malloc(sizeof(iButtonProtocolsDallas));
 
     protocols->host = onewire_host_alloc(&ibutton_gpio);
@@ -23,13 +20,13 @@ iButtonProtocolsDallas* ibutton_protocols_dallas_alloc() {
     return protocols;
 }
 
-void ibutton_protocols_dallas_free(iButtonProtocolsDallas* protocols) {
+static void ibutton_protocols_dallas_free(iButtonProtocolsDallas* protocols) {
     onewire_slave_free(protocols->bus);
     onewire_host_free(protocols->host);
     free(protocols);
 }
 
-size_t ibutton_protocols_dallas_get_max_data_size(iButtonProtocolsDallas* protocols) {
+static size_t ibutton_protocols_dallas_get_max_data_size(iButtonProtocolsDallas* protocols) {
     UNUSED(protocols);
     size_t max_data_size = 0;
 
@@ -43,7 +40,7 @@ size_t ibutton_protocols_dallas_get_max_data_size(iButtonProtocolsDallas* protoc
     return max_data_size;
 }
 
-bool ibutton_protocols_dallas_get_id_by_name(
+static bool ibutton_protocols_dallas_get_id_by_name(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolId* protocol_id,
     const char* protocol_name) {
@@ -63,7 +60,7 @@ bool ibutton_protocols_dallas_get_id_by_name(
     return false;
 }
 
-uint32_t ibutton_protocols_dallas_get_features(
+static uint32_t ibutton_protocols_dallas_get_features(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolId protocol_id) {
     UNUSED(protocols);
@@ -71,7 +68,7 @@ uint32_t ibutton_protocols_dallas_get_features(
     return ibutton_protocols_dallas[protocol_id]->features;
 }
 
-const char* ibutton_protocols_dallas_get_manufacturer(
+static const char* ibutton_protocols_dallas_get_manufacturer(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolId protocol_id) {
     UNUSED(protocols);
@@ -79,7 +76,7 @@ const char* ibutton_protocols_dallas_get_manufacturer(
     return ibutton_protocols_dallas[protocol_id]->manufacturer;
 }
 
-const char* ibutton_protocols_dallas_get_name(
+static const char* ibutton_protocols_dallas_get_name(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolId protocol_id) {
     UNUSED(protocols);
@@ -97,7 +94,7 @@ static iButtonProtocolId ibutton_protocols_dallas_get_id_by_family_code(uint8_t 
     return protocol_id;
 }
 
-bool ibutton_protocols_dallas_read(
+static bool ibutton_protocols_dallas_read(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId* protocol_id) {
@@ -129,7 +126,7 @@ bool ibutton_protocols_dallas_read(
     return success;
 }
 
-bool ibutton_protocols_dallas_write_blank(
+static bool ibutton_protocols_dallas_write_blank(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id) {
@@ -151,7 +148,7 @@ bool ibutton_protocols_dallas_write_blank(
     return success;
 }
 
-bool ibutton_protocols_dallas_write_copy(
+static bool ibutton_protocols_dallas_write_copy(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id) {
@@ -174,7 +171,7 @@ bool ibutton_protocols_dallas_write_copy(
     return success;
 }
 
-void ibutton_protocols_dallas_emulate_start(
+static void ibutton_protocols_dallas_emulate_start(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id) {
@@ -184,14 +181,16 @@ void ibutton_protocols_dallas_emulate_start(
     onewire_slave_start(bus);
 }
 
-void ibutton_protocols_dallas_emulate_stop(
+static void ibutton_protocols_dallas_emulate_stop(
     iButtonProtocolsDallas* protocols,
+    iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id) {
     furi_assert(protocol_id < iButtonProtocolDSMax);
+    UNUSED(protocol_data);
     onewire_slave_stop(protocols->bus);
 }
 
-bool ibutton_protocols_dallas_save(
+static bool ibutton_protocols_dallas_save(
     iButtonProtocolsDallas* protocols,
     const iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
@@ -201,7 +200,7 @@ bool ibutton_protocols_dallas_save(
     return ibutton_protocols_dallas[protocol_id]->save(ff, protocol_data);
 }
 
-bool ibutton_protocols_dallas_load(
+static bool ibutton_protocols_dallas_load(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
@@ -212,7 +211,7 @@ bool ibutton_protocols_dallas_load(
     return ibutton_protocols_dallas[protocol_id]->load(ff, version, protocol_data);
 }
 
-void ibutton_protocols_dallas_render_data(
+static void ibutton_protocols_dallas_render_data(
     iButtonProtocolsDallas* protocols,
     const iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
@@ -224,7 +223,7 @@ void ibutton_protocols_dallas_render_data(
     protocol->render_data(result, protocol_data);
 }
 
-void ibutton_protocols_dallas_render_brief_data(
+static void ibutton_protocols_dallas_render_brief_data(
     iButtonProtocolsDallas* protocols,
     const iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
@@ -234,7 +233,7 @@ void ibutton_protocols_dallas_render_brief_data(
     ibutton_protocols_dallas[protocol_id]->render_brief_data(result, protocol_data);
 }
 
-void ibutton_protocols_dallas_render_error(
+static void ibutton_protocols_dallas_render_error(
     iButtonProtocolsDallas* protocols,
     const iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
@@ -244,7 +243,7 @@ void ibutton_protocols_dallas_render_error(
     ibutton_protocols_dallas[protocol_id]->render_error(result, protocol_data);
 }
 
-bool ibutton_protocols_dallas_is_valid(
+static bool ibutton_protocols_dallas_is_valid(
     iButtonProtocolsDallas* protocols,
     const iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id) {
@@ -253,7 +252,7 @@ bool ibutton_protocols_dallas_is_valid(
     return ibutton_protocols_dallas[protocol_id]->is_valid(protocol_data);
 }
 
-void ibutton_protocols_dallas_get_editable_data(
+static void ibutton_protocols_dallas_get_editable_data(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id,
@@ -263,7 +262,7 @@ void ibutton_protocols_dallas_get_editable_data(
     ibutton_protocols_dallas[protocol_id]->get_editable_data(editable_data, protocol_data);
 }
 
-void ibutton_protocols_dallas_apply_edits(
+static void ibutton_protocols_dallas_apply_edits(
     iButtonProtocolsDallas* protocols,
     iButtonProtocolData* protocol_data,
     iButtonProtocolId protocol_id) {
@@ -271,3 +270,35 @@ void ibutton_protocols_dallas_apply_edits(
     furi_assert(protocol_id < iButtonProtocolDSMax);
     ibutton_protocols_dallas[protocol_id]->apply_edits(protocol_data);
 }
+
+const iButtonProtocolsBase ibutton_protocol_group_dallas = {
+    .protocol_count = iButtonProtocolDSMax,
+
+    .alloc = (iButtonProtocolsAllocFunc)ibutton_protocols_dallas_alloc,
+    .free = (iButtonProtocolsFreeFunc)ibutton_protocols_dallas_free,
+
+    .get_max_data_size = (iButtonProtocolsGetSizeFunc)ibutton_protocols_dallas_get_max_data_size,
+    .get_id_by_name = (iButtonProtocolsGetIdFunc)ibutton_protocols_dallas_get_id_by_name,
+    .get_features = (iButtonProtocolsGetFeaturesFunc)ibutton_protocols_dallas_get_features,
+
+    .get_manufacturer = (iButtonProtocolsGetStringFunc)ibutton_protocols_dallas_get_manufacturer,
+    .get_name = (iButtonProtocolsGetStringFunc)ibutton_protocols_dallas_get_name,
+
+    .read = (iButtonProtocolsReadFunc)ibutton_protocols_dallas_read,
+    .write_blank = (iButtonProtocolsWriteFunc)ibutton_protocols_dallas_write_blank,
+    .write_copy = (iButtonProtocolsWriteFunc)ibutton_protocols_dallas_write_copy,
+
+    .emulate_start = (iButtonProtocolsApplyFunc)ibutton_protocols_dallas_emulate_start,
+    .emulate_stop = (iButtonProtocolsApplyFunc)ibutton_protocols_dallas_emulate_stop,
+
+    .save = (iButtonProtocolsSaveFunc)ibutton_protocols_dallas_save,
+    .load = (iButtonProtocolsLoadFunc)ibutton_protocols_dallas_load,
+
+    .render_data = (iButtonProtocolsRenderFunc)ibutton_protocols_dallas_render_data,
+    .render_brief_data = (iButtonProtocolsRenderFunc)ibutton_protocols_dallas_render_brief_data,
+    .render_error = (iButtonProtocolsRenderFunc)ibutton_protocols_dallas_render_error,
+
+    .is_valid = (iButtonProtocolsIsValidFunc)ibutton_protocols_dallas_is_valid,
+    .get_editable_data = (iButtonProtocolsGetDataFunc)ibutton_protocols_dallas_get_editable_data,
+    .apply_edits = (iButtonProtocolsApplyFunc)ibutton_protocols_dallas_apply_edits,
+};

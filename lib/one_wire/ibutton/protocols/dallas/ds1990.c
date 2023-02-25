@@ -54,16 +54,12 @@ const iButtonProtocolDallasBase ibutton_protocol_ds1990 = {
     .apply_edits = dallas_ds1990_apply_edits,
 };
 
-bool dallas_ds1990_read(
-    OneWireHost* host,
-    iButtonProtocolData* protocol_data) {
+bool dallas_ds1990_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data);
 }
 
-bool dallas_ds1990_write_blank(
-    OneWireHost* host,
-    iButtonProtocolData* protocol_data) {
+bool dallas_ds1990_write_blank(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
 
     return rw1990_write_v1(host, data->rom_data.bytes, sizeof(DallasCommonRomData)) ||
@@ -92,9 +88,7 @@ static bool dallas_ds1990_command_callback(uint8_t command, void* context) {
     return false;
 }
 
-void dallas_ds1990_emulate(
-    OneWireSlave* bus,
-    iButtonProtocolData* protocol_data) {
+void dallas_ds1990_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data) {
     DS1990ProtocolData* data = protocol_data;
     data->state.bus = bus;
 
