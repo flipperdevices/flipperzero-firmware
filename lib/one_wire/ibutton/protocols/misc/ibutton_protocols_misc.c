@@ -11,14 +11,14 @@
 
 typedef struct {
     ProtocolDict* dict;
-    ProtocolId id;
+    ProtocolId emulate_id;
 } iButtonProtocolsMisc;
 
 static iButtonProtocolsMisc* ibutton_protocols_misc_alloc() {
     iButtonProtocolsMisc* protocols = malloc(sizeof(iButtonProtocolsMisc));
 
     protocols->dict = protocol_dict_alloc(ibutton_protocols_misc, iButtonProtocolMiscMax);
-    protocols->id = PROTOCOL_NO;
+    protocols->emulate_id = PROTOCOL_NO;
 
     return protocols;
 }
@@ -141,13 +141,27 @@ static bool ibutton_protocols_misc_read(
     return result;
 }
 
+static void ibutton_protocols_misc_emulate_callback(void* context) {
+    iButtonProtocolsMisc* protocols = context;
+
+    const LevelDuration level_duration =
+        protocol_dict_encoder_yield(protocols->dict, protocols->emulate_id);
+
+    furi_hal_ibutton_emulate_set_next(level_duration_get_duration(level_duration));
+    furi_hal_ibutton_pin_write(level_duration_get_level(level_duration));
+}
+
 static void ibutton_protocols_misc_emulate_start(
     iButtonProtocolsMisc* protocols,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
-    UNUSED(protocols);
-    UNUSED(data);
-    UNUSED(id);
+    protocols->emulate_id = id;
+    protocol_dict_set_data(
+        protocols->dict, id, data, protocol_dict_get_data_size(protocols->dict, id));
+    protocol_dict_encoder_start(protocols->dict, protocols->emulate_id);
+
+    furi_hal_ibutton_pin_configure();
+    furi_hal_ibutton_emulate_start(0, ibutton_protocols_misc_emulate_callback, protocols);
 }
 
 static void ibutton_protocols_misc_emulate_stop(
@@ -157,6 +171,8 @@ static void ibutton_protocols_misc_emulate_stop(
     UNUSED(protocols);
     UNUSED(data);
     UNUSED(id);
+    furi_hal_ibutton_emulate_stop();
+    furi_hal_ibutton_pin_reset();
 }
 
 static bool ibutton_protocols_misc_save(
