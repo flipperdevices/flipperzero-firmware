@@ -10,7 +10,7 @@ env:
 
 jobs:
   test_updater_on_bench:
-    runs-on: [self-hosted, FlipperZeroTestMac1]
+    runs-on: [self-hosted, FlipperZeroUpdaterTest]
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
