@@ -215,7 +215,6 @@ static bool ducky_altstring(const char* param) {
 static bool ducky_string(BadUsbScript* bad_usb, const char* param) {
     uint32_t i = 0;
 
-
     while(param[i] != '\0') {
         uint16_t keycode = BADUSB_ASCII_TO_KEY(bad_usb, param[i]);
         if(keycode != HID_KEYBOARD_NONE) {
