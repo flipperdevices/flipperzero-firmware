@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - UL: SubGHz improvements
 - OFW: BadUsb: STRINGDELAY feature, worker signal handling refactoring
+- [NRF24 Batch Documentation updates (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
