@@ -15,31 +15,31 @@
 typedef struct {
     ProtocolDict* dict;
     ProtocolId emulate_id;
-} iButtonProtocolsMisc;
+} iButtonProtocolGroupMisc;
 
-static iButtonProtocolsMisc* ibutton_protocols_misc_alloc() {
-    iButtonProtocolsMisc* protocols = malloc(sizeof(iButtonProtocolsMisc));
+static iButtonProtocolGroupMisc* ibutton_protocol_group_misc_alloc() {
+    iButtonProtocolGroupMisc* group = malloc(sizeof(iButtonProtocolGroupMisc));
 
-    protocols->dict = protocol_dict_alloc(ibutton_protocols_misc, iButtonProtocolMiscMax);
-    protocols->emulate_id = PROTOCOL_NO;
+    group->dict = protocol_dict_alloc(ibutton_protocols_misc, iButtonProtocolMiscMax);
+    group->emulate_id = PROTOCOL_NO;
 
-    return protocols;
+    return group;
 }
 
-static void ibutton_protocols_misc_free(iButtonProtocolsMisc* protocols) {
-    protocol_dict_free(protocols->dict);
-    free(protocols);
+static void ibutton_protocol_group_misc_free(iButtonProtocolGroupMisc* group) {
+    protocol_dict_free(group->dict);
+    free(group);
 }
 
-static size_t ibutton_protocols_misc_get_max_data_size(iButtonProtocolsMisc* protocols) {
-    return protocol_dict_get_max_data_size(protocols->dict);
+static size_t ibutton_protocol_group_misc_get_max_data_size(iButtonProtocolGroupMisc* group) {
+    return protocol_dict_get_max_data_size(group->dict);
 }
 
-static bool ibutton_protocols_misc_get_id_by_name(
-    iButtonProtocolsMisc* protocols,
+static bool ibutton_protocol_group_misc_get_id_by_name(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolLocalId* id,
     const char* name) {
-    const ProtocolId found_id = protocol_dict_get_protocol_by_name(protocols->dict, name);
+    const ProtocolId found_id = protocol_dict_get_protocol_by_name(group->dict, name);
 
     if(found_id != PROTOCOL_NO) {
         *id = found_id;
@@ -48,23 +48,24 @@ static bool ibutton_protocols_misc_get_id_by_name(
     return false;
 }
 
-static uint32_t ibutton_protocols_misc_get_features(
-    iButtonProtocolsMisc* protocols,
+static uint32_t ibutton_protocol_group_misc_get_features(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolLocalId id) {
-    UNUSED(protocols);
+    UNUSED(group);
     UNUSED(id);
     return 0;
 }
 
-static const char* ibutton_protocols_misc_get_manufacturer(
-    iButtonProtocolsMisc* protocols,
+static const char* ibutton_protocol_group_misc_get_manufacturer(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolLocalId id) {
-    return protocol_dict_get_manufacturer(protocols->dict, id);
+    return protocol_dict_get_manufacturer(group->dict, id);
 }
 
-static const char*
-    ibutton_protocols_misc_get_name(iButtonProtocolsMisc* protocols, iButtonProtocolLocalId id) {
-    return protocol_dict_get_name(protocols->dict, id);
+static const char* ibutton_protocol_group_misc_get_name(
+    iButtonProtocolGroupMisc* group,
+    iButtonProtocolLocalId id) {
+    return protocol_dict_get_name(group->dict, id);
 }
 
 typedef struct {
@@ -84,13 +85,13 @@ static void ibutton_protocols_comparator_callback(bool level, void* context) {
     read_context->last_dwt_value = current_dwt_value;
 }
 
-static bool ibutton_protocols_misc_read(
-    iButtonProtocolsMisc* protocols,
+static bool ibutton_protocol_group_misc_read(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId* id) {
     bool result = false;
 
-    protocol_dict_decoders_start(protocols->dict);
+    protocol_dict_decoders_start(group->dict);
 
     furi_hal_rfid_pins_reset();
     // pulldown pull pin, we sense the signal through the analog part of the RFID schematic
@@ -117,19 +118,17 @@ static bool ibutton_protocols_misc_read(
 
         if(ret > 0) {
             ProtocolId decoded_index = protocol_dict_decoders_feed(
-                protocols->dict,
-                level_duration_get_level(level),
-                level_duration_get_duration(level));
+                group->dict, level_duration_get_level(level), level_duration_get_duration(level));
 
             if(decoded_index == PROTOCOL_NO) continue;
 
             *id = decoded_index;
 
             protocol_dict_get_data(
-                protocols->dict,
+                group->dict,
                 decoded_index,
                 data,
-                protocol_dict_get_data_size(protocols->dict, decoded_index));
+                protocol_dict_get_data_size(group->dict, decoded_index));
 
             result = true;
         }
@@ -144,56 +143,55 @@ static bool ibutton_protocols_misc_read(
     return result;
 }
 
-static void ibutton_protocols_misc_emulate_callback(void* context) {
-    iButtonProtocolsMisc* protocols = context;
+static void ibutton_protocol_group_misc_emulate_callback(void* context) {
+    iButtonProtocolGroupMisc* group = context;
 
     const LevelDuration level_duration =
-        protocol_dict_encoder_yield(protocols->dict, protocols->emulate_id);
+        protocol_dict_encoder_yield(group->dict, group->emulate_id);
 
     furi_hal_ibutton_emulate_set_next(level_duration_get_duration(level_duration));
     furi_hal_ibutton_pin_write(level_duration_get_level(level_duration));
 }
 
-static void ibutton_protocols_misc_emulate_start(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_emulate_start(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
-    protocols->emulate_id = id;
-    protocol_dict_set_data(
-        protocols->dict, id, data, protocol_dict_get_data_size(protocols->dict, id));
-    protocol_dict_encoder_start(protocols->dict, protocols->emulate_id);
+    group->emulate_id = id;
+    protocol_dict_set_data(group->dict, id, data, protocol_dict_get_data_size(group->dict, id));
+    protocol_dict_encoder_start(group->dict, group->emulate_id);
 
     furi_hal_ibutton_pin_configure();
-    furi_hal_ibutton_emulate_start(0, ibutton_protocols_misc_emulate_callback, protocols);
+    furi_hal_ibutton_emulate_start(0, ibutton_protocol_group_misc_emulate_callback, group);
 }
 
-static void ibutton_protocols_misc_emulate_stop(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_emulate_stop(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
-    UNUSED(protocols);
+    UNUSED(group);
     UNUSED(data);
     UNUSED(id);
     furi_hal_ibutton_emulate_stop();
     furi_hal_ibutton_pin_reset();
 }
 
-static bool ibutton_protocols_misc_save(
-    iButtonProtocolsMisc* protocols,
+static bool ibutton_protocol_group_misc_save(
+    iButtonProtocolGroupMisc* group,
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     FlipperFormat* ff) {
-    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
+    const size_t data_size = protocol_dict_get_data_size(group->dict, id);
     return flipper_format_write_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V2, data, data_size);
 }
 
-static bool ibutton_protocols_misc_load(
-    iButtonProtocolsMisc* protocols,
+static bool ibutton_protocol_group_misc_load(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     uint32_t version,
     FlipperFormat* ff) {
-    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
+    const size_t data_size = protocol_dict_get_data_size(group->dict, id);
     switch(version) {
     case 1:
         return flipper_format_read_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V1, data, data_size);
@@ -204,92 +202,96 @@ static bool ibutton_protocols_misc_load(
     }
 }
 
-static void ibutton_protocols_misc_render_data(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_render_data(
+    iButtonProtocolGroupMisc* group,
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     FuriString* result) {
-    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
-    protocol_dict_set_data(protocols->dict, id, data, data_size);
-    protocol_dict_render_data(protocols->dict, result, id);
+    const size_t data_size = protocol_dict_get_data_size(group->dict, id);
+    protocol_dict_set_data(group->dict, id, data, data_size);
+    protocol_dict_render_data(group->dict, result, id);
 }
 
-static void ibutton_protocols_misc_render_brief_data(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_render_brief_data(
+    iButtonProtocolGroupMisc* group,
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     FuriString* result) {
-    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
-    protocol_dict_set_data(protocols->dict, id, data, data_size);
-    protocol_dict_render_brief_data(protocols->dict, result, id);
+    const size_t data_size = protocol_dict_get_data_size(group->dict, id);
+    protocol_dict_set_data(group->dict, id, data, data_size);
+    protocol_dict_render_brief_data(group->dict, result, id);
 }
 
-static void ibutton_protocols_misc_render_error(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_render_error(
+    iButtonProtocolGroupMisc* group,
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     FuriString* result) {
-    UNUSED(protocols);
+    UNUSED(group);
     UNUSED(data);
     UNUSED(id);
     UNUSED(result);
 }
 
-static bool ibutton_protocols_misc_is_valid(
-    iButtonProtocolsMisc* protocols,
+static bool ibutton_protocol_group_misc_is_valid(
+    iButtonProtocolGroupMisc* group,
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
-    UNUSED(protocols);
+    UNUSED(group);
     UNUSED(data);
     UNUSED(id);
     return true;
 }
 
-static void ibutton_protocols_misc_get_editable_data(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_get_editable_data(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     iButtonEditableData* editable) {
     editable->ptr = data;
-    editable->size = protocol_dict_get_data_size(protocols->dict, id);
+    editable->size = protocol_dict_get_data_size(group->dict, id);
 }
 
-static void ibutton_protocols_misc_apply_edits(
-    iButtonProtocolsMisc* protocols,
+static void ibutton_protocol_group_misc_apply_edits(
+    iButtonProtocolGroupMisc* group,
     iButtonProtocolData* data,
     iButtonProtocolLocalId id) {
-    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
-    protocol_dict_set_data(protocols->dict, id, data, data_size);
+    const size_t data_size = protocol_dict_get_data_size(group->dict, id);
+    protocol_dict_set_data(group->dict, id, data, data_size);
 }
 
-const iButtonProtocolsBase ibutton_protocol_group_misc = {
+const iButtonProtocolGroupBase ibutton_protocol_group_misc = {
     .protocol_count = iButtonProtocolMiscMax,
 
-    .alloc = (iButtonProtocolsAllocFunc)ibutton_protocols_misc_alloc,
-    .free = (iButtonProtocolsFreeFunc)ibutton_protocols_misc_free,
+    .alloc = (iButtonProtocolGroupAllocFunc)ibutton_protocol_group_misc_alloc,
+    .free = (iButtonProtocolGroupFreeFunc)ibutton_protocol_group_misc_free,
 
-    .get_max_data_size = (iButtonProtocolsGetSizeFunc)ibutton_protocols_misc_get_max_data_size,
-    .get_id_by_name = (iButtonProtocolsGetIdFunc)ibutton_protocols_misc_get_id_by_name,
-    .get_features = (iButtonProtocolsGetFeaturesFunc)ibutton_protocols_misc_get_features,
+    .get_max_data_size =
+        (iButtonProtocolGropuGetSizeFunc)ibutton_protocol_group_misc_get_max_data_size,
+    .get_id_by_name = (iButtonProtocolGroupGetIdFunc)ibutton_protocol_group_misc_get_id_by_name,
+    .get_features = (iButtonProtocolGroupGetFeaturesFunc)ibutton_protocol_group_misc_get_features,
 
-    .get_manufacturer = (iButtonProtocolsGetStringFunc)ibutton_protocols_misc_get_manufacturer,
-    .get_name = (iButtonProtocolsGetStringFunc)ibutton_protocols_misc_get_name,
+    .get_manufacturer =
+        (iButtonProtocolGroupGetStringFunc)ibutton_protocol_group_misc_get_manufacturer,
+    .get_name = (iButtonProtocolGroupGetStringFunc)ibutton_protocol_group_misc_get_name,
 
-    .read = (iButtonProtocolsReadFunc)ibutton_protocols_misc_read,
+    .read = (iButtonProtocolGroupReadFunc)ibutton_protocol_group_misc_read,
     .write_blank = NULL,
     .write_copy = NULL,
 
-    .emulate_start = (iButtonProtocolsApplyFunc)ibutton_protocols_misc_emulate_start,
-    .emulate_stop = (iButtonProtocolsApplyFunc)ibutton_protocols_misc_emulate_stop,
+    .emulate_start = (iButtonProtocolGroupApplyFunc)ibutton_protocol_group_misc_emulate_start,
+    .emulate_stop = (iButtonProtocolGroupApplyFunc)ibutton_protocol_group_misc_emulate_stop,
 
-    .save = (iButtonProtocolsSaveFunc)ibutton_protocols_misc_save,
-    .load = (iButtonProtocolsLoadFunc)ibutton_protocols_misc_load,
+    .save = (iButtonProtocolGroupSaveFunc)ibutton_protocol_group_misc_save,
+    .load = (iButtonProtocolGroupLoadFunc)ibutton_protocol_group_misc_load,
 
-    .render_data = (iButtonProtocolsRenderFunc)ibutton_protocols_misc_render_data,
-    .render_brief_data = (iButtonProtocolsRenderFunc)ibutton_protocols_misc_render_brief_data,
-    .render_error = (iButtonProtocolsRenderFunc)ibutton_protocols_misc_render_error,
+    .render_data = (iButtonProtocolGroupRenderFunc)ibutton_protocol_group_misc_render_data,
+    .render_brief_data =
+        (iButtonProtocolGroupRenderFunc)ibutton_protocol_group_misc_render_brief_data,
+    .render_error = (iButtonProtocolGroupRenderFunc)ibutton_protocol_group_misc_render_error,
 
-    .is_valid = (iButtonProtocolsIsValidFunc)ibutton_protocols_misc_is_valid,
-    .get_editable_data = (iButtonProtocolsGetDataFunc)ibutton_protocols_misc_get_editable_data,
-    .apply_edits = (iButtonProtocolsApplyFunc)ibutton_protocols_misc_apply_edits,
+    .is_valid = (iButtonProtocolGroupIsValidFunc)ibutton_protocol_group_misc_is_valid,
+    .get_editable_data =
+        (iButtonProtocolGroupGetDataFunc)ibutton_protocol_group_misc_get_editable_data,
+    .apply_edits = (iButtonProtocolGroupApplyFunc)ibutton_protocol_group_misc_apply_edits,
 };

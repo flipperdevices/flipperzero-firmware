@@ -2,4 +2,4 @@
 
 #include "../ibutton_protocols_base.h"
 
-extern const iButtonProtocolsBase ibutton_protocol_group_misc;
+extern const iButtonProtocolGroupBase ibutton_protocol_group_misc;
