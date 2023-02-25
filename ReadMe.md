@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz improvements
 - OFW: BadUsb: STRINGDELAY feature, worker signal handling refactoring
 - [NRF24 Batch Documentation updates (By vad7)](https://github.com/vad7/nRF24-Batch)
+- UL: Keeloq: Beninca support included
 
 <a name="release">
 
