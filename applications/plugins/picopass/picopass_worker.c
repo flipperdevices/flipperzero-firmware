@@ -291,6 +291,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
     err = picopass_auth_standard(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data, AA1[PICOPASS_KD_BLOCK_INDEX].data);
     if(err == ERR_NONE) {
+        memcpy(pacs->key, picopass_iclass_key, PICOPASS_BLOCK_LEN);
         return ERR_NONE;
     }
 
@@ -639,10 +640,10 @@ void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
     ReturnCode err;
     PicopassWorkerEvent nextState = PicopassWorkerEventSuccess;
 
-    uint8_t* csn = &AA1->data[PICOPASS_CSN_BLOCK_INDEX];
-    uint8_t* configBlock = &AA1->data[PICOPASS_CONFIG_BLOCK_INDEX];
+    uint8_t* csn = AA1[PICOPASS_CSN_BLOCK_INDEX].data;
+    uint8_t* configBlock = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data;
     uint8_t fuses = configBlock[7];
-    uint8_t* oldKey = &AA1->data[PICOPASS_KD_BLOCK_INDEX];
+    uint8_t* oldKey = AA1[PICOPASS_KD_BLOCK_INDEX].data;
 
     uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
     loclass_diversifyKey(csn, picopass_iclass_key, newKey);
