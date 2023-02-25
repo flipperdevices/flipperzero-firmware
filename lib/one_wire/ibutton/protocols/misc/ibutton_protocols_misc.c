@@ -9,6 +9,9 @@
 
 #define IBUTTON_MISC_READ_TIMEOUT 100
 
+#define IBUTTON_MISC_ROM_DATA_KEY_V1 "Data"
+#define IBUTTON_MISC_ROM_DATA_KEY_V2 "Rom Data"
+
 typedef struct {
     ProtocolDict* dict;
     ProtocolId emulate_id;
@@ -180,11 +183,8 @@ static bool ibutton_protocols_misc_save(
     const iButtonProtocolData* data,
     iButtonProtocolLocalId id,
     FlipperFormat* ff) {
-    UNUSED(protocols);
-    UNUSED(data);
-    UNUSED(id);
-    UNUSED(ff);
-    return false;
+    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
+    return flipper_format_write_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V2, data, data_size);
 }
 
 static bool ibutton_protocols_misc_load(
@@ -193,12 +193,15 @@ static bool ibutton_protocols_misc_load(
     iButtonProtocolLocalId id,
     uint32_t version,
     FlipperFormat* ff) {
-    UNUSED(protocols);
-    UNUSED(data);
-    UNUSED(id);
-    UNUSED(version);
-    UNUSED(ff);
-    return false;
+    const size_t data_size = protocol_dict_get_data_size(protocols->dict, id);
+    switch(version) {
+    case 1:
+        return flipper_format_read_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V1, data, data_size);
+    case 2:
+        return flipper_format_read_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V2, data, data_size);
+    default:
+        return false;
+    }
 }
 
 static void ibutton_protocols_misc_render_data(
