@@ -1,8 +1,8 @@
-#include "ibutton_protocols_dallas.h"
+#include "protocol_group_dallas.h"
 
 #include <furi_hal_resources.h>
 
-#include "ibutton_protocol_dallas_defs.h"
+#include "protocol_group_dallas_defs.h"
 
 #define IBUTTON_ONEWIRE_ROM_SIZE 8U
 

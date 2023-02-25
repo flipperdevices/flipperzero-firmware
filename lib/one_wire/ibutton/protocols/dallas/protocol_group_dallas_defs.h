@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dallas_base.h"
+#include "protocol_dallas_base.h"
 
 typedef enum {
     iButtonProtocolDS1990,

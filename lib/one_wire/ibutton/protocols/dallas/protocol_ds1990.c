@@ -1,4 +1,4 @@
-#include "ds1990.h"
+#include "protocol_ds1990.h"
 
 #include <core/string.h>
 #include <core/core_defines.h>

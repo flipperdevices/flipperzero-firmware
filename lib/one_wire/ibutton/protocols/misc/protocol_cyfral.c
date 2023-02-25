@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include "cyfral.h"
+#include "protocol_cyfral.h"
 
 #define CYFRAL_DATA_SIZE sizeof(uint16_t)
 #define CYFRAL_PERIOD (125 * furi_hal_cortex_instructions_per_microsecond())

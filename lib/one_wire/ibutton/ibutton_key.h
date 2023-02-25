@@ -8,7 +8,7 @@
 
 #include <core/string.h>
 
-#include "protocols/ibutton_protocol_common.h"
+#include "protocols/protocol_common.h"
 
 #ifdef __cplusplus
 extern "C" {

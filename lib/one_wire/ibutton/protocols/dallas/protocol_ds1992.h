@@ -1,5 +1,5 @@
 #pragma once
 
-#include "dallas_base.h"
+#include "protocol_dallas_base.h"
 
 extern const iButtonProtocolDallasBase ibutton_protocol_ds1992;

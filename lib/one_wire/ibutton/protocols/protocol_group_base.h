@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <flipper_format.h>
 
-#include "ibutton_protocol_common_i.h"
+#include "protocol_common_i.h"
 
 typedef void iButtonProtocolGroupData;
 typedef int32_t iButtonProtocolGroupId;

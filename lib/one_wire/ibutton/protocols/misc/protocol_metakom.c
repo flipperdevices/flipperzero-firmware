@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include "metakom.h"
+#include "protocol_metakom.h"
 
 #define METAKOM_DATA_SIZE sizeof(uint32_t)
 #define METAKOM_PERIOD (125 * furi_hal_cortex_instructions_per_microsecond())

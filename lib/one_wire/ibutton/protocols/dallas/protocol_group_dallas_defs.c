@@ -1,9 +1,9 @@
-#include "ibutton_protocol_dallas_defs.h"
+#include "protocol_group_dallas_defs.h"
 
-#include "ds1990.h"
-#include "ds1992.h"
-#include "ds1996.h"
-#include "ds_generic.h"
+#include "protocol_ds1990.h"
+#include "protocol_ds1992.h"
+#include "protocol_ds1996.h"
+#include "protocol_ds_generic.h"
 
 const iButtonProtocolDallasBase* ibutton_protocols_dallas[] = {
     [iButtonProtocolDS1990] = &ibutton_protocol_ds1990,

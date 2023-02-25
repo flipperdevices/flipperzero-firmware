@@ -1,4 +1,4 @@
-#include "ds1996.h"
+#include "protocol_ds1996.h"
 
 #include <core/core_defines.h>
 #include <toolbox/pretty_format.h>

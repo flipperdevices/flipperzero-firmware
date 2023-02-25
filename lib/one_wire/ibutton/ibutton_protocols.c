@@ -3,7 +3,7 @@
 #include <storage/storage.h>
 
 #include "ibutton_key_i.h"
-#include "protocols/ibutton_protocols_defs.h"
+#include "protocols/protocol_group_defs.h"
 
 #define IBUTTON_FILE_TYPE "Flipper iButton key"
 

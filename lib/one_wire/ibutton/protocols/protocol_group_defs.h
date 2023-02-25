@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ibutton_protocols_base.h"
+#include "protocol_group_base.h"
 
 typedef enum {
     iButtonProtocolGroupDallas,

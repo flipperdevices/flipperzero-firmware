@@ -1,11 +1,11 @@
-#include "ibutton_protocols_misc.h"
+#include "protocol_group_misc.h"
 
 #include <furi_hal_rfid.h>
 #include <furi_hal_ibutton.h>
 
 #include <toolbox/protocols/protocol_dict.h>
 
-#include "ibutton_protocol_misc_defs.h"
+#include "protocol_group_misc_defs.h"
 
 #define IBUTTON_MISC_READ_TIMEOUT 100
 
