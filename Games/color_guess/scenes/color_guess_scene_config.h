@@ -1,3 +1,5 @@
-ADD_SCENE(color_guess, start, Start)
+ADD_SCENE(color_guess, startscreen, Startscreen)
+ADD_SCENE(color_guess, menu, Menu)
 ADD_SCENE(color_guess, color_set, ColorSet)
 ADD_SCENE(color_guess, play, Play)
+ADD_SCENE(color_guess, settings, Settings)

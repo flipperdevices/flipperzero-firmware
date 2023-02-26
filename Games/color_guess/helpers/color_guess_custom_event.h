@@ -1,6 +1,12 @@
 #pragma once
 
 typedef enum {
+    ColorGuessCustomEventStartscreenUp,
+    ColorGuessCustomEventStartscreenDown,
+    ColorGuessCustomEventStartscreenLeft,
+    ColorGuessCustomEventStartscreenRight,
+    ColorGuessCustomEventStartscreenOk,
+    ColorGuessCustomEventStartscreenBack,
     ColorGuessCustomEventColorSetUp,
     ColorGuessCustomEventColorSetDown,
     ColorGuessCustomEventColorSetLeft,
