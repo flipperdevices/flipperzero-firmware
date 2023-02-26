@@ -24,17 +24,27 @@ void cli_command_power_info_callback(const char* key, const char* value, bool la
     printf("%-24s: %s\r\n", key, value);
 }
 
-/* 
- * Info Command
+/** Info Command
+ *
  * This command is intended to be used by humans
- * 
+ *
  * Arguments:
  * - device - print device info
  * - power - print power info
  * - power_debug - print power debug info
+ *
+ * @param      cli      The cli instance
+ * @param      args     The arguments
+ * @param      context  The context
  */
 void cli_command_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
+
+    if(context) {
+        furi_hal_info_get(cli_command_device_info_callback, '_', NULL);
+        return;
+    }
+
     if(furi_string_size(args) > 0) {
         if(!furi_string_cmp(args, "device")) {
             furi_hal_info_get(cli_command_device_info_callback, '_', context);
@@ -434,6 +444,7 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
 void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, NULL);
     cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
 
     cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
     cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);
