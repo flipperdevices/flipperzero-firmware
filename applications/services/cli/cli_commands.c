@@ -12,16 +12,10 @@
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
 
-void cli_command_device_info_callback(const char* key, const char* value, bool last, void* context) {
-    UNUSED(context);
+void cli_command_info_callback(const char* key, const char* value, bool last, void* context) {
     UNUSED(last);
+    UNUSED(context);
     printf("%-30s: %s\r\n", key, value);
-}
-
-void cli_command_power_info_callback(const char* key, const char* value, bool last, void* context) {
-    UNUSED(last);
-    UNUSED(context);
-    printf("%-24s: %s\r\n", key, value);
 }
 
 /** Info Command
@@ -41,23 +35,19 @@ void cli_command_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
 
     if(context) {
-        furi_hal_info_get(cli_command_device_info_callback, '_', NULL);
+        furi_hal_info_get(cli_command_info_callback, '_', NULL);
         return;
     }
 
-    if(furi_string_size(args) > 0) {
-        if(!furi_string_cmp(args, "device")) {
-            furi_hal_info_get(cli_command_device_info_callback, '_', NULL);
-        } else if(!furi_string_cmp(args, "power")) {
-            furi_hal_power_info_get(cli_command_power_info_callback, '_', NULL);
-        } else if(!furi_string_cmp(args, "power_debug")) {
-            furi_hal_power_debug_get(cli_command_power_info_callback, NULL);
-        } else {
-            cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
-        }
-        return;
+    if(!furi_string_cmp(args, "device")) {
+        furi_hal_info_get(cli_command_info_callback, '.', NULL);
+    } else if(!furi_string_cmp(args, "power")) {
+        furi_hal_power_info_get(cli_command_info_callback, '.', NULL);
+    } else if(!furi_string_cmp(args, "power_debug")) {
+        furi_hal_power_debug_get(cli_command_info_callback, NULL);
+    } else {
+        cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
     }
-    cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
 }
 
 void cli_command_help(Cli* cli, FuriString* args, void* context) {
@@ -442,7 +432,7 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
 }
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
     cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
 
