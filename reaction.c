@@ -6,8 +6,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
-#include "reaction_icons.h"
-
 uint8_t state = 0;
 int time = 42;
 FuriTimer* timer;
