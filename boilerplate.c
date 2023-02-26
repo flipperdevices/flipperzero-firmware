@@ -37,7 +37,6 @@ Boilerplate* boilerplate_app_alloc() {
     view_dispatcher_set_tick_event_callback(app->view_dispatcher, boilerplate_tick_event_callback, 100);
     view_dispatcher_set_custom_event_callback(app->view_dispatcher, boilerplate_custom_event_callback);
     app->submenu = submenu_alloc();
-    app->boilerplate_settings = submenu_alloc();
 
     app->haptic = 1;
     app->speaker = 1;
@@ -51,10 +50,7 @@ Boilerplate* boilerplate_app_alloc() {
     app->boilerplate_scene_2 = boilerplate_scene_2_alloc();
     view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdScene2, boilerplate_scene_2_get_view(app->boilerplate_scene_2));
     app->variable_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        BoilerplateViewIdSettings,
-        variable_item_list_get_view(app->variable_item_list));
+    view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdSettings, variable_item_list_get_view(app->variable_item_list));
 
     //End Scene Additions
 
@@ -73,7 +69,6 @@ void boilerplate_app_free(Boilerplate* app) {
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdSettings);
     submenu_free(app->submenu);
-    submenu_free(app->boilerplate_settings);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
