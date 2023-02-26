@@ -25,6 +25,6 @@
     "clangd.arguments": [
         // We might be able to tighten this a bit more to only include the correct toolchain.
         "--query-driver=${workspaceFolder}/toolchain/**/bin/arm-none-eabi-*",
-        "--compile-commands-dir=${workspaceFolder}/build/f7-firmware-D"
+        "--compile-commands-dir=${workspaceFolder}/build/latest"
     ]
 }
