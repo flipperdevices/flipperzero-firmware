@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz: Debug mode counter increase settings (+5, +10, default: +1)
 - UL: Infrared: Debug TX PIN output settings (ability to move tx signal out to GPIO) 
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- Fix SubGHz Remote FAP Issue
 
 <a name="release">
 
