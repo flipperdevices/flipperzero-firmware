@@ -44,28 +44,25 @@ static void vcp_on_cdc_control_line(void* context, uint8_t state);
 static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config);
 
 static const CdcCallbacks cdc_cb = {
-    vcp_on_cdc_tx_complete,
-    vcp_on_cdc_rx,
-    vcp_state_callback,
-    vcp_on_cdc_control_line,
-    vcp_on_line_config,
-};
-
-/* USB UART worker */
+    .tx_ep_callback = &vcp_on_cdc_tx_complete,
+    .rx_ep_callback = &vcp_on_cdc_rx,
+    .state_callback = &vcp_state_callback,
+    .ctrl_line_callback = &vcp_on_cdc_control_line,
+    .config_callback = &vcp_on_line_config};
 
 static void usb_uart_vcp_init(UsbUart* usb_uart, uint8_t vcp_ch) {
     furi_hal_usb_unlock();
+
+    Cli* cli = furi_record_open(RECORD_CLI);
+    cli_session_close(cli);
+
     if(vcp_ch == 0) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_close(cli);
-        furi_record_close(RECORD_CLI);
         furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
     } else {
         furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
-        Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_open(cli, &cli_vcp);
-        furi_record_close(RECORD_CLI);
     }
+    furi_record_close(RECORD_CLI);
     furi_hal_cdc_set_callbacks(vcp_ch, (CdcCallbacks*)&cdc_cb, usb_uart);
 }
 
@@ -189,11 +186,9 @@ static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config
 
 UsbUart* usb_uart_enable(UsbUartConfig* cfg) {
     UsbUart* usb_uart = malloc(sizeof(UsbUart));
-
     memcpy(&(usb_uart->cfg_new), cfg, sizeof(UsbUartConfig));
 
     usb_uart->thread = furi_thread_alloc_ex("UsbUartWorker", 1024, usb_uart_worker, usb_uart);
-
     furi_thread_start(usb_uart->thread);
     return usb_uart;
 }
