@@ -47,9 +47,9 @@ void cli_command_info(Cli* cli, FuriString* args, void* context) {
 
     if(furi_string_size(args) > 0) {
         if(!furi_string_cmp(args, "device")) {
-            furi_hal_info_get(cli_command_device_info_callback, '_', context);
+            furi_hal_info_get(cli_command_device_info_callback, '_', NULL);
         } else if(!furi_string_cmp(args, "power")) {
-            furi_hal_power_info_get(cli_command_power_info_callback, '_', context);
+            furi_hal_power_info_get(cli_command_power_info_callback, '_', NULL);
         } else if(!furi_string_cmp(args, "power_debug")) {
             furi_hal_power_debug_get(cli_command_power_info_callback, NULL);
         } else {
