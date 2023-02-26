@@ -51,20 +51,20 @@ void nfc_scene_saved_menu_on_enter(void* context) {
         if(!mf_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data)) {
             submenu_add_item(
                 submenu,
-                "Detect Reader",
+                "Detect reader",
                 SubmenuIndexDetectReader,
                 nfc_scene_saved_menu_submenu_callback,
                 nfc);
         }
         submenu_add_item(
             submenu,
-            "Write to Initial Card",
+            "Write To Initial Card",
             SubmenuIndexWrite,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
         submenu_add_item(
             submenu,
-            "Update from Initial Card",
+            "Update From Initial Card",
             SubmenuIndexUpdate,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
@@ -75,7 +75,13 @@ void nfc_scene_saved_menu_on_enter(void* context) {
        !mf_ul_is_full_capture(&nfc->dev->dev_data.mf_ul_data)) {
         submenu_add_item(
             submenu,
-            "Unlock",
+            "Unlock With Reader",
+            SubmenuIndexMfUlUnlockByReader,
+            nfc_scene_saved_menu_submenu_callback,
+            nfc);
+        submenu_add_item(
+            submenu,
+            "Unlock With Password",
             SubmenuIndexMfUlUnlockByPassword,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
@@ -83,7 +89,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     if(nfc->dev->shadow_file_exist) {
         submenu_add_item(
             submenu,
-            "Restore to Original",
+            "Restore to original",
             SubmenuIndexRestoreOriginal,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
@@ -155,9 +161,9 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexRestoreOriginal) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRestoreOriginalConfirm);
             consumed = true;
-	    /*} else if(event.event == SubmenuIndexMfUlUnlockByReader) {
+        } else if(event.event == SubmenuIndexMfUlUnlockByReader) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockAuto);
-            consumed = true;*/
+            consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockByPassword) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
             consumed = true;
