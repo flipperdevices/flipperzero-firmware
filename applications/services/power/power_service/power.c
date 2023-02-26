@@ -217,6 +217,12 @@ static void power_check_battery_level_change(Power* power) {
 
 int32_t power_srv(void* p) {
     UNUSED(p);
+
+    FuriHalRtcBootMode mode = furi_hal_rtc_get_boot_mode();
+    if((mode == FuriHalRtcBootModePreUpdate) || (mode == FuriHalRtcBootModePostUpdate)) {
+        return 0;
+    }
+
     Power* power = power_alloc();
     power_update_info(power);
     furi_record_create(RECORD_POWER, power);

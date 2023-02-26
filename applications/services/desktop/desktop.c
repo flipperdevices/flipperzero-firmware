@@ -321,6 +321,12 @@ static bool desktop_check_file_flag(const char* flag_path) {
 
 int32_t desktop_srv(void* p) {
     UNUSED(p);
+
+    FuriHalRtcBootMode mode = furi_hal_rtc_get_boot_mode();
+    if((mode == FuriHalRtcBootModePreUpdate) || (mode == FuriHalRtcBootModePostUpdate)) {
+        return 0;
+    }
+
     Desktop* desktop = desktop_alloc();
 
     bool loaded = DESKTOP_SETTINGS_LOAD(&desktop->settings);
