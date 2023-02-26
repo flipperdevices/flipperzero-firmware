@@ -137,9 +137,9 @@ void picopass_text_store_clear(Picopass* picopass) {
     memset(picopass->text_store, 0, sizeof(picopass->text_store));
 }
 
-static const NotificationSequence picopass_sequence_blink_start_blue = {
+static const NotificationSequence picopass_sequence_blink_start_cyan = {
     &message_blink_start_10,
-    &message_blink_set_color_blue,
+    &message_blink_set_color_cyan,
     &message_do_not_reset,
     NULL,
 };
@@ -150,7 +150,7 @@ static const NotificationSequence picopass_sequence_blink_stop = {
 };
 
 void picopass_blink_start(Picopass* picopass) {
-    notification_message(picopass->notifications, &picopass_sequence_blink_start_blue);
+    notification_message(picopass->notifications, &picopass_sequence_blink_start_cyan);
 }
 
 void picopass_blink_stop(Picopass* picopass) {
@@ -169,6 +169,16 @@ void picopass_show_loading_popup(void* context, bool show) {
         // Restore default timer priority
         vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
     }
+}
+
+bool picopass_is_memset(const uint8_t* data, const uint8_t pattern, size_t size) {
+    bool result = size > 0;
+    while(size > 0) {
+        result &= (*data == pattern);
+        data++;
+        size--;
+    }
+    return result;
 }
 
 int32_t picopass_app(void* p) {

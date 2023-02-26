@@ -42,13 +42,12 @@ def generate(env, **kw):
         ],
         GDBOPTS_BASE=[
             "-ex",
-            "set pagination off",
-            "-ex",
             "target extended-remote ${GDBREMOTE}",
             "-ex",
-            "set confirm off",
+            "source ${FBT_DEBUG_DIR}/gdbinit",
         ],
         GDBOPTS_BLACKMAGIC=[
+            "-q",
             "-ex",
             "monitor swdp_scan",
             "-ex",

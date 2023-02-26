@@ -1,12 +1,10 @@
+#include "infrared_worker.h"
+
+#include <furi_hal_infrared.h>
+#include <float_tools.h>
+
 #include <core/check.h>
 #include <core/common_defines.h>
-#include "sys/_stdint.h"
-#include "infrared_worker.h"
-#include <infrared.h>
-#include <furi_hal_infrared.h>
-#include <limits.h>
-#include <stdint.h>
-#include <furi.h>
 
 #include <notification/notification_messages.h>
 
@@ -397,8 +395,9 @@ static bool infrared_get_new_signal(InfraredWorker* instance) {
         }
 
         instance->tx.tx_raw_cnt = 0;
-        instance->tx.need_reinitialization = (new_tx_frequency != instance->tx.frequency) ||
-                                             (new_tx_duty_cycle != instance->tx.duty_cycle);
+        instance->tx.need_reinitialization =
+            (new_tx_frequency != instance->tx.frequency) ||
+            !float_is_equal(new_tx_duty_cycle, instance->tx.duty_cycle);
         instance->tx.frequency = new_tx_frequency;
         instance->tx.duty_cycle = new_tx_duty_cycle;
         if(instance->signal.decoded) {
@@ -469,18 +468,23 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
     furi_assert(instance->state == InfraredWorkerStateStartTx);
     furi_assert(thread_context);
 
+    size_t repeats_left =
+        instance->signal.decoded ?
+            infrared_get_protocol_min_repeat_count(instance->signal.message.protocol) :
+            1;
     uint32_t events = 0;
-    bool new_data_available = true;
-    bool exit = false;
 
-    exit = !infrared_get_new_signal(instance);
-    furi_assert(!exit);
+    bool exit_pending = false;
 
-    while(!exit) {
+    bool running = infrared_get_new_signal(instance);
+    furi_assert(running);
+
+    while(running) {
         switch(instance->state) {
         case InfraredWorkerStateStartTx:
+            --repeats_left; /* The first message does not result in TX_MESSAGE_SENT event for some reason */
             instance->tx.need_reinitialization = false;
-            new_data_available = infrared_worker_tx_fill_buffer(instance);
+            const bool new_data_available = infrared_worker_tx_fill_buffer(instance);
             furi_hal_infrared_async_tx_start(instance->tx.frequency, instance->tx.duty_cycle);
 
             if(!new_data_available) {
@@ -494,7 +498,7 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
             break;
         case InfraredWorkerStateStopTx:
             furi_hal_infrared_async_tx_stop();
-            exit = true;
+            running = false;
             break;
         case InfraredWorkerStateWaitTxEnd:
             furi_hal_infrared_async_tx_wait_termination();
@@ -502,18 +506,18 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
 
             events = furi_thread_flags_get();
             if(events & INFRARED_WORKER_EXIT) {
-                exit = true;
+                running = false;
                 break;
             }
 
             break;
         case InfraredWorkerStateRunTx:
-            events = furi_thread_flags_wait(INFRARED_WORKER_ALL_TX_EVENTS, 0, FuriWaitForever);
+            events = furi_thread_flags_wait(
+                INFRARED_WORKER_ALL_TX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
             furi_check(events & INFRARED_WORKER_ALL_TX_EVENTS); /* at least one caught */
 
             if(events & INFRARED_WORKER_EXIT) {
-                instance->state = InfraredWorkerStateStopTx;
-                break;
+                exit_pending = true;
             }
 
             if(events & INFRARED_WORKER_TX_FILL_BUFFER) {
@@ -525,9 +529,19 @@ static int32_t infrared_worker_tx_thread(void* thread_context) {
             }
 
             if(events & INFRARED_WORKER_TX_MESSAGE_SENT) {
-                if(instance->tx.message_sent_callback)
+                if(repeats_left > 0) {
+                    --repeats_left;
+                }
+
+                if(instance->tx.message_sent_callback) {
                     instance->tx.message_sent_callback(instance->tx.message_sent_context);
+                }
             }
+
+            if(exit_pending && repeats_left == 0) {
+                instance->state = InfraredWorkerStateStopTx;
+            }
+
             break;
         default:
             furi_assert(0);

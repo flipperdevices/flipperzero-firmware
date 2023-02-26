@@ -49,6 +49,7 @@ NfcMagic* nfc_magic_alloc() {
 
     // Nfc device
     nfc_magic->nfc_dev = nfc_device_alloc();
+    furi_string_set(nfc_magic->nfc_dev->folder, NFC_APP_FOLDER);
 
     // Open GUI record
     nfc_magic->gui = furi_record_open(RECORD_GUI);
@@ -135,9 +136,9 @@ void nfc_magic_free(NfcMagic* nfc_magic) {
     free(nfc_magic);
 }
 
-static const NotificationSequence nfc_magic_sequence_blink_start_blue = {
+static const NotificationSequence nfc_magic_sequence_blink_start_cyan = {
     &message_blink_start_10,
-    &message_blink_set_color_blue,
+    &message_blink_set_color_cyan,
     &message_do_not_reset,
     NULL,
 };
@@ -148,7 +149,7 @@ static const NotificationSequence nfc_magic_sequence_blink_stop = {
 };
 
 void nfc_magic_blink_start(NfcMagic* nfc_magic) {
-    notification_message(nfc_magic->notifications, &nfc_magic_sequence_blink_start_blue);
+    notification_message(nfc_magic->notifications, &nfc_magic_sequence_blink_start_cyan);
 }
 
 void nfc_magic_blink_stop(NfcMagic* nfc_magic) {

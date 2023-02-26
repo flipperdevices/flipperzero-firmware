@@ -34,43 +34,43 @@ ENTER
 STRING               _.-------.._                    -,
 ENTER
 HOME
-STRING           .-"```"--..,,_/ /`-,               -,  \ 
+STRING           .-"'''"--..,,_/ /'-,               -,  \
 ENTER
 HOME
-STRING        .:"          /:/  /'\  \     ,_...,  `. |  |
+STRING        .:"          /:/  /'\  \     ,_...,  '. |  |
 ENTER
 HOME
-STRING       /       ,----/:/  /`\ _\~`_-"`     _;
+STRING       /       ,----/:/  /'\ _\~'_-"'     _;
 ENTER
 HOME
-STRING      '      / /`"""'\ \ \.~`_-'      ,-"'/ 
+STRING      '      / /'"""'\ \ \.~'_-'      ,-"'/
 ENTER
 HOME
-STRING     |      | |  0    | | .-'      ,/`  /
+STRING     |      | |  0    | | .-'      ,/'  /
 ENTER
 HOME
-STRING    |    ,..\ \     ,.-"`       ,/`    /
+STRING    |    ,..\ \     ,.-"'       ,/'    /
 ENTER
 HOME
-STRING   ;    :    `/`""\`           ,/--==,/-----,
+STRING   ;    :    '/'""\'           ,/--==,/-----,
 ENTER
 HOME
-STRING   |    `-...|        -.___-Z:_______J...---;
+STRING   |    '-...|        -.___-Z:_______J...---;
 ENTER
 HOME
-STRING   :         `                           _-'
+STRING   :         '                           _-'
 ENTER
 HOME
-STRING  _L_  _     ___  ___  ___  ___  ____--"`
+STRING  _L_  _     ___  ___  ___  ___  ____--"'
 ENTER
 HOME
-STRING | __|| |   |_ _|| _ \| _ \| __|| _ \ 
+STRING | __|| |   |_ _|| _ \| _ \| __|| _ \
 ENTER
 HOME
-STRING | _| | |__  | | |  _/|  _/| _| |   / 
+STRING | _| | |__  | | |  _/|  _/| _| |   /
 ENTER
 HOME
-STRING |_|  |____||___||_|  |_|  |___||_|_\ 
+STRING |_|  |____||___||_|  |_|  |___||_|_\
 ENTER
 HOME
 ENTER
@@ -79,7 +79,7 @@ STRING Flipper Zero BadUSB feature is compatible with USB Rubber Ducky script fo
 ENTER
 STRING More information about script syntax can be found here:
 ENTER
-STRING https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript
+STRING https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/file_formats/BadUsbScriptFormat.md
 ENTER
 
 STRING EOF

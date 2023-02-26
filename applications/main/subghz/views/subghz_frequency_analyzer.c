@@ -11,6 +11,7 @@
 #include "../helpers/subghz_frequency_analyzer_log_item_array.h"
 
 #include <assets_icons.h>
+#include <float_tools.h>
 
 #define LOG_FREQUENCY_MAX_ITEMS 60 // uint8_t (limited by 'seq' of SubGhzFrequencyAnalyzerLogItem)
 
@@ -47,7 +48,8 @@ typedef struct {
 } SubGhzFrequencyAnalyzerModel;
 
 static inline uint8_t rssi_sanitize(float rssi) {
-    return (rssi ? (uint8_t)(rssi - SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) : 0);
+    return (
+        !float_is_equal(rssi, 0.f) ? (uint8_t)(rssi - SUBGHZ_FREQUENCY_ANALYZER_THRESHOLD) : 0);
 }
 
 void subghz_frequency_analyzer_set_callback(
@@ -77,7 +79,6 @@ void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, uint8_t rssi, uint8_t x
 void subghz_frequency_analyzer_draw_log_rssi(Canvas* canvas, uint8_t rssi, uint8_t x, uint8_t y) {
     uint8_t column_height = 6;
     if(rssi) {
-        //rssi = rssi
         if(rssi > 54) rssi = 54;
         for(uint8_t i = 1; i < rssi; i++) {
             if(i % 5) {
@@ -294,9 +295,6 @@ static bool subghz_frequency_analyzer_log_frequency_insert(SubGhzFrequencyAnalyz
     if(items_count < LOG_FREQUENCY_MAX_ITEMS) {
         SubGhzFrequencyAnalyzerLogItem_t* item =
             SubGhzFrequencyAnalyzerLogItemArray_push_new(model->log_frequency);
-        if(item == NULL) {
-            return false;
-        }
         (*item)->frequency = model->frequency;
         (*item)->count = 1;
         (*item)->rssi_max = model->rssi;
@@ -340,7 +338,7 @@ void subghz_frequency_analyzer_pair_callback(
     float rssi,
     bool signal) {
     SubGhzFrequencyAnalyzer* instance = context;
-    if((rssi == 0.f) && (instance->locked)) {
+    if(float_is_equal(rssi, 0.f) && instance->locked) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerUnlock, instance->context);
         }
@@ -355,13 +353,13 @@ void subghz_frequency_analyzer_pair_callback(
                 model->history_frequency[0] = model->frequency;
             },
             false);
-    } else if((rssi != 0.f) && (!instance->locked)) {
+    } else if(!float_is_equal(rssi, 0.f) && !instance->locked) {
         if(instance->callback) {
             instance->callback(SubGhzCustomEventSceneAnalyzerLock, instance->context);
         }
     }
 
-    instance->locked = (rssi != 0.f);
+    instance->locked = !float_is_equal(rssi, 0.f);
     with_view_model(
         instance->view,
         SubGhzFrequencyAnalyzerModel * model,

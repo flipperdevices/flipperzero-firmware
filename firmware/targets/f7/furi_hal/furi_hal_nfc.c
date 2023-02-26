@@ -1,5 +1,5 @@
 #include <limits.h>
-#include "furi_hal_nfc.h"
+#include <furi_hal_nfc.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
 #include <rfal_rf.h>
@@ -24,13 +24,29 @@ FuriEventFlag* event = NULL;
 #define FURI_HAL_NFC_UID_INCOMPLETE (0x04)
 
 void furi_hal_nfc_init() {
+    furi_assert(!event);
+    event = furi_event_flag_alloc();
+
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
-        event = furi_event_flag_alloc();
         FURI_LOG_I(TAG, "Init OK");
     } else {
-        FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
+        FURI_LOG_W(TAG, "Init Failed, RFAL returned: %d", ret);
+    }
+}
+
+void furi_hal_nfc_deinit() {
+    ReturnCode ret = rfalDeinitialize();
+    if(ret == ERR_NONE) {
+        FURI_LOG_I(TAG, "Deinit OK");
+    } else {
+        FURI_LOG_W(TAG, "Deinit Failed, RFAL returned: %d", ret);
+    }
+
+    if(event) {
+        furi_event_flag_free(event);
+        event = NULL;
     }
 }
 
@@ -425,7 +441,7 @@ bool furi_hal_nfc_emulate_nfca(
         buff_rx_len = 0;
         buff_tx_len = 0;
         uint32_t flag = furi_event_flag_wait(event, EVENT_FLAG_ALL, FuriFlagWaitAny, timeout);
-        if(flag == FuriFlagErrorTimeout || flag == EVENT_FLAG_STOP) {
+        if(flag == (unsigned)FuriFlagErrorTimeout || flag == EVENT_FLAG_STOP) {
             break;
         }
         bool data_received = false;
@@ -609,9 +625,9 @@ static uint16_t furi_hal_nfc_data_and_parity_to_bitstream(
             out[curr_bit_pos / 8] = next_par_bit;
             curr_bit_pos++;
         } else {
-            out[curr_bit_pos / 8] |= data[i] << curr_bit_pos % 8;
+            out[curr_bit_pos / 8] |= data[i] << (curr_bit_pos % 8);
             out[curr_bit_pos / 8 + 1] = data[i] >> (8 - curr_bit_pos % 8);
-            out[curr_bit_pos / 8 + 1] |= next_par_bit << curr_bit_pos % 8;
+            out[curr_bit_pos / 8 + 1] |= next_par_bit << (curr_bit_pos % 8);
             curr_bit_pos += 9;
         }
     }
@@ -635,7 +651,7 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     uint16_t bit_processed = 0;
     memset(out_parity, 0, in_buff_bits / 9);
     while(bit_processed < in_buff_bits) {
-        out_data[curr_byte] = in_buff[bit_processed / 8] >> bit_processed % 8;
+        out_data[curr_byte] = in_buff[bit_processed / 8] >> (bit_processed % 8);
         out_data[curr_byte] |= in_buff[bit_processed / 8 + 1] << (8 - bit_processed % 8);
         out_parity[curr_byte / 8] |= FURI_BIT(in_buff[bit_processed / 8 + 1], bit_processed % 8)
                                      << (7 - curr_byte % 8);

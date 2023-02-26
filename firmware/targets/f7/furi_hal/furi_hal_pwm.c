@@ -1,4 +1,4 @@
-#include "furi_hal_pwm.h"
+#include <furi_hal_pwm.h>
 #include <core/check.h>
 #include <furi_hal_resources.h>
 
@@ -110,7 +110,7 @@ void furi_hal_pwm_set_params(FuriHalPwmOutputId channel, uint32_t freq, uint8_t 
         bool clock_lse = false;
 
         do {
-            period = freq_div / (1 << prescaler);
+            period = freq_div / (1UL << prescaler);
             if(period <= 0xFFFF) {
                 break;
             }

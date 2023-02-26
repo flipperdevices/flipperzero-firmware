@@ -262,7 +262,7 @@ void loader_unlock(Loader* instance) {
     FURI_CRITICAL_EXIT();
 }
 
-bool loader_is_locked(Loader* instance) {
+bool loader_is_locked(const Loader* instance) {
     return instance->lock_count > 0;
 }
 
@@ -280,7 +280,7 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             furi_hal_power_insomnia_enter();
         }
     } else if(thread_state == FuriThreadStateStopped) {
-        FURI_LOG_I(TAG, "Application stopped. Free heap: %d", memmgr_get_free_heap());
+        FURI_LOG_I(TAG, "Application stopped. Free heap: %zu", memmgr_get_free_heap());
 
         if(loader_instance->application_arguments) {
             free(loader_instance->application_arguments);

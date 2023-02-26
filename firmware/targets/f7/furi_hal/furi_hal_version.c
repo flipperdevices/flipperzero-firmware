@@ -174,8 +174,6 @@ static void furi_hal_version_load_otp_v2() {
 void furi_hal_version_init() {
     switch(furi_hal_version_get_otp_version()) {
     case FuriHalVersionOtpVersionUnknown:
-        furi_hal_version_load_otp_default();
-        break;
     case FuriHalVersionOtpVersionEmpty:
         furi_hal_version_load_otp_default();
         break;
@@ -195,14 +193,6 @@ void furi_hal_version_init() {
     furi_hal_rtc_set_register(FuriHalRtcRegisterVersion, (uint32_t)version_get());
 
     FURI_LOG_I(TAG, "Init OK");
-}
-
-bool furi_hal_version_do_i_belong_here() {
-    return furi_hal_version_get_hw_target() == 7;
-}
-
-const char* furi_hal_version_get_model_name() {
-    return "Flipper Zero";
 }
 
 FuriHalVersionOtpVersion furi_hal_version_get_otp_version() {

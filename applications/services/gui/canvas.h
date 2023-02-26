@@ -17,6 +17,7 @@ extern "C" {
 typedef enum {
     ColorWhite = 0x00,
     ColorBlack = 0x01,
+    ColorXOR = 0x02,
 } Color;
 
 /** Fonts enumeration */
@@ -66,13 +67,25 @@ typedef struct {
 /** Canvas anonymous structure */
 typedef struct Canvas Canvas;
 
+/** Reset canvas drawing tools configuration
+ *
+ * @param      canvas  Canvas instance
+ */
+void canvas_reset(Canvas* canvas);
+
+/** Commit canvas. Send buffer to display
+ *
+ * @param      canvas  Canvas instance
+ */
+void canvas_commit(Canvas* canvas);
+
 /** Get Canvas width
  *
  * @param      canvas  Canvas instance
  *
  * @return     width in pixels.
  */
-uint8_t canvas_width(Canvas* canvas);
+uint8_t canvas_width(const Canvas* canvas);
 
 /** Get Canvas height
  *
@@ -80,7 +93,7 @@ uint8_t canvas_width(Canvas* canvas);
  *
  * @return     height in pixels.
  */
-uint8_t canvas_height(Canvas* canvas);
+uint8_t canvas_height(const Canvas* canvas);
 
 /** Get current font height
  *
@@ -88,7 +101,7 @@ uint8_t canvas_height(Canvas* canvas);
  *
  * @return     height in pixels.
  */
-uint8_t canvas_current_font_height(Canvas* canvas);
+uint8_t canvas_current_font_height(const Canvas* canvas);
 
 /** Get font parameters
  *
@@ -97,7 +110,7 @@ uint8_t canvas_current_font_height(Canvas* canvas);
  *
  * @return     pointer to CanvasFontParameters structure
  */
-CanvasFontParameters* canvas_get_font_params(Canvas* canvas, Font font);
+const CanvasFontParameters* canvas_get_font_params(const Canvas* canvas, Font font);
 
 /** Clear canvas
  *
@@ -132,6 +145,13 @@ void canvas_invert_color(Canvas* canvas);
  * @param      font    Font
  */
 void canvas_set_font(Canvas* canvas, Font font);
+
+/** Set custom drawing font
+ *
+ * @param      canvas  Canvas instance
+ * @param      font    Pointer to u8g2 const uint8_t* font array
+ */
+void canvas_set_custom_u8g2_font(Canvas* canvas, const uint8_t* font);
 
 /** Draw string at position of baseline defined by x, y.
  *

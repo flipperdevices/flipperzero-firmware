@@ -196,12 +196,13 @@ static bool
         break;
     }
 
-    instance->encoder.size_upload = subghz_protocol_blocks_get_upload(
+    instance->encoder.size_upload = subghz_protocol_blocks_get_upload_from_bit_array(
         upload_hex_data,
         upload_hex_count_bit,
         instance->encoder.upload,
         instance->encoder.size_upload,
-        subghz_protocol_chamb_code_const.te_short);
+        subghz_protocol_chamb_code_const.te_short,
+        SubGhzProtocolBlockAlignBitLeft);
 
     return true;
 }
@@ -280,9 +281,9 @@ static bool subghz_protocol_chamb_code_to_bit(uint64_t* data, uint8_t size) {
     uint64_t data_tmp = data[0];
     uint64_t data_res = 0;
     for(uint8_t i = 0; i < size; i++) {
-        if((data_tmp & 0xF) == CHAMBERLAIN_CODE_BIT_0) {
+        if((data_tmp & 0xFll) == CHAMBERLAIN_CODE_BIT_0) {
             bit_write(data_res, i, 0);
-        } else if((data_tmp & 0xF) == CHAMBERLAIN_CODE_BIT_1) {
+        } else if((data_tmp & 0xFll) == CHAMBERLAIN_CODE_BIT_1) {
             bit_write(data_res, i, 1);
         } else {
             return false;
