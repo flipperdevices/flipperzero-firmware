@@ -7,6 +7,7 @@ from SCons.Tool import gnulink
 import strip
 import gdb
 import objdump
+import shutil
 
 from SCons.Action import _subproc
 import subprocess
@@ -15,8 +16,7 @@ import subprocess
 def prefix_commands(env, command_prefix, cmd_list):
     for command in cmd_list:
         if command in env:
-            env[command] = command_prefix + env[command]
-
+            env[command] = shutil.which(command_prefix + env[command])
 
 def _get_tool_version(env, tool):
     verstr = "version unknown"
