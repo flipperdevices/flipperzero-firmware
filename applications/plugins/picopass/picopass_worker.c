@@ -287,7 +287,7 @@ static ReturnCode picopass_auth_dict(
 ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
     ReturnCode err;
 
-    FURI_LOG_E(TAG, "Trying standard legacy key");
+    FURI_LOG_I(TAG, "Trying standard legacy key");
     err = picopass_auth_standard(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data, AA1[PICOPASS_KD_BLOCK_INDEX].data);
     if(err == ERR_NONE) {
@@ -295,7 +295,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         return ERR_NONE;
     }
 
-    FURI_LOG_E(TAG, "Trying factory default key");
+    FURI_LOG_I(TAG, "Trying factory default key");
     err = picopass_auth_factory(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data, AA1[PICOPASS_KD_BLOCK_INDEX].data);
     if(err == ERR_NONE) {
@@ -303,7 +303,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         return ERR_NONE;
     }
 
-    FURI_LOG_E(TAG, "Starting user dictionary attack");
+    FURI_LOG_I(TAG, "Starting user dictionary attack");
     err = picopass_auth_dict(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
@@ -313,7 +313,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         return ERR_NONE;
     }
 
-    FURI_LOG_E(TAG, "Starting system dictionary attack");
+    FURI_LOG_I(TAG, "Starting system dictionary attack");
     err = picopass_auth_dict(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
@@ -560,7 +560,7 @@ void picopass_worker_detect(PicopassWorker* picopass_worker) {
             }
 
             // Thank you proxmark!
-            pacs->legacy = (memcmp(AA1[5].data, "\xff\xff\xff\xff\xff\xff\xff\xff", 8) == 0);
+            pacs->legacy = picopass_is_memset(AA1[5].data, 0xFF, 8);
             pacs->se_enabled = (memcmp(AA1[5].data, "\xff\xff\xff\x00\x06\xff\xff\xff", 8) == 0);
             if(pacs->se_enabled) {
                 FURI_LOG_D(TAG, "SE enabled");

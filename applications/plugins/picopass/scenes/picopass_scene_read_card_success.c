@@ -16,8 +16,6 @@ void picopass_scene_read_card_success_widget_callback(
 void picopass_scene_read_card_success_on_enter(void* context) {
     Picopass* picopass = context;
 
-    uint8_t zeros[PICOPASS_BLOCK_LEN] = {0};
-    uint8_t ffs[PICOPASS_BLOCK_LEN] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
     FuriString* csn_str = furi_string_alloc_set("CSN:");
     FuriString* credential_str = furi_string_alloc();
     FuriString* wiegand_str = furi_string_alloc();
@@ -39,8 +37,8 @@ void picopass_scene_read_card_success_on_enter(void* context) {
         furi_string_cat_printf(csn_str, "%02X ", csn[i]);
     }
 
-    bool no_key = memcmp(pacs->key, zeros, PICOPASS_BLOCK_LEN) == 0;
-    bool empty = memcmp(AA1[PICOPASS_PACS_CFG_BLOCK_INDEX].data, ffs, PICOPASS_BLOCK_LEN) == 0;
+    bool no_key = picopass_is_memset(pacs->key, 0x00, PICOPASS_BLOCK_LEN);
+    bool empty = picopass_is_memset(AA1[PICOPASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
 
     if (no_key) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
