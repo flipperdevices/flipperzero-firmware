@@ -74,6 +74,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Bar code scanner emulator via COM port (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator)
 - [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
+- [NRF24 Batch Read/Send (WIP) (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
