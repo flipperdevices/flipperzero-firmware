@@ -1,6 +1,12 @@
 #pragma once
 
 typedef enum {
+    BoilerplateCustomEventStartscreenUp,
+    BoilerplateCustomEventStartscreenDown,
+    BoilerplateCustomEventStartscreenLeft,
+    BoilerplateCustomEventStartscreenRight,
+    BoilerplateCustomEventStartscreenOk,
+    BoilerplateCustomEventStartscreenBack,
     BoilerplateCustomEventScene1Up,
     BoilerplateCustomEventScene1Down,
     BoilerplateCustomEventScene1Left,
