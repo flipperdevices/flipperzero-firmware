@@ -541,6 +541,7 @@ bool mf_classic_authenticate_skip_activate(
 
 bool mf_classic_auth_attempt(
     FuriHalNfcTxRxContext* tx_rx,
+    Crypto1* crypto,
     MfClassicAuthContext* auth_ctx,
     uint64_t key) {
     furi_assert(tx_rx);
@@ -549,15 +550,14 @@ bool mf_classic_auth_attempt(
     bool need_halt = (auth_ctx->key_a == MF_CLASSIC_NO_KEY) &&
                      (auth_ctx->key_b == MF_CLASSIC_NO_KEY);
 
-    Crypto1 crypto;
     if(auth_ctx->key_a == MF_CLASSIC_NO_KEY) {
         // Try AUTH with key A
         if(mf_classic_auth(
                tx_rx,
-               mf_classic_get_first_block_num_of_sector(auth_ctx->sector),
+               mf_classic_get_sector_trailer_block_num_by_sector(auth_ctx->sector),
                key,
                MfClassicKeyA,
-               &crypto,
+               crypto,
                false,
                0)) {
             auth_ctx->key_a = key;
@@ -573,10 +573,10 @@ bool mf_classic_auth_attempt(
         // Try AUTH with key B
         if(mf_classic_auth(
                tx_rx,
-               mf_classic_get_first_block_num_of_sector(auth_ctx->sector),
+               mf_classic_get_sector_trailer_block_num_by_sector(auth_ctx->sector),
                key,
                MfClassicKeyB,
-               &crypto,
+               crypto,
                false,
                0)) {
             auth_ctx->key_b = key;
