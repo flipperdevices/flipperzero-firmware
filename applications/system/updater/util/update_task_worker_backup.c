@@ -136,8 +136,6 @@ static void update_task_cleanup_resources(UpdateTask* update_task, const uint32_
                     FS_Error result = storage_common_remove(
                         update_task->storage, furi_string_get_cstr(folder_path));
                     if(result != FSE_OK && result != FSE_EXIST) {
-                        FS_Error result = storage_common_remove(
-                            update_task->storage, furi_string_get_cstr(folder_path));
                         FURI_LOG_E(
                             TAG,
                             "%s remove failed, cause %s",
