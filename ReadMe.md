@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz: Debug mode counter increase settings (+5, +10, default: +1)
 - UL: Infrared: Debug TX PIN output settings (ability to move tx signal out to GPIO) 
 - Fix SubGHz Remote FAP Issue
+- OFW: [Picopass: factory key support, app rename and move to NFC category, minor code cleanup #2417 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/2417)
 
 <a name="release">
 
