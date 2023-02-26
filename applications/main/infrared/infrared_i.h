@@ -9,6 +9,7 @@
 #include <gui/modules/popup.h>
 #include <gui/modules/loading.h>
 #include <gui/modules/submenu.h>
+#include <gui/modules/variable_item_list.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/button_menu.h>
@@ -87,6 +88,7 @@ struct Infrared {
 
     Submenu* submenu;
     TextInput* text_input;
+    VariableItemList* variable_item_list;
     DialogEx* dialog_ex;
     ButtonMenu* button_menu;
     Popup* popup;
@@ -108,6 +110,7 @@ struct Infrared {
 typedef enum {
     InfraredViewSubmenu,
     InfraredViewTextInput,
+    InfraredViewVariableItemList,
     InfraredViewDialogEx,
     InfraredViewButtonMenu,
     InfraredViewPopup,
