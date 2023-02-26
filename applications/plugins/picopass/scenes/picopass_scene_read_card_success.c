@@ -38,15 +38,16 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     }
 
     bool no_key = picopass_is_memset(pacs->key, 0x00, PICOPASS_BLOCK_LEN);
-    bool empty = picopass_is_memset(AA1[PICOPASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
+    bool empty =
+        picopass_is_memset(AA1[PICOPASS_PACS_CFG_BLOCK_INDEX].data, 0xFF, PICOPASS_BLOCK_LEN);
 
-    if (no_key) {
+    if(no_key) {
         furi_string_cat_printf(wiegand_str, "Read Failed");
 
         if(pacs->se_enabled) {
             furi_string_cat_printf(credential_str, "SE enabled");
         }
-    } else if (empty) {
+    } else if(empty) {
         furi_string_cat_printf(wiegand_str, "Empty");
     } else if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
