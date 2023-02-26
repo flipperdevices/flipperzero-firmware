@@ -502,8 +502,8 @@ void unirfremix_tx_stop(UniRFRemix* app) {
 
         keeloq_reset_mfname();
         keeloq_reset_kl_type();
-        keeloq_reset_original_btn();
-        alutech_reset_original_btn();
+        // keeloq_reset_original_btn();
+        // alutech_reset_original_btn();
         star_line_reset_mfname();
         star_line_reset_kl_type();
     }
