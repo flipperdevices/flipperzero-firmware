@@ -9,9 +9,15 @@ You need a **geiger counter** board to run this application. This board can be u
 
 The geiger counter board can be powered with +5V power pin of the **Flipper Zero**. This pin will automatically be enabled when the program is launched. 
 
-Output pin for measure on arduino cannot be used on the **Flipper Zero** because output voltage is too low. You can use jack out port instead. This port must be connected on **A7** GPIO :
+Output pin for measure on arduino cannot be used on the **Flipper Zero** because output voltage is too low. You can use jack out port instead. Just cut jack wire and connect audio channel (left, right or both together) on **A7** GPIO :
 
-<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schematic.jpg" width=75% height=75%></p>
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/jack.png" width=40% height=40%></p>
+
+Black wire is usually used for the ground (sleeve on the schematic). You can use a multimeter to be sure or simply test other wires.
+
+Global schema :
+
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=75% height=75%></p>
 
 ## Build the program
 
