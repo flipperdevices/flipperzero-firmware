@@ -18,6 +18,8 @@
 #include "helpers/pin_lock.h"
 #include "helpers/slideshow_filename.h"
 
+#define TAG "Desktop"
+
 static void desktop_auto_lock_arm(Desktop*);
 static void desktop_auto_lock_inhibit(Desktop*);
 static void desktop_start_auto_lock_timer(Desktop*);
