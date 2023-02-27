@@ -9,5 +9,5 @@ Generic GPIO uses PC0.
 CHECK: "LPTIM1.IN LPTIM2.IN"
 
 Devices:
-- BME280[I²C] (SCL)
-- BH1750[I²C] (SCL)
+- BME280[I2C] (SCL)
+- BH1750[I2C] (SCL)

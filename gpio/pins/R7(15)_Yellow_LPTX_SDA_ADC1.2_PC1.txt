@@ -7,5 +7,5 @@ Generic GPIO uses PC1.
 CHECK: "LPTIM1.OUT/ADC1.2"
 
 Devices:
-- BME280[I²C] (SDA)
-- BH1750[I²C] (SDA)
+- BME280[I2C] (SDA)
+- BH1750[I2C] (SDA)
