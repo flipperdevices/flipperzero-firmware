@@ -41,6 +41,7 @@ struct WifiMarauderApp {
     VariableItemList* var_item_list;
 
     WifiMarauderUart* uart;
+    WifiMarauderUart* lp_uart;
     int selected_menu_index;
     int selected_option_index[NUM_MENU_ITEMS];
     const char* selected_tx_string;
