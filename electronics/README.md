@@ -12,6 +12,10 @@ If you are just starting out, I'd recommend ordering this starter kit...
 
 
 ## Parts list
+### Tools
+- [Amazon link](https://amzn.to/3kyRqM3) Inexpensive logic analyzer that runs on Windows and Linux machines.  I use PulseView for viewing and analyzing signals using this probe.  You do NEED to solder the probes.
+- [Amazon link](https://amzn.to/3kyRqM3) This is the soldering station I use for my projects.  It's fairly expensive, so if you are on a budget you can get an iron for a lot cheaper -- something like [link](https://amzn.to/3IVu9x3) should work okay (but I don't personally own it).
+
 ### Breadboards
 - [Amazon link](https://amzn.to/3IyKacg) Great starter kit : Boardboard + jumper wires + some starter components (LEDs, resistors, pots, transistors, capacitors, switches, 74959 IC, CdS sensor, buzzers, etc.)
 - [Amazon link](https://amzn.to/3lRGRUM) Large breadboard, very similar to the one in my videos.  Great for prototyping LARGE circuits.
