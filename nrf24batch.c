@@ -295,7 +295,7 @@ uint8_t nrf24_send_packet()
 		}
 	} else notification_message(APP->notification, &sequence_blink_red_100);
 	NRF_time = furi_get_tick();
-	FURI_LOG_D(TAG, "Send packet: %d%s", rw_type, send_status, NRF_last_packet_send_st, send_status == sst_receiving ? ", Receiving" : "");
+	FURI_LOG_D(TAG, "Send packet: %d%s", NRF_last_packet_send_st, send_status == sst_receiving ? ", Receiving" : "");
 	return NRF_last_packet_send_st;
 }
 
