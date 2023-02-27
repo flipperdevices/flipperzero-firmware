@@ -588,7 +588,7 @@ static bool nfc_worker_mf_get_b_key_from_sector_trailer(
         if(mf_classic_read_block(tx_rx, &crypto, block, &block_tmp)) {
             *found_key = nfc_util_bytes2num(&block_tmp.value[10], sizeof(uint8_t) * 6);
 
-            return found_key != 0;
+            return *found_key;
         }
     }
 
