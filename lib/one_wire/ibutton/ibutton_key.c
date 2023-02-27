@@ -9,7 +9,7 @@ struct iButtonKey {
 iButtonKey* ibutton_key_alloc(size_t data_size) {
     iButtonKey* key = malloc(sizeof(iButtonKey));
 
-    key->protocol_id = -1;
+    key->protocol_id = iButtonProtocolIdInvalid;
     key->protocol_data = malloc(data_size);
     key->protocol_data_size = data_size;
 
@@ -22,7 +22,7 @@ void ibutton_key_free(iButtonKey* key) {
 }
 
 void ibutton_key_reset(iButtonKey* key) {
-    key->protocol_id = -1;
+    key->protocol_id = iButtonProtocolIdInvalid;
     memset(key->protocol_data, 0, key->protocol_data_size);
 }
 

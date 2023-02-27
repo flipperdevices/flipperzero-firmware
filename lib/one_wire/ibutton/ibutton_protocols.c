@@ -3,6 +3,7 @@
 #include <storage/storage.h>
 
 #include "ibutton_key_i.h"
+
 #include "protocols/protocol_group_defs.h"
 
 #define IBUTTON_FILE_TYPE "Flipper iButton key"
@@ -92,7 +93,7 @@ static iButtonProtocolId
         }
         offset += ibutton_protocol_groups[i]->protocol_count;
     }
-    return -1;
+    return iButtonProtocolIdInvalid;
 }
 
 uint32_t ibutton_protocols_get_features(iButtonProtocols* protocols, iButtonProtocolId id) {
@@ -125,7 +126,7 @@ const char* ibutton_protocols_get_name(iButtonProtocols* protocols, iButtonProto
 }
 
 bool ibutton_protocols_read(iButtonProtocols* protocols, iButtonKey* key) {
-    iButtonProtocolLocalId id = -1;
+    iButtonProtocolLocalId id = iButtonProtocolIdInvalid;
     iButtonProtocolData* data = ibutton_key_get_protocol_data(key);
 
     iButtonProtocolLocalId offset = 0;
@@ -138,7 +139,7 @@ bool ibutton_protocols_read(iButtonProtocols* protocols, iButtonKey* key) {
     }
 
     ibutton_key_set_protocol_id(key, id);
-    return id != -1;
+    return id != iButtonProtocolIdInvalid;
 }
 
 bool ibutton_protocols_write_blank(iButtonProtocols* protocols, iButtonKey* key) {

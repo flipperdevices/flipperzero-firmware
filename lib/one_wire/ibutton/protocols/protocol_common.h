@@ -5,6 +5,10 @@
 
 typedef int32_t iButtonProtocolId;
 
+enum {
+    iButtonProtocolIdInvalid = -1,
+};
+
 typedef enum {
     iButtonProtocolFeatureExtData = (1U << 0),
     iButtonProtocolFeatureWriteBlank = (1U << 1),
