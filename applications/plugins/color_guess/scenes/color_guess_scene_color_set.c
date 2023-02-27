@@ -33,7 +33,7 @@ bool color_guess_scene_color_set_on_event(void* context, SceneManagerEvent event
             notification_message(app->notification, &sequence_reset_green);
             notification_message(app->notification, &sequence_reset_blue);
             if(!scene_manager_search_and_switch_to_previous_scene(
-                   app->scene_manager, ColorGuessSceneStart)) {
+                   app->scene_manager, ColorGuessSceneMenu)) {
                 scene_manager_stop(app->scene_manager);
                 view_dispatcher_stop(app->view_dispatcher);
             }

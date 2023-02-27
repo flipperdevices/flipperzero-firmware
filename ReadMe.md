@@ -29,7 +29,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0226-0327-0.77.2-3626499](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0227-0126-0.77.2-17ab5fa](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-27 01:21 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-27 01:21 EST`
@@ -64,6 +64,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper) (Now With Setup Instructions)
 - UL: SubGHz: Custom buttons for Nice Flor S - now you can use arrow buttons to send signal with different button code
 - UL: [mousejacker FIX DEL, ADD TAB & ALTSTRING #366 (By MatthisC)](https://github.com/DarkFlippers/unleashed-firmware/pull/366)
+- Updated: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 
 <a name="release">
 

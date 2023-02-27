@@ -1,5 +1,6 @@
 #include "../color_guess.h"
 #include "color_guess_icons.h"
+#include "../helpers/color_guess_led.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -61,25 +62,11 @@ static void color_guess_color_set_model_init(ColorGuessColorSetModel* const mode
 void color_guess_color_set_set_led(void* context, ColorGuessColorSetModel* model) {
     furi_assert(context);
     ColorGuess* app = context;
-    NotificationMessage notification_led_message_1;
-    NotificationMessage notification_led_message_2;
-    NotificationMessage notification_led_message_3;
-    notification_led_message_1.type = NotificationMessageTypeLedRed;
-    notification_led_message_1.data.led.value = (model->digit[0] * 16) + model->digit[1];
-    notification_led_message_2.type = NotificationMessageTypeLedGreen;
-    notification_led_message_2.data.led.value = (model->digit[2] * 16) + model->digit[3];
-    notification_led_message_3.type = NotificationMessageTypeLedBlue;
-    notification_led_message_3.data.led.value = (model->digit[4] * 16) + model->digit[5];
-    const NotificationSequence notification_sequence = {
-        &notification_led_message_1,
-        &notification_led_message_2,
-        &notification_led_message_3,
-        &message_do_not_reset,
-        NULL,
-    };
-    notification_message(app->notification, &notification_sequence);
-    furi_thread_flags_wait(
-        0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+    led_set_rgb(
+        app,
+        (model->digit[0] * 16) + model->digit[1],
+        (model->digit[2] * 16) + model->digit[3],
+        (model->digit[4] * 16) + model->digit[5]);
 }
 
 bool color_guess_color_set_input(InputEvent* event, void* context) {
@@ -131,7 +118,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         model->digit[model->cursorpos] = 0;
                     }
                     color_guess_color_set_set_led(instance->context, model);
-                    //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
                 },
                 true);
             break;
@@ -145,7 +131,6 @@ bool color_guess_color_set_input(InputEvent* event, void* context) {
                         model->digit[model->cursorpos] = 15;
                     }
                     color_guess_color_set_set_led(instance->context, model);
-                    //instance->callback(ColorGuessCustomEventColorSetUp, instance->context);
                 },
                 true);
             break;
