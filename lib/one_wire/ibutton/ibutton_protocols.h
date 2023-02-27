@@ -44,6 +44,14 @@ uint32_t ibutton_protocols_get_protocol_count();
 size_t ibutton_protocols_get_max_data_size(iButtonProtocols* protocols);
 
 /**
+ * Get the protocol id based on its name
+ * @param [in] protocols pointer to an iButtonProtocols object
+ * @param [in] name pointer to a string containing the name
+ * @return protocol id on success on iButtonProtocolIdInvalid on failure
+ */
+iButtonProtocolId ibutton_protocols_get_id_by_name(iButtonProtocols* protocols, const char* name);
+
+/**
  * Get the manufacturer name based on the protocol id
  * @param [in] protocols pointer to an iButtonProtocols object
  * @param [in] id id of the protocol in question

@@ -40,22 +40,27 @@ static void ibutton_cli_print_usage() {
     printf("\t<key_data> are hex-formatted\r\n");
 };
 
-// bool ibutton_cli_get_key_type(FuriString* data, iButtonKeyType* type) {
-//     bool result = false;
-//
-//     if(furi_string_cmp_str(data, "Dallas") == 0 || furi_string_cmp_str(data, "dallas") == 0) {
-//         result = true;
-//         *type = iButtonKeyDS1990;
-//     } else if(furi_string_cmp_str(data, "Cyfral") == 0 || furi_string_cmp_str(data, "cyfral") == 0) {
-//         result = true;
-//         *type = iButtonKeyCyfral;
-//     } else if(furi_string_cmp_str(data, "Metakom") == 0 || furi_string_cmp_str(data, "metakom") == 0) {
-//         result = true;
-//         *type = iButtonKeyMetakom;
-//     }
-//
-//     return result;
-// }
+static bool
+    ibutton_cli_get_key_type(iButtonProtocols* protocols, iButtonKey* key, FuriString* name) {
+    bool result = false;
+
+    do {
+        if(furi_string_empty(name)) break;
+
+        // Make the protocol name uppercase
+        const char first = furi_string_get_char(name, 0);
+        furi_string_set_char(name, 0, toupper((int)first));
+
+        const iButtonProtocolId id =
+            ibutton_protocols_get_id_by_name(protocols, furi_string_get_cstr(name));
+        if(id == iButtonProtocolIdInvalid) break;
+        ibutton_key_set_protocol_id(key, id);
+
+        result = true;
+    } while(false);
+
+    return result;
+}
 
 static void ibutton_cli_print_key_data(iButtonProtocols* protocols, iButtonKey* key) {
     const char* name = ibutton_protocols_get_name(protocols, ibutton_key_get_protocol_id(key));
@@ -201,51 +206,52 @@ typedef struct {
 //     furi_event_flag_free(write_context.event);
 // };
 
-// void ibutton_cli_emulate(Cli* cli, FuriString* args) {
-//     iButtonKey* key = ibutton_key_alloc();
-//     iButtonWorker* worker = ibutton_worker_alloc();
-//     iButtonKeyType type;
-//     uint8_t key_data[IBUTTON_KEY_DATA_SIZE];
-//     FuriString* data;
-//
-//     data = furi_string_alloc();
-//     ibutton_worker_start_thread(worker);
-//
-//     do {
-//         if(!args_read_string_and_trim(args, data)) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         if(!ibutton_cli_get_key_type(data, &type)) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         if(!args_read_hex_bytes(args, key_data, ibutton_key_get_size_by_type(type))) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         ibutton_key_set_type(key, type);
-//         ibutton_key_set_data(key, key_data, ibutton_key_get_size_by_type(type));
-//
-//         printf("Emulating key ");
-//         ibutton_cli_print_key_data(key);
-//         printf("Press Ctrl+C to abort\r\n");
-//
-//         ibutton_worker_emulate_start(worker, key);
-//         while(!cli_cmd_interrupt_received(cli)) {
-//             furi_delay_ms(100);
-//         };
-//         ibutton_worker_stop(worker);
-//     } while(false);
-//
-//     furi_string_free(data);
-//     ibutton_worker_stop_thread(worker);
-//     ibutton_worker_free(worker);
-//     ibutton_key_free(key);
-// };
+void ibutton_cli_emulate(Cli* cli, FuriString* args) {
+    iButtonProtocols* protocols = ibutton_protocols_alloc();
+    iButtonWorker* worker = ibutton_worker_alloc(protocols);
+    iButtonKey* key = ibutton_key_alloc(ibutton_protocols_get_max_data_size(protocols));
+    FuriString* name = furi_string_alloc();
+
+    ibutton_worker_start_thread(worker);
+
+    do {
+        if(!args_read_string_and_trim(args, name)) {
+            ibutton_cli_print_usage();
+            break;
+        }
+
+        if(!ibutton_cli_get_key_type(protocols, key, name)) {
+            ibutton_cli_print_usage();
+            break;
+        }
+
+        iButtonEditableData data;
+        ibutton_protocols_get_editable_data(protocols, key, &data);
+
+        if(!args_read_hex_bytes(args, data.ptr, data.size)) {
+            ibutton_cli_print_usage();
+            break;
+        }
+
+        printf("Emulating key ");
+        ibutton_cli_print_key_data(protocols, key);
+        printf("Press Ctrl+C to abort\r\n");
+
+        ibutton_worker_emulate_start(worker, key);
+        while(!cli_cmd_interrupt_received(cli)) {
+            furi_delay_ms(100);
+        };
+
+    } while(false);
+
+    ibutton_worker_stop(worker);
+    ibutton_worker_stop_thread(worker);
+
+    ibutton_key_free(key);
+    ibutton_worker_free(worker);
+    ibutton_protocols_free(protocols);
+    furi_string_free(name);
+};
 
 void ibutton_cli(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
@@ -264,7 +270,7 @@ void ibutton_cli(Cli* cli, FuriString* args, void* context) {
     } else if(furi_string_cmp_str(cmd, "write") == 0) {
         // ibutton_cli_write(cli, args);
     } else if(furi_string_cmp_str(cmd, "emulate") == 0) {
-        // ibutton_cli_emulate(cli, args);
+        ibutton_cli_emulate(cli, args);
     } else {
         ibutton_cli_print_usage();
     }

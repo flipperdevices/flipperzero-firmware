@@ -82,8 +82,7 @@ uint32_t ibutton_protocols_get_protocol_count() {
     return count;
 }
 
-static iButtonProtocolId
-    ibutton_protocols_get_id_by_name(iButtonProtocols* protocols, const char* name) {
+iButtonProtocolId ibutton_protocols_get_id_by_name(iButtonProtocols* protocols, const char* name) {
     iButtonProtocolLocalId offset = 0;
 
     for(iButtonProtocolGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {

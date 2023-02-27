@@ -1609,6 +1609,7 @@ Function,+,ibutton_protocols_emulate_stop,void,"iButtonProtocols*, iButtonKey*"
 Function,+,ibutton_protocols_free,void,iButtonProtocols*
 Function,+,ibutton_protocols_get_editable_data,void,"iButtonProtocols*, const iButtonKey*, iButtonEditableData*"
 Function,+,ibutton_protocols_get_features,uint32_t,"iButtonProtocols*, iButtonProtocolId"
+Function,+,ibutton_protocols_get_id_by_name,iButtonProtocolId,"iButtonProtocols*, const char*"
 Function,+,ibutton_protocols_get_manufacturer,const char*,"iButtonProtocols*, iButtonProtocolId"
 Function,+,ibutton_protocols_get_max_data_size,size_t,iButtonProtocols*
 Function,+,ibutton_protocols_get_name,const char*,"iButtonProtocols*, iButtonProtocolId"
