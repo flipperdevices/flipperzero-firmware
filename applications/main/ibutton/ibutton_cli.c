@@ -1,5 +1,3 @@
-#include <stdarg.h>
-
 #include <furi.h>
 #include <furi_hal.h>
 
@@ -40,12 +38,13 @@ static void ibutton_cli_print_usage() {
     printf("\t<key_data> are hex-formatted\r\n");
 };
 
-static bool
-    ibutton_cli_get_key_type(iButtonProtocols* protocols, iButtonKey* key, FuriString* name) {
+static bool ibutton_cli_parse_key(iButtonProtocols* protocols, iButtonKey* key, FuriString* args) {
     bool result = false;
+    FuriString* name = furi_string_alloc();
 
     do {
-        if(furi_string_empty(name)) break;
+        // Read protocol name
+        if(!args_read_string_and_trim(args, name)) break;
 
         // Make the protocol name uppercase
         const char first = furi_string_get_char(name, 0);
@@ -54,15 +53,24 @@ static bool
         const iButtonProtocolId id =
             ibutton_protocols_get_id_by_name(protocols, furi_string_get_cstr(name));
         if(id == iButtonProtocolIdInvalid) break;
+
         ibutton_key_set_protocol_id(key, id);
+
+        // Get the data pointer
+        iButtonEditableData data;
+        ibutton_protocols_get_editable_data(protocols, key, &data);
+
+        // Read data
+        if(!args_read_hex_bytes(args, data.ptr, data.size)) break;
 
         result = true;
     } while(false);
 
+    furi_string_free(name);
     return result;
 }
 
-static void ibutton_cli_print_key_data(iButtonProtocols* protocols, iButtonKey* key) {
+static void ibutton_cli_print_key(iButtonProtocols* protocols, iButtonKey* key) {
     const char* name = ibutton_protocols_get_name(protocols, ibutton_key_get_protocol_id(key));
 
     if(strncmp(name, "DS", 2) == 0) {
@@ -106,7 +114,7 @@ static void ibutton_cli_read(Cli* cli) {
             furi_event_flag_wait(event, EVENT_FLAG_IBUTTON_COMPLETE, FuriFlagWaitAny, 100);
 
         if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
-            ibutton_cli_print_key_data(protocols, key);
+            ibutton_cli_print_key(protocols, key);
             break;
         }
 
@@ -128,116 +136,89 @@ typedef struct {
     iButtonWorkerWriteResult result;
 } iButtonWriteContext;
 
-// static void ibutton_cli_worker_write_cb(void* context, iButtonWorkerWriteResult result) {
-//     furi_assert(context);
-//     iButtonWriteContext* write_context = (iButtonWriteContext*)context;
-//     write_context->result = result;
-//     furi_event_flag_set(write_context->event, EVENT_FLAG_IBUTTON_COMPLETE);
-// }
+static void ibutton_cli_worker_write_cb(void* context, iButtonWorkerWriteResult result) {
+    furi_assert(context);
+    iButtonWriteContext* write_context = (iButtonWriteContext*)context;
+    write_context->result = result;
+    furi_event_flag_set(write_context->event, EVENT_FLAG_IBUTTON_COMPLETE);
+}
 
-// void ibutton_cli_write(Cli* cli, FuriString* args) {
-//     iButtonKey* key = ibutton_key_alloc();
-//     iButtonWorker* worker = ibutton_worker_alloc();
-//     iButtonKeyType type;
-//     iButtonWriteContext write_context;
-//     uint8_t key_data[IBUTTON_KEY_DATA_SIZE];
-//     FuriString* data;
-//
-//     write_context.event = furi_event_flag_alloc();
-//
-//     data = furi_string_alloc();
-//     ibutton_worker_start_thread(worker);
-//     ibutton_worker_write_set_callback(worker, ibutton_cli_worker_write_cb, &write_context);
-//
-//     do {
-//         if(!args_read_string_and_trim(args, data)) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         if(!ibutton_cli_get_key_type(data, &type)) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         if(type != iButtonKeyDS1990) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         if(!args_read_hex_bytes(args, key_data, ibutton_key_get_size_by_type(type))) {
-//             ibutton_cli_print_usage();
-//             break;
-//         }
-//
-//         ibutton_key_set_type(key, type);
-//         ibutton_key_set_data(key, key_data, ibutton_key_get_size_by_type(type));
-//
-//         printf("Writing key ");
-//         ibutton_cli_print_key_data(key);
-//         printf("Press Ctrl+C to abort\r\n");
-//
-//         ibutton_worker_write_start(worker, key);
-//         while(true) {
-//             uint32_t flags = furi_event_flag_wait(
-//                 write_context.event, EVENT_FLAG_IBUTTON_COMPLETE, FuriFlagWaitAny, 100);
-//
-//             if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
-//                 if(write_context.result == iButtonWorkerWriteSameKey ||
-//                    write_context.result == iButtonWorkerWriteOK) {
-//                     printf("Write success\r\n");
-//                     break;
-//                 } else if(write_context.result == iButtonWorkerWriteCannotWrite) {
-//                     printf("Write fail\r\n");
-//                     break;
-//                 }
-//             }
-//
-//             if(cli_cmd_interrupt_received(cli)) break;
-//         }
-//         ibutton_worker_stop(worker);
-//     } while(false);
-//
-//     furi_string_free(data);
-//     ibutton_worker_stop_thread(worker);
-//     ibutton_worker_free(worker);
-//     ibutton_key_free(key);
-//
-//     furi_event_flag_free(write_context.event);
-// };
+void ibutton_cli_write(Cli* cli, FuriString* args) {
+    iButtonProtocols* protocols = ibutton_protocols_alloc();
+    iButtonWorker* worker = ibutton_worker_alloc(protocols);
+    iButtonKey* key = ibutton_key_alloc(ibutton_protocols_get_max_data_size(protocols));
+
+    iButtonWriteContext write_context;
+    write_context.event = furi_event_flag_alloc();
+
+    ibutton_worker_start_thread(worker);
+    ibutton_worker_write_set_callback(worker, ibutton_cli_worker_write_cb, &write_context);
+
+    do {
+        if(!ibutton_cli_parse_key(protocols, key, args)) {
+            ibutton_cli_print_usage();
+            break;
+        }
+
+        if(!(ibutton_protocols_get_features(protocols, ibutton_key_get_protocol_id(key)) &
+             iButtonProtocolFeatureWriteBlank)) {
+            ibutton_cli_print_usage();
+            break;
+        }
+
+        printf("Writing key ");
+        ibutton_cli_print_key(protocols, key);
+        printf("Press Ctrl+C to abort\r\n");
+
+        ibutton_worker_write_blank_start(worker, key);
+        while(true) {
+            uint32_t flags = furi_event_flag_wait(
+                write_context.event, EVENT_FLAG_IBUTTON_COMPLETE, FuriFlagWaitAny, 100);
+
+            if(flags & EVENT_FLAG_IBUTTON_COMPLETE) {
+                if(write_context.result == iButtonWorkerWriteSameKey ||
+                   write_context.result == iButtonWorkerWriteOK) {
+                    printf("Write success\r\n");
+                    break;
+                } else if(write_context.result == iButtonWorkerWriteCannotWrite) {
+                    printf("Write fail\r\n");
+                    break;
+                }
+            }
+
+            if(cli_cmd_interrupt_received(cli)) break;
+        }
+    } while(false);
+
+    ibutton_worker_stop(worker);
+    ibutton_worker_stop_thread(worker);
+
+    ibutton_key_free(key);
+    ibutton_worker_free(worker);
+    ibutton_protocols_free(protocols);
+
+    furi_event_flag_free(write_context.event);
+}
 
 void ibutton_cli_emulate(Cli* cli, FuriString* args) {
     iButtonProtocols* protocols = ibutton_protocols_alloc();
     iButtonWorker* worker = ibutton_worker_alloc(protocols);
     iButtonKey* key = ibutton_key_alloc(ibutton_protocols_get_max_data_size(protocols));
-    FuriString* name = furi_string_alloc();
 
     ibutton_worker_start_thread(worker);
 
     do {
-        if(!args_read_string_and_trim(args, name)) {
-            ibutton_cli_print_usage();
-            break;
-        }
-
-        if(!ibutton_cli_get_key_type(protocols, key, name)) {
-            ibutton_cli_print_usage();
-            break;
-        }
-
-        iButtonEditableData data;
-        ibutton_protocols_get_editable_data(protocols, key, &data);
-
-        if(!args_read_hex_bytes(args, data.ptr, data.size)) {
+        if(!ibutton_cli_parse_key(protocols, key, args)) {
             ibutton_cli_print_usage();
             break;
         }
 
         printf("Emulating key ");
-        ibutton_cli_print_key_data(protocols, key);
+        ibutton_cli_print_key(protocols, key);
         printf("Press Ctrl+C to abort\r\n");
 
         ibutton_worker_emulate_start(worker, key);
+
         while(!cli_cmd_interrupt_received(cli)) {
             furi_delay_ms(100);
         };
@@ -250,7 +231,6 @@ void ibutton_cli_emulate(Cli* cli, FuriString* args) {
     ibutton_key_free(key);
     ibutton_worker_free(worker);
     ibutton_protocols_free(protocols);
-    furi_string_free(name);
 };
 
 void ibutton_cli(Cli* cli, FuriString* args, void* context) {
@@ -268,7 +248,7 @@ void ibutton_cli(Cli* cli, FuriString* args, void* context) {
     if(furi_string_cmp_str(cmd, "read") == 0) {
         ibutton_cli_read(cli);
     } else if(furi_string_cmp_str(cmd, "write") == 0) {
-        // ibutton_cli_write(cli, args);
+        ibutton_cli_write(cli, args);
     } else if(furi_string_cmp_str(cmd, "emulate") == 0) {
         ibutton_cli_emulate(cli, args);
     } else {
