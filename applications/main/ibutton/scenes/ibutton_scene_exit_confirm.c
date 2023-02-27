@@ -21,7 +21,7 @@ void ibutton_scene_exit_confirm_on_enter(void* context) {
     widget_add_string_element(
         widget, 64, 19, AlignCenter, AlignBottom, FontPrimary, "Exit to iButton Menu?");
     widget_add_string_element(
-        widget, 64, 31, AlignCenter, AlignBottom, FontSecondary, "All unsaved data\nwill be lost!");
+        widget, 64, 31, AlignCenter, AlignBottom, FontSecondary, "All unsaved data will be lost!");
 
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewWidget);
 }
