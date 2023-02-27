@@ -41,7 +41,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - Added: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Added: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
-- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - UL: SubGHz improvements
 - OFW: BadUsb: STRINGDELAY feature, worker signal handling refactoring
 - [NRF24 Batch Documentation updates (By vad7)](https://github.com/vad7/nRF24-Batch)
@@ -59,6 +58,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FuriHal, Power, UnitTests: fix, rename battery charging voltage limit API #2228 (By digitalcircuit)](https://github.com/flipperdevices/flipperzero-firmware/pull/2228)
 - OFW: [F8, F18: bump API symbols version #2435 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2435)
 - OFW: [Drivers: remove excessive check in bq25896 and make PVS happy #2436 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2436)
+- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
+- Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
+- Updated: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper) (Now With Setup Instructions)
 
 <a name="release">
 

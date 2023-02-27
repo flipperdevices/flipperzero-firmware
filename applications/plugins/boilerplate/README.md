@@ -5,7 +5,7 @@ Use this code as a foundation for developing Flipper Zero Applications, change t
 <br><br>
 
 ### Features
-- Start Screen (tbd)
+- Start Screen
 - Menu
 - Different Scenes / Views
 - Settings Page (On/Off for haptics, sound, led)
@@ -17,6 +17,7 @@ Use this code as a foundation for developing Flipper Zero Applications, change t
 - Sound Effects
 - LED Effects
 - Dolphin Deeds (make dolphin happy)
+- Storage (tbd)
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>

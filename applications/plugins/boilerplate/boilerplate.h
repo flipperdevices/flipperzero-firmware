@@ -11,6 +11,7 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
 #include "scenes/boilerplate_scene.h"
+#include "views/boilerplate_startscreen.h"
 #include "views/boilerplate_scene_1.h"
 #include "views/boilerplate_scene_2.h"
 
@@ -21,16 +22,16 @@ typedef struct {
     Submenu* submenu;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
+    BoilerplateStartscreen* boilerplate_startscreen;
     BoilerplateScene1* boilerplate_scene_1;
     BoilerplateScene2* boilerplate_scene_2;
-    Submenu* boilerplate_settings;
     int haptic;
     int speaker;
     int led;
-    //BoilerplateSettings* boilerplate_settings;
 } Boilerplate;
 
 typedef enum {
+    BoilerplateViewIdStartscreen,
     BoilerplateViewIdMenu,
     BoilerplateViewIdScene1,
     BoilerplateViewIdScene2,

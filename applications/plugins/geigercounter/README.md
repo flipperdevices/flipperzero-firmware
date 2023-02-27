@@ -5,13 +5,21 @@ A geiger counter application for the Flipper Zero
 
 You need a **geiger counter** board to run this application. This board can be used : https://aliexpress.com/item/1005004074447209.html
 
+You also need jumper wires to connect the board on the **Flipper Zero**.
+
 **Note :** this board uses a **J305** geiger tube. According this [website](https://www.rhelectronics.store/j305-glassy-geiger-muller-tube-nuclear-radiation-sensor) gamma conversion factor is **0.0081** for this tube. This value has been declared in the header of the source file so you can change it easily if needed. Incorrect conversion factor will give false measurements when **μSv/h** / **mSv/y** is selected.
 
 The geiger counter board can be powered with +5V power pin of the **Flipper Zero**. This pin will automatically be enabled when the program is launched. 
 
-Output pin for measure on arduino cannot be used on the **Flipper Zero** because output voltage is too low. You can use jack out port instead. This port must be connected on **A7** GPIO :
+Output pin for measure on arduino cannot be used on the **Flipper Zero** because output voltage is too low. You can use jack out port instead. Just cut audio jack cable and connect audio channel (left, right or both together) with a cut male jumper wire on **A7** GPIO :
 
-<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schematic.jpg" width=75% height=75%></p>
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/jack.png" width=40% height=40%></p>
+
+Black wire is usually used for the ground (sleeve on the schematic). You can use a multimeter to be sure or simply test other wires.
+
+Global schema :
+
+<p align="center"><img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/schema.jpg" width=75% height=75%></p>
 
 ## Build the program
 
@@ -61,6 +69,9 @@ All previous measures in a row (the scale of the graph is automatically adjusted
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper7.png" width=25% height=25%>
 
 ## Changelog
+
+* 2023-02-26
+  * More clarity about how to connect audio jack cable on A7 GPIO
 
 * 2023-02-02
   * μSv/h and mSv/y have been added

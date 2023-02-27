@@ -6,31 +6,32 @@ enum SubmenuIndex {
     SubmenuIndexSettings,
 };
 
-void boilerplate_scene_start_submenu_callback(void* context, uint32_t index) {
+void boilerplate_scene_menu_submenu_callback(void* context, uint32_t index) {
     Boilerplate* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-void boilerplate_scene_start_on_enter(void* context) {
+void boilerplate_scene_menu_on_enter(void* context) {
     Boilerplate* app = context;
 
     submenu_add_item(
-        app->submenu, "Scene 1", SubmenuIndexScene1, boilerplate_scene_start_submenu_callback, app);
+        app->submenu, "Scene 1", SubmenuIndexScene1, boilerplate_scene_menu_submenu_callback, app);
     submenu_add_item(
-        app->submenu, "Scene 2", SubmenuIndexScene2, boilerplate_scene_start_submenu_callback, app);
+        app->submenu, "Scene 2", SubmenuIndexScene2, boilerplate_scene_menu_submenu_callback, app);
     submenu_add_item(
         app->submenu,
         "Settings",
         SubmenuIndexSettings,
-        boilerplate_scene_start_submenu_callback,
+        boilerplate_scene_menu_submenu_callback,
         app);
 
     submenu_set_selected_item(
-        app->submenu, scene_manager_get_scene_state(app->scene_manager, BoilerplateSceneStart));
+        app->submenu, scene_manager_get_scene_state(app->scene_manager, BoilerplateSceneMenu));
+
     view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdMenu);
 }
 
-bool boilerplate_scene_start_on_event(void* context, SceneManagerEvent event) {
+bool boilerplate_scene_menu_on_event(void* context, SceneManagerEvent event) {
     Boilerplate* app = context;
     UNUSED(app);
     if(event.type == SceneManagerEventTypeBack) {
@@ -41,17 +42,17 @@ bool boilerplate_scene_start_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexScene1) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneStart, SubmenuIndexScene1);
+                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene1);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene2) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneStart, SubmenuIndexScene2);
+                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexScene2);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneScene_2);
             return true;
         } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
-                app->scene_manager, BoilerplateSceneStart, SubmenuIndexSettings);
+                app->scene_manager, BoilerplateSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, BoilerplateSceneSettings);
             return true;
         }
@@ -59,7 +60,7 @@ bool boilerplate_scene_start_on_event(void* context, SceneManagerEvent event) {
     return false;
 }
 
-void boilerplate_scene_start_on_exit(void* context) {
+void boilerplate_scene_menu_on_exit(void* context) {
     Boilerplate* app = context;
     submenu_reset(app->submenu);
 }

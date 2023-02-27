@@ -56,7 +56,7 @@ uint8_t cmd_array_cnt = 0;
 uint8_t save_settings = 0;
 uint16_t view_cmd[3] = {0, 0, 0}; // ReadBatch, Read, WriteBatch
 uint8_t view_x = 0;
-char Info[20] = "";
+char Info[32] = "";
 char screen_buf[64];
 char file_name[32];
 char ERR_STR[32];
@@ -256,8 +256,8 @@ static void prepare_nrf24(void) {
         nrf24_write_reg(
             nrf24_HANDLE,
             REG_SETUP_RETR,
-            ((NRF_rate == 0 ? 0b0010 : 0b0001) << 4) |
-                0b0111); // Automatic Retransmission, ARD, ARC
+            ((NRF_rate == 0 ? 0b0100 : 0b0010) << 4) |
+                0b1111); // Automatic Retransmission, ARD, ARC
         nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x01); // Auto acknowledgement
         nrf24_write_reg(
             nrf24_HANDLE,
@@ -691,6 +691,7 @@ static uint8_t load_settings_file() {
     FURI_LOG_D(TAG, "Loading settings file");
     FuriString* str = furi_string_alloc();
     free_store();
+    Info[0] = '\0';
     NRF_INITED = false;
     while(stream_read_line(file_stream, str)) {
         char* p = (char*)furi_string_get_cstr(str);
@@ -1043,7 +1044,7 @@ int32_t nrf24batch_app(void* p) {
         if(furi_log_get_level() != FuriLogLevel) {
             FuriLogLevel = furi_log_get_level();
             if(FuriLogLevel == FuriLogLevelDebug)
-                furi_hal_uart_set_br(FuriHalUartIdUSART1, 460800);
+                furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
         }
 
         if(event_status == FuriStatusOk) {

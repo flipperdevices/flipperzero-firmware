@@ -40,7 +40,6 @@ Boilerplate* boilerplate_app_alloc() {
     view_dispatcher_set_custom_event_callback(
         app->view_dispatcher, boilerplate_custom_event_callback);
     app->submenu = submenu_alloc();
-    app->boilerplate_settings = submenu_alloc();
 
     app->haptic = 1;
     app->speaker = 1;
@@ -48,6 +47,11 @@ Boilerplate* boilerplate_app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, BoilerplateViewIdMenu, submenu_get_view(app->submenu));
+    app->boilerplate_startscreen = boilerplate_startscreen_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        BoilerplateViewIdStartscreen,
+        boilerplate_startscreen_get_view(app->boilerplate_startscreen));
     app->boilerplate_scene_1 = boilerplate_scene_1_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -81,7 +85,6 @@ void boilerplate_app_free(Boilerplate* app) {
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, BoilerplateViewIdSettings);
     submenu_free(app->submenu);
-    submenu_free(app->boilerplate_settings);
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
@@ -103,7 +106,9 @@ int32_t boilerplate_app(void* p) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    scene_manager_next_scene(app->scene_manager, BoilerplateSceneStart);
+    scene_manager_next_scene(
+        app->scene_manager, BoilerplateSceneStartscreen); //Start with start screen
+    //scene_manager_next_scene(app->scene_manager, BoilerplateSceneMenu); //if you want to directly start with Menu
 
     furi_hal_power_suppress_charge_enter();
 
