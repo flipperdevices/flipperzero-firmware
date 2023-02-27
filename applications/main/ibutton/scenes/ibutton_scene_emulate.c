@@ -24,7 +24,7 @@ void ibutton_scene_emulate_on_enter(void* context) {
     furi_string_printf(
         tmp,
         "%s\n[%s]",
-        ibutton->key_name,
+        furi_string_empty(ibutton->file_path) ? "Unsaved Key" : ibutton->key_name,
         ibutton_protocols_get_name(ibutton->protocols, ibutton_key_get_protocol_id(key)));
 
     widget_add_text_box_element(

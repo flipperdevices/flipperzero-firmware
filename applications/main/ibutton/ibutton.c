@@ -227,12 +227,15 @@ bool ibutton_delete_key(iButton* ibutton) {
     result = storage_simply_remove(storage, furi_string_get_cstr(ibutton->file_path));
     furi_record_close(RECORD_STORAGE);
 
-    memset(ibutton->key_name, 0, IBUTTON_KEY_NAME_SIZE + 1);
-
-    furi_string_reset(ibutton->file_path);
-    ibutton_key_reset(ibutton->key);
+    ibutton_reset_key(ibutton);
 
     return result;
+}
+
+void ibutton_reset_key(iButton* ibutton) {
+    memset(ibutton->key_name, 0, IBUTTON_KEY_NAME_SIZE + 1);
+    furi_string_reset(ibutton->file_path);
+    ibutton_key_reset(ibutton->key);
 }
 
 void ibutton_notification_message(iButton* ibutton, uint32_t message) {

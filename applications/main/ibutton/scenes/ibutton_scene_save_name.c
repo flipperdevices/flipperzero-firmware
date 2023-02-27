@@ -14,7 +14,7 @@ void ibutton_scene_save_name_on_enter(void* context) {
     iButton* ibutton = context;
     TextInput* text_input = ibutton->text_input;
 
-    const bool is_new_file = (strlen(ibutton->key_name) == 0);
+    const bool is_new_file = furi_string_empty(ibutton->file_path);
 
     if(is_new_file) {
         set_random_name(ibutton->key_name, IBUTTON_KEY_NAME_SIZE);

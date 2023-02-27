@@ -92,6 +92,7 @@ bool ibutton_select_and_load_key(iButton* ibutton);
 bool ibutton_load_key(iButton* ibutton);
 bool ibutton_save_key(iButton* ibutton);
 bool ibutton_delete_key(iButton* ibutton);
+void ibutton_reset_key(iButton* ibutton);
 void ibutton_notification_message(iButton* ibutton, uint32_t message);
 
 void ibutton_submenu_callback(void* context, uint32_t index);
