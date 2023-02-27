@@ -671,6 +671,9 @@ void mf_classic_read_sector(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data, u
     do {
         if(blocks_read == total_blocks) break;
         if(!key_b_found) break;
+        if(key_a_found) {
+            furi_hal_nfc_sleep();
+        }
         FURI_LOG_D(TAG, "Try to read blocks with key B");
         key = nfc_util_bytes2num(sec_tr->key_b, sizeof(sec_tr->key_b));
         if(!mf_classic_auth(tx_rx, start_block, key, MfClassicKeyB, &crypto, false, 0)) break;
