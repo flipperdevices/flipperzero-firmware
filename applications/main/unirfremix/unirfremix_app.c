@@ -18,6 +18,7 @@
 #include <lib/subghz/protocols/keeloq.h>
 #include <lib/subghz/protocols/star_line.h>
 #include <lib/subghz/protocols/alutech_at_4n.h>
+#include <lib/subghz/protocols/nice_flor_s.h>
 
 #include <SubGHz_Remote_icons.h>
 
@@ -504,6 +505,7 @@ void unirfremix_tx_stop(UniRFRemix* app) {
         keeloq_reset_kl_type();
         // keeloq_reset_original_btn();
         // alutech_reset_original_btn();
+        // nice_flors_reset_original_btn();
         star_line_reset_mfname();
         star_line_reset_kl_type();
     }
