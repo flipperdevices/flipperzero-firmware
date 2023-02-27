@@ -29,14 +29,30 @@ typedef struct {
     size_t data_size;
 } SubGhzRadioPreset;
 
+typedef enum {
+    SubGhzProtocolErrorUnknown = 0,
+    SubGhzProtocolErrorNoError,
+    SubGhzProtocolErrorHeader,
+    SubGhzProtocolErrorFrequency,
+    SubGhzProtocolErrorPreset,
+    SubGhzProtocolErrorCustomPreset,
+    SubGhzProtocolErrorProtocolName,
+    SubGhzProtocolErrorBit,
+    SubGhzProtocolErrorCountBit,
+    SubGhzProtocolErrorKey,
+    SubGhzProtocolErrorTE,
+    SubGhzProtocolErrorEncoderGetUpload,
+    SubGhzProtocolErrorOthers,
+} SubGhzProtocolError;
+
 // Allocator and Deallocator
 typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Serialize and Deserialize
-typedef bool (
+typedef SubGhzProtocolError (
     *SubGhzSerialize)(void* context, FlipperFormat* flipper_format, SubGhzRadioPreset* preset);
-typedef bool (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
+typedef SubGhzProtocolError (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);

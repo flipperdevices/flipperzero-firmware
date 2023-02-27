@@ -23,11 +23,11 @@ bool subghz_protocol_decoder_base_get_string(
     return status;
 }
 
-bool subghz_protocol_decoder_base_serialize(
+SubGhzProtocolError subghz_protocol_decoder_base_serialize(
     SubGhzProtocolDecoderBase* decoder_base,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
-    bool status = false;
+    SubGhzProtocolError status = SubGhzProtocolErrorUnknown;
 
     if(decoder_base->protocol && decoder_base->protocol->decoder &&
        decoder_base->protocol->decoder->serialize) {
@@ -37,10 +37,10 @@ bool subghz_protocol_decoder_base_serialize(
     return status;
 }
 
-bool subghz_protocol_decoder_base_deserialize(
+SubGhzProtocolError subghz_protocol_decoder_base_deserialize(
     SubGhzProtocolDecoderBase* decoder_base,
     FlipperFormat* flipper_format) {
-    bool status = false;
+    SubGhzProtocolError status = SubGhzProtocolErrorUnknown;
 
     if(decoder_base->protocol && decoder_base->protocol->decoder &&
        decoder_base->protocol->decoder->deserialize) {

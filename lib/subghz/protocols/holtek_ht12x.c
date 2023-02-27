@@ -147,39 +147,41 @@ static bool
     return true;
 }
 
-bool subghz_protocol_encoder_holtek_th12x_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    subghz_protocol_encoder_holtek_th12x_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderHoltek_HT12X* instance = context;
-    bool res = false;
+    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_holtek_th12x_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolErrorNoError) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolErrorOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
             FURI_LOG_E(TAG, "Missing TE");
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           subghz_protocol_holtek_th12x_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolErrorTE;
             break;
         }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        if(!subghz_protocol_encoder_holtek_th12x_get_upload(instance)) break;
+        if(!subghz_protocol_encoder_holtek_th12x_get_upload(instance)) {
+            ret = SubGhzProtocolErrorEncoderGetUpload;
+            break;
+        }
         instance->encoder.is_running = true;
-
-        res = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
 void subghz_protocol_encoder_holtek_th12x_stop(void* context) {
@@ -327,42 +329,45 @@ uint8_t subghz_protocol_decoder_holtek_th12x_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_holtek_th12x_serialize(
+SubGhzProtocolError subghz_protocol_decoder_holtek_th12x_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderHoltek_HT12X* instance = context;
-    bool res = subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
-    if(res && !flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)) {
+    SubGhzProtocolError ret =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    if((ret == SubGhzProtocolErrorNoError) &&
+       !flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)) {
         FURI_LOG_E(TAG, "Unable to add TE");
-        res = false;
+        ret = SubGhzProtocolErrorTE;
     }
-    return res;
+    return ret;
 }
 
-bool subghz_protocol_decoder_holtek_th12x_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    subghz_protocol_decoder_holtek_th12x_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderHoltek_HT12X* instance = context;
-    bool ret = false;
+    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           subghz_protocol_holtek_th12x_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_holtek_th12x_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolErrorNoError) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolErrorOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
             FURI_LOG_E(TAG, "Missing TE");
+            ret = SubGhzProtocolErrorTE;
             break;
         }
-        ret = true;
     } while(false);
     return ret;
 }

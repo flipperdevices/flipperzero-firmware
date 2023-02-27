@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,15.0,,
+Version,+,16.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2566,9 +2566,10 @@ Function,-,strupr,char*,char*
 Function,-,strverscmp,int,"const char*, const char*"
 Function,-,strxfrm,size_t,"char*, const char*, size_t"
 Function,-,strxfrm_l,size_t,"char*, const char*, size_t, locale_t"
-Function,+,subghz_block_generic_deserialize,_Bool,"SubGhzBlockGeneric*, FlipperFormat*"
+Function,+,subghz_block_generic_deserialize,SubGhzProtocolError,"SubGhzBlockGeneric*, FlipperFormat*"
+Function,+,subghz_block_generic_deserialize_check_count_bit,SubGhzProtocolError,"SubGhzBlockGeneric*, FlipperFormat*, uint16_t"
 Function,+,subghz_block_generic_get_preset_name,void,"const char*, FuriString*"
-Function,+,subghz_block_generic_serialize,_Bool,"SubGhzBlockGeneric*, FlipperFormat*, SubGhzRadioPreset*"
+Function,+,subghz_block_generic_serialize,SubGhzProtocolError,"SubGhzBlockGeneric*, FlipperFormat*, SubGhzRadioPreset*"
 Function,+,subghz_environment_alloc,SubGhzEnvironment*,
 Function,+,subghz_environment_free,void,SubGhzEnvironment*
 Function,+,subghz_environment_get_alutech_at_4n_rainbow_table_file_name,const char*,SubGhzEnvironment*
@@ -2610,19 +2611,19 @@ Function,+,subghz_protocol_blocks_parity_bytes,uint8_t,"const uint8_t[], size_t"
 Function,+,subghz_protocol_blocks_reverse_key,uint64_t,"uint64_t, uint8_t"
 Function,+,subghz_protocol_blocks_set_bit_array,void,"_Bool, uint8_t[], size_t, size_t"
 Function,+,subghz_protocol_blocks_xor_bytes,uint8_t,"const uint8_t[], size_t"
-Function,-,subghz_protocol_decoder_base_deserialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*"
+Function,+,subghz_protocol_decoder_base_deserialize,SubGhzProtocolError,"SubGhzProtocolDecoderBase*, FlipperFormat*"
 Function,+,subghz_protocol_decoder_base_get_hash_data,uint8_t,SubGhzProtocolDecoderBase*
 Function,+,subghz_protocol_decoder_base_get_string,_Bool,"SubGhzProtocolDecoderBase*, FuriString*"
-Function,+,subghz_protocol_decoder_base_serialize,_Bool,"SubGhzProtocolDecoderBase*, FlipperFormat*, SubGhzRadioPreset*"
+Function,+,subghz_protocol_decoder_base_serialize,SubGhzProtocolError,"SubGhzProtocolDecoderBase*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_decoder_base_set_decoder_callback,void,"SubGhzProtocolDecoderBase*, SubGhzProtocolDecoderBaseRxCallback, void*"
 Function,+,subghz_protocol_decoder_raw_alloc,void*,SubGhzEnvironment*
-Function,+,subghz_protocol_decoder_raw_deserialize,_Bool,"void*, FlipperFormat*"
+Function,+,subghz_protocol_decoder_raw_deserialize,SubGhzProtocolError,"void*, FlipperFormat*"
 Function,+,subghz_protocol_decoder_raw_feed,void,"void*, _Bool, uint32_t"
 Function,+,subghz_protocol_decoder_raw_free,void,void*
 Function,+,subghz_protocol_decoder_raw_get_string,void,"void*, FuriString*"
 Function,+,subghz_protocol_decoder_raw_reset,void,void*
 Function,+,subghz_protocol_encoder_raw_alloc,void*,SubGhzEnvironment*
-Function,+,subghz_protocol_encoder_raw_deserialize,_Bool,"void*, FlipperFormat*"
+Function,+,subghz_protocol_encoder_raw_deserialize,SubGhzProtocolError,"void*, FlipperFormat*"
 Function,+,subghz_protocol_encoder_raw_free,void,void*
 Function,+,subghz_protocol_encoder_raw_stop,void,void*
 Function,+,subghz_protocol_encoder_raw_yield,LevelDuration,void*
