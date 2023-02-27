@@ -58,7 +58,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [FuriHal, Power, UnitTests: fix, rename battery charging voltage limit API #2228 (By digitalcircuit)](https://github.com/flipperdevices/flipperzero-firmware/pull/2228)
 - OFW: [F8, F18: bump API symbols version #2435 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2435)
 - OFW: [Drivers: remove excessive check in bq25896 and make PVS happy #2436 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2436)
-- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper) (Now With Setup Instructions)
@@ -67,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Added: [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - Added: [EM4100 Key Generator (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
+- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
