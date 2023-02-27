@@ -19,7 +19,7 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
     Submenu* submenu = ibutton->submenu;
 
     const iButtonProtocolId protocol_id = ibutton_key_get_protocol_id(ibutton->key);
-    const uint32_t features = ibutton_protocols_get_features(protocol_id);
+    const uint32_t features = ibutton_protocols_get_features(ibutton->protocols, protocol_id);
 
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, ibutton_scene_read_key_menu_submenu_callback, ibutton);

@@ -6,7 +6,7 @@ void ibutton_scene_view_data_on_enter(void* context) {
     Widget* widget = ibutton->widget;
 
     FuriString* tmp = furi_string_alloc();
-    ibutton_protocols_render_data(key, tmp);
+    ibutton_protocols_render_data(ibutton->protocols, key, tmp);
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 64, furi_string_get_cstr(tmp));
 

@@ -79,7 +79,7 @@ void ibutton_worker_mode_read_start(iButtonWorker* worker) {
 }
 
 void ibutton_worker_mode_read_tick(iButtonWorker* worker) {
-    if(ibutton_protocols_read(worker->key)) {
+    if(ibutton_protocols_read(worker->protocols, worker->key)) {
         if(worker->read_cb != NULL) {
             worker->read_cb(worker->cb_ctx);
         }
@@ -101,7 +101,7 @@ void ibutton_worker_mode_emulate_start(iButtonWorker* worker) {
     furi_hal_rfid_pins_reset();
     furi_hal_rfid_pin_pull_pulldown();
 
-    ibutton_protocols_emulate_start(worker->key);
+    ibutton_protocols_emulate_start(worker->protocols, worker->key);
 }
 
 void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
@@ -111,7 +111,7 @@ void ibutton_worker_mode_emulate_tick(iButtonWorker* worker) {
 void ibutton_worker_mode_emulate_stop(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    ibutton_protocols_emulate_stop(worker->key);
+    ibutton_protocols_emulate_stop(worker->protocols, worker->key);
 
     furi_hal_rfid_pins_reset();
 }
@@ -126,7 +126,7 @@ void ibutton_worker_mode_write_common_start(iButtonWorker* worker) { //-V524
 void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    const bool success = ibutton_protocols_write_blank(worker->key);
+    const bool success = ibutton_protocols_write_blank(worker->protocols, worker->key);
     // TODO: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
                                                       iButtonWorkerWriteNoDetect;
@@ -138,7 +138,7 @@ void ibutton_worker_mode_write_blank_tick(iButtonWorker* worker) {
 void ibutton_worker_mode_write_copy_tick(iButtonWorker* worker) {
     furi_assert(worker->key);
 
-    const bool success = ibutton_protocols_write_copy(worker->key);
+    const bool success = ibutton_protocols_write_copy(worker->protocols, worker->key);
     // TODO: pass a proper result to the callback
     const iButtonWorkerWriteResult result = success ? iButtonWorkerWriteOK :
                                                       iButtonWorkerWriteNoDetect;

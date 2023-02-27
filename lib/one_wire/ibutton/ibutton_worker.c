@@ -22,17 +22,13 @@ typedef struct {
 
 static int32_t ibutton_worker_thread(void* thread_context);
 
-iButtonWorker* ibutton_worker_alloc() {
+iButtonWorker* ibutton_worker_alloc(iButtonProtocols* protocols) {
     iButtonWorker* worker = malloc(sizeof(iButtonWorker));
-    worker->key = NULL;
+
+    worker->protocols = protocols;
     worker->messages = furi_message_queue_alloc(1, sizeof(iButtonMessage));
 
     worker->mode_index = iButtonWorkerModeIdle;
-    worker->read_cb = NULL;
-    worker->write_cb = NULL;
-    worker->emulate_cb = NULL;
-    worker->cb_ctx = NULL;
-
     worker->thread = furi_thread_alloc_ex("iButtonWorker", 2048, ibutton_worker_thread, worker);
 
     return worker;

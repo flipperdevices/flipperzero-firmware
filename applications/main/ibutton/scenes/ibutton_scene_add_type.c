@@ -11,8 +11,8 @@ void ibutton_scene_add_type_on_enter(void* context) {
         furi_string_printf(
             tmp,
             "%s %s",
-            ibutton_protocols_get_manufacturer(protocol_id),
-            ibutton_protocols_get_name(protocol_id));
+            ibutton_protocols_get_manufacturer(ibutton->protocols, protocol_id),
+            ibutton_protocols_get_name(ibutton->protocols, protocol_id));
 
         submenu_add_item(
             submenu, furi_string_get_cstr(tmp), protocol_id, ibutton_submenu_callback, context);
@@ -40,7 +40,7 @@ bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
         ibutton_key_reset(key);
         ibutton_key_set_protocol_id(key, protocol_id);
 
-        ibutton_protocols_apply_edits(key);
+        ibutton_protocols_apply_edits(ibutton->protocols, key);
 
         scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneAddType, protocol_id);
         scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);

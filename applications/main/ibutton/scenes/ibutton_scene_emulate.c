@@ -25,7 +25,7 @@ void ibutton_scene_emulate_on_enter(void* context) {
         tmp,
         "%s\n[%s]",
         ibutton->key_name,
-        ibutton_protocols_get_name(ibutton_key_get_protocol_id(key)));
+        ibutton_protocols_get_name(ibutton->protocols, ibutton_key_get_protocol_id(key)));
 
     widget_add_text_box_element(
         widget, 52, 38, 75, 26, AlignCenter, AlignCenter, furi_string_get_cstr(tmp), true);

@@ -49,8 +49,9 @@ struct iButton {
     NotificationApp* notifications;
     RpcAppSystem* rpc;
 
-    iButtonWorker* worker;
     iButtonKey* key;
+    iButtonWorker* worker;
+    iButtonProtocols* protocols;
     iButtonWriteMode write_mode;
 
     FuriString* file_path;

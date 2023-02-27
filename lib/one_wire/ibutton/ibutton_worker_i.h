@@ -32,6 +32,7 @@ typedef enum {
 
 struct iButtonWorker {
     iButtonKey* key;
+    iButtonProtocols* protocols;
     iButtonWorkerMode mode_index;
     FuriMessageQueue* messages;
     FuriThread* thread;

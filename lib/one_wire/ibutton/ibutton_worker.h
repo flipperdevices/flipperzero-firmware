@@ -5,7 +5,9 @@
  */
 
 #pragma once
+
 #include "ibutton_key.h"
+#include "ibutton_protocols.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +30,7 @@ typedef struct iButtonWorker iButtonWorker;
  * Allocate ibutton worker
  * @return iButtonWorker* 
  */
-iButtonWorker* ibutton_worker_alloc();
+iButtonWorker* ibutton_worker_alloc(iButtonProtocols* protocols);
 
 /**
  * Free ibutton worker

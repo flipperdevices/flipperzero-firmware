@@ -76,8 +76,6 @@ void ibutton_tick_event_callback(void* context) {
 }
 
 iButton* ibutton_alloc() {
-    ibutton_protocols_init();
-
     iButton* ibutton = malloc(sizeof(iButton));
 
     ibutton->file_path = furi_string_alloc();
@@ -99,8 +97,9 @@ iButton* ibutton_alloc() {
     ibutton->dialogs = furi_record_open(RECORD_DIALOGS);
     ibutton->notifications = furi_record_open(RECORD_NOTIFICATION);
 
-    ibutton->key = ibutton_key_alloc(ibutton_protocols_get_max_data_size());
-    ibutton->worker = ibutton_worker_alloc();
+    ibutton->protocols = ibutton_protocols_alloc();
+    ibutton->key = ibutton_key_alloc(ibutton_protocols_get_max_data_size(ibutton->protocols));
+    ibutton->worker = ibutton_worker_alloc(ibutton->protocols);
     ibutton_worker_start_thread(ibutton->worker);
 
     ibutton->submenu = submenu_alloc();
@@ -166,19 +165,18 @@ void ibutton_free(iButton* ibutton) {
     ibutton_worker_stop_thread(ibutton->worker);
     ibutton_worker_free(ibutton->worker);
     ibutton_key_free(ibutton->key);
+    ibutton_protocols_free(ibutton->protocols);
 
     furi_string_free(ibutton->file_path);
 
     free(ibutton);
-
-    ibutton_protocols_shutdown();
 }
 
 bool ibutton_load_key(iButton* ibutton) {
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewLoading);
 
-    const bool success =
-        ibutton_protocols_load(ibutton->key, furi_string_get_cstr(ibutton->file_path));
+    const bool success = ibutton_protocols_load(
+        ibutton->protocols, ibutton->key, furi_string_get_cstr(ibutton->file_path));
 
     if(!success) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot load\nkey file");
@@ -212,7 +210,8 @@ bool ibutton_save_key(iButton* ibutton) {
     ibutton_make_app_folder(ibutton);
 
     iButtonKey* key = ibutton->key;
-    const bool success = ibutton_protocols_save(key, furi_string_get_cstr(ibutton->file_path));
+    const bool success =
+        ibutton_protocols_save(ibutton->protocols, key, furi_string_get_cstr(ibutton->file_path));
 
     if(!success) {
         dialog_message_show_storage_error(ibutton->dialogs, "Cannot save\nkey file");
