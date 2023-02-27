@@ -1,0 +1,4 @@
+This is one of three ground pins on the Flipper Zero.  You can use pins 8 (L8), 11 (R3), 18 (R10) interchangeably.
+
+Devices:
+- All

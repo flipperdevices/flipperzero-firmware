@@ -20,8 +20,19 @@ Feel free to reach out to me at CodeAllNight@outlook.com with any questions or l
 
 
 ## GPIO
+### gpio-pins
+[tool](./gpio/pins/README.md) - This is a set of files you can copy to your Flipper Zero so that you can easily lookup the meaning of a pin.
+
+### hc_sr04
+[project](./gpio/hc_sr04/README.md) - This is an improvement over the original HC_SR04 library so that you can get mm accuracy in measurements.  It displays ultrasonic distance in both inches/cm.  The readme explains how the code gets more accurate timings.
+
+### gpio-gpio-7segment
+[project](./gpio/gpio_7segment/README.md) - This application can control a common-anode or common-cathode 7-segment display.  When you click the OK button the display shows a random dice roll (1-6); but you can modify code to display any number from 0-9.
+
 ### gpio-gpio-polling-demo
 [tutorial](./gpio/gpio_polling_demo/README.md) - This is a "hello world" demonstration of reading a GPIO pin using polling.
+
+
 
 
 ## Subghz [folder](./subghz/README.md)

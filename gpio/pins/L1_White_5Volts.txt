@@ -1,0 +1,10 @@
+Connected via USB cable it will have +5 volts OTHERWISE you must enable via GPIO/"5V on GPIO" and click "ON".
+Max of 1 watt (1-Amp).
+
+Look at device datasheet.  If 5 volts, connect to "VIN", "VCC" or "+5V" (if NO VIN) on the device.
+If datasheet says 3.3 volts, do NOT use this pin!
+
+Devices:
+- HC-SR04
+- Joystick (via a 10K resistor)
+- Mx2125 (recommend 3v3 pin)

@@ -1,0 +1,6 @@
+This pin is used for back key (PA13) and SWD only.
+
+CHECK: "PA13/SWIO"
+
+Devices:
+- None
