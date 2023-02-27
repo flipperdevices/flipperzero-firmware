@@ -11,6 +11,7 @@ typedef struct {
     const char* path;
     FS_AccessMode access_mode;
     FS_OpenMode open_mode;
+    FuriThreadId thread_id;
 } SADataFOpen;
 
 typedef struct {
@@ -34,6 +35,7 @@ typedef struct {
 typedef struct {
     File* file;
     const char* path;
+    FuriThreadId thread_id;
 } SADataDOpen;
 
 typedef struct {
@@ -51,6 +53,7 @@ typedef struct {
 typedef struct {
     const char* path;
     FileInfo* fileinfo;
+    FuriThreadId thread_id;
 } SADataCStat;
 
 typedef struct {
@@ -65,6 +68,7 @@ typedef struct {
 
 typedef struct {
     const char* path;
+    FuriThreadId thread_id;
 } SADataPath;
 
 typedef struct {

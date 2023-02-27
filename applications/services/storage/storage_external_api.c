@@ -39,12 +39,6 @@
             .file = file, \
         }};
 
-#define S_API_DATA_PATH   \
-    SAData data = {       \
-        .path = {         \
-            .path = path, \
-        }};
-
 #define S_RETURN_BOOL (return_data.bool_value);
 #define S_RETURN_UINT16 (return_data.uint16_value);
 #define S_RETURN_UINT64 (return_data.uint64_value);
@@ -70,6 +64,7 @@ static bool storage_file_open_internal(
             .path = path,
             .access_mode = access_mode,
             .open_mode = open_mode,
+            .thread_id = furi_thread_get_current_id(),
         }};
 
     file->type = FileTypeOpenFile;
@@ -266,6 +261,7 @@ static bool storage_dir_open_internal(File* file, const char* path) {
         .dopen = {
             .file = file,
             .path = path,
+            .thread_id = furi_thread_get_current_id(),
         }};
 
     file->type = FileTypeOpenDir;
@@ -374,8 +370,12 @@ FS_Error storage_common_timestamp(Storage* storage, const char* path, uint32_t* 
 
 FS_Error storage_common_stat(Storage* storage, const char* path, FileInfo* fileinfo) {
     S_API_PROLOGUE;
-
-    SAData data = {.cstat = {.path = path, .fileinfo = fileinfo}};
+    SAData data = {
+        .cstat = {
+            .path = path,
+            .fileinfo = fileinfo,
+            .thread_id = furi_thread_get_current_id(),
+        }};
 
     S_API_MESSAGE(StorageCommandCommonStat);
     S_API_EPILOGUE;
@@ -384,7 +384,12 @@ FS_Error storage_common_stat(Storage* storage, const char* path, FileInfo* filei
 
 FS_Error storage_common_remove(Storage* storage, const char* path) {
     S_API_PROLOGUE;
-    S_API_DATA_PATH;
+    SAData data = {
+        .path = {
+            .path = path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
     S_API_MESSAGE(StorageCommandCommonRemove);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
@@ -619,7 +624,12 @@ FS_Error storage_common_merge(Storage* storage, const char* old_path, const char
 
 FS_Error storage_common_mkdir(Storage* storage, const char* path) {
     S_API_PROLOGUE;
-    S_API_DATA_PATH;
+    SAData data = {
+        .path = {
+            .path = path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
     S_API_MESSAGE(StorageCommandCommonMkDir);
     S_API_EPILOGUE;
     return S_RETURN_ERROR;
