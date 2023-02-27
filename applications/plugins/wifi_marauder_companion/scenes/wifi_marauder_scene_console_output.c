@@ -58,8 +58,6 @@ void wifi_marauder_console_output_handle_rx_packets_cb(uint8_t* buf, size_t len,
     if (app->is_writing) {
         storage_file_write(app->capture_file, buf, len);
     }
-
-    view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshConsoleOutput);
 }
 
 void wifi_marauder_scene_console_output_on_enter(void* context) {
