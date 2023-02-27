@@ -20,8 +20,24 @@ As of commit 7e9a9dc (1/21/23) The non-pixel-by-pixel version of the Flipper app
 <img src="doc/attachments/PwnInAction.gif" width="256" height="160"/>
 
 ## Setup
-TODO: Explain setup process
-NOTE: Interface is still being developed, when I have a working version I will explain the setup procedure.
+### Flipagotchi Setup (Flipper side)
+This procedure explains the setup of the Flipagotchi app on the Flipper Zero. This will involve the manual compile as the firmware is constantly being updated and releasing a FAP for each firmware change is currently not feasible.
+1. Connect your Flipper to your computer
+2. Clone the Flipper Zero firmware onto your machine
+3. Place the ```flipagotchi/``` directory into the ```applications_user/```
+4. Open a terminal and navigate to the root of the firmware
+5. Execute the following command to compile the app and launch it on the Flipper:<br>
+    ```./fbt launch_app APPSRC=applications_user/flipagotchi```
+6. This will now compile and load the app onto your Flipper
+
+### PwnZero Setup (Pwnagotchi side)
+This procedure will explain how to configure the Pwnagotchi to use the PwnZero plugin to communicate with the Flipper.
+1. Disable Bluetooth on the Pi by adding ```dt-overlay=disable-bt``` at the bottom of the ```/boot/config.txt``` file<br>
+    -- This needs to be disabled so that the full UART is directed to ```/dev/serial0```
+2. Place the PwnZero.py file somewhere on the Pi in either its own folder or a folder with other plugins
+3. Edit ```/etc/pwnagotchi/config.toml``` file and set ```main.custom_plugins = "/path/to/plugin/folder"```
+4. Follow hardware setup shown in the doc/HardwareSetup.md to connect the devices
+5. Restart the Pwnagotchi and open the Flipagotchi app on the Flipper Zero
 
 ## Development stages
 ### Stage 1: Simple display rendering
