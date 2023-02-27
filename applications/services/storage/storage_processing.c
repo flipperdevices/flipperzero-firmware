@@ -4,12 +4,6 @@
 
 #define FS_CALL(_storage, _fn) ret = _storage->fs_api->_fn;
 
-static StorageData* storage_get_storage_by_type(Storage* app, StorageType type) {
-    furi_check(type == ST_EXT || type == ST_INT);
-    StorageData* storage = &app->storage[type];
-    return storage;
-}
-
 static bool storage_type_is_not_valid(StorageType type) {
 #ifdef FURI_RAM_EXEC
     return type != ST_EXT;
@@ -74,6 +68,17 @@ static void storage_path_change_to_real_storage(FuriString* path, StorageType re
     }
 }
 
+FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage) {
+    StorageType type = storage_get_type_by_path(app, path);
+    if(storage_type_is_not_valid(type)) {
+        return FSE_INVALID_NAME;
+    } else {
+        *storage = &app->storage[type];
+        storage_path_change_to_real_storage(path, type);
+        return FSE_OK;
+    }
+}
+
 /******************* File Functions *******************/
 
 bool storage_process_file_open(
@@ -83,23 +88,17 @@ bool storage_process_file_open(
     FS_AccessMode access_mode,
     FS_OpenMode open_mode) {
     bool ret = false;
-    StorageType type = storage_get_type_by_path(app, path);
     StorageData* storage;
-    file->error_id = FSE_OK;
+    file->error_id = storage_get_data(app, path, &storage);
 
-    if(storage_type_is_not_valid(type)) {
-        file->error_id = FSE_INVALID_NAME;
-    } else {
-        storage = storage_get_storage_by_type(app, type);
-        storage_path_change_to_real_storage(path, type);
-
+    if(file->error_id == FSE_OK) {
         if(storage_path_already_open(path, storage->files)) {
             file->error_id = FSE_ALREADY_OPEN;
         } else {
             if(access_mode & FSAM_WRITE) {
                 storage_data_timestamp(storage);
             }
-            storage_push_storage_file(file, path, type, storage);
+            storage_push_storage_file(file, path, storage);
             FS_CALL(
                 storage,
                 file.open(
@@ -247,20 +246,14 @@ static bool storage_process_file_eof(Storage* app, File* file) {
 
 bool storage_process_dir_open(Storage* app, File* file, FuriString* path) {
     bool ret = false;
-    StorageType type = storage_get_type_by_path(app, path);
     StorageData* storage;
-    file->error_id = FSE_OK;
+    file->error_id = storage_get_data(app, path, &storage);
 
-    if(storage_type_is_not_valid(type)) {
-        file->error_id = FSE_INVALID_NAME;
-    } else {
-        storage = storage_get_storage_by_type(app, type);
-        storage_path_change_to_real_storage(path, type);
-
+    if(file->error_id == FSE_OK) {
         if(storage_path_already_open(path, storage->files)) {
             file->error_id = FSE_ALREADY_OPEN;
         } else {
-            storage_push_storage_file(file, path, type, storage);
+            storage_push_storage_file(file, path, storage);
             FS_CALL(storage, dir.open(storage, file, cstr_path_without_vfs_prefix(path)));
         }
     }
@@ -320,13 +313,10 @@ bool storage_process_dir_rewind(Storage* app, File* file) {
 
 static FS_Error
     storage_process_common_timestamp(Storage* app, FuriString* path, uint32_t* timestamp) {
-    FS_Error ret = FSE_OK;
-    StorageType type = storage_get_type_by_path(app, path);
+    StorageData* storage;
+    FS_Error ret = storage_get_data(app, path, &storage);
 
-    if(storage_type_is_not_valid(type)) {
-        ret = FSE_INVALID_NAME;
-    } else {
-        StorageData* storage = storage_get_storage_by_type(app, type);
+    if(ret == FSE_OK) {
         *timestamp = storage_data_get_timestamp(storage);
     }
 
@@ -334,13 +324,10 @@ static FS_Error
 }
 
 static FS_Error storage_process_common_stat(Storage* app, FuriString* path, FileInfo* fileinfo) {
-    FS_Error ret = FSE_OK;
-    StorageType type = storage_get_type_by_path(app, path);
+    StorageData* storage;
+    FS_Error ret = storage_get_data(app, path, &storage);
 
-    if(storage_type_is_not_valid(type)) {
-        ret = FSE_INVALID_NAME;
-    } else {
-        StorageData* storage = storage_get_storage_by_type(app, type);
+    if(ret == FSE_OK) {
         FS_CALL(storage, common.stat(storage, cstr_path_without_vfs_prefix(path), fileinfo));
     }
 
@@ -348,17 +335,10 @@ static FS_Error storage_process_common_stat(Storage* app, FuriString* path, File
 }
 
 static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
-    FS_Error ret = FSE_OK;
-    StorageType type = storage_get_type_by_path(app, path);
-    storage_path_change_to_real_storage(path, type);
+    StorageData* storage;
+    FS_Error ret = storage_get_data(app, path, &storage);
 
     do {
-        if(storage_type_is_not_valid(type)) {
-            ret = FSE_INVALID_NAME;
-            break;
-        }
-
-        StorageData* storage = storage_get_storage_by_type(app, type);
         if(storage_path_already_open(path, storage->files)) {
             ret = FSE_ALREADY_OPEN;
             break;
@@ -372,13 +352,10 @@ static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
 }
 
 static FS_Error storage_process_common_mkdir(Storage* app, FuriString* path) {
-    FS_Error ret = FSE_OK;
-    StorageType type = storage_get_type_by_path(app, path);
+    StorageData* storage;
+    FS_Error ret = storage_get_data(app, path, &storage);
 
-    if(storage_type_is_not_valid(type)) {
-        ret = FSE_INVALID_NAME;
-    } else {
-        StorageData* storage = storage_get_storage_by_type(app, type);
+    if(ret == FSE_OK) {
         storage_data_timestamp(storage);
         FS_CALL(storage, common.mkdir(storage, cstr_path_without_vfs_prefix(path)));
     }
@@ -391,13 +368,10 @@ static FS_Error storage_process_common_fs_info(
     FuriString* path,
     uint64_t* total_space,
     uint64_t* free_space) {
-    FS_Error ret = FSE_OK;
-    StorageType type = storage_get_type_by_path(app, path);
+    StorageData* storage;
+    FS_Error ret = storage_get_data(app, path, &storage);
 
-    if(storage_type_is_not_valid(type)) {
-        ret = FSE_INVALID_NAME;
-    } else {
-        StorageData* storage = storage_get_storage_by_type(app, type);
+    if(ret == FSE_OK) {
         FS_CALL(
             storage,
             common.fs_info(storage, cstr_path_without_vfs_prefix(path), total_space, free_space));
