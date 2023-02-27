@@ -257,7 +257,8 @@ SubGhzProtocolError subghz_protocol_decoder_scher_khan_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_scher_khan_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    subghz_protocol_decoder_scher_khan_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderScherKhan* instance = context;
     return subghz_block_generic_deserialize(&instance->generic, flipper_format);

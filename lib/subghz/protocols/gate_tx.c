@@ -129,7 +129,8 @@ static bool subghz_protocol_encoder_gate_tx_get_upload(SubGhzProtocolEncoderGate
     return true;
 }
 
-SubGhzProtocolError subghz_protocol_encoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    subghz_protocol_encoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderGateTx* instance = context;
     SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;

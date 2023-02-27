@@ -254,7 +254,8 @@ static bool
     return true;
 }
 
-SubGhzProtocolError subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
     SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;

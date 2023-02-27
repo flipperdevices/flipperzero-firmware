@@ -302,10 +302,14 @@ SubGhzProtocolError subghz_protocol_decoder_phoenix_v2_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_phoenix_v2_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    subghz_protocol_decoder_phoenix_v2_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderPhoenix_V2* instance = context;
-    return subghz_block_generic_deserialize_check_count_bit(&instance->generic, flipper_format,subghz_protocol_phoenix_v2_const.min_count_bit_for_found);
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic,
+        flipper_format,
+        subghz_protocol_phoenix_v2_const.min_count_bit_for_found);
 }
 
 void subghz_protocol_decoder_phoenix_v2_get_string(void* context, FuriString* output) {
