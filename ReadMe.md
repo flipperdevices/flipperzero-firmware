@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [mousejacker FIX DEL, ADD TAB & ALTSTRING #366 (By MatthisC)](https://github.com/DarkFlippers/unleashed-firmware/pull/366)
 - Updated: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Added: [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
+- Added: [EM4100 Key Generator (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 
 <a name="release">
 
@@ -310,6 +311,7 @@ $ ./fbt dolphin_ext
 - [Dolphin Restorer (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/1384) Cloned by RogueMaster
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
+- [EM4100 Key Generator (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
