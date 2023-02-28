@@ -356,74 +356,59 @@ static const char* storage_test_apps[] = {
 static size_t storage_test_apps_count = COUNT_OF(storage_test_apps);
 
 static int32_t storage_test_app(void* arg) {
-    FuriString* result = arg;
+    UNUSED(arg);
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* path = furi_string_alloc();
-
-    int32_t ret;
-    if(storage_common_get_my_data_path(storage, path)) {
-        furi_string_set(result, path);
-        ret = 0;
-    } else {
-        furi_string_set(result, "");
-        ret = -1;
-    }
-
-    furi_string_free(path);
+    storage_common_remove(storage, "/app/test");
+    int32_t ret = storage_file_create(storage, "/app/test", "test");
     furi_record_close(RECORD_STORAGE);
     return ret;
 }
 
-MU_TEST(test_storage_common_get_my_data_path_apps) {
+MU_TEST(test_storage_data_path_apps) {
     for(size_t i = 0; i < storage_test_apps_count; i++) {
-        FuriString* result = furi_string_alloc();
-
         FuriThread* thread =
-            furi_thread_alloc_ex(storage_test_apps[i], 1024, storage_test_app, result);
+            furi_thread_alloc_ex(storage_test_apps[i], 1024, storage_test_app, NULL);
         furi_thread_set_appid(thread, storage_test_apps[i]);
         furi_thread_start(thread);
         furi_thread_join(thread);
 
-        mu_assert_int_eq(0, furi_thread_get_return_code(thread));
+        mu_assert_int_eq(true, furi_thread_get_return_code(thread));
 
+        // Check if app data dir and file exists
+        Storage* storage = furi_record_open(RECORD_STORAGE);
         FuriString* expected = furi_string_alloc();
         furi_string_printf(expected, APPSDATA_APP_PATH("%s"), storage_test_apps[i]);
-        mu_assert_string_eq(furi_string_get_cstr(expected), furi_string_get_cstr(result));
 
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        FileInfo fileinfo;
-        mu_check(
-            storage_common_stat(storage, furi_string_get_cstr(expected), &fileinfo) == FSE_OK);
-        mu_check(fileinfo.flags & FSF_DIRECTORY);
-        storage_simply_remove(storage, furi_string_get_cstr(expected));
+        mu_check(storage_dir_exists(storage, furi_string_get_cstr(expected)));
+        furi_string_cat(expected, "/test");
+        mu_check(storage_file_exists(storage, furi_string_get_cstr(expected)));
+
+        furi_string_printf(expected, APPSDATA_APP_PATH("%s"), storage_test_apps[i]);
+        storage_simply_remove_recursive(storage, furi_string_get_cstr(expected));
+
         furi_record_close(RECORD_STORAGE);
 
         furi_string_free(expected);
-        furi_string_free(result);
         furi_thread_free(thread);
     }
 }
 
-MU_TEST(test_storage_common_get_my_data_path) {
+MU_TEST(test_storage_data_path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* path = furi_string_alloc();
-    FileInfo fileinfo;
-    mu_check(storage_common_get_my_data_path(storage, path));
 
-    // we runned from "cli" app, so path should be "/ext/appsdata/cli"
-    mu_assert_string_eq(furi_string_get_cstr(path), APPSDATA_APP_PATH("cli"));
+    File* file = storage_file_alloc(storage);
+    mu_check(storage_dir_open(file, "/app"));
+    mu_check(storage_dir_close(file));
+    storage_file_free(file);
 
     // check that appsdata folder exists
-    mu_check(storage_common_stat(storage, APPSDATA_PATH, &fileinfo) == FSE_OK);
-    mu_check(fileinfo.flags & FSF_DIRECTORY);
+    mu_check(storage_dir_exists(storage, APPSDATA_PATH));
 
     // check that cli folder exists
-    mu_check(storage_common_stat(storage, APPSDATA_APP_PATH("cli"), &fileinfo) == FSE_OK);
-    mu_check(fileinfo.flags & FSF_DIRECTORY);
+    mu_check(storage_dir_exists(storage, APPSDATA_APP_PATH("cli")));
 
     storage_simply_remove(storage, APPSDATA_APP_PATH("cli"));
 
-    furi_string_free(path);
     furi_record_close(RECORD_STORAGE);
 }
 
@@ -593,9 +578,12 @@ MU_TEST(test_storage_common_migrate) {
     furi_record_close(RECORD_STORAGE);
 }
 
+MU_TEST_SUITE(test_data_path) {
+    MU_RUN_TEST(test_storage_data_path);
+    MU_RUN_TEST(test_storage_data_path_apps);
+}
+
 MU_TEST_SUITE(test_storage_common) {
-    MU_RUN_TEST(test_storage_common_get_my_data_path);
-    MU_RUN_TEST(test_storage_common_get_my_data_path_apps);
     MU_RUN_TEST(test_storage_common_migrate);
 }
 
@@ -603,6 +591,7 @@ int run_minunit_test_storage() {
     MU_RUN_SUITE(storage_file);
     MU_RUN_SUITE(storage_dir);
     MU_RUN_SUITE(storage_rename);
+    MU_RUN_SUITE(test_data_path);
     MU_RUN_SUITE(test_storage_common);
     return MU_EXIT_CODE;
 }
