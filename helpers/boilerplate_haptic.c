@@ -2,7 +2,7 @@
 #include "../boilerplate.h"
 
 
-void play_happy_bump(void* context) {
+void boilerplate_play_happy_bump(void* context) {
     Boilerplate* app = context;
     if (app->haptic != 1) {
         return;
@@ -12,7 +12,7 @@ void play_happy_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
-void play_bad_bump(void* context) {
+void boilerplate_play_bad_bump(void* context) {
     Boilerplate* app = context;
     if (app->haptic != 1) {
         return;
@@ -22,7 +22,7 @@ void play_bad_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
-void play_long_bump(void* context) {
+void boilerplate_play_long_bump(void* context) {
     Boilerplate* app = context;
     if (app->haptic != 1) {
         return;
