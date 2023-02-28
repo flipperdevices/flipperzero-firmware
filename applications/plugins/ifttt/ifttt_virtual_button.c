@@ -1,8 +1,8 @@
 #include "ifttt_virtual_button.h"
 
-#define IFTTT_FOLDER "/ext/ifttt"
-#define IFTTT_CONFIG_FOLDER "/ext/ifttt/config"
-const char* CONFIG_FILE_PATH = "/ext/ifttt/config/config.settings";
+#define IFTTT_FOLDER "/ext/apps_data/ifttt"
+#define IFTTT_CONFIG_FOLDER "/ext/apps_data/ifttt/config"
+const char* CONFIG_FILE_PATH = "/ext/apps_data/ifttt/config/config.settings";
 
 #define FLIPPERZERO_SERIAL_BAUD 115200
 typedef enum ESerialCommand { ESerialCommand_Config } ESerialCommand;
