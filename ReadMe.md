@@ -1,7 +1,7 @@
 
 <a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="40%"></a>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0228-0133-0.78.2-1c2a5cd.tgz&channel=RM0228-0133-0.78.2-1c2a5cd&version=0.77.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0228-1235-0.78.2-5eb5e99.tgz&channel=RM0228-1235-0.78.2-5eb5e99&version=0.77.2)
 
 ## What Is Not In The Firmware? [SD CARD EXTRA FILES AND OTHER RESEARCH SOURCES](https://github.com/RogueMaster/awesome-flipperzero-withModules)
 
@@ -29,22 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0228-0133-0.78.2-1c2a5cd](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
+## Latest Updates - [PATREON: Latest Release RM0228-1235-0.78.2-5eb5e99](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-28 01:20 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-27 01:20 EST`
-- Updated: 2 Clock Apps for Proper AM/PM switch.
-- Updated: [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) & [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [Both now have proper NFC folder by default (Thanks to AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2437)
-- Updated: [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan) - Fix NRF24 Scan Location
-- Relocated BlackJack Settings File, Move file into apps_data.
-- Relocated Passport Settings File, Move file into apps_data.
-- Relocated SWD Probe Scripts Folder, Move folder into apps_data.
-- Relocated TAMA P1 ROM/SAVE Folder, Move folder into apps_data.
-- Relocated IFTTT Folder, Move folder into apps_data.
-- Relocated Picopass Folder, Move folder into apps_data.
-- Re-Added: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
-- Fixed issue with BadUSB not shown on Main Menu (Only as FAP)
-- Fix NFC Magic Gen4 Load Path
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-28 12:35 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-27 12:35 EST`
 
 <a name="release">
 
@@ -367,4 +355,4 @@ $ ./fbt dolphin_ext
 - [Wii EC Analyser (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
 - [Zero Tracker (By DrZZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0228-0133-0.78.2-1c2a5cd.tgz&channel=RM0228-0133-0.78.2-1c2a5cd&version=0.77.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0228-1235-0.78.2-5eb5e99.tgz&channel=RM0228-1235-0.78.2-5eb5e99&version=0.77.2)
