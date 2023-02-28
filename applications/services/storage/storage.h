@@ -261,16 +261,6 @@ FS_Error storage_common_fs_info(
     uint64_t* free_space);
 
 /**
- * @brief Get path to the current app data directory. The folders will be created if they don't exist.
- * For example: "/ext/appsdata/snake_game"
- * 
- * @param storage 
- * @param path 
- * @return bool success flag
- */
-bool storage_common_get_my_data_path(Storage* storage, FuriString* path);
-
-/**
  * @brief Move content of one folder to another, with rename of all conflicting files. 
  * Source folder will be deleted if the migration is successful.
  * 
