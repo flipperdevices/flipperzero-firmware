@@ -1,5 +1,5 @@
 App(
-    appid="Remote",
+    appid="RemoteUSB",
     name="Remote",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hid_usb_app",
@@ -11,7 +11,7 @@ App(
 )
 
 App(
-    appid="Remote",
+    appid="RemoteBT",
     name="Remote",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hid_ble_app",
