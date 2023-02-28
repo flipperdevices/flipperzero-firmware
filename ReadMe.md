@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `27 Feb 01:19 GMT +3`
+### Apps checked & updated at `28 Feb 07:23 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -43,8 +43,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
 - [Tic-Tac-Toe Multi (By RouNNdeL)](https://github.com/RouNNdeL/flipper-tictactoe-multi)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- [Reaction test Game (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 
-## Music
+## Media
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
@@ -102,6 +103,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [BT Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
 - [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
+- [EM4100 universal keys generator (for RFID Fuzzer) (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 
 --- 
 
