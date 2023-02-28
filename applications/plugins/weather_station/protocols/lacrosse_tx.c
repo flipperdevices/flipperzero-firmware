@@ -290,10 +290,12 @@ SubGhzProtocolError ws_protocol_decoder_lacrosse_tx_serialize(
     return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError ws_protocol_decoder_lacrosse_tx_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolError
+    ws_protocol_decoder_lacrosse_tx_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderLaCrosse_TX* instance = context;
-    return ws_block_generic_deserialize_check_count_bit(&instance->generic, flipper_format,ws_protocol_lacrosse_tx_const.min_count_bit_for_found);
+    return ws_block_generic_deserialize_check_count_bit(
+        &instance->generic, flipper_format, ws_protocol_lacrosse_tx_const.min_count_bit_for_found);
 }
 
 void ws_protocol_decoder_lacrosse_tx_get_string(void* context, FuriString* output) {

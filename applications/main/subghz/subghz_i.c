@@ -199,7 +199,7 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
             if(subghz->txrx->txrx_state != SubGhzTxRxStateSleep) {
                 subghz_idle(subghz);
             }
-                }
+        }
 
     } while(false);
     furi_string_free(temp_str);

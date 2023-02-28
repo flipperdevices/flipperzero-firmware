@@ -69,7 +69,8 @@ SubGhzProtocolError ws_protocol_decoder_thermopro_tx4_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError ws_protocol_decoder_thermopro_tx4_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolError
+    ws_protocol_decoder_thermopro_tx4_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
