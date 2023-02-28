@@ -130,7 +130,6 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                        subghz,
                        subghz_history_get_raw_data(
                            subghz->txrx->history, subghz->txrx->idx_menu_chosen))) {
-                    //scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                     if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
                         subghz_tx_stop(subghz);
                     }

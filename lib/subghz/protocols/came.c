@@ -247,8 +247,11 @@ void subghz_protocol_decoder_came_feed(void* context, bool level, uint32_t durat
         if(!level) { //save interval
             if(duration >= (subghz_protocol_came_const.te_short * 4)) {
                 instance->decoder.parser_step = CameDecoderStepFoundStartBit;
-                if(instance->decoder.decode_count_bit >=
-                   subghz_protocol_came_const.min_count_bit_for_found) {
+                if((instance->decoder.decode_count_bit ==
+                    subghz_protocol_came_const.min_count_bit_for_found) ||
+                   (instance->decoder.decode_count_bit == AIRFORCE_COUNT_BIT) ||
+                   (instance->decoder.decode_count_bit == PRASTEL_COUNT_BIT) ||
+                   (instance->decoder.decode_count_bit == CAME_24_COUNT_BIT)) {
                     instance->generic.serial = 0x0;
                     instance->generic.btn = 0x0;
 
