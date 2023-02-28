@@ -69,9 +69,9 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     UNUSED(model);
-                    stop_all_sound(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
                     instance->callback(BoilerplateCustomEventScene2Back, instance->context);
-                    play_long_bump(instance->context);
+                    boilerplate_play_long_bump(instance->context);
                 },
                 true);
             break;
@@ -81,9 +81,9 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 6;
-                    play_bad_bump(instance->context);
-                    stop_all_sound(instance->context);
-                    led_set_rgb(instance->context, 255, 0, 255);
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 0, 255);
                 },
                 true);
             break;
@@ -93,9 +93,9 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 7;
-                    play_bad_bump(instance->context);
-                    stop_all_sound(instance->context);
-                    led_set_rgb(instance->context, 255, 255, 0);
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 255, 0);
                 },
                 true);
             break;
@@ -105,9 +105,9 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 8;
-                    play_bad_bump(instance->context);
-                    stop_all_sound(instance->context);
-                    led_set_rgb(instance->context, 0, 255, 255);
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 0, 255, 255);
                 },
                 true);
             break;
@@ -117,9 +117,9 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 9;
-                    play_bad_bump(instance->context);
-                    stop_all_sound(instance->context);
-                    led_set_rgb(instance->context, 255, 0, 0);
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 0, 0);
                 },
                 true);
             break;
@@ -129,9 +129,9 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 10;
-                    play_bad_bump(instance->context);
-                    stop_all_sound(instance->context);
-                    led_set_rgb(instance->context, 255, 255, 255);
+                    boilerplate_play_bad_bump(instance->context);
+                    boilerplate_stop_all_sound(instance->context);
+                    boilerplate_led_set_rgb(instance->context, 255, 255, 255);
                 },
                 true);
             break;
@@ -146,8 +146,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 1;
-                    play_happy_bump(instance->context);
-                    play_input_sound(instance->context);
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
                 },
                 true);
             break;
@@ -157,8 +157,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 2;
-                    play_happy_bump(instance->context);
-                    play_input_sound(instance->context);
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
                 },
                 true);
             break;
@@ -168,8 +168,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 3;
-                    play_happy_bump(instance->context);
-                    play_input_sound(instance->context);
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
                 },
                 true);
             break;
@@ -179,8 +179,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 4;
-                    play_happy_bump(instance->context);
-                    play_input_sound(instance->context);
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
                 },
                 true);
             break;
@@ -190,8 +190,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
                 BoilerplateScene2Model * model,
                 {
                     model->screen_text = 5;
-                    play_happy_bump(instance->context);
-                    play_input_sound(instance->context);
+                    boilerplate_play_happy_bump(instance->context);
+                    boilerplate_play_input_sound(instance->context);
                 },
                 true);
             break;
@@ -207,8 +207,8 @@ bool boilerplate_scene_2_input(InputEvent* event, void* context) {
 void boilerplate_scene_2_exit(void* context) {
     furi_assert(context);
     Boilerplate* app = context;
-    stop_all_sound(app);
-    //led_reset(app);
+    boilerplate_stop_all_sound(app);
+    //boilerplate_led_reset(app);
 }
 
 void boilerplate_scene_2_enter(void* context) {
