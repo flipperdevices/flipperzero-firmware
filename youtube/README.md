@@ -22,6 +22,7 @@ There are a few different playlists:
 ### Electronics
 - [intro video](https://youtu.be/wfNIyLphR3Y) Introduction to LEDs (lights)
 - [intro video](https://youtu.be/j5Jy3Wedw58) Introduction to breadboard/protoboard (for making circuit prototypes)
+- [intro video](https://youtu.be/ldHCXL-D8HM) Introduction to pull-up/pull-down resistors.
 
 ### Sensors
 - [demo video](https://youtu.be/iC5fBGwCPHw) Connecting lots of different sensors to Flipper Zero.
