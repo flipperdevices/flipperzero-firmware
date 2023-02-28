@@ -45,7 +45,6 @@ struct SPIMemApp {
     Popup* popup;
     NotificationApp* notifications;
     FuriString* file_path;
-    FuriString* file_path_default;
     DialogsApp* dialogs;
     Storage* storage;
     File* file;

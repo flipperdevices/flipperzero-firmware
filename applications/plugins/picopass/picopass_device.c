@@ -20,8 +20,6 @@ PicopassDevice* picopass_device_alloc() {
     picopass_dev->storage = furi_record_open(RECORD_STORAGE);
     picopass_dev->dialogs = furi_record_open(RECORD_DIALOGS);
     picopass_dev->load_path = furi_string_alloc();
-    picopass_dev->app_path = furi_string_alloc();
-    storage_common_get_my_data_path(picopass_dev->storage, picopass_dev->app_path);
     return picopass_dev;
 }
 
@@ -124,7 +122,7 @@ static bool picopass_device_save_file(
 bool picopass_device_save(PicopassDevice* dev, const char* dev_name) {
     if(dev->format == PicopassDeviceSaveFormatHF) {
         return picopass_device_save_file(
-            dev, dev_name, furi_string_get_cstr(dev->app_path), PICOPASS_APP_EXTENSION, true);
+            dev, dev_name, STORAGE_APPS_DATA_PATH_PREFIX, PICOPASS_APP_EXTENSION, true);
     } else if(dev->format == PicopassDeviceSaveFormatLF) {
         return picopass_device_save_file(dev, dev_name, ANY_PATH("lfrfid"), ".rfid", true);
     }
@@ -218,7 +216,6 @@ void picopass_device_free(PicopassDevice* picopass_dev) {
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
     furi_string_free(picopass_dev->load_path);
-    furi_string_free(picopass_dev->app_path);
     free(picopass_dev);
 }
 
@@ -227,10 +224,9 @@ bool picopass_file_select(PicopassDevice* dev) {
 
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, PICOPASS_APP_EXTENSION, &I_Nfc_10px);
-    browser_options.base_path = furi_string_get_cstr(dev->app_path);
+    browser_options.base_path = STORAGE_APPS_DATA_PATH_PREFIX;
 
-    bool res =
-        dialog_file_browser_show(dev->dialogs, dev->load_path, dev->app_path, &browser_options);
+    bool res = dialog_file_browser_show(dev->dialogs, dev->load_path, NULL, &browser_options);
 
     if(res) {
         FuriString* filename;
@@ -269,11 +265,7 @@ bool picopass_device_delete(PicopassDevice* dev, bool use_load_path) {
             furi_string_set(file_path, dev->load_path);
         } else {
             furi_string_printf(
-                file_path,
-                "%s/%s%s",
-                furi_string_get_cstr(dev->app_path),
-                dev->dev_name,
-                PICOPASS_APP_EXTENSION);
+                file_path, APPS_DATA_PATH("%s%s"), dev->dev_name, PICOPASS_APP_EXTENSION);
         }
         if(!storage_simply_remove(dev->storage, furi_string_get_cstr(file_path))) break;
         deleted = true;

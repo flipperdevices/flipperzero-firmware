@@ -18,7 +18,7 @@ static bool spi_mem_back_event_callback(void* context) {
 SPIMemApp* spi_mem_alloc(void) {
     SPIMemApp* instance = malloc(sizeof(SPIMemApp));
 
-    instance->file_path = furi_string_alloc();
+    instance->file_path = furi_string_alloc_set(STORAGE_APPS_DATA_PATH_PREFIX);
     instance->gui = furi_record_open(RECORD_GUI);
     instance->notifications = furi_record_open(RECORD_NOTIFICATION);
     instance->view_dispatcher = view_dispatcher_alloc();
@@ -36,17 +36,9 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->view_detect = spi_mem_view_detect_alloc();
     instance->text_input = text_input_alloc();
     instance->mode = SPIMemModeUnknown;
-    instance->file_path_default = furi_string_alloc();
-
-    if(!storage_common_get_my_data_path(instance->storage, instance->file_path_default)) {
-        dialog_message_show_storage_error(instance->dialogs, "Cannot find\napp folder");
-    }
 
     // Migrate data from old sd-card folder
-    storage_common_migrate(
-        instance->storage, "/ext/spimem", furi_string_get_cstr(instance->file_path_default));
-
-    furi_string_set(instance->file_path, instance->file_path_default);
+    storage_common_migrate(instance->storage, "/ext/spimem", STORAGE_APPS_DATA_PATH_PREFIX);
 
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
@@ -106,7 +98,6 @@ void spi_mem_free(SPIMemApp* instance) {
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
     furi_string_free(instance->file_path);
-    furi_string_free(instance->file_path_default);
     furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_external);
     furi_hal_power_disable_otg();
     free(instance);

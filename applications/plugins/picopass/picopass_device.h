@@ -72,7 +72,6 @@ typedef struct {
 
 typedef struct {
     Storage* storage;
-    FuriString* app_path;
     DialogsApp* dialogs;
     PicopassDeviceData dev_data;
     char dev_name[PICOPASS_DEV_NAME_MAX_LEN + 1];
@@ -80,7 +79,6 @@ typedef struct {
     PicopassDeviceSaveFormat format;
     PicopassLoadingCallback loading_cb;
     void* loading_cb_ctx;
-
 } PicopassDevice;
 
 PicopassDevice* picopass_device_alloc();

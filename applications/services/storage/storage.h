@@ -261,6 +261,16 @@ FS_Error storage_common_fs_info(
     uint64_t* free_space);
 
 /**
+ * @brief Parse aliases in path and replace them with real path
+ * Also will create special folders if they are not exist
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+void storage_common_process_aliases(Storage* storage, FuriString* path);
+
+/**
  * @brief Move content of one folder to another, with rename of all conflicting files. 
  * Source folder will be deleted if the migration is successful.
  * 

@@ -660,6 +660,19 @@ FS_Error storage_common_fs_info(
     return S_RETURN_ERROR;
 }
 
+void storage_common_process_aliases(Storage* storage, FuriString* path) {
+    S_API_PROLOGUE;
+
+    SAData data = {
+        .cprocessaliases = {
+            .path = path,
+            .thread_id = furi_thread_get_current_id(),
+        }};
+
+    S_API_MESSAGE(StorageCommandCommonProcessAliases);
+    S_API_EPILOGUE;
+}
+
 FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest) {
     if(!storage_common_exists(storage, source)) {
         return FSE_OK;

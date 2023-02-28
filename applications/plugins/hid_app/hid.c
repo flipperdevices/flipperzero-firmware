@@ -2,7 +2,6 @@
 #include "views.h"
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
-#include <toolbox/path_helper.h>
 
 #define TAG "HidApp"
 
@@ -377,18 +376,21 @@ int32_t hid_ble_app(void* p) {
     // Wait 2nd core to update nvm storage
     furi_delay_ms(200);
 
-    PathHelper* path_helper = path_helper_alloc_apps_data();
-    path_helper_append(path_helper, HID_BT_KEYS_STORAGE_NAME);
-
     // Migrate data from old sd-card folder
     Storage* storage = furi_record_open(RECORD_STORAGE);
+
     storage_common_migrate(
-        storage, EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME), path_helper_get(path_helper));
+        storage,
+        EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME),
+        APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+
+    FuriString* bt_keys_storage_path =
+        furi_string_alloc_set(APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+    storage_common_process_aliases(storage, bt_keys_storage_path);
+    bt_keys_storage_set_storage_path(app->bt, furi_string_get_cstr(bt_keys_storage_path));
+    furi_string_free(bt_keys_storage_path);
+
     furi_record_close(RECORD_STORAGE);
-
-    bt_keys_storage_set_storage_path(app->bt, path_helper_get(path_helper));
-
-    path_helper_free(path_helper);
 
     if(!bt_set_profile(app->bt, BtProfileHidKeyboard)) {
         FURI_LOG_E(TAG, "Failed to switch to HID profile");

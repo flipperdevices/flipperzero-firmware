@@ -584,6 +584,10 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         message->return_data->error_value = storage_process_common_fs_info(
             app, path, message->data->cfsinfo.total_space, message->data->cfsinfo.free_space);
         break;
+    case StorageCommandCommonProcessAliases:
+        storage_process_alias(
+            app, message->data->cprocessaliases.path, message->data->cprocessaliases.thread_id);
+        break;
 
     // SD operations
     case StorageCommandSDFormat:
