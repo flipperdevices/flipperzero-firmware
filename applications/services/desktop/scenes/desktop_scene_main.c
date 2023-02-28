@@ -24,7 +24,6 @@
 #define DICE_APP EXT_PATH("apps/Games/Dice.fap")
 #define ARKANOID_APP EXT_PATH("apps/Games/Arkanoid.fap")
 #define HEAP_DEFENCE_APP EXT_PATH("apps/Games/Heap_Defence.fap")
-#define SUBGHZ_REMOTE_APP EXT_PATH("apps/Main/SubGHz_Remote.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -289,7 +288,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         case DesktopMainEventOpenSubRemote: {
-            desktop_scene_main_open_app_or_profile(desktop, SUBGHZ_REMOTE_APP);
+            loader_start(desktop->loader, FLIPPER_APPS[3].name, NULL);
+            // LoaderStatus status = loader_start(desktop->loader, "unirfremix", NULL);
+            // if(status != LoaderStatusOk) {
+                // FURI_LOG_E(TAG, "loader_start failed: %d", status);
+            // }
+            consumed = true;
             break;
         }
         case DesktopMainEventOpenClock: {

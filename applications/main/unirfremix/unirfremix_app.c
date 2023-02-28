@@ -8,6 +8,8 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include <assets_icons.h>
+
 #include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/path.h>
 #include <applications/main/subghz/subghz_i.h>
@@ -19,33 +21,12 @@
 #include <lib/subghz/protocols/star_line.h>
 #include <lib/subghz/protocols/alutech_at_4n.h>
 #include <lib/subghz/protocols/nice_flor_s.h>
-
-#include <SubGHz_Remote_icons.h>
+#include <lib/subghz/protocols/somfy_telis.h>
 
 #define UNIRFMAP_FOLDER "/ext/subghz/unirf"
 #define UNIRFMAP_EXTENSION ".txt"
 
 #define TAG "UniRF Remix"
-
-static const char* mfname;
-
-static int kl_type;
-
-void keeloq_reset_mfname() {
-    mfname = "";
-}
-
-void keeloq_reset_kl_type() {
-    kl_type = 0;
-}
-
-void star_line_reset_mfname() {
-    mfname = "";
-}
-
-void star_line_reset_kl_type() {
-    kl_type = 0;
-}
 
 typedef struct {
     uint32_t frequency;
@@ -503,9 +484,10 @@ void unirfremix_tx_stop(UniRFRemix* app) {
 
         keeloq_reset_mfname();
         keeloq_reset_kl_type();
-        // keeloq_reset_original_btn();
-        // alutech_reset_original_btn();
-        // nice_flors_reset_original_btn();
+        keeloq_reset_original_btn();
+        alutech_reset_original_btn();
+        nice_flors_reset_original_btn();
+        somfy_telis_reset_original_btn();
         star_line_reset_mfname();
         star_line_reset_kl_type();
     }
@@ -712,8 +694,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
         case 5:
             canvas_draw_icon(canvas, 113, 15, &I_Pin_cell_13x13);
             canvas_draw_icon(canvas, 116, 18, &I_Pin_star_7x7);
-            break;
-        default:
             break;
         }
 
@@ -1009,8 +989,6 @@ int32_t unirfremix_app(void* p) {
                     break;
                 case 5:
                     app->send_status_c = 5;
-                    break;
-                default:
                     break;
                 }
 
