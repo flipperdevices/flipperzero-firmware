@@ -289,10 +289,6 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenSubRemote: {
             loader_start(desktop->loader, FLIPPER_APPS[3].name, NULL);
-            // LoaderStatus status = loader_start(desktop->loader, "unirfremix", NULL);
-            // if(status != LoaderStatusOk) {
-                // FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            // }
             consumed = true;
             break;
         }
