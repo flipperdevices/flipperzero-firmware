@@ -10,8 +10,8 @@ App(
     ],
     stack_size=4 * 1024,
     order=30,
-    fap_icon="../../../assets/icons/Archive/Nfc_10px.png",
-    fap_category="Tools",
+    fap_icon="../../../assets/icons/Archive/125_10px.png",
+    fap_category="NFC",
     fap_private_libs=[
         Lib(
             name="magic",
