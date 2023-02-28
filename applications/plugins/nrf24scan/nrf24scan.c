@@ -18,7 +18,7 @@
 #define MAX_CHANNEL 125
 #define MAX_ADDR 6
 
-#define SCAN_APP_PATH_FOLDER "/ext/nrf24scan"
+#define SCAN_APP_PATH_FOLDER "/ext/apps_data/nrf24scan"
 #define SETTINGS_FILENAME "addresses.txt" // Settings file format (1 parameter per line):
 // SNIFF - if present then sniff mode
 // Rate: 0/1/2 - rate in Mbps (=0.25/1/2)
