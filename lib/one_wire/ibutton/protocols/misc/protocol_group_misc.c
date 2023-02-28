@@ -9,8 +9,7 @@
 
 #define IBUTTON_MISC_READ_TIMEOUT 100
 
-#define IBUTTON_MISC_ROM_DATA_KEY_V1 "Data"
-#define IBUTTON_MISC_ROM_DATA_KEY_V2 "Rom Data"
+#define IBUTTON_MISC_DATA_KEY_KEY_COMMON "Data"
 
 typedef struct {
     ProtocolDict* dict;
@@ -182,7 +181,7 @@ static bool ibutton_protocol_group_misc_save(
     iButtonProtocolLocalId id,
     FlipperFormat* ff) {
     const size_t data_size = protocol_dict_get_data_size(group->dict, id);
-    return flipper_format_write_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V2, data, data_size);
+    return flipper_format_write_hex(ff, IBUTTON_MISC_DATA_KEY_KEY_COMMON, data, data_size);
 }
 
 static bool ibutton_protocol_group_misc_load(
@@ -194,9 +193,8 @@ static bool ibutton_protocol_group_misc_load(
     const size_t data_size = protocol_dict_get_data_size(group->dict, id);
     switch(version) {
     case 1:
-        return flipper_format_read_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V1, data, data_size);
     case 2:
-        return flipper_format_read_hex(ff, IBUTTON_MISC_ROM_DATA_KEY_V2, data, data_size);
+        return flipper_format_read_hex(ff, IBUTTON_MISC_DATA_KEY_KEY_COMMON, data, data_size);
     default:
         return false;
     }

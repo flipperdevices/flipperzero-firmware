@@ -15,7 +15,8 @@ void ibutton_scene_info_on_enter(void* context) {
         ibutton->key_name,
         ibutton_protocols_get_name(ibutton->protocols, protocol_id));
 
-    widget_add_text_box_element(widget, 0, 2, 128, 12, AlignLeft, AlignTop, furi_string_get_cstr(tmp), true);
+    widget_add_text_box_element(
+        widget, 0, 2, 128, 12, AlignLeft, AlignTop, furi_string_get_cstr(tmp), true);
 
     furi_string_reset(tmp);
     ibutton_protocols_render_brief_data(ibutton->protocols, key, tmp);
