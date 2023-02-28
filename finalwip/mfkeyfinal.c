@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define MSB_LIMIT 16
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -31,47 +32,6 @@ static inline int filter(uint32_t const x) {
 }
 static inline uint8_t evenparity32(uint32_t x) {
     return (__builtin_parity(x) & 0xFF);
-}
-int binsearch(int data[], int start, int stop) {
-    int mid, val = data[stop] & 0xff000000;
-    while (start != stop) {
-        mid = (stop - start) >> 1;
-        if ((data[start + mid] ^ 0x80000000) > (val ^ 0x80000000))
-            stop = start + mid;
-        else
-            start += mid + 1;
-    }
-    return start;
-}
-void quicksort(int array[], int low, int high) {
-    if (SIZEOF(array) == 0)
-        return;
-    if (low >= high)
-        return;
-    int middle = low + (high - low) / 2;
-    int pivot = array[middle];
-    int i = low, j = high;
-    while (i <= j) {
-        while (array[i] < pivot) {
-            i++;
-        }
-        while (array[j] > pivot) {
-            j--;
-        }
-        if (i <= j) { // swap
-            int temp = array[i];
-            array[i] = array[j];
-            array[j] = temp;
-            i++;
-            j--;
-        }
-    }
-    if (low < j) {
-        quicksort(array, low, j);
-    }
-    if (high > i) {
-        quicksort(array, i, high);
-    }
 }
 void update_contribution(int data[], int item, int mask1, int mask2) {
     int p = data[item] >> 25;
@@ -163,22 +123,28 @@ int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
     }
     return found;
 }
-int deduplicate(int arr[], int n) {
-    int i, j;
-    for (i = 0, j = 1; j < n; j++) {
-        if (arr[j] != arr[i]) {
-            i++;
-            arr[i] = arr[j];
-        }
-    }
-    return i + 1;
-}
-int* extend_table_precompute_msb(int head, int *tail, int xks, int iterations, int m1, int m2, char msb) {
-    int *data = malloc(sizeof(int) * (5 << 12));
+int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p) {
+    // TODO: Combine Odd and Even loops
+    int found_key = 0;
+    const int iterations = 15;
+    const int rows = MSB_LIMIT; // Process MSB_LIMIT MSB's at once
+    const int columns = 512; // Up to 512 possible odd partial states per MSB
+    int (*odd_arrays)[columns] = (int (*)[columns])malloc(rows * sizeof(*odd_arrays));
+    int (*even_arrays)[columns] = (int (*)[columns])malloc(rows * sizeof(*even_arrays));
+    int odd_tails[MSB_LIMIT] = {0};
+    int even_tails[MSB_LIMIT] = {0};
+    int msb_start = (MSB_LIMIT * msb_iter); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
+    int msb_end = (MSB_LIMIT * (msb_iter+1));
+    int xks = 0, m1 = 0, m2 = 0;
+    int x, y, i;
 
+    // Odd
+    xks = oks;
+    m1 = CONST_M1_1;
+    m2 = CONST_M2_1;
     for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
         if (filter(main_iter) == (xks & 1)) {
-            int *temp_states_buffer = malloc(sizeof(int)*(2<<12)); // TODO: Set to 8192 for testing
+            int *temp_states_buffer = malloc(sizeof(int)*(2<<9));
             int temp_states_tail = 0;
 
             temp_states_buffer[0] = main_iter;
@@ -215,49 +181,113 @@ int* extend_table_precompute_msb(int head, int *tail, int xks, int iterations, i
 
             for (int s = 0; s <= temp_states_tail; s++) {
                 char s_msb = temp_states_buffer[s] >> 24;
-                if (s_msb == msb) {
-                    data[*tail] = temp_states_buffer[s];
-                    (*tail)++;
+                if ((s_msb >= msb_start) && (s_msb < msb_end)) {
+                    int found = 0;
+                    for (i = 0; i < odd_tails[s_msb - msb_start]; i++) {
+                        if (odd_arrays[s_msb - msb_start][i] == temp_states_buffer[s]) {
+                            found = 1;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        odd_arrays[s_msb - msb_start][odd_tails[s_msb - msb_start]++] = temp_states_buffer[s];
+                    }
                 }
             }
 
             free(temp_states_buffer);
         }
     }
-    quicksort(data, head, *tail);
-    *tail = deduplicate(data, *tail);
 
-    return data;
+    // Even
+    xks = eks;
+    m1 = CONST_M1_2;
+    m2 = CONST_M2_2;
+    for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
+        if (filter(main_iter) == (xks & 1)) {
+            int *temp_states_buffer = malloc(sizeof(int)*(2<<9));
+            int temp_states_tail = 0;
+
+            temp_states_buffer[0] = main_iter;
+
+            for (int extend_iter = 1; extend_iter <= iterations; extend_iter++) {
+                int xks_bit = BIT(xks, extend_iter);
+
+                for (int s = 0; s <= temp_states_tail; s++) {
+                    temp_states_buffer[s] <<= 1;
+                    int t = temp_states_buffer[s];
+
+                    if ((filter(t) ^ filter(t | 1)) != 0 ) {
+                        temp_states_buffer[s] |= filter(t) ^ xks_bit;
+                        if (extend_iter > 4) {
+                            update_contribution(temp_states_buffer, s, m1, m2);
+                        }
+                    } else if (filter(t) == xks_bit) {
+                        // TODO: Refactor
+                        if (extend_iter > 4) {
+                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
+                            temp_states_buffer[s + 1] = temp_states_buffer[s] | 1;
+                            update_contribution(temp_states_buffer, s, m1, m2);
+                            s++;
+                            update_contribution(temp_states_buffer, s, m1, m2);
+                        } else {
+                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
+                            temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
+                        }
+                    } else {
+                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+                    }
+                }
+            }
+
+            for (int s = 0; s <= temp_states_tail; s++) {
+                char s_msb = temp_states_buffer[s] >> 24;
+                if ((s_msb >= msb_start) && (s_msb < msb_end)) {
+                    int found = 0;
+                    for (i = 0; i < even_tails[s_msb - msb_start]; i++) {
+                        if (even_arrays[s_msb - msb_start][i] == temp_states_buffer[s]) {
+                            found = 1;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        continue;
+                    }
+                    even_arrays[s_msb - msb_start][even_tails[s_msb - msb_start]++] = temp_states_buffer[s];
+                    temp_states_buffer[s] = (temp_states_buffer[s] << 1) ^ evenparity32(temp_states_buffer[s] & LF_POLY_EVEN);
+                    // Check against all odd states for MSB
+                    for (y = 0; y <= odd_tails[s_msb - msb_start]; ++y) {
+                        struct Crypto1State temp = {0, 0};
+                        temp.even = odd_arrays[s_msb - msb_start][y];
+                        temp.odd = temp_states_buffer[s] ^ evenparity32(odd_arrays[s_msb - msb_start][y] & LF_POLY_ODD);
+                        if (check_state(&temp, p)) {
+                            found_key = 1;
+                            free(temp_states_buffer);
+                            free(odd_arrays);
+                            return found_key;
+                        }
+                    }
+                }
+            }
+
+            free(temp_states_buffer);
+        }
+    }
+    free(odd_arrays);
+    return found_key;
 }
 int recover(struct Crypto1Params *p, int ks2) {
-    int o, e, i, x, y;
-    int o_head = 0, o_tail = 0, oks = 0, e_head = 0, e_tail = 0, eks = 0;
+    int i;
+    int oks = 0, eks = 0;
     for (i = 31; i >= 0; i -= 2) {
         oks = oks << 1 | BEBIT(ks2, i);
     }
     for (i = 30; i >= 0; i -= 2) {
         eks = eks << 1 | BEBIT(ks2, i);
     }
-    for (int msb = 0x00; msb <= 0xff; msb++) {
-        printf("Current MSB value: %i\n", msb);
-        o_tail = 0;
-        e_tail = 0;
-        int *odd = extend_table_precompute_msb(e_head, &o_tail, oks, 15, CONST_M1_1, CONST_M2_1, (char) msb);
-        int *even = extend_table_precompute_msb(e_head, &e_tail, eks, 15, CONST_M1_2, CONST_M2_2, (char) msb);
-        printf("o_tail: %i, e_tail: %i\n", o_tail, e_tail);
-        printf("Have %i permutations to search\n", ((e_tail+1)*(o_tail+1)));
-        for (x = e_head; x <= e_tail; ++x) {
-            even[x] = (even[x] << 1) ^ evenparity32(even[x] & LF_POLY_EVEN);
-            for (y = o_head; y <= o_tail; ++y) {
-                struct Crypto1State temp = {0, 0};
-                temp.even = odd[y];
-                temp.odd = even[x] ^ evenparity32(odd[y] & LF_POLY_ODD);
-                if (check_state(&temp, p)) {
-                    free(odd);
-                    free(even);
-                    return 1;
-                }
-            }
+    for (int msb_iter = 0; msb_iter <= ((256/MSB_LIMIT)-1); msb_iter++) {
+        if (calculate_msb_tables(oks, eks, msb_iter, p)) {
+            return 1;
         }
     }
     return 0;
