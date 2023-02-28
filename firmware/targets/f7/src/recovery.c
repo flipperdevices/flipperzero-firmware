@@ -41,7 +41,7 @@ void flipper_boot_recovery_exec() {
 
     size_t counter = COUNTER_VALUE;
     while(counter) {
-        if(!furi_hal_gpio_read(&gpio_button_back)) {
+        if(!furi_hal_gpio_read(&gpio_button_down)) {
             break;
         }
 
