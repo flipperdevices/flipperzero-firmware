@@ -1,7 +1,7 @@
 #include <storage/storage.h>
 #include "util.h"
 
-const char* CONFIG_FILE_PATH = EXT_PATH(".blackjack.settings");
+const char* CONFIG_FILE_PATH = EXT_PATH("apps_data/.blackjack.settings");
 
 void save_settings(Settings settings) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
