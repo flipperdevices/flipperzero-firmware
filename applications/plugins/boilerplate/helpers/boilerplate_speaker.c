@@ -3,7 +3,7 @@
 
 #define NOTE_INPUT 587.33f
 
-void play_input_sound(void* context) {
+void boilerplate_play_input_sound(void* context) {
     Boilerplate* app = context;
     if(app->speaker != 1) {
         return;
@@ -14,7 +14,7 @@ void play_input_sound(void* context) {
     }
 }
 
-void stop_all_sound(void* context) {
+void boilerplate_stop_all_sound(void* context) {
     Boilerplate* app = context;
     if(app->speaker != 1) {
         return;

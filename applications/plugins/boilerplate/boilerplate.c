@@ -99,10 +99,12 @@ void boilerplate_app_free(Boilerplate* app) {
 int32_t boilerplate_app(void* p) {
     UNUSED(p);
     Boilerplate* app = boilerplate_app_alloc();
+    /*
     if(!furi_hal_region_is_provisioned()) {
         boilerplate_app_free(app);
         return 1;
     }
+    */
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
