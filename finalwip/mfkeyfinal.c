@@ -264,6 +264,7 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
                             found_key = 1;
                             free(temp_states_buffer);
                             free(odd_arrays);
+                            free(even_arrays);
                             return found_key;
                         }
                     }
@@ -274,6 +275,7 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
         }
     }
     free(odd_arrays);
+    free(even_arrays);
     return found_key;
 }
 int recover(struct Crypto1Params *p, int ks2) {
