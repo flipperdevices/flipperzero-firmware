@@ -10,5 +10,5 @@ App(
     stack_size=int(2 * 1024),
     icon="A_Sub1ghz_14",
     order=13,
-	link="/ext/apps/Tools/SubGHz_Playlist.fap",
+	link="/ext/apps/Sub-GHz/SubGHz_Playlist.fap",
 )
