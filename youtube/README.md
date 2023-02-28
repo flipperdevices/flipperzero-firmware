@@ -25,6 +25,7 @@ There are a few different playlists:
 
 ### Sensors
 - [demo video](https://youtu.be/iC5fBGwCPHw) Connecting lots of different sensors to Flipper Zero.
+- [intro video](https://youtu.be/TCAT25kTq54) "Pins" - A tool for remembering which pins are for what.
 - [1337 video](https://youtu.be/7VdVobQyRfo) Looking at UART signals from GPS module & using Logic Analyzer to decode UART. 
 
 ### GPIO
