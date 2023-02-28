@@ -42,6 +42,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Relocated TAMA P1 ROM/SAVE Folder, Move folder into apps_data.
 - Relocated IFTTT Folder, Move folder into apps_data.
 - Relocated Picopass Folder, Move folder into apps_data.
+- Re-Added: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
+- Fixed issue with BadUSB not shown on Main Menu (Only as FAP)
 
 <a name="release">
 
