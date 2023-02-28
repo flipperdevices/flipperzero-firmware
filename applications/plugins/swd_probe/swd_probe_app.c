@@ -2589,7 +2589,8 @@ static bool swd_message_process(AppFSM* ctx) {
                     break;
 
                 case ModePageScan: {
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("apps_data/swd_scripts"));
+                    FuriString* result_path =
+                        furi_string_alloc_printf(ANY_PATH("apps_data/swd_scripts"));
                     FuriString* preselected = furi_string_alloc_printf(
                         (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
                                                              ANY_PATH("apps_data/swd_scripts"));
@@ -2662,7 +2663,8 @@ static bool swd_message_process(AppFSM* ctx) {
                     }
                 } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
                     uint32_t mode_page = ctx->mode_page;
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("apps_data/swd_scripts"));
+                    FuriString* result_path =
+                        furi_string_alloc_printf(ANY_PATH("apps_data/swd_scripts"));
                     FuriString* preselected = furi_string_alloc_printf(
                         (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
                                                              ANY_PATH("apps_data/swd_scripts"));
