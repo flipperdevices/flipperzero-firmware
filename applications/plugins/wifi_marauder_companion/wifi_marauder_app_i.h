@@ -6,6 +6,7 @@
 #include "scenes/wifi_marauder_scene.h"
 #include "wifi_marauder_custom_event.h"
 #include "wifi_marauder_uart.h"
+#include "wifi_marauder_pcap.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
