@@ -33,7 +33,9 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-02-28 01:20 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-02-27 01:20 EST`
-- Updated 2 Clock Apps for Proper AM/PM switch.
+- Updated: 2 Clock Apps for Proper AM/PM switch.
+- Updated: [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) & [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [Both now have proper NFC folder by default (Thanks to AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2437)
+
 
 <a name="release">
 
