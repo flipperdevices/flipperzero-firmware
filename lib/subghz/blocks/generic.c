@@ -103,6 +103,7 @@ SubGhzProtocolError
     do {
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            res = SubGhzProtocolErrorOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "Bit", (uint32_t*)&temp_data, 1)) {
