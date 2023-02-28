@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Relocated Picopass Folder, Move folder into apps_data.
 - Re-Added: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - Fixed issue with BadUSB not shown on Main Menu (Only as FAP)
+- Fix NFC Magic Gen4 Load Path
 
 <a name="release">
 

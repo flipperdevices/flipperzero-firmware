@@ -42,8 +42,8 @@ void nfc_magic_scene_file_select_on_enter(void* context) {
     nfc_device_set_loading_callback(
         nfc_magic->source_dev, nfc_magic_show_loading_popup, nfc_magic);
 
-    if(!furi_string_size(nfc_magic->nfc_dev->load_path)) {
-        furi_string_set_str(nfc_magic->nfc_dev->load_path, NFC_APP_FOLDER);
+    if(!furi_string_size(nfc_magic->source_dev->load_path)) {
+        furi_string_set_str(nfc_magic->source_dev->load_path, NFC_APP_FOLDER);
     }
 
     if(nfc_file_select(nfc_magic->source_dev)) {
