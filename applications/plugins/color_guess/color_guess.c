@@ -103,10 +103,12 @@ int32_t color_guess_app(void* p) {
         return 255;
     }
 
+    /*
     if(!furi_hal_region_is_provisioned()) {
         color_guess_app_free(app);
         return 1;
     }
+    */
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
